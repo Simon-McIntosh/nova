@@ -72,13 +72,17 @@ class FrameSet(netCDF, FrameSetLoc):
 
     def __str__(self):
         """Return string representation of coilset frame."""
-        columns = [col for col in ['link', 'part', 'section', 'turn',
-                                   'delta', 'nturn']
+        return str(self.superframe)
+
+    @property
+    def superframe(self):
+        """Return descriptive superframe including net coil currents."""
+        columns = [col for col in ['link', 'part', 'segment', 'nturn']
                    if col in self.frame]
         superframe = pandas.DataFrame(self.Loc[:, columns])
         superframe['Ic'] = self.sloc['Ic'][self.frame.subref]
         superframe['It'] = superframe['Ic'] * superframe['nturn']
-        return superframe.__str__()
+        return superframe
 
     @staticmethod
     def import_method(name: str, package: Optional[str]):

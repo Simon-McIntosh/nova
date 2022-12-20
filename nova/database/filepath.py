@@ -128,9 +128,9 @@ class FilePath:
         for i, parent in zip(range(self.parents), self.path.parents):
             if self.fsys.isdir(str(parent)):
                 return parent
-        raise FileNotFoundError(f'directory not found for {parent} with a '
-                                f'parent number of {self.parents} and '
-                                f'{len(self.path.parents)} parents')
+        raise FileNotFoundError(f'directory not found for {parent} at '
+                                f'depth {self.parents} of '
+                                f'{len(self.path.parents)}')
 
     def is_file(self) -> bool:
         """Return status of filesystem isfile evaluated on host."""
@@ -159,29 +159,6 @@ class FilePath:
         self.path = path.parent
         self.filename = path.name
 
-    '''
-    def mkdir(self, subpath=None):
-        """Make path if not found."""
-        print('mkdir', subpath)
-        path = self.path
-        if subpath is not None:
-            if not (dirname := os.path.dirname(subpath)):
-                path = os.path.join(path, subpath)
-        self.fsys.makedirs(path, exist_ok=True)
-        return path
-
-    def get_directory(self, filename, path):
-        """Return directory."""
-        if filename is None:
-            return self.mkdir(path)
-        return os.path.join(self.mkdir(path), filename)
-
-    def get_filepath(self, filename=None, path=None):
-        """Return filepath."""
-        if filename is None:
-            filename = self.filename
-        return self.get_directory(filename, path)
-    '''
 
 if __name__ == '__main__':
 

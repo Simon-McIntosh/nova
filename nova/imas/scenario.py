@@ -27,12 +27,3 @@ class Scenario(IdsData):
     @abstractmethod
     def build(self):
         """Build netCDF group from ids."""
-    '''
-    def store(self):
-        """Extend netCDF.store."""
-        return super().store(group=self.name)
-
-    def load(self):
-        """Extend netCDF.load."""
-        return super().load(group=self.name)
-    '''

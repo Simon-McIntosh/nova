@@ -64,30 +64,6 @@ class netCDF(FilePath):
         xxh32.update(str(attrs))
         return xxh32.hexdigest()
 
-    '''
-    def netcdf_group(self, group=None):
-        """Return netcdf group."""
-        if group is None:
-            return self.netcdf_path(self.name)
-        return group
-
-    def netcdf_path(self, *labels, group_prefix=True) -> str | None:
-        """Return path for netcdf group."""
-        if group_prefix:
-            labels = (self.group,) + labels
-        labels = tuple(label for label in labels if label is not None)
-        if len(labels) == 0:
-            return None
-        return '/'.join(labels)
-
-    def get_filepath(self, filename=None, path=None):
-        """Return filepath, extend FilePath.get_filepath."""
-        filepath = super().get_filepath(filename, path)
-        if os.path.split(filepath)[1] and not os.path.splitext(filepath)[1]:
-            filepath = str(filepath) + '.nc'
-        return filepath
-    '''
-
     def mode(self, mode=None) -> str:
         """Return file access mode."""
         if mode is not None:
@@ -100,7 +76,7 @@ class netCDF(FilePath):
         """Store data as group within netCDF file."""
         mode = self.mode(mode)
         if self.host is not None:  # remote write
-            with self.fsys.open(self.filepath, mode+'b') as file:
+            with self.fsys.open(str(self.filepath), mode+'b') as file:
                 self.data.to_netcdf(file, mode=mode, group=self.group)
         else:
             self.data.to_netcdf(self.filepath, mode=mode, group=self.group)
@@ -114,15 +90,3 @@ class netCDF(FilePath):
             self.data = data
             self.data.load()
         return self
-
-    '''
-    def store(self, filename=None, path=None):
-        """Store data as netCDF in hdf5 file."""
-        group = self.netcdf_path(self.name)
-        return super().store(filename, path, group)
-
-    def load(self, filename=None, path=None):
-        """Load data from hdf5."""
-        group = self.netcdf_path(self.name)
-        return super().load(filename, path, group)
-    '''

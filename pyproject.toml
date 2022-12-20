@@ -32,6 +32,7 @@ dependencies = [
   "alphashape",
   "appdirs",
   "click",
+  "contourpy",
   "cython",
   "bokeh",
   "dask[distributed]",

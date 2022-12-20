@@ -286,10 +286,11 @@ class Signal(netCDF, Waveform, SignalParameters):
     def build(self):
         """Store samples to netCDF file."""
         self.initialize_dataarray()
-        for name in tqdm(self.magnetics['frame'].index[:1]):
+        for name in tqdm(self.magnetics['frame'].index[:100]):
             self.generate()
             self.update_dataarray(name)
-            self.store(f'{name}.nc', mode='w')
+            self.filename = name + '.nc'
+            self.store('w')
 
     def plot(self, axes=None):
         """Plot waveform."""
@@ -318,10 +319,12 @@ if __name__ == '__main__':
     white.axes.legend()
 
     '''
+    dirname = '/home/ITER/mcintos/magnetics/data'
+    hostname = 'sdcc-login01.iter.org'
 
-    frequency = 1e3
+    frequency = 2e6
     signal = Signal(5, 2e5, offset=0.5, scale=0.1, frequency=frequency,
-                    alpha=1, rng=2025)
+                    alpha=1, rng=2025, dirname=dirname, hostname=hostname)
     signal.build()
     #print(signal.build_array(signal.magnetics['frame'].index[0]))
 

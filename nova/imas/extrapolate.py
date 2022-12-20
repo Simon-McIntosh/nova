@@ -1,8 +1,6 @@
 """Extrapolate equilibria beyond separatrix."""
 from __future__ import annotations
 from dataclasses import dataclass, field, fields
-from functools import cached_property
-from importlib import import_module
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -108,69 +106,6 @@ class ExtrapolationGrid:
         if self.ngrid == 'ids':
             self.ngrid = self.equilibrium.data.dims['r'] * \
                 self.equilibrium.data.dims['z']
-
-
-@dataclass
-class TimeSlice:
-    """Generate interpolants from single time slice of equilibrium ids."""
-
-    data: xarray.Dataset
-
-    def __post_init__(self):
-        """Load dataset."""
-        self.data['psi2d_norm'] = self.normalize(self.data.psi2d)
-
-    def __getattr__(self, attr: str):
-        """Return attribute from xarray dataset."""
-        return getattr(self.data, attr).values
-
-    @property
-    def boundary(self):
-        """Return boundary contour, override getattr to trim contour."""
-        return self.data.boundary[:self.data.boundary_length.values].values
-
-    def normalize(self, psi):
-        """Return normalized poloidal flux."""
-        return (psi - self.psi_axis) / (self.psi_boundary - self.psi_axis)
-
-    @cached_property
-    def psi_rbs(self):
-        """Return cached 2D RectBivariateSpline psi2d interpolant."""
-        return self._rbs('psi2d')
-
-    def _rbs(self, attr):
-        """Return 2D RectBivariateSpline interpolant."""
-        return import_module('scipy.interpolate').RectBivariateSpline(
-            self.r, self.z, self.data[attr]).ev
-
-    def _interp1d(self, x, y):
-        """Return 1D interpolant."""
-        return import_module('scipy.interpolate').interp1d(
-            x, y, kind='quadratic', fill_value='extrapolate')
-
-    @cached_property
-    def p_prime(self):
-        """Return cached pprime 1D interpolant."""
-        return self._interp1d(self.psi_norm, self.dpressure_dpsi)
-
-    @cached_property
-    def ff_prime(self):
-        """Return cached pprime 1D interpolant."""
-        return self._interp1d(self.psi_norm, self.f_df_dpsi)
-
-    def plot(self):
-        """Plot flux function interpolants."""
-        from nova.plot import plt, sns
-        psi_norm = np.linspace(0, 1, 500)
-        axes = plt.subplots(2, 1, sharex=True)[1]
-        axes[0].plot(self.psi_norm, self.dpressure_dpsi, '.')
-        axes[0].plot(psi_norm, self.p_prime(psi_norm), '-')
-        axes[1].plot(self.psi_norm, self.f_df_dpsi, '.')
-        axes[1].plot(psi_norm, self.ff_prime(psi_norm), '-')
-        axes[0].set_ylabel(r'$P^\prime$')
-        axes[1].set_ylabel(r'$FF^\prime$')
-        axes[1].set_xlabel(r'$\psi_{norm}$')
-        sns.despine()
 
 
 @dataclass
@@ -329,7 +264,6 @@ class Extrapolate(Plot, ExtrapolateMachine, ExtrapolationGrid, Database):
 
     def load_equilibrium(self):
         """Load equilibrium dataset."""
-        self.name = 'equilibrium'
         self.equilibrium = Equilibrium(**self.ids_attrs, ids=self.ids)
 
     def set_free(self):
@@ -351,11 +285,11 @@ class Extrapolate(Plot, ExtrapolateMachine, ExtrapolationGrid, Database):
         """Return group attributes."""
         return super().group_attrs | self.grid_attrs
 
-    def build(self, **kwargs):
-        """Build frameset and interpolation grid."""
-        super().build(**kwargs)
-        self.grid.solve(**self.grid_attrs)
-        return self.store()
+    def solve_biot(self):
+        """Extend machine solve biot to include extrapolation grid."""
+        super().solve_biot()
+        if self.sloc['plasma'].sum() > 0:
+            self.grid.solve(**self.grid_attrs)
 
     @property
     def itime(self) -> int:

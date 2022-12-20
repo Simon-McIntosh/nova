@@ -800,7 +800,7 @@ if __name__ == '__main__':
     #import doctest
     #doctest.testmod()
 
-    machine = Machine(pf_passive=False, nplasma=500)
+    machine = Machine(pf_passive=False)#pf_passive=False, nplasma=500)
 
     machine.sloc['Ic'] = 1
     machine.sloc['plasma', 'Ic'] = -10000

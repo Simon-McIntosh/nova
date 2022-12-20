@@ -146,14 +146,14 @@ class BiotConstants:
     @classmethod
     def ellipk(cls, m):
         """Return complete elliptic intergral of the 1st kind."""
-        return scipy.special.ellipk(m)
-        #return cls._ellip('k', m)
+        #return scipy.special.ellipk(m)
+        return cls._ellip('k', m)
 
     @classmethod
     def ellipe(cls, m):
         """Return complete elliptic intergral of the 2nd kind."""
-        return scipy.special.ellipe(m)
-        #return cls._ellip('e', m)
+        #return scipy.special.ellipe(m)
+        return cls._ellip('e', m)
 
     @classmethod
     def ellippi(cls, n, m):

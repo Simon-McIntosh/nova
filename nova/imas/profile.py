@@ -2,29 +2,28 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
 from functools import cached_property
-from typing import TYPE_CHECKING
 
 import numpy as np
 from scipy.interpolate import interp1d, RectBivariateSpline
 
+from nova.frame.baseplot import Plot
+from nova.imas.database import IdsData
 from nova.imas.equilibrium import Equilibrium
+from nova.imas.pf_active import PF_Active
 
-if TYPE_CHECKING:
-    import xarray
+import xarray
 
 
 @dataclass
 class GetSlice:
     """Convinence method to provide access to sliced equilibrium data."""
 
-    time_index: int
-    data: xarray.Dataset
+    time_index: int = field(init=False, default=0)
+    data: xarray.Dataset | xarray.DataArray = \
+        field(default_factory=xarray.Dataset, repr=False)
 
     def __getitem__(self, key: str):
         """Regulate access to equilibrium dataset."""
-        match key:
-            case 'dpressure_dpsi':
-                return
         return self.data[self.match(key)][self.time_index]
 
     def match(self, key: str) -> str:
@@ -39,18 +38,6 @@ class GetSlice:
             case _:
                 raise ValueError(f'invalid key {key}')
 
-
-@dataclass
-class Profile(Equilibrium):
-    """Interpolation of profiles from an equilibrium time slice."""
-
-    time_index: int = field(init=False, default=0)
-
-    def __post_init__(self):
-        """Define get slice."""
-        super().__post_init__()
-        self.get = GetSlice(self.time_index, self.data)
-
     @property
     def itime(self):
         """Manage time index."""
@@ -59,15 +46,40 @@ class Profile(Equilibrium):
     @itime.setter
     def itime(self, time_index: int):
         self.time_index = time_index
-        self.itime_update()
+        self.update()
 
-    def itime_update(self):
-        """Clear cache following itime update. Extend as required."""
+    def update(self):
+        """Clear cache following update to itime. Extend as required."""
+
+
+@dataclass
+class Current(GetSlice, IdsData):
+    """Manage time slice current data."""
+
+    def __post_init__(self):
+        """Load pf active data."""
+        self.load_data(PF_Active)
+        super().__post_init__()
+
+
+@dataclass
+class Profile(Plot, GetSlice, IdsData):
+    """Interpolation of profiles from an equilibrium time slice."""
+
+    def __post_init__(self):
+        """Load equilibrium data."""
+        self.load_data(Equilibrium)
+        super().__post_init__()
+
+    def update(self):
+        """Clear cache following update to itime. Extend as required."""
+        super().update
         self._clear_cached_properties()
 
     def _clear_cached_properties(self):
         """Clear cached properties."""
-        for attr in ['boundary', 'psi_rbs', 'p_prime', 'ff_prime']:
+        for attr in ['boundary', 'psi_axis', 'psi_boundary',
+                     'psi_rbs', 'p_prime', 'ff_prime']:
             try:
                 delattr(self, attr)
             except AttributeError:
@@ -76,12 +88,21 @@ class Profile(Equilibrium):
     @cached_property
     def boundary(self):
         """Return trimmed boundary contour."""
-        return self.get['boundary'][:self.get['boundary_length'].values].values
+        return self['boundary'][:self['boundary_length'].values].values
+
+    @cached_property
+    def psi_axis(self):
+        """Return on-axis poloidal flux."""
+        return float(self['psi_axis'])
+
+    @cached_property
+    def psi_boundary(self):
+        """Return boundary poloidal flux."""
+        return float(self['psi_boundary'])
 
     def normalize(self, psi):
         """Return normalized poloidal flux."""
-        return (psi - self.get['psi_axis']) / \
-            (self.get['psi_boundary'] - self.get['psi_axis'])
+        return (psi - self.psi_axis) / (self.psi_boundary - self.psi_axis)
 
     @cached_property
     def psi_rbs(self):
@@ -90,7 +111,7 @@ class Profile(Equilibrium):
 
     def _rbs(self, attr):
         """Return 2D RectBivariateSpline interpolant."""
-        return RectBivariateSpline(self.data.r, self.data.z, self.get[attr]).ev
+        return RectBivariateSpline(self.data.r, self.data.z, self[attr]).ev
 
     def _interp1d(self, x, y):
         """Return 1D interpolant."""
@@ -98,19 +119,19 @@ class Profile(Equilibrium):
 
     @cached_property
     def p_prime(self):
-        """Return cached pprime 1D interpolant."""
-        return self._interp1d(self.data.psi_norm, self.get['p_prime'])
+        """Return cached p prime 1D interpolant."""
+        return self._interp1d(self.data.psi_norm, self['p_prime'])
 
     @cached_property
     def ff_prime(self):
-        """Return cached pprime 1D interpolant."""
-        return self._interp1d(self.data.psi_norm, self.get['f_df_dpsi'])
+        """Return cached ff prime 1D interpolant."""
+        return self._interp1d(self.data.psi_norm, self['ff_prime'])
 
     def plot_profile(self, attr='p_prime', axes=None):
         """Plot flux function interpolants."""
         self.set_axes(axes, '1d')
         psi_norm = np.linspace(0, 1, 500)
-        self.axes.plot(self.data.psi_norm, self.get[attr], '.')
+        self.axes.plot(self.data.psi_norm, self[attr], '.')
         self.axes.plot(psi_norm, getattr(self, attr)(psi_norm), '-')
         self.axes.set_ylabel(attr)
         self.axes.set_xlabel(r'$\psi_{norm}$')
@@ -119,4 +140,4 @@ class Profile(Equilibrium):
 if __name__ == '__main__':
 
     profile = Profile(105028, 1)
-    profile.plot_2d()
+    profile.plot_profile()

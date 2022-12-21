@@ -233,7 +233,7 @@ class Equilibrium(Profile2D, Profile1D, Parameter0D, Boundary, Grid):
 
     """
 
-    name: str = 'equilibrium'
+    name: str | None = 'equilibrium'
 
     def build(self):
         """Build netCDF database using data extracted from imasdb."""

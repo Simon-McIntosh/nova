@@ -368,6 +368,7 @@ class FerriticBase(FrameSetLoc):
     """Ferritic insert baseclass."""
 
     delta: float = -1
+    name: str | None = None
     default: dict = field(init=False, default_factory=lambda: {
         'label': 'Fi', 'part': 'fi', 'ferritic': True, 'active': False})
 

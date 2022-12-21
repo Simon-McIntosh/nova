@@ -156,13 +156,13 @@ class Database:
 
     def __post_init__(self):
         """Load parameters and set ids."""
-        self.load_name()
+        self.rename()
         self.load_database()
         if hasattr(super(), '__post_init__'):
             super().__post_init__()
 
-    def load_name(self):
-        """Update name if default is not None."""
+    def rename(self):
+        """Reset name to default if default is not None."""
         if (name := next(field for field in fields(self)
                          if field.name == 'name').default) is not None:
             self.name = name
@@ -188,6 +188,9 @@ class Database:
         Update name to match ids.__name__
         """
         self.pulse = self.run = self.ids_hash
+        if self.name is not None and self.name != self.ids_data.__name__:
+            raise NameError(f'missmatch between instance name {self.name} '
+                            f'and ids_data {self.ids_data.__name__}')
         self.name = self.ids_data.__name__
 
     def _load_from_attrs(self):
@@ -430,9 +433,20 @@ class IdsData(Datafile, Database):
 
     def __post_init__(self):
         """Update filename and group."""
-        self.filename = f'{self.machine}_{self.pulse}_{self.run}'
-        self.group = self.name
+        self.rename()
+        if self.filename is None:
+            self.filename = f'{self.machine}_{self.pulse}_{self.run}'
+            self.group = self.name
         super().__post_init__()
+
+    def load_data(self, IdsClass):
+        """Load data from IdsClass and merge."""
+        try:
+            data = IdsClass(**self.ids_attrs, ids=self.ids).data
+        except NameError:  # load from single ids_data instance
+            return
+        print('load data', IdsClass)
+        self.data = self.data.merge(data, combine_attrs='drop_conflicts')
 
 
 @dataclass

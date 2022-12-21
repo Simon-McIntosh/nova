@@ -10,6 +10,7 @@ class BiotData(netCDF, FrameSetLoc):
     """Biot solution abstract base class."""
 
     attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])
+    name: str | None = None
     classname: str = field(init=False)
 
     def __post_init__(self):

@@ -187,7 +187,7 @@ class Annulus(GeomData):
 
 
 @dataclass
-class Geometry:
+class CrossSection:
     """Manage poloidal cross-sections."""
 
     ids: ImasIds = field(repr=False)
@@ -240,29 +240,29 @@ class Element:
     index: int = 0
     name: str = field(init=False)
     nturn: float = field(init=False)
-    geometry: Geometry = field(init=False)
+    section: CrossSection = field(init=False)
 
     def __post_init__(self):
         """Extract element data from ids."""
         self.name = self.ids.name.strip()
         self.nturn = self.ids.turns_with_sign
-        self.geometry = Geometry(self.ids.geometry)
+        self.section = CrossSection(self.ids.geometry)
 
     def is_poly(self) -> bool:
         """Return True if geometry.name == 'oblique' or 'annulus'."""
-        return self.geometry.name in ['oblique', 'annulus']
+        return self.section.name in ['oblique', 'annulus']
 
     def is_rectangular(self) -> bool:
         """Return geometry.name == 'rectangle'."""
-        return self.geometry.name == 'rectangle'
+        return self.section.name == 'rectangle'
 
     def is_oblique(self) -> bool:
         """Return geometry.name == 'oblique'."""
-        return self.geometry.name == 'oblique'
+        return self.section.name == 'oblique'
 
     def is_point(self) -> bool:
         """Return geometry validity flag."""
-        return np.isclose(self.geometry.data.poly.area, 0)
+        return np.isclose(self.section.data.poly.area, 0)
 
 
 @dataclass
@@ -293,7 +293,7 @@ class FrameData(ABC):
         for attr in self.element_attrs:
             self.data[attr].append(getattr(element, attr))
         for attr in self.geometry_attrs:
-            self.data[attr].append(getattr(element.geometry, attr))
+            self.data[attr].append(getattr(element.section, attr))
         for attr in self.loop_attrs:
             self.data[attr] = getattr(loop, attr)
 
@@ -636,9 +636,9 @@ class Wall(CoilDatabase):
 
 
 @dataclass
-class MachineGeometry:
+class CoilGeometry:
     """
-    Manage IDS geometry attributes.
+    Manage IDS coil geometry attributes.
 
     Parameters
     ----------
@@ -706,7 +706,7 @@ class MachineGeometry:
 
 
 @dataclass
-class Machine(CoilSet, MachineGeometry, CoilData):
+class Machine(CoilSet, CoilGeometry, CoilData):
     """Manage ITER machine geometry."""
 
     filename: str = 'iter'

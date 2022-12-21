@@ -4,14 +4,11 @@ from dataclasses import dataclass, field
 from importlib import import_module
 import os
 import sys
-from typing import TYPE_CHECKING
 
+import xarray
 import xxhash
 
 from nova.database.filepath import FilePath
-
-if TYPE_CHECKING:
-    import xarray
 
 
 @dataclass
@@ -19,9 +16,8 @@ class netCDF(FilePath):
     """Provide regulated access to netCDF database."""
 
     group: str | None = None
-    cache: bool = False
-    data: xarray.Dataset | xarray.DataArray | None = \
-        field(default=None, repr=False)
+    data: xarray.Dataset | xarray.DataArray = \
+        field(default_factory=xarray.Dataset, repr=False)
 
     def __post_init__(self):
         """Forward post init for for cooperative inheritance."""
@@ -89,4 +85,5 @@ class netCDF(FilePath):
                 self.filepath, group=self.group, cache=True) as data:
             self.data = data
             self.data.load()
+            self.data.close()
         return self

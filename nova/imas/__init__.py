@@ -11,7 +11,7 @@ __all__ = [
     'Scenario',
     ]
 
-from .database import (CoilData, Database, Ids, ImasIds)
+from .database import CoilData, Database, Ids, IdsData, ImasIds
 from .equilibrium import Equilibrium
 from .machine import Machine
 from .pf_active import PF_Active

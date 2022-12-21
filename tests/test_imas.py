@@ -2,7 +2,7 @@ import pytest
 
 from nova.imas.database import Database
 from nova.imas.equilibrium import Equilibrium
-from nova.imas.machine import (MachineGeometry,
+from nova.imas.machine import (CoilGeometry,
                                PoloidalFieldActive, PoloidalFieldPassive)
 from nova.imas.pf_active import PF_Active
 from nova.imas.utilities import ids_attrs, load_ids, mark
@@ -119,30 +119,30 @@ def test_equilibrium_rebuild():
     assert equilibrium_reload == equilibrium
 
 
-def test_machinegeometry_boolean_input():
-    geometry = MachineGeometry(wall=False)
+def test_geometry_boolean_input():
+    geometry = CoilGeometry(wall=False)
     assert geometry.wall is False
     assert geometry.pf_active == PoloidalFieldActive.default_ids_attrs()
     assert geometry.pf_passive == PoloidalFieldPassive.default_ids_attrs()
 
 
-def test_machinegeometry_update_run():
-    pf_active = MachineGeometry(pf_active=dict(run=101)).pf_active
+def test_geometry_update_run():
+    pf_active = CoilGeometry(pf_active=dict(run=101)).pf_active
     assert pf_active == PoloidalFieldActive.default_ids_attrs() | dict(run=101)
 
 
 @mark['pf_active']
-def test_machine_geometry_pf_active_as_ids_hash():
+def test_geometry_pf_active_as_ids_hash():
     database = Database(**ids_attrs['pf_active'])
-    pf_active = MachineGeometry(database.ids_data).pf_active
+    pf_active = CoilGeometry(database.ids_data).pf_active
     assert pf_active['run'] != ids_attrs['pf_active']['run']
 
 
 @mark['pf_active']
-def test_machine_geometry_pf_active_as_itterable():
+def test_geometry_pf_active_as_itterable():
     pulse_run = (ids_attrs['pf_active']['pulse'],
                  ids_attrs['pf_active']['run'])
-    pf_active = MachineGeometry(pf_active=pulse_run).pf_active
+    pf_active = CoilGeometry(pf_active=pulse_run).pf_active
     assert all(pf_active[attr] == ids_attrs['pf_active'][attr]
                for attr in ids_attrs['pf_active'])
 

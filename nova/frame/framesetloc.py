@@ -100,7 +100,6 @@ class FrameSetLoc(FrameData):
 
     """
 
-    name: Optional[str] = None
     version: dict = field(init=False, default_factory=dict, repr=False)
 
     def __post_init__(self):

@@ -11,11 +11,12 @@ class CoilSetAttrs(ABC, FrameSetLoc):
     """CoilSetAttrs baseclass."""
 
     delta: float = -1
+    name: str | None = None
     _attrs: dict = field(init=False, default_factory=dict, repr=False)
     default: dict = field(init=False, default_factory=lambda: {})
     link: bool = field(init=False, default=False)
-    attributes: list[str] = field(init=False, default_factory=lambda: [
-        'delta'])
+    attributes: list[str] = \
+        field(init=False, default_factory=lambda: ['delta'])
 
     @abstractmethod
     def insert(self, *args, required=None, iloc=None, **additional):

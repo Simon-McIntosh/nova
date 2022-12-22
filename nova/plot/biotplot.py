@@ -1,16 +1,33 @@
 """Manage biot plot utility functions."""
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
+import numpy as np
 from nova.frame.baseplot import Plot
 
 
 @dataclass
-class BiotPlot(Plot):
+class LinePlot(Plot):
+    """Single contour plot base class."""
+
+    color: str = field(init=False, default='lightgray')
+    linewidth: float = field(init=False, default=1.5)
+    linestyle: str = field(init=False, default='solid')
+    alpha: float = field(init=False, default=0.9)
+
+    def plot_kwargs(self, **kwargs):
+        """Return line plot kwargs."""
+        return dict(color=self.color, linewidth=self.linewidth,
+                    alpha=self.alpha, linestyle=self.linestyle) | kwargs
+
+
+@dataclass
+class BiotPlot(LinePlot):
     """Biot plot base class."""
 
-    levels: int | list[float] = 31
+    levels: int | np.ndarray = 31
 
     def contour_kwargs(self, **kwargs):
         """Return contour plot kwargs."""
-        return dict(colors='lightgray', linewidths=1.5, alpha=0.9,
-                    linestyles='solid', levels=self.levels) | kwargs
+        return dict(colors=self.color, linewidths=self.linewidth,
+                    alpha=self.alpha, linestyles=self.linestyle,
+                    levels=self.levels) | kwargs

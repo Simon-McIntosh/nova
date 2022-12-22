@@ -76,6 +76,7 @@ class Axes:
         plt = import_module('matplotlib.pyplot')
         self.axes = plt.subplots(1, 1)[1]
         self.set_style(style)
+        return self.axes
 
     def gca(self):
         """Link axes instance to current axes."""
@@ -176,6 +177,7 @@ class Plot:
         """Get current axes instance and set style."""
         self.axes = axes
         self.axes_style = style
+        return self.axes
 
     def legend(self, *args, **Kwargs):
         """Expose axes legend."""

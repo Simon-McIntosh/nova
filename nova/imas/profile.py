@@ -16,7 +16,7 @@ import xarray
 
 @dataclass
 class GetSlice:
-    """Convinence method to provide access to sliced equilibrium data."""
+    """Convinence method to provide access to sliced ids data."""
 
     time_index: int = field(init=False, default=0)
     data: xarray.Dataset | xarray.DataArray = \

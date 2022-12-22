@@ -1,6 +1,6 @@
 """Interpolate equilibria within separatrix."""
 from __future__ import annotations
-from dataclasses import dataclass, field, fields
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -12,7 +12,7 @@ from nova.imas.profile import Current, Profile
 if TYPE_CHECKING:
     import pandas
 
-from nova.imas import Equilibrium, Ids, IdsData, Machine
+from nova.imas import Equilibrium, Ids, Machine
 
 
 @dataclass
@@ -140,7 +140,7 @@ class Operate(Machine, Current, Profile, Grid, Equilibrium):
         """Extend itime update."""
         super().update()
         self.update_plasma()
-        # self.sloc['coil', 'Ic'] = self['current']
+        #self.sloc['coil', 'Ic'] = self['current']
 
     def update_plasma(self):
         """Ionize plasma filaments and set turn number."""
@@ -160,7 +160,8 @@ class Operate(Machine, Current, Profile, Grid, Equilibrium):
 
 if __name__ == '__main__':
 
-    operate = Operate(105028, 1)
+    operate = Operate(105028, 1, limit=0)  # DINA
+    # operate = Operate(130506, 403, limit=0)  # CORSICA
 
     operate.itime = 50
     operate.plot('plasma')

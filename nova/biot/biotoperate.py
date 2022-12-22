@@ -90,6 +90,11 @@ class BiotOperate(BiotData):
             self._svd_rank = svd_rank
             self.load_operators()
 
+    @property
+    def shape(self):
+        """Return target shape."""
+        return (self.target_number,)
+
     def post_solve(self):
         """Solve biot interaction - extened by subclass."""
         super().post_solve()
@@ -129,6 +134,10 @@ class BiotOperate(BiotData):
             if attr.capitalize() in self.attrs or attr == 'bn':
                 if attr.islower():
                     self.array[attr] = np.zeros(self.target_number)
+                    if len(self.shape) == 1:
+                        continue
+                    ndarray = self.array[attr].reshape(self.shape)
+                    self.array[f'{attr}_'] = ndarray
                     continue
                 self.array[attr] = self.operator[attr].matrix
 
@@ -155,6 +164,13 @@ class BiotOperate(BiotData):
     def __getattr__(self, attr):
         """Return variable data - lazy evaluation - cached."""
         attr = attr.replace('_field_', '')
+
+        if attr.islower() and attr[-1] == '_':  # return shaped array
+            if len(self.shape) == 1:
+                return getattr(self, attr[:-1])
+            self.array[attr][:] = getattr(self, attr[:-1]).reshape(self.shape)
+            return self.array[attr]
+
         if attr not in (avalible := [attr for attr in self.version
                                      if attr.capitalize() in self.attrs
                                      or attr == 'bn']):

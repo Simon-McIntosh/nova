@@ -15,6 +15,7 @@ def test_extrapolation_grid_relitive_to_coilset():
     grid_attrs = Grid(100, 0, 'coil').grid_attrs
     assert grid_attrs == {'ngrid': 100, 'limit': 0, 'index': 'coil'}
 
+
 @mark['equilibrium']
 def test_extrapolation_grid_relitive_to_ids():
     equilibrium = Equilibrium(ids_attrs['equilibrium']['pulse'],

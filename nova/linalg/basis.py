@@ -36,7 +36,7 @@ class LinearSample:
 class Basis(LinePlot, LinearSample):
     """Basis function base class."""
 
-    order: int = None
+    order: int = 0
     name: ClassVar[str] = 'Base'
 
     def __post_init__(self):

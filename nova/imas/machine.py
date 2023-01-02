@@ -197,7 +197,8 @@ class CrossSection:
 
     def __post_init__(self):
         """Build geometry instance."""
-        self.data = self.transform[self.ids.geometry_type](self.ids)
+        self.data = \
+            self.transform.get(self.ids.geometry_type, Rectangle)(self.ids)
 
     def __getattr__(self, attr):
         """Return data attributes."""
@@ -541,10 +542,11 @@ class PoloidalFieldActive(CoilDatabase):
 
     def build_circuit(self):
         """Build circuit influence matrix."""
-        supply = [supply.identifier
-                  for supply in getattr(self.ids_data, 'supply')]
-        nodes = max((len(circuit.connections)
-                     for circuit in getattr(self.ids_data, 'circuit')))
+        if len(self.ids_data.circuit) == 0:  # no circuit
+            return
+        supply = [supply.identifier for supply in self.ids_data.supply]
+        nodes = max(len(circuit.connections)
+                    for circuit in self.ids_data.circuit)
         self.circuit.initialize(supply, nodes)
         for circuit in getattr(self.ids_data, 'circuit'):
             self.circuit.insert(circuit.identifier, circuit.connections)
@@ -800,7 +802,7 @@ if __name__ == '__main__':
     #import doctest
     #doctest.testmod()
 
-    machine = Machine(pf_passive=False)#pf_passive=False, nplasma=500)
+    machine = Machine(pf_passive=False)  #pf_passive=False, nplasma=500)
 
     machine.sloc['Ic'] = 1
     machine.sloc['plasma', 'Ic'] = -10000

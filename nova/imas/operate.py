@@ -140,7 +140,17 @@ class Operate(Machine, Current, Profile, Grid, Equilibrium):
         """Extend itime update."""
         super().update()
         self.update_plasma()
-        #self.sloc['coil', 'Ic'] = self['current']
+
+        # TODO - fix this - nasty indexing for ill-formated ids inputs
+        try:
+            self.sloc['coil', 'Ic'] = self['current']
+        except ValueError:
+            coil_index, ids_index = zip(
+                *([self.sloc['coil', :].index.get_loc(name), i]
+                  for i, name in enumerate(operate.data.coil_name.values)
+                  if name in self.sloc['coil', :].index))
+            self.sloc['Ic'][np.array(coil_index)] = \
+                operate['current'].values[np.array(ids_index)]
 
     def update_plasma(self):
         """Ionize plasma filaments and set turn number."""
@@ -160,9 +170,37 @@ class Operate(Machine, Current, Profile, Grid, Equilibrium):
 
 if __name__ == '__main__':
 
-    operate = Operate(105028, 1, limit=0)  # DINA
-    # operate = Operate(130506, 403, limit=0)  # CORSICA
+    from matplotlib import pyplot as plt
+    import seaborn as sns
 
-    operate.itime = 50
+    from nova.biot.contour import Contour
+
+    #operate = Operate(105028, 1, limit=0)  # DINA
+    operate = Operate(130506, 403, limit=0)  # CORSICA
+
+
+    contour = Contour(operate.grid, levels=500)
+
+
+    operate.itime = 45
     operate.plot('plasma')
     operate.grid.plot()
+
+    Jp = operate._rbs('j_tor2d')
+    contour.generate(Jp)
+    contour.plot(color='C0')
+
+    contour.axes.contour(operate.data.r2d, operate.data.z2d,
+                         operate['j_tor2d'])
+
+    axes = plt.subplots(2, 1, sharex=True)[1]
+    sns.despine()
+
+    operate.plot_1d(operate.itime, 'dpressure_dpsi', axes=axes[0])
+    contour.plot_fit(operate.normalize, 0, axes=axes[0])
+
+    operate.plot_1d(operate.itime, 'f_df_dpsi', axes=axes[1])
+    contour.plot_fit(operate.normalize, 1, axes=axes[1])
+
+    axes[0].set_ylabel(r'$p^\prime$')
+    axes[1].set_ylabel(r'$ff^\prime$')

@@ -1,12 +1,14 @@
 """Extract flux function coefficnets from poloidal flux contours."""
 from __future__ import annotations
 from dataclasses import dataclass, field, fields, InitVar
-from typing import TYPE_CHECKING
+from typing import Callable, TYPE_CHECKING
 
 import contourpy
 import numpy as np
+from scipy.constants import mu_0
+from scipy.interpolate import RectBivariateSpline, interp1d
 
-from nova.plot.biotplot import BiotPlot, LinePlot
+from nova.plot.biotplot import LinePlot
 
 if TYPE_CHECKING:
     from nova.biot.biotgrid import BiotGrid
@@ -18,7 +20,11 @@ class Line(LinePlot):
 
     points: np.ndarray
     code: InitVar[np.ndarray]
+    psi: float
     closed: bool = field(init=False)
+    variable: np.ndarray = field(init=False)
+    coefficients: np.ndarray = field(init=False)
+    residual: np.ndarray = field(init=False)
 
     def __post_init__(self, code):
         """Store contour line."""
@@ -37,6 +43,24 @@ class Line(LinePlot):
         """Return contour line height."""
         return self.points[:, 1]
 
+    def fit(self, fun: Callable[[np.ndarray, np.ndarray], np.ndarray]):
+        """Fit flux function coefficents to variable."""
+        minimum_sample_number = 0
+        if (sample_number := len(self.radius)) < minimum_sample_number:
+            sample = np.linspace(0, 1, sample_number)
+            upsample = np.linspace(0, 1, minimum_sample_number)
+            radius = interp1d(sample, self.radius)(upsample)
+            height = interp1d(sample, self.height)(upsample)
+        else:
+            radius, height = self.radius, self.height
+        self.variable = fun(radius, height)
+        self.coefficients, self.residual = np.linalg.lstsq(
+            np.c_[radius, 1 / (mu_0 * radius)],
+            self.variable)[:2]
+        self.coefficients /= -2*np.pi
+        if len(self.radius) < 5:
+            self.coefficients = np.zeros(2)
+
     def plot(self, **kwargs):
         """Plot contour line."""
         self.axes.plot(self.radius, self.height,
@@ -47,9 +71,12 @@ class Line(LinePlot):
 class ContourLoc:
     """Provide dict like access to contour data."""
 
-    radius: np.ndarray = field(init=False, repr=False)
-    height: np.ndarray = field(init=False, repr=False)
+    points: np.ndarray = field(init=False, repr=False)
     closed: np.ndarray = field(init=False, repr=False)
+    psi: np.ndarray = field(init=False, repr=False)
+    variable: np.ndarray = field(init=False, repr=False)
+    coefficients: np.ndarray = field(init=False, repr=False)
+    residual: np.ndarray = field(init=False, repr=False)
 
     def __getitem__(self, attr: str):
         """Implement dict like acces to contour attributes."""
@@ -76,7 +103,7 @@ class Contour(LinePlot):
         super().__post_init__()
         self.generator = contourpy.contour_generator(
             self.grid.data.x2d, self.grid.data.z2d, self.grid.psi_,
-            line_type='SeparateCode')
+            line_type='SeparateCode', quad_as_tri=True)
 
     @property
     def psi(self):
@@ -91,23 +118,35 @@ class Contour(LinePlot):
                 raise TypeError('levels has incorect type '
                                 f'{type(self.levels)}')
 
-    def update(self):
+    def update_loc(self):
         """Update loc indexer."""
         self.loc.update(self.lines)
 
-    def generate(self):
+    def generate(self, fun=None):
         """Extract contours."""
         self.lines = []
         for psi in self.psi:
             for points, code in zip(*self.generator.lines(psi)):
-                self.lines.append(Line(points, code))
-        self.update()
+                line = Line(points, code, psi)
+                if fun is not None:
+                    line.fit(fun)
+                self.lines.append(line)
+        self.update_loc()
 
     def plot(self, **kwargs):
         """Plot contours."""
-        for line, closed in zip(self.lines, self.loc['closed']):
-            if closed:
-                line.plot(color='C0')
+        for line in self.lines:
+            line.plot(**self.plot_kwargs(**kwargs))
+
+    def plot_fit(self, norm: Callable | None = None, index: int = 0,
+                 axes=None):
+        """Plot flux function fit."""
+        self.set_axes(axes, '1d')
+        psi = self.loc['psi']
+        if norm is not None:
+            psi = norm(-psi)
+        self.axes.plot(psi[self.loc['closed']],
+                       self.loc['coefficients'][self.loc['closed'], index])
 
 
 if __name__ == '__main__':
@@ -121,12 +160,17 @@ if __name__ == '__main__':
     levels = coilset.grid.plot()
 
     contour = Contour(coilset.grid, levels=levels)
-    contour.generate()
 
-    contour.plot()
+    Jp_fun = RectBivariateSpline(contour.grid.data.x, contour.grid.data.z,
+                                 contour.grid.data.x2d).ev
 
-    Jp = operate._rbs('j_tor2d')(radius, height)
-    alpha, beta = np.linalg.lstsq(np.c_[radius, radius**-1], Jp)[0]
+    contour.generate(Jp_fun)
+
+    contour.plot_fit()
+
+
+    #Jp = operate._rbs('j_tor2d')(radius, height)
+    #alpha, beta = np.linalg.lstsq(np.c_[radius, radius**-1], Jp)[0]
 
     '''
     coords, code = cgen.lines(73)

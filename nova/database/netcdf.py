@@ -21,8 +21,6 @@ class netCDF(FilePath):
 
     def __post_init__(self):
         """Forward post init for for cooperative inheritance."""
-        if self.data is None:
-            self.data = import_module('xarray').Dataset()
         super().__post_init__()
 
     @FilePath.filepath.getter  # type: ignore

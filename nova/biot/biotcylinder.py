@@ -15,6 +15,7 @@ class CylinderConstants(BiotConstants):
     """Extend BiotConstants class."""
 
     alpha: ClassVar[float] = np.pi/2
+    romberg_k: ClassVar[int] = 4
 
     @cached_property
     def v(self):
@@ -74,22 +75,11 @@ class CylinderConstants(BiotConstants):
     @cached_property
     def zeta(self):
         """Return zeta coefficient calculated using Romberg integration."""
-        k = 4
-        phi, dphi = np.linspace(np.pi, 0, 2**k + 1, retstep=True)
+        phi_zeta = np.pi + np.linspace(0, -2*self.alpha, 2**self.romberg_k + 1)
+        dalpha_zeta = self.alpha / 2**self.romberg_k
         return scipy.integrate.romb(
-            np.stack((self._arcsinh_beta1(_phi) for _phi in phi), axis=-1),
-            dx=dphi)
-
-
-        #return np.sum(self.phi_weights * np.arcsinh(
-        #    self.beta1(self.phi_points, shape=(..., np.newaxis))), axis=-1)
-        return zeta(self.r, self.rs, self.z, self.zs,
-                    self.phi_points, self.phi_weights)
-
-        result = np.zeros_like(self.r, np.float_)
-        for phi, weight in zip(self.phi_points, self.phi_weights):
-            result += weight * np.arcsinh(self.beta1(phi))
-        return result
+            np.stack((self._arcsinh_beta1(phi) for phi in phi_zeta), axis=-1),
+            dx=dalpha_zeta)
 
     @property
     def Qr(self) -> dict[int, np.ndarray]:

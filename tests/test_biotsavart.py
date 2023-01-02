@@ -115,8 +115,7 @@ def test_cyliner_cylinder_coil_pair():
                         delta=-10)
     coilset.point.solve([[8, 0]])
     assert np.isclose(coilset.point.psi, 0)
-test_cyliner_cylinder_coil_pair()
-assert False
+
 
 def test_cylinder_ring_coil_pair():
     coilset = CoilSet(dcoil=-1)

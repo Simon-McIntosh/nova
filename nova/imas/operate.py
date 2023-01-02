@@ -140,6 +140,8 @@ class Operate(Machine, Current, Profile, Grid, Equilibrium):
         """Extend itime update."""
         super().update()
         self.update_plasma()
+        if 'current' not in self.data:
+            return
 
         # TODO - fix this - nasty indexing for ill-formated ids inputs
         try:
@@ -150,7 +152,7 @@ class Operate(Machine, Current, Profile, Grid, Equilibrium):
                   for i, name in enumerate(operate.data.coil_name.values)
                   if name in self.sloc['coil', :].index))
             self.sloc['Ic'][np.array(coil_index)] = \
-                operate['current'].values[np.array(ids_index)]
+                self['current'].values[np.array(ids_index)]
 
     def update_plasma(self):
         """Ionize plasma filaments and set turn number."""

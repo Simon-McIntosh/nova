@@ -15,7 +15,12 @@ class CylinderConstants(BiotConstants):
     """Extend BiotConstants class."""
 
     alpha: ClassVar[float] = np.pi/2
-    romberg_k: ClassVar[int] = 4
+    romberg_k: ClassVar[int] = 8
+
+    def __post_init__(self):
+        """Adjust alpha."""
+        self.alpha -= self.eps
+        super().__post_init__()
 
     @cached_property
     def v(self):

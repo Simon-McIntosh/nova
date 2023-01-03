@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from functools import cached_property
 from typing import ClassVar
 
+import numba
 import numpy as np
 import scipy.integrate
 
@@ -10,17 +11,22 @@ from nova.biot.biotconstants import BiotConstants
 from nova.biot.biotmatrix import BiotMatrix
 
 
+@numba.njit(parallel=True)
+def zeta(r, rs, z, zs, phi, delta):
+    """Return zeta coefficent."""
+    result = np.zeros_like(r)
+    for i in numba.prange(len(phi)):
+        result += np.arcsinh((rs - r * np.cos(phi[i])) /
+                             np.sqrt((zs - z)**2 + r**2 * np.sin(phi[i])**2))
+    return delta*result
+
+
 @dataclass
 class CylinderConstants(BiotConstants):
     """Extend BiotConstants class."""
 
     alpha: ClassVar[float] = np.pi/2
-    romberg_k: ClassVar[int] = 8
-
-    def __post_init__(self):
-        """Adjust alpha."""
-        self.alpha -= self.eps
-        super().__post_init__()
+    num: ClassVar[int] = 120
 
     @cached_property
     def v(self):
@@ -80,11 +86,10 @@ class CylinderConstants(BiotConstants):
     @cached_property
     def zeta(self):
         """Return zeta coefficient calculated using Romberg integration."""
-        phi_zeta = np.pi + np.linspace(0, -2*self.alpha, 2**self.romberg_k + 1)
-        dalpha_zeta = self.alpha / 2**self.romberg_k
-        return scipy.integrate.romb(
-            np.stack((self._arcsinh_beta1(phi) for phi in phi_zeta), axis=-1),
-            dx=dalpha_zeta)
+        phi, dphi = np.linspace(0, -2*self.alpha, self.num+1, retstep=True)
+        phi = np.pi + phi[:-1] + dphi/2
+        dalpha = self.alpha / self.num
+        return zeta(self.r, self.rs, self.z, self.zs, phi, dalpha)
 
     @property
     def Qr(self) -> dict[int, np.ndarray]:

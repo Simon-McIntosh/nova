@@ -59,6 +59,7 @@ class PF_Active(Plot, Scenario):
 
 if __name__ == '__main__':
 
-    pf_active = PF_Active(130506, 403, machine='iter')
-    #pf_active = PF_Active(135011, 7)
+    # pf_active = PF_Active(130506, 403, machine='iter')
+    # pf_active = PF_Active(135011, 7)
+    pf_active = PF_Active(105028, 1)
     pf_active.plot()

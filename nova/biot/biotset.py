@@ -20,10 +20,10 @@ class BiotSet:
         Calculation target
 
     turns: list[bool, bool]
-        Multiply columns / rows by turn number (source / target) if True.
+        Multiply columns / rows by turn number (source, target) if True.
 
     reduce: list[bool, bool]
-        Apply linked turn reduction (source / target) if True.
+        Apply linked turn reduction (source, target) if True.
 
     """
 

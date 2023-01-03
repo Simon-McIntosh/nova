@@ -139,4 +139,4 @@ if __name__ == '__main__':
     framespace.insert(range(40), 1, Ic=6.5, name='PF1', part='PF',
                       active=False)
 
-    print(framespace.passive)
+    #print(framespace.passive)

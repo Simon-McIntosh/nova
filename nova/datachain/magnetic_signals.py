@@ -276,7 +276,7 @@ class Signal(netCDF, Waveform, SignalParameters):
             attrs=self.metadata)
 
     def update_dataarray(self, name):
-        """Update DataArrat with sample / intergral data."""
+        """Update DataArray with sample / intergral data."""
         self.data.name = name
         self.data[0] = self.cast.to_dtype(self.sample)
         self.data[1] = self.cast.to_dtype(self.intergral)
@@ -286,7 +286,7 @@ class Signal(netCDF, Waveform, SignalParameters):
     def build(self):
         """Store samples to netCDF file."""
         self.initialize_dataarray()
-        for name in tqdm(self.magnetics['frame'].index[:100]):
+        for name in tqdm(self.magnetics['frame'].index):
             self.generate()
             self.update_dataarray(name)
             self.filename = name + '.nc'
@@ -319,11 +319,11 @@ if __name__ == '__main__':
     white.axes.legend()
 
     '''
-    dirname = '/home/ITER/mcintos/magnetics/data'
-    hostname = 'sdcc-login01.iter.org'
+    dirname = '/mnt/ITER/mcintos/magnetics/data'
+    # hostname = 'sdcc-login01.iter.org'
+    hostname = 'access-xpoz.codac.iter.org'
 
-    frequency = 2e6
-    signal = Signal(5, 2e5, offset=0.5, scale=0.1, frequency=frequency,
+    signal = Signal(5, 2e5, offset=0.005, scale=0.1, frequency=10,
                     alpha=1, rng=2025, dirname=dirname, hostname=hostname)
     signal.build()
     #print(signal.build_array(signal.magnetics['frame'].index[0]))

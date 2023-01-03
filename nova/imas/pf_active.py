@@ -48,18 +48,21 @@ class PF_Active(Plot, Scenario):
             for i in range(len(coil_names)):
                 coil = self.ids.coil[i]
                 for attr in self.coil_attrs:
-                    self.data[attr][:, i] = getattr(coil, attr).data
+                    try:
+                        self.data[attr][:, i] = getattr(coil, attr).data
+                    except ValueError:  # skip missing attributes
+                        pass
         return self
 
     def plot(self, axes=None):
         """Plot current timeseries."""
         self.set_axes(axes, '1d')
-        self.axes.plot(self.data.current)
+        self.axes.plot(self.data.time, self.data.current)
 
 
 if __name__ == '__main__':
 
     # pf_active = PF_Active(130506, 403, machine='iter')
     # pf_active = PF_Active(135011, 7)
-    pf_active = PF_Active(105028, 1)
+    pf_active = PF_Active(135003, 5)  # b field max timed
     pf_active.plot()

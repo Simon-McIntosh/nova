@@ -2,7 +2,7 @@
 from dataclasses import dataclass, field
 from functools import cached_property
 from importlib import import_module
-from typing import Optional
+from typing import ClassVar, Optional
 
 import netCDF4
 import pandas
@@ -42,18 +42,21 @@ class FrameSet(netCDF, FrameSetLoc):
     required: list[str] = field(repr=False, default_factory=lambda: [])
     additional: list[str] = field(repr=False, default_factory=lambda: [
         'turn', 'frame', 'plasma', 'Ic', 'nturn'])
-    available: list[str] = field(repr=False, default_factory=lambda: [
-        'link', 'part', 'frame', 'dx', 'dy', 'dz', 'area', 'volume', 'vtk',
-        'delta', 'section', 'turn', 'scale', 'nturn', 'nfilament',
-        'Ic', 'It', 'Psi', 'Bx', 'Bz', 'B', 'acloss'])
+    available: list[str] = field(repr=False, default_factory=list)
     subspace: list[str] = field(repr=False, default_factory=lambda: [
         'Ic'])
     array: list[str] = field(repr=False, default_factory=lambda: [
         'Ic', 'nturn', 'active', 'passive', 'plasma', 'coil',
         'fix', 'free', 'ferritic'])
 
+    _available: ClassVar[list[str]] = [
+        'link', 'part', 'frame', 'dx', 'dy', 'dz', 'area', 'volume',
+        'delta', 'section', 'turn', 'scale', 'nturn', 'nfilament',
+        'Ic', 'It', 'Psi', 'Bx', 'Bz', 'B', 'acloss']
+
     def __post_init__(self):
         """Create frame and subframe."""
+        self.available = list(dict.fromkeys(self.available + self._available))
         self.frame = FrameSpace(
             base=self.base, required=self.required, additional=self.additional,
             available=self.available, subspace=[],

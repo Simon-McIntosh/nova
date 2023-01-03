@@ -5,6 +5,7 @@ __all__ = ['BiotGrid',
            'BiotPlasmaBoundary',
            'BiotPlasmaGrid',
            'BiotPoint',
+           'BoundaryField'
            'Plasma',
            ]
 
@@ -19,6 +20,7 @@ if imp.defer:
     BiotPlasmaBoundary = imp.load('.biotplasmaboundary', 'BiotPlasmaBoundary')
     BiotPlasmaGrid = imp.load('.biotplasmagrid', 'BiotPlasmaGrid')
     BiotPoint = imp.load('.biotpoint', 'BiotPoint')
+    BoundaryField = imp.load('.boundaryfield', 'BoundaryField')
     Plasma = imp.load('.plasma', 'Plasma')
 else:
     from nova.biot.biotgrid import BiotGrid  # NOQA
@@ -27,4 +29,5 @@ else:
     from nova.biot.biotplasmaboundary import BiotPlasmaBoundary  # NOQA
     from nova.biot.biotplasmagrid import BiotPlasmaGrid  # NOQA
     from nova.biot.biotpoint import BiotPoint  # NOQA
+    from nova.biot.boundaryfield import BoundaryField
     from nova.biot.plasma import Plasma  # NOQA

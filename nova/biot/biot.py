@@ -2,7 +2,7 @@
 from dataclasses import dataclass, field
 
 from nova.biot import (BiotGrid, BiotInductance, BiotLoop, BiotPlasmaBoundary,
-                       BiotPlasmaGrid, BiotPoint, Plasma)
+                       BiotPlasmaGrid, BiotPoint, BoundaryField, Plasma)
 from nova.biot.biotdata import BiotData
 from nova.database.netcdf import netCDF
 from nova.frame.frameset import FrameSet, frame_factory
@@ -68,6 +68,11 @@ class Biot(FrameSet):
     @frame_factory(BiotLoop)
     def loop(self):
         """Return biot loop instance."""
+        return self.biot_kwargs
+
+    @frame_factory(BoundaryField)
+    def field(self):
+        """Return boundary field instance."""
         return self.biot_kwargs
 
     @frame_factory(BiotInductance)

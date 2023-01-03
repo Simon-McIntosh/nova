@@ -1,17 +1,27 @@
 """Solve maximum field on coil perimiter."""
 from dataclasses import dataclass
 
+from nova.biot.biotframe import BiotFrame
 from nova.biot.biotoperate import BiotOperate
 from nova.biot.biotsolve import BiotSolve
 from nova.frame.baseplot import Plot
+from nova.geometry.polyframe import PolyFrame
 
 
 @dataclass
-class Field(Plot, BiotOperate):
+class BoundaryField(Plot, BiotOperate):
     """Compute maximum field around coil perimeter."""
 
-    def solve(self, target):
+    def solve(self):
         """Solve magnetic field around coil perimeter."""
+        target = BiotFrame()
+
+        for coil in self.loc['coil', 'frame'].unique():
+            print(coil)
+            print(self.frame.loc[coil, 'poly'])
+            poly = PolyFrame.loads(self.frame.loc[coil, 'poly']).poly
+
+        '''
         self.data = BiotSolve(self.subframe, target,
                               reduce=[True, False], turns=[True, False],
                               columns=['Br', 'Bz'], name=self.name).data
@@ -19,6 +29,7 @@ class Field(Plot, BiotOperate):
         self.data.coords['x'] = target.x.values
         self.data.coords['z'] = target.z.values
         super().post_solve()
+        '''
 
     def plot(self, axes=None, **kwargs):
         """Plot points."""

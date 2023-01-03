@@ -101,7 +101,3 @@ class PolyFrame(GeoFrame):
         """Return polygon boundary."""
         boundary = self.poly.boundary.xy
         return np.c_[boundary[0], boundary[1]]
-
-    # def orient(self):
-    #     """Return coerced polygon boundary as a positively oriented curve."""
-    #     self.poly = shapely.geometry.polygon.orient(self.poly)

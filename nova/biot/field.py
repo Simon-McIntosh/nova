@@ -1,6 +1,8 @@
 """Solve maximum field on coil perimiter."""
 from dataclasses import dataclass
 
+import shapely.geometry
+
 from nova.biot.biotframe import BiotFrame
 from nova.biot.biotoperate import BiotOperate
 from nova.biot.biotsolve import BiotSolve
@@ -44,26 +46,28 @@ class Field(Plot, BiotOperate):
                   for i in range(nPoly-1)]
             polygon[attr] = np.concatenate(dL).ravel()
     '''
+
     def extract_poly(self, coil: str):
         """Extract polygon from frame."""
         match self.frame.loc[coil, 'poly']:
             case str():
-                print('str')
                 return PolyFrame.loads(self.frame.loc[coil, 'poly']).poly
             case PolyFrame(poly):
                 return poly
 
-    def extract_boundary(self, coil: str):
-        poly = self.extract_poly(coil)
+    def extract_boundary(self, poly: shapely.geometry.Polygon):
+        """Extract boundary from polygon and interpolate."""
         if self.dfield == 0:
-            return poly
+            return poly.boundary.xy
 
     def build(self):
         """Return boundary."""
         target = BiotFrame()
         for coil in self.loc['coil', 'frame'].unique():
             poly = self.extract_poly(coil)
-            print(coil, poly)
+            if poly.boundary.is_ring:
+                boundary = self.extract_boundary(poly)
+                print(coil, boundary)
 
     def solve(self):
         """Solve magnetic field around coil perimeter."""

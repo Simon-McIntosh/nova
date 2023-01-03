@@ -13,7 +13,7 @@ class Biot(FrameSet):
     """Expose biot methods as cached properties."""
 
     field_attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])
-    dfield: float = field(default=-1, repr=False)
+    dfield: float = field(default=0, repr=False)
 
     @property
     def biot_kwargs(self):

@@ -809,4 +809,5 @@ if __name__ == '__main__':
     machine.plot()
     machine.plasmagrid.plot()
 
-    machine.field.solve()
+    machine.field.solve(0.25)
+    machine.field.plot()

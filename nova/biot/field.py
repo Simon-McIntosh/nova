@@ -10,8 +10,18 @@ from nova.geometry.polyframe import PolyFrame
 
 @dataclass
 class Field(Plot, BiotOperate):
-    """Compute maximum field around coil perimeter."""
+    """Compute maximum field around coil perimeter.
 
+    Parameters
+    ----------
+    dfield : float, optional
+        Boundary probe resoultion. The default is 0.
+
+    """
+
+    dfield: float = 0
+
+    '''
     x, z = coil.polygon[index].boundary.coords.xy
     if dField == 0:  # no interpolation
         polygon = {'x': x, 'z': z}
@@ -33,17 +43,32 @@ class Field(Plot, BiotOperate):
                     endpoint=False))
                   for i in range(nPoly-1)]
             polygon[attr] = np.concatenate(dL).ravel()
+    '''
+    def extract_poly(self, coil: str):
+        """Extract polygon from frame."""
+        match self.frame.loc[coil, 'poly']:
+            case str():
+                print('str')
+                return PolyFrame.loads(self.frame.loc[coil, 'poly']).poly
+            case PolyFrame(poly):
+                return poly
+
+    def extract_boundary(self, coil: str):
+        poly = self.extract_poly(coil)
+        if self.dfield == 0:
+            return poly
+
+    def build(self):
+        """Return boundary."""
+        target = BiotFrame()
+        for coil in self.loc['coil', 'frame'].unique():
+            poly = self.extract_poly(coil)
+            print(coil, poly)
 
     def solve(self):
         """Solve magnetic field around coil perimeter."""
-        target = BiotFrame()
-
-        for coil in self.loc['coil', 'frame'].unique():
-            try:
-                poly = self.frame.loc[coil, 'poly'].poly
-            except AttributeError:
-                poly = PolyFrame.loads(self.frame.loc[coil, 'poly']).poly
-            print(coil, poly)
+        self.build()
+        #print(coil, poly)
 
         '''
         self.data = BiotSolve(self.subframe, target,

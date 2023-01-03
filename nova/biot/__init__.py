@@ -5,7 +5,7 @@ __all__ = ['BiotGrid',
            'BiotPlasmaBoundary',
            'BiotPlasmaGrid',
            'BiotPoint',
-           'BoundaryField'
+           'Field'
            'Plasma',
            ]
 

@@ -57,8 +57,17 @@ class Field(Plot, BiotOperate):
 
     def extract_boundary(self, poly: shapely.geometry.Polygon):
         """Extract boundary from polygon and interpolate."""
+        match self.dfield:
+            case 0:
+                return poly.boundary.xy
+            case int() if self.dfield < 0:
+                radius, height = poly.boundary.xy
+                length =
+            case _:
+
         if self.dfield == 0:
-            return poly.boundary.xy
+            return
+
 
     def build(self):
         """Return boundary."""

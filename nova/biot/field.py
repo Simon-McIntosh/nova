@@ -1,6 +1,8 @@
 """Solve maximum field on coil perimiter."""
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
+import numpy as np
+from scipy.interpolate import interp1d
 import shapely.geometry
 
 from nova.biot.biotframe import BiotFrame
@@ -8,6 +10,74 @@ from nova.biot.biotoperate import BiotOperate
 from nova.biot.biotsolve import BiotSolve
 from nova.frame.baseplot import Plot
 from nova.geometry.polyframe import PolyFrame
+
+
+@dataclass
+class Interpolate(Plot):
+    """Interpolate field probes between boundary nodes."""
+
+    radius: np.ndarray
+    height: np.ndarray
+    delta: int | float
+    number: int = field(init=False)
+    interp: dict[str, interp1d] = field(init=False, repr=False,
+                                        default_factory=dict)
+    data: dict[str, np.ndarray] = field(init=False, repr=False,
+                                        default_factory=dict)
+
+    def __post_init__(self):
+        """Store segment coordinates and build boundary interpolators."""
+        super().__post_init__()
+        assert len(self.radius) == len(self.height)
+        self.number = len(self.radius) - 1
+        assert self.number > 0
+        self.build()
+        self.concatenate()
+
+    def __getitem__(self, attr: str):
+        """Return item from data."""
+        return self.data[attr]
+
+    def build(self):
+        """Build segment interpolators for delta != 0."""
+        if self.delta == 0:
+            return
+        length = np.sqrt(np.diff(self.radius)**2 + np.diff(self.height)**2)
+        self.data['length'] = np.append([0, np.cumsum(length)])
+        for attr in ['radius', 'height']:
+            self.interp[attr] = interp1d(self.length, self[attr])
+        self.data['node_number'] = self.number
+
+    @property
+    def node_number(self):
+        """Calculate node number for each segment."""
+        match self.delta:
+            case 0:
+                return np.ones(self.number)
+            case int() if self.delta < 0:
+                return -self.delta * np.ones(self.number)
+            case int() | float():
+                return np.array([
+                    int(np.diff(self['length'][i:i+2])[0]/self.delta)
+                    for i in range(self.number)])
+
+    def concatenate(self):
+        """Concatenate interpolated boundary segments."""
+        if self.delta == 0:
+            for attr in ['radius', 'height']:
+                self.data[attr] = getattr(self, attr)[:-1]
+            return
+        for attr in ['radius', 'height']:
+            segments = (self.interp[attr](np.linspace(
+                self['length'][i], self['length'][i+1], self['node_number'][i],
+                endpoint=False)) for i in range(self.number))
+            self.data[attr] = np.concatenate(segments).ravel()
+
+    def plot(self, axes=None):
+        """Plot boundary and interpolant nodes."""
+        self.get_axes(axes, '2d')
+        self.axes.plot(self.radius, self.height, 'C2o', ms=4)
+        self.axes.plot(self['radius'], self['height'], 'C1.', ms=4)
 
 
 @dataclass
@@ -57,13 +127,13 @@ class Field(Plot, BiotOperate):
 
     def extract_boundary(self, poly: shapely.geometry.Polygon):
         """Extract boundary from polygon and interpolate."""
-        match self.dfield:
-            case 0:
-                return poly.boundary.xy
-            case int() if self.dfield < 0:
-                radius, height = poly.boundary.xy
-                length =
-            case _:
+        if self.dfield == 0:
+            print(poly.boundary.x)
+            interp = Interpolate(*poly.boundary.xy, self.dfield)
+            interp.plot()
+
+            return poly.boundary.xy
+
 
         if self.dfield == 0:
             return

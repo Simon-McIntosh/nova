@@ -87,10 +87,6 @@ def test_subgrid_1d():
     coilset.plasma.plot()
     coilset.plot()
 
-test_subgrid_1d()
-assert False
-
-
 if __name__ == '__main__':
 
     pytest.main([__file__])

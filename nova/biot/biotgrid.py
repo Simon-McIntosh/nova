@@ -8,9 +8,9 @@ import xarray
 from nova.biot.biotframe import BiotTarget
 from nova.biot.biotoperate import BiotOperate
 from nova.biot.biotsolve import BiotSolve
+from nova.biot.fieldnull import FieldNull
 from nova.frame.baseplot import Plot
 from nova.frame.error import GridError
-from nova.frame.fieldnull import FieldNull
 from nova.frame.framelink import FrameLink
 from nova.plot.biotplot import BiotPlot
 

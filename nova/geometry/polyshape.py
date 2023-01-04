@@ -15,7 +15,7 @@ class PolyShape:
         dict.fromkeys(['ellipse', 'ellip', 'el', 'e'], 'ellipse') | \
         dict.fromkeys(['square', 'sq', 's'], 'square') | \
         dict.fromkeys(['rectangle', 'rect', 'rec', 'r'], 'rectangle') | \
-        dict.fromkeys(['skin', 'sk'], 'skin') | \
+        dict.fromkeys(['skin', 'sk', 'ring'], 'skin') | \
         dict.fromkeys(['polygon', 'poly'], 'polygon') |\
         dict.fromkeys(['shell', 'shl', 'sh'], 'shell') |\
         dict.fromkeys(['hexagon', 'hex', 'hx', 'h'], 'hexagon')

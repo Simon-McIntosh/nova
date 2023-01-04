@@ -34,6 +34,10 @@ class Sample(Plot):
         """Return item from data."""
         return self.data[attr]
 
+    def __len__(self):
+        """Return sample length."""
+        return len(self.data.get('radius', []))
+
     @property
     def number(self):
         """Return segment number."""
@@ -45,11 +49,10 @@ class Sample(Plot):
             raise IndexError(f'boundary length {len(self.boundary)} '
                              'must be greater than 1')
         if not np.allclose(self.boundary[0], self.boundary[-1]):
-            raise ValueError(f'boundary does not form closed loop')
+            raise ValueError('boundary does not form closed loop')
 
     def build(self):
         """Build segment interpolators for delta != 0."""
-
         if self.delta == 0:
             return
         length = np.sqrt(np.diff(self.boundary[:, 0])**2 +
@@ -99,36 +102,20 @@ class Field(Plot, BiotOperate):
 
     Parameters
     ----------
-    dfield : float, optional
+    dfield : int | +float, optional
         Boundary probe resoultion. The default is 0.
+
+            - 0: boundary contour probes
+            - > 0: probe segment resolution
+            - int < 0: probe segment number
 
     """
 
     dfield: float = 0
 
-    '''
-    x, z = coil.polygon[index].boundary.coords.xy
-    if dField == 0:  # no interpolation
-        polygon = {'x': x, 'z': z}
-    else:
-        if dField == -1:  # extract dField from coil
-            _dL = coil.loc[index, 'dCoil']
-        else:
-            _dL = dField
-        nPoly = len(x)
-        polygon = {'_x': x, '_z': z,
-                   '_L': length(x, z, norm=False)}
-        for attr in ['x', 'z']:
-            polygon[f'interp{attr}'] = \
-                interp1d(polygon['_L'], polygon[f'_{attr}'])
-            dL = [polygon[f'interp{attr}'](
-                np.linspace(
-                    polygon['_L'][i], polygon['_L'][i+1],
-                    1+int(np.diff(polygon['_L'][i:i+2])[0]/_dL),
-                    endpoint=False))
-                  for i in range(nPoly-1)]
-            polygon[attr] = np.concatenate(dL).ravel()
-    '''
+    def __len__(self):
+        """Return field probe number."""
+        return len(self.data.get('x', []))
 
     def extract_polyframe(self, coil: str):
         """Extract polygon from frame."""
@@ -161,75 +148,3 @@ class Field(Plot, BiotOperate):
         self.axes = axes
         kwargs = dict(marker='o', linestyle='', color='C1', ms=4) | kwargs
         self.axes.plot(self.data.coords['x'], self.data.coords['z'], **kwargs)
-
-
-'''
-class Field(Probe):
-    """Field values imposed on coil boundaries - extends Probe class."""
-
-    _biot_attributes = Probe._biot_attributes + ['_coil_index']
-
-    def __init__(self, subcoil, **biot_attributes):
-        Probe.__init__(self, subcoil, **biot_attributes)
-
-    def add_coil(self, coil, parts, dField=0.5):
-        """
-        Add field probes spaced around each coil perimiter.
-
-        Parameters
-        ----------
-        coil : CoilFrame
-            Coil coilframe.
-        parts : str or list
-            Part names to include field calculation.
-        dField : float, optional
-            Coil boundary probe resoultion. The default is 0.5.
-
-        Returns
-        -------
-        None.
-
-        """
-        if not is_list_like(parts):
-            parts = [parts]
-        self._coil_index = []
-        target = {'x': [], 'z': [], 'coil': [], 'nC': []}
-        for part in parts:
-            for index in coil.index[coil.part == part]:
-                self._coil_index.append(index)
-                x, z = coil.polygon[index].boundary.coords.xy
-                if dField == 0:  # no interpolation
-                    polygon = {'x': x, 'z': z}
-                else:
-                    if dField == -1:  # extract dField from coil
-                        _dL = coil.loc[index, 'dCoil']
-                    else:
-                        _dL = dField
-                    nPoly = len(x)
-                    polygon = {'_x': x, '_z': z,
-                               '_L': length(x, z, norm=False)}
-                    for attr in ['x', 'z']:
-                        polygon[f'interp{attr}'] = \
-                            interp1d(polygon['_L'], polygon[f'_{attr}'])
-                        dL = [polygon[f'interp{attr}'](
-                            np.linspace(
-                                polygon['_L'][i], polygon['_L'][i+1],
-                                1+int(np.diff(polygon['_L'][i:i+2])[0]/_dL),
-                                endpoint=False))
-                              for i in range(nPoly-1)]
-                        polygon[attr] = np.concatenate(dL).ravel()
-                nP = len(polygon['x'])
-                target['x'].extend(polygon['x'])
-                target['z'].extend(polygon['z'])
-                target['coil'].extend([index for __ in range(nP)])
-                target['nC'].append(nP)
-        self.target.add_coil(target['x'], target['z'],
-                             label='Field', delim='',
-                             coil=target['coil'])
-        _nC = 0
-        for nC in target['nC']:
-            index = [f'Field{i}' for i in np.arange(_nC, _nC+nC)]
-            self.target.add_mpc(index)
-            _nC += nC
-        self.assemble_biotset()
-'''

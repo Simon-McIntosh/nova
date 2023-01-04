@@ -44,12 +44,41 @@ def test_boundary_ring_error():
 
 def test_boundary_positive_delta_a():
     sample = Sample(frame.poly[0].boundary, 1.0)
-    assert len(sample['radius']) == 2*1 + 2*3
+    assert len(sample) == 2*1 + 2*3
 
 
 def test_boundary_positive_delta_b():
     sample = Sample(frame.poly[0].boundary, 1.5)
-    assert len(sample['radius']) == (2*1 + 2*2)
+    assert len(sample) == (2*1 + 2*2)
+
+
+def test_multipolygon():
+    coilset = CoilSet(dfield=-2)
+    coilset.coil.insert({'ring': [4.2, -0.4, 1.25, 0.5]})
+    coilset.field.solve()
+    assert len(coilset.field) == 0
+
+
+def test_plasma():
+    coilset = CoilSet(dfield=0, nplasma=50)
+    coilset.firstwall.insert({'ellip': [1, 0, 0.1, 0.3]})
+    coilset.coil.insert(1.1, 0, 0.05, 0.1)
+    coilset.field.solve()
+    assert len(coilset.field) == 4
+
+
+@pytest.mark.skip(reason='not finished')
+def test_radial_field():
+    coilset = CoilSet(dfield=0.01, nplasma=5)
+    coilset.coil.insert([1.1, 1.2, 1.3], 0, 0.075, 0.15, Ic=15e3)
+    coilset.field.solve()
+
+    coilset.grid.solve(1000)
+    coilset.plot()
+    coilset.grid.plot()
+    coilset.field.plot()
+    #print(coilset.field.br)
+
 
 
 if __name__ == '__main__':

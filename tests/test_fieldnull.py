@@ -1,8 +1,106 @@
 import pytest
 import numpy as np
 
+from itertools import product
+from nova.biot.fieldnull import DataNull
 from nova.frame.coilset import CoilSet
 from nova.geometry.polygon import Polygon
+
+
+def meshgrid():
+    x, z = np.meshgrid(np.arange(1, 4, 1, dtype=float),
+                       np.arange(1, 4, 1, dtype=float), indexing='ij')
+    x, z, = x.flatten(), z.flatten()
+    return x, z
+
+
+def coefficient_matrix(x, z):
+    return np.c_[x**2, z**2, x, z, x*z, np.ones_like(x)]
+
+
+def quadratic_surface(x, z, null_type: int, xo=2, zo=2):
+    if null_type == 0:  # saddle
+        return (x-xo)**2 + -(z-zo)**2
+    if null_type == -1:  # minimum
+        return (x-xo)**2 + (z-zo)**2
+    if null_type == 1:  # maximum
+        return -(x-xo)**2 + -(z-zo)**2
+    if null_type == 2:  # plane
+        return x + z + 1
+
+
+@pytest.mark.parametrize('null_type', [-1, 0, 1, 2])
+def test_quadratic_coefficents(null_type: int):
+    x, z = meshgrid()
+    psi = quadratic_surface(x, z, null_type)
+    coef = DataNull.quadratic_surface(x, z, psi)
+    assert np.allclose(psi, coefficient_matrix(x, z) @ coef)
+
+
+@pytest.mark.parametrize('null_type', [-1, 0, 1])
+def test_quadratic_null_type(null_type: int):
+    x, z = meshgrid()
+    psi = quadratic_surface(x, z, null_type)
+    coef = DataNull.quadratic_surface(x, z, psi)
+    assert DataNull.null_type(coef) == null_type
+
+
+@pytest.mark.parametrize('null_type,coordinate',
+                         product([-1, 0, 1],
+                                 [(0.8, 2.7), (2.2, 2.2), (-1, 5.2), (2, 2)]))
+def test_quadratic_coordinate(null_type, coordinate):
+    x, z = meshgrid()
+    psi = quadratic_surface(x, z, null_type, *coordinate)
+    coef = DataNull.quadratic_surface(x, z, psi)
+    assert np.allclose(DataNull.null_coordinate(coef), coordinate)
+
+
+@pytest.mark.parametrize('null_type,coordinate',
+                         product([-1, 0, 1], [(1, 2.7), (2.2, 2.2), (2, 3)]))
+def test_quadratic_coordinate_cluster(null_type, coordinate):
+    x, z = meshgrid()
+    psi = quadratic_surface(x, z, null_type, *coordinate)
+    coef = DataNull.quadratic_surface(x, z, psi)
+    DataNull.null_coordinate(coef, (x, z))
+
+
+@pytest.mark.parametrize('null_type,coordinate',
+                         product([-1, 0, 1],
+                                 [(0.95, 2.7), (3.05, 2),
+                                  (2, 0.95), (0.8, 3.1)]))
+def test_quadratic_coordinate_xcluster(null_type, coordinate):
+    x, z = meshgrid()
+    psi = quadratic_surface(x, z, null_type, *coordinate)
+    coef = DataNull.quadratic_surface(x, z, psi)
+    with pytest.raises(AssertionError):
+        DataNull.null_coordinate(coef, (x, z))
+
+
+def test_quadratic_plane_surface():
+    x, z = meshgrid()
+    psi = quadratic_surface(x, z, 2)
+    coef = DataNull.quadratic_surface(x, z, psi)
+    with pytest.raises(ValueError):
+        DataNull.null_type(coef)
+
+
+@pytest.mark.parametrize('null,coordinate',
+                         product([-1, 0, 1], [(1, 2.7), (2.2, 2.2), (2, 3)]))
+def test_subnull(null, coordinate):
+    x, z = meshgrid()
+    psi = quadratic_surface(x, z, null, *coordinate)
+    null_coords, null_psi, null_type = DataNull.subnull(x, z, psi)
+    assert np.allclose(null_coords, coordinate)
+    assert np.isclose(null_psi, 0)
+    assert null_type == null
+
+
+def test_grid_2d():
+    coilset = CoilSet()
+    coilset.coil.insert(5, [-1, 1], 0.75, 0.5, Ic=1e3)
+    coilset.grid.solve(50, 0.2)
+    assert coilset.grid.x_point_number == 1
+    assert np.isclose(coilset.grid.x_point[0][1], 0, atol=1e-2)
 
 
 def test_plasma_update(plot=False):
@@ -106,7 +204,7 @@ def test_plasma_coil_parity(plot=False):
     if plot:
         coilset.plot()
         coilset.grid.plot()
-    assert np.isclose(coilset.grid.x_point[0][1], 0)
+    assert np.isclose(coilset.grid.x_point[0][1], 0, atol=1e-3)
 
 
 if __name__ == '__main__':

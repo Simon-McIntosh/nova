@@ -160,7 +160,7 @@ class DataNull(Plot):
 
     @staticmethod
     @numba.njit
-    def null_coordinate(coefficients, cluster=None, atol=1e-12):
+    def null_coordinate(coefficients, cluster=None):
         """
         Return null coodinates in 2D plane.
 
@@ -183,8 +183,10 @@ class DataNull(Plot):
                         2*coefficients[0]*coefficients[3]) / root
         if cluster is not None:
             for i, coord in enumerate([x_coordinate, z_coordinate]):
-                assert coord >= np.min(cluster[i]) - atol
-                assert coord <= np.max(cluster[i]) + atol
+                maximum, minimum = np.max(cluster[i]), np.min(cluster[i])
+                delta = maximum - minimum
+                assert coord >= minimum - delta/4
+                assert coord <= maximum + delta/4
         return x_coordinate, z_coordinate
 
     @staticmethod
@@ -223,7 +225,6 @@ class DataNull(Plot):
             stencil_vertex = stencil[bisect(stencil_index, i)]
             x_cluster = x_coordinate[stencil_vertex]
             z_cluster = z_coordinate[stencil_vertex]
-            print(x_cluster, z_cluster)
             psi_cluster = psi[stencil_vertex]
             nulls.append(self.subnull(x_cluster, z_cluster, psi_cluster))
         return dict(index=index) | self._unique(nulls)

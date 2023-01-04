@@ -79,13 +79,6 @@ def test_radial_field():
     coilset.field.plot()
     #print(coilset.field.br)
 
-@pytest.mark.skip(reason='not finished')
-def test_subgrid_1d():
-    coilset = CoilSet(nplasma=15)
-    coilset.firstwall.insert(0.5, 0, 0.075, 0.15, Ic=15e3)
-    coilset.plasmagrid.solve()
-    coilset.plasma.plot()
-    coilset.plot()
 
 if __name__ == '__main__':
 

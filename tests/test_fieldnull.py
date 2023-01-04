@@ -66,8 +66,8 @@ def test_quadratic_coordinate_cluster(null_type, coordinate):
 
 @pytest.mark.parametrize('null_type,coordinate',
                          product([-1, 0, 1],
-                                 [(0.95, 2.7), (3.05, 2),
-                                  (2, 0.95), (0.8, 3.1)]))
+                                 [(0, 2.7), (4, 2),
+                                  (2, 0), (0.8, 4)]))
 def test_quadratic_coordinate_xcluster(null_type, coordinate):
     x, z = meshgrid()
     psi = quadratic_surface(x, z, null_type, *coordinate)
@@ -101,6 +101,18 @@ def test_grid_2d():
     coilset.grid.solve(50, 0.2)
     assert coilset.grid.x_point_number == 1
     assert np.isclose(coilset.grid.x_point[0][1], 0, atol=1e-2)
+
+
+def test_grid_1d():
+    coilset = CoilSet(nplasma=50)
+    coilset.firstwall.insert(dict(ellip=[0.5, 0, 0.075, 0.15]), Ic=15e3)
+    coilset.coil.insert(0.5, [-0.08, 0.08], 0.01, 0.01, Ic=5e3)
+    coilset.plasmagrid.solve()
+    coilset.plasma.plot()
+    coilset.plot()
+    assert coilset.plasmagrid.o_point[0][0] != coilset.plasmagrid.x_point[0][0]
+    assert coilset.plasmagrid.o_point_number == 1
+    assert coilset.plasmagrid.x_point_number == 2
 
 
 def test_plasma_update(plot=False):

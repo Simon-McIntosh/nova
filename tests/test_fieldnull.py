@@ -182,6 +182,14 @@ def global_null(sign, plot=False):
     return coilset
 
 
+def test_unique_null():
+    coilset = CoilSet()
+    coilset.coil.insert([1.1, 1.2, 1.3], 0, 0.075, 0.15, Ic=15e3)
+    coilset.grid.solve(100)
+    assert coilset.grid.x_point_number == 1
+    assert coilset.grid.o_point_number == 2
+
+
 def test_global_null_Ip_positive(plot=False):
     coilset = global_null(1, plot)
     assert coilset.grid.x_point_number == 3

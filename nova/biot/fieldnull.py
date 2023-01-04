@@ -9,12 +9,31 @@ from nova.frame.baseplot import Plot
 from nova.geometry.pointloop import PointLoop
 
 
+@numba.njit
+def bisect(vector, value):
+    """Return the bisect left index, assuming vector is sorted.
+
+    The return index i is such that all e in vector[:i] have e < value,
+    and all e in vector[i:] have e >= value.
+
+    Addapted from bisect.bisect_left to allow jit compilation.
+    """
+    low, high = 0, len(vector)
+    while low < high:
+        mid = (low + high) // 2
+        if vector[mid] < value:
+            low = mid + 1
+        else:
+            high = mid
+    return low
+
+
 @dataclass
 class DataNull(Plot):
     """Store sort and remove field nulls."""
 
     subgrid: bool = True
-    data: xarray.Dataset | None = \
+    data: xarray.Dataset | xarray.DataArray = \
         field(repr=False, default_factory=xarray.Dataset)
     loop: np.ndarray | None = field(repr=False, default=None)
     data_o: dict[str, np.ndarray] = field(init=False, default_factory=dict,
@@ -63,58 +82,43 @@ class DataNull(Plot):
             return self.update_mask_1d(mask, psi)
         return self.update_mask_2d(mask, psi)
 
+    @staticmethod
+    def _empty_mask():
+        """Return empty dict structure when all(mask==0)."""
+        index, points = np.empty((0, 2), int), np.empty((0, 2), float)
+        return dict(index=index, points=points)
+
+    def _select(self, points, index):
+        """Select subset of points within loop when loop is not None."""
+        if self.loop is None:
+            return points, index
+        subindex = PointLoop(points).update(self.loop)
+        return points[subindex], index[subindex]
+
     def update_mask_1d(self, mask, psi):
         """Return masked data dict from 1D input."""
         try:
             index, points = self._index_1d(
                 self.data.x.data, self.data.z.data, mask)
         except IndexError:  # catch empty mask
-            index, points = np.empty((0, 2), int), np.empty((0, 2), float)
-            return dict(index=index, points=points)
-        if self.loop is not None:
-            subindex = PointLoop(points).update(self.loop)
-            index = index[subindex]
-            points = points[subindex]
-        data = dict(index=index, points=points)
-        data['psi'] = psi[index]
-        return data
+            return self._empty_mask()
+        points, index = self._select(points, index)
+        if self.subgrid:
+            return dict(index=index) | self._subnull_1d(index, psi)
+        return dict(index=index, points=points, psi=psi[index])
 
     def update_mask_2d(self, mask, psi):
         """Return masked data dict from 2D input."""
         try:
             index, points = self._index_2d(
                 self.data.x.data, self.data.z.data, mask)
-        except IndexError:  # catch empty mask
-            index, points = np.empty((0, 2), int), np.empty((0, 2), float)
-            return dict(index=index, points=points)
-        if self.loop is not None:
-            subindex = PointLoop(points).update(self.loop)
-            index = index[subindex]
-            points = points[subindex]
+        except IndexError:
+            return self._empty_mask()
+        points, index = self._select(points, index)
         if self.subgrid:
-            return self.subnull_2d(index, psi)
-        data = dict(index=index, points=points)
-        data['psi'] = np.array([psi[tuple(i)] for i in index])
-        return data
-
-    @staticmethod
-    @numba.njit
-    def bisect(vector, value):
-        """Return the bisect left index, assuming vector is sorted.
-
-        The return index i is such that all e in vector[:i] have e < value,
-        and all e in vector[i:] have e >= value.
-
-        Addapted from bisect.bisect_left to allow jit compilation.
-        """
-        low, high = 0, len(vector)
-        while low < high:
-            mid = (low + high) // 2
-            if vector[mid] < value:
-                low = mid + 1
-            else:
-                high = mid
-        return low
+            return dict(index=index) | self._subnull_2d(index, psi)
+        return dict(index=index, points=points,
+                    psi=np.array([psi[tuple(i)] for i in index]))
 
     @staticmethod
     @numba.njit
@@ -191,32 +195,50 @@ class DataNull(Plot):
                         coords[0]*coords[1], 1]) @ coef
 
     @staticmethod
+    def _unique(nulls, decimals=3):
+        """Return unique field nulls."""
+        points = np.array([null[0] for null in nulls])
+        psi = np.array([null[1] for null in nulls])
+        null_type = np.array([null[2] for null in nulls])
+        points, index = np.unique(points.round(decimals),
+                                  axis=0, return_index=True)
+        return dict(points=points, psi=psi[index], null_type=null_type[index])
+
+    @staticmethod
     def subnull(x_cluster, z_cluster, psi_cluster):
         """Return subgrid null coordinates, value, and type."""
         coef = DataNull.quadratic_surface(x_cluster, z_cluster, psi_cluster)
+        null_type = DataNull.null_type(coef)
         coords = DataNull.null_coordinate(coef, (x_cluster, z_cluster))
         psi = DataNull.null(coef, coords)
-        null_type = DataNull.null_type(coef)
         return coords, psi, null_type
 
-    def subnull_2d(self, index, psi2d):
-        """Return unique field nulls."""
-        x2d, z2d = self.data.x2d.values, self.data.z2d.values
-        points = np.empty_like(index, dtype=float)
-        psi = np.empty(len(index), dtype=float)
-        null_type = np.empty(len(index), dtype=int)
-        for i, ij in enumerate(index):
-            ij = (slice(ij[0]-1, ij[0]+2), slice(ij[1]-1, ij[1]+2))
+    def _subnull_1d(self, index, psi):
+        """Return unique field nulls from 1d unstructured grid."""
+        x_coordinate, z_coordinate = self.data.x.data, self.data.z.data
+        stencil = self.data.stencil.data
+        stencil_index = self.data.stencil_index.data
+        nulls = []
+        for i in index:
+            stencil_vertex = stencil[bisect(stencil_index, i)]
+            x_cluster = x_coordinate[stencil_vertex]
+            z_cluster = z_coordinate[stencil_vertex]
+            print(x_cluster, z_cluster)
+            psi_cluster = psi[stencil_vertex]
+            nulls.append(self.subnull(x_cluster, z_cluster, psi_cluster))
+        return dict(index=index) | self._unique(nulls)
+
+    def _subnull_2d(self, index, psi2d):
+        """Return unique field nulls from 2d grid."""
+        x2d, z2d = self.data.x2d.data, self.data.z2d.data
+        nulls = []
+        for i, j in index:
+            ij = (slice(i-1, i+2), slice(j-1, j+2))
             x_cluster = x2d[ij].flatten()
             z_cluster = z2d[ij].flatten()
-            _psi = psi2d[ij].flatten()
-            coef = DataNull.quadratic_surface(x_cluster, z_cluster, _psi)
-            null_type[i] = DataNull.null_type(coef)
-            points[i] = DataNull.null_coordinate(coef, (x_cluster, z_cluster))
-            psi[i] = DataNull.null(coef, points[i])
-        points, unique_index = np.unique(points, axis=0, return_index=True)
-        return dict(index=index, points=points, psi=psi[unique_index],
-                    null_type=null_type[unique_index])
+            psi_cluster = psi2d[ij].flatten()
+            nulls.append(self.subnull(x_cluster, z_cluster, psi_cluster))
+        return dict(index=index) | self._unique(nulls)
 
     @staticmethod
     @numba.njit
@@ -260,8 +282,10 @@ class DataNull(Plot):
     def plot(self, axes=None):
         """Plot null points."""
         self.get_axes(axes)
-        self.axes.plot(*self.data_o['points'].T, 'C0o')
-        self.axes.plot(*self.data_x['points'].T, 'C3X')
+        if self.o_point_number > 0:
+            self.axes.plot(*self.data_o['points'].T, 'C0o')
+        if self.x_point_number > 0:
+            self.axes.plot(*self.data_x['points'].T, 'C3X')
 
 
 @dataclass

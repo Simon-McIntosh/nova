@@ -45,7 +45,7 @@ class BiotSolve(BiotSet):
                     f'in Biot.generator: {self.generator.keys()}')
             index = self.source.index[self.source_segment == segment]
             for i, chunk in enumerate(
-                    self.group_segments(index, 3, index[-1])):
+                    self.group_segments(index, 500, index[-1])):
                 self.source_segment.loc[list(chunk)] = f'{segment}_{i}'
 
     @staticmethod
@@ -136,7 +136,6 @@ class BiotSolve(BiotSet):
         generator = self.generator[segment.split('_')[0]](
             self.source.loc[self.source_segment == segment, :].to_dict(),
             self.target, turns=self.turns, reduce=self.reduce)
-        print(self.source.loc[self.source_segment == segment, :].to_dict())
         for attr in self.attrs:
             matrix, plasma = generator.compute(attr)
             self.data[attr].loc[:, source_index] += matrix

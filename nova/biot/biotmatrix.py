@@ -49,7 +49,6 @@ class BiotMatrix(BiotSet):
         #if isinstance(matrix, da.Array):
         #    matrix = matrix.compute()
         plasma = matrix[:, self.source.plasma]
-        print('***', plasma.shape, self.source.plasma)
         if self.source.turns:
             matrix *= self.source('nturn')
         # reduce

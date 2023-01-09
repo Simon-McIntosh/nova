@@ -2,13 +2,14 @@
 import numpy as np
 
 from nova.frame.framespace import FrameSpace
+from nova.frame.framelink import FrameLink
 from nova.frame.metamethod import BiotSection, BiotShape, BiotReduce, PolyGeo
 
 
 # pylint: disable=too-many-ancestors
 
 
-class BiotFrame(FrameSpace):
+class BiotFrame(FrameLink):
     """Extend FrameSpace class with biot specific attributes and methods."""
 
     _metadata = ['turns', 'reduce']

@@ -227,12 +227,12 @@ def test_plasma_coil_parity(plot=False):
 
 
 def test_xpoint_select():
-    coilset = CoilSet(nplasma=3)
+    coilset = CoilSet(nplasma=500)
 
     coilset.firstwall.insert(dict(e={0.5, 0, 0.2, 0.1}))
     coilset.coil.insert(0.485, [-0.12, 0.12], 0.03, 0.03, Ic=5e3)
 
-    #coilset.grid.solve(10)
+    coilset.grid.solve(500)
 
     coilset.plasma.solve()
 
@@ -242,9 +242,6 @@ def test_xpoint_select():
     coilset.plasma.grid.plot()
     coilset.plot()
     coilset.grid.plot()
-
-#test_xpoint_select()
-#assert False
 
 
 

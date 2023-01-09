@@ -89,7 +89,7 @@ def test_equilibrium_database_from_ids_str_hash():
 def test_equilibrium_database_ids_attrs():
     equilibrium = Database(**ids_attrs['equilibrium'])
     assert equilibrium.ids_attrs == ids_attrs['equilibrium'] | \
-        dict(user='public', machine='iter', backend=13)
+        dict(occurrence=0, user='public', machine='iter', backend=13)
 
 
 @mark['equilibrium']

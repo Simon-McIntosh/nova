@@ -42,7 +42,7 @@ class DataNull(Plot):
                                           repr=False)
 
     @property
-    def o_point(self):
+    def o_points(self):
         """Return o-point locations."""
         return self.data_o['points']
 
@@ -57,7 +57,7 @@ class DataNull(Plot):
         return len(self.data_o['points'])
 
     @property
-    def x_point(self):
+    def x_points(self):
         """Return x-point locations."""
         return self.data_x['points']
 
@@ -185,8 +185,8 @@ class DataNull(Plot):
             for i, coord in enumerate([x_coordinate, z_coordinate]):
                 maximum, minimum = np.max(cluster[i]), np.min(cluster[i])
                 delta = maximum - minimum
-                assert coord >= minimum - delta/4
-                assert coord <= maximum + delta/4
+                assert coord >= minimum - delta
+                assert coord <= maximum + delta
         return x_coordinate, z_coordinate
 
     @staticmethod
@@ -231,13 +231,13 @@ class DataNull(Plot):
 
     def _subnull_2d(self, index, psi2d):
         """Return unique field nulls from 2d grid."""
-        x2d, z2d = self.data.x2d.data, self.data.z2d.data
+        x_coordinate, z_coordinate = self.data.x.data, self.data.z.data
         nulls = []
         for i, j in index:
-            ij = (slice(i-1, i+2), slice(j-1, j+2))
-            x_cluster = x2d[ij].flatten()
-            z_cluster = z2d[ij].flatten()
-            psi_cluster = psi2d[ij].flatten()
+            x2d, z2d = np.meshgrid(x_coordinate[i-1:i+2],
+                                   z_coordinate[j-1:j+2], indexing='ij')
+            x_cluster, z_cluster = x2d.flatten(), z2d.flatten()
+            psi_cluster = psi2d[i-1:i+2, j-1:j+2].flatten()
             nulls.append(self.subnull(x_cluster, z_cluster, psi_cluster))
         return dict(index=index) | self._unique(nulls)
 
@@ -247,7 +247,7 @@ class DataNull(Plot):
         index = np.where(mask)[0]
         point_number = len(index)
         points = np.empty((point_number, 2), dtype=numba.float64)
-        for i in numba.prange(point_number):
+        for i in numba.prange(point_number):  # pylint: disable=not-an-iterable
             points[i, 0] = x_coordinate[index[i]]
             points[i, 1] = z_coordinate[index[i]]
         return index, points
@@ -255,17 +255,13 @@ class DataNull(Plot):
     @staticmethod
     @numba.njit
     def _index_2d(x_coordinate, z_coordinate, mask):
-        index = np.asarray([(i, j) for i, j in zip(*np.where(mask))])
+        index = np.asarray(list(zip(*np.where(mask))))
         point_number = len(index)
         points = np.empty((point_number, 2), dtype=numba.float64)
-        for i in numba.prange(point_number):
+        for i in numba.prange(point_number):  # pylint: disable=not-an-iterable
             points[i, 0] = x_coordinate[index[i][0]]
             points[i, 1] = z_coordinate[index[i][1]]
         return index, points
-
-    def sort(self):
-        """Sort data."""
-        raise NotImplementedError
 
     def delete(self, null: str, index):
         """Delete elements in data specified by index.
@@ -354,8 +350,7 @@ class FieldNull(DataNull):
         o_mask = np.full((xdim, zdim), False)
         x_mask = np.full((xdim, zdim), False)
         stencil = [(-1, 0), (0, -1), (1, -1), (1, 0), (0, 1), (-1, 1)]
-        #  stencil = [(-1, 0), (-1, -1), (0, -1), (1, 0), (1, 1), (0, 1)]
-        for i in numba.prange(1, xdim-1):
+        for i in numba.prange(1, xdim-1):  # pylint: disable=not-an-iterable
             for j in range(1, zdim-1):
                 center = data[i, j]
                 sign = data[i+stencil[-1][0], j+stencil[-1][1]] > center

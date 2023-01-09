@@ -120,10 +120,10 @@ class Profile1D(Plot, Scenario):
                 self.data[attr][itime] = np.interp(
                     self.data.psi_norm, psi_norm, self.data[attr][itime])
 
-    def plot_1d(self, itime=-1, attr='psi', axes=None):
+    def plot_1d(self, itime=-1, attr='psi', axes=None, **kwargs):
         """Plot 1d profile."""
         self.set_axes(axes, '1d')
-        self.axes.plot(self.data.psi_norm, self.data[attr][itime])
+        self.axes.plot(self.data.psi_norm, self.data[attr][itime], **kwargs)
 
 
 @dataclass
@@ -249,6 +249,7 @@ if __name__ == '__main__':
     #import doctest
     #doctest.testmod()
 
-    equilibrium = Equilibrium(105028, 1)
-    equilibrium.plot_2d(50, 'psi')
-    equilibrium.plot_boundary(50)
+    #equilibrium = Equilibrium(105028, 1).build()
+    equilibrium = Equilibrium(105007, 10, 0)
+    equilibrium.plot_2d(0, 'psi')
+    equilibrium.plot_boundary(0)

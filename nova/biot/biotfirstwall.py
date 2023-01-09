@@ -7,11 +7,12 @@ from nova.biot.biotpoint import BiotPoint
 
 
 @dataclass
-class BiotPlasmaBoundary(BiotPoint):
+class BiotFirstWall(BiotPoint):
     """Compute interaction for a series of discrete points."""
 
-    def solve(self, points):
+    def solve(self):
         """Solve Biot wall-pannel mid-points."""
+        points = self.Loc['plasma', 'poly'][0].boundary
         firstwall = np.empty((2*len(points)-1, 2))
         firstwall[::2] = points
         firstwall[1::2] = (points[:-1, :] + points[1:, :]) / 2

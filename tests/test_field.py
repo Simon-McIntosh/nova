@@ -68,16 +68,21 @@ def test_plasma():
 
 
 @pytest.mark.skip(reason='not finished')
-def test_radial_field():
+def test_radial_field_matrix_length():
     coilset = CoilSet(dfield=0.01, nplasma=5)
     coilset.coil.insert([1.1, 1.2, 1.3], 0, 0.075, 0.15, Ic=15e3)
     coilset.field.solve()
 
-    coilset.grid.solve(100)
-    coilset.plot()
-    coilset.grid.plot()
-    coilset.field.plot()
+    assert len(coilset.field) == len(coilset.field.data.Br)
+    print(coilset.field.max_br())
+    #coilset.grid.solve(100)
+    #coilset.plot()
+    #coilset.grid.plot()
+    #coilset.field.plot()
     #print(coilset.field.br)
+    assert False
+
+#test_radial_field_matrix_length()
 
 
 if __name__ == '__main__':

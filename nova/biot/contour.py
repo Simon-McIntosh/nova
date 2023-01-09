@@ -1,7 +1,8 @@
 """Extract flux function coefficnets from poloidal flux contours."""
 from __future__ import annotations
+import bisect
 from dataclasses import dataclass, field, fields, InitVar
-from typing import Callable, TYPE_CHECKING
+from typing import Callable
 
 import contourpy
 import numpy as np
@@ -10,11 +11,8 @@ from scipy.interpolate import RectBivariateSpline, interp1d
 
 from nova.plot.biotplot import LinePlot
 
-if TYPE_CHECKING:
-    from nova.biot.biotgrid import BiotGrid
 
-
-@dataclass
+@dataclass(repr=False)
 class Line(LinePlot):
     """Provide storage and transforms for single contour line."""
 
@@ -30,6 +28,8 @@ class Line(LinePlot):
         """Store contour line."""
         super().__post_init__()
         self.closed = code[-1] == 79
+        if len(self.points) <= 5:
+            self.closed = False
         if not self.closed:
             self.linestyle = 'dashed'
 
@@ -45,18 +45,9 @@ class Line(LinePlot):
 
     def fit(self, fun: Callable[[np.ndarray, np.ndarray], np.ndarray]):
         """Fit flux function coefficents to variable."""
-        minimum_sample_number = 0
-        if (sample_number := len(self.radius)) < minimum_sample_number:
-            sample = np.linspace(0, 1, sample_number)
-            upsample = np.linspace(0, 1, minimum_sample_number)
-            radius = interp1d(sample, self.radius)(upsample)
-            height = interp1d(sample, self.height)(upsample)
-        else:
-            radius, height = self.radius, self.height
-        self.variable = fun(radius, height)
+        self.variable = fun(self.radius, self.height)
         self.coefficients, self.residual = np.linalg.lstsq(
-            np.c_[radius, 1 / (mu_0 * radius)],
-            self.variable)[:2]
+            np.c_[self.radius, 1 / (mu_0 * self.radius)], self.variable)[:2]
         self.coefficients /= -2*np.pi
         if len(self.radius) < 5:
             self.coefficients = np.zeros(2)
@@ -93,7 +84,9 @@ class ContourLoc:
 class Contour(LinePlot):
     """Contour 2d poloidal flux map and extract flux function coeffiecents."""
 
-    grid: BiotGrid
+    x2d: np.ndarray
+    z2d: np.ndarray
+    psi2d: np.ndarray
     levels: int | np.ndarray = 10
     lines: list[Line] = field(init=False, repr=False)
     loc: ContourLoc = field(init=False, default_factory=ContourLoc)
@@ -102,7 +95,7 @@ class Contour(LinePlot):
         """Initialize contour generator."""
         super().__post_init__()
         self.generator = contourpy.contour_generator(
-            self.grid.data.x2d, self.grid.data.z2d, self.grid.psi_,
+            self.x2d, self.z2d, self.psi2d,
             line_type='SeparateCode', quad_as_tri=True)
 
     @property
@@ -110,7 +103,8 @@ class Contour(LinePlot):
         """Return poloidal flux contor levels."""
         match self.levels:
             case int():
-                return np.linspace(self.grid.psi.min(), self.grid.psi.max(),
+                return np.linspace(self.psi2d.min(),
+                                   self.psi2d.max(),
                                    self.levels)
             case np.ndarray():
                 return self.levels
@@ -122,8 +116,20 @@ class Contour(LinePlot):
         """Update loc indexer."""
         self.loc.update(self.lines)
 
+    def line(self, psi):
+        """Return contour lines for single level."""
+        lines = []
+        for points, code in zip(*self.generator.lines(psi)):
+            lines.append(Line(points, code, psi))
+        return lines
+
+    def plot_contour(self, psi, **kwargs):
+        """Plot contours for single level."""
+        for line in self.line(psi):
+            line.plot(**kwargs)
+
     def generate(self, fun=None):
-        """Extract contours."""
+        """Generate contours."""
         self.lines = []
         for psi in self.psi:
             for points, code in zip(*self.generator.lines(psi)):
@@ -138,15 +144,41 @@ class Contour(LinePlot):
         for line in self.lines:
             line.plot(**self.plot_kwargs(**kwargs))
 
-    def plot_fit(self, norm: Callable | None = None, index: int = 0,
-                 axes=None):
+    def plot_fit(self, psi: float, norm: Callable | None = None, axes=None):
+        """Plot least squares fit for single closed contour."""
+        contour_psi = self.loc['psi'][self.loc['closed']]
+        if norm is not None:
+            contour_psi = norm(contour_psi)
+        if contour_psi[0] < contour_psi[-1]:
+            index = bisect.bisect_left(contour_psi, psi)
+        else:
+            index = bisect.bisect_right(-contour_psi, -psi)
+        line = np.array(self.lines)[self.loc['closed']][index]
+        self.set_axes(axes, '1d')
+        self.axes.plot(line.points[:, 0], line.variable, 'C0.', ms=5,
+                       label=rf'contour: $\psi^\prime$={psi}')
+        radius = np.linspace(np.min(line.points[:, 0]),
+                             np.max(line.points[:, 0]))
+
+        fit = -2*np.pi * np.c_[radius, 1 / (mu_0 * radius)] @ line.coefficients
+        fit_label = rf'fit: $p^\prime$={line.coefficients[0]:1.2f} '
+        fit_label += rf'$ff^\prime$={line.coefficients[1]:1.2f}'
+        self.axes.plot(radius, fit, 'C1', label=fit_label)
+        self.axes.legend()
+        self.axes.set_xlabel('radius')
+        self.axes.set_ylabel(r'$J_p$')
+        return np.arange(len(self.loc['psi']))[self.loc['closed']][index]
+
+    def plot_1d(self, norm: Callable | None = None, index: int = 0,
+                axes=None, **kwargs):
         """Plot flux function fit."""
         self.set_axes(axes, '1d')
         psi = self.loc['psi']
         if norm is not None:
-            psi = norm(-psi)
+            psi = norm(psi)  # COCOS
         self.axes.plot(psi[self.loc['closed']],
-                       self.loc['coefficients'][self.loc['closed'], index])
+                       self.loc['coefficients'][self.loc['closed'], index],
+                       **kwargs)
 
 
 if __name__ == '__main__':
@@ -159,40 +191,12 @@ if __name__ == '__main__':
     coilset.plot()
     levels = coilset.grid.plot()
 
-    contour = Contour(coilset.grid, levels=levels)
+    contour = Contour(coilset.grid.data.x2d, coilset.grid.data.z2d,
+                      coilset.grid.psi_, levels=levels)
 
-    Jp_fun = RectBivariateSpline(contour.grid.data.x, contour.grid.data.z,
-                                 contour.grid.data.x2d).ev
+    Jp_fun = RectBivariateSpline(coilset.grid.data.x, coilset.grid.data.z,
+                                 coilset.grid.data.x2d).ev
 
     contour.generate(Jp_fun)
 
-    contour.plot_fit()
-
-
-    #Jp = operate._rbs('j_tor2d')(radius, height)
-    #alpha, beta = np.linalg.lstsq(np.c_[radius, radius**-1], Jp)[0]
-
-    '''
-    coords, code = cgen.lines(73)
-
-    axes_2d = operate.set_axes(operate.axes, '2d')
-    axes_1d = operate.set_axes(None, '1d')
-
-    for index in range(len(coords)):
-        radius = coords[index][:, 0]
-        height = coords[index][:, 1]
-
-        axes_2d.plot(radius, height, 'C3')
-
-        Jp = operate._rbs('j_tor2d')(radius, height)
-
-        #Jp -= 2e3*height
-
-        #operate.set_axes(None, '1d')
-        axes_1d.plot(radius, Jp, 'C3')
-
-        alpha, beta = np.linalg.lstsq(np.c_[radius, radius**-1], Jp)[0]
-
-        axes_1d.plot(radius := np.linspace(radius.min(), radius.max()),
-                     alpha*radius + beta/radius, 'C0--')
-    '''
+    contour.plot_1d()

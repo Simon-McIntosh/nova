@@ -9,10 +9,10 @@ from nova.frame.baseplot import Plot
 class LinePlot(Plot):
     """Single contour plot base class."""
 
-    color: str = field(init=False, default='lightgray')
-    linewidth: float = field(init=False, default=1.5)
-    linestyle: str = field(init=False, default='solid')
-    alpha: float = field(init=False, default=0.9)
+    color: str = field(init=False, default='lightgray', repr=False)
+    linewidth: float = field(init=False, default=1.5, repr=False)
+    linestyle: str = field(init=False, default='solid', repr=False)
+    alpha: float = field(init=False, default=0.9, repr=False)
 
     def plot_kwargs(self, **kwargs):
         """Return line plot kwargs."""

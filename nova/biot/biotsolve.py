@@ -134,8 +134,7 @@ class BiotSolve(BiotSet):
         source_index = self.source_index(segment)
         plasma_index = self.plasma_index(segment)
         generator = self.generator[segment.split('_')[0]](
-            pandas.DataFrame(
-                self.source.loc[self.source_segment == segment, :]),
+            self.source.loc[self.source_segment == segment, :].to_dict(),
             self.target, turns=self.turns, reduce=self.reduce)
         for attr in self.attrs:
             matrix, plasma = generator.compute(attr)

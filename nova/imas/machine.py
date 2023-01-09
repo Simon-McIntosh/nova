@@ -766,8 +766,9 @@ class Machine(CoilSet, CoilGeometry, CoilData):
     def solve_biot(self):
         """Solve biot instances."""
         if self.sloc['plasma'].sum() > 0:
-            self.plasmaboundary.solve(self.Loc['plasma', 'poly'][0].boundary)
-            self.plasmagrid.solve()
+            self.plasma.solve()
+            #self.plasmaboundary.solve()  # self.Loc['plasma', 'poly'][0].boundary
+            #self.plasmagrid.solve()
 
     def build(self, **kwargs):
         """Build dataset, frameset and, biotset and save to file."""

@@ -13,9 +13,6 @@ from nova.frame.dataarray import (
     ArrayIndexer,
     DataArray
     )
-#from nova.frame.energize import Energize
-#from nova.frame.multipoint import MultiPoint
-#from nova.frame.select import Select
 from nova.geometry.polygeom import PolyGeom
 from nova.geometry.polygon import Polygon
 

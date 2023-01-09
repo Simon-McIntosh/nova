@@ -8,8 +8,8 @@ import numpy as np
 import scipy.spatial
 
 from nova.database.netcdf import netCDF
+from nova.biot.biotfirstwall import BiotFirstWall
 from nova.biot.biotplasmagrid import BiotPlasmaGrid
-from nova.biot.biotplasmaboundary import BiotPlasmaBoundary
 from nova.frame.baseplot import Plot
 from nova.frame.framesetloc import FrameSetLoc
 from nova.geometry.polygon import Polygon
@@ -22,8 +22,7 @@ class Plasma(Plot, netCDF, FrameSetLoc):
 
     name: str = 'plasma'
     grid: BiotPlasmaGrid = field(repr=False, default_factory=BiotPlasmaGrid)
-    boundary: BiotPlasmaBoundary = field(repr=False,
-                                         default_factory=BiotPlasmaBoundary)
+    wall: BiotFirstWall = field(repr=False, default_factory=BiotFirstWall)
 
     def __post_init__(self):
         """Update subframe metadata."""
@@ -41,6 +40,18 @@ class Plasma(Plot, netCDF, FrameSetLoc):
         """Return string representation of plasma subframe."""
         return self.loc['ionize', ['x', 'z', 'section', 'area',
                                    'Ic', 'It', 'nturn']].__str__()
+
+    def solve(self):
+        """Solve interaction matricies across plasma grid."""
+        self.grid.solve()
+
+    @property
+    def psi_axis(self):
+        """Return on-axis poloidal flux."""
+        if len(self.grid.o_psi) > 1:
+            raise IndexError('multiple field nulls found within firstwall\n'
+                             f'{self.grid.data_o}')
+        return self.grid.o_psi[0]
 
     @property
     def psi(self):

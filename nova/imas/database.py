@@ -1,7 +1,8 @@
 """Manage access to IMAS database."""
 from contextlib import contextmanager
 from dataclasses import dataclass, field, fields, InitVar
-from typing import ClassVar, Optional, Type
+from importlib import import_module
+from typing import Any, ClassVar, Optional, Type
 
 import xxhash
 
@@ -10,12 +11,24 @@ from nova.database.netcdf import netCDF
 
 # _pylint: disable=too-many-ancestors
 
-ImasIds = object
+ImasIds = Any
 Ids = (ImasIds | dict[str, int | str] | tuple[int | str])
 
 
 @dataclass
-class Database:
+class IDS:
+    """High level IDS attributes."""
+
+    pulse: int = 0
+    run: int = 0
+    occurrence: int = 0
+    name: str | None = None
+
+    attrs: ClassVar[list[str]] = ['pulse', 'run', 'occurrence', 'name']
+
+
+@dataclass
+class Database(IDS):
     """
     Methods to access IMAS database.
 
@@ -25,6 +38,8 @@ class Database:
         Pulse number. The default is 0.
     run: int, optional (required when ids not set)
         Run number. The default is 0.
+    occurrence: int, optional (required when ids not set)
+        Occurrence number. The default is 0.
     name: str, optional (required when ids not set)
         Ids name. The default is ''.
     user: str, optional (required when ids not set)
@@ -68,7 +83,7 @@ class Database:
     Load an equilibrium ids from file with defaults for user, machine and
     backend:
 
-    >>> equilibrium = Database(130506, 403, 'equilibrium')
+    >>> equilibrium = Database(130506, 403, name='equilibrium')
     >>> equilibrium.pulse, equilibrium.run, equilibrium.name
     (130506, 403, 'equilibrium')
     >>> equilibrium.user, equilibrium.machine, equilibrium.backend
@@ -84,7 +99,7 @@ class Database:
 
     Malformed inputs are thrown as TypeErrors:
 
-    >>> malformed_database = Database(None, 403, 'equilibrium')
+    >>> malformed_database = Database(None, 403, name='equilibrium')
     >>> malformed_database.ids_data
     Traceback (most recent call last):
         ...
@@ -126,7 +141,7 @@ class Database:
     The ids_attrs property returns a dict of key instance attributes which may
     be used to identify the instance
 
-    >>> equilibrium.ids_attrs == dict(pulse=130506, run=403, \
+    >>> equilibrium.ids_attrs == dict(pulse=130506, run=403, occurrence=0,\
                                       name='equilibrium', user='public', \
                                       machine='iter', backend=13)
     True
@@ -143,16 +158,12 @@ class Database:
 
     """
 
-    pulse: int = 0
-    run: int = 0
-    name: str | None = None
     user: str = 'public'
     machine: str = 'iter'
     backend: int = 13
     ids: ImasIds | None = field(repr=False, default=None)
 
-    attrs: ClassVar[list[str]] = \
-        ['pulse', 'run', 'name', 'user', 'machine', 'backend']
+    attrs: ClassVar[list[str]] = IDS.attrs + ['user', 'machine', 'backend']
 
     def __post_init__(self):
         """Load parameters and set ids."""
@@ -229,14 +240,15 @@ class Database:
                              if item is not None)).split('.', 1)
         with self._get_ids() as db_entry:
             if len(ids_name) == 2:
-                return db_entry.partial_get(*ids_name)
-            return db_entry.get(*ids_name)
+                return db_entry.partial_get(*ids_name,
+                                            occurrence=self.occurrence)
+            return db_entry.get(*ids_name, occurrence=self.occurrence)
 
     @contextmanager
     def _get_ids(self):
         """Yield database with context manager."""
         try:
-            import imas
+            imas = import_module('imas')
         except ImportError as error:
             raise ImportError('imas module not found'
                               'try module load IMAS') from error
@@ -264,7 +276,7 @@ class Database:
         underway to provide ids hashes via the IMAS access layer.
         """
         xxh32 = xxhash.xxh32()
-        xxh32.update(self.ids_data.__str__())
+        xxh32.update(str(self.ids_data))
         return xxh32.intdigest()
 
 
@@ -306,13 +318,14 @@ class DataAttrs:
 
     Database attributes may be extracted from any class derived from Database:
 
-    >>> database = Database(130506, 403, 'equilibrium', machine='iter')
+    >>> database = Database(130506, 403, 0, 'equilibrium', machine='iter')
     >>> DataAttrs(database).attrs == database.ids_attrs
     True
 
     Passing a fully defined attribute dict returns this input:
 
-    >>> attrs = dict(pulse=130506, run=403, name='pf_active', user='other', \
+    >>> attrs = dict(pulse=130506, run=403, occurrence=0, \
+                     name='pf_active', user='other', \
                      machine='iter', backend=13)
     >>> DataAttrs(attrs).attrs == attrs
     True
@@ -344,7 +357,7 @@ class DataAttrs:
     expanded by the passed subclass and must resolve to a valid ids. Partial
     input is acepted as long as the defaults enable a correct resolution.
 
-    >>> DataAttrs((130506, 403, 'equilibrium')).attrs == database.ids_attrs
+    >>> DataAttrs((130506, 403, 0, 'equilibrium')).attrs == database.ids_attrs
     True
 
     Raises TypeError when input attrs are malformed:
@@ -424,6 +437,10 @@ class Datafile(netCDF):
         except (FileNotFoundError, OSError):
             self.build()
 
+    def build(self):
+        """Build ids dataset."""
+        raise NotImplementedError()
+
 
 @dataclass
 class IdsData(Datafile, Database):
@@ -436,17 +453,22 @@ class IdsData(Datafile, Database):
         self.rename()
         if self.filename is None:
             self.filename = f'{self.machine}_{self.pulse}_{self.run}'
+            if self.occurrence > 0:
+                self.filename += f'_{self.occurrence}'
             self.group = self.name
         super().__post_init__()
 
-    def load_data(self, IdsClass):
+    def load_data(self, ids_class):
         """Load data from IdsClass and merge."""
         try:
-            data = IdsClass(**self.ids_attrs, ids=self.ids).data
+            data = ids_class(**self.ids_attrs, ids=self.ids).data
         except NameError:  # load from single ids_data instance
             return
-        print('load data', IdsClass)
         self.data = self.data.merge(data, combine_attrs='drop_conflicts')
+
+    def build(self):
+        """Build ids dataset."""
+        raise NotImplementedError()
 
 
 @dataclass
@@ -476,7 +498,11 @@ class CoilData(Datafile):
         Group attrs used by :func:`~nova.database.filepath.FilePath.hash_attrs`
         to generate a unique hex hash to label data within a netCDF file.
         """
-        return dict()
+        return {}
+
+    def build(self):
+        """Build ids dataset."""
+        raise NotImplementedError()
 
 
 if __name__ == '__main__':

@@ -1,7 +1,7 @@
 """Manage biot methods."""
 from dataclasses import dataclass, field
 
-from nova.biot import (BiotGrid, BiotInductance, BiotLoop, BiotPlasmaBoundary,
+from nova.biot import (BiotGrid, BiotInductance, BiotLoop, BiotFirstWall,
                        BiotPlasmaGrid, BiotPoint, Field, Plasma)
 from nova.biot.biotdata import BiotData
 from nova.database.netcdf import netCDF
@@ -37,8 +37,8 @@ class Biot(FrameSet):
     @frame_factory(Plasma)
     def plasma(self):
         """Return plasma instance."""
-        return dict(dirname=self.path,
-                    grid=self.plasmagrid, boundary=self.plasmaboundary)
+        return dict(dirname=self.path, grid=self.plasmagrid,
+                    wall=self.plasmawall)
 
     @frame_factory(BiotGrid)
     def grid(self):
@@ -50,8 +50,8 @@ class Biot(FrameSet):
         """Return plasma grid biot instance."""
         return self.biot_kwargs
 
-    @frame_factory(BiotPlasmaBoundary)
-    def plasmaboundary(self):
+    @frame_factory(BiotFirstWall)
+    def plasmawall(self):
         """Return plasma firstwall biot instance."""
         return self.biot_kwargs
 

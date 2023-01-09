@@ -91,8 +91,8 @@ class Extrapolate(Operate):
     center of each filament as follows,
 
     .. math::
-        I_i = -2 \pi A [r p\prime (\psi\prime) +
-                        f f\prime(\psi\prime) / (\mu_0 r)]
+        I_i = -2 \pi A [r p^\prime (\psi) +
+                        f f^\prime(\psi) / (\mu_0 r)]
 
     With a total plasma current :math:`I_p` condition enforced such that,
 
@@ -184,7 +184,7 @@ class Extrapolate(Operate):
             super().plot_2d(self.itime, attr, colors='C3',
                             levels=-levels[::-1], axes=self.axes)
         except KeyError:
-            print('keyarror', attr)
+            print('key error', attr)
             pass
         self.plot_boundary(self.itime)
 
@@ -215,8 +215,6 @@ class Extrapolate(Operate):
     '''
 
 if __name__ == '__main__':
-
-    pass
 
     # import doctest
     # doctest.testmod()

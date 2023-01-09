@@ -98,7 +98,8 @@ class Sample(Plot):
 
 @dataclass
 class Field(Plot, BiotOperate):
-    """Compute maximum field around coil perimeter.
+    """
+    Compute maximum field around coil perimeter.
 
     Parameters
     ----------
@@ -112,6 +113,7 @@ class Field(Plot, BiotOperate):
     """
 
     dfield: float = 0
+    target: BiotFrame = field(init=False, repr=False)
 
     def __len__(self):
         """Return field probe number."""
@@ -129,19 +131,26 @@ class Field(Plot, BiotOperate):
         """Extract boundary and solve magnetic field around coil perimeter."""
         if dfield is not None:
             self.dfield = dfield
-        target = BiotFrame(label='Field')
+        self.target = BiotFrame(label='Field')
         for coil in self.loc['coil', 'frame'].unique():
             polyframe = self.extract_polyframe(coil)
             if polyframe.poly.boundary.is_ring:
                 sample = Sample(polyframe.boundary, delta=self.dfield)
-                target.insert(sample['radius'], sample['height'], link=True)
-        self.data = BiotSolve(self.subframe, target,
+                self.target.insert(sample['radius'], sample['height'],
+                                   link=True)
+        self.data = BiotSolve(self.subframe, self.target,
                               reduce=[True, False], turns=[True, False],
                               attrs=['Br', 'Bz'], name=self.name).data
         # insert grid data
-        self.data.coords['x'] = target.x
-        self.data.coords['z'] = target.z
+        self.data.coords['x'] = self.target.x
+        self.data.coords['z'] = self.target.z
         super().post_solve()
+
+    def max_br(self):
+        #print(self.target.biotreduce.indices)
+        return np.maximum.reduceat(self.br,
+                                   self.target.biotreduce.indices)
+
 
     def plot(self, axes=None, **kwargs):
         """Plot points."""

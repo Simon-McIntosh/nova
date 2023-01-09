@@ -79,7 +79,7 @@ class Profile(Plot, GetSlice, IdsData):
     def _clear_cached_properties(self):
         """Clear cached properties."""
         for attr in ['boundary', 'psi_axis', 'psi_boundary',
-                     'psi_rbs', 'p_prime', 'ff_prime']:
+                     'psi_rbs', 'j_tor_rbs', 'p_prime', 'ff_prime']:
             try:
                 delattr(self, attr)
             except AttributeError:
@@ -104,10 +104,19 @@ class Profile(Plot, GetSlice, IdsData):
         """Return normalized poloidal flux."""
         return (psi - self.psi_axis) / (self.psi_boundary - self.psi_axis)
 
+    def denormalize(self, psi_norm):
+        """Return poloidal flux."""
+        return psi_norm * (self.psi_boundary - self.psi_axis) + self.psi_axis
+
     @cached_property
     def psi_rbs(self):
         """Return cached 2D RectBivariateSpline psi2d interpolant."""
         return self._rbs('psi2d')
+
+    @cached_property
+    def j_tor_rbs(self):
+        """Return cached 2D RectBivariateSpline j_tor2d interpolant."""
+        return self._rbs('j_tor2d')
 
     def _rbs(self, attr):
         """Return 2D RectBivariateSpline interpolant."""
@@ -139,5 +148,5 @@ class Profile(Plot, GetSlice, IdsData):
 
 if __name__ == '__main__':
 
-    profile = Profile(105028, 1)
-    profile.plot_profile()
+    profile = Profile(105007, 10, 1)
+    profile.plot_profile(attr='p_prime')

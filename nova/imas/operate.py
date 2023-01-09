@@ -7,12 +7,11 @@ import numpy as np
 from scipy.constants import mu_0
 import xarray
 
+from nova.imas import Equilibrium, Ids, Machine
 from nova.imas.profile import Current, Profile
 
 if TYPE_CHECKING:
     import pandas
-
-from nova.imas import Equilibrium, Ids, Machine
 
 
 @dataclass
@@ -66,7 +65,8 @@ class Grid:
     ngrid: int | str = 5000
     limit: float | list[float] | str = 0.25
     index: str | slice | pandas.Index = 'plasma'
-    data: xarray.Dataset = field(default_factory=xarray.Dataset, repr=False)
+    data: xarray.Dataset | xarray.DataArray = field(
+        default_factory=xarray.Dataset, repr=False)
 
     def __post_init__(self):
         """Update grid attributes for equilibrium derived properties."""
@@ -149,7 +149,7 @@ class Operate(Machine, Current, Profile, Grid, Equilibrium):
         except ValueError:
             coil_index, ids_index = zip(
                 *([self.sloc['coil', :].index.get_loc(name), i]
-                  for i, name in enumerate(operate.data.coil_name.values)
+                  for i, name in enumerate(self.data.coil_name.values)
                   if name in self.sloc['coil', :].index))
             self.sloc['Ic'][np.array(coil_index)] = \
                 self['current'].values[np.array(ids_index)]
@@ -172,37 +172,5 @@ class Operate(Machine, Current, Profile, Grid, Equilibrium):
 
 if __name__ == '__main__':
 
-    from matplotlib import pyplot as plt
-    import seaborn as sns
-
-    from nova.biot.contour import Contour
-
-    #operate = Operate(105028, 1, limit=0)  # DINA
-    operate = Operate(130506, 403, limit=0)  # CORSICA
-
-
-    contour = Contour(operate.grid, levels=500)
-
-
-    operate.itime = 45
-    operate.plot('plasma')
-    operate.grid.plot()
-
-    Jp = operate._rbs('j_tor2d')
-    contour.generate(Jp)
-    contour.plot(color='C0')
-
-    contour.axes.contour(operate.data.r2d, operate.data.z2d,
-                         operate['j_tor2d'])
-
-    axes = plt.subplots(2, 1, sharex=True)[1]
-    sns.despine()
-
-    operate.plot_1d(operate.itime, 'dpressure_dpsi', axes=axes[0])
-    contour.plot_fit(operate.normalize, 0, axes=axes[0])
-
-    operate.plot_1d(operate.itime, 'f_df_dpsi', axes=axes[1])
-    contour.plot_fit(operate.normalize, 1, axes=axes[1])
-
-    axes[0].set_ylabel(r'$p^\prime$')
-    axes[1].set_ylabel(r'$ff^\prime$')
+    operate = Operate(105028, 1, limit=0)
+    operate.itime = 300

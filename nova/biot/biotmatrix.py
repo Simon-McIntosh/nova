@@ -49,13 +49,13 @@ class BiotMatrix(BiotSet):
         #if isinstance(matrix, da.Array):
         #    matrix = matrix.compute()
         plasma = matrix[:, self.source.plasma]
+        print('***', plasma.shape, self.source.plasma)
         if self.source.turns:
             matrix *= self.source('nturn')
         # reduce
         if self.source.reduce and self.source.biotreduce.reduce:
             matrix = np.add.reduceat(
-                matrix, self.source.biotreduce.indices,
-                axis=1, dtype=np.float128)
+                matrix, self.source.biotreduce.indices, axis=1)
         if self.target.reduce and self.target.biotreduce.reduce:
             matrix = np.add.reduceat(
                 matrix, self.target.biotreduce.indices, axis=0)

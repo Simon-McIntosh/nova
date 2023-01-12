@@ -26,7 +26,7 @@ class DataArray(DataProperty):
 
     Parameters
     ----------
-    data : Union[tuple[np.array, BiotFrame, str], xarray.DataArray]
+    data : tuple[np.array, BiotFrame, str] | xarray.DataArray
 
         - tuple[time, target, name]
             time : array-like, shape(nt,)
@@ -40,7 +40,7 @@ class DataArray(DataProperty):
             Exsisting data array.
     """
 
-    data: Union[tuple[np.array, BiotFrame, str], xarray.DataArray] = \
+    data: tuple[np.ndarray, BiotFrame, str] | xarray.DataArray = \
         field(repr=False)
     name: str = field(init=False)
     attrs: list = field(init=False, default_factory=list)
@@ -52,7 +52,7 @@ class DataArray(DataProperty):
         self.name = self.data.name
         self.attrs = [attr for attr in self.data.attrs]
 
-    def _initialize(self, time: np.array, target: BiotFrame, name: str):
+    def _initialize(self, time: np.ndarray, target: BiotFrame, name: str):
         """Return empty xarray.DataArray instance with simulation metadata.
 
         time : array-like, shape(nt,)
@@ -106,7 +106,7 @@ class DataArray(DataProperty):
 class DataSet(DataProperty):
     """Manage a collection of coilset data with xarray.Dataset."""
 
-    data: Union[tuple[np.array, BiotFrame, list[str]], xarray.Dataset] = \
+    data: tuple[np.ndarray, BiotFrame, list[str]] | xarray.Dataset = \
         field(repr=False)
     names: list[str] = field(default_factory=list, init=False)
 
@@ -116,7 +116,8 @@ class DataSet(DataProperty):
             self.data = self._initialize(*self.data)
         self.names = [name for name in self.data]
 
-    def _initialize(self, time: np.array, target: BiotFrame, names: list[str]):
+    def _initialize(self, time: np.ndarray, target: BiotFrame,
+                    names: list[str]):
         """Return initialized DataSet."""
         data = xarray.Dataset()
         for name in names:
@@ -146,25 +147,23 @@ class DataSet(DataProperty):
 
 if __name__ == '__main__':
 
-    cs = CoilSet()
-    cs.add_coil(5, 1, 0.5, 0.5, dCoil=0.2)
-    cs.add_coil(6, 1, 0.5, 0.5, dCoil=0.1)
-    cs.add_coil(5, -1, 0.5, 0.5, dCoil=0.05)
+    coilset = CoilSet()
+    coilset.coil.insert(5, 1, 0.5, 0.5, delta=0.2)
+    coilset.coil.insert(6, 1, 0.5, 0.5, delta=0.1)
+    coilset.coil.insert(5, -1, 0.5, 0.5, delta=0.05)
 
-    cs.biot_instances = ['forcefield']
-    cs.forcefield.solve_biot()
+    coilset.inductance.solve()
 
-    da = DataArray((np.linspace(0, 1, 20), cs.forcefield.target, 'B'))
-
-    ds = DataSet((np.linspace(0, 1, 20), cs.forcefield.target, ['Bx', 'Bz']))
+    # da = DataArray((np.linspace(0, 1, 20), coilset.*, 'B'))
+    # ds = DataSet((np.linspace(0, 1, 20), coilset.*, ['Bx', 'Bz']))
 
     '''
 
-    cda = CoilDataArray(np.linspace(0, 1, 20), cs.forcefield.target, 'B')
+    cda = CoilDataArray(np.linspace(0, 1, 20), coilset.forcefield.target, 'B')
     for i, t in enumerate(cda.time()):
-        cs.Ic = 1e3*t
-        cda.data[i] = cs.forcefield.B
+        coilset.Ic = 1e3*t
+        cda.data[i] = coilset.forcefield.B
 
     cda.save('Bdiff', 'diffrent forcefield values', machine='ITER', coilset=None,
-             dCoil=cs.dCoil, dPlasma=cs.dPlasma, replace=False)
+             dCoil=coilset.dCoil, dPlasma=coilset.dPlasma, replace=False)
     '''

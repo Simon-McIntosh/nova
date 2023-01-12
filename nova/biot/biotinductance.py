@@ -13,7 +13,7 @@ class BiotInductance(Plot, BiotOperate):
     def solve(self, index=slice(None)):
         """Solve Biot interaction across grid."""
         self.data = BiotSolve(self.subframe, self.subframe.loc[:, index],
-                              reduce=[True, True], columns=['Psi'],
+                              reduce=[True, True], attrs=['Psi'],
                               name=self.name).data
         super().post_solve()
 

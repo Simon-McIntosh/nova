@@ -153,6 +153,7 @@ class FrameSet(netCDF, FrameSetLoc):
         for attr in self.__dict__:
             data = getattr(self, attr)
             if isinstance(data, netCDF) and isinstance(data, FrameData):
+                print(attr)
                 data.filepath = self.filepath
                 data.group = self.subgroup(data.name)
                 data.store()

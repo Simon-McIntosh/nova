@@ -132,25 +132,34 @@ class Field(Plot, BiotOperate):
         if dfield is not None:
             self.dfield = dfield
         self.target = BiotFrame(label='Field')
-        for coil in self.loc['coil', 'frame'].unique():
-            polyframe = self.extract_polyframe(coil)
+        index = []
+        for name in self.loc['coil', 'frame'].unique():
+            polyframe = self.extract_polyframe(name)
             if polyframe.poly.boundary.is_ring:
                 sample = Sample(polyframe.boundary, delta=self.dfield)
                 self.target.insert(sample['radius'], sample['height'],
                                    link=True)
+                index.append(name)
         self.data = BiotSolve(self.subframe, self.target,
                               reduce=[True, False], turns=[True, False],
                               attrs=['Br', 'Bz'], name=self.name).data
         # insert grid data
+        self.data.coords['index'] = index
         self.data.coords['x'] = self.target.x
         self.data.coords['z'] = self.target.z
         super().post_solve()
 
-    def max_br(self):
-        #print(self.target.biotreduce.indices)
-        return np.maximum.reduceat(self.br,
-                                   self.target.biotreduce.indices)
+    @property
+    def points(self):
+        """Return point array."""
+        return np.array([self.data.x, self.data.z]).T
 
+    def __getattr__(self, attr):
+        """Extend biotoperate getattr with maximum reduceat operator."""
+        if attr == 'bn':
+            return np.maximum.reduceat(super().__getattr__(attr),
+                                       self.target.biotreduce.indices)
+        return super().__getattr__(attr)
 
     def plot(self, axes=None, **kwargs):
         """Plot points."""

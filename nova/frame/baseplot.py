@@ -139,6 +139,25 @@ class MatPlotLib:
 
 
 @dataclass
+class MoviePy:
+    """Manage moviepy libaries."""
+
+    @cached_property
+    def editor(self):
+        """Provide access to moviepy editor."""
+        return import_module('moviepy.editor')
+
+    @cached_property
+    def bindings(self):
+        """Provide access to moviepy video io bindings."""
+        return import_module('moviepy.video.io.bindings')
+
+    def mplfig_to_npimage(self, fig):
+        """Return mplfig as npimage."""
+        return self.bindings.mplfig_to_npimage(fig)
+
+
+@dataclass
 class Plot:
     """Manage plot workflow."""
 
@@ -146,6 +165,7 @@ class Plot:
         """Link matplotlib libaries."""
         self.mpl_axes = Axes()
         self.mpl = MatPlotLib()
+        self.mpy = MoviePy()
         if hasattr(super(), '__post_init__'):
             super().__post_init__()
 

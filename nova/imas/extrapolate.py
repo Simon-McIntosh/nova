@@ -1,10 +1,8 @@
 """Extrapolate equilibria beyond separatrix."""
-from __future__ import annotations
 import bisect
 from dataclasses import dataclass
+from importlib import import_module
 
-from moviepy.editor import VideoClip
-from moviepy.video.io.bindings import mplfig_to_npimage
 import numpy as np
 from scipy.constants import mu_0
 from tqdm import tqdm
@@ -160,6 +158,10 @@ class Extrapolate(Operate):
     #    ids.vacuum_toroidal_field = self.ids.vacuum_toroidal_field
     #    return ids
 
+    def update_current(self):
+        """Dissable ids current update."""
+        pass
+
     def update(self):
         """Solve pf_active currents to fit internal flux."""
         super().update()
@@ -221,7 +223,7 @@ class Extrapolate(Operate):
                 pass
         if masks[1] is not None:
             self.grid.plot(self.masked_data(attr, masks[1]), levels=levels,
-                           colors='C0', nulls=True)
+                           colors='C0', nulls=False)
         if masks[2] is not None:
             self.grid.plot(self.masked_data(attr, masks[2]), levels=levels,
                            colors='C2', nulls=False)
@@ -249,13 +251,14 @@ class Extrapolate(Operate):
         # self.plot_bar()
         self.plot_2d('psi', mask='map', axes=self.axes)
         self.mpl['pyplot'].tight_layout()
-        return mplfig_to_npimage(self.fig)
+        return self.mpy.mplfig_to_npimage(self.fig)
 
     def annimate(self, duration: float, filename='extrapolate'):
         """Generate annimiation."""
         self.duration = duration
         self.max_time = 150
-        animation = VideoClip(self._make_frame, duration=duration)
+        animation = self.mpy.editor.VideoClip(
+            self._make_frame, duration=duration)
         animation.write_gif(f'{filename}.gif', fps=10)
 
     def plot_bar(self):
@@ -273,10 +276,9 @@ class Extrapolate(Operate):
         self.axes.legend(ncol=2, loc='upper center',
                          bbox_to_anchor=(0.5, 1.05))
 
-    def plot_waveform(self, plasma_current_fraction=0.05):
+    def plot_waveform(self, ip_index=0.05):
         """Plot coil current waveform."""
-        time_index = \
-            abs(self.data.ip) > plasma_current_fraction*abs(self.data.ip).max()
+        time_index = abs(self.data.ip) > ip_index*abs(self.data.ip).max()
         name_map = dict(CS1='CS1U', VS3='VS3U')
         coil_name = [name_map.get(name, name)
                      for name in self.data.coil_name.data]
@@ -314,8 +316,8 @@ if __name__ == '__main__':
     # import doctest
     # doctest.testmod()
 
-    pulse, run, filename, limit = 114101, 41, 'JINTRAC', 0
-    pulse, run, filename, limit = 130506, 403, 'CORSICA', 'ids'
+    # pulse, run, filename, limit = 114101, 41, 'JINTRAC', 0
+    # pulse, run, filename, limit = 130506, 403, 'CORSICA', 'ids'
     pulse, run, filename, limit = 105028, 1, 'DINA', 'ids'
 
     extrapolate = Extrapolate(pulse, run, filename=filename, limit=limit)
@@ -330,20 +332,14 @@ if __name__ == '__main__':
     import matplotlib.pylab as plt
     extrapolate.mpl_axes.fig = plt.figure()#figsize=(6, 9))
 
-    extrapolate.plot_waveform(time_index=slice(390))
+    extrapolate.plot_waveform()
     #extrapolate.itime = 300
     #extrapolate.plot_2d('psi', mask='map')
 
-    plt.tight_layout()
-    plt.savefig('build.png')
+    #plt.tight_layout()
+    #plt.savefig('build.png')
 
     #extrapolate.plot_bar()
     #extrapolate.plasmagrid.plot()
 
     #extrapolate.annimate(5, filename=filename)
-    '''
-    try:
-        extrapolate.plot_bar()
-    except IndexError:
-        pass
-    '''

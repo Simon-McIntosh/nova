@@ -36,6 +36,7 @@ class DataFrame(FrameAttrs):
 
     _geoframe = dict(
         Polygon='.geometry.polyframe.PolyFrame',
+        MultiPolygon='.geometry.polyframe.PolyFrame',
         VTK='.geometry.vtkgen.VtkFrame',
         Geo='.geometry.geoframe.GeoFrame')
 

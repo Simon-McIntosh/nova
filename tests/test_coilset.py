@@ -206,6 +206,20 @@ def test_store_load_poly():
                       new_coilset.frame.poly[0].area)
 
 
+def test_store_load_multipoly():
+    coilset = CoilSet(dcoil=-3, nplasma=8)
+    coilset.coil.insert(Polygon(dict(rect=(1, 2, 0.3, 0.6), disc=[4, 3, 0.5])))
+    coilset.plot()
+    with tempfile.NamedTemporaryFile() as tmp:
+        coilset.filepath = tmp.name
+        coilset.store()
+        new_coilset = CoilSet()
+        new_coilset.filepath = tmp.name
+        new_coilset.load()
+    assert np.isclose(coilset.frame.poly[0].area,
+                      new_coilset.frame.poly[0].area)
+
+
 def test_store_load_version():
     coilset = CoilSet(dcoil=-3, nplasma=8)
     coilset.coil.insert(10, 0.5, 0.95, 0.95, section='hex', turn='r',

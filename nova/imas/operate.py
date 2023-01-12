@@ -140,9 +140,12 @@ class Operate(Machine, Current, Profile, Grid, Equilibrium):
         """Extend itime update."""
         super().update()
         self.update_plasma()
+        self.update_current()
+
+    def update_current(self):
+        """Update coil currents from pf_active."""
         if 'current' not in self.data:
             return
-        '''
         # TODO - fix this - nasty indexing for ill-formated ids inputs
         try:
             self.sloc['coil', 'Ic'] = self['current']
@@ -153,7 +156,6 @@ class Operate(Machine, Current, Profile, Grid, Equilibrium):
                   if name in self.sloc['coil', :].index))
             self.sloc['Ic'][np.array(coil_index)] = \
                 self['current'].values[np.array(ids_index)]
-        '''
 
     def update_plasma(self):
         """Ionize plasma filaments and set turn number."""
@@ -173,16 +175,11 @@ class Operate(Machine, Current, Profile, Grid, Equilibrium):
 
 if __name__ == '__main__':
 
-    operate = Operate(105028, 1, nplasma=250, ngrid=100)
+    operate = Operate(105028, 1, nplasma=10, ngrid=5)
     operate.itime = 200
-
-    #operate.aloc['nturn'] = 1
-
-    import matplotlib.pylab as plt
-    plt.figure(figsize=(6, 8))
 
     operate.plot(None)
     operate.plasma.wall.plot()
 
-    plt.tight_layout()
-    plt.savefig('plasma_turns.png')
+    #plt.tight_layout()
+    #plt.savefig('plasma_turns.png')

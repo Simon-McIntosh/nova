@@ -175,7 +175,7 @@ class Operate(Machine, Current, Profile, Grid, Equilibrium):
 
 if __name__ == '__main__':
 
-    operate = Operate(105028, 1, nplasma=10, ngrid=5)
+    operate = Operate(105028, 1)
     operate.itime = 200
 
     operate.plot(None)

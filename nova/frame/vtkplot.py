@@ -5,7 +5,7 @@ import matplotlib
 import numpy as np
 import vedo
 
-from nova.frame.baseplot import Display
+from nova.frame.baseplot import Properties
 import nova.frame.metamethod as metamethod
 from nova.frame.dataframe import DataFrame
 
@@ -41,7 +41,7 @@ class VtkPlot(metamethod.VtkPlot):
         self.frame.vtkgeo.generate_vtk()
         index = self.frame.geotype('Geo', 'vtk')
         color = {f'C{i}': c for i, c in enumerate(colors)}
-        vtk = [vtk.c(color[Display.get_facecolor(part)])
+        vtk = [vtk.c(color[Properties.get_facecolor(part)])
                for vtk, part in self.frame.loc[index, ['vtk', 'part']].values]
         if len(vtk) > 0:
             return vedo.show(*vtk)

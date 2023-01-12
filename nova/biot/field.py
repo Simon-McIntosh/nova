@@ -3,7 +3,6 @@ from dataclasses import dataclass, field
 
 import numpy as np
 from scipy.interpolate import interp1d
-import shapely.geometry
 
 from nova.biot.biotframe import BiotFrame
 from nova.biot.biotoperate import BiotOperate

@@ -178,8 +178,6 @@ if __name__ == '__main__':
     operate = Operate(105028, 1)
     operate.itime = 200
 
-    operate.plot(None)
+    operate.plot()
+    operate.grid.plot()
     operate.plasma.wall.plot()
-
-    #plt.tight_layout()
-    #plt.savefig('plasma_turns.png')

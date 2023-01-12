@@ -10,6 +10,7 @@ import numpy as np
 import pandas
 from scipy.interpolate import interp1d
 import scipy.signal
+import seaborn as sns
 
 from nova.definitions import root_dir
 from nova.utilities.IO import pythonIO
@@ -137,7 +138,7 @@ class cold_test(pythonIO):
     def read_coldtest_file(self, folder, filename):
         data = pandas.read_csv(
             os.path.join(self.directory, folder, filename), header=7)
-        data.loc[:, 'timestamp'] = pandas.to_datetime(data.loc[:, 'timestamp'])
+        data.loc[:, 'timestamp'] = pandas.to_datetime(data.timestamp)
         self.format_columns(data)
         if '20200107' in filename:  # trim start of file
             data = data.iloc[28:, :]
@@ -376,14 +377,14 @@ class cold_test(pythonIO):
             ax.legend([c for c in dataframe.columns.droplevel(1)],
                       ncol=ncol, loc='upper center',
                       bbox_to_anchor=(0.5, 1+shift))
-        plt.despine()
+        sns.despine()
         fig.autofmt_xdate()
         if labels:
             if xlabel:
                 ax.set_xlabel('timestamp')
             if group in self._labels and ylabel:
                 ax.set_ylabel(self._labels[group])
-        plt.set_aspect(0.7)
+        #plt.set_aspect(0.7)
         return offset
 
     def plot_col(self, label, index=['cooldown', 'test'], offset_dt=5*60):
@@ -395,7 +396,7 @@ class cold_test(pythonIO):
 
     def plot_row(self, label, index='test', ncol=2, color=None,
                  offset_dt=5*60):
-        plt.set_aspect(0.8)
+        #plt.set_aspect(0.8)
         fig = plt.figure()
         gs = matplotlib.gridspec.GridSpec(2, 1, height_ratios=[6, 1])
         ax = []
@@ -487,7 +488,7 @@ class cold_test(pythonIO):
                 color = self.get_color(i, col)
                 ax.plot(I, value, '-', label=col[0], color=color,
                         lw=1.5)
-        plt.despine()
+        sns.despine()
         plt.xlabel('$I$ kA')
         plt.ylabel(self._labels[group])
         shift = np.floor(dataframe.shape[1] / ncol) * 0.12
@@ -548,7 +549,7 @@ class cold_test(pythonIO):
                 xticks = [x for x in xticks if abs(x - xtick) / dx > 0.1]
                 xticks = np.sort(np.append(xticks, xtick))
                 ax.set_xticks(xticks)
-            plt.despine()
+            sns.despine()
             if xlabel:
                 ax.set_xlabel('$I$ kA')
             ax.set_ylabel(self._labels[group])
@@ -598,17 +599,34 @@ class cold_test(pythonIO):
             return slice('2021-04-09 10:30:00', '2021-04-09 13:20:00')
         if index == 'CSM2_19':
             return slice('2021-03-19', '2021-03-19')
+        if index == 'CSM3_a':
+            return slice('2022-12-12', '2022-12-14')
+        if index == 'CSM3_b':
+            return slice('2023-01-12', '2023-01-14')
+        if index == 'CSM3':
+            return slice('2022-12-12 08:00:00', '2022-12-12 18:00:00')
         return slice(None)
 
 
 
 if __name__ == '__main__':
-    plt.set_context('talk')
+    sns.set_context('talk')
 
 
-    ct = cold_test(project_dir='CSM2', read_txt=False)
-    #ct.load_coldtest('displace', read_txt=True)
+    ct = cold_test(project_dir='CSM3', read_txt=False)
+    ct.load_coldtest('extend', read_txt=False)
+    ct.load_coldtest('displace', read_txt=False)
 
+    ct.plot_row('extend', index='CSM3_a', ncol=2)
+    ct.plot_loop('extend', index='CSM3_a', ncol=2)
+    ct.fit('extend', index='CSM3_a', Imin=12.5, Itrim=25, Imax=40, ncol=2)
+
+
+    #displace = ['DS001', 'DS002', 'DS003', 'DS004', 'DS005']
+    #ct.plot_row(displace, index='CSM3_a', ncol=5)
+
+    #ct.fit(displace, index='CSM3_a', Imin=5, Itrim=32.5, Imax=40, ncol=5)
+"""
     ct.plot_row(['DS007', 'DS008'], index='CSM2_08', ncol=2)
     ct.plot_loop(['DS007', 'DS008'], index='CSM2_08', ncol=2)
     ct.fit(['DS007', 'DS008'], index='CSM2_08', Imin=5, Itrim=32.5, Imax=40, ncol=4)
@@ -814,3 +832,4 @@ if __name__ == '__main__':
 
     #myFmt = mdates.DateFormatter('%d %B')
     #ax.xaxis.set_major_formatter(myFmt)
+"""

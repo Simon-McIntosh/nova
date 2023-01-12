@@ -3,18 +3,74 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from functools import cached_property
 from importlib import import_module
-from typing import ClassVar, Optional, TYPE_CHECKING
-from collections import Counter
+import statistics
 from string import digits
+from typing import ClassVar, Optional, TYPE_CHECKING
 
 import numpy as np
-import statistics
-
-if TYPE_CHECKING:
-    import pandas
 
 from nova.frame.dataframe import DataFrame
 from nova.frame.error import ColumnError
+
+if TYPE_CHECKING:
+    import matplotlib
+
+
+@dataclass
+class Properties:
+    """Manage plot properties."""
+
+    patchwork: float = 0
+    alpha: dict[str, float] = field(default_factory=lambda: {'plasma': 0.75})
+    linewidth: float = 0.5
+    edgecolor: str = 'white'
+    facecolor: ClassVar[dict[str, str]] = {
+        'vs3': 'C0', 'vs3j': 'gray', 'cs': 'C0', 'pf': 'C0',
+        'trs': 'C3', 'dir': 'C3', 'vv': 'C3', 'vvin': 'C3',
+        'vvout': 'C3', 'bb': 'C7', 'plasma': 'C4', 'cryo': 'C5',
+        'fi': 'C2', 'tf': 'C7'}
+    zorder: dict[str, int] = field(default_factory=lambda: {
+        'VS3': 1, 'VS3j': 0, 'CS': 3, 'PF': 2})
+
+    @staticmethod
+    def get_part(part):
+        """Return formated part name."""
+        if part.rstrip(digits) == 'fi':
+            return 'fi'
+        return part
+
+    def get_alpha(self, part):
+        """Return patch alpha."""
+        return self.alpha.get(part, 1)
+
+    @classmethod
+    def get_facecolor(cls, part):
+        """Return patch facecolor."""
+        return cls.facecolor.get(cls.get_part(part), 'C9')
+
+    def get_zorder(self, part):
+        """Return patch zorder."""
+        return self.zorder.get(part, 0)
+
+    def get_linewidth(self, unique_part, part, area, total_area):
+        """Return patch linewidth."""
+        finesse_fraction = 0.01
+        patch_area = statistics.mode(area[part == unique_part])
+        area_fraction = patch_area/total_area
+        if area_fraction < finesse_fraction:
+            return self.linewidth * area_fraction/finesse_fraction
+        return self.linewidth
+
+    def patch_properties(self, part, area):
+        """Return unique dict of patch properties extracted from parts list."""
+        total_area = area.sum()
+        return {unique_part: {'alpha': self.get_alpha(unique_part),
+                              'facecolor': self.get_facecolor(unique_part),
+                              'zorder': self.get_zorder(unique_part),
+                              'linewidth': self.get_linewidth(
+                                  unique_part, part, area, total_area),
+                              'edgecolor': self.edgecolor}
+                for unique_part in part.unique()}
 
 
 @dataclass
@@ -70,6 +126,8 @@ class Axes:
     """Manage plot axes."""
 
     style: str = '2d'
+    _fig: matplotlib.figure.Figure | None = field(init=False, repr=False)
+    _axes: matplotlib.axes.Axes | None = field(init=False, repr=False)
 
     def generate(self, style='2d'):
         """Generate new axis instance."""
@@ -78,10 +136,15 @@ class Axes:
         self.set_style(style)
         return self.axes
 
+    def gcf(self):
+        """Link fig instance to current figure and return."""
+        self._fig = import_module('matplotlib.pyplot').gcf()
+        return self._fig
+
     def gca(self):
-        """Link axes instance to current axes."""
-        plt = import_module('matplotlib.pyplot')
-        self._axes = plt.gca()
+        """Link axes instance to current axes and return."""
+        self._axes = import_module('matplotlib.pyplot').gca()
+        return self._axes
 
     def despine(self):
         """Remove spines from axes instance."""
@@ -104,10 +167,16 @@ class Axes:
                 raise NotImplementedError(f'style {style} not implemented')
         self.style = style
 
-    @cached_property
-    def _axes(self):
-        """Cache axes instance."""
-        return None
+    @property
+    def fig(self):
+        """Manage figure instance."""
+        if self._fig is None:
+            return self.gcf()
+        return self._fig
+
+    @fig.setter
+    def fig(self, fig):
+        self._fig = fig
 
     @property
     def axes(self):
@@ -120,6 +189,10 @@ class Axes:
     @axes.setter
     def axes(self, axes):
         self._axes = axes
+
+    def legend(self, *args, **Kwargs):
+        """Expose axes legend."""
+        self.axes.legend(*args, **Kwargs)
 
 
 @dataclass
@@ -207,168 +280,3 @@ class Plot:
     def legend(self, *args, **Kwargs):
         """Expose axes legend."""
         self.mpl_axes.legend(*args, **Kwargs)
-
-
-@dataclass
-class Display:
-    """Manage axes parameters."""
-
-    patchwork: float = 0
-    alpha: dict[str, float] = field(default_factory=lambda: {'plasma': 0.75})
-    linewidth: float = 0.5
-    edgecolor: str = 'white'
-    facecolor: ClassVar[dict[str, str]] = {
-        'vs3': 'C0', 'vs3j': 'gray', 'cs': 'C0', 'pf': 'C0',
-        'trs': 'C3', 'dir': 'C3', 'vv': 'C3', 'vvin': 'C3',
-        'vvout': 'C3', 'bb': 'C7', 'plasma': 'C4', 'cryo': 'C5',
-        'fi': 'C2', 'tf': 'C7'}
-    zorder: dict[str, int] = field(default_factory=lambda: {
-        'VS3': 1, 'VS3j': 0, 'CS': 3, 'PF': 2})
-
-    @staticmethod
-    def get_part(part):
-        """Return formated part name."""
-        if part.rstrip(digits) == 'fi':
-            return 'fi'
-        return part
-
-    def get_alpha(self, part):
-        """Return patch alpha."""
-        return self.alpha.get(part, 1)
-
-    @classmethod
-    def get_facecolor(cls, part):
-        """Return patch facecolor."""
-        return cls.facecolor.get(cls.get_part(part), 'C9')
-
-    def get_zorder(self, part):
-        """Return patch zorder."""
-        return self.zorder.get(part, 0)
-
-    def get_linewidth(self, part):
-        """Return patch linewidth."""
-        finesse_fraction = 0.01
-        total_area = self.frame.area.sum()
-        index = self.frame.part == part
-        area = self.frame.loc[index, 'area']
-        patch_area = statistics.mode(area)
-        area_fraction = patch_area/total_area
-        if area_fraction < finesse_fraction:
-            return self.linewidth * area_fraction/finesse_fraction
-        return self.linewidth
-
-    def patch_properties(self, parts):
-        """Return unique dict of patch properties extracted from parts list."""
-        return {part: {'alpha': self.get_alpha(part),
-                       'facecolor': self.get_facecolor(part),
-                       'zorder': self.get_zorder(part),
-                       'linewidth': self.get_linewidth(part),
-                       'edgecolor': self.edgecolor}
-                for part in parts.unique()}
-
-    def patch_number(self, parts):
-        """Return patch number for each part."""
-        return Counter(parts)
-
-
-@dataclass
-class Label:
-    """Generate plot labels."""
-
-    label: str = 'coil'
-    current_unit: str = 'A'
-    field_unit: bool | str = 'T'
-    zeroturn: bool = False
-    options: dict[str, str | int | float] = field(
-        repr=False, default_factory=lambda: {'font_size': 'medium',
-                                             'label_limit': 20})
-    index: pandas.Index = field(init=False, repr=False)
-
-    def __post_init__(self):
-        """Update plot flags."""
-        self.update_flags()
-        if hasattr(super(), '__post_init__'):
-            super().__post_init__()
-
-    def update_flags(self):
-        """Update plot attribute flags."""
-        if hasattr(self, 'biot'):
-            if 'field' not in self.biot:
-                self.field_unit = None
-        if not 'energize' in self.frame.attrs:
-            self.current_unit = None
-
-    '''
-    @property
-        else:
-            if not pandas.api.types.is_list_like(label):
-                label = [label]
-            parts = self.coil.part
-            parts = [_part for _part in label if _part in parts]
-    '''
-
-    #def update_index(self):
-    #    """Return update index from self.label boolean."""
-    #    # if self.label#
-    #
-    #    with self.frame.setlock(True, 'subspace'):
-    #        return self.frame.index[self.frame[self.label]]
-
-    def add_label(self):
-        """Add plot labels."""
-        index = self.get_index()
-        parts = self.frame.part[index]
-        '''
-        part_number = {p: sum(coil.part == p) for p in parts}
-        # check for presence of field instance
-
-        # referance vertical length scale
-        referance_height = np.diff(self.axes.get_ylim())[0] / 100
-        vertical_divisions = \
-            np.sum(np.array([not parts.empty,
-                             bool(self.current),
-                             field]))
-        if nz == 1:
-            dz_ref = 0
-        ztext = {name: 0 for name, value
-                 in zip(['label', 'current', 'field'],
-                        [label, current, field]) if value}
-        for name, dz in zip(ztext, nz*dz_ref * np.linspace(1, -1, nz)):
-            ztext[name] = dz
-        for name, part in zip(coil.index, coil.part):
-            if part in parts and N[part] < Nmax:
-                x, z = coil.loc[name, 'x'], coil.loc[name, 'z']
-                dx = coil.loc[name, 'dx']
-                drs = 2/3*dx * np.array([-1, 1])
-                if coil.part[name] == 'CS':
-                    drs_index = 0
-                    ha = 'right'
-                else:
-                    drs_index = 1
-                    ha = 'left'
-                # label coil
-                ax.text(x + drs[drs_index], z + ztext['label'],
-                        name, fontsize=fs, ha=ha, va='center',
-                        color=0.2 * np.ones(3))
-                if current:
-                    if current == 'Ic' or current == 'A':  # line current
-                        unit = 'A'
-                        Ilabel = coil.loc[name, 'Ic']
-                    elif current == 'It' or current == 'AT':  # turn current
-                        unit = 'At'
-                        Ilabel = coil.loc[name, 'It']
-                    else:
-                        raise IndexError(f'current {current} not in '
-                                         '[Ic, A, It, AT]')
-                    txt = f'{human_format(Ilabel, precision=1)}{unit}'
-                    ax.text(x + drs[drs_index], z + ztext['current'], txt,
-                            fontsize=fs, ha=ha, va='center',
-                            color=0.2 * np.ones(3))
-                if field:
-                    self.update_field()
-                    Blabel = coil.loc[name, 'B']
-                    txt = f'{human_format(Blabel, precision=4)}T'
-                    ax.text(x + drs[drs_index], z + ztext['field'], txt,
-                            fontsize=fs, ha=ha, va='center',
-                            color=0.2 * np.ones(3))
-        '''

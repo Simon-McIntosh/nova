@@ -95,7 +95,6 @@ class Connect:
     def copy_frame(self, *ids_names: str, hide=False):
         """Copy frame from shared to public on remote."""
         for ids in ids_names:
-            print(ids, self.copy_command(self.frame, ids))
             self.module_run(self.copy_command(self.frame, ids), hide=hide)
 
     def rsync(self):
@@ -212,7 +211,7 @@ if __name__ == '__main__':
 
     #ScenarioDatabase().sync_shot('130012/1')
     scenario = ScenarioDatabase()
-    scenario.sync_shot('105007/10')
+    scenario.sync_shot('105001/4')
     #scenario.load_frame('workflow', 'DINA-IMAS')
     #ScenarioDatabase().sync_workflow('CORSICA')
 

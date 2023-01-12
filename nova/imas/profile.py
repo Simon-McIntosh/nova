@@ -1,6 +1,5 @@
 """Extract time slices from equilibrium IDS."""
-from __future__ import annotations
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from functools import cached_property
 
 import numpy as np
@@ -9,47 +8,8 @@ from scipy.interpolate import interp1d, RectBivariateSpline
 from nova.frame.baseplot import Plot
 from nova.imas.database import IdsData
 from nova.imas.equilibrium import Equilibrium
+from nova.imas.getslice import GetSlice
 from nova.imas.pf_active import PF_Active
-
-import xarray
-
-
-@dataclass
-class GetSlice:
-    """Convinence method to provide access to sliced ids data."""
-
-    time_index: int = field(init=False, default=0)
-    data: xarray.Dataset | xarray.DataArray = \
-        field(default_factory=xarray.Dataset, repr=False)
-
-    def __getitem__(self, key: str):
-        """Regulate access to equilibrium dataset."""
-        return self.data[self.match(key)][self.time_index]
-
-    def match(self, key: str) -> str:
-        """Return key matched to internal naming convention."""
-        match key:
-            case 'p_prime':
-                return 'dpressure_dpsi'
-            case 'ff_prime':
-                return 'f_df_dpsi'
-            case str():
-                return key
-            case _:
-                raise ValueError(f'invalid key {key}')
-
-    @property
-    def itime(self):
-        """Manage time index."""
-        return self.time_index
-
-    @itime.setter
-    def itime(self, time_index: int):
-        self.time_index = time_index
-        self.update()
-
-    def update(self):
-        """Clear cache following update to itime. Extend as required."""
 
 
 @dataclass
@@ -58,7 +18,10 @@ class Current(GetSlice, IdsData):
 
     def __post_init__(self):
         """Load pf active data."""
-        self.load_data(PF_Active)
+        try:
+            self.load_data(PF_Active)
+        except IndexError:  # pf_active empty
+            pass
         super().__post_init__()
 
 
@@ -78,17 +41,12 @@ class Profile(Plot, GetSlice, IdsData):
 
     def _clear_cached_properties(self):
         """Clear cached properties."""
-        for attr in ['boundary', 'psi_axis', 'psi_boundary',
+        for attr in ['psi_axis', 'psi_boundary',
                      'psi_rbs', 'j_tor_rbs', 'p_prime', 'ff_prime']:
             try:
                 delattr(self, attr)
             except AttributeError:
                 pass
-
-    @cached_property
-    def boundary(self):
-        """Return trimmed boundary contour."""
-        return self['boundary'][:self['boundary_length'].values].values
 
     @cached_property
     def psi_axis(self):

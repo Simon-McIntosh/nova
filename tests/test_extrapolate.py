@@ -52,9 +52,9 @@ def test_extrapolate_attrs():
 def test_extrapolate_rms_error(itime):
     equilibrium = Equilibrium(**ids_attrs['CORSICA'])
     extrapolate = Extrapolate(ids=equilibrium.ids_data, limit='ids', ngrid=50,
-                              nplasma=250)
+                              nplasma=250, nturn=10)
     extrapolate.itime = itime
-    extrapolate_psi = extrapolate.grid.psi_array
+    extrapolate_psi = extrapolate.grid.psi_.copy()
 
     radius = extrapolate.grid.data.x2d
     height = extrapolate.grid.data.z2d

@@ -74,7 +74,7 @@ class Axes:
     def generate(self, style='2d'):
         """Generate new axis instance."""
         plt = import_module('matplotlib.pyplot')
-        self.axes = plt.subplots(1, 1)[1]
+        self.fig, self.axes = plt.subplots(1, 1)
         self.set_style(style)
         return self.axes
 
@@ -148,6 +148,11 @@ class Plot:
         self.mpl = MatPlotLib()
         if hasattr(super(), '__post_init__'):
             super().__post_init__()
+
+    @property
+    def fig(self):
+        """Expose mpl figure instance."""
+        return self.mpl_axes.fig
 
     @property
     def axes(self):

@@ -226,23 +226,27 @@ def test_plasma_coil_parity(plot=False):
     assert np.isclose(coilset.grid.x_points[0][1], 0, atol=1e-3)
 
 
-def test_xpoint_select():
-    coilset = CoilSet(nplasma=500)
+def test_plasma_unique_psi_axis():
+    coilset = CoilSet(nplasma=20)
+    coilset.firstwall.insert(dict(e={0.5, 0, 0.2, 0.1}))
+    coilset.coil.insert(0.5, [-0.05, 0.05], 0.01, 0.01, Ic=1e3)
+    coilset.plasma.solve()
+    coilset.sloc['plasma', 'Ic'] = 1e3
+    with pytest.raises(IndexError):
+        coilset.plasma.psi_axis
 
+
+def test_plasma_x_point():
+    coilset = CoilSet(nplasma=100)
     coilset.firstwall.insert(dict(e={0.5, 0, 0.2, 0.1}))
     coilset.coil.insert(0.485, [-0.12, 0.12], 0.03, 0.03, Ic=5e3)
-
-    coilset.grid.solve(500)
-
     coilset.plasma.solve()
-
     coilset.sloc['plasma', 'Ic'] = 7e3
-    coilset.saloc['Ic'][1] += 1e2
-
-    coilset.plasma.grid.plot()
-    coilset.plot()
-    coilset.grid.plot()
-
+    coilset.saloc['Ic'][1] = 4.5e3
+    assert coilset.plasma.x_point[1] > 0
+    coilset.saloc['Ic'][1] = 5.5e3
+    coilset.plasma.grid.check_null()
+    assert coilset.plasma.x_point[1] < 0
 
 
 if __name__ == '__main__':

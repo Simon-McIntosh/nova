@@ -1,5 +1,6 @@
 """Generate grids for BiotGrid methods."""
 from dataclasses import dataclass, field
+from functools import cached_property
 
 import numpy as np
 import shapely.geometry
@@ -12,6 +13,7 @@ from nova.biot.fieldnull import FieldNull
 from nova.frame.baseplot import Plot
 from nova.frame.error import GridError
 from nova.frame.framelink import FrameLink
+from nova.geometry.pointloop import PointLoop
 from nova.plot.biotplot import BiotPlot
 
 
@@ -155,21 +157,11 @@ class BiotBaseGrid(BiotPlot, FieldNull, BiotOperate):
         super().__post_init__()
         self.version['fieldnull'] = None
 
-    @property
-    def psi_array(self):
-        """
-        Return psi re-shaped for field null calculation.
-
-        Return 1D vector as standard.
-        Extend method to change dimensionality of psi input.
-        """
-        return self.psi
-
     def check_null(self):
         """Check validity of upstream data, update field null if nessisary."""
         if (version := self.aloc_hash['Ic']) != self.version['fieldnull'] or \
                 self.version['Psi'] != self.subframe.version['nturn']:
-            self.update_null(self.psi_array)
+            self.update_null(self.psi_)
             self.version['fieldnull'] = version
 
     def __getattribute__(self, attr):
@@ -212,27 +204,33 @@ class BiotGrid(BiotBaseGrid):
         self.data.coords['z2d'] = (['x', 'z'], z2d)
         super().post_solve()
 
+    @cached_property
+    def pointloop(self):
+        """Return pointloop instance, used to check loop membership."""
+        points = np.array([self.data.x2d.data.flatten(),
+                           self.data.z2d.data.flatten()]).T
+        return PointLoop(points)
+
+    def mask(self, boundary: np.ndarray):
+        """Return boundary mask."""
+        return self.pointloop.update(boundary).reshape(self.shape)
+
     @property
     def shape(self):
         """Return grid shape."""
         return self.data.dims['x'], self.data.dims['z']
-
-    @property
-    def psi_array(self):
-        """Return psi as 2D array."""
-        return self.psi.reshape(self.shape)
 
     def plot(self, attr='psi', axes=None, nulls=True, clabel=None, **kwargs):
         """Plot contours."""
         self.axes = axes
         if nulls:
             super().plot(axes=axes)
-        QuadContourSet = self.axes.contour(
-            self.data.x, self.data.z,
-            getattr(self, attr).reshape(*self.shape).T,
-            **self.contour_kwargs(**kwargs))
+        if isinstance(attr, str):
+            attr = getattr(self, f'{attr}_')
+        QuadContourSet = self.axes.contour(self.data.x, self.data.z, attr.T,
+                                           **self.contour_kwargs(**kwargs))
         if isinstance(kwargs.get('levels', None), int):
             self.levels = QuadContourSet.levels
         if clabel is not None:
             self.axes.clabel(QuadContourSet, **clabel)
-        return QuadContourSet.levels
+        return np.array(QuadContourSet.levels)

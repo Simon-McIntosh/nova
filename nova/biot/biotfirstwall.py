@@ -4,18 +4,29 @@ from dataclasses import dataclass
 import numpy as np
 
 from nova.biot.biotpoint import BiotPoint
+from nova.geometry.polyframe import PolyFrame
 
 
 @dataclass
 class BiotFirstWall(BiotPoint):
     """Compute interaction for a series of discrete points."""
 
+    @property
+    def loop(self):
+        """Return first wall loop."""
+        try:
+            return self.Loc['plasma', 'poly'][0].boundary
+        except AttributeError:
+            return PolyFrame.loads(self.Loc['plasma', 'poly'][0]).boundary
+
     def solve(self):
         """Solve Biot wall-pannel mid-points."""
-        points = self.Loc['plasma', 'poly'][0].boundary
-        firstwall = np.empty((2*len(points)-1, 2))
-        firstwall[::2] = points
-        firstwall[1::2] = (points[:-1, :] + points[1:, :]) / 2
+        loop = self.loop
+        self.data.coords['x'] = loop[:, 0]
+        self.data.coords['z'] = loop[:, 1]
+        firstwall = np.empty((2*len(loop)-1, 2))
+        firstwall[::2] = loop
+        firstwall[1::2] = (loop[:-1, :] + loop[1:, :]) / 2
         super().solve(firstwall)
 
     def plot(self, axes=None, **kwargs):

@@ -5,11 +5,12 @@ from dataclasses import dataclass, field
 from importlib import import_module
 
 from nova.imas.database import IdsData
+from nova.imas.getslice import GetSlice
 from nova.imas.timeslice import TimeSlice
 
 
 @dataclass
-class Scenario(IdsData):
+class Scenario(GetSlice, IdsData):
     """Manage access to scenario data (load, store, build)."""
 
     machine: str = 'iter'

@@ -1,9 +1,11 @@
 """Manage access to equilibrium data."""
 from dataclasses import dataclass, field
+from functools import cached_property
 
 import numpy as np
 
 from nova.frame.baseplot import Plot
+from nova.geometry.pointloop import PointLoop
 from nova.imas.scenario import Scenario
 from nova.plot.biotplot import BiotPlot
 
@@ -39,6 +41,22 @@ class Grid(Scenario):
         self.data['z2d'] = ('r', 'z'), z2d
         self.data.attrs['profiles_2d'] = ('time', 'r', 'z')
 
+    @cached_property
+    def mask_2d(self):
+        """Return pointloop instance, used to check loop membership."""
+        points = np.array([self.data.r2d.data.flatten(),
+                           self.data.z2d.data.flatten()]).T
+        return PointLoop(points)
+
+    @property
+    def shape(self):
+        """Return grid shape."""
+        return self.data.dims['r'], self.data.dims['z']
+
+    def mask(self, boundary: np.ndarray):
+        """Return boundary mask."""
+        return self.mask_2d.update(boundary).reshape(self.shape)
+
 
 @dataclass
 class Boundary(Plot, Scenario):
@@ -67,12 +85,15 @@ class Boundary(Plot, Scenario):
             self.data['boundary_length'][itime] = len(outline)
             self.data['boundary'][itime, :len(outline)] = outline
 
-    def plot_boundary(self, itime: int, axes=None):
+    @property
+    def boundary(self):
+        """Return trimmed boundary contour."""
+        return self['boundary'][:self['boundary_length'].values].values
+
+    def plot_boundary(self, axes=None):
         """Plot 2D boundary at itime."""
         self.get_axes(axes, '2d')
-        length = self.data.boundary_length[itime].values
-        self.axes.plot(self.data.boundary[itime, :length, 0],
-                       self.data.boundary[itime, :length, 1],
+        self.axes.plot(self.boundary[:, 0], self.boundary[:, 1],
                        'gray', alpha=0.5)
 
 
@@ -139,13 +160,16 @@ class Profile2D(BiotPlot, Scenario):
         super().build()
         self.time_slice.build('profiles_2d', self.attrs_2d, postfix='2d')
 
-    def plot_2d(self, itime=-1, attr='psi', axes=None, **kwargs):
+    def data_2d(self, attr: str, mask=0):
+        """Return data array."""
+        return self[f'{attr}2d']
+
+    def plot_2d(self, attr='psi', mask=0, axes=None, **kwargs):
         """Plot 2d profile."""
         self.set_axes(axes, '2d')
         kwargs = self.contour_kwargs(**kwargs)
         QuadContourSet = self.axes.contour(
-            self.data.r, self.data.z, self.data[f'{attr}2d'][itime].T,
-            **kwargs)
+            self.data.r, self.data.z, self.data_2d(attr, mask).T, **kwargs)
         return QuadContourSet.levels
 
 
@@ -243,6 +267,16 @@ class Equilibrium(Profile2D, Profile1D, Parameter0D, Boundary, Grid):
             super().build()
         return self
 
+    def data_2d(self, attr: str, mask=0):
+        """Extend to return masked data array."""
+        data = super().data_2d(attr)
+        if mask == 0:
+            return data
+        if mask == -1:
+            return np.ma.masked_array(data, ~self.mask(self.boundary))
+        if mask == 1:
+            return np.ma.masked_array(data, self.mask(self.boundary))
+
 
 if __name__ == '__main__':
 
@@ -250,6 +284,7 @@ if __name__ == '__main__':
     #doctest.testmod()
 
     #equilibrium = Equilibrium(105028, 1).build()
-    equilibrium = Equilibrium(105007, 10, 0)
-    equilibrium.plot_2d(0, 'psi')
-    equilibrium.plot_boundary(0)
+    equilibrium = Equilibrium(105007, 10, 1)
+    equilibrium.itime = 4
+    equilibrium.plot_2d('psi', mask=1)
+    equilibrium.plot_boundary()

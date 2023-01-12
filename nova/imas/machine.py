@@ -767,8 +767,6 @@ class Machine(CoilSet, CoilGeometry, CoilData):
         """Solve biot instances."""
         if self.sloc['plasma'].sum() > 0:
             self.plasma.solve()
-            #self.plasmaboundary.solve()  # self.Loc['plasma', 'poly'][0].boundary
-            #self.plasmagrid.solve()
 
     def build(self, **kwargs):
         """Build dataset, frameset and, biotset and save to file."""
@@ -803,12 +801,12 @@ if __name__ == '__main__':
     #import doctest
     #doctest.testmod()
 
-    machine = Machine(pf_passive=False)  # pf_passive=False, nplasma=500)
+    machine = Machine(pf_passive=False, nplasma=150)  # pf_passive=False, nplasma=500)
 
     machine.sloc['Ic'] = 1
     machine.sloc['plasma', 'Ic'] = -10000
-    machine.plot()
-    machine.plasmagrid.plot()
 
-    machine.field.solve(0.25)
-    machine.field.plot()
+    #machine.plasmagrid.plot()
+
+    #machine.field.solve(0.25)
+    #machine.field.plot()

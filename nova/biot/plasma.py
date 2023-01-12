@@ -43,15 +43,33 @@ class Plasma(Plot, netCDF, FrameSetLoc):
 
     def solve(self):
         """Solve interaction matricies across plasma grid."""
+        self.wall.solve()
         self.grid.solve()
 
     @property
     def psi_axis(self):
         """Return on-axis poloidal flux."""
-        if len(self.grid.o_psi) > 1:
+        if self.grid.o_point_number > 1:
             raise IndexError('multiple field nulls found within firstwall\n'
                              f'{self.grid.data_o}')
         return self.grid.o_psi[0]
+
+    @property
+    def boundary_index(self):
+        """Return x-point index for plasma boundary."""
+        return np.argmin(abs(self.grid.x_psi - self.psi_axis))
+
+    @property
+    def x_point(self):
+        """Return coordinates of primary x-point."""
+        return self.grid.x_points[self.boundary_index]
+
+    @property
+    def psi_boundary(self):
+        """Return boundary poloidal flux."""
+        if self.grid.x_point_number == 1:
+            return self.grid.x_psi[0]
+        return self.grid.x_psi[self.boundary_index]
 
     @property
     def psi(self):
@@ -195,7 +213,6 @@ class Plasma(Plot, netCDF, FrameSetLoc):
                 poly.__geo_interface__,
                 facecolor='C4', alpha=0.75, linewidth=0, zorder=-10))
         '''
-        self.boundary.plot()
         self.grid.plot(**kwargs)
 
 

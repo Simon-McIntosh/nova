@@ -1,5 +1,6 @@
 """Methods for calculating the position and value of x-points and o-points."""
 from dataclasses import dataclass, field
+from functools import cached_property
 
 import numba
 import numpy as np
@@ -41,36 +42,6 @@ class DataNull(Plot):
     data_x: dict[str, np.ndarray] = field(init=False, default_factory=dict,
                                           repr=False)
 
-    @property
-    def o_points(self):
-        """Return o-point locations."""
-        return self.data_o['points']
-
-    @property
-    def o_psi(self):
-        """Return flux values at o-point locations."""
-        return self.data_o['psi']
-
-    @property
-    def o_point_number(self):
-        """Return o-point number."""
-        return len(self.data_o['points'])
-
-    @property
-    def x_points(self):
-        """Return x-point locations."""
-        return self.data_x['points']
-
-    @property
-    def x_psi(self):
-        """Return flux values at x-point locations."""
-        return self.data_x['psi']
-
-    @property
-    def x_point_number(self):
-        """Return x-point number."""
-        return len(self.data_x['points'])
-
     def update_masks(self, mask_o, mask_x, psi):
         """Update null points."""
         for null, mask in zip('ox', [mask_o, mask_x]):
@@ -86,7 +57,7 @@ class DataNull(Plot):
     def _empty_mask():
         """Return empty dict structure when all(mask==0)."""
         index, points = np.empty((0, 2), int), np.empty((0, 2), float)
-        return dict(index=index, points=points)
+        return dict(index=index, points=points, psi=np.empty(0))
 
     def _select(self, points, index):
         """Select subset of points within loop when loop is not None."""
@@ -289,10 +260,45 @@ class DataNull(Plot):
 class FieldNull(DataNull):
     """Calculate positions of all field nulls."""
 
+    @cached_property
+    def o_points(self):
+        """Return o-point locations."""
+        return self.data_o['points']
+
+    @cached_property
+    def o_psi(self):
+        """Return flux values at o-point locations."""
+        return self.data_o['psi']
+
+    @property
+    def o_point_number(self):
+        """Return o-point number."""
+        return len(self.o_psi)
+
+    @cached_property
+    def x_points(self):
+        """Return x-point locations."""
+        return self.data_x['points']
+
+    @cached_property
+    def x_psi(self):
+        """Return flux values at x-point locations."""
+        return self.data_x['psi']
+
+    @property
+    def x_point_number(self):
+        """Return x-point number."""
+        return len(self.x_psi)
+
     def update_null(self, psi):
         """Update calculation of field nulls."""
         mask_o, mask_x = self.categorize(psi)
         super().update_masks(mask_o, mask_x, psi)
+        for attr in ['o_psi', 'o_points', 'x_psi', 'x_points']:
+            try:
+                delattr(self, attr)
+            except AttributeError:
+                pass
 
     def categorize(self, psi):
         """Return o-point and x-point masks from loop sign counts."""

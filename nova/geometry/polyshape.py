@@ -15,18 +15,24 @@ class PolyShape:
         dict.fromkeys(['ellipse', 'ellip', 'el', 'e'], 'ellipse') | \
         dict.fromkeys(['square', 'sq', 's'], 'square') | \
         dict.fromkeys(['rectangle', 'rect', 'rec', 'r'], 'rectangle') | \
-        dict.fromkeys(['skin', 'sk', 'ring'], 'skin') | \
-        dict.fromkeys(['polygon', 'poly'], 'polygon') |\
+        dict.fromkeys(['skin', 'sk', 'ring', 'annulus'], 'skin') | \
+        dict.fromkeys(['polygon', 'poly', 'oblique'], 'polygon') |\
         dict.fromkeys(['shell', 'shl', 'sh'], 'shell') |\
         dict.fromkeys(['hexagon', 'hex', 'hx', 'h'], 'hexagon')
 
-    @property
-    def shape(self):
-        """Return polygeom shape name."""
-        section = self.section.rstrip(string.digits)
+    def _shape(self, section: str):
+        """Return polygeom shape name from str input."""
+        section = section.rstrip(string.digits)
         try:
             return self.polyshape[section]
         except AttributeError as error:
             raise AttributeError(
                 f'cross_section: {self.section} not implemented'
                 f'\n specify as {self.polyshape}') from error
+
+    @property
+    def shape(self):
+        """Return polygeom shape name."""
+        if isinstance(self.section, list):
+            return [self._shape(section) for section in self.section]
+        return self._shape(self.section)

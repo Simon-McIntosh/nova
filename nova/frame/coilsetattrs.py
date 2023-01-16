@@ -52,12 +52,19 @@ class CoilSetAttrs(ABC, FrameSetLoc):
             self.ifthen('delta', -1, 'turn', 'skin')
         """
 
+    def _flatten(self, items):
+        """Retrun flat list."""
+        return [_item[0] if isinstance(_item, list)
+                else _item for _item in items]
+
     def ifthen(self, attr, cond, key, value):
         """Update _attrs[key] = value when _attrs[check] == cond."""
         if isinstance(attr, str):
             attr, cond = [attr], [cond]
-        if all([self._attrs.get(_attr, getattr(self, _attr)) == _cond
-                for _attr, _cond in zip(attr, cond)]):
+        attrs = self._flatten([self._attrs.get(_attr, getattr(self, _attr))
+                               for _attr in attr])
+        conds = self._flatten(cond)
+        if all([_attr == _cond for _attr, _cond in zip(attrs, conds)]):
             self._attrs[key] = value
 
     @property

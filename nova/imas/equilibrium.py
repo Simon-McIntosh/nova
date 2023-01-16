@@ -283,7 +283,7 @@ if __name__ == '__main__':
     #import doctest
     #doctest.testmod()
 
-    equilibrium = Equilibrium(105007, 9, 1)
+    equilibrium = Equilibrium(105007, 10, 1)
     equilibrium.itime = 6
     equilibrium.plot_2d('psi', mask=0)
     equilibrium.plot_boundary()

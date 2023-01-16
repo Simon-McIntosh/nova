@@ -175,16 +175,15 @@ if __name__ == '__main__':
 
     from nova.imas.pf_active import PF_Active
 
+    operate = Operate(105007, 10, 1,
+                      pf_active=(105007, 10, 0, 'iter'))
 
-    operate = Operate(105007, 9, 1,
-                      pf_active=dict(pulse=135011, run=7, machine='iter'))
-
-    #pf_active = PF_Active(105007, 9)
-    #operate.merge_data(pf_active.data)
+    pf_active = PF_Active(105007, 10)
+    operate.merge_data(pf_active.data)
 
     operate.itime = 2
 
-    operate.sloc[-1, 'Ic'] *= 4
+    #operate.sloc[-1, 'Ic'] *= 4
 
     operate.plot()
     operate.grid.plot()

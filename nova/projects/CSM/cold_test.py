@@ -411,6 +411,7 @@ class cold_test(pythonIO):
         Imax_iloc = np.nanargmax(self.current['PSIOut'])
         Imax = self.current.iloc[Imax_iloc]['PSIOut']
         #ax[1].text(, Imax, f'{Imax}')
+        return ax
 
     def extract_shrinkage(self, sensors=['displace', 'extend'], plot=True,
                           Imax=48.5):
@@ -605,6 +606,8 @@ class cold_test(pythonIO):
             return slice('2023-01-12', '2023-01-14')
         if index == 'CSM3':
             return slice('2022-12-12 08:00:00', '2022-12-12 18:00:00')
+        if index == 'CSM3_strain':
+            return slice('2022-12-09', '2022-12-15')
         return slice(None)
 
 
@@ -614,13 +617,19 @@ if __name__ == '__main__':
 
 
     ct = cold_test(project_dir='CSM3', read_txt=False)
-    ct.load_coldtest('extend', read_txt=False)
+    ct.load_coldtest('strain', read_txt=False)
     ct.load_coldtest('displace', read_txt=False)
 
-    ct.plot_row('extend', index='CSM3_a', ncol=2)
-    ct.plot_loop('extend', index='CSM3_a', ncol=2)
-    ct.fit('extend', index='CSM3_a', Imin=12.5, Itrim=25, Imax=40, ncol=2)
+    #ct.plot_row('extend', index='CSM3_a', ncol=2)
+    #ct.plot_loop('extend', index='CSM3_a', ncol=2)
+    #ct.fit('extend', index='CSM3_a', Imin=12.5, Itrim=25, Imax=40, ncol=6)
 
+    columns = [name for name in ct.strain.columns.droplevel(1)
+               if 'SThOD' in name]
+    ct.plot_row(columns, index='CSM3', ncol=6)
+
+    ct.fit(columns, index='CSM3', Imin=5, Itrim=40, Imax=40,
+           ncol=6, trim=True)
 
     #displace = ['DS001', 'DS002', 'DS003', 'DS004', 'DS005']
     #ct.plot_row(displace, index='CSM3_a', ncol=5)
@@ -647,19 +656,20 @@ if __name__ == '__main__':
     ct.plot_loop('extend', index='CSM2_08', ncol=2)
     ct.fit('extend', index='CSM2_08', Imin=12.5, Itrim=25, Imax=40, ncol=2)
 
+    ct.plot_row(['STvID', 'STvOD'], index=None)
 
-    ct.plot_row(['SThID0', 'SThID1', 'SThID2'], index='CSM2_08', ncol=3)
-    ct.plot_loop(['SThID0', 'SThID1', 'SThID2'], index='CSM2_08', ncol=3)
+    ct.plot_row(['SThID0', 'SThID1', 'SThID2'], index=None, ncol=3)
+    ct.plot_loop(['SThID0', 'SThID1', 'SThID2'], index='CSM3_a', ncol=3)
     ct.fit(['SThID0', 'SThID1', 'SThID2'], index='CSM2_08', Imin=0, Itrim=40,
            Imax=40, ncol=3, trim=False)
 
-    ct.plot_row(['SThOD0', 'SThOD1', 'SThOD2'], index='CSM2_08', ncol=3)
-    ct.plot_loop(['SThOD0', 'SThOD1', 'SThOD2'], index='CSM2_08', ncol=3)
-    ct.fit(['SThOD0', 'SThOD1', 'SThOD2'], index='CSM2_08', Imin=0, Itrim=40,
+    ct.plot_row(['SThOD0', 'SThOD1', 'SThOD2'], index=None, ncol=3)
+    ct.plot_loop(['SThOD0', 'SThOD1', 'SThOD2'], index='CSM3_a', ncol=3)
+    ct.fit(['SThOD0', 'SThOD1', 'SThOD2'], index='CSM3_a', Imin=0, Itrim=40,
            Imax=40, ncol=3, trim=False)
 
-    ct.plot_row(['STvID', 'STvOD'], index='CSM2_08', ncol=2)
-    ct.plot_loop(['STvID', 'STvOD'], index='CSM2_08', ncol=2)
+    ct.plot_row(['STvID', 'STvOD'], index='CSM3_a', ncol=2)
+    ct.plot_loop(['STvID', 'STvOD'], index='CSM3_a', ncol=2)
     ct.fit(['STvID', 'STvOD'],
            index='CSM2_08', Imin=0, Itrim=40, Imax=40, ncol=2, trim=False)
 
@@ -678,7 +688,7 @@ if __name__ == '__main__':
     self.mean_strain('SThOD2', data, [106, 112, 118])
     '''
 
-    ct.plot_row([f'ST{i}' for i in range(119, 124)], index='CSM2_08', ncol=2)
+    ct.plot_row([f'ST{i}' for i in range(101, 107)], index='CSM3_a', ncol=2)
 
 
     ct.plot_row([f'ST{i}' for i in range(101, 119)], index='CSM2_08', ncol=3)
@@ -734,7 +744,7 @@ if __name__ == '__main__':
     #ct.plot('extend')
 
     ct.fit(['STvID', 'STvOD'],
-           index='CSM2_08', Imin=0, Itrim=40, Imax=40, ncol=3)
+           index='CSM3_a', Imin=0, Itrim=40, Imax=40, ncol=3)
 
     ct.fit(['ST103', 'ST109', 'ST115'],
            index='CSM2_08', Imin=0, Itrim=40, Imax=40, ncol=3)

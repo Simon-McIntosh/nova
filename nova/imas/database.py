@@ -22,9 +22,9 @@ class IDS:
     pulse: int = 0
     run: int = 0
     occurrence: int = 0
-    name: str | None = None
+    machine: str = 'iter'
 
-    attrs: ClassVar[list[str]] = ['pulse', 'run', 'occurrence', 'name']
+    attrs: ClassVar[list[str]] = ['pulse', 'run', 'occurrence', 'machine']
 
 
 @dataclass
@@ -40,12 +40,12 @@ class Database(IDS):
         Run number. The default is 0.
     occurrence: int, optional (required when ids not set)
         Occurrence number. The default is 0.
-    name: str, optional (required when ids not set)
-        Ids name. The default is ''.
-    user: str, optional (required when ids not set)
-        User name. The default is public.
     machine: str, optional (required when ids not set)
         Machine name. The default is iter.
+    user: str, optional (required when ids not set)
+        User name. The default is public.
+    name: str, optional (required when ids not set)
+        Ids name. The default is ''.
     backend: int, optional (required when ids not set)
         Access layer backend. The default is 13 (HDF5).
     ids: ImasIds, optional
@@ -56,7 +56,7 @@ class Database(IDS):
     ids_data: ImasIds
         IMAS ids.
     ids_attrs: dict
-        Ids attributes as dict with keys [pulse, run, name, user, machine]
+        Ids attributes as dict with keys [pulse, run, machine, user, name]
 
     Notes
     -----
@@ -159,11 +159,11 @@ class Database(IDS):
     """
 
     user: str = 'public'
-    machine: str = 'iter'
+    name: str | None = None
     backend: int = 13
     ids: ImasIds | None = field(repr=False, default=None)
 
-    attrs: ClassVar[list[str]] = IDS.attrs + ['user', 'machine', 'backend']
+    attrs: ClassVar[list[str]] = IDS.attrs + ['user', 'name', 'backend']
 
     def __post_init__(self):
         """Load parameters and set ids."""
@@ -233,6 +233,16 @@ class Database(IDS):
     def ids_attrs(self):
         """Return dict of ids attributes."""
         return {attr: getattr(self, attr) for attr in self.attrs}
+
+    @property
+    def group_attrs(self):
+        """
+        Return database attributes.
+
+        Group attrs used by :func:`~nova.database.filepath.FilePath.hash_attrs`
+        to generate a unique hex hash to label data within a netCDF file.
+        """
+        return self.ids_attrs
 
     def get_ids(self, ids_path: Optional[str] = None):
         """Return ids. Extend name with ids_path if not None."""
@@ -318,7 +328,7 @@ class DataAttrs:
 
     Database attributes may be extracted from any class derived from Database:
 
-    >>> database = Database(130506, 403, 0, 'equilibrium', machine='iter')
+    >>> database = Database(130506, 403, 0, 'iter', name='equilibrium')
     >>> DataAttrs(database).attrs == database.ids_attrs
     True
 
@@ -357,7 +367,8 @@ class DataAttrs:
     expanded by the passed subclass and must resolve to a valid ids. Partial
     input is acepted as long as the defaults enable a correct resolution.
 
-    >>> DataAttrs((130506, 403, 0, 'equilibrium')).attrs == database.ids_attrs
+    >>> DataAttrs(dict(pulse=130506, run=403,\
+                       name='equilibrium')).attrs == database.ids_attrs
     True
 
     Raises TypeError when input attrs are malformed:
@@ -503,6 +514,8 @@ class CoilData(Datafile):
         Group attrs used by :func:`~nova.database.filepath.FilePath.hash_attrs`
         to generate a unique hex hash to label data within a netCDF file.
         """
+        if hasattr(super(), 'group_attrs'):
+            return super().group_attrs
         return {}
 
     def build(self):

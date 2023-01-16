@@ -285,6 +285,13 @@ class FrameData(ABC):
         self.data = {attr: [] for attr in self.attrs}
 
     @property
+    def name(self):
+        """Return coil name."""
+        if self.data['identifier'] != '':
+            return self.data['identifier']
+        return self.data['name']
+
+    @property
     def empty(self) -> bool:
         """Return empty boolean."""
         return len(self.data[self.attrs[0]]) == 0
@@ -306,10 +313,7 @@ class FrameData(ABC):
     @property
     def part(self):
         """Return part name."""
-        try:
-            label = self.data['identifier']
-        except KeyError:
-            label = self.data['name']
+        label = self.name
         if isinstance(label, list):
             label = label[0]
         if 'VES' in label:
@@ -338,7 +342,6 @@ class FrameData(ABC):
 class IdsCoilData(FrameData):
     """Extract coildata from ids."""
 
-    name: list[str] = field(init=False, default_factory=list)
     geometry_attrs: ClassVar[list[str]] = ['r', 'z', 'width', 'height']
     loop_attrs: ClassVar[list[str]] = ['identifier', 'resistance']
 
@@ -378,13 +381,13 @@ class PassiveShellData(Plot, FrameData):
         assert element.is_oblique()
         if not self.points:
             return self._new(loop, element)
-        if np.allclose(self.points[-1][-1], element.geometry.start):
+        if np.allclose(self.points[-1][-1], element.cross_section.start):
             return self._end(loop, element)
         return self._new(loop, element)
 
     def _new(self, loop: Loop, element: Element):
         """Start new loop."""
-        geometry = element.geometry
+        geometry = element.cross_section
         self.points.append(np.c_[geometry.start, geometry.end].T)
         for attr in self.loop_attrs:
             self.data[attr].append(getattr(loop, attr))
@@ -393,7 +396,7 @@ class PassiveShellData(Plot, FrameData):
 
     def _end(self, loop: Loop, element: Element):
         """Append endpoint to current loop."""
-        geometry = element.geometry
+        geometry = element.cross_section
         self.points[-1] = np.append(
             self.points[-1], geometry.end.reshape(1, -1), axis=0)
         for attr in self.geometry_attrs:
@@ -474,7 +477,7 @@ class PoloidalFieldPassive(CoilDatabase):
                 if element.is_rectangular():
                     coildata.append(loop, element)
                     continue
-                raise NotImplementedError(f'geometory {element.geometry.name} '
+                raise NotImplementedError(f'geometory {element.section} '
                                           'not implemented')
 
             coildata.insert(self.coil, delta=self.dshell)
@@ -495,10 +498,10 @@ class ActiveCoilData(IdsCoilData):
             return None
         self.data['nturn'] = np.abs(self.data['nturn'])
         kwargs = {'active': True, 'fix': False,
-                  'name': self.data['identifier'],
+                  'name': self.name,
                   'delim': '_', 'nturn': self.data['nturn'],
+                  'section': self.data['section'],
                   } | kwargs
-        print(self.data)
         return super().insert(constructor, **kwargs)
 
 
@@ -539,7 +542,7 @@ class PoloidalFieldActive(CoilDatabase):
                 if element.is_poly():
                     polydata.append(loop, element)
                     continue
-                raise NotImplementedError(f'geometory {element.geometry.name} '
+                raise NotImplementedError(f'geometory {element.name} '
                                           'not implemented')
             if len(ids_loop.element) == 1:
                 constructor = self.coil
@@ -557,6 +560,8 @@ class PoloidalFieldActive(CoilDatabase):
                     for circuit in self.ids_data.circuit)
         self.circuit.initialize(supply, nodes)
         for circuit in getattr(self.ids_data, 'circuit'):
+            if len(circuit.connections) == 0:
+                continue
             self.circuit.insert(circuit.identifier, circuit.connections)
         self.circuit.link()  # link single loop circuits
 
@@ -770,7 +775,7 @@ class Machine(CoilSet, CoilGeometry, CoilData):
 
         Extends :func:`~nova.imas.database.CoilData.group_attrs`.
         """
-        return self.coilset_attrs | self.geometry_attrs
+        return super().group_attrs | self.coilset_attrs | self.geometry_attrs
 
     def solve_biot(self):
         """Solve biot instances."""
@@ -809,8 +814,8 @@ if __name__ == '__main__':
 
     #import doctest
     #doctest.testmod()
-
-    machine = Machine(pf_active=dict(pulse=135011, run=7, machine='iter'),
+    #dict(pulse=135011, run=7, machine='iter')
+    machine = Machine(pf_active=(105007, 10, 0, 'iter'),
                       pf_passive=False, nplasma=150)  # pf_passive=False, nplasma=500)
 
     machine.sloc['Ic'] = 1

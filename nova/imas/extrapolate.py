@@ -316,11 +316,13 @@ if __name__ == '__main__':
     # import doctest
     # doctest.testmod()
 
-    # pulse, run, filename, limit = 114101, 41, 'JINTRAC', 0
-    # pulse, run, filename, limit = 130506, 403, 'CORSICA', 'ids'
-    pulse, run, filename, limit = 105028, 1, 'DINA', 'ids'
+    # pulse, run = 114101, 41  # JINTRAC
+    pulse, run = 130506, 403  # CORSICA
+    pulse, run = 105028, 1  # DINA
 
-    extrapolate = Extrapolate(pulse, run, filename=filename, limit=limit)
+    extrapolate = Extrapolate(pulse, run, limit='ids', ngrid=5, nplasma=5)
+
+    '''
 
     #extrapolate = Extrapolate(pulse, run, filename=filename,
     #                          limit=[4, 6.5, -4.5, -2.5], ngrid=1000,
@@ -343,3 +345,4 @@ if __name__ == '__main__':
     #extrapolate.plasmagrid.plot()
 
     #extrapolate.annimate(5, filename=filename)
+    '''

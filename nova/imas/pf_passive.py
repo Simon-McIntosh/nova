@@ -45,7 +45,7 @@ class PF_Passive(Plot, Scenario):
             #self.initalize()
             for attr in self.loop_attrs:
                 try:
-                    self.data[attr] = coords, self.get_ids(f'loop(:)/{attr}')
+                    self.data[attr] = coords, self.get_ids(f'loop(:)/{attr}').T
                 except ValueError:  # skip missing attributes
                     pass
             '''

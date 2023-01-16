@@ -236,8 +236,8 @@ class Database(IDS):
 
     def get_ids(self, ids_path: Optional[str] = None):
         """Return ids. Extend name with ids_path if not None."""
-        ids_name = '.'.join((item for item in [self.name, ids_path]
-                             if item is not None)).split('.', 1)
+        ids_name = '/'.join((item for item in [self.name, ids_path]
+                             if item is not None)).split('/', 1)
         with self._get_ids() as db_entry:
             if len(ids_name) == 2:
                 return db_entry.partial_get(*ids_name,
@@ -457,6 +457,11 @@ class IdsData(Datafile, Database):
                 self.filename += f'_{self.occurrence}'
             self.group = self.name
         super().__post_init__()
+
+    def merge_data(self, data):
+        """Merge external data, interpolating to existing dataset timebase."""
+        self.data = self.data.merge(data.interp(time=self.data.time),
+                                    combine_attrs='drop_conflicts')
 
     def load_data(self, ids_class):
         """Load data from IdsClass and merge."""

@@ -147,15 +147,13 @@ class Operate(Machine, Current, Profile, Grid, Equilibrium):
         if 'current' not in self.data:
             return
         # TODO - fix this - nasty indexing for ill-formated ids inputs
-        try:
-            self.sloc['coil', 'Ic'] = self['current']
-        except ValueError:
-            coil_index, ids_index = zip(
-                *([self.sloc['coil', :].index.get_loc(name), i]
-                  for i, name in enumerate(self.data.coil_name.values)
-                  if name in self.sloc['coil', :].index))
-            self.sloc['Ic'][np.array(coil_index)] = \
-                self['current'].values[np.array(ids_index)]
+        index = self.sloc.frame.index
+        coil_name = self.data.coil_name.values
+        coil_index, ids_index = zip(*([index.get_loc(name), i]
+                                    for i, name in enumerate(coil_name)
+                                    if name in index))
+        self.sloc['Ic'][np.array(coil_index)] = \
+            self['current'].values[np.array(ids_index)]
 
     def update_plasma(self):
         """Ionize plasma filaments and set turn number."""
@@ -175,8 +173,18 @@ class Operate(Machine, Current, Profile, Grid, Equilibrium):
 
 if __name__ == '__main__':
 
-    operate = Operate(105028, 1)
-    operate.itime = 200
+    from nova.imas.pf_active import PF_Active
+
+
+    operate = Operate(105007, 9, 1,
+                      pf_active=dict(pulse=135011, run=7, machine='iter'))
+
+    #pf_active = PF_Active(105007, 9)
+    #operate.merge_data(pf_active.data)
+
+    operate.itime = 2
+
+    operate.sloc[-1, 'Ic'] *= 4
 
     operate.plot()
     operate.grid.plot()

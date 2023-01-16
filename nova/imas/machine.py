@@ -241,29 +241,34 @@ class Element:
     index: int = 0
     name: str = field(init=False)
     nturn: float = field(init=False)
-    section: CrossSection = field(init=False)
+    cross_section: CrossSection = field(init=False)
 
     def __post_init__(self):
         """Extract element data from ids."""
         self.name = self.ids.name.strip()
         self.nturn = self.ids.turns_with_sign
-        self.section = CrossSection(self.ids.geometry)
+        self.cross_section = CrossSection(self.ids.geometry)
+
+    @property
+    def section(self):
+        """Return section name."""
+        return self.cross_section.name
 
     def is_poly(self) -> bool:
         """Return True if geometry.name == 'oblique' or 'annulus'."""
-        return self.section.name in ['oblique', 'annulus']
+        return self.section in ['oblique', 'annulus']
 
     def is_rectangular(self) -> bool:
         """Return geometry.name == 'rectangle'."""
-        return self.section.name == 'rectangle'
+        return self.section == 'rectangle'
 
     def is_oblique(self) -> bool:
         """Return geometry.name == 'oblique'."""
-        return self.section.name == 'oblique'
+        return self.section == 'oblique'
 
     def is_point(self) -> bool:
         """Return geometry validity flag."""
-        return np.isclose(self.section.data.poly.area, 0)
+        return np.isclose(self.cross_section.data.poly.area, 0)
 
 
 @dataclass
@@ -294,7 +299,7 @@ class FrameData(ABC):
         for attr in self.element_attrs:
             self.data[attr].append(getattr(element, attr))
         for attr in self.geometry_attrs:
-            self.data[attr].append(getattr(element.section, attr))
+            self.data[attr].append(getattr(element.cross_section, attr))
         for attr in self.loop_attrs:
             self.data[attr] = getattr(loop, attr)
 
@@ -452,6 +457,7 @@ class PoloidalFieldPassive(CoilDatabase):
 
     pulse: int = 115005
     run: int = 2
+    occurrence: int = 0
     name: str = 'pf_passive'
 
     def build(self):
@@ -479,7 +485,7 @@ class PoloidalFieldPassive(CoilDatabase):
 class ActiveCoilData(IdsCoilData):
     """Extract coildata from active ids."""
 
-    element_attrs: ClassVar[list[str]] = ['nturn', 'index', 'name']
+    element_attrs: ClassVar[list[str]] = ['nturn', 'index', 'name', 'section']
     geometry_attrs: ClassVar[list[str]] = ['r', 'z', 'width', 'height']
     loop_attrs: ClassVar[list[str]] = ['identifier', 'resistance']
 
@@ -492,6 +498,7 @@ class ActiveCoilData(IdsCoilData):
                   'name': self.data['identifier'],
                   'delim': '_', 'nturn': self.data['nturn'],
                   } | kwargs
+        print(self.data)
         return super().insert(constructor, **kwargs)
 
 
@@ -508,6 +515,7 @@ class PoloidalFieldActive(CoilDatabase):
 
     pulse: int = 111001
     run: int = 202
+    occurrence: int = 0
     name: str = 'pf_active'
 
     def build(self):
@@ -625,6 +633,7 @@ class Wall(CoilDatabase):
 
     pulse: int = 116000
     run: int = 2
+    occurrence: int = 0
     name: str = 'wall'
 
     def build(self):
@@ -801,7 +810,8 @@ if __name__ == '__main__':
     #import doctest
     #doctest.testmod()
 
-    machine = Machine(pf_passive=False, nplasma=150)  # pf_passive=False, nplasma=500)
+    machine = Machine(pf_active=dict(pulse=135011, run=7, machine='iter'),
+                      pf_passive=False, nplasma=150)  # pf_passive=False, nplasma=500)
 
     machine.sloc['Ic'] = 1
     machine.sloc['plasma', 'Ic'] = -10000

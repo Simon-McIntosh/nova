@@ -37,7 +37,7 @@ def test_get_ids_path():
 @mark['pf_active']
 def test_get_ids_partial_name():
     pf_active = Database(**ids_attrs['pf_active']
-                         | dict(name='pf_active.coil'))
+                         | dict(name='pf_active/coil'))
     assert pf_active.get_ids()[0].name == 'Central Solenoid 3U (CS3U)'
 
 
@@ -45,8 +45,15 @@ def test_get_ids_partial_name():
 def test_get_ids_partial_path():
     pf_active = Database(**ids_attrs['pf_active']
                          | dict(name=None))
-    assert pf_active.get_ids('pf_active.coil')[0].name == \
+    assert pf_active.get_ids('pf_active/coil')[0].name == \
         'Central Solenoid 3U (CS3U)'
+
+
+@mark['equilibrium']
+def test_get_ids_partial_vector():
+    pf_active = Database(**ids_attrs['equilibrium']
+                         | dict(name='pf_active'))
+    assert pf_active.get_ids('coil(:)/current/data').shape == (14, 51)
 
 
 @mark['equilibrium']

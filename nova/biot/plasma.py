@@ -113,6 +113,8 @@ class Plasma(Plot, netCDF, FrameSetLoc):
         """
         if self.sloc['plasma'].sum() == 0:
             return
+        #if not np.allclose(loop[0], loop[1]):
+        #    loop = np.append(loop, loop[:1], axis=0)
         try:
             inloop = self.pointloop.update(loop)
         except numba.TypingError:

@@ -212,7 +212,7 @@ if __name__ == '__main__':
     #ScenarioDatabase().sync_shot('130012/1')
     scenario = ScenarioDatabase()
     #scenario.sync_shot('105007/9')
-    scenario.load_frame('workflow', 'DINA-IMAS')
-    #ScenarioDatabase().sync_workflow('CORSICA')
+    #scenario.load_frame('workflow', 'DINA-IMAS')
+    #ScenarioDatabase().sync_workflow('DINA-IMAS')
 
     #ScenarioDatabase().sync_shot('135011/7')

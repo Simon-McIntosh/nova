@@ -139,7 +139,6 @@ tag_prefix = ""
 parentdir_prefix = "nova-"
 
 [tool.pytest.ini_options]
-addopts = "-n auto"
 testpaths = [
   "tests",
   "nova/imas"

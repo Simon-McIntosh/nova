@@ -120,9 +120,9 @@ class Operate(Machine, Current, Profile, Grid, Equilibrium):
         wall IDS. The default is True
     """
 
-    pf_active: Ids | bool = True
-    pf_passive: Ids | bool = False
-    wall: Ids | bool = True
+    pf_active: Ids | bool | str = True
+    pf_passive: Ids | bool | str = False
+    wall: Ids | bool | str = 'iter_md'
     nplasma: int = 2500
 
     @property
@@ -175,11 +175,11 @@ if __name__ == '__main__':
 
     from nova.imas.pf_active import PF_Active
 
-    operate = Operate(105007, 10, 1,
-                      pf_active=(105007, 10, 0, 'iter'))
+    operate = Operate(105007, 10, 'iter', 1, pf_active=True)
 
-    pf_active = PF_Active(105007, 10)
-    operate.merge_data(pf_active.data)
+    #pf_active = PF_Active(105007, 10)
+    #operate.merge_data(pf_active.data)
+
 
     operate.itime = 2
 

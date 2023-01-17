@@ -127,7 +127,8 @@ def test_equilibrium_rebuild():
 
 
 def test_geometry_boolean_input():
-    geometry = CoilGeometry(wall=False)
+    geometry = CoilGeometry(pf_active='iter_md', pf_passive='iter_md',
+                            wall=False)
     assert geometry.wall is False
     assert geometry.pf_active == PoloidalFieldActive.default_ids_attrs()
     assert geometry.pf_passive == PoloidalFieldPassive.default_ids_attrs()

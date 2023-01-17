@@ -21,10 +21,14 @@ class IDS:
 
     pulse: int = 0
     run: int = 0
-    occurrence: int = 0
     machine: str = 'iter'
+    occurrence: int = 0
+    user: str = 'public'
+    name: str | None = None
+    backend: int = 13
 
-    attrs: ClassVar[list[str]] = ['pulse', 'run', 'occurrence', 'machine']
+    attrs: ClassVar[list[str]] = ['pulse', 'run', 'machine', 'occurrence',
+                                  'user', 'name', 'backend']
 
 
 @dataclass
@@ -158,12 +162,7 @@ class Database(IDS):
 
     """
 
-    user: str = 'public'
-    name: str | None = None
-    backend: int = 13
     ids: ImasIds | None = field(repr=False, default=None)
-
-    attrs: ClassVar[list[str]] = IDS.attrs + ['user', 'name', 'backend']
 
     def __post_init__(self):
         """Load parameters and set ids."""
@@ -218,6 +217,11 @@ class Database(IDS):
         return DataAttrs(ids_attrs, cls).attrs
 
     @classmethod
+    def merge_ids_attrs(cls, ids_attrs: bool | Ids, base_attrs: dict):
+        """Return merged class attributes."""
+        return DataAttrs(ids_attrs, cls).merge_ids_attrs(base_attrs)
+
+    @classmethod
     def from_ids_attrs(cls, ids_attrs: bool | Ids):
         """Initialize database instance from ids attributes."""
         if isinstance(attrs := cls.update_ids_attrs(ids_attrs), dict):
@@ -225,7 +229,7 @@ class Database(IDS):
         return False
 
     @classmethod
-    def default_ids_attrs(cls):
+    def default_ids_attrs(cls) -> dict:
         """Return dict of ids attributes."""
         return {attr: getattr(cls, attr) for attr in cls.attrs}
 
@@ -328,7 +332,7 @@ class DataAttrs:
 
     Database attributes may be extracted from any class derived from Database:
 
-    >>> database = Database(130506, 403, 0, 'iter', name='equilibrium')
+    >>> database = Database(130506, 403, 'iter', 0, name='equilibrium')
     >>> DataAttrs(database).attrs == database.ids_attrs
     True
 
@@ -391,24 +395,32 @@ class DataAttrs:
     @property
     def attrs(self) -> dict | bool:
         """Return output from update_attrs."""
-        return self.update_attrs()
+        return self.update_ids_attrs()
 
-    def update_attrs(self) -> dict | bool:
+    def merge_ids_attrs(self, base_attrs: dict):
+        """Merge database attributes."""
+        attrs = self.update_ids_attrs({})
+        if isinstance(attrs, bool):
+            return attrs
+        return base_attrs | attrs
+
+    def update_ids_attrs(self, default_attrs=None) -> dict | bool:
         """Return formated database attributes."""
+        if default_attrs is None:
+            default_attrs = self.default_attrs
         if self.ids_attrs is False:
             return False
         if self.ids_attrs is True:
-            return self.default_attrs
+            return default_attrs
         if isinstance(self.ids_attrs, Database):
             return self.ids_attrs.ids_attrs
         if isinstance(self.ids_attrs, dict):
-            return self.default_attrs | self.ids_attrs
+            return default_attrs | self.ids_attrs
         if hasattr(self.ids_attrs, 'ids_properties'):  # IMAS ids
-            database = Database(**self.default_attrs, ids=self.ids_attrs)
+            database = Database(**default_attrs, ids=self.ids_attrs)
             return database.ids_attrs | dict(ids=self.ids_attrs)
         if isinstance(self.ids_attrs, list | tuple):
-            return self.default_attrs | dict(zip(Database.attrs,
-                                                 self.ids_attrs))
+            return default_attrs | dict(zip(Database.attrs, self.ids_attrs))
         raise TypeError(f'malformed attrs: {type(self.ids_attrs)}')
 
 

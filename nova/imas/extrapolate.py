@@ -1,7 +1,6 @@
 """Extrapolate equilibria beyond separatrix."""
 import bisect
 from dataclasses import dataclass
-from importlib import import_module
 
 import numpy as np
 from scipy.constants import mu_0
@@ -145,9 +144,9 @@ class Extrapolate(Operate):
 
     def select_free_coils(self):
         """Select free coils."""
-        self.saloc['free'] = [
-            self.Loc[name, 'nturn'] > self.nturn and not
-            self.sloc[name, 'plasma'] for name in self.sloc.frame.index]
+        index = [self.loc[name, 'subref'] for name in self.sloc.frame.index]
+        self.saloc['free'] = self.frame.iloc[index].nturn > self.nturn
+        self.saloc['free'] = self.saloc['free'] & ~self.saloc['plasma']
 
     #def update_metadata(self):
     #    """Return extrapolated equilibrium ids."""
@@ -231,7 +230,7 @@ class Extrapolate(Operate):
     def plot_2d(self, attr='psi', mask=None, levels=51, axes=None):
         """Plot plasma filements and polidal flux."""
         self.get_axes(axes, '2d')
-        super().plot('plasma')
+        super().plot()#'plasma')
         self.plasma.wall.plot()
         vector = getattr(self.grid, attr)
         levels = np.linspace(vector.min(), vector.max(), levels)
@@ -317,26 +316,36 @@ if __name__ == '__main__':
     # doctest.testmod()
 
     # pulse, run = 114101, 41  # JINTRAC
-    pulse, run = 130506, 403  # CORSICA
+    # pulse, run = 130506, 403  # CORSICA
     pulse, run = 105028, 1  # DINA
 
-    extrapolate = Extrapolate(pulse, run, limit='ids', ngrid=5, nplasma=5)
+    #pulse, run = 135011, 7  # DINA
 
-    '''
-
-    #extrapolate = Extrapolate(pulse, run, filename=filename,
-    #                          limit=[4, 6.5, -4.5, -2.5], ngrid=1000,
-    #                          index='plasma')
-
-    #extrapolate = Extrapolate(pulse, run, filename=filename,
-    #                          limit=0.1, index='coil')
+    extrapolate = Extrapolate(pulse, run, limit='ids', pf_passive=False)
 
     import matplotlib.pylab as plt
-    extrapolate.mpl_axes.fig = plt.figure()#figsize=(6, 9))
+    extrapolate.mpl_axes.fig = plt.figure(figsize=(6, 9))
 
-    extrapolate.plot_waveform()
-    #extrapolate.itime = 300
-    #extrapolate.plot_2d('psi', mask='map')
+    #extrapolate.plot_waveform()
+
+    extrapolate.itime = 36
+    extrapolate.plot_2d('psi', mask='map')
+
+    from nova.imas.pf_passive import PF_Passive
+    pf_passive = PF_Passive(pulse, run)
+
+    extrapolate.set_axes(None, '1d')
+    extrapolate.axes.plot(extrapolate.data.time,
+                          1e-3*pf_passive.data.current, color='gray',
+                          alpha=0.2)
+    extrapolate.axes.plot(extrapolate.data.time,
+                          1e-3*extrapolate.data.current[:, -1], label='VS3')
+    extrapolate.axes.plot(extrapolate.data.time,
+                          1e-3*pf_passive.data.current[:, 0], label='TRI_SUPP')
+    extrapolate.legend()
+    extrapolate.axes.set_xlabel('time s')
+    extrapolate.axes.set_ylabel('current kA')
+
 
     #plt.tight_layout()
     #plt.savefig('build.png')
@@ -345,4 +354,3 @@ if __name__ == '__main__':
     #extrapolate.plasmagrid.plot()
 
     #extrapolate.annimate(5, filename=filename)
-    '''

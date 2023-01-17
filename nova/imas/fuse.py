@@ -10,7 +10,7 @@ class Fuse(Machine):
     """
     Equilibrium generation and reconstruction methods.
 
-    Join model predictions with data observations.
+    Merge model predictions with data observations.
     """
 
     ncontour: int = 10

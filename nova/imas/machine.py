@@ -10,7 +10,7 @@ import numpy as np
 
 from nova.frame.baseplot import Plot
 from nova.frame.coilset import CoilSet
-from nova.imas.database import CoilData, Database, Ids, ImasIds
+from nova.imas.database import CoilData, DataAttrs, Database, IDS, Ids, ImasIds
 from nova.geometry.polygon import Polygon
 if TYPE_CHECKING:
     from nova.frame.shell import Shell
@@ -285,9 +285,9 @@ class FrameData(ABC):
         self.data = {attr: [] for attr in self.attrs}
 
     @property
-    def name(self):
+    def coil_name(self):
         """Return coil name."""
-        if self.data['identifier'] != '':
+        if 'identifier' in self.data and self.data['identifier'] != '':
             return self.data['identifier']
         return self.data['name']
 
@@ -313,7 +313,7 @@ class FrameData(ABC):
     @property
     def part(self):
         """Return part name."""
-        label = self.name
+        label = self.coil_name
         if isinstance(label, list):
             label = label[0]
         if 'VES' in label:
@@ -324,7 +324,7 @@ class FrameData(ABC):
             return 'dir'
         if 'CS' in label or 'PF' in label:
             return label[:2].lower()
-        if 'VS3' in label:
+        if 'VS' in label:
             return 'vs3'
         return ''
 
@@ -363,7 +363,7 @@ class PassiveShellData(Plot, FrameData):
     length: float = 0
     points: list[np.ndarray] = field(init=False, repr=False,
                                      default_factory=list)
-    loop_attrs: ClassVar[list[str]] = ['name', 'resistance']
+    loop_attrs: ClassVar[list[str]] = ['resistance']
     geometry_attrs: ClassVar[list[str]] = ['thickness']
 
     def reset(self):
@@ -427,7 +427,7 @@ class PassiveCoilData(IdsCoilData):
     """Extract coildata from passive ids."""
 
     geometry_attrs: ClassVar[list[str]] = ['r', 'z', 'width', 'height']
-    loop_attrs: ClassVar[list[str]] = ['name', 'resistance']
+    loop_attrs: ClassVar[list[str]] = ['resistance']
 
     def insert(self, constructor, **kwargs):
         """Insert data via coil method."""
@@ -498,7 +498,7 @@ class ActiveCoilData(IdsCoilData):
             return None
         self.data['nturn'] = np.abs(self.data['nturn'])
         kwargs = {'active': True, 'fix': False,
-                  'name': self.name,
+                  'name': self.coil_name,
                   'delim': '_', 'nturn': self.data['nturn'],
                   'section': self.data['section'],
                   } | kwargs
@@ -699,9 +699,9 @@ class CoilGeometry:
 
     """
 
-    pf_active: Ids | bool = True
-    pf_passive: Ids | bool = True
-    wall: Ids | bool = True
+    pf_active: Ids | bool | int = True
+    pf_passive: Ids | bool | int = True
+    wall: Ids | bool | str = 'iter_md'
 
     geometry: ClassVar[dict] = dict(pf_active=PoloidalFieldActive,
                                     pf_passive=PoloidalFieldPassive,
@@ -710,10 +710,22 @@ class CoilGeometry:
     def __post_init__(self):
         """Map geometry parameters to dict attributes."""
         for attr, geometry in self.geometry.items():
-            attrs = geometry.update_ids_attrs(getattr(self, attr))
-            setattr(self, attr, attrs)
+            ids_attrs = self.get_ids_attrs(attr, geometry)
+            setattr(self, attr, ids_attrs)
         if hasattr(super(), '__post_init__'):
             super().__post_init__()
+
+    def get_ids_attrs(self, attr, geometry):
+        """Return default ids attributes."""
+        match getattr(self, attr):
+            case str(attrs) if attrs == 'iter_md':  # update from iter_md
+                return geometry.update_ids_attrs(True)
+            case str():
+                raise ValueError(f'attr str input {attr} != iter_md')
+            case attrs if hasattr(self, 'ids_attrs') and self.ids is None:
+                return geometry.merge_ids_attrs(attrs, self.ids_attrs)
+            case attrs:
+                return geometry.update_ids_attrs(attrs)
 
     @property
     def geometry_attrs(self) -> dict:
@@ -722,7 +734,7 @@ class CoilGeometry:
 
 
 @dataclass
-class Machine(CoilSet, CoilGeometry, CoilData):
+class Machine(CoilSet, CoilGeometry, CoilData, Database):
     """Manage ITER machine geometry."""
 
     filename: str = 'iter'
@@ -792,8 +804,6 @@ class Machine(CoilSet, CoilGeometry, CoilData):
             if isinstance(geometry_attrs, dict):
                 coilset = geometry(**geometry_attrs, **self.frameset_attrs)
                 self += coilset
-            for attr in coilset.biot_methods:
-                getattr(self, attr).data = getattr(coilset, attr).data
         self.solve_biot()
         return self.store()
 
@@ -815,8 +825,11 @@ if __name__ == '__main__':
     #import doctest
     #doctest.testmod()
     #dict(pulse=135011, run=7, machine='iter')
-    machine = Machine(pf_active=(105007, 10, 0, 'iter'),
-                      pf_passive=False, nplasma=150)  # pf_passive=False, nplasma=500)
+    machine = Machine(105007, 10, pf_active=True, pf_passive=False,
+                      wall='iter_md')
+
+    #                  pf_active=(105007, 10, 0, 'iter'),
+    #                  pf_passive=False, nplasma=150)  # pf_passive=False, nplasma=500)
 
     machine.sloc['Ic'] = 1
     machine.sloc['plasma', 'Ic'] = -10000

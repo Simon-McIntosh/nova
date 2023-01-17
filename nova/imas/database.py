@@ -399,7 +399,7 @@ class DataAttrs:
 
     def merge_ids_attrs(self, base_attrs: dict):
         """Merge database attributes."""
-        attrs = self.update_ids_attrs({})
+        attrs = self.update_ids_attrs(dict(name=self.default_attrs['name']))
         if isinstance(attrs, bool):
             return attrs
         return base_attrs | attrs

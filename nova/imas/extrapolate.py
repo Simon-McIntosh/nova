@@ -321,7 +321,7 @@ if __name__ == '__main__':
 
     #pulse, run = 135011, 7  # DINA
 
-    extrapolate = Extrapolate(pulse, run, limit='ids', pf_passive=False)
+    extrapolate = Extrapolate(pulse, run, limit='ids', pf_passive=True)
 
     import matplotlib.pylab as plt
     extrapolate.mpl_axes.fig = plt.figure(figsize=(6, 9))
@@ -329,7 +329,8 @@ if __name__ == '__main__':
     #extrapolate.plot_waveform()
 
     extrapolate.itime = 36
-    extrapolate.plot_2d('psi', mask='map')
+    extrapolate.plot_2d('psi', mask='ids')
+    plt.tight_layout()
 
     from nova.imas.pf_passive import PF_Passive
     pf_passive = PF_Passive(pulse, run)
@@ -347,7 +348,7 @@ if __name__ == '__main__':
     extrapolate.axes.set_ylabel('current kA')
 
 
-    #plt.tight_layout()
+    plt.tight_layout()
     #plt.savefig('build.png')
 
     #extrapolate.plot_bar()

@@ -363,7 +363,7 @@ class PassiveShellData(Plot, FrameData):
     length: float = 0
     points: list[np.ndarray] = field(init=False, repr=False,
                                      default_factory=list)
-    loop_attrs: ClassVar[list[str]] = ['resistance']
+    loop_attrs: ClassVar[list[str]] = ['name', 'resistance']
     geometry_attrs: ClassVar[list[str]] = ['thickness']
 
     def reset(self):
@@ -426,15 +426,16 @@ class PassiveShellData(Plot, FrameData):
 class PassiveCoilData(IdsCoilData):
     """Extract coildata from passive ids."""
 
+    element_attrs: ClassVar[list[str]] = ['section']
     geometry_attrs: ClassVar[list[str]] = ['r', 'z', 'width', 'height']
-    loop_attrs: ClassVar[list[str]] = ['resistance']
+    loop_attrs: ClassVar[list[str]] = ['name', 'resistance']
 
     def insert(self, constructor, **kwargs):
         """Insert data via coil method."""
         if self.empty:
             return None
         kwargs = {'active': False, 'name': self.data['name'],
-                  'turn': 'rect'} | kwargs
+                  'section': self.data['section']} | kwargs
         return super().insert(constructor, **kwargs)
 
 
@@ -479,8 +480,7 @@ class PoloidalFieldPassive(CoilDatabase):
                     continue
                 raise NotImplementedError(f'geometory {element.section} '
                                           'not implemented')
-
-            coildata.insert(self.coil, delta=self.dshell)
+            coildata.insert(self.coil, delta=-1)
             shelldata.insert(self.shell)
 
 
@@ -670,7 +670,7 @@ class CoilGeometry:
     --------
     Dissable wall geometry via boolean input:
 
-    >>> geometry = MachineGeometry(wall=False)
+    >>> geometry = CoilGeometry(wall=False)
     >>> geometry.wall
     False
     >>> geometry.pf_active == PoloidalFieldActive.default_ids_attrs()
@@ -680,20 +680,20 @@ class CoilGeometry:
 
     Modify pf_active attrs via dict input:
 
-    >>> pf_active = MachineGeometry(pf_active=dict(run=101)).pf_active
+    >>> pf_active = CoilGeometry(pf_active=dict(run=101)).pf_active
     >>> pf_active == PoloidalFieldActive.default_ids_attrs() | dict(run=101)
     True
 
     Specify pf_active as an ids:
 
-    >>> database = Database(111001, 202, 'pf_active', machine='iter_md')
-    >>> pf_active = MachineGeometry(database.ids_data).pf_active
-    >>> pf_active['run']
-    1072318551
+    >>> database = Database(111001, 202, 'iter_md', name='pf_active')
+    >>> pf_active = CoilGeometry(database.ids_data).pf_active
+    >>> pf_active['run'] == database.ids_hash
+    True
 
     Specify pf_active as an itterable:
 
-    >>> pf_active = MachineGeometry(pf_active=(111001, 202)).pf_active
+    >>> pf_active = CoilGeometry(pf_active=(111001, 202)).pf_active
     >>> tuple(pf_active[attr] for attr in ['pulse', 'run', 'name', 'machine'])
     (111001, 202, 'pf_active', 'iter_md')
 
@@ -822,17 +822,16 @@ class Machine(CoilSet, CoilGeometry, CoilData, Database):
 
 if __name__ == '__main__':
 
-    #import doctest
-    #doctest.testmod()
+    import doctest
+    doctest.testmod()
     #dict(pulse=135011, run=7, machine='iter')
-    machine = Machine(105007, 10, pf_active=True, pf_passive=False,
+
+    machine = Machine(105028, 1, pf_active=True, pf_passive=True,
                       wall='iter_md')
+    machine.plot()
 
-    #                  pf_active=(105007, 10, 0, 'iter'),
-    #                  pf_passive=False, nplasma=150)  # pf_passive=False, nplasma=500)
-
-    machine.sloc['Ic'] = 1
-    machine.sloc['plasma', 'Ic'] = -10000
+    #machine.sloc['Ic'] = 1
+    #machine.sloc['plasma', 'Ic'] = -10000
 
     #machine.plasmagrid.plot()
 

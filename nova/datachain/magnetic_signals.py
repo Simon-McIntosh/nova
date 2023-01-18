@@ -2,6 +2,8 @@
 from dataclasses import dataclass, field
 from datetime import datetime
 from functools import cached_property
+import pathlib
+import subprocess
 
 import json
 import numpy as np
@@ -304,6 +306,14 @@ class Signal(netCDF, Waveform, SignalParameters):
         axes[1].set_xlabel('time s')
         axes[1].set_ylabel(r'$Vs$')
 
+    @staticmethod
+    def scp(hostname: str, dirname: str):
+        """Syncronize xpoz remote /tmp/magnetics with local."""
+        pathlib.Path(dirname).mkdir(parents=True, exist_ok=True)
+        hostdir = '/'.join(dirname.split('/')[:-2])
+        command = f'scp -rp {dirname} {hostname}:{hostdir}'
+        subprocess.run(command.split())
+
 
 if __name__ == '__main__':
 
@@ -319,15 +329,15 @@ if __name__ == '__main__':
     white.axes.legend()
 
     '''
-    dirname = '/tmp/magnetics/machine'
+    dirname = '/tmp/magnetics/'
     # hostname = 'sdcc-login01.iter.org'
-    hostname = 'access-xpoz.codac.iter.org'
+    hostname = None #'access-xpoz.codac.iter.org'
 
     signal = Signal(5, 2e5, offset=0.005, scale=0.1, frequency=10,
                     alpha=1, rng=2025, dirname=dirname, hostname=hostname)
     for i, index in enumerate(
             np.array_split(signal.magnetics['frame'].index, 4)):
-        signal.path = f'{dirname}_{i}'
+        signal.path = f'{dirname}machine_{i}'
         signal.build(index)
 
-    #print(signal.build_array(signal.magnetics['frame'].index[0]))
+    signal.scp('access-xpoz.codac.iter.org', dirname)

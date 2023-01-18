@@ -283,10 +283,10 @@ class Signal(netCDF, Waveform, SignalParameters):
         self.data.attrs['diagnostic'] = \
             self.magnetics['frame'].loc[name, :].to_json()
 
-    def build(self):
+    def build(self, index=slice(None)):
         """Store samples to netCDF file."""
         self.initialize_dataarray()
-        for name in tqdm(self.magnetics['frame'].index):
+        for name in tqdm(self.magnetics['frame'].loc[index].index):
             self.generate()
             self.update_dataarray(name)
             self.filename = name + '.nc'
@@ -319,35 +319,15 @@ if __name__ == '__main__':
     white.axes.legend()
 
     '''
-    dirname = '/mnt/ITER/mcintos/magnetics/data'
+    dirname = '/tmp/magnetics/machine'
     # hostname = 'sdcc-login01.iter.org'
     hostname = 'access-xpoz.codac.iter.org'
 
     signal = Signal(5, 2e5, offset=0.005, scale=0.1, frequency=10,
                     alpha=1, rng=2025, dirname=dirname, hostname=hostname)
-    signal.build()
+    for i, index in enumerate(
+            np.array_split(signal.magnetics['frame'].index, 4)):
+        signal.path = f'{dirname}_{i}'
+        signal.build(index)
+
     #print(signal.build_array(signal.magnetics['frame'].index[0]))
-
-
-'''
-
-
-@dataclass
-class Signal(Generator):
-
-    bit_depth: int = 16
-    signal_width: float = 5
-    cutoff: float | None = 1e6
-
-    def sample(self, waveform):
-        """Return sampled waveform."""
-        if cutoff is not None:
-            pass
-
-
-if __name__ == '__main__':
-
-    signal = Signal(11, 2e6, 0.3, 0.05)
-
-    print(signal().std())
-'''

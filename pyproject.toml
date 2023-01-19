@@ -55,7 +55,7 @@ dependencies = [
   "seaborn",
   "scipy",
   "scikit-learn",
-  "shapely",
+  "shapely>2.0",
   "tqdm",
   "vedo>=2022.4",
   "wheel",

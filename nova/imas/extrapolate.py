@@ -335,20 +335,6 @@ if __name__ == '__main__':
     from nova.imas.pf_passive import PF_Passive
     pf_passive = PF_Passive(pulse, run)
 
-    extrapolate.set_axes(None, '1d')
-    extrapolate.axes.plot(extrapolate.data.time,
-                          1e-3*pf_passive.data.current, color='gray',
-                          alpha=0.2)
-    extrapolate.axes.plot(extrapolate.data.time,
-                          1e-3*extrapolate.data.current[:, -1], label='VS3')
-    extrapolate.axes.plot(extrapolate.data.time,
-                          1e-3*pf_passive.data.current[:, 0], label='TRI_SUPP')
-    extrapolate.legend()
-    extrapolate.axes.set_xlabel('time s')
-    extrapolate.axes.set_ylabel('current kA')
-
-
-    plt.tight_layout()
     #plt.savefig('build.png')
 
     #extrapolate.plot_bar()

@@ -180,7 +180,6 @@ if __name__ == '__main__':
     #pf_active = PF_Active(105007, 10)
     #operate.merge_data(pf_active.data)
 
-
     operate.itime = 2
 
     #operate.sloc[-1, 'Ic'] *= 4

@@ -209,7 +209,6 @@ def test_store_load_poly():
 def test_store_load_multipoly():
     coilset = CoilSet(dcoil=-3, nplasma=8)
     coilset.coil.insert(Polygon(dict(rect=(1, 2, 0.3, 0.6), disc=[4, 3, 0.5])))
-    coilset.plot()
     with tempfile.NamedTemporaryFile() as tmp:
         coilset.filepath = tmp.name
         coilset.store()

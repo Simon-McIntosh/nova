@@ -246,7 +246,7 @@ class PolyGrid(PolyCell):
         """Return polycells trimed to bounding polygon."""
         polytree = shapely.strtree.STRtree([poly.poly for poly in polys])
         buffer = self.poly.buffer(1e-8*self.cell_delta[0])
-        index = polytree.query_items(self.poly)
+        index = polytree.query(self.poly)
         polys = np.array(polys)[index]
         polys = [PolyFrame(polytrim, poly.metadata if poly.poly.within(buffer)
                            else dict(name='polygon'))

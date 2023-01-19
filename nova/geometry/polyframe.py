@@ -5,11 +5,12 @@ import json
 import numpy as np
 import shapely.geometry
 
+from nova.frame.baseplot import Plot
 from nova.geometry.geoframe import GeoFrame
 
 
 @dataclass
-class PolyFrame(GeoFrame):
+class PolyFrame(Plot, GeoFrame):
     """Geometry object for dataframe polygons."""
 
     poly: shapely.geometry.Polygon
@@ -55,10 +56,8 @@ class PolyFrame(GeoFrame):
 
     def plot_boundary(self, axes=None, **kwargs):
         """Plot polygon boundary."""
-        from nova.plot import plt
-        if axes is None:
-            axes = plt.subplots(1, 1)[1]
-        axes.plot(*self.poly.exterior.xy, **kwargs)
+        self.get_axes(axes)
+        self.axes.plot(*self.poly.exterior.xy, **kwargs)
 
     @property
     def xlim(self) -> tuple[float]:

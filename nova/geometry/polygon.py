@@ -39,6 +39,8 @@ class Polygon(PolyFrame):
             self.metadata |= dict(name=self.name)
         self.name = self.metadata.get('name', None)
         self.poly = self.translate()
+        if hasattr(super(), '__post_init__'):
+            super().__post_init__()
 
     def correct_aspect(self):
         """Correct bounds to equal aspect geometries."""

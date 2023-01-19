@@ -238,6 +238,7 @@ class Plot:
         """Link matplotlib libaries."""
         self.mpl_axes = Axes()
         self.mpl = MatPlotLib()
+        self.plt = self.mpl['pylab']
         self.mpy = MoviePy()
         if hasattr(super(), '__post_init__'):
             super().__post_init__()

@@ -2,6 +2,7 @@
 from dataclasses import dataclass
 
 import shapely
+import shapely.affinity
 import shapely.geometry
 import shapely.ops
 import numpy as np

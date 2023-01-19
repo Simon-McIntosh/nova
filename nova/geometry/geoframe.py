@@ -7,6 +7,8 @@ class GeoFrame(ABC):
 
     def __init__(self):
         self.name = 'geoframe'
+        if hasattr(super(), '__post_init__'):
+            super().__post_init__()
 
     def __str__(self):
         """Return name."""

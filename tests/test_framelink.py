@@ -56,7 +56,7 @@ def test_drop_multipoint():
 def test_delim():
     framelink = FrameLink(Required=['x', 'z'], label='PF', delim='_')
     framelink.insert(2, range(2))
-    assert framelink.index.to_list() == ['PF_0', 'PF_1']
+    assert framelink.index.to_list() == ['PF', 'PF_1']
 
 
 def test_columns():

@@ -36,14 +36,16 @@ class Force(Plot, BiotOperate):
         """Extract boundary and solve magnetic field around coil perimeter."""
         if dforce is not None:
             self.dforce = dforce
-        self.target = BiotFrame(label='Force')
-        index = []
-        for name in self.loc['coil', 'frame'].unique():
+        self.target = BiotFrame()
+        index = self.frame.index[self.Loc['coil']]
+        for name in index:
             polyframe = self.frame.loc[name, 'poly']
             polygrid = PolyGrid(polyframe, turn='rectangle', delta=self.dforce,
                                 nturn=self.Loc[name, 'nturn'])
             self.target.insert(polygrid.frame, part=self.loc[name, 'part'],
-                               link=True)
+                               xo=self.loc[name, 'x'],
+                               zo=self.loc[name, 'z'],
+                               link=True, name=name, delim='_')
         self.data = BiotSolve(self.subframe, self.target,
                               reduce=[True, True], turns=[True, True],
                               attrs=['Br', 'Bz', 'Brdz', 'Bzdr', 'Psi'],

@@ -48,8 +48,8 @@ if __name__ == '__main__':
     reload = True
     if reload:
         coilset = CoilSet(dcoil=-5, nplasma=150)
-        coilset.coil.insert(1, 0.5, 0.95, 0.95, section='hex', turn='r',
-                            nturn=-500.8, delta=-1, part='pf')
+        coilset.coil.insert(1, 0.5, 0.95, 0.95, section='r', turn='r',
+                            nturn=-5.8, delta=-1, part='pf')
         coilset.coil.insert(1, -0.5, 0.95, 0.95, section='hex', turn='c',
                             tile=True, delta=-6, name='bubble')
         coilset.coil.insert(2, 0, 0.95, 0.1, section='sk', nturn=-1.8)

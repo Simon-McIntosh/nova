@@ -86,7 +86,8 @@ class DataFrame(FrameAttrs):
                 offset = offset.replace('_', '')
                 offset = int(offset)
             offset += 1
-        except (TypeError, StopIteration):  # unit index, label not present
+        except (TypeError, ValueError, StopIteration):
+            # unit index, label not present
             offset = 0
         metatag['offset'] = np.max([offset, metatag['offset']])
 
@@ -118,7 +119,7 @@ class DataFrame(FrameAttrs):
         label_delim = metatag['label']+metatag['delim']
         index = [f'{label_delim}{i+metatag["offset"]:d}'
                  for i in range(index_length)]
-        if 'frame' in self.columns and metatag['label'] not in self.index:
+        if metatag['delim'] and metatag['label'] not in self.index:
             index[0] = metatag['label']
         return self._check_index(index, index_length)
 

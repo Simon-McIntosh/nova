@@ -123,14 +123,13 @@ class Field(Plot, BiotOperate):
         if dfield is not None:
             self.dfield = dfield
         self.target = BiotFrame(label='Field')
-        index = []
-        for name in self.loc['coil', 'frame'].unique():
+        index = self.frame.index[self.Loc['coil']]
+        for name in index:
             polyframe = self.frame.loc[name, 'poly']
             if polyframe.poly.boundary.is_ring:
                 sample = Sample(polyframe.boundary, delta=self.dfield)
                 self.target.insert(sample['radius'], sample['height'],
                                    link=True)
-                index.append(name)
         self.data = BiotSolve(self.subframe, self.target,
                               reduce=[True, False], turns=[True, False],
                               attrs=['Br', 'Bz'], name=self.name).data

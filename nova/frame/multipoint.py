@@ -58,7 +58,19 @@ class MultiPoint(metamethod.MultiPoint):
                 factor = self.frame.factor
                 factor = factor[istrue | isnumeric][1:]
                 self.link(index, factor)
+        self.sort_link()
         self.build()
+
+    def sort_link(self):
+        """Update frame.links to ensure monotonic increasing."""
+        for index, link in enumerate(self.frame.link):
+            if link:
+                name = self.frame.index[index]
+                link_index = self.frame.index.get_loc(link)
+                if link_index > index:  # reverse
+                    self.frame.loc[link, 'link'] = name
+                    self.frame.loc[self.frame.link == link, 'link'] = name
+                    self.frame.loc[name, 'link'] = ''
 
     def build(self):
         """Update multi-point parameters."""

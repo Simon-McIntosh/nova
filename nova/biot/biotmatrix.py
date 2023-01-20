@@ -90,10 +90,10 @@ class BiotMatrix(BiotSet):
         # link target
         target_link = self.target.biotreduce.link
         if self.target.reduce and len(target_link) > 0:
-            for link in target_link:  # sum linked columns
+            for link in target_link:  # sum linked rows
                 ref, factor = target_link[link]
-                matrix[ref, :] += factor * matrix[link, :]
-                plasma[ref, :] += factor * plasma[link, :]
+                matrix[ref, :] += factor * matrix[link]
+                plasma[ref, :] += factor * plasma[link]
             matrix = np.delete(matrix, list(target_link), 0)
             plasma = np.delete(plasma, list(target_link), 0)
         return matrix, plasma

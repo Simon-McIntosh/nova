@@ -1,7 +1,6 @@
 """Manage subframe access."""
 from dataclasses import dataclass, field
 from functools import cached_property
-from typing import Optional
 
 import numpy as np
 import xxhash
@@ -39,9 +38,8 @@ class LocIndexer:
         if self.frame.hascol('subspace', col) and not self.subspace:
             raise SpaceKeyError(self.name, col)
         if self.frame.hascol('array', col):
-            if isinstance(index, slice):
-                if index == slice(None):
-                    return setattr(self.frame, col, value)
+            if isinstance(index, slice) and index == slice(None):
+                return setattr(self.frame, col, value)
             getattr(self.frame, col)[index] = value
             return None
         self.frame.loc[index, col] = value
@@ -51,9 +49,8 @@ class LocIndexer:
         index = self.frame.get_index(key)
         col = self.frame.get_col(key)
         if self.frame.hascol('array', col):
-            if isinstance(index, slice):
-                if index == slice(None):
-                    return getattr(self.frame, col)
+            if isinstance(index, slice) and index == slice(None):
+                return getattr(self.frame, col)
             self.frame.get_index(key)
             return getattr(self.frame, col)[index]
         self.frame.update_frame()

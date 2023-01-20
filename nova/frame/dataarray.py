@@ -124,7 +124,8 @@ class DataArray(ArrayIndexer, DataFrame):
             elif len(value) != len(self):
                 raise IndexError(f'input length {len(value)} != {len(self)}') \
                     from keyerror
-            self.attrs['metaframe'].data[col] = value
+            self.attrs['metaframe'].data[col] = np.zeros_like(value)
+            self._set_array(col, value)
 
     def _get_frame(self, col):
         """Return col from frame."""
@@ -155,6 +156,5 @@ if __name__ == '__main__':
 
     dataarray = DataArray({'x': range(7)},
                           additional=['Ic', 'free'], array=['x'], label='Coil')
-
 
     print(dataarray.free)

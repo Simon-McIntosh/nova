@@ -45,10 +45,10 @@ class Force(Plot, BiotOperate):
             self.target.insert(polygrid.frame, part=self.loc[name, 'part'],
                                xo=self.loc[name, 'x'],
                                zo=self.loc[name, 'z'],
-                               link=True, name=name, delim='_')
+                               link=True, label=name, delim='_')
         self.data = BiotSolve(self.subframe, self.target,
                               reduce=[True, True], turns=[True, True],
-                              attrs=['Br', 'Bz', 'Brdz', 'Bzdr', 'Psi'],
+                              attrs=['Br', 'Bz', 'Brdz'],
                               name=self.name).data
         # insert grid data
         self.data.coords['index'] = index
@@ -56,13 +56,8 @@ class Force(Plot, BiotOperate):
         self.data.coords['z'] = self.target.z
         super().post_solve()
 
-    @property
-    def polyplot(self):
-        """Return polyplot instance."""
-        target = self.target.copy()
-        return PolyPlot(DataFrame(target))
-
-    def plot(self, axes=None):
-        """Plot force polycells."""
+    def plot(self, axes=None, **kwargs):
+        """Plot force intergration points."""
         self.get_axes(axes, '2d')
-        self.polyplot.plot()
+        kwargs = dict(marker='o', linestyle='', color='C2', ms=4) | kwargs
+        self.axes.plot(self.data.coords['x'], self.data.coords['z'], **kwargs)

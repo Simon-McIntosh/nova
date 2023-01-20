@@ -117,6 +117,18 @@ def test_link_avalible():
     framelink.insert(1)
 
 
+def test_link_sort_normal():
+    framelink = FrameLink(Required=['x'], Available=['link'], label='Coil')
+    framelink.insert(range(4), link=['Coil0', '', 'Coil0', ''])
+    assert framelink.link.to_list() == ['Coil0', '', 'Coil0', '']
+
+
+def test_link_sort_reverse():
+    framelink = FrameLink(Required=['x'], Available=['link'], label='Coil')
+    framelink.insert(range(4), link=['Coil3', '', 'Coil3', ''])
+    assert framelink.link.to_list() == ['', '', 'Coil0', 'Coil0']
+
+
 if __name__ == '__main__':
 
     pytest.main([__file__])

@@ -4,7 +4,6 @@ from dataclasses import dataclass, field
 import numpy as np
 
 from nova.frame.dataframe import DataFrame
-from nova.frame.error import ColumnError
 import nova.frame.metamethod as metamethod
 
 
@@ -86,7 +85,7 @@ class Select(metamethod.Select):
             with self.frame.setlock(True, ['subspace', 'array']):
                 try:
                     self.frame[label] = value
-                except ColumnError:
+                except IndexError:
                     pass
 
     def any_label(self, columns, default):

@@ -153,6 +153,6 @@ class Field(Plot, BiotOperate):
 
     def plot(self, axes=None, **kwargs):
         """Plot points."""
-        self.axes = axes
+        self.get_axes(axes, '2d')
         kwargs = dict(marker='o', linestyle='', color='C1', ms=4) | kwargs
         self.axes.plot(self.data.coords['x'], self.data.coords['z'], **kwargs)

@@ -138,7 +138,6 @@ class BiotSolve(BiotSet):
             self.target, turns=self.turns, reduce=self.reduce)
         for attr in self.attrs:
             matrix, plasma = generator.compute(attr)
-            print(source_index, matrix.shape, self.data[attr].shape)
             self.data[attr].loc[:, source_index] += matrix
             self.data[f'_{attr}'].loc[:, plasma_index] += plasma
 

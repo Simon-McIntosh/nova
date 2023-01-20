@@ -31,6 +31,9 @@ class BiotOp:
     def __post_init__(self, dataset):
         """Extract matrix, plasma_matrix and plasma_index from dataset."""
         data_vars = list(dataset.data_vars)
+        self.force = 'subref' in dataset
+        if self.force:
+            self.subref = dataset.subref.data
         self.matrix = dataset[data_vars[0]].data
         self.plasma_matrix = dataset[data_vars[1]].data
         self.plasma_index = dataset.attrs['plasma_index']
@@ -47,7 +50,9 @@ class BiotOp:
 
     def evaluate(self):
         """Return interaction."""
-        return self.matrix @ self.saloc['Ic']
+        if not self.force:
+            return self.matrix @ self.saloc['Ic']
+        return self.saloc['Ic'][self.subref] * (self.matrix @ self.saloc['Ic'])
 
     @property
     def plasma_nturn(self):

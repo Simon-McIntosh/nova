@@ -125,8 +125,10 @@ def test_link_sort_normal():
 
 def test_link_sort_reverse():
     framelink = FrameLink(Required=['x'], Available=['link'], label='Coil')
-    framelink.insert(range(4), link=['Coil3', '', 'Coil3', ''])
-    assert framelink.link.to_list() == ['', '', 'Coil0', 'Coil0']
+    framelink.insert(range(6), link=['Coil3', '', 'Coil3', '', '', 'Coil4'])
+    assert framelink.link.to_list() == ['', '', 'Coil0', 'Coil0', '', 'Coil4']
+    assert framelink.ref.to_list() == [0, 1, 0, 0, 4, 4]
+    assert framelink.subref.to_list() == [0, 1, 0, 0, 2, 2]
 
 
 if __name__ == '__main__':

@@ -45,14 +45,19 @@ class BiotMatrix(BiotSet):
         raise NotImplementedError
 
     @property
-    def Bzdr(self):
-        """Return first moment of vertical field."""
-        return self.target.delta_r[:, np.newaxis] * self.Bz
+    def Fr(self):
+        """Return radial force array."""
+        return self.Bz
 
     @property
-    def Brdz(self):
-        """Return first moment of radial field."""
-        return self.target.delta_z[:, np.newaxis] * self.Br
+    def Fz(self):
+        """Return vertical force array."""
+        return -self.Br
+
+    @property
+    def Fzdz(self):
+        """Return first moment of vertical (crushing) force."""
+        return self.target.delta_z[:, np.newaxis] * self.Fz
 
     def compute(self, attr: str):
         """
@@ -66,8 +71,6 @@ class BiotMatrix(BiotSet):
         matrix = getattr(self, attr)
         if self.target.turns:
             matrix *= self.target('nturn')
-        #if isinstance(matrix, da.Array):
-        #    matrix = matrix.compute()
         plasma = matrix[:, self.source.plasma]
         if self.source.turns:
             matrix *= self.source('nturn')

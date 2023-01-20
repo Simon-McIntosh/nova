@@ -48,10 +48,10 @@ class Force(Plot, BiotOperate):
                                link=True, label=name, delim='_')
         self.data = BiotSolve(self.subframe, self.target,
                               reduce=[True, True], turns=[True, True],
-                              attrs=['Br', 'Bz', 'Brdz'],
+                              attrs=['Fr', 'Fz', 'Fzdz'],
                               name=self.name).data
         # insert grid data
-        self.data.coords['index'] = index
+        self.data.coords['subref'] = 'target', self.Loc['coil', 'subref']
         self.data.coords['x'] = self.target.x
         self.data.coords['z'] = self.target.z
         super().post_solve()

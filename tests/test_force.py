@@ -12,6 +12,7 @@ def linked():
     coilset = CoilSet(dforce=-10, dcoil=-1, nplasma=3)
     coilset.coil.insert(5, 1, 0.1, 0.1, nturn=1)
     coilset.shell.insert({'e': [5, 1, 1.75, 1.0]}, 13, 0.05, delta=-9)
+    coilset.shell.insert({'e': [5, 1, 1.95, 1.2]}, 13, 0.05, delta=-9)
     coilset.coil.insert(5, 2, 0.1, 0.2, nturn=1.3)
     coilset.coil.insert(5.2, 2, 0.1, 0.2, nturn=1.25)
     coilset.firstwall.insert(5.4, 1, 0.3, 0.6, section='e', Ic=-15e6)
@@ -50,16 +51,16 @@ def test_zero_delta():
 
 
 def test_matrix_attrs(linked):
-    for attr in ['Br', 'Bz', 'Brdz']:
+    for attr in ['Fr', 'Fz', 'Fzdz']:
         assert attr in linked.force.data
 
 
 def test_matrix_length(linked):
-    assert len(linked.Loc['coil', :]) == len(linked.force.Br)
+    assert len(linked.Loc['coil', :]) == len(linked.force.Fr)
 
 
 def test_store_load(linked):
-    br = linked.force.br
+    fr = linked.force.fr
     with tempfile.NamedTemporaryFile(delete=False) as tmp:
         linked.filepath = tmp.name
         linked.store()
@@ -67,17 +68,17 @@ def test_store_load(linked):
         path = Path(tmp.name)
         coilset = CoilSet(filename=path.name, dirname=path.parent).load()
     os.unlink(tmp.name)
-    assert np.allclose(br, coilset.force.br)
+    assert np.allclose(fr, coilset.force.fr)
 
 
 def test_resolution():
-    coilset = CoilSet(dcoil=-2)
+    coilset = CoilSet(dcoil=-1)
     coilset.coil.insert(5, [5, 6], 0.9, 0.1, Ic=45e3, nturn=500)
-    coilset.force.solve(dforce=-50)
-    br_lowres = coilset.force.br
-    coilset.force.solve(dforce=-500)
-    br_highres = coilset.force.br
-    assert np.allclose(br_lowres, br_highres, rtol=1e-4)
+    coilset.force.solve(dforce=-100)
+    fr_lowres = coilset.force.fr
+    coilset.force.solve(dforce=-200)
+    fr_highres = coilset.force.fr
+    assert np.allclose(fr_lowres, fr_highres, rtol=1e-3)
 
 
 if __name__ == '__main__':

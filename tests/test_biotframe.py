@@ -82,6 +82,13 @@ def test_matrix_shape():
     assert biotframe('x').shape == (6, 2)
 
 
+def test_biotreduce_indices_link():
+    biotframe = BiotFrame(dict(x=range(8), z=1), label='Coil',
+                          link=['', 'Coil3', '', '', '', 'Coil4', '', ''])
+    assert biotframe.biotreduce.indices == [0, 1, 2, 3, 4, 6, 7]
+    assert biotframe.biotreduce.link == {3: [1, 1.0]}
+
+
 if __name__ == '__main__':
 
     pytest.main([__file__])

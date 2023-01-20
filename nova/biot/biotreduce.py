@@ -36,14 +36,6 @@ class BiotReduce(metamethod.BiotReduce):
         factor = np.array(self.frame.factor)
         if np.all(ref[:-1] <= ref[1:]) and np.all(factor == 1):  # monotonic
             return np.unique(ref)
-        print()
-        print(ref)
-        for unique_ref in np.unique(ref):  # allow reverse links
-            index = (ref == unique_ref)
-            if sum(index) > 1:
-                ref[index] = np.argmax(ref == unique_ref)
-        print(ref)
-        print()
         indices = [ref[0]]  # sead list
         for i, index in enumerate(ref):
             if factor[i] == 1:

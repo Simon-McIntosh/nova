@@ -118,14 +118,6 @@ class Field(Plot, BiotOperate):
         """Return field probe number."""
         return len(self.data.get('x', []))
 
-    def extract_polyframe(self, coil: str):
-        """Extract polygon from frame."""
-        match self.frame.loc[coil, 'poly']:
-            case str():
-                return PolyFrame.loads(self.frame.loc[coil, 'poly'])
-            case PolyFrame():
-                return self.frame.loc[coil, 'poly']
-
     def solve(self, dfield=None):
         """Extract boundary and solve magnetic field around coil perimeter."""
         if dfield is not None:
@@ -133,7 +125,7 @@ class Field(Plot, BiotOperate):
         self.target = BiotFrame(label='Field')
         index = []
         for name in self.loc['coil', 'frame'].unique():
-            polyframe = self.extract_polyframe(name)
+            polyframe = self.frame.loc[name, 'poly']
             if polyframe.poly.boundary.is_ring:
                 sample = Sample(polyframe.boundary, delta=self.dfield)
                 self.target.insert(sample['radius'], sample['height'],

@@ -105,7 +105,7 @@ class Polygon(PolyFrame):
         if isinstance(self.poly, (shapely.geometry.Polygon,
                                   shapely.geometry.MultiPolygon)):
             return self.poly
-        if isinstance(self.poly, PolyFrame):
+        if hasattr(self.poly, 'poly'):
             return self.poly.poly
         if isinstance(self.poly, dict):
             names = list(self.poly)

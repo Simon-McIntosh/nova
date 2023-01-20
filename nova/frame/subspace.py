@@ -82,12 +82,12 @@ class SubSpace(SubSpaceIndexer, FrameLink):
         if frame.columns.empty:
             return frame.metaframe.subspace
         subspace = frame.metaframe.subspace
-        if np.array([attr in subspace for attr in frame.columns]).any():
+        if np.array([attr in subspace for attr in frame]).any():
             with frame.setlock(None, 'subspace'):  # update metaframe
                 frame.metaframe.metadata = \
                     {'additional': frame.metaframe.subspace}
             frame.update_columns()
-            return frame.metaframe.subspace
+            return [attr for attr in subspace if attr in frame]
         return []
 
     @staticmethod

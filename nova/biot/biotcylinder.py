@@ -162,22 +162,22 @@ class BiotCylinder(CylinderConstants, BiotMatrix):
 
     @cached_property
     def Aphi(self):
-        """Return Aphi dask array."""
+        """Return Aphi array."""
         return self._intergrate(self.Aphi_hat())
 
     @property
     def Psi(self):
-        """Return Psi dask array."""
+        """Return Psi array."""
         return 2 * np.pi * self.mu_0 * self.target('x') * self.Aphi
 
-    @property
+    @cached_property
     def Br(self):
-        """Return radial field dask array."""
+        """Return radial field array."""
         return self.mu_0 * self._intergrate(self.Br_hat())
 
-    @property
+    @cached_property
     def Bz(self):
-        """Return vertical field dask array."""
+        """Return vertical field array."""
         return self.mu_0 * self._intergrate(self.Bz_hat())
 
 

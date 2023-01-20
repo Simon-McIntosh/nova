@@ -1,6 +1,6 @@
 Equilibrium tools for reconstruction, scenario design and machine operation
 
-Requires python3.9
+Requires python3.10
 
 Install
 

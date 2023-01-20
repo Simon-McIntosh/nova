@@ -1,7 +1,6 @@
 """Biot specific Frame class."""
 import numpy as np
 
-from nova.frame.framespace import FrameSpace
 from nova.frame.framelink import FrameLink
 from nova.frame.metamethod import BiotSection, BiotShape, BiotReduce, PolyGeo
 
@@ -24,9 +23,10 @@ class BiotFrame(FrameLink):
     def update_metadata(self, data, columns, attrs, metadata):
         """Extend FrameAttrs update_metadata."""
         metadata = dict(required=['x', 'z'],
-                        additional=['plasma', 'nturn', 'link', 'segment'],
+                        additional=['xo', 'zo', 'plasma', 'nturn',
+                                    'link', 'segment', 'part'],
                         available=['section', 'poly'],
-                        array=['x', 'z', 'dx', 'dz',
+                        array=['x', 'z', 'xo', 'zo', 'dx', 'dz',
                                'area', 'nturn']) | metadata
         super().update_metadata(data, columns, attrs, metadata)
 
@@ -54,6 +54,16 @@ class BiotFrame(FrameLink):
     def set_source(self, number):
         """Set source number."""
         return self.biotshape.set_source(number)
+
+    @property
+    def delta_r(self):
+        """Return normalized r-coordinate distance from coil centroid."""
+        return (self.x - self.xo) / self.dx
+
+    @property
+    def delta_z(self):
+        """Return normalized z-coordinate distance from coil centroid."""
+        return (self.z - self.zo) / self.dz
 
 
 class BiotTarget(BiotFrame):

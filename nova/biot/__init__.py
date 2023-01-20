@@ -7,6 +7,7 @@ __all__ = [
            'BiotPlasmaGrid',
            'BiotPoint',
            'Field',
+           'Force',
            'Plasma',
            ]
 
@@ -22,13 +23,15 @@ if imp.defer:
     BiotPlasmaGrid = imp.load('.biotplasmagrid', 'BiotPlasmaGrid')
     BiotPoint = imp.load('.biotpoint', 'BiotPoint')
     Field = imp.load('.field', 'Field')
+    Force = imp.load('.force', 'Force')
     Plasma = imp.load('.plasma', 'Plasma')
 else:
-    from nova.biot.biotgrid import BiotGrid  # NOQA
-    from nova.biot.biotinductance import BiotInductance  # NOQA
-    from nova.biot.biotloop import BiotLoop  # NOQA
-    from nova.biot.biotfirstwall import BiotFirstWall  # NOQA
-    from nova.biot.biotplasmagrid import BiotPlasmaGrid  # NOQA
-    from nova.biot.biotpoint import BiotPoint  # NOQA
+    from nova.biot.biotgrid import BiotGrid
+    from nova.biot.biotinductance import BiotInductance
+    from nova.biot.biotloop import BiotLoop
+    from nova.biot.biotfirstwall import BiotFirstWall
+    from nova.biot.biotplasmagrid import BiotPlasmaGrid
+    from nova.biot.biotpoint import BiotPoint
     from nova.biot.field import Field
-    from nova.biot.plasma import Plasma  # NOQA
+    from nova.biot.force import Force
+    from nova.biot.plasma import Plasma

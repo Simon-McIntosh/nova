@@ -2,7 +2,7 @@
 from dataclasses import dataclass, field
 
 from nova.biot import (BiotGrid, BiotInductance, BiotLoop, BiotFirstWall,
-                       BiotPlasmaGrid, BiotPoint, Field, Plasma)
+                       BiotPlasmaGrid, BiotPoint, Field, Force, Plasma)
 from nova.biot.biotdata import BiotData
 from nova.database.netcdf import netCDF
 from nova.frame.frameset import FrameSet, frame_factory
@@ -14,6 +14,7 @@ class Biot(FrameSet):
 
     field_attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])
     dfield: float = field(default=0, repr=False)
+    dforce: float = field(default=-10, repr=False)
 
     @property
     def biot_kwargs(self):
@@ -74,6 +75,11 @@ class Biot(FrameSet):
     def field(self):
         """Return boundary field instance."""
         return dict(dfield=self.dfield)
+
+    @frame_factory(Force)
+    def force(self):
+        """Return force field instance."""
+        return dict(dforce=self.dforce)
 
     @frame_factory(BiotInductance)
     def inductance(self):

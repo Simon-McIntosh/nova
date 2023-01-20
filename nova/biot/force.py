@@ -1,15 +1,13 @@
 """Solve intergral coil forces."""
 from dataclasses import dataclass, field
 
-import numpy as np
-from scipy.interpolate import interp1d
-
 from nova.biot.biotframe import BiotFrame
 from nova.biot.biotoperate import BiotOperate
 from nova.biot.biotsolve import BiotSolve
 from nova.frame.baseplot import Plot
-from nova.geometry.polyframe import PolyFrame
-
+from nova.frame.dataframe import DataFrame
+from nova.frame.polygrid import PolyGrid
+from nova.frame.polyplot import PolyPlot
 
 
 @dataclass
@@ -30,6 +28,10 @@ class Force(Plot, BiotOperate):
     dforce: float = -10
     target: BiotFrame = field(init=False, repr=False)
 
+    def __len__(self):
+        """Return force patch number."""
+        return len(self.data.get('x', []))
+
     def solve(self, dforce=None):
         """Extract boundary and solve magnetic field around coil perimeter."""
         if dforce is not None:
@@ -37,18 +39,28 @@ class Force(Plot, BiotOperate):
         self.target = BiotFrame(label='Force')
         index = []
         for name in self.loc['coil', 'frame'].unique():
-
-            polyframe = self.extract_polyframe(name)
-            if polyframe.poly.boundary.is_ring:
-                sample = Sample(polyframe.boundary, delta=self.dfield)
-                self.target.insert(sample['radius'], sample['height'],
-                                   link=True)
-                index.append(name)
+            polyframe = self.frame.loc[name, 'poly']
+            polygrid = PolyGrid(polyframe, turn='rectangle', delta=self.dforce,
+                                nturn=self.Loc[name, 'nturn'])
+            self.target.insert(polygrid.frame, part=self.loc[name, 'part'],
+                               link=True)
         self.data = BiotSolve(self.subframe, self.target,
-                              reduce=[True, False], turns=[True, False],
-                              attrs=['Br', 'Bz'], name=self.name).data
+                              reduce=[True, True], turns=[True, True],
+                              attrs=['Br', 'Bz', 'Brdz', 'Bzdr', 'Psi'],
+                              name=self.name).data
         # insert grid data
         self.data.coords['index'] = index
         self.data.coords['x'] = self.target.x
         self.data.coords['z'] = self.target.z
         super().post_solve()
+
+    @property
+    def polyplot(self):
+        """Return polyplot instance."""
+        target = self.target.copy()
+        return PolyPlot(DataFrame(target))
+
+    def plot(self, axes=None):
+        """Plot force polycells."""
+        self.get_axes(axes, '2d')
+        self.polyplot.plot()

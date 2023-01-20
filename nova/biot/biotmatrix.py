@@ -34,6 +34,26 @@ class BiotMatrix(BiotSet):
             return self.target
         return self.source
 
+    @property
+    def Br(self):
+        """Return radial field array."""
+        raise NotImplementedError
+
+    @property
+    def Bz(self):
+        """Return vertical field array."""
+        raise NotImplementedError
+
+    @property
+    def Bzdr(self):
+        """Return first moment of vertical field."""
+        return self.target.delta_r[:, np.newaxis] * self.Bz
+
+    @property
+    def Brdz(self):
+        """Return first moment of radial field."""
+        return self.target.delta_z[:, np.newaxis] * self.Br
+
     def compute(self, attr: str):
         """
         Return full and unit plasma interaction matrices.

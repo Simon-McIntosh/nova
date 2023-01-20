@@ -3,8 +3,9 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-import nova.frame.metamethod as metamethod
 from nova.frame.dataframe import DataFrame
+from nova.frame.error import ColumnError
+import nova.frame.metamethod as metamethod
 
 
 @dataclass
@@ -62,7 +63,7 @@ class Select(metamethod.Select):
         self.add_label('active', 'active')
         self.add_label('passive', None, 'active')
         self.add_label('plasma', 'plasma')
-        self.add_label('coil', None, ['plasma', 'passive'])
+        self.add_label('coil', None, ['ferritic', 'passive', 'plasma'])
         self.add_label('fix', 'fix')
         self.add_label('free', None, 'fix')
         self.add_label('ferritic', 'ferritic')
@@ -83,7 +84,10 @@ class Select(metamethod.Select):
             exclude = self.any_label(self.labels[label]['exclude'], False)
             value = np.all([include, ~exclude], axis=0)
             with self.frame.setlock(True, ['subspace', 'array']):
-                self.frame[label] = value
+                try:
+                    self.frame[label] = value
+                except ColumnError:
+                    pass
 
     def any_label(self, columns, default):
         """Return boolean index evaluated as columns.any()."""

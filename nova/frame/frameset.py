@@ -60,10 +60,10 @@ class FrameSet(netCDF, FrameSetLoc):
         self.frame = FrameSpace(
             base=self.base, required=self.required, additional=self.additional,
             available=self.available, subspace=[],
-            exclude=['frame', 'Ic', 'It',
-                     'active', 'passive', 'plasma', 'coil',
-                     'fix', 'free', 'ferritic'], array=[],
+            exclude=['frame', 'Ic', 'It', 'fix', 'free'],
+            array=['coil'],
             version=['index'])
+        self.frame.frame_attr(Select)
         self.subframe = FrameSpace(
             base=self.base, required=self.required, additional=self.additional,
             available=self.available, subspace=self.subspace,

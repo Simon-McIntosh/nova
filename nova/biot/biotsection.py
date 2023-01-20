@@ -29,6 +29,7 @@ class BiotSection(metamethod.BiotSection):
             'rectangle': 'square',
             'ellipse': 'disc',
             'polygon': 'square',
+            'polyloop': 'square',
             'shell': 'square',
             'hexagon': 'disc'})
 

@@ -1,8 +1,8 @@
 """Baseclass for dataframe geometroy objects."""
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 
 
-class GeoFrame(ABC):
+class GeoFrame:
     """Geometry object abstract base class."""
 
     def __init__(self):

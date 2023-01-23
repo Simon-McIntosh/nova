@@ -62,7 +62,7 @@ class Force(Plot, BiotOperate):
             self.data.coords['z'] = 'target', self.target.z
         super().post_solve()
 
-    def plot(self, axes=None, scale=0.5, **kwargs):
+    def plot(self, scale=0.5, axes=None, **kwargs):
         """Plot force vectors and intergration points."""
         self.get_axes(axes, '2d')
         kwargs = dict(marker='o', linestyle='', color='C2', ms=4) | kwargs
@@ -75,8 +75,9 @@ class Force(Plot, BiotOperate):
             tail = np.c_[self.data.xo, self.data.zo]
         else:
             tail = np.c_[self.data.x, self.data.z]
-        arrows = [patch((x, z), (x+dx, z+dz), mutation_scale=0.1)
+        arrows = [patch((x, z), (x+dx, z+dz), mutation_scale=0.2*scale)
                   for x, z, dx, dz in
-                  zip(tail[:, 0], tail[:, 1], length[:, 0], length[:, 1])]
+                  zip(tail[:, 0], tail[:, 1], length[:, 0], length[:, 1])
+                  if np.isfinite((dx, dz)).all()]
         collections = self.mpl.collections.PatchCollection(arrows)
         self.axes.add_collection(collections)

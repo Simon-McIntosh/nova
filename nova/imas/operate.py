@@ -172,18 +172,14 @@ class Operate(Machine, Current, Profile, Grid, Equilibrium):
 
 if __name__ == '__main__':
 
-    from nova.imas.pf_active import PF_Active
-
     operate = Operate(130506, 403, 'iter', 0, pf_active='iter_md',
-                      ngrid=0, nplasma=10)
+                      ngrid=500, nplasma=300)
 
-    #pf_active = PF_Active(105007, 10)
-    #operate.merge_data(pf_active.data)
-
-    operate.itime = 2
-
-    #operate.sloc[-1, 'Ic'] *= 4
+    operate.itime = 15
 
     operate.plot()
     operate.grid.plot()
     operate.plasma.wall.plot()
+
+    operate.force.solve(-100)
+    operate.force.plot(5)

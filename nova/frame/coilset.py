@@ -19,7 +19,6 @@ class CoilSet(Biot, Control, Frame):
 
     """
 
-    filename: str = 'coilset'
     dirname: str = '.nova'
 
     @property

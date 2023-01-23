@@ -114,7 +114,7 @@ def test_load_equilibrium_attrs():
     assert equilibrium.name == 'equilibrium'
     assert equilibrium.user == 'public'
     assert equilibrium.machine == 'iter'
-    assert equilibrium.filename == 'iter_130506_403'
+    assert equilibrium.filename == 'equilibrium_iter_130506_403'
     assert equilibrium.group == 'equilibrium'
 
 

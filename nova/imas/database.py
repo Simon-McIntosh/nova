@@ -474,11 +474,13 @@ class IdsData(Datafile, Database):
     def __post_init__(self):
         """Update filename and group."""
         self.rename()
-        if self.filename is None:
-            self.filename = f'{self.machine}_{self.pulse}_{self.run}'
+        if self.filename == '':
+            self.filename = self.__class__.__name__.lower()
+            self.filename += f'_{self.machine}_{self.pulse}_{self.run}'
             if self.occurrence > 0:
                 self.filename += f'_{self.occurrence}'
-            self.group = self.name
+            if self.name is not None:
+                self.group = self.name
         super().__post_init__()
 
     def merge_data(self, data):

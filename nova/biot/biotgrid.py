@@ -186,6 +186,8 @@ class BiotGrid(BiotBaseGrid):
     def solve(self, ngrid: int, limit: float | np.ndarray = 0,
               index: str | slice | np.ndarray = slice(None)):
         """Solve Biot interaction across grid."""
+        if ngrid == 0:
+            return
         if isinstance(limit, (int, float)):
             limit = Expand(self.subframe, index)(limit)
         grid = Grid(ngrid, limit)
@@ -222,6 +224,8 @@ class BiotGrid(BiotBaseGrid):
 
     def plot(self, attr='psi', axes=None, nulls=True, clabel=None, **kwargs):
         """Plot contours."""
+        if len(self.data) == 0:
+            return
         self.axes = axes
         if nulls:
             super().plot(axes=axes)

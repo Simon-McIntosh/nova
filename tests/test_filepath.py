@@ -44,7 +44,7 @@ def test_filepath():
 
 
 def test_filepath_error():
-    filepath = FilePath(filename=None, dirname='/tmp')
+    filepath = FilePath(filename='', dirname='/tmp')
     with pytest.raises(FileNotFoundError):
         filepath.filepath
 

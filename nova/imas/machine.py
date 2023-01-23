@@ -737,8 +737,6 @@ class CoilGeometry:
 class Machine(CoilSet, CoilGeometry, CoilData, Database):
     """Manage ITER machine geometry."""
 
-    filename: str = 'iter'
-
     @property
     def metadata(self):
         """Manage machine metadata.

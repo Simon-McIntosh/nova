@@ -261,6 +261,7 @@ class Equilibrium(Profile2D, Profile1D, Parameter0D, Boundary, Grid):
 
     def build(self):
         """Build netCDF database using data extracted from imasdb."""
+        print('\n\neq')
         with self.build_scenario():
             self.data['time'] = self.ids_data.time
             self.data['itime'] = 'time', range(len(self.data['time']))
@@ -283,7 +284,7 @@ if __name__ == '__main__':
     #import doctest
     #doctest.testmod()
 
-    equilibrium = Equilibrium(135013, 2, 0)
+    equilibrium = Equilibrium(135013, 2)
     equilibrium.itime = 600
     equilibrium.plot_2d('psi', mask=0)
     equilibrium.plot_boundary()

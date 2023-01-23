@@ -133,8 +133,7 @@ class Operate(Machine, Current, Profile, Grid, Equilibrium):
     def solve_biot(self):
         """Extend machine solve biot to include extrapolation grid."""
         super().solve_biot()
-        if self.sloc['plasma'].sum() > 0:
-            self.grid.solve(**self.grid_attrs)
+        self.grid.solve(**self.grid_attrs)
 
     def update(self):
         """Extend itime update."""
@@ -176,7 +175,7 @@ if __name__ == '__main__':
     from nova.imas.pf_active import PF_Active
 
     operate = Operate(130506, 403, 'iter', 0, pf_active='iter_md',
-                      ngrid=10, nplasma=10)
+                      ngrid=0, nplasma=10)
 
     #pf_active = PF_Active(105007, 10)
     #operate.merge_data(pf_active.data)

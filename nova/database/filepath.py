@@ -25,7 +25,7 @@ def stardot(func):
 class FilePath:
     """Manage to access to data via store and load methods."""
 
-    filename: str | None = None
+    filename: str = ''
     dirname: Path | str = ''
     basename: Path | str = 'user_data'
     hostname: str | None = None
@@ -148,8 +148,8 @@ class FilePath:
     @property
     def filepath(self):
         """Return full filepath."""
-        if self.filename is None:
-            raise FileNotFoundError('filename is None')
+        if self.filename == '':
+            raise FileNotFoundError('filename not set')
         self.makepath()
         return self.path / self.filename
 

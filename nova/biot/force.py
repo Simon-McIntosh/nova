@@ -1,13 +1,13 @@
 """Solve intergral coil forces."""
 from dataclasses import dataclass, field
 
+import numpy as np
+
 from nova.biot.biotframe import BiotFrame
 from nova.biot.biotoperate import BiotOperate
 from nova.biot.biotsolve import BiotSolve
 from nova.frame.baseplot import Plot
-from nova.frame.dataframe import DataFrame
 from nova.frame.polygrid import PolyGrid
-from nova.frame.polyplot import PolyPlot
 
 
 @dataclass
@@ -26,6 +26,8 @@ class Force(Plot, BiotOperate):
     """
 
     dforce: float = -10
+    reduce: bool = True
+    attrs: list[str] = field(default_factory=lambda: ['Fr', 'Fz', 'Fc'])
     target: BiotFrame = field(init=False, repr=False)
 
     def __len__(self):
@@ -37,8 +39,7 @@ class Force(Plot, BiotOperate):
         if dforce is not None:
             self.dforce = dforce
         self.target = BiotFrame()
-        index = self.frame.index[self.Loc['coil']]
-        for name in index:
+        for name in self.frame.index[self.Loc['coil']]:
             polyframe = self.frame.loc[name, 'poly']
             polygrid = PolyGrid(polyframe, turn='rectangle', delta=self.dforce,
                                 nturn=self.Loc[name, 'nturn'])
@@ -47,17 +48,35 @@ class Force(Plot, BiotOperate):
                                zo=self.loc[name, 'z'],
                                link=True, label=name, delim='_')
         self.data = BiotSolve(self.subframe, self.target,
-                              reduce=[True, True], turns=[True, True],
-                              attrs=['Fr', 'Fz', 'Fzdz'],
-                              name=self.name).data
+                              reduce=[True, self.reduce], turns=[True, True],
+                              attrs=self.attrs, name=self.name).data
         # insert grid data
-        self.data.coords['subref'] = 'target', self.Loc['coil', 'subref']
-        self.data.coords['x'] = self.target.x
-        self.data.coords['z'] = self.target.z
+        self.data.coords['index'] = 'target', self.Loc['coil', 'subref']
+        if self.reduce:
+            self.data.coords['xo'] = 'target', self.Loc['coil', 'x']
+            self.data.coords['zo'] = 'target', self.Loc['coil', 'z']
+            self.data.coords['x'] = self.target.x
+            self.data.coords['z'] = self.target.z
+        else:
+            self.data.coords['x'] = 'target', self.target.x
+            self.data.coords['z'] = 'target', self.target.z
         super().post_solve()
 
-    def plot(self, axes=None, **kwargs):
-        """Plot force intergration points."""
+    def plot(self, axes=None, scale=0.5, **kwargs):
+        """Plot force vectors and intergration points."""
         self.get_axes(axes, '2d')
         kwargs = dict(marker='o', linestyle='', color='C2', ms=4) | kwargs
         self.axes.plot(self.data.coords['x'], self.data.coords['z'], **kwargs)
+        vector = np.c_[self.fr, self.fz]
+        norm = np.linalg.norm(vector, axis=1)
+        length = scale * vector / norm[:, np.newaxis]
+        patch = self.mpl['patches'].FancyArrowPatch
+        if self.reduce:
+            tail = np.c_[self.data.xo, self.data.zo]
+        else:
+            tail = np.c_[self.data.x, self.data.z]
+        arrows = [patch((x, z), (x+dx, z+dz), mutation_scale=0.1)
+                  for x, z, dx, dz in
+                  zip(tail[:, 0], tail[:, 1], length[:, 0], length[:, 1])]
+        collections = self.mpl.collections.PatchCollection(arrows)
+        self.axes.add_collection(collections)

@@ -1,5 +1,5 @@
 """Manage coilset supplies."""
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from importlib import import_module
 
 import numpy as np
@@ -15,13 +15,14 @@ class Circuit(Plot, netCDF, FrameSetLoc):
     """Manage coil supplies."""
 
     name: str = 'circuit'
+    data: xarray.Dataset = field(default_factory=xarray.Dataset, repr=False)
 
     def initialize(self, supply: list[str], nodes: int):
         """Initialize dataset."""
         self.data = xarray.Dataset()
         self.data['supply'] = supply
-        self.data['coil'] = self.sloc().index.values
-        self.data['edge'] = np.append(supply, self.sloc().index.values)
+        self.data['coil'] = self.Loc().index.values
+        self.data['edge'] = np.append(supply, self.Loc().index.values)
         self.data['node'] = np.arange(nodes)
         self.data['circuit'] = np.array([], str)
 

@@ -134,22 +134,15 @@ class Field(Plot, BiotOperate):
                               reduce=[True, False], turns=[True, False],
                               attrs=['Br', 'Bz'], name=self.name).data
         # insert grid data
-        self.data.coords['index'] = index
-        self.data.coords['x'] = self.target.x
-        self.data.coords['z'] = self.target.z
+        self.data.coords['index'] = self.target.biotreduce.indices
+        self.data.coords['x'] = 'target', self.target.x
+        self.data.coords['z'] = 'target', self.target.z
         super().post_solve()
 
     @property
     def points(self):
         """Return point array."""
         return np.array([self.data.x, self.data.z]).T
-
-    def __getattr__(self, attr):
-        """Extend biotoperate getattr with maximum reduceat operator."""
-        if attr == 'bn':
-            return np.maximum.reduceat(super().__getattr__(attr),
-                                       self.target.biotreduce.indices)
-        return super().__getattr__(attr)
 
     def plot(self, axes=None, **kwargs):
         """Plot points."""

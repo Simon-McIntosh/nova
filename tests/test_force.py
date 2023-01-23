@@ -51,7 +51,7 @@ def test_zero_delta():
 
 
 def test_matrix_attrs(linked):
-    for attr in ['Fr', 'Fz', 'Fzdz']:
+    for attr in ['Fr', 'Fz', 'Fc']:
         assert attr in linked.force.data
 
 

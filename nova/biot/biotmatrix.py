@@ -55,7 +55,7 @@ class BiotMatrix(BiotSet):
         return -self.Br
 
     @property
-    def Fzdz(self):
+    def Fc(self):
         """Return first moment of vertical (crushing) force."""
         return self.target.delta_z[:, np.newaxis] * self.Fz
 

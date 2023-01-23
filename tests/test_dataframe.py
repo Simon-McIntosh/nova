@@ -132,6 +132,26 @@ def test_store_load_hash_index():
     assert dataframe.version['index'] == dataframe.loc_hash('index')
 
 
+def test_dataframe_label():
+    dataframe = DataFrame(dict(x=range(3)), label='PF')
+    assert dataframe.index.to_list() == ['PF0', 'PF1', 'PF2']
+
+
+def test_dataframe_label_delim():
+    dataframe = DataFrame(dict(x=range(3)), label='PF0', delim='_')
+    assert dataframe.index.to_list() == ['PF0', 'PF0_1', 'PF0_2']
+
+
+def test_dataframe_name():
+    dataframe = DataFrame(dict(x=range(3)), name='PF')
+    assert dataframe.index.to_list() == ['PF0', 'PF1', 'PF2']
+
+
+def test_dataframe_name_offset():
+    dataframe = DataFrame(dict(x=range(3)), name='PF78')
+    assert dataframe.index.to_list() == ['PF78', 'PF79', 'PF80']
+
+
 if __name__ == '__main__':
 
     pytest.main([__file__])

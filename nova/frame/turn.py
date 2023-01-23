@@ -51,7 +51,7 @@ class TurnGeom:
 class Turn(CoilSetAttrs):
     """Construct single coil from turns."""
 
-    turn: str = 'rectangle'#'skin'
+    turn: str = 'rectangle'
     section: str = 'rectangle'
     required: list[str] = field(default_factory=lambda: ['x', 'z', 'dl', 'dt'])
     default: dict = field(init=False, default_factory=lambda: {
@@ -92,13 +92,13 @@ class Turn(CoilSetAttrs):
         name = self.attrs.get(
             'name', self.frame.build_index(1, name=self.attrs['label'])[0])
         self.attrs['name'] = name
-        self.attrs['label'] = \
-            ''.join(character for i, character in enumerate(name[0])
-                    if all(character == _name[i] for _name in name))
-        subattrs = {'section': self.turn, 'label': name, 'frame': name,
+        #self.attrs['label'] = \
+        #    ''.join(character for i, character in enumerate(name[0])
+        #            if all(character == _name[i] for _name in name))
+        subattrs = {'section': self.turn, 'name': name, 'frame': name,
                     'delim': '_', 'link': True} | self.attrs
-        if isinstance(name, list):
-            self.attrs['name'] = self.attrs['label']
+        #if isinstance(name, list):
+        #    self.attrs['name'] = self.attrs['label']
         with self.insert_required(required):
             subindex = self.subframe.insert(*args, **subattrs)
         poly = shapely.geometry.MultiPolygon(

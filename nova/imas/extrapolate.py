@@ -172,6 +172,7 @@ class Extrapolate(Operate):
         matrix = self.plasmagrid['Psi'][ionize[plasma]]
         internal = -self.psi_rbs(radius, height)  # COCOS11
         target = internal - matrix[:, plasma_index]*float(self['ip'])
+        print(matrix[:, self.saloc['free']])
         moore_penrose = MoorePenrose(matrix=matrix[:, self.saloc['free']],
                                      gamma=self.gamma)
         self.saloc['Ic'][self.saloc['free']] = moore_penrose / target
@@ -230,7 +231,7 @@ class Extrapolate(Operate):
     def plot_2d(self, attr='psi', mask=None, levels=51, axes=None):
         """Plot plasma filements and polidal flux."""
         self.get_axes(axes, '2d')
-        super().plot()#'plasma')
+        super().plot('plasma')
         self.plasma.wall.plot()
         vector = getattr(self.grid, attr)
         levels = np.linspace(vector.min(), vector.max(), levels)
@@ -316,12 +317,13 @@ if __name__ == '__main__':
     # doctest.testmod()
 
     # pulse, run = 114101, 41  # JINTRAC
-    # pulse, run = 130506, 403  # CORSICA
-    pulse, run = 105028, 1  # DINA
+    pulse, run = 130506, 403  # CORSICA
+    # pulse, run = 105028, 1  # DINA
 
     #pulse, run = 135011, 7  # DINA
 
-    extrapolate = Extrapolate(pulse, run, limit='ids', pf_passive=True)
+    extrapolate = Extrapolate(pulse, run, pf_passive=False,
+                              pf_active='iter_md')
 
     import matplotlib.pylab as plt
     extrapolate.mpl_axes.fig = plt.figure(figsize=(6, 9))
@@ -329,7 +331,7 @@ if __name__ == '__main__':
     #extrapolate.plot_waveform()
 
     extrapolate.itime = 36
-    extrapolate.plot_2d('psi', mask='ids')
+    extrapolate.plot_2d('psi', mask='map')
     plt.tight_layout()
 
     from nova.imas.pf_passive import PF_Passive

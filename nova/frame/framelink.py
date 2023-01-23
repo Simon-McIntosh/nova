@@ -305,7 +305,7 @@ class FrameLink(LinkIndexer, DataArray):
         """
         Return *args and **kwargs with data extracted from frame.
 
-        If args[0].., replace *args and update **kwargs.
+        If args[0] is polygon, replace *args and update **kwargs.
         Else pass *args, **kwargs.
 
         """

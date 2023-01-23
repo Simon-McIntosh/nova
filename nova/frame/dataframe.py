@@ -109,7 +109,7 @@ class DataFrame(FrameAttrs):
                 metatag['label'] = metatag['delim'].join(split_name[:-1])
                 metatag['offset'] = int(split_name[-1])
             else:
-                metatag['delim'] = ''
+                # metatag['delim'] = ''
                 metatag['label'] = name.rstrip(string.digits)
                 try:
                     metatag['offset'] = int(name.lstrip(string.ascii_letters))
@@ -305,6 +305,3 @@ if __name__ == '__main__':
     dataframe = DataFrame(base=['x', 'y', 'z'],
                           required=['x'], additional=['Ic', 'z'],
                           Subspace=[], label='PF')
-
-    #dataframe.store('tmp.h5', 'frame')
-    #dataframe.load('tmp.h5', 'frame')

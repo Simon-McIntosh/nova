@@ -175,7 +175,8 @@ if __name__ == '__main__':
 
     from nova.imas.pf_active import PF_Active
 
-    operate = Operate(105007, 10, 'iter', 1, pf_active=True)
+    operate = Operate(130506, 403, 'iter', 0, pf_active='iter_md',
+                      ngrid=10, nplasma=10)
 
     #pf_active = PF_Active(105007, 10)
     #operate.merge_data(pf_active.data)

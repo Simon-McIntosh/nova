@@ -26,14 +26,13 @@ class BiotOp:
 
     aloc: ArrayLocIndexer
     saloc: ArrayLocIndexer
+    classname: str
+    index: np.ndarray
     dataset: InitVar[xarray.Dataset]
 
     def __post_init__(self, dataset):
         """Extract matrix, plasma_matrix and plasma_index from dataset."""
         data_vars = list(dataset.data_vars)
-        self.force = 'subref' in dataset
-        if self.force:
-            self.subref = dataset.subref.data
         self.matrix = dataset[data_vars[0]].data
         self.plasma_matrix = dataset[data_vars[1]].data
         self.plasma_index = dataset.attrs['plasma_index']
@@ -50,9 +49,10 @@ class BiotOp:
 
     def evaluate(self):
         """Return interaction."""
-        if not self.force:
-            return self.matrix @ self.saloc['Ic']
-        return self.saloc['Ic'][self.subref] * (self.matrix @ self.saloc['Ic'])
+        result = self.matrix @ self.saloc['Ic']
+        if self.classname == 'Force':
+            return self.saloc['Ic'][self.index] * result
+        return result
 
     @property
     def plasma_nturn(self):
@@ -78,27 +78,27 @@ class BiotOperate(BiotData):
 
     version: dict[str, int | None] = field(
         init=False, repr=False, default_factory=dict)
-    _svd_rank: int = field(init=False, default=-1)
+    svd_rank: int = field(init=False, default=0)
+    index: np.ndarray = field(init=False, repr=False)
     operator: dict[str, BiotOp] = field(init=False, default_factory=dict,
                                         repr=False)
-    target_number: int = field(init=False, default=0)
     array: dict = field(init=False, repr=False, default_factory=dict)
 
     @property
-    def svd_rank(self):
-        """Manage svd rank. Set to -1 to disable svd plasma turn update."""
-        return self._svd_rank
+    def rank(self):
+        """Manage svd rank. Set to 0 to disable svd plasma turn update."""
+        return self.svd_rank
 
-    @svd_rank.setter
-    def svd_rank(self, svd_rank: int):
-        if svd_rank != self._svd_rank:
-            self._svd_rank = svd_rank
+    @rank.setter
+    def rank(self, rank: int):
+        if rank != self.svd_rank:
+            self.svd_rank = rank
             self.load_operators()
 
     @property
     def shape(self):
         """Return target shape."""
-        return (self.target_number,)
+        return (self.data.dims['target'],)
 
     def post_solve(self):
         """Solve biot interaction - extened by subclass."""
@@ -118,9 +118,12 @@ class BiotOperate(BiotData):
         if 'attributes' not in self.data.attrs:
             return
         self.attrs = self.data.attrs['attributes']
+        self.index = self.data.get('index', xarray.DataArray([])).data
+        self.classname = self.data.classname
         for attr in self.attrs:
-            self.operator[attr] = BiotOp(self.aloc, self.saloc,
-                                         self.data[[attr, f'_{attr}']])
+            dataset = self.data[[attr, f'_{attr}']]
+            self.operator[attr] = BiotOp(self.aloc, self.saloc, self.classname,
+                                         self.index, dataset)
         self.load_version()
         self.load_arrays()
 
@@ -134,11 +137,13 @@ class BiotOperate(BiotData):
 
     def load_arrays(self):
         """Link data arrays."""
-        self.target_number = self.data.dims['target']
         for attr in self.version:
             if attr.capitalize() in self.attrs or attr == 'bn':
                 if attr.islower():
-                    self.array[attr] = np.zeros(self.target_number)
+                    if attr == 'bn' and self.classname == 'Field':
+                        self.array[attr] = np.zeros(self.data.dims['index'])
+                    else:
+                        self.array[attr] = np.zeros(self.data.dims['target'])
                     if len(self.shape) == 1:
                         continue
                     ndarray = self.array[attr].reshape(self.shape)
@@ -157,7 +162,10 @@ class BiotOperate(BiotData):
 
     def calculate_norm(self):
         """Return calculated L2 norm."""
-        return np.linalg.norm([self.br, self.bz], axis=0)
+        result = np.linalg.norm([self.br, self.bz], axis=0)
+        if self.classname == 'Field':
+            return np.maximum.reduceat(result, self.index)
+        return result
 
     def get_norm(self):
         """Return cached field L2 norm."""

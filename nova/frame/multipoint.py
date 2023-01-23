@@ -64,7 +64,7 @@ class MultiPoint(metamethod.MultiPoint):
     def sort_link(self):
         """Update frame.links to ensure monotonic increasing."""
         for index, link in enumerate(self.frame.link):
-            if link:
+            if link and link in self.frame.index:
                 name = self.frame.index[index]
                 link_index = self.frame.index.get_loc(link)
                 if link_index > index:  # reverse

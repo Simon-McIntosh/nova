@@ -826,8 +826,8 @@ if __name__ == '__main__':
     doctest.testmod()
     #dict(pulse=135011, run=7, machine='iter')
 
-    machine = Machine(105028, 1, pf_active=True, pf_passive=True,
-                      wall='iter_md')
+    machine = Machine(105028, 1, pf_active='iter_md', pf_passive=False,
+                      wall=False)
     machine.plot()
 
     #machine.sloc['Ic'] = 1

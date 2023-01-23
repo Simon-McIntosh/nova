@@ -13,18 +13,25 @@ class Biot(FrameSet):
     """Expose biot methods as cached properties."""
 
     field_attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])
+    force_attrs: list[str] = field(default_factory=lambda: ['Fr', 'Fz', 'Fc'])
     dfield: float = field(default=0, repr=False)
     dforce: float = field(default=-10, repr=False)
 
     @property
-    def biot_kwargs(self):
+    def field_kwargs(self):
         """Return default biot factory kwargs."""
         return dict(attrs=self.field_attrs)
 
     @property
+    def force_kwargs(self):
+        """Return default biot factory kwargs."""
+        return dict(attrs=self.force_attrs)
+
+    @property
     def biot_attrs(self):
         """Return frame attributes."""
-        return dict(dfield=self.dfield, field_attrs=self.field_attrs)
+        return dict(dfield=self.dfield, field_attrs=self.field_attrs,
+                    force_attrs=self.force_attrs)
 
     @property
     def biot_methods(self):
@@ -44,32 +51,32 @@ class Biot(FrameSet):
     @frame_factory(BiotGrid)
     def grid(self):
         """Return grid biot instance."""
-        return self.biot_kwargs
+        return self.field_kwargs
 
     @frame_factory(BiotPlasmaGrid)
     def plasmagrid(self):
         """Return plasma grid biot instance."""
-        return self.biot_kwargs
+        return self.field_kwargs
 
     @frame_factory(BiotFirstWall)
     def plasmawall(self):
         """Return plasma firstwall biot instance."""
-        return self.biot_kwargs
+        return self.field_kwargs
 
     @frame_factory(BiotPoint)
     def point(self):
         """Return point biot instance."""
-        return self.biot_kwargs
+        return self.field_kwargs
 
     @frame_factory(BiotPoint)
     def probe(self):
         """Return biot probe instance."""
-        return self.biot_kwargs
+        return self.field_kwargs
 
     @frame_factory(BiotLoop)
     def loop(self):
         """Return biot loop instance."""
-        return self.biot_kwargs
+        return self.field_kwargs
 
     @frame_factory(Field)
     def field(self):
@@ -79,12 +86,12 @@ class Biot(FrameSet):
     @frame_factory(Force)
     def force(self):
         """Return force field instance."""
-        return dict(dforce=self.dforce)
+        return dict(dforce=self.dforce, attrs=self.force_attrs)
 
     @frame_factory(BiotInductance)
     def inductance(self):
         """Return biot inductance instance."""
-        return self.biot_kwargs
+        return self.field_kwargs
 
     def clear_biot(self):
         """Clear all biot attributes."""

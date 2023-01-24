@@ -24,7 +24,7 @@ class BiotFrame(FrameLink):
         """Extend FrameAttrs update_metadata."""
         metadata = dict(required=['x', 'z'],
                         additional=['xo', 'zo', 'plasma', 'nturn',
-                                    'link', 'segment', 'part'],
+                                    'link', 'segment'],
                         available=['section', 'poly'],
                         array=['x', 'z', 'xo', 'zo', 'dx', 'dz',
                                'area', 'nturn']) | metadata

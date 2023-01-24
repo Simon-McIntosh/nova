@@ -66,8 +66,8 @@ def test_quadratic_coordinate_cluster(null_type, coordinate):
 
 @pytest.mark.parametrize('null_type,coordinate',
                          product([-1, 0, 1],
-                                 [(-4, 2.7), (7, 2),
-                                  (2, -4), (0.8, 7)]))
+                                 [(-4, 2.7), (8, 2),
+                                  (2, -4), (0.8, 8)]))
 def test_quadratic_coordinate_xcluster(null_type, coordinate):
     x, z = meshgrid()
     psi = quadratic_surface(x, z, null_type, *coordinate)

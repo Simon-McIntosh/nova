@@ -47,12 +47,12 @@ class BiotMatrix(BiotSet):
     @property
     def Fr(self):
         """Return radial force array."""
-        return self.Bz
+        return 2*np.pi*self.target.x[:, np.newaxis] * self.Bz
 
     @property
     def Fz(self):
         """Return vertical force array."""
-        return -self.Br
+        return -2*np.pi*self.target.x[:, np.newaxis] * self.Br
 
     @property
     def Fc(self):

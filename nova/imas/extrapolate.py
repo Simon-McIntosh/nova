@@ -172,7 +172,6 @@ class Extrapolate(Operate):
         matrix = self.plasmagrid['Psi'][ionize[plasma]]
         internal = -self.psi_rbs(radius, height)  # COCOS11
         target = internal - matrix[:, plasma_index]*float(self['ip'])
-        print(matrix[:, self.saloc['free']])
         moore_penrose = MoorePenrose(matrix=matrix[:, self.saloc['free']],
                                      gamma=self.gamma)
         self.saloc['Ic'][self.saloc['free']] = moore_penrose / target

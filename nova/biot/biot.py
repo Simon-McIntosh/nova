@@ -15,7 +15,7 @@ class Biot(FrameSet):
     field_attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])
     force_attrs: list[str] = field(default_factory=lambda: ['Fr', 'Fz', 'Fc'])
     dfield: float = field(default=0, repr=False)
-    dforce: float = field(default=-10, repr=False)
+    dforce: float = field(default=-100, repr=False)
 
     @property
     def field_kwargs(self):

@@ -8,7 +8,7 @@ from scipy.constants import mu_0
 import xarray
 
 from nova.imas import Equilibrium, Ids, Machine
-from nova.imas.profile import Current, Profile
+from nova.imas.profile import Profile
 
 if TYPE_CHECKING:
     import pandas
@@ -104,7 +104,7 @@ class Grid:
 
 
 @dataclass
-class Operate(Machine, Current, Profile, Grid, Equilibrium):
+class Operate(Machine, Profile, Grid, Equilibrium):
     """
     Extend Machine with default values for Operate class.
 
@@ -133,6 +133,7 @@ class Operate(Machine, Current, Profile, Grid, Equilibrium):
     def solve_biot(self):
         """Extend machine solve biot to include extrapolation grid."""
         super().solve_biot()
+        self.force.solve()
         self.grid.solve(**self.grid_attrs)
 
     def update(self):
@@ -172,14 +173,13 @@ class Operate(Machine, Current, Profile, Grid, Equilibrium):
 
 if __name__ == '__main__':
 
-    operate = Operate(130506, 403, 'iter', 0, pf_active='iter_md',
+    operate = Operate(105011, 9, 'iter', 0, pf_active='iter_md',
                       ngrid=500, nplasma=300)
 
-    operate.itime = 15
+    operate.itime = 0
 
     operate.plot()
     operate.grid.plot()
     operate.plasma.wall.plot()
 
-    operate.force.solve(-100)
-    operate.force.plot(5)
+    norm = operate.force.plot(norm=80e6)

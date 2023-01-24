@@ -156,6 +156,7 @@ class DataNull(Plot):
             for i, coord in enumerate([x_coordinate, z_coordinate]):
                 maximum, minimum = np.max(cluster[i]), np.min(cluster[i])
                 delta = maximum - minimum
+                print(minimum - 2*delta, coord, maximum + 2*delta)
                 assert coord >= minimum - 2*delta
                 assert coord <= maximum + 2*delta
         return x_coordinate, z_coordinate

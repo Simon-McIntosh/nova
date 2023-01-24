@@ -1,7 +1,5 @@
 """Facilitate structured access to netCDF data."""
-from __future__ import annotations
 from dataclasses import dataclass, field
-from importlib import import_module
 import os
 import sys
 
@@ -79,7 +77,7 @@ class netCDF(FilePath):
 
     def load(self):
         """Load dataset from file."""
-        with import_module('xarray').open_dataset(
+        with xarray.open_dataset(
                 self.filepath, group=self.group, cache=True) as data:
             data.load()
             data.close()

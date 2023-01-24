@@ -4,6 +4,7 @@ from dataclasses import dataclass, field, fields, InitVar
 from importlib import import_module
 from typing import Any, ClassVar, Optional, Type
 
+import numpy as np
 import xxhash
 
 from nova.database.netcdf import netCDF
@@ -248,15 +249,23 @@ class Database(IDS):
         """
         return self.ids_attrs
 
-    def get_ids(self, ids_path: Optional[str] = None):
+    def empty(self, ids_path: Optional[str] = None):
+        """Return ids status based on first element extracted from ids_path."""
+        data = self.get_ids(ids_path)
+        if hasattr(data, 'flat'):
+            data = data.flat[0]
+        return data is None or np.isclose(data, -9e40)
+
+    def get_ids(self, ids_path: Optional[str] = None, occurrence=None):
         """Return ids. Extend name with ids_path if not None."""
         ids_name = '/'.join((item for item in [self.name, ids_path]
                              if item is not None)).split('/', 1)
+        if occurrence is None:
+            occurrence = self.occurrence
         with self._get_ids() as db_entry:
             if len(ids_name) == 2:
-                return db_entry.partial_get(*ids_name,
-                                            occurrence=self.occurrence)
-            return db_entry.get(*ids_name, occurrence=self.occurrence)
+                return db_entry.partial_get(*ids_name, occurrence=occurrence)
+            return db_entry.get(*ids_name, occurrence=occurrence)
 
     @contextmanager
     def _get_ids(self):
@@ -492,7 +501,7 @@ class IdsData(Datafile, Database):
         """Load data from IdsClass and merge."""
         try:
             data = ids_class(**self.ids_attrs, ids=self.ids).data
-        except NameError:  # load from single ids_data instance
+        except (NameError, IndexError):
             return
         self.data = self.data.merge(data, combine_attrs='drop_conflicts')
 

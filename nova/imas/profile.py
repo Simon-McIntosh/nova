@@ -13,24 +13,12 @@ from nova.imas.pf_active import PF_Active
 
 
 @dataclass
-class Current(GetSlice, IdsData):
-    """Manage time slice current data."""
-
-    def __post_init__(self):
-        """Load pf active data."""
-        try:
-            self.load_data(PF_Active)
-        except IndexError:  # pf_active empty
-            pass
-        super().__post_init__()
-
-
-@dataclass
 class Profile(Plot, GetSlice, IdsData):
     """Interpolation of profiles from an equilibrium time slice."""
 
     def __post_init__(self):
         """Load equilibrium data."""
+        self.load_data(PF_Active)
         self.load_data(Equilibrium)
         super().__post_init__()
 

@@ -176,6 +176,7 @@ if __name__ == '__main__':
     operate = Operate(105011, 9, 'iter', 0, pf_active='iter_md',
                       ngrid=500, nplasma=300)
 
+    '''
     operate.itime = 0
 
     operate.plot()
@@ -183,3 +184,4 @@ if __name__ == '__main__':
     operate.plasma.wall.plot()
 
     norm = operate.force.plot(norm=80e6)
+    '''

@@ -317,7 +317,7 @@ if __name__ == '__main__':
 
     # pulse, run = 114101, 41  # JINTRAC
     pulse, run = 130506, 403  # CORSICA
-    # pulse, run = 105028, 1  # DINA
+    pulse, run = 105028, 1  # DINA
 
     #pulse, run = 135011, 7  # DINA
 

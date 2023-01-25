@@ -17,14 +17,16 @@ class Grid(Scenario):
     def build(self):
         """Build grid from single timeslice and store in data."""
         super().build()
-        time_slice = self.time_slice('profiles_2d', 0)
-        grid_type, grid = time_slice.grid_type, time_slice.grid
-        self.data.attrs['grid_type'] = grid_type.index
+        if self.ids_array.empty('profiles_2d.grid_type.index'):
+            return
+        index = self.ids_array.get_slice(0, 'profiles_2d.grid_type.index')
+        grid = self.ids_array.get_slice(0, 'profiles_2d.grid')
+        self.data.attrs['grid_type'] = index
         if self.data.grid_type == -999999999:  # unset
             self.data.attrs['grid_type'] = 1
         if self.data.grid_type == 1:
             return self.rectangular_grid(grid)
-        raise NotImplementedError(f'grid {grid_type} not implemented.')
+        raise NotImplementedError(f'grid index {index} not implemented.')
 
     def rectangular_grid(self, grid):
         """
@@ -34,12 +36,10 @@ class Grid(Scenario):
         In this case the position arrays should not be
         filled since they are redundant with grid/dim1 and dim2.
         """
-        self.data['r'] = grid.dim1
-        self.data['z'] = grid.dim2
+        self.data['r'], self.data['z'] = grid.dim1, grid.dim2
         r2d, z2d = np.meshgrid(self.data['r'], self.data['z'], indexing='ij')
         self.data['r2d'] = ('r', 'z'), r2d
         self.data['z2d'] = ('r', 'z'), z2d
-        self.data.attrs['profiles_2d'] = ('time', 'r', 'z')
 
     @cached_property
     def mask_2d(self):
@@ -62,17 +62,17 @@ class Grid(Scenario):
 class Boundary(Plot, Scenario):
     """Load boundary timeseries from equilibrium ids."""
 
-    def outline(self, itime):
-        """Return r,z."""
-        outline = self.time_slice('boundary', itime, index=None).outline
+    def outline(self, itime: int) -> np.ndarray:
+        """Return r, z outline."""
+        outline = self.ids_array.get_slice(itime, 'boundary.outline')
         return np.c_[outline.r, outline.z]
 
     def build(self):
         """Build outline timeseries."""
         super().build()
-        outline_length = max(len(self.outline(itime))
-                             for itime in range(self.data.dims['time']))
-        self.data['boundary_index'] = range(outline_length)
+        length = max(len(self.outline(itime))
+                     for itime in self.data.itime.data)
+        self.data['boundary_index'] = range(length)
         self.data['coordinate'] = ['radial', 'vertical']
         self.data['boundary'] = ('time', 'boundary_index', 'coordinate'), \
             np.zeros((self.data.dims['time'],
@@ -80,10 +80,11 @@ class Boundary(Plot, Scenario):
                       self.data.dims['coordinate']))
         self.data['boundary_length'] = 'time', \
             np.zeros(self.data.dims['time'], dtype=int)
-        for itime in range(self.data.dims['time']):
+        for itime in self.data.itime.data:
             outline = self.outline(itime)
-            self.data['boundary_length'][itime] = len(outline)
-            self.data['boundary'][itime, :len(outline)] = outline
+            length = len(outline)
+            self.data['boundary_length'][itime] = length
+            self.data['boundary'][itime, :length] = outline
 
     @property
     def boundary(self):
@@ -103,13 +104,20 @@ class Parameter0D(Plot, Scenario):
 
     attrs_0d: list[str] = field(
             default_factory=lambda: ['ip', 'beta_pol', 'li_3',
-                                     'psi_axis', 'psi_boundary'])
+                                     'psi_axis', 'psi_boundary',
+                                     'volume', 'area', 'surface', 'length_pol',
+                                     'q_axis', 'q_95', 'psi_external_average',
+                                     'plasma_inductance'])
 
     def build(self):
         """Build 0D parameter timeseries."""
         super().build()
-        self.data.attrs['global_quantities'] = ('time',)
-        self.time_slice.build('global_quantities', self.attrs_0d, index=None)
+        self.ids_array.append(self.data, 'time', self.attrs_0d,
+                              'global_quantities')
+        self.ids_array.append(self.data, 'time', ['r', 'z'],
+                              'global_quantities.magnetic_axis', postfix='o')
+        self.ids_array.append(self.data, 'time', ['r', 'z'],
+                              'global_quantities.current_centre', postfix='p')
 
     def plot_0d(self, attr, axes=None):
         """Plot 0D parameter timeseries."""
@@ -128,18 +136,23 @@ class Profile1D(Plot, Scenario):
     def build(self):
         """Build 1d profile data."""
         super().build()
-        time_slice = self.time_slice('profiles_1d', 0, index=None)
-        self.data['psi_norm'] = np.linspace(0, 1, len(time_slice.psi))
-        self.data.attrs['profiles_1d'] = ('time', 'psi_norm')
-        self.time_slice.build('profiles_1d', self.attrs_1d, index=None)
-        for itime in range(self.data.dims['time']):  # normalize 1D profiles
+        if self.ids_array.empty('profiles_1d.psi'):
+            return
+        length = self.ids_array['profiles_1d.psi'][0]
+        self.data['psi_norm'] = np.linspace(0, 1, length)
+        self.ids_array.append(self.data, ('time', 'psi_norm'),
+                              self.attrs_1d, 'profiles_1d')
+        for itime in self.data.itime.data:  # normalize 1D profiles
             psi = self.data.psi[itime]
             if np.isclose(psi[-1] - psi[0], 0):
                 continue
             psi_norm = (psi - psi[0]) / (psi[-1] - psi[0])
             for attr in self.attrs_1d:
-                self.data[attr][itime] = np.interp(
-                    self.data.psi_norm, psi_norm, self.data[attr][itime])
+                try:
+                    self.data[attr][itime] = np.interp(
+                        self.data.psi_norm, psi_norm, self.data[attr][itime])
+                except KeyError:
+                    pass
 
     def plot_1d(self, itime=-1, attr='psi', axes=None, **kwargs):
         """Plot 1d profile."""
@@ -158,7 +171,8 @@ class Profile2D(BiotPlot, Scenario):
     def build(self):
         """Build profile 2d data and store to xarray data structure."""
         super().build()
-        self.time_slice.build('profiles_2d', self.attrs_2d, postfix='2d')
+        self.ids_array.append(self.data, ('time', 'r', 'z'), self.attrs_2d,
+                              'profiles_2d', postfix='2d')
 
     def data_2d(self, attr: str, mask=0):
         """Return data array."""
@@ -262,8 +276,6 @@ class Equilibrium(Profile2D, Profile1D, Parameter0D, Boundary, Grid):
     def build(self):
         """Build netCDF database using data extracted from imasdb."""
         with self.build_scenario():
-            self.data['time'] = self.ids_data.time
-            self.data['itime'] = 'time', range(len(self.data['time']))
             super().build()
         return self
 
@@ -283,7 +295,13 @@ if __name__ == '__main__':
     #import doctest
     #doctest.testmod()
 
-    equilibrium = Equilibrium(135013, 2)
-    equilibrium.itime = 600
+    pulse, run = 105028, 1  # DINA
+    # pulse, run = 135011, 7  # DINA
+
+    Equilibrium(pulse, run)._clear()
+    equilibrium = Equilibrium(pulse, run)
+
+
+    equilibrium.itime = 200
     equilibrium.plot_2d('psi', mask=0)
     equilibrium.plot_boundary()

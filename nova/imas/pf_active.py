@@ -12,9 +12,9 @@ class PF_Active(Plot, Scenario):
     """Manage access to pf_active ids."""
 
     name: str = 'pf_active'
+    ids_node: str = 'coil'
     coil_attrs: list[str] = field(
         default_factory=lambda: ['current', 'b_field_max_timed'])
-    ids_node: str = 'coil'
 
     @staticmethod
     def coil_name(coil):
@@ -40,8 +40,7 @@ class PF_Active(Plot, Scenario):
         with self.build_scenario():
             self.data.coords['coil_name'] = name
             self.data.coords['coil_index'] = 'coil_name', range(len(name))
-            self.ids_array.append(self.data, ('time', 'coil_name'),
-                                  self.coil_attrs, '*.data')
+            self.append(('time', 'coil_name'), self.coil_attrs, '*.data')
         return self
 
     def plot(self, axes=None):

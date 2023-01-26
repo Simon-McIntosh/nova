@@ -17,10 +17,10 @@ class Grid(Scenario):
     def build(self):
         """Build grid from single timeslice and store in data."""
         super().build()
-        if self.ids_array.empty('profiles_2d.grid_type.index'):
+        if self.ids_index.empty('profiles_2d.grid_type.index'):
             return
-        index = self.ids_array.get_slice(0, 'profiles_2d.grid_type.index')
-        grid = self.ids_array.get_slice(0, 'profiles_2d.grid')
+        index = self.ids_index.get_slice(0, 'profiles_2d.grid_type.index')
+        grid = self.ids_index.get_slice(0, 'profiles_2d.grid')
         self.data.attrs['grid_type'] = index
         if self.data.grid_type == -999999999:  # unset
             self.data.attrs['grid_type'] = 1
@@ -64,7 +64,7 @@ class Boundary(Plot, Scenario):
 
     def outline(self, itime: int) -> np.ndarray:
         """Return r, z outline."""
-        outline = self.ids_array.get_slice(itime, 'boundary.outline')
+        outline = self.ids_index.get_slice(itime, 'boundary.outline')
         return np.c_[outline.r, outline.z]
 
     def build(self):
@@ -112,12 +112,11 @@ class Parameter0D(Plot, Scenario):
     def build(self):
         """Build 0D parameter timeseries."""
         super().build()
-        self.ids_array.append(self.data, 'time', self.attrs_0d,
-                              'global_quantities')
-        self.ids_array.append(self.data, 'time', ['r', 'z'],
-                              'global_quantities.magnetic_axis', postfix='o')
-        self.ids_array.append(self.data, 'time', ['r', 'z'],
-                              'global_quantities.current_centre', postfix='p')
+        self.append('time', self.attrs_0d, 'global_quantities')
+        self.append('time', ['r', 'z'], 'global_quantities.magnetic_axis',
+                    postfix='o')
+        self.append('time', ['r', 'z'], 'global_quantities.current_centre',
+                    postfix='p')
 
     def plot_0d(self, attr, axes=None):
         """Plot 0D parameter timeseries."""
@@ -136,12 +135,11 @@ class Profile1D(Plot, Scenario):
     def build(self):
         """Build 1d profile data."""
         super().build()
-        if self.ids_array.empty('profiles_1d.psi'):
+        if self.ids_index.empty('profiles_1d.psi'):
             return
-        length = self.ids_array['profiles_1d.psi'][0]
+        length = self.ids_index['profiles_1d.psi'][0]
         self.data['psi_norm'] = np.linspace(0, 1, length)
-        self.ids_array.append(self.data, ('time', 'psi_norm'),
-                              self.attrs_1d, 'profiles_1d')
+        self.append(('time', 'psi_norm'), self.attrs_1d, 'profiles_1d')
         for itime in self.data.itime.data:  # normalize 1D profiles
             psi = self.data.psi[itime]
             if np.isclose(psi[-1] - psi[0], 0):
@@ -171,8 +169,8 @@ class Profile2D(BiotPlot, Scenario):
     def build(self):
         """Build profile 2d data and store to xarray data structure."""
         super().build()
-        self.ids_array.append(self.data, ('time', 'r', 'z'), self.attrs_2d,
-                              'profiles_2d', postfix='2d')
+        self.append(('time', 'r', 'z'), self.attrs_2d, 'profiles_2d',
+                    postfix='2d')
 
     def data_2d(self, attr: str, mask=0):
         """Return data array."""

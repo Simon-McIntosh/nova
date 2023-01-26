@@ -7,7 +7,9 @@ import numpy as np
 from scipy.constants import mu_0
 import xarray
 
-from nova.imas import Equilibrium, Ids, Machine
+from nova.imas.database import Ids
+from nova.imas.equilibrium import Equilibrium
+from nova.imas.machine import Machine
 from nova.imas.profile import Profile
 
 if TYPE_CHECKING:
@@ -173,8 +175,7 @@ class Operate(Machine, Profile, Grid, Equilibrium):
 
 if __name__ == '__main__':
 
-    operate = Operate(105011, 9, 'iter', 0, pf_active='iter_md',
-                      ngrid=500, nplasma=300)
+    operate = Operate(105011, 9, pf_active='iter_md', ngrid=500, nplasma=300)
 
     '''
     operate.itime = 0

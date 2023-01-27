@@ -142,7 +142,7 @@ parentdir_prefix = "nova-"
 addopts = "--doctest-modules"
 testpaths = [
   "tests",
-  "nova/imas/database.py"
+  "nova/imas"
 ]
 filterwarnings = [
   "once::Warning",

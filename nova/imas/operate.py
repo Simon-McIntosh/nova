@@ -36,32 +36,41 @@ class Grid:
         - ids: bounds extracted from from equilibrium ids.
     index : {'plasma', 'coil', slice, pandas.Index}
         Filament index from which relative grid limits are set.
-    equilibrium : Equilibrium, optional
-        Equilibrium ids required for equilibrium derived grid dimensions.
-        The default is False
+    data: xarray.Dataset, optional
+        IDS xarray dataset required for equilibrium derived grid dimensions.
+        The default is xarray.Dataset()
 
     Examples
     --------
+    Skip doctest if IMAS instalation or requisite IDS(s) not found.
+
+    >>> import pytest
+    >>> from nova.imas.database import Database
+    >>> try:
+    ...     _ = Database(130506, 403).get_ids('equilibrium')
+    ... except:
+    ...     pytest.skip('IMAS not found or 130506/403 unavailable')
+
     Manualy specify grid relitive to coilset:
     >>> Grid(100, 0, 'coil').grid_attrs
     {'ngrid': 100, 'limit': 0, 'index': 'coil'}
 
     Specify grid relitive to equilibrium ids.
     >>> equilibrium = Equilibrium(130506, 403)
-    >>> Grid(50, 'ids', equilibrium=equilibrium).grid_attrs
+    >>> Grid(50, 'ids', data=equilibrium.data).grid_attrs
     {'ngrid': 50, 'limit': [2.75, 8.9, -5.49, 5.51], 'index': 'plasma'}
 
     Extract exact grid from equilibrium ids.
-    >>> grid = Grid('ids', 'ids', equilibrium=equilibrium)
+    >>> grid = Grid('ids', 'ids', data=equilibrium.data)
     >>> grid.grid_attrs['ngrid']
     8385
 
-    Raises attribute error when grid initialied with unset equilibrium ids:
+    Raises attribute error when grid initialied with unset data attribute:
     >>> Grid(1000, 'ids', 'coil')
     Traceback (most recent call last):
         ...
-    AttributeError: equilibrium ids is None
-    require valid ids when limit:ids or ngrid:1000 == 'ids'
+    AttributeError: data is empty
+    require valid ids data when limit:ids or ngrid:1000 == 'ids'
     """
 
     ngrid: int | str = 5000

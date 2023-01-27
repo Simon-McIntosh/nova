@@ -11,12 +11,19 @@ class Matrix(Operate):
 
     pulse: int = 105028
     run: int = 1
-    time_index: int = 20
-    pf_active: Ids | bool | str = 'iter_md'
+    pf_active: Ids | bool | str = True
+
+    def plot(self):
+        """Plot coilset, fluxmap and coil force vectors."""
+        super().plot()
+        self.grid.plot()
+        self.plasma.wall.plot()
+        self.force.plot(scale=2)
 
 
 if __name__ == '__main__':
 
     matrix = Matrix()
 
-    # operate.itime = 200
+    matrix.itime = 200
+    matrix.plot()

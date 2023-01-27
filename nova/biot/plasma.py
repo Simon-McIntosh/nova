@@ -146,9 +146,6 @@ class Plasma(Plot, netCDF, FrameSetLoc):
         plasma = self.aloc['plasma']
         self.aloc['nturn'][plasma] = nturn
         self.update_aloc_hash('nturn')
-        assert np.isclose(self.aloc['nturn'][plasma].sum(), 0)
-
-
 
 
     def __XXX_residual(self, Psi):

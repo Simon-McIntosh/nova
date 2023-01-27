@@ -101,17 +101,28 @@ class Extrapolate(Operate):
 
     Examples
     --------
+    Skip doctest if IMAS instalation or requisite IDS(s) not found.
+
+    >>> import pytest
+    >>> from nova.imas.database import Database
+    >>> try:
+    ...     _ = Database(130506, 403).get_ids('equilibrium')
+    ...     _ = Database(111001, 202, 'iter_md').get_ids('pf_active')
+    ... except:
+    ...     pytest.skip('IMAS not found or 130506/403, 111001/202 unavailable')
+
     Pass a pulse and run number to initiate as an **IMAS code**:
 
     >>> from nova.imas.extrapolate import Extrapolate
     >>> pulse, run = 130506, 403  # CORSICA equilibrium solution
-    >>> extrapolate = Extrapolate(pulse, run, ngrid=10, nplasma=10)
+    >>> extrapolate = Extrapolate(pulse, run, pf_active='iter_md',
+    ...                           ngrid=10, nplasma=10)
     >>> extrapolate.pulse, extrapolate.run
     (130506, 403)
 
     The equilibrium ids is read from file and stored as an ids attribute:
 
-    >>> extrapolate.ids.code.name
+    >>> extrapolate.get_ids('equilibrium').code.name
     'CORSICA'
 
     To run code as an **IMAS actor**,
@@ -119,13 +130,14 @@ class Extrapolate(Operate):
 
     >>> from nova.imas.database import Database
     >>> pulse, run = 130506, 403  # CORSICA equilibrium solution
-    >>> equilibrium = Database(130506, 403, 'equilibrium', machine='iter')
+    >>> equilibrium = Database(130506, 403, name='equilibrium')
     >>> equilibrium.pulse, equilibrium.run
     (130506, 403)
 
     then pass this ids to the Extrapolate class:
 
-    >>> extrapolate = Extrapolate(ids=equilibrium.ids, limit='ids', ngrid=500, nplasma=100)
+    >>> extrapolate = Extrapolate(ids=equilibrium.ids_data, limit='ids',
+    ...                           ngrid=500, nplasma=100)
     >>> extrapolate.itime = 20
     >>> extrapolate.itime
     20

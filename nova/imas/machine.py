@@ -668,6 +668,16 @@ class CoilGeometry:
 
     Examples
     --------
+    Skip doctest if IMAS instalation or requisite IDS(s) not found.
+
+    >>> import pytest
+    >>> from nova.imas.database import Database
+    >>> try:
+    ...     _ = Database(111001, 202, 'iter_md').get_ids('pf_active')
+    ...     _ = Database(115005, 2, 'iter_md').get_ids('pf_passive')
+    ... except:
+    ...     pytest.skip('IMAS not found or 111001/202, 115005/2 unavailable')
+
     Dissable wall geometry via boolean input:
 
     >>> geometry = CoilGeometry(wall=False)

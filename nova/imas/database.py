@@ -85,6 +85,14 @@ class Database(IDS):
 
     Examples
     --------
+    Skip doctest if IMAS instalation or requisite IDS(s) not found.
+
+    >>> import pytest
+    >>> try:
+    ...     _ = Database(130506, 403).get_ids('equilibrium')
+    ... except:
+    ...     pytest.skip('IMAS not installed or 130506/403 unavailable')
+
     Load an equilibrium ids from file with defaults for user, machine and
     backend:
 
@@ -320,6 +328,15 @@ class DataAttrs:
 
     Examples
     --------
+    Skip doctest if IMAS instalation or requisite IDS(s) not found.
+
+    >>> import pytest
+    >>> try:
+    ...     _ = Database(130506, 403).get_ids('equilibrium')
+    ...     _ = Database(130506, 403).get_ids('pf_active')
+    ... except:
+    ...     pytest.skip('IMAS not found or 130506/403 unavailable')
+
     The get_ids_attrs method is used to resolve a full ids_attrs dict from
     a partial input. If the input to get_ids_attrs is boolean then True
     returns the instance's default':
@@ -428,7 +445,86 @@ class DataAttrs:
 
 @dataclass
 class IdsIndex:
-    """Methods for indexing array data from within an ids."""
+    """
+    Methods for indexing data as arrays from an ids.
+
+    Parameters
+    ----------
+    ids_data : ImasIds
+        IMAS IDS (in-memory).
+    ids_node : str
+        Array extraction node.
+
+    Examples
+    --------
+    Check access to required IDS(s).
+
+    >>> import pytest
+    >>> try:
+    ...     _ = Database(105028, 1).get_ids('pf_active')
+    ...     _ = Database(105028, 1).get_ids('equilibrium')
+    ...     _ = Database(105011, 9).get_ids('pf_active')
+    ... except:
+    ...     pytest.skip('IMAS not installed or 105028/1, 105011/9 unavailable')
+
+    First load an ids, accomplished here using the Database class from
+    nova.imas.database.
+
+    >>> from nova.imas.database import Database, IdsIndex
+    >>> pulse, run = 105028, 1  # DINA scenario data
+    >>> pf_active = Database(pulse, run, name='pf_active')
+
+    Initiate an instance of IdsIndex using ids_data from pf_active and
+    specifying 'coil' as the array extraction node.
+
+    >>> ids_index = IdsIndex(pf_active.ids_data, 'coil')
+
+    Get first 5 coil names.
+
+    >>> ids_index.array('name')[:5]
+    array(['CS3U', 'CS2U', 'CS1', 'CS2L', 'CS3L'], dtype=object)
+
+    Get full array of current data (551 time slices for all 12 coils).
+
+    >>> current = ids_index.array('current.data')
+    >>> current.shape
+    (551, 12)
+
+    Get vector of coil currents at single time slice (itime=320)
+
+    >>> current = ids_index.vector(320, 'current.data')
+    >>> current.shape
+    (12,)
+
+    Load equilibrium ids and initiate new instance of ids_index.
+    >>> equilibrium = Database(pulse, run, name='equilibrium')
+    >>> ids_index = IdsIndex(equilibrium.ids_data, 'time_slice')
+
+    Get psi at itime=30 from profiles_1d and profiles_2d.
+
+    >>> ids_index.vector(30, 'profiles_1d.psi').shape
+    (50,)
+    >>> ids_index.vector(30, 'profiles_2d.psi').shape
+    (65, 129)
+
+    Load pf_active ids containing force data.
+
+    >>> pulse, run = 105011, 9  # DINA scenario including force data
+    >>> pf_active = Database(pulse, run, name='pf_active')
+    >>> ids_index = IdsIndex(pf_active.ids_data, 'coil')
+
+    Use context manager to temporarily switch the ids_node to radial_force
+    and vertical_force and extract force data at itime=100 from each node.
+
+    >>> with ids_index.node('radial_force'):
+    ...     ids_index.vector(100, 'force.data').shape
+    (12,)
+
+    >>> with ids_index.node('vertical_force'):
+    ...     ids_index.vector(100, 'force.data').shape
+    (12,)
+
+    """
 
     ids_data: ImasIds
     ids_node: str = 'time_slice'
@@ -449,11 +545,21 @@ class IdsIndex:
 
         Example
         -------
-        >>> from nova.imas.database import Database
+        Check access to required IDS(s).
+
+        >>> import pytest
+        >>> try:
+        ...     _ = Database(105011, 9).get_ids('pf_active')
+        ... except:
+        ...     pytest.skip('IMAS not installed or 105011/9 unavailable')
+
+        Demonstrate use of context manager for switching active ids_node.
+
+        >>> from nova.imas.database import IdsIndex
         >>> ids_data = Database(105011, 9, name='pf_active').ids_data
         >>> ids_index = IdsIndex(ids_data, 'coil')
         >>> with ids_index.node('vertical_force'):
-        >>>     ids_index.array('force.data').shape
+        ...     ids_index.array('force.data').shape
         (1600, 12)
         """
         _ids_node = self.ids_node
@@ -638,7 +744,10 @@ class IdsData(Datafile, Database):
             data = ids_class(**self.ids_attrs, ids=self.ids).data
         except NameError:  # name missmatch when loading from ids node
             return
-        self.data = self.data.merge(data, combine_attrs='drop_conflicts')
+        if hasattr(self.data, 'time'):
+            data = data.interp(dict(time=self.data.time))
+        self.data = self.data.merge(data, compat='override',
+                                    combine_attrs='drop_conflicts')
 
     def build(self):
         """Build ids dataset."""
@@ -646,7 +755,7 @@ class IdsData(Datafile, Database):
 
 
 @dataclass
-class CoilData(Datafile):
+class CoilData(IdsData):
     """
     Provide cached access to coilset data.
 

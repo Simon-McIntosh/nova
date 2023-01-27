@@ -72,6 +72,8 @@ class Boundary(Plot, Scenario):
         super().build()
         length = max(len(self.outline(itime))
                      for itime in self.data.itime.data)
+        if length == 0:
+            return
         self.data['boundary_index'] = range(length)
         self.data['coordinate'] = ['radial', 'vertical']
         self.data['boundary'] = ('time', 'boundary_index', 'coordinate'), \
@@ -85,11 +87,12 @@ class Boundary(Plot, Scenario):
             length = len(outline)
             self.data['boundary_length'][itime] = length
             self.data['boundary'][itime, :length] = outline
+            print(length)
 
     @property
     def boundary(self):
         """Return trimmed boundary contour."""
-        return self['boundary'][:self['boundary_length'].values].values
+        return self['boundary'][:int(self['boundary_length'].values)].values
 
     def plot_boundary(self, axes=None):
         """Plot 2D boundary at itime."""
@@ -293,13 +296,17 @@ if __name__ == '__main__':
     #import doctest
     #doctest.testmod()
 
-    pulse, run = 105028, 1  # DINA
-    # pulse, run = 135011, 7  # DINA
+    pulse, run = 105028, 1  # DINA -10MA divertor PCS
+    #pulse, run = 135011, 7  # DINA
+    pulse, run = 105011, 9
+    pulse, run = 135003, 5
+    pulse, run = 135007, 4
+
+    pulse, run = 105028, 1
 
     Equilibrium(pulse, run)._clear()
     equilibrium = Equilibrium(pulse, run)
 
-
-    equilibrium.itime = 200
-    equilibrium.plot_2d('psi', mask=0)
-    equilibrium.plot_boundary()
+    #equilibrium.itime = 50
+    #equilibrium.plot_2d('psi', mask=0)
+    #equilibrium.plot_boundary()

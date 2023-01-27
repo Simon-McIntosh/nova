@@ -496,7 +496,7 @@ class ActiveCoilData(IdsCoilData):
         """Insert data via coil method."""
         if self.empty:
             return None
-        self.data['nturn'] = np.abs(self.data['nturn'])
+        self.data['nturn'] = self.data['nturn']
         kwargs = {'active': True, 'fix': False,
                   'name': self.coil_name,
                   'delim': '_', 'nturn': self.data['nturn'],
@@ -699,8 +699,8 @@ class CoilGeometry:
 
     """
 
-    pf_active: Ids | bool | int = True
-    pf_passive: Ids | bool | int = True
+    pf_active: Ids | bool | str = True
+    pf_passive: Ids | bool | str = True
     wall: Ids | bool | str = 'iter_md'
 
     geometry: ClassVar[dict] = dict(pf_active=PoloidalFieldActive,
@@ -734,7 +734,7 @@ class CoilGeometry:
 
 
 @dataclass
-class Machine(CoilSet, CoilGeometry, CoilData, Database):
+class Machine(CoilSet, CoilGeometry, CoilData):
     """Manage ITER machine geometry."""
 
     @property
@@ -824,7 +824,9 @@ if __name__ == '__main__':
     doctest.testmod()
     #dict(pulse=135011, run=7, machine='iter')
 
-    machine = Machine(105028, 1, pf_active='iter_md', pf_passive=False,
+    pulse, run = 105028, 1  # DINA
+
+    machine = Machine(pulse, run, pf_active=True, pf_passive=False,
                       wall=False)
     machine.plot()
 

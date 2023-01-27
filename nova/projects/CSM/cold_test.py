@@ -625,10 +625,10 @@ if __name__ == '__main__':
     #ct.fit('extend', index='CSM3_a', Imin=12.5, Itrim=25, Imax=40, ncol=6)
 
     columns = [name for name in ct.strain.columns.droplevel(1)
-               if 'SThOD' in name]
+               if 'ST1' in name]
     ct.plot_row(columns, index='CSM3', ncol=6)
 
-    ct.fit(columns, index='CSM3', Imin=5, Itrim=40, Imax=40,
+    ct.fit(columns, index='CSM3', Imin=5, Itrim=20, Imax=20,
            ncol=6, trim=True)
 
     #displace = ['DS001', 'DS002', 'DS003', 'DS004', 'DS005']

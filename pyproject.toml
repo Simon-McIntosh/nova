@@ -139,9 +139,10 @@ tag_prefix = ""
 parentdir_prefix = "nova-"
 
 [tool.pytest.ini_options]
+addopts = "--doctest-modules"
 testpaths = [
   "tests",
-  "nova/imas"
+  "nova/imas/database.py"
 ]
 filterwarnings = [
   "once::Warning",

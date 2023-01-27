@@ -141,7 +141,7 @@ class Operate(Machine, Profile, Grid, Equilibrium):
     def update(self):
         """Extend itime update."""
         super().update()
-        self.update_plasma()
+        self.update_plasma_shape()
         self.update_current()
 
     def update_current(self):
@@ -156,11 +156,13 @@ class Operate(Machine, Profile, Grid, Equilibrium):
                                     if name in index))
         self.sloc['Ic'][np.array(coil_index)] = \
             self['current'].values[np.array(ids_index)]
-
-    def update_plasma(self):
-        """Ionize plasma filaments and set turn number."""
-        self.plasma.separatrix = self.boundary
         self.sloc['plasma', 'Ic'] = self['ip']
+
+    def update_plasma_shape(self):
+        """Ionize plasma filaments and set turn number."""
+        if 'boundary' not in self.data:
+            return
+        self.plasma.separatrix = self.boundary
         ionize = self.aloc['ionize']
         radius = self.aloc['x'][ionize]
         height = self.aloc['z'][ionize]
@@ -175,14 +177,33 @@ class Operate(Machine, Profile, Grid, Equilibrium):
 
 if __name__ == '__main__':
 
-    operate = Operate(105011, 9, pf_active='iter_md', ngrid=500, nplasma=300)
 
-    '''
-    operate.itime = 0
+
+    #pulse, run = 105007, 9
+    pulse, run = 135007, 4
+
+    operate = Operate(pulse, run, pf_active=True)
+
+    plasma = operate.aloc['plasma']
+    operate.aloc['nturn'][plasma] = nturn
+    operate.update_aloc_hash('nturn')
+
+    operate.itime = 1000
 
     operate.plot()
     operate.grid.plot()
     operate.plasma.wall.plot()
 
-    norm = operate.force.plot(norm=80e6)
-    '''
+    norm = operate.force.plot(scale=2)
+
+    operate.set_axes(None, '1d')
+    operate.axes.bar(operate.Loc['coil', :].index.values,
+                     operate.force.fr*1e-6)
+    operate.axes.bar(operate.Loc['coil', :].index.values,
+                     operate.data.radial_force[operate.itime]*1e-6, width=0.6)
+
+    operate.set_axes(None, '1d')
+    operate.axes.bar(operate.Loc['coil', :].index.values,
+                     operate.force.fz*1e-6)
+    operate.axes.bar(operate.Loc['coil', :].index.values,
+                     operate.data.vertical_force[operate.itime]*1e-6, width=0.6)

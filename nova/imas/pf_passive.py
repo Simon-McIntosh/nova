@@ -18,6 +18,8 @@ class PF_Passive(Plot, Scenario):
     def build(self):
         """Build netCDF database using data extracted from imasdb."""
         with self.build_scenario():
+            if len(self.ids.loop) == 0:
+                return self
             self.data.coords['loop_name'] = self.ids_index.array('name')
             self.data.coords['loop_index'] = \
                 'loop_name', range(self.data.dims['loop_name'])
@@ -27,5 +29,6 @@ class PF_Passive(Plot, Scenario):
 
 if __name__ == '__main__':
 
-    PF_Passive(105028, 1)._clear()
-    pf_passive = PF_Passive(105028, 1)
+    pulse, run = 105007, 9
+    PF_Passive(pulse, run)._clear()
+    pf_passive = PF_Passive(pulse, run)

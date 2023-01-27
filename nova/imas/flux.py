@@ -5,8 +5,7 @@ import numpy as np
 
 from nova.biot.contour import Contour
 from nova.biot.fieldnull import FieldNull
-from nova.imas import Equilibrium
-from nova.imas.getslice import GetSlice
+from nova.imas.equilibrium import Equilibrium
 from nova.imas.profile import Profile
 
 

@@ -91,10 +91,10 @@ class Turn(CoilSetAttrs):
         self.attrs = additional
         name = self.attrs.get(
             'name', self.frame.build_index(1, name=self.attrs['label'])[0])
-        self.attrs['name'] = name
-        #self.attrs['label'] = \
-        #    ''.join(character for i, character in enumerate(name[0])
-        #            if all(character == _name[i] for _name in name))
+        #self.attrs['name'] = name
+        self.attrs['label'] = \
+            ''.join(character for i, character in enumerate(name[0])
+                    if all(character == _name[i] for _name in name))
         subattrs = {'section': self.turn, 'name': name, 'frame': name,
                     'delim': '_', 'link': True} | self.attrs
         #if isinstance(name, list):

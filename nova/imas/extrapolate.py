@@ -145,7 +145,7 @@ class Extrapolate(Operate):
     def select_free_coils(self):
         """Select free coils."""
         index = [self.loc[name, 'subref'] for name in self.sloc.frame.index]
-        self.saloc['free'] = self.frame.iloc[index].nturn > self.nturn
+        self.saloc['free'] = self.frame.iloc[index].nturn >= self.nturn
         self.saloc['free'] = self.saloc['free'] & ~self.saloc['plasma']
 
     #def update_metadata(self):
@@ -158,8 +158,8 @@ class Extrapolate(Operate):
     #    return ids
 
     def update_current(self):
-        """Dissable ids current update."""
-        pass
+        """Only update plasma current (ignore coil currents if present."""
+        self.sloc['plasma', 'Ic'] = self['ip']
 
     def update(self):
         """Solve pf_active currents to fit internal flux."""
@@ -230,7 +230,7 @@ class Extrapolate(Operate):
     def plot_2d(self, attr='psi', mask=None, levels=51, axes=None):
         """Plot plasma filements and polidal flux."""
         self.get_axes(axes, '2d')
-        super().plot('plasma')
+        super().plot()#'plasma')
         self.plasma.wall.plot()
         vector = getattr(self.grid, attr)
         levels = np.linspace(vector.min(), vector.max(), levels)
@@ -293,6 +293,9 @@ class Extrapolate(Operate):
             self['_current'][data_index] = \
                 self.sloc[index, ['Ic']].squeeze().values
 
+        # switch reference sign for vs3 loop (Upper to Lower)
+        self.data._current[:, -1] *= -1
+
         self.get_axes(None, '1d')
         self.axes.plot(self.data.time[time_index],
                        1e-3*self.data.current[time_index, data_index],
@@ -322,7 +325,7 @@ if __name__ == '__main__':
     #pulse, run = 135011, 7  # DINA
 
     extrapolate = Extrapolate(pulse, run, pf_passive=False,
-                              pf_active='iter_md')
+                              pf_active=True)
 
     import matplotlib.pylab as plt
     extrapolate.mpl_axes.fig = plt.figure(figsize=(6, 9))

@@ -601,7 +601,7 @@ class cold_test(pythonIO):
         if index == 'CSM2_19':
             return slice('2021-03-19', '2021-03-19')
         if index == 'CSM3_a':
-            return slice('2022-12-12', '2022-12-14')
+            return slice('2022-12-12 8:00', '2022-12-12 18:00')
         if index == 'CSM3_b':
             return slice('2023-01-12', '2023-01-14')
         if index == 'CSM3':
@@ -625,10 +625,10 @@ if __name__ == '__main__':
     #ct.fit('extend', index='CSM3_a', Imin=12.5, Itrim=25, Imax=40, ncol=6)
 
     columns = [name for name in ct.strain.columns.droplevel(1)
-               if 'SThOD' in name]
+               if 'ST1' in name]
     ct.plot_row(columns, index='CSM3', ncol=6)
 
-    ct.fit(columns, index='CSM3', Imin=5, Itrim=40, Imax=40,
+    ct.fit(columns, index='CSM3_a', Imin=30, Itrim=50, Imax=40,
            ncol=6, trim=True)
 
     #displace = ['DS001', 'DS002', 'DS003', 'DS004', 'DS005']

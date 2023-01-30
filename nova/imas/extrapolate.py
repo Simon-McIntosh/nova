@@ -101,17 +101,28 @@ class Extrapolate(Operate):
 
     Examples
     --------
+    Skip doctest if IMAS instalation or requisite IDS(s) not found.
+
+    >>> import pytest
+    >>> from nova.imas.database import Database
+    >>> try:
+    ...     _ = Database(130506, 403).get_ids('equilibrium')
+    ...     _ = Database(111001, 202, 'iter_md').get_ids('pf_active')
+    ... except:
+    ...     pytest.skip('IMAS not found or 130506/403, 111001/202 unavailable')
+
     Pass a pulse and run number to initiate as an **IMAS code**:
 
     >>> from nova.imas.extrapolate import Extrapolate
     >>> pulse, run = 130506, 403  # CORSICA equilibrium solution
-    >>> extrapolate = Extrapolate(pulse, run, ngrid=10, nplasma=10)
+    >>> extrapolate = Extrapolate(pulse, run, pf_active='iter_md',
+    ...                           ngrid=10, nplasma=10)
     >>> extrapolate.pulse, extrapolate.run
     (130506, 403)
 
     The equilibrium ids is read from file and stored as an ids attribute:
 
-    >>> extrapolate.ids.code.name
+    >>> extrapolate.get_ids('equilibrium').code.name
     'CORSICA'
 
     To run code as an **IMAS actor**,
@@ -119,13 +130,14 @@ class Extrapolate(Operate):
 
     >>> from nova.imas.database import Database
     >>> pulse, run = 130506, 403  # CORSICA equilibrium solution
-    >>> equilibrium = Database(130506, 403, 'equilibrium', machine='iter')
+    >>> equilibrium = Database(130506, 403, name='equilibrium')
     >>> equilibrium.pulse, equilibrium.run
     (130506, 403)
 
     then pass this ids to the Extrapolate class:
 
-    >>> extrapolate = Extrapolate(ids=equilibrium.ids, limit='ids', ngrid=500, nplasma=100)
+    >>> extrapolate = Extrapolate(ids=equilibrium.ids_data, limit='ids',
+    ...                           ngrid=500, nplasma=100)
     >>> extrapolate.itime = 20
     >>> extrapolate.itime
     20
@@ -145,7 +157,7 @@ class Extrapolate(Operate):
     def select_free_coils(self):
         """Select free coils."""
         index = [self.loc[name, 'subref'] for name in self.sloc.frame.index]
-        self.saloc['free'] = self.frame.iloc[index].nturn > self.nturn
+        self.saloc['free'] = self.frame.iloc[index].nturn >= self.nturn
         self.saloc['free'] = self.saloc['free'] & ~self.saloc['plasma']
 
     #def update_metadata(self):
@@ -158,8 +170,8 @@ class Extrapolate(Operate):
     #    return ids
 
     def update_current(self):
-        """Dissable ids current update."""
-        pass
+        """Only update plasma current (ignore coil currents if present."""
+        self.sloc['plasma', 'Ic'] = self['ip']
 
     def update(self):
         """Solve pf_active currents to fit internal flux."""
@@ -230,7 +242,7 @@ class Extrapolate(Operate):
     def plot_2d(self, attr='psi', mask=None, levels=51, axes=None):
         """Plot plasma filements and polidal flux."""
         self.get_axes(axes, '2d')
-        super().plot('plasma')
+        super().plot()#'plasma')
         self.plasma.wall.plot()
         vector = getattr(self.grid, attr)
         levels = np.linspace(vector.min(), vector.max(), levels)
@@ -293,6 +305,9 @@ class Extrapolate(Operate):
             self['_current'][data_index] = \
                 self.sloc[index, ['Ic']].squeeze().values
 
+        # switch reference sign for vs3 loop (Upper to Lower)
+        self.data._current[:, -1] *= -1
+
         self.get_axes(None, '1d')
         self.axes.plot(self.data.time[time_index],
                        1e-3*self.data.current[time_index, data_index],
@@ -317,12 +332,12 @@ if __name__ == '__main__':
 
     # pulse, run = 114101, 41  # JINTRAC
     pulse, run = 130506, 403  # CORSICA
-    # pulse, run = 105028, 1  # DINA
+    pulse, run = 105028, 1  # DINA
 
     #pulse, run = 135011, 7  # DINA
 
     extrapolate = Extrapolate(pulse, run, pf_passive=False,
-                              pf_active='iter_md')
+                              pf_active=True)
 
     import matplotlib.pylab as plt
     extrapolate.mpl_axes.fig = plt.figure(figsize=(6, 9))

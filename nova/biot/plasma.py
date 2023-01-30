@@ -135,6 +135,19 @@ class Plasma(Plot, netCDF, FrameSetLoc):
         ionize_area = area[ionize]
         nturn[ionize] = ionize_area / np.sum(ionize_area)
 
+    @property
+    def nturn(self):
+        """Manage plasma turns."""
+        plasma = self.aloc['plasma']
+        return self.aloc['nturn'][plasma]
+
+    @nturn.setter
+    def nturn(self, nturn):
+        plasma = self.aloc['plasma']
+        self.aloc['nturn'][plasma] = nturn
+        self.update_aloc_hash('nturn')
+
+
     def __XXX_residual(self, Psi):
 
         self.grid.operator['Psi'].matrix[:, 115] = Psi

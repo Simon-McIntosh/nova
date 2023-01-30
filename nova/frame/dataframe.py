@@ -7,6 +7,7 @@ import copy
 import json
 import pandas
 import numpy as np
+import xarray
 
 from nova.frame.frameattrs import FrameAttrs
 
@@ -286,8 +287,7 @@ class DataFrame(FrameAttrs):
 
     def load(self, filepath, group=None):
         """Load dataframe from netCDF file."""
-        with import_module('xarray').open_dataset(
-                filepath, group=group, cache=True) as data:
+        with xarray.open_dataset(filepath, group=group, cache=True) as data:
             data.load()
             metadata = self.insert_metadata(data.attrs)
             self.__init__(data.to_dataframe(), **metadata)

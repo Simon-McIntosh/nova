@@ -2,13 +2,13 @@
 from contextlib import contextmanager
 from dataclasses import dataclass, field, fields, InitVar
 from importlib import import_module
+from operator import attrgetter
 from typing import Any, ClassVar, Optional, Type
 
 import numpy as np
 import xxhash
 
 from nova.database.netcdf import netCDF
-
 
 # _pylint: disable=too-many-ancestors
 
@@ -85,6 +85,14 @@ class Database(IDS):
 
     Examples
     --------
+    Skip doctest if IMAS instalation or requisite IDS(s) not found.
+
+    >>> import pytest
+    >>> try:
+    ...     _ = Database(130506, 403).get_ids('equilibrium')
+    ... except:
+    ...     pytest.skip('IMAS not installed or 130506/403 unavailable')
+
     Load an equilibrium ids from file with defaults for user, machine and
     backend:
 
@@ -249,13 +257,6 @@ class Database(IDS):
         """
         return self.ids_attrs
 
-    def empty(self, ids_path: Optional[str] = None):
-        """Return ids status based on first element extracted from ids_path."""
-        data = self.get_ids(ids_path)
-        if hasattr(data, 'flat'):
-            data = data.flat[0]
-        return data is None or np.isclose(data, -9e40)
-
     def get_ids(self, ids_path: Optional[str] = None, occurrence=None):
         """Return ids. Extend name with ids_path if not None."""
         ids_name = '/'.join((item for item in [self.name, ids_path]
@@ -327,6 +328,15 @@ class DataAttrs:
 
     Examples
     --------
+    Skip doctest if IMAS instalation or requisite IDS(s) not found.
+
+    >>> import pytest
+    >>> try:
+    ...     _ = Database(130506, 403).get_ids('equilibrium')
+    ...     _ = Database(130506, 403).get_ids('pf_active')
+    ... except:
+    ...     pytest.skip('IMAS not found or 130506/403 unavailable')
+
     The get_ids_attrs method is used to resolve a full ids_attrs dict from
     a partial input. If the input to get_ids_attrs is boolean then True
     returns the instance's default':
@@ -434,6 +444,237 @@ class DataAttrs:
 
 
 @dataclass
+class IdsIndex:
+    """
+    Methods for indexing data as arrays from an ids.
+
+    Parameters
+    ----------
+    ids_data : ImasIds
+        IMAS IDS (in-memory).
+    ids_node : str
+        Array extraction node.
+
+    Examples
+    --------
+    Check access to required IDS(s).
+
+    >>> import pytest
+    >>> try:
+    ...     _ = Database(105028, 1).get_ids('pf_active')
+    ...     _ = Database(105028, 1).get_ids('equilibrium')
+    ...     _ = Database(105011, 9).get_ids('pf_active')
+    ... except:
+    ...     pytest.skip('IMAS not installed or 105028/1, 105011/9 unavailable')
+
+    First load an ids, accomplished here using the Database class from
+    nova.imas.database.
+
+    >>> from nova.imas.database import Database, IdsIndex
+    >>> pulse, run = 105028, 1  # DINA scenario data
+    >>> pf_active = Database(pulse, run, name='pf_active')
+
+    Initiate an instance of IdsIndex using ids_data from pf_active and
+    specifying 'coil' as the array extraction node.
+
+    >>> ids_index = IdsIndex(pf_active.ids_data, 'coil')
+
+    Get first 5 coil names.
+
+    >>> ids_index.array('name')[:5]
+    array(['CS3U', 'CS2U', 'CS1', 'CS2L', 'CS3L'], dtype=object)
+
+    Get full array of current data (551 time slices for all 12 coils).
+
+    >>> current = ids_index.array('current.data')
+    >>> current.shape
+    (551, 12)
+
+    Get vector of coil currents at single time slice (itime=320)
+
+    >>> current = ids_index.vector(320, 'current.data')
+    >>> current.shape
+    (12,)
+
+    Load equilibrium ids and initiate new instance of ids_index.
+    >>> equilibrium = Database(pulse, run, name='equilibrium')
+    >>> ids_index = IdsIndex(equilibrium.ids_data, 'time_slice')
+
+    Get psi at itime=30 from profiles_1d and profiles_2d.
+
+    >>> ids_index.vector(30, 'profiles_1d.psi').shape
+    (50,)
+    >>> ids_index.vector(30, 'profiles_2d.psi').shape
+    (65, 129)
+
+    Load pf_active ids containing force data.
+
+    >>> pulse, run = 105011, 9  # DINA scenario including force data
+    >>> pf_active = Database(pulse, run, name='pf_active')
+    >>> ids_index = IdsIndex(pf_active.ids_data, 'coil')
+
+    Use context manager to temporarily switch the ids_node to radial_force
+    and vertical_force and extract force data at itime=100 from each node.
+
+    >>> with ids_index.node('radial_force'):
+    ...     ids_index.vector(100, 'force.data').shape
+    (12,)
+
+    >>> with ids_index.node('vertical_force'):
+    ...     ids_index.vector(100, 'force.data').shape
+    (12,)
+
+    """
+
+    ids_data: ImasIds
+    ids_node: str = 'time_slice'
+    transpose: bool = field(init=False, default=False)
+    length: int = field(init=False, default=0)
+    shapes: dict[str, tuple[int] | tuple[()]] = \
+        field(init=False, default_factory=dict)
+
+    def __post_init__(self):
+        """Calculate length of time vector."""
+        self.ids = self.ids_node
+        self.length = len(self.ids)
+
+    @contextmanager
+    def node(self, ids_node: str):
+        """
+        Permit tempary change to an instance's ids_node.
+
+        Example
+        -------
+        Check access to required IDS(s).
+
+        >>> import pytest
+        >>> try:
+        ...     _ = Database(105011, 9).get_ids('pf_active')
+        ... except:
+        ...     pytest.skip('IMAS not installed or 105011/9 unavailable')
+
+        Demonstrate use of context manager for switching active ids_node.
+
+        >>> from nova.imas.database import IdsIndex
+        >>> ids_data = Database(105011, 9, name='pf_active').ids_data
+        >>> ids_index = IdsIndex(ids_data, 'coil')
+        >>> with ids_index.node('vertical_force'):
+        ...     ids_index.array('force.data').shape
+        (1600, 12)
+        """
+        _ids_node = self.ids_node
+        self.ids = ids_node
+        yield
+        self.ids = _ids_node
+
+    @property
+    def ids(self):
+        """Return ids_data node."""
+        return attrgetter(self.ids_node)(self.ids_data)
+
+    @ids.setter
+    def ids(self, ids_node: str | None):
+        """Update ids node."""
+        if ids_node is not None:
+            self.transpose = ids_node != 'time_slice'
+            self.ids_node = ids_node
+
+    def __getitem__(self, path: str) -> tuple[int] | tuple[()]:
+        """Return cached dimension length."""
+        try:
+            return self.shapes[path]
+        except KeyError:
+            self.shapes[path] = self._path_shape(path)
+            return self[path]
+
+    def shape(self, path) -> tuple[int, ...]:
+        """Return attribute array shape."""
+        return (self.length,) + self[path]
+
+    def _path_shape(self, path: str) -> tuple[int] | tuple[()]:
+        """Return data shape at itime=0 on path."""
+        match data := self.get_slice(0, path):
+            case np.ndarray():
+                return data.shape
+            case float() | int() | str():
+                return ()
+            case _:
+                raise ValueError(f'unable to determine data length {path}')
+
+    def get_slice(self, index: int, path: str):
+        """Return attribute slice at node index."""
+        try:
+            return attrgetter(path)(self.ids[index])
+        except AttributeError:  # __structArray__
+            node, path = path.split('.', 1)
+            return attrgetter(path)(
+                attrgetter(node)(self.ids[index])[0])
+
+    def vector(self, itime: int, path: str):
+        """Return attribute data vector at itime."""
+        if len(self[path]) == 0:
+            raise IndexError(f'attribute {path} is 0-dimensional '
+                             'access with self.array(path)')
+        if self.transpose:
+            data = np.zeros(self.shape(path)[:-1], dtype=self.dtype(path))
+            for index in range(self.length):
+                try:
+                    data[index] = self.get_slice(index, path)[itime]
+                except ValueError:  # empty slice
+                    continue
+            return data
+        return self.get_slice(itime, path)
+
+    def array(self, path: str):
+        """Return attribute data array."""
+        data = np.zeros(self.shape(path), dtype=self.dtype(path))
+        for index in range(self.length):
+            try:
+                data[index] = self.get_slice(index, path)
+            except ValueError:  # empty slice
+                pass
+        if self.transpose:
+            return data.T
+        return data
+
+    def empty(self, path: str):
+        """Return status based on first data point extracted from ids_data."""
+        try:
+            data = self.get_slice(0, path)
+        except IndexError:
+            return True
+        if hasattr(data, 'flat'):
+            try:
+                data = data.flat[0]
+            except IndexError:
+                return True
+        try:  # string
+            return len(data) == 0
+        except TypeError:
+            return data is None or np.isclose(data, -9e40)
+
+    def dtype(self, path: str):
+        """Return data point type."""
+        if self.empty(path):
+            raise ValueError(f'data entry at {path} is empty')
+        data = self.get_slice(0, path)
+        if isinstance(data, str):
+            return object
+        if hasattr(data, 'flat'):
+            return type(data.flat[0])
+        return type(data)
+
+    @staticmethod
+    def get_path(branch: str, attr: str) -> str:
+        """Return ids attribute path."""
+        if not branch:
+            return attr
+        if '*' in branch:
+            return branch.replace('*', attr)
+        return '.'.join((branch, attr))
+
+
+@dataclass
 class Datafile(netCDF):
     """
     Provide cached acces to imas ids data.
@@ -501,9 +742,12 @@ class IdsData(Datafile, Database):
         """Load data from IdsClass and merge."""
         try:
             data = ids_class(**self.ids_attrs, ids=self.ids).data
-        except (NameError, IndexError):
+        except NameError:  # name missmatch when loading from ids node
             return
-        self.data = self.data.merge(data, combine_attrs='drop_conflicts')
+        if hasattr(self.data, 'time'):
+            data = data.interp(dict(time=self.data.time))
+        self.data = self.data.merge(data, compat='override',
+                                    combine_attrs='drop_conflicts')
 
     def build(self):
         """Build ids dataset."""
@@ -511,7 +755,7 @@ class IdsData(Datafile, Database):
 
 
 @dataclass
-class CoilData(Datafile):
+class CoilData(IdsData):
     """
     Provide cached access to coilset data.
 

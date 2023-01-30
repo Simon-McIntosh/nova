@@ -139,6 +139,7 @@ tag_prefix = ""
 parentdir_prefix = "nova-"
 
 [tool.pytest.ini_options]
+addopts = "--doctest-modules"
 testpaths = [
   "tests",
   "nova/imas"
@@ -154,6 +155,19 @@ filterwarnings = [
 warn_return_any = true
 warn_unused_configs = true 
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = [
+    "scipy",
+    "scipy.constants"
+]
+ignore_missing_imports = true
+
+[tool.pylsp-mypy]
+enabled = true
+live_mode = false
+dmypy = true
+strict = false
 
 [tool.coverage.run]
 omit = [

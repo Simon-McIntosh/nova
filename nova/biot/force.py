@@ -44,8 +44,8 @@ class Force(Plot, BiotOperate):
             polygrid = PolyGrid(polyframe, turn='rectangle', delta=self.dforce,
                                 nturn=self.Loc[name, 'nturn'])
             self.target.insert(polygrid.frame,
-                               xo=self.loc[name, 'x'],
-                               zo=self.loc[name, 'z'],
+                               xo=self.Loc[name, 'x'],
+                               zo=self.Loc[name, 'z'],
                                link=True, label=name, delim='_')
         self.data = BiotSolve(self.subframe, self.target,
                               reduce=[True, self.reduce], turns=[True, True],

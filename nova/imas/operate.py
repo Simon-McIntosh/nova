@@ -155,17 +155,11 @@ class Operate(Machine, Profile, Grid, Equilibrium):
 
     def update_current(self):
         """Update coil currents from pf_active."""
-        if 'current' not in self.data:
+        try:
+            self.sloc['coil', 'Ic'] = self['current']
+            self.sloc['plasma', 'Ic'] = self['ip']
+        except KeyError:  # data unavailable
             return
-        # TODO - fix this - nasty indexing for ill-formated ids inputs
-        index = self.sloc.frame.index
-        coil_name = self.data.coil_name.values
-        coil_index, ids_index = zip(*([index.get_loc(name), i]
-                                    for i, name in enumerate(coil_name)
-                                    if name in index))
-        self.sloc['Ic'][np.array(coil_index)] = \
-            self['current'].values[np.array(ids_index)]
-        self.sloc['plasma', 'Ic'] = self['ip']
 
     def update_plasma_shape(self):
         """Ionize plasma filaments and set turn number."""
@@ -186,33 +180,7 @@ class Operate(Machine, Profile, Grid, Equilibrium):
 
 if __name__ == '__main__':
 
-
-
     #pulse, run = 105007, 9
     pulse, run = 135007, 4
 
     operate = Operate(pulse, run, pf_active=True)
-
-    plasma = operate.aloc['plasma']
-    operate.aloc['nturn'][plasma] = nturn
-    operate.update_aloc_hash('nturn')
-
-    operate.itime = 1000
-
-    operate.plot()
-    operate.grid.plot()
-    operate.plasma.wall.plot()
-
-    norm = operate.force.plot(scale=2)
-
-    operate.set_axes(None, '1d')
-    operate.axes.bar(operate.Loc['coil', :].index.values,
-                     operate.force.fr*1e-6)
-    operate.axes.bar(operate.Loc['coil', :].index.values,
-                     operate.data.radial_force[operate.itime]*1e-6, width=0.6)
-
-    operate.set_axes(None, '1d')
-    operate.axes.bar(operate.Loc['coil', :].index.values,
-                     operate.force.fz*1e-6)
-    operate.axes.bar(operate.Loc['coil', :].index.values,
-                     operate.data.vertical_force[operate.itime]*1e-6, width=0.6)

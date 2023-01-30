@@ -156,7 +156,6 @@ class DataNull(Plot):
             for i, coord in enumerate([x_coordinate, z_coordinate]):
                 maximum, minimum = np.max(cluster[i]), np.min(cluster[i])
                 delta = maximum - minimum
-                print(minimum - 2*delta, coord, maximum + 2*delta)
                 assert coord >= minimum - 2*delta
                 assert coord <= maximum + 2*delta
         return x_coordinate, z_coordinate
@@ -252,9 +251,11 @@ class DataNull(Plot):
         """Plot null points."""
         self.get_axes(axes)
         if self.o_point_number > 0:
-            self.axes.plot(*self.data_o['points'].T, 'C0o')
+            self.axes.plot(*self.data_o['points'].T, 'o',
+                           ms=4, mec='C3', mew=1, mfc="none")
         if self.x_point_number > 0:
-            self.axes.plot(*self.data_x['points'].T, 'C3X')
+            self.axes.plot(*self.data_x['points'].T, 'x',
+                           ms=6, mec='C3', mew=1, mfc="none")
 
 
 @dataclass

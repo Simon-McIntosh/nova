@@ -122,7 +122,7 @@ class Extrapolate(Operate):
 
     The equilibrium ids is read from file and stored as an ids attribute:
 
-    >>> extrapolate.get_ids('equilibrium').code.name
+    >>> extrapolate.get_ids().code.name
     'CORSICA'
 
     To run code as an **IMAS actor**,
@@ -327,8 +327,8 @@ class Extrapolate(Operate):
 
 if __name__ == '__main__':
 
-    # import doctest
-    # doctest.testmod()
+    import doctest
+    doctest.testmod()
 
     # pulse, run = 114101, 41  # JINTRAC
     pulse, run = 130506, 403  # CORSICA
@@ -337,7 +337,7 @@ if __name__ == '__main__':
     #pulse, run = 135011, 7  # DINA
 
     extrapolate = Extrapolate(pulse, run, pf_passive=False,
-                              pf_active=True)
+                              pf_active=True, ngrid=10, nplasma=10)
 
     import matplotlib.pylab as plt
     extrapolate.mpl_axes.fig = plt.figure(figsize=(6, 9))

@@ -1,4 +1,5 @@
 """Manage access to IMAS database."""
+from abc import abstractmethod
 from contextlib import contextmanager
 from dataclasses import dataclass, field, fields, InitVar
 from importlib import import_module
@@ -710,9 +711,9 @@ class Datafile(netCDF):
         except (FileNotFoundError, OSError):
             self.build()
 
+    @abstractmethod
     def build(self):
         """Build ids dataset."""
-        raise NotImplementedError()
 
 
 @dataclass
@@ -724,12 +725,13 @@ class IdsData(Datafile, Database):
     def __post_init__(self):
         """Update filename and group."""
         self.rename()
+        self.load_database()
         if self.filename == '':
             self.filename = self.__class__.__name__.lower()
             self.filename += f'_{self.machine}_{self.pulse}_{self.run}'
             if self.occurrence > 0:
                 self.filename += f'_{self.occurrence}'
-            if self.name is not None:
+            if self.group is None and self.name is not None:
                 self.group = self.name
         super().__post_init__()
 
@@ -744,14 +746,10 @@ class IdsData(Datafile, Database):
             data = ids_class(**self.ids_attrs, ids=self.ids).data
         except NameError:  # name missmatch when loading from ids node
             return
-        if hasattr(self.data, 'time'):
-            data = data.interp(dict(time=self.data.time))
+        #if hasattr(self.data, 'time') and hasattr(data, 'time'):
+        #    data = data.interp(dict(time=self.data.time))
         self.data = self.data.merge(data, compat='override',
                                     combine_attrs='drop_conflicts')
-
-    def build(self):
-        """Build ids dataset."""
-        raise NotImplementedError()
 
 
 @dataclass
@@ -784,10 +782,6 @@ class CoilData(IdsData):
         if hasattr(super(), 'group_attrs'):
             return super().group_attrs
         return {}
-
-    def build(self):
-        """Build ids dataset."""
-        raise NotImplementedError()
 
 
 if __name__ == '__main__':

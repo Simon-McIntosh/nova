@@ -287,7 +287,7 @@ class DataFrame(FrameAttrs):
 
     def load(self, filepath, group=None):
         """Load dataframe from netCDF file."""
-        with xarray.open_dataset(filepath, group=group, cache=True) as data:
+        with xarray.open_dataset(filepath, group=group, cache=False) as data:
             data.load()
             metadata = self.insert_metadata(data.attrs)
             self.__init__(data.to_dataframe(), **metadata)

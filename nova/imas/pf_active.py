@@ -23,17 +23,6 @@ class PF_Active(Plot, Scenario):
             return coil.name
         return coil.identifier
 
-    def initalize(self):
-        """Create xarray coil data entries."""
-        coords = self.data.attrs['pf_active']
-        shape = tuple(self.data.dims[coordinate] for coordinate in coords)
-        coil = self.ids.coil[0]
-        for attr in list(self.coil_attrs):
-            if len(getattr(coil, attr).data) > 0:
-                self.data[attr] = coords, np.zeros(shape, float)
-            else:
-                self.coil_attrs.remove(attr)
-
     def build(self):
         """Build netCDF database using data extracted from imasdb."""
         name = [self.coil_name(coil).strip() for coil in self.ids_data.coil]

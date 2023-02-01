@@ -21,12 +21,12 @@ class Grid(Scenario):
             return
         index = self.ids_index.get_slice(0, 'profiles_2d.grid_type.index')
         grid = self.ids_index.get_slice(0, 'profiles_2d.grid')
-        self.data.attrs['grid_type'] = index
-        if self.data.grid_type == -999999999:  # unset
-            self.data.attrs['grid_type'] = 1
-        if self.data.grid_type == 1:
+        grid_type = index
+        if grid_type == -999999999:  # unset
+            grid_type = 1
+        if grid_type == 1:
             return self.rectangular_grid(grid)
-        raise NotImplementedError(f'grid index {index} not implemented.')
+        raise NotImplementedError(f'grid type {grid_type} not implemented.')
 
     def rectangular_grid(self, grid):
         """
@@ -275,7 +275,11 @@ class Equilibrium(Profile2D, Profile1D, Parameter0D, Boundary, Grid):
 
     """
 
-    name: str = 'equilibrium'
+    def __post_init__(self):
+        """Set instance name."""
+        self.name = 'equilibrium'
+        if hasattr(super(), '__post_init__'):
+            super().__post_init__()
 
     def build(self):
         """Build netCDF database using data extracted from imasdb."""
@@ -310,6 +314,6 @@ if __name__ == '__main__':
     Equilibrium(pulse, run)._clear()
     equilibrium = Equilibrium(pulse, run)
 
-    #equilibrium.itime = 50
-    #equilibrium.plot_2d('psi', mask=0)
-    #equilibrium.plot_boundary()
+    equilibrium.itime = 50
+    equilibrium.plot_2d('psi', mask=0)
+    equilibrium.plot_boundary()

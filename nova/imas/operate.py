@@ -5,9 +5,8 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 from scipy.constants import mu_0
-import xarray
 
-from nova.imas.database import Ids
+from nova.imas.database import Ids, IdsIndex, ImasIds
 from nova.imas.equilibrium import Equilibrium
 from nova.imas.machine import Machine
 from nova.imas.profile import Profile
@@ -36,9 +35,9 @@ class Grid:
         - ids: bounds extracted from from equilibrium ids.
     index : {'plasma', 'coil', slice, pandas.Index}
         Filament index from which relative grid limits are set.
-    data: xarray.Dataset, optional
-        IDS xarray dataset required for equilibrium derived grid dimensions.
-        The default is xarray.Dataset()
+    ids: ImasIds, optional
+        IMAS IDS required for equilibrium derived grid dimensions.
+        The default is None
 
     Examples
     --------
@@ -57,11 +56,11 @@ class Grid:
 
     Specify grid relitive to equilibrium ids.
     >>> equilibrium = Equilibrium(130506, 403)
-    >>> Grid(50, 'ids', data=equilibrium.data).grid_attrs
+    >>> Grid(50, 'ids', ids=equilibrium.ids_data).grid_attrs
     {'ngrid': 50, 'limit': [2.75, 8.9, -5.49, 5.51], 'index': 'plasma'}
 
     Extract exact grid from equilibrium ids.
-    >>> grid = Grid('ids', 'ids', data=equilibrium.data)
+    >>> grid = Grid('ids', 'ids', ids=equilibrium.ids_data)
     >>> grid.grid_attrs['ngrid']
     8385
 
@@ -69,15 +68,14 @@ class Grid:
     >>> Grid(1000, 'ids', 'coil')
     Traceback (most recent call last):
         ...
-    AttributeError: data is empty
-    require valid ids data when limit:ids or ngrid:1000 == 'ids'
+    AttributeError: Require IMAS ids when limit:ids or ngrid:1000 == 'ids'
+
     """
 
     ngrid: int | str = 5000
     limit: float | list[float] | str = 0.25
     index: str | slice | pandas.Index = 'plasma'
-    data: xarray.Dataset | xarray.DataArray = field(
-        default_factory=xarray.Dataset, repr=False)
+    ids: ImasIds | None = None
 
     def __post_init__(self):
         """Update grid attributes for equilibrium derived properties."""
@@ -95,27 +93,28 @@ class Grid:
         """Update grid limits."""
         if self.limit != 'ids' and self.ngrid != 'ids':
             return
-        if len(self.data) == 0:
-            raise AttributeError('data is empty\n'
-                                 'require valid ids data when '
-                                 f'limit:{self.limit} '
+        if self.ids is None:
+            raise AttributeError(f'Require IMAS ids when limit:{self.limit} '
                                  f'or ngrid:{self.ngrid} == \'ids\'')
+        ids_index = IdsIndex(self.ids)
+        index = ids_index.get_slice(0, 'profiles_2d.grid_type.index')
+        grid = ids_index.get_slice(0, 'profiles_2d.grid')
         if self.limit == 'ids':  # Load grid limit from equilibrium ids.
-            if self.data.grid_type != 1:
+            if index != 1:
                 raise TypeError('ids limits only valid for rectangular grids'
-                                f'{self.data.grid_type} != 1')
-            limit = [self.data.r.values, self.data.z.values]
+                                f'{index} != 1')
+            limit = [grid.dim1, grid.dim2]
             if self.ngrid == 'ids':
                 self.limit = limit
             else:
                 self.limit = [limit[0][0], limit[0][-1],
                               limit[1][0], limit[1][-1]]
         if self.ngrid == 'ids':
-            self.ngrid = self.data.dims['r'] * self.data.dims['z']
+            self.ngrid = len(grid.dim1) * len(grid.dim2)
 
 
 @dataclass
-class Operate(Machine, Profile, Grid, Equilibrium):
+class Operate(Machine, Grid, Profile, Equilibrium):
     """
     Extend Machine with default values for Operate class.
 
@@ -184,3 +183,7 @@ if __name__ == '__main__':
     pulse, run = 135007, 4
 
     operate = Operate(pulse, run, pf_active=True)
+
+    operate.itime = 50
+    operate.plot()
+    operate.grid.plot()

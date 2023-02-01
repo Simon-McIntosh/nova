@@ -6,11 +6,12 @@ from importlib import import_module
 import string
 from typing import ClassVar, TYPE_CHECKING
 
+import netCDF4
 import numpy as np
 
 from nova.frame.baseplot import Plot
 from nova.frame.coilset import CoilSet
-from nova.imas.database import CoilData, DataAttrs, Database, IDS, Ids, ImasIds
+from nova.imas.database import CoilData, Database, Ids, ImasIds
 from nova.geometry.polygon import Polygon
 if TYPE_CHECKING:
     from nova.frame.shell import Shell
@@ -813,37 +814,26 @@ class Machine(CoilSet, CoilGeometry, CoilData):
                 coilset = geometry(**geometry_attrs, **self.frameset_attrs)
                 self += coilset
         self.solve_biot()
+        if hasattr(super(), 'build'):
+            super().build()
         return self.store()
 
     def load(self):
         """Load machine geometry and data."""
         super().load()
-        self.metadata = self.load_metadata()
+        self.metadata = self.data.attrs
         return self
 
     def store(self):
         """Store frameset, biot attributes and metadata."""
+        self.data.attrs = self.metadata | self.data.attrs
         super().store()
-        self.store_metadata(self.metadata)
         return self
 
 
 if __name__ == '__main__':
 
-    import doctest
-    doctest.testmod()
-    #dict(pulse=135011, run=7, machine='iter')
-
     pulse, run = 105028, 1  # DINA
-
     machine = Machine(pulse, run, pf_active=True, pf_passive=False,
                       wall=False)
     machine.plot()
-
-    #machine.sloc['Ic'] = 1
-    #machine.sloc['plasma', 'Ic'] = -10000
-
-    #machine.plasmagrid.plot()
-
-    #machine.field.solve(0.25)
-    #machine.field.plot()

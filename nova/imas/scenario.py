@@ -22,7 +22,8 @@ class Scenario(GetSlice, IdsData):
         """Manage dataset creation and storage."""
         self.data = xarray.Dataset()
         self.ids_index = IdsIndex(self.ids_data, self.ids_node)
-        self.data.attrs |= self.ids_attrs
+        self.data.attrs[self.name] = \
+            ','.join([str(value) for value in self.ids_attrs.values()])
         self.data.coords['time'] = self.ids_data.time
         self.data.coords['itime'] = 'time', range(len(self.data['time']))
         yield

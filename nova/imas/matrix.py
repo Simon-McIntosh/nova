@@ -10,8 +10,8 @@ from nova.imas.profile import Profile
 class Matrix(Operate):
     """Calculate force and field copuling matricies + write to file."""
 
-    pulse: int = 135014  # 105028
-    run: int = 1  # 1
+    pulse: int = 135014
+    run: int = 1
     pf_active: Ids | bool | str = 'iter_md'
 
     def plot(self):
@@ -23,12 +23,10 @@ class Matrix(Operate):
 
 
 @dataclass
-class Benchmark(Profile):
+class Benchmark(Matrix):
     """Benchmark EM coupling matricies with other IDS."""
 
-    pulse: int = 135007
-    run: int = 4
-    matrix: Matrix = field(default_factory=Matrix)
+    #profile: Profile = field(default)
 
     '''
     def benchmark(self, ):

@@ -110,27 +110,6 @@ class FrameSet(netCDF, FrameSetLoc):
             return dataset[self.group]
         return dataset
 
-    def load_metadata(self):
-        """Return metadata from netCDF file."""
-        metadata = {}
-        with netCDF4.Dataset(self.filepath) as dataset:
-            dataset = self.subset(dataset)
-            if not hasattr(dataset, 'metadata'):
-                return {}
-            for attr in dataset.metadata:
-                metadata[attr] = getattr(dataset, attr)
-        return metadata
-
-    def store_metadata(self, metadata=None):
-        """Store metadata to netCDF file."""
-        if metadata is None:
-            return
-        with netCDF4.Dataset(self.filepath, 'a') as dataset:
-            dataset = self.subset(dataset)
-            dataset.metadata = list(metadata)
-            for attr in metadata:
-                setattr(dataset, attr, metadata[attr])
-
     def load(self):
         """Load frameset from file."""
         self.frame.load(self.filepath, self.subgroup('frame'))
@@ -144,6 +123,7 @@ class FrameSet(netCDF, FrameSetLoc):
                     data.filepath = self.filepath
                     data.group = self.subgroup(data.name)
                     data.load()
+        super().load()
         return self
 
     def store(self):
@@ -156,6 +136,7 @@ class FrameSet(netCDF, FrameSetLoc):
                 data.filepath = self.filepath
                 data.group = self.subgroup(data.name)
                 data.store()
+        super().store()
         return self
 
     def plot(self, index=None, axes=None, **kwargs):

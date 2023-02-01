@@ -20,7 +20,7 @@ def test_extrapolation_grid_relitive_to_coilset():
 def test_extrapolation_grid_relitive_to_ids():
     equilibrium = Equilibrium(ids_attrs['equilibrium']['pulse'],
                               ids_attrs['equilibrium']['run'])
-    grid = Grid(50, 'ids', data=equilibrium.data)
+    grid = Grid(50, 'ids', ids=equilibrium.ids_data)
     assert grid.grid_attrs == {'ngrid': 50, 'limit': [2.75, 8.9, -5.49, 5.51],
                                'index': 'plasma'}
 
@@ -29,14 +29,14 @@ def test_extrapolation_grid_relitive_to_ids():
 def test_extrapolation_grid_exact_copy_of_ids():
     equilibrium = Equilibrium(ids_attrs['equilibrium']['pulse'],
                               ids_attrs['equilibrium']['run'])
-    grid = Grid('ids', 'ids', data=equilibrium.data)
+    grid = Grid('ids', 'ids', ids=equilibrium.ids_data)
     assert grid.grid_attrs['ngrid'] == 8385
 
 
 def test_extrapolation_grid_raises():
     with pytest.raises(AttributeError) as error:
         Grid(1000, 'ids', 'coil')
-    assert 'data is empty' in str(error.value)
+    assert 'Require IMAS ids when' in str(error.value)
 
 
 @mark['CORSICA']

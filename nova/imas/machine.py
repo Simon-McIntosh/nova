@@ -684,38 +684,38 @@ class CoilGeometry:
     >>> geometry = CoilGeometry(wall=False)
     >>> geometry.wall
     False
-    >>> geometry.pf_active_md == PoloidalFieldActive.default_ids_attrs()
+    >>> geometry.pf_active == PoloidalFieldActive.default_ids_attrs()
     True
-    >>> geometry.pf_passive_md == PoloidalFieldPassive.default_ids_attrs()
+    >>> geometry.pf_passive == PoloidalFieldPassive.default_ids_attrs()
     True
 
     Modify pf_active attrs via dict input:
 
-    >>> pf_active_md = CoilGeometry(pf_active_md=dict(run=101)).pf_active_md
-    >>> pf_active_md == PoloidalFieldActive.default_ids_attrs() | dict(run=101)
+    >>> pf_active = CoilGeometry(pf_active=dict(run=101)).pf_active
+    >>> pf_active == PoloidalFieldActive.default_ids_attrs() | dict(run=101)
     True
 
     Specify pf_active as an ids:
 
     >>> database = Database(111001, 202, 'iter_md', name='pf_active')
-    >>> pf_active_md = CoilGeometry(database.ids_data).pf_active_md
-    >>> pf_active_md['run'] == database.ids_hash
+    >>> pf_active = CoilGeometry(database.ids_data).pf_active
+    >>> pf_active['run'] == database.ids_hash
     True
 
     Specify pf_active as an itterable:
 
-    >>> pf_active_md = CoilGeometry(pf_active_md=(111001, 202)).pf_active_md
-    >>> tuple(pf_active_md[attr] for attr in ['pulse', 'run', 'name'])
+    >>> pf_active = CoilGeometry(pf_active=(111001, 202)).pf_active
+    >>> tuple(pf_active[attr] for attr in ['pulse', 'run', 'name'])
     (111001, 202, 'pf_active')
 
     """
 
-    pf_active_md: Ids | bool | str = True
-    pf_passive_md: Ids | bool | str = True
+    pf_active: Ids | bool | str = True
+    pf_passive: Ids | bool | str = True
     wall: Ids | bool | str = 'iter_md'
 
-    geometry: ClassVar[dict] = dict(pf_active_md=PoloidalFieldActive,
-                                    pf_passive_md=PoloidalFieldPassive,
+    geometry: ClassVar[dict] = dict(pf_active=PoloidalFieldActive,
+                                    pf_passive=PoloidalFieldPassive,
                                     wall=Wall)
 
     def __post_init__(self):
@@ -741,7 +741,7 @@ class CoilGeometry:
     @property
     def geometry_attrs(self) -> dict:
         """Return geometry attributes."""
-        return {attr: getattr(self, attr) for attr in self.geometry}
+        return {f'{attr}_md': getattr(self, attr) for attr in self.geometry}
 
 
 @dataclass
@@ -758,10 +758,11 @@ class Machine(CoilSet, CoilGeometry, CoilData):
                 A change in the metadata group hash has been detected.
         """
         metadata = self.coilset_attrs
-        for geometry in self.geometry:
+        for geometry in self.geometry_attrs:
             if (attrs := self.geometry_attrs[geometry]) is False:
                 continue
-            metadata[geometry] = ','.join([str(attrs[attr]) for attr in attrs])
+            metadata[geometry] = \
+                ','.join([str(attrs[attr]) for attr in attrs])
         return metadata
 
     @metadata.setter
@@ -770,13 +771,13 @@ class Machine(CoilSet, CoilGeometry, CoilData):
         attr_hash = self.hash_attrs(self.group_attrs)
         for attr in self.coilset_attrs:
             setattr(self, attr, metadata[attr])
-        for geometry in self.geometry:
+        for geometry in self.geometry_attrs:
             if geometry not in metadata:
                 setattr(self, geometry, False)
                 continue
             values = [self._format_geometry_attrs(attr)
                       for attr in metadata[geometry].split(',')]
-            setattr(self, geometry, dict(zip(Database.attrs, values)))
+            setattr(self, geometry[:-3], dict(zip(Database.attrs, values)))
         assert attr_hash == self.hash_attrs(self.group_attrs)
 
     @staticmethod
@@ -834,6 +835,6 @@ class Machine(CoilSet, CoilGeometry, CoilData):
 if __name__ == '__main__':
 
     pulse, run = 105028, 1  # DINA
-    machine = Machine(pulse, run, pf_active_md=True, pf_passive_md=False,
+    machine = Machine(pulse, run, pf_active=True, pf_passive=False,
                       wall=False)
     machine.plot()

@@ -16,11 +16,11 @@ from nova.imas.pf_active import PF_Active
 class Profile(Plot, GetSlice, IdsData):
     """Interpolation of profiles from an equilibrium time slice."""
 
-    def __post_init__(self):
-        """Merge ids datasets."""
-        super().__post_init__()
-        #self.load_data(PF_Active)
-        #self.load_data(Equilibrium)
+    def build(self):
+        """Build and merge ids datasets."""
+        super().build()
+        self.load_data(PF_Active)
+        self.load_data(Equilibrium)
 
     def update(self):
         """Clear cache following update to itime. Extend as required."""

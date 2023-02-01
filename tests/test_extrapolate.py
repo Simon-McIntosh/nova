@@ -42,7 +42,7 @@ def test_extrapolation_grid_raises():
 @mark['CORSICA']
 def test_extrapolate_attrs():
     extrapolate = Extrapolate(**ids_attrs['CORSICA'], ngrid=10, nplasma=10,
-                              pf_active_md='iter_md')
+                              pf_active='iter_md')
     assert extrapolate.pulse == ids_attrs['CORSICA']['pulse']
     assert extrapolate.run == ids_attrs['CORSICA']['run']
     assert extrapolate.ids_data.code.name == 'CORSICA'

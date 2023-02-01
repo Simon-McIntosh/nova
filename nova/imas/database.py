@@ -302,7 +302,7 @@ class Database(IDS):
         """
         xxh32 = xxhash.xxh32()
         xxh32.update(str(self.ids_data))
-        return xxh32.intdigest()
+        return -xxh32.intdigest()
 
 
 @dataclass

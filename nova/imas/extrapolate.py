@@ -115,7 +115,7 @@ class Extrapolate(Operate):
 
     >>> from nova.imas.extrapolate import Extrapolate
     >>> pulse, run = 130506, 403  # CORSICA equilibrium solution
-    >>> extrapolate = Extrapolate(pulse, run, pf_active='iter_md',
+    >>> extrapolate = Extrapolate(pulse, run, pf_active_md='iter_md',
     ...                           ngrid=10, nplasma=10)
     >>> extrapolate.pulse, extrapolate.run
     (130506, 403)
@@ -327,22 +327,19 @@ class Extrapolate(Operate):
 
 if __name__ == '__main__':
 
-    import doctest
-    doctest.testmod()
-
     # pulse, run = 114101, 41  # JINTRAC
     pulse, run = 130506, 403  # CORSICA
     pulse, run = 105028, 1  # DINA
-
-    #pulse, run = 135011, 7  # DINA
+    # pulse, run = 135011, 7  # DINA
 
     extrapolate = Extrapolate(pulse, run, pf_passive=False,
-                              pf_active=True, ngrid=10, nplasma=10)
+                              pf_active='iter_md', nplasma=10, ngrid=10)
 
+    '''
     import matplotlib.pylab as plt
     extrapolate.mpl_axes.fig = plt.figure(figsize=(6, 9))
 
-    #extrapolate.plot_waveform()
+    extrapolate.plot_waveform()
 
     extrapolate.itime = 36
     extrapolate.plot_2d('psi', mask='map')
@@ -357,3 +354,4 @@ if __name__ == '__main__':
     #extrapolate.plasmagrid.plot()
 
     #extrapolate.annimate(5, filename=filename)
+    '''

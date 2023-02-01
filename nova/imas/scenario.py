@@ -20,7 +20,7 @@ class Scenario(GetSlice, IdsData):
     @contextmanager
     def build_scenario(self):
         """Manage dataset creation and storage."""
-        self.data = xarray.Dataset()
+        #self.data = xarray.Dataset()
         self.ids_index = IdsIndex(self.ids_data, self.ids_node)
         self.data.attrs[self.name] = \
             ','.join([str(value) for value in self.ids_attrs.values()])

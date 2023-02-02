@@ -91,6 +91,13 @@ class Profile(Plot, GetSlice, IdsData):
         self.axes.set_ylabel(attr)
         self.axes.set_xlabel(r'$\psi_{norm}$')
 
+    def plot_current(self, axes=None):
+        """Plot current timeseries."""
+        self.set_axes(axes, '1d')
+        self.axes.plot(self.data.time, 1e-3*self.data.current)
+        self.axes.set_xlabel('time s')
+        self.axes.set_ylabel(r'$I$ kA')
+
 
 if __name__ == '__main__':
 

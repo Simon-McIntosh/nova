@@ -1,7 +1,7 @@
 """Generate and benchmark force and field coupling matricies."""
 from dataclasses import dataclass, field
 
-from nova.imas.database import Ids
+from nova.imas.database import Database, Ids
 from nova.imas.operate import Operate
 from nova.imas.profile import Profile
 
@@ -13,6 +13,7 @@ class Matrix(Operate):
     pulse: int = 135014
     run: int = 1
     pf_active: Ids | bool | str = 'iter_md'
+    time_index: int = 315
 
     def plot(self):
         """Plot coilset, fluxmap and coil force vectors."""
@@ -26,7 +27,13 @@ class Matrix(Operate):
 class Benchmark(Matrix):
     """Benchmark EM coupling matricies with other IDS."""
 
-    #profile: Profile = field(default)
+    profile_ids: Ids = (135007, 4)
+
+    def __post_init__(self):
+        """Generate profile instance."""
+        super().__post_init__()
+        self.profile_ids = Database.update_ids_attrs(self.profile_ids)
+        self.profile = Profile(**self.profile_ids)
 
     '''
     def benchmark(self, ):

@@ -12,6 +12,11 @@ class GetSlice:
     data: xarray.Dataset | xarray.DataArray = \
         field(default_factory=xarray.Dataset, repr=False)
 
+    def __post_init__(self):
+        """Set time index."""
+        super().__post_init__()
+        self.itime = self.time_index
+
     def __getitem__(self, key: str):
         """Regulate access to equilibrium dataset."""
         return self.data[self.match(key)][self.time_index]

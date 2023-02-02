@@ -62,7 +62,8 @@ class Database(IDS):
     ids_data: ImasIds
         IMAS ids.
     ids_attrs: dict
-        Ids attributes as dict with keys [pulse, run, machine, user, name]
+        Ids attributes as dict with keys [pulse, run, machine, occurence,
+                                          user, name, backend]
 
     Notes
     -----
@@ -132,11 +133,11 @@ class Database(IDS):
     Other database attributes such as pulse and run, are
     not avalable when an ids is passed. These values are set to the hash of
     the ids. This enables automatic caching of ids derived data by downstream
-    actors:
+    actors. The ids hash is always negative:
 
-    >>> database.pulse != 130506
+    >>> database.pulse != 130506 and database.pulse < 0
     True
-    >>> database.run != 403
+    >>> database.run != 403 and database.run < 0
     True
 
     The equilibrium and database instances may be shown to share the same ids
@@ -746,8 +747,8 @@ class IdsData(Datafile, Database):
             data = ids_class(**self.ids_attrs, ids=self.ids).data
         except NameError:  # name missmatch when loading from ids node
             return
-        #if hasattr(self.data, 'time') and hasattr(data, 'time'):
-        #    data = data.interp(dict(time=self.data.time))
+        if hasattr(self.data, 'time') and hasattr(data, 'time'):
+            data = data.interp(dict(time=self.data.time))
         self.data = self.data.merge(data, compat='override',
                                     combine_attrs='drop_conflicts')
 

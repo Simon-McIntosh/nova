@@ -182,7 +182,7 @@ if __name__ == '__main__':
     #pulse, run = 105007, 9
     pulse, run = 135007, 4
 
-    operate = Operate(pulse, run, pf_active=True)
+    operate = Operate(pulse, run, pf_active=True, nplasma=50, ngrid=50)
 
     operate.itime = 50
     operate.plot()

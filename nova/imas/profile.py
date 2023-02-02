@@ -18,7 +18,6 @@ class Profile(Plot, GetSlice, IdsData):
 
     def build(self):
         """Build and merge ids datasets."""
-        super().build()
         self.load_data(PF_Active)
         self.load_data(Equilibrium)
 

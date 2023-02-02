@@ -3,8 +3,6 @@ from abc import abstractmethod
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 
-import xarray
-
 from nova.imas.database import IdsData, IdsIndex
 from nova.imas.getslice import GetSlice
 
@@ -20,7 +18,6 @@ class Scenario(GetSlice, IdsData):
     @contextmanager
     def build_scenario(self):
         """Manage dataset creation and storage."""
-        #self.data = xarray.Dataset()
         self.ids_index = IdsIndex(self.ids_data, self.ids_node)
         self.data.attrs[self.name] = \
             ','.join([str(value) for value in self.ids_attrs.values()])

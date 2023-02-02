@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 
+from nova.imas.database import Database
 from nova.imas.equilibrium import Equilibrium
 from nova.imas.extrapolate import Extrapolate
 from nova.imas.operate import Grid
@@ -14,6 +15,16 @@ mark['CORSICA'] = pytest.mark.skipif(not load_ids(**ids_attrs['CORSICA']),
 def test_extrapolation_grid_relitive_to_coilset():
     grid_attrs = Grid(100, 0, 'coil').grid_attrs
     assert grid_attrs == {'ngrid': 100, 'limit': 0, 'index': 'coil'}
+
+
+@mark['CORSICA']
+def test_load_from_ids():
+    equilibrium = Database(**ids_attrs['CORSICA'])
+    kwargs = dict(ids=equilibrium.ids_data, limit='ids', ngrid=5, nplasma=5,
+                  dfield=0, dforce=-10, filename='tmp')
+    Extrapolate(**kwargs)._clear()
+    extrapolate = Extrapolate(**kwargs)
+    extrapolate._clear()
 
 
 @mark['equilibrium']

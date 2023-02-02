@@ -155,7 +155,7 @@ class Axes:
         sns.despine(ax=axes)
 
     @staticmethod
-    def _axes_style(axes, style):
+    def _set_style(style, axes):
         """Set style on single axes instance."""
         match style:
             case '1d':
@@ -172,7 +172,7 @@ class Axes:
         if style is None:
             style = self.style
         for axes in np.atleast_1d(self.axes):
-            self._axes_style(axes, style)
+            self._set_style(style, axes)
         if style == '1d':
             self.despine()
         self.style = style
@@ -280,7 +280,7 @@ class Plot:
         """Set axes instance and style."""
         if axes is None:
             return self.mpl_axes.generate(style, **kwargs)
-        return self.get_axes(axes, style)
+        return self.get_axes(style, axes=axes)
 
     def get_axes(self, style: Optional[str] = None, axes=None):
         """Get current axes instance and set style."""

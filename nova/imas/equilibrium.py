@@ -95,7 +95,7 @@ class Boundary(Plot, Scenario):
 
     def plot_boundary(self, axes=None):
         """Plot 2D boundary at itime."""
-        self.get_axes(axes, '2d')
+        self.get_axes('2d', axes=axes)
         self.axes.plot(self.boundary[:, 0], self.boundary[:, 1],
                        'gray', alpha=0.5)
 
@@ -122,7 +122,7 @@ class Parameter0D(Plot, Scenario):
 
     def plot_0d(self, attr, axes=None):
         """Plot 0D parameter timeseries."""
-        self.set_axes(axes, '1d')
+        self.set_axes('1d', axes=axes)
         self.axes.plot(self.data.time, self.data[attr], label=attr)
 
 
@@ -155,7 +155,7 @@ class Profile1D(Plot, Scenario):
 
     def plot_1d(self, attr='psi', axes=None, **kwargs):
         """Plot 1d profile."""
-        self.set_axes(axes, '1d')
+        self.set_axes('1d', axes=axes)
         self.axes.plot(self.data.psi_norm, self[attr], **kwargs)
 
 
@@ -179,7 +179,7 @@ class Profile2D(BiotPlot, Scenario):
 
     def plot_2d(self, attr='psi', mask=0, axes=None, **kwargs):
         """Plot 2d profile."""
-        self.set_axes(axes, '2d')
+        self.set_axes('2d', axes=axes)
         kwargs = self.contour_kwargs(**kwargs)
         QuadContourSet = self.axes.contour(
             self.data.r, self.data.z, self.data_2d(attr, mask).T, **kwargs)

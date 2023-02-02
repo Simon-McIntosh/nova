@@ -143,6 +143,7 @@ class Operate(Machine, Grid, Profile, Equilibrium):
     def solve_biot(self):
         """Extend machine solve biot to include extrapolation grid."""
         super().solve_biot()
+        self.field.solve()
         self.force.solve()
         self.grid.solve(**self.grid_attrs)
 

@@ -47,7 +47,7 @@ class Circuit(Plot, netCDF, FrameSetLoc):
 
     def plot(self, circuit: str, axes=None):
         """Plot directed graph."""
-        self.set_axes(axes, '2d')
+        self.set_axes('2d', axes=axes)
         edge_list = self.edge_list(circuit)
         networkx = import_module('networkx')
         dig = networkx.DiGraph(edge_list.values())

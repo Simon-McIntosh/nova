@@ -139,7 +139,7 @@ class PolyPlot(Plot, Properties, Labels, metamethod.PolyPlot, BasePlot):
         index = self.get_index(index)  # retrieve frame index
         if sum(index) == 0:
             return
-        self.get_axes(axes, '2d')
+        self.set_axes('2d', axes)
         patch = []
         properties = self.patch_properties(self.frame.part, self.frame.area)
         basecolor = {part: properties[part]['facecolor']

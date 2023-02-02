@@ -1,8 +1,6 @@
 """Manage access to dynamic coil data data."""
 from dataclasses import dataclass, field
 
-import numpy as np
-
 from nova.frame.baseplot import Plot
 from nova.imas.scenario import Scenario
 
@@ -38,7 +36,7 @@ class PF_Active(Plot, Scenario):
 
     def plot(self, axes=None):
         """Plot current timeseries."""
-        self.set_axes(axes, '1d')
+        self.set_axes('1d', axes=axes)
         self.axes.plot(self.data.time, self.data.current)
 
 
@@ -48,6 +46,7 @@ if __name__ == '__main__':
     pulse, run = 105028, 1
     pulse, run = 105011, 9
     pulse, run = 135003, 5
+    #pulse, run = 135007, 4
     PF_Active(pulse, run)._clear()
     pf_active = PF_Active(pulse, run)
     #pf_active = PF_Active(105007, 9)  # b field max timed 135002, 5

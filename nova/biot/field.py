@@ -90,7 +90,7 @@ class Sample(Plot):
 
     def plot(self, axes=None):
         """Plot boundary and interpolant nodes."""
-        self.get_axes(axes, '2d')
+        self.get_axes('2d', axes=axes)
         self.axes.plot(*self.boundary.T, 'C2o', ms=4)
         self.axes.plot(self['radius'], self['height'], 'C1.', ms=4)
 
@@ -122,14 +122,13 @@ class Field(Plot, BiotOperate):
         """Extract boundary and solve magnetic field around coil perimeter."""
         if dfield is not None:
             self.dfield = dfield
-        self.target = BiotFrame(label='Field')
-        index = self.frame.index[self.Loc['coil']]
-        for name in index:
+        self.target = BiotFrame()
+        for name in self.Loc['coil', :].index:
             polyframe = self.frame.loc[name, 'poly']
             if polyframe.poly.boundary.is_ring:
                 sample = Sample(polyframe.boundary, delta=self.dfield)
                 self.target.insert(sample['radius'], sample['height'],
-                                   link=True)
+                                   link=True, label=name, delim='_')
         self.data = BiotSolve(self.subframe, self.target,
                               reduce=[True, False], turns=[True, False],
                               attrs=['Br', 'Bz'], name=self.name).data
@@ -140,12 +139,17 @@ class Field(Plot, BiotOperate):
         super().post_solve()
 
     @property
+    def coil_name(self):
+        """Return target coil name."""
+        return self.data.target[self.data.index].data
+
+    @property
     def points(self):
         """Return point array."""
         return np.array([self.data.x, self.data.z]).T
 
     def plot(self, axes=None, **kwargs):
         """Plot points."""
-        self.get_axes(axes, '2d')
+        self.get_axes('2d', axes=axes)
         kwargs = dict(marker='o', linestyle='', color='C1', ms=4) | kwargs
         self.axes.plot(self.data.coords['x'], self.data.coords['z'], **kwargs)

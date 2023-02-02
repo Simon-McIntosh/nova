@@ -145,7 +145,7 @@ class Oblique(Plot, GeomData):
 
     def plot(self, axes=None):
         """Plot oblique patch verticies and start/end points."""
-        self.set_axes(axes, '2d')
+        self.set_axes('2d', axes=axes)
         self.axes.plot(*self.poly.boundary.xy, 'o', label='vertex')
         self.axes.plot(*self.start, 'C1o', label='start')
         self.axes.plot(*self.end, 'C3o', label='end')
@@ -418,7 +418,7 @@ class PassiveShellData(Plot, FrameData):
 
     def plot(self, axes=None):
         """Plot shell centerlines."""
-        self.set_axes(axes, '2d')
+        self.set_axes('2d', axes=axes)
         for loop in self.points:
             self.axes.plot(loop[:, 0], loop[:, 1], 'o-')
 
@@ -579,7 +579,7 @@ class ContourData(Plot):
 
     def plot(self, axes=None):
         """Plot contours."""
-        self.axes.set_axes(axes, '2d')
+        self.axes.set_axes('2d', axes=axes)
         for component in self.data.items():
             self.axes.plot(*self.data[component].T, label=component)
         self.axes.legend()
@@ -629,7 +629,7 @@ class Contour(Plot):
 
     def plot(self, axes=None):
         """Plot closed contour."""
-        self.set_axes(axes, '2d')
+        self.set_axes('2d', axes=axes)
         self.axes.plot(*self.loop.T, 'C3-')
 
 

@@ -129,10 +129,10 @@ class Axes:
     _fig: matplotlib.figure.Figure | None = field(init=False, repr=False)
     _axes: matplotlib.axes.Axes | None = field(init=False, repr=False)
 
-    def generate(self, style='2d'):
+    def generate(self, style='2d', nrows=1, ncols=1, **kwargs):
         """Generate new axis instance."""
         plt = import_module('matplotlib.pyplot')
-        self.fig, self.axes = plt.subplots(1, 1)
+        self.fig, self.axes = plt.subplots(nrows, ncols, **kwargs)
         self.set_style(style)
         return self.axes
 
@@ -146,25 +146,35 @@ class Axes:
         self._axes = import_module('matplotlib.pyplot').gca()
         return self._axes
 
-    def despine(self):
+    def despine(self, axes=None):
         """Remove spines from axes instance."""
         sns = import_module('seaborn')
-        sns.despine(ax=self.axes)
+        if axes is None:
+            for axes in np.atleast_1d(self.axes):
+                sns.despine(ax=axes)
+        sns.despine(ax=axes)
+
+    @staticmethod
+    def _axes_style(axes, style):
+        """Set style on single axes instance."""
+        match style:
+            case '1d':
+                axes.set_aspect('auto')
+                axes.axis('on')
+            case '2d':
+                axes.set_aspect('equal')
+                axes.axis('off')
+            case _:
+                raise NotImplementedError(f'style {style} not implemented')
 
     def set_style(self, style: Optional[str] = None):
         """Set axes style."""
         if style is None:
             style = self.style
-        match style:
-            case '1d':
-                self.axes.set_aspect('auto')
-                self.axes.axis('on')
-                self.despine()
-            case '2d':
-                self.axes.set_aspect('equal')
-                self.axes.axis('off')
-            case _:
-                raise NotImplementedError(f'style {style} not implemented')
+        for axes in np.atleast_1d(self.axes):
+            self._axes_style(axes, style)
+        if style == '1d':
+            self.despine()
         self.style = style
 
     @property
@@ -266,13 +276,13 @@ class Plot:
     def axes_style(self, style: str):
         self.mpl_axes.set_style(style)
 
-    def set_axes(self, axes, style: Optional[str] = None):
+    def set_axes(self, style: Optional[str] = None, axes=None, **kwargs):
         """Set axes instance and style."""
         if axes is None:
-            return self.mpl_axes.generate(style)
+            return self.mpl_axes.generate(style, **kwargs)
         return self.get_axes(axes, style)
 
-    def get_axes(self, axes, style: Optional[str] = None):
+    def get_axes(self, style: Optional[str] = None, axes=None):
         """Get current axes instance and set style."""
         self.axes = axes
         self.axes_style = style

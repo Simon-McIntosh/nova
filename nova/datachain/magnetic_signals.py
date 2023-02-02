@@ -62,7 +62,7 @@ class Waveform(Plot, Generator):
 
     def plot_psd(self, axes=None, **kwargs):
         """Plot signals power spectral densty."""
-        self.set_axes(axes, '1d')
+        self.set_axes('1d', axes=axes)
         frequency, Pxx = scipy.signal.periodogram(self.sample)
         self.axes.semilogy(frequency[1:], Pxx[1:], **kwargs)
         self.axes.set_xlabel('normalized frequency')

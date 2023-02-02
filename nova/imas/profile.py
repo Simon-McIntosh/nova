@@ -24,10 +24,9 @@ class Profile(Plot, GetSlice, IdsData):
 
     def update(self):
         """Clear cache following update to itime. Extend as required."""
-        super().update
-        self._clear_cached_properties()
+        self.clear_cached_properties()
 
-    def _clear_cached_properties(self):
+    def clear_cached_properties(self):
         """Clear cached properties."""
         for attr in ['psi_axis', 'psi_boundary',
                      'psi_rbs', 'j_tor_rbs', 'p_prime', 'ff_prime']:
@@ -84,7 +83,7 @@ class Profile(Plot, GetSlice, IdsData):
 
     def plot_profile(self, attr='p_prime', axes=None):
         """Plot flux function interpolants."""
-        self.set_axes(axes, '1d')
+        self.set_axes('1d', axes=axes)
         psi_norm = np.linspace(0, 1, 500)
         self.axes.plot(self.data.psi_norm, self[attr], '.')
         self.axes.plot(psi_norm, getattr(self, attr)(psi_norm), '-')
@@ -93,7 +92,7 @@ class Profile(Plot, GetSlice, IdsData):
 
     def plot_current(self, axes=None):
         """Plot current timeseries."""
-        self.set_axes(axes, '1d')
+        self.set_axes('1d', axes=axes)
         self.axes.plot(self.data.time, 1e-3*self.data.current)
         self.axes.set_xlabel('time s')
         self.axes.set_ylabel(r'$I$ kA')

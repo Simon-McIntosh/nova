@@ -154,7 +154,7 @@ class Contour(LinePlot):
         else:
             index = bisect.bisect_right(-contour_psi, -psi)
         line = np.array(self.lines)[self.loc['closed']][index]
-        self.set_axes(axes, '1d')
+        self.set_axes('1d', axes=axes)
         self.axes.plot(line.points[:, 0], line.variable, 'C0.', ms=5,
                        label=rf'contour: $\psi^\prime$={psi}')
         radius = np.linspace(np.min(line.points[:, 0]),
@@ -172,7 +172,7 @@ class Contour(LinePlot):
     def plot_1d(self, norm: Callable | None = None, index: int = 0,
                 axes=None, **kwargs):
         """Plot flux function fit."""
-        self.set_axes(axes, '1d')
+        self.set_axes('1d', axes=axes)
         psi = self.loc['psi']
         if norm is not None:
             psi = norm(psi)  # COCOS

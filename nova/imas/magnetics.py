@@ -142,7 +142,7 @@ class Magnetics(Plot, Database):
 
     def plot(self, axes=None):
         """Plot diagnostics."""
-        self.set_axes(axes, '2d')
+        self.set_axes('2d', axes=axes)
         data = self['flux_loop']
 
         for index in data.loc[data.group == 'AD'].index:

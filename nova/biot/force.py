@@ -62,15 +62,20 @@ class Force(Plot, BiotOperate):
             self.data.coords['z'] = 'target', self.target.z
         super().post_solve()
 
+    @property
+    def coil_name(self):
+        """Return target coil names."""
+        return self.data.target.data
+
     def plot_points(self, axes=None, **kwargs):
         """Plot force intergration points."""
-        self.get_axes(axes, '2d')
+        self.get_axes('2d', axes=axes)
         kwargs = dict(marker='o', linestyle='', color='C2', ms=4) | kwargs
         self.axes.plot(self.data.coords['x'], self.data.coords['z'], **kwargs)
 
     def plot(self, scale=1, norm=None, axes=None, **kwargs):
         """Plot force vectors and intergration points."""
-        self.get_axes(axes, '2d')
+        self.get_axes('2d', axes)
         vector = np.c_[self.fr, self.fz]
         if norm is None:
             norm = np.max(np.linalg.norm(vector, axis=1))

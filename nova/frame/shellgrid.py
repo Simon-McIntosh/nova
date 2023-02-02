@@ -67,7 +67,7 @@ class ShellCoords(Plot):
 
     def plot_coordinates(self, axes=None):
         """Plot shell coordinates."""
-        self.set_axes(axes, '2d')
+        self.set_axes('2d', axes=axes)
         self.asxes.plot(self.x_coordinate, self.z_coordinate, '.-',
                         label='coords')
 
@@ -159,7 +159,7 @@ class ShellSegment(ShellInterp):
 
     def plot_features(self, axes=None):
         """Plot RDP features."""
-        self.set_axes(axes, '2d')
+        self.set_axes('2d', axes=axes)
         self.axes.plot(*self.interp(self.rdp).T, 's', label='rdp')
 
     @property

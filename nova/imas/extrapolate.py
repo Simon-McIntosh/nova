@@ -241,7 +241,7 @@ class Extrapolate(Operate):
 
     def plot_2d(self, attr='psi', mask=None, levels=51, axes=None):
         """Plot plasma filements and polidal flux."""
-        self.get_axes(axes, '2d')
+        self.get_axes('2d', axes=axes)
         super().plot()#'plasma')
         self.plasma.wall.plot()
         vector = getattr(self.grid, attr)

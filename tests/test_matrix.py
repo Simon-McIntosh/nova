@@ -6,14 +6,15 @@ from nova.imas.matrix import Benchmark
 try:
     import imas
 except ImportError:
-    pytest.skip('IMAS module unavailable')
+    pytest.skip('IMAS module unavailable', allow_module_level=True)
 
 
 try:
     benchmark = Benchmark(nplasma=150, ngrid=0, dfield=-15, dforce=-100)
 except imas.ids_base.ALException:
     pytest.skip('Requisite IDSs unavailable. '
-                'Unable to initiate matrix benchmark, skipping tests')
+                'Unable to initiate matrix benchmark, skipping tests',
+                allow_module_level=True)
 
 
 @pytest.mark.parametrize('itime', [0, 10, 200, 1000, 1800, -1])

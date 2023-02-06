@@ -68,15 +68,34 @@ class PulseSchedule(Plot, Scenario):
 
         return self
 
+    def plot(self):
+        """Plot pulse schedule profile."""
+        self.set_axes('1d', nrows=4, sharex=True)
+        self.axes[0].plot(self.data.time, 1e-6*self.data.i_plasma, 'C0')
+        self.axes[0].set_ylabel(r'$I_p$ MA')
+        self.axes[1].plot(self.data.time, self.data.loop_voltage, 'C1')
+        self.axes[1].set_ylabel(r'$V_{loop}$ Vm$^{-1}$')
+        self.axes[2].plot(self.data.time, self.data.li_3, 'C2')
+        self.axes[2].set_ylabel(r'$Li_3$')
+        self.axes[3].plot(self.data.time, self.data.minor_radius, 'C3',
+                          label=r'$r$')
+        self.axes[3].plot(self.data.time, self.data.elongation, 'C4',
+                          label=r'$\kappa$')
+        self.axes[3].plot(self.data.time, self.data.triangularity, 'C5',
+                          label=r'$\delta$')
+        self.axes[3].set_ylabel('section')
+        self.axes[3].legend()
+        self.axes[-1].set_xlabel('time s')
+
 
 
 if __name__ == '__main__':
 
     ids = 135007, 4
-    #ids = 135011, 7
-
+    # ids = 135011, 7
+    ids = 135003, 5
 
     PulseSchedule(*ids)._clear()
-    pulse = PulseSchedule(*ids)
+    schedule = PulseSchedule(*ids)
 
-    print(pulse.data.data_vars)
+    schedule.plot()

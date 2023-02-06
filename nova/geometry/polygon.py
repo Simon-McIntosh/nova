@@ -97,8 +97,8 @@ class Polygon(PolyFrame):
             Malformed bounding box, shape is not (4,).
             Malformed bounding loop, shape is not (n, 2).
 
-        Stores
-        ------
+        Returns
+        -------
         polygon : shapely.geometry.Polygon
 
         """

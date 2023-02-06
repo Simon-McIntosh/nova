@@ -28,10 +28,13 @@ class PF_Active(Plot, Scenario):
             self.data.coords['coil_name'] = name
             self.data.coords['coil_index'] = 'coil_name', range(len(name))
             self.append(('time', 'coil_name'), self.coil_attrs, '*.data')
+            coil_number = len(self.data.coil_name)
             for force in ['radial', 'vertical']:
                 with self.ids_index.node(f'{force}_force'):
-                    self.append(('time', 'coil_name'), ['force'], '*.data',
-                                prefix=f'{force}_')
+                    if self.ids_index.empty('force.data'):
+                        continue
+                    self.data[f'{force}_force'] = ('time', 'coil_name'), \
+                        self.ids_index.array('force.data')[:, :coil_number]
         return self
 
     def plot(self, axes=None):
@@ -48,9 +51,9 @@ if __name__ == '__main__':
     pulse, run = 105007, 9
     pulse, run = 105011, 10
     pulse, run = 135003, 5
-    #pulse, run = 115002, 4
+    # pulse, run = 115002, 4
     pulse, run = 135007, 4
-    pulse, run = 135011, 7
+    # pulse, run = 135011, 7
     PF_Active(pulse, run)._clear()
     pf_active = PF_Active(pulse, run)
     #pf_active = PF_Active(105007, 9)  # b field max timed 135002, 5

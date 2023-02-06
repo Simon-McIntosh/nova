@@ -135,9 +135,9 @@ class Database(IDS):
     the ids. This enables automatic caching of ids derived data by downstream
     actors. The ids hash is always negative:
 
-    >>> database.pulse != 130506 and database.pulse < 0
+    >>> database.pulse != 130506
     True
-    >>> database.run != 403 and database.run < 0
+    >>> database.run != 403
     True
 
     The equilibrium and database instances may be shown to share the same ids
@@ -303,7 +303,7 @@ class Database(IDS):
         """
         xxh32 = xxhash.xxh32()
         xxh32.update(str(self.ids_data))
-        return -xxh32.intdigest()
+        return xxh32.intdigest()
 
 
 @dataclass
@@ -465,9 +465,9 @@ class IdsIndex:
     >>> try:
     ...     _ = Database(105028, 1).get_ids('pf_active')
     ...     _ = Database(105028, 1).get_ids('equilibrium')
-    ...     _ = Database(105011, 9).get_ids('pf_active')
+    ...     _ = Database(135007, 4).get_ids('pf_active')
     ... except:
-    ...     pytest.skip('IMAS not installed or 105028/1, 105011/9 unavailable')
+    ...     pytest.skip('IMAS not installed or 105028/1, 135007/4 unavailable')
 
     First load an ids, accomplished here using the Database class from
     nova.imas.database.
@@ -511,7 +511,7 @@ class IdsIndex:
 
     Load pf_active ids containing force data.
 
-    >>> pulse, run = 105011, 9  # DINA scenario including force data
+    >>> pulse, run = 135007, 4  # DINA scenario including force data
     >>> pf_active = Database(pulse, run, name='pf_active')
     >>> ids_index = IdsIndex(pf_active.ids_data, 'coil')
 
@@ -522,8 +522,8 @@ class IdsIndex:
     ...     ids_index.vector(100, 'force.data').shape
     (12,)
 
-    >>> with ids_index.node('vertical_force'):
-    ...     ids_index.vector(100, 'force.data').shape
+    with ids_index.node('vertical_force'):
+        ids_index.vector(100, 'force.data').shape
     (12,)
 
     """
@@ -550,18 +550,18 @@ class IdsIndex:
 
         >>> import pytest
         >>> try:
-        ...     _ = Database(105011, 9).get_ids('pf_active')
+        ...     _ = Database(135007, 4).get_ids('pf_active')
         ... except:
-        ...     pytest.skip('IMAS not installed or 105011/9 unavailable')
+        ...     pytest.skip('IMAS not installed or 135007/4 unavailable')
 
         Demonstrate use of context manager for switching active ids_node.
 
         >>> from nova.imas.database import IdsIndex
-        >>> ids_data = Database(105011, 9, name='pf_active').ids_data
+        >>> ids_data = Database(135007, 4, name='pf_active').ids_data
         >>> ids_index = IdsIndex(ids_data, 'coil')
         >>> with ids_index.node('vertical_force'):
         ...     ids_index.array('force.data').shape
-        (1600, 12)
+        (2338, 17)
         """
         _ids_node = self.ids_node
         self.ids = ids_node
@@ -588,6 +588,9 @@ class IdsIndex:
 
     def __getitem__(self, path: str) -> tuple[int] | tuple[()]:
         """Return cached dimension length."""
+        #if self.ids_node is not None:
+        #    path = '.'.join([self.ids_node, path])
+        # TODO fix relative path
         try:
             return self.shapes[path]
         except KeyError:

@@ -42,7 +42,7 @@ class Connect:
         command = f'{self._module_load_string} && {command}'
         return self.ssh.run(command, hide=hide).stdout
 
-    def read_summary(self, columns: str, select: str) -> str:
+    def read_summary(self, columns: str, select: str | int | float) -> str:
         """Return scenario summary."""
         return self.module_run(f'{self.command} -c {columns} -s {select}')
 
@@ -64,7 +64,7 @@ class Connect:
                    col.split('[')[0].strip() for col in frame}
         return frame.rename(columns=columns)
 
-    def load_frame(self, key: str, value: Union[str, int, float]):
+    def load_frame(self, key: str, value: str | int | float):
         """Load scenario summary to dataframe, filtered by key value pair."""
         columns = [col for col in self.columns
                    if col not in self._space_columns]
@@ -214,7 +214,7 @@ if __name__ == '__main__':
 
     #ScenarioDatabase().sync_shot('130012/1')
     scenario = ScenarioDatabase()
-    #scenario.sync_shot('135011/7')
+    #scenario.sync_shot('135003/5')
     #scenario.load_frame('workflow', 'DINA-IMAS')
     #scenario.sync_workflow('DINA-IMAS')
 

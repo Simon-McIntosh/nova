@@ -49,8 +49,8 @@ class PolyGeom(Polygon):
     @cached_property
     def reference_length(self):
         """Return reference loop length."""
-        if self.segment == 'ring':  # dy==ring circumference
-            return 2*np.pi*self.centroid.x
+        if self.segment in ['ring', 'cylinder', 'polygon']:
+            return 2*np.pi*self.centroid.x  # dy==ring circumference
         return 0
 
     @cached_property
@@ -109,6 +109,11 @@ class PolyGeom(Polygon):
         if self.section == 'hexagon':
             return 3/2 * self.height**2 / np.sqrt(3)
         return self.poly.area
+
+    @cached_property
+    def volume(self):
+        """Return polygon area (torus with cross-section in x-z plane)."""
+        return self.loop_length*self.area
 
     @cached_property
     def box(self):
@@ -179,7 +184,7 @@ class PolyGeom(Polygon):
         return {'x': centroid.x, 'y': centroid.y, 'z': centroid.z,
                 'dl': self.length, 'dt': self.thickness,
                 'dx': self.delta.x, 'dy': self.delta.y, 'dz': self.delta.z,
-                'area': self.area, 'rms': self.rms,
+                'area': self.area, 'volume': self.volume, 'rms': self.rms,
                 'poly': PolyFrame(self.poly, self.metadata),
                 'section': self.section}
 

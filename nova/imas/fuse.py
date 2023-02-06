@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 
+from nova.imas.database import Ids
 from nova.imas.machine import Machine
 
 
@@ -14,7 +15,7 @@ class Fuse(Machine):
     """
 
     ncontour: int = 10
-    pf_passive: bool = False
+    pf_passive: Ids | bool | str = False
 
 
 if __name__ == '__main__':

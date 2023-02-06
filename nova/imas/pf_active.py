@@ -45,8 +45,12 @@ if __name__ == '__main__':
     # pf_active = PF_Active(130506, 403, machine='iter')
     pulse, run = 105028, 1
     pulse, run = 105011, 9
+    pulse, run = 105007, 9
+    pulse, run = 105011, 10
     pulse, run = 135003, 5
-    #pulse, run = 135007, 4
+    #pulse, run = 115002, 4
+    pulse, run = 135007, 4
+    pulse, run = 135011, 7
     PF_Active(pulse, run)._clear()
     pf_active = PF_Active(pulse, run)
     #pf_active = PF_Active(105007, 9)  # b field max timed 135002, 5

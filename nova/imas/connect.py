@@ -132,7 +132,8 @@ class ScenarioDatabase(Connect):
             workflow_names = ['CORSICA', 'ASTRA', 'DINA-IMAS']
         for workflow in workflow_names:
             self.load_frame('workflow', workflow)
-        self.copy_frame('equilibrium', 'pf_active', 'pf_passive')
+        #self.copy_frame('equilibrium', 'pf_active', 'pf_passive')
+        self.module_run(self.copy_command(self.frame), hide=True)
         self.rsync()
 
     def sync_shot(self, *shot: str):
@@ -140,7 +141,8 @@ class ScenarioDatabase(Connect):
         self.frame = pandas.DataFrame(
             np.array([s.split('/') for s in shot], int),
             columns=['pulse', 'run'])
-        self.copy_frame('equilibrium', 'pf_active', 'pf_passive', 'magnetics')
+        #self.copy_frame('equilibrium', 'pf_active', 'pf_passive', 'magnetics')
+        self.module_run(self.copy_command(self.frame), hide=True)
         self.rsync()
 
 
@@ -180,7 +182,8 @@ class MachineDatabase(Connect):
     def sync_ids(self, *ids_names):
         """Sync ids names with local repo."""
         if len(ids_names) == 0:
-            ids_names = ['pf_active', 'tf', 'pf_passive', 'magnetics', 'wall']
+            ids_names = ['pf_active', 'tf', 'pf_passive', 'magnetics', 'wall',
+                         'pulse_schedule']
         self.load_ids(*ids_names)
         self.copy_ids()
         self.rsync()
@@ -211,7 +214,7 @@ if __name__ == '__main__':
 
     #ScenarioDatabase().sync_shot('130012/1')
     scenario = ScenarioDatabase()
-    #scenario.sync_shot('135007/4')
+    #scenario.sync_shot('135011/7')
     #scenario.load_frame('workflow', 'DINA-IMAS')
     #scenario.sync_workflow('DINA-IMAS')
 

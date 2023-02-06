@@ -1,7 +1,8 @@
 """Load ids data as xarray datasets."""
 from abc import abstractmethod
 from contextlib import contextmanager
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+from functools import cached_property
 
 from nova.imas.database import IdsData, IdsIndex
 from nova.imas.getslice import GetSlice
@@ -13,16 +14,22 @@ class Scenario(GetSlice, IdsData):
 
     machine: str = 'iter'
     ids_node: str = 'time_slice'
-    ids_index: IdsIndex = field(init=False, repr=False)
+
+    @cached_property
+    def ids_index(self):
+        """Return cached ids_index instance."""
+        return IdsIndex(self.ids_data, self.ids_node)
 
     @contextmanager
     def build_scenario(self):
         """Manage dataset creation and storage."""
-        self.ids_index = IdsIndex(self.ids_data, self.ids_node)
         self.data.attrs[self.name] = \
             ','.join([str(value) for value in self.ids_attrs.values()])
-        self.data.coords['time'] = self.ids_data.time
-        self.data.coords['itime'] = 'time', range(len(self.data['time']))
+        self.data.attrs['homogeneous_time'] = \
+            self.ids_data.ids_properties.homogeneous_time
+        if self.data.attrs['homogeneous_time'] == 1:
+            self.data.coords['time'] = self.ids_data.time
+            self.data.coords['itime'] = 'time', range(len(self.data['time']))
         yield
         self.store()
 

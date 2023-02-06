@@ -536,9 +536,8 @@ class IdsIndex:
         field(init=False, default_factory=dict)
 
     def __post_init__(self):
-        """Calculate length of time vector."""
+        """Initialize ids node."""
         self.ids = self.ids_node
-        self.length = len(self.ids)
 
     @contextmanager
     def node(self, ids_node: str):
@@ -572,7 +571,9 @@ class IdsIndex:
     @property
     def ids(self):
         """Return ids_data node."""
-        return attrgetter(self.ids_node)(self.ids_data)
+        if self.ids_node:
+            return attrgetter(self.ids_node)(self.ids_data)
+        return self.ids_data
 
     @ids.setter
     def ids(self, ids_node: str | None):
@@ -580,6 +581,10 @@ class IdsIndex:
         if ids_node is not None:
             self.transpose = ids_node != 'time_slice'
             self.ids_node = ids_node
+        try:
+            self.length = len(self.ids)
+        except TypeError:
+            self.length = 0
 
     def __getitem__(self, path: str) -> tuple[int] | tuple[()]:
         """Return cached dimension length."""
@@ -602,6 +607,10 @@ class IdsIndex:
                 return ()
             case _:
                 raise ValueError(f'unable to determine data length {path}')
+
+    def get(self, path: str):
+        """Return attribute from ids path."""
+        return attrgetter(path)(self.ids)
 
     def get_slice(self, index: int, path: str):
         """Return attribute slice at node index."""

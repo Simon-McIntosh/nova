@@ -1,4 +1,5 @@
 
+import os
 import tempfile
 
 import numpy as np
@@ -63,6 +64,7 @@ def test_insert_frame_fromfile():
         subframe.store(tmp.name)
         coilset = CoilSet(available=['vtk'])
         coilset.ferritic.insert(tmp.name)
+    os.unlink(tmp.name)
     assert coilset.frame.index.to_list() == ['fi1', 'Fi0']
 
 

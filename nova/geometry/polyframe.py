@@ -56,7 +56,7 @@ class PolyFrame(Plot, GeoFrame):
 
     def plot_boundary(self, axes=None, **kwargs):
         """Plot polygon boundary."""
-        self.get_axes(axes)
+        self.get_axes(axes=axes)
         self.axes.plot(*self.poly.exterior.xy, **kwargs)
 
     @property

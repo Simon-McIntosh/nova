@@ -78,12 +78,12 @@ class PolyGeo(metamethod.PolyGeo):
     required: list[str] = field(default_factory=lambda: [
         'segment', 'section', 'poly'])
     additional: list[str] = field(default_factory=lambda: [
-        'dl', 'dt', 'rms', 'area'])
+        'dl', 'dt', 'rms', 'area', 'volume'])
     require_all: bool = field(init=False, repr=False, default=False)
     base: list[str] = field(init=False, default_factory=lambda: [
         'x', 'y', 'z', 'segment', 'dx', 'dy', 'dz'])
     features: list[str] = field(init=False, default_factory=lambda: [
-        'x', 'y', 'z', 'dx', 'dy', 'dz', 'area', 'rms'])
+        'x', 'y', 'z', 'dx', 'dy', 'dz', 'area',  'volume', 'rms'])
 
     def initialize(self):
         """Init sectional polygon data."""

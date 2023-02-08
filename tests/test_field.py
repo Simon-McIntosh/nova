@@ -97,6 +97,7 @@ def test_store_load():
         del coilset
         path = Path(tmp.name)
         coilset = CoilSet(filename=path.name, dirname=path.parent).load()
+        coilset._clear()
     os.unlink(tmp.name)
     assert np.allclose(bn, coilset.field.bn)
 

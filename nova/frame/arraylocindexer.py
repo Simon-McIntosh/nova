@@ -16,11 +16,17 @@ class DataLocIndexer:
 
     def __setitem__(self, key, value):
         """Set data array item in metaframe.data dict."""
-        self._data[key][:] = value
+        try:
+            self._data[key][:] = value
+        except KeyError:
+            self._data[key[1]][self._data[key[0]]] = value
 
     def __getitem__(self, key) -> np.ndarray:
         """Return data array item in metaframe.data dict."""
-        return self._data[key]
+        try:
+            return self._data[key]
+        except KeyError:
+            return self._data[key[1]][self._data[key[0]]]
 
 
 @dataclass

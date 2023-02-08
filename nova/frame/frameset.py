@@ -47,7 +47,7 @@ class FrameSet(netCDF, FrameSetLoc):
         'Ic'])
     array: list[str] = field(repr=False, default_factory=lambda: [
         'Ic', 'nturn', 'active', 'passive', 'plasma', 'coil',
-        'fix', 'free', 'ferritic'])
+        'fix', 'free', 'ferritic', 'area', 'volume'])
 
     _available: ClassVar[list[str]] = [
         'link', 'part', 'frame', 'dx', 'dy', 'dz', 'area', 'volume',

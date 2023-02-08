@@ -25,6 +25,7 @@ def test_store_load():
         frameset = FrameSet()
         frameset.filepath = tmp.name
         frameset.load()
+        frameset._clear()
     assert (frameset.subframe.link == subframe.link).all()
     assert np.isclose(frameset.sloc['Ic'], [6]).all()
 

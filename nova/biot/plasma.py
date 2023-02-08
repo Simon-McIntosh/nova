@@ -16,6 +16,15 @@ from nova.geometry.polygon import Polygon
 from nova.geometry.pointloop import PointLoop
 
 
+@numba.njit
+def update_nturn(inloop, plasma, ionize, nturn, area):
+    """Update plasma turns."""
+    ionize[plasma] = inloop
+    nturn[plasma] = 0
+    ionize_area = area[ionize]
+    nturn[ionize] = ionize_area / np.sum(ionize_area)
+
+
 @dataclass
 class Plasma(Plot, netCDF, FrameSetLoc):
     """Set plasma separatix, ionize plasma filaments."""
@@ -84,7 +93,7 @@ class Plasma(Plot, netCDF, FrameSetLoc):
     @cached_property
     def pointloop(self):
         """Return pointloop instance, used to check loop membership."""
-        if self.sloc['plasma'].sum() == 0:
+        if self.saloc['plasma'].sum() == 0:
             raise AttributeError('No plasma filaments found.')
         return PointLoop(self.loc['plasma', ['x', 'z']].to_numpy())
 
@@ -111,26 +120,21 @@ class Plasma(Plot, netCDF, FrameSetLoc):
             Bounding loop.
 
         """
-        if self.sloc['plasma'].sum() == 0:
+        if self.saloc['plasma'].sum() == 0:
             return
-        #if not np.allclose(loop[0], loop[1]):
-        #    loop = np.append(loop, loop[:1], axis=0)
         try:
             inloop = self.pointloop.update(loop)
         except numba.TypingError:
             loop = Polygon(loop).boundary
             inloop = self.pointloop.update(loop)
-        plasma = self.aloc['plasma']
-        ionize = self.aloc['ionize']
-        nturn = self.aloc['nturn']
-        area = self.aloc['area']
-        ionize[plasma] = inloop
-        self._update_nturn(plasma, ionize, nturn, area)
+        update_nturn(inloop, self.aloc['plasma'], self.aloc['ionize'],
+                     self.aloc['nturn'], self.aloc['area'])
         self.update_aloc_hash('nturn')
 
     @staticmethod
     @numba.njit
-    def _update_nturn(plasma, ionize, nturn, area):
+    def _update_nturn(inloop, plasma, ionize, nturn, area):
+        ionize[plasma] = inloop
         nturn[plasma] = 0
         ionize_area = area[ionize]
         nturn[ionize] = ionize_area / np.sum(ionize_area)

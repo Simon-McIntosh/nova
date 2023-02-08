@@ -835,6 +835,5 @@ class Machine(CoilSet, CoilGeometry, CoilData):
 if __name__ == '__main__':
 
     pulse, run = 105028, 1  # DINA
-    machine = Machine(pulse, run, pf_active=True, pf_passive=False,
-                      wall=False)
+    machine = Machine(pf_active=True, pf_passive=False, wall=False)
     machine.plot()

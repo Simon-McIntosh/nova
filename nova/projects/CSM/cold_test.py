@@ -44,6 +44,7 @@ class cold_test(pythonIO):
     def __init__(self, project_dir='CSM2', read_txt=False):
         super().__init__()  # python read/write
         self.directory = os.path.join(root_dir, 'data/CSM', project_dir)
+        self.module = project_dir
         self.groups, self.channels = [], {}
         self._units_r = {self._units[u]: u for u in self._units}
         self.to = np.datetime64('2020-01-07T08:33:00.000000000')
@@ -138,7 +139,7 @@ class cold_test(pythonIO):
     def read_coldtest_file(self, folder, filename):
         data = pandas.read_csv(
             os.path.join(self.directory, folder, filename), header=7)
-        data.loc[:, 'timestamp'] = pandas.to_datetime(data.timestamp)
+        data['timestamp'] = pandas.to_datetime(data.timestamp)
         self.format_columns(data)
         if '20200107' in filename:  # trim start of file
             data = data.iloc[28:, :]
@@ -146,18 +147,14 @@ class cold_test(pythonIO):
 
     def read_strain_file(self, folder, filename):
         filepath = os.path.join(self.directory, folder, filename)
-
-        '''
-        # CSM1
-        data = pandas.read_csv(filepath, skiprows=[0, 1, 2, 4, 5, 6])
-        data = data.iloc[:, 3:]  # drop first three rows
-
-        elapsed = pandas.read_csv(filepath,
-                skiprows=6, usecols=[2])
-        '''
         data = pandas.read_csv(filepath, header=7)
-        data = data.iloc[:, 1:]  # drop first rows
-        elapsed = pandas.read_csv(filepath, header=7, usecols=[0])
+        if self.module == 'CSM1':
+            data = data.iloc[:, 3:]  # drop first three rows
+            elapsed = pandas.read_csv(filepath, header=7, usecols=[0])
+        else:
+            data = data.iloc[:, 1:]  # drop first rows
+            elapsed = pandas.read_csv(filepath, header=7, usecols=[0])
+        print(data)
         columns = {}
         for c in data.columns:
             if c[:2] == 'EX':
@@ -171,17 +168,18 @@ class cold_test(pythonIO):
         if '021320 - 021420' in filename:  # correct time shift
             data.loc[:, 'timestamp'] -= datetime.timedelta(seconds=21*60+21)
         self.format_columns(data)
-        # five gauge vertical strain
-        self.mean_strain('STvID', data, range(119, 124))
-        self.mean_strain('STvOD', data, range(124, 129))
-        # three gauge hoop strain, ID
-        self.mean_strain('SThID0', data, [101, 107])
-        self.mean_strain('SThID1', data, [108, 114])
-        self.mean_strain('SThID2', data, [103, 109, 115])
-        # three gauge hoop strain, OD
-        self.mean_strain('SThOD0', data, [104, 110, 116])
-        self.mean_strain('SThOD1', data, [105, 111, 117])
-        self.mean_strain('SThOD2', data, [106, 112, 118])
+        if self.module == 'CSM2':
+            # five gauge vertical strain
+            self.mean_strain('STvID', data, range(119, 124))
+            self.mean_strain('STvOD', data, range(124, 129))
+            # three gauge hoop strain, ID
+            self.mean_strain('SThID0', data, [101, 107])
+            self.mean_strain('SThID1', data, [108, 114])
+            self.mean_strain('SThID2', data, [103, 109, 115])
+            # three gauge hoop strain, OD
+            self.mean_strain('SThOD0', data, [104, 110, 116])
+            self.mean_strain('SThOD1', data, [105, 111, 117])
+            self.mean_strain('SThOD2', data, [106, 112, 118])
         # rename ppm
         data.rename({'uStrain': 'ppm'}, level=1, axis=1, inplace=True)
         return data
@@ -191,10 +189,8 @@ class cold_test(pythonIO):
         columns = [col for i in index if (col := f'ST{i}') in data]
         data.loc[:, (label, 'uStrain')] = data.loc[:, columns].mean(1)
 
-
     def format_columns(self, data):
-        data.rename(columns={'timestamp': 'timestamp_(time}'},
-                    inplace=True)
+        data.rename(columns={'timestamp': 'timestamp_(time}'}, inplace=True)
         columns = data.columns.values
         _columns = [c.replace('mean', '').replace('_', '') for c in columns]
         _columns = [c.replace('value', '') for c in _columns]
@@ -207,6 +203,8 @@ class cold_test(pythonIO):
                 names=('ID', 'unit'))
         data.set_index(('timestamp', 'time'), inplace=True)
         data.index.name = ('timestamp')
+        #data.rename(columns={'Ibusfast': 'IBus', 'PSIOutfast': 'PSIOut'},
+        #            inplace=True, level=0)
 
     def t(self, index, to=None):
         if to is None:
@@ -343,7 +341,8 @@ class cold_test(pythonIO):
                 self.load_coldtest(group)  # load dataframe
             dataframe = getattr(self, group).copy() # get dataframe
             if group in ['current']:
-                dataframe.drop(columns=['IBus'], inplace=True) # 'Ibusfast',
+                dataframe.drop(columns=['IBus'], inplace=True)
+                #dataframe.drop(columns=['PSIOut'], inplace=True)
                 channels = dataframe.columns[::-1]
             dataframe = dataframe.loc[:, channels]
         dataframe = dataframe[index]
@@ -447,6 +446,7 @@ class cold_test(pythonIO):
         if not hasattr(self, 'current'):
             self.load_coldtest('current')
         I = self.current.loc[index, ('PSIOut', 'kA')]
+        #I = self.current.loc[index, ('IBus', 'kA')]
         # extract dataframe
         dataframe, group = self.get_dataframe(label, index)
         # interpolate
@@ -586,6 +586,8 @@ class cold_test(pythonIO):
             return slice('2020-02-12 16:00', '2020-02-12 17:00')
         if index == 'drop_trim':
             return slice('2020-02-12 16:10', '2020-02-12 16:27:30')
+        if index == 'CSM1':
+            return slice('2020-02-14', '2020-02-14')
         if index == 'CSM2':
             return slice('2021-03-18', '2021-04-22')
         if index == 'CSM2_trim':
@@ -600,42 +602,47 @@ class cold_test(pythonIO):
             return slice('2021-04-09 10:30:00', '2021-04-09 13:20:00')
         if index == 'CSM2_19':
             return slice('2021-03-19', '2021-03-19')
-        if index == 'CSM3_a':
+        if index == 'CSM4_a':
             return slice('2022-12-12 8:00', '2022-12-12 18:00')
-        if index == 'CSM3_b':
+        if index == 'CSM4_b':
             return slice('2023-01-12', '2023-01-14')
-        if index == 'CSM3':
+        if index == 'CSM4':
             return slice('2022-12-12 08:00:00', '2022-12-12 18:00:00')
-        if index == 'CSM3_strain':
+        if index == 'CSM4_strain':
             return slice('2022-12-09', '2022-12-15')
         return slice(None)
-
 
 
 if __name__ == '__main__':
     sns.set_context('talk')
 
 
-    ct = cold_test(project_dir='CSM3', read_txt=False)
-    ct.load_coldtest('strain', read_txt=False)
-    ct.load_coldtest('displace', read_txt=False)
+    ct = cold_test(project_dir='CSM4', read_txt=True)
+    #ct.load_coldtest('strain', read_txt=True)
+    #ct.load_coldtest('displace', read_txt=True)
+    #ct.load_coldtest('current', read_txt=True)
 
-    #ct.plot_row('extend', index='CSM3_a', ncol=2)
-    #ct.plot_loop('extend', index='CSM3_a', ncol=2)
-    #ct.fit('extend', index='CSM3_a', Imin=12.5, Itrim=25, Imax=40, ncol=6)
+    ct.plot_row('displace', index='fit', ncol=2)
+    ct.plot_loop('displace', index='fit')
+    ct.fit('displace', index='test')
+
+    '''
+    #ct.plot_row('extend', index='CSM4_a', ncol=2)
+    #ct.plot_loop('extend', index='CSM4_a', ncol=2)
+    #ct.fit('extend', index='CSM4_a', Imin=12.5, Itrim=25, Imax=40, ncol=6)
 
     columns = [name for name in ct.strain.columns.droplevel(1)
                if 'ST1' in name]
-    ct.plot_row(columns, index='CSM3', ncol=6)
+    ct.plot_row(columns, index='CSM4', ncol=6)
 
-    ct.fit(columns, index='CSM3_a', Imin=30, Itrim=50, Imax=40,
+    ct.fit(columns, index='CSM4_a', Imin=30, Itrim=50, Imax=40,
            ncol=6, trim=True)
 
     #displace = ['DS001', 'DS002', 'DS003', 'DS004', 'DS005']
-    #ct.plot_row(displace, index='CSM3_a', ncol=5)
+    #ct.plot_row(displace, index='CSM4_a', ncol=5)
 
-    #ct.fit(displace, index='CSM3_a', Imin=5, Itrim=32.5, Imax=40, ncol=5)
-"""
+    #ct.fit(displace, index='CSM4_a', Imin=5, Itrim=32.5, Imax=40, ncol=5)
+
     ct.plot_row(['DS007', 'DS008'], index='CSM2_08', ncol=2)
     ct.plot_loop(['DS007', 'DS008'], index='CSM2_08', ncol=2)
     ct.fit(['DS007', 'DS008'], index='CSM2_08', Imin=5, Itrim=32.5, Imax=40, ncol=4)
@@ -659,36 +666,36 @@ if __name__ == '__main__':
     ct.plot_row(['STvID', 'STvOD'], index=None)
 
     ct.plot_row(['SThID0', 'SThID1', 'SThID2'], index=None, ncol=3)
-    ct.plot_loop(['SThID0', 'SThID1', 'SThID2'], index='CSM3_a', ncol=3)
+    ct.plot_loop(['SThID0', 'SThID1', 'SThID2'], index='CSM4_a', ncol=3)
     ct.fit(['SThID0', 'SThID1', 'SThID2'], index='CSM2_08', Imin=0, Itrim=40,
            Imax=40, ncol=3, trim=False)
 
     ct.plot_row(['SThOD0', 'SThOD1', 'SThOD2'], index=None, ncol=3)
-    ct.plot_loop(['SThOD0', 'SThOD1', 'SThOD2'], index='CSM3_a', ncol=3)
-    ct.fit(['SThOD0', 'SThOD1', 'SThOD2'], index='CSM3_a', Imin=0, Itrim=40,
+    ct.plot_loop(['SThOD0', 'SThOD1', 'SThOD2'], index='CSM4_a', ncol=3)
+    ct.fit(['SThOD0', 'SThOD1', 'SThOD2'], index='CSM4_a', Imin=0, Itrim=40,
            Imax=40, ncol=3, trim=False)
 
-    ct.plot_row(['STvID', 'STvOD'], index='CSM3_a', ncol=2)
-    ct.plot_loop(['STvID', 'STvOD'], index='CSM3_a', ncol=2)
+    ct.plot_row(['STvID', 'STvOD'], index='CSM4_a', ncol=2)
+    ct.plot_loop(['STvID', 'STvOD'], index='CSM4_a', ncol=2)
     ct.fit(['STvID', 'STvOD'],
            index='CSM2_08', Imin=0, Itrim=40, Imax=40, ncol=2, trim=False)
 
 
 
     '''
-    self.mean_strain('STvID', data, range(119, 124))
-    self.mean_strain('STvOD', data, range(124, 129))
+    #self.mean_strain('STvID', data, range(119, 124))
+    #self.mean_strain('STvOD', data, range(124, 129))
     # three gauge hoop strain, ID
-    self.mean_strain('SThID0', data, [101, 107, 113])
-    self.mean_strain('SThID1', data, [102, 108, 114])
-    self.mean_strain('SThID2', data, [103, 109, 115])
+    #self.mean_strain('SThID0', data, [101, 107, 113])
+    #self.mean_strain('SThID1', data, [102, 108, 114])
+    #self.mean_strain('SThID2', data, [103, 109, 115])
     # three gauge hoop strain, OD
-    self.mean_strain('SThOD0', data, [104, 110, 116])
-    self.mean_strain('SThOD1', data, [105, 111, 117])
-    self.mean_strain('SThOD2', data, [106, 112, 118])
+    #self.mean_strain('SThOD0', data, [104, 110, 116])
+    #self.mean_strain('SThOD1', data, [105, 111, 117])
+    #self.mean_strain('SThOD2', data, [106, 112, 118])
     '''
 
-    ct.plot_row([f'ST{i}' for i in range(101, 107)], index='CSM3_a', ncol=2)
+    ct.plot_row([f'ST{i}' for i in range(101, 107)], index='CSM4_a', ncol=2)
 
 
     ct.plot_row([f'ST{i}' for i in range(101, 119)], index='CSM2_08', ncol=3)
@@ -731,6 +738,7 @@ if __name__ == '__main__':
 
     ct.fit(['SThOD0', 'SThOD1', 'SThOD2'],
            index='CSM2_08', trim=False, Imax=40, ncol=3)
+    '''
 
 
     '''
@@ -744,7 +752,7 @@ if __name__ == '__main__':
     #ct.plot('extend')
 
     ct.fit(['STvID', 'STvOD'],
-           index='CSM3_a', Imin=0, Itrim=40, Imax=40, ncol=3)
+           index='CSM4_a', Imin=0, Itrim=40, Imax=40, ncol=3)
 
     ct.fit(['ST103', 'ST109', 'ST115'],
            index='CSM2_08', Imin=0, Itrim=40, Imax=40, ncol=3)
@@ -842,4 +850,3 @@ if __name__ == '__main__':
 
     #myFmt = mdates.DateFormatter('%d %B')
     #ax.xaxis.set_major_formatter(myFmt)
-"""

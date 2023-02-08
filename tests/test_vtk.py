@@ -1,4 +1,6 @@
 
+import os
+
 import numpy as np
 import pytest
 import tempfile
@@ -43,6 +45,7 @@ def test_save_load_vtk():
     with tempfile.NamedTemporaryFile(delete=False) as tmp:
         frame.store(tmp.name, 'frame', vtk=True)
         new_frame = FrameSpace().load(tmp.name, 'frame')
+    os.unlink(tmp.name)
     assert np.isclose(new_frame.vtk[0].volume(), frame.vtk[0].volume())
 
 

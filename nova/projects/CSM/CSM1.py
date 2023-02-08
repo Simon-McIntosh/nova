@@ -380,7 +380,7 @@ class cold_test(pythonIO):
 
     def plot_row(self, label, index='test', ncol=2, color=None,
                  offset_dt=5*60):
-        plt.set_aspect(0.7)
+        #plt.set_aspect(0.7)
         fig = plt.figure()
         gs = matplotlib.gridspec.GridSpec(2, 1, height_ratios=[6, 1])
         ax = []
@@ -537,10 +537,10 @@ class cold_test(pythonIO):
         return index
 
 if __name__ == '__main__':
-    plt.set_context('talk')
+    #plt.set_context('talk')
 
 
-    ct = cold_test(read_txt=False)
+    ct = cold_test(read_txt=True)
     #ct.load_coldtest('strain', read_txt=True)
 
     #ct.plot('temperature')
@@ -556,7 +556,7 @@ if __name__ == '__main__':
 
     # ct.plot_row('temperature', index='high_strain_trim', ncol=0)
 
-    plt.set_aspect(0.5)
+    #plt.set_aspect(0.5)
     #ct.plot_row('strain', index='low_strain')
     #ct.plot_row(['SG-340-ID', 'SG-220-OD'], index='low_strain')
     #ct.plot_row(['SG-340-ID', 'SG-220-OD'], index='low_strain_trim')

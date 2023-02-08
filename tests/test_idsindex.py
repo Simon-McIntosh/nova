@@ -14,6 +14,17 @@ def test_node_array_shape():
 
 
 @mark['pf_active_iter']
+def test_node_array_shape_force():
+    ids_data = load_ids(**ids_attrs['pf_active_iter']).ids_data
+    ids_index = IdsIndex(ids_data, 'radial_force')
+    _ = ids_index.shape('force.data')
+    ids_index.ids = 'vertical_force'
+    _ = ids_index.shape('force.data')
+    assert ids_index.shapes == {'radial_force.force.data': (1600,),
+                                'vertical_force.force.data': (1600,)}
+
+
+@mark['pf_active_iter']
 def test_node_vector_shape():
     ids_data = load_ids(**ids_attrs['pf_active_iter']).ids_data
     ids_index = IdsIndex(ids_data, 'coil')

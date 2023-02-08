@@ -216,7 +216,7 @@ class Database(IDS):
 
     def _load_from_attrs(self):
         """Confirm minimum working set of input attributes."""
-        if self.pulse == 0 or self.run == 0 or self.name == '':
+        if self.pulse == 0 and self.run == 0 and self.name is None:
             raise ValueError(
                 f'When self.ids is None require:\n'
                 f'pulse ({self.pulse} > 0) & run ({self.run} > 0) & '
@@ -522,9 +522,9 @@ class IdsIndex:
     ...     ids_index.vector(100, 'force.data').shape
     (12,)
 
-    with ids_index.node('vertical_force'):
-        ids_index.vector(100, 'force.data').shape
-    (12,)
+    >>> with ids_index.node('vertical_force'):
+    ...     ids_index.vector(100, 'force.data').shape
+    (17,)
 
     """
 
@@ -588,14 +588,18 @@ class IdsIndex:
 
     def __getitem__(self, path: str) -> tuple[int] | tuple[()]:
         """Return cached dimension length."""
-        #if self.ids_node is not None:
-        #    path = '.'.join([self.ids_node, path])
-        # TODO fix relative path
+        _path = self.ids_path(path)
         try:
-            return self.shapes[path]
+            return self.shapes[_path]
         except KeyError:
-            self.shapes[path] = self._path_shape(path)
+            self.shapes[_path] = self._path_shape(path)
             return self[path]
+
+    def ids_path(self, path: str) -> str:
+        """Return full ids path."""
+        if self.ids_node is None:
+            return path
+        return f'{self.ids_node}.{path}'
 
     def shape(self, path) -> tuple[int, ...]:
         """Return attribute array shape."""
@@ -634,8 +638,8 @@ class IdsIndex:
             for index in range(self.length):
                 try:
                     data[index] = self.get_slice(index, path)[itime]
-                except ValueError:  # empty slice
-                    continue
+                except (ValueError, IndexError):  # empty slice
+                    pass
             return data
         return self.get_slice(itime, path)
 
@@ -795,9 +799,3 @@ class CoilData(IdsData):
         if hasattr(super(), 'group_attrs'):
             return super().group_attrs
         return {}
-
-
-if __name__ == '__main__':
-
-    import doctest
-    doctest.testmod()

@@ -50,6 +50,22 @@ class PulseSchedule(Plot, Scenario):
         for attr in attrs:
             self.build_point('.'.join([ids_node, attr]))
 
+    def build_gaps(self):
+        """Build firstwall gaps."""
+        with self.ids_index.node('position_control.gap'):
+            if self.ids_index.empty('value.reference.data'):
+                return
+            if self.data['homogeneous_time'] == 1:
+                self.data.coords['gap_name'] = \
+                    self.ids_index.array('identifier')
+                #sel
+
+
+            '''
+            for index in range(self.ids_index.length):
+            time = self.time_coordinate('value.reference', 'gap')
+            '''
+
     def build(self):
         """Build netCDF database using data extracted from imasdb."""
         with self.build_scenario():
@@ -65,10 +81,10 @@ class PulseSchedule(Plot, Scenario):
             self.build_points(
                 'position_control',
                 ['x_point', 'strike_point', 'boundary_outline'])
-
+            #self.build_gaps()
         return self
 
-    def plot(self):
+    def plot_profile(self):
         """Plot pulse schedule profile."""
         self.set_axes('1d', nrows=4, sharex=True)
         self.axes[0].plot(self.data.time, 1e-6*self.data.i_plasma, 'C0')
@@ -94,8 +110,9 @@ if __name__ == '__main__':
     ids = 135007, 4
     # ids = 135011, 7
     ids = 135003, 5
+    ids = 105028, 1  # Maksim
 
     PulseSchedule(*ids)._clear()
     schedule = PulseSchedule(*ids)
 
-    schedule.plot()
+    schedule.plot_profile()

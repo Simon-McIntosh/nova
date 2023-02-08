@@ -1,3 +1,5 @@
+import tempfile
+
 import numpy as np
 import pytest
 
@@ -21,10 +23,10 @@ def test_extrapolation_grid_relitive_to_coilset():
 def test_load_from_ids():
     equilibrium = Database(**ids_attrs['CORSICA'])
     kwargs = dict(ids=equilibrium.ids_data, limit='ids', ngrid=5, nplasma=5,
-                  dfield=0, dforce=-10, filename='tmp')
-    Extrapolate(**kwargs)._clear()
-    extrapolate = Extrapolate(**kwargs)
-    extrapolate._clear()
+                  dfield=0, dforce=-10)
+    with tempfile.NamedTemporaryFile() as tmp:
+        extrapolate = Extrapolate(**kwargs, filename=tmp.name)
+        extrapolate._clear()
 
 
 @mark['equilibrium']

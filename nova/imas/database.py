@@ -1,5 +1,4 @@
 """Manage access to IMAS database."""
-from abc import abstractmethod
 from contextlib import contextmanager
 from dataclasses import dataclass, field, fields, InitVar
 from importlib import import_module
@@ -9,7 +8,7 @@ from typing import Any, ClassVar, Optional, Type
 import numpy as np
 import xxhash
 
-from nova.database.netcdf import netCDF
+from nova.database.datafile import Datafile
 
 # _pylint: disable=too-many-ancestors
 
@@ -70,10 +69,6 @@ class Database(IDS):
     The Database class regulates access to IMAS ids data. Requests may be made
     via pulse, run, name identifiers or as direct referances to
     open ids handles.
-
-    See Also
-    --------
-    nova.imas.Datafile: Cached access to ids data.
 
     Raises
     ------
@@ -693,47 +688,6 @@ class IdsIndex:
 
 
 @dataclass
-class Datafile(netCDF):
-    """
-    Provide cached acces to imas ids data.
-
-    Extends Database class via the provision of load and store methods.
-
-    .. _RST Overview:
-
-    See Also
-    --------
-    nova.imas.Database
-
-    """
-
-    def __post_init__(self):
-        """Set ids and filepath."""
-        super().__post_init__()
-        self.load_build()
-
-    def load_build(self):
-        """
-        Load netCDF data.
-
-        Raises
-        ------
-        FileNotFoundError
-            File not present: self.filepath
-        OSError
-            Group not present in netCDF file: self.group
-        """
-        try:
-            self.load()
-        except (FileNotFoundError, OSError):
-            self.build()
-
-    @abstractmethod
-    def build(self):
-        """Build ids dataset."""
-
-
-@dataclass
 class IdsData(Datafile, Database):
     """Provide cached acces to imas ids data."""
 
@@ -774,11 +728,11 @@ class CoilData(IdsData):
     """
     Provide cached access to coilset data.
 
-    Extends: :class:`~nova.imas.database.Datafile`
+    Extends: :class:`~nova.imas.database.IdsData`
 
     See Also
     --------
-    :class:`~nova.imas.database.Datafile`
+    :class:`~nova.imas.database.IdsData`
     """
 
     dirname: str = '.nova'

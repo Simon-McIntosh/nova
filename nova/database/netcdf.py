@@ -43,7 +43,7 @@ class netCDF(FilePath):
     def clear_cache(self):
         """Clear cached datafile at self.filepath."""
         if os.path.isfile(self.filepath):
-            remove = input('Confirm removal of the followig cached datafile:'
+            remove = input('Confirm removal of the following cached datafile:'
                            f'\n{self.filepath}\nProceed (Y/n)?')
             if remove == '' or remove.lower() == 'y':
                 os.remove(self.filepath)

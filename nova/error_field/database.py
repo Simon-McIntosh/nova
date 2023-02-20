@@ -2,6 +2,7 @@
 from dataclasses import dataclass
 from typing import ClassVar
 
+import json
 import numpy as np
 import pandas
 import scipy
@@ -24,20 +25,17 @@ class Database(Plot, Datafile):
                   'Inserts magnetized by TF, CS and PF coils in 5MA/1.8T '
                   'H-mode scenario'}
 
-    def reshape(self, vector, shape, value=None):
+    def _reshape(self, vector, shape):
         """Return vector reshaped as fortran array with axes 1, 2 swapped."""
         return vector.values.reshape(
             (shape[0],) + shape[-2:][::-1], order='F').swapaxes(2, 1)
-        '''
-        if value is None:
-            return np.append(array, array[:, :1, :], axis=1)
-        value *= np.ones_like(array)
-        return np.append(array, value[:, :1, :], axis=1)
-        '''
 
     def build(self):
         """Build database from source datafile."""
         self.read_datafile()
+        self.build_surface()
+        self.compose()
+        self.decompose()
         self.store()
 
     def read_datafile(self):
@@ -53,12 +51,12 @@ class Database(Plot, Datafile):
         self.data.attrs['uid'] = self.filename
         self.data.attrs['title'] = self.library[self.filename]
         self.data.attrs['Io'] = float(header.split()[-1])
-        self.data.coords['radius'] = self.reshape(data.r, shape)[:, 0, 0]
-        self.data.coords['phi'] = self.reshape(data.phi, shape, 360)[0, :, 0]
-        self.data.coords['height'] = self.reshape(data.z, shape)[0, 0, :]
+        self.data.coords['radius'] = self._reshape(data.r, shape)[:, 0, 0]
+        self.data.coords['phi'] = self._reshape(data.phi, shape)[0, :, 0]
+        self.data.coords['height'] = self._reshape(data.z, shape)[0, 0, :]
         for attr in ['Br', 'Bphi', 'Bz']:
             self.data[f'grid_{attr}'] = ('radius', 'phi', 'height'), \
-                self.reshape(data[attr], shape)
+                self._reshape(data[attr], shape)
 
     def build_surface(self):
         """Build control surface."""
@@ -71,33 +69,40 @@ class Database(Plot, Datafile):
         delta[2] = np.roll(data.height, -1) - np.roll(data.height, 1)
         normal = np.cross(np.array([0, 1, 0])[np.newaxis, :], delta, axisb=0)
         normal /= np.linalg.norm(normal, axis=1)[:, np.newaxis]
-        self.data.coords['coord'] = ['radius', 'height']
-        self.data.coords['loop'] = \
-            ('index', 'coord'), np.c_[data.radius, data.height]
+        self.data.coords['index'] = np.arange(len(data))
+        self.data.coords['coordinate'] = ['radius', 'height']
+        self.data.coords['surface'] = \
+            ('index', 'coordinate'), np.c_[data.radius, data.height]
         self.data.coords['normal'] = \
-            ('index', 'coord'), np.c_[normal[:, 0], normal[:, 2]]
+            ('index', 'coordinate'), np.c_[normal[:, 0], normal[:, 2]]
 
     def compose(self):
         """Interpolate field components to control surface."""
         for attr in ['Br', 'Bphi', 'Bz']:
-            self.data[f'loop_{attr}'] = \
+            self.data[attr] = \
                 ('index', 'phi'), self.data[f'grid_{attr}'].interp(
-                    dict(radius=self.data.loop[:, 0],
-                         height=self.data.loop[:, 1])).data
-        field = np.stack([self.data.loop_Br, self.data.loop_Bz], axis=-1)
-        self.data['loop_Bn'] = \
-            ('index', 'phi'), np.einsum('ik,ijk->ij', self.data.normal, field)
+                    dict(radius=self.data.surface[:, 0],
+                         height=self.data.surface[:, 1])).data
+        field = np.stack([self.data.Br, self.data.Bz], axis=-1)
+        self.data['Bn'] = ('index', 'phi'), \
+            np.einsum('ik,ijk->ij', self.data.normal, field)
 
     def decompose(self):
         """Perform Fourier decomposition."""
+        coef = scipy.fft.rfft(self.data.Bn.data)
+        self.data.coords['mode_number'] = np.arange(0, coef.shape[-1])
+        self.data['Bn_real'] = ('index', 'mode_number'), np.real(coef)
+        self.data['Bn_imag'] = ('index', 'mode_number'), np.imag(coef)
 
-    def plot_normal(self, skip=5):
-        """Plot loop surface and loop normals."""
-        self.set_axes('2d')
-        self.axes.plot(self.data.loop[:, 0], self.data.loop[:, 1], 'C0-')
+    def _plot_normal(self, axes, mode=1, scale=1, skip=5):
+        """Plot surface and unit normals scaled to mode amplitude."""
+        axes.plot(self.data.surface[:, 0], self.data.surface[:, 1], 'C0-')
         patch = self.mpl['patches'].FancyArrowPatch
-        tail = self.data.loop[::skip]
-        length = self.data.normal[::skip]
+        tail = self.data.surface[::skip]
+        amplitude = np.sqrt(self.data.Bn_real[:, mode]**2 +
+                            self.data.Bn_imag[:, mode]**2)
+        length = self.data.normal[::skip] * scale*amplitude[::skip]
+
         arrows = [patch((x, z), (x+dx, z+dz), mutation_scale=0.5,
                         arrowstyle='simple,head_length=0.4, head_width=0.3,'
                         ' tail_width=0.1', shrinkA=0, shrinkB=0)
@@ -105,32 +110,60 @@ class Database(Plot, Datafile):
                   zip(tail[:, 0], tail[:, 1], length[:, 0], length[:, 1])]
         collections = self.mpl.collections.PatchCollection(
             arrows, facecolor='black', edgecolor='darkgray')
-        self.axes.add_collection(collections)
-        self.axes.autoscale_view()
+        axes.text(np.mean(self.data.surface[:, 0]),
+                  np.mean(self.data.surface[:, 1]),
+                  f'n={mode}', fontsize='x-large',
+                  ha='center', va='center')
+        axes.add_collection(collections)
+        axes.autoscale_view()
 
-    def plot_trace(self, attr='loop_Bn', index=250):
+    def plot_normal(self, modes=[18], scale=1):
+        """Plot Bn mode amplitudes."""
+        self.set_axes('2d', ncols=len(modes))
+        for i, mode in enumerate(modes):
+            try:
+                axes = self.axes[i]
+            except TypeError:
+                axes = self.axes
+            self._plot_normal(axes, mode, scale)
+
+    def plot_trace(self, index=250):
         """Plot poloidal trace."""
-
-        coef = scipy.fft.rfft(self.data[attr].data)
+        coef = self.data.Bn_real + self.data.Bn_imag * 1j
         coef[:, 36:] = 0
-        data = scipy.fft.irfft(coef)
-
-        print(data.shape, self.data[attr].shape)
+        ifft = scipy.fft.irfft(coef.data)
 
         self.set_axes('1d')
-        self.axes.plot(self.data[attr].phi, self.data[attr][index], 'C0-')
-        self.axes.plot(self.data[attr].phi, data[index], 'C1--')
+        self.axes.plot(self.data.phi, self.data.Bn[index], 'C0-')
+        self.axes.plot(self.data.phi, ifft[index], 'C1--')
         self.axes.set_xlabel(r'$\phi$ deg')
-        self.axes.set_ylabel(attr)
+        self.axes.set_ylabel(r'$B_n$')
 
+    def write(self):
+        """Write subset of dataset to file."""
+        data = self.data[['surface', 'normal',
+                          'Br', 'Bphi', 'Bz', 'Bn', 'Bn_real', 'Bn_imag']]
+        filepath = FilePath(
+            dirname=self.dirname,
+            filename=f'external_field_{self.filename}.nc').filepath
+        data.to_netcdf(filepath)
+
+    def grid_schema(self):
+        """Print schema for grid data."""
+        data = self.data[['grid_Br', 'grid_Bphi', 'grid_Bz']]
+        data = data.rename({attr: attr.replace('grid_', '') for attr in
+                            ['grid_Br', 'grid_Bphi', 'grid_Bz']})
+        print(data)
+        print(json.dumps(data.to_dict(False), indent=4))
 
 
 if __name__ == '__main__':
 
     database = Database('86T4WW')
-    database.build_surface()
-    database.compose()
 
-    #database.plot_normal()
+    database.plot_normal(modes=[1], scale=20)
+    #database.plot_normal(modes=[18], scale=1)
+    #database.write()
+    #database.plot_trace()
 
-    database.plot_trace()
+    #database.grid_schema()

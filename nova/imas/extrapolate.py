@@ -242,7 +242,7 @@ class Extrapolate(Operate):
     def plot_2d(self, attr='psi', mask=None, levels=51, axes=None):
         """Plot plasma filements and polidal flux."""
         self.get_axes('2d', axes=axes)
-        super().plot()#'plasma')
+        super().plot(axes=self.axes)#'plasma')
         self.plasma.wall.plot()
         vector = getattr(self.grid, attr)
         levels = np.linspace(vector.min(), vector.max(), levels)
@@ -334,7 +334,6 @@ if __name__ == '__main__':
 
     extrapolate = Extrapolate(pulse, run, pf_passive=False,
                               pf_active='iter_md')
-
 
     import matplotlib.pylab as plt
     extrapolate.mpl_axes.fig = plt.figure(figsize=(6, 9))

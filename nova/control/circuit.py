@@ -52,7 +52,6 @@ class Circuit(Plot, netCDF, FrameSetLoc):
         networkx = import_module('networkx')
         dig = networkx.DiGraph(edge_list.values())
         pos = networkx.planar_layout(dig)
-
         edge_labels = {edge_list[edge]: edge for edge in edge_list}
         if len(edge_list) == 2:
             networkx.draw_networkx_edges(dig, pos,
@@ -81,9 +80,10 @@ class Circuit(Plot, netCDF, FrameSetLoc):
         for loop in networkx.cycle_basis(graph):
             edge = [_loop for _loop in loop if isinstance(_loop, str)]
             nodes = [_loop for _loop in loop if not isinstance(_loop, str)]
-            nodes.append(nodes[0])
+            nodes = [nodes[-1]] + nodes
             pairs = [tuple(nodes[i:i+2]) for i in range(len(nodes) - 1)]
             sign = np.ones(len(pairs), dtype=int)
+
             for i, pair in enumerate(pairs):
                 if pair in edge_nodes:
                     continue

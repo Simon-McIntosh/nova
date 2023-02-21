@@ -23,7 +23,10 @@ class Database(Plot, Datafile):
     library: ClassVar[dict[str, str]] = {
         '86T4WW': 'Database of magnetic field produced by Ferromagnetic '
                   'Inserts magnetized by TF, CS and PF coils in 5MA/1.8T '
-                  'H-mode scenario'}
+                  'H-mode scenario',
+        '88LDE3': 'Database of magnetic field produced by Ferromagnetic '
+                  'Inserts and Test Blanket Modules magnetized by TF, CS and '
+                  'PF coils in 15MA reference scenario'}
 
     def _reshape(self, vector, shape):
         """Return vector reshaped as fortran array with axes 1, 2 swapped."""
@@ -60,7 +63,8 @@ class Database(Plot, Datafile):
 
     def build_surface(self):
         """Build control surface."""
-        datafile = FilePath(dirname=self.datadir, filename='surface.txt')
+        datafile = FilePath(dirname=self.datadir,
+                            filename=f'surface_{self.filename}.txt')
         with open(datafile.filepath, 'r') as file:
             data = pandas.read_csv(file, header=None, delim_whitespace=True,
                                    names=['radius', 'height'])
@@ -130,7 +134,7 @@ class Database(Plot, Datafile):
     def plot_trace(self, index=250):
         """Plot poloidal trace."""
         coef = self.data.Bn_real + self.data.Bn_imag * 1j
-        coef[:, 36:] = 0
+        #coef[:, 20:] = 0
         ifft = scipy.fft.irfft(coef.data)
 
         self.set_axes('1d')
@@ -161,9 +165,9 @@ if __name__ == '__main__':
 
     database = Database('86T4WW')
 
-    database.plot_normal(modes=[1], scale=20)
+    #database.plot_normal(modes=[1, 2, 3], scale=20)
     #database.plot_normal(modes=[18], scale=1)
     #database.write()
-    #database.plot_trace()
+    database.plot_trace()
 
     #database.grid_schema()

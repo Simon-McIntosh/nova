@@ -8,7 +8,7 @@ from nova.geometry.polyline import ThreePointArc, PolyLine
 def test_2d_arc_radius():
     arc = ThreePointArc((0, 1, 0), (1, 0, 0), (0, -1, 0))
     assert np.isclose(arc.radius, 1)
-
+test_2d_arc_radius()
 
 def test_2d_arc_center():
     arc = ThreePointArc((0, 1, 0), (1, 0, 0), (0, -1, 0))

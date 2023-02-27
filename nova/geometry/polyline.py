@@ -8,53 +8,74 @@ import scipy
 from nova.frame.baseplot import Plot
 
 
-def fit_2d(points):
-    """Return center and radius of best fit circle to polyline."""
-    coef = np.linalg.lstsq(np.c_[2*points, np.ones(len(points))],
-                           np.sum(points**2, axis=1), rcond=None)[0]
-    center = coef[:2]
-    radius = np.sqrt(coef[2] + np.sum(center**2))
-    return center, radius
-
-
 @dataclass
 class Triple:
     """Manage 3-point arc nodes."""
 
-    point_a: tuple | list | np.ndarray
-    point_b: tuple | list | np.ndarray
-    point_c: tuple | list | np.ndarray
+    point_a: np.ndarray
+    point_b: np.ndarray
+    point_c: np.ndarray
 
 
 @dataclass
-class ThreePointArc(Plot):
-    """Generate arc segments."""
+class Arc(Plot):
+    """Fit arc to 3d point cloud."""
 
-    point_a: tuple | list | np.ndarray
-    point_b: tuple | list | np.ndarray
-    point_c: tuple | list | np.ndarray
-
+    points: np.ndarray | None = None
     arc_axes: np.ndarray = field(init=False)
     center: np.ndarray = field(init=False)
     radius: float = field(init=False)
 
     def __post_init__(self):
         """Generate curve."""
+        self.align()
         self.fit()
-        super().__post_init__()
+        if hasattr(super(), '__post_init__'):
+            super().__post_init__()
+
+    def align(self):
+        """Align point cloud to 2d plane."""
+        self.mean = np.mean(self.points, axis=0)
+        delta = self.points - self.mean[np.newaxis, :]
+        self.arc_axes = scipy.linalg.svd(delta)[2]
+
+    @staticmethod
+    def fit_2d(points):
+        """Return center and radius of best fit circle to polyline."""
+        coef = np.linalg.lstsq(np.c_[2*points, np.ones(len(points))],
+                               np.sum(points**2, axis=1), rcond=None)[0]
+        center = coef[:2]
+        radius = np.sqrt(coef[2] + np.sum(center**2))
+        return center, radius
 
     def fit(self):
         """Align local coordinate system and fit arc to plane point cloud."""
-        points = np.c_[self.point_a, self.point_b, self.point_c].T
-        mean = np.mean(points, axis=0)
-        delta = points - mean[np.newaxis, :]
-        self.arc_axes = scipy.linalg.svd(delta)[2]
-        points_2d = np.zeros((len(points), 2))
-        points_2d[:, 0] = np.einsum('j,ij->i', self.arc_axes[0], points)
-        points_2d[:, 1] = np.einsum('j,ij->i', self.arc_axes[1], points)
-        center, self.radius = fit_2d(points_2d)
+        points_2d = np.zeros((len(self.points), 2))
+        points_2d[:, 0] = np.einsum('j,ij->i', self.arc_axes[0], self.points)
+        points_2d[:, 1] = np.einsum('j,ij->i', self.arc_axes[1], self.points)
+        center, self.radius = self.fit_2d(points_2d)
         self.center = center @ self.arc_axes[:2]
-        self.center += np.dot(self.arc_axes[2], mean)*self.arc_axes[2]
+        self.center += np.dot(self.arc_axes[2], self.mean)*self.arc_axes[2]
+
+    def plot(self):
+        """Plot best-fit arc and point cloud."""
+        self.get_axes('2d')
+        self.axes.plot(self.points[:, 0], self.points[:, 1], 'o')
+        theta = np.linspace(0, 2*np.pi)
+        points_2d = self.radius * np.c_[np.cos(theta), np.sin(theta)]
+        points = points_2d @ self.arc_axes[:2]
+        points += self.center
+        self.axes.plot(points[:, 0], points[:, 1], ':', color='gray')
+
+
+@dataclass
+class ThreePointArc(Arc, Triple):
+    """Generate arc segments."""
+
+    def __post_init__(self):
+        """Generate curve."""
+        self.points = np.c_[self.point_a, self.point_b, self.point_c].T
+        super().__post_init__()
 
     @cached_property
     def axis(self) -> np.ndarray | None:
@@ -147,6 +168,9 @@ if __name__ == '__main__':
 
     line = PolyLine(points)
     line.plot()
+
+    arc = Arc(line.curve)
+    arc.plot()
 
     '''
     arc = Arc(8.88, (0.001, 7.3, -3), (-np.pi, np.pi), np.pi/2)

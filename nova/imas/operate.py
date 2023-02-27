@@ -143,8 +143,6 @@ class Operate(Machine, Grid, Profile, Equilibrium):
     def solve_biot(self):
         """Extend machine solve biot to include extrapolation grid."""
         super().solve_biot()
-        self.field.solve()
-        self.force.solve()
         self.grid.solve(**self.grid_attrs)
 
     def update(self):
@@ -180,10 +178,12 @@ class Operate(Machine, Grid, Profile, Equilibrium):
 
 if __name__ == '__main__':
 
-    #pulse, run = 105007, 9
-    pulse, run = 135007, 4
+    pulse, run = 105007, 9
+    #pulse, run = 135007, 4
+    pulse, run = 105028, 1
 
-    operate = Operate(pulse, run, pf_active=True, nplasma=50, ngrid=50)
+    operate = Operate(pulse, run, pf_active=True, nplasma=50, ngrid=50,
+                      limit=0.25)
 
     operate.itime = 50
     operate.plot()

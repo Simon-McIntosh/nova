@@ -102,31 +102,33 @@ class Field(Plot, BiotOperate):
 
     Parameters
     ----------
-    dfield : int | +float, optional
-        Boundary probe resoultion. The default is 0.
+    nfield : int | -float, optional
+        Boundary probe resoultion. The default is 1.
 
-            - 0: boundary contour probes
-            - > 0: probe segment resolution
-            - int < 0: probe segment number
+            - 0: no boundary contour probes
+            - < 0: probe segment resolution
+            - int >= 0: probe segment number
 
     """
 
-    dfield: float = 0
+    nfield: int | float = 1
     target: BiotFrame = field(init=False, repr=False)
 
     def __len__(self):
         """Return field probe number."""
         return len(self.data.get('x', []))
 
-    def solve(self, dfield=None):
+    def solve(self, nfield=None):
         """Extract boundary and solve magnetic field around coil perimeter."""
-        if dfield is not None:
-            self.dfield = dfield
+        if nfield is not None:
+            self.nfield = nfield
+        if self.nfield == 0:
+            return
         self.target = BiotFrame()
         for name in self.Loc['coil', :].index:
             polyframe = self.frame.loc[name, 'poly']
             if polyframe.poly.boundary.is_ring:
-                sample = Sample(polyframe.boundary, delta=self.dfield)
+                sample = Sample(polyframe.boundary, delta=-self.nfield)
                 self.target.insert(sample['radius'], sample['height'],
                                    link=True, label=name, delim='_')
         self.data = BiotSolve(self.subframe, self.target,

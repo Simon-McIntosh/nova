@@ -60,7 +60,6 @@ class PulseSchedule(Plot, Scenario):
                     self.ids_index.array('identifier')
                 #sel
 
-
             '''
             for index in range(self.ids_index.length):
             time = self.time_coordinate('value.reference', 'gap')
@@ -107,12 +106,12 @@ class PulseSchedule(Plot, Scenario):
 
 if __name__ == '__main__':
 
-    ids = 135007, 4
-    # ids = 135011, 7
-    ids = 135003, 5
-    ids = 105028, 1  # Maksim
+    pulse, run = 135007, 4
+    # pulse, run = 135011, 7
+    pulse, run = 135003, 5
+    # pulse, run = 105028, 1  # Maksim
 
-    PulseSchedule(*ids)._clear()
-    schedule = PulseSchedule(*ids)
+    PulseSchedule(pulse, run)._clear()
+    schedule = PulseSchedule(pulse, run)
 
     schedule.plot_profile()

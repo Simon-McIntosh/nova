@@ -1,5 +1,6 @@
 """Facilitate structured access to netCDF data."""
 from dataclasses import dataclass, field
+import gc
 import os
 import sys
 
@@ -73,6 +74,7 @@ class netCDF(FilePath):
         else:
             self.data.to_netcdf(self.filepath, mode=mode, group=self.group)
         self.data.close()
+        gc.collect()
         return self
 
     def load(self):
@@ -81,5 +83,4 @@ class netCDF(FilePath):
                 self.filepath, group=self.group, cache=False) as data:
             data.load()
             self.data = self.data.merge(data, combine_attrs='drop_conflicts')
-            data.close()
         return self

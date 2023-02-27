@@ -14,8 +14,8 @@ class Biot(FrameSet):
 
     field_attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])
     force_attrs: list[str] = field(default_factory=lambda: ['Fr', 'Fz', 'Fc'])
-    dfield: float = field(default=-25, repr=False)
-    dforce: float = field(default=-500, repr=False)
+    nfield: int | float = field(default=0, repr=False)
+    nforce: int | float = field(default=0, repr=False)
 
     @property
     def field_kwargs(self):
@@ -30,7 +30,7 @@ class Biot(FrameSet):
     @property
     def biot_attrs(self):
         """Return frame attributes."""
-        return dict(dfield=self.dfield, dforce=self.dforce,
+        return dict(nfield=self.nfield, nforce=self.nforce,
                     field_attrs=self.field_attrs,
                     force_attrs=self.force_attrs)
 
@@ -82,12 +82,12 @@ class Biot(FrameSet):
     @frame_factory(Field)
     def field(self):
         """Return boundary field instance."""
-        return dict(dfield=self.dfield)
+        return dict(nfield=self.nfield)
 
     @frame_factory(Force)
     def force(self):
         """Return force field instance."""
-        return dict(dforce=self.dforce, attrs=self.force_attrs)
+        return dict(nforce=self.nforce, attrs=self.force_attrs)
 
     @frame_factory(BiotInductance)
     def inductance(self):

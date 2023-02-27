@@ -308,7 +308,7 @@ class Extrapolate(Operate):
         # switch reference sign for vs3 loop (Upper to Lower)
         # self.data._current[:, -1] *= -1
 
-        self.get_axes(None, '1d')
+        self.get_axes('1d')
         self.axes.plot(self.data.time[time_index],
                        1e-3*self.data.current[time_index, data_index],
                        color='gray')

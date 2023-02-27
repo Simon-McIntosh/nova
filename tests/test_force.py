@@ -9,7 +9,7 @@ from nova.frame.coilset import CoilSet
 
 @pytest.fixture
 def linked():
-    coilset = CoilSet(dforce=-10, dcoil=-1, nplasma=3)
+    coilset = CoilSet(nforce=10, dcoil=-1, nplasma=3)
     coilset.coil.insert(5, 1, 0.1, 0.1, nturn=1)
     coilset.shell.insert({'e': [5, 1, 1.75, 1.0]}, 13, 0.05, delta=-9)
     coilset.shell.insert({'e': [5, 1, 1.95, 1.2]}, 13, 0.05, delta=-9)
@@ -23,28 +23,28 @@ def linked():
 
 
 def test_turn_number():
-    coilset = CoilSet(dforce=-5, dcoil=-2)
+    coilset = CoilSet(nforce=5, dcoil=-2)
     coilset.coil.insert(5, range(3), 0.1, 0.3, nturn=[1, 2, 3])
     coilset.force.solve()
     assert np.isclose(coilset.force.target.nturn.sum(), 6)
 
 
 def test_negative_delta():
-    coilset = CoilSet(dforce=-9, dcoil=-2)
+    coilset = CoilSet(nforce=9, dcoil=-2)
     coilset.coil.insert(5, 6, 0.9, 0.1)
     coilset.force.solve()
     assert len(coilset.force) == 9
 
 
 def test_positive_delta():
-    coilset = CoilSet(dforce=0.1, dcoil=-2)
+    coilset = CoilSet(nforce=-0.1, dcoil=-2)
     coilset.coil.insert(5, 6, 0.9, 0.1)
     coilset.force.solve()
     assert len(coilset.force) == 9
 
 
-def test_zero_delta():
-    coilset = CoilSet(dforce=0, dcoil=-2)
+def test_unit_delta():
+    coilset = CoilSet(nforce=1, dcoil=-2)
     coilset.coil.insert(5, 6, 0.9, 0.1)
     coilset.force.solve()
     assert len(coilset.force) == 1
@@ -75,9 +75,9 @@ def test_store_load(linked):
 def test_resolution():
     coilset = CoilSet(dcoil=-1)
     coilset.coil.insert(5, [5, 6], 0.9, 0.1, Ic=45e3, nturn=500)
-    coilset.force.solve(dforce=-100)
+    coilset.force.solve(nforce=100)
     fr_lowres = coilset.force.fr
-    coilset.force.solve(dforce=-200)
+    coilset.force.solve(nforce=200)
     fr_highres = coilset.force.fr
     assert np.allclose(fr_lowres, fr_highres, rtol=1e-3)
 

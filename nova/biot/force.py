@@ -17,15 +17,15 @@ class Force(Plot, BiotOperate):
 
     Parameters
     ----------
-    dforce : int | +float, optional
-        Coil force resoultion. The default is -100.
+    nforce : int | -float, optional
+        Coil force segment resoultion. The default is 500.
 
-            - > 0: probe segment resolution
-            - int <= 0: probe segment number
+            - < 0: coil segment resolution
+            - int >= 0: coil segment number
 
     """
 
-    dforce: float = -100
+    nforce: int | float | None = 500
     reduce: bool = True
     attrs: list[str] = field(default_factory=lambda: ['Fr', 'Fz', 'Fc'])
     target: BiotFrame = field(init=False, repr=False)
@@ -34,14 +34,17 @@ class Force(Plot, BiotOperate):
         """Return force patch number."""
         return len(self.data.get('x', []))
 
-    def solve(self, dforce=None):
+    def solve(self, nforce=None):
         """Extract boundary and solve magnetic field around coil perimeter."""
-        if dforce is not None:
-            self.dforce = dforce
+        if nforce is not None:
+            self.nforce = nforce
+        if self.nforce == 0:
+            return
         self.target = BiotFrame()
         for name in self.Loc['coil', :].index:
             polyframe = self.frame.loc[name, 'poly']
-            polygrid = PolyGrid(polyframe, turn='rectangle', delta=self.dforce,
+            polygrid = PolyGrid(polyframe, turn='rectangle',
+                                delta=-self.nforce,
                                 nturn=self.Loc[name, 'nturn'])
             self.target.insert(polygrid.frame,
                                xo=self.Loc[name, 'x'],

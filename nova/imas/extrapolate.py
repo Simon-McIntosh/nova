@@ -306,7 +306,7 @@ class Extrapolate(Operate):
                 self.sloc[index, ['Ic']].squeeze().values
 
         # switch reference sign for vs3 loop (Upper to Lower)
-        # self.data._current[:, -1] *= -1
+        self.data._current[:, -1] *= -1
 
         self.get_axes('1d')
         self.axes.plot(self.data.time[time_index],

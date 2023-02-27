@@ -10,7 +10,7 @@ except ImportError:
 
 
 try:
-    benchmark = Benchmark(nplasma=150, ngrid=0, dfield=-15, dforce=-100)
+    benchmark = Benchmark(nplasma=150, ngrid=0, nfield=15, nforce=100)
 except imas.ids_base.ALException:
     pytest.skip('Requisite IDSs unavailable. '
                 'Unable to initiate matrix benchmark, skipping tests',

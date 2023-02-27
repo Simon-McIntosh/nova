@@ -25,9 +25,9 @@ def test_dshell():
     assert coilset.dshell == 0.7
 
 
-def test_dfield():
-    coilset = CoilSet(dfield=-1)
-    assert coilset.dfield == -1
+def test_nfield():
+    coilset = CoilSet(nfield=1)
+    assert coilset.nfield == 1
 
 
 def test_dpol_default():

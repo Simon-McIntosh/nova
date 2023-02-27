@@ -56,14 +56,21 @@ def test_boundary_positive_delta_b():
 
 
 def test_multipolygon():
-    coilset = CoilSet(dfield=-2)
+    coilset = CoilSet(nfield=-2)
     coilset.coil.insert({'ring': [4.2, -0.4, 1.25, 0.5]})
     coilset.field.solve()
     assert len(coilset.field) == 0
 
 
+def test_nfield_zero():
+    coilset = CoilSet(nfield=0)
+    coilset.coil.insert(1.1, 0, 0.05, 0.1)
+    coilset.field.solve()
+    assert len(coilset.field.data) == 0
+
+
 def test_plasma():
-    coilset = CoilSet(dfield=0, nplasma=50)
+    coilset = CoilSet(nfield=1, nplasma=50)
     coilset.firstwall.insert({'ellip': [1, 0, 0.1, 0.3]})
     coilset.coil.insert(1.1, 0, 0.05, 0.1)
     coilset.field.solve()
@@ -71,7 +78,7 @@ def test_plasma():
 
 
 def test_radial_field_matrix_length():
-    coilset = CoilSet(dfield=0.01)
+    coilset = CoilSet(nfield=-0.01)
     coilset.coil.insert([1.1, 1.2, 1.3], 0, 0.075, 0.15, Ic=15e3)
     coilset.field.solve()
     assert len(coilset.field) == len(coilset.field.data.Br)
@@ -79,7 +86,7 @@ def test_radial_field_matrix_length():
 
 
 def test_radial_field_single_coil():
-    coilset = CoilSet(dfield=-3)
+    coilset = CoilSet(nfield=3)
     coilset.coil.insert(1.3, 0, 0.075, 0.15, Ic=15e3)
     coilset.field.solve()
     coilset.point.solve(coilset.field.points)
@@ -87,7 +94,7 @@ def test_radial_field_single_coil():
 
 
 def test_store_load():
-    coilset = CoilSet(dfield=0.01)
+    coilset = CoilSet(nfield=-0.01)
     coilset.coil.insert([1.1, 1.2, 1.3], 0, 0.075, 0.15, Ic=15e3)
     coilset.field.solve()
     bn = coilset.field.bn

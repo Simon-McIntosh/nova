@@ -803,6 +803,10 @@ class Machine(CoilSet, CoilGeometry, CoilData):
         """Solve biot instances."""
         if self.sloc['plasma'].sum() > 0:
             self.plasma.solve()
+        if self.nfield != 0:
+            self.field.solve()
+        if self.nforce != 0:
+            self.force.solve()
 
     def build(self, **kwargs):
         """Build dataset, frameset and, biotset and save to file."""

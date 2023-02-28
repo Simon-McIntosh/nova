@@ -2,13 +2,13 @@
 import numpy as np
 import pytest
 
-from nova.geometry.polyline import ThreePointArc, PolyLine
+from nova.geometry.polyline import Arc, PolyLine, ThreePointArc
 
 
 def test_2d_arc_radius():
     arc = ThreePointArc((0, 1, 0), (1, 0, 0), (0, -1, 0))
     assert np.isclose(arc.radius, 1)
-test_2d_arc_radius()
+
 
 def test_2d_arc_center():
     arc = ThreePointArc((0, 1, 0), (1, 0, 0), (0, -1, 0))
@@ -33,7 +33,64 @@ def test_points_on_polyline():
         delta = np.linalg.norm(line.curve - point[np.newaxis, :], axis=1)
         assert np.min(delta) < 0.1
 
-#line = PolyLine(points)
+
+def test_arc_length():
+    line = PolyLine(np.array([(1, 0, 0), (0, 1, 0), (-1, 0, 0)]), 100)
+    arc = Arc(line.curve)
+    assert np.isclose(arc.length, np.pi, atol=1e-3)
+
+
+def test_match_arc():
+    arc = Arc(np.array([(1, 0, 0), (0, 1, 0), (-1, 0, 0)]))
+    assert arc.match
+
+
+def test_match_arc_3d():
+    arc = Arc(np.array([(1, 0, 0), (0, 1, 0), (-1, 0, 0.5)]))
+    assert arc.match
+
+
+def test_match_four_point_arc():
+    arc = Arc(np.array([(1, 0, 0), (0, 1, 0), (-1, 0, 0), (0, -1, 0)]))
+    assert arc.match
+
+
+def test_missmatch_four_point_arc():
+    arc = Arc(np.array([(1, 0, 0), (0, 1, 0), (-1, 0, 0), (0, -1, 0.01)]))
+    assert not arc.match
+
+
+def test_match_single_arc():
+    rng = np.random.default_rng(2025)
+    points = rng.random((3, 3))
+    line = PolyLine(points, 20)
+    arc = Arc(line.curve)
+    assert arc.match
+
+
+def test_missmatch_dual_arc():
+    rng = np.random.default_rng(2025)
+    points = rng.random((5, 3))
+    line = PolyLine(points, 20)
+    arc = Arc(line.curve)
+    assert not arc.match
+
+
+def test_match_single_polyarc():
+    rng = np.random.default_rng(2025)
+    points = rng.random((5, 3))
+    line = PolyLine(points, 100)
+    arc = Arc(line.curve[:100])
+    assert arc.match
+
+
+def test_mismatch_single_polyarc_plus_one():
+    rng = np.random.default_rng(2025)
+    points = rng.random((5, 3))
+    line = PolyLine(points, 100)
+    arc = Arc(line.curve[:101])
+    assert not arc.match
+
 
 if __name__ == '__main__':
 

@@ -25,13 +25,16 @@ class Arc(Plot):
     arc_axes: np.ndarray = field(init=False)
     center: np.ndarray = field(init=False)
     radius: float = field(init=False)
+    theta: float = field(init=False)
+    error: float = field(init=False)
+    eps: float = 1e-8
 
     def __post_init__(self):
         """Generate curve."""
-        self.align()
-        self.fit()
         if hasattr(super(), '__post_init__'):
             super().__post_init__()
+        self.align()
+        self.fit()
 
     def align(self):
         """Align point cloud to 2d plane."""
@@ -48,24 +51,56 @@ class Arc(Plot):
         radius = np.sqrt(coef[2] + np.sum(center**2))
         return center, radius
 
+    @cached_property
+    def points_2d(self):
+        """Return point locations projected onto 2d plane."""
+        return np.c_[np.einsum('j,ij->i', self.arc_axes[0], self.points),
+                     np.einsum('j,ij->i', self.arc_axes[1], self.points)]
+
+    @cached_property
+    def points_fit(self):
+        """Return best-fit points in 3d space."""
+        return self.center[np.newaxis, :] + \
+            self.radius*(np.cos(self.theta)*self.arc_axes[np.newaxis, 0] +
+                         np.sin(self.theta)*self.arc_axes[np.newaxis, 1])
+
     def fit(self):
         """Align local coordinate system and fit arc to plane point cloud."""
-        points_2d = np.zeros((len(self.points), 2))
-        points_2d[:, 0] = np.einsum('j,ij->i', self.arc_axes[0], self.points)
-        points_2d[:, 1] = np.einsum('j,ij->i', self.arc_axes[1], self.points)
-        center, self.radius = self.fit_2d(points_2d)
+        center, self.radius = self.fit_2d(self.points_2d)
         self.center = center @ self.arc_axes[:2]
-        self.center += np.dot(self.arc_axes[2], self.mean)*self.arc_axes[2]
+        self.center += np.mean(np.einsum('j,ij->i', self.arc_axes[2],
+                                         self.points))*self.arc_axes[2]
+        center_points = self.points_2d - center
+        self.theta = np.arctan2(center_points[:, 1],
+                                center_points[:, 0])[:, np.newaxis]
+        self.error = np.linalg.norm(self.points -
+                                    self.points_fit, axis=1).std()
 
-    def plot(self):
-        """Plot best-fit arc and point cloud."""
+    @property
+    def length(self):
+        """Return length of discrete polyline."""
+        return np.linalg.norm(self.points[1:] - self.points[:-1], axis=1).sum()
+
+    @property
+    def match(self):
+        """Return status of normalized fit residual."""
+        return self.error / self.length < self.eps
+
+    def plot_circle(self):
+        """Plot best fit circle."""
         self.get_axes('2d')
-        self.axes.plot(self.points[:, 0], self.points[:, 1], 'o')
         theta = np.linspace(0, 2*np.pi)
         points_2d = self.radius * np.c_[np.cos(theta), np.sin(theta)]
         points = points_2d @ self.arc_axes[:2]
         points += self.center
         self.axes.plot(points[:, 0], points[:, 1], ':', color='gray')
+
+    def plot_fit(self):
+        """Plot best-fit arc and point cloud."""
+        self.get_axes('2d')
+        self.axes.plot(self.points[:, 0], self.points[:, 1], 'o')
+        self.axes.plot(self.points_fit[:, 0], self.points_fit[:, 1], 'D')
+        self.plot_circle()
 
 
 @dataclass
@@ -152,10 +187,6 @@ class PolyLine(Plot):
         self.axes.plot(self.curve[:, 0], self.curve[:, 1], '-')
 
 
-#@dataclass
-
-
-
 if __name__ == '__main__':
 
 
@@ -163,14 +194,21 @@ if __name__ == '__main__':
     #arc.plot()
 
     rng = np.random.default_rng(2025)
-    points = rng.random((11, 3))
+    points = rng.random((5, 3))
     #points[:, 2] = 0
 
-    line = PolyLine(points)
+    line = PolyLine(points, 20)
+
     line.plot()
 
-    arc = Arc(line.curve)
-    arc.plot()
+
+    arc = Arc(line.curve[:20])
+    arc.plot_fit()
+
+    line.plot()
+
+    print(arc.match)
+
 
     '''
     arc = Arc(8.88, (0.001, 7.3, -3), (-np.pi, np.pi), np.pi/2)

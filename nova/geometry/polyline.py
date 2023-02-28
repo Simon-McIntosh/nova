@@ -33,13 +33,27 @@ class Arc(Plot):
     def __post_init__(self):
         """Generate curve."""
         super().__post_init__()
+        self.build()
+
+    def __call__(self, points):
+        """Re-build arc instance."""
+        self.build(points)
+        return self
+
+    def build(self, points=None):
+        """Align and fit 3d arc to point cloud."""
+        if points is not None:
+            self.points = points
+        if self.points is None:
+            return
         self.align()
         self.fit()
+        return self
 
     def align(self):
         """Align point cloud to 2d plane."""
-        self.mean = np.mean(self.points, axis=0)
-        delta = self.points - self.mean[np.newaxis, :]
+        mean = np.mean(self.points, axis=0)
+        delta = self.points - mean[np.newaxis, :]
         self.arc_axes = scipy.linalg.svd(delta)[2]
 
     @staticmethod
@@ -51,13 +65,13 @@ class Arc(Plot):
         radius = np.sqrt(coef[2] + np.sum(center**2))
         return center, radius
 
-    @cached_property
+    @property
     def points_2d(self):
         """Return point locations projected onto 2d plane."""
         return np.c_[np.einsum('j,ij->i', self.arc_axes[0], self.points),
                      np.einsum('j,ij->i', self.arc_axes[1], self.points)]
 
-    @cached_property
+    @property
     def points_fit(self):
         """Return best-fit points in 3d space."""
         return self.center[np.newaxis, :] + self.radius*(
@@ -111,8 +125,10 @@ class Arc(Plot):
     def plot(self):
         """Plot point and best-fit data."""
         self.get_axes('2d')
-        self.axes.plot(self.points[:, 0], self.points[:, 1], 'o')
-        self.axes.plot(self.points_fit[:, 0], self.points_fit[:, 1], 'D')
+        points = self.sample(21)
+        self.axes.plot(points[:, 1], points[:, 2])
+        self.axes.plot(self.points[:, 1], self.points[:, 2], 'o')
+        self.axes.plot(self.points_fit[:, 1], self.points_fit[:, 2], 'D')
 
     def plot_fit(self):
         """Plot best-fit arc and point cloud."""
@@ -175,59 +191,68 @@ class PolyArc(Plot):
 
 @dataclass
 class PolyLine(Plot):
-    """Decimate polylines using a hybrid arc/line-segment rdp algorithum."""
+    """Decimate polyline using a hybrid arc/line-segment rdp algorithum."""
 
     points: np.ndarray
+    eps: float = 5e-4
+    arc: Arc = field(init=False, repr=False)
     segments: list = field(init=False, default_factory=list)
+
+    def __post_init__(self):
+        """Decimate polyline."""
+        super().__post_init__()
+        self.arc = Arc(eps=self.eps)
+        self.decimate()
 
     def fit_arc(self, points):
         """Return point index prior to first arc mis-match."""
         for i in range(4, len(points)+1):
-            if not Arc(points[:i]).match:
-                return i-1
+            if not self.arc(points[:i]).match:
+                if i > 4:
+                    return i-1
+                return 2
         return i
 
     def append(self, points):
         """Append points to segment list."""
         if len(points) >= 4:
-            self.segments.append(Arc(points).nodes)
+            self.segments.append(self.arc(points).nodes)
             return
-        if i in range(len(points)):
+        points = rdp(points, epsilon=1e-3)
+        for i in range(len(points)-1):
             self.segments.append(points[i:i+2])
+
+    def decimate(self):
+        """Decimate polyline via rdp reduction followed by an arc fit."""
+        points = self.points
+        point_number = len(points)
+        start = 0
+        while start <= point_number-4:
+            number = self.fit_arc(points[start:])
+            self.append(points[start:start+number])
+            start += number-1
+        if point_number-start > 1:
+            self.append(points[start:])
 
     def plot(self):
         """Plot decimated polyline."""
         self.set_axes('2d')
-        self.axes.plot(self.points[:, 0], self.points[:, 1])
-
-
-        #points = rdp(self.points, 1e-3)
-        points = self.points
-
-        start = 0
-        while start <= len(points) - 4:
-            number = self.fit_arc(points[start:])
-            print(number)
-            self.append(points[start:start+number])
-            start += number-1
+        self.axes.plot(self.points[:, 1], self.points[:, 2])
+        for segment in self.segments:
+            if len(segment) == 3:  # arc
+                Arc(segment).plot()
+                continue
+            self.axes.plot(segment[:, 1], segment[:, 2], 'k')
 
 
 if __name__ == '__main__':
 
-    rng = np.random.default_rng(2025)
-    points = rng.random((3, 3))
-    line = PolyArc(points, 100)
+    from nova.assembly.fiducialdata import FiducialData
 
-    curve = line.curve
-    for i in range(2):
-        points = rng.random((8, 3))
-        line = PolyArc(points, 100)
-        curve = np.append(curve, rng.random((2, 3)), axis=0)
-        curve = np.append(curve, line.curve, axis=0)
+    fiducial = FiducialData('RE', fill=True)
 
-
-    #line.plot()
-
+    curve = fiducial.data.centerline.data # factor*self.data.centerline_delta[coil, :, 0]
+    curve += 500*fiducial.data.centerline_delta[3].data
     polyline = PolyLine(curve)
     polyline.plot()
 

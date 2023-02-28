@@ -122,7 +122,7 @@ class GaussianProcessRegressor:
                           label='95% confidence')
 
         if text:
-            plt.despine()
+            #plt.despine()
             plt.xlabel('arc length')
             plt.ylabel('displacement, mm')
             plt.title(self.regressor.kernel_)

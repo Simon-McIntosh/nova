@@ -253,7 +253,7 @@ if __name__ == '__main__':
 
     fiducial = FiducialData('RE', fill=True)
     fiducial.plot_single(3)
-    #fiducial.plot_gpr(1, 0)
+    fiducial.plot_gpr(1, 0)
 
     '''
     plotter = pv.Plotter()

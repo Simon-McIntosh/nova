@@ -1,8 +1,9 @@
-
+"""Impement rdp-like decimator for mixed linear / arc polylines."""
 from dataclasses import dataclass, field
 from functools import cached_property
 
 import numpy as np
+from rdp import rdp
 import scipy
 
 from nova.frame.baseplot import Plot
@@ -31,8 +32,7 @@ class Arc(Plot):
 
     def __post_init__(self):
         """Generate curve."""
-        if hasattr(super(), '__post_init__'):
-            super().__post_init__()
+        super().__post_init__()
         self.align()
         self.fit()
 
@@ -60,9 +60,9 @@ class Arc(Plot):
     @cached_property
     def points_fit(self):
         """Return best-fit points in 3d space."""
-        return self.center[np.newaxis, :] + \
-            self.radius*(np.cos(self.theta)*self.arc_axes[np.newaxis, 0] +
-                         np.sin(self.theta)*self.arc_axes[np.newaxis, 1])
+        return self.center[np.newaxis, :] + self.radius*(
+            np.cos(self.theta)[:, np.newaxis]*self.arc_axes[np.newaxis, 0] +
+            np.sin(self.theta)[:, np.newaxis]*self.arc_axes[np.newaxis, 1])
 
     def fit(self):
         """Align local coordinate system and fit arc to plane point cloud."""
@@ -71,8 +71,8 @@ class Arc(Plot):
         self.center += np.mean(np.einsum('j,ij->i', self.arc_axes[2],
                                          self.points))*self.arc_axes[2]
         center_points = self.points_2d - center
-        self.theta = np.arctan2(center_points[:, 1],
-                                center_points[:, 0])[:, np.newaxis]
+        self.theta = np.unwrap(np.arctan2(center_points[:, 1],
+                                          center_points[:, 0]))
         self.error = np.linalg.norm(self.points -
                                     self.points_fit, axis=1).std()
 
@@ -86,6 +86,19 @@ class Arc(Plot):
         """Return status of normalized fit residual."""
         return self.error / self.length < self.eps
 
+    def sample(self, point_number=50):
+        """Return sampled polyline."""
+        theta = np.linspace(self.theta[0], self.theta[-1],
+                            point_number)[:, np.newaxis]
+        return self.center[np.newaxis, :] + self.radius*(
+            np.cos(theta)*self.arc_axes[0][np.newaxis, :] +
+            np.sin(theta)*self.arc_axes[1][np.newaxis, :])
+
+    @property
+    def nodes(self):
+        """Return best-fit node triple respecting start and end locations."""
+        return np.array([self.points[0], self.sample(3)[1], self.points[-1]])
+
     def plot_circle(self):
         """Plot best fit circle."""
         self.get_axes('2d')
@@ -95,11 +108,15 @@ class Arc(Plot):
         points += self.center
         self.axes.plot(points[:, 0], points[:, 1], ':', color='gray')
 
-    def plot_fit(self):
-        """Plot best-fit arc and point cloud."""
+    def plot(self):
+        """Plot point and best-fit data."""
         self.get_axes('2d')
         self.axes.plot(self.points[:, 0], self.points[:, 1], 'o')
         self.axes.plot(self.points_fit[:, 0], self.points_fit[:, 1], 'D')
+
+    def plot_fit(self):
+        """Plot best-fit arc and point cloud."""
+        self.plot()
         self.plot_circle()
 
 
@@ -112,37 +129,6 @@ class ThreePointArc(Arc, Triple):
         self.points = np.c_[self.point_a, self.point_b, self.point_c].T
         super().__post_init__()
 
-    @cached_property
-    def axis(self) -> np.ndarray | None:
-        """Return arc axis, None if points are co-linear."""
-        axis = np.cross(np.array(self.point_c) - np.array(self.point_b),
-                        np.array(self.point_b) - np.array(self.point_a))
-        length = np.linalg.norm(axis)
-        if np.isclose(length, 0):
-            return None
-        return axis / length
-
-    def _norm(self, point):
-        """Return normalized vector between center and point."""
-        vector = getattr(self, f'point_{point}') - self.center
-        return vector / np.linalg.norm(vector)
-
-    def sample(self, point_number=50):
-        """Return sampled polyline."""
-        axis_a = self._norm('a')
-        axis_c = self._norm('c')
-        axis_n = np.cross(axis_a, self.axis)
-        cos_theta = np.dot(axis_a, axis_c)
-        sin_theta = np.sqrt(1 - cos_theta**2)
-        point_c = self.center + self.radius*(cos_theta*axis_a +
-                                             sin_theta*axis_n)
-        theta = np.linspace(0, np.arccos(cos_theta), point_number)
-        if not np.allclose(point_c, self.point_c):
-            theta = np.linspace(0, 2*np.pi-np.arccos(cos_theta), point_number)
-        return self.center[np.newaxis, :] + self.radius*(
-            np.cos(theta)[:, np.newaxis]*axis_a[np.newaxis, :] +
-            np.sin(theta)[:, np.newaxis]*axis_n[np.newaxis, :])
-
     def plot(self):
         """Plot arc."""
         self.set_axes('2d')
@@ -154,8 +140,8 @@ class ThreePointArc(Arc, Triple):
 
 
 @dataclass
-class PolyLine(Plot):
-    """Construct polyline from multiple segments."""
+class PolyArc(Plot):
+    """Construct polyline from multiple arc segments."""
 
     points: np.ndarray
     resolution: int = 20
@@ -187,33 +173,67 @@ class PolyLine(Plot):
         self.axes.plot(self.curve[:, 0], self.curve[:, 1], '-')
 
 
+@dataclass
+class PolyLine(Plot):
+    """Decimate polylines using a hybrid arc/line-segment rdp algorithum."""
+
+    points: np.ndarray
+    segments: list = field(init=False, default_factory=list)
+
+    def fit_arc(self, points):
+        """Return point index prior to first arc mis-match."""
+        for i in range(4, len(points)+1):
+            if not Arc(points[:i]).match:
+                return i-1
+        return i
+
+    def append(self, points):
+        """Append points to segment list."""
+        if len(points) >= 4:
+            self.segments.append(Arc(points).nodes)
+            return
+        if i in range(len(points)):
+            self.segments.append(points[i:i+2])
+
+    def plot(self):
+        """Plot decimated polyline."""
+        self.set_axes('2d')
+        self.axes.plot(self.points[:, 0], self.points[:, 1])
+
+
+        #points = rdp(self.points, 1e-3)
+        points = self.points
+
+        start = 0
+        while start <= len(points) - 4:
+            number = self.fit_arc(points[start:])
+            print(number)
+            self.append(points[start:start+number])
+            start += number-1
+
+
 if __name__ == '__main__':
 
-
-    #arc = ThreePointArc((0, 1, -3.4), (1, 0, -3.4), (0, -1, -3.4))
-    #arc.plot()
-
     rng = np.random.default_rng(2025)
-    points = rng.random((5, 3))
-    #points[:, 2] = 0
+    points = rng.random((3, 3))
+    line = PolyArc(points, 100)
 
-    line = PolyLine(points, 20)
-
-    line.plot()
-
-
-    arc = Arc(line.curve[:20])
-    arc.plot_fit()
-
-    line.plot()
-
-    print(arc.match)
+    curve = line.curve
+    for i in range(2):
+        points = rng.random((8, 3))
+        line = PolyArc(points, 100)
+        curve = np.append(curve, rng.random((2, 3)), axis=0)
+        curve = np.append(curve, line.curve, axis=0)
 
 
-    '''
-    arc = Arc(8.88, (0.001, 7.3, -3), (-np.pi, np.pi), np.pi/2)
-    arc.plot()
-    #xyz = arc((0, 0, 0), 5, (0, np.pi), (0, np.pi))
-    #.poplt.plot(xyz[0], xyz[2])
-    print(arc.fit())
-    '''
+    #line.plot()
+
+    polyline = PolyLine(curve)
+    polyline.plot()
+
+    #arc = Arc(line.curve[:20])
+    #arc.plot_fit()
+
+    #line.plot()
+
+    #print(arc.match)

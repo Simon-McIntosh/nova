@@ -2,8 +2,9 @@ import pytest
 import numpy as np
 
 from itertools import product
-from nova.biot.fieldnull import DataNull
+
 from nova.frame.coilset import CoilSet
+from nova.geometry import select
 from nova.geometry.polygon import Polygon
 
 
@@ -33,7 +34,7 @@ def quadratic_surface(x, z, null_type: int, xo=2, zo=2):
 def test_quadratic_coefficents(null_type: int):
     x, z = meshgrid()
     psi = quadratic_surface(x, z, null_type)
-    coef = DataNull.quadratic_surface(x, z, psi)
+    coef = select.quadratic_surface(x, z, psi)
     assert np.allclose(psi, coefficient_matrix(x, z) @ coef)
 
 
@@ -41,8 +42,8 @@ def test_quadratic_coefficents(null_type: int):
 def test_quadratic_null_type(null_type: int):
     x, z = meshgrid()
     psi = quadratic_surface(x, z, null_type)
-    coef = DataNull.quadratic_surface(x, z, psi)
-    assert DataNull.null_type(coef) == null_type
+    coef = select.quadratic_surface(x, z, psi)
+    assert select.null_type(coef) == null_type
 
 
 @pytest.mark.parametrize('null_type,coordinate',
@@ -51,8 +52,8 @@ def test_quadratic_null_type(null_type: int):
 def test_quadratic_coordinate(null_type, coordinate):
     x, z = meshgrid()
     psi = quadratic_surface(x, z, null_type, *coordinate)
-    coef = DataNull.quadratic_surface(x, z, psi)
-    assert np.allclose(DataNull.null_coordinate(coef), coordinate)
+    coef = select.quadratic_surface(x, z, psi)
+    assert np.allclose(select.null_coordinate(coef), coordinate)
 
 
 @pytest.mark.parametrize('null_type,coordinate',
@@ -60,8 +61,8 @@ def test_quadratic_coordinate(null_type, coordinate):
 def test_quadratic_coordinate_cluster(null_type, coordinate):
     x, z = meshgrid()
     psi = quadratic_surface(x, z, null_type, *coordinate)
-    coef = DataNull.quadratic_surface(x, z, psi)
-    DataNull.null_coordinate(coef, (x, z))
+    coef = select.quadratic_surface(x, z, psi)
+    select.null_coordinate(coef, (x, z))
 
 
 @pytest.mark.parametrize('null_type,coordinate',
@@ -71,17 +72,17 @@ def test_quadratic_coordinate_cluster(null_type, coordinate):
 def test_quadratic_coordinate_xcluster(null_type, coordinate):
     x, z = meshgrid()
     psi = quadratic_surface(x, z, null_type, *coordinate)
-    coef = DataNull.quadratic_surface(x, z, psi)
+    coef = select.quadratic_surface(x, z, psi)
     with pytest.raises(AssertionError):
-        DataNull.null_coordinate(coef, (x, z))
+        select.null_coordinate(coef, (x, z))
 
 
 def test_quadratic_plane_surface():
     x, z = meshgrid()
     psi = quadratic_surface(x, z, 2)
-    coef = DataNull.quadratic_surface(x, z, psi)
+    coef = select.quadratic_surface(x, z, psi)
     with pytest.raises(ValueError):
-        DataNull.null_type(coef)
+        select.null_type(coef)
 
 
 @pytest.mark.parametrize('null,coordinate',
@@ -89,7 +90,7 @@ def test_quadratic_plane_surface():
 def test_subnull(null, coordinate):
     x, z = meshgrid()
     psi = quadratic_surface(x, z, null, *coordinate)
-    null_coords, null_psi, null_type = DataNull.subnull(x, z, psi)
+    null_coords, null_psi, null_type = select.subnull(x, z, psi)
     assert np.allclose(null_coords, coordinate)
     assert np.isclose(null_psi, 0)
     assert null_type == null

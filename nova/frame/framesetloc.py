@@ -138,6 +138,12 @@ class FrameSetLoc(FrameData):
         self.update_subframeloc()
 
     @cached_property
+    def plasma_index(self):
+        """Return plasma index."""
+        return next(self.frame.subspace.index.get_loc(name) for name in
+                    self.subframe.frame[self.aloc['plasma']].unique())
+
+    @cached_property
     def aloc_hash(self):
         """Return interger hash computed on aloc array attribute."""
         return HashLoc('array_hash', self.aloc, self.saloc)

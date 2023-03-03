@@ -5,6 +5,7 @@ import numpy as np
 
 from nova.frame.baseplot import Plot
 from nova.imas.scenario import Scenario
+import scipy
 
 
 @dataclass
@@ -16,7 +17,7 @@ class PulseSchedule(Plot, Scenario):
 
     def time_coordinate(self, path: str, attr: str):
         """Return time coordinate."""
-        if self.data.attrs['homogeneous_time'] == 1:
+        if self.data.homogeneous_time == 1:
             return ('time',)
         coord = f'{attr}_time'
         self.data.coords[coord] = self.ids_index.get(path + '.time')
@@ -55,15 +56,36 @@ class PulseSchedule(Plot, Scenario):
         with self.ids_index.node('position_control.gap'):
             if self.ids_index.empty('value.reference.data'):
                 return
-            if self.data['homogeneous_time'] == 1:
-                self.data.coords['gap_name'] = \
-                    self.ids_index.array('identifier')
-                #sel
+
+            self.data.coords['gap_id'] = self.ids_index.array('identifier')
+            if not self.ids_index.empty('name'):
+                self.data.coords['gap_name'] = 'gap_id', \
+                    self.ids_index.array('name')
+            for attr in ['r', 'z', 'angle']:
+                if self.ids_index.empty(attr):
+                    continue
+                self.data.coords[f'gap_{attr}'] = 'gap_id', \
+                    self.ids_index.array(attr)
+            if self.data.homogeneous_time == 1:
+                self.data['gap'] = ('time', 'gap_id'), \
+                    self.ids_index.array('value.reference.data')
+
+            #print(self.time_coordinate('value.reference', 'gap1'))
+            #self.data['gap'] = self.time_coordinate('value.reference', name)
+
 
             '''
             for index in range(self.ids_index.length):
             time = self.time_coordinate('value.reference', 'gap')
             '''
+
+    def build_derived(self):
+        """Build derived attributes."""
+        if 'loop_voltage' in self.data:
+            self.data['loop_psi'] = 'time', \
+                -scipy.integrate.cumulative_trapezoid(
+                    self.data.loop_voltage, self.data.time, initial=0)
+            self.data['loop_psi'] -= self.data.loop_psi[-1]/2
 
     def build(self):
         """Build netCDF database using data extracted from imasdb."""
@@ -80,7 +102,8 @@ class PulseSchedule(Plot, Scenario):
             self.build_points(
                 'position_control',
                 ['x_point', 'strike_point', 'boundary_outline'])
-            #self.build_gaps()
+            self.build_gaps()
+        self.build_derived()
         return self
 
     def plot_profile(self):
@@ -102,16 +125,29 @@ class PulseSchedule(Plot, Scenario):
         self.axes[3].legend()
         self.axes[-1].set_xlabel('time s')
 
+    def plot_0d(self, attr, axes=None):
+        """Plot 0D parameter timeseries."""
+        self.set_axes('1d', axes=axes)
+        self.axes.plot(self.data.time, self.data[attr], label=attr)
+        self.axes.set_xlabel(r'$t$ s')
+        self.axes.set_ylabel(attr)
+
+    def plot(self):
+        """Plot gaps."""
+        self.get_axes('2d')
+        self.axes.plot(self.data.gap_r, self.data.gap_z, 'o')
 
 
 if __name__ == '__main__':
 
     pulse, run = 135007, 4
-    # pulse, run = 135011, 7
+    pulse, run = 135011, 7
     pulse, run = 135003, 5
     # pulse, run = 105028, 1  # Maksim
 
     PulseSchedule(pulse, run)._clear()
     schedule = PulseSchedule(pulse, run)
 
-    schedule.plot_profile()
+    #schedule.plot_profile()
+
+    schedule.plot_0d('loop_psi')

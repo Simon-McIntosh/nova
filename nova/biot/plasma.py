@@ -85,10 +85,15 @@ class Plasma(Plot, netCDF, FrameSetLoc):
         """Return concatenated array of grid and boundary psi values."""
         return np.append(self.grid.psi, self.boundary.psi)
 
+    @cached_property
+    def index(self):
+        """Return plasma index."""
+        return self.plasma_index
+
     @property
     def polarity(self):
         """Return plasma polarity."""
-        return np.sign(self.sloc['Plasma', 'Ic'])
+        return np.sign(self.saloc['Ic'][self.index])
 
     @cached_property
     def pointloop(self):
@@ -131,14 +136,6 @@ class Plasma(Plot, netCDF, FrameSetLoc):
                      self.aloc['nturn'], self.aloc['area'])
         self.update_aloc_hash('nturn')
 
-    @staticmethod
-    @numba.njit
-    def _update_nturn(inloop, plasma, ionize, nturn, area):
-        ionize[plasma] = inloop
-        nturn[plasma] = 0
-        ionize_area = area[ionize]
-        nturn[ionize] = ionize_area / np.sum(ionize_area)
-
     @property
     def nturn(self):
         """Manage plasma turns."""
@@ -150,6 +147,22 @@ class Plasma(Plot, netCDF, FrameSetLoc):
         plasma = self.aloc['plasma']
         self.aloc['nturn'][plasma] = nturn
         self.update_aloc_hash('nturn')
+
+    def plot(self, turns=True, **kwargs):
+        """Plot separatirx as polygon patch."""
+        if turns:
+            self.subframe.polyplot('plasma')
+        '''
+        poly = Polygon(self.separatrix).poly
+        if not poly.is_empty:
+            self.axes.add_patch(descartes.PolygonPatch(
+                poly.__geo_interface__,
+                facecolor='C4', alpha=0.75, linewidth=0, zorder=-10))
+        '''
+        limit = np.argmin(self.wall.psi)
+
+        self.grid.plot(**kwargs)
+        self.wall.plot()
 
 
     def __XXX_residual(self, Psi):
@@ -220,33 +233,3 @@ class Plasma(Plot, netCDF, FrameSetLoc):
         #                   self.aloc['nturn'], self.aloc['area'])
         self.update_aloc_hash('nturn')
         return nturn - self.aloc['nturn'][plasma]
-
-    def plot(self, turns=True, **kwargs):
-        """Plot separatirx as polygon patch."""
-        if turns:
-            self.subframe.polyplot('plasma')
-        '''
-        poly = Polygon(self.separatrix).poly
-        if not poly.is_empty:
-            self.axes.add_patch(descartes.PolygonPatch(
-                poly.__geo_interface__,
-                facecolor='C4', alpha=0.75, linewidth=0, zorder=-10))
-        '''
-        self.grid.plot(**kwargs)
-
-
-'''
-
-    def store(self, filename: str, path=None):
-        """Extend netCDF.store, store data as netCDF in hdf5 file."""
-        self.data = xarray.Dataset()
-        self.data['loop_coorinates'] = ['x', 'z']
-        self.data['loop'] = ('loop_index', 'loop_coorinates'), self.loop
-        super().store(filename, path)
-
-    def load(self, filename: str, path=None):
-        """Extend netCDF.load, load data from hdf5."""
-        super().load(filename, path)
-        self.loop = self.data['loop'].data
-        return self
-'''

@@ -11,10 +11,10 @@ class BiotInductance(Plot, BiotOperate):
     """Compute self interaction."""
 
     def solve(self, index=slice(None)):
-        """Solve Biot interaction across grid."""
+        """Solve Biot interaction across subframe."""
         self.data = BiotSolve(self.subframe, self.subframe.loc[:, index],
-                              reduce=[True, True], attrs=['Psi'],
-                              name=self.name).data
+                              turns=[True, True], reduce=[True, True],
+                              attrs=['Psi'], name=self.name).data
         super().post_solve()
 
     def plot(self, axes=None, **kwargs):

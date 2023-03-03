@@ -1,6 +1,7 @@
 """Extract time slices from equilibrium IDS."""
 from dataclasses import dataclass, field
 
+import numpy as np
 import xarray
 
 
@@ -35,13 +36,22 @@ class GetSlice:
 
     @property
     def itime(self):
-        """Manage time index."""
+        """Manage solution time index."""
         return self.time_index
 
     @itime.setter
     def itime(self, time_index: int):
         self.time_index = time_index
         self.update()
+
+    @property
+    def time(self):
+        """Manage solution time."""
+        return self['time']
+
+    @time.setter
+    def time(self, time):
+        self.itime = np.searchsorted(self.data.time, time)
 
     def update(self):
         """Clear cache following update to itime. Extend as required."""

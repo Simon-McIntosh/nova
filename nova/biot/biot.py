@@ -62,7 +62,7 @@ class Biot(FrameSet):
     @frame_factory(BiotFirstWall)
     def plasmawall(self):
         """Return plasma firstwall biot instance."""
-        return self.field_kwargs
+        return dict(attrs=['Psi'])
 
     @frame_factory(BiotPoint)
     def point(self):

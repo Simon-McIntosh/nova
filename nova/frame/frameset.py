@@ -142,6 +142,8 @@ class FrameSet(netCDF, FrameSetLoc):
     def plot(self, index=None, axes=None, **kwargs):
         """Plot coilset subframe via polyplot instance."""
         self.subframe.polyplot(index=index, axes=axes, **kwargs)
+        if hasattr(super(), 'plot'):
+            super().plot()
 
 
 if __name__ == '__main__':

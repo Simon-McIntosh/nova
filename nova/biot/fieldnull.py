@@ -1,42 +1,26 @@
 """Methods for calculating the position and value of x-points and o-points."""
 from dataclasses import dataclass, field
-from functools import cached_property
 
 import numba
 import numpy as np
 import xarray
 
+from nova.biot.biotarray import BiotArray
 from nova.frame.baseplot import Plot
+from nova.geometry import select
 from nova.geometry.pointloop import PointLoop
 
 
-@numba.njit
-def bisect(vector, value):
-    """Return the bisect left index, assuming vector is sorted.
-
-    The return index i is such that all e in vector[:i] have e < value,
-    and all e in vector[i:] have e >= value.
-
-    Addapted from bisect.bisect_left to allow jit compilation.
-    """
-    low, high = 0, len(vector)
-    while low < high:
-        mid = (low + high) // 2
-        if vector[mid] < value:
-            low = mid + 1
-        else:
-            high = mid
-    return low
-
-
 @dataclass
-class DataNull(Plot):
+class DataNull(Plot, BiotArray):
     """Store sort and remove field nulls."""
 
     subgrid: bool = True
     data: xarray.Dataset | xarray.DataArray = \
         field(repr=False, default_factory=xarray.Dataset)
     loop: np.ndarray | None = field(repr=False, default=None)
+    array_attrs: list[str] = field(
+        default_factory=lambda: ['x', 'z', 'stencil', 'stencil_index'])
     data_o: dict[str, np.ndarray] = field(init=False, default_factory=dict,
                                           repr=False)
     data_x: dict[str, np.ndarray] = field(init=False, default_factory=dict,
@@ -69,8 +53,7 @@ class DataNull(Plot):
     def update_mask_1d(self, mask, psi):
         """Return masked data dict from 1D input."""
         try:
-            index, points = self._index_1d(
-                self.data.x.data, self.data.z.data, mask)
+            index, points = self._index_1d(self['x'], self['z'], mask)
         except IndexError:  # catch empty mask
             return self._empty_mask()
         points, index = self._select(points, index)
@@ -81,8 +64,7 @@ class DataNull(Plot):
     def update_mask_2d(self, mask, psi):
         """Return masked data dict from 2D input."""
         try:
-            index, points = self._index_2d(
-                self.data.x.data, self.data.z.data, mask)
+            index, points = self._index_2d(self['x'], self['z'], mask)
         except IndexError:
             return self._empty_mask()
         points, index = self._select(points, index)
@@ -90,82 +72,6 @@ class DataNull(Plot):
             return dict(index=index) | self._subnull_2d(index, psi)
         return dict(index=index, points=points,
                     psi=np.array([psi[tuple(i)] for i in index]))
-
-    @staticmethod
-    @numba.njit
-    def quadratic_surface(x_cluster, z_cluster, psi_cluster):
-        """Return psi quatratic surface coefficients."""
-        coefficient_matrix = np.column_stack(
-            (x_cluster**2, z_cluster**2, x_cluster, z_cluster,
-             x_cluster*z_cluster, np.ones_like(x_cluster)))
-        coefficients = np.linalg.lstsq(coefficient_matrix, psi_cluster)[0]
-        return coefficients
-
-    @staticmethod
-    @numba.njit
-    def null_type(coefficients, atol=1e-12):
-        """Return null type.
-
-            - 0: saddle
-                :math:`4AB - E^2 < 0`
-            - -1: minimum
-                :math:`A>0` and :math:`B>0`
-            - 1: maximum
-                :math:`A<0` and :math:`B<0`
-
-        Raises
-        ------
-        ValueError
-            degenerate surface
-        """
-        root = 4*coefficients[0]*coefficients[1] - coefficients[4]**2
-        if abs(root) < atol:
-            raise ValueError('Plane surface')
-        if root < 0:
-            return 0
-        if coefficients[0] > 0 and coefficients[1] > 0:
-            return -1
-        if coefficients[0] < 0 and coefficients[1] < 0:
-            return 1
-        raise ValueError('Coefficients form a degenerate surface.')
-
-    @staticmethod
-    @numba.njit
-    def null_coordinate(coefficients, cluster=None):
-        """
-        Return null coodinates in 2D plane.
-
-        Returns
-        -------
-        x_coordinate: float
-            subgrid field null x_coordinate
-        z_coordinate: float
-            subgrid field null z_coordinate
-
-        Raises
-        ------
-        ValueError
-            subgrid coordinate outside cluster
-        """
-        root = 4*coefficients[0]*coefficients[1] - coefficients[4]**2
-        x_coordinate = (coefficients[4]*coefficients[3] -
-                        2*coefficients[1]*coefficients[2]) / root
-        z_coordinate = (coefficients[4]*coefficients[2] -
-                        2*coefficients[0]*coefficients[3]) / root
-        if cluster is not None:
-            for i, coord in enumerate([x_coordinate, z_coordinate]):
-                maximum, minimum = np.max(cluster[i]), np.min(cluster[i])
-                delta = maximum - minimum
-                assert coord >= minimum - 2*delta
-                assert coord <= maximum + 2*delta
-        return x_coordinate, z_coordinate
-
-    @staticmethod
-    @numba.njit
-    def null(coef, coords):
-        """Return null poloidal flux."""
-        return np.array([coords[0]**2, coords[1]**2, coords[0], coords[1],
-                        coords[0]*coords[1], 1]) @ coef
 
     @staticmethod
     def _unique(nulls, decimals=3):
@@ -177,39 +83,28 @@ class DataNull(Plot):
                                   axis=0, return_index=True)
         return dict(points=points, psi=psi[index], null_type=null_type[index])
 
-    @staticmethod
-    def subnull(x_cluster, z_cluster, psi_cluster):
-        """Return subgrid null coordinates, value, and type."""
-        coef = DataNull.quadratic_surface(x_cluster, z_cluster, psi_cluster)
-        null_type = DataNull.null_type(coef)
-        coords = DataNull.null_coordinate(coef, (x_cluster, z_cluster))
-        psi = DataNull.null(coef, coords)
-        return coords, psi, null_type
-
     def _subnull_1d(self, index, psi):
         """Return unique field nulls from 1d unstructured grid."""
-        x_coordinate, z_coordinate = self.data.x.data, self.data.z.data
-        stencil = self.data.stencil.data
-        stencil_index = self.data.stencil_index.data
+        stencil_index = self['stencil_index']
         nulls = []
         for i in index:
-            stencil_vertex = stencil[bisect(stencil_index, i)]
-            x_cluster = x_coordinate[stencil_vertex]
-            z_cluster = z_coordinate[stencil_vertex]
+            stencil_vertex = self['stencil'][select.bisect(stencil_index, i)]
+            x_cluster = self['x'][stencil_vertex]
+            z_cluster = self['z'][stencil_vertex]
             psi_cluster = psi[stencil_vertex]
-            nulls.append(self.subnull(x_cluster, z_cluster, psi_cluster))
+            nulls.append(select.subnull(x_cluster, z_cluster, psi_cluster))
         return dict(index=index) | self._unique(nulls)
 
     def _subnull_2d(self, index, psi2d):
         """Return unique field nulls from 2d grid."""
-        x_coordinate, z_coordinate = self.data.x.data, self.data.z.data
+        x_coordinate, z_coordinate = self['x'], self['z']
         nulls = []
         for i, j in index:
             x2d, z2d = np.meshgrid(x_coordinate[i-1:i+2],
                                    z_coordinate[j-1:j+2], indexing='ij')
             x_cluster, z_cluster = x2d.flatten(), z2d.flatten()
             psi_cluster = psi2d[i-1:i+2, j-1:j+2].flatten()
-            nulls.append(self.subnull(x_cluster, z_cluster, psi_cluster))
+            nulls.append(select.subnull(x_cluster, z_cluster, psi_cluster))
         return dict(index=index) | self._unique(nulls)
 
     @staticmethod
@@ -262,12 +157,12 @@ class DataNull(Plot):
 class FieldNull(DataNull):
     """Calculate positions of all field nulls."""
 
-    @cached_property
+    @property
     def o_points(self):
         """Return o-point locations."""
         return self.data_o['points']
 
-    @cached_property
+    @property
     def o_psi(self):
         """Return flux values at o-point locations."""
         return self.data_o['psi']
@@ -277,12 +172,12 @@ class FieldNull(DataNull):
         """Return o-point number."""
         return len(self.o_psi)
 
-    @cached_property
+    @property
     def x_points(self):
         """Return x-point locations."""
         return self.data_x['points']
 
-    @cached_property
+    @property
     def x_psi(self):
         """Return flux values at x-point locations."""
         return self.data_x['psi']
@@ -296,11 +191,6 @@ class FieldNull(DataNull):
         """Update calculation of field nulls."""
         mask_o, mask_x = self.categorize(psi)
         super().update_masks(mask_o, mask_x, psi)
-        for attr in ['o_psi', 'o_points', 'x_psi', 'x_points']:
-            try:
-                delattr(self, attr)
-            except AttributeError:
-                pass
 
     def categorize(self, psi):
         """Return o-point and x-point masks from loop sign counts."""

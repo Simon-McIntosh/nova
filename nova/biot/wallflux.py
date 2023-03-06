@@ -13,12 +13,11 @@ from nova.geometry import select
 class WallFlux(Plot, BiotArray):
     """Calculate value and position of limiter wall flux."""
 
-    subgrid: bool = True
     data: xarray.Dataset | xarray.DataArray = \
         field(repr=False, default_factory=xarray.Dataset)
     array_attrs: list[str] = field(default_factory=lambda: ['x', 'z'])
-    data_w: dict[str, np.ndarray] = field(init=False, default_factory=dict,
-                                          repr=False)
+    data_w: dict[str, float | tuple[float, float]] = field(init=False,
+                                                           repr=False)
 
     @property
     def w_point(self):

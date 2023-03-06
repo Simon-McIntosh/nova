@@ -10,6 +10,7 @@ import scipy.spatial
 from nova.database.netcdf import netCDF
 from nova.biot.biotfirstwall import BiotFirstWall
 from nova.biot.biotplasmagrid import BiotPlasmaGrid
+from nova.biot.error import PlasmaTopologyError
 from nova.frame.baseplot import Plot
 from nova.frame.framesetloc import FrameSetLoc
 from nova.geometry.polygon import Polygon
@@ -17,9 +18,9 @@ from nova.geometry.pointloop import PointLoop
 
 
 @numba.njit
-def update_nturn(inloop, plasma, ionize, nturn, area):
+def update_nturn(select, plasma, ionize, nturn, area):
     """Update plasma turns."""
-    ionize[plasma] = inloop
+    ionize[plasma] = select
     nturn[plasma] = 0
     ionize_area = area[ionize]
     nturn[ionize] = ionize_area / np.sum(ionize_area)
@@ -64,8 +65,10 @@ class Plasma(Plot, netCDF, FrameSetLoc):
         return self.grid.o_psi[0]
 
     @property
-    def boundary_index(self):
+    def x_point_index(self):
         """Return x-point index for plasma boundary."""
+        if self.grid.x_point_number == 0:
+            raise PlasmaTopologyError('no x-points within first wall')
         return np.argmin(abs(self.grid.x_psi - self.psi_axis))
 
     @property
@@ -76,9 +79,11 @@ class Plasma(Plot, netCDF, FrameSetLoc):
     @property
     def psi_boundary(self):
         """Return boundary poloidal flux."""
+        if self.grid.x_point_number == 0:
+            return self.wall.w_psi
         if self.grid.x_point_number == 1:
             return self.grid.x_psi[0]
-        return self.grid.x_psi[self.boundary_index]
+        return self.grid.x_psi[self.x_point_index]
 
     @property
     def psi(self):
@@ -102,6 +107,20 @@ class Plasma(Plot, netCDF, FrameSetLoc):
             raise AttributeError('No plasma filaments found.')
         return PointLoop(self.loc['plasma', ['x', 'z']].to_numpy())
 
+    def ionize(self, index):
+        """Return plasma filament selection mask."""
+        match index:
+            case float(psi):
+                return self.polarity*self.grid.psi > self.polarity*psi
+            case (psi, *z_limit):
+                return self.polarity*self.grid.psi > self.polarity*psi
+            case _:
+                try:
+                    return self.pointloop.update(index)
+                except numba.TypingError:
+                    index = Polygon(index).boundary
+                    return self.pointloop.update(index)
+
     @property
     def separatrix(self):
         """Return plasma separatrix, the convex hull of active filaments."""
@@ -112,7 +131,7 @@ class Plasma(Plot, netCDF, FrameSetLoc):
         return points[vertices]
 
     @separatrix.setter
-    def separatrix(self, loop):
+    def separatrix(self, index):
         """
         Update plasma separatrix.
 
@@ -127,12 +146,8 @@ class Plasma(Plot, netCDF, FrameSetLoc):
         """
         if self.saloc['plasma'].sum() == 0:
             return
-        try:
-            inloop = self.pointloop.update(loop)
-        except numba.TypingError:
-            loop = Polygon(loop).boundary
-            inloop = self.pointloop.update(loop)
-        update_nturn(inloop, self.aloc['plasma'], self.aloc['ionize'],
+        select = self.ionize(index)
+        update_nturn(select, self.aloc['plasma'], self.aloc['ionize'],
                      self.aloc['nturn'], self.aloc['area'])
         self.update_aloc_hash('nturn')
 

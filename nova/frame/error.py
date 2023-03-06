@@ -1,4 +1,4 @@
-"""Collection of electromagnetic error classes."""
+"""Collection of frameset error classes."""
 
 
 class ColumnError(IndexError):

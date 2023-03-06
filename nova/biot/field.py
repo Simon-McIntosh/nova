@@ -13,7 +13,7 @@ from nova.geometry.polyframe import PolyFrame
 
 @dataclass
 class Sample(Plot):
-    """Sample coil boundary."""
+    """Sample boundary."""
 
     boundary: np.ndarray
     delta: int | float = 0

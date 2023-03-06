@@ -25,10 +25,22 @@ class Waveform(Machine, PulseSchedule):
     def update(self):
         """Extend itime update."""
         self.sloc['plasma', 'Ic'] = self['i_plasma']
+        self.update_loop_psi()
+
+    def update_loop_psi(self):
+        """Update loop psi."""
+        Psi = self.inductance.Psi[self.plasma_index, :][np.newaxis, :]
+        loop_psi = np.atleast_1d(self['loop_psi'])
+        plasma_psi = Psi[:, self.plasma_index] * self.sloc['plasma', 'Ic']
+        self.sloc['coil', 'Ic'] = np.linalg.lstsq(
+            Psi[:, self.sloc['coil']], loop_psi - plasma_psi)[0]
 
     def plot(self):
         """Plot machine and constraints."""
         super().plot()
+
+    def solve(self):
+        """solve waveform."""
 
 
 if __name__ == '__main__':
@@ -40,20 +52,53 @@ if __name__ == '__main__':
     waveform.time = 250
 
     waveform.plasma.separatrix = dict(e=[6, 0.5, 3, 6])
-    _ = waveform.inductance.psi
-    Psi = waveform.inductance.Psi[waveform.inductance.plasma_index,
-                                  :][np.newaxis, :]
-    loop_psi = np.atleast_1d(waveform['loop_psi'])
 
-    #loop_psi -= waveform.inductance.psi
-    waveform.sloc['coil', 'Ic'] = np.linalg.lstsq(
-        Psi[:, waveform.sloc['coil']],
-        loop_psi - Psi[:, waveform.inductance.plasma_index] * \
-        waveform.sloc['plasma', 'Ic'])[0]
+    #waveform.plasma.plot()
 
-    # waveform.plot()
+
+    #waveform.plasma.separatrix = waveform.plasmawall.w_psi
+    #waveform.plasma.plot()
+
+    waveform.saloc['Ic'][:5] *= 0.01
+
+
+    def fun(nturn):
+        """Return psi grid residual."""
+
+        nturn /= np.sum(nturn)
+
+        waveform.aloc['nturn'][waveform.aloc['plasma']] = nturn
+        waveform.update_aloc_hash('nturn')
+
+        print('axis', waveform.plasma.psi_axis)
+        waveform.plasma.separatrix = -62. #waveform.plasma.psi_axis - 1.
+
+        residual = waveform.aloc['nturn'][waveform.aloc['plasma']] - nturn
+        print(np.linalg.norm(residual), np.sum(nturn))
+
+        return residual
+
+    from scipy import optimize
+
+    nturn = waveform.aloc['plasma'][waveform.aloc['plasma']]
+
+    sol = optimize.newton_krylov(fun, nturn)
+    #print(sol)
+
     waveform.plasma.plot()
 
+
+
+    '''
+    import matplotlib.pyplot as plt
+
+    plt.figure()
+    _index = slice(index-5, index+5)
+    plt.plot(np.arange(len(waveform.plasmawall.psi)),
+             waveform.plasmawall.psi, '-')
+    plt.plot(np.arange(len(waveform.plasmawall.psi))[_index],
+             waveform.plasmawall.psi[_index], 'o-')
+    '''
     #
 
     #waveform.plot()

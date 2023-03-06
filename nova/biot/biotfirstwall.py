@@ -6,7 +6,6 @@ import numpy as np
 from nova.biot.biotpoint import BiotPoint
 from nova.biot.field import Sample
 from nova.biot.wallflux import WallFlux
-from nova.geometry.polyframe import PolyFrame
 
 
 @dataclass
@@ -39,19 +38,13 @@ class BiotFirstWall(WallFlux, BiotPoint):
         return super().__getattribute__(attr)
 
     @property
-    def loop(self):
-        """Return first wall loop."""
+    def boundary(self):
+        """Return first wall boundary."""
         return self.Loc['plasma', 'poly'][0].boundary
-        '''
-        try:
-            return
-        except AttributeError:
-            return PolyFrame.loads(self.Loc['plasma', 'poly'][0]).boundary
-        '''
 
     def solve(self):
         """Solve Biot wall-pannel nodes and mid-points."""
-        sample = Sample(self.loop, delta=0.1)
+        sample = Sample(self.boundary, delta=0.1)
         super().solve(np.c_[sample['radius'], sample['height']])
 
     def plot(self, axes=None, wallflux=True, **kwargs):

@@ -74,7 +74,7 @@ class Plasma(Plot, netCDF, FrameSetLoc):
     @property
     def x_point(self):
         """Return coordinates of primary x-point."""
-        return self.grid.x_points[self.boundary_index]
+        return self.grid.x_points[self.x_point_index]
 
     @property
     def psi_boundary(self):
@@ -112,7 +112,7 @@ class Plasma(Plot, netCDF, FrameSetLoc):
         match index:
             case float(psi):
                 return self.polarity*self.grid.psi > self.polarity*psi
-            case (psi, *z_limit):
+            case (float(psi), *z_limit):
                 return self.polarity*self.grid.psi > self.polarity*psi
             case _:
                 try:

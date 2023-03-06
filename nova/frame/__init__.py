@@ -19,9 +19,9 @@ if imp.defer:
     Turn = imp.load('.turn', 'Turn')
     Winding = imp.load('.winding', 'Winding')
 else:
-    from nova.frame.coil import Coil  # NOQA
-    from nova.frame.ferritic import Ferritic  # NOQA
-    from nova.frame.firstwall import FirstWall  # NOQA
-    from nova.frame.shell import Shell  # NOQA
-    from nova.frame.turn import Turn  # NOQA
-    from nova.frame.winding import Winding  # NOQA
+    from nova.frame.coil import Coil
+    from nova.frame.ferritic import Ferritic
+    from nova.frame.firstwall import FirstWall
+    from nova.frame.shell import Shell
+    from nova.frame.turn import Turn
+    from nova.frame.winding import Winding

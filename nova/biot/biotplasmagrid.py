@@ -16,7 +16,7 @@ class BiotPlasmaGrid(BiotBaseGrid):
     """Compute interaction across hexagonal grid."""
 
     attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])
-    levels: int | list[float] = 21
+    levels: int | list[float] | np.ndarray = 21
 
     def solve(self):
         """Solve Biot interaction across plasma grid."""

@@ -24,7 +24,7 @@ class LinePlot(Plot):
 class BiotPlot(LinePlot):
     """Biot plot base class."""
 
-    levels: int | np.ndarray = 31
+    levels: int | list[float] | np.ndarray = 31
 
     def contour_kwargs(self, **kwargs):
         """Return contour plot kwargs."""

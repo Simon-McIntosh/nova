@@ -1,11 +1,15 @@
 """Manage access to dynamic coil data data."""
 from dataclasses import dataclass
+from functools import cached_property
 
 import numpy as np
 
 from nova.frame.baseplot import Plot
 from nova.imas.scenario import Scenario
 import scipy
+from shapely.geometry import LinearRing
+
+from nova.imas.machine import Wall
 
 
 @dataclass
@@ -51,6 +55,35 @@ class PulseSchedule(Plot, Scenario):
         for attr in attrs:
             self.build_point('.'.join([ids_node, attr]))
 
+    @cached_property
+    def wall_segment(self):
+        """Return iter_md first wall instance."""
+        return Wall().segment()
+
+    @cached_property
+    def _angle(self, corner_eps=0.01):
+        """Return gap angle interpolater (firstwall inward facing normals)."""
+        boundary = self.wall_segment
+        panel = boundary[1:] - boundary[:-1]
+        number = 3*len(panel) - 1
+        points = np.zeros((number, 2))
+        points[::3] = boundary[:-1] + corner_eps*panel
+        points[1::3] = boundary[:-1] + (1 - corner_eps)*panel
+        points[2::3] = boundary[1:-1]
+        tangent = panel / np.linalg.norm(panel, axis=1)[:, np.newaxis]
+        tangent = np.append(tangent, np.zeros((len(tangent), 1)), axis=1)
+        if LinearRing(boundary).is_ccw:
+            normal = np.cross([0, 0, 1], tangent)[:, :2]
+        else:
+            normal = np.cross(tangent, [0, 0, 1])[:, :2]
+        panel_angle = np.arctan2(normal[:, 1], normal[:, 0])
+        angle = np.zeros(number)
+        angle[::3] = panel_angle
+        angle[1::3] = panel_angle
+        angle[2::3] = np.mean(
+            np.c_[panel_angle[:-1], panel_angle[1:]], axis=1)
+        return scipy.interpolate.NearestNDInterpolator(points, angle)
+
     def build_gaps(self):
         """Build firstwall gaps."""
         with self.ids_index.node('position_control.gap'):
@@ -62,22 +95,18 @@ class PulseSchedule(Plot, Scenario):
                 self.data.coords['gap_name'] = 'gap_id', \
                     self.ids_index.array('name')
             for attr in ['r', 'z', 'angle']:
-                if self.ids_index.empty(attr):
+                if self.ids_index.empty(attr) and attr == 'angle':
+                    self.data.coords['gap_angle'] = 'gap_id', \
+                        self._angle(self.ids_index.array('r'),
+                                    self.ids_index.array('z'))
                     continue
                 self.data.coords[f'gap_{attr}'] = 'gap_id', \
                     self.ids_index.array(attr)
             if self.data.homogeneous_time == 1:
                 self.data['gap'] = ('time', 'gap_id'), \
                     self.ids_index.array('value.reference.data')
-
-            #print(self.time_coordinate('value.reference', 'gap1'))
-            #self.data['gap'] = self.time_coordinate('value.reference', name)
-
-
-            '''
-            for index in range(self.ids_index.length):
-            time = self.time_coordinate('value.reference', 'gap')
-            '''
+            else:
+                raise NotImplementedError('gaps with non-homogeneous time')
 
     def build_derived(self):
         """Build derived attributes."""
@@ -132,10 +161,24 @@ class PulseSchedule(Plot, Scenario):
         self.axes.set_xlabel(r'$t$ s')
         self.axes.set_ylabel(attr)
 
-    def plot(self):
+    def plot_gaps(self):
         """Plot gaps."""
         self.get_axes('2d')
-        self.axes.plot(self.data.gap_r, self.data.gap_z, 'o')
+        self.axes.plot(self.wall_segment[:, 0], self.wall_segment[:, 1],
+                       color='gray', lw=1.5)
+        tail = np.c_[self.data.gap_r, self.data.gap_z]
+        vector = self['gap'].data[:, np.newaxis] * \
+            np.c_[np.cos(self.data.gap_angle), np.sin(self.data.gap_angle)]
+        patch = self.mpl['patches'].FancyArrowPatch
+        arrows = [patch((x, z), (x+dx, z+dz),
+                        arrowstyle='|-|,'
+                        'widthA=0.075, angleA=0, widthB=0.075, angleB=0',
+                        shrinkA=0, shrinkB=0)
+                  for x, z, dx, dz in
+                  zip(tail[:, 0], tail[:, 1], vector[:, 0], vector[:, 1])]
+        collections = self.mpl.collections.PatchCollection(
+            arrows, facecolor='black', edgecolor='black')
+        self.axes.add_collection(collections)
 
 
 if __name__ == '__main__':
@@ -145,9 +188,14 @@ if __name__ == '__main__':
     pulse, run = 135003, 5
     # pulse, run = 105028, 1  # Maksim
 
-    PulseSchedule(pulse, run)._clear()
+    # PulseSchedule(pulse, run)._clear()
     schedule = PulseSchedule(pulse, run)
 
-    #schedule.plot_profile()
+    schedule.time = 250
 
-    schedule.plot_0d('loop_psi')
+
+    schedule.plot_gaps()
+
+    #schedule.plot_gaps()
+
+    #schedule.plot_0d('loop_psi')

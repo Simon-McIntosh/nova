@@ -642,6 +642,12 @@ class Wall(CoilDatabase):
     occurrence: int = 0
     name: str = 'wall'
 
+    def segment(self, index=0):
+        """Return firstwall segment."""
+        limiter = getattr(self.ids_data, 'description_2d').array[0].limiter
+        return np.array([limiter.unit[index].outline.r,
+                         limiter.unit[index].outline.z]).T
+
     def build(self):
         """Build plasma bound by firstwall contour."""
         firstwall = ContourData()

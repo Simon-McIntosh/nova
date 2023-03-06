@@ -24,6 +24,16 @@ def bisect(vector, value):
 
 
 @numba.njit
+def bisect_2d(matrix, value):
+    """Return vector of bisection values."""
+    number = len(matrix)
+    index = np.zeros(number)
+    for i in numba.prange(number):
+        index[i] = bisect(matrix[i], value)
+    return index
+
+
+@numba.njit
 def length_2d(x_coordinate, z_coordinate):
     """Return the cumalative length of a 2d polyline."""
     points = np.column_stack((x_coordinate, z_coordinate))

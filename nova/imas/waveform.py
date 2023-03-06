@@ -16,6 +16,7 @@ class Waveform(Machine, PulseSchedule):
     pf_active: Ids | bool | str = 'iter_md'
     pf_passive: Ids | bool | str = 'iter_md'
     wall: Ids | bool | str = 'iter_md'
+    tplasma: str = 'hex'
 
     def solve_biot(self):
         """Extend Machine.solve_biot."""
@@ -51,30 +52,16 @@ if __name__ == '__main__':
 
     waveform.time = 250
 
-    waveform.plasma.separatrix = dict(e=[6, 0.5, 3, 6])
-
-    #waveform.plasma.plot()
-
-
-    #waveform.plasma.separatrix = waveform.plasmawall.w_psi
-    #waveform.plasma.plot()
-
-    waveform.saloc['Ic'][:5] *= 0.01
-
-
     def fun(nturn):
         """Return psi grid residual."""
-
-        nturn /= np.sum(nturn)
-
         waveform.aloc['nturn'][waveform.aloc['plasma']] = nturn
         waveform.update_aloc_hash('nturn')
 
-        print('axis', waveform.plasma.psi_axis)
-        waveform.plasma.separatrix = -62. #waveform.plasma.psi_axis - 1.
+        waveform.plasma.separatrix = waveform.plasma.psi_boundary
+        waveform.update_loop_psi()
 
         residual = waveform.aloc['nturn'][waveform.aloc['plasma']] - nturn
-        print(np.linalg.norm(residual), np.sum(nturn))
+        print(np.linalg.norm(residual))
 
         return residual
 
@@ -83,9 +70,9 @@ if __name__ == '__main__':
     nturn = waveform.aloc['plasma'][waveform.aloc['plasma']]
 
     sol = optimize.newton_krylov(fun, nturn)
-    #print(sol)
 
     waveform.plasma.plot()
+    waveform.plot_gaps()
 
 
 

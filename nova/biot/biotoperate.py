@@ -194,14 +194,22 @@ class BiotOperate(BiotData):
         if attr == 'bn':
             return self.get_norm()
         Attr = attr.capitalize()
-        if self.version[Attr] != self.subframe.version['nturn']:
-            self.update_turns(Attr)
+        self.check_plasma(Attr)
         if attr == Attr:
             return self.array[attr]
+        self.check_source(attr)
+        return self.array[attr]
+
+    def check_plasma(self, Attr: str):
+        """Check plasma turn status, update coupling matrix if required."""
+        if self.version[Attr] != self.subframe.version['nturn']:
+            self.update_turns(Attr)
+
+    def check_source(self, attr: str):
+        """Check source current, re-evaluate if requried."""
         if self.version[attr] != (version := self.aloc_hash['Ic']):
             self.version[attr] = version
-            self.array[attr][:] = self.operator[Attr].evaluate()
-        return self.array[attr]
+            self.array[attr][:] = self.operator[attr.capitalize()].evaluate()
 
     def __getitem__(self, attr):
         """Return array attribute via dict-like access."""

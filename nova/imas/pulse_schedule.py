@@ -40,15 +40,22 @@ class PulseSchedule(Plot, Scenario):
         """Extract rz points."""
         name = ids_node.split('.')[-1]
         with self.ids_index.node(ids_node):
-            if self.ids_index.empty('r.reference.data'):
+            if self.ids_index.empty('r.reference.data') and \
+                    self.ids_index.empty('z.reference.data'):
                 return
             time = self.time_coordinate('r.reference', name)
             shape = self.ids_index.shape('r.reference.data')[::-1] + (2,)
             data = np.zeros(shape, dtype=float)
             for i, attr in enumerate(['r', 'z']):
+                if self.ids_index.empty(f'{attr}.reference.data'):
+                    continue  # skip empty fields
                 data[..., i] = self.ids_index.array(f'{attr}.reference.data')
             self.data.coords['point'] = ['r', 'z']
-            self.data[name] = time + (f'{name}_index', 'point'), data
+            if self.ids_index.length == 0:
+                coordinate = time + ('point',)
+            else:
+                coordinate = time + (f'{name}_index', 'point')
+            self.data[name] = coordinate, data
 
     def build_points(self, ids_node: str, attrs: list[str]):
         """Build point set."""
@@ -130,7 +137,8 @@ class PulseSchedule(Plot, Scenario):
                  'active_limiter_point.z'])
             self.build_points(
                 'position_control',
-                ['x_point', 'strike_point', 'boundary_outline'])
+                ['magnetic_axis', 'geometric_axis',
+                 'x_point', 'strike_point', 'boundary_outline'])
             self.build_gaps()
         self.build_derived()
         return self

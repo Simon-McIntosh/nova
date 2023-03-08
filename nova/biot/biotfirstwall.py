@@ -15,7 +15,7 @@ class BiotFirstWall(WallFlux, BiotPoint):
     attrs: list[str] = field(default_factory=lambda: ['Psi'])
 
     def __post_init__(self):
-        """Initialize fieldnull version."""
+        """Initialize wallflux version."""
         super().__post_init__()
         self.version['wallflux'] = None
 

@@ -108,7 +108,7 @@ class DataNull(Plot, BiotArray):
         return dict(index=index) | self._unique(nulls)
 
     @staticmethod
-    @numba.njit
+    @numba.njit(cache=True)
     def _index_1d(x_coordinate, z_coordinate, mask):
         index = np.where(mask)[0]
         point_number = len(index)
@@ -119,7 +119,7 @@ class DataNull(Plot, BiotArray):
         return index, points
 
     @staticmethod
-    @numba.njit
+    @numba.njit(cache=True)
     def _index_2d(x_coordinate, z_coordinate, mask):
         index = np.asarray(list(zip(*np.where(mask))))
         point_number = len(index)
@@ -199,7 +199,7 @@ class FieldNull(DataNull):
         return self.categorize_2d(psi)
 
     @staticmethod
-    @numba.njit
+    @numba.njit(cache=True)
     def categorize_1d(data, stencil):
         """Categorize points in 1d hexagonal grid.
 
@@ -231,7 +231,7 @@ class FieldNull(DataNull):
         return o_mask, x_mask
 
     @staticmethod
-    @numba.njit
+    @numba.njit(cache=True)
     def categorize_2d(data):
         """Categorize points in 2D rectangular grid.
 

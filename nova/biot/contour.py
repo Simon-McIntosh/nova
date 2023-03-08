@@ -12,20 +12,20 @@ from scipy.interpolate import RectBivariateSpline, interp1d
 from nova.plot.biotplot import LinePlot
 
 
-@dataclass(repr=False)
-class Line(LinePlot):
-    """Provide storage and transforms for single contour line."""
+@dataclass
+class Surface(LinePlot):
+    """Provide storage and transforms for single contour surface."""
 
-    points: np.ndarray
-    code: InitVar[np.ndarray]
+    points: np.ndarray = field(repr=False)
+    code: InitVar[np.ndarray] = field(repr=False)
     psi: float
     closed: bool = field(init=False)
-    variable: np.ndarray = field(init=False)
-    coefficients: np.ndarray = field(init=False)
-    residual: np.ndarray = field(init=False)
+    variable: np.ndarray = field(init=False, repr=False)
+    coefficients: np.ndarray = field(init=False, repr=False)
+    residual: np.ndarray = field(init=False, repr=False)
 
     def __post_init__(self, code):
-        """Store contour line."""
+        """Store contour surface."""
         super().__post_init__()
         self.closed = code[-1] == 79
         if len(self.points) <= 5:
@@ -35,12 +35,12 @@ class Line(LinePlot):
 
     @property
     def radius(self):
-        """Return contour line radius."""
+        """Return contour surface radius."""
         return self.points[:, 0]
 
     @property
     def height(self):
-        """Return contour line height."""
+        """Return contour surface height."""
         return self.points[:, 1]
 
     def fit(self, fun: Callable[[np.ndarray, np.ndarray], np.ndarray]):
@@ -53,7 +53,7 @@ class Line(LinePlot):
             self.coefficients = np.zeros(2)
 
     def plot(self, **kwargs):
-        """Plot contour line."""
+        """Plot contour surface."""
         self.get_axes('2d')
         self.axes.plot(self.radius, self.height,
                        **self.plot_kwargs(**kwargs))
@@ -74,11 +74,11 @@ class ContourLoc:
         """Implement dict like acces to contour attributes."""
         return getattr(self, attr)
 
-    def update(self, lines: list[Line]):
+    def update(self, nest: list[Surface]):
         """Update contour attributes."""
         for attr in (field.name for field in fields(ContourLoc)):
             setattr(self, attr,
-                    np.array([getattr(line, attr) for line in lines]))
+                    np.array([getattr(surface, attr) for surface in nest]))
 
 
 @dataclass
@@ -89,7 +89,7 @@ class Contour(LinePlot):
     z2d: np.ndarray
     psi2d: np.ndarray
     levels: int | np.ndarray = 10
-    lines: list[Line] = field(init=False, repr=False)
+    nest: list[Surface] = field(init=False, repr=False)
     loc: ContourLoc = field(init=False, default_factory=ContourLoc)
 
     def __post_init__(self):
@@ -115,35 +115,43 @@ class Contour(LinePlot):
 
     def update_loc(self):
         """Update loc indexer."""
-        self.loc.update(self.lines)
+        self.loc.update(self.nest)
 
-    def line(self, psi):
-        """Return contour lines for single level."""
-        lines = []
+    def levelset(self, psi):
+        """Return level-set from contour nest."""
+        nest = []
         for points, code in zip(*self.generator.lines(psi)):
-            lines.append(Line(points, code, psi))
-        return lines
+            nest.append(Surface(points, code, psi))
+        return nest
 
-    def plot_contour(self, psi, **kwargs):
-        """Plot contours for single level."""
-        for line in self.line(psi):
-            line.plot(**kwargs)
+    def closedlevelset(self, psi):
+        """Return first closed level-set contour nest."""
+        for points, code in zip(*self.generator.lines(psi)):
+            if (surface := Surface(points, code, psi)).closed:
+                return surface
+
+    def plot_levelset(self, psi, closed=True, **kwargs):
+        """Plot contours for single levelset."""
+        for surface in self.levelset(psi):
+            if closed and not surface.closed:
+                continue
+            surface.plot(**kwargs)
 
     def generate(self, fun=None):
         """Generate contours."""
-        self.lines = []
+        self.nest = []
         for psi in self.psi:
             for points, code in zip(*self.generator.lines(psi)):
-                line = Line(points, code, psi)
+                surface = Surface(points, code, psi)
                 if fun is not None:
-                    line.fit(fun)
-                self.lines.append(line)
+                    surface.fit(fun)
+                self.nest.append(surface)
         self.update_loc()
 
     def plot(self, **kwargs):
         """Plot contours."""
-        for line in self.lines:
-            line.plot(**self.plot_kwargs(**kwargs))
+        for surface in self.nest:
+            surface.plot(**self.plot_kwargs(**kwargs))
 
     def plot_fit(self, psi: float, norm: Callable | None = None, axes=None):
         """Plot least squares fit for single closed contour."""
@@ -154,16 +162,16 @@ class Contour(LinePlot):
             index = bisect.bisect_left(contour_psi, psi)
         else:
             index = bisect.bisect_right(-contour_psi, -psi)
-        line = np.array(self.lines)[self.loc['closed']][index]
+        surface = np.array(self.nest)[self.loc['closed']][index]
         self.set_axes('1d', axes=axes)
-        self.axes.plot(line.points[:, 0], line.variable, 'C0.', ms=5,
+        self.axes.plot(surface.points[:, 0], surface.variable, 'C0.', ms=5,
                        label=rf'contour: $\psi^\prime$={psi}')
-        radius = np.linspace(np.min(line.points[:, 0]),
-                             np.max(line.points[:, 0]))
+        radius = np.linspace(np.min(surface.points[:, 0]),
+                             np.max(surface.points[:, 0]))
 
-        fit = -2*np.pi * np.c_[radius, 1 / (mu_0 * radius)] @ line.coefficients
-        fit_label = rf'fit: $p^\prime$={line.coefficients[0]:1.2f} '
-        fit_label += rf'$ff^\prime$={line.coefficients[1]:1.2f}'
+        fit = -2*np.pi * np.c_[radius, 1 / (mu_0 * radius)] @ surface.coefficients
+        fit_label = rf'fit: $p^\prime$={surface.coefficients[0]:1.2f} '
+        fit_label += rf'$ff^\prime$={surface.coefficients[1]:1.2f}'
         self.axes.plot(radius, fit, 'C1', label=fit_label)
         self.axes.legend()
         self.axes.set_xlabel('radius')

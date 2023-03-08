@@ -2,6 +2,7 @@
 from dataclasses import dataclass
 
 import numpy as np
+from scipy import optimize
 
 from nova.imas.database import Ids
 from nova.imas.machine import Machine
@@ -9,10 +10,9 @@ from nova.imas.pulse_schedule import PulseSchedule
 
 
 @dataclass
-class Waveform(Machine, PulseSchedule):
-    """Generated coilset voltage and current waveforms."""
+class MachineDescription(Machine):
+    """Machine description default class."""
 
-    name: str = 'pulse_schedule'
     pf_active: Ids | bool | str = 'iter_md'
     pf_passive: Ids | bool | str = 'iter_md'
     wall: Ids | bool | str = 'iter_md'
@@ -26,6 +26,13 @@ class Waveform(Machine, PulseSchedule):
         self.inductance.solve()
         self.wallgap.solve(np.c_[self.data.gap_r.data, self.data.gap_z.data],
                            self.data.gap_angle.data, self.data.gap_id.data)
+
+
+@dataclass
+class Waveform(MachineDescription, PulseSchedule):
+    """Generated coilset voltage and current waveforms."""
+
+    name: str = 'pulse_schedule'
 
     def update(self):
         """Extend itime update."""
@@ -41,6 +48,7 @@ class Waveform(Machine, PulseSchedule):
             Psi[:, self.sloc['coil']], loop_psi - plasma_psi)[0]
 
     def update_gap(self):
+        """Solve gap wall flux."""
         Psi = self.wallgap.matrix(self['gap'].data)
         plasma_psi = Psi[:, self.plasma_index] * self.sloc['plasma', 'Ic']
         self.sloc['coil', 'Ic'] = np.linalg.lstsq(
@@ -52,7 +60,7 @@ class Waveform(Machine, PulseSchedule):
         super().plot()
 
     def solve(self):
-        """solve waveform."""
+        """Solve waveform."""
 
 
 if __name__ == '__main__':
@@ -69,35 +77,10 @@ if __name__ == '__main__':
         residual = waveform.aloc['plasma', 'nturn'] - nturn
         return residual
 
-    from scipy import optimize
-
     waveform.time = 500
     nturn = waveform.aloc['plasma', 'nturn']
     optimize.newton_krylov(fun, nturn, x_tol=5e-2, f_tol=1e-3)
 
     waveform.plasma.plot()
     waveform.plot_gaps()
-
-    #waveform.plasmaflux.contour.plot_contour(-40, color='C3')
-
-
-
-
-
-
-    '''
-    import matplotlib.pyplot as plt
-
-    plt.figure()
-    _index = slice(index-5, index+5)
-    plt.plot(np.arange(len(waveform.plasmawall.psi)),
-             waveform.plasmawall.psi, '-')
-    plt.plot(np.arange(len(waveform.plasmawall.psi))[_index],
-             waveform.plasmawall.psi[_index], 'o-')
-    '''
-    #
-
-    #waveform.plot()
-    #waveform.firstwall.plot()
-
-    #waveform.loc
+    waveform.plasma.lcfs(['major_radius', 'minor_radius', 'elongation'])

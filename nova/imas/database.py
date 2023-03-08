@@ -527,7 +527,7 @@ class IdsIndex:
     ids_node: str = 'time_slice'
     transpose: bool = field(init=False, default=False)
     length: int = field(init=False, default=0)
-    shapes: dict[str, tuple[int] | tuple[()]] = \
+    shapes: dict[str, tuple[int, ...] | tuple[()]] = \
         field(init=False, default_factory=dict)
 
     def __post_init__(self):
@@ -581,7 +581,7 @@ class IdsIndex:
         except TypeError:
             self.length = 0
 
-    def __getitem__(self, path: str) -> tuple[int] | tuple[()]:
+    def __getitem__(self, path: str) -> tuple[int, ...] | tuple[()]:
         """Return cached dimension length."""
         _path = self.ids_path(path)
         try:
@@ -598,9 +598,11 @@ class IdsIndex:
 
     def shape(self, path) -> tuple[int, ...]:
         """Return attribute array shape."""
+        if self.length == 0:
+            return self[path]
         return (self.length,) + self[path]
 
-    def _path_shape(self, path: str) -> tuple[int] | tuple[()]:
+    def _path_shape(self, path: str) -> tuple[int, ...] | tuple[()]:
         """Return data shape at itime=0 on path."""
         match data := self.get_slice(0, path):
             case np.ndarray():
@@ -622,6 +624,8 @@ class IdsIndex:
             node, path = path.split('.', 1)
             return attrgetter(path)(
                 attrgetter(node)(self.ids[index])[0])
+        except TypeError:  # object is not subscriptable
+            return self.get(path)
 
     def vector(self, itime: int, path: str):
         """Return attribute data vector at itime."""
@@ -640,6 +644,8 @@ class IdsIndex:
 
     def array(self, path: str):
         """Return attribute data array."""
+        if self.length == 0:
+            return self.get(path)
         data = np.zeros(self.shape(path), dtype=self.dtype(path))
         for index in range(self.length):
             try:

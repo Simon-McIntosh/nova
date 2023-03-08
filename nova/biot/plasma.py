@@ -11,14 +11,14 @@ from nova.database.netcdf import netCDF
 from nova.biot.biotfirstwall import BiotFirstWall
 from nova.biot.biotplasmagrid import BiotPlasmaGrid
 from nova.biot.error import PlasmaTopologyError
-from nova.biot.flux import Flux
+from nova.biot.flux import Flux, LCFS
 from nova.frame.baseplot import Plot
 from nova.frame.framesetloc import FrameSetLoc
 from nova.geometry.polygon import Polygon
 from nova.geometry.pointloop import PointLoop
 
 
-@numba.njit
+@numba.njit(cache=True)
 def update_nturn(select, plasma, ionize, nturn, area):
     """Update plasma turns."""
     ionize[plasma] = select
@@ -35,6 +35,7 @@ class Plasma(Plot, netCDF, FrameSetLoc):
     grid: BiotPlasmaGrid = field(repr=False, default_factory=BiotPlasmaGrid)
     wall: BiotFirstWall = field(repr=False, default_factory=BiotFirstWall)
     flux: Flux = field(repr=False, default_factory=Flux)
+    lcfs: LCFS | None = field(init=False, default=None)
 
     def __post_init__(self):
         """Update subframe metadata."""
@@ -43,6 +44,7 @@ class Plasma(Plot, netCDF, FrameSetLoc):
              'array': ['plasma', 'ionize', 'area', 'nturn', 'x', 'z']}
         self.subframe.update_columns()
         super().__post_init__()
+        self.version['lcfs'] = None
 
     def __len__(self):
         """Return number of plasma filaments."""
@@ -59,17 +61,21 @@ class Plasma(Plot, netCDF, FrameSetLoc):
         self.grid.solve()
         self.flux.solve()
 
-    def check_wall(self):
+    def update_lcfs(self):
+        """Update last closed flux surface."""
+        self.lcfs = self.flux.lcfs(self.psi_boundary)
+
+    def check_lcfs(self):
         """Check validity of upstream data, update wall flux if nessisary."""
-        if (version := self.aloc_hash['Ic']) != self.version['wallflux'] or \
-                self.version['Psi'] != self.subframe.version['nturn']:
-            self.update_wall(self.psi, self.plasma_polarity)
-            self.version['wallflux'] = version
+        if (version := self.grid.version['fieldnull']) is None or \
+                version != self.version['lcfs']:
+            self.update_lcfs()
+            self.version['lcfs'] = version
 
     def __getattribute__(self, attr):
         """Extend getattribute to intercept field null data access."""
         if attr == 'lcfs':
-            self.check_wall()
+            self.check_lcfs()
         return super().__getattribute__(attr)
 
     @property
@@ -202,10 +208,6 @@ class Plasma(Plot, netCDF, FrameSetLoc):
         self.aloc['plasma', 'nturn'] = nturn
         self.update_aloc_hash('nturn')
 
-    @cached_property
-    def lcfs(self):
-        """Return the last closed flux surface."""
-
     def plot(self, turns=True, **kwargs):
         """Plot separatirx as polygon patch."""
         if turns:
@@ -217,77 +219,5 @@ class Plasma(Plot, netCDF, FrameSetLoc):
                 poly.__geo_interface__,
                 facecolor='C4', alpha=0.75, linewidth=0, zorder=-10))
         '''
-        limit = np.argmin(self.wall.psi)
-
         self.grid.plot(**kwargs)
         self.wall.plot()
-
-
-    def __XXX_residual(self, Psi):
-
-        self.grid.operator['Psi'].matrix[:, 115] = Psi
-        self.grid.version['psi'] = None
-
-        plasma = self.aloc['plasma']
-        ionize = self.aloc['ionize']
-        nturn = self.aloc['nturn']
-        area = self.aloc['area']
-
-        ionize[:] = 0
-        ionize[plasma] = self.grid.psi < -50
-
-        self._update_nturn(plasma, ionize, nturn, area)
-        self.grid.operator['Psi'].update_turns(True)
-
-        return Psi - self.grid.operator['Psi'].matrix[:, 115]
-
-    def _XXX_residual(self, nturn):
-        """Update plasma seperatrix."""
-
-        '''
-        psi_grid = psi[:self.grid.target_number]
-        self.grid.update_null(psi_grid)
-
-        #print(self.grid.x_psi.min())
-        psi_boundary = psi[-self.boundary.target_number:]
-        #s_psi = np.min([psi_boundary.min(), self.grid.x_psi[0]])
-        '''
-
-        '''
-        try:
-            s_psi = self.grid.x_psi[0]
-        except IndexError:
-            s_psi = self.boundary.psi.min()
-        '''
-        nturn /= sum(nturn)
-
-        # update nturn
-        plasma = self.aloc['plasma']
-        self.aloc['nturn'][plasma] = nturn
-        self.update_aloc_hash('nturn')
-
-
-        # solve rhs
-
-        psi = self.boundary.psi.min()
-        '''
-        if len(self.grid.x_psi) > 0:
-            psi = self.grid.x_psi.min()
-        else:
-            psi = psi_boundary
-        print(psi, [psi_boundary, self.grid.x_psi])
-        '''
-
-        self.aloc['ionize'] = 0
-        self.aloc['ionize'][plasma] = self.grid.psi < psi
-        self.aloc['nturn'][plasma] = 0
-        ionize_area = self.aloc['area'][self.aloc['ionize']]
-        self.aloc['nturn'][self.aloc['ionize']] = \
-            ionize_area / np.sum(ionize_area)
-
-        print(sum(nturn), sum(self.aloc['nturn'][self.aloc['ionize']]))
-
-        #self._update_nturn(plasma, ionize,
-        #                   self.aloc['nturn'], self.aloc['area'])
-        self.update_aloc_hash('nturn')
-        return nturn - self.aloc['nturn'][plasma]

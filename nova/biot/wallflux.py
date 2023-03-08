@@ -1,7 +1,6 @@
 """Methods for calculating wall flux position and value."""
 from dataclasses import dataclass, field
 
-import numpy as np
 import xarray
 
 from nova.biot.biotarray import BiotArray

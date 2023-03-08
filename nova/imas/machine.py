@@ -824,9 +824,9 @@ class Machine(CoilSet, CoilGeometry, CoilData):
             if isinstance(geometry_attrs, dict):
                 coilset = geometry(**geometry_attrs, **self.frameset_attrs)
                 self += coilset
-        self.solve_biot()
         if hasattr(super(), 'build'):
             super().build()
+        self.solve_biot()
         return self.store()
 
     def load(self):

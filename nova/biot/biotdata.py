@@ -1,8 +1,6 @@
 """Biot data storage class."""
 from dataclasses import dataclass, field
 
-import numpy as np
-
 from nova.database.netcdf import netCDF
 from nova.frame.framesetloc import FrameSetLoc
 

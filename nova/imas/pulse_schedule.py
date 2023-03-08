@@ -177,7 +177,7 @@ class PulseSchedule(Plot, Scenario):
                   for x, z, dx, dz in
                   zip(tail[:, 0], tail[:, 1], vector[:, 0], vector[:, 1])]
         collections = self.mpl.collections.PatchCollection(
-            arrows, facecolor='black', edgecolor='black')
+            arrows, facecolor='gray', edgecolor='gray')
         self.axes.add_collection(collections)
 
 
@@ -188,7 +188,7 @@ if __name__ == '__main__':
     pulse, run = 135003, 5
     # pulse, run = 105028, 1  # Maksim
 
-    # PulseSchedule(pulse, run)._clear()
+    #PulseSchedule(pulse, run)._clear()
     schedule = PulseSchedule(pulse, run)
 
     schedule.time = 250

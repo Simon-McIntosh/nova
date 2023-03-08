@@ -17,11 +17,15 @@ class Waveform(Machine, PulseSchedule):
     pf_passive: Ids | bool | str = 'iter_md'
     wall: Ids | bool | str = 'iter_md'
     tplasma: str = 'hex'
+    nplasma: int = 5000
+    ngap: int | float = 150
 
     def solve_biot(self):
         """Extend Machine.solve_biot."""
         super().solve_biot()
         self.inductance.solve()
+        self.wallgap.solve(np.c_[self.data.gap_r.data, self.data.gap_z.data],
+                           self.data.gap_angle.data, self.data.gap_id.data)
 
     def update(self):
         """Extend itime update."""
@@ -35,6 +39,13 @@ class Waveform(Machine, PulseSchedule):
         plasma_psi = Psi[:, self.plasma_index] * self.sloc['plasma', 'Ic']
         self.sloc['coil', 'Ic'] = np.linalg.lstsq(
             Psi[:, self.sloc['coil']], loop_psi - plasma_psi)[0]
+
+    def update_gap(self):
+        Psi = self.wallgap.matrix(self['gap'].data)
+        plasma_psi = Psi[:, self.plasma_index] * self.sloc['plasma', 'Ic']
+        self.sloc['coil', 'Ic'] = np.linalg.lstsq(
+            Psi[:, self.sloc['coil']], -40.*np.ones(24) - plasma_psi)[0]
+        self.plasma.separatrix = -40.
 
     def plot(self):
         """Plot machine and constraints."""
@@ -50,29 +61,27 @@ if __name__ == '__main__':
 
     waveform = Waveform(pulse, run)
 
-    waveform.time = 250
-
     def fun(nturn):
         """Return psi grid residual."""
-        waveform.aloc['nturn'][waveform.aloc['plasma']] = nturn
-        waveform.update_aloc_hash('nturn')
-
-        waveform.plasma.separatrix = waveform.plasma.psi_boundary
-        waveform.update_loop_psi()
-
-        residual = waveform.aloc['nturn'][waveform.aloc['plasma']] - nturn
-        print(np.linalg.norm(residual))
-
+        nturn /= np.sum(nturn)
+        waveform.plasma.nturn = nturn
+        waveform.update_gap()
+        residual = waveform.aloc['plasma', 'nturn'] - nturn
         return residual
 
     from scipy import optimize
 
-    nturn = waveform.aloc['plasma'][waveform.aloc['plasma']]
-
-    sol = optimize.newton_krylov(fun, nturn)
+    waveform.time = 500
+    nturn = waveform.aloc['plasma', 'nturn']
+    optimize.newton_krylov(fun, nturn, x_tol=5e-2, f_tol=1e-3)
 
     waveform.plasma.plot()
     waveform.plot_gaps()
+
+    #waveform.plasmaflux.contour.plot_contour(-40, color='C3')
+
+
+
 
 
 

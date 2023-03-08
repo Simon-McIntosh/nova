@@ -54,6 +54,7 @@ class Line(LinePlot):
 
     def plot(self, **kwargs):
         """Plot contour line."""
+        self.get_axes('2d')
         self.axes.plot(self.radius, self.height,
                        **self.plot_kwargs(**kwargs))
 

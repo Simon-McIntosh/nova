@@ -1,8 +1,9 @@
 """Manage biot methods."""
 from dataclasses import dataclass, field
 
-from nova.biot import (BiotGrid, BiotInductance, BiotLoop, BiotFirstWall,
-                       BiotPlasmaGrid, BiotPoint, Field, Force, Plasma)
+from nova.biot import (BiotGap, BiotGrid, BiotInductance, BiotLoop,
+                       BiotFirstWall, BiotPlasmaGrid, BiotPoint,
+                       Field, Flux, Force, Plasma)
 from nova.biot.biotdata import BiotData
 from nova.database.netcdf import netCDF
 from nova.frame.frameset import FrameSet, frame_factory
@@ -16,23 +17,31 @@ class Biot(FrameSet):
     force_attrs: list[str] = field(default_factory=lambda: ['Fr', 'Fz', 'Fc'])
     nfield: int | float = field(default=0, repr=False)
     nforce: int | float = field(default=0, repr=False)
+    mingap: int | float = 1e-3
+    maxgap: int | float = 5
+    ngap: int | float = 150
 
     @property
     def field_kwargs(self):
-        """Return default biot factory kwargs."""
+        """Return field kwargs."""
         return dict(attrs=self.field_attrs)
 
     @property
     def force_kwargs(self):
-        """Return default biot factory kwargs."""
+        """Return force kwargs."""
         return dict(attrs=self.force_attrs)
+
+    @property
+    def gap_kwargs(self):
+        """Return gap kwargs."""
+        return dict(mingap=self.mingap, maxgap=self.maxgap, ngap=self.ngap)
 
     @property
     def biot_attrs(self):
         """Return frame attributes."""
-        return dict(nfield=self.nfield, nforce=self.nforce,
-                    field_attrs=self.field_attrs,
-                    force_attrs=self.force_attrs)
+        return dict(field_attrs=self.field_attrs,
+                    force_attrs=self.force_attrs,
+                    nfield=self.nfield, nforce=self.nforce) | self.gap_kwargs
 
     @property
     def biot_methods(self):
@@ -47,12 +56,17 @@ class Biot(FrameSet):
     def plasma(self):
         """Return plasma instance."""
         return dict(dirname=self.path, grid=self.plasmagrid,
-                    wall=self.plasmawall)
+                    wall=self.plasmawall, flux=self.plasmaflux)
 
     @frame_factory(BiotGrid)
     def grid(self):
         """Return grid biot instance."""
         return self.field_kwargs
+
+    @frame_factory(Flux)
+    def plasmaflux(self):
+        """Return plasma grid biot instance."""
+        return dict(attrs=['Psi'], nplasma=self.nplasma)
 
     @frame_factory(BiotPlasmaGrid)
     def plasmagrid(self):
@@ -73,6 +87,11 @@ class Biot(FrameSet):
     def probe(self):
         """Return biot probe instance."""
         return self.field_kwargs
+
+    @frame_factory(BiotGap)
+    def wallgap(self):
+        """Return biot wall-gap probe instance."""
+        return self.gap_kwargs
 
     @frame_factory(BiotLoop)
     def loop(self):

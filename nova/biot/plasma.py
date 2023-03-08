@@ -11,6 +11,7 @@ from nova.database.netcdf import netCDF
 from nova.biot.biotfirstwall import BiotFirstWall
 from nova.biot.biotplasmagrid import BiotPlasmaGrid
 from nova.biot.error import PlasmaTopologyError
+from nova.biot.flux import Flux
 from nova.frame.baseplot import Plot
 from nova.frame.framesetloc import FrameSetLoc
 from nova.geometry.polygon import Polygon
@@ -33,6 +34,7 @@ class Plasma(Plot, netCDF, FrameSetLoc):
     name: str = 'plasma'
     grid: BiotPlasmaGrid = field(repr=False, default_factory=BiotPlasmaGrid)
     wall: BiotFirstWall = field(repr=False, default_factory=BiotFirstWall)
+    flux: Flux = field(repr=False, default_factory=Flux)
 
     def __post_init__(self):
         """Update subframe metadata."""
@@ -55,6 +57,20 @@ class Plasma(Plot, netCDF, FrameSetLoc):
         """Solve interaction matricies across plasma grid."""
         self.wall.solve()
         self.grid.solve()
+        self.flux.solve()
+
+    def check_wall(self):
+        """Check validity of upstream data, update wall flux if nessisary."""
+        if (version := self.aloc_hash['Ic']) != self.version['wallflux'] or \
+                self.version['Psi'] != self.subframe.version['nturn']:
+            self.update_wall(self.psi, self.plasma_polarity)
+            self.version['wallflux'] = version
+
+    def __getattribute__(self, attr):
+        """Extend getattribute to intercept field null data access."""
+        if attr == 'lcfs':
+            self.check_wall()
+        return super().__getattribute__(attr)
 
     @property
     def psi_axis(self):
@@ -75,6 +91,11 @@ class Plasma(Plot, netCDF, FrameSetLoc):
     def x_point(self):
         """Return coordinates of primary x-point."""
         return self.grid.x_points[self.x_point_index]
+
+    @property
+    def o_point(self):
+        """Return o-point coordinates."""
+        return self.grid.o_points[0]
 
     @property
     def psi_boundary(self):
@@ -107,13 +128,33 @@ class Plasma(Plot, netCDF, FrameSetLoc):
             raise AttributeError('No plasma filaments found.')
         return PointLoop(self.loc['plasma', ['x', 'z']].to_numpy())
 
+    def psi_mask(self, psi):
+        """Return plasma filament psi-mask."""
+        return self.polarity*self.grid.psi > self.polarity*psi
+
+    def x_mask(self):
+        """Return plasma filament x-mask."""
+        mask = np.ones(self.aloc['plasma'].sum(), dtype=bool)
+        if self.grid.x_point_number == 0:
+            return mask
+        z_plasma = self.aloc['plasma', 'z']
+        for x_point in self.grid.x_points:
+            if x_point[1] < self.o_point[1]:
+                mask &= z_plasma > x_point[1]
+            else:
+                mask &= z_plasma < x_point[1]
+        return mask
+
     def ionize(self, index):
         """Return plasma filament selection mask."""
         match index:
-            case float(psi):
-                return self.polarity*self.grid.psi > self.polarity*psi
-            case (float(psi), *z_limit):
-                return self.polarity*self.grid.psi > self.polarity*psi
+            case int(psi) | float(psi):
+                return self.psi_mask(psi) & self.x_mask()
+            case [int(psi) | float(psi), float(z_min)]:
+                return self.psi_mask(psi) & self.aloc['plasma', 'z'] > z_min
+            case [int(psi) | float(psi), float(z_min), float(z_max)]:
+                z_plasma = self.aloc['plasma', 'z']
+                return self.psi_mask(psi) & z_plasma > z_min & z_plasma < z_max
             case _:
                 try:
                     return self.pointloop.update(index)
@@ -154,14 +195,16 @@ class Plasma(Plot, netCDF, FrameSetLoc):
     @property
     def nturn(self):
         """Manage plasma turns."""
-        plasma = self.aloc['plasma']
-        return self.aloc['nturn'][plasma]
+        return self.aloc['plasma', 'nturn']
 
     @nturn.setter
     def nturn(self, nturn):
-        plasma = self.aloc['plasma']
-        self.aloc['nturn'][plasma] = nturn
+        self.aloc['plasma', 'nturn'] = nturn
         self.update_aloc_hash('nturn')
+
+    @cached_property
+    def lcfs(self):
+        """Return the last closed flux surface."""
 
     def plot(self, turns=True, **kwargs):
         """Plot separatirx as polygon patch."""

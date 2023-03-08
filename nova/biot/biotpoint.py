@@ -1,7 +1,6 @@
 """Build interaction matrix for a set of poloidal points."""
 from dataclasses import dataclass
 
-# import nlopt
 import numpy as np
 
 from nova.biot.biotframe import BiotTarget

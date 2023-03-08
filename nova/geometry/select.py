@@ -24,12 +24,31 @@ def bisect(vector, value):
 
 
 @numba.njit
-def bisect_2d(matrix, value):
+def bisect_right(vector, value):
+    """Return the bisect right index, assuming vector is sorted.
+
+    The return value i is such that all e in vector[:i] have e <= value,
+    and all e in vector[i:] have e > value.
+
+    Addapted from bisect.bisect_right to enable jit compilation.
+    """
+    low, high = 0, len(vector)
+    while low < high:
+        mid = (low + high) // 2
+        if value < vector[mid]:
+            high = mid
+        else:
+            low = mid + 1
+    return low
+
+
+@numba.njit
+def bisect_2d(vector, value):
     """Return vector of bisection values."""
-    number = len(matrix)
-    index = np.zeros(number)
+    number = len(value)
+    index = np.zeros(number, dtype=numba.int16)
     for i in numba.prange(number):
-        index[i] = bisect(matrix[i], value)
+        index[i] = bisect_right(vector, value[i])
     return index
 
 

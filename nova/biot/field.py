@@ -8,7 +8,6 @@ from nova.biot.biotframe import BiotFrame
 from nova.biot.biotoperate import BiotOperate
 from nova.biot.biotsolve import BiotSolve
 from nova.frame.baseplot import Plot
-from nova.geometry.polyframe import PolyFrame
 
 
 @dataclass

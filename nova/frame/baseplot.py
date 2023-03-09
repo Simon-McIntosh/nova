@@ -291,3 +291,7 @@ class Plot:
     def legend(self, *args, **Kwargs):
         """Expose axes legend."""
         self.mpl_axes.legend(*args, **Kwargs)
+
+    def savefig(self, *args, **kwargs):
+        """Save figure to file."""
+        self.plt.savefig(*args, **kwargs)

@@ -220,4 +220,4 @@ class Plasma(Plot, netCDF, FrameSetLoc):
                 facecolor='C4', alpha=0.75, linewidth=0, zorder=-10))
         '''
         self.grid.plot(**kwargs)
-        self.wall.plot()
+        self.wall.plot(wallflux=False)

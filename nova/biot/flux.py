@@ -100,7 +100,8 @@ class LCFS(Plot):
     def plot(self):
         """Plot last closed flux surface and key geometrical points."""
         self.get_axes('2d')
-        self.surface.plot(color='C0')
+        self.surface.plot(color='k', alpha=0.25)
+        '''
         self.axes.plot(self.r_max, self.height[np.argmax(self.radius)], 'o',
                        label='Rmax')
         self.axes.plot(self.r_min, self.height[np.argmin(self.radius)], 'o',
@@ -110,6 +111,7 @@ class LCFS(Plot):
         self.axes.plot(self.r_zmax, self.z_max, 'o', label='Zmax')
         self.axes.plot(self.r_zmin, self.z_min, 'o', label='Zmin')
         self.axes.legend(loc='center')
+        '''
 
 
 @dataclass

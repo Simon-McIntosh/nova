@@ -15,6 +15,8 @@ class Matrix(Operate):
     run: int = 1
     pf_active: Ids | bool | str = 'iter_md'
     time_index: int = 315
+    nforce: int | float = 500
+    nfield: int | float = 50
 
     def write(self):
         """Write coupling matricies to file."""
@@ -31,7 +33,7 @@ class Matrix(Operate):
         """Plot coilset, fluxmap and coil force vectors."""
         super().plot()
         self.grid.plot()
-        self.plasma.wall.plot()
+        self.plasma.wall.plot(wallflux=False)
         self.force.plot(scale=2)
 
 
@@ -81,7 +83,7 @@ class Benchmark(Matrix):
             self.profile['current'][self.profile_index]
         self.sloc['plasma', 'Ic'] = self.profile['ip']
 
-    def plot_current(self):
+    def plot_force(self):
         """Plot timeslice force benchmark."""
         self.set_axes('1d', nrows=3, sharex=True)
         self.axes[0].bar(self.force.coil_name, self.force.fr*1e-6,
@@ -124,11 +126,14 @@ if __name__ == '__main__':
     #matrix = Matrix()
     #matrix.write()
 
-    benchmark = Benchmark()
+    benchmark = Benchmark(ngrid=0, tplasma='hex')
     benchmark.itime = -1
-    benchmark.plot_current()
+    benchmark.plot_force()
     benchmark.plot_field()
     benchmark.plot()
+
+
+    #benchmark.plasmagrid.plot()
 
     #matrix = Matrix()
 

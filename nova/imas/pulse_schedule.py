@@ -1,4 +1,5 @@
 """Manage access to dynamic coil data data."""
+import bisect
 from dataclasses import dataclass
 from functools import cached_property
 
@@ -140,7 +141,7 @@ class PulseSchedule(Plot, Scenario):
                 ['magnetic_axis', 'geometric_axis',
                  'x_point', 'strike_point', 'boundary_outline'])
             self.build_gaps()
-        self.build_derived()
+            self.build_derived()
         return self
 
     def plot_profile(self):
@@ -188,6 +189,27 @@ class PulseSchedule(Plot, Scenario):
             arrows, facecolor='gray', edgecolor='gray')
         self.axes.add_collection(collections)
 
+    def _make_frame(self, time):
+        """Make frame for annimation."""
+        self.axes.clear()
+        max_time = np.min([self.data.time[-1], self.max_time])
+        try:
+            self.itime = bisect.bisect_left(
+                self.data.time, max_time * time / self.duration)
+        except ValueError:
+            pass
+        self.plot_gaps()
+        return self.mpy.mplfig_to_npimage(self.fig)
+
+    def annimate(self, duration: float, filename='gaps'):
+        """Generate annimiation."""
+        self.duration = duration
+        self.max_time = 100
+        self.set_axes('2d')
+        animation = self.mpy.editor.VideoClip(
+            self._make_frame, duration=duration)
+        animation.write_gif(f'{filename}.gif', fps=10)
+
 
 if __name__ == '__main__':
 
@@ -196,14 +218,19 @@ if __name__ == '__main__':
     pulse, run = 135003, 5
     # pulse, run = 105028, 1  # Maksim
 
-    #PulseSchedule(pulse, run)._clear()
+    PulseSchedule(pulse, run)._clear()
     schedule = PulseSchedule(pulse, run)
 
     schedule.time = 250
 
 
-    schedule.plot_gaps()
-
     #schedule.plot_gaps()
 
-    #schedule.plot_0d('loop_psi')
+    #schedule.plot_profile()
+
+    # schedule.annimate(2.5)
+
+    #schedule.plot_gaps()
+    schedule.plot_0d('loop_voltage')
+
+    schedule.plot_0d('loop_psi')

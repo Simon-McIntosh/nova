@@ -129,6 +129,7 @@ class Contour(LinePlot):
         for points, code in zip(*self.generator.lines(psi)):
             if (surface := Surface(points, code, psi)).closed:
                 return surface
+        return surface
 
     def plot_levelset(self, psi, closed=True, **kwargs):
         """Plot contours for single levelset."""

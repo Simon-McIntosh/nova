@@ -20,12 +20,16 @@ class PulseSchedule(Plot, Scenario):
     name: str = 'pulse_schedule'
     ids_node: str = ''
 
-    def time_coordinate(self, path: str, attr: str):
+    def time_coordinate(self, path: str, attr: str, index=None):
         """Return time coordinate."""
         if self.data.homogeneous_time == 1:
             return ('time',)
         coord = f'{attr}_time'
-        self.data.coords[coord] = self.ids_index.get(path + '.time')
+        if index is None:
+            self.data.coords[coord] = self.ids_index.get(path + '.time')
+        else:
+            self.data.coords[coord] = \
+                self.ids_index.get_slice(index, path + '.time')
         return (coord,)
 
     def build_0d(self, ids_node: str, attrs: list[str]):
@@ -97,24 +101,30 @@ class PulseSchedule(Plot, Scenario):
         with self.ids_index.node('position_control.gap'):
             if self.ids_index.empty('value.reference.data'):
                 return
-
-            self.data.coords['gap_id'] = self.ids_index.array('identifier')
+            gap_id = self.ids_index.array('identifier')
+            self.data.coords['gap_index'] = range(len(gap_id))
+            self.data.coords['gap_id'] = 'gap_index', gap_id
             if not self.ids_index.empty('name'):
-                self.data.coords['gap_name'] = 'gap_id', \
+                self.data.coords['gap_name'] = 'gap_index', \
                     self.ids_index.array('name')
             for attr in ['r', 'z', 'angle']:
                 if self.ids_index.empty(attr) and attr == 'angle':
-                    self.data.coords['gap_angle'] = 'gap_id', \
+                    self.data.coords['gap_angle'] = 'gap_index', \
                         self._angle(self.ids_index.array('r'),
                                     self.ids_index.array('z'))
                     continue
-                self.data.coords[f'gap_{attr}'] = 'gap_id', \
+                self.data.coords[f'gap_{attr}'] = 'gap_index', \
                     self.ids_index.array(attr)
             if self.data.homogeneous_time == 1:
-                self.data['gap'] = ('time', 'gap_id'), \
+                self.data['gap'] = ('time', 'gap_index'), \
                     self.ids_index.array('value.reference.data')
             else:
-                raise NotImplementedError('gaps with non-homogeneous time')
+                for index in self.data.gap_index.data:
+                    path = 'value.reference'
+                    attr = f'gap{index}'
+                    coordinate = self.time_coordinate(path, attr, index)
+                    self.data[attr] = coordinate, self.ids_index.get_slice(
+                        index, path + '.data')
 
     def build_derived(self):
         """Build derived attributes."""
@@ -221,7 +231,7 @@ if __name__ == '__main__':
     PulseSchedule(pulse, run)._clear()
     schedule = PulseSchedule(pulse, run)
 
-    schedule.time = 250
+    #schedule.time = 250
 
 
     #schedule.plot_gaps()
@@ -231,6 +241,5 @@ if __name__ == '__main__':
     # schedule.annimate(2.5)
 
     #schedule.plot_gaps()
-    schedule.plot_0d('loop_voltage')
-
-    schedule.plot_0d('loop_psi')
+    #schedule.plot_0d('loop_voltage')
+    #schedule.plot_0d('loop_psi')

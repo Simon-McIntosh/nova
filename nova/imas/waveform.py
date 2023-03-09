@@ -34,7 +34,7 @@ class MachineDescription(Machine):
 
 @dataclass
 class Waveform(MachineDescription, PulseSchedule):
-    """Generated coilset voltage and current waveforms."""
+    """Generate coilset voltage and current waveforms."""
 
     name: str = 'pulse_schedule'
 
@@ -76,11 +76,8 @@ class Waveform(MachineDescription, PulseSchedule):
         """Solve gap wall flux."""
         psi_boundary = float(self['loop_psi'].data)
         Psi, psi = self.append(self.gap_psi())
-        matrix = MoorePenrose(Psi, gamma=1e-4)
+        matrix = MoorePenrose(Psi, gamma=2.5e-4)
         self.sloc['coil', 'Ic'] = matrix / psi
-        #self.sloc['coil', 'Ic'] = np.linalg.lstsq(
-        #    Psi[:, self.sloc['coil']],
-        #    psi_boundary*np.ones(24) - plasma_psi)[0]
         self.plasma.separatrix = psi_boundary
 
     def plot(self):
@@ -102,7 +99,7 @@ class Waveform(MachineDescription, PulseSchedule):
     def solve(self):
         """Solve waveform."""
         optimize.newton_krylov(self.residual, self.aloc['plasma', 'nturn'],
-                               x_tol=5e-2, f_tol=1e-3) #
+                               x_tol=5e-2, f_tol=1e-3)
 
     def _make_frame(self, time):
         """Make frame for annimation."""
@@ -130,6 +127,7 @@ class Waveform(MachineDescription, PulseSchedule):
             self._make_frame, duration=duration)
         animation.write_gif(f'{filename}.gif', fps=10)
 
+
 if __name__ == '__main__':
 
     pulse, run = 135003, 5
@@ -155,8 +153,7 @@ if __name__ == '__main__':
     #waveform.plasma.lcfs.plot()
     '''
 
-
-
+    '''
     currents = np.zeros((250, waveform.saloc['coil'].sum()))
     times = np.linspace(4, 685, len(currents))
 
@@ -175,7 +172,7 @@ if __name__ == '__main__':
     waveform.axes.set_xlabel('time, s')
     waveform.axes.set_ylabel(r'$I_c$, kA')
     waveform.savefig('waveform')
-
+    '''
 
     '''
     waveform.time = 500

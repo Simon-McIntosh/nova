@@ -141,7 +141,7 @@ class OdinaryLeastSquares(RegressionBase):
 
 @dataclass
 class MoorePenrose(RegressionBase):
-    """Fast operators for linear regression analysis using pseudoinverse."""
+    """Fast operators for linear regression analysis using pseudo-inverse."""
 
     gamma: float = 0
     rank: int = 0
@@ -162,7 +162,7 @@ class MoorePenrose(RegressionBase):
                        self.matrices['Vh'], self.model)
 
     def __inverse(self, V, s, Uh, data):
-        """Calcuate inverse via svd psudo inverse."""
+        """Calcuate inverse via svd pseudo-inverse."""
         return V @ ((Uh @ data) * s / (s**2 + self.gamma**2))
 
     def _inverse(self):

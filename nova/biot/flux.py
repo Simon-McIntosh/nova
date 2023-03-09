@@ -5,7 +5,7 @@ from functools import cached_property
 import numpy as np
 
 from nova.biot.biotgrid import BiotGrid
-from nova.biot.contour import Contour, Surface
+from nova.biot.contour import Contour
 from nova.frame.baseplot import Plot
 
 # pylint: disable=too-many-ancestors
@@ -15,7 +15,7 @@ from nova.frame.baseplot import Plot
 class LCFS(Plot):
     """Calculate plasma shape parameters from the last closed flux surface."""
 
-    surface: Surface
+    points: np.ndarray
 
     def __call__(self, attrs: list[str]):
         """Return attribute shape vector."""
@@ -24,12 +24,12 @@ class LCFS(Plot):
     @cached_property
     def radius(self):
         """Return surface radius."""
-        return self.surface.points[:, 0]
+        return self.points[:, 0]
 
     @cached_property
     def height(self):
         """Return surface height."""
-        return self.surface.points[:, 1]
+        return self.points[:, 1]
 
     @cached_property
     def r_max(self):
@@ -42,8 +42,8 @@ class LCFS(Plot):
         return self.radius.min()
 
     @cached_property
-    def major_radius(self):
-        """Return major radius, Rgeo."""
+    def geometric_radius(self):
+        """Return geometric radius, Rgeo."""
         return (self.r_max + self.r_min) / 2
 
     @cached_property
@@ -64,7 +64,7 @@ class LCFS(Plot):
     @cached_property
     def inverse_aspect_ratio(self):
         """Return inverse aspect ratio, epsilon."""
-        return self.minor_radius / self.major_radius
+        return self.minor_radius / self.geometric_radius
 
     @cached_property
     def elongation(self):
@@ -85,33 +85,31 @@ class LCFS(Plot):
     def triangularity(self):
         """Return triangularity, del."""
         r_zmean = (self.r_zmax + self.r_zmin) / 2
-        return (self.major_radius - r_zmean) / self.minor_radius
+        return (self.geometric_radius - r_zmean) / self.minor_radius
 
     @cached_property
     def upper_triangularity(self):
         """Return upper triangularity, del_u."""
-        return (self.major_radius - self.r_zmax) / self.minor_radius
+        return (self.geometric_radius - self.r_zmax) / self.minor_radius
 
     @cached_property
     def lower_triangularity(self):
         """Return lower triangularity, del_l."""
-        return (self.major_radius - self.r_zmin) / self.minor_radius
+        return (self.geometric_radius - self.r_zmin) / self.minor_radius
 
     def plot(self):
         """Plot last closed flux surface and key geometrical points."""
         self.get_axes('2d')
-        self.surface.plot(color='k', alpha=0.25)
-        '''
+        self.axes.plot(self.radius, self.height, color='k', alpha=0.25)
         self.axes.plot(self.r_max, self.height[np.argmax(self.radius)], 'o',
                        label='Rmax')
         self.axes.plot(self.r_min, self.height[np.argmin(self.radius)], 'o',
                        label='Rmin')
-        self.axes.plot(self.major_radius, (self.z_max + self.z_min) / 2, 'o',
-                       label='Rgeo')
+        self.axes.plot(self.geometric_radius, (self.z_max + self.z_min) / 2,
+                       'o', label='Rgeo')
         self.axes.plot(self.r_zmax, self.z_max, 'o', label='Zmax')
         self.axes.plot(self.r_zmin, self.z_min, 'o', label='Zmin')
         self.axes.legend(loc='center')
-        '''
 
 
 @dataclass

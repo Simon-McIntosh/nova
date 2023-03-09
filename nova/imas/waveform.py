@@ -174,7 +174,7 @@ if __name__ == '__main__':
     waveform.axes.legend(ncol=4)
     waveform.axes.set_xlabel('time, s')
     waveform.axes.set_ylabel(r'$I_c$, kA')
-    waveform.savefig('waveform_a')
+    waveform.savefig('waveform')
 
 
     '''

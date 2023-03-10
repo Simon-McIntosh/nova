@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 
 from nova.biot import (BiotGap, BiotGrid, BiotInductance, BiotLoop,
                        BiotFirstWall, BiotPlasmaGrid, BiotPoint,
-                       Field, Flux, Force, Plasma)
+                       Field, Force, LevelSet, Plasma)
 from nova.biot.biotdata import BiotData
 from nova.database.netcdf import netCDF
 from nova.frame.frameset import FrameSet, frame_factory
@@ -56,15 +56,15 @@ class Biot(FrameSet):
     def plasma(self):
         """Return plasma instance."""
         return dict(dirname=self.path, grid=self.plasmagrid,
-                    wall=self.plasmawall, flux=self.plasmaflux)
+                    wall=self.plasmawall, levelset=self.levelset)
 
     @frame_factory(BiotGrid)
     def grid(self):
         """Return grid biot instance."""
         return self.field_kwargs
 
-    @frame_factory(Flux)
-    def plasmaflux(self):
+    @frame_factory(LevelSet)
+    def levelset(self):
         """Return plasma grid biot instance."""
         return dict(attrs=['Psi'], nplasma=self.nplasma)
 

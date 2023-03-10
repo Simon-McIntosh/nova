@@ -61,15 +61,19 @@ class Properties:
             return self.linewidth * area_fraction/finesse_fraction
         return self.linewidth
 
+    def patch_kwargs(self, part: str):
+        """Return single patch kwargs."""
+        return dict(alpha=self.get_alpha(part),
+                    facecolor=self.get_facecolor(part),
+                    zorder=self.get_zorder(part),
+                    linewidth=self.linewidth,
+                    edgecolor=self.edgecolor)
+
     def patch_properties(self, part, area):
         """Return unique dict of patch properties extracted from parts list."""
         total_area = area.sum()
-        return {unique_part: {'alpha': self.get_alpha(unique_part),
-                              'facecolor': self.get_facecolor(unique_part),
-                              'zorder': self.get_zorder(unique_part),
-                              'linewidth': self.get_linewidth(
-                                  unique_part, part, area, total_area),
-                              'edgecolor': self.edgecolor}
+        return {unique_part: self.patch_kwargs(unique_part) | dict(
+            linewidth=self.get_linewidth(unique_part, part, area, total_area))
                 for unique_part in part.unique()}
 
 

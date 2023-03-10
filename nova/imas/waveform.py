@@ -76,14 +76,13 @@ class Waveform(MachineDescription, PulseSchedule):
         """Solve gap wall flux."""
         psi_boundary = float(self['loop_psi'].data)
         Psi, psi = self.append(self.gap_psi())
-        matrix = MoorePenrose(Psi, gamma=2.5e-4)
+        matrix = MoorePenrose(Psi, gamma=1e-5)
         self.sloc['coil', 'Ic'] = matrix / psi
         self.plasma.separatrix = psi_boundary
 
     def plot(self):
         """Plot machine and constraints."""
         super().plot()
-
 
     def residual(self, nturn):
         """Return psi grid residual."""
@@ -136,22 +135,13 @@ if __name__ == '__main__':
 
     #waveform.annimate(2.5, 'newton_krylov_ramp_up')
 
-    #waveform.time = 500
+    waveform.time = 500
+    waveform.solve()
 
-    '''
-    def plasma_shape(coil_current):
-        waveform.saloc['coil', 'Ic'] = coil_current
-        #waveform.plasma.separatrix = waveform.plasma.psi_boundary
-        waveform.plasma.update_lcfs()
-        shape = waveform.plasma.lcfs(['major_radius', 'minor_radius',
-                                      'elongation', 'triangularity'])
-        result = np.zeros(12)
-        result[:4] = shape - [5.0, 2, 1.76623817, 1.5]
-        return result
+    waveform.plasma.plot(turns=False)
+    waveform.plot_gaps()
+    waveform.plasma.lcfs.plot()
 
-    #waveform.plasma.plot()
-    #waveform.plasma.lcfs.plot()
-    '''
 
     '''
     currents = np.zeros((250, waveform.saloc['coil'].sum()))
@@ -171,7 +161,6 @@ if __name__ == '__main__':
     waveform.axes.legend(ncol=4)
     waveform.axes.set_xlabel('time, s')
     waveform.axes.set_ylabel(r'$I_c$, kA')
-    waveform.savefig('waveform')
     '''
 
     '''

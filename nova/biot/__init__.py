@@ -8,8 +8,8 @@ __all__ = [
            'BiotPlasmaGrid',
            'BiotPoint',
            'Field',
-           'Flux',
            'Force',
+           'LevelSet',
            'Plasma',
            ]
 
@@ -26,8 +26,8 @@ if imp.defer:
     BiotPlasmaGrid = imp.load('.biotplasmagrid', 'BiotPlasmaGrid')
     BiotPoint = imp.load('.biotpoint', 'BiotPoint')
     Field = imp.load('.field', 'Field')
-    Flux = imp.load('.flux', 'Flux')
     Force = imp.load('.force', 'Force')
+    LevelSet = imp.load('.levelset', 'LevelSet')
     Plasma = imp.load('.plasma', 'Plasma')
 else:
     from nova.biot.biotgap import BiotGap
@@ -38,6 +38,6 @@ else:
     from nova.biot.biotplasmagrid import BiotPlasmaGrid
     from nova.biot.biotpoint import BiotPoint
     from nova.biot.field import Field
-    from nova.biot.flux import Flux
+    from nova.biot.levelset import LevelSet
     from nova.biot.force import Force
     from nova.biot.plasma import Plasma

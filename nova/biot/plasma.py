@@ -2,17 +2,19 @@
 from dataclasses import dataclass, field
 from functools import cached_property
 
-import descartes
+from descartes import PolygonPatch
 import numba
 import numpy as np
+from scipy.interpolate import interp1d
 import scipy.spatial
 
 from nova.database.netcdf import netCDF
 from nova.biot.biotfirstwall import BiotFirstWall
 from nova.biot.biotplasmagrid import BiotPlasmaGrid
 from nova.biot.error import PlasmaTopologyError
-from nova.biot.flux import Flux, LCFS
-from nova.frame.baseplot import Plot
+from nova.biot.levelset import LevelSet
+from nova.biot.separatrix import LCFS
+from nova.frame.baseplot import Plot, Properties
 from nova.frame.framesetloc import FrameSetLoc
 from nova.geometry.polygon import Polygon
 from nova.geometry.pointloop import PointLoop
@@ -34,7 +36,7 @@ class Plasma(Plot, netCDF, FrameSetLoc):
     name: str = 'plasma'
     grid: BiotPlasmaGrid = field(repr=False, default_factory=BiotPlasmaGrid)
     wall: BiotFirstWall = field(repr=False, default_factory=BiotFirstWall)
-    flux: Flux = field(repr=False, default_factory=Flux)
+    levelset: LevelSet = field(repr=False, default_factory=LevelSet)
     lcfs: LCFS | None = field(init=False, default=None)
 
     def __post_init__(self):
@@ -59,11 +61,11 @@ class Plasma(Plot, netCDF, FrameSetLoc):
         """Solve interaction matricies across plasma grid."""
         self.wall.solve()
         self.grid.solve()
-        self.flux.solve()
+        self.levelset.solve()
 
     def update_lcfs(self):
         """Update last closed flux surface."""
-        self.lcfs = self.flux.lcfs(self.psi_boundary)
+        self.lcfs = self.levelset.lcfs(self.psi_boundary)
 
     def check_lcfs(self):
         """Check validity of upstream data, update wall flux if nessisary."""
@@ -175,7 +177,12 @@ class Plasma(Plot, netCDF, FrameSetLoc):
         points = self.loc['plasma', ['x', 'z']][index].values
         hull = scipy.spatial.ConvexHull(points)
         vertices = np.append(hull.vertices, hull.vertices[0])
-        return points[vertices]
+        convexhull = points[vertices]
+        tangent = convexhull[1:] - convexhull[:-1]
+        length = np.append(0, np.cumsum(np.linalg.norm(tangent, axis=1)))
+        _length = np.linspace(0, length[-1], 250)
+        return np.c_[interp1d(length, convexhull[:, 0], 'quadratic')(_length),
+                     interp1d(length, convexhull[:, 1], 'quadratic')(_length)]
 
     @separatrix.setter
     def separatrix(self, index):
@@ -208,16 +215,16 @@ class Plasma(Plot, netCDF, FrameSetLoc):
         self.aloc['plasma', 'nturn'] = nturn
         self.update_aloc_hash('nturn')
 
-    def plot(self, turns=True, **kwargs):
+    def plot(self, turns=True, axes=None, **kwargs):
         """Plot separatirx as polygon patch."""
+        self.axes = axes
         if turns:
             self.subframe.polyplot('plasma')
-        '''
-        poly = Polygon(self.separatrix).poly
-        if not poly.is_empty:
-            self.axes.add_patch(descartes.PolygonPatch(
-                poly.__geo_interface__,
-                facecolor='C4', alpha=0.75, linewidth=0, zorder=-10))
-        '''
+        else:
+            poly = Polygon(self.separatrix).poly
+            if not poly.is_empty:
+                self.axes.add_patch(PolygonPatch(
+                    poly.__geo_interface__,
+                    facecolor='C4', alpha=0.75, linewidth=0, zorder=-10))
         self.grid.plot(**kwargs)
         self.wall.plot(wallflux=False)

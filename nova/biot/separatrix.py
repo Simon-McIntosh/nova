@@ -1,4 +1,5 @@
 """Generate of an artifical an separatrix from shape parameters."""
+import bisect
 from dataclasses import dataclass, field
 from functools import cached_property
 
@@ -110,48 +111,121 @@ class LCFS(Plot):
 
 
 @dataclass
-class Separatrix:
-    """Generate target separatrix from plasma shape parameters."""
+class Miller(Plot):
+    """
+    Generate Miller profiles from plasma shape parameters.
 
-    geometric_radius: float = 0
-    geometric_height: float = 0
-    minor_radius: float = 1
-    elongation: float | tuple[float, float] = 0
-    triangularity: float | tuple[float, float] = 0
-    number: int = 250
-    lcfs: LCFS = field(init=False, repr=False)
+    Simple, General, Realistic, Robust, Analytic, Tokamak Equilibria I.
+    Limiter and Divertor Tokamaks
+
+    L. Guazzotto1 and J. P. Freidberg2
+    """
+
+    radius: float
+    height: float
+    point_number: int = 250
+    theta_x: float | None = None
+    _points: np.ndarray = field(init=False, repr=False)
+    attrs: dict[str, float] = field(init=False, default_factory=dict)
 
     def __post_init__(self):
-        """Build seperatrix."""
-        self.build()
+        """Initialize point array."""
+        self._points = np.zeros((self.point_number, 2))
+        super().__post_init__()
 
-    def __call__(self, attrs):
-        """Return lcfs attribute list."""
-        return self.lcfs(attrs)
+    @property
+    def axis(self):
+        """Return geometric axis."""
+        return np.array([self.radius, self.height])
 
-    def __getitem__(self, attr):
-        """Return lcfs attributes."""
-        return getattr(self.lcfs, attr)
+    @property
+    def points(self) -> np.ndarray:
+        """Return profile r,z points."""
+        return self._points + self.axis[np.newaxis, :]
 
-    def build(self):
-        """Build canditate surface."""
-        theta = np.linspace(0, 2*np.pi, self.number)
-        del_hat = np.arcsin(self.triangularity)
-        points = self.minor_radius * np.c_[
-             np.cos(theta + del_hat * np.sin(theta)),
-             self.elongation * np.sin(theta)]
-        points[:, 0] += self.geometric_radius
-        points[:, 1] += self.geometric_height
-        self.lcfs = LCFS(points)
+    @points.setter
+    def points(self, points):
+        """Update zero centered point array."""
+        self._points[:] = points
+
+    @cached_property
+    def theta(self):
+        """Return full theta array."""
+        return np.linspace(0, 2*np.pi, self.point_number)
+
+    @cached_property
+    def upper_point_number(self):
+        """Return number of upper profile points."""
+        return bisect.bisect_right(self.theta, np.pi)
+
+    @cached_property
+    def x_point_number(self):
+        """Return number of profile points to the lower x-point."""
+        return bisect.bisect_right(self.theta, self.theta_x)
+
+    @cached_property
+    def theta_upper(self):
+        """Return upper theta array 0<=theta<np.pi."""
+        return self.theta[:self.upper_point_number]
+
+    @cached_property
+    def theta_lower_hfs(self):
+        """Return lower theta array on the high field side."""
+        return self.theta[self.upper_point_number:self.x_point_number]
+
+    @cached_property
+    def theta_lower_lfs(self):
+        """Return lower theta array on the low field side."""
+        return np.linspace(-(self.theta_x - np.pi), 0,
+                           self.point_number-self.x_point_number)
+
+    @staticmethod
+    def miller(theta, minor_radius, elongation, triangularity):
+        """Return Miller profile."""
+        del_hat = np.arcsin(triangularity)
+        return minor_radius * np.c_[np.cos(theta + del_hat * np.sin(theta)),
+                                    elongation * np.sin(theta)]
+
+    def limiter(self, minor_radius, elongation, triangularity):
+        """Update points - symetric limiter."""
+        self.points = self.miller(self.theta, minor_radius,
+                                  elongation, triangularity)
+        self.attrs = dict(minor_radius=minor_radius, elongation=elongation,
+                          triangularity=triangularity)
+        return self
+
+    def single_null(self, minor_radius, elongation, triangularity,
+                    elongation_x=None, triangularity_x=None):
+        """Update points - lower single null."""
+        if elongation_x is None:
+            elongation_x = elongation
+        if triangularity_x is None:
+            triangularity_x = triangularity
+        upper = self.miller(self.theta_upper, minor_radius,
+                            elongation, triangularity)
+        self.theta_x = np.arctan2(elongation_x, triangularity_x) + np.pi
+        k_o = -elongation_x / np.sin(self.theta_x)
+
+        x_1 = (-triangularity_x - np.cos(self.theta_x)) / \
+            (np.cos(self.theta_x) + 1)
+        x_2 = (-triangularity_x - np.cos(-(self.theta_x - np.pi))) / \
+            (np.cos(-(self.theta_x - np.pi)) - 1)
+        lower_hfs = minor_radius * np.c_[
+            x_1 + (1 + x_1) * np.cos(self.theta_lower_hfs),
+            k_o * np.sin(self.theta_lower_hfs)]
+        lower_lfs = minor_radius * np.c_[
+            -x_2 + (1 + x_2) * np.cos(self.theta_lower_lfs),
+            k_o * np.sin(self.theta_lower_lfs)]
+        self.points = np.vstack((upper, lower_hfs, lower_lfs))
+        return self
 
     def plot(self):
         """Plot last closed flux surface."""
-        self.lcfs.plot()
+        self.get_axes('2d')
+        self.axes.plot(*self.points.T, 'gray')
 
 
 if __name__ == '__main__':
 
-    separatrix = Separatrix(5, 2, 3, 1, 0.5)
-    print(separatrix(['geometric_radius', 'minor_radius',
-                      'elongation', 'triangularity']))
+    separatrix = Miller(5, 0, 2000).single_null(2, 1.75, 0.3)
     separatrix.plot()

@@ -28,7 +28,7 @@ def test_field(itime):
                      if name in benchmark.field.coil_name[field_index]]
     assert np.allclose(
         benchmark.field.bn[field_index],
-        benchmark.profile['b_field_max_timed'][profile_index].data, rtol=1e-1)
+        benchmark.profile['b_field_max_timed'][profile_index], rtol=1e-1)
 
 
 @pytest.mark.parametrize('itime', [0, 10, 200, 1000, 1800])
@@ -41,11 +41,11 @@ def test_force(itime):
                      if name in benchmark.force.coil_name[force_index]]
     assert np.allclose(
         benchmark.force.fr[force_index],
-        benchmark.profile['radial_force'][profile_index].data,
+        benchmark.profile['radial_force'][profile_index],
         rtol=1e-1, atol=1e6)
     assert np.allclose(
         benchmark.force.fz[force_index],
-        benchmark.profile['vertical_force'][profile_index].data,
+        benchmark.profile['vertical_force'][profile_index],
         rtol=1e-1, atol=1e6)
 
 

@@ -186,7 +186,7 @@ class PulseSchedule(Plot, Scenario):
         self.axes.plot(self.wall_segment[:, 0], self.wall_segment[:, 1],
                        color='gray', lw=1.5)
         tail = np.c_[self.data.gap_r, self.data.gap_z]
-        vector = self['gap'].data[:, np.newaxis] * \
+        vector = self['gap'][:, np.newaxis] * \
             np.c_[np.cos(self.data.gap_angle), np.sin(self.data.gap_angle)]
         patch = self.mpl['patches'].FancyArrowPatch
         arrows = [patch((x, z), (x+dx, z+dz),
@@ -228,7 +228,7 @@ if __name__ == '__main__':
     pulse, run = 135003, 5
     # pulse, run = 105028, 1  # Maksim
 
-    PulseSchedule(pulse, run)._clear()
+    # PulseSchedule(pulse, run)._clear()
     schedule = PulseSchedule(pulse, run)
 
     #schedule.time = 250
@@ -236,7 +236,7 @@ if __name__ == '__main__':
 
     #schedule.plot_gaps()
 
-    #schedule.plot_profile()
+    schedule.plot_profile()
 
     # schedule.annimate(2.5)
 

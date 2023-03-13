@@ -47,7 +47,7 @@ class BiotFirstWall(WallFlux, BiotPoint):
         sample = Sample(self.boundary, delta=0.1)
         super().solve(np.c_[sample['radius'], sample['height']])
 
-    def plot(self, axes=None, wallflux=True, **kwargs):
+    def plot(self, axes=None, wallflux=False, **kwargs):
         """Plot wall pannels."""
         if len(self.data) == 0:
             return

@@ -91,7 +91,7 @@ class Boundary(Plot, Scenario):
     @property
     def boundary(self):
         """Return trimmed boundary contour."""
-        return self['boundary'][:int(self['boundary_length'].values)].values
+        return self['boundary'][:int(self['boundary_length'])]
 
     def plot_boundary(self, axes=None):
         """Plot 2D boundary at itime."""

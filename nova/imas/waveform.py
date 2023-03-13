@@ -7,6 +7,7 @@ import numpy as np
 from scipy import optimize
 from tqdm import tqdm
 
+from nova.biot.separatrix import Separatrix
 from nova.imas.database import Ids
 from nova.imas.machine import Machine
 from nova.imas.pulse_schedule import PulseSchedule
@@ -55,7 +56,7 @@ class Waveform(MachineDescription, PulseSchedule):
         """Return gap psi matrix and data."""
         Psi = self.wallgap.matrix(self['gap'].data)
         #psi = self.plasma.psi_boundary*np.ones(len(Psi))
-        psi = float(self['loop_psi'].data)*np.ones(len(Psi))
+        psi = float(self['loop_psi'])*np.ones(len(Psi))
         plasma = Psi[:, self.plasma_index] * self.saloc['plasma', 'Ic']
         return Psi[:, self.saloc['coil']], psi-plasma
 
@@ -74,7 +75,7 @@ class Waveform(MachineDescription, PulseSchedule):
 
     def update_gap(self):
         """Solve gap wall flux."""
-        psi_boundary = float(self['loop_psi'].data)
+        psi_boundary = float(self['loop_psi'])
         Psi, psi = self.append(self.gap_psi())
         matrix = MoorePenrose(Psi, gamma=1e-5)
         self.sloc['coil', 'Ic'] = matrix / psi
@@ -141,6 +142,12 @@ if __name__ == '__main__':
     waveform.plasma.plot(turns=False)
     waveform.plot_gaps()
     waveform.plasma.lcfs.plot()
+
+    separatrix = Separatrix(waveform['geometric_axis'][0], 0.5).single_null(
+        waveform['minor_radius'],  waveform['elongation'],
+        waveform['triangularity'])  # , x_point=waveform['x_point'][0]
+    separatrix.plot()
+    separatrix.axes.plot(*waveform['x_point'][0], 'C0o')
 
 
     '''

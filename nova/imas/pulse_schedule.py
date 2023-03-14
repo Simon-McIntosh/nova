@@ -255,8 +255,17 @@ if __name__ == '__main__':
     gap_data = gap_vector + gap_o
 
     import scipy
-    tree = scipy.spatial.KDTree(separatrix.points)
-    tree.query(gap_data)
+
+    def fun(x):
+        separatrix.single_null(x[:2], *x[2:])
+        tree = scipy.spatial.KDTree(separatrix.points)
+        return np.max(tree.query(gap_data))
+
+    xo = [separatrix.radius, separatrix.height, separatrix.minor_radius]
+    sol = scipy.optimize.minimize(fun, xo)
+    print(sol)
+
+    separatrix.single_null(sol.x[:2], *sol.x[2:]).plot()
 
     # schedule.plot_profile()
 

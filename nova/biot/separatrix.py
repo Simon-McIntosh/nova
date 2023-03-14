@@ -197,7 +197,7 @@ class PlasmaShape:
         self.data['geometric_axis'] = \
             np.array([self.radius, self.height], float)
         attrs = ['minor_radius', 'elongation', 'triangularity']
-        if isinstance(args[0], tuple):
+        if len(args) > 0 and isinstance(args[0], tuple):
             attrs = ['geometric_axis'] + attrs
         self.data |= kwargs | {attr: arg for arg, attr in zip(args, attrs)}
         self['geometric_axis'] = np.array(self.geometric_axis, float)
@@ -315,7 +315,7 @@ class Separatrix(Plot, PlasmaShape):
         delta = np.linalg.norm(points[1:] - points[:-1], axis=1)
         length = np.append(0, np.cumsum(delta))
         linspace = np.linspace(0, length[-1], self.point_number)
-        self.theta = interp1d(length, self.theta, 'linear', 0)(linspace)
+        #self.theta = interp1d(length, self.theta, 'linear', 0)(linspace)
         self.profile[:] = interp1d(length, points, 'quadratic', 0)(linspace)
 
     @cached_property

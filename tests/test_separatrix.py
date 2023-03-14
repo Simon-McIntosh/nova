@@ -19,8 +19,9 @@ def test_limiter_profile(minor_radius, elongation, triangularity):
     profile = Separatrix(5.2, 0).limiter(minor_radius, elongation,
                                          triangularity)
     lcfs = LCFS(profile.points)
+    attrs = ['minor_radius', 'elongation', 'triangularity']
     assert np.allclose(np.array([minor_radius, elongation, triangularity]),
-                       lcfs(profile.attrs), atol=1e-2)
+                       lcfs(attrs), atol=1e-2)
 
 
 def test_theta_upper():
@@ -33,62 +34,64 @@ def test_sn_profile(minor_radius, elongation, triangularity):
     profile = Separatrix(5.2, 0).single_null(minor_radius, elongation,
                                              triangularity)
     lcfs = LCFS(profile.points)
+    attrs = ['minor_radius', 'elongation', 'triangularity']
     assert np.allclose(np.array([minor_radius, elongation, triangularity]),
-                       lcfs(profile.attrs), atol=1e-2)
+                       lcfs(attrs), atol=1e-2)
 
 
 def test_sn_x_point():
-    profile = Separatrix(5.2, 3).single_null(2, 1.5, 0, x_point=(3.2, 0))
-    assert np.allclose(profile.x_point, (3.2, 0))
-    assert profile.radius == 3.2
+    profile = Separatrix(5.2, 3).single_null(2, 1.5, 0, x_point=(4.2, 0))
+    assert np.allclose(profile.x_point, (4.2, 0))
+    assert np.isclose(profile.radius, 5.2)
 
 
 def test_elongation():
-    plasma = PlasmaShape(dict(elongation=2.3))
+    plasma = PlasmaShape(data=dict(elongation=2.3))
     assert plasma.elongation == 2.3
 
 
 def test_upper_lower_elongation():
-    plasma = PlasmaShape(dict(upper_elongation=3, lower_elongation=2))
+    plasma = PlasmaShape(data=dict(upper_elongation=3, lower_elongation=2))
     assert plasma.elongation == 2.5
 
 
 def test_upper_elongation():
-    plasma = PlasmaShape(dict(upper_elongation=3, lower_elongation=2))
+    plasma = PlasmaShape(data=dict(upper_elongation=3, lower_elongation=2))
     assert plasma.upper_elongation == 3
 
 
 def test_upper_elongation_from_lower():
-    plasma = PlasmaShape(dict(lower_elongation=2.5))
+    plasma = PlasmaShape(data=dict(lower_elongation=2.5))
     assert plasma.upper_elongation == 2.5
 
 
 def test_lower_elongation():
-    plasma = PlasmaShape(dict(upper_elongation=3, lower_elongation=1.4))
+    plasma = PlasmaShape(data=dict(upper_elongation=3, lower_elongation=1.4))
     assert plasma.lower_elongation == 1.4
 
 
 def test_lower_elongation_from_upper():
-    plasma = PlasmaShape(dict(upper_elongation=2.4))
+    plasma = PlasmaShape(data=dict(upper_elongation=2.4))
     assert plasma.lower_elongation == 2.4
 
 
 def test_elongation_over_constraint_error():
     with pytest.raises(AssertionError):
-        PlasmaShape(dict(elongation=2.4,
-                         upper_elongation=3, lower_elongation=1.4))
+        PlasmaShape(data=dict(elongation=2.4,
+                              upper_elongation=3, lower_elongation=1.4))
 
 
 def test_triangularty_over_constraint():
-    plasma = PlasmaShape(dict(triangularity=2.5,
-                         upper_triangularity=3, lower_triangularity=2))
+    plasma = PlasmaShape(data=dict(triangularity=2.5,
+                                   upper_triangularity=3,
+                                   lower_triangularity=2))
     assert plasma.triangularity == 2.5
     assert plasma.upper_triangularity == 3
     assert plasma.lower_triangularity == 2
 
 
 def test_lower_triangularity():
-    plasma = PlasmaShape(dict(upper_triangularity=3))
+    plasma = PlasmaShape(data=dict(upper_triangularity=3))
     assert plasma.lower_triangularity == 3
 
 

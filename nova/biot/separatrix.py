@@ -112,13 +112,17 @@ class LCFS(Plot):
 
 
 @dataclass
-class UpperLower:
+class UpDown:
     """Manage access to upper/lower type plasma shape parameters."""
 
     attr: str
     data: dict[str, float]
 
     def __post_init__(self):
+        """Check dataset for self-consistency."""
+        self.check_consistency()
+
+    def check_consistency(self):
         """Check data consistency."""
         if all(attr in self.data for attr in
                [self.attr, self.upper_attr, self.lower_attr]):
@@ -177,17 +181,33 @@ class UpperLower:
 class PlasmaShape:
     """Manage plasma shape parameters."""
 
-    data: dict[str, float]
-    kappa: UpperLower = field(init=False)
-    delta: UpperLower = field(init=False)
+    radius: float = 0
+    height: float = 0
+    data: dict[str, float] = field(default_factory=dict)
+    kappa: UpDown = field(init=False, repr=False)
+    delta: UpDown = field(init=False, repr=False)
 
     def __post_init__(self):
-        """Initialize upper / lower attribute selection logic."""
-        self.kappa = UpperLower('elongation', self.data)
-        self.delta = UpperLower('triangularity', self.data)
+        """Initialise updown."""
+        self.kappa = UpDown('elongation', self.data)
+        self.delta = UpDown('triangularity', self.data)
+
+    def __call__(self, *args, **kwargs):
+        """Update plasma shape."""
+        self.data['geometric_axis'] = \
+            np.array([self.radius, self.height], float)
+        attrs = ['minor_radius', 'elongation', 'triangularity']
+        if isinstance(args[0], tuple):
+            attrs = ['geometric_axis'] + attrs
+        self.data |= kwargs | {attr: arg for arg, attr in zip(args, attrs)}
+        self['geometric_axis'] = np.array(self.geometric_axis, float)
+        self.kappa = UpDown('elongation', self.data)
+        self.delta = UpDown('triangularity', self.data)
+        self.radius, self.height = self.geometric_axis
+        return self
 
     def __getattr__(self, attr):
-        """Return unspecified attributes directly from data."""
+        """Return unspecified attributes directly from data dict."""
         return self.data[attr]
 
     def __getitem__(self, attr):
@@ -197,6 +217,31 @@ class PlasmaShape:
     def __setitem__(self, attr, value):
         """Update data attribute."""
         self.data[attr] = value
+
+    def check_consistency(self):
+        """Check data consistency."""
+        for attr in ['kappa', 'delta']:
+            getattr(self, attr).check_consistency()
+
+    @property
+    def x_point(self):
+        """Manage x-point."""
+        return self['x_point']
+
+    @x_point.setter
+    def x_point(self, x_point):
+        """Adjust lower elongation and triangularity to match x_point."""
+        if x_point is None:
+            return
+        self['lower_triangularity'] = \
+            (self.geometric_axis[0] - self.x_point[0]) / self.minor_radius
+        if 'triangularity' in self.data:
+            self['upper_triangularity'] = self['triangularity']
+            del self.data['triangularity']
+        self['lower_elongation'] = \
+            (self.geometric_axis[1] - self.x_point[1]) / self.minor_radius
+        assert abs(self['lower_triangularity']) < 1
+        self.check_consistency()
 
     @property
     def elongation(self):
@@ -228,25 +273,19 @@ class PlasmaShape:
         """Return plasma triangularity."""
         return self.delta.lower
 
-    def set_single_null(self):
-        """Adjust lower elongation compliant with single null topologies."""
-        if self.lower_elongation < 2*(1 - self.lower_triangularity**2)**0.5:
-            self['lower_elongation'] = \
-                1e-3 + 2*(1 - self.lower_triangularity**2)**0.5
-            self['upper_elongation'] = \
-                2*self.elongation - self.lower_elongation
-
-    def get_upper(self):
-        """Return upper shape parameters."""
-        return self.upper_elongation, self.upper_triangularity
-
-    def get_lower(self):
-        """Return lower shape parameters."""
-        return self.lower_elongation, self.lower_triangularity
+    def adjust_lower_elongation(self):
+        """Adjust lower elongation for single-null compliance."""
+        if self.lower_elongation < (min_kappa :=
+                                    2*(1 - self.lower_triangularity**2)**0.5):
+            delta_kappa = 1e-3 + min_kappa - self.lower_elongation
+            self['lower_elongation'] = self.lower_elongation + delta_kappa
+            self.geometric_axis[1] += self.minor_radius * delta_kappa
+            self.height = self.geometric_axis[1]
+            self.kappa.check_consistency()
 
 
 @dataclass
-class Separatrix(Plot):
+class Separatrix(Plot, PlasmaShape):
     """
     Generate Separatrix profiles from plasma shape parameters.
 
@@ -256,48 +295,19 @@ class Separatrix(Plot):
     L. Guazzotto1 and J. P. Freidberg2
     """
 
-    radius: float = 0
-    height: float = 0
     point_number: int = 1000
-    _points: np.ndarray = field(init=False, repr=False)
-    data: dict[str, float] = field(init=False, default_factory=dict)
-    attrs: list[str] = field(init=False, default_factory=list)
+    profile: np.ndarray | None = field(init=False, repr=False, default=None)
 
     def __post_init__(self):
         """Initialize point array."""
-        self._points = np.zeros((self.point_number, 2))
+        self.profile = np.zeros((self.point_number, 2))
         super().__post_init__()
-
-    def __getitem__(self, attr):
-        """Return data item."""
-        return self.data[attr]
-
-    @property
-    def axis(self):
-        """Return geometric axis."""
-        return np.array([self.radius, self.height])
-
-    @axis.setter
-    def axis(self, axis):
-        self.radius, self.height = axis
-
-    @property
-    def x_point(self):
-        """Return location of lower x-point."""
-        return self.data['_x-point'] + self.axis
-
-    @x_point.setter
-    def x_point(self, x_point):
-        """Position plasma relitive to x-point."""
-        if x_point is None:
-            return
-        self.radius -= (self.x_point[0] - x_point[0])
-        self.height -= (self.x_point[1] - x_point[1])
 
     @property
     def points(self) -> np.ndarray:
         """Return profile r,z points."""
-        return self._points + self.axis[np.newaxis, :]
+        assert isinstance(self.geometric_axis, np.ndarray)
+        return self.profile + self.geometric_axis[np.newaxis, :]
 
     @points.setter
     def points(self, points):
@@ -305,7 +315,8 @@ class Separatrix(Plot):
         delta = np.linalg.norm(points[1:] - points[:-1], axis=1)
         length = np.append(0, np.cumsum(delta))
         linspace = np.linspace(0, length[-1], self.point_number)
-        self._points[:] = interp1d(length, points, 'quadratic', 0)(linspace)
+        self.theta = interp1d(length, self.theta, 'linear', 0)(linspace)
+        self.profile[:] = interp1d(length, points, 'quadratic', 0)(linspace)
 
     @cached_property
     def theta(self):
@@ -317,7 +328,7 @@ class Separatrix(Plot):
         """Return number of upper profile points."""
         return bisect.bisect_right(self.theta, np.pi)
 
-    @cached_property
+    @property
     def x_point_number(self):
         """Return number of profile points to the lower x-point."""
         return bisect.bisect_right(self.theta, self['theta_o'] + np.pi)
@@ -327,71 +338,66 @@ class Separatrix(Plot):
         """Return upper theta array 0<=theta<np.pi."""
         return self.theta[:self.upper_point_number]
 
-    @cached_property
+    @property
     def theta_lower_hfs(self):
         """Return lower theta array on the high field side."""
         return self.theta[self.upper_point_number:self.x_point_number]
 
-    @cached_property
+    @property
     def theta_lower_lfs(self):
         """Return lower theta array on the low field side."""
         return np.linspace(-self['theta_o'], 0,
                            self.point_number - self.x_point_number)
 
     @staticmethod
-    def miller(theta, minor_radius, elongation, triangularity):
+    def miller_profile(theta, minor_radius, elongation, triangularity):
         """Return Miller profile."""
-        del_hat = np.arcsin(triangularity)
-        return minor_radius * np.c_[np.cos(theta + del_hat * np.sin(theta)),
-                                    elongation * np.sin(theta)]
-
-    def plasma_shape(self, *args, **kwargs):
-        """Return plasma shape instance."""
-        kwargs |= {attr: arg for arg, attr in
-                   zip(args, ['minor_radius', 'elongation', 'triangularity'])}
-        self.attrs = list(kwargs.keys())
-        return PlasmaShape(kwargs)
+        return minor_radius * np.c_[
+            np.cos(theta + np.arcsin(triangularity) * np.sin(theta)),
+            elongation * np.sin(theta)]
 
     def limiter(self, *args, **kwargs):
         """Update points - symetric limiter."""
-        plasma = self.plasma_shape(*args, **kwargs)
-        self.points = self.miller(self.theta, plasma.minor_radius,
-                                  plasma.elongation, plasma.triangularity)
+        self(*args, **kwargs)
+        self.points = self.miller_profile(self.theta, self.minor_radius,
+                                          self.elongation, self.triangularity)
         return self
 
     def single_null(self, *args, **kwargs):
         """Update points - lower single null."""
-        plasma = self.plasma_shape(*args, **kwargs)
-        plasma.set_single_null()
-        minor_radius = plasma.minor_radius
-        kappa_u, delta_u = plasma.get_upper()
-        kappa_x, delta_x = plasma.get_lower()
-        upper = self.miller(self.theta_upper, minor_radius, kappa_u, delta_u)
-        x_i = (1 - delta_x**2)**0.5 / (kappa_x - (1 - delta_x**2)**0.5)
-        k_o = kappa_x / (1 - x_i**2)**0.5
-        x_1 = (x_i - delta_x) / (1 - x_i)
-        x_2 = (x_i + delta_x) / (1 - x_i)
+        self(*args, **kwargs)
+        self.x_point = kwargs.get('x_point', None)
+        self.adjust_lower_elongation()
+        upper = self.miller_profile(
+            self.theta_upper, self.minor_radius,
+            self.upper_elongation, self.upper_triangularity)
+        x_i = (1 - self.lower_triangularity**2)**0.5 / \
+            (self.lower_elongation - (1 - self.lower_triangularity**2)**0.5)
+        k_o = self.lower_elongation / (1 - x_i**2)**0.5
+        x_1 = (x_i - self.lower_triangularity) / (1 - x_i)
+        x_2 = (x_i + self.lower_triangularity) / (1 - x_i)
         self.data['theta_o'] = np.arctan((1 - x_i**2)**0.5 / x_i)
-        lower_hfs = minor_radius * np.c_[
+        lower_hfs = self.minor_radius * np.c_[
             x_1 + (1 + x_1) * np.cos(self.theta_lower_hfs),
             k_o * np.sin(self.theta_lower_hfs)]
-        lower_lfs = minor_radius * np.c_[
+        lower_lfs = self.minor_radius * np.c_[
             -x_2 + (1 + x_2) * np.cos(self.theta_lower_lfs),
             k_o * np.sin(self.theta_lower_lfs)]
-        self.data['_x-point'] = lower_lfs[0]
         self.points = np.vstack((lower_lfs[:-1], upper,
                                  lower_hfs, lower_lfs[0]))
-        self.x_point = kwargs.get('x_point', None)
         return self
 
     def plot(self):
         """Plot last closed flux surface."""
         self.get_axes('2d')
-        self.axes.plot(*self.points.T, 'C3')
+        self.axes.plot(*self.points.T, '-', lw=1.5, color='C6')
+        if 'x_point' in self.data:
+            self.axes.plot(*self.x_point, 'x',
+                           ms=6, mec='C3', mew=1, mfc="none")
 
 
 if __name__ == '__main__':
 
-    separatrix = Separatrix().single_null(2, 2, 0.3, lower_triangularity=0.5,
-                                      x_point=(0, -0.2))
+    separatrix = Separatrix().single_null(
+        (5, 0), 2, 1.8, 0.3, x_point=(4, -4.5))
     separatrix.plot()

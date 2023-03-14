@@ -20,6 +20,10 @@ class PulseSchedule(Plot, Scenario):
     name: str = 'pulse_schedule'
     ids_node: str = ''
 
+    def __call__(self, attrs: list[str]) -> dict:
+        """Return attribute listing."""
+        return {attr: self[attr] for attr in attrs}
+
     def time_coordinate(self, path: str, attr: str, index=None):
         """Return time coordinate."""
         if self.data.homogeneous_time == 1:
@@ -231,12 +235,30 @@ if __name__ == '__main__':
     # PulseSchedule(pulse, run)._clear()
     schedule = PulseSchedule(pulse, run)
 
-    #schedule.time = 250
+    schedule.time = 250
+    schedule.plot_gaps()
 
+    from nova.biot.separatrix import Separatrix
 
-    #schedule.plot_gaps()
+    geometry = schedule(['geometric_axis', 'minor_radius',
+                         'elongation', 'triangularity'])
+    geometry['x_point'] = schedule['x_point'][0]
+    geometry['geometric_axis'][1] = 0.5
 
-    schedule.plot_profile()
+    separatrix = Separatrix()
+    separatrix.single_null(**geometry).plot()
+
+    gap_o = np.c_[schedule.data.gap_r, schedule.data.gap_z]
+    gap_norm = np.c_[np.cos(schedule.data.gap_angle),
+                     np.sin(schedule.data.gap_angle)]
+    gap_vector = schedule['gap'][:, np.newaxis] * gap_norm
+    gap_data = gap_vector + gap_o
+
+    import scipy
+    tree = scipy.spatial.KDTree(separatrix.points)
+    tree.query(gap_data)
+
+    # schedule.plot_profile()
 
     # schedule.annimate(2.5)
 

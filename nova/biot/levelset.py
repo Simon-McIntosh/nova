@@ -5,7 +5,7 @@ import numpy as np
 
 from nova.biot.biotgrid import BiotGrid
 from nova.biot.contour import Contour
-from nova.biot.separatrix import LCFS
+from nova.biot.separatrix import PlasmaShape
 
 # pylint: disable=too-many-ancestors
 
@@ -46,4 +46,4 @@ class LevelSet(BiotGrid):
     def lcfs(self, psi):
         """Return last closed flux surface."""
         psi_levelset = self.contour.closedlevelset(psi)
-        return LCFS(psi_levelset.points)
+        return PlasmaShape(psi_levelset.points)

@@ -7,10 +7,11 @@ import numpy as np
 from scipy.interpolate import interp1d
 
 from nova.frame.baseplot import Plot
+from nova.imas.pulse_schedule import PulseSchedule
 
 
 @dataclass
-class LCFS(Plot):
+class PlasmaShape(Plot):
     """Calculate plasma shape parameters from the last closed flux surface."""
 
     points: np.ndarray
@@ -178,8 +179,8 @@ class UpDown:
 
 
 @dataclass
-class PlasmaShape:
-    """Manage plasma shape parameters."""
+class PlasmaProfile:
+    """Generate plasma profile from plasma parameters."""
 
     radius: float = 0
     height: float = 0
@@ -197,7 +198,7 @@ class PlasmaShape:
         self.data['geometric_axis'] = \
             np.array([self.radius, self.height], float)
         attrs = ['minor_radius', 'elongation', 'triangularity']
-        if len(args) > 0 and isinstance(args[0], tuple):
+        if len(args) > 0 and isinstance(args[0], (list | tuple | np.ndarray)):
             attrs = ['geometric_axis'] + attrs
         self.data |= kwargs | {attr: arg for arg, attr in zip(args, attrs)}
         self['geometric_axis'] = np.array(self.geometric_axis, float)
@@ -212,7 +213,10 @@ class PlasmaShape:
 
     def __getitem__(self, attr):
         """Return data attribute."""
-        return self.data[attr]
+        if attr in self.data:
+            return self.data[attr]
+        if hasattr(super(), '__getitem__'):
+            return super()[attr]
 
     def __setitem__(self, attr, value):
         """Update data attribute."""
@@ -285,7 +289,7 @@ class PlasmaShape:
 
 
 @dataclass
-class Separatrix(Plot, PlasmaShape):
+class Separatrix(Plot, PlasmaProfile):
     """
     Generate Separatrix profiles from plasma shape parameters.
 
@@ -366,7 +370,7 @@ class Separatrix(Plot, PlasmaShape):
     def single_null(self, *args, **kwargs):
         """Update points - lower single null."""
         self(*args, **kwargs)
-        self.x_point = kwargs.get('x_point', None)
+        self.x_point = kwargs.get('x_point', self.data.get('x_point', None))
         self.adjust_lower_elongation()
         upper = self.miller_profile(
             self.theta_upper, self.minor_radius,
@@ -393,11 +397,95 @@ class Separatrix(Plot, PlasmaShape):
         self.axes.plot(*self.points.T, '-', lw=1.5, color='C6')
         if 'x_point' in self.data:
             self.axes.plot(*self.x_point, 'x',
-                           ms=6, mec='C3', mew=1, mfc="none")
+                           ms=6, mec='C3', mew=1, mfc='none')
+
+
+@dataclass
+class LCFS(Separatrix, PulseSchedule):
+    """Fit Last Closed Flux Surface to Pulse Schedule parameters."""
+
+
+    #gap_vector = self['gap'][:, np.newaxis] * gap_norm
+    #gap_data = gap_vector + gap_o
+
+    '''
+
+    from nova.biot.separatrix import Separatrix
+
+    geometry = schedule(['geometric_axis', 'minor_radius',
+                         'elongation', 'triangularity'])
+    geometry['x_point'] = schedule['x_point'][0]
+    geometry['geometric_axis'][1] = 0.5
+
+
+    separatrix = Separatrix()
+    separatrix.limiter(**geometry).plot()
+
+
+
+    tree = scipy.spatial.KDTree(separatrix.points)
+    index = tree.query(gap_data)[1]
+
+    separatrix.axes.plot(*separatrix.points[index, :].T, 'x')
+
+
+    import scipy
+
+    def fun(x):
+        separatrix.limiter(x[:2], *x[2:])
+        tree = scipy.spatial.KDTree(separatrix.points)
+        index = tree.query(gap_data)[1]
+        vector = np.einsum('ij,ij->i', gap_vector,
+                           separatrix.points[index, :] - gap_data)
+        distance = np.linalg.norm(separatrix.points[index, :] - gap_data,
+                                  axis=1)
+        return np.sum(abs(distance))
+
+    def gap(x):
+        separatrix.limiter(x[:2], *x[2:])
+        tree = scipy.spatial.KDTree(separatrix.points)
+        index = tree.query(gap_data)[1]
+        vector = np.einsum('ij,ij->i', gap_vector,
+                           separatrix.points[index, :] - gap_data)
+        return vector
+
+    xo = [separatrix.radius, separatrix.height,
+          separatrix.minor_radius, separatrix.elongation,
+          separatrix.triangularity]
+    bounds = [(None, None) for _ in range(len(xo))]
+    bounds[-1] = (-1, 1)
+
+    constraints = dict(type='ineq', fun=gap)
+
+    sol = scipy.optimize.minimize(fun, xo, method='SLSQP',
+                                  bounds=bounds, constraints=constraints)
+    print(sol)
+
+    separatrix.limiter(sol.x[:2], *sol.x[2:]).plot()
+
+    tree = scipy.spatial.KDTree(separatrix.points)
+    index = tree.query(gap_data)[1]
+
+    separatrix.axes.plot(*separatrix.points[index, :].T, 'x')
+
+    # schedule.plot_profile()
+
+    # schedule.annimate(2.5)
+
+    #schedule.plot_gaps()
+    #schedule.plot_0d('loop_voltage')
+    #schedule.plot_0d('loop_psi')
+    '''
 
 
 if __name__ == '__main__':
 
-    separatrix = Separatrix().single_null(
-        (5, 0), 2, 1.8, 0.3, x_point=(4, -4.5))
-    separatrix.plot()
+    pulse, run = 135003, 5
+    lcfs = LCFS(pulse, run)
+
+    lcfs.time = 5
+
+    lcfs.plot_gaps()
+    #separatrix = Separatrix().single_null(
+    #    (5, 0), 2, 1.8, 0.3, x_point=(4, -4.5))
+    #separatrix.plot()

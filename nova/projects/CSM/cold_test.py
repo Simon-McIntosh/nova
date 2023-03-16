@@ -617,10 +617,10 @@ if __name__ == '__main__':
     sns.set_context('talk')
 
 
-    ct = cold_test(project_dir='CSM4', read_txt=True)
-    #ct.load_coldtest('strain', read_txt=True)
-    #ct.load_coldtest('displace', read_txt=True)
-    #ct.load_coldtest('current', read_txt=True)
+    ct = cold_test(project_dir='CSM2', read_txt=True)
+    ct.load_coldtest('strain', read_txt=True)
+    ct.load_coldtest('displace', read_txt=True)
+    ct.load_coldtest('current', read_txt=True)
 
     ct.plot_row('displace', index='fit', ncol=2)
     ct.plot_loop('displace', index='fit')

@@ -20,7 +20,11 @@ class GetSlice:
 
     def __getitem__(self, key: str):
         """Regulate access to equilibrium dataset."""
-        return self.data[self.match(key)][self.time_index].data
+        data = self.data[self.match(key)][self.time_index].data
+        try:
+            return data.item()
+        except ValueError:
+            return data
 
     def match(self, key: str) -> str:
         """Return key matched to internal naming convention."""

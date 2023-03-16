@@ -145,7 +145,7 @@ if __name__ == '__main__':
 
     separatrix = Separatrix(waveform['geometric_axis'][0], 0.5).single_null(
         waveform['minor_radius'],  waveform['elongation'],
-        waveform['triangularity'])  # , x_point=waveform['x_point'][0]
+        waveform['triangularity'], x_point=waveform['x_point'][0])
     separatrix.plot()
     separatrix.axes.plot(*waveform['x_point'][0], 'C0o')
 

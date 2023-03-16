@@ -111,14 +111,19 @@ class PulseSchedule(Plot, Scenario):
             if not self.ids_index.empty('name'):
                 self.data.coords['gap_name'] = 'gap_index', \
                     self.ids_index.array('name')
-            for attr in ['r', 'z', 'angle']:
-                if self.ids_index.empty(attr) and attr == 'angle':
-                    self.data.coords['gap_angle'] = 'gap_index', \
-                        self._angle(self.ids_index.array('r'),
-                                    self.ids_index.array('z'))
-                    continue
-                self.data.coords[f'gap_{attr}'] = 'gap_index', \
-                    self.ids_index.array(attr)
+            if 'point' not in self.data:
+                self.data.coords['point'] = ['r', 'z']
+            self.data.coords['gap_point'] = ('gap_index', 'point'), \
+                np.c_[self.ids_index.array('r'), self.ids_index.array('z')]
+            if not self.ids_index.empty('angle'):
+                self.data.coords['gap_angle'] = 'gap_index', \
+                    self.ids_index.array('angle')
+            else:
+                self.data.coords['gap_angle'] = 'gap_index', \
+                    self._angle(self.ids_index.array('r'),
+                                self.ids_index.array('z'))
+            self.data.coords['gap_vector'] = ('gap_index', 'point'), \
+                np.c_[np.cos(self.data.gap_angle), np.sin(self.data.gap_angle)]
             if self.data.homogeneous_time == 1:
                 self.data['gap'] = ('time', 'gap_index'), \
                     self.ids_index.array('value.reference.data')
@@ -189,7 +194,7 @@ class PulseSchedule(Plot, Scenario):
         self.get_axes('2d')
         self.axes.plot(self.wall_segment[:, 0], self.wall_segment[:, 1],
                        color='gray', lw=1.5)
-        tail = np.c_[self.data.gap_r, self.data.gap_z]
+        tail = self.data.gap_point
         vector = self['gap'][:, np.newaxis] * \
             np.c_[np.cos(self.data.gap_angle), np.sin(self.data.gap_angle)]
         patch = self.mpl['patches'].FancyArrowPatch
@@ -235,37 +240,9 @@ if __name__ == '__main__':
     # PulseSchedule(pulse, run)._clear()
     schedule = PulseSchedule(pulse, run)
 
-    schedule.time = 250
+    schedule.time = 500
     schedule.plot_gaps()
 
-    from nova.biot.separatrix import Separatrix
-
-    geometry = schedule(['geometric_axis', 'minor_radius',
-                         'elongation', 'triangularity'])
-    geometry['x_point'] = schedule['x_point'][0]
-    geometry['geometric_axis'][1] = 0.5
-
-    separatrix = Separatrix()
-    separatrix.single_null(**geometry).plot()
-
-    gap_o = np.c_[schedule.data.gap_r, schedule.data.gap_z]
-    gap_norm = np.c_[np.cos(schedule.data.gap_angle),
-                     np.sin(schedule.data.gap_angle)]
-    gap_vector = schedule['gap'][:, np.newaxis] * gap_norm
-    gap_data = gap_vector + gap_o
-
-    import scipy
-
-    def fun(x):
-        separatrix.single_null(x[:2], *x[2:])
-        tree = scipy.spatial.KDTree(separatrix.points)
-        return np.max(tree.query(gap_data))
-
-    xo = [separatrix.radius, separatrix.height, separatrix.minor_radius]
-    sol = scipy.optimize.minimize(fun, xo)
-    print(sol)
-
-    separatrix.single_null(sol.x[:2], *sol.x[2:]).plot()
 
     # schedule.plot_profile()
 

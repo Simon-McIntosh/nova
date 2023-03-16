@@ -13,7 +13,7 @@ from nova.biot.biotfirstwall import BiotFirstWall
 from nova.biot.biotplasmagrid import BiotPlasmaGrid
 from nova.biot.error import PlasmaTopologyError
 from nova.biot.levelset import LevelSet
-from nova.biot.separatrix import LCFS
+from nova.biot.separatrix import PlasmaShape
 from nova.frame.baseplot import Plot, Properties
 from nova.frame.framesetloc import FrameSetLoc
 from nova.geometry.polygon import Polygon
@@ -37,7 +37,7 @@ class Plasma(Plot, netCDF, FrameSetLoc):
     grid: BiotPlasmaGrid = field(repr=False, default_factory=BiotPlasmaGrid)
     wall: BiotFirstWall = field(repr=False, default_factory=BiotFirstWall)
     levelset: LevelSet = field(repr=False, default_factory=LevelSet)
-    lcfs: LCFS | None = field(init=False, default=None)
+    lcfs: PlasmaShape | None = field(init=False, default=None)
 
     def __post_init__(self):
         """Update subframe metadata."""

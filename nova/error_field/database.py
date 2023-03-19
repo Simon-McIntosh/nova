@@ -16,7 +16,8 @@ from nova.frame.baseplot import Plot
 class Database(Plot, Datafile):
     """Interpolate field dataset to first wall and decompose."""
 
-    filename: str
+    datafile: str
+    surface: str | None = None
     dirname: str = '.error_field'
     datadir: str = '/mnt/data/error_field'
 
@@ -27,6 +28,14 @@ class Database(Plot, Datafile):
         '88LDE3': 'Database of magnetic field produced by Ferromagnetic '
                   'Inserts and Test Blanket Modules magnetized by TF, CS and '
                   'PF coils in 15MA reference scenario'}
+
+    def __post_init__(self):
+        """Set surface and filenanes."""
+        if self.surface is None:
+            self.surface = f'surface_{self.filename}'
+            self.filename = self.datafile
+        else:
+            self.filename = f'{self.surface}_{self.datafile}'
 
     def _reshape(self, vector, shape):
         """Return vector reshaped as fortran array with axes 1, 2 swapped."""
@@ -44,15 +53,15 @@ class Database(Plot, Datafile):
     def read_datafile(self):
         """Read source datafile."""
         datafile = FilePath(dirname=self.datadir,
-                            filename=f'{self.filename}.txt')
+                            filename=f'{self.datafile}.txt')
         with open(datafile.filepath, 'r') as file:
             header = file.readline()
             data = pandas.read_csv(
                 file, header=None, delim_whitespace=True,
                 names=['r', 'phi', 'z', 'Br', 'Bphi', 'Bz'])
         shape = tuple(int(dim) for dim in header.split()[:3])
-        self.data.attrs['uid'] = self.filename
-        self.data.attrs['title'] = self.library[self.filename]
+        self.data.attrs['uid'] = self.datafile
+        self.data.attrs['title'] = self.library[self.datafile]
         self.data.attrs['Io'] = float(header.split()[-1])
         self.data.coords['radius'] = self._reshape(data.r, shape)[:, 0, 0]
         self.data.coords['phi'] = self._reshape(data.phi, shape)[0, :, 0]
@@ -64,7 +73,7 @@ class Database(Plot, Datafile):
     def build_surface(self):
         """Build control surface."""
         datafile = FilePath(dirname=self.datadir,
-                            filename=f'surface_{self.filename}.txt')
+                            filename=f'{self.surface}.txt')
         with open(datafile.filepath, 'r') as file:
             data = pandas.read_csv(file, header=None, delim_whitespace=True,
                                    names=['radius', 'height'])
@@ -163,7 +172,7 @@ class Database(Plot, Datafile):
 
 if __name__ == '__main__':
 
-    database = Database('86T4WW')
+    database = Database('88LDE3', surface='surf_gpec_131025')
 
     #database.plot_normal(modes=[1, 2, 3], scale=20)
     #database.plot_normal(modes=[18], scale=1)

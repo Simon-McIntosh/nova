@@ -209,7 +209,8 @@ if __name__ == '__main__':
     # MachineDatabase(machine='iter_md').sync_shot('150100/4')
 
     # ScenarioDatabase(user='tribolp').sync_shot('135011/21')
-    ScenarioDatabase(user='dubrovm').sync_shot('105028/1')
+    # ScenarioDatabase(user='dubrovm').sync_shot('105028/1')
+    ScenarioDatabase(user='dubrovm').sync_shot('105027/1')
 
 
     #ScenarioDatabase().sync_shot('130012/1')

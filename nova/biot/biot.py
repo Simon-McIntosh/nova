@@ -10,16 +10,32 @@ from nova.frame.frameset import FrameSet, frame_factory
 
 
 @dataclass
-class Biot(FrameSet):
+class Gap:
+
+    mingap: int | float = 1e-3
+    maxgap: int | float = 5
+    ngap: int | float = 150
+
+    @property
+    def gap_kwargs(self):
+        """Return gap kwargs."""
+        return dict(mingap=self.mingap, maxgap=self.maxgap, ngap=self.ngap)
+
+    @frame_factory(BiotGap)
+    def wallgap(self):
+        """Return biot wall-gap probe instance."""
+        return self.gap_kwargs
+
+
+@dataclass
+class Biot(Gap, FrameSet):
     """Expose biot methods as cached properties."""
 
     field_attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])
     force_attrs: list[str] = field(default_factory=lambda: ['Fr', 'Fz', 'Fc'])
     nfield: int | float = field(default=0, repr=False)
     nforce: int | float = field(default=0, repr=False)
-    mingap: int | float = 1e-3
-    maxgap: int | float = 5
-    ngap: int | float = 150
+    nlevelset: int = 5000
 
     @property
     def field_kwargs(self):
@@ -30,11 +46,6 @@ class Biot(FrameSet):
     def force_kwargs(self):
         """Return force kwargs."""
         return dict(attrs=self.force_attrs)
-
-    @property
-    def gap_kwargs(self):
-        """Return gap kwargs."""
-        return dict(mingap=self.mingap, maxgap=self.maxgap, ngap=self.ngap)
 
     @property
     def biot_attrs(self):
@@ -66,7 +77,7 @@ class Biot(FrameSet):
     @frame_factory(LevelSet)
     def levelset(self):
         """Return plasma grid biot instance."""
-        return dict(attrs=['Psi'], nplasma=self.nplasma)
+        return dict(attrs=['Psi'], nlevelset=self.nlevelset)
 
     @frame_factory(BiotPlasmaGrid)
     def plasmagrid(self):
@@ -87,11 +98,6 @@ class Biot(FrameSet):
     def probe(self):
         """Return biot probe instance."""
         return self.field_kwargs
-
-    @frame_factory(BiotGap)
-    def wallgap(self):
-        """Return biot wall-gap probe instance."""
-        return self.gap_kwargs
 
     @frame_factory(BiotLoop)
     def loop(self):

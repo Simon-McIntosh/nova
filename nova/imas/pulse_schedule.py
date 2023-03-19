@@ -113,7 +113,7 @@ class PulseSchedule(Plot, Scenario):
                     self.ids_index.array('name')
             if 'point' not in self.data:
                 self.data.coords['point'] = ['r', 'z']
-            self.data.coords['gap_point'] = ('gap_index', 'point'), \
+            self.data.coords['gap_tail'] = ('gap_index', 'point'), \
                 np.c_[self.ids_index.array('r'), self.ids_index.array('z')]
             if not self.ids_index.empty('angle'):
                 self.data.coords['gap_angle'] = 'gap_index', \
@@ -194,7 +194,7 @@ class PulseSchedule(Plot, Scenario):
         self.get_axes('2d')
         self.axes.plot(self.wall_segment[:, 0], self.wall_segment[:, 1],
                        color='gray', lw=1.5)
-        tail = self.data.gap_point
+        tail = self.data.gap_tail
         vector = self['gap'][:, np.newaxis] * \
             np.c_[np.cos(self.data.gap_angle), np.sin(self.data.gap_angle)]
         patch = self.mpl['patches'].FancyArrowPatch
@@ -236,15 +236,17 @@ if __name__ == '__main__':
     pulse, run = 135011, 7
     pulse, run = 135003, 5
     # pulse, run = 105028, 1  # Maksim
+    pulse, run = 105027, 1  # Maksim
 
     # PulseSchedule(pulse, run)._clear()
     schedule = PulseSchedule(pulse, run)
 
-    schedule.time = 500
-    schedule.plot_gaps()
+    #schedule.time = 500
+    #schedule.plot_gaps()
 
 
-    # schedule.plot_profile()
+
+    #schedule.plot_profile()
 
     # schedule.annimate(2.5)
 

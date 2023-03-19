@@ -18,13 +18,17 @@ class GetSlice:
         super().__post_init__()
         self.itime = self.time_index
 
-    def __getitem__(self, key: str):
-        """Regulate access to equilibrium dataset."""
+    def get(self, key: str):
+        """Regulate access to imas dataset."""
         data = self.data[self.match(key)][self.time_index].data
         try:
             return data.item()
         except ValueError:
             return data
+
+    def __getitem__(self, key: str):
+        """Return dataset value with dict-like access."""
+        return self.get(key)
 
     def match(self, key: str) -> str:
         """Return key matched to internal naming convention."""

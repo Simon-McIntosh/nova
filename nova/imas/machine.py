@@ -564,7 +564,7 @@ class PoloidalFieldActive(CoilDatabase):
             if len(circuit.connections) == 0:
                 continue
             self.circuit.insert(circuit.identifier, circuit.connections)
-        self.circuit.link()  # link single loop circuits
+        # self.circuit.link()  # link single loop circuits
 
 
 @dataclass
@@ -820,7 +820,6 @@ class Machine(CoilSet, CoilGeometry, CoilData):
         self.clear_frameset()
         for attr, geometry in self.geometry.items():
             geometry_attrs = getattr(self, attr)
-            # pylint: disable=not-a-mapping
             if isinstance(geometry_attrs, dict):
                 coilset = geometry(**geometry_attrs, **self.frameset_attrs)
                 self += coilset
@@ -849,17 +848,18 @@ if __name__ == '__main__':
     machine = Machine(pulse, run,
                       pf_active='iter_md', pf_passive=False, wall='iter_md',
                       tplasma='hex')
-    #machine.plot('plasma')
+    machine.plot()
 
+    '''
     import scipy
     from nova.biot.separatrix import Separatrix
 
     points = np.c_[machine.aloc['plasma', 'x'], machine.aloc['plasma', 'z']]
     tree = scipy.spatial.KDTree(points)
 
-    separatrix = Separatrix(6, 0.5).single_null(1.5, 1.8, 0.3)
+    separatrix = Separatrix().single_null(6.3, 0.5, 1.5, 1.8, 0.3)
 
-    radius = 0.5 * np.sqrt(machine.aloc['plasma', 'area'].mean())
+    radius = 0.2 * np.sqrt(machine.aloc['plasma', 'area'].mean())
 
     index = tree.query(separatrix.points, distance_upper_bound=radius)[1]
     index = np.unique(index)
@@ -874,3 +874,4 @@ if __name__ == '__main__':
     separatrix.plot()
     machine.plot('plasma')
     machine.plasmawall.plot()
+    '''

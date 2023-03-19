@@ -155,19 +155,13 @@ filterwarnings = [
 warn_return_any = true
 warn_unused_configs = true 
 ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = [
-    "scipy",
-    "scipy.constants"
-]
-ignore_missing_imports = true
+no_implicit_reexport = true
 
 [tool.pylsp-mypy]
 enabled = true
-live_mode = false
-dmypy = true
-strict = false
+live_mode = true
+dmypy = false
+strict = true
 
 [tool.coverage.run]
 omit = [

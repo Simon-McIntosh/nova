@@ -26,19 +26,22 @@ class CoilSet(Biot, Control, Frame):
         """Return coilset attrs."""
         return self.frameset_attrs | self.biot_attrs
 
-    def __add__(self, other: FrameSet):
+    def __add__(self, other):
         """Return framset union of self and other."""
         frame = self.frame + other.frame
         subframe = self.subframe + other.subframe
+        circuit = self.circuit + other.circuit
         coilset = CoilSet()
         coilset.frames = frame, subframe
+        coilset.circuit.data = circuit.data
         return coilset
 
-    def __iadd__(self, other: FrameSet):
+    def __iadd__(self, other):
         """Return coilset augmented by other."""
         self.clear_biot()
         self.frame += other.frame
         self.subframe += other.subframe
+        self.circuit += other.circuit
         return self
 
 

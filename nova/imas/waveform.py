@@ -7,10 +7,9 @@ import numpy as np
 from scipy import optimize
 from tqdm import tqdm
 
-from nova.biot.separatrix import Separatrix
+from nova.biot.separatrix import LCFS
 from nova.imas.database import Ids
 from nova.imas.machine import Machine
-from nova.imas.pulse_schedule import PulseSchedule
 from nova.linalg.regression import MoorePenrose
 
 
@@ -29,18 +28,19 @@ class MachineDescription(Machine):
         """Extend Machine.solve_biot."""
         super().solve_biot()
         self.inductance.solve()
-        self.wallgap.solve(np.c_[self.data.gap_r.data, self.data.gap_z.data],
-                           self.data.gap_angle.data, self.data.gap_id.data)
+        self.wallgap.solve(self.data.gap_tail.data, self.data.gap_angle.data,
+                           self.data.gap_id.data)
 
 
 @dataclass
-class Waveform(MachineDescription, PulseSchedule):
+class Waveform(MachineDescription, LCFS):
     """Generate coilset voltage and current waveforms."""
 
     name: str = 'pulse_schedule'
 
     def update(self):
         """Extend itime update."""
+        super().update()
         self.sloc['plasma', 'Ic'] = self['i_plasma']
         self.update_loop_psi()
 
@@ -81,9 +81,9 @@ class Waveform(MachineDescription, PulseSchedule):
         self.sloc['coil', 'Ic'] = matrix / psi
         self.plasma.separatrix = psi_boundary
 
-    def plot(self):
+    def plot(self, index=None, axes=None, **kwargs):
         """Plot machine and constraints."""
-        super().plot()
+        super().plot(index=index, axes=axes, **kwargs)
 
     def residual(self, nturn):
         """Return psi grid residual."""
@@ -121,7 +121,7 @@ class Waveform(MachineDescription, PulseSchedule):
     def annimate(self, duration: float, filename='newton_krylov'):
         """Generate annimiation."""
         self.duration = duration
-        self.max_time = 80 #685
+        self.max_time = 15
         self.set_axes('2d')
         animation = self.mpy.editor.VideoClip(
             self._make_frame, duration=duration)
@@ -143,11 +143,16 @@ if __name__ == '__main__':
     waveform.plot_gaps()
     waveform.plasma.lcfs.plot()
 
+    waveform.fit()
+    waveform.plot('plasma')
+
+    '''
     separatrix = Separatrix(waveform['geometric_axis'][0], 0.5).single_null(
         waveform['minor_radius'],  waveform['elongation'],
         waveform['triangularity'], x_point=waveform['x_point'][0])
     separatrix.plot()
     separatrix.axes.plot(*waveform['x_point'][0], 'C0o')
+    '''
 
 
     '''

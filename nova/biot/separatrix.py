@@ -2,9 +2,12 @@
 import bisect
 from dataclasses import dataclass, field
 from functools import cached_property
+from typing import ClassVar
 
 import numpy as np
 from scipy.interpolate import interp1d
+from scipy.optimize import minimize
+from scipy.spatial import KDTree
 
 from nova.frame.baseplot import Plot
 from nova.imas.pulse_schedule import PulseSchedule
@@ -116,8 +119,8 @@ class PlasmaShape(Plot):
 class UpDown:
     """Manage access to upper/lower type plasma shape parameters."""
 
-    attr: str
-    data: dict[str, float]
+    segment: str
+    coef: dict[str, float]
 
     def __post_init__(self):
         """Check dataset for self-consistency."""
@@ -125,25 +128,25 @@ class UpDown:
 
     def check_consistency(self):
         """Check data consistency."""
-        if all(attr in self.data for attr in
-               [self.attr, self.upper_attr, self.lower_attr]):
+        if all(attr in self.coef for attr in
+               [self.segment, self.upper_attr, self.lower_attr]):
             assert np.isclose(self.mean, (self.upper + self.lower) / 2)
 
     @property
     def upper_attr(self) -> str:
         """Return upper attribute name."""
-        return f'upper_{self.attr}'
+        return f'upper_{self.segment}'
 
     @property
     def lower_attr(self) -> str:
         """Return lower attribute name."""
-        return f'lower_{self.attr}'
+        return f'lower_{self.segment}'
 
     @property
     def mean(self):
         """Return mean attribute."""
-        match self.data:
-            case {self.attr: mean}:
+        match self.coef:
+            case {self.segment: mean}:
                 return mean
             case {self.upper_attr: upper, self.lower_attr: lower}:
                 return (upper + lower) / 2
@@ -153,12 +156,12 @@ class UpDown:
                 return lower
             case _:
                 raise KeyError('attributes required to reconstruct '
-                               f'mean {self.attr} not found in {self.data}')
+                               f'mean {self.segment} not found in {self.coef}')
 
     @property
     def upper(self):
         """Return upper attribute."""
-        match self.data:
+        match self.coef:
             case {self.upper_attr: upper}:
                 return upper
             case {self.lower_attr: lower}:
@@ -169,7 +172,7 @@ class UpDown:
     @property
     def lower(self):
         """Return lower attribute."""
-        match self.data:
+        match self.coef:
             case {self.lower_attr: lower}:
                 return lower
             case {self.upper_attr: upper}:
@@ -182,68 +185,60 @@ class UpDown:
 class PlasmaProfile:
     """Generate plasma profile from plasma parameters."""
 
-    radius: float = 0
-    height: float = 0
-    data: dict[str, float] = field(default_factory=dict)
+    coef: dict[str, float] = field(default_factory=dict)
     kappa: UpDown = field(init=False, repr=False)
     delta: UpDown = field(init=False, repr=False)
 
+    profile_attrs: ClassVar[list[str]] = \
+        ['geometric_radius', 'geometric_height',
+         'minor_radius', 'elongation', 'triangularity']
+
     def __post_init__(self):
         """Initialise updown."""
-        self.kappa = UpDown('elongation', self.data)
-        self.delta = UpDown('triangularity', self.data)
+        if hasattr(super(), '__post_init__'):
+            super().__post_init__()
+        self.kappa = UpDown('elongation', self.coef)
+        self.delta = UpDown('triangularity', self.coef)
 
-    def __call__(self, *args, **kwargs):
-        """Update plasma shape."""
-        self.data['geometric_axis'] = \
-            np.array([self.radius, self.height], float)
-        attrs = ['minor_radius', 'elongation', 'triangularity']
-        if len(args) > 0 and isinstance(args[0], (list | tuple | np.ndarray)):
-            attrs = ['geometric_axis'] + attrs
-        self.data |= kwargs | {attr: arg for arg, attr in zip(args, attrs)}
-        self['geometric_axis'] = np.array(self.geometric_axis, float)
-        self.kappa = UpDown('elongation', self.data)
-        self.delta = UpDown('triangularity', self.data)
-        self.radius, self.height = self.geometric_axis
+    def update_coefficents(self, *args, **kwargs):
+        """Update plasma profile coefficients."""
+        self.coef = kwargs
+        self.coef |= {attr: arg for attr, arg in zip(self.profile_attrs, args)}
+        self.kappa = UpDown('elongation', self.coef)
+        self.delta = UpDown('triangularity', self.coef)
         return self
 
     def __getattr__(self, attr):
         """Return unspecified attributes directly from data dict."""
-        return self.data[attr]
+        return self.coef[attr]
 
     def __getitem__(self, attr):
-        """Return data attribute."""
-        if attr in self.data:
-            return self.data[attr]
+        """Return attribute from coef if present else from pulse data."""
+        if attr in self.coef:
+            return self.coef[attr]
         if hasattr(super(), '__getitem__'):
-            return super()[attr]
+            return super().__getitem__(attr)
 
     def __setitem__(self, attr, value):
-        """Update data attribute."""
-        self.data[attr] = value
+        """Update coef attribute."""
+        self.coef[attr] = value
 
     def check_consistency(self):
         """Check data consistency."""
         for attr in ['kappa', 'delta']:
             getattr(self, attr).check_consistency()
 
-    @property
-    def x_point(self):
-        """Manage x-point."""
-        return self['x_point']
-
-    @x_point.setter
-    def x_point(self, x_point):
+    def set_x_point(self, x_point):
         """Adjust lower elongation and triangularity to match x_point."""
         if x_point is None:
             return
         self['lower_triangularity'] = \
-            (self.geometric_axis[0] - self.x_point[0]) / self.minor_radius
-        if 'triangularity' in self.data:
+            (self.geometric_radius - self.x_point[0]) / self.minor_radius
+        if 'triangularity' in self.coef:
             self['upper_triangularity'] = self['triangularity']
-            del self.data['triangularity']
+            del self.coef['triangularity']
         self['lower_elongation'] = \
-            (self.geometric_axis[1] - self.x_point[1]) / self.minor_radius
+            (self.geometric_height - self.x_point[1]) / self.minor_radius
         assert abs(self['lower_triangularity']) < 1
         self.check_consistency()
 
@@ -283,8 +278,7 @@ class PlasmaProfile:
                                     2*(1 - self.lower_triangularity**2)**0.5):
             delta_kappa = 1e-3 + min_kappa - self.lower_elongation
             self['lower_elongation'] = self.lower_elongation + delta_kappa
-            self.geometric_axis[1] += self.minor_radius * delta_kappa
-            self.height = self.geometric_axis[1]
+            self.geometric_height += self.minor_radius * delta_kappa
             self.kappa.check_consistency()
 
 
@@ -308,9 +302,14 @@ class Separatrix(Plot, PlasmaProfile):
         super().__post_init__()
 
     @property
+    def geometric_axis(self):
+        """Manage geometric axis attribute."""
+        return np.array([self['geometric_radius'],
+                         self['geometric_height']], float)
+
+    @property
     def points(self) -> np.ndarray:
         """Return profile r,z points."""
-        assert isinstance(self.geometric_axis, np.ndarray)
         return self.profile + self.geometric_axis[np.newaxis, :]
 
     @points.setter
@@ -319,8 +318,11 @@ class Separatrix(Plot, PlasmaProfile):
         delta = np.linalg.norm(points[1:] - points[:-1], axis=1)
         length = np.append(0, np.cumsum(delta))
         linspace = np.linspace(0, length[-1], self.point_number)
-        #self.theta = interp1d(length, self.theta, 'linear', 0)(linspace)
-        self.profile[:] = interp1d(length, points, 'quadratic', 0)(linspace)
+        try:
+            self.profile[:] = interp1d(length, points,
+                                       'quadratic', 0)(linspace)
+        except ValueError:
+            self.profile[:] = np.zeros((self.point_number, 2))
 
     @cached_property
     def theta(self):
@@ -362,15 +364,15 @@ class Separatrix(Plot, PlasmaProfile):
 
     def limiter(self, *args, **kwargs):
         """Update points - symetric limiter."""
-        self(*args, **kwargs)
+        self.update_coefficents(*args, **kwargs)
         self.points = self.miller_profile(self.theta, self.minor_radius,
                                           self.elongation, self.triangularity)
         return self
 
     def single_null(self, *args, **kwargs):
         """Update points - lower single null."""
-        self(*args, **kwargs)
-        self.x_point = kwargs.get('x_point', self.data.get('x_point', None))
+        self.update_coefficents(*args, **kwargs)
+        self.set_x_point(kwargs.get('x_point', None))
         self.adjust_lower_elongation()
         upper = self.miller_profile(
             self.theta_upper, self.minor_radius,
@@ -380,7 +382,7 @@ class Separatrix(Plot, PlasmaProfile):
         k_o = self.lower_elongation / (1 - x_i**2)**0.5
         x_1 = (x_i - self.lower_triangularity) / (1 - x_i)
         x_2 = (x_i + self.lower_triangularity) / (1 - x_i)
-        self.data['theta_o'] = np.arctan((1 - x_i**2)**0.5 / x_i)
+        self.coef['theta_o'] = np.arctan((1 - x_i**2)**0.5 / x_i)
         lower_hfs = self.minor_radius * np.c_[
             x_1 + (1 + x_1) * np.cos(self.theta_lower_hfs),
             k_o * np.sin(self.theta_lower_hfs)]
@@ -391,82 +393,166 @@ class Separatrix(Plot, PlasmaProfile):
                                  lower_hfs, lower_lfs[0]))
         return self
 
-    def plot(self):
+    def plot(self, axes=None, **kwargs):
         """Plot last closed flux surface."""
-        self.get_axes('2d')
+        self.get_axes('2d', axes)
         self.axes.plot(*self.points.T, '-', lw=1.5, color='C6')
-        if 'x_point' in self.data:
-            self.axes.plot(*self.x_point, 'x',
-                           ms=6, mec='C3', mew=1, mfc='none')
 
 
 @dataclass
 class LCFS(Separatrix, PulseSchedule):
     """Fit Last Closed Flux Surface to Pulse Schedule parameters."""
 
+    gap_head: np.ndarray = field(init=False, repr=False)
 
-    #gap_vector = self['gap'][:, np.newaxis] * gap_norm
-    #gap_data = gap_vector + gap_o
+    def __post_init__(self):
+        """Extract geometric axis from pulse schedule dataset."""
+        super().__post_init__()
+        self.extract_geometric_axis()
+
+    def extract_geometric_axis(self):
+        """Extract geometric radius and height from geometric axis."""
+        self.data['geometric_radius'] = self.data.geometric_axis[:, 0]
+        self.data['geometric_height'] = self.data.geometric_axis[:, 1]
+
+    @cached_property
+    def gap_tail(self) -> np.ndarray:
+        """Return gap tail from pulse schedule dataset."""
+        return self.data.gap_tail.data
+
+    @cached_property
+    def gap_vector(self):
+        """Return gap vactor from pulse schedule dataset."""
+        return self.data.gap_vector.data
+
+    def update(self):
+        """Extend GetSlice.update to include gap_head calculation."""
+        super().update()
+        try:  # clear cached property
+            delattr(self, 'topology')
+        except AttributeError:
+            pass
+        self.gap_head = self.get('gap')[:, np.newaxis] * self.gap_vector
+        self.gap_head += self.gap_tail
+
+    @cached_property
+    def hfs_radius(self):
+        """Return first wall radius on the high field side."""
+        return self.wall_segment[:, 0].min()
+
+    @cached_property
+    def lfs_gap_index(self):
+        """Return low field side gap index."""
+        return self.gap_tail[:, 0] > self.hfs_radius + 1e-3
+
+    @cached_property
+    def topology(self):
+        """Return plasma topology discriptor."""
+        if self.get('x_point')[0, 0] < self.hfs_radius + 1e-3:
+            return 'limiter'
+        return 'single_null'
+
+    def update_separatrix(self, coef: np.ndarray):
+        """Update plasma boundary points."""
+        if self.topology == 'limiter':
+            return self.limiter(*coef)
+        return self.single_null(*coef, x_point=self.get('x_point')[0])
+
+    def kd_tree(self, points: np.ndarray) -> np.ndarray:
+        """Return boundary point selection index using a 2d partition tree."""
+        return KDTree(self.points).query(self.gap_head)[1]
+
+    def kd_index(self, coef: np.ndarray) -> np.ndarray:
+        """Update separatrix with coef and return gap-point selection index."""
+        self.update_separatrix(coef)
+        return self.kd_tree(self.points)
+
+    def objective(self, coef: np.ndarray) -> float:
+        """Return lcfs fitting objective."""
+        index = self.kd_index(coef)
+        error = np.linalg.norm(self.points[index, :] - self.gap_head, axis=1)
+        return np.mean(error**2)
+
+    def gap_constraint(self, coef: np.ndarray) -> np.ndarray:
+        """Return lcfs fillting constraints."""
+        index = self.kd_index(coef)
+        gap_delta = np.einsum('ij,ij->i', self.gap_vector,
+                              self.points[index, :] - self.gap_head)
+        if self.topology == 'limiter':
+            return gap_delta[self.lfs_gap_index]
+        return gap_delta
+
+    def limiter_constraint(self, coef: np.ndarray) -> np.ndarray:
+        """Return lcfs radial hfs limiter constraint."""
+        self.update_separatrix(coef)
+        return np.array([self.points[:, 0].min() - self.hfs_radius])
+
+    @property
+    def constraints(self):
+        """Return gap and limiter constraints."""
+        gap_constraint = dict(type='ineq', fun=self.gap_constraint)
+        if self.topology == 'limiter':
+            limiter_constraint = dict(type='eq', fun=self.limiter_constraint)
+            return [gap_constraint, limiter_constraint]
+        return gap_constraint
+
+    @property
+    def bounds(self):
+        """Return parameter bounds."""
+        return [(-1, 1) if attr == 'triangularity' else (None, None)
+                for attr in self.profile_attrs]
+
+    @property
+    def coef_o(self):
+        """Return IDS profile coeffients."""
+        return [self.get(attr) for attr in self.profile_attrs]
+
+    def initialize(self):
+        """Initialize analytic separatrix with pulse schedule data."""
+        self.objective(self.coef_o)
+
+    def fit(self):
+        """Fit analytic separatrix to pulse schedule gaps."""
+        self.initialize()
+        if np.allclose(self.get('gap'), 0):
+            return
+        sol = minimize(self.objective, self.coef_o, method='SLSQP',
+                       bounds=self.bounds, constraints=self.constraints)
+        self.objective(sol.x)
+
+    def plot(self, axes=None, **kwargs):
+        """Plot first wall, gaps, and plasma profile."""
+        if not np.isclose(self.geometric_radius, 0):
+            super().plot(axes=axes, **kwargs)
+        if self.topology == 'single_null':
+            self.axes.plot(*self.get('x_point')[0], 'x',
+                           ms=6, mec='C3', mew=1, mfc='none')
+        self.plot_gaps()
+
+    def _make_frame(self, time):
+        """Make frame for annimation."""
+        self.axes.clear()
+        max_time = np.min([self.data.time[-1], self.max_time])
+        try:
+            self.itime = bisect.bisect_left(
+                self.data.time, max_time * time / self.duration)
+        except ValueError:
+            pass
+        self.initialize()
+        self.fit()
+        self.plot()
+        return self.mpy.mplfig_to_npimage(self.fig)
+
+    def annimate(self, duration: float, filename='gaps'):
+        """Generate annimiation."""
+        self.duration = duration
+        self.max_time = 15
+        self.set_axes('2d')
+        animation = self.mpy.editor.VideoClip(
+            self._make_frame, duration=duration)
+        animation.write_gif(f'{filename}.gif', fps=10)
 
     '''
-
-    from nova.biot.separatrix import Separatrix
-
-    geometry = schedule(['geometric_axis', 'minor_radius',
-                         'elongation', 'triangularity'])
-    geometry['x_point'] = schedule['x_point'][0]
-    geometry['geometric_axis'][1] = 0.5
-
-
-    separatrix = Separatrix()
-    separatrix.limiter(**geometry).plot()
-
-
-
-    tree = scipy.spatial.KDTree(separatrix.points)
-    index = tree.query(gap_data)[1]
-
-    separatrix.axes.plot(*separatrix.points[index, :].T, 'x')
-
-
-    import scipy
-
-    def fun(x):
-        separatrix.limiter(x[:2], *x[2:])
-        tree = scipy.spatial.KDTree(separatrix.points)
-        index = tree.query(gap_data)[1]
-        vector = np.einsum('ij,ij->i', gap_vector,
-                           separatrix.points[index, :] - gap_data)
-        distance = np.linalg.norm(separatrix.points[index, :] - gap_data,
-                                  axis=1)
-        return np.sum(abs(distance))
-
-    def gap(x):
-        separatrix.limiter(x[:2], *x[2:])
-        tree = scipy.spatial.KDTree(separatrix.points)
-        index = tree.query(gap_data)[1]
-        vector = np.einsum('ij,ij->i', gap_vector,
-                           separatrix.points[index, :] - gap_data)
-        return vector
-
-    xo = [separatrix.radius, separatrix.height,
-          separatrix.minor_radius, separatrix.elongation,
-          separatrix.triangularity]
-    bounds = [(None, None) for _ in range(len(xo))]
-    bounds[-1] = (-1, 1)
-
-    constraints = dict(type='ineq', fun=gap)
-
-    sol = scipy.optimize.minimize(fun, xo, method='SLSQP',
-                                  bounds=bounds, constraints=constraints)
-    print(sol)
-
-    separatrix.limiter(sol.x[:2], *sol.x[2:]).plot()
-
-    tree = scipy.spatial.KDTree(separatrix.points)
-    index = tree.query(gap_data)[1]
-
-    separatrix.axes.plot(*separatrix.points[index, :].T, 'x')
 
     # schedule.plot_profile()
 
@@ -483,9 +569,13 @@ if __name__ == '__main__':
     pulse, run = 135003, 5
     lcfs = LCFS(pulse, run)
 
-    lcfs.time = 5
+    lcfs.time = 11.656 -0.5
 
-    lcfs.plot_gaps()
+    lcfs.fit()
+    lcfs.plot()
+
+    lcfs.annimate(10, 'gaps_fit_limiter')
+    #lcfs.plot_gaps()
     #separatrix = Separatrix().single_null(
     #    (5, 0), 2, 1.8, 0.3, x_point=(4, -4.5))
     #separatrix.plot()

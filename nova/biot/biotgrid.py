@@ -238,3 +238,7 @@ class BiotGrid(BiotBaseGrid):
         if clabel is not None:
             self.axes.clabel(QuadContourSet, **clabel)
         return np.array(QuadContourSet.levels)
+
+    def plot_grid(self):
+        """Plot grid."""
+        Grid.plot(self)

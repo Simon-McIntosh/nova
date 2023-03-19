@@ -17,6 +17,16 @@ class Circuit(Plot, netCDF, FrameSetLoc):
     name: str = 'circuit'
     data: xarray.Dataset = field(default_factory=xarray.Dataset, repr=False)
 
+    def __add__(self, other):
+        """Return union of self and other."""
+        data = self.data.merge(other.data, combine_attrs='drop_conflicts')
+        return Circuit(*self.frames, data=data)
+
+    def __iadd__(self, other):
+        """Return self with data augmented by other."""
+        self.data = self.data.merge(other.data, combine_attrs='drop_conflicts')
+        return self
+
     def initialize(self, supply: list[str], nodes: int):
         """Initialize dataset."""
         self.data = xarray.Dataset()
@@ -71,7 +81,7 @@ class Circuit(Plot, netCDF, FrameSetLoc):
             self.plot(circuit, None)
 
     def edge_loops(self, circuit: str):
-        """Extract basis loops."""
+        """Return basis loops."""
         edge_list = self.edge_list(circuit)
         edge_nodes = edge_list.values()
         networkx = import_module('networkx')

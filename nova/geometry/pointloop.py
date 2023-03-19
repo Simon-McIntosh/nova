@@ -10,7 +10,7 @@ import numba
 import numpy as np
 
 
-@numba.njit(cache=True)
+@numba.njit()
 def point_in_polygon(point, polygon) -> int:
     """
     Return boolean for point in polygon (is_inside_sm).
@@ -72,7 +72,7 @@ def point_in_polygon(point, polygon) -> int:
     return intersections & 1
 
 
-@numba.njit(cache=True)
+@numba.njit()
 def points_in_polygon(select, points, polygon, status):
     """Return polygon membership status for multiple points."""
     point_number = len(points)

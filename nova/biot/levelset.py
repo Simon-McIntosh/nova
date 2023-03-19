@@ -14,17 +14,17 @@ from nova.biot.separatrix import PlasmaShape
 class LevelSet(BiotGrid):
     """Extend BiotGrid class with levelset contouring algorithums."""
 
-    nplasma: float = 1000
+    nlevelset: int = 5000
     levels: int | np.ndarray = 50
     contour: Contour = field(init=False, repr=False)
 
     def solve(self, *args, limit=0, index='plasma'):
         """Solve rectangular grid fit to first wall contour."""
         try:
-            ngrid = args[0]
+            nlevelset = args[0]
         except IndexError:
-            ngrid = self.nplasma
-        super().solve(ngrid, limit=limit, index=index)
+            nlevelset = self.nlevelset
+        super().solve(nlevelset, limit=limit, index=index)
 
     def load_operators(self):
         """Extend BiotGrid.load_operators to initalize contour instance."""

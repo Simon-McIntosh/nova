@@ -20,7 +20,7 @@ from nova.geometry.polygon import Polygon
 from nova.geometry.pointloop import PointLoop
 
 
-@numba.njit(cache=True)
+@numba.njit()
 def update_nturn(select, plasma, ionize, nturn, area):
     """Update plasma turns."""
     ionize[plasma] = select

@@ -848,7 +848,17 @@ if __name__ == '__main__':
     machine = Machine(pulse, run,
                       pf_active='iter_md', pf_passive=False, wall='iter_md',
                       tplasma='hex')
-    machine.plot()
+    # machine.plot()
+
+    M = machine.inductance.Psi[machine.Loc['coil']][:, machine.Loc['coil']]
+
+    coil_inductance = machine.circuit.coil_matrix() @ M
+
+    #def fun():
+    #    Idot =
+
+
+
 
     '''
     import scipy

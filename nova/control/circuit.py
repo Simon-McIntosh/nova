@@ -1,5 +1,6 @@
 """Manage coilset supplies."""
 from dataclasses import dataclass, field
+from functools import cached_property
 from importlib import import_module
 
 import numpy as np
@@ -93,7 +94,6 @@ class Circuit(Plot, netCDF, FrameSetLoc):
             nodes = [nodes[-1]] + nodes
             pairs = [tuple(nodes[i:i+2]) for i in range(len(nodes) - 1)]
             sign = np.ones(len(pairs), dtype=int)
-
             for i, pair in enumerate(pairs):
                 if pair in edge_nodes:
                     continue
@@ -102,17 +102,64 @@ class Circuit(Plot, netCDF, FrameSetLoc):
                     continue
                 raise IndexError(f'node pair {pair} '
                                  f'not in edge nodes {edge_nodes}')
-            for i, name in enumerate(edge):
-                if name in self.frame.index:
-                    continue
-                if sign[i] == -1:
-                    sign *= -1
             loops.append(dict(edge=edge, sign=sign))
         return loops
 
+    @cached_property
+    def loops(self):
+        """Return list of all circuit loops."""
+        return [loop for circuit in self.data.circuit.data
+                for loop in self.edge_loops(circuit)]
+
+    @cached_property
+    def loop_number(self):
+        """Return total loop number."""
+        return len(self.loops)
+
+    def _extract_linked_coils(self, loop):
+        """Extract coil edge and orientations from loop."""
+        index = np.array([np.where(coil == np.array(loop['edge']))[0][0]
+                          for coil in self.data.coil.data
+                          if coil in np.array(loop['edge'])], dtype=int)
+        if len(index) < 2:
+            return None
+        return {attr: list(np.array(loop[attr])[index])
+                for attr in ['edge', 'sign']}
+
+    @cached_property
+    def links(self):
+        """Return list of all single circuits with more than one coil."""
+        return [loop for circuit in self.data.circuit.data
+                if len(loops := self.edge_loops(circuit)) == 1 and
+                (loop := self._extract_linked_coils(loops[0])) is not None]
+
+    @cached_property
+    def link_number(self):
+        """Return single circuit coil link number."""
+        return np.sum([len(link['edge'])-1 for link in self.links])
+
+    def _coupling_matrix(self, column: str):
+        """Return loop conectivity matrix."""
+        vector = self.data[column].data
+        matrix = np.zeros((self.loop_number + self.link_number,
+                           self.data.dims[column]), float)
+        for i, loop in enumerate(self.loops):
+            matrix[i] = np.sum([
+                np.where(vector == edge, sign, 0)
+                for edge, sign in zip(loop['edge'], loop['sign'])], axis=0)
+        return matrix
+
+    def supply_matrix(self):
+        """Return supply conectivity matrix."""
+        return self._coupling_matrix('supply')
+
+    def coil_matrix(self):
+        """Return coil conectivity matrix."""
+        return self._coupling_matrix('coil')
+
     def link(self):
         """Link single circuit coils."""
-        for circuit in self.data.circuit.values:
+        for circuit in self.data.circuit.data:
             loops = self.edge_loops(circuit)
             if len(loops) > 1:
                 continue

@@ -65,14 +65,17 @@ class HashLoc:
 
     name: str
     aloc: ArrayLocIndexer = field(repr=False)
-    saloc: ArrayLocIndexer = field(repr=False)
+    saloc: ArrayLocIndexer | None = field(repr=False, default=None)
     xxh64: xxhash.xxh64 = field(repr=False, init=False)
     subspace: list[str] = field(repr=False, init=False)
 
     def __post_init__(self):
         """Create xxhash generator."""
         self.xxh64 = xxhash.xxh64()
-        self.subspace = self.saloc.frame.columns.to_list()
+        try:
+            self.subspace = self.saloc.frame.columns.to_list()
+        except AttributeError:
+            self.subspace = []
 
     def _array(self, key):
         """Return loc array."""

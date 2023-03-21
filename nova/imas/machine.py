@@ -441,6 +441,13 @@ class PassiveCoilData(IdsCoilData):
 
 
 @dataclass
+class PassivePolyCoilData(PassiveCoilData):
+    """Extract coildata from active ids."""
+
+    geometry_attrs: ClassVar[list[str]] = ['poly']
+
+
+@dataclass
 class CoilDatabase(CoilSet, CoilData, Database):
     """Manage coilset construction from ids structures."""
 
@@ -466,8 +473,10 @@ class CoilDatabase(CoilSet, CoilData, Database):
 class PoloidalFieldPassive(CoilDatabase):
     """Manage passive poloidal loop ids, pf_passive."""
 
-    pulse: int = 115005
-    run: int = 2
+    #pulse: int = 115005
+    #run: int = 2
+    pulse: int = 115004
+    run: int = 5
     occurrence: int = 0
     name: str = 'pf_passive'
 
@@ -475,6 +484,7 @@ class PoloidalFieldPassive(CoilDatabase):
         """Build pf passive geometroy."""
         shelldata = PassiveShellData()
         coildata = PassiveCoilData()
+        polydata = PassivePolyCoilData()
         for ids_loop in getattr(self.ids_data, 'loop'):
             loop = Loop(ids_loop)
             for i, ids_element in enumerate(ids_loop.element):
@@ -485,9 +495,13 @@ class PoloidalFieldPassive(CoilDatabase):
                 if element.is_rectangular():
                     coildata.append(loop, element)
                     continue
+                if element.is_poly():
+                    polydata.append(loop, element)
+                    continue
                 raise NotImplementedError(f'geometory {element.section} '
                                           'not implemented')
             coildata.insert(self.coil, delta=-1)
+            polydata.insert(self.coil, delta=-1)
             shelldata.insert(self.shell)
 
 
@@ -580,9 +594,14 @@ class PoloidalFieldActive(CoilDatabase):
                 resistance = np.zeros(len(name))
             self.supply.insert(resistance, name=name)
 
-        #self.supply.insert()
-
-        # self.circuit.link()  # link single loop circuits
+            for attr, label in zip(['I', 'V'], ['current', 'voltage']):
+                for minmax in ['min', 'max']:
+                    supply = f'{attr}{minmax}'
+                    node = f'{label}_limit_{minmax}'
+                    try:
+                        self.supply[supply] = self.ids_index.array(node)
+                    except ValueError:  # node is empty
+                        self.supply[supply] = 0
 
 
 @dataclass

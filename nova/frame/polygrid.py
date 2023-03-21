@@ -7,6 +7,7 @@ import shapely.strtree
 import numpy as np
 import pandas
 
+from nova.biot.biotframe import BiotFrame
 from nova.frame.dataframe import DataFrame
 from nova.frame.polyplot import PolyPlot
 from nova.geometry.polyframe import PolyFrame
@@ -295,6 +296,29 @@ class PolyGrid(PolyCell):
         self.polyplot()
         plt.axis('off')
         plt.axis('equal')
+
+
+@dataclass
+class PolyTarget:
+    """Construct biotframe target from dataframe."""
+
+    frame: DataFrame
+    delta: int | float
+    target: BiotFrame = field(default_factory=BiotFrame)
+
+    def __post_init__(self):
+        """Build poly-target."""
+        for name in self.frame.index:
+            polyframe = self.frame.loc[name, 'poly']
+            print(name, self.delta, polyframe)
+            polygrid = PolyGrid(polyframe, turn='rectangle',
+                                delta=self.delta,
+                                nturn=self.frame.loc[name, 'nturn'])
+            print(polygrid.frame, self.frame.loc[name, 'nturn'])
+            self.target.insert(polygrid.frame,
+                               xo=self.frame.loc[name, 'x'],
+                               zo=self.frame.loc[name, 'z'],
+                               link=True, label=name, delim='_')
 
 
 if __name__ == '__main__':

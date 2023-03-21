@@ -22,11 +22,13 @@ class Circuit(Plot, netCDF, FrameSetLoc):
 
     def __add__(self, other):
         """Return union of self and other."""
+        supply = self.supply + other.supply
         data = self.data.merge(other.data, combine_attrs='drop_conflicts')
-        return Circuit(*self.frames, data=data)
+        return Circuit(*self.frames, supply=supply, data=data)
 
     def __iadd__(self, other):
         """Return self with data augmented by other."""
+        self.supply += other.supply
         self.data = self.data.merge(other.data, combine_attrs='drop_conflicts')
         return self
 

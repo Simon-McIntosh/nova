@@ -10,7 +10,8 @@ from nova.frame.frameset import FrameSet, frame_factory
 
 
 @dataclass
-class Gap:
+class WallGap:
+    """Manage wallgap biot probe attributes."""
 
     mingap: int | float = 1e-3
     maxgap: int | float = 5
@@ -28,14 +29,15 @@ class Gap:
 
 
 @dataclass
-class Biot(Gap, FrameSet):
+class Biot(WallGap, FrameSet):
     """Expose biot methods as cached properties."""
 
-    field_attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])
     force_attrs: list[str] = field(default_factory=lambda: ['Fr', 'Fz', 'Fc'])
-    nfield: int | float = field(default=0, repr=False)
+    field_attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])
     nforce: int | float = field(default=0, repr=False)
-    nlevelset: int = 5000
+    nfield: int | float = field(default=0, repr=False)
+    njoint: int | float = field(default=0, repr=False)
+    nlevelset: int = 0
 
     @property
     def field_kwargs(self):
@@ -117,7 +119,7 @@ class Biot(Gap, FrameSet):
     @frame_factory(BiotInductance)
     def inductance(self):
         """Return biot inductance instance."""
-        return self.field_kwargs
+        return dict(njoint=self.njoint, attrs=['Psi'])
 
     def clear_biot(self):
         """Clear all biot attributes."""

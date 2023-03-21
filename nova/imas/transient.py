@@ -14,10 +14,7 @@ class Transient(Machine):
     wall: Ids | bool | str = 'iter_md'
     tplasma: str = 'hex'
 
-    #def build(self):
-    #    """Extend Machine.build to include
-
-    def sole_biot(self):
+    def solve_biot(self):
         """Extend solve biot to include mutual-inductance."""
         super().solve_biot()
         self.inductance.solve()

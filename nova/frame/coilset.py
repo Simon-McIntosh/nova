@@ -32,7 +32,7 @@ class CoilSet(Biot, Control, Frame):
         circuit = self.circuit + other.circuit
         coilset = CoilSet()
         coilset.frames = frame, subframe
-        coilset.circuit.data = circuit.data
+        coilset.circuit = circuit
         return coilset
 
     def __iadd__(self, other):

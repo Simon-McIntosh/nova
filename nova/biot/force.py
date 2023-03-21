@@ -7,7 +7,7 @@ from nova.biot.biotframe import BiotFrame
 from nova.biot.biotoperate import BiotOperate
 from nova.biot.biotsolve import BiotSolve
 from nova.frame.baseplot import Plot
-from nova.frame.polygrid import PolyGrid
+from nova.frame.polygrid import PolyTarget
 
 
 @dataclass
@@ -40,16 +40,7 @@ class Force(Plot, BiotOperate):
             self.nforce = nforce
         if self.nforce == 0:
             return
-        self.target = BiotFrame()
-        for name in self.Loc['coil', :].index:
-            polyframe = self.frame.loc[name, 'poly']
-            polygrid = PolyGrid(polyframe, turn='rectangle',
-                                delta=-self.nforce,
-                                nturn=self.Loc[name, 'nturn'])
-            self.target.insert(polygrid.frame,
-                               xo=self.Loc[name, 'x'],
-                               zo=self.Loc[name, 'z'],
-                               link=True, label=name, delim='_')
+        self.target = PolyTarget(self.Loc['coil', :], -self.nforce).target
         self.data = BiotSolve(self.subframe, self.target,
                               reduce=[True, self.reduce], turns=[True, True],
                               attrs=self.attrs, name=self.name).data

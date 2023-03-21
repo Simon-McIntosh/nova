@@ -1,5 +1,5 @@
 """Manage error field database."""
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import ClassVar
 
 import json
@@ -16,10 +16,11 @@ from nova.frame.baseplot import Plot
 class Database(Plot, Datafile):
     """Interpolate field dataset to first wall and decompose."""
 
-    datafile: str
+    filename: str
     surface: str | None = None
     dirname: str = '.error_field'
     datadir: str = '/mnt/data/error_field'
+    datafile: str = field(init=False, default='')
 
     library: ClassVar[dict[str, str]] = {
         '86T4WW': 'Database of magnetic field produced by Ferromagnetic '
@@ -31,11 +32,12 @@ class Database(Plot, Datafile):
 
     def __post_init__(self):
         """Set surface and filenanes."""
+        self.datafile = self.filename
         if self.surface is None:
             self.surface = f'surface_{self.filename}'
-            self.filename = self.datafile
         else:
-            self.filename = f'{self.surface}_{self.datafile}'
+            self.filename = f'{self.datafile}_{self.surface}'
+        super().__post_init__()
 
     def _reshape(self, vector, shape):
         """Return vector reshaped as fortran array with axes 1, 2 swapped."""
@@ -143,7 +145,7 @@ class Database(Plot, Datafile):
     def plot_trace(self, index=250):
         """Plot poloidal trace."""
         coef = self.data.Bn_real + self.data.Bn_imag * 1j
-        #coef[:, 20:] = 0
+        # coef[:, 20:] = 0
         ifft = scipy.fft.irfft(coef.data)
 
         self.set_axes('1d')
@@ -176,7 +178,7 @@ if __name__ == '__main__':
 
     #database.plot_normal(modes=[1, 2, 3], scale=20)
     #database.plot_normal(modes=[18], scale=1)
-    #database.write()
-    database.plot_trace()
+    # database.write()
+    # database.plot_trace(0)
 
     #database.grid_schema()

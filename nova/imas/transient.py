@@ -1,41 +1,12 @@
 """Manage transient electromagnetic solutions."""
 from dataclasses import dataclass
-from functools import cached_property
 
-from nova.frame.framedata import FrameData
-from nova.frame.framesetloc import ArrayLocIndexer, LocIndexer
-from nova.frame.framespace import FrameSpace
 from nova.imas.database import Ids
 from nova.imas.machine import Machine
 
 
 @dataclass
-class SupplyLoc(FrameData):
-    """
-    Supply Loc indexer.
-
-        - vLoc: Access supply attributes.
-
-    """
-
-    #@cached_property
-    #def aloc_hash(self):
-    #    """Return interger hash computed on aloc array attribute."""
-    #    return HashLoc('array_hash', self.aloc, self.saloc)
-
-    @cached_property
-    def vloc(self):
-        """Return fast frame array attributes."""
-        return LocIndexer('loc', self.source)
-
-    @cached_property
-    def valoc(self):
-        """Return fast frame array attributes."""
-        return ArrayLocIndexer('array', self.source)
-
-
-@dataclass
-class Transient(SupplyLoc, Machine):
+class Transient(Machine):
     """Implementation of transient machine class."""
 
     pf_active: Ids | bool | str = 'iter_md'
@@ -43,13 +14,8 @@ class Transient(SupplyLoc, Machine):
     wall: Ids | bool | str = 'iter_md'
     tplasma: str = 'hex'
 
-    def __post_init__(self):
-        """Create voltage source frame."""
-        super().__post_init__()
-        self.supply = FrameSpace(
-            base=[], required=['R'], additional=['V', 'Is', 'R'],
-            available=[], subspace=['V'],
-            array=['V', 'Is', 'R'], delim='_', version=[])
+    #def build(self):
+    #    """Extend Machine.build to include
 
     def sole_biot(self):
         """Extend solve biot to include mutual-inductance."""

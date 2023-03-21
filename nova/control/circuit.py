@@ -9,6 +9,7 @@ import xarray
 from nova.database.netcdf import netCDF
 from nova.frame.baseplot import Plot
 from nova.frame.framesetloc import FrameSetLoc
+from nova.frame.framespace import FrameSpace
 
 
 @dataclass
@@ -16,6 +17,7 @@ class Circuit(Plot, netCDF, FrameSetLoc):
     """Manage coil supplies."""
 
     name: str = 'circuit'
+    supply: FrameSpace = field(default_factory=FrameSpace)
     data: xarray.Dataset = field(default_factory=xarray.Dataset, repr=False)
 
     def __add__(self, other):

@@ -2,6 +2,7 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
+from functools import cached_property
 from importlib import import_module
 import string
 from typing import ClassVar, TYPE_CHECKING
@@ -10,7 +11,7 @@ import numpy as np
 
 from nova.frame.baseplot import Plot
 from nova.frame.coilset import CoilSet
-from nova.imas.database import CoilData, Database, Ids, ImasIds
+from nova.imas.database import CoilData, Database, Ids, IdsIndex, ImasIds
 from nova.geometry.polygon import Polygon
 if TYPE_CHECKING:
     from nova.frame.shell import Shell
@@ -444,6 +445,12 @@ class CoilDatabase(CoilSet, CoilData, Database):
     """Manage coilset construction from ids structures."""
 
     machine: str = 'iter_md'
+    ids_node: str = ''
+
+    @cached_property
+    def ids_index(self):
+        """Return cached ids_index instance."""
+        return IdsIndex(self.ids_data, self.ids_node)
 
     @property
     def group_attrs(self) -> dict:
@@ -563,6 +570,18 @@ class PoloidalFieldActive(CoilDatabase):
             if len(circuit.connections) == 0:
                 continue
             self.circuit.insert(circuit.identifier, circuit.connections)
+        with self.ids_index.node('supply'):
+            name = self.ids_index.array('identifier')
+            if self.ids_index.empty('resistance'):
+                resistance = np.zeros(len(name))
+            try:
+                resistance = self.ids_index.array('resistance')
+            except ValueError:  # resistance field is empty
+                resistance = np.zeros(len(name))
+            self.supply.insert(resistance, name=name)
+
+        #self.supply.insert()
+
         # self.circuit.link()  # link single loop circuits
 
 

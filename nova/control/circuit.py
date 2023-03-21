@@ -157,6 +157,22 @@ class Circuit(Plot, netCDF, FrameSetLoc):
         """Return coil conectivity matrix."""
         return self._coupling_matrix('coil')
 
+    def link_matrix(self):
+        """Return single loop link matrix."""
+        coils = self.data.coil.data
+        matrix = np.zeros((self.link_number,
+                           self.data.dims['coil']), float)
+        index = 0
+        for link in self.links:
+            reference = np.where(coils == link['edge'][0], link['sign'][0], 0)
+            for i in range(len(link['edge']) - 1):
+                matrix[index] = np.sum([reference,
+                                        np.where(coils == link['edge'][i+1],
+                                                 -link['sign'][i+1], 0)],
+                                       axis=0)
+                index += 1
+        return matrix
+
     def link(self):
         """Link single circuit coils."""
         for circuit in self.data.circuit.data:

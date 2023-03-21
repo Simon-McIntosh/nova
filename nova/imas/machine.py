@@ -6,7 +6,6 @@ from importlib import import_module
 import string
 from typing import ClassVar, TYPE_CHECKING
 
-import netCDF4
 import numpy as np
 
 from nova.frame.baseplot import Plot
@@ -849,16 +848,6 @@ if __name__ == '__main__':
                       pf_active='iter_md', pf_passive=False, wall='iter_md',
                       tplasma='hex')
     # machine.plot()
-
-    M = machine.inductance.Psi[machine.Loc['coil']][:, machine.Loc['coil']]
-
-    coil_inductance = machine.circuit.coil_matrix() @ M
-
-    #def fun():
-    #    Idot =
-
-
-
 
     '''
     import scipy

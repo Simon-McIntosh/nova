@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from nova.biot.biot import Biot
 from nova.control.control import Control
 from nova.frame.frame import Frame
-from nova.frame.frameset import FrameSet
 from nova.geometry.polygon import Polygon
 
 

@@ -20,7 +20,9 @@ class WallGap:
     @property
     def gap_kwargs(self):
         """Return gap kwargs."""
-        return dict(mingap=self.mingap, maxgap=self.maxgap, ngap=self.ngap)
+        return {'mingap': self.mingap,
+                'maxgap': self.maxgap,
+                'ngap': self.ngap}
 
     @frame_factory(BiotGap)
     def wallgap(self):
@@ -34,27 +36,29 @@ class Biot(WallGap, FrameSet):
 
     force_attrs: list[str] = field(default_factory=lambda: ['Fr', 'Fz', 'Fc'])
     field_attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])
-    nforce: int | float = field(default=0, repr=False)
-    nfield: int | float = field(default=0, repr=False)
-    njoint: int | float = field(default=0, repr=False)
-    nlevelset: int = 0
+    nforce: int | float = None
+    nfield: int | float = None
+    ninductance: int | float = None
+    nlevelset: int = 500
 
     @property
     def field_kwargs(self):
         """Return field kwargs."""
-        return dict(attrs=self.field_attrs)
+        return {'attrs': self.field_attrs}
 
     @property
     def force_kwargs(self):
         """Return force kwargs."""
-        return dict(attrs=self.force_attrs)
+        return {'attrs': self.force_attrs}
 
     @property
     def biot_attrs(self):
         """Return frame attributes."""
-        return dict(field_attrs=self.field_attrs,
-                    force_attrs=self.force_attrs,
-                    nfield=self.nfield, nforce=self.nforce) | self.gap_kwargs
+        kwargs = {attr: value for attr in
+                  ['field_attrs', 'force_attrs', 'nfield', 'nforce',
+                   'ninductance', 'nlevelset']
+                  if (value := getattr(self, attr)) is not None}
+        return kwargs | self.gap_kwargs
 
     @property
     def biot_methods(self):
@@ -68,8 +72,8 @@ class Biot(WallGap, FrameSet):
     @frame_factory(Plasma)
     def plasma(self):
         """Return plasma instance."""
-        return dict(dirname=self.path, grid=self.plasmagrid,
-                    wall=self.plasmawall, levelset=self.levelset)
+        return {'dirname': self.path, 'grid': self.plasmagrid,
+                'wall': self.plasmawall, 'levelset': self.levelset}
 
     @frame_factory(BiotGrid)
     def grid(self):
@@ -79,7 +83,7 @@ class Biot(WallGap, FrameSet):
     @frame_factory(LevelSet)
     def levelset(self):
         """Return plasma grid biot instance."""
-        return dict(attrs=['Psi'], nlevelset=self.nlevelset)
+        return {'attrs': ['Psi'], 'nlevelset': self.nlevelset}
 
     @frame_factory(BiotPlasmaGrid)
     def plasmagrid(self):
@@ -89,7 +93,7 @@ class Biot(WallGap, FrameSet):
     @frame_factory(BiotFirstWall)
     def plasmawall(self):
         """Return plasma firstwall biot instance."""
-        return dict(attrs=['Psi'])
+        return {'attrs': ['Psi']}
 
     @frame_factory(BiotPoint)
     def point(self):
@@ -109,17 +113,17 @@ class Biot(WallGap, FrameSet):
     @frame_factory(Field)
     def field(self):
         """Return boundary field instance."""
-        return dict(nfield=self.nfield)
+        return {'number': self.nfield}
 
     @frame_factory(Force)
     def force(self):
         """Return force field instance."""
-        return dict(nforce=self.nforce, attrs=self.force_attrs)
+        return {'number': self.nforce, 'attrs': self.force_attrs}
 
     @frame_factory(BiotInductance)
     def inductance(self):
         """Return biot inductance instance."""
-        return dict(njoint=self.njoint, attrs=['Psi'])
+        return {'number': self.ninductance, 'attrs': ['Psi']}
 
     def clear_biot(self):
         """Clear all biot attributes."""

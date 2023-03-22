@@ -11,16 +11,14 @@ from nova.frame.polygrid import PolyTarget
 class BiotInductance(Plot, BiotOperate):
     """Compute self interaction."""
 
-    njoint: int | float = 0
-
-    def solve(self, index=slice(None)):
+    def solve(self, number=None, index=slice(None)):
         """Solve Biot interaction across subframe."""
-        self.target = PolyTarget(self.Loc[:, index], -self.njoint).target
-        print(self.target, self.target.shape)
-        self.data = BiotSolve(self.subframe, self.target,
-                              turns=[True, True], reduce=[True, True],
-                              attrs=self.attrs, name=self.name).data
-        super().post_solve()
+        with self.solve_biot(number) as number:
+            if number is not None:
+                self.target = PolyTarget(self.Loc[:, index], -number).target
+                self.data = BiotSolve(self.subframe, self.target,
+                                      turns=[True, True], reduce=[True, True],
+                                      attrs=self.attrs, name=self.name).data
 
     def plot(self, axes=None, **kwargs):
         """Plot points."""

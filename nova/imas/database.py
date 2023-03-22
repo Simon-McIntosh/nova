@@ -1,4 +1,5 @@
 """Manage access to IMAS database."""
+from abc import abstractmethod
 from contextlib import contextmanager
 from dataclasses import dataclass, field, fields, InitVar
 from importlib import import_module
@@ -101,7 +102,7 @@ class Database(IDS):
 
     Minimum input requred for Database is 'ids' or 'pulse', 'run' and 'name':
 
-    >>> Database()
+    >>> Database().ids_data
     Traceback (most recent call last):
         ...
     ValueError: When self.ids is None require:
@@ -187,29 +188,31 @@ class Database(IDS):
     def ids_data(self):
         """Return ids data, lazy load."""
         if self.ids is None:
+            self._check_ids_attrs()
             self.ids = self.get_ids()
         return self.ids
 
     def load_database(self):
         """Load instance database attributes."""
         if self.ids is not None:
-            return self._load_from_ids()
-        return self._load_from_attrs()
+            return self._load_attrs_from_ids()
+        return None
 
-    def _load_from_ids(self):
+    def _load_attrs_from_ids(self):
         """
         Initialize database class directly from an ids.
 
         Set unknown pulse and run numbers to the ids hash
         Update name to match ids.__name__
         """
-        self.pulse = self.run = self.ids_hash
+        self.pulse = self.ids_hash
+        self.run = 0
         if self.name is not None and self.name != self.ids_data.__name__:
             raise NameError(f'missmatch between instance name {self.name} '
                             f'and ids_data {self.ids_data.__name__}')
         self.name = self.ids_data.__name__
 
-    def _load_from_attrs(self):
+    def _check_ids_attrs(self):
         """Confirm minimum working set of input attributes."""
         if self.pulse == 0 and self.run == 0 and self.name is None:
             raise ValueError(
@@ -415,7 +418,7 @@ class DataAttrs:
 
     def merge_ids_attrs(self, base_attrs: dict):
         """Merge database attributes."""
-        attrs = self.update_ids_attrs(dict(name=self.default_attrs['name']))
+        attrs = self.update_ids_attrs({'name': self.default_attrs['name']})
         if isinstance(attrs, bool):
             return attrs
         return base_attrs | attrs
@@ -434,7 +437,7 @@ class DataAttrs:
             return default_attrs | self.ids_attrs
         if hasattr(self.ids_attrs, 'ids_properties'):  # IMAS ids
             database = Database(**default_attrs, ids=self.ids_attrs)
-            return database.ids_attrs | dict(ids=self.ids_attrs)
+            return database.ids_attrs | {'ids': self.ids_attrs}
         if isinstance(self.ids_attrs, list | tuple):
             return default_attrs | dict(zip(Database.attrs, self.ids_attrs))
         raise TypeError(f'malformed attrs: {type(self.ids_attrs)}')
@@ -705,7 +708,9 @@ class IdsData(Datafile, Database):
         self.load_database()
         if self.filename == '':
             self.filename = self.__class__.__name__.lower()
-            self.filename += f'_{self.machine}_{self.pulse}_{self.run}'
+            self.filename += f'_{self.machine}'
+            if self.pulse > 0 and self.run > 0:
+                self.filename += f'_{self.pulse}_{self.run}'
             if self.occurrence > 0:
                 self.filename += f'_{self.occurrence}'
             if self.group is None and self.name is not None:
@@ -724,9 +729,13 @@ class IdsData(Datafile, Database):
         except NameError:  # name missmatch when loading from ids node
             return
         if hasattr(self.data, 'time') and hasattr(data, 'time'):
-            data = data.interp(dict(time=self.data.time))
+            data = data.interp({'time': self.data.time})
         self.data = self.data.merge(data, compat='override',
                                     combine_attrs='drop_conflicts')
+
+    def build(self):
+        """Build netCDF dataset."""
+        super().build()
 
 
 @dataclass
@@ -759,3 +768,7 @@ class CoilData(IdsData):
         if hasattr(super(), 'group_attrs'):
             return super().group_attrs
         return {}
+
+    def build(self):
+        """Build netCDF dataset."""
+        super().build()

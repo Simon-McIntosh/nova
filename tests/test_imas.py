@@ -69,7 +69,7 @@ def test_equilibrium_attr_defaults():
 
 def test_database_minimum_required_input():
     with pytest.raises(ValueError) as error:
-        Database()
+        Database().ids_data
     assert 'When self.ids is None require:' in str(error.value)
 
 

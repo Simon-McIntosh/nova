@@ -25,7 +25,6 @@ class Force(Plot, BiotOperate):
 
     """
 
-    nforce: int | float | None = 500
     reduce: bool = True
     attrs: list[str] = field(default_factory=lambda: ['Fr', 'Fz', 'Fc'])
     target: BiotFrame = field(init=False, repr=False)
@@ -34,27 +33,26 @@ class Force(Plot, BiotOperate):
         """Return force patch number."""
         return len(self.data.get('x', []))
 
-    def solve(self, nforce=None):
+    def solve(self, number=None):
         """Extract boundary and solve magnetic field around coil perimeter."""
-        if nforce is not None:
-            self.nforce = nforce
-        if self.nforce == 0:
-            return
-        self.target = PolyTarget(self.Loc['coil', :], -self.nforce).target
-        self.data = BiotSolve(self.subframe, self.target,
-                              reduce=[True, self.reduce], turns=[True, True],
-                              attrs=self.attrs, name=self.name).data
-        # insert grid data
-        self.data.coords['index'] = 'target', self.Loc['coil', 'subref']
-        if self.reduce:
-            self.data.coords['xo'] = 'target', self.Loc['coil', 'x']
-            self.data.coords['zo'] = 'target', self.Loc['coil', 'z']
-            self.data.coords['x'] = self.target.x
-            self.data.coords['z'] = self.target.z
-        else:
-            self.data.coords['x'] = 'target', self.target.x
-            self.data.coords['z'] = 'target', self.target.z
-        super().post_solve()
+        with self.solve_biot(number) as number:
+            if number is not None:
+                self.target = PolyTarget(self.Loc['coil', :], -number).target
+                self.data = BiotSolve(self.subframe, self.target,
+                                      reduce=[True, self.reduce],
+                                      turns=[True, True],
+                                      attrs=self.attrs, name=self.name).data
+                # insert grid data
+                self.data.coords['index'] = 'target', \
+                    self.Loc['coil', 'subref']
+                if self.reduce:
+                    self.data.coords['xo'] = 'target', self.Loc['coil', 'x']
+                    self.data.coords['zo'] = 'target', self.Loc['coil', 'z']
+                    self.data.coords['x'] = self.target.x
+                    self.data.coords['z'] = self.target.z
+                else:
+                    self.data.coords['x'] = 'target', self.target.x
+                    self.data.coords['z'] = 'target', self.target.z
 
     @property
     def coil_name(self):

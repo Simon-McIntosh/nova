@@ -1,6 +1,5 @@
 """Manage access to netCDF data."""
 from abc import abstractmethod
-
 from dataclasses import dataclass
 
 from nova.database.netcdf import netCDF

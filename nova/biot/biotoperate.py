@@ -1,4 +1,5 @@
 """Manage matmul operations and svd reductions on BiotData."""
+from contextlib import contextmanager
 from dataclasses import dataclass, field, InitVar
 
 import numba
@@ -99,6 +100,15 @@ class BiotOperate(BiotData):
     def shape(self):
         """Return target shape."""
         return (self.data.dims['target'],)
+
+    @contextmanager
+    def solve_biot(self, number: int | float | None):
+        """Manage biot solution - update number and execute post_solve."""
+        if number is not None:
+            self.number = number
+        yield self.number
+        if self.number is not None:
+            self.post_solve()
 
     def post_solve(self):
         """Solve biot interaction - extened by subclass."""

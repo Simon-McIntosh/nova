@@ -62,8 +62,8 @@ def test_multipolygon():
     assert len(coilset.field) == 0
 
 
-def test_nfield_zero():
-    coilset = CoilSet(nfield=0)
+def test_nfield_none():
+    coilset = CoilSet()
     coilset.coil.insert(1.1, 0, 0.05, 0.1)
     coilset.field.solve()
     assert len(coilset.field.data) == 0

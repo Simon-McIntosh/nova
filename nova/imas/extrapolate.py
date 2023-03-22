@@ -3,7 +3,6 @@ import bisect
 from dataclasses import dataclass
 
 import numpy as np
-from scipy.constants import mu_0
 from tqdm import tqdm
 
 from nova.imas.operate import Operate

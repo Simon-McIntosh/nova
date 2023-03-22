@@ -75,9 +75,9 @@ def test_store_load(linked):
 def test_resolution():
     coilset = CoilSet(dcoil=-1)
     coilset.coil.insert(5, [5, 6], 0.9, 0.1, Ic=45e3, nturn=500)
-    coilset.force.solve(nforce=100)
+    coilset.force.solve(100)
     fr_lowres = coilset.force.fr
-    coilset.force.solve(nforce=200)
+    coilset.force.solve(200)
     fr_highres = coilset.force.fr
     assert np.allclose(fr_lowres, fr_highres, rtol=1e-3)
 

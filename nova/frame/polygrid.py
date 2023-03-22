@@ -310,11 +310,9 @@ class PolyTarget:
         """Build poly-target."""
         for name in self.frame.index:
             polyframe = self.frame.loc[name, 'poly']
-            print(name, self.delta, polyframe)
             polygrid = PolyGrid(polyframe, turn='rectangle',
                                 delta=self.delta,
                                 nturn=self.frame.loc[name, 'nturn'])
-            print(polygrid.frame, self.frame.loc[name, 'nturn'])
             self.target.insert(polygrid.frame,
                                xo=self.frame.loc[name, 'x'],
                                zo=self.frame.loc[name, 'z'],

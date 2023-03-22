@@ -11,6 +11,7 @@ class BiotData(netCDF, FrameSetLoc):
 
     attrs: list[str] = field(
         default_factory=lambda: ['Br', 'Bz', 'Psi'])
+    number: int | float | None = field(default=None)
     name: str | None = None
     classname: str = field(init=False)
 

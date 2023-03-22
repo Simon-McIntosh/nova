@@ -188,18 +188,34 @@ class Annulus(GeomData):
 
 
 @dataclass
+class ThickLine(GeomData):
+    """Thick line patch."""
+
+    name: str = 'thick_line'
+    attrs: ClassVar[list[str]] = ['thickness']
+
+    def extract(self):
+        """Extend GeomData.extract."""
+        super().extract()
+        data = getattr(self.ids, self.name)
+        for attr, label in zip(['start', 'end'], ['first', 'second']):
+            point = getattr(data, f'{label}_point')
+            self.data[attr] = np.array([point.r, point.z])
+
+
+@dataclass
 class CrossSection:
     """Manage poloidal cross-sections."""
 
     ids: ImasIds = field(repr=False)
     data: GeomData = field(init=False)
     transform: ClassVar[dict[int, object]] = \
-        {1: Outline, 2: Rectangle, 3: Oblique, 4: Arcs, 5: Annulus}
+        {1: Outline, 2: Rectangle, 3: Oblique, 4: Arcs, 5: Annulus,
+         6: ThickLine}
 
     def __post_init__(self):
         """Build geometry instance."""
-        self.data = \
-            self.transform.get(self.ids.geometry_type, Rectangle)(self.ids)
+        self.data = self.transform[self.ids.geometry_type](self.ids)
 
     def __getattr__(self, attr):
         """Return data attributes."""
@@ -241,12 +257,14 @@ class Element:
     ids: ImasIds = field(repr=False)
     index: int = 0
     name: str = field(init=False)
+    identifier: str = field(init=False)
     nturn: float = field(init=False)
     cross_section: CrossSection = field(init=False)
 
     def __post_init__(self):
         """Extract element data from ids."""
         self.name = self.ids.name.strip()
+        self.identifier = self.ids.identifier.strip()
         self.nturn = self.ids.turns_with_sign
         self.cross_section = CrossSection(self.ids.geometry)
 
@@ -271,6 +289,10 @@ class Element:
         """Return geometry validity flag."""
         return np.isclose(self.cross_section.data.poly.area, 0)
 
+    def is_thickline(self) -> bool:
+        """Return geometry.name == 'thick_line'."""
+        return self.section == 'thick_line'
+
 
 @dataclass
 class FrameData(ABC):
@@ -288,9 +310,18 @@ class FrameData(ABC):
     @property
     def coil_name(self):
         """Return coil name."""
-        if 'identifier' in self.data and self.data['identifier'] != '':
-            return self.data['identifier']
-        return self.data['name']
+        identifier = self.data.get('identifier', '')
+        if not isinstance(identifier, str):
+            identifier = identifier[0]
+        if identifier != '':
+            return identifier
+        name = self.data['name']
+        if not isinstance(name, str):
+            name = name[0]
+        label = ''.join(name.split()[:2]).rstrip(string.punctuation)
+        digit = name.split()[-1].lstrip(
+            string.ascii_letters + string.punctuation)
+        return ''.join([part for part in [label, digit] if part != ''])
 
     @property
     def empty(self) -> bool:
@@ -317,14 +348,16 @@ class FrameData(ABC):
         label = self.coil_name
         if isinstance(label, list):
             label = label[0]
-        if 'VES' in label:
+        if 'VES' in label or 'VV' in label:
             return 'vv'
-        if 'TRI' in label:
+        if 'TRI' in label or 'Tri' in label:
             return 'trs'
-        if label == 'INB_RAIL':
+        if label == 'INB_RAIL' or 'Div' in label:
             return 'dir'
         if 'CS' in label or 'PF' in label:
             return label[:2].lower()
+        if 'SS' in label:
+            return 'vs3j'
         if 'VS' in label:
             return 'vs3'
         return ''
@@ -379,7 +412,7 @@ class PassiveShellData(Plot, FrameData):
 
     def append(self, loop: Loop, element: Element):
         """Check start/end point colocation."""
-        assert element.is_oblique()
+        assert element.is_oblique() or element.is_thickline()
         if not self.points:
             return self._new(loop, element)
         if np.allclose(self.points[-1][-1], element.cross_section.start):
@@ -401,7 +434,7 @@ class PassiveShellData(Plot, FrameData):
         self.points[-1] = np.append(
             self.points[-1], geometry.end.reshape(1, -1), axis=0)
         for attr in self.geometry_attrs:
-            self.data[attr][-1].append(getattr(loop, attr))
+            self.data[attr][-1].append(getattr(geometry, attr))
 
     def insert(self, shell: Shell):
         """Insert data into shell instance."""
@@ -410,8 +443,7 @@ class PassiveShellData(Plot, FrameData):
         for i in range(len(self)):
             thickness = np.mean(self.data['thickness'][i])
             index = shell.insert(*self.points[i].T, self.length, thickness,
-                                 rho=0, name=self.data['name'][i],
-                                 part=self.part)
+                                 rho=0, name=self.coil_name, part=self.part)
             self.update_resistivity(index, shell.frame, shell.subframe,
                                     self.data['resistance'][i])
         self.reset()
@@ -427,7 +459,7 @@ class PassiveShellData(Plot, FrameData):
 class PassiveCoilData(IdsCoilData):
     """Extract coildata from passive ids."""
 
-    element_attrs: ClassVar[list[str]] = ['section']
+    element_attrs: ClassVar[list[str]] = ['identifier', 'section']
     geometry_attrs: ClassVar[list[str]] = ['r', 'z', 'width', 'height']
     loop_attrs: ClassVar[list[str]] = ['name', 'resistance']
 
@@ -435,14 +467,14 @@ class PassiveCoilData(IdsCoilData):
         """Insert data via coil method."""
         if self.empty:
             return None
-        kwargs = {'active': False, 'name': self.data['name'],
+        kwargs = {'active': False, 'name': self.coil_name,
                   'section': self.data['section']} | kwargs
         return super().insert(constructor, **kwargs)
 
 
 @dataclass
 class PassivePolyCoilData(PassiveCoilData):
-    """Extract coildata from active ids."""
+    """Extract coildata from passive ids."""
 
     geometry_attrs: ClassVar[list[str]] = ['poly']
 
@@ -473,23 +505,21 @@ class CoilDatabase(CoilSet, CoilData, Database):
 class PoloidalFieldPassive(CoilDatabase):
     """Manage passive poloidal loop ids, pf_passive."""
 
-    #pulse: int = 115005
-    #run: int = 2
-    pulse: int = 115004
-    run: int = 5
+    pulse: int = 115004  # 115005
+    run: int = 5  # 2
     occurrence: int = 0
     name: str = 'pf_passive'
 
     def build(self):
         """Build pf passive geometroy."""
-        shelldata = PassiveShellData()
-        coildata = PassiveCoilData()
-        polydata = PassivePolyCoilData()
         for ids_loop in getattr(self.ids_data, 'loop'):
             loop = Loop(ids_loop)
+            shelldata = PassiveShellData()
+            coildata = PassiveCoilData()
+            polydata = PassivePolyCoilData()
             for i, ids_element in enumerate(ids_loop.element):
                 element = Element(ids_element, i)
-                if element.is_oblique():
+                if element.is_oblique() or element.is_thickline():
                     shelldata.append(loop, element)
                     continue
                 if element.is_rectangular():
@@ -501,7 +531,7 @@ class PoloidalFieldPassive(CoilDatabase):
                 raise NotImplementedError(f'geometory {element.section} '
                                           'not implemented')
             coildata.insert(self.coil, delta=-1)
-            polydata.insert(self.coil, delta=-1)
+            polydata.insert(self.coil, delta=-10)
             shelldata.insert(self.shell)
 
 
@@ -742,7 +772,7 @@ class CoilGeometry:
 
     >>> database = Database(111001, 202, 'iter_md', name='pf_active')
     >>> pf_active = CoilGeometry(database.ids_data).pf_active
-    >>> pf_active['run'] == database.ids_hash
+    >>> pf_active['pulse'] == database.ids_hash
     True
 
     Specify pf_active as an itterable:
@@ -882,10 +912,9 @@ if __name__ == '__main__':
 
     pulse, run = 105028, 1  # DINA
 
-    machine = Machine(pulse, run,
-                      pf_active='iter_md', pf_passive=False, wall='iter_md',
-                      tplasma='hex')
-    # machine.plot()
+    machine = Machine(pf_active='iter_md', pf_passive='iter_md',
+                      wall='iter_md', tplasma='hex')
+    machine.plot()
 
     '''
     import scipy

@@ -117,27 +117,25 @@ class Field(Plot, BiotOperate):
         """Return field probe number."""
         return len(self.data.get('x', []))
 
-    def solve(self, nfield=None):
+    def solve(self, number=None):
         """Extract boundary and solve magnetic field around coil perimeter."""
-        if nfield is not None:
-            self.nfield = nfield
-        if self.nfield == 0:
-            return
-        self.target = BiotFrame()
-        for name in self.Loc['coil', :].index:
-            polyframe = self.frame.loc[name, 'poly']
-            if polyframe.poly.boundary.is_ring:
-                sample = Sample(polyframe.boundary, delta=-self.nfield)
-                self.target.insert(sample['radius'], sample['height'],
-                                   link=True, label=name, delim='_')
-        self.data = BiotSolve(self.subframe, self.target,
-                              reduce=[True, False], turns=[True, False],
-                              attrs=['Br', 'Bz'], name=self.name).data
-        # insert grid data
-        self.data.coords['index'] = self.target.biotreduce.indices
-        self.data.coords['x'] = 'target', self.target.x
-        self.data.coords['z'] = 'target', self.target.z
-        super().post_solve()
+        with self.solve_biot(number) as number:
+            if number is not None:
+                self.target = BiotFrame()
+                for name in self.Loc['coil', :].index:
+                    polyframe = self.frame.loc[name, 'poly']
+                    if polyframe.poly.boundary.is_ring:
+                        sample = Sample(polyframe.boundary, delta=-number)
+                        self.target.insert(sample['radius'], sample['height'],
+                                           link=True, label=name, delim='_')
+                self.data = BiotSolve(self.subframe, self.target,
+                                      reduce=[True, False],
+                                      turns=[True, False],
+                                      attrs=['Br', 'Bz'], name=self.name).data
+                # insert grid data
+                self.data.coords['index'] = self.target.biotreduce.indices
+                self.data.coords['x'] = 'target', self.target.x
+                self.data.coords['z'] = 'target', self.target.z
 
     @property
     def coil_name(self):

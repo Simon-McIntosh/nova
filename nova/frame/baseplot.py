@@ -25,7 +25,7 @@ class Properties:
     linewidth: float = 0.5
     edgecolor: str = 'white'
     facecolor: ClassVar[dict[str, str]] = {
-        'vs3': 'C0', 'vs3j': 'gray', 'cs': 'C0', 'pf': 'C0',
+        'vs3': 'C0', 'vs3j': 'C3', 'cs': 'C0', 'pf': 'C0',
         'trs': 'C3', 'dir': 'C3', 'vv': 'C3', 'vvin': 'C3',
         'vvout': 'C3', 'bb': 'C7', 'plasma': 'C4', 'cryo': 'C5',
         'fi': 'C2', 'tf': 'C7'}

@@ -73,15 +73,22 @@ def test_ITER_subinductance_matrix(segment):
 
 
 def test_biot_inductance():
-    coilset = CoilSet(dcoil=0.25)
+    coilset = CoilSet(dcoil=-1)
     coilset.coil.insert(3.9431, 7.5641, 0.9590, 0.9841, nturn=248.64,
                         name='PF1', part='PF')
     coilset.coil.insert(1.722, 5.313, 0.719, 2.075, nturn=554,
                         name='CS3U', part='CS')
-    coilset.inductance.solve()
+    coilset.inductance.solve(0)
     Mc_ddd = [[7.076E-01, 1.348E-01],  # referance
               [1.348E-01, 7.954E-01]]
     assert allclose(Mc_ddd, coilset.inductance.Psi, atol=5e-3)
+
+
+def test_inductance_number_none():
+    coilset = CoilSet()
+    coilset.coil.insert(1, 0, 0.1, 0.1)
+    coilset.inductance.solve()
+    assert len(coilset.inductance.data) == 0
 
 
 def test_solenoid_grid():

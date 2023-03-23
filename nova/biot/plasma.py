@@ -9,8 +9,8 @@ from scipy.interpolate import interp1d
 import scipy.spatial
 
 from nova.database.netcdf import netCDF
-from nova.biot.biotfirstwall import BiotFirstWall
-from nova.biot.biotplasmagrid import BiotPlasmaGrid
+from nova.biot.plasmawall import PlasmaWall
+from nova.biot.plasmagrid import PlasmaGrid
 from nova.biot.error import PlasmaTopologyError
 from nova.biot.levelset import LevelSet
 from nova.biot.separatrix import PlasmaShape
@@ -34,8 +34,8 @@ class Plasma(Plot, netCDF, FrameSetLoc):
     """Set plasma separatix, ionize plasma filaments."""
 
     name: str = 'plasma'
-    grid: BiotPlasmaGrid = field(repr=False, default_factory=BiotPlasmaGrid)
-    wall: BiotFirstWall = field(repr=False, default_factory=BiotFirstWall)
+    grid: PlasmaGrid = field(repr=False, default_factory=PlasmaGrid)
+    wall: PlasmaWall = field(repr=False, default_factory=PlasmaWall)
     levelset: LevelSet = field(repr=False, default_factory=LevelSet)
     lcfs: PlasmaShape | None = field(init=False, default=None)
 

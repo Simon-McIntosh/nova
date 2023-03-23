@@ -2,7 +2,7 @@
 import numpy as np
 
 from nova.frame.framelink import FrameLink
-from nova.frame.metamethod import BiotSection, BiotShape, BiotReduce, PolyGeo
+from nova.frame.metamethod import Section, Shape, Reduce, PolyGeo
 
 
 # pylint: disable=too-many-ancestors
@@ -16,7 +16,7 @@ class BiotFrame(FrameLink):
     def __init__(self, data=None, index=None, columns=None, attrs=None,
                  **metadata):
         super().__init__(data, index, columns, attrs, **metadata)
-        self.frame_attrs(PolyGeo, BiotShape, BiotSection, BiotReduce)
+        self.frame_attrs(PolyGeo, Shape, Section, Reduce)
         for attr in self._metadata:
             setattr(self, attr, None)
 

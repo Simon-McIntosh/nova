@@ -3,13 +3,13 @@ from dataclasses import dataclass, field
 
 import xarray
 
-from nova.biot.biotarray import BiotArray
+from nova.biot.array import Array
 from nova.frame.baseplot import Plot
 from nova.geometry import select
 
 
 @dataclass
-class WallFlux(Plot, BiotArray):
+class Limiter(Plot, Array):
     """Calculate value and position of limiter wall flux."""
 
     data: xarray.Dataset | xarray.DataArray = \

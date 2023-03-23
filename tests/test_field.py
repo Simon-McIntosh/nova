@@ -70,7 +70,7 @@ def test_nfield_none():
 
 
 def test_plasma():
-    coilset = CoilSet(nfield=1, nplasma=50)
+    coilset = CoilSet(nfield=1, dplasma=-5, tplasma='hex')
     coilset.firstwall.insert({'ellip': [1, 0, 0.1, 0.3]})
     coilset.coil.insert(1.1, 0, 0.05, 0.1)
     coilset.field.solve()

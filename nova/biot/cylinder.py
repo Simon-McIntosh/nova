@@ -7,8 +7,8 @@ import numba
 import numpy as np
 import scipy.integrate
 
-from nova.biot.biotconstants import BiotConstants
-from nova.biot.biotmatrix import BiotMatrix
+from nova.biot.constants import Constants
+from nova.biot.matrix import Matrix
 
 
 @numba.njit(parallel=True)
@@ -22,8 +22,8 @@ def zeta(r, rs, z, zs, phi, delta):
 
 
 @dataclass
-class CylinderConstants(BiotConstants):
-    """Extend BiotConstants class."""
+class CylinderConstants(Constants):
+    """Extend Constants class."""
 
     alpha: ClassVar[float] = np.pi/2
     num: ClassVar[int] = 120
@@ -114,7 +114,7 @@ class CylinderConstants(BiotConstants):
 
 
 @dataclass
-class BiotCylinder(CylinderConstants, BiotMatrix):
+class Cylinder(CylinderConstants, Matrix):
     """
     Extend Biot base class.
 

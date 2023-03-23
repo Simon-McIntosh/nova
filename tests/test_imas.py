@@ -2,7 +2,7 @@ import pytest
 
 from nova.imas.database import Database
 from nova.imas.equilibrium import Equilibrium
-from nova.imas.machine import (CoilGeometry,
+from nova.imas.machine import (CoilGeometry, Machine,
                                PoloidalFieldActive, PoloidalFieldPassive)
 from nova.imas.pf_active import PF_Active
 from nova.imas.utilities import ids_attrs, load_ids, mark
@@ -161,6 +161,38 @@ def test_pf_active_default_name():
     pf_active = PF_Active(**ids_attrs['equilibrium'])
     assert equilibrium.name == ids_attrs['equilibrium']['name']
     assert pf_active.name == 'pf_active'
+
+
+def test_md_geometry_default():
+    geometry = CoilGeometry(pf_active='iter_md', pf_passive=False, wall=False)
+    assert geometry.filename == 'machine_description'
+
+
+def test_md_geometry_default_str_error():
+    with pytest.raises(ValueError):
+        CoilGeometry(pf_active='md', pf_passive='md', wall='md')
+
+
+def test_md_geometry_relative():
+    geometry = CoilGeometry(pf_active='iter_md', pf_passive=True, wall=False)
+    assert geometry.filename == ''
+
+
+@mark['pf_active']
+def test_machine_geometry_default():
+    machine = Machine(105011, 9, pf_active='iter_md', pf_passive=False,
+                      wall=False)
+    machine_ = Machine(105011, 10, pf_active='iter_md', pf_passive=False,
+                       wall=False)
+    assert machine.filename == 'machine_iter'
+    assert machine.group == machine_.group
+
+
+@mark['pf_active_iter']
+def test_machine_geometry_relative():
+    machine = Machine(105011, 9, pf_active=True, pf_passive=False,
+                      wall=False)
+    assert machine.filename == 'machine_iter_105011_9'
 
 
 if __name__ == '__main__':

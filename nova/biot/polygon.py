@@ -6,13 +6,13 @@ from typing import ClassVar
 
 import numpy as np
 
-from nova.biot.biotconstants import BiotConstants
+from nova.biot.constants import Constants
 from nova.biot.biotframe import BiotFrame
-from nova.biot.biotmatrix import BiotMatrix
+from nova.biot.matrix import Matrix
 
 
 @dataclass
-class PolygonConstants(BiotConstants):
+class PolygonConstants(Constants):
     """Extend biot constants class to include polygon specific attributes."""
 
     @cached_property
@@ -27,7 +27,7 @@ class PolygonConstants(BiotConstants):
 
     @cached_property
     def gamma(self):
-        """Return gamma coefficient (override BiotConstant)."""
+        """Return gamma coefficient (override Constant)."""
         return self.zv1 - self.z
 
     @cached_property
@@ -50,16 +50,16 @@ class PolygonConstants(BiotConstants):
         return self.gamma + self.b1*(self.rs - self.r * np.cos(phi))
 
     def G2(self, phi):
-        """Return G**2 coefficient (override BiotConstant)."""
+        """Return G**2 coefficient (override Constant)."""
         return self.gamma**2 + self.r**2 * np.sin(phi)**2
 
     def B2(self, phi):
-        """Return B2 coefficient (override BiotConstant)."""
+        """Return B2 coefficient (override Constant)."""
         return (self.r1 - self.r * np.cos(phi))**2 + \
             self.a02 * self.r**2 * np.sin(phi)**2
 
     def D2(self, phi):
-        """Return D2 coefficient (override BiotConstant)."""
+        """Return D2 coefficient (override Constant)."""
         return self.gamma**2 + self.r**2 * np.sin(phi)**2 + \
             (self.rs - self.r * np.cos(phi))**2
 
@@ -81,15 +81,14 @@ class PolygonConstants(BiotConstants):
         """Return a2 coefficent."""
         return self.gamma**2 + self.rs
 
-
     def cphi(self, alpha):
         """Return the anti-derivative of Cphi(alpha)."""
 
 
 @dataclass
-class BiotPolygon(PolygonConstants, BiotMatrix):
+class Polygon(PolygonConstants, Matrix):
     """
-    Extend Biotmatrix base class.
+    Extend matrix base class.
 
     Compute interaction for complete toroidal coils with polygonal sections.
 

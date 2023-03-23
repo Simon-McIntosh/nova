@@ -115,7 +115,7 @@ class Extrapolate(Operate):
     >>> from nova.imas.extrapolate import Extrapolate
     >>> pulse, run = 130506, 403  # CORSICA equilibrium solution
     >>> extrapolate = Extrapolate(pulse, run, pf_active='iter_md',
-    ...                           ngrid=10, nplasma=10)
+    ...                           ngrid=10, dplasma=-10, tplasma='hex')
     >>> extrapolate.pulse, extrapolate.run
     (130506, 403)
 
@@ -136,7 +136,7 @@ class Extrapolate(Operate):
     then pass this ids to the Extrapolate class:
 
     >>> extrapolate = Extrapolate(ids=equilibrium.ids_data, limit='ids',
-    ...                           ngrid=500, nplasma=100)
+    ...                           ngrid=500, dplasma=-100, tplasma='hex')
     >>> extrapolate.itime = 20
     >>> extrapolate.itime
     20

@@ -39,7 +39,7 @@ class PlasmaGrid(PoloidalGrid):
 
 @dataclass
 class FirstWall(Plot, PlasmaGrid, FrameSetLoc):
-    """Set plasma separatix, ionize plasma filaments."""
+    """Mesh plasma rejoin."""
 
     name: str = 'firstwall'
 

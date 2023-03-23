@@ -6,7 +6,7 @@ from nova.frame.framesetloc import FrameSetLoc
 
 
 @dataclass
-class BiotData(netCDF, FrameSetLoc):
+class Data(netCDF, FrameSetLoc):
     """Biot solution abstract base class."""
 
     attrs: list[str] = field(

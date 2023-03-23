@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-from nova.biot.biotgrid import BiotGrid
+from nova.biot.grid import Grid
 from nova.biot.contour import Contour
 from nova.biot.separatrix import PlasmaShape
 
@@ -11,26 +11,22 @@ from nova.biot.separatrix import PlasmaShape
 
 
 @dataclass
-class LevelSet(BiotGrid):
-    """Extend BiotGrid class with levelset contouring algorithums."""
+class LevelSet(Grid):
+    """Extend Grid class with levelset contouring algorithums."""
 
-    nlevelset: int = 5000
     levels: int | np.ndarray = 50
     contour: Contour = field(init=False, repr=False)
 
-    def solve(self, *args, limit=0, index='plasma'):
+    def solve(self, number=None, limit=0, index='plasma'):
         """Solve rectangular grid fit to first wall contour."""
-        try:
-            nlevelset = args[0]
-        except IndexError:
-            nlevelset = self.nlevelset
-        super().solve(nlevelset, limit=limit, index=index)
+        super().solve(number, limit=limit, index=index)
 
     def load_operators(self):
-        """Extend BiotGrid.load_operators to initalize contour instance."""
+        """Extend Grid.load_operators to initalize contour instance."""
         super().load_operators()
-        self.contour = Contour(self.data.x2d, self.data.z2d, self.psi_,
-                               levels=self.levels)
+        if self.number is not None:
+            self.contour = Contour(self.data.x2d, self.data.z2d, self.psi_,
+                                   levels=self.levels)
 
     def check_contour(self):
         """Check contour flux operators."""

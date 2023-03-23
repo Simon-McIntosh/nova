@@ -3,7 +3,7 @@ import pytest
 import numpy as np
 
 from nova.biot.biotframe import BiotFrame
-from nova.biot.biotsection import BiotSection
+from nova.biot.section import Section
 from nova.frame.framelink import FrameLink
 from nova.frame.dataframe import DataFrame
 
@@ -49,9 +49,9 @@ def test_framelink_insert_keyerror():
 
 def test_section_keyerror():
     frame = DataFrame({'section': ['hexagon', 'random']})
-    biotsection = BiotSection(frame)
+    section = Section(frame)
     with pytest.raises(KeyError):
-        biotsection.initialize()
+        section.initialize()
 
 
 def test_target_shape():

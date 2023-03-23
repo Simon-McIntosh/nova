@@ -12,7 +12,7 @@ from nova.geometry import select
 
 
 @dataclass
-class BiotGap(Plot, BiotOperate):
+class Gap(Plot, BiotOperate):
     """Compute flux interaction across a series of 1d gap probes."""
 
     attrs: list[str] = field(default_factory=lambda: ['Psi'])

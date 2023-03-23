@@ -5,7 +5,7 @@ import xarray
 
 
 @dataclass
-class BiotArray:
+class Array:
     """Cache fast access xarray attributes within array dict."""
 
     data: xarray.Dataset | xarray.DataArray = \

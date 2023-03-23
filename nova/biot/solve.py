@@ -4,18 +4,17 @@ from itertools import zip_longest
 from typing import ClassVar
 
 import numpy as np
-import pandas
 from tqdm import tqdm
 import xarray
 
-from nova.biot.biotcylinder import BiotCylinder
-from nova.biot.biotpolygon import BiotPolygon
-from nova.biot.biotring import BiotRing
-from nova.biot.biotset import BiotSet
+from nova.biot.cylinder import Cylinder
+from nova.biot.polygon import Polygon
+from nova.biot.ring import Ring
+from nova.biot.groupset import GroupSet
 
 
 @dataclass
-class BiotSolve(BiotSet):
+class Solve(GroupSet):
     """Manage biot interaction between multiple filament types."""
 
     name: str = 'biot'
@@ -24,8 +23,8 @@ class BiotSolve(BiotSet):
     source_segment: np.ndarray = field(init=False, repr=False)
     data: xarray.Dataset = field(init=False, default_factory=xarray.Dataset)
 
-    generator: ClassVar[dict] = {'ring': BiotRing, 'cylinder': BiotCylinder,
-                                 'polygon': BiotPolygon}
+    generator: ClassVar[dict] = {'ring': Ring, 'cylinder': Cylinder,
+                                 'polygon': Polygon}
 
     def __post_init__(self):
         """Initialise dataset and compute biot interaction."""

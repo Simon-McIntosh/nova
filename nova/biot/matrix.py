@@ -5,11 +5,11 @@ from typing import ClassVar
 
 import numpy as np
 
-from nova.biot.biotset import BiotSet
+from nova.biot.groupset import GroupSet
 
 
 @dataclass
-class BiotMatrix(BiotSet):
+class Matrix(GroupSet):
     """Compute Biot interaction matricies."""
 
     data: dict[str, np.ndarray] = field(init=False, repr=False,

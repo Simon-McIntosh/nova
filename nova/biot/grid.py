@@ -7,8 +7,8 @@ import shapely.geometry
 import xarray
 
 from nova.biot.biotframe import BiotTarget
-from nova.biot.biotoperate import BiotOperate
-from nova.biot.biotsolve import BiotSolve
+from nova.biot.operate import Operate
+from nova.biot.solve import Solve
 from nova.biot.fieldnull import FieldNull
 from nova.frame.baseplot import Plot
 from nova.frame.error import GridError
@@ -53,8 +53,8 @@ class GridCoord:
 
 
 @dataclass
-class Grid(Plot):
-    """Generate grid."""
+class Gridgen(Plot):
+    """Generate 2d grid."""
 
     ngrid: int | None = field(default=None)
     limit: np.ndarray | None = field(default=None)
@@ -147,7 +147,7 @@ class Expand:
         return limit
 
 
-class BiotBaseGrid(BiotPlot, FieldNull, BiotOperate):
+class BaseGrid(BiotPlot, FieldNull, Operate):
     """Flux grid baseclass."""
 
     attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])
@@ -180,31 +180,30 @@ class BiotBaseGrid(BiotPlot, FieldNull, BiotOperate):
 
 
 @dataclass
-class BiotGrid(BiotBaseGrid):
+class Grid(BaseGrid):
     """Compute interaction across grid."""
 
-    def solve(self, ngrid: int, limit: float | np.ndarray = 0,
+    def solve(self, number: int, limit: float | np.ndarray = 0,
               index: str | slice | np.ndarray = slice(None)):
         """Solve Biot interaction across grid."""
-        if ngrid == 0:
-            return
-        if isinstance(limit, (int, float)):
-            limit = Expand(self.subframe, index)(limit)
-        grid = Grid(ngrid, limit)
-        self.solve2d(grid.data.x2d.values, grid.data.z2d.values)
+        with self.solve_biot(number) as number:
+            if number is not None:
+                if isinstance(limit, (int, float)):
+                    limit = Expand(self.subframe, index)(limit)
+                grid = Gridgen(number, limit)
+                self.solve2d(grid.data.x2d.values, grid.data.z2d.values)
 
     def solve2d(self, x2d, z2d):
         """Solve interaction across rectangular grid."""
         target = BiotTarget(dict(x=x2d.flatten(), z=z2d.flatten()),
                             label='Grid')
-        self.data = BiotSolve(self.subframe, target, reduce=[True, False],
-                              name=self.name, attrs=self.attrs).data
+        self.data = Solve(self.subframe, target, reduce=[True, False],
+                          name=self.name, attrs=self.attrs).data
         # insert grid data
         self.data.coords['x'] = x2d[:, 0]
         self.data.coords['z'] = z2d[0]
         self.data.coords['x2d'] = (['x', 'z'], x2d)
         self.data.coords['z2d'] = (['x', 'z'], z2d)
-        super().post_solve()
 
     @cached_property
     def pointloop(self):

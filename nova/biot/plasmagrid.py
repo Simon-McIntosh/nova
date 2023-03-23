@@ -5,14 +5,14 @@ from importlib import import_module
 import numpy as np
 
 from nova.biot.biotframe import BiotTarget
-from nova.biot.biotgrid import BiotBaseGrid
-from nova.biot.biotsolve import BiotSolve
+from nova.biot.grid import BaseGrid
+from nova.biot.solve import Solve
 from nova.frame.error import GridError
 from nova.geometry.pointloop import PointLoop
 
 
 @dataclass
-class BiotPlasmaGrid(BiotBaseGrid):
+class PlasmaGrid(BaseGrid):
     """Compute interaction across hexagonal grid."""
 
     attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])
@@ -23,8 +23,9 @@ class BiotPlasmaGrid(BiotBaseGrid):
         if self.sloc['plasma'].sum() == 0:
             raise GridError('plasma')
         target = BiotTarget(self.subframe.loc['plasma', ['x', 'z']].to_dict())
-        self.data = BiotSolve(self.subframe, target, reduce=[True, False],
-                              attrs=self.attrs, name=self.name).data
+        self.number = len(target)
+        self.data = Solve(self.subframe, target, reduce=[True, False],
+                          attrs=self.attrs, name=self.name).data
         self.tessellate()
         super().post_solve()
 

@@ -72,7 +72,7 @@ if __name__ == '__main__':
         coilset.sloc['bubble', 'Ic'] = 5
         coilset.sloc['Shl0', 'Ic'] = -5
         coilset.sloc['plasma', 'Ic'] = -1
-        coilset.store()
+        #coilset.store()
     else:
         coilset = CoilSet().load()
 

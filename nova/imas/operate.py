@@ -52,16 +52,16 @@ class Grid:
 
     Manualy specify grid relitive to coilset:
     >>> Grid(100, 0, 'coil').grid_attrs
-    {'ngrid': 100, 'limit': 0, 'index': 'coil'}
+    {'number': 100, 'limit': 0, 'index': 'coil'}
 
     Specify grid relitive to equilibrium ids.
     >>> equilibrium = Equilibrium(130506, 403)
     >>> Grid(50, 'ids', ids=equilibrium.ids_data).grid_attrs
-    {'ngrid': 50, 'limit': [2.75, 8.9, -5.49, 5.51], 'index': 'plasma'}
+    {'number': 50, 'limit': [2.75, 8.9, -5.49, 5.51], 'index': 'plasma'}
 
     Extract exact grid from equilibrium ids.
     >>> grid = Grid('ids', 'ids', ids=equilibrium.ids_data)
-    >>> grid.grid_attrs['ngrid']
+    >>> grid.grid_attrs['number']
     8385
 
     Raises attribute error when grid initialied with unset data attribute:
@@ -86,8 +86,8 @@ class Grid:
     @property
     def grid_attrs(self) -> dict:
         """Return grid attributes."""
-        return {attr: getattr(self, attr)
-                for attr in ['ngrid', 'limit', 'index']}
+        return {'number': self.ngrid} | {attr: getattr(self, attr)
+                                         for attr in ['limit', 'index']}
 
     def update_grid(self):
         """Update grid limits."""
@@ -133,7 +133,7 @@ class Operate(Machine, Grid, Profile, Equilibrium):
     pf_active: Ids | bool | str = True
     pf_passive: Ids | bool | str = False
     wall: Ids | bool | str = 'iter_md'
-    nplasma: int = 2500
+    dplasma: int | float = -2500
 
     @property
     def group_attrs(self):

@@ -5,8 +5,8 @@ import numpy as np
 from scipy.interpolate import interp1d
 
 from nova.biot.biotframe import BiotFrame
-from nova.biot.biotoperate import BiotOperate
-from nova.biot.biotsolve import BiotSolve
+from nova.biot.operate import Operate
+from nova.biot.solve import Solve
 from nova.frame.baseplot import Plot
 
 
@@ -95,7 +95,7 @@ class Sample(Plot):
 
 
 @dataclass
-class Field(Plot, BiotOperate):
+class Field(Plot, Operate):
     """
     Compute maximum field around coil perimeter.
 
@@ -128,10 +128,10 @@ class Field(Plot, BiotOperate):
                         sample = Sample(polyframe.boundary, delta=-number)
                         self.target.insert(sample['radius'], sample['height'],
                                            link=True, label=name, delim='_')
-                self.data = BiotSolve(self.subframe, self.target,
-                                      reduce=[True, False],
-                                      turns=[True, False],
-                                      attrs=['Br', 'Bz'], name=self.name).data
+                self.data = Solve(self.subframe, self.target,
+                                  reduce=[True, False],
+                                  turns=[True, False],
+                                  attrs=['Br', 'Bz'], name=self.name).data
                 # insert grid data
                 self.data.coords['index'] = self.target.biotreduce.indices
                 self.data.coords['x'] = 'target', self.target.x

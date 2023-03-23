@@ -1,10 +1,11 @@
 """Manage biot methods."""
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+from typing import ClassVar
 
-from nova.biot import (BiotGap, BiotGrid, BiotInductance, BiotLoop,
-                       BiotFirstWall, BiotPlasmaGrid, BiotPoint,
+from nova.biot import (Gap, Grid, Inductance, Loop,
+                       PlasmaWall, PlasmaGrid, Point,
                        Field, Force, LevelSet, Plasma)
-from nova.biot.biotdata import BiotData
+from nova.biot.data import Data
 from nova.database.netcdf import netCDF
 from nova.frame.frameset import FrameSet, frame_factory
 
@@ -24,7 +25,7 @@ class WallGap:
                 'maxgap': self.maxgap,
                 'ngap': self.ngap}
 
-    @frame_factory(BiotGap)
+    @frame_factory(Gap)
     def wallgap(self):
         """Return biot wall-gap probe instance."""
         return self.gap_kwargs
@@ -34,12 +35,15 @@ class WallGap:
 class Biot(WallGap, FrameSet):
     """Expose biot methods as cached properties."""
 
-    force_attrs: list[str] = field(default_factory=lambda: ['Fr', 'Fz', 'Fc'])
-    field_attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])
+    ngrid: int | float = None
+    nwall: int | float = None
+    nlevelset: int | float = None
     nforce: int | float = None
     nfield: int | float = None
     ninductance: int | float = None
-    nlevelset: int = 500
+
+    force_attrs: ClassVar[list[str]] = ['Fr', 'Fz', 'Fc']
+    field_attrs: ClassVar[list[str]] = ['Br', 'Bz', 'Psi']
 
     @property
     def field_kwargs(self):
@@ -75,37 +79,37 @@ class Biot(WallGap, FrameSet):
         return {'dirname': self.path, 'grid': self.plasmagrid,
                 'wall': self.plasmawall, 'levelset': self.levelset}
 
-    @frame_factory(BiotGrid)
+    @frame_factory(Grid)
     def grid(self):
         """Return grid biot instance."""
-        return self.field_kwargs
+        return {'number': self.ngrid} | self.field_kwargs
 
     @frame_factory(LevelSet)
     def levelset(self):
         """Return plasma grid biot instance."""
-        return {'attrs': ['Psi'], 'nlevelset': self.nlevelset}
+        return {'number': self.nlevelset, 'attrs': ['Psi']}
 
-    @frame_factory(BiotPlasmaGrid)
+    @frame_factory(PlasmaGrid)
     def plasmagrid(self):
         """Return plasma grid biot instance."""
         return self.field_kwargs
 
-    @frame_factory(BiotFirstWall)
+    @frame_factory(PlasmaWall)
     def plasmawall(self):
         """Return plasma firstwall biot instance."""
-        return {'attrs': ['Psi']}
+        return {'number': self.nwall, 'attrs': ['Psi']}
 
-    @frame_factory(BiotPoint)
+    @frame_factory(Point)
     def point(self):
         """Return point biot instance."""
         return self.field_kwargs
 
-    @frame_factory(BiotPoint)
+    @frame_factory(Point)
     def probe(self):
         """Return biot probe instance."""
         return self.field_kwargs
 
-    @frame_factory(BiotLoop)
+    @frame_factory(Loop)
     def loop(self):
         """Return biot loop instance."""
         return self.field_kwargs
@@ -120,7 +124,7 @@ class Biot(WallGap, FrameSet):
         """Return force field instance."""
         return {'number': self.nforce, 'attrs': self.force_attrs}
 
-    @frame_factory(BiotInductance)
+    @frame_factory(Inductance)
     def inductance(self):
         """Return biot inductance instance."""
         return {'number': self.ninductance, 'attrs': ['Psi']}
@@ -129,7 +133,7 @@ class Biot(WallGap, FrameSet):
         """Clear all biot attributes."""
         delattrs = []
         for attr in self.__dict__:
-            if isinstance(getattr(self, attr), BiotData):
+            if isinstance(getattr(self, attr), Data):
                 delattrs.append(attr)
         for attr in delattrs:
             delattr(self, attr)

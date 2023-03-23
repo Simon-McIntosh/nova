@@ -3,12 +3,12 @@ from numpy import allclose
 import numpy as np
 
 
-from nova.biot.biotmatrix import BiotMatrix
+from nova.biot.matrix import Matrix
 from nova.biot.biotframe import BiotFrame
-from nova.biot.biotgrid import BiotGrid
-from nova.biot.biotpoint import BiotPoint
-from nova.biot.biotring import BiotRing
-from nova.biot.biotsolve import BiotSolve
+from nova.biot.grid import Grid
+from nova.biot.point import Point
+from nova.biot.ring import Ring
+from nova.biot.solve import Solve
 from nova.frame.coilset import CoilSet
 
 segments = ['ring', 'cylinder']
@@ -38,7 +38,7 @@ def test_link_negative_factor():
     biotframe.insert(1, 0)
     biotframe.insert(1, 0)
     biotframe.multipoint.link(['C0', 'C1'], -1)
-    biot = BiotRing(biotframe, biotframe, reduce=[True, True])
+    biot = Ring(biotframe, biotframe, reduce=[True, True])
     assert np.isclose(biot.compute('Psi')[0][0, 0], 0)
 
 
@@ -47,7 +47,7 @@ def test_random_segment_error():
     biotframe.insert(1, 0, segment='circle')
     biotframe.insert(1, 0, segment='random')
     with pytest.raises(NotImplementedError):
-        BiotSolve(biotframe, biotframe)
+        Solve(biotframe, biotframe)
 
 
 @pytest.mark.parametrize('segment', segments)
@@ -64,8 +64,8 @@ def test_ITER_subinductance_matrix(segment):
                         name='CS3U', part='CS', segment=segment)
     coilset.coil.insert(1.722, 3.188, 0.719, 2.075, nturn=554,
                         name='CS2U', part='CS', segment=segment)
-    biot = BiotRing(coilset.subframe, coilset.subframe,
-                    turns=[True, True], reduce=[True, True])
+    biot = Ring(coilset.subframe, coilset.subframe,
+                turns=[True, True], reduce=[True, True])
     Mc_ddd = [[7.076E-01, 1.348E-01, 6.021E-02],  # referance
               [1.348E-01, 7.954E-01, 2.471E-01],
               [6.021E-02, 2.471E-01, 7.954E-01]]
@@ -97,10 +97,10 @@ def test_solenoid_grid():
     coilset = CoilSet(dcoil=0.5)
     coilset.coil.insert(1.5, 0, 0.01, height, nturn=nturn, section='rect')
     coilset.sloc['Ic'] = current
-    biotgrid = BiotGrid(*coilset.frames)
-    biotgrid.solve(4, [1e-9, 1.5, 0, 1])
-    Bz_theory = BiotMatrix.mu_0 * nturn * current / height
-    Bz_grid = np.dot(biotgrid.data.Bz, coilset.sloc['Ic'])
+    grid = Grid(*coilset.frames)
+    grid.solve(4, [1e-9, 1.5, 0, 1])
+    Bz_theory = Matrix.mu_0 * nturn * current / height
+    Bz_grid = np.dot(grid.data.Bz, coilset.sloc['Ic'])
     assert allclose(Bz_grid[0], Bz_theory, atol=5e-3)
 
 
@@ -112,10 +112,10 @@ def test_solenoid_probe(segment):
     coilset.coil.insert(1.5, 0, 0.01, height, nturn=nturn,
                         section='rectangle', segment=segment)
     coilset.sloc['Ic'] = current
-    biotpoint = BiotPoint(*coilset.frames)
-    biotpoint.solve((1e-9, 0))
-    Bz_theory = BiotMatrix.mu_0 * nturn * current / height
-    Bz_point = np.dot(biotpoint.data.Bz, coilset.sloc['Ic'])
+    point = Point(*coilset.frames)
+    point.solve((1e-9, 0))
+    Bz_theory = Matrix.mu_0 * nturn * current / height
+    Bz_point = np.dot(point.data.Bz, coilset.sloc['Ic'])
     assert allclose(Bz_point, Bz_theory, atol=5e-3)
 
 
@@ -151,7 +151,7 @@ def test_hemholtz_flux(segment):
     coilset.coil.insert(1, [-0.5, 0.5], 0.01, 0.01, Ic=1, segment=segment)
     point_radius = 0.1
     coilset.point.solve([[point_radius, 0]])
-    Bz = (4/5)**(3/2) * BiotMatrix.mu_0
+    Bz = (4/5)**(3/2) * Matrix.mu_0
     psi = Bz * np.pi*point_radius**2
     assert np.isclose(coilset.point.psi[0], psi)
 
@@ -161,7 +161,7 @@ def test_hemholtz_field(segment):
     coilset = CoilSet(dcoil=-2)
     coilset.coil.insert(1, [-0.5, 0.5], 0.01, 0.01, Ic=1, segment=segment)
     coilset.point.solve([[1e-3, 0]])
-    bz = (4/5)**(3/2) * BiotMatrix.mu_0
+    bz = (4/5)**(3/2) * Matrix.mu_0
     assert np.isclose(coilset.point.bz[0], bz)
 
 

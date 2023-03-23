@@ -4,13 +4,13 @@ from dataclasses import dataclass
 import numpy as np
 
 from nova.biot.biotframe import BiotTarget
-from nova.biot.biotoperate import BiotOperate
-from nova.biot.biotsolve import BiotSolve
+from nova.biot.operate import Operate
+from nova.biot.solve import Solve
 from nova.frame.baseplot import Plot
 
 
 @dataclass
-class BiotPoint(Plot, BiotOperate):
+class Point(Plot, Operate):
     """Compute interaction for a series of discrete points."""
 
     def solve(self, points):
@@ -20,8 +20,8 @@ class BiotPoint(Plot, BiotOperate):
         target = BiotTarget(dict(x=[point[0] for point in points],
                                  z=[point[1] for point in points]),
                             label='Point')
-        self.data = BiotSolve(self.subframe, target, reduce=[True, False],
-                              attrs=self.attrs, name=self.name).data
+        self.data = Solve(self.subframe, target, reduce=[True, False],
+                          attrs=self.attrs, name=self.name).data
         # insert coordinate data
         self.data.coords['x'] = target['x']
         self.data.coords['z'] = target['z']

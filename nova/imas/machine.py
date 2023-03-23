@@ -614,6 +614,8 @@ class PoloidalFieldActive(CoilDatabase):
             if len(circuit.connections) == 0:
                 continue
             self.circuit.insert(circuit.identifier, circuit.connections)
+        if len(self.ids_data.supply) == 0:  # no supplies
+            return
         with self.ids_index.node('supply'):
             name = self.ids_index.array('identifier')
             if self.ids_index.empty('resistance'):
@@ -786,6 +788,7 @@ class CoilGeometry:
     pf_active: Ids | bool | str = True
     pf_passive: Ids | bool | str = True
     wall: Ids | bool | str = 'iter_md'
+    filename: str = ''
 
     geometry: ClassVar[dict] = dict(pf_active=PoloidalFieldActive,
                                     pf_passive=PoloidalFieldPassive,
@@ -793,11 +796,19 @@ class CoilGeometry:
 
     def __post_init__(self):
         """Map geometry parameters to dict attributes."""
+        self.set_filename()
         for attr, geometry in self.geometry.items():
             ids_attrs = self.get_ids_attrs(attr, geometry)
             setattr(self, attr, ids_attrs)
         if hasattr(super(), '__post_init__'):
             super().__post_init__()
+
+    def set_filename(self):
+        """Set filename when all geometry attrs is str or False."""
+        if np.all([isinstance(getattr(self, attr), str) or
+                   getattr(self, attr) is False
+                   for attr in self.geometry]) and self.filename == '':
+            self.filename = 'machine_description'
 
     def get_ids_attrs(self, attr, geometry):
         """Return default ids attributes."""
@@ -870,16 +881,14 @@ class Machine(CoilSet, CoilGeometry, CoilData):
 
         Extends :func:`~nova.imas.database.CoilData.group_attrs`.
         """
-        return super().group_attrs | self.coilset_attrs | self.geometry_attrs
+        return self.coilset_attrs | self.geometry_attrs
 
     def solve_biot(self):
         """Solve biot instances."""
         if self.sloc['plasma'].sum() > 0:
             self.plasma.solve()
-        if self.nfield != 0:
-            self.field.solve()
-        if self.nforce != 0:
-            self.force.solve()
+        self.field.solve()
+        self.force.solve()
 
     def build(self, **kwargs):
         """Build dataset, frameset and, biotset and save to file."""

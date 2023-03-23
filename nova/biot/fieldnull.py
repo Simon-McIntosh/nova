@@ -5,14 +5,14 @@ import numba
 import numpy as np
 import xarray
 
-from nova.biot.biotarray import BiotArray
+from nova.biot.array import Array
 from nova.frame.baseplot import Plot
 from nova.geometry import select
 from nova.geometry.pointloop import PointLoop
 
 
 @dataclass
-class DataNull(Plot, BiotArray):
+class DataNull(Plot, Array):
     """Store sort and remove field nulls."""
 
     subgrid: bool = True

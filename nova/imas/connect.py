@@ -210,10 +210,10 @@ if __name__ == '__main__':
 
     # ScenarioDatabase(user='tribolp').sync_shot('135011/21')
     # ScenarioDatabase(user='dubrovm').sync_shot('105028/1')
-    ScenarioDatabase(user='dubrovm').sync_shot('105027/1')
+    # ScenarioDatabase(user='dubrovm').sync_shot('105027/1')
 
 
-    #ScenarioDatabase().sync_shot('130012/1')
+    #ScenarioDatabase().sync_shot('105011/9')
     #scenario = ScenarioDatabase()
     #scenario.sync_shot('135003/5')
     #scenario.load_frame('workflow', 'DINA-IMAS')

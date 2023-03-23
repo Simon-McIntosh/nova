@@ -8,7 +8,7 @@ from nova.frame.framelink import FrameLink
 
 
 @dataclass
-class BiotSection(metamethod.BiotSection):
+class Section(metamethod.Section):
     """
     Section methods for BiotFrame.
 

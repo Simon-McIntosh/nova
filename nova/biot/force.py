@@ -4,14 +4,14 @@ from dataclasses import dataclass, field
 import numpy as np
 
 from nova.biot.biotframe import BiotFrame
-from nova.biot.biotoperate import BiotOperate
-from nova.biot.biotsolve import BiotSolve
+from nova.biot.operate import Operate
+from nova.biot.solve import Solve
 from nova.frame.baseplot import Plot
 from nova.frame.polygrid import PolyTarget
 
 
 @dataclass
-class Force(Plot, BiotOperate):
+class Force(Plot, Operate):
     """
     Compute coil force interaction matricies.
 
@@ -38,10 +38,10 @@ class Force(Plot, BiotOperate):
         with self.solve_biot(number) as number:
             if number is not None:
                 self.target = PolyTarget(self.Loc['coil', :], -number).target
-                self.data = BiotSolve(self.subframe, self.target,
-                                      reduce=[True, self.reduce],
-                                      turns=[True, True],
-                                      attrs=self.attrs, name=self.name).data
+                self.data = Solve(self.subframe, self.target,
+                                  reduce=[True, self.reduce],
+                                  turns=[True, True],
+                                  attrs=self.attrs, name=self.name).data
                 # insert grid data
                 self.data.coords['index'] = 'target', \
                     self.Loc['coil', 'subref']

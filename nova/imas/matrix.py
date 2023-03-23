@@ -118,8 +118,6 @@ class Benchmark(Matrix):
         self.axes.set_ylabel(r'$b_n$ T')
         self.axes.legend()
 
-    #def check_force(self):
-
 
 if __name__ == '__main__':
 

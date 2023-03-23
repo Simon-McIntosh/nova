@@ -9,7 +9,7 @@ from nova.frame.dataframe import DataFrame
 
 
 @dataclass
-class BiotReduce(metamethod.BiotReduce):
+class Reduce(metamethod.Reduce):
     """Calculate reduction indices for reduceat."""
 
     name = 'biotreduce'

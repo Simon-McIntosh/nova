@@ -3,7 +3,7 @@ import pytest
 import numpy as np
 import xarray
 
-from nova.biot.biotarray import BiotArray
+from nova.biot.array import Array
 
 
 @pytest.fixture
@@ -12,29 +12,29 @@ def data():
 
 
 def test_keyerror(data):
-    biotarray = BiotArray(data)
+    array = Array(data)
     with pytest.raises(KeyError):
-        biotarray['x']
+        array['x']
 
 
 def test_getitem(data):
-    biotarray = BiotArray(data, array_attrs=['x'])
-    biotarray.load_arrays()
-    assert np.allclose(biotarray['x'], range(3))
+    array = Array(data, array_attrs=['x'])
+    array.load_arrays()
+    assert np.allclose(array['x'], range(3))
 
 
 def test_keys(data):
-    biotarray = BiotArray(data, array_attrs=['x', 'z'])
-    biotarray.load_arrays()
-    assert list(biotarray.array.keys()) == ['x', 'z']
+    array = Array(data, array_attrs=['x', 'z'])
+    array.load_arrays()
+    assert list(array.array.keys()) == ['x', 'z']
 
 
 def test_skip_attr(data):
-    biotarray = BiotArray(data, array_attrs=['x', 'y', 'z'])
-    biotarray.load_arrays()
-    assert list(biotarray.array.keys()) == ['x', 'z']
+    array = Array(data, array_attrs=['x', 'y', 'z'])
+    array.load_arrays()
+    assert list(array.array.keys()) == ['x', 'z']
     with pytest.raises(KeyError):
-        biotarray['y']
+        array['y']
 
 
 if __name__ == '__main__':

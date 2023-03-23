@@ -1,20 +1,20 @@
 """Build interaction matrix toroidal loops."""
 from dataclasses import dataclass
 
-from nova.biot.biotoperate import BiotOperate
-from nova.biot.biotsolve import BiotSolve
+from nova.biot.operate import Operate
+from nova.biot.solve import Solve
 from nova.frame.baseplot import Plot
 
 
 @dataclass
-class BiotLoop(Plot, BiotOperate):
+class Loop(Plot, Operate):
     """Compute interaction across grid."""
 
     def solve(self, target):
         """Solve Biot interaction at targets."""
-        self.data = BiotSolve(self.subframe, target,
-                              reduce=[True, True], turns=[True, True],
-                              attrs=['Psi'], name=self.name).data
+        self.data = Solve(self.subframe, target,
+                          reduce=[True, True], turns=[True, True],
+                          attrs=['Psi'], name=self.name).data
         # insert grid data
         self.data.coords['x'] = target.x.values
         self.data.coords['z'] = target.z.values

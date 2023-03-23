@@ -6,7 +6,7 @@ from nova.frame.framelink import FrameLink
 
 
 @dataclass
-class BiotShape(metamethod.BiotShape):
+class Shape(metamethod.Shape):
     """Shape methods for BiotFrame."""
 
     name = 'biotshape'

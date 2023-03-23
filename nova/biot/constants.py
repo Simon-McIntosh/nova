@@ -66,7 +66,7 @@ def unit_nudge(limit_factor=1.5, threshold_factor=3):
 
 
 @dataclass
-class BiotConstants:
+class Constants:
     """Manage biot intergration constants."""
 
     rs: Array = field(default_factory=lambda: da.zeros_like([]))

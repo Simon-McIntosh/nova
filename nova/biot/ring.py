@@ -4,8 +4,8 @@ from typing import ClassVar
 
 import numpy as np
 
-from nova.biot.biotconstants import BiotConstants
-from nova.biot.biotmatrix import BiotMatrix
+from nova.biot.constants import Constants
+from nova.biot.matrix import Matrix
 
 
 @dataclass
@@ -94,9 +94,9 @@ class OffsetFilaments:
 
 
 @dataclass
-class BiotRing(BiotConstants, BiotMatrix):
+class Ring(Constants, Matrix):
     """
-    Extend Biot base class.
+    Extend base class.
 
     Compute interaction for complete circular filaments.
 
@@ -142,7 +142,7 @@ if __name__ == '__main__':
 
     from nova.frame.coilset import CoilSet
 
-    coilset = CoilSet(dcoil=-100, nplasma=150, chunks=None)
+    coilset = CoilSet(dcoil=-100, nplasma=150)
     coilset.coil.insert(5, 0.5, 0.01, 0.8, section='r', turn='r',
                         nturn=300, segment='ring')
     coilset.coil.insert(5.1, 0.5+0.4, 0.2, 0.01, section='r', turn='r',

@@ -14,7 +14,7 @@ def test_aloc():
 
 
 def test_aloc_index():
-    coilset = CoilSet(nplasma=9)
+    coilset = CoilSet(dplasma=-9)
     coilset.coil.insert(3, range(4), 0.1, 0.1)
     coilset.firstwall.insert(4, 1, 0.5, 0.5, tile=False)
     coilset.aloc['coil', 'nturn'] = 1
@@ -34,7 +34,7 @@ def test_saloc():
 
 
 def test_asloc_index():
-    coilset = CoilSet(nplasma=-5)
+    coilset = CoilSet(dplasma=5)
     coilset.coil.insert(3, range(4), 0.1, 0.1, link=True)
     coilset.firstwall.insert(dict(ellipse=[1, 0, 0.5, 1.5]))
     coilset.saloc['coil', 'Ic'] = 5

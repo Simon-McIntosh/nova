@@ -1,4 +1,4 @@
-"""Manage source and target biotframes."""
+"""Manage source and target frames."""
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -7,9 +7,9 @@ from nova.biot.biotframe import BiotFrame
 
 
 @dataclass
-class BiotSet:
+class GroupSet:
     """
-    Construct Biot source/target frames.
+    Construct Biot source/target biot frames.
 
     Parameters
     ----------
@@ -33,7 +33,7 @@ class BiotSet:
     reduce: list[bool] = field(default_factory=lambda: [True, True])
 
     def __post_init__(self):
-        """Format source and target frames."""
+        """Format source and target biot frames."""
         if not isinstance(self.source, BiotFrame):
             self.source = BiotFrame(self.source)
         if not isinstance(self.target, BiotFrame):
@@ -51,7 +51,7 @@ class BiotSet:
         return len(self.target), len(self.source)
 
     def set_flags(self):
-        """Set turn and reduction flags on source and target BiotFrames."""
+        """Set turn and reduction flags on source and target biot frames."""
         if isinstance(self.turns, bool):
             self.turns = [self.turns, self.turns]
         if isinstance(self.reduce, bool):
@@ -62,7 +62,7 @@ class BiotSet:
         self.target.reduce = self.reduce[1]
 
     def assemble(self):
-        """Assemble BiotSet."""
+        """Assemble GroupSet."""
         self.set_shape()
         self.update_index()
 
@@ -72,11 +72,11 @@ class BiotSet:
         self.target.set_source(len(self.source))
 
     def update_index(self):
-        """Update index. Product of source and target BiotFrames."""
+        """Update index. Product of source and target biot frames."""
         self.index = range(len(self))
-        #self.index = ['_'.join(label) for label
-        #              in itertools.product(self.source.index,
-        #                                   self.target.index)]
+        # self.index = ['_'.join(label) for label
+        #               in itertools.product(self.source.index,
+        #                                    self.target.index)]
 
     def plot(self, axes=None):
         """Plot source and target markers."""
@@ -95,5 +95,5 @@ if __name__ == '__main__':
 
     source = BiotFrame({'x': [3, 3.4, 3.6], 'z': [3.1, 3, 3.3],
                         'dl': 0.3, 'dt': 0.3, 'section': 'hex'})
-    biotset = BiotSet(source, source)
-    biotset.plot()
+    groupset = GroupSet(source, source)
+    groupset.plot()

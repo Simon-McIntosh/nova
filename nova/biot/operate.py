@@ -1,4 +1,4 @@
-"""Manage matmul operations and svd reductions on BiotData."""
+"""Manage matmul operations and svd reductions on Biot Data."""
 from contextlib import contextmanager
 from dataclasses import dataclass, field, InitVar
 
@@ -6,7 +6,7 @@ import numba
 import numpy as np
 import xarray
 
-from nova.biot.biotdata import BiotData
+from nova.biot.data import Data
 from nova.frame.framesetloc import ArrayLocIndexer
 
 '''
@@ -74,7 +74,7 @@ class BiotOp:
 
 
 @dataclass
-class BiotOperate(BiotData):
+class Operate(Data):
     """Multi-attribute interface to numba Biot Evaluate methods."""
 
     version: dict[str, int | None] = field(

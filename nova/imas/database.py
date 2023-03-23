@@ -706,16 +706,26 @@ class IdsData(Datafile, Database):
         """Update filename and group."""
         self.rename()
         self.load_database()
+        self.update_filename()
+        super().__post_init__()
+
+    @property
+    def classname(self):
+        """Return base filename."""
+        return f'{self.__class__.__name__.lower()}_{self.machine}'
+
+    def update_filename(self):
+        """Update filename."""
         if self.filename == '':
-            self.filename = self.__class__.__name__.lower()
-            self.filename += f'_{self.machine}'
+            self.filename = self.classname
             if self.pulse > 0 and self.run > 0:
                 self.filename += f'_{self.pulse}_{self.run}'
             if self.occurrence > 0:
                 self.filename += f'_{self.occurrence}'
-            if self.group is None and self.name is not None:
-                self.group = self.name
-        super().__post_init__()
+        if self.filename == 'machine_description':
+            self.filename = self.classname
+        if self.group is None and self.name is not None:
+            self.group = self.name
 
     def merge_data(self, data):
         """Merge external data, interpolating to existing dataset timebase."""

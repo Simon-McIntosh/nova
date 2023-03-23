@@ -173,9 +173,9 @@ class Select(MetaMethod):
 
 
 @dataclass
-class BiotSection(MetaMethod):
+class Section(MetaMethod):
     """
-    Section methods for BiotFrame.
+    Section methods for Biot Frame.
 
     Set cross-section factors used in Biot_Savart calculations.
     """
@@ -183,22 +183,22 @@ class BiotSection(MetaMethod):
     name: str = field(init=False, default='biotsection')
     required: list[str] = field(default_factory=lambda: ['section'])
 
-    _subclass: ClassVar[str] = '.biot.biotsection.BiotSection'
+    _subclass: ClassVar[str] = '.biot.section.Section'
 
 
 @dataclass
-class BiotShape(MetaMethod):
-    """Shape methods for BiotFrame."""
+class Shape(MetaMethod):
+    """Shape methods for Biot Frame."""
 
     name: str = field(init=False, default='biotshape')
 
-    _subclass: ClassVar[str] = '.biot.biotshape.BiotShape'
+    _subclass: ClassVar[str] = '.biot.shape.Shape'
 
 
 @dataclass
-class BiotReduce(MetaMethod):
+class Reduce(MetaMethod):
     """Calculate reduction indices for reduceat."""
 
     name: str = field(init=False, default='biotreduce')
 
-    _subclass: ClassVar[str] = '.biot.biotreduce.BiotReduce'
+    _subclass: ClassVar[str] = '.biot.reduce.Reduce'

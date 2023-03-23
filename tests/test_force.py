@@ -9,7 +9,7 @@ from nova.frame.coilset import CoilSet
 
 @pytest.fixture
 def linked():
-    coilset = CoilSet(nforce=10, dcoil=-1, nplasma=3)
+    coilset = CoilSet(nforce=10, dcoil=-2, dplasma=-3, tplasma='hex')
     coilset.coil.insert(5, 1, 0.1, 0.1, nturn=1)
     coilset.shell.insert({'e': [5, 1, 1.75, 1.0]}, 13, 0.05, delta=-9)
     coilset.shell.insert({'e': [5, 1, 1.95, 1.2]}, 13, 0.05, delta=-9)

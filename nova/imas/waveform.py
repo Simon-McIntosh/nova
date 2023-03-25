@@ -33,7 +33,7 @@ class Waveform(MachineDescription, LCFS):
     ngap: int | float = 150
     ninductance: Nbiot = 0
     nlevelset: Nbiot = 1000
-    nkdtree: Nbiot = 1000
+    nkdtree: Nbiot = 5000
 
     def solve_biot(self):
         """Extend Machine.solve_biot."""

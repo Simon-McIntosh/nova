@@ -29,11 +29,18 @@ def test_turn_number():
     assert np.isclose(coilset.force.target.nturn.sum(), 6)
 
 
-def test_negative_delta():
-    coilset = CoilSet(nforce=9, dcoil=-2)
+def test_negative_delta_frame():
+    coilset = CoilSet(nforce=9, dcoil=-1)
     coilset.coil.insert(5, 6, 0.9, 0.1)
     coilset.force.solve()
     assert len(coilset.force) == 9
+
+
+def test_negative_delta_subframe():
+    coilset = CoilSet(nforce=12, dcoil=-16)
+    coilset.coil.insert(5, 6, 0.3, 0.3)
+    coilset.force.solve()
+    assert len(coilset.force) == 12
 
 
 def test_positive_delta():

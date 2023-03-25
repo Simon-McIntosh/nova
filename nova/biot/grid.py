@@ -6,7 +6,7 @@ import numpy as np
 import shapely.geometry
 import xarray
 
-from nova.biot.biotframe import BiotTarget
+from nova.biot.biotframe import Target
 from nova.biot.operate import Operate
 from nova.biot.solve import Solve
 from nova.biot.fieldnull import FieldNull
@@ -54,7 +54,7 @@ class GridCoord:
 
 @dataclass
 class Gridgen(Plot):
-    """Generate 2d grid."""
+    """Generate rectangular 2d grid."""
 
     ngrid: int | None = field(default=None)
     limit: np.ndarray | None = field(default=None)
@@ -195,11 +195,9 @@ class Grid(BaseGrid):
 
     def solve2d(self, x2d, z2d):
         """Solve interaction across rectangular grid."""
-        target = BiotTarget(dict(x=x2d.flatten(), z=z2d.flatten()),
-                            label='Grid')
+        target = Target(dict(x=x2d.flatten(), z=z2d.flatten()), label='Grid')
         self.data = Solve(self.subframe, target, reduce=[True, False],
                           name=self.name, attrs=self.attrs).data
-        # insert grid data
         self.data.coords['x'] = x2d[:, 0]
         self.data.coords['z'] = z2d[0]
         self.data.coords['x2d'] = (['x', 'z'], x2d)

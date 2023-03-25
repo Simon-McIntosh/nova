@@ -111,12 +111,14 @@ class BasePlot:
             index = self.frame.index[index]
         return self.frame.index.isin(index)
 
-    def get_index(self, index=None, segment=None):
+    def get_index(self, index=None, segment=None, zeroturn=None):
         """Return label based index for plot."""
         index = self.to_boolean(index)
+        if zeroturn is None:
+            zeroturn = self.zeroturn
         with self.frame.setlock(True, 'subspace'):
             try:
-                if not self.zeroturn:  # exclude zeroturn (nturn == 0)
+                if not zeroturn:  # exclude zeroturn (nturn == 0)
                     index &= self.frame.loc[:, 'nturn'] != 0
             except (AttributeError, KeyError, ColumnError):  # turns not set
                 pass

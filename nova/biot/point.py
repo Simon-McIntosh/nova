@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from nova.biot.biotframe import BiotTarget
+from nova.biot.biotframe import Target
 from nova.biot.operate import Operate
 from nova.biot.solve import Solve
 from nova.frame.baseplot import Plot
@@ -17,9 +17,8 @@ class Point(Plot, Operate):
         """Solve Biot interaction at points."""
         points = np.array(points)
         points.shape = (-1, 2)  # shape(n, 2)
-        target = BiotTarget(dict(x=[point[0] for point in points],
-                                 z=[point[1] for point in points]),
-                            label='Point')
+        target = Target(dict(x=[point[0] for point in points],
+                             z=[point[1] for point in points]), label='Point')
         self.data = Solve(self.subframe, target, reduce=[True, False],
                           attrs=self.attrs, name=self.name).data
         # insert coordinate data

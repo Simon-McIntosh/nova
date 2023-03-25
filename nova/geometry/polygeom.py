@@ -70,7 +70,7 @@ class PolyGeom(Polygon):
                     self.metadata.get('z_centroid', self.poly.centroid.y))
 
     @cached_property
-    def delta(self):
+    def segment_delta(self):
         """
         Return geometry characteristic dimensions.
 
@@ -183,7 +183,9 @@ class PolyGeom(Polygon):
         centroid = self.centroid
         return {'x': centroid.x, 'y': centroid.y, 'z': centroid.z,
                 'dl': self.length, 'dt': self.thickness,
-                'dx': self.delta.x, 'dy': self.delta.y, 'dz': self.delta.z,
+                'dx': self.segment_delta.x,
+                'dy': self.segment_delta.y,
+                'dz': self.segment_delta.z,
                 'area': self.area, 'volume': self.volume, 'rms': self.rms,
                 'poly': PolyFrame(self.poly, self.metadata),
                 'section': self.section}

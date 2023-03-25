@@ -11,7 +11,7 @@ from nova.biot.limiter import Limiter
 
 
 @dataclass
-class PlasmaWall(Limiter, Point):
+class Wall(Limiter, Point):
     """Compute interaction for a series of discrete points."""
 
     attrs: list[str] = field(default_factory=lambda: ['Psi'])

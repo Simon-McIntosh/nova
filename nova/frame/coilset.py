@@ -48,15 +48,14 @@ if __name__ == '__main__':
 
     reload = True
     if reload:
-        coilset = CoilSet(dcoil=-5, nplasma=150)
+        coilset = CoilSet(dcoil=-5, dplasma=-500, tplasma='hex')
         coilset.coil.insert(1, 0.5, 0.95, 0.95, section='r', turn='r',
                             nturn=-5.8, delta=-1, part='pf')
         coilset.coil.insert(1, -0.5, 0.95, 0.95, section='hex', turn='c',
                             tile=True, delta=-6, name='bubble')
         coilset.coil.insert(2, 0, 0.95, 0.1, section='sk', nturn=-1.8)
         coilset.coil.insert(3, 0, 0.6, 0.9, section='r', turn='sk')
-        coilset.firstwall.insert({'ellip': [4.2, -0.4, 1.25, 4.2]},
-                                 turn='r', segment='cylinder')
+        coilset.firstwall.insert({'ellip': [4.2, -0.4, 1.25, 4.2]})
         coilset.shell.insert({'e': [2.5, -1.25, 1.75, 1.0]}, 13, 0.05,
                              delta=-4, part='vv')
 
@@ -66,7 +65,7 @@ if __name__ == '__main__':
         coilset.grid.solve(500, 0.1)  # , 'plasma'
         coilset.plasmagrid.solve()
 
-        coilset.plasma.separatrix = dict(c=[4.5, 0.25, 0.9])
+        coilset.plasma.separatrix = dict(c=[5, 0.25, 0.9])
 
         coilset.sloc['Ic'] = 6
         coilset.sloc['bubble', 'Ic'] = 5
@@ -76,7 +75,7 @@ if __name__ == '__main__':
     else:
         coilset = CoilSet().load()
 
-    separatrix = Polygon(dict(c=[4.0, -0.75, 0.9])).boundary
+    separatrix = Polygon(dict(c=[4.2, -0.75, 0.9])).boundary
     coilset.plasma.separatrix = separatrix
 
     coilset.sloc['bubble', 'Ic'] = 8

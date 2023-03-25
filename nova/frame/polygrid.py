@@ -9,6 +9,7 @@ import pandas
 
 from nova.biot.biotframe import BiotFrame
 from nova.frame.dataframe import DataFrame
+from nova.frame.frameset import FrameSet
 from nova.frame.polyplot import PolyPlot
 from nova.geometry.polyframe import PolyFrame
 from nova.geometry.polygen import PolyGen
@@ -85,7 +86,7 @@ class PolyDelta(PolyGeom):
         if np.isclose(box_number, 1):
             return 1, 1
         ndiv_x = np.sqrt(box_number * aspect)
-        if not (self.tile or self.fill):
+        if not (self.tile or self.fill) and ndiv_x >= 1:
             ndiv_x = np.round(ndiv_x)
         ndiv_z = box_number / ndiv_x
         return ndiv_x, ndiv_z
@@ -299,21 +300,24 @@ class PolyGrid(PolyCell):
 
 
 @dataclass
-class PolyTarget:
+class PolyTarget(FrameSet):
     """Construct biotframe target from dataframe."""
 
-    frame: DataFrame
-    delta: int | float
+    delta: int | float = 0
+    index: str | slice = slice(None)
     target: BiotFrame = field(default_factory=BiotFrame)
 
     def __post_init__(self):
         """Build poly-target."""
-        for name in self.frame.index:
-            polyframe = self.frame.loc[name, 'poly']
-            polygrid = PolyGrid(polyframe, turn='rectangle',
-                                delta=self.delta,
-                                nturn=self.frame.loc[name, 'nturn'])
-            self.target.insert(polygrid.frame,
+        for name in self.Loc[self.index, :].index:
+            index = self.loc['frame'] == name
+            if self.loc[name, 'coil']:
+                target = PolyGrid(self.Loc[name, 'poly'],
+                                  turn='rectangle', delta=self.delta,
+                                  nturn=self.Loc[name, 'nturn']).frame
+            else:
+                target = self.loc[index, :]
+            self.target.insert(target,
                                xo=self.frame.loc[name, 'x'],
                                zo=self.frame.loc[name, 'z'],
                                link=True, label=name, delim='_')

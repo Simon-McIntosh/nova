@@ -9,12 +9,13 @@ from scipy.interpolate import interp1d
 import scipy.spatial
 
 from nova.database.netcdf import netCDF
-from nova.biot.plasmawall import PlasmaWall
-from nova.biot.plasmagrid import PlasmaGrid
 from nova.biot.error import PlasmaTopologyError
+from nova.biot.kdtree import KDTree
 from nova.biot.levelset import LevelSet
+from nova.biot.plasmagrid import PlasmaGrid
 from nova.biot.separatrix import PlasmaShape
-from nova.frame.baseplot import Plot, Properties
+from nova.biot.wall import Wall
+from nova.frame.baseplot import Plot
 from nova.frame.framesetloc import FrameSetLoc
 from nova.geometry.polygon import Polygon
 from nova.geometry.pointloop import PointLoop
@@ -35,8 +36,9 @@ class Plasma(Plot, netCDF, FrameSetLoc):
 
     name: str = 'plasma'
     grid: PlasmaGrid = field(repr=False, default_factory=PlasmaGrid)
-    wall: PlasmaWall = field(repr=False, default_factory=PlasmaWall)
+    wall: Wall = field(repr=False, default_factory=Wall)
     levelset: LevelSet = field(repr=False, default_factory=LevelSet)
+    kdtree: KDTree = field(repr=False, default_factory=KDTree)
     lcfs: PlasmaShape | None = field(init=False, default=None)
 
     def __post_init__(self):
@@ -62,6 +64,7 @@ class Plasma(Plot, netCDF, FrameSetLoc):
         self.wall.solve()
         self.grid.solve()
         self.levelset.solve()
+        self.kdtree.solve()
 
     def update_lcfs(self):
         """Update last closed flux surface."""

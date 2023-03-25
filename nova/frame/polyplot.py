@@ -130,13 +130,13 @@ class PolyPlot(Plot, Properties, Labels, metamethod.PolyPlot, BasePlot):
         if not self.frame.empty:
             self.plot(index, axes, **kwargs)
 
-    def plot(self, index=slice(None), axes=None, **kwargs):
+    def plot(self, index=slice(None), axes=None, zeroturn=None, **kwargs):
         """
         Plot frame.
 
         Addapted from geoplot.PolygonPatch.
         """
-        index = self.get_index(index)  # retrieve frame index
+        index = self.get_index(index, zeroturn=zeroturn)
         if sum(index) == 0:
             return
         self.get_axes('2d', axes)

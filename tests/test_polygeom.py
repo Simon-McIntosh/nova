@@ -46,7 +46,7 @@ def test_rectangular_cross_section():
 
 def test_free_aspect():
     geom = PolyGeom(Polygon(dict(rec=(4, 6, 0.1, 0.5))))
-    assert geom.delta.x != geom.delta.z
+    assert geom.segment_delta.x != geom.segment_delta.z
 
 
 def test_circular_cross_section():
@@ -62,12 +62,12 @@ def test_ring_centroid():
 
 def test_ring_delta():
     geom = PolyGeom(Polygon(dict(rec=(4, 6, 0.1, 0.5))), 'ring')
-    assert np.allclose(geom.delta, [0.1, 2*np.pi*4, 0.5])
+    assert np.allclose(geom.segment_delta, [0.1, 2*np.pi*4, 0.5])
 
 
 def test_other_delta():
     geom = PolyGeom(Polygon(dict(rec=(4, 6, 0.1, 0.5))), 'other')
-    assert np.allclose(geom.delta, [0.1, 0, 0.5])
+    assert np.allclose(geom.segment_delta, [0.1, 0, 0.5])
 
 
 if __name__ == '__main__':

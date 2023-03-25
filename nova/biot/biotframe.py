@@ -66,7 +66,7 @@ class BiotFrame(FrameLink):
         return (self.z - self.zo) / self.dz
 
 
-class BiotTarget(BiotFrame):
+class Target(BiotFrame):
     """Extend BiotFrame dropping additional and available metadata."""
 
     def __init__(self, data=None, index=None, columns=None, attrs=None,

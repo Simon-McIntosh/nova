@@ -4,7 +4,7 @@ from importlib import import_module
 
 import numpy as np
 
-from nova.biot.biotframe import BiotTarget
+from nova.biot.biotframe import Target
 from nova.biot.grid import BaseGrid
 from nova.biot.solve import Solve
 from nova.frame.error import GridError
@@ -22,11 +22,10 @@ class PlasmaGrid(BaseGrid):
         """Solve Biot interaction across plasma grid."""
         if self.sloc['plasma'].sum() == 0:
             raise GridError('plasma')
-        target = BiotTarget(self.subframe.loc['plasma', ['x', 'z']].to_dict())
-        self.number = len(target)
+        target = Target(self.loc['plasma', ['x', 'z']].to_dict())
         self.data = Solve(self.subframe, target, reduce=[True, False],
                           attrs=self.attrs, name=self.name).data
-        self.tessellate()
+        self.tessellate(target)
         super().post_solve()
 
     @staticmethod
@@ -52,12 +51,13 @@ class PlasmaGrid(BaseGrid):
                             neighbours[mask], axis=1)
         return stencil, stencil_index
 
-    def tessellate(self):
+    def tessellate(self, target: Target):
         """Tesselate hexagonal mesh, compute 6-point neighbour loops."""
-        points = self.subframe.loc['plasma', ['x', 'z']].to_numpy()
+        points = np.c_[target.x, target.z]
         tri = import_module('scipy.spatial').Delaunay(points)
         neighbor_vertices = tri.vertex_neighbor_vertices
         wall = self.Loc['plasma', 'poly'][0].poly.boundary
+        #  TODO source wall from target strucutre (not frame / subframe)
         boundary_vertices = np.array([i for i, polygon in
                                       enumerate(self.loc['plasma', 'poly'])
                                       if polygon.poly.intersects(wall)])

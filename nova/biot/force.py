@@ -37,7 +37,8 @@ class Force(Plot, Operate):
         """Extract boundary and solve magnetic field around coil perimeter."""
         with self.solve_biot(number) as number:
             if number is not None:
-                self.target = PolyTarget(self.Loc['coil', :], -number).target
+                self.target = PolyTarget(*self.frames, index='coil',
+                                         delta=-number).target
                 self.data = Solve(self.subframe, self.target,
                                   reduce=[True, self.reduce],
                                   turns=[True, True],

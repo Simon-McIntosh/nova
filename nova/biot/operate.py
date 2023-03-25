@@ -132,6 +132,7 @@ class Operate(Data):
             self.attrs = [self.attrs]
         self.index = self.data.get('index', xarray.DataArray([])).data
         self.classname = self.data.classname
+        self.number = self.data.dims['target']
         for attr in np.array(self.attrs):
             dataset = self.data[[attr, f'_{attr}']]
             self.operator[attr] = BiotOp(self.aloc, self.saloc, self.classname,

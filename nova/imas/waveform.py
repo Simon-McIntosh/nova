@@ -7,6 +7,7 @@ import numpy as np
 from scipy import optimize
 from tqdm import tqdm
 
+from nova.biot.biot import Nbiot
 from nova.biot.separatrix import LCFS
 from nova.imas.database import Ids
 from nova.imas.machine import Machine
@@ -21,15 +22,7 @@ class MachineDescription(Machine):
     pf_passive: Ids | bool | str = 'iter_md'
     wall: Ids | bool | str = 'iter_md'
     tplasma: str = 'hex'
-    nplasma: int = 5000
-    ngap: int | float = 150
-
-    def solve_biot(self):
-        """Extend Machine.solve_biot."""
-        super().solve_biot()
-        self.inductance.solve()
-        self.wallgap.solve(self.data.gap_tail.data, self.data.gap_angle.data,
-                           self.data.gap_id.data)
+    dplasma: int | float = -1000
 
 
 @dataclass
@@ -37,6 +30,17 @@ class Waveform(MachineDescription, LCFS):
     """Generate coilset voltage and current waveforms."""
 
     name: str = 'pulse_schedule'
+    ngap: int | float = 150
+    ninductance: Nbiot = 0
+    nlevelset: Nbiot = 1000
+    nkdtree: Nbiot = 1000
+
+    def solve_biot(self):
+        """Extend Machine.solve_biot."""
+        super().solve_biot()
+        self.inductance.solve()
+        self.wallgap.solve(self.data.gap_tail.data, self.data.gap_angle.data,
+                           self.data.gap_id.data)
 
     def update(self):
         """Extend itime update."""
@@ -139,12 +143,23 @@ if __name__ == '__main__':
     waveform.time = 500
     waveform.solve()
 
-    waveform.plasma.plot(turns=False)
+    #waveform.plasma.plot(turns=False)
     waveform.plot_gaps()
     waveform.plasma.lcfs.plot()
 
+    waveform.kdtree.plot()
+
     waveform.fit()
     waveform.plot('plasma')
+    waveform.kdtree.plot()
+
+    '''
+    from nova.biot.separatrix import Separatrix
+    waveform.levelset.set_axes('2d')
+    separatrix = Separatrix().single_null(6.5, 0.5, 1.5, 1.8, -0.3)
+    waveform.levelset.plot_query(separatrix.points)
+    '''
+
 
     '''
     separatrix = Separatrix(waveform['geometric_axis'][0], 0.5).single_null(

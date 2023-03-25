@@ -924,29 +924,3 @@ if __name__ == '__main__':
     machine = Machine(pf_active='iter_md', pf_passive='iter_md',
                       wall='iter_md', tplasma='hex')
     machine.plot()
-
-    '''
-    import scipy
-    from nova.biot.separatrix import Separatrix
-
-    points = np.c_[machine.aloc['plasma', 'x'], machine.aloc['plasma', 'z']]
-    tree = scipy.spatial.KDTree(points)
-
-    separatrix = Separatrix().single_null(6.3, 0.5, 1.5, 1.8, 0.3)
-
-    radius = 0.2 * np.sqrt(machine.aloc['plasma', 'area'].mean())
-
-    index = tree.query(separatrix.points, distance_upper_bound=radius)[1]
-    index = np.unique(index)
-    if index[-1] == len(machine.plasma):
-        index = index[:-1]
-
-    nturn = machine.plasma.nturn
-    nturn[:] = 0
-    nturn[index] = 1
-    machine.plasma.nturn = nturn
-
-    separatrix.plot()
-    machine.plot('plasma')
-    machine.plasmawall.plot()
-    '''

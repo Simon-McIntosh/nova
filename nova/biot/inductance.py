@@ -11,11 +11,11 @@ from nova.frame.polygrid import PolyTarget
 class Inductance(Plot, Operate):
     """Compute self interaction."""
 
-    def solve(self, number=None, index=slice(None)):
+    def solve(self, number=None):
         """Solve Biot interaction across subframe."""
         with self.solve_biot(number) as number:
             if number is not None:
-                self.target = PolyTarget(self.Loc[:, index], -number).target
+                self.target = PolyTarget(*self.frames, delta=-number).target
                 self.data = Solve(self.subframe, self.target,
                                   turns=[True, True], reduce=[True, True],
                                   attrs=self.attrs, name=self.name).data

@@ -2,12 +2,14 @@
 from dataclasses import dataclass
 from typing import ClassVar
 
-from nova.biot import (Gap, Grid, Inductance, Loop,
-                       PlasmaWall, PlasmaGrid, Point,
+from nova.biot import (Gap, Grid, Inductance, KDTree, Loop,
+                       Wall, PlasmaGrid, Point,
                        Field, Force, LevelSet, Plasma)
 from nova.biot.data import Data
 from nova.database.netcdf import netCDF
 from nova.frame.frameset import FrameSet, frame_factory
+
+Nbiot = int | float | None
 
 
 @dataclass
@@ -35,12 +37,13 @@ class WallGap:
 class Biot(WallGap, FrameSet):
     """Expose biot methods as cached properties."""
 
-    ngrid: int | float = None
-    nwall: int | float = None
-    nlevelset: int | float = None
-    nforce: int | float = None
-    nfield: int | float = None
-    ninductance: int | float = None
+    ngrid: Nbiot = None
+    nwall: Nbiot = None
+    nkdtree: Nbiot = None
+    nlevelset: Nbiot = None
+    nforce: Nbiot = None
+    nfield: Nbiot = None
+    ninductance: Nbiot = None
 
     force_attrs: ClassVar[list[str]] = ['Fr', 'Fz', 'Fc']
     field_attrs: ClassVar[list[str]] = ['Br', 'Bz', 'Psi']
@@ -60,7 +63,7 @@ class Biot(WallGap, FrameSet):
         """Return frame attributes."""
         kwargs = {attr: value for attr in
                   ['field_attrs', 'force_attrs', 'nfield', 'nforce',
-                   'ninductance', 'nlevelset']
+                   'ninductance', 'nlevelset', 'ngrid', 'nwall', 'nkdtree']
                   if (value := getattr(self, attr)) is not None}
         return kwargs | self.gap_kwargs
 
@@ -77,12 +80,18 @@ class Biot(WallGap, FrameSet):
     def plasma(self):
         """Return plasma instance."""
         return {'dirname': self.path, 'grid': self.plasmagrid,
-                'wall': self.plasmawall, 'levelset': self.levelset}
+                'wall': self.plasmawall, 'levelset': self.levelset,
+                'kdtree': self.kdtree}
 
     @frame_factory(Grid)
     def grid(self):
         """Return grid biot instance."""
         return {'number': self.ngrid} | self.field_kwargs
+
+    @frame_factory(KDTree)
+    def kdtree(self):
+        """Return kd-tree biot instance."""
+        return {'number': self.nkdtree, 'attrs': ['Psi']}
 
     @frame_factory(LevelSet)
     def levelset(self):
@@ -94,7 +103,7 @@ class Biot(WallGap, FrameSet):
         """Return plasma grid biot instance."""
         return self.field_kwargs
 
-    @frame_factory(PlasmaWall)
+    @frame_factory(Wall)
     def plasmawall(self):
         """Return plasma firstwall biot instance."""
         return {'number': self.nwall, 'attrs': ['Psi']}

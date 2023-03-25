@@ -14,7 +14,7 @@ def test_aloc():
 
 
 def test_aloc_index():
-    coilset = CoilSet(dplasma=-9)
+    coilset = CoilSet(dplasma=-9, tplasma='rectangle')
     coilset.coil.insert(3, range(4), 0.1, 0.1)
     coilset.firstwall.insert(4, 1, 0.5, 0.5, tile=False)
     coilset.aloc['coil', 'nturn'] = 1

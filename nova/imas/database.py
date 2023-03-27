@@ -1,5 +1,4 @@
 """Manage access to IMAS database."""
-from abc import abstractmethod
 from contextlib import contextmanager
 from dataclasses import dataclass, field, fields, InitVar
 from importlib import import_module
@@ -263,13 +262,13 @@ class Database(IDS):
                              if item is not None)).split('/', 1)
         if occurrence is None:
             occurrence = self.occurrence
-        with self._get_ids() as db_entry:
+        with self.db_open() as db_entry:
             if len(ids_name) == 2:
                 return db_entry.partial_get(*ids_name, occurrence=occurrence)
             return db_entry.get(*ids_name, occurrence=occurrence)
 
     @contextmanager
-    def _get_ids(self):
+    def _db_entry(self):
         """Yield database with context manager."""
         try:
             imas = import_module('imas')
@@ -278,17 +277,37 @@ class Database(IDS):
                               'try module load IMAS') from error
         db_entry = imas.DBEntry(self.backend, self.machine,
                                 self.pulse, self.run, user_name=self.user)
-        try:
-            db_entry.open()
-        except TypeError as error:
-            raise TypeError(f'malformed input to imas.DBEntry\n{error}\n'
-                            f'pulse {self.pulse}, '
-                            f'run {self.run}, '
-                            f'user {self.user}\n'
-                            f'machine {self.machine}, '
-                            f'backend: {self.backend}') from error
         yield db_entry
         db_entry.close()
+
+    @contextmanager
+    def db_open(self):
+        """Yield open database entry."""
+        with self._db_entry() as db_entry:
+            try:
+                db_entry.open()
+            except TypeError as error:
+                raise TypeError(f'malformed input to imas.DBEntry\n{error}\n'
+                                f'pulse {self.pulse}, '
+                                f'run {self.run}, '
+                                f'user {self.user}\n'
+                                f'machine {self.machine}, '
+                                f'backend: {self.backend}') from error
+            yield db_entry
+
+    @contextmanager
+    def db_create(self):
+        """Yeild bare database entry."""
+        with self._db_entry() as db_entry:
+            db_entry.create()
+            yield db_entry
+
+    def put_ids(self, ids, occurrence=None):
+        """Write ids data to database entry."""
+        if occurrence is None:
+            occurrence = self.occurrence
+        with self.db_create() as db_entry:
+            db_entry.put(ids, occurrence=occurrence)
 
     @property
     def ids_hash(self) -> int:

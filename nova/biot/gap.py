@@ -16,7 +16,7 @@ class Gap(Plot, Operate):
     """Compute flux interaction across a series of 1d gap probes."""
 
     attrs: list[str] = field(default_factory=lambda: ['Psi'])
-    ngap: int | float = 50
+    ngap: int | float | None = 50
     mingap: int | float = 1e-3
     maxgap: int | float = 5
     gap_number: int = field(init=False, default=0)

@@ -2,6 +2,7 @@
 from dataclasses import dataclass, field
 from typing import ClassVar
 
+from importlib import import_module
 import json
 import numpy as np
 import pandas
@@ -10,10 +11,12 @@ import scipy
 from nova.database.datafile import Datafile
 from nova.database.filepath import FilePath
 from nova.frame.baseplot import Plot
+from nova.imas.database import Database
+from nova.imas.metadata import Metadata
 
 
 @dataclass
-class Database(Plot, Datafile):
+class ErrorField(Plot, Datafile):
     """Interpolate field dataset to first wall and decompose."""
 
     filename: str
@@ -163,6 +166,20 @@ class Database(Plot, Datafile):
             filename=f'external_field_{self.filename}.nc').filepath
         data.to_netcdf(filepath)
 
+    def write_ids(self, pulse=160400, run=0):
+        """Write data to ids."""
+        ids = import_module('imas').error_b_field()
+        metadata = Metadata(ids)
+        metadata.put_properties(self.library[self.datafile], self.datafile)
+        metadata.put_code('Toroidal control surface Fourier decomposition')
+
+        ids.field_map.grid.r.resize(self.data.dims['radius'])
+        ids.field_map.grid.r = self.data.radius.data
+
+        print(ids)
+        #database = Database(pulse, run)
+        #database.put_ids(ids)
+
     def grid_schema(self):
         """Print schema for grid data."""
         data = self.data[['grid_Br', 'grid_Bphi', 'grid_Bz']]
@@ -174,11 +191,14 @@ class Database(Plot, Datafile):
 
 if __name__ == '__main__':
 
-    database = Database('88LDE3', surface='surf_gpec_131025')
+    errorfield = ErrorField('88LDE3', surface='surf_gpec_131025')
 
-    #database.plot_normal(modes=[1, 2, 3], scale=20)
-    #database.plot_normal(modes=[18], scale=1)
-    # database.write()
-    # database.plot_trace(0)
+    errorfield.write_ids()
 
-    #database.grid_schema()
+
+    #errorfield.plot_normal(modes=[1, 2, 3], scale=20)
+    #errorfield.plot_normal(modes=[18], scale=1)
+    # errorfield.write()
+    # errorfield.plot_trace(0)
+
+    #errorfield.grid_schema()

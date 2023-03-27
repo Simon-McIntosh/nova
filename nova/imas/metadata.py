@@ -1,0 +1,131 @@
+"""Update ids metadata."""
+from abc import ABC
+from dataclasses import dataclass, field
+from datetime import datetime
+from typing import ClassVar
+
+import git
+import pandas
+
+import nova
+from nova.imas.database import Ids
+
+
+@dataclass
+class Attrs(ABC):
+    """Provide IdsData baseclass."""
+
+    attributes: ClassVar[list[str]] = []
+
+    def update(self, ids: object):
+        """Update code metadata."""
+        for attr in self.attributes:
+            try:
+                attribute = getattr(self, attr)
+            except AttributeError:
+                continue
+            if attribute is None:
+                continue
+            setattr(ids, attr, attribute)
+
+
+@dataclass
+class Properties(Attrs):
+    """Manage imas ids_property attributes."""
+
+    homogeneous_time: int
+    comment: str | None = None
+    source: str | None = None
+    provider: str | None = 'Simon McIntosh, simon.mcintosh@iter.org'
+    provenance: Ids = None
+
+    attributes: ClassVar[list[str]] = \
+        ['comment', 'homogeneous_time', 'source', 'provider', 'creation_date',
+         'provenance']
+
+    def update(self, ids):
+        """Extend Attrs update to include provenance ids."""
+        super().update(ids)
+        if self.provenance is not None:
+            ids.provenance.node.resize(1)
+            ids.provenance.node[0].sources = self.provenance.code
+
+    @property
+    def creation_date(self):
+        """Return creation date."""
+        return datetime.today().strftime('%d-%m-%Y')
+
+
+@dataclass
+class Code(Attrs):
+    """Methods for retriving and formating code metadata."""
+
+    description: str | None = None
+    parameter_dict: dict | None = None
+    output_flag: int = 1
+
+    name: ClassVar[str] = 'Nova'
+    attributes: ClassVar[list[str]] = \
+        ['name', 'description', 'commit', 'version', 'repository',
+         'parameters', 'output_flag']
+
+    def __post_init__(self):
+        """Load git repository."""
+        self.repo = git.Repo(search_parent_directories=True)
+
+    @property
+    def parameters(self):
+        """Return code parameters as HTML table."""
+        if self.parameter_dict is None:
+            return None
+        return pandas.Series(self.parameter_dict).to_frame().to_html()
+
+    @parameters.setter
+    def parameters(self, parameters: dict):
+        """Update code parameters."""
+        self.parameter_dict = parameters
+
+    @property
+    def commit(self):
+        """Return git commit hash."""
+        return self.repo.head.object.hexsha
+
+    @property
+    def version(self):
+        """Return code version."""
+        return nova.__version__
+
+    @property
+    def repository(self):
+        """Return repository url."""
+        return self.repo.remotes.origin.url
+
+
+@dataclass
+class Metadata:
+    """Write ids metadata."""
+
+    ids: Ids
+
+    def put_properties(self, comment, source=None, homogeneous_time=1,
+                       provider=None, provenance=None):
+        """Update ids_properties."""
+        props = Properties(homogeneous_time, comment, source,
+                           provider, provenance)
+        props.update(self.ids.ids_properties)
+
+    def put_code(self, description, parameter_dict=None, output_flag=1):
+        """Update referances to Nova code."""
+        code = Code(description, parameter_dict, output_flag)
+        code.update(self.ids.code)
+
+
+if __name__ == '__main__':
+
+    import imas
+    ids = imas.equilibrium()
+
+    metadata = Metadata(ids)
+    metadata.put_properties('Equilibrium extrapolation', 'Yuri\'s database',
+                            provider='Simon McIntosh')
+    metadata.put_code('test code attribute update')

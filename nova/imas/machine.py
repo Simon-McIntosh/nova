@@ -475,7 +475,6 @@ class PassiveCoilData(IdsCoilData):
 @dataclass
 class PassivePolyCoilData(PassiveCoilData):
     """Extract coildata from passive ids."""
-
     geometry_attrs: ClassVar[list[str]] = ['poly']
 
 

@@ -2,10 +2,8 @@
 import bisect
 from dataclasses import dataclass
 
-import nlopt
 import numpy as np
 from scipy import optimize
-from tqdm import tqdm
 
 from nova.biot.biot import Nbiot
 from nova.biot.separatrix import LCFS
@@ -30,7 +28,7 @@ class Waveform(MachineDescription, LCFS):
     """Generate coilset voltage and current waveforms."""
 
     name: str = 'pulse_schedule'
-    ngap: int | float = 150
+    ngap: Nbiot = 150
     ninductance: Nbiot = 0
     nlevelset: Nbiot = 1000
     nkdtree: Nbiot = 5000
@@ -40,7 +38,7 @@ class Waveform(MachineDescription, LCFS):
         super().solve_biot()
         self.inductance.solve()
         self.wallgap.solve(self.data.gap_tail.data, self.data.gap_angle.data,
-                           self.data.gap_id.data)
+                       self.data.gap_id.data)
 
     def update(self):
         """Extend itime update."""
@@ -146,8 +144,6 @@ if __name__ == '__main__':
     #waveform.plasma.plot(turns=False)
     waveform.plot_gaps()
     waveform.plasma.lcfs.plot()
-
-    waveform.kdtree.plot()
 
     waveform.fit()
     waveform.plot('plasma')

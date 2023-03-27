@@ -186,8 +186,7 @@ class PlasmaProfile:
     """Generate plasma profile from plasma parameters."""
 
     coef: dict[str, float] = field(default_factory=dict)
-    kappa: UpDown = field(init=False, repr=False)
-    delta: UpDown = field(init=False, repr=False)
+    plasma_shape: dict[str, UpDown] = field(init=False, default_factory=dict)
 
     profile_attrs: ClassVar[list[str]] = \
         ['geometric_radius', 'geometric_height',
@@ -197,15 +196,15 @@ class PlasmaProfile:
         """Initialise updown."""
         if hasattr(super(), '__post_init__'):
             super().__post_init__()
-        self.kappa = UpDown('elongation', self.coef)
-        self.delta = UpDown('triangularity', self.coef)
+        self.plasma_shape['kappa'] = UpDown('elongation', self.coef)
+        self.plasma_shape['delta'] = UpDown('triangularity', self.coef)
 
     def update_coefficents(self, *args, **kwargs):
         """Update plasma profile coefficients."""
         self.coef = kwargs
         self.coef |= {attr: arg for attr, arg in zip(self.profile_attrs, args)}
-        self.kappa = UpDown('elongation', self.coef)
-        self.delta = UpDown('triangularity', self.coef)
+        self.plasma_shape['kappa'] = UpDown('elongation', self.coef)
+        self.plasma_shape['delta'] = UpDown('triangularity', self.coef)
         return self
 
     def __getattr__(self, attr):
@@ -226,7 +225,7 @@ class PlasmaProfile:
     def check_consistency(self):
         """Check data consistency."""
         for attr in ['kappa', 'delta']:
-            getattr(self, attr).check_consistency()
+            self.plasma_shape[attr].check_consistency()
 
     def set_x_point(self, x_point):
         """Adjust lower elongation and triangularity to match x_point."""
@@ -245,32 +244,32 @@ class PlasmaProfile:
     @property
     def elongation(self):
         """Return plasma elongation."""
-        return self.kappa.mean
+        return self.plasma_shape['kappa'].mean
 
     @property
     def upper_elongation(self):
         """Return upper plasma elongation."""
-        return self.kappa.upper
+        return self.plasma_shape['kappa'].upper
 
     @property
     def lower_elongation(self):
         """Return lower plasma elongation."""
-        return self.kappa.lower
+        return self.plasma_shape['kappa'].lower
 
     @property
     def triangularity(self):
         """Return plasma triangularity."""
-        return self.delta.mean
+        return self.plasma_shape['delta'].mean
 
     @property
     def upper_triangularity(self):
         """Return plasma triangularity."""
-        return self.delta.upper
+        return self.plasma_shape['delta'].upper
 
     @property
     def lower_triangularity(self):
         """Return plasma triangularity."""
-        return self.delta.lower
+        return self.plasma_shape['delta'].lower
 
     def adjust_lower_elongation(self):
         """Adjust lower elongation for single-null compliance."""
@@ -279,7 +278,7 @@ class PlasmaProfile:
             delta_kappa = 1e-3 + min_kappa - self.lower_elongation
             self['lower_elongation'] = self.lower_elongation + delta_kappa
             self.geometric_height += self.minor_radius * delta_kappa
-            self.kappa.check_consistency()
+            self.plasma_shape['kappa'].check_consistency()
 
 
 @dataclass
@@ -552,29 +551,19 @@ class LCFS(Separatrix, PulseSchedule):
             self._make_frame, duration=duration)
         animation.write_gif(f'{filename}.gif', fps=10)
 
-    '''
-
-    # schedule.plot_profile()
-
-    # schedule.annimate(2.5)
-
-    #schedule.plot_gaps()
-    #schedule.plot_0d('loop_voltage')
-    #schedule.plot_0d('loop_psi')
-    '''
-
 
 if __name__ == '__main__':
 
     pulse, run = 135003, 5
     lcfs = LCFS(pulse, run)
 
-    lcfs.time = 11.656 -0.5
+    lcfs.time = 11.656 - 0.5
 
     lcfs.fit()
     lcfs.plot()
 
-    lcfs.annimate(10, 'gaps_fit_limiter')
+    # lcfs.annimate(10, 'gaps_fit_limiter')
+
     #lcfs.plot_gaps()
     #separatrix = Separatrix().single_null(
     #    (5, 0), 2, 1.8, 0.3, x_point=(4, -4.5))

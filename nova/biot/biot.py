@@ -1,5 +1,5 @@
 """Manage biot methods."""
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import ClassVar
 
 from nova.biot import (Gap, Grid, Inductance, KDTree, Loop,
@@ -13,40 +13,22 @@ Nbiot = int | float | None
 
 
 @dataclass
-class WallGap:
-    """Manage wallgap biot probe attributes."""
+class BiotBase(FrameSet):
+    """Biot methods base class."""
 
-    mingap: int | float = 1e-3
-    maxgap: int | float = 5
-    ngap: int | float = 150
-
-    @property
-    def gap_kwargs(self):
-        """Return gap kwargs."""
-        return {'mingap': self.mingap,
-                'maxgap': self.maxgap,
-                'ngap': self.ngap}
-
-    @frame_factory(Gap)
-    def wallgap(self):
-        """Return biot wall-gap probe instance."""
-        return self.gap_kwargs
-
-
-@dataclass
-class Biot(WallGap, FrameSet):
-    """Expose biot methods as cached properties."""
-
-    ngrid: Nbiot = None
-    nwall: Nbiot = None
-    nkdtree: Nbiot = None
-    nlevelset: Nbiot = None
-    nforce: Nbiot = None
-    nfield: Nbiot = None
-    ninductance: Nbiot = None
-
+    _biot_attrs: dict[str, list[str] | Nbiot] = field(
+        init=False, default_factory=dict)
     force_attrs: ClassVar[list[str]] = ['Fr', 'Fz', 'Fc']
     field_attrs: ClassVar[list[str]] = ['Br', 'Bz', 'Psi']
+
+    def __post_init__(self):
+        """Append biot attrs."""
+        self.append_biot_attrs(['field_attrs', 'force_attrs'])
+        super().__post_init__()
+
+    def append_biot_attrs(self, attrs: list[str]):
+        """Append biot attributes."""
+        self._biot_attrs |= {attr: getattr(self, attr) for attr in attrs}
 
     @property
     def field_kwargs(self):
@@ -59,15 +41,6 @@ class Biot(WallGap, FrameSet):
         return {'attrs': self.force_attrs}
 
     @property
-    def biot_attrs(self):
-        """Return frame attributes."""
-        kwargs = {attr: value for attr in
-                  ['field_attrs', 'force_attrs', 'nfield', 'nforce',
-                   'ninductance', 'nlevelset', 'ngrid', 'nwall', 'nkdtree']
-                  if (value := getattr(self, attr)) is not None}
-        return kwargs | self.gap_kwargs
-
-    @property
     def biot_methods(self):
         """Return list of active biot methods."""
         attrs = []
@@ -76,17 +49,35 @@ class Biot(WallGap, FrameSet):
                 attrs.append(attr)
         return attrs
 
+    def clear_biot(self):
+        """Clear all biot attributes."""
+        delattrs = []
+        for attr in self.__dict__:
+            if isinstance(getattr(self, attr), Data):
+                delattrs.append(attr)
+        for attr in delattrs:
+            delattr(self, attr)
+
+
+@dataclass
+class BiotPlasma(BiotBase):
+    """Group plasma biot methods."""
+
+    nwall: Nbiot = None
+    nkdtree: Nbiot = None
+    nlevelset: Nbiot = None
+
+    def __post_init__(self):
+        """Append biot attrs."""
+        self.append_biot_attrs(['nwall', 'nkdtree', 'nlevelset'])
+        super().__post_init__()
+
     @frame_factory(Plasma)
     def plasma(self):
         """Return plasma instance."""
         return {'dirname': self.path, 'grid': self.plasmagrid,
                 'wall': self.plasmawall, 'levelset': self.levelset,
                 'kdtree': self.kdtree}
-
-    @frame_factory(Grid)
-    def grid(self):
-        """Return grid biot instance."""
-        return {'number': self.ngrid} | self.field_kwargs
 
     @frame_factory(KDTree)
     def kdtree(self):
@@ -108,20 +99,19 @@ class Biot(WallGap, FrameSet):
         """Return plasma firstwall biot instance."""
         return {'number': self.nwall, 'attrs': ['Psi']}
 
-    @frame_factory(Point)
-    def point(self):
-        """Return point biot instance."""
-        return self.field_kwargs
 
-    @frame_factory(Point)
-    def probe(self):
-        """Return biot probe instance."""
-        return self.field_kwargs
+@dataclass
+class BiotCoil(BiotBase):
+    """Group coil biot methods."""
 
-    @frame_factory(Loop)
-    def loop(self):
-        """Return biot loop instance."""
-        return self.field_kwargs
+    nforce: Nbiot = None
+    nfield: Nbiot = None
+    ninductance: Nbiot = None
+
+    def __post_init__(self):
+        """Append biot attrs."""
+        self.append_biot_attrs(['nforce', 'nfield', 'ninductance'])
+        super().__post_init__()
 
     @frame_factory(Field)
     def field(self):
@@ -138,11 +128,67 @@ class Biot(WallGap, FrameSet):
         """Return biot inductance instance."""
         return {'number': self.ninductance, 'attrs': ['Psi']}
 
-    def clear_biot(self):
-        """Clear all biot attributes."""
-        delattrs = []
-        for attr in self.__dict__:
-            if isinstance(getattr(self, attr), Data):
-                delattrs.append(attr)
-        for attr in delattrs:
-            delattr(self, attr)
+
+@dataclass
+class BiotGap(BiotBase):
+    """Manage biot gap probe methods."""
+
+    ngap: Nbiot = 150
+    mingap: int | float = 1e-3
+    maxgap: int | float = 5
+
+    def __post_init__(self):
+        """Append biot attrs."""
+        self.append_biot_attrs(['ngap', 'mingap', 'maxgap'])
+        super().__post_init__()
+
+    @property
+    def gap_kwargs(self):
+        """Return gap kwargs."""
+        return {'mingap': self.mingap,
+                'maxgap': self.maxgap,
+                'ngap': self.ngap}
+
+    @frame_factory(Gap)
+    def wallgap(self):
+        """Return biot wall-gap probe instance."""
+        return self.gap_kwargs
+
+
+@dataclass
+class Biot(BiotPlasma, BiotCoil, BiotGap):
+    """Expose biot methods as cached properties."""
+
+    ngrid: Nbiot = None
+
+    def __post_init__(self):
+        """Append biot attrs."""
+        self.append_biot_attrs(['ngrid'])
+        super().__post_init__()
+
+    @property
+    def biot_attrs(self):
+        """Return frame attributes."""
+        kwargs = {attr: value for attr, value in self._biot_attrs.items()
+                  if value is not None}
+        return kwargs | self.gap_kwargs
+
+    @frame_factory(Grid)
+    def grid(self):
+        """Return grid biot instance."""
+        return {'number': self.ngrid} | self.field_kwargs
+
+    @frame_factory(Point)
+    def point(self):
+        """Return point biot instance."""
+        return self.field_kwargs
+
+    @frame_factory(Point)
+    def probe(self):
+        """Return biot probe instance."""
+        return self.field_kwargs
+
+    @frame_factory(Loop)
+    def loop(self):
+        """Return biot loop instance."""
+        return self.field_kwargs

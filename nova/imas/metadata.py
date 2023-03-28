@@ -33,9 +33,9 @@ class Attrs(ABC):
 class Properties(Attrs):
     """Manage imas ids_property attributes."""
 
-    homogeneous_time: int
     comment: str | None = None
     source: str | None = None
+    homogeneous_time: int = 1
     provider: str | None = 'Simon McIntosh, simon.mcintosh@iter.org'
     provenance: Ids = None
 
@@ -107,11 +107,9 @@ class Metadata:
 
     ids: Ids
 
-    def put_properties(self, comment, source=None, homogeneous_time=1,
-                       provider=None, provenance=None):
+    def put_properties(self, comment, source=None, *args, **kwargs):
         """Update ids_properties."""
-        props = Properties(homogeneous_time, comment, source,
-                           provider, provenance)
+        props = Properties(comment, source, *args, **kwargs)
         props.update(self.ids.ids_properties)
 
     def put_code(self, description, parameter_dict=None, output_flag=1):

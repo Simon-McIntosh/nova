@@ -1,10 +1,14 @@
 """Manage access to IMAS database."""
-from contextlib import contextmanager
+from contextlib import contextmanager, redirect_stdout, redirect_stderr
 from dataclasses import dataclass, field, fields, InitVar
-from importlib import import_module
 from operator import attrgetter
 from typing import Any, ClassVar, Optional, Type
 
+try:
+    import imas
+    IMAS_MODULE_NOT_FOUND = False
+except ModuleNotFoundError:
+    IMAS_MODULE_NOT_FOUND = True
 import numpy as np
 import xxhash
 
@@ -270,11 +274,8 @@ class Database(IDS):
     @contextmanager
     def _db_entry(self):
         """Yield database with context manager."""
-        try:
-            imas = import_module('imas')
-        except ImportError as error:
-            raise ImportError('imas module not found'
-                              'try module load IMAS') from error
+        if IMAS_MODULE_NOT_FOUND:
+            raise ImportError('imas module not found, try `ml load IMAS`')
         db_entry = imas.DBEntry(self.backend, self.machine,
                                 self.pulse, self.run, user_name=self.user)
         yield db_entry
@@ -296,7 +297,7 @@ class Database(IDS):
             yield db_entry
 
     @contextmanager
-    def db_create(self):
+    def db_write(self):
         """Yeild bare database entry."""
         with self._db_entry() as db_entry:
             db_entry.create()
@@ -306,7 +307,7 @@ class Database(IDS):
         """Write ids data to database entry."""
         if occurrence is None:
             occurrence = self.occurrence
-        with self.db_create() as db_entry:
+        with self.db_write() as db_entry:
             db_entry.put(ids, occurrence=occurrence)
 
     @property

@@ -2,7 +2,7 @@
 from dataclasses import dataclass, field
 from typing import ClassVar
 
-from importlib import import_module
+import imas
 import json
 import numpy as np
 import pandas
@@ -168,17 +168,36 @@ class ErrorField(Plot, Datafile):
 
     def write_ids(self, pulse=160400, run=0):
         """Write data to ids."""
-        ids = import_module('imas').error_b_field()
+        ids = imas.error_b_field()
         metadata = Metadata(ids)
-        metadata.put_properties(self.library[self.datafile], self.datafile)
-        metadata.put_code('Toroidal control surface Fourier decomposition')
-
-        ids.field_map.grid.r.resize(self.data.dims['radius'])
+        metadata.put_properties(self.library[self.datafile], self.datafile,
+                                homogeneous_time=2)
+        metadata.put_code('Toroidal Fourier decomposition of '
+                          'b-field normal to a given control surface')
+        ids.field_map.name = self.library[self.datafile]
         ids.field_map.grid.r = self.data.radius.data
+        ids.field_map.grid.phi = self.data.phi.data * np.pi/180
+        ids.field_map.grid.z = self.data.height.data
+        ids.field_map.b_field_r = self.data.grid_Br.data
+        ids.field_map.b_field_phi = self.data.grid_Bphi.data
+        ids.field_map.b_field_z = self.data.grid_Bz.data
 
-        print(ids)
-        #database = Database(pulse, run)
-        #database.put_ids(ids)
+        ids.control_surface.resize(1)
+
+        control_surface = ids.control_surface[0]
+        control_surface.outline.r = self.data.surface[:, 0].data
+        control_surface.outline.z = self.data.surface[:, 1].data
+        control_surface.normal_vector.r = self.data.normal[:, 0].data
+        control_surface.normal_vector.z = self.data.normal[:, 1].data
+        control_surface.phi = self.data.phi.data * np.pi/180
+        control_surface.n_tor = self.data.mode_number.data
+        control_surface.b_field_r = self.data.Br.data
+        control_surface.b_field_phi = self.data.Bphi.data
+        control_surface.b_field_z = self.data.Bz.data
+        control_surface.b_field_normal_fourier = \
+            self.data.Bn_real.data + 1j * self.data.Bn_imag.data
+
+        Database(pulse, run).put_ids(ids)
 
     def grid_schema(self):
         """Print schema for grid data."""
@@ -202,3 +221,5 @@ if __name__ == '__main__':
     # errorfield.plot_trace(0)
 
     #errorfield.grid_schema()
+    import imas
+    imas.DBEntry

@@ -104,6 +104,8 @@ class Connect:
         pathlib.Path(local).mkdir(parents=True, exist_ok=True)
         command = f'rsync -aP {self.cluster}:{public} {local}'
         subprocess.run(command.split())
+        command = f'rsync -aP {local} {self.cluster}:{public}'
+        subprocess.run(command.split())
 
     def subframe(self, index):
         """Return subframe."""
@@ -214,7 +216,7 @@ if __name__ == '__main__':
 
 
     #ScenarioDatabase().sync_shot('105011/9')
-    #scenario = ScenarioDatabase()
+    scenario = ScenarioDatabase()
     #scenario.sync_shot('135003/5')
     #scenario.load_frame('workflow', 'DINA-IMAS')
     #scenario.sync_workflow('DINA-IMAS')

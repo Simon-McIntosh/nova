@@ -183,7 +183,6 @@ class ErrorField(Plot, Datafile):
         ids.field_map.b_field_z = self.data.grid_Bz.data
 
         ids.control_surface.resize(1)
-
         control_surface = ids.control_surface[0]
         control_surface.outline.r = self.data.surface[:, 0].data
         control_surface.outline.z = self.data.surface[:, 1].data

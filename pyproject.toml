@@ -144,12 +144,12 @@ testpaths = [
   "tests",
   "nova/imas"
 ]
-filterwarnings = [
-  "once::Warning",
-  "ignore::DeprecationWarning",
-  "ignore::FutureWarning",
-  "ignore::ImportWarning"
-]
+# filterwarnings = [
+#  "once::Warning",
+#  #"ignore::DeprecationWarning",
+#  #"ignore::FutureWarning",
+#  #"ignore::ImportWarning"
+# ]
 
 [tool.mypy]
 warn_return_any = true

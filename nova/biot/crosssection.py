@@ -1,4 +1,4 @@
-"""Section methods for BiotFrame."""
+"""Cross-ection methods for BiotFrame."""
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -8,9 +8,9 @@ from nova.frame.framelink import FrameLink
 
 
 @dataclass
-class Section(metamethod.Section):
+class CrossSection(metamethod.CrossSection):
     """
-    Section methods for BiotFrame.
+    Cross-section methods for BiotFrame.
 
     Set cross-section factors used in Biot_Savart calculations.
     """

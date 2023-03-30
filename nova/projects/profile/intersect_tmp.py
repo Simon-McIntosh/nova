@@ -1,6 +1,6 @@
 from shapely.geometry import Polygon, Point, LinearRing
 
-def
+
 poly = Polygon([(0, 0), (2,8), (14, 10), (6,1)])
 point = Point(7,6)
 

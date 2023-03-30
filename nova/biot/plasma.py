@@ -10,10 +10,10 @@ import scipy.spatial
 
 from nova.database.netcdf import netCDF
 from nova.biot.error import PlasmaTopologyError
-from nova.biot.kdtree import KDTree
 from nova.biot.levelset import LevelSet
 from nova.biot.plasmagrid import PlasmaGrid
 from nova.biot.separatrix import PlasmaShape
+from nova.biot.select import Select
 from nova.biot.wall import Wall
 from nova.frame.baseplot import Plot
 from nova.frame.framesetloc import FrameSetLoc
@@ -22,9 +22,9 @@ from nova.geometry.pointloop import PointLoop
 
 
 @numba.njit()
-def update_nturn(select, plasma, ionize, nturn, area):
+def update_nturn(mask, plasma, ionize, nturn, area):
     """Update plasma turns."""
-    ionize[plasma] = select
+    ionize[plasma] = mask
     nturn[plasma] = 0
     ionize_area = area[ionize]
     nturn[ionize] = ionize_area / np.sum(ionize_area)
@@ -38,7 +38,7 @@ class Plasma(Plot, netCDF, FrameSetLoc):
     grid: PlasmaGrid = field(repr=False, default_factory=PlasmaGrid)
     wall: Wall = field(repr=False, default_factory=Wall)
     levelset: LevelSet = field(repr=False, default_factory=LevelSet)
-    kdtree: KDTree = field(repr=False, default_factory=KDTree)
+    select: Select = field(repr=False, default_factory=Select)
     lcfs: PlasmaShape | None = field(init=False, default=None)
 
     def __post_init__(self):
@@ -64,7 +64,7 @@ class Plasma(Plot, netCDF, FrameSetLoc):
         self.wall.solve()
         self.grid.solve()
         self.levelset.solve()
-        self.kdtree.solve()
+        self.select.solve()
 
     def update_lcfs(self):
         """Update last closed flux surface."""
@@ -203,8 +203,8 @@ class Plasma(Plot, netCDF, FrameSetLoc):
         """
         if self.saloc['plasma'].sum() == 0:
             return
-        select = self.ionize(index)
-        update_nturn(select, self.aloc['plasma'], self.aloc['ionize'],
+        mask = self.ionize(index)
+        update_nturn(mask, self.aloc['plasma'], self.aloc['ionize'],
                      self.aloc['nturn'], self.aloc['area'])
         self.update_aloc_hash('nturn')
 
@@ -229,5 +229,5 @@ class Plasma(Plot, netCDF, FrameSetLoc):
                 self.axes.add_patch(PolygonPatch(
                     poly.__geo_interface__,
                     facecolor='C4', alpha=0.75, linewidth=0, zorder=-10))
-        self.grid.plot(**kwargs)
+        self.levelset.plot(**kwargs)
         self.wall.plot(wallflux=False)

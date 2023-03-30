@@ -124,7 +124,8 @@ def test_inverse(matrix_shape):
     matrix = rng.random(matrix_shape)
     data = rng.random(matrix.shape[0])
     ols = OdinaryLeastSquares(matrix, data=data)
-    assert np.allclose(np.linalg.lstsq(matrix, data)[0], ols.inverse())
+    assert np.allclose(np.linalg.lstsq(matrix, data, rcond=None)[0],
+                       ols.inverse())
 
 
 @pytest.mark.parametrize('matrix_shape', matrix_shapes)

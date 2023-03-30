@@ -124,7 +124,7 @@ plt.xscale('log')
 plt.yscale('log')
 plt.legend()
 # "FTPTrans@PSI"
-http://www.psi.ch
+# http://www.psi.ch
 
 #plt.xscale('log')
 #plt.yscale('log')
@@ -138,4 +138,3 @@ plt.plot(w, 10**(mag/20), label='bode')
 plt.xscale('log')
 plt.yscale('log')
 plt.legend()
-

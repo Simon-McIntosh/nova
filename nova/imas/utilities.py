@@ -4,10 +4,11 @@ import pytest
 from nova.imas.database import Database
 
 try:
-    import imas
+    from imas.hli_exception import ALException
     IMPORT_IMAS = True
 except ImportError:
     IMPORT_IMAS = False
+    ALException = None
 
 ids_attrs = dict(
     pf_active=dict(pulse=111001, run=202, name='pf_active', machine='iter_md'),
@@ -25,7 +26,7 @@ def load_ids(*args, **kwargs):
         database = Database(*args, **kwargs)
         database.get_ids()
         return database
-    except (ModuleNotFoundError, imas.hli_exception.ALException):
+    except (ModuleNotFoundError, ALException):
         return False
 
 

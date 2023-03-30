@@ -6,7 +6,7 @@ from nova.utilities import geom
 import matplotlib.pyplot as plt
 
 
-class testbeam(finiteframe):  
+class testbeam(finiteframe):
 
     def __init__(self, N, name='', case=None):
         finiteframe.__init__(self, frame='3D')
@@ -33,7 +33,7 @@ class testbeam(finiteframe):
 
     def bar(self, theta=0, L=3):
         self.L = L
-        self.x = np.linspace(0, self.L, 50) 
+        self.x = np.linspace(0, self.L, 50)
         X = np.zeros((self.N, 3))
         X[:, 0] = np.linspace(0, self.L, self.N)
         X = geom.qrotate(X, theta=theta, dx='y')
@@ -75,20 +75,20 @@ class testbeam(finiteframe):
             ax[2].set_xlabel('beam length')
         plt.despine()
 
-    '''
-    def test(self, case, theta=0):
-        self.clfe()  # clear all (mesh, BCs, constraints and loads)
-        g = geom.qrotate([0, 0, -1], theta=theta, dx='y')[0]
+'''
+def test(self, case, theta=0):
+    self.clfe()  # clear all (mesh, BCs, constraints and loads)
+    g = geom.qrotate([0, 0, -1], theta=theta, dx='y')[0]
 
-        self.bar(theta=theta)  # add nodes / elements
-        v = np.zeros(np.shape(self.x))
-        m = np.zeros(np.shape(self.x))
-        s = np.zeros(np.shape(self.x))
-    '''
+    self.bar(theta=theta)  # add nodes / elements
+    v = np.zeros(np.shape(self.x))
+    m = np.zeros(np.shape(self.x))
+    s = np.zeros(np.shape(self.x))
+'''
 
 def test_simple_beam():  # simple beam
     name = 'simple beam'
-    
+
     # analytic solution
     v = self.w * self.x / (24 * self.EI) *\
         (self.L**3 - 2 * self.L * self.x**2 + self.x**3)
@@ -98,6 +98,7 @@ def test_simple_beam():  # simple beam
     self.add_bc('ny', -1, part='beam', ends=1)
     self.add_weight(g=g)
     self.solve()  # solve
+'''
 self.plot(case, v, m, s, name, theta=theta)
 
 elif case == 1:  # cantilever beam
@@ -177,13 +178,13 @@ elif case == 8:
     self.add_bc('fix', 0, part='beam', ends=0)
     self.add_weight(g=g)
 
-
+'''
 
 
 if __name__ == '__main__':
 
     tb = testbeam(13)
-    
+
     tb.test(0, theta=1*np.pi/180)
     #tb.plot()
 
@@ -192,4 +193,3 @@ if __name__ == '__main__':
     #tb.plot_matrix(tb.stiffness(0))
     #tb.plot_matrix(tb.Ko)
     #tb.plot_matrix(tb.K)
-

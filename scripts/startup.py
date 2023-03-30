@@ -4,6 +4,7 @@ import matplotlib as mpl
 import numpy as np
 import pandas
 import seaborn as sns
+import warnings
 
 
 class Startup:
@@ -13,6 +14,7 @@ class Startup:
         """Configure environment."""
         self.pandas()
         self.seaborn()
+        warnings.filterwarnings('ignore', '', ResourceWarning)
 
     @staticmethod
     def seaborn():

@@ -173,9 +173,9 @@ class Select(MetaMethod):
 
 
 @dataclass
-class Section(MetaMethod):
+class CrossSection(MetaMethod):
     """
-    Section methods for Biot Frame.
+    Cross-section methods for Biot Frame.
 
     Set cross-section factors used in Biot_Savart calculations.
     """
@@ -183,7 +183,7 @@ class Section(MetaMethod):
     name: str = field(init=False, default='biotsection')
     required: list[str] = field(default_factory=lambda: ['section'])
 
-    _subclass: ClassVar[str] = '.biot.section.Section'
+    _subclass: ClassVar[str] = '.biot.crosssection.CrossSection'
 
 
 @dataclass

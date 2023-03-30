@@ -4,6 +4,7 @@ from dataclasses import dataclass
 
 import numpy as np
 from scipy import optimize
+from tqdm import tqdm
 
 from nova.biot.biot import Nbiot
 from nova.biot.separatrix import LCFS
@@ -20,7 +21,7 @@ class MachineDescription(Machine):
     pf_passive: Ids | bool | str = 'iter_md'
     wall: Ids | bool | str = 'iter_md'
     tplasma: str = 'hex'
-    dplasma: int | float = -1000
+    dplasma: int | float = -5000
 
 
 @dataclass
@@ -30,15 +31,15 @@ class Waveform(MachineDescription, LCFS):
     name: str = 'pulse_schedule'
     ngap: Nbiot = 150
     ninductance: Nbiot = 0
-    nlevelset: Nbiot = 1000
-    nkdtree: Nbiot = 5000
+    nlevelset: Nbiot = 10000
+    nselect: Nbiot = None
 
     def solve_biot(self):
         """Extend Machine.solve_biot."""
         super().solve_biot()
         self.inductance.solve()
         self.wallgap.solve(self.data.gap_tail.data, self.data.gap_angle.data,
-                       self.data.gap_id.data)
+                           self.data.gap_id.data)
 
     def update(self):
         """Extend itime update."""
@@ -52,7 +53,7 @@ class Waveform(MachineDescription, LCFS):
         loop_psi = np.atleast_1d(self['loop_psi'])
         plasma_psi = Psi[:, self.plasma_index] * self.sloc['plasma', 'Ic']
         self.sloc['coil', 'Ic'] = np.linalg.lstsq(
-            Psi[:, self.sloc['coil']], loop_psi - plasma_psi)[0]
+            Psi[:, self.sloc['coil']], loop_psi - plasma_psi, rcond=None)[0]
 
     def gap_psi(self):
         """Return gap psi matrix and data."""
@@ -66,6 +67,14 @@ class Waveform(MachineDescription, LCFS):
         """Return loop psi matrix and data."""
         Psi = self.inductance.Psi[self.plasma_index, :][np.newaxis, :]
         psi = float(self['loop_psi'].data)
+        plasma = Psi[:, self.plasma_index] * self.saloc['plasma', 'Ic']
+        return Psi[:, self.saloc['coil']], psi-plasma
+
+    def lcfs_psi(self):
+        """Return separatrix psi matrix and data."""
+        index = self.levelset.query(self.points)
+        Psi = self.levelset.Psi[index]
+        psi = float(self['loop_psi'])*np.ones(len(Psi))
         plasma = Psi[:, self.plasma_index] * self.saloc['plasma', 'Ic']
         return Psi[:, self.saloc['coil']], psi-plasma
 
@@ -83,15 +92,25 @@ class Waveform(MachineDescription, LCFS):
         self.sloc['coil', 'Ic'] = matrix / psi
         self.plasma.separatrix = psi_boundary
 
-    def plot(self, index=None, axes=None, **kwargs):
+    def update_lcfs(self):
+        """Fit Lasc Closed Separatrix."""
+        psi_boundary = float(self['loop_psi'])
+        Psi, psi = self.append(self.lcfs_psi())
+        matrix = MoorePenrose(Psi, gamma=0)
+        self.sloc['coil', 'Ic'] = matrix / psi
+        self.plasma.separatrix = psi_boundary
+
+    def plot(self, index='plasma', axes=None, **kwargs):
         """Plot machine and constraints."""
         super().plot(index=index, axes=axes, **kwargs)
+        self.plot_gaps()
+        self.plasma.plot()
 
     def residual(self, nturn):
         """Return psi grid residual."""
         nturn /= np.sum(nturn)
         self.plasma.nturn = nturn
-        self.update_gap()
+        self.update_lcfs()
         #sol = optimize.root(plasma_shape, self.saloc['coil', 'Ic'])
         #self.saloc['coil', 'Ic'] = sol.x
         #self.plasma.separatrix = self.plasma.psi_boundary
@@ -100,6 +119,7 @@ class Waveform(MachineDescription, LCFS):
 
     def solve(self):
         """Solve waveform."""
+        self.fit()
         optimize.newton_krylov(self.residual, self.aloc['plasma', 'nturn'],
                                x_tol=5e-2, f_tol=1e-3)
 
@@ -116,14 +136,13 @@ class Waveform(MachineDescription, LCFS):
             self.solve()
         except ValueError:
             pass
-        self.plasma.plot()
-        self.plot_gaps()
+        self.plot()
         return self.mpy.mplfig_to_npimage(self.fig)
 
     def annimate(self, duration: float, filename='newton_krylov'):
         """Generate annimiation."""
         self.duration = duration
-        self.max_time = 15
+        self.max_time = 12
         self.set_axes('2d')
         animation = self.mpy.editor.VideoClip(
             self._make_frame, duration=duration)
@@ -136,18 +155,14 @@ if __name__ == '__main__':
 
     waveform = Waveform(pulse, run)
 
-    #waveform.annimate(2.5, 'newton_krylov_ramp_up')
+    #waveform.annimate(5, 'newton_krylov_ramp_up')
 
-    waveform.time = 500
+    waveform.time = 12
     waveform.solve()
+    waveform.plot()
 
-    #waveform.plasma.plot(turns=False)
-    waveform.plot_gaps()
-    waveform.plasma.lcfs.plot()
-
-    waveform.fit()
-    waveform.plot('plasma')
-    waveform.kdtree.plot()
+    # waveform.levelset.tree.plot(waveform.points)
+    # waveform.axes.plot(*waveform.points.T, 'C3')
 
     '''
     from nova.biot.separatrix import Separatrix
@@ -164,7 +179,6 @@ if __name__ == '__main__':
     separatrix.plot()
     separatrix.axes.plot(*waveform['x_point'][0], 'C0o')
     '''
-
 
     '''
     currents = np.zeros((250, waveform.saloc['coil'].sum()))

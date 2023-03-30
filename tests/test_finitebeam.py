@@ -2,9 +2,10 @@ import pytest
 import numpy as np
 
 from nova.structural.finiteframe import finiteframe
-#from nova.structural.properties import secondmoment
+# from nova.structural.properties import secondmoment
 from nova.utilities import geom
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 
 class testbeam(finiteframe):
@@ -33,7 +34,6 @@ class testbeam(finiteframe):
 
     def bar(self, L=3, **kwargs):
         self.L = L
-        #self.x = np.linspace(0, self.L, 50)
         X = np.zeros((self.N, 3))
         X[:, 0] = np.linspace(0, self.L, self.N)
         X = geom.qrotate(X, theta=kwargs.get('theta', self.theta), dx='y')
@@ -98,7 +98,8 @@ class testbeam(finiteframe):
                 ax[2].plot(self.x, self.analytic['s'], '--')
             ax[2].set_ylabel(r'shear')
             ax[2].set_xlabel('beam length')
-        plt.despine()
+        sns.despine()
+
 
 def test_simple(plot=False):
     tb = testbeam('simple beam')
@@ -109,7 +110,7 @@ def test_simple(plot=False):
     tb.solve()
     # analytic solution
     tb.analytic['v'] = tb.w*tb.x / (24*tb.EI) * (tb.L**3 - 2*tb.L*tb.x**2 +
-                                                   tb.x**3)
+                                                 tb.x**3)
     tb.analytic['m'] = -tb.w*tb.x / 2 * (tb.L-tb.x)
     tb.analytic['s'] = -tb.w * (tb.L/2 - tb.x)
     # assert
@@ -117,24 +118,25 @@ def test_simple(plot=False):
     if plot:
         tb.plot()
 
+
 def test_simple_xy(plot=False):
     tb = testbeam('simple beam')
     # define model
-    tb.add_bc('ny', 0, part='beam', ends=0)
-    tb.add_bc('ny', -1, part='beam', ends=1)
+    tb.add_bc('nz', 0, part='beam', ends=0)
+    tb.add_bc('nz', -1, part='beam', ends=1)
     finiteframe.add_weight(tb, g=[0, -1, 0])
     tb.solve()
-    tb.extract_model(i=0)
-    finiteframe.plot(tb, projection='xy')
+    tb.extract_model(i=1)
     # analytic solution
     tb.analytic['v'] = tb.w*tb.x / (24*tb.EI) * (tb.L**3 - 2*tb.L*tb.x**2 +
-                                                   tb.x**3)
+                                                 tb.x**3)
     tb.analytic['m'] = -tb.w*tb.x / 2 * (tb.L-tb.x)
     tb.analytic['s'] = -tb.w * (tb.L/2 - tb.x)
     # assert
-    #tb.check()
+    tb.check()
     if plot:
         tb.plot()
+
 
 def test_cantilever(plot=False):
     tb = testbeam('cantilever beam')
@@ -151,6 +153,7 @@ def test_cantilever(plot=False):
     tb.check()
     if plot:
         tb.plot()
+
 
 def test_pin_fix(plot=False):
     tb = testbeam('pin fix')
@@ -169,6 +172,7 @@ def test_pin_fix(plot=False):
     if plot:
         tb.plot()
 
+
 def test_cantilever_point_load(plot=False):
     tb = testbeam('cantilever - point load')
     # define model
@@ -186,6 +190,7 @@ def test_cantilever_point_load(plot=False):
     if plot:
         tb.plot()
 
+
 def test_end_moment(plot=False):
     tb = testbeam('end moment')
     # define model
@@ -200,6 +205,7 @@ def test_end_moment(plot=False):
     tb.check()
     if plot:
         tb.plot()
+
 
 def test_cantilever_tapered_distributed_load(plot=False):
     tb = testbeam('cantilever tapered distributed load')
@@ -220,6 +226,7 @@ def test_cantilever_tapered_distributed_load(plot=False):
     if plot:
         tb.plot()
 
+
 def test_pinned_tapered_distributed_load(plot=False):
     tb = testbeam('pinned tapered distributed load')
     # define model
@@ -239,6 +246,7 @@ def test_pinned_tapered_distributed_load(plot=False):
     if plot:
         tb.plot()
 
+
 def test_axial_tip_point_load(plot=False):
     tb = testbeam('axial tip point load')
     # define model
@@ -257,7 +265,6 @@ def test_axial_tip_point_load(plot=False):
 def test_vertical_hanging_beam(plot=False):
     tb = testbeam('vertical hanging beam', theta=0)
     # define model
-    #g = geom.qrotate([0, 0, -1], theta=theta, dx='y')[0]
     tb.clfe()  # clear all (mesh, BCs, constraints and loads)
     tb.bar(theta=np.pi/2)  # rotate beam
     tb.add_bc('fix', 0, part='beam', ends=0)
@@ -269,18 +276,7 @@ def test_vertical_hanging_beam(plot=False):
     tb.check()
     if plot:
         tb.plot()
-    return tb
 
 
 if __name__ == '__main__':
-    #pytest.main([__file__])
-
-    test_simple_xy(plot=True)
-
-    #tb.plot()
-    #tb.plot_stress()
-    #tb.plot_moment()
-    #tb.plot_matrix(tb.stiffness(0))
-    #tb.plot_matrix(tb.Ko)
-    #tb.plot_matrix(tb.K)
-
+    pytest.main([__file__])

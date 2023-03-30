@@ -4,8 +4,7 @@ Created on Tue Jul 17 10:40:20 2018
 
 @author: mcintos
 """
-
-        '''
+'''
     def build_coilset(self, include_vessel=True):
         vs_geom = VSgeom()
         self.ind = inductance()
@@ -47,8 +46,8 @@ Created on Tue Jul 17 10:40:20 2018
         plt.legend()
 
         print(1e-3*np.min((Iode[0])))
-        '''
-        '''
+
+
         self.build_coilset(include_vessel=False)
         self.ind.Ic[0] = -60e3  # inital current
         self.ind.Rc[0] = 17.66e-3  # total vs3 resistance
@@ -61,9 +60,9 @@ Created on Tue Jul 17 10:40:20 2018
         plt.legend()
 
         print(1e-3*np.min((Iode[0])))
-        '''
 
-        '''
+
+
         t = np.linspace(0, self.t[-1], 200)
 
         Iode = self.ind.solve(t)
@@ -73,8 +72,8 @@ Created on Tue Jul 17 10:40:20 2018
 
         plt.plot(1e3*t, 1e-3*self.ind.Ic[0]*np.exp(-t/tau), 'C0--')
         plt.plot(1e3*t, 1e-3*Iode[0], 'C1--')
-        '''
-        '''
+
+
     def fit_waveform(self, Rvv):
         Iref = self.LTC['LTC+vessel']['Ic']
         self.update_Rvv(Rvv)
@@ -96,4 +95,4 @@ Created on Tue Jul 17 10:40:20 2018
         self.plot_LTC()
         #plt.plot(1e3*t, 1e-3*self.ind.Ic[0]*np.exp(-t/tau), 'C0--')
         plt.plot(1e3*t, 1e-3*Iode[0], 'C1--')
-        '''
+'''

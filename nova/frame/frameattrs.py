@@ -168,7 +168,7 @@ class FrameAttrs(pandas.DataFrame):
         if isinstance(data, dict):
             with self.setlock(True):
                 for col in self.columns:
-                    self.loc[:, col] = self.format_value(col, self[col])
+                    self[col] = self.format_value(col, self[col])
 
     def hasattrs(self, attr):
         """Return True if attr in self.attrs."""
@@ -178,15 +178,21 @@ class FrameAttrs(pandas.DataFrame):
         """Expose metaframe.hascol."""
         return self.metaframe.hascol(attr, col)
 
-    def format_value(self, col, value):
-        """Return vector with dtype as type(metaframe.default[col])."""
+    def col_dtype(self, col, value):
+        """Return column dtype."""
         if not self.hasattrs('metaframe') or col == 'link':
-            return value
+            return None
         try:
             dtype = type(self.metaframe.default[col])
         except (KeyError, TypeError):  # no default type, isinstance(col, list)
-            return value
+            return None
         if isinstance(self.metaframe.default[col], type(None)):
+            return None
+        return dtype
+
+    def format_value(self, col, value):
+        """Return vector with dtype as type(metaframe.default[col])."""
+        if (dtype := self.col_dtype(col, value)) is None:
             return value
         if value is None:
             return dtype(0)

@@ -70,51 +70,51 @@ if __name__ == '__main__':
 
 
 
-'''
+    '''
 
-def _H(x):
-    H = x[0]
-    for bp in x[1:]:
-        H /= (omega+bp)
-    return H
+    def _H(x):
+        H = x[0]
+        for bp in x[1:]:
+            H /= (omega+bp)
+        return H
 
-def bode(x):
-    zeros, poles, gain = [], -x[:-1], x[-1]
-    magnitude = scipy.signal.bode((zeros, poles, gain), w=omega)[1]
-    H = 10**(mag/20)
-    return H
+    def bode(x):
+        zeros, poles, gain = [], -x[:-1], x[-1]
+        magnitude = scipy.signal.bode((zeros, poles, gain), w=omega)[1]
+        H = 10**(mag/20)
+        return H
 
-def bode_err(x):
-    H = bode(x)
-    return np.sqrt(np.mean((np.log10(p) - np.log10(H))**2))
+    def bode_err(x):
+        H = bode(x)
+        return np.sqrt(np.mean((np.log10(p) - np.log10(H))**2))
 
-def log_rms(x, grad):
-    err = bode_err(x)
-    print(err)
-    if len(grad) > 0:
-        grad[:] = scipy.optimize.approx_fprime(x, bode_err, 1e-6)
-    return err
-
-
-xo = [6, 10, 10]
-opt = nlopt.opt(nlopt.LD_MMA, len(xo))
-opt.set_min_objective(log_rms)
-opt.set_ftol_rel(1e-6)
-#opt.set_xtol_rel(self.xtol_rel)
-x = opt.optimize(xo)
-print(x, opt.last_optimize_result())
-
-#opt.set_ftol_rel(self.ftol_rel)
-#opt.set_xtol_rel(self.xtol_rel)
-#opt.set_lower_bounds(self.grid_boundary[::2])
-#opt.set_upper_bounds(self.grid_boundary[1::2])
+    def log_rms(x, grad):
+        err = bode_err(x)
+        print(err)
+        if len(grad) > 0:
+            grad[:] = scipy.optimize.approx_fprime(x, bode_err, 1e-6)
+        return err
 
 
+    xo = [6, 10, 10]
+    opt = nlopt.opt(nlopt.LD_MMA, len(xo))
+    opt.set_min_objective(log_rms)
+    opt.set_ftol_rel(1e-6)
+    #opt.set_xtol_rel(self.xtol_rel)
+    x = opt.optimize(xo)
+    print(x, opt.last_optimize_result())
 
-xo = [0.1, 2, 20]
-bounds = [(np.min(omega), np.max(omega)) for __ in range(len(xo))]
-bounds[-1] = (1e-6, None)
-res = scipy.optimize.minimize(bode_err, xo, method='L-BFGS-B',
-                              bounds=bounds, options={'gtol': 1e-9})
-tau = np.sort(2*np.pi/res.x[:-1])
-'''
+    #opt.set_ftol_rel(self.ftol_rel)
+    #opt.set_xtol_rel(self.xtol_rel)
+    #opt.set_lower_bounds(self.grid_boundary[::2])
+    #opt.set_upper_bounds(self.grid_boundary[1::2])
+
+
+
+    xo = [0.1, 2, 20]
+    bounds = [(np.min(omega), np.max(omega)) for __ in range(len(xo))]
+    bounds[-1] = (1e-6, None)
+    res = scipy.optimize.minimize(bode_err, xo, method='L-BFGS-B',
+                                  bounds=bounds, options={'gtol': 1e-9})
+    tau = np.sort(2*np.pi/res.x[:-1])
+    '''

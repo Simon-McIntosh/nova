@@ -155,6 +155,6 @@ class MetaFrame(MetaSet):
                 self.metadata = {attr: metadata.pop(attr)}
             elif attr in self.default:
                 self.default[attr] = metadata.pop(attr)
-        if len(metadata) > 0:
-            raise IndexError('unreconised attributes set in **metadata: '
-                             f'{metadata}.')
+        #if len(metadata) > 0:
+        #    raise IndexError('unreconised attributes set in **metadata: '
+        #                     f'{metadata}.')

@@ -139,29 +139,30 @@ tag_prefix = ""
 parentdir_prefix = "nova-"
 
 [tool.pytest.ini_options]
-addopts = "--doctest-modules"
+addopts = "-rfEs -n auto --doctest-modules"
+norecursedirs = ".git __pycache__"
 testpaths = [
   "tests",
-  "nova/imas"
+  "nova/imas", 
 ]
-# filterwarnings = [
-#  "once::Warning",
-#  #"ignore::DeprecationWarning",
-#  #"ignore::FutureWarning",
-#  #"ignore::ImportWarning"
-# ]
+ filterwarnings = [
+  "once::Warning",
+  # "ignore::DeprecationWarning",
+  # "ignore::FutureWarning",
+  # "ignore::ImportWarning"
+]
 
 [tool.mypy]
 warn_return_any = true
-warn_unused_configs = true 
+warn_unused_configs = false
 ignore_missing_imports = true
-no_implicit_reexport = true
+implicit_reexport = true
 
 [tool.pylsp-mypy]
 enabled = true
 live_mode = true
 dmypy = false
-strict = true
+strict = false
 
 [tool.coverage.run]
 omit = [

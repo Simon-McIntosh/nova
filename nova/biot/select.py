@@ -1,20 +1,23 @@
 """Manage unstructured kd-tree."""
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
+import numpy as np
 from shapely.geometry import box
 
 from nova.biot.grid import Expand
 from nova.biot.plasmagrid import PlasmaGrid
 from nova.biot.solve import Solve
 from nova.frame.polygrid import PolyGrid
+from nova.geometry.kdtree import KDTree
 
 
 @dataclass
-class KDTree(PlasmaGrid):
+class Select(PlasmaGrid):
     """Implement kd-tree querys for arbitaray unstructured grids."""
 
     turn: str = 'hexagon'
     tile: bool = True
+    tree: KDTree = field(init=False, repr=False)
 
     def solve(self, number=None, limit=0.2, index='plasma'):
         """Overwrid PlasmaGrid.solve to permit arbitrary solution domains."""
@@ -27,3 +30,9 @@ class KDTree(PlasmaGrid):
                 self.data = Solve(self.subframe, target, reduce=[True, False],
                                   attrs=self.attrs, name=self.name).data
                 self.tessellate(target, wall)
+
+    def load_operators(self):
+        """Extend Grid.load_operators to update tree instance."""
+        super().load_operators()
+        if self.number is not None:
+            self.tree = KDTree(np.c_[self.data.x.data, self.data.z.data])

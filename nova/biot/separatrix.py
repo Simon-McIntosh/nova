@@ -207,9 +207,25 @@ class PlasmaProfile:
         self.plasma_shape['delta'] = UpDown('triangularity', self.coef)
         return self
 
-    def __getattr__(self, attr):
-        """Return unspecified attributes directly from data dict."""
-        return self.coef[attr]
+    @property
+    def minor_radius(self):
+        """Return minor radius."""
+        return self.coef['minor_radius']
+
+    @property
+    def geometric_radius(self):
+        """Return geometric raidus."""
+        return self.coef['geometric_radius']
+
+    @property
+    def geometric_height(self):
+        """Return geometric height."""
+        return self.coef['geometric_height']
+
+    @property
+    def x_point(self):
+        """Return x-point."""
+        return self.coef['x_point']
 
     def __getitem__(self, attr):
         """Return attribute from coef if present else from pulse data."""

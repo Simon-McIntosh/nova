@@ -3,7 +3,7 @@ import pytest
 import numpy as np
 
 from nova.biot.biotframe import BiotFrame
-from nova.biot.section import Section
+from nova.biot.crosssection import CrossSection
 from nova.frame.framelink import FrameLink
 from nova.frame.dataframe import DataFrame
 
@@ -49,7 +49,7 @@ def test_framelink_insert_keyerror():
 
 def test_section_keyerror():
     frame = DataFrame({'section': ['hexagon', 'random']})
-    section = Section(frame)
+    section = CrossSection(frame)
     with pytest.raises(KeyError):
         section.initialize()
 

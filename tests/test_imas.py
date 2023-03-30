@@ -5,7 +5,7 @@ from nova.imas.equilibrium import Equilibrium
 from nova.imas.machine import (CoilGeometry, Machine,
                                PoloidalFieldActive, PoloidalFieldPassive)
 from nova.imas.pf_active import PF_Active
-from nova.imas.utilities import ids_attrs, load_ids, mark
+from nova.imas.utilities import ids_attrs, load_ids, mark, ALException
 
 
 @mark['pf_active']
@@ -64,21 +64,21 @@ def test_equilibrium_attr_defaults():
     assert equilibrium.name == ids_attrs['equilibrium']['name']
     assert equilibrium.user == 'public'
     assert equilibrium.machine == 'iter'
-    assert equilibrium.backend == 13
+    assert equilibrium.backend == 'hdf5'
 
 
 def test_database_minimum_required_input():
-    with pytest.raises(ValueError) as error:
+    with pytest.raises(ALException) as error:
         Database().ids_data
     assert 'When self.ids is None require:' in str(error.value)
 
 
 @mark['equilibrium']
 def test_database_malformed_input():
-    with pytest.raises(TypeError) as error:
+    with pytest.raises(ALException) as error:
         equilibrium = ids_attrs['equilibrium'] | dict(run=None)
         Database(**equilibrium).ids_data
-    assert 'malformed input to imas.DBEntry' in str(error.value)
+    assert 'When self.ids is None require:' in str(error.value)
 
 
 @mark['equilibrium']
@@ -96,7 +96,7 @@ def test_equilibrium_database_from_ids_str_hash():
 def test_equilibrium_database_ids_attrs():
     equilibrium = Database(**ids_attrs['equilibrium'])
     assert equilibrium.ids_attrs == ids_attrs['equilibrium'] | \
-        dict(occurrence=0, user='public', machine='iter', backend=13)
+        dict(occurrence=0, user='public', machine='iter', backend='hdf5')
 
 
 @mark['equilibrium']

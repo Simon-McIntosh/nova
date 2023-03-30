@@ -4,7 +4,7 @@ import io
 import pathlib
 import re
 import subprocess
-from typing import Union, ClassVar
+from typing import ClassVar
 
 import fabric
 import numpy as np

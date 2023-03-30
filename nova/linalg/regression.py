@@ -87,7 +87,7 @@ class RegressionBase():
     @staticmethod
     def _lstsq(matrix, data):
         """Calcuate inverse via numpy's lstsq method."""
-        return np.linalg.lstsq(matrix, data)[0]
+        return np.linalg.lstsq(matrix, data, rcond=None)[0]
 
     @abstractmethod
     def _inverse(self):
@@ -133,7 +133,7 @@ class OdinaryLeastSquares(RegressionBase):
     @staticmethod
     def _lstsq(matrix, data):
         """Calcuate inverse vir numpy's lstsq method."""
-        return np.linalg.lstsq(matrix, data)[0]
+        return np.linalg.lstsq(matrix, data, rcond=None)[0]
 
     def _inverse(self):
         return self._lstsq(self.matrix, self.data)

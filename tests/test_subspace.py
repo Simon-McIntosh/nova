@@ -12,7 +12,7 @@ def test_init():
     framespace = FrameSpace(link=True, required=['x', 'z', 'dl', 'dt'],
                             metadata={'additional': ['link']})
     framespace.insert(4, [5, 7, 12], 0.1, 0.05)
-    return framespace
+    assert framespace.shape == (3, 8)
 
 
 def test_len():
@@ -249,7 +249,7 @@ def test_insert_negative_factor_Ic():
                             subspace=['Ic'])
     framespace.insert(4, [7, 8], link=True, factor=-0.5)
     framespace.insert(4, [7, 8], link=True, factor=-1)
-    framespace.subspace.Ic = 10
+    framespace.subspace.Ic = 10.
     assert framespace.loc[:, 'Ic'].to_list() == [10, 5, 10, -5, 10, -10]
 
 

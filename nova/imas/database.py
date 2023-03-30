@@ -1,5 +1,5 @@
 """Manage access to IMAS database."""
-from contextlib import contextmanager, redirect_stdout, redirect_stderr
+from contextlib import contextmanager
 from dataclasses import dataclass, field, fields, InitVar
 from operator import attrgetter
 from typing import Any, ClassVar, Optional, Type
@@ -30,7 +30,7 @@ class IDS:
     occurrence: int = 0
     user: str = 'public'
     name: str | None = None
-    backend: int = 13
+    backend: str = 'hdf5'
 
     attrs: ClassVar[list[str]] = ['pulse', 'run', 'machine', 'occurrence',
                                   'user', 'name', 'backend']
@@ -55,8 +55,8 @@ class Database(IDS):
         User name. The default is public.
     name: str, optional (required when ids not set)
         Ids name. The default is ''.
-    backend: int, optional (required when ids not set)
-        Access layer backend. The default is 13 (HDF5).
+    backend: str, optional (required when ids not set)
+        Access layer backend. The default is hdf5.
     ids: ImasIds, optional
         When set the ids parameter takes prefrence. The default is None.
 
@@ -80,9 +80,9 @@ class Database(IDS):
         Imas module not found. IMAS access layer not loaded or installed.
     TypeError
         Malformed imput passed to database instance.
-    ValueError
+    ALException
         Insufficient parameters passed to define ids.
-        self.ids is None and pulse, run, and name set to defaults.
+        self.ids is None and pulse, run, and name set to defaults or None.
 
     Examples
     --------
@@ -101,14 +101,14 @@ class Database(IDS):
     >>> equilibrium.pulse, equilibrium.run, equilibrium.name
     (130506, 403, 'equilibrium')
     >>> equilibrium.user, equilibrium.machine, equilibrium.backend
-    ('public', 'iter', 13)
+    ('public', 'iter', 'hdf5')
 
     Minimum input requred for Database is 'ids' or 'pulse', 'run' and 'name':
 
     >>> Database().ids_data
     Traceback (most recent call last):
         ...
-    ValueError: When self.ids is None require:
+    imas.hli_exception.ALException: When self.ids is None require:
     pulse (0 > 0) & run (0 > 0) & name (None != None)
 
     Malformed inputs are thrown as TypeErrors:
@@ -117,10 +117,8 @@ class Database(IDS):
     >>> malformed_database.ids_data
     Traceback (most recent call last):
         ...
-    TypeError: malformed input to imas.DBEntry
-    an integer is required
-    pulse None, run 403, user public
-    machine iter, backend: 13
+    imas.hli_exception.ALException: When self.ids is None require:
+    pulse (None > 0) & run (403 > 0) & name (equilibrium != None)
 
     The database class may also be initiated with an ids from which the
     name attribute may be recovered:
@@ -157,7 +155,7 @@ class Database(IDS):
 
     >>> equilibrium.ids_attrs == dict(pulse=130506, run=403, occurrence=0,\
                                       name='equilibrium', user='public', \
-                                      machine='iter', backend=13)
+                                      machine='iter', backend='hdf5')
     True
 
     Database instances may be created via the from_ids_attrs class method:
@@ -217,8 +215,9 @@ class Database(IDS):
 
     def _check_ids_attrs(self):
         """Confirm minimum working set of input attributes."""
-        if self.pulse == 0 and self.run == 0 and self.name is None:
-            raise ValueError(
+        if self.pulse == 0 or self.pulse is None or \
+                self.run == 0 or self.run is None or self.name is None:
+            raise imas.hli_exception.ALException(
                 f'When self.ids is None require:\n'
                 f'pulse ({self.pulse} > 0) & run ({self.run} > 0) & '
                 f'name ({self.name} != None)')
@@ -271,13 +270,18 @@ class Database(IDS):
                 return db_entry.partial_get(*ids_name, occurrence=occurrence)
             return db_entry.get(*ids_name, occurrence=occurrence)
 
+    @property
+    def uri(self):
+        """Return IDS URI."""
+        return f"imas:{self.backend}?user={self.user};version=3;" \
+               f"shot={self.pulse};run={self.run};database={self.machine}"
+
     @contextmanager
     def _db_entry(self):
         """Yield database with context manager."""
         if IMAS_MODULE_NOT_FOUND:
             raise ImportError('imas module not found, try `ml load IMAS`')
-        db_entry = imas.DBEntry(self.backend, self.machine,
-                                self.pulse, self.run, user_name=self.user)
+        db_entry = imas.DBEntry()
         yield db_entry
         db_entry.close()
 
@@ -286,21 +290,22 @@ class Database(IDS):
         """Yield open database entry."""
         with self._db_entry() as db_entry:
             try:
-                db_entry.open()
-            except TypeError as error:
-                raise TypeError(f'malformed input to imas.DBEntry\n{error}\n'
-                                f'pulse {self.pulse}, '
-                                f'run {self.run}, '
-                                f'user {self.user}\n'
-                                f'machine {self.machine}, '
-                                f'backend: {self.backend}') from error
+                db_entry.open(uri=self.uri)
+            except imas.hli_exception.ALException as error:
+                raise imas.hli_exception.ALException(
+                    f'malformed input to imas.DBEntry\n{error}\n'
+                    f'pulse {self.pulse}, '
+                    f'run {self.run}, '
+                    f'user {self.user}\n'
+                    f'machine {self.machine}, '
+                    f'backend: {self.backend}') from error
             yield db_entry
 
     @contextmanager
     def db_write(self):
         """Yeild bare database entry."""
         with self._db_entry() as db_entry:
-            db_entry.create()
+            db_entry.create(uri=self.uri)
             yield db_entry
 
     def put_ids(self, ids, occurrence=None):
@@ -379,7 +384,7 @@ class DataAttrs:
 
     >>> attrs = dict(pulse=130506, run=403, occurrence=0, \
                      name='pf_active', user='other', \
-                     machine='iter', backend=13)
+                     machine='iter', backend='hdf5')
     >>> DataAttrs(attrs).attrs == attrs
     True
 

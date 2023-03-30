@@ -4,12 +4,12 @@ from dataclasses import dataclass
 from functools import cached_property
 
 import numpy as np
-
-from nova.frame.baseplot import Plot
-from nova.imas.scenario import Scenario
 import scipy
 from shapely.geometry import LinearRing
 
+
+from nova.frame.baseplot import Plot
+from nova.imas.scenario import Scenario
 from nova.imas.machine import Wall
 
 
@@ -74,7 +74,7 @@ class PulseSchedule(Plot, Scenario):
     @cached_property
     def wall_segment(self):
         """Return iter_md first wall instance."""
-        return Wall().segment()
+        return self.data.wall.data
 
     @cached_property
     def _angle(self, corner_eps=0.01):
@@ -143,6 +143,13 @@ class PulseSchedule(Plot, Scenario):
                     self.data.loop_voltage, self.data.time, initial=0)
             self.data['loop_psi'] -= self.data.loop_psi[-1]/2
 
+    def build_wall(self):
+        """Extract wall profile from IDS."""
+        wall = Wall()
+        self.data['wall'] = ('wall_index', 'point'), wall.segment()
+        self.data.attrs['wall_md'] = ','.join(
+            [str(value) for _, value in wall.ids_attrs.items()])
+
     def build(self):
         """Build netCDF database using data extracted from imasdb."""
         with self.build_scenario():
@@ -159,6 +166,7 @@ class PulseSchedule(Plot, Scenario):
                 'position_control',
                 ['magnetic_axis', 'geometric_axis',
                  'x_point', 'strike_point', 'boundary_outline'])
+            self.build_wall()
             self.build_gaps()
             self.build_derived()
         return self

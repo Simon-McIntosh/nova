@@ -29,7 +29,7 @@ class Waveform(MachineDescription, LCFS):
     """Generate coilset voltage and current waveforms."""
 
     name: str = 'pulse_schedule'
-    ngap: Nbiot = 500
+    ngap: Nbiot = 2000
     ninductance: Nbiot = 0
     nlevelset: Nbiot = None
     nselect: Nbiot = None
@@ -57,7 +57,9 @@ class Waveform(MachineDescription, LCFS):
 
     def gap_psi(self):
         """Return gap psi matrix and data."""
-        Psi = self.wallgap.matrix(self['gap'].data)
+        index = self.plasmagap.query(self.points)
+        Psi = self.plasmagap.Psi[index]
+        #Psi = self.plasmagap.matrix(self['gap'].data)
         #psi = self.plasma.psi_boundary*np.ones(len(Psi))
         psi = float(self['loop_psi'])*np.ones(len(Psi))
         plasma = Psi[:, self.plasma_index] * self.saloc['plasma', 'Ic']
@@ -88,7 +90,7 @@ class Waveform(MachineDescription, LCFS):
         """Solve gap wall flux."""
         psi_boundary = float(self['loop_psi'])
         Psi, psi = self.append(self.gap_psi())
-        matrix = MoorePenrose(Psi, gamma=1e-5)
+        matrix = MoorePenrose(Psi, gamma=0)
         self.sloc['coil', 'Ic'] = matrix / psi
         self.plasma.separatrix = psi_boundary
 
@@ -110,7 +112,7 @@ class Waveform(MachineDescription, LCFS):
         """Return psi grid residual."""
         nturn /= np.sum(nturn)
         self.plasma.nturn = nturn
-        self.update_lcfs()
+        self.update_gap()
         #sol = optimize.root(plasma_shape, self.saloc['coil', 'Ic'])
         #self.saloc['coil', 'Ic'] = sol.x
         #self.plasma.separatrix = self.plasma.psi_boundary
@@ -122,6 +124,7 @@ class Waveform(MachineDescription, LCFS):
         self.fit()
         optimize.newton_krylov(self.residual, self.aloc['plasma', 'nturn'],
                                x_tol=5e-2, f_tol=1e-3)
+        print(len(self.plasmagap.query(self.points)))
 
     def _make_frame(self, time):
         """Make frame for annimation."""
@@ -159,7 +162,7 @@ if __name__ == '__main__':
 
     waveform.time = 12
     waveform.solve()
-    waveform.plot()
+    #waveform.plot()
 
     # waveform.levelset.tree.plot(waveform.points)
     # waveform.axes.plot(*waveform.points.T, 'C3')
@@ -180,9 +183,9 @@ if __name__ == '__main__':
     separatrix.axes.plot(*waveform['x_point'][0], 'C0o')
     '''
 
-    '''
-    currents = np.zeros((250, waveform.saloc['coil'].sum()))
-    times = np.linspace(4, 685, len(currents))
+
+    currents = np.zeros((50, waveform.saloc['coil'].sum()))
+    times = np.linspace(50, 100, len(currents)) # 685
 
     for i, time in enumerate(tqdm(times, 'calculating current waveform')):
         waveform.time = time
@@ -198,7 +201,7 @@ if __name__ == '__main__':
     waveform.axes.legend(ncol=4)
     waveform.axes.set_xlabel('time, s')
     waveform.axes.set_ylabel(r'$I_c$, kA')
-    '''
+
 
     '''
     waveform.time = 500

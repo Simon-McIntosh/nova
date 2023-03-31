@@ -36,7 +36,7 @@ class KDTree(Plot):
         """Return mean adjacent node spacing."""
         return np.mean(self.kd_tree.query(self.points, k=2)[0][..., 1])
 
-    def query(self, other: np.ndarray) -> np.ndarray:
+    def query(self, other: np.ndarray):
         """Return distance plasma filament selection arrays."""
         distance, tree = self.kd_tree.query(
             other, distance_upper_bound=self.upper_bound)
@@ -51,3 +51,18 @@ class KDTree(Plot):
         index = self.query(other)[1]
         self.axes.plot(*other.T, '-.', color='gray')
         self.axes.plot(*self.points[index, :].T, 'k.')
+
+
+@dataclass
+class Tree:
+    """Manage fast nearest-neighbour selections from inital point cloud."""
+
+    tree: KDTree = field(init=False, repr=False)
+
+    def update_tree(self, points: np.ndarray, factor=0.1):
+        """Update kd selection tree."""
+        self.tree = KDTree(points, factor)
+
+    def query(self, other: np.ndarray):
+        """Return point index from kdtree."""
+        return self.tree.query(other)[1]

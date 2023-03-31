@@ -133,26 +133,21 @@ class BiotCoil(BiotBase):
 class BiotGap(BiotBase):
     """Manage biot gap probe methods."""
 
-    ngap: Nbiot = 150
-    mingap: int | float = 1e-3
-    maxgap: int | float = 5
+    ngap: Nbiot = None
+    mingap: int | float = 0
+    maxgap: int | float = 3
 
     def __post_init__(self):
         """Append biot attrs."""
         self.append_biot_attrs(['ngap', 'mingap', 'maxgap'])
         super().__post_init__()
 
-    @property
-    def gap_kwargs(self):
-        """Return gap kwargs."""
-        return {'mingap': self.mingap,
-                'maxgap': self.maxgap,
-                'ngap': self.ngap}
-
     @frame_factory(Gap)
-    def wallgap(self):
+    def plasmagap(self):
         """Return biot wall-gap probe instance."""
-        return self.gap_kwargs
+        return {'ngap': self.ngap,
+                'mingap': self.mingap,
+                'maxgap': self.maxgap}
 
 
 @dataclass
@@ -169,9 +164,8 @@ class Biot(BiotPlasma, BiotCoil, BiotGap):
     @property
     def biot_attrs(self):
         """Return frame attributes."""
-        kwargs = {attr: value for attr, value in self._biot_attrs.items()
-                  if value is not None}
-        return kwargs | self.gap_kwargs
+        return {attr: value for attr, value in self._biot_attrs.items()
+                if value is not None}
 
     @frame_factory(Grid)
     def grid(self):

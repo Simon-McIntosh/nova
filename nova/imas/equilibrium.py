@@ -257,7 +257,7 @@ class Equilibrium(Profile2D, Profile1D, Parameter0D, Boundary, Grid):
 
     Plot poloidal flux at itime=10:
 
-    >>> itime = 20
+    >>> equilibrium.itime = 20
     >>> levels = equilibrium.plot_2d('psi', colors='C3', levels=31)
     >>> equilibrium.plot_boundary()
 

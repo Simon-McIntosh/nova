@@ -9,7 +9,7 @@ import xarray
 class GetSlice:
     """Convinence method to provide access to sliced ids data."""
 
-    time_index: int = field(init=False, default=0)
+    time_index: int | None = field(init=False, default=None)
     data: xarray.Dataset | xarray.DataArray = \
         field(default_factory=xarray.Dataset, repr=False)
 
@@ -20,7 +20,7 @@ class GetSlice:
 
     def get(self, key: str):
         """Regulate access to imas dataset."""
-        data = self.data[self.match(key)][self.time_index].data
+        data = self.data[self.match(key)][self.itime].data
         try:
             return data.item()
         except ValueError:
@@ -45,10 +45,14 @@ class GetSlice:
     @property
     def itime(self):
         """Manage solution time index."""
+        if self.time_index is None:
+            raise IndexError('itime is None')
         return self.time_index
 
     @itime.setter
-    def itime(self, time_index: int):
+    def itime(self, time_index: int | None):
+        if time_index is None:
+            return
         self.time_index = time_index
         self.update()
 

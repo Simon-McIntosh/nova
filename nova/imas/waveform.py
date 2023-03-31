@@ -18,7 +18,7 @@ class MachineDescription(Machine):
     """Machine description default class."""
 
     pf_active: Ids | bool | str = 'iter_md'
-    pf_passive: Ids | bool | str = 'iter_md'
+    pf_passive: Ids | bool | str = False
     wall: Ids | bool | str = 'iter_md'
     tplasma: str = 'hex'
     dplasma: int | float = -5000
@@ -29,17 +29,17 @@ class Waveform(MachineDescription, LCFS):
     """Generate coilset voltage and current waveforms."""
 
     name: str = 'pulse_schedule'
-    ngap: Nbiot = 150
+    ngap: Nbiot = 500
     ninductance: Nbiot = 0
-    nlevelset: Nbiot = 10000
+    nlevelset: Nbiot = None
     nselect: Nbiot = None
 
     def solve_biot(self):
         """Extend Machine.solve_biot."""
         super().solve_biot()
         self.inductance.solve()
-        self.wallgap.solve(self.data.gap_tail.data, self.data.gap_angle.data,
-                           self.data.gap_id.data)
+        self.plasmagap.solve(self.data.gap_tail.data, self.data.gap_angle.data,
+                             self.data.gap_id.data)
 
     def update(self):
         """Extend itime update."""

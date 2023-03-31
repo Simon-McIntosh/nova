@@ -210,22 +210,22 @@ class PlasmaProfile:
     @property
     def minor_radius(self):
         """Return minor radius."""
-        return self.coef['minor_radius']
+        return self['minor_radius']
 
     @property
     def geometric_radius(self):
         """Return geometric raidus."""
-        return self.coef['geometric_radius']
+        return self['geometric_radius']
 
     @property
     def geometric_height(self):
         """Return geometric height."""
-        return self.coef['geometric_height']
+        return self['geometric_height']
 
     @property
     def x_point(self):
         """Return x-point."""
-        return self.coef['x_point']
+        return self['x_point']
 
     def __getitem__(self, attr):
         """Return attribute from coef if present else from pulse data."""
@@ -293,7 +293,7 @@ class PlasmaProfile:
                                     2*(1 - self.lower_triangularity**2)**0.5):
             delta_kappa = 1e-3 + min_kappa - self.lower_elongation
             self['lower_elongation'] = self.lower_elongation + delta_kappa
-            self.geometric_height += self.minor_radius * delta_kappa
+            self['geometric_height'] += self.minor_radius * delta_kappa
             self.plasma_shape['kappa'].check_consistency()
 
 

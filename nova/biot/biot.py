@@ -135,7 +135,7 @@ class BiotGap(BiotBase):
 
     ngap: Nbiot = None
     mingap: int | float = 0
-    maxgap: int | float = 3
+    maxgap: int | float = 2.5
 
     def __post_init__(self):
         """Append biot attrs."""

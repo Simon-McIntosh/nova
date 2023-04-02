@@ -19,7 +19,7 @@ class Gap(Plot, Tree, Operate):
     attrs: list[str] = field(default_factory=lambda: ['Psi'])
     ngap: int | float | None = 50
     mingap: int | float = 0
-    maxgap: int | float = 5
+    maxgap: int | float = 2.5
     node_number: int = field(init=False, default=0)
     gap_number: int = field(init=False, default=0)
 

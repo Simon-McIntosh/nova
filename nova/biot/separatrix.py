@@ -532,7 +532,8 @@ class LCFS(Separatrix, PulseSchedule):
         if np.allclose(self.get('gap'), 0):
             return
         sol = minimize(self.objective, self.coef_o, method='SLSQP',
-                       bounds=self.bounds, constraints=self.constraints)
+                       bounds=self.bounds, constraints=self.constraints,
+                       tol=0.001)
         self.objective(sol.x)
 
     def plot(self, axes=None, **kwargs):
@@ -578,7 +579,17 @@ if __name__ == '__main__':
     lcfs.fit()
     lcfs.plot()
 
-    # lcfs.annimate(10, 'gaps_fit_limiter')
+    height = np.zeros(500)
+    for i, time in enumerate(np.linspace(4, 640, len(height))):
+        lcfs.time = time
+        lcfs.fit()
+        height[i] = lcfs.geometric_height
+    lcfs.axes.plot(height)
+
+    plt.plot(height)
+    plt.plot(scipy.signal.savgol_filter(height, 15, 2))
+
+    #lcfs.annimate(10, 'gaps_fit_limiter')
 
     #lcfs.plot_gaps()
     #separatrix = Separatrix().single_null(

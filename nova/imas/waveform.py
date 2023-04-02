@@ -20,8 +20,8 @@ class MachineDescription(Machine):
     pf_active: Ids | bool | str = 'iter_md'
     pf_passive: Ids | bool | str = False
     wall: Ids | bool | str = 'iter_md'
-    tplasma: str = 'hex'
-    dplasma: int | float = -5000
+    tplasma: str = 'r'
+    dplasma: int | float = -1000
 
 
 @dataclass
@@ -29,11 +29,11 @@ class Waveform(MachineDescription, LCFS):
     """Generate coilset voltage and current waveforms."""
 
     name: str = 'pulse_schedule'
-    ngap: Nbiot = 2000
+    ngap: Nbiot = 1000
     ninductance: Nbiot = 0
     nlevelset: Nbiot = None
     nselect: Nbiot = None
-    point_number: int = 10000
+    point_number: int = 5000
 
     def solve_biot(self):
         """Extend Machine.solve_biot."""
@@ -58,10 +58,9 @@ class Waveform(MachineDescription, LCFS):
 
     def gap_psi(self):
         """Return gap psi matrix and data."""
-        index = self.plasmagap.query(self.points)
-        Psi = self.plasmagap.Psi[index]
-        #Psi = self.plasmagap.matrix(self['gap'].data)
-        #psi = self.plasma.psi_boundary*np.ones(len(Psi))
+        #index = self.plasmagap.query(self.points)
+        #Psi = self.plasmagap.Psi[index]
+        Psi = self.plasmagap.matrix(self['gap'].data)
         psi = float(self['loop_psi'])*np.ones(len(Psi))
         plasma = Psi[:, self.plasma_index] * self.saloc['plasma', 'Ic']
         return Psi[:, self.saloc['coil']], psi-plasma
@@ -89,18 +88,17 @@ class Waveform(MachineDescription, LCFS):
 
     def update_gap(self):
         """Solve gap wall flux."""
-        psi_boundary = float(self['loop_psi'])
         Psi, psi = self.append(self.gap_psi())
         matrix = MoorePenrose(Psi, gamma=1e-5)
-        self.sloc['coil', 'Ic'] = matrix / psi
-        self.plasma.separatrix = psi_boundary
+        self.saloc['coil', 'Ic'] = matrix / psi
+        self.plasma.separatrix = float(self['loop_psi'])
 
     def update_lcfs(self):
         """Fit Lasc Closed Separatrix."""
         psi_boundary = float(self['loop_psi'])
         Psi, psi = self.append(self.lcfs_psi())
         matrix = MoorePenrose(Psi, gamma=0)
-        self.sloc['coil', 'Ic'] = matrix / psi
+        self.saloc['coil', 'Ic'] = matrix / psi
         self.plasma.separatrix = psi_boundary
 
     def plot(self, index='plasma', axes=None, **kwargs):
@@ -122,9 +120,12 @@ class Waveform(MachineDescription, LCFS):
 
     def solve(self):
         """Solve waveform."""
-        self.fit()
-        optimize.newton_krylov(self.residual, self.aloc['plasma', 'nturn'],
-                               x_tol=5e-2, f_tol=1e-3)
+        #self.fit()
+
+        self.aloc['plasma', 'nturn'] = optimize.newton_krylov(
+            self.residual, self.aloc['plasma', 'nturn'],
+            x_tol=1e-3, f_tol=1e-3, iter=2)
+        self.update_gap()
 
     def _make_frame(self, time):
         """Make frame for annimation."""
@@ -161,8 +162,9 @@ if __name__ == '__main__':
     #waveform.annimate(5, 'newton_krylov_ramp_up')
 
     waveform.time = 12
+    waveform.fit()
     waveform.solve()
-    #waveform.plot()
+    waveform.plot()
 
     # waveform.levelset.tree.plot(waveform.points)
     # waveform.axes.plot(*waveform.points.T, 'C3')
@@ -183,9 +185,8 @@ if __name__ == '__main__':
     separatrix.axes.plot(*waveform['x_point'][0], 'C0o')
     '''
 
-
     currents = np.zeros((150, waveform.saloc['coil'].sum()))
-    times = np.linspace(0, 685, len(currents))
+    times = np.linspace(10, 685, len(currents))
 
     for i, time in enumerate(tqdm(times, 'calculating current waveform')):
         waveform.time = time

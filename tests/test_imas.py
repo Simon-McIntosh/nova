@@ -67,6 +67,7 @@ def test_equilibrium_attr_defaults():
     assert equilibrium.backend == 'hdf5'
 
 
+@mark['imas']
 def test_database_minimum_required_input():
     with pytest.raises(ALException) as error:
         Database().ids_data

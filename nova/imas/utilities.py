@@ -30,7 +30,8 @@ def load_ids(*args, **kwargs):
         return False
 
 
-mark = {}
+mark = {'imas': pytest.mark.skipif(
+    not IMPORT_IMAS, reason='imas module not loaded')}
 for attr in ids_attrs:
     mark[attr] = pytest.mark.skipif(
         not load_ids(**ids_attrs[attr]), reason=f'{attr} database unavalible')

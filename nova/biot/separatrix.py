@@ -32,6 +32,10 @@ class LCFS(Plot):
         return self.points[:, 1]
 
     @cached_property
+    def length(self):
+        """Return lenght of last closed flux surface>""
+
+    @cached_property
     def r_max(self):
         """Return maximum radius, Rmax."""
         return self.radius.max()

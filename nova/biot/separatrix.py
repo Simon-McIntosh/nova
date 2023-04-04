@@ -33,7 +33,8 @@ class LCFS(Plot):
 
     @cached_property
     def length(self):
-        """Return lenght of last closed flux surface>""
+        """Return lenght of last closed flux surface."""
+        return np.linalg.norm(self.points[1:] - self.points[:-1], axis=1).sum()
 
     @cached_property
     def r_max(self):

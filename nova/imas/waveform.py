@@ -60,7 +60,7 @@ class Waveform(MachineDescription, PulseDesign):
         """Return gap psi matrix and data."""
         #index = self.plasmagap.query(self.points)
         #Psi = self.plasmagap.Psi[index]
-        Psi = self.plasmagap.matrix(self['gap'].data)
+        Psi = self.plasmagap.matrix(self['gap'])
         psi = float(self['loop_psi'])*np.ones(len(Psi))
         plasma = Psi[:, self.plasma_index] * self.saloc['plasma', 'Ic']
         return Psi[:, self.saloc['coil']], psi-plasma
@@ -111,8 +111,8 @@ class Waveform(MachineDescription, PulseDesign):
         """Return psi grid residual."""
         nturn /= np.sum(nturn)
         self.plasma.nturn = nturn
-        #self.update_gap()
-        self.update_lcfs()
+        self.update_gap()
+        #self.update_lcfs()
         #sol = optimize.root(plasma_shape, self.saloc['coil', 'Ic'])
         #self.saloc['coil', 'Ic'] = sol.x
         #self.plasma.separatrix = self.plasma.psi_boundary

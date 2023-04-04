@@ -59,7 +59,7 @@ class FirstWall(Plot, PlasmaGrid, FrameSetLoc):
         self.update_aloc_hash('nturn')
 
     def normalize_multiframe(self):
-        """Nnormalize turn number for multiframe plasmas."""
+        """Normalize turn number for multiframe plasmas."""
         self.linkframe(self.Loc['plasma', :].index.tolist())
         self.Loc['plasma', 'nturn'] = \
             self.Loc['plasma', 'area'] / np.sum(self.Loc['plasma', 'area'])

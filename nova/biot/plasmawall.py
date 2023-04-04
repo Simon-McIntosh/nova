@@ -11,7 +11,7 @@ from nova.biot.limiter import Limiter
 
 
 @dataclass
-class Wall(Limiter, Point):
+class PlasmaWall(Limiter, Point):
     """Compute interaction for a series of discrete points."""
 
     attrs: list[str] = field(default_factory=lambda: ['Psi'])
@@ -28,7 +28,7 @@ class Wall(Limiter, Point):
 
     def check_limiter(self):
         """Check validity of upstream data -> update limiter flux."""
-        if (version := self.aloc_hash['Ic']) != self.version['wallflux'] or \
+        if (version := self.aloc_hash['Ic']) != self.version['limitflux'] or \
                 self.version['Psi'] != self.subframe.version['nturn']:
             self.update_wall(self.psi, self.plasma_polarity)
             self.version['limitflux'] = version
@@ -49,7 +49,7 @@ class Wall(Limiter, Point):
         sample = Sample(self.boundary, delta=0.1)
         super().solve(np.c_[sample['radius'], sample['height']])
 
-    def plot(self, axes=None, wallflux=False, **kwargs):
+    def plot(self, axes=None, limitflux=False, **kwargs):
         """Plot wall pannels."""
         if len(self.data) == 0:
             return
@@ -57,5 +57,5 @@ class Wall(Limiter, Point):
         kwargs = dict(marker=None, linestyle='-', ms=4, color='gray',
                       linewidth=1.5) | kwargs
         self.axes.plot(self.data.x, self.data.z, **kwargs)
-        if wallflux:
+        if limitflux:
             super().plot(axes=axes)

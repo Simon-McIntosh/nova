@@ -124,7 +124,6 @@ class Parameter0D(Plot, Scenario):
                     continue
                 self.data[attr] = 'time', self.ids_index.array(path)
 
-
     @property
     def boundary(self):
         """Return trimmed boundary contour."""
@@ -203,7 +202,7 @@ class Profile2D(BiotPlot, Scenario):
 
 
 @dataclass
-class Equilibrium(Parameter0D, Grid):  # Profile2D, Profile1D,
+class Equilibrium(Profile2D, Profile1D, Parameter0D, Grid):
     """
     Manage active equilibrium ids.
 

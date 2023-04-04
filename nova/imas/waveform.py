@@ -7,9 +7,9 @@ from scipy import optimize
 from tqdm import tqdm
 
 from nova.biot.biot import Nbiot
-from nova.biot.separatrix import LCFS
 from nova.imas.database import Ids
 from nova.imas.machine import Machine
+from nova.imas.pulsedesign import PulseDesign
 from nova.linalg.regression import MoorePenrose
 
 
@@ -25,13 +25,13 @@ class MachineDescription(Machine):
 
 
 @dataclass
-class Waveform(MachineDescription, LCFS):
+class Waveform(MachineDescription, PulseDesign):
     """Generate coilset voltage and current waveforms."""
 
     name: str = 'pulse_schedule'
     ngap: Nbiot = 1000
     ninductance: Nbiot = 0
-    nlevelset: Nbiot = None
+    nlevelset: Nbiot = 2500
     nselect: Nbiot = None
     point_number: int = 5000
 
@@ -111,7 +111,8 @@ class Waveform(MachineDescription, LCFS):
         """Return psi grid residual."""
         nturn /= np.sum(nturn)
         self.plasma.nturn = nturn
-        self.update_gap()
+        #self.update_gap()
+        self.update_lcfs()
         #sol = optimize.root(plasma_shape, self.saloc['coil', 'Ic'])
         #self.saloc['coil', 'Ic'] = sol.x
         #self.plasma.separatrix = self.plasma.psi_boundary
@@ -120,7 +121,7 @@ class Waveform(MachineDescription, LCFS):
 
     def solve(self):
         """Solve waveform."""
-        #self.fit()
+        self.fit()
 
         nturn = optimize.newton_krylov(
             self.residual, self.aloc['plasma', 'nturn'],

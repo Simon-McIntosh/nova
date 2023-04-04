@@ -12,9 +12,9 @@ from nova.database.netcdf import netCDF
 from nova.biot.error import PlasmaTopologyError
 from nova.biot.levelset import LevelSet
 from nova.biot.plasmagrid import PlasmaGrid
-from nova.biot.separatrix import PlasmaShape
+from nova.biot.separatrix import LCFS
 from nova.biot.select import Select
-from nova.biot.wall import Wall
+from nova.biot.plasmawall import PlasmaWall
 from nova.frame.baseplot import Plot
 from nova.frame.framesetloc import FrameSetLoc
 from nova.geometry.polygon import Polygon
@@ -36,10 +36,10 @@ class Plasma(Plot, netCDF, FrameSetLoc):
 
     name: str = 'plasma'
     grid: PlasmaGrid = field(repr=False, default_factory=PlasmaGrid)
-    wall: Wall = field(repr=False, default_factory=Wall)
+    wall: PlasmaWall = field(repr=False, default_factory=PlasmaWall)
     levelset: LevelSet = field(repr=False, default_factory=LevelSet)
     select: Select = field(repr=False, default_factory=Select)
-    lcfs: PlasmaShape | None = field(init=False, default=None)
+    lcfs: LCFS | None = field(init=False, default=None)
 
     def __post_init__(self):
         """Update subframe metadata."""
@@ -229,5 +229,7 @@ class Plasma(Plot, netCDF, FrameSetLoc):
                 self.axes.add_patch(PolygonPatch(
                     poly.__geo_interface__,
                     facecolor='C4', alpha=0.75, linewidth=0, zorder=-10))
-        self.levelset.plot(**kwargs)
-        self.wall.plot(wallflux=False)
+        levels = self.levelset.plot(**kwargs)
+        if levels is None:
+            self.grid.plot(**kwargs)
+        self.wall.plot(limitflux=True)

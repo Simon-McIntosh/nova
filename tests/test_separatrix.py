@@ -3,7 +3,7 @@ import pytest
 
 import numpy as np
 
-from nova.biot.separatrix import PlasmaShape, PlasmaProfile, Separatrix
+from nova.biot.separatrix import LCFS, PlasmaProfile, Separatrix
 
 
 @pytest.mark.parametrize('radius,height', product([0, 2.5, 5], [-1.3, 0, 7.2]))
@@ -18,7 +18,7 @@ def test_profile_axis(radius, height):
 def test_limiter_profile(minor_radius, elongation, triangularity):
     profile = Separatrix().limiter(5.2, 0, minor_radius,
                                    elongation, triangularity)
-    shape = PlasmaShape(profile.points)
+    shape = LCFS(profile.points)
     attrs = ['minor_radius', 'elongation', 'triangularity']
     assert np.allclose(np.array([minor_radius, elongation, triangularity]),
                        shape(attrs), atol=1e-2)
@@ -33,7 +33,7 @@ def test_theta_upper():
 def test_sn_profile(minor_radius, elongation, triangularity):
     profile = Separatrix().single_null(5.2, 0, minor_radius, elongation,
                                        triangularity)
-    shape = PlasmaShape(profile.points)
+    shape = LCFS(profile.points)
     attrs = ['minor_radius', 'elongation', 'triangularity']
     assert np.allclose(np.array([minor_radius, elongation, triangularity]),
                        shape(attrs), atol=1e-2)

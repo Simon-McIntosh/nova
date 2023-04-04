@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from typing import ClassVar
 
 from nova.biot import (Gap, Grid, Inductance, Loop,
-                       Wall, PlasmaGrid, Point, Select,
+                       PlasmaWall, PlasmaGrid, Point, Select,
                        Field, Force, LevelSet, Plasma)
 from nova.biot.data import Data
 from nova.database.netcdf import netCDF
@@ -94,7 +94,7 @@ class BiotPlasma(BiotBase):
         """Return plasma grid biot instance."""
         return self.field_kwargs
 
-    @frame_factory(Wall)
+    @frame_factory(PlasmaWall)
     def plasmawall(self):
         """Return plasma firstwall biot instance."""
         return {'number': self.nwall, 'attrs': ['Psi']}

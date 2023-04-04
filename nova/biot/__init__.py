@@ -9,9 +9,9 @@ __all__ = [
            'Loop',
            'Plasma',
            'PlasmaGrid',
+           'PlasmaWall',
            'Point',
            'Select',
-           'Wall',
            ]
 
 from nova import ImportManager
@@ -28,9 +28,9 @@ if imp.defer:
     Loop = imp.load('.loop', 'Loop')
     Plasma = imp.load('.plasma', 'Plasma')
     PlasmaGrid = imp.load('.plasmagrid', 'PlasmaGrid')
+    PlasmaWall = imp.load('.plasmawall', 'PlasmaWall')
     Point = imp.load('.point', 'Point')
     Select = imp.load('.select', 'Select')
-    Wall = imp.load('.wall', 'Wall')
 else:
     from nova.biot.field import Field
     from nova.biot.force import Force
@@ -41,6 +41,6 @@ else:
     from nova.biot.loop import Loop
     from nova.biot.plasma import Plasma
     from nova.biot.plasmagrid import PlasmaGrid
+    from nova.biot.plasmawall import PlasmaWall
     from nova.biot.point import Point
     from nova.biot.select import Select
-    from nova.biot.wall import Wall

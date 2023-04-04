@@ -92,7 +92,7 @@ class LimType(click.ParamType):
 def extrapolate(ctx, pulse, run, ngrid, nplasma,
                 limit, index, pf_active, wall,
                 scenario_db, machine_db, backend):
-    """
+    r"""
     Extrapolate poloidal flux and magnetic field beyond separatrix.
 
     Reads flux functions from equilibrium IDS and solves for coil currents

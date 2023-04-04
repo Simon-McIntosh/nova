@@ -100,30 +100,40 @@ class PulseSchedule(Plot, Scenario):
             np.c_[panel_angle[:-1], panel_angle[1:]], axis=1)
         return scipy.interpolate.NearestNDInterpolator(points, angle)
 
+    def build_gap_reference(self):
+        """Build gap reference (r, z, angle)."""
+        if self.ids_index.empty('r') or self.ids_index.empty('z'):
+            return
+        if 'point' not in self.data:
+            self.data.coords['point'] = ['r', 'z']
+        self.data.coords['gap_tail'] = ('gap_index', 'point'), \
+            np.c_[self.ids_index.array('r'), self.ids_index.array('z')]
+        if not self.ids_index.empty('angle'):
+            self.data.coords['gap_angle'] = 'gap_index', \
+                self.ids_index.array('angle')
+        else:
+            self.data.coords['gap_angle'] = 'gap_index', \
+                self._angle(self.ids_index.array('r'),
+                            self.ids_index.array('z'))
+        self.data.coords['gap_vector'] = ('gap_index', 'point'), \
+            np.c_[np.cos(self.data.gap_angle), np.sin(self.data.gap_angle)]
+
     def build_gaps(self):
         """Build firstwall gaps."""
         with self.ids_index.node('position_control.gap'):
             if self.ids_index.empty('value.reference.data'):
                 return
-            gap_id = self.ids_index.array('identifier')
+            if not self.ids_index.empty('identifier'):
+                gap_id = self.ids_index.array('identifier')
+            else:
+                gap_id = [f'gap_{i}' for i in
+                          range(len(self.ids_data.position_control.gap))]
             self.data.coords['gap_index'] = range(len(gap_id))
             self.data.coords['gap_id'] = 'gap_index', gap_id
             if not self.ids_index.empty('name'):
                 self.data.coords['gap_name'] = 'gap_index', \
                     self.ids_index.array('name')
-            if 'point' not in self.data:
-                self.data.coords['point'] = ['r', 'z']
-            self.data.coords['gap_tail'] = ('gap_index', 'point'), \
-                np.c_[self.ids_index.array('r'), self.ids_index.array('z')]
-            if not self.ids_index.empty('angle'):
-                self.data.coords['gap_angle'] = 'gap_index', \
-                    self.ids_index.array('angle')
-            else:
-                self.data.coords['gap_angle'] = 'gap_index', \
-                    self._angle(self.ids_index.array('r'),
-                                self.ids_index.array('z'))
-            self.data.coords['gap_vector'] = ('gap_index', 'point'), \
-                np.c_[np.cos(self.data.gap_angle), np.sin(self.data.gap_angle)]
+            self.build_gap_reference()
             if self.data.homogeneous_time == 1:
                 self.data['gap'] = ('time', 'gap_index'), \
                     self.ids_index.array('value.reference.data')
@@ -245,8 +255,9 @@ if __name__ == '__main__':
     pulse, run = 135003, 5
     # pulse, run = 105028, 1  # Maksim
     pulse, run = 105027, 1  # Maksim
+    pulse, run = 135013, 2
 
-    # PulseSchedule(pulse, run)._clear()
+    PulseSchedule(pulse, run)._clear()
     schedule = PulseSchedule(pulse, run)
 
     #schedule.time = 500

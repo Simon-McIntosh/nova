@@ -20,8 +20,8 @@ class MachineDescription(Machine):
     pf_active: Ids | bool | str = 'iter_md'
     pf_passive: Ids | bool | str = False
     wall: Ids | bool | str = 'iter_md'
-    tplasma: str = 'r'
-    dplasma: int | float = -1000
+    tplasma: str = 'hex'
+    dplasma: int | float = -2500
 
 
 @dataclass
@@ -122,10 +122,12 @@ class Waveform(MachineDescription, LCFS):
         """Solve waveform."""
         #self.fit()
 
-        self.aloc['plasma', 'nturn'] = optimize.newton_krylov(
+        nturn = optimize.newton_krylov(
             self.residual, self.aloc['plasma', 'nturn'],
-            x_tol=1e-3, f_tol=1e-3, iter=2)
-        self.update_gap()
+            x_tol=1e-3, f_tol=1e-3, maxiter=10)
+        self.residual(nturn)
+        #self.aloc['plasma', 'nturn'] = nturn
+        #self.update_gap()
 
     def _make_frame(self, time):
         """Make frame for annimation."""
@@ -185,6 +187,7 @@ if __name__ == '__main__':
     separatrix.axes.plot(*waveform['x_point'][0], 'C0o')
     '''
 
+    '''
     currents = np.zeros((150, waveform.saloc['coil'].sum()))
     times = np.linspace(10, 685, len(currents))
 
@@ -202,7 +205,7 @@ if __name__ == '__main__':
     waveform.axes.legend(ncol=4)
     waveform.axes.set_xlabel('time, s')
     waveform.axes.set_ylabel(r'$I_c$, kA')
-
+    '''
 
     '''
     waveform.time = 500

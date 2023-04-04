@@ -1,6 +1,7 @@
 """Manage access to equilibrium data."""
 from dataclasses import dataclass, field
 from functools import cached_property
+from typing import ClassVar
 
 import numpy as np
 
@@ -59,18 +60,44 @@ class Grid(Scenario):
 
 
 @dataclass
-class Boundary(Plot, Scenario):
-    """Load boundary timeseries from equilibrium ids."""
+class Parameter0D(Plot, Scenario):
+    """Load 0D parameter timeseries from equilibrium ids."""
 
-    def outline(self, itime: int) -> np.ndarray:
-        """Return r, z outline."""
-        outline = self.ids_index.get_slice(itime, 'boundary.outline')
-        return np.c_[outline.r, outline.z]
+    attrs_0d: list[str] = field(
+            default_factory=lambda: ['ip', 'beta_pol', 'li_3',
+                                     'psi_axis', 'psi_boundary',
+                                     'volume', 'area', 'surface', 'length_pol',
+                                     'q_axis', 'q_95',
+                                     'psi_external_average', 'v_external',
+                                     'plasma_inductance', 'plasma_resistance'])
+    attrs_boundary: ClassVar[list[str]] = [
+        'minor_radius', 'elongation', 'elongation_upper', 'elongation_lower',
+        'triangularity', 'triangularity_upper', 'triangularity_lower',
+        'squareness_upper_inner', 'squareness_upper_outer',
+        'squareness_lower_inner', 'squareness_lower_outer']
 
     def build(self):
-        """Build outline timeseries."""
+        """Build 0D parameter timeseries."""
         super().build()
-        length = max(len(self.outline(itime))
+        self.append('time', self.attrs_0d, 'global_quantities')
+        self.append('time', ['r', 'z'], 'global_quantities.magnetic_axis',
+                    postfix='o')
+        self.append('time', ['r', 'z'], 'global_quantities.current_centre',
+                    postfix='p')
+        self.append('time', ['psi', 'type'], 'boundary_separatrix',
+                    prefix='boundary_')
+        self.append('time', self.attrs_boundary, 'boundary_separatrix')
+        self.build_boundary_outline()
+
+    def boundary_outline(self, itime: int) -> np.ndarray:
+        """Return r, z boundary outline."""
+        outline = self.ids_index.get_slice(
+            itime, 'boundary_separatrix.outline')
+        return np.c_[outline.r, outline.z]
+
+    def build_boundary_outline(self):
+        """Build outline timeseries."""
+        length = max(len(self.boundary_outline(itime))
                      for itime in self.data.itime.data)
         if length == 0:
             return
@@ -83,47 +110,36 @@ class Boundary(Plot, Scenario):
         self.data['boundary_length'] = 'time', \
             np.zeros(self.data.dims['time'], dtype=int)
         for itime in self.data.itime.data:
-            outline = self.outline(itime)
+            outline = self.boundary_outline(itime)
             length = len(outline)
             self.data['boundary_length'][itime] = length
             self.data['boundary'][itime, :length] = outline
+
+    def build_boundary_shape(self):
+        """Build plasma shape parameters."""
+        with self.ids_index.node('time_slice'):
+            for attr in self.attrs_boundary:
+                path = f'boundary_separatrix.{attr}'
+                if self.ids_index.empty(path):
+                    continue
+                self.data[attr] = 'time', self.ids_index.array(path)
+
 
     @property
     def boundary(self):
         """Return trimmed boundary contour."""
         return self['boundary'][:int(self['boundary_length'])]
 
+    def plot_0d(self, attr, axes=None):
+        """Plot 0D parameter timeseries."""
+        self.set_axes('1d', axes=axes)
+        self.axes.plot(self.data.time, self.data[attr], label=attr)
+
     def plot_boundary(self, axes=None):
         """Plot 2D boundary at itime."""
         self.get_axes('2d', axes=axes)
         self.axes.plot(self.boundary[:, 0], self.boundary[:, 1],
                        'gray', alpha=0.5)
-
-
-@dataclass
-class Parameter0D(Plot, Scenario):
-    """Load 0D parameter timeseries from equilibrium ids."""
-
-    attrs_0d: list[str] = field(
-            default_factory=lambda: ['ip', 'beta_pol', 'li_3',
-                                     'psi_axis', 'psi_boundary',
-                                     'volume', 'area', 'surface', 'length_pol',
-                                     'q_axis', 'q_95', 'psi_external_average',
-                                     'plasma_inductance'])
-
-    def build(self):
-        """Build 0D parameter timeseries."""
-        super().build()
-        self.append('time', self.attrs_0d, 'global_quantities')
-        self.append('time', ['r', 'z'], 'global_quantities.magnetic_axis',
-                    postfix='o')
-        self.append('time', ['r', 'z'], 'global_quantities.current_centre',
-                    postfix='p')
-
-    def plot_0d(self, attr, axes=None):
-        """Plot 0D parameter timeseries."""
-        self.set_axes('1d', axes=axes)
-        self.axes.plot(self.data.time, self.data[attr], label=attr)
 
 
 @dataclass
@@ -187,7 +203,7 @@ class Profile2D(BiotPlot, Scenario):
 
 
 @dataclass
-class Equilibrium(Profile2D, Profile1D, Parameter0D, Boundary, Grid):
+class Equilibrium(Parameter0D, Grid):  # Profile2D, Profile1D,
     """
     Manage active equilibrium ids.
 
@@ -304,16 +320,18 @@ if __name__ == '__main__':
     #doctest.testmod()
 
     pulse, run = 105028, 1  # DINA -10MA divertor PCS
-    #pulse, run = 135011, 7  # DINA
+    pulse, run = 135011, 7  # DINA
     pulse, run = 105011, 9
     pulse, run = 135003, 5
-    pulse, run = 135007, 4
-
+    # pulse, run = 135007, 4
     pulse, run = 105028, 1
+    pulse, run = 135013, 2
 
     Equilibrium(pulse, run)._clear()
     equilibrium = Equilibrium(pulse, run)
 
-    equilibrium.itime = 50
-    equilibrium.plot_2d('psi', mask=0)
-    equilibrium.plot_boundary()
+
+
+    #equilibrium.itime = 50
+    #equilibrium.plot_2d('psi', mask=0)
+    #equilibrium.plot_boundary()

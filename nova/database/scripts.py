@@ -11,12 +11,12 @@ from nova.database.filepath import FilePath
 @click.option('-base', 'basename', default='user_data', type=str)
 @click.version_option(package_name='nova', message='%(package)s %(version)s')
 @click.pass_context
-def nova(ctx, dirname, basename):
+def filepath(ctx, dirname, basename):
     """Manage nova filepath."""
     ctx.obj = FilePath(dirname=dirname, basename=basename)
 
 
-@nova.command
+@filepath.command
 @click.pass_context
 def clear(ctx):
     """Clear local file cache."""

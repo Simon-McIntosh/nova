@@ -126,6 +126,7 @@ class Waveform(MachineDescription, PulseDesign):
         nturn = optimize.newton_krylov(
             self.residual, self.aloc['plasma', 'nturn'],
             x_tol=1e-3, f_tol=1e-3, maxiter=10)
+        print(np.sqrt(np.mean((nturn - self.aloc['plasma', 'nturn'])**2)))
         self.residual(nturn)
         #self.aloc['plasma', 'nturn'] = nturn
         #self.update_gap()
@@ -168,6 +169,8 @@ if __name__ == '__main__':
     waveform.fit()
     waveform.solve()
     waveform.plot()
+
+
 
     # waveform.levelset.tree.plot(waveform.points)
     # waveform.axes.plot(*waveform.points.T, 'C3')

@@ -19,6 +19,10 @@ class LevelSet(Tree, Grid):
     levels: int | np.ndarray = 50
     contour: Contour = field(init=False, repr=False)
 
+    def __call__(self, psi):
+        """Return flux surface."""
+        return self.contour.closedlevelset(psi).points
+
     def solve(self, number=None, limit=0, index='plasma'):
         """Solve rectangular grid fit to first wall contour."""
         super().solve(number, limit=limit, index=index)
@@ -42,8 +46,3 @@ class LevelSet(Tree, Grid):
         if attr == 'contour':
             self.check_contour()
         return super().__getattribute__(attr)
-
-    def lcfs(self, psi):
-        """Return last closed flux surface."""
-        psi_levelset = self.contour.closedlevelset(psi)
-        return LCFS(psi_levelset.points)

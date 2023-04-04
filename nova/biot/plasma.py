@@ -68,7 +68,9 @@ class Plasma(Plot, netCDF, FrameSetLoc):
 
     def update_lcfs(self):
         """Update last closed flux surface."""
-        self.lcfs = self.levelset.lcfs(self.psi_boundary)
+        points = self.levelset(self.psi_boundary)
+        mask = self.x_mask(points[:, 1])
+        self.lcfs = LCFS(points[mask])
 
     def check_lcfs(self):
         """Check validity of upstream data, update wall flux if nessisary."""
@@ -143,12 +145,11 @@ class Plasma(Plot, netCDF, FrameSetLoc):
         """Return plasma filament psi-mask."""
         return self.polarity*self.grid.psi > self.polarity*psi
 
-    def x_mask(self):
-        """Return plasma filament x-mask."""
-        mask = np.ones(self.aloc['plasma'].sum(), dtype=bool)
+    def x_mask(self, z_plasma: np.ndarray):
+        """Return plasma filament/boundary x-mask."""
+        mask = np.ones(len(z_plasma), dtype=bool)
         if self.grid.x_point_number == 0:
             return mask
-        z_plasma = self.aloc['plasma', 'z']
         for x_point in self.grid.x_points:
             if x_point[1] < self.o_point[1]:
                 mask &= z_plasma > x_point[1]
@@ -160,7 +161,8 @@ class Plasma(Plot, netCDF, FrameSetLoc):
         """Return plasma filament selection mask."""
         match index:
             case int(psi) | float(psi):
-                return self.psi_mask(psi) & self.x_mask()
+                z_plasma = self.aloc['plasma', 'z']
+                return self.psi_mask(psi) & self.x_mask(z_plasma)
             case [int(psi) | float(psi), float(z_min)]:
                 return self.psi_mask(psi) & self.aloc['plasma', 'z'] > z_min
             case [int(psi) | float(psi), float(z_min), float(z_max)]:

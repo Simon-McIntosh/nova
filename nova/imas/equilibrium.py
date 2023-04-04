@@ -91,8 +91,7 @@ class Parameter0D(Plot, Scenario):
 
     def boundary_outline(self, itime: int) -> np.ndarray:
         """Return r, z boundary outline."""
-        outline = self.ids_index.get_slice(
-            itime, 'boundary_separatrix.outline')
+        outline = self.ids_index.get_slice(itime, 'boundary.outline')
         return np.c_[outline.r, outline.z]
 
     def build_boundary_outline(self):

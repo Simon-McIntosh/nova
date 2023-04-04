@@ -139,7 +139,7 @@ tag_prefix = ""
 parentdir_prefix = "nova-"
 
 [tool.pytest.ini_options]
-addopts = "-rfEs -n auto --doctest-modules"
+addopts = "-rfEs --doctest-modules"
 norecursedirs = ".git __pycache__"
 testpaths = [
   "tests",

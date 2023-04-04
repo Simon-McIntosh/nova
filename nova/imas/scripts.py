@@ -3,7 +3,6 @@ from importlib import import_module
 
 import click
 
-from nova.imas.extrapolate import Extrapolate
 
 class ResType(click.ParamType):
     """
@@ -92,8 +91,7 @@ class LimType(click.ParamType):
 def extrapolate(ctx, pulse, run, ngrid, nplasma,
                 limit, index, pf_active, wall,
                 scenario_db, machine_db, backend):
-    r"""
-    Extrapolate poloidal flux and magnetic field beyond separatrix.
+    r"""Extrapolate poloidal flux and magnetic field beyond separatrix.
 
     Reads flux functions from equilibrium IDS and solves for coil currents
     in a least squares sense to fit known poloidal flux interior to separatrix.

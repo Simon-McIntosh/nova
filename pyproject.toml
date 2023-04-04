@@ -46,7 +46,7 @@ dependencies = [
   "numba",
   "numdifftools", 
   "numpy",
-  "pandas>=1.5",
+  "pandas>=1.5,<2",
   "pylops>=2.0",
   "pyperf",
   "pyvista",

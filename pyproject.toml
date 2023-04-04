@@ -126,7 +126,7 @@ thermofluids = [
 [project.scripts]
 benchmark = "nova.scripts.benchmark:benchmark"
 extrapolate = "nova.imas.scripts:extrapolate"
-nova = "nova.database.scripts:nova"
+filepath = "nova.database.scripts:filepath"
 
 [project.urls]
 Homepage = "https://git.iter.org/projects/EQ/repos/nova/"

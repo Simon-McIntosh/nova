@@ -22,12 +22,11 @@ class BiotFrame(FrameLink):
 
     def update_metadata(self, data, columns, attrs, metadata):
         """Extend FrameAttrs update_metadata."""
-        metadata = dict(required=['x', 'z'],
-                        additional=['xo', 'zo', 'plasma', 'nturn',
-                                    'link', 'segment'],
-                        available=['section', 'poly'],
-                        array=['x', 'z', 'xo', 'zo', 'dx', 'dz',
-                               'area', 'nturn']) | metadata
+        metadata = \
+            {'required': ['x', 'z'],
+             'additional': ['xo', 'zo', 'plasma', 'nturn', 'link', 'segment'],
+             'available': ['section', 'poly'],
+             'array': ['x', 'z', 'dx', 'dz', 'area', 'nturn']} | metadata
         super().update_metadata(data, columns, attrs, metadata)
 
     def __call__(self, attr):
@@ -58,12 +57,12 @@ class BiotFrame(FrameLink):
     @property
     def delta_r(self):
         """Return normalized r-coordinate distance from coil centroid."""
-        return (self.x - self.xo) / self.dx
+        return (self.x - self.xo.values) / self.dx
 
     @property
     def delta_z(self):
         """Return normalized z-coordinate distance from coil centroid."""
-        return (self.z - self.zo) / self.dz
+        return (self.z - self.zo.values) / self.dz
 
 
 class Target(BiotFrame):

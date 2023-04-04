@@ -82,7 +82,7 @@ def test_radial_field_matrix_length():
     coilset.coil.insert([1.1, 1.2, 1.3], 0, 0.075, 0.15, Ic=15e3)
     coilset.field.solve()
     assert len(coilset.field) == len(coilset.field.data.Br)
-    assert len(coilset.field.bn) == len(coilset.frame)
+    assert len(coilset.field.bp) == len(coilset.frame)
 
 
 def test_radial_field_single_coil():
@@ -90,14 +90,14 @@ def test_radial_field_single_coil():
     coilset.coil.insert(1.3, 0, 0.075, 0.15, Ic=15e3)
     coilset.field.solve()
     coilset.point.solve(coilset.field.points)
-    assert np.isclose(coilset.field.bn[0], coilset.point.bn.max())
+    assert np.isclose(coilset.field.bp[0], coilset.point.bp.max())
 
 
 def test_store_load():
     coilset = CoilSet(nfield=-0.01)
     coilset.coil.insert([1.1, 1.2, 1.3], 0, 0.075, 0.15, Ic=15e3)
     coilset.field.solve()
-    bn = coilset.field.bn
+    bp = coilset.field.bp
     with tempfile.NamedTemporaryFile(delete=False) as tmp:
         coilset.filepath = tmp.name
         coilset.store()
@@ -106,7 +106,7 @@ def test_store_load():
         coilset = CoilSet(filename=path.name, dirname=path.parent).load()
         coilset._clear()
     os.unlink(tmp.name)
-    assert np.allclose(bn, coilset.field.bn)
+    assert np.allclose(bp, coilset.field.bp)
 
 
 if __name__ == '__main__':

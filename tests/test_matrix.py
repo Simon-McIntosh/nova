@@ -27,7 +27,7 @@ def test_field(itime):
                      enumerate(benchmark.profile.data.coil_name.data)
                      if name in benchmark.field.coil_name[field_index]]
     assert np.allclose(
-        benchmark.field.bn[field_index],
+        benchmark.field.bp[field_index],
         benchmark.profile['b_field_max_timed'][profile_index], rtol=1e-1)
 
 

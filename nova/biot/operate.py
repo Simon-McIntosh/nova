@@ -146,14 +146,14 @@ class Operate(Data):
                          for attr in self.attrs}
         self.version |= {attr.lower(): None for attr in self.attrs}
         if 'Br' in self.attrs and 'Bz' in self.attrs:
-            self.version['bn'] = None
+            self.version['bp'] = None
 
     def load_arrays(self):
         """Link data arrays."""
         for attr in self.version:
-            if attr.capitalize() in self.attrs or attr == 'bn':
+            if attr.capitalize() in self.attrs or attr == 'bp':
                 if attr.islower():
-                    if attr == 'bn' and self.classname == 'Field':
+                    if attr == 'bp' and self.classname == 'Field':
                         self.array[attr] = np.zeros(self.data.dims['index'])
                     else:
                         self.array[attr] = np.zeros(self.data.dims['target'])
@@ -182,10 +182,10 @@ class Operate(Data):
 
     def get_norm(self):
         """Return cached field L2 norm."""
-        if (version := self.aloc_hash['Ic']) != self.version['bn']:
-            self.version['bn'] = version
-            self.array['bn'][:] = self.calculate_norm()
-        return self.array['bn']
+        if (version := self.aloc_hash['Ic']) != self.version['bp']:
+            self.version['bp'] = version
+            self.array['bp'][:] = self.calculate_norm()
+        return self.array['bp']
 
     def __getattr__(self, attr):
         """Return variable data - lazy evaluation - cached."""
@@ -197,12 +197,12 @@ class Operate(Data):
             return self.array[attr]
         if attr not in (avalible := [attr for attr in self.version
                                      if attr.capitalize() in self.attrs
-                                     or attr == 'bn']):
+                                     or attr == 'bp']):
             raise AttributeError(f'Attribute {attr} '
                                  f'not defined in {avalible}.')
         if len(self.data) == 0:
             return self.array[attr]
-        if attr == 'bn':
+        if attr == 'bp':
             return self.get_norm()
         Attr = attr.capitalize()
         self.check_plasma(Attr)

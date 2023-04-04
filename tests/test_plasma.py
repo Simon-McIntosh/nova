@@ -6,6 +6,16 @@ from nova.frame.coilset import CoilSet
 from nova.geometry.polygon import Polygon
 
 
+def test_plasma_volume():
+    coilset = CoilSet(dplasma=-15)
+    coilset.firstwall.insert([[1, 5, 5, 1, 1], [1, 1, 5, 5, 1]])
+    volume = 16 * 2*np.pi*3
+    assert np.isclose(coilset.Loc['volume'][0], volume)
+    assert np.isclose(coilset.Loc['volume'][0], coilset.loc['volume'].sum())
+    assert np.allclose(coilset.loc['volume'],
+                       coilset.loc['area'] * 2*np.pi*coilset.loc['x'])
+
+
 def test_polygon_separatrix_loop():
     coilset = CoilSet(dplasma=-35)
     coilset.firstwall.insert([[1, 5, 5, 1, 1], [1, 1, 5, 5, 1]])

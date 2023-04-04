@@ -5,6 +5,7 @@ from functools import cached_property
 from descartes import PolygonPatch
 import numba
 import numpy as np
+from scipy.constants import mu_0
 from scipy.interpolate import interp1d
 import scipy.spatial
 
@@ -92,6 +93,14 @@ class Plasma(Plot, netCDF, FrameSetLoc):
             raise IndexError('multiple field nulls found within firstwall\n'
                              f'{self.grid.data_o}')
         return self.grid.o_psi[0]
+
+    @property
+    def li(self):
+        """Return normalized plasma inductance."""
+        volume = self.aloc['ionize', 'volume']
+        index = self.aloc['plasma', 'ionize']
+        bp = np.sum(self.grid.bp[index]**2 * volume) / np.sum(volume)
+        return bp / (mu_0 * self.saloc['plasma', 'Ic'][0] / self.lcfs.length)
 
     @property
     def x_point_index(self):

@@ -68,7 +68,7 @@ class DataFrame(FrameAttrs):
         """Reset index if self.index is unset."""
         if not self.index.is_unique:  # rebuild index
             self.index = pandas.RangeIndex(len(self))
-        if isinstance(self.index, pandas.RangeIndex):
+        if isinstance(self.index, pandas.RangeIndex) and len(self) > 0:
             self['index'] = self._build_index(self)
             self.set_index('index', inplace=True)
             self.index.name = None
@@ -94,7 +94,8 @@ class DataFrame(FrameAttrs):
 
     def _build_index(self, data: pandas.DataFrame, **kwargs):
         """Wrap public build_index with dataframe input."""
-        index_length = self._index_length(data)
+        if (index_length := self._index_length(data)) == 0:
+            return None
         return self.build_index(index_length, **kwargs)
 
     def build_index(self, index_length: int, **kwargs):

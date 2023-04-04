@@ -217,7 +217,8 @@ class PolyGrid(PolyCell):
     vector: PolyVector = field(init=False)
     frame: pandas.DataFrame = field(init=False, repr=False)
     columns: list[str] = field(init=False, default_factory=lambda: [
-        'x', 'z', 'dl', 'dt', 'dx', 'dz', 'rms', 'area', 'section', 'poly'])
+        'x', 'z', 'dl', 'dt', 'dx', 'dz', 'rms', 'area', 'volume',
+        'section', 'poly'])
 
     def __post_init__(self):
         """Generate grid."""

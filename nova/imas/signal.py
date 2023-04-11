@@ -77,7 +77,6 @@ class Defeature:
         self['rdp'] = self['sample'].sel({'time': mask})
 
 
-
 @dataclass
 class Sample(Plot, Select):
     """Re-sample signal using a polyphase filter."""
@@ -194,7 +193,7 @@ if __name__ == '__main__':
     pulse, run = 135013, 2
 
     equilibrium = Equilibrium(pulse, run)
-    sample = Sample(equilibrium.data, 1.5, (3, 1))
+    sample = Sample(equilibrium.data, 2.5, (3, 1))
 
     sample.plot(['elongation', 'triangularity_upper', 'triangularity_lower'])
-    sample.plot('ip')
+    #sample.plot('ip')

@@ -62,7 +62,7 @@ def test_extrapolate_attrs():
 
 
 @mark['CORSICA']
-@pytest.mark.parametrize('itime', [5, 10, 20, 30, 35, 40])
+@pytest.mark.parametrize('itime', [5, 15, 20, 30, 35, 40])
 def test_extrapolate_rms_error(itime):
     equilibrium = Equilibrium(**ids_attrs['CORSICA'])
     extrapolate = Extrapolate(ids=equilibrium.ids_data, limit='ids',

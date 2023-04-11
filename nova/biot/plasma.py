@@ -69,6 +69,8 @@ class Plasma(Plot, netCDF, FrameSetLoc):
 
     def update_lcfs(self):
         """Update last closed flux surface."""
+        if len(self.levelset) == 0:
+            raise RuntimeError('solve levelset - nlevelset is None')
         points = self.levelset(self.psi_boundary)
         mask = self.x_mask(points[:, 1])
         self.lcfs = LCFS(points[mask])
@@ -95,12 +97,18 @@ class Plasma(Plot, netCDF, FrameSetLoc):
         return self.grid.o_psi[0]
 
     @property
+    def current(self):
+        """Return plasma current."""
+        return self.saloc['plasma', 'Ic'][0]
+
+    @property
     def li(self):
         """Return normalized plasma inductance."""
         volume = self.aloc['ionize', 'volume']
-        index = self.aloc['plasma', 'ionize']
-        bp = np.sum(self.grid.bp[index]**2 * volume) / np.sum(volume)
-        return bp / (mu_0 * self.saloc['plasma', 'Ic'][0] / self.lcfs.length)
+        poloidal_field = self.grid.bp[self.aloc['plasma', 'ionize']]
+        surface = np.sum(poloidal_field * volume) / np.sum(volume)
+        boundary = (mu_0 * self.current / self.lcfs.length)**2
+        return surface / boundary
 
     @property
     def x_point_index(self):

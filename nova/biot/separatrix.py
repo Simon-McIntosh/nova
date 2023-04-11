@@ -1,14 +1,87 @@
 """Generate of an artifical an separatrix from shape parameters."""
 import bisect
 from dataclasses import dataclass, field
-from functools import cached_property
+from functools import cached_property, wraps
 from typing import ClassVar
 
 import numpy as np
 from scipy.interpolate import interp1d
-
+from scipy.optimize import minimize_scalar
 
 from nova.frame.baseplot import Plot
+
+
+def negate(func):
+    """Return negated interpolator output."""
+    @wraps(func)
+    def wrapper(*args):
+        return -func(*args)
+    return wrapper
+
+
+@dataclass
+class Peak:
+    """Wrapped (loop) interpolation and minimization."""
+
+    length: np.ndarray
+    value: int
+    pad_width: int = 6
+    kind: str = 'quadratic'
+
+    def __post_init__(self):
+        """Wrap inputs."""
+        if self.pad_width > 0:
+            segments = self.length[1:] - self.length[:-1]
+            segments = np.pad(segments, self.pad_width, 'wrap')
+            self.length = np.append(0, np.cumsum(segments))
+            self.length /= self.length[-1]
+            self.value = np.pad(self.value, self.pad_width, 'wrap')
+
+    def __call__(self, length):
+        """Return call to interpolator."""
+        return self.interpolator(length)
+
+    @cached_property
+    def interpolator(self):
+        """Return 1d interpolator."""
+        return interp1d(self.length, self.value, self.kind)
+
+    @staticmethod
+    def _minimize(fun):
+        """Wrap scipy minimize_scalar."""
+        return minimize_scalar(fun, bounds=(0, 1), method='bounded')
+
+    @cached_property
+    def minimum(self):
+        """Return location and value of minimium."""
+        res = self._minimize(self.interpolator)
+        return res.x, res.fun
+
+    @cached_property
+    def maximum(self):
+        """Return location and value of minimium."""
+        res = self._minimize(negate(self.interpolator))
+        return res.x, -res.fun
+
+    @property
+    def min_length(self):
+        """Return normalized minimum length."""
+        return self.minimum[0]
+
+    @property
+    def min_value(self):
+        """Return normalized minimum length."""
+        return self.minimum[1]
+
+    @property
+    def max_length(self):
+        """Return normalized maximum length."""
+        return self.maximum[0]
+
+    @property
+    def max_value(self):
+        """Return normalized minimum length."""
+        return self.maximum[1]
 
 
 @dataclass
@@ -22,34 +95,49 @@ class LCFS(Plot):
         return np.array([getattr(self, attr) for attr in attrs])
 
     @cached_property
+    def segment_length(self):
+        """Return separatrix segment lengths."""
+        return np.linalg.norm(self.points[1:] - self.points[:-1], axis=1)
+
+    @cached_property
+    def cumaulative_length(self):
+        """Return normalized cumaulative separatrix length."""
+        return np.append(0, np.cumsum(self.segment_length)) / self.length
+
+    @cached_property
     def radius(self):
-        """Return surface radius."""
-        return self.points[:, 0]
+        """Return surface radius interpolator."""
+        return Peak(self.cumaulative_length, self.points[:, 0])
 
     @cached_property
     def height(self):
-        """Return surface height."""
-        return self.points[:, 1]
+        """Return surface height interpolator."""
+        return Peak(self.cumaulative_length, self.points[:, 1])
 
     @cached_property
     def length(self):
-        """Return lenght of last closed flux surface."""
-        return np.linalg.norm(self.points[1:] - self.points[:-1], axis=1).sum()
+        """Return length of last closed flux surface."""
+        return self.segment_length.sum()
 
-    @cached_property
+    @property
     def r_max(self):
-        """Return maximum radius, Rmax."""
-        return self.radius.max()
+        """Return minimum radius, Rmin."""
+        return self.radius.max_value
 
-    @cached_property
+    @property
     def r_min(self):
         """Return minimum radius, Rmin."""
-        return self.radius.min()
+        return self.radius.min_value
 
     @cached_property
     def geometric_radius(self):
         """Return geometric radius, Rgeo."""
         return (self.r_max + self.r_min) / 2
+
+    @cached_property
+    def geometric_height(self):
+        """Return geometric height, Zgeo."""
+        return (self.z_max + self.z_min) / 2
 
     @cached_property
     def minor_radius(self):
@@ -59,12 +147,12 @@ class LCFS(Plot):
     @cached_property
     def z_max(self):
         """Return maximum height, Zmax."""
-        return self.height.max()
+        return self.height.max_value
 
     @cached_property
     def z_min(self):
         """Return minimum height, Zmin."""
-        return self.height.min()
+        return self.height.min_value
 
     @cached_property
     def inverse_aspect_ratio(self):
@@ -79,12 +167,22 @@ class LCFS(Plot):
     @cached_property
     def r_zmax(self):
         """Return radius at maximum height, Rzmax."""
-        return self.radius[np.argmax(self.height)]
+        return self.radius(self.height.max_length)
 
     @cached_property
     def r_zmin(self):
         """Return radius at minimum height, Rzmin."""
-        return self.radius[np.argmin(self.height)]
+        return self.radius(self.height.min_length)
+
+    @cached_property
+    def z_rmax(self):
+        """Return height at maximum radius, Zrmax."""
+        return self.height(self.radius.max_length)
+
+    @cached_property
+    def z_rmin(self):
+        """Return height at minimum radius, Zrmin."""
+        return self.height(self.radius.min_length)
 
     @cached_property
     def triangularity(self):
@@ -93,24 +191,22 @@ class LCFS(Plot):
         return (self.geometric_radius - r_zmean) / self.minor_radius
 
     @cached_property
-    def upper_triangularity(self):
+    def triangularity_upper(self):
         """Return upper triangularity, del_u."""
         return (self.geometric_radius - self.r_zmax) / self.minor_radius
 
     @cached_property
-    def lower_triangularity(self):
+    def triangularity_lower(self):
         """Return lower triangularity, del_l."""
         return (self.geometric_radius - self.r_zmin) / self.minor_radius
 
     def plot(self, label=False):
         """Plot last closed flux surface and key geometrical points."""
         self.get_axes('2d')
-        self.axes.plot(self.radius, self.height, color='k', alpha=0.25)
+        self.axes.plot(*self.points.T, color='k', alpha=0.25)
         if label:
-            self.axes.plot(self.r_max, self.height[np.argmax(self.radius)],
-                           'o', label='Rmax')
-            self.axes.plot(self.r_min, self.height[np.argmin(self.radius)],
-                           'o', label='Rmin')
+            self.axes.plot(self.r_max, self.z_rmax, 'o', label='Rmax')
+            self.axes.plot(self.r_min, self.z_rmin, 'o', label='Rmin')
             self.axes.plot(self.geometric_radius,
                            (self.z_max + self.z_min) / 2, 'o', label='Rgeo')
             self.axes.plot(self.r_zmax, self.z_max, 'o', label='Zmax')
@@ -138,12 +234,12 @@ class UpDown:
     @property
     def upper_attr(self) -> str:
         """Return upper attribute name."""
-        return f'upper_{self.segment}'
+        return f'{self.segment}_upper'
 
     @property
     def lower_attr(self) -> str:
         """Return lower attribute name."""
-        return f'lower_{self.segment}'
+        return f'{self.segment}_lower'
 
     @property
     def mean(self):
@@ -250,14 +346,14 @@ class PlasmaProfile:
         """Adjust lower elongation and triangularity to match x_point."""
         if x_point is None:
             return
-        self['lower_triangularity'] = \
+        self['triangularity_lower'] = \
             (self.geometric_radius - self.x_point[0]) / self.minor_radius
         if 'triangularity' in self.coef:
-            self['upper_triangularity'] = self['triangularity']
+            self['triangularity_upper'] = self['triangularity']
             del self.coef['triangularity']
-        self['lower_elongation'] = \
+        self['elongation_lower'] = \
             (self.geometric_height - self.x_point[1]) / self.minor_radius
-        assert abs(self['lower_triangularity']) < 1
+        assert abs(self['triangularity_lower']) < 1
         self.check_consistency()
 
     @property
@@ -266,12 +362,12 @@ class PlasmaProfile:
         return self.plasma_shape['kappa'].mean
 
     @property
-    def upper_elongation(self):
+    def elongation_upper(self):
         """Return upper plasma elongation."""
         return self.plasma_shape['kappa'].upper
 
     @property
-    def lower_elongation(self):
+    def elongation_lower(self):
         """Return lower plasma elongation."""
         return self.plasma_shape['kappa'].lower
 
@@ -281,21 +377,21 @@ class PlasmaProfile:
         return self.plasma_shape['delta'].mean
 
     @property
-    def upper_triangularity(self):
+    def triangularity_upper(self):
         """Return plasma triangularity."""
         return self.plasma_shape['delta'].upper
 
     @property
-    def lower_triangularity(self):
+    def triangularity_lower(self):
         """Return plasma triangularity."""
         return self.plasma_shape['delta'].lower
 
-    def adjust_lower_elongation(self):
+    def adjust_elongation_lower(self):
         """Adjust lower elongation for single-null compliance."""
-        if self.lower_elongation < (min_kappa :=
-                                    2*(1 - self.lower_triangularity**2)**0.5):
-            delta_kappa = 1e-3 + min_kappa - self.lower_elongation
-            self['lower_elongation'] = self.lower_elongation + delta_kappa
+        if self.elongation_lower < (min_kappa :=
+                                    2*(1 - self.triangularity_lower**2)**0.5):
+            delta_kappa = 1e-3 + min_kappa - self.elongation_lower
+            self['elongation_lower'] = self.elongation_lower + delta_kappa
             self['geometric_height'] += self.minor_radius * delta_kappa
             self.plasma_shape['kappa'].check_consistency()
 
@@ -391,15 +487,15 @@ class Separatrix(Plot, PlasmaProfile):
         """Update points - lower single null."""
         self.update_coefficents(*args, **kwargs)
         self.set_x_point(kwargs.get('x_point', None))
-        self.adjust_lower_elongation()
+        self.adjust_elongation_lower()
         upper = self.miller_profile(
             self.theta_upper, self.minor_radius,
-            self.upper_elongation, self.upper_triangularity)
-        x_i = (1 - self.lower_triangularity**2)**0.5 / \
-            (self.lower_elongation - (1 - self.lower_triangularity**2)**0.5)
-        k_o = self.lower_elongation / (1 - x_i**2)**0.5
-        x_1 = (x_i - self.lower_triangularity) / (1 - x_i)
-        x_2 = (x_i + self.lower_triangularity) / (1 - x_i)
+            self.elongation_upper, self.triangularity_upper)
+        x_i = (1 - self.triangularity_lower**2)**0.5 / \
+            (self.elongation_lower - (1 - self.triangularity_lower**2)**0.5)
+        k_o = self.elongation_lower / (1 - x_i**2)**0.5
+        x_1 = (x_i - self.triangularity_lower) / (1 - x_i)
+        x_2 = (x_i + self.triangularity_lower) / (1 - x_i)
         self.coef['theta_o'] = np.arctan((1 - x_i**2)**0.5 / x_i)
         lower_hfs = self.minor_radius * np.c_[
             x_1 + (1 + x_1) * np.cos(self.theta_lower_hfs),
@@ -415,3 +511,15 @@ class Separatrix(Plot, PlasmaProfile):
         """Plot last closed flux surface."""
         self.get_axes('2d', axes)
         self.axes.plot(*self.points.T, '-', lw=1.5, color='C6')
+
+
+if __name__ == '__main__':
+
+    geometric_axis = (5.2, 0)
+    minor_radius, elongation, triangularity = 0.5, 1.4, 0.3
+    profile = Separatrix(point_number=21).limiter(
+        *geometric_axis, minor_radius, elongation, triangularity)
+    shape = LCFS(profile.points)
+
+    profile.plot()
+    shape.plot(True)

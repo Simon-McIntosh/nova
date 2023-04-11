@@ -33,7 +33,7 @@ class Matrix(Operate):
         """Plot coilset, fluxmap and coil force vectors."""
         super().plot()
         self.grid.plot()
-        self.plasma.wall.plot(wallflux=False)
+        self.plasma.wall.plot(limitflux=False)
         self.force.plot(scale=2)
 
 
@@ -126,8 +126,8 @@ if __name__ == '__main__':
 
     benchmark = Benchmark(ngrid=None, tplasma='hex')
     benchmark.itime = -1
-    benchmark.plot_force()
-    benchmark.plot_field()
+    #benchmark.plot_force()
+    #benchmark.plot_field()
 
     benchmark.set_axes('2d')
     benchmark.plot()

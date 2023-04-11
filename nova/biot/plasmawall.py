@@ -17,7 +17,7 @@ class PlasmaWall(Limiter, Point):
     attrs: list[str] = field(default_factory=lambda: ['Psi'])
 
     def __post_init__(self):
-        """Initialize wallflux version."""
+        """Initialize limiter flux version."""
         super().__post_init__()
         self.version['limitflux'] = None
 

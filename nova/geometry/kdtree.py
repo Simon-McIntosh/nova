@@ -23,7 +23,7 @@ class KDTree(Plot):
 
     @cached_property
     def kd_tree(self):
-        """Return 2d plasma filament selection tree."""
+        """Return 2d selection tree."""
         return scipy.spatial.KDTree(self.points)
 
     @cached_property
@@ -54,15 +54,25 @@ class KDTree(Plot):
 
 
 @dataclass
-class Tree:
-    """Manage fast nearest-neighbour selections from inital point cloud."""
+class Proximate:
+    """Implement fast nearest-neighbour selections via kd-tree queries."""
 
-    tree: KDTree = field(init=False, repr=False)
+    kd_factor: float = 0.1
+    kd_tree: KDTree = field(init=False, repr=False)
 
-    def update_tree(self, points: np.ndarray, factor=0.1):
+    @property
+    def kd_points(self):
+        """Generate kd-tree and return point cloud."""
+        return self.kdtree.points
+
+    @kd_points.setter
+    def kd_points(self, points):
+        self._update_kd_tree(points)
+
+    def _update_kd_tree(self, points: np.ndarray):
         """Update kd selection tree."""
-        self.tree = KDTree(points, factor)
+        self.kd_tree = KDTree(points, self.kd_factor)
 
-    def query(self, other: np.ndarray):
+    def kd_query(self, other: np.ndarray):
         """Return point index from kdtree."""
-        return self.tree.query(other)[1]
+        return self.kd_tree.query(other)[1]

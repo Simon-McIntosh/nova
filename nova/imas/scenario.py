@@ -33,13 +33,15 @@ class Scenario(GetSlice, IdsData):
         yield
         self.store()
 
-    def append(self, coords: tuple[str, ...], attrs: list[str],
+    def append(self, coords: tuple[str, ...], attrs: list[str] | str,
                branch='', prefix='', postfix='', ids_node=None):
         """Append xarray dataset with ids attributes."""
         self.ids = ids_node
+        if isinstance(attrs, str):
+            attrs = [attrs]
         for attr in attrs:
             path = self.ids_index.get_path(branch, attr)
-            if self.ids_index.empty(path):
+            if not self.ids_index.valid(path) or self.ids_index.empty(path):
                 continue
             self.data[prefix+attr+postfix] = coords, self.ids_index.array(path)
 

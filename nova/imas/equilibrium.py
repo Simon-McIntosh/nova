@@ -5,6 +5,7 @@ from typing import ClassVar
 
 import numpy as np
 
+from nova.biot.separatrix import LCFS
 from nova.frame.baseplot import Plot
 from nova.geometry.pointloop import PointLoop
 from nova.imas.scenario import Scenario
@@ -71,28 +72,106 @@ class Parameter0D(Plot, Scenario):
                                      'psi_external_average', 'v_external',
                                      'plasma_inductance', 'plasma_resistance'])
     attrs_boundary: ClassVar[list[str]] = [
-        'minor_radius', 'elongation', 'elongation_upper', 'elongation_lower',
+        'geometric_radius', 'geometric_height',
+        'minor_radius', 'elongation',
         'triangularity', 'triangularity_upper', 'triangularity_lower',
         'squareness_upper_inner', 'squareness_upper_outer',
         'squareness_lower_inner', 'squareness_lower_outer']
+
+    def build_axis(self, path: str):
+        """Build axis from global quantities."""
+        attr = path.split('.')[-1]
+        if any(self.ids_index.empty(f'{path}.{label}') for label in 'rz'):
+            return
+        self.data[attr] = ('time', 'point'), \
+            np.c_[self.ids_index.array(f'{path}.r'),
+                  self.ids_index.array(f'{path}.z')]
 
     def build(self):
         """Build 0D parameter timeseries."""
         super().build()
         self.append('time', self.attrs_0d, 'global_quantities')
-        self.append('time', ['r', 'z'], 'global_quantities.magnetic_axis',
-                    postfix='o')
-        self.append('time', ['r', 'z'], 'global_quantities.current_centre',
-                    postfix='p')
-        self.append('time', ['psi', 'type'], 'boundary_separatrix',
-                    prefix='boundary_')
-        self.append('time', self.attrs_boundary, 'boundary_separatrix')
+        self.build_axis('global_quantities.magnetic_axis')
+        self.build_axis('global_quantities.current_centre')
+        self.build_x_points()
         self.build_boundary_outline()
+        self.build_boundary_shape()
+
+    def outline(self, itime):
+        """Return boundary outline."""
+        for node in ['boundary_separatrix', 'boundary']:
+            outline = self.ids_index.get_slice(itime, f'{node}.outline')
+            points = np.c_[outline.r, outline.z]
+            if len(points) > 0:
+                return points
+        return points
+
+    def x_point_array(self, itime: int):
+        """Return x-point array at itime."""
+        x_points = []
+        for x_point in self.ids_index.get_slice(
+                itime, 'boundary_separatrix.x_point'):
+            x_points.append([x_point.r, x_point.z])
+        x_points = np.array(x_points)
+        points = self.outline(itime)
+        if len(points) > 0:
+            delta = np.max(np.linalg.norm(points[1:] - points[:-1], axis=1))
+            index = np.array([np.min(np.linalg.norm(points - x_point, axis=1))
+                              for x_point in x_points]) < delta
+            x_points = x_points[index]
+        if len(x_points) > 0:
+            return np.array(x_points, float)
+        return np.zeros((1, 2), float)
+
+    def build_x_points(self):
+        """Build x-point locations."""
+        x_point = np.stack([self.x_point_array(itime)[0]
+                            for itime in self.data.itime.data])
+        self.data['x_point'] = ('time', 'point'), x_point
+
+    def x_mask(self, itime: int, outline_z: int, eps=0):
+        """Return boundary x-point mask."""
+        mask = np.ones(len(outline_z), dtype=bool)
+        x_point = self.data.x_point[itime].data
+        o_point = self.data.magnetic_axis[itime].data
+        if np.allclose(x_point, (0, 0)):
+            return mask
+        if x_point[1] < o_point[1]:
+            mask &= outline_z > x_point[1] - eps
+        else:
+            mask &= outline_z < x_point[1] + eps
+        return mask
 
     def boundary_outline(self, itime: int) -> np.ndarray:
-        """Return r, z boundary outline."""
-        outline = self.ids_index.get_slice(itime, 'boundary.outline')
-        return np.c_[outline.r, outline.z]
+        """Return masked r, z boundary outline."""
+        points = self.outline(itime)
+        if len(points) == 0:
+            return points
+        segment = np.linalg.norm(points[1:] - points[:-1], axis=1)
+        x_point = self.data.x_point[itime].data
+        o_point = self.data.magnetic_axis[itime].data
+        limiter = np.allclose(x_point, (0, 0))
+        if limiter:  # limiter
+            index = np.arange(len(segment))[segment > 5*np.std(segment)]
+            if len(index) > 0:
+                loops = np.split(points, index)
+                loop_index = np.argmin((np.linalg.norm(loop[-1] - loop[0]) for
+                                       loop in loops))
+                return np.append(loops[loop_index], loops[loop_index][:1],
+                                 axis=0)
+        mask = self.x_mask(itime, points[:, 1])
+        points = points[mask]
+        if sum(mask) == 0:
+            return points
+        if not limiter:
+            points = np.append(points, x_point[np.newaxis, :], axis=0)
+            points = np.unique(points, axis=0)
+            theta = np.arctan2(points[:, 1]-o_point[1],
+                               points[:, 0]-o_point[0])
+            points = points[np.argsort(theta)]
+        if not np.allclose(points[0], points[-1]):
+            return np.append(points, points[:1], axis=0)
+        return points
 
     def build_boundary_outline(self):
         """Build outline timeseries."""
@@ -101,11 +180,10 @@ class Parameter0D(Plot, Scenario):
         if length == 0:
             return
         self.data['boundary_index'] = range(length)
-        self.data['coordinate'] = ['radial', 'vertical']
-        self.data['boundary'] = ('time', 'boundary_index', 'coordinate'), \
+        self.data['boundary'] = ('time', 'boundary_index', 'point'), \
             np.zeros((self.data.dims['time'],
                       self.data.dims['boundary_index'],
-                      self.data.dims['coordinate']))
+                      self.data.dims['point']))
         self.data['boundary_length'] = 'time', \
             np.zeros(self.data.dims['time'], dtype=int)
         for itime in self.data.itime.data:
@@ -114,14 +192,41 @@ class Parameter0D(Plot, Scenario):
             self.data['boundary_length'][itime] = length
             self.data['boundary'][itime, :length] = outline
 
+    def extract_shape_parameters(self):
+        """Return shape parameters calculated from lcfs."""
+        lcfs_data = {attr: np.zeros(self.data.dims['time'], float)
+                     for attr in self.attrs_boundary if hasattr(LCFS, attr)}
+        for itime in self.data.itime.data:
+            boundary = self.boundary_outline(itime)
+            if len(boundary) == 0:
+                continue
+            lcfs = LCFS(boundary)
+            try:
+                for attr in lcfs_data:
+                    lcfs_data[attr][itime] = getattr(lcfs, attr)
+            except ValueError:
+                continue
+        return lcfs_data
+
     def build_boundary_shape(self):
         """Build plasma shape parameters."""
-        with self.ids_index.node('time_slice'):
-            for attr in self.attrs_boundary:
-                path = f'boundary_separatrix.{attr}'
-                if self.ids_index.empty(path):
-                    continue
-                self.data[attr] = 'time', self.ids_index.array(path)
+        self.append('time', 'psi', 'boundary_separatrix', postfix='_boundary')
+        self.append('time', 'type', 'boundary_separatrix', prefix='boundary_')
+        self.append('time', self.attrs_boundary, 'boundary_separatrix')
+        lcfs_data = self.extract_shape_parameters()
+        for attr in self.attrs_boundary:
+            path = f'boundary_separatrix.{attr}'
+            if attr not in self.data and attr in lcfs_data:
+                self.data[attr] = 'time', lcfs_data[attr]
+
+        path = 'boundary_separatrix.geometric_axis'
+        if any(self.ids_index.empty(f'{path}.{label}') for label in 'rz'):
+            geometric_axis = np.c_[lcfs_data['geometric_radius'],
+                                   lcfs_data['geometric_height']]
+        else:
+            geometric_axis = np.c_[self.ids_index.array(f'{path}.r'),
+                                   self.ids_index.array(f'{path}.z')]
+        self.data['geometric_axis'] = ('time', 'point'), geometric_axis
 
     @property
     def boundary(self):
@@ -138,6 +243,16 @@ class Parameter0D(Plot, Scenario):
         self.get_axes('2d', axes=axes)
         self.axes.plot(self.boundary[:, 0], self.boundary[:, 1],
                        'gray', alpha=0.5)
+        self.axes.plot(*self['x_point'], 'x', ms=6, mec='C3', mew=1)
+
+    def plot_shape(self, axes=None):
+        """Plot separatrix shape parameter waveforms."""
+        self.set_axes('1d', axes=axes)
+        for attr in ['elongation', 'triangularity',
+                     'triangularity_upper', 'triangularity_lower']:
+            self.axes.plot(self.data.time, self.data[attr].data,
+                           label=attr)
+        self.axes.legend(ncol=4)
 
 
 @dataclass
@@ -145,7 +260,7 @@ class Profile1D(Plot, Scenario):
     """Manage extraction of 1d profile data from imas ids."""
 
     attrs_1d: list[str] = field(
-            default_factory=lambda: ['psi', 'dpressure_dpsi', 'f_df_dpsi'])
+            default_factory=lambda: ['dpressure_dpsi', 'f_df_dpsi'])
 
     def build(self):
         """Build 1d profile data."""
@@ -154,9 +269,11 @@ class Profile1D(Plot, Scenario):
             return
         length = self.ids_index['profiles_1d.psi'][0]
         self.data['psi_norm'] = np.linspace(0, 1, length)
+        self.data['psi1d'] = ('time', 'psi_norm'), \
+            self.ids_index.array('profiles_1d.psi')
         self.append(('time', 'psi_norm'), self.attrs_1d, 'profiles_1d')
         for itime in self.data.itime.data:  # normalize 1D profiles
-            psi = self.data.psi[itime]
+            psi = self.data.psi1d[itime]
             if np.isclose(psi[-1] - psi[0], 0):
                 continue
             psi_norm = (psi - psi[0]) / (psi[-1] - psi[0])
@@ -298,6 +415,7 @@ class Equilibrium(Profile2D, Profile1D, Parameter0D, Grid):
     def build(self):
         """Build netCDF database using data extracted from imasdb."""
         with self.build_scenario():
+            self.data.coords['point'] = ['r', 'z']
             super().build()
         return self
 
@@ -325,11 +443,14 @@ if __name__ == '__main__':
     pulse, run = 105028, 1
     pulse, run = 135013, 2
 
+    pulse, run = 130506, 403
+
+    pulse, run = 135014, 1
+
+
     Equilibrium(pulse, run)._clear()
     equilibrium = Equilibrium(pulse, run)
 
-
-
-    #equilibrium.itime = 50
-    #equilibrium.plot_2d('psi', mask=0)
-    #equilibrium.plot_boundary()
+    equilibrium.itime = 10
+    equilibrium.plot_2d('psi', mask=0)
+    equilibrium.plot_boundary()

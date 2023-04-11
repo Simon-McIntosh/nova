@@ -59,7 +59,6 @@ class PulseSchedule(Plot, Scenario):
                 if self.ids_index.empty(f'{attr}.reference.data'):
                     continue  # skip empty fields
                 data[..., i] = self.ids_index.array(f'{attr}.reference.data')
-            self.data.coords['point'] = ['r', 'z']
             if self.ids_index.length == 0:
                 coordinate = time + ('point',)
             else:
@@ -157,12 +156,14 @@ class PulseSchedule(Plot, Scenario):
         """Extract wall profile from IDS."""
         wall = Wall()
         self.data['wall'] = ('wall_index', 'point'), wall.segment()
+        self.data.coords['wall_index'] = np.arange(self.data.wall.shape[0])
         self.data.attrs['wall_md'] = ','.join(
             [str(value) for _, value in wall.ids_attrs.items()])
 
     def build(self):
         """Build netCDF database using data extracted from imasdb."""
         with self.build_scenario():
+            self.data.coords['point'] = ['r', 'z']
             self.build_0d(
                 'flux_control',
                 ['i_plasma', 'loop_voltage', 'li_3', 'beta_normal'])

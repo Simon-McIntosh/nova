@@ -8,18 +8,19 @@ from nova.biot.biotframe import Target
 from nova.biot.operate import Operate
 from nova.biot.solve import Solve
 from nova.frame.baseplot import Plot
-from nova.geometry.kdtree import Tree
+from nova.geometry.kdtree import Proximate
 from nova.geometry import select
 
 
 @dataclass
-class Gap(Plot, Tree, Operate):
+class Gap(Plot, Proximate, Operate):
     """Compute flux interaction across a series of 1d plasma gap probes."""
 
     attrs: list[str] = field(default_factory=lambda: ['Psi'])
     ngap: int | float | None = 50
     mingap: int | float = 0
     maxgap: int | float = 2.5
+    kd_factor: float = 2.5
     node_number: int = field(init=False, default=0)
     gap_number: int = field(init=False, default=0)
 
@@ -78,8 +79,8 @@ class Gap(Plot, Tree, Operate):
         if self.number is not None:
             self.node_number = self.data.dims['nodes']
             self.gap_number = self.data.dims['name']
-            self.update_tree(np.c_[self.data.x2d.data.flatten(),
-                                   self.data.z2d.data.flatten()], factor=2.5)
+            self.kd_points = np.c_[self.data.x2d.data.flatten(),
+                                   self.data.z2d.data.flatten()]
 
     @cached_property
     def shape(self):
@@ -91,9 +92,9 @@ class Gap(Plot, Tree, Operate):
         """Return gap probe bin edges."""
         return np.arange(0, self.number+1, self.node_number)
 
-    def query(self, other: np.ndarray):
+    def kd_query(self, other: np.ndarray):
         """Extend Tree.query to restrict result number to <= 1 per gap."""
-        index = super().query(other)
+        index = super().kd_query(other)
         bin_index = np.searchsorted(self.bins, index)
         return index[np.unique(bin_index, return_index=True)[1]]
 

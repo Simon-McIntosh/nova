@@ -166,24 +166,31 @@ class ErrorField(Plot, Datafile):
             filename=f'external_field_{self.filename}.nc').filepath
         data.to_netcdf(filepath)
 
-    def write_ids(self, pulse=160400, run=0):
+    def write_ids(self, pulse=160400, run=1):
         """Write data to ids."""
-        ids = imas.error_b_field()
+        ids = imas.b_field_non_axisymmetric()
         metadata = Metadata(ids)
         metadata.put_properties(self.library[self.datafile], self.datafile,
-                                homogeneous_time=2)
+                                homogeneous_time=1)
         metadata.put_code('Toroidal Fourier decomposition of '
                           'b-field normal to a given control surface')
-        ids.field_map.name = self.library[self.datafile]
-        ids.field_map.grid.r = self.data.radius.data
-        ids.field_map.grid.phi = self.data.phi.data * np.pi/180
-        ids.field_map.grid.z = self.data.height.data
-        ids.field_map.b_field_r = self.data.grid_Br.data
-        ids.field_map.b_field_phi = self.data.grid_Bphi.data
-        ids.field_map.b_field_z = self.data.grid_Bz.data
 
-        ids.control_surface.resize(1)
-        control_surface = ids.control_surface[0]
+        ids.control_surface_names = [self.surface]
+
+        ids.time.resize(1)
+        ids.time = np.array([0])
+        ids.time_slice.resize(1)
+        time_slice = ids.time_slice[0]
+        time_slice.field_map.name = self.library[self.datafile]
+        time_slice.field_map.grid.r = self.data.radius.data
+        time_slice.field_map.grid.phi = self.data.phi.data * np.pi/180
+        time_slice.field_map.grid.z = self.data.height.data
+        time_slice.field_map.b_field_r = self.data.grid_Br.data
+        time_slice.field_map.b_field_phi = self.data.grid_Bphi.data
+        time_slice.field_map.b_field_z = self.data.grid_Bz.data
+
+        time_slice.control_surface.resize(1)
+        control_surface = time_slice.control_surface[0]
         control_surface.outline.r = self.data.surface[:, 0].data
         control_surface.outline.z = self.data.surface[:, 1].data
         control_surface.normal_vector.r = self.data.normal[:, 0].data
@@ -220,5 +227,5 @@ if __name__ == '__main__':
     # errorfield.plot_trace(0)
 
     #errorfield.grid_schema()
-    import imas
-    imas.DBEntry
+
+    field = Database(pulse=160400, run=1, name='b_field_non_axisymmetric')

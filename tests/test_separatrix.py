@@ -50,48 +50,48 @@ def test_elongation():
     assert plasma.elongation == 2.3
 
 
-def test_upper_lower_elongation():
-    plasma = PlasmaProfile(coef=dict(upper_elongation=3, lower_elongation=2))
+def test_upper_elongation_lower():
+    plasma = PlasmaProfile(coef=dict(elongation_upper=3, elongation_lower=2))
     assert plasma.elongation == 2.5
 
 
-def test_upper_elongation():
-    plasma = PlasmaProfile(coef=dict(upper_elongation=3, lower_elongation=2))
-    assert plasma.upper_elongation == 3
+def test_elongation_upper():
+    plasma = PlasmaProfile(coef=dict(elongation_upper=3, elongation_lower=2))
+    assert plasma.elongation_upper == 3
 
 
-def test_upper_elongation_from_lower():
-    plasma = PlasmaProfile(coef=dict(lower_elongation=2.5))
-    assert plasma.upper_elongation == 2.5
+def test_elongation_upper_from_lower():
+    plasma = PlasmaProfile(coef=dict(elongation_lower=2.5))
+    assert plasma.elongation_upper == 2.5
 
 
-def test_lower_elongation():
-    plasma = PlasmaProfile(coef=dict(upper_elongation=3, lower_elongation=1.4))
-    assert plasma.lower_elongation == 1.4
+def test_elongation_lower():
+    plasma = PlasmaProfile(coef=dict(elongation_upper=3, elongation_lower=1.4))
+    assert plasma.elongation_lower == 1.4
 
 
-def test_lower_elongation_from_upper():
-    plasma = PlasmaProfile(coef=dict(upper_elongation=2.4))
-    assert plasma.lower_elongation == 2.4
+def test_elongation_lower_from_upper():
+    plasma = PlasmaProfile(coef=dict(elongation_upper=2.4))
+    assert plasma.elongation_lower == 2.4
 
 
 def test_elongation_over_constraint_error():
     with pytest.raises(AssertionError):
         PlasmaProfile(coef=dict(
-            elongation=2.4, upper_elongation=3, lower_elongation=1.4))
+            elongation=2.4, elongation_upper=3, elongation_lower=1.4))
 
 
 def test_triangularty_over_constraint():
     plasma = PlasmaProfile(coef=dict(
-        triangularity=2.5, upper_triangularity=3, lower_triangularity=2))
+        triangularity=2.5, triangularity_upper=3, triangularity_lower=2))
     assert plasma.triangularity == 2.5
-    assert plasma.upper_triangularity == 3
-    assert plasma.lower_triangularity == 2
+    assert plasma.triangularity_upper == 3
+    assert plasma.triangularity_lower == 2
 
 
-def test_lower_triangularity():
-    plasma = PlasmaProfile(coef=dict(upper_triangularity=3))
-    assert plasma.lower_triangularity == 3
+def test_triangularity_lower():
+    plasma = PlasmaProfile(coef=dict(triangularity_upper=3))
+    assert plasma.triangularity_lower == 3
 
 
 if __name__ == '__main__':

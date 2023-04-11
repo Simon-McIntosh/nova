@@ -684,6 +684,14 @@ class IdsIndex:
             return data.T
         return data
 
+    def valid(self, path: str):
+        """Return validity flag for ids path."""
+        try:
+            self.empty(path)
+            return True
+        except TypeError:
+            return False
+
     def empty(self, path: str):
         """Return status based on first data point extracted from ids_data."""
         try:
@@ -698,7 +706,8 @@ class IdsIndex:
         try:  # string
             return len(data) == 0
         except TypeError:
-            return data is None or np.isclose(data, -9e40)
+            return data is None or np.isclose(data, -9e40) \
+                or np.isclose(data, -999999999)
 
     def dtype(self, path: str):
         """Return data point type."""

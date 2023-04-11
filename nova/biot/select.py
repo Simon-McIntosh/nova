@@ -8,16 +8,16 @@ from nova.biot.grid import Expand
 from nova.biot.plasmagrid import PlasmaGrid
 from nova.biot.solve import Solve
 from nova.frame.polygrid import PolyGrid
-from nova.geometry.kdtree import KDTree
+from nova.geometry.kdtree import Proximate
 
 
 @dataclass
-class Select(PlasmaGrid):
+class Select(Proximate, PlasmaGrid):
     """Implement kd-tree querys for arbitaray unstructured grids."""
 
+    kd_factor: float = 0.1
     turn: str = 'hexagon'
     tile: bool = True
-    tree: KDTree = field(init=False, repr=False)
 
     def solve(self, number=None, limit=0.2, index='plasma'):
         """Overwrid PlasmaGrid.solve to permit arbitrary solution domains."""
@@ -35,4 +35,4 @@ class Select(PlasmaGrid):
         """Extend Grid.load_operators to update tree instance."""
         super().load_operators()
         if self.number is not None:
-            self.tree = KDTree(np.c_[self.data.x.data, self.data.z.data])
+            self.kd_points = np.c_[self.data.x.data, self.data.z.data]

@@ -181,10 +181,13 @@ if __name__ == '__main__':
     pulse, run = 105007, 9
     #pulse, run = 135007, 4
     pulse, run = 105028, 1
+    pulse, run = 135013, 2
 
-    operate = Operate(pulse, run, pf_active=True, nplasma=50, ngrid=50,
-                      limit=0.25)
+    operate = Operate(pulse, run, pf_active=True, dplasma=-1000, ngrid=500,
+                      tplasma='hex', limit=0.25)
 
     operate.itime = 50
     operate.plot()
     operate.grid.plot()
+    operate.plot_boundary()
+    operate.plasma.lcfs.plot()

@@ -1,10 +1,11 @@
 """Update ids metadata."""
 from abc import ABC
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
 from typing import ClassVar
 
 import git
+import numpy as np
 import pandas
 
 import nova
@@ -62,7 +63,7 @@ class Code(Attrs):
 
     description: str | None = None
     parameter_dict: dict | None = None
-    output_flag: int = 1
+    output_flag: list[int] | np.ndarray | None = None
 
     name: ClassVar[str] = 'Nova'
     attributes: ClassVar[list[str]] = \
@@ -72,6 +73,8 @@ class Code(Attrs):
     def __post_init__(self):
         """Load git repository."""
         self.repo = git.Repo(search_parent_directories=True)
+        if self.output_flag is not None:
+            self.output_flag = np.array(self.output_flag, int)
 
     @property
     def parameters(self):
@@ -112,7 +115,7 @@ class Metadata:
         props = Properties(comment, source, *args, **kwargs)
         props.update(self.ids.ids_properties)
 
-    def put_code(self, description, parameter_dict=None, output_flag=1):
+    def put_code(self, description, parameter_dict=None, output_flag=None):
         """Update referances to Nova code."""
         code = Code(description, parameter_dict, output_flag)
         code.update(self.ids.code)

@@ -74,7 +74,7 @@ class Waveform(MachineDescription, PulseDesign):
 
     def lcfs_psi(self):
         """Return separatrix psi matrix and data."""
-        index = self.levelset.query(self.points)
+        index = self.levelset.kd_query(self.points)
         Psi = self.levelset.Psi[index]
         psi = float(self['loop_psi'])*np.ones(len(Psi))
         plasma = Psi[:, self.plasma_index] * self.saloc['plasma', 'Ic']
@@ -111,8 +111,8 @@ class Waveform(MachineDescription, PulseDesign):
         """Return psi grid residual."""
         nturn /= np.sum(nturn)
         self.plasma.nturn = nturn
-        self.update_gap()
-        #self.update_lcfs()
+        #self.update_gap()
+        self.update_lcfs()
         #sol = optimize.root(plasma_shape, self.saloc['coil', 'Ic'])
         #self.saloc['coil', 'Ic'] = sol.x
         #self.plasma.separatrix = self.plasma.psi_boundary

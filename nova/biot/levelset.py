@@ -1,22 +1,21 @@
 """Manage contouring algorithums solved on a rectngular plasma grid."""
 from dataclasses import dataclass, field
-from functools import cached_property
 
 import numpy as np
 
 from nova.biot.grid import Grid
 from nova.biot.contour import Contour
-from nova.biot.separatrix import LCFS
-from nova.geometry.kdtree import Tree
+from nova.geometry.kdtree import Proximate
 
 # pylint: disable=too-many-ancestors
 
 
 @dataclass
-class LevelSet(Tree, Grid):
+class LevelSet(Proximate, Grid):
     """Extend Grid class with levelset contouring algorithums."""
 
     levels: int | np.ndarray = 50
+    kd_factor: float = 0.1
     contour: Contour = field(init=False, repr=False)
 
     def __call__(self, psi):
@@ -33,8 +32,8 @@ class LevelSet(Tree, Grid):
         if self.number is not None:
             self.contour = Contour(self.data.x2d, self.data.z2d, self.psi_,
                                    levels=self.levels)
-            self.update_tree(np.c_[self.data.x2d.data.flatten(),
-                                   self.data.z2d.data.flatten()], 0.1)
+            self.kd_points = np.c_[self.data.x2d.data.flatten(),
+                                   self.data.z2d.data.flatten()]
 
     def check_contour(self):
         """Check contour flux operators."""

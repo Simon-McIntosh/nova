@@ -47,9 +47,9 @@ class Peak:
         return interp1d(self.length, self.value, self.kind)
 
     @staticmethod
-    def _minimize(fun):
+    def _minimize(function):
         """Wrap scipy minimize_scalar."""
-        return minimize_scalar(fun, bounds=(0, 1), method='bounded')
+        return minimize_scalar(function, bounds=(0, 1), method='bounded')
 
     @cached_property
     def minimum(self):

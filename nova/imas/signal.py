@@ -4,6 +4,7 @@ from functools import cached_property
 
 import numpy as np
 from rdp import rdp
+from sklearn import cluster
 from sklearn.preprocessing import minmax_scale
 import scipy.signal
 import xarray
@@ -16,7 +17,7 @@ from nova.imas.equilibrium import Equilibrium
 class Select:
     """Select subset of data based on coordinate."""
 
-    data: xarray.Dataset = field(repr=False)
+    data: xarray.Dataset = field(default_factory=xarray.Dataset, repr=False)
 
     def attrs(self, coord: str):
         """Return attribute list selected according to coord."""
@@ -37,13 +38,16 @@ class Select:
 class Defeature:
     """Defeature dataset using a clustered RDP algoritum."""
 
-    data: xarray.Dataset = field(repr=False)
+    data: xarray.Dataset = field(default_factory=xarray.Dataset, repr=False)
     epsilon: float = 1e-3
+    eps: float = 2
     features: list[str] | None = None
 
     def __post_init__(self):
         """Extract feature list if None."""
         self.check_features()
+        if hasattr(super(), '__post_init__'):
+            super().__post_init__()
 
     def check_features(self):
         """Check features, update it None."""
@@ -62,41 +66,47 @@ class Defeature:
         """Return time vector with shape (n, 1)."""
         return np.copy(self.data.time.data[:, np.newaxis])
 
-    def maxmin(self, array: np.ndarray):
-        """Return minmax scaled array."""
-
-        return minmax_scale(self['sample'][self.features].to_array(), axis=1).T
-
-    def extract(self):
-        """Extract turning points from a single attribute waveform."""
-
-        #time =
-        time /= time[-1] - time[0]
-        array = np.append(time, self.maxmin_scale(), axis=1)
-        mask = rdp(array, self.epsilon, return_mask=True)
-        self['rdp'] = self['sample'].sel({'time': mask})
+    def defeature(self):
+        """Return clustered turning point dataset."""
+        indices = []
+        index = np.arange(self.data.dims['time'])
+        for attr in self.features:
+            array = np.c_[self.time, minmax_scale(self.data[attr].data)]
+            mask = rdp(array, self.epsilon, return_mask=True)
+            indices.extend(index[mask])
+            print(attr, index[mask])
+        print(indices)
+        indices = np.unique(indices)
+        print(indices)
+        time = self.time[indices]
+        print(time, time.shape)
+        clustering = cluster.DBSCAN(eps=self.eps, min_samples=1, p=1)
+        cluster_label = clustering.fit_predict(time)
+        cluster_index = np.unique(cluster_label)
+        return self.data.isel({'time': indices[cluster_index]})
 
 
 @dataclass
-class Signal(Plot, Select):
+class Signal(Plot, Defeature, Select):
     """Re-sample signal."""
 
-    data: xarray.Dataset = field(repr=False)
-    delta: int | float = -100
-    savgol: tuple[int, int] | None = (10, 1)
-    epsilon: float = 0.01
+    data: xarray.Dataset = field(default_factory=xarray.Dataset, repr=False)
+    dtime: int | float = 2.5
+    savgol: tuple[int, int] | None = (3, 1)
+    epsilon: float = 0.1
     features: list[str] = field(default_factory=lambda: [
-        'elongation', 'ip'])
+        'elongation', 'triangularity_upper', 'triangularity_lower', 'ip'])
     samples: dict[str, xarray.Dataset] = field(default_factory=dict)
 
     def __post_init__(self):
         """Interpolate data onto uniform time-base and resample."""
-        self['source'] = self.data.copy()
+        self['source'] = self.data
         self.clip('li_3', 0)
         self.interpolate()
         self.resample()
-        #self.defeature()
-        super().__post_init__()
+        self.defeature()
+        if hasattr(super(), '__post_init__'):
+            super().__post_init__()
 
     def __getitem__(self, attr: str) -> xarray.Dataset:
         """Return dataset from samples dict."""
@@ -104,12 +114,13 @@ class Signal(Plot, Select):
 
     def __setitem__(self, attr: str, data: xarray.Dataset):
         """Set item in profiles dict."""
+        self.data = data
         self.samples[attr] = data
 
     def clip(self, attr: str, value: float | str):
         """Select data as abs(attr) > value."""
         time = self.data.time[abs(self.data[attr]) > value]
-        return self.data.sel({'time': time})
+        self['clip'] = self.data.sel({'time': time})
 
     @cached_property
     def minimum_timestep(self) -> float:
@@ -119,13 +130,13 @@ class Signal(Plot, Select):
     @property
     def factor(self):
         """Return re-sample factor."""
-        match self.delta:
-            case int() if self.delta < 0:
-                return -self.delta / float(self.interp_data.dims['time'])
-            case int() | float() if self.delta > 0:
-                return self.minimum_timestep / self.delta
+        match self.dtime:
+            case int() if self.dtime < 0:
+                return -self.dtime / float(self.data.dims['time'])
+            case int() | float() if self.dtime > 0:
+                return self.minimum_timestep / self.dtime
             case _:
-                raise ValueError(f'delta {self.delta} is '
+                raise ValueError(f'dtime {self.dtime} is '
                                  'not a negative int or float')
 
     @property
@@ -166,7 +177,7 @@ class Signal(Plot, Select):
 
     def defeature(self):
         """Defeature sample waveform using rdp algorithum."""
-        #Defeature(self['sample'], self.features)
+        self['rdp'] = super().defeature()
 
     def plot(self, attrs=None):
         """Plot source, interpolated, and sampled datasets."""
@@ -179,14 +190,14 @@ class Signal(Plot, Select):
             dims = self.data[attr].coords.dims
             if 'time' not in dims or len(dims) != 1:
                 continue
-            self.axes.plot(self.data.time, self.data[attr],
-                           '-', color='gray', lw=1.5)
+            self.axes.plot(self['clip'].time, self['clip'][attr],
+                           '-', color='k', lw=0.5)
             self.axes.plot(self['uniform'].time, self['uniform'][attr],
-                           '-', color=f'C{i}', lw=0.5)
+                           '-', color='gray', alpha=0.75, lw=2.5)
             self.axes.plot(self['sample'].time, self['sample'][attr],
                            '-', color=f'C{i}', lw=2)
-            #self.axes.plot(self['rdp'].time, self['rdp'][attr],
-            #               'o-', color='k', lw=1, ms=6)
+            self.axes.plot(self['rdp'].time, self['rdp'][attr],
+                           'o', color='k', lw=2, ms=6)
 
 
 if __name__ == '__main__':
@@ -194,7 +205,7 @@ if __name__ == '__main__':
     pulse, run = 135013, 2
 
     equilibrium = Equilibrium(pulse, run)
-    sample = Sample(equilibrium.data, 2.5, (3, 1))
+    signal = Signal(equilibrium.data)
 
-    sample.plot(['elongation', 'triangularity_upper', 'triangularity_lower'])
-    #sample.plot('ip')
+    signal.plot(['elongation', 'triangularity_upper', 'triangularity_lower'])
+    signal.plot('ip')

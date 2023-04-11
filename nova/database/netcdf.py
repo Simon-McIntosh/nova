@@ -15,8 +15,7 @@ class netCDF(FilePath):
     """Provide regulated access to netCDF database."""
 
     group: str | None = None
-    data: xarray.Dataset | xarray.DataArray = \
-        field(default_factory=xarray.Dataset, repr=False)
+    data: xarray.Dataset = field(default_factory=xarray.Dataset, repr=False)
 
     def __post_init__(self):
         """Forward post init for for cooperative inheritance."""

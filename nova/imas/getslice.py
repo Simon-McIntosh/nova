@@ -10,8 +10,7 @@ class GetSlice:
     """Convinence method to provide access to sliced ids data."""
 
     time_index: int | None = field(init=False, default=None)
-    data: xarray.Dataset | xarray.DataArray = \
-        field(default_factory=xarray.Dataset, repr=False)
+    data: xarray.Dataset = field(default_factory=xarray.Dataset, repr=False)
 
     def __post_init__(self):
         """Set time index."""

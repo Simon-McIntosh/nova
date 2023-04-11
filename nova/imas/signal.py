@@ -78,8 +78,8 @@ class Defeature:
 
 
 @dataclass
-class Sample(Plot, Select):
-    """Re-sample signal using a polyphase filter."""
+class Signal(Plot, Select):
+    """Re-sample signal."""
 
     data: xarray.Dataset = field(repr=False)
     delta: int | float = -100
@@ -87,23 +87,24 @@ class Sample(Plot, Select):
     epsilon: float = 0.01
     features: list[str] = field(default_factory=lambda: [
         'elongation', 'ip'])
-    profile_data: dict[str, xarray.Dataset] = field(default_factory=dict)
+    samples: dict[str, xarray.Dataset] = field(default_factory=dict)
 
     def __post_init__(self):
         """Interpolate data onto uniform time-base and resample."""
-        self.data = self.clip('li_3', 0)
+        self['source'] = self.data.copy()
+        self.clip('li_3', 0)
         self.interpolate()
         self.resample()
         #self.defeature()
         super().__post_init__()
 
     def __getitem__(self, attr: str) -> xarray.Dataset:
-        """Return dataset from profile_data dict."""
-        return self.profile_data[attr]
+        """Return dataset from samples dict."""
+        return self.samples[attr]
 
     def __setitem__(self, attr: str, data: xarray.Dataset):
         """Set item in profiles dict."""
-        self.profile_data[attr] = data
+        self.samples[attr] = data
 
     def clip(self, attr: str, value: float | str):
         """Select data as abs(attr) > value."""

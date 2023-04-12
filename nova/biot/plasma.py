@@ -13,13 +13,13 @@ from nova.database.netcdf import netCDF
 from nova.biot.error import PlasmaTopologyError
 from nova.biot.levelset import LevelSet
 from nova.biot.plasmagrid import PlasmaGrid
-from nova.biot.separatrix import LCFS
 from nova.biot.select import Select
 from nova.biot.plasmawall import PlasmaWall
 from nova.frame.baseplot import Plot
 from nova.frame.framesetloc import FrameSetLoc
 from nova.geometry.polygon import Polygon
 from nova.geometry.pointloop import PointLoop
+from nova.geometry.separatrix import LCFS
 
 
 @numba.njit()

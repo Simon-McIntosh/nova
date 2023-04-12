@@ -4,7 +4,7 @@ from functools import cached_property
 
 import numpy as np
 from rdp import rdp
-from sklearn import cluster
+from sklearn.cluster import DBSCAN
 from sklearn.preprocessing import minmax_scale
 import scipy.signal
 import xarray
@@ -40,7 +40,6 @@ class Defeature:
 
     data: xarray.Dataset = field(default_factory=xarray.Dataset, repr=False)
     epsilon: float = 1e-3
-    eps: float = 2
     features: list[str] | None = None
 
     def __post_init__(self):
@@ -66,7 +65,7 @@ class Defeature:
         """Return time vector with shape (n, 1)."""
         return np.copy(self.data.time.data[:, np.newaxis])
 
-    def defeature(self):
+    def defeature(self, cluster=False):
         """Return clustered turning point dataset."""
         indices = []
         index = np.arange(self.data.dims['time'])
@@ -74,16 +73,22 @@ class Defeature:
             array = np.c_[self.time, minmax_scale(self.data[attr].data)]
             mask = rdp(array, self.epsilon, return_mask=True)
             indices.extend(index[mask])
-            print(attr, index[mask])
-        print(indices)
         indices = np.unique(indices)
-        print(indices)
+        if cluster:
+            indices = self.cluster(indices)
+        return self.data.isel({'time': indices})
+
+    def cluster(self, indices):
+        """Apply DBSCAN clustering algorithum to indices."""
         time = self.time[indices]
-        print(time, time.shape)
-        clustering = cluster.DBSCAN(eps=self.eps, min_samples=1, p=1)
-        cluster_label = clustering.fit_predict(time)
-        cluster_index = np.unique(cluster_label)
-        return self.data.isel({'time': indices[cluster_index]})
+        clustering = DBSCAN(eps=self.dtime, min_samples=1).fit(time)
+        labels = np.unique(clustering.labels_)
+        centroid = np.zeros(len(labels), int)
+        label_index = np.arange(len(indices))
+        for i, label in enumerate(labels):
+            centroid[i] = int(np.mean(
+                label_index[label == clustering.labels_]))
+        return indices[centroid]
 
 
 @dataclass
@@ -91,9 +96,9 @@ class Signal(Plot, Defeature, Select):
     """Re-sample signal."""
 
     data: xarray.Dataset = field(default_factory=xarray.Dataset, repr=False)
-    dtime: int | float = 2.5
+    dtime: int | float = 1.5
     savgol: tuple[int, int] | None = (3, 1)
-    epsilon: float = 0.1
+    epsilon: float = 0.05
     features: list[str] = field(default_factory=lambda: [
         'elongation', 'triangularity_upper', 'triangularity_lower', 'ip'])
     samples: dict[str, xarray.Dataset] = field(default_factory=dict)
@@ -197,7 +202,7 @@ class Signal(Plot, Defeature, Select):
             self.axes.plot(self['sample'].time, self['sample'][attr],
                            '-', color=f'C{i}', lw=2)
             self.axes.plot(self['rdp'].time, self['rdp'][attr],
-                           'o', color='k', lw=2, ms=6)
+                           'o-', color='k', lw=1.5, ms=6)
 
 
 if __name__ == '__main__':

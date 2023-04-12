@@ -4,10 +4,14 @@ from functools import cached_property
 from typing import ClassVar
 
 import numpy as np
+import shapely
+from shapely.geometry import LineString, MultiLineString
 
-from nova.biot.separatrix import LCFS
+from nova.biot.contour import Contour
 from nova.frame.baseplot import Plot
 from nova.geometry.pointloop import PointLoop
+from nova.geometry.separatrix import LCFS
+from nova.imas.machine import Wall
 from nova.imas.scenario import Scenario
 from nova.plot.biotplot import BiotPlot
 
@@ -101,23 +105,27 @@ class Parameter0D(Plot, Scenario):
         """Return boundary outline."""
         for node in ['boundary_separatrix', 'boundary']:
             outline = self.ids_index.get_slice(itime, f'{node}.outline')
-            points = np.c_[outline.r, outline.z]
-            if len(points) > 0:
-                return points
-        return points
+            boundary = np.c_[outline.r, outline.z]
+            if len(boundary) > 0:
+                return boundary
+        return boundary
+
+    def _point_array(self, itime: int, path: str) -> np.ndarray:
+        """Return point array."""
+        points = []
+        for point in self.ids_index.get_slice(itime, path):
+            points.append([point.r, point.z])
+        return np.array(points, float)
 
     def x_point_array(self, itime: int):
         """Return x-point array at itime."""
-        x_points = []
-        for x_point in self.ids_index.get_slice(
-                itime, 'boundary_separatrix.x_point'):
-            x_points.append([x_point.r, x_point.z])
-        x_points = np.array(x_points)
-        points = self.outline(itime)
-        if len(points) > 0:
-            delta = np.max(np.linalg.norm(points[1:] - points[:-1], axis=1))
-            index = np.array([np.min(np.linalg.norm(points - x_point, axis=1))
-                              for x_point in x_points]) < delta
+        x_points = self._point_array(itime, 'boundary_separatrix.x_point')
+        boundary = self.outline(itime)
+        if len(boundary) > 0:
+            delta = np.max(np.linalg.norm(
+                boundary[1:] - boundary[:-1], axis=1))
+            index = np.array([np.min(np.linalg.norm(
+                boundary - x_point, axis=1)) for x_point in x_points]) < delta
             x_points = x_points[index]
         if len(x_points) > 0:
             return np.array(x_points, float)
@@ -129,49 +137,78 @@ class Parameter0D(Plot, Scenario):
                             for itime in self.data.itime.data])
         self.data['x_point'] = ('time', 'point'), x_point
 
-    def x_mask(self, itime: int, outline_z: int, eps=0):
+    @cached_property
+    def divertor(self):
+        """Return divertor outline."""
+        wall = Wall()
+        return wall.segment(1)
+
+    def strike_point_array(self, itime: int):
+        """Return strike-point array at itime."""
+        strike_points = self._point_array(
+            itime, 'boundary_separatrix.strike_point')
+        if len(strike_points) == 0:
+            boundary = self.outline(itime)
+            contour = Contour(self.data.r2d, self.data.z2d,
+                              self.data.psi2d[itime])
+            levelset = contour.levelset(self.data.psi_boundary[itime])
+            separatrix = MultiLineString(
+                [surface.points for surface in levelset])
+
+            points = shapely.intersection(separatrix, LineString(self.divertor))
+            print(points)
+
+            self.set_axes('2d')
+            for surface in levelset:
+                surface.plot()
+            self.axes.plot(*self.divertor.T)
+            #self.axes.plot(*boundary.T)
+
+
+    def build_strike_points(self):
+        """Build strike-point locations when not present in IDS."""
+
+    def x_mask(self, itime: int, outline_z: np.ndarray, eps=0):
         """Return boundary x-point mask."""
-        mask = np.ones(len(outline_z), dtype=bool)
         x_point = self.data.x_point[itime].data
         o_point = self.data.magnetic_axis[itime].data
         if np.allclose(x_point, (0, 0)):
-            return mask
+            return np.ones(len(outline_z), bool)
         if x_point[1] < o_point[1]:
-            mask &= outline_z > x_point[1] - eps
-        else:
-            mask &= outline_z < x_point[1] + eps
-        return mask
+            return outline_z > x_point[1] - eps
+        return outline_z < x_point[1] + eps
 
     def boundary_outline(self, itime: int) -> np.ndarray:
         """Return masked r, z boundary outline."""
-        points = self.outline(itime)
-        if len(points) == 0:
-            return points
-        segment = np.linalg.norm(points[1:] - points[:-1], axis=1)
+        boundary = self.outline(itime)
+        if len(boundary) == 0:
+            return boundary
+        segment = np.linalg.norm(boundary[1:] - boundary[:-1], axis=1)
         x_point = self.data.x_point[itime].data
         o_point = self.data.magnetic_axis[itime].data
         limiter = np.allclose(x_point, (0, 0))
         if limiter:  # limiter
-            index = np.arange(len(segment))[segment > 5*np.std(segment)]
+            step = np.mean(segment) + 3*np.std(segment)
+            index = np.arange(len(segment))[segment > step]
             if len(index) > 0:
-                loops = np.split(points, index)
-                loop_index = np.argmin((np.linalg.norm(loop[-1] - loop[0]) for
-                                       loop in loops))
+                loops = np.split(boundary, index)
+                loop_index = np.argmin([np.linalg.norm(loop[-1] - loop[0]) for
+                                       loop in loops])
                 return np.append(loops[loop_index], loops[loop_index][:1],
                                  axis=0)
-        mask = self.x_mask(itime, points[:, 1])
-        points = points[mask]
+        mask = self.x_mask(itime, boundary[:, 1])
+        boundary = boundary[mask]
         if sum(mask) == 0:
-            return points
+            return boundary
         if not limiter:
-            points = np.append(points, x_point[np.newaxis, :], axis=0)
-            points = np.unique(points, axis=0)
-            theta = np.arctan2(points[:, 1]-o_point[1],
-                               points[:, 0]-o_point[0])
-            points = points[np.argsort(theta)]
-        if not np.allclose(points[0], points[-1]):
-            return np.append(points, points[:1], axis=0)
-        return points
+            boundary = np.append(boundary, x_point[np.newaxis, :], axis=0)
+            boundary = np.unique(boundary, axis=0)
+            theta = np.arctan2(boundary[:, 1]-o_point[1],
+                               boundary[:, 0]-o_point[0])
+            boundary = boundary[np.argsort(theta)]
+        if not np.allclose(boundary[0], boundary[-1]):
+            return np.append(boundary, boundary[:1], axis=0)
+        return boundary
 
     def build_boundary_outline(self):
         """Build outline timeseries."""
@@ -240,10 +277,11 @@ class Parameter0D(Plot, Scenario):
 
     def plot_boundary(self, axes=None):
         """Plot 2D boundary at itime."""
+        boundary = self.boundary
         self.get_axes('2d', axes=axes)
-        self.axes.plot(self.boundary[:, 0], self.boundary[:, 1],
-                       'gray', alpha=0.5)
-        self.axes.plot(*self['x_point'], 'x', ms=6, mec='C3', mew=1)
+        self.axes.plot(boundary[:, 0], boundary[:, 1], 'gray', alpha=0.5)
+        if not np.allclose(self['x_point'], (0, 0)):
+            self.axes.plot(*self['x_point'], 'x', ms=6, mec='C3', mew=1)
 
     def plot_shape(self, axes=None):
         """Plot separatrix shape parameter waveforms."""
@@ -449,10 +487,9 @@ if __name__ == '__main__':
 
     pulse, run = 135013, 2
 
-
     Equilibrium(pulse, run)._clear()
     equilibrium = Equilibrium(pulse, run)
 
-    equilibrium.itime = 10
+    equilibrium.time = 100
     equilibrium.plot_2d('psi', mask=0)
     equilibrium.plot_boundary()

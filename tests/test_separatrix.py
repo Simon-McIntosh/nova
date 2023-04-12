@@ -3,7 +3,7 @@ import pytest
 
 import numpy as np
 
-from nova.biot.separatrix import LCFS, PlasmaProfile, Separatrix
+from nova.geometry.separatrix import LCFS, PlasmaProfile, Separatrix
 
 
 @pytest.mark.parametrize('radius,height', product([0, 2.5, 5], [-1.3, 0, 7.2]))

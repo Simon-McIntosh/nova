@@ -7,8 +7,8 @@ import numpy as np
 from scipy.optimize import minimize
 from scipy.spatial import KDTree
 
-from nova.biot.separatrix import Separatrix
-from nova.imas.pulse_schedule import PulseSchedule
+from nova.geometry.separatrix import Separatrix
+from nova.imas.pulseschedule import PulseSchedule
 
 
 @dataclass

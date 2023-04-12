@@ -175,14 +175,6 @@ if __name__ == '__main__':
     # waveform.axes.plot(*waveform.points.T, 'C3')
 
     '''
-    from nova.biot.separatrix import Separatrix
-    waveform.levelset.set_axes('2d')
-    separatrix = Separatrix().single_null(6.5, 0.5, 1.5, 1.8, -0.3)
-    waveform.levelset.plot_query(separatrix.points)
-    '''
-
-
-    '''
     separatrix = Separatrix(waveform['geometric_axis'][0], 0.5).single_null(
         waveform['minor_radius'],  waveform['elongation'],
         waveform['triangularity'], x_point=waveform['x_point'][0])

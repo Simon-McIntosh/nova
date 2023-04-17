@@ -813,7 +813,6 @@ class IdsEntry(IdsIndex, IDS):
 
     def put_ids(self, occurrence=None):
         """Expose Database.put_ids."""
-        print(self.database.ids_attrs)
         self.database.put_ids(self.ids_data, occurrence)
 
 

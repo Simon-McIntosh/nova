@@ -29,11 +29,15 @@ class Select:
         return [attr for attr, value in self.data.items()
                 if coord in value.coords]
 
-    def select(self, coord: str, data=None):
+    def select(self, coord: str, data=None, dtype=None):
         """Return data subset including all data variables with coord."""
         if data is None:
             data = self.data
-        return data[self.attrs(coord)]
+        attrs = self.attrs(coord)
+        if dtype is None:
+            return data[attrs]
+        attrs = [attr for attr in attrs if self.data[attr].data.dtype == dtype]
+        return data[attrs]
 
 
 @dataclass
@@ -100,9 +104,9 @@ class Signal(Plot, Defeature, Select):
 
     data: xarray.Dataset = field(default_factory=xarray.Dataset, repr=False)
     dtime: int | float | None = None
-    savgol: tuple[int, int] | None = None
+    savgol: tuple[int, int] | None = (3, 1)
     epsilon: float = 0.05
-    cluster: int | float | None = 0.5
+    cluster: int | float | None = None
     features: list[str] = field(default_factory=lambda: [
         'minor_radius', 'elongation',
         'triangularity_upper', 'triangularity_lower',
@@ -116,6 +120,7 @@ class Signal(Plot, Defeature, Select):
         if self.dtime is not None:
             self.interpolate()
             self.resample()
+        self.smooth()
         self.defeature()
         if hasattr(super(), '__post_init__'):
             super().__post_init__()
@@ -161,8 +166,7 @@ class Signal(Plot, Defeature, Select):
                 return int(10*round(factor, 1)), 10
             case float(factor) if factor < 1:
                 return 10, int(10*round(1/factor, 1))
-            case _:
-                raise ValueError(f'invalid sample factor {self.factor}')
+        raise ValueError(f'invalid sample factor {self.factor}')
 
     def interpolate(self):
         """Interpolate data onto uniform time-base."""
@@ -183,17 +187,37 @@ class Signal(Plot, Defeature, Select):
         for attr, value in self.select('time', self['uniform']).items():
             dims = value.coords.dims
             value = scipy.signal.resample_poly(value, *updown, padtype='line')
-            if self.savgol is not None:
-                value = scipy.signal.savgol_filter(value, *self.savgol, axis=0)
             time_sample[attr] = dims, value
         self['sample'] = xarray.merge([self.select('~time', self['uniform']),
                                        time_sample])
+
+    def smooth(self):
+        """Smooth signal using savgol filter."""
+        if self.savgol is None:
+            return
+        savgol = xarray.Dataset(coords={'time': self.data.time})
+        for attr, value in self.select('time', self.data, float).items():
+            dims = value.coords.dims
+            value = scipy.signal.savgol_filter(value, *self.savgol, axis=0)
+            savgol[attr] = dims, value
+        self['smooth'] = xarray.merge(
+            [self.select('~time', self.data),
+             self.select('time', self.data, int), savgol])
 
     def defeature(self):
         """Defeature sample waveform using rdp algorithum."""
         self['rdp'] = super().defeature()
 
-    def plot(self, attrs=None):
+    def _plot_attr(self, sample: str, attr: str, scale=True, **kwargs):
+        """Plot single attribute waveform."""
+        self.axes = kwargs.get('axes', None)
+        data = self[sample]
+        value = data[attr]
+        if scale:
+            value = minmax_scale(value, axis=0)
+        self.axes.plot(data.time, value, **kwargs)
+
+    def plot(self, attrs=None, scale=False):
         """Plot source, interpolated, and sampled datasets."""
         if attrs is None:
             attrs = [attr for attr in self.features if attr != 'ip']
@@ -204,19 +228,23 @@ class Signal(Plot, Defeature, Select):
             dims = self.data[attr].coords.dims
             if 'time' not in dims or len(dims) != 1:
                 continue
-            self.axes.plot(self['clip'].time, self['clip'][attr],
-                           '-', color=f'C{i}', lw=2, label=attr)
+            self._plot_attr('clip', attr, ls='-', color=f'C{i}',
+                            lw=2.0, label=attr, scale=scale)
             if self.dtime is not None:
-                self.axes.plot(self['uniform'].time, self['uniform'][attr],
-                               '-', color='gray', alpha=0.75, lw=2.5)
-                self.axes.plot(self['sample'].time, self['sample'][attr],
-                               '-', color=f'C{i}', lw=2, label=attr)
-            self.axes.plot(self['rdp'].time, self['rdp'][attr],
-                           'o-', color='k', lw=1.5, ms=6,
-                           zorder=-10)
+                self._plot_attr('sample', attr, ls='-', color='gray',
+                                lw=1, scale=scale)
+            if self.savgol is not None:
+                self._plot_attr('smooth', attr, ls='-', color='k', lw=0.5,
+                                scale=scale)
+            self._plot_attr('rdp', attr, ls='-', marker='o', color='k',
+                            lw=1.5, ms=6, zorder=-10, scale=scale,
+                            mfc='k', mec=f'C{i}')
         self.axes.legend(ncol=3)
         self.axes.set_xlabel('time s')
-        self.axes.set_ylabel('value')
+        ylabel = 'value'
+        if scale:
+            ylabel = f'normalized {ylabel}'
+        self.axes.set_ylabel(ylabel)
 
     def write_ids(self, **ids_attrs):
         """Write signal data to pulse_schedule ids."""
@@ -238,6 +266,7 @@ class Signal(Plot, Defeature, Select):
 
         with ids_entry.node('flux_control.*.reference.data'):
             ids_entry['i_plasma'] = self.data.ip.data
+            ids_entry['loop_voltage'] = self.data.psi_boundary.data
             for attr in ['li_3', 'beta_normal']:
                 ids_entry[attr] = self.data[attr].data
 
@@ -262,6 +291,6 @@ if __name__ == '__main__':
     signal = Signal(equilibrium.data)
 
     signal.write_ids(**equilibrium.ids_attrs)
-    signal.plot()
+    #signal.plot('loop_voltage')
 
     # signal.plot('ip')

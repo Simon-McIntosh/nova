@@ -335,6 +335,7 @@ if __name__ == '__main__':
 
     signal = Signal(5, 2e5, offset=0.005, scale=0.1, frequency=10,
                     alpha=1, rng=2025, dirname=dirname, hostname=hostname)
+
     for i, index in enumerate(
             np.array_split(signal.magnetics['frame'].index, 4)):
         signal.path = f'{dirname}machine_{i}'

@@ -46,10 +46,10 @@ class Waveform(MachineDescription, PulseSeparatrix):
         """Extend itime update."""
         super().update()
         self.sloc['plasma', 'Ic'] = self['i_plasma']
-        self.update_loop_psi()
+        # self.update_loop_psi()
 
-    def update_loop_psi(self):
-        """Update loop psi."""
+    def loop_psi(self):
+        """Return loop psi matrix and data."""
         Psi = self.inductance.Psi[self.plasma_index, :][np.newaxis, :]
         loop_psi = np.atleast_1d(self['loop_psi'])
         plasma_psi = Psi[:, self.plasma_index] * self.sloc['plasma', 'Ic']
@@ -110,8 +110,8 @@ class Waveform(MachineDescription, PulseSeparatrix):
         """Return psi grid residual."""
         nturn /= np.sum(nturn)
         self.plasma.nturn = nturn
-        #self.update_gap()
-        self.update_lcfs()
+        self.update_gap()
+        #self.update_lcfs()
         #sol = optimize.root(plasma_shape, self.saloc['coil', 'Ic'])
         #self.saloc['coil', 'Ic'] = sol.x
         #self.plasma.separatrix = self.plasma.psi_boundary
@@ -120,7 +120,7 @@ class Waveform(MachineDescription, PulseSeparatrix):
 
     def solve(self):
         """Solve waveform."""
-        self.fit()
+        #self.fit()
 
         nturn = optimize.newton_krylov(
             self.residual, self.aloc['plasma', 'nturn'],
@@ -159,7 +159,9 @@ if __name__ == '__main__':
 
     pulse, run = 135003, 5
 
-    waveform = Waveform(pulse, run)
+    pulse, run = 135013, 2
+
+    waveform = Waveform(pulse, run, )
 
     #waveform.annimate(5, 'newton_krylov_ramp_up')
 

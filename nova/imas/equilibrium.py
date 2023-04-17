@@ -4,6 +4,7 @@ from functools import cached_property
 from typing import ClassVar
 
 import numpy as np
+from scipy.interpolate import interp1d
 import shapely
 from shapely.geometry import LineString, MultiLineString
 
@@ -158,7 +159,6 @@ class Parameter0D(Plot, Scenario):
         max_length = max(len(point_function(itime))
                          for itime in self.data.itime.data)
         if max_length == 0:
-            print(attr)
             self.data[attr] = ('time', 'point'), \
                 np.zeros((self.data.dims['time'], 2), float)
             self.data[f'{attr}_number'] = 'time', \
@@ -525,8 +525,6 @@ if __name__ == '__main__':
     pulse, run = 135013, 2
 
     pulse, run = 135013, 2
-
-    105007, 10, 'iter', 1
 
     Equilibrium(pulse, run)._clear()
     equilibrium = Equilibrium(pulse, run)

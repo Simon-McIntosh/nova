@@ -278,5 +278,5 @@ if __name__ == '__main__':
     # schedule.annimate(2.5)
 
     #schedule.plot_gaps()
-    #schedule.plot_0d('loop_voltage')
+    schedule.plot_0d('loop_voltage')
     #schedule.plot_0d('loop_psi')

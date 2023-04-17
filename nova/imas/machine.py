@@ -475,11 +475,12 @@ class PassiveCoilData(IdsCoilData):
 @dataclass
 class PassivePolyCoilData(PassiveCoilData):
     """Extract coildata from passive ids."""
+
     geometry_attrs: ClassVar[list[str]] = ['poly']
 
 
 @dataclass
-class CoilDatabase(CoilSet, CoilData, Database):
+class CoilDatabase(CoilSet, CoilData):
     """Manage coilset construction from ids structures."""
 
     machine: str = 'iter_md'
@@ -710,24 +711,31 @@ class Wall(CoilDatabase):
     occurrence: int = 0
     name: str = 'wall'
 
+    @cached_property
+    def limiter(self):
+        """Return limiter units."""
+        return getattr(self.ids_data, 'description_2d').array[0].limiter
+
+    @cached_property
+    def boundary(self):
+        """Return closed firstwall boundary contour."""
+        firstwall = ContourData()
+        for unit in self.limiter.unit:
+            firstwall.append(unit)
+        return Contour(firstwall.data).loop
+
     def segment(self, index=0):
         """Return firstwall segment."""
-        limiter = getattr(self.ids_data, 'description_2d').array[0].limiter
-        return np.array([limiter.unit[index].outline.r,
-                         limiter.unit[index].outline.z]).T
+        return np.array([self.limiter.unit[index].outline.r,
+                         self.limiter.unit[index].outline.z]).T
 
     def build(self):
         """Build plasma bound by firstwall contour."""
-        firstwall = ContourData()
-        limiter = getattr(self.ids_data, 'description_2d').array[0].limiter
-        for unit in limiter.unit:
-            firstwall.append(unit)
-        contour = Contour(firstwall.data)  # extract closed loop
-        self.firstwall.insert(contour.loop)
+        self.firstwall.insert(self.boundary)
 
 
 @dataclass
-class CoilGeometry:
+class Geometry:
     """
     Manage IDS coil geometry attributes.
 
@@ -755,7 +763,7 @@ class CoilGeometry:
 
     Dissable wall geometry via boolean input:
 
-    >>> geometry = CoilGeometry(wall=False)
+    >>> geometry = Geometry(wall=False)
     >>> geometry.wall
     False
     >>> geometry.pf_active == PoloidalFieldActive.default_ids_attrs()
@@ -765,20 +773,20 @@ class CoilGeometry:
 
     Modify pf_active attrs via dict input:
 
-    >>> pf_active = CoilGeometry(pf_active=dict(run=101)).pf_active
+    >>> pf_active = Geometry(pf_active=dict(run=101)).pf_active
     >>> pf_active == PoloidalFieldActive.default_ids_attrs() | dict(run=101)
     True
 
-    Specify pf_active as an ids:
+    Specify pf_active as an ids with pulse, run, and name:
 
     >>> database = Database(111001, 202, 'iter_md', name='pf_active')
-    >>> pf_active = CoilGeometry(database.ids_data).pf_active
-    >>> pf_active['pulse'] == database.ids_hash
+    >>> pf_active = Geometry(database.ids_data).pf_active
+    >>> pf_active['pulse'] == 111001
     True
 
     Specify pf_active as an itterable:
 
-    >>> pf_active = CoilGeometry(pf_active=(111001, 202)).pf_active
+    >>> pf_active = Geometry(pf_active=(111001, 202)).pf_active
     >>> tuple(pf_active[attr] for attr in ['pulse', 'run', 'name'])
     (111001, 202, 'pf_active')
 
@@ -788,6 +796,7 @@ class CoilGeometry:
     pf_passive: Ids | bool | str = True
     wall: Ids | bool | str = 'iter_md'
     filename: str = ''
+    ids: ImasIds | None = None
 
     geometry: ClassVar[dict] = dict(pf_active=PoloidalFieldActive,
                                     pf_passive=PoloidalFieldPassive,
@@ -797,10 +806,16 @@ class CoilGeometry:
         """Map geometry parameters to dict attributes."""
         self.set_filename()
         for attr, geometry in self.geometry.items():
-            ids_attrs = self.get_ids_attrs(attr, geometry)
+            ids_attrs = self.get_ids_attrs(getattr(self, attr), geometry)
             setattr(self, attr, ids_attrs)
         if hasattr(super(), '__post_init__'):
             super().__post_init__()
+
+    def __getitem__(self, attr):
+        """Return geometry item."""
+        if attr in self.geometry:
+            return self.geometry[attr]
+        return super().__getitem__(attr)
 
     def set_filename(self):
         """Set filename when all geometry attrs is str or False."""
@@ -809,13 +824,13 @@ class CoilGeometry:
                    for attr in self.geometry]) and self.filename == '':
             self.filename = 'machine_description'
 
-    def get_ids_attrs(self, attr, geometry):
+    def get_ids_attrs(self, attrs, geometry):
         """Return default ids attributes."""
-        match getattr(self, attr):
-            case str(attrs) if attrs == 'iter_md':  # update from iter_md
+        match attrs:
+            case str() if attrs == 'iter_md':  # update from iter_md
                 return geometry.update_ids_attrs(True)
             case str():
-                raise ValueError(f'attr str input {attr} != iter_md')
+                raise ValueError(f'attr str input {attrs} != iter_md')
             case attrs if hasattr(self, 'ids_attrs') and self.ids is None:
                 return geometry.merge_ids_attrs(attrs, self.ids_attrs)
             case attrs:
@@ -828,7 +843,7 @@ class CoilGeometry:
 
 
 @dataclass
-class Machine(CoilSet, CoilGeometry, CoilData):
+class Machine(CoilSet, Geometry, CoilData):
     """Manage ITER machine geometry."""
 
     @property

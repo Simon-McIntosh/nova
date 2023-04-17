@@ -9,7 +9,7 @@ from tqdm import tqdm
 from nova.biot.biot import Nbiot
 from nova.imas.database import Ids
 from nova.imas.machine import Machine
-from nova.imas.pulsedesign import PulseDesign
+from nova.imas.pulseseparatrix import PulseSeparatrix
 from nova.linalg.regression import MoorePenrose
 
 
@@ -18,14 +18,14 @@ class MachineDescription(Machine):
     """Machine description default class."""
 
     pf_active: Ids | bool | str = 'iter_md'
-    pf_passive: Ids | bool | str = False
+    pf_passive: Ids | bool | str = 'iter_md'
     wall: Ids | bool | str = 'iter_md'
     tplasma: str = 'hex'
     dplasma: int | float = -2500
 
 
 @dataclass
-class Waveform(MachineDescription, PulseDesign):
+class Waveform(MachineDescription, PulseSeparatrix):
     """Generate coilset voltage and current waveforms."""
 
     name: str = 'pulse_schedule'
@@ -104,7 +104,6 @@ class Waveform(MachineDescription, PulseDesign):
     def plot(self, index='plasma', axes=None, **kwargs):
         """Plot machine and constraints."""
         super().plot(index=index, axes=axes, **kwargs)
-        self.plot_gaps()
         self.plasma.plot()
 
     def residual(self, nturn):
@@ -168,8 +167,6 @@ if __name__ == '__main__':
     waveform.fit()
     waveform.solve()
     waveform.plot()
-
-
 
     # waveform.levelset.tree.plot(waveform.points)
     # waveform.axes.plot(*waveform.points.T, 'C3')

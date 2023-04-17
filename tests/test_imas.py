@@ -2,7 +2,7 @@ import pytest
 
 from nova.imas.database import Database
 from nova.imas.equilibrium import Equilibrium
-from nova.imas.machine import (CoilGeometry, Machine,
+from nova.imas.machine import (Geometry, Machine,
                                PoloidalFieldActive, PoloidalFieldPassive)
 from nova.imas.pf_active import PF_Active
 from nova.imas.utilities import ids_attrs, load_ids, mark, ALException
@@ -128,30 +128,30 @@ def test_equilibrium_rebuild():
 
 
 def test_geometry_boolean_input():
-    geometry = CoilGeometry(pf_active='iter_md', pf_passive='iter_md',
-                            wall=False)
+    geometry = Geometry(pf_active='iter_md', pf_passive='iter_md',
+                        wall=False)
     assert geometry.wall is False
     assert geometry.pf_active == PoloidalFieldActive.default_ids_attrs()
     assert geometry.pf_passive == PoloidalFieldPassive.default_ids_attrs()
 
 
 def test_geometry_update_run():
-    pf_active = CoilGeometry(pf_active=dict(run=101)).pf_active
+    pf_active = Geometry(pf_active=dict(run=101)).pf_active
     assert pf_active == PoloidalFieldActive.default_ids_attrs() | dict(run=101)
 
 
 @mark['pf_active']
-def test_geometry_pf_active_as_ids_hash():
+def test_geometry_pf_active_run_ids():
     database = Database(**ids_attrs['pf_active'])
-    pf_active = CoilGeometry(database.ids_data).pf_active
-    assert pf_active['run'] != ids_attrs['pf_active']['run']
+    pf_active = Geometry(database.ids_data).pf_active
+    assert pf_active['run'] == ids_attrs['pf_active']['run']
 
 
 @mark['pf_active']
 def test_geometry_pf_active_as_itterable():
     pulse_run = (ids_attrs['pf_active']['pulse'],
                  ids_attrs['pf_active']['run'])
-    pf_active = CoilGeometry(pf_active=pulse_run).pf_active
+    pf_active = Geometry(pf_active=pulse_run).pf_active
     assert all(pf_active[attr] == ids_attrs['pf_active'][attr]
                for attr in ids_attrs['pf_active'])
 
@@ -165,17 +165,17 @@ def test_pf_active_default_name():
 
 
 def test_md_geometry_default():
-    geometry = CoilGeometry(pf_active='iter_md', pf_passive=False, wall=False)
+    geometry = Geometry(pf_active='iter_md', pf_passive=False, wall=False)
     assert geometry.filename == 'machine_description'
 
 
 def test_md_geometry_default_str_error():
     with pytest.raises(ValueError):
-        CoilGeometry(pf_active='md', pf_passive='md', wall='md')
+        Geometry(pf_active='md', pf_passive='md', wall='md')
 
 
 def test_md_geometry_relative():
-    geometry = CoilGeometry(pf_active='iter_md', pf_passive=True, wall=False)
+    geometry = Geometry(pf_active='iter_md', pf_passive=True, wall=False)
     assert geometry.filename == ''
 
 

@@ -11,7 +11,7 @@ from nova.biot.contour import Contour
 from nova.frame.baseplot import Plot
 from nova.geometry.pointloop import PointLoop
 from nova.geometry.separatrix import LCFS
-from nova.imas.machine import Wall
+from nova.geometry.strike import Strike
 from nova.imas.scenario import Scenario
 from nova.plot.biotplot import BiotPlot
 
@@ -69,14 +69,14 @@ class Parameter0D(Plot, Scenario):
     """Load 0D parameter timeseries from equilibrium ids."""
 
     attrs_0d: list[str] = field(
-            default_factory=lambda: ['ip', 'beta_pol', 'li_3',
+            default_factory=lambda: ['ip', 'beta_pol', 'beta_tor',
+                                     'beta_normal', 'li_3',
                                      'psi_axis', 'psi_boundary',
                                      'volume', 'area', 'surface', 'length_pol',
                                      'q_axis', 'q_95',
                                      'psi_external_average', 'v_external',
                                      'plasma_inductance', 'plasma_resistance'])
     attrs_boundary: ClassVar[list[str]] = [
-        'geometric_radius', 'geometric_height',
         'minor_radius', 'elongation',
         'triangularity', 'triangularity_upper', 'triangularity_lower',
         'squareness_upper_inner', 'squareness_upper_outer',
@@ -94,12 +94,28 @@ class Parameter0D(Plot, Scenario):
     def build(self):
         """Build 0D parameter timeseries."""
         super().build()
+        self.data.attrs['r0'] = self.get_ids('vacuum_toroidal_field/r0')
+        self.data['b0'] = 'time', self.get_ids('vacuum_toroidal_field/b0')
         self.append('time', self.attrs_0d, 'global_quantities')
+        self.build_axis('boundary_separatrix.geometric_axis')
         self.build_axis('global_quantities.magnetic_axis')
         self.build_axis('global_quantities.current_centre')
-        self.build_x_points()
+        self.build_points('x_point')
+        self.build_points('strike_point')
         self.build_boundary_outline()
         self.build_boundary_shape()
+        self.build_beta_normal()
+
+    def build_beta_normal(self):
+        """Build beta normal from known parameters."""
+        if 'beta_normal' in self.data:
+            return
+        attrs = ['beta_tor', 'minor_radius', 'b0', 'ip']
+        if any(attr not in self.data for attr in attrs):
+            return
+        data = {attr: self.data[attr].data for attr in attrs}
+        self.data['beta_normal'] = 'time', 100 * data['beta_tor'] * \
+            data['minor_radius'] * data['b0'] / (1e-6 * data['ip'])
 
     def outline(self, itime):
         """Return boundary outline."""
@@ -120,6 +136,8 @@ class Parameter0D(Plot, Scenario):
     def x_point_array(self, itime: int):
         """Return x-point array at itime."""
         x_points = self._point_array(itime, 'boundary_separatrix.x_point')
+        if len(x_points) == 0:
+            return x_points
         boundary = self.outline(itime)
         if len(boundary) > 0:
             delta = np.max(np.linalg.norm(
@@ -127,9 +145,41 @@ class Parameter0D(Plot, Scenario):
             index = np.array([np.min(np.linalg.norm(
                 boundary - x_point, axis=1)) for x_point in x_points]) < delta
             x_points = x_points[index]
-        if len(x_points) > 0:
-            return np.array(x_points, float)
-        return np.zeros((1, 2), float)
+        return x_points
+
+    def strike_point_array(self, itime: int):
+        """Return strike-point array at itime."""
+        return self._point_array(itime, 'boundary_separatrix.strike_point')
+
+    def build_points(self, attr: str, point_function=None):
+        """Build point array."""
+        if point_function is None:
+            point_function = getattr(self, f'{attr}_array')
+        max_length = max(len(point_function(itime))
+                         for itime in self.data.itime.data)
+        if max_length == 0:
+            print(attr)
+            self.data[attr] = ('time', 'point'), \
+                np.zeros((self.data.dims['time'], 2), float)
+            self.data[f'{attr}_number'] = 'time', \
+                np.zeros(self.data.dims['time'], int)
+            return
+        self.data[f'{attr}_index'] = range(max_length)
+        self.data[attr] = ('time', f'{attr}_index', 'point'), \
+            np.zeros((self.data.dims['time'],
+                      self.data.dims[f'{attr}_index'],
+                      self.data.dims['point']))
+        self.data[f'{attr}_number'] = 'time', \
+            np.zeros(self.data.dims['time'], dtype=int)
+        for itime in self.data.itime.data:
+            points = point_function(itime)
+            length = len(points)
+            if length == 0:
+                continue
+            self.data[f'{attr}_number'][itime] = length
+            self.data[attr][itime, :length] = points
+        if max_length == 1:
+            self.data = self.data.squeeze(f'{attr}_index', drop=True)
 
     def build_x_points(self):
         """Build x-point locations."""
@@ -137,43 +187,12 @@ class Parameter0D(Plot, Scenario):
                             for itime in self.data.itime.data])
         self.data['x_point'] = ('time', 'point'), x_point
 
-    @cached_property
-    def divertor(self):
-        """Return divertor outline."""
-        wall = Wall()
-        return wall.segment(1)
-
-    def strike_point_array(self, itime: int):
-        """Return strike-point array at itime."""
-        strike_points = self._point_array(
-            itime, 'boundary_separatrix.strike_point')
-        if len(strike_points) == 0:
-            boundary = self.outline(itime)
-            contour = Contour(self.data.r2d, self.data.z2d,
-                              self.data.psi2d[itime])
-            levelset = contour.levelset(self.data.psi_boundary[itime])
-            separatrix = MultiLineString(
-                [surface.points for surface in levelset])
-
-            points = shapely.intersection(separatrix, LineString(self.divertor))
-            print(points)
-
-            self.set_axes('2d')
-            for surface in levelset:
-                surface.plot()
-            self.axes.plot(*self.divertor.T)
-            #self.axes.plot(*boundary.T)
-
-
-    def build_strike_points(self):
-        """Build strike-point locations when not present in IDS."""
-
     def x_mask(self, itime: int, outline_z: np.ndarray, eps=0):
         """Return boundary x-point mask."""
+        if self.data.x_point_number[itime].data == 0:
+            return np.ones(len(outline_z), bool)
         x_point = self.data.x_point[itime].data
         o_point = self.data.magnetic_axis[itime].data
-        if np.allclose(x_point, (0, 0)):
-            return np.ones(len(outline_z), bool)
         if x_point[1] < o_point[1]:
             return outline_z > x_point[1] - eps
         return outline_z < x_point[1] + eps
@@ -185,7 +204,6 @@ class Parameter0D(Plot, Scenario):
             return boundary
         segment = np.linalg.norm(boundary[1:] - boundary[:-1], axis=1)
         x_point = self.data.x_point[itime].data
-        o_point = self.data.magnetic_axis[itime].data
         limiter = np.allclose(x_point, (0, 0))
         if limiter:  # limiter
             step = np.mean(segment) + 3*np.std(segment)
@@ -196,11 +214,13 @@ class Parameter0D(Plot, Scenario):
                                        loop in loops])
                 return np.append(loops[loop_index], loops[loop_index][:1],
                                  axis=0)
+            return boundary
         mask = self.x_mask(itime, boundary[:, 1])
         boundary = boundary[mask]
         if sum(mask) == 0:
             return boundary
         if not limiter:
+            o_point = self.data.magnetic_axis[itime].data
             boundary = np.append(boundary, x_point[np.newaxis, :], axis=0)
             boundary = np.unique(boundary, axis=0)
             theta = np.arctan2(boundary[:, 1]-o_point[1],
@@ -231,8 +251,9 @@ class Parameter0D(Plot, Scenario):
 
     def extract_shape_parameters(self):
         """Return shape parameters calculated from lcfs."""
+        attrs = self.attrs_boundary + ['geometric_radius', 'geometric_height']
         lcfs_data = {attr: np.zeros(self.data.dims['time'], float)
-                     for attr in self.attrs_boundary if hasattr(LCFS, attr)}
+                     for attr in attrs if hasattr(LCFS, attr)}
         for itime in self.data.itime.data:
             boundary = self.boundary_outline(itime)
             if len(boundary) == 0:
@@ -260,10 +281,7 @@ class Parameter0D(Plot, Scenario):
         if any(self.ids_index.empty(f'{path}.{label}') for label in 'rz'):
             geometric_axis = np.c_[lcfs_data['geometric_radius'],
                                    lcfs_data['geometric_height']]
-        else:
-            geometric_axis = np.c_[self.ids_index.array(f'{path}.r'),
-                                   self.ids_index.array(f'{path}.z')]
-        self.data['geometric_axis'] = ('time', 'point'), geometric_axis
+            self.data['geometric_axis'] = ('time', 'point'), geometric_axis
 
     @property
     def boundary(self):
@@ -280,7 +298,7 @@ class Parameter0D(Plot, Scenario):
         boundary = self.boundary
         self.get_axes('2d', axes=axes)
         self.axes.plot(boundary[:, 0], boundary[:, 1], 'gray', alpha=0.5)
-        if not np.allclose(self['x_point'], (0, 0)):
+        if self['x_point_number'] == 1:
             self.axes.plot(*self['x_point'], 'x', ms=6, mec='C3', mew=1)
 
     def plot_shape(self, axes=None):
@@ -455,7 +473,32 @@ class Equilibrium(Profile2D, Profile1D, Parameter0D, Grid):
         with self.build_scenario():
             self.data.coords['point'] = ['r', 'z']
             super().build()
+            self.contour_build()
         return self
+
+    @cached_property
+    def strike(self):
+        """Return divertor strike instance."""
+        return Strike(indices=(1,))
+
+    def contour_build(self):
+        """Re-build geometry components from psi2d contour if not present."""
+        if 'strike_point' not in self.data:
+            self.build_points('strike_point', self.strike_point_contour)
+
+    def strike_point_contour(self, itime: int):
+        """Return strike point array at itime."""
+        if self.data.x_point_number[itime].data == 0:
+            return np.array([])
+        contour = Contour(self.data.r2d, self.data.z2d,
+                          self.data.psi2d[itime])
+        levelset = contour.levelset(self.data.psi_boundary[itime])
+        self.strike.update([surface.points for surface in levelset])
+        if len(strike_points := self.strike.points) == 2:
+            return strike_points
+        minmax_index = [np.argmin(strike_points[:, 0]),
+                        np.argmax(strike_points[:, 0])]
+        return strike_points[minmax_index]
 
     def data_2d(self, attr: str, mask=0):
         """Extend to return masked data array."""
@@ -481,11 +524,9 @@ if __name__ == '__main__':
     pulse, run = 105028, 1
     pulse, run = 135013, 2
 
-    pulse, run = 130506, 403
-
-    pulse, run = 135014, 1
-
     pulse, run = 135013, 2
+
+    105007, 10, 'iter', 1
 
     Equilibrium(pulse, run)._clear()
     equilibrium = Equilibrium(pulse, run)

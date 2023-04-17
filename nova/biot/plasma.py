@@ -251,4 +251,4 @@ class Plasma(Plot, netCDF, FrameSetLoc):
         levels = self.levelset.plot(**kwargs)
         if levels is None:
             self.grid.plot(**kwargs)
-        self.wall.plot(limitflux=True)
+        self.wall.plot(limitflux=False)

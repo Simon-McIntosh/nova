@@ -76,6 +76,11 @@ class PulseSchedule(Plot, Scenario):
         return self.data.wall.data
 
     @cached_property
+    def divertor_segment(self):
+        """Return iter_md first wall instance."""
+        return self.data.divertor.data
+
+    @cached_property
     def _angle(self, corner_eps=0.01):
         """Return gap angle interpolater (firstwall inward facing normals)."""
         boundary = self.wall_segment
@@ -155,8 +160,10 @@ class PulseSchedule(Plot, Scenario):
     def build_wall(self):
         """Extract wall profile from IDS."""
         wall = Wall()
-        self.data['wall'] = ('wall_index', 'point'), wall.segment()
-        self.data.coords['wall_index'] = np.arange(self.data.wall.shape[0])
+        for i, attr in enumerate(['wall', 'divertor']):
+            self.data[attr] = (f'{attr}_index', 'point'), wall.segment(i)
+            index = np.arange(self.data[attr].shape[0])
+            self.data.coords[f'{attr}_index'] = index
         self.data.attrs['wall_md'] = ','.join(
             [str(value) for _, value in wall.ids_attrs.items()])
 

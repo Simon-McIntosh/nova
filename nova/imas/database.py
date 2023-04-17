@@ -2,6 +2,7 @@
 from contextlib import contextmanager
 from dataclasses import dataclass, field, fields, InitVar
 from operator import attrgetter
+import os
 from typing import Any, ClassVar, Optional, Type
 
 try:
@@ -32,8 +33,60 @@ class IDS:
     name: str | None = None
     backend: str = 'hdf5'
 
+    dd_version: ClassVar[int] = 3
     attrs: ClassVar[list[str]] = ['pulse', 'run', 'machine', 'occurrence',
                                   'user', 'name', 'backend']
+
+    @property
+    def uri(self):
+        """Return IDS URI."""
+        return f"imas:{self.backend}?user={self.user};"\
+               f"version={self.dd_version};"\
+               f"shot={self.pulse};run={self.run};database={self.machine}"
+
+    @property
+    def home(self):
+        """Return database root."""
+        if self.user == 'public':
+            return os.path.join(os.environ['IMAS_HOME'], 'shared')
+        return os.path.join(os.path.expanduser(f'~{self.user}'), 'public')
+
+    @property
+    def _path(self):
+        """Return top level of database path."""
+        return os.path.join(self.home, 'imasdb', self.machine,
+                            str(self.dd_version))
+
+    @property
+    def path(self):
+        """Return path to database entry."""
+        match self.backend:
+            case str(backend) if backend == 'hdf5':
+                return os.path.join(self._path, str(self.pulse), str(self.run))
+            case _:
+                raise NotImplementedError(f'not implemented for {self.backend}'
+                                          ' backend')
+
+    @property
+    def empty(self):
+        """Return true if database entry does not exist."""
+        if os.path.isdir(self.path) and os.listdir(self.path):
+            return False
+        return True
+
+    def get_ids(self):
+        """Return empty ids."""
+        return getattr(imas, self.name)()
+
+    @classmethod
+    def default_ids_attrs(cls) -> dict:
+        """Return dict of ids attributes."""
+        return {attr: getattr(cls, attr) for attr in cls.attrs}
+
+    @property
+    def ids_attrs(self):
+        """Return dict of ids attributes."""
+        return {attr: getattr(self, attr) for attr in self.attrs}
 
 
 @dataclass
@@ -199,6 +252,12 @@ class Database(IDS):
             return self._load_attrs_from_ids()
         return None
 
+    @property
+    def _unset_attrs(self) -> bool:
+        """Return True if any required input attributes are unset."""
+        return self.pulse == 0 or self.pulse is None or \
+            self.run == 0 or self.run is None or self.name is None
+
     def _load_attrs_from_ids(self):
         """
         Initialize database class directly from an ids.
@@ -206,17 +265,17 @@ class Database(IDS):
         Set unknown pulse and run numbers to the ids hash
         Update name to match ids.__name__
         """
-        self.pulse = self.ids_hash
-        self.run = 0
-        if self.name is not None and self.name != self.ids_data.__name__:
-            raise NameError(f'missmatch between instance name {self.name} '
-                            f'and ids_data {self.ids_data.__name__}')
-        self.name = self.ids_data.__name__
+        if self._unset_attrs:
+            self.pulse = self.ids_hash
+            self.run = 0
+            if self.name is not None and self.name != self.ids_data.__name__:
+                raise NameError(f'missmatch between instance name {self.name} '
+                                f'and ids_data {self.ids_data.__name__}')
+            self.name = self.ids_data.__name__
 
     def _check_ids_attrs(self):
         """Confirm minimum working set of input attributes."""
-        if self.pulse == 0 or self.pulse is None or \
-                self.run == 0 or self.run is None or self.name is None:
+        if self._unset_attrs:
             raise imas.hli_exception.ALException(
                 f'When self.ids is None require:\n'
                 f'pulse ({self.pulse} > 0) & run ({self.run} > 0) & '
@@ -239,16 +298,6 @@ class Database(IDS):
             return cls(**attrs)
         return False
 
-    @classmethod
-    def default_ids_attrs(cls) -> dict:
-        """Return dict of ids attributes."""
-        return {attr: getattr(cls, attr) for attr in cls.attrs}
-
-    @property
-    def ids_attrs(self):
-        """Return dict of ids attributes."""
-        return {attr: getattr(self, attr) for attr in self.attrs}
-
     @property
     def group_attrs(self):
         """
@@ -260,7 +309,7 @@ class Database(IDS):
         return self.ids_attrs
 
     def get_ids(self, ids_path: Optional[str] = None, occurrence=None):
-        """Return ids. Extend name with ids_path if not None."""
+        """Return ids. Override IDS.get_ids. Extend name with ids_path."""
         ids_name = '/'.join((item for item in [self.name, ids_path]
                              if item is not None)).split('/', 1)
         if occurrence is None:
@@ -270,11 +319,13 @@ class Database(IDS):
                 return db_entry.partial_get(*ids_name, occurrence=occurrence)
             return db_entry.get(*ids_name, occurrence=occurrence)
 
-    @property
-    def uri(self):
-        """Return IDS URI."""
-        return f"imas:{self.backend}?user={self.user};version=3;" \
-               f"shot={self.pulse};run={self.run};database={self.machine}"
+    def next_occurrence(self, limit=10000) -> int:
+        """Return index of next available occurrence."""
+        ids_path = 'ids_properties/homogeneous_time'
+        for i in range(limit):
+            if self.get_ids(ids_path, i) == imas.imasdef.EMPTY_INT:
+                return i
+        raise IndexError(f'no empty occurrences found for i < {limit}')
 
     @contextmanager
     def _db_entry(self):
@@ -301,11 +352,18 @@ class Database(IDS):
                     f'backend: {self.backend}') from error
             yield db_entry
 
+    @property
+    def db_mode(self):
+        """Return db_entry mode."""
+        if self.empty:
+            return 'create'
+        return 'open'
+
     @contextmanager
     def db_write(self):
         """Yeild bare database entry."""
         with self._db_entry() as db_entry:
-            db_entry.create(uri=self.uri)
+            getattr(db_entry, self.db_mode)(uri=self.uri)
             yield db_entry
 
     def put_ids(self, ids, occurrence=None):
@@ -606,7 +664,7 @@ class IdsIndex:
             self.ids_node = ids_node
         try:
             self.length = len(self.ids)
-        except TypeError:
+        except (AttributeError, TypeError):
             self.length = 0
 
     def __getitem__(self, path: str) -> tuple[int, ...] | tuple[()]:
@@ -643,6 +701,14 @@ class IdsIndex:
     def get(self, path: str):
         """Return attribute from ids path."""
         return attrgetter(path)(self.ids)
+
+    def __setitem__(self, attr, value):
+        """Set attribute on ids path."""
+        path = self.get_path(self.ids_node, attr)
+        split_path = path.split('.')
+        node = '.'.join(split_path[:-1])
+        leaf = split_path[-1]
+        setattr(attrgetter(node)(self.ids_data), leaf, value)
 
     def get_slice(self, index: int, path: str):
         """Return attribute slice at node index."""
@@ -728,6 +794,27 @@ class IdsIndex:
         if '*' in branch:
             return branch.replace('*', attr)
         return '.'.join((branch, attr))
+
+
+@dataclass
+class IdsEntry(IdsIndex, IDS):
+    """Methods to facilitate sane ids entry."""
+
+    ids_data: ImasIds = None
+    ids_node: str = ''
+    database: Database | None = field(init=False, default=None)
+
+    def __post_init__(self):
+        """Initialize ids_data and create database instance."""
+        if self.ids_data is None:
+            self.ids_data = self.get_ids()
+        self.database = Database(**self.ids_attrs, ids=self.ids_data)
+        super().__post_init__()
+
+    def put_ids(self, occurrence=None):
+        """Expose Database.put_ids."""
+        print(self.database.ids_attrs)
+        self.database.put_ids(self.ids_data, occurrence)
 
 
 @dataclass

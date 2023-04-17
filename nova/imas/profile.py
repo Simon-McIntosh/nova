@@ -23,23 +23,23 @@ class Profile(Plot, GetSlice, IdsData):
 
     def update(self):
         """Clear cache following update to itime. Extend as required."""
+        super().update()
         self.clear_cached_properties()
 
     def clear_cached_properties(self):
         """Clear cached properties."""
-        for attr in ['psi_axis', 'psi_boundary',
-                     'psi_rbs', 'j_tor_rbs', 'p_prime', 'ff_prime']:
+        for attr in ['p_prime', 'ff_prime']:
             try:
                 delattr(self, attr)
             except AttributeError:
                 pass
 
-    @cached_property
+    @property
     def psi_axis(self):
         """Return on-axis poloidal flux."""
         return float(self['psi_axis'])
 
-    @cached_property
+    @property
     def psi_boundary(self):
         """Return boundary poloidal flux."""
         return float(self['psi_boundary'])
@@ -52,12 +52,12 @@ class Profile(Plot, GetSlice, IdsData):
         """Return poloidal flux."""
         return psi_norm * (self.psi_boundary - self.psi_axis) + self.psi_axis
 
-    @cached_property
+    @property
     def psi_rbs(self):
         """Return cached 2D RectBivariateSpline psi2d interpolant."""
         return self._rbs('psi2d')
 
-    @cached_property
+    @property
     def j_tor_rbs(self):
         """Return cached 2D RectBivariateSpline j_tor2d interpolant."""
         return self._rbs('j_tor2d')
@@ -100,4 +100,5 @@ class Profile(Plot, GetSlice, IdsData):
 if __name__ == '__main__':
 
     profile = Profile(105007, 10, 'iter', 1)
-    profile.plot_profile(attr='p_prime')
+    profile.itime = 6
+    profile.plot_profile(attr='ff_prime')

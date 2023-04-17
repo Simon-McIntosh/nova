@@ -11,6 +11,7 @@ class GetSlice:
 
     time_index: int | None = field(init=False, default=None)
     data: xarray.Dataset = field(default_factory=xarray.Dataset, repr=False)
+    _cache: dict = field(init=False, repr=False, default_factory=dict)
 
     def __post_init__(self):
         """Set time index."""
@@ -27,7 +28,11 @@ class GetSlice:
 
     def __getitem__(self, key: str):
         """Return dataset value with dict-like access."""
-        return self.get(key)
+        try:
+            return self._cache[key]
+        except KeyError:
+            self._cache[key] = self.get(key)
+            return self._cache[key]
 
     def match(self, key: str) -> str:
         """Return key matched to internal naming convention."""
@@ -66,3 +71,4 @@ class GetSlice:
 
     def update(self):
         """Clear cache following update to itime. Extend as required."""
+        self._cache = {}

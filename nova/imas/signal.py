@@ -104,7 +104,7 @@ class Signal(Plot, Defeature, Select):
 
     data: xarray.Dataset = field(default_factory=xarray.Dataset, repr=False)
     dtime: int | float | None = None
-    savgol: tuple[int, int] | None = (3, 1)
+    savgol: tuple[int, int] | None = None
     epsilon: float = 0.05
     cluster: int | float | None = None
     features: list[str] = field(default_factory=lambda: [
@@ -279,6 +279,17 @@ class Signal(Plot, Defeature, Select):
             for attr in ['minor_radius', 'elongation', 'triangularity_upper',
                          'triangularity_lower']:
                 ids_entry[attr] = self.data[attr].data
+
+        ids_entry.resize('position_control.x_point', 1)
+        with ids_entry.node('position_control.x_point:*.reference.data'):
+            ids_entry['r', 0] = self.data.x_point[:, 0].data
+            ids_entry['z', 0] = self.data.x_point[:, 1].data
+
+        ids_entry.resize('position_control.strike_point', 2)
+        with ids_entry.node('position_control.strike_point:*.reference.data'):
+            for i in range(2):
+                ids_entry['r', i] = self.data.strike_point[:, i, 0].data
+                ids_entry['z', i] = self.data.strike_point[:, i, 1].data
 
         ids_entry.put_ids()
 

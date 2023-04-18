@@ -67,13 +67,6 @@ class IDS:
                 raise NotImplementedError(f'not implemented for {self.backend}'
                                           ' backend')
 
-    @property
-    def empty(self):
-        """Return true if database entry does not exist."""
-        if os.path.isdir(self.path) and os.listdir(self.path):
-            return False
-        return True
-
     def get_ids(self):
         """Return empty ids."""
         return getattr(imas, self.name)()
@@ -353,9 +346,16 @@ class Database(IDS):
             yield db_entry
 
     @property
+    def db_empty(self):
+        """Return true if database entry does not exist."""
+        if os.path.isdir(self.path) and os.listdir(self.path):
+            return False
+        return True
+
+    @property
     def db_mode(self):
         """Return db_entry mode."""
-        if self.empty:
+        if self.db_empty:
             return 'create'
         return 'open'
 
@@ -702,13 +702,29 @@ class IdsIndex:
         """Return attribute from ids path."""
         return attrgetter(path)(self.ids)
 
+    def resize(self, path: str, number: int):
+        """Resize structured array."""
+        attrgetter(path)(self.ids_data).resize(number)
+
     def __setitem__(self, attr, value):
         """Set attribute on ids path."""
+        if isinstance(attr, tuple):
+            attr, index = attr
+        else:
+            index = 0
         path = self.get_path(self.ids_node, attr)
         split_path = path.split('.')
         node = '.'.join(split_path[:-1])
         leaf = split_path[-1]
-        setattr(attrgetter(node)(self.ids_data), leaf, value)
+        match node.split(':'):
+            case (str(node),):
+                branch = attrgetter(node)(self.ids_data)
+            case (str(array), str(node)):
+                trunk = attrgetter(array)(self.ids_data)[index]
+                branch = attrgetter(node)(trunk)
+            case _:
+                raise IndexError(f'malformed node {node}')
+        setattr(branch, leaf, value)
 
     def get_slice(self, index: int, path: str):
         """Return attribute slice at node index."""

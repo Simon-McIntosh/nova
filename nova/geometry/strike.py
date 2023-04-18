@@ -42,10 +42,11 @@ class Strike(Plot):
 
     @property
     def points(self):
-        """Return strike-point array."""
+        """Return radially sorted strike-point array."""
         if not self.intersects:
             return np.array([])
-        return np.c_[[[geom.x, geom.y] for geom in self['point']]]
+        point_array = np.c_[[[geom.x, geom.y] for geom in self['point']]]
+        return point_array[np.argsort(point_array[:, 0])]
 
     def __getitem__(self, attr):
         """Return geometry itterable."""

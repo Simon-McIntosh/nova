@@ -161,7 +161,7 @@ if __name__ == '__main__':
 
     pulse, run = 135013, 2
 
-    waveform = Waveform(pulse, run, )
+    waveform = Waveform(pulse, run)
 
     #waveform.annimate(5, 'newton_krylov_ramp_up')
 

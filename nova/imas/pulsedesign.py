@@ -384,6 +384,10 @@ class Benchmark(PulseDesign):
 
 if __name__ == '__main__':
 
+    #point = ControlPoint(135013, 2, 'iter', 1)
+    #point.itime = 0
+    #point.plot()
+
     design = PulseDesign(135013, 2, 'iter', 1)
 
     design.itime = 0

@@ -105,7 +105,7 @@ class Signal(Plot, Defeature, Select):
     data: xarray.Dataset = field(default_factory=xarray.Dataset, repr=False)
     dtime: int | float | None = None
     savgol: tuple[int, int] | None = None
-    epsilon: float = 0.05
+    epsilon: float = 0.15
     cluster: int | float | None = None
     features: list[str] = field(default_factory=lambda: [
         'minor_radius', 'elongation',
@@ -302,6 +302,6 @@ if __name__ == '__main__':
     signal = Signal(equilibrium.data)
 
     signal.write_ids(**equilibrium.ids_attrs)
-    #signal.plot('loop_voltage')
+    signal.plot()
 
     # signal.plot('ip')

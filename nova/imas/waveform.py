@@ -48,7 +48,7 @@ class Waveform(MachineDescription, PulseSeparatrix):
         self.sloc['plasma', 'Ic'] = self['i_plasma']
         # self.update_loop_psi()
 
-    def loop_psi(self):
+    def _update_loop_psi(self):
         """Return loop psi matrix and data."""
         Psi = self.inductance.Psi[self.plasma_index, :][np.newaxis, :]
         loop_psi = np.atleast_1d(self['loop_psi'])

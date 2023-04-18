@@ -483,7 +483,8 @@ class Equilibrium(Profile2D, Profile1D, Parameter0D, Grid):
 
     def contour_build(self):
         """Re-build geometry components from psi2d contour if not present."""
-        if 'strike_point' not in self.data:
+        if 'strike_point' not in self.data or \
+                np.max(self.data.strike_point_number.data) == 0:
             self.build_points('strike_point', self.strike_point_contour)
 
     def strike_point_contour(self, itime: int):

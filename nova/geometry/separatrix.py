@@ -44,7 +44,7 @@ class Peak:
     @cached_property
     def interpolator(self):
         """Return 1d interpolator."""
-        return interp1d(self.length, self.value, self.kind)
+        return interp1d(self.length, self.value, self.kind, assume_sorted=True)
 
     @staticmethod
     def _minimize(function):
@@ -199,6 +199,16 @@ class LCFS(Plot):
     def triangularity_lower(self):
         """Return lower triangularity, del_l."""
         return (self.geometric_radius - self.r_zmin) / self.minor_radius
+
+    @cached_property
+    def triangularity_inner(self):
+        """Return inner triangularity, del_i."""
+        return (self.z_rmin - self.geometric_height) / self.minor_radius
+
+    @cached_property
+    def triangularity_outer(self):
+        """Return outer triangularity, del_o."""
+        return (self.z_rmax - self.geometric_height) / self.minor_radius
 
     def plot(self, label=False):
         """Plot last closed flux surface and key geometrical points."""

@@ -16,8 +16,7 @@ class DataNull(Plot, Array):
     """Store sort and remove field nulls."""
 
     subgrid: bool = True
-    data: xarray.Dataset | xarray.DataArray = \
-        field(repr=False, default_factory=xarray.Dataset)
+    data: xarray.Dataset = field(repr=False, default_factory=xarray.Dataset)
     loop: np.ndarray | None = field(repr=False, default=None)
     array_attrs: list[str] = field(
         default_factory=lambda: ['x', 'z', 'stencil', 'stencil_index'])

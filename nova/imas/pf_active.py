@@ -54,6 +54,7 @@ if __name__ == '__main__':
     # pulse, run = 115002, 4
     pulse, run = 135007, 4
     # pulse, run = 135011, 7
+    pulse, run = 135013, 2
     PF_Active(pulse, run)._clear()
     pf_active = PF_Active(pulse, run)
     #pf_active = PF_Active(105007, 9)  # b field max timed 135002, 5

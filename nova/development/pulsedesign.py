@@ -5,7 +5,6 @@ from typing import ClassVar
 
 import numpy as np
 from scipy import optimize
-from scipy.sparse.linalg import LinearOperator
 from scipy.spatial import distance_matrix
 
 from nova.biot.biot import Nbiot
@@ -160,9 +159,9 @@ class Constraint(Plot):
         self.axes.plot(*self.points.T, 'o', color=color, ms=ms/4)
         self.axes.plot(*self._points('psi').T, 's', ms=ms, mec=color,
                        mew=2, mfc='none')
-        self.axes.plot(*self._points('radial').T, '|', ms=2*ms, mec=color)
-        self.axes.plot(*self._points('vertical').T, '_', ms=2*ms, mec=color)
-        self.axes.plot(*self._points('null').T, 'x', ms=2*ms, mec=color)
+        self.axes.plot(*self._points('radial').T, '|', mew=2, ms=2*ms, mec=color)
+        self.axes.plot(*self._points('vertical').T, '_', mew=2, ms=2*ms, mec=color)
+        self.axes.plot(*self._points('null').T, 'x', mew=2, ms=2*ms, mec=color)
 
 
 @dataclass
@@ -347,8 +346,8 @@ class PulseDesign(ITER, ControlPoint):
         super().update()
         self.sloc['plasma', 'Ic'] = self['i_plasma']
 
-    def _constrain(self, constraint, field_weight=50):
-        """Return coupling matrix and vectors."""
+    def _constrain(self, constraint, field_weight=10):
+        """Return matrix and coupling and vector constraint."""
         if len(constraint) == 0:
             return
         point_index = np.array([self.levelset.kd_query(point) for point in
@@ -360,7 +359,6 @@ class PulseDesign(ITER, ControlPoint):
                 continue
             index = point_index[constraint[attr].index]
             matrix = getattr(self.levelset, attr.capitalize())[index]
-
             vector = constraint[attr].data - \
                 matrix[:, self.plasma_index] * self.saloc['plasma', 'Ic']
 
@@ -375,7 +373,7 @@ class PulseDesign(ITER, ControlPoint):
         return matrix[:, self.saloc['coil']], vector
 
     def _stack(self, *args):
-        """Stack coupling matrix and vectors."""
+        """Stack coupling matricies and data."""
         matrix = np.vstack([arg[0] for arg in args if arg is not None])
         data = np.hstack([arg[1] for arg in args if arg is not None])
         return matrix, data
@@ -387,39 +385,20 @@ class PulseDesign(ITER, ControlPoint):
         matrix, vector = self._stack(*coupling)
         self.saloc['coil', 'Ic'] = MoorePenrose(matrix, gamma=1e-5) / vector
 
-    @cached_property
-    def _Psi(self):
-        """Return plasma grid coupling matrix."""
-        return self.plasmagrid.data._Psi.data
-
-    @property
-    def _psi(self):
-        """Return plasma component of poloidal flux on grid."""
-        return self._Psi @ self.plasma.nturn
-
-    @profile
     def residual(self, nturn):
         """Return psi grid residual."""
         # nturn = abs(nturn) / np.sum(abs(nturn))
-        self.plasma.nturn = nturn #/ np.sum(nturn)
-        #psi = self._psi
+        self.plasma.nturn = abs(nturn) / np.sum(abs(nturn))
         self.solve_current()
-        psi_boundary = self.plasma.psi_boundary
-        self.plasma.separatrix = psi_boundary
-        return self.plasma.nturn - nturn
-
-        #print(np.linalg.norm(psi), np.linalg.norm(self._psi))
-        return 1000*(self._psi - psi)
+        self.plasma.separatrix = self.plasma.psi_boundary
+        residual = self.aloc['plasma', 'nturn'] - nturn
+        return residual
 
     def solve(self):
         """Solve waveform."""
-        nturn = optimize.newton_krylov(
-            self.residual, self.plasma.nturn, verbose=True)
-        #self.residual(nturn)
-        nturn = np.where(abs(nturn) > 1e-9, nturn, 0)
-        self.plasma.nturn = nturn / np.sum(nturn)
-        self.solve_current()
-
+        optimize.newton_krylov(
+            self.residual, self.aloc['plasma', 'nturn'], verbose=True)
+            #x_rtol=1e-1, maxiter=10)
 
     def plot(self, index=None, axes=None, **kwargs):
         """Extend plot to include plasma contours."""
@@ -465,10 +444,9 @@ if __name__ == '__main__':
     # design.strike = Constraint()
     # design.control.points[3, 1] += 0.5
 
-    design.itime = 10
+    design.itime = 11
     #design.control.points[3, 1] -= 0.1
     #design.strike = Constraint()
-
     design.solve()
     design.plot('plasma')
     design.levelset.plot_levelset(-design['loop_voltage'], False, color='C3')

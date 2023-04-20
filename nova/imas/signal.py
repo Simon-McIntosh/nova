@@ -25,9 +25,9 @@ class Select:
         """Return attribute list selected according to coord."""
         if coord[0] == '~':
             return [attr for attr, value in self.data.items()
-                    if coord[1:] not in value.coords]
+                    if coord[1:] not in value.coords or len(value.shape) > 1]
         return [attr for attr, value in self.data.items()
-                if coord in value.coords]
+                if coord in value.coords and len(value.shape) == 1]
 
     def select(self, coord: str, data=None, dtype=None):
         """Return data subset including all data variables with coord."""
@@ -104,12 +104,13 @@ class Signal(Plot, Defeature, Select):
 
     data: xarray.Dataset = field(default_factory=xarray.Dataset, repr=False)
     dtime: int | float | None = None
-    savgol: tuple[int, int] | None = None
+    savgol: tuple[int, int] | None = (5, 1)
     epsilon: float = 0.15
     cluster: int | float | None = None
     features: list[str] = field(default_factory=lambda: [
         'minor_radius', 'elongation',
         'triangularity_upper', 'triangularity_lower',
+        'triangularity_inner', 'triangularity_outer',
         'li_3', 'beta_normal', 'ip'])
     samples: dict[str, xarray.Dataset] = field(default_factory=dict)
 
@@ -279,6 +280,11 @@ class Signal(Plot, Defeature, Select):
             for attr in ['minor_radius', 'elongation', 'triangularity_upper',
                          'triangularity_lower']:
                 ids_entry[attr] = self.data[attr].data
+            # TOODO fix once IDS is updated with missing triangularities
+            for tmp_attr, attr in zip(['elongation_upper', 'elongation_lower'],
+                                      ['triangularity_outer',
+                                       'triangularity_inner']):
+                ids_entry[tmp_attr] = self.data[attr].data
 
         ids_entry.resize('position_control.x_point', 1)
         with ids_entry.node('position_control.x_point:*.reference.data'):

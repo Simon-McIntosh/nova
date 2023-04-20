@@ -284,13 +284,18 @@ def test_biot_solve_index_version():
     assert coilset.subframe.version['index'] == index_hash
 
 
-def test_biot_solve_no_plasma():
+def test_separatrix_no_plasma_poly():
     coilset = CoilSet(dcoil=-5)
     coilset.coil.insert(3, -0.5, 0.95, 0.95)
-    coilset.plasma.separatrix = Polygon(dict(o=(3, 0, 1)))
-    coilset.grid.solve(10, 0.05)
-    coilset.sloc['Ic'] = 5
-    assert (coilset.grid.psi != 0).all()
+    with pytest.raises(AttributeError):
+        coilset.plasma.separatrix = Polygon(dict(o=(3, 0, 1)))
+
+
+def test_separatrix_no_plasma_psi():
+    coilset = CoilSet(dcoil=-5)
+    coilset.coil.insert(3, -0.5, 0.95, 0.95)
+    with pytest.raises(AttributeError):
+        coilset.plasma.separatrix = -21.3
 
 
 def test_biotdata_numpy():

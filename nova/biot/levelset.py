@@ -15,7 +15,7 @@ class LevelSet(Proximate, Grid):
     """Extend Grid class with levelset contouring algorithums."""
 
     levels: int | np.ndarray = 50
-    kd_factor: float = 0.1
+    kd_factor: float = np.inf
     contour: Contour = field(init=False, repr=False)
 
     def __call__(self, psi):
@@ -45,3 +45,7 @@ class LevelSet(Proximate, Grid):
         if attr == 'contour':
             self.check_contour()
         return super().__getattribute__(attr)
+
+    def plot_levelset(self, psi, closed=True, **kwargs):
+        """Expose contour.plot_levelset."""
+        self.contour.plot_levelset(psi, closed, **kwargs)

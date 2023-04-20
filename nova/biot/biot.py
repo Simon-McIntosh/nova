@@ -87,7 +87,7 @@ class BiotPlasma(BiotBase):
     @frame_factory(LevelSet)
     def levelset(self):
         """Return plasma grid biot instance."""
-        return {'number': self.nlevelset, 'attrs': ['Psi']}
+        return {'number': self.nlevelset, 'attrs': self.field_attrs}
 
     @frame_factory(PlasmaGrid)
     def plasmagrid(self):

@@ -12,8 +12,7 @@ from nova.geometry import select
 class Limiter(Plot, Array):
     """Calculate value and position of limiter wall flux."""
 
-    data: xarray.Dataset | xarray.DataArray = \
-        field(repr=False, default_factory=xarray.Dataset)
+    data: xarray.Dataset = field(repr=False, default_factory=xarray.Dataset)
     array_attrs: list[str] = field(default_factory=lambda: ['x', 'z'])
     data_w: dict[str, float | tuple[float, float]] = field(init=False,
                                                            repr=False)

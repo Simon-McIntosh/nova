@@ -7,8 +7,6 @@ from nova.biot.point import Point
 from nova.biot.field import Sample
 from nova.biot.limiter import Limiter
 
-# Limiter,
-
 
 @dataclass
 class PlasmaWall(Limiter, Point):
@@ -44,9 +42,13 @@ class PlasmaWall(Limiter, Point):
         """Return first wall boundary."""
         return self.Loc['plasma', 'poly'][0].boundary
 
-    def solve(self):
+    def solve(self, boundary=None):
         """Solve Biot wall-pannel nodes with a delta subpannel spacing."""
-        sample = Sample(self.boundary, delta=0.1)
+        if self.number is None:
+            return
+        if boundary is None:
+            boundary = self.boundary
+        sample = Sample(boundary, delta=-self.number)
         super().solve(np.c_[sample['radius'], sample['height']])
 
     def plot(self, axes=None, limitflux=False, **kwargs):

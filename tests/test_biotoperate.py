@@ -6,7 +6,7 @@ from nova.frame.coilset import CoilSet
 
 
 def test_grid_shape():
-    coilset = CoilSet(dcoil=-5)
+    coilset = CoilSet(dcoil=-5, tcoil='hex')
     coilset.coil.insert(3, 0, 0.1, 0.1)
     coilset.grid.solve(10)
     assert coilset.grid.shape == (coilset.grid.data.dims['x'],
@@ -14,14 +14,14 @@ def test_grid_shape():
 
 
 def test_grid_shaped_array():
-    coilset = CoilSet(dcoil=-5)
+    coilset = CoilSet(dcoil=-5, tcoil='hex')
     coilset.coil.insert(3, 0, 0.1, 0.5)
     coilset.grid.solve(9)
     assert coilset.grid.shape == coilset.grid.psi_.shape
 
 
 def test_grid_shaped_array_address():
-    coilset = CoilSet(dcoil=-5)
+    coilset = CoilSet(dcoil=-5, tcoil='hex')
     coilset.coil.insert(5, -2, 0.7, 0.5)
     coilset.grid.solve(5)
     psi_ = coilset.grid.psi_
@@ -30,14 +30,14 @@ def test_grid_shaped_array_address():
 
 
 def test_point_shaped_array():
-    coilset = CoilSet(dcoil=-5)
+    coilset = CoilSet(dcoil=-5, tcoil='hex')
     coilset.coil.insert(5, -2, 0.7, 0.5, Ic=10)
     coilset.point.solve(((1, 2), (4, 5), (7, 3)))
     assert len(coilset.point.shape) == 1
 
 
 def test_point_shaped_array_address():
-    coilset = CoilSet(dcoil=-5)
+    coilset = CoilSet(dcoil=-5, tcoil='hex')
     coilset.coil.insert(5, -2, 0.7, 0.5, Ic=-10)
     coilset.point.solve(((1, 12), (4, 5), (7, -3)))
     assert coilset.point.psi.ctypes.data == coilset.point.psi_.ctypes.data
@@ -52,7 +52,7 @@ def test_nturn_hash_update():
 
 
 def test_nturn_Psi_update():
-    coilset = CoilSet(dcoil=-5, dplasma=-15)
+    coilset = CoilSet(dcoil=-5, dplasma=-15, tcoil='hex', tplasma='hex')
     coilset.firstwall.insert(dict(o=[5, 1, 5]), Ic=15e6)
     coilset.plasmagrid.solve()
     Psi = coilset.plasmagrid.data['Psi'].values.copy()
@@ -62,7 +62,7 @@ def test_nturn_Psi_update():
 
 
 def test_nturn_skip_Psi_update():
-    coilset = CoilSet(dcoil=-5, dplasma=-5)
+    coilset = CoilSet(dcoil=-5, dplasma=-5, tcoil='hex', tplasma='hex')
     coilset.firstwall.insert(dict(o=[5, 1, 5]), Ic=15e6)
     coilset.plasmagrid.solve()
     coilset.sloc['Ic'] = 1
@@ -74,7 +74,7 @@ def test_nturn_skip_Psi_update():
 
 
 def test_nturn_current_update():
-    coilset = CoilSet(dcoil=-5, dplasma=-5)
+    coilset = CoilSet(dcoil=-5, dplasma=-5, tcoil='hex', tplasma='hex')
     coilset.firstwall.insert(dict(o=[5, 1, 5]), Ic=15e6)
     coilset.plasmagrid.solve()
     coilset.sloc['Ic'] = 1e6
@@ -84,7 +84,7 @@ def test_nturn_current_update():
 
 
 def test_nturn_skip_current_update():
-    coilset = CoilSet(dcoil=-5, dplasma=-5)
+    coilset = CoilSet(dcoil=-5, dplasma=-5, tcoil='hex', tplasma='hex')
     coilset.firstwall.insert(dict(o=[5, 1, 5]), Ic=15e6)
     coilset.plasmagrid.solve()
     coilset.sloc['Ic'] = 1

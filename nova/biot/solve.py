@@ -56,20 +56,27 @@ class Solve(GroupSet):
 
     def initialize(self):
         """Initialize dataset."""
+        source_plasma = np.any(self.source.plasma)
+        target_plasma = np.any(self.target.plasma)
         self.data = xarray.Dataset(
-            coords=dict(source=self.get_index('source'),
-                        plasma=self.source.index[self.source.plasma].to_list(),
-                        target=self.get_index('target')))
+            coords=dict(
+                source=self.get_index('source'),
+                target=self.get_index('target'),
+                plasma=self.source.index[self.source.plasma].to_list()))
         self.data.attrs['attributes'] = self.attrs
-        for source, prefix in zip(['source', 'plasma'], ['', '_']):
+        for row, col, prefix, postfix in zip(
+                ['target', 'target', 'plasma', 'plasma'],
+                ['source', 'plasma', 'source', 'plasma'],
+                ['', '', '_', '_'],
+                ['', '_', '', '_']):
+            if row == 'plasma' and not target_plasma:
+                continue
+            if col == 'plasma' and not source_plasma:
+                continue
             for attr in self.attrs:
-                self.data[f'{prefix}{attr}'] = xarray.DataArray(
-                    0., dims=['target', source],
-                    coords=[self.data.target, self.data[source]])
-
-        #    self.data[f'_{attr}'] = xarray.DataArray(
-        #        0., dims=['target', 'plasma'],
-        #        coords=[self.data.target, self.data.plasma])
+                self.data[f'{prefix}{attr}{postfix}'] = xarray.DataArray(
+                    0., dims=[row, col],
+                    coords=[self.data[row], self.data[col]])
 
         #self._initialize_svd('target', 'source')
         #self._initialize_svd('target', 'plasma', prefix='_')
@@ -136,9 +143,15 @@ class Solve(GroupSet):
             self.source.loc[self.source_segment == segment, :].to_dict(),
             self.target, turns=self.turns, reduce=self.reduce)
         for attr in self.attrs:
-            matrix, plasma = generator.compute(attr)
+            matrix, target_plasma, plasma_source, plasma_plasma = \
+                generator.compute(attr)
             self.data[attr].loc[:, source_index] += matrix
-            self.data[f'_{attr}'].loc[:, plasma_index] += plasma
+            if np.prod(target_plasma.shape) > 0:
+                self.data[f'{attr}_'].loc[:, plasma_index] += target_plasma
+            if np.prod(plasma_source.shape) > 0:
+                self.data[f'_{attr}'].loc[:, source_index] += plasma_source
+            if np.prod(plasma_plasma.shape) > 0:
+                self.data[f'_{attr}_'].data[:, plasma_index] += plasma_plasma
 
     def decompose(self):
         """Compute plasma svd and update dataset."""

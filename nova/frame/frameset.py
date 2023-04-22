@@ -2,7 +2,7 @@
 from dataclasses import dataclass, field
 from functools import cached_property
 from importlib import import_module
-from typing import ClassVar, Optional
+from typing import ClassVar
 
 import netCDF4
 import pandas
@@ -23,7 +23,7 @@ def frame_factory(frame_method):
         @cached_property
         def wrapper(self):
             nonlocal frame_method
-            kwargs = dict(name=method.__name__) | method(self)
+            kwargs = {'name': method.__name__} | method(self)
             try:
                 return frame_method(*self.frames, **kwargs)
             except TypeError:  # import_module from DeferredImport.load()
@@ -88,7 +88,7 @@ class FrameSet(netCDF, FrameSetLoc):
         return superframe
 
     @staticmethod
-    def import_method(name: str, package: Optional[str]):
+    def import_method(name: str, package: str | None):
         """Return method imported from dot seperated module lookup."""
         module_name = '.'.join(name.split('.')[:-1])
         method_name = name.split('.')[-1]

@@ -154,7 +154,7 @@ class Extrapolate(Operate):
         self.select_free_coils()
 
     def select_free_coils(self):
-        """Select free coils."""
+        """Assign free coils."""
         index = [self.loc[name, 'subref'] for name in self.sloc.frame.index]
         self.saloc['free'] = self.frame.iloc[index].nturn >= self.nturn
         self.saloc['free'] = self.saloc['free'] & ~self.saloc['plasma']

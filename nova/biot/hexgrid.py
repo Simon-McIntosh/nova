@@ -1,5 +1,5 @@
 """Manage unstructured kd-tree."""
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 import numpy as np
 from shapely.geometry import box
@@ -12,15 +12,18 @@ from nova.geometry.kdtree import Proximate
 
 
 @dataclass
-class Select(Proximate, PlasmaGrid):
+class HexGrid(Proximate, PlasmaGrid):
     """Implement kd-tree querys for arbitaray unstructured grids."""
 
+    limit: float = 0.2
     kd_factor: float = 0.1
     turn: str = 'hexagon'
     tile: bool = True
 
-    def solve(self, number=None, limit=0.2, index='plasma'):
+    def solve(self, number=None, limit=None, index='plasma'):
         """Overwrid PlasmaGrid.solve to permit arbitrary solution domains."""
+        if limit is None:
+            limit = self.limit
         with self.solve_biot(number) as number:
             if number is not None:
                 limit = Expand(self.subframe, index)(limit)

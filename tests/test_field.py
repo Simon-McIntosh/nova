@@ -42,7 +42,7 @@ def test_boundary_length_error():
 
 def test_boundary_ring_error():
     with pytest.raises(ValueError):
-        Sample(np.array([[1, 2], [2, 2], [1, 2.1]]))
+        Sample(np.array([[1, 2], [2, 2], [1, 2.1]]), closed=True)
 
 
 def test_boundary_positive_delta_a():

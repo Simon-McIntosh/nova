@@ -2,8 +2,8 @@
 from dataclasses import dataclass, field
 from typing import ClassVar
 
-from nova.biot import (Gap, Grid, Inductance, Loop,
-                       PlasmaWall, PlasmaGrid, Point, Select,
+from nova.biot import (Gap, Grid, HexGrid, Inductance, Loop,
+                       PlasmaWall, PlasmaGrid, Point,
                        Field, Force, LevelSet, Plasma)
 from nova.biot.data import Data
 from nova.database.netcdf import netCDF
@@ -63,26 +63,25 @@ class BiotBase(FrameSet):
 class BiotPlasma(BiotBase):
     """Group plasma biot methods."""
 
+    nhex: Nbiot = None
     nwall: Nbiot = None
-    nselect: Nbiot = None
     nlevelset: Nbiot = None
 
     def __post_init__(self):
         """Append biot attrs."""
-        self.append_biot_attrs(['nwall', 'nselect', 'nlevelset'])
+        self.append_biot_attrs(['nhex', 'nwall', 'nlevelset'])
         super().__post_init__()
 
     @frame_factory(Plasma)
     def plasma(self):
         """Return plasma instance."""
         return {'dirname': self.path, 'grid': self.plasmagrid,
-                'wall': self.plasmawall, 'levelset': self.levelset,
-                'select': self.select}
+                'wall': self.plasmawall, 'levelset': self.levelset}
 
-    @frame_factory(Select)
-    def select(self):
+    @frame_factory(HexGrid)
+    def hexgrid(self):
         """Return unstructured grid instance for fast nearest node queries."""
-        return {'number': self.nselect, 'attrs': ['Psi']}
+        return {'number': self.nhex, 'attrs': ['Psi']}
 
     @frame_factory(LevelSet)
     def levelset(self):

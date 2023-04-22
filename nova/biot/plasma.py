@@ -13,7 +13,6 @@ from nova.database.netcdf import netCDF
 from nova.biot.error import PlasmaTopologyError
 from nova.biot.levelset import LevelSet
 from nova.biot.plasmagrid import PlasmaGrid
-from nova.biot.select import Select
 from nova.biot.plasmawall import PlasmaWall
 from nova.frame.baseplot import Plot
 from nova.frame.framesetloc import FrameSetLoc
@@ -49,13 +48,9 @@ class Profile:
     def ionize(self, mask):
         self._ionize[self._plasma] = mask
 
-    def _tare(self):
-        """Set plasma turns to zero."""
-        self.nturn = 0
-
     def uniform(self, mask):
         """Update plasma turns with a uniform current distribution."""
-        self._tare()
+        self.nturn = 0
         self.ionize = mask
         ionize_area = self._area[self._ionize]
         self._nturn[self._ionize] = ionize_area / np.sum(ionize_area)
@@ -69,7 +64,6 @@ class Plasma(Plot, netCDF, FrameSetLoc):
     grid: PlasmaGrid = field(repr=False, default_factory=PlasmaGrid)
     wall: PlasmaWall = field(repr=False, default_factory=PlasmaWall)
     levelset: LevelSet = field(repr=False, default_factory=LevelSet)
-    select: Select = field(repr=False, default_factory=Select)
     lcfs: LCFS | None = field(init=False, default=None)
 
     def __post_init__(self):
@@ -95,7 +89,6 @@ class Plasma(Plot, netCDF, FrameSetLoc):
         self.wall.solve(boundary)
         self.grid.solve()
         self.levelset.solve()
-        self.select.solve()
 
     def update_lcfs(self):
         """Update last closed flux surface."""
@@ -145,7 +138,7 @@ class Plasma(Plot, netCDF, FrameSetLoc):
         """Return x-point index for plasma boundary."""
         if self.grid.x_point_number == 0:
             raise PlasmaTopologyError('no x-points within first wall')
-        return np.argmin(abs(self.grid.x_psi - self.psi_axis))
+        return np.argmax(self.polarity*(self.grid.x_psi - self.psi_axis))
 
     @property
     def x_point(self):
@@ -165,7 +158,6 @@ class Plasma(Plot, netCDF, FrameSetLoc):
         return self.grid.x_psi[self.x_point_index]
 
     @property
-    @profile
     def psi_boundary(self):
         """Return boundary poloidal flux."""
         if self.grid.x_point_number == 0:
@@ -217,7 +209,11 @@ class Plasma(Plot, netCDF, FrameSetLoc):
         match index:
             case int(psi) | float(psi):
                 z_plasma = self.aloc['plasma', 'z']
-                return self.psi_mask(psi) & self.x_mask(z_plasma)
+                mask = self.psi_mask(psi)
+                try:
+                    return mask & self.x_mask(z_plasma)
+                except IndexError:
+                    return mask
             case [int(psi) | float(psi), float(z_min)]:
                 return self.psi_mask(psi) & self.aloc['plasma', 'z'] > z_min
             case [int(psi) | float(psi), float(z_min), float(z_max)]:

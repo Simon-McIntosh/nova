@@ -99,7 +99,7 @@ class Defeature:
 
 
 @dataclass
-class Signal(Plot, Defeature, Select):
+class Sample(Plot, Defeature, Select):
     """Re-sample signal."""
 
     data: xarray.Dataset = field(default_factory=xarray.Dataset, repr=False)
@@ -247,24 +247,8 @@ class Signal(Plot, Defeature, Select):
             ylabel = f'normalized {ylabel}'
         self.axes.set_ylabel(ylabel)
 
-    def write_ids(self, **ids_attrs):
-        """Write signal data to pulse_schedule ids."""
-        ids_attrs |= {'occurrence':  Database(**ids_attrs).next_occurrence(),
-                      'name': 'pulse_schedule'}
-        ids_entry = IdsEntry(**ids_attrs)
-
-        metadata = Metadata(ids_entry.ids_data)
-        comment = 'Feature preserving reduced order waveforms'
-        source = ','.join([str(value) for value in ids_attrs.values()])
-        metadata.put_properties(comment, source, homogeneous_time=1)
-        code_parameters = {attr: getattr(self, attr) for attr in
-                           ['dtime', 'savgol', 'epsilon', 'cluster',
-                            'features']}
-        metadata.put_code('Geometry extraction and RDP order reduciton',
-                          code_parameters)
-
-        ids_entry.ids_data.time = self.data.time.data
-
+    def _write_pulse_schedule(self, ids_entry):
+        """Write sample data to a pulse schedule IDS."""
         with ids_entry.node('flux_control.*.reference.data'):
             ids_entry['i_plasma'] = self.data.ip.data
             ids_entry['loop_voltage'] = self.data.psi_boundary.data
@@ -297,6 +281,68 @@ class Signal(Plot, Defeature, Select):
                 ids_entry['r', i] = self.data.strike_point[:, i, 0].data
                 ids_entry['z', i] = self.data.strike_point[:, i, 1].data
 
+    def _write_equilibrium(self, ids_entry):
+        """Write sample data to a equilibrium IDS."""
+        ids_entry.ids_data.time_slice.resize(self.data.dims['time'])
+        with ids_entry.node('time_slice:global_quantities.*'):
+            for attr in ['ip', 'li_3', 'beta_normal']:
+                ids_entry[attr, :] = self.data[attr].data
+
+        with ids_entry.node('time_slice:boundary_separatrix.*'):
+            ids_entry['psi', :] = self.data['psi_boundary'].data
+            for attr in ['minor_radius', 'elongation',
+                         'triangularity_upper', 'triangularity_lower']:
+                ids_entry[attr, :] = self.data[attr].data
+            # TOODO fix once IDS is updated with missing triangularities
+            for tmp_attr, attr in zip(
+                    ['elongation_upper', 'elongation_lower'],
+                    ['triangularity_outer', 'triangularity_inner']):
+                ids_entry[tmp_attr, :] = self.data[attr].data
+
+        with ids_entry.node('time_slice:boundary_separatrix.'
+                            'geometric_axis.*'):
+            for i, attr in enumerate('rz'):
+                ids_entry[attr, :] = self.data.geometric_axis[:,  i].data
+
+        with ids_entry.node('time_slice:boundary_separatrix.x_point:*'):
+            for itime in range(self.data.dims['time']):
+                if self.data.x_point_number.data[itime] == 1:
+                    ids_entry['r', itime] = self.data.x_point.data[itime,  0]
+                    ids_entry['z', itime] = self.data.x_point.data[itime,  1]
+
+        with ids_entry.node('time_slice:boundary_separatrix.strike_point:*'):
+            for itime in range(self.data.dims['time']):
+                for i in range(self.data.strike_point_number.data[itime]):
+                    for j, attr in enumerate('rz'):
+                        ids_entry[attr, itime, i] = \
+                            self.data.strike_point.data[itime, i, j]
+
+    def write_ids(self, **ids_attrs):
+        """Write sample data to pulse_schedule ids."""
+        if ids_attrs['occurrence'] is None:
+            ids_attrs['occurrence'] = Database(**ids_attrs).next_occurrence()
+        ids_entry = IdsEntry(**ids_attrs)
+        metadata = Metadata(ids_entry.ids_data)
+        comment = 'Feature preserving reduced order waveforms'
+        source = ','.join([str(value) for value in ids_attrs.values()])
+        metadata.put_properties(comment, source, homogeneous_time=1)
+        code_parameters = {attr: getattr(self, attr) for attr in
+                           ['dtime', 'savgol', 'epsilon', 'cluster',
+                            'features']}
+        metadata.put_code('Geometry extraction and RDP order reduciton',
+                          code_parameters)
+
+        ids_entry.ids_data.time = self.data.time.data
+
+        match ids_attrs['name']:
+            case 'equilibrium':
+                self._write_equilibrium(ids_entry)
+            case 'pulse_schedule':
+                self._write_pulse_schedule(ids_entry)
+            case _:
+                raise NotImplementedError('write_ids not implemented for '
+                                          f'ids_name {ids_attrs["name"]}')
+
         ids_entry.put_ids()
 
 
@@ -305,9 +351,9 @@ if __name__ == '__main__':
     pulse, run = 135013, 2
 
     equilibrium = Equilibrium(pulse, run)
-    signal = Signal(equilibrium.data)
+    sample = Sample(equilibrium.data)
 
-    signal.write_ids(**equilibrium.ids_attrs)
-    signal.plot()
+    sample.write_ids(**equilibrium.ids_attrs | {'occurrence': 1})
+    sample.plot()
 
-    # signal.plot('ip')
+    # sample.plot('ip')

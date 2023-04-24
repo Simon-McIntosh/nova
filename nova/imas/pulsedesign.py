@@ -15,7 +15,7 @@ from nova.imas.database import Ids
 from nova.imas.equilibrium import Equilibrium
 from nova.imas.machine import Machine
 from nova.imas.pf_active import PF_Active
-from nova.imas.pulseschedule import PulseSchedule
+#from nova.imas.pulseschedule import PulseSchedule
 from nova.linalg.regression import MoorePenrose
 
 
@@ -166,7 +166,7 @@ class Constraint(Plot):
 
 
 @dataclass
-class ControlPoint(PulseSchedule):
+class ControlPoint(Equilibrium):
     """Build control points from pulse schedule data."""
 
     control: Constraint = field(init=False, default_factory=Constraint)
@@ -343,7 +343,7 @@ class ITER(Machine):
 class PulseDesign(ITER, ControlPoint):
     """Generate coilset voltage and current waveforms."""
 
-    name: str = 'pulse_schedule'
+    name: str = 'equilibrium'
     nwall: Nbiot = 10
     nlevelset: Nbiot = 3000
     ninductance: Nbiot = 0
@@ -353,7 +353,7 @@ class PulseDesign(ITER, ControlPoint):
     def update_constraints(self):
         """Extend ControlPoint.update_constraints to include psi proxy."""
         # for DINA benchmark
-        super().update_constraints(-self['loop_voltage'])  # COCOS11
+        super().update_constraints(-self['psi_boundary'])  # COCOS11
 
     def update(self):
         """Extend itime update."""
@@ -532,5 +532,5 @@ if __name__ == '__main__':
 
     #design.optimize_current()
     design.plot('plasma')
-    design.levelset.plot_levelset(-design['loop_voltage'], False, color='k')
+    design.levelset.plot_levelset(-design['psi_boundary'], False, color='k')  # Cocos
     design.levelset.plot_levelset(design.psi_boundary, False, color='C3')

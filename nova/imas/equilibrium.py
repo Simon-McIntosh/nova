@@ -78,7 +78,7 @@ class Parameter0D(Plot, Scenario):
                                      'psi_external_average', 'v_external',
                                      'plasma_inductance', 'plasma_resistance'])
     attrs_boundary: ClassVar[list[str]] = [
-        'minor_radius', 'elongation',
+        'minor_radius', 'elongation', 'elongation_upper', 'elongation_lower',
         'triangularity', 'triangularity_upper', 'triangularity_lower',
         'triangularity_inner', 'triangularity_outer',
         'squareness_upper_inner', 'squareness_upper_outer',
@@ -96,8 +96,7 @@ class Parameter0D(Plot, Scenario):
     def build(self):
         """Build 0D parameter timeseries."""
         super().build()
-        self.data.attrs['r0'] = self.ids_data.vacuum_toroidal_field.r0
-        self.data['b0'] = 'time', self.ids_data.vacuum_toroidal_field.b0
+        self.build_vacuum_field()
         self.append('time', self.attrs_0d, 'global_quantities')
         self.build_axis('boundary_separatrix.geometric_axis')
         self.build_axis('global_quantities.magnetic_axis')
@@ -107,6 +106,14 @@ class Parameter0D(Plot, Scenario):
         self.build_boundary_outline()
         self.build_boundary_shape()
         self.build_beta_normal()
+
+    def build_vacuum_field(self):
+        """Build vacuum toroidal field."""
+        with self.ids_index.node('vacuum_toroidal_field'):
+            if self.ids_index.empty('r0') or self.ids_index.empty('b0'):
+                return
+            self.data.attrs['r0'] = self.ids_index.get('r0')
+            self.data['b0'] = 'time', self.ids_index.array('b0')
 
     def build_beta_normal(self):
         """Build beta normal from known parameters."""
@@ -528,9 +535,11 @@ if __name__ == '__main__':
 
     pulse, run = 135013, 2
 
-    Equilibrium(pulse, run)._clear()
-    equilibrium = Equilibrium(pulse, run)
+    Equilibrium(pulse, run, occurrence=1)._clear()
+    #135013, 2
+
+    equilibrium = Equilibrium(pulse, run, occurrence=1)
 
     equilibrium.time = 100
-    equilibrium.plot_2d('psi', mask=0)
-    equilibrium.plot_boundary()
+    #equilibrium.plot_2d('psi', mask=0)
+    #equilibrium.plot_boundary()

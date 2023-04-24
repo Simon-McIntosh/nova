@@ -316,7 +316,10 @@ class Database(IDS):
         """Return index of next available occurrence."""
         ids_path = 'ids_properties/homogeneous_time'
         for i in range(limit):
-            if self.get_ids(ids_path, i) == imas.imasdef.EMPTY_INT:
+            try:
+                if self.get_ids(ids_path, i) == imas.imasdef.EMPTY_INT:
+                    return i
+            except imas.hli_exception.ALException:
                 return i
         raise IndexError(f'no empty occurrences found for i < {limit}')
 
@@ -706,12 +709,24 @@ class IdsIndex:
         """Resize structured array."""
         attrgetter(path)(self.ids_data).resize(number)
 
-    def __setitem__(self, attr, value):
+    def __setitem__(self, key, value):
         """Set attribute on ids path."""
-        if isinstance(attr, tuple):
-            attr, index = attr
-        else:
-            index = 0
+        match key:
+            case str(attr):
+                index, subindex = 0, 0
+            case (str(attr), index):
+                subindex = 0
+            case (str(attr), index, int(subindex)):
+                pass
+            case _:
+                raise KeyError(f'invalid key {key}')
+
+        if isinstance(index, slice):
+            # recursive update for all indicies specified in slice.
+            for _index, _value in zip(range(len(value))[index], value[index]):
+                self.__setitem__((attr, _index, subindex), _value)
+            return
+
         path = self.get_path(self.ids_node, attr)
         split_path = path.split('.')
         node = '.'.join(split_path[:-1])
@@ -723,8 +738,19 @@ class IdsIndex:
                 trunk = attrgetter(array)(self.ids_data)[index]
                 branch = attrgetter(node)(trunk)
             case _:
-                raise IndexError(f'malformed node {node}')
-        setattr(branch, leaf, value)
+                raise IndexError(f'invalid node {node}')
+        match leaf.split(':'):
+            case (str(leaf),):
+                setattr(branch, leaf, value)
+            case str(stem), str(leaf):
+                try:
+                    shoot = attrgetter(stem)(branch)[subindex]
+                except IndexError:
+                    attrgetter(stem)(branch).resize(subindex+1)
+                    shoot = attrgetter(stem)(branch)[subindex]
+                setattr(shoot, leaf, value)
+            case _:
+                raise NotImplementedError(f'invalid leaf {leaf}')
 
     def get_slice(self, index: int, path: str):
         """Return attribute slice at node index."""

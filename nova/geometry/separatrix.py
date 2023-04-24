@@ -85,121 +85,10 @@ class Peak:
 
 
 @dataclass
-class Squareness(Plot):
-    """Calculate plasma squarness for each quadrant."""
+class BoxGeometry:
+    """Calculate bounding box control points from plasma separatrix."""
 
     points: np.ndarray
-
-    outer: tuple[float, float]
-    upper: tuple[float, float]
-    inner: tuple[float, float]
-    lower: tuple[float, float]
-
-    parametric_midpoint: ClassVar[float] = np.sqrt(8)/2 - 1
-
-    @cached_property
-    def theta(self):
-        """Return unwrapped separatrix poloidal angle."""
-        angle = np.arctan2(self.points[:, 1], self.points[:, 0])
-        return np.where(angle >= 0, angle, angle + np.pi)
-
-    def quadrant_mask(self, index: int):
-        """Return quadrant mask."""
-        match index:
-            case 0:  # upper_outer
-                return self.points[:, 0] > self.upper[0] & \
-                    self.points[:, 1] >= self.outer[1]
-            case 1:  # upper_inner
-                return self.points[:, 0] <= self.upper[0] & \
-                    self.points[:, 1] > self.inner[1]
-            case 2:  # lower_inner
-                return self.points[:, 0] < self.lower[0] & \
-                    self.points[:, 1] <= self.inner[1]
-            case 3:  # lower_outer
-                return self.points[:, 0] >= self.lower[0] & \
-                    self.points[:, 1] < self.outer[1]
-            case _:
-                raise IndexError(f'quadrant index {index} not 0-3')
-
-    def quadrant_axis(self, index: int):
-        """Return loca quadrant axis."""
-        match index:
-            case 0:  # upper_outer
-                return self.upper_radius, self.outer_height
-            case 1:  # upper_inner
-                return self.upper_radius, self.inner_height
-            case 2:  # lower_inner
-                return self.lower_radius, self.inner_height
-            case 3:  # lower_outer
-                return self.lower_radius, self.outer_height
-            case _:
-                raise IndexError(f'quadrant index {index} not 0-3')
-
-    def minor_axis(self, quadrant: int):
-        """Return signed minor axis."""
-        match index:
-            case 0:  # upper_outer
-                return self.upper_radius, self.outer_height
-            case 1:  # upper_inner
-                return self.upper_radius, self.inner_height
-            case 2:  # lower_inner
-                return self.lower_radius, self.inner_height
-            case 3:  # lower_outer
-                return self.lower_radius, self.outer_height
-            case _:
-                raise IndexError(f'quadrant index {index} not 0-3')
-
-    @cached_property
-    def height(self):
-        """Return surface height interpolator."""
-        return Peak(self.theta, self.points[:, 1], pad_width=0)
-
-    def arc_radius(self, u, quadrant: int):
-        """Return parametric arc radius."""
-        return self.minor_axis * (1 - u**2) / (1 + u**2)
-
-    def arc_height(self, u):
-        """Return parametric arc height."""
-        return self.major_axis * 2*u / (1 + u**2)
-
-    def plot(self, axes=None):
-        """Plot parametric curves."""
-        self.set_axes('2d', axes)
-        parametric_arc = np.linspace(0, 1)
-        for quadrant in range(4):
-            axis = self.quadrant_axis(quadrant)
-
-            self.axes.plot(self.arc_radius(parametric_arc) + axis[0],
-                           self.arc_height(parametric_arc) + axis[1],
-                           ':', color='gray')
-
-    '''
-    @property
-    def ellipse_radius(self):
-        """Return radius of elliptic arc at quadrant midpoint."""
-        return np.linalg.norm([self.arc_height(self.parametric_midpoint),
-                               self.arc_radius(self.parametric_midpoint)])
-
-    @property
-    def squarness(self):
-        """Return point squarness."""
-        return (self.point_radius - self.ellipse_radius) / np.linalg.norm(
-            [self.minor_radius, self.major_radius])
-
-
-
-    '''
-
-
-@dataclass
-class LCFS(Plot):
-    """Calculate plasma shape parameters from the last closed flux surface."""
-
-    points: np.ndarray
-
-    def __call__(self, attrs: list[str]):
-        """Return attribute shape vector."""
-        return np.array([getattr(self, attr) for attr in attrs])
 
     @cached_property
     def segment_length(self):
@@ -237,21 +126,6 @@ class LCFS(Plot):
         return self.radius.min_value
 
     @cached_property
-    def geometric_radius(self):
-        """Return geometric radius, Rgeo."""
-        return (self.r_max + self.r_min) / 2
-
-    @cached_property
-    def geometric_height(self):
-        """Return geometric height, Zgeo."""
-        return (self.z_max + self.z_min) / 2
-
-    @cached_property
-    def minor_radius(self):
-        """Return minor radius, a."""
-        return (self.r_max - self.r_min) / 2
-
-    @cached_property
     def z_max(self):
         """Return maximum height, Zmax."""
         return self.height.max_value
@@ -260,16 +134,6 @@ class LCFS(Plot):
     def z_min(self):
         """Return minimum height, Zmin."""
         return self.height.min_value
-
-    @cached_property
-    def inverse_aspect_ratio(self):
-        """Return inverse aspect ratio, epsilon."""
-        return self.minor_radius / self.geometric_radius
-
-    @cached_property
-    def elongation(self):
-        """Return elongation, kappa."""
-        return (self.z_max - self.z_min) / (2*self.minor_radius)
 
     @cached_property
     def r_zmax(self):
@@ -290,6 +154,46 @@ class LCFS(Plot):
     def z_rmin(self):
         """Return height at minimum radius, Zrmin."""
         return self.height(self.radius.min_length)
+
+
+@dataclass
+class PointGeometry(BoxGeometry):
+    """Calculate geometric axis and derived parameters from bounding box."""
+
+    @cached_property
+    def geometric_radius(self):
+        """Return geometric radius, Rgeo."""
+        return (self.r_max + self.r_min) / 2
+
+    @cached_property
+    def geometric_height(self):
+        """Return geometric height, Zgeo."""
+        return (self.z_max + self.z_min) / 2
+
+    @cached_property
+    def minor_radius(self):
+        """Return minor radius, a."""
+        return (self.r_max - self.r_min) / 2
+
+    @cached_property
+    def inverse_aspect_ratio(self):
+        """Return inverse aspect ratio, epsilon."""
+        return self.minor_radius / self.geometric_radius
+
+
+@dataclass
+class Elongation(PointGeometry):
+    """Extend Point Geometry to include plasma elongation."""
+
+    @cached_property
+    def elongation(self):
+        """Return elongation, kappa."""
+        return (self.z_max - self.z_min) / (2*self.minor_radius)
+
+
+@dataclass
+class Triangularity(PointGeometry):
+    """Extend Point Geometry to include plasma triangularity."""
 
     @cached_property
     def triangularity(self):
@@ -316,6 +220,166 @@ class LCFS(Plot):
     def triangularity_outer(self):
         """Return outer triangularity, del_o."""
         return (self.z_rmax - self.geometric_height) / self.minor_radius
+
+
+@dataclass
+class Quadrant(Plot):
+    """Manage squarness calculations for single quadrant."""
+
+    minor_point: tuple[float, float]
+    major_point: tuple[float, float]
+
+    @cached_property
+    def axis(self):
+        """Return quadrant axis."""
+        return np.array([self.major_point[0], self.minor_point[1]])
+
+    @cached_property
+    def minor_radius(self):
+        """Return minor radius."""
+        return self.minor_point[0] - self.axis[0]
+
+    @cached_property
+    def major_radius(self):
+        """Return minor radius."""
+        return self.major_point[1] - self.axis[1]
+
+    @cached_property
+    def quadrant(self):
+        """Return quadrant index."""
+        theta = np.arctan2(self.major_radius, self.minor_radius)
+        if theta < 0:
+            theta += 2*np.pi
+        return int(2*theta / np.pi)
+
+    def _radius(self, u):
+        """Return parametric arc radius."""
+        return self.minor_radius * (1 - u**2) / (1 + u**2)
+
+    def _height(self, u):
+        """Return parametric arc height."""
+        return self.major_radius * 2*u / (1 + u**2)
+
+    @cached_property
+    def ellipse_point(self):
+        """Return arc bisection point."""
+        _u = np.sqrt(8)/2 - 1
+        return np.array([self._radius(_u), self._height(_u)]) + self.axis
+
+    @cached_property
+    def ellipse_radius(self):
+        """Return radius of elliptic arc at quadrant midpoint."""
+        return np.linalg.norm(self.ellipse_point - self.axis)
+
+    @cached_property
+    def square_radius(self):
+        """Return ellipse radius L2 norm."""
+        return np.linalg.norm([self.minor_radius, self.major_radius])
+
+    def squareness(self, point):
+        """Return point squarness."""
+        radius = np.linalg.norm(np.array(point) - self.axis)
+        return (radius - self.ellipse_radius) / (self.square_radius -
+                                                 self.ellipse_radius)
+
+    def plot(self, axes=None):
+        """Plot parametric arc."""
+        u = np.linspace(0, 1)
+        self.set_axes('2d', axes)
+        self.axes.plot(*self.minor_point, 'ko', ms=4)
+        self.axes.plot(*self.major_point, 'ko', ms=4)
+        self.axes.plot(*self.ellipse_point, 'kd', ms=6)
+        self.axes.plot(self._radius(u) + self.axis[0],
+                       self._height(u) + self.axis[1], ':', color='gray')
+
+
+@dataclass
+class Squareness(Plot, PointGeometry):
+    """Extend point geometry to inculde squarness calculation."""
+
+    points: np.ndarray
+    quadrants: list[Quadrant] = field(init=False)
+
+    '''
+    @cached_property
+    def theta(self):
+        """Return unwrapped separatrix poloidal angle."""
+        angle = np.arctan2(self.points[:, 1], self.points[:, 0])
+        return np.where(angle >= 0, angle, angle + np.pi)
+
+    def quadrant_mask(self, index: int):
+        """Return quadrant mask."""
+        match index:
+            case 0:  # upper_outer
+                return self.points[:, 0] > self.upper[0] & \
+                    self.points[:, 1] >= self.outer[1]
+            case 1:  # upper_inner
+                return self.points[:, 0] <= self.upper[0] & \
+                    self.points[:, 1] > self.inner[1]
+            case 2:  # lower_inner
+                return self.points[:, 0] < self.lower[0] & \
+                    self.points[:, 1] <= self.inner[1]
+            case 3:  # lower_outer
+                return self.points[:, 0] >= self.lower[0] & \
+                    self.points[:, 1] < self.outer[1]
+            case _:
+                raise IndexError(f'quadrant index {index} not 0-3')
+
+    def quadrant_axis(self, index: int):
+        """Return loca quadrant axis."""
+        match index:
+            case 0:  # upper_outer
+                return self.upper[0], self.outer[1]
+            case 1:  # upper_inner
+                return self.upper[0], self.inner[1]
+            case 2:  # lower_inner
+                return self.lower[0], self.inner[1]
+            case 3:  # lower_outer
+                return self.lower[0], self.outer[1]
+            case _:
+                raise IndexError(f'quadrant index {index} not 0-3')
+
+    def minor_axis(self, quadrant: int):
+        """Return signed minor axis."""
+        match index:
+            case 0:  # upper_outer
+                return self.upper_radius, self.outer_height
+            case 1:  # upper_inner
+                return self.upper_radius, self.inner_height
+            case 2:  # lower_inner
+                return self.lower_radius, self.inner_height
+            case 3:  # lower_outer
+                return self.lower_radius, self.outer_height
+            case _:
+                raise IndexError(f'quadrant index {index} not 0-3')
+
+    @cached_property
+    def height(self):
+        """Return surface height interpolator."""
+        return Peak(self.theta, self.points[:, 1], pad_width=0)
+    '''
+
+    def plot_quadrants(self, axes=None):
+        """Plot parametric curves."""
+        self.set_axes('2d', axes)
+        parametric_arc = np.linspace(0, 1)
+        for quadrant in range(4):
+            axis = self.quadrant_axis(quadrant)
+
+            self.axes.plot(self.arc_radius(parametric_arc) + axis[0],
+                           self.arc_height(parametric_arc) + axis[1],
+                           ':', color='gray')
+
+
+@dataclass
+class LCFS(Elongation, Triangularity, Squareness, Plot):
+    """Calculate plasma shape parameters from the last closed flux surface."""
+
+    points: np.ndarray
+
+    def __call__(self, attrs: list[str]):
+        """Return attribute shape vector."""
+        return np.array([getattr(self, attr) for attr in attrs])
 
     def plot(self, label=False):
         """Plot last closed flux surface and key geometrical points."""
@@ -644,6 +708,9 @@ if __name__ == '__main__':
     #quad = Quadrant(minor_radius, elongation*minor_radius, 3)
     #quad.plot(geometric_axis, profile.axes)
 
-    square = Squareness(profile.points,
-                        shape.z_rmax, shape.r_zmax, shape.z_rmin, shape.r_zmin)
-    square.plot()
+    #square = Squareness(profile.points,
+    #                    shape.z_rmax, shape.r_zmax, shape.z_rmin, shape.r_zmin)
+    #square.plot()
+
+    quad = Quadrant((0.4, -0.3), (2.4, -5))
+    quad.plot()

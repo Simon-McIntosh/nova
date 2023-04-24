@@ -35,8 +35,9 @@ class BiotOp:
         """Extract matrix, plasma_matrix and plasma_index from dataset."""
         data_vars = list(dataset.data_vars)
         self.matrix = dataset[data_vars[0]].data
-        self.plasma_matrix = dataset[data_vars[1]].data
         self.plasma_index = dataset.attrs['plasma_index']
+        if self.plasma_index != -1:
+            self.plasma_matrix = dataset[f'{data_vars[0]}_'].data
 
         '''
         #  perform svd order reduction
@@ -134,7 +135,10 @@ class Operate(Data):
         self.classname = self.data.classname
         self.number = self.data.dims['target']
         for attr in np.array(self.attrs):
-            dataset = self.data[[attr, f'_{attr}']]
+            attrs = [_attr for _attr in
+                     [attr, 'f_{attr}', f'{attr}_', f'_{attr}_']
+                     if _attr in self.data]
+            dataset = self.data[attrs]
             self.operator[attr] = BiotOp(self.aloc, self.saloc, self.classname,
                                          self.index, dataset)
         self.load_version()

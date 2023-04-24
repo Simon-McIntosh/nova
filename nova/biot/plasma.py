@@ -13,7 +13,6 @@ from nova.database.netcdf import netCDF
 from nova.biot.error import PlasmaTopologyError
 from nova.biot.levelset import LevelSet
 from nova.biot.plasmagrid import PlasmaGrid
-from nova.biot.select import Select
 from nova.biot.plasmawall import PlasmaWall
 from nova.frame.baseplot import Plot
 from nova.frame.framesetloc import FrameSetLoc
@@ -22,13 +21,39 @@ from nova.geometry.pointloop import PointLoop
 from nova.geometry.separatrix import LCFS
 
 
-@numba.njit()
-def update_nturn(mask, plasma, ionize, nturn, area):
-    """Update plasma turns."""
-    ionize[plasma] = mask
-    nturn[plasma] = 0
-    ionize_area = area[ionize]
-    nturn[ionize] = ionize_area / np.sum(ionize_area)
+@dataclass
+class Profile:
+    """Manage plasma current distribution."""
+
+    _plasma: np.ndarray = field(repr=False)
+    _ionize: np.ndarray = field(repr=False)
+    _nturn: np.ndarray = field(repr=False)
+    _area: np.ndarray = field(repr=False)
+
+    @property
+    def nturn(self):
+        """Manage plasma turns."""
+        return self._nturn[self._plasma]
+
+    @nturn.setter
+    def nturn(self, nturn):
+        self._nturn[self._plasma] = nturn
+
+    @property
+    def ionize(self):
+        """Manage plasma ionization mask."""
+        return self._ionize[self._plasma]
+
+    @ionize.setter
+    def ionize(self, mask):
+        self._ionize[self._plasma] = mask
+
+    def uniform(self, mask):
+        """Update plasma turns with a uniform current distribution."""
+        self.nturn = 0
+        self.ionize = mask
+        ionize_area = self._area[self._ionize]
+        self._nturn[self._ionize] = ionize_area / np.sum(ionize_area)
 
 
 @dataclass
@@ -39,7 +64,6 @@ class Plasma(Plot, netCDF, FrameSetLoc):
     grid: PlasmaGrid = field(repr=False, default_factory=PlasmaGrid)
     wall: PlasmaWall = field(repr=False, default_factory=PlasmaWall)
     levelset: LevelSet = field(repr=False, default_factory=LevelSet)
-    select: Select = field(repr=False, default_factory=Select)
     lcfs: LCFS | None = field(init=False, default=None)
 
     def __post_init__(self):
@@ -60,12 +84,11 @@ class Plasma(Plot, netCDF, FrameSetLoc):
         return self.loc['ionize', ['x', 'z', 'section', 'area',
                                    'Ic', 'It', 'nturn']].__str__()
 
-    def solve(self):
+    def solve(self, boundary=None):
         """Solve interaction matricies across plasma grid."""
-        self.wall.solve()
+        self.wall.solve(boundary)
         self.grid.solve()
         self.levelset.solve()
-        self.select.solve()
 
     def update_lcfs(self):
         """Update last closed flux surface."""
@@ -115,7 +138,7 @@ class Plasma(Plot, netCDF, FrameSetLoc):
         """Return x-point index for plasma boundary."""
         if self.grid.x_point_number == 0:
             raise PlasmaTopologyError('no x-points within first wall')
-        return np.argmin(abs(self.grid.x_psi - self.psi_axis))
+        return np.argmax(self.polarity*(self.grid.x_psi - self.psi_axis))
 
     @property
     def x_point(self):
@@ -128,13 +151,20 @@ class Plasma(Plot, netCDF, FrameSetLoc):
         return self.grid.o_points[0]
 
     @property
+    def x_point_primary(self):
+        """Return primary x-point."""
+        if self.grid.x_point_number == 1:
+            return self.grid.x_psi[0]
+        return self.grid.x_psi[self.x_point_index]
+
+    @property
     def psi_boundary(self):
         """Return boundary poloidal flux."""
         if self.grid.x_point_number == 0:
             return self.wall.w_psi
-        if self.grid.x_point_number == 1:
-            return self.grid.x_psi[0]
-        return self.grid.x_psi[self.x_point_index]
+        if self.polarity < 0:
+            return np.min([self.x_point_primary, self.wall.w_psi])
+        return np.max([self.x_point_primary, self.wall.w_psi])
 
     @property
     def psi(self):
@@ -174,12 +204,16 @@ class Plasma(Plot, netCDF, FrameSetLoc):
                 mask &= z_plasma < x_point[1]
         return mask
 
-    def ionize(self, index):
+    def ionize_mask(self, index):
         """Return plasma filament selection mask."""
         match index:
             case int(psi) | float(psi):
                 z_plasma = self.aloc['plasma', 'z']
-                return self.psi_mask(psi) & self.x_mask(z_plasma)
+                mask = self.psi_mask(psi)
+                try:
+                    return mask & self.x_mask(z_plasma)
+                except IndexError:
+                    return mask
             case [int(psi) | float(psi), float(z_min)]:
                 return self.psi_mask(psi) & self.aloc['plasma', 'z'] > z_min
             case [int(psi) | float(psi), float(z_min), float(z_max)]:
@@ -220,21 +254,28 @@ class Plasma(Plot, netCDF, FrameSetLoc):
             Bounding loop.
 
         """
-        if self.saloc['plasma'].sum() == 0:
-            return
-        mask = self.ionize(index)
-        update_nturn(mask, self.aloc['plasma'], self.aloc['ionize'],
-                     self.aloc['nturn'], self.aloc['area'])
+        try:
+            mask = self.ionize_mask(index)
+        except (AttributeError, StopIteration) as error:
+            raise AttributeError('use coilset.firstwall.insert '
+                                 'to define plasma rejoin') from error
+        self.profile.uniform(mask)
         self.update_aloc_hash('nturn')
+
+    @cached_property
+    def profile(self):
+        """Return plasma profile instance."""
+        return Profile(self.aloc['plasma'], self.aloc['ionize'],
+                       self.aloc['nturn'], self.aloc['area'])
 
     @property
     def nturn(self):
         """Manage plasma turns."""
-        return self.aloc['plasma', 'nturn']
+        return self.profile.nturn
 
     @nturn.setter
     def nturn(self, nturn):
-        self.aloc['plasma', 'nturn'] = nturn
+        self.profile.nturn = nturn
         self.update_aloc_hash('nturn')
 
     def plot(self, turns=True, axes=None, **kwargs):

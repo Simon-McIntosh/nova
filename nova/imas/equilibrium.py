@@ -80,6 +80,7 @@ class Parameter0D(Plot, Scenario):
     attrs_boundary: ClassVar[list[str]] = [
         'minor_radius', 'elongation',
         'triangularity', 'triangularity_upper', 'triangularity_lower',
+        'triangularity_inner', 'triangularity_outer',
         'squareness_upper_inner', 'squareness_upper_outer',
         'squareness_lower_inner', 'squareness_lower_outer']
 
@@ -95,8 +96,8 @@ class Parameter0D(Plot, Scenario):
     def build(self):
         """Build 0D parameter timeseries."""
         super().build()
-        self.data.attrs['r0'] = self.get_ids('vacuum_toroidal_field/r0')
-        self.data['b0'] = 'time', self.get_ids('vacuum_toroidal_field/b0')
+        self.data.attrs['r0'] = self.ids_data.vacuum_toroidal_field.r0
+        self.data['b0'] = 'time', self.ids_data.vacuum_toroidal_field.b0
         self.append('time', self.attrs_0d, 'global_quantities')
         self.build_axis('boundary_separatrix.geometric_axis')
         self.build_axis('global_quantities.magnetic_axis')
@@ -293,11 +294,11 @@ class Parameter0D(Plot, Scenario):
         self.set_axes('1d', axes=axes)
         self.axes.plot(self.data.time, self.data[attr], label=attr)
 
-    def plot_boundary(self, axes=None):
+    def plot_boundary(self, axes=None, color='gray'):
         """Plot 2D boundary at itime."""
         boundary = self.boundary
         self.get_axes('2d', axes=axes)
-        self.axes.plot(boundary[:, 0], boundary[:, 1], 'gray', alpha=0.5)
+        self.axes.plot(boundary[:, 0], boundary[:, 1], color, alpha=0.85)
         if self['x_point_number'] == 1:
             self.axes.plot(*self['x_point'], 'x', ms=6, mec='C3', mew=1)
 

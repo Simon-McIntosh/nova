@@ -8,8 +8,7 @@ import xarray
 class Array:
     """Cache fast access xarray attributes within array dict."""
 
-    data: xarray.Dataset | xarray.DataArray = \
-        field(repr=False, default_factory=xarray.Dataset)
+    data: xarray.Dataset = field(repr=False, default_factory=xarray.Dataset)
     array_attrs: list[str] = field(default_factory=list)
     array: dict = field(init=False, repr=False, default_factory=dict)
 

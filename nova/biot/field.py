@@ -16,6 +16,7 @@ class Sample(Plot):
 
     boundary: np.ndarray
     delta: int | float = 0
+    closed: bool = False
     interp: dict[str, interp1d] = field(init=False, repr=False,
                                         default_factory=dict)
     data: dict[str, np.ndarray] = field(init=False, repr=False,
@@ -46,7 +47,8 @@ class Sample(Plot):
         if self.number <= 0:
             raise IndexError(f'boundary length {len(self.boundary)} '
                              'must be greater than 1')
-        if not np.allclose(self.boundary[0], self.boundary[-1]):
+        if self.closed and not np.allclose(self.boundary[0],
+                                           self.boundary[-1]):
             raise ValueError('boundary does not form closed loop')
 
     def build(self):

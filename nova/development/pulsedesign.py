@@ -4,8 +4,7 @@ from functools import cached_property
 from typing import ClassVar
 
 import numpy as np
-from scipy.optimize import minimize, LinearConstraint
-from scipy.sparse.linalg import LinearOperator
+from scipy import optimize
 from scipy.spatial import distance_matrix
 
 from nova.biot.biot import Nbiot
@@ -160,9 +159,9 @@ class Constraint(Plot):
         self.axes.plot(*self.points.T, 'o', color=color, ms=ms/4)
         self.axes.plot(*self._points('psi').T, 's', ms=ms, mec=color,
                        mew=2, mfc='none')
-        self.axes.plot(*self._points('radial').T, '|', ms=2*ms, mec=color)
-        self.axes.plot(*self._points('vertical').T, '_', ms=2*ms, mec=color)
-        self.axes.plot(*self._points('null').T, 'x', ms=2*ms, mec=color)
+        self.axes.plot(*self._points('radial').T, '|', mew=2, ms=2*ms, mec=color)
+        self.axes.plot(*self._points('vertical').T, '_', mew=2, ms=2*ms, mec=color)
+        self.axes.plot(*self._points('null').T, 'x', mew=2, ms=2*ms, mec=color)
 
 
 @dataclass
@@ -181,39 +180,14 @@ class ControlPoint(PulseSchedule):
         """Return limiter flag."""
         return np.allclose(self['x_point'], (0, 0))
 
-    @property
-    def control_points(self):
-        """Return control points."""
-        points = np.c_[[getattr(self, attr)
-                        for attr in self.point_attrs['boundary']]]
-        points = np.r_[points, [(self.inner + self.outer) / 2]]
-        if self.limiter:
-            return points
-        return points#[:3]
-
-    @property
-    def strike_points(self):
-        """Return strike points."""
-        if self.limiter:
-            return np.array([])
-        return np.c_[[getattr(self, attr)
-                      for attr in self.point_attrs['strike']]]
-
     def update_control_point(self, psi=0):
         """Update control point constraints."""
         self.control = Constraint(self.control_points)
-        self.control.poloidal_flux = psi, [0, 1, 2, 3]
+        self.control.poloidal_flux = psi
         self.control.radial_field = 0, [0, 2]
         self.control.vertical_field = 0, [1, 3]
-
         if not self.limiter:
             self.control.radial_field = 0, [3]
-
-    def update_field_constraint(self):
-        """Update boundary field inequality constraints."""
-        self.field = Constraint(self.control_points[4:])
-        #self.field.radial_field = 0, [1]
-        self.field.radial_field = 0, [0]
 
     def update_strike_point(self, psi=0):
         """Update strike point constraints."""
@@ -224,12 +198,28 @@ class ControlPoint(PulseSchedule):
         """Update flux and field constraints."""
         self.update_control_point(psi)
         self.update_strike_point(psi)
-        self.update_field_constraint()
 
     def update(self):
         """Update source equilibrium."""
         super().update()
         self.update_constraints()
+
+    @property
+    def control_points(self):
+        """Return control points."""
+        points = np.c_[[getattr(self, attr)
+                        for attr in self.point_attrs['boundary']]]
+        if self.limiter:
+            return points
+        return points[:3]
+
+    @property
+    def strike_points(self):
+        """Return strike points."""
+        if self.limiter:
+            return np.array([])
+        return np.c_[[getattr(self, attr)
+                      for attr in self.point_attrs['strike']]]
 
     @property
     def axis(self):
@@ -334,10 +324,6 @@ class ITER(Machine):
     tplasma: str = 'hex'
     dplasma: int | float = -3000
 
-    def __post_init__(self):
-        super().__post_init__()
-        self.saloc['free'][-2] = False
-
 
 @dataclass
 class PulseDesign(ITER, ControlPoint):
@@ -346,9 +332,9 @@ class PulseDesign(ITER, ControlPoint):
     name: str = 'pulse_schedule'
     nwall: Nbiot = 10
     nlevelset: Nbiot = 3000
-    ninductance: Nbiot = 0
-    nforce: Nbiot = 0
-    nfield: Nbiot = 0
+    ninductance: Nbiot = None
+    nforce: Nbiot = None
+    nfield: Nbiot = None
 
     def update_constraints(self):
         """Extend ControlPoint.update_constraints to include psi proxy."""
@@ -360,13 +346,12 @@ class PulseDesign(ITER, ControlPoint):
         super().update()
         self.sloc['plasma', 'Ic'] = self['i_plasma']
 
-    def _constrain(self, constraint, field_weight=1):
-        """Return coupling matrix and vectors."""
+    def _constrain(self, constraint, field_weight=10):
+        """Return matrix and coupling and vector constraint."""
         if len(constraint) == 0:
             return
         point_index = np.array([self.levelset.kd_query(point) for point in
                                 constraint.points])
-        assert len(point_index) == constraint.point_number
 
         _matrix, _vector = [], []
         for attr in constraint.attrs:
@@ -374,7 +359,6 @@ class PulseDesign(ITER, ControlPoint):
                 continue
             index = point_index[constraint[attr].index]
             matrix = getattr(self.levelset, attr.capitalize())[index]
-
             vector = constraint[attr].data - \
                 matrix[:, self.plasma_index] * self.saloc['plasma', 'Ic']
 
@@ -386,10 +370,10 @@ class PulseDesign(ITER, ControlPoint):
             _vector.append(vector)
         matrix = np.vstack(_matrix)
         vector = np.hstack(_vector)
-        return matrix[:, self.saloc['free']], vector
+        return matrix[:, self.saloc['coil']], vector
 
     def _stack(self, *args):
-        """Stack coupling matrix and vectors."""
+        """Stack coupling matricies and data."""
         matrix = np.vstack([arg[0] for arg in args if arg is not None])
         data = np.hstack([arg[1] for arg in args if arg is not None])
         return matrix, data
@@ -399,85 +383,22 @@ class PulseDesign(ITER, ControlPoint):
         coupling = [self._constrain(self.control),
                     self._constrain(self.strike)]
         matrix, vector = self._stack(*coupling)
+        self.saloc['coil', 'Ic'] = MoorePenrose(matrix, gamma=1e-5) / vector
 
-        print(matrix.shape)
-        self.saloc['free', 'Ic'] = MoorePenrose(matrix, gamma=2e-5) / vector
-
-
-    def fun(self, x):
-        """Return optimization goal."""
-        #return np.sum(self.superframe.Ic.values * self.inductance.psi)
-        return np.sum(x**2)
-
-    def hess(self, x):
-        return np.zeros((len(x), len(x)))
-
-    def optimize_current(self):
-        """Optimize external coil currents."""
-        coupling = [self._constrain(self.control)]
-                    #self._constrain(self.strike)]
-        matrix, vector = self._stack(*coupling)
-
-        fmatrix, fvector = self._constrain(self.field)
-
-        print(fmatrix)
-
-        self.solve_current()
-
-        constraints = [LinearConstraint(matrix, vector, vector),
-                       LinearConstraint(fmatrix, fvector, fvector)]
-
-        sol = minimize(self.fun, self.saloc['free', 'Ic'],
-                       hess=self.hess, method='trust-constr',
-                       constraints=constraints)
-        self.saloc['free', 'Ic'] = sol.x
-
-        print(self._constrain(self.field)[1])
-        print(np.dot(self._constrain(self.field)[0],
-                     self.saloc['free', 'Ic']))
-        #print(sol)
-
-
-    @cached_property
-    def Psi_(self):
-        """Return plasma grid coupling matrix."""
-        return self.plasmagrid.data.Psi_.data
-
-    @property
-    def _psi(self):
-        """Return plasma component of poloidal flux on grid."""
-        return self.Psi_ @ self.plasma.nturn
-
-    @property
-    def psi_boundary(self):
-        """Return boundary psi."""
-        if self.limiter:
-            return self.plasmawall.w_psi
-        return self.plasma.x_point_primary
-
-    def residual(self, xin):
+    def residual(self, nturn):
         """Return psi grid residual."""
-        self.plasma.nturn = xin[:-1]
+        # nturn = abs(nturn) / np.sum(abs(nturn))
+        self.plasma.nturn = abs(nturn) / np.sum(abs(nturn))
         self.solve_current()
-        self.plasma.separatrix = xin[-1]
-
-        xout = np.r_[self.plasma.nturn, np.sum(self.plasma.nturn)]
-        residual = xout - np.r_[xin[:-1], 1]
-        residual[-1] /= self.plasmagrid.number
+        self.plasma.separatrix = self.plasma.psi_boundary
+        residual = self.aloc['plasma', 'nturn'] - nturn
         return residual
 
     def solve(self):
         """Solve waveform."""
-        for _ in range(4):
-            #self.solve_current()
-            self.optimize_current()
-            self.plasma.separatrix = self.psi_boundary
-        '''
-        xin = np.r_[self.plasma.nturn, -self['loop_voltage']]
-        xout = optimize.newton_krylov(self.residual, xin, verbose=True)
-        self.plasma.nturn = xout[:-1]
-        self.plasma.separatrix = xout[-1]
-        '''
+        optimize.newton_krylov(
+            self.residual, self.aloc['plasma', 'nturn'], verbose=True)
+            #x_rtol=1e-1, maxiter=10)
 
     def plot(self, index=None, axes=None, **kwargs):
         """Extend plot to include plasma contours."""
@@ -518,19 +439,14 @@ class Benchmark(PulseDesign):
 
 if __name__ == '__main__':
 
-
-    #design = PulseDesign(135013, 2, 'iter', 1)
-    design = Benchmark(135013, 2, 'iter', 1)
+    design = PulseDesign(135013, 2, 'iter', 1)
+    # design = Benchmark(135013, 2, 'iter', 1)
     # design.strike = Constraint()
     # design.control.points[3, 1] += 0.5
 
-    design.itime = 20
+    design.itime = 11
     #design.control.points[3, 1] -= 0.1
     #design.strike = Constraint()
-
     design.solve()
-
-    #design.optimize_current()
     design.plot('plasma')
-    design.levelset.plot_levelset(-design['loop_voltage'], False, color='k')
-    design.levelset.plot_levelset(design.psi_boundary, False, color='C3')
+    design.levelset.plot_levelset(-design['loop_voltage'], False, color='C3')

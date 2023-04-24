@@ -614,6 +614,9 @@ class PoloidalFieldActive(CoilDatabase):
             if len(circuit.connections) == 0:
                 continue
             self.circuit.insert(circuit.identifier, circuit.connections)
+
+        self.circuit.link()  # link single loop circuits
+
         if len(self.ids_data.supply) == 0:  # no supplies
             return
         with self.ids_index.node('supply'):
@@ -900,7 +903,9 @@ class Machine(CoilSet, Geometry, CoilData):
     def solve_biot(self):
         """Solve biot instances."""
         if self.sloc['plasma'].sum() > 0:
-            self.plasma.solve()
+            boundary = self['wall'](**self.wall).segment(0)
+            self.plasma.solve(boundary)
+        self.inductance.solve()
         self.field.solve()
         self.force.solve()
 
@@ -936,5 +941,5 @@ if __name__ == '__main__':
     pulse, run = 105028, 1  # DINA
 
     machine = Machine(pf_active='iter_md', pf_passive='iter_md',
-                      wall='iter_md', tplasma='hex')
+                      wall='iter_md', tplasma='hex', nwall=5)
     machine.plot()

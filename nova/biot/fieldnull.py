@@ -16,8 +16,7 @@ class DataNull(Plot, Array):
     """Store sort and remove field nulls."""
 
     subgrid: bool = True
-    data: xarray.Dataset | xarray.DataArray = \
-        field(repr=False, default_factory=xarray.Dataset)
+    data: xarray.Dataset = field(repr=False, default_factory=xarray.Dataset)
     loop: np.ndarray | None = field(repr=False, default=None)
     array_attrs: list[str] = field(
         default_factory=lambda: ['x', 'z', 'stencil', 'stencil_index'])
@@ -58,8 +57,8 @@ class DataNull(Plot, Array):
             return self._empty_mask()
         points, index = self._select(points, index)
         if self.subgrid:
-            return dict(index=index) | self._subnull_1d(index, psi)
-        return dict(index=index, points=points, psi=psi[index])
+            return {'index': index} | self._subnull_1d(index, psi)
+        return {'index': index, 'points': points, 'psi': psi[index]}
 
     def update_mask_2d(self, mask, psi):
         """Return masked data dict from 2D input."""
@@ -69,9 +68,9 @@ class DataNull(Plot, Array):
             return self._empty_mask()
         points, index = self._select(points, index)
         if self.subgrid:
-            return dict(index=index) | self._subnull_2d(index, psi)
-        return dict(index=index, points=points,
-                    psi=np.array([psi[tuple(i)] for i in index]))
+            return {'index': index} | self._subnull_2d(index, psi)
+        return {'index': index, 'points': points,
+                'psi': np.array([psi[tuple(i)] for i in index])}
 
     @staticmethod
     def _unique(nulls, decimals=3):
@@ -81,7 +80,8 @@ class DataNull(Plot, Array):
         null_type = np.array([null[2] for null in nulls])
         points, index = np.unique(points.round(decimals),
                                   axis=0, return_index=True)
-        return dict(points=points, psi=psi[index], null_type=null_type[index])
+        return {'points': points, 'psi': psi[index],
+                'null_type': null_type[index]}
 
     def _subnull_1d(self, index, psi):
         """Return unique field nulls from 1d unstructured grid."""
@@ -93,7 +93,7 @@ class DataNull(Plot, Array):
             z_cluster = self['z'][stencil_vertex]
             psi_cluster = psi[stencil_vertex]
             nulls.append(select.subnull(x_cluster, z_cluster, psi_cluster))
-        return dict(index=index) | self._unique(nulls)
+        return {'index': index} | self._unique(nulls)
 
     def _subnull_2d(self, index, psi2d):
         """Return unique field nulls from 2d grid."""
@@ -108,23 +108,23 @@ class DataNull(Plot, Array):
         return dict(index=index) | self._unique(nulls)
 
     @staticmethod
-    @numba.njit()
+    @numba.njit(cache=True)
     def _index_1d(x_coordinate, z_coordinate, mask):
         index = np.where(mask)[0]
         point_number = len(index)
         points = np.empty((point_number, 2), dtype=numba.float64)
-        for i in numba.prange(point_number):  # pylint: disable=not-an-iterable
+        for i in range(point_number):  # pylint: disable=not-an-iterable
             points[i, 0] = x_coordinate[index[i]]
             points[i, 1] = z_coordinate[index[i]]
         return index, points
 
     @staticmethod
-    @numba.njit()
+    @numba.njit(cache=True)
     def _index_2d(x_coordinate, z_coordinate, mask):
         index = np.asarray(list(zip(*np.where(mask))))
         point_number = len(index)
         points = np.empty((point_number, 2), dtype=numba.float64)
-        for i in numba.prange(point_number):  # pylint: disable=not-an-iterable
+        for i in range(point_number):  # pylint: disable=not-an-iterable
             points[i, 0] = x_coordinate[index[i][0]]
             points[i, 1] = z_coordinate[index[i][1]]
         return index, points
@@ -199,7 +199,7 @@ class FieldNull(DataNull):
         return self.categorize_2d(psi)
 
     @staticmethod
-    @numba.njit()
+    @numba.njit(cache=True)
     def categorize_1d(data, stencil):
         """Categorize points in 1d hexagonal grid.
 
@@ -231,7 +231,7 @@ class FieldNull(DataNull):
         return o_mask, x_mask
 
     @staticmethod
-    @numba.njit()
+    @numba.njit(cache=True)
     def categorize_2d(data):
         """Categorize points in 2D rectangular grid.
 
@@ -248,7 +248,7 @@ class FieldNull(DataNull):
         o_mask = np.full((xdim, zdim), False)
         x_mask = np.full((xdim, zdim), False)
         stencil = [(-1, 0), (0, -1), (1, -1), (1, 0), (0, 1), (-1, 1)]
-        for i in numba.prange(1, xdim-1):  # pylint: disable=not-an-iterable
+        for i in range(1, xdim-1):  # pylint: disable=not-an-iterable
             for j in range(1, zdim-1):
                 center = data[i, j]
                 sign = data[i+stencil[-1][0], j+stencil[-1][1]] > center

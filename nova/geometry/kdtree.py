@@ -43,7 +43,13 @@ class KDTree(Plot):
         unique, unique_indices = np.unique(tree, return_index=True)
         missing = unique == self.number
         index = unique_indices[~missing]
-        return distance[index], tree[index]
+        try:
+            return distance[index], tree[index]
+        except TypeError:
+            pass
+        if index[0] == 0:
+            return distance, tree
+        return np.array([]), np.array([])
 
     def plot(self, other: np.ndarray):
         """Plot kd selection query."""

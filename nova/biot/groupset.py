@@ -4,10 +4,11 @@ from dataclasses import dataclass, field
 import numpy as np
 
 from nova.biot.biotframe import BiotFrame
+from nova.frame.baseplot import Plot
 
 
 @dataclass
-class GroupSet:
+class GroupSet(Plot):
     """
     Construct Biot source/target biot frames.
 
@@ -37,9 +38,10 @@ class GroupSet:
         if not isinstance(self.source, BiotFrame):
             self.source = BiotFrame(self.source)
         if not isinstance(self.target, BiotFrame):
-            self.target = BiotFrame(self.target, additional=[], available=[])
+            self.target = BiotFrame(self.target, available=[])
         self.set_flags()
         self.assemble()
+        super().__post_init__()
 
     def __len__(self):
         """Return interaction length."""
@@ -80,15 +82,13 @@ class GroupSet:
 
     def plot(self, axes=None):
         """Plot source and target markers."""
-        from nova.plot import plt
-        if axes is None:
-            axes = plt.gca()
-        self.source.plot('x', 'z', 'scatter', ax=axes,
+        self.axes = axes
+        self.source.plot('x', 'z', 'scatter', ax=self.axes,
                          color='C1', marker='o', label='source')
-        self.target.plot('x', 'z', 'scatter', ax=axes,
+        self.target.plot('x', 'z', 'scatter', ax=self.axes,
                          color='C2', marker='.', label='target')
-        axes.axis('equal')
-        axes.axis('off')
+        self.axes.axis('equal')
+        self.axes.axis('off')
 
 
 if __name__ == '__main__':

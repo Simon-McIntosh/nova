@@ -4,7 +4,7 @@ from functools import cached_property
 from typing import ClassVar
 
 import numpy as np
-from scipy import optimize
+from scipy.optimize import minimize, LinearConstraint
 from scipy.sparse.linalg import LinearOperator
 from scipy.spatial import distance_matrix
 
@@ -181,35 +181,12 @@ class ControlPoint(PulseSchedule):
         """Return limiter flag."""
         return np.allclose(self['x_point'], (0, 0))
 
-    def update_control_point(self, psi=0):
-        """Update control point constraints."""
-        self.control = Constraint(self.control_points)
-        self.control.poloidal_flux = psi
-        self.control.radial_field = 0, [0, 2]
-        self.control.vertical_field = 0, [1, 3]
-        if not self.limiter:
-            self.control.radial_field = 0, [3]
-
-    def update_strike_point(self, psi=0):
-        """Update strike point constraints."""
-        self.strike = Constraint(self.strike_points)
-        self.strike.poloidal_flux = psi
-
-    def update_constraints(self, psi=0):
-        """Update flux and field constraints."""
-        self.update_control_point(psi)
-        self.update_strike_point(psi)
-
-    def update(self):
-        """Update source equilibrium."""
-        super().update()
-        self.update_constraints()
-
     @property
     def control_points(self):
         """Return control points."""
         points = np.c_[[getattr(self, attr)
                         for attr in self.point_attrs['boundary']]]
+        points = np.r_[points, [(self.inner + self.outer) / 2]]
         if self.limiter:
             return points
         return points#[:3]
@@ -221,6 +198,38 @@ class ControlPoint(PulseSchedule):
             return np.array([])
         return np.c_[[getattr(self, attr)
                       for attr in self.point_attrs['strike']]]
+
+    def update_control_point(self, psi=0):
+        """Update control point constraints."""
+        self.control = Constraint(self.control_points)
+        self.control.poloidal_flux = psi, [0, 1, 2, 3]
+        self.control.radial_field = 0, [0, 2]
+        self.control.vertical_field = 0, [1, 3]
+
+        if not self.limiter:
+            self.control.radial_field = 0, [3]
+
+    def update_field_constraint(self):
+        """Update boundary field inequality constraints."""
+        self.field = Constraint(self.control_points[4:])
+        #self.field.radial_field = 0, [1]
+        self.field.radial_field = 0, [0]
+
+    def update_strike_point(self, psi=0):
+        """Update strike point constraints."""
+        self.strike = Constraint(self.strike_points)
+        self.strike.poloidal_flux = psi
+
+    def update_constraints(self, psi=0):
+        """Update flux and field constraints."""
+        self.update_control_point(psi)
+        self.update_strike_point(psi)
+        self.update_field_constraint()
+
+    def update(self):
+        """Update source equilibrium."""
+        super().update()
+        self.update_constraints()
 
     @property
     def axis(self):
@@ -351,12 +360,13 @@ class PulseDesign(ITER, ControlPoint):
         super().update()
         self.sloc['plasma', 'Ic'] = self['i_plasma']
 
-    def _constrain(self, constraint, field_weight=100):
+    def _constrain(self, constraint, field_weight=1):
         """Return coupling matrix and vectors."""
         if len(constraint) == 0:
             return
         point_index = np.array([self.levelset.kd_query(point) for point in
                                 constraint.points])
+        assert len(point_index) == constraint.point_number
 
         _matrix, _vector = [], []
         for attr in constraint.attrs:
@@ -389,7 +399,44 @@ class PulseDesign(ITER, ControlPoint):
         coupling = [self._constrain(self.control),
                     self._constrain(self.strike)]
         matrix, vector = self._stack(*coupling)
+
+        print(matrix.shape)
         self.saloc['free', 'Ic'] = MoorePenrose(matrix, gamma=2e-5) / vector
+
+
+    def fun(self, x):
+        """Return optimization goal."""
+        #return np.sum(self.superframe.Ic.values * self.inductance.psi)
+        return np.sum(x**2)
+
+    def hess(self, x):
+        return np.zeros((len(x), len(x)))
+
+    def optimize_current(self):
+        """Optimize external coil currents."""
+        coupling = [self._constrain(self.control)]
+                    #self._constrain(self.strike)]
+        matrix, vector = self._stack(*coupling)
+
+        fmatrix, fvector = self._constrain(self.field)
+
+        print(fmatrix)
+
+        self.solve_current()
+
+        constraints = [LinearConstraint(matrix, vector, vector),
+                       LinearConstraint(fmatrix, fvector, fvector)]
+
+        sol = minimize(self.fun, self.saloc['free', 'Ic'],
+                       hess=self.hess, method='trust-constr',
+                       constraints=constraints)
+        self.saloc['free', 'Ic'] = sol.x
+
+        print(self._constrain(self.field)[1])
+        print(np.dot(self._constrain(self.field)[0],
+                     self.saloc['free', 'Ic']))
+        #print(sol)
+
 
     @cached_property
     def Psi_(self):
@@ -421,8 +468,9 @@ class PulseDesign(ITER, ControlPoint):
 
     def solve(self):
         """Solve waveform."""
-        for _ in range(10):
-            self.solve_current()
+        for _ in range(4):
+            #self.solve_current()
+            self.optimize_current()
             self.plasma.separatrix = self.psi_boundary
         '''
         xin = np.r_[self.plasma.nturn, -self['loop_voltage']]
@@ -480,6 +528,8 @@ if __name__ == '__main__':
     #design.strike = Constraint()
 
     design.solve()
+
+    #design.optimize_current()
     design.plot('plasma')
     design.levelset.plot_levelset(-design['loop_voltage'], False, color='k')
     design.levelset.plot_levelset(design.psi_boundary, False, color='C3')

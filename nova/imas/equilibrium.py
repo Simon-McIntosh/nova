@@ -13,6 +13,7 @@ from nova.frame.baseplot import Plot
 from nova.geometry.pointloop import PointLoop
 from nova.geometry.separatrix import LCFS
 from nova.geometry.strike import Strike
+from nova.imas.machine import Wall
 from nova.imas.scenario import Scenario
 from nova.plot.biotplot import BiotPlot
 
@@ -284,7 +285,6 @@ class Parameter0D(Plot, Scenario):
             path = f'boundary_separatrix.{attr}'
             if attr not in self.data and attr in lcfs_data:
                 self.data[attr] = 'time', lcfs_data[attr]
-
         path = 'boundary_separatrix.geometric_axis'
         if any(self.ids_index.empty(f'{path}.{label}') for label in 'rz'):
             geometric_axis = np.c_[lcfs_data['geometric_radius'],
@@ -482,6 +482,7 @@ class Equilibrium(Profile2D, Profile1D, Parameter0D, Grid):
             self.data.coords['point'] = ['r', 'z']
             super().build()
             self.contour_build()
+        Wall().insert(self.data)  # insert wall and divertor structures
         return self
 
     @cached_property
@@ -536,10 +537,8 @@ if __name__ == '__main__':
     pulse, run = 135013, 2
 
     Equilibrium(pulse, run, occurrence=1)._clear()
-    #135013, 2
-
     equilibrium = Equilibrium(pulse, run, occurrence=1)
 
-    equilibrium.time = 100
+    #equilibrium.time = 100
     #equilibrium.plot_2d('psi', mask=0)
     #equilibrium.plot_boundary()

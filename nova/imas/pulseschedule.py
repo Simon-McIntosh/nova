@@ -159,13 +159,7 @@ class PulseSchedule(Plot, Scenario):
 
     def build_wall(self):
         """Extract wall profile from IDS."""
-        wall = Wall()
-        for i, attr in enumerate(['wall', 'divertor']):
-            self.data[attr] = (f'{attr}_index', 'point'), wall.segment(i)
-            index = np.arange(self.data[attr].shape[0])
-            self.data.coords[f'{attr}_index'] = index
-        self.data.attrs['wall_md'] = ','.join(
-            [str(value) for _, value in wall.ids_attrs.items()])
+        Wall().insert(self.data)
 
     def build(self):
         """Build netCDF database using data extracted from imasdb."""
@@ -278,5 +272,5 @@ if __name__ == '__main__':
     # schedule.annimate(2.5)
 
     #schedule.plot_gaps()
-    schedule.plot_0d('loop_voltage')
+    #schedule.plot_0d('loop_voltage')
     #schedule.plot_0d('loop_psi')

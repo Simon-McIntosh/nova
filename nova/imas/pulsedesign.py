@@ -358,7 +358,7 @@ class PulseDesign(ITER, ControlPoint):
     def update(self):
         """Extend itime update."""
         super().update()
-        self.sloc['plasma', 'Ic'] = self['i_plasma']
+        self.sloc['plasma', 'Ic'] = self['ip']
 
     def _constrain(self, constraint, field_weight=1):
         """Return coupling matrix and vectors."""

@@ -104,13 +104,15 @@ class Sample(Plot, Defeature, Select):
 
     data: xarray.Dataset = field(default_factory=xarray.Dataset, repr=False)
     dtime: int | float | None = None
-    savgol: tuple[int, int] | None = (5, 1)
-    epsilon: float = 0.15
+    savgol: tuple[int, int] | None = (10, 1)
+    epsilon: float = 0.1
     cluster: int | float | None = None
     features: list[str] = field(default_factory=lambda: [
         'minor_radius', 'elongation',
         'triangularity_upper', 'triangularity_lower',
         'triangularity_inner', 'triangularity_outer',
+        'squareness_upper_inner', 'squareness_upper_outer',
+        'squareness_lower_inner', 'squareness_lower_outer',
         'li_3', 'beta_normal', 'ip'])
     samples: dict[str, xarray.Dataset] = field(default_factory=dict)
 
@@ -240,7 +242,7 @@ class Sample(Plot, Defeature, Select):
             self._plot_attr('rdp', attr, ls='-', marker='o', color='k',
                             lw=1.5, ms=6, zorder=-10, scale=scale,
                             mfc='k', mec=f'C{i}')
-        self.axes.legend(ncol=3)
+        self.axes.legend(ncol=2)
         self.axes.set_xlabel('time s')
         ylabel = 'value'
         if scale:
@@ -261,8 +263,8 @@ class Sample(Plot, Defeature, Select):
                 ids_entry[attr] = self.data.geometric_axis[:,  i].data
 
         with ids_entry.node('position_control.*.reference.data'):
-            for attr in ['minor_radius', 'elongation', 'triangularity_upper',
-                         'triangularity_lower']:
+            for attr in ['minor_radius', 'elongation',
+                         'triangularity_upper', 'triangularity_lower']:
                 ids_entry[attr] = self.data[attr].data
             # TOODO fix once IDS is updated with missing triangularities
             for tmp_attr, attr in zip(['elongation_upper', 'elongation_lower'],
@@ -291,7 +293,9 @@ class Sample(Plot, Defeature, Select):
         with ids_entry.node('time_slice:boundary_separatrix.*'):
             ids_entry['psi', :] = self.data['psi_boundary'].data
             for attr in ['minor_radius', 'elongation',
-                         'triangularity_upper', 'triangularity_lower']:
+                         'triangularity_upper', 'triangularity_lower',
+                         'squareness_upper_inner', 'squareness_upper_outer',
+                         'squareness_lower_inner', 'squareness_lower_outer']:
                 ids_entry[attr, :] = self.data[attr].data
             # TOODO fix once IDS is updated with missing triangularities
             for tmp_attr, attr in zip(
@@ -312,7 +316,7 @@ class Sample(Plot, Defeature, Select):
 
         with ids_entry.node('time_slice:boundary_separatrix.strike_point:*'):
             for itime in range(self.data.dims['time']):
-                for i in range(self.data.strike_point_number.data[itime]):
+                for i in range(self.data.dims['strike_point_index']):
                     for j, attr in enumerate('rz'):
                         ids_entry[attr, itime, i] = \
                             self.data.strike_point.data[itime, i, j]
@@ -354,6 +358,7 @@ if __name__ == '__main__':
     sample = Sample(equilibrium.data)
 
     sample.write_ids(**equilibrium.ids_attrs | {'occurrence': 1})
-    sample.plot()
+    sample.plot(['squareness_upper_inner', 'squareness_upper_outer',
+                 'squareness_lower_inner', 'squareness_lower_outer'])
 
     # sample.plot('ip')

@@ -52,7 +52,19 @@ def test_quadrant_angles(quadrant):
     angle = np.arctan2(point[1], point[0])
     if angle < 0:
         angle += 2*np.pi
-    assert np.isclose(angle, np.pi/4 + quadrant*np.pi/2, rtol=1e-3)
+    assert np.isclose(angle,
+                      shape.quadrant(quadrant).theta + quadrant*np.pi/2,
+                      rtol=1e-3)
+
+
+def test_circle():
+    geometric_axis = (5.2, 0.2)
+    minor_radius, elongation, triangularity = 0.5, 1, 0
+    profile = Separatrix(point_number=51).limiter(
+        *geometric_axis, minor_radius, elongation, triangularity)
+    shape = LCFS(profile.points)
+    for i in range(4):
+        assert np.isclose(shape.squareness(i), 0, atol=1e-3)
 
 
 if __name__ == '__main__':

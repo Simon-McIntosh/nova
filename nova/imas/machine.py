@@ -8,6 +8,7 @@ import string
 from typing import ClassVar, TYPE_CHECKING
 
 import numpy as np
+import xarray
 
 from nova.frame.baseplot import Plot
 from nova.frame.coilset import CoilSet
@@ -735,6 +736,15 @@ class Wall(CoilDatabase):
     def build(self):
         """Build plasma bound by firstwall contour."""
         self.firstwall.insert(self.boundary)
+
+    def insert(self, data: xarray.Dataset):
+        """Insert wall and divertor geometory into dataset structure."""
+        for i, attr in enumerate(['wall', 'divertor']):
+            data[attr] = (f'{attr}_index', 'point'), self.segment(i)
+            index = np.arange(data[attr].shape[0])
+            data.coords[f'{attr}_index'] = index
+        data.attrs['wall_md'] = ','.join(
+            [str(value) for _, value in self.ids_attrs.items()])
 
 
 @dataclass

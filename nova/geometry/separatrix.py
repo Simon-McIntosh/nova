@@ -89,6 +89,7 @@ class BoxGeometry:
     """Calculate bounding box control points from plasma separatrix."""
 
     points: np.ndarray
+    pad_width: int = 6
 
     @cached_property
     def segment_length(self):
@@ -96,19 +97,19 @@ class BoxGeometry:
         return np.linalg.norm(self.points[1:] - self.points[:-1], axis=1)
 
     @cached_property
-    def cumaulative_length(self):
-        """Return normalized cumaulative separatrix length."""
+    def cumulative_length(self):
+        """Return normalized cumulative separatrix length."""
         return np.append(0, np.cumsum(self.segment_length)) / self.length
 
     @cached_property
     def radius(self):
         """Return surface radius interpolator."""
-        return Peak(self.cumaulative_length, self.points[:, 0])
+        return Peak(self.cumulative_length, self.points[:, 0], self.pad_width)
 
     @cached_property
     def height(self):
         """Return surface height interpolator."""
-        return Peak(self.cumaulative_length, self.points[:, 1])
+        return Peak(self.cumulative_length, self.points[:, 1], self.pad_width)
 
     @cached_property
     def length(self):
@@ -252,11 +253,11 @@ class Quadrant(Plot):
             theta += 2*np.pi
         return int(2*theta / np.pi)
 
-    def _radius(self, u):
+    def arc_radius(self, u):
         """Return parametric arc radius."""
         return self.minor_radius * (1 - u**2) / (1 + u**2)
 
-    def _height(self, u):
+    def arc_height(self, u):
         """Return parametric arc height."""
         return self.major_radius * 2*u / (1 + u**2)
 
@@ -264,7 +265,8 @@ class Quadrant(Plot):
     def ellipse_point(self):
         """Return arc bisection point."""
         _u = np.sqrt(8)/2 - 1
-        return np.array([self._radius(_u), self._height(_u)]) + self.axis
+        print(180/np.pi*np.arctan2( self.arc_height(_u), self.arc_radius(_u)))
+        return np.array([self.arc_radius(_u), self.arc_height(_u)]) + self.axis
 
     @cached_property
     def ellipse_radius(self):
@@ -289,16 +291,91 @@ class Quadrant(Plot):
         self.axes.plot(*self.minor_point, 'ko', ms=4)
         self.axes.plot(*self.major_point, 'ko', ms=4)
         self.axes.plot(*self.ellipse_point, 'kd', ms=6)
-        self.axes.plot(self._radius(u) + self.axis[0],
-                       self._height(u) + self.axis[1], ':', color='gray')
+        self.axes.plot(self.arc_radius(u) + self.axis[0],
+                       self.arc_height(u) + self.axis[1], ':', color='gray')
 
 
 @dataclass
 class Squareness(Plot, PointGeometry):
     """Extend point geometry to inculde squarness calculation."""
 
-    points: np.ndarray
-    quadrants: list[Quadrant] = field(init=False)
+    @cached_property
+    def quadrant_theta(self):
+        """Return separatrix quadrant-local poloidal angle."""
+        points = np.copy(self.points)
+        for i in range(4):
+            points[self.quadrant_mask(i)] -= self.quadrant_axis(i)
+        theta = np.arctan2(points[:, 1], points[:, 0])
+        theta[theta < 0] += 2*np.pi
+        theta = np.unwrap(theta)
+        if theta[0] > np.pi:
+            theta -= 2*np.pi
+        return np.unwrap(theta)
+
+    @cached_property
+    def quadrant_length(self):
+        """Return quadrant cumulative length interpolator."""
+        length = self.radius.length
+        if self.pad_width > 0:
+            length = length[self.pad_width:-self.pad_width]
+        return Peak(self.quadrant_theta, length, pad_width=0)
+
+    def quadrant_mask(self, index: int):
+        """Return quadrant mask."""
+        match index:
+            case 0:  # upper_outer
+                return (self.points[:, 0] >= self.r_zmax) & \
+                    (self.points[:, 1] >= self.z_rmax)
+            case 1:  # upper_inner
+                return (self.points[:, 0] < self.r_zmax) & \
+                    (self.points[:, 1] > self.z_rmin)
+            case 2:  # lower_inner
+                return (self.points[:, 0] <= self.r_zmin) & \
+                    (self.points[:, 1] <= self.z_rmin)
+            case 3:  # lower_outer
+                return (self.points[:, 0] > self.r_zmin) & \
+                    (self.points[:, 1] < self.z_rmax)
+            case _:
+                raise IndexError(f'quadrant index {index} not 0-3')
+
+    def quadrant_axis(self, index: int):
+        """Return loca quadrant axis."""
+        match index:
+            case 0:  # upper_outer
+                return self.r_zmax, self.z_rmax
+            case 1:  # upper_inner
+                return self.r_zmax, self.z_rmin
+            case 2:  # lower_inner
+                return self.r_zmin, self.z_rmin
+            case 3:  # lower_outer
+                return self.r_zmin, self.z_rmax
+            case _:
+                raise IndexError(f'quadrant index {index} not 0-3')
+
+    def quadrant_point(self, index: int):
+        """Return quadrant point."""
+        theta = np.pi/4 + index*np.pi/2
+        length = self.quadrant_length(theta)
+        return np.array([self.radius(length), self.height(length)])
+
+    def quadrant(self, index):
+        """Return quadrant index."""
+        match index:
+            case 0:  # upper_outer
+                minor_point = (self.r_max, self.z_rmax)
+                major_point = (self.r_zmax, self.z_max)
+            case 1:  # upper_inner
+                minor_point = (self.r_min, self.z_rmin)
+                major_point = (self.r_zmax, self.z_max)
+            case 2:  # lower_inner
+                minor_point = (self.r_min, self.z_rmin)
+                major_point = (self.r_zmin, self.z_min)
+            case 3:  # lower_outer
+                minor_point = (self.r_max, self.z_rmax)
+                major_point = (self.r_zmin, self.z_min)
+            case _:
+                raise IndexError(f'quadrant index {index} not 0-3')
+        return Quadrant(minor_point, major_point)
 
     '''
     @cached_property
@@ -307,37 +384,6 @@ class Squareness(Plot, PointGeometry):
         angle = np.arctan2(self.points[:, 1], self.points[:, 0])
         return np.where(angle >= 0, angle, angle + np.pi)
 
-    def quadrant_mask(self, index: int):
-        """Return quadrant mask."""
-        match index:
-            case 0:  # upper_outer
-                return self.points[:, 0] > self.upper[0] & \
-                    self.points[:, 1] >= self.outer[1]
-            case 1:  # upper_inner
-                return self.points[:, 0] <= self.upper[0] & \
-                    self.points[:, 1] > self.inner[1]
-            case 2:  # lower_inner
-                return self.points[:, 0] < self.lower[0] & \
-                    self.points[:, 1] <= self.inner[1]
-            case 3:  # lower_outer
-                return self.points[:, 0] >= self.lower[0] & \
-                    self.points[:, 1] < self.outer[1]
-            case _:
-                raise IndexError(f'quadrant index {index} not 0-3')
-
-    def quadrant_axis(self, index: int):
-        """Return loca quadrant axis."""
-        match index:
-            case 0:  # upper_outer
-                return self.upper[0], self.outer[1]
-            case 1:  # upper_inner
-                return self.upper[0], self.inner[1]
-            case 2:  # lower_inner
-                return self.lower[0], self.inner[1]
-            case 3:  # lower_outer
-                return self.lower[0], self.outer[1]
-            case _:
-                raise IndexError(f'quadrant index {index} not 0-3')
 
     def minor_axis(self, quadrant: int):
         """Return signed minor axis."""
@@ -362,13 +408,8 @@ class Squareness(Plot, PointGeometry):
     def plot_quadrants(self, axes=None):
         """Plot parametric curves."""
         self.set_axes('2d', axes)
-        parametric_arc = np.linspace(0, 1)
-        for quadrant in range(4):
-            axis = self.quadrant_axis(quadrant)
-
-            self.axes.plot(self.arc_radius(parametric_arc) + axis[0],
-                           self.arc_height(parametric_arc) + axis[1],
-                           ':', color='gray')
+        for i in range(4):
+            self.quadrant(i).plot(self.axes)
 
 
 @dataclass
@@ -393,6 +434,9 @@ class LCFS(Elongation, Triangularity, Squareness, Plot):
             self.axes.plot(self.r_zmax, self.z_max, 'o', label='Zmax')
             self.axes.plot(self.r_zmin, self.z_min, 'o', label='Zmin')
             self.axes.legend(loc='center')
+        self.plot_quadrants(self.axes)
+        for quadrant in range(4):
+            self.axes.plot(*self.quadrant_point(quadrant), 'ko')
 
 
 @dataclass

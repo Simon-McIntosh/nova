@@ -4,18 +4,17 @@ from functools import cached_property
 from typing import ClassVar
 
 import numpy as np
-from scipy.optimize import minimize, LinearConstraint
+from scipy.optimize import minimize, newton_krylov, LinearConstraint
 from scipy.sparse.linalg import LinearOperator
 from scipy.spatial import distance_matrix
 
 from nova.biot.biot import Nbiot
 from nova.frame.baseplot import Plot
-from nova.geometry.separatrix import Separatrix
+from nova.geometry.separatrix import Quadrant, Separatrix
 from nova.imas.database import Ids
 from nova.imas.equilibrium import Equilibrium
 from nova.imas.machine import Machine
 from nova.imas.pf_active import PF_Active
-#from nova.imas.pulseschedule import PulseSchedule
 from nova.linalg.regression import MoorePenrose
 
 
@@ -173,7 +172,9 @@ class ControlPoint(Equilibrium):
     strike: Constraint = field(init=False, default_factory=Constraint)
 
     point_attrs: ClassVar[dict[str, list[str]]] = {
-        'boundary': ['outer', 'upper', 'inner', 'lower'],
+        'boundary': ['outer', 'upper', 'inner', 'lower',
+                     'upper_outer', 'upper_inner',
+                     'lower_inner', 'lower_outer'],
         'strike': ['inner_strike', 'outer_strike']}
 
     @property
@@ -186,7 +187,6 @@ class ControlPoint(Equilibrium):
         """Return control points."""
         points = np.c_[[getattr(self, attr)
                         for attr in self.point_attrs['boundary']]]
-        points = np.r_[points, [(self.inner + self.outer) / 2]]
         if self.limiter:
             return points
         return points#[:3]
@@ -202,10 +202,9 @@ class ControlPoint(Equilibrium):
     def update_control_point(self, psi=0):
         """Update control point constraints."""
         self.control = Constraint(self.control_points)
-        self.control.poloidal_flux = psi, [0, 1, 2, 3]
+        self.control.poloidal_flux = psi, [0, 1, 2, 3, 4, 5]
         self.control.radial_field = 0, [0, 2]
         self.control.vertical_field = 0, [1, 3]
-
         if not self.limiter:
             self.control.radial_field = 0, [3]
 
@@ -217,14 +216,14 @@ class ControlPoint(Equilibrium):
 
     def update_strike_point(self, psi=0):
         """Update strike point constraints."""
-        self.strike = Constraint(self.strike_points)
+        self.strike = Constraint()#self.strike_points)
         self.strike.poloidal_flux = psi
 
     def update_constraints(self, psi=0):
         """Update flux and field constraints."""
         self.update_control_point(psi)
         self.update_strike_point(psi)
-        self.update_field_constraint()
+        #self.update_field_constraint()
 
     def update(self):
         """Update source equilibrium."""
@@ -291,6 +290,30 @@ class ControlPoint(Equilibrium):
             [1, self.triangularity_outer])
 
     @property
+    def upper_outer(self):
+        """Return upper outer control point."""
+        return Quadrant(self.outer, self.upper).separatrix_point(
+            self['squareness_upper_outer'])
+
+    @property
+    def upper_inner(self):
+        """Return upper inner control point."""
+        return Quadrant(self.inner, self.upper).separatrix_point(
+            self['squareness_upper_inner'])
+
+    @property
+    def lower_inner(self):
+        """Return lower inner control point."""
+        return Quadrant(self.inner, self.lower).separatrix_point(
+            self['squareness_lower_inner'])
+
+    @property
+    def lower_outer(self):
+        """Return lower outer control point."""
+        return Quadrant(self.outer, self.lower).separatrix_point(
+            self['squareness_lower_outer'])
+
+    @property
     def inner_strike(self):
         """Return inner strike point."""
         return self['strike_point'][0]
@@ -335,6 +358,7 @@ class ITER(Machine):
     dplasma: int | float = -3000
 
     def __post_init__(self):
+        """Disable vs3 current updates."""
         super().__post_init__()
         self.saloc['free'][-2] = False
 
@@ -360,28 +384,23 @@ class PulseDesign(ITER, ControlPoint):
         super().update()
         self.sloc['plasma', 'Ic'] = self['ip']
 
-    def _constrain(self, constraint, field_weight=1):
+    def _constrain(self, constraint, field_weight=200):
         """Return coupling matrix and vectors."""
         if len(constraint) == 0:
             return
         point_index = np.array([self.levelset.kd_query(point) for point in
                                 constraint.points])
-        assert len(point_index) == constraint.point_number
-
         _matrix, _vector = [], []
         for attr in constraint.attrs:
             if len(constraint[attr]) == 0:
                 continue
             index = point_index[constraint[attr].index]
             matrix = getattr(self.levelset, attr.capitalize())[index]
-
             vector = constraint[attr].data - \
                 matrix[:, self.plasma_index] * self.saloc['plasma', 'Ic']
-
             if attr != 'psi':
                 matrix *= np.sqrt(field_weight)
                 vector *= np.sqrt(field_weight)
-
             _matrix.append(matrix)
             _vector.append(vector)
         matrix = np.vstack(_matrix)
@@ -399,9 +418,7 @@ class PulseDesign(ITER, ControlPoint):
         coupling = [self._constrain(self.control),
                     self._constrain(self.strike)]
         matrix, vector = self._stack(*coupling)
-
-        print(matrix.shape)
-        self.saloc['free', 'Ic'] = MoorePenrose(matrix, gamma=2e-5) / vector
+        self.saloc['free', 'Ic'] = MoorePenrose(matrix, gamma=1e-5) / vector
 
 
     def fun(self, x):
@@ -468,16 +485,15 @@ class PulseDesign(ITER, ControlPoint):
 
     def solve(self):
         """Solve waveform."""
+        '''
         for _ in range(4):
-            #self.solve_current()
-            self.optimize_current()
+            self.solve_current()
             self.plasma.separatrix = self.psi_boundary
         '''
-        xin = np.r_[self.plasma.nturn, -self['loop_voltage']]
-        xout = optimize.newton_krylov(self.residual, xin, verbose=True)
+        xin = np.r_[self.plasma.nturn, -self['psi_boundary']]
+        xout = newton_krylov(self.residual, xin, verbose=True)
         self.plasma.nturn = xout[:-1]
         self.plasma.separatrix = xout[-1]
-        '''
 
     def plot(self, index=None, axes=None, **kwargs):
         """Extend plot to include plasma contours."""

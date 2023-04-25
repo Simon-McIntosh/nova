@@ -225,7 +225,7 @@ class Triangularity(PointGeometry):
 
 @dataclass
 class Quadrant(Plot):
-    """Manage squarness calculations for single quadrant."""
+    """Manage single quadrant squarness calculations."""
 
     minor_point: tuple[float, float]
     major_point: tuple[float, float]
@@ -286,11 +286,18 @@ class Quadrant(Plot):
         """Return ellipse radius L2 norm."""
         return np.linalg.norm([self.minor_radius, self.major_radius])
 
-    def squareness(self, point):
-        """Return point squarness."""
-        radius = np.linalg.norm(np.array(point) - self.axis)
+    def squareness(self, separatrix_point):
+        """Return squarness of separatrix point."""
+        radius = np.linalg.norm(np.array(separatrix_point) - self.axis)
         return (radius - self.ellipse_radius) / (self.square_radius -
                                                  self.ellipse_radius)
+
+    def separatrix_point(self, squareness):
+        """Return separatrix point for a given squareness."""
+        radius = squareness * (self.square_radius -
+                               self.ellipse_radius) + self.ellipse_radius
+        theta = self.theta + self.quadrant * np.pi/2
+        return self.axis + radius * np.array([np.cos(theta), np.sin(theta)])
 
     def plot(self, axes=None):
         """Plot parametric arc."""

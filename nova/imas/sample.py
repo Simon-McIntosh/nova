@@ -104,7 +104,7 @@ class Sample(Plot, Defeature, Select):
 
     data: xarray.Dataset = field(default_factory=xarray.Dataset, repr=False)
     dtime: int | float | None = None
-    savgol: tuple[int, int] | None = (10, 1)
+    savgol: tuple[int, int] | None = (3, 1)
     epsilon: float = 0.1
     cluster: int | float | None = None
     features: list[str] = field(default_factory=lambda: [
@@ -316,7 +316,7 @@ class Sample(Plot, Defeature, Select):
 
         with ids_entry.node('time_slice:boundary_separatrix.strike_point:*'):
             for itime in range(self.data.dims['time']):
-                for i in range(self.data.dims['strike_point_index']):
+                for i in range(self.data.dims['strike_point_index'])[::-1]:
                     for j, attr in enumerate('rz'):
                         ids_entry[attr, itime, i] = \
                             self.data.strike_point.data[itime, i, j]

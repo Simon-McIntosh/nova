@@ -362,9 +362,10 @@ class ITER(Machine):
         super().__post_init__()
         self.saloc['free'][-2] = False
 
+from nova.imas.profile import Profile
 
 @dataclass
-class PulseDesign(ITER, ControlPoint):
+class PulseDesign(ITER, ControlPoint, Profile):
     """Generate coilset voltage and current waveforms."""
 
     name: str = 'equilibrium'
@@ -478,10 +479,23 @@ class PulseDesign(ITER, ControlPoint):
         self.solve_current()
         self.plasma.separatrix = xin[-1]
 
+        #nturn = self.plasma.nturn * self.aloc['plasma', 'x']**-1
+        #self.plasma.nturn = nturn / np.sum(nturn)
+        #print('a')
+
         xout = np.r_[self.plasma.nturn, np.sum(self.plasma.nturn)]
         residual = xout - np.r_[xin[:-1], 1]
         residual[-1] /= self.plasmagrid.number
         return residual
+
+    def psi_residual(self, psi_in):  # psi on grid and wall
+        """Return psi residual."""
+        self.plasmagrid.array['psi'] = psi_in
+        self.plasmagrid.version['fieldnull'] = None
+        self.plasma.separatrix = self.plasmagrid.x_psi[0]
+        self.plasmagrid.version['psi'] = None
+        self.solve_current()
+        return self.plasmagrid.psi - psi_in
 
     def solve(self):
         """Solve waveform."""
@@ -490,10 +504,13 @@ class PulseDesign(ITER, ControlPoint):
             self.solve_current()
             self.plasma.separatrix = self.psi_boundary
         '''
-        xin = np.r_[self.plasma.nturn, -self['psi_boundary']]
-        xout = newton_krylov(self.residual, xin, verbose=True)
-        self.plasma.nturn = xout[:-1]
-        self.plasma.separatrix = xout[-1]
+        #xin = np.r_[self.plasma.nturn, -self['psi_boundary']]
+        self.solve_current()
+        xin = self.plasmagrid.psi
+        xout = newton_krylov(self.psi_residual, xin, verbose=True)
+        #self.plasma.nturn = xout[:-1]
+        #self.plasma.separatrix = xout[-1]
+        self.psi_residual(xout)
 
     def plot(self, index=None, axes=None, **kwargs):
         """Extend plot to include plasma contours."""
@@ -540,10 +557,18 @@ if __name__ == '__main__':
     # design.strike = Constraint()
     # design.control.points[3, 1] += 0.5
 
-    design.itime = 20
+    design.itime = 12
     #design.control.points[3, 1] -= 0.1
     #design.strike = Constraint()
 
+    '''
+    design.saloc['free', 'Ic'] = np.array([-50040.66207598,  50248.41318872,  10166.79909156,  64709.82963811,
+           -34543.74662353,  -3383.64089807,  28878.48273823,  23200.7477658 ,
+             7638.1247157 ,  81609.37192012, -74802.62916739])
+    '''
+    design.solve()
+
+    design.solve_current()
     design.solve()
 
     #design.optimize_current()

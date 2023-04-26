@@ -55,6 +55,10 @@ class Profile:
         ionize_area = self._area[self._ionize]
         self._nturn[self._ionize] = ionize_area / np.sum(ionize_area)
 
+    def function(self, psi, p_prime, ff_prime):
+        """Update plasma turns with flux functions."""
+        #jtor =
+
 
 @dataclass
 class Plasma(Plot, netCDF, FrameSetLoc):
@@ -120,17 +124,20 @@ class Plasma(Plot, netCDF, FrameSetLoc):
         return self.grid.o_psi[0]
 
     @property
-    def current(self):
-        """Return plasma current."""
+    def i_plasma(self):
+        """Return total plasma current."""
         return self.saloc['plasma', 'Ic'][0]
 
     @property
-    def li(self):
+    def li_3(self):
         """Return normalized plasma inductance."""
-        volume = self.aloc['ionize', 'volume']
+        filament_volume = self.aloc['ionize', 'volume']
+        volume = np.sum(filament_volume)
         poloidal_field = self.grid.bp[self.aloc['plasma', 'ionize']]
-        surface = np.sum(poloidal_field * volume) / np.sum(volume)
-        boundary = (mu_0 * self.current / self.lcfs.length)**2
+        surface = np.sum(poloidal_field**2 * filament_volume) / volume
+        #boundary = (mu_0 * self.current / self.lcfs.length)**2
+        radius = 6.2#self.lcfs.geometric_radius
+        boundary = (mu_0 * self.i_plasma)**2 * radius / (2*volume)
         return surface / boundary
 
     @property
@@ -250,7 +257,7 @@ class Plasma(Plot, netCDF, FrameSetLoc):
 
         Parameters
         ----------
-        loop : array-like (n, 2), Polygon, dict[str, list[float]], list[float]
+        index : array-like (n, 2), Polygon, dict[str, list[float]], list[float]
             Bounding loop.
 
         """

@@ -321,6 +321,13 @@ class Sample(Plot, Defeature, Select):
                         ids_entry[attr, itime, i] = \
                             self.data.strike_point.data[itime, i, j]
 
+        # include profile data - to remove in future
+        with ids_entry.node('time_slice:profiles_1d.*'):
+            for itime in range(self.data.dims['time']):
+                ids_entry['psi', itime] = self.data.psi1d.data[itime]
+                for attr in ['dpressure_dpsi', 'f_df_dpsi']:
+                    ids_entry[attr, itime] = self.data[attr].data[itime]
+
     def write_ids(self, **ids_attrs):
         """Write sample data to pulse_schedule ids."""
         if ids_attrs['occurrence'] is None:

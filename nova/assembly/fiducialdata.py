@@ -12,6 +12,7 @@ from nova.assembly.centerline import CenterLine
 from nova.assembly.fiducialccl import Fiducial, FiducialIDM, FiducialRE
 from nova.assembly.gaussianprocessregressor import GaussianProcessRegressor
 from nova.assembly.plotter import Plotter
+
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -28,6 +29,7 @@ class FiducialData(Plotter):
     data: xarray.Dataset = field(init=False, repr=False)
     gpr: GaussianProcessRegressor = field(init=False, repr=False)
     mesh: pv.PolyData = field(init=False)
+
     location: ClassVar[list[int]] = [14, 15, 4, 17, 6, 7, 2, 3, 16, 5,
                                      12, 13, 8, 9, 10, 11, 18, 1, 19]
 
@@ -251,7 +253,7 @@ class FiducialData(Plotter):
 
 if __name__ == '__main__':
 
-    fiducial = FiducialData('RE', fill=True)
+    fiducial = FiducialData('IDM', fill=True)
     fiducial.plot_single(3)
     fiducial.plot_gpr(1, 0)
 

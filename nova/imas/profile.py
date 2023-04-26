@@ -99,6 +99,7 @@ class Profile(Plot, GetSlice, IdsData):
 
 if __name__ == '__main__':
 
-    profile = Profile(105007, 10, 'iter', 1)
-    profile.itime = 6
+    pulse, run = 135013, 2
+    profile = Profile(pulse, run, 'iter', 0)
+    profile.time = 300
     profile.plot_profile(attr='ff_prime')

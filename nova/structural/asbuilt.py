@@ -49,8 +49,6 @@ class AsBuilt:
                 for coil in coils}
 
 
-
-
 if __name__ == '__main__':
 
     asbuilt = AsBuilt()

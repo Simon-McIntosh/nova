@@ -178,16 +178,32 @@ class Operate(Machine, Grid, Profile, Equilibrium):
 
 if __name__ == '__main__':
 
-    pulse, run = 105007, 9
+    #pulse, run = 105007, 9
     #pulse, run = 135007, 4
     pulse, run = 105028, 1
-    pulse, run = 135013, 2
+    #pulse, run = 135013, 2
 
-    operate = Operate(pulse, run, pf_active=True, dplasma=-1000, ngrid=500,
-                      tplasma='hex', limit=0.25)
+    #pulse, run = 130506, 403  # CORSICA
+
+    operate = Operate(pulse, run, pf_active=True, dplasma=-1000,
+                      ngrid=500,
+                      tplasma='hex', limit=0.25, nlevelset=1000, nwall=10)
 
     operate.itime = 50
-    operate.plot()
-    operate.grid.plot()
+    operate.plot('plasma')
+    operate.plasma.plot()
     operate.plot_boundary()
     operate.plasma.lcfs.plot()
+
+    index = abs(operate.data.ip.data) > 1e3
+
+    li_3 = np.zeros(operate.data.dims['time'])
+    for i in np.arange(operate.data.dims['time'])[index]:
+        operate.itime = i
+        if operate['li_3'] == 0:
+            continue
+        li_3[i] = operate.plasma.li_3
+
+    operate.set_axes('1d')
+    operate.axes.plot(operate.data.time[index], operate.data.li_3[index])
+    operate.axes.plot(operate.data.time[index], li_3[index])

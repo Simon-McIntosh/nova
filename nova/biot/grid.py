@@ -159,8 +159,10 @@ class BaseGrid(BiotPlot, FieldNull, Operate):
 
     def check_null(self):
         """Check validity of upstream data, update field null if nessisary."""
-        if (version := self.aloc_hash['Ic']) != self.version['fieldnull'] or \
-                self.version['Psi'] != self.subframe.version['nturn']:
+        if (version := self.version['psi']) != self.version['fieldnull'] or \
+                self.version['psi'] != self.aloc_hash['Ic'] or \
+                self.version['Psi'] != self.subframe.version['nturn'] or \
+                self.version['fieldnull'] is None:
             self.update_null(self.psi_)
             self.version['fieldnull'] = version
 

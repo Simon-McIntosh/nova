@@ -385,7 +385,7 @@ class PulseDesign(ITER, ControlPoint, Profile):
         super().update()
         self.sloc['plasma', 'Ic'] = self['ip']
 
-    def _constrain(self, constraint, field_weight=200):
+    def _constrain(self, constraint, field_weight=100):
         """Return coupling matrix and vectors."""
         if len(constraint) == 0:
             return
@@ -455,23 +455,12 @@ class PulseDesign(ITER, ControlPoint, Profile):
                      self.saloc['free', 'Ic']))
         #print(sol)
 
-
-    @cached_property
-    def Psi_(self):
-        """Return plasma grid coupling matrix."""
-        return self.plasmagrid.data.Psi_.data
-
-    @property
-    def _psi(self):
-        """Return plasma component of poloidal flux on grid."""
-        return self.Psi_ @ self.plasma.nturn
-
     @property
     def psi_boundary(self):
         """Return boundary psi."""
         if self.limiter:
-            return self.plasmawall.w_psi
-        return self.plasma.x_point_primary
+            return self.plasma.psi_w
+        return self.plasma.psi_x
 
     def residual(self, xin):
         """Return psi grid residual."""
@@ -488,29 +477,19 @@ class PulseDesign(ITER, ControlPoint, Profile):
         residual[-1] /= self.plasmagrid.number
         return residual
 
-    def psi_residual(self, psi_in):  # psi on grid and wall
+    def psi_residual(self, psi):  # psi on grid and wall
         """Return psi residual."""
-        self.plasmagrid.array['psi'] = psi_in
-        self.plasmagrid.version['fieldnull'] = None
-        self.plasma.separatrix = self.plasmagrid.x_psi[0]
-        self.plasmagrid.version['psi'] = None
+        self.plasma.psi = psi
+        self.plasma.separatrix = self.plasma.psi_boundary
         self.solve_current()
-        return self.plasmagrid.psi - psi_in
+        return np.r_[self.plasmagrid.psi, self.plasmawall.psi] - psi
 
     def solve(self):
         """Solve waveform."""
-        '''
-        for _ in range(4):
-            self.solve_current()
-            self.plasma.separatrix = self.psi_boundary
-        '''
-        #xin = np.r_[self.plasma.nturn, -self['psi_boundary']]
         self.solve_current()
-        xin = self.plasmagrid.psi
-        xout = newton_krylov(self.psi_residual, xin, verbose=True)
-        #self.plasma.nturn = xout[:-1]
-        #self.plasma.separatrix = xout[-1]
-        self.psi_residual(xout)
+        psi = np.r_[self.plasmagrid.psi, self.plasmawall.psi]
+        psi = newton_krylov(self.psi_residual, self.plasma.psi, verbose=True)
+        self.psi_residual(psi)
 
     def plot(self, index=None, axes=None, **kwargs):
         """Extend plot to include plasma contours."""
@@ -552,26 +531,23 @@ class Benchmark(PulseDesign):
 if __name__ == '__main__':
 
 
-    #design = PulseDesign(135013, 2, 'iter', 1)
-    design = Benchmark(135013, 2, 'iter', 1)
+    design = PulseDesign(135013, 2, 'iter', 1)
+    #design = Benchmark(135013, 2, 'iter', 1)
     # design.strike = Constraint()
     # design.control.points[3, 1] += 0.5
 
-    design.itime = 12
-    #design.control.points[3, 1] -= 0.1
+    design.itime = 30
+    #design.control.points[3, 0] += 0.2
+    #design.control.points[3, 1] += 0.6
     #design.strike = Constraint()
 
-    '''
-    design.saloc['free', 'Ic'] = np.array([-50040.66207598,  50248.41318872,  10166.79909156,  64709.82963811,
-           -34543.74662353,  -3383.64089807,  28878.48273823,  23200.7477658 ,
-             7638.1247157 ,  81609.37192012, -74802.62916739])
-    '''
+    #design.saloc['free', 'Ic'] = np.array([-25165.58379627,  39487.41871743,  14124.85852006,  71118.5512022 ,
+    #       -48672.04102026, -22220.38133958,  41509.18374367,  22574.05540302,
+    #         7335.78074361,  81871.25182582, -70840.0819651 ])
+
+
     design.solve()
 
-    design.solve_current()
-    design.solve()
-
-    #design.optimize_current()
     design.plot('plasma')
     design.levelset.plot_levelset(-design['psi_boundary'], False, color='k')  # Cocos
     design.levelset.plot_levelset(design.psi_boundary, False, color='C3')

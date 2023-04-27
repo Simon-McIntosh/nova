@@ -18,46 +18,8 @@ from nova.frame.baseplot import Plot
 from nova.frame.framesetloc import FrameSetLoc
 from nova.geometry.polygon import Polygon
 from nova.geometry.pointloop import PointLoop
+from nova.geometry.select import bisect, bisect_right
 from nova.geometry.separatrix import LCFS
-
-
-@dataclass
-class Profile:
-    """Manage plasma current distribution."""
-
-    _plasma: np.ndarray = field(repr=False)
-    _ionize: np.ndarray = field(repr=False)
-    _nturn: np.ndarray = field(repr=False)
-    _area: np.ndarray = field(repr=False)
-
-    @property
-    def nturn(self):
-        """Manage plasma turns."""
-        return self._nturn[self._plasma]
-
-    @nturn.setter
-    def nturn(self, nturn):
-        self._nturn[self._plasma] = nturn
-
-    @property
-    def ionize(self):
-        """Manage plasma ionization mask."""
-        return self._ionize[self._plasma]
-
-    @ionize.setter
-    def ionize(self, mask):
-        self._ionize[self._plasma] = mask
-
-    def uniform(self, mask):
-        """Update plasma turns with a uniform current distribution."""
-        self.nturn = 0
-        self.ionize = mask
-        ionize_area = self._area[self._ionize]
-        self._nturn[self._ionize] = ionize_area / np.sum(ionize_area)
-
-    def function(self, psi, p_prime, ff_prime):
-        """Update plasma turns with flux functions."""
-        #jtor =
 
 
 @dataclass
@@ -78,6 +40,9 @@ class Plasma(Plot, netCDF, FrameSetLoc):
         self.subframe.update_columns()
         super().__post_init__()
         self.version['lcfs'] = None
+        self.version['psi_o'] = None
+        self.version['psi_x'] = None
+        self.version['psi_w'] = None
 
     def __len__(self):
         """Return number of plasma filaments."""
@@ -102,26 +67,46 @@ class Plasma(Plot, netCDF, FrameSetLoc):
         mask = self.x_mask(points[:, 1])
         self.lcfs = LCFS(points[mask])
 
-    def check_lcfs(self):
+    def _check_lcfs(self):
         """Check validity of upstream data, update wall flux if nessisary."""
         if (version := self.grid.version['fieldnull']) is None or \
                 version != self.version['lcfs']:
             self.update_lcfs()
             self.version['lcfs'] = version
 
-    def __getattribute__(self, attr):
-        """Extend getattribute to intercept field null data access."""
-        if attr == 'lcfs':
-            self.check_lcfs()
-        return super().__getattribute__(attr)
+    def _check_psi_axis(self):
+        """Check validity of psi_axis attribute."""
+        if (version := self.grid.version['fieldnull']) is None or \
+                version != self.version['psi_o']:
+            self._clear_cache(['psi_axis'])
+            self.version['psi_o'] = version
 
-    @property
-    def psi_axis(self):
-        """Return on-axis poloidal flux."""
-        if self.grid.o_point_number > 1:
-            raise IndexError('multiple field nulls found within firstwall\n'
-                             f'{self.grid.data_o}')
-        return self.grid.o_psi[0]
+    def _check_psi_x(self):
+        """Check validity of psi_x attribute."""
+        if (version := self.grid.version['fieldnull']) is None or \
+                version != self.version['psi_x']:
+            self._clear_cache(['psi_x', 'psi_boundary'])
+            self.version['psi_x'] = version
+
+    def _check_psi_w(self):
+        """Check validity of psi_w attribute."""
+        if (version := self.wall.version['limitflux']) is None or \
+                version != self.version['psi_w']:
+            self._clear_cache(['psi_w', 'psi_boundary'])
+            self.version['psi_w'] = version
+
+    def __getattribute__(self, attr):
+        """Extend getattribute to intercept grid and wall data access."""
+        match attr:
+            case 'lcfs':
+                self._check_lcfs()
+            case 'psi_axis':
+                self._check_psi_axis()
+            case 'psi_x' | 'psi_boundary':
+                self._check_psi_x()
+            case 'psi_w' | 'psi_boundary':
+                self._check_psi_w()
+        return super().__getattribute__(attr)
 
     @property
     def i_plasma(self):
@@ -135,14 +120,14 @@ class Plasma(Plot, netCDF, FrameSetLoc):
         volume = np.sum(filament_volume)
         poloidal_field = self.grid.bp[self.aloc['plasma', 'ionize']]
         surface = np.sum(poloidal_field**2 * filament_volume) / volume
-        #boundary = (mu_0 * self.current / self.lcfs.length)**2
-        radius = 6.2#self.lcfs.geometric_radius
+        # boundary = (mu_0 * self.i_plasma / self.lcfs.length)**2
+        radius = 6.2 # self.lcfs.geometric_radius
         boundary = (mu_0 * self.i_plasma)**2 * radius / (2*volume)
         return surface / boundary
 
     @property
     def x_point_index(self):
-        """Return x-point index for plasma boundary."""
+        """Return x-point index for plasma separatrix."""
         if self.grid.x_point_number == 0:
             raise PlasmaTopologyError('no x-points within first wall')
         return np.argmax(self.polarity*(self.grid.x_psi - self.psi_axis))
@@ -157,31 +142,111 @@ class Plasma(Plot, netCDF, FrameSetLoc):
         """Return o-point coordinates."""
         return self.grid.o_points[0]
 
-    @property
-    def x_point_primary(self):
-        """Return primary x-point."""
+    @cached_property
+    def psi_axis(self):
+        """Return on-axis poloidal flux."""
+        if self.grid.o_point_number > 1:
+            raise IndexError('multiple field nulls found within firstwall\n'
+                             f'{self.grid.data_o}')
+        return self.grid.o_psi[0]
+
+    @cached_property
+    def psi_x(self):
+        """Return poloidal flux at primary x-point."""
         if self.grid.x_point_number == 1:
             return self.grid.x_psi[0]
         return self.grid.x_psi[self.x_point_index]
 
-    @property
+    @cached_property
+    def psi_w(self):
+        """Return poloidal flux at limiter point."""
+        return self.wall.w_psi
+
+    @cached_property
     def psi_boundary(self):
         """Return boundary poloidal flux."""
         if self.grid.x_point_number == 0:
-            return self.wall.w_psi
+            return self.psi_w
         if self.polarity < 0:
-            return np.min([self.x_point_primary, self.wall.w_psi])
-        return np.max([self.x_point_primary, self.wall.w_psi])
+            return np.min([self.psi_x, self.psi_w])
+        return np.max([self.psi_x, self.psi_x])
+
+    @cached_property
+    def psi_index(self):
+        """Return plasma wall number."""
+        return np.cumsum([self.grid.number, self.wall.number])
 
     @property
     def psi(self):
-        """Return concatenated array of grid and boundary psi values."""
-        return np.append(self.grid.psi, self.boundary.psi)
+        """Manage concatenated array of grid and wall flux values."""
+        return np.r_[self.grid.psi, self.wall.psi]
+
+    @psi.setter
+    def psi(self, psi):
+        self.grid['psi'] = psi[:self.psi_index[0]]
+        self.wall['psi'] = psi[slice(*self.psi_index[0:2])]
+
+    @property
+    def psi_norm(self):
+        """Return normalized grid flux."""
+        psi_axis = self.psi_axis
+        psi_boundary = self.psi_boundary
+        return (self.grid.psi - self.psi_axis) / (psi_boundary - psi_axis)
 
     @cached_property
     def index(self):
-        """Return plasma index."""
+        """Return plasma frame index."""
         return self.plasma_index
+
+    @cached_property
+    def _slice(self):
+        """Return plasma filament slice."""
+        start = bisect(self.aloc['plasma'], True)
+        number = bisect_right(~self.aloc['plasma'][start:], False)
+        if number != np.sum(self.aloc['plasma']):
+            raise IndexError('plasma filaments are non-contiguous.')
+        return slice(start, start+number)
+
+    @cached_property
+    def _nturn(self):
+        """Return a view of the plasma's nturn array."""
+        return self.aloc['nturn'][self._slice]
+
+    @cached_property
+    def _ionize(self):
+        """Return a view of the plasma's ionize array."""
+        return self.aloc['ionize'][self._slice]
+
+    @cached_property
+    def _area(self):
+        """Return a view of the plasma's area array."""
+        return self.aloc['area'][self._slice]
+
+    @property
+    def nturn(self):
+        """Manage ionized plasma turn attribute."""
+        return self._nturn[self.ionize]
+
+    @nturn.setter
+    def nturn(self, nturn):
+        self._nturn[self.ionize] = nturn
+        self.update_aloc_hash('nturn')
+
+    @property
+    def ionize(self):
+        """Manage plasma ionization property."""
+        return self._ionize
+
+    @ionize.setter
+    def ionize(self, mask):
+        self._nturn[:] = 0
+        self._ionize[:] = mask
+        self._clear_cache(['area'])
+
+    @cached_property
+    def area(self):
+        """Return ionized indexed area."""
+        return self._area[self._ionize]
 
     @property
     def polarity(self):
@@ -200,7 +265,7 @@ class Plasma(Plot, netCDF, FrameSetLoc):
         return self.polarity*self.grid.psi > self.polarity*psi
 
     def x_mask(self, z_plasma: np.ndarray):
-        """Return plasma filament/boundary x-mask."""
+        """Return plasma filament x-mask."""
         mask = np.ones(len(z_plasma), dtype=bool)
         if self.grid.x_point_number == 0:
             return mask
@@ -266,24 +331,8 @@ class Plasma(Plot, netCDF, FrameSetLoc):
         except (AttributeError, StopIteration) as error:
             raise AttributeError('use coilset.firstwall.insert '
                                  'to define plasma rejoin') from error
-        self.profile.uniform(mask)
-        self.update_aloc_hash('nturn')
-
-    @cached_property
-    def profile(self):
-        """Return plasma profile instance."""
-        return Profile(self.aloc['plasma'], self.aloc['ionize'],
-                       self.aloc['nturn'], self.aloc['area'])
-
-    @property
-    def nturn(self):
-        """Manage plasma turns."""
-        return self.profile.nturn
-
-    @nturn.setter
-    def nturn(self, nturn):
-        self.profile.nturn = nturn
-        self.update_aloc_hash('nturn')
+        self.ionize = mask
+        self.nturn = self.area / np.sum(self.area)
 
     def plot(self, turns=True, axes=None, **kwargs):
         """Plot separatirx as polygon patch."""

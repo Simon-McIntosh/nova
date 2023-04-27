@@ -26,8 +26,10 @@ class PlasmaWall(Limiter, Point):
 
     def check_limiter(self):
         """Check validity of upstream data -> update limiter flux."""
-        if (version := self.aloc_hash['Ic']) != self.version['limitflux'] or \
-                self.version['Psi'] != self.subframe.version['nturn']:
+        if (version := self.version['psi']) != self.version['limitflux'] or \
+                self.version['psi'] != self.aloc_hash['Ic'] or \
+                self.version['Psi'] != self.subframe.version['nturn'] or \
+                self.version['limitflux'] is None:
             self.update_wall(self.psi, self.plasma_polarity)
             self.version['limitflux'] = version
 

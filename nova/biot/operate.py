@@ -226,6 +226,11 @@ class Operate(Data):
             self.version[attr] = version
             self.array[attr][:] = self.operator[attr.capitalize()].evaluate()
 
-    def __getitem__(self, attr):
+    def __getitem__(self, attr: str):
         """Return array attribute via dict-like access."""
         return getattr(self, attr)
+
+    def __setitem__(self, attr: str, value: np.ndarray):
+        """Update array attribute in-place."""
+        self.array[attr][:] = value.copy()
+        self.version[attr] = None

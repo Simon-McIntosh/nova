@@ -157,12 +157,12 @@ testpaths = [
 warn_return_any = true
 warn_unused_configs = false
 ignore_missing_imports = true
-implicit_reexport = true
+implicit_reexport = false
 
 [tool.pylsp-mypy]
 enabled = true
-live_mode = true
-dmypy = false
+live_mode = false
+dmypy = true
 strict = false
 
 [tool.coverage.run]

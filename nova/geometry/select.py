@@ -113,7 +113,6 @@ def wall_flux(x_wall, z_wall, psi_wall, polarity=1):
     psi = coef[0]*w_coordinate**2 + coef[1]*w_coordinate + coef[2]
     x_coordinate, z_coordinate = wall_coordinate(
         w_coordinate, x_cluster, z_cluster, w_cluster)
-    #return x_wall[index], z_wall[index], psi_wall[index]
     return x_coordinate, z_coordinate, psi
 
 

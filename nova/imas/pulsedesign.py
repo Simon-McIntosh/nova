@@ -7,8 +7,10 @@ import numpy as np
 from scipy.optimize import minimize, newton_krylov, LinearConstraint
 from scipy.sparse.linalg import LinearOperator
 from scipy.spatial import distance_matrix
+from tqdm import tqdm
 
 from nova.biot.biot import Nbiot
+from nova.biot.error import PlasmaTopologyError
 from nova.frame.baseplot import Plot
 from nova.geometry.separatrix import Quadrant, Separatrix
 from nova.imas.database import Ids
@@ -185,11 +187,8 @@ class ControlPoint(Equilibrium):
     @property
     def control_points(self):
         """Return control points."""
-        points = np.c_[[getattr(self, attr)
-                        for attr in self.point_attrs['boundary']]]
-        if self.limiter:
-            return points
-        return points#[:3]
+        return np.c_[[getattr(self, attr)
+                      for attr in self.point_attrs['boundary']]]
 
     @property
     def strike_points(self):
@@ -208,22 +207,15 @@ class ControlPoint(Equilibrium):
         if not self.limiter:
             self.control.radial_field = 0, [3]
 
-    def update_field_constraint(self):
-        """Update boundary field inequality constraints."""
-        self.field = Constraint(self.control_points[4:])
-        #self.field.radial_field = 0, [1]
-        self.field.radial_field = 0, [0]
-
     def update_strike_point(self, psi=0):
         """Update strike point constraints."""
-        self.strike = Constraint()#self.strike_points)
+        self.strike = Constraint(self.strike_points)
         self.strike.poloidal_flux = psi
 
     def update_constraints(self, psi=0):
         """Update flux and field constraints."""
         self.update_control_point(psi)
-        self.update_strike_point(psi)
-        #self.update_field_constraint()
+        # self.update_strike_point(psi)
 
     def update(self):
         """Update source equilibrium."""
@@ -369,11 +361,11 @@ class PulseDesign(ITER, ControlPoint, Profile):
     """Generate coilset voltage and current waveforms."""
 
     name: str = 'equilibrium'
-    nwall: Nbiot = 10
+    nwall: Nbiot = 3
     nlevelset: Nbiot = 3000
-    ninductance: Nbiot = 0
-    nforce: Nbiot = 0
-    nfield: Nbiot = 0
+    ninductance: Nbiot = None
+    nforce: Nbiot = None
+    nfield: Nbiot = None
 
     def update_constraints(self):
         """Extend ControlPoint.update_constraints to include psi proxy."""
@@ -385,7 +377,7 @@ class PulseDesign(ITER, ControlPoint, Profile):
         super().update()
         self.sloc['plasma', 'Ic'] = self['ip']
 
-    def _constrain(self, constraint, field_weight=100):
+    def _constrain(self, constraint, field_weight=500):
         """Return coupling matrix and vectors."""
         if len(constraint) == 0:
             return
@@ -419,13 +411,22 @@ class PulseDesign(ITER, ControlPoint, Profile):
         coupling = [self._constrain(self.control),
                     self._constrain(self.strike)]
         matrix, vector = self._stack(*coupling)
-        self.saloc['free', 'Ic'] = MoorePenrose(matrix, gamma=1e-5) / vector
+        self.saloc['free', 'Ic'] = MoorePenrose(matrix, gamma=2.5e-5) / vector
+        '''
+        bounds = [(self.frame.loc[index, 'Imin'],
+                   self.frame.loc[index, 'Imax'])
+                  for index in self.sloc().index[self.saloc['free']]]
+        res = minimize(self.fun, self.saloc['free', 'Ic'],
+                       args=(matrix, vector), bounds=bounds)
+        self.saloc['free', 'Ic'] = res.x
+        '''
 
-
-    def fun(self, x):
+    def fun(self, xin, matrix, vector):
         """Return optimization goal."""
-        #return np.sum(self.superframe.Ic.values * self.inductance.psi)
-        return np.sum(x**2)
+        return np.linalg.norm(matrix @ xin - vector)
+
+    #def jac(self, xin, matrix):
+
 
     def hess(self, x):
         return np.zeros((len(x), len(x)))
@@ -477,24 +478,48 @@ class PulseDesign(ITER, ControlPoint, Profile):
         residual[-1] /= self.plasmagrid.number
         return residual
 
-    def psi_residual(self, psi):  # psi on grid and wall
+    def psi_residual(self, psi):
         """Return psi residual."""
         self.plasma.psi = psi
-        self.plasma.separatrix = self.plasma.psi_boundary
+        with self.plasma.profile(self.p_prime, self.ff_prime):
+            self.plasma.separatrix = self.plasma.psi_boundary
         self.solve_current()
         return np.r_[self.plasmagrid.psi, self.plasmawall.psi] - psi
 
-    def solve(self):
-        """Solve waveform."""
+    def _solve(self, verbose=True):
+        """Solve waveform with Newton Krylov scheame."""
+        #self.plasma.ionize = True
+        #self.plasma.nturn = self.plasma.area / np.sum(self.plasma.area)
         self.solve_current()
         psi = np.r_[self.plasmagrid.psi, self.plasmawall.psi]
-        psi = newton_krylov(self.psi_residual, self.plasma.psi, verbose=True)
+        psi = newton_krylov(self.psi_residual, self.plasma.psi,
+                            verbose=verbose, iter=5)
         self.psi_residual(psi)
+
+    def solve(self, verbose=False):
+        """Basic solve using Picard itteration."""
+        for _ in range(2):
+            self.solve_current()
+            with self.plasma.profile(self.p_prime, self.ff_prime):
+                self.plasma.separatrix = self.plasma.psi_boundary
+        self.solve_current()
 
     def plot(self, index=None, axes=None, **kwargs):
         """Extend plot to include plasma contours."""
         super().plot(index, axes, **kwargs)
         self.plasma.plot()
+
+    def solve_waveform(self, verbose=False):
+        """Solve current waveform."""
+        current = np.zeros((self.data.dims['time'],
+                            np.sum(self.saloc['free'])))
+
+        for itime in tqdm(self.data.itime.data[:-1],
+                          'solving current waveform', disable=~verbose):
+            self.itime = itime
+            self.solve(verbose=False)
+            current[itime] = self.saloc['free', 'Ic']
+        return current
 
 
 @dataclass
@@ -527,27 +552,62 @@ class Benchmark(PulseDesign):
         super().plot(index, axes, **kwargs)
         self['equilibrium'].plot_boundary(self.axes, 'C2')
 
+    def plot_current(self):
+        """Compare benchmark coil curents."""
+        self.set_axes('1d')
+        coil_name = self['pf_active'].data.coil_name
+        current = self['pf_active']['current']
+        self.axes.bar(coil_name[:-1], 1e-3*current[:-1], label='DINA')
+
+        self.axes.bar(coil_name[:-1],
+                      1e-3*self.saloc['Ic'][:-2], width=0.5, label='NOVA')
+        self.axes.legend()
+        self.axes.set_xlabel('coil name')
+        self.axes.set_ylabel('coil current')
+
+    def plot_waveform(self):
+        """Compare benchmark coil current waveforms."""
+        currents = self.solve_waveform()
+        benchmark = self['pf_active'].data
+        coil_name = benchmark.coil_name.data
+
+        for group in ['CS', 'PF']:
+            self.set_axes('1d')
+            for i, name in enumerate(coil_name[:-1]):
+                if group not in name:
+                    continue
+                self.axes.plot(benchmark.time, 1e-3*benchmark.current[:, i],
+                               color='gray')
+                self.axes.plot(self.data.time, 1e-3*currents[:, i],
+                               label=name)
+            self.axes.set_ylabel(f'{group} coil current, kA')
+            self.axes.set_xlabel('time, s')
+            self.axes.legend()
+
+
 
 if __name__ == '__main__':
 
-
-    design = PulseDesign(135013, 2, 'iter', 1)
-    #design = Benchmark(135013, 2, 'iter', 1)
+    #design = PulseDesign(135013, 2, 'iter', 1)
+    design = Benchmark(135013, 2, 'iter', 1)
     # design.strike = Constraint()
     # design.control.points[3, 1] += 0.5
 
-    design.itime = 30
+    design.itime = 10
     #design.control.points[3, 0] += 0.2
     #design.control.points[3, 1] += 0.6
     #design.strike = Constraint()
 
-    #design.saloc['free', 'Ic'] = np.array([-25165.58379627,  39487.41871743,  14124.85852006,  71118.5512022 ,
-    #       -48672.04102026, -22220.38133958,  41509.18374367,  22574.05540302,
-    #         7335.78074361,  81871.25182582, -70840.0819651 ])
+    #design.plot_waveform()
+
 
 
     design.solve()
 
+    #design.saloc['Ic'][:-2] = design['pf_active']['current'][:-1]
+
     design.plot('plasma')
     design.levelset.plot_levelset(-design['psi_boundary'], False, color='k')  # Cocos
-    design.levelset.plot_levelset(design.psi_boundary, False, color='C3')
+    design.levelset.plot_levelset(design.plasma.psi_boundary, False, color='C3')
+
+    design.plot_current()

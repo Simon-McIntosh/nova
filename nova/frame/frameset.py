@@ -41,7 +41,7 @@ class FrameSet(netCDF, FrameSetLoc):
         'x', 'y', 'z', 'dx', 'dy', 'dz'])
     required: list[str] = field(repr=False, default_factory=lambda: [])
     additional: list[str] = field(repr=False, default_factory=lambda: [
-        'turn', 'frame', 'plasma', 'Ic', 'nturn'])
+        'turn', 'frame', 'plasma', 'Ic', 'nturn', 'Imin', 'Imax'])
     available: list[str] = field(repr=False, default_factory=list)
     subspace: list[str] = field(repr=False, default_factory=lambda: [
         'Ic'])
@@ -59,7 +59,7 @@ class FrameSet(netCDF, FrameSetLoc):
         self.available = list(dict.fromkeys(self.available + self._available))
         self.frame = FrameSpace(
             base=self.base, required=self.required, additional=self.additional,
-            available=self.available, subspace=[],
+            available=self.available, subspace=['Imin', 'Imax'],
             exclude=['frame', 'Ic', 'It', 'fix', 'free'],
             array=['coil'],
             version=['index'])

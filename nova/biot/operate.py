@@ -1,6 +1,7 @@
 """Manage matmul operations and svd reductions on Biot Data."""
 from contextlib import contextmanager
 from dataclasses import dataclass, field, InitVar
+from functools import cached_property
 
 import numba
 import numpy as np
@@ -170,12 +171,11 @@ class Operate(Data):
 
     def update_turns(self, Attr: str, svd=True):
         """Update plasma turns."""
-        if self.data.attrs['plasma_index'] == -1:
+        if self.plasma_index == -1:
             return
         self.operator[Attr].update_turns(svd)
         self.version[Attr] = self.data.attrs[Attr] = \
             self.subframe.version['nturn']
-        self.version[Attr.lower()] = None
 
     def calculate_norm(self):
         """Return calculated L2 norm."""
@@ -215,16 +215,28 @@ class Operate(Data):
         self.check_source(attr)
         return self.array[attr]
 
+    @cached_property
+    def _source_version(self) -> list[str]:
+        return [attr for attr in self.version if attr.islower() and
+                attr not in ['frameloc', 'subframeloc']]
+
     def check_plasma(self, Attr: str):
         """Check plasma turn status, update coupling matrix if required."""
         if self.version[Attr] != self.subframe.version['nturn']:
             self.update_turns(Attr)
+            for attr in self._source_version:
+                self.version[attr] = None
 
     def check_source(self, attr: str):
         """Check source current, re-evaluate if requried."""
         if self.version[attr] != (version := self.aloc_hash['Ic']):
             self.version[attr] = version
             self.array[attr][:] = self.operator[attr.capitalize()].evaluate()
+
+    def check(self, attr: str):
+        """Check plasma and source attributes."""
+        self.check_plasma(attr.capitalize())
+        self.check_source(attr)
 
     def __getitem__(self, attr: str):
         """Return array attribute via dict-like access."""

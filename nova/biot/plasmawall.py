@@ -19,25 +19,29 @@ class PlasmaWall(Limiter, Point):
         super().__post_init__()
         self.version['limitflux'] = None
 
-    @property
-    def plasma_polarity(self):
-        """Return plasma polarity."""
-        return np.sign(self.saloc['Ic'][self.plasma_index])
+    def __getattribute__(self, attr):
+        """Extend getattribute to intercept field null data access."""
+        match attr:
+            case 'data_w':
+                self.check_limiter()
+        return super().__getattribute__(attr)
 
     def check_limiter(self):
         """Check validity of upstream data -> update limiter flux."""
-        if (version := self.version['psi']) != self.version['limitflux'] or \
-                self.version['psi'] != self.aloc_hash['Ic'] or \
-                self.version['Psi'] != self.subframe.version['nturn'] or \
-                self.version['limitflux'] is None:
-            self.update_wall(self.psi, self.plasma_polarity)
-            self.version['limitflux'] = version
+        self.check('psi')
+        if self.version['limitflux'] != self.version['psi']:
+            self.update_wall(self.psi, self.polarity)
+            self.version['limitflux'] = self.version['psi']
 
-    def __getattribute__(self, attr):
-        """Extend getattribute to intercept field null data access."""
-        if attr == 'data_w':
-            self.check_limiter()
-        return super().__getattribute__(attr)
+    def __getitem__(self, attr):
+        """Implement dict-like access to wall limiter flux attributes."""
+        match attr:
+            case 'w_point':
+                return self.w_point
+            case 'w_psi':
+                return self.w_psi
+        if hasattr(self, '__getitem__'):
+            return super().__getitem__(attr)
 
     @property
     def boundary(self):

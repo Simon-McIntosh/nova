@@ -580,6 +580,7 @@ class PoloidalFieldActive(CoilDatabase):
 
     def build_coil(self):
         """Build pf active coil geometroy."""
+        maximum_current = {}
         for ids_loop in getattr(self.ids_data, 'coil'):
             loop = ActiveLoop(ids_loop)
             coildata = ActiveCoilData()
@@ -602,6 +603,12 @@ class PoloidalFieldActive(CoilDatabase):
                 constructor = self.turn
             coildata.insert(constructor)
             polydata.insert(constructor)
+            current_limit_max = ids_loop.current_limit_max
+            if len(current_limit_max) > 0:
+                maximum_current[ids_loop.identifier] = current_limit_max[-1, 0]
+        self.frame.loc[:, ['Imax']] = maximum_current
+        self.frame.loc[:, ['Imin']] = {coil: -limit for coil, limit in
+                                       maximum_current.items()}
 
     def build_circuit(self):
         """Build circuit influence matrix."""
@@ -950,6 +957,6 @@ if __name__ == '__main__':
 
     pulse, run = 105028, 1  # DINA
 
-    machine = Machine(pf_active='iter_md', pf_passive='iter_md',
-                      wall='iter_md', tplasma='hex', nwall=5)
+    machine = Machine(pf_active='iter_md', pf_passive=False,
+                      wall=False, tplasma='hex', nwall=5)
     machine.plot()

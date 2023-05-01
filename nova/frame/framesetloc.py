@@ -143,8 +143,21 @@ class FrameSetLoc(FrameData):
     @cached_property
     def plasma_index(self):
         """Return plasma index."""
-        return next(self.frame.subspace.index.get_loc(name) for name in
-                    self.subframe.frame[self.aloc['plasma']].unique())
+        try:
+            return next(self.frame.subspace.index.get_loc(name) for name in
+                        self.subframe.frame[self.aloc['plasma']].unique())
+        except StopIteration:
+            return -1
+
+    @property
+    def i_plasma(self):
+        """Return total plasma current."""
+        return self.saloc['Ic'][self.plasma_index]
+
+    @property
+    def polarity(self):
+        """Return plasma polarity."""
+        return np.sign(self.i_plasma)
 
     @cached_property
     def aloc_hash(self):

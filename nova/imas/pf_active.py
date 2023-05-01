@@ -28,6 +28,10 @@ class PF_Active(Plot, Scenario):
             self.data.coords['coil_name'] = name
             self.data.coords['coil_index'] = 'coil_name', range(len(name))
             self.append(('time', 'coil_name'), self.coil_attrs, '*.data')
+            with self.ids_index.node('coil'):
+                if not self.ids_index.empty('current_limit_max'):
+                    self.data['maximum_current'] = 'coil_name', \
+                        self.ids_index.array('current_limit_max')[0, 0]
             coil_number = len(self.data.coil_name)
             for force in ['radial', 'vertical']:
                 with self.ids_index.node(f'{force}_force'):
@@ -37,10 +41,10 @@ class PF_Active(Plot, Scenario):
                         self.ids_index.array('force.data')[:, :coil_number]
         return self
 
-    def plot(self, axes=None):
+    def plot(self, axes=None, **kwargs):
         """Plot current timeseries."""
         self.set_axes('1d', axes=axes)
-        self.axes.plot(self.data.time, self.data.current)
+        self.axes.plot(self.data.time, 1e-3*self.data.current, **kwargs)
 
 
 if __name__ == '__main__':
@@ -55,7 +59,9 @@ if __name__ == '__main__':
     pulse, run = 135007, 4
     # pulse, run = 135011, 7
     pulse, run = 135013, 2
-    PF_Active(pulse, run)._clear()
-    pf_active = PF_Active(pulse, run)
+
+    pulse, run = 111001, 202
+    PF_Active(pulse, run, 'iter_md')._clear()
+    pf_active = PF_Active(pulse, run, 'iter_md')
     #pf_active = PF_Active(105007, 9)  # b field max timed 135002, 5
-    pf_active.plot()
+    #pf_active.plot()

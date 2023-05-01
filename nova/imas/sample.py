@@ -105,7 +105,7 @@ class Sample(Plot, Defeature, Select):
     data: xarray.Dataset = field(default_factory=xarray.Dataset, repr=False)
     dtime: int | float | None = None
     savgol: tuple[int, int] | None = (3, 1)
-    epsilon: float = 0.1
+    epsilon: float = 0.75
     cluster: int | float | None = None
     features: list[str] = field(default_factory=lambda: [
         'minor_radius', 'elongation',

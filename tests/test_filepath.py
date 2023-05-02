@@ -83,7 +83,7 @@ def test_ssh_filesystem():
 @mark_ssh
 def test_ssh_appdirs_error():
     with pytest.raises(FileNotFoundError):
-        FilePath(hostname=HOSTNAME, dirname='user_data', parents=2)
+        FilePath(hostname=HOSTNAME, dirname='/tmp.nova', parents=1)
 
 
 def test_mkdepth_error():

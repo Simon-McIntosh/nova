@@ -233,10 +233,9 @@ def test_plasma_unique_psi_axis():
     coilset.coil.insert(0.5, [-0.05, 0.05], 0.01, 0.01, Ic=1e3)
     coilset.plasma.solve()
     coilset.sloc['plasma', 'Ic'] = 1e3
-    coilset.plasma.plot()
     with pytest.raises(IndexError):
-        coilset.plasmagrid.psi_axis
-test_plasma_unique_psi_axis()
+        coilset.plasma.psi_axis
+
 
 def test_plasma_x_point():
     coilset = CoilSet(dplasma=-100, tplasma='hex')
@@ -245,10 +244,10 @@ def test_plasma_x_point():
     coilset.plasma.solve()
     coilset.sloc['plasma', 'Ic'] = 7e3
     coilset.saloc['Ic'][1] = 4.5e3
-    assert coilset.plasmagrid.x_point[1] > 0
+    assert coilset.plasmagrid['x_point'][1] > 0
     coilset.saloc['Ic'][1] = 5.5e3
     coilset.plasma.grid.check_null()
-    assert coilset.plasmagrid.x_point[1] < 0
+    assert coilset.plasmagrid['x_point'][1] < 0
 
 
 if __name__ == '__main__':

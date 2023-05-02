@@ -41,7 +41,7 @@ class PlasmaGrid(BaseGrid, PlasmaLoc):
             case 'o_point':
                 return self.o_points[self._o_point_index()]
             case 'o_psi':
-                return self.o_psi[0]
+                return self.o_psi[self._o_point_index()]
         if hasattr(self, '__getitem__'):
             return super().__getitem__(attr)
 
@@ -66,16 +66,6 @@ class PlasmaGrid(BaseGrid, PlasmaLoc):
             case _:
                 raise PlasmaTopologyError(
                     'multiple o-points found within first wall {self.data_o}')
-
-    '''
-    def __getattribute__(self, attr):
-        """Extend getattribute to intercept cached attribute access."""
-        match attr:
-            case 'psi_axis' | 'psi_x':
-                self.check_cached(attr)
-                print(attr)
-        return super().__getattribute__(attr)
-    '''
 
     def solve(self):
         """Solve Biot interaction across plasma grid."""

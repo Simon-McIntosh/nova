@@ -323,12 +323,20 @@ class Database(IDS):
                 return i
         raise IndexError(f'no empty occurrences found for i < {limit}')
 
+    @property
+    def backend_id(self):  # TODO remove once uri interface is released
+        """Return backend id from backend."""
+        return getattr(imas.hli_utils.imasdef,
+                       f'{self.backend.upper()}_BACKEND')
+
     @contextmanager
     def _db_entry(self):
         """Yield database with context manager."""
         if IMAS_MODULE_NOT_FOUND:
             raise ImportError('imas module not found, try `ml load IMAS`')
-        db_entry = imas.DBEntry()
+        db_entry = imas.DBEntry(self.backend_id, self.machine, self.pulse,
+                                self.run, self.user)
+        # db_entry = imas.DBEntry()  # TODO uri update
         yield db_entry
         db_entry.close()
 
@@ -337,7 +345,7 @@ class Database(IDS):
         """Yield open database entry."""
         with self._db_entry() as db_entry:
             try:
-                db_entry.open(uri=self.uri)
+                db_entry.open()  # (uri=self.uri)  # TODO uri update
             except imas.hli_exception.ALException as error:
                 raise imas.hli_exception.ALException(
                     f'malformed input to imas.DBEntry\n{error}\n'
@@ -366,7 +374,7 @@ class Database(IDS):
     def db_write(self):
         """Yeild bare database entry."""
         with self._db_entry() as db_entry:
-            getattr(db_entry, self.db_mode)(uri=self.uri)
+            getattr(db_entry, self.db_mode)()  # (uri=self.uri)  # TODO uri
             yield db_entry
 
     def put_ids(self, ids, occurrence=None):

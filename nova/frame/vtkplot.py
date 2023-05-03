@@ -5,7 +5,7 @@ import matplotlib
 import numpy as np
 import vedo
 
-from nova.frame.baseplot import Properties
+from nova.graphics.plot import Properties
 import nova.frame.metamethod as metamethod
 from nova.frame.dataframe import DataFrame
 

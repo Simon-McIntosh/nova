@@ -11,7 +11,7 @@ from tqdm import tqdm
 
 from nova.biot.biot import Nbiot
 from nova.biot.error import PlasmaTopologyError
-from nova.frame.baseplot import Plot
+from nova.graphics.plot import Plot
 from nova.geometry.separatrix import Quadrant, Separatrix
 from nova.imas.database import Ids
 from nova.imas.equilibrium import Equilibrium

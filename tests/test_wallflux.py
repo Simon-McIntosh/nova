@@ -1,11 +1,11 @@
 from itertools import product
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pytest
 from shapely.geometry import Point
 
 from nova.geometry import select
+from nova.graphics.plot import Plot
 
 
 def meshwall():
@@ -71,6 +71,7 @@ def test_wall_coordinate(null_type, null_position, plot=False):
     null_coordinate = select.wall_coordinate(w_coordinate,
                                              x_cluster, z_cluster, w_cluster)
     if plot:
+        plt = Plot().plt
         plt.plot(x_cluster, z_cluster, '-o')
         plt.plot(*_null_coordinate, 'd')
         plt.plot(*null_coordinate, 'X')

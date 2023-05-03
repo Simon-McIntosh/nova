@@ -3,11 +3,9 @@ from dataclasses import dataclass, field
 from functools import cached_property, wraps
 from typing import ClassVar
 
-import dask.array as da
 import numpy as np
 import scipy.special
 
-Array = da.Array | np.ndarray
 
 # pylint: disable=no-member  # disable scipy.special module not found
 # pylint: disable=W0631  # disable short names
@@ -69,10 +67,10 @@ def unit_nudge(limit_factor=1.5, threshold_factor=3):
 class Constants:
     """Manage biot intergration constants."""
 
-    rs: Array = field(default_factory=lambda: da.zeros_like([]))
-    zs: Array = field(default_factory=lambda: da.zeros_like([]))
-    r: Array = field(default_factory=lambda: da.zeros_like([]))
-    z: Array = field(default_factory=lambda: da.zeros_like([]))
+    rs: np.ndarray = field(default_factory=lambda: np.zeros_like([]))
+    zs: np.ndarray = field(default_factory=lambda: np.zeros_like([]))
+    r: np.ndarray = field(default_factory=lambda: np.zeros_like([]))
+    z: np.ndarray = field(default_factory=lambda: np.zeros_like([]))
 
     eps: ClassVar[np.float64] = 2*np.finfo(float).eps
 

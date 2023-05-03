@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 from nova.biot.operate import Operate
 from nova.biot.solve import Solve
-from nova.frame.baseplot import Plot
+from nova.graphics.plot import Plot
 
 
 @dataclass

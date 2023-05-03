@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-from nova.frame.baseplot import Plot
+from nova.graphics.plot import Plot
 from nova.frame.framesetloc import FrameSetLoc
 from nova.frame.poloidalgrid import PoloidalGrid
 from nova.geometry.polygon import Polygon

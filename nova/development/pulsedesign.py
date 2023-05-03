@@ -8,7 +8,7 @@ from scipy import optimize
 from scipy.spatial import distance_matrix
 
 from nova.biot.biot import Nbiot
-from nova.frame.baseplot import Plot
+from nova.graphics.plot import Plot
 from nova.geometry.separatrix import Separatrix
 from nova.imas.database import Ids
 from nova.imas.equilibrium import Equilibrium

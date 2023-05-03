@@ -5,7 +5,7 @@ from functools import cached_property
 import numpy as np
 from scipy.interpolate import interp1d, RectBivariateSpline
 
-from nova.frame.baseplot import Plot
+from nova.graphics.plot import Plot
 from nova.imas.database import IdsData
 from nova.imas.equilibrium import Equilibrium
 from nova.imas.getslice import GetSlice

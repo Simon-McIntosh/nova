@@ -10,7 +10,7 @@ import scipy
 
 from nova.database.datafile import Datafile
 from nova.database.filepath import FilePath
-from nova.frame.baseplot import Plot
+from nova.graphics.plot import Plot
 from nova.imas.database import Database
 from nova.imas.metadata import Metadata
 

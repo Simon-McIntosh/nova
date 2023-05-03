@@ -2,7 +2,6 @@ import appdirs
 from contextlib import contextmanager
 import fsspec
 import os
-import paramiko
 from pathlib import Path
 import pytest
 
@@ -20,6 +19,7 @@ except ImportError:
 HOSTNAME = 'sdcc-login01.iter.org'
 
 try:
+    import paramiko
     client = paramiko.SSHClient()
     client.load_system_host_keys()
     client.connect(HOSTNAME)
@@ -29,8 +29,10 @@ except:
 
 
 mark_imas = pytest.mark.skipif(not IMPORT_IMAS, reason='failed to import imas')
-mark_ssh = pytest.mark.skipif(not VALID_HOST,
-                              reason='unable to connect to ssh host')
+mark_ssh = pytest.mark.skipif(
+    not VALID_HOST, reason=f"unable to connect to ssh host {HOSTNAME}\n"
+                           "check vpn connection\n"
+                           "try pip install -e .['shell']")
 
 
 KEYPATH = dict(nova=os.path.join(nova.__name__,

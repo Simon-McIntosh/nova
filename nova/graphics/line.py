@@ -2,11 +2,11 @@
 from dataclasses import dataclass, field
 
 import numpy as np
-from nova.frame.baseplot import Plot
+from nova.graphics.plot import Plot
 
 
 @dataclass
-class LinePlot(Plot):
+class Line(Plot):
     """Single contour plot base class."""
 
     color: str = field(init=False, default='lightgray', repr=False)
@@ -21,8 +21,8 @@ class LinePlot(Plot):
 
 
 @dataclass
-class BiotPlot(LinePlot):
-    """Biot plot base class."""
+class Chart(Line):
+    """Multi-contour base class."""
 
     levels: int | list[float] | np.ndarray = 31
 

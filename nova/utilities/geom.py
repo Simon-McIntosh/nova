@@ -8,6 +8,7 @@ import scipy as sp
 from scipy.interpolate import interp1d
 from scipy.interpolate import UnivariateSpline as spline
 from matplotlib.collections import PolyCollection
+import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.mplot3d import art3d
 from shapely.geometry import Polygon, LineString, MultiPoint
@@ -17,7 +18,6 @@ from scipy.spatial import ConvexHull
 from rdp import rdp
 from pyquaternion import Quaternion
 
-import matplotlib.pyplot as plt
 
 
 def rms(x, Nt):

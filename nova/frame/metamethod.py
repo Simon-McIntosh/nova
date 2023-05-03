@@ -84,7 +84,7 @@ class VtkGeo(MetaMethod):
     name: str = field(init=False, default='vtkgeo')
     required: list[str] = field(default_factory=lambda: ['vtk'])
 
-    _subclass: ClassVar[str] = '.frame.geometry.VtkGeo'
+    _subclass: ClassVar[str] = '.frame.vtkgeo.VtkGeo'
 
 
 @dataclass
@@ -100,7 +100,7 @@ class PolyGeo(MetaMethod):
         'segment', 'section', 'poly'])
     require_all: bool = False
 
-    _subclass: ClassVar[str] = '.frame.geometry.PolyGeo'
+    _subclass: ClassVar[str] = '.frame.polygeo.PolyGeo'
 
 
 @dataclass

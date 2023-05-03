@@ -6,7 +6,7 @@ from scipy import signal
 from tqdm import tqdm
 import xarray
 
-from nova.frame.baseplot import Plot
+from nova.graphics.plot import Plot
 from nova.imas.database import Database
 from nova.imas.pf_active import PF_Active
 from nova.imas.pf_passive import PF_Passive

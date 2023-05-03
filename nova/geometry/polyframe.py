@@ -5,7 +5,7 @@ import json
 import numpy as np
 import shapely.geometry
 
-from nova.frame.baseplot import Plot
+from nova.graphics.plot import Plot
 from nova.geometry.geoframe import GeoFrame
 
 

@@ -6,7 +6,7 @@ import numpy as np
 import scipy.fft as fft
 from scipy.interpolate import interp1d
 
-from nova.frame.baseplot import Plot
+from nova.graphics.plot import Plot
 
 
 @dataclass

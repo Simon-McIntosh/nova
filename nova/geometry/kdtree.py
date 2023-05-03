@@ -5,7 +5,7 @@ from functools import cached_property
 import numpy as np
 import scipy.spatial
 
-from nova.frame.baseplot import Plot
+from nova.graphics.plot import Plot
 
 
 @dataclass

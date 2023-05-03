@@ -1,5 +1,5 @@
 """Extend pylops regression class."""
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from pylops import LinearOperator
 from pylops.optimization.leastsquares import RegularizedInversion

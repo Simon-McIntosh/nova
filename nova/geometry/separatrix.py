@@ -8,7 +8,7 @@ import numpy as np
 from scipy.interpolate import interp1d
 from scipy.optimize import minimize_scalar
 
-from nova.frame.baseplot import Plot
+from nova.graphics.plot import Plot
 
 
 def negate(func):
@@ -328,7 +328,6 @@ class Squareness(Plot, PointGeometry):
     def __post_init__(self):
         """Initialize quadrant points."""
         self.update_quadrants()
-        super().__post_init__()
 
     def update_quadrants(self):
         """Update separatrix quadrant-local poloidal angle."""

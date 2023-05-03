@@ -7,13 +7,13 @@ from typing import Callable
 import contourpy
 import numpy as np
 from scipy.constants import mu_0
-from scipy.interpolate import RectBivariateSpline, interp1d
+from scipy.interpolate import RectBivariateSpline
 
-from nova.plot.biotplot import LinePlot
+from nova.graphics.line import Line
 
 
 @dataclass
-class Surface(LinePlot):
+class Surface(Line):
     """Provide storage and transforms for single contour surface."""
 
     points: np.ndarray = field(repr=False)
@@ -82,7 +82,7 @@ class ContourLoc:
 
 
 @dataclass
-class Contour(LinePlot):
+class Contour(Line):
     """Contour 2d poloidal flux map and extract flux function coeffiecents."""
 
     x2d: np.ndarray
@@ -94,7 +94,6 @@ class Contour(LinePlot):
 
     def __post_init__(self):
         """Initialize contour generator."""
-        super().__post_init__()
         self.generator = contourpy.contour_generator(
             self.x2d, self.z2d, self.psi2d,
             line_type='SeparateCode', quad_as_tri=True)
@@ -170,7 +169,8 @@ class Contour(LinePlot):
         radius = np.linspace(np.min(surface.points[:, 0]),
                              np.max(surface.points[:, 0]))
 
-        fit = -2*np.pi * np.c_[radius, 1 / (mu_0 * radius)] @ surface.coefficients
+        fit = -2*np.pi * np.c_[radius,
+                               1 / (mu_0 * radius)] @ surface.coefficients
         fit_label = rf'fit: $p^\prime$={surface.coefficients[0]:1.2f} '
         fit_label += rf'$ff^\prime$={surface.coefficients[1]:1.2f}'
         self.axes.plot(radius, fit, 'C1', label=fit_label)

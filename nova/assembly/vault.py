@@ -12,11 +12,11 @@ import numpy.typing as npt
 import xarray
 
 from nova.geometry.polygon import Polygon
-from nova.plot.plotter import ImagePlot
+from nova.graphics.plot import Plot2D
 
 
 @dataclass
-class Wedge(ImagePlot):
+class Wedge(Plot2D):
     """Generate wedge polygons."""
 
     radius: float

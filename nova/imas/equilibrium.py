@@ -4,18 +4,15 @@ from functools import cached_property
 from typing import ClassVar
 
 import numpy as np
-from scipy.interpolate import interp1d
-import shapely
-from shapely.geometry import LineString, MultiLineString
 
 from nova.biot.contour import Contour
-from nova.frame.baseplot import Plot
+from nova.graphics.plot import Plot
 from nova.geometry.pointloop import PointLoop
 from nova.geometry.separatrix import LCFS
 from nova.geometry.strike import Strike
 from nova.imas.machine import Wall
 from nova.imas.scenario import Scenario
-from nova.plot.biotplot import BiotPlot
+from nova.graphics.line import Chart
 
 
 @dataclass
@@ -355,7 +352,7 @@ class Profile1D(Plot, Scenario):
 
 
 @dataclass
-class Profile2D(BiotPlot, Scenario):
+class Profile2D(Chart, Scenario):
     """Manage extraction of 2d profile data from imas ids."""
 
     attrs_2d: list[str] = field(
@@ -450,7 +447,7 @@ class Equilibrium(Profile2D, Profile1D, Parameter0D, Grid):
     >>> equilibrium_reload == equilibrium
     True
 
-    Plot poloidal flux at itime=10:
+    Plot poloidal flux at itime=20:
 
     >>> equilibrium.itime = 20
     >>> levels = equilibrium.plot_2d('psi', colors='C3', levels=31)

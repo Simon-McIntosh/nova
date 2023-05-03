@@ -1,12 +1,11 @@
 """Impement rdp-like decimator for mixed linear / arc polylines."""
 from dataclasses import dataclass, field
-from functools import cached_property
 
 import numpy as np
-from rdp import rdp
 import scipy
 
-from nova.frame.baseplot import Plot
+from nova.graphics.plot import Plot
+from nova.geometry.rdp import rdp
 
 
 @dataclass
@@ -32,7 +31,6 @@ class Arc(Plot):
 
     def __post_init__(self):
         """Generate curve."""
-        super().__post_init__()
         self.build()
 
     def __call__(self, points):
@@ -165,7 +163,6 @@ class PolyArc(Plot):
 
     def __post_init__(self):
         """Build multi-arc polyline."""
-        super().__post_init__()
         self.build()
 
     def build(self):
@@ -200,7 +197,6 @@ class PolyLine(Plot):
 
     def __post_init__(self):
         """Decimate polyline."""
-        super().__post_init__()
         self.arc = Arc(eps=self.eps)
         self.decimate()
 

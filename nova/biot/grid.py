@@ -10,11 +10,11 @@ from nova.biot.biotframe import Target
 from nova.biot.operate import Operate
 from nova.biot.solve import Solve
 from nova.biot.fieldnull import FieldNull
-from nova.frame.baseplot import Plot
+from nova.graphics.plot import Plot
 from nova.frame.error import GridError
 from nova.frame.framelink import FrameLink
 from nova.geometry.pointloop import PointLoop
-from nova.plot.biotplot import BiotPlot
+from nova.graphics.line import Chart
 
 
 @dataclass
@@ -147,7 +147,7 @@ class Expand:
         return limit
 
 
-class BaseGrid(BiotPlot, FieldNull, Operate):
+class BaseGrid(Chart, FieldNull, Operate):
     """Flux grid baseclass."""
 
     attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])

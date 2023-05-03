@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 import numpy as np
 
 from nova.biot.biotframe import BiotFrame
-from nova.frame.baseplot import Plot
+from nova.graphics.plot import Plot
 
 
 @dataclass
@@ -41,7 +41,6 @@ class GroupSet(Plot):
             self.target = BiotFrame(self.target, available=[])
         self.set_flags()
         self.assemble()
-        super().__post_init__()
 
     def __len__(self):
         """Return interaction length."""

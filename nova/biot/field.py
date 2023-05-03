@@ -7,7 +7,7 @@ from scipy.interpolate import interp1d
 from nova.biot.biotframe import BiotFrame
 from nova.biot.operate import Operate
 from nova.biot.solve import Solve
-from nova.frame.baseplot import Plot
+from nova.graphics.plot import Plot
 
 
 @dataclass
@@ -24,7 +24,6 @@ class Sample(Plot):
 
     def __post_init__(self):
         """Store segment coordinates and build boundary interpolators."""
-        super().__post_init__()
         self.check()
         self.build()
         self.concatenate()

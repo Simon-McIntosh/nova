@@ -8,7 +8,7 @@ import scipy
 from shapely.geometry import LinearRing
 
 
-from nova.frame.baseplot import Plot
+from nova.graphics.plot import Plot
 from nova.imas.scenario import Scenario
 from nova.imas.machine import Wall
 

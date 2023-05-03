@@ -3,12 +3,11 @@ from dataclasses import dataclass, field
 from collections import Counter
 import colorsys
 
-from descartes import PolygonPatch
 import numpy as np
 
 from nova.frame import metamethod
 from nova.frame.dataframe import DataFrame
-from nova.frame.baseplot import BasePlot, Plot, Properties
+from nova.graphics.plot import BasePlot, Plot, Properties
 
 # pylint:disable=unsubscriptable-object
 
@@ -152,10 +151,10 @@ class PolyPlot(Plot, Properties, Labels, metamethod.PolyPlot, BasePlot):
             patch_kwargs |= kwargs
             try:  # MultiPolygon.
                 for _poly in polyframe.poly:
-                    patch.append(PolygonPatch(
+                    patch.append(self.patch(
                         _poly.__geo_interface__, **patch_kwargs))
             except (TypeError, AssertionError):  # Polygon.
-                patch.append(PolygonPatch(
+                patch.append(self.patch(
                     polyframe.poly.__geo_interface__, **patch_kwargs))
         patch_collection = \
             self.mpl['PatchCollection'](patch, match_original=True)

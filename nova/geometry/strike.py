@@ -5,7 +5,7 @@ import numpy as np
 from shapely import intersects, intersection
 from shapely.geometry import LineString, MultiLineString, MultiPoint, Point
 
-from nova.frame.baseplot import Plot
+from nova.graphics.plot import Plot
 from nova.imas.database import Ids
 from nova.imas.machine import Geometry
 
@@ -28,7 +28,6 @@ class Strike(Plot):
         self.wall = wall.ids_attrs
         segments = [wall.segment(index) for index in self.indices]
         self.limiter = MultiLineString(segments)
-        super().__post_init__()
 
     def update(self, lines):
         """Update intersections between contour and limiter surfaces."""

@@ -5,7 +5,7 @@ from typing import ClassVar
 import numpy as np
 import pandas
 
-from nova.frame.baseplot import Plot
+from nova.graphics.plot import Plot
 from nova.imas.database import Database
 
 

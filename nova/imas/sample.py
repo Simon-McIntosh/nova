@@ -3,13 +3,13 @@ from dataclasses import dataclass, field
 from functools import cached_property
 
 import numpy as np
-from rdp import rdp
 from sklearn.cluster import DBSCAN
 from sklearn.preprocessing import minmax_scale
 import scipy.signal
 import xarray
 
-from nova.frame.baseplot import Plot
+from nova.graphics.plot import Plot
+from nova.geometry.rdp import rdp
 from nova.imas.database import Database, IdsEntry
 from nova.imas.equilibrium import Equilibrium
 from nova.imas.metadata import Metadata

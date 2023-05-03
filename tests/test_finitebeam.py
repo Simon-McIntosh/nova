@@ -1,11 +1,14 @@
 import pytest
 import numpy as np
 
+try:
+    from nova.geometry.rotate import qrotate
+except ModuleNotFoundError:
+    pytest.skip("structural dependancies not available\n"
+                "try pip install -e .['structural']",
+                allow_module_level=True)
 from nova.structural.finiteframe import finiteframe
-# from nova.structural.properties import secondmoment
-from nova.utilities import geom
 import matplotlib.pyplot as plt
-import seaborn as sns
 
 
 class testbeam(finiteframe):
@@ -36,14 +39,14 @@ class testbeam(finiteframe):
         self.L = L
         X = np.zeros((self.N, 3))
         X[:, 0] = np.linspace(0, self.L, self.N)
-        X = geom.qrotate(X, theta=kwargs.get('theta', self.theta), dx='y')
+        X = qrotate(X, theta=kwargs.get('theta', self.theta), dx='y')
         self.add_nodes(X)
         self.add_elements(part_name='beam', nmat='tube')
         self.update_rotation()  # check / update rotation matrix
 
     @property
     def g(self):
-        return geom.qrotate([0, 0, -1], theta=self.theta, dx='y')[0]
+        return qrotate([0, 0, -1], theta=self.theta, dx='y')[0]
 
     def add_weight(self):
         finiteframe.add_weight(self, g=self.g)
@@ -54,8 +57,8 @@ class testbeam(finiteframe):
         elif self.name == 'vertical hanging beam':
             self.model = {'U': self.part['beam']['U'][:, 2]}
         else:
-            v = geom.qrotate(self.part['beam']['D'],
-                             theta=-self.theta, dx='y')[:, i]  # deflection
+            v = qrotate(self.part['beam']['D'],
+                       theta=-self.theta, dx='y')[:, i]  # deflection
             m = self.EI*self.part['beam']['d2u'][:, i]  # moment
             s = self.EI*self.part['beam']['d3u'][:, i]  # shear
             self.model = {'v': v, 'm': m, 's': s}
@@ -98,7 +101,6 @@ class testbeam(finiteframe):
                 ax[2].plot(self.x, self.analytic['s'], '--')
             ax[2].set_ylabel(r'shear')
             ax[2].set_xlabel('beam length')
-        sns.despine()
 
 
 def test_simple(plot=False):

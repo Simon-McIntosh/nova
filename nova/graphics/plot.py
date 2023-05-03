@@ -250,14 +250,30 @@ class MoviePy:
 class Plot:
     """Manage plot workflow."""
 
-    def __post_init__(self):
-        """Link matplotlib libaries."""
-        self.mpl_axes = Axes()
-        self.mpl = MatPlotLib()
-        self.plt = self.mpl['pylab']
-        self.mpy = MoviePy()
-        if hasattr(super(), '__post_init__'):
-            super().__post_init__()
+    @cached_property
+    def mpl_axes(self):
+        """Return Axes instance."""
+        return Axes()
+
+    @cached_property
+    def mpl(self):
+        """Return matplotlib instance."""
+        return MatPlotLib()
+
+    @cached_property
+    def plt(self):
+        """Return pylab instance."""
+        return self.mpl['pylab']
+
+    @cached_property
+    def mpy(self):
+        """Return moviepy instance."""
+        return MoviePy()
+
+    @cached_property
+    def patch(self):
+        """Provice acces to descartes PolygonPatch class."""
+        return import_module('descartes', 'PolygonPatch')
 
     @property
     def fig(self):
@@ -301,3 +317,21 @@ class Plot:
     def savefig(self, *args, **kwargs):
         """Save figure to file."""
         self.plt.savefig(*args, **kwargs)
+
+
+class Plot1D(Plot):
+    """Generate axes for 1d line objects."""
+
+    @cached_property
+    def mpl_axes(self):
+        """Override Plot.Axes instance."""
+        return Axes('1d')
+
+
+class Plot2D(Plot):
+    """Generate axes for 2d image objects."""
+
+    @cached_property
+    def mpl_axes(self):
+        """Override Plot.Axes instance."""
+        return Axes('2d')

@@ -14,7 +14,7 @@ from nova.frame.polyplot import PolyPlot
 from nova.geometry.polyframe import PolyFrame
 from nova.geometry.polygen import PolyGen
 from nova.geometry.polygeom import PolyGeom
-import matplotlib.pyplot as plt
+from nova.graphics.plot import Plot
 
 
 # pylint:disable=unsubscriptable-object
@@ -210,7 +210,7 @@ class PolyVector:
 
 
 @dataclass
-class PolyGrid(PolyCell):
+class PolyGrid(PolyCell, Plot):
     """Construct 2d grid from polycell basis."""
 
     trim: bool = True
@@ -294,10 +294,9 @@ class PolyGrid(PolyCell):
 
     def plot(self):
         """Plot polygon exterior and polycells."""
+        self.set_axes('2d')
         self.plot_boundary()
         self.polyplot()
-        plt.axis('off')
-        plt.axis('equal')
 
 
 @dataclass

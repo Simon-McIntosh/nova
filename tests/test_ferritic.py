@@ -4,7 +4,14 @@ import tempfile
 
 import numpy as np
 import pytest
-import vedo
+
+try:
+    import vedo
+except ModuleNotFoundError:
+    pytest.skip("vtk modules not available\n"
+                "try pip install -e .['vtk']",
+                allow_module_level=True)
+
 
 from nova.frame.coilset import CoilSet
 
@@ -14,6 +21,7 @@ def test_insert_box_subframe():
     box = vedo.shapes.Box(pos=(5, 0, 0), length=1, width=2, height=3)
     coilset.ferritic.insert(box)
     assert np.isclose(coilset.subframe.volume[0], 6)
+
 
 def test_insert_doublebox_subframe():
     coilset = CoilSet(available=['vtk'])

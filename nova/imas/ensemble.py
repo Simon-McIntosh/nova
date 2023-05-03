@@ -8,7 +8,7 @@ import xarray
 from nova.database.netcdf import netCDF
 from nova.imas.connect import ScenarioDatabase
 from nova.imas.equilibrium import Equilibrium
-from nova.plot.plotter import LinePlot
+from nova.graphics.plot import Plot1D
 
 
 @dataclass
@@ -22,7 +22,7 @@ class EnsembleAttrs:
 
 
 @dataclass
-class Ensemble(netCDF, LinePlot, EnsembleAttrs):
+class Ensemble(netCDF, Plot1D, EnsembleAttrs):
     """Manage workflow ensemble equilibrium 1d profile data."""
 
     filename: str = 'ensemble'
@@ -85,7 +85,7 @@ class Ensemble(netCDF, LinePlot, EnsembleAttrs):
                            data.T, color=color,
                            label=self.data.reference.data[i],
                            **kwargs)
-            #self.axes.legend()
+            self.axes.legend()
 
 
 if __name__ == '__main__':

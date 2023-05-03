@@ -1,13 +1,13 @@
 """Manage coilset supplies."""
 from dataclasses import dataclass, field
 from functools import cached_property
-from importlib import import_module
 
+import networkx
 import numpy as np
 import xarray
 
 from nova.database.netcdf import netCDF
-from nova.frame.baseplot import Plot
+from nova.graphics.plot import Plot
 from nova.frame.framesetloc import FrameSetLoc
 from nova.frame.framespace import FrameSpace
 
@@ -64,7 +64,6 @@ class Circuit(Plot, netCDF, FrameSetLoc):
         """Plot directed graph."""
         self.set_axes('2d', axes=axes)
         edge_list = self.edge_list(circuit)
-        networkx = import_module('networkx')
         dig = networkx.DiGraph(edge_list.values())
         pos = networkx.planar_layout(dig)
         edge_labels = {edge_list[edge]: edge for edge in edge_list}
@@ -89,7 +88,6 @@ class Circuit(Plot, netCDF, FrameSetLoc):
         """Return basis loops."""
         edge_list = self.edge_list(circuit)
         edge_nodes = edge_list.values()
-        networkx = import_module('networkx')
         graph = networkx.Graph(edge_list)
         loops = []
         for loop in networkx.cycle_basis(graph):

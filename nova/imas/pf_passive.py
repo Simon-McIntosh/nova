@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-from nova.frame.baseplot import Plot
+from nova.graphics.plot import Plot
 from nova.imas.scenario import Scenario
 
 

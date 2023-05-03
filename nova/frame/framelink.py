@@ -1,6 +1,7 @@
 """Extend DataArray - add multipoint and link methods."""
 from contextlib import contextmanager
 from copy import copy
+from importlib import import_module
 from typing import Union
 
 import numpy as np
@@ -311,11 +312,10 @@ class FrameLink(LinkIndexer, DataArray):
         """
         if len(args) != 1:
             return args, kwargs
-        import vedo
         if len(self.metaframe.required) == 1 and \
             (not isinstance(args[0], (shapely.geometry.Polygon,
                                       shapely.geometry.MultiPolygon, dict))
-                or isinstance(args[0], vedo.Mesh)):
+                or hasattr(args[0], 'faces')):
             return args, kwargs
         if isinstance(args[0], list) and all(
                 [isinstance(poly, (Polygon, shapely.geometry.Polygon))

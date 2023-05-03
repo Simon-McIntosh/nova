@@ -10,9 +10,8 @@ import scipy.special
 import scipy.sparse
 import xarray
 
-from nova.imas.equilibrium import Equilibrium
 from nova.linalg.decompose import Decompose
-from nova.plot.plotter import LinePlot
+from nova.graphics.plot import Plot1D
 
 
 @dataclass
@@ -33,7 +32,7 @@ class LinearSample:
 
 
 @dataclass
-class Basis(LinePlot, LinearSample):
+class Basis(Plot1D, LinearSample):
     """Basis function base class."""
 
     order: int = 0
@@ -105,8 +104,6 @@ class Svd(Basis, SvdAttrs):
         self.append_data(data)
         return self
 
-    #def load_workflow(self, workflow: str):
-
     def __iadd__(self, data):
         """Append data to SVD basis."""
         self.append_data(data)
@@ -147,8 +144,11 @@ class Svd(Basis, SvdAttrs):
 
 if __name__ == '__main__':
 
-    #bernstein = Bernstein(50, 21)
+    bernstein = Bernstein(50, 21)
+    print(bernstein.shape)
     #bernstein.plot()
+
+    '''
 
     eq = Equilibrium(135011, 7)
     attr = 'f_df_dpsi'
@@ -167,6 +167,7 @@ if __name__ == '__main__':
     #svd += eq.data[attr]
 
     svd.plot(ls='--')
+    '''
 
     '''
 

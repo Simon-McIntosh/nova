@@ -1,7 +1,13 @@
 import numpy as np
 import pytest
 
-from nova.structural.finiteframe import finiteframe, scale
+try:
+    from nova.structural.finiteframe import finiteframe, scale
+except ModuleNotFoundError:
+    pytest.skip("structural dependancies not available\n"
+                "try pip install -e .['structural']",
+                allow_module_level=True)
+
 from nova.structural.catenary import catenary
 import matplotlib.pyplot as plt
 

@@ -10,7 +10,7 @@ from typing import ClassVar, TYPE_CHECKING
 import numpy as np
 import xarray
 
-from nova.frame.baseplot import Plot
+from nova.graphics.plot import Plot
 from nova.frame.coilset import CoilSet
 from nova.imas.database import CoilData, Database, Ids, IdsIndex, ImasIds
 from nova.geometry.polygon import Polygon
@@ -958,5 +958,5 @@ if __name__ == '__main__':
     pulse, run = 105028, 1  # DINA
 
     machine = Machine(pf_active='iter_md', pf_passive=False,
-                      wall=False, tplasma='hex', nwall=5)
+                      wall='iter_md', tplasma='hex', nwall=5)
     machine.plot()

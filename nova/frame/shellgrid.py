@@ -1,15 +1,17 @@
 """Manage shell grid."""
 from dataclasses import dataclass, field
-from importlib import import_module
 
 import numpy as np
 import pandas
+import scipy.interpolate
+from shapely import geometry
 
-from nova.frame.baseplot import Plot
+from nova.graphics.plot import Plot
 from nova.frame.dataframe import DataFrame
 from nova.frame.polyplot import PolyPlot
 from nova.geometry.polygeom import PolyGeom
 from nova.geometry.polygon import Polygon
+from nova.geometry.rdp import rdp
 
 # pylint:disable=no-member
 
@@ -93,7 +95,7 @@ class ShellInterp(ShellCoords):
 
     def generate_interpolator(self):
         """Return segment interpolator ."""
-        return import_module('scipy.interpolate').interp1d(
+        return scipy.interpolate.interp1d(
             self.unit_length, self.coords, axis=0)
 
 
@@ -153,7 +155,7 @@ class ShellSegment(ShellInterp):
         None.
 
         """
-        mask = import_module('rdp').rdp(
+        mask = rdp(
             self.coords, epsilon=self.eps*self.total_length, return_mask=True)
         return self.unit_length[mask]
 
@@ -165,7 +167,6 @@ class ShellSegment(ShellInterp):
     @property
     def poly(self):
         """Return segment polygon."""
-        geometry = import_module('shapely.geometry')
         coords = self.interp(self.rdp)
         poly = geometry.LineString(coords).buffer(
             self.thickness/2, cap_style=2, join_style=2)

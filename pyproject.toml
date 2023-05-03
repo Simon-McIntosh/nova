@@ -33,20 +33,16 @@ dependencies = [
   "click",
   "contourpy",
   "cython",
-  "bokeh",
-  "dask[distributed]",
   "descartes",
-  "fabric",
+  "fsspec",
   "gitpython",
   "netCDF4",
+  "networkx",
   "numba",
   "numpy",
   "pandas>=2.0",
-  "pylops>=2.0",
   "pytest",
-  "rdp",
   "scipy",
-  "scikit-learn",
   "shapely>=2.0",
   "tqdm",
   "xarray",
@@ -60,51 +56,66 @@ ansys = [
   "fortranformat",
   "openpyxl",
 ]
+assembly = [
+  "scikit-learn",
+]
 cuda = [
   "cupy-cuda115",
 ]
-dev = [ 
-  "nova[docs, mesh, optimize, spyder, tests]",
-]	
+develop = [
+  "nova[graphics, mesh, optimize, shell, spyder, test, vtk]",
+]
 docs = [
   "pandoc", 
   "jupyter",
 ]
 full = [
-  "nova[ansys, docs, mesh, optimize, plan, spyder, test, thermofluids]"
+  "nova[develop, structural, thermofluids]"
+]
+graphics = [
+  "bokeh",
+  "matplotlib",
+  "moviepy", 
+  "seaborn",
+]
+spyder = [
+  "moviepy", 
+  "nova[docs, mesh, optimize, tests]",
+  "seaborn",
+  "spyder", 
+  "spyder-unittest", 
+  "spyder-line-profiler", 
+  "spyder-memory-profiler", 
 ]
 mesh = [
   "alphashape",
   "gmsh", 
   "meshio",
   "pygmsh", 
-  "pyvista",
   "tetgen", 
   "trimesh",
-  "vedo>=2022.4",
 ]
 optimize = [
   "nlopt", 
+  "pylops>=2.0",
 ]
 plan = [
   "python-dateutil",
 ]
-spyder = [
-  "seaborn",
-  "spyder", 
-  "spyder-unittest", 
-  "spyder-line-profiler", 
-  "spyder-memory-profiler", 
-  "moviepy", 
-  "pylsp-mypy",
-  "line_profiler",
-  "pandas-stubs",
+shell = [
+  "fabric",
+]
+structural = [
+  "pyquaternion",
 ]
 test = [
   "asv", 
   "coverage2clover", 
+  "line_profiler",
   "lizard", 
   "mypy",
+  "pandas-stubs",
+  "pylsp-mypy",
   "pyperf",
   "pytest", 
   "pytest-cov", 
@@ -118,6 +129,10 @@ thermofluids = [
   "coolprop", 
   "tables", 
   "xlrd",
+]
+vtk = [
+  "pyvista",
+  "vedo>=2022.4",
 ]
 
 [project.scripts]
@@ -141,13 +156,14 @@ addopts = "-rfEs --doctest-modules"
 norecursedirs = ".git __pycache__"
 testpaths = [
   "tests",
-  "nova/imas", 
+  "nova/imas/database.py", 
+  "nova/imas/equilibrium.py", 
+  "nova/imas/extrapolate.py", 
+  "nova/imas/operate.py", 
 ]
  filterwarnings = [
   "once::Warning",
-  # "ignore::DeprecationWarning",
-  # "ignore::FutureWarning",
-  # "ignore::ImportWarning"
+  "ignore:open:DeprecationWarning:imas",
 ]
 
 [tool.mypy]

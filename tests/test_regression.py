@@ -1,11 +1,21 @@
 import pytest
 
 import numpy as np
-import pylops
+
+try:
+    from nova.linalg.lops import Lops
+    from pylops.utils import dottest
+    IMPORT_LOPS = True
+except ModuleNotFoundError:
+    IMPORT_LOPS = False
 
 from nova.linalg.decompose import Decompose
 from nova.linalg.regression import OdinaryLeastSquares, MoorePenrose
-from nova.linalg.lops import Lops
+
+
+mark_lops = pytest.mark.skipif(
+    not IMPORT_LOPS, reason="failed to import Lops from nova.linalg.lops\n"
+                            "try pip install -e .['optimize']")
 
 
 matrix_shapes = [(3, 3), (2, 9), (5, 12)]
@@ -145,14 +155,16 @@ def test_regression_dot(matrix_shape):
         (forward_data + model_adjoint + 1e-15) / 2) < 1e-15
 
 
+@mark_lops
 @pytest.mark.parametrize('matrix_shape', matrix_shapes)
 def test_regression_lops_dot(matrix_shape):
     rng = np.random.default_rng(seed=rng_seed)
     matrix = rng.random(matrix_shape)
     lops = Lops(matrix)
-    pylops.utils.dottest(lops, *matrix_shape)
+    dottest(lops, *matrix_shape)
 
 
+@mark_lops
 @pytest.mark.parametrize('matrix_shape', matrix_shapes)
 def test_regression_lops(matrix_shape):
     rng = np.random.default_rng(seed=rng_seed)

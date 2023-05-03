@@ -3,7 +3,6 @@ from contextlib import contextmanager
 from dataclasses import dataclass, field
 from functools import cached_property
 
-from descartes import PolygonPatch
 import numpy as np
 from scipy.constants import mu_0
 from scipy.interpolate import interp1d
@@ -13,7 +12,7 @@ from nova.database.netcdf import netCDF
 from nova.biot.levelset import LevelSet
 from nova.biot.plasmagrid import PlasmaGrid
 from nova.biot.plasmawall import PlasmaWall
-from nova.frame.baseplot import Plot
+from nova.graphics.plot import Plot
 from nova.frame.plasmaloc import PlasmaLoc
 from nova.geometry.polygon import Polygon
 from nova.geometry.separatrix import LCFS
@@ -183,7 +182,7 @@ class Plasma(Plot, netCDF, PlasmaLoc):
         else:
             poly = Polygon(self.separatrix).poly
             if not poly.is_empty:
-                self.axes.add_patch(PolygonPatch(
+                self.axes.add_patch(self.patch(
                     poly.__geo_interface__,
                     facecolor='C4', alpha=0.75, linewidth=0, zorder=-10))
         levels = self.levelset.plot(**kwargs)

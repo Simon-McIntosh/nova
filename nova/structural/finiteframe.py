@@ -2,16 +2,17 @@ import itertools
 from itertools import count, cycle
 from warnings import warn
 
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 from scipy.optimize import minimize
 from scipy.sparse import csr_matrix
 from scipy.interpolate import interp1d
-from mpl_toolkits.mplot3d import Axes3D
 
-from nova.structural.properties import secondmoment
-import matplotlib.pyplot as plt
+from nova.geometry.rotate import rotate, qrotate
 from nova.plot.addtext import linelabel
-from nova.utilities import geom
+from nova.plot.polyfill import polyfill3D
+from nova.structural.properties import secondmoment
 
 
 def delete_row_csr(mat, i):
@@ -276,7 +277,7 @@ class finiteframe(secondmoment):
         dy = np.zeros(np.shape(dx))
         for i, (dx_, dy_) in enumerate(zip(dx, el_dy)):
             dy[i, :] = dy_ - np.dot(dy_, dx_.T) * dx_
-        norm = np.dot(np.linalg.norm(dy, axis=1).reshape(-1, 1), 
+        norm = np.dot(np.linalg.norm(dy, axis=1).reshape(-1, 1),
                       np.ones((1, 3)))
         dy /= norm
         dz = np.cross(dx, dy)  # right hand coordinates
@@ -978,7 +979,7 @@ class finiteframe(secondmoment):
 
     def rotate_cp(self, name, dof, theta, axis):
         self.check_cp_rotation(dof, self.mpc[name]['neq'])
-        R = geom.rotate(theta, axis=axis)  # 3x3 rotation matrix
+        R = rotate(theta, axis=axis)  # 3x3 rotation matrix
         self.mpc[name]['Cr'] = np.zeros((self.mpc[name]['neq'],
                                          self.mpc[name]['neq']))
         self.mpc[name]['Cr'][:3, :3] = R
@@ -1359,7 +1360,7 @@ class finiteframe(secondmoment):
     def plot_sections(self, ax=None, theta=0):
         if ax is None:
             ax = Axes3D(plt.figure(figsize=plt.figaspect(1.5)))
-        R = geom.rotate(theta, axis='z')  # rotation matrix
+        R = rotate(theta, axis='z')  # rotation matrix
         plt.axis('equal')
         plt.axis('off')
         dx_ref = np.array([1, 0, 0], ndmin=2, dtype=float)
@@ -1397,11 +1398,9 @@ class finiteframe(secondmoment):
                     y = pnt[0][ns]
                     z = pnt[1][ns]
                     x = np.zeros(np.shape(y))
-                    points = geom.qrotate(np.array([x, y, z]).T,
-                                          theta_a, xo=[0, 0, 0],
-                                          dx=pivot)
-                    dy_ref_o = geom.qrotate(dy_ref, theta_a, xo=[0, 0, 0],
-                                            dx=pivot)
+                    points = qrotate(np.array([x, y, z]).T,
+                                     theta_a, xo=[0, 0, 0], dx=pivot)
+                    dy_ref_o = qrotate(dy_ref, theta_a, xo=[0, 0, 0], dx=pivot)
 
                     dy_dot = np.dot(dy_ref_o, dy.T).tolist()[0][0]
                     dy_pivot = np.cross(dy_ref_o, dy)[0]
@@ -1410,14 +1409,14 @@ class finiteframe(secondmoment):
                     if np.linalg.norm(dy_pivot) == 0:
                         dy_pivot = np.array(dx)[0]
                     theta_b = np.arccos(dy_dot)
-                    points = geom.qrotate(points, theta_b, xo=[0, 0, 0],
-                                          dx=dy_pivot)
+                    points = qrotate(points, theta_b, xo=[0, 0, 0],
+                                     dx=dy_pivot)
                     x, y, z = points[:, 0], points[:, 1], points[:, 2]
                     x += X[0]  # translate
                     y += X[1]
                     z += X[2]
                     Xr = np.dot(np.array([x, y, z]).T, R).T  # rotate patch
-                    geom.polyfill3D(Xr[0], Xr[1], Xr[2], ax=ax, alpha=0.5)
+                    polyfill3D(Xr[0], Xr[1], Xr[2], ax=ax, alpha=0.5)
         for i, part in enumerate(self.part):
             D = self.part[part]['D']
             D = np.dot(D, R)

@@ -13,7 +13,7 @@ import xarray
 
 import nova
 from nova.database.netcdf import netCDF
-from nova.frame.baseplot import Plot
+from nova.graphics.plot import Plot
 from nova.imas.magnetics import Magnetics
 
 

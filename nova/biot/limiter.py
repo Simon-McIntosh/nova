@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 import xarray
 
 from nova.biot.array import Array
-from nova.frame.baseplot import Plot
+from nova.graphics.plot import Plot
 from nova.geometry import select
 
 

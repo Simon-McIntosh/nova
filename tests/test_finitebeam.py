@@ -8,7 +8,7 @@ except ModuleNotFoundError:
                 "try pip install -e .['structural']",
                 allow_module_level=True)
 from nova.structural.finiteframe import finiteframe
-import matplotlib.pyplot as plt
+from nova.graphics.plot import Plot
 
 
 class testbeam(finiteframe):
@@ -76,6 +76,7 @@ class testbeam(finiteframe):
 
     def plot(self):
         if self.name in ['axial tip point load', 'vertical hanging beam']:
+            plt = Plot().plt
             plt.figure()
             plt.title(self.name)
             plt.xlabel('beam length')

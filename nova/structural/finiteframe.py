@@ -10,8 +10,8 @@ from scipy.sparse import csr_matrix
 from scipy.interpolate import interp1d
 
 from nova.geometry.rotate import rotate, qrotate
-from nova.plot.addtext import linelabel
-from nova.plot.polyfill import polyfill3D
+from nova.graphics.addtext import linelabel
+from nova.graphics.polyfill import polyfill3D
 from nova.structural.properties import secondmoment
 
 

@@ -127,7 +127,6 @@ class Extrapolate(Operate):
     To run code as an **IMAS actor**,
     first load an apropriate equilibrium IDS,
 
-    >>> from nova.imas.database import Database
     >>> pulse, run = 130506, 403  # CORSICA equilibrium solution
     >>> equilibrium = Database(130506, 403, name='equilibrium')
     >>> equilibrium.pulse, equilibrium.run
@@ -140,8 +139,6 @@ class Extrapolate(Operate):
     >>> extrapolate.itime = 20
     >>> extrapolate.itime
     20
-
-    >>> extrapolate.plot_2d('psi')
 
     """
 
@@ -239,7 +236,33 @@ class Extrapolate(Operate):
                            colors='C2', nulls=False)
 
     def plot_2d(self, attr='psi', mask=None, levels=51, axes=None):
-        """Plot plasma filements and polidal flux."""
+        """Plot plasma filements and polidal flux.
+
+        Examples
+        --------
+        Skip doctest if IMAS instalation or requisite IDS(s) not found.
+
+        >>> import pytest
+        >>> from nova.imas.database import Database
+        >>> try:
+        ...     _ = Database(130506, 403).get_ids('equilibrium')
+        ... except:
+        ...     pytest.skip('IMAS not found or 130506/403 unavailable')
+
+        >>> equilibrium = Database(130506, 403, name='equilibrium')
+        >>> extrapolate = Extrapolate(ids=equilibrium.ids_data, limit='ids',
+        ...                           ngrid=500, dplasma=-100, tplasma='hex')
+
+        Skip doctest if graphics dependencies are not available.
+
+        >>> try:
+        ...     _ = extrapolate.set_axes('2d')
+        ... except:
+        ...     pytest.skip('graphics dependencies not available')
+
+        >>> extrapolate.itime = 20
+        >>> extrapolate.plot_2d('psi')
+        """
         self.get_axes('2d', axes=axes)
         super().plot(axes=self.axes)#'plasma')
         self.plasma.wall.plot()

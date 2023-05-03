@@ -294,7 +294,35 @@ class Parameter0D(Plot, Scenario):
         return self['boundary'][:int(self['boundary_length'])]
 
     def plot_0d(self, attr, axes=None):
-        """Plot 0D parameter timeseries."""
+        """Plot 0D parameter timeseries.
+
+        Examples
+        --------
+        Skip doctest if IMAS instalation or requisite IDS(s) not found.
+
+        >>> import pytest
+        >>> from nova.imas.database import Database
+        >>> try:
+        ...     _ = Database(130506, 403).get_ids('equilibrium')
+        ... except:
+        ...     pytest.skip('IMAS not found or 130506/403 unavailable')
+
+        Load equilibrium data from pulse and run indicies
+        asuming defaults for others:
+
+        >>> equilibrium = Equilibrium(130506, 403)
+
+        Skip doctest if graphics dependencies are not available.
+
+        >>> try:
+        ...     _ = equilibrium.set_axes('1d')
+        ... except:
+        ...     pytest.skip('graphics dependencies not available')
+
+        Plot plasma current waveform.
+
+        >>> equilibrium.plot_0d('ip')
+        """
         self.set_axes('1d', axes=axes)
         self.axes.plot(self.data.time, self.data[attr], label=attr)
 
@@ -346,7 +374,37 @@ class Profile1D(Plot, Scenario):
                     pass
 
     def plot_1d(self, attr='psi', axes=None, **kwargs):
-        """Plot 1d profile."""
+        """Plot 1d profile.
+
+        Examples
+        --------
+        Skip doctest if IMAS instalation or requisite IDS(s) not found.
+
+        >>> import pytest
+        >>> from nova.imas.database import Database
+        >>> try:
+        ...     _ = Database(130506, 403).get_ids('equilibrium')
+        ... except:
+        ...     pytest.skip('IMAS not found or 130506/403 unavailable')
+
+        Load equilibrium data from pulse and run indicies
+        asuming defaults for others:
+
+        >>> equilibrium = Equilibrium(130506, 403)
+
+        Skip doctest if graphics dependencies are not available.
+
+        >>> try:
+        ...     _ = equilibrium.set_axes('1d')
+        ... except:
+        ...     pytest.skip('graphics dependencies not available')
+
+        Plot 1D dpressure_dpsi profile at itime=10.
+
+        >>> equilibrium.itime = 10
+        >>> equilibrium.plot_1d('dpressure_dpsi')
+
+        """
         self.set_axes('1d', axes=axes)
         self.axes.plot(self.data.psi_norm, self[attr], **kwargs)
 
@@ -370,7 +428,42 @@ class Profile2D(Chart, Scenario):
         return self[f'{attr}2d']
 
     def plot_2d(self, attr='psi', mask=0, axes=None, **kwargs):
-        """Plot 2d profile."""
+        """Plot 2d profile.
+
+        Examples
+        --------
+        Skip doctest if IMAS instalation or requisite IDS(s) not found.
+
+        >>> import pytest
+        >>> from nova.imas.database import Database
+        >>> try:
+        ...     _ = Database(130506, 403).get_ids('equilibrium')
+        ... except:
+        ...     pytest.skip('IMAS not found or 130506/403 unavailable')
+
+        Load equilibrium data from pulse and run indicies
+        asuming defaults for others:
+
+        >>> equilibrium = Equilibrium(130506, 403)
+
+        Skip doctest if graphics dependencies are not available.
+
+        >>> try:
+        ...     _ = equilibrium.set_axes('2d')
+        ... except:
+        ...     pytest.skip('graphics dependencies not available')
+
+        Plot poloidal flux at itime=20:
+
+        >>> equilibrium.itime = 20
+        >>> levels = equilibrium.plot_2d('psi', colors='C3', levels=31)
+        >>> equilibrium.plot_boundary()
+
+        Plot contour map of toroidal current density at itime=10:
+
+        >>> levels = equilibrium.plot_2d('j_tor')
+
+        """
         self.set_axes('2d', axes=axes)
         kwargs = self.contour_kwargs(**kwargs)
         QuadContourSet = self.axes.contour(
@@ -446,24 +539,6 @@ class Equilibrium(Profile2D, Profile1D, Parameter0D, Grid):
     >>> equilibrium_reload = equilibrium.build()
     >>> equilibrium_reload == equilibrium
     True
-
-    Plot poloidal flux at itime=20:
-
-    >>> equilibrium.itime = 20
-    >>> levels = equilibrium.plot_2d('psi', colors='C3', levels=31)
-    >>> equilibrium.plot_boundary()
-
-    Plot contour map of toroidal current density at itime=10:
-
-    >>> levels = equilibrium.plot_2d('j_tor')
-
-    Plot 1D dpressure_dpsi profile.
-
-    >>> equilibrium.plot_1d('dpressure_dpsi')
-
-    Plot plasma current waveform.
-
-    >>> equilibrium.plot_0d('ip')
 
     """
 

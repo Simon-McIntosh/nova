@@ -273,7 +273,7 @@ class Plot:
     @cached_property
     def patch(self):
         """Provice acces to descartes PolygonPatch class."""
-        return import_module('descartes', 'PolygonPatch')
+        return import_module('descartes').PolygonPatch
 
     @property
     def fig(self):

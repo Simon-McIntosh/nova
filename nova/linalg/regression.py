@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
+from nova.graphics.plot import Plot
 from nova.imas.equilibrium import Equilibrium
 from nova.linalg.decompose import Decompose
 
@@ -115,7 +116,7 @@ class RegressionBase():
 
     def plot(self, axes=None):
         """Plot fit."""
-        from nova.plot import plt
+        plt = Plot().plt
         if axes is None:
             axes = plt.subplots(1, 1)[0]
         if self.data is not None:

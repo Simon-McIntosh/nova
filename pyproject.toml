@@ -29,7 +29,6 @@ dynamic = ["version"]
 keywords = ["equilibrium", "generation", "reconstruction", "inference", "plasma", "Biot-Savart", "mesh-free"]
 
 dependencies = [
-  "alphashape",
   "appdirs",
   "click",
   "contourpy",
@@ -38,46 +37,38 @@ dependencies = [
   "dask[distributed]",
   "descartes",
   "fabric",
-  "fortranformat",
   "gitpython",
-  "meshio",
-  "moviepy", 
   "netCDF4",
   "numba",
-  "numdifftools", 
   "numpy",
-  "pandas>=1.5,<2",
+  "pandas>=2.0",
   "pylops>=2.0",
-  "pyperf",
-  "pyvista",
-  "pyquaternion",
+  "pytest",
   "rdp",
-  "seaborn",
   "scipy",
   "scikit-learn",
   "shapely>=2.0",
   "tqdm",
-  "vedo>=2022.4",
-  "wheel",
   "xarray",
-  "xxhash"
+  "xxhash",
 ]
  
 [project.optional-dependencies]
 ansys = [
   "ansys-dpf-core", 
   "ansys-dpf-post", 
-  "openpyxl"
+  "fortranformat",
+  "openpyxl",
 ]
 cuda = [
-  "cupy-cuda115"
+  "cupy-cuda115",
 ]
 dev = [ 
   "nova[docs, mesh, optimize, spyder, tests]",
 ]	
 docs = [
   "pandoc", 
-  "jupyter"
+  "jupyter",
 ]
 full = [
   "nova[ansys, docs, mesh, optimize, plan, spyder, test, thermofluids]"
@@ -85,42 +76,48 @@ full = [
 mesh = [
   "alphashape",
   "gmsh", 
+  "meshio",
   "pygmsh", 
+  "pyvista",
   "tetgen", 
-  "trimesh"
+  "trimesh",
+  "vedo>=2022.4",
 ]
 optimize = [
-  "nlopt" 
+  "nlopt", 
 ]
 plan = [
-  "python-dateutil"
+  "python-dateutil",
 ]
 spyder = [
+  "seaborn",
   "spyder", 
   "spyder-unittest", 
   "spyder-line-profiler", 
   "spyder-memory-profiler", 
+  "moviepy", 
   "pylsp-mypy",
   "line_profiler",
   "pandas-stubs",
 ]
 test = [
+  "asv", 
   "coverage2clover", 
+  "lizard", 
+  "mypy",
+  "pyperf",
   "pytest", 
   "pytest-cov", 
   "pytest-xdist", 
+  "snakeviz",
   "tuna",
-  "lizard", 
-  "mypy",
-  "asv", 
   "virtualenv", 
-  "snakeviz"
 ]
 thermofluids = [
   "ftputil", 
   "coolprop", 
   "tables", 
-  "xlrd"
+  "xlrd",
 ]
 
 [project.scripts]

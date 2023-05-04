@@ -33,7 +33,6 @@ dependencies = [
   "click",
   "contourpy",
   "cython",
-  "descartes",
   "fsspec",
   "gitpython",
   "netCDF4",
@@ -63,17 +62,22 @@ cuda = [
   "cupy-cuda115",
 ]
 develop = [
-  "nova[graphics, mesh, optimize, shell, spyder, test, vtk]",
+  "nova[graphics, mesh, optimize, ssh, spyder, test, vtk]",
 ]
 docs = [
   "pandoc", 
   "jupyter",
 ]
+ferritic = [
+  "vedo>=2022.4", 
+  "scikit-learn",
+]
 full = [
-  "nova[develop, structural, thermofluids]"
+  "nova[assembly, develop, ferritic, structural, thermofluids]"
 ]
 graphics = [
   "bokeh",
+  "descartes",
   "matplotlib",
   "moviepy", 
   "seaborn",
@@ -98,11 +102,12 @@ mesh = [
 optimize = [
   "nlopt", 
   "pylops>=2.0",
+  "scikit-learn",
 ]
 plan = [
   "python-dateutil",
 ]
-shell = [
+ssh = [
   "fabric",
 ]
 structural = [

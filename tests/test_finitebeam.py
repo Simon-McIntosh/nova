@@ -1,12 +1,10 @@
 import pytest
 import numpy as np
 
-try:
+from nova import skip_import
+with skip_import('structural'):
     from nova.geometry.rotate import qrotate
-except ModuleNotFoundError:
-    pytest.skip("structural dependancies not available\n"
-                "try pip install -e .['structural']",
-                allow_module_level=True)
+
 from nova.structural.finiteframe import finiteframe
 from nova.graphics.plot import Plot
 

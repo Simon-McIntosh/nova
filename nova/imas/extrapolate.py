@@ -353,6 +353,7 @@ if __name__ == '__main__':
     pulse, run = 130506, 403  # CORSICA
     pulse, run = 105028, 1  # DINA
     # pulse, run = 135011, 7  # DINA
+    pulse, run = 135013, 2
 
     extrapolate = Extrapolate(pulse, run, pf_passive=False,
                               pf_active='iter_md')
@@ -362,7 +363,7 @@ if __name__ == '__main__':
 
     # extrapolate.plot_waveform()
 
-    extrapolate.itime = 36
+    extrapolate.time = 143.9
     extrapolate.plot_2d('psi', mask='map')
     plt.tight_layout()
 

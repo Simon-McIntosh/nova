@@ -1,15 +1,12 @@
 import numpy as np
 import pytest
 
-try:
+from nova import skip_import
+with skip_import('structural'):
     from nova.structural.finiteframe import finiteframe, scale
-except ModuleNotFoundError:
-    pytest.skip("structural dependancies not available\n"
-                "try pip install -e .['structural']",
-                allow_module_level=True)
 
+from nova.graphics.plot import Plot
 from nova.structural.catenary import catenary
-import matplotlib.pyplot as plt
 
 
 def test_couple(plot=False):
@@ -37,6 +34,7 @@ def test_couple(plot=False):
     assert ff.D['y'][1] == ff.D['y'][2]
     # plot
     if plot:
+        plt = Plot().plt
         with scale(ff.deform, -0.5):
             ff.plot_nodes()
             ff.plot_F(projection='xy', factor=0.25)
@@ -71,6 +69,7 @@ def test_rotational_couple(plot=False):
             np.array([ff.D['x'], ff.D['y'], ff.D['z']])[:, 1:].T)])
     assert np.isclose(tangential, tangential[0]).all()
     if plot:
+        plt = Plot().plt
         with scale(ff.deform, -0.35):
             ff.plot_nodes()
             ff.plot_F(factor=0.5)
@@ -111,6 +110,7 @@ def test_xy_plane_3D(plot=False):
     assert np.allclose(ff.D['y'][:10], ff.D['y'][11:][::-1])
     # plot
     if plot:
+        plt = Plot().plt
         with scale(ff.deform, -0.5):
             ax = plt.subplots(1, 1)[1]
             ff.plot_nodes(ax=ax)
@@ -148,6 +148,7 @@ def test_displacment_constraints(plot=False):
                        np.array([ff.D['x'][2], ff.D['y'][1], ff.D['z'][3]]))
     # plot
     if plot:
+        plt = Plot().plt
         with scale(ff.deform, -0.5):
             ax = plt.subplots(1, 1)[1]
             ff.plot_nodes(ax=ax)

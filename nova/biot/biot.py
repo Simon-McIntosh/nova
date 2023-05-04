@@ -17,7 +17,7 @@ class BiotBase(FrameSet):
     """Biot methods base class."""
 
     _biot_attrs: dict[str, list[str] | Nbiot] = field(
-        init=False, default_factory=dict)
+        init=False, default_factory=dict, repr=False)
     force_attrs: ClassVar[list[str]] = ['Fr', 'Fz', 'Fc']
     field_attrs: ClassVar[list[str]] = ['Br', 'Bz', 'Psi']
 

@@ -8,6 +8,7 @@ import pytest
 import nova
 from nova.database.filepath import FilePath
 from nova.definitions import root_dir
+
 try:
     import imas
     IMPORT_IMAS = True
@@ -18,8 +19,10 @@ except ImportError:
 
 HOSTNAME = 'sdcc-login01.iter.org'
 
-try:
+with nova.mark_import('ssh') as mark_ssh:
     import paramiko
+
+try:
     client = paramiko.SSHClient()
     client.load_system_host_keys()
     client.connect(HOSTNAME)
@@ -29,10 +32,8 @@ except:
 
 
 mark_imas = pytest.mark.skipif(not IMPORT_IMAS, reason='failed to import imas')
-mark_ssh = pytest.mark.skipif(
-    not VALID_HOST, reason=f"unable to connect to ssh host {HOSTNAME}\n"
-                           "check vpn connection\n"
-                           "try pip install -e .['shell']")
+mark_connect = pytest.mark.skipif(
+    not VALID_HOST, reason=f"unable to connect to host {HOSTNAME}")
 
 
 KEYPATH = dict(nova=os.path.join(nova.__name__,
@@ -76,6 +77,7 @@ def test_local_filesystem():
 
 
 @mark_ssh
+@mark_connect
 def test_ssh_filesystem():
     filepath = FilePath(hostname=HOSTNAME, dirname='/tmp')
     assert isinstance(filepath.fsys,
@@ -83,6 +85,7 @@ def test_ssh_filesystem():
 
 
 @mark_ssh
+@mark_connect
 def test_ssh_appdirs_error():
     with pytest.raises(FileNotFoundError):
         FilePath(hostname=HOSTNAME, dirname='/tmp.nova', parents=1)
@@ -115,6 +118,7 @@ def test_checkdir(subpath):
 
 
 @mark_ssh
+@mark_connect
 def test_checkdir_ssh():
     path = '/tmp/_filepath'
     with clear(path) as filepath:

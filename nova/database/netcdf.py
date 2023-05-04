@@ -14,7 +14,7 @@ from nova.database.filepath import FilePath
 class netCDF(FilePath):
     """Provide regulated access to netCDF database."""
 
-    group: str | None = None
+    group: str | None = field(default=None, repr=False)
     data: xarray.Dataset = field(default_factory=xarray.Dataset, repr=False)
 
     def __post_init__(self):

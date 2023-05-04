@@ -5,12 +5,9 @@ import numpy as np
 import pytest
 import tempfile
 
-try:
+from nova import skip_import
+with skip_import('vtk'):
     import vedo
-except ModuleNotFoundError:
-    pytest.skip("vtk modules not available\n"
-                "try pip install -e .['vtk']",
-                allow_module_level=True)
 
 from nova.frame.framespace import FrameSpace
 from nova.geometry.volume import VtkFrame

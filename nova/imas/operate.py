@@ -114,7 +114,7 @@ class Grid:
 
 
 @dataclass
-class Operate(Machine, Grid, Profile, Equilibrium):
+class Operate(Grid, Machine, Profile, Equilibrium):
     """
     Extend Machine with default values for Operate class.
 

@@ -930,7 +930,7 @@ class CoilData(IdsData):
     :class:`~nova.imas.database.IdsData`
     """
 
-    dirname: str = '.nova'
+    dirname: str = field(default='.nova', repr=False)
 
     def __post_init__(self):
         """Update filename and group."""

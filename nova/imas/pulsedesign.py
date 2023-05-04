@@ -5,17 +5,15 @@ from typing import ClassVar
 
 import numpy as np
 from scipy.optimize import minimize, newton_krylov, LinearConstraint
-from scipy.sparse.linalg import LinearOperator
-from scipy.spatial import distance_matrix
 from tqdm import tqdm
 
 from nova.biot.biot import Nbiot
-from nova.biot.error import PlasmaTopologyError
 from nova.graphics.plot import Plot
 from nova.geometry.separatrix import Quadrant, Separatrix
 from nova.imas.database import Ids
 from nova.imas.equilibrium import Equilibrium
 from nova.imas.machine import Machine
+from nova.imas.profile import Profile
 from nova.imas.pf_active import PF_Active
 from nova.linalg.regression import MoorePenrose
 
@@ -73,7 +71,6 @@ class Constraint(Plot):
 
     def __post_init__(self):
         """Initialize constraint data."""
-        super().__post_init__()
         for attr in self.attrs:
             self.constraint[attr] = ConstraintData(self.point_number)
 
@@ -170,8 +167,10 @@ class Constraint(Plot):
 class ControlPoint(Equilibrium):
     """Build control points from pulse schedule data."""
 
-    control: Constraint = field(init=False, default_factory=Constraint)
-    strike: Constraint = field(init=False, default_factory=Constraint)
+    control: Constraint = field(init=False, default_factory=Constraint,
+                                repr=False)
+    strike: Constraint = field(init=False, default_factory=Constraint,
+                               repr=False)
 
     point_attrs: ClassVar[dict[str, list[str]]] = {
         'boundary': ['outer', 'upper', 'inner', 'lower',
@@ -201,10 +200,12 @@ class ControlPoint(Equilibrium):
     def update_control_point(self, psi=0):
         """Update control point constraints."""
         self.control = Constraint(self.control_points)
-        self.control.poloidal_flux = psi, [0, 1, 2, 3, 4, 5]
+        self.control.poloidal_flux = psi, [0, 1, 2, 3]
         self.control.radial_field = 0, [0, 2]
         self.control.vertical_field = 0, [1, 3]
-        if not self.limiter:
+        if self.limiter:
+            self.control.poloidal_flux = psi, [4, 5, 6, 7]
+        else:
             self.control.radial_field = 0, [3]
 
     def update_strike_point(self, psi=0):
@@ -324,7 +325,7 @@ class ControlPoint(Equilibrium):
                     ['minor_radius', 'elongation',
                      'triangularity_upper', 'triangularity_lower']}
 
-    def plot_profile(self):
+    def plot_plasma_profile(self):
         """Plot analytic profile."""
         profile = Separatrix(point_number=121)
         profile.limiter(**self.coef).plot()
@@ -343,9 +344,9 @@ class ControlPoint(Equilibrium):
 class ITER(Machine):
     """ITER machine description."""
 
-    pf_active: Ids | bool | str = 'iter_md'
-    pf_passive: Ids | bool | str = False
-    wall: Ids | bool | str = 'iter_md'
+    pf_active: Ids | bool | str = field(default='iter_md', repr=False)
+    pf_passive: Ids | bool | str = field(default=False, repr=False)
+    wall: Ids | bool | str = field(default='iter_md', repr=False)
     tplasma: str = 'hex'
     dplasma: int | float = -3000
 
@@ -354,7 +355,6 @@ class ITER(Machine):
         super().__post_init__()
         self.saloc['free'][-2] = False
 
-from nova.imas.profile import Profile
 
 @dataclass
 class PulseDesign(ITER, ControlPoint, Profile):
@@ -368,8 +368,7 @@ class PulseDesign(ITER, ControlPoint, Profile):
     nfield: Nbiot = None
 
     def update_constraints(self):
-        """Extend ControlPoint.update_constraints to include psi proxy."""
-        # for DINA benchmark
+        """Extend ControlPoint.update_constraints to include boundary psi."""
         super().update_constraints(-self['psi_boundary'])  # COCOS11
 
     def update(self):
@@ -377,7 +376,7 @@ class PulseDesign(ITER, ControlPoint, Profile):
         super().update()
         self.sloc['plasma', 'Ic'] = self['ip']
 
-    def _constrain(self, constraint, field_weight=500):
+    def _constrain(self, constraint, field_weight=50):
         """Return coupling matrix and vectors."""
         if len(constraint) == 0:
             return
@@ -411,7 +410,7 @@ class PulseDesign(ITER, ControlPoint, Profile):
         coupling = [self._constrain(self.control),
                     self._constrain(self.strike)]
         matrix, vector = self._stack(*coupling)
-        self.saloc['free', 'Ic'] = MoorePenrose(matrix, gamma=2.5e-5) / vector
+        self.saloc['free', 'Ic'] = MoorePenrose(matrix, gamma=1.0e-5) / vector
         '''
         bounds = [(self.frame.loc[index, 'Imin'],
                    self.frame.loc[index, 'Imax'])
@@ -425,36 +424,23 @@ class PulseDesign(ITER, ControlPoint, Profile):
         """Return optimization goal."""
         return np.linalg.norm(matrix @ xin - vector)
 
-    #def jac(self, xin, matrix):
-
-
     def hess(self, x):
+        """Return Hessian for a linear operator."""
         return np.zeros((len(x), len(x)))
 
     def optimize_current(self):
         """Optimize external coil currents."""
-        coupling = [self._constrain(self.control)]
-                    #self._constrain(self.strike)]
+        coupling = [self._constrain(self.control),
+                    self._constrain(self.strike)]
         matrix, vector = self._stack(*coupling)
-
         fmatrix, fvector = self._constrain(self.field)
-
-        print(fmatrix)
-
         self.solve_current()
-
         constraints = [LinearConstraint(matrix, vector, vector),
                        LinearConstraint(fmatrix, fvector, fvector)]
-
         sol = minimize(self.fun, self.saloc['free', 'Ic'],
                        hess=self.hess, method='trust-constr',
                        constraints=constraints)
         self.saloc['free', 'Ic'] = sol.x
-
-        print(self._constrain(self.field)[1])
-        print(np.dot(self._constrain(self.field)[0],
-                     self.saloc['free', 'Ic']))
-        #print(sol)
 
     @property
     def psi_boundary(self):
@@ -468,11 +454,6 @@ class PulseDesign(ITER, ControlPoint, Profile):
         self.plasma.nturn = xin[:-1]
         self.solve_current()
         self.plasma.separatrix = xin[-1]
-
-        #nturn = self.plasma.nturn * self.aloc['plasma', 'x']**-1
-        #self.plasma.nturn = nturn / np.sum(nturn)
-        #print('a')
-
         xout = np.r_[self.plasma.nturn, np.sum(self.plasma.nturn)]
         residual = xout - np.r_[xin[:-1], 1]
         residual[-1] /= self.plasmagrid.number
@@ -488,8 +469,6 @@ class PulseDesign(ITER, ControlPoint, Profile):
 
     def _solve(self, verbose=True):
         """Solve waveform with Newton Krylov scheame."""
-        #self.plasma.ionize = True
-        #self.plasma.nturn = self.plasma.area / np.sum(self.plasma.area)
         self.solve_current()
         psi = np.r_[self.plasmagrid.psi, self.plasmawall.psi]
         psi = newton_krylov(self.psi_residual, self.plasma.psi,
@@ -497,8 +476,8 @@ class PulseDesign(ITER, ControlPoint, Profile):
         self.psi_residual(psi)
 
     def solve(self, verbose=False):
-        """Basic solve using Picard itteration."""
-        for _ in range(2):
+        """Solve waveform using basic Picard itteration."""
+        for _ in range(3):
             self.solve_current()
             with self.plasma.profile(self.p_prime, self.ff_prime):
                 self.plasma.separatrix = self.plasma.psi_boundary
@@ -520,6 +499,11 @@ class PulseDesign(ITER, ControlPoint, Profile):
             self.solve(verbose=False)
             current[itime] = self.saloc['free', 'Ic']
         return current
+
+    @property
+    def _pf_active(self):
+        """Return pf_active ids including current waveform solution."""
+        return super().pf_active
 
 
 @dataclass
@@ -585,7 +569,6 @@ class Benchmark(PulseDesign):
             self.axes.legend()
 
 
-
 if __name__ == '__main__':
 
     #design = PulseDesign(135013, 2, 'iter', 1)
@@ -593,13 +576,12 @@ if __name__ == '__main__':
     # design.strike = Constraint()
     # design.control.points[3, 1] += 0.5
 
-    design.itime = 10
+    design.itime = -1
     #design.control.points[3, 0] += 0.2
     #design.control.points[3, 1] += 0.6
     #design.strike = Constraint()
 
     #design.plot_waveform()
-
 
 
     design.solve()

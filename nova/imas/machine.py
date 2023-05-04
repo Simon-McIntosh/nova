@@ -816,7 +816,7 @@ class Geometry:
     pf_passive: Ids | bool | str = True
     wall: Ids | bool | str = 'iter_md'
     filename: str = ''
-    ids: ImasIds | None = None
+    ids: ImasIds | None = field(default=None, repr=False)
 
     geometry: ClassVar[dict] = dict(pf_active=PoloidalFieldActive,
                                     pf_passive=PoloidalFieldPassive,

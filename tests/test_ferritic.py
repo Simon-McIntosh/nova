@@ -5,13 +5,9 @@ import tempfile
 import numpy as np
 import pytest
 
-try:
+from nova import skip_import
+with skip_import('ferritic'):
     import vedo
-except ModuleNotFoundError:
-    pytest.skip("vtk modules not available\n"
-                "try pip install -e .['vtk']",
-                allow_module_level=True)
-
 
 from nova.frame.coilset import CoilSet
 

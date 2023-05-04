@@ -2,7 +2,8 @@ import pytest
 import numpy as np
 import scipy
 
-try:
+from nova import skip_import
+with skip_import('thermofluids'):
     import ftputil
 
     from nova.thermalhydralic.sultan.campaign import Campaign
@@ -14,15 +15,12 @@ try:
     from nova.thermalhydralic.sultan.profile import Profile
     from nova.thermalhydralic.sultan.remotedata import FTPData
     from nova.thermalhydralic.sultan.model import Model
-except ImportError:
-    pytest.skip("thermohydralic modules not available\n"
-                "try pip install -e .['thermofluids']",
-                allow_module_level=True)
 
 try:
     FTPData().listdir()
 except ftputil.error.FTPOSError:
-    pytest.skip('FTPOSError: [Errno 111] Connection refused')
+    pytest.skip('FTPOSError: [Errno 111] Connection refused',
+                allow_module_level=True)
 
 
 def test_experiment():

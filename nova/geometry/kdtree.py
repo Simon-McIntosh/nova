@@ -19,7 +19,6 @@ class KDTree(Plot):
     def __post_init__(self):
         """Update point number."""
         self.number = len(self.points)
-        super().__post_init__()
 
     @cached_property
     def kd_tree(self):

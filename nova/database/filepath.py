@@ -26,10 +26,10 @@ class FilePath:
     """Manage to access to data via store and load methods."""
 
     filename: str = ''
-    dirname: Path | str = ''
-    basename: Path | str = 'user_data'
-    hostname: str | None = None
-    parents: int = 3
+    dirname: Path | str = field(default='', repr=False)
+    basename: Path | str = field(default='user_data', repr=False)
+    hostname: str | None = field(default=None, repr=False)
+    parents: int = field(default=3, repr=False)
     fsys: fsspec.filesystem = field(init=False, repr=False)
 
     def __post_init__(self):

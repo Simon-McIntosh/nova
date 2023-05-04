@@ -2,13 +2,10 @@
 import numpy as np
 import pytest
 
-try:
+from nova import skip_import
+with skip_import('vtk'):
     from nova.geometry.vtkgen import VtkFrame
     from nova.geometry.volume import Section, Cell, Sweep
-except ModuleNotFoundError:
-    pytest.skip("vtk modules not available\n"
-                "try pip install -e .['vtk']",
-                allow_module_level=True)
 
 
 def test_section_translate():

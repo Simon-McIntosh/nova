@@ -130,13 +130,13 @@ class Plasma(Plot, netCDF, PlasmaLoc):
         except IndexError:
             psi_norm = None
         yield  # update separatrix
-        if psi_norm is None:
-            return
-        current_density = self.radius * p_prime(psi_norm[self.ionize]) + \
-            ff_prime(psi_norm[self.ionize]) / (mu_0 * self.radius)
-        current_density *= -2*np.pi
-        current = current_density * self.area
-        self.nturn = current / current.sum()
+        if psi_norm is not None:
+            psi_norm = psi_norm[self.ionize]
+            current_density = self.radius * p_prime(psi_norm) + \
+                ff_prime(psi_norm) / (mu_0 * self.radius)
+            current_density *= -2*np.pi
+            current = current_density * self.area
+            self.nturn = current / current.sum()
 
     @property
     def separatrix(self):

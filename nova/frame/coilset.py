@@ -1,5 +1,5 @@
 """Construct coilset with frameset and biot factories."""
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from nova.biot.biot import Biot
 from nova.control.control import Control
@@ -18,7 +18,7 @@ class CoilSet(Biot, Control, Frame):
 
     """
 
-    dirname: str = '.nova'
+    dirname: str = field(default='.nova', repr=False)
 
     @property
     def coilset_attrs(self):

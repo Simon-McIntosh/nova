@@ -7,6 +7,42 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from importlib import import_module
 import os
+import pytest
+
+
+def _report(dependencies: tuple[str, ...]):
+    """Return module not found error meassage for dependency list."""
+    dependency_list = f"{', '.join(dependencies)}"
+    return f"Optional dependencies [{dependency_list}] not installed. " \
+        f"pip install .['{dependency_list}']"
+
+
+@contextmanager
+def check_import(*dependencies: str):
+    """Check module import, raise if not found."""
+    try:
+        yield
+    except ModuleNotFoundError as error:
+        raise ModuleNotFoundError(_report(dependencies)) from error
+
+
+@contextmanager
+def mark_import(*dependencies: str, skip=False):
+    """Return pytest mark, skip if not found."""
+    skip = []
+    try:
+        yield pytest.mark.skipif(skip, reason=_report(dependencies))
+    except ModuleNotFoundError:
+        skip.append(True)
+
+
+@contextmanager
+def skip_import(*dependencies: str):
+    """Check module import, skip test if not found."""
+    try:
+        yield
+    except ModuleNotFoundError:
+        pytest.skip(_report(dependencies), allow_module_level=True)
 
 
 @contextmanager

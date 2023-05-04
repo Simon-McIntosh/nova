@@ -26,7 +26,6 @@ class Surface(Line):
 
     def __post_init__(self, code):
         """Store contour surface."""
-        super().__post_init__()
         self.closed = code[-1] == 79
         if len(self.points) <= 5:
             self.closed = False

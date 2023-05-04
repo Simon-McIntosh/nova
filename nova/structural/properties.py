@@ -7,8 +7,8 @@ from nova.utilities import geom
 class secondmoment(object):
 
     def __init__(self):
-        self.patch = []
-        self.hole = []
+        self._patch = []
+        self._hole = []
         self.C = {'y': 0, 'z': 0}
         self.I = {'yy': 0, 'zz': 0, 'xx': 0}
         self.A = 0
@@ -78,12 +78,12 @@ class secondmoment(object):
     def add_patch(self, patch, dy, dz):
         patch['y'] += dy
         patch['z'] += dz
-        self.patch.append(patch)
+        self._patch.append(patch)
 
     def add_hole(self, hole, dy, dz):
         hole['y'] += dy
         hole['z'] += dz
-        self.hole.append(hole)
+        self._hole.append(hole)
 
     def update(self, C, I, A):
         for ax in self.C:  # adjust centroid
@@ -139,9 +139,9 @@ class secondmoment(object):
         return self.C, self.I, self.A
 
     def plot(self, centroid=True):
-        for p in self.patch:
+        for p in self._patch:
             geom.polyfill(p['y'], p['z'], alpha=1)
-        for h in self.hole:
+        for h in self._hole:
             geom.polyfill(h['y'], h['z'], color=np.ones(3))
         plt.axis('equal')
         if centroid:
@@ -150,14 +150,14 @@ class secondmoment(object):
 
     def get_pnt(self):
         y, z = [], []
-        for p in self.patch:
+        for p in self._patch:
             y.append(p['y'])
             z.append(p['z'])
         return [y, z]
-    
+
     @property
     def section(self):
-        return {'C': self.C, 'I': self.I, 'A': self.A, 
+        return {'C': self.C, 'I': self.I, 'A': self.A,
                 'J': self.I['xx'], 'pnt': self.get_pnt()}
 
 

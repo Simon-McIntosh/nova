@@ -11,7 +11,7 @@ import xarray
 from nova.biot.biot import Nbiot
 from nova.graphics.plot import Plot
 from nova.geometry.separatrix import Quadrant, Separatrix
-from nova.imas.database import Database, Ids, IdsEntry
+from nova.imas.database import Database, IDS, Ids, IdsEntry
 from nova.imas.equilibrium import Equilibrium
 from nova.imas.machine import Machine
 from nova.imas.metadata import Metadata
@@ -206,7 +206,7 @@ class ControlPoint(Equilibrium):
         self.control.radial_field = 0, [0, 2]
         self.control.vertical_field = 0, [1, 3]
         if self.limiter:
-            self.control.poloidal_flux = psi, [4, 5, 6, 7]
+            self.control.poloidal_flux = psi, []
         else:
             self.control.radial_field = 0, [3]
 
@@ -368,6 +368,8 @@ class PulseDesign(ITER, ControlPoint, Profile):
     ninductance: Nbiot = None
     nforce: Nbiot = None
     nfield: Nbiot = None
+    gamma: float = 1e-5
+    field_weight: float | int = 50
 
     def update_constraints(self):
         """Extend ControlPoint.update_constraints to include boundary psi."""
@@ -378,7 +380,7 @@ class PulseDesign(ITER, ControlPoint, Profile):
         super().update()
         self.sloc['plasma', 'Ic'] = self['ip']
 
-    def _constrain(self, constraint, field_weight=50):
+    def _constrain(self, constraint):
         """Return coupling matrix and vectors."""
         if len(constraint) == 0:
             return
@@ -393,8 +395,8 @@ class PulseDesign(ITER, ControlPoint, Profile):
             vector = constraint[attr].data - \
                 matrix[:, self.plasma_index] * self.saloc['plasma', 'Ic']
             if attr != 'psi':
-                matrix *= np.sqrt(field_weight)
-                vector *= np.sqrt(field_weight)
+                matrix *= np.sqrt(self.field_weight)
+                vector *= np.sqrt(self.field_weight)
             _matrix.append(matrix)
             _vector.append(vector)
         matrix = np.vstack(_matrix)
@@ -412,7 +414,8 @@ class PulseDesign(ITER, ControlPoint, Profile):
         coupling = [self._constrain(self.control),
                     self._constrain(self.strike)]
         matrix, vector = self._stack(*coupling)
-        self.saloc['free', 'Ic'] = MoorePenrose(matrix, gamma=1.0e-5) / vector
+        gamma = self.gamma * abs(self['ip'])
+        self.saloc['free', 'Ic'] = MoorePenrose(matrix, gamma=gamma) / vector
         '''
         bounds = [(self.frame.loc[index, 'Imin'],
                    self.frame.loc[index, 'Imax'])
@@ -505,30 +508,26 @@ class PulseDesign(ITER, ControlPoint, Profile):
     def update_metadata(self, ids_entry: IdsEntry):
         """Update ids with instance metadata."""
         metadata = Metadata(ids_entry.ids_data)
-        comment = 'Feature preserving reduced order waveforms'
-        #source = ','.join([str(value) for value in ids_attrs.values()])
-
+        comment = 'Coil current waveforms to match 4-point bounding-box ' \
+            'separatrix targets.'
         provenance = [self.uri]
+        provenance.extend([IDS(*value.split(',')).uri for attr, value
+                           in self.data.attrs.items() if attr[-3:] == '_md'])
         metadata.put_properties(comment, homogeneous_time=1,
                                 provenance=provenance)
-
-        '''
-        code_parameters = {attr: getattr(self, attr) for attr in
-                           ['dtime', 'savgol', 'epsilon', 'cluster',
-                            'features']}
-        metadata.put_code('Geometry extraction and RDP order reduciton',
-                          code_parameters)
-        '''
+        code_parameters = self.data.attrs
+        code_parameters |= {attr: getattr(self, attr) for attr in
+                            ['gamma', 'field_weight']}
+        metadata.put_code(code_parameters)
 
     @cached_property
-    def waveform(self) -> xarray.Dataset:
+    def _data(self) -> xarray.Dataset:
         """Return waveform dataset."""
         data = xarray.Dataset()
         data['time'] = self.data.time
         data['coil_name'] = self.coil_name
         data['current'] = xarray.DataArray(0., coords=data.coords)
-
-        for itime in tqdm(self.data.itime.data):
+        for itime in tqdm(self.data.itime.data, 'PDS waveform'):
             self.itime = itime
             self.solve()
             data['current'][itime] = self.current
@@ -537,18 +536,17 @@ class PulseDesign(ITER, ControlPoint, Profile):
     @cached_property
     def pf_active_ids(self) -> Ids:
         """Return waveform pf_active ids."""
-        pf_active_md = Database(**self.pf_active)
+        pf_active_md = Database(**self.pf_active)  # type: ignore
         ids_entry = IdsEntry(ids_data=pf_active_md.ids_data, name='pf_active')
         self.update_metadata(ids_entry)
-        ids_entry.ids_data.time = self.waveform.time.data
+        ids_entry.ids_data.time = self._data.time.data
         with ids_entry.node('coil:*.data'):
-            ids_entry['current', :] = self.waveform['current'].data.T
-        print(ids_entry.ids_data.ids_properties)
+            ids_entry['current', :] = self._data['current'].data.T
+        return ids_entry.ids_data
 
     @cached_property
     def equilibrium_ids(self) -> Ids:
         """Return waveform equilibrium ids."""
-
 
 
 @dataclass
@@ -596,7 +594,6 @@ class Benchmark(PulseDesign):
 
     def plot_waveform(self):
         """Compare benchmark coil current waveforms."""
-        currents = self.solve_waveform()
         benchmark = self['pf_active'].data
         coil_name = benchmark.coil_name.data
 
@@ -607,7 +604,7 @@ class Benchmark(PulseDesign):
                     continue
                 self.axes.plot(benchmark.time, 1e-3*benchmark.current[:, i],
                                color='gray')
-                self.axes.plot(self.data.time, 1e-3*currents[:, i],
+                self.axes.plot(self.data.time, 1e-3*self._data.current[:, i],
                                label=name)
             self.axes.set_ylabel(f'{group} coil current, kA')
             self.axes.set_xlabel('time, s')
@@ -616,22 +613,20 @@ class Benchmark(PulseDesign):
 
 if __name__ == '__main__':
 
-    design = PulseDesign(135013, 2, 'iter', 1)
-    #design = Benchmark(135013, 2, 'iter', 1)
+    # design = PulseDesign(135013, 2, 'iter', 1)
+    design = Benchmark(135013, 2, 'iter', 1, field_weight=50, gamma=1e-12)
     # design.strike = Constraint()
     # design.control.points[3, 1] += 0.5
 
-    _ = design.pf_active_ids
+    #_ = design.pf_active_ids
 
-    '''
-    design.itime = -1
+
     #design.control.points[3, 0] += 0.2
     #design.control.points[3, 1] += 0.6
     #design.strike = Constraint()
-
-    #design.plot_waveform()
     #design.superframe
 
+    design.itime = -2
     design.solve()
 
     #design.saloc['Ic'][:-2] = design['pf_active']['current'][:-1]
@@ -641,4 +636,5 @@ if __name__ == '__main__':
     design.levelset.plot_levelset(design.plasma.psi_boundary, False, color='C3')
 
     design.plot_current()
-    '''
+
+    #design.plot_waveform()

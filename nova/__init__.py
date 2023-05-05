@@ -14,7 +14,7 @@ def _report(dependencies: tuple[str, ...]):
     """Return module not found error meassage for dependency list."""
     dependency_list = f"{', '.join(dependencies)}"
     return f"Optional dependencies [{dependency_list}] not installed. " \
-        f"pip install .['{dependency_list}']"
+        f"pip install .[{dependency_list}]"
 
 
 @contextmanager

@@ -133,8 +133,8 @@ class BiotGap(BiotBase):
     """Manage biot gap probe methods."""
 
     ngap: Nbiot = None
-    mingap: int | float = 0
-    maxgap: int | float = 2.5
+    mingap: int | float | None = 0
+    maxgap: int | float | None = 2.5
 
     def __post_init__(self):
         """Append biot attrs."""

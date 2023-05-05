@@ -15,8 +15,12 @@ class Fiducial(ABC):
 
     target: list[str] = field(
         default_factory=lambda: list(string.ascii_uppercase[:8]))
-    delta: dict[str, float] = field(init=False, default_factory=dict)
-    origin: list[str] = field(init=False, default_factory=list)
+    delta: dict[int, pandas.DataFrame] | dict = \
+        field(init=False, default_factory=dict)
+    origin: list[str] = field(init=False, default_factory=lambda:
+                              ['EU', 'JA', 'EU', 'EU', 'EU', 'EU', 'JA',
+                               'JA', 'EU', 'JA', 'EU', 'JA', 'JA', 'JA',
+                               'JA', 'JA', 'EU', 'EU', 'JA'])
     source: str = ''
 
     def __post_init__(self):
@@ -37,6 +41,7 @@ class Fiducial(ABC):
 class FiducialIDM(Fiducial):
     """Manage ccl fiducial data extracted from IDM documents."""
 
+    origin: list[str] = field(init=False, default_factory=list)
     source: str = 'IDM dataset'
 
     name: ClassVar[str] = ''
@@ -405,10 +410,6 @@ class FiducialIDM(Fiducial):
 class FiducialRE(Fiducial):
     """Manage Reverse Engineering fiducial data."""
 
-    origin: list[str] = field(init=False, default_factory=lambda:
-                              ['EU', 'JA', 'EU', 'EU', 'EU', 'EU', 'JA',
-                               'JA', 'EU', 'JA', 'EU', 'JA', 'JA', 'JA',
-                               'JA', 'JA', 'EU', 'EU', 'JA'])
     file: str = 'TFC18_asbuilt'
 
     def __post_init__(self):

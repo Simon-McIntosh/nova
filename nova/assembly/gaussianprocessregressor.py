@@ -47,7 +47,7 @@ class GaussianProcessRegressor:
 
     def fit(self, y):
         """Fit Gaussian Process Regressor."""
-        self.data['y'] = ('x', self.to_numpy(y))
+        self.data['y'] = 'x', self.to_numpy(y)
         _x, _y = self.data.x.to_numpy(), self.data.y.to_numpy()
         if np.isnan(_y).any():  # drop nans
             index = ~np.isnan(_y)

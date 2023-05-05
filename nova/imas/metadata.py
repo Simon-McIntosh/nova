@@ -38,7 +38,7 @@ class Properties(Attrs):
     source: str | None = None
     homogeneous_time: int = 1
     provider: str | None = 'Simon McIntosh, simon.mcintosh@iter.org'
-    provenance: list[str, ...] | None = None
+    provenance: list[str] | None = None
 
     attributes: ClassVar[list[str]] = \
         ['comment', 'homogeneous_time', 'source', 'provider', 'creation_date']
@@ -60,13 +60,12 @@ class Properties(Attrs):
 class Code(Attrs):
     """Methods for retriving and formating code metadata."""
 
-    description: str | None = None
     parameter_dict: dict | None = None
     output_flag: list[int] | np.ndarray | None = None
 
     name: ClassVar[str] = 'Nova'
     attributes: ClassVar[list[str]] = \
-        ['name', 'description', 'commit', 'version', 'repository',
+        ['name', 'commit', 'version', 'repository',
          'parameters', 'output_flag']
 
     def __post_init__(self):
@@ -114,9 +113,9 @@ class Metadata:
         properties = Properties(comment, source, *args, **kwargs)
         properties.update(self.ids.ids_properties)
 
-    def put_code(self, description, parameter_dict=None, output_flag=None):
+    def put_code(self, parameter_dict=None, output_flag=None):
         """Update referances to Nova code."""
-        code = Code(description, parameter_dict, output_flag)
+        code = Code(parameter_dict, output_flag)
         code.update(self.ids.code)
 
 

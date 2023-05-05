@@ -94,10 +94,10 @@ class Database(IDS):
         Pulse number. The default is 0.
     run: int, optional (required when ids not set)
         Run number. The default is 0.
-    occurrence: int, optional (required when ids not set)
-        Occurrence number. The default is 0.
     machine: str, optional (required when ids not set)
         Machine name. The default is iter.
+    occurrence: int, optional (required when ids not set)
+        Occurrence number. The default is 0.
     user: str, optional (required when ids not set)
         User name. The default is public.
     name: str, optional (required when ids not set)
@@ -262,10 +262,10 @@ class Database(IDS):
         if self._unset_attrs:
             self.pulse = self.ids_hash
             self.run = 0
-            if self.name is not None and self.name != self.ids_data.__name__:
-                raise NameError(f'missmatch between instance name {self.name} '
-                                f'and ids_data {self.ids_data.__name__}')
-            self.name = self.ids_data.__name__
+        if self.name is not None and self.name != self.ids_data.__name__:
+            raise NameError(f'missmatch between instance name {self.name} '
+                            f'and ids_data {self.ids_data.__name__}')
+        self.name = self.ids_data.__name__
 
     def _check_ids_attrs(self):
         """Confirm minimum working set of input attributes."""

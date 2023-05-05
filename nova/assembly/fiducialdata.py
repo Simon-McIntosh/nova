@@ -10,6 +10,7 @@ import xarray
 
 from nova.assembly.centerline import CenterLine
 from nova.assembly.fiducialccl import Fiducial, FiducialIDM, FiducialRE
+from nova.assembly.fiducialsector import FiducialSector
 from nova.assembly.gaussianprocessregressor import GaussianProcessRegressor
 from nova.assembly.plotter import Plotter
 
@@ -21,7 +22,7 @@ import seaborn as sns
 class FiducialData(Plotter):
     """Manage ccl fiducial data."""
 
-    fiducial: Fiducial | str = 'RE'
+    fiducial: Fiducial | str = 'Sector'
     fill: bool = True
     sead: int = 2030
     rawdata: dict[str, pandas.DataFrame] = \
@@ -36,7 +37,9 @@ class FiducialData(Plotter):
     def __post_init__(self):
         """Load data."""
         if not isinstance(self.fiducial, Fiducial):
-            self.fiducial = dict(RE=FiducialRE, IDM=FiducialIDM)[self.fiducial]
+            self.fiducial = {'RE': FiducialRE,
+                             'IDM': FiducialIDM,
+                             'Sector': FiducialSector}[self.fiducial]
         self.build_dataset()
         if self.fill:
             self.backfill()
@@ -143,12 +146,17 @@ class FiducialData(Plotter):
 
     def load_fiducial_deltas(self):
         """Load fiducial deltas."""
-        delta, origin = self.fiducial(self.data.target).data
+        fiducial = self.fiducial(self.data.target)  # , phase='SSAT BR'
+        delta, origin = fiducial.data
         self.data['coil'] = list(delta)
         self.data = self.data.assign_coords(origin=('coil', origin))
         self.data['fiducial_delta'] = (('coil', 'target', 'space'),
-                                       np.stack([delta[index]
+                                       np.stack([delta[index].to_numpy(float)
                                                  for index in delta], axis=0))
+        if hasattr(fiducial, 'variance'):
+            self.data['fiducial_variance'] = ('coil', 'target', 'space'), \
+                np.stack([fiducial.variance[index].to_numpy(float)
+                          for index in fiducial.variance], axis=0)
         self.data['centerline_delta'] = xarray.DataArray(
             0., coords=[('coil', self.data.coil.values),
                         ('arc_length', self.data.arc_length.values),
@@ -161,6 +169,13 @@ class FiducialData(Plotter):
 
     def load_gpr(self, coil_index, space_index):
         """Return Gaussian Process regression."""
+        try:
+            variance = \
+                self.data.fiducial_variance[coil_index, :, space_index].data
+        except AttributeError:
+            variance = 0.09
+        self.gpr = GaussianProcessRegressor(self.data.target_length,
+                                            variance=variance)
         return self.gpr.evaluate(
                         self.data.arc_length,
                         self.data.fiducial_delta[coil_index, :, space_index])
@@ -225,7 +240,11 @@ class FiducialData(Plotter):
                            bbox_to_anchor=[0.4, 0.5])
             axes[j].set_title(origin)
 
-    def plot_single(self, coil=2, factor=500, axes=None):
+    def coil_index(self, coil: int):
+        """Return coil index."""
+        return list(self.data.coil).index(coil)
+
+    def plot_single(self, coil_index, factor=500, axes=None):
         """Plot single fiducial curve."""
         if axes is None:
             axes = plt.subplots(1, 1)[1]
@@ -238,14 +257,14 @@ class FiducialData(Plotter):
             axes.text(*fiducial[::2], f' {fiducial.target.values}')
 
         axes.plot(self.data.fiducial[:, 0] +
-                  factor*self.data.fiducial_delta[coil, :, 0],
+                  factor*self.data.fiducial_delta[coil_index, :, 0],
                   self.data.fiducial[:, 2] +
-                  factor*self.data.fiducial_delta[coil, :, 2], 'C3o')
+                  factor*self.data.fiducial_delta[coil_index, :, 2], 'C3o')
 
         axes.plot(self.data.centerline[:, 0] +
-                  factor*self.data.centerline_delta[coil, :, 0],
+                  factor*self.data.centerline_delta[coil_index, :, 0],
                   self.data.centerline[:, 2] +
-                  factor*self.data.centerline_delta[coil, :, 2],
+                  factor*self.data.centerline_delta[coil_index, :, 2],
                   color='C0')
         axes.axis('equal')
         axes.axis('off')
@@ -253,10 +272,14 @@ class FiducialData(Plotter):
 
 if __name__ == '__main__':
 
-    fiducial = FiducialData('IDM', fill=True)
-    fiducial.plot_single(3)
-    fiducial.plot_gpr(1, 0)
+    fiducial = FiducialData('RE', fill=False)
+    coil = 13
+    coil_index = fiducial.coil_index(coil)
 
+    fiducial.plot_single(coil_index)
+    #fiducial.plot_gpr(1, 0)
+
+    fiducial.plot_gpr_array(coil_index)
     '''
     plotter = pv.Plotter()
     fiducial.mesh['delta'] *= 1e3
@@ -267,4 +290,4 @@ if __name__ == '__main__':
     '''
 
     fiducial.plot()
-    fiducial.plot_gpr_array(9)
+    #

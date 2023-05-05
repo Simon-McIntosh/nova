@@ -160,6 +160,26 @@ class FrameSetLoc(FrameData):
         return np.sign(self.i_plasma)
 
     @cached_property
+    def coil_name(self) -> list[str, ...]:
+        """Return coil names."""
+        return [name for name in self.Loc['coil', :].index]
+
+    @cached_property
+    def _subref(self):
+        """Return frame current subframe reference."""
+        return self.Loc['coil', 'subref'].to_numpy()
+
+    @cached_property
+    def _factor(self):
+        """Return frame current link factor."""
+        return self.Loc['coil', 'factor'].to_numpy()
+
+    @property
+    def current(self):
+        """Return frame coil currents."""
+        return self._factor * self.saloc['Ic'][self._subref]
+
+    @cached_property
     def aloc_hash(self):
         """Return interger hash computed on aloc array attribute."""
         return HashLoc('array_hash', self.aloc, self.saloc)

@@ -67,14 +67,13 @@ class Grid(Scenario):
 class Parameter0D(Plot, Scenario):
     """Load 0D parameter timeseries from equilibrium ids."""
 
-    attrs_0d: list[str] = field(repr=False,
-            default_factory=lambda: ['ip', 'beta_pol', 'beta_tor',
-                                     'beta_normal', 'li_3',
-                                     'psi_axis', 'psi_boundary',
-                                     'volume', 'area', 'surface', 'length_pol',
-                                     'q_axis', 'q_95',
-                                     'psi_external_average', 'v_external',
-                                     'plasma_inductance', 'plasma_resistance'])
+    attrs_0d: list[str] = field(
+            default_factory=lambda: [
+                'ip', 'beta_pol', 'beta_tor', 'beta_normal', 'li_3',
+                'psi_axis', 'psi_boundary', 'volume', 'area', 'surface',
+                'length_pol', 'q_axis', 'q_95', 'psi_external_average',
+                'v_external', 'plasma_inductance', 'plasma_resistance'],
+            repr=False)
     attrs_boundary: ClassVar[list[str]] = [
         'minor_radius', 'elongation', 'elongation_upper', 'elongation_lower',
         'triangularity', 'triangularity_upper', 'triangularity_lower',
@@ -348,8 +347,9 @@ class Parameter0D(Plot, Scenario):
 class Profile1D(Plot, Scenario):
     """Manage extraction of 1d profile data from imas ids."""
 
-    attrs_1d: list[str] = field(repr=False,
-            default_factory=lambda: ['dpressure_dpsi', 'f_df_dpsi'])
+    attrs_1d: list[str] = field(
+            default_factory=lambda: ['dpressure_dpsi', 'f_df_dpsi'],
+            repr=False)
 
     def build(self):
         """Build 1d profile data."""
@@ -413,9 +413,10 @@ class Profile1D(Plot, Scenario):
 class Profile2D(Chart, Scenario):
     """Manage extraction of 2d profile data from imas ids."""
 
-    attrs_2d: list[str] = field(repr=False,
-        default_factory=lambda: ['psi', 'phi', 'j_tor', 'j_parallel',
-                                 'b_field_r', 'b_field_z', 'b_field_tor'])
+    attrs_2d: list[str] = field(
+        default_factory=lambda: [
+            'psi', 'phi', 'j_tor', 'j_parallel', 'b_field_r', 'b_field_z',
+            'b_field_tor'], repr=False)
 
     def build(self):
         """Build profile 2d data and store to xarray data structure."""

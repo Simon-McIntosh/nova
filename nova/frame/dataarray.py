@@ -72,7 +72,7 @@ class DataArray(ArrayIndexer, DataFrame):
         return self
 
     def overwrite_array(self, data=None):
-        """Overwrite items in data with nans."""
+        """Overwrite float items in data with nans."""
         if data is None:
             data = self.metaframe.data
         for attr in data:

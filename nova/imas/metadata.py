@@ -38,18 +38,17 @@ class Properties(Attrs):
     source: str | None = None
     homogeneous_time: int = 1
     provider: str | None = 'Simon McIntosh, simon.mcintosh@iter.org'
-    provenance: Ids = None
+    provenance: list[str, ...] | None = None
 
     attributes: ClassVar[list[str]] = \
-        ['comment', 'homogeneous_time', 'source', 'provider', 'creation_date',
-         'provenance']
+        ['comment', 'homogeneous_time', 'source', 'provider', 'creation_date']
 
     def update(self, ids):
         """Extend Attrs update to include provenance ids."""
         super().update(ids)
         if self.provenance is not None:
             ids.provenance.node.resize(1)
-            ids.provenance.node[0].sources = self.provenance.code
+            ids.provenance.node[0].sources = self.provenance
 
     @property
     def creation_date(self):
@@ -112,8 +111,8 @@ class Metadata:
 
     def put_properties(self, comment, source=None, *args, **kwargs):
         """Update ids_properties."""
-        props = Properties(comment, source, *args, **kwargs)
-        props.update(self.ids.ids_properties)
+        properties = Properties(comment, source, *args, **kwargs)
+        properties.update(self.ids.ids_properties)
 
     def put_code(self, description, parameter_dict=None, output_flag=None):
         """Update referances to Nova code."""

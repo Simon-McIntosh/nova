@@ -40,9 +40,10 @@ class IDS:
     @property
     def uri(self):
         """Return IDS URI."""
-        return f"imas:{self.backend}?user={self.user};"\
-               f"version={self.dd_version};"\
-               f"shot={self.pulse};run={self.run};database={self.machine}"
+        return f"imas:{self.backend}?user={self.user};name={self.name};"\
+               f"shot={self.pulse};run={self.run};"\
+               f"occurrence={self.occurrence};"\
+               f"database={self.machine};version={self.dd_version};"
 
     @property
     def home(self):

@@ -6,13 +6,15 @@ from typing import ClassVar
 import numpy as np
 from scipy.optimize import minimize, newton_krylov, LinearConstraint
 from tqdm import tqdm
+import xarray
 
 from nova.biot.biot import Nbiot
 from nova.graphics.plot import Plot
 from nova.geometry.separatrix import Quadrant, Separatrix
-from nova.imas.database import Ids
+from nova.imas.database import Database, Ids, IdsEntry
 from nova.imas.equilibrium import Equilibrium
 from nova.imas.machine import Machine
+from nova.imas.metadata import Metadata
 from nova.imas.profile import Profile
 from nova.imas.pf_active import PF_Active
 from nova.linalg.regression import MoorePenrose
@@ -353,7 +355,7 @@ class ITER(Machine):
     def __post_init__(self):
         """Disable vs3 current updates."""
         super().__post_init__()
-        self.saloc['free'][-2] = False
+        self.saloc['free'][-2] = False  # TODO implement nturn_min filter
 
 
 @dataclass
@@ -500,10 +502,53 @@ class PulseDesign(ITER, ControlPoint, Profile):
             current[itime] = self.saloc['free', 'Ic']
         return current
 
-    @property
-    def _pf_active(self):
-        """Return pf_active ids including current waveform solution."""
-        return super().pf_active
+    def update_metadata(self, ids_entry: IdsEntry):
+        """Update ids with instance metadata."""
+        metadata = Metadata(ids_entry.ids_data)
+        comment = 'Feature preserving reduced order waveforms'
+        #source = ','.join([str(value) for value in ids_attrs.values()])
+
+        provenance = [self.uri]
+        metadata.put_properties(comment, homogeneous_time=1,
+                                provenance=provenance)
+
+        '''
+        code_parameters = {attr: getattr(self, attr) for attr in
+                           ['dtime', 'savgol', 'epsilon', 'cluster',
+                            'features']}
+        metadata.put_code('Geometry extraction and RDP order reduciton',
+                          code_parameters)
+        '''
+
+    @cached_property
+    def waveform(self) -> xarray.Dataset:
+        """Return waveform dataset."""
+        data = xarray.Dataset()
+        data['time'] = self.data.time
+        data['coil_name'] = self.coil_name
+        data['current'] = xarray.DataArray(0., coords=data.coords)
+
+        for itime in tqdm(self.data.itime.data):
+            self.itime = itime
+            self.solve()
+            data['current'][itime] = self.current
+        return data
+
+    @cached_property
+    def pf_active_ids(self) -> Ids:
+        """Return waveform pf_active ids."""
+        pf_active_md = Database(**self.pf_active)
+        ids_entry = IdsEntry(ids_data=pf_active_md.ids_data, name='pf_active')
+        self.update_metadata(ids_entry)
+        ids_entry.ids_data.time = self.waveform.time.data
+        with ids_entry.node('coil:*.data'):
+            ids_entry['current', :] = self.waveform['current'].data.T
+        print(ids_entry.ids_data.ids_properties)
+
+    @cached_property
+    def equilibrium_ids(self) -> Ids:
+        """Return waveform equilibrium ids."""
+
 
 
 @dataclass
@@ -571,18 +616,21 @@ class Benchmark(PulseDesign):
 
 if __name__ == '__main__':
 
-    #design = PulseDesign(135013, 2, 'iter', 1)
-    design = Benchmark(135013, 2, 'iter', 1)
+    design = PulseDesign(135013, 2, 'iter', 1)
+    #design = Benchmark(135013, 2, 'iter', 1)
     # design.strike = Constraint()
     # design.control.points[3, 1] += 0.5
 
+    _ = design.pf_active_ids
+
+    '''
     design.itime = -1
     #design.control.points[3, 0] += 0.2
     #design.control.points[3, 1] += 0.6
     #design.strike = Constraint()
 
     #design.plot_waveform()
-
+    #design.superframe
 
     design.solve()
 
@@ -593,3 +641,4 @@ if __name__ == '__main__':
     design.levelset.plot_levelset(design.plasma.psi_boundary, False, color='C3')
 
     design.plot_current()
+    '''

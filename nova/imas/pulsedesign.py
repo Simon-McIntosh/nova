@@ -8,6 +8,7 @@ from scipy.optimize import minimize, newton_krylov, LinearConstraint
 from tqdm import tqdm
 import xarray
 
+from numpy.ma import trace
 from nova.biot.biot import Nbiot
 from nova.graphics.plot import Plot
 from nova.geometry.separatrix import Quadrant, Separatrix
@@ -175,15 +176,12 @@ class ControlPoint(Equilibrium):
                                repr=False)
 
     point_attrs: ClassVar[dict[str, list[str]]] = {
-        'boundary': ['outer', 'upper', 'inner', 'lower',
-                     'upper_outer', 'upper_inner',
-                     'lower_inner', 'lower_outer'],
-        'strike': ['inner_strike', 'outer_strike']}
+        'boundary': ['outer', 'upper', 'inner', 'lower']}
 
     @property
     def limiter(self) -> bool:
         """Return limiter flag."""
-        return np.allclose(self['x_point'], (0, 0))
+        return self['boundary_type'] == 0
 
     @property
     def control_points(self):
@@ -205,9 +203,7 @@ class ControlPoint(Equilibrium):
         self.control.poloidal_flux = psi, [0, 1, 2, 3]
         self.control.radial_field = 0, [0, 2]
         self.control.vertical_field = 0, [1, 3]
-        if self.limiter:
-            self.control.poloidal_flux = psi, []
-        else:
+        if not self.limiter:
             self.control.radial_field = 0, [3]
 
     def update_strike_point(self, psi=0):
@@ -218,7 +214,6 @@ class ControlPoint(Equilibrium):
     def update_constraints(self, psi=0):
         """Update flux and field constraints."""
         self.update_control_point(psi)
-        # self.update_strike_point(psi)
 
     def update(self):
         """Update source equilibrium."""
@@ -344,7 +339,34 @@ class ControlPoint(Equilibrium):
 
 @dataclass
 class ITER(Machine):
-    """ITER machine description."""
+    """ITER machine description.
+
+    Extend `Machine` class with ITER specific defaults.
+
+    pf_active: Ids | bool | str, optional
+        Machine description ids for the `pf_active coil geometry,
+        turns and limits. The default is 'iter_md'.
+
+    pf_passive: Ids | bool | str, optional
+        Machine description ids for axisymetric passive structure. The default
+        is False.
+
+    wall: Ids | bool | str, optional
+        Machine description ids for first wall's poloidal contour. The default
+        is 'iter_md'.
+
+    tplasma: {'hex', 'rect'}
+        Plasma filament geometry. The default is 'hex'.
+
+    dplasma: int | float, optional
+        Plasma filament resolution. The default is -3000
+            - dplasma < 0: aproximate filament number ~ -int(dplasma)
+            - dplasma > 0: aproximate filament linear dimension
+
+    See :func:`nova.imas.machine.Geometry.get_ids_attrs` for usage details for
+    the pf_active, pf_passive, and wall attributes.
+
+    """
 
     pf_active: Ids | bool | str = field(default='iter_md', repr=False)
     pf_passive: Ids | bool | str = field(default=False, repr=False)
@@ -360,15 +382,231 @@ class ITER(Machine):
 
 @dataclass
 class PulseDesign(ITER, ControlPoint, Profile):
-    """Generate coilset voltage and current waveforms."""
+    """Generate Pulse Design Simulator current waveforms.
 
-    name: str = 'equilibrium'
+    Transform a prototype pulse design from a four-point bounding-box plasma
+    with boundary psi and profile information to self-consistent set of
+    external coil current waveforms.
+
+    Parameters
+    ----------
+    ids: ImasIds
+        Source equilibrium IDS. This source `ids` may also be referanced via a
+        series of attributes to read data from an IMAS database stored to file.
+        This `ids` must have a homogeneous timebase.
+        The following parameters must be pressent in this `ids`:
+
+        - time_slice(:).boundary_separatrix
+            - type
+            - psi
+            - geometric_axis
+            - minor_radius
+            - elongation
+            - elongation_upper (a proxy for triangulation_outer)  # IMAS-4682
+            - elongation_lower (a proxy for triangulation_inner)  # IMAS-4682
+            - triangularity_upper
+            - triangularity_lower
+        - time_slice(:).global_quantities
+            - ip
+        - time_slice(:).profiles_1d
+            - dpressure_dpsi
+            - f_df_dpsi
+
+        The eight geometry parameters defined the boundary_separatrix node
+        prescribe the positions of four points in the poloidal plane
+        where the plasma touches its r,z alligned bounding box.
+
+        Future versions of this code will replace the psi attribute with
+        definitions of Cejima and Li.
+
+        Future versions of this code will replace the profiles_1d attributes
+        with definitinos of Li and Beta.
+
+    pf_active: Ids | bool | str, optional
+        Machine description ids for the `pf_active coil geometry,
+        turns and limits. The default is 'iter_md'.
+
+    pf_passive: Ids | bool | str, optional
+        Machine description ids for axisymetric passive structure. The default
+        is False.
+
+    wall: Ids | bool | str, optional
+        Machine description ids for first wall's poloidal contour. The default
+        is 'iter_md'.
+
+    tplasma: {'hex', 'rect'}
+        Plasma filament geometry. The default is 'hex'.
+
+    dplasma: int | float, optional
+        Plasma filament resolution
+            - dplasma < 0: aproximate filament number ~ -int(dplasma)
+            - dplasma > 0: aproximate filament linear dimension
+
+    nwall: Nbiot, optional
+        Plasma wall subpanel resolution. The default is 3.
+
+    nlevelset: Nbiot, optional
+        Levelset resoultion for contouring and control point location.
+        The default is 3000.
+
+    ninductance: Nbiot, optional
+        Coil target subgrid resolution for self and mutual inductance
+        calculations. The default is None.
+        Inductance calculations are forseen in a future version. This attribute
+        will be used to calculate and minimize the machines `flux-state`'.
+
+    nforce: Nbiot, optional
+        Coil target subgrid resoultion for force calculations. The default is
+        None.
+        Force calculations are forseen in a future version. The coil force
+        vector and associated Jacobian will be used to constrain scenarios
+        such that the coil current waveforms keep the machines operating within
+        its force limits.
+
+    nfield: Nbiot, optional
+        Coil boundary subgrid resoultion for L2 norm maximum field
+        calculations. The default is None.
+        Maximum on-coil field calculations are forseen in a future version.
+        The coil field vector and associated Jacobian will be used to constrain
+        scenarios such that the coil current waveforms keep the maximum on-coil
+        fields below their respective limits.
+
+    gamma: float, optional
+        Tikhonov regularization factor used by Moore Penrose inversion. This
+        factor is multiplied by the absolute value of plasma current before
+        being applied to the rectangular diagnal matrix of the Singular Value
+        Decomposition. The default value is 1e-12
+
+    field_weight: float | int, optional
+        Weighting factor for all field constraints. The default value is 50.
+
+    Raises
+    ------
+    ValueError
+        Source `ids` has non-homogeneus time.
+        # TODO
+
+    AttributeError
+        Attributes missing from source equilibrium `ids`.
+        # TODO
+
+    ValueError
+        Bounding-box control points lie outside of first-wall contour.
+        # TODO
+
+    See Also
+    --------
+    `nova.imas.database.IDS` :
+        For a list of attributes and their definitons to be used in place of
+        the `ids` keyword when referancing the source equilibrium `ids` that
+        should be read from file.
+    `nova.imas.machine.Geometry.get_ids_attrs` :
+        For complete usage details for the pf_active, pf_passive,
+        and wall attributes.
+
+    Notes
+    -----
+    The class may be run in one of three modes:
+
+        - As an python IMAS **actor**, accepts and returns IDS(s)
+        - As an python IMAS **code**, reads and writes IDS(s)
+        - As a command line **script** see `pulsedesign --help` for details
+
+    # TODO: provide details for numerical method.
+
+    There is currently no way to store the inner and outer triangularities in
+    the IMAS data dictionary. Thes attributes are required by this class to
+    locate the heights of the inner and outer separatrix raidal turning points.
+    A workaround is implemented here whereby the redundant upper and lower
+    elongations are used to pass the outer and inner triangularities.
+    This fix will remain in-place until the JIRA ticket IMAS-4682 is fix on
+    the master IMAS-AL branch.
+
+    Examples
+    --------
+    A pulse design workflow will typicaly include a dedicated tool for the
+    creation and modification of the source equilibrium `ids`
+    used by this class. A dummy `ids` is created here using the
+    :func:`imas.database.IdsEntry` class to provide a concrete usage example
+    for the `PulseDesign` class.
+
+    import IdsEntry and instantiate as an equilibrium `ids`.
+
+    >>> from nova.imas.database import IdsEntry
+    >>> ids_entry = IdsEntry(name='equilibrium')
+
+    Define time vector, size time_slice, and define homogeneous_time.
+
+    >>> time = [1.5, 19, 110, 600, 670]
+    >>> ids_entry.ids_data.time = time
+    >>> ids_entry.ids_data.time_slice.resize(len(time))
+    >>> ids_entry.ids_data.ids_properties.homogeneous_time = 1
+
+    Populate boundary_separatrix node.
+
+    >>> with ids_entry.node('time_slice:boundary_separatrix.*'):
+    ...     ids_entry['type', :] = [0, 1, 1, 1, 1]
+    ...     ids_entry['psi', :] = [107.8,  73.5,  17.4, -13.7,  -7.5]
+    ...     ids_entry['minor_radius', :] = [1.7, 2. , 2. , 2. , 1.9]
+    ...     ids_entry['elongation', :] = [1.1, 1.8, 1.8, 1.9, 1.1]
+    ...     ids_entry['elongation_upper', :] = [0. , 0.2, 0.1, 0.1, 0.1]
+    ...     ids_entry['elongation_lower', :] = [0. ,  0.3,  0.2,  0.3,  0.3]
+    ...     ids_entry['triangularity_upper', :] = [0. ,  0.3,  0.4,  0.5,  0.3]
+    ...     ids_entry['triangularity_lower', :] = [0.1, 0.6, 0.5, 0.6, 0.6]
+    >>> with ids_entry.node('time_slice:boundary_separatrix.geometric_axis.*'):
+    ...     ids_entry['r', :] = [5.8, 6.2, 6.2, 6.2, 6.1]
+    ...     ids_entry['z', :] = [ 0. ,  0.1,  0.3,  0.3, -1. ]
+
+    Update plasma current.
+
+    >>> import numpy as np
+    >>> with ids_entry.node('time_slice:global_quantities.*'):
+    ...     ids_entry['ip', :] = 1e6 * np.array([-0.4, -5.1, -15, -15, -1.5])
+
+    Populate profiles_1d node.
+
+    >>> with ids_entry.node('time_slice:profiles_1d.*'):
+    ...     ids_entry['dpressure_dpsi', :] = 1e3 * np.array(
+    ...         [[ 0.2,  0.2,  0.2,  0.1,  0.1],
+    ...          [ 0. ,  0.7,  0.5,  0.4,  0.3],
+    ...          [ 0.4,  6.4,  5.7,  5.6,  5.7],
+    ...          [ 0.4,  7.2,  6.9,  6.5,  6.2],
+    ...          [-0. ,  0.3,  0.3,  0.2,  0.1]])
+    ...     ids_entry['f_df_dpsi', :] = np.array(
+    ...         [[ 0. ,  0.1,  0.1,  0.1,  0. ],
+    ...          [ 1.4,  0.4,  0.3,  0.2,  0.2],
+    ...          [ 2. ,  1.5,  0.7,  0.3,  0. ],
+    ...          [ 2. ,  1. ,  0.6,  0.3,  0.2],
+    ...          [ 1.7,  0.6,  0.1, -0. , -0.1]])
+
+    Instantiate PulseDesign using source equilibrium ids.
+
+    >>> design = PulseDesign(ids=ids_entry.ids_data)
+
+    Set time instance to update constraints and solve external currents.
+
+    >>> design.itime = 0
+
+    Plot solution.
+
+    >>> design.plot('plasma')
+
+    Plot coil current waveform.
+
+    >>> design.plot_waveform()
+
+    Extract pf_active ids for all times present in source equilibrium `ids`.
+
+    >>> pf_active = design.pf_active_ids
+
+    """
+
     nwall: Nbiot = 3
     nlevelset: Nbiot = 3000
     ninductance: Nbiot = None
     nforce: Nbiot = None
     nfield: Nbiot = None
-    gamma: float = 1e-5
+    gamma: float = 1e-12
     field_weight: float | int = 50
 
     def update_constraints(self):
@@ -379,6 +617,7 @@ class PulseDesign(ITER, ControlPoint, Profile):
         """Extend itime update."""
         super().update()
         self.sloc['plasma', 'Ic'] = self['ip']
+        self.solve()
 
     def _constrain(self, constraint):
         """Return coupling matrix and vectors."""
@@ -482,7 +721,7 @@ class PulseDesign(ITER, ControlPoint, Profile):
 
     def solve(self, verbose=False):
         """Solve waveform using basic Picard itteration."""
-        for _ in range(3):
+        for _ in range(5):
             self.solve_current()
             with self.plasma.profile(self.p_prime, self.ff_prime):
                 self.plasma.separatrix = self.plasma.psi_boundary
@@ -527,9 +766,8 @@ class PulseDesign(ITER, ControlPoint, Profile):
         data['time'] = self.data.time
         data['coil_name'] = self.coil_name
         data['current'] = xarray.DataArray(0., coords=data.coords)
-        for itime in tqdm(self.data.itime.data, 'PDS waveform'):
+        for itime in tqdm(self.data.itime.data, 'Solving PDS waveform'):
             self.itime = itime
-            self.solve()
             data['current'][itime] = self.current
         return data
 
@@ -547,6 +785,18 @@ class PulseDesign(ITER, ControlPoint, Profile):
     @cached_property
     def equilibrium_ids(self) -> Ids:
         """Return waveform equilibrium ids."""
+        # TODO implement
+        raise NotImplementedError
+
+    def plot_waveform(self):
+        """Extend plot_waveform to compare with benchmark."""
+        self.set_axes('1d')
+        for i, name in enumerate(self._data.coil_name.data[:-2]):
+            self.axes.plot(self.data.time, 1e-3*self._data.current[:, i],
+                           label=name)
+        self.axes.set_ylabel('coil current, kA')
+        self.axes.set_xlabel('time, s')
+        self.axes.legend()
 
 
 @dataclass
@@ -593,7 +843,8 @@ class Benchmark(PulseDesign):
         self.axes.set_ylabel('coil current')
 
     def plot_waveform(self):
-        """Compare benchmark coil current waveforms."""
+        """Extend plot_waveform to compare with benchmark."""
+        # TODO extend from pulsedesign
         benchmark = self['pf_active'].data
         coil_name = benchmark.coil_name.data
 
@@ -614,7 +865,7 @@ class Benchmark(PulseDesign):
 if __name__ == '__main__':
 
     # design = PulseDesign(135013, 2, 'iter', 1)
-    design = Benchmark(135013, 2, 'iter', 1, field_weight=50, gamma=1e-12)
+    design = Benchmark(135013, 2, 'iter', 1)
     # design.strike = Constraint()
     # design.control.points[3, 1] += 0.5
 

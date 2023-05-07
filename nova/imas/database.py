@@ -23,7 +23,49 @@ Ids = (ImasIds | dict[str, int | str] | tuple[int | str])
 
 @dataclass
 class IDS:
-    """High level IDS attributes."""
+    """High level IDS attributes.
+
+    Parameters
+    ----------
+    pulse: int, optional (required when ids not set)
+        Pulse number. The default is 0.
+    run: int, optional (required when ids not set)
+        Run number. The default is 0.
+    machine: str, optional (required when ids not set)
+        Machine name. The default is iter.
+    occurrence: int, optional (required when ids not set)
+        Occurrence number. The default is 0.
+    user: str, optional (required when ids not set)
+        User name. The default is public.
+    name: str, optional (required when ids not set)
+        Ids name. The default is ''.
+    backend: str, optional (required when ids not set)
+        Access layer backend. The default is hdf5.
+    ids: ImasIds, optional
+        When set the ids parameter takes prefrence. The default is None.
+
+    Attributes
+    ----------
+    ids_attrs : dict
+        Ids attributes as dict with keys [pulse, run, machine, occurence,
+                                          user, name, backend]
+    uri : str, read-only
+        IDS unified resorce identifier.
+
+    home : os.Path, read-only
+        Path to IMAS database home.
+
+    path : os.path, read-only
+        Path to IMAS database entry.
+
+    Methods
+    -------
+    get_ids()
+        Return bare ids.
+
+
+
+    """
 
     pulse: int = 0
     run: int = 0
@@ -74,7 +116,7 @@ class IDS:
 
     @classmethod
     def default_ids_attrs(cls) -> dict:
-        """Return dict of ids attributes."""
+        """Return dict of default ids attributes."""
         return {attr: getattr(cls, attr) for attr in cls.attrs}
 
     @property
@@ -82,30 +124,160 @@ class IDS:
         """Return dict of ids attributes."""
         return {attr: getattr(self, attr) for attr in self.attrs}
 
+    @classmethod
+    def update_ids_attrs(cls, ids_attrs: bool | Ids):
+        """Return class attributes."""
+        return DataAttrs(ids_attrs, cls).attrs
+
+    @classmethod
+    def merge_ids_attrs(cls, ids_attrs: bool | Ids, base_attrs: dict):
+        """Return merged class attributes."""
+        return DataAttrs(ids_attrs, cls).merge_ids_attrs(base_attrs)
+
+
+@dataclass
+class DataAttrs:
+    """
+    Methods to handle the formating of database attributes.
+
+    Parameters
+    ----------
+    attrs: bool | Database | Ids
+        Input attributes.
+    subclass: Type[Database], optional
+        Subclass instance or class. The default is Database.
+
+    Attributes
+    ----------
+    attrs: dict
+        Resolved attributes.
+
+    Raises
+    ------
+    TypeError
+        Malformed attrs input passed to class.
+
+    Examples
+    --------
+    Skip doctest if IMAS instalation or requisite IDS(s) not found.
+
+    >>> import pytest
+    >>> try:
+    ...     _ = Database(130506, 403).get_ids('equilibrium')
+    ...     _ = Database(130506, 403).get_ids('pf_active')
+    ... except:
+    ...     pytest.skip('IMAS not found or 130506/403 unavailable')
+
+    The get_ids_attrs method is used to resolve a full ids_attrs dict from
+    a partial input. If the input to get_ids_attrs is boolean then True
+    returns the instance's default':
+
+    >>> DataAttrs(True).attrs == Database.default_ids_attrs()
+    True
+
+    whilst False returns an empty dict:
+
+    >>> DataAttrs(False).attrs
+    False
+
+    Database attributes may be extracted from any class derived from Database:
+
+    >>> database = Database(130506, 403, 'iter', 0, name='equilibrium')
+    >>> DataAttrs(database).attrs == database.ids_attrs
+    True
+
+    Passing a fully defined attribute dict returns this input:
+
+    >>> attrs = dict(pulse=130506, run=403, occurrence=0, \
+                     name='pf_active', user='other', \
+                     machine='iter', backend='hdf5')
+    >>> DataAttrs(attrs).attrs == attrs
+    True
+
+    DataAttrs updates attrs with defaults for all missing values:
+
+    >>> _ = attrs.pop('user')
+    >>> DataAttrs(attrs).attrs == attrs | dict(user='public')
+    True
+
+    An additional example with attrs as a partial dict:
+
+    >>> attrs = DataAttrs(dict(pulse=3, run=4)).attrs
+    >>> attrs['pulse'], attrs['run'], attrs['machine']
+    (3, 4, 'iter')
+
+    Attrs may be input as an ids. In this case attrs is returned with
+    hashed pulse and run numbers in additional to the original ids attribute:
+
+    >>> attrs = DataAttrs(database.ids_data).attrs
+    >>> attrs['pulse'] != 130506
+    True
+    >>> attrs['run'] != 403
+    True
+    >>> attrs['ids'].__name__
+    'equilibrium'
+
+    Attrs may be input as a list or tuple of args. This input is
+    expanded by the passed subclass and must resolve to a valid ids. Partial
+    input is acepted as long as the defaults enable a correct resolution.
+
+    >>> DataAttrs(dict(pulse=130506, run=403,\
+                       name='equilibrium')).attrs == database.ids_attrs
+    True
+
+    Raises TypeError when input attrs are malformed:
+
+    >>> DataAttrs('equilibrium').attrs
+    Traceback (most recent call last):
+        ...
+    TypeError: malformed attrs: <class 'str'>
+
+    """
+
+    ids_attrs: Ids | bool | str
+    subclass: InitVar[Type[IDS]] = IDS
+    default_attrs: dict = field(init=False, default_factory=dict)
+
+    def __post_init__(self, subclass):
+        """Update database attributes."""
+        self.default_attrs = subclass.default_ids_attrs()
+
+    @property
+    def attrs(self) -> dict | bool:
+        """Return output from update_attrs."""
+        return self.update_ids_attrs()
+
+    def merge_ids_attrs(self, base_attrs: dict):
+        """Merge database attributes."""
+        attrs = self.update_ids_attrs({'name': self.default_attrs['name']})
+        if isinstance(attrs, bool):
+            return attrs
+        return base_attrs | attrs
+
+    def update_ids_attrs(self, default_attrs=None) -> dict | bool:
+        """Return formated database attributes."""
+        if default_attrs is None:
+            default_attrs = self.default_attrs
+        if self.ids_attrs is False:
+            return False
+        if self.ids_attrs is True:
+            return default_attrs
+        if isinstance(self.ids_attrs, Database):
+            return self.ids_attrs.ids_attrs
+        if isinstance(self.ids_attrs, dict):
+            return default_attrs | self.ids_attrs
+        if hasattr(self.ids_attrs, 'ids_properties'):  # IMAS ids
+            database = Database(**default_attrs, ids=self.ids_attrs)
+            return database.ids_attrs | {'ids': self.ids_attrs}
+        if isinstance(self.ids_attrs, list | tuple):
+            return default_attrs | dict(zip(Database.attrs, self.ids_attrs))
+        raise TypeError(f'malformed attrs: {type(self.ids_attrs)}')
+
 
 @dataclass
 class Database(IDS):
     """
     Methods to access IMAS database.
-
-    Parameters
-    ----------
-    pulse: int, optional (required when ids not set)
-        Pulse number. The default is 0.
-    run: int, optional (required when ids not set)
-        Run number. The default is 0.
-    machine: str, optional (required when ids not set)
-        Machine name. The default is iter.
-    occurrence: int, optional (required when ids not set)
-        Occurrence number. The default is 0.
-    user: str, optional (required when ids not set)
-        User name. The default is public.
-    name: str, optional (required when ids not set)
-        Ids name. The default is ''.
-    backend: str, optional (required when ids not set)
-        Access layer backend. The default is hdf5.
-    ids: ImasIds, optional
-        When set the ids parameter takes prefrence. The default is None.
 
     Attributes
     ----------
@@ -276,16 +448,6 @@ class Database(IDS):
                 f'name ({self.name} != None)')
 
     @classmethod
-    def update_ids_attrs(cls, ids_attrs: bool | Ids):
-        """Return class attributes."""
-        return DataAttrs(ids_attrs, cls).attrs
-
-    @classmethod
-    def merge_ids_attrs(cls, ids_attrs: bool | Ids, base_attrs: dict):
-        """Return merged class attributes."""
-        return DataAttrs(ids_attrs, cls).merge_ids_attrs(base_attrs)
-
-    @classmethod
     def from_ids_attrs(cls, ids_attrs: bool | Ids):
         """Initialize database instance from ids attributes."""
         if isinstance(attrs := cls.update_ids_attrs(ids_attrs), dict):
@@ -397,145 +559,6 @@ class Database(IDS):
         xxh32 = xxhash.xxh32()
         xxh32.update(str(self.ids_data))
         return xxh32.intdigest()
-
-
-@dataclass
-class DataAttrs:
-    """
-    Methods to handle the formating of database attributes.
-
-    Parameters
-    ----------
-    attrs: bool | Database | Ids
-        Input attributes.
-    subclass: Type[Database], optional
-        Subclass instance or class. The default is Database.
-
-    Attributes
-    ----------
-    attrs: dict
-        Resolved attributes.
-
-    Raises
-    ------
-    TypeError
-        Malformed attrs input passed to class.
-
-    Examples
-    --------
-    Skip doctest if IMAS instalation or requisite IDS(s) not found.
-
-    >>> import pytest
-    >>> try:
-    ...     _ = Database(130506, 403).get_ids('equilibrium')
-    ...     _ = Database(130506, 403).get_ids('pf_active')
-    ... except:
-    ...     pytest.skip('IMAS not found or 130506/403 unavailable')
-
-    The get_ids_attrs method is used to resolve a full ids_attrs dict from
-    a partial input. If the input to get_ids_attrs is boolean then True
-    returns the instance's default':
-
-    >>> DataAttrs(True).attrs == Database.default_ids_attrs()
-    True
-
-    whilst False returns an empty dict:
-
-    >>> DataAttrs(False).attrs
-    False
-
-    Database attributes may be extracted from any class derived from Database:
-
-    >>> database = Database(130506, 403, 'iter', 0, name='equilibrium')
-    >>> DataAttrs(database).attrs == database.ids_attrs
-    True
-
-    Passing a fully defined attribute dict returns this input:
-
-    >>> attrs = dict(pulse=130506, run=403, occurrence=0, \
-                     name='pf_active', user='other', \
-                     machine='iter', backend='hdf5')
-    >>> DataAttrs(attrs).attrs == attrs
-    True
-
-    DataAttrs updates attrs with defaults for all missing values:
-
-    >>> _ = attrs.pop('user')
-    >>> DataAttrs(attrs).attrs == attrs | dict(user='public')
-    True
-
-    An additional example with attrs as a partial dict:
-
-    >>> attrs = DataAttrs(dict(pulse=3, run=4)).attrs
-    >>> attrs['pulse'], attrs['run'], attrs['machine']
-    (3, 4, 'iter')
-
-    Attrs may be input as an ids. In this case attrs is returned with
-    hashed pulse and run numbers in additional to the original ids attribute:
-
-    >>> attrs = DataAttrs(database.ids_data).attrs
-    >>> attrs['pulse'] != 130506
-    True
-    >>> attrs['run'] != 403
-    True
-    >>> attrs['ids'].__name__
-    'equilibrium'
-
-    Attrs may be input as a list or tuple of args. This input is
-    expanded by the passed subclass and must resolve to a valid ids. Partial
-    input is acepted as long as the defaults enable a correct resolution.
-
-    >>> DataAttrs(dict(pulse=130506, run=403,\
-                       name='equilibrium')).attrs == database.ids_attrs
-    True
-
-    Raises TypeError when input attrs are malformed:
-
-    >>> DataAttrs('equilibrium').attrs
-    Traceback (most recent call last):
-        ...
-    TypeError: malformed attrs: <class 'str'>
-
-    """
-
-    ids_attrs: bool | Database | Ids
-    subclass: InitVar[Type[Database]] = Database
-    default_attrs: dict = field(init=False, default_factory=dict)
-
-    def __post_init__(self, subclass):
-        """Update database attributes."""
-        self.default_attrs = subclass.default_ids_attrs()
-
-    @property
-    def attrs(self) -> dict | bool:
-        """Return output from update_attrs."""
-        return self.update_ids_attrs()
-
-    def merge_ids_attrs(self, base_attrs: dict):
-        """Merge database attributes."""
-        attrs = self.update_ids_attrs({'name': self.default_attrs['name']})
-        if isinstance(attrs, bool):
-            return attrs
-        return base_attrs | attrs
-
-    def update_ids_attrs(self, default_attrs=None) -> dict | bool:
-        """Return formated database attributes."""
-        if default_attrs is None:
-            default_attrs = self.default_attrs
-        if self.ids_attrs is False:
-            return False
-        if self.ids_attrs is True:
-            return default_attrs
-        if isinstance(self.ids_attrs, Database):
-            return self.ids_attrs.ids_attrs
-        if isinstance(self.ids_attrs, dict):
-            return default_attrs | self.ids_attrs
-        if hasattr(self.ids_attrs, 'ids_properties'):  # IMAS ids
-            database = Database(**default_attrs, ids=self.ids_attrs)
-            return database.ids_attrs | {'ids': self.ids_attrs}
-        if isinstance(self.ids_attrs, list | tuple):
-            return default_attrs | dict(zip(Database.attrs, self.ids_attrs))
-        raise TypeError(f'malformed attrs: {type(self.ids_attrs)}')
 
 
 @dataclass

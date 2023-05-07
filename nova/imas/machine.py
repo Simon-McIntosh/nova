@@ -761,12 +761,12 @@ class Geometry:
 
     Parameters
     ----------
-    pf_active: Ids | bool, optional
-        pf active IDS. The default is True
-    pf_passive: Ids | bool, optional
-        pf passive IDS. The default is True
-    wall: Ids | bool, optional
-        wall IDS. The default is True
+    pf_active: Ids | bool | str, default=True
+        pf active IDS.
+    pf_passive: Ids | bool | str, default=True
+        pf passive IDS.
+    wall: Ids | bool | str, default = True
+        wall IDS.
 
 
     Examples
@@ -844,17 +844,80 @@ class Geometry:
                    for attr in self.geometry]) and self.filename == '':
             self.filename = 'machine_description'
 
-    def get_ids_attrs(self, attrs, geometry):
-        """Return default ids attributes."""
+    def get_ids_attrs(self, attrs, geometry) -> dict:
+        """Return default ids attributes.
+
+        Parameters
+        ----------
+        attrs : Ids | bool | str
+            Descriptor for geometry ids.
+
+        geometry : IDS
+            Geometry class derived from IDS parent. When `attrs` != 'iter_md'
+            child classes of the geometry class that define an `ids_attrs`
+            attribute (such as the `nova.imas.Database`) merge the `attrs`
+            parameter with `ids_attrs` with `ids_attrs` taking priority in
+            cases where an IDS attribute is pressent in both.
+
+        Returns
+        -------
+        dict[str, int | str]
+            IDS descriptor containing all the parameters required by the
+            `nova.imas.database.IDS` class \
+            (pulse, run, machine, occurrence, user, name, backend).
+            The `attrs` attribute is matched acordign to its type and value
+            as follows:
+
+                - 'iter_md' : Return default IDS stored in `ids_attrs` \
+                    attribute of the 'geometry' class.
+                - True : Return  `geometry.ids_attrs` | `self.ids_attrs`
+                - dict[str, int | str] : Return `geometry.ids_attrs` | attrs
+                - tuple[int | str] : Return `geometry.ids_attrs` | \
+                    `IDS(*attrs)`
+
+        Examples
+        --------
+        Instantiate the geometry class.
+
+        >>> geometry = Geometry()
+
+        Get default IDS for ITER's wall.
+
+        >>> wall_md = geometry.get_ids_attrs('iter_md', Wall)
+        >>> list(wall_md.values())
+        [116000, 2, 'iter_md', 0, 'public', 'wall', 'hdf5']
+
+        Extend geometry instance with an `ids_attrs` attribute.
+
+        >>> geometry.ids_attrs = wall_md | {'pulse': 20, 'run': 25}
+
+        Confrim that new attrs overide the defaults profided by `Wall`.
+
+        >>> list(geometry.get_ids_attrs(True, Wall).values())
+        [20, 25, 'iter_md', 0, 'public', 'wall', 'hdf5']
+
+        Request ids_attrs with a dict input replacing machine and occurence.
+
+        >>> attrs = {'machine': 'iter', 'occurrence': 3}
+        >>> list(geometry.get_ids_attrs(attrs, Wall).values())
+        [20, 25, 'iter', 3, 'public', 'wall', 'hdf5']
+
+        Request ids_attrs with a tuple input replacing the first 4 IDS attrs.
+
+        >>> attrs = (20, 38, 'demo', 42)
+        >>> list(geometry.get_ids_attrs(attrs, Wall).values())
+        [20, 38, 'demo', 42, 'public', 'wall', 'hdf5']
+        """
         match attrs:
-            case str() if attrs == 'iter_md':  # update from iter_md
-                return geometry.update_ids_attrs(True)
+            case 'iter_md':  # update from iter_md
+                ids_attrs = geometry.update_ids_attrs(True)
             case str():
                 raise ValueError(f'attr str input {attrs} != iter_md')
             case attrs if hasattr(self, 'ids_attrs') and self.ids is None:
-                return geometry.merge_ids_attrs(attrs, self.ids_attrs)
+                ids_attrs = geometry.merge_ids_attrs(attrs, self.ids_attrs)
             case attrs:
-                return geometry.update_ids_attrs(attrs)
+                ids_attrs = geometry.update_ids_attrs(attrs)
+        return ids_attrs
 
     @property
     def geometry_attrs(self) -> dict:

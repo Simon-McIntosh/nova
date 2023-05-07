@@ -163,7 +163,8 @@ testpaths = [
   "tests",
   "nova/imas/database.py", 
   "nova/imas/equilibrium.py", 
-  "nova/imas/extrapolate.py", 
+  "nova/imas/extrapolate.py",
+  "nova/imas/machine.py", 
   "nova/imas/operate.py", 
 ]
  filterwarnings = [

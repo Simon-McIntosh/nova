@@ -291,6 +291,7 @@ class Sample(Plot, Defeature, Select):
                 ids_entry[attr, :] = self.data[attr].data
 
         with ids_entry.node('time_slice:boundary_separatrix.*'):
+            ids_entry['type', :] = self.data['boundary_type'].data
             ids_entry['psi', :] = self.data['psi_boundary'].data
             for attr in ['minor_radius', 'elongation',
                          'triangularity_upper', 'triangularity_lower',
@@ -340,8 +341,7 @@ class Sample(Plot, Defeature, Select):
         code_parameters = {attr: getattr(self, attr) for attr in
                            ['dtime', 'savgol', 'epsilon', 'cluster',
                             'features']}
-        metadata.put_code('Geometry extraction and RDP order reduciton',
-                          code_parameters)
+        metadata.put_code(code_parameters)
 
         ids_entry.ids_data.time = self.data.time.data
 

@@ -100,6 +100,7 @@ class Parameter0D(Plot, Scenario):
         self.build_axis('global_quantities.current_centre')
         self.build_points('x_point')
         self.build_points('strike_point')
+        self.build_boundary_type()
         self.build_boundary_outline()
         self.build_boundary_shape()
         self.build_beta_normal()
@@ -192,6 +193,18 @@ class Parameter0D(Plot, Scenario):
                             for itime in self.data.itime.data])
         self.data['x_point'] = ('time', 'point'), x_point
 
+    def build_boundary_type(self):
+        """Build boundary limiter type."""
+        if not self.ids_index.empty('boundary_separatrix.type'):
+            self.data['boundary_type'] = 'time', \
+                self.ids_index.array('boundary_separatrix.type')
+            return
+        if self.ids_index.empty('boundary_separatrix.x_point'):
+            return
+        self.data['boundary_type'] = 'time', [
+            int(not np.allclose(x_point, (0, 0)))
+            for x_point in self.data.x_point.data]
+
     def x_mask(self, itime: int, outline_z: np.ndarray, eps=0):
         """Return boundary x-point mask."""
         if self.data.x_point_number[itime].data == 0:
@@ -235,11 +248,14 @@ class Parameter0D(Plot, Scenario):
             return np.append(boundary, boundary[:1], axis=0)
         return boundary
 
+    def _boundary_outline_length(self):
+        """Return maximum boundary outline length."""
+        return max(len(self.boundary_outline(itime))
+                   for itime in self.data.itime.data)
+
     def build_boundary_outline(self):
         """Build outline timeseries."""
-        length = max(len(self.boundary_outline(itime))
-                     for itime in self.data.itime.data)
-        if length == 0:
+        if (length := self._boundary_outline_length()) == 0:
             return
         self.data['boundary_index'] = range(length)
         self.data['boundary'] = ('time', 'boundary_index', 'point'), \
@@ -254,8 +270,10 @@ class Parameter0D(Plot, Scenario):
             self.data['boundary_length'][itime] = length
             self.data['boundary'][itime, :length] = outline
 
-    def extract_shape_parameters(self):
+    def extract_shape_parameters(self) -> dict:
         """Return shape parameters calculated from lcfs."""
+        if self._boundary_outline_length() == 0:
+            return {}
         attrs = self.attrs_boundary + ['geometric_radius', 'geometric_height']
         lcfs_data = {attr: np.zeros(self.data.dims['time'], float)
                      for attr in attrs if hasattr(LCFS, attr)}
@@ -354,12 +372,18 @@ class Profile1D(Plot, Scenario):
     def build(self):
         """Build 1d profile data."""
         super().build()
-        if self.ids_index.empty('profiles_1d.psi'):
+        if self.ids_index.empty('profiles_1d.dpressure_dpsi') or \
+                self.ids_index.empty('profiles_1d.f_df_dpsi'):
             return
-        length = self.ids_index['profiles_1d.psi'][0]
+        length = self.ids_index['profiles_1d.dpressure_dpsi'][0]
         self.data['psi_norm'] = np.linspace(0, 1, length)
-        self.data['psi1d'] = ('time', 'psi_norm'), \
-            self.ids_index.array('profiles_1d.psi')
+        if not self.ids_index.empty('profiles_1d.psi'):
+            self.data['psi1d'] = ('time', 'psi_norm'), \
+                self.ids_index.array('profiles_1d.psi')
+        else:
+            self.data['psi1d'] = ('time', 'psi_norm'), \
+                np.tile(self.data['psi_norm'].data,
+                        (self.data.dims['time'], 1))
         self.append(('time', 'psi_norm'), self.attrs_1d, 'profiles_1d')
         for itime in self.data.itime.data:  # normalize 1D profiles
             psi = self.data.psi1d[itime]
@@ -609,8 +633,8 @@ if __name__ == '__main__':
 
     pulse, run = 135013, 2
 
-    Equilibrium(pulse, run, occurrence=1)._clear()
-    equilibrium = Equilibrium(pulse, run, occurrence=1)
+    Equilibrium(pulse, run, occurrence=0)._clear()
+    equilibrium = Equilibrium(pulse, run, occurrence=0)
 
     #equilibrium.time = 100
     #equilibrium.plot_2d('psi', mask=0)

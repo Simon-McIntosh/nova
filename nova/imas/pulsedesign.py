@@ -532,7 +532,10 @@ class PulseDesign(ITER, ControlPoint, Profile):
 
     import IdsEntry and instantiate as an equilibrium `ids`.
 
-    >>> from nova.imas.database import IdsEntry
+    >>> import pytest
+    >>> from nova.imas.database import IdsEntry, IMAS_MODULE_NOT_FOUND
+    >>> if IMAS_MODULE_NOT_FOUND:
+    ...     pytest.skip('imas module not found')
     >>> ids_entry = IdsEntry(name='equilibrium')
 
     Define time vector, size time_slice, and define homogeneous_time.
@@ -542,7 +545,7 @@ class PulseDesign(ITER, ControlPoint, Profile):
     >>> ids_entry.ids_data.time_slice.resize(len(time))
     >>> ids_entry.ids_data.ids_properties.homogeneous_time = 1
 
-    Populate boundary_separatrix node.
+    Populate boundary_separatrix node. Low precision used here for readability.
 
     >>> with ids_entry.node('time_slice:boundary_separatrix.*'):
     ...     ids_entry['type', :] = [0, 1, 1, 1, 1]
@@ -587,7 +590,7 @@ class PulseDesign(ITER, ControlPoint, Profile):
 
     >>> design.itime = 0
 
-    Plot solution.
+    Plot solution at first time slice.
 
     >>> design.plot('plasma')
 

@@ -31,6 +31,7 @@ class Strike(Plot):
 
     def update(self, lines):
         """Update intersections between contour and limiter surfaces."""
+        print('***')
         self.contour = MultiLineString(lines)
         self.intersects = intersects(self.limiter, self.contour)
         if self.intersects:

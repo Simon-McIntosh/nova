@@ -903,10 +903,15 @@ class IdsData(Datafile, Database):
         self.update_filename()
         super().__post_init__()
 
+    #def assert_final(self, classname: str):
+    #    """
+
     @property
     def classname(self):
         """Return base filename."""
-        return f'{self.__class__.__name__.lower()}_{self.machine}'
+        if (classname := f'{self.__class__.__name__.lower()}') == self.name:
+            return self.machine
+        return f'{classname}_{self.machine}'
 
     def update_filename(self):
         """Update filename."""

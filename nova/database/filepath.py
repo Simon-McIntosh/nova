@@ -115,7 +115,9 @@ class FilePath:
                                     nova.__version__.split('+')[0])
             case str('imas'):
                 try:
-                    return import_module('imas').__name__
+                    imas = import_module('imas')
+                    imas_version = imas.__name__.replace('imas_', '')
+                    return os.path.join('imas', imas_version)
                 except ImportError:
                     return 'imas'
             case str(path):

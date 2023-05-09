@@ -170,10 +170,10 @@ class Constraint(Plot):
 class ControlPoint(Equilibrium):
     """Build control points from pulse schedule data."""
 
-    control: Constraint = field(init=False, default_factory=Constraint,
-                                repr=False)
-    strike: Constraint = field(init=False, default_factory=Constraint,
-                               repr=False)
+    control_point: Constraint = field(init=False, default_factory=Constraint,
+                                      repr=False)
+    strike_point: Constraint = field(init=False, default_factory=Constraint,
+                                     repr=False)
 
     point_attrs: ClassVar[dict[str, list[str]]] = {
         'boundary': ['outer', 'upper', 'inner', 'lower']}
@@ -199,17 +199,17 @@ class ControlPoint(Equilibrium):
 
     def update_control_point(self, psi=0):
         """Update control point constraints."""
-        self.control = Constraint(self.control_points)
-        self.control.poloidal_flux = psi, [0, 1, 2, 3]
-        self.control.radial_field = 0, [0, 2]
-        self.control.vertical_field = 0, [1, 3]
+        self.control_point = Constraint(self.control_points)
+        self.control_point.poloidal_flux = psi, [0, 1, 2, 3]
+        self.control_point.radial_field = 0, [0, 2]
+        self.control_point.vertical_field = 0, [1, 3]
         if not self.limiter:
-            self.control.radial_field = 0, [3]
+            self.control_point.radial_field = 0, [3]
 
     def update_strike_point(self, psi=0):
         """Update strike point constraints."""
-        self.strike = Constraint(self.strike_points)
-        self.strike.poloidal_flux = psi
+        self.strike_point = Constraint(self.strike_points)
+        self.strike_point.poloidal_flux = psi
 
     def update_constraints(self, psi=0):
         """Update flux and field constraints."""
@@ -333,8 +333,8 @@ class ControlPoint(Equilibrium):
         for segment in ['wall', 'divertor']:
             self.axes.plot(self.data[segment][:, 0], self.data[segment][:, 1],
                            '-', ms=4, color='gray', linewidth=1.5)
-        self.control.plot()
-        self.strike.plot()
+        self.control_point.plot()
+        self.strike_point.plot()
 
 
 @dataclass
@@ -650,8 +650,8 @@ class PulseDesign(ITER, ControlPoint, Profile):
 
     def solve_current(self):
         """Solve coil currents given flux and field targets."""
-        coupling = [self._constrain(self.control),
-                    self._constrain(self.strike)]
+        coupling = [self._constrain(self.control_point),
+                    self._constrain(self.strike_point)]
         matrix, vector = self._stack(*coupling)
         gamma = self.gamma * abs(self['ip'])
         self.saloc['free', 'Ic'] = MoorePenrose(matrix, gamma=gamma) / vector
@@ -674,8 +674,8 @@ class PulseDesign(ITER, ControlPoint, Profile):
 
     def optimize_current(self):
         """Optimize external coil currents."""
-        coupling = [self._constrain(self.control),
-                    self._constrain(self.strike)]
+        coupling = [self._constrain(self.control_point),
+                    self._constrain(self.strike_point)]
         matrix, vector = self._stack(*coupling)
         fmatrix, fvector = self._constrain(self.field)
         self.solve_current()
@@ -864,28 +864,13 @@ class Benchmark(PulseDesign):
 
 if __name__ == '__main__':
 
-    # design = PulseDesign(135013, 2, 'iter', 1)
-    design = Benchmark(135013, 2, 'iter', 1)
-    # design.strike = Constraint()
-    # design.control.points[3, 1] += 0.5
+    design = PulseDesign(135013, 2, 'iter', 1)
+    # design = Benchmark(135013, 2, 'iter', 1)
 
-    #_ = design.pf_active_ids
-
-
-    #design.control.points[3, 0] += 0.2
-    #design.control.points[3, 1] += 0.6
-    #design.strike = Constraint()
-    #design.superframe
-
-    design.itime = -2
-    design.solve()
-
-    #design.saloc['Ic'][:-2] = design['pf_active']['current'][:-1]
+    design.itime = 5
 
     design.plot('plasma')
     design.levelset.plot_levelset(-design['psi_boundary'], False, color='k')  # Cocos
     design.levelset.plot_levelset(design.plasma.psi_boundary, False, color='C3')
 
-    design.plot_current()
-
-    #design.plot_waveform()
+    design.plot_waveform()

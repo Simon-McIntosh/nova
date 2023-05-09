@@ -38,7 +38,8 @@ mark_connect = pytest.mark.skipif(
 
 KEYPATH = dict(nova=os.path.join(nova.__name__,
                                  nova.__version__.split('+')[0]),
-               imas=IMASNAME, root=root_dir)
+               imas=os.path.join('imas',  IMASNAME.replace('imas_', '')),
+               root=root_dir)
 
 
 def test_filepath():

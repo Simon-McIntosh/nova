@@ -14,9 +14,9 @@ from mpl_toolkits.mplot3d import art3d
 from shapely.geometry import Polygon, LineString, MultiPoint
 from scipy.signal import savgol_filter
 from scipy.spatial import ConvexHull
-
-from rdp import rdp
 from pyquaternion import Quaternion
+
+from nova.geometry.rdp import rdp
 
 
 

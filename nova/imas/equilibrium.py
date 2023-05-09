@@ -558,7 +558,7 @@ class Equilibrium(Profile2D, Profile1D, Parameter0D, Grid):
     ('equilibrium', 'public', 'iter')
 
     >>> equilibrium.filename
-    'equilibrium_iter_130506_403'
+    'iter_130506_403'
     >>> equilibrium.group
     'equilibrium'
 

@@ -1,7 +1,8 @@
-import numpy as np
 
 import matplotlib.pyplot as plt
-from nova.utilities import geom
+import numpy as np
+
+from nova.graphics import polyfill
 
 
 class secondmoment(object):
@@ -140,9 +141,9 @@ class secondmoment(object):
 
     def plot(self, centroid=True):
         for p in self._patch:
-            geom.polyfill(p['y'], p['z'], alpha=1)
+            polyfill(p['y'], p['z'], alpha=1)
         for h in self._hole:
-            geom.polyfill(h['y'], h['z'], color=np.ones(3))
+            polyfill(h['y'], h['z'], color=np.ones(3))
         plt.axis('equal')
         if centroid:
             plt.plot(0, 0, 's')

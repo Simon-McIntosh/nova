@@ -1,13 +1,14 @@
+
+import matplotlib.pyplot as plt
 import numpy as np
 from scipy.optimize import brentq, minimize
 
 from nova.structural.finiteframe import finiteframe
 from nova.utilities import geom
-import matplotlib.pyplot as plt
 
 
 class catenary(finiteframe):
-    
+
     g = 9.81
 
     def __init__(self, N=50):
@@ -108,7 +109,7 @@ class catenary(finiteframe):
         self.add_bc('nrz', [0], part='chain', ends=0)
         self.add_bc('nrz', [-1], part='chain', ends=1)
         self.add_weight(g=[0, -1, 0])  # add weight to all elements
-        
+
         # add tension
         if shape != 'beam':
             T = self.theory(L, Lo)
@@ -120,7 +121,7 @@ class catenary(finiteframe):
                     f = np.dot(self.T3[:, :, el].T, f)  # to local
                     self.add_nodal_load(nd, 'fx', f[0])
                     self.add_nodal_load(nd, 'fy', f[1])
-            
+
         finiteframe.solve(self)
 
 
@@ -128,7 +129,7 @@ if __name__ == '__main__':
 
     L, Lo = 1, 1.5
     cat = catenary(N=51)
-    
+
     cat.solve('beam', L, Lo)
     cat.plot(scale_factor=-0.2, projection='xy')
     cat.plot_moment()

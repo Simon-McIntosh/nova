@@ -30,6 +30,7 @@ class Datafile(netCDF):
         OSError
             Group not present in netCDF file: self.group
         """
+        print('load', self.filename, self.dirname)
         try:
             self.load()
         except (FileNotFoundError, OSError):

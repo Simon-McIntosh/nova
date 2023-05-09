@@ -1,7 +1,7 @@
 """Manage access to equilibrium data."""
 from dataclasses import dataclass, field
 from functools import cached_property
-from typing import ClassVar
+from typing import ClassVar, final
 
 import numpy as np
 
@@ -248,16 +248,17 @@ class Parameter0D(Plot, Scenario):
             return np.append(boundary, boundary[:1], axis=0)
         return boundary
 
-    def _boundary_outline_length(self):
+    @cached_property
+    def boundary_outline_length(self):
         """Return maximum boundary outline length."""
         return max(len(self.boundary_outline(itime))
                    for itime in self.data.itime.data)
 
     def build_boundary_outline(self):
         """Build outline timeseries."""
-        if (length := self._boundary_outline_length()) == 0:
+        if self.boundary_outline_length == 0:
             return
-        self.data['boundary_index'] = range(length)
+        self.data['boundary_index'] = range(self.boundary_outline_length)
         self.data['boundary'] = ('time', 'boundary_index', 'point'), \
             np.zeros((self.data.dims['time'],
                       self.data.dims['boundary_index'],
@@ -272,7 +273,7 @@ class Parameter0D(Plot, Scenario):
 
     def extract_shape_parameters(self) -> dict:
         """Return shape parameters calculated from lcfs."""
-        if self._boundary_outline_length() == 0:
+        if self.boundary_outline_length == 0:
             return {}
         attrs = self.attrs_boundary + ['geometric_radius', 'geometric_height']
         lcfs_data = {attr: np.zeros(self.data.dims['time'], float)
@@ -300,7 +301,8 @@ class Parameter0D(Plot, Scenario):
             if attr not in self.data and attr in lcfs_data:
                 self.data[attr] = 'time', lcfs_data[attr]
         path = 'boundary_separatrix.geometric_axis'
-        if any(self.ids_index.empty(f'{path}.{label}') for label in 'rz'):
+        if any(self.ids_index.empty(f'{path}.{label}') for label in 'rz') and \
+                self.boundary_outline_length > 0:
             geometric_axis = np.c_[lcfs_data['geometric_radius'],
                                    lcfs_data['geometric_height']]
             self.data['geometric_axis'] = ('time', 'point'), geometric_axis
@@ -496,6 +498,7 @@ class Profile2D(Chart, Scenario):
         return QuadContourSet.levels
 
 
+@final
 @dataclass
 class Equilibrium(Profile2D, Profile1D, Parameter0D, Grid):
     """
@@ -570,8 +573,7 @@ class Equilibrium(Profile2D, Profile1D, Parameter0D, Grid):
     def __post_init__(self):
         """Set instance name."""
         self.name = 'equilibrium'
-        if hasattr(super(), '__post_init__'):
-            super().__post_init__()
+        super().__post_init__()
 
     def build(self):
         """Build netCDF database using data extracted from imasdb."""
@@ -600,6 +602,7 @@ class Equilibrium(Profile2D, Profile1D, Parameter0D, Grid):
         contour = Contour(self.data.r2d, self.data.z2d,
                           self.data.psi2d[itime])
         levelset = contour.levelset(self.data.psi_boundary[itime])
+        # TODO fix TypeError
         self.strike.update([surface.points for surface in levelset])
         if len(strike_points := self.strike.points) == 2:
             return strike_points
@@ -633,7 +636,7 @@ if __name__ == '__main__':
 
     pulse, run = 135013, 2
 
-    Equilibrium(pulse, run, occurrence=0)._clear()
+    # Equilibrium(pulse, run, occurrence=0)._clear()
     equilibrium = Equilibrium(pulse, run, occurrence=0)
 
     #equilibrium.time = 100

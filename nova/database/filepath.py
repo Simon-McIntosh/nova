@@ -29,7 +29,7 @@ class FilePath:
     dirname: Path | str = field(default='', repr=False)
     basename: Path | str = field(default='user_data', repr=False)
     hostname: str | None = field(default=None, repr=False)
-    parents: int = field(default=4, repr=False)
+    parents: int = field(default=6, repr=False)
     fsys: fsspec.filesystem = field(init=False, repr=False)
 
     def __post_init__(self):

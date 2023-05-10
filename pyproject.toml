@@ -62,7 +62,7 @@ cuda = [
   "cupy-cuda115",
 ]
 develop = [
-  "nova[graphics, mesh, optimize, ssh, spyder, test, vtk]",
+  "nova[graphics, mesh, optimize, ssh, spyder, test, test_develop, vtk]",
 ]
 docs = [
   "pandoc", 
@@ -114,17 +114,19 @@ structural = [
   "pyquaternion",
 ]
 test = [
-  "asv", 
   "coverage2clover", 
+  "pytest", 
+  "pytest-cov", 
+  "pytest-xdist", 
+]
+test_develop = [
+  "asv", 
   "line_profiler",
   "lizard", 
   "mypy",
   "pandas-stubs",
   "pylsp-mypy",
   "pyperf",
-  "pytest", 
-  "pytest-cov", 
-  "pytest-xdist", 
   "snakeviz",
   "tuna",
   "virtualenv", 

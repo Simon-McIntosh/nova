@@ -9,14 +9,8 @@ import nova
 from nova.database.filepath import FilePath
 from nova.definitions import root_dir
 
-try:
-    import imas
-    IMPORT_IMAS = True
-    IMASNAME = imas.__name__
-except ImportError:
-    IMPORT_IMAS = False
-    IMASNAME = 'imas'
 
+IMAS_VERSION = os.environ.get('IMAS_VERSION', '')
 HOSTNAME = 'sdcc-login01.iter.org'
 
 with nova.mark_import('ssh') as mark_ssh:
@@ -30,15 +24,13 @@ try:
 except:
     VALID_HOST = False
 
-
-mark_imas = pytest.mark.skipif(not IMPORT_IMAS, reason='failed to import imas')
 mark_connect = pytest.mark.skipif(
     not VALID_HOST, reason=f"unable to connect to host {HOSTNAME}")
 
 
 KEYPATH = dict(nova=os.path.join(nova.__name__,
                                  nova.__version__.split('+')[0]),
-               imas=os.path.join('imas',  IMASNAME.replace('imas_', '')),
+               imas=os.path.join('imas',  IMAS_VERSION),
                root=root_dir)
 
 

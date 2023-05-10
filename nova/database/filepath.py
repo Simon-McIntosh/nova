@@ -110,16 +110,11 @@ class FilePath:
     def _resolve_relative(path: str) -> str:
         """Return resolved relative path."""
         match path:
-            case str('nova'):
+            case 'nova':
                 return os.path.join(nova.__name__,
                                     nova.__version__.split('+')[0])
-            case str('imas'):
-                try:
-                    imas = import_module('imas')
-                    imas_version = imas.__name__.replace('imas_', '')
-                    return os.path.join('imas', imas_version)
-                except ImportError:
-                    return 'imas'
+            case 'imas':
+                return os.path.join('imas', os.environ.get('IMAS_VERSION', ''))
             case str(path):
                 return path
             case _:

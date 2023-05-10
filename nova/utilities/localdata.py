@@ -7,8 +7,6 @@ import pathlib
 import appdirs
 import numpy as np
 
-from nova.definitions import root_dir
-
 
 @dataclass
 class LocalData:

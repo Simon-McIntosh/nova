@@ -3,7 +3,6 @@ from dataclasses import dataclass, field
 from functools import cached_property
 from importlib import import_module
 
-import numba
 import numpy as np
 from shapely.geometry.linestring import LineString
 
@@ -165,7 +164,7 @@ class PlasmaGrid(BaseGrid, PlasmaLoc):
             case _:
                 try:
                     return self.pointloop.update(index)
-                except numba.TypingError:
+                except Exception:  # numba.TypingError:
                     index = Polygon(index).boundary
                     return self.pointloop.update(index)
 

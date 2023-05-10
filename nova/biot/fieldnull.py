@@ -1,10 +1,10 @@
 """Methods for calculating the position and value of x-points and o-points."""
 from dataclasses import dataclass, field
 
-import numba
 import numpy as np
 import xarray
 
+from nova import njit
 from nova.biot.array import Array
 from nova.graphics.plot import Plot
 from nova.geometry import select
@@ -108,22 +108,22 @@ class DataNull(Plot, Array):
         return dict(index=index) | self._unique(nulls)
 
     @staticmethod
-    @numba.njit(cache=True)
+    @njit(cache=True)
     def _index_1d(x_coordinate, z_coordinate, mask):
         index = np.where(mask)[0]
         point_number = len(index)
-        points = np.empty((point_number, 2), dtype=numba.float64)
+        points = np.empty((point_number, 2), dtype=np.float64)
         for i in range(point_number):  # pylint: disable=not-an-iterable
             points[i, 0] = x_coordinate[index[i]]
             points[i, 1] = z_coordinate[index[i]]
         return index, points
 
     @staticmethod
-    @numba.njit(cache=True)
+    @njit(cache=True)
     def _index_2d(x_coordinate, z_coordinate, mask):
         index = np.asarray(list(zip(*np.where(mask))))
         point_number = len(index)
-        points = np.empty((point_number, 2), dtype=numba.float64)
+        points = np.empty((point_number, 2), dtype=np.float64)
         for i in range(point_number):  # pylint: disable=not-an-iterable
             points[i, 0] = x_coordinate[index[i][0]]
             points[i, 1] = z_coordinate[index[i][1]]
@@ -199,7 +199,7 @@ class FieldNull(DataNull):
         return self.categorize_2d(psi)
 
     @staticmethod
-    @numba.njit(cache=True)
+    @njit(cache=True)
     def categorize_1d(data, stencil):
         """Categorize points in 1d hexagonal grid.
 
@@ -231,7 +231,7 @@ class FieldNull(DataNull):
         return o_mask, x_mask
 
     @staticmethod
-    @numba.njit(cache=True)
+    @njit(cache=True)
     def categorize_2d(data):
         """Categorize points in 2D rectangular grid.
 

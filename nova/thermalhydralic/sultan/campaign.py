@@ -24,8 +24,9 @@ class Campaign:
 
     _experiment: str
     _mode: str = 'ac'
-    database: DataBase = field(init=False, repr=False, default=None)
-    metadata: pandas.DataFrame = field(init=False, repr=False, default=None)
+    database: DataBase | None = field(init=False, repr=False, default=None)
+    metadata: pandas.DataFrame | None = field(
+        init=False, repr=False, default=None)
     reload: SimpleNamespace = field(init=False, repr=False,
                                     default_factory=SimpleNamespace)
 
@@ -494,5 +495,5 @@ class Campaign:
 
 if __name__ == '__main__':
 
-    campaign = Campaign('CSJA_9', 'ac')
+    campaign = Campaign('ITER/JACS/JACS_9', 'ac')  # CSJA_9
     campaign.read_metadata()

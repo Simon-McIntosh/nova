@@ -3,12 +3,12 @@ from contextlib import contextmanager
 from dataclasses import dataclass, field, InitVar
 from functools import cached_property
 
-import numba
 import numpy as np
 import xarray
 
 from nova.biot.data import Data
 from nova.frame.framesetloc import ArrayLocIndexer
+
 
 '''
 @numba.njit(fastmath=True, parallel=True)
@@ -77,7 +77,7 @@ class BiotOp:
 
 @dataclass
 class Operate(Data):
-    """Multi-attribute interface to numba Biot Evaluate methods."""
+    """Multi-attribute interface to Biot Evaluate methods."""
 
     version: dict[str, int | None] = field(
         init=False, repr=False, default_factory=dict)

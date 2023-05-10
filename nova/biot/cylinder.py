@@ -3,19 +3,19 @@ from dataclasses import dataclass
 from functools import cached_property
 from typing import ClassVar
 
-import numba
 import numpy as np
 import scipy.integrate
 
+from nova import njit
 from nova.biot.constants import Constants
 from nova.biot.matrix import Matrix
 
 
-@numba.njit(parallel=True)
+@njit(cache=True)
 def zeta(r, rs, z, zs, phi, delta):
     """Return zeta coefficent."""
     result = np.zeros_like(r)
-    for i in numba.prange(len(phi)):
+    for i in np.arange(len(phi)):
         result += np.arcsinh((rs - r * np.cos(phi[i])) /
                              np.sqrt((zs - z)**2 + r**2 * np.sin(phi[i])**2))
     return delta*result

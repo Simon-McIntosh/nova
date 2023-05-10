@@ -125,8 +125,9 @@ test = [
   "pytest-xdist", 
 ]
 thermofluids = [
-  "ftputil", 
   "coolprop", 
+  "ftputil", 
+  "openpyxl",
   "tables", 
   "xlrd",
 ]

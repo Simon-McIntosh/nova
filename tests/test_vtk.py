@@ -10,7 +10,7 @@ with skip_import('vtk'):
     import vedo
 
 from nova.frame.framespace import FrameSpace
-from nova.geometry.volume import VtkFrame
+from nova.geometry.vtkgen import VtkFrame
 
 
 def test_add_single_volume_vtk():

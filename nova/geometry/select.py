@@ -1,10 +1,11 @@
 """Manage selection algorithms."""
 
-import numba
 import numpy as np
 
+from nova import njit
 
-@numba.njit(cache=True)
+
+@njit(cache=True)
 def bisect(vector, value):
     """Return the bisect left index, assuming vector is sorted.
 
@@ -23,7 +24,7 @@ def bisect(vector, value):
     return low
 
 
-@numba.njit(cache=True)
+@njit(cache=True)
 def bisect_right(vector, value):
     """Return the bisect right index, assuming vector is sorted.
 
@@ -42,17 +43,17 @@ def bisect_right(vector, value):
     return low
 
 
-@numba.njit(cache=True)
+@njit(cache=True)
 def bisect_2d(vector, value):
     """Return vector of bisection values."""
     number = len(value)
-    index = np.zeros(number, dtype=numba.int16)
-    for i in numba.prange(number):
+    index = np.zeros(number, dtype=np.int16)
+    for i in np.arange(number):
         index[i] = bisect_right(vector, value[i])
     return index
 
 
-@numba.njit(cache=True)
+@njit(cache=True)
 def length_2d(x_coordinate, z_coordinate):
     """Return the cumalative length of a 2d polyline."""
     points = np.column_stack((x_coordinate, z_coordinate))
@@ -60,22 +61,23 @@ def length_2d(x_coordinate, z_coordinate):
     return np.append(0, delta.cumsum())
 
 
-@numba.njit(cache=True)
+@njit(cache=True)
 def quadratic_wall(w_cluster, psi_cluster):
     """Return psi quatratic coefficients."""
     coefficient_matrix = np.column_stack(
         (w_cluster**2, w_cluster, np.ones_like(w_cluster)))
-    coefficients = np.linalg.lstsq(coefficient_matrix, psi_cluster)[0]
+    coefficients = np.linalg.lstsq(coefficient_matrix, psi_cluster,
+                                   rcond=None)[0]
     return coefficients
 
 
-@numba.njit(cache=True)
+@njit(cache=True)
 def wall_length(coef):
     """Return location of wall null."""
     return -coef[1] / (2*coef[0])
 
 
-@numba.njit(cache=True)
+@njit(cache=True)
 def wall_coordinate(w_coordinate, x_cluster, z_cluster, w_cluster):
     """Return wall coordinates."""
     x_coordinate = np.interp(w_coordinate, w_cluster, x_cluster)
@@ -83,7 +85,7 @@ def wall_coordinate(w_coordinate, x_cluster, z_cluster, w_cluster):
     return x_coordinate, z_coordinate
 
 
-@numba.njit(cache=True)
+@njit(cache=True)
 def wall_index(psi_wall):
     """Return cluster index and roll."""
     index = np.argmax(psi_wall)
@@ -94,7 +96,7 @@ def wall_index(psi_wall):
     return index, 0
 
 
-@numba.njit(cache=True)
+@njit(cache=True)
 def wall_flux(x_wall, z_wall, psi_wall, polarity=1):
     """Return sub-panel wall flux coordinates and value."""
     if polarity == 0:  # zero plasma current
@@ -116,17 +118,18 @@ def wall_flux(x_wall, z_wall, psi_wall, polarity=1):
     return x_coordinate, z_coordinate, psi
 
 
-@numba.njit(cache=True)
+@njit(cache=True)
 def quadratic_surface(x_cluster, z_cluster, psi_cluster):
     """Return psi quatratic surface coefficients."""
     coefficient_matrix = np.column_stack(
         (x_cluster**2, z_cluster**2, x_cluster, z_cluster,
          x_cluster*z_cluster, np.ones_like(x_cluster)))
-    coefficients = np.linalg.lstsq(coefficient_matrix, psi_cluster)[0]
+    coefficients = np.linalg.lstsq(coefficient_matrix, psi_cluster,
+                                   rcond=None)[0]
     return coefficients
 
 
-@numba.njit(cache=True)
+@njit(cache=True)
 def null_type(coefficients, atol=1e-12):
     """Return null type.
 
@@ -154,7 +157,7 @@ def null_type(coefficients, atol=1e-12):
     raise ValueError('Coefficients form a degenerate surface.')
 
 
-@numba.njit(cache=True)
+@njit(cache=True)
 def null_coordinate(coefficients, cluster=None):
     """
     Return null coodinates in 2D plane.
@@ -185,7 +188,7 @@ def null_coordinate(coefficients, cluster=None):
     return x_coordinate, z_coordinate
 
 
-@numba.njit(cache=True)
+@njit(cache=True)
 def null(coef, coords):
     """Return null poloidal flux."""
     return np.array([coords[0]**2, coords[1]**2, coords[0], coords[1],

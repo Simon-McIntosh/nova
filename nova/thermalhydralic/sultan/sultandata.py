@@ -15,7 +15,8 @@ class SultanData(PandasHDF):
 
     database: DataBase
     _filename: Optional[str] = None
-    _data: pandas.DataFrame = field(init=False, repr=False, default=None)
+    _data: pandas.DataFrame | None = field(init=False, repr=False,
+                                           default=None)
     reload: SimpleNamespace = field(init=False, repr=False,
                                     default_factory=SimpleNamespace)
 

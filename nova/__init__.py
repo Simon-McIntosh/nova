@@ -9,6 +9,21 @@ from importlib import import_module
 import os
 import pytest
 
+try:
+    from numba import njit
+except ModuleNotFoundError:
+    from functools import wraps
+
+    def njit(**jit_kwargs):
+        """Replicate njit decorator, accept and ignore decorator kwargs."""
+        def decorator(method):
+            """Return method evaluated with passed args and kwargs."""
+            @wraps(method)
+            def wrapper(*args, **kwargs):
+                return method(*args, **kwargs)
+            return wrapper
+        return decorator
+
 
 def _report(dependencies: tuple[str, ...]):
     """Return module not found error meassage for dependency list."""

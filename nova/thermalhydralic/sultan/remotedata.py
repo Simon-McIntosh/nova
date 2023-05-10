@@ -186,5 +186,5 @@ class FTPData:
 
 if __name__ == '__main__':
 
-    ftp = FTPData('CSJA13')
-    print(ftp.listdir(select='CSJA'))
+    ftp = FTPData('ITER/JACS/JACS_13')
+    print(ftp.listdir('ITER/JACS/JACS_13/ac/dat'))

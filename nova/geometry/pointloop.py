@@ -5,12 +5,12 @@ code adapted from https://github.com/sasamil/PointInPolygon_Py/pointInside.
 """
 from dataclasses import dataclass
 
-import numba
-
 import numpy as np
 
+from nova import njit
 
-@numba.njit()
+
+@njit(cache=True)
 def point_in_polygon(point, polygon) -> int:
     """
     Return boolean for point in polygon (is_inside_sm).
@@ -72,11 +72,11 @@ def point_in_polygon(point, polygon) -> int:
     return intersections & 1
 
 
-@numba.njit()
+@njit(cache=True)
 def points_in_polygon(select, points, polygon, status):
     """Return polygon membership status for multiple points."""
     point_number = len(points)
-    for i in numba.prange(point_number):
+    for i in np.arange(point_number):
         select[i] = point_in_polygon(points[i], polygon) == status
     return select
 

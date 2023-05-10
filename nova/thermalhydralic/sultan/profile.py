@@ -18,7 +18,8 @@ class Profile:
 
     sample: Union[Sample, Trial, Campaign, str]
     _data_offset: Union[bool, tuple[float]] = True
-    _offset: tuple[float] = field(init=False, default=(0, 0), repr=False)
+    _offset: tuple[float | int, float | int] = \
+        field(init=False, default=(0, 0), repr=False)
     _normalize: bool = False
     _lowpass_filter: bool = True
     reload: SimpleNamespace = field(init=False, repr=False,

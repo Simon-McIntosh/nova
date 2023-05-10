@@ -1,6 +1,8 @@
 """Manage Sultan database. Unify local and remote data access."""
-import os.path
+import os
 from dataclasses import dataclass, field
+from pathlib import Path
+import zipfile
 
 from nova.thermalhydralic.sultan.localdata import LocalData
 from nova.thermalhydralic.sultan.remotedata import FTPData
@@ -60,6 +62,15 @@ class DataBase:
                     file_not_found_error = file_not_found
         try:
             return self.source_filepath(datafile)
+        except UnboundLocalError:
+            # download and unzip dat.zip and retry datafile(filename)
+            if filename == 'dat':
+                raise FileNotFoundError
+            dat_zip = self.datafile('dat')
+            with zipfile.ZipFile(dat_zip, 'r') as zip_ref:
+                zip_ref.extractall(Path(dat_zip).parent)
+            os.remove(dat_zip)
+            return self.datafile(filename)
         except AttributeError:
             err_txt = f'datafile {filename} '
             err_txt += f'not found on datapath {self.datapath}'

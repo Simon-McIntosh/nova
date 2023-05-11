@@ -37,7 +37,6 @@ dependencies = [
   "gitpython",
   "netCDF4",
   "networkx",
-  "numba",
   "numpy",
   "pandas>=2.0",
   "pytest",
@@ -90,6 +89,9 @@ graphics = [
   "matplotlib",
   "moviepy", 
   "seaborn",
+]
+jit = [
+  "numba",
 ]
 spyder = [
   "spyder", 

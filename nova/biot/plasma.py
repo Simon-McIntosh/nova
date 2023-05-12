@@ -28,7 +28,6 @@ class Plasma(Plot, netCDF, PlasmaLoc):
     wall: PlasmaWall = field(repr=False, default_factory=PlasmaWall)
     levelset: LevelSet = field(repr=False, default_factory=LevelSet)
     lcfs: LCFS | None = field(init=False, default=None)
-    strike: Strike = field(init=False, default_factory=Strike)
 
     def __post_init__(self):
         """Update subframe metadata."""
@@ -38,6 +37,11 @@ class Plasma(Plot, netCDF, PlasmaLoc):
         self.subframe.update_columns()
         super().__post_init__()
         self.version['lcfs'] = None
+
+    @cached_property
+    def strike(self):
+        """Return strike instance."""
+        return Strike()
 
     def __getattribute__(self, attr):
         """Extend getattribute to intercept grid and wall data access."""

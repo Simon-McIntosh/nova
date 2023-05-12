@@ -12,7 +12,7 @@ import xarray
 
 from nova.graphics.plot import Plot
 from nova.frame.coilset import CoilSet
-from nova.imas.database import CoilData, Database, Ids, IdsIndex, ImasIds
+from nova.imas.database import CoilData, IDS, Ids, IdsIndex, ImasIds
 from nova.geometry.polygon import Polygon
 if TYPE_CHECKING:
     from nova.frame.shell import Shell
@@ -921,7 +921,9 @@ class Geometry:
     @property
     def geometry_attrs(self) -> dict:
         """Return geometry attributes."""
-        return {f'{attr}_md': getattr(self, attr) for attr in self.geometry}
+        return {f'{attr}_md':
+                value if isinstance(value := getattr(self, attr), bool) or
+                'ids' not in value else 'ids' for attr in self.geometry}
 
 
 @dataclass
@@ -941,6 +943,9 @@ class Machine(CoilSet, Geometry, CoilData):
         for geometry in self.geometry_attrs:
             if (attrs := self.geometry_attrs[geometry]) is False:
                 continue
+            if attrs == 'ids':
+                metadata[geometry] = attrs
+                continue
             metadata[geometry] = \
                 ','.join([str(attrs[attr]) for attr in attrs])
         return metadata
@@ -953,11 +958,14 @@ class Machine(CoilSet, Geometry, CoilData):
             setattr(self, attr, metadata[attr])
         for geometry in self.geometry_attrs:
             if geometry not in metadata:
-                setattr(self, geometry, False)
+                setattr(self, geometry[:-3], False)
+                continue
+            if metadata[geometry] == 'ids':
+                setattr(self, geometry[:-3], metadata[geometry])
                 continue
             values = [self._format_geometry_attrs(attr)
                       for attr in metadata[geometry].split(',')]
-            setattr(self, geometry[:-3], dict(zip(Database.attrs, values)))
+            setattr(self, geometry[:-3], dict(zip(IDS.attrs, values)))
         assert attr_hash == self.hash_attrs(self.group_attrs)
 
     @staticmethod

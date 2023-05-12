@@ -1,10 +1,11 @@
-import tempfile
-
 import numpy as np
 import pytest
 
-from nova.imas.database import IdsEntry
+from nova.imas.database import IdsEntry, IMAS_MODULE_NOT_FOUND
 from nova.imas.pulsedesign import PulseDesign
+
+mark_imas = pytest.mark.skipif(IMAS_MODULE_NOT_FOUND,
+                               reason='IMAS module unavailable')
 
 
 @pytest.fixture
@@ -45,6 +46,7 @@ def ids():
     return ids_entry.ids_data
 
 
+@mark_imas
 def test_ids_file_cache(ids):
     ids.time_slice[0].boundary_separatrix.psi = 66
     design_a = PulseDesign(ids=ids, dplasma=-1, nwall=None, nlevelset=None)
@@ -56,6 +58,16 @@ def test_ids_file_cache(ids):
 
     assert design_a['psi_boundary'] == 66
     assert design_b['psi_boundary'] == 77
+
+
+@mark_imas
+def test_pf_active_ids_input(ids):
+    design = PulseDesign(ids=ids, dplasma=-1, nwall=None, nlevelset=None)
+    pf_active_ids = design.geometry['pf_active'](**design.pf_active).ids_data
+    design = PulseDesign(ids=ids, dplasma=-1, nwall=None, nlevelset=None,
+                         pf_active={'ids': pf_active_ids})
+    ids_entry = IdsEntry(name='pf_active')
+    design.update_metadata(ids_entry)
 
 
 if __name__ == '__main__':

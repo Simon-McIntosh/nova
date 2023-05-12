@@ -734,7 +734,8 @@ class PulseDesign(Control, ITER):
         comment = 'Coil current waveforms to match 4-point bounding-box ' \
             'separatrix targets.'
         provenance = [self.uri]
-        provenance.extend([IDS(*value.split(',')).uri for attr, value
+        provenance.extend([IDS(*value.split(',')).uri if value != 'ids'
+                           else f'{attr[:-3]}=ids' for attr, value
                            in self.data.attrs.items() if attr[-3:] == '_md'])
         metadata.put_properties(comment, homogeneous_time=1,
                                 provenance=provenance)
@@ -761,7 +762,6 @@ class PulseDesign(Control, ITER):
         data['r2d'] = ('r', 'z'), self.levelset.data.x2d.data
         data['z2d'] = ('r', 'z'), self.levelset.data.z2d.data
         data['boundary_index'] = np.arange(500)
-        data['x_point_index'] = np.arange(2)
         data['strike_point_index'] = np.arange(2)
         data['coil_name'] = self.coil_name
 
@@ -780,8 +780,8 @@ class PulseDesign(Control, ITER):
             data[attr] = xarray.DataArray(
                 0, coords=[data.time], dims=['time'])
         data['x_point'] = xarray.DataArray(
-            EMPTY_FLOAT, coords=[data.time, data.x_point_index, data.point],
-            dims=['time', 'x_point_index', 'point'])
+            EMPTY_FLOAT, coords=[data.time, data.point],
+            dims=['time', 'point'])
         data['strike_point'] = xarray.DataArray(
             EMPTY_FLOAT,
             coords=[data.time, data.strike_point_index, data.point],
@@ -796,10 +796,10 @@ class PulseDesign(Control, ITER):
             data['magnetic_axis'][itime] = self.plasma.magnetic_axis
             data['boundary_type'][itime] = int(not self.plasma.limiter)
             data['geometric_axis'][itime] = self.plasma.geometric_axis
-            x_points = self.plasmagrid.x_points
-            data['x_point_number'][itime] = len(x_points)
-            if (n_points := len(x_points)) > 0:
-                data['x_point'][itime, :n_points] = x_points
+            data['x_point_number'][itime] = int(not self.plasma.limiter)
+            if not self.plasma.limiter:
+                data['x_point'][itime] = self.plasma.x_point
+
             strike_points = self.plasma.strike_points
             data['strike_point_number'][itime] = len(strike_points)
             if (n_points := len(strike_points)) > 0:
@@ -844,12 +844,40 @@ class PulseDesign(Control, ITER):
         with ids_entry.node('time_slice:boundary_separatrix.geometric_axis.*'):
             for i, attr in enumerate('rz'):
                 ids_entry[attr, :] = self._data['geometric_axis'].data[:, i]
-        with ids_entry.node('time_slice:boundary_separatrix.x_point.*'):
-            for i, attr in enumerate('rz'):
-                ids_entry[attr, :] = self._data['x_point'].data[..., i]
-        with ids_entry.node('time_slice:boundary_separatrix.strike_point.*'):
-            for i, attr in enumerate('rz'):
-                ids_entry[attr, :] = self._data['strike_point'].data[..., i]
+        for itime in range(self.data.dims['time']):
+            boundary = ids_entry.ids_data.time_slice[itime].boundary_separatrix
+            # boundary x_point
+            if self._data.x_point_number[itime].data > 0:
+                x_point = self._data.x_point[itime].data
+                boundary.x_point.resize(1)
+                boundary.x_point[0].r = x_point[0]
+                boundary.x_point[0].z = x_point[1]
+            # divertor strike points
+            if (number := self._data.strike_point_number[itime].data) > 0:
+                strike_point = self._data.strike_point[itime].data
+                boundary.strike_point.resize(number)
+                for point in range(number):
+                    boundary.strike_point[point].r = strike_point[point, 0]
+                    boundary.strike_point[point].z = strike_point[point, 1]
+            # profiles 2D
+            profiles_2d = ids_entry.ids_data.time_slice[itime].profiles_2d
+            profiles_2d.resize(1)
+            profiles_2d[0].type.name = 'total'
+            profiles_2d[0].type.index = 0
+            profiles_2d[0].type.name = 'total field and flux'
+            profiles_2d[0].grid_type.name = 'rectangular'
+            profiles_2d[0].grid_type.index = 1
+            profiles_2d[0].grid_type.description = 'cylindrical grid'
+            profiles_2d[0].grid.dim1 = self._data.r.data
+            profiles_2d[0].grid.dim2 = self._data.z.data
+            profiles_2d[0].r = self._data.r2d.data
+            profiles_2d[0].z = self._data.z2d.data
+            profiles_2d[0].psi = self.levelset.psi_
+            # only write field for high order plasma elements
+            if self.tplasma == 'rectangle':
+                profiles_2d[0].b_field_r = self.levelset.br_
+                profiles_2d[0].b_field_z = self.levelset.bz_
+
         return ids_entry.ids_data
 
     def plot_waveform(self):
@@ -929,12 +957,17 @@ class Benchmark(PulseDesign):
 if __name__ == '__main__':
 
     design = PulseDesign(135013, 2, 'iter', 1)
+    pf_active = design.geometry['pf_active'](**design.pf_active).ids_data
+
+    design = PulseDesign(135013, 2, 'iter', 1, pf_active={'ids': pf_active})
     # design = Benchmark(135013, 2, 'iter', 1)
 
     design.itime = 5
 
     design.plot('plasma')
-    design.levelset.plot_levelset(-design['psi_boundary'], False, color='k')  # Cocos
-    design.levelset.plot_levelset(design.plasma.psi_boundary, False, color='C3')
+    # Cocos
+    design.levelset.plot_levelset(-design['psi_boundary'], False, color='k')
+    design.levelset.plot_levelset(
+        design.plasma.psi_boundary, False, color='C3')
 
-    #design.plot_waveform()
+    # design.plot_waveform()

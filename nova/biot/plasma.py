@@ -16,6 +16,7 @@ from nova.graphics.plot import Plot
 from nova.frame.plasmaloc import PlasmaLoc
 from nova.geometry.polygon import Polygon
 from nova.geometry.separatrix import LCFS
+from nova.geometry.strike import Strike
 
 
 @dataclass
@@ -27,6 +28,7 @@ class Plasma(Plot, netCDF, PlasmaLoc):
     wall: PlasmaWall = field(repr=False, default_factory=PlasmaWall)
     levelset: LevelSet = field(repr=False, default_factory=LevelSet)
     lcfs: LCFS | None = field(init=False, default=None)
+    strike: Strike = field(init=False, default_factory=Strike)
 
     def __post_init__(self):
         """Update subframe metadata."""
@@ -42,7 +44,10 @@ class Plasma(Plot, netCDF, PlasmaLoc):
         match attr:
             case 'lcfs':
                 self._check_lcfs()
-        return super().__getattribute__(attr)
+        try:
+            return super().__getattribute__(attr)
+        except AttributeError:
+            return getattr(self.lcfs, attr)
 
     def solve(self, boundary=None):
         """Solve interaction matricies across plasma grid."""
@@ -55,15 +60,16 @@ class Plasma(Plot, netCDF, PlasmaLoc):
         if len(self.levelset) == 0:
             raise RuntimeError('solve levelset - nlevelset is None')
         points = self.levelset(self.psi_boundary)
-        mask = self.x_mask(points[:, 1])
+        mask = self.grid.x_mask(points[:, 1])
         self.lcfs = LCFS(points[mask])
 
     def _check_lcfs(self):
-        """Check validity of upstream data, update wall flux if nessisary."""
-        self.grid.check_plasma('Psi')
-        if self.version['lcfs'] != self.grid.version['psi']:
+        """Check validity of upstream data, update psi if nessisary."""
+        self.levelset.check_plasma('Psi')
+        if self.version['lcfs'] is None or \
+                self.version['lcfs'] != self.levelset.version['psi']:
             self.update_lcfs()
-            self.version['lcfs'] = self.grid.version['psi']
+            self.version['lcfs'] = self.levelset.version['psi']
 
     @property
     def li_3(self):
@@ -98,14 +104,29 @@ class Plasma(Plot, netCDF, PlasmaLoc):
         return self.grid['o_psi']
 
     @property
+    def magnetic_axis(self):
+        """Return location of plasma o-point."""
+        return self.grid['o_point']
+
+    @property
     def psi_x(self):
         """Return primary x-point poloidal flux."""
         return self.grid['x_psi']
 
     @property
+    def x_point(self):
+        """Return location of primary x-point."""
+        return self.grid['x_point']
+
+    @property
     def psi_w(self):
         """Return wall limiter poloidal flux."""
         return self.wall['w_psi']
+
+    @property
+    def limiter(self):
+        """Return True if plasma is in a limter state."""
+        return np.isclose(self.psi_boundary, self.psi_w)
 
     @property
     def psi_boundary(self):
@@ -115,6 +136,19 @@ class Plasma(Plot, netCDF, PlasmaLoc):
         if self.polarity < 0:
             return np.min([self.psi_x, self.psi_w])
         return np.max([self.psi_x, self.psi_w])
+
+    @property
+    def strike_points(self):
+        """Return divertor strike points."""
+        if self.limiter:
+            return np.array([])
+        levelset = self.levelset.contour.levelset(self.psi_boundary)
+        self.strike.update([surface.points for surface in levelset])
+        if len(strike_points := self.strike.points) == 2:
+            return strike_points
+        minmax_index = [np.argmin(strike_points[:, 0]),
+                        np.argmax(strike_points[:, 0])]
+        return strike_points[minmax_index]
 
     def normalize(self, psi):
         """Return normalized flux."""

@@ -24,14 +24,13 @@ class Strike(Plot):
     def __post_init__(self):
         """Extract limiter segments."""
         geometry = Geometry(False, False, wall=self.wall)
-        wall = geometry['wall'](**geometry.wall, dplasma=-1)
+        wall = geometry.geometry['wall'](**geometry.wall, dplasma=-1)
         self.wall = wall.ids_attrs
         segments = [wall.segment(index) for index in self.indices]
         self.limiter = MultiLineString(segments)
 
     def update(self, lines):
         """Update intersections between contour and limiter surfaces."""
-        print('***')
         self.contour = MultiLineString(lines)
         self.intersects = intersects(self.limiter, self.contour)
         if self.intersects:

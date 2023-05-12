@@ -150,7 +150,7 @@ if __name__ == '__main__':
 
     '''
 
-    eq = Equilibrium(135011, 7)
+    eq = EquilibriumData(135011, 7)
     attr = 'f_df_dpsi'
 
     svd = Svd(50, 5)
@@ -163,7 +163,7 @@ if __name__ == '__main__':
     #svd.load_frame('DINA-IMAS', attr)
     #svd.load_frame('CORSICA', attr)
 
-    #eq = Equilibrium(130506, 403)
+    #eq = EquilibriumData(130506, 403)
     #svd += eq.data[attr]
 
     svd.plot(ls='--')

@@ -9,7 +9,7 @@ from nova.imas.machine import Machine
 @dataclass
 class Fuse(Machine):
     """
-    Equilibrium generation and reconstruction methods.
+    EquilibriumData generation and reconstruction methods.
 
     Merge model predictions with data observations.
     """

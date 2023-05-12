@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from nova.imas.database import Database
-from nova.imas.equilibrium import Equilibrium
+from nova.imas.equilibrium import EquilibriumData
 from nova.imas.extrapolate import Extrapolate
 from nova.imas.operate import Grid
 from nova.imas.utilities import ids_attrs, load_ids, mark
@@ -31,18 +31,18 @@ def test_load_from_ids():
 
 @mark['equilibrium']
 def test_extrapolation_grid_relitive_to_ids():
-    equilibrium = Equilibrium(ids_attrs['equilibrium']['pulse'],
-                              ids_attrs['equilibrium']['run'])
-    grid = Grid(50, 'ids', ids=equilibrium.ids_data)
+    ids_data = EquilibriumData(ids_attrs['equilibrium']['pulse'],
+                              ids_attrs['equilibrium']['run']).ids_data
+    grid = Grid(50, 'ids', ids=ids_data)
     assert grid.grid_attrs == {'number': 50, 'limit': [2.75, 8.9, -5.49, 5.51],
                                'index': 'plasma'}
 
 
 @mark['equilibrium']
 def test_extrapolation_grid_exact_copy_of_ids():
-    equilibrium = Equilibrium(ids_attrs['equilibrium']['pulse'],
-                              ids_attrs['equilibrium']['run'])
-    grid = Grid('ids', 'ids', ids=equilibrium.ids_data)
+    ids_data = EquilibriumData(ids_attrs['equilibrium']['pulse'],
+                              ids_attrs['equilibrium']['run']).ids_data
+    grid = Grid('ids', 'ids', ids=ids_data)
     assert grid.grid_attrs['number'] == 8385
 
 
@@ -64,8 +64,8 @@ def test_extrapolate_attrs():
 @mark['CORSICA']
 @pytest.mark.parametrize('itime', [5, 15, 20, 30, 35, 40])
 def test_extrapolate_rms_error(itime):
-    equilibrium = Equilibrium(**ids_attrs['CORSICA'])
-    extrapolate = Extrapolate(ids=equilibrium.ids_data, limit='ids',
+    ids_data = EquilibriumData(**ids_attrs['CORSICA']).ids_data
+    extrapolate = Extrapolate(ids=ids_data, limit='ids',
                               ngrid=50, dplasma=-250, nturn=10)
     extrapolate.itime = itime
     extrapolate_psi = extrapolate.grid.psi_.copy()

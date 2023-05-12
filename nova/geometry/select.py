@@ -1,5 +1,4 @@
 """Manage selection algorithms."""
-
 import numpy as np
 
 from nova import njit

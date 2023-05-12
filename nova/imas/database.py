@@ -7,9 +7,15 @@ from typing import Any, ClassVar, Optional, Type
 
 try:
     import imas
+    from imas.hli_exception import ALException
+    from imas.hli_utils import imasdef
     IMAS_MODULE_NOT_FOUND = False
+    EMPTY_INT = imasdef.EMPTY_INT
+    EMPTY_FLOAT = imasdef.EMPTY_FLOAT
 except ModuleNotFoundError:
     IMAS_MODULE_NOT_FOUND = True
+    EMPTY_INT = -999999999
+    EMPTY_FLOAT = -9e40
 import numpy as np
 import xxhash
 
@@ -299,7 +305,7 @@ class Database(IDS):
         Imas module not found. IMAS access layer not loaded or installed.
     TypeError
         Malformed imput passed to database instance.
-    ALException
+    imas.hli_exceptionALException
         Insufficient parameters passed to define ids.
         self.ids is None and pulse, run, and name set to defaults or None.
 
@@ -389,14 +395,15 @@ class Database(IDS):
 
     """
 
+    filename: str = field(default='', repr=False)
+    group: str | None = field(default=None, repr=False)
     ids: ImasIds | None = field(repr=False, default=None)
 
     def __post_init__(self):
         """Load parameters and set ids."""
         self.rename()
         self.load_database()
-        if hasattr(super(), '__post_init__'):
-            super().__post_init__()
+        self.update_filename()
 
     def rename(self):
         """Reset name to default if default is not None."""
@@ -419,6 +426,28 @@ class Database(IDS):
         return None
 
     @property
+    def classname(self):
+        """Return base filename."""
+        classname = f'{self.__class__.__name__.lower()}'.replace('data', '')
+        if classname == self.name:
+            return self.machine
+        return f'{classname}_{self.machine}'
+
+    def update_filename(self):
+        """Update filename."""
+        if self.filename == '':
+            self.filename = self.classname
+            if self.pulse is not None and self.pulse > 0 and \
+                    self.run is not None and self.run > 0:
+                self.filename += f'_{self.pulse}_{self.run}'
+            if self.occurrence > 0:
+                self.filename += f'_{self.occurrence}'
+        if self.filename == 'machine_description':
+            self.filename = self.classname
+        if self.group is None and self.name is not None:
+            self.group = self.name
+
+    @property
     def _unset_attrs(self) -> bool:
         """Return True if any required input attributes are unset."""
         return self.pulse == 0 or self.pulse is None or \
@@ -432,7 +461,7 @@ class Database(IDS):
         Update name to match ids.__name__
         """
         if self._unset_attrs:
-            self.pulse = self.ids_hash
+            self.pulse = 0
             self.run = 0
         if self.name is not None and self.name != self.ids_data.__name__:
             raise NameError(f'missmatch between instance name {self.name} '
@@ -442,7 +471,7 @@ class Database(IDS):
     def _check_ids_attrs(self):
         """Confirm minimum working set of input attributes."""
         if self._unset_attrs:
-            raise imas.hli_exception.ALException(
+            raise ALException(
                 f'When self.ids is None require:\n'
                 f'pulse ({self.pulse} > 0) & run ({self.run} > 0) & '
                 f'name ({self.name} != None)')
@@ -482,7 +511,7 @@ class Database(IDS):
             try:
                 if self.get_ids(ids_path, i) == imas.imasdef.EMPTY_INT:
                     return i
-            except imas.hli_exception.ALException:
+            except ALException:
                 return i
         raise IndexError(f'no empty occurrences found for i < {limit}')
 
@@ -509,8 +538,8 @@ class Database(IDS):
         with self._db_entry() as db_entry:
             try:
                 db_entry.open()  # (uri=self.uri)  # TODO uri update
-            except imas.hli_exception.ALException as error:
-                raise imas.hli_exception.ALException(
+            except ALException as error:
+                raise ALException(
                     f'malformed input to imas.DBEntry\n{error}\n'
                     f'pulse {self.pulse}, '
                     f'run {self.run}, '
@@ -896,35 +925,8 @@ class IdsData(Datafile, Database):
 
     dirname: str = '.nova.imas'
 
-    def __post_init__(self):
-        """Update filename and group."""
-        self.rename()
-        self.load_database()
-        self.update_filename()
-        super().__post_init__()
-
     #def assert_final(self, classname: str):
     #    """
-
-    @property
-    def classname(self):
-        """Return base filename."""
-        if (classname := f'{self.__class__.__name__.lower()}') == self.name:
-            return self.machine
-        return f'{classname}_{self.machine}'
-
-    def update_filename(self):
-        """Update filename."""
-        if self.filename == '':
-            self.filename = self.classname
-            if self.pulse > 0 and self.run > 0:
-                self.filename += f'_{self.pulse}_{self.run}'
-            if self.occurrence > 0:
-                self.filename += f'_{self.occurrence}'
-        if self.filename == 'machine_description':
-            self.filename = self.classname
-        if self.group is None and self.name is not None:
-            self.group = self.name
 
     def merge_data(self, data):
         """Merge external data, interpolating to existing dataset timebase."""
@@ -933,6 +935,8 @@ class IdsData(Datafile, Database):
 
     def load_data(self, ids_class):
         """Load data from IdsClass and merge."""
+        if self.pulse == 0 and self.run == 0 and self.ids is None:
+            return
         try:
             data = ids_class(**self.ids_attrs, ids=self.ids).data
         except NameError:  # name missmatch when loading from ids node

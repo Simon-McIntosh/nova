@@ -111,6 +111,10 @@ class BoxGeometry:
         """Return surface height interpolator."""
         return Peak(self.cumulative_length, self.points[:, 1], self.pad_width)
 
+    def boundary(self, length):
+        """Return lcfs interpolated to normalized length."""
+        return np.c_[self.radius(length), self.height(length)]
+
     @cached_property
     def length(self):
         """Return length of last closed flux surface."""
@@ -170,6 +174,11 @@ class PointGeometry(BoxGeometry):
     def geometric_height(self):
         """Return geometric height, Zgeo."""
         return (self.z_max + self.z_min) / 2
+
+    @cached_property
+    def geometric_axis(self):
+        """Return geometric axis."""
+        return np.r_[self.geometric_radius, self.geometric_height]
 
     @cached_property
     def minor_radius(self):

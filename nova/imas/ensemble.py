@@ -7,7 +7,7 @@ import xarray
 
 from nova.database.netcdf import netCDF
 from nova.imas.connect import ScenarioDatabase
-from nova.imas.equilibrium import Equilibrium
+from nova.imas.equilibrium import EquilibriumData
 from nova.graphics.plot import Plot1D
 
 
@@ -62,7 +62,7 @@ class Ensemble(netCDF, Plot1D, EnsembleAttrs):
         data = []
         for i, (pulse, run) in enumerate(zip(self.data.pulse.data,
                                              self.data.run.data)):
-            eq_data = Equilibrium(pulse, run).data[self.attrs]
+            eq_data = EquilibriumData(pulse, run).data[self.attrs]
             _isnull = eq_data.isnull().any()
             if any([getattr(_isnull, attr) for attr in _isnull]):
                 warn(f'\nskipping {pulse}:{run} due to nans in dataset')

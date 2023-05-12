@@ -121,7 +121,7 @@ class Extrapolate(Operate):
 
     The equilibrium ids is read from file and stored as an ids attribute:
 
-    >>> extrapolate.get_ids().code.name
+    >>> extrapolate.get_ids('equilibrium').code.name
     'CORSICA'
 
     To run code as an **IMAS actor**,
@@ -159,7 +159,7 @@ class Extrapolate(Operate):
     #def update_metadata(self):
     #    """Return extrapolated equilibrium ids."""
     #    ids = imas.equilibrium()
-    #    Properties('Equilibrium extrapolation',
+    #    Properties('EquilibriumData extrapolation',
     #               provider='Simon McIntosh')(ids.ids_properties)
     #    Code(self.group_attrs)(ids.code)
     #    ids.vacuum_toroidal_field = self.ids.vacuum_toroidal_field

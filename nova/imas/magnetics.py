@@ -36,7 +36,7 @@ class Magnetics(Plot, Database):
     AI	MHD Saddles
     AJ	HF Sensors
     AK	RWM Sensors
-    AL	Divertor Equilibrium Sensors
+    AL	Divertor EquilibriumData Sensors
     AM	Divertor Shunts
     AN	Rogowskis (Divertor )
     AO	Toroidal Coils (Divertor)

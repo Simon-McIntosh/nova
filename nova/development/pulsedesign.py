@@ -11,7 +11,7 @@ from nova.biot.biot import Nbiot
 from nova.graphics.plot import Plot
 from nova.geometry.separatrix import Separatrix
 from nova.imas.database import Ids
-from nova.imas.equilibrium import Equilibrium
+from nova.imas.equilibrium import EquilibriumData
 from nova.imas.machine import Machine
 from nova.imas.pf_active import PF_Active
 from nova.imas.pulseschedule import PulseSchedule
@@ -415,7 +415,7 @@ class Benchmark(PulseDesign):
 
     def __post_init__(self):
         """Load source equilibrium instance."""
-        self.source_data['equilibrium'] = Equilibrium(self.pulse, self.run)
+        self.source_data['equilibrium'] = EquilibriumData(self.pulse, self.run)
         self.source_data['pf_active'] = PF_Active(self.pulse, self.run)
         super().__post_init__()
 

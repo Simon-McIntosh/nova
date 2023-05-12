@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 import numpy as np
 
 from nova.graphics.plot import Plot
-from nova.imas.equilibrium import Equilibrium
+from nova.imas.equilibrium import EquilibriumData
 from nova.linalg.decompose import Decompose
 
 
@@ -182,7 +182,7 @@ if __name__ == '__main__':
     #svd.load_frame('DINA-IMAS', attr)
     svd.load_frame('CORSICA', attr)
 
-    eq = Equilibrium(100504, 3)
+    eq = EquilibriumData(100504, 3)
 
     ols = OdinaryLeastSquares(svd.matrix)
 
@@ -208,7 +208,7 @@ if __name__ == '__main__':
 
     #berstein.plot()
 
-    eq = Equilibrium(135011, 7)
+    eq = EquilibriumData(135011, 7)
     # eq.build()
     attr = 'f_df_dpsi'
     #attr = 'dpressure_dpsi'

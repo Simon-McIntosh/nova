@@ -31,7 +31,8 @@ class Scenario(GetSlice, IdsData):
             self.data.coords['time'] = self.ids_data.time
             self.data.coords['itime'] = 'time', range(len(self.data['time']))
         yield
-        self.store()
+        if self.pulse != 0 and self.run != 0:  # don't store passed ids_data
+            self.store()
 
     def append(self, coords: tuple[str, ...], attrs: list[str] | str,
                branch='', prefix='', postfix='', ids_node=None):

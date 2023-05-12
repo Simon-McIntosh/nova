@@ -12,8 +12,9 @@ from numpy.ma import trace
 from nova.biot.biot import Nbiot
 from nova.graphics.plot import Plot
 from nova.geometry.separatrix import Quadrant, Separatrix
-from nova.imas.database import Database, IDS, Ids, IdsEntry
-from nova.imas.equilibrium import Equilibrium
+from nova.imas.database import (Database, IDS, Ids, IdsEntry,
+                                EMPTY_INT, EMPTY_FLOAT)
+from nova.imas.equilibrium import EquilibriumData
 from nova.imas.machine import Machine
 from nova.imas.metadata import Metadata
 from nova.imas.profile import Profile
@@ -167,13 +168,11 @@ class Constraint(Plot):
 
 
 @dataclass
-class ControlPoint(Equilibrium):
-    """Build control points from pulse schedule data."""
+class Control(Profile):
+    """Extract control points and flux profiles from equilibrium data."""
 
-    control_point: Constraint = field(init=False, default_factory=Constraint,
-                                      repr=False)
-    strike_point: Constraint = field(init=False, default_factory=Constraint,
-                                     repr=False)
+    constraint: Constraint = field(init=False, default_factory=Constraint,
+                                   repr=False)
 
     point_attrs: ClassVar[dict[str, list[str]]] = {
         'boundary': ['outer', 'upper', 'inner', 'lower']}
@@ -184,36 +183,19 @@ class ControlPoint(Equilibrium):
         return self['boundary_type'] == 0
 
     @property
-    def control_points(self):
+    def points(self):
         """Return control points."""
         return np.c_[[getattr(self, attr)
                       for attr in self.point_attrs['boundary']]]
 
-    @property
-    def strike_points(self):
-        """Return strike points."""
-        if self.limiter:
-            return np.array([])
-        return np.c_[[getattr(self, attr)
-                      for attr in self.point_attrs['strike']]]
-
-    def update_control_point(self, psi=0):
-        """Update control point constraints."""
-        self.control_point = Constraint(self.control_points)
-        self.control_point.poloidal_flux = psi, [0, 1, 2, 3]
-        self.control_point.radial_field = 0, [0, 2]
-        self.control_point.vertical_field = 0, [1, 3]
-        if not self.limiter:
-            self.control_point.radial_field = 0, [3]
-
-    def update_strike_point(self, psi=0):
-        """Update strike point constraints."""
-        self.strike_point = Constraint(self.strike_points)
-        self.strike_point.poloidal_flux = psi
-
     def update_constraints(self, psi=0):
         """Update flux and field constraints."""
-        self.update_control_point(psi)
+        self.constraint = Constraint(self.points)
+        self.constraint.poloidal_flux = psi, [0, 1, 2, 3]
+        self.constraint.radial_field = 0, [0, 2]
+        self.constraint.vertical_field = 0, [1, 3]
+        if not self.limiter:
+            self.constraint.radial_field = 0, [3]
 
     def update(self):
         """Update source equilibrium."""
@@ -330,11 +312,11 @@ class ControlPoint(Equilibrium):
     def plot(self, index=None, axes=None, **kwargs):
         """Plot control points and first wall."""
         self.get_axes('2d', axes)
-        for segment in ['wall', 'divertor']:
-            self.axes.plot(self.data[segment][:, 0], self.data[segment][:, 1],
+        wall = self.geometry['wall'](**self.wall)
+        for segment in wall.segments:
+            self.axes.plot(segment[:, 0], segment[:, 1],
                            '-', ms=4, color='gray', linewidth=1.5)
-        self.control_point.plot()
-        self.strike_point.plot()
+        self.constraint.plot()
 
 
 @dataclass
@@ -381,7 +363,7 @@ class ITER(Machine):
 
 
 @dataclass
-class PulseDesign(ITER, ControlPoint, Profile):
+class PulseDesign(Control, ITER):
     """Generate Pulse Design Simulator current waveforms.
 
     Transform a prototype pulse design from a four-point bounding-box plasma
@@ -605,12 +587,13 @@ class PulseDesign(ITER, ControlPoint, Profile):
     """
 
     nwall: Nbiot = 3
-    nlevelset: Nbiot = 3000
+    nlevelset: Nbiot = 6000
     ninductance: Nbiot = None
     nforce: Nbiot = None
     nfield: Nbiot = None
     gamma: float = 1e-12
     field_weight: float | int = 50
+    name: str = 'equilibrium'
 
     def update_constraints(self):
         """Extend ControlPoint.update_constraints to include boundary psi."""
@@ -653,8 +636,7 @@ class PulseDesign(ITER, ControlPoint, Profile):
 
     def solve_current(self):
         """Solve coil currents given flux and field targets."""
-        coupling = [self._constrain(self.control_point),
-                    self._constrain(self.strike_point)]
+        coupling = [self._constrain(self.constraint)]
         matrix, vector = self._stack(*coupling)
         gamma = self.gamma * abs(self['ip'])
         self.saloc['free', 'Ic'] = MoorePenrose(matrix, gamma=gamma) / vector
@@ -677,8 +659,7 @@ class PulseDesign(ITER, ControlPoint, Profile):
 
     def optimize_current(self):
         """Optimize external coil currents."""
-        coupling = [self._constrain(self.control_point),
-                    self._constrain(self.strike_point)]
+        coupling = [self._constrain(self.constraint)]
         matrix, vector = self._stack(*coupling)
         fmatrix, fvector = self._constrain(self.field)
         self.solve_current()
@@ -765,13 +746,65 @@ class PulseDesign(ITER, ControlPoint, Profile):
     @cached_property
     def _data(self) -> xarray.Dataset:
         """Return waveform dataset."""
+        attrs_0d = ['li_3', 'psi_axis', 'psi_boundary', 'minor_radius',
+                    'elongation', 'triangularity', 'triangularity_upper',
+                    'triangularity_lower', 'triangularity_inner',
+                    'triangularity_outer', 'squareness_upper_inner',
+                    'squareness_upper_outer', 'squareness_lower_inner',
+                    'squareness_lower_outer']
+
         data = xarray.Dataset()
         data['time'] = self.data.time
+        data['point'] = ['r', 'z']
+        data['r'] = self.levelset.data.x.data
+        data['z'] = self.levelset.data.z.data
+        data['r2d'] = ('r', 'z'), self.levelset.data.x2d.data
+        data['z2d'] = ('r', 'z'), self.levelset.data.z2d.data
+        data['boundary_index'] = np.arange(500)
+        data['x_point_index'] = np.arange(2)
+        data['strike_point_index'] = np.arange(2)
         data['coil_name'] = self.coil_name
-        data['current'] = xarray.DataArray(0., coords=data.coords)
+
+        data['current'] = xarray.DataArray(
+            0., coords=[data.time, data.coil_name], dims=['time', 'coil_name'])
+        data['boundary'] = xarray.DataArray(
+            0., coords=[data.time, data.boundary_index, data.point],
+            dims=['time', 'boundary_index', 'point'])
+        for attr in attrs_0d:
+            data[attr] = xarray.DataArray(
+                0., coords=[data.time], dims=['time'])
+        for axis in ['magnetic_axis', 'geometric_axis']:
+            data[axis] = xarray.DataArray(
+                0., coords=[data.time, data.point], dims=['time', 'point'])
+        for attr in ['boundary_type', 'x_point_number', 'strike_point_number']:
+            data[attr] = xarray.DataArray(
+                0, coords=[data.time], dims=['time'])
+        data['x_point'] = xarray.DataArray(
+            EMPTY_FLOAT, coords=[data.time, data.x_point_index, data.point],
+            dims=['time', 'x_point_index', 'point'])
+        data['strike_point'] = xarray.DataArray(
+            EMPTY_FLOAT,
+            coords=[data.time, data.strike_point_index, data.point],
+            dims=['time', 'strike_point_index', 'point'])
+        length = np.linspace(0, 1, data.dims['boundary_index'])
         for itime in tqdm(self.data.itime.data, 'Solving PDS waveform'):
             self.itime = itime
             data['current'][itime] = self.current
+            data['boundary'][itime] = self.plasma.boundary(length)
+            for attr in attrs_0d:
+                data[attr][itime] = getattr(self.plasma, attr)
+            data['magnetic_axis'][itime] = self.plasma.magnetic_axis
+            data['boundary_type'][itime] = int(not self.plasma.limiter)
+            data['geometric_axis'][itime] = self.plasma.geometric_axis
+            x_points = self.plasmagrid.x_points
+            data['x_point_number'][itime] = len(x_points)
+            if (n_points := len(x_points)) > 0:
+                data['x_point'][itime, :n_points] = x_points
+            strike_points = self.plasma.strike_points
+            data['strike_point_number'][itime] = len(strike_points)
+            if (n_points := len(strike_points)) > 0:
+                data['strike_point'][itime, :n_points] = strike_points
+        data.attrs['attrs_0d'] = attrs_0d
         return data
 
     @cached_property
@@ -788,8 +821,36 @@ class PulseDesign(ITER, ControlPoint, Profile):
     @cached_property
     def equilibrium_ids(self) -> Ids:
         """Return waveform equilibrium ids."""
-        # TODO implement
-        raise NotImplementedError
+        ids_entry = IdsEntry(ids_data=self.ids_data, name='equilibrium')
+        self.update_metadata(ids_entry)
+        ids_entry.ids_data.time = self._data.time.data
+        with ids_entry.node('time_slice:global_quantities.*'):
+            for attr in ['li_3', 'psi_axis', 'psi_boundary']:
+                data = self._data[attr].data
+                if 'psi' in attr:
+                    data *= -1  # COCOS
+                ids_entry[attr, :] = data
+        with ids_entry.node('time_slice:global_quantities.magnetic_axis*'):
+            for i, attr in enumerate('rz'):
+                ids_entry[attr, :] = self._data.magnetic_axis.data[:, i]
+        with ids_entry.node('time_slice:boundary_separatrix.*'):
+            for attr in self._data.attrs_0d:
+                ids_entry[attr, :] = self._data[attr].data
+            ids_entry['type', :] = self._data['boundary_type'].data
+            ids_entry['psi', :] = -self._data['psi_boundary'].data  # COCOS
+        with ids_entry.node('time_slice:boundary_separatrix.outline.*'):
+            for i, attr in enumerate('rz'):
+                ids_entry[attr, :] = self._data['boundary'].data[..., i]
+        with ids_entry.node('time_slice:boundary_separatrix.geometric_axis.*'):
+            for i, attr in enumerate('rz'):
+                ids_entry[attr, :] = self._data['geometric_axis'].data[:, i]
+        with ids_entry.node('time_slice:boundary_separatrix.x_point.*'):
+            for i, attr in enumerate('rz'):
+                ids_entry[attr, :] = self._data['x_point'].data[..., i]
+        with ids_entry.node('time_slice:boundary_separatrix.strike_point.*'):
+            for i, attr in enumerate('rz'):
+                ids_entry[attr, :] = self._data['strike_point'].data[..., i]
+        return ids_entry.ids_data
 
     def plot_waveform(self):
         """Extend plot_waveform to compare with benchmark."""
@@ -811,7 +872,7 @@ class Benchmark(PulseDesign):
 
     def __post_init__(self):
         """Load source equilibrium instance."""
-        self.source_data['equilibrium'] = Equilibrium(self.pulse, self.run)
+        self.source_data['equilibrium'] = EquilibriumData(self.pulse, self.run)
         self.source_data['pf_active'] = PF_Active(self.pulse, self.run)
         super().__post_init__()
 
@@ -876,4 +937,4 @@ if __name__ == '__main__':
     design.levelset.plot_levelset(-design['psi_boundary'], False, color='k')  # Cocos
     design.levelset.plot_levelset(design.plasma.psi_boundary, False, color='C3')
 
-    design.plot_waveform()
+    #design.plot_waveform()

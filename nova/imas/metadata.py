@@ -125,6 +125,6 @@ if __name__ == '__main__':
     ids = imas.equilibrium()
 
     metadata = Metadata(ids)
-    metadata.put_properties('Equilibrium extrapolation', 'Yuri\'s database',
+    metadata.put_properties('EquilibriumData extrapolation', 'Yuri\'s database',
                             provider='Simon McIntosh')
     metadata.put_code('test code attribute update')

@@ -736,9 +736,14 @@ class Wall(CoilDatabase):
         return Contour(firstwall.data).loop
 
     def segment(self, index=0):
-        """Return firstwall segment."""
+        """Return indexed firstwall segment."""
         return np.array([self.limiter.unit[index].outline.r,
                          self.limiter.unit[index].outline.z]).T
+
+    @cached_property
+    def segments(self):
+        """Return first wall segments."""
+        return [self.segment(i) for i in range(len(self.limiter.unit))]
 
     def build(self):
         """Build plasma bound by firstwall contour."""
@@ -830,12 +835,6 @@ class Geometry:
             setattr(self, attr, ids_attrs)
         if hasattr(super(), '__post_init__'):
             super().__post_init__()
-
-    def __getitem__(self, attr):
-        """Return geometry item."""
-        if attr in self.geometry:
-            return self.geometry[attr]
-        return super().__getitem__(attr)
 
     def set_filename(self):
         """Set filename when all geometry attrs is str or False."""
@@ -983,7 +982,7 @@ class Machine(CoilSet, Geometry, CoilData):
     def solve_biot(self):
         """Solve biot instances."""
         if self.sloc['plasma'].sum() > 0:
-            boundary = self['wall'](**self.wall).segment(0)
+            boundary = self.geometry['wall'](**self.wall).segment(0)
             self.plasma.solve(boundary)
         self.inductance.solve()
         self.field.solve()

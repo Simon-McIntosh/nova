@@ -6,13 +6,13 @@ from typing import ClassVar, final
 import numpy as np
 
 from nova.biot.contour import Contour
-from nova.graphics.plot import Plot
 from nova.geometry.pointloop import PointLoop
 from nova.geometry.separatrix import LCFS
 from nova.geometry.strike import Strike
+from nova.graphics.line import Chart
+from nova.imas.getslice import GetSlice
 from nova.imas.machine import Wall
 from nova.imas.scenario import Scenario
-from nova.graphics.line import Chart
 
 
 @dataclass
@@ -46,25 +46,9 @@ class Grid(Scenario):
         self.data['r2d'] = ('r', 'z'), r2d
         self.data['z2d'] = ('r', 'z'), z2d
 
-    @cached_property
-    def mask_2d(self):
-        """Return pointloop instance, used to check loop membership."""
-        points = np.array([self.data.r2d.data.flatten(),
-                           self.data.z2d.data.flatten()]).T
-        return PointLoop(points)
-
-    @property
-    def shape(self):
-        """Return grid shape."""
-        return self.data.dims['r'], self.data.dims['z']
-
-    def mask(self, boundary: np.ndarray):
-        """Return boundary mask."""
-        return self.mask_2d.update(boundary).reshape(self.shape)
-
 
 @dataclass
-class Parameter0D(Plot, Scenario):
+class Parameter0D(Scenario):
     """Load 0D parameter timeseries from equilibrium ids."""
 
     attrs_0d: list[str] = field(
@@ -307,64 +291,9 @@ class Parameter0D(Plot, Scenario):
                                    lcfs_data['geometric_height']]
             self.data['geometric_axis'] = ('time', 'point'), geometric_axis
 
-    @property
-    def boundary(self):
-        """Return trimmed boundary contour."""
-        return self['boundary'][:int(self['boundary_length'])]
-
-    def plot_0d(self, attr, axes=None):
-        """Plot 0D parameter timeseries.
-
-        Examples
-        --------
-        Skip doctest if IMAS instalation or requisite IDS(s) not found.
-
-        >>> import pytest
-        >>> from nova.imas.database import Database
-        >>> try:
-        ...     _ = Database(130506, 403).get_ids('equilibrium')
-        ... except:
-        ...     pytest.skip('IMAS not found or 130506/403 unavailable')
-
-        Load equilibrium data from pulse and run indicies
-        asuming defaults for others:
-
-        >>> equilibrium = Equilibrium(130506, 403)
-
-        Skip doctest if graphics dependencies are not available.
-
-        >>> try:
-        ...     _ = equilibrium.set_axes('1d')
-        ... except:
-        ...     pytest.skip('graphics dependencies not available')
-
-        Plot plasma current waveform.
-
-        >>> equilibrium.plot_0d('ip')
-        """
-        self.set_axes('1d', axes=axes)
-        self.axes.plot(self.data.time, self.data[attr], label=attr)
-
-    def plot_boundary(self, axes=None, color='gray'):
-        """Plot 2D boundary at itime."""
-        boundary = self.boundary
-        self.get_axes('2d', axes=axes)
-        self.axes.plot(boundary[:, 0], boundary[:, 1], color, alpha=0.85)
-        if self['x_point_number'] == 1:
-            self.axes.plot(*self['x_point'], 'x', ms=6, mec='C3', mew=1)
-
-    def plot_shape(self, axes=None):
-        """Plot separatrix shape parameter waveforms."""
-        self.set_axes('1d', axes=axes)
-        for attr in ['elongation', 'triangularity',
-                     'triangularity_upper', 'triangularity_lower']:
-            self.axes.plot(self.data.time, self.data[attr].data,
-                           label=attr)
-        self.axes.legend(ncol=4)
-
 
 @dataclass
-class Profile1D(Plot, Scenario):
+class Profile1D(Scenario):
     """Manage extraction of 1d profile data from imas ids."""
 
     attrs_1d: list[str] = field(
@@ -399,6 +328,82 @@ class Profile1D(Plot, Scenario):
                 except KeyError:
                     pass
 
+
+@dataclass
+class Profile2D(Scenario):
+    """Manage extraction of 2d profile data from imas ids."""
+
+    attrs_2d: list[str] = field(
+        default_factory=lambda: [
+            'psi', 'phi', 'j_tor', 'j_parallel', 'b_field_r', 'b_field_z',
+            'b_field_tor'], repr=False)
+
+    def build(self):
+        """Build profile 2d data and store to xarray data structure."""
+        super().build()
+        self.append(('time', 'r', 'z'), self.attrs_2d, 'profiles_2d',
+                    postfix='2d')
+
+
+@dataclass
+class Equilibrium(Chart, GetSlice):
+    """Operators for equlibrium data."""
+
+    @property
+    def boundary(self):
+        """Return trimmed boundary contour."""
+        return self['boundary'][:int(self['boundary_length'])]
+
+    def plot_0d(self, attr, axes=None):
+        """Plot 0D parameter timeseries.
+
+        Examples
+        --------
+        Skip doctest if IMAS instalation or requisite IDS(s) not found.
+
+        >>> import pytest
+        >>> from nova.imas.database import Database
+        >>> try:
+        ...     _ = Database(130506, 403).get_ids('equilibrium')
+        ... except:
+        ...     pytest.skip('IMAS not found or 130506/403 unavailable')
+
+        Load equilibrium data from pulse and run indicies
+        asuming defaults for others:
+
+        >>> equilibrium = EquilibriumData(130506, 403)
+
+        Skip doctest if graphics dependencies are not available.
+
+        >>> try:
+        ...     _ = equilibrium.set_axes('1d')
+        ... except:
+        ...     pytest.skip('graphics dependencies not available')
+
+        Plot plasma current waveform.
+
+        >>> equilibrium.plot_0d('ip')
+        """
+        self.set_axes('1d', axes=axes)
+        self.axes.plot(self.data.time, self.data[attr], label=attr)
+
+    def plot_boundary(self, axes=None, color='gray'):
+        """Plot 2D boundary at itime."""
+        boundary = self.boundary
+        self.get_axes('2d', axes=axes)
+        self.axes.plot(boundary[:, 0], boundary[:, 1], color, alpha=0.85)
+        if self['x_point_number'] == 1:
+            self.axes.plot(*self['x_point'], 'x', ms=6, mec='C3', mew=1)
+
+    def plot_shape(self, axes=None):
+        """Plot separatrix shape parameter waveforms."""
+        self.set_axes('1d', axes=axes)
+        for attr in ['elongation', 'triangularity',
+                     'triangularity_upper', 'triangularity_lower']:
+            self.axes.plot(self.data.time, self.data[attr].data,
+                           label=attr)
+        self.axes.legend(ncol=4)
+
     def plot_1d(self, attr='psi', axes=None, **kwargs):
         """Plot 1d profile.
 
@@ -416,7 +421,7 @@ class Profile1D(Plot, Scenario):
         Load equilibrium data from pulse and run indicies
         asuming defaults for others:
 
-        >>> equilibrium = Equilibrium(130506, 403)
+        >>> equilibrium = EquilibriumData(130506, 403)
 
         Skip doctest if graphics dependencies are not available.
 
@@ -434,21 +439,21 @@ class Profile1D(Plot, Scenario):
         self.set_axes('1d', axes=axes)
         self.axes.plot(self.data.psi_norm, self[attr], **kwargs)
 
+    @cached_property
+    def mask_2d(self):
+        """Return pointloop instance, used to check loop membership."""
+        points = np.array([self.data.r2d.data.flatten(),
+                           self.data.z2d.data.flatten()]).T
+        return PointLoop(points)
 
-@dataclass
-class Profile2D(Chart, Scenario):
-    """Manage extraction of 2d profile data from imas ids."""
+    @property
+    def shape(self):
+        """Return grid shape."""
+        return self.data.dims['r'], self.data.dims['z']
 
-    attrs_2d: list[str] = field(
-        default_factory=lambda: [
-            'psi', 'phi', 'j_tor', 'j_parallel', 'b_field_r', 'b_field_z',
-            'b_field_tor'], repr=False)
-
-    def build(self):
-        """Build profile 2d data and store to xarray data structure."""
-        super().build()
-        self.append(('time', 'r', 'z'), self.attrs_2d, 'profiles_2d',
-                    postfix='2d')
+    def mask(self, boundary: np.ndarray):
+        """Return boundary mask."""
+        return self.mask_2d.update(boundary).reshape(self.shape)
 
     def data_2d(self, attr: str, mask=0):
         """Return data array."""
@@ -471,7 +476,7 @@ class Profile2D(Chart, Scenario):
         Load equilibrium data from pulse and run indicies
         asuming defaults for others:
 
-        >>> equilibrium = Equilibrium(130506, 403)
+        >>> equilibrium = EquilibriumData(130506, 403)
 
         Skip doctest if graphics dependencies are not available.
 
@@ -500,7 +505,7 @@ class Profile2D(Chart, Scenario):
 
 @final
 @dataclass
-class Equilibrium(Profile2D, Profile1D, Parameter0D, Grid):
+class EquilibriumData(Equilibrium, Profile2D, Profile1D, Parameter0D, Grid):
     """
     Manage active equilibrium ids.
 
@@ -553,7 +558,7 @@ class Equilibrium(Profile2D, Profile1D, Parameter0D, Grid):
     Load equilibrium data from pulse and run indicies
     asuming defaults for others:
 
-    >>> equilibrium = Equilibrium(130506, 403)
+    >>> equilibrium = EquilibriumData(130506, 403)
     >>> equilibrium.name, equilibrium.user, equilibrium.machine
     ('equilibrium', 'public', 'iter')
 
@@ -602,7 +607,6 @@ class Equilibrium(Profile2D, Profile1D, Parameter0D, Grid):
         contour = Contour(self.data.r2d, self.data.z2d,
                           self.data.psi2d[itime])
         levelset = contour.levelset(self.data.psi_boundary[itime])
-        # TODO fix TypeError
         self.strike.update([surface.points for surface in levelset])
         if len(strike_points := self.strike.points) == 2:
             return strike_points
@@ -636,9 +640,9 @@ if __name__ == '__main__':
 
     pulse, run = 135013, 2
 
-    # Equilibrium(pulse, run, occurrence=0)._clear()
-    equilibrium = Equilibrium(pulse, run, occurrence=0)
+    # EquilibriumData(pulse, run, occurrence=0)._clear()
+    equilibrium = EquilibriumData(pulse, run, occurrence=0)
 
-    #equilibrium.time = 100
-    #equilibrium.plot_2d('psi', mask=0)
-    #equilibrium.plot_boundary()
+    equilibrium.time = 100
+    equilibrium.plot_2d('psi', mask=0)
+    equilibrium.plot_boundary()

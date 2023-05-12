@@ -44,16 +44,18 @@ def ids():
              [1.7, 0.6, 0.1, -0., -0.1]])
     return ids_entry.ids_data
 
-'''
+
 def test_ids_file_cache(ids):
     ids.time_slice[0].boundary_separatrix.psi = 66
     design_a = PulseDesign(ids=ids, dplasma=-1, nwall=None, nlevelset=None)
+    design_a.time_index = 0
+
     ids.time_slice[0].boundary_separatrix.psi = 77
     design_b = PulseDesign(ids=ids, dplasma=-1, nwall=None, nlevelset=None)
+    design_b.time_index = 0
 
-    assert False
-'''
-
+    assert design_a['psi_boundary'] == 66
+    assert design_b['psi_boundary'] == 77
 
 
 if __name__ == '__main__':

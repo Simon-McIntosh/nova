@@ -5,21 +5,21 @@ from functools import cached_property
 import numpy as np
 from scipy.interpolate import interp1d, RectBivariateSpline
 
-from nova.graphics.plot import Plot
 from nova.imas.database import IdsData
-from nova.imas.equilibrium import Equilibrium
+from nova.imas.equilibrium import Equilibrium, EquilibriumData
 from nova.imas.getslice import GetSlice
 from nova.imas.pf_active import PF_Active
 
 
 @dataclass
-class Profile(Plot, GetSlice, IdsData):
+class Profile(Equilibrium, GetSlice, IdsData):
     """Interpolation of profiles from an equilibrium time slice."""
 
-    def build(self):
+    def __post_init__(self):
         """Build and merge ids datasets."""
+        super().__post_init__()
         self.load_data(PF_Active)
-        self.load_data(Equilibrium)
+        self.load_data(EquilibriumData)
 
     def update(self):
         """Clear cache following update to itime. Extend as required."""
@@ -103,3 +103,5 @@ if __name__ == '__main__':
     profile = Profile(pulse, run, 'iter', 0)
     profile.time = 300
     profile.plot_profile(attr='ff_prime')
+
+    profile.plot_2d()

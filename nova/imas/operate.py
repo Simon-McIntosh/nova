@@ -7,7 +7,7 @@ import numpy as np
 from scipy.constants import mu_0
 
 from nova.imas.database import Ids, IdsIndex, ImasIds
-from nova.imas.equilibrium import Equilibrium
+from nova.imas.equilibrium import EquilibriumData
 from nova.imas.machine import Machine
 from nova.imas.profile import Profile
 
@@ -55,7 +55,7 @@ class Grid:
     {'number': 100, 'limit': 0, 'index': 'coil'}
 
     Specify grid relitive to equilibrium ids.
-    >>> equilibrium = Equilibrium(130506, 403)
+    >>> equilibrium = EquilibriumData(130506, 403)
     >>> Grid(50, 'ids', ids=equilibrium.ids_data).grid_attrs
     {'number': 50, 'limit': [2.75, 8.9, -5.49, 5.51], 'index': 'plasma'}
 
@@ -114,7 +114,7 @@ class Grid:
 
 
 @dataclass
-class Operate(Grid, Machine, Profile, Equilibrium):
+class Operate(Profile, Grid, Machine):
     """
     Extend Machine with default values for Operate class.
 

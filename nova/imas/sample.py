@@ -11,7 +11,7 @@ import xarray
 from nova.graphics.plot import Plot
 from nova.geometry.rdp import rdp
 from nova.imas.database import Database, IdsEntry
-from nova.imas.equilibrium import Equilibrium
+from nova.imas.equilibrium import EquilibriumData
 from nova.imas.metadata import Metadata
 
 
@@ -361,7 +361,7 @@ if __name__ == '__main__':
 
     pulse, run = 135013, 2
 
-    equilibrium = Equilibrium(pulse, run)
+    equilibrium = EquilibriumData(pulse, run)
     sample = Sample(equilibrium.data)
 
     sample.write_ids(**equilibrium.ids_attrs | {'occurrence': 1})

@@ -1,7 +1,7 @@
 import pytest
 
 from nova.imas.database import Database
-from nova.imas.equilibrium import Equilibrium
+from nova.imas.equilibrium import EquilibriumData
 from nova.imas.machine import (Geometry, Machine,
                                PoloidalFieldActive, PoloidalFieldPassive)
 from nova.imas.pf_active import PF_Active
@@ -110,8 +110,8 @@ def test_create_equilibrium_database_from_ids_attrs():
 
 @mark['equilibrium']
 def test_load_equilibrium_attrs():
-    equilibrium = Equilibrium(ids_attrs['equilibrium']['pulse'],
-                              ids_attrs['equilibrium']['run'])
+    equilibrium = EquilibriumData(ids_attrs['equilibrium']['pulse'],
+                                  ids_attrs['equilibrium']['run'])
     assert equilibrium.name == 'equilibrium'
     assert equilibrium.user == 'public'
     assert equilibrium.machine == 'iter'
@@ -121,10 +121,10 @@ def test_load_equilibrium_attrs():
 
 @mark['equilibrium']
 def test_equilibrium_rebuild():
-    equilibrium = Equilibrium(ids_attrs['equilibrium']['pulse'],
-                              ids_attrs['equilibrium']['run'])
-    equilibrium_reload = equilibrium.build()
-    assert equilibrium_reload == equilibrium
+    equilibrium_data = EquilibriumData(ids_attrs['equilibrium']['pulse'],
+                                       ids_attrs['equilibrium']['run'])
+    equilibrium_reload = equilibrium_data.build()
+    assert equilibrium_reload == equilibrium_data
 
 
 def test_geometry_boolean_input():
@@ -158,7 +158,7 @@ def test_geometry_pf_active_as_itterable():
 
 @mark['equilibrium']
 def test_pf_active_default_name():
-    equilibrium = Equilibrium(**ids_attrs['equilibrium'])
+    equilibrium = EquilibriumData(**ids_attrs['equilibrium'])
     pf_active = PF_Active(**ids_attrs['equilibrium'])
     assert equilibrium.name == ids_attrs['equilibrium']['name']
     assert pf_active.name == 'pf_active'

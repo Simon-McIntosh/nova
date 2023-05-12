@@ -5,12 +5,12 @@ import numpy as np
 
 from nova.biot.contour import Contour
 from nova.biot.fieldnull import FieldNull
-from nova.imas.equilibrium import Equilibrium
+from nova.imas.equilibrium import EquilibriumData
 from nova.imas.profile import Profile
 
 
 @dataclass
-class Flux(Profile, Equilibrium):
+class Flux(Profile, EquilibriumData):
     """Extract flux profiles from equilibra."""
 
     levels: int | np.ndarray = 50

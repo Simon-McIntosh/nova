@@ -8,7 +8,7 @@ import sklearn
 import xarray
 
 from nova.imas.ensemble import Ensemble
-from nova.imas.equilibrium import Equilibrium
+from nova.imas.equilibrium import EquilibriumData
 from nova.linalg.basis import Bernstein, Svd
 from nova.linalg.regression import OdinaryLeastSquares
 import matplotlib.pyplot as plt
@@ -179,7 +179,7 @@ if __name__ == '__main__':
 #plt.ylim([-0.001, 0.001])
 
 '''
-#data = Equilibrium(135011, 7).data
+#data = EquilibriumData(135011, 7).data
 
 basis = Bernstein(data.dims['psi_norm'], 3)
 

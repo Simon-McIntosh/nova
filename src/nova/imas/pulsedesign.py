@@ -574,15 +574,21 @@ class PulseDesign(Control, ITER):
 
     Plot solution at first time slice.
 
-    >>> design.plot('plasma')
+    >>> design.plot('plasma')  # doctest: +SKIP
 
     Plot coil current waveform.
 
-    >>> design.plot_waveform()
+    >>> design.plot_waveform()  # doctest: +SKIP
 
     Extract pf_active ids for all times present in source equilibrium `ids`.
 
     >>> pf_active = design.pf_active_ids
+
+    Extract equilibrium ids for all times present in source equilibrium `ids`.
+    Notice that the PDS computation trigered by the pf_active_ids property is
+    not repeated and the equilibrium ids is constructed from a cached datased.
+
+    >>> equilibrium = design.equilibrium_ids
 
     """
 

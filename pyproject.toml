@@ -2,9 +2,6 @@
 requires = ["setuptools", "wheel", "versioneer[toml]"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools]
-packages = ["nova"]
-
 [project]
 name = "nova"
 description = "Equilibrium generation and inference"
@@ -37,7 +34,6 @@ dependencies = [
   "gitpython",
   "netCDF4",
   "networkx",
-  "numba",
   "numpy",
   "pandas>=2.0",
   "pytest",

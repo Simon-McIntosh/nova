@@ -581,8 +581,9 @@ class Database(IDS):
         """
         Return ids hash.
 
-        This method is a placeholder based the has of ids.__str__() which
-        represents only a partial representation of the ids object. Work is
+        This method is a placeholder.
+        This method creates a hash of ids.__str__() which
+        is only a partial representation of the ids object. Work is
         underway to provide ids hashes via the IMAS access layer.
         """
         xxh32 = xxhash.xxh32()

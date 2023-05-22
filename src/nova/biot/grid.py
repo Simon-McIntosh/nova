@@ -118,7 +118,8 @@ class Expand:
     """Calculate grid limit as a factor expansion about multipoly bounds."""
 
     frame: FrameLink
-    index: str | slice | np.ndarray = slice(None)
+    index: str | slice | np.ndarray = field(
+        default_factory=lambda: slice(None))
     xmin: float = 1e-12
     fix_aspect: bool = False
 

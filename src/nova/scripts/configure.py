@@ -29,10 +29,12 @@ def configure():
     }
 
     setenv PYTHONSTARTUP _startup
+    setenv MYPYPATH _mypy
     """
 
     module = module.replace('_prefix', str(prefix))
     module = module.replace('_startup', str(startup))
+    module = module.replace('_mypy', str(root_dir))
     modulefile = Path.joinpath(moduledir, version)
 
     with open(modulefile, 'w') as file:

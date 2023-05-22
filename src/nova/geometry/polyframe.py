@@ -1,5 +1,6 @@
 """Manage single instance polygon data as polyframe."""
 from dataclasses import dataclass, field
+from functools import cached_property
 
 import json
 import numpy as np
@@ -44,12 +45,12 @@ class PolyFrame(Plot, GeoFrame):
         """Return polygon section."""
         return self.metadata.get('section', self.name)
 
-    @property
+    @cached_property
     def centroid(self):
         """Return polygon centroid."""
         return self.poly.centroid
 
-    @property
+    @cached_property
     def area(self):
         """Return polygon area."""
         return self.poly.area
@@ -59,43 +60,45 @@ class PolyFrame(Plot, GeoFrame):
         self.get_axes(axes=axes)
         self.axes.plot(*self.poly.exterior.xy, **kwargs)
 
-    @property
+    @cached_property
     def xlim(self) -> tuple[float]:
         """Return polygon bounding box x limit (xmin, xmax)."""
         return self.poly.bounds[::2]
 
-    @property
+    @cached_property
     def width(self) -> float:
         """Return polygon bounding box width."""
         return np.diff(self.xlim)[0]
 
-    @property
+    @cached_property
     def zlim(self) -> tuple[float]:
         """Return polygon bounding box x limit (xmin, xmax)."""
         return self.poly.bounds[1::2]
 
-    @property
+    @cached_property
     def height(self) -> float:
         """Return polygon bounding box height, [xmin, xmax]."""
         return np.diff(self.zlim)[0]
 
-    @property
+    @cached_property
     def box_area(self):
         """Return bounding box area."""
-        return self.width*self.height
+        if np.isclose((area := self.width*self.height), 0):
+            return self.area
+        return area
 
-    @property
+    @cached_property
     def limit(self):
         """Return polygon bounding box (xmin, xmax, zmin, zmax)."""
         return self.xlim + self.zlim
 
-    @property
+    @cached_property
     def points(self):
         """Return polygon points."""
         boundary = self.poly.boundary.xy
         return np.c_[boundary[0], np.zeros(len(boundary[0])), boundary[1]]
 
-    @property
+    @cached_property
     def boundary(self):
         """Return polygon boundary."""
         boundary = self.poly.boundary.xy

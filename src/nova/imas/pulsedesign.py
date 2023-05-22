@@ -740,9 +740,11 @@ class PulseDesign(Control, ITER):
         comment = 'Coil current waveforms to match 4-point bounding-box ' \
             'separatrix targets.'
         provenance = [self.uri]
-        provenance.extend([IDS(*value.split(',')).uri if value != 'ids'
-                           else f'{attr[:-3]}=ids' for attr, value
-                           in self.data.attrs.items() if attr[-3:] == '_md'])
+        provenance.extend([IDS(*value.split(',')).uri
+                           if not isinstance(value, np.integer)
+                           else f'imas:ids?name={attr[:-3]};hash={value}'
+                           for attr, value in self.data.attrs.items()
+                           if attr[-3:] == '_md'])
         metadata.put_properties(comment, homogeneous_time=1,
                                 provenance=provenance)
         code_parameters = self.data.attrs

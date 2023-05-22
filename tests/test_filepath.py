@@ -113,7 +113,7 @@ def test_checkdir(subpath):
 @mark_ssh
 @mark_connect
 def test_checkdir_ssh():
-    path = '/tmp/_filepath'
+    path = '/tmp/nova_test_filepath'
     with clear(path) as filepath:
         filepath.host = HOSTNAME
         filepath.path = path

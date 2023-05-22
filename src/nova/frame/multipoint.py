@@ -18,7 +18,7 @@ class MultiPoint(metamethod.MultiPoint):
     additional: list[str] = field(default_factory=lambda: [
         'factor', 'ref', 'subref'])
     indexer: list[int] = field(init=False, repr=False)
-    index: pandas.Index = field(default=pandas.Index([]))
+    index: pandas.Index = field(default_factory=lambda: pandas.Index([]))
 
     def initialize(self):
         """

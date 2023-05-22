@@ -15,7 +15,8 @@ class Reduce(metamethod.Reduce):
     name = 'biotreduce'
 
     frame: DataFrame = field(repr=False)
-    index: pandas.Index = field(default=pandas.Index([]), repr=False)
+    index: pandas.Index = field(default_factory=lambda: pandas.Index([]),
+                                repr=False)
     indices: list[int] = field(init=False, repr=False, default_factory=list)
     link: dict[int, int] = field(init=False, repr=False, default_factory=dict)
     reduce: bool = field(default=False)

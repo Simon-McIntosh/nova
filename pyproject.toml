@@ -58,7 +58,7 @@ cuda = [
   "cupy-cuda115",
 ]
 develop = [
-  "nova[complete, docs, diagnostics, graphics, mesh, optimize, ssh, spyder, test, vtk]",
+  "nova[complete, docs, diagnostics, graphics, jit, mesh, optimize, ssh, spyder, test, vtk]",
 ]
 diagnostics = [
   "asv", 

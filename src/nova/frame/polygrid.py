@@ -29,8 +29,8 @@ class PolyDelta(PolyGeom):
     nturn: float = 1.
     tile: bool = False
     fill: bool = False
-    cell_delta: list[float] = field(init=False)
-    grid_delta: list[float] = field(init=False)
+    cell_delta: list[float] = field(init=False, default_factory=list)
+    grid_delta: list[float] = field(init=False, default_factory=list)
 
     def __post_init__(self):
         """Generate deltas."""
@@ -214,7 +214,7 @@ class PolyGrid(PolyCell, Plot):
     """Construct 2d grid from polycell basis."""
 
     trim: bool = True
-    vector: PolyVector = field(init=False)
+    vector: PolyVector = field(init=False, repr=False)
     frame: pandas.DataFrame = field(init=False, repr=False)
     columns: list[str] = field(init=False, default_factory=lambda: [
         'x', 'z', 'dl', 'dt', 'dx', 'dz', 'rms', 'area', 'volume',
@@ -243,7 +243,7 @@ class PolyGrid(PolyCell, Plot):
         polys = [self.polycell(*coord) for coord in coords]
         if self.trim:
             return self.polytrim(coords, polys)
-        return coords, polys
+        return polys
 
     def polytrim(self, coords, polys):
         """Return polycells trimed to bounding polygon."""
@@ -304,7 +304,7 @@ class PolyTarget(FrameSet):
     """Construct biotframe target from dataframe."""
 
     delta: int | float = 0
-    index: str | slice = slice(None)
+    index: str | slice = field(default_factory=lambda: slice(None))
     target: BiotFrame = field(default_factory=BiotFrame)
 
     def __post_init__(self):

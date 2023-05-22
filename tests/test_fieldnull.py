@@ -229,7 +229,7 @@ def test_plasma_coil_parity(plot=False):
 
 def test_plasma_unique_psi_axis():
     coilset = CoilSet(dplasma=-20, tplasma='hex')
-    coilset.firstwall.insert(dict(e={0.5, 0, 0.2, 0.1}))
+    coilset.firstwall.insert({'e': [0.5, 0, 0.2, 0.1]})
     coilset.coil.insert(0.5, [-0.05, 0.05], 0.01, 0.01, Ic=1e3)
     coilset.plasma.solve()
     coilset.sloc['plasma', 'Ic'] = 1e3
@@ -239,7 +239,7 @@ def test_plasma_unique_psi_axis():
 
 def test_plasma_x_point():
     coilset = CoilSet(dplasma=-100, tplasma='hex')
-    coilset.firstwall.insert(dict(e={0.5, 0, 0.2, 0.1}))
+    coilset.firstwall.insert({'e': [0.5, 0, 0.1, 0.2]})
     coilset.coil.insert(0.485, [-0.12, 0.12], 0.03, 0.03, Ic=5e3)
     coilset.plasma.solve()
     coilset.sloc['plasma', 'Ic'] = 7e3

@@ -58,7 +58,7 @@ cuda = [
   "cupy-cuda115",
 ]
 develop = [
-  "nova[complete, docs, diagnostics, graphics, jit, mesh, optimize, ssh, spyder, test, vtk]",
+  "nova[complete, document, diagnostics, graphics, ide, jit, mesh, optimize, ssh, test, vtk]",
 ]
 diagnostics = [
   "asv", 
@@ -73,8 +73,8 @@ diagnostics = [
   "virtualenv", 
 ]
 document = [
-  "pandoc", 
-  "jupyter",
+  "pandoc",
+  "sphinx", 
 ]
 ferritic = [
   "vedo>=2022.4", 
@@ -87,14 +87,15 @@ graphics = [
   "moviepy", 
   "seaborn",
 ]
-jit = [
-  "numba",
-]
-spyder = [
+ide = [
+  "jupyter",
   "spyder", 
   "spyder-unittest", 
   "spyder-line-profiler", 
   "spyder-memory-profiler", 
+]
+jit = [
+  "numba",
 ]
 mesh = [
   "alphashape",

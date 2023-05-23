@@ -8,16 +8,14 @@ from scipy.optimize import minimize, newton_krylov, LinearConstraint
 from tqdm import tqdm
 import xarray
 
-from numpy.ma import trace
 from nova.biot.biot import Nbiot
 from nova.graphics.plot import Plot
 from nova.geometry.separatrix import Quadrant, Separatrix
-from nova.imas.database import (Database, IDS, Ids, IdsEntry,
-                                EMPTY_INT, EMPTY_FLOAT)
+from nova.imas.database import Database, IDS, Ids, IdsEntry
 from nova.imas.equilibrium import EquilibriumData
 from nova.imas.machine import Machine
 from nova.imas.metadata import Metadata
-from nova.imas.profile import Profile
+from nova.imas.profiles import Profile
 from nova.imas.pf_active import PF_Active
 from nova.linalg.regression import MoorePenrose
 
@@ -788,11 +786,10 @@ class PulseDesign(Control, ITER):
             data[attr] = xarray.DataArray(
                 0, coords=[data.time], dims=['time'])
         data['x_point'] = xarray.DataArray(
-            EMPTY_FLOAT, coords=[data.time, data.point],
+            0., coords=[data.time, data.point],
             dims=['time', 'point'])
         data['strike_point'] = xarray.DataArray(
-            EMPTY_FLOAT,
-            coords=[data.time, data.strike_point_index, data.point],
+            0., coords=[data.time, data.strike_point_index, data.point],
             dims=['time', 'strike_point_index', 'point'])
         length = np.linspace(0, 1, data.dims['boundary_index'])
         for itime in tqdm(self.data.itime.data, 'Solving PDS waveform'):

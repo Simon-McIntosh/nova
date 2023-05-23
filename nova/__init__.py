@@ -1,4 +1,24 @@
-"""Nova electromagnetic analysis package."""
+"""
+Nova: An electromagnetic analysis package for Python.
+
+Subpackages
+-----------
+Using any of these subpackages requires an explicit import. For example,
+``import nova.imas``.
+
+::
+
+ imas            --- Methods for interfacing with the IMAS data model.
+
+
+Public API in the main Nova namespace
+--------------------------------------
+
+::
+
+ __version__       --- Nova version string
+
+"""
 
 from . import _version
 __version__ = _version.get_versions()['version']
@@ -8,6 +28,15 @@ from dataclasses import dataclass
 from importlib import import_module
 import os
 import pytest
+
+submodules = [
+    'imas',
+]
+
+__all__ = submodules + [
+    '__version__',
+]
+
 
 try:
     from numba import njit
@@ -115,3 +144,19 @@ class ImportManager:
         if self.defer:
             return DeferredImport(module, method, self.package)
         return getattr(import_module(module, self.package), method)
+
+
+def __dir__():
+    return __all__
+
+
+def __getattr__(name):
+    if name in submodules:
+        return import_module(f'nova.{name}')
+    else:
+        try:
+            return globals()[name]
+        except KeyError:
+            raise AttributeError(
+                f"Module 'nova' has no attribute '{name}'"
+            )

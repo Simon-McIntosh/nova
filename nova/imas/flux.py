@@ -6,7 +6,7 @@ import numpy as np
 from nova.biot.contour import Contour
 from nova.biot.fieldnull import FieldNull
 from nova.imas.equilibrium import EquilibriumData
-from nova.imas.profile import Profile
+from nova.imas.profiles import Profile
 
 
 @dataclass

@@ -144,9 +144,9 @@ class FiducialSector(Fiducial):
     variance: dict[str, pandas.DataFrame] | dict = \
         field(init=False, default_factory=dict)
 
-    sectors: ClassVar[list[str, ...]] = [
+    sectors: ClassVar[list[str]] = [
         'Sector_Module_#6_CCL_as-built_data_8NQVKS_v2_1',
-        'Sector_Module_#7_CCL_as-built_data_8NR9J7_v2_0']
+        'Sector_Module_#7_CCL_as-built_data_8NR9J7_v2_1']
 
     def __post_init__(self):
         """Propogate origin."""
@@ -186,7 +186,7 @@ class FiducialSector(Fiducial):
 
 if __name__ == '__main__':
 
-    sector = SectorData('Sector_Module_#7_CCL_as-built_data_8NR9J7_v2_0')
+    sector = SectorData('Sector_Module_#7_CCL_as-built_data_8NR9J7_v2_1')
 
     fiducial = FiducialSector(phase='SSAT BR')
     #fiducial.compare()

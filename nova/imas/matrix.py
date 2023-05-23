@@ -4,7 +4,7 @@ from functools import cached_property
 
 from nova.imas.database import Database, Ids
 from nova.imas.operate import Operate
-from nova.imas.profile import Profile
+from nova.imas.profiles import Profile
 
 
 @dataclass

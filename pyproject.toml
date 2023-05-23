@@ -192,14 +192,14 @@ source = ["src"]
 branch = true
 source = ["src"]
 omit = [
-  "src/nova/ansys/*", 
-  "src/nova/assembly/*", 
-  "src/nova/design/*", 
-  "src/nova/development/*", 
-  "src/nova/dina/*", 
-  "src/nova/obsolete/*",
-  "src/nova/projects/*", 
-  "src/nova/scripts/*", 
-  "src/nova/thermalhydralic/*", 
-  "src/nova/utilities/*"
+  "nova/ansys/*", 
+  "nova/assembly/*", 
+  "nova/design/*", 
+  "nova/development/*", 
+  "nova/dina/*", 
+  "nova/obsolete/*",
+  "nova/projects/*", 
+  "nova/scripts/*", 
+  "nova/thermalhydralic/*", 
+  "nova/utilities/*"
 ]

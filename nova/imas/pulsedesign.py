@@ -961,14 +961,47 @@ class Benchmark(PulseDesign):
             self.axes.set_xlabel('time, s')
             self.axes.legend()
 
+    def rms(self):
+        """Calculate benchmark coil current rms error."""
+        benchmark = self['pf_active'].data
+
+        CS1U = benchmark.sel(coil_name='CS1').assign_coords(coil_name='CS1U')
+        CS1L = benchmark.sel(coil_name='CS1').assign_coords(coil_name='CS1L')
+        VS3U = benchmark.sel(coil_name='VS3').assign_coords(coil_name='VS3U')
+        VS3L = benchmark.sel(coil_name='VS3').assign_coords(coil_name='VS3L')
+        VS3U['current'] *= -1
+        benchmark = xarray.concat([benchmark, CS1U, CS1L, VS3U, VS3L],
+                                  'coil_name')
+        benchmark = benchmark.interp(time=self.data.time)
+        benchmark = benchmark.sel(coil_name=self.sloc['free', :].index)
+        waveform = self._data.sel(coil_name=self.sloc['free', :].index)
+
+        error = np.abs(waveform.current - benchmark.current)
+        mean = np.mean((waveform.current + benchmark.current) / 2, axis=0)
+        relative_error = np.mean(error, axis=0) / mean
+
+
+        print(relative_error)
+
+        self.set_axes('1d')
+        self.axes.plot(error[:, 1])
+
+        self.set_axes('1d')
+        self.axes.plot(benchmark.current[:, 1], color='gray')
+        self.axes.plot(waveform.current[:, 1], color='C0')
+
+
+
+
 
 if __name__ == '__main__':
 
-    design = PulseDesign(135013, 2, 'iter', 1)
-    pf_active = design.geometry['pf_active'](**design.pf_active).ids_data
+    #design = PulseDesign(135013, 2, 'iter', 1)
+    design = Benchmark(135013, 2, 'iter', 1)
 
-    design = PulseDesign(135013, 2, 'iter', 1, pf_active={'ids': pf_active})
-    # design = Benchmark(135013, 2, 'iter', 1)
+    design.rms()
+
+    '''
 
     design.itime = 5
 
@@ -978,4 +1011,5 @@ if __name__ == '__main__':
     design.levelset.plot_levelset(
         design.plasma.psi_boundary, False, color='C3')
 
-    # design.plot_waveform()
+    design.plot_waveform()
+    '''

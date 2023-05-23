@@ -12,7 +12,7 @@ from nova.assembly.transform import Rotate
 
 @dataclass
 class AsBuilt:
-    """Manage as-build TFC ccl data."""
+    """Manage as-built TFC ccl data."""
 
     coil: list[int]
     target: bool = False

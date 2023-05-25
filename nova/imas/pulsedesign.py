@@ -739,7 +739,7 @@ class PulseDesign(Control, ITER):
             'separatrix targets.'
         provenance = [self.uri]
         provenance.extend([IDS(*value.split(',')).uri
-                           if not isinstance(value, np.integer)
+                           if not isinstance(value, (int, np.integer))
                            else f'imas:ids?name={attr[:-3]};hash={value}'
                            for attr, value in self.data.attrs.items()
                            if attr[-3:] == '_md'])

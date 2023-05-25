@@ -91,8 +91,11 @@ ansys = [
   "openpyxl"
 ]
 ferritic = [
-  "vedo", 
+  "meshio",
+  "pyvista",
   "scikit-learn",
+  "trimesh",
+  "vedo", 
 ]
 graphics = [
   "bokeh",
@@ -118,6 +121,7 @@ optimize = [
   "scikit-learn",
 ]
 structural = [
+  "matplotlib",
   "pyquaternion",
 ]
 test = [
@@ -129,30 +133,29 @@ test = [
 thermofluids = [
   "coolprop", 
   "ftputil", 
+  "matplotlib",
   "openpyxl",
   "tables", 
   "xlrd",
 ]
 vtk = [
+  "meshio",
   "pyvista",
+  "trimesh",
   "vedo",
 ]
+
+[tool.poetry.scripts]
+benchmark = "nova.scripts.benchmark:benchmark"
+extrapolate = "nova.imas.scripts:extrapolate"
+filepath = "nova.database.scripts:filepath"
+configure = "nova.scripts.configure:configure"
 
 [tool.poetry-dynamic-versioning]
 enable = true
 vcs = "git"
 style = "pep440"
 pattern  = "^(?P<base>\\d+\\.\\d+\\.\\d+)(-?((?P<stage>[a-zA-Z]+)\\.?(?P<revision>\\d+)?))?"
-
-[build-system]
-requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning"]
-build-backend = "poetry_dynamic_versioning.backend"
-
-[project.scripts]
-benchmark = "nova.scripts.benchmark:benchmark"
-extrapolate = "nova.imas.scripts:extrapolate"
-filepath = "nova.database.scripts:filepath"
-configure = "nova.scripts.configure:configure"
 
 [tool.pytest.ini_options]
 addopts = "-rfEs --doctest-modules"
@@ -198,3 +201,12 @@ omit = [
   "nova/utilities/*"
 ]
 
+[build-system]
+requires = ["poetry >= 0.12, <1", "poetry-core>=1.0.0", "poetry-dynamic-versioning"]
+build-backend = "poetry_dynamic_versioning.backend"
+
+#[build-system]
+#requires = ["poetry >= 0.12, <1"]
+#build-backend = "poetry.masonry.api"
+
+[project.scripts]

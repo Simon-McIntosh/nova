@@ -1,87 +1,101 @@
-[build-system]
-requires = ["setuptools", "wheel", "versioneer[toml]"]
-build-backend = "setuptools.build_meta"
-
-[tool.setuptools]
-packages = ["nova"]
-
-[project]
+[tool.poetry]
 name = "nova"
+version = "0.0.0"
 description = "Equilibrium generation and inference"
-authors = [
-  {name = "Simon McIntosh"},
-  {email = "simon.mcintosh@iter.org"}
-]
+authors = ["Simon McIntosh <simon.mcintosh@iter.org>"]
+license = "ITER GIP"
 readme = "README.md"
-license = {text = "ITER GIP"}
-requires-python = ">=3.10"
+homepage = "https://git.iter.org/projects/EQ/repos/nova/"
+repository = "https://git.iter.org/projects/EQ/repos/nova/"
+keywords = ["equilibrium", "generation", "reconstruction", "inference", "plasma", "Biot-Savart", "mesh-free"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Science/Research",
-  "License :: ITER GIP License",
+  "License :: Other/Proprietary License",
+  "Natural Language :: English",
   "Operating System :: OS Independent",
-  "Programming Language :: Python",
-  "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.10",
-  "Topic :: Scientific/Engineering :: Fusion",
+  "Topic :: Scientific/Engineering :: Physics",
 ]
-dynamic = ["version"]
-keywords = ["equilibrium", "generation", "reconstruction", "inference", "plasma", "Biot-Savart", "mesh-free"]
 
-dependencies = [
-  "appdirs",
-  "click",
-  "contourpy",
-  "cython",
-  "fsspec",
-  "gitpython",
-  "netCDF4",
-  "networkx",
-  "numpy",
-  "pandas>=2.0",
-  "pytest",
-  "scipy",
-  "shapely>=2.0",
-  "tqdm",
-  "xarray",
-  "xxhash",
-]
- 
-[project.optional-dependencies]
+[tool.poetry.dependencies]
+python = ">=3.10,<3.12"
+appdirs = "^1.4.4"
+contourpy = "^1.0.7"
+fsspec = "^2023.5.0"
+gitpython = "^3.1.31"
+netcdf4 = "^1.6.3"
+networkx = "^3.1"
+numpy = "^1.24.3"
+pandas = "^2.0.1"
+scipy = "^1.10.1"
+shapely = "^2.0.1"
+tqdm = "^4.65.0"
+xarray = "^2023.5.0"
+xxhash = "^3.2.0"
+alphashape = {version = "^1.3.1", optional = true}
+ansys-dpf-core = {version = "^0.8.1", optional = true}
+ansys-dpf-post = {version = "^0.4.0", optional = true}
+bokeh = {version = "^3.1.1", optional = true}
+coolprop = {version = "^6.4.3.post1", optional = true}
+coverage2clover = {version = "^4.0.0", optional = true}
+descartes = {version = "^1.1.0", optional = true}
+fortranformat = {version = "^1.2.2", optional = true}
+ftputil = {version = "^5.0.4", optional = true}
+gmsh = {version = "^4.11.1", optional = true}
+matplotlib = {version = "^3.7.1", optional = true}
+meshio = {version = "^5.3.4", optional = true}
+moviepy = {version = "^1.0.3", optional = true}
+nlopt = {version = "^2.7.1", optional = true}
+numba = {version = "^0.57.0", optional = true}
+openpyxl = {version = "^3.1.2", optional = true}
+pygmsh = {version = "^7.1.17", optional = true}
+pylops = {version = "^2.1.0", optional = true}
+pyquaternion = {version = "^0.9.9", optional = true}
+pytest = {version = "^7.3.1", optional = true}
+pytest-cov = {version = "^4.1.0", optional = true}
+pytest-xdist = {version = "^3.3.1", optional = true}
+pyvista = {version = "^0.39.1", optional = true}
+scikit-learn = {version = "^1.2.2", optional = true}
+seaborn = {version = "^0.12.2", optional = true}
+tables = {version = "^3.8.0", optional = true}
+tetgen = {version = "^0.6.3", optional = true}
+trimesh = {version = "^3.21.7", optional = true}
+vedo = {version = "^2023.4.4", optional = true}
+xlrd = {version = "^2.0.1", optional = true}
+
+[tool.poetry.group.dev.dependencies]
+asv = "^0.5.1"
+fabric = "^3.0.1"
+jupyter = "^1.0.0"
+line-profiler = "^4.0.3"
+lizard = "^1.17.10"
+mypy = "^1.3.0"
+pandas-stubs = "^2.0.1.230501"
+pandoc = "^2.3"
+pylsp-mypy = "^0.6.6"
+pyperf = "^2.6.0"
+snakeviz = "^2.2.0"
+sphinx = "^7.0.1"
+spyder = "^5.4.3"
+spyder-unittest = "^0.5.1"
+spyder-line-profiler = "^0.3.1"
+spyder-memory-profiler = "^0.2.1"
+tuna = "^0.5.11"
+virtualenv = "^20.23.0"
+
+[tool.poetry.extras]
 ansys = [
   "ansys-dpf-core", 
   "ansys-dpf-post", 
-  "fortranformat",
-  "openpyxl",
-]
-complete = [
-  "nova[ferritic, optimize, structural, thermofluids]"
-]
-cuda = [
-  "cupy-cuda115",
-]
-develop = [
-  "nova[complete, document, diagnostics, graphics, ide, jit, mesh, optimize, ssh, test, vtk]",
-]
-diagnostics = [
-  "asv", 
-  "line_profiler",
-  "lizard", 
-  "mypy",
-  "pandas-stubs",
-  "pylsp-mypy",
-  "pyperf",
-  "snakeviz",
-  "tuna",
-  "virtualenv", 
-]
-document = [
-  "pandoc",
-  "sphinx", 
+  "fortranformat", 
+  "openpyxl"
 ]
 ferritic = [
-  "vedo>=2022.4", 
+  "meshio",
+  "pyvista",
   "scikit-learn",
+  "trimesh",
+  "vedo", 
 ]
 graphics = [
   "bokeh",
@@ -89,16 +103,6 @@ graphics = [
   "matplotlib",
   "moviepy", 
   "seaborn",
-]
-ide = [
-  "jupyter",
-  "spyder", 
-  "spyder-unittest", 
-  "spyder-line-profiler", 
-  "spyder-memory-profiler", 
-]
-jit = [
-  "numba",
 ]
 mesh = [
   "alphashape",
@@ -108,53 +112,50 @@ mesh = [
   "tetgen", 
   "trimesh",
 ]
+numba = [
+  "numba"
+]
 optimize = [
   "nlopt", 
-  "pylops>=2.0",
+  "pylops",
   "scikit-learn",
 ]
-plan = [
-  "python-dateutil",
-]
-ssh = [
-  "fabric",
-]
 structural = [
+  "matplotlib",
   "pyquaternion",
 ]
 test = [
   "coverage2clover", 
+  "pytest",
   "pytest-cov", 
   "pytest-xdist", 
 ]
 thermofluids = [
   "coolprop", 
   "ftputil", 
+  "matplotlib",
   "openpyxl",
   "tables", 
   "xlrd",
 ]
 vtk = [
+  "meshio",
   "pyvista",
-  "vedo>=2022.4",
+  "trimesh",
+  "vedo",
 ]
 
-[project.scripts]
+[tool.poetry.scripts]
 benchmark = "nova.scripts.benchmark:benchmark"
 extrapolate = "nova.imas.scripts:extrapolate"
 filepath = "nova.database.scripts:filepath"
 configure = "nova.scripts.configure:configure"
 
-[project.urls]
-Homepage = "https://git.iter.org/projects/EQ/repos/nova/"
-
-[tool.versioneer]
-VCS = "git"
+[tool.poetry-dynamic-versioning]
+enable = true
+vcs = "git"
 style = "pep440"
-versionfile_source = "nova/_version.py"
-versionfile_build = "nova/_version.py"
-tag_prefix = ""
-parentdir_prefix = "nova-"
+pattern  = "^(?P<base>\\d+\\.\\d+\\.\\d+)(-?((?P<stage>[a-zA-Z]+)\\.?(?P<revision>\\d+)?))?"
 
 [tool.pytest.ini_options]
 addopts = "-rfEs --doctest-modules"
@@ -185,12 +186,8 @@ live_mode = false
 dmypy = true
 strict = false
 
-[tool.coverage.paths]
-source = ["src"]
-
 [tool.coverage.run]
 branch = true
-source = ["src"]
 omit = [
   "nova/ansys/*", 
   "nova/assembly/*", 
@@ -203,3 +200,13 @@ omit = [
   "nova/thermalhydralic/*", 
   "nova/utilities/*"
 ]
+
+[build-system]
+requires = ["poetry >= 0.12, <1", "poetry-core>=1.0.0", "poetry-dynamic-versioning"]
+build-backend = "poetry_dynamic_versioning.backend"
+
+#[build-system]
+#requires = ["poetry >= 0.12, <1"]
+#build-backend = "poetry.masonry.api"
+
+[project.scripts]

@@ -20,14 +20,17 @@ Public API in the main Nova namespace
 
 """
 
-from . import _version
-__version__ = _version.get_versions()['version']
-
 from contextlib import contextmanager
 from dataclasses import dataclass
-from importlib import import_module
+from importlib import metadata, import_module
 import os
 import pytest
+
+
+try:
+    __version__ = metadata.version(__package__ or __name__)
+except metadata.PackageNotFoundError:
+    __version__ = "0.0.0"
 
 submodules = [
     'imas',

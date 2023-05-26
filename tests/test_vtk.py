@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 import tempfile
 
-from nova import skip_import
+from nova.utilities.importmanager import skip_import
 with skip_import('vtk'):
     import vedo
 

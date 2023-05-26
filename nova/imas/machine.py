@@ -855,7 +855,7 @@ class Geometry:
             Geometry class derived from IDS parent. When `attrs` != 'iter_md'
             child classes of the geometry class that define an `ids_attrs`
             attribute (such as the `nova.imas.Database`) merge the `attrs`
-            parameter with `ids_attrs` with `ids_attrs` taking priority in
+            parameter with `ids_attrs` with `attrs` taking priority in
             cases where an IDS attribute is pressent in both.
 
         Returns
@@ -864,7 +864,7 @@ class Geometry:
             IDS descriptor containing all the parameters required by the
             `nova.imas.database.IDS` class \
             (pulse, run, machine, occurrence, user, name, backend).
-            The `attrs` attribute is matched acordign to its type and value
+            The `attrs` attribute is matched according to its type and value
             as follows:
 
                 - 'iter_md' : Return default IDS stored in `ids_attrs` \

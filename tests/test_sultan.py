@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 import scipy
 
-from nova import skip_import
+from nova.utilities.importmanager import skip_import
 with skip_import('thermofluids'):
     import ftputil
 

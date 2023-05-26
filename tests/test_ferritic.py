@@ -5,7 +5,7 @@ import tempfile
 import numpy as np
 import pytest
 
-from nova import skip_import
+from nova.utilities.importmanager import skip_import
 with skip_import('ferritic'):
     import vedo
 

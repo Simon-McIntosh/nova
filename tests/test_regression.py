@@ -2,7 +2,7 @@ import pytest
 
 import numpy as np
 
-from nova import mark_import
+from nova.utilities.importmanager import mark_import
 with mark_import('optimize') as mark_optimize:
     from nova.linalg.lops import Lops
     from pylops.utils import dottest

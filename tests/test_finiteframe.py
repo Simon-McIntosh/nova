@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from nova import skip_import
+from nova.utilities.importmanager import skip_import
 with skip_import('structural'):
     from nova.structural.finiteframe import finiteframe, scale
 

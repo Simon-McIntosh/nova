@@ -110,7 +110,7 @@ class FilePath:
         """Return resolved relative path."""
         match path:
             case 'nova':
-                version = nova.__version__.replace('post', '+').split('+')[0]
+                version = nova.__version__.replace('.post', '+').split('+')[0]
                 return os.path.join(nova.__name__, version)
             case 'imas':
                 return os.path.join('imas', os.environ.get('IMAS_VERSION', ''))

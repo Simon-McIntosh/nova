@@ -14,7 +14,7 @@ __all__ = [
            'Point',
            ]
 
-from nova import ImportManager
+from nova.utilities.importmanager import ImportManager
 
 imp = ImportManager(package='nova.biot')
 

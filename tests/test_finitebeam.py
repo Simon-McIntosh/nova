@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 
-from nova import skip_import
+from nova.utilities.importmanager import skip_import
 with skip_import('structural'):
     from nova.geometry.rotate import qrotate
 

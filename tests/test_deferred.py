@@ -3,7 +3,11 @@ import itertools
 import os
 import pytest
 
-from nova import defer_import, DeferredImport, ImportManager
+from nova.utilities.importmanager import (
+    defer_import,
+    DeferredImport,
+    ImportManager
+)
 
 
 @contextmanager

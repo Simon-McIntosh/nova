@@ -1,7 +1,7 @@
 """Manage deferred import of circuit methods."""
 __all__ = ['Circuit']
 
-from nova import ImportManager
+from nova.utilities.importmanager import ImportManager
 
 imp = ImportManager(package='nova.control')
 

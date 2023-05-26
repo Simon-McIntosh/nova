@@ -7,7 +7,7 @@ __all__ = ['Coil',
            'Winding'
            ]
 
-from nova import ImportManager
+from nova.utilities.importmanager import ImportManager
 
 imp = ImportManager(package='nova.frame')
 

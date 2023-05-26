@@ -2,7 +2,7 @@
 import numpy as np
 import pytest
 
-from nova import skip_import
+from nova.utilities.importmanager import skip_import
 with skip_import('vtk'):
     from nova.geometry.vtkgen import VtkFrame
     from nova.geometry.volume import Section, Cell, Sweep

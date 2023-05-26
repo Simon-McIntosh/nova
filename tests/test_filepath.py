@@ -8,12 +8,13 @@ import pytest
 import nova
 from nova.database.filepath import FilePath
 from nova.definitions import root_dir
+from nova.utilities.importmanager import mark_import
 
 
 IMAS_VERSION = os.environ.get('IMAS_VERSION', '')
 HOSTNAME = 'sdcc-login01.iter.org'
 
-with nova.mark_import('ssh') as mark_ssh:
+with mark_import('ssh') as mark_ssh:
     import paramiko
 
 try:
@@ -28,8 +29,8 @@ mark_connect = pytest.mark.skipif(
     not VALID_HOST, reason=f"unable to connect to host {HOSTNAME}")
 
 
-KEYPATH = dict(nova=os.path.join(nova.__name__,
-                                 nova.__version__.split('+')[0]),
+KEYPATH = dict(nova=os.path.join(
+    nova.__name__, nova.__version__.replace('.post', '+').split('+')[0]),
                imas=os.path.join('imas',  IMAS_VERSION),
                root=root_dir)
 

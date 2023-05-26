@@ -17,11 +17,11 @@ class PlasmaGrid:
 
     def setup_cache(self):
         """Build reference coilset."""
-        coilset = CoilSet(dplasma=-500)
+        coilset = CoilSet(dplasma=-500, filename=self.filename)
         coilset.firstwall.insert({'ellip': [4.2, -0.4, 1.25, 4.2]}, turn='hex')
         coilset.plasmagrid.solve()
         coilset.plasmagrid.svd_rank = 75
-        coilset.store(self.filename)
+        coilset.store()
 
     def remove(self):
         """Remove coilset."""
@@ -29,7 +29,7 @@ class PlasmaGrid:
 
     def setup(self):
         """Load coilset from file."""
-        self.coilset = CoilSet().load(self.filename)
+        self.coilset = CoilSet().load()
 
 
 class PlasmaTurns(PlasmaGrid):
@@ -41,7 +41,7 @@ class PlasmaTurns(PlasmaGrid):
 
     def setup(self, svd_rank):
         """Load coilset from file and set svd rank."""
-        self.coilset = CoilSet().load(self.filename)
+        self.coilset = CoilSet(filename=self.filename).load()
         self.coilset.plasmagrid.svd_rank = svd_rank
 
     def time_update_turns(self, svd_rank):

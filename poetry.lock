@@ -993,7 +993,7 @@ files = [
 name = "coverage"
 version = "7.2.6"
 description = "Code coverage measurement for Python"
-optional = true
+optional = false
 python-versions = ">=3.7"
 files = [
     {file = "coverage-7.2.6-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:496b86f1fc9c81a1cd53d8842ef712e950a4611bba0c42d33366a7b91ba969ec"},
@@ -1329,7 +1329,7 @@ files = [
 name = "exceptiongroup"
 version = "1.1.1"
 description = "Backport of PEP 654 (exception groups)"
-optional = true
+optional = false
 python-versions = ">=3.7"
 files = [
     {file = "exceptiongroup-1.1.1-py3-none-any.whl", hash = "sha256:232c37c63e4f682982c8b6459f33a8981039e5fb8756b2074364e5055c498c9e"},
@@ -1343,7 +1343,7 @@ test = ["pytest (>=6)"]
 name = "execnet"
 version = "1.9.0"
 description = "execnet: rapid multi-Python deployment"
-optional = true
+optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 files = [
     {file = "execnet-1.9.0-py2.py3-none-any.whl", hash = "sha256:a295f7cc774947aac58dde7fdc85f4aa00c42adf5d8f5468fc630c1acf30a142"},
@@ -1548,19 +1548,6 @@ files = [
 
 [package.dependencies]
 gitdb = ">=4.0.1,<5"
-
-[[package]]
-name = "gmsh"
-version = "4.11.1"
-description = "Gmsh is a three-dimensional finite element mesh generator with built-in pre- and post-processing facilities."
-optional = true
-python-versions = "*"
-files = [
-    {file = "gmsh-4.11.1-py2.py3-none-macosx_10_15_x86_64.whl", hash = "sha256:f07d62ec3ee0edcf1c28ed070ce9eaca86f393e15480edaf37d323f09cc341c1"},
-    {file = "gmsh-4.11.1-py2.py3-none-macosx_12_0_arm64.whl", hash = "sha256:df6e401ea3cc6822b2cbff12a3e7fe68e0a11496807bb73f5e31af4496657c0b"},
-    {file = "gmsh-4.11.1-py2.py3-none-manylinux1_x86_64.whl", hash = "sha256:69d56865d80e6e7bdb665426333487bc3679bc778b9fee500eb8cf0d2714ad99"},
-    {file = "gmsh-4.11.1-py2.py3-none-win_amd64.whl", hash = "sha256:bde90654db3b8820759d47ad3b309ec0a9ab7c062522c36b84de12bc73719d37"},
-]
 
 [[package]]
 name = "google-api-core"
@@ -1832,7 +1819,7 @@ files = [
 name = "iniconfig"
 version = "2.0.0"
 description = "brain-dead simple config-ini parsing"
-optional = true
+optional = false
 python-versions = ">=3.7"
 files = [
     {file = "iniconfig-2.0.0-py3-none-any.whl", hash = "sha256:b6a85871a79d2e3b22d2d1b94ac2824226a63c6b741c88f7ae975f18b6778374"},
@@ -2308,13 +2295,13 @@ test = ["click", "coverage", "pre-commit", "pytest (>=7.0)", "pytest-asyncio (>=
 
 [[package]]
 name = "jupyter-server"
-version = "2.5.0"
+version = "2.6.0"
 description = "The backend—i.e. core services, APIs, and REST endpoints—to Jupyter web applications."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "jupyter_server-2.5.0-py3-none-any.whl", hash = "sha256:e6bc1e9e96d7c55b9ce9699ff6cb9a910581fe7349e27c40389acb67632e24c0"},
-    {file = "jupyter_server-2.5.0.tar.gz", hash = "sha256:9fde612791f716fd34d610cd939704a9639643744751ba66e7ee8fdc9cead07e"},
+    {file = "jupyter_server-2.6.0-py3-none-any.whl", hash = "sha256:19525a1515b5999618a91b3e99ec9f6869aa8c5ba73e0b6279fcda918b54ba36"},
+    {file = "jupyter_server-2.6.0.tar.gz", hash = "sha256:ae4af349f030ed08dd78cb7ac1a03a92d886000380c9ea6283f3c542a81f4b06"},
 ]
 
 [package.dependencies]
@@ -2323,10 +2310,11 @@ argon2-cffi = "*"
 jinja2 = "*"
 jupyter-client = ">=7.4.4"
 jupyter-core = ">=4.12,<5.0.dev0 || >=5.1.dev0"
-jupyter-events = ">=0.4.0"
+jupyter-events = ">=0.6.0"
 jupyter-server-terminals = "*"
 nbconvert = ">=6.4.4"
 nbformat = ">=5.3.0"
+overrides = "*"
 packaging = "*"
 prometheus-client = "*"
 pywinpty = {version = "*", markers = "os_name == \"nt\""}
@@ -2338,7 +2326,7 @@ traitlets = ">=5.6.0"
 websocket-client = "*"
 
 [package.extras]
-docs = ["docutils (<0.20)", "ipykernel", "jinja2", "jupyter-client", "jupyter-server", "mistune (<1.0.0)", "myst-parser", "nbformat", "prometheus-client", "pydata-sphinx-theme", "send2trash", "sphinx-autodoc-typehints", "sphinxcontrib-github-alt", "sphinxcontrib-openapi", "sphinxcontrib-spelling", "sphinxemoji", "tornado", "typing-extensions"]
+docs = ["ipykernel", "jinja2", "jupyter-client", "jupyter-server", "myst-parser", "nbformat", "prometheus-client", "pydata-sphinx-theme", "send2trash", "sphinx-autodoc-typehints", "sphinxcontrib-github-alt", "sphinxcontrib-openapi (>=0.8.0)", "sphinxcontrib-spelling", "sphinxemoji", "tornado", "typing-extensions"]
 test = ["ipykernel", "pre-commit", "pytest (>=7.0)", "pytest-console-scripts", "pytest-jupyter[server] (>=0.4)", "pytest-timeout", "requests"]
 
 [[package]]
@@ -3523,6 +3511,17 @@ files = [
 et-xmlfile = "*"
 
 [[package]]
+name = "overrides"
+version = "7.3.1"
+description = "A decorator to automatically detect mismatch when overriding a method."
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "overrides-7.3.1-py3-none-any.whl", hash = "sha256:6187d8710a935d09b0bcef8238301d6ee2569d2ac1ae0ec39a8c7924e27f58ca"},
+    {file = "overrides-7.3.1.tar.gz", hash = "sha256:8b97c6c1e1681b78cbc9424b138d880f0803c2254c5ebaabdde57bb6c62093f2"},
+]
+
+[[package]]
 name = "packaging"
 version = "23.1"
 description = "Core utilities for Python packages"
@@ -3640,13 +3639,13 @@ files = [
 
 [[package]]
 name = "paramiko"
-version = "3.1.0"
+version = "3.2.0"
 description = "SSH2 protocol library"
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "paramiko-3.1.0-py3-none-any.whl", hash = "sha256:f0caa660e797d9cd10db6fc6ae81e2c9b2767af75c3180fcd0e46158cd368d7f"},
-    {file = "paramiko-3.1.0.tar.gz", hash = "sha256:6950faca6819acd3219d4ae694a23c7a87ee38d084f70c1724b0c0dbb8b75769"},
+    {file = "paramiko-3.2.0-py3-none-any.whl", hash = "sha256:df0f9dd8903bc50f2e10580af687f3015bf592a377cd438d2ec9546467a14eb8"},
+    {file = "paramiko-3.2.0.tar.gz", hash = "sha256:93cdce625a8a1dc12204439d45033f3261bdb2c201648cfcdc06f9fd0f94ec29"},
 ]
 
 [package.dependencies]
@@ -4086,22 +4085,6 @@ files = [
 plugins = ["importlib-metadata"]
 
 [[package]]
-name = "pygmsh"
-version = "7.1.17"
-description = "Python frontend for Gmsh"
-optional = true
-python-versions = ">=3.7"
-files = [
-    {file = "pygmsh-7.1.17-py3-none-any.whl", hash = "sha256:3b3da976a4da5070eaf1b0d2c5eec3fc4902524580c6d256c32a390f720e86d4"},
-    {file = "pygmsh-7.1.17.tar.gz", hash = "sha256:563724abff4f8517598d3354b9c795feddbe0675786145bfeaf20cbee6691c1d"},
-]
-
-[package.dependencies]
-gmsh = "*"
-meshio = ">=4.3.2,<6"
-numpy = ">=1.20.0"
-
-[[package]]
 name = "pygount"
 version = "1.2.4"
 description = "count source lines of code (SLOC) using pygments"
@@ -4482,7 +4465,7 @@ files = [
 name = "pytest"
 version = "7.3.1"
 description = "pytest: simple powerful testing with Python"
-optional = true
+optional = false
 python-versions = ">=3.7"
 files = [
     {file = "pytest-7.3.1-py3-none-any.whl", hash = "sha256:3799fa815351fea3a5e96ac7e503a96fa51cc9942c3753cda7651b93c1cfa362"},
@@ -4504,7 +4487,7 @@ testing = ["argcomplete", "attrs (>=19.2.0)", "hypothesis (>=3.56)", "mock", "no
 name = "pytest-cov"
 version = "4.1.0"
 description = "Pytest plugin for measuring coverage."
-optional = true
+optional = false
 python-versions = ">=3.7"
 files = [
     {file = "pytest-cov-4.1.0.tar.gz", hash = "sha256:3904b13dfbfec47f003b8e77fd5b589cd11904a21ddf1ab38a64f204d6a10ef6"},
@@ -4522,7 +4505,7 @@ testing = ["fields", "hunter", "process-tests", "pytest-xdist", "six", "virtuale
 name = "pytest-xdist"
 version = "3.3.1"
 description = "pytest xdist plugin for distributed testing, most importantly across multiple CPUs"
-optional = true
+optional = false
 python-versions = ">=3.7"
 files = [
     {file = "pytest-xdist-3.3.1.tar.gz", hash = "sha256:d5ee0520eb1b7bcca50a60a518ab7a7707992812c578198f8b44fdfac78e8c93"},
@@ -5783,39 +5766,6 @@ docs = ["myst-parser", "pydata-sphinx-theme", "sphinx"]
 test = ["pre-commit", "pytest (>=7.0)", "pytest-timeout"]
 
 [[package]]
-name = "tetgen"
-version = "0.6.3"
-description = "Python interface to tetgen"
-optional = true
-python-versions = ">=3.7"
-files = [
-    {file = "tetgen-0.6.3-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:8aaa7d1e7e8ead62ebb5e3b319e0464cbd3253726762e6ebaa249b19dde24b3b"},
-    {file = "tetgen-0.6.3-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:521a3c37a7fbeedb64a4b1ac8110dd0535fbfbc7f8cdf28a795430bf902ba802"},
-    {file = "tetgen-0.6.3-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:e7109ad4fc6b883aac5352383cef0a3e80bb72af03c2da46b0d1ed46eea71e86"},
-    {file = "tetgen-0.6.3-cp310-cp310-win_amd64.whl", hash = "sha256:6403a4f89279e5e27f34ccc9aefa1f912a35f3fac7961f8b02e4da8c28b41838"},
-    {file = "tetgen-0.6.3-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:cf8856654df0db2de9c580f5e19e60bf21fadbec8d516c8b32632173c3e22ca3"},
-    {file = "tetgen-0.6.3-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:33569f8f85c0178158337f813e47ef346e1fc66c056142a17b0cab5395ac7ff1"},
-    {file = "tetgen-0.6.3-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:e01f1462539516cf0a347c7122f4d821f9ef9019e3828978a2f046ffcac5f62b"},
-    {file = "tetgen-0.6.3-cp311-cp311-win_amd64.whl", hash = "sha256:bbdf0b9cb7fa94a4b1b76c14883d9a2377f3f28d154e45218deb26bfeaede837"},
-    {file = "tetgen-0.6.3-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:470de47949071c572679d5890f8f9deaa1ac3392607402975153ba9d9a186653"},
-    {file = "tetgen-0.6.3-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:36efbdbd6e3d82530ee2fff6091b54f87bfadcec13983ae577ff4a250f71d8fe"},
-    {file = "tetgen-0.6.3-cp37-cp37m-win_amd64.whl", hash = "sha256:2189d44770abed4a167f32f9d272d724cf746695a106cf366b43646aa7ad168b"},
-    {file = "tetgen-0.6.3-cp38-cp38-macosx_10_9_universal2.whl", hash = "sha256:73c1e6825a3828f32b8507b70f9575507730f6583fd4811ac65eb1b5f5a9b1f4"},
-    {file = "tetgen-0.6.3-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:a621cb4fceee86f3e754075e80433f8124c8ab1db4dd4567a5e624526c250e0e"},
-    {file = "tetgen-0.6.3-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:867e220047b6cb8f8ffa2468f69c88a06c170a02634e93cdde6ce75a249e3f48"},
-    {file = "tetgen-0.6.3-cp38-cp38-win_amd64.whl", hash = "sha256:d2aed209652f2bcd5a438092885edc5a5ac643e217aef3573962802dfbaa8041"},
-    {file = "tetgen-0.6.3-cp39-cp39-macosx_10_9_universal2.whl", hash = "sha256:c01b792361d497592c0f2595ab2bfb18e8a1bc6a2cef7bf9461cddf5ed81daa1"},
-    {file = "tetgen-0.6.3-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:ca98f44f436278e250a3a96fa347f9c81c54d5794632c587b194c6335f2d7bfc"},
-    {file = "tetgen-0.6.3-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:4432348b1ffe8a1c1927e7fe13d2e178e97c25eb3881cdc9c59760cb169cf133"},
-    {file = "tetgen-0.6.3-cp39-cp39-win_amd64.whl", hash = "sha256:5a21e744d2a2021396e577122a0b6ba72f4322e903005d10470b9facf31167b0"},
-    {file = "tetgen-0.6.3.tar.gz", hash = "sha256:9be6ac805a3250c1ccf4c02fec24da2def9de5a214c33cb3aa977689c08a26e5"},
-]
-
-[package.dependencies]
-numpy = ">1.16.0"
-pyvista = ">=0.31.0"
-
-[[package]]
 name = "text-unidecode"
 version = "1.3"
 description = "The most basic Text::Unidecode port"
@@ -6627,15 +6577,14 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 ansys = ["ansys-dpf-core", "ansys-dpf-post", "fortranformat", "openpyxl"]
 ferritic = ["meshio", "pyvista", "scikit-learn", "trimesh", "vedo"]
 graphics = ["bokeh", "descartes", "matplotlib", "moviepy", "seaborn"]
-mesh = ["alphashape", "gmsh", "meshio", "pygmsh", "tetgen", "trimesh"]
 numba = ["numba"]
 optimize = ["nlopt", "pylops", "scikit-learn"]
 structural = ["matplotlib", "pyquaternion"]
-test = ["coverage2clover", "pytest", "pytest-cov", "pytest-xdist"]
+test = ["pytest"]
 thermofluids = ["coolprop", "ftputil", "matplotlib", "openpyxl", "tables", "xlrd"]
-vtk = ["meshio", "pyvista", "trimesh", "vedo"]
+vtk = ["alphashape", "meshio", "pyvista", "trimesh", "vedo"]
 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.12"
-content-hash = "9b6427c9364a69f1427b7f6656007e6e7a7b44b5e4933343ab46e00e86c2bacd"
+content-hash = "7783c7e44658edc176d3fe187d628e33e1e8f4b9d7a68832e41e044da00e70b8"

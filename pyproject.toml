@@ -41,24 +41,19 @@ coverage2clover = {version = "^4.0.0", optional = true}
 descartes = {version = "^1.1.0", optional = true}
 fortranformat = {version = "^1.2.2", optional = true}
 ftputil = {version = "^5.0.4", optional = true}
-gmsh = {version = "^4.11.1", optional = true}
 matplotlib = {version = "^3.7.1", optional = true}
 meshio = {version = "^5.3.4", optional = true}
 moviepy = {version = "^1.0.3", optional = true}
 nlopt = {version = "^2.7.1", optional = true}
 numba = {version = "^0.57.0", optional = true}
 openpyxl = {version = "^3.1.2", optional = true}
-pygmsh = {version = "^7.1.17", optional = true}
 pylops = {version = "^2.1.0", optional = true}
 pyquaternion = {version = "^0.9.9", optional = true}
 pytest = {version = "^7.3.1", optional = true}
-pytest-cov = {version = "^4.1.0", optional = true}
-pytest-xdist = {version = "^3.3.1", optional = true}
 pyvista = {version = "^0.39.1", optional = true}
 scikit-learn = {version = "^1.2.2", optional = true}
 seaborn = {version = "^0.12.2", optional = true}
 tables = {version = "^3.8.0", optional = true}
-tetgen = {version = "^0.6.3", optional = true}
 trimesh = {version = "^3.21.7", optional = true}
 vedo = {version = "^2023.4.4", optional = true}
 xlrd = {version = "^2.0.1", optional = true}
@@ -74,6 +69,8 @@ pandas-stubs = "^2.0.1.230501"
 pandoc = "^2.3"
 pylsp-mypy = "^0.6.6"
 pyperf = "^2.6.0"
+pytest-cov = "^4.1.0"
+pytest-xdist = "^3.3.1"
 snakeviz = "^2.2.0"
 sphinx = "^7.0.1"
 spyder = "^5.4.3"
@@ -104,14 +101,6 @@ graphics = [
   "moviepy", 
   "seaborn",
 ]
-mesh = [
-  "alphashape",
-  "gmsh", 
-  "meshio",
-  "pygmsh", 
-  "tetgen", 
-  "trimesh",
-]
 numba = [
   "numba"
 ]
@@ -125,10 +114,7 @@ structural = [
   "pyquaternion",
 ]
 test = [
-  "coverage2clover", 
   "pytest",
-  "pytest-cov", 
-  "pytest-xdist", 
 ]
 thermofluids = [
   "coolprop", 
@@ -139,6 +125,7 @@ thermofluids = [
   "xlrd",
 ]
 vtk = [
+  "alphashape",
   "meshio",
   "pyvista",
   "trimesh",
@@ -150,6 +137,14 @@ benchmark = "nova.scripts.benchmark:benchmark"
 extrapolate = "nova.imas.scripts:extrapolate"
 filepath = "nova.database.scripts:filepath"
 configure = "nova.scripts.configure:configure"
+
+[build-system]
+requires = ["poetry >= 0.12, <1", "poetry-core>=1.0.0", "poetry-dynamic-versioning"]
+build-backend = "poetry_dynamic_versioning.backend"
+
+#[build-system]
+#requires = ["poetry >= 0.12, <1"]
+#build-backend = "poetry.masonry.api"
 
 [tool.poetry-dynamic-versioning]
 enable = true
@@ -201,12 +196,3 @@ omit = [
   "nova/utilities/*"
 ]
 
-[build-system]
-requires = ["poetry >= 0.12, <1", "poetry-core>=1.0.0", "poetry-dynamic-versioning"]
-build-backend = "poetry_dynamic_versioning.backend"
-
-#[build-system]
-#requires = ["poetry >= 0.12, <1"]
-#build-backend = "poetry.masonry.api"
-
-[project.scripts]

@@ -1,6 +1,6 @@
 {
     "biotoperate.PlasmaEvaluate.time_field_magnitude": {
-        "code": "class PlasmaEvaluate:\n    def time_field_magnitude(self):\n        \"\"\"Time computation of radial field.\"\"\"\n        return self.coilset.plasmagrid.bn\n\nclass PlasmaGrid:\n    def setup(self):\n        \"\"\"Load coilset from file.\"\"\"\n        self.coilset = CoilSet().load(self.filename)\n\n    def setup_cache(self):\n        \"\"\"Build reference coilset.\"\"\"\n        coilset = CoilSet(dplasma=-500)\n        coilset.firstwall.insert({'ellip': [4.2, -0.4, 1.25, 4.2]}, turn='hex')\n        coilset.plasmagrid.solve()\n        coilset.plasmagrid.svd_rank = 75\n        coilset.store(self.filename)",
+        "code": "class PlasmaEvaluate:\n    def time_field_magnitude(self):\n        \"\"\"Time computation of radial field.\"\"\"\n        return self.coilset.plasmagrid.bn\n\nclass PlasmaGrid:\n    def setup(self):\n        \"\"\"Load coilset from file.\"\"\"\n        self.coilset = CoilSet().load()\n\n    def setup_cache(self):\n        \"\"\"Build reference coilset.\"\"\"\n        coilset = CoilSet(dplasma=-500, filename=self.filename)\n        coilset.firstwall.insert({'ellip': [4.2, -0.4, 1.25, 4.2]}, turn='hex')\n        coilset.plasmagrid.solve()\n        coilset.plasmagrid.svd_rank = 75\n        coilset.store()",
         "min_run_count": 2,
         "name": "biotoperate.PlasmaEvaluate.time_field_magnitude",
         "number": 5000,
@@ -13,11 +13,11 @@
         "timeout": 60.0,
         "type": "time",
         "unit": "seconds",
-        "version": "418d7a2a5425a3f1ab4e758cb19f218ac5a8f5878bd58c0e5d83402a9bbc3450",
+        "version": "b465b899371017df50de7cf1d2b54669cd07a733f14604434d80b1fae451fc6a",
         "warmup_time": -1
     },
     "biotoperate.PlasmaEvaluate.time_flux_function": {
-        "code": "class PlasmaEvaluate:\n    def time_flux_function(self):\n        \"\"\"Time computation of radial field.\"\"\"\n        return self.coilset.plasmagrid.psi\n\nclass PlasmaGrid:\n    def setup(self):\n        \"\"\"Load coilset from file.\"\"\"\n        self.coilset = CoilSet().load(self.filename)\n\n    def setup_cache(self):\n        \"\"\"Build reference coilset.\"\"\"\n        coilset = CoilSet(dplasma=-500)\n        coilset.firstwall.insert({'ellip': [4.2, -0.4, 1.25, 4.2]}, turn='hex')\n        coilset.plasmagrid.solve()\n        coilset.plasmagrid.svd_rank = 75\n        coilset.store(self.filename)",
+        "code": "class PlasmaEvaluate:\n    def time_flux_function(self):\n        \"\"\"Time computation of radial field.\"\"\"\n        return self.coilset.plasmagrid.psi\n\nclass PlasmaGrid:\n    def setup(self):\n        \"\"\"Load coilset from file.\"\"\"\n        self.coilset = CoilSet().load()\n\n    def setup_cache(self):\n        \"\"\"Build reference coilset.\"\"\"\n        coilset = CoilSet(dplasma=-500, filename=self.filename)\n        coilset.firstwall.insert({'ellip': [4.2, -0.4, 1.25, 4.2]}, turn='hex')\n        coilset.plasmagrid.solve()\n        coilset.plasmagrid.svd_rank = 75\n        coilset.store()",
         "min_run_count": 2,
         "name": "biotoperate.PlasmaEvaluate.time_flux_function",
         "number": 5000,
@@ -30,11 +30,11 @@
         "timeout": 60.0,
         "type": "time",
         "unit": "seconds",
-        "version": "60ee0c2f9c8fb9c34fc499780216bf157f77b69d3fe8b44ba592f854814b561f",
+        "version": "94a0a6d482808c2375345ad78c9c556ee5adcc4f4ec81f29534f381af1b1db82",
         "warmup_time": -1
     },
     "biotoperate.PlasmaEvaluate.time_flux_function_ev_only": {
-        "code": "class PlasmaEvaluate:\n    def time_flux_function_ev_only(self):\n        \"\"\"Time forced evaluation of flux function.\"\"\"\n        self.coilset.plasmagrid.operator['Psi'].evaluate()\n\nclass PlasmaGrid:\n    def setup(self):\n        \"\"\"Load coilset from file.\"\"\"\n        self.coilset = CoilSet().load(self.filename)\n\n    def setup_cache(self):\n        \"\"\"Build reference coilset.\"\"\"\n        coilset = CoilSet(dplasma=-500)\n        coilset.firstwall.insert({'ellip': [4.2, -0.4, 1.25, 4.2]}, turn='hex')\n        coilset.plasmagrid.solve()\n        coilset.plasmagrid.svd_rank = 75\n        coilset.store(self.filename)",
+        "code": "class PlasmaEvaluate:\n    def time_flux_function_ev_only(self):\n        \"\"\"Time forced evaluation of flux function.\"\"\"\n        self.coilset.plasmagrid.operator['Psi'].evaluate()\n\nclass PlasmaGrid:\n    def setup(self):\n        \"\"\"Load coilset from file.\"\"\"\n        self.coilset = CoilSet().load()\n\n    def setup_cache(self):\n        \"\"\"Build reference coilset.\"\"\"\n        coilset = CoilSet(dplasma=-500, filename=self.filename)\n        coilset.firstwall.insert({'ellip': [4.2, -0.4, 1.25, 4.2]}, turn='hex')\n        coilset.plasmagrid.solve()\n        coilset.plasmagrid.svd_rank = 75\n        coilset.store()",
         "min_run_count": 2,
         "name": "biotoperate.PlasmaEvaluate.time_flux_function_ev_only",
         "number": 5000,
@@ -47,11 +47,11 @@
         "timeout": 60.0,
         "type": "time",
         "unit": "seconds",
-        "version": "a446a8e82741583c687bfc5768c62fe00814b221e3fae8227e89d5660cd5f8ff",
+        "version": "1b8f5a5f98a0af4465ff69b19267d99e57ef5720d03c684b0ea0dea4d93da42d",
         "warmup_time": -1
     },
     "biotoperate.PlasmaEvaluate.time_radial_field": {
-        "code": "class PlasmaEvaluate:\n    def time_radial_field(self):\n        \"\"\"Time computation of radial field.\"\"\"\n        return self.coilset.plasmagrid.br\n\nclass PlasmaGrid:\n    def setup(self):\n        \"\"\"Load coilset from file.\"\"\"\n        self.coilset = CoilSet().load(self.filename)\n\n    def setup_cache(self):\n        \"\"\"Build reference coilset.\"\"\"\n        coilset = CoilSet(dplasma=-500)\n        coilset.firstwall.insert({'ellip': [4.2, -0.4, 1.25, 4.2]}, turn='hex')\n        coilset.plasmagrid.solve()\n        coilset.plasmagrid.svd_rank = 75\n        coilset.store(self.filename)",
+        "code": "class PlasmaEvaluate:\n    def time_radial_field(self):\n        \"\"\"Time computation of radial field.\"\"\"\n        return self.coilset.plasmagrid.br\n\nclass PlasmaGrid:\n    def setup(self):\n        \"\"\"Load coilset from file.\"\"\"\n        self.coilset = CoilSet().load()\n\n    def setup_cache(self):\n        \"\"\"Build reference coilset.\"\"\"\n        coilset = CoilSet(dplasma=-500, filename=self.filename)\n        coilset.firstwall.insert({'ellip': [4.2, -0.4, 1.25, 4.2]}, turn='hex')\n        coilset.plasmagrid.solve()\n        coilset.plasmagrid.svd_rank = 75\n        coilset.store()",
         "min_run_count": 2,
         "name": "biotoperate.PlasmaEvaluate.time_radial_field",
         "number": 5000,
@@ -64,11 +64,11 @@
         "timeout": 60.0,
         "type": "time",
         "unit": "seconds",
-        "version": "ecc0d850abb92b8638c08b7612e46f8bf3ee357f60a78e68dca550607f5f5d27",
+        "version": "bc0dc5ea8b8445a5226a14c4bfef99bbd1040c84cf2c4e29f3f999c6a53ea3b0",
         "warmup_time": -1
     },
     "biotoperate.PlasmaOperate.time_load_operators": {
-        "code": "class PlasmaOperate:\n    def time_load_operators(self):\n        \"\"\"Time biot operator reload.\"\"\"\n        self.coilset.plasmagrid.load_operators()\n\nclass PlasmaGrid:\n    def setup(self):\n        \"\"\"Load coilset from file.\"\"\"\n        self.coilset = CoilSet().load(self.filename)\n\n    def setup_cache(self):\n        \"\"\"Build reference coilset.\"\"\"\n        coilset = CoilSet(dplasma=-500)\n        coilset.firstwall.insert({'ellip': [4.2, -0.4, 1.25, 4.2]}, turn='hex')\n        coilset.plasmagrid.solve()\n        coilset.plasmagrid.svd_rank = 75\n        coilset.store(self.filename)",
+        "code": "class PlasmaOperate:\n    def time_load_operators(self):\n        \"\"\"Time biot operator reload.\"\"\"\n        self.coilset.plasmagrid.load_operators()\n\nclass PlasmaGrid:\n    def setup(self):\n        \"\"\"Load coilset from file.\"\"\"\n        self.coilset = CoilSet().load()\n\n    def setup_cache(self):\n        \"\"\"Build reference coilset.\"\"\"\n        coilset = CoilSet(dplasma=-500, filename=self.filename)\n        coilset.firstwall.insert({'ellip': [4.2, -0.4, 1.25, 4.2]}, turn='hex')\n        coilset.plasmagrid.solve()\n        coilset.plasmagrid.svd_rank = 75\n        coilset.store()",
         "min_run_count": 2,
         "name": "biotoperate.PlasmaOperate.time_load_operators",
         "number": 100,
@@ -81,11 +81,11 @@
         "timeout": 60.0,
         "type": "time",
         "unit": "seconds",
-        "version": "d898d321f6aaffbb8f5fe31e420d5dc6a7cc2d51b39833367815f54e7a56b59d",
+        "version": "6ce74a3b2a8909b47bcd6f471352f1e6b85f84f0ab4b0934dedcf718ceb641ad",
         "warmup_time": -1
     },
     "biotoperate.PlasmaOperate.time_solve": {
-        "code": "class PlasmaOperate:\n    def time_solve(self):\n        \"\"\"Time plasma grid biot solution.\"\"\"\n        self.coilset.plasmagrid.solve()\n\nclass PlasmaGrid:\n    def setup(self):\n        \"\"\"Load coilset from file.\"\"\"\n        self.coilset = CoilSet().load(self.filename)\n\n    def setup_cache(self):\n        \"\"\"Build reference coilset.\"\"\"\n        coilset = CoilSet(dplasma=-500)\n        coilset.firstwall.insert({'ellip': [4.2, -0.4, 1.25, 4.2]}, turn='hex')\n        coilset.plasmagrid.solve()\n        coilset.plasmagrid.svd_rank = 75\n        coilset.store(self.filename)",
+        "code": "class PlasmaOperate:\n    def time_solve(self):\n        \"\"\"Time plasma grid biot solution.\"\"\"\n        self.coilset.plasmagrid.solve()\n\nclass PlasmaGrid:\n    def setup(self):\n        \"\"\"Load coilset from file.\"\"\"\n        self.coilset = CoilSet().load()\n\n    def setup_cache(self):\n        \"\"\"Build reference coilset.\"\"\"\n        coilset = CoilSet(dplasma=-500, filename=self.filename)\n        coilset.firstwall.insert({'ellip': [4.2, -0.4, 1.25, 4.2]}, turn='hex')\n        coilset.plasmagrid.solve()\n        coilset.plasmagrid.svd_rank = 75\n        coilset.store()",
         "min_run_count": 2,
         "name": "biotoperate.PlasmaOperate.time_solve",
         "number": 10,
@@ -98,11 +98,11 @@
         "timeout": 60.0,
         "type": "time",
         "unit": "seconds",
-        "version": "0bf6ef2a28401fe3876de8eca2c311f22179d76bcabf360a250af420d7e8ec4a",
+        "version": "641afff999363709afb63f59d14b9480247333d5571c389b38026d9984c8c1a0",
         "warmup_time": -1
     },
     "biotoperate.PlasmaTurns.time_update_turns": {
-        "code": "class PlasmaTurns:\n    def time_update_turns(self, svd_rank):\n        \"\"\"Time generation of plasma grid.\"\"\"\n        self.coilset.plasmagrid.update_turns('Psi', svd_rank != -1)\n\n    def setup(self, svd_rank):\n        \"\"\"Load coilset from file and set svd rank.\"\"\"\n        self.coilset = CoilSet().load(self.filename)\n        self.coilset.plasmagrid.svd_rank = svd_rank\n\nclass PlasmaGrid:\n    def setup_cache(self):\n        \"\"\"Build reference coilset.\"\"\"\n        coilset = CoilSet(dplasma=-500)\n        coilset.firstwall.insert({'ellip': [4.2, -0.4, 1.25, 4.2]}, turn='hex')\n        coilset.plasmagrid.solve()\n        coilset.plasmagrid.svd_rank = 75\n        coilset.store(self.filename)",
+        "code": "class PlasmaTurns:\n    def time_update_turns(self, svd_rank):\n        \"\"\"Time generation of plasma grid.\"\"\"\n        self.coilset.plasmagrid.update_turns('Psi', svd_rank != -1)\n\n    def setup(self, svd_rank):\n        \"\"\"Load coilset from file and set svd rank.\"\"\"\n        self.coilset = CoilSet(filename=self.filename).load()\n        self.coilset.plasmagrid.svd_rank = svd_rank\n\nclass PlasmaGrid:\n    def setup_cache(self):\n        \"\"\"Build reference coilset.\"\"\"\n        coilset = CoilSet(dplasma=-500, filename=self.filename)\n        coilset.firstwall.insert({'ellip': [4.2, -0.4, 1.25, 4.2]}, turn='hex')\n        coilset.plasmagrid.solve()\n        coilset.plasmagrid.svd_rank = 75\n        coilset.store()",
         "min_run_count": 2,
         "name": "biotoperate.PlasmaTurns.time_update_turns",
         "number": 5000,
@@ -125,7 +125,7 @@
         "timeout": 60.0,
         "type": "time",
         "unit": "seconds",
-        "version": "cfb7da0986ab1f653e38322b6f4b7b591c1cd15c92349febd9bfaf0cbdca0297",
+        "version": "1ef60311a8880f6c7ddd0020fb9ff49df5a4ed2f9ade1c60019fb6524d31855a",
         "warmup_time": -1
     },
     "framesetloc.GetSubFrameLoc.time_item": {

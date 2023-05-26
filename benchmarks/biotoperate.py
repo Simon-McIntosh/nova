@@ -2,6 +2,7 @@
 import os
 import timeit
 
+from nova.database.filepath import FilePath
 from nova.frame.coilset import CoilSet
 
 
@@ -9,15 +10,22 @@ class PlasmaGrid:
     """Benchmark biotoperate methods - plasmagrid base class."""
 
     timer = timeit.default_timer
+    dirname = '.nova'
 
     @property
     def filename(self):
         """Return coilset filename."""
         return './plasmagrid_coilset'
 
+    @property
+    def filepath(self):
+        """Return coilset filepath."""
+        return FilePath(self.filename, self.dirname).filepath
+
     def setup_cache(self):
         """Build reference coilset."""
-        coilset = CoilSet(dplasma=-500, filename=self.filename)
+        coilset = CoilSet(dplasma=-500, filename=self.filename,
+                          dirname=self.dirname)
         coilset.firstwall.insert({'ellip': [4.2, -0.4, 1.25, 4.2]}, turn='hex')
         coilset.plasmagrid.solve()
         coilset.plasmagrid.svd_rank = 75
@@ -25,7 +33,7 @@ class PlasmaGrid:
 
     def remove(self):
         """Remove coilset."""
-        os.remove(self.filename + '.nc')
+        os.remove(self.filepath.with_suffix('.nc'))
 
     def setup(self):
         """Load coilset from file."""
@@ -92,6 +100,5 @@ if __name__ == '__main__':
     biot = PlasmaTurns()
     biot.setup_cache()
     biot.setup(75)
-    biot.coilset.plot()
     biot.time_update_turns(75)
     biot.remove()

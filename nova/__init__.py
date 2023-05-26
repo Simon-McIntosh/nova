@@ -32,9 +32,11 @@ submodules = [
     'imas',
 ]
 
-__all__ = submodules + [
+__all__ = [
     '__version__',
 ]
+
+__all__.extend(submodules)
 
 
 try:

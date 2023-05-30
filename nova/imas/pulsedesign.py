@@ -980,8 +980,8 @@ class Benchmark(PulseDesign):
 
         print(relative_error)
 
-        self.set_axes('1d')
-        self.axes.plot(error[:, 1])
+        # self.set_axes('1d')
+        # self.axes.plot(error[:, 1])
 
         self.set_axes('1d')
         self.axes.plot(benchmark.current[:, 1], color='gray')

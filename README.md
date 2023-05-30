@@ -35,7 +35,17 @@ Install
 -------
 
 ```sh
-# development package
-pip -e .['develop']
+# development package using poetry with a pipx install
+python3.10 -m pip install pipx-in-pipx
+pipx install poetry 
+pipx install tox 
+poetry install -all-extras 
+
+# run a single command using 
+poetry run <command>
+
+# or lanuch a poetry shell followed by the spyder IDE 
+poetry shell 
+spyder &
 ```
 

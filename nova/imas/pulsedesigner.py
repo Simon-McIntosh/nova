@@ -1,33 +1,14 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Tue May 30 14:15:07 2023
 
-@author: mcintos
-"""
-
-''' Present an interactive function explorer with slider widgets.
-
-Scrub the sliders to change the properties of the ``sin`` curve, or
-type into the title text box to update the title of the plot.
-
-Use the ``bokeh serve`` command to run the example by executing:
-
-    bokeh serve sliders.py
-
-at your command prompt. Then navigate to the URL
-
-    http://localhost:5006/sliders
-
-in your browser.
-
-'''
 import numpy as np
 
 from bokeh.io import curdoc
 from bokeh.layouts import column, row
-from bokeh.models import ColumnDataSource, Slider, TextInput
+from bokeh.models import ColumnDataSource, GeoJSONDataSource, Slider, TextInput
 from bokeh.plotting import figure
+
+from nova.imas.pulsedesign import Benchmark
+
+design = Benchmark(135013, 2, 'iter', 1)
 
 # Set up data
 N = 200
@@ -38,10 +19,16 @@ source = ColumnDataSource(data=dict(x=x, y=y))
 
 # Set up plot
 plot = figure(height=400, width=400, title="my sine wave",
-              tools="crosshair,pan,reset,save,wheel_zoom",
+              tools="pan,reset,wheel_zoom",
               x_range=[0, 4*np.pi], y_range=[-2.5, 2.5])
 
 plot.line('x', 'y', source=source, line_width=3, line_alpha=0.6)
+
+geo_source = GeoJSONDataSource(
+    geojson=design.frame.poly[0].poly.__geo_interface__)
+
+design.frame.poly[0].poly.__geo_interface__
+#plot.
 
 
 # Set up widgets
@@ -56,7 +43,9 @@ freq = Slider(title="frequency", value=1.0, start=0.1, end=5.1, step=0.1)
 def update_title(attrname, old, new):
     plot.title.text = text.value
 
+
 text.on_change('value', update_title)
+
 
 def update_data(attrname, old, new):
 
@@ -71,6 +60,7 @@ def update_data(attrname, old, new):
     y = a*np.sin(k*x + w) + b
 
     source.data = dict(x=x, y=y)
+
 
 for w in [offset, amplitude, phase, freq]:
     w.on_change('value', update_data)

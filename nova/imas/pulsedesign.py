@@ -977,7 +977,6 @@ class Benchmark(PulseDesign):
         mean = np.mean((waveform.current + benchmark.current) / 2, axis=0)
         relative_error = np.mean(error, axis=0) / mean
 
-
         print(relative_error)
 
         # self.set_axes('1d')

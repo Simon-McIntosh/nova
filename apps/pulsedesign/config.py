@@ -10,7 +10,7 @@ class IDS(database.IDS):
     pulse: int = 135013
     run: int = 2
     machine: str = "iter"
-    occurrence: int = 1
+    occurrence: int = 0
     user: str = "public"
     name: str | None = None
     backend: str = "hdf5"

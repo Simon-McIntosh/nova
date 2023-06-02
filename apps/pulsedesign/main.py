@@ -18,11 +18,13 @@ from bokeh.models import (
 from bokeh.plotting import figure
 
 from apps.pulsedesign import ids_attrs, Simulator
+from nova.imas.equilibrium import EquilibriumData
+from nova.imas.sample import Sample
 
-simulator = Simulator(**ids_attrs)
+equilibrium = EquilibriumData(**ids_attrs)  # load source equilibrium
+sample = Sample(equilibrium.data)  # extract key features
+simulator = Simulator(ids=sample.equilibrium_ids())  # pass to simulator instance
 source = simulator.source
-
-# os.path.join(self.home, 'imasdb'
 
 run = TextInput(value="", title="Run:", width=100)
 occurrence = TextInput(value="", title="Occurrence:", width=100)

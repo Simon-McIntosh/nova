@@ -788,8 +788,10 @@ class IdsIndex:
                 return data.shape
             case float() | int() | str():
                 return ()
+            case _ if isinstance(data, np.integer):
+                return ()
             case _:
-                raise ValueError(f"unable to determine data length {path}")
+                raise ValueError(f"unable to determine data length {path} {data}")
 
     def get(self, path: str):
         """Return attribute from ids path."""

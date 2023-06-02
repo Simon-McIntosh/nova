@@ -10,7 +10,7 @@ import xarray
 
 from nova.graphics.plot import Plot
 from nova.geometry.rdp import rdp
-from nova.imas.database import Database, IdsEntry
+from nova.imas.database import Database, Ids, IdsEntry
 from nova.imas.equilibrium import EquilibriumData
 from nova.imas.metadata import Metadata
 
@@ -283,8 +283,11 @@ class Sample(Plot, Defeature, Select):
             ylabel = f"normalized {ylabel}"
         self.axes.set_ylabel(ylabel)
 
-    def _write_pulse_schedule(self, ids_entry):
+    def pulse_schedule_ids(self) -> Ids:
         """Write sample data to a pulse schedule IDS."""
+        ids_entry = IdsEntry(name="pulse_schedule")
+        self.update_metadata(ids_entry, provenance=[self.data.attrs["pulse_schedule"]])
+        ids_entry.ids_data.time = self.data.time.data
         with ids_entry.node("flux_control.*.reference.data"):
             ids_entry["i_plasma"] = self.data.ip.data
             ids_entry["loop_voltage"] = self.data.psi_boundary.data
@@ -320,9 +323,13 @@ class Sample(Plot, Defeature, Select):
             for i in range(2):
                 ids_entry["r", i] = self.data.strike_point[:, i, 0].data
                 ids_entry["z", i] = self.data.strike_point[:, i, 1].data
+        return ids_entry.ids_data
 
-    def _write_equilibrium(self, ids_entry):
+    def equilibrium_ids(self) -> Ids:
         """Write sample data to a equilibrium IDS."""
+        ids_entry = IdsEntry(name="equilibrium")
+        self.update_metadata(ids_entry, provenance=[self.data.attrs["equilibrium"]])
+        ids_entry.ids_data.time = self.data.time.data
         ids_entry.ids_data.time_slice.resize(self.data.dims["time"])
         with ids_entry.node("time_slice:global_quantities.*"):
             for attr in ["ip", "li_3", "beta_normal"]:
@@ -373,34 +380,33 @@ class Sample(Plot, Defeature, Select):
                 ids_entry["psi", itime] = self.data.psi1d.data[itime]
                 for attr in ["dpressure_dpsi", "f_df_dpsi"]:
                     ids_entry[attr, itime] = self.data[attr].data[itime]
+        return ids_entry.ids_data
 
-    def write_ids(self, **ids_attrs):
-        """Write sample data to pulse_schedule ids."""
-        if ids_attrs["occurrence"] is None:
-            ids_attrs["occurrence"] = Database(**ids_attrs).next_occurrence()
-        ids_entry = IdsEntry(**ids_attrs)
+    def update_metadata(self, ids_entry: IdsEntry, provenance=None):
+        """Generate ids_entry and add metadata."""
         metadata = Metadata(ids_entry.ids_data)
         comment = "Feature preserving reduced order waveforms"
-        source = ",".join([str(value) for value in ids_attrs.values()])
-        metadata.put_properties(comment, source, homogeneous_time=1)
+        metadata.put_properties(comment, homogeneous_time=1, provenance=provenance)
         code_parameters = {
             attr: getattr(self, attr)
             for attr in ["dtime", "savgol", "epsilon", "cluster", "features"]
         }
         metadata.put_code(code_parameters)
 
-        ids_entry.ids_data.time = self.data.time.data
-
+    def write_ids(self, **ids_attrs):
+        """Write sample data to pulse_schedule ids."""
         match ids_attrs["name"]:
             case "equilibrium":
-                self._write_equilibrium(ids_entry)
+                ids_data = self.equilibrium_ids()
             case "pulse_schedule":
-                self._write_pulse_schedule(ids_entry)
+                ids_data = self.pulse_schedule_ids()
             case _:
                 raise NotImplementedError(
                     "write_ids not implemented for " f'ids_name {ids_attrs["name"]}'
                 )
-
+        if ids_attrs["occurrence"] is None:
+            ids_attrs["occurrence"] = Database(**ids_attrs).next_occurrence()
+        ids_entry = IdsEntry(ids_data=ids_data, **ids_attrs)
         ids_entry.put_ids()
 
 

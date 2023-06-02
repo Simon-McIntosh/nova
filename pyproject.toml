@@ -80,6 +80,7 @@ spyder-memory-profiler = "^0.2.1"
 tuna = "^0.5.11"
 virtualenv = "^20.23.0"
 jupyterlab = "^4.0.0"
+pre-commit = "^3.3.2"
 
 [tool.poetry.extras]
 ansys = [

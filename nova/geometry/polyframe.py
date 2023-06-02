@@ -103,3 +103,14 @@ class PolyFrame(Plot, GeoFrame):
         """Return polygon boundary."""
         boundary = self.poly.boundary.xy
         return np.c_[boundary[0], boundary[1]]
+
+    @cached_property
+    def polygons(self):
+        """Return polygon(s) coordinates a triple nested list."""
+        try:
+            geoms = self.poly.geoms
+        except AttributeError:
+            geoms = [self.poly]
+        polys = [[poly.exterior, *poly.interiors] for poly in geoms]
+        return ([[loop.xy[0].tolist() for loop in loops] for loops in polys],
+                [[loop.xy[1].tolist() for loop in loops] for loops in polys])

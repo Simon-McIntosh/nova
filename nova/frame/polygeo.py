@@ -64,3 +64,9 @@ class PolyGeo(metamethod.PolyGeo):
                  min(geom['z'] - geom['dz'] / 2),
                  max(geom['z'] + geom['dz'] / 2)]
         return limit
+
+    def polygons(self, index) -> dict:
+        """Return frame geometry in a Bokeh multi polygons format."""
+        polyframe = self.frame.loc[index, 'poly']
+        return {'xs': [poly.polygons[0] for poly in polyframe],
+                'ys': [poly.polygons[1] for poly in polyframe]}

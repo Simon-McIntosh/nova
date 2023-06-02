@@ -745,6 +745,12 @@ class Wall(CoilDatabase):
         """Return first wall segments."""
         return [self.segment(i) for i in range(len(self.limiter.unit))]
 
+    @cached_property
+    def outline(self):
+        """Return first wall xz outline."""
+        return {'x': [segment[:, 0] for segment in self.segments],
+                'z': [segment[:, 1] for segment in self.segments]}
+
     def build(self):
         """Build plasma bound by firstwall contour."""
         self.firstwall.insert(self.boundary)

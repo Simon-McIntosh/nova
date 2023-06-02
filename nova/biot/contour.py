@@ -97,6 +97,15 @@ class Contour(Line):
             self.x2d, self.z2d, self.psi2d,
             line_type='SeparateCode', quad_as_tri=True)
 
+    def __call__(self, levels: int | np.ndarray | None = None):
+        """Return flux surface coordinates."""
+        if levels is not None:
+            self.levels = levels
+        lines = [line for psi in self.psi
+                 for line in self.generator.lines(psi)[0]]
+        return {'x': [line[:, 0] for line in lines],
+                'z': [line[:, 1] for line in lines]}
+
     @property
     def psi(self):
         """Return poloidal flux contor levels."""

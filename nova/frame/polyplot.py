@@ -151,6 +151,7 @@ class PolyPlot(Plot, Properties, Labels, metamethod.PolyPlot, BasePlot):
             patch_kwargs |= kwargs
             try:  # MultiPolygon.
                 for _poly in polyframe.poly:
+                    assert False  # TODO remove branch if not triggered
                     patch.append(self.patch(
                         _poly.__geo_interface__, **patch_kwargs))
             except (TypeError, AssertionError):  # Polygon.

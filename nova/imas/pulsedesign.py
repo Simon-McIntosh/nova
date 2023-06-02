@@ -987,9 +987,6 @@ class Benchmark(PulseDesign):
         self.axes.plot(waveform.current[:, 1], color='C0')
 
 
-
-
-
 if __name__ == '__main__':
 
     #design = PulseDesign(135013, 2, 'iter', 1)

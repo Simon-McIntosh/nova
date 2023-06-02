@@ -52,6 +52,11 @@ class Simulator(PulseDesign):
                 "f_df_dpsi": [(slice(None), self["f_df_dpsi"])],
             }
         )
+        self.source["plasma"].patch(
+            {
+                "ionize": [(slice(None), 0.5 * self.plasma.ionize.astype(float))],
+            }
+        )
 
     @cached_property
     def wall_outline(self):
@@ -66,7 +71,7 @@ class Simulator(PulseDesign):
     @property
     def plasma_data(self):
         """Return plasma polygons."""
-        ionize = self.loc["plasma", "ionize"]
+        ionize = self.plasma.ionize.astype(float)
         return self.subframe.polygeo.polygons("plasma") | {"ionize": ionize}
 
 

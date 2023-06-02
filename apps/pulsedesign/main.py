@@ -45,7 +45,9 @@ ids = column(
 poloidal = figure(name="poloidal", match_aspect=True, height=650)
 poloidal.axis.visible = False
 
-flux = poloidal.multi_line("x", "z", source=source["levelset"], color="gray", alpha=0.5)
+flux = poloidal.multi_line(
+    "x", "z", source=source["levelset"], color="gray", alpha=0.5, level="overlay"
+)
 wall = poloidal.multi_line(
     "x", "z", source=source["wall"], color="gray", width=2, alpha=2
 )
@@ -53,7 +55,7 @@ nulls = poloidal.scatter(
     "x", "z", source=source["x_points"], marker="x", size=8, line_color="red"
 )
 plasma = poloidal.multi_polygons(
-    "x", "z", fill_alpha="ionize", line_alpha=None, source=source["plasma"]
+    "x", "z", fill_alpha="ionize", line_alpha=0, source=source["plasma"]
 )
 
 # coils = poloidal.multi_polygons(source=source['coil'])

@@ -7,7 +7,7 @@
 **nova** is a Python package built to facilitate the generation and interpretation of magnetically confined plasma equilibria. This package extends [pandas](http://pandas.pydata.org) objects to add domain specific support for plasma filaments, electromagnetic coils, passive structures and circuits via `FrameSpace` types. Core electromagnetic calculations are implemented using a grid-free approach based on Biot-Savart integrals. Multi-dimensional data is represented internally using [xarray]( https://docs.xarray.dev). The results of expensive calculations are cached as [netCDF](https://www.unidata.ucar.edu/software/netcdf) files.
 
 
-## Dependancies 
+## Dependencies 
 
 - [appdirs - Provides OS independent file system support]
 - [click - Facilitates the implementation of CLI tools]
@@ -39,8 +39,23 @@ poetry install -all-extras
 # run a single command using 
 poetry run <command>
 
-# or lanuch a poetry shell followed by the spyder IDE 
+# or launch a poetry shell followed by the spyder IDE 
 poetry shell 
-spyder &
+spyder 
 ```
 
+To install on SDCC (in advance of and EasyBuild module or for development work)
+```sh 
+# load IMAS module 
+ml IMAS 
+PYTHONPATH= PYTHON_KEYRING_BACKEND=keyring.backends.null.Keyring poetry install --all-extras 
+
+# run a single command using
+poetry run <command> 
+
+# launch Spyder 
+poetry run spyder 
+
+# launch Bokeh app
+poetry run bokeh serve apps/pulsedesign
+```

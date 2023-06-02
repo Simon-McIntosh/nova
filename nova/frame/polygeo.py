@@ -86,6 +86,6 @@ class PolyGeo(metamethod.PolyGeo):
         """Return frame geometry in a Bokeh multi polygons format."""
         polyframe = self.frame.loc[index, "poly"]
         return {
-            "xs": [poly.polygons[0] for poly in polyframe],
-            "ys": [poly.polygons[1] for poly in polyframe],
+            "x": [poly.polygons[0] for poly in polyframe],
+            "z": [poly.polygons[1] for poly in polyframe],
         }

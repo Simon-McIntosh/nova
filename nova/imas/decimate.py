@@ -2,15 +2,10 @@ from dataclasses import dataclass, field
 from functools import cached_property
 
 import numpy as np
-import numpy.typing as npt
 import scipy.spatial
-import sklearn
 import xarray
 
 from nova.imas.ensemble import Ensemble
-from nova.imas.equilibrium import EquilibriumData
-from nova.linalg.basis import Bernstein, Svd
-from nova.linalg.regression import OdinaryLeastSquares
 import matplotlib.pyplot as plt
 
 

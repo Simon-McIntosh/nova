@@ -1,16 +1,9 @@
 import numpy as np
 import pygmsh
-from nep.DINA.read_eqdsk import read_eqdsk
-from nova.streamfunction import SF
 from amigo.pyplot import plt
 from rdp import rdp
-import meshio
-import fipy as fp
-from matplotlib import tri
-from nova.cross_coil import mu_o
-from scipy.interpolate import interp2d
 from amigo import geom, mesh
-from shapely.geometry.polygon import LinearRing, Polygon
+from shapely.geometry.polygon import LinearRing
 from scipy.interpolate import splprep, splev
 
 

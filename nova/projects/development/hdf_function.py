@@ -1,9 +1,7 @@
 import inspect
-from tempfile import NamedTemporaryFile
 
 import h5py
-from hdf5_udf import UserDefinedFunction, lib
-import numpy as np
+from hdf5_udf import lib
 
 
 def dynamic_dataset():

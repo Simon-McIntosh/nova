@@ -35,7 +35,7 @@ def snap_PF(self, coil=None, solve=False):
 def snap_coils(self, solve=True, **kwargs):
     if "TFoffset" in kwargs:  # option to update TFoffset via kwarg
         self.TFoffset = kwargs["TFoffset"]
-    coil = kwargs.get("coil", None)
+    kwargs.get("coil", None)
     # L = self.grid_coils(coil=coil)
 
     L = self.get_L()

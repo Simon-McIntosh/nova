@@ -876,7 +876,7 @@ class scenario_data(read_dina, interpolate, operate):
         """Plot coil current vectors."""
         for name in self.index[self.Ic_iloc]:
             if name != "Ip" and "tf" not in name:
-                label = name[1:].upper()
+                name[1:].upper()
                 self.plot(y=name, label=name, **kwargs)
 
 

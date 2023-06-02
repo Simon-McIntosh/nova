@@ -1,18 +1,14 @@
 """Generate ansys interpolation tables to apply mesh morphing to FEA."""
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 import inspect
 import os
 
 import pyvista as pv
-import scipy.spatial
-import scipy.interpolate
 
 import numpy as np
 from nova.definitions import root_dir
 from nova.assembly.ansyspost import AnsysPost
 from nova.assembly.fiducialcoil import FiducialCoil
-from nova.assembly.morph import Morph
-from nova.utilities import ANSYS
 
 
 @dataclass
@@ -89,7 +85,7 @@ class MorphAnsys:
 
     def write_table(self):
         """Write ansys interpolation table to file."""
-        axes = self.generate_axes(csys=1)
+        self.generate_axes(csys=1)
         """
         grid = np.array(np.meshgrid(*axes, indexing='ij')).T
 

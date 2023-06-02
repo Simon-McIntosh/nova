@@ -1,21 +1,7 @@
 import pylab as pl
 from streamfunction import SF
 from elliptic import EQ
-from inverse import INV
 from eqConfig import Config
-from itertools import cycle
-import numpy as np
-from radial_build import RB
-import copy
-from shelf import PKL
-import cross_coil as cc
-import scipy as sp
-from surface import bernstein
-from scipy.interpolate import interp1d
-import scipy.optimize as op
-from scipy.ndimage.filters import gaussian_filter
-from scipy.interpolate import RectBivariateSpline
-from scipy.linalg import lstsq
 
 import seaborn as sns
 

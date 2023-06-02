@@ -1,7 +1,6 @@
 """Generate deformed geometries based on fiducial data."""
 from dataclasses import dataclass, field
 
-import numpy as np
 import pyvista as pv
 
 from nova.assembly.fiducialdata import FiducialData

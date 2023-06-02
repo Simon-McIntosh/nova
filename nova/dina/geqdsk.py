@@ -73,7 +73,7 @@ def read(f):
             sint.append(int(s_))
         except:
             pass
-    idum = int(sint[-3])
+    int(sint[-3])
     nxefit = int(sint[-2])
     nzefit = int(sint[-1])
 
@@ -94,15 +94,15 @@ def read(f):
 
     Ip = float(next(token))
     simagx = float(next(token))
-    xdum = float(next(token))
+    float(next(token))
     xmagx = float(next(token))
-    xdum = float(next(token))
+    float(next(token))
 
     zmagx = float(next(token))
-    xdum = float(next(token))
+    float(next(token))
     sibdry = float(next(token))
-    xdum = float(next(token))
-    xdum = float(next(token))
+    float(next(token))
+    float(next(token))
 
     # Read arrays
     def read_array(n, name="Unknown"):

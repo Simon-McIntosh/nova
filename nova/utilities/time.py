@@ -277,10 +277,10 @@ class time_constant:
 
     def ntxt(If, tau):
         txt = r"$\alpha$=["
-        for i, I in enumerate(If):
+        for i, _If in enumerate(If):
             if i > 0:
                 txt += ","
-            txt += "{:1.2f}".format(I)
+            txt += "{:1.2f}".format(_If)
         txt += "]"
         txt += r" $\tau$=["
         for i, t in enumerate(tau):

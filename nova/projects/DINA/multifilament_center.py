@@ -1,7 +1,6 @@
 import os
 
 import pandas
-import numpy as np
 
 from nova.definitions import root_dir
 from nova.utilities.IO import readtxt
@@ -30,9 +29,9 @@ class MultiFilament:
         )
 
         with readtxt(filename) as file:
-            plasma_current = eval(file.readline().split()[2])
+            eval(file.readline().split()[2])
             file.trim("Ipl_scale", index=0, rewind=True)
-            Ipl_scale = eval(file.readline().split()[-1])
+            eval(file.readline().split()[-1])
             index = -1
             while True:
                 try:

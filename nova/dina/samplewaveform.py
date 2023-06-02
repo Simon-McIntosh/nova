@@ -1,12 +1,8 @@
-from dataclasses import dataclass, field
-from typing import Union
+from dataclasses import dataclass
 
 import numpy as np
-import scipy
-import sklearn.manifold
 import pandas
 
-from nova.utilities.localdata import LocalData
 from nova.frame.IO.read_scenario import scenario_data
 import matplotlib.pyplot as plt
 

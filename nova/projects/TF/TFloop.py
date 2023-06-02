@@ -293,7 +293,7 @@ class Scoil(object):  # polybezier
         pl.plot(x["r"], x["z"])
 
 
-if __name__ is "__main__":  # plot coil classes
+if __name__ == "__main__":  # plot coil classes
     coil = Acoil()
     x = coil.plot()
 

@@ -1,9 +1,6 @@
 from nova.DEMOxlsx import DEMO
 from nova.loops import Profile
 from nova.shape import Shape
-import pylab as pl
-import matplotlib.animation as manimation
-import numpy as np
 
 nTF = 18
 family = "S"

@@ -1,10 +1,6 @@
-import numpy as np
-
 import matplotlib.pyplot as plt
 from nova.design.inverse import Inverse
-from nova.frame.coilset import CoilSet
 from nova.frame.coilgeom import ITERcoilset
-from nova.frame.machinedata import MachineData
 
 build_coilset = True
 source = "PCR_PF3PF4"

@@ -7,7 +7,6 @@ Created on Sat Jun 18 15:58:05 2016
 import matplotlib.pyplot as mp
 
 mp.rcParams.update({"font.size": 14})
-import scipy as sc
 from scipy import special
 import numpy as np
 

@@ -4,7 +4,6 @@ from dataclasses import dataclass
 
 import numpy as np
 from scipy import optimize
-from tqdm import tqdm
 
 from nova.biot.biot import Nbiot
 from nova.imas.database import Ids

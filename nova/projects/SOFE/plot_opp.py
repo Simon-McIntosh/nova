@@ -1,7 +1,6 @@
 import pylab as pl
 from nova.shelf import PKL
 from nova import loops
-import matplotlib.animation as manimation
 
 import seaborn as sns
 

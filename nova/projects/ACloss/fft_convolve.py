@@ -6,7 +6,7 @@ import scipy.interpolate
 import scipy.signal
 
 from nova.definitions import root_dir
-from nova.utilities.png_tools import data_mine, data_load
+from nova.utilities.png_tools import data_load
 import matplotlib.pyplot as plt
 
 

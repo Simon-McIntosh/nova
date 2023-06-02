@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 
 import numpy as np
 from shapely import intersects, intersection
-from shapely.geometry import LineString, MultiLineString, MultiPoint, Point
+from shapely.geometry import MultiLineString, MultiPoint, Point
 
 from nova.graphics.plot import Plot
 from nova.imas.database import Ids

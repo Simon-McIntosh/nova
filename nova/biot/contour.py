@@ -75,7 +75,7 @@ class ContourLoc:
 
     def update(self, nest: list[Surface]):
         """Update contour attributes."""
-        for attr in (field.name for field in fields(ContourLoc)):
+        for attr in (_field.name for _field in fields(ContourLoc)):
             setattr(self, attr, np.array([getattr(surface, attr) for surface in nest]))
 
 

@@ -4,7 +4,6 @@ import os
 
 import numpy as np
 import numpy.typing as npt
-import pickle
 import pyvista as pv
 import xarray
 
@@ -13,10 +12,8 @@ from nova.structural.datadir import AnsysDataDir
 from nova.utilities.time import clock
 
 from sklearn.base import BaseEstimator
-from sklearn.model_selection import KFold
-from sklearn.model_selection import cross_validate
 from sklearn.model_selection import cross_val_score
-from sklearn.linear_model import LinearRegression, RANSACRegressor
+from sklearn.linear_model import LinearRegression
 from sklearn.kernel_ridge import KernelRidge
 from sklearn.model_selection import train_test_split
 
@@ -288,7 +285,7 @@ class Simulator:
 
     def plot_pair(self, clim=None):
         plotter = pv.Plotter(shape=(2, 2), border=False)
-        sargs = dict(
+        dict(
             title_font_size=18,
             label_font_size=18,
             shadow=False,
@@ -321,11 +318,11 @@ class Simulator:
         plotter.add_title("ground_truth", font_size=12)
 
         plotter.subplot(0, 1)
-        plotter.add_mesh(self.mesh, scalars=f"predict_linear", clim=clim)
+        plotter.add_mesh(self.mesh, scalars="predict_linear", clim=clim)
         plotter.add_title("linear", font_size=12)
 
         plotter.subplot(0, 2)
-        plotter.add_mesh(self.mesh, scalars=f"predict_kridge", clim=clim)
+        plotter.add_mesh(self.mesh, scalars="predict_kridge", clim=clim)
         plotter.add_title("kridge", font_size=12)
 
         plotter.link_views()

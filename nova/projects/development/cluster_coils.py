@@ -1,7 +1,5 @@
-from amigo.pyplot import plt
-
 import numpy as np
-from nep.coil_geom import VVcoils, ITERcoilset, VSgeom
+from nep.coil_geom import ITERcoilset, VSgeom
 from nova.coil_class import CoilClass
 
 pf = ITERcoilset().cc

@@ -1,20 +1,9 @@
-import pylab as pl
-from nova.config import Setup, select
+from nova.config import select
 from nova.streamfunction import SF
 from nova.radial_build import RB
-from nova.elliptic import EQ
-from nova.coils import PF, TF
-from nova.inverse import INV, SWING
-import numpy as np
-from time import time
-import amigo.geom as geom
-from nova import loops
-from nova.loops import Profile, plot_oppvar
-from nova.shape import Shape
-from nova.DEMOxlsx import DEMO
-from nova.force import force_feild
-from nova.firstwall import divertor, main_chamber
-from amigo.IO import trim_dir
+from nova.coils import TF
+from nova.loops import Profile
+from nova.firstwall import main_chamber
 
 import seaborn as sns
 

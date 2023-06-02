@@ -1,5 +1,4 @@
 import numpy as np
-import scipy
 
 from nova.thermalhydralic.sultan.fluidresponse import FluidResponse
 import matplotlib.pyplot as plt

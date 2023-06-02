@@ -7,7 +7,7 @@ Created on Fri Apr 21 20:50:50 2023
 """
 
 import numpy as np
-from scipy.optimize import BFGS, minimize, LinearConstraint
+from scipy.optimize import minimize, LinearConstraint
 
 
 def fun(x):

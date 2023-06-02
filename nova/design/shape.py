@@ -77,7 +77,7 @@ class Shape(object):
 
     def dot_diffrence(self, p, side):
         Xloop, Zloop = p["x"], p["z"]  # inside coil loop
-        switch = 1 if side is "internal" else -1
+        switch = 1 if side == "internal" else -1
         nRloop, nZloop, Xloop, Zloop = geom.normal(Xloop, Zloop)
         X, Z = self.bound[side]["x"], self.bound[side]["z"]
         dot = np.zeros(len(X))
@@ -182,7 +182,7 @@ class Shape(object):
     """
 
 
-if __name__ is "__main__":
+if __name__ == "__main__":
     nTF = 16
     family = "D"
     ripple = False

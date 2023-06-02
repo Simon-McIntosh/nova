@@ -66,7 +66,7 @@ class divertor(object):
             dpsi = self.psi_fw[1] - self.sf.Xpsi
             dpsi = self.psi_fw[1] - self.sf.Xpsi
             Phi_target = [psi_plasma, self.sf.Xpsi - self.div_ex * dpsi]
-            if leg is "inner1" or leg is "outer2":
+            if leg == "inner1" or leg == "outer2":
                 Phi_target[0] = self.sf.Xpsi + self.div_ex * dpsi
             if self.targets[leg]["open"]:
                 theta_sign *= -1
@@ -75,7 +75,7 @@ class divertor(object):
             if "outer" in leg:
                 Direction = Direction[::-1]
                 theta_sign *= -1
-            if leg is "inner1" or leg is "outer2":
+            if leg == "inner1" or leg == "outer2":
                 Theta_end = Theta_end[::-1]
 
             self.targets[leg]["X"] = np.array([])
@@ -98,7 +98,7 @@ class divertor(object):
                 )
                 self.targets[leg]["X"] = np.append(self.targets[leg]["X"], X[::flip])
                 self.targets[leg]["Z"] = np.append(self.targets[leg]["Z"], Z[::flip])
-            if leg is "outer":
+            if leg == "outer":
                 self.targets[leg]["X"] = self.targets[leg]["X"][::-1]
                 self.targets[leg]["Z"] = self.targets[leg]["Z"][::-1]
 

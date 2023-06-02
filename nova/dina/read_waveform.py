@@ -11,7 +11,6 @@ from nova.definitions import root_dir
 from nova.utilities.IO import pythonIO, readtxt
 from nova.utilities.time import clock
 from nova.utilities.qdafile import QDAfile
-import nova
 
 
 class read_waveform(pythonIO):
@@ -183,9 +182,9 @@ class read_corsica(read_waveform):
         nz_index = 0
         with readtxt(filename) as f:
             f.trim("ncol", index=0)
-            ncol = f.readnumber()
+            f.readnumber()
             f.skiplines(1)
-            nt = f.readnumber()
+            f.readnumber()
             while True:
                 try:
                     label = f.readline(split=True, string=True, sep=":")
@@ -204,7 +203,7 @@ class read_corsica(read_waveform):
                         num = [float(n.replace("D", "E").replace(",", "")) for n in num]
                         comment += f" ({num[0]}, {num[1]})"
                     if variable == "Ncoils":  # read PF / CS coil currents
-                        nC = f.readnumber()
+                        f.readnumber()
                     else:
                         data[variable] = f.readblock()
                 except ValueError:

@@ -1,5 +1,4 @@
 from nova.streamfunction import SF
-from nova.elliptic import EQ
 from nova.inverse import INV
 from nova.config import Setup, select
 from itertools import cycle
@@ -7,11 +6,8 @@ import numpy as np
 from nova.radial_build import RB
 from nova.shelf import PKL
 from nova.coils import PF, TF
-from nova import loops
 from nova.loops import Profile
-from nova.inverse import SWING
 from nova.firstwall import main_chamber
-from nova.shape import Shape
 
 import seaborn as sns
 

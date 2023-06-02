@@ -1,21 +1,6 @@
 """Build example sheild mesh."""
 import gmsh
-import io
 import os
-
-
-from dolfinx.cpp.io import perm_gmsh
-from dolfinx.cpp.mesh import to_type
-from dolfinx.mesh import create_mesh
-from dolfinx.io import (
-    extract_gmsh_geometry,
-    extract_gmsh_topology_and_markers,
-    ufl_mesh_from_gmsh,
-)
-from mpi4py import MPI
-import numpy as np
-
-from warnings import filterwarnings
 
 
 from nova.definitions import root_dir

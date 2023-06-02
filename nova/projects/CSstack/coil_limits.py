@@ -1,8 +1,5 @@
 from nep.DINA.read_scenario import scenario_limits, scenario_data
 from amigo.pyplot import plt
-import numpy as np
-from scipy.interpolate import interp1d
-import pandas as pd
 
 strID = "15MA DT-DINA"
 

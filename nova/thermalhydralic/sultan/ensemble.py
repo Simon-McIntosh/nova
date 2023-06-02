@@ -9,7 +9,7 @@ class Ensemble:
         for experiment in ftp.listdir(select="CSJA")[2:]:
             for phase in Campaign(experiment).index:
                 for side in ["Left", "Right"]:
-                    spectrum = SultanSpectrum(experiment, phase, side, reload=True)
+                    SultanSpectrum(experiment, phase, side, reload=True)
 
 
 if __name__ == "__main__":

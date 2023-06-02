@@ -1,10 +1,8 @@
 import os
 import nep
-from amigo.png_tools import data_mine, data_load
+from amigo.png_tools import data_load
 from amigo.IO import class_dir
 from amigo.pyplot import plt
-from amigo.addtext import linelabel
-from read_dina import timeconstant
 
 path = os.path.join(class_dir(nep), "../Data/LTC/")
 # data_mine(path, 'VS3_force', [0, 0.08], [60e3, 260e3])

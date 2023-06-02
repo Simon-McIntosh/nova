@@ -77,15 +77,18 @@ class Bezier:
 
         if not hasattr(t_values, "__iter__"):
             raise TypeError(
-                "`t_values` Must be an iterable of integers or floats, of length greater than 0 ."
+                "`t_values` Must be an iterable of integers or floats, "
+                "of length greater than 0 ."
             )
         if len(t_values) < 1:
             raise TypeError(
-                "`t_values` Must be an iterable of integers or floats, of length greater than 0 ."
+                "`t_values` Must be an iterable of integers or floats, "
+                "of length greater than 0 ."
             )
         if not isinstance(t_values[0], (int, float)):
             raise TypeError(
-                "`t_values` Must be an iterable of integers or floats, of length greater than 0 ."
+                "`t_values` Must be an iterable of integers or floats, "
+                "of length greater than 0 ."
             )
 
         curve = np.array([[0.0] * len(points[0])])

@@ -834,7 +834,7 @@ class Profile(object):
         self.frame_data()
 
 
-if __name__ is "__main__":  # plot loop classes
+if __name__ == "__main__":  # plot loop classes
     # loop = Aloop()
     # x = loop.plot()
     # loop = Sloop(limits=False, symetric=False, tension='single')

@@ -8,7 +8,6 @@ from mpl_toolkits.mplot3d import proj3d
 import numpy as np
 from mpl_toolkits import axes_grid1
 from matplotlib.transforms import Bbox
-from matplotlib.colors import to_rgb
 from matplotlib.patches import Arc, RegularPolygon
 from matplotlib.path import Path
 

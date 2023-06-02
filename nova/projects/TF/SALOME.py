@@ -1,4 +1,3 @@
-from nova.TF.DEMOxlsx import DEMO
 from nova.coils import PF, TF
 from nova.loops import Profile
 from nova.coil_cage import coil_cage
@@ -11,7 +10,6 @@ import json
 from amigo.IO import trim_dir
 import seaborn as sns
 import pylab as pl
-from DEMOxlsx import DEMO
 from amigo import geom
 from amigo.ANSYS import table
 from nova.force import force_feild
@@ -445,7 +443,7 @@ allsel
         ans.close()
 
 
-if __name__ is "__main__":
+if __name__ == "__main__":
     # nPF,nTF = 3,13
     # config = {'TF':'SN','eq':'SN_{:d}PF_{:d}TF'.format(nPF,nTF)}
 

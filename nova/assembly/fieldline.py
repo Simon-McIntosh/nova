@@ -1,7 +1,6 @@
 """Perform post-processing analysis on Fourier perterbed TFC dataset."""
 from dataclasses import dataclass
 
-import numpy as np
 import xarray
 
 from nova.assembly import structural, electromagnetic

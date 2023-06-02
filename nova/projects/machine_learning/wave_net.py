@@ -1,7 +1,6 @@
 import numpy as np
-from tensorflow.keras import Model
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import InputLayer, Conv1D, Dense, Dropout
+from tensorflow.keras.layers import InputLayer, Conv1D, Dense
 from tensorflow.keras.metrics import mean_squared_error
 from amigo.pyplot import plt
 

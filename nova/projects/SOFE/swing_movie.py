@@ -1,9 +1,6 @@
 import pylab as pl
 import numpy as np
-from matplotlib import animation
 from nova.shelf import PKL
-from nova.coils import TF
-import pickle
 import matplotlib.animation as manimation
 
 FFMpegWriter = manimation.writers["ffmpeg"]
@@ -32,7 +29,6 @@ from amigo.addtext import linelabel
 from itertools import cycle
 
 Color = cycle(sns.color_palette("Set2"))
-from nova.radial_build import RB
 
 # tf = TF('DEMO_SN',coil_type='S',nTF=16,objective='L')
 
@@ -45,7 +41,7 @@ pl.figure()
 
 
 def animate(flux):  # ,data,ax
-    Color = cycle(sns.color_palette("Set2"))
+    cycle(sns.color_palette("Set2"))
 
     pl.cla()
     # ax1.set_axis_off()

@@ -286,7 +286,7 @@ def solve_interaction(self, plot=False, color="gray", *args, **kwargs):
             #        self.interaction[matrix].loc[:, self.coil.data.index],
             #        self.coil.data.Ic)
             # value = self.interaction[matrix].dot(self.Ic)
-            value = np.dot(self.interaction[matrix].to_numpy(), self.Ic)
+            np.dot(self.interaction[matrix].to_numpy(), self.Ic)
             # coil = DataFrame(value, index=index)  # grid, target
             """
             for part in coil.index.unique(level=1):

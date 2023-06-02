@@ -4,10 +4,7 @@ from nova.loops import Profile
 from nova.coil_cage import coil_cage
 from nova.streamfunction import SF
 from nova.config import Setup
-from scipy.optimize import minimize_scalar, minimize
 import numpy as np
-import json
-from nova.config import trim_dir
 import seaborn as sns
 import pylab as pl
 from DEMOxlsx import DEMO

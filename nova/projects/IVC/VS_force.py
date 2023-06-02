@@ -1,5 +1,4 @@
 from nep.DINA.read_dina import dina
-from nep.DINA.read_plasma import read_plasma
 from nep.DINA.read_psi import read_psi
 from amigo.pyplot import plt
 from nep.VS.VSgeom import VS

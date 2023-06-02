@@ -1,13 +1,8 @@
-import subprocess
 import os
-import hashlib
 
 import intake
-from intake.catalog import Catalog
-from intake.catalog.local import LocalCatalogEntry
 import pandas as pd
 import numpy as np
-from intake import open_catalog
 
 from nova.definitions import root_dir
 from nova.utilities.IO import pythonIO

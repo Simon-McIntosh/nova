@@ -130,7 +130,7 @@ class elm_flux(pythonIO):
         plt.detick(ax)
 
 
-if __name__ is "__main__":
+if __name__ == "__main__":
     elm = elm_flux(read_txt=False)
 
     ax = plt.subplots(2, 1)[1]

@@ -1,20 +1,8 @@
 from amigo.addtext import linelabel
 import pylab as pl
 from nova.streamfunction import SF
-from nova.elliptic import EQ
-from nova.inverse import INV
-from nova.config import Setup, select
+from nova.config import select
 from itertools import cycle
-import numpy as np
-from nova.radial_build import RB
-from nova.shelf import PKL
-import nova.cross_coil as cc
-from nova.coils import PF, TF
-from time import time
-from nova import loops
-from nova.DEMOxlsx import DEMO
-from nova.loops import Profile
-from nova.force import force_feild
 
 import seaborn as sns
 

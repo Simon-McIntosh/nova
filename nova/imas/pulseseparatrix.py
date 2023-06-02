@@ -176,7 +176,7 @@ class PulseSeparatrix(Separatrix, PulseSchedule):
 
 if __name__ == "__main__":
     pulse, run = 135003, 5
-    design = PulseDesign(pulse, run)
+    design = PulseSeparatrix(pulse, run)
 
     design.time = 11.656 - 0.5
 

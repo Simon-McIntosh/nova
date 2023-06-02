@@ -2,11 +2,8 @@
 from dataclasses import dataclass, field
 from typing import Union
 
-import numpy as np
-
 
 from nova.thermalhydralic.sultan.pointdata import PointData
-import matplotlib.pyplot as plt
 
 
 @dataclass

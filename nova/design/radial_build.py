@@ -126,9 +126,9 @@ class RB(object):
         )
         bfill = blanket.fill(plot=plot, color="C0")
 
-        inner = blanket.loops["inner"]["points"]
-        outer = blanket.loops["outer"]["points"]
-        divertor = self.segment["divertor_gap"]
+        blanket.loops["inner"]["points"]
+        blanket.loops["outer"]["points"]
+        self.segment["divertor_gap"]
 
         # TODO: finish stepped first wall work
         """
@@ -587,7 +587,7 @@ class Loop(object):
             for i in np.arange(Lindex[0], Lindex[1] - 1):
                 Xfill = np.array([Xin[i], Xout[i], Xout[i + 1], Xin[i + 1]])
                 Zfill = np.array([Zin[i], Zout[i], Zout[i + 1], Zin[i + 1]])
-                if flag is 0 and label is not None:
+                if flag == 0 and label is not None:
                     flag = 1
                     plt.fill(
                         Xfill,
@@ -603,7 +603,7 @@ class Loop(object):
                     )
 
     def blend(self, dt, ref_o=4 / 8 * np.pi, dref=np.pi / 4, gap=0, referance="theta"):
-        if referance is "theta":
+        if referance == "theta":
             theta = np.arctan2(self.Z - self.xo[1], self.X - self.xo[0]) - gap
             theta[theta > np.pi] = theta[theta > np.pi] - 2 * np.pi
             tblend = dt[0] * np.ones(len(theta))  # inner

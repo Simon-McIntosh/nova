@@ -1,27 +1,11 @@
-import copy
-import time
-import multiprocessing
-from itertools import cycle
-from warnings import warn
-import sys
 import operator
 
 import numpy as np
-from scipy.interpolate import RectBivariateSpline as RBS
 from scipy.interpolate import interp1d
-import scipy.optimize as op
-from scipy.optimize import minimize_scalar
-from scipy.optimize import brentq
 import nlopt
-from pandas import DataFrame, Series, concat, isnull
-from pandas.api.types import is_list_like
-from astropy import units
 
 from nova.utilities import geom
-from nova.utilities.time import clock
-import matplotlib.pyplot as plt
 from nova.frame.coilclass import CoilClass
-from nova.limits.tieplate import get_tie_plate
 from nova.limits.poloidal import PoloidalLimit
 
 

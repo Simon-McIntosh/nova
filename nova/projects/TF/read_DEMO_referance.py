@@ -3,11 +3,9 @@ import numpy as np
 import pylab as pl
 from amigo import geom
 import scipy as sp
-from scipy.interpolate import interp1d
 from collections import OrderedDict
 from itertools import cycle, count
 from scipy.linalg import norm
-from matplotlib.collections import PolyCollection
 import seaborn as sns
 
 rc = {
@@ -28,7 +26,7 @@ sns.set(
 
 
 def get_label(label, label_array, force=False, part=None):
-    if label != None:
+    if label is not None:
         label_array.append(label.replace(" ", "_"))
         flag = True
     else:
@@ -71,7 +69,7 @@ def cutcorners(r, z):
             np.arccos(np.dot(dR[:, i] / dL[i], dR[:, i + 1] / dL[i + 1])) * 180 / np.pi
         )
         append_value(lines, segment, r[i + 1], z[i + 1])
-        if abs(kink) > 40 and kflag == False:  # angle, deg
+        if abs(kink) > 40 and kflag is False:  # angle, deg
             segment = add_segment(lines, k)
             append_value(lines, segment, r[i + 1], z[i + 1])
             kflag = True
@@ -151,7 +149,7 @@ class DEMO(object):
                 self.parts[p][l] = OrderedDict()
 
             comp, start = row[2].value, 2
-            while comp == None:
+            while comp is None:
                 start += 1
                 comp = row[start].value
             if comp == "Rad":  # replace confusing 'Rad' label
@@ -340,7 +338,7 @@ class DEMO(object):
         wb.save("./referance/" + filename + ".xlsx")
 
 
-if __name__ is "__main__":
+if __name__ == "__main__":
     demo = DEMO()
 
     # demo.fill_loops()
@@ -357,8 +355,7 @@ if __name__ is "__main__":
     from nova.streamfunction import SF
     from nova.radial_build import RB
     from nova.elliptic import EQ
-    from nova.coils import PF, TF
-    from nova.inverse import INV
+    from nova.coils import PF
 
     import seaborn as sns
 

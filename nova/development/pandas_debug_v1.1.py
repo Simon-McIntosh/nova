@@ -1,5 +1,4 @@
 from nova.frame.coilset import CoilSet
-from nova.frame.coilframe import CoilFrame
 
 
 cs = CoilSet()

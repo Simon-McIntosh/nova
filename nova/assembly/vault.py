@@ -1,5 +1,5 @@
 """Create assembly graphics."""
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from dataclasses import dataclass, field
 
 import descartes
@@ -101,7 +101,7 @@ class BaseVault:
     delta_phi: npt.ArrayLike
     ncoil: int = 18
     resolution: int = 15
-    coil_index: list[int] = None
+    coil_index: list[int] | None = None
     data: xarray.Dataset = field(default_factory=xarray.Dataset)
 
     def __post_init__(self):
@@ -171,7 +171,7 @@ class BaseAssembly:
     gap: float = 0.05
     radial_window: float = 0.1
     toroidal_window: float = 0.075
-    coil_index: list[int] = None
+    coil_index: list[int] | None = None
     ncoil: int = 18
 
     def __post_init__(self):
@@ -211,12 +211,12 @@ class BaseAssembly:
 
 
 @dataclass
-class Animate(ImagePlot):
+class Animate(Plot2D):
     """Animation base class."""
 
     duration: float = 5.0
     fps: float = 10.0
-    samples: int = None
+    samples: int = 1
 
     @abstractmethod
     def sample(self, index=0):

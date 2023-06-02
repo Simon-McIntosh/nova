@@ -1,6 +1,5 @@
 import numpy as np
 from collections import OrderedDict
-import urllib.request
 import requests
 
 auth = (username, password)

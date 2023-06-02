@@ -1,6 +1,6 @@
 import os
 import nep_data
-from amigo.png_tools import data_mine, data_load
+from amigo.png_tools import data_load
 from amigo.IO import class_dir
 from amigo.pyplot import plt
 

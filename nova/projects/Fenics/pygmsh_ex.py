@@ -1,7 +1,5 @@
-import io
 import os
 
-import numpy as np
 
 import pygmsh
 import pyvista as pv

@@ -7,9 +7,7 @@ from itertools import cycle
 import numpy as np
 from nova.radial_build import RB
 from nova.shelf import PKL
-import nova.cross_coil as cc
 from nova.coils import PF, TF
-from time import time
 from nova import loops
 from DEMOxlsx import DEMO
 from nova.loops import Profile

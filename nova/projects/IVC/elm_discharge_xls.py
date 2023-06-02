@@ -199,6 +199,6 @@ class elm_data:
         ax[0].set_title(coil + " elm")
 
 
-if __name__ is "__main__":
+if __name__ == "__main__":
     elm = elm_data()
     elm.compare()

@@ -2,7 +2,6 @@ import dolfinx
 import dolfinx.io
 import dolfinx.plot
 import numpy as np
-import ufl
 from mpi4py import MPI
 
 try:

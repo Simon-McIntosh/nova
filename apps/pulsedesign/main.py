@@ -12,8 +12,6 @@ from bokeh.models import (
     TabPanel,
     Tabs,
     TextInput,
-    Toggle,
-    Patch,
 )
 from bokeh.plotting import figure
 

@@ -145,7 +145,7 @@ def constraint_array(self, xnorm, ripple_limit=0.6):
 def fit(self, xnorm):
     xo = self.get_oppvar(xnorm)  # de-normalize
     x = self.coil.draw(xo=xo)
-    if self.objective is "L":  # coil length
+    if self.objective == "L":  # coil length
         objF = geom.length(x["r"], x["z"], norm=False)[-1]
     else:  # coil volume
         objF = geom.loop_vol(x["r"], x["z"])
@@ -175,8 +175,8 @@ def dot(self, xnorm):
 
 def dot_diffrence(self, x, side):
     Rloop, Zloop = x["r"], x["z"]  # inside coil loop
-    switch = 1 if side is "internal" else -1
-    if side is "external":
+    switch = 1 if side == "internal" else -1
+    if side == "external":
         Rloop, Zloop = geom.offset(Rloop, Zloop, self.dRcoil + 2 * self.dRsteel)
     nRloop, nZloop, Rloop, Zloop = geom.normal(Rloop, Zloop)
     R, Z = self.bound[side]["R"], self.bound[side]["Z"]

@@ -4,7 +4,6 @@ from functools import cached_property
 from typing import ClassVar
 
 import numpy as np
-import scipy.integrate
 
 from nova import njit
 from nova.biot.constants import Constants

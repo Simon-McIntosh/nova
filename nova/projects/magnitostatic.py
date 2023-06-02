@@ -1,8 +1,5 @@
-import io
-
 from fenics import *
 import fenics as fe
-import pyvista as pv
 
 import matplotlib.pyplot as plt
 

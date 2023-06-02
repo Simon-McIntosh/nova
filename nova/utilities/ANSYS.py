@@ -206,8 +206,8 @@ class table(object):
             self.write_line(i, self.index[i], place=[1, 1, 1, 1, 1], taxis=1)
 
     def write_data(self):
-        for m in range(int(self.ijk[4])):
-            for l in range(int(self.ijk[3])):
+        for n in range(int(self.ijk[4])):
+            for m in range(int(self.ijk[3])):
                 for k in range(int(self.ijk[2])):
                     for j in range(int(self.ijk[1])):
                         if self.nD == 1:
@@ -217,10 +217,10 @@ class table(object):
                         elif self.nD == 3:
                             line = self.data[:, j, k]
                         elif self.nD == 4:
-                            line = self.data[:, j, k, l]
+                            line = self.data[:, j, k, m]
                         elif self.nD == 5:
-                            line = self.data[:, j, k, l, m]
-                        place = np.array([0, j, k, l, m]) + 1
+                            line = self.data[:, j, k, m, n]
+                        place = np.array([0, j, k, m, n]) + 1
                         self.write_line(0, line, place=place)
 
     def __exit__(self, type, value, traceback):

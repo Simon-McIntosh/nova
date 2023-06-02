@@ -18,7 +18,7 @@ def test():
         lcar=0.1,
     )
 
-    field0 = geom.add_boundary_layer(
+    geom.add_boundary_layer(
         edges_list=[poly.line_loop.lines[0]],
         hfar=0.1,
         hwall_n=0.01,
@@ -27,7 +27,7 @@ def test():
         anisomax=100.0,
     )
 
-    field1 = geom.add_boundary_layer(
+    geom.add_boundary_layer(
         nodes_list=[poly.line_loop.lines[1].points[1]],
         hfar=0.1,
         hwall_n=0.01,
@@ -41,15 +41,12 @@ def test():
     # geom.add_raw_code(f'Recombine Surface {{{poly.surface.id}}};')
     geom.add_raw_code("Mesh.Algorithm=6;")
 
-    ref = 4.0
     points, cells, _, _, _ = pygmsh.generate_mesh(geom)
     # assert abs(compute_volume(points, cells) - ref) < 1.0e-2 * ref
     return points, cells
 
 
 if __name__ == "__main__":
-    import meshio
-
     points, cells = test()
     triangulation = tri.Triangulation(points[:, 0], points[:, 1], cells["triangle"])
 

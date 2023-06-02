@@ -1,12 +1,6 @@
-import os
-
 # from ansys.dpf import core as dpf
 
 # from ansys.dpf import post
-import ansys.dpf.core as dpf
-
-from nova.definitions import root_dir
-import matplotlib.pyplot as plt
 
 
 from ansys.mapdl.core import launch_mapdl

@@ -1,7 +1,6 @@
 from dataclasses import dataclass, field, InitVar
 from typing import Union
 
-import numpy as np
 import pandas
 
 

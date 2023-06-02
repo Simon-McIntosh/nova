@@ -1,11 +1,9 @@
 """Construct error displacement fields from pairs of TFC18 instances"""
 
 from dataclasses import dataclass, field
-import os
 
 import pyvista as pv
 
-from nova.definitions import root_dir
 from nova.structural.datadir import DataDir
 from nova.structural.plotter import Plotter
 from nova.structural.TFC18 import TFC18

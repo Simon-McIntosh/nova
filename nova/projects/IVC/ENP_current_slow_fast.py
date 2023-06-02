@@ -1,6 +1,6 @@
 import os
 import nep
-from amigo.png_tools import data_mine, data_load
+from amigo.png_tools import data_load
 from amigo.IO import class_dir
 from amigo.pyplot import plt
 from nep.DINA.read_plasma import read_plasma

@@ -89,17 +89,15 @@ def test(self, case, theta=0):
 
 
 def test_simple_beam():  # simple beam
-    name = "simple beam"
-
     # analytic solution
-    v = (
+    (
         self.w
         * self.x
         / (24 * self.EI)
         * (self.L**3 - 2 * self.L * self.x**2 + self.x**3)
     )
-    m = -self.w * self.x / 2 * (self.L - self.x)
-    s = -self.w * (self.L / 2 - self.x)
+    -self.w * self.x / 2 * (self.L - self.x)
+    -self.w * (self.L / 2 - self.x)
     self.add_bc("ny", 0, part="beam", ends=0)
     self.add_bc("ny", -1, part="beam", ends=1)
     self.add_weight(g=g)

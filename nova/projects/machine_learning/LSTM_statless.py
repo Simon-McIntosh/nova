@@ -143,11 +143,15 @@ def split_data(x, y, ratio=0.8):
         y_test = y_test[: -1 * to_drop]
 
     # some reshaping
-    reshape_3 = lambda x: x.values.reshape((x.shape[0], x.shape[1], 1))
+    def reshape_3(x):
+        return x.values.reshape((x.shape[0], x.shape[1], 1))
+
     x_train = reshape_3(x_train)
     x_test = reshape_3(x_test)
 
-    reshape_2 = lambda x: x.values.reshape((x.shape[0], 1))
+    def reshape_2(x):
+        return x.values.reshape((x.shape[0], 1))
+
     y_train = reshape_2(y_train)
     y_test = reshape_2(y_test)
 

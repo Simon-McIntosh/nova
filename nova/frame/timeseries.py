@@ -1,7 +1,6 @@
 """Methods for saving and manipulating AC loss data."""
 
 from dataclasses import dataclass, field
-from typing import Union
 
 import xarray
 import numpy as np

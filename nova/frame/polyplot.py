@@ -44,7 +44,7 @@ class Labels:
     def label(self):
         """Add plot labels."""
         index = self.get_index()
-        parts = self.frame.part[index]
+        self.frame.part[index]
         """
         print(parts)
 

@@ -4,10 +4,9 @@ import numpy as np
 import scipy.interpolate
 import scipy.optimize
 import scipy.signal
-import nlopt
 
 from nova.definitions import root_dir
-from nova.utilities.png_tools import data_mine, data_load
+from nova.utilities.png_tools import data_load
 import matplotlib.pyplot as plt
 
 path = os.path.join(root_dir, "input/ACLoss/")

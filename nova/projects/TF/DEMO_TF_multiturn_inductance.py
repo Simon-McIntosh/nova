@@ -1,18 +1,9 @@
 import pylab as pl
-from nova.config import Setup
-from nova.streamfunction import SF
-from nova.radial_build import RB
-from nova.coils import PF, TF
-from etna.coil_geom import configure, coil_cage
-from etna.coil_apdl import coil_map
 from inductance import neumann
 import numpy as np
-from mpl_toolkits.mplot3d import Axes3D
 from time import time
 import sys
 import datetime
-import pickle
-from amigo import geom
 from nova.beam import Dcoil
 
 import seaborn as sns

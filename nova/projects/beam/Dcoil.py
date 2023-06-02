@@ -51,7 +51,7 @@ def pD(r1, r2, npoints=2000):
     return r, z
 
 
-if __name__ is "__main__":  # test shape function
+if __name__ == "__main__":  # test shape function
     import seaborn as sns
 
     r1, r2 = 4.486, 15.708  # DEMO baseline

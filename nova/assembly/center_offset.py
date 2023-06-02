@@ -148,7 +148,7 @@ axes[0].legend(fontsize="small", bbox_to_anchor=(0.71, 1))
 axes[1].plot(phi, 1e3 * h, "C2")
 axes[1].plot(phi, 1e3 * h_sol, "C1--")
 axes[1].set_xlabel(r"$\phi$")
-axes[1].set_ylabel(f"$h$, mm")
+axes[1].set_ylabel("$h$, mm")
 plt.despine()
 
 """

@@ -1,21 +1,14 @@
-from dataclasses import dataclass, field, InitVar
+from dataclasses import dataclass, field
 from typing import Union
-import os
 
 
 import pandas
-import numpy as np
-import scipy.signal
-import scipy.integrate
-import scipy.interpolate
-from matplotlib.lines import Line2D
 
 from nova.thermalhydralic.sultan.testplan import TestPlan
 from nova.thermalhydralic.sultan.shotinstance import ShotInstance
 from nova.thermalhydralic.sultan.shotprofile import ShotProfile
 from nova.thermalhydralic.sultan.sultanio import SultanIO
 
-import matplotlib.pyplot as plt
 from nova.utilities.time import clock
 
 '''
@@ -107,7 +100,7 @@ class FrequencyResponse(SultanIO):
                 index, ["file", "external", "current", "frequency"]
             ] = metadata.loc[["File", "Be", "Isample", "frequency"]].values
             data.loc[index, "excitation"] = self.shotprofile.excitation_field
-            shotresponse = ShotResponse(profile.lowpassdata, profile.heatindex)
+            ShotResponse(profile.lowpassdata, profile.heatindex)
             ####### >>>> ##### test shotresponse
 
             data.loc[

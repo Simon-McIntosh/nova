@@ -1,5 +1,5 @@
 import tensorflow as tf
-from tensorflow.keras import layers, Input, Model
+from tensorflow.keras import layers, Model
 import numpy as np
 from amigo.pyplot import plt
 

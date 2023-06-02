@@ -118,7 +118,7 @@ class QDAfile(object):
 
         if arg is None:
             self._fromdata([], **kwargs)
-        elif isinstance(arg, basestring if sys.version[0] == "2" else str):
+        elif isinstance(arg, str):
             with open(arg, "rb") as fh:
                 self._fromfile(fh)
         elif hasattr(arg, "seek"):

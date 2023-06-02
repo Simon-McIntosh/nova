@@ -120,7 +120,7 @@ def test():
 
     # Create polygon for airfoil
     char_length = 1.0e-1
-    airfoil = geom.add_polygon(airfoil_coordinates, char_length, make_surface=True)
+    geom.add_polygon(airfoil_coordinates, char_length, make_surface=True)
     """
     # Create surface for numerical domain with an airfoil-shaped hole
     left_dist = 1.0

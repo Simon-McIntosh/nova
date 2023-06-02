@@ -1,7 +1,7 @@
 from amigo.pyplot import plt
 import os
 import nep
-from amigo.png_tools import data_mine, data_load, image_plot
+from amigo.png_tools import data_load, image_plot
 from amigo.IO import class_dir
 
 

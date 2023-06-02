@@ -1,9 +1,4 @@
-import pylab as pl
-import numpy as np
 from itertools import cycle
-from nova.config import Setup
-from nova.streamfunction import SF
-from nova.elliptic import EQ
 
 # from elliptic import grid
 # import cross_coil as cc

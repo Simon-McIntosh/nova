@@ -1,9 +1,4 @@
 from nep.coil_geom import PFgeom
-from nova.elliptic import EQ
-from nep.DINA.read_eqdsk import read_eqdsk
-from amigo.pyplot import plt
-from nova.biot_savart import biot_savart
-from nova.coil_class import CoilClass
 
 cs = PFgeom(dCoil=0.25).cs
 

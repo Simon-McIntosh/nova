@@ -1,5 +1,4 @@
 from nep.DINA.capacitor_discharge import power_supply
-from nova.cross_coil import Bpoint
 import numpy as np
 from amigo.pyplot import plt
 from amigo.geom import grid

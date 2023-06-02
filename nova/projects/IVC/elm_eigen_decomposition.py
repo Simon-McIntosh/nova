@@ -90,7 +90,7 @@ class eigen:
         ax.set_ylabel("$I$ kA")
 
 
-if __name__ is "__main__":
+if __name__ == "__main__":
     ax = plt.subplots(1, 1)[1]
     LTC = eigen()
     LTC.solve_eigen(1e-3 * np.array([5.1, 61.7]), [2147.5, 12617.1])

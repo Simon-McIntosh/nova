@@ -1,7 +1,6 @@
 import datetime
 import os
 from glob import glob
-import string
 
 # import matplotlib.dates as mdates
 import matplotlib.gridspec
@@ -413,7 +412,7 @@ class cold_test(pythonIO):
         )
         self.plot("current", index=index, ax=ax[1], legend=False, color="gray")
         Imax_iloc = np.nanargmax(self.current["PSIOut"])
-        Imax = self.current.iloc[Imax_iloc]["PSIOut"]
+        self.current.iloc[Imax_iloc]["PSIOut"]
         # ax[1].text(, Imax, f'{Imax}')
 
     def extract_shrinkage(self, sensors=["displace", "extend"], plot=True, Imax=48.5):

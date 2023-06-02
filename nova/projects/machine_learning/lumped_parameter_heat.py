@@ -1,5 +1,4 @@
 import tensorflow as tf
-from sklearn import preprocessing
 import numpy as np
 from scipy.optimize import minimize_scalar
 from amigo.pyplot import plt

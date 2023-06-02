@@ -1,5 +1,4 @@
 import cupy as cp
-import numba
 import numpy as np
 
 

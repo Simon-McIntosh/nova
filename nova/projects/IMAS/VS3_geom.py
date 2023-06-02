@@ -2,7 +2,7 @@ import os
 
 from nova.definitions import root_dir
 from nova.frame.itergeom import ITERgeom
-from nova.utilities.png_tools import data_mine, data_load
+from nova.utilities.png_tools import data_load
 import matplotlib.pyplot as plt
 
 
@@ -21,7 +21,6 @@ index |= coilset.subframe.frame == "VS3Uj"
 coilset.plot(index)
 
 from matplotlib.patches import Patch
-from matplotlib.lines import Line2D
 
 axes = coilset.subframe.polyplot.axes
 

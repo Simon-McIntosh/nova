@@ -2,16 +2,10 @@ import numpy as np
 import pylab as pl
 from nova.finite_element import FE
 from nova.config import select
-from collections import OrderedDict
-from nova.radial_build import RB
-from nova.elliptic import EQ
 from nova.coils import PF
 from nova.inverse import INV
 from nova.coils import TF
-import nova.cross_coil as cc
-from amigo import geom
 from nova.loops import Profile
-from nova.force import force_feild
 from nova.structure import architect
 from nova.streamfunction import SF
 import seaborn as sns

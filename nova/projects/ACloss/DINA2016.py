@@ -3,14 +3,10 @@ from dataclasses import dataclass, field
 from typing import Union
 
 import numpy as np
-import scipy
 
 from nova.frame.coilset import CoilSet
 from nova.frame.coilgeom import ITERcoilset
-from nova.frame.timeseries import DataArray, DataSet
 from nova.utilities.localdata import LocalData
-import matplotlib.pyplot as plt
-from nova.utilities.time import clock
 
 
 @dataclass

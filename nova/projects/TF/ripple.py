@@ -5,7 +5,6 @@ import seaborn as sns
 from nova.config import Setup
 from nova.streamfunction import SF
 from amigo import geom
-from scipy.linalg import norm
 from scipy.optimize import minimize_scalar
 from nova import geqdsk
 
@@ -180,7 +179,7 @@ class ripple(object):
         pl.clabel(CS, inline=1, fontsize="xx-small", fmt="%1.2f")
 
 
-if __name__ is "__main__":
+if __name__ == "__main__":
     from nova.coils import TF
 
     config = "DEMO_SN"

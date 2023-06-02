@@ -1,4 +1,3 @@
-import numpy as np
 from amigo.pyplot import plt
 import SchemDraw as schem
 import SchemDraw.elements as e
@@ -15,7 +14,7 @@ def impulse_capacitor(ax=None):
         lftlabel="VS3\nturns",
         rgtlabel="passive\nfilaments",
     )
-    link = d.add(e.LINE, xy=ind.s1, l=d.unit / 8)
+    d.add(e.LINE, xy=ind.s1, l=d.unit / 8)
     d.add(e.LINE, xy=ind.s2, l=d.unit / 8)
     d.add(e.LINE, xy=ind.p2, l=d.unit / 2, d="left")
     SPDT = d.add(e.SWITCH_SPDT2_OPEN, d="left", flip=True, label="$t=t_{trip}$")

@@ -99,7 +99,7 @@ class read_scenario:
         plt.ylabel("$I$ kA.turn")
 
 
-if __name__ is "__main__":
+if __name__ == "__main__":
     scn = read_scenario()
     scn.read_file(folder=1)
 

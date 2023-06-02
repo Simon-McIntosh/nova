@@ -104,7 +104,7 @@ from dolfinx.io import (
     ufl_mesh_from_gmsh,
 )
 from dolfinx.cpp.io import perm_gmsh, extract_local_entities
-from dolfinx.cpp.mesh import to_type, cell_entity_type
+from dolfinx.cpp.mesh import to_type
 from dolfinx.cpp.graph import AdjacencyList_int32
 from dolfinx.mesh import create_meshtags, create_mesh
 

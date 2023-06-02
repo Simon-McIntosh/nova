@@ -8,7 +8,6 @@ Python implementation of the Ramer-Douglas-Peucker algorithm.
 :license: MIT, see LICENSE.txt for more details.
 
 """
-from math import sqrt
 from functools import partial
 import numpy as np
 import sys
@@ -49,7 +48,8 @@ def rdp_rec(M, epsilon, dist=pldist):
     :param epsilon: epsilon in the rdp algorithm
     :type epsilon: float
     :param dist: distance function
-    :type dist: function with signature ``f(point, start, end)`` -- see :func:`rdp.pldist`
+    :type dist: function with signature ``f(point, start, end)``
+    -- see :func:`rdp.pldist`
     """
     dmax = 0.0
     index = -1
@@ -110,7 +110,8 @@ def rdp_iter(M, epsilon, dist=pldist, return_mask=False):
     :param epsilon: epsilon in the rdp algorithm
     :type epsilon: float
     :param dist: distance function
-    :type dist: function with signature ``f(point, start, end)`` -- see :func:`rdp.pldist`
+    :type dist: function with signature ``f(point, start, end)``
+    -- see :func:`rdp.pldist`
     :param return_mask: return the mask of points to keep instead
     :type return_mask: bool
     """
@@ -159,12 +160,15 @@ def rdp(M, epsilon=0, dist=pldist, algo="iter", return_mask=False):
            [4, 4]])
 
     :param M: a series of points
-    :type M: numpy array with shape ``(n,d)`` where ``n`` is the number of points and ``d`` their dimension
+    :type M: numpy array with shape ``(n,d)`` where ``n`` is the number of points
+    and ``d`` their dimension
     :param epsilon: epsilon in the rdp algorithm
     :type epsilon: float
     :param dist: distance function
-    :type dist: function with signature ``f(point, start, end)`` -- see :func:`rdp.pldist`
-    :param algo: either ``iter`` for an iterative algorithm or ``rec`` for a recursive algorithm
+    :type dist: function with signature ``f(point, start, end)``
+    -- see :func:`rdp.pldist`
+    :param algo: either ``iter`` for an iterative algorithm or ``rec``
+    for a recursive algorithm
     :type algo: string
     :param return_mask: return mask instead of simplified array
     :type return_mask: bool

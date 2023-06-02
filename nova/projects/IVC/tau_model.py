@@ -4,7 +4,6 @@ from nep.DINA.read_tor import read_tor
 from nep.DINA.read_plasma import read_plasma
 from scipy.interpolate import interp1d
 from scipy.integrate import odeint
-from scipy.optimize import minimize
 
 Rvs3 = 17.66e-3
 Lvs3 = 1.52e-3

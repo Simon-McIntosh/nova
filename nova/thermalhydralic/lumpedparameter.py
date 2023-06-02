@@ -17,7 +17,7 @@ def heat_curve(self):
 
 
 def cool_curve(self):
-    f = self.shot[("P. Freq", "Hz")]
+    self.shot[("P. Freq", "Hz")]
 
     t_dwell = 10  # dwell time after max heating
 

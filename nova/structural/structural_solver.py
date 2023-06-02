@@ -4,7 +4,6 @@ from mpl_toolkits.mplot3d import Axes3D
 
 
 from amigo.pyplot import plt
-from nova.finiteframe import finiteframe, scale
 from nova.config import select
 from nova.coils import PF
 from nova.inverse import INV

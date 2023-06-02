@@ -1,6 +1,5 @@
 """Remove all local data."""
 import os
-import shutil
 
 from nova.definitions import root_dir
 

@@ -1,7 +1,6 @@
 """Manage access to dynamic pf passive data."""
 from dataclasses import dataclass, field
 
-import numpy as np
 
 from nova.graphics.plot import Plot
 from nova.imas.scenario import Scenario

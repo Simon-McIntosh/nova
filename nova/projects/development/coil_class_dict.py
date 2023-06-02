@@ -190,5 +190,5 @@ class coil_class(dict):
         self.pcs.plot(**kwargs)
 
 
-if __name__ is "__main__":
+if __name__ == "__main__":
     print("\nsee nova.coil_geom for usage examples")

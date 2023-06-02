@@ -5,7 +5,6 @@ from typing import ClassVar
 
 import numpy as np
 from scipy import optimize
-from scipy.spatial import distance_matrix
 
 from nova.biot.biot import Nbiot
 from nova.graphics.plot import Plot

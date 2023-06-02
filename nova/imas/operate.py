@@ -7,7 +7,6 @@ import numpy as np
 from scipy.constants import mu_0
 
 from nova.imas.database import Ids, IdsIndex, ImasIds
-from nova.imas.equilibrium import EquilibriumData
 from nova.imas.machine import Machine
 from nova.imas.profiles import Profile
 

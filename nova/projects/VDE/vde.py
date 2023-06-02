@@ -1,14 +1,9 @@
 import pylab as pl
 from nova.streamfunction import SF
 from nova.elliptic import EQ
-from nova.inverse import INV
 from nova.config import Setup
 from itertools import cycle
 import numpy as np
-from nova.radial_build import RB
-from nova.shelf import PKL
-import nova.cross_coil as cc
-import scipy as sp
 
 # from nova.surface import bernstein
 import scipy.optimize as op

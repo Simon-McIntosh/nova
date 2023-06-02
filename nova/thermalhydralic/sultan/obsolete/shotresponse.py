@@ -1,10 +1,7 @@
 """Methods to manage single shot Sultan waveform data."""
 from dataclasses import dataclass, field
 from typing import Union
-from types import SimpleNamespace
 
-import numpy as np
-import pandas
 
 from nova.thermalhydralic.sultan.shotprofile import ShotProfile
 from nova.thermalhydralic.sultan.shotinstance import ShotInstance

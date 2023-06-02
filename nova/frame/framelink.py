@@ -1,7 +1,6 @@
 """Extend DataArray - add multipoint and link methods."""
 from contextlib import contextmanager
 from copy import copy
-from importlib import import_module
 from typing import Union
 
 import numpy as np

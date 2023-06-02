@@ -2,7 +2,6 @@ import os
 
 import ansys.dpf.core as dpf
 from ansys.dpf import post
-import pyvista
 
 from nova.definitions import root_dir
 

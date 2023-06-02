@@ -1,7 +1,4 @@
 import numpy as np
-from amigo.pyplot import plt
-from scipy.interpolate import interp1d
-from skimage import measure
 from amigo.pyplot import cntr
 
 

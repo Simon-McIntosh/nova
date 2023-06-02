@@ -1,10 +1,6 @@
 from nep.DINA.read_plasma import read_plasma
 from nep.DINA.read_tor import read_tor
 from amigo.IO import pythonIO
-from amigo.pyplot import plt
-from nep.DINA.capacitor_discharge import power_supply
-from nep.coil_geom import PFgeom, VVcoils
-import numpy as np
 
 
 class toroidal_current(pythonIO):

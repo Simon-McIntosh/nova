@@ -1,12 +1,7 @@
 from dataclasses import dataclass, InitVar
 from typing import Union
-import sys
 
 import pandas
-import pygmo
-import numpy as np
-import scipy
-import nlopt
 
 from nova.thermalhydralic.sultan.trial import Trial
 from nova.thermalhydralic.sultan.sample import Sample

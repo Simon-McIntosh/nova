@@ -1,9 +1,7 @@
-import pyvista as pv
 import scipy.interpolate
 
 from nova.structural.ansyspost import AnsysPost
 from nova.structural.fiducialcoil import FiducialCoil
-from nova.structural.morph import Morph
 
 # morph.mesh = morph.mesh.slice(normal=[0, 0, 1])
 

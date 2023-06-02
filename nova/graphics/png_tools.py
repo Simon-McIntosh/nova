@@ -310,7 +310,7 @@ def data_load(path, filename, **kwargs):
 def image_plot(path, file, ax=None, **kwargs):
     limits = data_load(path, file, **kwargs)[2]
     for axis in ["x", "y"]:
-        lim = limits[f"{axis}_fig"]
+        limits[f"{axis}_fig"]
         """
         if limits[f'{axis}scale'] == 'log':
             delta = limits[f'{axis}_o'][1] - limits[f'{axis}_o'][0]

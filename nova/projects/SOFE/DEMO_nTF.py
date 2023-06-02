@@ -1,9 +1,8 @@
-from nova.loops import Profile, plot_oppvar, plot_variables
+from nova.loops import Profile
 from nova.shape import Shape
 from nova.DEMOxlsx import DEMO
 from nova.config import select
 import pylab as pl
-import numpy as np
 
 nTF = 18
 family = "S"

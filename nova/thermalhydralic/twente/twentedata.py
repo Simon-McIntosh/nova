@@ -393,7 +393,7 @@ class TwentePost(TwenteFile, SultanIO):
         return self.source.index
 
     def plot(self):
-        poly = self.fit_polynomial(2, index=slice(3), plot=False)
+        self.fit_polynomial(2, index=slice(3), plot=False)
         self.Qhys = 0  # 1.05*poly[0]
 
         axes = plt.subplots(1, 1)[1]

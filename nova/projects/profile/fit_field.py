@@ -3,12 +3,10 @@ from nep.DINA.scenario import scenario
 import numpy as np
 from amigo.pyplot import plt
 from amigo import geom
-from nova.streamfunction import SF
 from scipy.interpolate import interp1d
 from scipy.optimize import minimize
 import copy
 import nova.cross_coil as cc
-from scipy.integrate import cumtrapz
 
 
 class PlasmaParameters:
@@ -25,7 +23,7 @@ class PlasmaParameters:
         self.Bn = [0, 0.8, 0.2, 0.6]
         # control vector length
         self.L = [1, 0.25, 0.5, 0.5, 0.25, 1]
-        ft = x[6:9]  # normalized control vector angle (1==pi)
+        x[6:9]  # normalized control vector angle (1==pi)
 
         self.profile = {"inner": {"Bn": [0, 0.8, 0.2]}}
         self.field = [0, -1, -0.2, -0.7]  # lower, inner mp, upper, outer mp
@@ -313,7 +311,7 @@ class loop:
         )
 
     def update_target(self, Btarget, segment):
-        index = self.get_index(segment)
+        self.get_index(segment)
 
         self.Bt = Btarget(self.L)
 

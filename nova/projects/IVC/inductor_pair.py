@@ -1,8 +1,6 @@
 from nep.DINA.coupled_inductors import inductance
 import numpy as np
-from scipy.integrate import odeint
 from amigo.pyplot import plt
-from read_dina import timeconstant
 
 
 Io = 60

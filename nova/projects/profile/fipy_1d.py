@@ -1,5 +1,4 @@
 import fipy
-from scipy.special import erf
 
 D = 0.1
 steps = 20

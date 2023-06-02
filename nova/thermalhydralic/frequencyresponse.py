@@ -3,7 +3,6 @@
 import pandas
 import numpy as np
 
-from nova.thermalhydralic.sultan import SultanEnsemble
 import matplotlib.pyplot as plt
 
 

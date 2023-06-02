@@ -12,7 +12,6 @@ from nova.frame.biotframe import BiotFrame
 from nova.frame.vde import VDE
 from nova.utilities.time import clock
 import matplotlib.pyplot as plt
-from nova.plot.addtext import linelabel
 
 
 @dataclass

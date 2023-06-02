@@ -20,7 +20,6 @@ from nova.force import force_field
 from itertools import count
 from nova.cross_coil import get_coil_psi
 from amigo import geom
-from nova.inverse import INV
 from nova.coils import PF
 from nova.streamfunction import SF
 from amigo.time import clock
@@ -835,7 +834,7 @@ class scenario(pythonIO):
         self.ff.get_force()
 
     def set_coil_current(self, t):
-        It = self.get_coil_current(t, VS3=False)  # get coil currents
+        self.get_coil_current(t, VS3=False)  # get coil currents
         # self.pf.update_current(It)
 
     def get_coil_current(self, index, VS3=True):
@@ -1509,7 +1508,7 @@ class scenario(pythonIO):
         plt.detick(ax)
 
 
-if __name__ is "__main__":
+if __name__ == "__main__":
     scn = scenario(read_txt=False)
     scn.load_quiver(read_txt=True)
 

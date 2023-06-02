@@ -421,7 +421,7 @@ class OCC(object):
         ans.close()
 
 
-if __name__ is "__main__":
+if __name__ == "__main__":
     nTF, ripple = 18, True
     base = {"TF": "demo_nTF", "eq": "DEMO_SN_SOF"}
     config, setup = select(base, nTF=nTF, update=True)

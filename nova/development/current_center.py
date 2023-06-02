@@ -1,5 +1,4 @@
-from sympy import symbols, simplify, integrate, pretty, pi, cos, Piecewise
-import numpy as np
+from sympy import symbols, simplify, integrate, pretty, pi, cos
 
 
 x, dx, xc, h, r, theta, f = symbols("x dx xc h r theta f", real=True, positive=True)

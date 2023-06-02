@@ -7,7 +7,6 @@ import pyvista as pv
 
 from nova.definitions import root_dir
 from nova.assembly.ansyspost import AnsysPost
-from nova.assembly.fiducialcoil import FiducialCoil
 from nova.assembly.morph import Morph
 from nova.assembly.plotter import Plotter
 

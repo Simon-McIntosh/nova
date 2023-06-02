@@ -1,5 +1,4 @@
 # from nep.DINA.VDE_force import VDE_force
-from nep.DINA.coupled_inductors import inductance
 from nep.coil_geom import VSgeom, VVcoils
 import nova.cross_coil as cc
 from amigo.pyplot import plt

@@ -1,6 +1,5 @@
 import numpy as np
 import collections
-from nova.DEMOxlsx import DEMO
 import nova
 import os.path
 

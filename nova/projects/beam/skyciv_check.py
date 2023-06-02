@@ -1,8 +1,6 @@
 import numpy as np
-import pylab as pl
 from nova.finite_element import FE
 from nova.properties import second_moment
-from amigo import geom
 import seaborn as sns
 
 sns.set_context("talk")

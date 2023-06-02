@@ -3,8 +3,7 @@ import nep
 import numpy as np
 from scipy.interpolate import interp1d
 from scipy.signal import savgol_filter
-from scipy.optimize import minimize
-from amigo.png_tools import data_mine, data_load
+from amigo.png_tools import data_load
 from amigo.IO import class_dir
 from amigo.pyplot import plt
 from amigo.addtext import linelabel

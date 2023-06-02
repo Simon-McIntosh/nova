@@ -1,11 +1,9 @@
 from dataclasses import dataclass
 import os
 
-import numpy as np
 
 from ansys.mapdl.core import launch_mapdl
 from ansys.mapdl import core as pymapdl
-from contextlib import contextmanager
 
 from nova.definitions import root_dir
 

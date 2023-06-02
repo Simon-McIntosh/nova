@@ -47,7 +47,7 @@ class transient_elm(eigen):
         ax.set_ylabel("$I$ kA")
 
 
-if __name__ is "__main__":
+if __name__ == "__main__":
     trans = transient_elm(0, "ENP", "lower_elm")
 
     ax = plt.subplots(1, 1)[1]

@@ -517,8 +517,6 @@ class SET_PATH(object):  # file paths
         return d
 
     def result(self, task=0, postfix=""):
-        import shutil as sh
-
         self.Rdata = self.make_dir(self.root + "/Results")  # data
         self.Rfolder = self.make_dir(
             self.Rdata + "/" + self.date_str + "." + self.jobname + postfix

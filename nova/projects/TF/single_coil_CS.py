@@ -19,8 +19,6 @@ sns.set(
     rc=rc,
 )
 color = sns.color_palette("Set2")
-from amigo import geom
-from scipy.interpolate import interp1d
 
 coil = {"r": 8, "z": -10, "I": 30e6, "rc": 0.01}
 

@@ -1,5 +1,4 @@
 import fipy
-from amigo.pyplot import plt
 
 L = 10.0
 nx = 4

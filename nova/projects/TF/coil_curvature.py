@@ -1,5 +1,4 @@
 import numpy as np
-from DEMOxlsx import DEMO
 from nova.coils import TF
 from amigo import geom
 import pylab as pl

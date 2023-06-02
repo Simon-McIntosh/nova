@@ -3,8 +3,7 @@ import os
 import numpy as np
 
 from nova.definitions import root_dir
-from nova.utilities.png_tools import data_mine, data_load
-import matplotlib.pyplot as plt
+from nova.utilities.png_tools import data_mine
 
 path = os.path.join(root_dir, "input/Assembly/")
 # data_mine(path, 'peaktopeak_case1', xlim=(0, 2*np.pi), ylim=(0, 6))

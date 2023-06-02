@@ -27,7 +27,7 @@ class Model:
             self.order = [self.order]
         if not self._vector:  # vector unset - initialize with pole, time_delay
             self._vector = self._sead(_pole, _dcgain, _time_delay)
-        self.vector = self._vector[:self.parameter_number]
+        self.vector = self._vector[: self.parameter_number]
 
     def _sead(self, _pole, _dcgain, _time_delay):
         """
@@ -54,10 +54,12 @@ class Model:
             _pole = list(_pole)
         vector = _pole + [_dcgain, _time_delay]
         if len(vector) != self.system_number + 2:
-            raise IndexError(f'sead length {len(vector)} != '
-                             f'maximum parameter number '
-                             f'{self.system_number + 2}\n'
-                             f'check _pole kwarg {_pole}')
+            raise IndexError(
+                f"sead length {len(vector)} != "
+                f"maximum parameter number "
+                f"{self.system_number + 2}\n"
+                f"check _pole kwarg {_pole}"
+            )
         return vector
 
     @property
@@ -71,16 +73,16 @@ class Model:
             Optimization vector [*repeated_pole, dcgain, time_delay].
 
         """
-        return self._vector[:self.parameter_number]
+        return self._vector[: self.parameter_number]
 
     @vector.setter
     def vector(self, vector):
-        self._vector[:self.parameter_number] = vector[:self.parameter_number]
+        self._vector[: self.parameter_number] = vector[: self.parameter_number]
         self._generate()  # regenerate lti
 
     def update_pole(self, pole):
         """Update pole."""
-        self._vector[:self.system_number] = pole * np.ones(self.system_number)
+        self._vector[: self.system_number] = pole * np.ones(self.system_number)
         self._generate()  # regenerate lti
 
     def update_dcgain(self, dcgain):
@@ -104,7 +106,7 @@ class Model:
     @property
     def repeated_pole(self):
         """Return repeated system poles, read-only."""
-        return self._vector[:self.system_number]
+        return self._vector[: self.system_number]
 
     @property
     def pole(self) -> list[float]:
@@ -122,8 +124,7 @@ class Model:
     @property
     def system_gain(self):
         """Return LTI model system gain, read-only."""
-        return self.dcgain * \
-            np.prod(np.array(self.repeated_pole)**self.order)
+        return self.dcgain * np.prod(np.array(self.repeated_pole) ** self.order)
 
     @property
     def time_delay(self):
@@ -134,11 +135,14 @@ class Model:
     @property
     def label(self):
         """Return transfer function text descriptor."""
-        numerator = f'{self.system_gain:1.5f}'
-        denominator = ''.join([fr'(s+{pole:1.3f})^{order}'
-                               for pole, order in
-                               zip(self.repeated_pole, self.order)])
-        transferfunction = fr'$\frac{{{numerator}}}{{{denominator}}}$'
+        numerator = f"{self.system_gain:1.5f}"
+        denominator = "".join(
+            [
+                rf"(s+{pole:1.3f})^{order}"
+                for pole, order in zip(self.repeated_pole, self.order)
+            ]
+        )
+        transferfunction = rf"$\frac{{{numerator}}}{{{denominator}}}$"
         return transferfunction
 
     def get_label(self, massflow):
@@ -146,16 +150,22 @@ class Model:
         pole_coefficent = np.array(self.repeated_pole) / massflow
         dcgain = self.dcgain
         time_delay = self.time_delay
-        numerator = fr'{dcgain:1.2f}'
-        denominator = ''.join([fr'(s+{coefficent:1.3f}\dot{{m}})^{order}'
-                               for coefficent, order in
-                               zip(pole_coefficent, self.order)])
-        numerator += ''.join([fr'({coefficent:1.3f}\dot{{m}})^{order}'
-                              for coefficent, order in
-                              zip(pole_coefficent, self.order)])
+        numerator = rf"{dcgain:1.2f}"
+        denominator = "".join(
+            [
+                rf"(s+{coefficent:1.3f}\dot{{m}})^{order}"
+                for coefficent, order in zip(pole_coefficent, self.order)
+            ]
+        )
+        numerator += "".join(
+            [
+                rf"({coefficent:1.3f}\dot{{m}})^{order}"
+                for coefficent, order in zip(pole_coefficent, self.order)
+            ]
+        )
         if self.delay:
-            numerator += fr'\,\,{{e}}^{{-{time_delay:1.2f}s}}'
-        transferfunction = fr'$\frac{{{numerator}}}{{{denominator}}}$'
+            numerator += rf"\,\,{{e}}^{{-{time_delay:1.2f}s}}"
+        transferfunction = rf"$\frac{{{numerator}}}{{{denominator}}}$"
         return transferfunction
 
     def _generate(self):
@@ -182,18 +192,16 @@ class Model:
     def coefficents(self) -> pandas.Series:
         """Return model coefficents."""
         coefficents = {}
-        for attr in ['order', 'repeated_pole', 'dcgain', 'time_delay']:
+        for attr in ["order", "repeated_pole", "dcgain", "time_delay"]:
             coefficents[attr] = getattr(self, attr)
-        coefficents['delay'] = 1 if self.delay else 0
+        coefficents["delay"] = 1 if self.delay else 0
         return pandas.Series(coefficents)
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     model = Model(6, False, _dcgain=20.5)
     print(model, model.vector)
     model.delay = True
     print(model, model.vector)
     model.delay = False
     print(model, model.vector)
-

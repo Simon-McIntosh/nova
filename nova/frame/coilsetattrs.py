@@ -15,8 +15,7 @@ class CoilSetAttrs(ABC, FrameSetLoc):
     _attrs: dict = field(init=False, default_factory=dict, repr=False)
     default: dict = field(init=False, default_factory=lambda: {})
     link: bool = field(init=False, default=False)
-    attributes: list[str] = \
-        field(init=False, default_factory=lambda: ['delta'])
+    attributes: list[str] = field(init=False, default_factory=lambda: ["delta"])
 
     @abstractmethod
     def insert(self, *args, required=None, iloc=None, **additional):
@@ -54,15 +53,15 @@ class CoilSetAttrs(ABC, FrameSetLoc):
 
     def _flatten(self, items):
         """Retrun flat list."""
-        return [_item[0] if isinstance(_item, list)
-                else _item for _item in items]
+        return [_item[0] if isinstance(_item, list) else _item for _item in items]
 
     def ifthen(self, attr, cond, key, value):
         """Update _attrs[key] = value when _attrs[check] == cond."""
         if isinstance(attr, str):
             attr, cond = [attr], [cond]
-        attrs = self._flatten([self._attrs.get(_attr, getattr(self, _attr))
-                               for _attr in attr])
+        attrs = self._flatten(
+            [self._attrs.get(_attr, getattr(self, _attr)) for _attr in attr]
+        )
         conds = self._flatten(cond)
         if all([_attr == _cond for _attr, _cond in zip(attrs, conds)]):
             self._attrs[key] = value
@@ -84,14 +83,14 @@ class CoilSetAttrs(ABC, FrameSetLoc):
         for attr in [attr.name for attr in fields(self)]:
             if attr in self.attributes and attr not in self._attrs:
                 self._attrs[attr] = getattr(self, attr)
-            if attr in ['section', 'turn']:
+            if attr in ["section", "turn"]:
                 if attr not in self._attrs:
                     continue
                 self._attrs[attr] = PolyShape(self._attrs[attr]).shape
 
     def update_link(self):
         """Update link boolean."""
-        _link = self._attrs.get('link', self.frame.metaframe.default['link'])
+        _link = self._attrs.get("link", self.frame.metaframe.default["link"])
         if isinstance(_link, bool):
             self.link = _link
 
@@ -101,8 +100,10 @@ class GridAttrs(CoilSetAttrs):
     """Manage grid attributes."""
 
     gridattrs: dict = field(init=False, default_factory=lambda: {})
-    attributes: list[str] = field(init=False, default_factory=lambda: [
-        'trim', 'fill', 'delta', 'turn', 'section', 'tile'])
+    attributes: list[str] = field(
+        init=False,
+        default_factory=lambda: ["trim", "fill", "delta", "turn", "section", "tile"],
+    )
 
     @property
     def attrs(self):
@@ -113,12 +114,13 @@ class GridAttrs(CoilSetAttrs):
     def attrs(self, attrs):
         CoilSetAttrs.attrs.fset(self, attrs)
         self.set_conditional_attributes()
-        self.gridattrs = {attr: self._attrs.pop(attr)
-                          for attr in self.gridattrs}
+        self.gridattrs = {attr: self._attrs.pop(attr) for attr in self.gridattrs}
 
     @property
     def subattrs(self):
         """Return subframe attrs."""
-        return {attr: self._attrs[attr] for attr in self._attrs
-                if attr not in self.frame
-                and attr not in self.frame.metaframe.tag}
+        return {
+            attr: self._attrs[attr]
+            for attr in self._attrs
+            if attr not in self.frame and attr not in self.frame.metaframe.tag
+        }

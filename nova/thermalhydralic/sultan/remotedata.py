@@ -11,11 +11,11 @@ import ftputil
 class FTPData:
     """Manage access to FTP database."""
 
-    _experiment: str = ''
-    parent: str = 'Daten'
-    server: str = 'ftp.psi.ch'
-    username: str = 'sultan'
-    password: str = '3g8S4Nbq'
+    _experiment: str = ""
+    parent: str = "Daten"
+    server: str = "ftp.psi.ch"
+    username: str = "sultan"
+    password: str = "3g8S4Nbq"
     ftp_args: tuple[str] = field(init=False)
 
     def __post_init__(self):
@@ -31,13 +31,13 @@ class FTPData:
     @experiment.setter
     def experiment(self, experiment):
         self._experiment = experiment
-        '''
+        """
         try:
             experiment = self.locate(experiment, '../')
             self._experiment = experiment
         except FileNotFoundError as file_not_found:
             raise FileNotFoundError() from file_not_found
-        '''
+        """
 
     def locate(self, file, *relative_path):
         """
@@ -63,23 +63,22 @@ class FTPData:
         """
         with ftputil.FTPHost(*self.ftp_args) as host:
             self.changedir(host, self.parent, self.experiment, *relative_path)
-            files = host.listdir('./')
-        file_not_found_error = f'file {file} not found in {files}'
-        if '*' in file:
-            ext = file.split('*')[-1]
+            files = host.listdir("./")
+        file_not_found_error = f"file {file} not found in {files}"
+        if "*" in file:
+            ext = file.split("*")[-1]
             ftpfile = [f for f in files if ext in f]
             nmatch = len(ftpfile)
             if nmatch == 0:
                 raise FileNotFoundError(file_not_found_error)
             if nmatch > 1:
-                warn_txt = f'multiple files found {file} > {ftpfile}'
-                warn_txt += f'\nusing {ftpfile[0]}'
+                warn_txt = f"multiple files found {file} > {ftpfile}"
+                warn_txt += f"\nusing {ftpfile[0]}"
                 warn(warn_txt)
             remotefile = ftpfile[0]
         elif file not in files:
             try:
-                remotefile = next(filename for filename in files
-                                  if file in filename)
+                remotefile = next(filename for filename in files if file in filename)
             except StopIteration as stop_error:
                 raise FileNotFoundError(file_not_found_error) from stop_error
         else:
@@ -112,7 +111,7 @@ class FTPData:
 
         """
         if not os.path.isdir(directory):
-            raise FileNotFoundError(f'lLocal directory {directory} not found.')
+            raise FileNotFoundError(f"lLocal directory {directory} not found.")
         remotefile = self.locate(file, *relative_path)
         localfile = os.path.join(directory, remotefile)
         with ftputil.FTPHost(*self.ftp_args) as host:
@@ -121,8 +120,8 @@ class FTPData:
                 host.download(remotefile, localfile)
             except ftputil.error.PermanentError as file_not_found:
                 raise FileNotFoundError(
-                    f'file {file} not found in {host.listdir("./")}') \
-                    from file_not_found
+                    f'file {file} not found in {host.listdir("./")}'
+                ) from file_not_found
 
     @staticmethod
     def changedir(host, *relative_path):
@@ -151,14 +150,14 @@ class FTPData:
         folders = [folder for folder in relative_path if folder]
         for folder in folders:
             try:
-                host.chdir(f'./{folder}')
+                host.chdir(f"./{folder}")
             except ftputil.error.PermanentError as file_not_found:
                 raise FileNotFoundError(
-                    f'folder {folder} not found on {host.getcwd()} '
-                    f'in {host.listdir("./")}') \
-                    from file_not_found
+                    f"folder {folder} not found on {host.getcwd()} "
+                    f'in {host.listdir("./")}'
+                ) from file_not_found
 
-    def listdir(self, *relative_path, select=''):
+    def listdir(self, *relative_path, select=""):
         """
         Return file/directory list.
 
@@ -178,13 +177,12 @@ class FTPData:
         relative_path = [self.parent, *list(relative_path)]
         with ftputil.FTPHost(*self.ftp_args) as host:
             self.changedir(host, *relative_path)
-            names = host.listdir('./')
+            names = host.listdir("./")
         if select:
             names = [file for file in names if select in file]
         return names
 
 
-if __name__ == '__main__':
-
-    ftp = FTPData('ITER/JACS/JACS_13')
-    print(ftp.listdir('ITER/JACS/JACS_13/ac/dat'))
+if __name__ == "__main__":
+    ftp = FTPData("ITER/JACS/JACS_13")
+    print(ftp.listdir("ITER/JACS/JACS_13/ac/dat"))

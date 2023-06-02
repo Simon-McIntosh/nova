@@ -5,14 +5,13 @@ from scipy.interpolate import interp1d
 
 
 class bernstein(object):
-
     def __init__(self, t, n=5):
         self.t = t
         self.n = n
         self.knots()
 
     def basis(self, v):
-        return bn(self.n, v) * self.t**v * (1 - self.t)**(self.n - v)
+        return bn(self.n, v) * self.t**v * (1 - self.t) ** (self.n - v)
 
     def knots(self, v=[]):
         self.A = np.array(np.zeros((len(self.t), self.n + 1)))
@@ -34,11 +33,11 @@ class bernstein(object):
 
     def gen(self, b):
         if len(b) == 2 * (self.n + 1):
-            self.knots(v=b[self.n + 1:])
-        return np.dot(self.A, b[:self.n + 1])
+            self.knots(v=b[self.n + 1 :])
+        return np.dot(self.A, b[: self.n + 1])
 
     def error(self, b):
         data = self.data
         poly = self.gen(b)
-        rms = np.sqrt(np.mean((data - poly)**2))
+        rms = np.sqrt(np.mean((data - poly) ** 2))
         return rms

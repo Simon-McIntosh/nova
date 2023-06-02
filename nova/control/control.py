@@ -22,17 +22,17 @@ class ControlLoc(FrameData):
     @cached_property
     def caloc_hash(self):
         """Return interger hash computed on aloc array attribute."""
-        return HashLoc('array_hash', self.caloc)
+        return HashLoc("array_hash", self.caloc)
 
     @cached_property
     def cloc(self):
         """Return fast frame array attributes."""
-        return LocIndexer('loc', self.supply)
+        return LocIndexer("loc", self.supply)
 
     @cached_property
     def caloc(self):
         """Return fast frame array attributes."""
-        return ArrayLocIndexer('array', self.supply)
+        return ArrayLocIndexer("array", self.supply)
 
 
 @dataclass
@@ -42,22 +42,27 @@ class Control(FrameSet, ControlLoc):
     def __post_init__(self):
         """Create voltage source frame."""
         self.supply = FrameSpace(
-            base=['V', 'I', 'R'], required=['R'],
-            additional=['V', 'I', 'R', 'Imin', 'Imax', 'Vmin', 'Vmax'],
-            available=[], subspace=[],
-            array=['V', 'I', 'R'], delim='_', version=[])
+            base=["V", "I", "R"],
+            required=["R"],
+            additional=["V", "I", "R", "Imin", "Imax", "Vmin", "Vmax"],
+            available=[],
+            subspace=[],
+            array=["V", "I", "R"],
+            delim="_",
+            version=[],
+        )
         super().__post_init__()
 
     def load(self):
         """Load supply dataset from file."""
         super().load()
-        self.supply.load(self.filepath, self.subgroup('supply'))
+        self.supply.load(self.filepath, self.subgroup("supply"))
         return self
 
     def store(self):
         """Store supply dataset as group within netCDF file."""
         super().store()
-        self.supply.store(self.filepath, self.subgroup('supply'), 'a')
+        self.supply.store(self.filepath, self.subgroup("supply"), "a")
         return self
 
     @frame_factory(Circuit)

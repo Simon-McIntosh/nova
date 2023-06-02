@@ -34,20 +34,19 @@ class FiducialMesh(Plotter):
     def load_coilset(self):
         """Load full TF coilset."""
         self.clear_mesh()
-        for cell_index in range(self.data.dim['coil']):
+        for cell_index in range(self.data.dim["coil"]):
             self.load_coil(cell_index)
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     fiducialmesh = FiducialMesh()
     fiducialmesh.load_coil(3)
     fiducialmesh.warp(500)
 
-    #fiducial.load_coilset()
+    # fiducial.load_coilset()
     fiducialmesh.clear_mesh()
     for index in range(18):
         fiducialmesh.load_coil(index)
-    #for index in range(19):
+    # for index in range(19):
     #    fiducialmesh.load_coil(index, clear_mesh=False)
     fiducialmesh.warp(500)

@@ -13,8 +13,9 @@ class Phase:
     campaign: Campaign = field(repr=False)
     _name: Union[str, int] = 0
     _nameindex: int = field(init=False, default=None, repr=None)
-    reload: SimpleNamespace = field(init=False, repr=False,
-                                    default_factory=SimpleNamespace)
+    reload: SimpleNamespace = field(
+        init=False, repr=False, default_factory=SimpleNamespace
+    )
 
     def __post_init__(self):
         """Init reload."""
@@ -77,19 +78,17 @@ class Phase:
             try:
                 name = self.index[name]
             except IndexError as index_error:
-                raise IndexError(f'name index {name} '
-                                 'out of range\n\n'
-                                 f'{self.index}') from index_error
+                raise IndexError(
+                    f"name index {name} " "out of range\n\n" f"{self.index}"
+                ) from index_error
         elif isinstance(name, str):
             if name not in self.index:
-                raise IndexError(f'name {name} not found in '
-                                 f'\n{self.index}')
+                raise IndexError(f"name {name} not found in " f"\n{self.index}")
         self._name = name
         self.reload.name = False
         self.reload.sourcedata = True
 
 
-if __name__ == '__main__':
-
-    campaign = Campaign('CSJA13')
+if __name__ == "__main__":
+    campaign = Campaign("CSJA13")
     phase = Phase(campaign)

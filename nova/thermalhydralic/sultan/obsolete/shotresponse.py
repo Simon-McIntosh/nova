@@ -47,19 +47,15 @@ class ShotResponse:
 
     def plot(self):
         """Plot shot response."""
-        axes = plt.subplots(2, 1, gridspec_kw={'height_ratios': [1, 2]},
-                            sharex=True)[1]
+        axes = plt.subplots(2, 1, gridspec_kw={"height_ratios": [1, 2]}, sharex=True)[1]
 
         self.profile.plot(axes=axes[1])
 
-        self.shotdata.plot(self.heatindex.start, 'ko', axes=axes[1],
-                           label='start')
-        self.shotdata.plot(self.heatindex.stop, 'ks', axes=axes[1],
-                           label='start')
+        self.shotdata.plot(self.heatindex.start, "ko", axes=axes[1], label="start")
+        self.shotdata.plot(self.heatindex.stop, "ks", axes=axes[1], label="start")
 
-        #axes[1].plot(self.cool.time, self.cool.value, 'kd', label='cool')
+        # axes[1].plot(self.cool.time, self.cool.value, 'kd', label='cool')
         plt.legend()
-
 
     '''
     @property
@@ -73,8 +69,7 @@ class ShotResponse:
     '''
 
 
-if __name__ == '__main__':
-
-    response = ShotResponse('CSJA13')
+if __name__ == "__main__":
+    response = ShotResponse("CSJA13")
     response.profile.instance.index = -5
     response.plot()

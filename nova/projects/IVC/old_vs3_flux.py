@@ -4,7 +4,7 @@ Created on Tue Jul 17 10:40:20 2018
 
 @author: mcintos
 """
-'''
+"""
     def build_coilset(self, include_vessel=True):
         vs_geom = VSgeom()
         self.ind = inductance()
@@ -95,4 +95,4 @@ Created on Tue Jul 17 10:40:20 2018
         self.plot_LTC()
         #plt.plot(1e3*t, 1e-3*self.ind.Ic[0]*np.exp(-t/tau), 'C0--')
         plt.plot(1e3*t, 1e-3*Iode[0], 'C1--')
-'''
+"""

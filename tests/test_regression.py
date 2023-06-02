@@ -3,7 +3,8 @@ import pytest
 import numpy as np
 
 from nova.utilities.importmanager import mark_import
-with mark_import('optimize') as mark_optimize:
+
+with mark_import("optimize") as mark_optimize:
     from nova.linalg.lops import Lops
     from pylops.utils import dottest
 
@@ -19,7 +20,7 @@ def test_svd_matrices():
     rng = np.random.default_rng(seed=rng_seed)
     matrix = rng.random(matrix_shapes[0])
     svd = Decompose(matrix, rank=0)
-    assert all([attr in svd.matrices for attr in ['U', 's', 'Vh', 'Uh', 'V']])
+    assert all([attr in svd.matrices for attr in ["U", "s", "Vh", "Uh", "V"]])
 
 
 def test_model_init():
@@ -112,7 +113,7 @@ def test_forward_no_data_error():
         ols.inverse()
 
 
-@pytest.mark.parametrize('matrix_shape', matrix_shapes)
+@pytest.mark.parametrize("matrix_shape", matrix_shapes)
 def test_forward(matrix_shape):
     rng = np.random.default_rng(seed=rng_seed)
     matrix = rng.random(matrix_shape)
@@ -121,17 +122,16 @@ def test_forward(matrix_shape):
     assert np.allclose(matrix @ model, ols.forward())
 
 
-@pytest.mark.parametrize('matrix_shape', matrix_shapes)
+@pytest.mark.parametrize("matrix_shape", matrix_shapes)
 def test_inverse(matrix_shape):
     rng = np.random.default_rng(seed=rng_seed)
     matrix = rng.random(matrix_shape)
     data = rng.random(matrix.shape[0])
     ols = OdinaryLeastSquares(matrix, data=data)
-    assert np.allclose(np.linalg.lstsq(matrix, data, rcond=None)[0],
-                       ols.inverse())
+    assert np.allclose(np.linalg.lstsq(matrix, data, rcond=None)[0], ols.inverse())
 
 
-@pytest.mark.parametrize('matrix_shape', matrix_shapes)
+@pytest.mark.parametrize("matrix_shape", matrix_shapes)
 def test_regression_dot(matrix_shape):
     rng = np.random.default_rng(seed=rng_seed)
     matrix = rng.random(matrix_shape)
@@ -145,11 +145,12 @@ def test_regression_dot(matrix_shape):
     forward_data = forward @ data
     model_adjoint = model @ adjoint
     assert (forward_data - model_adjoint) / (
-        (forward_data + model_adjoint + 1e-15) / 2) < 1e-15
+        (forward_data + model_adjoint + 1e-15) / 2
+    ) < 1e-15
 
 
 @mark_optimize
-@pytest.mark.parametrize('matrix_shape', matrix_shapes)
+@pytest.mark.parametrize("matrix_shape", matrix_shapes)
 def test_regression_lops_dot(matrix_shape):
     rng = np.random.default_rng(seed=rng_seed)
     matrix = rng.random(matrix_shape)
@@ -158,7 +159,7 @@ def test_regression_lops_dot(matrix_shape):
 
 
 @mark_optimize
-@pytest.mark.parametrize('matrix_shape', matrix_shapes)
+@pytest.mark.parametrize("matrix_shape", matrix_shapes)
 def test_regression_lops(matrix_shape):
     rng = np.random.default_rng(seed=rng_seed)
     matrix = rng.random(matrix_shape)
@@ -168,7 +169,7 @@ def test_regression_lops(matrix_shape):
     assert np.allclose(ols.inverse(), lops / data)
 
 
-@pytest.mark.parametrize('matrix_shape', matrix_shapes)
+@pytest.mark.parametrize("matrix_shape", matrix_shapes)
 def test_moore_penrose(matrix_shape):
     rng = np.random.default_rng(seed=rng_seed)
     matrix = rng.random(matrix_shape)
@@ -180,6 +181,5 @@ def test_moore_penrose(matrix_shape):
     assert np.allclose(ols.model, mpen.model)
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     pytest.main([__file__])

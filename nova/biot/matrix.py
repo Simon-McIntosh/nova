@@ -12,11 +12,10 @@ from nova.biot.groupset import GroupSet
 class Matrix(GroupSet):
     """Compute Biot interaction matricies."""
 
-    data: dict[str, np.ndarray] = field(init=False, repr=False,
-                                        default_factory=dict)
+    data: dict[str, np.ndarray] = field(init=False, repr=False, default_factory=dict)
     attrs: dict[str, str] = field(default_factory=dict)
 
-    mu_0: ClassVar[float] = import_module('scipy.constants').mu_0
+    mu_0: ClassVar[float] = import_module("scipy.constants").mu_0
 
     def __post_init__(self):
         """Initialize input data."""
@@ -30,7 +29,7 @@ class Matrix(GroupSet):
 
     def get_frame(self, attr: str):
         """Return source or target frame associated with attr."""
-        if attr in 'rxyz':
+        if attr in "rxyz":
             return self.target
         return self.source
 
@@ -47,12 +46,12 @@ class Matrix(GroupSet):
     @property
     def Fr(self):
         """Return radial force array."""
-        return 2*np.pi*self.target.x[:, np.newaxis] * self.Bz
+        return 2 * np.pi * self.target.x[:, np.newaxis] * self.Bz
 
     @property
     def Fz(self):
         """Return vertical force array."""
-        return -2*np.pi*self.target.x[:, np.newaxis] * self.Br
+        return -2 * np.pi * self.target.x[:, np.newaxis] * self.Br
 
     @property
     def Fc(self):
@@ -73,24 +72,24 @@ class Matrix(GroupSet):
         plasma_source = matrix[self.target.plasma]
         plasma_plasma = plasma_source[:, self.source.plasma]
         if self.target.turns:
-            matrix *= self.target('nturn')
-            target_plasma *= self.target('nturn')[:, self.source.plasma]
-        #plasma = matrix[:, self.source.plasma]
+            matrix *= self.target("nturn")
+            target_plasma *= self.target("nturn")[:, self.source.plasma]
+        # plasma = matrix[:, self.source.plasma]
         if self.source.turns:
-            matrix *= self.source('nturn')
-            plasma_source *= self.source('nturn')[self.target.plasma]
+            matrix *= self.source("nturn")
+            plasma_source *= self.source("nturn")[self.target.plasma]
         # reduce
         if self.source.reduce and self.source.biotreduce.reduce:
-            matrix = np.add.reduceat(
-                matrix, self.source.biotreduce.indices, axis=1)
+            matrix = np.add.reduceat(matrix, self.source.biotreduce.indices, axis=1)
             plasma_source = np.add.reduceat(
-                plasma_source, self.source.biotreduce.indices, axis=1)
+                plasma_source, self.source.biotreduce.indices, axis=1
+            )
         if self.target.reduce and self.target.biotreduce.reduce:
-            matrix = np.add.reduceat(
-                matrix, self.target.biotreduce.indices, axis=0)
+            matrix = np.add.reduceat(matrix, self.target.biotreduce.indices, axis=0)
             target_plasma = np.add.reduceat(
-                target_plasma, self.target.biotreduce.indices, axis=0)
-            #plasma = np.add.reduceat(
+                target_plasma, self.target.biotreduce.indices, axis=0
+            )
+            # plasma = np.add.reduceat(
             #    plasma, self.target.biotreduce.indices, axis=0)
         # link source
         source_link = self.source.biotreduce.link
@@ -108,7 +107,7 @@ class Matrix(GroupSet):
                 ref, factor = target_link[link]
                 matrix[ref] += factor * matrix[link]
                 target_plasma[ref] += factor * target_plasma[link]
-                #plasma[ref, :] += factor * plasma[link]
+                # plasma[ref, :] += factor * plasma[link]
             matrix = np.delete(matrix, list(target_link), 0)
             target_plasma = np.delete(target_plasma, list(target_link), 0)
         return matrix, target_plasma, plasma_source, plasma_plasma

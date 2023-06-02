@@ -9,6 +9,7 @@ try:
     import imas
     from imas.hli_exception import ALException
     from imas.hli_utils import imasdef
+
     IMAS_MODULE_NOT_FOUND = False
     EMPTY_INT = imasdef.EMPTY_INT
     EMPTY_FLOAT = imasdef.EMPTY_FLOAT
@@ -24,7 +25,7 @@ from nova.database.datafile import Datafile
 # _pylint: disable=too-many-ancestors
 
 ImasIds = Any
-Ids = (ImasIds | dict[str, int | str] | tuple[int | str])
+Ids = ImasIds | dict[str, int | str] | tuple[int | str]
 
 
 @dataclass
@@ -75,46 +76,55 @@ class IDS:
 
     pulse: int = 0
     run: int = 0
-    machine: str = 'iter'
+    machine: str = "iter"
     occurrence: int = 0
-    user: str = 'public'
+    user: str = "public"
     name: str | None = None
-    backend: str = 'hdf5'
+    backend: str = "hdf5"
 
     dd_version: ClassVar[int] = 3
-    attrs: ClassVar[list[str]] = ['pulse', 'run', 'machine', 'occurrence',
-                                  'user', 'name', 'backend']
+    attrs: ClassVar[list[str]] = [
+        "pulse",
+        "run",
+        "machine",
+        "occurrence",
+        "user",
+        "name",
+        "backend",
+    ]
 
     @property
     def uri(self):
         """Return IDS URI."""
-        return f"imas:{self.backend}?user={self.user};name={self.name};"\
-               f"shot={self.pulse};run={self.run};"\
-               f"occurrence={self.occurrence};"\
-               f"database={self.machine};version={self.dd_version};"
+        return (
+            f"imas:{self.backend}?user={self.user};name={self.name};"
+            f"shot={self.pulse};run={self.run};"
+            f"occurrence={self.occurrence};"
+            f"database={self.machine};version={self.dd_version};"
+        )
 
     @property
     def home(self):
         """Return database root."""
-        if self.user == 'public':
-            return os.path.join(os.environ['IMAS_HOME'], 'shared')
-        return os.path.join(os.path.expanduser(f'~{self.user}'), 'public')
+        if self.user == "public":
+            return os.path.join(os.environ["IMAS_HOME"], "shared")
+        return os.path.join(os.path.expanduser(f"~{self.user}"), "public")
 
     @property
     def _path(self):
         """Return top level of database path."""
-        return os.path.join(self.home, 'imasdb', self.machine,
-                            str(self.dd_version))
+        return os.path.join(self.home, "imasdb", self.machine, str(self.dd_version))
 
     @property
     def path(self):
         """Return path to database entry."""
         match self.backend:
-            case str(backend) if backend == 'hdf5':
+            case str(backend) if backend == "hdf5":
                 return os.path.join(self._path, str(self.pulse), str(self.run))
             case _:
-                raise NotImplementedError(f'not implemented for {self.backend}'
-                                          ' backend')
+                raise NotImplementedError(
+                    f"not implemented for {self.backend}" " backend"
+                )
 
     def get_ids(self):
         """Return empty ids."""
@@ -255,7 +265,7 @@ class DataAttrs:
 
     def merge_ids_attrs(self, base_attrs: dict):
         """Merge database attributes."""
-        attrs = self.update_ids_attrs({'name': self.default_attrs['name']})
+        attrs = self.update_ids_attrs({"name": self.default_attrs["name"]})
         if isinstance(attrs, bool):
             return attrs
         return base_attrs | attrs
@@ -272,12 +282,12 @@ class DataAttrs:
             return self.ids_attrs.ids_attrs
         if isinstance(self.ids_attrs, dict):
             return default_attrs | self.ids_attrs
-        if hasattr(self.ids_attrs, 'ids_properties'):  # IMAS ids
+        if hasattr(self.ids_attrs, "ids_properties"):  # IMAS ids
             database = Database(**default_attrs, ids=self.ids_attrs)
-            return database.ids_attrs | {'ids': self.ids_attrs}
+            return database.ids_attrs | {"ids": self.ids_attrs}
         if isinstance(self.ids_attrs, list | tuple):
             return default_attrs | dict(zip(Database.attrs, self.ids_attrs))
-        raise TypeError(f'malformed attrs: {type(self.ids_attrs)}')
+        raise TypeError(f"malformed attrs: {type(self.ids_attrs)}")
 
 
 @dataclass
@@ -395,7 +405,7 @@ class Database(IDS):
 
     """
 
-    filename: str = field(default='', repr=False)
+    filename: str = field(default="", repr=False)
     group: str | None = field(default=None, repr=False)
     ids: ImasIds | None = field(repr=False, default=None)
 
@@ -407,8 +417,11 @@ class Database(IDS):
 
     def rename(self):
         """Reset name to default if default is not None."""
-        if (name := next(field for field in fields(self)
-                         if field.name == 'name').default) is not None:
+        if (
+            name := next(
+                field for field in fields(self) if field.name == "name"
+            ).default
+        ) is not None:
             self.name = name
 
     @property
@@ -428,21 +441,25 @@ class Database(IDS):
     @property
     def classname(self):
         """Return base filename."""
-        classname = f'{self.__class__.__name__.lower()}'.replace('data', '')
+        classname = f"{self.__class__.__name__.lower()}".replace("data", "")
         if classname == self.name:
             return self.machine
-        return f'{classname}_{self.machine}'
+        return f"{classname}_{self.machine}"
 
     def update_filename(self):
         """Update filename."""
-        if self.filename == '':
+        if self.filename == "":
             self.filename = self.classname
-            if self.pulse is not None and self.pulse > 0 and \
-                    self.run is not None and self.run > 0:
-                self.filename += f'_{self.pulse}_{self.run}'
+            if (
+                self.pulse is not None
+                and self.pulse > 0
+                and self.run is not None
+                and self.run > 0
+            ):
+                self.filename += f"_{self.pulse}_{self.run}"
             if self.occurrence > 0:
-                self.filename += f'_{self.occurrence}'
-        if self.filename == 'machine_description':
+                self.filename += f"_{self.occurrence}"
+        if self.filename == "machine_description":
             self.filename = self.classname
         if self.group is None and self.name is not None:
             self.group = self.name
@@ -450,8 +467,13 @@ class Database(IDS):
     @property
     def _unset_attrs(self) -> bool:
         """Return True if any required input attributes are unset."""
-        return self.pulse == 0 or self.pulse is None or \
-            self.run == 0 or self.run is None or self.name is None
+        return (
+            self.pulse == 0
+            or self.pulse is None
+            or self.run == 0
+            or self.run is None
+            or self.name is None
+        )
 
     def _load_attrs_from_ids(self):
         """
@@ -464,17 +486,20 @@ class Database(IDS):
             self.pulse = 0
             self.run = 0
         if self.name is not None and self.name != self.ids_data.__name__:
-            raise NameError(f'missmatch between instance name {self.name} '
-                            f'and ids_data {self.ids_data.__name__}')
+            raise NameError(
+                f"missmatch between instance name {self.name} "
+                f"and ids_data {self.ids_data.__name__}"
+            )
         self.name = self.ids_data.__name__
 
     def _check_ids_attrs(self):
         """Confirm minimum working set of input attributes."""
         if self._unset_attrs:
             raise ALException(
-                f'When self.ids is None require:\n'
-                f'pulse ({self.pulse} > 0) & run ({self.run} > 0) & '
-                f'name ({self.name} != None)')
+                f"When self.ids is None require:\n"
+                f"pulse ({self.pulse} > 0) & run ({self.run} > 0) & "
+                f"name ({self.name} != None)"
+            )
 
     @classmethod
     def from_ids_attrs(cls, ids_attrs: bool | Ids):
@@ -495,8 +520,9 @@ class Database(IDS):
 
     def get_ids(self, ids_path: Optional[str] = None, occurrence=None):
         """Return ids. Override IDS.get_ids. Extend name with ids_path."""
-        ids_name = '/'.join((item for item in [self.name, ids_path]
-                             if item is not None)).split('/', 1)
+        ids_name = "/".join(
+            (item for item in [self.name, ids_path] if item is not None)
+        ).split("/", 1)
         if occurrence is None:
             occurrence = self.occurrence
         with self.db_open() as db_entry:
@@ -506,28 +532,28 @@ class Database(IDS):
 
     def next_occurrence(self, limit=10000) -> int:
         """Return index of next available occurrence."""
-        ids_path = 'ids_properties/homogeneous_time'
+        ids_path = "ids_properties/homogeneous_time"
         for i in range(limit):
             try:
                 if self.get_ids(ids_path, i) == imas.imasdef.EMPTY_INT:
                     return i
             except ALException:
                 return i
-        raise IndexError(f'no empty occurrences found for i < {limit}')
+        raise IndexError(f"no empty occurrences found for i < {limit}")
 
     @property
     def backend_id(self):  # TODO remove once uri interface is released
         """Return backend id from backend."""
-        return getattr(imas.hli_utils.imasdef,
-                       f'{self.backend.upper()}_BACKEND')
+        return getattr(imas.hli_utils.imasdef, f"{self.backend.upper()}_BACKEND")
 
     @contextmanager
     def _db_entry(self):
         """Yield database with context manager."""
         if IMAS_MODULE_NOT_FOUND:
-            raise ImportError('imas module not found, try `ml load IMAS`')
-        db_entry = imas.DBEntry(self.backend_id, self.machine, self.pulse,
-                                self.run, self.user)
+            raise ImportError("imas module not found, try `ml load IMAS`")
+        db_entry = imas.DBEntry(
+            self.backend_id, self.machine, self.pulse, self.run, self.user
+        )
         # db_entry = imas.DBEntry()  # TODO uri update
         yield db_entry
         db_entry.close()
@@ -540,12 +566,13 @@ class Database(IDS):
                 db_entry.open()  # (uri=self.uri)  # TODO uri update
             except ALException as error:
                 raise ALException(
-                    f'malformed input to imas.DBEntry\n{error}\n'
-                    f'pulse {self.pulse}, '
-                    f'run {self.run}, '
-                    f'user {self.user}\n'
-                    f'machine {self.machine}, '
-                    f'backend: {self.backend}') from error
+                    f"malformed input to imas.DBEntry\n{error}\n"
+                    f"pulse {self.pulse}, "
+                    f"run {self.run}, "
+                    f"user {self.user}\n"
+                    f"machine {self.machine}, "
+                    f"backend: {self.backend}"
+                ) from error
             yield db_entry
 
     @property
@@ -559,8 +586,8 @@ class Database(IDS):
     def db_mode(self):
         """Return db_entry mode."""
         if self.db_empty:
-            return 'create'
-        return 'open'
+            return "create"
+        return "open"
 
     @contextmanager
     def db_write(self):
@@ -675,11 +702,12 @@ class IdsIndex:
     """
 
     ids_data: ImasIds
-    ids_node: str = 'time_slice'
+    ids_node: str = "time_slice"
     transpose: bool = field(init=False, default=False)
     length: int = field(init=False, default=0)
-    shapes: dict[str, tuple[int, ...] | tuple[()]] = \
-        field(init=False, default_factory=dict)
+    shapes: dict[str, tuple[int, ...] | tuple[()]] = field(
+        init=False, default_factory=dict
+    )
 
     def __post_init__(self):
         """Initialize ids node."""
@@ -725,7 +753,7 @@ class IdsIndex:
     def ids(self, ids_node: str | None):
         """Update ids node."""
         if ids_node is not None:
-            self.transpose = ids_node != 'time_slice'
+            self.transpose = ids_node != "time_slice"
             self.ids_node = ids_node
         try:
             self.length = len(self.ids)
@@ -745,7 +773,7 @@ class IdsIndex:
         """Return full ids path."""
         if self.ids_node is None:
             return path
-        return f'{self.ids_node}.{path}'
+        return f"{self.ids_node}.{path}"
 
     def shape(self, path) -> tuple[int, ...]:
         """Return attribute array shape."""
@@ -761,7 +789,7 @@ class IdsIndex:
             case float() | int() | str():
                 return ()
             case _:
-                raise ValueError(f'unable to determine data length {path}')
+                raise ValueError(f"unable to determine data length {path}")
 
     def get(self, path: str):
         """Return attribute from ids path."""
@@ -781,7 +809,7 @@ class IdsIndex:
             case (str(attr), index, int(subindex)):
                 pass
             case _:
-                raise KeyError(f'invalid key {key}')
+                raise KeyError(f"invalid key {key}")
 
         if isinstance(index, slice):
             # recursive update for all indicies specified in slice.
@@ -790,46 +818,46 @@ class IdsIndex:
             return
 
         path = self.get_path(self.ids_node, attr)
-        split_path = path.split('.')
-        node = '.'.join(split_path[:-1])
+        split_path = path.split(".")
+        node = ".".join(split_path[:-1])
         leaf = split_path[-1]
-        match node.split(':'):
+        match node.split(":"):
             case (str(node),):
                 branch = attrgetter(node)(self.ids_data)
             case (str(array), str(node)):
                 trunk = attrgetter(array)(self.ids_data)[index]
                 branch = attrgetter(node)(trunk)
             case _:
-                raise IndexError(f'invalid node {node}')
-        match leaf.split(':'):
+                raise IndexError(f"invalid node {node}")
+        match leaf.split(":"):
             case (str(leaf),):
                 setattr(branch, leaf, value)
             case str(stem), str(leaf):
                 try:
                     shoot = attrgetter(stem)(branch)[subindex]
                 except IndexError:
-                    attrgetter(stem)(branch).resize(subindex+1)
+                    attrgetter(stem)(branch).resize(subindex + 1)
                     shoot = attrgetter(stem)(branch)[subindex]
                 setattr(shoot, leaf, value)
             case _:
-                raise NotImplementedError(f'invalid leaf {leaf}')
+                raise NotImplementedError(f"invalid leaf {leaf}")
 
     def get_slice(self, index: int, path: str):
         """Return attribute slice at node index."""
         try:
             return attrgetter(path)(self.ids[index])
         except AttributeError:  # __structArray__
-            node, path = path.split('.', 1)
-            return attrgetter(path)(
-                attrgetter(node)(self.ids[index])[0])
+            node, path = path.split(".", 1)
+            return attrgetter(path)(attrgetter(node)(self.ids[index])[0])
         except TypeError:  # object is not subscriptable
             return self.get(path)
 
     def vector(self, itime: int, path: str):
         """Return attribute data vector at itime."""
         if len(self[path]) == 0:
-            raise IndexError(f'attribute {path} is 0-dimensional '
-                             'access with self.array(path)')
+            raise IndexError(
+                f"attribute {path} is 0-dimensional " "access with self.array(path)"
+            )
         if self.transpose:
             data = np.zeros(self.shape(path)[:-1], dtype=self.dtype(path))
             for index in range(self.length):
@@ -868,7 +896,7 @@ class IdsIndex:
             data = self.get_slice(0, path)
         except IndexError:
             return True
-        if hasattr(data, 'flat'):
+        if hasattr(data, "flat"):
             try:
                 data = data.flat[0]
             except IndexError:
@@ -876,17 +904,18 @@ class IdsIndex:
         try:  # string
             return len(data) == 0
         except TypeError:
-            return data is None or np.isclose(data, -9e40) \
-                or np.isclose(data, -999999999)
+            return (
+                data is None or np.isclose(data, -9e40) or np.isclose(data, -999999999)
+            )
 
     def dtype(self, path: str):
         """Return data point type."""
         if self.empty(path):
-            raise ValueError(f'data entry at {path} is empty')
+            raise ValueError(f"data entry at {path} is empty")
         data = self.get_slice(0, path)
         if isinstance(data, str):
             return object
-        if hasattr(data, 'flat'):
+        if hasattr(data, "flat"):
             return type(data.flat[0])
         return type(data)
 
@@ -895,9 +924,9 @@ class IdsIndex:
         """Return ids attribute path."""
         if not branch:
             return attr
-        if '*' in branch:
-            return branch.replace('*', attr)
-        return '.'.join((branch, attr))
+        if "*" in branch:
+            return branch.replace("*", attr)
+        return ".".join((branch, attr))
 
 
 @dataclass
@@ -905,7 +934,7 @@ class IdsEntry(IdsIndex, IDS):
     """Methods to facilitate sane ids entry."""
 
     ids_data: ImasIds = None
-    ids_node: str = ''
+    ids_node: str = ""
     database: Database | None = field(init=False, default=None)
 
     def __post_init__(self):
@@ -924,15 +953,16 @@ class IdsEntry(IdsIndex, IDS):
 class IdsData(Datafile, Database):
     """Provide cached acces to imas ids data."""
 
-    dirname: str = '.nova.imas'
+    dirname: str = ".nova.imas"
 
-    #def assert_final(self, classname: str):
+    # def assert_final(self, classname: str):
     #    """
 
     def merge_data(self, data):
         """Merge external data, interpolating to existing dataset timebase."""
-        self.data = self.data.merge(data.interp(time=self.data.time),
-                                    combine_attrs='drop_conflicts')
+        self.data = self.data.merge(
+            data.interp(time=self.data.time), combine_attrs="drop_conflicts"
+        )
 
     def load_data(self, ids_class):
         """Load data from IdsClass and merge."""
@@ -942,10 +972,11 @@ class IdsData(Datafile, Database):
             data = ids_class(**self.ids_attrs, ids=self.ids).data
         except NameError:  # name missmatch when loading from ids node
             return
-        if hasattr(self.data, 'time') and hasattr(data, 'time'):
-            data = data.interp({'time': self.data.time})
-        self.data = self.data.merge(data, compat='override',
-                                    combine_attrs='drop_conflicts')
+        if hasattr(self.data, "time") and hasattr(data, "time"):
+            data = data.interp({"time": self.data.time})
+        self.data = self.data.merge(
+            data, compat="override", combine_attrs="drop_conflicts"
+        )
 
     def build(self):
         """Build netCDF dataset."""
@@ -964,7 +995,7 @@ class CoilData(IdsData):
     :class:`~nova.imas.database.IdsData`
     """
 
-    dirname: str = field(default='.nova', repr=False)
+    dirname: str = field(default=".nova", repr=False)
 
     def __post_init__(self):
         """Update filename and group."""
@@ -979,7 +1010,7 @@ class CoilData(IdsData):
         Group attrs used by :func:`~nova.database.filepath.FilePath.hash_attrs`
         to generate a unique hex hash to label data within a netCDF file.
         """
-        if hasattr(super(), 'group_attrs'):
+        if hasattr(super(), "group_attrs"):
             return super().group_attrs
         return {}
 

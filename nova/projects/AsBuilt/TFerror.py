@@ -1,9 +1,8 @@
-
 import os
 
-#from ansys.dpf import core as dpf
+# from ansys.dpf import core as dpf
 
-#from ansys.dpf import post
+# from ansys.dpf import post
 import ansys.dpf.core as dpf
 
 from nova.definitions import root_dir
@@ -16,7 +15,7 @@ from ansys.mapdl.core import launch_mapdl
 mapdl = launch_mapdl()
 
 
-'''
+"""
 
 rst_file = os.path.join(root_dir, 'data/Ansys/TFC18/V4.rst')
 
@@ -42,9 +41,9 @@ select.inputs.named_selection_name.connect('WP')
 #oper = dpf.Operator('U')
 #oper.inputs.data_sources(data)
 
-'''
+"""
 
-'''
+"""
 #solution = post.load_solution()
 #mesh = solution.mesh
 
@@ -69,4 +68,4 @@ displacement.norm.plot_contour(show_edges=False, nan_opacity=0)
 
 #
 #displacement.tensor.plot_contour(show_edges=False, nan_opacity=0)
-'''
+"""

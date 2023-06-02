@@ -11,25 +11,30 @@ build_coilset = True
 pmag = Inverse()
 
 if build_coilset:
-    ITER = ITERcoilset(coils='pf', dCoil=0.2, n=5e2,
-                               limit=[3, 10, -5.75, 5.75], levels=61,
-                               biot_instances='colocate',
-                               read_txt=False)
+    ITER = ITERcoilset(
+        coils="pf",
+        dCoil=0.2,
+        n=5e2,
+        limit=[3, 10, -5.75, 5.75],
+        levels=61,
+        biot_instances="colocate",
+        read_txt=False,
+    )
     pmag.coilset = ITER.coilset
     pmag.scenario_filename = -2
-    pmag.scenario = 'SOF'
-    pmag.separatrix = ITER.data['separatrix']
-    #pmag.add_colocation_circle(5.7, 0, 2.6, N=30)
+    pmag.scenario = "SOF"
+    pmag.separatrix = ITER.data["separatrix"]
+    # pmag.add_colocation_circle(5.7, 0, 2.6, N=30)
     pmag.add_polygon(pmag.separatrix, N=10)
-    pmag.save_coilset('ITER')
+    pmag.save_coilset("ITER")
 else:
-    pmag.load_coilset('ITER')
+    pmag.load_coilset("ITER")
 
 pmag.scenario_filename = -1
-pmag.scenario = 'EOF'
+pmag.scenario = "EOF"
 pmag.Ip = 0
 
-#pmag.colocate.update_target()
+# pmag.colocate.update_target()
 print(pmag.colocate._psi)
 print(pmag.colocate.update_biot)
 
@@ -38,28 +43,27 @@ pmag.set_background()
 pmag.set_target()
 
 
-
 print(pmag.colocate.Psi)
 
-pmag.current_update = 'coil'
+pmag.current_update = "coil"
 
 pmag.solve_lstsq()
 
 print(pmag.colocate.Psi)
 print(pmag.wT)
 
-#pmag.solve()
+# pmag.solve()
 
 plt.set_aspect(0.8)
-pmag.plot(subcoil=True, label='coil')
+pmag.plot(subcoil=True, label="coil")
 pmag.grid.plot_flux()
 pmag.colocate.plot()
 
-#pmag.target.add_targets(
+# pmag.target.add_targets(
 #    [pmag.coil.loc['CS1U', 'x'] - pmag.coil.loc['CS1U', 'dx']/2,
 #     pmag.coil.loc['CS1U', 'z']])
-#pmag.target.plot()
-#print(np.linalg.norm([pmag.target.Bx, pmag.target.Bz]))
+# pmag.target.plot()
+# print(np.linalg.norm([pmag.target.Bx, pmag.target.Bz]))
 
 """
 pmag.scenario_filename = -2

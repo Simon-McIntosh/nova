@@ -20,8 +20,8 @@ class FieldLine:
 
     def predict(self, gap, roll, yaw, ndiv=360):
         """Return field line deviation waveform."""
-        radial = self.structural.predict('radial', gap, roll, yaw)
-        tangential = self.structural.predict('tangential', gap, roll, yaw)
+        radial = self.structural.predict("radial", gap, roll, yaw)
+        tangential = self.structural.predict("tangential", gap, roll, yaw)
         self.electromagnetic.predict(radial, tangential, ndiv)
         return self.electromagnetic.fieldline.data
 
@@ -34,43 +34,45 @@ class FieldLine:
         """Plot combined structural+EM benchmark."""
         gap = Gap(simulation)
         dataset = self.electromagnetic.load_dataset(simulation)
-        self.predict(gap.data['gap'], gap.data['roll'], gap.data['yaw'],
-                     dataset.dims['phi'])
-        axes = plt.subplots(2, 1, sharex=False, sharey=False,
-                            gridspec_kw=dict(height_ratios=[1, 2]))[1]
+        self.predict(
+            gap.data["gap"], gap.data["roll"], gap.data["yaw"], dataset.dims["phi"]
+        )
+        axes = plt.subplots(
+            2, 1, sharex=False, sharey=False, gridspec_kw=dict(height_ratios=[1, 2])
+        )[1]
         axes[0].bar(gap.data.index, gap.data.gap)
-        axes[0].set_ylabel('gap')
+        axes[0].set_ylabel("gap")
         axes[0].set_xticks([])
         self.electromagnetic.plot_deviation(
-            axes[1], dataset.phi, dataset.deviation.data)
+            axes[1], dataset.phi, dataset.deviation.data
+        )
         if title:
-            axes[0].set_title(f'Vault+EM benchmark: {simulation}')
-        plt.savefig('tmp.png', bbox_inches='tight')
+            axes[0].set_title(f"Vault+EM benchmark: {simulation}")
+        plt.savefig("tmp.png", bbox_inches="tight")
 
     def plot_peaktopeak(self, simulations=None):
         """Plot peak to peak benchmark."""
         if simulations is None:
-            simulations = ['a1', 'a2', 'c1', 'c2', 'v3']
+            simulations = ["a1", "a2", "c1", "c2", "v3"]
         data = xarray.Dataset(dict(simulations=simulations))
-        data['benchmark'] = xarray.DataArray(0., coords=data.coords)
-        data['model'] = xarray.DataArray(0., coords=data.coords)
+        data["benchmark"] = xarray.DataArray(0.0, coords=data.coords)
+        data["model"] = xarray.DataArray(0.0, coords=data.coords)
         for i, simulation in enumerate(simulations):
             dataset = self.electromagnetic.load_dataset(simulation)
-            data['benchmark'][i] = dataset.peaktopeak
+            data["benchmark"][i] = dataset.peaktopeak
             model = self.predict(Gap(simulation).gap)
-            data['model'][i] = model.max() - model.min()
+            data["model"][i] = model.max() - model.min()
         plt.figure()
-        plt.bar(simulations, data['benchmark'], label='ground truth')
-        plt.bar(simulations, data['model'], width=0.5, label='inference')
+        plt.bar(simulations, data["benchmark"], label="ground truth")
+        plt.bar(simulations, data["model"], width=0.5, label="inference")
         plt.despine()
-        plt.xlabel('simulation')
-        plt.ylabel(r'peak to peak deviation $H$, mm')
+        plt.xlabel("simulation")
+        plt.ylabel(r"peak to peak deviation $H$, mm")
         plt.legend()
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     feildline = FieldLine()
 
-    feildline.plot_benchmark('v3', title=False)
-    #feildline.plot_peaktopeak()
+    feildline.plot_benchmark("v3", title=False)
+    # feildline.plot_peaktopeak()

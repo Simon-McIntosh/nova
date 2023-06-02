@@ -22,19 +22,21 @@ class FrameAttrs(pandas.DataFrame):
 
     """
 
-    def __init__(self,
-                 data=None,
-                 index: Collection[Any] | None = None,
-                 columns: Collection[Any] | None = None,
-                 attrs: dict[str, Collection[Any]] | None = None,
-                 **metadata: dict[str, Collection[Any]]):
+    def __init__(
+        self,
+        data=None,
+        index: Collection[Any] | None = None,
+        columns: Collection[Any] | None = None,
+        attrs: dict[str, Collection[Any]] | None = None,
+        **metadata: dict[str, Collection[Any]],
+    ):
         super().__init__(data, index, columns)
         self.update_metadata(data, columns, attrs, metadata)
 
     @property
     def version(self):
         """Return metaframe version container."""
-        return self.attrs['metaframe'].version
+        return self.attrs["metaframe"].version
 
     def __getattr__(self, name):
         """Extend pandas.DataFrame.__getattr__. (frame.*)."""
@@ -50,7 +52,7 @@ class FrameAttrs(pandas.DataFrame):
 
     def __setitem__(self, key, value):
         """Extend pandas.DataFrame setitem, check that key is in columns."""
-        if self.lock('column') is False:
+        if self.lock("column") is False:
             self.check_column(key)
         super().__setitem__(key, value)
 
@@ -87,30 +89,32 @@ class FrameAttrs(pandas.DataFrame):
             data = {}
         if attrs is None:
             attrs = {}
-        if hasattr(data, 'attrs'):
+        if hasattr(data, "attrs"):
             for attr in data.attrs:  # update metadata from data
-                if isinstance(data.attrs[attr], (
-                        MetaFrame, MetaMethod, LocIndexer, pandas.DataFrame)):
+                if isinstance(
+                    data.attrs[attr],
+                    (MetaFrame, MetaMethod, LocIndexer, pandas.DataFrame),
+                ):
                     self.attrs[attr] = data.attrs[attr]
         for attr in attrs:  # update from attrs (replacing data.attrs)
-            if isinstance(attrs[attr], (
-                    MetaFrame, MetaMethod, LocIndexer, pandas.DataFrame)):
+            if isinstance(
+                attrs[attr], (MetaFrame, MetaMethod, LocIndexer, pandas.DataFrame)
+            ):
                 self.attrs[attr] = attrs[attr]
-        if not self.hasattrs('metaframe'):
-            self.attrs['metaframe'] = MetaFrame(self.index)
+        if not self.hasattrs("metaframe"):
+            self.attrs["metaframe"] = MetaFrame(self.index)
 
     def trim_columns(self, columns):
         """Trim metaframe required / additional to columns."""
         if columns:  # trim to columns
-            required = [attr for attr in self.metaframe.required
-                        if attr in columns]
-            additional = [attr for attr in self.metaframe.additional
-                          if attr in columns]
-            available = [attr for attr in self.metaframe.available
-                         if attr in columns]
-            self.metaframe.metadata = {'Required': required,
-                                       'Additional': additional,
-                                       'Available': available}
+            required = [attr for attr in self.metaframe.required if attr in columns]
+            additional = [attr for attr in self.metaframe.additional if attr in columns]
+            available = [attr for attr in self.metaframe.available if attr in columns]
+            self.metaframe.metadata = {
+                "Required": required,
+                "Additional": additional,
+                "Available": available,
+            }
 
     def extract_available(self, data, columns):
         """Update metaframe.available."""
@@ -121,20 +125,20 @@ class FrameAttrs(pandas.DataFrame):
         if columns is None:
             columns = []
         frame_columns = list(dict.fromkeys(list(columns)))
-        self.metaframe.metadata = {'available': data_columns+frame_columns}
+        self.metaframe.metadata = {"available": data_columns + frame_columns}
 
     def update_metaframe(self, metadata):
         """Update metaframe, appending available columns if required."""
-        if isinstance(metadata.get('version', None), list):
-            metadata['version'] = dict.fromkeys(metadata['version'])
+        if isinstance(metadata.get("version", None), list):
+            metadata["version"] = dict.fromkeys(metadata["version"])
         self.metaframe.update(metadata)
         if self.metaframe.columns:
-            self.metaframe.metadata = {'available': self.metaframe.columns}
+            self.metaframe.metadata = {"available": self.metaframe.columns}
         self.match_columns()
 
     def hash_array(self, attr):
         """Return hash array."""
-        if self.hasattrs('subspace') and attr in self.subspace:
+        if self.hasattrs("subspace") and attr in self.subspace:
             return getattr(self.subspace, attr)
         return getattr(self, attr)
 
@@ -152,16 +156,16 @@ class FrameAttrs(pandas.DataFrame):
 
     def update_version(self):
         """Update metaframe version hash dict."""
-        metadata = dict(version={attr: self.loc_hash(attr) for attr in
-                                 self.version})
-        self.attrs['metaframe'].update(metadata)
+        metadata = dict(version={attr: self.loc_hash(attr) for attr in self.version})
+        self.attrs["metaframe"].update(metadata)
 
     def match_columns(self):
         """Intersect metaframe.required with self.columns if not empty."""
         if not self.columns.empty:
-            required = [attr for attr in self.metaframe.required
-                        if attr in self.columns]
-            self.metaframe.metadata = {'Required': required}
+            required = [
+                attr for attr in self.metaframe.required if attr in self.columns
+            ]
+            self.metaframe.metadata = {"Required": required}
 
     def format_data(self, data):
         """Apply default formating to data passed as dict."""
@@ -180,7 +184,7 @@ class FrameAttrs(pandas.DataFrame):
 
     def col_dtype(self, col, value):
         """Return column dtype."""
-        if not self.hasattrs('metaframe') or col == 'link':
+        if not self.hasattrs("metaframe") or col == "link":
             return None
         try:
             dtype = type(self.metaframe.default[col])

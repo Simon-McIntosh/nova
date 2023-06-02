@@ -23,7 +23,7 @@ class Attributes:
         self._attributes = []
         self._default_attributes = {}
         self._input_attributes = []
-        self.attributes = ['dummy1', 'dummy2']
+        self.attributes = ["dummy1", "dummy2"]
 
     @property
     def attributes(self):
@@ -48,8 +48,9 @@ class Attributes:
     def attributes(self, attributes):
         if not pandas.api.types.is_list_like(attributes):
             attributes = [attributes]
-        self._attributes.extend([attr for attr in attributes
-                                 if attr not in self._attributes])
+        self._attributes.extend(
+            [attr for attr in attributes if attr not in self._attributes]
+        )
 
     @property
     def default_attributes(self):
@@ -75,9 +76,9 @@ class Attributes:
     def initialize_attributes(self):
         """Initialize data attributes."""
         for attribute in self.attributes:
-            setattr(self, f'_{attribute}', None)
+            setattr(self, f"_{attribute}", None)
         for attribute in self.default_attributes:
-            setattr(self, f'_{attribute}', self._default_attributes[attribute])
+            setattr(self, f"_{attribute}", self._default_attributes[attribute])
 
     def set_attributes(self, *args, **kwargs):
         """
@@ -105,7 +106,7 @@ class Attributes:
         _default_attributes = self._default_attributes.copy()
         for attribute in _default_attributes:  # retain set attributes
             try:
-                value = getattr(self, f'_{attribute}')
+                value = getattr(self, f"_{attribute}")
             except AttributeError:  # no underscore (read_txt)
                 try:
                     value = getattr(self, attribute)
@@ -138,9 +139,11 @@ class Attributes:
             Declration status of required inputs.
 
         """
-        return pandas.Series([getattr(self, f'_{attr}') is not None
-                              for attr in self._input_attributes],
-                             index=self._input_attributes, dtype=bool)
+        return pandas.Series(
+            [getattr(self, f"_{attr}") is not None for attr in self._input_attributes],
+            index=self._input_attributes,
+            dtype=bool,
+        )
 
     @property
     def isvalid(self):
@@ -156,10 +159,9 @@ class Attributes:
         return np.array(self.isset).all()
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     da = Attributes()
-    da.attributes = 'experiment'
+    da.attributes = "experiment"
 
     da2 = Attributes()
     print(da2.attributes, da.attributes)

@@ -10,7 +10,7 @@ from nova.linalg.decompose import Decompose
 
 
 @dataclass
-class RegressionBase():
+class RegressionBase:
     """Implement full-matrix forward and inverse models."""
 
     matrix: np.ndarray = field(repr=False)
@@ -20,7 +20,7 @@ class RegressionBase():
 
     def __post_init__(self):
         """Update coordinate, model, and data."""
-        self.matrix_h = self.matrix.T.copy(order='C')
+        self.matrix_h = self.matrix.T.copy(order="C")
         self.update_coordinate(self.coordinate)
         if self.model is not None:
             self.update_model(self.model)
@@ -51,8 +51,10 @@ class RegressionBase():
             self.coordinate = np.linspace(0, 1, len(self.matrix))
             return
         if len(coordinate) != self.shape[0]:
-            raise IndexError(f'coordinate length {len(coordinate)} != '
-                             f'matrix.shape[0] {self.shape[0]}')
+            raise IndexError(
+                f"coordinate length {len(coordinate)} != "
+                f"matrix.shape[0] {self.shape[0]}"
+            )
         self.coordinate = coordinate
 
     def update_model(self, model):
@@ -60,11 +62,11 @@ class RegressionBase():
         if model is None:
             if self.model is not None:
                 return
-            raise AttributeError('model not set, '
-                                 'unable to solve forward model')
+            raise AttributeError("model not set, " "unable to solve forward model")
         if len(model) != self.shape[1]:
-            raise IndexError(f'model length {len(model)} != '
-                             f'matrix.shape[1] {self.shape[1]}')
+            raise IndexError(
+                f"model length {len(model)} != " f"matrix.shape[1] {self.shape[1]}"
+            )
         self.model = model
 
     def _forward(self):
@@ -99,13 +101,13 @@ class RegressionBase():
         if data is None:
             if self.data is not None:
                 return
-            raise AttributeError('data not set, '
-                                 'unable to solve inverse problem')
+            raise AttributeError("data not set, " "unable to solve inverse problem")
         if len(data) != self.shape[0]:
-            raise IndexError(f'len(data) {len(data)} != '
-                             f'matrix.shape[0] {self.shape[0]}')
+            raise IndexError(
+                f"len(data) {len(data)} != " f"matrix.shape[0] {self.shape[0]}"
+            )
         if not isinstance(data, np.ndarray):
-            raise TypeError(f'type(data) {type(data)} is not ndarray')
+            raise TypeError(f"type(data) {type(data)} is not ndarray")
         self.data = data
 
     def inverse(self, data=None):
@@ -120,9 +122,9 @@ class RegressionBase():
         if axes is None:
             axes = plt.subplots(1, 1)[0]
         if self.data is not None:
-            axes.plot(self.coordinate, self.data, label='data')
+            axes.plot(self.coordinate, self.data, label="data")
         if self.model is not None:
-            axes.plot(self.coordinate, self.forward(), '--', label='fit')
+            axes.plot(self.coordinate, self.forward(), "--", label="fit")
         if self.data is not None or self.model is not None:
             axes.legend()
 
@@ -159,8 +161,9 @@ class MoorePenrose(RegressionBase):
 
     def _forward(self):
         """Call forward model - apply svd reduction if flag==True."""
-        self.__forward(self.matrices['U'], self.matrices['s'],
-                       self.matrices['Vh'], self.model)
+        self.__forward(
+            self.matrices["U"], self.matrices["s"], self.matrices["Vh"], self.model
+        )
 
     def __inverse(self, V, s, Uh, data):
         """Calcuate inverse via svd pseudo-inverse."""
@@ -168,19 +171,19 @@ class MoorePenrose(RegressionBase):
 
     def _inverse(self):
         """Extend Regression._inverse to include option for svd reduction."""
-        return self.__inverse(self.matrices['V'], self.matrices['s'],
-                              self.matrices['Uh'], self.data)
+        return self.__inverse(
+            self.matrices["V"], self.matrices["s"], self.matrices["Uh"], self.data
+        )
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     from nova.linalg.basis import Svd
 
     svd = Svd(7, 81)
-    attr = 'f_df_dpsi'
+    attr = "f_df_dpsi"
 
-    #svd.load_frame('DINA-IMAS', attr)
-    svd.load_frame('CORSICA', attr)
+    # svd.load_frame('DINA-IMAS', attr)
+    svd.load_frame("CORSICA", attr)
 
     eq = EquilibriumData(100504, 3)
 
@@ -191,20 +194,19 @@ if __name__ == '__main__':
 
     rng = np.random.default_rng(2025)
     data = profile.data.copy()
-    data += np.std(data) * (rng.random(eq.data.dims['psi_norm']) - 0.5)
+    data += np.std(data) * (rng.random(eq.data.dims["psi_norm"]) - 0.5)
 
     ols /= data
 
     ols.plot()
 
     import matplotlib.pyplot as plt
+
     plt.plot(ols.coordinate, profile.data)
 
 
-if __name__ == '__main__':
-
-
-    '''
+if __name__ == "__main__":
+    """
 
     #berstein.plot()
 
@@ -223,4 +225,4 @@ if __name__ == '__main__':
     bernstein = Bernstein(eq.data.dims['psi_norm'], 21)
     bernstein /= data
     bernstein.plot()
-    '''
+    """

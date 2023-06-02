@@ -12,13 +12,12 @@ class FrequencyResponse:
 
     def __init__(self, *args):
         self._data = {}
-        #self._input_frequency = None
-        #self._rms_power = None
-        #self.rms_power = rms_power
-        #self.magnitude = 20*np.log10(self.rms_power)
+        # self._input_frequency = None
+        # self._rms_power = None
+        # self.rms_power = rms_power
+        # self.magnitude = 20*np.log10(self.rms_power)
 
-    def append_data(self, input_frequency, rms_power, label=None,
-                    prefix='dataset'):
+    def append_data(self, input_frequency, rms_power, label=None, prefix="dataset"):
         """
         Append input data.
 
@@ -43,34 +42,32 @@ class FrequencyResponse:
         None.
 
         """
-        data = pandas.DataFrame([input_frequency, rms_power],
-                                columns=['frequency', 'rms_power'])
-        data.sort_values(['frequency'], inplace=True)
-        data['magnitude'] = 20*np.log10(data['rms_power'])
+        data = pandas.DataFrame(
+            [input_frequency, rms_power], columns=["frequency", "rms_power"]
+        )
+        data.sort_values(["frequency"], inplace=True)
+        data["magnitude"] = 20 * np.log10(data["rms_power"])
         if label is None:
             offset = sum([1 for label in self._data if prefix in label])
-            label = f'{prefix}{offset}'
+            label = f"{prefix}{offset}"
         if label in self._data:
-            raise IndexError(f'label {label} already present in dataset '
-                             f'{self._data.keys()}')
+            raise IndexError(
+                f"label {label} already present in dataset " f"{self._data.keys()}"
+            )
         self.data[label] = data
 
     def plot_data(self, ax=None):
         if ax is None:
             ax = plt.gca()
         for i, label in enumerate(self.data):
-            ax.plot(self.data[label]['frequency'],
-                    self.data[label]['magnitude'], 'o')
-        ax.set_xscale('log')
-        ax.set_xlabel(r'$\omega$ rads$^{-1}$')
-        ax.set_ylabel(r'$20$log$_{10}|H|$ dB$\dot{psi}')
+            ax.plot(self.data[label]["frequency"], self.data[label]["magnitude"], "o")
+        ax.set_xscale("log")
+        ax.set_xlabel(r"$\omega$ rads$^{-1}$")
+        ax.set_ylabel(r"$20$log$_{10}|H|$ dB$\dot{psi}")
 
 
-if __name__ == '__main__':
-
-
-
-    '''
+if __name__ == "__main__":
+    """
 
     def _H(x):
         H = x[0]
@@ -117,4 +114,4 @@ if __name__ == '__main__':
     res = scipy.optimize.minimize(bode_err, xo, method='L-BFGS-B',
                                   bounds=bounds, options={'gtol': 1e-9})
     tau = np.sort(2*np.pi/res.x[:-1])
-    '''
+    """

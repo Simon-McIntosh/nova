@@ -19,7 +19,7 @@ def test_basis_isabstract():
 
 def test_bernstein_shape():
     bernstein = Bernstein(25, 7)
-    assert bernstein.shape == (25, 7+1)
+    assert bernstein.shape == (25, 7 + 1)
 
 
 def test_bernstein_sum():
@@ -44,6 +44,5 @@ def test_svd_iadd_invariance():
     assert np.allclose(abs(svd.matrix), abs(_matrix))
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     pytest.main([__file__])

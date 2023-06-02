@@ -14,8 +14,7 @@ class FluidModel:
     """Calculate signal response of input LTI model."""
 
     _model: Union[Model, list[int], int]
-    _timeseries: tuple[np.array, np.array] = \
-        field(repr=False, default_factory=tuple)
+    _timeseries: tuple[np.array, np.array] = field(repr=False, default_factory=tuple)
     _output: np.array = field(init=False, repr=False)
     reload: bool = field(default=True)
 
@@ -61,8 +60,12 @@ class FluidModel:
             self.reload = False
             self.model.reload = False
             self._output = scipy.signal.lsim2(
-                self.model.lti, self.signal, T=self.time, rtol=5e-3,
-                hmax=15*(self.time[1]-self.time[0]))[1]
+                self.model.lti,
+                self.signal,
+                T=self.time,
+                rtol=5e-3,
+                hmax=15 * (self.time[1] - self.time[0]),
+            )[1]
             if self.model.time_delay > 0:
                 self._output = self._timeshift(self._output)
         return self._output
@@ -86,8 +89,11 @@ class FluidModel:
         """
         bounds = (output[0], output[-1])
         return scipy.interpolate.interp1d(
-            self.time+self.model.time_delay, output, fill_value=bounds,
-            bounds_error=False)(self.time)
+            self.time + self.model.time_delay,
+            output,
+            fill_value=bounds,
+            bounds_error=False,
+        )(self.time)
 
     def plot(self, axes=None, **kwargs):
         """Plot model output."""

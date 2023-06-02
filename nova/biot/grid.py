@@ -65,11 +65,10 @@ class Gridgen(Plot):
     def __post_init__(self):
         """Build grid coordinates."""
         self.xcoord, self.zcoord = self.generate()
-        self.data = xarray.Dataset(
-            coords=dict(x=self.xcoord, z=self.zcoord))
-        x2d, z2d = np.meshgrid(self.data.x, self.data.z, indexing='ij')
-        self.data['x2d'] = (['x', 'z'], x2d)
-        self.data['z2d'] = (['x', 'z'], z2d)
+        self.data = xarray.Dataset(coords=dict(x=self.xcoord, z=self.zcoord))
+        x2d, z2d = np.meshgrid(self.data.x, self.data.z, indexing="ij")
+        self.data["x2d"] = (["x", "z"], x2d)
+        self.data["z2d"] = (["x", "z"], z2d)
 
     def generate(self):
         """Return grid coordinates."""
@@ -81,12 +80,11 @@ class Gridgen(Plot):
         if len(self.limit) == 4:  # grid limits
             xgrid = GridCoord(*self.limit[:2])
             zgrid = GridCoord(*self.limit[2:])
-            xgrid.num = xgrid.delta / np.sqrt(
-                xgrid.delta*zgrid.delta / self.ngrid)
+            xgrid.num = xgrid.delta / np.sqrt(xgrid.delta * zgrid.delta / self.ngrid)
             zgrid.num = self.ngrid / xgrid.num
             self.ngrid = xgrid.num * zgrid.num
             return xgrid(), zgrid()
-        raise IndexError(f'len(limit) {len(self.limit)} not in [2, 4]')
+        raise IndexError(f"len(limit) {len(self.limit)} not in [2, 4]")
 
     def __len__(self):
         """Return grid resolution."""
@@ -100,15 +98,19 @@ class Gridgen(Plot):
     def plot(self, axes=None, **kwargs):
         """Plot grid."""
         self.axes = axes  # set plot axes
-        kwargs = {'linewidth': 0.4, 'color': 'gray',
-                  'alpha': 0.5, 'zorder': -100} | kwargs
+        kwargs = {
+            "linewidth": 0.4,
+            "color": "gray",
+            "alpha": 0.5,
+            "zorder": -100,
+        } | kwargs
         for num, step in zip(self.shape, [1, -1]):
             lines = np.zeros((num, 2, 2))
             for i in range(2):
                 index = tuple([slice(None), -i][::step])
                 lines[:, i, 0] = self.data.x2d[index]
                 lines[:, i, 1] = self.data.z2d[index]
-            segments = self.mpl['LineCollection'](lines, **kwargs)
+            segments = self.mpl["LineCollection"](lines, **kwargs)
             self.axes.add_collection(segments, autolim=True)
         self.axes.autoscale_view()
 
@@ -118,8 +120,7 @@ class Expand:
     """Calculate grid limit as a factor expansion about multipoly bounds."""
 
     frame: FrameLink
-    index: str | slice | np.ndarray = field(
-        default_factory=lambda: slice(None))
+    index: str | slice | np.ndarray = field(default_factory=lambda: slice(None))
     xmin: float = 1e-12
     fix_aspect: bool = False
 
@@ -131,7 +132,8 @@ class Expand:
             if sum(self.index) == 0:
                 raise GridError(index)
         poly = shapely.geometry.MultiPolygon(
-            [polygon.poly for polygon in self.frame.poly[self.index]])
+            [polygon.poly for polygon in self.frame.poly[self.index]]
+        )
         self.limit = np.array([*poly.bounds[::2], *poly.bounds[1::2]])
         self.xcoord = GridCoord(*self.limit[:2])
         self.zcoord = GridCoord(*self.limit[2:])
@@ -141,8 +143,9 @@ class Expand:
         delta_x, delta_z = self.xcoord.delta, self.zcoord.delta
         if not self.fix_aspect:
             delta_x = delta_z = np.mean([delta_x, delta_z])
-        limit = self.limit + factor/2 * np.array([-delta_x, delta_x,
-                                                  -delta_z, delta_z])
+        limit = self.limit + factor / 2 * np.array(
+            [-delta_x, delta_x, -delta_z, delta_z]
+        )
         if limit[0] < self.xmin:
             limit[0] = self.xmin
         return limit
@@ -151,31 +154,32 @@ class Expand:
 class BaseGrid(Chart, FieldNull, Operate):
     """Flux grid baseclass."""
 
-    attrs: list[str] = field(default_factory=lambda: ['Br', 'Bz', 'Psi'])
+    attrs: list[str] = field(default_factory=lambda: ["Br", "Bz", "Psi"])
 
     def __post_init__(self):
         """Initialize fieldnull version."""
         super().__post_init__()
-        self.version['fieldnull'] = None
+        self.version["fieldnull"] = None
 
     def check_null(self):
         """Check validity of upstream data, update field null if nessisary."""
-        self.check('psi')
-        if self.version['fieldnull'] != self.version['psi']:
+        self.check("psi")
+        if self.version["fieldnull"] != self.version["psi"]:
             self.update_null(self.psi_)
-            self.version['fieldnull'] = self.version['psi']
+            self.version["fieldnull"] = self.version["psi"]
 
     def __getattribute__(self, attr):
         """Extend getattribute to intercept field null data access."""
-        if attr == 'data_x' or attr == 'data_o':
+        if attr == "data_x" or attr == "data_o":
             self.check_null()
         return super().__getattribute__(attr)
 
     def plot_svd(self, **kwargs):
         """Plot influence of SVD reduction."""
-        for svd, color, linestyle in zip([False, True], ['C7', 'C3'],
-                                         ['solid', 'dashed']):
-            self.update_turns('Psi', svd)
+        for svd, color, linestyle in zip(
+            [False, True], ["C7", "C3"], ["solid", "dashed"]
+        ):
+            self.update_turns("Psi", svd)
             kwargs |= dict(colors=color, linestyles=linestyle)
             self.plot(**kwargs)
 
@@ -184,8 +188,12 @@ class BaseGrid(Chart, FieldNull, Operate):
 class Grid(BaseGrid):
     """Compute interaction across grid."""
 
-    def solve(self, number: int, limit: float | np.ndarray = 0,
-              index: str | slice | np.ndarray = slice(None)):
+    def solve(
+        self,
+        number: int,
+        limit: float | np.ndarray = 0,
+        index: str | slice | np.ndarray = slice(None),
+    ):
         """Solve Biot interaction across grid."""
         with self.solve_biot(number) as number:
             if number is not None:
@@ -196,19 +204,25 @@ class Grid(BaseGrid):
 
     def solve2d(self, x2d, z2d):
         """Solve interaction across rectangular grid."""
-        target = Target(dict(x=x2d.flatten(), z=z2d.flatten()), label='Grid')
-        self.data = Solve(self.subframe, target, reduce=[True, False],
-                          name=self.name, attrs=self.attrs).data
-        self.data.coords['x'] = x2d[:, 0]
-        self.data.coords['z'] = z2d[0]
-        self.data.coords['x2d'] = (['x', 'z'], x2d)
-        self.data.coords['z2d'] = (['x', 'z'], z2d)
+        target = Target(dict(x=x2d.flatten(), z=z2d.flatten()), label="Grid")
+        self.data = Solve(
+            self.subframe,
+            target,
+            reduce=[True, False],
+            name=self.name,
+            attrs=self.attrs,
+        ).data
+        self.data.coords["x"] = x2d[:, 0]
+        self.data.coords["z"] = z2d[0]
+        self.data.coords["x2d"] = (["x", "z"], x2d)
+        self.data.coords["z2d"] = (["x", "z"], z2d)
 
     @cached_property
     def pointloop(self):
         """Return pointloop instance, used to check loop membership."""
-        points = np.array([self.data.x2d.data.flatten(),
-                           self.data.z2d.data.flatten()]).T
+        points = np.array(
+            [self.data.x2d.data.flatten(), self.data.z2d.data.flatten()]
+        ).T
         return PointLoop(points)
 
     def mask(self, boundary: np.ndarray):
@@ -218,9 +232,9 @@ class Grid(BaseGrid):
     @property
     def shape(self):
         """Return grid shape."""
-        return self.data.dims['x'], self.data.dims['z']
+        return self.data.dims["x"], self.data.dims["z"]
 
-    def plot(self, attr='psi', axes=None, nulls=True, clabel=None, **kwargs):
+    def plot(self, attr="psi", axes=None, nulls=True, clabel=None, **kwargs):
         """Plot contours."""
         if len(self.data) == 0:
             return
@@ -228,10 +242,11 @@ class Grid(BaseGrid):
         if nulls:
             super().plot(axes=axes)
         if isinstance(attr, str):
-            attr = getattr(self, f'{attr}_')
-        QuadContourSet = self.axes.contour(self.data.x, self.data.z, attr.T,
-                                           **self.contour_kwargs(**kwargs))
-        if isinstance(kwargs.get('levels', None), int):
+            attr = getattr(self, f"{attr}_")
+        QuadContourSet = self.axes.contour(
+            self.data.x, self.data.z, attr.T, **self.contour_kwargs(**kwargs)
+        )
+        if isinstance(kwargs.get("levels", None), int):
             self.levels = QuadContourSet.levels
         if clabel is not None:
             self.axes.clabel(QuadContourSet, **clabel)

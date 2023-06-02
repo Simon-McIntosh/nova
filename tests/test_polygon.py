@@ -14,7 +14,7 @@ def test_polygon_shapely():
 
 def test_polygon_dict():
     polygon = Polygon(dict(rect=(1, 2, 0.3, 0.6)))
-    assert np.isclose(polygon.poly.area, 0.3*0.6)
+    assert np.isclose(polygon.poly.area, 0.3 * 0.6)
 
 
 def test_polygon_square():
@@ -29,17 +29,17 @@ def test_polygon_square_max_min():
 
 def test_polygon_disc():
     polygon = Polygon(dict(o=(1, 2, 0.2)))
-    assert np.isclose(polygon.poly.area, np.pi*0.1**2, rtol=5e-3)
+    assert np.isclose(polygon.poly.area, np.pi * 0.1**2, rtol=5e-3)
 
 
 def test_polygon_disc_max_min():
     polygon = Polygon(dict(o=(1, 2, 0.6, 0.2)))
-    assert np.isclose(polygon.poly.area, np.pi*0.1**2, rtol=5e-3)
+    assert np.isclose(polygon.poly.area, np.pi * 0.1**2, rtol=5e-3)
 
 
 def test_polygon_multi_dict():
     polygon = Polygon(dict(rect=(1, 2, 0.3, 0.6), disc=[4, 3, 0.5]))
-    assert np.isclose(polygon.poly.area, 0.3*0.6 + np.pi*0.25**2, rtol=1e-3)
+    assert np.isclose(polygon.poly.area, 0.3 * 0.6 + np.pi * 0.25**2, rtol=1e-3)
 
 
 def test_polygon_bbox():
@@ -71,23 +71,23 @@ def test_polygon_ne():
 
 
 def test_polygon_loop():
-    theta = np.linspace(0, 2*np.pi, 30, endpoint=False)
+    theta = np.linspace(0, 2 * np.pi, 30, endpoint=False)
     radius = 5
     loop = np.array([radius * np.cos(theta), radius * np.sin(theta)]).T
     polygon = Polygon(loop)
-    assert np.isclose(polygon.poly.area, np.pi*5**2, rtol=1e-2)
+    assert np.isclose(polygon.poly.area, np.pi * 5**2, rtol=1e-2)
 
 
 def test_polygon_names():
     polybox = Polygon([0, 5, -1, 1])
-    polyname = Polygon([0, 5, -1, 1], 'bbox')
-    theta = np.linspace(0, 2*np.pi, 30, endpoint=False)
+    polyname = Polygon([0, 5, -1, 1], "bbox")
+    theta = np.linspace(0, 2 * np.pi, 30, endpoint=False)
     loop = np.array([np.cos(theta), np.sin(theta)]).T
     polyloop = Polygon(loop)
-    assert polybox.name == 'rectangle'
-    assert polyname.name == 'bbox'
-    assert polyname.metadata['section'] == 'rectangle'
-    assert polyloop.name == 'polyloop'
+    assert polybox.name == "rectangle"
+    assert polyname.name == "bbox"
+    assert polyname.metadata["section"] == "rectangle"
+    assert polyloop.name == "polyloop"
 
 
 def test_invalid_cross_section():
@@ -102,7 +102,7 @@ def test_skin_thickness_error():
 
 def test_rectangular_cross_section():
     polygon = Polygon(dict(r=(1.75, 0.5, 2.5, 1.5)))
-    assert np.isclose(2.5*1.5, polygon.poly.area, rtol=1e-8)
+    assert np.isclose(2.5 * 1.5, polygon.poly.area, rtol=1e-8)
 
 
 def test_free_aspect():
@@ -110,5 +110,5 @@ def test_free_aspect():
     assert polygon.width != polygon.height
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pytest.main([__file__])

@@ -9,15 +9,15 @@ from nova.frame.coilset import CoilSet
 
 @pytest.fixture
 def linked():
-    coilset = CoilSet(nforce=10, dcoil=-2, dplasma=-3, tplasma='hex')
+    coilset = CoilSet(nforce=10, dcoil=-2, dplasma=-3, tplasma="hex")
     coilset.coil.insert(5, 1, 0.1, 0.1, nturn=1)
-    coilset.shell.insert({'e': [5, 1, 1.75, 1.0]}, 13, 0.05, delta=-9)
-    coilset.shell.insert({'e': [5, 1, 1.95, 1.2]}, 13, 0.05, delta=-9)
+    coilset.shell.insert({"e": [5, 1, 1.75, 1.0]}, 13, 0.05, delta=-9)
+    coilset.shell.insert({"e": [5, 1, 1.95, 1.2]}, 13, 0.05, delta=-9)
     coilset.coil.insert(5, 2, 0.1, 0.2, nturn=1.3)
     coilset.coil.insert(5.2, 2, 0.1, 0.2, nturn=1.25)
-    coilset.firstwall.insert(5.4, 1, 0.3, 0.6, section='e', Ic=-15e6)
-    coilset.linkframe(['Coil2', 'Coil0'])
-    coilset.sloc['coil', 'Ic'] = -15e6
+    coilset.firstwall.insert(5.4, 1, 0.3, 0.6, section="e", Ic=-15e6)
+    coilset.linkframe(["Coil2", "Coil0"])
+    coilset.sloc["coil", "Ic"] = -15e6
     coilset.force.solve()
     return coilset
 
@@ -58,12 +58,12 @@ def test_unit_delta():
 
 
 def test_matrix_attrs(linked):
-    for attr in ['Fr', 'Fz', 'Fc']:
+    for attr in ["Fr", "Fz", "Fc"]:
         assert attr in linked.force.data
 
 
 def test_matrix_length(linked):
-    assert len(linked.Loc['coil', :]) == len(linked.force.Fr)
+    assert len(linked.Loc["coil", :]) == len(linked.force.Fr)
 
 
 def test_store_load(linked):
@@ -89,6 +89,5 @@ def test_resolution():
     assert np.allclose(fr_lowres, fr_highres, rtol=1e-3)
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     pytest.main([__file__])

@@ -7,16 +7,15 @@ import pyvista
 rank = MPI.COMM_WORLD.rank
 
 gmsh.initialize()
-r = 0.1   # Radius of copper wires
-R = 5     # Radius of domain
-a = 1     # Radius of inner iron cylinder
-b = 1.2   # Radius of outer iron cylinder
-N = 8     # Number of windings
+r = 0.1  # Radius of copper wires
+R = 5  # Radius of domain
+a = 1  # Radius of inner iron cylinder
+b = 1.2  # Radius of outer iron cylinder
+N = 8  # Number of windings
 c_1 = 0.8  # Radius of inner copper wires
 c_2 = 1.4  # Radius of outer copper wires
 gdim = 2  # Geometric dimension of the mesh
 if rank == 0:
-
     # Define geometry for iron cylinder
     outer_iron = gmsh.model.occ.addCircle(0, 0, 0, b)
     inner_iron = gmsh.model.occ.addCircle(0, 0, 0, a)
@@ -30,14 +29,18 @@ if rank == 0:
     gmsh.model.occ.synchronize()
 
     # Define the copper-wires inside iron cylinder
-    angles_N = [i*2*np.pi/N for i in range(N)]
-    wires_N = [(2, gmsh.model.occ.addDisk(c_1*np.cos(v), c_1*np.sin(v),
-                                          0, r, r)) for v in angles_N]
+    angles_N = [i * 2 * np.pi / N for i in range(N)]
+    wires_N = [
+        (2, gmsh.model.occ.addDisk(c_1 * np.cos(v), c_1 * np.sin(v), 0, r, r))
+        for v in angles_N
+    ]
 
     # Define the copper-wires outside the iron cylinder
-    angles_S = [(i+0.5)*2*np.pi/N for i in range(N)]
-    wires_S = [(2, gmsh.model.occ.addDisk(c_2*np.cos(v), c_2*np.sin(v),
-                                          0, r, r)) for v in angles_S]
+    angles_S = [(i + 0.5) * 2 * np.pi / N for i in range(N)]
+    wires_S = [
+        (2, gmsh.model.occ.addDisk(c_2 * np.cos(v), c_2 * np.sin(v), 0, r, r))
+        for v in angles_S
+    ]
     gmsh.model.occ.synchronize()
     # Resolve all boundaries of the different wires in the background domain
     all_surfaces = [(2, iron)]
@@ -59,7 +62,7 @@ if rank == 0:
         com = gmsh.model.occ.getCenterOfMass(domain[0], domain[1])
         mass = gmsh.model.occ.getMass(domain[0], domain[1])
         # Identify iron circle by its mass
-        if np.isclose(mass, np.pi*(b**2-a**2)):
+        if np.isclose(mass, np.pi * (b**2 - a**2)):
             gmsh.model.addPhysicalGroup(domain[0], [domain[1]], tag=1)
             other_surfaces.append(domain)
         # Identify the background circle by its center of mass
@@ -69,12 +72,12 @@ if rank == 0:
         # Identify the inner circles by their center of mass
         elif np.isclose(np.linalg.norm(com), c_1):
             gmsh.model.addPhysicalGroup(domain[0], [domain[1]], inner_tag)
-            inner_tag +=1
+            inner_tag += 1
             other_surfaces.append(domain)
         # Identify the outer circles by their center of mass
         elif np.isclose(np.linalg.norm(com), c_2):
             gmsh.model.addPhysicalGroup(domain[0], [domain[1]], outer_tag)
-            outer_tag +=1
+            outer_tag += 1
             other_surfaces.append(domain)
     # Add marker for the vacuum
     gmsh.model.addPhysicalGroup(2, background_surfaces, tag=0)
@@ -95,11 +98,16 @@ if rank == 0:
     gmsh.model.mesh.generate(gdim)
 
 
-from dolfinx.io import extract_gmsh_geometry, extract_gmsh_topology_and_markers, ufl_mesh_from_gmsh
+from dolfinx.io import (
+    extract_gmsh_geometry,
+    extract_gmsh_topology_and_markers,
+    ufl_mesh_from_gmsh,
+)
 from dolfinx.cpp.io import perm_gmsh, extract_local_entities
 from dolfinx.cpp.mesh import to_type, cell_entity_type
 from dolfinx.cpp.graph import AdjacencyList_int32
 from dolfinx.mesh import create_meshtags, create_mesh
+
 if rank == 0:
     # Get mesh geometry
     x = extract_gmsh_geometry(gmsh.model)
@@ -148,12 +156,13 @@ ct = create_meshtags(mesh, tdim, adj, np.int32(local_values))
 
 
 import dolfinx
-#with dolfinx.io.XDMFFile(MPI.COMM_WORLD, "mt.xdmf", "w") as xdmf:
+
+# with dolfinx.io.XDMFFile(MPI.COMM_WORLD, "mt.xdmf", "w") as xdmf:
 #    xdmf.write_mesh(mesh)
 #    xdmf.write_meshtags(ct)
 
 
-'''
+"""
 
 import pyvista
 import dolfinx.plot
@@ -170,9 +179,7 @@ if not pyvista.OFF_SCREEN:
     plotter.show()
 else:
     cell_tag_fig = plotter.screenshot("cell_tags.png")
-'''
-
-
+"""
 
 
 Q = dolfinx.FunctionSpace(mesh, ("DG", 0))
@@ -184,31 +191,33 @@ with mu.vector.localForm() as loc_mu, J.vector.localForm() as loc_J:
     # As we only set some values in J, initialize all as 0
     loc_J.set(0)
     for tag in material_tags:
-        cells = ct.indices[ct.values==tag]
+        cells = ct.indices[ct.values == tag]
         num_cells = len(cells)
         # Set values for mu
         if tag == 0:
-            mu_ = 4 * np.pi*1e-7 # Vacuum
+            mu_ = 4 * np.pi * 1e-7  # Vacuum
         elif tag == 1:
-            mu_ = 1e-5 # Iron (This should really be 6.3e-3)
+            mu_ = 1e-5  # Iron (This should really be 6.3e-3)
         else:
-            mu_ = 1.26e-6 # Copper
+            mu_ = 1.26e-6  # Copper
         loc_mu.setValues(cells, np.full(num_cells, mu_))
         # Set values for J
-        if tag in range(2, 2+N):
+        if tag in range(2, 2 + N):
             loc_J.setValues(cells, np.full(num_cells, 1))
-        elif tag in range(2+N, 2*N + 2):
+        elif tag in range(2 + N, 2 * N + 2):
             loc_J.setValues(cells, np.full(num_cells, -1))
 
 import ufl
 import dolfinx
+
 V = dolfinx.FunctionSpace(mesh, ("CG", 1))
 u_bc = dolfinx.Function(V)
 with u_bc.vector.localForm() as bc_loc:
     bc_loc.set(0)
 facets = dolfinx.mesh.locate_entities_boundary(
-    mesh, tdim-1, lambda x: np.full(x.shape[1], True))
-dofs = dolfinx.fem.locate_dofs_topological(V, tdim-1, facets)
+    mesh, tdim - 1, lambda x: np.full(x.shape[1], True)
+)
+dofs = dolfinx.fem.locate_dofs_topological(V, tdim - 1, facets)
 bc = dolfinx.DirichletBC(u_bc, dofs)
 
 u = ufl.TrialFunction(V)
@@ -242,13 +251,19 @@ else:
     Az_fig = plotter.screenshot("Az.png")
 
 plotter = pyvista.Plotter()
-plotter.set_position([0,0,5])
+plotter.set_position([0, 0, 5])
 
-midpoints = dolfinx.cpp.mesh.midpoints(mesh, mesh.topology.dim, range(mesh.topology.index_map(mesh.topology.dim).size_local))
+midpoints = dolfinx.cpp.mesh.midpoints(
+    mesh,
+    mesh.topology.dim,
+    range(mesh.topology.index_map(mesh.topology.dim).size_local),
+)
 
 num_dofs_local = W.dofmap.index_map.size_local
 values = np.zeros((num_dofs_local, 3), dtype=np.float64)
-values[:, :mesh.geometry.dim] = B.vector.array.real.reshape(num_dofs_local, W.dofmap.index_map_bs)
+values[:, : mesh.geometry.dim] = B.vector.array.real.reshape(
+    num_dofs_local, W.dofmap.index_map_bs
+)
 cloud = pyvista.PolyData(midpoints)
 cloud["B"] = values
 glyphs = cloud.glyph("B", factor=1e6)

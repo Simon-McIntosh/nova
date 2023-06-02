@@ -23,11 +23,17 @@ class Select:
 
     def attrs(self, coord: str):
         """Return attribute list selected according to coord."""
-        if coord[0] == '~':
-            return [attr for attr, value in self.data.items()
-                    if coord[1:] not in value.coords or len(value.shape) > 1]
-        return [attr for attr, value in self.data.items()
-                if coord in value.coords and len(value.shape) == 1]
+        if coord[0] == "~":
+            return [
+                attr
+                for attr, value in self.data.items()
+                if coord[1:] not in value.coords or len(value.shape) > 1
+            ]
+        return [
+            attr
+            for attr, value in self.data.items()
+            if coord in value.coords and len(value.shape) == 1
+        ]
 
     def select(self, coord: str, data=None, dtype=None):
         """Return data subset including all data variables with coord."""
@@ -52,20 +58,24 @@ class Defeature:
     def __post_init__(self):
         """Extract feature list if None."""
         self.check_features()
-        if hasattr(super(), '__post_init__'):
+        if hasattr(super(), "__post_init__"):
             super().__post_init__()
 
     def check_features(self):
         """Check features, update it None."""
         match self.features:
             case None:
-                self.features = [attr for attr, value in self.data.items()
-                                 if value.coords.dims == ('time',)]
+                self.features = [
+                    attr
+                    for attr, value in self.data.items()
+                    if value.coords.dims == ("time",)
+                ]
             case list():
-                assert np.all(self.data[attr].coords.dims == ('time',)
-                              for attr in self.features)
+                assert np.all(
+                    self.data[attr].coords.dims == ("time",) for attr in self.features
+                )
             case _:
-                raise TypeError(f'features {self.feaures} not list')
+                raise TypeError(f"features {self.feaures} not list")
 
     @cached_property
     def time(self):
@@ -75,7 +85,7 @@ class Defeature:
     def defeature(self):
         """Return clustered turning point dataset."""
         indices = []
-        index = np.arange(self.data.dims['time'])
+        index = np.arange(self.data.dims["time"])
         for attr in self.features:
             array = np.c_[self.time, minmax_scale(self.data[attr].data)]
             mask = rdp(array, self.epsilon, return_mask=True)
@@ -83,7 +93,7 @@ class Defeature:
         indices = np.unique(indices)
         if self.cluster is not None:
             indices = self._cluster(indices)
-        return self.data.isel({'time': indices})
+        return self.data.isel({"time": indices})
 
     def _cluster(self, indices):
         """Apply DBSCAN clustering algorithum to indices."""
@@ -93,8 +103,7 @@ class Defeature:
         centroid = np.zeros(len(labels), int)
         label_index = np.arange(len(indices))
         for i, label in enumerate(labels):
-            centroid[i] = int(np.mean(
-                label_index[label == clustering.labels_]))
+            centroid[i] = int(np.mean(label_index[label == clustering.labels_]))
         return indices[centroid]
 
 
@@ -107,25 +116,35 @@ class Sample(Plot, Defeature, Select):
     savgol: tuple[int, int] | None = (3, 1)
     epsilon: float = 0.75
     cluster: int | float | None = None
-    features: list[str] = field(default_factory=lambda: [
-        'minor_radius', 'elongation',
-        'triangularity_upper', 'triangularity_lower',
-        'triangularity_inner', 'triangularity_outer',
-        'squareness_upper_inner', 'squareness_upper_outer',
-        'squareness_lower_inner', 'squareness_lower_outer',
-        'li_3', 'beta_normal', 'ip'])
+    features: list[str] = field(
+        default_factory=lambda: [
+            "minor_radius",
+            "elongation",
+            "triangularity_upper",
+            "triangularity_lower",
+            "triangularity_inner",
+            "triangularity_outer",
+            "squareness_upper_inner",
+            "squareness_upper_outer",
+            "squareness_lower_inner",
+            "squareness_lower_outer",
+            "li_3",
+            "beta_normal",
+            "ip",
+        ]
+    )
     samples: dict[str, xarray.Dataset] = field(default_factory=dict)
 
     def __post_init__(self):
         """Interpolate data onto uniform time-base and resample."""
-        self['source'] = self.data
-        self.clip('li_3', 0)
+        self["source"] = self.data
+        self.clip("li_3", 0)
         if self.dtime is not None:
             self.interpolate()
             self.resample()
         self.smooth()
         self.defeature()
-        if hasattr(super(), '__post_init__'):
+        if hasattr(super(), "__post_init__"):
             super().__post_init__()
 
     def __getitem__(self, attr: str) -> xarray.Dataset:
@@ -140,7 +159,7 @@ class Sample(Plot, Defeature, Select):
     def clip(self, attr: str, value: float | str):
         """Select data as abs(attr) > value."""
         time = self.data.time[abs(self.data[attr]) > value]
-        self['clip'] = self.data.sel({'time': time})
+        self["clip"] = self.data.sel({"time": time})
 
     @cached_property
     def minimum_timestep(self) -> float:
@@ -152,12 +171,13 @@ class Sample(Plot, Defeature, Select):
         """Return re-sample factor."""
         match self.dtime:
             case int() if self.dtime < 0:
-                return -self.dtime / float(self.data.dims['time'])
+                return -self.dtime / float(self.data.dims["time"])
             case int() | float() if self.dtime > 0:
                 return self.minimum_timestep / self.dtime
             case _:
-                raise ValueError(f'dtime {self.dtime} is '
-                                 'not a negative int or float')
+                raise ValueError(
+                    f"dtime {self.dtime} is " "not a negative int or float"
+                )
 
     @property
     def updown(self) -> tuple[int, int]:
@@ -166,54 +186,59 @@ class Sample(Plot, Defeature, Select):
             case float(factor) if factor == 0:
                 return 1, 1
             case float(factor) if factor > 1:
-                return int(10*round(factor, 1)), 10
+                return int(10 * round(factor, 1)), 10
             case float(factor) if factor < 1:
-                return 10, int(10*round(1/factor, 1))
-        raise ValueError(f'invalid sample factor {self.factor}')
+                return 10, int(10 * round(1 / factor, 1))
+        raise ValueError(f"invalid sample factor {self.factor}")
 
     def interpolate(self):
         """Interpolate data onto uniform time-base."""
-        time = np.arange(self.data.time[0], self.data.time[-1],
-                         self.minimum_timestep)
+        time = np.arange(self.data.time[0], self.data.time[-1], self.minimum_timestep)
 
-        self['uniform'] = self.data.interp({'time': time}).assign_coords(
-            {'itime': range(len(time))})
+        self["uniform"] = self.data.interp({"time": time}).assign_coords(
+            {"itime": range(len(time))}
+        )
 
     def resample(self):
         """Return dataset re-sampled using a polyphase filter."""
         updown = self.updown
         factor = updown[0] / updown[1]
-        ntime = int(np.ceil(self['uniform'].dims['time'] * factor))
+        ntime = int(np.ceil(self["uniform"].dims["time"] * factor))
         time = np.linspace(self.data.time[0], self.data.time[-1], ntime)
-        time_sample = xarray.Dataset(coords={'time': time})
-        time_sample.coords['itime'] = 'time', np.arange(len(time))
-        for attr, value in self.select('time', self['uniform']).items():
+        time_sample = xarray.Dataset(coords={"time": time})
+        time_sample.coords["itime"] = "time", np.arange(len(time))
+        for attr, value in self.select("time", self["uniform"]).items():
             dims = value.coords.dims
-            value = scipy.signal.resample_poly(value, *updown, padtype='line')
+            value = scipy.signal.resample_poly(value, *updown, padtype="line")
             time_sample[attr] = dims, value
-        self['sample'] = xarray.merge([self.select('~time', self['uniform']),
-                                       time_sample])
+        self["sample"] = xarray.merge(
+            [self.select("~time", self["uniform"]), time_sample]
+        )
 
     def smooth(self):
         """Smooth signal using savgol filter."""
         if self.savgol is None:
             return
-        savgol = xarray.Dataset(coords={'time': self.data.time})
-        for attr, value in self.select('time', self.data, float).items():
+        savgol = xarray.Dataset(coords={"time": self.data.time})
+        for attr, value in self.select("time", self.data, float).items():
             dims = value.coords.dims
             value = scipy.signal.savgol_filter(value, *self.savgol, axis=0)
             savgol[attr] = dims, value
-        self['smooth'] = xarray.merge(
-            [self.select('~time', self.data),
-             self.select('time', self.data, int), savgol])
+        self["smooth"] = xarray.merge(
+            [
+                self.select("~time", self.data),
+                self.select("time", self.data, int),
+                savgol,
+            ]
+        )
 
     def defeature(self):
         """Defeature sample waveform using rdp algorithum."""
-        self['rdp'] = super().defeature()
+        self["rdp"] = super().defeature()
 
     def _plot_attr(self, sample: str, attr: str, scale=True, **kwargs):
         """Plot single attribute waveform."""
-        self.axes = kwargs.get('axes', None)
+        self.axes = kwargs.get("axes", None)
         data = self[sample]
         value = data[attr]
         if scale:
@@ -223,149 +248,176 @@ class Sample(Plot, Defeature, Select):
     def plot(self, attrs=None, scale=False):
         """Plot source, interpolated, and sampled datasets."""
         if attrs is None:
-            attrs = [attr for attr in self.features if attr != 'ip']
+            attrs = [attr for attr in self.features if attr != "ip"]
         if isinstance(attrs, str):
             attrs = [attrs]
-        self.set_axes('1d')
+        self.set_axes("1d")
         for i, attr in enumerate(attrs):
             dims = self.data[attr].coords.dims
-            if 'time' not in dims or len(dims) != 1:
+            if "time" not in dims or len(dims) != 1:
                 continue
-            self._plot_attr('clip', attr, ls='-', color=f'C{i}',
-                            lw=2.0, label=attr, scale=scale)
+            self._plot_attr(
+                "clip", attr, ls="-", color=f"C{i}", lw=2.0, label=attr, scale=scale
+            )
             if self.dtime is not None:
-                self._plot_attr('sample', attr, ls='-', color='gray',
-                                lw=1, scale=scale)
+                self._plot_attr("sample", attr, ls="-", color="gray", lw=1, scale=scale)
             if self.savgol is not None:
-                self._plot_attr('smooth', attr, ls='-', color='k', lw=0.5,
-                                scale=scale)
-            self._plot_attr('rdp', attr, ls='-', marker='o', color='k',
-                            lw=1.5, ms=6, zorder=-10, scale=scale,
-                            mfc='k', mec=f'C{i}')
+                self._plot_attr("smooth", attr, ls="-", color="k", lw=0.5, scale=scale)
+            self._plot_attr(
+                "rdp",
+                attr,
+                ls="-",
+                marker="o",
+                color="k",
+                lw=1.5,
+                ms=6,
+                zorder=-10,
+                scale=scale,
+                mfc="k",
+                mec=f"C{i}",
+            )
         self.axes.legend(ncol=2)
-        self.axes.set_xlabel('time s')
-        ylabel = 'value'
+        self.axes.set_xlabel("time s")
+        ylabel = "value"
         if scale:
-            ylabel = f'normalized {ylabel}'
+            ylabel = f"normalized {ylabel}"
         self.axes.set_ylabel(ylabel)
 
     def _write_pulse_schedule(self, ids_entry):
         """Write sample data to a pulse schedule IDS."""
-        with ids_entry.node('flux_control.*.reference.data'):
-            ids_entry['i_plasma'] = self.data.ip.data
-            ids_entry['loop_voltage'] = self.data.psi_boundary.data
-            for attr in ['li_3', 'beta_normal']:
+        with ids_entry.node("flux_control.*.reference.data"):
+            ids_entry["i_plasma"] = self.data.ip.data
+            ids_entry["loop_voltage"] = self.data.psi_boundary.data
+            for attr in ["li_3", "beta_normal"]:
                 ids_entry[attr] = self.data[attr].data
 
-        with ids_entry.node('position_control.geometric_axis.'
-                            '*.reference.data'):
-            for i, attr in enumerate('rz'):
-                ids_entry[attr] = self.data.geometric_axis[:,  i].data
+        with ids_entry.node("position_control.geometric_axis." "*.reference.data"):
+            for i, attr in enumerate("rz"):
+                ids_entry[attr] = self.data.geometric_axis[:, i].data
 
-        with ids_entry.node('position_control.*.reference.data'):
-            for attr in ['minor_radius', 'elongation',
-                         'triangularity_upper', 'triangularity_lower']:
+        with ids_entry.node("position_control.*.reference.data"):
+            for attr in [
+                "minor_radius",
+                "elongation",
+                "triangularity_upper",
+                "triangularity_lower",
+            ]:
                 ids_entry[attr] = self.data[attr].data
             # TOODO fix once IDS is updated with missing triangularities
-            for tmp_attr, attr in zip(['elongation_upper', 'elongation_lower'],
-                                      ['triangularity_outer',
-                                       'triangularity_inner']):
+            for tmp_attr, attr in zip(
+                ["elongation_upper", "elongation_lower"],
+                ["triangularity_outer", "triangularity_inner"],
+            ):
                 ids_entry[tmp_attr] = self.data[attr].data
 
-        ids_entry.resize('position_control.x_point', 1)
-        with ids_entry.node('position_control.x_point:*.reference.data'):
-            ids_entry['r', 0] = self.data.x_point[:, 0].data
-            ids_entry['z', 0] = self.data.x_point[:, 1].data
+        ids_entry.resize("position_control.x_point", 1)
+        with ids_entry.node("position_control.x_point:*.reference.data"):
+            ids_entry["r", 0] = self.data.x_point[:, 0].data
+            ids_entry["z", 0] = self.data.x_point[:, 1].data
 
-        ids_entry.resize('position_control.strike_point', 2)
-        with ids_entry.node('position_control.strike_point:*.reference.data'):
+        ids_entry.resize("position_control.strike_point", 2)
+        with ids_entry.node("position_control.strike_point:*.reference.data"):
             for i in range(2):
-                ids_entry['r', i] = self.data.strike_point[:, i, 0].data
-                ids_entry['z', i] = self.data.strike_point[:, i, 1].data
+                ids_entry["r", i] = self.data.strike_point[:, i, 0].data
+                ids_entry["z", i] = self.data.strike_point[:, i, 1].data
 
     def _write_equilibrium(self, ids_entry):
         """Write sample data to a equilibrium IDS."""
-        ids_entry.ids_data.time_slice.resize(self.data.dims['time'])
-        with ids_entry.node('time_slice:global_quantities.*'):
-            for attr in ['ip', 'li_3', 'beta_normal']:
+        ids_entry.ids_data.time_slice.resize(self.data.dims["time"])
+        with ids_entry.node("time_slice:global_quantities.*"):
+            for attr in ["ip", "li_3", "beta_normal"]:
                 ids_entry[attr, :] = self.data[attr].data
 
-        with ids_entry.node('time_slice:boundary_separatrix.*'):
-            ids_entry['type', :] = self.data['boundary_type'].data
-            ids_entry['psi', :] = self.data['psi_boundary'].data
-            for attr in ['minor_radius', 'elongation',
-                         'triangularity_upper', 'triangularity_lower',
-                         'squareness_upper_inner', 'squareness_upper_outer',
-                         'squareness_lower_inner', 'squareness_lower_outer']:
+        with ids_entry.node("time_slice:boundary_separatrix.*"):
+            ids_entry["type", :] = self.data["boundary_type"].data
+            ids_entry["psi", :] = self.data["psi_boundary"].data
+            for attr in [
+                "minor_radius",
+                "elongation",
+                "triangularity_upper",
+                "triangularity_lower",
+                "squareness_upper_inner",
+                "squareness_upper_outer",
+                "squareness_lower_inner",
+                "squareness_lower_outer",
+            ]:
                 ids_entry[attr, :] = self.data[attr].data
             # TOODO fix once IDS is updated with missing triangularities
             for tmp_attr, attr in zip(
-                    ['elongation_upper', 'elongation_lower'],
-                    ['triangularity_outer', 'triangularity_inner']):
+                ["elongation_upper", "elongation_lower"],
+                ["triangularity_outer", "triangularity_inner"],
+            ):
                 ids_entry[tmp_attr, :] = self.data[attr].data
 
-        with ids_entry.node('time_slice:boundary_separatrix.'
-                            'geometric_axis.*'):
-            for i, attr in enumerate('rz'):
-                ids_entry[attr, :] = self.data.geometric_axis[:,  i].data
+        with ids_entry.node("time_slice:boundary_separatrix." "geometric_axis.*"):
+            for i, attr in enumerate("rz"):
+                ids_entry[attr, :] = self.data.geometric_axis[:, i].data
 
-        with ids_entry.node('time_slice:boundary_separatrix.x_point:*'):
-            for itime in range(self.data.dims['time']):
+        with ids_entry.node("time_slice:boundary_separatrix.x_point:*"):
+            for itime in range(self.data.dims["time"]):
                 if self.data.x_point_number.data[itime] == 1:
-                    ids_entry['r', itime] = self.data.x_point.data[itime,  0]
-                    ids_entry['z', itime] = self.data.x_point.data[itime,  1]
+                    ids_entry["r", itime] = self.data.x_point.data[itime, 0]
+                    ids_entry["z", itime] = self.data.x_point.data[itime, 1]
 
-        with ids_entry.node('time_slice:boundary_separatrix.strike_point:*'):
-            for itime in range(self.data.dims['time']):
-                for i in range(self.data.dims['strike_point_index'])[::-1]:
-                    for j, attr in enumerate('rz'):
-                        ids_entry[attr, itime, i] = \
-                            self.data.strike_point.data[itime, i, j]
+        with ids_entry.node("time_slice:boundary_separatrix.strike_point:*"):
+            for itime in range(self.data.dims["time"]):
+                for i in range(self.data.dims["strike_point_index"])[::-1]:
+                    for j, attr in enumerate("rz"):
+                        ids_entry[attr, itime, i] = self.data.strike_point.data[
+                            itime, i, j
+                        ]
 
         # include profile data - to remove in future
-        with ids_entry.node('time_slice:profiles_1d.*'):
-            for itime in range(self.data.dims['time']):
-                ids_entry['psi', itime] = self.data.psi1d.data[itime]
-                for attr in ['dpressure_dpsi', 'f_df_dpsi']:
+        with ids_entry.node("time_slice:profiles_1d.*"):
+            for itime in range(self.data.dims["time"]):
+                ids_entry["psi", itime] = self.data.psi1d.data[itime]
+                for attr in ["dpressure_dpsi", "f_df_dpsi"]:
                     ids_entry[attr, itime] = self.data[attr].data[itime]
 
     def write_ids(self, **ids_attrs):
         """Write sample data to pulse_schedule ids."""
-        if ids_attrs['occurrence'] is None:
-            ids_attrs['occurrence'] = Database(**ids_attrs).next_occurrence()
+        if ids_attrs["occurrence"] is None:
+            ids_attrs["occurrence"] = Database(**ids_attrs).next_occurrence()
         ids_entry = IdsEntry(**ids_attrs)
         metadata = Metadata(ids_entry.ids_data)
-        comment = 'Feature preserving reduced order waveforms'
-        source = ','.join([str(value) for value in ids_attrs.values()])
+        comment = "Feature preserving reduced order waveforms"
+        source = ",".join([str(value) for value in ids_attrs.values()])
         metadata.put_properties(comment, source, homogeneous_time=1)
-        code_parameters = {attr: getattr(self, attr) for attr in
-                           ['dtime', 'savgol', 'epsilon', 'cluster',
-                            'features']}
+        code_parameters = {
+            attr: getattr(self, attr)
+            for attr in ["dtime", "savgol", "epsilon", "cluster", "features"]
+        }
         metadata.put_code(code_parameters)
 
         ids_entry.ids_data.time = self.data.time.data
 
-        match ids_attrs['name']:
-            case 'equilibrium':
+        match ids_attrs["name"]:
+            case "equilibrium":
                 self._write_equilibrium(ids_entry)
-            case 'pulse_schedule':
+            case "pulse_schedule":
                 self._write_pulse_schedule(ids_entry)
             case _:
-                raise NotImplementedError('write_ids not implemented for '
-                                          f'ids_name {ids_attrs["name"]}')
+                raise NotImplementedError(
+                    "write_ids not implemented for " f'ids_name {ids_attrs["name"]}'
+                )
 
         ids_entry.put_ids()
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     pulse, run = 135013, 2
 
     equilibrium = EquilibriumData(pulse, run)
     sample = Sample(equilibrium.data)
 
-    sample.write_ids(**equilibrium.ids_attrs | {'occurrence': 1})
-    sample.plot(['squareness_upper_inner', 'squareness_upper_outer',
-                 'squareness_lower_inner', 'squareness_lower_outer'])
+    sample.write_ids(**equilibrium.ids_attrs | {"occurrence": 1})
+    sample.plot(
+        [
+            "squareness_upper_inner",
+            "squareness_upper_outer",
+            "squareness_lower_inner",
+            "squareness_lower_outer",
+        ]
+    )
 
     # sample.plot('ip')

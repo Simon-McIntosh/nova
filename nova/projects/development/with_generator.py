@@ -8,14 +8,16 @@ Created on Fri Apr  3 10:44:42 2020
 
 from contextlib import contextmanager
 
+
 @contextmanager
 def switch(flag):
-    flag['status'] = False
+    flag["status"] = False
     yield flag
-    flag['status'] = True
-            
-flag = {'status': True}
+    flag["status"] = True
+
+
+flag = {"status": True}
 print(flag)
 with switch(flag):
-    print(flag['status'])
-print(flag['status'])
+    print(flag["status"])
+print(flag["status"])

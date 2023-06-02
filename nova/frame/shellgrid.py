@@ -52,26 +52,26 @@ class ShellCoords(Plot):
         """Check coordinate shape and calculate segment length."""
         self.ensure_equal_length()
         self.ensure_positive_thickness()
-        self.coords = [(x, z) for x, z in
-                       zip(self.x_coordinate, self.z_coordinate)]
+        self.coords = [(x, z) for x, z in zip(self.x_coordinate, self.z_coordinate)]
 
     def ensure_equal_length(self):
         """Raise error if segment coordinates unequal."""
         if len(self.x_coordinate) != len(self.z_coordinate):
-            raise IndexError('Missmatched input coordiantes '
-                             f'len(x) {len(self.x_coordinate)} !='
-                             f'len(z) {len(self.z_coordinate)}')
+            raise IndexError(
+                "Missmatched input coordiantes "
+                f"len(x) {len(self.x_coordinate)} !="
+                f"len(z) {len(self.z_coordinate)}"
+            )
 
     def ensure_positive_thickness(self):
         """Raise error if thickness <= 0."""
         if self.thickness <= 0:
-            raise ValueError(f'Shell thickness {self.thickness} <= 0')
+            raise ValueError(f"Shell thickness {self.thickness} <= 0")
 
     def plot_coordinates(self, axes=None):
         """Plot shell coordinates."""
-        self.set_axes('2d', axes=axes)
-        self.asxes.plot(self.x_coordinate, self.z_coordinate, '.-',
-                        label='coords')
+        self.set_axes("2d", axes=axes)
+        self.asxes.plot(self.x_coordinate, self.z_coordinate, ".-", label="coords")
 
 
 @dataclass
@@ -89,14 +89,19 @@ class ShellInterp(ShellCoords):
 
     def segment_length(self):
         """Return total segment length and unit length vector."""
-        length = np.append(0, np.cumsum(np.sqrt(
-            np.diff(self.x_coordinate)**2 + np.diff(self.z_coordinate)**2)))
-        return length[-1], length/length[-1]
+        length = np.append(
+            0,
+            np.cumsum(
+                np.sqrt(
+                    np.diff(self.x_coordinate) ** 2 + np.diff(self.z_coordinate) ** 2
+                )
+            ),
+        )
+        return length[-1], length / length[-1]
 
     def generate_interpolator(self):
         """Return segment interpolator ."""
-        return scipy.interpolate.interp1d(
-            self.unit_length, self.coords, axis=0)
+        return scipy.interpolate.interp1d(self.unit_length, self.coords, axis=0)
 
 
 @dataclass
@@ -107,9 +112,23 @@ class ShellSegment(ShellInterp):
     rdp: np.ndarray = field(init=False, repr=False)
     ndiv: int = 2
     ldiv: np.ndarray = field(init=False, repr=False)
-    columns: list[str] = field(init=False, default_factory=lambda: [
-        'x', 'y', 'z', 'dl', 'dt', 'dx', 'dy', 'dz', 'rms', 'area',
-        'section', 'poly'])
+    columns: list[str] = field(
+        init=False,
+        default_factory=lambda: [
+            "x",
+            "y",
+            "z",
+            "dl",
+            "dt",
+            "dx",
+            "dy",
+            "dz",
+            "rms",
+            "area",
+            "section",
+            "poly",
+        ],
+    )
 
     def __post_init__(self):
         """Construct RDP vector."""
@@ -133,7 +152,7 @@ class ShellSegment(ShellInterp):
         """Return updated division number."""
         if self.length == 0:
             return len(self.coords)
-        return int(np.max([1 + self.total_length/self.length, self.ndiv]))
+        return int(np.max([1 + self.total_length / self.length, self.ndiv]))
 
     def update_ldiv(self):
         """Return updated normalize segment length."""
@@ -155,44 +174,43 @@ class ShellSegment(ShellInterp):
         None.
 
         """
-        mask = rdp(
-            self.coords, epsilon=self.eps*self.total_length, return_mask=True)
+        mask = rdp(self.coords, epsilon=self.eps * self.total_length, return_mask=True)
         return self.unit_length[mask]
 
     def plot_features(self, axes=None):
         """Plot RDP features."""
-        self.set_axes('2d', axes=axes)
-        self.axes.plot(*self.interp(self.rdp).T, 's', label='rdp')
+        self.set_axes("2d", axes=axes)
+        self.axes.plot(*self.interp(self.rdp).T, "s", label="rdp")
 
     @property
     def poly(self):
         """Return segment polygon."""
         coords = self.interp(self.rdp)
         poly = geometry.LineString(coords).buffer(
-            self.thickness/2, cap_style=2, join_style=2)
+            self.thickness / 2, cap_style=2, join_style=2
+        )
         if isinstance(poly, geometry.MultiPolygon):
             poly = poly.geoms[0]
-        return Polygon(poly, name='shell').poly
+        return Polygon(poly, name="shell").poly
 
     def divide(self):
         """Return subsegment geometry including RDP features."""
-        for i in range(self.ndiv-1):
-            start, stop = self.ldiv[i:i+2]
+        for i in range(self.ndiv - 1):
+            start, stop = self.ldiv[i : i + 2]
             index = (self.rdp > start) & (self.rdp < stop)
             subvector = start, *self.rdp[index], stop
             coords = self.interp(subvector)
-            yield ShellSegment(*coords.T, self.delta,
-                               self.thickness, eps=self.eps)
+            yield ShellSegment(*coords.T, self.delta, self.thickness, eps=self.eps)
 
     @property
     def dataframe(self):
         """Return subsegment dataframe."""
-        data = [[] for __ in range(self.ndiv-1)]
+        data = [[] for __ in range(self.ndiv - 1)]
         for i, segment in enumerate(self.divide()):
-            geom = PolyGeom(segment.poly, 'ring').geometry
+            geom = PolyGeom(segment.poly, "ring").geometry
             data[i] = {name: geom[name] for name in self.columns}
         frame = pandas.DataFrame(data, columns=self.columns)
-        frame['nturn'] = frame['area']
+        frame["nturn"] = frame["area"]
         return frame
 
 
@@ -228,25 +246,24 @@ class ShellGrid(ShellSegment):
 
     def plot_frame(self):
         """Plot frame polygons."""
-        PolyPlot(DataFrame(self.frame, additional=['part']))()
+        PolyPlot(DataFrame(self.frame, additional=["part"]))()
 
     def plot_subframe(self):
         """Plot subframe polygons."""
         for i, subframe in enumerate(self.subframe):
-            PolyPlot(DataFrame(subframe, additional=['part']),
-                     )(facecolor=f'C{i%10}')
+            PolyPlot(
+                DataFrame(subframe, additional=["part"]),
+            )(facecolor=f"C{i%10}")
 
 
-if __name__ == '__main__':
-
-    shellgrid = ShellGrid([1, 1.5, 2, 2, 2.5, 4, 4],
-                          [0, 0.1, 0, 1, 0.5, -1, 0], 0, 0.1,
-                          delta=0.1)
+if __name__ == "__main__":
+    shellgrid = ShellGrid(
+        [1, 1.5, 2, 2, 2.5, 4, 4], [0, 0.1, 0, 1, 0.5, -1, 0], 0, 0.1, delta=0.1
+    )
 
     shellgrid.plot()
 
-
-    #shellgrid = ShellGrid([[1, 1.5, 2, 2, 4, 4],
+    # shellgrid = ShellGrid([[1, 1.5, 2, 2, 4, 4],
     #                       [0, 0.1, 0, 1, -1, 0]], -6, 0.1, 1e-6,
     #                      delta=0.1)
-    #shellgrid.plot()
+    # shellgrid.plot()

@@ -38,8 +38,7 @@ class DataBase:
     @year.setter
     def year(self, year):
         self._year = year
-        self.local = \
-            LocalData('', parent_dir=os.path.join('Naka', f'{self.year}'))
+        self.local = LocalData("", parent_dir=os.path.join("Naka", f"{self.year}"))
         self.load_index()
         self.load_metadata()
 
@@ -50,12 +49,12 @@ class DataBase:
     @property
     def indexfile(self):
         """Return full path to local index file."""
-        return os.path.join(self.local.parent_directory, 'index.json')
+        return os.path.join(self.local.parent_directory, "index.json")
 
     def load_index(self):
         """Load directory index."""
         if os.path.isfile(self.indexfile):  # serve file localy
-            with open(self.indexfile, 'r') as jsonfile:
+            with open(self.indexfile, "r") as jsonfile:
                 self._index = json.load(jsonfile)
         else:  # read from server
             self._index = self._read_index()
@@ -68,13 +67,14 @@ class DataBase:
         try:
             with NakaServer(self.year) as server:
                 index = server.index
-                with open(self.indexfile, 'w') as jsonfile:
+                with open(self.indexfile, "w") as jsonfile:
                     json.dump(index, jsonfile, indent=4)
         except mechanize.HTTPError as http_error:
             if makedir:
                 self.local.removedir()  # remove if generated bare
-            raise FileNotFoundError(f'Year {self.year} not found on '
-                                    'naka server') from http_error
+            raise FileNotFoundError(
+                f"Year {self.year} not found on " "naka server"
+            ) from http_error
         return index
 
     @property
@@ -98,10 +98,11 @@ class DataBase:
             shot = self.shot_list[shot]
         if isinstance(shot, list):
             mrun, srun = shot
-            shot = f'MRun{mrun:03}_SRun{srun:03}'
+            shot = f"MRun{mrun:03}_SRun{srun:03}"
         if shot not in self.index:
-            raise IndexError(f'shot {shot} not found in '
-                             f'run index \n\n{self.run_index}')
+            raise IndexError(
+                f"shot {shot} not found in " f"run index \n\n{self.run_index}"
+            )
         return shot
 
     def locate(self, shot: Union[int, list[int, int], str], files=[]):
@@ -132,15 +133,14 @@ class DataBase:
         if files:
             names, urls = [], []
             identifier = regex.compile(r"\L<files>", files=files)
-            for name, url in zip(self.index[shot]['names'],
-                                 self.index[shot]['urls']):
+            for name, url in zip(self.index[shot]["names"], self.index[shot]["urls"]):
                 if identifier.search(name):
                     names.append(name)
                     urls.append(url)
         else:
-            names = self.index[shot]['names']
-            urls = self.index[shot]['urls']
-        localfiles = ['' for __ in range(len(names))]
+            names = self.index[shot]["names"]
+            urls = self.index[shot]["urls"]
+        localfiles = ["" for __ in range(len(names))]
         for i, (name, url) in enumerate(zip(names, urls)):
             directory = self._get_directory(name)
             localfile = os.path.join(directory, name)
@@ -151,7 +151,7 @@ class DataBase:
 
     def _get_directory(self, name):
         """Return directory based on filename extension."""
-        if name[-4:] == '.pdf':
+        if name[-4:] == ".pdf":
             directory = self.local.metadata_directory
         else:
             directory = self.local.source_directory
@@ -162,16 +162,17 @@ class DataBase:
         if self.pipeline.count > 0:
             tick = clock(
                 self.pipeline.count,
-                header=f'Downloading {self.pipeline.count} files '
-                f'from the Naka server.')
+                header=f"Downloading {self.pipeline.count} files "
+                f"from the Naka server.",
+            )
             with NakaServer(self.year) as server:
                 _url = server.browser.geturl()
                 for name, url in self.pipeline.serve():
-                    url = f'{_url}/{url}'
+                    url = f"{_url}/{url}"
                     directory = self._get_directory(name)
                     filename = os.path.join(directory, name)
                     with urllib.request.urlopen(url) as response:
-                        with open(filename, 'wb') as localfile:
+                        with open(filename, "wb") as localfile:
                             localfile.write(response.read())
                     tick.tock()
             self.pipeline.flush()
@@ -179,19 +180,21 @@ class DataBase:
     def _download_metadata(self):
         """Download all metadata files form Naka server for specified year."""
         for name in self.index:
-            self.locate(name, files=['pdf'])  # build pipeline
+            self.locate(name, files=["pdf"])  # build pipeline
         self.download()  # download files
 
     def read_metadata(self):
         """Return shot objective from metadata pdfs."""
         self._download_metadata()
-        metadata = pandas.DataFrame(index=range(len(self.index)),
-                                    columns=['shot', 'objective'])
-        metadata.loc[:, 'shot'] = self.shot_list
-        tick = clock(self.shot_number,
-                     header=f'reading {self.shot_number} metadata files')
+        metadata = pandas.DataFrame(
+            index=range(len(self.index)), columns=["shot", "objective"]
+        )
+        metadata.loc[:, "shot"] = self.shot_list
+        tick = clock(
+            self.shot_number, header=f"reading {self.shot_number} metadata files"
+        )
         for i in range(self.shot_number):
-            metadata.loc[i, ['objective']] = self.read_metafile(i)
+            metadata.loc[i, ["objective"]] = self.read_metafile(i)
             tick.tock()
         metadata.to_csv(self.metafile, index=False)
         self.metadata = metadata
@@ -199,7 +202,7 @@ class DataBase:
     @property
     def metafile(self):
         """Return full path to local metadata file."""
-        return os.path.join(self.local.parent_directory, 'metadata.csv')
+        return os.path.join(self.local.parent_directory, "metadata.csv")
 
     def load_metadata(self):
         """Load directory index."""
@@ -210,15 +213,15 @@ class DataBase:
 
     def read_metafile(self, shot):
         """Return shot objective."""
-        metafile = self.locate(shot, files='pdf')[0]
+        metafile = self.locate(shot, files="pdf")[0]
         doc = fitz.open(metafile)
         text = doc.loadPage(0).getText("text")
-        text = text.replace(':', '\n').split('\n')
+        text = text.replace(":", "\n").split("\n")
         text = [label.strip() for label in text]
-        if 'Object' in text:
-            objective_index = text.index('Object')+1
+        if "Object" in text:
+            objective_index = text.index("Object") + 1
         else:
-            objective_index = text.index('~')+5
+            objective_index = text.index("~") + 5
         objective = text[objective_index]
         return objective
 
@@ -230,12 +233,12 @@ class DataBase:
     def select_download(self, subobjective):
         """Download selected files."""
         for shot in self.select(subobjective).index:
-            self.locate(shot, files='csv')
+            self.locate(shot, files="csv")
         self.download()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     database = DataBase(2015)
-    #database.read_metadata()
-    print(database.select('Heating'))
-    #print(database.metadata.objective.values)
+    # database.read_metadata()
+    print(database.select("Heating"))
+    # print(database.metadata.objective.values)

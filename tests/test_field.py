@@ -9,25 +9,25 @@ from nova.frame.coilset import CoilSet
 from nova.frame.framespace import FrameSpace
 
 
-frame = FrameSpace(required=['x', 'z', 'dl', 'dt'], available=['poly'])
+frame = FrameSpace(required=["x", "z", "dl", "dt"], available=["poly"])
 frame.insert(5, 0, 1, 3)
 
 
 def test_sample_corners():
     sample = Sample(frame.poly[0].boundary, delta=0)
-    assert len(sample['radius']) == len(sample['height']) == 4
+    assert len(sample["radius"]) == len(sample["height"]) == 4
 
 
-@pytest.mark.parametrize('delta', [-1, -2, -7])
+@pytest.mark.parametrize("delta", [-1, -2, -7])
 def test_sample_negative_delta_node_number(delta):
     sample = Sample(frame.poly[0].boundary, delta)
-    assert np.allclose(sample['node_number'], -delta*np.ones(4))
+    assert np.allclose(sample["node_number"], -delta * np.ones(4))
 
 
-@pytest.mark.parametrize('delta', [-1, -11])
+@pytest.mark.parametrize("delta", [-1, -11])
 def test_sample_negative_delta_boundary_length(delta):
     sample = Sample(frame.poly[0].boundary, delta)
-    assert len(sample['radius']) == -delta*4
+    assert len(sample["radius"]) == -delta * 4
 
 
 def test_negative_float_error():
@@ -47,17 +47,17 @@ def test_boundary_ring_error():
 
 def test_boundary_positive_delta_a():
     sample = Sample(frame.poly[0].boundary, 1.0)
-    assert len(sample) == 2*1 + 2*3
+    assert len(sample) == 2 * 1 + 2 * 3
 
 
 def test_boundary_positive_delta_b():
     sample = Sample(frame.poly[0].boundary, 1.5)
-    assert len(sample) == (2*1 + 2*2)
+    assert len(sample) == (2 * 1 + 2 * 2)
 
 
 def test_multipolygon():
     coilset = CoilSet(nfield=-2)
-    coilset.coil.insert({'ring': [4.2, -0.4, 1.25, 0.5]})
+    coilset.coil.insert({"ring": [4.2, -0.4, 1.25, 0.5]})
     coilset.field.solve()
     assert len(coilset.field) == 0
 
@@ -70,8 +70,8 @@ def test_nfield_none():
 
 
 def test_plasma():
-    coilset = CoilSet(nfield=1, dplasma=-5, tplasma='hex')
-    coilset.firstwall.insert({'ellip': [1, 0, 0.1, 0.3]})
+    coilset = CoilSet(nfield=1, dplasma=-5, tplasma="hex")
+    coilset.firstwall.insert({"ellip": [1, 0, 0.1, 0.3]})
     coilset.coil.insert(1.1, 0, 0.05, 0.1)
     coilset.field.solve()
     assert len(coilset.field) == 4
@@ -109,6 +109,5 @@ def test_store_load():
     assert np.allclose(bp, coilset.field.bp)
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     pytest.main([__file__])

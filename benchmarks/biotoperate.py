@@ -10,12 +10,12 @@ class PlasmaGrid:
     """Benchmark biotoperate methods - plasmagrid base class."""
 
     timer = timeit.default_timer
-    dirname = '.nova'
+    dirname = ".nova"
 
     @property
     def filename(self):
         """Return coilset filename."""
-        return './plasmagrid_coilset'
+        return "./plasmagrid_coilset"
 
     @property
     def filepath(self):
@@ -24,16 +24,15 @@ class PlasmaGrid:
 
     def setup_cache(self):
         """Build reference coilset."""
-        coilset = CoilSet(dplasma=-500, filename=self.filename,
-                          dirname=self.dirname)
-        coilset.firstwall.insert({'ellip': [4.2, -0.4, 1.25, 4.2]}, turn='hex')
+        coilset = CoilSet(dplasma=-500, filename=self.filename, dirname=self.dirname)
+        coilset.firstwall.insert({"ellip": [4.2, -0.4, 1.25, 4.2]}, turn="hex")
         coilset.plasmagrid.solve()
         coilset.plasmagrid.svd_rank = 75
         coilset.store()
 
     def remove(self):
         """Remove coilset."""
-        os.remove(self.filepath.with_suffix('.nc'))
+        os.remove(self.filepath.with_suffix(".nc"))
 
     def setup(self):
         """Load coilset from file."""
@@ -45,7 +44,7 @@ class PlasmaTurns(PlasmaGrid):
 
     number = 5000
     params = [10, 75, 200, 500, -1]
-    param_names = ['svd_rank']
+    param_names = ["svd_rank"]
 
     def setup(self, svd_rank):
         """Load coilset from file and set svd rank."""
@@ -54,7 +53,7 @@ class PlasmaTurns(PlasmaGrid):
 
     def time_update_turns(self, svd_rank):
         """Time generation of plasma grid."""
-        self.coilset.plasmagrid.update_turns('Psi', svd_rank != -1)
+        self.coilset.plasmagrid.update_turns("Psi", svd_rank != -1)
 
 
 class PlasmaEvaluate(PlasmaGrid):
@@ -64,7 +63,7 @@ class PlasmaEvaluate(PlasmaGrid):
 
     def time_flux_function_ev_only(self):
         """Time forced evaluation of flux function."""
-        self.coilset.plasmagrid.operator['Psi'].evaluate()
+        self.coilset.plasmagrid.operator["Psi"].evaluate()
 
     def time_flux_function(self):
         """Time computation of radial field."""
@@ -95,8 +94,7 @@ PlasmaOperate.time_solve.number = 10
 PlasmaOperate.time_load_operators.number = 100
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     biot = PlasmaTurns()
     biot.setup_cache()
     biot.setup(75)

@@ -1,4 +1,3 @@
-
 from dataclasses import dataclass, InitVar
 from typing import Union
 import sys
@@ -40,12 +39,12 @@ class SultanSpectrum(SultanIO):
         """Return trial plan."""
         trial = Trial(self.experiment, self.phase)
         plan = trial.plan.droplevel(1, axis=1)
-        return plan.drop(columns='File'), trial.phase.name
+        return plan.drop(columns="File"), trial.phase.name
 
     @property
     def binaryfilepath(self):
         """Return full path of binary datafile."""
-        return self.database.binary_filepath('fluidresponse.h5')
+        return self.database.binary_filepath("fluidresponse.h5")
 
     @property
     def filepath(self):
@@ -55,7 +54,7 @@ class SultanSpectrum(SultanIO):
     @property
     def filename(self):
         """Return datafile filename."""
-        return f'{self.experiment}_{self.phase}_{self.side}'
+        return f"{self.experiment}_{self.phase}_{self.side}"
 
     def _read_data(self):
         """Refit fluid model to waveform data."""
@@ -64,21 +63,23 @@ class SultanSpectrum(SultanIO):
         fluidprofile = FluidProfile(sample, [4], 0, verbose=False)
         coefficents = pandas.DataFrame(
             index=range(sample.samplenumber),
-            columns=fluidprofile.shot_coefficents.index, dtype='float')
-        tick = clock(sample.samplenumber,
-                     header=f'Calculating {self.filename} fluid response.')
+            columns=fluidprofile.shot_coefficents.index,
+            dtype="float",
+        )
+        tick = clock(
+            sample.samplenumber, header=f"Calculating {self.filename} fluid response."
+        )
         for shot in sample.sequence():
             fluidprofile.read_data()
             coefficents.iloc[shot] = fluidprofile.shot_coefficents
             tick.tock()
-        return coefficents.astype('float')
+        return coefficents.astype("float")
 
     def plot(self):
         """Plot spectrum."""
-        plt.plot(self.data.frequency, self.data.steadystate, 'o')
+        plt.plot(self.data.frequency, self.data.steadystate, "o")
 
 
-if __name__ == '__main__':
-
-    spectrum = SultanSpectrum('CSJA_5', 0, 'Left')
+if __name__ == "__main__":
+    spectrum = SultanSpectrum("CSJA_5", 0, "Left")
     spectrum.plot()

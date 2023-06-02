@@ -22,11 +22,11 @@ class F4E_Data(Plotter):
         FE Analysis simulating non constant gap between inner legs
     """
 
-    filename: str = field(init=False, default='CCL_Deformed_Coils-nm')
-    gaps: list[str] = field(init=False, default_factory=lambda:
-                            ['V0', 'V1', 'V3', 'V4'])
-    datasheet: pandas.DataFrame = field(init=False,
-                                        default_factory=pandas.DataFrame)
+    filename: str = field(init=False, default="CCL_Deformed_Coils-nm")
+    gaps: list[str] = field(
+        init=False, default_factory=lambda: ["V0", "V1", "V3", "V4"]
+    )
+    datasheet: pandas.DataFrame = field(init=False, default_factory=pandas.DataFrame)
     mesh: pv.PolyData = field(init=False, repr=False)
 
     def __post_init__(self):
@@ -36,14 +36,12 @@ class F4E_Data(Plotter):
     @property
     def excel_file(self):
         """Return excel data filepath."""
-        return os.path.join(root_dir, 'input/geometry/ITER',
-                            self.filename + '.xlsx')
+        return os.path.join(root_dir, "input/geometry/ITER", self.filename + ".xlsx")
 
     @property
     def vtk_file(self):
         """Return vtk data filepath."""
-        return os.path.join(root_dir, 'data/Assembly',
-                            self.filename + '.vtk')
+        return os.path.join(root_dir, "data/Assembly", self.filename + ".vtk")
 
     def load(self):
         """Load mesh from vtk datafile."""
@@ -57,7 +55,7 @@ class F4E_Data(Plotter):
         self.load_geometry()
         self.load_dataset()
         self.load_cage()
-        self.diff('v3', 'v0')
+        self.diff("v3", "v0")
         self.mesh.save(self.vtk_file)
 
     @property
@@ -74,21 +72,19 @@ class F4E_Data(Plotter):
     def load_geometry(self):
         """Load single coil referance geometry."""
         self.gap = self.gaps[0]
-        points = self.datasheet.loc[:, ['X', 'Y', 'Z']]
+        points = self.datasheet.loc[:, ["X", "Y", "Z"]]
         points = self.close_loop(points)
         self.mesh = pv.Spline(points)
-        self.mesh['arc_length'] /= self.mesh['arc_length'][-1]
+        self.mesh["arc_length"] /= self.mesh["arc_length"][-1]
 
     @staticmethod
     def close_loop(data: pandas.DataFrame, axis=0):
         """Return data set with startpoint appended to end."""
-        return pandas.concat([data, data.iloc[:1, :]], axis=axis,
-                             ignore_index=True)
+        return pandas.concat([data, data.iloc[:1, :]], axis=axis, ignore_index=True)
 
     def load_data(self, coil: int):
         """Return displacment for single coil and store in pyvista mesh."""
-        data = self.datasheet.loc[:, [f'R-TF{coil}', f'T-TF{coil}',
-                                      f'Z-TF{coil}']]
+        data = self.datasheet.loc[:, [f"R-TF{coil}", f"T-TF{coil}", f"Z-TF{coil}"]]
         return self.close_loop(data)
 
     def load_dataset(self):
@@ -96,16 +92,16 @@ class F4E_Data(Plotter):
         for gap in self.gaps:
             self.gap = gap
             for coil in range(1, 19):
-                self.mesh[f'{gap}-TFC{coil}'] = self.load_data(coil)
+                self.mesh[f"{gap}-TFC{coil}"] = self.load_data(coil)
 
     def interpolate(self, mesh: pv.PolyData):
         """Interpolate coil displacments onto new vtk mesh."""
         for array in self.mesh.array_names:
-            if array == 'arc_length':
+            if array == "arc_length":
                 continue
             mesh[array] = scipy.interpolate.interp1d(
-                self.mesh['arc_length'], self.mesh[array],
-                axis=0)(mesh['arc_length'])
+                self.mesh["arc_length"], self.mesh[array], axis=0
+            )(mesh["arc_length"])
         return mesh
 
     def pattern(self, mesh: pv.PolyData):
@@ -115,10 +111,10 @@ class F4E_Data(Plotter):
         for i in range(18):
             coil = TFC1.copy()
             coil.clear_data()
-            coil['arc_length'] = TFC1['arc_length']
+            coil["arc_length"] = TFC1["arc_length"]
             for gap in self.gaps:
-                coil[gap.lower()] = TFC1[f'{gap}-TFC{i+1}']
-            coil.rotate_z(360*i / 18, transform_all_input_vectors=True)
+                coil[gap.lower()] = TFC1[f"{gap}-TFC{i+1}"]
+            coil.rotate_z(360 * i / 18, transform_all_input_vectors=True)
             mesh += coil
         return mesh
 
@@ -127,7 +123,7 @@ class F4E_Data(Plotter):
         """Return reference TFC1 single turn centerline."""
         mesh = ClusterTurns(UniformWindingPack().mesh, 1).mesh.extract_cells(0)
         mesh = pv.Spline(np.append(mesh.points, mesh.points[:1], axis=0))
-        mesh['arc_length'] /= mesh['arc_length'][-1]
+        mesh["arc_length"] /= mesh["arc_length"][-1]
         return mesh
 
     def load_cage(self):
@@ -137,9 +133,8 @@ class F4E_Data(Plotter):
         self.mesh = self.pattern(mesh)
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     f4e = F4E_Data()
-    #f4e.reload()
-    #f4e.mesh.save(f4e.vtk_file)
-    #f4e.warp()
+    # f4e.reload()
+    # f4e.mesh.save(f4e.vtk_file)
+    # f4e.warp()

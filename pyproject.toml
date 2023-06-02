@@ -81,6 +81,7 @@ tuna = "^0.5.11"
 virtualenv = "^20.23.0"
 jupyterlab = "^4.0.0"
 pre-commit = "^3.3.2"
+black = "^23.3.0"
 
 [tool.poetry.extras]
 ansys = [
@@ -141,6 +142,10 @@ benchmark = "nova.scripts.benchmark:benchmark"
 extrapolate = "nova.imas.scripts:extrapolate"
 filepath = "nova.database.scripts:filepath"
 configure = "nova.scripts.configure:configure"
+
+[tool.black]
+line-length = 88
+target-version = ['py310']
 
 [tool.pytest.ini_options]
 addopts = "-rfEs --doctest-modules"

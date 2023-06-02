@@ -14,34 +14,33 @@ from shapely.geometry.polygon import LinearRing, Polygon
 from scipy.interpolate import splprep, splev
 
 
-#eqdsk = read_eqdsk(file='burn').eqdsk
-#sf = SF(eqdsk=eqdsk)
-#xbdry, zbdry = sf.get_boundary(alpha=1, locate='zmin')
+# eqdsk = read_eqdsk(file='burn').eqdsk
+# sf = SF(eqdsk=eqdsk)
+# xbdry, zbdry = sf.get_boundary(alpha=1, locate='zmin')
 
 
 class loop:
-
-    def __init__(self, x, z, interp='rdp', close=True, **kwargs):
+    def __init__(self, x, z, interp="rdp", close=True, **kwargs):
         self.close = close
         self.set_interpolator(interp, **kwargs)
         self.load(x, z, **kwargs)
 
     def set_interpolator(self, name, **kwargs):
-        if name == 'linear':
+        if name == "linear":
             self.interpolate = self.linear
-            self.n = kwargs.get('n', 50)  # point number
-        elif name == 'rdp':
+            self.n = kwargs.get("n", 50)  # point number
+        elif name == "rdp":
             self.interpolate = self.rdp
-            self.f = kwargs.get('f', 0.0005)  # epsilon = f * loop_length
+            self.f = kwargs.get("f", 0.0005)  # epsilon = f * loop_length
 
     def load(self, x, z, **kwargs):
         x, z = self.orient(x, z)
-        close = kwargs.get('close', self.close)
+        close = kwargs.get("close", self.close)
         if close:
             x, z = self.close_loop(x, z)
         self.ring = LinearRing(np.c_[x, z])  # mutable loop
-        if 'shrink' in kwargs:
-            self.shrink(kwargs['shrink'])
+        if "shrink" in kwargs:
+            self.shrink(kwargs["shrink"])
         else:
             self.interpolate()
 
@@ -57,7 +56,7 @@ class loop:
         dx = bounds[2] - bounds[0]
         dz = bounds[3] - bounds[1]
         delta = fraction * np.min([dx, dz]) / 2
-        offset_ring = self.ring.parallel_offset(delta, side='left')
+        offset_ring = self.ring.parallel_offset(delta, side="left")
         x, z = self.smooth(*offset_ring.xy, s=1)
         x, z = self.orient(x, z)
         self.load(x, z)
@@ -68,12 +67,12 @@ class loop:
         # counter clockwise starting at zmin
         geom.order(x, z, anti=True)
         iloc = np.argmin(z)
-        x = np.append(x[iloc:], x[:iloc+1])
-        z = np.append(z[iloc:], z[:iloc+1])
+        x = np.append(x[iloc:], x[: iloc + 1])
+        z = np.append(z[iloc:], z[: iloc + 1])
         return x, z
 
     def close_loop(self, x, z, eps=1e-6):
-        if np.sqrt((x[0]-x[-1])**2 + (z[0]-z[-1])**2) > eps:
+        if np.sqrt((x[0] - x[-1]) ** 2 + (z[0] - z[-1]) ** 2) > eps:
             x_ = np.mean([x[0], x[-1]])
             z_ = np.mean([z[0], z[-1]])
             x, z = np.append(x, x_), np.append(z, z_)
@@ -99,21 +98,21 @@ class loop:
     def plot(self, *args, ax=None, **kwargs):
         if ax is None:
             ax = plt.gca()
-        for segment in ['inner', 'outer']:
+        for segment in ["inner", "outer"]:
             x, z = self.get_points(segment).T
             ax.plot(x, z, *args, **kwargs)
-        ax.axis('equal')
+        ax.axis("equal")
 
-    def get_points(self, segment='loop', dim=2):
+    def get_points(self, segment="loop", dim=2):
         x, z = self.ring.xy
-        if segment != 'loop':
+        if segment != "loop":
             imax = np.argmax(z)
-            if segment == 'inner':
+            if segment == "inner":
                 x, z = x[imax:], z[imax:]
-            elif segment == 'outer':
-                x, z = x[:imax+1], z[:imax+1]
+            elif segment == "outer":
+                x, z = x[: imax + 1], z[: imax + 1]
             else:
-                errtxt = 'segment {segment} not in [loop, inner, outer]'
+                errtxt = "segment {segment} not in [loop, inner, outer]"
                 raise IndexError(errtxt)
         points = np.c_[x, z]
         if dim == 3:
@@ -126,43 +125,42 @@ class gridgen:
 
     def __init__(self, x, z, nr, nc, shrink=0.5):
         self.geom = pygmsh.built_in.Geometry()
-        self.geom.add_raw_code('Mesh.Algorithm=8;')
+        self.geom.add_raw_code("Mesh.Algorithm=8;")
         self.set_loops(x, z, shrink=shrink)
         self.set_points(lcar=0.1)
         self.set_edge(nr, nc)
 
-    def set_loops(self, x, z, shrink=0.5, interp='rdp'):
+    def set_loops(self, x, z, shrink=0.5, interp="rdp"):
         self.loops = {}
-        self.loops['sep'] = loop(x, z, interp=interp)
-        self.loops['core'] = loop(x, z, interp=interp, shrink=shrink)
+        self.loops["sep"] = loop(x, z, interp=interp)
+        self.loops["core"] = loop(x, z, interp=interp, shrink=shrink)
 
     def set_points(self, lcar=None):
         self.points = {}
         for loop in self.loops:
             points = self.loops[loop].get_points(dim=3)
-            self.points[loop] = \
-                [self.geom.add_point(p, lcar=lcar) for p in points[:-1]]
+            self.points[loop] = [self.geom.add_point(p, lcar=lcar) for p in points[:-1]]
             self.points[loop].append(self.points[loop][0])
 
     def set_edge(self, nr, nc):
         lines = []
-        lines.append(self.geom.add_line(self.points['sep'][-1],
-                                        self.points['core'][-1]))
-        lines.append(self.geom.add_spline(self.points['core'][::-1]))
-        lines.append(self.geom.add_line(self.points['core'][0],
-                                        self.points['sep'][0]))
-        lines.append(self.geom.add_spline(self.points['sep']))
-        #ll = self.geom.add_line_loop(lines)
-        #surface = self.geom.add_plane_surface(ll)
+        lines.append(
+            self.geom.add_line(self.points["sep"][-1], self.points["core"][-1])
+        )
+        lines.append(self.geom.add_spline(self.points["core"][::-1]))
+        lines.append(self.geom.add_line(self.points["core"][0], self.points["sep"][0]))
+        lines.append(self.geom.add_spline(self.points["sep"]))
+        # ll = self.geom.add_line_loop(lines)
+        # surface = self.geom.add_plane_surface(ll)
 
         ll = self.geom.add_line_loop([lines[-1]])
         surface = self.geom.add_plane_surface(ll)
 
-        self.geom.add_physical_surface(surface, label='plasma')
-        self.geom.add_physical_line(lines, label='separatrix')
-        #self.geom.add_physical_line(lines[1], 'core')
+        self.geom.add_physical_surface(surface, label="plasma")
+        self.geom.add_physical_line(lines, label="separatrix")
+        # self.geom.add_physical_line(lines[1], 'core')
 
-        '''
+        """
         self.geom.set_transfinite_lines([lines[0], lines[2]], nr)
         self.geom.set_transfinite_lines([lines[1], lines[3]], nc)
         self.geom.set_transfinite_surface(surface)
@@ -171,18 +169,17 @@ class gridgen:
         self.geom.add_physical_surface(surface, 'plasma')
         self.geom.add_physical_line(lines[-1], 'separatrix')
         self.geom.add_physical_line(lines[1], 'core')
-        '''
+        """
 
     def generate(self, verbose=False):
-        self.mesh = pygmsh.generate_mesh(self.geom, dim=3, verbose=verbose,
-                                         mesh_file_type='msh')
+        self.mesh = pygmsh.generate_mesh(
+            self.geom, dim=3, verbose=verbose, mesh_file_type="msh"
+        )
 
     def plot(self):
         for loop in self.loops:
-            self.loops[loop].plot('-', color='gray')
+            self.loops[loop].plot("-", color="gray")
         mesh.plot(self.mesh[0], self.mesh[1])
-
-
 
 
 gg = gridgen(xbdry, zbdry, nr=10, nc=60, shrink=0.8)
@@ -190,11 +187,11 @@ gg = gridgen(xbdry, zbdry, nr=10, nc=60, shrink=0.8)
 gg.generate(verbose=True)
 
 ax = plt.subplots(1, 1, figsize=(6, 8))[1]
-plt.axis('off')
+plt.axis("off")
 gg.plot()
 
 
-'''
+"""
 class fixed_boundary:
 
     def __init__(self, npoints=80):
@@ -205,10 +202,10 @@ class fixed_boundary:
 
     def core(self, )
 
-'''
+"""
 
 
-'''
+"""
 #triangulation = tri.Triangulation(points[:, 0], points[:, 1],
 #                                  cells['triangle'])
 
@@ -291,4 +288,4 @@ ax.tricontour(triangulation_face, psi_norm_f, colors='gray',
 
 #quadplot(points[:, 0], points[:, 1], cells['quad'],
 #         facecolors=[], edgecolors='gray')
-'''
+"""

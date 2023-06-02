@@ -17,21 +17,21 @@ class TurnGeom:
 
     def __post_init__(self):
         """Calculate average geometrical parameters."""
-        self.data['area'] = self.frame.area.sum()
-        for attr in 'xyz':
+        self.data["area"] = self.frame.area.sum()
+        for attr in "xyz":
             self.data[attr] = self.weighted_mean(attr)
-        if self.frame.segment[0] == 'ring':  # update ring circumference
-            self.data['dy'] = 2*np.pi*self.data['x']
-        self.data['rms'] = self.weighted_rms()
-        self.data['nturn'] = self.frame.nturn.sum()
-        self.data['turn'] = self.frame.section[0]
-        self.data['dl'] = self.frame['dl'][0]
-        self.data['dt'] = self.frame['dt'][0]
+        if self.frame.segment[0] == "ring":  # update ring circumference
+            self.data["dy"] = 2 * np.pi * self.data["x"]
+        self.data["rms"] = self.weighted_rms()
+        self.data["nturn"] = self.frame.nturn.sum()
+        self.data["turn"] = self.frame.section[0]
+        self.data["dl"] = self.frame["dl"][0]
+        self.data["dt"] = self.frame["dt"][0]
 
     @property
     def area(self):
         """Return total cross-sectional area."""
-        return self.data['area']
+        return self.data["area"]
 
     @property
     def columns(self) -> list[str]:
@@ -51,17 +51,17 @@ class TurnGeom:
 class Turn(CoilSetAttrs):
     """Construct single coil from turns."""
 
-    turn: str = 'rectangle'
-    section: str = 'rectangle'
-    required: list[str] = field(default_factory=lambda: ['x', 'z', 'dl', 'dt'])
-    default: dict = field(init=False, default_factory=lambda: {
-        'label': 'Coil', 'part': 'coil', 'active': True})
+    turn: str = "rectangle"
+    section: str = "rectangle"
+    required: list[str] = field(default_factory=lambda: ["x", "z", "dl", "dt"])
+    default: dict = field(
+        init=False,
+        default_factory=lambda: {"label": "Coil", "part": "coil", "active": True},
+    )
 
     def set_conditional_attributes(self):
         """Set conditional attrs."""
-        self.ifthen(['delta', 'section'],
-                    [-1, 'rectangle'],
-                    'segment', 'cylinder')
+        self.ifthen(["delta", "section"], [-1, "rectangle"], "segment", "cylinder")
 
     def insert(self, *args, required=None, iloc=None, **additional):
         """
@@ -90,21 +90,33 @@ class Turn(CoilSetAttrs):
         """
         self.attrs = additional
         name = self.attrs.get(
-            'name', self.frame.build_index(1, name=self.attrs['label'])[0])
-        #self.attrs['name'] = name
-        self.attrs['label'] = \
-            ''.join(character for i, character in enumerate(name[0])
-                    if all(character == _name[i] for _name in name))
-        subattrs = {'section': self.turn, 'name': name, 'frame': name,
-                    'delim': '_', 'link': True} | self.attrs
-        #if isinstance(name, list):
+            "name", self.frame.build_index(1, name=self.attrs["label"])[0]
+        )
+        # self.attrs['name'] = name
+        self.attrs["label"] = "".join(
+            character
+            for i, character in enumerate(name[0])
+            if all(character == _name[i] for _name in name)
+        )
+        subattrs = {
+            "section": self.turn,
+            "name": name,
+            "frame": name,
+            "delim": "_",
+            "link": True,
+        } | self.attrs
+        # if isinstance(name, list):
         #    self.attrs['name'] = self.attrs['label']
         with self.insert_required(required):
             subindex = self.subframe.insert(*args, **subattrs)
         poly = shapely.geometry.MultiPolygon(
-            [polygon.poly for polygon in self.subframe.poly[subindex]])
-        attrs = {attr: self.attrs[attr] for attr in self.attrs if not
-                 isinstance(self.attrs[attr], (dict, list, np.ndarray))}
+            [polygon.poly for polygon in self.subframe.poly[subindex]]
+        )
+        attrs = {
+            attr: self.attrs[attr]
+            for attr in self.attrs
+            if not isinstance(self.attrs[attr], (dict, list, np.ndarray))
+        }
         index = self.frame.insert(poly, iloc=iloc, **attrs)
         geom = TurnGeom(self.subframe.loc[subindex, :])
         self.frame.loc[index, geom.columns] = geom.data.values()

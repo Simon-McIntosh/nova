@@ -22,13 +22,15 @@ class SampleData:
     _raw: pandas.DataFrame = field(init=False, repr=False)
     _lowpass: pandas.DataFrame = field(init=False, repr=False)
     _heatindex: HeatIndex = field(init=False, repr=False)
-    reload: SimpleNamespace = field(init=False, repr=False,
-                                    default_factory=SimpleNamespace)
+    reload: SimpleNamespace = field(
+        init=False, repr=False, default_factory=SimpleNamespace
+    )
 
     def __post_init__(self):
         """Init data pipeline."""
-        self.reload.__init__(raw=True, lowpass=True, heatindex=True,
-                             offset=True, waveform=True)
+        self.reload.__init__(
+            raw=True, lowpass=True, heatindex=True, offset=True, waveform=True
+        )
 
     @property
     def lowpass_filter(self):
@@ -95,11 +97,19 @@ class SampleData:
             Empty dataframe with time index and default columns names.
 
         """
-        variables = [('t', 's'), ('mdot', 'kg/s'), ('Ipulse', 'A'),
-                     ('Tin', 'K'), ('Tout', 'K'),
-                     ('Pin', 'Pa'), ('Pout', 'Pa'),
-                     ('hin', 'J/Kg'), ('hout', 'J/Kg'),
-                     ('Qdot', 'W'), ('Qdot_norm', 'W')]
+        variables = [
+            ("t", "s"),
+            ("mdot", "kg/s"),
+            ("Ipulse", "A"),
+            ("Tin", "K"),
+            ("Tout", "K"),
+            ("Pin", "Pa"),
+            ("Pout", "Pa"),
+            ("hin", "J/Kg"),
+            ("hout", "J/Kg"),
+            ("Qdot", "W"),
+            ("Qdot_norm", "W"),
+        ]
         columns = pandas.MultiIndex.from_tuples(variables)
         return pandas.DataFrame(columns=columns)
 
@@ -121,39 +131,43 @@ class SampleData:
 
         """
         data = self._initialize_dataframe()
-        data['t'] = self.sultandata['Time']
-        data['mdot'] = self.sultandata[f'dm/dt {self.side}'] * 1e-3
-        data['Ipulse'] = self.sultandata['PS EEI (I)']
-        side = ['Left', 'Right']
-        for end_index, end in enumerate(['in', 'out']):
-            temperature_index = 1 + side.index(self.side) + 2*end_index
-            temperature_array = [f'T{temperature_index}{1 + probe}'
-                                 for probe in range(4)]
-            data[f'T{end}'] = self.sultandata[temperature_array].mean(axis=1)
+        data["t"] = self.sultandata["Time"]
+        data["mdot"] = self.sultandata[f"dm/dt {self.side}"] * 1e-3
+        data["Ipulse"] = self.sultandata["PS EEI (I)"]
+        side = ["Left", "Right"]
+        for end_index, end in enumerate(["in", "out"]):
+            temperature_index = 1 + side.index(self.side) + 2 * end_index
+            temperature_array = [
+                f"T{temperature_index}{1 + probe}" for probe in range(4)
+            ]
+            data[f"T{end}"] = self.sultandata[temperature_array].mean(axis=1)
             # data[f'T{end}'] = self.sultandata[f'T {end} {self.side}']
-            data[f'P{end}'] = self.sultandata[f'P {end} {self.side}'] * 1e5
+            data[f"P{end}"] = self.sultandata[f"P {end} {self.side}"] * 1e5
         if lowpass:
-            timestep = np.diff(data['t'], axis=0).mean()
-            windowlength = int(0.5 / (timestep*self.frequency))
+            timestep = np.diff(data["t"], axis=0).mean()
+            windowlength = int(0.5 / (timestep * self.frequency))
             if windowlength % 2 == 0:
                 windowlength += 1
             if windowlength < 5:
                 windowlength = 5
-            for attribute in ['mdot', 'Ipulse', 'Tin', 'Tout', 'Pin', 'Pout']:
+            for attribute in ["mdot", "Ipulse", "Tin", "Tout", "Pin", "Pout"]:
                 data[attribute] = scipy.signal.savgol_filter(
-                    np.squeeze(data[attribute]), windowlength, polyorder=3)
-        for end in ['in', 'out']:  # Calculate enthapy
-            temperature = data[f'T{end}'].values
-            pressure = data[f'P{end}'].values
-            data[f'h{end}'] = CoolProp.PropsSI('H', 'T', temperature,
-                                               'P', pressure, 'Helium')
+                    np.squeeze(data[attribute]), windowlength, polyorder=3
+                )
+        for end in ["in", "out"]:  # Calculate enthapy
+            temperature = data[f"T{end}"].values
+            pressure = data[f"P{end}"].values
+            data[f"h{end}"] = CoolProp.PropsSI(
+                "H", "T", temperature, "P", pressure, "Helium"
+            )
         # net heating
-        data['Qdot'] = data[('mdot', 'kg/s')] * \
-            (data[('hout', 'J/Kg')] - data[('hin', 'J/Kg')])
+        data["Qdot"] = data[("mdot", "kg/s")] * (
+            data[("hout", "J/Kg")] - data[("hin", "J/Kg")]
+        )
         # per active length
-        data['Qdot'] /= 0.39
+        data["Qdot"] /= 0.39
         # normalize Qdot heating by |Bdot|**2
-        data['Qdot_norm'] = data['Qdot'] / self.excitation_field_rate**2
+        data["Qdot_norm"] = data["Qdot"] / self.excitation_field_rate**2
         return data
 
     @property
@@ -193,7 +207,7 @@ class SampleData:
         return self._heatindex
 
 
-if __name__ == '__main__':
-    trial = Trial('CSJA13', -1, 'ac')
+if __name__ == "__main__":
+    trial = Trial("CSJA13", -1, "ac")
     sourcedata = SourceData(trial, 2)
     sampledata = SampleData(sourcedata, True)

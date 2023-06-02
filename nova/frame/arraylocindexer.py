@@ -37,7 +37,7 @@ class ArrayLocIndexer(DataLocIndexer):
 
     def __post_init__(self):
         """Update referance data arrays."""
-        self.attrs = self.frame.attrs['metaframe'].array
+        self.attrs = self.frame.attrs["metaframe"].array
         self._data = {attr: self.frame[attr] for attr in self.attrs}
 
     def __call__(self):

@@ -47,21 +47,25 @@ class PolygonConstants(Constants):
 
     def Gamma(self, phi):
         """Return Gamma coefficient."""
-        return self.gamma + self.b1*(self.rs - self.r * np.cos(phi))
+        return self.gamma + self.b1 * (self.rs - self.r * np.cos(phi))
 
     def G2(self, phi):
         """Return G**2 coefficient (override Constant)."""
-        return self.gamma**2 + self.r**2 * np.sin(phi)**2
+        return self.gamma**2 + self.r**2 * np.sin(phi) ** 2
 
     def B2(self, phi):
         """Return B2 coefficient (override Constant)."""
-        return (self.r1 - self.r * np.cos(phi))**2 + \
-            self.a02 * self.r**2 * np.sin(phi)**2
+        return (self.r1 - self.r * np.cos(phi)) ** 2 + self.a02 * self.r**2 * np.sin(
+            phi
+        ) ** 2
 
     def D2(self, phi):
         """Return D2 coefficient (override Constant)."""
-        return self.gamma**2 + self.r**2 * np.sin(phi)**2 + \
-            (self.rs - self.r * np.cos(phi))**2
+        return (
+            self.gamma**2
+            + self.r**2 * np.sin(phi) ** 2
+            + (self.rs - self.r * np.cos(phi)) ** 2
+        )
 
     def beta1(self, phi):
         """Return beta1 coefficient."""
@@ -73,8 +77,9 @@ class PolygonConstants(Constants):
 
     def beta3(self, phi):
         """Return beta3 coefficient."""
-        return (self.gamma * (self.rs - self.r * np.cos(phi)) - self.b1 *
-                self.G2(phi)) / (self.r * np.sin(phi) * np.sqrt(self.D2(phi)))
+        return (
+            self.gamma * (self.rs - self.r * np.cos(phi)) - self.b1 * self.G2(phi)
+        ) / (self.r * np.sin(phi) * np.sqrt(self.D2(phi)))
 
     @cached_property
     def a2(self):
@@ -97,11 +102,15 @@ class Polygon(PolygonConstants, Matrix):
     edge: BiotFrame = field(repr=False, init=False)
     reduction_matrix: np.ndarray = field(repr=False, init=False)
 
-    name: ClassVar[str] = 'polygon'  # element name
-    attrs: ClassVar[dict[str, str]] = dict(area='area')
+    name: ClassVar[str] = "polygon"  # element name
+    attrs: ClassVar[dict[str, str]] = dict(area="area")
     metadata: ClassVar[dict[str, list]] = dict(
-        required=['ref', 'rv1', 'rv2', 'zv1', 'zv2'], additional=[],
-        available=[], array=['ref'], base=[])
+        required=["ref", "rv1", "rv2", "zv1", "zv2"],
+        additional=[],
+        available=[],
+        array=["ref"],
+        base=[],
+    )
 
     def __post_init__(self):
         """Initialize biotset and edgeframe."""
@@ -121,41 +130,45 @@ class Polygon(PolygonConstants, Matrix):
 
     def build(self):
         """Extract polygon edges and build reduction matrix."""
-        self.edge = BiotFrame(**self.metadata, label='edge', delim='-')
+        self.edge = BiotFrame(**self.metadata, label="edge", delim="-")
         for ref, poly in enumerate(self.source.poly):
             coords = poly.poly.boundary.xy
-            self.edge.insert(ref,
-                             coords[0][:-1], coords[0][1:],
-                             coords[1][:-1], coords[1][1:],
-                             metadata=self.metadata)
+            self.edge.insert(
+                ref,
+                coords[0][:-1],
+                coords[0][1:],
+                coords[1][:-1],
+                coords[1][1:],
+                metadata=self.metadata,
+            )
         self.edge.set_target(len(self.target))
         for attr in self.edge:
-            if attr == 'ref':
+            if attr == "ref":
                 continue
             self.data[attr] = self.edge(attr)
         with self.target_edge():
-            attrs = dict(r='x', z='z')
+            attrs = dict(r="x", z="z")
             for attr in attrs:
                 setattr(self, attr, self.target(attrs[attr]))
-        self.reduction_matrix = np.zeros((len(self.edge), len(self.source)),
-                                         dtype=bool)
+        self.reduction_matrix = np.zeros((len(self.edge), len(self.source)), dtype=bool)
         for i in range(len(self.source)):
-            self.reduction_matrix[:, i] = self.edge.loc[:, 'ref'] == i
+            self.reduction_matrix[:, i] = self.edge.loc[:, "ref"] == i
         self.rs = self.r1 + self.b1 * self.gamma
         #  self.r1 @ self.reduction_matrix).compute()
         print(self.beta1(0).shape)
         assert False
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     from nova.frame.coilset import CoilSet
 
     coilset = CoilSet(dcoil=-1, nplasma=150)
-    coilset.coil.insert([5, 6], 0.5, 0.2, 0.2, section='h', turn='r',
-                        nturn=300, segment='polygon')
-    coilset.coil.insert(5.5, 0.5, 0.6, 0.6, section='c', turn='r',
-                        nturn=300, segment='polygon')
+    coilset.coil.insert(
+        [5, 6], 0.5, 0.2, 0.2, section="h", turn="r", nturn=300, segment="polygon"
+    )
+    coilset.coil.insert(
+        5.5, 0.5, 0.6, 0.6, section="c", turn="r", nturn=300, segment="polygon"
+    )
     coilset.plot()
 
     coilset.grid.solve(100)

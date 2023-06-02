@@ -14,26 +14,25 @@ class DataAttrs:
     """Manage simulation and group dataset labels."""
 
     name: str | None = None
-    filename: str = 'vault'
-    datapath: str = 'data/Assembly'
+    filename: str = "vault"
+    datapath: str = "data/Assembly"
     group: str | None = field(init=False, default=None)
 
     def __post_init__(self):
         """Set dataset group for netCDF file load/store."""
         if self.group is None:
-            self.group = f'{self.__class__.__name__.lower()}'
+            self.group = f"{self.__class__.__name__.lower()}"
         if self.name is not None:
-            self.group += f'/{self.name}'
+            self.group += f"/{self.name}"
 
 
 @dataclass
 class Dataset(ABC, netCDF, DataAttrs):
     """Manage build, storage, and retrival of an xarray dataset."""
 
-    filename: str = 'vault'
-    directory: str = 'root'
-    data: xarray.Dataset = field(init=False, repr=False,
-                                 default_factory=xarray.Dataset)
+    filename: str = "vault"
+    directory: str = "root"
+    data: xarray.Dataset = field(init=False, repr=False, default_factory=xarray.Dataset)
 
     def __post_init__(self):
         """Load / build dataset."""
@@ -58,16 +57,15 @@ class ModelData(Dataset):
     @staticmethod
     def fft(data, axis=-2):
         """Apply fft to dataset."""
-        data.attrs['ncoil'] = data.dims['index']
-        data.attrs['nyquist'] = data.ncoil // 2
-        data['mode'] = range(data.nyquist + 1)
-        data['coefficient'] = ['real', 'imag', 'amplitude', 'phase']
+        data.attrs["ncoil"] = data.dims["index"]
+        data.attrs["nyquist"] = data.ncoil // 2
+        data["mode"] = range(data.nyquist + 1)
+        data["coefficient"] = ["real", "imag", "amplitude", "phase"]
         dimensions = list(data.delta.dims)
-        dimensions[axis] = 'mode'
-        dimensions = tuple(dimensions) + ('coefficient',)
-        data['fft'] = dimensions, \
-            np.zeros(tuple(data.dims[dim] for dim in dimensions))
-        coefficient = np.fft.rfft(data['delta'].data, axis=axis)
+        dimensions[axis] = "mode"
+        dimensions = tuple(dimensions) + ("coefficient",)
+        data["fft"] = dimensions, np.zeros(tuple(data.dims[dim] for dim in dimensions))
+        coefficient = np.fft.rfft(data["delta"].data, axis=axis)
         data.fft[..., 0] = coefficient.real
         data.fft[..., 1] = coefficient.imag
         data.fft[..., 2] = np.abs(coefficient) / data.nyquist
@@ -88,8 +86,10 @@ class ModelBase(ModelData):
 
     def load_filter(self):
         """Extract filter from dataset."""
-        self.filter = {dimension: self._filter(dimension).data
-                       for dimension in ['radial', 'tangential']}
+        self.filter = {
+            dimension: self._filter(dimension).data
+            for dimension in ["radial", "tangential"]
+        }
 
     @abstractmethod
     def _filter(self, label: str):

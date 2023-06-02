@@ -9,6 +9,5 @@ def test_netcdf_ext():
     netCDF().get_filepath()
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     pytest.main([__file__])

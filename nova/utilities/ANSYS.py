@@ -16,28 +16,27 @@ def edge(index, Narray):
 
 
 class table(object):
-
-    def __init__(self, filename, ext='.lib', nedge=6):
+    def __init__(self, filename, ext=".lib", nedge=6):
         self.nedge = nedge  # number of array items per line
-        f = open(filename + ext, 'w')
+        f = open(filename + ext, "w")
         self.f = f
 
     def __enter__(self):
         return self
 
     def format_txt(self, txt, nspace=12):
-        txt_split = txt.split('\n')
-        txt = ''
+        txt_split = txt.split("\n")
+        txt = ""
         for t in txt_split:
-            t = t.replace(' '*nspace, '')
-            txt += t+'\n'
+            t = t.replace(" " * nspace, "")
+            txt += t + "\n"
         return txt
 
     def nop(self):
-        self.f.write('/nop\n')  # supress output
+        self.f.write("/nop\n")  # supress output
 
     def go(self):
-        self.f.write('/go\n')  # resume output
+        self.f.write("/go\n")  # resume output
 
     def load(self, name, data, index=[]):
         if np.prod(np.shape(data)) == 1:
@@ -49,7 +48,7 @@ class table(object):
         self.shape = np.shape(data)
         self.nD = len(self.shape)  # 1D,2D,...5D
 
-    def write(self, primary, csysid=''):
+    def write(self, primary, csysid=""):
         self.write_header(primary, csysid=csysid)
         self.write_index()
         self.write_data()
@@ -59,32 +58,31 @@ class table(object):
         self.write_data()
 
     def write_text(self, text):
-        self.f.write(text + '\n')
+        self.f.write(text + "\n")
 
     def close(self):
         self.f.close()
 
     def boundary(self, BC, arguments, surface):
-        table = ''
+        table = ""
         for arg in arguments:
-            table = table + ',%' + arg + '%'
+            table = table + ",%" + arg + "%"
         table = table[1:]
-        if BC == 'hgen':
-            self.f.write('bfe,' + surface + ',' + BC + ',1,' + table + '\n\n')
-        elif BC == 'tcc':
-            self.f.write('rmodif,' + surface + ',14,' + table + '\n\n')
+        if BC == "hgen":
+            self.f.write("bfe," + surface + "," + BC + ",1," + table + "\n\n")
+        elif BC == "tcc":
+            self.f.write("rmodif," + surface + ",14," + table + "\n\n")
         else:
-            if BC in ['temp']:
-                BCtype = 'd'
-            elif BC in ['conv', 'hflux']:
-                BCtype = 'sf'
-            self.f.write(BCtype + ',' + surface + ',' +
-                         BC + ',' + table + '\n\n')
+            if BC in ["temp"]:
+                BCtype = "d"
+            elif BC in ["conv", "hflux"]:
+                BCtype = "sf"
+            self.f.write(BCtype + "," + surface + "," + BC + "," + table + "\n\n")
 
     def link_args(self, independant):
         for i, var in enumerate(independant):
-            self.f.write('*dim,' + var + ',table,1,,,time\n')
-            self.f.write(var + '(1,1) = arg' + str(i + 1) + '\n\n')
+            self.f.write("*dim," + var + ",table,1,,,time\n")
+            self.f.write(var + "(1,1) = arg" + str(i + 1) + "\n\n")
 
     def declare(self, name, shape):
         self.name = name
@@ -92,64 +90,84 @@ class table(object):
         self.nD = len(self.shape)
         self.write_header([])
 
-    def write_header(self, primary, csysid=''):
+    def write_header(self, primary, csysid=""):
         if self.nD > 3:
-            var_list = ['' for _ in range(self.nD)]
+            var_list = ["" for _ in range(self.nD)]
             var_list.append(csysid)
         else:
-            var_list = ['', '', '', csysid]
-        var_str = ''
+            var_list = ["", "", "", csysid]
+        var_str = ""
         for i, var in enumerate(primary):  # primary variables
             var_list[i] = var
         for var in var_list:
-            var_str = var_str + ',' + var
+            var_str = var_str + "," + var
 
         if not primary:  # empty primary array (array)
-            array_type = 'array'
+            array_type = "array"
         else:
-            array_type = 'table'
+            array_type = "table"
 
         self.ijk = np.ones(5)  # upto 5D
         for D in range(self.nD):
             self.ijk[D] = int(self.shape[D])
         if self.nD <= 3:
-            self.f.write('*dim,' + self.name + ',' + array_type +
-                         ',{:1.0f}'.format(self.ijk[0]) +
-                         ',{:1.0f}'.format(self.ijk[1]) +
-                         ',{:1.0f}'.format(self.ijk[2]) +
-                         var_str + '\n')
+            self.f.write(
+                "*dim,"
+                + self.name
+                + ","
+                + array_type
+                + ",{:1.0f}".format(self.ijk[0])
+                + ",{:1.0f}".format(self.ijk[1])
+                + ",{:1.0f}".format(self.ijk[2])
+                + var_str
+                + "\n"
+            )
         elif self.nD == 4:
-            self.f.write('*dim,' + self.name + ',' + array_type[:3] + '4' +
-                         ',{:1.0f}'.format(self.ijk[0]) +
-                         ',{:1.0f}'.format(self.ijk[1]) +
-                         ',{:1.0f}'.format(self.ijk[2]) +
-                         ',{:1.0f}'.format(self.ijk[3]) +
-                         var_str + '\n')
+            self.f.write(
+                "*dim,"
+                + self.name
+                + ","
+                + array_type[:3]
+                + "4"
+                + ",{:1.0f}".format(self.ijk[0])
+                + ",{:1.0f}".format(self.ijk[1])
+                + ",{:1.0f}".format(self.ijk[2])
+                + ",{:1.0f}".format(self.ijk[3])
+                + var_str
+                + "\n"
+            )
         elif self.nD == 5:
-            self.f.write('*dim,' + self.name + ',' + array_type[:3] + '5' +
-                         ',{:1.0f}'.format(self.ijk[0]) +
-                         ',{:1.0f}'.format(self.ijk[1]) +
-                         ',{:1.0f}'.format(self.ijk[2]) +
-                         ',{:1.0f}'.format(self.ijk[3]) +
-                         ',{:1.0f}'.format(self.ijk[4]) +
-                         var_str + '\n')
+            self.f.write(
+                "*dim,"
+                + self.name
+                + ","
+                + array_type[:3]
+                + "5"
+                + ",{:1.0f}".format(self.ijk[0])
+                + ",{:1.0f}".format(self.ijk[1])
+                + ",{:1.0f}".format(self.ijk[2])
+                + ",{:1.0f}".format(self.ijk[3])
+                + ",{:1.0f}".format(self.ijk[4])
+                + var_str
+                + "\n"
+            )
 
     def locate(self, i, cont=1, place=[0, 0, 0, 0, 0]):
-        loc = '('
+        loc = "("
         for j in range(self.nD):
             if i == j:
-                loc = loc + f'{cont:3.0f}'
+                loc = loc + f"{cont:3.0f}"
             else:
-                loc = loc + f'{place[j]:3.0f}'
+                loc = loc + f"{place[j]:3.0f}"
             if j + 1 < self.nD:
-                loc = loc + ','
-        loc = loc + ')'
+                loc = loc + ","
+        loc = loc + ")"
         return loc
 
     def format_row(self, snip):
-        row_str = ''
+        row_str = ""
         for num in snip:
-            row_str = row_str + ', {:13.6e}'.format(num)
+            row_str = row_str + ", {:13.6e}".format(num)
         row_str = row_str[1:]
         return row_str
 
@@ -157,7 +175,7 @@ class table(object):
         nTen = int(np.floor(len(line) / self.nedge))
         count, row_str = 0, []
         for i in range(nTen):
-            row_str.append(self.format_row(line[count:count + self.nedge]))
+            row_str.append(self.format_row(line[count : count + self.nedge]))
             count += self.nedge
         if len(line) > count:
             row_str.append(self.format_row(line[count:]))
@@ -169,10 +187,18 @@ class table(object):
         for row in row_str:
             loc = self.locate(dimension, cont=cont, place=place)
             if taxis == 1:
-                self.f.write('*taxis,' + self.name + loc + ',' +
-                             str(dimension + 1) + ',' + row + '\n')
+                self.f.write(
+                    "*taxis,"
+                    + self.name
+                    + loc
+                    + ","
+                    + str(dimension + 1)
+                    + ","
+                    + row
+                    + "\n"
+                )
             else:
-                self.f.write(self.name + loc + ' = ' + row + '\n')
+                self.f.write(self.name + loc + " = " + row + "\n")
             cont += self.nedge
 
     def write_index(self):

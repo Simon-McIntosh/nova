@@ -32,18 +32,18 @@ class PolyFrame(Plot, GeoFrame):
     def loads(cls, data: str):
         """Load geojson prepresentation."""
         polygon = json.loads(data)
-        metadata = polygon.pop('metadata', dict())
+        metadata = polygon.pop("metadata", dict())
         return cls(shapely.geometry.shape(polygon), metadata)
 
     @property
     def name(self):
         """Return polygon name."""
-        return self.metadata.get('name', 'polyframe')
+        return self.metadata.get("name", "polyframe")
 
     @property
     def section(self):
         """Return polygon section."""
-        return self.metadata.get('section', self.name)
+        return self.metadata.get("section", self.name)
 
     @cached_property
     def centroid(self):
@@ -83,7 +83,7 @@ class PolyFrame(Plot, GeoFrame):
     @cached_property
     def box_area(self):
         """Return bounding box area."""
-        if np.isclose((area := self.width*self.height), 0):
+        if np.isclose((area := self.width * self.height), 0):
             return self.area
         return area
 
@@ -112,5 +112,7 @@ class PolyFrame(Plot, GeoFrame):
         except AttributeError:
             geoms = [self.poly]
         polys = [[poly.exterior, *poly.interiors] for poly in geoms]
-        return ([[loop.xy[0].tolist() for loop in loops] for loops in polys],
-                [[loop.xy[1].tolist() for loop in loops] for loops in polys])
+        return (
+            [[loop.xy[0].tolist() for loop in loops] for loops in polys],
+            [[loop.xy[1].tolist() for loop in loops] for loops in polys],
+        )

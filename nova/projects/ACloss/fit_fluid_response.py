@@ -1,21 +1,20 @@
-
 import numpy as np
 import scipy
 
 from nova.thermalhydralic.sultan.fluidresponse import FluidResponse
 import matplotlib.pyplot as plt
 
-fluid = FluidResponse('CSJA_6', -1, 'Left')
+fluid = FluidResponse("CSJA_6", -1, "Left")
 
 omega, gain = fluid.response(2)
 
 gain = gain**2
 
-dBgain = 10*np.log10(gain)
+dBgain = 10 * np.log10(gain)
 log_omega = np.log10(omega)
 rolloff = (dBgain[-1] - dBgain[0]) / (log_omega[-1] - log_omega[0])
 
-'''
+"""
 nzero = 1
 npole = 1
 
@@ -33,15 +32,13 @@ lti = scipy.signal.ZerosPolesGain(zeropolegain[:nzero],
                                   zeropolegain[nzero:-1],
                                   zeropolegain[-1])
 lti_gain = scipy.signal.bode(lti, omega)[1]
-'''
+"""
 
 
-
-#response_matrix =
+# response_matrix =
 print(rolloff)
 
 plt.plot(omega, gain)
-plt.plot(omega, 10**(lti_gain / 20))
-plt.xscale('log')
-plt.yscale('log')
-
+plt.plot(omega, 10 ** (lti_gain / 20))
+plt.xscale("log")
+plt.yscale("log")

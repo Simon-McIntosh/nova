@@ -1,4 +1,3 @@
-
 import numpy as np
 import pytest
 
@@ -27,8 +26,12 @@ def test_negative_acute():
 
 
 def test_points_on_polyarc():
-    line = PolyArc(np.array([(0, 0, 0), (1, 0.5, 0.1), (1.5, 1.1, 0.2),
-                             (2, 2, 0.5), (5, -0.25, 5.8)]), 50)
+    line = PolyArc(
+        np.array(
+            [(0, 0, 0), (1, 0.5, 0.1), (1.5, 1.1, 0.2), (2, 2, 0.5), (5, -0.25, 5.8)]
+        ),
+        50,
+    )
     for point in line.points:
         delta = np.linalg.norm(line.curve - point[np.newaxis, :], axis=1)
         assert np.min(delta) < 0.1
@@ -125,6 +128,5 @@ def test_decimate_polyline():
     assert np.sum([len(segment) == 2 for segment in polyline.segments]) == 6
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     pytest.main([__file__])

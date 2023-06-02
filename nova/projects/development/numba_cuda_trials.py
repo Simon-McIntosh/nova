@@ -1,4 +1,3 @@
-
 import cupy as cp
 import numba
 import numpy as np
@@ -58,8 +57,7 @@ def fast_matmul(A, B, C):
     C[x, y] = tmp
 '''
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     M = 65**2
     N = 1000
 
@@ -67,15 +65,15 @@ if __name__ == '__main__':
     b = np.ones((N, 1), cp.float32)
     c = np.empty((M, 1), cp.float32)
 
-    '''
+    """
     _a = numba.cuda.to_device(a)
     _b = numba.cuda.to_device(b)
     _c = numba.cuda.to_device(c)
-    '''
+    """
 
     _a = cp.asarray(a)
     _b = cp.asarray(b)
     _c = cp.asarray(c)
     cp.matmul(_a, _b, _c)
 
-    #matmul[16, 16](_a, _b, _c)
+    # matmul[16, 16](_a, _b, _c)

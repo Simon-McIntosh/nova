@@ -16,7 +16,7 @@ class Sample:
 
     trial: Union[Trial, Campaign, str] = field(repr=False)
     _shot: InitVar[int] = field(default=0)
-    _side: InitVar[str] = field(default='Left')
+    _side: InitVar[str] = field(default="Left")
     sourcedata: SourceData = field(init=False, repr=True)
     sampledata: SampleData = field(init=False, repr=False)
 
@@ -74,13 +74,13 @@ class Sample:
     def metadata(self):
         """Return trial metadata, read-only."""
         metadata = pandas.Series(self.trial.plan.iloc[self.shot, :])
-        metadata['note'] = self.note
+        metadata["note"] = self.note
         return metadata
 
     @property
     def note(self):
         """Return sample note, read-only."""
-        return self.trial.notes.loc[self.shot, 'note']
+        return self.trial.notes.loc[self.shot, "note"]
 
     @property
     def filename(self):
@@ -100,23 +100,23 @@ class Sample:
     @property
     def massflow(self):
         """Return time average shot massflow."""
-        return self.sultandata.data[f'dm/dt {self.side}'].mean()
+        return self.sultandata.data[f"dm/dt {self.side}"].mean()
 
     @property
     def field(self):
         """Return background field."""
-        return self.trial.plan.at[self.shot, ('Be', 'T')]
+        return self.trial.plan.at[self.shot, ("Be", "T")]
 
     @property
     def current(self):
         """Return transport current."""
-        return self.trial.plan.at[self.shot, ('Isample', 'kA')]
+        return self.trial.plan.at[self.shot, ("Isample", "kA")]
 
     @property
     def samplename(self):
         """Return sample name."""
-        samplename = f'{self.trial.campaign.experiment} '
-        samplename += f'{self.trial.phase.name} {self.shot} {self.side}'
+        samplename = f"{self.trial.campaign.experiment} "
+        samplename += f"{self.trial.phase.name} {self.shot} {self.side}"
         return samplename
 
     @property
@@ -133,16 +133,15 @@ class Sample:
     @property
     def label(self):
         """Return sample label."""
-        label = f'{self.samplename} '
-        label += '('
-        label += fr'$\dot{{m}}$={self.massflow:1.1f}g/s, '
-        label += fr'$f$={self.frequency:1.1f}Hz, '
-        label += fr'$B$={self.field:1.0f}T, '
-        label += fr'$I$={self.current:1.0f}kA'
-        label += ')'
+        label = f"{self.samplename} "
+        label += "("
+        label += rf"$\dot{{m}}$={self.massflow:1.1f}g/s, "
+        label += rf"$f$={self.frequency:1.1f}Hz, "
+        label += rf"$B$={self.field:1.0f}T, "
+        label += rf"$I$={self.current:1.0f}kA"
+        label += ")"
         return label
 
 
-if __name__ == '__main__':
-
-    sample = Sample('CSJA13')
+if __name__ == "__main__":
+    sample = Sample("CSJA13")

@@ -8,8 +8,10 @@ import os
 def _report(dependencies: tuple[str, ...]):
     """Return module not found error meassage for dependency list."""
     dependency_list = f"{', '.join(dependencies)}"
-    return f"Optional dependencies [{dependency_list}] not installed. " \
+    return (
+        f"Optional dependencies [{dependency_list}] not installed. "
         f"pip install .[{dependency_list}]"
+    )
 
 
 @contextmanager
@@ -27,6 +29,7 @@ def mark_import(*dependencies: str, skip=False):
     skip = []
     try:
         import pytest
+
         yield pytest.mark.skipif(skip, reason=_report(dependencies))
     except ModuleNotFoundError:
         skip.append(True)
@@ -39,19 +42,20 @@ def skip_import(*dependencies: str):
         yield
     except ModuleNotFoundError:
         import pytest
+
         pytest.skip(_report(dependencies), allow_module_level=True)
 
 
 @contextmanager
 def defer_import(defer=True):
     """Manage deferred imports for optional nova frameset methods."""
-    previous = os.getenv('NOVA_DEFERRED_IMPORT', None)
-    os.environ['NOVA_DEFERRED_IMPORT'] = 'True' if defer else 'False'
+    previous = os.getenv("NOVA_DEFERRED_IMPORT", None)
+    os.environ["NOVA_DEFERRED_IMPORT"] = "True" if defer else "False"
     yield
     if previous is not None:
-        os.environ['NOVA_DEFERRED_IMPORT'] = previous
+        os.environ["NOVA_DEFERRED_IMPORT"] = previous
     else:
-        del os.environ['NOVA_DEFERRED_IMPORT']
+        del os.environ["NOVA_DEFERRED_IMPORT"]
 
 
 @dataclass
@@ -60,7 +64,7 @@ class DeferredImport:
 
     module: str
     method: str
-    package: str = 'nova'
+    package: str = "nova"
 
     def load(self):
         """Load method."""
@@ -72,23 +76,22 @@ class ImportManager:
     """Manage deferred import flags."""
 
     defer_default: str | bool = True
-    package: str = 'nova'
+    package: str = "nova"
 
     @property
     def defer(self) -> bool:
         """Return NOVA_DEFERRED_IMPORT flag."""
-        return os.getenv('NOVA_DEFERRED_IMPORT',
-                         str(self.defer_default)) == 'True'
+        return os.getenv("NOVA_DEFERRED_IMPORT", str(self.defer_default)) == "True"
 
     @defer.setter
     def defer(self, defer: str | bool):
-        os.environ['NOVA_DEFERRED_IMPORT'] = str(defer)
+        os.environ["NOVA_DEFERRED_IMPORT"] = str(defer)
 
     @property
     def unset(self):
         """Clear NOVA_DEFERRED_IMPORT flag."""
         try:
-            del os.environ['NOVA_DEFERRED_IMPORT']
+            del os.environ["NOVA_DEFERRED_IMPORT"]
         except KeyError:
             pass
 

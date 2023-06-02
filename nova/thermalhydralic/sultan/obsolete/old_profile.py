@@ -50,14 +50,13 @@ class Profile:
         """Return pointdata, read-only."""
         if self.sample.data.reload.profile:
             self._pointdata = PointData(
-                self.lowpassdata, self.heatindex.start,
-                self.offset, self.normalize)
+                self.lowpassdata, self.heatindex.start, self.offset, self.normalize
+            )
             self.sample.data.reload.profile = False
         return self._pointdata
 
 
-if __name__ == '__main__':
-
-    profile = Profile('CSJA13')
+if __name__ == "__main__":
+    profile = Profile("CSJA13")
     profile.sample.shot = -3
     profile.plot()

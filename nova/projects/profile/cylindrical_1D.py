@@ -3,18 +3,18 @@ from amigo.pyplot import plt
 
 L = 10.0
 nx = 4
-dx = L/nx
+dx = L / nx
 print(dx)
 origin = (6,)
 
 mesh = {}
-mesh['xy'] = fipy.Grid1D(nx=nx, dx=dx) + origin
-mesh['rz'] = fipy.CylindricalGrid1D(nx=nx, dx=dx, origin=origin)
+mesh["xy"] = fipy.Grid1D(nx=nx, dx=dx) + origin
+mesh["rz"] = fipy.CylindricalGrid1D(nx=nx, dx=dx, origin=origin)
 
 for m in mesh:
-    print(m, 'vol', mesh[m].cellVolumes)
-    print(m, 'centre', mesh[m].cellCenters.value)
-'''
+    print(m, "vol", mesh[m].cellVolumes)
+    print(m, "centre", mesh[m].cellCenters.value)
+"""
 c0 = fipy.numerix.zeros(nx, 'd')
 c0[40:60] = 1.0
 
@@ -35,4 +35,4 @@ for m in mesh:
 for m in mesh:
     eq[m].solve()
     viewer[m].plot()
-'''
+"""

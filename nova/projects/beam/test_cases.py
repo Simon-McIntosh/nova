@@ -7,9 +7,8 @@ import matplotlib.pyplot as plt
 
 
 class testbeam(finiteframe):
-
-    def __init__(self, N, name='', case=None):
-        finiteframe.__init__(self, frame='3D')
+    def __init__(self, N, name="", case=None):
+        finiteframe.__init__(self, frame="3D")
         self.N = N  # node number
         self.name = name
         self.case = case
@@ -17,17 +16,18 @@ class testbeam(finiteframe):
 
     def set_section(self):
         sm = second_moment()
-        sm.add_shape('circ', r=0.02, ro=0.01)
+        sm.add_shape("circ", r=0.02, ro=0.01)
         C, I, A = sm.report()
-        section = {'C': C, 'I': I, 'A': A, 'J': I['xx'], 'pnt': sm.get_pnt()}
-        self.add_mat('tube', ['steel_cast'], [section])
+        section = {"C": C, "I": I, "A": A, "J": I["xx"], "pnt": sm.get_pnt()}
+        self.add_mat("tube", ["steel_cast"], [section])
 
         # extract sectional properties
-        self.w = -9.81 * self.mat[0]['mat_o']['rho'] *\
-            self.mat[0]['mat_o']['A']  # weight / l
-        E = self.mat[0]['mat_o']['E']
-        A = self.mat[0]['mat_o']['A']
-        Iy = self.mat[0]['mat_o']['I'][1]
+        self.w = (
+            -9.81 * self.mat[0]["mat_o"]["rho"] * self.mat[0]["mat_o"]["A"]
+        )  # weight / l
+        E = self.mat[0]["mat_o"]["E"]
+        A = self.mat[0]["mat_o"]["A"]
+        Iy = self.mat[0]["mat_o"]["I"][1]
         self.EI = E * Iy
         self.EA = E * A
 
@@ -36,46 +36,47 @@ class testbeam(finiteframe):
         self.x = np.linspace(0, self.L, 50)
         X = np.zeros((self.N, 3))
         X[:, 0] = np.linspace(0, self.L, self.N)
-        X = geom.qrotate(X, theta=theta, dx='y')
+        X = geom.qrotate(X, theta=theta, dx="y")
         self.add_nodes(X)
-        self.add_elements(part_name='beam', nmat='tube')
+        self.add_elements(part_name="beam", nmat="tube")
         self.update_rotation()  # check / update rotation matrix
 
     def plot(self, v, m, s, theta=0):
         if self.case == 7 or self.case == 8:
             plt.figure()
             plt.title(self.name)
-            plt.xlabel('beam length')
-            plt.ylabel('extension')
+            plt.xlabel("beam length")
+            plt.ylabel("extension")
 
             if self.case == 7:
-                plt.plot(self.part['beam']['Lshp'],
-                         self.part['beam']['u'][:, 0], 'C0')
-                plt.plot(self.x, 1e6 * self.x / self.EA, '--C1')
+                plt.plot(self.part["beam"]["Lshp"], self.part["beam"]["u"][:, 0], "C0")
+                plt.plot(self.x, 1e6 * self.x / self.EA, "--C1")
             elif self.case == 8:
                 u = self.w / self.EA * (self.L * self.x - self.x**2 / 2)
-                plt.plot(self.part['beam']['Lshp'],
-                         self.part['beam']['U'][:, 2])
-                plt.plot(self.x, u, '--')
+                plt.plot(self.part["beam"]["Lshp"], self.part["beam"]["U"][:, 2])
+                plt.plot(self.x, u, "--")
         else:
             fig, ax = plt.subplots(3, 1, sharex=True, squeeze=True)
             ax[0].set_title(title)
-            D = geom.qrotate(self.part['beam']['D'], theta=-theta, dx='y')
-            ax[0].plot(self.part['beam']['Lshp'], D[:, 2])
-            ax[0].plot(self.x, v, '--')
-            ax[0].set_ylabel(r'deflection')
-            ax[1].plot(self.part['beam']['Lshp'],
-                       self.EI*self.part['beam']['d2u'][:, 2])
-            ax[1].plot(self.x, m, '--')
-            ax[1].set_ylabel(r'moment')
-            ax[2].plot(self.part['beam']['Lshp'],
-                       self.EI*self.part['beam']['d3u'][:, 2])
-            ax[2].plot(self.x, s, '--')
-            ax[2].set_ylabel(r'shear')
-            ax[2].set_xlabel('beam length')
+            D = geom.qrotate(self.part["beam"]["D"], theta=-theta, dx="y")
+            ax[0].plot(self.part["beam"]["Lshp"], D[:, 2])
+            ax[0].plot(self.x, v, "--")
+            ax[0].set_ylabel(r"deflection")
+            ax[1].plot(
+                self.part["beam"]["Lshp"], self.EI * self.part["beam"]["d2u"][:, 2]
+            )
+            ax[1].plot(self.x, m, "--")
+            ax[1].set_ylabel(r"moment")
+            ax[2].plot(
+                self.part["beam"]["Lshp"], self.EI * self.part["beam"]["d3u"][:, 2]
+            )
+            ax[2].plot(self.x, s, "--")
+            ax[2].set_ylabel(r"shear")
+            ax[2].set_xlabel("beam length")
         plt.despine()
 
-'''
+
+"""
 def test(self, case, theta=0):
     self.clfe()  # clear all (mesh, BCs, constraints and loads)
     g = geom.qrotate([0, 0, -1], theta=theta, dx='y')[0]
@@ -84,21 +85,28 @@ def test(self, case, theta=0):
     v = np.zeros(np.shape(self.x))
     m = np.zeros(np.shape(self.x))
     s = np.zeros(np.shape(self.x))
-'''
+"""
+
 
 def test_simple_beam():  # simple beam
-    name = 'simple beam'
+    name = "simple beam"
 
     # analytic solution
-    v = self.w * self.x / (24 * self.EI) *\
-        (self.L**3 - 2 * self.L * self.x**2 + self.x**3)
+    v = (
+        self.w
+        * self.x
+        / (24 * self.EI)
+        * (self.L**3 - 2 * self.L * self.x**2 + self.x**3)
+    )
     m = -self.w * self.x / 2 * (self.L - self.x)
-    s = -self.w * (self.L/2 - self.x)
-    self.add_bc('ny', 0, part='beam', ends=0)
-    self.add_bc('ny', -1, part='beam', ends=1)
+    s = -self.w * (self.L / 2 - self.x)
+    self.add_bc("ny", 0, part="beam", ends=0)
+    self.add_bc("ny", -1, part="beam", ends=1)
     self.add_weight(g=g)
     self.solve()  # solve
-'''
+
+
+"""
 self.plot(case, v, m, s, name, theta=theta)
 
 elif case == 1:  # cantilever beam
@@ -178,18 +186,17 @@ elif case == 8:
     self.add_bc('fix', 0, part='beam', ends=0)
     self.add_weight(g=g)
 
-'''
+"""
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     tb = testbeam(13)
 
-    tb.test(0, theta=1*np.pi/180)
-    #tb.plot()
+    tb.test(0, theta=1 * np.pi / 180)
+    # tb.plot()
 
-    #tb.plot_stress()
-    #tb.plot_moment()
-    #tb.plot_matrix(tb.stiffness(0))
-    #tb.plot_matrix(tb.Ko)
-    #tb.plot_matrix(tb.K)
+    # tb.plot_stress()
+    # tb.plot_moment()
+    # tb.plot_matrix(tb.stiffness(0))
+    # tb.plot_matrix(tb.Ko)
+    # tb.plot_matrix(tb.K)

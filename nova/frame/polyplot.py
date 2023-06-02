@@ -16,25 +16,25 @@ from nova.graphics.plot import BasePlot, Plot, Properties
 class Labels:
     """Manage polyplot labels."""
 
-    current_unit: str = 'A'
-    field_unit: bool | str = 'T'
+    current_unit: str = "A"
+    field_unit: bool | str = "T"
     zeroturn: bool = False
     options: dict[str, str | int | float] = field(
-        repr=False, default_factory=lambda: {'font_size': 'medium',
-                                             'label_limit': 20})
+        repr=False, default_factory=lambda: {"font_size": "medium", "label_limit": 20}
+    )
 
     def __post_init__(self):
         """Update plot flags."""
         self.update_flags()
-        if hasattr(super(), '__post_init__'):
+        if hasattr(super(), "__post_init__"):
             super().__post_init__()
 
     def update_flags(self):
         """Update plot attribute flags."""
-        if hasattr(self, 'biot'):
-            if 'field' not in self.biot:
+        if hasattr(self, "biot"):
+            if "field" not in self.biot:
                 self.field_unit = None
-        if 'energize' not in self.frame.attrs:
+        if "energize" not in self.frame.attrs:
             self.current_unit = None
 
     def patch_number(self, parts):
@@ -45,7 +45,7 @@ class Labels:
         """Add plot labels."""
         index = self.get_index()
         parts = self.frame.part[index]
-        '''
+        """
         print(parts)
 
         part_number = {p: sum(coil.part == p) for p in parts}
@@ -100,7 +100,7 @@ class Labels:
                     ax.text(x + drs[drs_index], z + ztext['field'], txt,
                             fontsize=fs, ha=ha, va='center',
                             color=0.2 * np.ones(3))
-        '''
+        """
 
 
 @dataclass
@@ -108,19 +108,20 @@ class PolyPlot(Plot, Properties, Labels, metamethod.PolyPlot, BasePlot):
     """Methods for ploting FrameSpace data."""
 
     frame: DataFrame = field(repr=False)
-    additional: list[str] = field(default_factory=lambda: ['part'])
+    additional: list[str] = field(default_factory=lambda: ["part"])
     rng: np.random.Generator = np.random.default_rng(2025)
 
     def initialize(self):
         """Initialize metamethod."""
         self.update_columns()
-        if 'frame' not in self.frame or len(self.frame) == 1:
+        if "frame" not in self.frame or len(self.frame) == 1:
             self.patchwork = 0
 
     def update_columns(self):
         """Update frame columns."""
-        unset = [attr not in self.frame.columns
-                 for attr in self.required + self.additional]
+        unset = [
+            attr not in self.frame.columns for attr in self.required + self.additional
+        ]
         if np.array(unset).any():
             self.frame.update_columns()
 
@@ -138,27 +139,24 @@ class PolyPlot(Plot, Properties, Labels, metamethod.PolyPlot, BasePlot):
         index = self.get_index(index, zeroturn=zeroturn)
         if sum(index) == 0:
             return
-        self.get_axes('2d', axes)
+        self.get_axes("2d", axes)
         patch = []
         properties = self.patch_properties(self.frame.part, self.frame.area)
-        basecolor = {part: properties[part]['facecolor']
-                     for part in properties}
-        for polyframe, part in self.frame.loc[index,
-                                              ['poly', 'part']].to_numpy():
+        basecolor = {part: properties[part]["facecolor"] for part in properties}
+        for polyframe, part in self.frame.loc[index, ["poly", "part"]].to_numpy():
             patch_kwargs = properties[part].copy()
             if self.patchwork != 0:  # Shuffle basecolor
-                patch_kwargs['facecolor'] = self.shuffle(basecolor[part])
+                patch_kwargs["facecolor"] = self.shuffle(basecolor[part])
             patch_kwargs |= kwargs
             try:  # MultiPolygon.
                 for _poly in polyframe.poly:
                     assert False  # TODO remove branch if not triggered
-                    patch.append(self.patch(
-                        _poly.__geo_interface__, **patch_kwargs))
+                    patch.append(self.patch(_poly.__geo_interface__, **patch_kwargs))
             except (TypeError, AssertionError):  # Polygon.
-                patch.append(self.patch(
-                    polyframe.poly.__geo_interface__, **patch_kwargs))
-        patch_collection = \
-            self.mpl['PatchCollection'](patch, match_original=True)
+                patch.append(
+                    self.patch(polyframe.poly.__geo_interface__, **patch_kwargs)
+                )
+        patch_collection = self.mpl["PatchCollection"](patch, match_original=True)
         self.axes.add_collection(patch_collection)
         self.axes.autoscale_view()
         self.label()
@@ -166,14 +164,14 @@ class PolyPlot(Plot, Properties, Labels, metamethod.PolyPlot, BasePlot):
     def shuffle(self, color):
         """Return shuffled facecolor. Alternate lightness by +-factor."""
         factor = (1 - 2 * self.rng.random(1)[0]) * self.patchwork
-        color = colorsys.rgb_to_hls(*self.mpl['colors'].to_rgb(color))
+        color = colorsys.rgb_to_hls(*self.mpl["colors"].to_rgb(color))
         color = colorsys.hls_to_rgb(
-                color[0], max(0, min(1, (1 + factor) * color[1])), color[2])
+            color[0], max(0, min(1, (1 + factor) * color[1])), color[2]
+        )
         return color
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     from nova.frame.coilset import CoilSet
 
     coilset = CoilSet()

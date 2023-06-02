@@ -1,4 +1,3 @@
-
 from dataclasses import dataclass, field, InitVar
 from typing import Union
 import os
@@ -74,7 +73,7 @@ class FrequencyResponse(SultanIO):
     @property
     def binaryfilepath(self):
         """Return full path of binary datafile."""
-        return self.testplan.database.binary_filepath('response.h5')
+        return self.testplan.database.binary_filepath("response.h5")
 
     @property
     def filename(self):
@@ -82,45 +81,54 @@ class FrequencyResponse(SultanIO):
         experiment = self.testplan.experiment
         testname = self.testplan.testname
         side = self.shotprofile.side
-        return f'{experiment}_{testname}_{side}'
+        return f"{experiment}_{testname}_{side}"
 
     def _read_data(self):
         data = pandas.DataFrame(
             index=range(self.testplan.shotnumber),
-            columns=['file', 'external', 'excitation', 'current', 'frequency',
-                     'stop', 'maximum', 'impulse', 'steady'])
-        header = f'Extracting frequency response: {self.filename}'
+            columns=[
+                "file",
+                "external",
+                "excitation",
+                "current",
+                "frequency",
+                "stop",
+                "maximum",
+                "impulse",
+                "steady",
+            ],
+        )
+        header = f"Extracting frequency response: {self.filename}"
         tick = clock(self.testplan.shotnumber, header=header)
         for index, shot in enumerate(self.shotinstance.sequence()):
             profile = self.shotprofile
             metadata = self.shotinstance.metadata.droplevel(1)
             data.loc[
-                index, ['file', 'external', 'current', 'frequency']] = \
-                metadata.loc[['File', 'Be', 'Isample', 'frequency']].values
-            data.loc[index, 'excitation'] = self.shotprofile.excitation_field
+                index, ["file", "external", "current", "frequency"]
+            ] = metadata.loc[["File", "Be", "Isample", "frequency"]].values
+            data.loc[index, "excitation"] = self.shotprofile.excitation_field
             shotresponse = ShotResponse(profile.lowpassdata, profile.heatindex)
             ####### >>>> ##### test shotresponse
 
             data.loc[
-                index, ['stop', 'maximum', 'step', 'steady']] = \
-                self.shotprofile.shotresponse.dataseries
+                index, ["stop", "maximum", "step", "steady"]
+            ] = self.shotprofile.shotresponse.dataseries
             tick.tock()
-        data.sort_values(['external', 'current', 'excitation', 'frequency'],
-                         inplace=True)
+        data.sort_values(
+            ["external", "current", "excitation", "frequency"], inplace=True
+        )
         data.fillna(-1, inplace=True)
         return data
 
 
-if __name__ == '__main__':
-
-    testplan = TestPlan('CSJA_3', 0)
+if __name__ == "__main__":
+    testplan = TestPlan("CSJA_3", 0)
     response = FrequencyResponse(testplan)
 
     response.shotinstance.index = 20
     response.shotprofile.plot()
 
-
-    '''
+    """
     #response.experiment = 'CSJA_5'
     response.testname = -1
     #print(response.testplan)
@@ -132,8 +140,7 @@ if __name__ == '__main__':
     print(response.testname)
     response.experiment = 'CSJA_3'
     print(response.testname)
-    '''
-
+    """
 
     '''
         @property
@@ -172,7 +179,6 @@ if __name__ == '__main__':
     def side(self, side):
         self.shotprofile.side = side
     '''
-
 
     '''
     def _initialize_testdata(self):
@@ -384,14 +390,13 @@ if __name__ == '__main__':
 
     '''
 
-
-    '''
+    """
     V = A Bdot
     V = IR
     P = IV = IA Bdot = 1/R (A Bdot)**2 = A**2/R |Bdot|**2
-    '''
+    """
 
-    '''
+    """
     import scipy.signal
 
     system = scipy.signal.lti([], [3, 50], 3000)
@@ -399,4 +404,4 @@ if __name__ == '__main__':
     mag = scipy.signal.bode(system, 2*np.pi*f)[1]
     Qbode = 10**(mag/20)
     plt.plot(f, Qbode)
-    '''
+    """

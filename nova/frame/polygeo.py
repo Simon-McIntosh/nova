@@ -17,56 +17,75 @@ class PolyGeo(metamethod.PolyGeo):
     Extract geometric features from shapely polygons.
     """
 
-    name = 'polygeo'
+    name = "polygeo"
 
     frame: DataFrame = field(repr=False)
-    required: list[str] = field(default_factory=lambda: [
-        'segment', 'section', 'poly'])
-    additional: list[str] = field(default_factory=lambda: [
-        'dl', 'dt', 'rms', 'area', 'volume'])
+    required: list[str] = field(default_factory=lambda: ["segment", "section", "poly"])
+    additional: list[str] = field(
+        default_factory=lambda: ["dl", "dt", "rms", "area", "volume"]
+    )
     require_all: bool = field(init=False, repr=False, default=False)
-    base: list[str] = field(init=False, default_factory=lambda: [
-        'x', 'y', 'z', 'segment', 'dx', 'dy', 'dz'])
-    features: list[str] = field(init=False, default_factory=lambda: [
-        'x', 'y', 'z', 'dx', 'dy', 'dz', 'area',  'volume', 'rms'])
+    base: list[str] = field(
+        init=False, default_factory=lambda: ["x", "y", "z", "segment", "dx", "dy", "dz"]
+    )
+    features: list[str] = field(
+        init=False,
+        default_factory=lambda: [
+            "x",
+            "y",
+            "z",
+            "dx",
+            "dy",
+            "dz",
+            "area",
+            "volume",
+            "rms",
+        ],
+    )
 
     def initialize(self):
         """Init sectional polygon data."""
-        index = self.frame.index[~self.frame.geotype('Geo', 'poly') &
-                                 ~self.frame.geotype('Json', 'poly') &
-                                 (self.frame.segment != '') &
-                                 (self.frame.section != '')]
+        index = self.frame.index[
+            ~self.frame.geotype("Geo", "poly")
+            & ~self.frame.geotype("Json", "poly")
+            & (self.frame.segment != "")
+            & (self.frame.section != "")
+        ]
         if (index_length := len(index)) > 0:
-            section = self.frame.loc[index, 'section'].values
-            poly_data = self.frame.loc[index, ['x', 'z', 'dl', 'dt']].values
-            segment = self.frame.loc[index, 'segment'].values
-            length = self.frame.loc[index, 'dy'].values
-            poly = self.frame.loc[index, 'poly'].values
-            poly_update = self.frame.loc[index, 'poly'].isna()
+            section = self.frame.loc[index, "section"].values
+            poly_data = self.frame.loc[index, ["x", "z", "dl", "dt"]].values
+            segment = self.frame.loc[index, "segment"].values
+            length = self.frame.loc[index, "dy"].values
+            poly = self.frame.loc[index, "poly"].values
+            poly_update = self.frame.loc[index, "poly"].isna()
             geom = np.empty((index_length, len(self.features)), dtype=float)
             # itterate over index - generate poly as required
             for i in range(index_length):
                 if poly_update[i]:
-                    poly[i] = Polygon({f'{section[i]}': poly_data[i]})
-                    section[i] = poly[i].metadata['section']
+                    poly[i] = Polygon({f"{section[i]}": poly_data[i]})
+                    section[i] = poly[i].metadata["section"]
                 geometry = PolyGeom(poly[i], segment[i], length[i]).geometry
                 geom[i] = [geometry[feature] for feature in self.features]
             if poly_update.any():
-                self.frame.loc[index, 'poly'] = poly
+                self.frame.loc[index, "poly"] = poly
             self.frame.loc[index, self.features] = geom
-            self.frame.loc[index, 'section'] = section
+            self.frame.loc[index, "section"] = section
 
     def limit(self, index):
         """Return coil limits [xmin, xmax, zmin, zmax]."""
-        geom = self.frame.loc[index, ['x', 'z', 'dx', 'dz']]
-        limit = [min(geom['x'] - geom['dx'] / 2),
-                 max(geom['x'] + geom['dx'] / 2),
-                 min(geom['z'] - geom['dz'] / 2),
-                 max(geom['z'] + geom['dz'] / 2)]
+        geom = self.frame.loc[index, ["x", "z", "dx", "dz"]]
+        limit = [
+            min(geom["x"] - geom["dx"] / 2),
+            max(geom["x"] + geom["dx"] / 2),
+            min(geom["z"] - geom["dz"] / 2),
+            max(geom["z"] + geom["dz"] / 2),
+        ]
         return limit
 
     def polygons(self, index) -> dict:
         """Return frame geometry in a Bokeh multi polygons format."""
-        polyframe = self.frame.loc[index, 'poly']
-        return {'xs': [poly.polygons[0] for poly in polyframe],
-                'ys': [poly.polygons[1] for poly in polyframe]}
+        polyframe = self.frame.loc[index, "poly"]
+        return {
+            "xs": [poly.polygons[0] for poly in polyframe],
+            "ys": [poly.polygons[1] for poly in polyframe],
+        }

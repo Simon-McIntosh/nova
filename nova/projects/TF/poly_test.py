@@ -27,7 +27,7 @@ verts = np.array([[1, 2, 3, 3, 3, 2, 1], [0, 3, 3, 2, 6, 6, 1]])
 verts = np.swapaxes(verts, 0, 1)
 
 # Make the collection and add it to the plot.
-coll = PolyCollection(verts, array=z, cmap=mpl.cm.jet, edgecolors='none')
+coll = PolyCollection(verts, array=z, cmap=mpl.cm.jet, edgecolors="none")
 ax.add_collection(coll)
 ax.autoscale_view()
 

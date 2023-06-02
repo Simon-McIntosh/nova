@@ -14,9 +14,9 @@ def configure():
     if sys.prefix == sys.base_prefix:  # installed in base environment
         return
     prefix = Path(sys.prefix)
-    startup = Path(root_dir).joinpath('scripts/startup.py')
+    startup = Path(root_dir).joinpath("scripts/startup.py")
     version = prefix.name
-    moduledir = Path.joinpath(Path.home(), 'modules/modulefiles/nova')
+    moduledir = Path.joinpath(Path.home(), "modules/modulefiles/nova")
     Path(moduledir).mkdir(parents=True, exist_ok=True)
 
     module = """\
@@ -32,17 +32,16 @@ def configure():
     setenv MYPYPATH _mypy
     """
 
-    module = module.replace('_prefix', str(prefix))
-    module = module.replace('_startup', str(startup))
-    module = module.replace('_mypy', str(root_dir))
+    module = module.replace("_prefix", str(prefix))
+    module = module.replace("_startup", str(startup))
+    module = module.replace("_mypy", str(root_dir))
     modulefile = Path.joinpath(moduledir, version)
 
-    with open(modulefile, 'w') as file:
+    with open(modulefile, "w") as file:
         file.write(dedent(module))
 
     modulefile.chmod(0o644)
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     configure()

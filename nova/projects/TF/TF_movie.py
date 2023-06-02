@@ -6,18 +6,18 @@ import matplotlib.animation as manimation
 import numpy as np
 
 nTF = 18
-family = 'S'
-config = {'TF': 'dtt', 'eq': 'SN'}
-config['TF'] = '{}{}{:d}'.format(config['eq'], config['TF'], nTF)
+family = "S"
+config = {"TF": "dtt", "eq": "SN"}
+config["TF"] = "{}{}{:d}".format(config["eq"], config["TF"], nTF)
 
 demo = DEMO()
-demo.fill_part('Blanket')
-demo.fill_part('Vessel')
+demo.fill_part("Blanket")
+demo.fill_part("Vessel")
 # demo.fill_part('TF_Coil')
 
-profile = Profile(config['TF'], family=family, part='tmp', load=False)
-shp = Shape(profile, nTF=nTF, obj='L', eqconf=config['eq'], ny=3)
-shp.add_vessel(demo.parts['Vessel']['out'])
+profile = Profile(config["TF"], family=family, part="tmp", load=False)
+shp = Shape(profile, nTF=nTF, obj="L", eqconf=config["eq"], ny=3)
+shp.add_vessel(demo.parts["Vessel"]["out"])
 shp.minimise(ripple=False, verbose=True)
 
 # shp.update()
@@ -28,7 +28,7 @@ shp.tf.fill()
 shp.plot_bounds()
 
 
-'''
+"""
 filename = 'movie'
 moviename = '../Movies/{}'.format(filename)
 moviename += '.mp4'
@@ -65,4 +65,4 @@ with writer.saving(pl.gcf(),'tmp.mp4',100):
         animate(i)
         #pl.tight_layout()
         writer.grab_frame()
-'''
+"""

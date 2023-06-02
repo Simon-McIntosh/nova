@@ -21,22 +21,34 @@ class Properties:
     """Manage plot properties."""
 
     patchwork: float = 0
-    alpha: dict[str, float] = field(default_factory=lambda: {'plasma': 0.75})
+    alpha: dict[str, float] = field(default_factory=lambda: {"plasma": 0.75})
     linewidth: float = 0.5
-    edgecolor: str = 'white'
+    edgecolor: str = "white"
     facecolor: ClassVar[dict[str, str]] = {
-        'vs3': 'C0', 'vs3j': 'C3', 'cs': 'C0', 'pf': 'C0',
-        'trs': 'C3', 'dir': 'C3', 'vv': 'C3', 'vvin': 'C3',
-        'vvout': 'C3', 'bb': 'C7', 'plasma': 'C4', 'cryo': 'C5',
-        'fi': 'C2', 'tf': 'C7'}
-    zorder: dict[str, int] = field(default_factory=lambda: {
-        'VS3': 1, 'VS3j': 0, 'CS': 3, 'PF': 2})
+        "vs3": "C0",
+        "vs3j": "C3",
+        "cs": "C0",
+        "pf": "C0",
+        "trs": "C3",
+        "dir": "C3",
+        "vv": "C3",
+        "vvin": "C3",
+        "vvout": "C3",
+        "bb": "C7",
+        "plasma": "C4",
+        "cryo": "C5",
+        "fi": "C2",
+        "tf": "C7",
+    }
+    zorder: dict[str, int] = field(
+        default_factory=lambda: {"VS3": 1, "VS3j": 0, "CS": 3, "PF": 2}
+    )
 
     @staticmethod
     def get_part(part):
         """Return formated part name."""
-        if part.rstrip(digits) == 'fi':
-            return 'fi'
+        if part.rstrip(digits) == "fi":
+            return "fi"
         return part
 
     def get_alpha(self, part):
@@ -46,7 +58,7 @@ class Properties:
     @classmethod
     def get_facecolor(cls, part):
         """Return patch facecolor."""
-        return cls.facecolor.get(cls.get_part(part), 'C9')
+        return cls.facecolor.get(cls.get_part(part), "C9")
 
     def get_zorder(self, part):
         """Return patch zorder."""
@@ -56,32 +68,36 @@ class Properties:
         """Return patch linewidth."""
         finesse_fraction = 0.01
         patch_area = statistics.mode(area[part == unique_part])
-        area_fraction = patch_area/total_area
+        area_fraction = patch_area / total_area
         if area_fraction < finesse_fraction:
-            return self.linewidth * area_fraction/finesse_fraction
+            return self.linewidth * area_fraction / finesse_fraction
         return self.linewidth
 
     def patch_kwargs(self, part: str):
         """Return single patch kwargs."""
-        return dict(alpha=self.get_alpha(part),
-                    facecolor=self.get_facecolor(part),
-                    zorder=self.get_zorder(part),
-                    linewidth=self.linewidth,
-                    edgecolor=self.edgecolor)
+        return dict(
+            alpha=self.get_alpha(part),
+            facecolor=self.get_facecolor(part),
+            zorder=self.get_zorder(part),
+            linewidth=self.linewidth,
+            edgecolor=self.edgecolor,
+        )
 
     def patch_properties(self, part, area):
         """Return unique dict of patch properties extracted from parts list."""
         total_area = area.sum()
-        return {unique_part: self.patch_kwargs(unique_part) | dict(
-            linewidth=self.get_linewidth(unique_part, part, area, total_area))
-                for unique_part in part.unique()}
+        return {
+            unique_part: self.patch_kwargs(unique_part)
+            | dict(linewidth=self.get_linewidth(unique_part, part, area, total_area))
+            for unique_part in part.unique()
+        }
 
 
 @dataclass
 class BasePlot:
     """Plot baseclass for poly and vtk plot."""
 
-    name = 'baseplot'
+    name = "baseplot"
 
     frame: DataFrame = field(repr=False)
 
@@ -116,10 +132,10 @@ class BasePlot:
         index = self.to_boolean(index)
         if zeroturn is None:
             zeroturn = self.zeroturn
-        with self.frame.setlock(True, 'subspace'):
+        with self.frame.setlock(True, "subspace"):
             try:
                 if not zeroturn:  # exclude zeroturn (nturn == 0)
-                    index &= self.frame.loc[:, 'nturn'] != 0
+                    index &= self.frame.loc[:, "nturn"] != 0
             except (AttributeError, KeyError, ColumnError):  # turns not set
                 pass
         if segment:
@@ -131,30 +147,30 @@ class BasePlot:
 class Axes:
     """Manage plot axes."""
 
-    style: str = '2d'
+    style: str = "2d"
     _fig: matplotlib.figure.Figure | None = field(init=False, repr=False)
     _axes: matplotlib.axes.Axes | None = field(init=False, repr=False)
 
-    def generate(self, style='2d', nrows=1, ncols=1, **kwargs):
+    def generate(self, style="2d", nrows=1, ncols=1, **kwargs):
         """Generate new axis instance."""
-        plt = import_module('matplotlib.pyplot')
+        plt = import_module("matplotlib.pyplot")
         self.fig, self.axes = plt.subplots(nrows, ncols, **kwargs)
         self.set_style(style)
         return self.axes
 
     def gcf(self):
         """Link fig instance to current figure and return."""
-        self._fig = import_module('matplotlib.pyplot').gcf()
+        self._fig = import_module("matplotlib.pyplot").gcf()
         return self._fig
 
     def gca(self):
         """Link axes instance to current axes and return."""
-        self._axes = import_module('matplotlib.pyplot').gca()
+        self._axes = import_module("matplotlib.pyplot").gca()
         return self._axes
 
     def despine(self, axes=None):
         """Remove spines from axes instance."""
-        sns = import_module('seaborn')
+        sns = import_module("seaborn")
         if axes is None:
             for axes in np.atleast_1d(self.axes):
                 sns.despine(ax=axes)
@@ -164,14 +180,14 @@ class Axes:
     def _set_style(style, axes):
         """Set style on single axes instance."""
         match style:
-            case '1d':
-                axes.set_aspect('auto')
-                axes.axis('on')
-            case '2d':
-                axes.set_aspect('equal')
-                axes.axis('off')
+            case "1d":
+                axes.set_aspect("auto")
+                axes.axis("on")
+            case "2d":
+                axes.set_aspect("equal")
+                axes.axis("off")
             case _:
-                raise NotImplementedError(f'style {style} not implemented')
+                raise NotImplementedError(f"style {style} not implemented")
 
     def set_style(self, style: Optional[str] = None):
         """Set axes style."""
@@ -179,7 +195,7 @@ class Axes:
             style = self.style
         for axes in np.atleast_1d(self.axes):
             self._set_style(style, axes)
-        if style == '1d':
+        if style == "1d":
             self.despine()
         self.style = style
 
@@ -217,14 +233,14 @@ class MatPlotLib:
 
     def __getitem__(self, key: str):
         """Get item from matplotlib collections libary."""
-        if 'Collection' in key:
+        if "Collection" in key:
             return getattr(self.collections, key)
-        return import_module(f'matplotlib.{key}')
+        return import_module(f"matplotlib.{key}")
 
     @cached_property
     def collections(self):
         """Return matplotlib collections."""
-        return import_module('matplotlib.collections')
+        return import_module("matplotlib.collections")
 
 
 @dataclass
@@ -234,12 +250,12 @@ class MoviePy:
     @cached_property
     def editor(self):
         """Provide access to moviepy editor."""
-        return import_module('moviepy.editor')
+        return import_module("moviepy.editor")
 
     @cached_property
     def bindings(self):
         """Provide access to moviepy video io bindings."""
-        return import_module('moviepy.video.io.bindings')
+        return import_module("moviepy.video.io.bindings")
 
     def mplfig_to_npimage(self, fig):
         """Return mplfig as npimage."""
@@ -263,7 +279,7 @@ class Plot:
     @cached_property
     def plt(self):
         """Return pylab instance."""
-        return self.mpl['pylab']
+        return self.mpl["pylab"]
 
     @cached_property
     def mpy(self):
@@ -273,7 +289,7 @@ class Plot:
     @cached_property
     def patch(self):
         """Provice acces to descartes PolygonPatch class."""
-        return import_module('descartes').PolygonPatch
+        return import_module("descartes").PolygonPatch
 
     @property
     def fig(self):
@@ -325,7 +341,7 @@ class Plot1D(Plot):
     @cached_property
     def mpl_axes(self):
         """Override Plot.Axes instance."""
-        return Axes('1d')
+        return Axes("1d")
 
 
 class Plot2D(Plot):
@@ -334,4 +350,4 @@ class Plot2D(Plot):
     @cached_property
     def mpl_axes(self):
         """Override Plot.Axes instance."""
-        return Axes('2d')
+        return Axes("2d")

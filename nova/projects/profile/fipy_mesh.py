@@ -1,7 +1,8 @@
 from fipy import Gmsh2D
 
 
-mesh = Gmsh2D('''
+mesh = Gmsh2D(
+    """
 // airfoil_interior.geo
 //
 //  Discussion:
@@ -237,4 +238,5 @@ Line Loop(213) = {                               107, 108, 109, 110,
                    201, 202, 203, 204, 205, 206, 207, 107 };
 
 Plane Surface(215) = { 213 };
-              ''')
+              """
+)

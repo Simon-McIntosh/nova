@@ -33,17 +33,18 @@ def array_module(module=None):
         cupy or numpy.
 
     """
-    module = module or os.environ.get('XPU', 'numpy')
+    module = module or os.environ.get("XPU", "numpy")
 
     if isinstance(module, ModuleType):
         return module
 
-    if module == 'numpy' or module == 'np':
+    if module == "numpy" or module == "np":
         return np
 
-    if module == 'cupy' or module == 'cp':
+    if module == "cupy" or module == "cp":
         try:
             import cupy as cp
+
             return cp
         except ModuleNotFoundError as e:
             global _warn

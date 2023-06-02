@@ -25,7 +25,7 @@ class CenterLine(Line):
     @property
     def vtk_file(self):
         """Return vtk file path (Centerline)."""
-        return os.path.join(root_dir, 'input/ITER/TF_CL.vtk')
+        return os.path.join(root_dir, "input/ITER/TF_CL.vtk")
 
     def load(self):
         """Load single coil centerline."""
@@ -41,27 +41,26 @@ class CenterLine(Line):
         cluster = ClusterTurns(windingpack.mesh, 1)
         points = cluster.mesh.cell_points(0)
         self.mesh = pv.Spline(np.append(points, points[:1], axis=0))
-        self.mesh['arc_length'] /= self.mesh['arc_length'][-1]
+        self.mesh["arc_length"] /= self.mesh["arc_length"][-1]
         self.compute_vectors()
 
     def plot(self, axes=None):
         """Plot 2D loop."""
         if axes is None:
             axes = plt.subplots(1, 1)[1]
-            plt.axis('equal')
-            plt.axis('off')
+            plt.axis("equal")
+            plt.axis("off")
         axes.plot(self.mesh.points[:, 0], self.mesh.points[:, 2])
 
-    def plot_vectors(self, vector='normal'):
+    def plot_vectors(self, vector="normal"):
         """Plot centerline vectors as glyphs."""
         if vector not in self.mesh.array_names:
-            raise IndexError(f'vector {vector} not in {self.mesh.array_names}')
+            raise IndexError(f"vector {vector} not in {self.mesh.array_names}")
         self.mesh[vector] = self.mesh[vector]
         self.mesh.active_vectors_name = vector
-        self.mesh.arrows.plot(scalars='arc_length')
+        self.mesh.arrows.plot(scalars="arc_length")
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     cl = CenterLine()
     cl.mesh.plot()

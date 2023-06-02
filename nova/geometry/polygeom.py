@@ -27,12 +27,16 @@ class PolyGeom(Polygon):
 
     """
 
-    poly: Union[Polygon, PolyFrame,
-                shapely.geometry.Polygon, shapely.geometry.MultiPolygon,
-                dict[str, list[float]],
-                list[float],
-                npt.ArrayLike] = field(repr=False)
-    segment: str = 'ring'
+    poly: Union[
+        Polygon,
+        PolyFrame,
+        shapely.geometry.Polygon,
+        shapely.geometry.MultiPolygon,
+        dict[str, list[float]],
+        list[float],
+        npt.ArrayLike,
+    ] = field(repr=False)
+    segment: str = "ring"
     loop_length: float = 0
     name: str | None = field(init=False, default=None)
 
@@ -49,8 +53,8 @@ class PolyGeom(Polygon):
     @cached_property
     def reference_length(self):
         """Return reference loop length."""
-        if self.segment in ['ring', 'cylinder', 'polygon']:
-            return 2*np.pi*self.centroid.x  # dy==ring circumference
+        if self.segment in ["ring", "cylinder", "polygon"]:
+            return 2 * np.pi * self.centroid.x  # dy==ring circumference
         return 0
 
     @cached_property
@@ -64,10 +68,12 @@ class PolyGeom(Polygon):
             Segment centroid [x, y, z] coordinates.
 
         """
-        data = namedtuple('point', 'x y z')
-        return data(self.metadata.get('x_centroid', self.poly.centroid.x),
-                    self.metadata.get('y_centroid', 0),
-                    self.metadata.get('z_centroid', self.poly.centroid.y))
+        data = namedtuple("point", "x y z")
+        return data(
+            self.metadata.get("x_centroid", self.poly.centroid.x),
+            self.metadata.get("y_centroid", 0),
+            self.metadata.get("z_centroid", self.poly.centroid.y),
+        )
 
     @cached_property
     def segment_delta(self):
@@ -80,49 +86,57 @@ class PolyGeom(Polygon):
             Segment deltas [x, y, z].
 
         """
-        data = namedtuple('length', 'x y z')
+        data = namedtuple("length", "x y z")
         box = self.box
         return data(box.x, box.y, box.z)
 
     @property
     def length(self):
         """Return section characteristic length."""
-        return self.metadata.get('length', None)
+        return self.metadata.get("length", None)
 
     @property
     def thickness(self):
         """Return section characteristic thickness."""
-        return self.metadata.get('thickness', None)
+        return self.metadata.get("thickness", None)
 
     @cached_property
     def area(self):
         """Return polygon area."""
-        if self.section == 'disc':
+        if self.section == "disc":
             return np.pi * self.length**2 / 4  # disc
-        if self.section == 'square':
+        if self.section == "square":
             return self.length**2  # square
-        if self.section == 'rectangle':
+        if self.section == "rectangle":
             return self.length * self.thickness  # rectangle
-        if self.section == 'skin':  # thickness = 1-r/R
-            return np.pi * self.length**2 * self.thickness / 4 * \
-                (2 - self.thickness**2)
-        if self.section == 'hexagon':
-            return 3/2 * self.height**2 / np.sqrt(3)
+        if self.section == "skin":  # thickness = 1-r/R
+            return (
+                np.pi
+                * self.length**2
+                * self.thickness
+                / 4
+                * (2 - self.thickness**2)
+            )
+        if self.section == "hexagon":
+            return 3 / 2 * self.height**2 / np.sqrt(3)
         return self.poly.area
 
     @cached_property
     def volume(self):
         """Return polygon area (torus with cross-section in x-z plane)."""
-        return self.loop_length*self.area
+        return self.loop_length * self.area
 
     @cached_property
     def box(self):
         """Return width and height of polygon bounding box."""
-        data = namedtuple('delta', 'x y z')
-        if self.section in PolyGen.polyshape and self.section != 'skin' and \
-                self.length is not None and \
-                self.thickness is not None:
-            if self.section in ['disc', 'square']:
+        data = namedtuple("delta", "x y z")
+        if (
+            self.section in PolyGen.polyshape
+            and self.section != "skin"
+            and self.length is not None
+            and self.thickness is not None
+        ):
+            if self.section in ["disc", "square"]:
                 length = PolyGen.boxbound(self.length, self.thickness)
                 return data(length, self.loop_length, length)
             return data(self.length, self.loop_length, self.thickness)
@@ -156,41 +170,57 @@ class PolyGeom(Polygon):
             Root mean square radius (uniform current density current center).
 
         """
-        if self.segment != 'ring':
+        if self.segment != "ring":
             return -1
         centroid_radius = self.centroid.x
-        if self.section == 'disc':
+        if self.section == "disc":
             return np.sqrt(centroid_radius**2 + self.length**2 / 16)  # disc
-        if self.section in ['square', 'rectangle']:
+        if self.section in ["square", "rectangle"]:
             return np.sqrt(centroid_radius**2 + self.length**2 / 12)  # square
-        if self.section == 'skin':
-            return np.sqrt((self.length**2 * self.thickness**2 / 24
-                            - self.length**2 * self.thickness / 8
-                            + self.length**2 / 8 + centroid_radius**2))
-        return (shapely.ops.transform(
-            lambda x, z: (x**2, z), self.poly).centroid.x)**0.5
+        if self.section == "skin":
+            return np.sqrt(
+                (
+                    self.length**2 * self.thickness**2 / 24
+                    - self.length**2 * self.thickness / 8
+                    + self.length**2 / 8
+                    + centroid_radius**2
+                )
+            )
+        return (
+            shapely.ops.transform(lambda x, z: (x**2, z), self.poly).centroid.x
+        ) ** 0.5
 
     @cached_property
     def polydata(self):
         """Return polygon metadata."""
         centroid = self.centroid
-        return dict(x_centroid=centroid.x, z_centroid=centroid.z,
-                    length=self.length, thickness=self.thickness)
+        return dict(
+            x_centroid=centroid.x,
+            z_centroid=centroid.z,
+            length=self.length,
+            thickness=self.thickness,
+        )
 
     @cached_property
     def geometry(self) -> dict[str, float | PolyFrame]:
         """Return geometrical features."""
         centroid = self.centroid
-        return {'x': centroid.x, 'y': centroid.y, 'z': centroid.z,
-                'dl': self.length, 'dt': self.thickness,
-                'dx': self.segment_delta.x,
-                'dy': self.segment_delta.y,
-                'dz': self.segment_delta.z,
-                'area': self.area, 'volume': self.volume, 'rms': self.rms,
-                'poly': PolyFrame(self.poly, self.metadata),
-                'section': self.section}
+        return {
+            "x": centroid.x,
+            "y": centroid.y,
+            "z": centroid.z,
+            "dl": self.length,
+            "dt": self.thickness,
+            "dx": self.segment_delta.x,
+            "dy": self.segment_delta.y,
+            "dz": self.segment_delta.z,
+            "area": self.area,
+            "volume": self.volume,
+            "rms": self.rms,
+            "poly": PolyFrame(self.poly, self.metadata),
+            "section": self.section,
+        }
 
 
-if __name__ == '__main__':
-
-    geom = PolyGeom(Polygon({'hex': [3, 2, 0.1]})).geometry
+if __name__ == "__main__":
+    geom = PolyGeom(Polygon({"hex": [3, 2, 0.1]})).geometry

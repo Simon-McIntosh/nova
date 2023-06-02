@@ -34,28 +34,29 @@ class Decompose:
         if self.rank < 0:
             self.rank += full_rank
             if self.rank <= 0:
-                raise ValueError(f'rank {full_rank-self.rank} >= full rank '
-                                 f'{full_rank}')
+                raise ValueError(
+                    f"rank {full_rank-self.rank} >= full rank " f"{full_rank}"
+                )
         self.rank = min(self.rank, full_rank)
 
     def decompose(self):
         """Perform SVD order reduction."""
         UsVh = np.linalg.svd(self.matrix, full_matrices=False)
-        self.matrices = dict(U=UsVh[0].copy('C'),
-                             s=UsVh[1],
-                             Vh=UsVh[2].copy('C'))
+        self.matrices = dict(U=UsVh[0].copy("C"), s=UsVh[1], Vh=UsVh[2].copy("C"))
         self.reduce()
         self.transpose()
-        assert (self.matrices['s'] > 0).all()
+        assert (self.matrices["s"] > 0).all()
 
     def transpose(self):
         """Transpose derived svd arrays."""
-        self.matrices |= dict(Uh=self.matrices['U'].T.copy(order='C'),
-                              V=self.matrices['Vh'].T.copy(order='C'))
+        self.matrices |= dict(
+            Uh=self.matrices["U"].T.copy(order="C"),
+            V=self.matrices["Vh"].T.copy(order="C"),
+        )
 
     def reduce(self):
         """Apply rank reduction to svd data."""
         if self.rank < min(self.shape):
-            self.matrices['U'] = self.matrices['U'][:, :self.rank]
-            self.matrices['s'] = self.matrices['s'][:self.rank]
-            self.matrices['Vh'] = self.matrices['Vh'][:self.rank, :]
+            self.matrices["U"] = self.matrices["U"][:, : self.rank]
+            self.matrices["s"] = self.matrices["s"][: self.rank]
+            self.matrices["Vh"] = self.matrices["Vh"][: self.rank, :]

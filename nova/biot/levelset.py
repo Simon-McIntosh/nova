@@ -22,7 +22,7 @@ class LevelSet(Proximate, Grid):
         """Return flux surface."""
         return self.contour.closedlevelset(psi).points
 
-    def solve(self, number=None, limit=0, index='plasma'):
+    def solve(self, number=None, limit=0, index="plasma"):
         """Solve rectangular grid fit to first wall contour."""
         super().solve(number, limit=limit, index=index)
 
@@ -30,19 +30,21 @@ class LevelSet(Proximate, Grid):
         """Extend Grid.load_operators to initalize contour instance."""
         super().load_operators()
         if self.number is not None:
-            self.contour = Contour(self.data.x2d, self.data.z2d, self.psi_,
-                                   levels=self.levels)
-            self.kd_points = np.c_[self.data.x2d.data.flatten(),
-                                   self.data.z2d.data.flatten()]
+            self.contour = Contour(
+                self.data.x2d, self.data.z2d, self.psi_, levels=self.levels
+            )
+            self.kd_points = np.c_[
+                self.data.x2d.data.flatten(), self.data.z2d.data.flatten()
+            ]
 
     def check_contour(self):
         """Check contour flux operators."""
-        self.check_plasma('Psi')
-        self.check_source('psi')
+        self.check_plasma("Psi")
+        self.check_source("psi")
 
     def __getattribute__(self, attr):
         """Extend getattribute to intercept field null data access."""
-        if attr == 'contour':
+        if attr == "contour":
             self.check_contour()
         return super().__getattribute__(attr)
 

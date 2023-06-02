@@ -18,32 +18,42 @@ from nova.shape import Shape
 from nova.firstwall import main_chamber
 
 import seaborn as sns
-rc = {'figure.figsize': [7 * 10 / 16, 7], 'savefig.dpi': 150,  # *12/16
-      'savefig.jpeg_quality': 100, 'savefig.pad_inches': 0.1,
-      'lines.linewidth': 0.75}
-sns.set(context='paper', style='white', font='sans-serif', palette='Set2',
-        font_scale=7 / 8, rc=rc)
-Color = cycle(sns.color_palette('Set2'))
+
+rc = {
+    "figure.figsize": [7 * 10 / 16, 7],
+    "savefig.dpi": 150,  # *12/16
+    "savefig.jpeg_quality": 100,
+    "savefig.pad_inches": 0.1,
+    "lines.linewidth": 0.75,
+}
+sns.set(
+    context="paper",
+    style="white",
+    font="sans-serif",
+    palette="Set2",
+    font_scale=7 / 8,
+    rc=rc,
+)
+Color = cycle(sns.color_palette("Set2"))
 
 
 nTF, nPF, nCS = 18, 6, 5
-config = {'TF': 'dtt', 'eq': 'SN'}
+config = {"TF": "dtt", "eq": "SN"}
 config, setup = select(config, nTF=nTF, nPF=nPF, nCS=nCS, update=False)
 
 sf = SF(setup.filename)
 rb = RB(sf, setup)
 pf = PF(sf.eqdsk)
 
-mc = main_chamber('dtt')
+mc = main_chamber("dtt")
 # mc.load_data(plot=True)  # load from file
-mc.generate([config['eq_base']], psi_n=1.07, flux_fit=True,
-            plot=False, symetric=False)
+mc.generate([config["eq_base"]], psi_n=1.07, flux_fit=True, plot=False, symetric=False)
 mc.shp.plot_bounds()
 
 rb.generate(mc, debug=False)
-profile = Profile(config['TF'], family='S', part='TF', nTF=nTF, obj='L')
-shp = Shape(profile, eqconf=config['eq_base'], ny=3)
-shp.add_vessel(rb.segment['vessel_outer'])
+profile = Profile(config["TF"], family="S", part="TF", nTF=nTF, obj="L")
+shp = Shape(profile, eqconf=config["eq_base"], ny=3)
+shp.add_vessel(rb.segment["vessel_outer"])
 shp.minimise(ripple=True, verbose=True)
 tf = shp.tf
 tf.fill()

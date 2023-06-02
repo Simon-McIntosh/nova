@@ -18,12 +18,14 @@ class Profile:
 
     sample: Union[Sample, Trial, Campaign, str]
     _data_offset: Union[bool, tuple[float]] = True
-    _offset: tuple[float | int, float | int] = \
-        field(init=False, default=(0, 0), repr=False)
+    _offset: tuple[float | int, float | int] = field(
+        init=False, default=(0, 0), repr=False
+    )
     _normalize: bool = False
     _lowpass_filter: bool = True
-    reload: SimpleNamespace = field(init=False, repr=False,
-                                    default_factory=SimpleNamespace)
+    reload: SimpleNamespace = field(
+        init=False, repr=False, default_factory=SimpleNamespace
+    )
 
     def __post_init__(self):
         """Calculate offset."""
@@ -38,7 +40,7 @@ class Profile:
     @property
     def columns(self):
         """Return timeseries column names."""
-        return {'time': ('t', 's'), 'data': ('Qdot', 'W')}
+        return {"time": ("t", "s"), "data": ("Qdot", "W")}
 
     @property
     def offset(self):
@@ -73,7 +75,8 @@ class Profile:
             if offset:
                 start_index = self.heatindex.start
                 self._offset = self.sample.sampledata.lowpass.loc[
-                    start_index, [self.time_label, self.data_label]].values
+                    start_index, [self.time_label, self.data_label]
+                ].values
         else:
             self._offset = offset
         self.reload.waveform = True
@@ -104,42 +107,43 @@ class Profile:
         try:
             label = self.columns[key]
         except KeyError as keyerror:
-            raise KeyError(f'{key} not in self.columns {self.columns}') \
-                from keyerror
+            raise KeyError(f"{key} not in self.columns {self.columns}") from keyerror
         return label
 
     @property
     def time_label(self):
         """Return time label."""
-        return self._get_column_label('time')
+        return self._get_column_label("time")
 
     @property
     def data_label(self):
         """Return data label."""
-        data_label = self._get_column_label('data')
+        data_label = self._get_column_label("data")
         if self.normalize:
-            label = (data_label[0]+'_norm', data_label[1])
+            label = (data_label[0] + "_norm", data_label[1])
         else:
             label = data_label
         return label
 
     def _locate(self, prefix, index=slice(None)):
         if prefix not in self.columns:
-            raise NameError(f'prefix {prefix} not in {self.columns}')
-        label = getattr(self, f'{prefix}_label')
+            raise NameError(f"prefix {prefix} not in {self.columns}")
+        label = getattr(self, f"{prefix}_label")
         offset_index = list(self.columns).index(prefix)
-        return self.sample.sampledata.data.loc[index, label].values - \
-            self.offset[offset_index]
+        return (
+            self.sample.sampledata.data.loc[index, label].values
+            - self.offset[offset_index]
+        )
 
     @property
     def time(self):
         """Return time array."""
-        return self._locate('time')
+        return self._locate("time")
 
     @property
     def data(self):
         """Return data array."""
-        return self._locate('data')
+        return self._locate("data")
 
     def timeseries(self, index=slice(None)):
         """Return data timeseries."""
@@ -191,7 +195,7 @@ class Profile:
         heatup = self.timeseries(index)[1]
         maximum = np.max(heatup)
         minimum = np.min(heatup)
-        heatdelta = maximum-minimum
+        heatdelta = maximum - minimum
         return heatdelta
 
     @property
@@ -207,14 +211,15 @@ class Profile:
         cooldown = self.cooldown[1]
         maximum = cooldown[0]
         minimum = np.max([np.min(cooldown), self.start[1]])
-        return maximum-minimum
+        return maximum - minimum
 
     @property
     def coldindex(self):
         """Return 95% cooldown index."""
         self._assert_lowpass()
         return self.maxindex + np.argmax(
-            self.cooldown[1] <= self.maximum[1] - 0.95*self.cooldelta)
+            self.cooldown[1] <= self.maximum[1] - 0.95 * self.cooldelta
+        )
 
     @property
     def cold(self):
@@ -233,19 +238,19 @@ class Profile:
     def minimum_ratio(self):
         """Return ratio of stop-minimum to heat delta."""
         self._assert_lowpass()
-        return (self.stop[1]-self.minimum[1]) / self.heatdelta
+        return (self.stop[1] - self.minimum[1]) / self.heatdelta
 
     @property
     def maximum_ratio(self):
         """Return ratio of offset maximum to heat delta."""
         self._assert_lowpass()
-        return (self.maximum[1]-self.start[1]) / self.heatdelta
+        return (self.maximum[1] - self.start[1]) / self.heatdelta
 
     @property
     def limit_ratio(self):
         """Return ration of index delta to heat delta."""
         self._assert_lowpass()
-        return (self.stop[1]-self.start[1]) / self.heatdelta
+        return (self.stop[1] - self.start[1]) / self.heatdelta
 
     @property
     def steady(self):
@@ -256,12 +261,13 @@ class Profile:
     @property
     def status(self):
         """Return pandas.DataFrame detailing stability metrics."""
-        status = pandas.DataFrame(index=['maximum', 'minimum', 'limit'],
-                                  columns=['ratio', 'steady'])
+        status = pandas.DataFrame(
+            index=["maximum", "minimum", "limit"], columns=["ratio", "steady"]
+        )
         self._assert_lowpass()
         for name in status.index:
-            status.loc[name, 'ratio'] = getattr(self, f'{name}_ratio')
-            status.loc[name, 'steady'] = status.loc[name, 'ratio'] >= 0.95
+            status.loc[name, "ratio"] = getattr(self, f"{name}_ratio")
+            status.loc[name, "steady"] = status.loc[name, "ratio"] >= 0.95
         return status
 
     @property
@@ -269,13 +275,13 @@ class Profile:
         """Return profile coefficents."""
         coefficents = {}
         with self.sample.sampledata(lowpass_filter=True):
-            for attribute in ['start', 'stop', 'cold', 'minimum', 'maximum']:
+            for attribute in ["start", "stop", "cold", "minimum", "maximum"]:
                 timesample = getattr(self, attribute)
-                for i, postfix in enumerate(['time', 'value']):
-                    coefficents[f'{attribute}_{postfix}'] = timesample[i]
-            for attribute in ['minimum_ratio', 'maximum_ratio', 'limit_ratio']:
+                for i, postfix in enumerate(["time", "value"]):
+                    coefficents[f"{attribute}_{postfix}"] = timesample[i]
+            for attribute in ["minimum_ratio", "maximum_ratio", "limit_ratio"]:
                 coefficents[attribute] = getattr(self, attribute)
-            coefficents['energy_data'] = self.pulse_energy
+            coefficents["energy_data"] = self.pulse_energy
         return pandas.Series(coefficents)
 
     def plot_point(self, index, *args, **kwargs):
@@ -294,7 +300,7 @@ class Profile:
         None.
 
         """
-        axes = kwargs.pop('axes', None)
+        axes = kwargs.pop("axes", None)
         if axes is None:
             axes = plt.subplots(1, 1)[1]
         axes.plot(*self.timeseries(index), *args, **kwargs)
@@ -318,15 +324,19 @@ class Profile:
         if axes is None:
             axes = plt.gca()
         if lowpass_filter:
-            color = 'C0'
-            label = 'lowpass'
+            color = "C0"
+            label = "lowpass"
             linewidth = 1.5
         else:
-            color = 'C9'
-            label = 'raw'
+            color = "C9"
+            label = "raw"
             linewidth = 1
-        kwargs = {'color': color, 'linestyle': '-', 'label': label,
-                  'lw': linewidth} | kwargs
+        kwargs = {
+            "color": color,
+            "linestyle": "-",
+            "label": label,
+            "lw": linewidth,
+        } | kwargs
         with self.sample.sampledata(lowpass_filter=lowpass_filter):
             axes.plot(*self.timeseries(), **kwargs)
 
@@ -339,9 +349,9 @@ class Profile:
             self.plot_single(lowpass_filter=True, axes=axes)
         if heat:
             self.plot_heat()
-        axes.legend(loc='upper right')
-        axes.set_xlabel('$t$ s')
-        axes.set_ylabel(r'$\dot{Q}$ W')
+        axes.legend(loc="upper right")
+        axes.set_xlabel("$t$ s")
+        axes.set_ylabel(r"$\dot{Q}$ W")
         plt.despine()
         plt.title(self.sample.label)
 
@@ -353,15 +363,18 @@ class Profile:
         time = timeseries[0]
         upper = timeseries[1]
         lower = np.min([np.min(upper), 0]) * np.ones(len(time))
-        kwargs = {'color': 'lightgray', 'alpha': 0.85,
-                  'label': 'heat', 'zorder': -1} | kwargs
+        kwargs = {
+            "color": "lightgray",
+            "alpha": 0.85,
+            "label": "heat",
+            "zorder": -1,
+        } | kwargs
         axes.fill_between(time, lower, upper, **kwargs)
 
 
-if __name__ == '__main__':
-
-    trial = Trial('CSJA12', 'ac0')
-    sample = Sample(trial, 0, 'Left')
+if __name__ == "__main__":
+    trial = Trial("CSJA12", "ac0")
+    sample = Sample(trial, 0, "Left")
     profile = Profile(sample, _normalize=False)
 
     profile.plot(lowpass=True, heat=True)

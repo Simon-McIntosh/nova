@@ -82,17 +82,19 @@ class GroupSet(Plot):
     def plot(self, axes=None):
         """Plot source and target markers."""
         self.axes = axes
-        self.source.plot('x', 'z', 'scatter', ax=self.axes,
-                         color='C1', marker='o', label='source')
-        self.target.plot('x', 'z', 'scatter', ax=self.axes,
-                         color='C2', marker='.', label='target')
-        self.axes.axis('equal')
-        self.axes.axis('off')
+        self.source.plot(
+            "x", "z", "scatter", ax=self.axes, color="C1", marker="o", label="source"
+        )
+        self.target.plot(
+            "x", "z", "scatter", ax=self.axes, color="C2", marker=".", label="target"
+        )
+        self.axes.axis("equal")
+        self.axes.axis("off")
 
 
-if __name__ == '__main__':
-
-    source = BiotFrame({'x': [3, 3.4, 3.6], 'z': [3.1, 3, 3.3],
-                        'dl': 0.3, 'dt': 0.3, 'section': 'hex'})
+if __name__ == "__main__":
+    source = BiotFrame(
+        {"x": [3, 3.4, 3.6], "z": [3.1, 3, 3.3], "dl": 0.3, "dt": 0.3, "section": "hex"}
+    )
     groupset = GroupSet(source, source)
     groupset.plot()

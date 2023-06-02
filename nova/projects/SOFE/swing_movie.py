@@ -6,33 +6,46 @@ from nova.coils import TF
 import pickle
 import matplotlib.animation as manimation
 
-FFMpegWriter = manimation.writers['ffmpeg']
+FFMpegWriter = manimation.writers["ffmpeg"]
 writer = FFMpegWriter(fps=5, bitrate=1000)
 
 import seaborn as sns
-rc = {'figure.figsize': [12, 5], 'savefig.dpi': 175,  # *12/16
-      'savefig.jpeg_quality': 100, 'savefig.pad_inches': 0.1,
-      'lines.linewidth': 1.75}
-sns.set(context='poster', style='white', font='sans-serif', palette='Set2',
-        font_scale=1, rc=rc)
-color = sns.color_palette('Set2')
+
+rc = {
+    "figure.figsize": [12, 5],
+    "savefig.dpi": 175,  # *12/16
+    "savefig.jpeg_quality": 100,
+    "savefig.pad_inches": 0.1,
+    "lines.linewidth": 1.75,
+}
+sns.set(
+    context="poster",
+    style="white",
+    font="sans-serif",
+    palette="Set2",
+    font_scale=1,
+    rc=rc,
+)
+color = sns.color_palette("Set2")
 from amigo.addtext import linelabel
 
 from itertools import cycle
-Color = cycle(sns.color_palette('Set2'))
+
+Color = cycle(sns.color_palette("Set2"))
 from nova.radial_build import RB
-#tf = TF('DEMO_SN',coil_type='S',nTF=16,objective='L')
+
+# tf = TF('DEMO_SN',coil_type='S',nTF=16,objective='L')
 
 
-
-config = 'DEMO_SF'
-pkl = PKL(config, directory='../../Movies/')
-sf, inv = pkl.fetch(['sf', 'inv'])
+config = "DEMO_SF"
+pkl = PKL(config, directory="../../Movies/")
+sf, inv = pkl.fetch(["sf", "inv"])
 
 pl.figure()
 
+
 def animate(flux):  # ,data,ax
-    Color = cycle(sns.color_palette('Set2'))
+    Color = cycle(sns.color_palette("Set2"))
 
     pl.cla()
     # ax1.set_axis_off()
@@ -46,9 +59,9 @@ def animate(flux):  # ,data,ax
     # tf.fill()
 
     # print(swing,sf.Xpsi,sf.Mpoint[1],inv.rms)
-    #B = eq.Bfeild([inv.fix['r'][-1],inv.fix['z'][-1]])
-    #arg = 180*np.arctan2(B[1],B[0])/np.pi
-    #print('swing {:1.0f} arg {:1.2f} rms {:1.3f}'.format(swing,arg,inv.rms))
+    # B = eq.Bfeild([inv.fix['r'][-1],inv.fix['z'][-1]])
+    # arg = 180*np.arctan2(B[1],B[0])/np.pi
+    # print('swing {:1.0f} arg {:1.2f} rms {:1.3f}'.format(swing,arg,inv.rms))
 
     inv.eq.run(update=False)
     # sf.sol(plot=True)
@@ -61,7 +74,7 @@ def animate(flux):  # ,data,ax
 
     # rb.divertor_outline(False,plot=True,debug=False)
 
-    '''
+    """
     with open('./plot_data/'+rb.conf.config+'_FW.pkl', 'rb') as input:
                 rb.targets = pickle.load(input)
                 rb.Rb = pickle.load(input)
@@ -80,57 +93,59 @@ def animate(flux):  # ,data,ax
 
     rb.TFopp(False,objF=conf.TFopp)  # L==length, V==volume
     rb.TFfill()
-    '''
+    """
     # pl.tight_layout()
 
     pl.sca(ax2)
     ax2.cla()
-    text = linelabel(Ndiv=10, value='', postfix='')
+    text = linelabel(Ndiv=10, value="", postfix="")
     for i, name in enumerate(inv.PF_coils):
         pl.plot(-2 * np.pi * (Swing - Swing[0]), abs(F[i, :, 1]))
         text.add(name)
-        pl.plot(-2 * np.pi * (swing * np.ones(2) -
-                              Swing[0]), [0, 450], 'k--', alpha=0.25)
+        pl.plot(
+            -2 * np.pi * (swing * np.ones(2) - Swing[0]), [0, 450], "k--", alpha=0.25
+        )
     pl.plot(-2 * np.pi * (Swing - Swing[0]), Fcs[:, 0])
-    text.add('Fsep')
+    text.add("Fsep")
     pl.plot(-2 * np.pi * (Swing - Swing[0]), abs(Fcs[:, 1]))
-    text.add('FzCS')
-    pl.ylabel(r'$|Fz|$ MN')
+    text.add("FzCS")
+    pl.ylabel(r"$|Fz|$ MN")
     pl.ylim([0, 450])
     pl.tight_layout()
-    #pl.xlabel(r'Swing Wb')
+    # pl.xlabel(r'Swing Wb')
     sns.despine()
     text.plot()
     # pl.tight_layout()
 
     pl.sca(ax3)
     ax3.cla()
-    text = linelabel(Ndiv=10, value='', postfix='')
+    text = linelabel(Ndiv=10, value="", postfix="")
     for i, name in enumerate(inv.PF_coils):
         pl.plot(-2 * np.pi * (Swing - Swing[0]), abs(I[i, :]) * 1e-6)
         text.add(name)
-        pl.plot(-2 * np.pi * (swing * np.ones(2) -
-                              Swing[0]), [0, 22], 'k--', alpha=0.25)
-    pl.ylabel(r'$|I|$ MA')
-    pl.xlabel(r'Swing Wb')
+        pl.plot(
+            -2 * np.pi * (swing * np.ones(2) - Swing[0]), [0, 22], "k--", alpha=0.25
+        )
+    pl.ylabel(r"$|I|$ MA")
+    pl.xlabel(r"Swing Wb")
     pl.tight_layout()
     sns.despine()
     text.plot()
     # pl.tight_layout()
 
 
-with writer.saving(fig, '../../Movies/{}_swing.wmv'.format(config), 100):
+with writer.saving(fig, "../../Movies/{}_swing.wmv".format(config), 100):
     for s in Swing:  # inv.log['position_iter'][-1]
         animate(s)
         writer.grab_frame()
 
 
-#anim = animation.FuncAnimation(fig,animate,frames=Swing,fargs=([],ax1))
-'''
+# anim = animation.FuncAnimation(fig,animate,frames=Swing,fargs=([],ax1))
+"""
 FFMpegWriter = animation.writers['ffmpeg']
 metadata = dict(title='SXex sweep')
 writer = FFMpegWriter(fps=3, bitrate=5000, metadata=metadata)
 anim.save('SX_animation_tmp.wmv',dpi=75,
           savefig_kwargs={'bboxinches':'tight'},
           writer=writer)
-'''
+"""

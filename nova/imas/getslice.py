@@ -37,20 +37,20 @@ class GetSlice:
     def match(self, key: str) -> str:
         """Return key matched to internal naming convention."""
         match key:
-            case 'p_prime':
-                return 'dpressure_dpsi'
-            case 'ff_prime':
-                return 'f_df_dpsi'
+            case "p_prime":
+                return "dpressure_dpsi"
+            case "ff_prime":
+                return "f_df_dpsi"
             case str():
                 return key
             case _:
-                raise ValueError(f'invalid key {key}')
+                raise ValueError(f"invalid key {key}")
 
     @property
     def itime(self):
         """Manage solution time index."""
         if self.time_index is None:
-            raise IndexError('itime is None')
+            raise IndexError("itime is None")
         return self.time_index
 
     @itime.setter
@@ -63,7 +63,7 @@ class GetSlice:
     @property
     def time(self):
         """Manage solution time."""
-        return self['time']
+        return self["time"]
 
     @time.setter
     def time(self, time):

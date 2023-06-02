@@ -40,7 +40,7 @@ class NakaData(PandasHDF):
     @property
     def binaryfilepath(self):
         """Return full path of binary datafile."""
-        return os.path.join(self.database.binary_filepath('testdata.h5'))
+        return os.path.join(self.database.binary_filepath("testdata.h5"))
 
     @property
     def filename(self):
@@ -49,12 +49,13 @@ class NakaData(PandasHDF):
 
     def _read_dataframe(self, file):
         """Return csv file data as pandas.DataFrame."""
-        dataframe = pandas.read_csv(file, skiprows=7, dtype=float,
-                                    na_values=['1.#INF00e+000'])
+        dataframe = pandas.read_csv(
+            file, skiprows=7, dtype=float, na_values=["1.#INF00e+000"]
+        )
         columns = {}
         for name in dataframe.columns:
-            columns[name] = name.replace('(sec)', '')
-            columns[name] = columns[name].replace('phy(', '').replace(')', '')
+            columns[name] = name.replace("(sec)", "")
+            columns[name] = columns[name].replace("phy(", "").replace(")", "")
         dataframe.rename(columns=columns, inplace=True)
         dataframe.dropna(inplace=True, axis=1)
         return dataframe
@@ -77,7 +78,7 @@ class NakaData(PandasHDF):
 
     def _read_data(self):
         """Return concatinated dataset."""
-        files = self.database.locate(self.shot, files='L.csv')
+        files = self.database.locate(self.shot, files="L.csv")
         self.database.download()
         return self._read_dataset(files)
 
@@ -86,7 +87,6 @@ class NakaData(PandasHDF):
         return [column for column in self.data.columns if label in column]
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     nakadata = NakaData(2015, 209)
-    #nakadata.read_data()
+    # nakadata.read_data()

@@ -11,19 +11,22 @@ class VtkFrame(vedo.Mesh, GeoFrame):
 
     def __str__(self):
         """Return polygon name."""
-        return 'vtk'
+        return "vtk"
 
     def dumps(self) -> str:
         """Return string representation of vtk object."""
         return json.dumps(
-            {'type': 'VTK',
-             'points': self.points().tolist(),
-             'cells': np.array(self.cells(), dtype=int).tolist(),
-             'color': self.color().tolist(), 'opacity': self.opacity()})
+            {
+                "type": "VTK",
+                "points": self.points().tolist(),
+                "cells": np.array(self.cells(), dtype=int).tolist(),
+                "color": self.color().tolist(),
+                "opacity": self.opacity(),
+            }
+        )
 
     @classmethod
     def loads(cls, vtk: str):
         """Load json prepresentation."""
         vtk = json.loads(vtk)
-        return cls([vtk['points'], vtk['cells']],
-                   c=vtk['color'], alpha=vtk['opacity'])
+        return cls([vtk["points"], vtk["cells"]], c=vtk["color"], alpha=vtk["opacity"])

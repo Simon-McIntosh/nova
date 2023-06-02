@@ -36,13 +36,14 @@ class Basis(Plot1D, LinearSample):
     """Basis function base class."""
 
     order: int = 0
-    name: ClassVar[str] = 'Base'
+    name: ClassVar[str] = "Base"
 
     def __post_init__(self):
         """Construct interaction matrix and initalize operator."""
         super().__post_init__()
         self.matrix = np.copy(
-            np.c_[[self.basis(i) for i in range(self.order+1)]].T, order='C')
+            np.c_[[self.basis(i) for i in range(self.order + 1)]].T, order="C"
+        )
 
     @property
     def shape(self):
@@ -55,13 +56,13 @@ class Basis(Plot1D, LinearSample):
 
     def plot(self, model=None, **kwargs):
         """Plot set of basis functions evaluated for coordinate."""
-        self.axes = kwargs.pop('axes', None)
+        self.axes = kwargs.pop("axes", None)
         if model is None:
-            model = np.ones(self.order+1)
+            model = np.ones(self.order + 1)
         for i, coef in enumerate(model):
             self.axes.plot(self.coordinate, coef * self.basis(i), **kwargs)
-        self.axes.set_xlabel('coordinate')
-        self.axes.set_ylabel('basis')
+        self.axes.set_xlabel("coordinate")
+        self.axes.set_ylabel("basis")
         self.axes.set_title(self.name)
 
 
@@ -69,12 +70,15 @@ class Basis(Plot1D, LinearSample):
 class Bernstein(Basis):
     """Berstein polynomial regression of a given order."""
 
-    name: ClassVar[str] = 'Bernstein Polynomial'
+    name: ClassVar[str] = "Bernstein Polynomial"
 
     def basis(self, term: int):
         """Return Bernstein basis polynomial."""
-        return scipy.special.binom(self.order, term) * \
-            self.coordinate**term * (1 - self.coordinate)**(self.order - term)
+        return (
+            scipy.special.binom(self.order, term)
+            * self.coordinate**term
+            * (1 - self.coordinate) ** (self.order - term)
+        )
 
 
 @dataclass
@@ -92,12 +96,12 @@ class Svd(Basis, SvdAttrs):
     matrix: npt.ArrayLike = None
     data: xarray.Dataset = field(init=False, default_factory=xarray.Dataset)
 
-    name: ClassVar[str] = 'Singular Value Decomposition'
+    name: ClassVar[str] = "Singular Value Decomposition"
 
     def __post_init__(self):
         """Update basis order."""
         self.update_coordinate()
-        self.order = self.rank-1
+        self.order = self.rank - 1
 
     def __call__(self, data):
         """Append data."""
@@ -120,13 +124,14 @@ class Svd(Basis, SvdAttrs):
         """Reshape data to match coordinate length."""
         if (length := data.shape[1]) == self.length:
             return data
-        return scipy.interpolate.interp1d(
-            np.linspace(0, 1, length), data, axis=1)(self.coordinate)
+        return scipy.interpolate.interp1d(np.linspace(0, 1, length), data, axis=1)(
+            self.coordinate
+        )
 
     def _reduce(self, data):
         """Perform svd reduction."""
         decompose = Decompose(data, self.rank)
-        return decompose.matrices['V']
+        return decompose.matrices["V"]
 
     def interpolate(self, length: int):
         """Interpolate matrix to new coodrinate length."""
@@ -134,21 +139,21 @@ class Svd(Basis, SvdAttrs):
             return
         _coordinate = self.coordinate.copy()
         self.update_coordinate(length)
-        self.matrix = scipy.interpolate.interp1d(
-            _coordinate, self.matrix, axis=0)(self.coordinate)
+        self.matrix = scipy.interpolate.interp1d(_coordinate, self.matrix, axis=0)(
+            self.coordinate
+        )
 
     def basis(self, term: int):
         """Return individual basis."""
         return self.matrix[:, term]
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     bernstein = Bernstein(50, 21)
     print(bernstein.shape)
-    #bernstein.plot()
+    # bernstein.plot()
 
-    '''
+    """
 
     eq = EquilibriumData(135011, 7)
     attr = 'f_df_dpsi'
@@ -167,9 +172,9 @@ if __name__ == '__main__':
     #svd += eq.data[attr]
 
     svd.plot(ls='--')
-    '''
+    """
 
-    '''
+    """
 
 
     import pylops
@@ -210,9 +215,9 @@ if __name__ == '__main__':
 
 
 
-    '''
+    """
 
-    '''
+    """
 
     import scipy
     from sklearn.kernel_ridge import KernelRidge
@@ -239,8 +244,7 @@ if __name__ == '__main__':
     bernstein /= data
     bernstein.plot(axes=plt.gca())
 
-    '''
-
+    """
 
     '''
     alpha = 0.5
@@ -279,7 +283,7 @@ if __name__ == '__main__':
     K = rbf_kernel(X)
     '''
 
-    '''
+    """
     ######### svd
     from sklearn.decomposition import TruncatedSVD
 
@@ -298,22 +302,22 @@ if __name__ == '__main__':
 
     reg.plot(axes=plt.gca())
     ########### svd
-    '''
+    """
 
-    '''
-    '''
-    #reg /= data
+    """
+    """
+    # reg /= data
 
-    '''
+    """
     bernstein = Bernstein(eq.data.dims['psi_norm'], 7)
 
     err = np.zeros((len(eq.data[attr]), eq.data.dims['psi_norm']))
     for i in range(eq.data.dims['time']):
         err[i] = eq.data[attr][i] - bernstein.forward(
             bernstein / eq.data[attr].data[i])
-    '''
+    """
 
-    '''
+    """
     import sklearn.covariance
 
     cov = sklearn.covariance.OAS().fit(eq.data[attr].data[itime-100:itime])
@@ -337,10 +341,9 @@ if __name__ == '__main__':
     bernstein.plot(plt.gca())
     #reg.coordinate = bernstein.coordinate
     #reg.plot(axes=plt.gca())
-    '''
+    """
 
-
-    '''
+    """
     from sklearn.decomposition import TruncatedSVD
 
 
@@ -357,26 +360,23 @@ if __name__ == '__main__':
     reg.plot(axes=plt.gca())
 
     plt.plot(reg.coordinate, profile.data)
-    '''
+    """
 
-    '''
+    """
     reg /= data
     reg.coordinate = bernstein.coordinate
     reg.plot(axes=plt.gca())
-    '''
+    """
 
-
-
-    '''
+    """
 
     for x in X:
         plt.plot(bernstein.coordinate, x)
 
     #print(np.allclose(K_, K))
-    '''
+    """
 
-
-    '''
+    """
     from sklearn.decomposition import TruncatedSVD
 
     svd = TruncatedSVD(3, algorithm='arpack')
@@ -391,12 +391,9 @@ if __name__ == '__main__':
 
     # bernstein / data
     bernstein.plot(axes=plt.gca())
-    '''
+    """
 
-
-
-
-    '''
+    """
     #cov = np.cov(eq.data[attr][:, :-1].T)
     #cov = graphical_lasso(cov, 0.01)
     #cov = GraphicalLassoCV().fit(eq.data[attr][:, :-1]).covariance_
@@ -430,4 +427,4 @@ if __name__ == '__main__':
     plt.plot(eq.data.psi_norm, profile)
     #plt.plot(eq.data.psi_norm, bernstein.matrix @ lsq.x, '--')
     plt.plot(eq.data.psi_norm, bernstein(), '-.')
-    '''
+    """

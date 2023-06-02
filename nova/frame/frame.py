@@ -1,7 +1,7 @@
 """Manage frame factroy methods."""
 from dataclasses import dataclass
 
-from nova.frame import (Coil, Ferritic, FirstWall, Shell, Turn, Winding)
+from nova.frame import Coil, Ferritic, FirstWall, Shell, Turn, Winding
 from nova.frame.frameset import FrameSet, frame_factory
 from nova.geometry.polyshape import PolyShape
 
@@ -14,8 +14,8 @@ class Frame(FrameSet):
     dcoil: float = -1
     dplasma: float = -500
     dshell: float = 0
-    tcoil: str = 'rectangle'
-    tplasma: str = 'rectangle'
+    tcoil: str = "rectangle"
+    tplasma: str = "rectangle"
 
     def __post_init__(self):
         """Update turn attribute names."""
@@ -24,14 +24,20 @@ class Frame(FrameSet):
 
     def _expand_polyattrs(self):
         """Expand polyshape attrbutes."""
-        for attr in ['tplasma', 'tcoil']:
+        for attr in ["tplasma", "tcoil"]:
             setattr(self, attr, PolyShape(getattr(self, attr)).shape)
 
     @property
     def frameset_attrs(self):
         """Return frame attributes."""
-        return dict(dcoil=self.dcoil, dplasma=self.dplasma, dshell=self.dshell,
-                    tcoil=self.tcoil, tplasma=self.tplasma, delta=self.delta)
+        return dict(
+            dcoil=self.dcoil,
+            dplasma=self.dplasma,
+            dshell=self.dshell,
+            tcoil=self.tcoil,
+            tplasma=self.tplasma,
+            delta=self.delta,
+        )
 
     @frameset_attrs.setter
     def frameset_attrs(self, attrs: dict[str, int | float | str]):

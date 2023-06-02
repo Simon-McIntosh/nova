@@ -25,8 +25,8 @@ class PolyDelta(PolyGeom):
     """Manage grid spacing and cell dimension."""
 
     delta: Union[int, float] = 0
-    turn: str = 'hexagon'
-    nturn: float = 1.
+    turn: str = "hexagon"
+    nturn: float = 1.0
     tile: bool = False
     fill: bool = False
     cell_delta: list[float] = field(init=False, default_factory=list)
@@ -48,7 +48,7 @@ class PolyDelta(PolyGeom):
         ndiv_x, ndiv_z = self.divide()
         ndiv_x, ndiv_z = np.max([ndiv_x, 1]), np.max([ndiv_z, 1])
         if self.tile or self.fill:
-            return self.width/ndiv_x, self.height/ndiv_z
+            return self.width / ndiv_x, self.height / ndiv_z
         return self.width / np.round(ndiv_x), self.height / np.round(ndiv_z)
 
     def divide(self):
@@ -62,21 +62,24 @@ class PolyDelta(PolyGeom):
             box_number = filament_number / fill_fraction
             width, height = self.width, self.height
             if self.tile:
-                if self.turn in ['disc', 'skin']:
-                    box_number *= np.sqrt(3)/2
-                elif self.turn == 'hexagon':
-                    box_number *= 3/8 * np.sqrt(3)
-            elif self.turn == 'hexagon':
-                box_number *= np.sqrt(3)/2
-            if np.isclose(aspect := width/height, 1) and \
-                    self.turn in ['disc', 'square', 'skin']:
+                if self.turn in ["disc", "skin"]:
+                    box_number *= np.sqrt(3) / 2
+                elif self.turn == "hexagon":
+                    box_number *= 3 / 8 * np.sqrt(3)
+            elif self.turn == "hexagon":
+                box_number *= np.sqrt(3) / 2
+            if np.isclose(aspect := width / height, 1) and self.turn in [
+                "disc",
+                "square",
+                "skin",
+            ]:
                 delta = np.sqrt(self.box_area / box_number)
-                return (ndiv := width/delta, ndiv)
-            if self.turn == 'hexagon' and not self.tile:
-                aspect /= np.sqrt(3)/2
+                return (ndiv := width / delta, ndiv)
+            if self.turn == "hexagon" and not self.tile:
+                aspect /= np.sqrt(3) / 2
             if aspect > 1:
                 return self.divide_box(box_number, aspect)
-            return self.divide_box(box_number, 1/aspect)[::-1]
+            return self.divide_box(box_number, 1 / aspect)[::-1]
         ndiv_x = self.width / self.delta
         ndiv_z = self.height / self.delta
         return ndiv_x, ndiv_z
@@ -96,15 +99,15 @@ class PolyDelta(PolyGeom):
         grid_delta = list(self.cell_delta)
         if self.tile:
             grid_delta = [delta := PolyGen.boxbound(*grid_delta), delta]
-            if self.turn == 'hexagon':
-                grid_delta[0] *= 3/2
-                grid_delta[1] *= np.sqrt(3)/4
+            if self.turn == "hexagon":
+                grid_delta[0] *= 3 / 2
+                grid_delta[1] *= np.sqrt(3) / 4
                 return grid_delta
-            if self.turn in ['disc', 'skin']:
-                grid_delta[1] *= np.sqrt(3)/2
+            if self.turn in ["disc", "skin"]:
+                grid_delta[1] *= np.sqrt(3) / 2
                 return grid_delta
-        if self.turn == 'hexagon' and self.delta != 0:
-            grid_delta[1] *= np.sqrt(3)/2
+        if self.turn == "hexagon" and self.delta != 0:
+            grid_delta[1] *= np.sqrt(3) / 2
         return grid_delta
 
 
@@ -123,7 +126,7 @@ class PolyCell(PolyDelta):
 
     def polycell(self, x_center, z_center):
         """Return cell polygon."""
-        poly = {f'{self.turn}': (x_center, z_center, *self.cell_delta)}
+        poly = {f"{self.turn}": (x_center, z_center, *self.cell_delta)}
         return PolyGeom(poly)
 
     @property
@@ -133,11 +136,11 @@ class PolyCell(PolyDelta):
 
     def _scale(self):
         """Apply scaling to cell."""
-        self.cell_delta = [self.scale*delta for delta in self.cell_delta]
+        self.cell_delta = [self.scale * delta for delta in self.cell_delta]
 
     def _skin(self):
         """Update thickness parameter for skin sections."""
-        if self.turn == 'skin':
+        if self.turn == "skin":
             self.cell_delta[1] = self.skin
 
 
@@ -157,29 +160,33 @@ class PolySpace:
 
     def divide(self):
         """Divide base length by delta, update stop parameter."""
-        self.base_length = self.stop-self.start
+        self.base_length = self.stop - self.start
         self.ndiv = int(np.ceil(self.base_length / self.grid_delta))
-        self.stop = self.start + self.ndiv*self.grid_delta
+        self.stop = self.start + self.ndiv * self.grid_delta
 
     def center(self):
         """Center grid on base."""
-        balance = self.ndiv*self.grid_delta - self.base_length
-        self.start -= balance/2
-        self.stop -= balance/2
+        balance = self.ndiv * self.grid_delta - self.base_length
+        self.start -= balance / 2
+        self.stop -= balance / 2
 
     def corner(self):
         """Return edge-edge spacing."""
-        return np.linspace(self.start, self.stop, self.ndiv+1)
+        return np.linspace(self.start, self.stop, self.ndiv + 1)
 
     def face(self):
         """Return face centered spacing."""
-        return np.linspace(self.start + self.grid_delta/2,
-                           self.stop - self.grid_delta/2, self.ndiv)
+        return np.linspace(
+            self.start + self.grid_delta / 2, self.stop - self.grid_delta / 2, self.ndiv
+        )
 
     def buffer_face(self):
         """Return extended face centered spacing."""
-        return np.linspace(self.start - self.grid_delta/2,
-                           self.stop + self.grid_delta/2, self.ndiv+2)
+        return np.linspace(
+            self.start - self.grid_delta / 2,
+            self.stop + self.grid_delta / 2,
+            self.ndiv + 2,
+        )
 
 
 @dataclass
@@ -195,15 +202,17 @@ class PolyVector:
 
     def __post_init__(self):
         """Init polyspace methods."""
-        self.polyspace['x'] = \
-            PolySpace(*self.limit[:2], self.cell_delta[0], self.grid_delta[0])
-        self.polyspace['z'] = \
-            PolySpace(*self.limit[2:], self.cell_delta[1], self.grid_delta[1])
+        self.polyspace["x"] = PolySpace(
+            *self.limit[:2], self.cell_delta[0], self.grid_delta[0]
+        )
+        self.polyspace["z"] = PolySpace(
+            *self.limit[2:], self.cell_delta[1], self.grid_delta[1]
+        )
 
     def __call__(self, direction):
         """Return 1D spacing vector in the requested direction."""
         if self.tile:
-            if self.turn == 'hexagon':
+            if self.turn == "hexagon":
                 return self.polyspace[direction].buffer_face()
             return self.polyspace[direction].corner()
         return self.polyspace[direction].face()
@@ -216,15 +225,29 @@ class PolyGrid(PolyCell, Plot):
     trim: bool = True
     vector: PolyVector = field(init=False, repr=False)
     frame: pandas.DataFrame = field(init=False, repr=False)
-    columns: list[str] = field(init=False, default_factory=lambda: [
-        'x', 'z', 'dl', 'dt', 'dx', 'dz', 'rms', 'area', 'volume',
-        'section', 'poly'])
+    columns: list[str] = field(
+        init=False,
+        default_factory=lambda: [
+            "x",
+            "z",
+            "dl",
+            "dt",
+            "dx",
+            "dz",
+            "rms",
+            "area",
+            "volume",
+            "section",
+            "poly",
+        ],
+    )
 
     def __post_init__(self):
         """Generate grid."""
         super().__post_init__()
         self.vector = PolyVector(
-            self.limit, self.cell_delta, self.grid_delta, self.tile, self.turn)
+            self.limit, self.cell_delta, self.grid_delta, self.tile, self.turn
+        )
         self.frame = self.dataframe()
 
     def __len__(self):
@@ -233,9 +256,9 @@ class PolyGrid(PolyCell, Plot):
 
     def grid_coordinates(self):
         """Return grid coordinates."""
-        grid = np.meshgrid(self.vector('x'), self.vector('z'), indexing='ij')
+        grid = np.meshgrid(self.vector("x"), self.vector("z"), indexing="ij")
         if self.tile:
-            grid[0][:, 1::2] += self.grid_delta[0]/2
+            grid[0][:, 1::2] += self.grid_delta[0] / 2
         return np.hstack((grid[0].reshape(-1, 1), grid[1].reshape(-1, 1)))
 
     def polycells(self, coords):
@@ -248,14 +271,18 @@ class PolyGrid(PolyCell, Plot):
     def polytrim(self, coords, polys):
         """Return polycells trimed to bounding polygon."""
         polytree = shapely.strtree.STRtree([poly.poly for poly in polys])
-        buffer = self.poly.buffer(1e-8*self.cell_delta[0])
+        buffer = self.poly.buffer(1e-8 * self.cell_delta[0])
         index = polytree.query(self.poly)
         polys = np.array(polys)[index]
-        polys = [PolyFrame(polytrim, poly.metadata if poly.poly.within(buffer)
-                           else dict(name='polygon'))
-                 for poly in polys
-                 if (polytrim := poly.poly.intersection(buffer))
-                 and isinstance(polytrim, shapely.geometry.Polygon)]
+        polys = [
+            PolyFrame(
+                polytrim,
+                poly.metadata if poly.poly.within(buffer) else dict(name="polygon"),
+            )
+            for poly in polys
+            if (polytrim := poly.poly.intersection(buffer))
+            and isinstance(polytrim, shapely.geometry.Polygon)
+        ]
         return polys
 
     def dataframe(self):
@@ -264,10 +291,10 @@ class PolyGrid(PolyCell, Plot):
         polys = self.polycells(coords)  # build trimmed cell polygons
         data = [[] for __ in range(len(polys))]
         for i, poly in enumerate(polys):
-            geom = PolyGeom(poly, 'ring').geometry
+            geom = PolyGeom(poly, "ring").geometry
             data[i] = {name: geom[name] for name in self.columns}
         frame = pandas.DataFrame(data, columns=self.columns)
-        frame['nturn'] = self.nturn * frame['area'] / frame['area'].sum()
+        frame["nturn"] = self.nturn * frame["area"] / frame["area"].sum()
         return frame
 
     @property
@@ -289,12 +316,12 @@ class PolyGrid(PolyCell, Plot):
     def polyplot(self):
         """Return polyplot instance."""
         frame = self.frame.copy()
-        frame['part'] = 'cs'
+        frame["part"] = "cs"
         return PolyPlot(DataFrame(frame))
 
     def plot(self):
         """Plot polygon exterior and polycells."""
-        self.set_axes('2d')
+        self.set_axes("2d")
         self.plot_boundary()
         self.polyplot()
 
@@ -310,21 +337,26 @@ class PolyTarget(FrameSet):
     def __post_init__(self):
         """Build poly-target."""
         for name in self.Loc[self.index, :].index:
-            index = self.loc['frame'] == name
-            if self.loc[name, 'coil']:
-                target = PolyGrid(self.Loc[name, 'poly'],
-                                  turn='rectangle', delta=self.delta,
-                                  nturn=self.Loc[name, 'nturn']).frame
+            index = self.loc["frame"] == name
+            if self.loc[name, "coil"]:
+                target = PolyGrid(
+                    self.Loc[name, "poly"],
+                    turn="rectangle",
+                    delta=self.delta,
+                    nturn=self.Loc[name, "nturn"],
+                ).frame
             else:
                 target = self.loc[index, :]
-            self.target.insert(target,
-                               xo=self.frame.loc[name, 'x'],
-                               zo=self.frame.loc[name, 'z'],
-                               link=True, label=name, delim='_')
+            self.target.insert(
+                target,
+                xo=self.frame.loc[name, "x"],
+                zo=self.frame.loc[name, "z"],
+                link=True,
+                label=name,
+                delim="_",
+            )
 
 
-if __name__ == '__main__':
-
-    polygrid = PolyGrid({'hx': [6, 3, 2.5, 2.5]}, delta=-60,
-                        turn='hex', tile=True)
+if __name__ == "__main__":
+    polygrid = PolyGrid({"hx": [6, 3, 2.5, 2.5]}, delta=-60, turn="hex", tile=True)
     polygrid.plot()

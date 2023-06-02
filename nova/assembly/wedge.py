@@ -18,10 +18,11 @@ class Wedge(Plotter):
 
     file: str
     subset: Union[str, list[str]] = field(
-        default_factory=lambda: ['case_il', 'case_ol'])
-    factor: float = 120.
-    folder: str = 'TFCgapsG10'
-    datapath: str = 'data/Assembly'
+        default_factory=lambda: ["case_il", "case_ol"]
+    )
+    factor: float = 120.0
+    folder: str = "TFCgapsG10"
+    datapath: str = "data/Assembly"
     mesh: pv.UnstructuredGrid = field(init=False, repr=False)
 
     def __post_init__(self):
@@ -37,8 +38,8 @@ class Wedge(Plotter):
     @property
     def filename(self):
         """Return mesh filename."""
-        name = f'wedge_{self.file}_' + '_'.join(self.subset)
-        name += f'_{self.factor}.vtk'
+        name = f"wedge_{self.file}_" + "_".join(self.subset)
+        name += f"_{self.factor}.vtk"
         return os.path.join(self.path, name)
 
     def load(self):
@@ -56,25 +57,35 @@ class Wedge(Plotter):
             mesh = vtk.split_bodies()[i]
             center = mesh.center_of_mass()
             phi = np.arctan2(center[1], center[0])
-            if phi < -np.pi/18:
-                phi += 2*np.pi
-            index = int(np.round(9*phi / np.pi))
-            phi = index*np.pi / 9
+            if phi < -np.pi / 18:
+                phi += 2 * np.pi
+            index = int(np.round(9 * phi / np.pi))
+            phi = index * np.pi / 9
             vector = np.array([np.cos(phi), np.sin(phi), 0])
-            point = 1e-3*gap_data.radius * vector
+            point = 1e-3 * gap_data.radius * vector
             phi = gap_data.rotate.data[index, 0]
             roll = gap_data.rotate.data[index, 1]
             yaw = gap_data.rotate.data[index, 2]
             mesh.rotate_vector(
-                vector, self.factor*180/np.pi*roll, point,
-                transform_all_input_vectors=False, inplace=True)
-            mesh.rotate_z(self.factor*180/np.pi*yaw, point,
-                          transform_all_input_vectors=False, inplace=True)
-            mesh.rotate_z(self.factor*180/np.pi*phi,
-                          transform_all_input_vectors=False, inplace=True)
+                vector,
+                self.factor * 180 / np.pi * roll,
+                point,
+                transform_all_input_vectors=False,
+                inplace=True,
+            )
+            mesh.rotate_z(
+                self.factor * 180 / np.pi * yaw,
+                point,
+                transform_all_input_vectors=False,
+                inplace=True,
+            )
+            mesh.rotate_z(
+                self.factor * 180 / np.pi * phi,
+                transform_all_input_vectors=False,
+                inplace=True,
+            )
             self.mesh += mesh
-        self.mesh['TFonly-cooldown'] = \
-            self.mesh['TFonly'] - self.mesh['cooldown']
+        self.mesh["TFonly-cooldown"] = self.mesh["TFonly"] - self.mesh["cooldown"]
         self.mesh.save(self.filename)
 
     def slice_z(self):
@@ -83,8 +94,7 @@ class Wedge(Plotter):
 
     def clip_box(self):
         """Clip mesh."""
-        self.mesh = wedge.mesh.clip_box([-15, 0, -15, 0, -15, 15],
-                                        invert=False)
+        self.mesh = wedge.mesh.clip_box([-15, 0, -15, 0, -15, 15], invert=False)
 
     def warp(self):
         """Plot warped mesh."""
@@ -92,32 +102,37 @@ class Wedge(Plotter):
 
     def animate(self, name: str, view: str, zoom=1.3, opacity=0.75):
         """Make animation."""
-        filename = os.path.join(self.path, f'{self.file}_{name}')
-        super().animate(filename, 'TFonly-cooldown', view=view,
-                        max_factor=self.factor, zoom=zoom, opacity=opacity)
+        filename = os.path.join(self.path, f"{self.file}_{name}")
+        super().animate(
+            filename,
+            "TFonly-cooldown",
+            view=view,
+            max_factor=self.factor,
+            zoom=zoom,
+            opacity=opacity,
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
+    wedge = Wedge("w4", factor=50)
 
-    wedge = Wedge('w4', factor=50)
-
-    #wedge.slice_z()
-    #wedge.clip_box()
+    # wedge.slice_z()
+    # wedge.clip_box()
 
     wedge.mesh = wedge.mesh.clip_box([-15, 15, -15, 15, -15, 0], invert=False)
-    #wedge.mesh = wedge.mesh.clip_box([-5, 5, -5, 5, -0.5, 0], invert=False)
+    # wedge.mesh = wedge.mesh.clip_box([-5, 5, -5, 5, -0.5, 0], invert=False)
 
-    wedge.animate('corrected_full', view='xy', zoom=1.3, opacity=0.75)
+    wedge.animate("corrected_full", view="xy", zoom=1.3, opacity=0.75)
 
-    #wedge.warp()
+    # wedge.warp()
 
-    #wedge.animate('wp_quarter', 'iso')
-    #reference = CCL('TFCgapsG10', 'v0')
-    #wedge.mesh = wedge.mesh.clip('z', invert=True)
-    #wedge
+    # wedge.animate('wp_quarter', 'iso')
+    # reference = CCL('TFCgapsG10', 'v0')
+    # wedge.mesh = wedge.mesh.clip('z', invert=True)
+    # wedge
 
-    #wedge.mesh - pv.UnstructuredGrid(reference.mesh)
+    # wedge.mesh - pv.UnstructuredGrid(reference.mesh)
 
-    #wedge.mesh = wedge.mesh.slice('z')
+    # wedge.mesh = wedge.mesh.slice('z')
 
-    #wedge
+    # wedge

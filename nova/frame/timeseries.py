@@ -16,7 +16,7 @@ class DataProperty:
     @property
     def time(self):
         """Return time array."""
-        return self.data.coords['time'].values
+        return self.data.coords["time"].values
 
 
 @dataclass
@@ -40,8 +40,7 @@ class DataArray(DataProperty):
             Exsisting data array.
     """
 
-    data: tuple[np.ndarray, BiotFrame, str] | xarray.DataArray = \
-        field(repr=False)
+    data: tuple[np.ndarray, BiotFrame, str] | xarray.DataArray = field(repr=False)
     name: str = field(init=False)
     attrs: list = field(init=False, default_factory=list)
 
@@ -82,32 +81,29 @@ class DataArray(DataProperty):
             index = target.index
             nT = target.nT
             indices = target._reduction_index  # slices to reduce.
-        dims = ('time', 'turn')
-        coords = {'time': time, 'turn': index}
+        dims = ("time", "turn")
+        coords = {"time": time, "turn": index}
         data = np.zeros((nt, nT))
         # extract attributes
-        attrs = {'nT': nT, 'indices': np.append(indices, nT)}
-        for attr in ['dx', 'dz', 'nturn', 'coil', 'x', 'z']:
+        attrs = {"nT": nT, "indices": np.append(indices, nT)}
+        for attr in ["dx", "dz", "nturn", "coil", "x", "z"]:
             value = target[attr].values
-            if attr in ['dx', 'dz', 'nturn', 'coil']:
+            if attr in ["dx", "dz", "nturn", "coil"]:
                 value = value[target._reduction_index]
             elif target.reduce:
                 value = np.add.reduceat(value, target._reduction_index)
-                value /= np.add.reduceat(np.ones(target.nT),
-                                         target._reduction_index)
-            if value.dtype == 'object':
-                value = value.astype('U60')  # convert to character array
+                value /= np.add.reduceat(np.ones(target.nT), target._reduction_index)
+            if value.dtype == "object":
+                value = value.astype("U60")  # convert to character array
             attrs[attr] = value
-        return xarray.DataArray(data, dims=dims, coords=coords,
-                                name=name, attrs=attrs)
+        return xarray.DataArray(data, dims=dims, coords=coords, name=name, attrs=attrs)
 
 
 @dataclass
 class DataSet(DataProperty):
     """Manage a collection of coilset data with xarray.Dataset."""
 
-    data: tuple[np.ndarray, BiotFrame, list[str]] | xarray.Dataset = \
-        field(repr=False)
+    data: tuple[np.ndarray, BiotFrame, list[str]] | xarray.Dataset = field(repr=False)
     names: list[str] = field(default_factory=list, init=False)
 
     def __post_init__(self):
@@ -116,8 +112,7 @@ class DataSet(DataProperty):
             self.data = self._initialize(*self.data)
         self.names = [name for name in self.data]
 
-    def _initialize(self, time: np.ndarray, target: BiotFrame,
-                    names: list[str]):
+    def _initialize(self, time: np.ndarray, target: BiotFrame, names: list[str]):
         """Return initialized DataSet."""
         data = xarray.Dataset()
         for name in names:
@@ -145,8 +140,7 @@ class DataSet(DataProperty):
         return len(self.data)
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     coilset = CoilSet()
     coilset.coil.insert(5, 1, 0.5, 0.5, delta=0.2)
     coilset.coil.insert(6, 1, 0.5, 0.5, delta=0.1)
@@ -157,7 +151,7 @@ if __name__ == '__main__':
     # da = DataArray((np.linspace(0, 1, 20), coilset.*, 'B'))
     # ds = DataSet((np.linspace(0, 1, 20), coilset.*, ['Bx', 'Bz']))
 
-    '''
+    """
 
     cda = CoilDataArray(np.linspace(0, 1, 20), coilset.forcefield.target, 'B')
     for i, t in enumerate(cda.time()):
@@ -166,4 +160,4 @@ if __name__ == '__main__':
 
     cda.save('Bdiff', 'diffrent forcefield values', machine='ITER', coilset=None,
              dCoil=coilset.dCoil, dPlasma=coilset.dPlasma, replace=False)
-    '''
+    """

@@ -15,26 +15,37 @@ from scipy.interpolate import interp1d
 import scipy.optimize as op
 
 import seaborn as sns
-rc = {'figure.figsize': [7 * 12 / 14, 7], 'savefig.dpi': 110,  # *12/16
-      'savefig.jpeg_quality': 100, 'savefig.pad_inches': 0.1,
-      'lines.linewidth': 0.75}
-sns.set(context='paper', style='white', font='sans-serif', palette='Set2',
-        font_scale=7 / 8, rc=rc)
-color = cycle(sns.color_palette('Set2'))
+
+rc = {
+    "figure.figsize": [7 * 12 / 14, 7],
+    "savefig.dpi": 110,  # *12/16
+    "savefig.jpeg_quality": 100,
+    "savefig.pad_inches": 0.1,
+    "lines.linewidth": 0.75,
+}
+sns.set(
+    context="paper",
+    style="white",
+    font="sans-serif",
+    palette="Set2",
+    font_scale=7 / 8,
+    rc=rc,
+)
+color = cycle(sns.color_palette("Set2"))
 pl.figure()
-pl.axis('equal')
-pl.axis('off')
+pl.axis("equal")
+pl.axis("off")
 
 
-eqdsk = 'vde'
-eqdsk = 'SN'
+eqdsk = "vde"
+eqdsk = "SN"
 
 sf = SF(Config(eqdsk))
-sf.eq['ncoil'] = 0
+sf.eq["ncoil"] = 0
 
-if eqdsk == 'vde':
+if eqdsk == "vde":
     eq = EQ(sf, dCoil=1, limit=[4.25, 8, -4.5, 2], n=1e3)
-    #eq = EQ(sf,dCoil=1,limit=[3,9,-6,6],n=5e3)
+    # eq = EQ(sf,dCoil=1,limit=[3,9,-6,6],n=5e3)
 else:
     eq = EQ(sf, dCoil=1, limit=[5, 13, -5.5, 5], n=5e4)
 

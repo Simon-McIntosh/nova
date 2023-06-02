@@ -11,13 +11,12 @@ import numpy as np
 
 
 def file_tokens(fp):
-    """ A generator to split a file into tokens
-    """
+    """A generator to split a file into tokens"""
     toklist = []
     while True:
         line = fp.readline()
         if not line:
-            yield '0'
+            yield "0"
         toklist = line.split()
         for tok in toklist:
             yield tok
@@ -30,17 +29,17 @@ def file_numbers(fp):
         line = fp.readline()
         if not line:
             break
-        if 'E' in line:
-            line = line.replace('E-', '*')
-            line = line.replace('-', ' -')  # add white space for split
-            line = line.replace('*', 'E-')
+        if "E" in line:
+            line = line.replace("E-", "*")
+            line = line.replace("-", " -")  # add white space for split
+            line = line.replace("*", "E-")
         toklist = line.split()
         for tok in toklist:
             yield tok
 
 
 def read(f):
-    """ Reads a G-EQDSK file
+    """Reads a G-EQDSK file
 
     Parameters
     ----------
@@ -181,49 +180,64 @@ def read(f):
         z[j] = (zmid - 0.5 * zdim) + zdim * j / float(nzefit - 1)
 
     # Create dictionary of values to return
-    result = {'name': name,
-              'header': header,  # first line of eqdsk file
-              # Number of horizontal and vertical points
-              'nx': nxefit, 'nz': nzefit,
-              'x': x, 'z': z,               # Location of the grid-points
-              'xdim': xdim, 'zdim': zdim,   # Size of the domain in meters
-              # Reference vacuum toroidal field (m, T)
-              'xcentr': xcentr, 'bcentr': bcentr,
-              'xgrid1': xgrid1,                  # R of left side of domain
-              'zmid': zmid,                    # Z at the middle of the domain
-              'xmagx': xmagx, 'zmagx': zmagx,     # Location of magnetic axis
-              'simagx': simagx,  # Poloidal flux at the axis (Weber / rad)
-              # Poloidal flux at plasma boundary (Weber / rad)
-              'sibdry': sibdry,
-              'Ip': Ip,  # plasma current
-              'psi': psi,    # Poloidal flux in Weber/rad on grid points
-              'fpol': fpol,  # Poloidal current function on uniform flux grid
-              # "FF'(psi) in (mT)^2/(Weber/rad) on uniform flux grid"
-              'ffprim': ffprim,
-              # "P'(psi) in (nt/m2)/(Weber/rad) on uniform flux grid"
-              'pprime': pprime,
-              # Plasma pressure in nt/m^2 on uniform flux grid
-              'pressure': pres,
-              'qpsi': qpsi,  # q values on uniform flux grid
-              'pnorm': np.linspace(0, 1, len(fpol)),  # uniform flux grid
-              # Plasma boundary
-              'nbdry': nbdry, 'xbdry': xbdry, 'zbdry': zbdry,
-              'nlim': nlim, 'xlim': xlim, 'zlim': zlim,
-              'ncoil': ncoil, 'xc': xc, 'zc': zc, 'dxc': dxc,
-              'dzc': dzc, 'It': It}  # coils
+    result = {
+        "name": name,
+        "header": header,  # first line of eqdsk file
+        # Number of horizontal and vertical points
+        "nx": nxefit,
+        "nz": nzefit,
+        "x": x,
+        "z": z,  # Location of the grid-points
+        "xdim": xdim,
+        "zdim": zdim,  # Size of the domain in meters
+        # Reference vacuum toroidal field (m, T)
+        "xcentr": xcentr,
+        "bcentr": bcentr,
+        "xgrid1": xgrid1,  # R of left side of domain
+        "zmid": zmid,  # Z at the middle of the domain
+        "xmagx": xmagx,
+        "zmagx": zmagx,  # Location of magnetic axis
+        "simagx": simagx,  # Poloidal flux at the axis (Weber / rad)
+        # Poloidal flux at plasma boundary (Weber / rad)
+        "sibdry": sibdry,
+        "Ip": Ip,  # plasma current
+        "psi": psi,  # Poloidal flux in Weber/rad on grid points
+        "fpol": fpol,  # Poloidal current function on uniform flux grid
+        # "FF'(psi) in (mT)^2/(Weber/rad) on uniform flux grid"
+        "ffprim": ffprim,
+        # "P'(psi) in (nt/m2)/(Weber/rad) on uniform flux grid"
+        "pprime": pprime,
+        # Plasma pressure in nt/m^2 on uniform flux grid
+        "pressure": pres,
+        "qpsi": qpsi,  # q values on uniform flux grid
+        "pnorm": np.linspace(0, 1, len(fpol)),  # uniform flux grid
+        # Plasma boundary
+        "nbdry": nbdry,
+        "xbdry": xbdry,
+        "zbdry": zbdry,
+        "nlim": nlim,
+        "xlim": xlim,
+        "zlim": zlim,
+        "ncoil": ncoil,
+        "xc": xc,
+        "zc": zc,
+        "dxc": dxc,
+        "dzc": dzc,
+        "It": It,
+    }  # coils
     return result
 
 
 def carrage_return(f, i):
     if np.mod(i + 1, 5) == 0:
-        f.write('\n')
+        f.write("\n")
     else:
-        f.write(' ')
+        f.write(" ")
 
 
 def write_line(f, data, var):
     for i, v in enumerate(var):
-        fmat = '{:16.9f}' if v != 'Ip' else '{:16.9e}'
+        fmat = "{:16.9f}" if v != "Ip" else "{:16.9e}"
         num = 0 if len(v) == 0 else data[v]
         f.write(fmat.format(num))
         carrage_return(f, i)
@@ -231,45 +245,46 @@ def write_line(f, data, var):
 
 def write_array(f, val, c):
     if np.size(val) == 1:
-        f.write('{:16.9e}'.format(val))
+        f.write("{:16.9e}".format(val))
         carrage_return(f, next(c))
         return
     for v in val:
-        f.write('{:16.9e}'.format(v))
+        f.write("{:16.9e}".format(v))
         carrage_return(f, next(c))
 
 
 def write(f, data):  # write a G-EQDSK file
     import time
     from itertools import count
+
     c = count(0)
     if isinstance(f, str):
         with open(f, "w") as fh:  # Ensure file is closed
             return write(fh, data)  # Call again with file object
-    f.write('{:48s} '.format(data['name'] + '_' + time.strftime("%d%m%Y")))
-    f.write('{:4d} {:4d} {:4d}\n'.format(0, data['nx'], data['ny']))
-    write_line(f, data, ['xdim', 'zdim', 'xcentr', 'xgrid1', 'zmid'])
-    write_line(f, data, ['xmagx', 'zmagx', 'simagx', 'sibdry', 'bcentr'])
-    write_line(f, data, ['Ip', 'simagx', '', 'xmagx', ''])
-    write_line(f, data, ['zmagx', '', 'sibdry', '', ''])
+    f.write("{:48s} ".format(data["name"] + "_" + time.strftime("%d%m%Y")))
+    f.write("{:4d} {:4d} {:4d}\n".format(0, data["nx"], data["ny"]))
+    write_line(f, data, ["xdim", "zdim", "xcentr", "xgrid1", "zmid"])
+    write_line(f, data, ["xmagx", "zmagx", "simagx", "sibdry", "bcentr"])
+    write_line(f, data, ["Ip", "simagx", "", "xmagx", ""])
+    write_line(f, data, ["zmagx", "", "sibdry", "", ""])
 
-    write_array(f, data['fpol'], c)
-    write_array(f, data['pressure'], c)
-    write_array(f, data['ffprim'], c)
-    write_array(f, data['pprime'], c)
-    write_array(f, data['psi'], c)
-    write_array(f, data['qpsi'], c)
+    write_array(f, data["fpol"], c)
+    write_array(f, data["pressure"], c)
+    write_array(f, data["ffprim"], c)
+    write_array(f, data["pprime"], c)
+    write_array(f, data["psi"], c)
+    write_array(f, data["qpsi"], c)
 
-    f.write('{:5d} {:5d}\n'.format(data['nbdry'], data['nlim']))
-    bdry = np.zeros(2 * data['nbdry'])
-    bdry[::2], bdry[1::2] = data['xbdry'], data['zbdry']
+    f.write("{:5d} {:5d}\n".format(data["nbdry"], data["nlim"]))
+    bdry = np.zeros(2 * data["nbdry"])
+    bdry[::2], bdry[1::2] = data["xbdry"], data["zbdry"]
     write_array(f, bdry, c)
-    lim = np.zeros(2 * data['nlim'])
-    lim[::2], lim[1::2] = data['xlim'], data['ylim']
+    lim = np.zeros(2 * data["nlim"])
+    lim[::2], lim[1::2] = data["xlim"], data["ylim"]
     write_array(f, lim, c)
 
-    f.write('{:5d}\n'.format(data['ncoil']))
-    coil = np.zeros(5 * data['ncoil'])
-    for i, v in enumerate(['xc', 'zc', 'dxc', 'dzc', 'It']):
+    f.write("{:5d}\n".format(data["ncoil"]))
+    coil = np.zeros(5 * data["ncoil"])
+    for i, v in enumerate(["xc", "zc", "dxc", "dzc", "It"]):
         coil[i::5] = data[v]
     write_array(f, coil, c)

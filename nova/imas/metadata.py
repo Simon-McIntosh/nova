@@ -37,11 +37,16 @@ class Properties(Attrs):
     comment: str | None = None
     source: str | None = None
     homogeneous_time: int = 1
-    provider: str | None = 'Simon McIntosh, simon.mcintosh@iter.org'
+    provider: str | None = "Simon McIntosh, simon.mcintosh@iter.org"
     provenance: list[str] | None = None
 
-    attributes: ClassVar[list[str]] = \
-        ['comment', 'homogeneous_time', 'source', 'provider', 'creation_date']
+    attributes: ClassVar[list[str]] = [
+        "comment",
+        "homogeneous_time",
+        "source",
+        "provider",
+        "creation_date",
+    ]
 
     def update(self, ids):
         """Extend Attrs update to include provenance ids."""
@@ -53,7 +58,7 @@ class Properties(Attrs):
     @property
     def creation_date(self):
         """Return creation date."""
-        return datetime.today().strftime('%d-%m-%Y')
+        return datetime.today().strftime("%d-%m-%Y")
 
 
 @dataclass
@@ -63,10 +68,15 @@ class Code(Attrs):
     parameter_dict: dict | None = None
     output_flag: list[int] | np.ndarray | None = None
 
-    name: ClassVar[str] = 'Nova'
-    attributes: ClassVar[list[str]] = \
-        ['name', 'commit', 'version', 'repository',
-         'parameters', 'output_flag']
+    name: ClassVar[str] = "Nova"
+    attributes: ClassVar[list[str]] = [
+        "name",
+        "commit",
+        "version",
+        "repository",
+        "parameters",
+        "output_flag",
+    ]
 
     def __post_init__(self):
         """Load git repository."""
@@ -119,12 +129,13 @@ class Metadata:
         code.update(self.ids.code)
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     import imas
+
     ids = imas.equilibrium()
 
     metadata = Metadata(ids)
-    metadata.put_properties('EquilibriumData extrapolation', 'Yuri\'s database',
-                            provider='Simon McIntosh')
-    metadata.put_code('test code attribute update')
+    metadata.put_properties(
+        "EquilibriumData extrapolation", "Yuri's database", provider="Simon McIntosh"
+    )
+    metadata.put_code("test code attribute update")

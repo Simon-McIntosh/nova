@@ -14,6 +14,7 @@ from nova.graphics.plot import Plot
 from nova.frame.coilset import CoilSet
 from nova.imas.database import CoilData, Database, IDS, Ids, IdsIndex, ImasIds
 from nova.geometry.polygon import Polygon
+
 if TYPE_CHECKING:
     from nova.frame.shell import Shell
 
@@ -25,8 +26,7 @@ class GeomData:
     """Geometry data baseclass."""
 
     ids: ImasIds = field(repr=False)
-    data: dict[str, int | float] = field(init=False, repr=False,
-                                         default_factory=dict)
+    data: dict[str, int | float] = field(init=False, repr=False, default_factory=dict)
     attrs: ClassVar[list[str]] = []
 
     def __post_init__(self):
@@ -63,71 +63,107 @@ class GeomData:
 class Outline(GeomData):
     """Polygonal poloidal patch."""
 
-    name: str = 'outline'
-    attrs: ClassVar[list[str]] = ['r', 'z']
+    name: str = "outline"
+    attrs: ClassVar[list[str]] = ["r", "z"]
 
     @property
     def poly(self):
         """Return shapely polygon."""
-        return Polygon([self.data['r'], self.data['z']]).poly
+        return Polygon([self.data["r"], self.data["z"]]).poly
 
 
 @dataclass
 class Rectangle(GeomData):
     """Rectangular poloidal patch."""
 
-    name: str = 'rectangle'
-    attrs: ClassVar[list[str]] = ['r', 'z', 'width', 'height']
+    name: str = "rectangle"
+    attrs: ClassVar[list[str]] = ["r", "z", "width", "height"]
 
     @property
     def poly(self):
         """Return shapely polygon."""
-        return Polygon({'r': [self.data['r'], self.data['z'],
-                              self.data['width'], self.data['height']]}).poly
+        return Polygon(
+            {
+                "r": [
+                    self.data["r"],
+                    self.data["z"],
+                    self.data["width"],
+                    self.data["height"],
+                ]
+            }
+        ).poly
 
 
 @dataclass
 class Oblique(Plot, GeomData):
     """Oblique poloidal patch (parallelogram)."""
 
-    name: str = 'oblique'
-    attrs: ClassVar[list[str]] = ['r', 'z', 'length_alpha', 'length_beta',
-                                  'alpha', 'beta']
+    name: str = "oblique"
+    attrs: ClassVar[list[str]] = [
+        "r",
+        "z",
+        "length_alpha",
+        "length_beta",
+        "alpha",
+        "beta",
+    ]
 
     @property
     def poly(self):
         """Return skewed shapely polygon."""
         radius = self.r + np.array(
-            [0, self.length_alpha * np.cos(self.alpha),
-             self.length_alpha * np.cos(self.alpha)
-             - self.length_beta * np.sin(self.beta),
-             -self.length_beta * np.sin(self.beta)])
+            [
+                0,
+                self.length_alpha * np.cos(self.alpha),
+                self.length_alpha * np.cos(self.alpha)
+                - self.length_beta * np.sin(self.beta),
+                -self.length_beta * np.sin(self.beta),
+            ]
+        )
         height = self.z + np.array(
-            [0, self.length_alpha * np.sin(self.alpha),
-             self.length_alpha * np.sin(self.alpha)
-             + self.length_beta * np.cos(self.beta),
-             self.length_beta * np.cos(self.beta)])
+            [
+                0,
+                self.length_alpha * np.sin(self.alpha),
+                self.length_alpha * np.sin(self.alpha)
+                + self.length_beta * np.cos(self.beta),
+                self.length_beta * np.cos(self.beta),
+            ]
+        )
         return Polygon([radius, height]).poly
 
     @property
     def start(self):
         """Return oblique geometry start point."""
         if self.length_alpha > self.length_beta:
-            return np.array([self.r - self.length_beta/2 * np.sin(self.beta),
-                             self.z + self.length_beta/2 * np.cos(self.beta)])
-        return np.array([self.r + self.length_alpha/2 * np.cos(self.alpha),
-                         self.z + self.length_alpha/2 * np.sin(self.alpha)])
+            return np.array(
+                [
+                    self.r - self.length_beta / 2 * np.sin(self.beta),
+                    self.z + self.length_beta / 2 * np.cos(self.beta),
+                ]
+            )
+        return np.array(
+            [
+                self.r + self.length_alpha / 2 * np.cos(self.alpha),
+                self.z + self.length_alpha / 2 * np.sin(self.alpha),
+            ]
+        )
 
     @property
     def end(self):
         """Return oblique geometry end point."""
         if self.length_alpha > self.length_beta:
             return self.start + np.array(
-                [self.length_alpha * np.cos(self.alpha),
-                 self.length_alpha * np.sin(self.alpha)])
+                [
+                    self.length_alpha * np.cos(self.alpha),
+                    self.length_alpha * np.sin(self.alpha),
+                ]
+            )
         return self.start + np.array(
-            [-self.length_beta * np.sin(self.beta),
-             self.length_beta * np.cos(self.beta)])
+            [
+                -self.length_beta * np.sin(self.beta),
+                self.length_beta * np.cos(self.beta),
+            ]
+        )
 
     @property
     def points(self):
@@ -146,10 +182,10 @@ class Oblique(Plot, GeomData):
 
     def plot(self, axes=None):
         """Plot oblique patch verticies and start/end points."""
-        self.set_axes('2d', axes=axes)
-        self.axes.plot(*self.poly.boundary.xy, 'o', label='vertex')
-        self.axes.plot(*self.start, 'C1o', label='start')
-        self.axes.plot(*self.end, 'C3o', label='end')
+        self.set_axes("2d", axes=axes)
+        self.axes.plot(*self.poly.boundary.xy, "o", label="vertex")
+        self.axes.plot(*self.start, "C1o", label="start")
+        self.axes.plot(*self.end, "C3o", label="end")
         self.axes.legend()
 
 
@@ -157,7 +193,7 @@ class Oblique(Plot, GeomData):
 class Arcs(GeomData):
     """Polygonal poloidal patch."""
 
-    name: str = 'arcs'
+    name: str = "arcs"
     attrs: ClassVar[list[str]] = []
 
     @property
@@ -170,37 +206,43 @@ class Arcs(GeomData):
 class Annulus(GeomData):
     """Annulus patch."""
 
-    name: str = 'annulus'
-    attrs: ClassVar[list[str]] = ['r', 'z', 'radius_inner', 'radius_outer']
+    name: str = "annulus"
+    attrs: ClassVar[list[str]] = ["r", "z", "radius_inner", "radius_outer"]
 
     def __post_init__(self):
         """Caclulate derived attributes."""
         super().__post_init__()
-        self.data['width'] = self.data['height'] = 2*self.data['radius_outer']
-        self.data['factor'] = \
-            1 - self.data['radius_inner'] / self.data['radius_outer']
+        self.data["width"] = self.data["height"] = 2 * self.data["radius_outer"]
+        self.data["factor"] = 1 - self.data["radius_inner"] / self.data["radius_outer"]
 
     @property
     def poly(self):
         """Return shapely polygon."""
-        return Polygon({'skin': [self.data['r'], self.data['z'],
-                                 self.data['width'],
-                                 self.data['factor']]}).poly
+        return Polygon(
+            {
+                "skin": [
+                    self.data["r"],
+                    self.data["z"],
+                    self.data["width"],
+                    self.data["factor"],
+                ]
+            }
+        ).poly
 
 
 @dataclass
 class ThickLine(GeomData):
     """Thick line patch."""
 
-    name: str = 'thick_line'
-    attrs: ClassVar[list[str]] = ['thickness']
+    name: str = "thick_line"
+    attrs: ClassVar[list[str]] = ["thickness"]
 
     def extract(self):
         """Extend GeomData.extract."""
         super().extract()
         data = getattr(self.ids, self.name)
-        for attr, label in zip(['start', 'end'], ['first', 'second']):
-            point = getattr(data, f'{label}_point')
+        for attr, label in zip(["start", "end"], ["first", "second"]):
+            point = getattr(data, f"{label}_point")
             self.data[attr] = np.array([point.r, point.z])
 
 
@@ -210,9 +252,14 @@ class CrossSection:
 
     ids: ImasIds = field(repr=False)
     data: GeomData = field(init=False)
-    transform: ClassVar[dict[int, object]] = \
-        {1: Outline, 2: Rectangle, 3: Oblique, 4: Arcs, 5: Annulus,
-         6: ThickLine}
+    transform: ClassVar[dict[int, object]] = {
+        1: Outline,
+        2: Rectangle,
+        3: Oblique,
+        4: Arcs,
+        5: Annulus,
+        6: ThickLine,
+    }
 
     def __post_init__(self):
         """Build geometry instance."""
@@ -235,7 +282,7 @@ class Loop:
     def __post_init__(self):
         """Extract data from loop ids."""
         self.name = self.ids.name.strip()
-        self.label = self.name.rstrip(string.digits + '_')
+        self.label = self.name.rstrip(string.digits + "_")
         self.resistance = self.ids.resistance
 
 
@@ -276,15 +323,15 @@ class Element:
 
     def is_poly(self) -> bool:
         """Return True if geometry.name == 'oblique' or 'annulus'."""
-        return self.section in ['oblique', 'annulus']
+        return self.section in ["oblique", "annulus"]
 
     def is_rectangular(self) -> bool:
         """Return geometry.name == 'rectangle'."""
-        return self.section == 'rectangle'
+        return self.section == "rectangle"
 
     def is_oblique(self) -> bool:
         """Return geometry.name == 'oblique'."""
-        return self.section == 'oblique'
+        return self.section == "oblique"
 
     def is_point(self) -> bool:
         """Return geometry validity flag."""
@@ -292,7 +339,7 @@ class Element:
 
     def is_thickline(self) -> bool:
         """Return geometry.name == 'thick_line'."""
-        return self.section == 'thick_line'
+        return self.section == "thick_line"
 
 
 @dataclass
@@ -311,18 +358,17 @@ class FrameData(ABC):
     @property
     def coil_name(self):
         """Return coil name."""
-        identifier = self.data.get('identifier', '')
+        identifier = self.data.get("identifier", "")
         if not isinstance(identifier, str):
             identifier = identifier[0]
-        if identifier != '':
+        if identifier != "":
             return identifier
-        name = self.data['name']
+        name = self.data["name"]
         if not isinstance(name, str):
             name = name[0]
-        label = ''.join(name.split()[:2]).rstrip(string.punctuation)
-        digit = name.split()[-1].lstrip(
-            string.ascii_letters + string.punctuation)
-        return ''.join([part for part in [label, digit] if part != ''])
+        label = "".join(name.split()[:2]).rstrip(string.punctuation)
+        digit = name.split()[-1].lstrip(string.ascii_letters + string.punctuation)
+        return "".join([part for part in [label, digit] if part != ""])
 
     @property
     def empty(self) -> bool:
@@ -349,44 +395,44 @@ class FrameData(ABC):
         label = self.coil_name
         if isinstance(label, list):
             label = label[0]
-        if 'VES' in label or 'VV' in label:
-            return 'vv'
-        if 'TRI' in label or 'Tri' in label:
-            return 'trs'
-        if label == 'INB_RAIL' or 'Div' in label:
-            return 'dir'
-        if 'CS' in label or 'PF' in label:
+        if "VES" in label or "VV" in label:
+            return "vv"
+        if "TRI" in label or "Tri" in label:
+            return "trs"
+        if label == "INB_RAIL" or "Div" in label:
+            return "dir"
+        if "CS" in label or "PF" in label:
             return label[:2].lower()
-        if 'SS' in label:
-            return 'vs3j'
-        if 'VS' in label:
-            return 'vs3'
-        return ''
+        if "SS" in label:
+            return "vs3j"
+        if "VS" in label:
+            return "vs3"
+        return ""
 
     @staticmethod
     def update_resistivity(index, frame, subframe, resistance):
         """Update frame and subframe resistivity."""
-        rho = resistance * frame.loc[index, 'area'] / frame.loc[index, 'dy']
-        frame.loc[index, 'rho'] = rho
+        rho = resistance * frame.loc[index, "area"] / frame.loc[index, "dy"]
+        frame.loc[index, "rho"] = rho
         for i, name in enumerate(index):
             subindex = subframe.frame == name
-            subframe.loc[subindex, 'rho'] = rho[i]
+            subframe.loc[subindex, "rho"] = rho[i]
 
 
 @dataclass
 class IdsCoilData(FrameData):
     """Extract coildata from ids."""
 
-    geometry_attrs: ClassVar[list[str]] = ['r', 'z', 'width', 'height']
-    loop_attrs: ClassVar[list[str]] = ['identifier', 'resistance']
+    geometry_attrs: ClassVar[list[str]] = ["r", "z", "width", "height"]
+    loop_attrs: ClassVar[list[str]] = ["identifier", "resistance"]
 
     def insert(self, constructor, **kwargs):
         """Insert data via Coilset.constructor method."""
-        attrs = kwargs.pop('attrs', self.geometry_attrs)
-        index = constructor.insert(*[self.data[attr] for attr in attrs],
-                                   part=self.part, rho=0, **kwargs)
-        self.update_resistivity(
-            index, *constructor.frames, self.data['resistance'])
+        attrs = kwargs.pop("attrs", self.geometry_attrs)
+        index = constructor.insert(
+            *[self.data[attr] for attr in attrs], part=self.part, rho=0, **kwargs
+        )
+        self.update_resistivity(index, *constructor.frames, self.data["resistance"])
         super().__post_init__()
         return index
 
@@ -396,10 +442,9 @@ class PassiveShellData(Plot, FrameData):
     """Extract oblique shell geometries from pf_passive ids."""
 
     length: float = 0
-    points: list[np.ndarray] = field(init=False, repr=False,
-                                     default_factory=list)
-    loop_attrs: ClassVar[list[str]] = ['name', 'resistance']
-    geometry_attrs: ClassVar[list[str]] = ['thickness']
+    points: list[np.ndarray] = field(init=False, repr=False, default_factory=list)
+    loop_attrs: ClassVar[list[str]] = ["name", "resistance"]
+    geometry_attrs: ClassVar[list[str]] = ["thickness"]
 
     def reset(self):
         """Reset instance state."""
@@ -433,7 +478,8 @@ class PassiveShellData(Plot, FrameData):
         """Append endpoint to current loop."""
         geometry = element.cross_section
         self.points[-1] = np.append(
-            self.points[-1], geometry.end.reshape(1, -1), axis=0)
+            self.points[-1], geometry.end.reshape(1, -1), axis=0
+        )
         for attr in self.geometry_attrs:
             self.data[attr][-1].append(getattr(geometry, attr))
 
@@ -442,34 +488,44 @@ class PassiveShellData(Plot, FrameData):
         if self.empty:
             return
         for i in range(len(self)):
-            thickness = np.mean(self.data['thickness'][i])
-            index = shell.insert(*self.points[i].T, self.length, thickness,
-                                 rho=0, name=self.coil_name, part=self.part)
-            self.update_resistivity(index, shell.frame, shell.subframe,
-                                    self.data['resistance'][i])
+            thickness = np.mean(self.data["thickness"][i])
+            index = shell.insert(
+                *self.points[i].T,
+                self.length,
+                thickness,
+                rho=0,
+                name=self.coil_name,
+                part=self.part,
+            )
+            self.update_resistivity(
+                index, shell.frame, shell.subframe, self.data["resistance"][i]
+            )
         self.reset()
 
     def plot(self, axes=None):
         """Plot shell centerlines."""
-        self.set_axes('2d', axes=axes)
+        self.set_axes("2d", axes=axes)
         for loop in self.points:
-            self.axes.plot(loop[:, 0], loop[:, 1], 'o-')
+            self.axes.plot(loop[:, 0], loop[:, 1], "o-")
 
 
 @dataclass
 class PassiveCoilData(IdsCoilData):
     """Extract coildata from passive ids."""
 
-    element_attrs: ClassVar[list[str]] = ['identifier', 'section']
-    geometry_attrs: ClassVar[list[str]] = ['r', 'z', 'width', 'height']
-    loop_attrs: ClassVar[list[str]] = ['name', 'resistance']
+    element_attrs: ClassVar[list[str]] = ["identifier", "section"]
+    geometry_attrs: ClassVar[list[str]] = ["r", "z", "width", "height"]
+    loop_attrs: ClassVar[list[str]] = ["name", "resistance"]
 
     def insert(self, constructor, **kwargs):
         """Insert data via coil method."""
         if self.empty:
             return None
-        kwargs = {'active': False, 'name': self.coil_name,
-                  'section': self.data['section']} | kwargs
+        kwargs = {
+            "active": False,
+            "name": self.coil_name,
+            "section": self.data["section"],
+        } | kwargs
         return super().insert(constructor, **kwargs)
 
 
@@ -477,15 +533,15 @@ class PassiveCoilData(IdsCoilData):
 class PassivePolyCoilData(PassiveCoilData):
     """Extract coildata from passive ids."""
 
-    geometry_attrs: ClassVar[list[str]] = ['poly']
+    geometry_attrs: ClassVar[list[str]] = ["poly"]
 
 
 @dataclass
 class CoilDatabase(CoilSet, CoilData):
     """Manage coilset construction from ids structures."""
 
-    machine: str = 'iter_md'
-    ids_node: str = ''
+    machine: str = "iter_md"
+    ids_node: str = ""
 
     @cached_property
     def ids_index(self):
@@ -509,11 +565,11 @@ class PoloidalFieldPassive(CoilDatabase):
     pulse: int = 115004  # 115005
     run: int = 5  # 2
     occurrence: int = 0
-    name: str = 'pf_passive'
+    name: str = "pf_passive"
 
     def build(self):
         """Build pf passive geometroy."""
-        for ids_loop in getattr(self.ids_data, 'loop'):
+        for ids_loop in getattr(self.ids_data, "loop"):
             loop = Loop(ids_loop)
             shelldata = PassiveShellData()
             coildata = PassiveCoilData()
@@ -529,8 +585,9 @@ class PoloidalFieldPassive(CoilDatabase):
                 if element.is_poly():
                     polydata.append(loop, element)
                     continue
-                raise NotImplementedError(f'geometory {element.section} '
-                                          'not implemented')
+                raise NotImplementedError(
+                    f"geometory {element.section} " "not implemented"
+                )
             coildata.insert(self.coil, delta=-1)
             polydata.insert(self.coil, delta=-10)
             shelldata.insert(self.shell)
@@ -540,20 +597,23 @@ class PoloidalFieldPassive(CoilDatabase):
 class ActiveCoilData(IdsCoilData):
     """Extract coildata from active ids."""
 
-    element_attrs: ClassVar[list[str]] = ['nturn', 'index', 'name', 'section']
-    geometry_attrs: ClassVar[list[str]] = ['r', 'z', 'width', 'height']
-    loop_attrs: ClassVar[list[str]] = ['identifier', 'resistance']
+    element_attrs: ClassVar[list[str]] = ["nturn", "index", "name", "section"]
+    geometry_attrs: ClassVar[list[str]] = ["r", "z", "width", "height"]
+    loop_attrs: ClassVar[list[str]] = ["identifier", "resistance"]
 
     def insert(self, constructor, **kwargs):
         """Insert data via coil method."""
         if self.empty:
             return None
-        self.data['nturn'] = self.data['nturn']
-        kwargs = {'active': True, 'fix': False,
-                  'name': self.coil_name,
-                  'delim': '_', 'nturn': self.data['nturn'],
-                  'section': self.data['section'],
-                  } | kwargs
+        self.data["nturn"] = self.data["nturn"]
+        kwargs = {
+            "active": True,
+            "fix": False,
+            "name": self.coil_name,
+            "delim": "_",
+            "nturn": self.data["nturn"],
+            "section": self.data["section"],
+        } | kwargs
         return super().insert(constructor, **kwargs)
 
 
@@ -561,7 +621,7 @@ class ActiveCoilData(IdsCoilData):
 class ActivePolyCoilData(ActiveCoilData):
     """Extract coildata from active ids."""
 
-    geometry_attrs: ClassVar[list[str]] = ['poly']
+    geometry_attrs: ClassVar[list[str]] = ["poly"]
 
 
 @dataclass
@@ -571,7 +631,7 @@ class PoloidalFieldActive(CoilDatabase):
     pulse: int = 111001
     run: int = 202
     occurrence: int = 0
-    name: str = 'pf_active'
+    name: str = "pf_active"
 
     def build(self):
         """Build pf active."""
@@ -581,7 +641,7 @@ class PoloidalFieldActive(CoilDatabase):
     def build_coil(self):
         """Build pf active coil geometroy."""
         maximum_current = {}
-        for ids_loop in getattr(self.ids_data, 'coil'):
+        for ids_loop in getattr(self.ids_data, "coil"):
             loop = ActiveLoop(ids_loop)
             coildata = ActiveCoilData()
             polydata = ActivePolyCoilData()
@@ -595,8 +655,9 @@ class PoloidalFieldActive(CoilDatabase):
                 if element.is_poly():
                     polydata.append(loop, element)
                     continue
-                raise NotImplementedError(f'geometory {element.name} '
-                                          'not implemented')
+                raise NotImplementedError(
+                    f"geometory {element.name} " "not implemented"
+                )
             if len(ids_loop.element) == 1:
                 constructor = self.coil
             else:
@@ -606,19 +667,19 @@ class PoloidalFieldActive(CoilDatabase):
             current_limit_max = ids_loop.current_limit_max
             if len(current_limit_max) > 0:
                 maximum_current[ids_loop.identifier] = current_limit_max[-1, 0]
-        self.frame.loc[:, ['Imax']] = maximum_current
-        self.frame.loc[:, ['Imin']] = {coil: -limit for coil, limit in
-                                       maximum_current.items()}
+        self.frame.loc[:, ["Imax"]] = maximum_current
+        self.frame.loc[:, ["Imin"]] = {
+            coil: -limit for coil, limit in maximum_current.items()
+        }
 
     def build_circuit(self):
         """Build circuit influence matrix."""
         if len(self.ids_data.circuit) == 0:  # no circuit
             return
         supply = [supply.identifier for supply in self.ids_data.supply]
-        nodes = max(len(circuit.connections)
-                    for circuit in self.ids_data.circuit)
+        nodes = max(len(circuit.connections) for circuit in self.ids_data.circuit)
         self.circuit.initialize(supply, nodes)
-        for circuit in getattr(self.ids_data, 'circuit'):
+        for circuit in getattr(self.ids_data, "circuit"):
             if len(circuit.connections) == 0:
                 continue
             self.circuit.insert(circuit.identifier, circuit.connections)
@@ -627,20 +688,20 @@ class PoloidalFieldActive(CoilDatabase):
 
         if len(self.ids_data.supply) == 0:  # no supplies
             return
-        with self.ids_index.node('supply'):
-            name = self.ids_index.array('identifier')
-            if self.ids_index.empty('resistance'):
+        with self.ids_index.node("supply"):
+            name = self.ids_index.array("identifier")
+            if self.ids_index.empty("resistance"):
                 resistance = np.zeros(len(name))
             try:
-                resistance = self.ids_index.array('resistance')
+                resistance = self.ids_index.array("resistance")
             except ValueError:  # resistance field is empty
                 resistance = np.zeros(len(name))
             self.supply.insert(resistance, name=name)
 
-            for attr, label in zip(['I', 'V'], ['current', 'voltage']):
-                for minmax in ['min', 'max']:
-                    supply = f'{attr}{minmax}'
-                    node = f'{label}_limit_{minmax}'
+            for attr, label in zip(["I", "V"], ["current", "voltage"]):
+                for minmax in ["min", "max"]:
+                    supply = f"{attr}{minmax}"
+                    node = f"{label}_limit_{minmax}"
                     try:
                         self.supply[supply] = self.ids_index.array(node)
                     except ValueError:  # node is empty
@@ -659,7 +720,7 @@ class ContourData(Plot):
 
     def plot(self, axes=None):
         """Plot contours."""
-        self.axes.set_axes('2d', axes=axes)
+        self.axes.set_axes("2d", axes=axes)
         for component in self.data.items():
             self.axes.plot(*self.data[component].T, label=component)
         self.axes.legend()
@@ -670,8 +731,9 @@ class Contour(Plot):
     """Extract closed contour from multiple unordered segments."""
 
     data: dict[str, np.ndarray]
-    loop: np.ndarray = field(init=False, default_factory=lambda:
-                             np.ndarray((0, 2), float))
+    loop: np.ndarray = field(
+        init=False, default_factory=lambda: np.ndarray((0, 2), float)
+    )
     segments: list[np.ndarray] = field(init=False)
 
     def __post_init__(self):
@@ -682,8 +744,9 @@ class Contour(Plot):
 
     def gap(self, index: int):
         """Return length of gap to next segment."""
-        return [np.linalg.norm(segment[index] - self.loop[-1])
-                for segment in self.segments]
+        return [
+            np.linalg.norm(segment[index] - self.loop[-1]) for segment in self.segments
+        ]
 
     def append(self, index: int, flip=False):
         """Pop matching segment and append loop."""
@@ -705,12 +768,12 @@ class Contour(Plot):
         while len(self.segments) > 0:
             self.select()
         self.loop = np.append(self.loop, self.loop[:1], axis=0)
-        assert import_module('shapely.geometry').LinearRing(self.loop).is_valid
+        assert import_module("shapely.geometry").LinearRing(self.loop).is_valid
 
     def plot(self, axes=None):
         """Plot closed contour."""
-        self.set_axes('2d', axes=axes)
-        self.axes.plot(*self.loop.T, 'C3-')
+        self.set_axes("2d", axes=axes)
+        self.axes.plot(*self.loop.T, "C3-")
 
 
 @dataclass
@@ -720,12 +783,12 @@ class Wall(CoilDatabase):
     pulse: int = 116000
     run: int = 2
     occurrence: int = 0
-    name: str = 'wall'
+    name: str = "wall"
 
     @cached_property
     def limiter(self):
         """Return limiter units."""
-        return getattr(self.ids_data, 'description_2d').array[0].limiter
+        return getattr(self.ids_data, "description_2d").array[0].limiter
 
     @cached_property
     def boundary(self):
@@ -737,8 +800,9 @@ class Wall(CoilDatabase):
 
     def segment(self, index=0):
         """Return indexed firstwall segment."""
-        return np.array([self.limiter.unit[index].outline.r,
-                         self.limiter.unit[index].outline.z]).T
+        return np.array(
+            [self.limiter.unit[index].outline.r, self.limiter.unit[index].outline.z]
+        ).T
 
     @cached_property
     def segments(self):
@@ -748,8 +812,10 @@ class Wall(CoilDatabase):
     @cached_property
     def outline(self):
         """Return first wall xz outline."""
-        return {'x': [segment[:, 0] for segment in self.segments],
-                'z': [segment[:, 1] for segment in self.segments]}
+        return {
+            "x": [segment[:, 0] for segment in self.segments],
+            "z": [segment[:, 1] for segment in self.segments],
+        }
 
     def build(self):
         """Build plasma bound by firstwall contour."""
@@ -757,12 +823,13 @@ class Wall(CoilDatabase):
 
     def insert(self, data: xarray.Dataset):
         """Insert wall and divertor geometory into dataset structure."""
-        for i, attr in enumerate(['wall', 'divertor']):
-            data[attr] = (f'{attr}_index', 'point'), self.segment(i)
+        for i, attr in enumerate(["wall", "divertor"]):
+            data[attr] = (f"{attr}_index", "point"), self.segment(i)
             index = np.arange(data[attr].shape[0])
-            data.coords[f'{attr}_index'] = index
-        data.attrs['wall_md'] = ','.join(
-            [str(value) for _, value in self.ids_attrs.items()])
+            data.coords[f"{attr}_index"] = index
+        data.attrs["wall_md"] = ",".join(
+            [str(value) for _, value in self.ids_attrs.items()]
+        )
 
 
 @dataclass
@@ -825,13 +892,13 @@ class Geometry:
 
     pf_active: Ids | bool | str = True
     pf_passive: Ids | bool | str = True
-    wall: Ids | bool | str = 'iter_md'
-    filename: str = ''
+    wall: Ids | bool | str = "iter_md"
+    filename: str = ""
     ids: ImasIds | None = field(default=None, repr=False)
 
-    geometry: ClassVar[dict] = dict(pf_active=PoloidalFieldActive,
-                                    pf_passive=PoloidalFieldPassive,
-                                    wall=Wall)
+    geometry: ClassVar[dict] = dict(
+        pf_active=PoloidalFieldActive, pf_passive=PoloidalFieldPassive, wall=Wall
+    )
 
     def __post_init__(self):
         """Map geometry parameters to dict attributes."""
@@ -839,15 +906,21 @@ class Geometry:
         for attr, geometry in self.geometry.items():
             ids_attrs = self.get_ids_attrs(getattr(self, attr), geometry)
             setattr(self, attr, ids_attrs)
-        if hasattr(super(), '__post_init__'):
+        if hasattr(super(), "__post_init__"):
             super().__post_init__()
 
     def set_filename(self):
         """Set filename when all geometry attrs is str or False."""
-        if np.all([isinstance(getattr(self, attr), str) or
-                   getattr(self, attr) is False
-                   for attr in self.geometry]) and self.filename == '':
-            self.filename = 'machine_description'
+        if (
+            np.all(
+                [
+                    isinstance(getattr(self, attr), str) or getattr(self, attr) is False
+                    for attr in self.geometry
+                ]
+            )
+            and self.filename == ""
+        ):
+            self.filename = "machine_description"
 
     def get_ids_attrs(self, attrs, geometry) -> dict:
         """Return default ids attributes.
@@ -914,11 +987,11 @@ class Geometry:
         [20, 38, 'demo', 42, 'public', 'wall', 'hdf5']
         """
         match attrs:
-            case 'iter_md':  # update from iter_md
+            case "iter_md":  # update from iter_md
                 ids_attrs = geometry.update_ids_attrs(True)
             case str():
-                raise ValueError(f'attr str input {attrs} != iter_md')
-            case attrs if hasattr(self, 'ids_attrs') and self.ids is None:
+                raise ValueError(f"attr str input {attrs} != iter_md")
+            case attrs if hasattr(self, "ids_attrs") and self.ids is None:
                 ids_attrs = geometry.merge_ids_attrs(attrs, self.ids_attrs)
             case attrs:
                 ids_attrs = geometry.update_ids_attrs(attrs)
@@ -927,11 +1000,13 @@ class Geometry:
     @property
     def geometry_attrs(self) -> dict:
         """Return geometry attributes."""
-        return {f'{attr}_md':
-                value if isinstance(value := getattr(self, attr),
-                                    (bool, np.integer))
-                or 'ids' not in value else Database(ids=value['ids']).ids_hash
-                for attr in self.geometry}
+        return {
+            f"{attr}_md": value
+            if isinstance(value := getattr(self, attr), (bool, np.integer))
+            or "ids" not in value
+            else Database(ids=value["ids"]).ids_hash
+            for attr in self.geometry
+        }
 
 
 @dataclass
@@ -955,8 +1030,7 @@ class Machine(CoilSet, Geometry, CoilData):
                 # ids hash
                 metadata[geometry] = attrs
                 continue
-            metadata[geometry] = \
-                ','.join([str(attrs[attr]) for attr in attrs])
+            metadata[geometry] = ",".join([str(attrs[attr]) for attr in attrs])
         return metadata
 
     @metadata.setter
@@ -972,15 +1046,17 @@ class Machine(CoilSet, Geometry, CoilData):
             if isinstance(metadata[geometry], np.integer):
                 setattr(self, geometry[:-3], metadata[geometry])
                 continue
-            values = [self._format_geometry_attrs(attr)
-                      for attr in metadata[geometry].split(',')]
+            values = [
+                self._format_geometry_attrs(attr)
+                for attr in metadata[geometry].split(",")
+            ]
             setattr(self, geometry[:-3], dict(zip(IDS.attrs, values)))
         assert attr_hash == self.hash_attrs(self.group_attrs)
 
     @staticmethod
     def _format_geometry_attrs(attr: str) -> str | int | float:
         """Return formated attr. Try int conversion except return str."""
-        if '.' in attr:
+        if "." in attr:
             return float(attr)
         try:
             return int(attr)
@@ -998,8 +1074,8 @@ class Machine(CoilSet, Geometry, CoilData):
 
     def solve_biot(self):
         """Solve biot instances."""
-        if self.sloc['plasma'].sum() > 0:
-            boundary = self.geometry['wall'](**self.wall).segment(0)
+        if self.sloc["plasma"].sum() > 0:
+            boundary = self.geometry["wall"](**self.wall).segment(0)
             self.plasma.solve(boundary)
         self.inductance.solve()
         self.field.solve()
@@ -1014,7 +1090,7 @@ class Machine(CoilSet, Geometry, CoilData):
             if isinstance(geometry_attrs, dict):
                 coilset = geometry(**geometry_attrs, **self.frameset_attrs)
                 self += coilset
-        if hasattr(super(), 'build'):
+        if hasattr(super(), "build"):
             super().build()
         self.solve_biot()
         return self.store()
@@ -1032,10 +1108,10 @@ class Machine(CoilSet, Geometry, CoilData):
         return self
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     pulse, run = 105028, 1  # DINA
 
-    machine = Machine(pf_active='iter_md', pf_passive=False,
-                      wall='iter_md', tplasma='hex', nwall=5)
+    machine = Machine(
+        pf_active="iter_md", pf_passive=False, wall="iter_md", tplasma="hex", nwall=5
+    )
     machine.plot()

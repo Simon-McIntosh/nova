@@ -9,10 +9,11 @@ from nova.imas.scenario import Scenario
 class PF_Active(Plot, Scenario):
     """Manage access to pf_active ids."""
 
-    name: str = 'pf_active'
-    ids_node: str = 'coil'
+    name: str = "pf_active"
+    ids_node: str = "coil"
     coil_attrs: list[str] = field(
-        default_factory=lambda: ['current', 'b_field_max_timed'])
+        default_factory=lambda: ["current", "b_field_max_timed"]
+    )
 
     @staticmethod
     def coil_name(coil):
@@ -25,30 +26,33 @@ class PF_Active(Plot, Scenario):
         """Build netCDF database using data extracted from imasdb."""
         name = [self.coil_name(coil).strip() for coil in self.ids_data.coil]
         with self.build_scenario():
-            self.data.coords['coil_name'] = name
-            self.data.coords['coil_index'] = 'coil_name', range(len(name))
-            self.append(('time', 'coil_name'), self.coil_attrs, '*.data')
-            with self.ids_index.node('coil'):
-                if not self.ids_index.empty('current_limit_max'):
-                    self.data['maximum_current'] = 'coil_name', \
-                        self.ids_index.array('current_limit_max')[0, 0]
+            self.data.coords["coil_name"] = name
+            self.data.coords["coil_index"] = "coil_name", range(len(name))
+            self.append(("time", "coil_name"), self.coil_attrs, "*.data")
+            with self.ids_index.node("coil"):
+                if not self.ids_index.empty("current_limit_max"):
+                    self.data["maximum_current"] = (
+                        "coil_name",
+                        self.ids_index.array("current_limit_max")[0, 0],
+                    )
             coil_number = len(self.data.coil_name)
-            for force in ['radial', 'vertical']:
-                with self.ids_index.node(f'{force}_force'):
-                    if self.ids_index.empty('force.data'):
+            for force in ["radial", "vertical"]:
+                with self.ids_index.node(f"{force}_force"):
+                    if self.ids_index.empty("force.data"):
                         continue
-                    self.data[f'{force}_force'] = ('time', 'coil_name'), \
-                        self.ids_index.array('force.data')[:, :coil_number]
+                    self.data[f"{force}_force"] = (
+                        "time",
+                        "coil_name",
+                    ), self.ids_index.array("force.data")[:, :coil_number]
         return self
 
     def plot(self, axes=None, **kwargs):
         """Plot current timeseries."""
-        self.set_axes('1d', axes=axes)
-        self.axes.plot(self.data.time, 1e-3*self.data.current, **kwargs)
+        self.set_axes("1d", axes=axes)
+        self.axes.plot(self.data.time, 1e-3 * self.data.current, **kwargs)
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     # pf_active = PF_Active(130506, 403, machine='iter')
     pulse, run = 105028, 1
     pulse, run = 105011, 9
@@ -61,7 +65,7 @@ if __name__ == '__main__':
     pulse, run = 135013, 2
 
     # pulse, run = 111001, 202
-    PF_Active(pulse, run, 'iter')._clear()
-    pf_active = PF_Active(pulse, run, 'iter')
-    #pf_active = PF_Active(105007, 9)  # b field max timed 135002, 5
-    #pf_active.plot()
+    PF_Active(pulse, run, "iter")._clear()
+    pf_active = PF_Active(pulse, run, "iter")
+    # pf_active = PF_Active(105007, 9)  # b field max timed 135002, 5
+    # pf_active.plot()

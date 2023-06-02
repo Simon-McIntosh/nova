@@ -18,8 +18,7 @@ class Fuse(Machine):
     pf_passive: Ids | bool | str = False
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     fuse = Fuse()
 
     fuse.plot()

@@ -9,10 +9,10 @@ from nova.imas.machine import Machine
 class Transient(Machine):
     """Implementation of transient machine class."""
 
-    pf_active: Ids | bool | str = 'iter_md'
-    pf_passive: Ids | bool | str = 'iter_md'
-    wall: Ids | bool | str = 'iter_md'
-    tplasma: str = 'hex'
+    pf_active: Ids | bool | str = "iter_md"
+    pf_passive: Ids | bool | str = "iter_md"
+    wall: Ids | bool | str = "iter_md"
+    tplasma: str = "hex"
 
     def solve_biot(self):
         """Extend solve biot to include mutual-inductance."""
@@ -20,15 +20,14 @@ class Transient(Machine):
         self.inductance.solve()
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     pulse, run = 105028, 1
 
     transient = Transient(pulse, run)
 
     transient.plot()
 
-    '''
+    """
     M = machine.inductance.Psi[machine.Loc['coil']][:, machine.Loc['coil']]
     coil_inductance = machine.circuit.coil_matrix() @ M
 
@@ -56,4 +55,4 @@ if __name__ == '__main__':
 
     plt.plot(time := np.linspace(sol.t[0], sol.t[-1], 1000),
              sol.sol(time).T)
-    '''
+    """

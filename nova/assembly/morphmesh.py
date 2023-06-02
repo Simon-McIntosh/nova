@@ -24,22 +24,23 @@ class MorphMesh(Plotter):
     def __post_init__(self):
         """Init data directory and load morphed mesh."""
         self.load()
-        #self.morph()
-        #self.mesh.save(self.filename)
+        # self.morph()
+        # self.mesh.save(self.filename)
 
     @property
     def name(self):
         """Return mesh name."""
-        name = f'{self.fiducial.name}_base'  # '_{self.base.name}'
+        name = f"{self.fiducial.name}_base"  # '_{self.base.name}'
         if self.version is not None:
-            name += f'_{self.version}'
+            name += f"_{self.version}"
         return name
 
     @property
     def filename(self):
         """Return full mesh filepath."""
-        return os.path.join(root_dir, 'data/Assembly/toroidal_fiducial',
-                            f'{self.name}.vtk')
+        return os.path.join(
+            root_dir, "data/Assembly/toroidal_fiducial", f"{self.name}.vtk"
+        )
 
     def load(self):
         """Load morphed vtk mesh."""
@@ -51,33 +52,28 @@ class MorphMesh(Plotter):
 
     def morph(self):
         """Morph base mesh."""
-        #self.mesh = Morph(self.fiducial, self.base,
+        # self.mesh = Morph(self.fiducial, self.base,
         #                  smoothing=self.smoothing).mesh
         self.mesh = self.base.copy()
-        #Morph(self.fiducial).predict(self.base)
+        # Morph(self.fiducial).predict(self.base)
         Morph(self.fiducial).interpolate(self.mesh, neighbors=None)
 
-    #morph.animate('TFC18_morph', 'delta', max_factor=500,
+    # morph.animate('TFC18_morph', 'delta', max_factor=500,
     #              frames=31, opacity=0)
 
 
-if __name__ == '__main__':
-
-    #fiducial = FiducialCoil('fiducial', 10)
-    base = AnsysPost('TFCgapsG10', 'k0_wp', 'all')
+if __name__ == "__main__":
+    # fiducial = FiducialCoil('fiducial', 10)
+    base = AnsysPost("TFCgapsG10", "k0_wp", "all")
     base.warp(500)
-    #morph = MorphMesh(fiducial.mesh, base.mesh)
+    # morph = MorphMesh(fiducial.mesh, base.mesh)
 
-    #morph.mesh['displacement mm'] = 1e3*morph.mesh['delta']
-    #plotter = morph.warp(0.1, 0, plotter=pv.Plotter())
-    #plotter.update_scalar_bar_range(clim=[0, 6])
-    #plotter.show()
+    # morph.mesh['displacement mm'] = 1e3*morph.mesh['delta']
+    # plotter = morph.warp(0.1, 0, plotter=pv.Plotter())
+    # plotter.update_scalar_bar_range(clim=[0, 6])
+    # plotter.show()
 
-
-
-    #morph.animate('TFC18_morph', 'delta', max_factor=500,
+    # morph.animate('TFC18_morph', 'delta', max_factor=500,
     #              frames=51, opacity=0)
 
-
-
-    #morph.warp(500, opacity=0)
+    # morph.warp(500, opacity=0)

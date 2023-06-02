@@ -20,7 +20,7 @@ phi.constrain(0.5, mesh.facesLeft)
 viewer = fipy.Viewer(vars=(phi), datamin=0.0, datamax=1.0)
 viewer.plot()
 
-'''
+"""
 eqX = fipy.TransientTerm() == fipy.ExplicitDiffusionTerm(coeff=D)
 for step in range(steps):
     eqX.solve(var=phi, dt=timeStepDuration)
@@ -31,5 +31,4 @@ phiAnalytical.setValue(1 - erf(x / (2 * fipy.numerix.sqrt(D * t))))
 
 viewer = fipy.Viewer(vars=(phi), datamin=0.0, datamax=1.0)
 #viewer.plot()
-'''
-
+"""

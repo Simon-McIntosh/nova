@@ -6,18 +6,20 @@ from nep.DINA.capacitor_discharge import power_supply
 from nep.coil_geom import PFgeom, VVcoils
 import numpy as np
 
-class toroidal_current(pythonIO):
 
+class toroidal_current(pythonIO):
     def __init__(self, read_txt=False, Iscale=1):
         pythonIO.__init__(self)  # python read/write
-        self.pl = read_plasma('disruptions', Iscale=Iscale,
-                              read_txt=read_txt)  # load plasma
-        self.tor = read_tor('disruptions', Iscale=Iscale,
-                            read_txt=read_txt)  # load currents
+        self.pl = read_plasma(
+            "disruptions", Iscale=Iscale, read_txt=read_txt
+        )  # load plasma
+        self.tor = read_tor(
+            "disruptions", Iscale=Iscale, read_txt=read_txt
+        )  # load currents
 
         self.tor.load_file(3)
 
-    '''
+    """
         self.ps = power_supply(vessel=True)
         self.load_coils()
 
@@ -88,15 +90,14 @@ class toroidal_current(pythonIO):
         if ax is None:
             ax = plt.subplots(1, 1, figsize=(6, 9))[1]
         self.pf.plot(subcoil=True, plasma=True, ax=ax)
-    '''
+    """
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     tc = toroidal_current(read_txt=False)
 
     # tc.frame_update(400)
 
     tc.tor.plot(400)
-    #tc.load_file(-1)
-    #tc.plot_coils()
+    # tc.load_file(-1)
+    # tc.plot_coils()

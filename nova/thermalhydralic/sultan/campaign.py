@@ -23,12 +23,12 @@ class Campaign:
     """
 
     _experiment: str
-    _mode: str = 'ac'
+    _mode: str = "ac"
     database: DataBase | None = field(init=False, repr=False, default=None)
-    metadata: pandas.DataFrame | None = field(
-        init=False, repr=False, default=None)
-    reload: SimpleNamespace = field(init=False, repr=False,
-                                    default_factory=SimpleNamespace)
+    metadata: pandas.DataFrame | None = field(init=False, repr=False, default=None)
+    reload: SimpleNamespace = field(
+        init=False, repr=False, default_factory=SimpleNamespace
+    )
 
     def __post_init__(self):
         """Initialize properties."""
@@ -78,8 +78,8 @@ class Campaign:
     @mode.setter
     def mode(self, mode):
         mode = mode.lower()
-        if mode not in ['cal', 'ac', 'dc', 'full']:
-            raise IndexError('mode not in [cal, ac, dc, full]')
+        if mode not in ["cal", "ac", "dc", "full"]:
+            raise IndexError("mode not in [cal, ac, dc, full]")
         self._mode = mode
         self.reload.mode = False
         self.reload.phase = True
@@ -87,11 +87,11 @@ class Campaign:
     @property
     def plan(self):
         """Return testplan index, read-only."""
-        if self.mode == 'full':
-            plan = self.metadata['index'].loc[:, 'name']
+        if self.mode == "full":
+            plan = self.metadata["index"].loc[:, "name"]
         else:
-            index = self.metadata['index']['testmode'] == self.mode[0]
-            plan = self.metadata['index'].loc[index, 'name']
+            index = self.metadata["index"]["testmode"] == self.mode[0]
+            plan = self.metadata["index"].loc[index, "name"]
         return plan
 
     @property
@@ -102,18 +102,18 @@ class Campaign:
     @property
     def note(self):
         """Return metadata notes."""
-        note = self.metadata['note']
+        note = self.metadata["note"]
         return note.reset_index()
 
     @property
     def metadatafile(self):
         """Return full local filepath of the binary metadata file."""
-        return self.database.binary_filepath('metadata.h5')
+        return self.database.binary_filepath("metadata.h5")
 
     @property
     def binaryfile(self):
         """Return full local filepath of bindary data file."""
-        return self.database.binary_filepath('testdata.h5')
+        return self.database.binary_filepath("testdata.h5")
 
     def load_metadata(self):
         """Load campaign metadata."""
@@ -124,9 +124,9 @@ class Campaign:
 
     def read_metadata(self):
         """Extract data from *.xls campaign metadata."""
-        metadata_xls = self.database.locate('*.xls')
-        extension = metadata_xls.split('.')[-1]
-        engine = 'openpyxl' if extension == 'xlsx' else None
+        metadata_xls = self.database.locate("*.xls")
+        extension = metadata_xls.split(".")[-1]
+        engine = "openpyxl" if extension == "xlsx" else None
         with pandas.ExcelFile(metadata_xls, engine=engine) as xls:
             metadata_index = self._read_metadata_index(xls)
             metadata = self._read_metadata_testplan(xls, metadata_index)
@@ -135,13 +135,13 @@ class Campaign:
 
     def _save_metadata(self, metadata):
         """Save metadata to hdf file."""
-        with pandas.HDFStore(self.metadatafile, mode='w') as store:
+        with pandas.HDFStore(self.metadatafile, mode="w") as store:
             for key in metadata:
-                store.put(key, metadata[key], format='table', append=True)
+                store.put(key, metadata[key], format="table", append=True)
 
     def _load_metadata(self):
         metadata = {}
-        with pandas.HDFStore(self.metadatafile, mode='r') as store:
+        with pandas.HDFStore(self.metadatafile, mode="r") as store:
             for key in store.keys():
                 metadata[key[1:]] = store[key]
         self.metadata = metadata
@@ -166,25 +166,25 @@ class Campaign:
         None.
 
         """
-        testmode = 'a'
-        labels = [label[0] for label in _xls_index.values
-                  if isinstance(label[0], str)]
+        testmode = "a"
+        labels = [label[0] for label in _xls_index.values if isinstance(label[0], str)]
         try:
-            strand = next(label for label in labels
-                          if f'{testmode}XXYYZZ' in label
-                          or f'{testmode.upper()}XXYYZZ' in label)
+            strand = next(
+                label
+                for label in labels
+                if f"{testmode}XXYYZZ" in label or f"{testmode.upper()}XXYYZZ" in label
+            )
         except StopIteration as stop:
-            raise StopIteration(f'{testmode}XXYYZZ not found in {labels}') \
-                from stop
-        return strand.split('XXYYZZ')[0][:-1].replace('-', '')
+            raise StopIteration(f"{testmode}XXYYZZ not found in {labels}") from stop
+        return strand.split("XXYYZZ")[0][:-1].replace("-", "")
 
     @staticmethod
     def _isshot(label):
         """Return True if label contains test, AC, or DC."""
-        isshot = 'test' in label[0].lower()
-        isshot &= 'tests' not in label[0].lower()
-        isshot |= label[0][:2] == 'AC'
-        isshot |= label[0][:2] == 'DC'
+        isshot = "test" in label[0].lower()
+        isshot &= "tests" not in label[0].lower()
+        isshot |= label[0][:2] == "AC"
+        isshot |= label[0][:2] == "DC"
         return isshot
 
     @staticmethod
@@ -206,9 +206,9 @@ class Campaign:
 
         """
         try:
-            nextlabel = index.values[i+1][0]
+            nextlabel = index.values[i + 1][0]
         except IndexError:
-            nextlabel = ''
+            nextlabel = ""
         return nextlabel
 
     @staticmethod
@@ -228,7 +228,7 @@ class Campaign:
 
         """
         try:
-            isfile = label.strip().capitalize() == 'File'
+            isfile = label.strip().capitalize() == "File"
         except AttributeError:
             isfile = False
         return isfile
@@ -282,15 +282,15 @@ class Campaign:
             Formated testname.
 
         """
-        testname = index.values[j-1][0]
+        testname = index.values[j - 1][0]
         try:
             if strand in testname:
-                testname = f'noname {j}'
+                testname = f"noname {j}"
         except TypeError:
-            testname = f'noname {j}'
-        testname = testname.split(':')[0].split('(')[0]
+            testname = f"noname {j}"
+        testname = testname.split(":")[0].split("(")[0]
         if testname in metadata_index:
-            testname += f' {j}'
+            testname += f" {j}"
         return testname
 
     @staticmethod
@@ -301,26 +301,27 @@ class Campaign:
             if metadata_index[testname][1] == 0:
                 metadata_index.pop(testname)
         # convert to DataFrame
-        metadata_index = pandas.DataFrame(metadata_index,
-                                          index=['start', 'stop',
-                                                 'testmode']).T
+        metadata_index = pandas.DataFrame(
+            metadata_index, index=["start", "stop", "testmode"]
+        ).T
         metadata_index.reset_index(inplace=True)
-        metadata_index['name'] = metadata_index['index']
+        metadata_index["name"] = metadata_index["index"]
         ac_index, dc_index = itertools.count(0), itertools.count(0)
         null_index = itertools.count(0)
-        for i, name in enumerate(metadata_index['index']):
-            if name.capitalize() == 'Instrumentation':
-                name = 'cal'
-            elif name[:2].upper() == 'AC':
-                name = f'ac{next(ac_index)}'
-            elif name[:2].upper() == 'DC':
-                name = f'dc{next(dc_index)}'
+        for i, name in enumerate(metadata_index["index"]):
+            if name.capitalize() == "Instrumentation":
+                name = "cal"
+            elif name[:2].upper() == "AC":
+                name = f"ac{next(ac_index)}"
+            elif name[:2].upper() == "DC":
+                name = f"dc{next(dc_index)}"
             else:
-                name = f'ex{next(null_index)}'
-            metadata_index.loc[i, 'index'] = name
+                name = f"ex{next(null_index)}"
+            metadata_index.loc[i, "index"] = name
         metadata_index = metadata_index.astype(
-            {'start': int, 'stop': int, 'testmode': str, 'name': str})
-        metadata_index.set_index('index', inplace=True)
+            {"start": int, "stop": int, "testmode": str, "name": str}
+        )
+        metadata_index.set_index("index", inplace=True)
         return metadata_index
 
     def _isnext_empty(self, _xls_index, i):
@@ -346,12 +347,11 @@ class Campaign:
         strand = self._read_strand(_xls_index)
         for i, label in enumerate(_xls_index.values):
             if isinstance(label[0], str):
-                if label[0][:len(strand)] == strand \
-                        and testname is not None:
+                if label[0][: len(strand)] == strand and testname is not None:
                     metadata_index[testname][1] = i  # advance stop index
                 else:
                     if self._istest(strand, label, _xls_index, i):
-                        j = i+1
+                        j = i + 1
                         skip_file = True
                     elif self._isfile(label[0]):
                         if skip_file:
@@ -362,11 +362,11 @@ class Campaign:
                         testname = None
                         continue
                     testname = self._format_testname(
-                        _xls_index, j, strand, metadata_index)
-                    if self._isnext_empty(_xls_index, i) and \
-                            not self._isfile(label[0]):
+                        _xls_index, j, strand, metadata_index
+                    )
+                    if self._isnext_empty(_xls_index, i) and not self._isfile(label[0]):
                         j += 1
-                    metadata_index[testname] = [j, 0, '']  # test start
+                    metadata_index[testname] = [j, 0, ""]  # test start
         testmode_index = len(strand)
         for testname in metadata_index:
             shotlabel = _xls_index.iloc[metadata_index[testname][1], 0]
@@ -377,9 +377,10 @@ class Campaign:
 
     @staticmethod
     def _append_note(note, testplan):
-        columns = [col for col in testplan.columns.get_level_values(0) if
-                   isinstance(col, str)]
-        note_column = [col for col in columns if 'note' in col.lower()]
+        columns = [
+            col for col in testplan.columns.get_level_values(0) if isinstance(col, str)
+        ]
+        note_column = [col for col in columns if "note" in col.lower()]
         if note_column:
             _note = testplan.loc[:, note_column[0]].values
             try:
@@ -398,16 +399,21 @@ class Campaign:
         drop_columns = columns[columns.isna()]
         if len(drop_columns) > 0:
             testplan.drop(columns=drop_columns, inplace=True, level=0)
-        testplan.fillna(method='pad', inplace=True)
+        testplan.fillna(method="pad", inplace=True)
         # rename columns
-        columns = {'I pulse': 'Ipulse', 'I Pulse': 'Ipulse',
-                   'B Sultan': 'Be', 'B SULTAN':  'Be',
-                   'B sultan': 'Be', 'frequency': 'frequency',
-                   'Frequency': 'frequency',
-                   'P. Freq': 'frequency',
-                   'I Sample': 'Isample'}
+        columns = {
+            "I pulse": "Ipulse",
+            "I Pulse": "Ipulse",
+            "B Sultan": "Be",
+            "B SULTAN": "Be",
+            "B sultan": "Be",
+            "frequency": "frequency",
+            "Frequency": "frequency",
+            "P. Freq": "frequency",
+            "I Sample": "Isample",
+        }
         testplan.rename(columns=columns, inplace=True)
-        testplan.rename(columns={np.nan: ''}, inplace=True, level=1)
+        testplan.rename(columns={np.nan: ""}, inplace=True, level=1)
 
     @staticmethod
     def _format_frequency_label(frequency_label):
@@ -426,7 +432,7 @@ class Campaign:
 
         """
         try:
-            frequency_label = float(frequency_label.split('/')[0])
+            frequency_label = float(frequency_label.split("/")[0])
         except ValueError:  # split string is string (BPTrapez)
             frequency_label = -1
         except AttributeError:  # x already float
@@ -435,53 +441,55 @@ class Campaign:
 
     @staticmethod
     def _format_frequency(testplan):
-        frequency_duration = ('frequency', 'Hz/duration')
-        frequency_hz = ('frequency', 'Hz')
+        frequency_duration = ("frequency", "Hz/duration")
+        frequency_hz = ("frequency", "Hz")
         if frequency_duration in testplan:
-            testplan[('frequency', 'Hz')] = \
-                testplan[frequency_duration].apply(
-                    Campaign._format_frequency_label)
+            testplan[("frequency", "Hz")] = testplan[frequency_duration].apply(
+                Campaign._format_frequency_label
+            )
         elif frequency_hz in testplan:
             if testplan[frequency_hz].dtype == object:
                 testplan[frequency_hz] = testplan[frequency_hz].apply(
-                    Campaign._format_frequency_label)
+                    Campaign._format_frequency_label
+                )
 
     def _read_metadata_testplan(self, xls, metadata_index):
         """Return metadata."""
-        metadata = {'index': metadata_index}
-        note = pandas.Series(name='note', dtype=str)
+        metadata = {"index": metadata_index}
+        note = pandas.Series(name="note", dtype=str)
         previouscolumns = None
         previouscolumns_mode = {}
-        for testname in metadata['index'].index:
-            testindex = metadata['index'].loc[testname, :]
-            testmode = testindex['testmode']
-            start, stop = testindex.loc[['start', 'stop']]
+        for testname in metadata["index"].index:
+            testindex = metadata["index"].loc[testname, :]
+            testmode = testindex["testmode"]
+            start, stop = testindex.loc[["start", "stop"]]
             _header = pandas.read_excel(
-                xls, skiprows=start, nrows=stop-start+1, header=None)
-            if _header.iloc[0, 0] == 'File':
+                xls, skiprows=start, nrows=stop - start + 1, header=None
+            )
+            if _header.iloc[0, 0] == "File":
                 start += 2
-                columns = pandas.MultiIndex.from_arrays(
-                    _header.iloc[:2].values)
+                columns = pandas.MultiIndex.from_arrays(_header.iloc[:2].values)
                 previouscolumns = columns
                 previouscolumns_mode[testmode] = columns
             elif previouscolumns is not None:
                 columns = previouscolumns_mode.get(testmode, previouscolumns)
-            testplan = pandas.read_excel(xls, skiprows=start,
-                                         nrows=stop-start+1, header=None)
+            testplan = pandas.read_excel(
+                xls, skiprows=start, nrows=stop - start + 1, header=None
+            )
             testplan.columns = columns
             self._format_columns(testplan)
             note = self._append_note(note, testplan)
             self._format_frequency(testplan)
-            testplan.sort_values([('Be', 'T'), ('Isample', 'kA')],
-                                 inplace=True)
+            testplan.sort_values([("Be", "T"), ("Isample", "kA")], inplace=True)
             try:  # AC data
-                testplan.sort_values([('frequency', 'Hz'), ('Ipulse', 'A')],
-                                     inplace=True)
+                testplan.sort_values(
+                    [("frequency", "Hz"), ("Ipulse", "A")], inplace=True
+                )
             except KeyError:
                 pass
             testplan.reset_index(inplace=True)
-            testplan.drop(columns=['index'], level=0, inplace=True)
-            testplan.fillna(method='ffill', inplace=True)
+            testplan.drop(columns=["index"], level=0, inplace=True)
+            testplan.fillna(method="ffill", inplace=True)
             testplan.dropna(axis=1, inplace=True)
             # convert object dtypes to str
             dtypes = testplan.dtypes
@@ -489,11 +497,10 @@ class Campaign:
             testplan = testplan.astype(astype)
             # save to dict
             metadata[testname] = testplan
-        metadata['note'] = pandas.DataFrame(note, columns=['note'])
+        metadata["note"] = pandas.DataFrame(note, columns=["note"])
         return metadata
 
 
-if __name__ == '__main__':
-
-    campaign = Campaign('ITER/JACS/JACS_9', 'ac')  # CSJA_9
+if __name__ == "__main__":
+    campaign = Campaign("ITER/JACS/JACS_9", "ac")  # CSJA_9
     campaign.read_metadata()

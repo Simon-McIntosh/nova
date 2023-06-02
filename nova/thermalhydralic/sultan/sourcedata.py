@@ -15,15 +15,17 @@ class SourceData:
 
     trial: Trial = field(repr=False)
     _shot: int = 0
-    _side: str = 'Left'
+    _side: str = "Left"
     sultandata: SultanData = field(init=False, repr=False)
-    reload: SimpleNamespace = field(init=False, repr=False,
-                                    default_factory=SimpleNamespace)
+    reload: SimpleNamespace = field(
+        init=False, repr=False, default_factory=SimpleNamespace
+    )
 
     def __post_init__(self):
         """Typecheck trial and initialize shot instance."""
-        self.reload.__init__(shot=True, side=True, sampledata=True,
-                             waveform=True, fluidmodel=True)
+        self.reload.__init__(
+            shot=True, side=True, sampledata=True, waveform=True, fluidmodel=True
+        )
         self.sultandata = SultanData(self.trial.database)
         self.sultandata.filename = self.filename
 
@@ -62,9 +64,11 @@ class SourceData:
         try:
             self._shot = self.trial.plan.index[shot]
         except IndexError as index_error:
-            raise IndexError(f'shot index {shot} '
-                             'out of bounds for trial.plan.index '
-                             f'{self.trial.plan.index}') from index_error
+            raise IndexError(
+                f"shot index {shot} "
+                "out of bounds for trial.plan.index "
+                f"{self.trial.plan.index}"
+            ) from index_error
         self.reload.shot = False
         self.sultandata.filename = self.filename
         self.reload.sampledata = True
@@ -93,8 +97,8 @@ class SourceData:
     @side.setter
     def side(self, side):
         side = side.capitalize()
-        if side not in ['Left', 'Right']:
-            raise IndexError(f'side {side} not in [Left, Right]')
+        if side not in ["Left", "Right"]:
+            raise IndexError(f"side {side} not in [Left, Right]")
         self._side = side
         self.reload.side = False
         self.reload.sampledata = True
@@ -117,7 +121,7 @@ class SourceData:
     @property
     def current_label(self):
         """Return sample excitation current string."""
-        return self.trial.plan.at[self.shot, ('Ipulse', 'A')]
+        return self.trial.plan.at[self.shot, ("Ipulse", "A")]
 
     @property
     def excitation_field(self):
@@ -136,18 +140,18 @@ class SourceData:
 
         """
         try:
-            current = float(re.findall(r'\d+', self.current_label)[0])
+            current = float(re.findall(r"\d+", self.current_label)[0])
         except TypeError:
             current = 230
-        excitation_field = current * 0.2/230  # excitation field amplitude
+        excitation_field = current * 0.2 / 230  # excitation field amplitude
         return excitation_field
 
     @property
     def excitation_field_rate(self):
         """Return amplitude of exciation field rate of change."""
-        return 2*np.pi*self.frequency*self.excitation_field
+        return 2 * np.pi * self.frequency * self.excitation_field
 
 
-if __name__ == '__main__':
-    trial = Trial('CSJA13', -1, 'ac')
+if __name__ == "__main__":
+    trial = Trial("CSJA13", -1, "ac")
     sourcedata = SourceData(trial, 2)

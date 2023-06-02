@@ -5,8 +5,8 @@ Created on Fri Nov  6 14:44:26 2020
 @author: mcintos
 """
 
-class Stencil:
 
+class Stencil:
     def __init__(self, grid_boundary):
         self.grid_boundary = grid_boundary
 
@@ -15,33 +15,33 @@ class Stencil:
 
 
 class FieldNull(Stencil):
-
     def __init__(self, grid_boundary, interpolate):
         Stencil.__init__(self, grid_boundary)
         self.interpolate = interpolate
 
     def fitness(self, x):
-        return [self.interpolate('B').ev(*x).item()]
+        return [self.interpolate("B").ev(*x).item()]
 
     def get_nobj(self):
         return 1
 
     def gradient(self, x):
-        return [self.interpolate('B').ev(*x, dx=1).item(),
-                self.interpolate('B').ev(*x, dy=1).item()]
+        return [
+            self.interpolate("B").ev(*x, dx=1).item(),
+            self.interpolate("B").ev(*x, dy=1).item(),
+        ]
 
     def get_Xpoint_pygmo(self, xo):
         uda = pg.nlopt("slsqp")
         algo = pg.algorithm(uda)
         algo.extract(pg.nlopt).ftol_rel = 1e-8
 
-        #print(algo)
+        # print(algo)
         prob = pg.problem(FieldNull(self.grid_boundary, self.interpolate))
         pop = pg.population(prob, size=1)
         pop = algo.evolve(pop)
-        #print(pop)
+        # print(pop)
         return pop.champion_x, pop.champion_f
-
 
     def get_Xpoint(self, xo):
         """
@@ -100,7 +100,7 @@ class FieldNull(Stencil):
         opt.set_lower_bounds(self.grid_boundary[::2])
         opt.set_upper_bounds(self.grid_boundary[1::2])
         x = opt.optimize(xo)
-        #print(self.interpolate('B').ev(*x))
+        # print(self.interpolate('B').ev(*x))
 
         """
         res = scipy.optimize.minimize(

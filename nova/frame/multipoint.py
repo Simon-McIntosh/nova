@@ -12,11 +12,10 @@ from nova.frame.dataframe import DataFrame
 class MultiPoint(metamethod.MultiPoint):
     """Manage multi-point constraints applied across frame.index."""
 
-    name = 'multipoint'
+    name = "multipoint"
 
     frame: DataFrame = field(repr=False)
-    additional: list[str] = field(default_factory=lambda: [
-        'factor', 'ref', 'subref'])
+    additional: list[str] = field(default_factory=lambda: ["factor", "ref", "subref"])
     indexer: list[int] = field(init=False, repr=False)
     index: pandas.Index = field(default_factory=lambda: pandas.Index([]))
 
@@ -41,20 +40,23 @@ class MultiPoint(metamethod.MultiPoint):
 
         """
         isna = pandas.isna(self.frame.link)
-        self.frame.loc[isna, 'link'] = self.frame.metaframe.default['link']
-        self.frame.loc[isna, 'factor'] = \
-            self.frame.metaframe.default['factor']
-        isnumeric = np.array([isinstance(link, (int, float)) &
-                              ~isinstance(link, bool)
-                              for link in self.frame.link], dtype=bool)
-        istrue = np.array([link is True for link in self.frame.link],
-                          dtype=bool)
-        isstr = np.array([isinstance(link, str)
-                          for link in self.frame.link], dtype=bool)
-        self.frame.loc[~istrue & ~isnumeric & ~isstr, 'link'] = ''
+        self.frame.loc[isna, "link"] = self.frame.metaframe.default["link"]
+        self.frame.loc[isna, "factor"] = self.frame.metaframe.default["factor"]
+        isnumeric = np.array(
+            [
+                isinstance(link, (int, float)) & ~isinstance(link, bool)
+                for link in self.frame.link
+            ],
+            dtype=bool,
+        )
+        istrue = np.array([link is True for link in self.frame.link], dtype=bool)
+        isstr = np.array(
+            [isinstance(link, str) for link in self.frame.link], dtype=bool
+        )
+        self.frame.loc[~istrue & ~isnumeric & ~isstr, "link"] = ""
         index = self.frame.index[istrue | isnumeric]
         if not index.empty:
-            with self.frame.setlock(True, 'multipoint'):
+            with self.frame.setlock(True, "multipoint"):
                 factor = self.frame.factor
                 factor = factor[istrue | isnumeric][1:]
                 self.link(index, factor)
@@ -68,14 +70,14 @@ class MultiPoint(metamethod.MultiPoint):
                 name = self.frame.index[index]
                 link_index = self.frame.index.get_loc(link)
                 if link_index > index:  # reverse
-                    self.frame.loc[link, 'link'] = name
-                    self.frame.loc[self.frame.link == link, 'link'] = name
-                    self.frame.loc[name, 'link'] = ''
+                    self.frame.loc[link, "link"] = name
+                    self.frame.loc[self.frame.link == link, "link"] = name
+                    self.frame.loc[name, "link"] = ""
 
     def build(self):
         """Update multi-point parameters."""
         range_index = np.arange(len(self.frame), dtype=int)
-        self.indexer = list(range_index[self.frame.link == ''])
+        self.indexer = list(range_index[self.frame.link == ""])
         self.index = self.frame.index[self.indexer]
         ref = self.frame.index.get_indexer(self.frame.link)
         ref[ref == -1] = 0
@@ -87,15 +89,16 @@ class MultiPoint(metamethod.MultiPoint):
 
     def expand_index(self, index, factor):
         """Return subindex extracted from frame column."""
-        if 'frame' not in self.frame:
-            raise IndexError('frame column required for index expansion')
+        if "frame" not in self.frame:
+            raise IndexError("frame column required for index expansion")
         factor = [1] + list(factor)
         subindex, subfactor = [], []
         for name, fact in zip(index, factor):
             names = self.frame.index[self.frame.frame == name]
             if len(names) == 0:
-                raise IndexError(f'name {name} not listed in frame '
-                                 f'{np.unique(self.frame.frame)}')
+                raise IndexError(
+                    f"name {name} not listed in frame " f"{np.unique(self.frame.frame)}"
+                )
             subindex.extend(names)
             subfactor.extend(fact * np.ones(len(names)))
         return subindex, subfactor[1:]
@@ -125,28 +128,29 @@ class MultiPoint(metamethod.MultiPoint):
 
         """
         if not pandas.api.types.is_list_like(index):
-            raise IndexError(f'index: {index} is not list like')
+            raise IndexError(f"index: {index} is not list like")
         if not pandas.api.types.is_list_like(factor):
-            factor = factor * np.ones(len(index)-1)
+            factor = factor * np.ones(len(index) - 1)
         if expand:
             index, factor = self.expand_index(index, factor)
         name = index[0]
-        link = self.frame.at[name, 'link']
-        if isinstance(link, str) and link != '':
+        link = self.frame.at[name, "link"]
+        if isinstance(link, str) and link != "":
             name = link
         else:
-            self.frame.at[name, 'link'] = ''
-            self.frame.at[name, 'factor'] = 1
+            self.frame.at[name, "link"] = ""
+            self.frame.at[name, "factor"] = 1
         index_number = len(index)
         if index_number == 1:
             return
-        if len(factor) != index_number-1:
-            raise IndexError(f'len(factor={factor}) must == 1 '
-                             f'or == len(index={index})-1')
+        if len(factor) != index_number - 1:
+            raise IndexError(
+                f"len(factor={factor}) must == 1 " f"or == len(index={index})-1"
+            )
         for i in np.arange(1, index_number):
-            self.frame.at[index[i], 'link'] = name
-            self.frame.at[index[i], 'factor'] = factor[i-1]
-        if self.frame.lock('multipoint') is False:
+            self.frame.at[index[i], "link"] = name
+            self.frame.at[index[i], "factor"] = factor[i - 1]
+        if self.frame.lock("multipoint") is False:
             self.frame.__init__(self.frame, attrs=self.frame.attrs)
 
     def drop(self, index):
@@ -167,5 +171,5 @@ class MultiPoint(metamethod.MultiPoint):
             if not pandas.api.types.is_list_like(index):
                 index = [index]
             reset = [link in index for link in self.frame.link]
-            self.frame.loc[reset, 'link'] = ''
+            self.frame.loc[reset, "link"] = ""
             self.initialize()

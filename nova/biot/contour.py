@@ -30,7 +30,7 @@ class Surface(Line):
         if len(self.points) <= 5:
             self.closed = False
         if not self.closed:
-            self.linestyle = 'dashed'
+            self.linestyle = "dashed"
 
     @property
     def radius(self):
@@ -46,16 +46,16 @@ class Surface(Line):
         """Fit flux function coefficents to variable."""
         self.variable = fun(self.radius, self.height)
         self.coefficients, self.residual = np.linalg.lstsq(
-            np.c_[self.radius, 1 / (mu_0 * self.radius)], self.variable)[:2]
-        self.coefficients /= -2*np.pi
+            np.c_[self.radius, 1 / (mu_0 * self.radius)], self.variable
+        )[:2]
+        self.coefficients /= -2 * np.pi
         if len(self.radius) < 5:
             self.coefficients = np.zeros(2)
 
     def plot(self, **kwargs):
         """Plot contour surface."""
-        self.get_axes('2d')
-        self.axes.plot(self.radius, self.height,
-                       **self.plot_kwargs(**kwargs))
+        self.get_axes("2d")
+        self.axes.plot(self.radius, self.height, **self.plot_kwargs(**kwargs))
 
 
 @dataclass
@@ -76,8 +76,7 @@ class ContourLoc:
     def update(self, nest: list[Surface]):
         """Update contour attributes."""
         for attr in (field.name for field in fields(ContourLoc)):
-            setattr(self, attr,
-                    np.array([getattr(surface, attr) for surface in nest]))
+            setattr(self, attr, np.array([getattr(surface, attr) for surface in nest]))
 
 
 @dataclass
@@ -94,31 +93,29 @@ class Contour(Line):
     def __post_init__(self):
         """Initialize contour generator."""
         self.generator = contourpy.contour_generator(
-            self.x2d, self.z2d, self.psi2d,
-            line_type='SeparateCode', quad_as_tri=True)
+            self.x2d, self.z2d, self.psi2d, line_type="SeparateCode", quad_as_tri=True
+        )
 
     def __call__(self, levels: int | np.ndarray | None = None):
         """Return flux surface coordinates."""
         if levels is not None:
             self.levels = levels
-        lines = [line for psi in self.psi
-                 for line in self.generator.lines(psi)[0]]
-        return {'x': [line[:, 0] for line in lines],
-                'z': [line[:, 1] for line in lines]}
+        lines = [line for psi in self.psi for line in self.generator.lines(psi)[0]]
+        return {
+            "x": [line[:, 0] for line in lines],
+            "z": [line[:, 1] for line in lines],
+        }
 
     @property
     def psi(self):
         """Return poloidal flux contor levels."""
         match self.levels:
             case int():
-                return np.linspace(self.psi2d.min(),
-                                   self.psi2d.max(),
-                                   self.levels)
+                return np.linspace(self.psi2d.min(), self.psi2d.max(), self.levels)
             case np.ndarray():
                 return self.levels
             case _:
-                raise TypeError('levels has incorect type '
-                                f'{type(self.levels)}')
+                raise TypeError("levels has incorect type " f"{type(self.levels)}")
 
     def update_loc(self):
         """Update loc indexer."""
@@ -163,45 +160,51 @@ class Contour(Line):
 
     def plot_fit(self, psi: float, norm: Callable | None = None, axes=None):
         """Plot least squares fit for single closed contour."""
-        contour_psi = self.loc['psi'][self.loc['closed']]
+        contour_psi = self.loc["psi"][self.loc["closed"]]
         if norm is not None:
             contour_psi = norm(contour_psi)
         if contour_psi[0] < contour_psi[-1]:
             index = bisect.bisect_left(contour_psi, psi)
         else:
             index = bisect.bisect_right(-contour_psi, -psi)
-        surface = np.array(self.nest)[self.loc['closed']][index]
-        self.set_axes('1d', axes=axes)
-        self.axes.plot(surface.points[:, 0], surface.variable, 'C0.', ms=5,
-                       label=rf'contour: $\psi^\prime$={psi}')
-        radius = np.linspace(np.min(surface.points[:, 0]),
-                             np.max(surface.points[:, 0]))
+        surface = np.array(self.nest)[self.loc["closed"]][index]
+        self.set_axes("1d", axes=axes)
+        self.axes.plot(
+            surface.points[:, 0],
+            surface.variable,
+            "C0.",
+            ms=5,
+            label=rf"contour: $\psi^\prime$={psi}",
+        )
+        radius = np.linspace(np.min(surface.points[:, 0]), np.max(surface.points[:, 0]))
 
-        fit = -2*np.pi * np.c_[radius,
-                               1 / (mu_0 * radius)] @ surface.coefficients
-        fit_label = rf'fit: $p^\prime$={surface.coefficients[0]:1.2f} '
-        fit_label += rf'$ff^\prime$={surface.coefficients[1]:1.2f}'
-        self.axes.plot(radius, fit, 'C1', label=fit_label)
+        fit = -2 * np.pi * np.c_[radius, 1 / (mu_0 * radius)] @ surface.coefficients
+        fit_label = rf"fit: $p^\prime$={surface.coefficients[0]:1.2f} "
+        fit_label += rf"$ff^\prime$={surface.coefficients[1]:1.2f}"
+        self.axes.plot(radius, fit, "C1", label=fit_label)
         self.axes.legend()
-        self.axes.set_xlabel('radius')
-        self.axes.set_ylabel(r'$J_p$')
-        return np.arange(len(self.loc['psi']))[self.loc['closed']][index]
+        self.axes.set_xlabel("radius")
+        self.axes.set_ylabel(r"$J_p$")
+        return np.arange(len(self.loc["psi"]))[self.loc["closed"]][index]
 
-    def plot_1d(self, norm: Callable | None = None, index: int = 0,
-                axes=None, **kwargs):
+    def plot_1d(
+        self, norm: Callable | None = None, index: int = 0, axes=None, **kwargs
+    ):
         """Plot flux function fit."""
-        self.set_axes('1d', axes=axes)
-        psi = self.loc['psi']
+        self.set_axes("1d", axes=axes)
+        psi = self.loc["psi"]
         if norm is not None:
             psi = norm(psi)  # COCOS
-        self.axes.plot(psi[self.loc['closed']],
-                       self.loc['coefficients'][self.loc['closed'], index],
-                       **kwargs)
+        self.axes.plot(
+            psi[self.loc["closed"]],
+            self.loc["coefficients"][self.loc["closed"], index],
+            **kwargs,
+        )
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     from nova.frame.coilset import CoilSet
+
     coilset = CoilSet(dcoil=-2)
     coilset.coil.insert(3, 0, 0.4, 0.2, Ic=1)
     coilset.grid.solve(250, 0.5)
@@ -209,11 +212,13 @@ if __name__ == '__main__':
     coilset.plot()
     levels = coilset.grid.plot()
 
-    contour = Contour(coilset.grid.data.x2d, coilset.grid.data.z2d,
-                      coilset.grid.psi_, levels=levels)
+    contour = Contour(
+        coilset.grid.data.x2d, coilset.grid.data.z2d, coilset.grid.psi_, levels=levels
+    )
 
-    Jp_fun = RectBivariateSpline(coilset.grid.data.x, coilset.grid.data.z,
-                                 coilset.grid.data.x2d).ev
+    Jp_fun = RectBivariateSpline(
+        coilset.grid.data.x, coilset.grid.data.z, coilset.grid.data.x2d
+    ).ev
 
     contour.generate(Jp_fun)
 

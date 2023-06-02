@@ -15,10 +15,10 @@ class SultanData(PandasHDF):
 
     database: DataBase
     _filename: Optional[str] = None
-    _data: pandas.DataFrame | None = field(init=False, repr=False,
-                                           default=None)
-    reload: SimpleNamespace = field(init=False, repr=False,
-                                    default_factory=SimpleNamespace)
+    _data: pandas.DataFrame | None = field(init=False, repr=False, default=None)
+    reload: SimpleNamespace = field(
+        init=False, repr=False, default_factory=SimpleNamespace
+    )
 
     def __post_init__(self):
         """Typecheck database."""
@@ -43,7 +43,7 @@ class SultanData(PandasHDF):
     @property
     def binaryfilepath(self):
         """Return full path of binary datafile."""
-        return self.database.binary_filepath('testdata.h5')
+        return self.database.binary_filepath("testdata.h5")
 
     @property
     def filepath(self):
@@ -70,20 +70,20 @@ class SultanData(PandasHDF):
             Shot data.
 
         """
-        data = pandas.read_csv(self.filepath, encoding='ISO-8859-1')
+        data = pandas.read_csv(self.filepath, encoding="ISO-8859-1")
         columns = {}
         for column in data.columns:
-            if 'left' in column or 'right' in column:
-                columns[column] = column.replace('left', 'Left')
-                columns[column] = columns[column].replace('right', 'Right')
-                columns[column] = columns[column].replace('  ', ' ')
-            if column[-7:] == ' (320K)':
+            if "left" in column or "right" in column:
+                columns[column] = column.replace("left", "Left")
+                columns[column] = columns[column].replace("right", "Right")
+                columns[column] = columns[column].replace("  ", " ")
+            if column[-7:] == " (320K)":
                 columns[column] = column[:-7]
         data.rename(columns=columns, inplace=True)
-        if 'T in' in data.columns:
-            data['T in Left'] = data['T in']
-            data['T in Right'] = data['T in']
-        if 'P in' in data.columns:
-            data['P in Left'] = data['P in']
-            data['P in Right'] = data['P in']
+        if "T in" in data.columns:
+            data["T in Left"] = data["T in"]
+            data["T in Right"] = data["T in"]
+        if "P in" in data.columns:
+            data["P in Left"] = data["P in"]
+            data["P in Right"] = data["P in"]
         return data

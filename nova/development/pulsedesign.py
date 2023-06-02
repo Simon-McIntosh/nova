@@ -64,10 +64,9 @@ class Constraint(Plot):
     """Manage flux and field constraints."""
 
     points: np.ndarray = field(default_factory=lambda: np.array([]))
-    constraint: dict[str, ConstraintData] = \
-        field(init=False, default_factory=dict)
+    constraint: dict[str, ConstraintData] = field(init=False, default_factory=dict)
 
-    attrs: ClassVar[list[str]] = ['psi', 'br', 'bz']
+    attrs: ClassVar[list[str]] = ["psi", "br", "bz"]
 
     def __post_init__(self):
         """Initialize constraint data."""
@@ -95,18 +94,24 @@ class Constraint(Plot):
 
     def index(self, attr: str):
         """Return constraint point index."""
-        if attr == 'null':
-            return np.intersect1d(self['br'].index[self['br'].data == 0],
-                                  self['bz'].index[self['bz'].data == 0],
-                                  assume_unique=True)
-        if attr == 'radial':
+        if attr == "null":
             return np.intersect1d(
-                self['br'].index[self['br'].data == 0],
-                self.point_index[self['bz'].mask], assume_unique=True)
-        if attr == 'vertical':
+                self["br"].index[self["br"].data == 0],
+                self["bz"].index[self["bz"].data == 0],
+                assume_unique=True,
+            )
+        if attr == "radial":
             return np.intersect1d(
-                self['bz'].index[self['bz'].data == 0],
-                self.point_index[self['br'].mask], assume_unique=True)
+                self["br"].index[self["br"].data == 0],
+                self.point_index[self["bz"].mask],
+                assume_unique=True,
+            )
+        if attr == "vertical":
+            return np.intersect1d(
+                self["bz"].index[self["bz"].data == 0],
+                self.point_index[self["br"].mask],
+                assume_unique=True,
+            )
         return self[attr].index
 
     def _points(self, attr: str):
@@ -124,44 +129,43 @@ class Constraint(Plot):
     @property
     def poloidal_flux(self):
         """Return poloidal flux constraints."""
-        return self['psi'].data
+        return self["psi"].data
 
     @poloidal_flux.setter
     def poloidal_flux(self, constraint):
         """Set poloidal flux constraint."""
-        self.update('psi', constraint)
+        self.update("psi", constraint)
 
     @property
     def radial_field(self):
         """Return radial_field constraints."""
-        return self['br'].data
+        return self["br"].data
 
     @radial_field.setter
     def radial_field(self, constraint):
         """Set radial field constraint."""
-        self.update('br', constraint)
+        self.update("br", constraint)
 
     @property
     def vertical_field(self):
         """Return vertical_field constraints."""
-        return self['bz'].data
+        return self["bz"].data
 
     @vertical_field.setter
     def vertical_field(self, constraint):
         """Set vertical field constraint."""
-        self.update('bz', constraint)
+        self.update("bz", constraint)
 
-    def plot(self, axes=None, ms=10, color='C2'):
+    def plot(self, axes=None, ms=10, color="C2"):
         """Plot constraint."""
         if self.point_number == 0:
             return
         self.axes = axes
-        self.axes.plot(*self.points.T, 'o', color=color, ms=ms/4)
-        self.axes.plot(*self._points('psi').T, 's', ms=ms, mec=color,
-                       mew=2, mfc='none')
-        self.axes.plot(*self._points('radial').T, '|', mew=2, ms=2*ms, mec=color)
-        self.axes.plot(*self._points('vertical').T, '_', mew=2, ms=2*ms, mec=color)
-        self.axes.plot(*self._points('null').T, 'x', mew=2, ms=2*ms, mec=color)
+        self.axes.plot(*self.points.T, "o", color=color, ms=ms / 4)
+        self.axes.plot(*self._points("psi").T, "s", ms=ms, mec=color, mew=2, mfc="none")
+        self.axes.plot(*self._points("radial").T, "|", mew=2, ms=2 * ms, mec=color)
+        self.axes.plot(*self._points("vertical").T, "_", mew=2, ms=2 * ms, mec=color)
+        self.axes.plot(*self._points("null").T, "x", mew=2, ms=2 * ms, mec=color)
 
 
 @dataclass
@@ -172,13 +176,14 @@ class ControlPoint(PulseSchedule):
     strike: Constraint = field(init=False, default_factory=Constraint)
 
     point_attrs: ClassVar[dict[str, list[str]]] = {
-        'boundary': ['outer', 'upper', 'inner', 'lower'],
-        'strike': ['inner_strike', 'outer_strike']}
+        "boundary": ["outer", "upper", "inner", "lower"],
+        "strike": ["inner_strike", "outer_strike"],
+    }
 
     @property
     def limiter(self) -> bool:
         """Return limiter flag."""
-        return np.allclose(self['x_point'], (0, 0))
+        return np.allclose(self["x_point"], (0, 0))
 
     def update_control_point(self, psi=0):
         """Update control point constraints."""
@@ -207,8 +212,7 @@ class ControlPoint(PulseSchedule):
     @property
     def control_points(self):
         """Return control points."""
-        points = np.c_[[getattr(self, attr)
-                        for attr in self.point_attrs['boundary']]]
+        points = np.c_[[getattr(self, attr) for attr in self.point_attrs["boundary"]]]
         if self.limiter:
             return points
         return points[:3]
@@ -218,86 +222,89 @@ class ControlPoint(PulseSchedule):
         """Return strike points."""
         if self.limiter:
             return np.array([])
-        return np.c_[[getattr(self, attr)
-                      for attr in self.point_attrs['strike']]]
+        return np.c_[[getattr(self, attr) for attr in self.point_attrs["strike"]]]
 
     @property
     def axis(self):
         """Return location of geometric axis."""
-        return self['geometric_axis']
+        return self["geometric_axis"]
 
     @property
     def minor_radius(self):
         """Return minor radius."""
-        return self['minor_radius']
+        return self["minor_radius"]
 
     @property
     def elongation(self):
         """Return elongation."""
-        return self['elongation']
+        return self["elongation"]
 
     @property
     def triangularity_upper(self):
         """Return upper triangularity."""
-        return self['triangularity_upper']
+        return self["triangularity_upper"]
 
     @property
     def triangularity_lower(self):
         """Return lower triangularity."""
-        return self['triangularity_lower']
+        return self["triangularity_lower"]
 
     @property
     def triangularity_outer(self):
         """Return outer triangularity."""
-        return self['elongation_upper']  # TODO update once IDS is fixed
+        return self["elongation_upper"]  # TODO update once IDS is fixed
 
     @property
     def triangularity_inner(self):
         """Return inner triangularity."""
-        return self['elongation_lower']  # TODO update once IDS is fixed
+        return self["elongation_lower"]  # TODO update once IDS is fixed
 
     @property
     def upper(self):
         """Return upper control point."""
-        return self.axis + self.minor_radius*np.array(
-            [-self.triangularity_upper, self.elongation])
+        return self.axis + self.minor_radius * np.array(
+            [-self.triangularity_upper, self.elongation]
+        )
 
     @property
     def lower(self):
         """Return upper control point."""
-        return self.axis - self.minor_radius*np.array(
-            [self.triangularity_lower, self.elongation])
+        return self.axis - self.minor_radius * np.array(
+            [self.triangularity_lower, self.elongation]
+        )
 
     @property
     def inner(self):
         """Return inner control point."""
-        return self.axis + self.minor_radius*np.array(
-            [-1, self.triangularity_inner])
+        return self.axis + self.minor_radius * np.array([-1, self.triangularity_inner])
 
     @property
     def outer(self):
         """Return outer control point."""
-        return self.axis + self.minor_radius*np.array(
-            [1, self.triangularity_outer])
+        return self.axis + self.minor_radius * np.array([1, self.triangularity_outer])
 
     @property
     def inner_strike(self):
         """Return inner strike point."""
-        return self['strike_point'][0]
+        return self["strike_point"][0]
 
     @property
     def outer_strike(self):
         """Return outer strike point."""
-        return self['strike_point'][1]
+        return self["strike_point"][1]
 
     @property
     def coef(self) -> dict:
         """Return plasma profile coefficents."""
-        return {'geometric_radius': self.axis[0],
-                'geometric_height': self.axis[1]} | {
-                    attr: getattr(self, attr) for attr in
-                    ['minor_radius', 'elongation',
-                     'triangularity_upper', 'triangularity_lower']}
+        return {"geometric_radius": self.axis[0], "geometric_height": self.axis[1]} | {
+            attr: getattr(self, attr)
+            for attr in [
+                "minor_radius",
+                "elongation",
+                "triangularity_upper",
+                "triangularity_lower",
+            ]
+        }
 
     def plot_profile(self):
         """Plot analytic profile."""
@@ -306,10 +313,16 @@ class ControlPoint(PulseSchedule):
 
     def plot(self, index=None, axes=None, **kwargs):
         """Plot control points and first wall."""
-        self.get_axes('2d', axes)
-        for segment in ['wall', 'divertor']:
-            self.axes.plot(self.data[segment][:, 0], self.data[segment][:, 1],
-                           '-', ms=4, color='gray', linewidth=1.5)
+        self.get_axes("2d", axes)
+        for segment in ["wall", "divertor"]:
+            self.axes.plot(
+                self.data[segment][:, 0],
+                self.data[segment][:, 1],
+                "-",
+                ms=4,
+                color="gray",
+                linewidth=1.5,
+            )
         self.control.plot()
         self.strike.plot()
 
@@ -318,10 +331,10 @@ class ControlPoint(PulseSchedule):
 class ITER(Machine):
     """ITER machine description."""
 
-    pf_active: Ids | bool | str = 'iter_md'
+    pf_active: Ids | bool | str = "iter_md"
     pf_passive: Ids | bool | str = False
-    wall: Ids | bool | str = 'iter_md'
-    tplasma: str = 'hex'
+    wall: Ids | bool | str = "iter_md"
+    tplasma: str = "hex"
     dplasma: int | float = -3000
 
 
@@ -329,7 +342,7 @@ class ITER(Machine):
 class PulseDesign(ITER, ControlPoint):
     """Generate coilset voltage and current waveforms."""
 
-    name: str = 'pulse_schedule'
+    name: str = "pulse_schedule"
     nwall: Nbiot = 10
     nlevelset: Nbiot = 3000
     ninductance: Nbiot = None
@@ -339,19 +352,20 @@ class PulseDesign(ITER, ControlPoint):
     def update_constraints(self):
         """Extend ControlPoint.update_constraints to include psi proxy."""
         # for DINA benchmark
-        super().update_constraints(-self['loop_voltage'])  # COCOS11
+        super().update_constraints(-self["loop_voltage"])  # COCOS11
 
     def update(self):
         """Extend itime update."""
         super().update()
-        self.sloc['plasma', 'Ic'] = self['i_plasma']
+        self.sloc["plasma", "Ic"] = self["i_plasma"]
 
     def _constrain(self, constraint, field_weight=10):
         """Return matrix and coupling and vector constraint."""
         if len(constraint) == 0:
             return
-        point_index = np.array([self.levelset.kd_query(point) for point in
-                                constraint.points])
+        point_index = np.array(
+            [self.levelset.kd_query(point) for point in constraint.points]
+        )
 
         _matrix, _vector = [], []
         for attr in constraint.attrs:
@@ -359,10 +373,12 @@ class PulseDesign(ITER, ControlPoint):
                 continue
             index = point_index[constraint[attr].index]
             matrix = getattr(self.levelset, attr.capitalize())[index]
-            vector = constraint[attr].data - \
-                matrix[:, self.plasma_index] * self.saloc['plasma', 'Ic']
+            vector = (
+                constraint[attr].data
+                - matrix[:, self.plasma_index] * self.saloc["plasma", "Ic"]
+            )
 
-            if attr != 'psi':
+            if attr != "psi":
                 matrix *= np.sqrt(field_weight)
                 vector *= np.sqrt(field_weight)
 
@@ -370,7 +386,7 @@ class PulseDesign(ITER, ControlPoint):
             _vector.append(vector)
         matrix = np.vstack(_matrix)
         vector = np.hstack(_vector)
-        return matrix[:, self.saloc['coil']], vector
+        return matrix[:, self.saloc["coil"]], vector
 
     def _stack(self, *args):
         """Stack coupling matricies and data."""
@@ -380,10 +396,9 @@ class PulseDesign(ITER, ControlPoint):
 
     def solve_current(self):
         """Solve coil currents given flux and field targets."""
-        coupling = [self._constrain(self.control),
-                    self._constrain(self.strike)]
+        coupling = [self._constrain(self.control), self._constrain(self.strike)]
         matrix, vector = self._stack(*coupling)
-        self.saloc['coil', 'Ic'] = MoorePenrose(matrix, gamma=1e-5) / vector
+        self.saloc["coil", "Ic"] = MoorePenrose(matrix, gamma=1e-5) / vector
 
     def residual(self, nturn):
         """Return psi grid residual."""
@@ -391,14 +406,15 @@ class PulseDesign(ITER, ControlPoint):
         self.plasma.nturn = abs(nturn) / np.sum(abs(nturn))
         self.solve_current()
         self.plasma.separatrix = self.plasma.psi_boundary
-        residual = self.aloc['plasma', 'nturn'] - nturn
+        residual = self.aloc["plasma", "nturn"] - nturn
         return residual
 
     def solve(self):
         """Solve waveform."""
         optimize.newton_krylov(
-            self.residual, self.aloc['plasma', 'nturn'], verbose=True)
-            #x_rtol=1e-1, maxiter=10)
+            self.residual, self.aloc["plasma", "nturn"], verbose=True
+        )
+        # x_rtol=1e-1, maxiter=10)
 
     def plot(self, index=None, axes=None, **kwargs):
         """Extend plot to include plasma contours."""
@@ -410,13 +426,12 @@ class PulseDesign(ITER, ControlPoint):
 class Benchmark(PulseDesign):
     """Benchmark pulse design with source IDSs."""
 
-    source_data: dict[str, Ids] = field(init=False, repr=False,
-                                        default_factory=dict)
+    source_data: dict[str, Ids] = field(init=False, repr=False, default_factory=dict)
 
     def __post_init__(self):
         """Load source equilibrium instance."""
-        self.source_data['equilibrium'] = EquilibriumData(self.pulse, self.run)
-        self.source_data['pf_active'] = PF_Active(self.pulse, self.run)
+        self.source_data["equilibrium"] = EquilibriumData(self.pulse, self.run)
+        self.source_data["pf_active"] = PF_Active(self.pulse, self.run)
         super().__post_init__()
 
     def __getitem__(self, attr):
@@ -434,19 +449,18 @@ class Benchmark(PulseDesign):
     def plot(self, index=None, axes=None, **kwargs):
         """Extend plot to include source flux map and separatrix."""
         super().plot(index, axes, **kwargs)
-        self['equilibrium'].plot_boundary(self.axes, 'C2')
+        self["equilibrium"].plot_boundary(self.axes, "C2")
 
 
-if __name__ == '__main__':
-
-    design = PulseDesign(135013, 2, 'iter', 1)
+if __name__ == "__main__":
+    design = PulseDesign(135013, 2, "iter", 1)
     # design = Benchmark(135013, 2, 'iter', 1)
     # design.strike = Constraint()
     # design.control.points[3, 1] += 0.5
 
     design.itime = 11
-    #design.control.points[3, 1] -= 0.1
-    #design.strike = Constraint()
+    # design.control.points[3, 1] -= 0.1
+    # design.strike = Constraint()
     design.solve()
-    design.plot('plasma')
-    design.levelset.plot_levelset(-design['loop_voltage'], False, color='C3')
+    design.plot("plasma")
+    design.levelset.plot_levelset(-design["loop_voltage"], False, color="C3")

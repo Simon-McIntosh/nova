@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import pygmsh
 
-#from helpers import compute_volume
+# from helpers import compute_volume
 
 
 def test():
@@ -36,15 +36,14 @@ def test():
         anisomax=100.0,
     )
 
-    #geom.add_background_field([field0, field1])
+    # geom.add_background_field([field0, field1])
 
-    #geom.add_raw_code(f'Recombine Surface {{{poly.surface.id}}};')
-    geom.add_raw_code('Mesh.Algorithm=6;')
-
+    # geom.add_raw_code(f'Recombine Surface {{{poly.surface.id}}};')
+    geom.add_raw_code("Mesh.Algorithm=6;")
 
     ref = 4.0
     points, cells, _, _, _ = pygmsh.generate_mesh(geom)
-    #assert abs(compute_volume(points, cells) - ref) < 1.0e-2 * ref
+    # assert abs(compute_volume(points, cells) - ref) < 1.0e-2 * ref
     return points, cells
 
 
@@ -52,15 +51,15 @@ if __name__ == "__main__":
     import meshio
 
     points, cells = test()
-    triangulation = tri.Triangulation(points[:, 0], points[:, 1],
-                                      cells['triangle'])
+    triangulation = tri.Triangulation(points[:, 0], points[:, 1], cells["triangle"])
 
     plt.triplot(triangulation)
 
-    def quatplot(x,y, quatrangles, ax=None, **kwargs):
-        if not ax: ax=plt.gca()
-        xy = np.c_[x,y]
-        verts=xy[quatrangles]
+    def quatplot(x, y, quatrangles, ax=None, **kwargs):
+        if not ax:
+            ax = plt.gca()
+        xy = np.c_[x, y]
+        verts = xy[quatrangles]
         pc = matplotlib.collections.PolyCollection(verts, **kwargs)
         ax.add_collection(pc)
         ax.autoscale()

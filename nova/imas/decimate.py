@@ -27,10 +27,11 @@ class Scale:
     def __post_init__(self):
         """Define scale axis."""
         if self.signal_axis >= self.ndim:
-            raise IndexError(f'signal_axis {self.signal_axis} inconsistent '
-                             f'with signal shape {self.shape}')
-        self.scale_axis = tuple(i for i in range(self.ndim)
-                                if i != self.signal_axis)
+            raise IndexError(
+                f"signal_axis {self.signal_axis} inconsistent "
+                f"with signal shape {self.shape}"
+            )
+        self.scale_axis = tuple(i for i in range(self.ndim) if i != self.signal_axis)
 
     def __getitem__(self, method: str):
         """Return result of scaling method."""
@@ -92,8 +93,7 @@ class Scale:
 
     def ramp(self):
         """Return signal with ramped mean offset standard scaling."""
-        ramp = self.scale_mean * \
-            np.linspace(1, 0, self.shape(self.signal_axis))
+        ramp = self.scale_mean * np.linspace(1, 0, self.shape(self.signal_axis))
         return (self.signal - ramp) / self.scale_std
 
     def unit(self):
@@ -106,9 +106,9 @@ class Feature:
     """Extract representative features from signal timeseries."""
 
     eps: float = 0.25
-    metric: str = 'correlation'
-    scaler: str = 'standard'
-    signal_dim: str = 'time'
+    metric: str = "correlation"
+    scaler: str = "standard"
+    signal_dim: str = "time"
     mean_offset: bool = False
     norm_order: int = 2
     data: xarray.Dataset = field(init=False, repr=False)
@@ -116,14 +116,23 @@ class Feature:
     @property
     def attrs(self):
         """Return select attributes."""
-        return {attr: getattr(self, attr)
-                for attr in ['eps', 'metric', 'scaler', 'signal_dim',
-                             'mean_offset', 'norm_order']}
+        return {
+            attr: getattr(self, attr)
+            for attr in [
+                "eps",
+                "metric",
+                "scaler",
+                "signal_dim",
+                "mean_offset",
+                "norm_order",
+            ]
+        }
 
     def pairwise(self, signal):
         """Return signal autocorrelation distance matrix."""
         return scipy.spatial.distance.squareform(
-            scipy.spatial.distance.pdist(signal, metric=self.metric))
+            scipy.spatial.distance.pdist(signal, metric=self.metric)
+        )
 
     def extract_features(self) -> list[int]:
         """Return feature index extracted from pairwise distance matrix."""
@@ -137,48 +146,49 @@ class Feature:
     def build(self, signal: xarray.DataArray):
         """Build signal dataset."""
         self.data = xarray.Dataset(attrs=self.attrs)
-        self.data['signal'] = signal
-        self.data['scale'] = Scale(signal)[self.scaler]
-        self.data['pairwise'] = (self.signal_dim, self.signal_dim), \
-            self.pairwise(self.data['scale'])
-        self.data.coords['feature_index'] = self.extract_features()
-        self.data['feature'] = self.data.scale[self.data.feature_index]
+        self.data["signal"] = signal
+        self.data["scale"] = Scale(signal)[self.scaler]
+        self.data["pairwise"] = (self.signal_dim, self.signal_dim), self.pairwise(
+            self.data["scale"]
+        )
+        self.data.coords["feature_index"] = self.extract_features()
+        self.data["feature"] = self.data.scale[self.data.feature_index]
         return self
 
     def plot(self):
         """Plot signal reduction."""
-        feature_dim = next(dim for dim in self.data.signal.dims
-                           if dim != self.signal_dim)
-        plt.plot(self.data[feature_dim], self.data.scale.T,
-                 color='lightgray', lw=0.2)
-        plt.plot(self.data[feature_dim],
-                 self.data.feature.T)
+        feature_dim = next(
+            dim for dim in self.data.signal.dims if dim != self.signal_dim
+        )
+        plt.plot(self.data[feature_dim], self.data.scale.T, color="lightgray", lw=0.2)
+        plt.plot(self.data[feature_dim], self.data.feature.T)
 
         plt.despine()
         nsignal = self.data.dims[self.signal_dim]
         nfeature = self.data.dims["feature_index"]
-        plt.title(f'signal reduction {nfeature} of {nsignal}'
-                  f' ({100 * nfeature/nsignal:1.1f}%)')
+        plt.title(
+            f"signal reduction {nfeature} of {nsignal}"
+            f" ({100 * nfeature/nsignal:1.1f}%)"
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
+    ens = Ensemble("DINA-IMAS")
+    # ens = Ensemble('ASTRA')
+    # ens.build()
 
-    ens = Ensemble('DINA-IMAS')
-    #ens = Ensemble('ASTRA')
-    #ens.build()
-
-    attr = 'f_df_dpsi'
-    attr = 'dpressure_dpsi'
+    attr = "f_df_dpsi"
+    attr = "dpressure_dpsi"
 
     feature = Feature().build(ens.data[attr])
     feature.plot()
 
 
-#* data.dims['psi_norm']
+# * data.dims['psi_norm']
 
-#plt.ylim([-0.001, 0.001])
+# plt.ylim([-0.001, 0.001])
 
-'''
+"""
 #data = EquilibriumData(135011, 7).data
 
 basis = Bernstein(data.dims['psi_norm'], 3)
@@ -206,10 +216,10 @@ for label in np.unique(labels):
 plt.axis('equal')
 #plt.axis('off')
 plt.title(f'Unique labels {len(np.unique(labels))-1}')
-'''
+"""
 
 
-'''
+"""
 index = labels == 3
 
 ols /= data.f_df_dpsi.data[index][-1]
@@ -217,4 +227,4 @@ ols /= data.f_df_dpsi.data[index][-1]
 _model = np.mean(model[index], axis=0)
 ols.update_model(_model)
 ols.plot()
-'''
+"""

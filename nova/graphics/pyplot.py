@@ -14,10 +14,10 @@ from matplotlib.path import Path
 
 
 def ring_coding(ob):
-    '''
+    """
     taken from: https://sgillies.net/2010/04/06/
     painting-punctured-polygons-with-matplotlib.html
-    '''
+    """
     # The codes will be all "LINETO" commands, except for "MOVETO"s at the
     # beginning of each subpath
     n = len(ob.coords)
@@ -27,23 +27,22 @@ def ring_coding(ob):
 
 
 def pathify(polygon):
-    '''
+    """
     taken from: https://sgillies.net/2010/04/06/
     painting-punctured-polygons-with-matplotlib.html
-    '''
+    """
     # Convert coordinates to path vertices. Objects produced by Shapely's
     # analytic methods have the proper coordinate order, no need to sort.
     vertices = np.concatenate(
-                    [np.asarray(polygon.exterior)]
-                    + [np.asarray(r) for r in polygon.interiors])
+        [np.asarray(polygon.exterior)] + [np.asarray(r) for r in polygon.interiors]
+    )
     codes = np.concatenate(
-                [ring_coding(polygon.exterior)]
-                + [ring_coding(r) for r in polygon.interiors])
+        [ring_coding(polygon.exterior)] + [ring_coding(r) for r in polygon.interiors]
+    )
     return Path(vertices, codes)
 
 
 class rail_patch:
-
     def __init__(self, x, y):
         extents = np.array([np.min(x), np.min(y), np.max(x), np.max(y)])
         self.Bbox = Bbox.from_extents(*extents)
@@ -57,8 +56,7 @@ def set_xticks(n, ax=None, ntick=20, whitespace=False):
         space = int(n / ntick) + 1
     else:
         space = 1
-    ticklabels = ['{:1d}'.format(i) if i % space == 0 else ''
-                  for i in range(n)]
+    ticklabels = ["{:1d}".format(i) if i % space == 0 else "" for i in range(n)]
     if whitespace:
         X = np.arange(n)
     else:
@@ -72,40 +70,50 @@ def set_xticks(n, ax=None, ntick=20, whitespace=False):
 
 
 def add_colorbar(im, aspect=20, pad_fraction=1.5, **kwargs):
-    ''' add a vertical color bar to an image plot '''
-    ax = kwargs.get('ax', plt.gca())
+    """add a vertical color bar to an image plot"""
+    ax = kwargs.get("ax", plt.gca())
     divider = axes_grid1.make_axes_locatable(ax)
-    width = axes_grid1.axes_size.AxesY(ax, aspect=1./aspect)
+    width = axes_grid1.axes_size.AxesY(ax, aspect=1.0 / aspect)
     pad = axes_grid1.axes_size.Fraction(pad_fraction, width)
     current_ax = plt.gca()
-    cax = divider.append_axes('right', size=width, pad=pad)
+    cax = divider.append_axes("right", size=width, pad=pad)
     plt.sca(current_ax)
     return plt.colorbar(im, cax=cax, **kwargs)
 
 
-def arrow_arc(x, y, r, angle=0, gap=0.4*np.pi, ax=None, color='C0', **kwargs):
+def arrow_arc(x, y, r, angle=0, gap=0.4 * np.pi, ax=None, color="C0", **kwargs):
     if ax is None:
         ax = plt.gca()
     reverse = False if r > 0 else True
     radius = abs(r)
     width = height = radius  # arc radius
-    linewidth = 2.5*radius
+    linewidth = 2.5 * radius
     if reverse:
-        rotation = gap-angle
-        theta = np.array([180/np.pi*gap, 0])
+        rotation = gap - angle
+        theta = np.array([180 / np.pi * gap, 0])
         flip = np.pi
     else:
-        rotation = 2*np.pi-gap+angle
-        theta = np.array([0, 180/np.pi*(2*np.pi-gap)])
+        rotation = 2 * np.pi - gap + angle
+        theta = np.array([0, 180 / np.pi * (2 * np.pi - gap)])
         flip = 0
-    arc = Arc((x, y), width, height, 180/np.pi*angle,
-              theta1=theta[0], theta2=theta[1],
-              capstyle='round', linewidth=linewidth, color=color, **kwargs)
+    arc = Arc(
+        (x, y),
+        width,
+        height,
+        180 / np.pi * angle,
+        theta1=theta[0],
+        theta2=theta[1],
+        capstyle="round",
+        linewidth=linewidth,
+        color=color,
+        **kwargs,
+    )
     ax.add_patch(arc)
-    x1 = x + radius/2*np.cos(rotation)
-    y1 = y + radius/2*np.sin(rotation)
-    ax.add_patch(RegularPolygon((x1, y1), 3, radius/6,
-                                flip+rotation, color=color, **kwargs))
+    x1 = x + radius / 2 * np.cos(rotation)
+    y1 = y + radius / 2 * np.sin(rotation)
+    ax.add_patch(
+        RegularPolygon((x1, y1), 3, radius / 6, flip + rotation, color=color, **kwargs)
+    )
 
 
 class Arrow3D(FancyArrowPatch):
@@ -121,10 +129,9 @@ class Arrow3D(FancyArrowPatch):
 
 
 class plstyle:
-
-    def __init__(self, context='notebook'):
+    def __init__(self, context="notebook"):
         self.reset()  # reset style
-        #self.style_dir = path.join(root_dir, 'style_sheets')
+        # self.style_dir = path.join(root_dir, 'style_sheets')
         self.context = context
         self.sns_contex(context)
         # mpl.rcParams['figure.dpi'] = 120
@@ -136,36 +143,36 @@ class plstyle:
         sns.set_context(self.context, scale)
 
     def sns_contex(self, context):
-        '''
+        """
         set sns context style sheet
-        '''
+        """
         try:
-            sns.set_style('white')
+            sns.set_style("white")
             # plt.style.use('seaborn-{}'.format(context))
         except OSError:
-            errtxt = 'context \'{}\''.format(context)
-            errtxt += 'not avalible as seabone style\n'
-            errtxt += 'specify plot context as:\n'
-            errtxt += '\'paper\', \'notebook\', \'talk\' or \'poster\''
+            errtxt = "context '{}'".format(context)
+            errtxt += "not avalible as seabone style\n"
+            errtxt += "specify plot context as:\n"
+            errtxt += "'paper', 'notebook', 'talk' or 'poster'"
             raise OSError(errtxt)
 
     def use(self, style_sheet):
         if style_sheet in plt.style.available:
             plt.use(style_sheet)
         else:
-            plt.style.use(path.join(self.style_dir, style_sheet + '.mplstyle'))
+            plt.style.use(path.join(self.style_dir, style_sheet + ".mplstyle"))
 
     def set_aspect(self, aspect):
-        width = mpl.rcParams['figure.figsize'][0]
+        width = mpl.rcParams["figure.figsize"][0]
         height = aspect * width
-        mpl.rcParams['figure.figsize'] = [width, height]
+        mpl.rcParams["figure.figsize"] = [width, height]
 
     def avalible(self):
         print(plt.style.available)
 
     def reset(self):
         # mpl.rcParams.update(mpl.rcParamsDefault)
-        plt.style.use('default')
+        plt.style.use("default")
 
 
 class multimap(object):
@@ -189,16 +196,16 @@ class multimap(object):
             vmin, vmax = clim
         self.index = np.argmax(np.diff(self.clim)[0], axis=0)
         referance = self.mappable[self.index]
-        cmap = kwargs.get('cmap', referance.get_cmap())
-        vmin = kwargs.get('vmin', vmin)
-        vmax = kwargs.get('vmax', vmax)
+        cmap = kwargs.get("cmap", referance.get_cmap())
+        vmin = kwargs.get("vmin", vmin)
+        vmax = kwargs.get("vmax", vmax)
         sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin, vmax))
         sm._A = []
         for mappable in self.mappable:
             mappable.set_cmap(cmap)
             mappable.set_clim((vmin, vmax))
-        kwargs.pop('vmin', None)
-        kwargs.pop('vmax', None)
+        kwargs.pop("vmin", None)
+        kwargs.pop("vmax", None)
         cb = plt.colorbar(sm, *args, **kwargs)
         return cb
 
@@ -206,7 +213,8 @@ class multimap(object):
 def detick(ax):  # remove xticks from upper subplots
     for i in range(len(ax) - 1):
         plt.setp(ax[i].get_xticklabels(), visible=False)
-        ax[i].set_xlabel('')
+        ax[i].set_xlabel("")
+
 
 def insert_yticks(ticks, ax=None, N=8):
     if ax is None:
@@ -214,16 +222,15 @@ def insert_yticks(ticks, ax=None, N=8):
     ylim = ax.get_ylim()
     dy = ylim[-1] - ylim[0]
     yticks = ax.get_yticks()
-    if not hasattr(ticks, '__iter__'):
+    if not hasattr(ticks, "__iter__"):
         ticks = [ticks]
     for tick in ticks:
-        yticks = yticks[abs(yticks-tick) > dy / (2*N)]
+        yticks = yticks[abs(yticks - tick) > dy / (2 * N)]
     yticks = np.append(yticks, ticks)
     ax.set_yticks(np.sort(yticks))
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     """
 
     mpl.rc('text', usetex=True)
@@ -248,22 +255,21 @@ if __name__ == '__main__':
 
     """
 
-
     from numpy.random import rand
 
     cmap = plt.cm.viridis
     mmap = multimap()
     fig, ax = plt.subplots(3, 3)
     cax = fig.add_axes([0.2, 0, 0.6, 0.04])
-    fig.text(0.5, 0.95, 'Multiple images', ha='center')
+    fig.text(0.5, 0.95, "Multiple images", ha="center")
 
     for i, a in enumerate(ax.flatten()):
-        data = ((1 + i)/10.0)*rand(10, 20)*1e-6
+        data = ((1 + i) / 10.0) * rand(10, 20) * 1e-6
         im = a.imshow(data, cmap=cmap)
         mmap.add(im)
     for i in range(2):
         for a in ax[i, :]:
             a.set_xticks([])
 
-    cb = mmap.colorbar(cax, orientation='horizontal')
-    cb.set_label('colors')
+    cb = mmap.colorbar(cax, orientation="horizontal")
+    cb.set_label("colors")

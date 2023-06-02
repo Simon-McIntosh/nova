@@ -13,12 +13,15 @@ class PoloidalGrid(GridAttrs):
 
     trim: bool = True
     fill: bool = False
-    gridattrs: dict = field(init=False, default_factory=lambda: dict.fromkeys([
-        'tile', 'trim', 'fill']))
-    required_columns: list = field(init=False, default_factory=lambda: [
-        'poly', 'delta', 'turn', 'nturn'])
-    additional_columns: list = field(init=False, default_factory=lambda: [
-        'scale', 'skin'])
+    gridattrs: dict = field(
+        init=False, default_factory=lambda: dict.fromkeys(["tile", "trim", "fill"])
+    )
+    required_columns: list = field(
+        init=False, default_factory=lambda: ["poly", "delta", "turn", "nturn"]
+    )
+    additional_columns: list = field(
+        init=False, default_factory=lambda: ["scale", "skin"]
+    )
 
     def insert(self, *args, required=None, iloc=None, **additional):
         """
@@ -60,22 +63,26 @@ class PoloidalGrid(GridAttrs):
 
         """
         frame = self.frame.loc[index, :]
-        griddata = frame.loc[:, self.required_columns +
-                             [attr for attr in self.additional_columns
-                              if attr in self.frame]]
+        griddata = frame.loc[
+            :,
+            self.required_columns
+            + [attr for attr in self.additional_columns if attr in self.frame],
+        ]
         subframe = []
         subattrs = pandas.DataFrame(self.subattrs, index=index)
         try:
-            turncurrent = subattrs.pop('It')
+            turncurrent = subattrs.pop("It")
         except KeyError:
             turncurrent = None
         for i, name in enumerate(index):
             polygrid = PolyGrid(**griddata.iloc[i].to_dict(), **self.gridattrs)
             data = frame.iloc[i].to_dict()
-            data |= {'label': name, 'frame': name, 'delim': '_', 'link': True}
+            data |= {"label": name, "frame": name, "delim": "_", "link": True}
             if turncurrent is not None:
-                data['It'] = turncurrent.iloc[i] * \
-                    polygrid.frame['nturn'] / polygrid.nturn
-            subframe.append(self.subframe.assemble(
-                polygrid.frame, **data, **subattrs.iloc[i]))
+                data["It"] = (
+                    turncurrent.iloc[i] * polygrid.frame["nturn"] / polygrid.nturn
+                )
+            subframe.append(
+                self.subframe.assemble(polygrid.frame, **data, **subattrs.iloc[i])
+            )
         self.subframe.concatenate(*subframe)

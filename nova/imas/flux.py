@@ -16,22 +16,21 @@ class Flux(Profile, EquilibriumData):
     levels: int | np.ndarray = 50
     psi2d: np.ndarray = field(init=False, repr=False)
     contour: Contour = field(init=False, repr=False)
-    fieldnull: FieldNull = field(init=False, repr=False,
-                                 default_factory=FieldNull)
+    fieldnull: FieldNull = field(init=False, repr=False, default_factory=FieldNull)
 
     def __post_init__(self):
         """Initialize contour instance."""
         super().__post_init__()
-        x2d, z2d = np.meshgrid(self.data.r, self.data.z, indexing='ij')
-        self.psi2d = self['psi2d']
+        x2d, z2d = np.meshgrid(self.data.r, self.data.z, indexing="ij")
+        self.psi2d = self["psi2d"]
         self.contour = Contour(x2d, z2d, self.psi2d, levels=self.levels)
-        self.fieldnull.data.coords['x'] = self.data.r
-        self.fieldnull.data.coords['z'] = self.data.z
+        self.fieldnull.data.coords["x"] = self.data.r
+        self.fieldnull.data.coords["z"] = self.data.z
 
     def update(self):
         """Extend profile update."""
         super().update()
-        self.psi2d[:] = self['psi2d']
+        self.psi2d[:] = self["psi2d"]
         self.contour.generate(self.j_tor_rbs)
         self.fieldnull.update_null(self.psi2d.data)
 
@@ -42,21 +41,19 @@ class Flux(Profile, EquilibriumData):
         self.fieldnull.plot()
 
 
-if __name__ == '__main__':
-
-
-    #from matplotlib import pyplot as plt
-    #import seaborn as sns
+if __name__ == "__main__":
+    # from matplotlib import pyplot as plt
+    # import seaborn as sns
 
     flux = Flux(105028, 1)  # DINA
     flux.itime = 300
 
     flux.plot()
 
-    #flux = Flux(130506, 403)  # CORSICA
-    #flux.itime = 35
+    # flux = Flux(130506, 403)  # CORSICA
+    # flux.itime = 35
 
-    '''
+    """
     Jp = flux._rbs('j_tor2d')
 
 
@@ -69,11 +66,9 @@ if __name__ == '__main__':
 
     index = contour.plot_fit(0.5, flux.normalize)
 
-    '''
+    """
 
-
-
-    '''
+    """
 
 
     contour = Contour(operate.grid.data.x2d, operate.grid.data.z2d,
@@ -84,10 +79,9 @@ if __name__ == '__main__':
     operate.psi_boundary = operate.plasmagrid.x_psi[0]
 
     index = contour.plot_fit(0.4, operate.normalize)
-    '''
+    """
 
-
-    '''
+    """
     plt.figure()
     operate.plot('plasma')
 
@@ -118,4 +112,4 @@ if __name__ == '__main__':
     axes[0].set_ylabel(r'$p^\prime$')
     axes[1].set_ylabel(r'$ff^\prime$')
     axes[0].legend()
-    '''
+    """

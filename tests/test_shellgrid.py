@@ -28,15 +28,31 @@ def test_negative_ndiv():
 
 
 def test_bump_sharp_corners():
-    shellgrid = ShellGrid([1, 1.5, 2, 2, 4, 4],
-                          [0, 0.1, 0, 1, -1, 0], -5, 0.1, eps=1e-3)
+    shellgrid = ShellGrid(
+        [1, 1.5, 2, 2, 4, 4], [0, 0.1, 0, 1, -1, 0], -5, 0.1, eps=1e-3
+    )
     assert len(shellgrid.dataframe) == 5
 
 
 def test_frame_columns():
     shellgrid = ShellGrid([1, 1.5], [0, 0.1], -3, 0.1)
-    assert all([attr in shellgrid.dataframe for attr in [
-        'x', 'z', 'dl', 'dt', 'dx', 'dz', 'rms', 'area', 'section', 'poly']])
+    assert all(
+        [
+            attr in shellgrid.dataframe
+            for attr in [
+                "x",
+                "z",
+                "dl",
+                "dt",
+                "dx",
+                "dz",
+                "rms",
+                "area",
+                "section",
+                "poly",
+            ]
+        ]
+    )
 
 
 def test_unequal_input_error():
@@ -71,6 +87,5 @@ def test_subsegment_length():
     assert len(subsegment.dataframe) == 7
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     pytest.main([__file__])

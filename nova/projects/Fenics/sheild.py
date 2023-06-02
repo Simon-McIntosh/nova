@@ -7,9 +7,11 @@ import os
 from dolfinx.cpp.io import perm_gmsh
 from dolfinx.cpp.mesh import to_type
 from dolfinx.mesh import create_mesh
-from dolfinx.io import (extract_gmsh_geometry,
-                        extract_gmsh_topology_and_markers,
-                        ufl_mesh_from_gmsh)
+from dolfinx.io import (
+    extract_gmsh_geometry,
+    extract_gmsh_topology_and_markers,
+    ufl_mesh_from_gmsh,
+)
 from mpi4py import MPI
 import numpy as np
 
@@ -18,8 +20,7 @@ from warnings import filterwarnings
 
 from nova.definitions import root_dir
 
-fname = os.path.join(root_dir,
-                     'input/geometry/ITER/sheild/EQ_RIB_SET_A_row37.stp')
+fname = os.path.join(root_dir, "input/geometry/ITER/sheild/EQ_RIB_SET_A_row37.stp")
 
 gmsh.initialize()
 gmsh.model.occ.importShapes(fname, format="step")
@@ -31,7 +32,7 @@ gmsh.model.mesh.generate(3)
 
 
 gmsh.fltk.run()
-'''
+"""
 gdim = 3
 
 filterwarnings("ignore")
@@ -61,4 +62,4 @@ cells = cells[:, gmsh_cell_perm]
 
 # Create distributed mesh
 mesh = create_mesh(MPI.COMM_WORLD, cells, geometry_data[:, :gdim], ufl_domain)
-'''
+"""

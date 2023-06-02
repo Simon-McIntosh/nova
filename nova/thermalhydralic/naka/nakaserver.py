@@ -12,7 +12,7 @@ class NakaServer:
     """Manage access to Naka server."""
 
     year: int
-    url: str = 'https://scml-svr.naka.qst.go.jp'
+    url: str = "https://scml-svr.naka.qst.go.jp"
     browser: mechanize.Browser = field(init=False, repr=False)
 
     def __post_init__(self):
@@ -27,12 +27,12 @@ class NakaServer:
 
     def __enter__(self):
         """Login to Naka website and navigate to year."""
-        self.browser.open(f'{self.url}/index-e.php')
+        self.browser.open(f"{self.url}/index-e.php")
         self.browser.select_form(nr=1)
-        self.browser.form['userid'] = 'FG'
-        self.browser.form['password'] = 'edmly70a'
+        self.browser.form["userid"] = "FG"
+        self.browser.form["password"] = "edmly70a"
         self.browser.submit()
-        self.browser.open(f'{self.url}/data/{self.year}')
+        self.browser.open(f"{self.url}/data/{self.year}")
         return self
 
     def __exit__(self, type, value, traceback):
@@ -44,22 +44,22 @@ class NakaServer:
         """Return server links to datafiles."""
         html = self.browser.response().read()
         soup = BeautifulSoup(html, "html.parser")
-        return soup.find_all('a')
+        return soup.find_all("a")
 
     @property
     def index(self):
         """Return packaged urls and filenames."""
         files = {}
         for link in self.links:
-            href = link.get('href')
-            if href[-4:] == '.pdf':
-                run = href.split('/')[-1][:-4]
-            elif href[-4:] == '.csv':
-                run = '_'.join(href.split('_')[1:3])
+            href = link.get("href")
+            if href[-4:] == ".pdf":
+                run = href.split("/")[-1][:-4]
+            elif href[-4:] == ".csv":
+                run = "_".join(href.split("_")[1:3])
             else:
                 continue
             if run not in files:
-                files[run] = {'urls': [], 'names': []}
-            files[run]['urls'].append(href)
-            files[run]['names'].append(href.split('/')[1])
+                files[run] = {"urls": [], "names": []}
+            files[run]["urls"].append(href)
+            files[run]["names"].append(href.split("/")[1])
         return files

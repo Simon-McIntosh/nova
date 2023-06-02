@@ -14,13 +14,24 @@ import datetime
 import pickle
 
 import seaborn as sns
-rc = {'figure.figsize': [10, 10 * 12 / 16], 'savefig.dpi': 100,
-      'savefig.jpeg_quality': 100, 'savefig.pad_inches': 0.1,
-      'lines.linewidth': 2}
-sns.set(context='talk', style='white', font='sans-serif', palette='Set2',
-        font_scale=7 / 8, rc=rc)
 
-cgeom = configure('TF', Ndp=0, Nloop=0)
+rc = {
+    "figure.figsize": [10, 10 * 12 / 16],
+    "savefig.dpi": 100,
+    "savefig.jpeg_quality": 100,
+    "savefig.pad_inches": 0.1,
+    "lines.linewidth": 2,
+}
+sns.set(
+    context="talk",
+    style="white",
+    font="sans-serif",
+    palette="Set2",
+    font_scale=7 / 8,
+    rc=rc,
+)
+
+cgeom = configure("TF", Ndp=0, Nloop=0)
 cmap = coil_map(cgeom)
 cgeom.segment(cmap.loops, Nseg=100)
 
@@ -30,7 +41,7 @@ theta = np.linspace(0, 2 * np.pi, nTF, endpoint=False)
 r_coil = cgeom.pn * np.sqrt(134 / np.pi)
 
 
-'''
+"""
 r_strand = cgeom.r_cond
 #r_strand = np.sqrt(235.3e-6/np.pi)
 cage = coil_cage(cgeom.profile,cmap.loops,theta,r_coil,r_strand)
@@ -81,4 +92,4 @@ print(M)
 print(np.sum(M))
 
 
-'''
+"""

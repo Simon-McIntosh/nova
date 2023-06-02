@@ -10,7 +10,7 @@ class PipeLine:
     names: list = field(default_factory=list)
     count: int = 0
 
-    def append(self,  name, url):
+    def append(self, name, url):
         """Append name, url."""
         self.names.append(name)
         self.urls.append(url)

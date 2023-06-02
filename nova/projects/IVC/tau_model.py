@@ -6,48 +6,56 @@ from scipy.interpolate import interp1d
 from scipy.integrate import odeint
 from scipy.optimize import minimize
 
-Rvs3=17.66e-3
-Lvs3=1.52e-3
+Rvs3 = 17.66e-3
+Lvs3 = 1.52e-3
 tau_vs3 = Lvs3 / Rvs3  # vs3 timeconstant
 
-pl = read_plasma('disruptions')
-tor = read_tor('disruptions')
+pl = read_plasma("disruptions")
+tor = read_tor("disruptions")
 
 nf = 1  # pl.dina.nf
 nt = 50  #  pl.nt-i_cq
 
-I_dict = {'t': [], 'Ivs': [], 'Ivv': [], 'Ip': [], 'zpl': [],
-          'Ivs_dot': [], 'Ivv_dot': [], 'Ip_dot': [], 'zpl_dot': []}
+I_dict = {
+    "t": [],
+    "Ivs": [],
+    "Ivv": [],
+    "Ip": [],
+    "zpl": [],
+    "Ivs_dot": [],
+    "Ivv_dot": [],
+    "Ip_dot": [],
+    "zpl_dot": [],
+}
 Iwf = [I_dict.copy() for _ in range(nf)]  # current waveforms
 
 nfile = 0
 
 ax = plt.subplots(3, 1, sharex=True)[1]
 for i in range(nf):
-    tor.read_file(i+nfile)
-    pl.read_file(i+nfile)
+    tor.read_file(i + nfile)
+    pl.read_file(i + nfile)
     i_cq, t_cq = pl.get_quench()[:2]  # quench index, time
 
-    Iwf[i]['t'] = np.linspace(t_cq, pl.t[-1], nt)  # even spaced time
+    Iwf[i]["t"] = np.linspace(t_cq, pl.t[-1], nt)  # even spaced time
     vs_index = ~np.isnan(pl.Ivs_o)
-    Iwf[i]['Ivs'] = interp1d(pl.t[vs_index], pl.Ivs_o[vs_index])(Iwf[i]['t'])
-    vv_index = ~np.isnan(tor.Ibar['vv'])
-    Iwf[i]['Ivv'] = interp1d(tor.t[vv_index],
-                             tor.Ibar['vv'][vv_index])(Iwf[i]['t'])
-    Iwf[i]['Ipl'] = interp1d(pl.t, pl.Ip)(Iwf[i]['t'])
-    Iwf[i]['zpl'] = interp1d(pl.t, pl.z)(Iwf[i]['t'])  # plasma position
+    Iwf[i]["Ivs"] = interp1d(pl.t[vs_index], pl.Ivs_o[vs_index])(Iwf[i]["t"])
+    vv_index = ~np.isnan(tor.Ibar["vv"])
+    Iwf[i]["Ivv"] = interp1d(tor.t[vv_index], tor.Ibar["vv"][vv_index])(Iwf[i]["t"])
+    Iwf[i]["Ipl"] = interp1d(pl.t, pl.Ip)(Iwf[i]["t"])
+    Iwf[i]["zpl"] = interp1d(pl.t, pl.z)(Iwf[i]["t"])  # plasma position
 
-    for var in ['Ivs', 'Ivv', 'Ipl', 'zpl']:
-        Iwf[i][var+'_dot'] = np.gradient(Iwf[i][var], Iwf[i]['t'])
+    for var in ["Ivs", "Ivv", "Ipl", "zpl"]:
+        Iwf[i][var + "_dot"] = np.gradient(Iwf[i][var], Iwf[i]["t"])
 
-    ax[0].plot(1e-3*Iwf[i]['t'], 1e-6*Iwf[i]['Ipl'])
+    ax[0].plot(1e-3 * Iwf[i]["t"], 1e-6 * Iwf[i]["Ipl"])
     ax[0].invert_yaxis()
 
-    ax[1].plot(1e-3*Iwf[i]['t'], 1e-3*Iwf[i]['Ivv'], 'C0')
-    ax[1].plot(1e-3*Iwf[i]['t'], 1e-3*Iwf[i]['Ivs'], 'C1')
+    ax[1].plot(1e-3 * Iwf[i]["t"], 1e-3 * Iwf[i]["Ivv"], "C0")
+    ax[1].plot(1e-3 * Iwf[i]["t"], 1e-3 * Iwf[i]["Ivs"], "C1")
 
-    ax[2].plot(1e-3*Iwf[i]['t'], Iwf[i]['Ivs_dot'], 'C0')
-    ax[2].plot(1e-3*Iwf[i]['t'], Iwf[i]['Ivv_dot'], 'C1')
+    ax[2].plot(1e-3 * Iwf[i]["t"], Iwf[i]["Ivs_dot"], "C0")
+    ax[2].plot(1e-3 * Iwf[i]["t"], Iwf[i]["Ivv_dot"], "C1")
     # ax[2].plot(1e-3*Iwf[i]['t'], Iwf[i]['zpl_dot'], 'C2')
 
 
@@ -59,8 +67,8 @@ def dIdt(I, t, *args):
     wpl, Ipl, Ipl_dot = pl_fun  # vertical speed, current, current rate
 
     Idot = np.dot(-tau_inv, I)
-    Idot += np.dot(-tau_inv, Ipl_dot(t)*tau_pl)  # timeconstants
-    Idot += np.dot(-tau_inv, Ipl(t)*wpl(t)*lambda_pl)  # vertical velocity
+    Idot += np.dot(-tau_inv, Ipl_dot(t) * tau_pl)  # timeconstants
+    Idot += np.dot(-tau_inv, Ipl(t) * wpl(t) * lambda_pl)  # vertical velocity
     return Idot
 
 
@@ -68,22 +76,23 @@ def get_waveform(x, *args):
     # tau_vv, tau_vv_vs, tau_vv_pl, tau_vs_pl = x[:4]  # unpack timeconstants
     # lambda_vv_pl, lambda_vz_pl = x[4:]  # unpack vertical velocity terms
     xf = np.zeros(6)  # full variable list
-    xf[:len(x)] = x  # populate in order
+    xf[: len(x)] = x  # populate in order
     tau, lam = {}, {}
-    for i, var in enumerate(['vv', 'vv_vs', 'vv_pl', 'vs_pl']):
+    for i, var in enumerate(["vv", "vv_vs", "vv_pl", "vs_pl"]):
         tau[var] = xf[i]  # label timeconstants
-    for i, var in enumerate(['vv_pl', 'vs_pl']):
-        lam[var] = xf[i+4]  # label timeconstants
+    for i, var in enumerate(["vv_pl", "vs_pl"]):
+        lam[var] = xf[i + 4]  # label timeconstants
 
-    tau['vs'] = args[0]  # vs3 timeconstant
+    tau["vs"] = args[0]  # vs3 timeconstant
     t = args[1]  # time (constant spacing)
     pl_fun = args[2]  # plasma functions, speed, current, current rate
     Io = args[3]  # inital current [Ivv[0], Ivs3[0]]
 
-    tau_pl = np.array([tau['vv_pl'], tau['vs_pl']])  # plasma coupling
-    lambda_pl = np.array([lam['vv_pl'], lam['vs_pl']])  # velocity coupling
-    tau = np.array([[tau['vv'], tau['vv_vs']],  # coupling matix
-                    [tau['vv_vs'], tau['vs']]])
+    tau_pl = np.array([tau["vv_pl"], tau["vs_pl"]])  # plasma coupling
+    lambda_pl = np.array([lam["vv_pl"], lam["vs_pl"]])  # velocity coupling
+    tau = np.array(
+        [[tau["vv"], tau["vv_vs"]], [tau["vv_vs"], tau["vs"]]]  # coupling matix
+    )
     tau_inv = np.linalg.inv(tau)  # inverse of coupling matrix
     Iode = odeint(dIdt, Io, t, args=(tau_inv, tau_pl, lambda_pl, pl_fun))
     return Iode, tau, lam
@@ -101,12 +110,12 @@ def fit_waveform(x, *args):
     return err
 
 
-wpl = interp1d(Iwf[i]['t'], Iwf[i]['zpl_dot'], fill_value='extrapolate')
-Ipl = interp1d(Iwf[i]['t'], Iwf[i]['Ipl'], fill_value='extrapolate')
-Ipl_dot = interp1d(Iwf[i]['t'], Iwf[i]['Ipl_dot'], fill_value='extrapolate')
+wpl = interp1d(Iwf[i]["t"], Iwf[i]["zpl_dot"], fill_value="extrapolate")
+Ipl = interp1d(Iwf[i]["t"], Iwf[i]["Ipl"], fill_value="extrapolate")
+Ipl_dot = interp1d(Iwf[i]["t"], Iwf[i]["Ipl_dot"], fill_value="extrapolate")
 pl_fun = [wpl, Ipl, Ipl_dot]
 
-xo = 1e-3*np.array([881.89, 73.97, 9.58, 0.19, 1.37, -0.45])
+xo = 1e-3 * np.array([881.89, 73.97, 9.58, 0.19, 1.37, -0.45])
 
 # tau_vv, tau_vv_vs, tau_vv_pl, tau_vs_pl
 
@@ -125,7 +134,7 @@ xo = 1e-3*np.array([881.89, 73.97, 9.58, 0.19, 1.37, -0.45])
 # 10) [268.86, 21.26, 2.66, 0.45, -0.14, -0.67]
 # 11) [863.27, 101.49, 7.89, 0.05, 1.53, -0.77]
 
-'''
+"""
 x = minimize(fit_waveform, xo, method='Nelder-Mead',
              options={'xatol': 1e-2},
              args=(tau_vs3, Iwf[i]['t'], pl_fun,
@@ -145,4 +154,4 @@ print([float('{:1.2f}'.format(1e3*n)) for n in x])
 # ax[1].plot(1e-3*Iwf[i]['t'], 1e-3*Iode[:, 0], 'C0--')
 # ax[1].plot(1e-3*Iwf[i]['t'], 1e-3*Iode[:, 1], 'C1--')
 
-'''
+"""

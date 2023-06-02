@@ -16,17 +16,18 @@ class Current:
     @property
     def filename(self):
         """Return coilset filename."""
-        return './framecurrent_frame.nc'
+        return "./framecurrent_frame.nc"
 
     def setup_cache(self):
         """Build reference coilset."""
-        framespace = FrameSpace(base=['x', 'y', 'z'],
-                                required=['x', 'z'],
-                                available=['It', 'poly'],
-                                Subspace=['Ic'],
-                                Array=['Ic'])
-        framespace.insert(range(40), 1, Ic=6.5, name='PF1', part='PF',
-                          active=False)
+        framespace = FrameSpace(
+            base=["x", "y", "z"],
+            required=["x", "z"],
+            available=["It", "poly"],
+            Subspace=["Ic"],
+            Array=["Ic"],
+        )
+        framespace.insert(range(40), 1, Ic=6.5, name="PF1", part="PF", active=False)
         framespace.subspace.Ic = np.random.rand(len(framespace.subspace))
         framespace.store(self.filename)
 
@@ -49,7 +50,7 @@ class SetCurrent(Current):
 
     def time_metaframe_data(self):
         """Time direct metaframe data update."""
-        self.framespace.subspace.metaframe.data['Ic'] = self.current
+        self.framespace.subspace.metaframe.data["Ic"] = self.current
 
     def time_subspace(self):
         """Time update to frame subspace."""
@@ -61,11 +62,11 @@ class GetCurrent(Current):
 
     def time_loc(self):
         """Time current access via loc method."""
-        return self.framespace.loc[:, 'Ic']
+        return self.framespace.loc[:, "Ic"]
 
     def time_getitem(self):
         """Time current access via getitem method."""
-        return self.framespace['Ic']
+        return self.framespace["Ic"]
 
     def time_getattr(self):
         """Time current access via getattr method."""
@@ -76,8 +77,7 @@ class GetCurrent(Current):
         return self.framespace.subspace.Ic
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     setcurrent = SetCurrent()
     setcurrent.setup_cache()
     setcurrent.setup()

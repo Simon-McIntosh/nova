@@ -10,15 +10,14 @@ from nep.DINA.read_plasma import read_plasma
 
 
 class read_psi:
-
-    def __init__(self, database_folder='disruptions'):
+    def __init__(self, database_folder="disruptions"):
         self.dina = dina(database_folder)
         self.pl = read_plasma(database_folder)
 
     def read_file(self, folder):
         self.folder = folder
-        self.filename = self.dina.locate_file('psi_data', folder=folder)
-        self.name = self.filename.split('\\')[-2]
+        self.filename = self.dina.locate_file("psi_data", folder=folder)
+        self.name = self.filename.split("\\")[-2]
         self.read_header()
         self.initalise_arrays()
         self.read_scalars()
@@ -32,9 +31,9 @@ class read_psi:
             self.nfw, self.nzero, __, self.nsep, self.nflux = index
             self.fw = np.zeros((self.nfw, 2))
 
-            self.rt.skipnumber(2*self.nzero)  # skip zeros
-            self.fw[:, 0] = 1e-2*self.rt.readarray(self.nfw)
-            self.fw[:, 1] = 1e-2*self.rt.readarray(self.nfw)
+            self.rt.skipnumber(2 * self.nzero)  # skip zeros
+            self.fw[:, 0] = 1e-2 * self.rt.readarray(self.nfw)
+            self.fw[:, 1] = 1e-2 * self.rt.readarray(self.nfw)
             self.nline_to_scalars = self.rt.nline  # number of lines to scalars
             self.rt.readarray(8)  # block parameters
             self.npsi = self.rt.skipblock(ncol=6)  # scalar potential
@@ -43,12 +42,12 @@ class read_psi:
             self.nline_to_sep = self.rt.nline  # number of lines to seperatrix
 
             if self.nx * self.nz != self.npsi:  # check psi grid dimension
-                txt = '\nmissmatch between psi data and xz grid\n'
-                txt += 'nx*nz {}, npsi {}'.format(self.nx*self.nz, self.npsi)
+                txt = "\nmissmatch between psi data and xz grid\n"
+                txt += "nx*nz {}, npsi {}".format(self.nx * self.nz, self.npsi)
                 raise ValueError(txt)
 
-            self.rt.skipnumber(2*self.nsep)  # skip seperatrix
-            self.rt.skipnumber(2*self.nflux)  # skip flux functions
+            self.rt.skipnumber(2 * self.nsep)  # skip seperatrix
+            self.rt.skipnumber(2 * self.nflux)  # skip flux functions
             self.nline_index = self.rt.nline  # line number for timestamp
 
     def initalise_arrays(self):
@@ -57,14 +56,21 @@ class read_psi:
                 pass
             self.nline += 1
         if self.nline % self.nline_index != 0:
-            txt = 'file length is not an interger multiple'
-            txt += 'of block length'
+            txt = "file length is not an interger multiple"
+            txt += "of block length"
             raise ValueError(txt)
 
-        self.nt = int(self.nline/self.nline_index)  # number of timestamps
-        self.scalar_dtype = [('dx', float), ('dz', float), ('pmag', float),
-                             ('pbound', float), ('ps', float),
-                             ('xo', float), ('zo', float), ('t', float)]
+        self.nt = int(self.nline / self.nline_index)  # number of timestamps
+        self.scalar_dtype = [
+            ("dx", float),
+            ("dz", float),
+            ("pmag", float),
+            ("pbound", float),
+            ("ps", float),
+            ("xo", float),
+            ("zo", float),
+            ("t", float),
+        ]
         self.scalars = np.zeros(self.nt, dtype=self.scalar_dtype)
         self.psi = np.zeros((self.nx, self.nz))
         self.sep = np.zeros((self.nsep, 2))
@@ -74,10 +80,10 @@ class read_psi:
         self.x = np.ones(self.nx)  # read x-z grid
         self.z = np.ones(self.nz)
         with readtxt(self.filename) as self.rt:
-            self.rt.skiplines(self.nline_to_scalars+2)
+            self.rt.skiplines(self.nline_to_scalars + 2)
             self.rt.skipblock(ncol=6)  # scalar potential
-            self.x = 1e-2*self.rt.readarray(self.nx)  # cm - m
-            self.z = 1e-2*self.rt.readarray(self.nz)  # cm - m
+            self.x = 1e-2 * self.rt.readarray(self.nx)  # cm - m
+            self.z = 1e-2 * self.rt.readarray(self.nz)  # cm - m
         self.read_single_array(0)  # read first time index
         self.update_sf()
 
@@ -87,34 +93,33 @@ class read_psi:
                 self.rt.skiplines(self.nline_to_scalars)
                 scalar_data = self.rt.readarray(8)
                 for key, value in zip(self.scalars.dtype.names, scalar_data):
-                    if key in ['dx', 'dz', 'xo', 'zo']:
+                    if key in ["dx", "dz", "xo", "zo"]:
                         value *= 1e-2  # cm to meters
-                    if key in ['pmag', 'pbound', 'ps']:
+                    if key in ["pmag", "pbound", "ps"]:
                         value *= 1e-5  # kGcm2 to Tm2
-                    if key == 't':
+                    if key == "t":
                         value *= 1e-3  # ms to s
                     self.scalars[time_index][key] = value
-                self.rt.skiplines(self.nline_index -
-                                  self.nline_to_scalars - 2)
+                self.rt.skiplines(self.nline_index - self.nline_to_scalars - 2)
 
     def read_array(self):
         self.time_index = int(self.rt.nline / self.nline_index)
-        self.rt.skiplines(self.nline_to_scalars+2)
+        self.rt.skiplines(self.nline_to_scalars + 2)
         self.psi = self.rt.readarray(self.npsi).reshape((self.nz, self.nx))
-        self.psi = 1e-5*self.psi.T  # kGcm2/rad to Webber/rad
-        self.x = 1e-2*self.rt.readarray(self.nx)  # cm - m
-        self.z = 1e-2*self.rt.readarray(self.nz)  # cm - m
+        self.psi = 1e-5 * self.psi.T  # kGcm2/rad to Webber/rad
+        self.x = 1e-2 * self.rt.readarray(self.nx)  # cm - m
+        self.z = 1e-2 * self.rt.readarray(self.nz)  # cm - m
         for i in range(2):
-            self.sep[:, i] = 1e-2*self.rt.readarray(self.nsep)  # cm - m
-        self.xmp = 1e-2*self.rt.readarray(self.nflux)  # cm - m
-        self.Jphi = 1e4*self.rt.readarray(self.nflux)  # Acm-2 - Am-2
+            self.sep[:, i] = 1e-2 * self.rt.readarray(self.nsep)  # cm - m
+        self.xmp = 1e-2 * self.rt.readarray(self.nflux)  # cm - m
+        self.Jphi = 1e4 * self.rt.readarray(self.nflux)  # Acm-2 - Am-2
 
     def read_single_array(self, time_index=0):
-        if time_index > self.nt-1:
-            txt = '\nrequested index {:d} '.format(time_index)
-            txt += 'greater than file length {:d}'.format(self.nt-1)
+        if time_index > self.nt - 1:
+            txt = "\nrequested index {:d} ".format(time_index)
+            txt += "greater than file length {:d}".format(self.nt - 1)
             raise ValueError(txt)
-        nff = time_index*self.nline_index  # fast-forward
+        nff = time_index * self.nline_index  # fast-forward
         with readtxt(self.filename) as self.rt:
             if nff > 0:  # skip data blocks
                 self.rt.skiplines(nff)
@@ -123,41 +128,52 @@ class read_psi:
     def update_sf(self):
         # prepare eqdsk dict for nova.streamfunction
         eqdsk = {
-            'name': 'DINA_'+self.name,
+            "name": "DINA_" + self.name,
             # Number of horizontal and vertical points
-            'nx': self.nx, 'nz': self.nz,  # Location of the grid-points
-            'x': self.x, 'z': self.z,  # size of the domain in meters
-            'xdim': self.scalars[self.time_index]['dx'],
-            'zdim': self.scalars[self.time_index]['dz'],
+            "nx": self.nx,
+            "nz": self.nz,  # Location of the grid-points
+            "x": self.x,
+            "z": self.z,  # size of the domain in meters
+            "xdim": self.scalars[self.time_index]["dx"],
+            "zdim": self.scalars[self.time_index]["dz"],
             # Reference vacuum toroidal field (m, T)
-            'xcentr': np.array([]), 'bcentr': np.array([]),
-            'xgrid1': self.x[0],  # x of left side of domain
-            'zmid': (self.z[-1] + self.z[0]) / 2,  # z mid-domain
+            "xcentr": np.array([]),
+            "bcentr": np.array([]),
+            "xgrid1": self.x[0],  # x of left side of domain
+            "zmid": (self.z[-1] + self.z[0]) / 2,  # z mid-domain
             # x-z location of magnetic axis
-            'xmagx': self.scalars[self.time_index]['xo'],
-            'zmagx': self.scalars[self.time_index]['zo'],
+            "xmagx": self.scalars[self.time_index]["xo"],
+            "zmagx": self.scalars[self.time_index]["zo"],
             # Poloidal flux at the axis (Weber / rad)
-            'simagx': self.scalars[self.time_index]['pmag'],
+            "simagx": self.scalars[self.time_index]["pmag"],
             # Poloidal flux at plasma boundary (Weber / rad)
-            'sibdry': self.scalars[self.time_index]['pbound'],
-            'cpasma': np.array([]),
-            'psi': self.psi,    # Poloidal flux in Weber/rad on grid points
-            'fpol': np.zeros(self.nflux),  # Poloidal current function
+            "sibdry": self.scalars[self.time_index]["pbound"],
+            "cpasma": np.array([]),
+            "psi": self.psi,  # Poloidal flux in Weber/rad on grid points
+            "fpol": np.zeros(self.nflux),  # Poloidal current function
             # 'FF'(psi) in (mT)^2/(Weber/rad) on uniform flux grid'
-            'ffprim': np.zeros(self.nflux),
+            "ffprim": np.zeros(self.nflux),
             # "P'(psi) in (nt/m2)/(Weber/rad) on uniform flux grid"
-            'pprime': np.zeros(self.nflux),
+            "pprime": np.zeros(self.nflux),
             # Plasma pressure in nt/m^2 on uniform flux grid
-            'pressure': np.zeros(self.nflux),
-            'qpsi': np.array([]),  # q values on uniform flux grid
-            'pnorm': np.array([]),  # uniform flux grid
+            "pressure": np.zeros(self.nflux),
+            "qpsi": np.array([]),  # q values on uniform flux grid
+            "pnorm": np.array([]),  # uniform flux grid
             # Plasma boundary
-            'nbdry': self.nsep,
-            'xbdry': self.sep[:, 0], 'zbdry': self.sep[:, 1],
-            'nlim': self.nfw, 'xlim': self.fw[:, 0], 'zlim': self.fw[:, 1],
-            'ncoil': 0, 'xc': np.array([]), 'zc': np.array([]),  # coils
-            'dxc': np.array([]), 'dzc': np.array([]), 'Ic': np.array([])}
-        if not hasattr(self, 'sf'):  # create
+            "nbdry": self.nsep,
+            "xbdry": self.sep[:, 0],
+            "zbdry": self.sep[:, 1],
+            "nlim": self.nfw,
+            "xlim": self.fw[:, 0],
+            "zlim": self.fw[:, 1],
+            "ncoil": 0,
+            "xc": np.array([]),
+            "zc": np.array([]),  # coils
+            "dxc": np.array([]),
+            "dzc": np.array([]),
+            "Ic": np.array([]),
+        }
+        if not hasattr(self, "sf"):  # create
             self.sf = SF(eqdsk=eqdsk)
         else:
             self.sf.update_plasma(eqdsk)  # update
@@ -186,16 +202,22 @@ class read_psi:
     def get_force(self, plot=False, scale=1e-2):
         B = self.get_field(self.vs.points)
         Ivs3 = np.zeros((3, self.vs.nP))
-        Ivs3[1, :] = 4*self.pl.Ivs3_o[self.time_index]  # Amp-turns
+        Ivs3[1, :] = 4 * self.pl.Ivs3_o[self.time_index]  # Amp-turns
         F = np.zeros((3, self.vs.nP))
         for i, coil in enumerate(self.vs.geom):
-            vs_sign = self.vs.geom[coil]['sign']
+            vs_sign = self.vs.geom[coil]["sign"]
             F[:, i] = np.cross(vs_sign * Ivs3[:, i], B[:, i], axis=0)
         if plot:
             for i, point in enumerate(self.vs.points):
-                plt.arrow(point[0], point[1],
-                          scale * F[0, i], scale * F[2, i],
-                          width=0.05, head_length=0.15, color='C3')
+                plt.arrow(
+                    point[0],
+                    point[1],
+                    scale * F[0, i],
+                    scale * F[2, i],
+                    width=0.05,
+                    head_length=0.15,
+                    color="C3",
+                )
         return B, F
 
     def plot(self, time_index=0, **kwargs):
@@ -207,23 +229,24 @@ class read_psi:
         self.vs.plot()
         # self.get_force(plot=True)
         self.plot_fw()
-        plt.plot(self.sep[:, 0], self.sep[:, 1], linewidth=2.5, color='gray')
-        plt.axis('off')
-        plt.axis('equal')
+        plt.plot(self.sep[:, 0], self.sep[:, 1], linewidth=2.5, color="gray")
+        plt.axis("off")
+        plt.axis("equal")
 
     def plot_fw(self):
-        plt.plot(self.fw[:, 0], self.fw[:, 1], 'C0')
+        plt.plot(self.fw[:, 0], self.fw[:, 1], "C0")
 
     def movie(self):
         fig, ax = plt.subplots(1, 1, figsize=(6, 10))
-        moviename = '../Movies/{}'.format(self.name+'_psi')
-        moviename += '.mp4'
-        FFMpegWriter = manimation.writers['ffmpeg']
-        writer = FFMpegWriter(fps=20, bitrate=-1, codec='libx264',
-                              extra_args=['-pix_fmt', 'yuv420p'])
+        moviename = "../Movies/{}".format(self.name + "_psi")
+        moviename += ".mp4"
+        FFMpegWriter = manimation.writers["ffmpeg"]
+        writer = FFMpegWriter(
+            fps=20, bitrate=-1, codec="libx264", extra_args=["-pix_fmt", "yuv420p"]
+        )
         tick = clock(self.nt)
-        plt.axis('off')
-        plt.axis('equal')
+        plt.axis("off")
+        plt.axis("equal")
         levels = self.sf.contour(boundary=False)  # fix contour levels
         xlim = np.array([self.x[0], self.x[-1]])
         zlim = np.array([self.z[0], self.z[-1]])
@@ -237,21 +260,19 @@ class read_psi:
                     self.vs.plot()
                     self.get_force(True)
                     plt.plot(self.fw[:, 0], self.fw[:, 1])
-                    plt.plot(self.sep[:, 0], self.sep[:, 1],
-                             linewidth=2.5, color='gray')
-                    plt.plot(xlim[0], zlim[0], '.', alpha=0)
-                    plt.plot(xlim[1], zlim[1], '.', alpha=0)
+                    plt.plot(
+                        self.sep[:, 0], self.sep[:, 1], linewidth=2.5, color="gray"
+                    )
+                    plt.plot(xlim[0], zlim[0], ".", alpha=0)
+                    plt.plot(xlim[1], zlim[1], ".", alpha=0)
                     writer.grab_frame()
                     tick.tock()
 
 
-if __name__ == '__main__':
-
-    psi = read_psi('disruptions')
+if __name__ == "__main__":
+    psi = read_psi("disruptions")
     psi.read_file(3)
 
     # psi.movie()
     # plt.figure(figsize=(7, 10))
     psi.plot(200)
-
-

@@ -47,7 +47,7 @@ print("*" * 33)
 
 np.random.seed(1986)
 
-print('Generating Data...')
+print("Generating Data...")
 
 
 def gen_uniform_amp(amp=1, xn=10000):
@@ -62,6 +62,7 @@ def gen_uniform_amp(amp=1, xn=10000):
     data_input = np.random.uniform(-1 * amp, +1 * amp, xn)
     data_input = pd.DataFrame(data_input)
     return data_input
+
 
 # Since the output is a moving average of the input,
 # the first few points of output will be NaN
@@ -91,36 +92,36 @@ if lahead > 1:
 expected_output = expected_output[to_drop:]
 data_input = data_input[to_drop:]
 
-print('Input shape:', data_input.shape)
-print('Output shape:', expected_output.shape)
-print('Input head: ')
+print("Input shape:", data_input.shape)
+print("Output shape:", expected_output.shape)
+print("Input head: ")
 print(data_input.head())
-print('Output head: ')
+print("Output head: ")
 print(expected_output.head())
-print('Input tail: ')
+print("Input tail: ")
 print(data_input.tail())
-print('Output tail: ')
+print("Output tail: ")
 print(expected_output.tail())
 
-print('Plotting input and expected output')
-plt.plot(data_input[0][:10], '.')
-plt.plot(expected_output[0][:10], '-')
-plt.legend(['Input', 'Expected output'])
-plt.title('Input')
+print("Plotting input and expected output")
+plt.plot(data_input[0][:10], ".")
+plt.plot(expected_output[0][:10], "-")
+plt.legend(["Input", "Expected output"])
+plt.title("Input")
 plt.show()
 
 
 def create_model(stateful):
     model = Sequential()
-    model.add(LSTM(20,
-              input_shape=(lahead, 1),
-              batch_size=batch_size,
-              stateful=stateful))
+    model.add(
+        LSTM(20, input_shape=(lahead, 1), batch_size=batch_size, stateful=stateful)
+    )
     model.add(Dense(1))
-    model.compile(loss='mse', optimizer='adam')
+    model.compile(loss="mse", optimizer="adam")
     return model
 
-print('Creating Stateful Model...')
+
+print("Creating Stateful Model...")
 model_stateful = create_model(stateful=True)
 
 
@@ -138,8 +139,8 @@ def split_data(x, y, ratio=0.8):
     # tweak to match with batch_size
     to_drop = x.shape[0] % batch_size
     if to_drop > 0:
-        x_test = x_test[:-1 * to_drop]
-        y_test = y_test[:-1 * to_drop]
+        x_test = x_test[: -1 * to_drop]
+        y_test = y_test[: -1 * to_drop]
 
     # some reshaping
     reshape_3 = lambda x: x.values.reshape((x.shape[0], x.shape[1], 1))
@@ -154,80 +155,86 @@ def split_data(x, y, ratio=0.8):
 
 
 (x_train, y_train), (x_test, y_test) = split_data(data_input, expected_output)
-print('x_train.shape: ', x_train.shape)
-print('y_train.shape: ', y_train.shape)
-print('x_test.shape: ', x_test.shape)
-print('y_test.shape: ', y_test.shape)
+print("x_train.shape: ", x_train.shape)
+print("y_train.shape: ", y_train.shape)
+print("x_test.shape: ", x_test.shape)
+print("y_test.shape: ", y_test.shape)
 
-print('Training')
+print("Training")
 for i in range(epochs):
-    print('Epoch', i + 1, '/', epochs)
+    print("Epoch", i + 1, "/", epochs)
     # Note that the last state for sample i in a batch will
     # be used as initial state for sample i in the next batch.
     # Thus we are simultaneously training on batch_size series with
     # lower resolution than the original series contained in data_input.
     # Each of these series are offset by one step and can be
     # extracted with data_input[i::batch_size].
-    model_stateful.fit(x_train,
-                       y_train,
-                       batch_size=batch_size,
-                       epochs=1,
-                       verbose=1,
-                       validation_data=(x_test, y_test),
-                       shuffle=False)
+    model_stateful.fit(
+        x_train,
+        y_train,
+        batch_size=batch_size,
+        epochs=1,
+        verbose=1,
+        validation_data=(x_test, y_test),
+        shuffle=False,
+    )
     model_stateful.reset_states()
 
-print('Predicting')
+print("Predicting")
 predicted_stateful = model_stateful.predict(x_test, batch_size=batch_size)
 
-print('Creating Stateless Model...')
+print("Creating Stateless Model...")
 model_stateless = create_model(stateful=False)
 
-print('Training')
-model_stateless.fit(x_train,
-                    y_train,
-                    batch_size=batch_size,
-                    epochs=epochs,
-                    verbose=1,
-                    validation_data=(x_test, y_test),
-                    shuffle=False)
+print("Training")
+model_stateless.fit(
+    x_train,
+    y_train,
+    batch_size=batch_size,
+    epochs=epochs,
+    verbose=1,
+    validation_data=(x_test, y_test),
+    shuffle=False,
+)
 
-print('Predicting')
+print("Predicting")
 predicted_stateless = model_stateless.predict(x_test, batch_size=batch_size)
 
 # ----------------------------
 
-print('Plotting Results')
+print("Plotting Results")
 plt.subplot(3, 1, 1)
 plt.plot(y_test)
-plt.title('Expected')
+plt.title("Expected")
 plt.subplot(3, 1, 2)
 # drop the first "tsteps-1" because it is not possible to predict them
 # since the "previous" timesteps to use do not exist
-plt.plot((y_test - predicted_stateful).flatten()[tsteps - 1:])
-plt.title('Stateful: Expected - Predicted')
+plt.plot((y_test - predicted_stateful).flatten()[tsteps - 1 :])
+plt.title("Stateful: Expected - Predicted")
 plt.subplot(3, 1, 3)
 plt.plot((y_test - predicted_stateless).flatten())
-plt.title('Stateless: Expected - Predicted')
+plt.title("Stateless: Expected - Predicted")
 plt.show()
 
-sl = model_stateless.predict(x_test[tsteps-1:tsteps+2, :])
+sl = model_stateless.predict(x_test[tsteps - 1 : tsteps + 2, :])
 
 plt.figure()
 nplot = 5
 t = -np.arange(nplot)
-plt.plot(t, y_test.flatten()[tsteps - 1:][:nplot], 'k-', label='gt')
-#plt.plot(t, predicted_stateful.flatten()[tsteps - 1:][:nplot], 'ro-', label='stateful')
-plt.plot(t, predicted_stateless.flatten()[tsteps - 1:][:nplot], 'k--', label='stateless')
+plt.plot(t, y_test.flatten()[tsteps - 1 :][:nplot], "k-", label="gt")
+# plt.plot(t, predicted_stateful.flatten()[tsteps - 1:][:nplot], 'ro-', label='stateful')
+plt.plot(
+    t, predicted_stateless.flatten()[tsteps - 1 :][:nplot], "k--", label="stateless"
+)
 
 
 for i in range(nplot):
-    plt.plot(np.arange(10)-10-i, x_test[i, :], f'C{i}')
-    plt.plot(np.arange(2)-1-i, 
-             [x_test[i, -1], 
-              predicted_stateless.flatten()[tsteps-1:][i]], 
-              #y_test.flatten()[tsteps - 1:][i]],
-              f'C{i}o-',
-              label=f'n{i}')
+    plt.plot(np.arange(10) - 10 - i, x_test[i, :], f"C{i}")
+    plt.plot(
+        np.arange(2) - 1 - i,
+        [x_test[i, -1], predicted_stateless.flatten()[tsteps - 1 :][i]],
+        # y_test.flatten()[tsteps - 1:][i]],
+        f"C{i}o-",
+        label=f"n{i}",
+    )
 plt.legend()
-    

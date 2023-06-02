@@ -120,9 +120,8 @@ def test():
 
     # Create polygon for airfoil
     char_length = 1.0e-1
-    airfoil = geom.add_polygon(airfoil_coordinates, char_length,
-                               make_surface=True)
-    '''
+    airfoil = geom.add_polygon(airfoil_coordinates, char_length, make_surface=True)
+    """
     # Create surface for numerical domain with an airfoil-shaped hole
     left_dist = 1.0
     right_dist = 3.0
@@ -139,9 +138,9 @@ def test():
     #polygon = geom.add_polygon(domainCoordinates, char_length, holes=[airfoil])
     polygon = geom.add_polygon([airfoil])
     geom.add_raw_code("Recombine Surface {{{}}};".format(polygon.surface.id))
-    '''
+    """
     points, cells, _, _, _ = pygmsh.generate_mesh(geom, remove_faces=True)
-    #assert abs(compute_volume(points, cells) - ref) < 1.0e-2 * ref
+    # assert abs(compute_volume(points, cells) - ref) < 1.0e-2 * ref
     return points, cells
 
 
@@ -154,8 +153,9 @@ if __name__ == "__main__":
     mesh = meshio.read("airfoil.vtu")
 
     from amigo.pyplot import plt
+
     for cell in mesh.cells:
         for nodes in mesh.cells[cell]:
             nodes = np.append(nodes, nodes[0])
-            plt.plot(mesh.points[nodes, 0], mesh.points[nodes, 1], 'C0-')
-    plt.axis('equal')
+            plt.plot(mesh.points[nodes, 0], mesh.points[nodes, 1], "C0-")
+    plt.axis("equal")

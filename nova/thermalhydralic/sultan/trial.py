@@ -12,7 +12,7 @@ class Trial:
 
     campaign: Union[Campaign, str]
     _name: Union[int, str] = field(default=0, repr=False)
-    _mode: str = field(default='ac', repr=False)
+    _mode: str = field(default="ac", repr=False)
     phase: Phase = field(init=False)
 
     def __post_init__(self):
@@ -38,7 +38,7 @@ class Trial:
     @property
     def testname(self):
         """Return test name."""
-        return f'{self.campaign.experiment}_{self.name}'
+        return f"{self.campaign.experiment}_{self.name}"
 
     @property
     def plan(self):
@@ -51,7 +51,7 @@ class Trial:
 
     def frequency(self, shot):
         """Return shot frequency."""
-        return self.plan.at[shot, ('frequency', 'Hz')]
+        return self.plan.at[shot, ("frequency", "Hz")]
 
     @property
     def database(self):
@@ -66,11 +66,10 @@ class Trial:
     @property
     def notes(self):
         """Return testplan notes, read-only."""
-        campaign_notes = self.campaign.note.set_index('index')
-        phase_notes = campaign_notes.loc[self.plan['File'], :]
+        campaign_notes = self.campaign.note.set_index("index")
+        phase_notes = campaign_notes.loc[self.plan["File"], :]
         return phase_notes.reset_index()
 
 
-if __name__ == '__main__':
-
-    trial = Trial('CSJA13', -1, 'ac')
+if __name__ == "__main__":
+    trial = Trial("CSJA13", -1, "ac")

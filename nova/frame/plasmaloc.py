@@ -14,53 +14,54 @@ class PlasmaLoc(FrameSetLoc):
 
     def __len__(self):
         """Return number of plasma filaments."""
-        return np.sum(self.aloc['plasma'])
+        return np.sum(self.aloc["plasma"])
 
     def __str__(self):
         """Return string representation of plasma subframe."""
-        return self.loc['ionize', ['x', 'z', 'section', 'area',
-                                   'Ic', 'It', 'nturn']].__str__()
+        return self.loc[
+            "ionize", ["x", "z", "section", "area", "Ic", "It", "nturn"]
+        ].__str__()
 
     def check_cached(self, attr):
         """Check validity of cached attribute."""
-        self.check('psi')
-        if self.version[attr] != self.version['psi']:
+        self.check("psi")
+        if self.version[attr] != self.version["psi"]:
             self._clear_cache([attr])
-            self.version[attr] = self.version['psi']
+            self.version[attr] = self.version["psi"]
 
     @cached_property
     def _slice(self):
         """Return plasma filament slice."""
-        start = bisect(self.aloc['plasma'], True)
-        number = bisect_right(~self.aloc['plasma'][start:], False)
-        if number != np.sum(self.aloc['plasma']):
-            raise IndexError('plasma filaments are non-contiguous.')
-        return slice(start, start+number)
+        start = bisect(self.aloc["plasma"], True)
+        number = bisect_right(~self.aloc["plasma"][start:], False)
+        if number != np.sum(self.aloc["plasma"]):
+            raise IndexError("plasma filaments are non-contiguous.")
+        return slice(start, start + number)
 
     @cached_property
     def _nturn(self):
         """Return a view of the plasma's nturn array."""
-        return self.aloc['nturn'][self._slice]
+        return self.aloc["nturn"][self._slice]
 
     @cached_property
     def _ionize(self):
         """Return a view of the plasma's ionize array."""
-        return self.aloc['ionize'][self._slice]
+        return self.aloc["ionize"][self._slice]
 
     @cached_property
     def _area(self):
         """Return a view of the plasma's area array."""
-        return self.aloc['area'][self._slice]
+        return self.aloc["area"][self._slice]
 
     @cached_property
     def _radius(self):
         """Return a view of the plasma's radial filiment cooridnate."""
-        return self.aloc['x'][self._slice]
+        return self.aloc["x"][self._slice]
 
     @cached_property
     def _height(self):
         """Return a view of the plasma's vertical filiment cooridnate."""
-        return self.aloc['z'][self._slice]
+        return self.aloc["z"][self._slice]
 
     @property
     def nturn(self):
@@ -70,7 +71,7 @@ class PlasmaLoc(FrameSetLoc):
     @nturn.setter
     def nturn(self, nturn):
         self._nturn[self.ionize] = nturn
-        self.update_aloc_hash('nturn')
+        self.update_aloc_hash("nturn")
 
     @property
     def ionize(self):
@@ -81,7 +82,7 @@ class PlasmaLoc(FrameSetLoc):
     def ionize(self, mask):
         self._nturn[:] = 0
         self._ionize[:] = mask
-        self._clear_cache(['area', 'radius', 'height'])
+        self._clear_cache(["area", "radius", "height"])
 
     @cached_property
     def area(self):

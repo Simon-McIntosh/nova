@@ -14,7 +14,7 @@ from nova.frame.dataframe import DataFrame
 class VtkPlot(metamethod.VtkPlot):
     """Methods for ploting 3D FrameSpace data."""
 
-    name = 'vtkplot'
+    name = "vtkplot"
 
     frame: DataFrame = field(repr=False)
     additional: list[str] = field(default_factory=lambda: [])
@@ -25,8 +25,9 @@ class VtkPlot(metamethod.VtkPlot):
 
     def update_columns(self):
         """Update frame columns."""
-        unset = [attr not in self.frame.columns
-                 for attr in self.required + self.additional]
+        unset = [
+            attr not in self.frame.columns for attr in self.required + self.additional
+        ]
         if np.array(unset).any():
             self.frame.update_columns()
 
@@ -37,11 +38,13 @@ class VtkPlot(metamethod.VtkPlot):
 
     def plot(self):
         """Plot vtk instances."""
-        colors = matplotlib.rcParams['axes.prop_cycle'].by_key()['color']
+        colors = matplotlib.rcParams["axes.prop_cycle"].by_key()["color"]
         self.frame.vtkgeo.generate_vtk()
-        index = self.frame.geotype('Geo', 'vtk')
-        color = {f'C{i}': c for i, c in enumerate(colors)}
-        vtk = [vtk.c(color[Properties.get_facecolor(part)])
-               for vtk, part in self.frame.loc[index, ['vtk', 'part']].values]
+        index = self.frame.geotype("Geo", "vtk")
+        color = {f"C{i}": c for i, c in enumerate(colors)}
+        vtk = [
+            vtk.c(color[Properties.get_facecolor(part)])
+            for vtk, part in self.frame.loc[index, ["vtk", "part"]].values
+        ]
         if len(vtk) > 0:
             return vedo.show(*vtk)

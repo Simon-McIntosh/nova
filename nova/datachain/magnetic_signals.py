@@ -26,7 +26,7 @@ class Generator:
     def __post_init__(self):
         """Initialize random number generator."""
         self.rng = np.random.default_rng(self.rng)
-        if hasattr(super(), '__post_init__'):
+        if hasattr(super(), "__post_init__"):
             super().__post_init__()
 
 
@@ -62,11 +62,11 @@ class Waveform(Plot, Generator):
 
     def plot_psd(self, axes=None, **kwargs):
         """Plot signals power spectral densty."""
-        self.set_axes('1d', axes=axes)
+        self.set_axes("1d", axes=axes)
         frequency, Pxx = scipy.signal.periodogram(self.sample)
         self.axes.semilogy(frequency[1:], Pxx[1:], **kwargs)
-        self.axes.set_xlabel('normalized frequency')
-        self.axes.set_ylabel('PSD')
+        self.axes.set_xlabel("normalized frequency")
+        self.axes.set_ylabel("PSD")
 
 
 @dataclass
@@ -113,8 +113,7 @@ class FractalNoise(WhiteNoise):
         sample_frequency = self.fftfreq()
         self._filter = np.ones_like(sample_frequency)
         frequency = self.normalized_frequency * self.sample_number / 2
-        self._filter[1:] = \
-            (frequency / sample_frequency[1:])**self.alpha
+        self._filter[1:] = (frequency / sample_frequency[1:]) ** self.alpha
 
     @property
     def fftlength(self):
@@ -125,8 +124,9 @@ class FractalNoise(WhiteNoise):
 
     def fftfreq(self):
         """Return one-sided fft frequencies."""
-        return abs(scipy.fft.fftfreq(
-            self.sample_number, d=1/self.sample_number))[:self.fftlength]
+        return abs(scipy.fft.fftfreq(self.sample_number, d=1 / self.sample_number))[
+            : self.fftlength
+        ]
 
     def _generate(self):
         """Return sample."""
@@ -150,7 +150,7 @@ class SignalParameters:
     def __post_init__(self):
         """Update sample number."""
         self.sample_number = int(self.duration * self.sample_rate)
-        if hasattr(super(), '__post_init__'):
+        if hasattr(super(), "__post_init__"):
             super().__post_init__()
 
     @cached_property
@@ -166,15 +166,21 @@ class SignalParameters:
     @property
     def noise_attrs(self):
         """Return noise attributes."""
-        return dict(scale=self.scale,
-                    normalized_frequency=self.normalized_frequency,
-                    alpha=self.alpha)
+        return dict(
+            scale=self.scale,
+            normalized_frequency=self.normalized_frequency,
+            alpha=self.alpha,
+        )
 
     @property
     def signal_attrs(self):
         """Return signal attributes."""
-        return dict(offset=self.offset, scale=self.scale,
-                    frequency=self.frequency, alpha=self.alpha)
+        return dict(
+            offset=self.offset,
+            scale=self.scale,
+            frequency=self.frequency,
+            alpha=self.alpha,
+        )
 
 
 @dataclass
@@ -189,8 +195,8 @@ class TypeCast:
         self.dtype_limit = (np.iinfo(self.dtype).min, np.iinfo(self.dtype).max)
         signal = self.measure(self.signal_limit)
         target = self.measure(self.dtype_limit)
-        self.multiplier = signal['width'] / target['width']
-        self.offset = self.multiplier * (signal['center'] - target['center'])
+        self.multiplier = signal["width"] / target["width"]
+        self.offset = self.multiplier * (signal["center"] - target["center"])
 
     def measure(self, limit):
         """Return limit width and center."""
@@ -214,39 +220,40 @@ class TypeCast:
 class Signal(netCDF, Waveform, SignalParameters):
     """Manage base waveform parameters."""
 
-    dirname: str = '.magnetics_6MHz'
+    dirname: str = ".magnetics_6MHz"
     magnetics: Magnetics = field(default_factory=Magnetics)
-    dtype: str | np.dtype = 'int32'
+    dtype: str | np.dtype = "int32"
     _intergal: np.ndarray | None = field(init=False, repr=False, default=None)
 
     def __post_init__(self):
         """Initialize component waveforms."""
         super().__post_init__()
         self.cast = TypeCast(self.dtype, self.limit)
-        self.noise = FractalNoise(self.rng, self.sample_number,
-                                  **self.noise_attrs)
+        self.noise = FractalNoise(self.rng, self.sample_number, **self.noise_attrs)
 
     @cached_property
     def metadata(self):
         """Return instance metadata."""
-        return dict(description='Synthetic magnetics waveform generated with '
-                                'a fractal noise model.',
-                    creation_date=datetime.today().strftime('%d-%m-%Y'),
-                    duration=self.duration,
-                    sample_rate=self.sample_rate,
-                    signal_minimum=-self.limit[0],
-                    signal_maximum=self.limit[1],
-                    units=json.dumps(dict(time='s', frequency='Hz',
-                                          proportional='V',
-                                          intergral='Vs')),
-                    code=json.dumps(self.code_attrs),
-                    magnetics_ids=json.dumps(self.magnetics.ids_attrs),
-                    noise=json.dumps(self.signal_attrs))
+        return dict(
+            description="Synthetic magnetics waveform generated with "
+            "a fractal noise model.",
+            creation_date=datetime.today().strftime("%d-%m-%Y"),
+            duration=self.duration,
+            sample_rate=self.sample_rate,
+            signal_minimum=-self.limit[0],
+            signal_maximum=self.limit[1],
+            units=json.dumps(
+                dict(time="s", frequency="Hz", proportional="V", intergral="Vs")
+            ),
+            code=json.dumps(self.code_attrs),
+            magnetics_ids=json.dumps(self.magnetics.ids_attrs),
+            noise=json.dumps(self.signal_attrs),
+        )
 
     @property
     def code_attrs(self):
         """Return code attributes."""
-        return dict(name='nova', version=nova.__version__)
+        return dict(name="nova", version=nova.__version__)
 
     def _generate(self):
         """Return sample."""
@@ -271,53 +278,54 @@ class Signal(netCDF, Waveform, SignalParameters):
             np.zeros((2, self.sample_number), dtype=self.dtype),
             coords=dict(
                 time=self.time.astype(np.float32),
-                signal=['proportional', 'intergral'],
+                signal=["proportional", "intergral"],
                 signal_offset=self.cast.offset,
-                signal_multiplier=self.cast.multiplier),
-            dims=('signal', 'time'),
-            attrs=self.metadata)
+                signal_multiplier=self.cast.multiplier,
+            ),
+            dims=("signal", "time"),
+            attrs=self.metadata,
+        )
 
     def update_dataarray(self, name):
         """Update DataArray with sample / intergral data."""
         self.data.name = name
         self.data[0] = self.cast.to_dtype(self.sample)
         self.data[1] = self.cast.to_dtype(self.intergral)
-        self.data.attrs['diagnostic'] = \
-            self.magnetics['frame'].loc[name, :].to_json()
+        self.data.attrs["diagnostic"] = self.magnetics["frame"].loc[name, :].to_json()
 
     def build(self, index=slice(None)):
         """Store samples to netCDF file."""
         self.initialize_dataarray()
-        for name in tqdm(self.magnetics['frame'].loc[index].index):
+        for name in tqdm(self.magnetics["frame"].loc[index].index):
             self.generate()
             self.update_dataarray(name)
-            self.filename = name + '.nc'
-            self.store('w')
+            self.filename = name + ".nc"
+            self.store("w")
 
     def plot(self, axes=None):
         """Plot waveform."""
         import matplotlib.pyplot as plt
+
         axes = plt.subplots(2, 1, sharex=True)[1]
         for _axes in axes:
-            self.set_axes(_axes, '1d')
+            self.set_axes(_axes, "1d")
         axes[0].plot(self.time, self.sample)
-        axes[1].plot(self.time, self.intergral, 'C1')
-        axes[0].set_ylabel(r'$V$')
-        axes[1].set_xlabel('time s')
-        axes[1].set_ylabel(r'$Vs$')
+        axes[1].plot(self.time, self.intergral, "C1")
+        axes[0].set_ylabel(r"$V$")
+        axes[1].set_xlabel("time s")
+        axes[1].set_ylabel(r"$Vs$")
 
     @staticmethod
     def scp(hostname: str, dirname: str):
         """Syncronize xpoz remote /tmp/magnetics with local."""
         pathlib.Path(dirname).mkdir(parents=True, exist_ok=True)
-        hostdir = '/'.join(dirname.split('/')[:-2])
-        command = f'scp -rp {dirname} {hostname}:{hostdir}'
+        hostdir = "/".join(dirname.split("/")[:-2])
+        command = f"scp -rp {dirname} {hostname}:{hostdir}"
         subprocess.run(command.split())
 
 
-if __name__ == '__main__':
-
-    '''
+if __name__ == "__main__":
+    """
     number = 5000
     rng = Generator(2025).rng
     white = WhiteNoise(rng, number, scale=0.1)
@@ -328,17 +336,25 @@ if __name__ == '__main__':
     fractal.plot_psd(white.axes, label='fractal noise')
     white.axes.legend()
 
-    '''
-    dirname = '/tmp/magnetics/'
+    """
+    dirname = "/tmp/magnetics/"
     # hostname = 'sdcc-login01.iter.org'
-    hostname = None #'access-xpoz.codac.iter.org'
+    hostname = None  #'access-xpoz.codac.iter.org'
 
-    signal = Signal(5, 2e5, offset=0.005, scale=0.1, frequency=10,
-                    alpha=1, rng=2025, dirname=dirname, hostname=hostname)
+    signal = Signal(
+        5,
+        2e5,
+        offset=0.005,
+        scale=0.1,
+        frequency=10,
+        alpha=1,
+        rng=2025,
+        dirname=dirname,
+        hostname=hostname,
+    )
 
-    for i, index in enumerate(
-            np.array_split(signal.magnetics['frame'].index, 4)):
-        signal.path = f'{dirname}machine_{i}'
+    for i, index in enumerate(np.array_split(signal.magnetics["frame"].index, 4)):
+        signal.path = f"{dirname}machine_{i}"
         signal.build(index)
 
-    signal.scp('access-xpoz.codac.iter.org', dirname)
+    signal.scp("access-xpoz.codac.iter.org", dirname)

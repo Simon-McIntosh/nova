@@ -23,7 +23,7 @@ from nova.geometry.strike import Strike
 class Plasma(Plot, netCDF, PlasmaLoc):
     """Set plasma separatix, ionize plasma filaments."""
 
-    name: str = 'plasma'
+    name: str = "plasma"
     grid: PlasmaGrid = field(repr=False, default_factory=PlasmaGrid)
     wall: PlasmaWall = field(repr=False, default_factory=PlasmaWall)
     levelset: LevelSet = field(repr=False, default_factory=LevelSet)
@@ -31,12 +31,13 @@ class Plasma(Plot, netCDF, PlasmaLoc):
 
     def __post_init__(self):
         """Update subframe metadata."""
-        self.subframe.metaframe.metadata = \
-            {'additional': ['plasma', 'ionize', 'area', 'nturn'],
-             'array': ['plasma', 'ionize', 'area', 'nturn', 'x', 'z']}
+        self.subframe.metaframe.metadata = {
+            "additional": ["plasma", "ionize", "area", "nturn"],
+            "array": ["plasma", "ionize", "area", "nturn", "x", "z"],
+        }
         self.subframe.update_columns()
         super().__post_init__()
-        self.version['lcfs'] = None
+        self.version["lcfs"] = None
 
     @cached_property
     def strike(self):
@@ -46,7 +47,7 @@ class Plasma(Plot, netCDF, PlasmaLoc):
     def __getattribute__(self, attr):
         """Extend getattribute to intercept grid and wall data access."""
         match attr:
-            case 'lcfs':
+            case "lcfs":
                 self._check_lcfs()
         try:
             return super().__getattribute__(attr)
@@ -62,29 +63,31 @@ class Plasma(Plot, netCDF, PlasmaLoc):
     def update_lcfs(self):
         """Update last closed flux surface."""
         if len(self.levelset) == 0:
-            raise RuntimeError('solve levelset - nlevelset is None')
+            raise RuntimeError("solve levelset - nlevelset is None")
         points = self.levelset(self.psi_boundary)
         mask = self.grid.x_mask(points[:, 1])
         self.lcfs = LCFS(points[mask])
 
     def _check_lcfs(self):
         """Check validity of upstream data, update psi if nessisary."""
-        self.levelset.check_plasma('Psi')
-        if self.version['lcfs'] is None or \
-                self.version['lcfs'] != self.levelset.version['psi']:
+        self.levelset.check_plasma("Psi")
+        if (
+            self.version["lcfs"] is None
+            or self.version["lcfs"] != self.levelset.version["psi"]
+        ):
             self.update_lcfs()
-            self.version['lcfs'] = self.levelset.version['psi']
+            self.version["lcfs"] = self.levelset.version["psi"]
 
     @property
     def li_3(self):
         """Return normalized plasma inductance."""
-        filament_volume = self.aloc['ionize', 'volume']
+        filament_volume = self.aloc["ionize", "volume"]
         volume = np.sum(filament_volume)
-        poloidal_field = self.grid.bp[self.aloc['plasma', 'ionize']]
+        poloidal_field = self.grid.bp[self.aloc["plasma", "ionize"]]
         surface = np.sum(poloidal_field**2 * filament_volume) / volume
         # boundary = (mu_0 * self.i_plasma / self.lcfs.length)**2
-        radius = 6.2 # self.lcfs.geometric_radius
-        boundary = (mu_0 * self.i_plasma)**2 * radius / (2*volume)
+        radius = 6.2  # self.lcfs.geometric_radius
+        boundary = (mu_0 * self.i_plasma) ** 2 * radius / (2 * volume)
         return surface / boundary
 
     @cached_property
@@ -99,33 +102,33 @@ class Plasma(Plot, netCDF, PlasmaLoc):
 
     @psi.setter
     def psi(self, psi):
-        self.grid['psi'] = psi[:self.psi_index[0]]
-        self.wall['psi'] = psi[slice(*self.psi_index[0:2])]
+        self.grid["psi"] = psi[: self.psi_index[0]]
+        self.wall["psi"] = psi[slice(*self.psi_index[0:2])]
 
     @property
     def psi_axis(self):
         """Return on-axis poloidal flux."""
-        return self.grid['o_psi']
+        return self.grid["o_psi"]
 
     @property
     def magnetic_axis(self):
         """Return location of plasma o-point."""
-        return self.grid['o_point']
+        return self.grid["o_point"]
 
     @property
     def psi_x(self):
         """Return primary x-point poloidal flux."""
-        return self.grid['x_psi']
+        return self.grid["x_psi"]
 
     @property
     def x_point(self):
         """Return location of primary x-point."""
-        return self.grid['x_point']
+        return self.grid["x_point"]
 
     @property
     def psi_w(self):
         """Return wall limiter poloidal flux."""
-        return self.wall['w_psi']
+        return self.wall["w_psi"]
 
     @property
     def limiter(self):
@@ -150,8 +153,7 @@ class Plasma(Plot, netCDF, PlasmaLoc):
         self.strike.update([surface.points for surface in levelset])
         if len(strike_points := self.strike.points) == 2:
             return strike_points
-        minmax_index = [np.argmin(strike_points[:, 0]),
-                        np.argmax(strike_points[:, 0])]
+        minmax_index = [np.argmin(strike_points[:, 0]), np.argmax(strike_points[:, 0])]
         return strike_points[minmax_index]
 
     def normalize(self, psi):
@@ -170,25 +172,28 @@ class Plasma(Plot, netCDF, PlasmaLoc):
         yield  # update separatrix
         if psi_norm is not None:
             psi_norm = psi_norm[self.ionize]
-            current_density = self.radius * p_prime(psi_norm) + \
-                ff_prime(psi_norm) / (mu_0 * self.radius)
-            current_density *= -2*np.pi
+            current_density = self.radius * p_prime(psi_norm) + ff_prime(psi_norm) / (
+                mu_0 * self.radius
+            )
+            current_density *= -2 * np.pi
             current = current_density * self.area
             self.nturn = current / current.sum()
 
     @property
     def separatrix(self):
         """Return plasma separatrix, the convex hull of active filaments."""
-        index = self.loc['plasma', 'nturn'] > 0
-        points = self.loc['plasma', ['x', 'z']][index].values
+        index = self.loc["plasma", "nturn"] > 0
+        points = self.loc["plasma", ["x", "z"]][index].values
         hull = scipy.spatial.ConvexHull(points)
         vertices = np.append(hull.vertices, hull.vertices[0])
         convexhull = points[vertices]
         tangent = convexhull[1:] - convexhull[:-1]
         length = np.append(0, np.cumsum(np.linalg.norm(tangent, axis=1)))
         _length = np.linspace(0, length[-1], 250)
-        return np.c_[interp1d(length, convexhull[:, 0], 'quadratic')(_length),
-                     interp1d(length, convexhull[:, 1], 'quadratic')(_length)]
+        return np.c_[
+            interp1d(length, convexhull[:, 0], "quadratic")(_length),
+            interp1d(length, convexhull[:, 1], "quadratic")(_length),
+        ]
 
     @separatrix.setter
     def separatrix(self, index):
@@ -207,8 +212,9 @@ class Plasma(Plot, netCDF, PlasmaLoc):
         try:
             mask = self.grid.ionize_mask(index)
         except (AttributeError, StopIteration) as error:
-            raise AttributeError('use coilset.firstwall.insert '
-                                 'to define plasma rejoin') from error
+            raise AttributeError(
+                "use coilset.firstwall.insert " "to define plasma rejoin"
+            ) from error
         self.ionize = mask
         self.nturn = self.area / np.sum(self.area)
 
@@ -216,13 +222,19 @@ class Plasma(Plot, netCDF, PlasmaLoc):
         """Plot separatirx as polygon patch."""
         self.axes = axes
         if turns:
-            self.subframe.polyplot('plasma')
+            self.subframe.polyplot("plasma")
         else:
             poly = Polygon(self.separatrix).poly
             if not poly.is_empty:
-                self.axes.add_patch(self.patch(
-                    poly.__geo_interface__,
-                    facecolor='C4', alpha=0.75, linewidth=0, zorder=-10))
+                self.axes.add_patch(
+                    self.patch(
+                        poly.__geo_interface__,
+                        facecolor="C4",
+                        alpha=0.75,
+                        linewidth=0,
+                        zorder=-10,
+                    )
+                )
         levels = self.levelset.plot(**kwargs)
         if levels is None:
             self.grid.plot(**kwargs)

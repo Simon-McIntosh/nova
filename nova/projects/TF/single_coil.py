@@ -1,16 +1,28 @@
 import nova.cross_coil as cc
 import pylab as pl
 import numpy as np
+
 mu_o = 4 * np.pi * 1e-7
 import seaborn as sns
-rc = {'figure.figsize': [8, 8], 'savefig.dpi': 100,  # *12/16
-      'savefig.jpeg_quality': 100, 'savefig.pad_inches': 0.1,
-      'lines.linewidth': 1.5}
-sns.set(context='poster', style='white', font='sans-serif', palette='Set2',
-        font_scale=7 / 8, rc=rc)
-color = sns.color_palette('Set2')
 
-coil = {'r': 8, 'z': -10, 'I': 30e6, 'rc': 0.01}
+rc = {
+    "figure.figsize": [8, 8],
+    "savefig.dpi": 100,  # *12/16
+    "savefig.jpeg_quality": 100,
+    "savefig.pad_inches": 0.1,
+    "lines.linewidth": 1.5,
+}
+sns.set(
+    context="poster",
+    style="white",
+    font="sans-serif",
+    palette="Set2",
+    font_scale=7 / 8,
+    rc=rc,
+)
+color = sns.color_palette("Set2")
+
+coil = {"r": 8, "z": -10, "I": 30e6, "rc": 0.01}
 
 limit = [-12, 12, -12, 12]
 
@@ -21,7 +33,7 @@ nz = int(np.sqrt(n / ar))
 nr = int(n / nz)
 r = np.linspace(ro[0], ro[1], nr)
 z = np.linspace(zo[0], zo[1], nz)
-r2d, z2d = np.meshgrid(r, z, indexing='ij')
+r2d, z2d = np.meshgrid(r, z, indexing="ij")
 Br = np.zeros(np.shape(r2d))
 Bz = np.zeros(np.shape(r2d))
 
@@ -30,9 +42,9 @@ Bzl = np.zeros(np.shape(r2d))
 
 for i, ri in enumerate(r):
     for j, zj in enumerate(z):
-        #B = mu_o*coil['I']*cc.green_feild(ri,zj,coil['r'],coil['z'])
-        #Br[i,j] = B[0]
-        #Bz[i,j] = B[1]
+        # B = mu_o*coil['I']*cc.green_feild(ri,zj,coil['r'],coil['z'])
+        # Br[i,j] = B[0]
+        # Bz[i,j] = B[1]
 
         B = cc.green_feild_loop(coil, (ri, zj, -1.5))
         Brl[i, j] = B[0]
@@ -40,22 +52,22 @@ for i, ri in enumerate(r):
 print(B)
 
 pl.figure()
-pl.axis('equal')
+pl.axis("equal")
 # pl.streamplot(r,z,Br.T,Bz.T)
 Bmag = np.sqrt(Brl.T**2 + Bzl.T**2)
 # pl.streamplot(r,z,Brl.T,Bzl.T,color=Bmag,cmap=pl.cm.Spectral)
 pl.quiver(r, z, Brl.T, Bzl.T)
 
-'''
+"""
 B = cc.green_feild_loop(coil,(r,0,z))
 
 print(B)
 
 levels = np.linspace(-50,300,50)
-'''
+"""
 
 # pl.figure(figsize=0.5*np.array((0.5*np.diff(limit[:2]),np.diff(limit[2:]))))
-'''
+"""
 pl.figure()
 pl.contour(r2d,z2d,psi,50,levels=levels)
 
@@ -102,4 +114,4 @@ ax.set_zlim(0, 3)
 
 ax.view_init(elev=40., azim=-90)
 ax.set_axis_off()
-'''
+"""

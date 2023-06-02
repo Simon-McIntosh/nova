@@ -12,11 +12,10 @@ from nova.frame.dataframe import DataFrame
 class Reduce(metamethod.Reduce):
     """Calculate reduction indices for reduceat."""
 
-    name = 'biotreduce'
+    name = "biotreduce"
 
     frame: DataFrame = field(repr=False)
-    index: pandas.Index = field(default_factory=lambda: pandas.Index([]),
-                                repr=False)
+    index: pandas.Index = field(default_factory=lambda: pandas.Index([]), repr=False)
     indices: list[int] = field(init=False, repr=False, default_factory=list)
     link: dict[int, int] = field(init=False, repr=False, default_factory=dict)
     reduce: bool = field(default=False)
@@ -31,7 +30,7 @@ class Reduce(metamethod.Reduce):
 
     def reduction_indices(self):
         """Return reduction indices, construct link if ref not monotonic."""
-        if 'ref' not in self.frame:
+        if "ref" not in self.frame:
             return range(len(self.frame))
         ref = np.array(self.frame.ref)
         factor = np.array(self.frame.factor)
@@ -46,5 +45,5 @@ class Reduce(metamethod.Reduce):
                     indices.append(index)
                     continue
             indices.append(i)
-            self.link[len(indices)-1] = [int(indices.index(index)), factor[i]]
+            self.link[len(indices) - 1] = [int(indices.index(index)), factor[i]]
         return indices

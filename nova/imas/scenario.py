@@ -12,8 +12,8 @@ from nova.imas.getslice import GetSlice
 class Scenario(GetSlice, IdsData):
     """Manage access to scenario data (load, store, build)."""
 
-    machine: str = 'iter'
-    ids_node: str = 'time_slice'
+    machine: str = "iter"
+    ids_node: str = "time_slice"
 
     @cached_property
     def ids_index(self):
@@ -23,19 +23,28 @@ class Scenario(GetSlice, IdsData):
     @contextmanager
     def build_scenario(self):
         """Manage dataset creation and storage."""
-        self.data.attrs[self.name] = \
-            ','.join([str(value) for value in self.ids_attrs.values()])
-        self.data.attrs['homogeneous_time'] = \
-            self.ids_data.ids_properties.homogeneous_time
-        if self.data.attrs['homogeneous_time'] == 1:
-            self.data.coords['time'] = self.ids_data.time
-            self.data.coords['itime'] = 'time', range(len(self.data['time']))
+        self.data.attrs[self.name] = ",".join(
+            [str(value) for value in self.ids_attrs.values()]
+        )
+        self.data.attrs[
+            "homogeneous_time"
+        ] = self.ids_data.ids_properties.homogeneous_time
+        if self.data.attrs["homogeneous_time"] == 1:
+            self.data.coords["time"] = self.ids_data.time
+            self.data.coords["itime"] = "time", range(len(self.data["time"]))
         yield
         if self.pulse != 0 and self.run != 0:  # don't store passed ids_data
             self.store()
 
-    def append(self, coords: tuple[str, ...], attrs: list[str] | str,
-               branch='', prefix='', postfix='', ids_node=None):
+    def append(
+        self,
+        coords: tuple[str, ...],
+        attrs: list[str] | str,
+        branch="",
+        prefix="",
+        postfix="",
+        ids_node=None,
+    ):
         """Append xarray dataset with ids attributes."""
         self.ids = ids_node
         if isinstance(attrs, str):
@@ -44,7 +53,7 @@ class Scenario(GetSlice, IdsData):
             path = self.ids_index.get_path(branch, attr)
             if not self.ids_index.valid(path) or self.ids_index.empty(path):
                 continue
-            self.data[prefix+attr+postfix] = coords, self.ids_index.array(path)
+            self.data[prefix + attr + postfix] = coords, self.ids_index.array(path)
 
     @abstractmethod
     def build(self):

@@ -24,68 +24,73 @@ class MorphAnsys:
     base: pv.PolyData
     resolution: float = 0.25
     smoothing: float = 1.0
-    repo: str = 'tfc18'
+    repo: str = "tfc18"
 
     def __post_init__(self):
         """Load morphed mesh and write table."""
         self._check_root()
-        if not os.path.isfile(os.path.join(self.morph_dir, self.name+'.mac')):
+        if not os.path.isfile(os.path.join(self.morph_dir, self.name + ".mac")):
             self.write_table()
 
     @property
     def root_dir(self):
         """Return root dir."""
-        return os.path.join(root_dir, f'../{self.repo}')
+        return os.path.join(root_dir, f"../{self.repo}")
 
     @property
     def macro_dir(self):
         """Return macro dir."""
-        return os.path.join(self.root_dir, 'MACRO')
+        return os.path.join(self.root_dir, "MACRO")
 
     @property
     def morph_dir(self):
         """Return morph data dir."""
-        return os.path.join(self.root_dir, 'MORPH')
+        return os.path.join(self.root_dir, "MORPH")
 
     def _check_root(self):
         """Check for tfc18 root dir."""
         if not os.path.isdir(self.root_dir):
-            raise FileNotFoundError(f'APDL root dir {self.root_dir} not found.'
-                                    ' Pull project from gitlab')
+            raise FileNotFoundError(
+                f"APDL root dir {self.root_dir} not found." " Pull project from gitlab"
+            )
 
     def cdread(self):
         """Write utility cdb initialization script."""
-        txt = '''
+        txt = """
             /clear
             cdread,db,MAGNET,cdb,../../MACRO/INPUT_FILES
-            '''
-        with open(os.path.join(self.macro_dir, 'read_cdb.mac'), 'w') as f:
+            """
+        with open(os.path.join(self.macro_dir, "read_cdb.mac"), "w") as f:
             f.write(inspect.cleandoc(txt))
 
     def generate_axes(self, csys=0):
         """Return interpolation axes."""
         if csys == 0:  # cartesian
-            bounds = [self.base.bounds[2*i:2*i+2] for i in range(3)]
-            axes = [np.linspace(*limit, int(np.diff(limit)/self.resolution))
-                    for limit in bounds]
+            bounds = [self.base.bounds[2 * i : 2 * i + 2] for i in range(3)]
+            axes = [
+                np.linspace(*limit, int(np.diff(limit) / self.resolution))
+                for limit in bounds
+            ]
             return axes
         index = ~np.isnan(self.base.points).any(axis=1)
         radius = np.linalg.norm(self.base.points[index, :1], axis=0)
         rlimit = [np.min(radius), np.max(radius)]
         zlimit = self.base.bounds[-2:]
 
-        print(int(np.diff(rlimit)/self.resolution))
+        print(int(np.diff(rlimit) / self.resolution))
 
-        axes = [np.linspace(*rlimit, int(np.diff(rlimit)/self.resolution)),
-                np.linspace(0, 2*np.pi, 5000),
-                np.linspace(*zlimit, int(np.diff(zlimit)/self.resolution))]
+        axes = [
+            np.linspace(*rlimit, int(np.diff(rlimit) / self.resolution)),
+            np.linspace(0, 2 * np.pi, 5000),
+            np.linspace(*zlimit, int(np.diff(zlimit) / self.resolution)),
+        ]
         print(np.shape(axes[0]), np.diff(rlimit), rlimit)
         return axes
 
     def write_table(self):
         """Write ansys interpolation table to file."""
         axes = self.generate_axes(csys=1)
-        '''
+        """
         grid = np.array(np.meshgrid(*axes, indexing='ij')).T
 
         shape = grid.shape
@@ -114,11 +119,11 @@ class MorphAnsys:
                 table.load(f'morph_d{coord}', delta[i], [*axes])
                 table.write(['x', 'y', 'z'])
                 table.write_text('/gopr')
-        '''
+        """
 
     def write_macro(self):
         """Write ansys interpolation tables script to file."""
-        txt = '''
+        txt = """
 
         *get,root_type,parm,root_dir,type
         *if,root_type,eq,5,then
@@ -183,17 +188,16 @@ class MorphAnsys:
         *del,xyz
         *del,ii
 
-        '''
-        with open(os.path.join(self.macro_dir, 'morph.mac'), 'w') as f:
+        """
+        with open(os.path.join(self.macro_dir, "morph.mac"), "w") as f:
             f.write(inspect.cleandoc(txt))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
+    fiducial = FiducialCoil("fiducial", 10)
+    base = AnsysPost("TFCgapsG10", "k0", "all")
 
-    fiducial = FiducialCoil('fiducial', 10)
-    base = AnsysPost('TFCgapsG10', 'k0', 'all')
+    ansys = MorphAnsys("ccl0", fiducial.mesh, base.mesh)
 
-    ansys = MorphAnsys('ccl0', fiducial.mesh, base.mesh)
-
-    #ansys.write_table()
-    #ansys.write_macro()
+    # ansys.write_table()
+    # ansys.write_macro()

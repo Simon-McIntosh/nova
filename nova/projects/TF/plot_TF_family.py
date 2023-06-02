@@ -8,31 +8,45 @@ from nova.streamfunction import SF
 from nova.config import Setup
 
 import seaborn as sns
-rc = {'figure.figsize': [10 * 1.1, 10], 'savefig.dpi': 100,  # *12/16
-      'savefig.jpeg_quality': 100, 'savefig.pad_inches': 0,
-      'lines.linewidth': 0.75}
-sns.set(context='talk', style='white', font='sans-serif', palette='Set2',
-        font_scale=1.5, rc=rc)
 
-text = linelabel(Ndiv=30, value='', loc='end')
+rc = {
+    "figure.figsize": [10 * 1.1, 10],
+    "savefig.dpi": 100,  # *12/16
+    "savefig.jpeg_quality": 100,
+    "savefig.pad_inches": 0,
+    "lines.linewidth": 0.75,
+}
+sns.set(
+    context="talk",
+    style="white",
+    font="sans-serif",
+    palette="Set2",
+    font_scale=1.5,
+    rc=rc,
+)
+
+text = linelabel(Ndiv=30, value="", loc="end")
 
 demo = DEMO()
-demo.fill_part('Blanket')
-demo.fill_part('Vessel')
+demo.fill_part("Blanket")
+demo.fill_part("Vessel")
 
-config = {'TF': 'dtt', 'eq': 'SN'}
-setup = Setup(config['eq'])
+config = {"TF": "dtt", "eq": "SN"}
+setup = Setup(config["eq"])
 sf = SF(setup.filename)
 # sf.contour(plot_vac=False)
-pl.plot(np.append(sf.rbdry, sf.rbdry[0]),
-        np.append(sf.zbdry, sf.zbdry[0]),
-        color=0.75 * np.ones(3), lw=2)
+pl.plot(
+    np.append(sf.rbdry, sf.rbdry[0]),
+    np.append(sf.zbdry, sf.zbdry[0]),
+    color=0.75 * np.ones(3),
+    lw=2,
+)
 
 NTF = np.arange(13, 19)[::-1]  # 13,
-pl.plot([3, 23], [-10, 9], 'ko', alpha=1)
+pl.plot([3, 23], [-10, 9], "ko", alpha=1)
 
 
-'''
+"""
 config['TF'] = 'dtt'
 config['TF'] = '{}{}{:d}'.format(config['eq'],config['TF'],18)
 profile = Profile(config['TF'],family='S',part='TF',load=True)
@@ -65,4 +79,4 @@ pl.axis('off')
 pl.axis('equal')
 pl.tight_layout()
 pl.savefig('../../Figs/TFfam_{:d}.png'.format(j))
-'''
+"""

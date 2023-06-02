@@ -22,7 +22,7 @@ class Line:
         if len(points) > 2:
             return cls(pv.Spline(points))
         mesh = pv.PolyData(points, lines=np.arange(0, len(points)))
-        mesh['arc_length'] = [0, np.linalg.norm(np.diff(points, axis=0))]
+        mesh["arc_length"] = [0, np.linalg.norm(np.diff(points, axis=0))]
         return cls(mesh)
 
     @staticmethod
@@ -45,20 +45,19 @@ class Line:
         backward[0] = backward[-1]
         backward = self.normalize(backward)
         # central diffrence
-        self.mesh['tangent'] = (forward + backward) / 2
-        self.mesh['tangent'] = self.normalize(self.mesh['tangent'])
+        self.mesh["tangent"] = (forward + backward) / 2
+        self.mesh["tangent"] = self.normalize(self.mesh["tangent"])
 
     def compute_normal(self):
         """Compute normal vector as cross product of tangent and plane."""
         plane = self.fit_plane()
-        self.mesh['normal'] = np.cross(plane, self.mesh['tangent'])
-        self.mesh['normal'] = self.normalize(self.mesh['normal'])
+        self.mesh["normal"] = np.cross(plane, self.mesh["tangent"])
+        self.mesh["normal"] = self.normalize(self.mesh["normal"])
 
     def compute_cross(self):
         """Compute cross product betweeh tangent and normal vectors."""
-        self.mesh['cross'] = np.cross(self.mesh['tangent'],
-                                      self.mesh['normal'])
-        self.mesh['cross'] = self.normalize(self.mesh['cross'])
+        self.mesh["cross"] = np.cross(self.mesh["tangent"], self.mesh["normal"])
+        self.mesh["cross"] = self.normalize(self.mesh["cross"])
 
     def fit_plane(self):
         """Return plane vector (eigen vector of smallest eigenvalue - PCA)."""

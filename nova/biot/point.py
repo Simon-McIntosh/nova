@@ -17,17 +17,24 @@ class Point(Plot, Operate):
         """Solve Biot interaction at points."""
         points = np.array(points)
         points.shape = (-1, 2)  # shape(n, 2)
-        target = Target(dict(x=[point[0] for point in points],
-                             z=[point[1] for point in points]), label='Point')
-        self.data = Solve(self.subframe, target, reduce=[True, False],
-                          attrs=self.attrs, name=self.name).data
+        target = Target(
+            dict(x=[point[0] for point in points], z=[point[1] for point in points]),
+            label="Point",
+        )
+        self.data = Solve(
+            self.subframe,
+            target,
+            reduce=[True, False],
+            attrs=self.attrs,
+            name=self.name,
+        ).data
         # insert coordinate data
-        self.data.coords['x'] = target['x']
-        self.data.coords['z'] = target['z']
+        self.data.coords["x"] = target["x"]
+        self.data.coords["z"] = target["z"]
         super().post_solve()
 
     def plot(self, axes=None, **kwargs):
         """Plot points."""
         self.axes = axes
-        kwargs = dict(marker='o', linestyle='', color='C1') | kwargs
-        self.axes.plot(self.data.coords['x'], self.data.coords['z'], **kwargs)
+        kwargs = dict(marker="o", linestyle="", color="C1") | kwargs
+        self.axes.plot(self.data.coords["x"], self.data.coords["z"], **kwargs)

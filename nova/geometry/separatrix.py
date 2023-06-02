@@ -13,9 +13,11 @@ from nova.graphics.plot import Plot
 
 def negate(func):
     """Return negated interpolator output."""
+
     @wraps(func)
     def wrapper(*args):
         return -func(*args)
+
     return wrapper
 
 
@@ -26,16 +28,16 @@ class Peak:
     length: np.ndarray
     value: int
     pad_width: int = 6
-    kind: str = 'quadratic'
+    kind: str = "quadratic"
 
     def __post_init__(self):
         """Wrap inputs."""
         if self.pad_width > 0:
             segments = self.length[1:] - self.length[:-1]
-            segments = np.pad(segments, self.pad_width, 'wrap')
+            segments = np.pad(segments, self.pad_width, "wrap")
             self.length = np.append(0, np.cumsum(segments))
             self.length /= self.length[-1]
-            self.value = np.pad(self.value, self.pad_width, 'wrap')
+            self.value = np.pad(self.value, self.pad_width, "wrap")
 
     def __call__(self, length):
         """Return call to interpolator."""
@@ -49,7 +51,7 @@ class Peak:
     @staticmethod
     def _minimize(function):
         """Wrap scipy minimize_scalar."""
-        return minimize_scalar(function, bounds=(0, 1), method='bounded')
+        return minimize_scalar(function, bounds=(0, 1), method="bounded")
 
     @cached_property
     def minimum(self):
@@ -198,7 +200,7 @@ class Elongation(PointGeometry):
     @cached_property
     def elongation(self):
         """Return elongation, kappa."""
-        return (self.z_max - self.z_min) / (2*self.minor_radius)
+        return (self.z_max - self.z_min) / (2 * self.minor_radius)
 
 
 @dataclass
@@ -259,8 +261,8 @@ class Quadrant(Plot):
         """Return quadrant index."""
         theta = np.arctan2(self.major_radius, self.minor_radius)
         if theta < 0:
-            theta += 2*np.pi
-        return int(2*theta / np.pi)
+            theta += 2 * np.pi
+        return int(2 * theta / np.pi)
 
     def arc_radius(self, u):
         """Return parametric arc radius."""
@@ -268,22 +270,23 @@ class Quadrant(Plot):
 
     def arc_height(self, u):
         """Return parametric arc height."""
-        return self.major_radius * 2*u / (1 + u**2)
+        return self.major_radius * 2 * u / (1 + u**2)
 
     @cached_property
     def theta(self):
         """Return quadrant bisection angle."""
         theta = np.arctan(abs(self.major_radius / self.minor_radius))
         if self.quadrant in [1, 3]:
-            theta = np.pi/2 - theta
+            theta = np.pi / 2 - theta
         return theta
 
     @cached_property
     def ellipse_point(self):
         """Return arc bisection point."""
-        u_bisect = np.tan(np.pi/8)
-        return np.array([self.arc_radius(u_bisect),
-                         self.arc_height(u_bisect)]) + self.axis
+        u_bisect = np.tan(np.pi / 8)
+        return (
+            np.array([self.arc_radius(u_bisect), self.arc_height(u_bisect)]) + self.axis
+        )
 
     @cached_property
     def ellipse_radius(self):
@@ -298,33 +301,47 @@ class Quadrant(Plot):
     def squareness(self, separatrix_point):
         """Return squarness of separatrix point."""
         radius = np.linalg.norm(np.array(separatrix_point) - self.axis)
-        return (radius - self.ellipse_radius) / (self.square_radius -
-                                                 self.ellipse_radius)
+        return (radius - self.ellipse_radius) / (
+            self.square_radius - self.ellipse_radius
+        )
 
     def separatrix_point(self, squareness):
         """Return separatrix point for a given squareness."""
-        radius = squareness * (self.square_radius -
-                               self.ellipse_radius) + self.ellipse_radius
-        theta = self.theta + self.quadrant * np.pi/2
+        radius = (
+            squareness * (self.square_radius - self.ellipse_radius)
+            + self.ellipse_radius
+        )
+        theta = self.theta + self.quadrant * np.pi / 2
         return self.axis + radius * np.array([np.cos(theta), np.sin(theta)])
 
     def plot(self, axes=None):
         """Plot parametric arc."""
         u = np.linspace(0, 1)
-        self.set_axes('2d', axes)
-        self.axes.plot(*self.minor_point, 'ko', ms=4)
-        self.axes.plot(*self.major_point, 'ko', ms=4)
-        self.axes.plot(*self.ellipse_point, 'kd', ms=6)
-        self.axes.plot(*np.c_[self.axis, self.ellipse_point],
-                       '--', color='gray')
-        self.axes.plot(self.axis[0] + np.array([0, self.minor_radius]),
-                       self.axis[1]*np.ones(2),
-                       '-', color='gray', lw=1)
-        self.axes.plot(self.axis[0] * np.ones(2),
-                       self.axis[1] + np.array([0, self.major_radius]),
-                       '-', color='gray', lw=1)
-        self.axes.plot(self.arc_radius(u) + self.axis[0],
-                       self.arc_height(u) + self.axis[1], '--', color='gray')
+        self.set_axes("2d", axes)
+        self.axes.plot(*self.minor_point, "ko", ms=4)
+        self.axes.plot(*self.major_point, "ko", ms=4)
+        self.axes.plot(*self.ellipse_point, "kd", ms=6)
+        self.axes.plot(*np.c_[self.axis, self.ellipse_point], "--", color="gray")
+        self.axes.plot(
+            self.axis[0] + np.array([0, self.minor_radius]),
+            self.axis[1] * np.ones(2),
+            "-",
+            color="gray",
+            lw=1,
+        )
+        self.axes.plot(
+            self.axis[0] * np.ones(2),
+            self.axis[1] + np.array([0, self.major_radius]),
+            "-",
+            color="gray",
+            lw=1,
+        )
+        self.axes.plot(
+            self.arc_radius(u) + self.axis[0],
+            self.arc_height(u) + self.axis[1],
+            "--",
+            color="gray",
+        )
 
 
 @dataclass
@@ -344,7 +361,7 @@ class Squareness(Plot, PointGeometry):
         for i in range(4):
             points[self.quadrant_mask(i)] -= self.quadrant_axis(i)
         theta = np.arctan2(points[:, 1], points[:, 0])
-        theta[theta < 0] += 2*np.pi
+        theta[theta < 0] += 2 * np.pi
         index = np.argsort(theta)
         theta = theta[index]
         points = self.points[index]
@@ -354,32 +371,34 @@ class Squareness(Plot, PointGeometry):
     @cached_property
     def quadrant_radius(self):
         """Return quadrant radius peak interpolator."""
-        return Peak(self.quadrant_theta, self.quadrant_points[:, 0],
-                    pad_width=0)
+        return Peak(self.quadrant_theta, self.quadrant_points[:, 0], pad_width=0)
 
     @cached_property
     def quadrant_height(self):
         """Return quadrant height peak interpolator."""
-        return Peak(self.quadrant_theta, self.quadrant_points[:, 1],
-                    pad_width=0)
+        return Peak(self.quadrant_theta, self.quadrant_points[:, 1], pad_width=0)
 
     def quadrant_mask(self, index: int):
         """Return quadrant mask."""
         match index:
             case 0:  # upper_outer
-                return (self.points[:, 0] >= self.r_zmax) & \
-                    (self.points[:, 1] >= self.z_rmax)
+                return (self.points[:, 0] >= self.r_zmax) & (
+                    self.points[:, 1] >= self.z_rmax
+                )
             case 1:  # upper_inner
-                return (self.points[:, 0] < self.r_zmax) & \
-                    (self.points[:, 1] > self.z_rmin)
+                return (self.points[:, 0] < self.r_zmax) & (
+                    self.points[:, 1] > self.z_rmin
+                )
             case 2:  # lower_inner
-                return (self.points[:, 0] <= self.r_zmin) & \
-                    (self.points[:, 1] <= self.z_rmin)
+                return (self.points[:, 0] <= self.r_zmin) & (
+                    self.points[:, 1] <= self.z_rmin
+                )
             case 3:  # lower_outer
-                return (self.points[:, 0] > self.r_zmin) & \
-                    (self.points[:, 1] < self.z_rmax)
+                return (self.points[:, 0] > self.r_zmin) & (
+                    self.points[:, 1] < self.z_rmax
+                )
             case _:
-                raise IndexError(f'quadrant index {index} not 0-3')
+                raise IndexError(f"quadrant index {index} not 0-3")
 
     def quadrant_axis(self, index: int):
         """Return loca quadrant axis."""
@@ -393,13 +412,12 @@ class Squareness(Plot, PointGeometry):
             case 3:  # lower_outer
                 return self.r_zmin, self.z_rmax
             case _:
-                raise IndexError(f'quadrant index {index} not 0-3')
+                raise IndexError(f"quadrant index {index} not 0-3")
 
     def quadrant_point(self, index: int):
         """Return quadrant point."""
-        theta = index*np.pi/2 + self.quadrant(index).theta
-        return np.array([self.quadrant_radius(theta),
-                         self.quadrant_height(theta)])
+        theta = index * np.pi / 2 + self.quadrant(index).theta
+        return np.array([self.quadrant_radius(theta), self.quadrant_height(theta)])
 
     def quadrant(self, index):
         """Return quadrant index."""
@@ -417,7 +435,7 @@ class Squareness(Plot, PointGeometry):
                 minor_point = (self.r_max, self.z_rmax)
                 major_point = (self.r_zmin, self.z_min)
             case _:
-                raise IndexError(f'quadrant index {index} not 0-3')
+                raise IndexError(f"quadrant index {index} not 0-3")
         return Quadrant(minor_point, major_point)
 
     def squareness(self, index):
@@ -446,7 +464,7 @@ class Squareness(Plot, PointGeometry):
 
     def plot_quadrants(self, axes=None):
         """Plot parametric curves."""
-        self.set_axes('2d', axes)
+        self.set_axes("2d", axes)
         for i in range(4):
             self.quadrant(i).plot(self.axes)
 
@@ -463,19 +481,20 @@ class LCFS(Elongation, Triangularity, Squareness, Plot):
 
     def plot(self, label=False):
         """Plot last closed flux surface and key geometrical points."""
-        self.get_axes('2d')
-        self.axes.plot(*self.points.T, color='k', alpha=0.25)
+        self.get_axes("2d")
+        self.axes.plot(*self.points.T, color="k", alpha=0.25)
         if label:
-            self.axes.plot(self.r_max, self.z_rmax, 'o', label='Rmax')
-            self.axes.plot(self.r_min, self.z_rmin, 'o', label='Rmin')
-            self.axes.plot(self.geometric_radius,
-                           (self.z_max + self.z_min) / 2, 'o', label='Rgeo')
-            self.axes.plot(self.r_zmax, self.z_max, 'o', label='Zmax')
-            self.axes.plot(self.r_zmin, self.z_min, 'o', label='Zmin')
-            self.axes.legend(loc='center')
+            self.axes.plot(self.r_max, self.z_rmax, "o", label="Rmax")
+            self.axes.plot(self.r_min, self.z_rmin, "o", label="Rmin")
+            self.axes.plot(
+                self.geometric_radius, (self.z_max + self.z_min) / 2, "o", label="Rgeo"
+            )
+            self.axes.plot(self.r_zmax, self.z_max, "o", label="Zmax")
+            self.axes.plot(self.r_zmin, self.z_min, "o", label="Zmin")
+            self.axes.legend(loc="center")
         self.plot_quadrants(self.axes)
         for quadrant in range(4):
-            self.axes.plot(*self.quadrant_point(quadrant), 'k.', ms=8)
+            self.axes.plot(*self.quadrant_point(quadrant), "k.", ms=8)
 
 
 @dataclass
@@ -491,19 +510,21 @@ class UpDown:
 
     def check_consistency(self):
         """Check data consistency."""
-        if all(attr in self.coef for attr in
-               [self.segment, self.upper_attr, self.lower_attr]):
+        if all(
+            attr in self.coef
+            for attr in [self.segment, self.upper_attr, self.lower_attr]
+        ):
             assert np.isclose(self.mean, (self.upper + self.lower) / 2)
 
     @property
     def upper_attr(self) -> str:
         """Return upper attribute name."""
-        return f'{self.segment}_upper'
+        return f"{self.segment}_upper"
 
     @property
     def lower_attr(self) -> str:
         """Return lower attribute name."""
-        return f'{self.segment}_lower'
+        return f"{self.segment}_lower"
 
     @property
     def mean(self):
@@ -518,8 +539,10 @@ class UpDown:
             case {self.lower_attr: lower}:
                 return lower
             case _:
-                raise KeyError('attributes required to reconstruct '
-                               f'mean {self.segment} not found in {self.coef}')
+                raise KeyError(
+                    "attributes required to reconstruct "
+                    f"mean {self.segment} not found in {self.coef}"
+                )
 
     @property
     def upper(self):
@@ -528,7 +551,7 @@ class UpDown:
             case {self.upper_attr: upper}:
                 return upper
             case {self.lower_attr: lower}:
-                return 2*self.mean - lower
+                return 2 * self.mean - lower
             case _:
                 return self.mean
 
@@ -539,7 +562,7 @@ class UpDown:
             case {self.lower_attr: lower}:
                 return lower
             case {self.upper_attr: upper}:
-                return 2*self.mean - upper
+                return 2 * self.mean - upper
             case _:
                 return self.mean
 
@@ -551,50 +574,54 @@ class PlasmaProfile:
     coef: dict[str, float] = field(default_factory=dict)
     plasma_shape: dict[str, UpDown] = field(init=False, default_factory=dict)
 
-    profile_attrs: ClassVar[list[str]] = \
-        ['geometric_radius', 'geometric_height',
-         'minor_radius', 'elongation', 'triangularity']
+    profile_attrs: ClassVar[list[str]] = [
+        "geometric_radius",
+        "geometric_height",
+        "minor_radius",
+        "elongation",
+        "triangularity",
+    ]
 
     def __post_init__(self):
         """Initialise updown."""
-        if hasattr(super(), '__post_init__'):
+        if hasattr(super(), "__post_init__"):
             super().__post_init__()
-        self.plasma_shape['kappa'] = UpDown('elongation', self.coef)
-        self.plasma_shape['delta'] = UpDown('triangularity', self.coef)
+        self.plasma_shape["kappa"] = UpDown("elongation", self.coef)
+        self.plasma_shape["delta"] = UpDown("triangularity", self.coef)
 
     def update_coefficents(self, *args, **kwargs):
         """Update plasma profile coefficients."""
         self.coef = kwargs
         self.coef |= {attr: arg for attr, arg in zip(self.profile_attrs, args)}
-        self.plasma_shape['kappa'] = UpDown('elongation', self.coef)
-        self.plasma_shape['delta'] = UpDown('triangularity', self.coef)
+        self.plasma_shape["kappa"] = UpDown("elongation", self.coef)
+        self.plasma_shape["delta"] = UpDown("triangularity", self.coef)
         return self
 
     @property
     def minor_radius(self):
         """Return minor radius."""
-        return self['minor_radius']
+        return self["minor_radius"]
 
     @property
     def geometric_radius(self):
         """Return geometric raidus."""
-        return self['geometric_radius']
+        return self["geometric_radius"]
 
     @property
     def geometric_height(self):
         """Return geometric height."""
-        return self['geometric_height']
+        return self["geometric_height"]
 
     @property
     def x_point(self):
         """Return x-point."""
-        return self['x_point']
+        return self["x_point"]
 
     def __getitem__(self, attr):
         """Return attribute from coef if present else from pulse data."""
         if attr in self.coef:
             return self.coef[attr]
-        if hasattr(super(), '__getitem__'):
+        if hasattr(super(), "__getitem__"):
             return super().__getitem__(attr)
 
     def __setitem__(self, attr, value):
@@ -603,61 +630,64 @@ class PlasmaProfile:
 
     def check_consistency(self):
         """Check data consistency."""
-        for attr in ['kappa', 'delta']:
+        for attr in ["kappa", "delta"]:
             self.plasma_shape[attr].check_consistency()
 
     def set_x_point(self, x_point):
         """Adjust lower elongation and triangularity to match x_point."""
         if x_point is None:
             return
-        self['triangularity_lower'] = \
-            (self.geometric_radius - self.x_point[0]) / self.minor_radius
-        if 'triangularity' in self.coef:
-            self['triangularity_upper'] = self['triangularity']
-            del self.coef['triangularity']
-        self['elongation_lower'] = \
-            (self.geometric_height - self.x_point[1]) / self.minor_radius
-        assert abs(self['triangularity_lower']) < 1
+        self["triangularity_lower"] = (
+            self.geometric_radius - self.x_point[0]
+        ) / self.minor_radius
+        if "triangularity" in self.coef:
+            self["triangularity_upper"] = self["triangularity"]
+            del self.coef["triangularity"]
+        self["elongation_lower"] = (
+            self.geometric_height - self.x_point[1]
+        ) / self.minor_radius
+        assert abs(self["triangularity_lower"]) < 1
         self.check_consistency()
 
     @property
     def elongation(self):
         """Return plasma elongation."""
-        return self.plasma_shape['kappa'].mean
+        return self.plasma_shape["kappa"].mean
 
     @property
     def elongation_upper(self):
         """Return upper plasma elongation."""
-        return self.plasma_shape['kappa'].upper
+        return self.plasma_shape["kappa"].upper
 
     @property
     def elongation_lower(self):
         """Return lower plasma elongation."""
-        return self.plasma_shape['kappa'].lower
+        return self.plasma_shape["kappa"].lower
 
     @property
     def triangularity(self):
         """Return plasma triangularity."""
-        return self.plasma_shape['delta'].mean
+        return self.plasma_shape["delta"].mean
 
     @property
     def triangularity_upper(self):
         """Return plasma triangularity."""
-        return self.plasma_shape['delta'].upper
+        return self.plasma_shape["delta"].upper
 
     @property
     def triangularity_lower(self):
         """Return plasma triangularity."""
-        return self.plasma_shape['delta'].lower
+        return self.plasma_shape["delta"].lower
 
     def adjust_elongation_lower(self):
         """Adjust lower elongation for single-null compliance."""
-        if self.elongation_lower < (min_kappa :=
-                                    2*(1 - self.triangularity_lower**2)**0.5):
+        if self.elongation_lower < (
+            min_kappa := 2 * (1 - self.triangularity_lower**2) ** 0.5
+        ):
             delta_kappa = 1e-3 + min_kappa - self.elongation_lower
-            self['elongation_lower'] = self.elongation_lower + delta_kappa
-            self['geometric_height'] += self.minor_radius * delta_kappa
-            self.plasma_shape['kappa'].check_consistency()
+            self["elongation_lower"] = self.elongation_lower + delta_kappa
+            self["geometric_height"] += self.minor_radius * delta_kappa
+            self.plasma_shape["kappa"].check_consistency()
 
 
 @dataclass
@@ -682,8 +712,7 @@ class Separatrix(Plot, PlasmaProfile):
     @property
     def geometric_axis(self):
         """Manage geometric axis attribute."""
-        return np.array([self['geometric_radius'],
-                         self['geometric_height']], float)
+        return np.array([self["geometric_radius"], self["geometric_height"]], float)
 
     @property
     def points(self) -> np.ndarray:
@@ -697,15 +726,14 @@ class Separatrix(Plot, PlasmaProfile):
         length = np.append(0, np.cumsum(delta))
         linspace = np.linspace(0, length[-1], self.point_number)
         try:
-            self.profile[:] = interp1d(length, points,
-                                       'quadratic', 0)(linspace)
+            self.profile[:] = interp1d(length, points, "quadratic", 0)(linspace)
         except ValueError:
             self.profile[:] = np.zeros((self.point_number, 2))
 
     @cached_property
     def theta(self):
         """Return full theta array."""
-        return np.linspace(0, 2*np.pi, self.point_number)
+        return np.linspace(0, 2 * np.pi, self.point_number)
 
     @cached_property
     def upper_point_number(self):
@@ -715,82 +743,97 @@ class Separatrix(Plot, PlasmaProfile):
     @property
     def x_point_number(self):
         """Return number of profile points to the lower x-point."""
-        return bisect.bisect_right(self.theta, self['theta_o'] + np.pi)
+        return bisect.bisect_right(self.theta, self["theta_o"] + np.pi)
 
     @cached_property
     def theta_upper(self):
         """Return upper theta array 0<=theta<np.pi."""
-        return self.theta[:self.upper_point_number]
+        return self.theta[: self.upper_point_number]
 
     @property
     def theta_lower_hfs(self):
         """Return lower theta array on the high field side."""
-        return self.theta[self.upper_point_number:self.x_point_number]
+        return self.theta[self.upper_point_number : self.x_point_number]
 
     @property
     def theta_lower_lfs(self):
         """Return lower theta array on the low field side."""
-        return np.linspace(-self['theta_o'], 0,
-                           self.point_number - self.x_point_number)
+        return np.linspace(-self["theta_o"], 0, self.point_number - self.x_point_number)
 
     @staticmethod
     def miller_profile(theta, minor_radius, elongation, triangularity):
         """Return Miller profile."""
-        return minor_radius * np.c_[
-            np.cos(theta + np.arcsin(triangularity) * np.sin(theta)),
-            elongation * np.sin(theta)]
+        return (
+            minor_radius
+            * np.c_[
+                np.cos(theta + np.arcsin(triangularity) * np.sin(theta)),
+                elongation * np.sin(theta),
+            ]
+        )
 
     def limiter(self, *args, **kwargs):
         """Update points - symetric limiter."""
         self.update_coefficents(*args, **kwargs)
-        self.points = self.miller_profile(self.theta, self.minor_radius,
-                                          self.elongation, self.triangularity)
+        self.points = self.miller_profile(
+            self.theta, self.minor_radius, self.elongation, self.triangularity
+        )
         return self
 
     def single_null(self, *args, **kwargs):
         """Update points - lower single null."""
         self.update_coefficents(*args, **kwargs)
-        self.set_x_point(kwargs.get('x_point', None))
+        self.set_x_point(kwargs.get("x_point", None))
         self.adjust_elongation_lower()
         upper = self.miller_profile(
-            self.theta_upper, self.minor_radius,
-            self.elongation_upper, self.triangularity_upper)
-        x_i = (1 - self.triangularity_lower**2)**0.5 / \
-            (self.elongation_lower - (1 - self.triangularity_lower**2)**0.5)
-        k_o = self.elongation_lower / (1 - x_i**2)**0.5
+            self.theta_upper,
+            self.minor_radius,
+            self.elongation_upper,
+            self.triangularity_upper,
+        )
+        x_i = (1 - self.triangularity_lower**2) ** 0.5 / (
+            self.elongation_lower - (1 - self.triangularity_lower**2) ** 0.5
+        )
+        k_o = self.elongation_lower / (1 - x_i**2) ** 0.5
         x_1 = (x_i - self.triangularity_lower) / (1 - x_i)
         x_2 = (x_i + self.triangularity_lower) / (1 - x_i)
-        self.coef['theta_o'] = np.arctan((1 - x_i**2)**0.5 / x_i)
-        lower_hfs = self.minor_radius * np.c_[
-            x_1 + (1 + x_1) * np.cos(self.theta_lower_hfs),
-            k_o * np.sin(self.theta_lower_hfs)]
-        lower_lfs = self.minor_radius * np.c_[
-            -x_2 + (1 + x_2) * np.cos(self.theta_lower_lfs),
-            k_o * np.sin(self.theta_lower_lfs)]
-        self.points = np.vstack((lower_lfs[:-1], upper,
-                                 lower_hfs, lower_lfs[0]))
+        self.coef["theta_o"] = np.arctan((1 - x_i**2) ** 0.5 / x_i)
+        lower_hfs = (
+            self.minor_radius
+            * np.c_[
+                x_1 + (1 + x_1) * np.cos(self.theta_lower_hfs),
+                k_o * np.sin(self.theta_lower_hfs),
+            ]
+        )
+        lower_lfs = (
+            self.minor_radius
+            * np.c_[
+                -x_2 + (1 + x_2) * np.cos(self.theta_lower_lfs),
+                k_o * np.sin(self.theta_lower_lfs),
+            ]
+        )
+        self.points = np.vstack((lower_lfs[:-1], upper, lower_hfs, lower_lfs[0]))
         return self
 
     def plot(self, axes=None, **kwargs):
         """Plot last closed flux surface."""
-        self.get_axes('2d', axes)
-        self.axes.plot(*self.points.T, '-', lw=1.5, color='C6')
+        self.get_axes("2d", axes)
+        self.axes.plot(*self.points.T, "-", lw=1.5, color="C6")
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     geometric_axis = (5.2, 0)
     minor_radius, elongation, triangularity = 0.5, 1.5, 0.3
     profile = Separatrix(point_number=201).limiter(
-        *geometric_axis, minor_radius, elongation, triangularity)
+        *geometric_axis, minor_radius, elongation, triangularity
+    )
     shape = LCFS(profile.points)
 
     profile.plot()
     shape.plot(True)
 
-    #quad = Quadrant(minor_radius, elongation*minor_radius, 3)
-    #quad.plot(geometric_axis, profile.axes)
+    # quad = Quadrant(minor_radius, elongation*minor_radius, 3)
+    # quad.plot(geometric_axis, profile.axes)
 
-    #square = Squareness(profile.points,
+    # square = Squareness(profile.points,
     #                    shape.z_rmax, shape.r_zmax, shape.z_rmin, shape.r_zmin)
-    #square.plot()
+    # square.plot()

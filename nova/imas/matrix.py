@@ -13,7 +13,7 @@ class Matrix(Operate):
 
     pulse: int = 135014
     run: int = 1
-    pf_active: Ids | bool | str = 'iter_md'
+    pf_active: Ids | bool | str = "iter_md"
     time_index: int = 315
     nforce: int | float = 500
     nfield: int | float = 50
@@ -21,12 +21,12 @@ class Matrix(Operate):
     def write(self):
         """Write coupling matricies to file."""
         self.fsys.makedirs(str(self.path / self.filename), exist_ok=True)
-        for attr in ['field', 'force']:
-            data_attrs = getattr(self, attr).data.attributes + ['index']
+        for attr in ["field", "force"]:
+            data_attrs = getattr(self, attr).data.attributes + ["index"]
             data = getattr(self, attr).data[data_attrs].copy()
             data.attrs = dict(itime=self.itime) | self.ids_attrs
             data.attrs |= self.metadata
-            filepath = self.path / self.filename / f'{attr}.nc'
+            filepath = self.path / self.filename / f"{attr}.nc"
             data.to_netcdf(filepath)
 
     def plot(self):
@@ -53,23 +53,30 @@ class Benchmark(Matrix):
     @cached_property
     def profile_index(self):
         """Return common coil index for profile data."""
-        return [i for i, name in
-                enumerate(self.profile.data.coil_name.data)
-                if name in self.sloc.frame.index]
+        return [
+            i
+            for i, name in enumerate(self.profile.data.coil_name.data)
+            if name in self.sloc.frame.index
+        ]
 
     @cached_property
     def sloc_index(self):
         """Return common coil index for profile data."""
-        return [self.sloc.frame.index.get_loc(name) for name in
-                self.profile.data.coil_name[self.profile_index].data
-                if name in self.sloc.frame.index]
+        return [
+            self.sloc.frame.index.get_loc(name)
+            for name in self.profile.data.coil_name[self.profile_index].data
+            if name in self.sloc.frame.index
+        ]
 
     def _check_coil_names(self):
         """Check for consistent coil labels between frame and profile data."""
-        assert all(n == i for index, name in
-                   zip(self.sloc['coil', :].index,
-                       self.profile.data.coil_name.data)
-                   for n, i in zip(name, index))
+        assert all(
+            n == i
+            for index, name in zip(
+                self.sloc["coil", :].index, self.profile.data.coil_name.data
+            )
+            for n, i in zip(name, index)
+        )
 
     def update(self):
         """Supress plasma shape update."""
@@ -78,64 +85,68 @@ class Benchmark(Matrix):
 
     def update_current(self):
         """Update coil currents from profile data."""
-        self.sloc['coil', 'Ic'] = 0
-        self.sloc[self.sloc_index, 'Ic'] = \
-            self.profile['current'][self.profile_index]
-        self.sloc['plasma', 'Ic'] = self.profile['ip']
+        self.sloc["coil", "Ic"] = 0
+        self.sloc[self.sloc_index, "Ic"] = self.profile["current"][self.profile_index]
+        self.sloc["plasma", "Ic"] = self.profile["ip"]
 
     def plot_force(self):
         """Plot timeslice force benchmark."""
-        self.set_axes('1d', nrows=3, sharex=True)
-        self.axes[0].bar(self.force.coil_name, self.force.fr*1e-6,
-                         label='matrix')
-        self.axes[0].bar(self.profile.data.coil_name,
-                         self.profile['radial_force']*1e-6, width=0.6,
-                         label='ids')
+        self.set_axes("1d", nrows=3, sharex=True)
+        self.axes[0].bar(self.force.coil_name, self.force.fr * 1e-6, label="matrix")
+        self.axes[0].bar(
+            self.profile.data.coil_name,
+            self.profile["radial_force"] * 1e-6,
+            width=0.6,
+            label="ids",
+        )
         self.axes[0].legend()
 
-        self.axes[1].bar(self.force.coil_name, self.force.fz*1e-6)
-        self.axes[1].bar(self.profile.data.coil_name,
-                         self.profile['vertical_force']*1e-6, width=0.6)
+        self.axes[1].bar(self.force.coil_name, self.force.fz * 1e-6)
+        self.axes[1].bar(
+            self.profile.data.coil_name,
+            self.profile["vertical_force"] * 1e-6,
+            width=0.6,
+        )
 
-        self.axes[2].bar(self.force.coil_name, self.force.fc*1e-6)
+        self.axes[2].bar(self.force.coil_name, self.force.fc * 1e-6)
         self.axes[2].set_xticks(range(len(self.force.coil_name)))
         self.axes[2].set_xticklabels(self.force.coil_name, rotation=90)
 
-        self.axes[0].set_ylabel(r'$f_r$ MN')
-        self.axes[1].set_ylabel(r'$f_z$ MN')
-        self.axes[2].set_ylabel(r'$f_c$ MN')
+        self.axes[0].set_ylabel(r"$f_r$ MN")
+        self.axes[1].set_ylabel(r"$f_z$ MN")
+        self.axes[2].set_ylabel(r"$f_c$ MN")
 
     def plot_field(self):
         """Plot timeslice maximum L2 norm field benchmark."""
-        self.set_axes('1d')
-        self.axes.bar(self.field.coil_name, self.field.bn,
-                      label='matrix')
-        self.axes.bar(self.profile.data.coil_name,
-                      self.profile['b_field_max_timed'], width=0.6,
-                      label='ids')
+        self.set_axes("1d")
+        self.axes.bar(self.field.coil_name, self.field.bn, label="matrix")
+        self.axes.bar(
+            self.profile.data.coil_name,
+            self.profile["b_field_max_timed"],
+            width=0.6,
+            label="ids",
+        )
         self.axes.set_xticks(range(len(self.field.coil_name)))
         self.axes.set_xticklabels(self.field.coil_name, rotation=90)
-        self.axes.set_ylabel(r'$b_n$ T')
+        self.axes.set_ylabel(r"$b_n$ T")
         self.axes.legend()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
+    # matrix = Matrix()
+    # matrix.write()
 
-    #matrix = Matrix()
-    #matrix.write()
-
-    benchmark = Benchmark(ngrid=None, tplasma='hex')
+    benchmark = Benchmark(ngrid=None, tplasma="hex")
     benchmark.itime = -1
-    #benchmark.plot_force()
-    #benchmark.plot_field()
+    # benchmark.plot_force()
+    # benchmark.plot_field()
 
-    benchmark.set_axes('2d')
+    benchmark.set_axes("2d")
     benchmark.plot()
 
+    # benchmark.plasmagrid.plot()
 
-    #benchmark.plasmagrid.plot()
+    # matrix = Matrix()
 
-    #matrix = Matrix()
-
-    #matrix.itime = 300
-    #matrix.plot()
+    # matrix.itime = 300
+    # matrix.plot()

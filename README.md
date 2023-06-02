@@ -1,18 +1,14 @@
 
-Nova
-----
+# nova: Python toolkit for equilibrium generation / reconstruction and scenario design
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-Python toolkit for equilibrium generation / reconstruction and scenario design
-
-
-Introduction
-------------
+## Introduction
 
 **nova** is a Python package built to facilitate the generation and interpretation of magnetically confined plasma equilibria. This package extends [pandas](http://pandas.pydata.org) objects to add domain specific support for plasma filaments, electromagnetic coils, passive structures and circuits via `FrameSpace` types. Core electromagnetic calculations are implemented using a grid-free approach based on Biot-Savart integrals. Multi-dimensional data is represented internally using [xarray]( https://docs.xarray.dev). The results of expensive calculations are cached as [netCDF](https://www.unidata.ucar.edu/software/netcdf) files.
 
 
-Dependancies 
-------------
+## Dependancies 
+
 - [appdirs - Provides OS independent file system support]
 - [click - Facilitates the implementation of CLI tools]
 - [contourpy - Fast level-set contouring]
@@ -31,8 +27,7 @@ Dependancies
 - [xxhash - Fast hashing to ensure calculations are only performed where necessary]
 
 
-Install
--------
+## Install
 
 ```sh
 # development package using poetry with a pipx install

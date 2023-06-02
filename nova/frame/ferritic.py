@@ -28,25 +28,25 @@ class ShieldBase:
     def check_avalible(self):
         """Check avaliblity of requested sector."""
         if self.sector not in self.avalible:
-            raise IndexError(f'sector {self.sector} not in {self.avalible}')
+            raise IndexError(f"sector {self.sector} not in {self.avalible}")
 
 
 @dataclass
 class ShieldDir:
     """Manage shield filepath."""
 
-    file: str = 'Fi'
+    file: str = "Fi"
     path: str = None
 
     def __post_init__(self):
         """Define file paths."""
         if self.path is None:
-            self.path = os.path.join(root_dir, 'input/ITER/shield')
+            self.path = os.path.join(root_dir, "input/ITER/shield")
 
     @property
     def cdf_file(self):
         """Return netCDF filename."""
-        return os.path.join(self.path, f'{self.file}.nc')
+        return os.path.join(self.path, f"{self.file}.nc")
 
 
 @dataclass
@@ -66,7 +66,7 @@ class ShieldCad(ShieldDir, ShieldBase):
     def cdf_file(self):
         """Return sector cdf filename as _{file}.cdf."""
         path, file = os.path.split(super().cdf_file)
-        return os.path.join(path, f'_{file}')
+        return os.path.join(path, f"_{file}")
 
     @property
     def data(self):
@@ -76,23 +76,23 @@ class ShieldCad(ShieldDir, ShieldBase):
     @property
     def frame_metadata(self):
         """Return frame metadata."""
-        return dict(label=f'fi{self.sector}', body='panel', delim='_')
+        return dict(label=f"fi{self.sector}", body="panel", delim="_")
 
     def frame_data(self, vtk: vedo.Mesh):
         """Return frame data."""
-        return dict(vtk=vtk, part=f'fi{self.sector}', ferritic=True)
+        return dict(vtk=vtk, part=f"fi{self.sector}", ferritic=True)
 
     @property
     def vtk_file(self):
         """Retun full vtk filename."""
-        return os.path.join(self.path, f'{self.file}_S{self.sector}.vtk')
+        return os.path.join(self.path, f"{self.file}_S{self.sector}.vtk")
 
     @property
     def stl_file(self):
         """Return full stl filename."""
-        file = os.path.join(self.path, f'{self.file}_S{self.sector}.stl')
+        file = os.path.join(self.path, f"{self.file}_S{self.sector}.stl")
         if not os.path.isfile(file):
-            raise FileNotFoundError(f'stl file {file} not found')
+            raise FileNotFoundError(f"stl file {file} not found")
         return file
 
     def load_mesh(self):
@@ -114,7 +114,7 @@ class ShieldCad(ShieldDir, ShieldBase):
     def load_frame(self):
         """Return shield dataframe."""
         try:
-            return FrameSpace().load(self.cdf_file, f'S{self.sector}')
+            return FrameSpace().load(self.cdf_file, f"S{self.sector}")
         except (FileNotFoundError, OSError):
             return self.build_frame()
 
@@ -122,7 +122,7 @@ class ShieldCad(ShieldDir, ShieldBase):
         """Return dataframe read from vtk file."""
         parts = self.mesh.splitByConnectivity(10000)
         frame = FrameSpace(**self.frame_metadata)
-        tick = clock(len(parts), header='loading decimated convex hulls')
+        tick = clock(len(parts), header="loading decimated convex hulls")
         for i, part in enumerate(parts):
             frame += self.frame_data(part.c(i))
             tick.tock()
@@ -131,8 +131,8 @@ class ShieldCad(ShieldDir, ShieldBase):
 
     def store_frame(self, frame):
         """Write frame to netCDF file."""
-        mode = 'a' if os.path.isfile(self.cdf_file) else 'w'
-        frame.store(self.cdf_file, f'S{self.sector}', mode=mode)
+        mode = "a" if os.path.isfile(self.cdf_file) else "w"
+        frame.store(self.cdf_file, f"S{self.sector}", mode=mode)
 
     def plot(self):
         """Plot vtk mesh."""
@@ -150,13 +150,13 @@ class ShieldSector(ShieldCad):
         """Extend ShieldCad build sector mesh via base rotation."""
         if self.sector in ShieldCad.avalible:
             return super().build_mesh()
-        return self.rotate('mesh')
+        return self.rotate("mesh")
 
     def build_frame(self):
         """Extend ShieldCad build sector frame via base rotation."""
         if self.sector in ShieldCad.avalible:
             return super().build_frame()
-        return self.rotate('frame')
+        return self.rotate("frame")
 
     def rotate(self, attribute: str):
         """Perform base rotation."""
@@ -167,25 +167,25 @@ class ShieldSector(ShieldCad):
 
     def _rotate(self):
         """Generate mesh and frame data via rotation from base."""
-        degrees = 40*(self.sector-self.base_sector)
+        degrees = 40 * (self.sector - self.base_sector)
         base = ShieldCad(self.base_sector, file=self.file)
         self.mesh = self.rotate_mesh(base.mesh, degrees)
         self.frame = self.rotate_frame(base.frame, degrees)
 
     def rotate_mesh(self, base_mesh: vedo.Mesh, degrees: float):
         """Return rotated mesh and save output to vtk file."""
-        mesh = base_mesh.clone().rotate(degrees, axis=(0, 0, 1),
-                                        point=(0, 0, 0))
+        mesh = base_mesh.clone().rotate(degrees, axis=(0, 0, 1), point=(0, 0, 0))
         self.store_mesh(mesh)
         return mesh
 
     def rotate_frame(self, base_frame: FrameSpace, degrees: float):
         """Rotate base frame and save output to netCDF file."""
         frame = FrameSpace(**self.frame_metadata)
-        tick = clock(len(base_frame),
-                     header=f'rotating baseframe {self.base_sector} '
-                            f'to {self.sector}')
-        for vtk in base_frame.loc[:, 'vtk']:
+        tick = clock(
+            len(base_frame),
+            header=f"rotating baseframe {self.base_sector} " f"to {self.sector}",
+        )
+        for vtk in base_frame.loc[:, "vtk"]:
             vtk = vtk.clone().rotate(degrees, axis=(0, 0, 1), point=(0, 0, 0))
             frame += self.frame_data(vtk)
             tick.tock()
@@ -197,7 +197,7 @@ class ShieldSector(ShieldCad):
 class ShieldSet(ShieldDir):
     """Manage complete ferritic insert dataset."""
 
-    file: str = 'Fi'
+    file: str = "Fi"
     mesh: vedo.Mesh = field(init=False, repr=False)
     frame: FrameSpace = field(init=False, repr=False)
     avalible: ClassVar[list[int]] = range(1, 10)
@@ -211,7 +211,7 @@ class ShieldSet(ShieldDir):
     @property
     def vtk_file(self):
         """Retun full vtk filename."""
-        return os.path.join(self.path, f'{self.file}.vtk')
+        return os.path.join(self.path, f"{self.file}.vtk")
 
     def load_mesh(self):
         """Return mesh."""
@@ -228,8 +228,7 @@ class ShieldSet(ShieldDir):
 
     def build_mesh(self):
         """Build complete ferritic sheildset vtk mesh."""
-        tick = clock(len(self.avalible),
-                     header='building ferritic insert mesh')
+        tick = clock(len(self.avalible), header="building ferritic insert mesh")
         mesh = []
         for i in self.avalible:
             sector = ShieldSector(i, file=self.file)
@@ -241,15 +240,14 @@ class ShieldSet(ShieldDir):
 
     def build_frame(self):
         """Build complete ferritic sheildset dataframe."""
-        tick = clock(len(self.avalible),
-                     header='building ferritic insert dataset')
+        tick = clock(len(self.avalible), header="building ferritic insert dataset")
         frame = []
         for i in self.avalible:
             sector = ShieldSector(i, file=self.file)
             frame.append(sector.frame)
             tick.tock()
         frame = FrameSpace().concatenate(*frame)
-        frame.store(self.cdf_file, mode='w')
+        frame.store(self.cdf_file, mode="w")
         return frame
 
     def plot_mesh(self):
@@ -258,7 +256,7 @@ class ShieldSet(ShieldDir):
 
     def plot_points(self):
         """Plot centroid point cloud."""
-        vedo.show(vedo.Mesh(self.frame.loc[:, ['x', 'y', 'z']].values))
+        vedo.show(vedo.Mesh(self.frame.loc[:, ["x", "y", "z"]].values))
 
 
 @dataclass
@@ -277,48 +275,50 @@ class Cluster:
 
     def cluster(self):
         """Cluster shield panels."""
-        points = self.source.loc[:, ['x', 'y', 'z']].values
-        eps = self.factor*self.source.dt.max()
+        points = self.source.loc[:, ["x", "y", "z"]].values
+        eps = self.factor * self.source.dt.max()
         cluster = sklearn.cluster.DBSCAN(eps=eps, min_samples=1).fit(points)
         frame = FrameSpace()
         for i, label in enumerate(set(cluster.labels_)):
             index = label == cluster.labels_
             vtksum = self.merge(index)
-            name = f'{vtksum.name.rstrip(digits)}{i}'
+            name = f"{vtksum.name.rstrip(digits)}{i}"
             frame += vtksum.to_dict() | dict(name=name)
-            frame.loc[name, ['x', 'y', 'z']] = self.centroid(index)
+            frame.loc[name, ["x", "y", "z"]] = self.centroid(index)
         return frame
 
     def merge(self, index):
         """Return vtk framespace sum."""
         dataseries = self.source.loc[index, :].iloc[0].copy()
-        vtk = vedo.merge(*self.source.loc[index, 'vtk'])
+        vtk = vedo.merge(*self.source.loc[index, "vtk"])
         if self.color is not None:
             vtk.c(self.color)
         if self.opacity is not None:
             vtk.opacity(self.opacity)
-        dataseries.loc['vtk'] = vtk
+        dataseries.loc["vtk"] = vtk
         return dataseries
 
     def centroid(self, index):
         """Return volume weighted centroid."""
-        centroids = self.source.loc[index, ['x', 'y', 'z']].values
-        volumes = self.source.loc[index, 'volume'].values.reshape(-1, 1)
+        centroids = self.source.loc[index, ["x", "y", "z"]].values
+        volumes = self.source.loc[index, "volume"].values.reshape(-1, 1)
         centroid = np.sum(centroids * volumes, axis=0)
         centroid /= np.sum(volumes)
         return centroid
 
     def plot(self):
         """Plot source and clustered vtk framesets."""
-        vedo.show(vedo.merge(*self.source.vtk),
-                  vedo.merge(*self.frame.vtk).opacity(0.75).c('b'))
+        vedo.show(
+            vedo.merge(*self.source.vtk),
+            vedo.merge(*self.frame.vtk).opacity(0.75).c("b"),
+        )
 
 
 @dataclass
 class ShieldCluster(ShieldDir):
     """Manage clustered ferritic insert dataset."""
 
-    file: str = 'Fi'
+    file: str = "Fi"
     frame: FrameSpace = field(init=False, default_factory=FrameSpace)
 
     def __post_init__(self):
@@ -330,7 +330,7 @@ class ShieldCluster(ShieldDir):
     def cdf_file(self):
         """Return clustered cfd filename."""
         file, ext = os.path.splitext(super().cdf_file)
-        return f'{file}c{ext}'
+        return f"{file}c{ext}"
 
     def load(self):
         """Load clustered shield frameset."""
@@ -349,13 +349,12 @@ class ShieldCluster(ShieldDir):
         shield = ShieldSet(self.file)  # load source dataset
         parts = shield.frame.part.unique()
         frames = []
-        tick = clock(len(parts), header='clustering shield set')
+        tick = clock(len(parts), header="clustering shield set")
         for i, part in enumerate(parts):
-            frames.append(Cluster(shield.frame.loc[part, :],
-                                  color=i, opacity=1).frame)
+            frames.append(Cluster(shield.frame.loc[part, :], color=i, opacity=1).frame)
             tick.tock()
         frame.concatenate(*frames)
-        frame.store(self.cdf_file, mode='w')
+        frame.store(self.cdf_file, mode="w")
         return frame
 
     def plot(self):
@@ -369,8 +368,15 @@ class FerriticBase(FrameSetLoc):
 
     delta: float = -1
     name: str | None = None
-    default: dict = field(init=False, default_factory=lambda: {
-        'label': 'Fi', 'part': 'fi', 'ferritic': True, 'active': False})
+    default: dict = field(
+        init=False,
+        default_factory=lambda: {
+            "label": "Fi",
+            "part": "fi",
+            "ferritic": True,
+            "active": False,
+        },
+    )
 
     @property
     def attrs(self):
@@ -380,7 +386,7 @@ class FerriticBase(FrameSetLoc):
     @attrs.setter
     def attrs(self, attrs):
         self._attrs = self.default | attrs
-        self.attrs.pop('vtk', None)
+        self.attrs.pop("vtk", None)
 
     def insert(self, vtk, iloc=None, **additional):
         """
@@ -402,17 +408,17 @@ class FerriticBase(FrameSetLoc):
 
         """
         self.attrs = additional
-        with self.insert_required('vtk'):
+        with self.insert_required("vtk"):
             name = self.frame.build_index(1, **self.attrs)[0]
-            self.attrs.pop('name', None)
-            self.attrs |= dict(frame=name, label=name, delim='_')
+            self.attrs.pop("name", None)
+            self.attrs |= dict(frame=name, label=name, delim="_")
             # insert subframes
             index = self.subframe.insert(vtk, iloc=iloc, **self.attrs)
             subframe = self.subframe.loc[index, :]
             # insert frame
             self.attrs |= subframe.iloc[0].to_dict()
-            self.attrs |= dict(body='insert', delim='', name=name)
-            self.attrs.pop('poly', None)
+            self.attrs |= dict(body="insert", delim="", name=name)
+            self.attrs.pop("poly", None)
             vtk = vedo.merge(*subframe.vtk)
             self.frame.insert(vtk, iloc=iloc, **self.attrs)
 
@@ -448,12 +454,11 @@ class Ferritic(FerriticBase):
         super().insert(vtk, iloc=iloc, **additional)
 
     def _update_label(self, additional):
-        if 'label' in additional:
-            self.attrs['label'] = additional['label']
-            self.attrs.pop('name', None)
+        if "label" in additional:
+            self.attrs["label"] = additional["label"]
+            self.attrs.pop("name", None)
 
-    def insert_frame(self, frame, multiframe=True, iloc=None, body='vtk',
-                     **additional):
+    def insert_frame(self, frame, multiframe=True, iloc=None, body="vtk", **additional):
         """Insert vtk objects from frame."""
         if not multiframe:
             self.attrs = additional | frame.iloc[0].to_dict()
@@ -463,7 +468,7 @@ class Ferritic(FerriticBase):
             index = part == frame.part
             _frame = frame.iloc[np.argmax(index)]
             self.attrs = additional | _frame.to_dict()
-            self.attrs['name'] = _frame.get('frame', _frame['part'])
+            self.attrs["name"] = _frame.get("frame", _frame["part"])
             self._update_label(additional)
             super().insert(frame.loc[index, :], iloc=iloc, **self.attrs)
 
@@ -476,27 +481,26 @@ class Ferritic(FerriticBase):
         return ShieldSet(file).frame
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     cad = ShieldCad(1)
-    #print(sum([ShieldCad(i).frame.volume.sum() for i in range(1, 10)]))
-    #base.frame = base.build_frame()
-    #print(base.frame.volume.sum())
-    #print(base.frame.volume.sum())
-    #shield = ShieldSet()
-    #shield.frame = shield.build_frame()
-    #print(shield.frame.volume.sum())
+    # print(sum([ShieldCad(i).frame.volume.sum() for i in range(1, 10)]))
+    # base.frame = base.build_frame()
+    # print(base.frame.volume.sum())
+    # print(base.frame.volume.sum())
+    # shield = ShieldSet()
+    # shield.frame = shield.build_frame()
+    # print(shield.frame.volume.sum())
 
-    #[ShieldCad(i).mesh.volume() for i in [2, 3, 4, 6]]
-    #[ShieldCad(i).mesh.volume() for i in [2, 3, 4, 6]]
+    # [ShieldCad(i).mesh.volume() for i in [2, 3, 4, 6]]
+    # [ShieldCad(i).mesh.volume() for i in [2, 3, 4, 6]]
 
     shield = ShieldCluster()
     print(shield.frame.volume.sum())
     vedo.show(*shield.frame.vtk)
 
-    '''
+    """
     mesh = []
     for i in range(1, 5):
         mesh.append(ShieldSector(i).mesh.rotate_z(-i*40).c(i).opacity(0.5))
     vedo.show(mesh)
-    '''
+    """

@@ -56,7 +56,7 @@ def bisect_2d(vector, value):
 def length_2d(x_coordinate, z_coordinate):
     """Return the cumalative length of a 2d polyline."""
     points = np.column_stack((x_coordinate, z_coordinate))
-    delta = np.sqrt(np.sum((points[1:] - points[:-1])**2, axis=1))
+    delta = np.sqrt(np.sum((points[1:] - points[:-1]) ** 2, axis=1))
     return np.append(0, delta.cumsum())
 
 
@@ -64,7 +64,8 @@ def length_2d(x_coordinate, z_coordinate):
 def quadratic_wall(w_cluster, psi_cluster):
     """Return psi quatratic coefficients."""
     coefficient_matrix = np.column_stack(
-        (w_cluster**2, w_cluster, np.ones_like(w_cluster)))
+        (w_cluster**2, w_cluster, np.ones_like(w_cluster))
+    )
     coefficients = np.linalg.lstsq(coefficient_matrix, psi_cluster)[0]
     return coefficients
 
@@ -72,7 +73,7 @@ def quadratic_wall(w_cluster, psi_cluster):
 @njit(cache=True)
 def wall_length(coef):
     """Return location of wall null."""
-    return -coef[1] / (2*coef[0])
+    return -coef[1] / (2 * coef[0])
 
 
 @njit(cache=True)
@@ -88,9 +89,9 @@ def wall_index(psi_wall):
     """Return cluster index and roll."""
     index = np.argmax(psi_wall)
     if index == 0:
-        return index+1, 1
-    if index == len(psi_wall)-1:
-        return index-1, -1
+        return index + 1, 1
+    if index == len(psi_wall) - 1:
+        return index - 1, -1
     return index, 0
 
 
@@ -99,20 +100,21 @@ def wall_flux(x_wall, z_wall, psi_wall, polarity=1):
     """Return sub-panel wall flux coordinates and value."""
     if polarity == 0:  # zero plasma current
         return 0, 0, 0
-    index, roll = wall_index(polarity*psi_wall)
+    index, roll = wall_index(polarity * psi_wall)
     if roll != 0:
         x_wall = np.roll(x_wall, roll)
         z_wall = np.roll(z_wall, roll)
         psi_wall = np.roll(psi_wall, roll)
-    x_cluster = x_wall[index-1:index+2]
-    z_cluster = z_wall[index-1:index+2]
-    psi_cluster = psi_wall[index-1:index+2]
+    x_cluster = x_wall[index - 1 : index + 2]
+    z_cluster = z_wall[index - 1 : index + 2]
+    psi_cluster = psi_wall[index - 1 : index + 2]
     w_cluster = length_2d(x_cluster, z_cluster)
     coef = quadratic_wall(w_cluster, psi_cluster)
     w_coordinate = wall_length(coef)
-    psi = coef[0]*w_coordinate**2 + coef[1]*w_coordinate + coef[2]
+    psi = coef[0] * w_coordinate**2 + coef[1] * w_coordinate + coef[2]
     x_coordinate, z_coordinate = wall_coordinate(
-        w_coordinate, x_cluster, z_cluster, w_cluster)
+        w_coordinate, x_cluster, z_cluster, w_cluster
+    )
     return x_coordinate, z_coordinate, psi
 
 
@@ -120,8 +122,15 @@ def wall_flux(x_wall, z_wall, psi_wall, polarity=1):
 def quadratic_surface(x_cluster, z_cluster, psi_cluster):
     """Return psi quatratic surface coefficients."""
     coefficient_matrix = np.column_stack(
-        (x_cluster**2, z_cluster**2, x_cluster, z_cluster,
-         x_cluster*z_cluster, np.ones_like(x_cluster)))
+        (
+            x_cluster**2,
+            z_cluster**2,
+            x_cluster,
+            z_cluster,
+            x_cluster * z_cluster,
+            np.ones_like(x_cluster),
+        )
+    )
     coefficients = np.linalg.lstsq(coefficient_matrix, psi_cluster)[0]
     return coefficients
 
@@ -142,16 +151,16 @@ def null_type(coefficients, atol=1e-12):
     ValueError
         degenerate surface
     """
-    root = 4*coefficients[0]*coefficients[1] - coefficients[4]**2
+    root = 4 * coefficients[0] * coefficients[1] - coefficients[4] ** 2
     if abs(root) < atol:
-        raise ValueError('Plane surface')
+        raise ValueError("Plane surface")
     if root < 0:
         return 0
     if coefficients[0] > 0 and coefficients[1] > 0:
         return -1
     if coefficients[0] < 0 and coefficients[1] < 0:
         return 1
-    raise ValueError('Coefficients form a degenerate surface.')
+    raise ValueError("Coefficients form a degenerate surface.")
 
 
 @njit(cache=True)
@@ -171,25 +180,38 @@ def null_coordinate(coefficients, cluster=None):
     ValueError
         subgrid coordinate outside cluster
     """
-    root = 4*coefficients[0]*coefficients[1] - coefficients[4]**2
-    x_coordinate = (coefficients[4]*coefficients[3] -
-                    2*coefficients[1]*coefficients[2]) / root
-    z_coordinate = (coefficients[4]*coefficients[2] -
-                    2*coefficients[0]*coefficients[3]) / root
+    root = 4 * coefficients[0] * coefficients[1] - coefficients[4] ** 2
+    x_coordinate = (
+        coefficients[4] * coefficients[3] - 2 * coefficients[1] * coefficients[2]
+    ) / root
+    z_coordinate = (
+        coefficients[4] * coefficients[2] - 2 * coefficients[0] * coefficients[3]
+    ) / root
     if cluster is not None:
         for i, coord in enumerate([x_coordinate, z_coordinate]):
             maximum, minimum = np.max(cluster[i]), np.min(cluster[i])
             delta = maximum - minimum
-            assert coord >= minimum - 2*delta
-            assert coord <= maximum + 2*delta
+            assert coord >= minimum - 2 * delta
+            assert coord <= maximum + 2 * delta
     return x_coordinate, z_coordinate
 
 
 @njit(cache=True)
 def null(coef, coords):
     """Return null poloidal flux."""
-    return np.array([coords[0]**2, coords[1]**2, coords[0], coords[1],
-                     coords[0]*coords[1], 1]) @ coef
+    return (
+        np.array(
+            [
+                coords[0] ** 2,
+                coords[1] ** 2,
+                coords[0],
+                coords[1],
+                coords[0] * coords[1],
+                1,
+            ]
+        )
+        @ coef
+    )
 
 
 def subnull(x_cluster, z_cluster, psi_cluster):

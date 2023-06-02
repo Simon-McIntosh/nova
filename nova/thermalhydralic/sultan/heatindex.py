@@ -13,8 +13,9 @@ class HeatIndex:
     data: pandas.DataFrame = field(repr=False)
     _threshold: float = 0.25
     _index: slice = field(init=False, default=None)
-    reload: SimpleNamespace = field(init=True, repr=False,
-                                    default_factory=SimpleNamespace)
+    reload: SimpleNamespace = field(
+        init=True, repr=False, default_factory=SimpleNamespace
+    )
 
     def __post_init__(self):
         """Init reload namespace."""
@@ -47,8 +48,7 @@ class HeatIndex:
     @threshold.setter
     def threshold(self, threshold):
         if threshold < 0 or threshold > 1:
-            raise ValueError(f'heat threshold {threshold} '
-                             'must lie between 0 and 1')
+            raise ValueError(f"heat threshold {threshold} " "must lie between 0 and 1")
         self._threshold = threshold
         self.reload.threshold = False
         self.reload.index = True
@@ -62,12 +62,11 @@ class HeatIndex:
 
         """
         if self.reload.index:
-            current = self.data.loc[:, ('Ipulse', 'A')]
+            current = self.data.loc[:, ("Ipulse", "A")]
             abs_current = current.abs()
             max_current = abs_current.max()
-            threshold_index = np.where(abs_current >=
-                                       self.threshold*max_current)[0]
-            self._index = slice(threshold_index[0], threshold_index[-1]+1)
+            threshold_index = np.where(abs_current >= self.threshold * max_current)[0]
+            self._index = slice(threshold_index[0], threshold_index[-1] + 1)
             self.reload.index = False
         return self._index
 
@@ -84,7 +83,7 @@ class HeatIndex:
     @property
     def time(self):
         """Return start / end time tuple of input heating period, read-only."""
-        return self.data.loc[[self.start, self.stop], ('t', 's')].values
+        return self.data.loc[[self.start, self.stop], ("t", "s")].values
 
     @property
     def time_delta(self):

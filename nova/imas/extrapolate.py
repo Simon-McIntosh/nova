@@ -152,11 +152,11 @@ class Extrapolate(Operate):
 
     def select_free_coils(self):
         """Assign free coils."""
-        index = [self.loc[name, 'subref'] for name in self.sloc.frame.index]
-        self.saloc['free'] = self.frame.iloc[index].nturn >= self.nturn
-        self.saloc['free'] = self.saloc['free'] & ~self.saloc['plasma']
+        index = [self.loc[name, "subref"] for name in self.sloc.frame.index]
+        self.saloc["free"] = self.frame.iloc[index].nturn >= self.nturn
+        self.saloc["free"] = self.saloc["free"] & ~self.saloc["plasma"]
 
-    #def update_metadata(self):
+    # def update_metadata(self):
     #    """Return extrapolated equilibrium ids."""
     #    ids = imas.equilibrium()
     #    Properties('EquilibriumData extrapolation',
@@ -167,22 +167,23 @@ class Extrapolate(Operate):
 
     def update_current(self):
         """Only update plasma current (ignore coil currents if present."""
-        self.sloc['plasma', 'Ic'] = self['ip']
+        self.sloc["plasma", "Ic"] = self["ip"]
 
     def update(self):
         """Solve pf_active currents to fit internal flux."""
         super().update()
-        ionize = self.aloc['ionize']
-        plasma = self.aloc['plasma']
-        radius = self.aloc['x'][ionize]
-        height = self.aloc['z'][ionize]
+        ionize = self.aloc["ionize"]
+        plasma = self.aloc["plasma"]
+        radius = self.aloc["x"][ionize]
+        height = self.aloc["z"][ionize]
         plasma_index = self.plasmagrid.data.plasma_index
-        matrix = self.plasmagrid['Psi'][ionize[plasma]]
+        matrix = self.plasmagrid["Psi"][ionize[plasma]]
         internal = -self.psi_rbs(radius, height)  # COCOS11
-        target = internal - matrix[:, plasma_index]*float(self['ip'])
-        moore_penrose = MoorePenrose(matrix=matrix[:, self.saloc['free']],
-                                     gamma=self.gamma)
-        self.saloc['Ic'][self.saloc['free']] = moore_penrose / target
+        target = internal - matrix[:, plasma_index] * float(self["ip"])
+        moore_penrose = MoorePenrose(
+            matrix=matrix[:, self.saloc["free"]], gamma=self.gamma
+        )
+        self.saloc["Ic"][self.saloc["free"]] = moore_penrose / target
 
     def boundary_mask(self, mask):
         """Return boundary mask."""
@@ -192,11 +193,11 @@ class Extrapolate(Operate):
             case int() if mask == 1:
                 return self.grid.mask(self.boundary)
             case _:
-                raise IndexError(f'mask {mask} not in [-1, 1]')
+                raise IndexError(f"mask {mask} not in [-1, 1]")
 
     def masked_data(self, attr: str, mask=0):
         """Return masked data."""
-        data = getattr(self.grid, f'{attr}_')
+        data = getattr(self.grid, f"{attr}_")
         if mask == 0:
             return data
         return np.ma.masked_array(data, self.boundary_mask(mask), copy=True)
@@ -206,36 +207,45 @@ class Extrapolate(Operate):
         match mask:
             case None:
                 return -1, None, None
-            case 'plasma':
+            case "plasma":
                 return -1, -1, None
-            case 'ids':
+            case "ids":
                 return 0, -1, None
-            case 'nova':
+            case "nova":
                 return 0, -1, 1
-            case 'map':
+            case "map":
                 return 0, -1, 1
 
-    def plot_2d_masked(self, attr='psi', mask=None, levels=51, axes=None):
+    def plot_2d_masked(self, attr="psi", mask=None, levels=51, axes=None):
         """Plot masked 2d data."""
         masks = self.get_masks(mask)
         if masks[0] is not None:
             try:
-                if attr == 'psi':
+                if attr == "psi":
                     _levels = -levels[::-1]
                 else:
                     _levels = levels
-                super().plot_2d(attr, mask=masks[0], levels=_levels,
-                                colors='gray', axes=self.axes)
+                super().plot_2d(
+                    attr, mask=masks[0], levels=_levels, colors="gray", axes=self.axes
+                )
             except KeyError:
                 pass
         if masks[1] is not None:
-            self.grid.plot(self.masked_data(attr, masks[1]), levels=levels,
-                           colors='C0', nulls=False)
+            self.grid.plot(
+                self.masked_data(attr, masks[1]),
+                levels=levels,
+                colors="C0",
+                nulls=False,
+            )
         if masks[2] is not None:
-            self.grid.plot(self.masked_data(attr, masks[2]), levels=levels,
-                           colors='C2', nulls=False)
+            self.grid.plot(
+                self.masked_data(attr, masks[2]),
+                levels=levels,
+                colors="C2",
+                nulls=False,
+            )
 
-    def plot_2d(self, attr='psi', mask=None, levels=51, axes=None):
+    def plot_2d(self, attr="psi", mask=None, levels=51, axes=None):
         """Plot plasma filements and polidal flux.
 
         Examples
@@ -263,8 +273,8 @@ class Extrapolate(Operate):
         >>> extrapolate.itime = 20
         >>> extrapolate.plot_2d('psi')
         """
-        self.get_axes('2d', axes=axes)
-        super().plot(axes=self.axes)#'plasma')
+        self.get_axes("2d", axes=axes)
+        super().plot(axes=self.axes)  #'plasma')
         self.plasma.wall.plot()
         vector = getattr(self.grid, attr)
         levels = np.linspace(vector.min(), vector.max(), levels)
@@ -275,104 +285,121 @@ class Extrapolate(Operate):
         """Make frame for annimation."""
         self.axes.clear()
         max_time = np.min([self.data.time[-1], self.max_time])
-        itime = bisect.bisect_left(
-            self.data.time, max_time * time / self.duration)
+        itime = bisect.bisect_left(self.data.time, max_time * time / self.duration)
         try:
             self.itime = itime
         except ValueError:
             pass
         # self.plot_bar()
-        self.plot_2d('psi', mask='map', axes=self.axes)
-        self.mpl['pyplot'].tight_layout()
+        self.plot_2d("psi", mask="map", axes=self.axes)
+        self.mpl["pyplot"].tight_layout()
         return self.mpy.mplfig_to_npimage(self.fig)
 
-    def annimate(self, duration: float, filename='extrapolate'):
+    def annimate(self, duration: float, filename="extrapolate"):
         """Generate annimiation."""
         self.duration = duration
         self.max_time = 150
-        animation = self.mpy.editor.VideoClip(
-            self._make_frame, duration=duration)
-        animation.write_gif(f'{filename}.gif', fps=10)
+        animation = self.mpy.editor.VideoClip(self._make_frame, duration=duration)
+        animation.write_gif(f"{filename}.gif", fps=10)
 
     def plot_bar(self):
         """Plot coil currents for single time-slice."""
-        index = [name for name in self.subframe.subspace.index
-                 if name in self.data.coil_name.data]
-        self.get_axes(None, '1d')
-        self.axes.barh(index, 1e-3*self['current'].loc[index].data,
-                       color='gray', label='ids')
-        self.axes.barh(index, 1e-3*self.sloc[index, ['Ic']].squeeze().values,
-                       color='C0', label='nova', height=0.5)
+        index = [
+            name
+            for name in self.subframe.subspace.index
+            if name in self.data.coil_name.data
+        ]
+        self.get_axes(None, "1d")
+        self.axes.barh(
+            index, 1e-3 * self["current"].loc[index].data, color="gray", label="ids"
+        )
+        self.axes.barh(
+            index,
+            1e-3 * self.sloc[index, ["Ic"]].squeeze().values,
+            color="C0",
+            label="nova",
+            height=0.5,
+        )
         self.axes.invert_yaxis()
         self.axes.set_xlim([-40, 40])
-        self.axes.set_xlabel('current kA')
-        self.axes.legend(ncol=2, loc='upper center',
-                         bbox_to_anchor=(0.5, 1.05))
+        self.axes.set_xlabel("current kA")
+        self.axes.legend(ncol=2, loc="upper center", bbox_to_anchor=(0.5, 1.05))
 
     def plot_waveform(self, ip_index=0.05):
         """Plot coil current waveform."""
-        time_index = abs(self.data.ip) > ip_index*abs(self.data.ip).max()
-        name_map = dict(CS1='CS1U', VS3='VS3U')
-        coil_name = [name_map.get(name, name)
-                     for name in self.data.coil_name.data]
+        time_index = abs(self.data.ip) > ip_index * abs(self.data.ip).max()
+        name_map = dict(CS1="CS1U", VS3="VS3U")
+        coil_name = [name_map.get(name, name) for name in self.data.coil_name.data]
         self.data = self.data.assign_coords(dict(coil_name=coil_name))
 
-        index = [name for name in self.subframe.subspace.index
-                 if name in self.data.coil_name.data]
-        data_index = [np.where(self.data.coil_name.data == name)[0][0]
-                      for name in index]
-        self.data['_current'] = self.data.current.copy()
-        for itime in tqdm(range(self.data.dims['time'])):
+        index = [
+            name
+            for name in self.subframe.subspace.index
+            if name in self.data.coil_name.data
+        ]
+        data_index = [
+            np.where(self.data.coil_name.data == name)[0][0] for name in index
+        ]
+        self.data["_current"] = self.data.current.copy()
+        for itime in tqdm(range(self.data.dims["time"])):
             self.itime = itime
-            self['_current'][data_index] = \
-                self.sloc[index, ['Ic']].squeeze().values
+            self["_current"][data_index] = self.sloc[index, ["Ic"]].squeeze().values
 
         # switch reference sign for vs3 loop (Upper to Lower)
         self.data._current[:, -1] *= -1
 
-        self.get_axes('1d')
-        self.axes.plot(self.data.time[time_index],
-                       1e-3*self.data.current[time_index, data_index],
-                       color='gray')
-        self.axes.plot(self.data.time[time_index],
-                       1e-3*self.data._current[time_index, data_index],
-                       color='C0')
-        self.axes.set_xlabel('time s')
-        self.axes.set_ylabel('current kA')
+        self.get_axes("1d")
+        self.axes.plot(
+            self.data.time[time_index],
+            1e-3 * self.data.current[time_index, data_index],
+            color="gray",
+        )
+        self.axes.plot(
+            self.data.time[time_index],
+            1e-3 * self.data._current[time_index, data_index],
+            color="C0",
+        )
+        self.axes.set_xlabel("time s")
+        self.axes.set_ylabel("current kA")
         self.axes.set_ylim([-45, 45])
-        Line2D = self.mpl['lines'].Line2D
-        self.axes.legend(handles=[Line2D([0], [0], label='ids', color='gray'),
-                                  Line2D([0], [0], label='nova', color='C0')],
-                         ncol=2, loc='upper center',
-                         bbox_to_anchor=(0.5, 1.1))
+        Line2D = self.mpl["lines"].Line2D
+        self.axes.legend(
+            handles=[
+                Line2D([0], [0], label="ids", color="gray"),
+                Line2D([0], [0], label="nova", color="C0"),
+            ],
+            ncol=2,
+            loc="upper center",
+            bbox_to_anchor=(0.5, 1.1),
+        )
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     # pulse, run = 114101, 41  # JINTRAC
     pulse, run = 130506, 403  # CORSICA
     pulse, run = 105028, 1  # DINA
     # pulse, run = 135011, 7  # DINA
     pulse, run = 135013, 2
 
-    extrapolate = Extrapolate(pulse, run, pf_passive=False,
-                              pf_active='iter_md')
+    extrapolate = Extrapolate(pulse, run, pf_passive=False, pf_active="iter_md")
 
     import matplotlib.pylab as plt
+
     extrapolate.mpl_axes.fig = plt.figure(figsize=(6, 9))
 
     # extrapolate.plot_waveform()
 
     extrapolate.time = 143.9
-    extrapolate.plot_2d('psi', mask='map')
+    extrapolate.plot_2d("psi", mask="map")
     plt.tight_layout()
 
     from nova.imas.pf_passive import PF_Passive
+
     pf_passive = PF_Passive(pulse, run)
 
-    #plt.savefig('build.png')
+    # plt.savefig('build.png')
 
-    #extrapolate.plot_bar()
-    #extrapolate.plasmagrid.plot()
+    # extrapolate.plot_bar()
+    # extrapolate.plasmagrid.plot()
 
-    #extrapolate.annimate(5, filename=filename)
+    # extrapolate.annimate(5, filename=filename)

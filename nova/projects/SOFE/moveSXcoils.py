@@ -14,35 +14,36 @@ from nova.firstwall import main_chamber
 from nova.shape import Shape
 
 import seaborn as sns
-sns.set(context='talk', style='white', font='sans-serif', font_scale=7 / 8)
-Color = cycle(sns.color_palette('Set2'))
+
+sns.set(context="talk", style="white", font="sans-serif", font_scale=7 / 8)
+Color = cycle(sns.color_palette("Set2"))
 
 
-
-pkl = PKL('DEMO_SX', directory='../../Movies/')
+pkl = PKL("DEMO_SX", directory="../../Movies/")
 
 
 nTF = 16
-base = {'TF': 'demo', 'eq': 'DEMO_SX'}
+base = {"TF": "demo", "eq": "DEMO_SX"}
 config, setup = select(base, nTF=nTF, update=False)
 
-setup_ref = Setup('DEMO_SN_SOF')  # referance plasma
+setup_ref = Setup("DEMO_SN_SOF")  # referance plasma
 sf = SF(setup_ref.filename)
 sf.sol()
 
 
 pf = PF(sf.eqdsk)
 
-for coil in pf.index['CS']['name']:
-    pf.coil[coil]['r'] = 2.7
-    pf.coil[coil]['dr'] = 0.8
+for coil in pf.index["CS"]["name"]:
+    pf.coil[coil]["r"] = 2.7
+    pf.coil[coil]["dr"] = 0.8
 
-profile = Profile(config['TF'], family='S', part='TF', nTF=nTF, obj='L')
+profile = Profile(config["TF"], family="S", part="TF", nTF=nTF, obj="L")
 tf = TF(profile=profile, sf=sf)
 
 inv = INV(pf, tf, dCoil=0.5)
-inv.colocate(sf, n=3e3, expand=0.5, centre=0, width=250/(2*np.pi),
-             SX=True, setup=setup)
+inv.colocate(
+    sf, n=3e3, expand=0.5, centre=0, width=250 / (2 * np.pi), SX=True, setup=setup
+)
 
 # inv.set_limit(FPFz=50)
 inv.wrap_PF(solve=True)
@@ -52,9 +53,15 @@ inv.optimize()
 
 pf.plot()
 
-mc = main_chamber('demo_SX')
-mc.generate(['DEMO_SN_SOF', 'DEMO_SN_EOF'], dx=0.225, psi_n=1.07,
-            flux_fit=True, plot=False, symetric=False)
+mc = main_chamber("demo_SX")
+mc.generate(
+    ["DEMO_SN_SOF", "DEMO_SN_EOF"],
+    dx=0.225,
+    psi_n=1.07,
+    flux_fit=True,
+    plot=False,
+    symetric=False,
+)
 
 inv.eq.resample(limit=[5.5, 14, -12, 6])
 inv.eq.run(update=True)
@@ -64,15 +71,15 @@ rb = RB(sf, setup)
 rb.generate(mc, plot=True, DN=False, debug=False)
 sf.contour()
 
-#tf.minimise(rb.segment['vessel_outer'], ripple=True,
+# tf.minimise(rb.segment['vessel_outer'], ripple=True,
 #            ny=1, nr=3, verbose=True)
 tf.fill()
 
 sf.eqwrite(pf, config=setup.configuration)
-pkl.write(data={'sf': sf, 'inv': inv, 'rb': rb, 'tf': tf})  # pickle data
+pkl.write(data={"sf": sf, "inv": inv, "rb": rb, "tf": tf})  # pickle data
 
 
-'''
+"""
 
 
 #inv.eq.plotb()
@@ -91,9 +98,9 @@ inv.plot_coils()
 
 # loops.plot_variables(inv.Io, scale=1, postfix='MA')
 # loops.plot_variables(inv.Lo, scale=1)
-'''
+"""
 
-'''
+"""
 
 inv.set_swing(centre=0, width=10, array=np.linspace(-0.5, 0.5, 3))
 inv.set_force_feild()
@@ -121,9 +128,9 @@ shp = Shape(tf.profile, eqconf=config['eq_base'], ny=3)
 shp.add_vessel(rb.segment['vessel_outer'])
 # shp.minimise(ripple=ripple,verbose=True)
 shp.tf.fill()
-'''
+"""
 
-'''
+"""
 inv.Lnorm = Lnorm
 sw = SWING(inv,sf)
 sw.flat_top()
@@ -133,9 +140,9 @@ for ends,name in zip([0,-1],['SOF','EOF']):
     inv.solve_slsqp(inv.swing['flux'][ends])
     eq.run(update=False)
     sf.eqwrite(pf,config='SXex_{}'.format(name))
-'''
+"""
 
-'''
+"""
 rb.write_json(tf=shp.tf)
 
 loops.plot_variables(inv.Io, scale=1, postfix='MA')
@@ -143,9 +150,9 @@ loops.plot_variables(inv.Lo, scale=1)
 
 sf.eqwrite(pf, config='SXex')
 pkl.write(data={'sf': sf, 'eq': eq, 'inv': inv})  # pickle data
-'''
+"""
 
-'''
+"""
 eq.gen_opp()
 
 #rb.firstwall(calc=False,plot=True,debug=False)
@@ -191,9 +198,9 @@ loops.plot_variables(inv.Io,scale=1,postfix='MA')
 loops.plot_variables(inv.Lo,scale=1)
 
 #
-'''
+"""
 
-'''
+"""
 
 #inv.write_swing()
 #sf.eqwrite(config='SXex')
@@ -225,4 +232,4 @@ print('R/X',Rsol[-1]/sf.Xpoint[0])
 print('Itotal',inv.Itotal*1e-6,'MA')
 print('R',rb.targets['outer']['Rsol'][-1],'Z',
       rb.targets['outer']['Zsol'][-1])
-'''
+"""

@@ -9,10 +9,11 @@ def plot(points, cells, ax=None, **kwargs):
     if ax is None:
         ax = plt.gca()
     xy = np.c_[points[:, 0], points[:, 1]]
-    for element in ['triangle', 'quad']:
+    for element in ["triangle", "quad"]:
         if element in cells:
             index = cells[element]
             verts = xy[index]
             pc = matplotlib.collections.PolyCollection(
-                    verts, facecolors=None, edgecolors='gray')
+                verts, facecolors=None, edgecolors="gray"
+            )
             ax.add_collection(pc)

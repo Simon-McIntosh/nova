@@ -6,14 +6,21 @@ from matplotlib import colors
 
 
 class linelabel(object):
-
-    def __init__(self, MaxLines=100, Ndiv=10, value='1.1f', postfix='',
-                 ax='', loc='end'):
+    def __init__(
+        self, MaxLines=100, Ndiv=10, value="1.1f", postfix="", ax="", loc="end"
+    ):
         self.ylabel = np.zeros(
-                (MaxLines,), dtype=[('x', 'float'), ('y', 'float'),
-                                    ('text', '|S80'), ('color', '3float'),
-                                    ('alpha', 'float'), ('value', '|S20'),
-                                    ('postfix', '|S20')])
+            (MaxLines,),
+            dtype=[
+                ("x", "float"),
+                ("y", "float"),
+                ("text", "|S80"),
+                ("color", "3float"),
+                ("alpha", "float"),
+                ("value", "|S20"),
+                ("postfix", "|S20"),
+            ],
+        )
         self.index = 0
         self.Ndiv = Ndiv
         self.value = value
@@ -21,7 +28,7 @@ class linelabel(object):
         self.ax = ax
         self.loc = loc
 
-    def add(self, label, loc='', value='', postfix='', **kwargs):
+    def add(self, label, loc="", value="", postfix="", **kwargs):
         if not self.ax:
             ax = plt.gca()
         else:
@@ -29,30 +36,29 @@ class linelabel(object):
         if len(loc) == 0:
             loc = self.loc
         line = ax.get_lines()[-1]
-        color = kwargs.get('color', line.get_color())
-        alpha = kwargs.get('alpha', line.get_alpha())
+        color = kwargs.get("color", line.get_color())
+        alpha = kwargs.get("alpha", line.get_alpha())
         if not alpha:
             alpha = 1
         data = line.get_data()
         if np.nanmax(data[1]) == np.min(data[1]):
-            loc = 'end'
-        if loc == 'max':
+            loc = "end"
+        if loc == "max":
             n = np.argmax(data[1])
-        elif loc == 'min':
+        elif loc == "min":
             n = np.argmin(data[1])
-        elif loc == 'start':
+        elif loc == "start":
             n = 0
-        elif loc == 'xlim':
+        elif loc == "xlim":
             xlim = ax.get_xlim()
             n = np.argmin(abs(xlim[-1] - data[0]))
         else:
             n = -1
         x, y = data[0][n], data[1][n]
-        x = kwargs.get('x', x)
+        x = kwargs.get("x", x)
         if isinstance(color, str):  # convert to rgb
             color = colors.hex2color(color)
-        self.ylabel[self.index] = (x, y, label, color[:3],
-                                   alpha, value, postfix)
+        self.ylabel[self.index] = (x, y, label, color[:3], alpha, value, postfix)
         self.index += 1
 
     def space(self, yo):
@@ -66,14 +72,14 @@ class linelabel(object):
 
     def fit(self, yo, args=()):
         y = self.space(yo)
-        err = np.sum((y - args)**2)
+        err = np.sum((y - args) ** 2)
         return err
 
-    def plot(self, xscale='', yscale='', Ralign=False, Roffset=0, fs=None):
+    def plot(self, xscale="", yscale="", Ralign=False, Roffset=0, fs=None):
         if self.index == 0:
-            raise ValueError('no lines defined - use self.add() after plt.')
+            raise ValueError("no lines defined - use self.add() after plt.")
         if fs is None:
-            fs = matplotlib.rcParams['legend.fontsize']
+            fs = matplotlib.rcParams["legend.fontsize"]
         if not self.ax:
             ax = plt.gca()
         else:
@@ -86,21 +92,21 @@ class linelabel(object):
             xscale = ax.get_xscale()
         if not yscale:
             yscale = ax.get_yscale()
-        self.ylabel = self.ylabel[:self.index]  # trim
-        self.ylabel = np.sort(self.ylabel, order='y')
-        if xscale == 'log':
-            self.ylabel['x'][self.ylabel['x'] == 0] = xlim[0]
-        if yscale == 'log':
-            self.ylabel['y'][self.ylabel['y'] == 0] = ylim[0]
-        yref = self.ylabel['y']
-        if xscale == 'log':
+        self.ylabel = self.ylabel[: self.index]  # trim
+        self.ylabel = np.sort(self.ylabel, order="y")
+        if xscale == "log":
+            self.ylabel["x"][self.ylabel["x"] == 0] = xlim[0]
+        if yscale == "log":
+            self.ylabel["y"][self.ylabel["y"] == 0] = ylim[0]
+        yref = self.ylabel["y"]
+        if xscale == "log":
             dx = 10 * xlim[1]
         else:
             dx = np.diff(xlim)
         dy = np.diff(ylim) / self.Ndiv
-        if yscale == 'log':
+        if yscale == "log":
             b = np.log10(ylim[1] / ylim[0]) / (ylim[1] - ylim[0])
-            a = ylim[0] / 10**(b * ylim[0])
+            a = ylim[0] / 10 ** (b * ylim[0])
             yref = np.log10(yref / a) / b
             ylim = np.log10(ylim / a) / b
             # dy = np.log10(dy/a)/b
@@ -113,36 +119,53 @@ class linelabel(object):
         for i in range(len(yo) - 1):
             bounds.append((dy, None))
 
-        yo = op.minimize(self.fit, yo, args=(yref),
-                         bounds=bounds, method='L-BFGS-B',
-                         tol=1e-6, options={'disp': False}).x
+        yo = op.minimize(
+            self.fit,
+            yo,
+            args=(yref),
+            bounds=bounds,
+            method="L-BFGS-B",
+            tol=1e-6,
+            options={"disp": False},
+        ).x
         y = self.space(yo)
 
-        if yscale == 'log':
-            y = a * 10**(b * y)
+        if yscale == "log":
+            y = a * 10 ** (b * y)
 
         for i in range(self.index):
             if Ralign:
-                xmax = np.nanmax(self.ylabel['x']) + 0.06 * dx + Roffset
+                xmax = np.nanmax(self.ylabel["x"]) + 0.06 * dx + Roffset
             else:
-                xmax = self.ylabel['x'][i] + 0.06 * dx + Roffset
-            ax.plot([self.ylabel['x'][i] + 0.01 * dx, xmax - 0.01 * dx],
-                    [self.ylabel['y'][i], y[i]],
-                    '-', color=self.ylabel['color'][i],
-                    linewidth=1, alpha=0.5)  # alpha=self.ylabel['alpha'][i]
-            label = self.ylabel['text'][i].decode()
-            value = self.ylabel['value'][i].decode()
-            postfix = self.ylabel['postfix'][i].decode()
+                xmax = self.ylabel["x"][i] + 0.06 * dx + Roffset
+            ax.plot(
+                [self.ylabel["x"][i] + 0.01 * dx, xmax - 0.01 * dx],
+                [self.ylabel["y"][i], y[i]],
+                "-",
+                color=self.ylabel["color"][i],
+                linewidth=1,
+                alpha=0.5,
+            )  # alpha=self.ylabel['alpha'][i]
+            label = self.ylabel["text"][i].decode()
+            value = self.ylabel["value"][i].decode()
+            postfix = self.ylabel["postfix"][i].decode()
 
-            if (self.value or value) and value != 'None':
+            if (self.value or value) and value != "None":
                 if not value:
                     value = self.value
                 if not postfix:
                     postfix = self.postfix
-                label += ' {:{value}}'.format(self.ylabel['y'][i],
-                                              value=value) + postfix
-            ax.text(xmax, y[i], label,
-                    va='center', color=self.ylabel['color'][i], fontsize=fs,
-                    alpha=self.ylabel['alpha'][i])
+                label += (
+                    " {:{value}}".format(self.ylabel["y"][i], value=value) + postfix
+                )
+            ax.text(
+                xmax,
+                y[i],
+                label,
+                va="center",
+                color=self.ylabel["color"][i],
+                fontsize=fs,
+                alpha=self.ylabel["alpha"][i],
+            )
         # ax.set_xticks(xticks)
         # sns.despine(trim=True)

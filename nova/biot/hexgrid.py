@@ -17,21 +17,27 @@ class HexGrid(Proximate, PlasmaGrid):
 
     limit: float = 0.2
     kd_factor: float = 0.1
-    turn: str = 'hexagon'
+    turn: str = "hexagon"
     tile: bool = True
 
-    def solve(self, number=None, limit=None, index='plasma'):
+    def solve(self, number=None, limit=None, index="plasma"):
         """Overwrid PlasmaGrid.solve to permit arbitrary solution domains."""
         if limit is None:
             limit = self.limit
         with self.solve_biot(number) as number:
             if number is not None:
                 limit = Expand(self.subframe, index)(limit)
-                target = PolyGrid(limit, delta=-number,
-                                  turn=self.turn, tile=self.tile).frame
+                target = PolyGrid(
+                    limit, delta=-number, turn=self.turn, tile=self.tile
+                ).frame
                 wall = box(*limit[::2], *limit[1::2]).boundary
-                self.data = Solve(self.subframe, target, reduce=[True, False],
-                                  attrs=self.attrs, name=self.name).data
+                self.data = Solve(
+                    self.subframe,
+                    target,
+                    reduce=[True, False],
+                    attrs=self.attrs,
+                    name=self.name,
+                ).data
                 self.tessellate(target, wall)
 
     def load_operators(self):

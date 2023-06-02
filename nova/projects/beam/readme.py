@@ -6,7 +6,7 @@ Created on Thu Aug 10 07:31:37 2017
 @author: Simon
 """
 
-'''
+"""
 notes for stress evaluation
 beam element has three major components
 
@@ -39,4 +39,4 @@ sx = d2w E z + d2v E y
 svm = sqrt()
 
 
-'''
+"""

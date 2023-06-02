@@ -1,4 +1,4 @@
-'''
+"""
 import pandas as pd
            
 data = {}            
@@ -34,9 +34,10 @@ csvwriter = csv.DictWriter(test_file, delimiter=',', fieldnames=fieldnames)
 for row in test_array:
      csvwriter.writerow(row)
 test_file.close()
-'''
+"""
 import csv
-with open('eggs.csv', 'w', newline='') as csvfile:
-    writer = csv.writer(csvfile, delimiter=',')
+
+with open("eggs.csv", "w", newline="") as csvfile:
+    writer = csv.writer(csvfile, delimiter=",")
     writer.writerow(demo.parts.keys())
-    writer.writerow(['Spam', 'Lovely Spam', 'Wonderful Spam'])
+    writer.writerow(["Spam", "Lovely Spam", "Wonderful Spam"])

@@ -9,17 +9,18 @@ from nova.frame.framesetloc import FrameSetLoc
 class Data(netCDF, FrameSetLoc):
     """Biot solution abstract base class."""
 
-    attrs: list[str] = field(
-        default_factory=lambda: ['Br', 'Bz', 'Psi'])
+    attrs: list[str] = field(default_factory=lambda: ["Br", "Bz", "Psi"])
     number: int | float | None = field(default=None)
     name: str | None = None
     classname: str = field(init=False)
 
     def __post_init__(self):
         """Init path and link line current and plasma index."""
-        self.subframe.metaframe.metadata = \
-            {'additional': ['plasma', 'nturn'],
-             'array': ['plasma', 'nturn'], 'subspace': ['Ic']}
+        self.subframe.metaframe.metadata = {
+            "additional": ["plasma", "nturn"],
+            "array": ["plasma", "nturn"],
+            "subspace": ["Ic"],
+        }
         self.subframe.update_columns()
         self.classname = self.__class__.__name__
         super().__post_init__()
@@ -30,10 +31,11 @@ class Data(netCDF, FrameSetLoc):
 
     def post_solve(self):
         """Post process biot solution - extened by subclass."""
-        self.data.attrs['classname'] = self.classname
+        self.data.attrs["classname"] = self.classname
         try:
-            self.data.attrs['plasma_index'] = next(
-                self.frame.subspace.index.get_loc(name) for name in
-                self.subframe.frame[self.aloc['plasma']].unique())
+            self.data.attrs["plasma_index"] = next(
+                self.frame.subspace.index.get_loc(name)
+                for name in self.subframe.frame[self.aloc["plasma"]].unique()
+            )
         except StopIteration:
-            self.data.attrs['plasma_index'] = -1
+            self.data.attrs["plasma_index"] = -1

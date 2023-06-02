@@ -65,9 +65,9 @@ import struct
 
 import numpy
 
-__version__ = '2013.01.18'
-__docformat__ = 'restructuredtext en'
-__all__ = ['QDAfile']
+__version__ = "2013.01.18"
+__docformat__ = "restructuredtext en"
+__all__ = ["QDAfile"]
 
 
 class QDAfile(object):
@@ -95,8 +95,9 @@ class QDAfile(object):
         sequence of column data types ('>f4', '>f8', or '>i4')
 
     """
-    _fileid = {b'\x00\x06': 6, b'\x00\x08': 8, b'\x00\x0C': 12}
-    _dtypes = {0: '>f4', 3: '>f8', 4: '>i4', '>f4': 0, '>f8': 3, '>i4': 4}
+
+    _fileid = {b"\x00\x06": 6, b"\x00\x08": 8, b"\x00\x0C": 12}
+    _dtypes = {0: ">f4", 3: ">f8", 4: ">i4", ">f4": 0, ">f8": 3, ">i4": 4}
 
     def __init__(self, arg=None, **kwargs):
         """Initialize instance using file name/descriptor or data array.
@@ -117,10 +118,10 @@ class QDAfile(object):
 
         if arg is None:
             self._fromdata([], **kwargs)
-        elif isinstance(arg, basestring if sys.version[0] == '2' else str):
-            with open(arg, 'rb') as fh:
+        elif isinstance(arg, basestring if sys.version[0] == "2" else str):
+            with open(arg, "rb") as fh:
                 self._fromfile(fh)
-        elif hasattr(arg, 'seek'):
+        elif hasattr(arg, "seek"):
             self._fromfile(arg)
         else:
             self._fromdata(arg, **kwargs)
@@ -129,10 +130,10 @@ class QDAfile(object):
         """Save data to QDA file."""
         if arg is None:
             arg = self.name
-        if hasattr(arg, 'seek'):
+        if hasattr(arg, "seek"):
             self._tofile(arg)
         else:
-            with open(arg, 'wb') as fh:
+            with open(arg, "wb") as fh:
                 self._tofile(fh)
 
     def _fromfile(self, fh):
@@ -147,25 +148,29 @@ class QDAfile(object):
         except KeyError:
             raise IOError("not a QDA file or unsupported version")
 
-        columns = numpy.fromfile(fh, dtype='>i2', count=1)[0]
+        columns = numpy.fromfile(fh, dtype=">i2", count=1)[0]
         if 1000 < columns < 0:
             raise IOError("not a QDA file")
 
         fh.read(512 - 4)
-        rows = list(numpy.fromfile(fh, count=columns,
-                                   dtype='>i4' if self.fid == 12 else '>i2'))
+        rows = list(
+            numpy.fromfile(fh, count=columns, dtype=">i4" if self.fid == 12 else ">i2")
+        )
 
         try:
-            dtypes = [self._dtypes[dt] for dt in
-                      numpy.fromfile(fh, dtype='>i2', count=columns)]
+            dtypes = [
+                self._dtypes[dt]
+                for dt in numpy.fromfile(fh, dtype=">i2", count=columns)
+            ]
         except KeyError:
             raise IOError("the file contains data of unsupported type")
 
-        headers = [s.split(b'\x00', 1)[0] for s in
-                   numpy.fromfile(fh, dtype='S40', count=columns)]
+        headers = [
+            s.split(b"\x00", 1)[0]
+            for s in numpy.fromfile(fh, dtype="S40", count=columns)
+        ]
 
-        data = numpy.empty((columns, max(rows) if rows else 0),
-                           dtype=numpy.float64)
+        data = numpy.empty((columns, max(rows) if rows else 0), dtype=numpy.float64)
         data[:] = numpy.NaN
         for i, (row, dtype) in enumerate(zip(rows, dtypes)):
             data[i, 0:row] = numpy.fromfile(fh, dtype=dtype, count=row)
@@ -178,14 +183,15 @@ class QDAfile(object):
         self.rows = rows
         self.headers = headers
 
-    def _fromdata(self, data, name="Untitled.qda", headers=None,
-                  rows=None, dtypes=None):
+    def _fromdata(
+        self, data, name="Untitled.qda", headers=None, rows=None, dtypes=None
+    ):
         """Initialize instance from data array and optional arguments.
 
         Raises ValueError if data is incompatible with file format.
 
         """
-        data = numpy.array(data, dtype='>f8')
+        data = numpy.array(data, dtype=">f8")
         data = numpy.atleast_2d(data)
         if len(data.shape) > 2:
             raise ValueError("data array must be 2 dimensional or less")
@@ -226,11 +232,9 @@ class QDAfile(object):
             except (IndexError, KeyError):
                 raise ValueError("invalid dtypes argument")
         else:
-            dtypes = ['>f8'] * columns
+            dtypes = [">f8"] * columns
 
-        if (len(dtypes) != columns
-                or len(headers) != columns
-                or len(rows) != columns):
+        if len(dtypes) != columns or len(headers) != columns or len(rows) != columns:
             raise ValueError("invalid argument(s)")
 
         self.fid = 12
@@ -243,34 +247,37 @@ class QDAfile(object):
 
     def _tofile(self, fh):
         """Write data to an open file."""
-        fh.write(b'\x00\x0C')
-        fh.write(struct.pack('>h', self.columns))
-        fh.write(b'\x00\x0E\x01\x02\x00\x05\x00\x01')
-        fh.write(b'\x00' * (512 - 12))
-        func = str if sys.version[0] == '2' else lambda x: bytes(x, 'ascii')
+        fh.write(b"\x00\x0C")
+        fh.write(struct.pack(">h", self.columns))
+        fh.write(b"\x00\x0E\x01\x02\x00\x05\x00\x01")
+        fh.write(b"\x00" * (512 - 12))
+        func = str if sys.version[0] == "2" else lambda x: bytes(x, "ascii")
         for r in self.rows:
-            fh.write(struct.pack('>i', r))
+            fh.write(struct.pack(">i", r))
         for t in self.dtypes:
-            fh.write(struct.pack('>h', self._dtypes[t]))
+            fh.write(struct.pack(">h", self._dtypes[t]))
         for h in self.headers:
             h = func(h)
-            fh.write(h + b'\x00' * (40 - len(h)))
-        for i, (r, t, h) in enumerate(zip(self.rows, self.dtypes,
-                                          self.headers)):
+            fh.write(h + b"\x00" * (40 - len(h)))
+        for i, (r, t, h) in enumerate(zip(self.rows, self.dtypes, self.headers)):
             self.data[i, 0:r].astype(t).tofile(fh, format=t)
-            fh.write(b'\x00\x01' * r)
-            fh.write(b'\x0E\x02\x01\x00\x05\x00\x00\x01')
+            fh.write(b"\x00\x01" * r)
+            fh.write(b"\x0E\x02\x01\x00\x05\x00\x00\x01")
             h = func(h)
-            fh.write(h + b'\x00' * (128 - len(h)))
+            fh.write(h + b"\x00" * (128 - len(h)))
 
     def __str__(self):
-        return "\n".join("%14s: %s" % t for t in (
-            ("File Name", self.name),
-            ("File ID", self.fid),
-            ("Columns", self.columns),
-            ("Rows", self.rows),
-            ("Headers", self.headers),
-            ("Data Types", self.dtypes), ))
+        return "\n".join(
+            "%14s: %s" % t
+            for t in (
+                ("File Name", self.name),
+                ("File ID", self.fid),
+                ("Columns", self.columns),
+                ("Rows", self.rows),
+                ("Headers", self.headers),
+                ("Data Types", self.dtypes),
+            )
+        )
 
     def __len__(self):
         return len(self.data)
@@ -316,4 +323,5 @@ def unique_headers(number):
 
 if __name__ == "__main__":
     import doctest
+
     doctest.testmod()

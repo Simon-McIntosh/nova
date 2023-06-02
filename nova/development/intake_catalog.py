@@ -13,35 +13,36 @@ from nova.definitions import root_dir
 from nova.utilities.IO import pythonIO
 
 
-intake_dir = os.path.join(root_dir, 'data/Intake')
-tmp_file = os.path.join(intake_dir, 'tmp.nc')
-cat_file = os.path.join(intake_dir, 'DINA.yaml')
+intake_dir = os.path.join(root_dir, "data/Intake")
+tmp_file = os.path.join(intake_dir, "tmp.nc")
+cat_file = os.path.join(intake_dir, "DINA.yaml")
 
 cat = intake.open_catalog(cat_file)
-#cat.close()
+# cat.close()
 
 
 # create random data sources
 random = 500
 np.random.seed(random)
-data = pd.DataFrame(np.random.random((24, 5)),
-                    columns=['rain', 'sun', 'wind', 'grass', 'trees'])
+data = pd.DataFrame(
+    np.random.random((24, 5)), columns=["rain", "sun", "wind", "grass", "trees"]
+)
 data.to_csv(tmp_file)
 
-md5_hash = pythonIO.hash_file(tmp_file, algorithm='md5')
+md5_hash = pythonIO.hash_file(tmp_file, algorithm="md5")
 md5_file = os.path.join(intake_dir, md5_hash)
-md5_http = f'http://static.iter.org/imas/assets/nova/MD5/{md5_hash}'
+md5_http = f"http://static.iter.org/imas/assets/nova/MD5/{md5_hash}"
 
-'''
+"""
 subprocess.run(['scp', '-r', tmp_file,
                 'hpc-login.iter.org:/work/imas/shared/external/'
                 f'assets/nova/MD5/{md5_hash}'])
-'''
+"""
 
 source = intake.open_csv(md5_http)
-source.name = f'random{random}'
-source.description = f'random {random} dataset'
-source.metadata = {'IDM': 2342, 'other': '55'}
+source.name = f"random{random}"
+source.description = f"random {random} dataset"
+source.metadata = {"IDM": 2342, "other": "55"}
 
 print(source.discover())
 print(source)
@@ -89,7 +90,6 @@ for e in entries:
 #cat.save(cat_file)
 '''
 """
-
 
 
 """

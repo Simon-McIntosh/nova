@@ -13,15 +13,17 @@ class LocalData:
     """Local data methods."""
 
     experiment: str
-    parent: str = ''
-    source: str = ''
-    data: str = ''
+    parent: str = ""
+    source: str = ""
+    data: str = ""
 
     def __post_init__(self):
         """Create hierarchical list used by makedir and removedir methods."""
-        self._directories = [self.experiment_directory,
-                             self.source_directory,
-                             self.data_directory]
+        self._directories = [
+            self.experiment_directory,
+            self.source_directory,
+            self.data_directory,
+        ]
 
     @property
     def parent_directory(self):
@@ -44,7 +46,7 @@ class LocalData:
         return self.getdir(self.experiment_directory, self.data)
 
     @staticmethod
-    def getdir(directory, subfolder=''):
+    def getdir(directory, subfolder=""):
         """Return directory, append subfolder if passed."""
         if subfolder:
             directory = os.path.join(directory, subfolder)
@@ -72,7 +74,7 @@ class LocalData:
         for directory in self._directories[::-1]:
             os.rmdir(directory)
 
-    def locate(self, file, directory_prefix='source'):
+    def locate(self, file, directory_prefix="source"):
         """
         Locate file on local host.
 
@@ -97,22 +99,23 @@ class LocalData:
 
         """
         try:
-            directory = getattr(self, f'{directory_prefix}_directory')
+            directory = getattr(self, f"{directory_prefix}_directory")
         except AttributeError as error:
-            raise AttributeError('directory prefix undefined '
-                                 f'{directory_prefix}') from error
+            raise AttributeError(
+                "directory prefix undefined " f"{directory_prefix}"
+            ) from error
         filepath = os.path.join(directory, file)
-        localfile = ''
-        if '*' in file:
+        localfile = ""
+        if "*" in file:
             localfile = glob.glob(filepath)
             if len(localfile) == 0:
-                raise FileNotFoundError(f'No files found matching {file}')
+                raise FileNotFoundError(f"No files found matching {file}")
             if len(localfile) > 1:
-                raise IndexError(f'multiple files found {file} > {localfile}')
+                raise IndexError(f"multiple files found {file} > {localfile}")
             localfile = os.path.split(localfile[0])[1]
         else:
             if os.path.isfile(filepath):
                 localfile = file
             else:
-                raise FileNotFoundError(f'File {file} not found')
+                raise FileNotFoundError(f"File {file} not found")
         return localfile

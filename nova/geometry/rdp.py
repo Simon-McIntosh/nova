@@ -33,8 +33,9 @@ def pldist(point, start, end):
         return np.linalg.norm(point - start)
 
     return np.divide(
-            np.abs(np.linalg.norm(np.cross(end - start, start - point))),
-            np.linalg.norm(end - start))
+        np.abs(np.linalg.norm(np.cross(end - start, start - point))),
+        np.linalg.norm(end - start),
+    )
 
 
 def rdp_rec(M, epsilon, dist=pldist):
@@ -61,7 +62,7 @@ def rdp_rec(M, epsilon, dist=pldist):
             dmax = d
 
     if dmax > epsilon:
-        r1 = rdp_rec(M[:index + 1], epsilon, dist)
+        r1 = rdp_rec(M[: index + 1], epsilon, dist)
         r2 = rdp_rec(M[index:], epsilon, dist)
 
         return np.vstack((r1[:-1], r2))
@@ -173,7 +174,7 @@ def rdp(M, epsilon=0, dist=pldist, algo="iter", return_mask=False):
         algo = partial(rdp_iter, return_mask=return_mask)
     elif algo == "rec":
         if return_mask:
-            raise NotImplementedError("return_mask=True not supported with algo=\"rec\"")
+            raise NotImplementedError('return_mask=True not supported with algo="rec"')
         algo = rdp_rec
 
     if "numpy" in str(type(M)):

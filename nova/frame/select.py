@@ -22,7 +22,8 @@ class Label:
         self.exclude = self.to_list(self.exclude)
         self.preclude = self.to_list(self.preclude)
         self.exclude.extend(
-            [label for label in self.preclude if label not in self.exclude])
+            [label for label in self.preclude if label not in self.exclude]
+        )
         for label in self.include:
             if label in self.exclude:
                 self.exclude.remove(label)
@@ -38,34 +39,36 @@ class Label:
 
     def to_dict(self):
         """Return label data as dict."""
-        return {'include': self.include, 'exclude': self.exclude}
+        return {"include": self.include, "exclude": self.exclude}
 
 
 @dataclass
 class Select(metamethod.Select):
     """Manage dependant frame energization parameters."""
 
-    name = 'select'
+    name = "select"
 
     frame: DataFrame = field(repr=False)
-    additional: list[str] = field(init=False, default_factory=lambda: [
-        'passive', 'coil', 'free'])
+    additional: list[str] = field(
+        init=False, default_factory=lambda: ["passive", "coil", "free"]
+    )
     avalible: list[str] = field(init=False, default_factory=list)
-    labels: dict[str, dict[str, list[str]]] = field(init=False, repr=False,
-                                                    default_factory=dict)
+    labels: dict[str, dict[str, list[str]]] = field(
+        init=False, repr=False, default_factory=dict
+    )
     superspace: list[str] = field(default_factory=lambda: [])
 
     def __post_init__(self):
         """Extend additional with unique values extracted from match."""
         if not self.generate:
             return
-        self.add_label('active', 'active')
-        self.add_label('passive', None, 'active')
-        self.add_label('plasma', 'plasma')
-        self.add_label('coil', None, ['ferritic', 'passive', 'plasma'])
-        self.add_label('fix', 'fix')
-        self.add_label('free', None, 'fix')
-        self.add_label('ferritic', 'ferritic')
+        self.add_label("active", "active")
+        self.add_label("passive", None, "active")
+        self.add_label("plasma", "plasma")
+        self.add_label("coil", None, ["ferritic", "passive", "plasma"])
+        self.add_label("fix", "fix")
+        self.add_label("free", None, "fix")
+        self.add_label("ferritic", "ferritic")
         self.update_metaframe()
         self.update_columns()
         super().__post_init__()
@@ -79,10 +82,10 @@ class Select(metamethod.Select):
         if self.frame.empty:
             return
         for label in self.labels:
-            include = self.any_label(self.labels[label]['include'], True)
-            exclude = self.any_label(self.labels[label]['exclude'], False)
+            include = self.any_label(self.labels[label]["include"], True)
+            exclude = self.any_label(self.labels[label]["exclude"], False)
             value = np.all([include, ~exclude], axis=0)
-            with self.frame.setlock(True, ['subspace', 'array']):
+            with self.frame.setlock(True, ["subspace", "array"]):
                 try:
                     self.frame[label] = value
                 except IndexError:
@@ -93,7 +96,7 @@ class Select(metamethod.Select):
         value = np.full(len(self.frame), False)
         if columns:
             for col in columns:
-                with self.frame.setlock(True, ['subspace', 'array']):
+                with self.frame.setlock(True, ["subspace", "array"]):
                     value |= np.array(self.frame.get(col, False), bool)
             return value
         return np.full(len(self.frame), default)
@@ -119,8 +122,11 @@ class Select(metamethod.Select):
         label = Label(*args)
         self.labels[name] = label.to_dict()
         self.avalible.append(name)
-        additional = [label for label in list(dict.fromkeys(label.require))
-                      if label not in self.additional]
+        additional = [
+            label
+            for label in list(dict.fromkeys(label.require))
+            if label not in self.additional
+        ]
         self.additional.extend(additional)
 
     def clear_labels(self):
@@ -136,25 +142,26 @@ class Select(metamethod.Select):
         """
         labels = list(self.labels)
         self.frame.metaframe.metadata = {
-            'additional': labels,
-            'subspace': [label for label in labels
-                         if label not in self.superspace],
-            }
+            "additional": labels,
+            "subspace": [label for label in labels if label not in self.superspace],
+        }
 
     def update_columns(self):
         """Update frame columns if any additional unset."""
-        unset = np.array([label not in self.frame.columns
-                          for label in self.additional])
+        unset = np.array([label not in self.frame.columns for label in self.additional])
         if unset.any():
             self.frame.update_columns()
 
 
-if __name__ == '__main__':
-
-    dataframe = DataFrame({'x': range(4),
-                           'plasma': [True, False, True, True],
-                           'active': [True, True, True, False],
-                           'fix': [False, True, False, False]})
+if __name__ == "__main__":
+    dataframe = DataFrame(
+        {
+            "x": range(4),
+            "plasma": [True, False, True, True],
+            "active": [True, True, True, False],
+            "fix": [False, True, False, False],
+        }
+    )
     select = Select(dataframe)
     select.initialize()
     print(dataframe.free)

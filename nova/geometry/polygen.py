@@ -110,8 +110,9 @@ class PolyGen(PolyShape):
         shape : shapely.polygon
 
         """
-        polygon = shapely.affinity.scale(PolyGen.disc(
-            x_center, z_center, width), 1, height/width)
+        polygon = shapely.affinity.scale(
+            PolyGen.disc(x_center, z_center, width), 1, height / width
+        )
         return shapely.geometry.Polygon(polygon)
 
     @staticmethod
@@ -136,8 +137,12 @@ class PolyGen(PolyShape):
 
         """
         width = PolyGen.boxbound(width, height)
-        polygon = shapely.geometry.box(x_center-width/2, z_center-width/2,
-                                       x_center+width/2, z_center+width/2)
+        polygon = shapely.geometry.box(
+            x_center - width / 2,
+            z_center - width / 2,
+            x_center + width / 2,
+            z_center + width / 2,
+        )
         return shapely.geometry.Polygon(polygon)
 
     @staticmethod
@@ -161,8 +166,12 @@ class PolyGen(PolyShape):
         shape : shapely.polygon
 
         """
-        polygon = shapely.geometry.box(x_center-width/2, z_center-height/2,
-                                       x_center+width/2, z_center+height/2)
+        polygon = shapely.geometry.box(
+            x_center - width / 2,
+            z_center - height / 2,
+            x_center + width / 2,
+            z_center + height / 2,
+        )
         return shapely.geometry.Polygon(polygon)
 
     @staticmethod
@@ -193,13 +202,12 @@ class PolyGen(PolyShape):
 
         """
         if factor <= 0 or factor > 1:
-            raise ValueError('skin factor not 0 <= '
-                             f'{factor} <= 1')
+            raise ValueError("skin factor not 0 <= " f"{factor} <= 1")
         disc_outer = PolyGen.disc(x_center, z_center, diameter)
         if factor == 1:
             return disc_outer
-        scale = 1-factor
-        disc_inner = PolyGen.disc(x_center, z_center, scale*diameter)
+        scale = 1 - factor
+        disc_inner = PolyGen.disc(x_center, z_center, scale * diameter)
         polygon = disc_outer.difference(disc_inner)
         return shapely.geometry.Polygon(polygon)
 
@@ -225,16 +233,16 @@ class PolyGen(PolyShape):
 
         """
         if height is None:
-            length = width/2
+            length = width / 2
         else:
-            length = PolyGen.boxbound(width/2, height/np.sqrt(3))
-        points = [[x_center + np.cos(alpha) * length,
-                   z_center + np.sin(alpha) * length]
-                  for alpha in np.linspace(0, 2*np.pi, 7)]
+            length = PolyGen.boxbound(width / 2, height / np.sqrt(3))
+        points = [
+            [x_center + np.cos(alpha) * length, z_center + np.sin(alpha) * length]
+            for alpha in np.linspace(0, 2 * np.pi, 7)
+        ]
         return shapely.geometry.Polygon(points)
 
 
-if __name__ == '__main__':
-
-    poly = PolyGen('hex')
+if __name__ == "__main__":
+    poly = PolyGen("hex")
     print(poly(3, 4, 2))

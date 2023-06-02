@@ -3,14 +3,14 @@ import numpy as np
 from nova.frame.coilset import CoilSet
 import matplotlib.pyplot as plt
 
-cs = CoilSet(biot_instances='grid', n=2e4)
-cs.add_coil(3, 0, 0.25, 0.5, dCoil=0.05, part='PF')
+cs = CoilSet(biot_instances="grid", n=2e4)
+cs.add_coil(3, 0, 0.25, 0.5, dCoil=0.05, part="PF")
 
 cs.Ic = 15e6
 cs.grid.generate_grid(expand=0.2)
 
 cs.plot(True)
-'''
+"""
 
 rs, zs = cs.grid.source._rms_, cs.grid.source._z_  # source
 drs, dzs = cs.grid.source._dx_, cs.grid.source._dz_  # source filament size
@@ -45,28 +45,27 @@ print(np.min(exponent), np.max(exponent))
 
 plt.contour(cs.grid.x2d, cs.grid.z2d, exponent.reshape(*cs.grid.n2d), 40)
 
-'''
+"""
 
 levels = cs.grid.plot_flux(levels=201)
 
 
 plt.figure()
 cs.plot(True)
-#levels = cs.grid.plot_field()
+# levels = cs.grid.plot_field()
 
 
 x = (cs.grid.x2d, cs.grid.z2d)
 cs.grid.filter_sigma = 0
-Bx = -cs.grid.interpolate('Psi').ev(*x, dy=1) / (2*np.pi*cs.grid.x2d)
-Bz = cs.grid.interpolate('Psi').ev(*x, dx=1) / (2*np.pi*cs.grid.x2d)
+Bx = -cs.grid.interpolate("Psi").ev(*x, dy=1) / (2 * np.pi * cs.grid.x2d)
+Bz = cs.grid.interpolate("Psi").ev(*x, dx=1) / (2 * np.pi * cs.grid.x2d)
 B = np.linalg.norm([Bx, Bz], axis=0)
 
-levels = plt.contour(cs.grid.x2d, cs.grid.z2d, cs.grid.B, colors='C7',
-                     levels=51).levels
-plt.contour(cs.grid.x2d, cs.grid.z2d, B, colors='C3', levels=levels)
+levels = plt.contour(cs.grid.x2d, cs.grid.z2d, cs.grid.B, colors="C7", levels=51).levels
+plt.contour(cs.grid.x2d, cs.grid.z2d, B, colors="C3", levels=levels)
 
 
-'''
+"""
 cs = CoilSet(biot_instances='grid', n=2e3)
 cs.add_coil(3, 0, 0.5, 0.5, dCoil=0.05, part='PF')
 
@@ -74,4 +73,4 @@ cs.Ic = 15e6
 cs.grid.generate_grid(expand=1.5)
 cs.grid.plot_field(levels=3)
 #cs.grid.plot_flux(levels=31, color='C1')
-'''
+"""

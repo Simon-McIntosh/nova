@@ -6,8 +6,8 @@ class GeoFrame:
     """Geometry object abstract base class."""
 
     def __init__(self):
-        self.name = 'geoframe'
-        if hasattr(super(), '__post_init__'):
+        self.name = "geoframe"
+        if hasattr(super(), "__post_init__"):
             super().__post_init__()
 
     def __str__(self):

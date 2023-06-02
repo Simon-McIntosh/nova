@@ -8,11 +8,11 @@ import os
 from scipy.interpolate import interp1d
 from scipy.optimize import minimize
 
-path = os.path.join(class_dir(nep), '../Data/LTC/')
-points = data_load(path, 'VS3_discharge_main_report', date='2018_06_25')[0]
+path = os.path.join(class_dir(nep), "../Data/LTC/")
+points = data_load(path, "VS3_discharge_main_report", date="2018_06_25")[0]
 
-to, Io = points[0]['x'], points[0]['y']  # bare conductor
-td, Id = points[1]['x'], points[1]['y']  # jacket + vessel
+to, Io = points[0]["x"], points[0]["y"]  # bare conductor
+td, Id = points[1]["x"], points[1]["y"]  # jacket + vessel
 to -= to[0]
 td -= td[0]
 
@@ -25,7 +25,7 @@ Lvs3 = tau_vs3 * Rvs3
 def dIdt(Ic, t, *args):  # current rate (function of odeint)
     Minv = args[0]
     Rc = args[1]
-    Idot = np.dot(-Minv, Ic*Rc)  # -IR + vbg
+    Idot = np.dot(-Minv, Ic * Rc)  # -IR + vbg
     return Idot
 
 
@@ -76,19 +76,22 @@ Ivs3_ref = interp1d(td, Id)(t)
 
 fsead = 0.7
 # xo = [Lvs3, 0.3*Lvs3, Rvs3]
-xo = [Lvs3, fsead*Lvs3, Lvs3, fsead*Lvs3, Rvs3, Rvs3]
+xo = [Lvs3, fsead * Lvs3, Lvs3, fsead * Lvs3, Rvs3, Rvs3]
 
-x = minimize(fit_waveform, xo, method='Nelder-Mead',
-             options={'xatol': 1e-5},
-             args=(Lvs3, Rvs3, Id[0], t, Ivs3_ref)).x
+x = minimize(
+    fit_waveform,
+    xo,
+    method="Nelder-Mead",
+    options={"xatol": 1e-5},
+    args=(Lvs3, Rvs3, Id[0], t, Ivs3_ref),
+).x
 
 err = fit_waveform(x, Lvs3, Rvs3, Id[0], t, Ivs3_ref)
 Iode = get_waveform(x, Lvs3, Rvs3, Id[0], t)
 
-print(err, x, x[0]/x[-1])
+print(err, x, x[0] / x[-1])
 
-plt.plot(td, Id, 'C2')
-plt.plot(t, Iode[0], 'C3-')
-plt.plot(t, Iode[1], 'C4-')
-plt.plot(t, Iode[2], 'C3-.')
-
+plt.plot(td, Id, "C2")
+plt.plot(t, Iode[0], "C3-")
+plt.plot(t, Iode[1], "C4-")
+plt.plot(t, Iode[2], "C3-.")

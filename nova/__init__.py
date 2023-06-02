@@ -29,11 +29,11 @@ except metadata.PackageNotFoundError:
     __version__ = "0.0.0"
 
 submodules = [
-    'imas',
+    "imas",
 ]
 
 __all__ = [
-    '__version__',
+    "__version__",
 ]
 
 __all__.extend(submodules)
@@ -46,12 +46,16 @@ except ModuleNotFoundError:
 
     def njit(**jit_kwargs):
         """Replicate njit decorator, accept and ignore decorator kwargs."""
+
         def decorator(method):
             """Return method evaluated with passed args and kwargs."""
+
             @wraps(method)
             def wrapper(*args, **kwargs):
                 return method(*args, **kwargs)
+
             return wrapper
+
         return decorator
 
 
@@ -61,11 +65,9 @@ def __dir__():
 
 def __getattr__(name):
     if name in submodules:
-        return import_module(f'nova.{name}')
+        return import_module(f"nova.{name}")
     else:
         try:
             return globals()[name]
         except KeyError:
-            raise AttributeError(
-                f"Module 'nova' has no attribute '{name}'"
-            )
+            raise AttributeError(f"Module 'nova' has no attribute '{name}'")

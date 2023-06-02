@@ -13,10 +13,10 @@ class LocalData(LocalData):
     """
 
     experiment: str
-    parent: str = 'Naka'
-    source: str = 'source'
-    binary: str = 'local'
-    metadata_dir: str = 'metadata'
+    parent: str = "Naka"
+    source: str = "source"
+    binary: str = "local"
+    metadata_dir: str = "metadata"
 
     def __post_init__(self):
         """Extend utilities.localdata.LocalData."""
@@ -29,5 +29,5 @@ class LocalData(LocalData):
         return self.getdir(self.experiment_directory, self.metadata_dir)
 
 
-if __name__ == '__main__':
-    local = LocalData('MRun028_SRun001')
+if __name__ == "__main__":
+    local = LocalData("MRun028_SRun001")

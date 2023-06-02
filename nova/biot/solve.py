@@ -17,14 +17,12 @@ from nova.biot.groupset import GroupSet
 class Solve(GroupSet):
     """Manage biot interaction between multiple filament types."""
 
-    name: str = 'biot'
-    attrs: list[str] = field(default_factory=lambda: [
-        'Aphi', 'Psi', 'Br', 'Bz'])
+    name: str = "biot"
+    attrs: list[str] = field(default_factory=lambda: ["Aphi", "Psi", "Br", "Bz"])
     source_segment: np.ndarray = field(init=False, repr=False)
     data: xarray.Dataset = field(init=False, default_factory=xarray.Dataset)
 
-    generator: ClassVar[dict] = {'ring': Ring, 'cylinder': Cylinder,
-                                 'polygon': Polygon}
+    generator: ClassVar[dict] = {"ring": Ring, "cylinder": Cylinder, "polygon": Polygon}
 
     def __post_init__(self):
         """Initialise dataset and compute biot interaction."""
@@ -32,7 +30,7 @@ class Solve(GroupSet):
         self.check_segments()
         self.initialize()
         self.compose()
-        #self.decompose()
+        # self.decompose()
 
     def check_segments(self):
         """Check for segment in self.generator."""
@@ -40,12 +38,12 @@ class Solve(GroupSet):
         for segment in self.source_segment.unique():
             if segment not in self.generator:
                 raise NotImplementedError(
-                    f'segment <{segment}> not implemented '
-                    f'in Biot.generator: {self.generator.keys()}')
+                    f"segment <{segment}> not implemented "
+                    f"in Biot.generator: {self.generator.keys()}"
+                )
             index = self.source.index[self.source_segment == segment]
-            for i, chunk in enumerate(
-                    self.group_segments(index, 50, index[-1])):
-                self.source_segment.loc[list(chunk)] = f'{segment}_{i}'
+            for i, chunk in enumerate(self.group_segments(index, 50, index[-1])):
+                self.source_segment.loc[list(chunk)] = f"{segment}_{i}"
 
     @staticmethod
     def group_segments(iterable, length, fillvalue):
@@ -60,27 +58,30 @@ class Solve(GroupSet):
         target_plasma = np.any(self.target.plasma)
         self.data = xarray.Dataset(
             coords=dict(
-                source=self.get_index('source'),
-                target=self.get_index('target'),
-                plasma=self.source.index[self.source.plasma].to_list()))
-        self.data.attrs['attributes'] = self.attrs
+                source=self.get_index("source"),
+                target=self.get_index("target"),
+                plasma=self.source.index[self.source.plasma].to_list(),
+            )
+        )
+        self.data.attrs["attributes"] = self.attrs
         for row, col, prefix, postfix in zip(
-                ['target', 'target', 'plasma', 'plasma'],
-                ['source', 'plasma', 'source', 'plasma'],
-                ['', '', '_', '_'],
-                ['', '_', '', '_']):
-            if row == 'plasma' and not target_plasma:
+            ["target", "target", "plasma", "plasma"],
+            ["source", "plasma", "source", "plasma"],
+            ["", "", "_", "_"],
+            ["", "_", "", "_"],
+        ):
+            if row == "plasma" and not target_plasma:
                 continue
-            if col == 'plasma' and not source_plasma:
+            if col == "plasma" and not source_plasma:
                 continue
             for attr in self.attrs:
-                self.data[f'{prefix}{attr}{postfix}'] = xarray.DataArray(
-                    0., dims=[row, col],
-                    coords=[self.data[row], self.data[col]])
+                self.data[f"{prefix}{attr}{postfix}"] = xarray.DataArray(
+                    0.0, dims=[row, col], coords=[self.data[row], self.data[col]]
+                )
 
-        #self._initialize_svd('target', 'source')
-        #self._initialize_svd('target', 'plasma', prefix='_')
-        '''
+        # self._initialize_svd('target', 'source')
+        # self._initialize_svd('target', 'plasma', prefix='_')
+        """
         if self.data.dims['plasma'] < self.data.dims['target']:
             sigma = 'plasma'
         else:
@@ -94,23 +95,24 @@ class Solve(GroupSet):
             self.data[f'_V{attr}'] = xarray.DataArray(
                 0., dims=[sigma, 'plasma'],
                 coords=[self.data[sigma], self.data.plasma])
-        '''
+        """
 
-    def _initialize_svd(self, row: str, column: str, prefix=''):
+    def _initialize_svd(self, row: str, column: str, prefix=""):
         """Initialize svd data structures."""
         if self.data.dims[column] < self.data.dims[row]:
             sigma = column
         else:
             sigma = row
         for attr in self.attrs:  # unit filament svd matricies
-            self.data[f'{prefix}{attr}_U'] = xarray.DataArray(
-                0., dims=[row, sigma],
-                coords=[self.data[row], self.data[sigma]])
-            self.data[f'{prefix}{attr}_s'] = xarray.DataArray(
-                0., dims=[sigma], coords=[self.data[sigma]])
-            self.data[f'{prefix}{attr}_V'] = xarray.DataArray(
-                0., dims=[sigma, column],
-                coords=[self.data[sigma], self.data[column]])
+            self.data[f"{prefix}{attr}_U"] = xarray.DataArray(
+                0.0, dims=[row, sigma], coords=[self.data[row], self.data[sigma]]
+            )
+            self.data[f"{prefix}{attr}_s"] = xarray.DataArray(
+                0.0, dims=[sigma], coords=[self.data[sigma]]
+            )
+            self.data[f"{prefix}{attr}_V"] = xarray.DataArray(
+                0.0, dims=[sigma, column], coords=[self.data[sigma], self.data[column]]
+            )
 
     def get_index(self, frame: str) -> list[str]:
         """Return matrix coordinate, reduce if flag True."""
@@ -121,14 +123,13 @@ class Solve(GroupSet):
 
     def compose(self):
         """Calculate full ensemble biot interaction."""
-        for segment in tqdm(self.source_segment.unique(), ncols=65,
-                            desc=self.name):
+        for segment in tqdm(self.source_segment.unique(), ncols=65, desc=self.name):
             self.compute(segment)
 
     def source_index(self, segment):
         """Return source segment index."""
         frame = self.source.frame[self.source_segment == segment]
-        return np.isin(self.get_index('source'), frame)
+        return np.isin(self.get_index("source"), frame)
 
     def plasma_index(self, segment):
         """Return plasma segment index."""
@@ -139,30 +140,34 @@ class Solve(GroupSet):
         """Compute segment and update dataset."""
         source_index = self.source_index(segment)
         plasma_index = self.plasma_index(segment)
-        generator = self.generator[segment.split('_')[0]](
+        generator = self.generator[segment.split("_")[0]](
             self.source.loc[self.source_segment == segment, :].to_dict(),
-            self.target, turns=self.turns, reduce=self.reduce)
+            self.target,
+            turns=self.turns,
+            reduce=self.reduce,
+        )
         for attr in self.attrs:
-            matrix, target_plasma, plasma_source, plasma_plasma = \
-                generator.compute(attr)
+            matrix, target_plasma, plasma_source, plasma_plasma = generator.compute(
+                attr
+            )
             self.data[attr].loc[:, source_index] += matrix
             if np.prod(target_plasma.shape) > 0:
-                self.data[f'{attr}_'].loc[:, plasma_index] += target_plasma
+                self.data[f"{attr}_"].loc[:, plasma_index] += target_plasma
             if np.prod(plasma_source.shape) > 0:
-                self.data[f'_{attr}'].loc[:, source_index] += plasma_source
+                self.data[f"_{attr}"].loc[:, source_index] += plasma_source
             if np.prod(plasma_plasma.shape) > 0:
-                self.data[f'_{attr}_'].data[:, plasma_index] += plasma_plasma
+                self.data[f"_{attr}_"].data[:, plasma_index] += plasma_plasma
 
     def decompose(self):
         """Compute plasma svd and update dataset."""
-        for source, prefix in zip(['source', 'plasma'], ['', '_']):
-            if self.data.dims[source] < self.data.dims['target']:
+        for source, prefix in zip(["source", "plasma"], ["", "_"]):
+            if self.data.dims[source] < self.data.dims["target"]:
                 sigma = source
             else:
-                sigma = 'target'
+                sigma = "target"
             for attr in self.attrs:
-                matrix = self.data[f'{prefix}{attr}']
+                matrix = self.data[f"{prefix}{attr}"]
                 UsV = np.linalg.svd(matrix, full_matrices=False)
-                self.data[f'{prefix}{attr}_U'] = ('target', sigma), UsV[0]
-                self.data[f'{prefix}{attr}_s'] = sigma, UsV[1]
-                self.data[f'{prefix}{attr}_V'] = (sigma, source), UsV[2]
+                self.data[f"{prefix}{attr}_U"] = ("target", sigma), UsV[0]
+                self.data[f"{prefix}{attr}_s"] = sigma, UsV[1]
+                self.data[f"{prefix}{attr}_V"] = (sigma, source), UsV[2]

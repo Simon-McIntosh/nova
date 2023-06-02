@@ -1,9 +1,9 @@
-
 import numpy as np
 import pytest
 
 from nova.utilities.importmanager import skip_import
-with skip_import('vtk'):
+
+with skip_import("vtk"):
     from nova.geometry.vtkgen import VtkFrame
     from nova.geometry.volume import Section, Cell, Sweep
 
@@ -13,10 +13,10 @@ def test_section_translate():
     section = Section(base)
     section.append()
     for i in range(5):
-        section.to_point((i*5, 0, 2))
+        section.to_point((i * 5, 0, 2))
         section.append()
     assert len(section) == 6
-    assert np.isclose(section.origin, (i*5, 0, 2)).all()
+    assert np.isclose(section.origin, (i * 5, 0, 2)).all()
 
 
 def test_section_rotate_triad():
@@ -38,8 +38,7 @@ def test_section_rotate_rotate():
     section = Section(base.copy())
     section.to_vector((0.5, 0.5, 66.7), 0)
     section.to_vector((1, 0, 0), 0)
-    assert all([np.isclose(p, b).all()
-                for p, b in zip(section.points, base)])
+    assert all([np.isclose(p, b).all() for p, b in zip(section.points, base)])
 
 
 def test_cell_volume():
@@ -68,15 +67,14 @@ def test_sweep():
     n_points, radius = 30, 5
     width, depth = 0.6, 0.9
     points = np.zeros((n_points, 3))
-    theta = np.linspace(0, 2*np.pi, n_points)
+    theta = np.linspace(0, 2 * np.pi, n_points)
     points[:, 0] = radius * np.cos(theta)
     points[:, 2] = radius * np.sin(theta)
     coil = Sweep(dict(r=(0, 0, width, depth)), points)
     coil.triangulate()
-    volume = 2*np.pi * radius * width * depth
+    volume = 2 * np.pi * radius * width * depth
     assert np.isclose(coil.volume(), volume, rtol=1e-2)
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     pytest.main([__file__])

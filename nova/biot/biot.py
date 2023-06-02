@@ -2,9 +2,20 @@
 from dataclasses import dataclass, field
 from typing import ClassVar
 
-from nova.biot import (Gap, Grid, HexGrid, Inductance, Loop,
-                       PlasmaWall, PlasmaGrid, Point,
-                       Field, Force, LevelSet, Plasma)
+from nova.biot import (
+    Gap,
+    Grid,
+    HexGrid,
+    Inductance,
+    Loop,
+    PlasmaWall,
+    PlasmaGrid,
+    Point,
+    Field,
+    Force,
+    LevelSet,
+    Plasma,
+)
 from nova.biot.data import Data
 from nova.database.netcdf import netCDF
 from nova.frame.frameset import FrameSet, frame_factory
@@ -17,13 +28,14 @@ class BiotBase(FrameSet):
     """Biot methods base class."""
 
     _biot_attrs: dict[str, list[str] | Nbiot] = field(
-        init=False, default_factory=dict, repr=False)
-    force_attrs: ClassVar[list[str]] = ['Fr', 'Fz', 'Fc']
-    field_attrs: ClassVar[list[str]] = ['Br', 'Bz', 'Psi']
+        init=False, default_factory=dict, repr=False
+    )
+    force_attrs: ClassVar[list[str]] = ["Fr", "Fz", "Fc"]
+    field_attrs: ClassVar[list[str]] = ["Br", "Bz", "Psi"]
 
     def __post_init__(self):
         """Append biot attrs."""
-        self.append_biot_attrs(['field_attrs', 'force_attrs'])
+        self.append_biot_attrs(["field_attrs", "force_attrs"])
         super().__post_init__()
 
     def append_biot_attrs(self, attrs: list[str]):
@@ -33,12 +45,12 @@ class BiotBase(FrameSet):
     @property
     def field_kwargs(self):
         """Return field kwargs."""
-        return {'attrs': self.field_attrs}
+        return {"attrs": self.field_attrs}
 
     @property
     def force_kwargs(self):
         """Return force kwargs."""
-        return {'attrs': self.force_attrs}
+        return {"attrs": self.force_attrs}
 
     @property
     def biot_methods(self):
@@ -69,24 +81,28 @@ class BiotPlasma(BiotBase):
 
     def __post_init__(self):
         """Append biot attrs."""
-        self.append_biot_attrs(['nhex', 'nwall', 'nlevelset'])
+        self.append_biot_attrs(["nhex", "nwall", "nlevelset"])
         super().__post_init__()
 
     @frame_factory(Plasma)
     def plasma(self):
         """Return plasma instance."""
-        return {'dirname': self.path, 'grid': self.plasmagrid,
-                'wall': self.plasmawall, 'levelset': self.levelset}
+        return {
+            "dirname": self.path,
+            "grid": self.plasmagrid,
+            "wall": self.plasmawall,
+            "levelset": self.levelset,
+        }
 
     @frame_factory(HexGrid)
     def hexgrid(self):
         """Return unstructured grid instance for fast nearest node queries."""
-        return {'number': self.nhex, 'attrs': ['Psi']}
+        return {"number": self.nhex, "attrs": ["Psi"]}
 
     @frame_factory(LevelSet)
     def levelset(self):
         """Return plasma grid biot instance."""
-        return {'number': self.nlevelset, 'attrs': self.field_attrs}
+        return {"number": self.nlevelset, "attrs": self.field_attrs}
 
     @frame_factory(PlasmaGrid)
     def plasmagrid(self):
@@ -96,7 +112,7 @@ class BiotPlasma(BiotBase):
     @frame_factory(PlasmaWall)
     def plasmawall(self):
         """Return plasma firstwall biot instance."""
-        return {'number': self.nwall, 'attrs': ['Psi']}
+        return {"number": self.nwall, "attrs": ["Psi"]}
 
 
 @dataclass
@@ -109,23 +125,23 @@ class BiotCoil(BiotBase):
 
     def __post_init__(self):
         """Append biot attrs."""
-        self.append_biot_attrs(['nforce', 'nfield', 'ninductance'])
+        self.append_biot_attrs(["nforce", "nfield", "ninductance"])
         super().__post_init__()
 
     @frame_factory(Field)
     def field(self):
         """Return boundary field instance."""
-        return {'number': self.nfield}
+        return {"number": self.nfield}
 
     @frame_factory(Force)
     def force(self):
         """Return force field instance."""
-        return {'number': self.nforce, 'attrs': self.force_attrs}
+        return {"number": self.nforce, "attrs": self.force_attrs}
 
     @frame_factory(Inductance)
     def inductance(self):
         """Return biot inductance instance."""
-        return {'number': self.ninductance, 'attrs': ['Psi']}
+        return {"number": self.ninductance, "attrs": ["Psi"]}
 
 
 @dataclass
@@ -138,15 +154,13 @@ class BiotGap(BiotBase):
 
     def __post_init__(self):
         """Append biot attrs."""
-        self.append_biot_attrs(['ngap', 'mingap', 'maxgap'])
+        self.append_biot_attrs(["ngap", "mingap", "maxgap"])
         super().__post_init__()
 
     @frame_factory(Gap)
     def plasmagap(self):
         """Return biot wall-gap probe instance."""
-        return {'ngap': self.ngap,
-                'mingap': self.mingap,
-                'maxgap': self.maxgap}
+        return {"ngap": self.ngap, "mingap": self.mingap, "maxgap": self.maxgap}
 
 
 @dataclass
@@ -157,19 +171,20 @@ class Biot(BiotPlasma, BiotCoil, BiotGap):
 
     def __post_init__(self):
         """Append biot attrs."""
-        self.append_biot_attrs(['ngrid'])
+        self.append_biot_attrs(["ngrid"])
         super().__post_init__()
 
     @property
     def biot_attrs(self):
         """Return frame attributes."""
-        return {attr: value for attr, value in self._biot_attrs.items()
-                if value is not None}
+        return {
+            attr: value for attr, value in self._biot_attrs.items() if value is not None
+        }
 
     @frame_factory(Grid)
     def grid(self):
         """Return grid biot instance."""
-        return {'number': self.ngrid} | self.field_kwargs
+        return {"number": self.ngrid} | self.field_kwargs
 
     @frame_factory(Point)
     def point(self):

@@ -14,9 +14,9 @@ from nova.frame.turn import Turn
 
 @dataclass
 class VS3(FrameData):
-
-    centroid: list[float, float] = \
-        field(default_factory=lambda: [0, 0])  # coil geometric centroid
+    centroid: list[float, float] = field(
+        default_factory=lambda: [0, 0]
+    )  # coil geometric centroid
     theta: float = 0  # inclination angle
     width: float = 0.068  # winding pack width
     height: float = 0.064  # widning pack height
@@ -26,9 +26,9 @@ class VS3(FrameData):
         """Create turn center pattern."""
         self.pattern = np.zeros((4, 3))  # turn pattern
         for i, (ix, iz) in enumerate(zip([1, 1, -1, -1], [-1, 1, 1, -1])):
-            self.pattern[i, 0] = ix * self.width/2
-            self.pattern[i, 2] = iz * self.height/2
-        rotation = Rotation.from_euler('y', self.theta, degrees=self.degrees)
+            self.pattern[i, 0] = ix * self.width / 2
+            self.pattern[i, 2] = iz * self.height / 2
+        rotation = Rotation.from_euler("y", self.theta, degrees=self.degrees)
         self.pattern = rotation.apply(self.pattern)
         self.pattern[:, 0] += self.centroid[0]
         self.pattern[:, 2] += self.centroid[1]
@@ -51,12 +51,12 @@ class VS3(FrameData):
         None.
 
         """
-        turn_fraction = 1 - radius[0]/radius[1]
-        self.turn.insert(self.pattern[:, 0], self.pattern[:, 2],
-                         radius[1], turn_fraction, **kwargs)
+        turn_fraction = 1 - radius[0] / radius[1]
+        self.turn.insert(
+            self.pattern[:, 0], self.pattern[:, 2], radius[1], turn_fraction, **kwargs
+        )
 
-
-    '''
+    """
     def insert_vs3_coils(self):
         co = 0.1065  # inner
         c1 = 0.14451  # outer
@@ -119,7 +119,7 @@ class VS3(FrameData):
                                  material='steel', delta=0, part='VS3j',
                                  active=False)
                 #  R=R, m=m
-        '''
+        """
 
 
 @dataclass
@@ -129,18 +129,23 @@ class ITERgeom(CoilSet):
     def __post_init__(self):
         """Insert default source."""
         super().__post_init__()
-        self.metadata = {'source': 'PCR'}
-        #self.insert_poloidal_field_coils()
-        #self.build_firstwall()
+        self.metadata = {"source": "PCR"}
+        # self.insert_poloidal_field_coils()
+        # self.build_firstwall()
 
-        for centroid, theta, name in \
-                zip([[7.504, -2.495], [5.81, 4.904]],
-                    [-37.8, 25.9], ['L', 'U']):
+        for centroid, theta, name in zip(
+            [[7.504, -2.495], [5.81, 4.904]], [-37.8, 25.9], ["L", "U"]
+        ):
             vs3 = VS3(*self.frames, centroid=centroid, theta=theta)
-            vs3.insert([0.01695, 0.02300], name=f'VS3{name}', part='vs3')
-            vs3.insert([0.0265, 0.0295], name=f'VS3{name}j', part='vs3j',
-                       active=False, link=True)
-        self.linkframe(['VS3L', 'VS3U'], -1)
+            vs3.insert([0.01695, 0.02300], name=f"VS3{name}", part="vs3")
+            vs3.insert(
+                [0.0265, 0.0295],
+                name=f"VS3{name}j",
+                part="vs3j",
+                active=False,
+                link=True,
+            )
+        self.linkframe(["VS3L", "VS3U"], -1)
 
     def build_firstwall(self):
         machine = MachineData(dcoil=self.dcoil, read_txt=False)
@@ -148,22 +153,27 @@ class ITERgeom(CoilSet):
 
     def insert_poloidal_field_coils(self):
         """Insert poloidal field coils."""
-        data = pandas.read_csv(self._poloidal_field_coils(), delimiter='\t',
-                               skiprows=1, index_col=0,  skipinitialspace=True)
-        part = ['cs' if 'CS' in name else 'pf' for name in data.index]
-        columns = {col: col.split(',')[0].lower() for col in data}
-        columns['R, ohm'] = 'R'
-        columns['N,'] = 'nturn'
+        data = pandas.read_csv(
+            self._poloidal_field_coils(),
+            delimiter="\t",
+            skiprows=1,
+            index_col=0,
+            skipinitialspace=True,
+        )
+        part = ["cs" if "CS" in name else "pf" for name in data.index]
+        columns = {col: col.split(",")[0].lower() for col in data}
+        columns["R, ohm"] = "R"
+        columns["N,"] = "nturn"
         data.rename(columns=columns, inplace=True)
-        data.rename(columns={'dx': 'dl', 'dz': 'dt'}, inplace=True)
-        self.coil.insert(data, part=part, turn='hex')
-        self.linkframe(['CS1U', 'CS1L'])
+        data.rename(columns={"dx": "dl", "dz": "dt"}, inplace=True)
+        self.coil.insert(data, part=part, turn="hex")
+        self.linkframe(["CS1U", "CS1L"])
 
     def _poloidal_field_coils(self):
         """Return poloidal field coil geometrical data."""
-        if self.metadata['source'] == 'PCR':  # update, post 2012
+        if self.metadata["source"] == "PCR":  # update, post 2012
             return io.StringIO(
-                '''
+                """
                 X, m	Z, m	DX, m	DZ, m	N,	R, ohm	m, Kg
                 CS3U	1.6870	5.4640	0.7400	2.093	554	0.102	9.0e3
                 CS2U	1.6870	3.2780	0.7400	2.093 	554	0.113	10.0e3
@@ -177,10 +187,11 @@ class ITERgeom(CoilSet):
                 PF4	11.9630	-2.2336	0.6382	0.9538	169.92	0.0791	28.0e3
                 PF5	8.3908	-6.7369	0.8125	0.9538	216.80	0.0791	28.0e3
                 PF6	4.3340	-7.4765	1.5590	1.1075	459.36	0.120	24.0e3
-                ''')
-        if self.metadata['source'] == 'baseline':  # old
+                """
+            )
+        if self.metadata["source"] == "baseline":  # old
             return io.StringIO(
-                '''
+                """
                 X, m	Z, m	DX, m	DZ, m	N,	R, ohm	m, Kg
                 CS3U	1.722	5.313	0.719	2.075	554	0.102	9.0e3
                 CS2U	1.722	3.188	0.719	2.075	554	0.113	10.0e3
@@ -194,23 +205,22 @@ class ITERgeom(CoilSet):
                 PF4	11.9630	-2.2336	0.6382	0.9538	169.92	0.0791	28.0e3
                 PF5	8.3908	-6.7369	0.8125	0.9538	216.80	0.0791	28.0e3
                 PF6	4.3340	-7.4765	1.5590	1.1075	459.36	0.120	24.0e3
-                ''')
+                """
+            )
         raise IndexError(f'source {self.metadata["source"]} not found')
 
 
-
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     coilset = ITERgeom(dcoil=0.25, nplasma=150)
 
-    index = (coilset.subframe.frame == 'VS3U')
-    index |= (coilset.subframe.frame == 'VS3Uj')
+    index = coilset.subframe.frame == "VS3U"
+    index |= coilset.subframe.frame == "VS3Uj"
     coilset.plot(index)
-    #coilset.ferritic.insert('Fi', multiframe=False, label='Fi', offset=1)
-    #coilset.plasma.insert({'ellip': [6.5, 0.5, 4.5, 6.5]})
-    #coilset.shell.insert({'ellip': [6.5, 0.5, 1.2*4.5, 1.2*6.5]}, -80, 0.25,
+    # coilset.ferritic.insert('Fi', multiframe=False, label='Fi', offset=1)
+    # coilset.plasma.insert({'ellip': [6.5, 0.5, 4.5, 6.5]})
+    # coilset.shell.insert({'ellip': [6.5, 0.5, 1.2*4.5, 1.2*6.5]}, -80, 0.25,
     #                     part='vv')
-    '''
+    """
     from nova.structural.centerline import CenterLine
 
     poly = dict(r=[0, 0, 0.6, 0.8])
@@ -222,9 +232,9 @@ if __name__ == '__main__':
     coilset.link(coilset.frame.iloc[-18:].index)
 
     coilset.subframe.vtkplot()
-    '''
+    """
 
-    '''
+    """
 
     #print(coilset.frame.vtk[-1].volume())
 
@@ -234,4 +244,4 @@ if __name__ == '__main__':
     #coilset.plot()
 
     #coilset.frame.vtkplot()
-    '''
+    """

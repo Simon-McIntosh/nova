@@ -23,12 +23,12 @@ class SpaceLocMixin(LinkLocMixin):
 
         """
         col = self.obj.get_col(key)
-        if self.obj.hascol('subspace', col):
-            if self.obj.lock('subspace') is False:
+        if self.obj.hascol("subspace", col):
+            if self.obj.lock("subspace") is False:
                 self.obj.inflate_subspace(col)
-        elif col == 'It' and self.obj.hascol('subspace', 'Ic'):
-            if self.obj.lock('subspace') is False:
-                self.obj.inflate_subspace('Ic')
+        elif col == "It" and self.obj.hascol("subspace", "Ic"):
+            if self.obj.lock("subspace") is False:
+                self.obj.inflate_subspace("Ic")
         return super().__getitem__(key)
 
     def __setitem__(self, key, value):
@@ -39,8 +39,8 @@ class SpaceLocMixin(LinkLocMixin):
 
         """
         col = self.obj.get_col(key)
-        if self.obj.hascol('subspace', col):
-            if self.obj.lock('subspace') is False:
+        if self.obj.hascol("subspace", col):
+            if self.obj.lock("subspace") is False:
                 raise SpaceKeyError(self.name, col)
         return super().__setitem__(key, value)
 
@@ -62,11 +62,10 @@ class FrameSpace(SpaceIndexer, FrameLink):
 
     """
 
-    def __init__(self, data=None, index=None, columns=None,
-                 attrs=None, **metadata):
+    def __init__(self, data=None, index=None, columns=None, attrs=None, **metadata):
         super().__init__(data, index, columns, attrs, **metadata)
         self.frame_attrs(PolyGeo, VtkGeo, PolyPlot, VtkPlot)
-        self.attrs['subspace'] = SubSpace(self)
+        self.attrs["subspace"] = SubSpace(self)
         self.update_version()
 
     def __repr__(self):
@@ -76,65 +75,65 @@ class FrameSpace(SpaceIndexer, FrameLink):
 
     def __setattr__(self, col, value):
         """Extend DataFrame.__setattr__ to gain fast access to array data."""
-        if self.hasattrs('subspace'):
-            if self.hascol('subspace', col):
-                if self.lock('subspace') is False:
-                    raise SpaceKeyError('loc', col)
+        if self.hasattrs("subspace"):
+            if self.hascol("subspace", col):
+                if self.lock("subspace") is False:
+                    raise SpaceKeyError("loc", col)
         return super().__setattr__(col, value)
 
     def __getitem__(self, col):
         """Extend DataFrame.__getitem__. (frame['*'])."""
-        if self.hasattrs('subspace'):
-            if self.hascol('subspace', col):
-                if self.lock('subspace') is False:
+        if self.hasattrs("subspace"):
+            if self.hascol("subspace", col):
+                if self.lock("subspace") is False:
                     self.inflate_subspace(col)
-            elif col == 'It' and self.hascol('subspace', 'Ic'):
-                if self.lock('subspace') is False:
-                    self.inflate_subspace('Ic')
+            elif col == "It" and self.hascol("subspace", "Ic"):
+                if self.lock("subspace") is False:
+                    self.inflate_subspace("Ic")
         return super().__getitem__(col)
 
     def __setitem__(self, col, value):
         """Check lock. Extend DataFrame.__setitem__. (frame['*'] = *)."""
-        if self.hasattrs('subspace'):
-            if self.hascol('subspace', col):
-                if self.lock('subspace') is False:
-                    raise SpaceKeyError('loc', col)
+        if self.hasattrs("subspace"):
+            if self.hascol("subspace", col):
+                if self.lock("subspace") is False:
+                    raise SpaceKeyError("loc", col)
         return super().__setitem__(col, value)
 
     def update_frame(self):
         """Propagate subspace varables to frame."""
-        if self.hasattrs('subspace'):
+        if self.hasattrs("subspace"):
             for col in [col for col in self.subspace if col in self]:
                 self.inflate_subspace(col)
         super().update_frame()  # update dataarray
 
     def inflate_subspace(self, col):
         """Inflate subspace variable and setattr in frame."""
-        with self.setlock(False, 'subspace'):
+        with self.setlock(False, "subspace"):
             value = self.subspace.__getitem__(col)
         if not isinstance(value, np.ndarray):
             value = value.to_numpy()
         try:
             value = value[self.subref]  # inflate if subref set
-            if col == 'Ic':
+            if col == "Ic":
                 value *= self.factor.values
         except (AttributeError, IndexError, TypeError):
             pass
-        with self.setlock(True, 'subspace'):
+        with self.setlock(True, "subspace"):
             super().__setitem__(col, value)
 
     @cached_property
     def aloc(self):
         """Return fast indexed array attributes."""
-        return ArrayLocIndexer('array', self)
+        return ArrayLocIndexer("array", self)
 
 
-if __name__ == '__main__':
-
-    framespace = FrameSpace(base=['x', 'y', 'z'],
-                            required=['x', 'z'],
-                            available=['It', 'poly'],
-                            Subspace=['Ic'],
-                            Array=['Ic'])
-    framespace.insert(range(40), 1, Ic=6.5, name='PF1', part='PF',
-                      active=False)
+if __name__ == "__main__":
+    framespace = FrameSpace(
+        base=["x", "y", "z"],
+        required=["x", "z"],
+        available=["It", "poly"],
+        Subspace=["Ic"],
+        Array=["Ic"],
+    )
+    framespace.insert(range(40), 1, Ic=6.5, name="PF1", part="PF", active=False)

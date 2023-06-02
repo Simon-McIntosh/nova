@@ -3,7 +3,7 @@ import fipy
 cellSize = 0.05
 radius = 1.0
 
-msh_txt = '''
+msh_txt = """
 cellSize = 0.05;
 radius = 1.0;
 Point(1) = {0, 0, 0, cellSize};
@@ -17,7 +17,7 @@ Circle(8) = {4, 1, 5};
 Circle(9) = {5, 1, 2};
 Line Loop(10) = {6, 7, 8, 9};
 Plane Surface(11) = {10};
-'''
+"""
 
 print(msh_txt)
 

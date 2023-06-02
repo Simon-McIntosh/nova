@@ -30,12 +30,11 @@ class Energize(metamethod.Energize):
         return col
 
     def _set_item(self, indexer, key, value):
-        if self.generate and self.frame.get_col(key) == 'It':
-            if self.frame.lock('energize') is False \
-                    and self.available['nturn']:
-                value /= indexer.__getitem__(self._get_key(key, 'nturn'))
+        if self.generate and self.frame.get_col(key) == "It":
+            if self.frame.lock("energize") is False and self.available["nturn"]:
+                value /= indexer.__getitem__(self._get_key(key, "nturn"))
                 try:
-                    self.frame['Ic'] = value
+                    self.frame["Ic"] = value
                 except SpaceKeyError:
                     if not isinstance(value, pandas.Series):
                         index = self.frame.loc[key[0], key[1]].index
@@ -43,15 +42,15 @@ class Energize(metamethod.Energize):
                     else:
                         index = value.index
                     index = index.intersection(self.frame.subspace.index)
-                    self.frame.subspace.loc[index, 'Ic'] = value[index]
+                    self.frame.subspace.loc[index, "Ic"] = value[index]
                 return
         return indexer.__setitem__(key, value)
 
     def _get_item(self, indexer, key):
-        if self.generate and self.frame.get_col(key) == 'It':
-            if self.available['Ic'] and self.available['nturn']:
-                line_current = indexer.__getitem__(self._get_key(key, 'Ic'))
-                turn_number = indexer.__getitem__(self._get_key(key, 'nturn'))
-                with self.frame.setlock(True, ['energize', 'subspace']):
-                    self._set_item(indexer, key, line_current*turn_number)
+        if self.generate and self.frame.get_col(key) == "It":
+            if self.available["Ic"] and self.available["nturn"]:
+                line_current = indexer.__getitem__(self._get_key(key, "Ic"))
+                turn_number = indexer.__getitem__(self._get_key(key, "nturn"))
+                with self.frame.setlock(True, ["energize", "subspace"]):
+                    self._set_item(indexer, key, line_current * turn_number)
         return indexer.__getitem__(key)

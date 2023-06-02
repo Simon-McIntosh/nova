@@ -30,9 +30,7 @@ ids = column(
     NumericInput(value=ids_attrs["pulse"], title="pulse:", mode="int"),
     NumericInput(value=ids_attrs["run"], title="run:"),
     AutocompleteInput(value="iter", completions=["iter", "iter_md"]),
-    Select(
-        value="public", title="user:", options=["public", os.environ["USER"]]
-    ),
+    Select(value="public", title="user:", options=["public", os.environ["USER"]]),
     name="ids",
 )
 
@@ -47,9 +45,7 @@ ids = column(
 poloidal = figure(name="poloidal", match_aspect=True, height=650)
 poloidal.axis.visible = False
 
-flux = poloidal.multi_line(
-    "x", "z", source=source["levelset"], color="gray", alpha=0.5
-)
+flux = poloidal.multi_line("x", "z", source=source["levelset"], color="gray", alpha=0.5)
 wall = poloidal.multi_line(
     "x", "z", source=source["wall"], color="gray", width=2, alpha=2
 )

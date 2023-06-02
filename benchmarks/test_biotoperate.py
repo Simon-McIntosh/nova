@@ -11,5 +11,5 @@ def test_plasma_turns():
     biot.remove()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pytest.main([__file__])

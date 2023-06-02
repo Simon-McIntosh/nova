@@ -1,4 +1,3 @@
-
 import os
 from dataclasses import dataclass, field
 from typing import Union
@@ -24,7 +23,7 @@ class Transient:
 
     def __post_init__(self):
         """Configure paths and load coilset."""
-        self.local = LocalData('', 'Nova', source='coilsets', data='transient')
+        self.local = LocalData("", "Nova", source="coilsets", data="transient")
         if self.coilset:
             self.coilset = self._coilset
         else:
@@ -44,41 +43,48 @@ class Transient:
 
     def _load_coilset(self):
         """Load coilset from file."""
-        if os.path.isfile(os.path.join(
-                self.local.source_directory, f'{self.filename}.pk')):
+        if os.path.isfile(
+            os.path.join(self.local.source_directory, f"{self.filename}.pk")
+        ):
             self.coilset = CoilSet().load_coilset(self.filename)
         else:
             self._coilset = CoilSet()
 
     def _update_biot_instances(self):
-        biot_instances = [instance for instance in ['passive', 'background']
-                          if instance not in self.coilset.biot_instances]
+        biot_instances = [
+            instance
+            for instance in ["passive", "background"]
+            if instance not in self.coilset.biot_instances
+        ]
         if biot_instances:
             self.coilset.biot_instances = biot_instances
 
     def rebuild(self):
         """Reduild coilset."""
-        print('rebuild')
+        print("rebuild")
         coilset = ITERcoilset(
-            name='trans',
-            coils='pf trs dir vv', dCoil=0.25, dPlasma=0.25, dField=0.25,
-            plasma_expand=0.2, plasma_n=2e3, n=1e3, read_txt=True).coilset
-        print(coilset['coilset_metadata']['name'])
+            name="trans",
+            coils="pf trs dir vv",
+            dCoil=0.25,
+            dPlasma=0.25,
+            dField=0.25,
+            plasma_expand=0.2,
+            plasma_n=2e3,
+            n=1e3,
+            read_txt=True,
+        ).coilset
+        print(coilset["coilset_metadata"]["name"])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
+    # waveform = WaveForm('15MA DT-DINA2017-04_v1.2', 30)
 
-    #waveform = WaveForm('15MA DT-DINA2017-04_v1.2', 30)
-
-    trans = Transient('transient')
+    trans = Transient("transient")
     trans.rebuild()
-    #trans.coilset.plot()
+    # trans.coilset.plot()
 
 
-
-
-
-'''
+"""
 #ITER.biot_instances = ['probe']
 #ITER.probe.add_target(7.5, -2.7)
 
@@ -155,9 +161,9 @@ ITER.grid.plot_flux()
 
 
 
-'''
+"""
 
-'''
+"""
 
 #ITER.plot(True)
 #ITER.plasmagrid.plot_flux()
@@ -166,4 +172,4 @@ plt.figure()
 iloc = int(np.where(ITER.coil.index == 'CS3L')[0])
 index = slice(*ITER.subcoil._reduction_index[iloc:iloc+2])
 plt.plot(cds['Bx'].t, cds['Bx'].data[:, index])
-'''
+"""

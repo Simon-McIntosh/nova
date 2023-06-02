@@ -21,22 +21,19 @@ class Plan:
     _index: int = 0
     test: Test = field(init=False)
     _campaign: Campaign = field(init=False, repr=False)
-    reload: SimpleNamespace = field(init=False, repr=False,
-                                    default_factory=SimpleNamespace)
+    reload: SimpleNamespace = field(
+        init=False, repr=False, default_factory=SimpleNamespace
+    )
 
     def __post_init__(self):
         """Init test campaign."""
-        self.reload.__init__(experiment=True, index=True, data=True,
-                             campaign=True)
+        self.reload.__init__(experiment=True, index=True, data=True, campaign=True)
 
 
-
-
-if __name__ == '__main__':
-
-    plan = Plan('CSJA_3', -1)
+if __name__ == "__main__":
+    plan = Plan("CSJA_3", -1)
     print(plan.testindex)
     print(plan.testname)
-    print(plan.plan['File'])
+    print(plan.plan["File"])
     print(plan.note)
     print(plan.mode)

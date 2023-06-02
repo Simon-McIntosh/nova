@@ -15,16 +15,16 @@ class SubspaceLocMixin(LinkLocMixin):
     def __setitem__(self, key, value):
         """Raise error when subspace variable is not found."""
         col = self.obj.get_col(key)
-        if self.obj.lock('subspace') is False:
-            if not self.obj.hascol('subspace', col) and isinstance(col, str):
+        if self.obj.lock("subspace") is False:
+            if not self.obj.hascol("subspace", col) and isinstance(col, str):
                 raise SubSpaceKeyError(col, self.obj.metaframe.subspace)
         return super().__setitem__(key, value)
 
     def __getitem__(self, key):
         """Raise error when single key subspace variable is not found."""
         col = self.obj.get_col(key)
-        if self.obj.lock('subspace') is False:
-            if not self.obj.hascol('subspace', col) and isinstance(col, str):
+        if self.obj.lock("subspace") is False:
+            if not self.obj.hascol("subspace", col) and isinstance(col, str):
                 raise SubSpaceKeyError(col, self.obj.metaframe.subspace)
         return super().__getitem__(key)
 
@@ -46,11 +46,20 @@ class SubSpace(SubSpaceIndexer, FrameLink):
         columns = self.get_subcolumns(frame)
         array = self.get_subarray(frame, columns)
         metaframe = MetaFrame(
-            index, required=[], additional=columns, available=[],
-            subspace=[], array=array, lock=frame.metaframe.lock)
-        super().__init__(pandas.DataFrame(frame.loc[index, columns]),
-                         index=index, columns=columns,
-                         attrs={'metaframe': metaframe})
+            index,
+            required=[],
+            additional=columns,
+            available=[],
+            subspace=[],
+            array=array,
+            lock=frame.metaframe.lock,
+        )
+        super().__init__(
+            pandas.DataFrame(frame.loc[index, columns]),
+            index=index,
+            columns=columns,
+            attrs={"metaframe": metaframe},
+        )
         self.update_subspace(frame)
         self.update_columns()
 
@@ -62,15 +71,15 @@ class SubSpace(SubSpaceIndexer, FrameLink):
 
     def __setitem__(self, col, value):
         """Raise error when subspace variable is set directly from frame."""
-        if self.lock('subspace') is False:
-            if not self.hascol('subspace', col):
+        if self.lock("subspace") is False:
+            if not self.hascol("subspace", col):
                 raise SubSpaceKeyError(col, self.metaframe.subspace)
         return super().__setitem__(col, value)
 
     @staticmethod
     def get_subindex(frame):
         """Return subspace index."""
-        if not hasattr(frame, 'multipoint'):
+        if not hasattr(frame, "multipoint"):
             return frame.index
         if frame.multipoint.index.empty:
             return frame.index
@@ -83,9 +92,8 @@ class SubSpace(SubSpaceIndexer, FrameLink):
             return frame.metaframe.subspace
         subspace = frame.metaframe.subspace
         if np.array([attr in subspace for attr in frame]).any():
-            with frame.setlock(None, 'subspace'):  # update metaframe
-                frame.metaframe.metadata = \
-                    {'additional': frame.metaframe.subspace}
+            with frame.setlock(None, "subspace"):  # update metaframe
+                frame.metaframe.metadata = {"additional": frame.metaframe.subspace}
             frame.update_columns()
             return [attr for attr in subspace if attr in frame]
         return []
@@ -99,5 +107,5 @@ class SubSpace(SubSpaceIndexer, FrameLink):
         """Update frame and subspace metadata."""
         subspace = list(self.columns)
         if subspace:
-            self.metaframe.metadata = {'Subspace': subspace}
-            frame.metaframe.metadata = {'subspace': subspace}
+            self.metaframe.metadata = {"Subspace": subspace}
+            frame.metaframe.metadata = {"subspace": subspace}

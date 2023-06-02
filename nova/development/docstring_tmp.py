@@ -6,4 +6,3 @@ import numpy as np
 minimize()
 np.linalg()
 np.array()
-

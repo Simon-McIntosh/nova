@@ -7,16 +7,16 @@ tf.keras.backend.clear_session()  # reset state
 
 N = 100
 f = 0.5
-t = np.linspace(0, 4, N+1)
-y = np.sin(t*f*2*np.pi)
+t = np.linspace(0, 4, N + 1)
+y = np.sin(t * f * 2 * np.pi)
 x_train = y[:-1].reshape(-1, 1, 1)
-y_train = y[1:] #.reshape(-1, 1, 1)
+y_train = y[1:]  # .reshape(-1, 1, 1)
 
-inputs = Input(batch_shape=(N, 1, 1), name='sin_input')
+inputs = Input(batch_shape=(N, 1, 1), name="sin_input")
 rnn = layers.LSTM(3, stateful=True, return_sequences=True)(inputs)  #
 outputs = layers.TimeDistributed(layers.Dense(1))(rnn)
 model = Model(inputs=inputs, outputs=outputs)
-model.compile(optimizer='adam', loss='mae')
+model.compile(optimizer="adam", loss="mae")
 
 train = tf.data.Dataset.from_tensor_slices((x_train, y_train))
 train = train.cache().batch(N)
@@ -28,10 +28,10 @@ for __ in range(1000):
 
 y_predict = model.predict(train)
 plt.plot(t, y)
-plt.plot(t[1:], y_predict[:,0,0])
+plt.plot(t[1:], y_predict[:, 0, 0])
 
 
-'''
+"""
 x = 0.0
 y_predict = np.zeros(len(y))
 for i in range(len(y)):
@@ -40,4 +40,4 @@ for i in range(len(y)):
 
 plt.plot(t, y)
 plt.plot(t, y_predict)
-'''
+"""

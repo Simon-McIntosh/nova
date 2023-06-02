@@ -34,7 +34,7 @@ class DataBase:
     def __post_init__(self):
         """Initialize local and ftp data instances."""
         if not self.datapath:
-            self.datapath = ['ac/dat', 'AC/dat', 'TEST/AC/ACdat']
+            self.datapath = ["ac/dat", "AC/dat", "TEST/AC/ACdat"]
         self.experiment = self._experiment
 
     @property
@@ -51,8 +51,8 @@ class DataBase:
     def datafile(self, filename):
         """Return full local path of datafile."""
         try:  # local search
-            datafile = self.local.locate(f'{filename}.dat')
-            return self.source_filepath(f'{filename}.dat')
+            datafile = self.local.locate(f"{filename}.dat")
+            return self.source_filepath(f"{filename}.dat")
         except FileNotFoundError:  # ftp search
             for relative_path in self.datapath:
                 try:
@@ -64,16 +64,16 @@ class DataBase:
             return self.source_filepath(datafile)
         except UnboundLocalError:
             # download and unzip dat.zip and retry datafile(filename)
-            if filename == 'dat':
+            if filename == "dat":
                 raise FileNotFoundError
-            dat_zip = self.datafile('dat')
-            with zipfile.ZipFile(dat_zip, 'r') as zip_ref:
+            dat_zip = self.datafile("dat")
+            with zipfile.ZipFile(dat_zip, "r") as zip_ref:
                 zip_ref.extractall(Path(dat_zip).parent)
             os.remove(dat_zip)
             return self.datafile(filename)
         except AttributeError:
-            err_txt = f'datafile {filename} '
-            err_txt += f'not found on datapath {self.datapath}'
+            err_txt = f"datafile {filename} "
+            err_txt += f"not found on datapath {self.datapath}"
             raise FileNotFoundError(err_txt) from file_not_found_error
 
     @property
@@ -106,13 +106,13 @@ class DataBase:
         if makedir:
             self.local.makedir()
         try:
-            self.ftp.download(filename, self.local.source_directory,
-                              *relative_path)
+            self.ftp.download(filename, self.local.source_directory, *relative_path)
         except FileNotFoundError as file_not_found:
             if makedir:
                 self.local.removedir()  # remove if generated bare
-            raise FileNotFoundError(f'File {filename} not found on '
-                                    'ftp server') from file_not_found
+            raise FileNotFoundError(
+                f"File {filename} not found on " "ftp server"
+            ) from file_not_found
         return self.source_filepath(filename)
 
     def binary_filepath(self, filename):

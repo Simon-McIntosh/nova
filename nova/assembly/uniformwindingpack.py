@@ -23,19 +23,19 @@ class UniformWindingPack:
 
     def __post_init__(self):
         """Load winding-pack mesh."""
-        self.wp_mesh = WindingPack('TFC1_CL').mesh
+        self.wp_mesh = WindingPack("TFC1_CL").mesh
         self.read_spine()
         self.load_ccl()
 
     @property
     def vtk_file(self):
         """Return vtk file path (Uniform Current Centerline)."""
-        return os.path.join(root_dir, 'input/ITER/TF_UCCL.vtk')
+        return os.path.join(root_dir, "input/ITER/TF_UCCL.vtk")
 
     @property
     def spine_file(self):
         """Return spine file path."""
-        return os.path.join(root_dir, 'input/ITER/TFC1_CCL.txt')
+        return os.path.join(root_dir, "input/ITER/TFC1_CCL.txt")
 
     def load_ccl(self):
         """Load single coil current centerline."""
@@ -49,8 +49,9 @@ class UniformWindingPack:
 
     def read_spine(self):
         """Read TFC1 conductor centerline from spine file."""
-        points = pandas.read_csv(self.spine_file, delimiter='\t',
-                                 skiprows=1, header=None).to_numpy()
+        points = pandas.read_csv(
+            self.spine_file, delimiter="\t", skiprows=1, header=None
+        ).to_numpy()
         points = np.insert(points, 1, np.zeros(len(points)), axis=1)
         points = np.append(points, points[:1, :], axis=0)
         self.spine_mesh = Line.from_points(points).mesh
@@ -58,24 +59,24 @@ class UniformWindingPack:
     def select_coil(self, n_coil, n_cells=7):
         """Return mesh for single TF coil."""
         return self.wp_mesh.extract_cells(
-            range(n_cells*n_coil, n_cells*(n_coil+1)))
+            range(n_cells * n_coil, n_cells * (n_coil + 1))
+        )
 
     def box_bounds(self, point, edge_length):
         """Return box centered around point."""
         bounds = np.zeros(6)
-        bounds[::2] = point - edge_length/2
-        bounds[1::2] = point + edge_length/2
+        bounds[::2] = point - edge_length / 2
+        bounds[1::2] = point + edge_length / 2
         return bounds
 
     def slice_coil(self, coil, index):
         """Return sliced mesh."""
         if isinstance(coil, int):
             coil = self.select_coil(coil)
-        tangent = self.spine_mesh['tangent'][index]
+        tangent = self.spine_mesh["tangent"][index]
         point = self.spine_mesh.points[index]
         plane = coil.slice(tangent, point)
-        cube = pv.Cube(center=[0, 0, -0.03],
-                       x_length=0.1, y_length=0.9, z_length=0.7)
+        cube = pv.Cube(center=[0, 0, -0.03], x_length=0.1, y_length=0.9, z_length=0.7)
         cube = self.rotate(cube, tangent)
         cube.translate(point)
         return plane.clip_box(cube, invert=False)
@@ -85,8 +86,7 @@ class UniformWindingPack:
         """Return Euler rotation angles."""
         rotvec = np.cross(referance, tangent)
         rotvec *= np.arccos(referance @ tangent) / np.linalg.norm(rotvec)
-        euler_angles = \
-            Rotation.from_rotvec(rotvec).as_euler('xyz', degrees=True)
+        euler_angles = Rotation.from_rotvec(rotvec).as_euler("xyz", degrees=True)
         mesh.rotate_x(euler_angles[0])
         mesh.rotate_y(euler_angles[1])
         mesh.rotate_z(euler_angles[2])
@@ -110,15 +110,15 @@ class UniformWindingPack:
 
     def extract_turns(self):
         """Extract low-field midplane turn layout."""
-        self.mesh['turns'] = self.slice_coil(0, 0).points
+        self.mesh["turns"] = self.slice_coil(0, 0).points
 
     def plot_turns(self):
         """Plot low-field turn grid in x-y plane."""
-        points = self.mesh['turns']
+        points = self.mesh["turns"]
         ax = plt.subplots(1, 1)[1]
-        ax.plot(points[:, 0], points[:, 1], 'o')
-        plt.axis('off')
-        plt.axis('equal')
+        ax.plot(points[:, 0], points[:, 1], "o")
+        plt.axis("off")
+        plt.axis("equal")
 
     def pattern_mesh(self):
         """Pattern TF coils."""
@@ -126,12 +126,11 @@ class UniformWindingPack:
         self.mesh = pv.PolyData()
         for i in range(18):
             TFC = TFC1.copy()
-            TFC.rotate_z(360*i / 18)
+            TFC.rotate_z(360 * i / 18)
             self.mesh += TFC
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     wp = UniformWindingPack()
     wp.plot_turns()
 

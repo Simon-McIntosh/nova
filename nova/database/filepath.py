@@ -14,9 +14,11 @@ from nova.definitions import root_dir
 
 def stardot(func):
     """Return resolved path with '.' replaced with '*'."""
+
     @wraps(func)
     def wrapper(path: str) -> str:
-        return func(path).replace('.', '*')
+        return func(path).replace(".", "*")
+
     return wrapper
 
 
@@ -24,9 +26,9 @@ def stardot(func):
 class FilePath:
     """Manage to access to data via store and load methods."""
 
-    filename: str = ''
-    dirname: Path | str = field(default='', repr=False)
-    basename: Path | str = field(default='user_data', repr=False)
+    filename: str = ""
+    dirname: Path | str = field(default="", repr=False)
+    basename: Path | str = field(default="user_data", repr=False)
     hostname: str | None = field(default=None, repr=False)
     parents: int = field(default=6, repr=False)
     fsys: fsspec.filesystem = field(init=False, repr=False)
@@ -35,7 +37,7 @@ class FilePath:
         """Set host and path. Forward post init for cooperative inheritance."""
         self.host = self.hostname
         self.path = self.dirname
-        if hasattr(super(), '__post_init__'):
+        if hasattr(super(), "__post_init__"):
             super().__post_init__()
 
     @property
@@ -47,12 +49,13 @@ class FilePath:
     def host(self, hostname: str | None):
         match hostname:
             case str():
-                self.fsys = fsspec.filesystem('ssh', host=hostname)
+                self.fsys = fsspec.filesystem("ssh", host=hostname)
             case None:
-                self.fsys = fsspec.filesystem('file')
+                self.fsys = fsspec.filesystem("file")
             case _:
-                raise NotImplementedError('filesystem for hostname '
-                                          f'{hostname} not implemented')
+                raise NotImplementedError(
+                    "filesystem for hostname " f"{hostname} not implemented"
+                )
         self.hostname = hostname
 
     @property
@@ -66,20 +69,20 @@ class FilePath:
             self.dirname = dirname
             self.checkpath()
             return
-        match dirname.split('.'):
+        match dirname.split("."):
             case [str(path)] if path[:1] == os.path.sep:
-                self.path = Path(dirname.replace('*', '.'))
+                self.path = Path(dirname.replace("*", "."))
             case [str(path), *subpath] if path[:1] != os.path.sep:
-                if path == '':
+                if path == "":
                     path = str(self.basename)
                 path = self._resolve_absolute(path)
-                self.path = '.'.join((path, *subpath))
+                self.path = ".".join((path, *subpath))
             case [str(path), str(subpath), *rest]:
                 subpath = self._resolve_relative(subpath)
                 path = os.path.join(path, str(subpath))
-                self.path = '.'.join((path, *rest))
+                self.path = ".".join((path, *rest))
             case _:
-                raise IndexError(f'unable to match dirname {dirname}')
+                raise IndexError(f"unable to match dirname {dirname}")
 
     @staticmethod
     @stardot
@@ -89,44 +92,45 @@ class FilePath:
         def get_appdir(path: str) -> str:
             """Return appdir path."""
             try:
-                return getattr(appdirs, f'{path}_dir')()
+                return getattr(appdirs, f"{path}_dir")()
             except AttributeError as error:
-                raise AttributeError(
-                    f'{path} is not a valid appdirs path') from error
+                raise AttributeError(f"{path} is not a valid appdirs path") from error
 
-        match path.split('_'):
-            case ['root']:
+        match path.split("_"):
+            case ["root"]:
                 return root_dir
-            case ['user', 'cache' | 'config' | 'data']:
+            case ["user", "cache" | "config" | "data"]:
                 return get_appdir(path)
-            case ['site', 'config' | 'data']:
+            case ["site", "config" | "data"]:
                 return get_appdir(path)
             case _:
-                raise ValueError(f'unable to resolve absolute path {path}')
+                raise ValueError(f"unable to resolve absolute path {path}")
 
     @staticmethod
     @stardot
     def _resolve_relative(path: str) -> str:
         """Return resolved relative path."""
         match path:
-            case 'nova':
-                version = nova.__version__.replace('.post', '+').split('+')[0]
+            case "nova":
+                version = nova.__version__.replace(".post", "+").split("+")[0]
                 return os.path.join(nova.__name__, version)
-            case 'imas':
-                return os.path.join('imas', os.environ.get('IMAS_VERSION', ''))
+            case "imas":
+                return os.path.join("imas", os.environ.get("IMAS_VERSION", ""))
             case str(path):
                 return path
             case _:
-                raise ValueError(f'unable to resolve relative path {path}')
+                raise ValueError(f"unable to resolve relative path {path}")
 
     def checkpath(self) -> str:
         """Return existing parent. Raise if not found beyond self.parents."""
         for i, parent in zip(range(self.parents), self.path.parents):
             if self.fsys.isdir(str(parent)):
                 return parent
-        raise FileNotFoundError(f'directory not found for {parent} at '
-                                f'depth {self.parents} of '
-                                f'{len(self.path.parents)}')
+        raise FileNotFoundError(
+            f"directory not found for {parent} at "
+            f"depth {self.parents} of "
+            f"{len(self.path.parents)}"
+        )
 
     def is_file(self) -> bool:
         """Return status of filesystem isfile evaluated on host."""
@@ -144,8 +148,8 @@ class FilePath:
     @property
     def filepath(self):
         """Return full filepath."""
-        if self.filename == '':
-            raise FileNotFoundError('filename not set')
+        if self.filename == "":
+            raise FileNotFoundError("filename not set")
         self.makepath()
         return self.path / self.filename
 
@@ -156,12 +160,11 @@ class FilePath:
         self.filename = path.name
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
+    filepath = FilePath(parents=2, basename="root", filename="test")
 
-    filepath = FilePath(parents=2, basename='root', filename='test')
-
-    filepath.path = '.nova'
+    filepath.path = ".nova"
     print(filepath.filepath)
 
-    filepath.filepath = '/home/mcintos/Code/nova/nova/2022.3.0/tests'
+    filepath.filepath = "/home/mcintos/Code/nova/nova/2022.3.0/tests"
     filepath.filename

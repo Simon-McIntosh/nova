@@ -38,7 +38,8 @@ class KDTree(Plot):
     def query(self, other: np.ndarray):
         """Return distance plasma filament selection arrays."""
         distance, tree = self.kd_tree.query(
-            other, distance_upper_bound=self.upper_bound)
+            other, distance_upper_bound=self.upper_bound
+        )
         unique, unique_indices = np.unique(tree, return_index=True)
         missing = unique == self.number
         index = unique_indices[~missing]
@@ -52,10 +53,10 @@ class KDTree(Plot):
 
     def plot(self, other: np.ndarray):
         """Plot kd selection query."""
-        self.get_axes('2d')
+        self.get_axes("2d")
         index = self.query(other)[1]
-        self.axes.plot(*other.T, '-.', color='gray')
-        self.axes.plot(*self.points[index, :].T, 'k.')
+        self.axes.plot(*other.T, "-.", color="gray")
+        self.axes.plot(*self.points[index, :].T, "k.")
 
 
 @dataclass

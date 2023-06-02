@@ -13,18 +13,24 @@ in_out_neurons = 1
 hidden_neurons = 3
 stateful = False
 
-inp = layers.Input(batch_shape=(batch_size, ntime, nfeature), name='input')
-rnn = layers.LSTM(hidden_neurons, return_sequences=True,
-                  stateful=stateful, name='RNN', activation='tanh')(inp)
+inp = layers.Input(batch_shape=(batch_size, ntime, nfeature), name="input")
+rnn = layers.LSTM(
+    hidden_neurons,
+    return_sequences=True,
+    stateful=stateful,
+    name="RNN",
+    activation="tanh",
+)(inp)
 dens = layers.TimeDistributed(
-        layers.Dense(in_out_neurons, name='dense', activation='linear'))(rnn)
+    layers.Dense(in_out_neurons, name="dense", activation="linear")
+)(rnn)
 model = Model(inputs=[inp], outputs=[dens])
-model.compile(loss='mean_squared_error',
-              sample_weight_mode='temporal',
-              optimizer='rmsprop')
+model.compile(
+    loss="mean_squared_error", sample_weight_mode="temporal", optimizer="rmsprop"
+)
 
 # construct dataset
-x = np.linspace(0, 4*2*np.pi, ntime+1)
+x = np.linspace(0, 4 * 2 * np.pi, ntime + 1)
 y = x[1:]
 x = x[:-1].reshape(batch_size, -1, 1)
 y = y.reshape(batch_size, -1, 1)

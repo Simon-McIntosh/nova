@@ -7,7 +7,7 @@ import itertools
 import sys
 import threading
 import _thread as thread
-    
+
 import numpy as np
 from scipy.optimize import minimize
 from timeit import default_timer as _timer
@@ -17,16 +17,17 @@ import matplotlib.pyplot as plt
 
 def quit_function(fn_name):
     # print to stderr, unbuffered in Python 2.
-    print('{0} took too long'.format(fn_name), file=sys.stderr)
-    sys.stderr.flush() # Python 3 stderr is likely buffered.
-    thread.interrupt_main() # raises KeyboardInterrupt
+    print("{0} took too long".format(fn_name), file=sys.stderr)
+    sys.stderr.flush()  # Python 3 stderr is likely buffered.
+    thread.interrupt_main()  # raises KeyboardInterrupt
 
 
 def exit_after(s):
-    '''
-    use as decorator to exit process if 
+    """
+    use as decorator to exit process if
     function takes longer than s seconds
-    '''
+    """
+
     def outer(fn):
         def inner(*args, **kwargs):
             timer = threading.Timer(s, quit_function, args=[fn.__name__])
@@ -36,16 +37,18 @@ def exit_after(s):
             finally:
                 timer.cancel()
             return result
+
         return inner
+
     return outer
 
 
 def timeit(_func=None, *, repeat=1, number=1000, file=sys.stdout):
-    '''
+    """
     timeit decorator taken from:
         https://github.com/realpython/materials/blob/master/
         pandas-fast-flexible-intuitive/tutorial/timer.py
-    '''
+    """
     """Decorator: prints time from best of `repeat` trials.
     Mimics `timeit.repeat()`, but avg. time is printed.
     Returns function result and prints time.
@@ -122,8 +125,7 @@ def timeit(_func=None, *, repeat=1, number=1000, file=sys.stdout):
 
 
 class clock(object):
-
-    def __init__(self, nITER=0, print_rate=1, print_width=22, header=''):
+    def __init__(self, nITER=0, print_rate=1, print_width=22, header=""):
         self.start(nITER, header)
         self.rate = print_rate
         self.width = print_width
@@ -133,7 +135,7 @@ class clock(object):
         self.to = time.time()
         self.nITER = nITER
         if self.nITER > 0:
-            self.nint = int(np.log10(self.nITER))+1
+            self.nint = int(np.log10(self.nITER)) + 1
         else:
             self.nint = 0
         self.time = True
@@ -149,16 +151,15 @@ class clock(object):
         if self.i % self.rate == 0 and self.i <= self.nITER:
             elapsed = time.time() - self.to
             remain = int((self.nITER - self.i) / self.i * elapsed)
-            txt = f'\r{{:{self.nint}d}}'
+            txt = f"\r{{:{self.nint}d}}"
             txt = txt.format(self.i)
-            txt += ' elapsed {:0>8}s'.format(str(
-                    datetime.timedelta(seconds=int(elapsed))))
-            txt += ' remain {:0>8}s'.format(str(
-                    datetime.timedelta(seconds=remain)))
-            txt += ' complete {:5.1f}%'.format(
-                    1e2 * self.i / self.nITER)
+            txt += " elapsed {:0>8}s".format(
+                str(datetime.timedelta(seconds=int(elapsed)))
+            )
+            txt += " remain {:0>8}s".format(str(datetime.timedelta(seconds=remain)))
+            txt += " complete {:5.1f}%".format(1e2 * self.i / self.nITER)
             nh = int(self.i / self.nITER * self.width)
-            txt += ' |' + nh * '#' + (self.width - nh) * '-' + '|'
+            txt += " |" + nh * "#" + (self.width - nh) * "-" + "|"
             self.write(txt)
         if self.i == self.nITER:
             self.stop()
@@ -166,15 +167,14 @@ class clock(object):
     def stop(self):
         if self.time:
             elapsed = time.time() - self.to
-            txt = f'{{:{55+self.nint+self.width}}}'  # flush
-            txt = txt.format(f'\rtotal elapsed time {elapsed:1.4f}s')
+            txt = f"{{:{55+self.nint+self.width}}}"  # flush
+            txt = txt.format(f"\rtotal elapsed time {elapsed:1.4f}s")
             self.write(txt)
-            self.write('\n')
+            self.write("\n")
             self.time = False
 
 
 class time_constant:
-
     def __init__(self, td, Id, trim_fraction=0.2):
         self.load(td, Id)
         self.trim_fraction = trim_fraction
@@ -184,13 +184,16 @@ class time_constant:
         self.Id = np.copy(Id)
 
     def trim(self, **kwargs):
-        self.trim_fraction = kwargs.get('trim_fraction', self.trim_fraction)
-        if self.trim_fraction > 0 and self.trim_fraction < 1\
-                and self.Id[0] != 0:
+        self.trim_fraction = kwargs.get("trim_fraction", self.trim_fraction)
+        if self.trim_fraction > 0 and self.trim_fraction < 1 and self.Id[0] != 0:
             dI = self.Id[-1] - self.Id[0]
-            i1 = next((i for i, Id in enumerate(self.Id)
-                       if abs(Id) < abs(self.Id[0] +
-                                        (1-self.trim_fraction)*dI)))
+            i1 = next(
+                (
+                    i
+                    for i, Id in enumerate(self.Id)
+                    if abs(Id) < abs(self.Id[0] + (1 - self.trim_fraction) * dI)
+                )
+            )
             td, Id = self.td[:i1], self.Id[:i1]
         else:
             td, Id = self.td, self.Id
@@ -199,22 +202,22 @@ class time_constant:
     def fit_tau(self, x, *args):
         to, Io, tau = x
         t_exp, I_exp = args
-        I_fit = Io*np.exp(-(t_exp-to)/tau)
-        err = np.sum((I_exp-I_fit)**2)  # sum of squares
+        I_fit = Io * np.exp(-(t_exp - to) / tau)
+        err = np.sum((I_exp - I_fit) ** 2)  # sum of squares
         return err
 
     def get_tau(self, plot=False, **kwargs):
         td, Id = self.trim(**kwargs)
-        to = kwargs.get('to', 10e-3)
-        Io = kwargs.get('Io', -60e3)
-        tau = kwargs.get('tau', 30e-3)
+        to = kwargs.get("to", 10e-3)
+        Io = kwargs.get("Io", -60e3)
+        tau = kwargs.get("tau", 30e-3)
         x = minimize(self.fit_tau, [to, Io, tau], args=(td, Id)).x
         err = self.fit_tau(x, td, Id)
         to, Io, tau = x
-        Iexp = Io*np.exp(-(td-to)/tau)
+        Iexp = Io * np.exp(-(td - to) / tau)
         if plot:
-            ax = kwargs.get('ax', plt.gca())
-            ax.plot(1e3*td, 1e-3*Iexp, '-', label='exp')
+            ax = kwargs.get("ax", plt.gca())
+            ax.plot(1e3 * td, 1e-3 * Iexp, "-", label="exp")
         return to, Io, tau, err, Iexp
 
     def get_td(self, plot=False, **kwargs):  # linear discharge time
@@ -222,35 +225,37 @@ class time_constant:
         A = np.ones((len(td), 2))
         A[:, 1] = td
         a, b = np.linalg.lstsq(A, Id, rcond=None)[0]
-        tlin = abs(self.Id[0]/b)  # discharge time
-        Ilin = a + b*td  # linear fit
-        err = np.sum((Id-Ilin)**2)
+        tlin = abs(self.Id[0] / b)  # discharge time
+        Ilin = a + b * td  # linear fit
+        err = np.sum((Id - Ilin) ** 2)
         if plot:
-            plt.plot(1e3*td, 1e-3*Ilin, '-', label='lin')
+            plt.plot(1e3 * td, 1e-3 * Ilin, "-", label="lin")
         return a, b, tlin, err, Ilin
 
     def fit_ntau(self, x, *args):
         texp, Iexp = args
         Ifit = self.I_nfit(texp, x)
-        err = np.sum((Iexp-Ifit)**2)  # sum of squares
+        err = np.sum((Iexp - Ifit) ** 2)  # sum of squares
         return err
 
     def I_nfit(self, t, x):
-        n = int(len(x)/2)
+        n = int(len(x) / 2)
         Io, tau = x[:n], x[n:]
         Ifit = np.zeros(len(t))
         for Io, tau in zip(x[:n], x[n:]):
-            Ifit += Io*np.exp(-t/tau)
+            Ifit += Io * np.exp(-t / tau)
         return Ifit
 
     def nfit(self, n, plot=False, **kwargs):
-        tau_o = kwargs.get('tau_o', 50e-3)  # inital timeconstant
+        tau_o = kwargs.get("tau_o", 50e-3)  # inital timeconstant
         td, Id = self.trim(**kwargs)
         to = td[0]
         td -= to  # time shift
-        xo = np.append(Id[0]/n*np.ones(n),
-                       np.sort(tau_o*np.ones(n) * np.random.random(n))[::-1])
-        #xo *= np.random.random(2*n)
+        xo = np.append(
+            Id[0] / n * np.ones(n),
+            np.sort(tau_o * np.ones(n) * np.random.random(n))[::-1],
+        )
+        # xo *= np.random.random(2*n)
         bounds = [(None, None) for __ in range(n)]
         bounds.extend([(1e-6, None) for __ in range(n)])
         x = minimize(self.fit_ntau, xo, args=(td, Id), tol=1e-5).x
@@ -258,31 +263,31 @@ class time_constant:
         Ifit = self.I_nfit(td, x)
         Io, tau = x[:n], x[n:]
         if plot:
-            if 'ax' in kwargs:
-                ax = kwargs['ax']
+            if "ax" in kwargs:
+                ax = kwargs["ax"]
             else:
                 ax = plt.subplots(1, 1)[1]
-            ax.plot(1e3*td+to, 1e-3*Id, '-', label='data')
-            ax.plot(1e3*td+to, 1e-3*Ifit, '--', label='fit')
-            ax.set_xlabel('$t$ ms')
-            ax.set_ylabel('$I$ kA')
+            ax.plot(1e3 * td + to, 1e-3 * Id, "-", label="data")
+            ax.plot(1e3 * td + to, 1e-3 * Ifit, "--", label="fit")
+            ax.set_xlabel("$t$ ms")
+            ax.set_ylabel("$I$ kA")
             plt.despine()
             plt.legend()
-        return Io, tau, td+to, Ifit
+        return Io, tau, td + to, Ifit
 
     def ntxt(If, tau):
-        txt = r'$\alpha$=['
+        txt = r"$\alpha$=["
         for i, I in enumerate(If):
             if i > 0:
-                txt += ','
-            txt += '{:1.2f}'.format(I)
-        txt += ']'
-        txt += r' $\tau$=['
+                txt += ","
+            txt += "{:1.2f}".format(I)
+        txt += "]"
+        txt += r" $\tau$=["
         for i, t in enumerate(tau):
             if i > 0:
-                txt += ','
-            txt += '{:1.1f}'.format(1e3*t)
-        txt += ']ms'
+                txt += ","
+            txt += "{:1.1f}".format(1e3 * t)
+        txt += "]ms"
         return txt
 
     def fit(self, plot=False, **kwargs):
@@ -290,27 +295,31 @@ class time_constant:
         tau, tau_err, Iexp = self.get_tau(plot=False, **kwargs)[-3:]
         tlin, tlin_err, Ilin = self.get_td(plot=False, **kwargs)[-3:]
         if tau_err < tlin_err:
-            self.discharge_type = 'exponential'
+            self.discharge_type = "exponential"
             self.discharge_time = tau
             Ifit = Iexp
         else:
-            self.discharge_type = 'linear'
+            self.discharge_type = "linear"
             self.discharge_time = tlin
             Ifit = Ilin
         if plot:
-            if 'ax' in kwargs:
-                ax = kwargs['ax']
+            if "ax" in kwargs:
+                ax = kwargs["ax"]
             else:
                 ax = plt.subplots(1, 1)[1]
 
-            ax.plot(1e3*tfit, 1e-3*Idata, '-', label='data')
-            ax.plot(1e3*tfit, 1e-3*Ifit, '--',
-                    label='{} fit'.format(self.discharge_type))
-            ax.set_xlabel('$t$ ms')
-            ax.set_ylabel('$I$ kA')
+            ax.plot(1e3 * tfit, 1e-3 * Idata, "-", label="data")
+            ax.plot(
+                1e3 * tfit,
+                1e-3 * Ifit,
+                "--",
+                label="{} fit".format(self.discharge_type),
+            )
+            ax.set_xlabel("$t$ ms")
+            ax.set_ylabel("$I$ kA")
             plt.despine()
             # plt.legend()
-            txt = '{} discharge'.format(self.discharge_type)
-            txt += ', t={:1.1f}ms'.format(self.discharge_time)
+            txt = "{} discharge".format(self.discharge_type)
+            txt += ", t={:1.1f}ms".format(self.discharge_time)
             # plt.title(txt)
         return self.discharge_time, self.discharge_type, tfit, Ifit

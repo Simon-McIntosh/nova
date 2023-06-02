@@ -10,10 +10,12 @@ from nova.geometry.polygeom import Polygon
 class Shell(GridAttrs):
     """Mesh poloidal shell elements."""
 
-    turn: str = 'shell'
-    required: list[str] = field(default_factory=lambda: ['x', 'z', 'dl', 'dt'])
-    default: dict = field(init=False, default_factory=lambda: {
-        'label': 'Shl', 'part': 'shell', 'active': False})
+    turn: str = "shell"
+    required: list[str] = field(default_factory=lambda: ["x", "z", "dl", "dt"])
+    default: dict = field(
+        init=False,
+        default_factory=lambda: {"label": "Shl", "part": "shell", "active": False},
+    )
 
     def set_conditional_attributes(self):
         """Set conditional attrs - not required for shell."""
@@ -49,15 +51,16 @@ class Shell(GridAttrs):
 
         self.attrs = additional
         with self.insert_required(required):
-            shellgrid = ShellGrid(*args, delta=self.attrs['delta'])
+            shellgrid = ShellGrid(*args, delta=self.attrs["delta"])
             index = self.frame.insert(shellgrid.frame, iloc=iloc, **self.attrs)
         frame = self.frame.loc[index, :]
         subframe = []
         for i, name in enumerate(index):
             data = frame.iloc[i].to_dict()
-            data |= {'label': name, 'frame': name, 'delim': '_', 'link': True}
-            subframe.append(self.subframe.assemble(
-                shellgrid.subframe[i], **data, **self.subattrs))
+            data |= {"label": name, "frame": name, "delim": "_", "link": True}
+            subframe.append(
+                self.subframe.assemble(shellgrid.subframe[i], **data, **self.subattrs)
+            )
         self.subframe.concatenate(*subframe)
         self.update_loc_indexer()
         return index

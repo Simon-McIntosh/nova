@@ -17,13 +17,13 @@ class Array:
         for attr in self.array_attrs:
             if attr in self.data:
                 self.array[attr] = self.data[attr].data
-        if hasattr(super(), 'load_arrays'):
+        if hasattr(super(), "load_arrays"):
             super().load_arrays()
 
     def __getitem__(self, attr):
         """Return array attribute via dict-like access."""
         if attr in self.array_attrs:
             return self.array[attr]
-        if hasattr(super(), '__getitem__'):
+        if hasattr(super(), "__getitem__"):
             return super().__getitem__(attr)
-        raise KeyError(f'{attr}')
+        raise KeyError(f"{attr}")

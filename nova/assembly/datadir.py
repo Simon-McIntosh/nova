@@ -11,9 +11,9 @@ class DataDir:
 
     folder: str
     file: str = None
-    subset: str = 'all'
-    data_dir: str = 'data/Ansys'
-    rst_dir: str = '//io-ws-ccstore1/ANSYS_Data/mcintos'
+    subset: str = "all"
+    data_dir: str = "data/Ansys"
+    rst_dir: str = "//io-ws-ccstore1/ANSYS_Data/mcintos"
 
     def __post_init__(self):
         """Set data directory."""
@@ -33,50 +33,48 @@ class DataDir:
     @property
     def rst_file(self):
         """Return rst file path."""
-        return os.path.join(self.rst_folder, f'{self.file}.rst')
+        return os.path.join(self.rst_folder, f"{self.file}.rst")
 
     @property
     def ansys_folder(self):
         """Return path of Ansys part vtk folder."""
-        ansys_folder = os.path.join(self.directory, 'ansys')
+        ansys_folder = os.path.join(self.directory, "ansys")
         self.mkdir(ansys_folder)
         return ansys_folder
 
     @property
     def ansys_file(self):
         """Return vtk file path."""
-        if self.subset == 'all':
-            return os.path.join(self.ansys_folder, f'{self.file}.vtk')
-        return os.path.join(self.ansys_folder,
-                            f'{self.file}_{self.subset.lower()}.vtk')
+        if self.subset == "all":
+            return os.path.join(self.ansys_folder, f"{self.file}.vtk")
+        return os.path.join(self.ansys_folder, f"{self.file}_{self.subset.lower()}.vtk")
 
     @property
     def ccl_folder(self):
         """Return path of conductor centerline vtk folder."""
-        ccl_folder = os.path.join(self.directory, 'ccl')
+        ccl_folder = os.path.join(self.directory, "ccl")
         self.mkdir(ccl_folder)
         return ccl_folder
 
     @property
     def ccl_file(self):
         """Return ccl file path."""
-        postfix = 'ccl' if self.cluster is None else 'uccl'
-        return os.path.join(self.ccl_folder, f'{self.file}_{postfix}.vtk')
+        postfix = "ccl" if self.cluster is None else "uccl"
+        return os.path.join(self.ccl_folder, f"{self.file}_{postfix}.vtk")
 
     @property
     def morph_folder(self):
         """Return path of morphed geometry vtk folder."""
-        morph_folder = os.path.join(self.directory, 'morph')
+        morph_folder = os.path.join(self.directory, "morph")
         self.mkdir(morph_folder)
         return morph_folder
 
     @property
     def morph_file(self):
         """Return morph file path."""
-        if self.subset == 'all':
-            return os.path.join(self.morph_folder, f'{self.file}.vtk')
-        return os.path.join(self.morph_folder,
-                            f'{self.file}_{self.subset.lower()}.vtk')
+        if self.subset == "all":
+            return os.path.join(self.morph_folder, f"{self.file}.vtk")
+        return os.path.join(self.morph_folder, f"{self.file}_{self.subset.lower()}.vtk")
 
     @property
     def args(self):

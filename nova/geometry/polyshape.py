@@ -9,16 +9,16 @@ class PolyShape:
     """Provilde polyshape dict."""
 
     section: str
-    polyshape: ClassVar[dict[str, str]] = \
-        dict.fromkeys(['disc', 'dsc', 'd', 'o', 'disk', 'dsk',
-                       'circle', 'c'], 'disc') | \
-        dict.fromkeys(['ellipse', 'ellip', 'el', 'e'], 'ellipse') | \
-        dict.fromkeys(['square', 'sq', 's'], 'square') | \
-        dict.fromkeys(['rectangle', 'rect', 'rec', 'r'], 'rectangle') | \
-        dict.fromkeys(['skin', 'sk', 'ring', 'annulus'], 'skin') | \
-        dict.fromkeys(['polygon', 'poly', 'oblique'], 'polygon') |\
-        dict.fromkeys(['shell', 'shl', 'sh'], 'shell') |\
-        dict.fromkeys(['hexagon', 'hex', 'hx', 'h'], 'hexagon')
+    polyshape: ClassVar[dict[str, str]] = (
+        dict.fromkeys(["disc", "dsc", "d", "o", "disk", "dsk", "circle", "c"], "disc")
+        | dict.fromkeys(["ellipse", "ellip", "el", "e"], "ellipse")
+        | dict.fromkeys(["square", "sq", "s"], "square")
+        | dict.fromkeys(["rectangle", "rect", "rec", "r"], "rectangle")
+        | dict.fromkeys(["skin", "sk", "ring", "annulus"], "skin")
+        | dict.fromkeys(["polygon", "poly", "oblique"], "polygon")
+        | dict.fromkeys(["shell", "shl", "sh"], "shell")
+        | dict.fromkeys(["hexagon", "hex", "hx", "h"], "hexagon")
+    )
 
     def _shape(self, section: str):
         """Return polygeom shape name from str input."""
@@ -27,8 +27,9 @@ class PolyShape:
             return self.polyshape[section]
         except AttributeError as error:
             raise AttributeError(
-                f'cross_section: {self.section} not implemented'
-                f'\n specify as {self.polyshape}') from error
+                f"cross_section: {self.section} not implemented"
+                f"\n specify as {self.polyshape}"
+            ) from error
 
     @property
     def shape(self):

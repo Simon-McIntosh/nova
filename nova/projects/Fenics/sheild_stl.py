@@ -14,10 +14,9 @@ class ShieldSector:
     """Manage shield sector."""
 
     sector: int = 4
-    file: str = 'IWS_FM_PLATE'
+    file: str = "IWS_FM_PLATE"
     path: str = None
-    sectors: list[int] = field(init=False,
-                               default_factory=lambda: [2, 3, 4, 6])
+    sectors: list[int] = field(init=False, default_factory=lambda: [2, 3, 4, 6])
     mesh: pv.PolyData = field(init=False, repr=False)
     geom: pv.PolyData = field(init=False, repr=False)
     frame: FrameSpace = field(init=False)
@@ -26,34 +25,34 @@ class ShieldSector:
         """Load datasets."""
         self.check_sector()
         if self.path is None:
-            self.path = os.path.join(root_dir, 'input/geometry/ITER/shield')
+            self.path = os.path.join(root_dir, "input/geometry/ITER/shield")
         self.load_mesh()
         self.load_frame()
 
     def check_sector(self):
         """Check sector number."""
         if self.sector not in self.sectors:
-            raise IndexError(f'sector {self.sector} not in {self.sectors}')
+            raise IndexError(f"sector {self.sector} not in {self.sectors}")
 
     @property
     def filename(self):
         """Return sector filename."""
-        return f'{self.file}_S{self.sector}'
+        return f"{self.file}_S{self.sector}"
 
     @property
     def vtk_file(self):
         """Retun full vtk filename."""
-        return os.path.join(self.path, f'{self.filename}.vtk')
+        return os.path.join(self.path, f"{self.filename}.vtk")
 
     @property
     def stl_file(self):
         """Return full stl filename."""
-        return os.path.join(self.path, f'{self.filename}.stl')
+        return os.path.join(self.path, f"{self.filename}.stl")
 
     @property
     def cdf_file(self):
         """Return netCDF filename."""
-        return os.path.join(self.path, f'{self.file}.nc')
+        return os.path.join(self.path, f"{self.file}.nc")
 
     def load_mesh(self):
         """Load mesh."""
@@ -71,7 +70,7 @@ class ShieldSector:
     def load_frame(self):
         """Load shield dataframe."""
         try:
-            self.frame = FrameSpace().load(self.cdf_file, f'S{self.sector}')
+            self.frame = FrameSpace().load(self.cdf_file, f"S{self.sector}")
         except FileNotFoundError:
             self.frame = self.read_frame()
 
@@ -79,13 +78,14 @@ class ShieldSector:
         """Return dataframe read from vtk file."""
         mesh = vedo.Mesh(self.vtk_file)
         parts = mesh.splitByConnectivity(10000)
-        frame = FrameSpace(label=f'fiS{self.sector}', body='panel', delim='_')
-        tick = clock(len(parts), header='loading decimated convex hulls')
+        frame = FrameSpace(label=f"fiS{self.sector}", body="panel", delim="_")
+        tick = clock(len(parts), header="loading decimated convex hulls")
         for i, part in enumerate(parts):
-            frame += dict(vtk=part.scale(1e-3).c(i),
-                          part=f'fiS{self.sector}', ferritic=True)
+            frame += dict(
+                vtk=part.scale(1e-3).c(i), part=f"fiS{self.sector}", ferritic=True
+            )
             tick.tock()
-        frame.store(self.cdf_file, f'S{self.sector}')
+        frame.store(self.cdf_file, f"S{self.sector}")
         return frame
 
     def plot(self):
@@ -93,9 +93,8 @@ class ShieldSector:
         vedo.show(self.frame.vtk)
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     shield = ShieldSector(2)
     shield.plot()
-    #shield.read_frame()
+    # shield.read_frame()
     # shield.plot()

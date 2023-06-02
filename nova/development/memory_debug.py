@@ -4,53 +4,59 @@ from nova.frame.coilgeom import ITERcoilset
 from nova.frame.IO.read_scenario import forcefield_data
 import matplotlib.pyplot as plt
 
-#hp = hpy()  # initialize memory manager
-
+# hp = hpy()  # initialize memory manager
 
 
 # load ITER coilset
-ITER = ITERcoilset(coils='pf vv dir trs', dCoil=-1, dField=0.1,
-                   n=5e3, expand=0.0, levels=31,
-                   read_txt=False, current_update='full')
+ITER = ITERcoilset(
+    coils="pf vv dir trs",
+    dCoil=-1,
+    dField=0.1,
+    n=5e3,
+    expand=0.0,
+    levels=31,
+    read_txt=False,
+    current_update="full",
+)
 
-'''
+"""
 ITER.add_coil(6, 0, 0.2, 0.2, label='plasma', delim='',
               Ic=1000, cross_section='circle')
 
 ITER.add_coil(8, 0, 0.2, 0.2, label='plasma', delim='',
               Ic=1000, cross_section='circle')
-'''
-#ITER.field.solve()
-#ITER.forcefield.solve()
+"""
+# ITER.field.solve()
+# ITER.forcefield.solve()
 
 
-#ff.source.nT = 5
+# ff.source.nT = 5
 
-#hp.setrelheap()  # set relative heap
+# hp.setrelheap()  # set relative heap
 
-#ITER.forcefield.calculate()
+# ITER.forcefield.calculate()
 
 
-#ITER.grid.generate_grid()
+# ITER.grid.generate_grid()
 
 
 ITER.filename = -1
-ITER.scenario = 'EOF'
+ITER.scenario = "EOF"
 
-#print(1e-6*ITER.forcefield.Fx)
+# print(1e-6*ITER.forcefield.Fx)
 
-#ITER.current_update = 'passive'
-#ITER.Ic = 0
+# ITER.current_update = 'passive'
+# ITER.Ic = 0
 
 plt.set_aspect(0.75)
 ITER.grid.plot_flux()
 
 ITER.plot()
-#ITER.field.plot()
-#ITER.forcefield.plot()
+# ITER.field.plot()
+# ITER.forcefield.plot()
 
 
-'''
+"""
 d3 = forcefield_data(read_txt=False)
 d3.load_file(-1)
 d3.to = ITER.t
@@ -67,9 +73,9 @@ ITER.target.update_biotset()
 print(ITER.target.B.max())
 print(ITER.target.B.argmax())  
 print(12.938000)
-'''
+"""
 
-'''
+"""
 Fx_cs3u      1095.000000
 Fx_cs2u      1361.300000
 Fx_cs1u      1386.000000
@@ -83,9 +89,9 @@ B_cs1u         12.938000
 B_cs1l         12.960000
 B_cs2l         12.956000
 B_cs3l         12.724000
-'''
+"""
 
-'''
+"""
 #ff.assemble()
 
 #ITER.plot(False)
@@ -97,5 +103,4 @@ byrcs= h.byrcs
 
 print(byrcs)
 print(byrcs[0].byvia)
-'''
-
+"""

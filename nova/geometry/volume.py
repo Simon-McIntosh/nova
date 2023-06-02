@@ -28,11 +28,20 @@ class TriShell:
     qhull: bool = False
     ahull: bool = False
     features: ClassVar[list[str]] = [
-        *'xyz', 'dx', 'dy', 'dz', 'dl', 'dt', 'area', 'volume']
+        *"xyz",
+        "dx",
+        "dy",
+        "dz",
+        "dl",
+        "dt",
+        "area",
+        "volume",
+    ]
 
     def __post_init__(self):
         """Create trimesh instance."""
         import trimesh
+
         self.tri = trimesh.Trimesh(self.mesh.points(), faces=self.mesh.faces())
         self._qhull = self._convex_hull
 
@@ -40,7 +49,8 @@ class TriShell:
     def _convex_hull(self) -> vedo.Mesh:
         """Return decimated convex hull."""
         return vedo.ConvexHull(self.mesh.points()).decimate(
-            n=6, method='pro', boundaries=True)
+            n=6, method="pro", boundaries=True
+        )
 
     @property
     def panel(self) -> vedo.Mesh:
@@ -49,7 +59,7 @@ class TriShell:
         mesh.opacity(self.mesh.opacity())
         mesh.c(self.mesh.c())
         mesh.origin(*self.center_mass)
-        mesh.scale((self.volume / mesh.volume())**(1/3))
+        mesh.scale((self.volume / mesh.volume()) ** (1 / 3))
         return mesh
 
     @property
@@ -74,10 +84,12 @@ class TriShell:
         """Return PCA rotational transform."""
         points = self._qhull.points()
         triangles = np.array(self._qhull.cells())
-        vertex = dict(a=points[triangles[:, 0]],
-                      b=points[triangles[:, 1]],
-                      c=points[triangles[:, 2]])
-        normal = np.cross(vertex['b']-vertex['a'], vertex['c']-vertex['a'])
+        vertex = dict(
+            a=points[triangles[:, 0]],
+            b=points[triangles[:, 1]],
+            c=points[triangles[:, 2]],
+        )
+        normal = np.cross(vertex["b"] - vertex["a"], vertex["c"] - vertex["a"])
         l2norm = np.linalg.norm(normal, axis=1)
         covariance = np.cov(normal, rowvar=False, aweights=l2norm**5)
         eigen = np.linalg.eigh(covariance)[1]
@@ -90,7 +102,7 @@ class TriShell:
             rotate = self.rotate
         points = self.rotate.inv().apply(self._qhull.points())
         extent = np.max(points, axis=0) - np.min(points, axis=0)
-        extent *= (self.volume / np.prod(extent))**(1 / 3)
+        extent *= (self.volume / np.prod(extent)) ** (1 / 3)
         return extent
 
     @property
@@ -126,24 +138,23 @@ class TriShell:
                 from alphashape import alphashape
                 from sklearn.cluster import DBSCAN
             except ImportError as error:
-                raise ImportError('Generation of ahull poloidal polygons '
-                                  'requires nova[\'mesh\']\n'
-                                  'pip install nova[\'mesh\']') \
-                    from error
+                raise ImportError(
+                    "Generation of ahull poloidal polygons "
+                    "requires nova['mesh']\n"
+                    "pip install nova['mesh']"
+                ) from error
             cluster = DBSCAN(eps=1e-3, min_samples=1)
             cluster.fit(poloidal)
             labels = np.unique(cluster.labels_)
             keypoints = np.zeros((len(labels), 2))
             for i, label in enumerate(labels):
-                keypoints[i, :] = np.mean(
-                    poloidal[label == cluster.labels_, :], axis=0)
+                keypoints[i, :] = np.mean(poloidal[label == cluster.labels_, :], axis=0)
             hull = alphashape(keypoints, 2.5)
             try:
-                return Polygon(hull, name='ahull')
+                return Polygon(hull, name="ahull")
             except NotImplementedError:
                 pass
-        return Polygon(shapely.geometry.MultiPoint(poloidal).convex_hull,
-                       name='qhull')
+        return Polygon(shapely.geometry.MultiPoint(poloidal).convex_hull, name="qhull")
 
 
 @dataclass
@@ -160,7 +171,8 @@ class TetVol(TriShell):
     def load_volume(self):
         """Compute volume from closed surface mesh."""
         import trimesh
-        with tempfile.NamedTemporaryFile(suffix='.msh') as tmp:
+
+        with tempfile.NamedTemporaryFile(suffix=".msh") as tmp:
             trimesh.interfaces.gmsh.to_volume(self.tri, file_name=tmp.name)
             msh = meshio.read(tmp.name)
         cells = msh.cells[0][1]
@@ -179,7 +191,7 @@ class TetVol(TriShell):
     @property
     def cell_volumes(self):
         """Return cell volumes."""
-        return self.tet['Volume'].reshape(-1, 1)
+        return self.tet["Volume"].reshape(-1, 1)
 
     @property
     def volume(self):
@@ -189,8 +201,7 @@ class TetVol(TriShell):
     @property
     def center_mass(self):
         """Return grid center of mass."""
-        return np.sum(self.cell_volumes*self.cell_centers,
-                      axis=0) / self.volume
+        return np.sum(self.cell_volumes * self.cell_centers, axis=0) / self.volume
 
 
 class Patch(vedo.Mesh):
@@ -205,9 +216,11 @@ class VtkPoly(VtkFrame):
     """Construct boundary line mesh from shapely polygon."""
 
     def __init__(self, poly: shapely.geometry.Polygon, c=None, alpha=1):
-        points = np.c_[poly.boundary.xy[0],
-                       np.zeros(len(poly.boundary.coords)),
-                       poly.boundary.xy[1]]
+        points = np.c_[
+            poly.boundary.xy[0],
+            np.zeros(len(poly.boundary.coords)),
+            poly.boundary.xy[1],
+        ]
         lines = [list(range(len(points)))]
         poly = vedo.utils.buildPolyData(points, lines=lines)
         super().__init__(poly, c, alpha)
@@ -220,9 +233,12 @@ class Ring(VtkFrame):
         try:
             mesh = VtkPoly(poly).extrude(zshift=0, rotation=360, res=60)
         except NotImplementedError:  # multipart boundary (skin)
-            mesh = [VtkPoly(Polygon(np.array(boundary.xy).T).poly).extrude(
-                    zshift=0, rotation=360, res=60)
-                    for boundary in poly.boundary.geoms]
+            mesh = [
+                VtkPoly(Polygon(np.array(boundary.xy).T).poly).extrude(
+                    zshift=0, rotation=360, res=60
+                )
+                for boundary in poly.boundary.geoms
+            ]
             mesh = vedo.merge(mesh)
         super().__init__(mesh, c, alpha)
         self.flat()
@@ -234,9 +250,11 @@ class Section:
 
     points: npt.ArrayLike
     origin: npt.ArrayLike = field(
-        init=False, default_factory=lambda: np.zeros(3, float))
+        init=False, default_factory=lambda: np.zeros(3, float)
+    )
     triad: npt.ArrayLike = field(
-        init=False, default_factory=lambda: np.identity(3, float))
+        init=False, default_factory=lambda: np.identity(3, float)
+    )
     mesh_array: list[VtkFrame] = field(init=False, default_factory=list)
     point_array: list[npt.ArrayLike] = field(init=False, default_factory=list)
 
@@ -252,7 +270,8 @@ class Section:
         """Generate mesh and append mesh to list."""
         self.point_array.append(self.points.tolist())
         self.mesh_array.append(
-            VtkFrame([self.points, [range(len(self.points))]]).c(len(self)))
+            VtkFrame([self.points, [range(len(self.points))]]).c(len(self))
+        )
 
     @staticmethod
     def normalize(vector):
@@ -266,13 +285,16 @@ class Section:
         dot = np.dot(self.triad[coord], vector)
         if np.linalg.norm(cross) == 0 and dot == -1:  # catch -pi rotation
             axis = np.cross(self.triad[coord], self.triad[coord][::-1])
-            rotation = Rotation.from_rotvec(-np.pi*axis)
+            rotation = Rotation.from_rotvec(-np.pi * axis)
         else:
-            v_cross = np.array([[0, -cross[2], cross[1]],
-                                [cross[2], 0, -cross[0]],
-                                [-cross[1], cross[0], 0]])
-            Rmat = np.identity(3) + v_cross + \
-                np.dot(v_cross, v_cross) / (1+dot)
+            v_cross = np.array(
+                [
+                    [0, -cross[2], cross[1]],
+                    [cross[2], 0, -cross[0]],
+                    [-cross[1], cross[0], 0],
+                ]
+            )
+            Rmat = np.identity(3) + v_cross + np.dot(v_cross, v_cross) / (1 + dot)
             rotation = Rotation.from_matrix(Rmat)
         self.points -= self.origin
         self.points = rotation.apply(self.points)
@@ -289,8 +311,8 @@ class Section:
         """Sweep section along path."""
         for i in range(mesh.n_points):
             self.to_point(mesh.points[i])
-            self.to_vector(mesh['normal'][i], 0)
-            self.to_vector(mesh['tangent'][i], 1)
+            self.to_vector(mesh["normal"][i], 0)
+            self.to_vector(mesh["tangent"][i], 1)
             self.append()
         return self
 
@@ -304,7 +326,7 @@ class Path:
     """Manage 3D path sub-divisions."""
 
     points: npt.ArrayLike
-    delta: float = 0.
+    delta: float = 0.0
     mesh: pyvista.PolyData = field(init=False)
     submesh: pyvista.PolyData = field(init=False)
 
@@ -322,19 +344,22 @@ class Path:
         """Interpolate mesh to submesh."""
         arc_length = self._arc_length()
         sub_points = scipy.interpolate.interp1d(
-            self.mesh['arc_length'], self.points, axis=0)(arc_length)
+            self.mesh["arc_length"], self.points, axis=0
+        )(arc_length)
         self.submesh = Line.from_points(sub_points).mesh
 
     def _arc_length(self) -> npt.ArrayLike:
         """Return updated sub-segment spacing parameter."""
         if self.delta == 0:
-            return self.mesh['arc_length']
+            return self.mesh["arc_length"]
         if self.delta < 0:  # specify segment number
-            return np.linspace(self.mesh['arc_length'][0],
-                               self.mesh['arc_length'][-1], -self.delta+1)
-        segment_number = int(1 + self.mesh['arc_length'][-1] / self.delta)
-        return np.linspace(self.mesh['arc_length'][0],
-                           self.mesh['arc_length'][-1], segment_number)
+            return np.linspace(
+                self.mesh["arc_length"][0], self.mesh["arc_length"][-1], -self.delta + 1
+            )
+        segment_number = int(1 + self.mesh["arc_length"][-1] / self.delta)
+        return np.linspace(
+            self.mesh["arc_length"][0], self.mesh["arc_length"][-1], segment_number
+        )
 
     def plot(self):
         """Plot mesh and submesh loops."""
@@ -346,8 +371,7 @@ class Cell(VtkFrame):
 
     def __init__(self, point_array, link=False):
         """Construct vtk instance for cell constructed from bounding polys."""
-        assert all((len(array) == len(point_array[0])
-                    for array in point_array[1:]))
+        assert all((len(array) == len(point_array[0]) for array in point_array[1:]))
         point_array = np.array(point_array)
         if np.isclose(point_array[0, 0], point_array[0, -1]).all():
             point_array = point_array[:, :-1]  # open closed loop
@@ -355,8 +379,8 @@ class Cell(VtkFrame):
         points = np.vstack(point_array)
         nodes = np.arange(0, len(points)).reshape(-1, n_cap)
         cells = []
-        for i in range(n_section-1):
-            cells.extend(self._link(nodes[i], nodes[i+1]))
+        for i in range(n_section - 1):
+            cells.extend(self._link(nodes[i], nodes[i + 1]))
         if link:  # link start and end sections
             cells.extend(self._link(nodes[-1], nodes[0]))
         else:  # cap
@@ -377,7 +401,7 @@ class Cell(VtkFrame):
 
     def __str__(self):
         """Return volume name."""
-        return 'cell'
+        return "cell"
 
 
 class Sweep(Cell):
@@ -400,7 +424,7 @@ class Sweep(Cell):
 
         """
         if not isinstance(poly, Polygon):
-            poly = PolyGeom(poly, segment='sweep')
+            poly = PolyGeom(poly, segment="sweep")
         if isinstance(path, pyvista.PolyData):
             path = path.points
         mesh = Path.from_points(path, delta=delta)
@@ -413,4 +437,4 @@ class Sweep(Cell):
 
     def __str__(self):
         """Return volume name."""
-        return 'sweep'
+        return "sweep"

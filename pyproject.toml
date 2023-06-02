@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nova"
-version = "0.0.0"
+version = "2023.5.3"
 description = "Equilibrium generation and inference"
 authors = ["Simon McIntosh <simon.mcintosh@iter.org>"]
 license = "ITER GIP"
@@ -139,20 +139,6 @@ extrapolate = "nova.imas.scripts:extrapolate"
 filepath = "nova.database.scripts:filepath"
 configure = "nova.scripts.configure:configure"
 
-[build-system]
-requires = ["poetry >= 0.12, <1", "poetry-core>=1.0.0", "poetry-dynamic-versioning"]
-build-backend = "poetry_dynamic_versioning.backend"
-
-#[build-system]
-#requires = ["poetry >= 0.12, <1"]
-#build-backend = "poetry.masonry.api"
-
-[tool.poetry-dynamic-versioning]
-enable = true
-vcs = "git"
-style = "pep440"
-pattern  = "^(?P<base>\\d+\\.\\d+\\.\\d+)(-?((?P<stage>[a-zA-Z]+)\\.?(?P<revision>\\d+)?))?"
-
 [tool.pytest.ini_options]
 addopts = "-rfEs --doctest-modules"
 norecursedirs = ".git __pycache__"
@@ -202,4 +188,8 @@ omit = [
   "nova/thermalhydralic/*", 
   "nova/utilities/*"
 ]
+
+[build-system]
+requires = ["poetry >= 1.5, <2"]
+build-backend = "poetry.masonry.api"
 

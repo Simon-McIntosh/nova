@@ -50,6 +50,7 @@ openpyxl = {version = "^3.1.2", optional = true}
 pylops = {version = "^2.1.0", optional = true}
 pyquaternion = {version = "^0.9.9", optional = true}
 pytest = {version = "^7.3.1", optional = true}
+pytest-cov = {version = "^4.1.0", optional = true}
 pyvista = {version = "^0.39.1", optional = true}
 scikit-learn = {version = "^1.2.2", optional = true}
 seaborn = {version = "^0.12.2", optional = true}
@@ -69,7 +70,6 @@ pandas-stubs = "^2.0.1.230501"
 pandoc = "^2.3"
 pylsp-mypy = "^0.6.6"
 pyperf = "^2.6.0"
-pytest-cov = "^4.1.0"
 pytest-xdist = "^3.3.1"
 snakeviz = "^2.2.0"
 sphinx = "^7.0.1"
@@ -116,7 +116,9 @@ structural = [
   "pyquaternion",
 ]
 test = [
+  "coverage2clover",
   "pytest",
+  "pytest-cov",
 ]
 thermofluids = [
   "coolprop", 

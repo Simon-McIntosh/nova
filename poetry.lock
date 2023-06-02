@@ -1019,7 +1019,7 @@ files = [
 name = "coverage"
 version = "7.2.7"
 description = "Code coverage measurement for Python"
-optional = false
+optional = true
 python-versions = ">=3.7"
 files = [
     {file = "coverage-7.2.7-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:d39b5b4f2a66ccae8b7263ac3c8170994b65266797fb96cbbfd3fb5b23921db8"},
@@ -4652,7 +4652,7 @@ testing = ["argcomplete", "attrs (>=19.2.0)", "hypothesis (>=3.56)", "mock", "no
 name = "pytest-cov"
 version = "4.1.0"
 description = "Pytest plugin for measuring coverage."
-optional = false
+optional = true
 python-versions = ">=3.7"
 files = [
     {file = "pytest-cov-4.1.0.tar.gz", hash = "sha256:3904b13dfbfec47f003b8e77fd5b589cd11904a21ddf1ab38a64f204d6a10ef6"},
@@ -6745,11 +6745,11 @@ graphics = ["bokeh", "descartes", "matplotlib", "moviepy", "seaborn"]
 numba = ["numba"]
 optimize = ["nlopt", "pylops", "scikit-learn"]
 structural = ["matplotlib", "pyquaternion"]
-test = ["pytest"]
+test = ["coverage2clover", "pytest", "pytest-cov"]
 thermofluids = ["coolprop", "ftputil", "matplotlib", "openpyxl", "tables", "xlrd"]
 vtk = ["alphashape", "meshio", "pyvista", "trimesh", "vedo"]
 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.12"
-content-hash = "27907b72d7bc45519b55f5993cba3ce05683edccddf259d1dbf70731d289d439"
+content-hash = "35b448057ca743727da42e25523490fc535c7028ae7eb594ed72d1264bb6b6af"

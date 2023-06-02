@@ -140,6 +140,10 @@ class Plasma(Plot, netCDF, PlasmaLoc):
         """Return boundary poloidal flux."""
         if self.grid.x_point_number == 0:
             return self.psi_w
+        w_height = self.wall.w_point[1]
+        x_height = self.grid.x_points[:, 1]
+        if w_height < np.min(x_height) or w_height > np.max(x_height):
+            return self.psi_x
         if self.polarity < 0:
             return np.min([self.psi_x, self.psi_w])
         return np.max([self.psi_x, self.psi_w])

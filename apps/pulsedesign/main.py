@@ -54,7 +54,9 @@ nulls = poloidal.scatter(
 plasma = poloidal.multi_polygons(
     "x", "z", fill_alpha="ionize", line_alpha=0, source=source["plasma"]
 )
-
+points = poloidal.scatter(
+    "x", "z", source=source["points"], marker="circle_cross", size=8
+)
 pprime = figure(height=150)
 pprime.line("psi_norm", "dpressure_dpsi", source=source["profiles"])
 
@@ -70,8 +72,9 @@ itime = Slider(
 )
 
 elongation = Slider(title="elongation", value=2, start=0, end=3, step=0.01)
+minor_radius = Slider(title="minor_radius", value=2, start=0, end=3, step=0.1)
 
-sliders = column(itime, elongation, pprime, ffprime, name="sliders")
+sliders = column(itime, elongation, minor_radius, pprime, ffprime, name="sliders")
 
 
 def update_itime(attr, old, new):
@@ -79,10 +82,20 @@ def update_itime(attr, old, new):
     if old == new:
         return
     simulator.itime = new
+    minor_radius.value = simulator["minor_radius"]
+
+
+def update_minor_radius(attr, old, new):
+    """Implement itime update."""
+    if old == new:
+        return
+    simulator["minor_radius"] = new
+    simulator.update()
 
 
 simulator.itime = 0
 itime.on_change("value", update_itime)
+minor_radius.on_change("value", update_minor_radius)
 
 curdoc().add_root(sliders)
 curdoc().add_root(poloidal)

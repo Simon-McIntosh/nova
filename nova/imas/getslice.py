@@ -34,6 +34,11 @@ class GetSlice:
             self._cache[key] = self.get(key)
             return self._cache[key]
 
+    def __setitem__(self, key: str, value):
+        """Update reference to item in data and cache."""
+        self.data[self.match(key)][self.itime] = value
+        self._cache[key] = value
+
     def match(self, key: str) -> str:
         """Return key matched to internal naming convention."""
         match key:

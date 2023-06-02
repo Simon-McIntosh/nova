@@ -25,6 +25,7 @@ class Simulator(PulseDesign):
         "profiles",
         "x_points",
         "o_points",
+        "points",
     ]
 
     def __post_init__(self):
@@ -44,6 +45,7 @@ class Simulator(PulseDesign):
     def update(self):
         """Extend PulseDesign update to include bokeh datasources."""
         super().update()
+        self.source["points"].data = dict(zip("xz", self.points.T))
         self.source["levelset"].data = self.levelset.contour()
         self.source["x_points"].data = dict(zip("xz", self.levelset.x_points.T))
         self.source["profiles"].patch(

@@ -733,7 +733,8 @@ class PulseDesign(Control, ITER):
             self.solve_current()
             with self.plasma.profile(self.p_prime, self.ff_prime):
                 self.plasma.separatrix = self.plasma.psi_boundary
-        self.solve_current()
+
+        # self.solve_current()
 
     def plot(self, index=None, axes=None, **kwargs):
         """Extend plot to include plasma contours."""
@@ -1028,16 +1029,18 @@ class Benchmark(PulseDesign):
 
 
 if __name__ == "__main__":
-    # design = PulseDesign(135013, 2, 'iter', 1)
-    design = Benchmark(135013, 2, "iter", 1)
+    design = PulseDesign(135013, 2, "iter", 1)
+    # design = Benchmark(135013, 2, "iter", 1)
 
-    design.rms()
+    design.itime = 5
+    design["minor_radius"] = 1.0
+    design.update()
+    design.plot("plasma")
+    # design.rms()
 
     """
 
-    design.itime = 5
 
-    design.plot('plasma')
     # Cocos
     design.levelset.plot_levelset(-design['psi_boundary'], False, color='k')
     design.levelset.plot_levelset(

@@ -44,6 +44,7 @@ class Grid:
 
     >>> import pytest
     >>> from nova.imas.database import Database
+    >>> from nova.imas.equilibrium import EquilibriumData
     >>> try:
     ...     _ = Database(130506, 403).get_ids('equilibrium')
     ... except:

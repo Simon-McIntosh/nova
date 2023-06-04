@@ -2,12 +2,15 @@ from itertools import product
 import numpy as np
 import pytest
 
-from nova.geometry.separatrix import LCFS, PlasmaProfile, Quadrant, Separatrix
+from nova.geometry.plasmapoints import PlasmaPoints
+from nova.geometry.plasmaprofile import PlasmaProfile
+from nova.geometry.quadrant import Quadrant
+from nova.geometry.separatrix import LCFS
 
 
 @pytest.mark.parametrize("radius,height", product([0, 2.5, 5], [-1.3, 0, 7.2]))
 def test_profile_axis(radius, height):
-    separatrix = Separatrix().limiter(radius, height, 1, 1, 0)
+    separatrix = PlasmaProfile().limiter(radius, height, 1, 1, 0)
     assert np.allclose(np.mean(separatrix.points, 0), (radius, height), atol=1e-2)
 
 
@@ -16,7 +19,7 @@ def test_profile_axis(radius, height):
     product([1, 5.2], [0.8, 1, 1.5], [-0.2, 0.2, 0.5]),
 )
 def test_limiter_profile(minor_radius, elongation, triangularity):
-    profile = Separatrix().limiter(5.2, 0, minor_radius, elongation, triangularity)
+    profile = PlasmaProfile().limiter(5.2, 0, minor_radius, elongation, triangularity)
     shape = LCFS(profile.points)
     attrs = ["minor_radius", "elongation", "triangularity"]
     assert np.allclose(
@@ -25,7 +28,7 @@ def test_limiter_profile(minor_radius, elongation, triangularity):
 
 
 def test_theta_upper():
-    assert Separatrix().theta_upper[-1] < np.pi
+    assert PlasmaProfile().theta_upper[-1] < np.pi
 
 
 @pytest.mark.parametrize(
@@ -33,7 +36,9 @@ def test_theta_upper():
     product([1, 5.2], [1.5, 2.1, 2.5], [-0.2, 0.2, 0.5]),
 )
 def test_sn_profile(minor_radius, elongation, triangularity):
-    profile = Separatrix().single_null(5.2, 0, minor_radius, elongation, triangularity)
+    profile = PlasmaProfile().single_null(
+        5.2, 0, minor_radius, elongation, triangularity
+    )
     shape = LCFS(profile.points)
     attrs = ["minor_radius", "elongation", "triangularity"]
     assert np.allclose(
@@ -42,50 +47,50 @@ def test_sn_profile(minor_radius, elongation, triangularity):
 
 
 def test_sn_x_point():
-    profile = Separatrix().single_null(5.2, 3, 2, 1.5, 0, x_point=(4.2, 0))
+    profile = PlasmaProfile().single_null(5.2, 3, 2, 1.5, 0, x_point=(4.2, 0))
     assert np.allclose(profile.x_point, (4.2, 0))
     assert np.isclose(profile.geometric_radius, 5.2)
 
 
 def test_elongation():
-    plasma = PlasmaProfile(coef=dict(elongation=2.3))
+    plasma = PlasmaPoints(coef=dict(elongation=2.3))
     assert plasma.elongation == 2.3
 
 
 def test_upper_elongation_lower():
-    plasma = PlasmaProfile(coef=dict(elongation_upper=3, elongation_lower=2))
+    plasma = PlasmaPoints(coef=dict(elongation_upper=3, elongation_lower=2))
     assert plasma.elongation == 2.5
 
 
 def test_elongation_upper():
-    plasma = PlasmaProfile(coef=dict(elongation_upper=3, elongation_lower=2))
+    plasma = PlasmaPoints(coef=dict(elongation_upper=3, elongation_lower=2))
     assert plasma.elongation_upper == 3
 
 
 def test_elongation_upper_from_lower():
-    plasma = PlasmaProfile(coef=dict(elongation_lower=2.5))
+    plasma = PlasmaPoints(coef=dict(elongation_lower=2.5))
     assert plasma.elongation_upper == 2.5
 
 
 def test_elongation_lower():
-    plasma = PlasmaProfile(coef=dict(elongation_upper=3, elongation_lower=1.4))
+    plasma = PlasmaPoints(coef=dict(elongation_upper=3, elongation_lower=1.4))
     assert plasma.elongation_lower == 1.4
 
 
 def test_elongation_lower_from_upper():
-    plasma = PlasmaProfile(coef=dict(elongation_upper=2.4))
+    plasma = PlasmaPoints(coef=dict(elongation_upper=2.4))
     assert plasma.elongation_lower == 2.4
 
 
 def test_elongation_over_constraint_error():
     with pytest.raises(AssertionError):
-        PlasmaProfile(
+        PlasmaPoints(
             coef=dict(elongation=2.4, elongation_upper=3, elongation_lower=1.4)
         )
 
 
 def test_triangularty_over_constraint():
-    plasma = PlasmaProfile(
+    plasma = PlasmaPoints(
         coef=dict(triangularity=2.5, triangularity_upper=3, triangularity_lower=2)
     )
     assert plasma.triangularity == 2.5
@@ -94,7 +99,7 @@ def test_triangularty_over_constraint():
 
 
 def test_triangularity_lower():
-    plasma = PlasmaProfile(coef=dict(triangularity_upper=3))
+    plasma = PlasmaPoints(coef=dict(triangularity_upper=3))
     assert plasma.triangularity_lower == 3
 
 
@@ -138,7 +143,7 @@ def test_unit_squareness(minor_point, major_point):
 def test_quadrant_angles(quadrant):
     geometric_axis = (5.2, 0.2)
     minor_radius, elongation, triangularity = 0.5, 1.4, 0.3
-    profile = Separatrix(point_number=51).limiter(
+    profile = PlasmaProfile(point_number=51).limiter(
         *geometric_axis, minor_radius, elongation, triangularity
     )
     shape = LCFS(profile.points)
@@ -154,7 +159,7 @@ def test_quadrant_angles(quadrant):
 def test_square_circle():
     geometric_axis = (5.2, 0.2)
     minor_radius, elongation, triangularity = 0.5, 1, 0
-    profile = Separatrix(point_number=51).limiter(
+    profile = PlasmaProfile(point_number=51).limiter(
         *geometric_axis, minor_radius, elongation, triangularity
     )
     shape = LCFS(profile.points)

@@ -7,12 +7,12 @@ import numpy as np
 from scipy.optimize import minimize
 from scipy.spatial import KDTree
 
-from nova.geometry.separatrix import Separatrix
+from nova.geometry.plasmaprofile import PlasmaProfile
 from nova.imas.pulseschedule import PulseSchedule
 
 
 @dataclass
-class PulseSeparatrix(Separatrix, PulseSchedule):
+class PulseProfile(PlasmaProfile, PulseSchedule):
     """Fit Last Closed Flux Surface to Pulse Schedule gap parameters."""
 
     gap_head: np.ndarray = field(init=False, repr=False)
@@ -176,16 +176,11 @@ class PulseSeparatrix(Separatrix, PulseSchedule):
 
 if __name__ == "__main__":
     pulse, run = 135003, 5
-    design = PulseSeparatrix(pulse, run)
+    pulseprofile = PulseProfile(pulse, run)
 
-    design.time = 11.656 - 0.5
+    pulseprofile.time = 11.656 - 0.5
 
-    design.fit()
-    design.plot()
+    pulseprofile.fit()
+    pulseprofile.plot()
 
-    design.annimate(10, "gaps_fit_limiter")
-
-    # lcfs.plot_gaps()
-    # separatrix = Separatrix().single_null(
-    #    (5, 0), 2, 1.8, 0.3, x_point=(4, -4.5))
-    # separatrix.plot()
+    pulseprofile.annimate(10, "gaps_fit_limiter")

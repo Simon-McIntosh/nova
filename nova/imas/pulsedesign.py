@@ -10,7 +10,11 @@ import xarray
 
 from nova.biot.biot import Nbiot
 from nova.graphics.plot import Plot
-from nova.geometry.separatrix import Quadrant, Separatrix
+
+# from nova.geometry.plasmapoints import PlasmaPoints
+from nova.geometry.plasmaprofile import PlasmaProfile
+from nova.geometry.quadrant import Quadrant
+
 from nova.imas.database import Database, IDS, Ids, IdsEntry
 from nova.imas.equilibrium import EquilibriumData
 from nova.imas.machine import Machine
@@ -170,7 +174,7 @@ class Constraint(Plot):
 
 
 @dataclass
-class Control(Profile):
+class Control(Profile):  # PlasmaPoints,
     """Extract control points and flux profiles from equilibrium data."""
 
     constraint: Constraint = field(init=False, default_factory=Constraint, repr=False)
@@ -315,8 +319,8 @@ class Control(Profile):
 
     def plot_plasma_profile(self):
         """Plot analytic profile."""
-        profile = Separatrix(point_number=121)
-        profile.limiter(**self.coef).plot()
+        plasmaprofile = PlasmaProfile(point_number=121)
+        plasmaprofile.limiter(**self.coef).plot()
 
     def plot(self, index=None, axes=None, **kwargs):
         """Plot control points and first wall."""
@@ -327,6 +331,15 @@ class Control(Profile):
                 segment[:, 0], segment[:, 1], "-", ms=4, color="gray", linewidth=1.5
             )
         self.constraint.plot()
+
+    '''
+
+    def plot(self, index=None, axes=None, **kwargs):
+        """Extend PlasmaPoints.plot to include constraints."""
+        super().plot(index, axes, **kwargs)
+        self.constraint.plot()
+
+    '''
 
 
 @dataclass

@@ -6,9 +6,10 @@ import numpy as np
 from scipy import optimize
 
 from nova.biot.biot import Nbiot
+from nova.geometry.plasmaprofile import PlasmaProfile
 from nova.imas.database import Ids
 from nova.imas.machine import Machine
-from nova.imas.pulseseparatrix import PulseSeparatrix
+from nova.imas.pulseprofile import PulseProfile
 from nova.linalg.regression import MoorePenrose
 
 
@@ -24,7 +25,7 @@ class MachineDescription(Machine):
 
 
 @dataclass
-class Waveform(MachineDescription, PulseSeparatrix):
+class Waveform(MachineDescription, PulseProfile):
     """Generate coilset voltage and current waveforms."""
 
     name: str = "pulse_schedule"
@@ -95,7 +96,7 @@ class Waveform(MachineDescription, PulseSeparatrix):
         self.plasma.separatrix = float(self["loop_psi"])
 
     def update_lcfs(self):
-        """Fit Lasc Closed Separatrix."""
+        """Fit Last Closed Separatrix."""
         psi_boundary = float(self["loop_psi"])
         Psi, psi = self.append(self.lcfs_psi())
         matrix = MoorePenrose(Psi, gamma=0)
@@ -178,13 +179,14 @@ if __name__ == "__main__":
     # waveform.levelset.tree.plot(waveform.points)
     # waveform.axes.plot(*waveform.points.T, 'C3')
 
-    """
-    separatrix = Separatrix(waveform['geometric_axis'][0], 0.5).single_null(
-        waveform['minor_radius'],  waveform['elongation'],
-        waveform['triangularity'], x_point=waveform['x_point'][0])
-    separatrix.plot()
-    separatrix.axes.plot(*waveform['x_point'][0], 'C0o')
-    """
+    plasmaprofile = PlasmaProfile(waveform["geometric_axis"][0], 0.5).single_null(
+        waveform["minor_radius"],
+        waveform["elongation"],
+        waveform["triangularity"],
+        x_point=waveform["x_point"][0],
+    )
+    plasmaprofile.plot()
+    plasmaprofile.axes.plot(*waveform["x_point"][0], "C0o")
 
     """
     currents = np.zeros((150, waveform.saloc['coil'].sum()))

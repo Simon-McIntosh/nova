@@ -1042,11 +1042,11 @@ class Benchmark(PulseDesign):
 
 
 if __name__ == "__main__":
-    design = PulseDesign(135013, 2, "iter", 1)
+    design = PulseDesign(135013, 2, "iter", 1, field_weight=50)
     # design = Benchmark(135013, 2, "iter", 1)
 
     design.itime = 5
-    design["minor_radius"] = 1.0
+    # design["minor_radius"] = 1.0
     design.update()
     design.plot("plasma")
     # design.rms()

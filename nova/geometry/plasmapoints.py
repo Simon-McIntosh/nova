@@ -1,129 +1,121 @@
 """Manage methods related to plasma profile control points."""
 from dataclasses import dataclass, field
-from typing import ClassVar
+from functools import cached_property
 
 import numpy as np
+import xarray
+
+from nova.geometry.quadrant import Quadrant
 
 
 @dataclass
-class FourPoint:
-    """Manage access to (upper, lower, inner, outer) type plasma shape parameters."""
+class Points:
+    """Manage access to plasma shape point groups."""
 
-    segment: str
-    coef: dict[str, float]
+    name: str = ""
+    data: xarray.Dataset = field(default_factory=xarray.Dataset, repr=False)
+    axis: str = ""
+    attrs: list[str] = field(init=False, default_factory=list)
+    labels: list[str] = field(init=False, default_factory=list)
 
     def __post_init__(self):
         """Check dataset for self-consistency."""
-        self.check_consistency()
+        self._select_axis()
 
-    def check_consistency(self):
-        """Check data consistency."""
-        if all(
-            attr in self.coef
-            for attr in [self.segment, self.upper_attr, self.lower_attr]
-        ):
-            assert np.isclose(self.mean, (self.upper + self.lower) / 2)
-        if all(
-            attr in self.coef
-            for attr in [self.segment, self.inner_attr, self.outer_attr]
-        ):
-            assert np.isclose(self.minor, (self.inner + self.outer) / 2)
+    def _select_axis(self):
+        """Select point attribures attrs from data."""
+        match self.axis:
+            case "":
+                self._set_attrs()
+            case "major":
+                self._set_attrs("upper", "lower")
+            case "minor":
+                self._set_attrs("inner", "outer")
+            case "ids_fix":
+                self._set_attrs("upper", "lower")
+            case "dual":
+                self._set_attrs("upper", "lower", "inner", "outer")
+            case "square":
+                self._set_attrs(
+                    "upper_outer", "upper_inner", "lower_inner", "lower_outer"
+                )
+            case _:
+                raise ValueError(f"axis {self.axis} not in [major, minor, dual].")
 
-    @property
-    def upper_attr(self) -> str:
-        """Return upper attribute name."""
-        return f"{self.segment}_upper"
+    def _set_attrs(self, *labels):
+        """Set attribute list."""
+        if len(labels) == 0:
+            attrs = [self.name]
+        else:
+            attrs = ["_".join([self.name, label]) for label in labels]
+        self.attrs = [attr for attr in attrs if attr in self.data]
+        self.labels = list(labels)
 
-    @property
-    def lower_attr(self) -> str:
-        """Return lower attribute name."""
-        return f"{self.segment}_lower"
+    def __getitem__(self, attr: str):
+        """Return item from data."""
+        try:
+            return self.data[f"{self.name}_{attr}"]
+        except KeyError as error:
+            if attr in self.labels:
+                return self.mean
+            raise KeyError(f"invalid attr {attr}") from error
 
-    @property
-    def inner_attr(self) -> str:
-        """Return inner attribute name."""
-        return f"{self.segment}_inner"
+    def __setitem__(self, key: str, value):
+        """Update data attribute."""
+        if key == "mean":
+            factor = value / self.mean
+            for attr in self.attrs:
+                self.data[attr] *= factor
+            return
+        self.data[f"{self.name}_{key}"] = value
 
-    @property
-    def outer_attr(self) -> str:
-        """Return outer attribute name."""
-        return f"{self.segment}_outer"
+    def __getattr__(self, attr):
+        """Provide attribute get."""
+        if self.axis == "ids_fix":
+            attr = {"outer": "upper", "inner": "lower"}[attr]
+        if attr in self.labels:
+            return self[attr]
+        raise AttributeError(f"attribute {attr} not defined")
 
     @property
     def mean(self):
-        """Return mean attribute."""
-        match self.coef:
-            case {self.segment: mean}:
-                return mean
-            case {self.upper_attr: upper, self.lower_attr: lower}:
-                return (upper + lower) / 2
-            case {self.upper_attr: upper}:
-                return upper
-            case {self.lower_attr: lower}:
-                return lower
-            case _:
-                raise KeyError(
-                    "attributes required to reconstruct "
-                    f"mean {self.segment} not found in {self.coef}"
-                )
+        """Manage mean attribute."""
+        if len(self.attrs) == 0:
+            return self.data[self.name]
+        return np.mean([self.data[attr] for attr in self.attrs])
 
-    @property
-    def upper(self):
-        """Return upper attribute."""
-        match self.coef:
-            case {self.upper_attr: upper}:
-                return upper
-            case {self.lower_attr: lower}:
-                return 2 * self.mean - lower
-            case _:
-                return self.mean
-
-    @property
-    def lower(self):
-        """Return lower attribute."""
-        match self.coef:
-            case {self.lower_attr: lower}:
-                return lower
-            case {self.upper_attr: upper}:
-                return 2 * self.mean - upper
-            case _:
-                return self.mean
+    @mean.setter
+    def mean(self, value):
+        self["mean"] = value
 
 
 @dataclass
 class PlasmaPoints:
     """Calculate plasma profile control points from plasma parameters."""
 
-    coef: dict[str, float] = field(default_factory=dict)
-    plasma_shape: dict[str, FourPoint] = field(init=False, default_factory=dict)
+    data: xarray.Dataset = field(default_factory=xarray.Dataset)
 
-    profile_attrs: ClassVar[list[str]] = [
-        "geometric_radius",
-        "geometric_height",
-        "minor_radius",
-        "elongation",
-        "triangularity",
-    ]
+    def __getitem__(self, attr):
+        """Return attribute from data if present else from super."""
+        if hasattr(super(), "__getitem__"):
+            return super().__getitem__(attr)
+        if attr in self.data:
+            return self.data[attr]
+        raise KeyError(f"mapping attr {attr} not found")
 
-    def __post_init__(self):
-        """Initialise updown."""
-        if hasattr(super(), "__post_init__"):
-            super().__post_init__()
-        self.plasma_shape["kappa"] = FourPoint("elongation", self.coef)
-        self.plasma_shape["delta"] = FourPoint("triangularity", self.coef)
-
-    def update_coefficents(self, *args, **kwargs):
-        """Update plasma profile coefficients."""
-        self.coef = kwargs
-        self.coef |= {attr: arg for attr, arg in zip(self.profile_attrs, args)}
-        self.plasma_shape["kappa"] = FourPoint("elongation", self.coef)
-        self.plasma_shape["delta"] = FourPoint("triangularity", self.coef)
-        return self
+    def __setitem__(self, attr, value):
+        """Update coef attribute."""
+        if hasattr(super(), "__getitem__"):
+            super().__setitem__(attr, value)
+        else:
+            self.data[attr] = value
 
     @property
-    def minor_radius(self):
-        """Return minor radius."""
-        return self["minor_radius"]
+    def _pointdata(self):
+        """Return point data."""
+        if hasattr(self, "itime"):
+            return self
+        return self.data
 
     @property
     def geometric_radius(self):
@@ -136,78 +128,93 @@ class PlasmaPoints:
         return self["geometric_height"]
 
     @property
-    def x_point(self):
-        """Return x-point."""
-        return self["x_point"]
-
-    def __getitem__(self, attr):
-        """Return attribute from coef if present else from super."""
-        if attr in self.coef:
-            return self.coef[attr]
-        if hasattr(super(), "__getitem__"):
-            return super().__getitem__(attr)
-
-    def __setitem__(self, attr, value):
-        """Update coef attribute."""
-        self.coef[attr] = value
-
-    def check_consistency(self):
-        """Check data consistency."""
-        for attr in ["kappa", "delta"]:
-            self.plasma_shape[attr].check_consistency()
-
-    def set_x_point(self, x_point):
-        """Adjust lower elongation and triangularity to match x_point."""
-        if x_point is None:
-            return
-        self["triangularity_lower"] = (
-            self.geometric_radius - self.x_point[0]
-        ) / self.minor_radius
-        if "triangularity" in self.coef:
-            self["triangularity_upper"] = self["triangularity"]
-            del self.coef["triangularity"]
-        self["elongation_lower"] = (
-            self.geometric_height - self.x_point[1]
-        ) / self.minor_radius
-        assert abs(self["triangularity_lower"]) < 1
-        self.check_consistency()
+    def axis(self):
+        """Return location of geometric axis."""
+        return self["geometric_axis"]
 
     @property
     def elongation(self):
         """Return plasma elongation."""
-        return self.plasma_shape["kappa"].mean
+        return self["elongation"]
 
     @property
-    def elongation_upper(self):
-        """Return upper plasma elongation."""
-        return self.plasma_shape["kappa"].upper
+    def minor_radius(self):
+        """Return minor radius."""
+        return self["minor_radius"]
 
-    @property
-    def elongation_lower(self):
-        """Return lower plasma elongation."""
-        return self.plasma_shape["kappa"].lower
-
-    @property
+    @cached_property
     def triangularity(self):
-        """Return plasma triangularity."""
-        return self.plasma_shape["delta"].mean
+        """Return triangularity points instance."""
+        return Points("triangularity", self._pointdata, "dual")
+
+    @cached_property
+    def triangularity_major(self):
+        """Return major triangularity points instance."""
+        return Points("triangularity", self._pointdata, "major")
+
+    @cached_property
+    def triangularity_minor(self):
+        """Return minor triangularity points instance."""
+        # TODO update once IDS is fixed
+        return Points("elongation", self._pointdata, "ids_fix")
+
+    @cached_property
+    def squareness(self):
+        """Return squareness points instance."""
+        return Points("squareness", self._pointdata, "square")
 
     @property
-    def triangularity_upper(self):
-        """Return plasma triangularity."""
-        return self.plasma_shape["delta"].upper
+    def upper(self):
+        """Return upper control point."""
+        return self.axis + self.minor_radius * np.array(
+            [-self.triangularity.upper, self.elongation]
+        )
 
     @property
-    def triangularity_lower(self):
-        """Return plasma triangularity."""
-        return self.plasma_shape["delta"].lower
+    def lower(self):
+        """Return upper control point."""
+        return self.axis - self.minor_radius * np.array(
+            [self.triangularity.lower, self.elongation]
+        )
 
-    def adjust_elongation_lower(self):
-        """Adjust lower elongation for single-null compliance."""
-        if self.elongation_lower < (
-            min_kappa := 2 * (1 - self.triangularity_lower**2) ** 0.5
-        ):
-            delta_kappa = 1e-3 + min_kappa - self.elongation_lower
-            self["elongation_lower"] = self.elongation_lower + delta_kappa
-            self["geometric_height"] += self.minor_radius * delta_kappa
-            self.plasma_shape["kappa"].check_consistency()
+    @property
+    def inner(self):
+        """Return inner control point."""
+        return self.axis + self.minor_radius * np.array(
+            [-1, self.triangularity_minor.inner]
+        )
+
+    @property
+    def outer(self):
+        """Return outer control point."""
+        return self.axis + self.minor_radius * np.array(
+            [1, self.triangularity_minor.outer]
+        )
+
+    @property
+    def upper_outer(self):
+        """Return upper outer control point."""
+        return Quadrant(self.outer, self.upper).separatrix_point(
+            self["squareness_upper_outer"]
+        )
+
+    @property
+    def upper_inner(self):
+        """Return upper inner control point."""
+        return Quadrant(self.inner, self.upper).separatrix_point(
+            self["squareness_upper_inner"]
+        )
+
+    @property
+    def lower_inner(self):
+        """Return lower inner control point."""
+        return Quadrant(self.inner, self.lower).separatrix_point(
+            self["squareness_lower_inner"]
+        )
+
+    @property
+    def lower_outer(self):
+        """Return lower outer control point."""
+        return Quadrant(self.outer, self.lower).separatrix_point(
+            self["squareness_lower_outer"]
+        )

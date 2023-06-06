@@ -39,6 +39,10 @@ class GetSlice:
         self.data[self.match(key)][self.itime] = value
         self._cache[key] = value
 
+    def __iter__(self):
+        """Return data iterator."""
+        return iter(self.data)
+
     def match(self, key: str) -> str:
         """Return key matched to internal naming convention."""
         match key:

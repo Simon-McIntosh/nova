@@ -2,7 +2,6 @@ from itertools import product
 import numpy as np
 import pytest
 
-from nova.geometry.plasmapoints import PlasmaPoints
 from nova.geometry.plasmaprofile import PlasmaProfile
 from nova.geometry.quadrant import Quadrant
 from nova.geometry.separatrix import LCFS
@@ -10,8 +9,8 @@ from nova.geometry.separatrix import LCFS
 
 @pytest.mark.parametrize("radius,height", product([0, 2.5, 5], [-1.3, 0, 7.2]))
 def test_profile_axis(radius, height):
-    separatrix = PlasmaProfile().limiter(radius, height, 1, 1, 0)
-    assert np.allclose(np.mean(separatrix.points, 0), (radius, height), atol=1e-2)
+    profile = PlasmaProfile().limiter(radius, height, 1, 1, 0)
+    assert np.allclose(np.mean(profile.points, 0), (radius, height), atol=1e-2)
 
 
 @pytest.mark.parametrize(
@@ -50,57 +49,6 @@ def test_sn_x_point():
     profile = PlasmaProfile().single_null(5.2, 3, 2, 1.5, 0, x_point=(4.2, 0))
     assert np.allclose(profile.x_point, (4.2, 0))
     assert np.isclose(profile.geometric_radius, 5.2)
-
-
-def test_elongation():
-    plasma = PlasmaPoints(coef=dict(elongation=2.3))
-    assert plasma.elongation == 2.3
-
-
-def test_upper_elongation_lower():
-    plasma = PlasmaPoints(coef=dict(elongation_upper=3, elongation_lower=2))
-    assert plasma.elongation == 2.5
-
-
-def test_elongation_upper():
-    plasma = PlasmaPoints(coef=dict(elongation_upper=3, elongation_lower=2))
-    assert plasma.elongation_upper == 3
-
-
-def test_elongation_upper_from_lower():
-    plasma = PlasmaPoints(coef=dict(elongation_lower=2.5))
-    assert plasma.elongation_upper == 2.5
-
-
-def test_elongation_lower():
-    plasma = PlasmaPoints(coef=dict(elongation_upper=3, elongation_lower=1.4))
-    assert plasma.elongation_lower == 1.4
-
-
-def test_elongation_lower_from_upper():
-    plasma = PlasmaPoints(coef=dict(elongation_upper=2.4))
-    assert plasma.elongation_lower == 2.4
-
-
-def test_elongation_over_constraint_error():
-    with pytest.raises(AssertionError):
-        PlasmaPoints(
-            coef=dict(elongation=2.4, elongation_upper=3, elongation_lower=1.4)
-        )
-
-
-def test_triangularty_over_constraint():
-    plasma = PlasmaPoints(
-        coef=dict(triangularity=2.5, triangularity_upper=3, triangularity_lower=2)
-    )
-    assert plasma.triangularity == 2.5
-    assert plasma.triangularity_upper == 3
-    assert plasma.triangularity_lower == 2
-
-
-def test_triangularity_lower():
-    plasma = PlasmaPoints(coef=dict(triangularity_upper=3))
-    assert plasma.triangularity_lower == 3
 
 
 @pytest.mark.parametrize(

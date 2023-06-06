@@ -11,9 +11,8 @@ import xarray
 from nova.biot.biot import Nbiot
 from nova.graphics.plot import Plot
 
-# from nova.geometry.plasmapoints import PlasmaPoints
+from nova.geometry.plasmapoints import PlasmaPoints
 from nova.geometry.plasmaprofile import PlasmaProfile
-from nova.geometry.quadrant import Quadrant
 
 from nova.imas.database import Database, IDS, Ids, IdsEntry
 from nova.imas.equilibrium import EquilibriumData
@@ -174,7 +173,7 @@ class Constraint(Plot):
 
 
 @dataclass
-class Control(Profile):  # PlasmaPoints,
+class Control(PlasmaPoints, Profile):
     """Extract control points and flux profiles from equilibrium data."""
 
     constraint: Constraint = field(init=False, default_factory=Constraint, repr=False)
@@ -206,93 +205,6 @@ class Control(Profile):  # PlasmaPoints,
         """Update source equilibrium."""
         super().update()
         self.update_constraints()
-
-    @property
-    def axis(self):
-        """Return location of geometric axis."""
-        return self["geometric_axis"]
-
-    @property
-    def minor_radius(self):
-        """Return minor radius."""
-        return self["minor_radius"]
-
-    @property
-    def elongation(self):
-        """Return elongation."""
-        return self["elongation"]
-
-    @property
-    def triangularity_upper(self):
-        """Return upper triangularity."""
-        return self["triangularity_upper"]
-
-    @property
-    def triangularity_lower(self):
-        """Return lower triangularity."""
-        return self["triangularity_lower"]
-
-    @property
-    def triangularity_outer(self):
-        """Return outer triangularity."""
-        return self["elongation_upper"]  # TODO update once IDS is fixed
-
-    @property
-    def triangularity_inner(self):
-        """Return inner triangularity."""
-        return self["elongation_lower"]  # TODO update once IDS is fixed
-
-    @property
-    def upper(self):
-        """Return upper control point."""
-        return self.axis + self.minor_radius * np.array(
-            [-self.triangularity_upper, self.elongation]
-        )
-
-    @property
-    def lower(self):
-        """Return upper control point."""
-        return self.axis - self.minor_radius * np.array(
-            [self.triangularity_lower, self.elongation]
-        )
-
-    @property
-    def inner(self):
-        """Return inner control point."""
-        return self.axis + self.minor_radius * np.array([-1, self.triangularity_inner])
-
-    @property
-    def outer(self):
-        """Return outer control point."""
-        return self.axis + self.minor_radius * np.array([1, self.triangularity_outer])
-
-    @property
-    def upper_outer(self):
-        """Return upper outer control point."""
-        return Quadrant(self.outer, self.upper).separatrix_point(
-            self["squareness_upper_outer"]
-        )
-
-    @property
-    def upper_inner(self):
-        """Return upper inner control point."""
-        return Quadrant(self.inner, self.upper).separatrix_point(
-            self["squareness_upper_inner"]
-        )
-
-    @property
-    def lower_inner(self):
-        """Return lower inner control point."""
-        return Quadrant(self.inner, self.lower).separatrix_point(
-            self["squareness_lower_inner"]
-        )
-
-    @property
-    def lower_outer(self):
-        """Return lower outer control point."""
-        return Quadrant(self.outer, self.lower).separatrix_point(
-            self["squareness_lower_outer"]
-        )
 
     @property
     def inner_strike(self):

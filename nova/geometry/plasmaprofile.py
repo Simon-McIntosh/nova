@@ -2,6 +2,7 @@
 import bisect
 from dataclasses import dataclass, field
 from functools import cached_property
+from typing import ClassVar
 
 import numpy as np
 from scipy.interpolate import interp1d
@@ -23,11 +24,25 @@ class PlasmaProfile(Plot, PlasmaPoints):
 
     point_number: int = 1000
     profile: np.ndarray | None = field(init=False, repr=False, default=None)
+    theta_o: float = field(init=False, default=0.0)
+
+    profile_attrs: ClassVar[list[str]] = [
+        "geometric_radius",
+        "geometric_height",
+        "minor_radius",
+        "elongation",
+        "triangularity",
+    ]
 
     def __post_init__(self):
         """Initialize point array."""
         self.profile = np.zeros((self.point_number, 2))
-        super().__post_init__()
+
+    def update_coefficents(self, *args, **kwargs):
+        """Update plasma profile coefficients."""
+        self.data = kwargs
+        self.data |= {attr: arg for attr, arg in zip(self.profile_attrs, args)}
+        return self
 
     @property
     def geometric_axis(self):
@@ -63,7 +78,7 @@ class PlasmaProfile(Plot, PlasmaPoints):
     @property
     def x_point_number(self):
         """Return number of profile points to the lower x-point."""
-        return bisect.bisect_right(self.theta, self["theta_o"] + np.pi)
+        return bisect.bisect_right(self.theta, self.theta_o + np.pi)
 
     @cached_property
     def theta_upper(self):
@@ -78,7 +93,7 @@ class PlasmaProfile(Plot, PlasmaPoints):
     @property
     def theta_lower_lfs(self):
         """Return lower theta array on the low field side."""
-        return np.linspace(-self["theta_o"], 0, self.point_number - self.x_point_number)
+        return np.linspace(-self.theta_o, 0, self.point_number - self.x_point_number)
 
     @staticmethod
     def miller_profile(theta, minor_radius, elongation, triangularity):
@@ -95,28 +110,61 @@ class PlasmaProfile(Plot, PlasmaPoints):
         """Update points - symetric limiter."""
         self.update_coefficents(*args, **kwargs)
         self.points = self.miller_profile(
-            self.theta, self.minor_radius, self.elongation, self.triangularity
+            self.theta, self.minor_radius, self.elongation, self.triangularity.mean
         )
         return self
+
+    @property
+    def x_point(self):
+        """Return x-point."""
+        return self["x_point"]
+
+    def check_consistency(self):
+        """Check data consistency."""
+        for attr in ["kappa", "delta"]:
+            self.plasma_shape[attr].check_consistency()
+
+    def set_x_point(self, x_point, elongation):
+        """Adjust lower elongation and triangularity to match x_point."""
+        if x_point is None:
+            return
+        self.triangularity.lower = (
+            self.geometric_radius - self.x_point[0]
+        ) / self.minor_radius
+        elongation["lower"] = (
+            self.geometric_height - self.x_point[1]
+        ) / self.minor_radius
+        assert abs(self.triangularity.lower) < 1
+
+    def adjust_elongation_lower(self, elongation):
+        """Adjust lower elongation for single-null compliance."""
+        if elongation["lower"] < (
+            min_kappa := 2 * (1 - self.triangularity.lower**2) ** 0.5
+        ):
+            delta_kappa = 1e-3 + min_kappa - elongation["lower"]
+            elongation["lower"] += delta_kappa
+            elongation["upper"] -= delta_kappa
+            # self["geometric_height"] += self.minor_radius * delta_kappa
 
     def single_null(self, *args, **kwargs):
         """Update points - lower single null."""
         self.update_coefficents(*args, **kwargs)
-        self.set_x_point(kwargs.get("x_point", None))
-        self.adjust_elongation_lower()
+        elongation = {"upper": self.elongation, "lower": self.elongation}
+        self.set_x_point(kwargs.get("x_point", None), elongation)
+        self.adjust_elongation_lower(elongation)
         upper = self.miller_profile(
             self.theta_upper,
             self.minor_radius,
-            self.elongation_upper,
-            self.triangularity_upper,
+            elongation["upper"],
+            self.triangularity.upper,
         )
-        x_i = (1 - self.triangularity_lower**2) ** 0.5 / (
-            self.elongation_lower - (1 - self.triangularity_lower**2) ** 0.5
+        x_i = (1 - self.triangularity.lower**2) ** 0.5 / (
+            elongation["lower"] - (1 - self.triangularity.lower**2) ** 0.5
         )
-        k_o = self.elongation_lower / (1 - x_i**2) ** 0.5
-        x_1 = (x_i - self.triangularity_lower) / (1 - x_i)
-        x_2 = (x_i + self.triangularity_lower) / (1 - x_i)
-        self.coef["theta_o"] = np.arctan((1 - x_i**2) ** 0.5 / x_i)
+        k_o = elongation["lower"] / (1 - x_i**2) ** 0.5
+        x_1 = (x_i - self.triangularity.lower) / (1 - x_i)
+        x_2 = (x_i + self.triangularity.lower) / (1 - x_i)
+        self.theta_o = np.arctan((1 - x_i**2) ** 0.5 / x_i)
         lower_hfs = (
             self.minor_radius
             * np.c_[
@@ -142,9 +190,13 @@ class PlasmaProfile(Plot, PlasmaPoints):
 
 if __name__ == "__main__":
     geometric_axis = (5.2, 0)
-    minor_radius, elongation, triangularity = 0.5, 1.5, 0.3
-    profile = PlasmaProfile(point_number=201).limiter(
-        *geometric_axis, minor_radius, elongation, triangularity
+    minor_radius, elongation, triangularity, triangularity_minor = 0.5, 1.5, 0.3, 0.1
+    profile = PlasmaProfile(point_number=201).single_null(
+        *geometric_axis,
+        minor_radius,
+        elongation,
+        triangularity,
+        triangularity_minor,
     )
 
     profile.plot()

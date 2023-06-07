@@ -12,7 +12,6 @@ from nova.biot.biot import Nbiot
 from nova.graphics.plot import Plot
 
 from nova.geometry.plasmapoints import PlasmaPoints
-from nova.geometry.plasmaprofile import PlasmaProfile
 
 from nova.imas.database import Database, IDS, Ids, IdsEntry
 from nova.imas.equilibrium import EquilibriumData
@@ -165,7 +164,6 @@ class Constraint(Plot):
         if self.point_number == 0:
             return
         self.axes = axes
-        self.axes.plot(*self.points.T, "o", color=color, ms=ms / 4)
         self.axes.plot(*self._points("psi").T, "s", ms=ms, mec=color, mew=2, mfc="none")
         self.axes.plot(*self._points("radial").T, "|", ms=2 * ms, mec=color)
         self.axes.plot(*self._points("vertical").T, "_", ms=2 * ms, mec=color)
@@ -177,25 +175,24 @@ class Control(PlasmaPoints, Profile):
     """Extract control points and flux profiles from equilibrium data."""
 
     constraint: Constraint = field(init=False, default_factory=Constraint, repr=False)
+    gap: float = 0.2
 
-    point_attrs: ClassVar[dict[str, list[str]]] = {
-        "boundary": ["outer", "upper", "inner", "lower"]
-    }
+    def __post_init__(self):
+        """Initialize minimum gap."""
+        super().__post_init__()
+        self.data["minimum_gap"] = self.gap * self.data["boundary_type"]
 
     @property
     def limiter(self) -> bool:
         """Return limiter flag."""
         return self["boundary_type"] == 0
 
-    @property
-    def points(self):
-        """Return control points."""
-        return np.c_[[getattr(self, attr) for attr in self.point_attrs["boundary"]]]
-
     def update_constraints(self, psi=0):
         """Update flux and field constraints."""
-        self.constraint = Constraint(self.points)
-        self.constraint.poloidal_flux = psi, [0, 1, 2, 3]
+        self.constraint = Constraint(self.control_points)
+        self.constraint.poloidal_flux = psi, range(4)
+        if self.square:
+            self.constraint.poloidal_flux = psi, range(4, 8)
         self.constraint.radial_field = 0, [0, 2]
         self.constraint.vertical_field = 0, [1, 3]
         if not self.limiter:
@@ -216,42 +213,10 @@ class Control(PlasmaPoints, Profile):
         """Return outer strike point."""
         return self["strike_point"][1]
 
-    @property
-    def coef(self) -> dict:
-        """Return plasma profile coefficents."""
-        return {"geometric_radius": self.axis[0], "geometric_height": self.axis[1]} | {
-            attr: getattr(self, attr)
-            for attr in [
-                "minor_radius",
-                "elongation",
-                "triangularity_upper",
-                "triangularity_lower",
-            ]
-        }
-
-    def plot_plasma_profile(self):
-        """Plot analytic profile."""
-        plasmaprofile = PlasmaProfile(point_number=121)
-        plasmaprofile.limiter(**self.coef).plot()
-
-    def plot(self, index=None, axes=None, **kwargs):
-        """Plot control points and first wall."""
-        self.get_axes("2d", axes)
-        wall = self.geometry["wall"](**self.wall)
-        for segment in wall.segments:
-            self.axes.plot(
-                segment[:, 0], segment[:, 1], "-", ms=4, color="gray", linewidth=1.5
-            )
-        self.constraint.plot()
-
-    '''
-
     def plot(self, index=None, axes=None, **kwargs):
         """Extend PlasmaPoints.plot to include constraints."""
         super().plot(index, axes, **kwargs)
         self.constraint.plot()
-
-    '''
 
 
 @dataclass
@@ -530,8 +495,8 @@ class PulseDesign(Control, ITER):
     nwall: Nbiot = 3
     nlevelset: Nbiot = 6000
     ninductance: Nbiot = None
-    nforce: Nbiot = None
-    nfield: Nbiot = None
+    nforce: Nbiot = 15
+    nfield: Nbiot = 100
     gamma: float = 1e-12
     field_weight: float | int = 50
     name: str = "equilibrium"
@@ -654,6 +619,12 @@ class PulseDesign(Control, ITER):
 
     def solve(self, verbose=False):
         """Solve waveform using basic Picard itteration."""
+        self.plasma.separatrix = {
+            "ellipse": np.r_[
+                self["geometric_axis"],
+                2 * self["minor_radius"] * np.array([1, self["elongation"]]),
+            ]
+        }
         for _ in range(5):
             self.solve_current()
             with self.plasma.profile(self.p_prime, self.ff_prime):
@@ -732,9 +703,18 @@ class PulseDesign(Control, ITER):
         data["boundary_index"] = np.arange(500)
         data["strike_point_index"] = np.arange(2)
         data["coil_name"] = self.coil_name
+        data["field_coil_name"] = self.field.coil_name
 
         data["current"] = xarray.DataArray(
             0.0, coords=[data.time, data.coil_name], dims=["time", "coil_name"]
+        )
+        data["vertical_force"] = xarray.DataArray(
+            0.0, coords=[data.time, data.coil_name], dims=["time", "coil_name"]
+        )
+        data["field"] = xarray.DataArray(
+            0.0,
+            coords=[data.time, data.field_coil_name],
+            dims=["time", "field_coil_name"],
         )
         data["boundary"] = xarray.DataArray(
             0.0,
@@ -761,6 +741,8 @@ class PulseDesign(Control, ITER):
         for itime in tqdm(self.data.itime.data, "Solving PDS waveform"):
             self.itime = itime
             data["current"][itime] = self.current
+            data["vertical_force"][itime] = self.force.fz
+            data["field"][itime] = self.field.bp
             data["boundary"][itime] = self.plasma.boundary(length)
             for attr in attrs_0d:
                 data[attr][itime] = getattr(self.plasma, attr)
@@ -954,14 +936,17 @@ class Benchmark(PulseDesign):
 
 
 if __name__ == "__main__":
-    design = PulseDesign(135013, 2, "iter", 1, field_weight=50)
+    design = PulseDesign(135013, 2, "iter", 1, square=True)
     # design = Benchmark(135013, 2, "iter", 1)
 
     design.itime = 5
-    # design["minor_radius"] = 1.0
+    # design["minor_radius"] = 0.5
+    # design.update()
+    design.square = False
+    design["triangularity_upper"] = 0
+    design.fit()
     design.update()
     design.plot("plasma")
-    # design.rms()
 
     """
 

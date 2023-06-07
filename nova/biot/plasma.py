@@ -142,7 +142,13 @@ class Plasma(Plot, netCDF, PlasmaLoc):
             return self.psi_w
         w_height = self.wall.w_point[1]
         x_height = self.grid.x_points[:, 1]
-        if w_height < np.min(x_height) or w_height > np.max(x_height):
+        o_height = self.grid["o_point"][1]
+        x_bounds = [np.min(x_height), np.max(x_height)]
+        if x_bounds[0] > o_height:
+            x_bounds[0] = -np.inf
+        if x_bounds[1] < o_height:
+            x_bounds[1] = np.inf
+        if w_height < x_bounds[0] or w_height > x_bounds[1]:
             return self.psi_x
         if self.polarity < 0:
             return np.min([self.psi_x, self.psi_w])

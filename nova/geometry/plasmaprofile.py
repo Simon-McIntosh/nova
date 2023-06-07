@@ -8,11 +8,10 @@ import numpy as np
 from scipy.interpolate import interp1d
 
 from nova.geometry.plasmapoints import PlasmaPoints
-from nova.graphics.plot import Plot
 
 
 @dataclass
-class PlasmaProfile(Plot, PlasmaPoints):
+class PlasmaProfile(PlasmaPoints):
     """
     Generate Separatrix profiles from plasma shape parameters.
 

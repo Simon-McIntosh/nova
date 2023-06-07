@@ -26,11 +26,15 @@ class Simulator(PulseDesign):
         "x_points",
         "o_points",
         "points",
+        "current",
+        "vertical_force",
+        "field",
     ]
 
     def __post_init__(self):
         """Create Bokeh data sources."""
         super().__post_init__()
+        _ = self._data
         for attr in self.bokeh_attrs:
             self.source[attr] = ColumnDataSource()
         self.source["coil"].data = self.coil_data
@@ -41,11 +45,18 @@ class Simulator(PulseDesign):
             "dpressure_dpsi": np.zeros_like(self.data.psi_norm.data),
             "f_df_dpsi": np.zeros_like(self.data.psi_norm.data),
         }
+        self.source["current"].data = 1e-3 * self._data.current.to_pandas()
+        self.source["vertical_force"].data = (
+            1e-6 * self._data.vertical_force.to_pandas()
+        )
+        self.source["field"].data = self._data.field.to_pandas()
 
     def update(self):
         """Extend PulseDesign update to include bokeh datasources."""
         super().update()
-        self.source["points"].data = dict(zip("xz", self.points.T))
+        if not self.source:
+            return
+        self.source["points"].data = dict(zip("xz", self.control_points.T))
         self.source["levelset"].data = self.levelset.contour()
         self.source["x_points"].data = dict(zip("xz", self.levelset.x_points.T))
         self.source["profiles"].patch(
@@ -59,6 +70,11 @@ class Simulator(PulseDesign):
                 "ionize": [(slice(None), 0.5 * self.plasma.ionize.astype(float))],
             }
         )
+        self.source["current"].data = 1e-3 * self._data.current.to_pandas()
+        self.source["vertical_force"].data = (
+            1e-6 * self._data.vertical_force.to_pandas()
+        )
+        self.source["field"].data = self._data.field.to_pandas()
 
     @cached_property
     def wall_outline(self):

@@ -39,13 +39,18 @@
 {% endblock %}
 
 {% block contents%}
-    <div class="container">
+    <div class="container-fluid">
         <div class="row justify-content-center">
-            <div class="col-4 align-self-start">
+            <div class="col-3 align-self-start">
                 {{ embed(roots.sliders) }}
             </div>
-            <div class="col-4 align-self-center">
+            <div class="col-3 align-self-center">
                 {{ embed(roots.poloidal) }}
+            </div>
+            <div class="col-6 align-self-center">
+                {{ embed(roots.current) }}
+                {{ embed(roots.vertical_force) }}
+                {{ embed(roots.field) }}
             </div>
         </div>
     </div>

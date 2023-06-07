@@ -36,15 +36,18 @@
 # development package using poetry with a pipx install
 python3.10 -m pip install pipx-in-pipx
 pipx install poetry 
-pipx install tox 
 poetry install -all-extras 
-
+poetry run pre-commit install
+ 
 # run a single command using 
 poetry run <command>
 
-# or launch a poetry shell followed by the spyder IDE 
+# for example, to run the test suite use
+poetry run pytest 
+
+# or launch a poetry shell followed by the spyder IDE (with command returned back to the shell)
 poetry shell 
-spyder 
+spyder &
 ```
 
 To install on SDCC (in advance of and EasyBuild module or for development work)

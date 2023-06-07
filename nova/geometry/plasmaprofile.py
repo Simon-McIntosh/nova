@@ -128,10 +128,10 @@ class PlasmaProfile(PlasmaPoints):
         if x_point is None:
             return
         self.triangularity.lower = (
-            self.geometric_radius - self.x_point[0]
+            self.geometric_axis[0] - self.x_point[0]
         ) / self.minor_radius
         elongation["lower"] = (
-            self.geometric_height - self.x_point[1]
+            self.geometric_axis[1] - self.x_point[1]
         ) / self.minor_radius
         assert abs(self.triangularity.lower) < 1
 

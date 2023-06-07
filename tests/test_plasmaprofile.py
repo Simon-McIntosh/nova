@@ -48,7 +48,7 @@ def test_sn_profile(minor_radius, elongation, triangularity):
 def test_sn_x_point():
     profile = PlasmaProfile().single_null(5.2, 3, 2, 1.5, 0, x_point=(4.2, 0))
     assert np.allclose(profile.x_point, (4.2, 0))
-    assert np.isclose(profile.geometric_radius, 5.2)
+    assert np.isclose(profile.geometric_axis[0], 5.2)
 
 
 @pytest.mark.parametrize(

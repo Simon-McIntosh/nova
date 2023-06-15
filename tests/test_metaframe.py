@@ -1,6 +1,12 @@
 import pytest
 
 from nova.frame.metaframe import MetaFrame
+from nova.frame.metamethod import MetaMethod
+
+
+def test_init_metamethod():
+    with pytest.raises(NotImplementedError):
+        MetaMethod({}).initialize()
 
 
 def test_init_metaframe():

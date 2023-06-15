@@ -14,6 +14,13 @@ from nova.frame.coilset import CoilSet
 segments = ["ring", "cylinder"]
 
 
+def test_matrix_getitem():
+    biotframe = BiotFrame()
+    biotframe.insert(1, 7.3)
+    biot = Ring(biotframe, biotframe)
+    assert np.isclose(biot["zs"].item(), 7.3)
+
+
 def test_biotreduce():
     biotframe = BiotFrame()
     biotframe.insert(range(3), 0)

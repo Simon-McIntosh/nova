@@ -3,7 +3,6 @@ from dataclasses import dataclass, field
 from typing import ClassVar
 
 from nova.biot import (
-    Gap,
     Grid,
     HexGrid,
     Inductance,
@@ -15,6 +14,7 @@ from nova.biot import (
     Force,
     LevelSet,
     Plasma,
+    PlasmaGap,
 )
 from nova.biot.data import Data
 from nova.database.netcdf import netCDF
@@ -157,7 +157,7 @@ class BiotGap(BiotBase):
         self.append_biot_attrs(["ngap", "mingap", "maxgap"])
         super().__post_init__()
 
-    @frame_factory(Gap)
+    @frame_factory(PlasmaGap)
     def plasmagap(self):
         """Return biot wall-gap probe instance."""
         return {"ngap": self.ngap, "mingap": self.mingap, "maxgap": self.maxgap}

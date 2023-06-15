@@ -13,7 +13,7 @@ from nova.geometry import select
 
 
 @dataclass
-class Gap(Plot, Proximate, Operate):
+class PlasmaGap(Plot, Proximate, Operate):
     """Compute flux interaction across a series of 1d plasma gap probes."""
 
     attrs: list[str] = field(default_factory=lambda: ["Psi"])
@@ -38,15 +38,16 @@ class Gap(Plot, Proximate, Operate):
                 self.node_number = int(self.maxgap / -self.ngap) + 1
                 self.mingap = 0
             case _:
-                raise TypeError(f"invalid gap number {self.ngap}")
+                raise IndexError(f"invalid gap number {self.ngap}")
 
     @cached_property
     def nodes(self):
         """Return gap node spacing."""
         if self.mingap == 0:
             return np.linspace(self.mingap, self.maxgap, self.node_number)
-        geomspace = np.geomspace(self.mingap, self.maxgap, self.node_number - 1)
-        return np.append(0, geomspace)
+        if self.mingap > 0:
+            return np.geomspace(self.mingap, self.maxgap, self.node_number)
+        raise ValueError(f"mingap {self.mingap} < 0")
 
     def solve(self, points, angle, label=None):
         """Solve linear flux probes."""
@@ -82,7 +83,7 @@ class Gap(Plot, Proximate, Operate):
         super().post_solve()
 
     def load_operators(self):
-        """Extend Grid.load_operators to initalize contour instance."""
+        """Extend Grid.load_operators to initalize kd-tree instance."""
         super().load_operators()
         if self.number is not None:
             self.node_number = self.data.dims["nodes"]

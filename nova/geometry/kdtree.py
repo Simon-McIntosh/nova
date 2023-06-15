@@ -69,7 +69,7 @@ class Proximate:
     @property
     def kd_points(self):
         """Generate kd-tree and return point cloud."""
-        return self.kdtree.points
+        return self.kd_tree.points
 
     @kd_points.setter
     def kd_points(self, points):
@@ -80,5 +80,5 @@ class Proximate:
         self.kd_tree = KDTree(points, self.kd_factor)
 
     def kd_query(self, other: np.ndarray):
-        """Return point index from kdtree."""
+        """Return point index from kd-tree."""
         return self.kd_tree.query(other)[1]

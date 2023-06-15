@@ -6,7 +6,6 @@ import numpy as np
 from scipy.interpolate import interp1d
 from scipy.optimize import minimize_scalar
 
-from nova.geometry.plasmaprofile import PlasmaProfile
 from nova.geometry.quadrant import Quadrant
 from nova.graphics.plot import Plot
 
@@ -87,8 +86,8 @@ class Peak:
 
 
 @dataclass
-class BoxGeometry:
-    """Calculate bounding box control points from plasma separatrix."""
+class Curve:
+    """Calculate geometric properties for a curve traced by an input point array."""
 
     points: np.ndarray
     pad_width: int = 6
@@ -164,7 +163,7 @@ class BoxGeometry:
 
 
 @dataclass
-class PointGeometry(BoxGeometry):
+class PointGeometry(Curve):
     """Calculate geometric axis and derived parameters from bounding box."""
 
     @cached_property
@@ -388,8 +387,11 @@ class LCFS(Elongation, Triangularity, Squareness, Plot):
 
 
 if __name__ == "__main__":
+    from nova.geometry.plasmaprofile import PlasmaProfile
+
     geometric_axis = (5.2, 0)
     minor_radius, elongation, triangularity = 0.5, 1.5, 0.3
+
     profile = PlasmaProfile(point_number=201).limiter(
         *geometric_axis, minor_radius, elongation, triangularity
     )

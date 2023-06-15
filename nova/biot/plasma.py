@@ -14,8 +14,8 @@ from nova.biot.plasmagrid import PlasmaGrid
 from nova.biot.plasmawall import PlasmaWall
 from nova.graphics.plot import Plot
 from nova.frame.plasmaloc import PlasmaLoc
+from nova.geometry.curve import LCFS
 from nova.geometry.polygon import Polygon
-from nova.geometry.separatrix import LCFS
 from nova.geometry.strike import Strike
 
 

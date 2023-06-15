@@ -15,6 +15,7 @@ ids_attrs = dict(
     pf_active=dict(pulse=111001, run=202, name="pf_active", machine="iter_md"),
     pf_active_iter=dict(pulse=105011, run=9, name="pf_active"),
     equilibrium=dict(pulse=130506, run=403, name="equilibrium"),
+    equilibrium_pds=dict(pulse=135013, run=2, name="equilibrium"),
     wall=dict(pulse=116000, run=2, name="wall", machine="iter_md"),
     pf_passive=dict(pulse=115005, run=2, name="pf_passive", machine="iter_md"),
 )

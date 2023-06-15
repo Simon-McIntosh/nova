@@ -67,7 +67,18 @@ class GetSlice:
     def itime(self, time_index: int | None):
         if time_index is None:
             return
+        if self._cache.get("data", None) is None:
+            self.cache_data()
         self.time_index = time_index
+        self.update()
+
+    def cache_data(self):
+        """Update data cache."""
+        self._cache["data"] = self.data.copy(deep=True)
+
+    def reset_data(self):
+        """Reset data with cached copy."""
+        self.data = self._cache["data"].copy(deep=True)
         self.update()
 
     @cached_property
@@ -92,4 +103,4 @@ class GetSlice:
 
     def update(self):
         """Clear cache following update to itime. Extend as required."""
-        self._cache = {}
+        self._cache = {"data": self._cache.get("data", None)}

@@ -2,7 +2,10 @@ import numpy as np
 import pytest
 
 from nova.imas.database import Database, IdsEntry, IMAS_MODULE_NOT_FOUND
-from nova.imas.pulsedesign import PulseDesign
+from nova.imas.pulsedesign import Constraint, PulseDesign
+from nova.imas.equilibrium import EquilibriumData
+from nova.imas.sample import Sample
+from nova.imas.utilities import ids_attrs, mark
 
 mark_imas = pytest.mark.skipif(IMAS_MODULE_NOT_FOUND, reason="IMAS module unavailable")
 
@@ -101,6 +104,15 @@ def test_pf_active_ids_input_cache(ids):
     assert (
         design_101.group_attrs["pf_active_md"] != design_202.group_attrs["pf_active_md"]
     )
+
+
+@mark["equilibrium_pds"]
+def test_sample_pds():
+    equilibrium = EquilibriumData(**ids_attrs["equilibrium_pds"])
+    sample = Sample(equilibrium.data)
+    design = PulseDesign(ids=sample.equilibrium_ids(), strike=True)
+    design.itime = 0
+    # TODO finish test
 
 
 if __name__ == "__main__":

@@ -833,7 +833,7 @@ class PulseDesign(Animate, Plot1D, Control, ITER):
 
     def make_frame(self, time):
         """Make animation frame."""
-        self.reset()
+        self.reset_data()
         scene = self.scene(time)
         self.time = scene.pop("time", self.time)
         if len(scene) > 0:
@@ -878,12 +878,59 @@ class PulseDesign(Animate, Plot1D, Control, ITER):
             self.axes = axes
 
         else:
-            self.plot()
+            self.plot("plasma")
             # self.force.plot(norm=6e8)
 
 
 @dataclass
-class Benchmark(PulseDesign):
+class AnimateDesign(PulseDesign):
+    """Extend pulse design to include control-point annimation."""
+
+    sequence: tuple[str | tuple[int]] = (
+        (2, 0),
+        "triangularity",
+        (6, 50),
+        "box",
+        (6, -50),
+    )
+
+    def __post_init__(self):
+        """Build animation sequence."""
+        super().__post_init__()
+        for sequence in self.sequence:
+            match sequence:
+                case str():
+                    getattr(self, f"animate_{sequence}")()
+                case duration, ramp:
+                    self.add_animation("time", duration, ramp=ramp)
+                case _:
+                    raise IndexError(f"invalid sequence {sequence}")
+
+    def animate_square(self):
+        """Add square animation sequence."""
+        self.add_animation("squareness_upper_outer", 2, amplitude=0.3)
+        self.add_animation("squareness_upper_inner", 2, amplitude=0.2)
+        self.add_animation("squareness_lower_inner", 2, amplitude=0.2)
+        self.add_animation("squareness_lower_outer", 2, amplitude=0.1)
+
+    def animate_triangularity(self):
+        """Add triangularity animation sequence."""
+        self.add_animation("elongation_lower", 2, amplitude=0.1)  # TODO IDS fix
+        self.add_animation("triangularity_upper", 2, amplitude=0.1)
+        self.add_animation("elongation_upper", 2, amplitude=0.1)  # TODO IDS fix
+        self.add_animation("triangularity_lower", 2, amplitude=0.1)
+
+    def animate_box(self):
+        """Add bounding box animation."""
+        self.add_animation("elongation", 4, amplitude=-0.1)
+        self.add_animation("elongation_lower", 2, amplitude=0.2)
+        self.add_animation("triangularity_upper", 2, amplitude=0.2)
+        self.add_animation("elongation_upper", 2, amplitude=0.2)
+        self.add_animation("minimum_gap", 6, amplitude=0.2)
+
+
+@dataclass
+class BenchmarkDesign(PulseDesign):
     """Benchmark pulse design with source IDSs."""
 
     source_data: dict[str, Ids] = field(init=False, repr=False, default_factory=dict)
@@ -975,7 +1022,7 @@ class Benchmark(PulseDesign):
 
 
 if __name__ == "__main__":
-    design = PulseDesign(
+    design = AnimateDesign(
         135013,
         2,
         "iter",
@@ -983,55 +1030,29 @@ if __name__ == "__main__":
         square=False,
         strike=True,
         fps=5,
-        pf_passive="iter_md",
     )
     # design = Benchmark(135013, 2, "iter", 1)
 
-    design.levelset.solve(limit=0.1, index="coil")
+    # design.levelset.solve(limit=0.1, index="coil")
     design.itime = 0
-
-    """
-    design.square = True
-    design.add_animation("time", 2, ramp=10)
-    design.add_animation("squareness_upper_outer", 2, amplitude=0.3)
-    design.add_animation("squareness_upper_inner", 2, amplitude=0.2)
-    design.add_animation("squareness_lower_inner", 2, amplitude=0.2)
-    design.add_animation("squareness_lower_outer", 2, amplitude=0.1)
-    """
-
-    """
-    design.add_animation("elongation_lower", 2, amplitude=0.1)
-    design.add_animation("triangularity_upper", 2, amplitude=0.1)
-    design.add_animation("elongation_upper", 2, amplitude=0.1)
-    design.add_animation("triangularity_lower", 2, amplitude=0.1)
-
-    design.add_animation("time", 6, ramp=50)
-    design.add_animation("elongation", 4, amplitude=-0.1)
-    design.add_animation("elongation_lower", 2, amplitude=0.2)
-    design.add_animation("triangularity_upper", 2, amplitude=0.2)
-    design.add_animation("elongation_upper", 2, amplitude=0.2)
-    design.add_animation("minimum_gap", 6, amplitude=0.2)
-    design.add_animation("time", 6, ramp=-50)
-    design.add_animation("time", 2, ramp=0)
-    """
 
     # design.plot_animation(False)
     # design.set_axes("triple")
 
     design.set_axes("2d", aspect=1.5)
 
-    design.add_animation("time", 10, ramp=100)
-
-    design.make_frame(100)
-
-    # design.time = design.scene(20)["time"]
-    # design.plasma.lcfs.plot()
-    design.fig.tight_layout(pad=0)
-    design.savefig("frame")
+    # design.add_animation("time", 10, ramp=100)
 
     # design.make_frame(100)
 
-    # design.animate()
+    # design.time = design.scene(20)["time"]
+    # design.plasma.lcfs.plot()
+    # design.fig.tight_layout(pad=0)
+    # design.savefig("frame")
+
+    # design.make_frame(84 / 5)
+
+    design.animate()
 
     """
     design.itime = 5

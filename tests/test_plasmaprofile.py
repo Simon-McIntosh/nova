@@ -2,9 +2,9 @@ from itertools import product
 import numpy as np
 import pytest
 
+from nova.geometry.curve import LCFS
 from nova.geometry.plasmaprofile import PlasmaProfile
 from nova.geometry.quadrant import Quadrant
-from nova.geometry.separatrix import LCFS
 
 
 @pytest.mark.parametrize("radius,height", product([0, 2.5, 5], [-1.3, 0, 7.2]))

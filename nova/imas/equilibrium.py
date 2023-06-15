@@ -7,7 +7,7 @@ import numpy as np
 
 from nova.biot.contour import Contour
 from nova.geometry.pointloop import PointLoop
-from nova.geometry.separatrix import LCFS
+from nova.geometry.curve import LCFS
 from nova.geometry.strike import Strike
 from nova.graphics.line import Chart
 from nova.imas.getslice import GetSlice

@@ -470,7 +470,10 @@ class Animate(MoviePy, Plot):
 
     def get_itime(self, time):
         """Extend to return time index."""
-        raise NotImplementedError()
+        try:
+            return super().get_itime(time)
+        except AttributeError:
+            raise NotImplementedError()
 
     def _animation_offset(self, attr: str, time: int | float) -> float:
         """Return attribute offset at current duration."""

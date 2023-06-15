@@ -6,6 +6,7 @@ import numpy as np
 from scipy.optimize import minimize
 import xarray
 
+from nova.geometry.curve import Curve
 from nova.geometry.quadrant import Quadrant
 from nova.geometry.kdtree import KDTree
 from nova.graphics.plot import Plot
@@ -113,13 +114,6 @@ class PlasmaPoints(Plot):
             self.data["minimum_gap"] = self.gap * self.data["boundary_type"]
         except KeyError:
             pass
-        # if isinstance(self.data, xarray.Dataset):
-        #    self._datacache = self.data.copy(deep=True)
-
-    def reset(self):
-        """Reset data at itime to inital state."""
-        self.data = self._datacache.copy(deep=True)
-        self._cache = {}
 
     @property
     def point_attrs(self):
@@ -269,7 +263,8 @@ class PlasmaPoints(Plot):
     @cached_property
     def firstwall(self):
         """Return firstwall contour (main chamber)."""
-        return Wall().segment(index=0)
+        wall = Curve(Wall().segment(index=0), pad_width=0)
+        return wall.boundary(np.linspace(0, 1, 250))
 
     @cached_property
     def midpoint(self):
@@ -319,10 +314,10 @@ class PlasmaPoints(Plot):
 
     def _update_point_gap(self, x, minor_radius, point_index):
         """Return vector of pannel normal wall gaps."""
-        self._update(x, minor_radius)
+        self._update_radii(x, minor_radius)
         return self.point_gap(point_index)
 
-    def _update(self, x, minor_radius):
+    def _update_radii(self, x, minor_radius):
         """Update major and minor radii."""
         self["minor_radius"] = x[0]
         self["geometric_axis"][0] = x[1]
@@ -331,8 +326,8 @@ class PlasmaPoints(Plot):
                 return self.inner[0] + abs(x[0] - minor_radius)
             case 1:  # single null
                 x_point_delta = self["x_point"] - self.lower
-                self["geometric_axis"][1] += x_point_delta[1]
-                return -x[0] + abs(x_point_delta[0])
+                self["geometric_axis"] += x_point_delta
+                return -x[0]  # + 2 * abs(x_point_delta[0])
             case _:
                 raise NotImplementedError(
                     f'boundary type {self["boundary_type"]} not implemented'
@@ -342,12 +337,13 @@ class PlasmaPoints(Plot):
         """First wall contour with gap constrainted contorl points."""
         minor_radius = self["minor_radius"]
         firstwall_limit = (np.min(self.firstwall[:, 0]), np.max(self.firstwall[:, 0]))
+
         bounds = [
             (0, firstwall_limit[1] - firstwall_limit[0]),
             (firstwall_limit[0], firstwall_limit[1]),
         ]
         point_number = len(self.control_points)
-        if self.strike:
+        if not self.limiter and self.strike:
             point_number -= 2
         constraints = [
             {
@@ -360,16 +356,17 @@ class PlasmaPoints(Plot):
             }
             for index in range(point_number)
         ]
-
         sol = minimize(
-            self._update,
+            self._update_radii,
             [self["minor_radius"], self["geometric_axis"][0]],
             args=(minor_radius,),
             bounds=bounds,
             constraints=constraints,
             method="SLSQP",
         )
-        self._update(sol.x, minor_radius)
+        if sol.success is False:
+            raise ValueError(f"minimizer failed to converge {sol}")
+        self._update_radii(sol.x, minor_radius)
 
 
 if __name__ == "__main__":

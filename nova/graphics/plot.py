@@ -8,6 +8,7 @@ from string import digits
 from typing import ClassVar, Optional, TYPE_CHECKING
 
 import numpy as np
+import xarray
 
 from nova.frame.dataframe import DataFrame
 from nova.frame.error import ColumnError
@@ -21,7 +22,7 @@ class Properties:
     """Manage plot properties."""
 
     patchwork: float = 0
-    alpha: dict[str, float] = field(default_factory=lambda: {"plasma": 0.75})
+    alpha: dict[str, float] = field(default_factory=lambda: {"plasma": 1})
     linewidth: float = 0.5
     edgecolor: str = "white"
     facecolor: ClassVar[dict[str, str]] = {
@@ -75,20 +76,20 @@ class Properties:
 
     def patch_kwargs(self, part: str):
         """Return single patch kwargs."""
-        return dict(
-            alpha=self.get_alpha(part),
-            facecolor=self.get_facecolor(part),
-            zorder=self.get_zorder(part),
-            linewidth=self.linewidth,
-            edgecolor=self.edgecolor,
-        )
+        return {
+            "alpha": self.get_alpha(part),
+            "facecolor": self.get_facecolor(part),
+            "zorder": self.get_zorder(part),
+            "linewidth": self.linewidth,
+            "edgecolor": self.edgecolor,
+        }
 
     def patch_properties(self, part, area):
         """Return unique dict of patch properties extracted from parts list."""
         total_area = area.sum()
         return {
             unique_part: self.patch_kwargs(unique_part)
-            | dict(linewidth=self.get_linewidth(unique_part, part, area, total_area))
+            | {"linewidth": self.get_linewidth(unique_part, part, area, total_area)}
             for unique_part in part.unique()
         }
 
@@ -127,11 +128,9 @@ class BasePlot:
             index = self.frame.index[index]
         return self.frame.index.isin(index)
 
-    def get_index(self, index=None, segment=None, zeroturn=None):
+    def get_index(self, index=None, segment=None, zeroturn=False):
         """Return label based index for plot."""
         index = self.to_boolean(index)
-        if zeroturn is None:
-            zeroturn = self.zeroturn
         with self.frame.setlock(True, "subspace"):
             try:
                 if not zeroturn:  # exclude zeroturn (nturn == 0)
@@ -148,13 +147,36 @@ class Axes:
     """Manage plot axes."""
 
     style: str = "2d"
-    _fig: matplotlib.figure.Figure | None = field(init=False, repr=False)
-    _axes: matplotlib.axes.Axes | None = field(init=False, repr=False)
+    _fig: matplotlib.figure.Figure | None = field(init=False, repr=False, default=None)
+    _axes: matplotlib.axes.Axes | None = field(init=False, repr=False, default=None)
+
+    @cached_property
+    def gridspec(self):
+        """Provide access to gridspec layout editor."""
+        return import_module("matplotlib.gridspec").GridSpec
+
+    @cached_property
+    def plt(self):
+        """Provied access to pyplot module."""
+        return import_module("matplotlib.pyplot")
 
     def generate(self, style="2d", nrows=1, ncols=1, **kwargs):
         """Generate new axis instance."""
-        plt = import_module("matplotlib.pyplot")
-        self.fig, self.axes = plt.subplots(nrows, ncols, **kwargs)
+        if style == "triple":
+            axes = []
+            grid = self.gridspec(3, 2)
+            grid.update(wspace=0.2, hspace=0.05)
+            axes.append(self.plt.subplot(grid[0, 1]))
+            axes.append(self.plt.subplot(grid[1, 1]))
+            axes.append(self.plt.subplot(grid[2, 1]))
+            axes.append(self.plt.subplot(grid[:, 0]))
+            self.axes = axes
+            self.fig = self.gcf()
+            return self.axes
+        aspect = kwargs.pop("aspect", None)
+        if aspect is not None:
+            kwargs["figsize"] = import_module("matplotlib.figure").figaspect(aspect)
+        self.fig, self.axes = self.plt.subplots(nrows, ncols, **kwargs)
         self.set_style(style)
         return self.axes
 
@@ -172,9 +194,9 @@ class Axes:
         """Remove spines from axes instance."""
         sns = import_module("seaborn")
         if axes is None:
-            for axes in np.atleast_1d(self.axes):
-                sns.despine(ax=axes)
-        sns.despine(ax=axes)
+            axes = self.axes
+        for _axes in np.atleast_1d(axes):
+            sns.despine(ax=_axes)
 
     @staticmethod
     def _set_style(style, axes):
@@ -226,6 +248,17 @@ class Axes:
         """Expose axes legend."""
         self.axes.legend(*args, **Kwargs)
 
+    @staticmethod
+    def get_limit(axes):
+        """Return axes limits."""
+        return {"x": axes.get_xlim(), "y": axes.get_ylim()}
+
+    @staticmethod
+    def set_limit(axes, limit):
+        """Set axes limits."""
+        axes.set_xlim(limit["x"])
+        axes.set_ylim(limit["y"])
+
 
 @dataclass
 class MatPlotLib:
@@ -251,6 +284,11 @@ class MoviePy:
     def editor(self):
         """Provide access to moviepy editor."""
         return import_module("moviepy.editor")
+
+    @cached_property
+    def videoclip(self):
+        """Provide access to moviepy VideoClip class."""
+        return self.editor.VideoClip
 
     @cached_property
     def bindings(self):
@@ -330,6 +368,24 @@ class Plot:
         """Expose axes legend."""
         self.mpl_axes.legend(*args, **Kwargs)
 
+    @property
+    def axes_limit(self):
+        """Mange axes limits."""
+        if isinstance(self.axes, list | np.ndarray):
+            limits = []
+            for axes in self.axes:
+                limits.append(Axes.get_limit(axes))
+            return limits
+        return Axes.get_limit(self.axes)
+
+    @axes_limit.setter
+    def axes_limit(self, limits):
+        if isinstance(limits, list | np.ndarray):
+            for axes, limit in zip(self.axes, limits):
+                Axes.set_limit(axes, limit)
+            return
+        Axes.set_limit(self.axes, limits)
+
     def savefig(self, *args, **kwargs):
         """Save figure to file."""
         self.plt.savefig(*args, **kwargs)
@@ -351,3 +407,161 @@ class Plot2D(Plot):
     def mpl_axes(self):
         """Override Plot.Axes instance."""
         return Axes("2d")
+
+
+@dataclass
+class Animate(MoviePy, Plot):
+    """Manage animation workflow."""
+
+    fps: float = 10
+    data: xarray.Dataset = field(default_factory=xarray.Dataset, repr=False)
+    _segments: dict[str, np.ndarray] = field(
+        init=False, default_factory=dict, repr=False
+    )
+
+    def __getitem__(self, attr: str):
+        """Return item from data."""
+        if hasattr(super(), "__getitem__"):
+            return super().__getitem__(attr)
+        try:
+            return self.data[attr]
+        except KeyError:
+            return getattr(self, attr)
+
+    @property
+    def duration(self):
+        """Manage animation duration."""
+        if len(self._segments) == 0:
+            return 0
+        return np.max([value[-1, 0] for value in self._segments.values()])
+
+    @duration.setter
+    def duration(self, duration):
+        if (current_duration := self.duration) == duration:
+            return
+        factor = duration / current_duration
+        for value in self._segments.values():
+            value[:, 0] *= factor
+
+    def _animation_time(self, time, append: bool, num=50):
+        """Return animation time vector."""
+        match time:
+            case int() | float() as duration:
+                time = np.linspace(0, duration, num)
+            case int() | float() as start, int() | float() as end:
+                time = np.linspace(start, end, num)
+        if append:
+            time += self.duration
+        return time
+
+    def _animation_value(self, num: int, **kwargs):
+        """Return animation value vector."""
+        match kwargs:
+            case {"amplitude": amplitude, **other}:
+                repeat = other.get("repeat", 1)
+                angle = repeat * np.linspace(0, 2 * np.pi, num)
+                value = amplitude * np.sin(angle)
+            case {"ramp": ramp}:
+                transition = np.linspace(0, 1, num)
+                value = ramp * transition
+            case _:
+                raise NotImplementedError(f"segment not implemented for {kwargs}")
+        return value
+
+    def get_itime(self, time):
+        """Extend to return time index."""
+        raise NotImplementedError()
+
+    def _animation_offset(self, attr: str, time: int | float) -> float:
+        """Return attribute offset at current duration."""
+        if "time" in self._segments:
+            time = self.interp1d("time")(time)
+            if attr == "time":
+                return time
+        try:
+            itime = self.get_itime(time)
+            return self.data[attr][itime].data.item()
+        except (NotImplementedError, AttributeError):
+            pass
+        try:
+            return self[attr]
+        except AttributeError:
+            return 0
+
+    def add_animation(self, attr: str, time, append=True, offset=True, **kwargs):
+        """Add moviepy animation segment."""
+        num = kwargs.pop("num", 50)
+        time = self._animation_time(time, append, num)
+        value = self._animation_value(num, **kwargs)
+        match offset:
+            case True:
+                value += self._animation_offset(attr, time[0])
+            case int() | float():
+                value += offset
+        data = np.c_[time, value]
+        if attr != "time":
+            data = np.r_[
+                [[time[0], np.nan]],
+                data,
+                [[time[-1] + 2 * np.finfo(np.float64).eps, np.nan]],
+            ]
+        if attr in self._segments:
+            data = np.r_[self._segments[attr], data]
+        self._segments[attr] = data
+
+    def interp1d(self, attr: str):
+        """Return animation segment interpolator."""
+        waveform = self._segments[attr]
+        return import_module("scipy.interpolate").interp1d(
+            *waveform.T,
+            bounds_error=False,
+            fill_value=(waveform[0, 1], waveform[-1, 1]),
+        )
+
+    def scene(self, time: float):
+        """Return animation scene at requested time-point."""
+        return {
+            attr: value
+            for attr in self._segments
+            if np.isfinite(value := float(self.interp1d(attr)(time)))
+        }
+
+    def plot_animation(self, skip_time=True):
+        """Plot animation segments."""
+        if self.duration == 0:
+            return
+        self.set_axes("1d")
+        time = np.linspace(0, self.duration, 150)
+        for attr in self._segments:
+            if attr == "time" and skip_time:
+                continue
+            self.axes.plot(time, self.interp1d(attr)(time), label=attr)
+        self.axes.legend()
+
+    def make_frame(self, time):
+        """Override method in child class."""
+        raise NotImplementedError("animate method requies make_frame")
+
+    def _make_frame(self, time):
+        """Make frame for animation."""
+        if isinstance(self.axes, list):
+            for axes in self.axes:
+                axes.clear()
+        else:
+            self.axes.clear()
+        self.make_frame(time)
+        self.fig.tight_layout(pad=0)
+        return self.mplfig_to_npimage(self.fig)
+
+    def animate(self, filename=None, duration=None):
+        """Generate animiation."""
+        if filename is None:
+            filename = self.__class__.__name__.lower()
+        if duration is None:
+            duration = self.duration
+        else:
+            self.duration = duration
+        if duration == 0:
+            raise ValueError("no animation segments.")
+        animation = self.videoclip(self._make_frame, duration=duration)
+        animation.write_gif(f"{filename}.gif", fps=self.fps)

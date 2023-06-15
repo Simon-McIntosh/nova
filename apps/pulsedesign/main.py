@@ -22,7 +22,9 @@ from nova.imas.sample import Sample
 
 equilibrium = EquilibriumData(**ids_attrs)  # load source equilibrium
 sample = Sample(equilibrium.data)  # extract key features
-simulator = Simulator(ids=sample.equilibrium_ids())  # pass to simulator instance
+simulator = Simulator(
+    ids=sample.equilibrium_ids(), strike=True
+)  # pass to simulator instance
 simulator.itime = 0  # initialize itime
 simulator.lock = False
 source = simulator.source
@@ -63,18 +65,14 @@ ffprime.line("psi_norm", "f_df_dpsi", source=source["profiles"])
 
 view = CDSView(filter=IndexFilter([simulator.itime]))
 
-current = figure(
-    height=210, name="current", y_range=(-50, 50), sizing_mode="stretch_both"
-)
+current = figure(height=210, name="current", y_range=(-50, 50))
 current.xaxis.axis_label = "time, s"
 current.yaxis.axis_label = "current, kA"
 for coil_name in simulator.sloc["free", :].index:
     current.line("time", coil_name, source=source["current"])
     current.circle("time", coil_name, source=source["current"], view=view, color="red")
 
-vertical_force = figure(
-    height=210, name="vertical_force", y_range=(-500, 500), sizing_mode="stretch_both"
-)
+vertical_force = figure(height=210, name="vertical_force", y_range=(-500, 500))
 vertical_force.xaxis.axis_label = "time, s"
 vertical_force.yaxis.axis_label = "vertical force, MN"
 for coil_name in simulator.coil_name:
@@ -84,7 +82,7 @@ for coil_name in simulator.coil_name:
     )
 
 
-field = figure(height=210, name="field", y_range=(0, 15), sizing_mode="stretch_both")
+field = figure(height=210, name="field", y_range=(0, 15))
 field.xaxis.axis_label = "time, s"
 field.yaxis.axis_label = "magnetic field, T"
 for coil_name in simulator.field.coil_name:

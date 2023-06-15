@@ -1,5 +1,4 @@
 """Manage access to dynamic coil data data."""
-import bisect
 from dataclasses import dataclass
 from functools import cached_property
 
@@ -251,6 +250,7 @@ class PulseSchedule(Plot, Scenario):
         )
         self.axes.add_collection(collections)
 
+    '''
     def _make_frame(self, time):
         """Make frame for annimation."""
         self.axes.clear()
@@ -271,6 +271,7 @@ class PulseSchedule(Plot, Scenario):
         self.set_axes("2d")
         animation = self.mpy.editor.VideoClip(self._make_frame, duration=duration)
         animation.write_gif(f"{filename}.gif", fps=10)
+    '''
 
 
 if __name__ == "__main__":
@@ -278,8 +279,8 @@ if __name__ == "__main__":
     pulse, run = 135011, 7
     pulse, run = 135003, 5
     # pulse, run = 105028, 1  # Maksim
-    pulse, run = 105027, 1  # Maksim
-    pulse, run = 135013, 2
+    # pulse, run = 105027, 1  # Maksim
+    # pulse, run = 135013, 2
 
     PulseSchedule(pulse, run)._clear()
     schedule = PulseSchedule(pulse, run)

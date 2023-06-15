@@ -97,8 +97,29 @@ class Points:
 class PlasmaPoints(Plot):
     """Calculate plasma profile control points from plasma parameters."""
 
-    data: xarray.Dataset = field(default_factory=xarray.Dataset)
+    data: dict = field(default_factory=dict)  # TODO check {}
+    # _datacache: xarray.Dataset = field(
+    #    init=False, repr=False, default_factory=xarray.Dataset
+    # )
+    gap: float = 0.2
     square: bool = False
+    strike: bool = False
+
+    def __post_init__(self):
+        """Generate minimum gap and create copy of instance data."""
+        if hasattr(super(), "__post_init__"):
+            super().__post_init__()
+        try:
+            self.data["minimum_gap"] = self.gap * self.data["boundary_type"]
+        except KeyError:
+            pass
+        # if isinstance(self.data, xarray.Dataset):
+        #    self._datacache = self.data.copy(deep=True)
+
+    def reset(self):
+        """Reset data at itime to inital state."""
+        self.data = self._datacache.copy(deep=True)
+        self._cache = {}
 
     @property
     def point_attrs(self):
@@ -106,12 +127,20 @@ class PlasmaPoints(Plot):
         attrs = ["outer", "upper", "inner", "lower"]
         if self.square:
             attrs.extend(["upper_outer", "upper_inner", "lower_inner", "lower_outer"])
+        if self.strike:
+            attrs.extend(["inner_strike", "outer_strike"])
         return attrs
 
     @property
     def control_points(self):
         """Return control points."""
-        return np.c_[[getattr(self, attr) for attr in self.point_attrs]]
+        return np.c_[
+            [
+                point
+                for attr in self.point_attrs
+                if not np.allclose((point := getattr(self, attr)), (0, 0))
+            ]
+        ]
 
     def __getitem__(self, attr):
         """Return attribute from data if present else from super."""
@@ -227,6 +256,16 @@ class PlasmaPoints(Plot):
             self["squareness_lower_outer"]
         )
 
+    @property
+    def inner_strike(self):
+        """Return inner strike point."""
+        return self["strike_point"][0]
+
+    @property
+    def outer_strike(self):
+        """Return outer strike point."""
+        return self["strike_point"][1]
+
     @cached_property
     def firstwall(self):
         """Return firstwall contour (main chamber)."""
@@ -253,7 +292,12 @@ class PlasmaPoints(Plot):
             self.axes.plot(
                 segment[:, 0], segment[:, 1], "-", ms=4, color="gray", linewidth=1.5
             )
-        self.axes.plot(*self.control_points.T, "o", color="C2", ms=10 / 4)
+        points = np.array(
+            [point for point in self.control_points if not np.allclose(point, (0, 0))]
+        )
+        self.axes.plot(*points.T, "o", color="C2", ms=10 / 4)
+        if hasattr(super(), "plot"):
+            super().plot(index, axes, **kwargs)
 
     @cached_property
     def kd_tree(self):
@@ -297,6 +341,14 @@ class PlasmaPoints(Plot):
     def fit(self):
         """First wall contour with gap constrainted contorl points."""
         minor_radius = self["minor_radius"]
+        firstwall_limit = (np.min(self.firstwall[:, 0]), np.max(self.firstwall[:, 0]))
+        bounds = [
+            (0, firstwall_limit[1] - firstwall_limit[0]),
+            (firstwall_limit[0], firstwall_limit[1]),
+        ]
+        point_number = len(self.control_points)
+        if self.strike:
+            point_number -= 2
         constraints = [
             {
                 "type": "ineq",
@@ -306,13 +358,14 @@ class PlasmaPoints(Plot):
                     index,
                 ),
             }
-            for index in range(len(self.control_points))
+            for index in range(point_number)
         ]
 
         sol = minimize(
             self._update,
             [self["minor_radius"], self["geometric_axis"][0]],
             args=(minor_radius,),
+            bounds=bounds,
             constraints=constraints,
             method="SLSQP",
         )
@@ -321,7 +374,7 @@ class PlasmaPoints(Plot):
 
 if __name__ == "__main__":
     plasmapoints = PlasmaPoints(
-        {
+        data={
             "geometric_axis": [6, 0],
             "minor_radius": 3.75,
             "elongation": 2.0,
@@ -334,6 +387,7 @@ if __name__ == "__main__":
             "minimum_gap": 0.2,
             "boundary_type": 0,
             "x_point": [5.1, -3.4],
+            "strike_point": [[4.2, -3.8], [5.6, -4.4]],
         }
     )
 

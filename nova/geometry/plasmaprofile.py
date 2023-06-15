@@ -36,11 +36,14 @@ class PlasmaProfile(PlasmaPoints):
     def __post_init__(self):
         """Initialize point array."""
         self.profile = np.zeros((self.point_number, 2))
+        if hasattr(super(), "__post_init__"):
+            super().__post_init__()
 
     def update_coefficents(self, *args, **kwargs):
         """Update plasma profile coefficients."""
-        self.data = kwargs
-        self.data |= {attr: arg for attr, arg in zip(self.profile_attrs, args)}
+        coef = kwargs | {attr: arg for attr, arg in zip(self.profile_attrs, args)}
+        for attr, value in coef.items():
+            self[attr] = value
         return self
 
     @property
@@ -151,6 +154,13 @@ class PlasmaProfile(PlasmaPoints):
         elongation = {"upper": self.elongation, "lower": self.elongation}
         self.set_x_point(kwargs.get("x_point", None), elongation)
         self.adjust_elongation_lower(elongation)
+
+        print(
+            self.theta_upper,
+            self.minor_radius,
+            elongation["upper"],
+            self.triangularity.upper,
+        )
         upper = self.miller_profile(
             self.theta_upper,
             self.minor_radius,

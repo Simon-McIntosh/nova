@@ -9,7 +9,8 @@ from tqdm import tqdm
 import xarray
 
 from nova.biot.biot import Nbiot
-from nova.graphics.plot import Plot
+from nova.biot.plot import Plot1D
+from nova.graphics.plot import Animate, Plot
 
 from nova.geometry.plasmapoints import PlasmaPoints
 
@@ -175,12 +176,6 @@ class Control(PlasmaPoints, Profile):
     """Extract control points and flux profiles from equilibrium data."""
 
     constraint: Constraint = field(init=False, default_factory=Constraint, repr=False)
-    gap: float = 0.2
-
-    def __post_init__(self):
-        """Initialize minimum gap."""
-        super().__post_init__()
-        self.data["minimum_gap"] = self.gap * self.data["boundary_type"]
 
     @property
     def limiter(self) -> bool:
@@ -193,6 +188,11 @@ class Control(PlasmaPoints, Profile):
         self.constraint.poloidal_flux = psi, range(4)
         if self.square:
             self.constraint.poloidal_flux = psi, range(4, 8)
+        if self.strike and not self.limiter:
+            self.constraint.poloidal_flux = (
+                psi,
+                self.constraint.point_number + np.array([-2, -1]),
+            )
         self.constraint.radial_field = 0, [0, 2]
         self.constraint.vertical_field = 0, [1, 3]
         if not self.limiter:
@@ -202,16 +202,6 @@ class Control(PlasmaPoints, Profile):
         """Update source equilibrium."""
         super().update()
         self.update_constraints()
-
-    @property
-    def inner_strike(self):
-        """Return inner strike point."""
-        return self["strike_point"][0]
-
-    @property
-    def outer_strike(self):
-        """Return outer strike point."""
-        return self["strike_point"][1]
 
     def plot(self, index=None, axes=None, **kwargs):
         """Extend PlasmaPoints.plot to include constraints."""
@@ -263,7 +253,7 @@ class ITER(Machine):
 
 
 @dataclass
-class PulseDesign(Control, ITER):
+class PulseDesign(Animate, Plot1D, Control, ITER):
     """Generate Pulse Design Simulator current waveforms.
 
     Transform a prototype pulse design from a four-point bounding-box plasma
@@ -625,12 +615,11 @@ class PulseDesign(Control, ITER):
                 2 * self["minor_radius"] * np.array([1, self["elongation"]]),
             ]
         }
-        for _ in range(5):
+        for _ in range(3):
             self.solve_current()
             with self.plasma.profile(self.p_prime, self.ff_prime):
                 self.plasma.separatrix = self.plasma.psi_boundary
-
-        # self.solve_current()
+        self.solve_current()
 
     def plot(self, index=None, axes=None, **kwargs):
         """Extend plot to include plasma contours."""
@@ -842,6 +831,56 @@ class PulseDesign(Control, ITER):
         self.axes.set_xlabel("time, s")
         self.axes.legend()
 
+    def make_frame(self, time):
+        """Make animation frame."""
+        self.reset()
+        scene = self.scene(time)
+        self.time = scene.pop("time", self.time)
+        if len(scene) > 0:
+            for attr, value in scene.items():
+                self[attr] = value
+                self.fit()
+            self.update()
+        if isinstance(self.axes, list) and len(self.axes) == 4:
+            axes = self.axes
+            self.bar(
+                "current",
+                "free",
+                scale=1e-3,
+                limit=[-45, 45],
+                label=r"$I$ kA",
+                color="C0",
+                axes=self.axes[0],
+            )
+            self.axes = axes
+            self.force.bar(
+                "fz",
+                "free",
+                scale=1e-6,
+                limit=[-300, 300],
+                label=r"$F_z$ MN",
+                color="C1",
+                axes=self.axes[1],
+            )
+            self.force.axes.get_xaxis().set_visible(False)
+
+            self.field.bar(
+                "bp",
+                "free",
+                scale=1,
+                limit=[0, 15],
+                label=r"$|\mathbf{B_p}|$ T",
+                color="C2",
+                axes=self.axes[2],
+            )
+            axes = self.axes
+            self.plot("plasma", axes=self.axes[3])
+            self.axes = axes
+
+        else:
+            self.plot()
+            # self.force.plot(norm=6e8)
+
 
 @dataclass
 class Benchmark(PulseDesign):
@@ -936,9 +975,65 @@ class Benchmark(PulseDesign):
 
 
 if __name__ == "__main__":
-    design = PulseDesign(135013, 2, "iter", 1, square=True)
+    design = PulseDesign(
+        135013,
+        2,
+        "iter",
+        1,
+        square=False,
+        strike=True,
+        fps=5,
+        pf_passive="iter_md",
+    )
     # design = Benchmark(135013, 2, "iter", 1)
 
+    design.levelset.solve(limit=0.1, index="coil")
+    design.itime = 0
+
+    """
+    design.square = True
+    design.add_animation("time", 2, ramp=10)
+    design.add_animation("squareness_upper_outer", 2, amplitude=0.3)
+    design.add_animation("squareness_upper_inner", 2, amplitude=0.2)
+    design.add_animation("squareness_lower_inner", 2, amplitude=0.2)
+    design.add_animation("squareness_lower_outer", 2, amplitude=0.1)
+    """
+
+    """
+    design.add_animation("elongation_lower", 2, amplitude=0.1)
+    design.add_animation("triangularity_upper", 2, amplitude=0.1)
+    design.add_animation("elongation_upper", 2, amplitude=0.1)
+    design.add_animation("triangularity_lower", 2, amplitude=0.1)
+
+    design.add_animation("time", 6, ramp=50)
+    design.add_animation("elongation", 4, amplitude=-0.1)
+    design.add_animation("elongation_lower", 2, amplitude=0.2)
+    design.add_animation("triangularity_upper", 2, amplitude=0.2)
+    design.add_animation("elongation_upper", 2, amplitude=0.2)
+    design.add_animation("minimum_gap", 6, amplitude=0.2)
+    design.add_animation("time", 6, ramp=-50)
+    design.add_animation("time", 2, ramp=0)
+    """
+
+    # design.plot_animation(False)
+    # design.set_axes("triple")
+
+    design.set_axes("2d", aspect=1.5)
+
+    design.add_animation("time", 10, ramp=100)
+
+    design.make_frame(100)
+
+    # design.time = design.scene(20)["time"]
+    # design.plasma.lcfs.plot()
+    design.fig.tight_layout(pad=0)
+    design.savefig("frame")
+
+    # design.make_frame(100)
+
+    # design.animate()
+
+    """
     design.itime = 5
     # design["minor_radius"] = 0.5
     # design.update()
@@ -947,6 +1042,7 @@ if __name__ == "__main__":
     design.fit()
     design.update()
     design.plot("plasma")
+    """
 
     """
 

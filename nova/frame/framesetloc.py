@@ -162,9 +162,9 @@ class FrameSetLoc(FrameData):
         return np.sign(self.i_plasma)
 
     @cached_property
-    def coil_name(self) -> list[str, ...]:
+    def coil_name(self):
         """Return coil names."""
-        return [name for name in self.Loc["coil", :].index]
+        return np.array([name for name in self.Loc["coil", :].index])
 
     @cached_property
     def _subref(self):

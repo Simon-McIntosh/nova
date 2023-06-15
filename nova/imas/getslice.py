@@ -1,5 +1,6 @@
 """Extract time slices from equilibrium IDS."""
 from dataclasses import dataclass, field
+from functools import cached_property
 
 import numpy as np
 import xarray
@@ -69,6 +70,17 @@ class GetSlice:
         self.time_index = time_index
         self.update()
 
+    @cached_property
+    def _partition(self):
+        """Return time vector midpoints."""
+        time_partition = np.copy(self.data.time)
+        time_partition[:-1] += np.diff(self.data.time) / 2
+        return time_partition
+
+    def get_itime(self, time: float) -> np.integer:
+        """Return searchsorted itime for time."""
+        return np.searchsorted(self._partition, time)
+
     @property
     def time(self):
         """Manage solution time."""
@@ -76,7 +88,7 @@ class GetSlice:
 
     @time.setter
     def time(self, time):
-        self.itime = np.searchsorted(self.data.time, time)
+        self.itime = self.get_itime(time)
 
     def update(self):
         """Clear cache following update to itime. Extend as required."""

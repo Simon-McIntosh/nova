@@ -1,12 +1,11 @@
 """Generate coil voltage and current waveforms to suport pulse design."""
-import bisect
 from dataclasses import dataclass
 
 import numpy as np
 from scipy import optimize
 
 from nova.biot.biot import Nbiot
-from nova.geometry.plasmaprofile import PlasmaProfile
+from nova.graphics.plot import Animate
 from nova.imas.database import Ids
 from nova.imas.machine import Machine
 from nova.imas.pulseprofile import PulseProfile
@@ -25,7 +24,7 @@ class MachineDescription(Machine):
 
 
 @dataclass
-class Waveform(MachineDescription, PulseProfile):
+class Waveform(Animate, MachineDescription, PulseProfile):
     """Generate coilset voltage and current waveforms."""
 
     name: str = "pulse_schedule"
@@ -106,7 +105,7 @@ class Waveform(MachineDescription, PulseProfile):
     def plot(self, index="plasma", axes=None, **kwargs):
         """Plot machine and constraints."""
         super().plot(index=index, axes=axes, **kwargs)
-        self.plasma.plot()
+        # self.plasma.plot()  # TODO enable after separatrix plots...
 
     def residual(self, nturn):
         """Return psi grid residual."""
@@ -135,6 +134,7 @@ class Waveform(MachineDescription, PulseProfile):
         # self.aloc['plasma', 'nturn'] = nturn
         # self.update_gap()
 
+    '''
     def _make_frame(self, time):
         """Make frame for annimation."""
         self.axes.clear()
@@ -160,21 +160,40 @@ class Waveform(MachineDescription, PulseProfile):
         self.set_axes("2d")
         animation = self.mpy.editor.VideoClip(self._make_frame, duration=duration)
         animation.write_gif(f"{filename}.gif", fps=10)
+    '''
+
+    def make_frame(self, time):
+        """Make animation frame."""
+        self.time = self.scene(time).pop("time", self.time)
+        self.fit()
+        self.plot()
 
 
 if __name__ == "__main__":
     pulse, run = 135003, 5
-
     pulse, run = 135013, 2
 
-    waveform = Waveform(pulse, run)
+    waveform = Waveform(pulse, run, fps=5)
 
-    # waveform.annimate(5, 'newton_krylov_ramp_up')
+    waveform.plasma.loc["plasma", "nturn"] = 0
 
+    waveform.set_axes("2d", aspect=2)
+    waveform.itime = 0
+    waveform.add_animation("time", 20, ramp=50)
+    waveform.animate("profile_gap")
+
+    """
     waveform.time = 12
     waveform.fit()
+    # waveform.solve()
+    waveform.plot()
+    """
+    """
     waveform.solve()
     waveform.plot()
+    """
+
+    """
 
     # waveform.levelset.tree.plot(waveform.points)
     # waveform.axes.plot(*waveform.points.T, 'C3')
@@ -187,6 +206,7 @@ if __name__ == "__main__":
     )
     plasmaprofile.plot()
     plasmaprofile.axes.plot(*waveform["x_point"][0], "C0o")
+    """
 
     """
     currents = np.zeros((150, waveform.saloc['coil'].sum()))

@@ -245,7 +245,7 @@ class Sample(Plot, Defeature, Select):
             value = minmax_scale(value, axis=0)
         self.axes.plot(data.time, value, **kwargs)
 
-    def plot(self, attrs=None, scale=False):
+    def plot(self, attrs=None, scale=False, rdp=True):
         """Plot source, interpolated, and sampled datasets."""
         if attrs is None:
             attrs = [attr for attr in self.features if attr != "ip"]
@@ -263,19 +263,20 @@ class Sample(Plot, Defeature, Select):
                 self._plot_attr("sample", attr, ls="-", color="gray", lw=1, scale=scale)
             if self.savgol is not None:
                 self._plot_attr("smooth", attr, ls="-", color="k", lw=0.5, scale=scale)
-            self._plot_attr(
-                "rdp",
-                attr,
-                ls="-",
-                marker="o",
-                color="k",
-                lw=1.5,
-                ms=6,
-                zorder=-10,
-                scale=scale,
-                mfc="k",
-                mec=f"C{i}",
-            )
+            if rdp:
+                self._plot_attr(
+                    "rdp",
+                    attr,
+                    ls="-",
+                    marker="o",
+                    color="k",
+                    lw=1.5,
+                    ms=6,
+                    zorder=-10,
+                    scale=scale,
+                    mfc="k",
+                    mec=f"C{i}",
+                )
         self.axes.legend(ncol=2)
         self.axes.set_xlabel("time s")
         ylabel = "value"
@@ -414,9 +415,21 @@ if __name__ == "__main__":
     pulse, run = 135013, 2
 
     equilibrium = EquilibriumData(pulse, run)
-    sample = Sample(equilibrium.data)
+    sample = Sample(equilibrium.data, epsilon=0)
 
-    sample.write_ids(**equilibrium.ids_attrs | {"occurrence": 1})
+    sample.write_ids(**equilibrium.ids_attrs | {"occurrence": 2})
+    sample.plot(
+        [
+            "minor_radius",
+            "elongation",
+            "triangularity_upper",
+            "triangularity_lower",
+            "triangularity_inner",
+            "triangularity_outer",
+        ]
+    )
+    sample.savefig("sample")
+    """
     sample.plot(
         [
             "squareness_upper_inner",
@@ -425,5 +438,6 @@ if __name__ == "__main__":
             "squareness_lower_outer",
         ]
     )
+    """
 
     # sample.plot('ip')

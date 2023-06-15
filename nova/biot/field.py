@@ -6,6 +6,7 @@ from scipy.interpolate import interp1d
 
 from nova.biot.biotframe import BiotFrame
 from nova.biot.operate import Operate
+from nova.biot.plot import Plot1D
 from nova.biot.solve import Solve
 from nova.graphics.plot import Plot
 
@@ -107,7 +108,7 @@ class Sample(Plot):
 
 
 @dataclass
-class Field(Plot, Operate):
+class Field(Plot1D, Operate):
     """
     Compute maximum field around coil perimeter.
 

@@ -13,16 +13,15 @@ from nova.assembly.fiducialccl import Fiducial, FiducialIDM, FiducialRE
 from nova.assembly.fiducialsector import FiducialSector
 from nova.assembly.gaussianprocessregressor import GaussianProcessRegressor
 from nova.assembly.plotter import Plotter
-
-import matplotlib.pyplot as plt
-import seaborn as sns
+from nova.graphics.plot import Plot
 
 
 @dataclass
-class FiducialData(Plotter):
+class FiducialData(Plot, Plotter):
     """Manage ccl fiducial data."""
 
     fiducial: Fiducial | str = "Sector"
+    phase: str = "SSAT BR"
     fill: bool = True
     sead: int = 2030
     rawdata: dict[str, pandas.DataFrame] = field(
@@ -192,7 +191,7 @@ class FiducialData(Plotter):
 
     def load_fiducial_deltas(self):
         """Load fiducial deltas."""
-        fiducial = self.fiducial(self.data.target)  # , phase='SSAT BR'
+        fiducial = self.fiducial(self.data.target, phase=self.phase)
         delta, origin = fiducial.data
         self.data["coil"] = list(delta)
         self.data = self.data.assign_coords(origin=("coil", origin))
@@ -241,14 +240,15 @@ class FiducialData(Plotter):
 
     def plot_gpr_array(self, coil_index):
         """Plot gpr array."""
-        axes = plt.subplots(3, 1, sharex=True, sharey=True)[1]
+        self.axes = self.set_axes(
+            "1d", nrows=3, ncols=1, sharex=True, sharey=True, aspect=0.8
+        )
         for space_index, coord in enumerate("xyz"):
             self.load_gpr(coil_index, space_index)
-            self.gpr.plot(axes=axes[space_index], text=False)
-            axes[space_index].set_ylabel(rf"$\Delta{{{coord}}}$ mm")
-        sns.despine()
-        axes[-1].set_xlabel("arc length")
-        axes[0].legend(loc="center", bbox_to_anchor=(0, 1.25, 1, 0.1), ncol=2)
+            self.gpr.plot(axes=self.axes[space_index], text=False)
+            self.axes[space_index].set_ylabel(rf"$\Delta{{{coord}}}$ mm")
+        self.axes[-1].set_xlabel("arc length")
+        self.axes[0].legend(loc="center", bbox_to_anchor=(0, 1.25, 1, 0.1), ncol=2)
 
     @staticmethod
     def fiducials():
@@ -270,17 +270,17 @@ class FiducialData(Plotter):
 
     def plot(self, factor=400):
         """Plot fiudicial points on coil cenerline."""
-        axes = plt.subplots(1, 2, sharey=True)[1]
+        self.axes = self.set_axes("2d", nrows=1, ncols=2, sharey=True)
         for j in range(2):
-            axes[j].plot(
+            self.axes[j].plot(
                 self.data.centerline[:, 0], self.data.centerline[:, 2], "gray", ls="--"
             )
-            axes[j].axis("equal")
-            axes[j].axis("off")
+        limits = self.axeslim
+        print(limits)
         color = [0, 0]
         for i in range(self.data.dims["coil"]):
             j = 0 if self.data.origin[i] == "EU" else 1
-            axes[j].plot(
+            self.axes[j].plot(
                 self.data.centerline[:, 0]
                 + factor * self.data.centerline_delta[i, :, 0],
                 self.data.centerline[:, 2]
@@ -288,7 +288,7 @@ class FiducialData(Plotter):
                 color=f"C{color[j]}",
                 label=f"{self.data.coil[i].values:02d}",
             )
-            axes[j].plot(
+            self.axes[j].plot(
                 self.data.fiducial[:, 0] + factor * self.data.fiducial_delta[i, :, 0],
                 self.data.fiducial[:, 2] + factor * self.data.fiducial_delta[i, :, 2],
                 ".",
@@ -296,8 +296,11 @@ class FiducialData(Plotter):
             )
             color[j] += 1
         for j, origin in enumerate(["EU", "JA"]):
-            axes[j].legend(fontsize="x-small", loc="center", bbox_to_anchor=[0.4, 0.5])
-            axes[j].set_title(origin)
+            self.axes[j].legend(
+                fontsize="large", loc="center", bbox_to_anchor=[0.4, 0.5]
+            )
+            self.axes[j].set_title(f"{origin} {self.phase}")
+        self.axeslim = limits
 
     def coil_index(self, coil: int):
         """Return coil index."""
@@ -305,18 +308,16 @@ class FiducialData(Plotter):
 
     def plot_single(self, coil_index, factor=500, axes=None):
         """Plot single fiducial curve."""
-        if axes is None:
-            axes = plt.subplots(1, 1)[1]
-
-        axes.plot(
+        self.set_axes("2d", axes, aspect=1.5)
+        self.axes.plot(
             self.data.centerline[:, 0], self.data.centerline[:, 2], "gray", ls="--"
         )
-
+        limits = self.axeslim
         for fiducial in self.data.fiducial:
-            axes.plot(*fiducial[::2], "ko")
-            axes.text(*fiducial[::2], f" {fiducial.target.values}")
+            self.axes.plot(*fiducial[::2], "ko")
+            self.axes.text(*fiducial[::2], f" {fiducial.target.values}")
 
-        axes.plot(
+        self.axes.plot(
             self.data.fiducial[:, 0]
             + factor * self.data.fiducial_delta[coil_index, :, 0],
             self.data.fiducial[:, 2]
@@ -324,26 +325,40 @@ class FiducialData(Plotter):
             "C3o",
         )
 
-        axes.plot(
+        self.axes.plot(
             self.data.centerline[:, 0]
             + factor * self.data.centerline_delta[coil_index, :, 0],
             self.data.centerline[:, 2]
             + factor * self.data.centerline_delta[coil_index, :, 2],
             color="C0",
         )
-        axes.axis("equal")
-        axes.axis("off")
+        self.axeslim = limits
+        self.axes.set_title(f"TF{self.data.coil[coil_index].data} {self.phase}")
 
 
 if __name__ == "__main__":
-    fiducial = FiducialData("RE", fill=False)
+    phase = "FAT supplier"
+    phase = "SSAT BR"
+
+    fiducial = FiducialData(phase=phase, fill=False)
+
     coil = 13
     coil_index = fiducial.coil_index(coil)
 
     fiducial.plot_single(coil_index)
+    fiducial.fig.tight_layout(pad=0)
+    fiducial.savefig("single")
+
     # fiducial.plot_gpr(1, 0)
 
     fiducial.plot_gpr_array(coil_index)
+    fiducial.fig.tight_layout(pad=0)
+    fiducial.savefig("gpr_array")
+
+    # fiducial.plot()
+    # fiducial.fig.tight_layout(pad=0)
+    # fiducial.savefig("fiducial")
+
     """
     plotter = pv.Plotter()
     fiducial.mesh['delta'] *= 1e3
@@ -353,5 +368,4 @@ if __name__ == "__main__":
     plotter.show()
     """
 
-    fiducial.plot()
     #

@@ -5,13 +5,13 @@ import numpy as np
 
 from nova.biot.biotframe import BiotFrame
 from nova.biot.operate import Operate
+from nova.biot.plot import Plot1D
 from nova.biot.solve import Solve
-from nova.graphics.plot import Plot
 from nova.frame.polygrid import PolyTarget
 
 
 @dataclass
-class Force(Plot, Operate):
+class Force(Plot1D, Operate):
     """
     Compute coil force interaction matricies.
 
@@ -69,6 +69,19 @@ class Force(Plot, Operate):
         self.get_axes("2d", axes=axes)
         kwargs = dict(marker="o", linestyle="", color="C2", ms=4) | kwargs
         self.axes.plot(self.data.coords["x"], self.data.coords["z"], **kwargs)
+
+    '''
+    def bar(self, attr: str, index=slice(None), axes=None, **kwargs):
+        """Plot per-coil force component."""
+        self.get_axes("1d", axes)
+        if isinstance(index, str):
+            index = [name in self.loc[index, :].index for name in self.coil_name]
+        names = self.coil_name[index]
+        self.axes.bar(names, 1e-6 * getattr(self, attr)[index], **kwargs)
+        self.axes.set_xticklabels(names, rotation=90, ha="center")
+        label = {"fr": "radial", "fz": "vertical"}
+        self.axes.set_ylabel(f"{label[attr]} force MN")
+    '''
 
     def plot(self, scale=1, norm=None, axes=None, **kwargs):
         """Plot force vectors and intergration points."""

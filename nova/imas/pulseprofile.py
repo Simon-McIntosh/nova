@@ -1,5 +1,4 @@
 """Calculate plasma shape from pulse schedule."""
-import bisect
 from dataclasses import dataclass, field
 from functools import cached_property
 
@@ -143,13 +142,14 @@ class PulseProfile(PlasmaProfile, PulseSchedule):
 
     def plot(self, axes=None, **kwargs):
         """Plot first wall, gaps, and plasma profile."""
-        if not np.isclose(self.geometric_radius, 0):
+        if not np.isclose(self["geometric_radius"], 0):
             super().plot(axes=axes, **kwargs)
         # if self.topology == 'single_null':
         #    self.axes.plot(*self.get('x_point')[0], 'x',
         #                   ms=6, mec='C3', mew=1, mfc='none')
         self.plot_gaps()
 
+    '''
     def _make_frame(self, time):
         """Make frame for annimation."""
         self.axes.clear()
@@ -172,6 +172,7 @@ class PulseProfile(PlasmaProfile, PulseSchedule):
         self.set_axes("2d")
         animation = self.mpy.editor.VideoClip(self._make_frame, duration=duration)
         animation.write_gif(f"{filename}.gif", fps=10)
+    '''
 
 
 if __name__ == "__main__":

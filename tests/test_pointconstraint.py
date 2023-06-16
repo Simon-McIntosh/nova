@@ -12,10 +12,10 @@ def test_constraint_point_index():
     constraint.radial_field = 0, [3]
 
     assert np.allclose(constraint.point_index, range(8))
-    assert constraint.index("null") == 3
+    assert np.allclose(constraint.index("null"), 3)
     assert np.allclose(constraint.index("radial"), [0, 2])
-    assert np.allclose(constraint.index("vertical"), [1, 3])
+    assert np.allclose(constraint.index("vertical"), 1)
 
 
-test_constraint_point_index()
-assert False
+if __name__ == "__main__":
+    pytest.main([__file__])

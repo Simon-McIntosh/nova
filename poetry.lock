@@ -4334,6 +4334,25 @@ files = [
 python-lsp-server = ">=1.0.1"
 
 [[package]]
+name = "pylsp-mypy"
+version = "0.6.7"
+description = "Mypy linter for the Python LSP Server"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "pylsp-mypy-0.6.7.tar.gz", hash = "sha256:06ba6d09bdd6ec29025ccc952dd66a849361a224a9f04cebd69b9f45f7d4a064"},
+    {file = "pylsp_mypy-0.6.7-py3-none-any.whl", hash = "sha256:7c50dc8bbfc45aee1efb9e7555d3bee7188c81a74098efd2e0e51ef574c8d277"},
+]
+
+[package.dependencies]
+mypy = ">=0.981"
+python-lsp-server = ">=1.7.0"
+tomli = {version = ">=1.1.0", markers = "python_version < \"3.11\""}
+
+[package.extras]
+test = ["coverage", "pytest", "pytest-cov", "tox"]
+
+[[package]]
 name = "pynacl"
 version = "1.5.0"
 description = "Python binding to the Networking and Cryptography (NaCl) library"
@@ -6792,4 +6811,4 @@ vtk = ["alphashape", "meshio", "pyvista", "trimesh", "vedo"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.12"
-content-hash = "009bb3893510bec5eea557f94bb5995098aed4cd6f5e34b7cf0961a2fb546752"
+content-hash = "3916f90d6e9674ee8f6f9e6dd9f67cea91fc95bee140496d43676ff7d03cfd59"

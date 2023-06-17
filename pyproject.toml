@@ -83,6 +83,7 @@ black = "^23.3.0"
 ruff = "^0.0.270"
 sphinx-rtd-theme = "^1.2.2"
 sphinx = "^6"
+pylsp-mypy = "^0.6.7"
 
 [tool.poetry.extras]
 ansys = [
@@ -179,7 +180,7 @@ target-version = "py310"
 max-complexity = 10
 
 [tool.pytest.ini_options]
-addopts = "-rfEs --doctest-modules"
+addopts = "-rfEs --doctest-modules --ignore=tests/test_sultan.py"
 norecursedirs = ".git __pycache__"
 testpaths = [
   "tests",

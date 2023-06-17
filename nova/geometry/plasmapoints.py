@@ -20,12 +20,14 @@ class Points:
     name: str = ""
     data: xarray.Dataset = field(default_factory=xarray.Dataset, repr=False)
     axis: str = ""
+    group: str = field(init=False, default="")
     attrs: list[str] = field(init=False, default_factory=list)
     labels: list[str] = field(init=False, default_factory=list)
 
     def __post_init__(self):
         """Check dataset for self-consistency."""
         self._select_axis()
+        self.group = "_".join([name for name in [self.name, self.axis] if name != ""])
 
     def _select_axis(self):
         """Select point attribures attrs from data."""
@@ -56,52 +58,93 @@ class Points:
         self.attrs = [attr for attr in attrs if attr in self.data]
         self.labels = list(labels)
 
+    def _fixattr(self, attr):
+        """Implement missing minor triangularity ids workarround."""
+        if self.axis == "ids_fix":
+            attr = {"outer": "upper", "inner": "lower"}[attr]  # TODO fix ids
+        return attr
+
+    def _getattr(self, attr):
+        """Return resolved attribute name."""
+        if attr in [self.group, self.name, "mean"]:
+            return attr
+        attr = self._fixattr(attr)  # TODO fix ids
+        return f"{self.name}_{attr}"
+
     def __getitem__(self, attr: str):
         """Return item from data."""
+        label = attr
+        attr = self._getattr(attr)  # TODO fix ids
         try:
-            return self.data[f"{self.name}_{attr}"]
+            if isinstance(self.data, xarray.Dataset):
+                data = self.data[attr].data
+                try:
+                    return data.item()
+                except ValueError:
+                    return data
+                raise TypeError(f"xarray {attr}: {self.data}")
+            else:
+                return self.data[attr]
         except KeyError as error:
-            if attr in self.labels:
+            if label in self.labels and attr not in [self.group, self.name]:
                 return self.mean
             raise KeyError(f"invalid attr {attr}") from error
+        raise KeyError(f"Mapping attr {attr} not found.")
 
-    def __setitem__(self, key: str, value):
+    def __setitem__(self, attr: str, value):
         """Update data attribute."""
-        if key == "mean":
-            factor = value / self.mean
-            for attr in self.attrs:
-                self.data[attr] *= factor
-            return
-        self.data[f"{self.name}_{key}"] = value
+        attr = self._getattr(attr)  # TODO fix ids
+        if attr == self.group:  # and attr in self.data:
+            factor = value / self.mean  # self.data[attr]
+            for subattr in self.attrs:
+                self.data[subattr] *= factor
+        self.data[attr] = value
 
-    def __getattr__(self, attr):
-        """Provide attribute get."""
-        if self.axis == "ids_fix":
-            attr = {"outer": "upper", "inner": "lower"}[attr]
-        if attr in self.labels:
-            return self[attr]
-        raise AttributeError(f"attribute {attr} not defined")
+    def __getattribute__(self, attr):
+        """Extend getattribute to provide access to self.data."""
+        try:
+            return super().__getattribute__(attr)
+        except AttributeError as attribute_error:
+            _attr = self._fixattr(attr)  # TODO fix ids
+            if _attr not in self.labels:
+                raise attribute_error
+        return self[attr]
+
+    @cached_property
+    def complete(self):
+        """Return True if all attributes in labels are defined."""
+        return np.all(
+            ["_".join([self.name, label]) in self.attrs for label in self.labels]
+        )
+
+    def _attr_mean(self):
+        """Return mean of attribute set."""
+        if len(self.attrs) == 0:
+            return self[self.name]
+        return np.mean([self.data[attr] for attr in self.attrs])
 
     @property
     def mean(self):
         """Manage mean attribute."""
-        if len(self.attrs) == 0:
-            return self.data[self.name]
-        return np.mean([self.data[attr] for attr in self.attrs])
+        if self.complete:
+            return self._attr_mean()
+            # self[self.group] = self._attr_mean()
+            # return self[self.group]
+        try:
+            return self[self.group]
+        except KeyError:
+            return self._attr_mean()
 
     @mean.setter
     def mean(self, value):
-        self["mean"] = value
+        self[self.group] = value
 
 
 @dataclass
-class PlasmaPoints(Plot):
-    """Calculate plasma profile control points from plasma parameters."""
+class ControlPoints(Plot):
+    """Defined plasma separatrix control points from plasma parameters."""
 
-    data: dict = field(default_factory=dict)  # TODO check {}
-    # _datacache: xarray.Dataset = field(
-    #    init=False, repr=False, default_factory=xarray.Dataset
-    # )
+    data: xarray.Dataset = field(default_factory=xarray.Dataset, repr=False)
     gap: float = 0.2
     square: bool = False
     strike: bool = False
@@ -141,6 +184,13 @@ class PlasmaPoints(Plot):
         if hasattr(super(), "__getitem__"):
             return super().__getitem__(attr)
         if attr in self.data:
+            if isinstance(self.data, xarray.Dataset):
+                data = self.data[attr].data
+                try:
+                    return data.item()
+                except ValueError:
+                    return data
+                raise TypeError(f"xarray {attr}: {self.data[attr]}")
             return self.data[attr]
         raise KeyError(f"mapping attr {attr} not found")
 
@@ -149,7 +199,14 @@ class PlasmaPoints(Plot):
         if hasattr(super(), "__getitem__"):
             super().__setitem__(attr, value)
         else:
-            self.data[attr] = value
+            try:
+                self.data[attr].data = value
+            except KeyError:
+                dimension = len(np.shape(value))
+                coord = tuple(
+                    coord for coord, _ in zip(["point", "index"], range(dimension))
+                )
+                self.data[attr] = coord, np.array(value)
 
     @property
     def _pointdata(self):
@@ -186,8 +243,7 @@ class PlasmaPoints(Plot):
     @cached_property
     def triangularity_minor(self):
         """Return minor triangularity points instance."""
-        # TODO update once IDS is fixed
-        return Points("elongation", self._pointdata, "ids_fix")
+        return Points("elongation", self._pointdata, "ids_fix")  # TODO fix IDS
 
     @cached_property
     def squareness(self):
@@ -260,6 +316,26 @@ class PlasmaPoints(Plot):
         """Return outer strike point."""
         return self["strike_point"][1]
 
+    def plot(self, index=None, axes=None, **kwargs):
+        """Plot control points."""
+        self.get_axes("2d", axes)
+        points = np.array(
+            [point for point in self.control_points if not np.allclose(point, (0, 0))]
+        )
+        self.axes.plot(*points.T, "o", color="C2", ms=10 / 4)
+        if hasattr(super(), "plot"):
+            super().plot(index, axes, **kwargs)
+
+
+@dataclass
+class PlasmaPoints(ControlPoints):
+    """Fit plasma separatrix control points to first wall."""
+
+    @property
+    def limiter(self) -> bool:
+        """Return limiter flag."""
+        return self["boundary_type"] == 0
+
     @cached_property
     def firstwall(self):
         """Return firstwall contour (main chamber)."""
@@ -279,21 +355,6 @@ class PlasmaPoints(Plot):
         ]
         return np.cross([0, 0, 1], tangent)[:, :2]
 
-    def plot(self, index=None, axes=None, **kwargs):
-        """Plot control points and first wall."""
-        self.get_axes("2d", axes)
-        wall = Wall()
-        for segment in wall.segments:
-            self.axes.plot(
-                segment[:, 0], segment[:, 1], "-", ms=4, color="gray", linewidth=1.5
-            )
-        points = np.array(
-            [point for point in self.control_points if not np.allclose(point, (0, 0))]
-        )
-        self.axes.plot(*points.T, "o", color="C2", ms=10 / 4)
-        if hasattr(super(), "plot"):
-            super().plot(index, axes, **kwargs)
-
     @cached_property
     def kd_tree(self):
         """Return kd_tree instance for fast nearest neighbour lookup."""
@@ -312,22 +373,22 @@ class PlasmaPoints(Plot):
             gap -= self["minimum_gap"]
         return gap
 
-    def _update_point_gap(self, x, minor_radius, point_index):
+    def _update_point_gap(self, radii, minor_radius, point_index):
         """Return vector of pannel normal wall gaps."""
-        self._update_radii(x, minor_radius)
+        self._update_radii(radii, minor_radius)
         return self.point_gap(point_index)
 
-    def _update_radii(self, x, minor_radius):
+    def _update_radii(self, radii, minor_radius):
         """Update major and minor radii."""
-        self["minor_radius"] = x[0]
-        self["geometric_axis"][0] = x[1]
+        self["minor_radius"] = radii[0]
+        self["geometric_axis"][0] = radii[1]
         match self["boundary_type"]:
             case 0:  # limiter
-                return self.inner[0] + abs(x[0] - minor_radius)
+                return self.inner[0] + abs(radii[0] - minor_radius)
             case 1:  # single null
                 x_point_delta = self["x_point"] - self.lower
                 self["geometric_axis"] += x_point_delta
-                return -x[0]  # + 2 * abs(x_point_delta[0])
+                return -radii[0]
             case _:
                 raise NotImplementedError(
                     f'boundary type {self["boundary_type"]} not implemented'
@@ -368,11 +429,20 @@ class PlasmaPoints(Plot):
             raise ValueError(f"minimizer failed to converge {sol}")
         self._update_radii(sol.x, minor_radius)
 
+    def plot(self, index=None, axes=None, **kwargs):
+        """Plot control points and first wall."""
+        super().plot()
+        wall = Wall()
+        for segment in wall.segments:
+            self.axes.plot(
+                segment[:, 0], segment[:, 1], "-", ms=4, color="gray", linewidth=1.5
+            )
+
 
 if __name__ == "__main__":
-    plasmapoints = PlasmaPoints(
-        data={
-            "geometric_axis": [6, 0],
+    data = xarray.Dataset(
+        {
+            "geometric_axis": ("point", [6, 0]),
             "minor_radius": 3.75,
             "elongation": 2.0,
             "triangularity": 0.2,
@@ -383,10 +453,13 @@ if __name__ == "__main__":
             "squareness": 1,
             "minimum_gap": 0.2,
             "boundary_type": 0,
-            "x_point": [5.1, -3.4],
-            "strike_point": [[4.2, -3.8], [5.6, -4.4]],
+            "x_point": ("point", [5.1, -3.4]),
+            "strike_point": (("index", "point"), [[4.2, -3.8], [5.6, -4.4]]),
         }
     )
+
+    plasmapoints = PlasmaPoints(data)
+    plasmapoints.elongation
 
     plasmapoints.fit()
     plasmapoints.plot()

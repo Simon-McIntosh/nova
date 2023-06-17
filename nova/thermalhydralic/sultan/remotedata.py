@@ -41,7 +41,7 @@ class FTPData:
 
     def locate(self, file, *relative_path):
         """
-        Locate file no ftp server.
+        Locate file on ftp server.
 
         Parameters
         ----------

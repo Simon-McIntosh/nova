@@ -32,22 +32,18 @@
 
 ## Install
 
+The NOVA package is PEP 517 compliant. Project dependancies are specified in the pyproject.toml file stored in the project's root. Base instalations may be perfomed using `pip` or `poetry`. Developlemnt installs should use `poetry`.
+
+To install using pip (without an IDE)
 ```sh
-# development package using poetry with a pipx install
-python3.10 -m pip install pipx-in-pipx
-pipx install poetry 
-poetry install -all-extras 
-poetry run pre-commit install
- 
-# run a single command using 
-poetry run <command>
+# to install the NOVA base
+pip install .
 
-# for example, to run the test suite use
-poetry run pytest 
+# optional extras may be specified using pip, such as the test enviroment 
+pip install .[test]  
 
-# or launch a poetry shell followed by the spyder IDE (with command returned back to the shell)
-poetry shell 
-spyder &
+# to run the full test suite issue the following command from the project's root 
+pytest
 ```
 
 To install on SDCC (in advance of and EasyBuild module or for development work)
@@ -65,3 +61,22 @@ poetry run spyder
 # launch Bokeh app
 poetry run bokeh serve apps/pulsedesign
 ```
+
+To install a development package using poetry (installed here prior to the nova package via pipx)
+```sh
+python3.10 -m pip install pipx-in-pipx
+pipx install poetry 
+poetry install -all-extras 
+poetry run pre-commit install
+ 
+# run a single command using 
+poetry run <command>
+
+# for example, to run the test suite use
+poetry run pytest 
+
+# or launch a poetry shell followed by the spyder IDE (with command returned back to the shell)
+poetry shell 
+spyder &
+```
+

@@ -44,7 +44,6 @@ class ConstraintData:
         """Update constraint."""
         if index is None:
             index = self.point_index
-        index = [i for i in index if i < self.point_number]
         self.array[index] = data
         self.mask[index] = False
 
@@ -176,11 +175,6 @@ class Control(PlasmaPoints, Profile):
     """Extract control points and flux profiles from equilibrium data."""
 
     constraint: Constraint = field(init=False, default_factory=Constraint, repr=False)
-
-    @property
-    def limiter(self) -> bool:
-        """Return limiter flag."""
-        return self["boundary_type"] == 0
 
     def update_constraints(self, psi=0):
         """Update flux and field constraints."""
@@ -1039,11 +1033,11 @@ if __name__ == "__main__":
     # design.plot_animation(False)
     # design.set_axes("triple")
 
-    design.set_axes("2d", aspect=1.5)
+    # design.set_axes("2d", aspect=1.5)
 
     # design.add_animation("time", 10, ramp=100)
 
-    # design.make_frame(100)
+    design.make_frame(100)
 
     # design.time = design.scene(20)["time"]
     # design.plasma.lcfs.plot()
@@ -1052,7 +1046,7 @@ if __name__ == "__main__":
 
     # design.make_frame(84 / 5)
 
-    design.animate()
+    # design.animate()
 
     """
     design.itime = 5

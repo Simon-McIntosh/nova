@@ -66,7 +66,7 @@ To install a development package using poetry (installed here prior to the nova 
 ```sh
 python3.10 -m pip install pipx-in-pipx
 pipx install poetry 
-poetry install -all-extras 
+poetry install --all-extras 
 poetry run pre-commit install
  
 # run a single command using 

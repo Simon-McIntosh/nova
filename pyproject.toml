@@ -84,6 +84,7 @@ ruff = "^0.0.270"
 sphinx-rtd-theme = "^1.2.2"
 sphinx = "^6"
 pylsp-mypy = "^0.6.7"
+coverage = {extras = ["toml"], version = "^7.2.7"}
 
 [tool.poetry.extras]
 ansys = [
@@ -227,6 +228,16 @@ omit = [
   "nova/scripts/*", 
   "nova/thermalhydralic/*", 
   "nova/utilities/*"
+]
+
+[tool.coverage.report]
+ignore_errors = true
+exclude_lines = [
+  "pragma: no cover",
+  "def __repr__",
+  "raise AssertionError",
+  "raise NotImplementedError",
+  "if __name__ == .__main__.:",
 ]
 
 [build-system]

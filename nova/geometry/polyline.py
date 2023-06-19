@@ -100,9 +100,17 @@ class Arc(Plot):
         return np.linalg.norm(self.points[1:] - self.points[:-1], axis=1).sum()
 
     @property
+    def arclength(self):
+        """Return arc length."""
+        return self.radius * abs(self.theta[-1] - self.theta[0])
+
+    @property
     def match(self):
         """Return status of normalized fit residual."""
-        return self.error / self.length < self.eps
+        return (
+            self.error / self.length < self.eps
+            and self.arclength / self.radius <= 3 / 2 * np.pi
+        )
 
     def sample(self, point_number=50):
         """Return sampled polyline."""
@@ -189,8 +197,8 @@ class PolyArc(Plot):
     def plot(self):
         """Plot polyline."""
         self.get_axes("2d")
-        self.axes.plot(self.points[:, 0], self.points[:, 1], "o")
-        self.axes.plot(self.curve[:, 0], self.curve[:, 1], "-")
+        self.axes.plot(self.points[:, 1], self.points[:, 2], "o")
+        self.axes.plot(self.curve[:, 1], self.curve[:, 2], "-")
 
 
 @dataclass

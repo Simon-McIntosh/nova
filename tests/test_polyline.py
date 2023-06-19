@@ -141,12 +141,12 @@ def test_arc_plotfit():
 def test_plot_threepointarc():
     rng = np.random.default_rng(2025)
     points = rng.random((3, 3))
-    tpa = ThreePointArc(*points)
-    assert np.allclose(tpa.point_a, points[0])
-    assert np.allclose(tpa.point_b, points[1])
-    assert np.allclose(tpa.point_c, points[2])
+    arc = ThreePointArc(*points)
+    assert np.allclose(arc.point_a, points[0])
+    assert np.allclose(arc.point_b, points[1])
+    assert np.allclose(arc.point_c, points[2])
     with matplotlib.pylab.ioff():
-        tpa.plot()
+        arc.plot()
 
 
 def test_polyarc_plot():
@@ -154,6 +154,15 @@ def test_polyarc_plot():
     points = rng.random((3, 3))
     with matplotlib.pylab.ioff():
         PolyArc(points).plot()
+
+
+def test_circle():
+    theta = np.linspace(0, 2 * np.pi)
+    points = 3.2 * np.c_[np.zeros_like(theta), np.cos(theta), np.sin(theta)]
+    curve = PolyLine(points)
+    assert len(curve.segments) == 2
+    with matplotlib.pylab.ioff():
+        curve.plot()
 
 
 if __name__ == "__main__":

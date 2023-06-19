@@ -2,7 +2,6 @@
 from dataclasses import dataclass, field
 
 import numpy as np
-import numpy.typing as npt
 import pyvista as pv
 
 
@@ -17,7 +16,7 @@ class Line:
         self.compute_vectors()
 
     @classmethod
-    def from_points(cls, points: npt.ArrayLike):
+    def from_points(cls, points: np.ndarray):
         """Return line instance generated from points."""
         if len(points) > 2:
             return cls(pv.Spline(points))

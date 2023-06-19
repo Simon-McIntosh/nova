@@ -636,6 +636,7 @@ class FiducialRE(Fiducial):
     """Manage Reverse Engineering fiducial data."""
 
     file: str = "TFC18_asbuilt"
+    phase: str = "FAT supplier"
 
     def __post_init__(self):
         """Propogate origin."""

@@ -1,4 +1,4 @@
-"""Generate of an artifical an separatrix from shape parameters."""
+"""Calculate shape interpolators and parameters from a separatrix point string."""
 from dataclasses import dataclass, field
 from functools import cached_property, wraps
 

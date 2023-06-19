@@ -125,11 +125,10 @@ def rdp_iter(M, epsilon, dist=pldist, return_mask=False):
 
 def rdp(M, epsilon=0, dist=pldist, algo="iter", return_mask=False):
     """
-    Simplifies a given array of points using the Ramer-Douglas-Peucker
-    algorithm.
+    Simplifies a given array of points using the Ramer-Douglas-Peucker algorithm.
 
-    Example:
-
+    Examples
+    --------
     >>> from rdp import rdp
     >>> rdp([[1, 1], [2, 2], [3, 3], [4, 4]])
     [[1, 1], [4, 4]]
@@ -142,7 +141,7 @@ def rdp(M, epsilon=0, dist=pldist, algo="iter", return_mask=False):
     array, a NumPy array is returned.
 
     The parameter ``return_mask=True`` can be used in conjunction
-    with ``algo="iter"`` to return only the mask of points to keep. Example:
+    with ``algo="iter"`` to return only the mask of points to keep.
 
     >>> from rdp import rdp
     >>> import numpy as np
@@ -173,7 +172,6 @@ def rdp(M, epsilon=0, dist=pldist, algo="iter", return_mask=False):
     :param return_mask: return mask instead of simplified array
     :type return_mask: bool
     """
-
     if algo == "iter":
         algo = partial(rdp_iter, return_mask=return_mask)
     elif algo == "rec":

@@ -1,3 +1,4 @@
+import matplotlib.pylab
 import numpy as np
 import pytest
 
@@ -108,7 +109,7 @@ def test_decimate_dual_arc():
     rng = np.random.default_rng(2025)
     points = rng.random((5, 3))
     line = PolyArc(points, 100)
-    polyline = PolyLine(line.curve)
+    polyline = PolyLine(line.curve, eps=1e-4)
     assert len(polyline.segments) == 2
     assert [len(segment) == 3 for segment in polyline.segments] == [True, True]
 
@@ -126,6 +127,33 @@ def test_decimate_polyline():
     polyline = PolyLine(curve, eps=1e-8)
     assert np.sum([len(segment) == 3 for segment in polyline.segments]) == 7
     assert np.sum([len(segment) == 2 for segment in polyline.segments]) == 6
+
+
+def test_arc_plotfit():
+    rng = np.random.default_rng(2025)
+    points = rng.random((3, 3))
+    points[:, 0] = 0
+    arc = Arc(points)
+    with matplotlib.pylab.ioff():
+        arc.plot_fit()
+
+
+def test_plot_threepointarc():
+    rng = np.random.default_rng(2025)
+    points = rng.random((3, 3))
+    tpa = ThreePointArc(*points)
+    assert np.allclose(tpa.point_a, points[0])
+    assert np.allclose(tpa.point_b, points[1])
+    assert np.allclose(tpa.point_c, points[2])
+    with matplotlib.pylab.ioff():
+        tpa.plot()
+
+
+def test_polyarc_plot():
+    rng = np.random.default_rng(2025)
+    points = rng.random((3, 3))
+    with matplotlib.pylab.ioff():
+        PolyArc(points).plot()
 
 
 if __name__ == "__main__":

@@ -124,7 +124,7 @@ class Arc(Plot):
         points_2d = self.radius * np.c_[np.cos(theta), np.sin(theta)]
         points = points_2d @ self.arc_axes[:2]
         points += self.center
-        self.axes.plot(points[:, 0], points[:, 1], ":", color="gray")
+        self.axes.plot(points[:, 1], points[:, 2], ":", color="gray")
 
     def plot(self):
         """Plot point and best-fit data."""

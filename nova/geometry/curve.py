@@ -91,6 +91,7 @@ class Curve:
 
     points: np.ndarray
     pad_width: int = 6
+    kind: str = "quadratic"
 
     @cached_property
     def segment_length(self):
@@ -105,12 +106,16 @@ class Curve:
     @cached_property
     def radius(self):
         """Return surface radius interpolator."""
-        return Peak(self.cumulative_length, self.points[:, 0], self.pad_width)
+        return Peak(
+            self.cumulative_length, self.points[:, 0], self.pad_width, self.kind
+        )
 
     @cached_property
     def height(self):
         """Return surface height interpolator."""
-        return Peak(self.cumulative_length, self.points[:, 1], self.pad_width)
+        return Peak(
+            self.cumulative_length, self.points[:, 1], self.pad_width, self.kind
+        )
 
     def boundary(self, length):
         """Return lcfs interpolated to normalized length."""

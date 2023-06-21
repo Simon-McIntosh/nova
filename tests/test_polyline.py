@@ -160,9 +160,16 @@ def test_circle():
     theta = np.linspace(0, 2 * np.pi)
     points = 3.2 * np.c_[np.zeros_like(theta), np.cos(theta), np.sin(theta)]
     curve = PolyLine(points)
-    assert len(curve.segments) == 2
+    assert len(curve.segments) == 1
     with matplotlib.pylab.ioff():
         curve.plot()
+
+
+def test_ellipse():
+    theta = np.linspace(0, 2 * np.pi, 250)
+    points = np.c_[np.zeros_like(theta), 1.2 * np.cos(theta), 1.0 * np.sin(theta)]
+    curve = PolyLine(points)
+    assert len(curve.segments) > 1
 
 
 if __name__ == "__main__":

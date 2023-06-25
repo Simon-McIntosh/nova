@@ -33,6 +33,7 @@ class ConstraintData:
 
     def __post_init__(self):
         """Initialize data and mask arrays."""
+        print("init array", self.point_number)
         self.array = np.zeros(self.point_number, float)
         self.mask = np.ones(self.point_number, bool)
 
@@ -44,6 +45,7 @@ class ConstraintData:
         """Update constraint."""
         if index is None:
             index = self.point_index
+        print(self.array)
         self.array[index] = data
         self.mask[index] = False
 
@@ -75,6 +77,7 @@ class Constraint(Plot):
     def __post_init__(self):
         """Initialize constraint data."""
         for attr in self.attrs:
+            print(attr, self.point_number, self.points)
             self.constraint[attr] = ConstraintData(self.point_number)
 
     def __len__(self):
@@ -485,6 +488,11 @@ class PulseDesign(Animate, Plot1D, Control, ITER):
     field_weight: float | int = 50
     name: str = "equilibrium"
 
+    def __post_init__(self):
+        """Cache input dataset."""
+        super().__post_init__()
+        # self.cache()
+
     def update_constraints(self):
         """Extend ControlPoint.update_constraints to include boundary psi."""
         super().update_constraints(-self["psi_boundary"])  # COCOS11
@@ -658,7 +666,7 @@ class PulseDesign(Animate, Plot1D, Control, ITER):
 
     @cached_property
     def _data(self) -> xarray.Dataset:
-        """Return waveform dataset."""
+        """Return cached waveform dataset."""
         attrs_0d = [
             "li_3",
             "psi_axis",
@@ -815,6 +823,15 @@ class PulseDesign(Animate, Plot1D, Control, ITER):
                 profiles_2d[0].b_field_z = self.levelset.bz_
 
         return ids_entry.ids_data
+
+    def write_ids(self, **ids_attrs):
+        """Write pulse design data to equilibrium ids."""
+        if ids_attrs["occurrence"] is None:
+            ids_attrs["occurrence"] = Database(**ids_attrs).next_occurrence()
+        ids_entry = IdsEntry(
+            name="equilibrium", ids_data=self.equilibrium_ids, **ids_attrs
+        )
+        ids_entry.put_ids()
 
     def plot_waveform(self):
         """Extend plot_waveform to compare with benchmark."""

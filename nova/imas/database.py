@@ -479,7 +479,7 @@ class Database(IDS):
         """
         Initialize database class directly from an ids.
 
-        Set unknown pulse and run numbers to the ids hash
+        Set unknown pulse and run numbers to zero if unset
         Update name to match ids.__name__
         """
         if self._unset_attrs:
@@ -520,6 +520,7 @@ class Database(IDS):
 
     def get_ids(self, ids_path: Optional[str] = None, occurrence=None):
         """Return ids. Override IDS.get_ids. Extend name with ids_path."""
+        print("!!!", "get_ids")
         ids_name = "/".join(
             (item for item in [self.name, ids_path] if item is not None)
         ).split("/", 1)
@@ -968,9 +969,11 @@ class IdsData(Datafile, Database):
 
     def load_data(self, ids_class):
         """Load data from IdsClass and merge."""
+        print("%%%", self.pulse, self.run, self.ids)
         if self.pulse == 0 and self.run == 0 and self.ids is None:
             return
         try:
+            print("((((", self.ids)
             data = ids_class(**self.ids_attrs, ids=self.ids).data
         except NameError:  # name missmatch when loading from ids node
             return

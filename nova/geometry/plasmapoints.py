@@ -183,6 +183,7 @@ class ControlPoints(Plot):
     @property
     def control_points(self):
         """Return control points."""
+        print("***", [getattr(self, attr) for attr in self.point_attrs])
         return np.c_[
             [
                 point

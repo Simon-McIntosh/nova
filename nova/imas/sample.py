@@ -133,7 +133,7 @@ class Sample(Plot, Defeature, Select):
             "ip",
         ]
     )
-    samples: dict[str, xarray.Dataset] = field(default_factory=dict)
+    samples: dict[str, xarray.Dataset] = field(default_factory=dict, repr=False)
 
     def __post_init__(self):
         """Interpolate data onto uniform time-base and resample."""
@@ -415,9 +415,9 @@ if __name__ == "__main__":
     pulse, run = 135013, 2
 
     equilibrium = EquilibriumData(pulse, run)
-    sample = Sample(equilibrium.data, epsilon=0)
+    sample = Sample(equilibrium.data)
 
-    sample.write_ids(**equilibrium.ids_attrs | {"occurrence": 2})
+    sample.write_ids(**equilibrium.ids_attrs | {"occurrence": 1})
     sample.plot(
         [
             "minor_radius",

@@ -415,9 +415,9 @@ if __name__ == "__main__":
     pulse, run = 135013, 2
 
     equilibrium = EquilibriumData(pulse, run)
-    sample = Sample(equilibrium.data, epsilon=0)
+    sample = Sample(equilibrium.data)
 
-    sample.write_ids(**equilibrium.ids_attrs | {"occurrence": 2})
+    # sample.write_ids(**equilibrium.ids_attrs | {"occurrence": 2})
     sample.plot(
         [
             "minor_radius",
@@ -428,7 +428,7 @@ if __name__ == "__main__":
             "triangularity_outer",
         ]
     )
-    sample.savefig("sample")
+
     """
     sample.plot(
         [

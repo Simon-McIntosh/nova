@@ -1016,7 +1016,7 @@ class BenchmarkDesign(PulseDesign):
 
 
 if __name__ == "__main__":
-    design = AnimateDesign(
+    design = BenchmarkDesign(
         135013,
         2,
         "iter",
@@ -1024,11 +1024,12 @@ if __name__ == "__main__":
         square=False,
         strike=True,
         fps=5,
+        gamma=1e-12,
     )
     # design = Benchmark(135013, 2, "iter", 1)
 
     # design.levelset.solve(limit=0.1, index="coil")
-    design.itime = 0
+    design.itime = 5
 
     # design.plot_animation(False)
     # design.set_axes("triple")
@@ -1038,6 +1039,8 @@ if __name__ == "__main__":
     # design.add_animation("time", 10, ramp=100)
 
     design.make_frame(100)
+
+    design.plot_current()
 
     # design.time = design.scene(20)["time"]
     # design.plasma.lcfs.plot()

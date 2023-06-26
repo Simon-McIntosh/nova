@@ -4,39 +4,52 @@ import os
 from bokeh.io import curdoc
 from bokeh.layouts import column, row
 from bokeh.models import (
-    AutocompleteInput,
     Button,
     CDSView,
     IndexFilter,
-    NumericInput,
     RadioGroup,
     Select,
     Slider,
     Switch,
+    TabPanel,
+    Tabs,
 )
 from bokeh.plotting import figure
 
 from apps.pulsedesign import ids_attrs, Simulator
+from nova.imas.autocomplete import AutoComplete
 from nova.imas.database import Database
 
+select = AutoComplete(**ids_attrs)
 simulator = Simulator(strike=True, **ids_attrs)
-simulator.itime = 0  # initialize itime
-# simulator._cache_data()
-simulator.lock = False
 source = simulator.source
 
-pulse = NumericInput(value=ids_attrs["pulse"], title="pulse:", mode="int")
-run = NumericInput(value=ids_attrs["run"], title="run:")
-machine = AutocompleteInput(
-    value="iter", completions=["iter", "iter_md"], title="machine:"
+
+pulse = Select(
+    value=str(ids_attrs["pulse"]),
+    title="pulse:",
+    options=select.pulse_list,
 )
-occurrence = NumericInput(value=ids_attrs["occurrence"], title="occurrence:")
+run = Select(value=str(ids_attrs["run"]), title="run:", options=select.run_list)
+machine = Select(
+    value=ids_attrs["machine"], title="machine:", options=select.machine_list
+)
+occurrence = Select(
+    value=str(ids_attrs["occurrence"]),
+    title="occurrence:",
+    options=select.occurrence_list("equilibrium"),
+)
 user = Select(value="public", title="user:", options=["public", os.environ["USER"]])
+equilibrium_ids = column(row([pulse, run, occurrence, machine, user]), name="ids")
+equilibrium = TabPanel(child=equilibrium_ids, title="equilibrium")
+
+load = Button(label="load", button_type="success")
 write = Button(label="write", button_type="success")
 reset = Button(label="reset", button_type="success")
-ids = column(
-    row(pulse, run), occurrence, row(machine, user), row(write, reset), name="ids"
-)
+
+interface = column(row([load, write, reset]), name="interface")
+
+ids = Tabs(tabs=[equilibrium], name="ids")
 
 poloidal = figure(name="poloidal", match_aspect=True, height=650)
 poloidal.axis.visible = False
@@ -115,6 +128,7 @@ minimum_gap = Slider(
     end=0.5,
     step=0.025,
     disabled=simulator.limiter,
+    bar_color="gray",
 )
 elongation = Slider(
     title="elongation", value=simulator["elongation"], start=0.5, end=2.5, step=0.025
@@ -174,6 +188,52 @@ def update_disabled():
         minor_radius.disabled = True
 
 
+def update_user(attr, old, new):
+    """Update username."""
+    load.button_type = "primary"
+    select.user = new
+    machine.options = select.machine_list
+    if machine.options:
+        machine.value = machine.options[0]
+    else:
+        pulse.options = []
+        run.options = []
+        occurrence.options = []
+
+
+def update_machine(attr, old, new):
+    """Update machine input."""
+    load.button_type = "primary"
+    select.machine = new
+    pulse.options = select.pulse_list
+    if pulse.options:
+        pulse.value = pulse.options[0]
+
+
+def update_pulse(attr, old, new):
+    """Update equilibrium pulse input."""
+    load.button_type = "primary"
+    select.pulse = int(new)
+    run.options = select.run_list
+    if run.options:
+        run.value = run.options[0]
+
+
+def update_run(attr, old, new):
+    """Update equilibrium run input."""
+    load.button_type = "primary"
+    select.run = int(new)
+    occurrence.options = select.occurrence_list("equilibrium")
+    if occurrence.options:
+        occurrence.value = occurrence.options[0]
+
+
+def update_occurrence(attr, old, new):
+    """Update equilibrium occurrence input."""
+    select.occurrence = int(new)
+    load.button_type = "primary"
+
+
 def update_itime(attr, old, new):
     """Implement itime update."""
     if old == new:
@@ -221,14 +281,28 @@ def update_square(attr, old, new):
     simulator.update()
 
 
+def update_sliders():
+    """Update slider values."""
+    pulse.value = str(simulator.pulse)
+    run.value = str(simulator.run)
+    machine.value = simulator.machine
+    occurrence.value = str(simulator.occurrence)
+    user.value = simulator.user
+    update_itime("value", -1, simulator.itime)
+
+
+def load_ids(event):
+    """Load new ids."""
+    simulator.load_ids(**select.ids_attrs)
+    update_sliders()
+    load.button_type = "success"
+
+
 def reset_ids(event):
     """Implement ids reset."""
     simulator.reset()
-    pulse.value = ids_attrs["pulse"]
-    run.value = ids_attrs["run"]
-    machine.value = ids_attrs["machine"]
-    occurrence.value = ids_attrs["occurrence"]
-    user.value = ids_attrs["user"]
+    update_sliders()
+    load.button_type = "success"
 
 
 def write_ids(event):
@@ -244,6 +318,11 @@ def write_ids(event):
     )
 
 
+user.on_change("value", update_user)
+machine.on_change("value", update_machine)
+pulse.on_change("value", update_pulse)
+run.on_change("value", update_run)
+occurrence.on_change("value", update_occurrence)
 itime.on_change("value", update_itime)
 topology.on_change("active", update_plasmapoints("boundary_type"))
 minor_radius.on_change("value", update_plasmapoints("minor_radius"))
@@ -254,11 +333,13 @@ triangularity_lower.on_change("value", update_plasmapoints("triangularity_lower"
 triangularity_inner.on_change("value", update_plasmapoints("elongation_lower"))
 triangularity_outer.on_change("value", update_plasmapoints("elongation_upper"))
 square.on_change("active", update_square)
+load.on_click(load_ids)
 reset.on_click(reset_ids)
 write.on_click(write_ids)
 
 curdoc().add_root(sliders)
 curdoc().add_root(ids)
+curdoc().add_root(interface)
 curdoc().add_root(poloidal)
 curdoc().add_root(current)
 curdoc().add_root(vertical_force)

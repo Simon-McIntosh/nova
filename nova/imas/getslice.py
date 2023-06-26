@@ -120,6 +120,10 @@ class GetSlice:
     def time(self, time):
         self.itime = self.get_itime(time)
 
+    def clear_cache(self):
+        """Clear data cache."""
+        self._cache = {attr: self._cache.get(attr, None) for attr in self.persist}
+
     def update(self):
         """Clear cache following update to itime. Extend as required."""
-        self._cache = {attr: self._cache.get(attr, None) for attr in self.persist}
+        self.clear_cache()

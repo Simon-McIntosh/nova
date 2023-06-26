@@ -33,7 +33,6 @@ class ConstraintData:
 
     def __post_init__(self):
         """Initialize data and mask arrays."""
-        print("init array", self.point_number)
         self.array = np.zeros(self.point_number, float)
         self.mask = np.ones(self.point_number, bool)
 
@@ -45,7 +44,6 @@ class ConstraintData:
         """Update constraint."""
         if index is None:
             index = self.point_index
-        print(self.array)
         self.array[index] = data
         self.mask[index] = False
 
@@ -77,7 +75,6 @@ class Constraint(Plot):
     def __post_init__(self):
         """Initialize constraint data."""
         for attr in self.attrs:
-            print(attr, self.point_number, self.points)
             self.constraint[attr] = ConstraintData(self.point_number)
 
     def __len__(self):
@@ -491,7 +488,7 @@ class PulseDesign(Animate, Plot1D, Control, ITER):
     def __post_init__(self):
         """Cache input dataset."""
         super().__post_init__()
-        # self.cache()
+        self.cache()
 
     def update_constraints(self):
         """Extend ControlPoint.update_constraints to include boundary psi."""

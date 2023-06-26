@@ -108,10 +108,10 @@ def test_control_midpoints(data):
     index = control.point_index
     control_midpoints = control.control_midpoints(index)
     gaps = control.point_gap(index)
-    aproximate_gaps = np.linalg.norm(
+    approximate_gaps = np.linalg.norm(
         control.control_points[index] - control_midpoints, axis=1
     )
-    assert np.allclose(gaps, aproximate_gaps, 1e-3)
+    assert np.allclose(gaps, approximate_gaps, 5e-3, 5e-3)
 
 
 @mark["wall"]

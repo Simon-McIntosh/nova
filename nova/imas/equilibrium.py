@@ -325,7 +325,6 @@ class Parameter0D(Scenario):
         self.append("time", self.attrs_boundary, "boundary_separatrix")
         lcfs_data = self.extract_shape_parameters()
         for attr in self.attrs_boundary:
-            print(attr)
             path = f"boundary_separatrix.{attr}"
             if attr not in self.data and attr in lcfs_data:
                 self.data[attr] = "time", lcfs_data[attr]
@@ -698,9 +697,8 @@ if __name__ == "__main__":
     pulse, run = 135003, 5
     # pulse, run = 135007, 4
     pulse, run = 105028, 1
-    pulse, run = 135013, 2
 
-    pulse, run = 135013, 2
+    # pulse, run = 135013, 2
 
     # EquilibriumData(pulse, run, occurrence=0)._clear()
     equilibrium = EquilibriumData(pulse, run, occurrence=0)

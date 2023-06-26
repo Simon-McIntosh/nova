@@ -62,8 +62,8 @@ class IDS:
     home : os.Path, read-only
         Path to IMAS database home.
 
-    path : os.path, read-only
-        Path to IMAS database entry.
+    ids_path : os.path, read-only
+        Path to IDS database entry.
 
     Methods
     -------
@@ -111,16 +111,16 @@ class IDS:
         return os.path.join(os.path.expanduser(f"~{self.user}"), "public")
 
     @property
-    def _path(self):
+    def database_path(self):
         """Return top level of database path."""
         return os.path.join(self.home, "imasdb", self.machine, str(self.dd_version))
 
     @property
-    def path(self):
+    def ids_path(self):
         """Return path to database entry."""
         match self.backend:
             case str(backend) if backend == "hdf5":
-                return os.path.join(self._path, str(self.pulse), str(self.run))
+                return os.path.join(self.database_path, str(self.pulse), str(self.run))
             case _:
                 raise NotImplementedError(
                     f"not implemented for {self.backend}" " backend"
@@ -520,7 +520,6 @@ class Database(IDS):
 
     def get_ids(self, ids_path: Optional[str] = None, occurrence=None):
         """Return ids. Override IDS.get_ids. Extend name with ids_path."""
-        print("!!!", "get_ids")
         ids_name = "/".join(
             (item for item in [self.name, ids_path] if item is not None)
         ).split("/", 1)
@@ -579,7 +578,7 @@ class Database(IDS):
     @property
     def db_empty(self):
         """Return true if database entry does not exist."""
-        if os.path.isdir(self.path) and os.listdir(self.path):
+        if os.path.isdir(self.ids_path) and os.listdir(self.ids_path):
             return False
         return True
 
@@ -958,9 +957,6 @@ class IdsData(Datafile, Database):
 
     dirname: str = ".nova.imas"
 
-    # def assert_final(self, classname: str):
-    #    """
-
     def merge_data(self, data):
         """Merge external data, interpolating to existing dataset timebase."""
         self.data = self.data.merge(
@@ -969,12 +965,14 @@ class IdsData(Datafile, Database):
 
     def load_data(self, ids_class):
         """Load data from IdsClass and merge."""
-        print("%%%", self.pulse, self.run, self.ids)
         if self.pulse == 0 and self.run == 0 and self.ids is None:
             return
+        if self.ids is not None:
+            ids_attrs = {"ids": self.ids}
+        else:
+            ids_attrs = self.ids_attrs
         try:
-            print("((((", self.ids)
-            data = ids_class(**self.ids_attrs, ids=self.ids).data
+            data = ids_class(**ids_attrs).data
         except NameError:  # name missmatch when loading from ids node
             return
         if hasattr(self.data, "time") and hasattr(data, "time"):

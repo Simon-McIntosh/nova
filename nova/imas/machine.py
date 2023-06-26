@@ -1075,7 +1075,7 @@ class Machine(CoilSet, Geometry, CoilData):
     def solve_biot(self):
         """Solve biot instances."""
         if self.sloc["plasma"].sum() > 0:
-            boundary = self.geometry["wall"](**self.wall).segment(0)
+            boundary = self.geometry["wall"](**self.wall).boundary  # segment(0)
             self.plasma.solve(boundary)
         self.inductance.solve()
         self.field.solve()

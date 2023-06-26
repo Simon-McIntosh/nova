@@ -145,18 +145,8 @@ class ControlPoints(Plot):
     """Defined plasma separatrix control points from plasma parameters."""
 
     data: xarray.Dataset = field(default_factory=xarray.Dataset, repr=False)
-    gap: float = 0.2
     square: bool = False
     strike: bool = False
-
-    def __post_init__(self):
-        """Generate minimum gap and create copy of instance data."""
-        if hasattr(super(), "__post_init__"):
-            super().__post_init__()
-        try:
-            self.data["minimum_gap"] = self.gap * self.data["boundary_type"]
-        except KeyError:
-            pass
 
     @property
     def point_attrs(self):
@@ -183,7 +173,6 @@ class ControlPoints(Plot):
     @property
     def control_points(self):
         """Return control points."""
-        print("***", [getattr(self, attr) for attr in self.point_attrs])
         return np.c_[
             [
                 point
@@ -344,6 +333,33 @@ class ControlPoints(Plot):
 class PlasmaPoints(ControlPoints):
     """Fit plasma separatrix control points to first wall."""
 
+    def __post_init__(self):
+        """Generate minimum gap and create copy of instance data."""
+        if hasattr(super(), "__post_init__"):
+            super().__post_init__()
+        self.update_minimum_gap()
+
+    def update_minimum_gap(self):
+        """Update minimum gap."""
+        try:
+            if "time" in self.data:
+                self.data["minimum_gap"] = "time", self.minimum_gap()
+            else:
+                self.data["minimum_gap"] = np.min(self.point_gap(self.point_index))
+        except KeyError:
+            self.data["minimum_gap"] = 0
+
+    def minimum_gap(self):
+        """Return minimum wall normal point gap vector."""
+        gap = np.zeros_like(self.data["time"])
+        time_index = self.time_index
+        for i in range(self.data.dims["time"]):
+            self.time_index = i
+            self.clear_cache()
+            gap[i] = np.min(self.point_gap(self.point_index))
+        self.time_index = time_index
+        return gap
+
     @property
     def limiter(self) -> bool:
         """Return limiter flag."""
@@ -379,7 +395,13 @@ class PlasmaPoints(ControlPoints):
         attrs = self.point_attrs[point_index]
         if isinstance(attrs, str):
             attrs = [attrs]
-        return np.c_[[getattr(self, attr) for attr in attrs]]
+        return np.c_[
+            [
+                point
+                for attr in attrs
+                if not np.allclose(point := getattr(self, attr), (0, 0))
+            ]
+        ]
 
     def _midpoint_index(self, points):
         """Return pannel midpoint index closest to requested control points."""
@@ -487,7 +509,7 @@ if __name__ == "__main__":
         }
     )
 
-    plasmapoints = PlasmaPoints(data, gap=0.05, square=True, strike=True)
+    plasmapoints = PlasmaPoints(data, square=True, strike=True)
     plasmapoints.elongation
 
     sol = plasmapoints.fit()

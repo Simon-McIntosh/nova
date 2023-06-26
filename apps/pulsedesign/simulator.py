@@ -1,4 +1,5 @@
 """Manage interface from PulseDesign class to pulsedesign app."""
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 from functools import cached_property
 from typing import ClassVar
@@ -15,6 +16,7 @@ from nova.imas.sample import Sample
 class Simulator(PulseDesign):
     """Compose PulseDesign to interface with Bokeh data sources."""
 
+    lock: bool = field(init=False, default=False)
     sample: Sample = field(init=False)
     source: dict[str, ColumnDataSource] = field(
         init=False, repr=False, default_factory=dict
@@ -37,12 +39,9 @@ class Simulator(PulseDesign):
 
     def __post_init__(self):
         """Create Bokeh data sources."""
-        for attr in self.bokeh_attrs:
-            self.source[attr] = ColumnDataSource()
-        self.update_sample(self.ids_attrs)
-        # self.load_source_data()
+        self.load_ids(**self.ids_attrs)
 
-    def update_sample(self, attrs):
+    def load_ids(self, **ids_attrs):
         """Update sample dataset.
 
         Parameters
@@ -50,27 +49,28 @@ class Simulator(PulseDesign):
         attrs : Ids | bool | str
             Descriptor for geometry ids.
         """
-        ids_attrs = self.merge_ids_attrs(attrs, self.ids_attrs)
+        ids_attrs = self.merge_ids_attrs(ids_attrs, self.ids_attrs)
         equilibrium = EquilibriumData(**ids_attrs)  # load source equilibrium
         self.sample = Sample(equilibrium.data)  # extract key features
         self.ids = self.sample.equilibrium_ids()
+        for attr, value in ids_attrs.items():
+            setattr(self, attr, value)
+        with self.load_source():
+            super().__post_init__()
+        self.itime = 0
 
-        print(EquilibriumData(**ids_attrs, ids=self.ids).data)
-
-        """
-        print(len(self.ids.time_slice))
-        super().__post_init__()
-        print(self.data.data_vars)
-        print(self.data.time)
-        print(self.control_points)
-        # self.itime = 0
-        """
-
-    def load_ids(self):
-        """Switch data source to another ids."""
-
-    def load_source_data(self):
+    @contextmanager
+    def load_source(self):
         """Load source data and link to Bokeh column data sources."""
+        self.source = {}
+        self.lock = False
+        try:
+            del self._data
+        except AttributeError:
+            pass
+        yield
+        for attr in self.bokeh_attrs:
+            self.source[attr] = ColumnDataSource()
         self.source["coil"].data = self.coil_data
         self.source["plasma"].data = self.plasma_data
         self.source["wall"].data = self.wall_outline
@@ -128,4 +128,9 @@ class Simulator(PulseDesign):
 
 
 if __name__ == "__main__":
-    simulator = Simulator(135013, 2, "iter", 0)
+    pulse, run = 135013, 2
+    pulse, run = 135011, 7
+    pulse, run = 105028, 1
+
+    simulator = Simulator(pulse, run, "iter", 0)
+    simulator.plot()

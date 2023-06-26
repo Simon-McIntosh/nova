@@ -41,7 +41,7 @@ class netCDF(FilePath):
             os.remove(self.filepath)
 
     @property
-    def clear_cache(self):
+    def clear(self):
         """Clear cached datafile at self.filepath."""
         if os.path.isfile(self.filepath):
             remove = input(

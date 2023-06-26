@@ -139,6 +139,7 @@ class Sample(Plot, Defeature, Select):
         """Interpolate data onto uniform time-base and resample."""
         self["source"] = self.data
         self.clip("li_3", 0)
+        self.clip("ip", 1e-5)
         if self.dtime is not None:
             self.interpolate()
             self.resample()
@@ -307,7 +308,7 @@ class Sample(Plot, Defeature, Select):
                 "triangularity_lower",
             ]:
                 ids_entry[attr] = self.data[attr].data
-            # TOODO fix once IDS is updated with missing triangularities
+            # TODO fix IDS
             for tmp_attr, attr in zip(
                 ["elongation_upper", "elongation_lower"],
                 ["triangularity_outer", "triangularity_inner"],
@@ -350,7 +351,7 @@ class Sample(Plot, Defeature, Select):
                 "squareness_lower_outer",
             ]:
                 ids_entry[attr, :] = self.data[attr].data
-            # TOODO fix once IDS is updated with missing triangularities
+            # TODO fix IDS
             for tmp_attr, attr in zip(
                 ["elongation_upper", "elongation_lower"],
                 ["triangularity_outer", "triangularity_inner"],
@@ -413,6 +414,7 @@ class Sample(Plot, Defeature, Select):
 
 if __name__ == "__main__":
     pulse, run = 135013, 2
+    pulse, run = 105028, 1
 
     equilibrium = EquilibriumData(pulse, run)
     sample = Sample(equilibrium.data)

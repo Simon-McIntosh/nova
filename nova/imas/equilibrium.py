@@ -313,6 +313,9 @@ class Parameter0D(Scenario):
                     lcfs_data[attr][itime] = getattr(lcfs, attr)
             except ValueError:
                 continue
+        # TODO fix IDS
+        lcfs_data["elongation_upper"] = lcfs_data["triangularity_outer"]
+        lcfs_data["elongation_lower"] = lcfs_data["triangularity_inner"]
         return lcfs_data
 
     def build_boundary_shape(self):
@@ -322,6 +325,7 @@ class Parameter0D(Scenario):
         self.append("time", self.attrs_boundary, "boundary_separatrix")
         lcfs_data = self.extract_shape_parameters()
         for attr in self.attrs_boundary:
+            print(attr)
             path = f"boundary_separatrix.{attr}"
             if attr not in self.data and attr in lcfs_data:
                 self.data[attr] = "time", lcfs_data[attr]

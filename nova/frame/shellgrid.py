@@ -71,7 +71,7 @@ class ShellCoords(Plot):
     def plot_coordinates(self, axes=None):
         """Plot shell coordinates."""
         self.set_axes("2d", axes=axes)
-        self.asxes.plot(self.x_coordinate, self.z_coordinate, ".-", label="coords")
+        self.axes.plot(self.x_coordinate, self.z_coordinate, ".-", label="coords")
 
 
 @dataclass

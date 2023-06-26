@@ -1,8 +1,36 @@
+from itertools import product
+
 import matplotlib.pylab
 import numpy as np
 import pytest
+import xarray
 
 from nova.imas.pulsedesign import Constraint, Control
+from nova.imas.utilities import mark
+
+
+@pytest.fixture
+def data():
+    data = xarray.Dataset()
+    data["time"] = [0]
+    data["point"] = ["r", "z"]
+    data["index"] = [0, 1]
+
+    data["boundary_type"] = "time", [1]
+    data["geometric_axis"] = ("time", "point"), [[5.8, 0.3]]
+    data["x_point"] = ("time", "point"), [[5, -2.5]]
+    data["minor_radius"] = "time", [1.0]
+    data["elongation_upper"] = "time", [0.1]
+    data["elongation_lower"] = "time", [0.1]
+    data["triangularity"] = "time", [0.4]
+    data["elongation"] = "time", [2.1]
+    data["squareness_upper_outer"] = "time", [0.1]
+    data["squareness_upper_inner"] = "time", [0.1]
+    data["squareness_lower_inner"] = "time", [0.1]
+    data["squareness_lower_outer"] = "time", [0.1]
+
+    data["strike_point"] = ("time", "point", "index"), [[[4.8, -3.5], [5.5, -3.5]]]
+    return data.copy(deep=True)
 
 
 def test_constraint_point_index():
@@ -55,16 +83,54 @@ def test_point_index_error():
         constraint.radial_field = 3.3, [3]
 
 
-def test_pds_control():
-    control = Control()
+@mark["wall"]
+@pytest.mark.parametrize("strike,square", product([True, False], [True, False]))
+def test_control_plot(data, strike, square):
+    control = Control(data=data, strike=strike, square=square)
+    control.itime = 0
+    with matplotlib.pylab.ioff():
+        control.plot()
 
-    control.data
 
-    # control.plot()
+@mark["wall"]
+def test_control_normal(data):
+    control = Control(data=data, strike=True, square=True)
+    control.itime = 0
+    assert np.allclose(np.linalg.norm(control.normal, axis=1), 1)
 
 
-# test_pds_control()
-# assert False
+@mark["wall"]
+def test_control_midpoints(data):
+    control = Control(data=data, strike=True, square=True)
+    data["boundary_type"][0] = 1
+    control.itime = 0
+    control.fit()
+    index = control.point_index
+    control_midpoints = control.control_midpoints(index)
+    gaps = control.point_gap(index)
+    aproximate_gaps = np.linalg.norm(
+        control.control_points[index] - control_midpoints, axis=1
+    )
+    assert np.allclose(gaps, aproximate_gaps, 1e-3)
+
+
+@mark["wall"]
+@pytest.mark.parametrize(
+    "strike,square,boundary_type", product([True, False], [True, False], [0, 1])
+)
+def test_control_fit(data, strike, square, boundary_type):
+    data["boundary_type"][0] = boundary_type
+    control = Control(data=data)
+    control.itime = 0
+    control.fit()
+    index = control.point_index
+    gaps = control.point_gap(index)
+    if boundary_type == 0:  # limiter
+        mingap = 0
+    else:
+        mingap = control["minimum_gap"]
+    assert np.all([gap >= mingap - 1e-8 for gap in gaps])
+
 
 if __name__ == "__main__":
     pytest.main([__file__])

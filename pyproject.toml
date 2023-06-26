@@ -111,7 +111,6 @@ numba = [
   "numba"
 ]
 optimize = [
-  "nlopt", 
   "pylops",
   "scikit-learn",
 ]

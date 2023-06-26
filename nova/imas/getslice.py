@@ -1,6 +1,7 @@
 """Extract time slices from equilibrium IDS."""
 from dataclasses import dataclass, field
 from functools import cached_property
+from typing import ClassVar
 
 import numpy as np
 import xarray
@@ -14,9 +15,12 @@ class GetSlice:
     data: xarray.Dataset = field(default_factory=xarray.Dataset, repr=False)
     _cache: dict = field(init=False, repr=False, default_factory=dict)
 
+    persist: ClassVar[list[str]] = ["data"]
+
     def __post_init__(self):
         """Set time index."""
-        super().__post_init__()
+        if hasattr(super(), "__post_init__"):
+            super().__post_init__()
         self.itime = self.time_index
 
     def get(self, key: str):
@@ -54,7 +58,7 @@ class GetSlice:
             case str():
                 return key
             case _:
-                raise ValueError(f"invalid key {key}")
+                raise TypeError(f"invalid key {key}")
 
     @property
     def itime(self):
@@ -67,18 +71,33 @@ class GetSlice:
     def itime(self, time_index: int | None):
         if time_index is None:
             return
-        if self._cache.get("data", None) is None:
-            self.cache_data()
         self.time_index = time_index
         self.update()
 
-    def cache_data(self):
-        """Update data cache."""
-        self._cache["data"] = self.data.copy(deep=True)
+    @staticmethod
+    def copy(data):
+        """Return copy of instance attribute."""
+        try:
+            return data.copy(deep=True)  # Dataset
+        except TypeError:
+            return data.copy()  # dict | np.ndarray
+        except AttributeError:  # int | float | tuple
+            return data
 
-    def reset_data(self):
+    def cache(self):
+        """Update data cache."""
+        for attr in self.persist:
+            self._cache[attr] = self.copy(getattr(self, attr))
+
+    def reset(self):
         """Reset data with cached copy."""
-        self.data = self._cache["data"].copy(deep=True)
+        try:
+            for attr in self.persist:
+                setattr(self, attr, self.copy(self._cache[attr]))
+        except KeyError as error:
+            raise KeyError(
+                "data cache not found - call cache_data to store copy of data in cache."
+            ) from error
         self.update()
 
     @cached_property
@@ -103,4 +122,4 @@ class GetSlice:
 
     def update(self):
         """Clear cache following update to itime. Extend as required."""
-        self._cache = {"data": self._cache.get("data", None)}
+        self._cache = {attr: self._cache.get(attr, None) for attr in self.persist}

@@ -166,11 +166,24 @@ class ControlPoints(Plot):
             attrs.extend(["upper_outer", "upper_inner", "lower_inner", "lower_outer"])
         if self.strike:
             attrs.extend(["inner_strike", "outer_strike"])
-        return attrs
+        return np.array(attrs)
+
+    @property
+    def point_index(self) -> np.ndarray:
+        """Return constraint point index excluding strike points."""
+        return np.array(
+            [
+                i
+                for i, attr in enumerate(self.point_attrs)
+                if attr.split("_")[-1] != "strike"
+            ],
+            dtype=int,
+        )
 
     @property
     def control_points(self):
         """Return control points."""
+        print("***", [getattr(self, attr) for attr in self.point_attrs])
         return np.c_[
             [
                 point
@@ -339,8 +352,8 @@ class PlasmaPoints(ControlPoints):
     @cached_property
     def firstwall(self):
         """Return firstwall contour (main chamber)."""
-        wall = Curve(Wall().segment(index=0), pad_width=0)
-        return wall.boundary(np.linspace(0, 1, 250))
+        wall = Curve(Wall().boundary, pad_width=0, kind="linear")
+        return wall.boundary(np.linspace(0, 1, 1000))
 
     @cached_property
     def midpoint(self):
@@ -353,6 +366,7 @@ class PlasmaPoints(ControlPoints):
         tangent = np.c_[
             -np.diff(self.firstwall, axis=0), np.zeros(len(self.firstwall) - 1)
         ]
+        tangent /= np.linalg.norm(tangent, axis=1)[:, np.newaxis]
         return np.cross([0, 0, 1], tangent)[:, :2]
 
     @cached_property
@@ -360,23 +374,36 @@ class PlasmaPoints(ControlPoints):
         """Return kd_tree instance for fast nearest neighbour lookup."""
         return KDTree(self.midpoint, np.inf)
 
-    def point_gap(self, point_index=slice(None)):
-        """Return vector of pannel normal wall gaps."""
+    def _control_points(self, point_index: slice | int = slice(None)):
+        """Return indexed control points."""
         attrs = self.point_attrs[point_index]
         if isinstance(attrs, str):
             attrs = [attrs]
-        points = np.c_[[getattr(self, attr) for attr in attrs]]
-        index = np.array([self.kd_tree.query(point)[1] for point in points])
+        return np.c_[[getattr(self, attr) for attr in attrs]]
+
+    def _midpoint_index(self, points):
+        """Return pannel midpoint index closest to requested control points."""
+        return np.array([self.kd_tree.query(point)[1] for point in points])
+
+    def control_midpoints(self, point_index: slice | int = slice(None)):
+        """Return wall pannel midpoints closest to requested control points."""
+        points = self._control_points(point_index)
+        return self.midpoint[self._midpoint_index(points)]
+
+    def point_gap(self, point_index: slice | int = slice(None)):
+        """Return vector of pannel normal wall gaps."""
+        points = self._control_points(point_index)
+        index = self._midpoint_index(points)
         vector = points - self.midpoint[index]
-        gap = np.einsum("ij,ij->i", self.normal[index], vector)
-        if self["boundary_type"] == 1:
-            gap -= self["minimum_gap"]
-        return gap
+        return np.einsum("ij,ij->i", self.normal[index], vector)
 
     def _update_point_gap(self, radii, minor_radius, point_index):
         """Return vector of pannel normal wall gaps."""
         self._update_radii(radii, minor_radius)
-        return self.point_gap(point_index)
+        gap = self.point_gap(point_index)
+        if self["boundary_type"] == 1:
+            return gap - self["minimum_gap"]
+        return gap
 
     def _update_radii(self, radii, minor_radius):
         """Update major and minor radii."""
@@ -400,12 +427,9 @@ class PlasmaPoints(ControlPoints):
         firstwall_limit = (np.min(self.firstwall[:, 0]), np.max(self.firstwall[:, 0]))
 
         bounds = [
-            (0, firstwall_limit[1] - firstwall_limit[0]),
+            (0, 0.5 * (firstwall_limit[1] - firstwall_limit[0])),
             (firstwall_limit[0], firstwall_limit[1]),
         ]
-        point_number = len(self.control_points)
-        if not self.limiter and self.strike:
-            point_number -= 2
         constraints = [
             {
                 "type": "ineq",
@@ -415,7 +439,7 @@ class PlasmaPoints(ControlPoints):
                     index,
                 ),
             }
-            for index in range(point_number)
+            for index in self.point_index
         ]
         sol = minimize(
             self._update_radii,
@@ -425,9 +449,10 @@ class PlasmaPoints(ControlPoints):
             constraints=constraints,
             method="SLSQP",
         )
-        if sol.success is False:
+        if not sol.success:
             raise ValueError(f"minimizer failed to converge {sol}")
         self._update_radii(sol.x, minor_radius)
+        return sol
 
     def plot(self, index=None, axes=None, **kwargs):
         """Plot control points and first wall."""
@@ -442,24 +467,30 @@ class PlasmaPoints(ControlPoints):
 if __name__ == "__main__":
     data = xarray.Dataset(
         {
-            "geometric_axis": ("point", [6, 0]),
-            "minor_radius": 3.75,
+            "geometric_axis": ("point", [6.0, 0.0]),
+            "minor_radius": 1.75,
             "elongation": 2.0,
             "triangularity": 0.2,
             "triangularity_upper": 0.2,
             "triangularity_lower": 0.5,
             "elongation_upper": 0.1,  # triangularity outer
             "elongation_lower": 0.5,  # triangularity_inner
+            "squareness_upper_outer": 0.1,
+            "squareness_upper_inner": 0.1,
+            "squareness_lower_inner": 0.1,
+            "squareness_lower_outer": 0.1,
             "squareness": 1,
             "minimum_gap": 0.2,
-            "boundary_type": 0,
+            "boundary_type": 1,
             "x_point": ("point", [5.1, -3.4]),
             "strike_point": (("index", "point"), [[4.2, -3.8], [5.6, -4.4]]),
         }
     )
 
-    plasmapoints = PlasmaPoints(data)
+    plasmapoints = PlasmaPoints(data, gap=0.05, square=True, strike=True)
     plasmapoints.elongation
 
-    plasmapoints.fit()
+    sol = plasmapoints.fit()
+    print(plasmapoints.control_points)
+    print(np.array([plasmapoints.point_gap(i) for i in plasmapoints.point_index]))
     plasmapoints.plot()

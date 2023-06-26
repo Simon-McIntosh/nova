@@ -133,7 +133,7 @@ class Sample(Plot, Defeature, Select):
             "ip",
         ]
     )
-    samples: dict[str, xarray.Dataset] = field(default_factory=dict)
+    samples: dict[str, xarray.Dataset] = field(default_factory=dict, repr=False)
 
     def __post_init__(self):
         """Interpolate data onto uniform time-base and resample."""

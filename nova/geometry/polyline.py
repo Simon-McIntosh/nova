@@ -107,10 +107,7 @@ class Arc(Plot):
     @property
     def match(self):
         """Return status of normalized fit residual."""
-        return (
-            self.error / self.length < self.eps
-            and self.arclength / self.radius <= 3 / 2 * np.pi
-        )
+        return self.error / self.length < self.eps
 
     def sample(self, point_number=50):
         """Return sampled polyline."""
@@ -253,7 +250,7 @@ class PolyLine(Plot):
             if len(segment) == 3:  # arc
                 Arc(segment).plot()
                 continue
-            self.axes.plot(segment[:, 1], segment[:, 2], "k")
+            self.axes.plot(segment[:, 1], segment[:, 2], "k.")
 
 
 if __name__ == "__main__":

@@ -6,13 +6,16 @@ from typing import ClassVar
 from bokeh.models import ColumnDataSource
 import numpy as np
 
+from nova.imas.equilibrium import EquilibriumData
 from nova.imas.pulsedesign import PulseDesign
+from nova.imas.sample import Sample
 
 
 @dataclass
 class Simulator(PulseDesign):
     """Compose PulseDesign to interface with Bokeh data sources."""
 
+    sample: Sample = field(init=False)
     source: dict[str, ColumnDataSource] = field(
         init=False, repr=False, default_factory=dict
     )
@@ -30,13 +33,44 @@ class Simulator(PulseDesign):
         "vertical_force",
         "field",
     ]
+    persist: ClassVar[list[str]] = ["data", "_data"]
 
     def __post_init__(self):
         """Create Bokeh data sources."""
-        super().__post_init__()
-        _ = self._data
         for attr in self.bokeh_attrs:
             self.source[attr] = ColumnDataSource()
+        self.update_sample(self.ids_attrs)
+        # self.load_source_data()
+
+    def update_sample(self, attrs):
+        """Update sample dataset.
+
+        Parameters
+        ----------
+        attrs : Ids | bool | str
+            Descriptor for geometry ids.
+        """
+        ids_attrs = self.merge_ids_attrs(attrs, self.ids_attrs)
+        equilibrium = EquilibriumData(**ids_attrs)  # load source equilibrium
+        self.sample = Sample(equilibrium.data)  # extract key features
+        self.ids = self.sample.equilibrium_ids()
+
+        print(EquilibriumData(**ids_attrs, ids=self.ids).data)
+
+        """
+        print(len(self.ids.time_slice))
+        super().__post_init__()
+        print(self.data.data_vars)
+        print(self.data.time)
+        print(self.control_points)
+        # self.itime = 0
+        """
+
+    def load_ids(self):
+        """Switch data source to another ids."""
+
+    def load_source_data(self):
+        """Load source data and link to Bokeh column data sources."""
         self.source["coil"].data = self.coil_data
         self.source["plasma"].data = self.plasma_data
         self.source["wall"].data = self.wall_outline
@@ -94,4 +128,4 @@ class Simulator(PulseDesign):
 
 
 if __name__ == "__main__":
-    simulator = Simulator(135013, 2, "iter", 1)
+    simulator = Simulator(135013, 2, "iter", 0)

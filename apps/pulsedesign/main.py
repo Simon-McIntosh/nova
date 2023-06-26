@@ -2,9 +2,10 @@
 import os
 
 from bokeh.io import curdoc
-from bokeh.layouts import column
+from bokeh.layouts import column, row
 from bokeh.models import (
     AutocompleteInput,
+    Button,
     CDSView,
     IndexFilter,
     NumericInput,
@@ -12,31 +13,29 @@ from bokeh.models import (
     Select,
     Slider,
     Switch,
-    TextInput,
 )
 from bokeh.plotting import figure
 
 from apps.pulsedesign import ids_attrs, Simulator
-from nova.imas.equilibrium import EquilibriumData
-from nova.imas.sample import Sample
+from nova.imas.database import Database
 
-equilibrium = EquilibriumData(**ids_attrs)  # load source equilibrium
-sample = Sample(equilibrium.data)  # extract key features
-simulator = Simulator(
-    ids=sample.equilibrium_ids(), strike=True
-)  # pass to simulator instance
+simulator = Simulator(strike=True, **ids_attrs)
 simulator.itime = 0  # initialize itime
+# simulator._cache_data()
 simulator.lock = False
 source = simulator.source
 
-run = TextInput(value="", title="Run:", width=100)
-occurrence = TextInput(value="", title="Occurrence:", width=100)
+pulse = NumericInput(value=ids_attrs["pulse"], title="pulse:", mode="int")
+run = NumericInput(value=ids_attrs["run"], title="run:")
+machine = AutocompleteInput(
+    value="iter", completions=["iter", "iter_md"], title="machine:"
+)
+occurrence = NumericInput(value=ids_attrs["occurrence"], title="occurrence:")
+user = Select(value="public", title="user:", options=["public", os.environ["USER"]])
+write = Button(label="write", button_type="success")
+reset = Button(label="reset", button_type="success")
 ids = column(
-    NumericInput(value=ids_attrs["pulse"], title="pulse:", mode="int"),
-    NumericInput(value=ids_attrs["run"], title="run:"),
-    AutocompleteInput(value="iter", completions=["iter", "iter_md"]),
-    Select(value="public", title="user:", options=["public", os.environ["USER"]]),
-    name="ids",
+    row(pulse, run), occurrence, row(machine, user), row(write, reset), name="ids"
 )
 
 poloidal = figure(name="poloidal", match_aspect=True, height=650)
@@ -222,6 +221,29 @@ def update_square(attr, old, new):
     simulator.update()
 
 
+def reset_ids(event):
+    """Implement ids reset."""
+    simulator.reset()
+    pulse.value = ids_attrs["pulse"]
+    run.value = ids_attrs["run"]
+    machine.value = ids_attrs["machine"]
+    occurrence.value = ids_attrs["occurrence"]
+    user.value = ids_attrs["user"]
+
+
+def write_ids(event):
+    """Implement ids reset."""
+    if occurrence.value <= simulator.occurrence:
+        occurrence.value = Database(**ids_attrs).next_occurrence()
+    simulator.write_ids(
+        pulse=pulse.value,
+        run=run.value,
+        machine=machine.value,
+        occurrence=occurrence.value,
+        user=user.value,
+    )
+
+
 itime.on_change("value", update_itime)
 topology.on_change("active", update_plasmapoints("boundary_type"))
 minor_radius.on_change("value", update_plasmapoints("minor_radius"))
@@ -232,8 +254,11 @@ triangularity_lower.on_change("value", update_plasmapoints("triangularity_lower"
 triangularity_inner.on_change("value", update_plasmapoints("elongation_lower"))
 triangularity_outer.on_change("value", update_plasmapoints("elongation_upper"))
 square.on_change("active", update_square)
+reset.on_click(reset_ids)
+write.on_click(write_ids)
 
 curdoc().add_root(sliders)
+curdoc().add_root(ids)
 curdoc().add_root(poloidal)
 curdoc().add_root(current)
 curdoc().add_root(vertical_force)

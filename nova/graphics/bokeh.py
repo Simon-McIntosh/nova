@@ -43,8 +43,6 @@ class IdsInput(AutoComplete):
         self._setattr(attr, value)
         if self.text:
             return
-        print(attr, value, getattr(self, f"{attr}_list"))
-        print(str(value) not in (valid := getattr(self, f"{attr}_list")))
         if str(value) not in (valid := getattr(self, f"{attr}_list")):
             raise ValueError(f"{value} is not a valid selection {valid}")
         if (child := self._child(attr)) is None:

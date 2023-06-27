@@ -825,9 +825,8 @@ class PulseDesign(Animate, Plot1D, Control, ITER):
         """Write pulse design data to equilibrium ids."""
         if ids_attrs["occurrence"] is None:
             ids_attrs["occurrence"] = Database(**ids_attrs).next_occurrence()
-        ids_entry = IdsEntry(
-            name="equilibrium", ids_data=self.equilibrium_ids, **ids_attrs
-        )
+        ids_attrs |= {"name": "equilibrium"}
+        ids_entry = IdsEntry(ids_data=self.equilibrium_ids, **ids_attrs)
         ids_entry.put_ids()
 
     def plot_waveform(self):
@@ -841,7 +840,7 @@ class PulseDesign(Animate, Plot1D, Control, ITER):
 
     def make_frame(self, time):
         """Make animation frame."""
-        self.reset_data()
+        self.reset()
         scene = self.scene(time)
         self.time = scene.pop("time", self.time)
         if len(scene) > 0:
@@ -895,11 +894,11 @@ class AnimateDesign(PulseDesign):
     """Extend pulse design to include control-point annimation."""
 
     sequence: tuple[str | tuple[int]] = (
-        (2, 0),
+        (6, 10),
         "triangularity",
         (6, 50),
         "box",
-        (6, -50),
+        (6, -60),
     )
 
     def __post_init__(self):
@@ -926,7 +925,7 @@ class AnimateDesign(PulseDesign):
         self.add_animation("elongation_lower", 2, amplitude=0.1)  # TODO IDS fix
         self.add_animation("triangularity_upper", 2, amplitude=0.1)
         self.add_animation("elongation_upper", 2, amplitude=0.1)  # TODO IDS fix
-        self.add_animation("triangularity_lower", 2, amplitude=0.1)
+        self.add_animation("triangularity_lower", 2, amplitude=0.02)
 
     def animate_box(self):
         """Add bounding box animation."""
@@ -1030,7 +1029,7 @@ class BenchmarkDesign(PulseDesign):
 
 
 if __name__ == "__main__":
-    design = BenchmarkDesign(
+    design = AnimateDesign(
         135013,
         2,
         "iter",
@@ -1043,18 +1042,18 @@ if __name__ == "__main__":
     # design = Benchmark(135013, 2, "iter", 1)
 
     # design.levelset.solve(limit=0.1, index="coil")
-    design.itime = 5
+    design.time = 10
 
     # design.plot_animation(False)
     # design.set_axes("triple")
 
     # design.set_axes("2d", aspect=1.5)
 
-    # design.add_animation("time", 10, ramp=100)
+    #
 
-    design.make_frame(100)
+    # design.make_frame(100)
 
-    design.plot_current()
+    # design.plot_current()
 
     # design.time = design.scene(20)["time"]
     # design.plasma.lcfs.plot()
@@ -1063,7 +1062,7 @@ if __name__ == "__main__":
 
     # design.make_frame(84 / 5)
 
-    # design.animate()
+    design.animate()
 
     """
     design.itime = 5

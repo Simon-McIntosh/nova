@@ -17,6 +17,7 @@ class Simulator(PulseDesign):
     """Compose PulseDesign to interface with Bokeh data sources."""
 
     lock: bool = field(init=False, default=False)
+    init: bool = field(init=False, default=False)
     sample: Sample = field(init=False)
     source: dict[str, ColumnDataSource] = field(
         init=False, repr=False, default_factory=dict
@@ -34,11 +35,16 @@ class Simulator(PulseDesign):
         "current",
         "vertical_force",
         "field",
+        "reference_current",
+        "reference_vertical_force",
+        "reference_field",
     ]
     persist: ClassVar[list[str]] = ["data", "_data"]
 
     def __post_init__(self):
         """Create Bokeh data sources."""
+        for attr in self.bokeh_attrs:
+            self.source[attr] = ColumnDataSource()
         self.load_ids(**self.ids_attrs)
 
     def load_ids(self, **ids_attrs):
@@ -62,15 +68,14 @@ class Simulator(PulseDesign):
     @contextmanager
     def load_source(self):
         """Load source data and link to Bokeh column data sources."""
-        self.source = {}
         self.lock = False
+        self.init = True
         try:
             del self._data
         except AttributeError:
             pass
         yield
-        for attr in self.bokeh_attrs:
-            self.source[attr] = ColumnDataSource()
+        self.init = False
         self.source["coil"].data = self.coil_data
         self.source["plasma"].data = self.plasma_data
         self.source["wall"].data = self.wall_outline
@@ -84,15 +89,26 @@ class Simulator(PulseDesign):
             1e-6 * self._data.vertical_force.to_pandas()
         )
         self.source["field"].data = self._data.field.to_pandas()
+        reference = self._cache["_data"]
+        self.source["reference_current"].data = 1e-3 * reference.current.to_pandas()
+        self.source["reference_vertical_force"].data = (
+            1e-6 * reference.vertical_force.to_pandas()
+        )
+        self.source["reference_field"].data = reference.field.to_pandas()
 
     def update(self):
         """Extend PulseDesign update to include bokeh datasources."""
         super().update()
-        if not self.source:
+        if self.init:
             return
         self.source["points"].data = dict(zip("xz", self.control_points.T))
         self.source["levelset"].data = self.levelset.contour()
         self.source["x_points"].data = dict(zip("xz", self.levelset.x_points.T))
+        self.source["current"].data = 1e-3 * self._data.current.to_pandas()
+        self.source["vertical_force"].data = (
+            1e-6 * self._data.vertical_force.to_pandas()
+        )
+        self.source["field"].data = self._data.field.to_pandas()
         self.source["profiles"].patch(
             {
                 "dpressure_dpsi": [(slice(None), self["dpressure_dpsi"])],
@@ -104,11 +120,6 @@ class Simulator(PulseDesign):
                 "ionize": [(slice(None), 0.5 * self.plasma.ionize.astype(float))],
             }
         )
-        self.source["current"].data = 1e-3 * self._data.current.to_pandas()
-        self.source["vertical_force"].data = (
-            1e-6 * self._data.vertical_force.to_pandas()
-        )
-        self.source["field"].data = self._data.field.to_pandas()
 
     @cached_property
     def wall_outline(self):

@@ -468,10 +468,8 @@ class Database(IDS):
     def _unset_attrs(self) -> bool:
         """Return True if any required input attributes are unset."""
         return (
-            self.pulse == 0
-            or self.pulse is None
-            or self.run == 0
-            or self.run is None
+            (self.pulse == 0 or self.pulse is None)
+            or (self.run == 0 or self.run is None)
             or self.name is None
         )
 
@@ -975,10 +973,13 @@ class IdsData(Datafile, Database):
             data = ids_class(**ids_attrs).data
         except NameError:  # name missmatch when loading from ids node
             return
+        if self.ids is not None:  # override when using ids input
+            self.data = data
+            return
         if hasattr(self.data, "time") and hasattr(data, "time"):
             data = data.interp({"time": self.data.time})
-        self.data = self.data.merge(
-            data, compat="override", combine_attrs="drop_conflicts"
+        self.data = data.merge(
+            self.data, compat="override", combine_attrs="drop_conflicts"
         )
 
     def build(self):

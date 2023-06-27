@@ -5,6 +5,8 @@ attrs:
     min_border: 0
     sizing_mode: 'stretch_width'
     toolbar_location: !!null
+  Slider:
+    sizing_mode: 'stretch_width'
   Grid:
     grid_line_color: !!null
   Axis:

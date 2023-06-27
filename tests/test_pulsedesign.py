@@ -1,3 +1,4 @@
+import matplotlib.pylab
 import numpy as np
 import pytest
 
@@ -106,13 +107,22 @@ def test_pf_active_ids_input_cache(ids):
     )
 
 
+@mark_imas
+def test_make_frame(ids):
+    design = PulseDesign(ids=ids)
+    design.itime = 0
+    design.add_animation("time", 10, ramp=100)
+    with matplotlib.pylab.ioff():
+        design.make_frame(20)
+
+
 @mark["equilibrium_pds"]
 def test_sample_pds():
     equilibrium = EquilibriumData(**ids_attrs["equilibrium_pds"])
     sample = Sample(equilibrium.data)
     design = PulseDesign(ids=sample.equilibrium_ids(), strike=True)
     design.itime = 0
-    # TODO finish test
+    assert design.data.dims["time"] == 15
 
 
 if __name__ == "__main__":

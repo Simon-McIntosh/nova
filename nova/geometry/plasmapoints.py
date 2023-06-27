@@ -128,8 +128,6 @@ class Points:
         """Manage mean attribute."""
         if self.complete:
             return self._attr_mean()
-            # self[self.group] = self._attr_mean()
-            # return self[self.group]
         try:
             return self[self.group]
         except KeyError:
@@ -261,7 +259,7 @@ class ControlPoints(Plot):
 
     @property
     def lower(self):
-        """Return upper control point."""
+        """Return lower control point."""
         return self.axis - self.minor_radius * np.array(
             [self.triangularity.lower, self.elongation]
         )
@@ -435,8 +433,9 @@ class PlasmaPoints(ControlPoints):
             case 0:  # limiter
                 return self.inner[0] + abs(radii[0] - minor_radius)
             case 1:  # single null
-                x_point_delta = self["x_point"] - self.lower
-                self["geometric_axis"] += x_point_delta
+                if not np.allclose(self["x_point"], (0, 0)):
+                    x_point_delta = self["x_point"] - self.lower
+                    self["geometric_axis"] += x_point_delta
                 return -radii[0]
             case _:
                 raise NotImplementedError(

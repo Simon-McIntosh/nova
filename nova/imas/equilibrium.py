@@ -244,7 +244,7 @@ class Parameter0D(Scenario):
         x_point = self.data.x_point[itime].data
         limiter = np.allclose(x_point, (0, 0))
         if limiter:  # limiter
-            step = np.mean(segment) + 3 * np.std(segment)
+            step = 2 * np.mean(segment)
             index = np.arange(len(segment))[segment > step]
             if len(index) > 0:
                 loops = np.split(boundary, index)
@@ -698,11 +698,11 @@ if __name__ == "__main__":
     # pulse, run = 135007, 4
     pulse, run = 105028, 1
 
-    # pulse, run = 135013, 2
+    pulse, run = 135013, 2
 
-    # EquilibriumData(pulse, run, occurrence=0)._clear()
-    equilibrium = EquilibriumData(pulse, run, occurrence=0)
+    EquilibriumData(pulse, run, occurrence=16)._clear()
+    equilibrium = EquilibriumData(pulse, run, occurrence=16)
 
-    equilibrium.time = 100
+    equilibrium.itime = -1
     equilibrium.plot_2d("psi", mask=0)
     equilibrium.plot_boundary()

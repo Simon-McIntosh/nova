@@ -492,7 +492,7 @@ class PulseDesign(Animate, Plot1D, Control, ITER):
 
     def update_constraints(self):
         """Extend ControlPoint.update_constraints to include boundary psi."""
-        super().update_constraints(-self["psi_boundary"])  # COCOS11
+        super().update_constraints(-self["psi_boundary"])  # COCOS
 
     def update(self):
         """Extend itime update."""
@@ -611,7 +611,7 @@ class PulseDesign(Animate, Plot1D, Control, ITER):
         self.plasma.separatrix = {
             "ellipse": np.r_[
                 self["geometric_axis"],
-                2 * self["minor_radius"] * np.array([1, self["elongation"]]),
+                1 * self["minor_radius"] * np.array([1, self["elongation"]]),
             ]
         }
         for _ in range(3):
@@ -693,6 +693,13 @@ class PulseDesign(Animate, Plot1D, Control, ITER):
         data["coil_name"] = self.coil_name
         data["field_coil_name"] = self.field.coil_name
 
+        data["psi2d"] = xarray.DataArray(
+            0.0, coords=[data.time, data.r, data.z], dims=["time", "r", "z"]
+        )
+        if self.tplasma == "rectangle":
+            data["br2d"] = xarray.zeros_like(data["psi2d"])
+            data["bz2d"] = xarray.zeros_like(data["psi2d"])
+
         data["current"] = xarray.DataArray(
             0.0, coords=[data.time, data.coil_name], dims=["time", "coil_name"]
         )
@@ -728,6 +735,10 @@ class PulseDesign(Animate, Plot1D, Control, ITER):
         length = np.linspace(0, 1, data.dims["boundary_index"])
         for itime in tqdm(self.data.itime.data, "Solving PDS waveform"):
             self.itime = itime
+            data["psi2d"][itime] = self.levelset.psi_
+            if self.tplasma == "rectangle":
+                data["br2d"][itime] = self.levelset.br_
+                data["bz2d"][itime] = self.levelset.bz_
             data["current"][itime] = self.current
             data["vertical_force"][itime] = self.force.fz
             data["field"][itime] = self.field.bp
@@ -769,9 +780,10 @@ class PulseDesign(Animate, Plot1D, Control, ITER):
             for attr in ["li_3", "psi_axis", "psi_boundary"]:
                 data = self._data[attr].data
                 if "psi" in attr:
-                    data *= -1  # COCOS
-                ids_entry[attr, :] = data
-        with ids_entry.node("time_slice:global_quantities.magnetic_axis*"):
+                    ids_entry[attr, :] = -data  # COCOS
+                else:
+                    ids_entry[attr, :] = data
+        with ids_entry.node("time_slice:global_quantities.magnetic_axis.*"):
             for i, attr in enumerate("rz"):
                 ids_entry[attr, :] = self._data.magnetic_axis.data[:, i]
         with ids_entry.node("time_slice:boundary_separatrix.*"):
@@ -800,6 +812,8 @@ class PulseDesign(Animate, Plot1D, Control, ITER):
                 for point in range(number):
                     boundary.strike_point[point].r = strike_point[point, 0]
                     boundary.strike_point[point].z = strike_point[point, 1]
+            # profiles 1D
+
             # profiles 2D
             profiles_2d = ids_entry.ids_data.time_slice[itime].profiles_2d
             profiles_2d.resize(1)
@@ -813,11 +827,11 @@ class PulseDesign(Animate, Plot1D, Control, ITER):
             profiles_2d[0].grid.dim2 = self._data.z.data
             profiles_2d[0].r = self._data.r2d.data
             profiles_2d[0].z = self._data.z2d.data
-            profiles_2d[0].psi = self.levelset.psi_
+            profiles_2d[0].psi = -self._data.psi2d[itime].data  # COCOS
             # only write field for high order plasma elements
             if self.tplasma == "rectangle":
-                profiles_2d[0].b_field_r = self.levelset.br_
-                profiles_2d[0].b_field_z = self.levelset.bz_
+                profiles_2d[0].b_field_r = self._data.br2d[itime].data
+                profiles_2d[0].b_field_z = self._data.bz2d[itime].data
 
         return ids_entry.ids_data
 
@@ -1033,17 +1047,17 @@ if __name__ == "__main__":
         135013,
         2,
         "iter",
-        1,
+        19,
         square=False,
         strike=True,
         fps=5,
-        gamma=1e-12,
     )
     # design = Benchmark(135013, 2, "iter", 1)
 
     # design.levelset.solve(limit=0.1, index="coil")
-    design.time = 10
+    design.itime = -1
 
+    design.axes.plot(*design.plasma.boundary(np.linspace(0, 1, 500)).T)
     # design.plot_animation(False)
     # design.set_axes("triple")
 
@@ -1053,7 +1067,7 @@ if __name__ == "__main__":
 
     # design.make_frame(100)
 
-    # design.plot_current()
+    design.plot()
 
     # design.time = design.scene(20)["time"]
     # design.plasma.lcfs.plot()
@@ -1062,7 +1076,7 @@ if __name__ == "__main__":
 
     # design.make_frame(84 / 5)
 
-    design.animate()
+    # design.animate()
 
     """
     design.itime = 5

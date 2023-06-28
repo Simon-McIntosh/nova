@@ -417,13 +417,12 @@ if __name__ == "__main__":
     pulse, run = 105028, 1
 
     pulse, run = 135013, 2
-    pulse, run = 135012, 2
 
-    equilibrium = EquilibriumData(pulse, run)
+    equilibrium = EquilibriumData(pulse, run, occurrence=18)
     sample = Sample(equilibrium.data)
     print(sample.data)
 
-    # sample.write_ids(**equilibrium.ids_attrs | {"occurrence": 2})
+    sample.write_ids(**equilibrium.ids_attrs | {"occurrence": 19})
     sample.plot(
         [
             "minor_radius",

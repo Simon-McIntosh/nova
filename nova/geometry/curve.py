@@ -45,7 +45,14 @@ class Peak:
     @cached_property
     def interpolator(self):
         """Return 1d interpolator."""
-        return interp1d(self.length, self.value, self.kind, assume_sorted=True)
+        return interp1d(
+            self.length,
+            self.value,
+            self.kind,
+            assume_sorted=True,
+            bounds_error=False,
+            fill_value="extrapolate",
+        )
 
     @staticmethod
     def _minimize(function):
@@ -90,7 +97,7 @@ class Curve:
     """Calculate geometric properties for a curve traced by an input point array."""
 
     points: np.ndarray
-    pad_width: int = 6
+    pad_width: int = 0
     kind: str = "quadratic"
 
     @cached_property
@@ -118,8 +125,10 @@ class Curve:
         )
 
     def boundary(self, length):
-        """Return lcfs interpolated to normalized length."""
-        return np.c_[self.radius(length), self.height(length)]
+        """Return lcfs interpolated to zero-pad normalized length."""
+        radius = Peak(self.cumulative_length, self.points[:, 0], 0, self.kind)
+        height = Peak(self.cumulative_length, self.points[:, 1], 0, self.kind)
+        return np.c_[radius(length), height(length)]
 
     @cached_property
     def length(self):

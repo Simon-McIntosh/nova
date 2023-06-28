@@ -187,6 +187,7 @@ class Plasma(Plot, netCDF, PlasmaLoc):
             )
             current_density *= -2 * np.pi
             current = current_density * self.area
+            current = abs(current)  # TODO investigate further - reverse current rejoins
             self.nturn = current / current.sum()
 
     @property

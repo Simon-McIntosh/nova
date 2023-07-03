@@ -199,6 +199,7 @@ if __name__ == "__main__":
 
     fiducial = FiducialSector(phase="SSAT BR")
     # fiducial.compare()
+    fiducial.plot()
 
     for coil, ccl in fiducial.delta.items():
         print(f"Coil {coil}")

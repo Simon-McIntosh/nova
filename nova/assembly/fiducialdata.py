@@ -238,14 +238,14 @@ class FiducialData(Plot, Plotter):
         self.load_gpr(coil_index, space_index)
         self.gpr.plot()
 
-    def plot_gpr_array(self, coil_index):
+    def plot_gpr_array(self, coil_index, stage):
         """Plot gpr array."""
         self.axes = self.set_axes(
-            "1d", nrows=3, ncols=1, sharex=True, sharey=True, aspect=0.8
+            "1d", nrows=3, ncols=1, sharex=True, sharey=True, aspect=0.7
         )
         for space_index, coord in enumerate("xyz"):
             self.load_gpr(coil_index, space_index)
-            self.gpr.plot(axes=self.axes[space_index], text=False)
+            self.gpr.plot(stage, axes=self.axes[space_index], text=False)
             self.axes[space_index].set_ylabel(rf"$\Delta{{{coord}}}$ mm")
         self.axes[-1].set_xlabel("arc length")
         self.axes[0].legend(loc="center", bbox_to_anchor=(0, 1.25, 1, 0.1), ncol=2)
@@ -275,8 +275,7 @@ class FiducialData(Plot, Plotter):
             self.axes[j].plot(
                 self.data.centerline[:, 0], self.data.centerline[:, 2], "gray", ls="--"
             )
-        limits = self.axeslim
-        print(limits)
+        limits = self.axes_limit
         color = [0, 0]
         for i in range(self.data.dims["coil"]):
             j = 0 if self.data.origin[i] == "EU" else 1
@@ -300,40 +299,66 @@ class FiducialData(Plot, Plotter):
                 fontsize="large", loc="center", bbox_to_anchor=[0.4, 0.5]
             )
             self.axes[j].set_title(f"{origin} {self.phase}")
-        self.axeslim = limits
+        self.axes_limit = limits
 
     def coil_index(self, coil: int):
         """Return coil index."""
         return list(self.data.coil).index(coil)
 
-    def plot_single(self, coil_index, factor=500, axes=None):
+    def plot_single(self, coil_index, stage=3, factor=500, axes=None):
         """Plot single fiducial curve."""
-        self.set_axes("2d", axes, aspect=1.5)
-        self.axes.plot(
-            self.data.centerline[:, 0], self.data.centerline[:, 2], "gray", ls="--"
+        self.set_axes(
+            "2d",
+            axes,
+            aspect=1,
+            nrows=1,
+            ncols=2,
+            sharey=True,
+            width_ratios=[3, 1],
         )
-        limits = self.axeslim
-        for fiducial in self.data.fiducial:
-            self.axes.plot(*fiducial[::2], "ko")
-            self.axes.text(*fiducial[::2], f" {fiducial.target.values}")
+        for ax, (i, j) in enumerate(zip((0, 1), (2, 2))):
+            self.axes[ax].plot(
+                self.data.centerline[:, i], self.data.centerline[:, j], "gray", ls="--"
+            )
+        limits = self.axes_limit
+        for ax, (i, j) in enumerate(zip((0, 1), (2, 2))):
+            for fiducial in self.data.fiducial:
+                self.axes[ax].plot(fiducial[i], fiducial[j], "ko")
+                if ax == 0:
+                    self.axes[ax].text(
+                        fiducial[i], fiducial[j], f" {fiducial.target.values}"
+                    )
+            if stage > 0:
+                self.axes[ax].plot(
+                    self.data.fiducial[:, i]
+                    + factor * self.data.fiducial_delta[coil_index, :, i],
+                    self.data.fiducial[:, j]
+                    + factor * self.data.fiducial_delta[coil_index, :, j],
+                    "C3o",
+                )
+            if stage > 1:
+                self.axes[ax].plot(
+                    self.data.centerline[:, i]
+                    + factor * self.data.centerline_delta[coil_index, :, i],
+                    self.data.centerline[:, j]
+                    + factor * self.data.centerline_delta[coil_index, :, j],
+                    color="gray",
+                )
+            if stage > 2:
+                gpr_fiducial = (
+                    self.data.centerline
+                    + factor * self.data.centerline_delta[coil_index]
+                )
 
-        self.axes.plot(
-            self.data.fiducial[:, 0]
-            + factor * self.data.fiducial_delta[coil_index, :, 0],
-            self.data.fiducial[:, 2]
-            + factor * self.data.fiducial_delta[coil_index, :, 2],
-            "C3o",
-        )
-
-        self.axes.plot(
-            self.data.centerline[:, 0]
-            + factor * self.data.centerline_delta[coil_index, :, 0],
-            self.data.centerline[:, 2]
-            + factor * self.data.centerline_delta[coil_index, :, 2],
-            color="C0",
-        )
-        self.axeslim = limits
-        self.axes.set_title(f"TF{self.data.coil[coil_index].data} {self.phase}")
+                self.axes[ax].plot(
+                    gpr_fiducial[self.data.target_index, i],
+                    gpr_fiducial[self.data.target_index, j],
+                    "d",
+                    color="gray",
+                )
+        limits[1]["x"] = [-1000, 1000]
+        self.axes_limit = limits
+        # self.axes.set_title(f"TF{self.data.coil[coil_index].data} {self.phase}")
 
 
 if __name__ == "__main__":
@@ -342,17 +367,18 @@ if __name__ == "__main__":
 
     fiducial = FiducialData(phase=phase, fill=False)
 
-    coil = 13
+    coil = 12
     coil_index = fiducial.coil_index(coil)
 
-    fiducial.plot_single(coil_index)
-    fiducial.fig.tight_layout(pad=0)
+    fiducial.plot_single(coil_index, 3)
+
+    fiducial.fig.tight_layout(pad=0.5)
     fiducial.savefig("single")
 
     # fiducial.plot_gpr(1, 0)
 
-    fiducial.plot_gpr_array(coil_index)
-    fiducial.fig.tight_layout(pad=0)
+    fiducial.plot_gpr_array(coil_index, 3)
+    fiducial.fig.tight_layout(pad=0.5)
     fiducial.savefig("gpr_array")
 
     # fiducial.plot()

@@ -444,13 +444,15 @@ class Equilibrium(Chart, GetSlice):
         self.set_axes("1d", axes=axes)
         self.axes.plot(self.data.time, self.data[attr], label=attr)
 
-    def plot_boundary(self, axes=None, color="gray"):
+    def plot_boundary(self, outline=False, axes=None, color="gray"):
         """Plot 2D boundary at itime."""
         boundary = self.boundary
         self.get_axes("2d", axes=axes)
         self.axes.plot(boundary[:, 0], boundary[:, 1], color, alpha=0.85)
         if self["x_point_number"] == 1:
             self.axes.plot(*self["x_point"], "x", ms=6, mec="C3", mew=1)
+        if outline:
+            self.axes.plot(*self.outline(self.itime).T, "C3")
 
     def plot_shape(self, axes=None):
         """Plot separatrix shape parameter waveforms."""
@@ -700,9 +702,9 @@ if __name__ == "__main__":
 
     pulse, run = 135013, 2
 
-    EquilibriumData(pulse, run, occurrence=16)._clear()
-    equilibrium = EquilibriumData(pulse, run, occurrence=16)
+    # EquilibriumData(pulse, run, occurrence=0)._clear()
+    equilibrium = EquilibriumData(pulse, run, occurrence=0)
 
-    equilibrium.itime = -1
+    equilibrium.time = 10
     equilibrium.plot_2d("psi", mask=0)
-    equilibrium.plot_boundary()
+    equilibrium.plot_boundary(outline=False)

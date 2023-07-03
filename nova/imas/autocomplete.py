@@ -21,19 +21,27 @@ class AutoComplete(IDS):
             set([machine.lower() for machine in os.listdir(machine_path)])
         )
         return sorted(machine_list)
+    
+    @staticmethod
+    def _listdir(path):
+        """Return valid path list."""
+        try:
+            return os.listdir(path)
+        except NotADirectoryError:
+            return []
 
     def _isids(self, pulse_path, run):
         """Return named IDS status at pulse_path/run by checking for {name}.* entry."""
         ids_path = os.path.join(pulse_path, run)
         if self.name is None:
             return os.path.isdir(ids_path)
-        return self.name in [name.split(".")[0] for name in os.listdir(ids_path)]
+        return self.name in [name.split(".")[0] for name in self._listdir(ids_path)]
 
     def _filter(self, pulse_path):
         """Return filtered run list es."""
         if self.name is None:
             return os.listdir(pulse_path)
-        return [run for run in os.listdir(pulse_path) if self._isids(pulse_path, run)]
+        return [run for run in self._listdir(pulse_path) if self._isids(pulse_path, run)]
 
     @property
     def pulse_list(self):
@@ -88,4 +96,4 @@ if __name__ == "__main__":
     }
 
     complete = AutoComplete(**attrs | {"name": "pf_active"})
-    print(complete.occurrence_list)
+    print(complete.pulse_list)

@@ -230,6 +230,7 @@ class PulseSchedule(Plot, Scenario):
             self.wall_segment[:, 0], self.wall_segment[:, 1], color="gray", lw=1.5
         )
         tail = self.data.gap_tail
+        self.axes.plot(*tail.T, "C3X")
         vector = (
             self["gap"][:, np.newaxis]
             * np.c_[np.cos(self.data.gap_angle), np.sin(self.data.gap_angle)]
@@ -278,7 +279,7 @@ if __name__ == "__main__":
     pulse, run = 135007, 4
     pulse, run = 135011, 7
     pulse, run = 135003, 5
-    # pulse, run = 105028, 1  # Maksim
+    pulse, run = 105028, 1  # Maksim
     # pulse, run = 105027, 1  # Maksim
     # pulse, run = 135013, 2
 
@@ -286,7 +287,7 @@ if __name__ == "__main__":
     schedule = PulseSchedule(pulse, run)
 
     # schedule.time = 500
-    # schedule.plot_gaps()
+    schedule.plot_gaps()
 
     # schedule.plot_profile()
 

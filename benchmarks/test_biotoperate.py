@@ -1,6 +1,6 @@
 import pytest
 
-from biotoperate import PlasmaTurns
+from .biotoperate import PlasmaTurns
 
 
 def test_plasma_turns():

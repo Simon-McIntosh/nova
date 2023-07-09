@@ -1,16 +1,17 @@
 """Volumetric methods for Vtkgeo class."""
 from dataclasses import dataclass, field
+from functools import cached_property
 import tempfile
 from typing import ClassVar
 
 import meshio
 import numpy as np
-import numpy.typing as npt
 import pandas
 import pyvista
 import scipy.interpolate
 from scipy.spatial.transform import Rotation
 import shapely.geometry
+import trimesh
 import vedo
 import vtk
 
@@ -40,12 +41,10 @@ class TriShell:
 
     def __post_init__(self):
         """Create trimesh instance."""
-        import trimesh
-
+        self.mesh.triangulate()
         self.tri = trimesh.Trimesh(self.mesh.points(), faces=self.mesh.faces())
-        self._qhull = self._convex_hull
 
-    @property
+    @cached_property
     def _convex_hull(self) -> vedo.Mesh:
         """Return decimated convex hull."""
         return vedo.ConvexHull(self.mesh.points()).decimate(
@@ -55,7 +54,7 @@ class TriShell:
     @property
     def panel(self) -> vedo.Mesh:
         """Return scaled convex hull."""
-        mesh = self._qhull.clone()
+        mesh = self._convex_hull.clone()
         mesh.opacity(self.mesh.opacity())
         mesh.c(self.mesh.c())
         mesh.origin(*self.center_mass)
@@ -82,8 +81,8 @@ class TriShell:
     @property
     def rotate(self) -> Rotation:
         """Return PCA rotational transform."""
-        points = self._qhull.points()
-        triangles = np.array(self._qhull.cells())
+        points = self._convex_hull.points()
+        triangles = np.array(self._convex_hull.cells())
         vertex = dict(
             a=points[triangles[:, 0]],
             b=points[triangles[:, 1]],
@@ -100,7 +99,7 @@ class TriShell:
         """Return optimal bounding box extents."""
         if rotate is None:
             rotate = self.rotate
-        points = self.rotate.inv().apply(self._qhull.points())
+        points = self.rotate.inv().apply(self._convex_hull.points())
         extent = np.max(points, axis=0) - np.min(points, axis=0)
         extent *= (self.volume / np.prod(extent)) ** (1 / 3)
         return extent
@@ -207,7 +206,7 @@ class TetVol(TriShell):
 class Patch(vedo.Mesh):
     """Construct surface patch."""
 
-    def __init__(self, points: npt.ArrayLike):
+    def __init__(self, points: np.ndarray):
         cells = np.arange(0, len(points)).reshape(1, -1)
         super().__init__((points, cells))
 
@@ -248,15 +247,11 @@ class Ring(VtkFrame):
 class Section:
     """Transform 2D sectional data."""
 
-    points: npt.ArrayLike
-    origin: npt.ArrayLike = field(
-        init=False, default_factory=lambda: np.zeros(3, float)
-    )
-    triad: npt.ArrayLike = field(
-        init=False, default_factory=lambda: np.identity(3, float)
-    )
+    points: np.ndarray
+    origin: np.ndarray = field(init=False, default_factory=lambda: np.zeros(3, float))
+    triad: np.ndarray = field(init=False, default_factory=lambda: np.identity(3, float))
     mesh_array: list[VtkFrame] = field(init=False, default_factory=list)
-    point_array: list[npt.ArrayLike] = field(init=False, default_factory=list)
+    point_array: list[np.ndarray] = field(init=False, default_factory=list)
 
     def __post_init__(self):
         """Append inital section to mesh."""
@@ -278,12 +273,14 @@ class Section:
         """Return normalized vector."""
         return vector / np.linalg.norm(vector)
 
-    def to_vector(self, vector: npt.ArrayLike, coord: int):
+    def to_vector(self, vector: np.ndarray, coord: int):
         """Rotate mesh to vector."""
         vector = self.normalize(vector)
         cross = np.cross(self.triad[coord], vector)
         dot = np.dot(self.triad[coord], vector)
-        if np.linalg.norm(cross) == 0 and dot == -1:  # catch -pi rotation
+        if np.isclose(np.linalg.norm(cross), 0) and np.isclose(
+            dot, -1
+        ):  # catch -pi rotation
             axis = np.cross(self.triad[coord], self.triad[coord][::-1])
             rotation = Rotation.from_rotvec(-np.pi * axis)
         else:
@@ -325,7 +322,7 @@ class Section:
 class Path:
     """Manage 3D path sub-divisions."""
 
-    points: npt.ArrayLike
+    points: np.ndarray
     delta: float = 0.0
     mesh: pyvista.PolyData = field(init=False)
     submesh: pyvista.PolyData = field(init=False)
@@ -336,7 +333,7 @@ class Path:
         self.interpolate()
 
     @classmethod
-    def from_points(cls, points: npt.ArrayLike, delta=0):
+    def from_points(cls, points: np.ndarray, delta=0):
         """Return submesh calculated from points and delta."""
         return cls(points, delta).submesh
 
@@ -348,7 +345,7 @@ class Path:
         )(arc_length)
         self.submesh = Line.from_points(sub_points).mesh
 
-    def _arc_length(self) -> npt.ArrayLike:
+    def _arc_length(self) -> np.ndarray:
         """Return updated sub-segment spacing parameter."""
         if self.delta == 0:
             return self.mesh["arc_length"]
@@ -419,7 +416,7 @@ class Sweep(Cell):
             - list[float], shape(4,) bounding box [xmin, xmax, zmin, zmax]
             - array-like, shape(n,2) bounding loop [x, z]
 
-        path : npt.ArrayLike, shape(,3)
+        path : np.ndarray, shape(,3)
             Swept path.
 
         """
@@ -427,12 +424,12 @@ class Sweep(Cell):
             poly = PolyGeom(poly, segment="sweep")
         if isinstance(path, pyvista.PolyData):
             path = path.points
-        mesh = Path.from_points(path, delta=delta)
-        n_points = mesh.n_points
-        if np.isclose(mesh.points[0], mesh.points[-1]).all():
+        self.mesh = Path.from_points(path, delta=delta)
+        n_points = self.mesh.n_points
+        if np.isclose(self.mesh.points[0], self.mesh.points[-1]).all():
             n_points -= 1
             link = True
-        section = Section(poly.points).sweep(mesh)
+        section = Section(poly.points).sweep(self.mesh)
         super().__init__(section.point_array, link=link)
 
     def __str__(self):

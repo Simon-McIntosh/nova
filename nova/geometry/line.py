@@ -21,7 +21,9 @@ class Line:
         if len(points) > 2:
             return cls(pv.Spline(points))
         mesh = pv.PolyData(points, lines=np.arange(0, len(points)))
-        mesh["arc_length"] = [0, np.linalg.norm(np.diff(points, axis=0))]
+        mesh["arc_length"] = np.array(
+            [0, np.linalg.norm(np.diff(points, axis=0))], float
+        )
         return cls(mesh)
 
     @staticmethod

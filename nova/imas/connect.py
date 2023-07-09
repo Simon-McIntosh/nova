@@ -237,7 +237,7 @@ if __name__ == "__main__":
 
     # ScenarioDatabase().sync_shot('105011/9')
     scenario = ScenarioDatabase()
-    # scenario.sync_shot('135003/5')
+    scenario.sync_shot("115001/1")
     # scenario.load_frame('workflow', 'DINA-IMAS')
     # scenario.sync_workflow('DINA-IMAS')
 

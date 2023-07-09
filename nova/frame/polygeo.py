@@ -49,6 +49,7 @@ class PolyGeo(metamethod.PolyGeo):
             ~self.frame.geotype("Geo", "poly")
             & ~self.frame.geotype("Json", "poly")
             & (self.frame.segment != "")
+            & (self.frame.segment != "winding")
             & (self.frame.section != "")
         ]
         if (index_length := len(index)) > 0:

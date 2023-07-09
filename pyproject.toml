@@ -85,6 +85,7 @@ sphinx-rtd-theme = "^1.2.2"
 sphinx = "^6"
 pylsp-mypy = "^0.6.7"
 coverage = {extras = ["toml"], version = "^7.2.7"}
+pdoc = "^14.0.0"
 
 [tool.poetry.extras]
 ansys = [

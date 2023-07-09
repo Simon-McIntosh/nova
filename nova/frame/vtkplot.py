@@ -47,4 +47,4 @@ class VtkPlot(metamethod.VtkPlot):
             for vtk, part in self.frame.loc[index, ["vtk", "part"]].values
         ]
         if len(vtk) > 0:
-            return vedo.show(*vtk)
+            return vedo.show(*vtk, new=True)

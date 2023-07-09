@@ -14,13 +14,17 @@ class Winding(CoilSetAttrs):
     """Insert 3D coil winding."""
 
     delta: float = 0.0
-    turn: str = "disc"
+    turn: str = "rectangle"
+    segment: str = "winding"
     required: list[str] = field(
         default_factory=lambda: ["x", "y", "z", "dx", "dy", "dz", "volume", "vtk"]
     )
     default: dict = field(
         init=False,
         default_factory=lambda: {"label": "Swp", "part": "coil", "active": True},
+    )
+    attributes: list[str] = field(
+        init=False, default_factory=lambda: ["delta", "turn", "section", "segment"]
     )
 
     def set_conditional_attributes(self):
@@ -60,11 +64,14 @@ class Winding(CoilSetAttrs):
 
         """
         if not isinstance(poly, Polygon):
-            poly = Polygon(poly, segment="sweep")
+            poly = Polygon(poly, name="sweep")
         vtk = Sweep(poly, path)
         frame_data = self.vtk_data(vtk)
         self.attrs = additional | dict(
-            section=poly.section, segment="sweep", dl=poly.length, dt=poly.thickness
+            section=poly.section,
+            name="sweep",
+            dl=vtk.mesh["arc_length"][-1],
+            dt=poly.area,
         )
         with self.insert_required(required):
             index = self.frame.insert(*frame_data, iloc=iloc, **self.attrs)
@@ -74,10 +81,8 @@ class Winding(CoilSetAttrs):
                 "delim": "_",
                 "link": True,
             }
-
             submesh = Path.from_points(path, delta=self.attrs["delta"])
             section = Section(poly.points).sweep(submesh)
-
             vtk = [
                 Cell(section.point_array[i : i + 2])
                 for i in range(submesh.n_points - 1)
@@ -86,6 +91,7 @@ class Winding(CoilSetAttrs):
             centroid = (points[1:] + points[:-1]) / 2
             vector = points[1:] - points[:-1]
             volume = [_vtk.clone().triangulate().volume() for _vtk in vtk]
+            print(np.sum(volume))
             poly = [TriShell(_vtk).poly for _vtk in vtk]
             area = self.frame.loc[index, "area"]
             self.subframe.insert(
@@ -97,8 +103,9 @@ class Winding(CoilSetAttrs):
     @staticmethod
     def vtk_data(vtk: vedo.Mesh):
         """Extract data from vtk object."""
-        centroid = vtk.centerOfMass()
+        centroid = vtk.center_of_mass()
+        vtk.triangulate()
         bounds = np.array(vtk.bounds())
         bbox = bounds[1::2] - bounds[::2]
-        volume = vtk.clone().triangulate().volume()
+        volume = vtk.volume()
         return *centroid, *bbox, volume, vtk

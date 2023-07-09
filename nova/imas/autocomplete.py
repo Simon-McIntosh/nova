@@ -21,7 +21,7 @@ class AutoComplete(IDS):
             set([machine.lower() for machine in os.listdir(machine_path)])
         )
         return sorted(machine_list)
-    
+
     @staticmethod
     def _listdir(path):
         """Return valid path list."""
@@ -41,7 +41,9 @@ class AutoComplete(IDS):
         """Return filtered run list es."""
         if self.name is None:
             return os.listdir(pulse_path)
-        return [run for run in self._listdir(pulse_path) if self._isids(pulse_path, run)]
+        return [
+            run for run in self._listdir(pulse_path) if self._isids(pulse_path, run)
+        ]
 
     @property
     def pulse_list(self):

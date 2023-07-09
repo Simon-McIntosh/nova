@@ -211,28 +211,30 @@ class ITERgeom(CoilSet):
 
 
 if __name__ == "__main__":
-    coilset = ITERgeom(dcoil=0.25, nplasma=150)
-
+    coilset = ITERgeom(dcoil=0.25, dplasma=-150)
+    """
     index = coilset.subframe.frame == "VS3U"
     index |= coilset.subframe.frame == "VS3Uj"
     coilset.plot(index)
-    # coilset.ferritic.insert('Fi', multiframe=False, label='Fi', offset=1)
-    # coilset.plasma.insert({'ellip': [6.5, 0.5, 4.5, 6.5]})
-    # coilset.shell.insert({'ellip': [6.5, 0.5, 1.2*4.5, 1.2*6.5]}, -80, 0.25,
-    #                     part='vv')
+    
+    coilset.ferritic.insert("Fi", multiframe=False, label="Fi", offset=1)
+    coilset.plasma.insert({"ellip": [6.5, 0.5, 4.5, 6.5]})
+    coilset.shell.insert(
+        {"ellip": [6.5, 0.5, 1.2 * 4.5, 1.2 * 6.5]}, -80, 0.25, part="vv"
+    )
     """
-    from nova.structural.centerline import CenterLine
+    from nova.assembly.centerline import CenterLine
 
     poly = dict(r=[0, 0, 0.6, 0.8])
     mesh = CenterLine().mesh
     for __ in range(18):
         mesh.rotate_z(20)
-        coilset.winding.insert(poly, mesh.points, nturn=134,
-                               label='TF', offset=1, part='tf', delta=0)
+        coilset.winding.insert(
+            poly, mesh.points, nturn=134, label="TF", offset=1, part="tf", delta=0
+        )
     coilset.link(coilset.frame.iloc[-18:].index)
 
     coilset.subframe.vtkplot()
-    """
 
     """
 

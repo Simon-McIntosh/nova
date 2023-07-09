@@ -227,7 +227,7 @@ if __name__ == "__main__":
     # machine.load_ids('pf_active')
     # print(machine.frame)
 
-    # MachineDatabase(user='hosokam', machine='ITER_MD').sync_shot('111001/202')
+    MachineDatabase(machine="iter_md").sync_shot("115001/1")
 
     # ScenarioDatabase().sync_shot('135013/2')
 
@@ -236,8 +236,8 @@ if __name__ == "__main__":
     # ScenarioDatabase(user='dubrovm').sync_shot('105027/1')
 
     # ScenarioDatabase().sync_shot('105011/9')
-    scenario = ScenarioDatabase()
-    scenario.sync_shot("115001/1")
+    # scenario = ScenarioDatabase()
+    # scenario.sync_shot("115001/1")
     # scenario.load_frame('workflow', 'DINA-IMAS')
     # scenario.sync_workflow('DINA-IMAS')
 

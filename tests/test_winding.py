@@ -16,14 +16,5 @@ def test_rect_volume():
     assert np.isclose(coilset.subframe.volume.sum(), volume, 1e-3)
 
 
-def test_circle_sweep():
-    coilset = CoilSet(additional=["vtk"])
-    coilset.coil.insert(5, 3, 0.1, 0.1)
-    # coilset.plot()
-
-
-# test_circle_sweep()
-
-
 if __name__ == "__main__":
     pytest.main([__file__])

@@ -17,6 +17,7 @@ import vtk
 
 from nova.geometry.polygeom import PolyGeom
 from nova.geometry.polygon import Polygon
+from nova.geometry.rotate import to_vector
 from nova.geometry.vtkgen import VtkFrame
 from nova.geometry.line import Line
 
@@ -268,19 +269,15 @@ class Section:
             VtkFrame([self.points, [range(len(self.points))]]).c(len(self))
         )
 
-    @staticmethod
-    def normalize(vector):
-        """Return normalized vector."""
-        return vector / np.linalg.norm(vector)
-
     def to_vector(self, vector: np.ndarray, coord: int):
         """Rotate mesh to vector."""
+        rotation = to_vector(self.triad[coord], vector)
+        """
         vector = self.normalize(vector)
         cross = np.cross(self.triad[coord], vector)
         dot = np.dot(self.triad[coord], vector)
-        if np.isclose(np.linalg.norm(cross), 0) and np.isclose(
-            dot, -1
-        ):  # catch -pi rotation
+        if np.isclose(np.linalg.norm(cross), 0) and np.isclose(dot, -1):
+            # catch -pi rotation
             axis = np.cross(self.triad[coord], self.triad[coord][::-1])
             rotation = Rotation.from_rotvec(-np.pi * axis)
         else:
@@ -293,6 +290,7 @@ class Section:
             )
             Rmat = np.identity(3) + v_cross + np.dot(v_cross, v_cross) / (1 + dot)
             rotation = Rotation.from_matrix(Rmat)
+        """
         self.points -= self.origin
         self.points = rotation.apply(self.points)
         self.points += self.origin

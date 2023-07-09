@@ -91,7 +91,6 @@ class Winding(CoilSetAttrs):
             centroid = (points[1:] + points[:-1]) / 2
             vector = points[1:] - points[:-1]
             volume = [_vtk.clone().triangulate().volume() for _vtk in vtk]
-            print(np.sum(volume))
             poly = [TriShell(_vtk).poly for _vtk in vtk]
             area = self.frame.loc[index, "area"]
             self.subframe.insert(

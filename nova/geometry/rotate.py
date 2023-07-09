@@ -2,6 +2,7 @@
 
 import numpy as np
 from pyquaternion import Quaternion
+from scipy.spatial.transform import Rotation
 
 
 def rotate(theta, axis="z"):
@@ -52,11 +53,11 @@ def rotate2D(theta, xo=0, yo=0, dx=0, dy=0):
     return X[:2, :2], TRT
 
 
-def rotate_vector2D(V, theta):
-    """Rotate 2d point cloud by theta about z-axis."""
-    Vmag = np.sqrt(V[0] ** 2 + V[1] ** 2)
+def rotate_vector2D(vector, theta):
+    """Rotate 2d point cloud by theta about vector."""
+    Vmag = np.sqrt(vector[0] ** 2 + vector[1] ** 2)
     X = rotate2D(theta)[0]
-    Vhat = (X * np.matrix([[V[0]], [V[1]]])).getA1() / Vmag
+    Vhat = (X * np.matrix([[vector[0]], [vector[1]]])).getA1() / Vmag
     return Vhat
 
 
@@ -142,3 +143,29 @@ def qrotate(point, **kwargs):
             p[var] = rpoint[:, i]
         rpoint = p
     return rpoint
+
+
+def normalize(vector):
+    """Return normalized vector."""
+    return vector / np.linalg.norm(vector)
+
+
+def to_vector(axis: np.ndarray, vector: np.ndarray):
+    """Return rotation instance that aligns axis to vector."""
+    axis = normalize(axis)
+    vector = normalize(vector)
+    cross = np.cross(axis, vector)
+    dot = np.dot(axis, vector)
+    if np.isclose(np.linalg.norm(cross), 0) and np.isclose(dot, -1):
+        # catch -pi rotation
+        axis = np.cross(axis, np.roll(axis, -1))
+        return Rotation.from_rotvec(-np.pi * axis)
+    v_cross = np.array(
+        [
+            [0, -cross[2], cross[1]],
+            [cross[2], 0, -cross[0]],
+            [-cross[1], cross[0], 0],
+        ]
+    )
+    Rmat = np.identity(3) + v_cross + np.dot(v_cross, v_cross) / (1 + dot)
+    return Rotation.from_matrix(Rmat)

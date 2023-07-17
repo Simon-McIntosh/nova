@@ -199,6 +199,14 @@ class PolyArc(Plot):
 
 
 @dataclass
+class Segment:
+    """Segment base class."""
+
+    name: float
+    points: np.ndarray
+
+
+@dataclass
 class PolyLine(Plot):
     """Decimate polyline using a hybrid arc/line-segment rdp algorithum."""
 

@@ -63,5 +63,3 @@ if __name__ == "__main__":
     pulse, run = 115001, 1
     Coils_Non_Axisymmetyric(pulse, run, "iter_md")._clear()
     coil = Coils_Non_Axisymmetyric(pulse, run, "iter_md")
-
-    print(coil.data)

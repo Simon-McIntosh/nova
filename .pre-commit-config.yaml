@@ -4,7 +4,8 @@ repos:
     hooks:
       - id: poetry-check
       - id: poetry-export
-        args: ["-f", "requirements.txt", "-o", "requirements.txt"]
+        args: ["--extras", "ferritic", "graphics", "numba", "optimize", "structural", "test", "thermofluids", "vtk", 
+               "-f", "requirements.txt", "-o", "requirements.txt"]
         verbose: true
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.0.270

@@ -18,7 +18,7 @@ class Connect:
     command: str
     machine: str
     user: str = "public"
-    cluster: str = "sdcc-login02.iter.org"
+    cluster: str = "sdcc-login01.iter.org"
     backend: str = "HDF5"
     columns: list[str] = field(default_factory=lambda: [])
     frame: pandas.DataFrame = field(
@@ -227,10 +227,10 @@ if __name__ == "__main__":
     # machine.load_ids('pf_active')
     # print(machine.frame)
 
-    MachineDatabase(machine="iter_md").sync_shot("115001/1")
+    # MachineDatabase(machine="iter_md").sync_shot("115001/1")
 
     # ScenarioDatabase().sync_shot('135013/2')
-
+    ScenarioDatabase().rsync()
     # ScenarioDatabase(user='tribolp').sync_shot('135011/21')
     # ScenarioDatabase(user='dubrovm').sync_shot('105028/1')
     # ScenarioDatabase(user='dubrovm').sync_shot('105027/1')

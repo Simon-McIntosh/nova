@@ -10,7 +10,7 @@ repos:
                "--extras", "optimize", 
                "--extras", "structural", 
                "--extras", "test", 
-               "--extrras", "thermofluids", 
+               "--extras", "thermofluids", 
                "--extras", "vtk", 
                "-f", "requirements.txt", "-o", "requirements.txt"]
         verbose: true

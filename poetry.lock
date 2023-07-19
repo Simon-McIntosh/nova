@@ -796,13 +796,13 @@ files = [
 
 [[package]]
 name = "click"
-version = "8.1.5"
+version = "8.1.6"
 description = "Composable command line interface toolkit"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "click-8.1.5-py3-none-any.whl", hash = "sha256:e576aa487d679441d7d30abb87e1b43d24fc53bffb8758443b1a9e1cee504548"},
-    {file = "click-8.1.5.tar.gz", hash = "sha256:4be4b1af8d665c6d942909916d31a213a106800c47d0eeba73d34da3cbc11367"},
+    {file = "click-8.1.6-py3-none-any.whl", hash = "sha256:fa244bb30b3b5ee2cae3da8f55c9e5e0c0e86093306301fb418eb9dc40fbded5"},
+    {file = "click-8.1.6.tar.gz", hash = "sha256:48ee849951919527a045bfe3bf7baa8a959c423134e1a5b98c05c20ba75a1cbd"},
 ]
 
 [package.dependencies]
@@ -5933,13 +5933,13 @@ test = ["pytest"]
 
 [[package]]
 name = "spyder"
-version = "5.4.3"
+version = "5.4.4"
 description = "The Scientific Python Development Environment"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "spyder-5.4.3-py3-none-any.whl", hash = "sha256:b2520a4a9afe50d7b53c92bda1d3a34338ce2ff407cf712c15c62d54f3dba7c5"},
-    {file = "spyder-5.4.3.tar.gz", hash = "sha256:14c86757a5122cb0785817d0ab6c00d8fe894ebd214c97e8ef5c44f962601371"},
+    {file = "spyder-5.4.4-py3-none-any.whl", hash = "sha256:24a44ae04cbbb8e6ab6e9cfb085ac6782163becaa4883ac9a3e72c28ddb40e5a"},
+    {file = "spyder-5.4.4.tar.gz", hash = "sha256:f8052928f8d15358ade47bd8bad098fcde5f1f7a247508c969830c2cf6b0c0a2"},
 ]
 
 [package.dependencies]
@@ -5950,7 +5950,7 @@ cloudpickle = ">=0.5.0"
 cookiecutter = ">=1.6.0"
 diff-match-patch = ">=20181111"
 intervaltree = ">=3.0.2"
-ipython = ">=7.31.1,<8.8.0 || >8.8.0,<8.9.0 || >8.9.0,<8.10.0 || >8.10.0,<9.0.0"
+ipython = ">=7.31.1,<8.8.0 || >8.8.0,<8.9.0 || >8.9.0,<8.10.0 || >8.10.0,<8.11.0 || >8.11.0,<8.12.0 || >8.12.0,<8.12.1 || >8.12.1,<9.0.0"
 jedi = ">=0.17.2,<0.19.0"
 jellyfish = ">=0.7"
 jsonschema = ">=3.2.0"
@@ -5964,12 +5964,12 @@ pickleshare = ">=0.4"
 psutil = ">=5.3"
 pygments = ">=2.0"
 pylint = ">=2.5.0,<3.0"
-pylint-venv = ">=2.1.1"
+pylint-venv = ">=3.0.2"
 pyls-spyder = ">=0.4.0"
 pyqt5 = "<5.16"
 pyqtwebengine = "<5.16"
-python-lsp-black = ">=1.2.0"
-python-lsp-server = {version = ">=1.7.2,<1.8.0", extras = ["all"]}
+python-lsp-black = ">=1.2.0,<3.0.0"
+python-lsp-server = {version = ">=1.7.4,<1.8.0", extras = ["all"]}
 pyxdg = {version = ">=0.26", markers = "platform_system == \"Linux\""}
 pyzmq = ">=22.1.0"
 qdarkstyle = ">=3.0.2,<3.2.0"
@@ -5980,7 +5980,7 @@ qtpy = ">=2.1.0"
 rtree = ">=0.9.7"
 setuptools = ">=49.6.0"
 sphinx = ">=0.6.6"
-spyder-kernels = ">=2.4.3,<2.5.0"
+spyder-kernels = ">=2.4.4,<2.5.0"
 textdistance = ">=4.2.0"
 three-merge = ">=0.1.1"
 watchdog = ">=0.10.3"

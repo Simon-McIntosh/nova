@@ -11,7 +11,10 @@ class AutoComplete(IDS):
     @staticmethod
     def _sort(_list: list[str], key=None):
         """Return interger sorted list."""
-        return sorted(_list, key=int)
+        try:
+            return sorted(_list, key=key)
+        except ValueError:
+            return []
 
     @property
     def machine_list(self):
@@ -38,7 +41,7 @@ class AutoComplete(IDS):
         return self.name in [name.split(".")[0] for name in self._listdir(ids_path)]
 
     def _filter(self, pulse_path):
-        """Return filtered run list es."""
+        """Return filtered run list."""
         if self.name is None:
             return os.listdir(pulse_path)
         return [

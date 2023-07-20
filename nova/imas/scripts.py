@@ -63,10 +63,10 @@ class LimType(click.ParamType):
                         """,
 )
 @click.option(
-    "-nplasma",
-    "nplasma",
+    "-dplasma",
+    "dplasma",
     type=int,
-    default=2500,
+    default=-2500,
     help="plasma filiment number (aprox.)",
 )
 @click.option(
@@ -133,7 +133,7 @@ def extrapolate(
     pulse,
     run,
     ngrid,
-    nplasma,
+    dplasma,
     limit,
     index,
     pf_active,
@@ -168,7 +168,7 @@ def extrapolate(
         pulse,
         run,
         ngrid=ngrid,
-        nplasma=nplasma,
+        dplasma=dplasma,
         limit=limit,
         index=index,
         user=scenario_db[0],

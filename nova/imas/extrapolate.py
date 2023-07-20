@@ -222,7 +222,7 @@ class Extrapolate(Operate):
         if masks[0] is not None:
             try:
                 if attr == "psi":
-                    _levels = -levels[::-1]
+                    _levels = -levels[::-1]  # COCOS
                 else:
                     _levels = levels
                 super().plot_2d(
@@ -274,7 +274,7 @@ class Extrapolate(Operate):
         >>> extrapolate.plot_2d('psi')
         """
         self.get_axes("2d", axes=axes)
-        super().plot(axes=self.axes)  #'plasma')
+        super().plot("plasma", axes=self.axes)
         self.plasma.wall.plot()
         vector = getattr(self.grid, attr)
         levels = np.linspace(vector.min(), vector.max(), levels)
@@ -377,9 +377,9 @@ class Extrapolate(Operate):
 if __name__ == "__main__":
     # pulse, run = 114101, 41  # JINTRAC
     pulse, run = 130506, 403  # CORSICA
-    pulse, run = 105028, 1  # DINA
+    # pulse, run = 105028, 1  # DINA
     # pulse, run = 135011, 7  # DINA
-    pulse, run = 135013, 2
+    # pulse, run = 135013, 2
 
     extrapolate = Extrapolate(pulse, run, pf_passive=False, pf_active="iter_md")
 
@@ -389,7 +389,7 @@ if __name__ == "__main__":
 
     # extrapolate.plot_waveform()
 
-    extrapolate.time = 143.9
+    extrapolate.itime = 25
     extrapolate.plot_2d("psi", mask="map")
     plt.tight_layout()
 

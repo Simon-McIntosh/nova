@@ -63,10 +63,10 @@ class LimType(click.ParamType):
                         """,
 )
 @click.option(
-    "-dplasma",
-    "dplasma",
+    "-nplasma",
+    "nplasma",
     type=int,
-    default=-2500,
+    default=2500,
     help="plasma filiment number (aprox.)",
 )
 @click.option(
@@ -123,7 +123,7 @@ class LimType(click.ParamType):
     "-backend",
     "backend",
     default="HDF5",
-    type=click.Choice(["HDF5", "MDSPLUS", "MEMORY", "ASCII"], case_sensitive=True),
+    type=click.Choice(["HDF5", "MDSPLUS", "MEMORY", "ASCII"], case_sensitive=False),
     help="access layer backend",
 )
 @click.version_option(package_name="nova", message="%(package)s %(version)s")
@@ -133,7 +133,7 @@ def extrapolate(
     pulse,
     run,
     ngrid,
-    dplasma,
+    nplasma,
     limit,
     index,
     pf_active,
@@ -157,9 +157,8 @@ def extrapolate(
     Extrapolate from LCFS CORSICA solution to standard grid and plot
     radial field.
 
-    >>> extrapolate 130506 403 plot 25 -attr br
+    >>> extrapolate 130506 403 plot 25 -attr psi
     """
-    backend = dict(HDF5=13, MDSPLUS=12, MEMORY=14, ASCII=11).get(backend.upper())
     machine_db = dict(zip(["user", "machine"], machine_db))
     machine_db |= dict(backend=backend)
     pf_active = machine_db | dict(zip(["pulse", "run"], pf_active))
@@ -168,7 +167,7 @@ def extrapolate(
         pulse,
         run,
         ngrid=ngrid,
-        dplasma=dplasma,
+        dplasma=-nplasma,
         limit=limit,
         index=index,
         user=scenario_db[0],
@@ -186,6 +185,6 @@ def extrapolate(
 def plot(ctx, itime, attr):
     """Plot extrapolation result at itime."""
     plt = import_module("matplotlib.pyplot")
-    ctx.obj.ionize(itime)
+    ctx.obj.itime = itime
     ctx.obj.plot_2d(attr)
     plt.show()

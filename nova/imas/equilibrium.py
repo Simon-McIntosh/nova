@@ -254,9 +254,12 @@ class Parameter0D(Scenario):
                 return np.append(loops[loop_index], loops[loop_index][:1], axis=0)
             return boundary
         mask = self.x_mask(itime, boundary[:, 1])
-        boundary = boundary[mask]
         if sum(mask) == 0:
-            return boundary
+            contour = Contour(self.data.r2d, self.data.z2d, self.data.psi2d[itime])
+            psi_boundary = self.ids_index.get_slice(itime, "boundary_separatrix.psi")
+            boundary = contour.closedlevelset(psi_boundary).points
+            mask = self.x_mask(itime, boundary[:, 1])
+        boundary = boundary[mask]
         if not limiter:
             o_point = self.data.magnetic_axis[itime].data
             boundary = np.append(boundary, x_point[np.newaxis, :], axis=0)
@@ -569,7 +572,7 @@ class Equilibrium(Chart, GetSlice):
 
 @final
 @dataclass
-class EquilibriumData(Equilibrium, Profile2D, Profile1D, Parameter0D, Grid):
+class EquilibriumData(Equilibrium, Parameter0D, Profile1D, Profile2D, Grid):
     """
     Manage active equilibrium ids.
 
@@ -699,12 +702,13 @@ if __name__ == "__main__":
     pulse, run = 135003, 5
     # pulse, run = 135007, 4
     pulse, run = 105028, 1
+    pulse, run = 130506, 403  # CORSICA
 
     # pulse, run = 135013, 2
 
-    # EquilibriumData(pulse, run, occurrence=0)._clear()
+    EquilibriumData(pulse, run, occurrence=0)._clear()
     equilibrium = EquilibriumData(pulse, run, occurrence=0)
 
-    equilibrium.time = 10
+    equilibrium.itime = 25
     equilibrium.plot_2d("psi", mask=0)
     equilibrium.plot_boundary(outline=False)

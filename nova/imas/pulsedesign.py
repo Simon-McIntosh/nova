@@ -1047,7 +1047,7 @@ if __name__ == "__main__":
         135013,
         2,
         "iter",
-        19,
+        1,
         square=False,
         strike=True,
         fps=5,
@@ -1055,7 +1055,7 @@ if __name__ == "__main__":
     # design = Benchmark(135013, 2, "iter", 1)
 
     # design.levelset.solve(limit=0.1, index="coil")
-    design.itime = -1
+    design.itime = 10
 
     design.axes.plot(*design.plasma.boundary(np.linspace(0, 1, 500)).T)
     # design.plot_animation(False)
@@ -1069,6 +1069,7 @@ if __name__ == "__main__":
 
     design.plot()
 
+    design.plt.show()
     # design.time = design.scene(20)["time"]
     # design.plasma.lcfs.plot()
     # design.fig.tight_layout(pad=0)

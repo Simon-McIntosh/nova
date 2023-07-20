@@ -255,7 +255,8 @@ class Parameter0D(Scenario):
             return boundary
         mask = self.x_mask(itime, boundary[:, 1])
         if sum(mask) == 0:
-            contour = Contour(self.data.r2d, self.data.z2d, self.data.psi2d[itime])
+            psi2d = self.ids_index.get_slice(itime, "profiles_2d.psi")
+            contour = Contour(self.data.r2d, self.data.z2d, psi2d)
             psi_boundary = self.ids_index.get_slice(itime, "boundary_separatrix.psi")
             boundary = contour.closedlevelset(psi_boundary).points
             mask = self.x_mask(itime, boundary[:, 1])
@@ -572,7 +573,7 @@ class Equilibrium(Chart, GetSlice):
 
 @final
 @dataclass
-class EquilibriumData(Equilibrium, Parameter0D, Profile1D, Profile2D, Grid):
+class EquilibriumData(Equilibrium, Profile2D, Profile1D, Parameter0D, Grid):
     """
     Manage active equilibrium ids.
 

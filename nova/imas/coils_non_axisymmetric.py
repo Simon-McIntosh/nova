@@ -1,20 +1,25 @@
 """Manage access to non-axisymmetric coil data."""
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+from typing import ClassVar
 
 import numpy as np
 
-from nova.imas.coil import coil_names
+from nova.geometry.polyline import PolyLine
 from nova.graphics.plot import Plot
-from nova.imas.scenario import Scenario
+from nova.imas.coil import coil_name
+from nova.imas.machine import CoilDatabase
 
 
 @dataclass
-class Coils_Non_Axisymmetyric(Plot, Scenario):
+class Coils_Non_Axisymmetyric(Plot, CoilDatabase):
     """Manage access to coils_non_axisymmetric ids."""
 
+    pulse: int = 115001
+    run: int = 1
     name: str = "coils_non_axisymmetric"
     ids_node: str = "coil"
-    coil_attrs: list[str] = field(default_factory=lambda: ["turns", "resistance"])
+
+    coil_attrs: ClassVar[list[str]] = ["turns", "resistance"]
 
     def _points(self, ids_points):
         """Return cartesian point array from nested cylindrical ids structure."""
@@ -26,6 +31,22 @@ class Coils_Non_Axisymmetyric(Plot, Scenario):
 
     def build(self):
         """Build netCDF database using data extracted from imasdb."""
+        for coil in self.ids_data.coil[:1]:
+            name = coil_name(coil)
+            print(name)
+
+            points = []
+            for conductor in coil.conductor:
+                points.extend(
+                    np.r_[
+                        self._points(conductor.elements.start_points),
+                        self._points(conductor.elements.intermediate_points),
+                        self._points(conductor.elements.end_points),
+                    ]
+                )
+            polyline = PolyLine(np.array(points))
+            polyline.plot()
+        """
         coil_name = coil_names(self.ids_data.coil)
         with self.build_scenario():
             self.data.coords["point"] = ["x", "y", "z"]
@@ -38,7 +59,7 @@ class Coils_Non_Axisymmetyric(Plot, Scenario):
             points = []
             for i, coil in enumerate(self.ids_data.coil):
                 for conductor in coil.conductor:
-                    points.append(
+                    points.extend(
                         np.r_[
                             self._points(conductor.elements.start_points),
                             self._points(conductor.elements.intermediate_points),
@@ -49,17 +70,18 @@ class Coils_Non_Axisymmetyric(Plot, Scenario):
                     self.data["indices"][i] = 0
                     continue
                 self.data["indices"][i] = self.data["indices"][i - 1] + len(points[-1])
+            print(np.shape(points))
 
-            # self.data["points"] =
+            self.data["points"] = ("index", "point"), points
             # point_array = points.r * np.cos(points.phi)
             # y_coord = points.r * np.sin(points.phi)
             # z_coord = points.z
 
             # mesh.plot()
             # xarray.
+            """
 
 
 if __name__ == "__main__":
-    pulse, run = 115001, 1
-    Coils_Non_Axisymmetyric(pulse, run, "iter_md")._clear()
-    coil = Coils_Non_Axisymmetyric(pulse, run, "iter_md")
+    coil = Coils_Non_Axisymmetyric()
+    coil._clear()

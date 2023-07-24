@@ -173,6 +173,8 @@ class Axes:
             self.axes = axes
             self.fig = self.gcf()
             return self.axes
+        if style == "3d":
+            kwargs["subplot_kw"] = {"projection": "3d"}
         aspect = kwargs.pop("aspect", None)
         if aspect is not None:
             kwargs["figsize"] = import_module("matplotlib.figure").figaspect(aspect)
@@ -205,7 +207,7 @@ class Axes:
             case "1d":
                 axes.set_aspect("auto")
                 axes.axis("on")
-            case "2d":
+            case "2d" | "3d":
                 axes.set_aspect("equal")
                 axes.axis("off")
             case _:

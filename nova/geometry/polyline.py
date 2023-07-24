@@ -139,6 +139,14 @@ class Arc(Plot):
         self.axes.plot(self.points[:, 1], self.points[:, 2], "o")
         self.axes.plot(self.points_fit[:, 1], self.points_fit[:, 2], "D")
 
+    def plot3d(self):
+        """Plot point and best-fit data."""
+        self.get_axes("3d")
+        points = self.sample(21)
+        self.axes.plot(*points.T)
+        self.axes.plot(*self.points.T, "o")
+        self.axes.plot(*self.points_fit.T, "D")
+
     def plot_fit(self):
         """Plot best-fit arc and point cloud."""
         self.plot()
@@ -211,7 +219,8 @@ class PolyLine(Plot):
     """Decimate polyline using a hybrid arc/line-segment rdp algorithum."""
 
     points: np.ndarray
-    eps: float = 5e-4
+    eps: float = 1e-3
+    epsilon: float = 1e-3
     arc: Arc = field(init=False, repr=False)
     segments: list = field(init=False, default_factory=list)
 
@@ -252,13 +261,13 @@ class PolyLine(Plot):
 
     def plot(self):
         """Plot decimated polyline."""
-        self.set_axes("2d")
-        self.axes.plot(self.points[:, 1], self.points[:, 2])
+        self.set_axes("3d")
+        self.axes.plot(*self.points.T)  # self.points[:, 1], self.points[:, 2])
         for segment in self.segments:
             if len(segment) == 3:  # arc
-                Arc(segment).plot()
+                Arc(segment).plot3d()
                 continue
-            self.axes.plot(segment[:, 1], segment[:, 2], "k.")
+            self.axes.plot(*segment.T, "k.")
 
 
 if __name__ == "__main__":

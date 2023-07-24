@@ -707,9 +707,9 @@ if __name__ == "__main__":
 
     # pulse, run = 135013, 2
 
-    EquilibriumData(pulse, run, occurrence=0)._clear()
+    # EquilibriumData(pulse, run, occurrence=0)._clear()
     equilibrium = EquilibriumData(pulse, run, occurrence=0)
 
-    equilibrium.itime = 25
+    equilibrium.itime = 22
     equilibrium.plot_2d("psi", mask=0)
     equilibrium.plot_boundary(outline=False)

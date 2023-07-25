@@ -36,17 +36,20 @@ class ShieldDir:
     """Manage shield filepath."""
 
     file: str = "Fi"
-    path: str = None
+    data_dir: str | None = None
+    source_dir: str = "/mnt/share/shield"  # //io-ws-ccstore1/ANSYS_Data/mcintos
 
     def __post_init__(self):
         """Define file paths."""
-        if self.path is None:
-            self.path = os.path.join(root_dir, "input/ITER/shield")
+        if hasattr(super(), "__post_init__"):
+            super().__post_init__()
+        if self.data_dir is None:
+            self.data_dir = os.path.join(root_dir, "input/ITER/shield")
 
     @property
     def cdf_file(self):
         """Return netCDF filename."""
-        return os.path.join(self.path, f"{self.file}.nc")
+        return os.path.join(self.data_dir, f"{self.file}.nc")
 
 
 @dataclass
@@ -61,6 +64,7 @@ class ShieldCad(ShieldDir, ShieldBase):
         super().__post_init__()
         self.mesh = self.load_mesh()
         self.frame = self.load_frame()
+        self.frame.vtkgeo.generate_vtk()
 
     @property
     def cdf_file(self):
@@ -85,15 +89,19 @@ class ShieldCad(ShieldDir, ShieldBase):
     @property
     def vtk_file(self):
         """Retun full vtk filename."""
-        return os.path.join(self.path, f"{self.file}_S{self.sector}.vtk")
+        return os.path.join(self.data_dir, f"{self.file}_S{self.sector}.vtk")
 
     @property
     def stl_file(self):
         """Return full stl filename."""
-        file = os.path.join(self.path, f"{self.file}_S{self.sector}.stl")
-        if not os.path.isfile(file):
-            raise FileNotFoundError(f"stl file {file} not found")
-        return file
+        filename = f"{self.file}_S{self.sector}.stl"
+        if os.path.isfile(file := os.path.join(self.data_dir, filename)):
+            return file
+        if os.path.isfile(file := os.path.join(self.source_dir, filename)):
+            return file
+        raise FileNotFoundError(
+            f"file {filename} not found in: \n{self.data_dir} \n{self.source_dir}"
+        )
 
     def load_mesh(self):
         """Return mesh."""
@@ -120,7 +128,7 @@ class ShieldCad(ShieldDir, ShieldBase):
 
     def build_frame(self):
         """Return dataframe read from vtk file."""
-        parts = self.mesh.splitByConnectivity(10000)
+        parts = self.mesh.split(10000)
         frame = FrameSpace(**self.frame_metadata)
         tick = clock(len(parts), header="loading decimated convex hulls")
         for i, part in enumerate(parts):
@@ -143,7 +151,7 @@ class ShieldCad(ShieldDir, ShieldBase):
 class ShieldSector(ShieldCad):
     """Manage shield sector rotations."""
 
-    avalible: ClassVar[list[int]] = range(1, 10)
+    avalible: ClassVar[list[int]] = [*range(1, 10)]
     base_sector: ClassVar[int] = 6
 
     def build_mesh(self):
@@ -200,18 +208,19 @@ class ShieldSet(ShieldDir):
     file: str = "Fi"
     mesh: vedo.Mesh = field(init=False, repr=False)
     frame: FrameSpace = field(init=False, repr=False)
-    avalible: ClassVar[list[int]] = range(1, 10)
+    avalible: ClassVar[list[int]] = [*range(1, 10)]
 
     def __post_init__(self):
         """Load shieldset."""
         super().__post_init__()
         self.mesh = self.load_mesh()
         self.frame = self.load_frame()
+        self.frame.vtkgeo.generate_vtk()
 
     @property
     def vtk_file(self):
         """Retun full vtk filename."""
-        return os.path.join(self.path, f"{self.file}.vtk")
+        return os.path.join(self.data_dir, f"{self.file}.vtk")
 
     def load_mesh(self):
         """Return mesh."""
@@ -265,8 +274,8 @@ class Cluster:
 
     source: FrameSpace = field(repr=False)
     factor: float = 1.5
-    color: Union[int, str] = None
-    opacity: float = None
+    color: Union[int, str] | None = None
+    opacity: float | None = None
     frame: FrameSpace = field(init=False)
 
     def __post_init__(self):
@@ -325,6 +334,7 @@ class ShieldCluster(ShieldDir):
         """Load dataset."""
         super().__post_init__()
         self.frame = self.load()
+        self.frame.vtkgeo.generate_vtk()
 
     @property
     def cdf_file(self):
@@ -351,7 +361,8 @@ class ShieldCluster(ShieldDir):
         frames = []
         tick = clock(len(parts), header="clustering shield set")
         for i, part in enumerate(parts):
-            frames.append(Cluster(shield.frame.loc[part, :], color=i, opacity=1).frame)
+            index = shield.frame.part == part
+            frames.append(Cluster(shield.frame.loc[index, :], color=i, opacity=1).frame)
             tick.tock()
         frame.concatenate(*frames)
         frame.store(self.cdf_file, mode="w")
@@ -482,7 +493,7 @@ class Ferritic(FerriticBase):
 
 
 if __name__ == "__main__":
-    cad = ShieldCad(1)
+    # cad = ShieldCad(2)
     # print(sum([ShieldCad(i).frame.volume.sum() for i in range(1, 10)]))
     # base.frame = base.build_frame()
     # print(base.frame.volume.sum())
@@ -493,6 +504,7 @@ if __name__ == "__main__":
 
     # [ShieldCad(i).mesh.volume() for i in [2, 3, 4, 6]]
     # [ShieldCad(i).mesh.volume() for i in [2, 3, 4, 6]]
+    # shield = ShieldSet()
 
     shield = ShieldCluster()
     print(shield.frame.volume.sum())

@@ -2,7 +2,9 @@
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from functools import cached_property
+from glob import glob
 import os
+from pathlib import Path
 from typing import ClassVar
 
 import openpyxl
@@ -10,25 +12,50 @@ import pandas
 
 from nova.assembly.fiducialccl import Fiducial, FiducialRE
 from nova.definitions import root_dir
+from nova.database.filepath import FilePath
 
 
 @dataclass
-class SectorData:
+class Sector:
+    r"""
+    Sector filename path and group.
+
+    Sector module data is downloaded from IDM and stored at:
+    \\\\io-ws-ccstore1\\ANSYS_Data\\mcintos\\sector_modules
+
+    idm_dir : str
+        Mount point location for IO shared folder
+    """
+
+    sector: int
+    version: str | int = "latest"
+    idm_dir: Path | str = "/mnt/share/sector_modules"
+
+    def __post_init__(self):
+        """Set dataset group."""
+        print(self.path, self.sector)
+        print(glob(self.idm_dir + "/*Sector_Module_#[1-9]*.xlsx"))
+
+
+@dataclass
+class SectorData(FilePath, Sector):
     """Manage fiducial coil and sector assembly data sourced from IDM."""
 
-    file: str
+    filename: str = "sector_modules"
+    dirname: Path | str = ".nova"
     data: dict = field(init=False, repr=False, default_factory=dict)
     ccl: dict = field(init=False, repr=False, default_factory=dict)
 
-    def __post_init__(self):
+    def build(self):
         """Build mesurment dataset."""
-        self.build_data()
-        self.build_ccl()
+        print("build")
+        # self.build_data()
+        # self.build_ccl()
 
     @property
     def xls_file(self):
         """Return xls filename."""
-        return os.path.join(root_dir, "input/ITER", f"{self.file}.xlsx")
+        return os.path.join(root_dir, self.idm_dir, f"{self.file}.xlsx")
 
     def _initialize_data(self):
         """Initialize data as a bare nested dict with coil name entries."""
@@ -46,12 +73,12 @@ class SectorData:
                     self.data[name][sheet] = self.read_frame(index, sheet)
 
     @cached_property
-    def coil(self) -> list[str, str]:
+    def coil(self) -> list[str]:
         """Return list of coil names."""
         return [name for name in self.data]
 
     @cached_property
-    def phase(self) -> list[str, ...]:
+    def phase(self) -> list[str]:
         """Return list of assembly phases."""
         return [phase for phase in self.data[self.coil[0]] if phase != "Nominal"]
 
@@ -151,19 +178,31 @@ class FiducialSector(Fiducial):
         init=False, default_factory=dict
     )
 
+    sheets: ClassVar[dict[str, str]] = {"FATsup": "FAT supplier", "SSAT": "SSAT BR"}
     sectors: ClassVar[list[str]] = [
-        "Sector_Module_#6_CCL_as-built_data_8NQVKS_v2_1",
-        "Sector_Module_#7_CCL_as-built_data_8NR9J7_v2_1",
+        # "Sector_Module_#1_CCL_as-built_data_8LMK6A_v1_1",
+        # "Sector_Module_#2_CCL_as-built_data_8LN52G_v1_0",
+        # "Sector_Module_#3_CCL_as-built_data_8M6Y9U_v1_1",
+        # "Sector_Module_#4_CCL_as-built_data_8H2YGF_v1_0",
+        # "Sector_Module_#5_CCL_as-built_data_8L34J6_v1_0",
+        # "Sector_Module_#6_CCL_as-built_data_8NQVKS_v2_1",
+        # "Sector_Module_#7_CCL_as-built_data_8NR9J7_v2_1",
+        "Sector_Module_#8_CCL_as-built_data_8PVXAG_v1_0",
     ]
 
     def __post_init__(self):
         """Propogate origin."""
+        self._set_phase()
         super().__post_init__()
         self.source = "Reverse Engineering IDM datasets (xls workbooks)"
         self.origin = [
             origin for i, origin in enumerate(self.origin) if i + 1 in self.delta
         ]
         self._load_variance()
+
+    def _set_phase(self):
+        """Expand short string phase label."""
+        self.phase = self.sheets.get(self.phase, self.phase)
 
     def _load_deltas(self):
         """Implement load deltas abstractmethod."""
@@ -188,6 +227,8 @@ class FiducialSector(Fiducial):
         """Compare fiducial sector data with previous RE dataset."""
         previous = FiducialRE()
         for coil, ccl in self.delta.items():
+            if coil not in previous.delta:
+                continue
             print(coil)
             _ccl = previous.delta[coil].xs("FAT", 1)
             print(ccl.loc[:, ["dx", "dy", "dz"]] - _ccl)
@@ -197,11 +238,13 @@ class FiducialSector(Fiducial):
 if __name__ == "__main__":
     sector = SectorData("Sector_Module_#7_CCL_as-built_data_8NR9J7_v2_1")
 
-    fiducial = FiducialSector(phase="SSAT BR")
-    # fiducial.compare()
-    fiducial.plot()
+    """
+    fiducial = FiducialSector(phase="FATsup")
+    fiducial.compare()
+    # fiducial.plot()
 
     for coil, ccl in fiducial.delta.items():
         print(f"Coil {coil}")
         print(ccl)
         print()
+    """

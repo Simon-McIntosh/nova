@@ -185,6 +185,8 @@ class FrameLink(LinkIndexer, DataArray):
             frames = [frame, *insert]
         else:  # insert
             frames = [frame.iloc[:iloc, :], *insert, frame.iloc[iloc:, :]]
+        for frame in frames:
+            frame.attrs = {}
         frame = pandas.concat(frames, sort=sort)  # concatenate
         self.__init__(frame, attrs=self.attrs, metadata=self.metaframe.metadata)
         self.update_version()
@@ -285,7 +287,7 @@ class FrameLink(LinkIndexer, DataArray):
                 f"{frame.columns}"
             )
         args = [frame[col] for col in self.metaframe.required]
-        _ = [kwargs.pop(attr, None) for attr in self.metaframe.required]
+        [kwargs.pop(attr, None) for attr in self.metaframe.required]
         if not isinstance(frame.index, pandas.RangeIndex):
             kwargs["name"] = frame.index
         kwargs |= {col: frame[col] for col in self.metaframe.columns if col in frame}

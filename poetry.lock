@@ -1355,7 +1355,7 @@ files = [
 name = "et-xmlfile"
 version = "1.1.0"
 description = "An implementation of lxml.xmlfile for the standard library"
-optional = true
+optional = false
 python-versions = ">=3.6"
 files = [
     {file = "et_xmlfile-1.1.0-py3-none-any.whl", hash = "sha256:a2ba85d1d6a74ef63837eed693bcb89c3f752169b0e3e7ae5b16ca5e1b3deada"},
@@ -3652,7 +3652,7 @@ testing = ["matplotlib", "pytest", "pytest-cov"]
 name = "openpyxl"
 version = "3.1.2"
 description = "A Python library to read/write Excel 2010 xlsx/xlsm files"
-optional = true
+optional = false
 python-versions = ">=3.6"
 files = [
     {file = "openpyxl-3.1.2-py2.py3-none-any.whl", hash = "sha256:f91456ead12ab3c6c2e9491cf33ba6d08357d802192379bb482f1033ade496f5"},
@@ -6278,6 +6278,17 @@ files = [
 ]
 
 [[package]]
+name = "types-openpyxl"
+version = "3.1.0.15"
+description = "Typing stubs for openpyxl"
+optional = false
+python-versions = "*"
+files = [
+    {file = "types-openpyxl-3.1.0.15.tar.gz", hash = "sha256:4eee0c32882c96cc4bf15b122da234385c5c7cdce2121727ef4e6a2637b05863"},
+    {file = "types_openpyxl-3.1.0.15-py3-none-any.whl", hash = "sha256:b8bb8665edb10ebe11ee7ce7e74024f6101b884f74186477495615415f51de6a"},
+]
+
+[[package]]
 name = "types-pytz"
 version = "2023.3.0.0"
 description = "Typing stubs for pytz"
@@ -6907,4 +6918,4 @@ vtk = ["alphashape", "meshio", "pyvista", "trimesh", "vedo"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.12"
-content-hash = "5ee1667d15613bea06eaa648b896994dd410d7581da01889d662fa05c5d54c32"
+content-hash = "82a92b05a7f950bcd526e6084bc35af216258af9c8888159b446b64dc8928673"

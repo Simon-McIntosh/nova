@@ -11,6 +11,6 @@ path = np.c_[2 * np.cos(theta), np.linspace(0, 3, len(theta)), 3 * np.sin(theta)
 
 coilset.winding.insert({"e": [0, 0, 0.25, 0.2]}, path, part="pf")
 
-# coilset.frame.vtkplot()
+coilset.frame.vtkplot()
 
 polyline = PolyLine(path)

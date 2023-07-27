@@ -45,7 +45,10 @@ class Coils_Non_Axisymmetyric(Plot, CoilDatabase):
                     ]
                 )
             polyline = PolyLine(np.array(points))
-            polyline.plot()
+            # polyline.plot()
+
+            print(len(polyline.points), len(polyline.segments))
+
         """
         coil_name = coil_names(self.ids_data.coil)
         with self.build_scenario():
@@ -84,4 +87,4 @@ class Coils_Non_Axisymmetyric(Plot, CoilDatabase):
 
 if __name__ == "__main__":
     coil = Coils_Non_Axisymmetyric()
-    coil._clear()
+    # coil._clear()

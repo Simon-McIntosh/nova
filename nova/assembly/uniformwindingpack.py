@@ -43,9 +43,9 @@ class UniformWindingPack:
             self.mesh = pv.read(self.vtk_file)
         except FileNotFoundError:
             self.compute_ccl()
-            self.extract_turns()
-            self.pattern_mesh()
-            self.mesh.save(self.vtk_file)
+            # self.extract_turns()
+            # self.pattern_mesh()
+            # self.mesh.save(self.vtk_file)
 
     def read_spine(self):
         """Read TFC1 conductor centerline from spine file."""
@@ -79,6 +79,11 @@ class UniformWindingPack:
         cube = pv.Cube(center=[0, 0, -0.03], x_length=0.1, y_length=0.9, z_length=0.7)
         cube = self.rotate(cube, tangent)
         cube.translate(point)
+
+        cube_plane = cube
+        cube_plane += plane
+        cube_plane.plot()
+
         return plane.clip_box(cube, invert=False)
 
     @staticmethod
@@ -86,10 +91,11 @@ class UniformWindingPack:
         """Return Euler rotation angles."""
         rotvec = np.cross(referance, tangent)
         rotvec *= np.arccos(referance @ tangent) / np.linalg.norm(rotvec)
+        print(rotvec)
         euler_angles = Rotation.from_rotvec(rotvec).as_euler("xyz", degrees=True)
-        mesh.rotate_x(euler_angles[0])
-        mesh.rotate_y(euler_angles[1])
-        mesh.rotate_z(euler_angles[2])
+        mesh.rotate_x(euler_angles[0], inplace=True)
+        mesh.rotate_y(euler_angles[1], inplace=True)
+        mesh.rotate_z(euler_angles[2], inplace=True)
         return mesh
 
     def compute_ccl(self):
@@ -97,16 +103,18 @@ class UniformWindingPack:
         coil = self.select_coil(0)
         loops = np.zeros((134, self.spine_mesh.n_points, 3))
         index = 0
-        for i in range(self.spine_mesh.n_points):
+
+        for i in range(1):  # self.spine_mesh.n_points):
             plane = self.slice_coil(coil, i)
             try:
                 loops[:, index] = plane.points
                 index += 1
             except ValueError:
                 pass
+
         self.mesh = pv.PolyData()
-        for loop in loops[:, :index]:
-            self.mesh += pv.Spline(loop)
+        # for loop in loops[:, :index]:
+        #    # self.mesh += pv.Spline(loop)
 
     def extract_turns(self):
         """Extract low-field midplane turn layout."""
@@ -132,8 +140,11 @@ class UniformWindingPack:
 
 if __name__ == "__main__":
     wp = UniformWindingPack()
+
+    """
     wp.plot_turns()
 
     points = wp.mesh.points.reshape(18, 134, -1, 3)
     loop = points[9, 0]
     plt.plot(loop[:, 0], loop[:, 2])
+    """

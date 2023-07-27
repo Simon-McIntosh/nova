@@ -15,13 +15,12 @@ from nova.assembly.centerline import CenterLine
 from nova.assembly.fiducialdata import FiducialData
 from nova.assembly.fiducialplotter import FiducialPlotter
 from nova.assembly.gaussianprocessregressor import GaussianProcessRegressor
-from nova.assembly.spacialanalyzer import SpacialAnalyzer
 from nova.assembly.transform import Rotate
 
 
 @dataclass
-class SectorTransform:
-    """Perform optimal sector transforms fiting fiducials to targets."""
+class FiducialTransform:
+    """Perform optimal transforms fiting GPR fiducials to nominal targets."""
 
     sector: int = 6
     infer: bool = True
@@ -37,12 +36,14 @@ class SectorTransform:
     def __post_init__(self):
         """Load data."""
         self.rotate = Rotate()
+        """
         self.spacial_analyzer = SpacialAnalyzer(sector=self.sector, files=self.files)
         self.load_reference()
         self.load_centerline()
         self.load_gpr()
         self.fit_reference()
         self.fit()
+        """
 
     def load_reference(self):
         """Load reference sector data."""
@@ -319,7 +320,7 @@ class SectorTransform:
 
 
 if __name__ == "__main__":
-    transform = SectorTransform(
+    transform = FiducialTransform(
         6, True, method="rms", n_samples=5, files=dict(reference_ccl="reference_ccl")
     )
     # transform.plot('target')
@@ -328,5 +329,5 @@ if __name__ == "__main__":
     # transform.plot_transform()
     # transform.write()
 
-    transform.plot_gpr("reference", 0, n_samples=5)
+    # transform.plot_gpr("reference", 0, n_samples=5)
     # transform.plot_gpr('reference', 1)

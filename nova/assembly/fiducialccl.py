@@ -59,6 +59,7 @@ class Fiducial(ABC):
 class FiducialIDM(Fiducial):
     """Manage ccl fiducial data extracted from IDM documents."""
 
+    phase: str = "FAT supplier"
     origin: list[str] = field(init=False, default_factory=list)
     source: str = "IDM dataset"
 
@@ -355,7 +356,12 @@ class FiducialIDM(Fiducial):
 
     @property
     def _tfc09(self):
-        """Return TFC09 fiducidal data - 2SU8F4 - F4E_D_2KYN3R v2.0 EU."""
+        """
+        Return TFC09 fiducidal data - 2SU8F4 - F4E_D_2KYN3R v2.0 EU.
+
+        Updated to reflect 2KYN3R v2.1
+
+        """
         return (
             pandas.DataFrame(
                 index=[
@@ -392,36 +398,36 @@ class FiducialIDM(Fiducial):
                 ],
                 columns=["dx", "dy", "dz"],
                 data=[
-                    [-0.3, 0.32, -0.16],
-                    [-0.02, 0.32, -0.04],
-                    [0.2, 0.23, 0.06],
-                    [0.25, -0.05, 0.14],
-                    [0.28, -0.31, 0.21],
-                    [0.06, -0.25, 0.18],
-                    [-0.16, -0.18, 0.15],
-                    [-0.38, -0.16, 0.12],
-                    [-0.64, -0.26, 0.07],
-                    [-0.99, -0.11, 0.22],
-                    [-1.29, 0.25, 0.5],
-                    [-1.59, 0.6, 0.77],
-                    [-1.88, 0.92, 1.02],
-                    [-2.09, 0.79, 0.79],
-                    [-2.3, 0.65, 0.56],
-                    [-2.5, 0.52, 0.33],
-                    [-2.72, 0.39, 0.1],
-                    [-2.95, 0.23, -0.17],
-                    [-3.2, 0.07, -0.44],
-                    [-3.44, -0.08, -0.71],
-                    [-3.34, -0.15, -0.92],
-                    [-3.09, -0.16, -1.07],
-                    [-2.84, -0.18, -1.22],
-                    [-2.6, -0.19, -1.36],
-                    [-2.35, -0.22, -1.5],
-                    [-2.03, -0.23, -1.68],
-                    [-1.71, -0.23, -1.83],
-                    [-1.08, 0.17, -0.77],
-                    [-0.9, 0.29, -0.47],
-                    [-0.61, 0.32, -0.29],
+                    [-0.5, 0.78, -0.16],
+                    [-0.14, 0.28, -0.04],
+                    [0.25, 0.26, 0.06],
+                    [0.34, -0.23, 0.14],
+                    [0.52, -0.53, 0.21],
+                    [0.17, -0.51, 0.18],
+                    [-0.08, -0.65, 0.15],
+                    [-0.49, -0.21, 0.12],
+                    [-0.79, 0.47, 0.07],
+                    [-1.35, 0.6, 0.77],
+                    [-1.17, 0.56, 1.34],
+                    [-0.98, 0.28, 1.51],
+                    [-1.05, 0.12, 1.66],
+                    [-1.23, -0.01, 0.84],
+                    [-1.62, -1.0, 0.26],
+                    [-2.04, -0.75, -0.15],
+                    [-2.43, -0.65, -0.41],
+                    [-2.99, -0.31, -0.72],
+                    [-3.62, -0.04, -0.94],
+                    [-4.08, -0.41, -0.99],
+                    [-4.39, -0.13, -0.92],
+                    [-4.16, -0.1, -0.78],
+                    [-3.79, 0.46, -0.66],
+                    [-3.59, -0.12, -0.47],
+                    [-3.2, -0.23, -0.34],
+                    [-2.56, 0.99, -0.28],
+                    [-0.14, 2.48, -2.97],
+                    [-0.26, 3.04, -0.82],
+                    [-0.3, 2.8, -0.72],
+                    [-0.64, 1.61, -0.59],
                 ],
             ),
             "EU",
@@ -569,7 +575,7 @@ class FiducialIDM(Fiducial):
     @property
     def _tfc14(self):
         """Return TFC14 fiducial data - EU."""
-        raise NotImplementedError("TFC14 - JA - pending")
+        raise NotImplementedError("TFC14 - EU - pending")
 
     @property
     def _tfc15(self):
@@ -597,25 +603,12 @@ class FiducialIDM(Fiducial):
         raise NotImplementedError("TFC19 - JA - pending")
 
     @staticmethod
-    def coordinate_transform(mcs):
-        """
-        Convert ccl delta coordinates from AU (JA) to space.
-
-        space to MCS:
-            𝑋𝑀𝐶𝑆 = 5334.4 − 𝑋𝑇𝐺𝐶𝑆
-            𝑌𝑀𝐶𝑆 = 29 − 𝑍𝑇𝐺𝐶𝑆
-            𝑍𝑀𝐶𝑆 = 𝑌𝑇𝐺𝐶𝑆
-
-        From MCS to space:
-            𝑋𝑇𝐺𝐶𝑆 = 5334.4 − 𝑋𝑀𝐶𝑆
-            𝑌𝑇𝐺𝐶𝑆 = 𝑍𝑀𝐶𝑆
-            𝑍𝑇𝐺𝐶𝑆 = 29 - 𝑌𝑀𝐶𝑆
-
-        """
-        space = pandas.DataFrame(index=mcs.index, columns=mcs.columns)
-        space.loc[:, "dx"] = mcs.dz
-        space.loc[:, "dy"] = mcs.dx
-        space.loc[:, "dz"] = mcs.dy
+    def coordinate_transform(auja):
+        """Convert ccl delta coordinates from AU (JA) to space."""
+        space = pandas.DataFrame(index=auja.index, columns=auja.columns)
+        space.loc[:, "dx"] = auja.dz
+        space.loc[:, "dy"] = auja.dx
+        space.loc[:, "dz"] = auja.dy
         return space
 
     @staticmethod
@@ -628,7 +621,7 @@ class FiducialIDM(Fiducial):
         ccl = ccl.iloc[:, column_index]
         ccl.columns = ["dx", "dy", "dz"]
         ccl = ccl.iloc[~(ccl == "-").any(axis=1).values, :]
-        return ccl.dropna(0).astype(float)
+        return ccl.dropna().astype(float)
 
 
 @dataclass

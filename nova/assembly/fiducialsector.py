@@ -12,7 +12,7 @@ import numpy as np
 import openpyxl
 import pandas
 
-from nova.assembly.fiducialccl import Fiducial, FiducialRE
+from nova.assembly.fiducialccl import Fiducial, FiducialRE, FiducialIDM
 from nova.database.filepath import FilePath
 
 
@@ -129,7 +129,6 @@ class SectorData(FilePath, SectorFile):
 
     def build(self):
         """Build mesurment dataset."""
-        print(self.filename)
         self.build_data()
         self.build_ccl()
         self.store()
@@ -268,9 +267,7 @@ class FiducialSector(Fiducial):
         self._set_phase()
         super().__post_init__()
         self.source = "Reverse Engineering IDM datasets (xls workbooks)"
-        self.origin = [
-            origin for i, origin in enumerate(self.origin) if i + 1 in self.delta
-        ]
+        self.origin = [self.origin[coil - 1] for coil in self.delta]
         self._load_variance()
 
     def _set_phase(self):
@@ -296,13 +293,22 @@ class FiducialSector(Fiducial):
                     columns={col: f"s2{col[-1]}" for col in columns}
                 )
 
-    def compare(self):
+    def compare(self, source="RE"):
         """Compare fiducial sector data with previous RE dataset."""
-        previous = FiducialRE()
+        match source:
+            case "IDM":
+                previous = FiducialIDM()
+            case "RE":
+                previous = FiducialRE()
+            case _:
+                raise ValueError(f"source {source} not in [RE, IDM]")
+
         for coil, ccl in self.delta.items():
             if coil not in previous.delta:
                 continue
-            _ccl = previous.delta[coil].xs("FAT", 1)
+            _ccl = previous.delta[coil]
+            if source == "RE":
+                _ccl = _ccl = previous.delta[coil].xs("FAT", 1)
             change = ccl.loc[:, ["dx", "dy", "dz"]] - _ccl
             if not np.allclose(np.array(change, float), 0):
                 print(f"\ncoil #{coil}")
@@ -310,10 +316,10 @@ class FiducialSector(Fiducial):
 
 
 if __name__ == "__main__":
-    sector = SectorData(8)
+    # sector = SectorData(8)
 
     fiducial = FiducialSector(phase="FATsup")  # , sectors=[8]
-    fiducial.compare()
+    fiducial.compare("RE")
     # fiducial.plot()
 
     # for coil, ccl in fiducial.delta.items():

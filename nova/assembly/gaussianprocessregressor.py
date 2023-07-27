@@ -127,8 +127,8 @@ class GaussianProcessRegressor:
         if stage > 1:
             axes.fill_between(
                 self.data.x_mean,
-                self.data.y_mean - self.data.y_std,
-                self.data.y_mean + self.data.y_std,
+                self.data.y_mean - 2 * self.data.y_std,
+                self.data.y_mean + 2 * self.data.y_std,
                 alpha=0.15,
                 color="k",
                 label="95% confidence",

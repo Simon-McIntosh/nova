@@ -14,7 +14,7 @@ class WindingPack:
     """Load referance winding pack centerlines from file."""
 
     file: str
-    directory: str = None
+    directory: str | None = None
     data: xarray.Dataset = field(init=False, repr=False)
     mesh: pv.PolyData = field(init=False, repr=False)
 

@@ -412,9 +412,9 @@ class Sweep(Cell):
             - shapely.geometry.Polygon
             - dict[str, list[float]], polyname: *args
             - list[float], shape(4,) bounding box [xmin, xmax, zmin, zmax]
-            - array-like, shape(n,2) bounding loop [x, z]
+            - array-like, shape(n, 2) bounding loop [x, z]
 
-        path : np.ndarray, shape(,3)
+        path : np.ndarray, shape(n, 3)
             Swept path.
 
         """

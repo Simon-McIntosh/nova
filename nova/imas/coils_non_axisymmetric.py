@@ -1,10 +1,9 @@
 """Manage access to non-axisymmetric coil data."""
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import ClassVar
 
 import numpy as np
 
-from nova.geometry.polyline import PolyLine
 from nova.graphics.plot import Plot
 from nova.imas.coil import coil_name
 from nova.imas.machine import CoilDatabase
@@ -18,6 +17,7 @@ class Coils_Non_Axisymmetyric(Plot, CoilDatabase):
     run: int = 1
     name: str = "coils_non_axisymmetric"
     ids_node: str = "coil"
+    available: list[str] = field(default_factory=lambda: ["vtk"])
 
     coil_attrs: ClassVar[list[str]] = ["turns", "resistance"]
 
@@ -32,9 +32,7 @@ class Coils_Non_Axisymmetyric(Plot, CoilDatabase):
     def build(self):
         """Build netCDF database using data extracted from imasdb."""
         for coil in self.ids_data.coil[:1]:
-            name = coil_name(coil)
-            print(name)
-
+            coil_name(coil)
             points = []
             for conductor in coil.conductor:
                 points.extend(
@@ -44,10 +42,17 @@ class Coils_Non_Axisymmetyric(Plot, CoilDatabase):
                         self._points(conductor.elements.end_points),
                     ]
                 )
-            polyline = PolyLine(np.array(points))
+            print(np.shape(points))
+
+            self.points = points
+            # line = Line().from_points(np.array(points))
+            # line.show()
+            # self.winding.insert({"c": [0, 0, 0.005]}, np.array(points), name=name)
+            # polyline = PolyLine(np.array(points))
             # polyline.plot()
 
-            print(len(polyline.points), len(polyline.segments))
+        # self.polyline = polyline
+        # self.frame.vtk.plot()
 
         """
         coil_name = coil_names(self.ids_data.coil)
@@ -87,4 +92,5 @@ class Coils_Non_Axisymmetyric(Plot, CoilDatabase):
 
 if __name__ == "__main__":
     coil = Coils_Non_Axisymmetyric()
+    coil.subframe.vtkplot()
     # coil._clear()

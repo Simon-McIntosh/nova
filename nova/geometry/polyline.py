@@ -144,8 +144,8 @@ class Arc(Plot):
         self.get_axes("3d")
         points = self.sample(21)
         self.axes.plot(*points.T)
-        self.axes.plot(*self.points.T, "o")
-        self.axes.plot(*self.points_fit.T, "D")
+        self.axes.plot(*self.points.T, "o", ms=3)
+        self.axes.plot(*self.points_fit.T, "D", ms=3)
 
     def plot_fit(self):
         """Plot best-fit arc and point cloud."""

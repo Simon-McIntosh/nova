@@ -47,7 +47,8 @@ class Line:
         backward = self.normalize(backward)
         # central diffrence
         self.mesh["tangent"] = (forward + backward) / 2
-        self.mesh["tangent"] = self.normalize(self.mesh["tangent"])
+        self.mesh["tangent"][0] = forward[0]
+        self.mesh["tangent"][-1] = backward[-1]
 
     def compute_normal(self):
         """Compute normal vector as cross product of tangent and plane."""

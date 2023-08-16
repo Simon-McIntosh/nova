@@ -1,12 +1,89 @@
 """Manage access to non-axisymmetric coil data."""
 from dataclasses import dataclass, field
+from functools import cached_property
 from typing import ClassVar
 
 import numpy as np
 
 from nova.graphics.plot import Plot
 from nova.imas.coil import coil_name
+from nova.imas.database import ImasIds
 from nova.imas.machine import CoilDatabase
+
+
+@dataclass
+class Elements(Plot):
+    """Manage conductor element data extracted from coils_non_axisymmetric IDS."""
+
+    points: np.ndarray = field(
+        init=False, repr=False, default_factory=lambda: np.array([])
+    )
+    elements: ImasIds = field(repr=False, default=None)
+    data: dict[str, np.ndarray] = field(init=False, repr=False, default_factory=dict)
+
+    point_attrs: ClassVar[list[str]] = [
+        "start_points",
+        "intermediate_points",
+        "end_points",
+    ]
+
+    def __post_init__(self):
+        """Extract point data from elements node."""
+        self.data["types"] = self.elements.types
+        for attr in self.point_attrs:
+            self.data[attr] = self._to_array(getattr(self.elements, attr))
+        self.points = self._extract_points()
+
+    def __len__(self):
+        """Return maximum length of arrays stored in data dict."""
+        return np.max([len(array) for array in self.data.values()])
+
+    def _to_array(self, ids_points):
+        """Return cartesian point array from nested cylindrical ids structure."""
+        return np.c_[
+            ids_points.r * np.cos(ids_points.phi),
+            ids_points.r * np.sin(ids_points.phi),
+            ids_points.z,
+        ]
+
+    @cached_property
+    def _point_array(self):
+        """Return shape (n, 3, 3) point array."""
+        points = np.zeros((len(self), 3, 3))
+        for i, attr in enumerate(self.point_attrs):
+            if len(self.data[attr]) == 0:  # skip unfilled entries
+                continue
+            points[..., i] = self.data[attr]
+        return points
+
+    @cached_property
+    def _type_array(self):
+        """Return shape (n,) element types array."""
+        types = np.zeros(len(self))
+        types[:] = self.data["types"]
+        return types
+
+    def _extract_points(self):
+        """Return shape (n, 3) unique point centerline."""
+        points = []
+        for element_type, point_array in zip(self._type_array, self._point_array):
+            match element_type:
+                case 1:
+                    points.append(point_array[..., 0])
+                case 2:
+                    points.append(point_array[..., 0])
+                    points.append(point_array[..., 1])
+                case _:
+                    raise ValueError(f"element_type {element_type} not supported")
+        points.append(point_array[..., -1])
+        return np.array(points)[
+            np.sort(np.unique(points, return_index=True, axis=0)[1])
+        ]
+
+    def plot(self):
+        """Plot polyline."""
+        self.set_axes("3d")
+        self.axes.plot(*self.points.T)
 
 
 @dataclass
@@ -21,35 +98,17 @@ class Coils_Non_Axisymmetyric(Plot, CoilDatabase):
 
     coil_attrs: ClassVar[list[str]] = ["turns", "resistance"]
 
-    def _points(self, ids_points):
-        """Return cartesian point array from nested cylindrical ids structure."""
-        return np.c_[
-            ids_points.r * np.cos(ids_points.phi),
-            ids_points.r * np.sin(ids_points.phi),
-            ids_points.z,
-        ]
-
     def build(self):
         """Build netCDF database using data extracted from imasdb."""
         for coil in self.ids_data.coil[:1]:
-            coil_name(coil)
-            points = []
-            for conductor in coil.conductor:
-                points.extend(
-                    np.r_[
-                        self._points(conductor.elements.start_points),
-                        self._points(conductor.elements.intermediate_points),
-                        self._points(conductor.elements.end_points),
-                    ]
-                )
-            print(np.shape(points))
-
-            self.points = points
+            print(coil_name(coil))
+            for i, conductor in enumerate(coil.conductor):
+                elements = Elements(elements=conductor.elements)
+            self.winding.insert({"c": [0, 0, 0.05]}, elements.points)
+            # elements.plot()
             # line = Line().from_points(np.array(points))
             # line.show()
             # self.winding.insert({"c": [0, 0, 0.005]}, np.array(points), name=name)
-            # polyline = PolyLine(np.array(points))
-            # polyline.plot()
 
         # self.polyline = polyline
         # self.frame.vtk.plot()
@@ -92,5 +151,5 @@ class Coils_Non_Axisymmetyric(Plot, CoilDatabase):
 
 if __name__ == "__main__":
     coil = Coils_Non_Axisymmetyric()
-    coil.subframe.vtkplot()
+    # coil.subframe.vtkplot()
     # coil._clear()

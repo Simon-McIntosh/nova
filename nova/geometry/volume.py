@@ -262,7 +262,7 @@ class Section:
         """Return length of mesh."""
         return len(self.mesh_array)
 
-    def append(self):
+    def _append(self):
         """Generate mesh and append mesh to list."""
         self.point_array.append(self.points.tolist())
         self.mesh_array.append(
@@ -272,25 +272,6 @@ class Section:
     def to_vector(self, vector: np.ndarray, coord: int):
         """Rotate mesh to vector."""
         rotation = to_vector(self.triad[coord], vector)
-        """
-        vector = self.normalize(vector)
-        cross = np.cross(self.triad[coord], vector)
-        dot = np.dot(self.triad[coord], vector)
-        if np.isclose(np.linalg.norm(cross), 0) and np.isclose(dot, -1):
-            # catch -pi rotation
-            axis = np.cross(self.triad[coord], self.triad[coord][::-1])
-            rotation = Rotation.from_rotvec(-np.pi * axis)
-        else:
-            v_cross = np.array(
-                [
-                    [0, -cross[2], cross[1]],
-                    [cross[2], 0, -cross[0]],
-                    [-cross[1], cross[0], 0],
-                ]
-            )
-            Rmat = np.identity(3) + v_cross + np.dot(v_cross, v_cross) / (1 + dot)
-            rotation = Rotation.from_matrix(Rmat)
-        """
         self.points -= self.origin
         self.points = rotation.apply(self.points)
         self.points += self.origin
@@ -306,9 +287,9 @@ class Section:
         """Sweep section along path."""
         for i in range(mesh.n_points):
             self.to_point(mesh.points[i])
-            self.to_vector(mesh["normal"][i], 0)
             self.to_vector(mesh["tangent"][i], 1)
-            self.append()
+            self.to_vector(mesh["normal"][i], 0)
+            self._append()
         return self
 
     def plot(self):
@@ -328,7 +309,10 @@ class Path:
     def __post_init__(self):
         """Calculate length parameters and initialize interpolator."""
         self.mesh = Line.from_points(self.points).mesh
-        self.interpolate()
+        if self.delta != 0:
+            self.interpolate()
+        else:
+            self.submesh = self.mesh
 
     @classmethod
     def from_points(cls, points: np.ndarray, delta=0):
@@ -349,7 +333,9 @@ class Path:
             return self.mesh["arc_length"]
         if self.delta < 0:  # specify segment number
             return np.linspace(
-                self.mesh["arc_length"][0], self.mesh["arc_length"][-1], -self.delta + 1
+                self.mesh["arc_length"][0],
+                self.mesh["arc_length"][-1],
+                int(-self.delta + 1),
             )
         segment_number = int(1 + self.mesh["arc_length"][-1] / self.delta)
         return np.linspace(
@@ -422,6 +408,7 @@ class Sweep(Cell):
             poly = PolyGeom(poly, segment="sweep")
         if isinstance(path, pyvista.PolyData):
             path = path.points
+
         self.mesh = Path.from_points(path, delta=delta)
         n_points = self.mesh.n_points
         if np.isclose(self.mesh.points[0], self.mesh.points[-1]).all():

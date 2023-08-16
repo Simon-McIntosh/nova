@@ -109,7 +109,7 @@ def test_decimate_dual_arc():
     rng = np.random.default_rng(2025)
     points = rng.random((5, 3))
     line = PolyArc(points, 100)
-    polyline = PolyLine(line.curve, eps=1e-4)
+    polyline = PolyLine(line.curve, arc_eps=1e-4)
     assert len(polyline.segments) == 2
     assert [len(segment) == 3 for segment in polyline.segments] == [True, True]
 
@@ -124,7 +124,7 @@ def test_decimate_polyline():
         line = PolyArc(points, 100)
         curve = np.append(curve, rng.random((2, 3)), axis=0)
         curve = np.append(curve, line.curve, axis=0)
-    polyline = PolyLine(curve, eps=1e-8)
+    polyline = PolyLine(curve, arc_eps=1e-8)
     assert np.sum([len(segment) == 3 for segment in polyline.segments]) == 7
     assert np.sum([len(segment) == 2 for segment in polyline.segments]) == 6
 

@@ -11,10 +11,10 @@ with skip_import("vtk"):
 def test_section_translate():
     base = np.array([[0, 0, 0], [1, 0, 0], [1, 2, 0], [0, 2, 0]])
     section = Section(base)
-    section.append()
+    section._append()
     for i in range(5):
         section.to_point((i * 5, 0, 2))
-        section.append()
+        section._append()
     assert len(section) == 6
     assert np.isclose(section.origin, (i * 5, 0, 2)).all()
 

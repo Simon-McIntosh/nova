@@ -34,8 +34,7 @@ class Winding(CoilSetAttrs):
         """
         Add 3D coils to frameset.
 
-        Lines described by x, y, z coordinates meshed into n elements based on
-        dloop (delta).
+        Lines described by x, y, z coordinates meshed into n elements based on delta.
 
         Parameters
         ----------
@@ -45,7 +44,7 @@ class Winding(CoilSetAttrs):
             - list[float], shape(4,) bounding box [xmin, xmax, zmin, zmax]
             - array-like, shape(n,2) bounding loop [x, z]
 
-        path : npt.ArrayLike, shape(,3)
+        path : npt.ArrayLike, shape(n,3)
             Swept path.
 
         required : list[str]

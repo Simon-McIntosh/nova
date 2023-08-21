@@ -262,7 +262,7 @@ class Section:
         """Return length of mesh."""
         return len(self.mesh_array)
 
-    def append(self):
+    def _append(self):
         """Generate mesh and append mesh to list."""
         self.point_array.append(self.points.tolist())
         self.mesh_array.append(
@@ -287,9 +287,9 @@ class Section:
         """Sweep section along path."""
         for i in range(mesh.n_points):
             self.to_point(mesh.points[i])
-            self.to_vector(mesh["normal"][i], 0)
             self.to_vector(mesh["tangent"][i], 1)
-            self.append()
+            self.to_vector(mesh["normal"][i], 0)
+            self._append()
         return self
 
     def plot(self):
@@ -310,7 +310,10 @@ class Path:
     def __post_init__(self):
         """Calculate length parameters and initialize interpolator."""
         self.mesh = Line.from_points(self.points).mesh
-        self.interpolate()
+        if self.delta != 0:
+            self.interpolate()
+        else:
+            self.submesh = self.mesh
 
     @classmethod
     def from_points(cls, points: np.ndarray, delta=0):
@@ -331,7 +334,9 @@ class Path:
             return self.mesh["arc_length"]
         if self.delta < 0:  # specify segment number
             return np.linspace(
-                self.mesh["arc_length"][0], self.mesh["arc_length"][-1], -self.delta + 1
+                self.mesh["arc_length"][0],
+                self.mesh["arc_length"][-1],
+                int(-self.delta + 1),
             )
         segment_number = int(1 + self.mesh["arc_length"][-1] / self.delta)
         return np.linspace(
@@ -404,6 +409,7 @@ class Sweep(Cell):
             poly = PolyGeom(poly, segment="sweep")
         if isinstance(path, pyvista.PolyData):
             path = path.points
+
         self.mesh = Path.from_points(path, delta=delta)
         n_points = self.mesh.n_points
         if np.isclose(self.mesh.points[0], self.mesh.points[-1]).all():

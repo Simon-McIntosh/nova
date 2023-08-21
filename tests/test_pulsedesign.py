@@ -119,7 +119,7 @@ def test_make_frame(ids):
 @mark["equilibrium_pds"]
 def test_sample_pds():
     equilibrium = EquilibriumData(**ids_attrs["equilibrium_pds"])
-    sample = Sample(equilibrium.data)
+    sample = Sample(equilibrium.data, epsilon=0.75, savgol=None)
     design = PulseDesign(ids=sample.equilibrium_ids(), strike=True)
     design.itime = 0
     assert design.data.dims["time"] == 15

@@ -570,6 +570,19 @@ class Equilibrium(Chart, GetSlice):
         )
         return QuadContourSet.levels
 
+    def plot_quiver(self, axes=None, skip=5):
+        """Create magnetic field quiver plot."""
+        self.get_axes("2d", axes=axes)
+        self.axes.quiver(
+            self.data.r2d[::skip, ::skip],
+            self.data.z2d[::skip, ::skip],
+            self["b_field_r2d"][::skip, ::skip],
+            self["b_field_z2d"][::skip, ::skip],
+            pivot="mid",
+            scale=10,
+            width=0.008,
+        )
+
 
 @final
 @dataclass
@@ -704,12 +717,14 @@ if __name__ == "__main__":
     # pulse, run = 135007, 4
     pulse, run = 105028, 1
     pulse, run = 130506, 403  # CORSICA
+    pulse, run = 134173, 106
 
     # pulse, run = 135013, 2
 
     # EquilibriumData(pulse, run, occurrence=0)._clear()
     equilibrium = EquilibriumData(pulse, run, occurrence=0)
 
-    equilibrium.itime = 22
+    equilibrium.time = 300
     equilibrium.plot_2d("psi", mask=0)
     equilibrium.plot_boundary(outline=False)
+    equilibrium.plot_quiver()

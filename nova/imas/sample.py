@@ -114,7 +114,7 @@ class Sample(Plot, Defeature, Select):
     data: xarray.Dataset = field(default_factory=xarray.Dataset, repr=False)
     dtime: int | float | None = None
     savgol: tuple[int, int] | None = (3, 1)
-    epsilon: float = 0.75
+    epsilon: float = 0.25
     cluster: int | float | None = None
     features: list[str] = field(
         default_factory=lambda: [
@@ -417,11 +417,20 @@ if __name__ == "__main__":
     pulse, run = 105028, 1
 
     pulse, run = 135013, 2
+    pulse, run = 105050, 2
+    # pulse, run = 135001, 7
 
     equilibrium = EquilibriumData(pulse, run, occurrence=0)
-    sample = Sample(equilibrium.data)
-    print(sample.data)
+    sample = Sample(
+        equilibrium.data, features=["ip", "x_point_number", "psi_axis"], cluster=1.5
+    )
 
+    sample.plot()
+    sample.plot(attrs=["ip"])
+
+    # print(sample.data)
+
+    """
     sample.write_ids(**equilibrium.ids_attrs | {"occurrence": 1})
     sample.plot(
         [
@@ -433,6 +442,7 @@ if __name__ == "__main__":
             "triangularity_outer",
         ]
     )
+    """
 
     """
     sample.plot(

@@ -42,7 +42,6 @@ class PlasmaProfile(PlasmaPoints):
     def update_coefficents(self, *args, **kwargs):
         """Update plasma profile coefficients."""
         coef = kwargs | {attr: arg for attr, arg in zip(self.profile_attrs, args)}
-        print(coef)
         for attr, value in coef.items():
             self[attr] = value
         return self
@@ -112,11 +111,6 @@ class PlasmaProfile(PlasmaPoints):
     def limiter(self, *args, **kwargs):
         """Update points - symetric limiter."""
         self.update_coefficents(*args, **kwargs)
-
-        print(self.theta)
-        print(self.minor_radius)
-        print(self.elongation)
-        print(self.triangularity.mean)
         self.points = self.miller_profile(
             self.theta, self.minor_radius, self.elongation, self.triangularity.mean
         )

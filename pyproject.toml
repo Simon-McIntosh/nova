@@ -55,6 +55,7 @@ pyvista = {version = ">=0.39.1", optional = true}
 scikit-learn = {version = ">=1.2.2", optional = true}
 seaborn = {version = ">=0.12.2", optional = true}
 tables = {version = ">=3.8.0", optional = true}
+tox = {version = ">=4.6.4", optional = true}
 trimesh = {version = ">=3.21.7", optional = true}
 vedo = {version = ">=2023.4.4", optional = true}
 xlrd = {version = ">=2.0.1", optional = true}
@@ -127,6 +128,7 @@ test = [
   "coverage2clover",
   "pytest",
   "pytest-cov",
+  "tox",
 ]
 thermofluids = [
   "coolprop", 

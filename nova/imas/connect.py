@@ -229,8 +229,8 @@ if __name__ == "__main__":
 
     # MachineDatabase(machine="iter_md").sync_shot("115001/1")
 
-    # ScenarioDatabase().sync_shot('135013/2')
-    ScenarioDatabase().rsync()
+    ScenarioDatabase().sync_shot("135001/7")
+    # ScenarioDatabase().rsync()
     # ScenarioDatabase(user='tribolp').sync_shot('135011/21')
     # ScenarioDatabase(user='dubrovm').sync_shot('105028/1')
     # ScenarioDatabase(user='dubrovm').sync_shot('105027/1')

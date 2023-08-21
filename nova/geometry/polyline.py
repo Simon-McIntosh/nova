@@ -9,15 +9,6 @@ from nova.geometry.rdp import rdp
 
 
 @dataclass
-class Triple:
-    """Manage 3-point arc nodes."""
-
-    point_a: np.ndarray
-    point_b: np.ndarray
-    point_c: np.ndarray
-
-
-@dataclass
 class Arc(Plot):
     """Fit arc to 3d point cloud."""
 
@@ -154,6 +145,15 @@ class Arc(Plot):
 
 
 @dataclass
+class Triple:
+    """Manage 3-point arc nodes."""
+
+    point_a: np.ndarray
+    point_b: np.ndarray
+    point_c: np.ndarray
+
+
+@dataclass
 class ThreePointArc(Arc, Triple):
     """Generate arc segments."""
 
@@ -207,32 +207,23 @@ class PolyArc(Plot):
 
 
 @dataclass
-class Segment:
-    """Segment base class."""
-
-    name: float
-    points: np.ndarray
-
-
-@dataclass
 class PolyLine(Plot):
     """Decimate polyline using a hybrid arc/line-segment rdp algorithum."""
 
-    points: np.ndarray
-    eps: float = 1e-3
-    epsilon: float = 1e-3
-    arc: Arc = field(init=False, repr=False)
-    segments: list = field(init=False, default_factory=list)
+    points: np.ndarray = field(repr=False)
+    arc_eps: float = 1e-3
+    rdp_eps: float = 1e-3
+    segments: list = field(init=False, repr=False, default_factory=list)
 
     def __post_init__(self):
         """Decimate polyline."""
-        self.arc = Arc(eps=self.eps)
+        self._arc = Arc(eps=self.arc_eps)
         self.decimate()
 
     def fit_arc(self, points):
         """Return point index prior to first arc mis-match."""
         for i in range(4, len(points) + 1):
-            if not self.arc(points[:i]).match:
+            if not self._arc(points[:i]).match:
                 if i > 4:
                     return i - 1
                 return 2
@@ -240,10 +231,10 @@ class PolyLine(Plot):
 
     def append(self, points):
         """Append points to segment list."""
-        if len(points) >= 4:
-            self.segments.append(self.arc(points).nodes)
+        if len(points) >= 3:
+            self.segments.append(self._arc(points).nodes)
             return
-        points = rdp(points, epsilon=1e-3)
+        points = rdp(points, epsilon=self.rdp_eps)
         for i in range(len(points) - 1):
             self.segments.append(points[i : i + 2])
 
@@ -252,7 +243,7 @@ class PolyLine(Plot):
         points = self.points
         point_number = len(points)
         start = 0
-        while start <= point_number - 4:
+        while start <= point_number - 3:
             number = self.fit_arc(points[start:])
             self.append(points[start : start + number])
             start += number - 1
@@ -268,6 +259,7 @@ class PolyLine(Plot):
                 Arc(segment).plot3d()
                 continue
             self.axes.plot(*segment.T, "k.")
+        self.axes.set_aspect("equal")
 
 
 if __name__ == "__main__":

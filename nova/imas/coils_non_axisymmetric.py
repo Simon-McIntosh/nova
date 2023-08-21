@@ -4,6 +4,8 @@ from typing import ClassVar
 
 import numpy as np
 
+# from nova.geometry.line import Line
+# from nova.geometry.polyline import PolyLine
 from nova.graphics.plot import Plot
 from nova.imas.coil import coil_name
 from nova.imas.machine import CoilDatabase
@@ -35,6 +37,8 @@ class Coils_Non_Axisymmetyric(Plot, CoilDatabase):
             coil_name(coil)
             points = []
             for conductor in coil.conductor:
+                types = conductor.elements.types
+                print(type(types))
                 points.extend(
                     np.r_[
                         self._points(conductor.elements.start_points),
@@ -42,11 +46,11 @@ class Coils_Non_Axisymmetyric(Plot, CoilDatabase):
                         self._points(conductor.elements.end_points),
                     ]
                 )
-            print(np.shape(points))
+            points = points[: int(len(points) / 2)]  # TODO update when imas_md fixed
 
-            self.points = points
-            # line = Line().from_points(np.array(points))
-            # line.show()
+            # self.points = points
+            # line = Line.from_points(np.array(points))
+
             # self.winding.insert({"c": [0, 0, 0.005]}, np.array(points), name=name)
             # polyline = PolyLine(np.array(points))
             # polyline.plot()

@@ -266,31 +266,12 @@ class Section:
         """Generate mesh and append mesh to list."""
         self.point_array.append(self.points.tolist())
         self.mesh_array.append(
-            VtkFrame([self.points, [range(len(self.points))]]).c(len(self))
+            VtkFrame([self.points, [[*range(len(self.points))]]]).c(len(self))
         )
 
     def to_vector(self, vector: np.ndarray, coord: int):
         """Rotate mesh to vector."""
         rotation = to_vector(self.triad[coord], vector)
-        """
-        vector = self.normalize(vector)
-        cross = np.cross(self.triad[coord], vector)
-        dot = np.dot(self.triad[coord], vector)
-        if np.isclose(np.linalg.norm(cross), 0) and np.isclose(dot, -1):
-            # catch -pi rotation
-            axis = np.cross(self.triad[coord], self.triad[coord][::-1])
-            rotation = Rotation.from_rotvec(-np.pi * axis)
-        else:
-            v_cross = np.array(
-                [
-                    [0, -cross[2], cross[1]],
-                    [cross[2], 0, -cross[0]],
-                    [-cross[1], cross[0], 0],
-                ]
-            )
-            Rmat = np.identity(3) + v_cross + np.dot(v_cross, v_cross) / (1 + dot)
-            rotation = Rotation.from_matrix(Rmat)
-        """
         self.points -= self.origin
         self.points = rotation.apply(self.points)
         self.points += self.origin
@@ -313,7 +294,8 @@ class Section:
 
     def plot(self):
         """Plot mesh instances."""
-        vedo.show(*self.mesh_array)
+        print(np.shape(self.mesh_array))
+        vedo.show(*self.mesh_array, new=True)
 
 
 @dataclass
@@ -428,6 +410,7 @@ class Sweep(Cell):
             n_points -= 1
             link = True
         section = Section(poly.points).sweep(self.mesh)
+        section.plot()
         super().__init__(section.point_array, link=link)
 
     def __str__(self):

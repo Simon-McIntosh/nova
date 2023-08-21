@@ -88,6 +88,8 @@ coverage = {extras = ["toml"], version = ">=7.2.7"}
 pdoc = ">=14.0.0"
 openpyxl = "^3.1.2"
 types-openpyxl = "^3.1.0.15"
+cython = "0.29.34"
+easybuild = "^4.8.0"
 
 [tool.poetry.extras]
 ansys = [

@@ -544,7 +544,7 @@ class Database(IDS):
         """Return backend id from backend."""
         return getattr(imas.hli_utils.imasdef, f"{self.backend.upper()}_BACKEND")
 
-    @contextmanager
+    # @contextmanager
     def _db_entry(self):
         """Yield database with context manager."""
         if IMAS_MODULE_NOT_FOUND:
@@ -1021,3 +1021,9 @@ class CoilData(IdsData):
     def build(self):
         """Build netCDF dataset."""
         super().build()
+
+
+if __name__ == "__main__":
+    import doctest
+
+    doctest.testmod(verbose=True)

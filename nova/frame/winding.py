@@ -6,7 +6,7 @@ import vedo
 
 from nova.frame.coilsetattrs import CoilSetAttrs
 from nova.geometry.polygeom import Polygon
-from nova.geometry.volume import Sweep
+from nova.geometry.volume import Path, Section, Cell, Sweep, TriShell
 
 
 @dataclass
@@ -74,14 +74,15 @@ class Winding(CoilSetAttrs):
         )
         with self.insert_required(required):
             index = self.frame.insert(*frame_data, iloc=iloc, **self.attrs)
-
-            """
             subattrs = self.attrs | {
                 "label": index[0],
                 "frame": index[0],
                 "delim": "_",
                 "link": True,
             }
+
+            # segments = Polyline(path).segments
+
             submesh = Path.from_points(path, delta=self.attrs["delta"])
             section = Section(poly.points).sweep(submesh)
             vtk = [
@@ -97,7 +98,6 @@ class Winding(CoilSetAttrs):
             self.subframe.insert(
                 *centroid.T, *vector.T, volume, vtk, poly=poly, area=area, **subattrs
             )
-            """
         self.update_loc_indexer()
         return index
 

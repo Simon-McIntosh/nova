@@ -2,10 +2,11 @@
 from dataclasses import dataclass, field
 
 import numpy as np
+import pyvista
 import scipy
+from vedo import Mesh, shapes
 
 from nova.graphics.plot import Plot
-from nova.geometry.rdp import rdp
 
 
 @dataclass
@@ -24,11 +25,6 @@ class Arc(Plot):
         """Generate curve."""
         self.build()
 
-    def __call__(self, points):
-        """Re-build arc instance."""
-        self.build(points)
-        return self
-
     def build(self, points=None):
         """Align and fit 3d arc to point cloud."""
         if points is not None:
@@ -44,17 +40,27 @@ class Arc(Plot):
         mean = np.mean(self.points, axis=0)
         delta = self.points - mean[np.newaxis, :]
         self.arc_axes = scipy.linalg.svd(delta)[2]
+        self.arc_axes[0] = self.points[-1] - self.points[0]  # arc chord
+        self.arc_axes[1] = np.cross(self.arc_axes[0], self.arc_axes[2])
+        self.arc_axes /= np.linalg.norm(self.arc_axes, axis=1)[:, np.newaxis]
 
     @staticmethod
     def fit_2d(points):
         """Return center and radius of best fit circle to polyline."""
+        chord = np.linalg.norm(points[-1] - points[0])
+        origin = np.mean(np.c_[points[0], points[-1]], axis=1)
+        points -= origin[np.newaxis, :]
         coef = np.linalg.lstsq(
-            np.c_[2 * points, np.ones(len(points))],
-            np.sum(points**2, axis=1),
+            2 * points[:, 1:2],
+            chord**2 / 4 - np.sum(points**2, axis=1),
             rcond=None,
         )[0]
-        center = coef[:2]
-        radius = np.sqrt(coef[2] + np.sum(center**2))
+        center = origin
+        center[1] -= coef[0]
+        points[:, 1] -= coef[0]
+        endpoint_radii = [np.linalg.norm(points[0]), np.linalg.norm(points[-1])]
+        assert np.isclose(*endpoint_radii)
+        radius = np.mean(endpoint_radii)
         return center, radius
 
     @property
@@ -78,7 +84,13 @@ class Arc(Plot):
         center, self.radius = self.fit_2d(self.points_2d)
         self.center = center @ self.arc_axes[:2]
         self.center += (
-            np.mean(np.einsum("j,ij->i", self.arc_axes[2], self.points))
+            np.mean(
+                np.einsum(
+                    "j,ij->i",
+                    self.arc_axes[2],
+                    np.c_[self.points[0], self.points[-1]].T,
+                )
+            )
             * self.arc_axes[2]
         )
         center_points = self.points_2d - center
@@ -91,12 +103,17 @@ class Arc(Plot):
         return np.linalg.norm(self.points[1:] - self.points[:-1], axis=1).sum()
 
     @property
-    def arclength(self):
-        """Return arc length."""
-        return self.radius * abs(self.theta[-1] - self.theta[0])
+    def central_angle(self):
+        """Return the absolute angle subtended by arc from the arc's center."""
+        return abs(self.theta[-1] - self.theta[0])
 
     @property
-    def match(self):
+    def arclength(self):
+        """Return arc length."""
+        return self.radius * self.central_angle
+
+    @property
+    def test(self):
         """Return status of normalized fit residual."""
         return self.error / self.length < self.eps
 
@@ -113,35 +130,83 @@ class Arc(Plot):
         """Return best-fit node triple respecting start and end locations."""
         return np.array([self.points[0], self.sample(3)[1], self.points[-1]])
 
+    @property
+    def chord(self):
+        """Return arc chord."""
+        return Line(np.c_[self.points[0], self.points[-1]].T)
+
     def plot_circle(self):
         """Plot best fit circle."""
         self.get_axes("2d")
         theta = np.linspace(0, 2 * np.pi)
+        theta = self.theta
         points_2d = self.radius * np.c_[np.cos(theta), np.sin(theta)]
         points = points_2d @ self.arc_axes[:2]
         points += self.center
-        self.axes.plot(points[:, 1], points[:, 2], ":", color="gray")
+        self.axes.plot(points[:, 0], points[:, 2], ":", color="gray")
 
     def plot(self):
         """Plot point and best-fit data."""
         self.get_axes("2d")
         points = self.sample(21)
-        self.axes.plot(points[:, 1], points[:, 2])
-        self.axes.plot(self.points[:, 1], self.points[:, 2], "o")
-        self.axes.plot(self.points_fit[:, 1], self.points_fit[:, 2], "D")
+        self.axes.plot(points[:, 0], points[:, 2])
+        self.axes.plot(self.points[:, 0], self.points[:, 2], "o")
+        self.axes.plot(self.points_fit[:, 0], self.points_fit[:, 2], "D")
 
     def plot3d(self):
         """Plot point and best-fit data."""
         self.get_axes("3d")
         points = self.sample(21)
         self.axes.plot(*points.T)
-        self.axes.plot(*self.points.T, "o", ms=3)
-        self.axes.plot(*self.points_fit.T, "D", ms=3)
+        self.axes.plot(*self.nodes.T, "o", ms=3)
 
     def plot_fit(self):
         """Plot best-fit arc and point cloud."""
         self.plot()
         self.plot_circle()
+
+    @property
+    def mesh(self):
+        """Return vtk mesh."""
+        print(np.linalg.norm(self.points[0] - self.center))
+        print(np.linalg.norm(self.points[-1] - self.center))
+        print(self.radius)
+        print(self.sample(2))
+        print(self.points[0], self.points[1])
+        print()
+
+        return Mesh(
+            pyvista.CircularArc(
+                self.points[0], self.points[-1], self.center, resolution=50
+            )
+        )
+        # return shapes.Arc(self.center, self.points[0][::2], self.points[-1][::2])
+
+
+@dataclass
+class Line(Plot):
+    """Manage 3D line element."""
+
+    points: np.ndarray
+
+    def __post_init__(self):
+        """Assert two point line."""
+        assert len(self.points) == 2
+
+    @property
+    def length(self):
+        """Return line length."""
+        return np.linalg.norm(self.points[1] - self.points[0])
+
+    def plot3d(self):
+        """Plot point and best-fit data."""
+        self.get_axes("3d")
+        self.axes.plot(*self.points.T, "k-o", ms=3)
+
+    @property
+    def mesh(self):
+        """Return vtk mesh."""
+        return shapes.Line(self.points[0], self.points[1])
 
 
 @dataclass
@@ -212,18 +277,22 @@ class PolyLine(Plot):
 
     points: np.ndarray = field(repr=False)
     arc_eps: float = 1e-3
-    rdp_eps: float = 1e-3
-    segments: list = field(init=False, repr=False, default_factory=list)
+    line_eps: float = 5e-3
+    segments: list[Line | Arc] = field(init=False, repr=False, default_factory=list)
 
     def __post_init__(self):
         """Decimate polyline."""
-        self._arc = Arc(eps=self.arc_eps)
         self.decimate()
+
+    def __iter__(self):
+        """Yield mesh elements from segments."""
+        for segment in self.segments:
+            yield segment.mesh
 
     def fit_arc(self, points):
         """Return point index prior to first arc mis-match."""
         for i in range(4, len(points) + 1):
-            if not self._arc(points[:i]).match:
+            if not Arc(points[:i], eps=self.arc_eps).test:
                 if i > 4:
                     return i - 1
                 return 2
@@ -232,14 +301,13 @@ class PolyLine(Plot):
     def append(self, points):
         """Append points to segment list."""
         if len(points) >= 3:
-            self.segments.append(self._arc(points).nodes)
+            self.segments.append(Arc(points, eps=self.arc_eps))
             return
-        points = rdp(points, epsilon=self.rdp_eps)
         for i in range(len(points) - 1):
-            self.segments.append(points[i : i + 2])
+            self.segments.append(Line(points[i : i + 2]))
 
     def decimate(self):
-        """Decimate polyline via rdp reduction followed by an arc fit."""
+        """Decimate polyline via multi-segment by an arc fit."""
         points = self.points
         point_number = len(points)
         start = 0
@@ -249,17 +317,24 @@ class PolyLine(Plot):
             start += number - 1
         if point_number - start > 1:
             self.append(points[start:])
+        for i, segment in enumerate(self.segments):
+            if isinstance(segment, Line):
+                continue
+            central_angle = segment.central_angle
+            if abs(np.sin(central_angle) * np.tan(central_angle)) < self.line_eps:
+                self.segments[i] = segment.chord
 
     def plot(self):
         """Plot decimated polyline."""
         self.set_axes("3d")
-        self.axes.plot(*self.points.T)  # self.points[:, 1], self.points[:, 2])
+        self.axes.plot(*self.points.T)
         for segment in self.segments:
-            if len(segment) == 3:  # arc
-                Arc(segment).plot3d()
-                continue
-            self.axes.plot(*segment.T, "k.")
+            segment.plot3d()
         self.axes.set_aspect("equal")
+
+    def vtkplot(self):
+        """Plot vtk centerline."""
+        Mesh(*[segment.mesh for segment in self.segments]).show()
 
 
 if __name__ == "__main__":
@@ -278,5 +353,3 @@ if __name__ == "__main__":
     # arc.plot_fit()
 
     # line.plot()
-
-    # print(arc.match)

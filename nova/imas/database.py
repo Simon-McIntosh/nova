@@ -544,7 +544,7 @@ class Database(IDS):
         """Return backend id from backend."""
         return getattr(imas.hli_utils.imasdef, f"{self.backend.upper()}_BACKEND")
 
-    # @contextmanager
+    @contextmanager
     def _db_entry(self):
         """Yield database with context manager."""
         if IMAS_MODULE_NOT_FOUND:

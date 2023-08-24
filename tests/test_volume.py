@@ -53,6 +53,8 @@ def test_cell_closed():
     base = np.array([[0, 0, 0], [1, 0, 0], [1, 2, 0], [0, 2, 0]])
     top = base + (0, 0, 3)
     mesh = Cell([base, top])
+    assert not mesh.is_closed()
+    mesh = Cell([base, top], cap=True)
     assert mesh.is_closed()
 
 

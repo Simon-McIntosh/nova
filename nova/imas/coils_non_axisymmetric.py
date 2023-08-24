@@ -5,8 +5,6 @@ from typing import ClassVar
 
 import numpy as np
 
-# from nova.geometry.line import Line
-# from nova.geometry.polyline import PolyLine
 from nova.graphics.plot import Plot
 from nova.imas.coil import coil_name
 from nova.imas.database import ImasIds
@@ -106,7 +104,13 @@ class Coils_Non_Axisymmetyric(Plot, CoilDatabase):
             print(coil_name(coil))
             for i, conductor in enumerate(coil.conductor):
                 elements = Elements(elements=conductor.elements)
-            self.winding.insert({"c": [0, 0, 0.05]}, elements.points)
+
+            print(len(elements.points))
+            from nova.geometry.polyline import PolyLine
+
+            polyline = PolyLine(elements.points)
+            print(len(polyline.segments))
+            # self.winding.insert({"c": [0, 0, 0.05]}, elements.points)
             # elements.plot()
             # line = Line().from_points(np.array(points))
             # line.show()

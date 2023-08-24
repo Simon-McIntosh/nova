@@ -28,7 +28,7 @@ def pldist(point, start, end):
     :param end: another point of the line
     :type end: numpy array
     """
-    if np.all(np.equal(start, end)):
+    if np.allclose(start, end):
         return np.linalg.norm(point - start)
 
     return np.divide(

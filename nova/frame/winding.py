@@ -80,6 +80,9 @@ class Winding(CoilSetAttrs):
                 "delim": "_",
                 "link": True,
             }
+
+            # segments = Polyline(path).segments
+
             submesh = Path.from_points(path, delta=self.attrs["delta"])
             section = Section(poly.points).sweep(submesh)
             vtk = [

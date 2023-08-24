@@ -2,7 +2,7 @@ import matplotlib.pylab
 import numpy as np
 import pytest
 
-from nova.geometry.polyline import Arc, PolyArc, PolyLine, ThreePointArc
+from nova.geometry.polyline import Arc, Line, PolyArc, PolyLine, ThreePointArc
 
 
 def test_2d_arc_radius():
@@ -46,22 +46,22 @@ def test_arc_length():
 
 def test_match_arc():
     arc = Arc(np.array([(1, 0, 0), (0, 1, 0), (-1, 0, 0)]))
-    assert arc.match
+    assert arc.test
 
 
 def test_match_arc_3d():
     arc = Arc(np.array([(1, 0, 0), (0, 1, 0), (-1, 0, 0.5)]))
-    assert arc.match
+    assert arc.test
 
 
 def test_match_four_point_arc():
     arc = Arc(np.array([(1, 0, 0), (0, 1, 0), (-1, 0, 0), (0, -1, 0)]))
-    assert arc.match
+    assert arc.test
 
 
 def test_missmatch_four_point_arc():
     arc = Arc(np.array([(1, 0, 0), (0, 1, 0), (-1, 0, 0), (0, -1, 0.01)]))
-    assert not arc.match
+    assert not arc.test
 
 
 def test_match_single_arc():
@@ -69,7 +69,7 @@ def test_match_single_arc():
     points = rng.random((3, 3))
     line = PolyArc(points, 20)
     arc = Arc(line.curve)
-    assert arc.match
+    assert arc.test
 
 
 def test_missmatch_dual_arc():
@@ -77,7 +77,7 @@ def test_missmatch_dual_arc():
     points = rng.random((5, 3))
     line = PolyArc(points, 20)
     arc = Arc(line.curve)
-    assert not arc.match
+    assert not arc.test
 
 
 def test_match_single_polyarc():
@@ -85,7 +85,7 @@ def test_match_single_polyarc():
     points = rng.random((5, 3))
     line = PolyArc(points, 100)
     arc = Arc(line.curve[:100])
-    assert arc.match
+    assert arc.test
 
 
 def test_mismatch_single_polyarc_plus_one():
@@ -93,7 +93,7 @@ def test_mismatch_single_polyarc_plus_one():
     points = rng.random((5, 3))
     line = PolyArc(points, 100)
     arc = Arc(line.curve[:101])
-    assert not arc.match
+    assert not arc.test
 
 
 def test_decimate_single_arc():
@@ -102,7 +102,7 @@ def test_decimate_single_arc():
     line = PolyArc(points, 100)
     polyline = PolyLine(line.curve)
     assert len(polyline.segments) == 1
-    assert len(polyline.segments[0]) == 3
+    assert isinstance(polyline.segments[0], Arc)
 
 
 def test_decimate_dual_arc():
@@ -111,7 +111,10 @@ def test_decimate_dual_arc():
     line = PolyArc(points, 100)
     polyline = PolyLine(line.curve, arc_eps=1e-4)
     assert len(polyline.segments) == 2
-    assert [len(segment) == 3 for segment in polyline.segments] == [True, True]
+    assert [isinstance(polyline.segments[0], Arc) for segment in polyline.segments] == [
+        True,
+        True,
+    ]
 
 
 def test_decimate_polyline():
@@ -125,8 +128,8 @@ def test_decimate_polyline():
         curve = np.append(curve, rng.random((2, 3)), axis=0)
         curve = np.append(curve, line.curve, axis=0)
     polyline = PolyLine(curve, arc_eps=1e-8)
-    assert np.sum([len(segment) == 3 for segment in polyline.segments]) == 7
-    assert np.sum([len(segment) == 2 for segment in polyline.segments]) == 6
+    assert np.sum([isinstance(segment, Arc) for segment in polyline.segments]) == 7
+    assert np.sum([isinstance(segment, Line) for segment in polyline.segments]) == 6
 
 
 def test_arc_plotfit():

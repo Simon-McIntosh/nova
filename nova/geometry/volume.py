@@ -266,7 +266,7 @@ class Section:
         """Generate mesh and append mesh to list."""
         self.point_array.append(self.points.tolist())
         self.mesh_array.append(
-            VtkFrame([self.points, [range(len(self.points))]]).c(len(self))
+            VtkFrame([self.points, [[*range(len(self.points))]]]).c(len(self))
         )
 
     def to_vector(self, vector: np.ndarray, coord: int):
@@ -294,7 +294,7 @@ class Section:
 
     def plot(self):
         """Plot mesh instances."""
-        vedo.show(*self.mesh_array)
+        vedo.show(*self.mesh_array, new=True)
 
 
 @dataclass
@@ -350,7 +350,7 @@ class Path:
 class Cell(VtkFrame):
     """Build vtk cell from a list of sectional polygons."""
 
-    def __init__(self, point_array, link=False):
+    def __init__(self, point_array, link=False, cap=False):
         """Construct vtk instance for cell constructed from bounding polys."""
         assert all((len(array) == len(point_array[0]) for array in point_array[1:]))
         point_array = np.array(point_array)
@@ -362,12 +362,9 @@ class Cell(VtkFrame):
         cells = []
         for i in range(n_section - 1):
             cells.extend(self._link(nodes[i], nodes[i + 1]))
-        if link:  # link start and end sections
-            cells.extend(self._link(nodes[-1], nodes[0]))
-        else:  # cap
-            cells.append(nodes[0][::-1].tolist())  # base
-            cells.append(nodes[-1].tolist())  # top
         super().__init__([points, cells])
+        if cap:
+            self.cap()
 
     def _link(self, start, end):
         """Return list of rectangular cells linking start loop to end loop."""
@@ -388,7 +385,7 @@ class Cell(VtkFrame):
 class Sweep(Cell):
     """Sweep polygon along path."""
 
-    def __init__(self, poly, path, delta=0, link=False):
+    def __init__(self, poly, path, delta=0, link=False, cap=True):
         """
         Sweep cross-section and return vedo.Mesh.
 
@@ -415,7 +412,7 @@ class Sweep(Cell):
             n_points -= 1
             link = True
         section = Section(poly.points).sweep(self.mesh)
-        super().__init__(section.point_array, link=link)
+        super().__init__(section.point_array, link=link, cap=cap)
 
     def __str__(self):
         """Return volume name."""

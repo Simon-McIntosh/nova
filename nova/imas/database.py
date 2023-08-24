@@ -1021,3 +1021,9 @@ class CoilData(IdsData):
     def build(self):
         """Build netCDF dataset."""
         super().build()
+
+
+if __name__ == "__main__":
+    import doctest
+
+    doctest.testmod(verbose=True)

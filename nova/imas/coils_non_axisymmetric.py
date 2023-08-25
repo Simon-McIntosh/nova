@@ -110,7 +110,7 @@ class Coils_Non_Axisymmetyric(Plot, CoilDatabase):
 
             polyline = PolyLine(elements.points)
             print(len(polyline.segments))
-            # self.winding.insert({"c": [0, 0, 0.05]}, elements.points)
+            self.winding.insert({"c": [0, 0, 0.05]}, elements.points)
             # elements.plot()
             # line = Line().from_points(np.array(points))
             # line.show()
@@ -157,5 +157,5 @@ class Coils_Non_Axisymmetyric(Plot, CoilDatabase):
 
 if __name__ == "__main__":
     coil = Coils_Non_Axisymmetyric()
-    # coil.subframe.vtkplot()
+    coil.frame.vtkplot()
     # coil._clear()

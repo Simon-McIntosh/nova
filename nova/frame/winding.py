@@ -86,7 +86,7 @@ class Winding(CoilSetAttrs):
             submesh = Path.from_points(path, delta=self.attrs["delta"])
             section = Section(poly.points).sweep(submesh)
             vtk = [
-                Cell(section.point_array[i : i + 2])
+                Cell(section.point_array[i : i + 2], cap=True)
                 for i in range(submesh.n_points - 1)
             ]
             points = submesh.points

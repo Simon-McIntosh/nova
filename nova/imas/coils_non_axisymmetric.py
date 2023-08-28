@@ -105,11 +105,6 @@ class Coils_Non_Axisymmetyric(Plot, CoilDatabase):
             for i, conductor in enumerate(coil.conductor):
                 elements = Elements(elements=conductor.elements)
 
-            print(len(elements.points))
-            from nova.geometry.polyline import PolyLine
-
-            polyline = PolyLine(elements.points)
-            print(len(polyline.segments))
             self.winding.insert({"c": [0, 0, 0.05]}, elements.points)
             # elements.plot()
             # line = Line().from_points(np.array(points))

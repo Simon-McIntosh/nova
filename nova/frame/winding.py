@@ -83,6 +83,11 @@ class Winding(CoilSetAttrs):
 
             # segments = Polyline(path).segments
 
+            from nova.geometry.polyline import PolyLine
+
+            polyline = PolyLine(path)
+            polyline.plot()
+
             submesh = Path.from_points(path, delta=self.attrs["delta"])
             section = Section(poly.points).sweep(submesh)
             vtk = [

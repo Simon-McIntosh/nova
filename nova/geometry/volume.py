@@ -389,7 +389,7 @@ class Cell(VtkFrame):
 class Sweep(Cell):
     """Sweep polygon along path."""
 
-    def __init__(self, poly, path, delta=0):
+    def __init__(self, poly, path, delta=0, cap=False):
         """
         Sweep cross-section and return vedo.Mesh.
 
@@ -414,7 +414,7 @@ class Sweep(Cell):
         if np.isclose(self.mesh.points[0], self.mesh.points[-1]).all():
             link = np.mean([section.point_array[0], section.point_array[-1]], axis=0)
             section.point_array[0] = section.point_array[-1] = link
-        super().__init__(section.point_array)
+        super().__init__(section.point_array, cap=cap)
 
     def __str__(self):
         """Return volume name."""

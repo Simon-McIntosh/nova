@@ -99,7 +99,7 @@ def test_mismatch_single_polyarc_plus_one():
 def test_three_point_line():
     rng = np.random.default_rng(2025)
     points = rng.random((3, 3))
-    polyline = PolyLine(points)
+    polyline = PolyLine(points, minimum_arc_nodes=4)
     assert len(polyline.segments) == 2
     assert np.sum([isinstance(segment, Line) for segment in polyline.segments]) == 2
 
@@ -107,7 +107,7 @@ def test_three_point_line():
 def test_four_point_line():
     rng = np.random.default_rng(2025)
     points = rng.random((4, 3))
-    polyline = PolyLine(points)
+    polyline = PolyLine(points, minimum_arc_nodes=4)
     assert len(polyline.segments) == 3
     assert np.sum([isinstance(segment, Line) for segment in polyline.segments]) == 3
 
@@ -119,7 +119,7 @@ def test_line_line_arc_line_line():
         points[:-1], PolyArc(np.r_[points[-1:], rng.random((2, 3))], 5).curve, axis=0
     )
     points = np.append(points[:-1], rng.random((2, 3)), axis=0)
-    polyline = PolyLine(points, arc_eps=1e-3, line_eps=1e-3)
+    polyline = PolyLine(points, arc_eps=1e-3, line_eps=1e-3, minimum_arc_nodes=4)
     assert len(polyline.segments) == 5
     assert np.sum([isinstance(segment, Arc) for segment in polyline.segments]) == 1
     assert np.sum([isinstance(segment, Line) for segment in polyline.segments]) == 4
@@ -159,14 +159,12 @@ def test_decimate_polyline():
     points = rng.random((3, 3))
     line = PolyArc(points, 100)
     curve = line.curve
-
     for i in range(2):
         points = rng.random((3, 3))
         line = PolyArc(points, 25)
         curve = np.append(curve, rng.random((2, 3)), axis=0)
         curve = np.append(curve, line.curve, axis=0)
-
-    polyline = PolyLine(curve, arc_eps=1e-4, line_eps=5e-4)
+    polyline = PolyLine(curve, arc_eps=1e-4, line_eps=5e-4, minimum_arc_nodes=4)
     assert np.sum([isinstance(segment, Arc) for segment in polyline.segments]) == 3
     assert np.sum([isinstance(segment, Line) for segment in polyline.segments]) == 6
 

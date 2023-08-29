@@ -88,6 +88,7 @@ class MetaFrame(MetaSet):
             "y": 0.0,
             "z": 0.0,
             "xo": 0.0,
+            "yo": 0.0,
             "zo": 0.0,
             "segment": "ring",
             "dl": 0.1,

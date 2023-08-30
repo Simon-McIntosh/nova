@@ -21,8 +21,9 @@ class ArrayLocMixin:
                 if index == slice(None):
                     return self.obj.__setitem__(col, value)
             try:
-                self.obj.__getitem__(col)[index] = value
-                return None
+                _value = self.obj.__getitem__(col).copy()
+                _value[index] = value
+                return self.obj.__setitem__(col, _value)
             except KeyError:
                 pass
         return super().__setitem__(key, value)

@@ -354,17 +354,21 @@ class Cell(VtkFrame):
         """Construct vtk instance for cell constructed from bounding polys."""
         assert all((len(array) == len(point_array[0]) for array in point_array[1:]))
         point_array = np.array(point_array)
-        if np.isclose(point_array[0, 0], point_array[0, -1]).all():
-            point_array = point_array[:, :-1]  # open closed loop
+        if np.allclose(point_array[0], point_array[-1]):
+            point_array = point_array[:-1]  # open closed loop
+            link = True
         n_section, n_cap = point_array.shape[:2]
         points = np.vstack(point_array)
         nodes = np.arange(0, len(points)).reshape(-1, n_cap)
         cells = []
         for i in range(n_section - 1):
             cells.extend(self._link(nodes[i], nodes[i + 1]))
+        if link:  # link start and end sections
+            cells.extend(self._link(nodes[-1], nodes[0]))
+        if cap:  # cap
+            cells.append(nodes[0][::-1].tolist())  # base
+            cells.append(nodes[-1].tolist())  # top
         super().__init__([points, cells])
-        if cap:
-            self.cap()
 
     def _link(self, start, end):
         """Return list of rectangular cells linking start loop to end loop."""
@@ -385,7 +389,7 @@ class Cell(VtkFrame):
 class Sweep(Cell):
     """Sweep polygon along path."""
 
-    def __init__(self, poly, path, delta=0, link=False, cap=True):
+    def __init__(self, poly, path, delta=0, cap=False):
         """
         Sweep cross-section and return vedo.Mesh.
 
@@ -405,14 +409,12 @@ class Sweep(Cell):
             poly = PolyGeom(poly, segment="sweep")
         if isinstance(path, pyvista.PolyData):
             path = path.points
-
         self.mesh = Path.from_points(path, delta=delta)
-        n_points = self.mesh.n_points
-        if np.isclose(self.mesh.points[0], self.mesh.points[-1]).all():
-            n_points -= 1
-            link = True
         section = Section(poly.points).sweep(self.mesh)
-        super().__init__(section.point_array, link=link, cap=cap)
+        if np.isclose(self.mesh.points[0], self.mesh.points[-1]).all():
+            link = np.mean([section.point_array[0], section.point_array[-1]], axis=0)
+            section.point_array[0] = section.point_array[-1] = link
+        super().__init__(section.point_array, cap=cap)
 
     def __str__(self):
         """Return volume name."""

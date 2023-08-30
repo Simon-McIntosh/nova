@@ -70,7 +70,7 @@ class Winding(CoilSetAttrs):
             section=poly.section,
             name="sweep",
             dl=vtk.mesh["arc_length"][-1],
-            dt=poly.area,
+            dt=np.max([poly.width, poly.height]),
         )
         with self.insert_required(required):
             index = self.frame.insert(*frame_data, iloc=iloc, **self.attrs)
@@ -83,10 +83,18 @@ class Winding(CoilSetAttrs):
 
             # segments = Polyline(path).segments
 
+        # print("-", self.frame.metaframe.required)
+        with self.insert_required(required):  # ["x", "y", "z", "dx", "dy", "dz", "vtk"]
+            # print("*", self.frame.metaframe.required)
+            from nova.geometry.polyline import PolyLine
+
+            polyline = PolyLine(path)
+            polyline.plot()
+
             submesh = Path.from_points(path, delta=self.attrs["delta"])
             section = Section(poly.points).sweep(submesh)
             vtk = [
-                Cell(section.point_array[i : i + 2])
+                Cell(section.point_array[i : i + 2], cap=True)
                 for i in range(submesh.n_points - 1)
             ]
             points = submesh.points
@@ -98,6 +106,7 @@ class Winding(CoilSetAttrs):
             self.subframe.insert(
                 *centroid.T, *vector.T, volume, vtk, poly=poly, area=area, **subattrs
             )
+            # self.subframe.insert(*centroid.T, *vector.T, vtk, **subattrs)
         self.update_loc_indexer()
         return index
 

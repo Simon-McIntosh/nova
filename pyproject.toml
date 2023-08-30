@@ -59,6 +59,7 @@ tox = {version = ">=4.6.4", optional = true}
 trimesh = {version = ">=3.21.7", optional = true}
 vedo = {version = ">=2023.4.4", optional = true}
 xlrd = {version = ">=2.0.1", optional = true}
+overrides = "^7.4.0"
 
 [tool.poetry.group.dev.dependencies]
 asv = ">=0.5.1"

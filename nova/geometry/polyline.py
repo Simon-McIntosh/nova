@@ -1,23 +1,42 @@
 """Impement rdp-like decimator for mixed linear / arc polylines."""
+import abc
 from dataclasses import dataclass, field
 
 import numpy as np
+from overrides import override
 import pyvista
 import scipy
 from vedo import Mesh, shapes
 
+from nova.geometry.rdp import rdp
 from nova.graphics.plot import Plot
 
 
 @dataclass
-class Arc(Plot):
+class Element(abc.ABC):
+    """Element base class."""
+
+    points: np.ndarray | None = field(default=None, repr=False)
+
+    @abc.abstractmethod
+    def mesh(self):
+        """Return element vtk mesh."""
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def nodes(self):
+        """Return minimal-set element defining nodes."""
+        raise NotImplementedError
+
+
+@dataclass
+class Arc(Plot, Element):
     """Fit arc to 3d point cloud."""
 
-    points: np.ndarray | None = None
     arc_axes: np.ndarray = field(init=False)
     center: np.ndarray = field(init=False)
     radius: float = field(init=False)
-    theta: float = field(init=False)
+    theta: float = field(init=False, repr=False)
     error: float = field(init=False)
     eps: float = 1e-8
 
@@ -41,7 +60,13 @@ class Arc(Plot):
         delta = self.points - mean[np.newaxis, :]
         self.arc_axes = scipy.linalg.svd(delta)[2]
         self.arc_axes[0] = self.points[-1] - self.points[0]  # arc chord
+        arc_axis_2 = np.cross(
+            self.arc_axes[0], np.mean(self.points[1:-1] - self.points[0], axis=0)
+        )
+        if not np.allclose(arc_axis_2, 0):
+            self.arc_axes[2] = arc_axis_2
         self.arc_axes[1] = np.cross(self.arc_axes[0], self.arc_axes[2])
+        # self.arc_axes[2] = np.cross(self.arc_axes[0], self.arc_axes[1])
         self.arc_axes /= np.linalg.norm(self.arc_axes, axis=1)[:, np.newaxis]
 
     @staticmethod
@@ -57,10 +82,11 @@ class Arc(Plot):
         )[0]
         center = origin
         center[1] -= coef[0]
+        radius = np.sqrt(chord**2 / 4 + coef[0] ** 2)
+
         points[:, 1] -= coef[0]
-        endpoint_radii = [np.linalg.norm(points[0]), np.linalg.norm(points[-1])]
-        assert np.isclose(*endpoint_radii)
-        radius = np.mean(endpoint_radii)
+        assert np.allclose(radius, np.linalg.norm(points[0]))
+        assert np.allclose(radius, np.linalg.norm(points[-1]))
         return center, radius
 
     @property
@@ -84,13 +110,8 @@ class Arc(Plot):
         center, self.radius = self.fit_2d(self.points_2d)
         self.center = center @ self.arc_axes[:2]
         self.center += (
-            np.mean(
-                np.einsum(
-                    "j,ij->i",
-                    self.arc_axes[2],
-                    np.c_[self.points[0], self.points[-1]].T,
-                )
-            )
+            np.mean(np.c_[self.points[0], self.points[-1]].T, axis=0)
+            @ self.arc_axes[2]
             * self.arc_axes[2]
         )
         center_points = self.points_2d - center
@@ -126,6 +147,7 @@ class Arc(Plot):
         )
 
     @property
+    @override
     def nodes(self):
         """Return best-fit node triple respecting start and end locations."""
         return np.array([self.points[0], self.sample(3)[1], self.points[-1]])
@@ -166,6 +188,7 @@ class Arc(Plot):
         self.plot_circle()
 
     @property
+    @override
     def mesh(self):
         """Return vtk mesh."""
         print(np.linalg.norm(self.points[0] - self.center))
@@ -192,6 +215,11 @@ class Line(Plot):
     def __post_init__(self):
         """Assert two point line."""
         assert len(self.points) == 2
+
+    @property
+    def nodes(self):
+        """Return line endpoints."""
+        return self.points
 
     @property
     def length(self):
@@ -277,7 +305,9 @@ class PolyLine(Plot):
 
     points: np.ndarray = field(repr=False)
     arc_eps: float = 1e-3
-    line_eps: float = 5e-3
+    line_eps: float = 2e-3
+    rdp_eps: float = 1e-4
+    minimum_arc_nodes: int = 3
     segments: list[Line | Arc] = field(init=False, repr=False, default_factory=list)
 
     def __post_init__(self):
@@ -291,16 +321,17 @@ class PolyLine(Plot):
 
     def fit_arc(self, points):
         """Return point index prior to first arc mis-match."""
-        for i in range(4, len(points) + 1):
+        point_number = len(points)
+        for i in range(self.minimum_arc_nodes, point_number + 1):
             if not Arc(points[:i], eps=self.arc_eps).test:
-                if i > 4:
+                if i > self.minimum_arc_nodes:
                     return i - 1
                 return 2
-        return i
+        return point_number
 
     def append(self, points):
         """Append points to segment list."""
-        if len(points) >= 3:
+        if len(points) >= self.minimum_arc_nodes:
             self.segments.append(Arc(points, eps=self.arc_eps))
             return
         for i in range(len(points) - 1):
@@ -308,21 +339,52 @@ class PolyLine(Plot):
 
     def decimate(self):
         """Decimate polyline via multi-segment by an arc fit."""
-        points = self.points
-        point_number = len(points)
+        point_number = len(self.points)
         start = 0
+        self.segments = []
         while start <= point_number - 3:
-            number = self.fit_arc(points[start:])
-            self.append(points[start : start + number])
+            number = self.fit_arc(self.points[start:])
+            self.append(self.points[start : start + number])
             start += number - 1
         if point_number - start > 1:
-            self.append(points[start:])
+            self.append(self.points[start:])
         for i, segment in enumerate(self.segments):
             if isinstance(segment, Line):
                 continue
             central_angle = segment.central_angle
             if abs(np.sin(central_angle) * np.tan(central_angle)) < self.line_eps:
                 self.segments[i] = segment.chord
+        self.rdp_merge()
+
+    def _rdp_line_segments(self, nodes):
+        """Return rdp reduced Line segments."""
+        nodes = np.r_[nodes[::2], nodes[-1:]]
+        nodes = rdp(nodes, self.rdp_eps)
+        return [Line(nodes[i : i + 2]) for i in range(len(nodes) - 1)]
+
+    def rdp_merge(self):
+        """Merge multiple line segments using the rdp algorithum."""
+        segments = []
+        nodes = []
+        for segment in self.segments:
+            match segment:
+                case Line():
+                    nodes.extend(segment.nodes)
+                case Arc():
+                    if nodes:
+                        segments.extend(self._rdp_line_segments(nodes))
+                        nodes = []
+                    segments.append(segment)
+        segments.extend(self._rdp_line_segments(nodes))
+        self.segments = segments
+
+    @property
+    def nodes(self):
+        """Return segment nodes."""
+        return np.r_[
+            np.r_[*[seg.nodes[:-1] for seg in self.segments]],
+            self.segments[-1].points[-1:],
+        ]
 
     def plot(self):
         """Plot decimated polyline."""
@@ -345,7 +407,7 @@ if __name__ == "__main__":
     curve = (
         fiducial.data.centerline.data
     )  # factor*self.data.centerline_delta[coil, :, 0]
-    curve += 500 * fiducial.data.centerline_delta[3].data
+    curve += 1000 * fiducial.data.centerline_delta[3].data
     polyline = PolyLine(curve)
     polyline.plot()
 

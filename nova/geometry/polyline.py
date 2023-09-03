@@ -1,14 +1,18 @@
 """Impement rdp-like decimator for mixed linear / arc polylines."""
 import abc
 from dataclasses import dataclass, field
+from functools import cached_property
+from typing import ClassVar
 
 import numpy as np
 from overrides import override
-import pyvista
+import pandas
 import scipy
-from vedo import Mesh, shapes
+from vedo import Mesh
 
+from nova.geometry.polygeom import Polygon
 from nova.geometry.rdp import rdp
+from nova.geometry.volume import Cell, Path, Sweep, TriShell
 from nova.graphics.plot import Plot
 
 
@@ -17,12 +21,56 @@ class Element(abc.ABC):
     """Element base class."""
 
     points: np.ndarray | None = field(default=None, repr=False)
+    center: np.ndarray = field(init=False, default_factory=lambda: np.zeros(3))
+    axis: np.ndarray = field(init=False, default_factory=lambda: np.zeros(3))
+    start_point: np.ndarray = field(init=False, default_factory=lambda: np.zeros(3))
+    mid_point: np.ndarray = field(init=False, default_factory=lambda: np.zeros(3))
+    end_point: np.ndarray = field(init=False, default_factory=lambda: np.zeros(3))
 
+    name: ClassVar[str] = "base"
+    keys: ClassVar[dict[str, list[str]]] = {
+        "center": ["x", "y", "z"],
+        "axis": ["dx", "dy", "dz"],
+        "start_point": ["x0", "y0", "z0"],
+        "mid_point": ["x1", "y1", "z1"],
+        "end_point": ["x2", "y2", "z2"],
+    }
+
+    def __post_init__(self):
+        """Set default values."""
+        self.start_point = self.points[0]
+        self.end_point = self.points[-1]
+
+    def __getitem__(self, attr: str):
+        """Return item from geometry dict."""
+        return self.geometry[attr]
+
+    def _to_dict(self, keys: list[str], attr: str) -> dict:
+        """Return dict combining values in attr with keys."""
+        return dict(zip(keys, getattr(self, attr)))
+
+    @cached_property
+    def geometry(self) -> dict:
+        """Return geometry dict."""
+        return {"segment": self.name} | {
+            key: value
+            for attr, keys in self.keys.items()
+            for key, value in self._to_dict(keys, attr).items()
+        }
+
+    @property
     @abc.abstractmethod
-    def mesh(self):
-        """Return element vtk mesh."""
+    def length(self):
+        """Return element length."""
         raise NotImplementedError
 
+    @property
+    @abc.abstractmethod
+    def path(self):
+        """Return discrete element path."""
+        raise NotImplementedError
+
+    @property
     @abc.abstractmethod
     def nodes(self):
         """Return minimal-set element defining nodes."""
@@ -30,18 +78,61 @@ class Element(abc.ABC):
 
 
 @dataclass
+class Line(Plot, Element):
+    """Manage 3D line element."""
+
+    name: ClassVar[str] = "line"
+
+    def __post_init__(self):
+        """Assert two point line."""
+        super().__post_init__()
+        assert len(self.points) == 2
+        self.axis = self.end_point - self.start_point
+        self.axis /= np.linalg.norm(self.axis)
+        self.center = self.mid_point = np.mean(
+            [self.start_point, self.end_point], axis=0
+        )
+
+    @property
+    @override
+    def nodes(self):
+        """Return line endpoints."""
+        return self.points
+
+    @property
+    @override
+    def length(self):
+        """Return line length."""
+        return np.linalg.norm(self.points[1] - self.points[0])
+
+    def plot3d(self):
+        """Plot point and best-fit data."""
+        self.get_axes("3d")
+        self.axes.plot(*self.points.T, "k-o", ms=3)
+
+    @property
+    @override
+    def path(self):
+        """Return discrete element path."""
+        return self.nodes
+
+
+@dataclass
 class Arc(Plot, Element):
     """Fit arc to 3d point cloud."""
 
     arc_axes: np.ndarray = field(init=False)
-    center: np.ndarray = field(init=False)
     radius: float = field(init=False)
     theta: float = field(init=False, repr=False)
     error: float = field(init=False)
     eps: float = 1e-8
+    resolution: int = 50
+
+    name: ClassVar[str] = "arc"
 
     def __post_init__(self):
         """Generate curve."""
+        super().__post_init__()
         self.build()
 
     def build(self, points=None):
@@ -49,7 +140,7 @@ class Arc(Plot, Element):
         if points is not None:
             self.points = points
         if self.points is None:
-            return
+            return None
         self.align()
         self.fit()
         return self
@@ -60,14 +151,16 @@ class Arc(Plot, Element):
         delta = self.points - mean[np.newaxis, :]
         self.arc_axes = scipy.linalg.svd(delta)[2]
         self.arc_axes[0] = self.points[-1] - self.points[0]  # arc chord
-        arc_axis_2 = np.cross(
-            self.arc_axes[0], np.mean(self.points[1:-1] - self.points[0], axis=0)
-        )
-        if not np.allclose(arc_axis_2, 0):
-            self.arc_axes[2] = arc_axis_2
+        if not np.allclose(
+            normal := np.cross(
+                self.arc_axes[0], np.mean(self.points[1:-1] - self.points[0], axis=0)
+            ),
+            0,
+        ):
+            self.arc_axes[2] = normal
         self.arc_axes[1] = np.cross(self.arc_axes[0], self.arc_axes[2])
-        # self.arc_axes[2] = np.cross(self.arc_axes[0], self.arc_axes[1])
         self.arc_axes /= np.linalg.norm(self.arc_axes, axis=1)[:, np.newaxis]
+        self.axis = self.arc_axes[2]
 
     @staticmethod
     def fit_2d(points):
@@ -117,11 +210,7 @@ class Arc(Plot, Element):
         center_points = self.points_2d - center
         self.theta = np.unwrap(np.arctan2(center_points[:, 1], center_points[:, 0]))
         self.error = np.linalg.norm(self.points - self.points_fit, axis=1).std()
-
-    @property
-    def length(self):
-        """Return length of discrete polyline."""
-        return np.linalg.norm(self.points[1:] - self.points[:-1], axis=1).sum()
+        self.mid_point = self.sample(3)[1]
 
     @property
     def central_angle(self):
@@ -129,7 +218,7 @@ class Arc(Plot, Element):
         return abs(self.theta[-1] - self.theta[0])
 
     @property
-    def arclength(self):
+    def length(self):
         """Return arc length."""
         return self.radius * self.central_angle
 
@@ -150,7 +239,7 @@ class Arc(Plot, Element):
     @override
     def nodes(self):
         """Return best-fit node triple respecting start and end locations."""
-        return np.array([self.points[0], self.sample(3)[1], self.points[-1]])
+        return np.array([self.start_point, self.mid_point, self.end_point])
 
     @property
     def chord(self):
@@ -189,80 +278,9 @@ class Arc(Plot, Element):
 
     @property
     @override
-    def mesh(self):
-        """Return vtk mesh."""
-        print(np.linalg.norm(self.points[0] - self.center))
-        print(np.linalg.norm(self.points[-1] - self.center))
-        print(self.radius)
-        print(self.sample(2))
-        print(self.points[0], self.points[1])
-        print()
-
-        return Mesh(
-            pyvista.CircularArc(
-                self.points[0], self.points[-1], self.center, resolution=50
-            )
-        )
-        # return shapes.Arc(self.center, self.points[0][::2], self.points[-1][::2])
-
-
-@dataclass
-class Line(Plot):
-    """Manage 3D line element."""
-
-    points: np.ndarray
-
-    def __post_init__(self):
-        """Assert two point line."""
-        assert len(self.points) == 2
-
-    @property
-    def nodes(self):
-        """Return line endpoints."""
-        return self.points
-
-    @property
-    def length(self):
-        """Return line length."""
-        return np.linalg.norm(self.points[1] - self.points[0])
-
-    def plot3d(self):
-        """Plot point and best-fit data."""
-        self.get_axes("3d")
-        self.axes.plot(*self.points.T, "k-o", ms=3)
-
-    @property
-    def mesh(self):
-        """Return vtk mesh."""
-        return shapes.Line(self.points[0], self.points[1])
-
-
-@dataclass
-class Triple:
-    """Manage 3-point arc nodes."""
-
-    point_a: np.ndarray
-    point_b: np.ndarray
-    point_c: np.ndarray
-
-
-@dataclass
-class ThreePointArc(Arc, Triple):
-    """Generate arc segments."""
-
-    def __post_init__(self):
-        """Generate curve."""
-        self.points = np.c_[self.point_a, self.point_b, self.point_c].T
-        super().__post_init__()
-
-    def plot(self):
-        """Plot arc."""
-        self.set_axes("2d")
-        points = self.sample()
-        self.axes.plot(points[:, 0], points[:, 1])
-        self.axes.plot(self.point_a[0], self.point_a[1], "o")
-        self.axes.plot(self.point_b[0], self.point_b[1], "X")
-        self.axes.plot(self.point_c[0], self.point_c[1], "s")
+    def path(self):
+        """Return pyvista mesh."""
+        return self.sample(self.resolution)
 
 
 @dataclass
@@ -288,9 +306,9 @@ class PolyArc(Plot):
             start_index = i * self.resolution
             if i > 0:
                 start_index -= 1
-            self.curve[
-                slice(start_index, start_index + self.resolution)
-            ] = ThreePointArc(*points).sample(self.resolution)
+            self.curve[slice(start_index, start_index + self.resolution)] = Arc(
+                points
+            ).sample(self.resolution)
 
     def plot(self):
         """Plot polyline."""
@@ -304,20 +322,49 @@ class PolyLine(Plot):
     """Decimate polyline using a hybrid arc/line-segment rdp algorithum."""
 
     points: np.ndarray = field(repr=False)
+    cross_section: Polygon | None = field(repr=False, default=None)
+    delta: float = 0
     arc_eps: float = 1e-3
     line_eps: float = 2e-3
     rdp_eps: float = 1e-4
     minimum_arc_nodes: int = 3
     segments: list[Line | Arc] = field(init=False, repr=False, default_factory=list)
 
+    path_attrs: ClassVar[list[str]] = [
+        "x",
+        "y",
+        "z",
+        "dx",
+        "dy",
+        "dz",
+        "x0",
+        "y0",
+        "z0",
+        "x1",
+        "y1",
+        "z1",
+        "x2",
+        "y2",
+        "z2",
+        "segment",
+    ]
+    volume_attrs: ClassVar[list[str]] = [
+        "vtk",
+        "poly",
+        "volume",
+    ]
+
     def __post_init__(self):
         """Decimate polyline."""
-        self.decimate()
+        match self.delta:
+            case 0:
+                self.decimate()
+            case _:
+                self.interpolate()
 
-    def __iter__(self):
-        """Yield mesh elements from segments."""
-        for segment in self.segments:
-            yield segment.mesh
+    def __getitem__(self, attr: str):
+        """Return geometry attribute."""
+        return self.geometry[attr]
 
     def fit_arc(self, points):
         """Return point index prior to first arc mis-match."""
@@ -356,6 +403,11 @@ class PolyLine(Plot):
                 self.segments[i] = segment.chord
         self.rdp_merge()
 
+    def interpolate(self):
+        """Perform delta based interpolation."""
+        points = Path.from_points(self.points, delta=self.delta).mesh.points
+        self.segments = [Line(points[i : i + 2]) for i in range(len(points) - 1)]
+
     def _rdp_line_segments(self, nodes):
         """Return rdp reduced Line segments."""
         nodes = np.r_[nodes[::2], nodes[-1:]]
@@ -386,6 +438,37 @@ class PolyLine(Plot):
             self.segments[-1].points[-1:],
         ]
 
+    def _to_list(self, attr: str):
+        """Return segment attribute list."""
+        return [segment[attr] for segment in self.segments]
+
+    @cached_property
+    def vtk(self) -> list[Cell]:
+        """Retun list of vtk mesh segments swept along segment paths."""
+        return [Sweep(self.cross_section, segment.path) for segment in self.segments]
+
+    @property
+    def poly(self) -> list[Polygon]:
+        """Return list of polygon objects for 3D coil projected to 2d poloidal plane."""
+        return [TriShell(_vtk).poly for _vtk in self.vtk]
+
+    @property
+    def volume(self) -> list[float]:
+        """Return subframe volume list."""
+        return [_vtk.clone().triangulate().volume() for _vtk in self.vtk]
+
+    @cached_property
+    def geometry(self) -> dict:
+        """Return geometry attribute dict."""
+        data = {attr: self._to_list(attr) for attr in self.path_attrs}
+        if self.cross_section:
+            data |= {attr: getattr(self, attr) for attr in self.volume_attrs}
+        return data
+
+    def to_frame(self):
+        """Return segment geometry as a pandas DataFrame."""
+        return pandas.DataFrame(self.geometry)
+
     def plot(self):
         """Plot decimated polyline."""
         self.set_axes("3d")
@@ -404,10 +487,8 @@ if __name__ == "__main__":
 
     fiducial = FiducialData("RE", fill=True)
 
-    curve = (
-        fiducial.data.centerline.data
-    )  # factor*self.data.centerline_delta[coil, :, 0]
-    curve += 1000 * fiducial.data.centerline_delta[3].data
+    curve = fiducial.data.centerline.data
+    # curve += 1000 * fiducial.data.centerline_delta[3].data
     polyline = PolyLine(curve)
     polyline.plot()
 

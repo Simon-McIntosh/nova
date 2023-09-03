@@ -1,27 +1,28 @@
-import matplotlib.pylab
 import numpy as np
 import pytest
+import vedo
 
-from nova.geometry.polyline import Arc, Line, PolyArc, PolyLine, ThreePointArc
+from nova.assembly.fiducialdata import FiducialData
+from nova.geometry.polyline import Arc, Line, PolyArc, PolyLine
 
 
 def test_2d_arc_radius():
-    arc = ThreePointArc((0, 1, 0), (1, 0, 0), (0, -1, 0))
+    arc = Arc(np.array([(0, 1, 0), (1, 0, 0), (0, -1, 0)]))
     assert np.isclose(arc.radius, 1)
 
 
 def test_2d_arc_center():
-    arc = ThreePointArc((0, 1, 0), (1, 0, 0), (0, -1, 0))
+    arc = Arc(np.array([(0, 1, 0), (1, 0, 0), (0, -1, 0)]))
     assert np.allclose(arc.center, (0, 0, 0))
 
 
 def test_3d_arc_center():
-    arc = ThreePointArc((0, 1, -3.4), (1, 0, -3.4), (0, -1, -3.4))
+    arc = Arc(np.array([(0, 1, -3.4), (1, 0, -3.4), (0, -1, -3.4)]))
     assert np.isclose(arc.center[2], -3.4)
 
 
 def test_negative_acute():
-    arc = ThreePointArc((0, 1, 0), (1, 0, 0), (-1, 0, 0))
+    arc = Arc(np.array([(0, 1, 0), (1, 0, 0), (-1, 0, 0)]))
     assert np.allclose(arc.center, (0, 0, 0))
     assert np.allclose(arc.sample(2)[-1], (-1, 0, 0))
 
@@ -174,26 +175,26 @@ def test_arc_plotfit():
     points = rng.random((3, 3))
     points[:, 0] = 0
     arc = Arc(points)
-    with matplotlib.pylab.ioff():
+    with arc.test_plot():
         arc.plot_fit()
 
 
-def test_plot_threepointarc():
+def test_arc_plot():
     rng = np.random.default_rng(2025)
     points = rng.random((3, 3))
-    arc = ThreePointArc(*points)
-    assert np.allclose(arc.point_a, points[0])
-    assert np.allclose(arc.point_b, points[1])
-    assert np.allclose(arc.point_c, points[2])
-    with matplotlib.pylab.ioff():
+    arc = Arc(points)
+    assert np.allclose(arc.start_point, points[0])
+    assert np.allclose(arc.end_point, points[2])
+    with arc.test_plot():
         arc.plot()
 
 
 def test_polyarc_plot():
     rng = np.random.default_rng(2025)
     points = rng.random((3, 3))
-    with matplotlib.pylab.ioff():
-        PolyArc(points).plot()
+    polyarc = PolyArc(points)
+    with polyarc.test_plot():
+        polyarc.plot()
 
 
 def test_circle():
@@ -201,7 +202,7 @@ def test_circle():
     points = 3.2 * np.c_[np.zeros_like(theta), np.cos(theta), np.sin(theta)]
     curve = PolyLine(points)
     assert len(curve.segments) == 1
-    with matplotlib.pylab.ioff():
+    with curve.test_plot():
         curve.plot()
 
 
@@ -210,6 +211,125 @@ def test_ellipse():
     points = np.c_[np.zeros_like(theta), 1.2 * np.cos(theta), 1.0 * np.sin(theta)]
     curve = PolyLine(points)
     assert len(curve.segments) > 1
+
+
+def test_line_3_point_error():
+    with pytest.raises(AssertionError):
+        Line(np.zeros((3, 3)))
+
+
+def test_line_points():
+    rng = np.random.default_rng(2025)
+    points = rng.random((2, 3))
+    line = Line(points)
+    assert np.allclose(points[0], line.start_point)
+    assert np.allclose(points[-1], line.end_point)
+    assert not np.allclose(line.mid_point, (0, 0, 0))
+    assert np.allclose(line.center, line.mid_point)
+    assert np.allclose(line.nodes, line.points)
+
+    rng = np.random.default_rng(2025)
+    points = rng.random((2, 3))
+    line = Line(points)
+    assert np.isclose(np.linalg.norm(line.axis), 1)
+    assert np.isclose(line.axis @ (line.end_point - line.start_point), line.length)
+
+
+def test_line_plot():
+    rng = np.random.default_rng(2025)
+    points = rng.random((2, 3))
+    line = Line(points)
+    with line.test_plot():
+        line.plot3d()
+
+
+def test_line_path():
+    rng = np.random.default_rng(2025)
+    points = rng.random((2, 3))
+    line = Line(points)
+    assert np.allclose(line.path, line.points)
+
+
+def test_line_name():
+    rng = np.random.default_rng(2025)
+    points = rng.random((2, 3))
+    line = Line(points)
+    assert line.name == "line"
+
+
+def test_line_geometry():
+    rng = np.random.default_rng(2025)
+    points = rng.random((2, 3))
+    line = Line(points)
+    geom = line.geometry
+    assert np.allclose(line.center, [geom[attr] for attr in ["x", "y", "z"]])
+    assert np.allclose(line.axis, [geom[attr] for attr in ["dx", "dy", "dz"]])
+    assert np.allclose(line.start_point, [geom[attr] for attr in ["x0", "y0", "z0"]])
+    assert np.allclose(line.mid_point, [geom[attr] for attr in ["x1", "y1", "z1"]])
+    assert np.allclose(line.end_point, [geom[attr] for attr in ["x2", "y2", "z2"]])
+
+
+def test_arc_path():
+    arc = Arc(np.array([[1, 0, 0], [0, 0, 1], [-1, 0, 0]]))
+    assert isinstance(arc.path, np.ndarray)
+
+
+def test_arc_points():
+    arc = Arc(np.array([[1, 0.5, 0], [0, 0.5, 1], [0, 0.5, -1]]))
+    assert arc.test
+    assert np.allclose(arc.center, (0, 0.5, 0))
+    assert np.allclose(arc.axis, (0, 1, 0))
+    assert np.allclose(arc.start_point, [1, 0.5, 0])
+    assert np.allclose(arc.end_point, [0, 0.5, -1])
+    assert np.isclose(arc.length, 2 * np.pi * 3 / 4)
+    assert np.allclose(arc.mid_point, arc.sample(3)[1])
+    assert np.isclose(arc.central_angle, 3 / 2 * np.pi)
+
+
+def test_arc_points_fail():
+    arc = Arc(np.array([[1, 0.5, 0], [0, -0.5, 1], [0, 0.5, 1], [0, 0.5, -1]]))
+    assert not arc.test
+
+
+def test_arc_name():
+    arc = Arc(np.array([[1, 0.5, 0], [0, 0.5, 1], [0, 0.5, -1]]))
+    assert arc.name == "arc"
+
+
+@pytest.fixture
+def fiducial_polyline():
+    """Return TF coil centerline."""
+    fiducial = FiducialData("RE", fill=True)
+    return PolyLine(
+        fiducial.data.centerline.data,
+        arc_eps=1e-3,
+        line_eps=2e-3,
+        rdp_eps=1e-4,
+        minimum_arc_nodes=3,
+    )
+
+
+def test_fiducial_polyline_geometry_segments(fiducial_polyline):
+    segment_number = len(fiducial_polyline.segments)
+    assert np.all(
+        [
+            len(fiducial_polyline.geometry[attr]) == segment_number
+            for attr in fiducial_polyline.path_attrs
+        ]
+    )
+    assert fiducial_polyline.geometry["segment"] == [
+        "arc",
+        "arc",
+        "arc",
+        "line",
+        "arc",
+        "arc",
+        "arc",
+    ]
+
+
+def test_fiducial_polyline_frame(fiducial_polyline):
+    assert len(fiducial_polyline.to_frame()) == len(fiducial_polyline.segments)
 
 
 if __name__ == "__main__":

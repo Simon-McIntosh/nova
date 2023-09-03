@@ -92,6 +92,9 @@ openpyxl = "^3.1.2"
 types-openpyxl = "^3.1.0.15"
 cython = "0.29.34"
 easybuild = "^4.8.0"
+types-decorator = "^5.1.8.4"
+types-six = "^1.16.21.9"
+pyarrow = "^13.0.0"
 
 [tool.poetry.extras]
 ansys = [

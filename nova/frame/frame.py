@@ -14,6 +14,7 @@ class Frame(FrameSet):
     dcoil: float = -1
     dplasma: float = -500
     dshell: float = 0
+    dwinding: float = 0
     tcoil: str = "rectangle"
     tplasma: str = "rectangle"
 
@@ -75,4 +76,4 @@ class Frame(FrameSet):
     @frame_factory(Winding)
     def winding(self):
         """Return winding constructor."""
-        return dict(delta=self.delta)
+        return dict(delta=self.dwinding)

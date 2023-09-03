@@ -107,7 +107,12 @@ class Polygon(PolyFrame):
 
         """
         if isinstance(
-            self.poly, (shapely.geometry.Polygon, shapely.geometry.MultiPolygon)
+            self.poly,
+            (
+                shapely.geometry.Polygon,
+                shapely.geometry.MultiPolygon,
+                shapely.geometry.LineString,
+            ),
         ):
             return self.poly
         if hasattr(self.poly, "poly"):

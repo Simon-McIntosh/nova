@@ -1,5 +1,6 @@
 """Methods for ploting FrameSpace data."""
 from __future__ import annotations
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 from functools import cached_property
 from importlib import import_module
@@ -320,6 +321,14 @@ class Plot:
     def plt(self):
         """Return pylab instance."""
         return self.mpl["pylab"]
+
+    @contextmanager
+    def test_plot(self):
+        """Return plot close and ioff context managers."""
+        self.plt.ioff()
+        yield
+        self.plt.close()
+        self.plt.ion()
 
     @cached_property
     def mpy(self):

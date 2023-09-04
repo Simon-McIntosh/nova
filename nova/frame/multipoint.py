@@ -39,6 +39,7 @@ class MultiPoint(metamethod.MultiPoint):
                 - factor = value
 
         """
+        self.frame.link = self.frame.link.astype(object)
         isna = pandas.isna(self.frame.link)
         self.frame.loc[isna, "link"] = self.frame.metaframe.default["link"]
         self.frame.loc[isna, "factor"] = self.frame.metaframe.default["factor"]
@@ -59,7 +60,8 @@ class MultiPoint(metamethod.MultiPoint):
             with self.frame.setlock(True, "multipoint"):
                 factor = self.frame.factor
                 factor = factor[istrue | isnumeric][1:]
-                self.link(index, factor)
+                self.link(index, factor.values)
+        self.frame.link = self.frame.link.astype(str)
         self.sort_link()
         self.build()
 
@@ -82,7 +84,9 @@ class MultiPoint(metamethod.MultiPoint):
         ref = self.frame.index.get_indexer(self.frame.link)
         ref[ref == -1] = 0
         ref[self.indexer] = range_index[self.indexer]
+        print("ref", ref)
         self.frame.ref = ref
+        print(self.frame.ref)
         subref = np.zeros(len(self.frame), dtype=int)
         subref[self.indexer] = np.arange(len(self.indexer), dtype=int)
         self.frame.subref = subref[ref]
@@ -145,10 +149,12 @@ class MultiPoint(metamethod.MultiPoint):
             return
         if len(factor) != index_number - 1:
             raise IndexError(
-                f"len(factor={factor}) must == 1 " f"or == len(index={index})-1"
+                f"len(factor={factor}) must == 1 for == len(index={index})-1"
             )
         for i in np.arange(1, index_number):
             self.frame.at[index[i], "link"] = name
+            print(index[i])
+            print(factor)
             self.frame.at[index[i], "factor"] = factor[i - 1]
         if self.frame.lock("multipoint") is False:
             self.frame.__init__(self.frame, attrs=self.frame.attrs)

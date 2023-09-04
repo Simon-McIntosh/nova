@@ -2,6 +2,8 @@ import pytest
 
 from nova.frame.framelink import FrameLink
 
+pytestmark = pytest.mark.filterwarnings("error::FutureWarning")
+
 
 def test_instance():
     framelink = FrameLink()
@@ -245,10 +247,11 @@ def test_frame_addition_required_error():
 
 def test_frame_insert_required():
     framelink = FrameLink(required=["x", "y"])
+    framelink.insert(1, 2)
     with framelink.insert_required(["x"]):
         framelink.insert([4, 5])
-    assert framelink.x.to_list() == [4, 5]
-    assert framelink.y.to_list() == [0, 0]
+    assert framelink.x.to_list() == [1, 4, 5]
+    assert framelink.y.to_list() == [2, 0, 0]
 
 
 if __name__ == "__main__":

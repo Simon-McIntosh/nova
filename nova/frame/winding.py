@@ -71,27 +71,23 @@ class Winding(CoilSetAttrs):
         frame_data = self.vtk_data(vtk)
         self.attrs = additional | dict(
             section=poly.section,
+            poly=poly,
             name="sweep",
             dl=vtk.mesh["arc_length"][-1],
             dt=np.max([poly.width, poly.height]),
         )
         with self.insert_required(required):
             index = self.frame.insert(*frame_data, iloc=iloc, **self.attrs)
-            """
-            subattrs = self.attrs | {
-                "label": index[0],
-                "frame": index[0],
-                "delim": "_",
-                "link": True,
-            }
-            """
+            # subattrs = self.attrs | {
+            #    "label": index[0],
+            #    "frame": index[0],
+            #    "delim": "_",
+            #    "link": True,
+            # }
 
         with self.insert_required([]):
-            print(path)
+            # print(path)
             polyline = PolyLine(path, cross_section=poly)
-
-            polyline.vtk[0].cap()
-            print("vol", polyline.vtk[0].volume())
             self.subframe.insert(**polyline.geometry)
 
             """

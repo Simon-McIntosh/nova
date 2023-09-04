@@ -31,9 +31,9 @@ class Element(abc.ABC):
     keys: ClassVar[dict[str, list[str]]] = {
         "center": ["x", "y", "z"],
         "axis": ["dx", "dy", "dz"],
-        "start_point": ["x0", "y0", "z0"],
-        "mid_point": ["x1", "y1", "z1"],
-        "end_point": ["x2", "y2", "z2"],
+        "start_point": ["x1", "y1", "z1"],
+        "mid_point": ["x2", "y2", "z2"],
+        "end_point": ["x3", "y3", "z3"],
     }
 
     def __post_init__(self):
@@ -126,7 +126,7 @@ class Arc(Plot, Element):
     theta: float = field(init=False, repr=False)
     error: float = field(init=False)
     eps: float = 1e-8
-    resolution: int = 50
+    resolution: int = 150
 
     name: ClassVar[str] = "arc"
 
@@ -212,12 +212,12 @@ class Arc(Plot, Element):
         self.error = np.linalg.norm(self.points - self.points_fit, axis=1).std()
         self.mid_point = self.sample(3)[1]
 
-    @property
+    @cached_property
     def central_angle(self):
         """Return the absolute angle subtended by arc from the arc's center."""
         return abs(self.theta[-1] - self.theta[0])
 
-    @property
+    @cached_property
     def length(self):
         """Return arc length."""
         return self.radius * self.central_angle
@@ -241,7 +241,7 @@ class Arc(Plot, Element):
         """Return best-fit node triple respecting start and end locations."""
         return np.array([self.start_point, self.mid_point, self.end_point])
 
-    @property
+    @cached_property
     def chord(self):
         """Return arc chord."""
         return Line(np.c_[self.points[0], self.points[-1]].T)
@@ -279,7 +279,7 @@ class Arc(Plot, Element):
     @property
     @override
     def path(self):
-        """Return pyvista mesh."""
+        """Return arc path at sample resolution."""
         return self.sample(self.resolution)
 
 
@@ -288,7 +288,7 @@ class PolyArc(Plot):
     """Construct polyline from multiple arc segments."""
 
     points: np.ndarray
-    resolution: int = 20
+    resolution: int = 50
     curve: np.ndarray = field(init=False)
 
     def __post_init__(self):
@@ -337,15 +337,15 @@ class PolyLine(Plot):
         "dx",
         "dy",
         "dz",
-        "x0",
-        "y0",
-        "z0",
         "x1",
         "y1",
         "z1",
         "x2",
         "y2",
         "z2",
+        "x3",
+        "y3",
+        "z3",
         "segment",
     ]
     volume_attrs: ClassVar[list[str]] = [
@@ -398,8 +398,7 @@ class PolyLine(Plot):
         for i, segment in enumerate(self.segments):
             if isinstance(segment, Line):
                 continue
-            central_angle = segment.central_angle
-            if abs(np.sin(central_angle) * np.tan(central_angle)) < self.line_eps:
+            if (segment.length - segment.chord.length) / segment.length < self.line_eps:
                 self.segments[i] = segment.chord
         self.rdp_merge()
 

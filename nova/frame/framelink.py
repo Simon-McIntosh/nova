@@ -182,7 +182,10 @@ class FrameLink(LinkIndexer, DataArray):
             self.overwrite_array(self.subspace.metaframe.data)
         frame = pandas.DataFrame(self)
         if iloc is None:  # append
-            frames = [frame, *insert]
+            if frame.empty:
+                frames = insert
+            else:
+                frames = [frame, *insert]
         else:  # insert
             frames = [frame.iloc[:iloc, :], *insert, frame.iloc[iloc:, :]]
         for frame in frames:
@@ -405,6 +408,6 @@ if __name__ == "__main__":
     framelink.insert(
         [-4, -5], 1, Ic=6.5, name="PF1", active=False, plasma=True, frame="coil1"
     )
-    framelink.insert(range(4), 3, Ic=4, nturn=20, label="PF", link=True)
+    framelink.insert(range(4), 3, Ic=4, nturn=20, label="PF", link="PF1")
 
     # framelink.multipoint.link(['PF1', 'PF5'], factor=1)

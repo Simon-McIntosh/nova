@@ -264,9 +264,9 @@ def test_line_geometry():
     geom = line.geometry
     assert np.allclose(line.center, [geom[attr] for attr in ["x", "y", "z"]])
     assert np.allclose(line.axis, [geom[attr] for attr in ["dx", "dy", "dz"]])
-    assert np.allclose(line.start_point, [geom[attr] for attr in ["x0", "y0", "z0"]])
-    assert np.allclose(line.mid_point, [geom[attr] for attr in ["x1", "y1", "z1"]])
-    assert np.allclose(line.end_point, [geom[attr] for attr in ["x2", "y2", "z2"]])
+    assert np.allclose(line.start_point, [geom[attr] for attr in ["x1", "y1", "z1"]])
+    assert np.allclose(line.mid_point, [geom[attr] for attr in ["x2", "y2", "z2"]])
+    assert np.allclose(line.end_point, [geom[attr] for attr in ["x3", "y3", "z3"]])
 
 
 def test_arc_path():

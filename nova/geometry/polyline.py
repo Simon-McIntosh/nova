@@ -434,7 +434,7 @@ class PolyLine(Plot):
     def nodes(self):
         """Return segment nodes."""
         return np.r_[
-            np.r_[*[seg.nodes[:-1] for seg in self.segments]],
+            np.vstack([seg.nodes[:-1] for seg in self.segments]),
             self.segments[-1].points[-1:],
         ]
 

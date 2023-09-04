@@ -14,25 +14,25 @@ frame.insert(5, 0, 1, 3)
 
 
 def test_sample_corners():
-    sample = Sample(frame.poly[0].boundary, delta=0)
+    sample = Sample(frame.poly.iloc[0].boundary, delta=0)
     assert len(sample["radius"]) == len(sample["height"]) == 4
 
 
 @pytest.mark.parametrize("delta", [-1, -2, -7])
 def test_sample_negative_delta_node_number(delta):
-    sample = Sample(frame.poly[0].boundary, delta)
+    sample = Sample(frame.poly.iloc[0].boundary, delta)
     assert np.allclose(sample["node_number"], -delta * np.ones(4))
 
 
 @pytest.mark.parametrize("delta", [-1, -11])
 def test_sample_negative_delta_boundary_length(delta):
-    sample = Sample(frame.poly[0].boundary, delta)
+    sample = Sample(frame.poly.iloc[0].boundary, delta)
     assert len(sample["radius"]) == -delta * 4
 
 
 def test_negative_float_error():
     with pytest.raises(TypeError):
-        Sample(frame.poly[0].boundary, -1.1)
+        Sample(frame.poly.iloc[0].boundary, -1.1)
 
 
 def test_boundary_length_error():
@@ -46,12 +46,12 @@ def test_boundary_ring_error():
 
 
 def test_boundary_positive_delta_a():
-    sample = Sample(frame.poly[0].boundary, 1.0)
+    sample = Sample(frame.poly.iloc[0].boundary, 1.0)
     assert len(sample) == 2 * 1 + 2 * 3
 
 
 def test_boundary_positive_delta_b():
-    sample = Sample(frame.poly[0].boundary, 1.5)
+    sample = Sample(frame.poly.iloc[0].boundary, 1.5)
     assert len(sample) == (2 * 1 + 2 * 2)
 
 

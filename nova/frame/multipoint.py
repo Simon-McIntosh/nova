@@ -84,9 +84,7 @@ class MultiPoint(metamethod.MultiPoint):
         ref = self.frame.index.get_indexer(self.frame.link)
         ref[ref == -1] = 0
         ref[self.indexer] = range_index[self.indexer]
-        print("ref", ref)
         self.frame.ref = ref
-        print(self.frame.ref)
         subref = np.zeros(len(self.frame), dtype=int)
         subref[self.indexer] = np.arange(len(self.indexer), dtype=int)
         self.frame.subref = subref[ref]
@@ -153,8 +151,6 @@ class MultiPoint(metamethod.MultiPoint):
             )
         for i in np.arange(1, index_number):
             self.frame.at[index[i], "link"] = name
-            print(index[i])
-            print(factor)
             self.frame.at[index[i], "factor"] = factor[i - 1]
         if self.frame.lock("multipoint") is False:
             self.frame.__init__(self.frame, attrs=self.frame.attrs)

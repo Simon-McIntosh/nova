@@ -36,7 +36,7 @@ class Startup:
                 "show_dimensions": False,
             },
             "mode": {"chained_assignment": "warn"},  # Control SettingWithCopyWarning
-            "future": {"infer_string": True},
+            # "future": {"infer_string": True},
         }
 
         for category, option in options.items():

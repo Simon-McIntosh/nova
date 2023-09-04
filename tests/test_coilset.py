@@ -219,7 +219,9 @@ def test_store_load_poly():
         new_coilset.filepath = tmp.name
         new_coilset.load()
         coilset._clear()
-    assert np.isclose(coilset.frame.poly[0].area, new_coilset.frame.poly[0].area)
+    assert np.isclose(
+        coilset.frame.poly.iloc[0].area, new_coilset.frame.poly.iloc[0].area
+    )
 
 
 def test_store_load_multipoly():
@@ -232,7 +234,9 @@ def test_store_load_multipoly():
         new_coilset.filepath = tmp.name
         new_coilset.load()
         coilset._clear()
-    assert np.isclose(coilset.frame.poly[0].area, new_coilset.frame.poly[0].area)
+    assert np.isclose(
+        coilset.frame.poly.iloc[0].area, new_coilset.frame.poly.iloc[0].area
+    )
 
 
 def test_store_load_version():

@@ -71,7 +71,7 @@ class PlasmaGrid(BaseGrid, PlasmaLoc):
         if self.sloc["plasma"].sum() == 0:
             raise GridError("plasma")
         target = Target(self.loc["plasma", ["x", "z", "poly"]].to_dict())
-        wall = self.Loc["plasma", "poly"][0].poly.boundary
+        wall = self.Loc["plasma", "poly"].iloc[0].poly.boundary
         self.data = Solve(
             self.subframe,
             target,

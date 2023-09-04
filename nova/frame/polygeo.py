@@ -62,7 +62,7 @@ class PolyGeo(metamethod.PolyGeo):
             geom = np.empty((index_length, len(self.features)), dtype=float)
             # itterate over index - generate poly as required
             for i in range(index_length):
-                if poly_update[i]:
+                if poly_update.iloc[i]:
                     poly[i] = Polygon({f"{section[i]}": poly_data[i]})
                     section[i] = poly[i].metadata["section"]
                 geometry = PolyGeom(poly[i], segment[i], length[i]).geometry

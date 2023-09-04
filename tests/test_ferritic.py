@@ -36,7 +36,7 @@ def test_insert_doublebox_frame_volume():
         vedo.shapes.Box(pos=(7, 0, 1), length=1, width=2, height=3),
     ]
     coilset.ferritic.insert(box)
-    assert np.isclose(coilset.frame.volume[0], 12)
+    assert np.isclose(coilset.frame.volume.iloc[0], 12)
 
 
 def test_insert_doublebox_frame_centroid():

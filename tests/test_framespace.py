@@ -40,37 +40,37 @@ def test_fix_aspect():
         required=["x", "z", "dl", "dt"], available=["section", "poly"]
     )
     framespace.insert(4, 6, 0.1, 0.5, section="sq")
-    assert framespace.dx[0] == framespace.dz[0]
+    assert framespace.dx.iloc[0] == framespace.dz.iloc[0]
 
 
 def test_rectangular_cross_section():
     framespace = FrameSpace(Required=["x", "z", "dl", "dt"])
     framespace.insert(1.75, 0.5, 2.5, 1.5, section="rectangle")
-    assert np.isclose(2.5 * 1.5, framespace.area[0], rtol=1e-8)
+    assert np.isclose(2.5 * 1.5, framespace.area.iloc[0], rtol=1e-8)
 
 
 def test_skin_section_area():
     framespace = FrameSpace(Required=["x", "z"])
     framespace.insert(1.75, 0.2, dl=0.5, dt=0.1, section="skin")
-    assert np.isclose(framespace.area[0], framespace.poly[0].area, rtol=1e-1)
+    assert np.isclose(framespace.area.iloc[0], framespace.poly.iloc[0].area, rtol=1e-1)
 
 
 def test_loop_length():
     framespace = FrameSpace(Required=["x", "z", "dl", "dt"])
     framespace.insert(1.75, 0.5, 2.5, 1.5, section="rectangle")
-    assert np.isclose(framespace.dy[0], 2 * np.pi * 1.75)
+    assert np.isclose(framespace.dy.iloc[0], 2 * np.pi * 1.75)
 
 
 def test_loop_length_factor():
     framespace = FrameSpace(Required=["x", "z", "dl", "dt"])
     framespace.insert(1.75, 0.5, 2.5, 1.5, section="rectangle", dy=-0.5)
-    assert np.isclose(framespace.dy[0], np.pi * 1.75)
+    assert np.isclose(framespace.dy.iloc[0], np.pi * 1.75)
 
 
 def test_loop_length_abs():
     framespace = FrameSpace(Required=["x", "z", "dl", "dt"])
     framespace.insert(1.75, 0.5, 2.5, 1.5, section="rectangle", dy=22.3)
-    assert np.isclose(framespace.dy[0], 22.3)
+    assert np.isclose(framespace.dy.iloc[0], 22.3)
 
 
 if __name__ == "__main__":

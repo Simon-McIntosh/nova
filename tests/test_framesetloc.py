@@ -134,7 +134,7 @@ def test_set_frame_It_subspace_Ic():
     coilset = CoilSet(dcoil=-1, subspace=["Ic"], array=[])
     coilset.coil.insert(1.5, required=["x"], nturn=3)
     coilset.loc["It"] = 9.9
-    assert np.isclose(coilset.sloc["Ic"][0], 3.3)
+    assert np.isclose(coilset.sloc["Ic"].iloc[0], 3.3)
 
 
 def test_subframe_plasma_index():

@@ -20,13 +20,13 @@ class TurnGeom:
         self.data["area"] = self.frame.area.sum()
         for attr in "xyz":
             self.data[attr] = self.weighted_mean(attr)
-        if self.frame.segment[0] == "ring":  # update ring circumference
+        if self.frame.segment.iloc[0] == "ring":  # update ring circumference
             self.data["dy"] = 2 * np.pi * self.data["x"]
         self.data["rms"] = self.weighted_rms()
         self.data["nturn"] = self.frame.nturn.sum()
-        self.data["turn"] = self.frame.section[0]
-        self.data["dl"] = self.frame["dl"][0]
-        self.data["dt"] = self.frame["dt"][0]
+        self.data["turn"] = self.frame.section.iloc[0]
+        self.data["dl"] = self.frame["dl"].iloc[0]
+        self.data["dt"] = self.frame["dt"].iloc[0]
 
     @property
     def area(self):

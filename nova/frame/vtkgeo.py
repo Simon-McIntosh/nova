@@ -41,9 +41,9 @@ class VtkGeo(metamethod.VtkGeo):
             frame = self.frame.loc[index, :].copy()
             for i in range(index_length):
                 tri = TriShell(
-                    frame.vtk[i],
-                    qhull=frame.part[i] in self.qhull,
-                    ahull=frame.part[i] in self.ahull,
+                    frame.vtk.iloc[i],
+                    qhull=frame.part.iloc[i] in self.qhull,
+                    ahull=frame.part.iloc[i] in self.ahull,
                 )
                 mesh = vedo.Mesh(
                     [tri.vtk.points(), tri.vtk.cells()],
@@ -51,7 +51,7 @@ class VtkGeo(metamethod.VtkGeo):
                     alpha=tri.vtk.opacity(),
                 )
                 frame.loc[frame.index[i], "vtk"] = VtkFrame(mesh)
-                if frame.part[i] in self.geom:
+                if frame.part.iloc[i] in self.geom:
                     frame.loc[frame.index[i], self.features] = tri.geom
                     frame.loc[frame.index[i], ["segment", "section"]] = ""
                     frame.loc[frame.index[i], "poly"] = tri.poly

@@ -9,15 +9,15 @@ from nova.frame.error import GridError
 def test_centroid_x():
     coilset = CoilSet()
     coilset.firstwall.insert([[1, 2, 2, 1, 1], [1, 1, 3, 3, 1]])
-    poly = coilset.frame.poly[0]
-    assert poly.centroid.x == coilset.frame.x[0] == 1.5
+    poly = coilset.frame.poly.iloc[0]
+    assert poly.centroid.x == coilset.frame.x.iloc[0] == 1.5
 
 
 def test_centroid_z():
     coilset = CoilSet()
     coilset.firstwall.insert([[1, 2, 1.5, 1], [0, 0, 3, 0]])
-    poly = coilset.frame.poly[0]
-    assert poly.centroid.y == 1 == coilset.frame.z[0]
+    poly = coilset.frame.poly.iloc[0]
+    assert poly.centroid.y == 1 == coilset.frame.z.iloc[0]
 
 
 def test_circle():
@@ -30,14 +30,14 @@ def test_circle():
 def test_plasma_turns():
     coilset = CoilSet(dplasma=0.25)
     coilset.firstwall.insert({"ellipse": [1.7, 1, 0.5, 0.85]})
-    assert coilset.frame.nturn[0] == 1
+    assert coilset.frame.nturn.iloc[0] == 1
     assert np.isclose(coilset.subframe.nturn.sum(), 1)
 
 
 def test_plasma_part():
     coilset = CoilSet(dplasma=0)
     coilset.firstwall.insert({"o": [1.7, 1, 0.5]})
-    assert coilset.frame.part[0] == "plasma"
+    assert coilset.frame.part.iloc[0] == "plasma"
 
 
 def test_multiframe_area():

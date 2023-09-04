@@ -414,9 +414,9 @@ class FrameData(ABC):
         """Update frame and subframe resistivity."""
         rho = resistance * frame.loc[index, "area"] / frame.loc[index, "dy"]
         frame.loc[index, "rho"] = rho
-        for i, name in enumerate(index):
+        for name in index:
             subindex = subframe.frame == name
-            subframe.loc[subindex, "rho"] = rho[i]
+            subframe.loc[subindex, "rho"] = rho[name]
 
 
 @dataclass

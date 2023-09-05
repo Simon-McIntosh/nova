@@ -227,9 +227,9 @@ if __name__ == "__main__":
     # machine.load_ids('pf_active')
     # print(machine.frame)
 
-    # MachineDatabase(machine="iter_md").sync_shot("115001/1")
+    MachineDatabase(machine="iter_md").sync_shot("111003/1")
 
-    ScenarioDatabase().sync_shot("135001/7")
+    # ScenarioDatabase().sync_shot("135001/7")
     # ScenarioDatabase().rsync()
     # ScenarioDatabase(user='tribolp').sync_shot('135011/21')
     # ScenarioDatabase(user='dubrovm').sync_shot('105028/1')

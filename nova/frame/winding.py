@@ -8,7 +8,6 @@ from nova.frame.coilsetattrs import CoilSetAttrs
 from nova.geometry.polygeom import Polygon
 from nova.geometry.polyline import PolyLine
 
-# from nova.geometry.volume import Path, Section, Cell, Sweep, TriShell
 from nova.geometry.volume import Sweep, TriShell
 
 

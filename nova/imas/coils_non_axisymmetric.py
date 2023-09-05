@@ -8,7 +8,7 @@ from tqdm import tqdm
 
 from nova.geometry.polygeom import Polygon
 from nova.graphics.plot import Plot
-from nova.imas.coil import coil_name
+from nova.imas.coil import coil_name, part_name
 from nova.imas.database import ImasIds
 from nova.imas.machine import CoilDatabase
 
@@ -111,12 +111,17 @@ class Coils_Non_Axisymmetyric(Plot, CoilDatabase):
                     ]
                 )
                 self.winding.insert(
-                    cross_section, elements.points, label=coil_name(coil)
+                    cross_section,
+                    elements.points,
+                    label=coil_name(coil),
+                    part=part_name(coil),
                 )
         self.store()
 
 
 if __name__ == "__main__":
-    coil = Coils_Non_Axisymmetyric()
+    coil = Coils_Non_Axisymmetyric(111003, 1)  # CC
+    coil += Coils_Non_Axisymmetyric(115001, 1)  # ELM
+
     coil.frame.vtkplot()
     # coil._clear()

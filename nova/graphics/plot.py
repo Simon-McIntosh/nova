@@ -23,9 +23,9 @@ class Properties:
     """Manage plot properties."""
 
     patchwork: float = 0
-    alpha: dict[str, float] = field(default_factory=lambda: {"plasma": 1})
     linewidth: float = 0.5
     edgecolor: str = "white"
+    alpha: ClassVar[dict[str, float]] = {"plasma": 0.25}
     facecolor: ClassVar[dict[str, str]] = {
         "vs3": "C0",
         "vs3j": "C3",
@@ -41,6 +41,8 @@ class Properties:
         "cryo": "C5",
         "fi": "C2",
         "tf": "C7",
+        "elm": "C3",
+        "cc": "C2",
     }
     zorder: dict[str, int] = field(
         default_factory=lambda: {"VS3": 1, "VS3j": 0, "CS": 3, "PF": 2}
@@ -53,9 +55,10 @@ class Properties:
             return "fi"
         return part
 
-    def get_alpha(self, part):
+    @classmethod
+    def get_alpha(cls, part):
         """Return patch alpha."""
-        return self.alpha.get(part, 1)
+        return cls.alpha.get(cls.get_part(part), 1)
 
     @classmethod
     def get_facecolor(cls, part):

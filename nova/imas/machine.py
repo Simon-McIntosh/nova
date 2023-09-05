@@ -1112,6 +1112,12 @@ if __name__ == "__main__":
     pulse, run = 105028, 1  # DINA
 
     machine = Machine(
-        pf_active="iter_md", pf_passive=False, wall="iter_md", tplasma="hex", nwall=5
+        pf_active="iter_md",
+        pf_passive=False,
+        wall="iter_md",
+        tplasma="hex",
+        nwall=5,
     )
-    machine.plot()
+    # machine.plot()
+
+    machine.frame.vtkplot()

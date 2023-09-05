@@ -43,7 +43,9 @@ class VtkPlot(metamethod.VtkPlot):
         index = self.frame.geotype("Geo", "vtk")
         color = {f"C{i}": c for i, c in enumerate(colors)}
         vtk = [
-            vtk.c(color[Properties.get_facecolor(part)])
+            vtk.c(color[Properties.get_facecolor(part)]).alpha(
+                Properties.get_alpha(part)
+            )
             for vtk, part in self.frame.loc[index, ["vtk", "part"]].values
         ]
         if len(vtk) > 0:

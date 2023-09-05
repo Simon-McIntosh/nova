@@ -325,10 +325,12 @@ class Plot:
     @contextmanager
     def test_plot(self):
         """Return plot close and ioff context managers."""
+        _interactive = self.plt.isinteractive()
         self.plt.ioff()
         yield
         self.plt.close()
-        self.plt.ion()
+        if _interactive:
+            self.plt.ion()
 
     @cached_property
     def mpy(self):

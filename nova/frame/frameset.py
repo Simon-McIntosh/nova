@@ -73,6 +73,7 @@ class FrameSet(netCDF, FrameSetLoc):
             "volume",
         ],
     )
+    vtk: bool = False
 
     _available: ClassVar[list[str]] = [
         "link",
@@ -101,6 +102,7 @@ class FrameSet(netCDF, FrameSetLoc):
     def __post_init__(self):
         """Create frame and subframe."""
         self.available = list(dict.fromkeys(self.available + self._available))
+        self._update_vtk()
         self.frame = FrameSpace(
             base=self.base,
             required=self.required,
@@ -140,6 +142,13 @@ class FrameSet(netCDF, FrameSetLoc):
         superframe["Ic"] = self.sloc["Ic"][self.frame.subref]
         superframe["It"] = superframe["Ic"] * superframe["nturn"]
         return superframe
+
+    def _update_vtk(self):
+        """Update vtk field in available attributes."""
+        if self.vtk and "vtk" not in self.available:
+            self.available.append("vtk")
+        elif not self.vtk and "vtk" in self.available:
+            self.available.pop(self.available.index("vtk"))
 
     @staticmethod
     def import_method(name: str, package: str | None):

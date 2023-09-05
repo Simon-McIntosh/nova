@@ -156,7 +156,7 @@ def to_vector(axis: np.ndarray, vector: np.ndarray):
     vector = normalize(vector)
     cross = np.cross(axis, vector)
     dot = np.dot(axis, vector)
-    if np.isclose(np.linalg.norm(cross), 0) and np.isclose(dot, -1):
+    if np.isclose(dot, -1):
         # catch -pi rotation
         axis = np.cross(axis, np.roll(axis, -1))
         return Rotation.from_rotvec(-np.pi * axis)

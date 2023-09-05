@@ -313,11 +313,11 @@ def test_fiducial_polyline_geometry_segments(fiducial_polyline):
     segment_number = len(fiducial_polyline.segments)
     assert np.all(
         [
-            len(fiducial_polyline.geometry[attr]) == segment_number
+            len(fiducial_polyline.path_geometry[attr]) == segment_number
             for attr in fiducial_polyline.path_attrs
         ]
     )
-    assert fiducial_polyline.geometry["segment"] == [
+    assert fiducial_polyline.path_geometry["segment"] == [
         "arc",
         "arc",
         "arc",

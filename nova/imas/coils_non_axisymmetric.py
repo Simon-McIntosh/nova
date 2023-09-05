@@ -4,7 +4,9 @@ from functools import cached_property
 from typing import ClassVar
 
 import numpy as np
+from tqdm import tqdm
 
+from nova.geometry.polygeom import Polygon
 from nova.graphics.plot import Plot
 from nova.imas.coil import coil_name
 from nova.imas.database import ImasIds
@@ -94,60 +96,24 @@ class Coils_Non_Axisymmetyric(Plot, CoilDatabase):
     run: int = 1
     name: str = "coils_non_axisymmetric"
     ids_node: str = "coil"
-    available: list[str] = field(default_factory=lambda: ["vtk"])
+    vtk: bool = True
 
     coil_attrs: ClassVar[list[str]] = ["turns", "resistance"]
 
     def build(self):
         """Build netCDF database using data extracted from imasdb."""
-        for coil in self.ids_data.coil[:1]:
-            print(coil_name(coil))
-            for i, conductor in enumerate(coil.conductor):
+        for coil in tqdm(self.ids_data.coil, "building coils non-axysymmetric"):
+            for conductor in coil.conductor:
                 elements = Elements(elements=conductor.elements)
-
-            self.winding.insert({"c": [0, 0, 0.05]}, elements.points)
-            # elements.plot()
-            # line = Line().from_points(np.array(points))
-            # line.show()
-            # self.winding.insert({"c": [0, 0, 0.005]}, np.array(points), name=name)
-
-        # self.polyline = polyline
-        # self.frame.vtk.plot()
-
-        """
-        coil_name = coil_names(self.ids_data.coil)
-        with self.build_scenario():
-            self.data.coords["point"] = ["x", "y", "z"]
-            self.data.coords["coil_name"] = coil_name
-            self.append("coil_name", self.coil_attrs)
-
-            self.data["indices"] = "coil_name", np.zeros(
-                self.data.dims["coil_name"], int
-            )
-            points = []
-            for i, coil in enumerate(self.ids_data.coil):
-                for conductor in coil.conductor:
-                    points.extend(
-                        np.r_[
-                            self._points(conductor.elements.start_points),
-                            self._points(conductor.elements.intermediate_points),
-                            self._points(conductor.elements.end_points),
-                        ]
-                    )
-                if i == 0:
-                    self.data["indices"][i] = 0
-                    continue
-                self.data["indices"][i] = self.data["indices"][i - 1] + len(points[-1])
-            print(np.shape(points))
-
-            self.data["points"] = ("index", "point"), points
-            # point_array = points.r * np.cos(points.phi)
-            # y_coord = points.r * np.sin(points.phi)
-            # z_coord = points.z
-
-            # mesh.plot()
-            # xarray.
-            """
+                cross_section = Polygon(
+                    np.c_[
+                        conductor.cross_section.delta_r, conductor.cross_section.delta_z
+                    ]
+                )
+                self.winding.insert(
+                    cross_section, elements.points, label=coil_name(coil)
+                )
+        self.store()
 
 
 if __name__ == "__main__":

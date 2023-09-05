@@ -9,7 +9,7 @@ from nova.geometry.polygeom import Polygon
 from nova.geometry.polyline import PolyLine
 
 # from nova.geometry.volume import Path, Section, Cell, Sweep, TriShell
-from nova.geometry.volume import Sweep
+from nova.geometry.volume import Sweep, TriShell
 
 
 @dataclass
@@ -71,60 +71,23 @@ class Winding(CoilSetAttrs):
         frame_data = self.vtk_data(vtk)
         self.attrs = additional | dict(
             section=poly.section,
-            poly=poly,
-            name="sweep",
-            dl=vtk.mesh["arc_length"][-1],
-            dt=np.max([poly.width, poly.height]),
+            poly=TriShell(vtk).poly,
+            area=poly.area,
+            dl=poly.width,
+            dt=poly.height,
         )
         with self.insert_required(required):
             index = self.frame.insert(*frame_data, iloc=iloc, **self.attrs)
-            # subattrs = self.attrs | {
-            #    "label": index[0],
-            #    "frame": index[0],
-            #    "delim": "_",
-            #    "link": True,
-            # }
 
         with self.insert_required([]):
-            # print(path)
-            polyline = PolyLine(path, cross_section=poly)
-            self.subframe.insert(**polyline.geometry)
-
-            """
-            case int() | float():
-                submesh = Path.from_points(path, delta=self.attrs["delta"])
-                section = Section(poly.points).sweep(submesh)
-                vtk = [
-                    Cell(section.point_array[i : i + 2], cap=True)
-                    for i in range(submesh.n_points - 1)
-                ]
-                points = submesh.points
-                centroid = (points[1:] + points[:-1]) / 2
-                vector = points[1:] - points[:-1]
-
-                volume = [_vtk.clone().triangulate().volume() for _vtk in vtk]
-                poly = [TriShell(_vtk).poly for _vtk in vtk]
-                area = self.frame.loc[index, "area"]
-                self.subframe.insert(
-                    *centroid.T,
-                    *vector.T,
-                    volume,
-                    vtk,
-                    poly=poly,
-                    area=area,
-                    **subattrs,
-                )
-            case _:
-                raise NotImplementedError(f"delta {self.delta} not implemented.")
-            """
-
-            """
-            polyline.plot()
-
-
-            # self.subframe.insert(*centroid.T, *vector.T, vtk, **subattrs)
-            """
-
+            polyline = PolyLine(path, cross_section=poly, delta=self.delta)
+            subattrs = (
+                self.attrs
+                | {"label": index[0], "frame": index[0], "delim": "_", "link": True}
+                | polyline.path_geometry
+                | polyline.volume_geometry
+            )
+            self.subframe.insert(**subattrs)
         self.update_loc_indexer()
         return index
 

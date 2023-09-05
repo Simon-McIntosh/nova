@@ -12,9 +12,7 @@ class CoilSet(Biot, Control, Frame):
     """
     Manage coilset.
 
-    - poloidal: add poloidal coils.
-    - shell: add poloidal shells.
-    - plasma: add plasma (poloidal).
+    See Frame for insert methods.
 
     """
 

@@ -286,9 +286,9 @@ class DataFrame(FrameAttrs):
         xframe = self.to_xarray()
         xframe.attrs = self.extract_metadata()
         for col in ["poly", "vtk"]:
-            if col == "vtk" and not vtk:
-                xframe = xframe.drop_vars("vtk", errors="ignore")
-                continue
+            # if col == "vtk" and not vtk:
+            #    xframe = xframe.drop_vars("vtk", errors="ignore")
+            #    continue
             try:
                 xframe[col].values = self._dumps(col)
             except KeyError:

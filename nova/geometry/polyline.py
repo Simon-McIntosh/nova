@@ -126,7 +126,7 @@ class Arc(Plot, Element):
     theta: float = field(init=False, repr=False)
     error: float = field(init=False)
     eps: float = 1e-8
-    resolution: int = 150
+    resolution: int = 50
 
     name: ClassVar[str] = "arc"
 
@@ -280,7 +280,10 @@ class Arc(Plot, Element):
     @override
     def path(self):
         """Return arc path at sample resolution."""
-        return self.sample(self.resolution)
+        resolution = np.max(
+            [3, int(self.resolution * self.central_angle / (2 * np.pi))]
+        )
+        return self.sample(resolution)
 
 
 @dataclass
@@ -351,6 +354,7 @@ class PolyLine(Plot):
     volume_attrs: ClassVar[list[str]] = [
         "vtk",
         "poly",
+        "area",
         "volume",
     ]
 
@@ -363,8 +367,8 @@ class PolyLine(Plot):
                 self.interpolate()
 
     def __getitem__(self, attr: str):
-        """Return geometry attribute."""
-        return self.geometry[attr]
+        """Return path geometry attribute."""
+        return self.path_geometry[attr]
 
     def fit_arc(self, points):
         """Return point index prior to first arc mis-match."""
@@ -446,10 +450,15 @@ class PolyLine(Plot):
         """Retun list of vtk mesh segments swept along segment paths."""
         return [Sweep(self.cross_section, segment.path) for segment in self.segments]
 
-    @property
+    @cached_property
     def poly(self) -> list[Polygon]:
         """Return list of polygon objects for 3D coil projected to 2d poloidal plane."""
         return [TriShell(_vtk).poly for _vtk in self.vtk]
+
+    @cached_property
+    def area(self) -> list[float]:
+        """Return list of polygon arease projected to 2d poloiodal plane."""
+        return [poly.area for poly in self.poly]
 
     @property
     def volume(self) -> list[float]:
@@ -457,16 +466,20 @@ class PolyLine(Plot):
         return [_vtk.clone().triangulate().volume() for _vtk in self.vtk]
 
     @cached_property
-    def geometry(self) -> dict:
-        """Return geometry attribute dict."""
-        data = {attr: self._to_list(attr) for attr in self.path_attrs}
-        if self.cross_section:
-            data |= {attr: getattr(self, attr) for attr in self.volume_attrs}
-        return data
+    def path_geometry(self) -> dict:
+        """Return path geometry attribute dict."""
+        return {attr: self._to_list(attr) for attr in self.path_attrs}
+
+    @cached_property
+    def volume_geometry(self) -> dict:
+        """Return volume geometry attribute dict."""
+        if not self.cross_section:
+            return {}
+        return {attr: getattr(self, attr) for attr in self.volume_attrs}
 
     def to_frame(self):
         """Return segment geometry as a pandas DataFrame."""
-        return pandas.DataFrame(self.geometry)
+        return pandas.DataFrame(self.path_geometry | self.volume_geometry)
 
     def plot(self):
         """Plot decimated polyline."""

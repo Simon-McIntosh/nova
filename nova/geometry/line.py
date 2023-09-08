@@ -53,7 +53,7 @@ class Line:
     def compute_normal(self):
         """Compute normal vector as cross product of tangent and plane."""
         plane = self.fit_plane()
-        self.mesh["normal"] = np.cross(plane, self.mesh["tangent"])
+        self.mesh["normal"] = np.cross(self.mesh["tangent"], plane)
         self.mesh["normal"] = self.normalize(self.mesh["normal"])
 
     def compute_cross(self):

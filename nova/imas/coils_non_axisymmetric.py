@@ -8,9 +8,11 @@ from tqdm import tqdm
 
 from nova.geometry.polygeom import Polygon
 from nova.graphics.plot import Plot
-from nova.imas.coil import coil_name, part_name
+from nova.imas.coil import coil_name, coil_names, part_name
 from nova.imas.database import ImasIds
 from nova.imas.machine import CoilDatabase
+
+from nova.imas.scenario import Scenario
 
 
 @dataclass
@@ -89,7 +91,7 @@ class Elements(Plot):
 
 
 @dataclass
-class Coils_Non_Axisymmetyric(Plot, CoilDatabase):
+class Coils_Non_Axisymmetyric(Plot, CoilDatabase, Scenario):
     """Manage access to coils_non_axisymmetric ids."""
 
     pulse: int = 115001
@@ -102,26 +104,58 @@ class Coils_Non_Axisymmetyric(Plot, CoilDatabase):
 
     def build(self):
         """Build netCDF database using data extracted from imasdb."""
-        for coil in tqdm(self.ids_data.coil, "building coils non-axysymmetric"):
-            for conductor in coil.conductor:
-                elements = Elements(elements=conductor.elements)
-                cross_section = Polygon(
-                    np.c_[
-                        conductor.cross_section.delta_r, conductor.cross_section.delta_z
-                    ]
+        name = coil_names(self.ids_data.coil)
+        with self.build_scenario():
+            self.data.coords["coil_name"] = name
+            self.data.coords["coil_index"] = "coil_name", range(len(name))
+            self.data.coords["point"] = ["x", "y", "z"]
+
+            points = {}
+            for coil in tqdm(self.ids_data.coil, "building coils non-axysymmetric"):
+                name = coil_name(coil)
+                points[name] = []
+                for i, conductor in enumerate(coil.conductor):
+                    elements = Elements(elements=conductor.elements)
+                    polygon = Polygon(
+                        np.c_[
+                            conductor.cross_section.delta_r,
+                            conductor.cross_section.delta_z,
+                        ]
+                    )
+                    points[name].extend(elements.points)
+                    if i > 0:
+                        name = f"name{i}"
+                    self.winding.insert(
+                        polygon,
+                        elements.points,
+                        name=name,
+                        part=part_name(coil),
+                    )
+                    if i > 0:
+                        self.linkframe([coil_name(coil), name])
+                points[name] = np.array(points[name])
+            maximum_point_number = np.max([len(_points) for _points in points.values()])
+            self.data.coords["points_index"] = np.arange(1, maximum_point_number + 1)
+            self.data["points"] = ("coil_name", "points_index", "points"), np.zeros(
+                (
+                    self.data.dims["coil_name"],
+                    self.data.dims["points_index"],
+                    self.data.dims["point"],
                 )
-                self.winding.insert(
-                    cross_section,
-                    elements.points,
-                    label=coil_name(coil),
-                    part=part_name(coil),
-                )
-        self.store()
+            )
+            self.data["points_length"] = "coil_name", [
+                len(_points) for _points in points.values()
+            ]
+            print(self.data["points"].shape)
+            for i, (number, name) in enumerate(
+                zip(self.data["points_length"].data, self.data["coil_name"].data)
+            ):
+                self.data["points"].data[i, :number] = points[name]
 
 
 if __name__ == "__main__":
     coil = Coils_Non_Axisymmetyric(111003, 1)  # CC
-    coil += Coils_Non_Axisymmetyric(115001, 1)  # ELM
+    # coil += Coils_Non_Axisymmetyric(115001, 1)  # ELM
 
-    coil.frame.vtkplot()
-    # coil._clear()
+    coil.subframe.vtkplot()
+    coil._clear()

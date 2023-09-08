@@ -15,9 +15,8 @@ import trimesh
 import vedo
 import vtk
 
-from nova.geometry.polygeom import PolyGeom
 from nova.geometry.polygon import Polygon
-from nova.geometry.rotate import to_vector
+from nova.geometry.rotate import to_vector, to_axes
 from nova.geometry.vtkgen import VtkFrame
 from nova.geometry.line import Line
 
@@ -245,59 +244,6 @@ class Ring(VtkFrame):
 
 
 @dataclass
-class Section:
-    """Transform 2D sectional data."""
-
-    points: np.ndarray
-    origin: np.ndarray = field(init=False, default_factory=lambda: np.zeros(3, float))
-    triad: np.ndarray = field(init=False, default_factory=lambda: np.identity(3, float))
-    mesh_array: list[VtkFrame] = field(init=False, default_factory=list)
-    point_array: list[np.ndarray] = field(init=False, default_factory=list)
-
-    def __post_init__(self):
-        """Append inital section to mesh."""
-        self.points = np.array(self.points, float)
-
-    def __len__(self):
-        """Return length of mesh."""
-        return len(self.mesh_array)
-
-    def _append(self):
-        """Generate mesh and append mesh to list."""
-        self.point_array.append(self.points.tolist())
-        self.mesh_array.append(
-            VtkFrame([self.points, [[*range(len(self.points))]]]).c(len(self))
-        )
-
-    def to_vector(self, vector: np.ndarray, coord: int):
-        """Rotate mesh to vector."""
-        rotation = to_vector(self.triad[coord], vector)
-        self.points -= self.origin
-        self.points = rotation.apply(self.points)
-        self.points += self.origin
-        self.triad = rotation.apply(self.triad)
-
-    def to_point(self, point):
-        """Translate points to point and store mesh."""
-        delta = np.array(point - self.origin, float)
-        self.origin += delta
-        self.points += delta
-
-    def sweep(self, mesh: pyvista.PolyData):
-        """Sweep section along path."""
-        for i in range(mesh.n_points):
-            self.to_point(mesh.points[i])
-            self.to_vector(mesh["tangent"][i], 1)
-            self.to_vector(mesh["normal"][i], 0)
-            self._append()
-        return self
-
-    def plot(self):
-        """Plot mesh instances."""
-        vedo.show(*self.mesh_array, new=True)
-
-
-@dataclass
 class Path:
     """Manage 3D path sub-divisions."""
 
@@ -347,6 +293,66 @@ class Path:
         vedo.show(self.mesh, self.submesh)
 
 
+@dataclass
+class Section:
+    """Transform 2D sectional data."""
+
+    points: np.ndarray
+    origin: np.ndarray = field(default_factory=lambda: np.zeros(3, float))
+    triad: np.ndarray = field(default_factory=lambda: np.identity(3, float))
+    mesh_array: list[VtkFrame] = field(init=False, default_factory=list)
+    point_array: list[np.ndarray] = field(init=False, default_factory=list)
+
+    def __len__(self):
+        """Return length of mesh."""
+        return len(self.mesh_array)
+
+    def _append(self):
+        """Generate mesh and append mesh to list."""
+        self.point_array.append(self.points.tolist())
+        self.mesh_array.append(
+            VtkFrame([self.points, [[*range(len(self.points))]]]).c(len(self))
+        )
+
+    def _rotate_points(self, rotation):
+        self.points -= self.origin
+        self.points = rotation.apply(self.points)
+        self.points += self.origin
+
+    def to_vector(self, vector: np.ndarray, coord: int):
+        """Rotate points to vector."""
+        rotation = to_vector(self.triad[coord], vector)
+        self._rotate_points(rotation)
+        self.triad = rotation.apply(self.triad)
+
+    def to_axes(self, axes: np.ndarray):
+        """Rotate points to triad."""
+        rotation = to_axes(axes, self.triad)
+        self._rotate_points(rotation)
+        self.triad = rotation.apply(self.triad.T).T
+
+    def to_point(self, point):
+        """Translate points to point and store mesh."""
+        delta = np.array(point - self.origin, float)
+        self.origin = self.origin + delta
+        self.points = self.points + delta
+
+    def sweep(self, path):
+        """Sweep section along path."""
+        if not isinstance(path, pyvista.PolyData):
+            path = Path.from_points(path)
+        for i in range(path.n_points):
+            self.to_point(path.points[i])
+            axes = np.c_[path["cross"][i], path["tangent"][i], path["normal"][i]]
+            self.to_axes(axes)
+            self._append()
+        return self
+
+    def plot(self):
+        """Plot mesh instances."""
+        vedo.show(*self.mesh_array, new=True, axes=True)
+
+
 class Cell(VtkFrame):
     """Build vtk cell from a list of sectional polygons."""
 
@@ -387,34 +393,29 @@ class Cell(VtkFrame):
 
 
 class Sweep(Cell):
-    """Sweep polygon along path."""
+    """Sweep boundary polygon along path."""
 
-    def __init__(self, poly, path, delta=0, cap=False):
-        """
-        Sweep cross-section and return vedo.Mesh.
+    def __init__(
+        self,
+        boundary: np.ndarray,
+        path: np.ndarray,
+        cross: np.ndarray = np.array([0, 1, 0]),
+        delta: int = 0,
+        cap: bool = False,
+        origin: np.ndarray = np.zeros(3, float),
+        triad: np.ndarray = np.identity(3, float),
+    ):
+        path = Path.from_points(path)
+        if len(path.points) == 2:  # and normal and cross vectors for line segment
+            normal = np.cross(cross, path["tangent"][0])
+            path["cross"][0] = path["cross"][1] = cross
+            path["normal"][0] = path["normal"][1] = normal
 
-        Parameters
-        ----------
-        poly :
-            - shapely.geometry.Polygon
-            - dict[str, list[float]], polyname: *args
-            - list[float], shape(4,) bounding box [xmin, xmax, zmin, zmax]
-            - array-like, shape(n, 2) bounding loop [x, z]
-
-        path : np.ndarray, shape(n, 3)
-            Swept path.
-
-        """
-        if not isinstance(poly, Polygon):
-            poly = PolyGeom(poly, segment="sweep")
-        if isinstance(path, pyvista.PolyData):
-            path = path.points
-        self.mesh = Path.from_points(path, delta=delta)
-        section = Section(poly.points).sweep(self.mesh)
-        if np.isclose(self.mesh.points[0], self.mesh.points[-1]).all():
+        section = Section(boundary, origin, triad).sweep(path)
+        if np.isclose(path.points[0], path.points[-1]).all():
             link = np.mean([section.point_array[0], section.point_array[-1]], axis=0)
             section.point_array[0] = section.point_array[-1] = link
-        super().__init__(section.point_array, cap=cap)
+        super().__init__(section.point_array, cap=self.cap)
 
     def __str__(self):
         """Return volume name."""

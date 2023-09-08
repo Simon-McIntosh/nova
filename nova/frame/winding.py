@@ -66,7 +66,7 @@ class Winding(CoilSetAttrs):
         """
         if not isinstance(poly, Polygon):
             poly = Polygon(poly, name="sweep")
-        vtk = Sweep(poly, path)
+        vtk = Sweep(poly.points, path)
         frame_data = self.vtk_data(vtk)
         self.attrs = additional | dict(
             section=poly.section,
@@ -79,7 +79,7 @@ class Winding(CoilSetAttrs):
             index = self.frame.insert(*frame_data, iloc=iloc, **self.attrs)
 
         with self.insert_required([]):
-            polyline = PolyLine(path, cross_section=poly, delta=self.delta)
+            polyline = PolyLine(path, boundary=poly.points, delta=self.delta)
             subattrs = (
                 self.attrs
                 | {"label": index[0], "frame": index[0], "delim": "_", "link": True}

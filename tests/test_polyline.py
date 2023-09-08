@@ -1,9 +1,10 @@
 import numpy as np
 import pytest
-import vedo
 
 from nova.assembly.fiducialdata import FiducialData
 from nova.geometry.polyline import Arc, Line, PolyArc, PolyLine
+from nova.imas.coils_non_axisymmetric import Coils_Non_Axisymmetyric, Elements
+from nova.imas.utilities import mark
 
 
 def test_2d_arc_radius():
@@ -231,8 +232,8 @@ def test_line_points():
     rng = np.random.default_rng(2025)
     points = rng.random((2, 3))
     line = Line(points)
-    assert np.isclose(np.linalg.norm(line.axis), 1)
-    assert np.isclose(line.axis @ (line.end_point - line.start_point), line.length)
+    assert np.isclose(np.linalg.norm(line.normal), 1)
+    assert np.isclose(np.linalg.norm(line.end_point - line.start_point), line.length)
 
 
 def test_line_plot():
@@ -263,7 +264,7 @@ def test_line_geometry():
     line = Line(points)
     geom = line.geometry
     assert np.allclose(line.center, [geom[attr] for attr in ["x", "y", "z"]])
-    assert np.allclose(line.axis, [geom[attr] for attr in ["dx", "dy", "dz"]])
+    assert np.allclose(line.normal, [geom[attr] for attr in ["dx", "dy", "dz"]])
     assert np.allclose(line.start_point, [geom[attr] for attr in ["x1", "y1", "z1"]])
     assert np.allclose(line.mid_point, [geom[attr] for attr in ["x2", "y2", "z2"]])
     assert np.allclose(line.end_point, [geom[attr] for attr in ["x3", "y3", "z3"]])
@@ -278,7 +279,7 @@ def test_arc_points():
     arc = Arc(np.array([[1, 0.5, 0], [0, 0.5, 1], [0, 0.5, -1]]))
     assert arc.test
     assert np.allclose(arc.center, (0, 0.5, 0))
-    assert np.allclose(arc.axis, (0, 1, 0))
+    assert np.allclose(arc.normal, (0, arc.radius, 0))
     assert np.allclose(arc.start_point, [1, 0.5, 0])
     assert np.allclose(arc.end_point, [0, 0.5, -1])
     assert np.isclose(arc.length, 2 * np.pi * 3 / 4)
@@ -297,11 +298,13 @@ def test_arc_name():
 
 
 @pytest.fixture
-def fiducial_polyline():
+def cc_polyline():
     """Return TF coil centerline."""
-    fiducial = FiducialData("RE", fill=True)
+    coil = Coils_Non_Axisymmetyric(111003, 1)
+    number = coil.data.points_length[0].data
+    points = coil.data.points[0, :number].data
     return PolyLine(
-        fiducial.data.centerline.data,
+        points,
         arc_eps=1e-3,
         line_eps=2e-3,
         rdp_eps=1e-4,
@@ -309,15 +312,19 @@ def fiducial_polyline():
     )
 
 
-def test_fiducial_polyline_geometry_segments(fiducial_polyline):
-    segment_number = len(fiducial_polyline.segments)
+@mark["coils_non_axisymmetric"]
+def test_fiducial_polyline_geometry_segments(cc_polyline):
+    segment_number = len(cc_polyline.segments)
     assert np.all(
         [
-            len(fiducial_polyline.path_geometry[attr]) == segment_number
-            for attr in fiducial_polyline.path_attrs
+            len(cc_polyline.path_geometry[attr]) == segment_number
+            for attr in cc_polyline.path_attrs
         ]
     )
-    assert fiducial_polyline.path_geometry["segment"] == [
+    assert cc_polyline.path_geometry["segment"] == [
+        "arc",
+        "arc",
+        "line",
         "arc",
         "arc",
         "arc",
@@ -328,8 +335,31 @@ def test_fiducial_polyline_geometry_segments(fiducial_polyline):
     ]
 
 
-def test_fiducial_polyline_frame(fiducial_polyline):
-    assert len(fiducial_polyline.to_frame()) == len(fiducial_polyline.segments)
+@mark["coils_non_axisymmetric"]
+def test_fiducial_polyline_frame(cc_polyline):
+    assert len(cc_polyline.to_frame()) == len(cc_polyline.segments)
+
+
+def test_straight_line_normal():
+    path = np.array(
+        [
+            [-1, 0, -1],
+            [-0.5, 0, -1],
+            [0, 0, -1],
+            [np.cos(np.pi / 3), 0, -np.sin(np.pi / 3)],
+            [np.cos(np.pi / 4), 0, -np.sin(np.pi / 4)],
+            [1, 0, 0],
+            [1, 0, 0.5],
+            [1, 0, 1],
+        ]
+    )
+    polyline = PolyLine(path, minimum_arc_nodes=4)
+    normal = np.c_[polyline["dx"], polyline["dy"], polyline["dz"]]
+    reference = np.zeros((3, 3))
+    reference[:, 1] = 1
+    assert len(polyline) == 3
+    assert np.allclose(np.linalg.norm(normal, axis=1), np.ones(3))
+    assert np.allclose(normal, reference)
 
 
 if __name__ == "__main__":

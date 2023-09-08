@@ -10,6 +10,7 @@ import pandas
 import scipy
 from vedo import Mesh
 
+from nova.geometry import line
 from nova.geometry.polygeom import Polygon
 from nova.geometry.rdp import rdp
 from nova.geometry.volume import Cell, Path, Sweep, TriShell
@@ -21,8 +22,8 @@ class Element(abc.ABC):
     """Element base class."""
 
     points: np.ndarray | None = field(default=None, repr=False)
+    normal: np.ndarray = field(default_factory=lambda: np.zeros(3))
     center: np.ndarray = field(init=False, default_factory=lambda: np.zeros(3))
-    axis: np.ndarray = field(init=False, default_factory=lambda: np.zeros(3))
     start_point: np.ndarray = field(init=False, default_factory=lambda: np.zeros(3))
     mid_point: np.ndarray = field(init=False, default_factory=lambda: np.zeros(3))
     end_point: np.ndarray = field(init=False, default_factory=lambda: np.zeros(3))
@@ -30,7 +31,7 @@ class Element(abc.ABC):
     name: ClassVar[str] = "base"
     keys: ClassVar[dict[str, list[str]]] = {
         "center": ["x", "y", "z"],
-        "axis": ["dx", "dy", "dz"],
+        "normal": ["dx", "dy", "dz"],
         "start_point": ["x1", "y1", "z1"],
         "mid_point": ["x2", "y2", "z2"],
         "end_point": ["x3", "y3", "z3"],
@@ -79,7 +80,17 @@ class Element(abc.ABC):
 
 @dataclass
 class Line(Plot, Element):
-    """Manage 3D line element."""
+    """
+    Manage 3D line element.
+
+    Attributes
+    ----------
+    points: np.ndarray(2, 3)
+        Line endpoints.
+
+    normal: np.ndarray(3)
+        A vector normal to the line such that axis @ normal = 0.
+    """
 
     name: ClassVar[str] = "line"
 
@@ -87,11 +98,18 @@ class Line(Plot, Element):
         """Assert two point line."""
         super().__post_init__()
         assert len(self.points) == 2
-        self.axis = self.end_point - self.start_point
-        self.axis /= np.linalg.norm(self.axis)
         self.center = self.mid_point = np.mean(
             [self.start_point, self.end_point], axis=0
         )
+        axis = self.end_point - self.start_point
+        axis /= np.linalg.norm(axis)
+        if np.isclose(np.linalg.norm(self.normal), 0):
+            self.normal = np.cross(axis, [0, 0, 1])
+        if not np.isclose(np.linalg.norm(self.normal), 1):
+            self.normal /= np.linalg.norm(self.normal)
+        if not np.isclose(np.dot(axis, self.normal), 0):
+            self.normal = np.cross(axis, np.cross(self.normal, axis))
+            self.normal /= np.linalg.norm(self.normal)
 
     @property
     @override
@@ -160,7 +178,7 @@ class Arc(Plot, Element):
             self.arc_axes[2] = normal
         self.arc_axes[1] = np.cross(self.arc_axes[0], self.arc_axes[2])
         self.arc_axes /= np.linalg.norm(self.arc_axes, axis=1)[:, np.newaxis]
-        self.axis = self.arc_axes[2]
+        self.normal = self.arc_axes[2]
 
     @staticmethod
     def fit_2d(points):
@@ -211,6 +229,7 @@ class Arc(Plot, Element):
         self.theta = np.unwrap(np.arctan2(center_points[:, 1], center_points[:, 0]))
         self.error = np.linalg.norm(self.points - self.points_fit, axis=1).std()
         self.mid_point = self.sample(3)[1]
+        self.normal *= self.radius
 
     @cached_property
     def central_angle(self):
@@ -243,8 +262,8 @@ class Arc(Plot, Element):
 
     @cached_property
     def chord(self):
-        """Return arc chord."""
-        return Line(np.c_[self.points[0], self.points[-1]].T)
+        """Return arc chord as Line instance."""
+        return Line(np.c_[self.points[0], self.points[-1]].T, self.normal)
 
     def plot_circle(self):
         """Plot best fit circle."""
@@ -325,7 +344,7 @@ class PolyLine(Plot):
     """Decimate polyline using a hybrid arc/line-segment rdp algorithum."""
 
     points: np.ndarray = field(repr=False)
-    cross_section: Polygon | None = field(repr=False, default=None)
+    boundary: np.ndarray = field(repr=False, default_factory=lambda: np.array([]))
     delta: float = 0
     arc_eps: float = 1e-3
     line_eps: float = 2e-3
@@ -370,6 +389,10 @@ class PolyLine(Plot):
         """Return path geometry attribute."""
         return self.path_geometry[attr]
 
+    def __len__(self):
+        """Return segment number."""
+        return len(self.segments)
+
     def fit_arc(self, points):
         """Return point index prior to first arc mis-match."""
         point_number = len(points)
@@ -380,25 +403,29 @@ class PolyLine(Plot):
                 return 2
         return point_number
 
-    def append(self, points):
+    def append(self, points, normal):
         """Append points to segment list."""
         if len(points) >= self.minimum_arc_nodes:
             self.segments.append(Arc(points, eps=self.arc_eps))
             return
         for i in range(len(points) - 1):
-            self.segments.append(Line(points[i : i + 2]))
+            self.segments.append(Line(points[i : i + 2], normal[i]))
 
     def decimate(self):
         """Decimate polyline via multi-segment by an arc fit."""
         point_number = len(self.points)
         start = 0
         self.segments = []
+        line_normal = line.Line.from_points(self.points).mesh["cross"]
         while start <= point_number - 3:
             number = self.fit_arc(self.points[start:])
-            self.append(self.points[start : start + number])
+            self.append(
+                self.points[start : start + number],
+                line_normal[start : start + number],
+            )
             start += number - 1
         if point_number - start > 1:
-            self.append(self.points[start:])
+            self.append(self.points[start:], line_normal[start:])
         for i, segment in enumerate(self.segments):
             if isinstance(segment, Line):
                 continue
@@ -407,30 +434,36 @@ class PolyLine(Plot):
         self.rdp_merge()
 
     def interpolate(self):
-        """Perform delta based interpolation."""
-        points = Path.from_points(self.points, delta=self.delta).mesh.points
-        self.segments = [Line(points[i : i + 2]) for i in range(len(points) - 1)]
+        """Interpolate mesh points."""
+        mesh = Path.from_points(self.points, delta=self.delta).mesh
+        self.segments = [
+            Line(mesh.points[i : i + 2], mesh["normal"][i])
+            for i in range(len(mesh.points) - 1)
+        ]
 
-    def _rdp_line_segments(self, nodes):
+    def _rdp_line_segments(self, nodes, line_normal):
         """Return rdp reduced Line segments."""
         nodes = np.r_[nodes[::2], nodes[-1:]]
-        nodes = rdp(nodes, self.rdp_eps)
-        return [Line(nodes[i : i + 2]) for i in range(len(nodes) - 1)]
+        line_normal = np.append(line_normal, line_normal[-1:], axis=0)
+        rdp_mask = rdp(nodes, self.rdp_eps, algo="iter", return_mask=True)
+        nodes = nodes[rdp_mask]
+        line_normal = line_normal[rdp_mask]
+        return [Line(nodes[i : i + 2], line_normal[i]) for i in range(len(nodes) - 1)]
 
     def rdp_merge(self):
         """Merge multiple line segments using the rdp algorithum."""
-        segments = []
-        nodes = []
+        segments, nodes, line_normal = [], [], []
         for segment in self.segments:
             match segment:
                 case Line():
                     nodes.extend(segment.nodes)
+                    line_normal.append(segment.normal)
                 case Arc():
                     if nodes:
-                        segments.extend(self._rdp_line_segments(nodes))
-                        nodes = []
+                        segments.extend(self._rdp_line_segments(nodes, line_normal))
+                        nodes, line_normal = [], []
                     segments.append(segment)
-        segments.extend(self._rdp_line_segments(nodes))
+        segments.extend(self._rdp_line_segments(nodes, line_normal))
         self.segments = segments
 
     @property
@@ -448,7 +481,10 @@ class PolyLine(Plot):
     @cached_property
     def vtk(self) -> list[Cell]:
         """Retun list of vtk mesh segments swept along segment paths."""
-        return [Sweep(self.cross_section, segment.path) for segment in self.segments]
+        return [
+            Sweep(self.boundary, segment.path, segment.normal)
+            for segment in self.segments
+        ]
 
     @cached_property
     def poly(self) -> list[Polygon]:
@@ -473,7 +509,7 @@ class PolyLine(Plot):
     @cached_property
     def volume_geometry(self) -> dict:
         """Return volume geometry attribute dict."""
-        if not self.cross_section:
+        if len(self.boundary) == 0:
             return {}
         return {attr: getattr(self, attr) for attr in self.volume_attrs}
 

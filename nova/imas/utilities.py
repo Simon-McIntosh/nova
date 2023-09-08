@@ -18,6 +18,9 @@ ids_attrs = dict(
     equilibrium_pds=dict(pulse=135013, run=2, name="equilibrium"),
     wall=dict(pulse=116000, run=2, name="wall", machine="iter_md"),
     pf_passive=dict(pulse=115005, run=2, name="pf_passive", machine="iter_md"),
+    coils_non_axisymmetric=dict(
+        pulse=111003, run=1, name="coils_non_axisymmetric", machine="iter_md"
+    ),
 )
 
 

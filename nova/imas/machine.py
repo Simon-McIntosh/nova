@@ -639,7 +639,7 @@ class PoloidalFieldActive(CoilDatabase):
         self.build_circuit()
 
     def build_coil(self):
-        """Build pf active coil geometroy."""
+        """Build pf active coil geometry."""
         maximum_current = {}
         for ids_loop in getattr(self.ids_data, "coil"):
             loop = ActiveLoop(ids_loop)
@@ -1118,6 +1118,6 @@ if __name__ == "__main__":
         tplasma="hex",
         nwall=5,
     )
-    # machine.plot()
+    machine.plot()
 
-    machine.frame.vtkplot()
+    # machine.frame.vtkplot()

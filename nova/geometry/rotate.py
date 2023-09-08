@@ -151,7 +151,7 @@ def normalize(vector):
 
 
 def to_vector(axis: np.ndarray, vector: np.ndarray):
-    """Return rotation instance that aligns axis to vector."""
+    """Return rotation instance that aligns vector to axis."""
     axis = normalize(axis)
     vector = normalize(vector)
     cross = np.cross(axis, vector)
@@ -168,4 +168,12 @@ def to_vector(axis: np.ndarray, vector: np.ndarray):
         ]
     )
     Rmat = np.identity(3) + v_cross + np.dot(v_cross, v_cross) / (1 + dot)
+    return Rotation.from_matrix(Rmat)
+
+
+def to_axes(axes: np.ndarray, triad: np.ndarray):
+    """Return rotation instance that aligns triad to axes."""
+    mat = np.linalg.solve(triad, axes)
+    Rmat = triad @ mat @ triad.T
+
     return Rotation.from_matrix(Rmat)

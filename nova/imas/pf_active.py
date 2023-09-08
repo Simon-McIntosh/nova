@@ -25,7 +25,6 @@ class PF_Active(Plot, Scenario):
 
     def build(self):
         """Build netCDF database using data extracted from imasdb."""
-        # name = [self.coil_name(coil).strip() for coil in self.ids_data.coil]
         name = coil_names(self.ids_data.coil)
         with self.build_scenario():
             self.data.coords["coil_name"] = name

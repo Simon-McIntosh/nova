@@ -5,7 +5,7 @@ from abc import abstractmethod
 class GeoFrame:
     """Geometry object abstract base class."""
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         self.name = "geoframe"
         if hasattr(super(), "__post_init__"):
             super().__post_init__()

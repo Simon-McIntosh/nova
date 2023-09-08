@@ -51,7 +51,27 @@ class FrameData:
             frame.update_metaframe(dict(Required=required))
 
     def linkframe(self, index, factor=1):
-        """Apply multipoint link to subframe."""
+        """Apply multipoint link to subframe.
+
+        Parameters
+        ----------
+        index : list[str]
+            List of coil names (present in self.frame.index).
+        factor : float, optional
+            Inter-coil coupling factor. The default is 1.
+
+        Raises
+        ------
+        IndexError
+
+            - index must be list-like
+            - len(index) must be greater than l
+            - len(factor) must equal 1 or len(name)-1.
+
+        Returns
+        -------
+        None.
+        """
         self.frame.multipoint.link(index, factor)
         self.subframe.multipoint.link(index, factor, expand=True)
 

@@ -53,6 +53,7 @@ class FrameSet(netCDF, FrameSetLoc):
             "nturn",
             "Imin",
             "Imax",
+            "vtk",
         ],
     )
     available: list[str] = field(repr=False, default_factory=list)
@@ -84,6 +85,7 @@ class FrameSet(netCDF, FrameSetLoc):
         "dz",
         "area",
         "volume",
+        "vtk",
         "delta",
         "section",
         "turn",

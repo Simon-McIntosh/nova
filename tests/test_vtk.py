@@ -9,7 +9,9 @@ from nova.utilities.importmanager import skip_import
 with skip_import("vtk"):
     import vedo
 
+from nova.frame.coilset import CoilSet
 from nova.frame.framespace import FrameSpace
+from nova.geometry.volume import Ring
 from nova.geometry.vtkgen import VtkFrame
 
 
@@ -54,7 +56,7 @@ def test_save_load_vtk():
 
 def test_box_bounds():
     box = vedo.shapes.Box(pos=(5, 0, 0), length=2, width=8.3, height=2)
-    frame = FrameSpace(part="vtk") + dict(vtk=box, name="box")
+    frame = FrameSpace() + dict(vtk=box, name="box", part="vtk")
     assert np.isclose(
         np.array(frame.loc["box", ["dx", "dy", "dz"]].values, float),
         np.array([2, 8.3, 2]),
@@ -82,6 +84,22 @@ def test_vtk_skin():
     frame.insert(5, 2, 4, 0.2, section="skin")
     frame.vtkgeo.generate_vtk()
     assert isinstance(frame.vtk.iloc[0], VtkFrame)
+
+
+def test_vtk_from_poly():
+    frame = FrameSpace(required=["x", "z", "dl", "dt"], available=["vtk"])
+    frame.insert(3, 2.2, 0.1, 0.1)
+    assert frame.at["Coil0", "vtk"] is None
+    frame.vtkgeo.generate_vtk()
+    assert isinstance(frame.at["Coil0", "vtk"], Ring)
+
+
+def test_coilset_default_vtk():
+    coilset = CoilSet()
+    coilset.coil.insert(6, 7.5, 0.5, 0.5)
+    assert coilset.frame.at["Coil0", "vtk"] is None
+    coilset.frame.vtkgeo.generate_vtk()
+    assert isinstance(coilset.frame.at["Coil0", "vtk"], Ring)
 
 
 if __name__ == "__main__":

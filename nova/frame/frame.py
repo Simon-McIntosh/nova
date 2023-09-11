@@ -38,7 +38,6 @@ class Frame(FrameSet):
             tcoil=self.tcoil,
             tplasma=self.tplasma,
             delta=self.delta,
-            # vtk=self.vtk,
         )
 
     @frameset_attrs.setter

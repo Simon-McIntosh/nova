@@ -146,7 +146,6 @@ class Coils_Non_Axisymmetyric(Plot, CoilDatabase, Scenario):
             self.data["points_length"] = "coil_name", [
                 len(_points) for _points in points.values()
             ]
-            print(self.data["points"].shape)
             for i, (number, name) in enumerate(
                 zip(self.data["points_length"].data, self.data["coil_name"].data)
             ):
@@ -155,7 +154,7 @@ class Coils_Non_Axisymmetyric(Plot, CoilDatabase, Scenario):
 
 if __name__ == "__main__":
     coil = Coils_Non_Axisymmetyric(111003, 1)  # CC
-    # coil += Coils_Non_Axisymmetyric(115001, 1)  # ELM
+    coil += Coils_Non_Axisymmetyric(115001, 1)  # ELM
 
     coil.subframe.vtkplot()
-    coil._clear()
+    # coil._clear()

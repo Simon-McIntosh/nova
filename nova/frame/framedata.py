@@ -35,7 +35,6 @@ class FrameData:
         self.update_required(required)
         if len(required) != len(self.frame.metaframe.required):
             raise AttributeError(
-                f"Set CoilSet(vtk=True) to build vtk objects\n"
                 f"Required attrs not set {required} ensure that attrs are "
                 "present in frame.columns via updates to frame.metaframe:\n"
                 f"required: {self.frame.metaframe.required}\n"

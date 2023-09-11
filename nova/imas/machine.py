@@ -1120,4 +1120,4 @@ if __name__ == "__main__":
     )
     machine.plot()
 
-    # machine.frame.vtkplot()
+    machine.frame.vtkplot()

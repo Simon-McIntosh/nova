@@ -387,5 +387,11 @@ def test_iadd_clear_biot():
     assert len(coilset.probe.data) == 0
 
 
+def test_field_attrs():
+    coilset = CoilSet(field_attrs=["Br", "Bx"], force_attrs=["Fc"])
+    assert coilset.field_kwargs["attrs"] == ["Br", "Bx"]
+    assert coilset.force_kwargs["attrs"] == ["Fc"]
+
+
 if __name__ == "__main__":
     pytest.main([__file__])

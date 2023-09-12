@@ -151,7 +151,7 @@ class TriShell:
             hull = alphashape(keypoints, 2.5)
             try:
                 return Polygon(hull, name="ahull")
-            except NotImplementedError:
+            except (NotImplementedError, IndexError):
                 pass
         return Polygon(shapely.geometry.MultiPoint(poloidal).convex_hull, name="qhull")
 

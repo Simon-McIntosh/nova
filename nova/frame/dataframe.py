@@ -35,12 +35,12 @@ class DataFrame(FrameAttrs):
 
     """
 
-    _geoframe = dict(
-        Polygon=".geometry.polyframe.PolyFrame",
-        MultiPolygon=".geometry.polyframe.PolyFrame",
-        VTK=".geometry.vtkgen.VtkFrame",
-        Geo=".geometry.geoframe.GeoFrame",
-    )
+    _geoframe = {
+        "Polygon": ".geometry.polyframe.PolyFrame",
+        "MultiPolygon": ".geometry.polyframe.PolyFrame",
+        "VTK": ".geometry.vtkgen.VtkFrame",
+        "Geo": ".geometry.geoframe.GeoFrame",
+    }
 
     def __init__(self, data=None, index=None, columns=None, attrs=None, **metadata):
         super().__init__(data, index, columns, attrs, **metadata)
@@ -286,9 +286,9 @@ class DataFrame(FrameAttrs):
         xframe = self.to_xarray()
         xframe.attrs = self.extract_metadata()
         for col in ["poly", "vtk"]:
-            # if col == "vtk" and not vtk:
-            #    xframe = xframe.drop_vars("vtk", errors="ignore")
-            #    continue
+            if col == "vtk" and not vtk:
+                xframe = xframe.drop_vars("vtk", errors="ignore")
+                continue
             try:
                 xframe[col].values = self._dumps(col)
             except KeyError:

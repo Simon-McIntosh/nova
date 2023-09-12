@@ -2,6 +2,7 @@
 from dataclasses import dataclass, field
 import os
 from string import digits
+from tqdm import tqdm
 from typing import ClassVar, Union
 
 import numpy as np
@@ -11,7 +12,6 @@ import vedo
 from nova.definitions import root_dir
 from nova.frame.framesetloc import FrameSetLoc
 from nova.frame.framespace import FrameSpace
-from nova.utilities.time import clock
 
 
 @dataclass
@@ -64,7 +64,6 @@ class ShieldCad(ShieldDir, ShieldBase):
         super().__post_init__()
         self.mesh = self.load_mesh()
         self.frame = self.load_frame()
-        self.frame.vtkgeo.generate_vtk()
 
     @property
     def cdf_file(self):
@@ -80,11 +79,11 @@ class ShieldCad(ShieldDir, ShieldBase):
     @property
     def frame_metadata(self):
         """Return frame metadata."""
-        return dict(label=f"fi{self.sector}", body="panel", delim="_")
+        return {"label": f"fi{self.sector}", "segment": "panel", "delim": "_"}
 
     def frame_data(self, vtk: vedo.Mesh):
         """Return frame data."""
-        return dict(vtk=vtk, part=f"fi{self.sector}", ferritic=True)
+        return {"vtk": vtk, "part": f"fi{self.sector}", "ferritic": True}
 
     @property
     def vtk_file(self):
@@ -130,17 +129,15 @@ class ShieldCad(ShieldDir, ShieldBase):
         """Return dataframe read from vtk file."""
         parts = self.mesh.split(10000)
         frame = FrameSpace(**self.frame_metadata)
-        tick = clock(len(parts), header="loading decimated convex hulls")
-        for i, part in enumerate(parts):
+        for i, part in enumerate(tqdm(parts, "loading decimated convex hulls")):
             frame += self.frame_data(part.c(i))
-            tick.tock()
         self.store_frame(frame)
         return frame
 
     def store_frame(self, frame):
         """Write frame to netCDF file."""
         mode = "a" if os.path.isfile(self.cdf_file) else "w"
-        frame.store(self.cdf_file, f"S{self.sector}", mode=mode)
+        frame.store(self.cdf_file, f"S{self.sector}", mode=mode, vtk=True)
 
     def plot(self):
         """Plot vtk mesh."""
@@ -189,14 +186,12 @@ class ShieldSector(ShieldCad):
     def rotate_frame(self, base_frame: FrameSpace, degrees: float):
         """Rotate base frame and save output to netCDF file."""
         frame = FrameSpace(**self.frame_metadata)
-        tick = clock(
-            len(base_frame),
-            header=f"rotating baseframe {self.base_sector} " f"to {self.sector}",
-        )
-        for vtk in base_frame.loc[:, "vtk"]:
+        for vtk in tqdm(
+            base_frame.loc[:, "vtk"],
+            f"rotating baseframe {self.base_sector} " f"to {self.sector}",
+        ):
             vtk = vtk.clone().rotate(degrees, axis=(0, 0, 1), point=(0, 0, 0))
             frame += self.frame_data(vtk)
-            tick.tock()
         self.store_frame(frame)
         return frame
 
@@ -215,7 +210,6 @@ class ShieldSet(ShieldDir):
         super().__post_init__()
         self.mesh = self.load_mesh()
         self.frame = self.load_frame()
-        self.frame.vtkgeo.generate_vtk()
 
     @property
     def vtk_file(self):
@@ -237,26 +231,22 @@ class ShieldSet(ShieldDir):
 
     def build_mesh(self):
         """Build complete ferritic sheildset vtk mesh."""
-        tick = clock(len(self.avalible), header="building ferritic insert mesh")
         mesh = []
-        for i in self.avalible:
+        for i in tqdm(self.avalible, "building ferritic insert mesh"):
             sector = ShieldSector(i, file=self.file)
             mesh.append(sector.mesh)
-            tick.tock()
         mesh = vedo.merge(mesh)
         mesh.write(self.vtk_file)
         return mesh
 
     def build_frame(self):
         """Build complete ferritic sheildset dataframe."""
-        tick = clock(len(self.avalible), header="building ferritic insert dataset")
         frame = []
-        for i in self.avalible:
+        for i in tqdm(self.avalible, "building ferritic insert dataset"):
             sector = ShieldSector(i, file=self.file)
             frame.append(sector.frame)
-            tick.tock()
         frame = FrameSpace().concatenate(*frame)
-        frame.store(self.cdf_file, mode="w")
+        frame.store(self.cdf_file, mode="w", vtk=True)
         return frame
 
     def plot_mesh(self):
@@ -287,12 +277,12 @@ class Cluster:
         points = self.source.loc[:, ["x", "y", "z"]].values
         eps = self.factor * self.source.dt.max()
         cluster = sklearn.cluster.DBSCAN(eps=eps, min_samples=1).fit(points)
-        frame = FrameSpace()
+        frame = FrameSpace(segment="panel")
         for i, label in enumerate(set(cluster.labels_)):
             index = label == cluster.labels_
             vtksum = self.merge(index)
             name = f"{vtksum.name.rstrip(digits)}{i}"
-            frame += vtksum.to_dict() | dict(name=name)
+            frame += vtksum.to_dict() | {"name": name}
             frame.loc[name, ["x", "y", "z"]] = self.centroid(index)
         return frame
 
@@ -334,13 +324,12 @@ class ShieldCluster(ShieldDir):
         """Load dataset."""
         super().__post_init__()
         self.frame = self.load()
-        self.frame.vtkgeo.generate_vtk()
 
     @property
     def cdf_file(self):
         """Return clustered cfd filename."""
         file, ext = os.path.splitext(super().cdf_file)
-        return f"{file}c{ext}"
+        return f"{file}_cl{ext}"
 
     def load(self):
         """Load clustered shield frameset."""
@@ -355,17 +344,15 @@ class ShieldCluster(ShieldDir):
 
     def _build(self):
         """Build clustered frameset."""
-        frame = FrameSpace()
+        frame = FrameSpace(segment="panel")
         shield = ShieldSet(self.file)  # load source dataset
         parts = shield.frame.part.unique()
         frames = []
-        tick = clock(len(parts), header="clustering shield set")
-        for i, part in enumerate(parts):
+        for i, part in enumerate(tqdm(parts, "clustering shield set")):
             index = shield.frame.part == part
             frames.append(Cluster(shield.frame.loc[index, :], color=i, opacity=1).frame)
-            tick.tock()
         frame.concatenate(*frames)
-        frame.store(self.cdf_file, mode="w")
+        frame.store(self.cdf_file, mode="w", vtk=True)
         return frame
 
     def plot(self):
@@ -386,6 +373,7 @@ class FerriticBase(FrameSetLoc):
             "part": "fi",
             "ferritic": True,
             "active": False,
+            "segment": "vtk",
         },
     )
 
@@ -422,13 +410,17 @@ class FerriticBase(FrameSetLoc):
         with self.insert_required("vtk"):
             name = self.frame.build_index(1, **self.attrs)[0]
             self.attrs.pop("name", None)
-            self.attrs |= dict(frame=name, label=name, delim="_")
+            self.attrs |= {
+                "frame": name,
+                "label": name,
+                "delim": "_",
+            }
             # insert subframes
             index = self.subframe.insert(vtk, iloc=iloc, **self.attrs)
             subframe = self.subframe.loc[index, :]
             # insert frame
             self.attrs |= subframe.iloc[0].to_dict()
-            self.attrs |= dict(body="insert", delim="", name=name)
+            self.attrs |= {"delim": "", "name": name, "segment": "vtk"}
             self.attrs.pop("poly", None)
             vtk = vedo.merge(*subframe.vtk)
             self.frame.insert(vtk, iloc=iloc, **self.attrs)
@@ -469,7 +461,9 @@ class Ferritic(FerriticBase):
             self.attrs["label"] = additional["label"]
             self.attrs.pop("name", None)
 
-    def insert_frame(self, frame, multiframe=True, iloc=None, body="vtk", **additional):
+    def insert_frame(
+        self, frame, multiframe=True, iloc=None, segment="vtk", **additional
+    ):
         """Insert vtk objects from frame."""
         if not multiframe:
             self.attrs = additional | frame.iloc[0].to_dict()
@@ -494,21 +488,34 @@ class Ferritic(FerriticBase):
 
 if __name__ == "__main__":
     # cad = ShieldCad(2)
-    # print(sum([ShieldCad(i).frame.volume.sum() for i in range(1, 10)]))
-    # base.frame = base.build_frame()
-    # print(base.frame.volume.sum())
-    # print(base.frame.volume.sum())
+    # sector = ShieldSector(2)
+    # shield = ShieldSet()
+    # cluster = ShieldCluster()
+
+    from nova.frame.coilset import CoilSet
+
+    coilset = CoilSet()
+    coilset.ferritic.insert("Fi")
+    coilset.plot()
+
+    """
+    cad = ShieldCad(2)
+    print(sum([ShieldCad(i).frame.volume.sum() for i in range(1, 10)]))
+    base.frame = base.build_frame()
+    print(base.frame.volume.sum())
+    print(base.frame.volume.sum())
     # shield = ShieldSet()
     # shield.frame = shield.build_frame()
     # print(shield.frame.volume.sum())
 
-    # [ShieldCad(i).mesh.volume() for i in [2, 3, 4, 6]]
+    [ShieldCad(i).mesh.volume() for i in [2, 3, 4, 6]]
     # [ShieldCad(i).mesh.volume() for i in [2, 3, 4, 6]]
     # shield = ShieldSet()
 
     shield = ShieldCluster()
-    print(shield.frame.volume.sum())
-    vedo.show(*shield.frame.vtk)
+    # print(shield.frame.volume.sum())
+    # vedo.show(*shield.frame.vtk, new=True)
+    """
 
     """
     mesh = []

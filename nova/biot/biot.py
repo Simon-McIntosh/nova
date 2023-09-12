@@ -1,6 +1,5 @@
 """Manage biot methods."""
 from dataclasses import dataclass, field
-from typing import ClassVar
 
 from nova.biot import (
     Grid,
@@ -27,11 +26,11 @@ Nbiot = int | float | None
 class BiotBase(FrameSet):
     """Biot methods base class."""
 
+    force_attrs: list[str] = field(default_factory=lambda: ["Fr", "Fz", "Fc"])
+    field_attrs: list[str] = field(default_factory=lambda: ["Br", "Bz", "Psi"])
     _biot_attrs: dict[str, list[str] | Nbiot] = field(
         init=False, default_factory=dict, repr=False
     )
-    force_attrs: ClassVar[list[str]] = ["Fr", "Fz", "Fc"]
-    field_attrs: ClassVar[list[str]] = ["Br", "Bz", "Psi"]
 
     def __post_init__(self):
         """Append biot attrs."""

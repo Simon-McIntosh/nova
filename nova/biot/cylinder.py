@@ -155,7 +155,7 @@ class Cylinder(CylinderConstants, Matrix):
     """
     Extend Biot base class.
 
-    Compute interaction for complete circular filaments.
+    Compute interaction for rectangular section complete toroidal conductors.
 
     """
 
@@ -242,7 +242,7 @@ class Cylinder(CylinderConstants, Matrix):
 if __name__ == "__main__":
     from nova.frame.coilset import CoilSet
 
-    coilset = CoilSet(dcoil=-1, nplasma=15**2, field_attrs=["Psi"])
+    coilset = CoilSet(dcoil=-1, dplasma=-(15**2))
     """
     coilset.coil.insert(5, 0.5, 0.01, 0.8, segment='cylinder')
     coilset.coil.insert(5.1, 0.5+0.4, 0.2, 0.01, segment='cylinder')
@@ -264,7 +264,7 @@ if __name__ == "__main__":
     coilset.grid.plot("psi", colors="C1", nulls=False, clabel={})
     # coilset.grid.plot('ke', colors='C0', nulls=False, clabel={})
 
-    coilset = CoilSet(dcoil=-1, nplasma=15**2, field_attrs=["Psi"])
+    coilset = CoilSet(dcoil=-1, dplasma=-(15**2))
     """
     coilset.coil.insert(5, 0.5, 0.01, 0.8, segment='cylinder')
     coilset.coil.insert(5.1, 0.5+0.4, 0.2, 0.01, segment='cylinder')

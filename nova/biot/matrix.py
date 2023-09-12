@@ -39,6 +39,16 @@ class Matrix(GroupSet):
         raise NotImplementedError
 
     @property
+    def Bx(self):
+        """Return x-field array."""
+        raise NotImplementedError
+
+    @property
+    def By(self):
+        """Return y-field array."""
+        raise NotImplementedError
+
+    @property
     def Bz(self):
         """Return vertical field array."""
         raise NotImplementedError

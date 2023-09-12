@@ -98,7 +98,6 @@ class Coils_Non_Axisymmetyric(Plot, CoilDatabase, Scenario):
     run: int = 1
     name: str = "coils_non_axisymmetric"
     ids_node: str = "coil"
-    vtk: bool = True
 
     coil_attrs: ClassVar[list[str]] = ["turns", "resistance"]
 
@@ -156,5 +155,5 @@ if __name__ == "__main__":
     coil = Coils_Non_Axisymmetyric(111003, 1)  # CC
     coil += Coils_Non_Axisymmetyric(115001, 1)  # ELM
 
-    coil.subframe.vtkplot()
+    coil.frame.vtkplot()
     # coil._clear()

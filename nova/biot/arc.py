@@ -18,21 +18,57 @@ class ArcConstants(Constants):
 
 
 @dataclass
-class Cylinder(ArcConstants, Matrix):
+class Arc(ArcConstants, Matrix):
     """
     Extend Biot base class.
 
-    Compute interaction for complete circular filaments.
+    Compute interaction for 3d arc filaments.
 
     """
 
-    name: ClassVar[str] = "cylinder"  # element name
+    name: ClassVar[str] = "arc"  # element name
 
     def __post_init__(self):
         """Load intergration constants."""
+        super().__post_init__()
+        self.rs = np.stack(
+            [
+                self.source("x") + delta / 2 * self.source("dx")
+                for delta in [-1, 1, 1, -1]
+            ],
+            axis=-1,
+        )
+        self.zs = np.stack(
+            [
+                self.source("z") + delta / 2 * self.source("dz")
+                for delta in [-1, -1, 1, 1]
+            ],
+            axis=-1,
+        )
+        self.r = np.stack([self.target("x") for _ in range(4)], axis=-1)
+        self.z = np.stack([self.target("z") for _ in range(4)], axis=-1)
 
 
 if __name__ == "__main__":
+    from nova.frame.coilset import CoilSet
+
+    coilset = CoilSet(dwinding=0, field_attrs=["Bx", "By", "Bz"])
+    coilset.winding.insert(
+        {"c": (0, 0, 0.5)}, np.array([[5, 0, 3.2], [0, 5, 3.2], [-5, 0, 3.2]]), nturn=2
+    )
+    coilset.winding.insert(
+        {"c": (0, 0, 0.5)},
+        np.array([[-5, 0, 3.2], [0, -5, 3.2], [5, 0, 3.2]]),
+        nturn=2,
+    )
+    coilset.linkframe(["Swp0", "Swp1"])
+
+    coilset.grid.solve(500)
+
+    coilset.plot()
+
+    # coilset.subframe.vtkplot()
+
     k = 0.3
 
     theta = np.pi / 3

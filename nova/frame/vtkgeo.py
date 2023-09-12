@@ -28,7 +28,7 @@ class VtkGeo(metamethod.VtkGeo):
     features: list[str] = field(init=False, default_factory=lambda: TriShell.features)
     qhull: ClassVar[list[str]] = ["panel"]
     ahull: ClassVar[list[str]] = ["insert"]
-    geom: ClassVar[list[str]] = ["panel", "stl", "insert", "fi", "vtk"]
+    geom: ClassVar[list[str]] = ["insert", "panel", "vtk", "stl"]
 
     def initialize(self):
         """Init vtk data."""
@@ -42,8 +42,8 @@ class VtkGeo(metamethod.VtkGeo):
             for i in range(index_length):
                 tri = TriShell(
                     frame.vtk.iloc[i],
-                    qhull=frame.part.iloc[i] in self.qhull,
-                    ahull=frame.part.iloc[i] in self.ahull,
+                    qhull=frame.segment.iloc[i] in self.qhull,
+                    ahull=frame.segment.iloc[i] in self.ahull,
                 )
                 mesh = vedo.Mesh(
                     [tri.vtk.points(), tri.vtk.cells()],
@@ -51,9 +51,9 @@ class VtkGeo(metamethod.VtkGeo):
                     alpha=tri.vtk.opacity(),
                 )
                 frame.loc[frame.index[i], "vtk"] = VtkFrame(mesh)
-                if frame.part.iloc[i] in self.geom:
+                if frame.segment.iloc[i] in self.geom:
                     frame.loc[frame.index[i], self.features] = tri.geom
-                    frame.loc[frame.index[i], ["segment", "section"]] = ""
+                    frame.loc[frame.index[i], ["section"]] = ""
                     frame.loc[frame.index[i], "poly"] = tri.poly
                 else:
                     frame.loc[frame.index[i], "volume"] = tri.volume

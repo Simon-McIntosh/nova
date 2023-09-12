@@ -116,7 +116,7 @@ class MetaFrame(MetaSet):
             "rho": 0.0,
             "section": "rectangle",
             "turn": "rectangle",
-            "body": "",
+            "assembly": "",
             "turnturn": 1.0,
             "scale": 1.0,
             "skin": 1.0,

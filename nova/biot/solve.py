@@ -7,6 +7,7 @@ import numpy as np
 from tqdm import tqdm
 import xarray
 
+from nova.biot.arc import Arc
 from nova.biot.cylinder import Cylinder
 from nova.biot.polygon import Polygon
 from nova.biot.ring import Ring
@@ -22,7 +23,12 @@ class Solve(GroupSet):
     source_segment: np.ndarray = field(init=False, repr=False)
     data: xarray.Dataset = field(init=False, default_factory=xarray.Dataset)
 
-    generator: ClassVar[dict] = {"ring": Ring, "cylinder": Cylinder, "polygon": Polygon}
+    generator: ClassVar[dict] = {
+        "ring": Ring,
+        "cylinder": Cylinder,
+        "polygon": Polygon,
+        "arc": Arc,
+    }
 
     def __post_init__(self):
         """Initialise dataset and compute biot interaction."""

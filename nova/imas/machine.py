@@ -1118,6 +1118,13 @@ if __name__ == "__main__":
         tplasma="hex",
         nwall=5,
     )
-    machine.plot()
+    # machine.plot()
+
+    from nova.imas.coils_non_axisymmetric import Coils_Non_Axisymmetyric
+
+    machine += Coils_Non_Axisymmetyric(111003, 1)  # CC
+    machine += Coils_Non_Axisymmetyric(115001, 1)  # ELM
+
+    machine.ferritic.insert("Fi")
 
     machine.frame.vtkplot()

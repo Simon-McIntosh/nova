@@ -161,5 +161,3 @@ if __name__ == "__main__":
     dataarray = DataArray(
         {"x": range(7)}, additional=["Ic", "free"], array=["x"], label="Coil"
     )
-
-    print(dataarray.free)

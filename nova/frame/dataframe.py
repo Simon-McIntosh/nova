@@ -112,7 +112,6 @@ class DataFrame(FrameAttrs):
                 metatag["label"] = metatag["delim"].join(split_name[:-1])
                 metatag["offset"] = int(split_name[-1])
             else:
-                # metatag['delim'] = ''
                 metatag["label"] = name.rstrip(string.digits)
                 try:
                     metatag["offset"] = int(name.lstrip(string.ascii_letters))
@@ -286,9 +285,9 @@ class DataFrame(FrameAttrs):
         xframe = self.to_xarray()
         xframe.attrs = self.extract_metadata()
         for col in ["poly", "vtk"]:
-            if col == "vtk" and not vtk:
-                xframe = xframe.drop_vars("vtk", errors="ignore")
-                continue
+            # if col == "vtk" and not vtk:
+            #    xframe = xframe.drop_vars("vtk", errors="ignore")
+            #    continue
             try:
                 xframe[col].values = self._dumps(col)
             except KeyError:

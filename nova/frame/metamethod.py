@@ -175,7 +175,16 @@ class Select(MetaMethod):
 
     name: str = field(init=False, default="select")
     required: list[str] = field(
-        default_factory=lambda: ["active", "plasma", "fix", "ferritic"], repr=False
+        default_factory=lambda: [
+            "active",
+            "passive",
+            "plasma",
+            "fix",
+            "free",
+            "ferritic",
+            "coil",
+        ],
+        repr=False,
     )
     require_all: bool = False
 

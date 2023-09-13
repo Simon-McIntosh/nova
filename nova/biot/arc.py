@@ -63,7 +63,7 @@ if __name__ == "__main__":
     )
     coilset.linkframe(["Swp0", "Swp1"])
 
-    coilset.grid.solve(500)
+    # coilset.grid.solve(500)
 
     coilset.plot()
 

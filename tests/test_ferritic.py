@@ -81,5 +81,17 @@ def test_insert_frame_fromfile():
     assert coilset.frame.index.to_list() == ["fi1", "Fi0"]
 
 
+def test_select():
+    coilset = CoilSet()
+    box = vedo.shapes.Box(pos=(5, 0, 0), length=1, width=2, height=3)
+    coilset.ferritic.insert(box)
+    assert coilset.subframe["ferritic"][0]
+    assert not coilset.subframe["active"][0]
+    assert coilset.subframe["passive"][0]
+    assert coilset.subframe["fix"][0]
+    assert not coilset.subframe["free"][0]
+    assert not coilset.subframe["coil"][0]
+
+
 if __name__ == "__main__":
     pytest.main([__file__])

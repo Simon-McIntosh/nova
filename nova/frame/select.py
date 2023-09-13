@@ -50,7 +50,16 @@ class Select(metamethod.Select):
 
     frame: DataFrame = field(repr=False)
     additional: list[str] = field(
-        init=False, default_factory=lambda: ["passive", "coil", "free"]
+        init=False,
+        default_factory=lambda: [
+            "coil",
+            "active",
+            "passive",
+            "plasma",
+            "fix",
+            "free",
+            "ferritic",
+        ],
     )
     avalible: list[str] = field(init=False, default_factory=list)
     labels: dict[str, dict[str, list[str]]] = field(
@@ -62,6 +71,7 @@ class Select(metamethod.Select):
         """Extend additional with unique values extracted from match."""
         if not self.generate:
             return
+
         self.add_label("active", "active")
         self.add_label("passive", None, "active")
         self.add_label("plasma", "plasma")
@@ -164,5 +174,3 @@ if __name__ == "__main__":
     )
     select = Select(dataframe)
     select.initialize()
-    print(dataframe.free)
-    print(dataframe)

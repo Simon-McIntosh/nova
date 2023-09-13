@@ -21,7 +21,7 @@ class Scenario(GetSlice, IdsData):
         return IdsIndex(self.ids_data, self.ids_node)
 
     @contextmanager
-    def build_scenario(self):
+    def build_scenario(self, vtk=False):
         """Manage dataset creation and storage."""
         self.data.attrs[self.name] = ",".join(
             [str(value) for value in self.ids_attrs.values()]

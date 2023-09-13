@@ -10,7 +10,7 @@ import sklearn.cluster
 import vedo
 
 from nova.definitions import root_dir
-from nova.frame.framesetloc import FrameSetLoc
+from nova.frame.coilsetattrs import CoilSetAttrs
 from nova.frame.framespace import FrameSpace
 
 
@@ -79,11 +79,15 @@ class ShieldCad(ShieldDir, ShieldBase):
     @property
     def frame_metadata(self):
         """Return frame metadata."""
-        return {"label": f"fi{self.sector}", "segment": "panel", "delim": "_"}
+        return {
+            "label": f"fi{self.sector}",
+            "segment": "panel",
+            "delim": "_",
+        }
 
     def frame_data(self, vtk: vedo.Mesh):
         """Return frame data."""
-        return {"vtk": vtk, "part": f"fi{self.sector}", "ferritic": True}
+        return {"vtk": vtk, "part": f"fi{self.sector}"}
 
     @property
     def vtk_file(self):
@@ -361,7 +365,7 @@ class ShieldCluster(ShieldDir):
 
 
 @dataclass
-class FerriticBase(FrameSetLoc):
+class FerriticBase(CoilSetAttrs):
     """Ferritic insert baseclass."""
 
     delta: float = -1
@@ -374,18 +378,25 @@ class FerriticBase(FrameSetLoc):
             "ferritic": True,
             "active": False,
             "segment": "vtk",
+            "link": "",
+            "factor": False,
+            "ref": 0,
+            "subref": 0,
         },
     )
 
     @property
     def attrs(self):
-        """Manage ferritic attrs."""
-        return self._attrs
+        """Extend CoilSet attrs."""
+        return CoilSetAttrs.attrs.fget(self)
 
     @attrs.setter
     def attrs(self, attrs):
-        self._attrs = self.default | attrs
+        CoilSetAttrs.attrs.fset(self, attrs)
         self.attrs.pop("vtk", None)
+
+    def set_conditional_attributes(self):
+        """Set conditional attributes. Not currently required for ferritic class."""
 
     def insert(self, vtk, iloc=None, **additional):
         """
@@ -488,7 +499,8 @@ class Ferritic(FerriticBase):
 
 if __name__ == "__main__":
     # cad = ShieldCad(2)
-    # sector = ShieldSector(2)
+    # sector = ShieldSector(9)
+    # sector.mesh.show(new=True)
     # shield = ShieldSet()
     # cluster = ShieldCluster()
 

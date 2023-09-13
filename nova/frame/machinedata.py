@@ -289,7 +289,6 @@ class MachineData(CoilSet, pythonIO):
         for part in part_list:
             for segment in self.models[part]:
                 frame = self.models[part][segment]
-                print(frame.dt)
                 self.shell.insert(
                     frame.x,
                     frame.z,

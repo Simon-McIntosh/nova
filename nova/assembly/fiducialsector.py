@@ -255,6 +255,7 @@ class FiducialSector(Fiducial):
     """Manage Reverse Engineering fiducial data."""
 
     phase: str = "FAT supplier"
+    sector: dict[int, int] = field(init=False, default_factory=dict)
     sectors: list[int] = field(default_factory=lambda: [*range(1, 9)])
     variance: dict[str, pandas.DataFrame] | dict = field(
         init=False, default_factory=dict
@@ -280,6 +281,7 @@ class FiducialSector(Fiducial):
         for sector in self.sectors:
             data = SectorData(sector)
             for coil, ccl in data.ccl[self.phase].items():
+                self.sector[coil] = sector
                 self.delta[coil] = ccl.loc[self.target, columns]
 
     def _load_variance(self):
@@ -319,7 +321,7 @@ if __name__ == "__main__":
     # sector = SectorData(8)
 
     fiducial = FiducialSector(phase="FATsup")  # , sectors=[8]
-    fiducial.compare("RE")
+    fiducial.compare("IDM")
     # fiducial.plot()
 
     # for coil, ccl in fiducial.delta.items():

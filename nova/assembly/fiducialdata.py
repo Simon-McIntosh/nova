@@ -363,12 +363,10 @@ class FiducialData(Plot, Plotter):
 
 if __name__ == "__main__":
     phase = "FAT supplier"
-    phase = "SSAT BR"
+    # phase = "SSAT BR"
 
     fiducial = FiducialData("Sector", phase=phase, fill=False)
     fiducial.plot()
-
-    """
 
     coil = 12
     coil_index = fiducial.coil_index(coil)
@@ -376,7 +374,7 @@ if __name__ == "__main__":
     fiducial.plot_single(coil_index, 3)
 
     fiducial.fig.tight_layout(pad=0.5)
-    fiducial.savefig("single")
+    # fiducial.savefig("single")
 
     # fiducial.plot_gpr(1, 0)
 
@@ -387,7 +385,6 @@ if __name__ == "__main__":
     # fiducial.plot()
     # fiducial.fig.tight_layout(pad=0)
     # fiducial.savefig("fiducial")
-    """
 
     """
     plotter = pv.Plotter()

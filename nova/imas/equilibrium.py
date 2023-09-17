@@ -716,15 +716,15 @@ if __name__ == "__main__":
     pulse, run = 135003, 5
     # pulse, run = 135007, 4
     pulse, run = 105028, 1
-    pulse, run = 130506, 403  # CORSICA
-    pulse, run = 134173, 106
+    # pulse, run = 130506, 403  # CORSICA
+    # pulse, run = 134173, 106
 
     # pulse, run = 135013, 2
 
     # EquilibriumData(pulse, run, occurrence=0)._clear()
     equilibrium = EquilibriumData(pulse, run, occurrence=0)
 
-    equilibrium.time = 300
+    equilibrium.itime = 300
     equilibrium.plot_2d("psi", mask=0)
     equilibrium.plot_boundary(outline=False)
-    equilibrium.plot_quiver()
+    # equilibrium.plot_quiver()

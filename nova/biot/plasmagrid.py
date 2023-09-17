@@ -184,7 +184,14 @@ class PlasmaGrid(BaseGrid, PlasmaLoc):
         super().plot(axes=kwargs.get("axes", None))
         kwargs = self.contour_kwargs(**kwargs)
         if kwargs.pop("plot_mesh", False):
-            self.axes.triplot(self.data.x, self.data.z, self.data.triangles, lw=0.5)
+            self.axes.triplot(
+                self.data.x,
+                self.data.z,
+                self.data.triangles,
+                lw=0.5,
+                color="C0",
+                alpha=0.2,
+            )
         self.axes.tricontour(
             self.data.x, self.data.z, self.data.triangles, self.psi, **kwargs
         )

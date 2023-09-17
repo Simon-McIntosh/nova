@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 from scipy.constants import mu_0
 
+from nova.biot.biot import Nbiot
 from nova.imas.database import Ids, IdsIndex, ImasIds
 from nova.imas.machine import Machine
 from nova.imas.profiles import Profile
@@ -72,7 +73,7 @@ class Grid:
 
     """
 
-    ngrid: int | str = 5000
+    ngrid: Nbiot = 5000
     limit: float | list[float] | str = 0.25
     index: str | slice | pandas.Index = "plasma"
     ids: ImasIds | None = None
@@ -205,6 +206,10 @@ if __name__ == "__main__":
     operate.plasma.plot()
     operate.plot_boundary()
     operate.plasma.lcfs.plot()
+
+    operate.plot_2d()
+
+    operate.plasmagrid.plot()
 
     index = abs(operate.data.ip.data) > 1e3
 

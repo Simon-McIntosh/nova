@@ -25,7 +25,16 @@ class BiotFrame(FrameLink):
             "required": ["x", "z"],
             "additional": ["xo", "zo", "plasma", "nturn", "link", "segment"],
             "available": ["section", "poly"],
-            "array": ["x", "z", "dx", "dz", "area", "nturn"],
+            "array": [
+                "x",
+                "y",
+                "z",
+                "dx",
+                "dy",
+                "dz",
+                "area",
+                "nturn",
+            ],
         } | metadata
         super().update_metadata(data, columns, attrs, metadata)
 

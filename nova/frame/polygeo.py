@@ -56,7 +56,7 @@ class PolyGeo(metamethod.PolyGeo):
             section = self.frame.loc[index, "section"].values
             poly_data = self.frame.loc[index, ["x", "z", "dl", "dt"]].values
             segment = self.frame.loc[index, "segment"].values
-            length = self.frame.loc[index, "dy"].values
+            length = self.frame.loc[index, ["dy"]].values[0]
             poly = self.frame.loc[index, "poly"].values
             poly_update = self.frame.loc[index, "poly"].isna()
             geom = np.empty((index_length, len(self.features)), dtype=float)

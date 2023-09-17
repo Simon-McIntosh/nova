@@ -175,5 +175,4 @@ def to_axes(axes: np.ndarray, triad: np.ndarray):
     """Return rotation instance that aligns triad to axes."""
     mat = np.linalg.solve(triad, axes)
     Rmat = triad @ mat @ triad.T
-
     return Rotation.from_matrix(Rmat)

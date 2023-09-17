@@ -23,18 +23,18 @@ class Element(abc.ABC):
 
     points: np.ndarray | None = field(default=None, repr=False)
     normal: np.ndarray = field(default_factory=lambda: np.zeros(3))
+    axis: np.ndarray = field(init=False, default_factory=lambda: np.zeros(3))
     center: np.ndarray = field(init=False, default_factory=lambda: np.zeros(3))
     start_point: np.ndarray = field(init=False, default_factory=lambda: np.zeros(3))
-    mid_point: np.ndarray = field(init=False, default_factory=lambda: np.zeros(3))
     end_point: np.ndarray = field(init=False, default_factory=lambda: np.zeros(3))
 
     name: ClassVar[str] = "base"
     keys: ClassVar[dict[str, list[str]]] = {
         "center": ["x", "y", "z"],
-        "normal": ["dx", "dy", "dz"],
+        "axis": ["dx", "dy", "dz"],
+        "normal": ["nx", "ny", "nz"],
         "start_point": ["x1", "y1", "z1"],
-        "mid_point": ["x2", "y2", "z2"],
-        "end_point": ["x3", "y3", "z3"],
+        "end_point": ["x2", "y2", "z2"],
     }
 
     def __post_init__(self):
@@ -98,17 +98,15 @@ class Line(Plot, Element):
         """Assert two point line."""
         super().__post_init__()
         assert len(self.points) == 2
-        self.center = self.mid_point = np.mean(
-            [self.start_point, self.end_point], axis=0
-        )
-        axis = self.end_point - self.start_point
-        axis /= np.linalg.norm(axis)
+        self.center = np.mean([self.start_point, self.end_point], axis=0)
+        self.axis = self.end_point - self.start_point
+        self.axis /= np.linalg.norm(self.axis)
         if np.isclose(np.linalg.norm(self.normal), 0):
-            self.normal = np.cross(axis, [0, 0, 1])
+            self.normal = np.cross(self.axis, [0, 0, 1])
         if not np.isclose(np.linalg.norm(self.normal), 1):
             self.normal /= np.linalg.norm(self.normal)
-        if not np.isclose(np.dot(axis, self.normal), 0):
-            self.normal = np.cross(axis, np.cross(self.normal, axis))
+        if not np.isclose(np.dot(self.axis, self.normal), 0):
+            self.normal = np.cross(self.axis, np.cross(self.normal, self.axis))
             self.normal /= np.linalg.norm(self.normal)
 
     @property
@@ -170,15 +168,15 @@ class Arc(Plot, Element):
         self.arc_axes = scipy.linalg.svd(delta)[2]
         self.arc_axes[0] = self.points[-1] - self.points[0]  # arc chord
         if not np.allclose(
-            normal := np.cross(
+            axis := np.cross(
                 self.arc_axes[0], np.mean(self.points[1:-1] - self.points[0], axis=0)
             ),
             0,
         ):
-            self.arc_axes[2] = normal
+            self.arc_axes[2] = axis
         self.arc_axes[1] = np.cross(self.arc_axes[0], self.arc_axes[2])
         self.arc_axes /= np.linalg.norm(self.arc_axes, axis=1)[:, np.newaxis]
-        self.normal = self.arc_axes[2]
+        self.axis = self.normal = self.arc_axes[2]
 
     @staticmethod
     def fit_2d(points):
@@ -228,8 +226,6 @@ class Arc(Plot, Element):
         center_points = self.points_2d - center
         self.theta = np.unwrap(np.arctan2(center_points[:, 1], center_points[:, 0]))
         self.error = np.linalg.norm(self.points - self.points_fit, axis=1).std()
-        self.mid_point = self.sample(3)[1]
-        self.normal *= self.radius
 
     @cached_property
     def central_angle(self):
@@ -254,6 +250,11 @@ class Arc(Plot, Element):
             + np.sin(theta) * self.arc_axes[1][np.newaxis, :]
         )
 
+    @cached_property
+    def mid_point(self):
+        """Return arc mid-point."""
+        return self.sample(3)[1]
+
     @property
     @override
     def nodes(self):
@@ -263,7 +264,7 @@ class Arc(Plot, Element):
     @cached_property
     def chord(self):
         """Return arc chord as Line instance."""
-        return Line(np.c_[self.points[0], self.points[-1]].T, self.normal)
+        return Line(np.c_[self.points[0], self.points[-1]].T, self.axis)
 
     def plot_circle(self):
         """Plot best fit circle."""
@@ -365,9 +366,6 @@ class PolyLine(Plot):
         "x2",
         "y2",
         "z2",
-        "x3",
-        "y3",
-        "z3",
         "segment",
     ]
     volume_attrs: ClassVar[list[str]] = [

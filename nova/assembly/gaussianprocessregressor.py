@@ -75,14 +75,14 @@ class GaussianProcessRegressor:
     def predict(self, x_mean):
         """Return mean Gaussian Process Regressor."""
         x_mean = self.x_space(x_mean)
-        y_mean, y_cov = self.regressor.predict(x_mean[:, np.newaxis], return_cov=True)
+        y_mean, y_std = self.regressor.predict(x_mean[:, np.newaxis], return_std=True)
         try:
             self.data = self.data.drop_vars(["x_mean", "y_mean", "y_std"])
         except ValueError:
             pass
         self.data["x_mean"] = x_mean
         self.data["y_mean"] = ("x_mean", y_mean)
-        self.data["y_std"] = ("x_mean", np.sqrt(np.diag(y_cov)))
+        self.data["y_std"] = ("x_mean", y_std)
         return y_mean
 
     def sample(self, x_sample, n_samples: int):

@@ -19,7 +19,7 @@ from nova.biot.data import Data
 from nova.database.netcdf import netCDF
 from nova.frame.frameset import FrameSet, frame_factory
 
-Nbiot = int | float | None
+Nbiot = int | float | str | None
 
 
 @dataclass

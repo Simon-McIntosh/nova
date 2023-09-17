@@ -28,6 +28,26 @@ class Winding(CoilSetAttrs):
     attributes: list[str] = field(
         init=False, default_factory=lambda: ["delta", "turn", "section", "segment"]
     )
+    array: list[str] = field(
+        init=False,
+        default_factory=lambda: [
+            "x",
+            "y",
+            "z",
+            "dx",
+            "dy",
+            "dz",
+            "x1",
+            "y1",
+            "z1",
+            "x2",
+            "y2",
+            "z2",
+            "x3",
+            "y3",
+            "z3",
+        ],
+    )
 
     def set_conditional_attributes(self):
         """Set conditional attrs - not required for winding."""

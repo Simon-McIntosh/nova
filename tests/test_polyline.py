@@ -225,14 +225,14 @@ def test_line_points():
     line = Line(points)
     assert np.allclose(points[0], line.start_point)
     assert np.allclose(points[-1], line.end_point)
-    assert not np.allclose(line.mid_point, (0, 0, 0))
-    assert np.allclose(line.center, line.mid_point)
+    assert np.allclose(line.center, np.mean(points, axis=0))
     assert np.allclose(line.nodes, line.points)
 
     rng = np.random.default_rng(2025)
     points = rng.random((2, 3))
     line = Line(points)
     assert np.isclose(np.linalg.norm(line.normal), 1)
+    assert np.isclose(np.linalg.norm(line.axis), 1)
     assert np.isclose(np.linalg.norm(line.end_point - line.start_point), line.length)
 
 
@@ -264,10 +264,9 @@ def test_line_geometry():
     line = Line(points)
     geom = line.geometry
     assert np.allclose(line.center, [geom[attr] for attr in ["x", "y", "z"]])
-    assert np.allclose(line.normal, [geom[attr] for attr in ["dx", "dy", "dz"]])
+    assert np.allclose(line.axis, [geom[attr] for attr in ["dx", "dy", "dz"]])
     assert np.allclose(line.start_point, [geom[attr] for attr in ["x1", "y1", "z1"]])
-    assert np.allclose(line.mid_point, [geom[attr] for attr in ["x2", "y2", "z2"]])
-    assert np.allclose(line.end_point, [geom[attr] for attr in ["x3", "y3", "z3"]])
+    assert np.allclose(line.end_point, [geom[attr] for attr in ["x2", "y2", "z2"]])
 
 
 def test_arc_path():
@@ -279,7 +278,7 @@ def test_arc_points():
     arc = Arc(np.array([[1, 0.5, 0], [0, 0.5, 1], [0, 0.5, -1]]))
     assert arc.test
     assert np.allclose(arc.center, (0, 0.5, 0))
-    assert np.allclose(arc.normal, (0, arc.radius, 0))
+    assert np.allclose(arc.axis, (0, 1, 0))
     assert np.allclose(arc.start_point, [1, 0.5, 0])
     assert np.allclose(arc.end_point, [0, 0.5, -1])
     assert np.isclose(arc.length, 2 * np.pi * 3 / 4)
@@ -354,7 +353,9 @@ def test_straight_line_normal():
         ]
     )
     polyline = PolyLine(path, minimum_arc_nodes=4)
-    normal = np.c_[polyline["dx"], polyline["dy"], polyline["dz"]]
+    normal = np.c_[
+        polyline._to_list("nx"), polyline._to_list("ny"), polyline._to_list("nz")
+    ]
     reference = np.zeros((3, 3))
     reference[:, 1] = 1
     assert len(polyline) == 3

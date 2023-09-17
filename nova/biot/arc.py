@@ -1,5 +1,6 @@
 """Biot-Savart calculation for arc segments."""
 from dataclasses import dataclass
+from functools import cached_property
 from typing import ClassVar
 
 import numpy as np
@@ -7,6 +8,8 @@ from scipy.special import ellipj, ellipkinc
 
 from nova.biot.constants import Constants
 from nova.biot.matrix import Matrix
+
+# from nova.geometry.rotate import to_vector
 
 
 @dataclass
@@ -31,6 +34,18 @@ class Arc(ArcConstants, Matrix):
     def __post_init__(self):
         """Load intergration constants."""
         super().__post_init__()
+
+        axes = np.stack(
+            [self.source["dx"], self.source["dy"], self.source["dz"]], axis=-1
+        )
+
+        print()
+        print(self.source["dy"])
+        print(axes.shape)
+        ##Rmat = to_vector(
+        #    [0, 0, 1], coilset.subframe.loc[:, ['dx', 'dy', 'dz']]
+        # )
+
         self.rs = np.stack(
             [
                 self.source("x") + delta / 2 * self.source("dx")
@@ -48,11 +63,16 @@ class Arc(ArcConstants, Matrix):
         self.r = np.stack([self.target("x") for _ in range(4)], axis=-1)
         self.z = np.stack([self.target("z") for _ in range(4)], axis=-1)
 
+    @cached_property
+    def Bx(self):
+        """Return x-axis alligned field coupling matrix."""
+        return self.r[..., 0]
+
 
 if __name__ == "__main__":
     from nova.frame.coilset import CoilSet
 
-    coilset = CoilSet(dwinding=0, field_attrs=["Bx", "By", "Bz"])
+    coilset = CoilSet(dwinding=0, field_attrs=["Bx"])
     coilset.winding.insert(
         {"c": (0, 0, 0.5)}, np.array([[5, 0, 3.2], [0, 5, 3.2], [-5, 0, 3.2]]), nturn=2
     )
@@ -63,7 +83,7 @@ if __name__ == "__main__":
     )
     coilset.linkframe(["Swp0", "Swp1"])
 
-    # coilset.grid.solve(500)
+    coilset.grid.solve(500)
 
     coilset.plot()
 

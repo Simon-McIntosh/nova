@@ -1112,14 +1112,19 @@ if __name__ == "__main__":
     pulse, run = 105028, 1  # DINA
 
     machine = Machine(
+        pulse,
+        run,
         pf_active="iter_md",
         pf_passive=False,
         wall="iter_md",
         tplasma="hex",
         nwall=5,
     )
-    # machine.plot()
 
+    machine.time = 250
+    machine.plot()
+
+    """
     from nova.imas.coils_non_axisymmetric import Coils_Non_Axisymmetyric
 
     machine += Coils_Non_Axisymmetyric(111003, 1)  # CC
@@ -1129,3 +1134,4 @@ if __name__ == "__main__":
     # machine += inserts
 
     machine.frame.vtkplot()
+    """

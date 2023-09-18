@@ -108,7 +108,7 @@ class Indexer(ABC):
             return key[0], col
         return index, col
 
-    def get_index(self, key) -> slice | pandas.Index:
+    def get_index(self, key) -> slice | list[int] | pandas.Index:
         """Return index."""
         if not isinstance(key, tuple):
             return slice(None)

@@ -34,11 +34,17 @@ class ArrayLocMixin:
         key = self.obj.get_key(key)
         if self.obj.hascol("array", col):
             if self.obj.lock("array") is False:
-                try:
-                    return super().__getitem__(key)
-                except AttributeError:  # loc[slice, col]
+                # try:
+                #    return super().__getitem__(key)
+                # except AttributeError:
+                #    pass
+                column = self.obj.__getitem__(col)
+                try:  # loc[slice, col]
                     index = self.obj.get_index(key)
-                    return self.obj.__getitem__(col)[index]
+                    return column[index]
+                except IndexError:  # loc[list[str], col]
+                    index = [self.obj.index.get_loc(idx) for idx in index]
+                    return column[index]
         return super().__getitem__(key)
 
 

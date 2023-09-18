@@ -55,8 +55,7 @@ class PolyGeo(metamethod.PolyGeo):
         if (index_length := len(index)) > 0:
             section = self.frame.loc[index, "section"].values
             poly_data = self.frame.loc[index, ["x", "z", "dl", "dt"]].values
-            segment = self.frame.loc[index, "segment"].values
-            length = self.frame.loc[index, ["dy"]].values[0]
+            segment_data = self.frame.loc[index, ["segment", "dy"]].values
             poly = self.frame.loc[index, "poly"].values
             poly_update = self.frame.loc[index, "poly"].isna()
             geom = np.empty((index_length, len(self.features)), dtype=float)
@@ -65,7 +64,9 @@ class PolyGeo(metamethod.PolyGeo):
                 if poly_update.iloc[i]:
                     poly[i] = Polygon({f"{section[i]}": poly_data[i]})
                     section[i] = poly[i].metadata["section"]
-                geometry = PolyGeom(poly[i], segment[i], length[i]).geometry
+                geometry = PolyGeom(
+                    poly[i], segment_data[i, 0], segment_data[i, 1]
+                ).geometry
                 geom[i] = [geometry[feature] for feature in self.features]
             if poly_update.any():
                 self.frame.loc[index, "poly"] = poly

@@ -134,11 +134,11 @@ class Coils_Non_Axisymmetyric(Plot, CoilDatabase, Scenario):
                         self.linkframe([coil_name(coil), name])
                 points[name] = np.array(points[name])
             maximum_point_number = np.max([len(_points) for _points in points.values()])
-            self.data.coords["points_index"] = np.arange(1, maximum_point_number + 1)
-            self.data["points"] = ("coil_name", "points_index", "points"), np.zeros(
+            self.data.coords["point_index"] = np.arange(1, maximum_point_number + 1)
+            self.data["points"] = ("coil_name", "point_index", "point"), np.zeros(
                 (
                     self.data.dims["coil_name"],
-                    self.data.dims["points_index"],
+                    self.data.dims["point_index"],
                     self.data.dims["point"],
                 )
             )

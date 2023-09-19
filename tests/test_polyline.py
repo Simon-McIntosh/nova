@@ -1,9 +1,8 @@
 import numpy as np
 import pytest
 
-from nova.assembly.fiducialdata import FiducialData
 from nova.geometry.polyline import Arc, Line, PolyArc, PolyLine
-from nova.imas.coils_non_axisymmetric import Coils_Non_Axisymmetyric, Elements
+from nova.imas.coils_non_axisymmetric import Coils_Non_Axisymmetyric
 from nova.imas.utilities import mark
 
 

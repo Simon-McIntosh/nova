@@ -24,7 +24,7 @@ class BiotFrame(FrameLink):
         metadata = {
             "required": ["x", "z"],
             "additional": ["xo", "zo", "plasma", "nturn", "link", "segment"],
-            "available": ["section", "poly"],
+            "available": ["section", "poly", "x1", "y1", "z1", "x2", "y2", "z2"],
             "array": [
                 "x",
                 "y",
@@ -32,6 +32,12 @@ class BiotFrame(FrameLink):
                 "dx",
                 "dy",
                 "dz",
+                "x1",
+                "y1",
+                "z1",
+                "x2",
+                "y2",
+                "z2",
                 "area",
                 "nturn",
             ],

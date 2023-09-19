@@ -30,18 +30,18 @@ class Arc(ArcConstants, Matrix):
     """
 
     name: ClassVar[str] = "arc"  # element name
+    csys: str = "global"
 
     def __post_init__(self):
         """Load intergration constants."""
         super().__post_init__()
 
-        axes = np.stack(
-            [self.source["dx"], self.source["dy"], self.source["dz"]], axis=-1
-        )
+        # start_point = self._to_global(self.start_point)
+        # print(start_point)
+        # transform = np.stack(
+        #    [self.source["dx"], self.source["dy"], self.source["dz"]], axis=-1
+        # )
 
-        print()
-        print(self.source["dy"])
-        print(axes.shape)
         ##Rmat = to_vector(
         #    [0, 0, 1], coilset.subframe.loc[:, ['dx', 'dy', 'dz']]
         # )
@@ -63,6 +63,48 @@ class Arc(ArcConstants, Matrix):
         self.r = np.stack([self.target("x") for _ in range(4)], axis=-1)
         self.z = np.stack([self.target("z") for _ in range(4)], axis=-1)
 
+    # @contextmanager
+    # def local(self):
+    # """Contextual mapping to source and target points to local coordinate system."""
+
+    @property
+    def center(self):
+        """Return arc center."""
+        return np.c_[self.source["x"], self.source["y"], self.source["z"]]
+
+    @property
+    def start_point(self):
+        """Return arc start point."""
+        return np.c_[self.source["x1"], self.source["y1"], self.source["z1"]]
+
+    @property
+    def end_point(self):
+        """Return arc end point."""
+        return np.c_[self.source["x2"], self.source["y2"], self.source["z2"]]
+
+    @property
+    def axis(self):
+        """Return arc axis."""
+        return np.c_[self.source["dx"], self.source["dy"], self.source["dz"]]
+
+    @cached_property
+    def transform(self):
+        """Return global to local coordinate mapping transfrom."""
+        transform = np.zeros((len(self.source), 3, 3))
+        transform[..., 0] = self.start_point - self.center
+        transform[..., 2] = self.axis
+        transform[..., 1] = np.cross(transform[..., 2], transform[..., 0])
+        transform /= np.linalg.norm(transform, axis=1)[:, np.newaxis]
+        return transform
+
+    def _to_local(self, points: np.ndarray):
+        """Return point array mapped to local coordinate system."""
+        return np.einsum("ij,ijk->ik", points, self.transform)
+
+    def _to_global(self, points: np.ndarray):
+        """Return point array mapped to global coordinate system."""
+        return np.einsum("ij,ikj->ik", points, self.transform)
+
     @cached_property
     def Bx(self):
         """Return x-axis alligned field coupling matrix."""
@@ -74,18 +116,25 @@ if __name__ == "__main__":
 
     coilset = CoilSet(dwinding=0, field_attrs=["Bx"])
     coilset.winding.insert(
-        {"c": (0, 0, 0.5)}, np.array([[5, 0, 3.2], [0, 5, 3.2], [-5, 0, 3.2]]), nturn=2
+        {"c": (0, 0, 0.5)},
+        np.array([[5, 0, 3.2], [0, 5, 3.2], [-5, 0, 3.2]]),
+        nturn=2,
     )
     coilset.winding.insert(
         {"c": (0, 0, 0.5)},
         np.array([[-5, 0, 3.2], [0, -5, 3.2], [5, 0, 3.2]]),
         nturn=2,
     )
+    coilset.winding.insert(
+        {"c": (0, 0, 0.5)}, np.array([[-5, 0, 3.2], [0, 0, 8.2], [5, 0, 3.2]])
+    )
+    coilset.winding.insert(
+        {"c": (0, 0, 0.5)}, np.array([[5, 0, 3.2], [0, 0, -1.8], [-5, 0, 3.2]])
+    )
     coilset.linkframe(["Swp0", "Swp1"])
+    coilset.linkframe(["Swp2", "Swp3"])
 
     coilset.grid.solve(500)
-
-    coilset.plot()
 
     # coilset.subframe.vtkplot()
 

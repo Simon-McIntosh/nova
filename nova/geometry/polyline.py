@@ -534,7 +534,7 @@ if __name__ == "__main__":
     fiducial = FiducialData("RE", fill=True)
 
     curve = fiducial.data.centerline.data
-    # curve += 1000 * fiducial.data.centerline_delta[3].data
+    curve += 500 * fiducial.data.centerline_delta[3].data
     polyline = PolyLine(curve)
     polyline.plot()
 

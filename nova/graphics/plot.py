@@ -9,6 +9,9 @@ from string import digits
 from typing import ClassVar, Optional, TYPE_CHECKING
 
 import numpy as np
+from matplotlib.patches import FancyArrowPatch
+from mpl_toolkits.mplot3d import proj3d
+from mpl_toolkits.mplot3d.art3d import Patch3DCollection
 import xarray
 
 from nova.frame.dataframe import DataFrame
@@ -306,6 +309,21 @@ class MoviePy:
         return self.bindings.mplfig_to_npimage(fig)
 
 
+class FancyArrowPatch3D(FancyArrowPatch):
+    """Draw 3D arrows https://stackoverflow.com/a/22867877/5025009."""
+
+    def __init__(self, posA, posB, *args, **kwargs):
+        super().__init__((0, 0), (0, 0), *args, **kwargs)
+        self._points = np.c_[posA, posB].T
+
+    def draw(self, renderer):
+        """Extend FancyArrowpatch for 3d renderer."""
+        _points2d = proj3d.proj_transform(*self._points, renderer.M)
+        print(_points2d[0][:2], _points2d[1][:2])
+        self.set_positions(_points2d[0][:2], _points2d[1][:2])
+        super().draw(renderer)
+
+
 @dataclass
 class Plot:
     """Manage plot workflow."""
@@ -344,6 +362,45 @@ class Plot:
     def patch(self):
         """Provice acces to descartes PolygonPatch class."""
         return import_module("descartes").PolygonPatch
+
+    def arrow(
+        self,
+        point: np.ndarray,
+        vector: np.ndarray,
+        scale=1,
+        norm=None,
+        axes=None,
+        **kwargs,
+    ):
+        """Plot force vectors and intergration points."""
+        style = kwargs.get("style", f"{vector.shape[1]}d")
+        self.get_axes(style, axes)
+        if norm is None:
+            norm = np.max(np.linalg.norm(vector, axis=1))
+        length = scale * vector / norm
+        match style:
+            case "2d":
+                patch = self.mpl["patches"].FancyArrowPatch
+                collection = self.mpl.collections.PatchCollection
+            case "3d":
+                patch = FancyArrowPatch3D
+                collection = Patch3DCollection
+            case _:
+                raise NotImplementedError(f"arrow not implemented for {style} style")
+        arrows = [
+            patch(
+                _point,
+                _point + _length,
+                mutation_scale=1,
+                arrowstyle="simple,head_length=0.4, head_width=0.3," " tail_width=0.1",
+                shrinkA=0,
+                shrinkB=0,
+            )
+            for _point, _length in zip(point, length)
+        ]
+        collections = collection(arrows, facecolor="black", edgecolor="darkgray")
+        self.axes.add_collection(collections)
+        return norm
 
     @property
     def fig(self):

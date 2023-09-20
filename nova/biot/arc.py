@@ -1,4 +1,5 @@
 """Biot-Savart calculation for arc segments."""
+from contextlib import contextmanager
 from dataclasses import dataclass
 from functools import cached_property
 from typing import ClassVar
@@ -35,6 +36,11 @@ class Arc(ArcConstants, Matrix):
     def __post_init__(self):
         """Load intergration constants."""
         super().__post_init__()
+        print("init")
+
+        # use context manager to manage source and target attributes -> unwind on yield
+        # define local attributes in local coordinate system
+        # map parameters back to global coordinates on solve
 
         # start_point = self._to_global(self.start_point)
         # print(start_point)
@@ -63,9 +69,10 @@ class Arc(ArcConstants, Matrix):
         self.r = np.stack([self.target("x") for _ in range(4)], axis=-1)
         self.z = np.stack([self.target("z") for _ in range(4)], axis=-1)
 
-    # @contextmanager
-    # def local(self):
-    # """Contextual mapping to source and target points to local coordinate system."""
+    @contextmanager
+    def local(self):
+        """Contextual mapping to source and target points to local coordinate system."""
+        # for attr in 'xyz':
 
     @property
     def center(self):

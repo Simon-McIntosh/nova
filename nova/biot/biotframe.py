@@ -19,30 +19,16 @@ class BiotFrame(FrameLink):
         for attr in self._metadata:
             setattr(self, attr, None)
 
-    def update_metadata(self, data, columns, attrs, metadata):
-        """Extend FrameAttrs update_metadata."""
-        metadata = {
-            "required": ["x", "z"],
-            "additional": ["xo", "zo", "plasma", "nturn", "link", "segment"],
-            "available": ["section", "poly", "x1", "y1", "z1", "x2", "y2", "z2"],
-            "array": [
-                "x",
-                "y",
-                "z",
-                "dx",
-                "dy",
-                "dz",
-                "x1",
-                "y1",
-                "z1",
-                "x2",
-                "y2",
-                "z2",
-                "area",
-                "nturn",
-            ],
-        } | metadata
-        super().update_metadata(data, columns, attrs, metadata)
+    def update_metaframe(self, metadata):
+        """Extend metaframe update."""
+        self.metaframe.update(
+            {
+                "required": ["x", "z"],
+                "additional": ["plasma", "nturn", "link", "segment"],
+                "array": ["x", "y", "z", "dx", "dy", "dz", "nturn"],
+            }
+        )
+        super().update_metaframe(metadata)
 
     def __call__(self, attr):
         """Return attribute matrix, shape(target, source)."""
@@ -81,13 +67,42 @@ class BiotFrame(FrameLink):
         return (self.z - self.zo.values) / self.dz
 
 
+class Source(BiotFrame):
+    """Extend BiotFrame with modified additional and available metadata."""
+
+    # def __init__(self, data=None, index=None, columns=None, attrs=None, **metadata):
+    #    metadata["available"] = ["section", "poly", "x1", "y1", "z1", "x2", "y2", "z2"]
+    #    metadata["array"] = ["x1", "y1", "z1", "x2", "y2", "z2", "area"]
+    #    super().__init__(data, index, columns, attrs, **metadata)
+
+    def update_metaframe(self, metadata):
+        """Extend metaframe update."""
+        self.metaframe.update(
+            {
+                "available": ["section", "poly", "x1", "y1", "z1", "x2", "y2", "z2"],
+                "array": ["x1", "y1", "z1", "x2", "y2", "z2", "area"],
+            }
+        )
+        super().update_metaframe(metadata)
+
+
 class Target(BiotFrame):
     """Extend BiotFrame with modified additional and available metadata."""
 
-    def __init__(self, data=None, index=None, columns=None, attrs=None, **metadata):
-        metadata["available"] = []
-        metadata["additional"] = ["plasma"]
-        super().__init__(data, index, columns, attrs, **metadata)
+    # def __init__(self, data=None, index=None, columns=None, attrs=None, **metadata):
+    #    metadata["additional"] = ["xo", "zo"]
+    #    metadata["array"] = ["x"]
+    #    super().__init__(data, index, columns, attrs, **metadata)
+
+    def update_metaframe(self, metadata):
+        """Extend metaframe update."""
+        self.metaframe.update(
+            {
+                "additional": ["xo", "zo"],
+                "array": ["x"],
+            }
+        )
+        super().update_metaframe(metadata)
 
 
 if __name__ == "__main__":

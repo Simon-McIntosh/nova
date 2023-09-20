@@ -7,7 +7,7 @@ import shapely.strtree
 import numpy as np
 import pandas
 
-from nova.biot.biotframe import BiotFrame
+from nova.biot.biotframe import Target
 from nova.frame.dataframe import DataFrame
 from nova.frame.frameset import FrameSet
 from nova.frame.polyplot import PolyPlot
@@ -332,7 +332,7 @@ class PolyTarget(FrameSet):
 
     delta: int | float = 0
     index: str | slice = field(default_factory=lambda: slice(None))
-    target: BiotFrame = field(default_factory=BiotFrame)
+    target: Target = field(default_factory=Target)
 
     def __post_init__(self):
         """Build poly-target."""

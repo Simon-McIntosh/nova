@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-from nova.biot.biotframe import BiotFrame
+from nova.biot.biotframe import Source, Target
 from nova.graphics.plot import Plot
 
 
@@ -28,17 +28,17 @@ class GroupSet(Plot):
 
     """
 
-    source: BiotFrame = field(repr=False, default_factory=BiotFrame)
-    target: BiotFrame = field(repr=False, default_factory=BiotFrame)
+    source: Source = field(repr=False, default_factory=Source)
+    target: Target = field(repr=False, default_factory=Target)
     turns: list[bool] = field(default_factory=lambda: [True, False])
     reduce: list[bool] = field(default_factory=lambda: [True, True])
 
     def __post_init__(self):
         """Format source and target biot frames."""
-        if not isinstance(self.source, BiotFrame):
-            self.source = BiotFrame(self.source)
-        if not isinstance(self.target, BiotFrame):
-            self.target = BiotFrame(self.target, available=[])
+        if not isinstance(self.source, Source):
+            self.source = Source(self.source)
+        if not isinstance(self.target, Target):
+            self.target = Target(self.target, available=[])
         self.set_flags()
         self.assemble()
 
@@ -93,7 +93,7 @@ class GroupSet(Plot):
 
 
 if __name__ == "__main__":
-    source = BiotFrame(
+    source = Source(
         {"x": [3, 3.4, 3.6], "z": [3.1, 3, 3.3], "dl": 0.3, "dt": 0.3, "section": "hex"}
     )
     groupset = GroupSet(source, source)

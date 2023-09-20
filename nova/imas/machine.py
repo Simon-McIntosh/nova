@@ -1121,7 +1121,6 @@ if __name__ == "__main__":
         nwall=5,
     )
 
-    machine.time = 250
     machine.plot()
 
     """

@@ -84,11 +84,9 @@ class Matrix(GroupSet):
         if self.target.turns:
             matrix *= self.target("nturn")
             target_plasma *= self.target("nturn")[:, self.source.plasma]
-        # plasma = matrix[:, self.source.plasma]
         if self.source.turns:
             matrix *= self.source("nturn")
             plasma_source *= self.source("nturn")[self.target.plasma]
-        # reduce
         if self.source.reduce and self.source.biotreduce.reduce:
             matrix = np.add.reduceat(matrix, self.source.biotreduce.indices, axis=1)
             plasma_source = np.add.reduceat(
@@ -99,8 +97,6 @@ class Matrix(GroupSet):
             target_plasma = np.add.reduceat(
                 target_plasma, self.target.biotreduce.indices, axis=0
             )
-            # plasma = np.add.reduceat(
-            #    plasma, self.target.biotreduce.indices, axis=0)
         # link source
         source_link = self.source.biotreduce.link
         if self.source.reduce and len(source_link) > 0:

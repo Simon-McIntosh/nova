@@ -27,6 +27,7 @@ class Force(Plot1D, Operate):
 
     reduce: bool = True
     attrs: list[str] = field(default_factory=lambda: ["Fr", "Fz", "Fc"])
+    frame_index: str = "coil"
     target: BiotFrame = field(init=False, repr=False)
 
     def __len__(self):
@@ -38,7 +39,7 @@ class Force(Plot1D, Operate):
         with self.solve_biot(number) as number:
             if number is not None:
                 self.target = PolyTarget(
-                    *self.frames, index="coil", delta=-number
+                    *self.frames, index=self.frame_index, delta=-number
                 ).target
                 self.data = Solve(
                     self.subframe,
@@ -49,13 +50,20 @@ class Force(Plot1D, Operate):
                     name=self.name,
                 ).data
                 # insert grid data
-                self.data.coords["index"] = "target", self.Loc["coil", "subref"]
                 if self.reduce:
-                    self.data.coords["xo"] = "target", self.Loc["coil", "x"]
-                    self.data.coords["zo"] = "target", self.Loc["coil", "z"]
+                    self.data.coords["index"] = (
+                        "target",
+                        self.Loc[self.frame_index, "subref"],
+                    )
+                    self.data.coords["xo"] = "target", self.Loc[self.frame_index, "x"]
+                    self.data.coords["zo"] = "target", self.Loc[self.frame_index, "z"]
                     self.data.coords["x"] = self.target.x
                     self.data.coords["z"] = self.target.z
                 else:
+                    self.data.coords["index"] = (
+                        "target",
+                        self.loc[self.frame_index, "subref"],
+                    )
                     self.data.coords["x"] = "target", self.target.x
                     self.data.coords["z"] = "target", self.target.z
 

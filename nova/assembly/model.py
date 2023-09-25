@@ -1,6 +1,7 @@
 """Perform post-processing analysis on Fourier perterbed TFC dataset."""
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import ClassVar
 
 import numpy as np
@@ -15,7 +16,7 @@ class DataAttrs:
 
     name: str | None = None
     filename: str = "vault"
-    datapath: str = "data/Assembly"
+    dirname: Path | str = "data/Assembly"
     group: str | None = field(init=False, default=None)
 
     def __post_init__(self):
@@ -31,13 +32,13 @@ class Dataset(ABC, netCDF, DataAttrs):
     """Manage build, storage, and retrival of an xarray dataset."""
 
     filename: str = "vault"
-    directory: str = "root"
+    basename: str = "root"
     data: xarray.Dataset = field(init=False, repr=False, default_factory=xarray.Dataset)
 
     def __post_init__(self):
         """Load / build dataset."""
         super().__post_init__()
-        self.set_path(self.datapath)
+        # self.set_path(self.datapath)
         try:
             self.load()
         except (FileNotFoundError, OSError, KeyError):

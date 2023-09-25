@@ -33,12 +33,17 @@ class BiotOp:
     dataset: InitVar[xarray.Dataset]
 
     def __post_init__(self, dataset):
-        """Extract matrix, plasma_matrix and plasma_index from dataset."""
-        data_vars = list(dataset.data_vars)
-        self.matrix = dataset[data_vars[0]].data
-        self.plasma_index = dataset.attrs["plasma_index"]
-        if self.plasma_index != -1:
-            self.plasma_matrix = dataset[f"{data_vars[0]}_"].data
+        """Extract matrix, plasma_matrices, and plasma indicies from dataset."""
+        attr = list(dataset.data_vars)[0]
+        self.matrix = dataset[attr].data
+        self.source_plasma_index = dataset.attrs["source_plasma_index"]
+        self.target_plasma_index = dataset.attrs["target_plasma_index"]
+        if source_plasma := self.source_plasma_index != -1:
+            self.matrix_ = dataset[f"{attr}_"].data
+        if target_plasma := self.target_plasma_index != -1:
+            self._matrix = dataset[f"_{attr}"].data
+        if source_plasma and target_plasma:
+            self._matrix_ = dataset[f"_{attr}_"].data
 
         """
         #  perform svd order reduction
@@ -71,7 +76,15 @@ class BiotOp:
             return
         print('svd == -1')
         """
-        self.matrix[:, self.plasma_index] = self.plasma_matrix @ self.plasma_nturn
+        plasma_nturn = self.plasma_nturn
+        if update_source := self.source_plasma_index != -1:
+            self.matrix[:, self.source_plasma_index] = self.matrix_ @ plasma_nturn
+        if update_target := self.target_plasma_index != -1:
+            self.matrix[self.target_plasma_index, :] = plasma_nturn @ self._matrix
+        if update_source and update_target:
+            self.matrix[self.target_plasma_index, self.source_plasma_index] = (
+                plasma_nturn @ self._matrix_ @ plasma_nturn
+            )
 
 
 @dataclass
@@ -135,7 +148,7 @@ class Operate(Data):
         for attr in np.array(self.attrs):
             attrs = [
                 _attr
-                for _attr in [attr, "f_{attr}", f"{attr}_", f"_{attr}_"]
+                for _attr in [attr, f"_{attr}", f"{attr}_", f"_{attr}_"]
                 if _attr in self.data
             ]
             dataset = self.data[attrs]
@@ -168,9 +181,19 @@ class Operate(Data):
                     continue
                 self.array[attr] = self.operator[attr].matrix
 
+    @cached_property
+    def source_plasma_index(self):
+        """Return source plasma index."""
+        return self.data.attrs["source_plasma_index"]
+
+    @cached_property
+    def target_plasma_index(self):
+        """Return target plasma index."""
+        return self.data.attrs["target_plasma_index"]
+
     def update_turns(self, Attr: str, svd=True):
         """Update plasma turns."""
-        if self.plasma_index == -1:
+        if self.source_plasma_index == -1 and self.target_plasma_index == -1:
             return
         self.operator[Attr].update_turns(svd)
         self.version[Attr] = self.data.attrs[Attr] = self.subframe.version["nturn"]

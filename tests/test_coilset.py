@@ -341,7 +341,7 @@ def test_biot_multiframe_plasma():
     coilset.firstwall.insert(3, -0.5, 0.5, 0.5, Ic=1)
     coilset.firstwall.insert(3, 0.5, 0.5, 0.5, name="second_plasma_rejoin")
     coilset.grid.solve(50, 0.05)
-    assert coilset.grid.data.attrs["plasma_index"] == 1
+    assert coilset.grid.data.attrs["source_plasma_index"] == 1
 
 
 def test_add_coilset():

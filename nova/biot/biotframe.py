@@ -1,14 +1,14 @@
 """Biot specific Frame class."""
 import numpy as np
 
-from nova.frame.framelink import FrameLink
+from nova.frame.framespace import FrameSpace
 from nova.frame.metamethod import CrossSection, Shape, Reduce, PolyGeo
 
 
 # pylint: disable=too-many-ancestors
 
 
-class BiotFrame(FrameLink):
+class BiotFrame(FrameSpace):
     """Extend FrameSpace class with biot specific attributes and methods."""
 
     _metadata = ["turns", "reduce"]
@@ -24,8 +24,8 @@ class BiotFrame(FrameLink):
         self.metaframe.update(
             {
                 "required": ["x", "z"],
-                "additional": ["plasma", "nturn", "link", "segment"],
-                "array": ["x", "y", "z", "dx", "dy", "dz", "nturn"],
+                "additional": ["plasma", "nturn", "link", "segment", "frame"],
+                "array": ["x", "y", "z", "dx", "dy", "dz", "nturn", "plasma"],
             }
         )
         super().update_metaframe(metadata)
@@ -70,11 +70,6 @@ class BiotFrame(FrameLink):
 class Source(BiotFrame):
     """Extend BiotFrame with modified additional and available metadata."""
 
-    # def __init__(self, data=None, index=None, columns=None, attrs=None, **metadata):
-    #    metadata["available"] = ["section", "poly", "x1", "y1", "z1", "x2", "y2", "z2"]
-    #    metadata["array"] = ["x1", "y1", "z1", "x2", "y2", "z2", "area"]
-    #    super().__init__(data, index, columns, attrs, **metadata)
-
     def update_metaframe(self, metadata):
         """Extend metaframe update."""
         self.metaframe.update(
@@ -88,11 +83,6 @@ class Source(BiotFrame):
 
 class Target(BiotFrame):
     """Extend BiotFrame with modified additional and available metadata."""
-
-    # def __init__(self, data=None, index=None, columns=None, attrs=None, **metadata):
-    #    metadata["additional"] = ["xo", "zo"]
-    #    metadata["array"] = ["x"]
-    #    super().__init__(data, index, columns, attrs, **metadata)
 
     def update_metaframe(self, metadata):
         """Extend metaframe update."""

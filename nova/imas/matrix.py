@@ -119,7 +119,7 @@ class Benchmark(Matrix):
     def plot_field(self):
         """Plot timeslice maximum L2 norm field benchmark."""
         self.set_axes("1d")
-        self.axes.bar(self.field.coil_name, self.field.bn, label="matrix")
+        self.axes.bar(self.field.coil_name, self.field.bp, label="matrix")
         self.axes.bar(
             self.profile.data.coil_name,
             self.profile["b_field_max_timed"],

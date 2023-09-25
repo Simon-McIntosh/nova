@@ -124,6 +124,7 @@ class Field(Plot1D, Operate):
     """
 
     nfield: int | float = 1
+    frame_index: str = "coil"
     target: BiotFrame = field(init=False, repr=False)
 
     def __len__(self):
@@ -135,7 +136,7 @@ class Field(Plot1D, Operate):
         with self.solve_biot(number) as number:
             if number is not None:
                 self.target = BiotFrame()
-                for name in self.Loc["coil", :].index:
+                for name in self.Loc[self.frame_index, :].index:
                     polyframe = self.frame.loc[name, "poly"]
                     if polyframe.poly.boundary.is_ring:
                         sample = Sample(polyframe.boundary, delta=-number)

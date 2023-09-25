@@ -84,6 +84,8 @@ class Solve(GroupSet):
                 self.data[f"{prefix}{attr}{postfix}"] = xarray.DataArray(
                     0.0, dims=[row, col], coords=[self.data[row], self.data[col]]
                 )
+        for frame in ["source", "target"]:
+            self.data.attrs[f"{frame}_plasma_index"] = self.get_plasma_index(frame)
 
         # self._initialize_svd('target', 'source')
         # self._initialize_svd('target', 'plasma', prefix='_')
@@ -119,6 +121,17 @@ class Solve(GroupSet):
             self.data[f"{prefix}{attr}_V"] = xarray.DataArray(
                 0.0, dims=[sigma, column], coords=[self.data[sigma], self.data[column]]
             )
+
+    def get_plasma_index(self, frame: str) -> int:
+        """Return frame plasma index."""
+        biotframe = getattr(self, frame)
+        try:
+            return next(
+                biotframe.subspace.index.get_loc(name)
+                for name in biotframe.frame[biotframe.aloc["plasma"]].unique()
+            )
+        except StopIteration:
+            return -1
 
     def get_index(self, frame: str) -> list[str]:
         """Return matrix coordinate, reduce if flag True."""

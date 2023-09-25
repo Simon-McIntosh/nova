@@ -14,10 +14,10 @@ class GroupSet(Plot):
 
     Parameters
     ----------
-    source: BiotFrame
+    source: Source
         Field source
 
-    target: BiotFrame
+    target: Target
         Calculation target
 
     turns: list[bool, bool]

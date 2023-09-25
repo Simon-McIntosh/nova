@@ -179,7 +179,10 @@ class PlasmaGrid(BaseGrid, PlasmaLoc):
                     index = Polygon(index).boundary
                     return self.pointloop.update(index)
 
-    def plot(self, **kwargs):
+    def _label_format(self, value):
+        return f"{1e3*value:1.1f}"
+
+    def plot(self, attr="psi", clabel=False, **kwargs):
         """Plot poloidal flux contours."""
         super().plot(axes=kwargs.get("axes", None))
         kwargs = self.contour_kwargs(**kwargs)
@@ -192,6 +195,16 @@ class PlasmaGrid(BaseGrid, PlasmaLoc):
                 color="C0",
                 alpha=0.2,
             )
-        self.axes.tricontour(
-            self.data.x, self.data.z, self.data.triangles, self.psi, **kwargs
+        if isinstance(attr, str):
+            attr = getattr(self, attr)
+        contour = self.axes.tricontour(
+            self.data.x, self.data.z, self.data.triangles, attr, **kwargs
         )
+        if clabel:
+            self.axes.clabel(
+                contour,
+                contour.levels[::2],
+                inline=True,
+                fmt=self._label_format,
+                fontsize="small",
+            )

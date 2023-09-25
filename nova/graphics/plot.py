@@ -125,6 +125,8 @@ class BasePlot:
             return np.full(len(self.frame), True)
         if isinstance(index, str) and index in self.frame:
             index = self.frame.index[self.frame[index]]
+        if isinstance(index, str) and index in self.frame.part.values:
+            index = self.frame.index[index == self.frame.part]
         if isinstance(index, (str, int)):
             if isinstance(index, int):
                 index = self.frame.index[index]

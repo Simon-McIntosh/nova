@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from nova.geometry.polyline import Arc, Line, PolyArc, PolyLine
-from nova.imas.coils_non_axisymmetric import Coils_Non_Axisymmetyric
+from nova.imas.coils_non_axisymmetric import CoilsNonAxisymmetyric
 from nova.imas.utilities import mark
 
 
@@ -298,7 +298,7 @@ def test_arc_name():
 @pytest.fixture
 def cc_polyline():
     """Return TF coil centerline."""
-    coil = Coils_Non_Axisymmetyric(111003, 1)
+    coil = CoilsNonAxisymmetyric(111003, 1)
     number = coil.data.points_length[0].data
     points = coil.data.points[0, :number].data
     return PolyLine(

@@ -96,6 +96,7 @@ types-decorator = "^5.1.8.4"
 types-six = "^1.16.21.9"
 pyarrow = "^13.0.0"
 types-tqdm = "^4.66.0.2"
+dill = "^0.3.7"
 
 [tool.poetry.extras]
 ansys = [

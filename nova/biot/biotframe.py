@@ -58,41 +58,85 @@ class BiotFrame(FrameLink):
 
     @property
     def delta_r(self):
-        """Return normalized r-coordinate distance from coil centroid."""
+        """Return normalized r-coordinate distance from PF coil centroid."""
         return (self.x - self.xo.values) / self.dx
 
     @property
     def delta_z(self):
-        """Return normalized z-coordinate distance from coil centroid."""
+        """Return normalized z-coordinate distance from PF coil centroid."""
         return (self.z - self.zo.values) / self.dz
+
+    @staticmethod
+    def _to_local(self, points: np.ndarray, transform: np.ndarray):
+        """Return point array mapped to local coordinate system."""
+        return np.einsum("ij,ijk->ik", points, transform)
+
+    @staticmethod
+    def _to_global(self, points: np.ndarray):
+        """Return point array mapped to global coordinate system."""
+        return np.einsum("ij,ikj->ik", points, self.transform)
 
 
 class Source(BiotFrame):
     """Extend BiotFrame with modified additional and available metadata."""
 
-    # def __init__(self, data=None, index=None, columns=None, attrs=None, **metadata):
-    #    metadata["available"] = ["section", "poly", "x1", "y1", "z1", "x2", "y2", "z2"]
-    #    metadata["array"] = ["x1", "y1", "z1", "x2", "y2", "z2", "area"]
-    #    super().__init__(data, index, columns, attrs, **metadata)
-
     def update_metaframe(self, metadata):
         """Extend metaframe update."""
         self.metaframe.update(
             {
-                "available": ["section", "poly", "x1", "y1", "z1", "x2", "y2", "z2"],
-                "array": ["x1", "y1", "z1", "x2", "y2", "z2", "area"],
+                "available": [
+                    "section",
+                    "poly",
+                    "x1",
+                    "y1",
+                    "z1",
+                    "x2",
+                    "y2",
+                    "z2",
+                    "ax",
+                    "ay",
+                    "az",
+                    "nx",
+                    "ny",
+                    "nz",
+                ],
+                "array": [
+                    "x1",
+                    "y1",
+                    "z1",
+                    "x2",
+                    "y2",
+                    "z2",
+                    "ax",
+                    "ay",
+                    "az",
+                    "nx",
+                    "ny",
+                    "nz",
+                    "area",
+                ],
             }
         )
         super().update_metaframe(metadata)
 
+    @property
+    def center(self):
+        """Return arc center."""
+        return np.c_[self.loc["x"], self.loc["y"], self.loc["z"]]
+
+    @property
+    def start_point(self):
+        """Return arc start point."""
+        return np.c_[self.loc["x1"], self.loc["y1"], self.loc["z1"]]
+
+    @property
+    def end_point(self):
+        """Return arc end point."""
+        return np.c_[self.loc["x2"], self.loc["y2"], self.loc["z2"]]
+
 
 class Target(BiotFrame):
     """Extend BiotFrame with modified additional and available metadata."""
-
-    # def __init__(self, data=None, index=None, columns=None, attrs=None, **metadata):
-    #    metadata["additional"] = ["xo", "zo"]
-    #    metadata["array"] = ["x"]
-    #    super().__init__(data, index, columns, attrs, **metadata)
 
     def update_metaframe(self, metadata):
         """Extend metaframe update."""

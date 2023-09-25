@@ -91,7 +91,7 @@ class Elements(Plot):
 
 
 @dataclass
-class Coils_Non_Axisymmetyric(Plot, CoilDatabase, Scenario):
+class CoilsNonAxisymmetyric(Plot, CoilDatabase, Scenario):
     """Manage access to coils_non_axisymmetric ids."""
 
     pulse: int = 115001
@@ -152,8 +152,8 @@ class Coils_Non_Axisymmetyric(Plot, CoilDatabase, Scenario):
 
 
 if __name__ == "__main__":
-    coil = Coils_Non_Axisymmetyric(111003, 1)  # CC
-    coil += Coils_Non_Axisymmetyric(115001, 1)  # ELM
+    coil3d = CoilsNonAxisymmetyric(111003, 1)  # CC
+    coil3d += CoilsNonAxisymmetyric(115001, 1)  # ELM
 
-    coil.frame.vtkplot()
-    coil._clear()
+    coil3d.frame.vtkplot()
+    coil3d._clear()

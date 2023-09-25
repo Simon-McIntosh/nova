@@ -417,7 +417,7 @@ if __name__ == "__main__":
     pulse, run = 105028, 1
 
     pulse, run = 135013, 2
-    pulse, run = 105050, 2
+    # pulse, run = 105050, 2
     # pulse, run = 135001, 7
 
     equilibrium = EquilibriumData(pulse, run, occurrence=0)

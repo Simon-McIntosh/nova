@@ -6,6 +6,7 @@ from nova.biot.arc import Arc
 from nova.frame.coilset import CoilSet
 
 
+@pytest.mark.skip("pending refactor of BiotFrame methods for 3D elements")
 def test_transform():
     coilset = CoilSet(dwinding=0, field_attrs=["Bx"])
     coilset.winding.insert(

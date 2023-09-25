@@ -907,13 +907,7 @@ class PulseDesign(Animate, Plot1D, Control, ITER):
 class AnimateDesign(PulseDesign):
     """Extend pulse design to include control-point annimation."""
 
-    sequence: tuple[str | tuple[int]] = (
-        (6, 10),
-        "triangularity",
-        (6, 50),
-        "box",
-        (6, -60),
-    )
+    sequence: tuple = ((6, 10), "triangularity", (6, 50), "box", (6, -60))
 
     def __post_init__(self):
         """Build animation sequence."""

@@ -1,5 +1,4 @@
 """Biot-Savart calculation for arc segments."""
-from contextlib import contextmanager
 from dataclasses import dataclass
 from functools import cached_property
 from typing import ClassVar
@@ -68,49 +67,6 @@ class Arc(ArcConstants, Matrix):
         )
         self.r = np.stack([self.target("x") for _ in range(4)], axis=-1)
         self.z = np.stack([self.target("z") for _ in range(4)], axis=-1)
-
-    @contextmanager
-    def local(self):
-        """Contextual mapping to source and target points to local coordinate system."""
-        # for attr in 'xyz':
-
-    @property
-    def center(self):
-        """Return arc center."""
-        return np.c_[self.source["x"], self.source["y"], self.source["z"]]
-
-    @property
-    def start_point(self):
-        """Return arc start point."""
-        return np.c_[self.source["x1"], self.source["y1"], self.source["z1"]]
-
-    @property
-    def end_point(self):
-        """Return arc end point."""
-        return np.c_[self.source["x2"], self.source["y2"], self.source["z2"]]
-
-    @property
-    def axis(self):
-        """Return arc axis."""
-        return np.c_[self.source["dx"], self.source["dy"], self.source["dz"]]
-
-    @cached_property
-    def transform(self):
-        """Return global to local coordinate mapping transfrom."""
-        transform = np.zeros((len(self.source), 3, 3))
-        transform[..., 0] = self.start_point - self.center
-        transform[..., 2] = self.axis
-        transform[..., 1] = np.cross(transform[..., 2], transform[..., 0])
-        transform /= np.linalg.norm(transform, axis=1)[:, np.newaxis]
-        return transform
-
-    def _to_local(self, points: np.ndarray):
-        """Return point array mapped to local coordinate system."""
-        return np.einsum("ij,ijk->ik", points, self.transform)
-
-    def _to_global(self, points: np.ndarray):
-        """Return point array mapped to global coordinate system."""
-        return np.einsum("ij,ikj->ik", points, self.transform)
 
     @cached_property
     def Bx(self):

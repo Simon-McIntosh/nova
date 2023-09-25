@@ -1,4 +1,5 @@
 """Manage source and target frames."""
+from functools import cached_property
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -78,6 +79,26 @@ class GroupSet(Plot):
         # self.index = ['_'.join(label) for label
         #               in itertools.product(self.source.index,
         #                                    self.target.index)]
+
+    @cached_property
+    def axis(self):
+        """Return source element axis."""
+        return np.c_[self.source["ax"], self.source["ay"], self.source["az"]]
+
+    @cached_property
+    def normal(self):
+        """Return source element normal."""
+        return np.c_[self.source["nx"], self.source["ny"], self.source["nz"]]
+
+    @cached_property
+    def transform(self):
+        """Return global to local coordinate mapping transfrom."""
+        transform = np.zeros((len(self.source), 3, 3))
+        transform[..., 0] = self.normal
+        transform[..., 1] = np.cross(self.axis, self.normal)
+        transform[..., 2] = self.axis
+        transform /= np.linalg.norm(transform, axis=1)[:, np.newaxis]
+        return transform
 
     def plot(self, axes=None):
         """Plot source and target markers."""

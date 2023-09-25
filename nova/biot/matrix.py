@@ -87,7 +87,6 @@ class Matrix(GroupSet):
         if self.source.turns:
             matrix *= self.source("nturn")
             plasma_source *= self.source("nturn")[self.target.plasma]
-        # reduce
         if self.source.reduce and self.source.biotreduce.reduce:
             matrix = np.add.reduceat(matrix, self.source.biotreduce.indices, axis=1)
             plasma_source = np.add.reduceat(

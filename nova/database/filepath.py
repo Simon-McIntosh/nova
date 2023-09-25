@@ -162,7 +162,7 @@ class FilePath:
 
 if __name__ == "__main__":
     filepath = FilePath(parents=2, basename="root", filename="test")
-
+    print(filepath.path)
     filepath.path = ".nova"
     print(filepath.filepath)
 

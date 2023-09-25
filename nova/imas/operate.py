@@ -184,24 +184,94 @@ class Operate(Profile, Grid, Machine):
 if __name__ == "__main__":
     # pulse, run = 105007, 9
     # pulse, run = 135007, 4
-    pulse, run = 105028, 1
-    # pulse, run = 135013, 2
+    # pulse, run = 105028, 1
+    pulse, run = 135013, 2
 
     # pulse, run = 130506, 403  # CORSICA
 
     operate = Operate(
         pulse,
         run,
-        pf_active=True,
-        dplasma=-1000,
+        pf_active="iter_md",
+        elm=True,
+        dplasma=-2000,
         ngrid=500,
-        tplasma="hex",
+        tplasma="rect",
         limit=0.25,
-        nlevelset=1000,
+        nlevelset=None,
         nwall=10,
+        nforce=0,
+        force_index="plasma",
     )
 
-    operate.itime = 50
+    # operate.force.solve(0, index="plasma")
+
+    # operate.itime = 50
+
+    # operate.sloc["VS3U", "Ic"] = 0
+    # operate.sloc["mELM", "Ic"] = 0
+
+    def plot_force(mode: str, time=4, Ivs3=60e3, Ielm=10.5e3):
+        """Return plasma vertical force."""
+        operate.time = time
+        operate.sloc["VS3U", "Ic"] = 0
+        operate.sloc["passive", "Ic"] = 0
+        fz_ref = operate.force.fz[0]
+        match mode.lower():
+            case "vs3":
+                operate.sloc["VS3U", "Ic"] = -Ivs3
+                current = Ivs3
+            case "mid elm":
+                operate.sloc["mELM", "Ic"] = Ielm
+                current = Ielm
+            case "all elm":
+                operate.sloc["lELM", "Ic"] = Ielm
+                operate.sloc["mELM", "Ic"] = Ielm
+                operate.sloc["uELM", "Ic"] = Ielm
+                current = Ielm
+            case _:
+                raise NotImplementedError(f"mode {mode} not implemented")
+        delta_fz = operate.force.fz[0] - fz_ref
+        operate.sloc[:-5, "Ic"] = 0
+        operate.sloc["plasma", "Ic"] = 0
+
+        operate.set_axes("2d")
+        operate.plasmawall.plot(limitflux=False)
+        operate.plasmagrid.plot(attr="br", clabel=True, colors="k")
+        operate.plasmagrid.plot(attr="psi")
+        operate.plot("plasma")
+        operate.plot("elm")
+        operate.plot("vs3")
+
+        operate.axes.set_title(
+            f"{mode}: {1e-3*current:1.1f}kA \n"
+            + "contours: $B_r$ mT \n"
+            + rf" $\Delta f_z$: {1e-6*delta_fz:1.2f}MN"
+        )
+        return
+
+    plot_force("vs3")
+    plot_force("vs3", Ivs3=5e3)
+    plot_force("mid elm")
+    plot_force("all elm")
+    # operate.loc["plasma", "nturn"] = 0
+
+    # operate.force.plot()
+
+    """
+    from nova.imas.coils_non_axisymmetric import Coils_Non_Axisymmetyric
+
+    coils_3d = Coils_Non_Axisymmetyric(115001, 1)
+    coils_3d.frame.part = "_elm"
+    operate += coils_3d
+    operate.frame.vtkplot()
+    """
+
+    """
+    operate.grid.solve(1000)
+
+    operate.sloc["Ic"][-1] = 20
+
     operate.plot("plasma")
     operate.plasma.plot()
     operate.plot_boundary()
@@ -210,7 +280,9 @@ if __name__ == "__main__":
     operate.plot_2d()
 
     operate.plasmagrid.plot()
+    """
 
+    """
     index = abs(operate.data.ip.data) > 1e3
 
     li_3 = np.zeros(operate.data.dims["time"])
@@ -223,3 +295,4 @@ if __name__ == "__main__":
     operate.set_axes("1d")
     operate.axes.plot(operate.data.time[index], operate.data.li_3[index])
     operate.axes.plot(operate.data.time[index], li_3[index])
+    """

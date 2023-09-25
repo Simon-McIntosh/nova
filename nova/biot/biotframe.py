@@ -1,14 +1,14 @@
 """Biot specific Frame class."""
 import numpy as np
 
-from nova.frame.framelink import FrameLink
+from nova.frame.framespace import FrameSpace
 from nova.frame.metamethod import CrossSection, Shape, Reduce, PolyGeo
 
 
 # pylint: disable=too-many-ancestors
 
 
-class BiotFrame(FrameLink):
+class BiotFrame(FrameSpace):
     """Extend FrameSpace class with biot specific attributes and methods."""
 
     _metadata = ["turns", "reduce"]
@@ -24,8 +24,8 @@ class BiotFrame(FrameLink):
         self.metaframe.update(
             {
                 "required": ["x", "z"],
-                "additional": ["plasma", "nturn", "link", "segment"],
-                "array": ["x", "y", "z", "dx", "dy", "dz", "nturn"],
+                "additional": ["plasma", "nturn", "link", "segment", "frame"],
+                "array": ["x", "y", "z", "dx", "dy", "dz", "nturn", "plasma"],
             }
         )
         super().update_metaframe(metadata)

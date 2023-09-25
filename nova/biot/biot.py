@@ -119,7 +119,9 @@ class BiotCoil(BiotBase):
     """Group coil biot methods."""
 
     nforce: Nbiot = None
+    force_index: str = "coil"
     nfield: Nbiot = None
+    field_index: str = "coil"
     ninductance: Nbiot = None
 
     def __post_init__(self):
@@ -130,12 +132,19 @@ class BiotCoil(BiotBase):
     @frame_factory(Field)
     def field(self):
         """Return boundary field instance."""
-        return {"number": self.nfield}
+        return {
+            "number": self.nfield,
+            "frame_index": self.field_index,
+        }
 
     @frame_factory(Force)
     def force(self):
         """Return force field instance."""
-        return {"number": self.nforce, "attrs": self.force_attrs}
+        return {
+            "number": self.nforce,
+            "attrs": self.force_attrs,
+            "frame_index": self.force_index,
+        }
 
     @frame_factory(Inductance)
     def inductance(self):

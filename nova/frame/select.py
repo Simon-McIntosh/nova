@@ -71,7 +71,6 @@ class Select(metamethod.Select):
         """Extend additional with unique values extracted from match."""
         if not self.generate:
             return
-
         self.add_label("active", "active")
         self.add_label("passive", None, "active")
         self.add_label("plasma", "plasma")

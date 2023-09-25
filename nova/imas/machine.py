@@ -366,6 +366,8 @@ class FrameData(ABC):
         name = self.data["name"]
         if not isinstance(name, str):
             name = name[0]
+        if len(name.split()) == 1:
+            return name
         label = "".join(name.split()[:2]).rstrip(string.punctuation)
         digit = name.split()[-1].lstrip(string.ascii_letters + string.punctuation)
         return "".join([part for part in [label, digit] if part != ""])
@@ -833,6 +835,74 @@ class Wall(CoilDatabase):
 
 
 @dataclass
+class ELM(CoilDatabase):
+    """Construct axisymetric ELM coils.
+
+    Centerline data extracted from: Data_for_study_of_ITER_plasma_magnetic_33NHXN_v3.20
+
+    """
+
+    pulse: int = 0
+    run: int = 0
+    occurrence: int = 0
+    name: str = "elm"
+
+    def build(self):
+        """Build axisymmetric elm coil geometry."""
+        # lower ELM (feed / return)
+        lower_nturn = 30 / 40 * 6  # 30 degrees per sector
+        self.coil.insert(
+            {"r": [7.8320, -2.4100, 0.0689, 0.122]},
+            name="lELM",
+            nturn=lower_nturn,
+            active=False,
+            part="elm",
+        )
+        self.coil.insert(
+            {"r": [8.2280, -1.5450, 0.0689, 0.122]},
+            name="lELMr",
+            nturn=3 / 4 * 6,
+            active=False,
+            part="elm",
+        )
+        self.linkframe(["lELM", "lELMr"], factor=-1)
+        # mid ELM (feed / return)
+        mid_nturn = 20 / 40 * 6  # 20 degrees per sector
+        self.coil.insert(
+            {"r": [8.677, -0.5560, 0.0689, 0.122]},
+            name="mELM",
+            nturn=mid_nturn,
+            active=False,
+            part="elm",
+        )
+        self.coil.insert(
+            {"r": [8.6340, 1.7960, 0.0689, 0.122]},
+            name="mELMr",
+            nturn=mid_nturn,
+            active=False,
+            part="elm",
+        )
+        self.linkframe(["mELM", "mELMr"], factor=-1)
+        # upper ELM (feed / return)
+        upper_nturn = 28.9 / 40 * 6  # 28.5 degrees per sector
+        self.coil.insert(
+            {"r": [8.2600, 2.6250, 0.0689, 0.122]},
+            name="uELM",
+            nturn=upper_nturn,
+            active=False,
+            part="elm",
+        )
+        self.coil.insert(
+            {"r": [7.7330, 3.3780, 0.0689, 0.122]},
+            name="uELMr",
+            nturn=upper_nturn,
+            active=False,
+            part="elm",
+        )
+        self.linkframe(["uELM", "uELMr"], factor=-1)
+
+
+@dataclass
 class Geometry:
     """
     Manage IDS coil geometry attributes.
@@ -845,6 +915,7 @@ class Geometry:
         pf passive IDS.
     wall: Ids | bool | str, default = True
         wall IDS.
+    elm: bool, default = False
 
 
     Examples
@@ -893,11 +964,15 @@ class Geometry:
     pf_active: Ids | bool | str = True
     pf_passive: Ids | bool | str = True
     wall: Ids | bool | str = "iter_md"
+    elm: bool = False
     filename: str = ""
     ids: ImasIds | None = field(default=None, repr=False)
 
     geometry: ClassVar[dict] = dict(
-        pf_active=PoloidalFieldActive, pf_passive=PoloidalFieldPassive, wall=Wall
+        pf_active=PoloidalFieldActive,
+        pf_passive=PoloidalFieldPassive,
+        wall=Wall,
+        elm=ELM,
     )
 
     def __post_init__(self):
@@ -1090,6 +1165,7 @@ class Machine(CoilSet, Geometry, CoilData):
             if isinstance(geometry_attrs, dict):
                 coilset = geometry(**geometry_attrs, **self.frameset_attrs)
                 self += coilset
+
         if hasattr(super(), "build"):
             super().build()
         self.solve_biot()
@@ -1116,12 +1192,11 @@ if __name__ == "__main__":
         run,
         pf_active="iter_md",
         pf_passive=False,
+        elm=True,
         wall="iter_md",
         tplasma="hex",
         nwall=5,
     )
-
-    machine.plot()
 
     """
     from nova.imas.coils_non_axisymmetric import Coils_Non_Axisymmetyric

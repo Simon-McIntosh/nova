@@ -24,14 +24,14 @@ class SectorFile:
     Sector module data is downloaded from IDM and stored in IO shared folder at:
     \\\\io-ws-ccstore1\\ANSYS_Data\\mcintos\\sector_modules
 
-    data_dir : str
+    datadir : str
         Data directory. Set as mount point location to access IO shared folder
     """
 
     sector: int
     filename: str = ""
     version: str | int = "latest"
-    data_dir: str = "/mnt/share/sector_modules"
+    datadir: str = "/mnt/share/sector_modules"
 
     def __post_init__(self):
         """Locate source datafiles."""
@@ -65,7 +65,7 @@ class SectorFile:
         """Return filename list."""
         return [
             Path(path).with_suffix("").name
-            for path in glob(self.data_dir + f"/*Sector_Module_#{self.sector}*.xlsx")
+            for path in glob(self.datadir + f"/*Sector_Module_#{self.sector}*.xlsx")
         ]
 
     @cached_property
@@ -74,9 +74,9 @@ class SectorFile:
         versions = [self._get_version(filename) for filename in self.filenames]
         if len(versions) == 0:
             raise FileNotFoundError(
-                f"Unable to locate RE data files at {self.data_dir}. "
+                f"Unable to locate RE data files at {self.datadir}. "
                 "Check contents of data directory. "
-                "Confirm connection to the IO network if data_dir is a mounted share."
+                "Confirm connection to the IO network if datadir is a mounted share."
             )
         return versions
 
@@ -136,7 +136,7 @@ class SectorData(FilePath, SectorFile):
     @property
     def xls_file(self):
         """Return xls filename."""
-        return os.path.join(self.data_dir, f"{self.filename}.xlsx")
+        return os.path.join(self.datadir, f"{self.filename}.xlsx")
 
     def _initialize_data(self):
         """Initialize data as a bare nested dict with coil name entries."""

@@ -344,7 +344,7 @@ class PolyArc(Plot):
 class PolyLine(Plot):
     """Decimate polyline using a hybrid arc/line-segment rdp algorithum."""
 
-    points: np.ndarray = field(repr=False)
+    points: np.ndarray = field(repr=False, default_factory=lambda: np.array([]))
     boundary: np.ndarray = field(repr=False, default_factory=lambda: np.array([]))
     delta: float = 0
     arc_eps: float = 1e-3
@@ -377,11 +377,7 @@ class PolyLine(Plot):
 
     def __post_init__(self):
         """Decimate polyline."""
-        match self.delta:
-            case 0:
-                self.decimate()
-            case _:
-                self.interpolate()
+        self.build()
 
     def __getitem__(self, attr: str):
         """Return path geometry attribute."""
@@ -390,6 +386,14 @@ class PolyLine(Plot):
     def __len__(self):
         """Return segment number."""
         return len(self.segments)
+
+    def build(self):
+        """Decimate polyline."""
+        match self.delta:
+            case 0:
+                self.decimate()
+            case _:
+                self.interpolate()
 
     def fit_arc(self, points):
         """Return point index prior to first arc mis-match."""

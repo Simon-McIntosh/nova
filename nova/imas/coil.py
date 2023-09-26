@@ -9,12 +9,13 @@ def coil_name(coil):
     return coil.identifier
 
 
-def part_name(coil):
+def part_name(name):
     """Return coil part."""
-    name = coil_name(coil)
+    if not isinstance(name, str):
+        name = coil_name(name)
     if name[:2] in ["EU", "EE", "EL"]:
         return "elm"
-    if name[-2:] == "CC":
+    if name[-2:] == "CC" or name[:2] == "CC":
         return "cc"
     raise NotImplementedError(f"coil part not implemented for {name}")
 

@@ -6,7 +6,6 @@ repos:
       - id: poetry-export
         args: ["--extras", "ferritic", 
                "--extras", "graphics", 
-               "--extras", "numba", 
                "--extras", "optimize", 
                "--extras", "structural", 
                "--extras", "test", 

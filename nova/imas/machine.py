@@ -1185,7 +1185,7 @@ class Machine(CoilSet, Geometry, CoilData):
 
 
 if __name__ == "__main__":
-    pulse, run = 105028, "1"  # DINA
+    pulse, run = 105028, 1  # DINA
 
     machine = Machine(
         pulse,
@@ -1197,6 +1197,8 @@ if __name__ == "__main__":
         tplasma="hex",
         nwall=5,
     )
+
+    # machine.plasma.separatrix = {'e': [6.5, 0, 3, 4.5]}
 
     """
     from nova.imas.coils_non_axisymmetric import CoilsNonAxisymmetyric

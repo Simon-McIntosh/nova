@@ -51,6 +51,7 @@ class Control(FrameSet, ControlLoc):
             delim="_",
             version=[],
         )
+
         super().__post_init__()
 
     def load(self):

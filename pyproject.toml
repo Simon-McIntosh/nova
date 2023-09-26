@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nova"
-version = "2023.6.5"
+version = "2023.6.6"
 description = "Equilibrium generation and inference"
 authors = ["Simon McIntosh <simon.mcintosh@iter.org>"]
 license = "ITER GIP"
@@ -25,7 +25,7 @@ fsspec = ">=2023.5.0"
 gitpython = ">=3.1.31"
 netcdf4 = ">=1.6.3"
 networkx = ">=3.1"
-numpy = ">=1.25.0"
+numpy = ">=1.26.0"
 pandas = ">=2.0.1"
 scipy = ">=1.10.1"
 shapely = ">=2.0.1"
@@ -45,7 +45,6 @@ matplotlib = {version = ">=3.7.1", optional = true}
 meshio = {version = ">=5.3.4", optional = true}
 moviepy = {version = ">=1.0.3", optional = true}
 nlopt = {version = ">=2.7.1", optional = true}
-numba = {version = ">=0.57.0", optional = true}
 openpyxl = {version = ">=3.1.2", optional = true}
 pylops = {version = ">=2.1.0", optional = true}
 pyquaternion = {version = ">=0.9.9", optional = true}
@@ -117,9 +116,6 @@ graphics = [
   "matplotlib",
   "moviepy", 
   "seaborn",
-]
-numba = [
-  "numba"
 ]
 optimize = [
   "pylops",

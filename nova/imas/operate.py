@@ -250,9 +250,9 @@ if __name__ == "__main__":
         )
         return
 
-    plot_force("vs3")
-    plot_force("vs3", Ivs3=5e3)
-    plot_force("mid elm")
+    # plot_force("vs3")
+    # plot_force("vs3", Ivs3=5e3)
+    # plot_force("mid elm")
     plot_force("all elm")
     # operate.loc["plasma", "nturn"] = 0
 

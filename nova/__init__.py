@@ -38,10 +38,9 @@ __all__ = [
 
 __all__.extend(submodules)
 
-
 try:
     from numba import njit
-except ModuleNotFoundError:
+except (ModuleNotFoundError, ImportError):
     from functools import wraps
 
     def njit(**jit_kwargs):

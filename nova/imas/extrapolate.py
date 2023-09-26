@@ -176,7 +176,7 @@ class Extrapolate(Operate):
         plasma = self.aloc["plasma"]
         radius = self.aloc["x"][ionize]
         height = self.aloc["z"][ionize]
-        plasma_index = self.plasmagrid.data.plasma_index
+        plasma_index = self.plasmagrid.data.source_plasma_index
         matrix = self.plasmagrid["Psi"][ionize[plasma]]
         internal = -self.psi_rbs(radius, height)  # COCOS11
         target = internal - matrix[:, plasma_index] * float(self["ip"])

@@ -116,7 +116,7 @@ class IDS:
         return os.path.join(self.home, "imasdb", self.machine, str(self.dd_version))
 
     @property
-    def ids_path(self):
+    def ids_path(self) -> str:
         """Return path to database entry."""
         match self.backend:
             case str(backend) if backend == "hdf5":
@@ -125,6 +125,7 @@ class IDS:
                 raise NotImplementedError(
                     f"not implemented for {self.backend}" " backend"
                 )
+        return ""
 
     def get_ids(self):
         """Return empty ids."""
@@ -790,6 +791,7 @@ class IdsIndex:
                 return ()
             case _:
                 raise ValueError(f"unable to determine data length {path} {data}")
+        return ()
 
     def get(self, path: str):
         """Return attribute from ids path."""

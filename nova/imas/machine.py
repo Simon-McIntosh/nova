@@ -1185,7 +1185,7 @@ class Machine(CoilSet, Geometry, CoilData):
 
 
 if __name__ == "__main__":
-    pulse, run = 105028, 1  # DINA
+    pulse, run = 105028, "1"  # DINA
 
     machine = Machine(
         pulse,
@@ -1199,10 +1199,10 @@ if __name__ == "__main__":
     )
 
     """
-    from nova.imas.coils_non_axisymmetric import Coils_Non_Axisymmetyric
+    from nova.imas.coils_non_axisymmetric import CoilsNonAxisymmetyric
 
-    machine += Coils_Non_Axisymmetyric(111003, 1)  # CC
-    machine += Coils_Non_Axisymmetyric(115001, 1)  # ELM
+    machine += CoilsNonAxisymmetyric(111003, 1)  # CC
+    machine += CoilsNonAxisymmetyric(115001, 1)  # ELM
 
     machine.ferritic.insert("Fi")
     # machine += inserts

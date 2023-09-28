@@ -1202,9 +1202,11 @@ if __name__ == "__main__":
 
     """
     from nova.imas.coils_non_axisymmetric import CoilsNonAxisymmetyric
+    from nova.geometry.centerline import Centerline
 
     machine += CoilsNonAxisymmetyric(111003, 1)  # CC
     machine += CoilsNonAxisymmetyric(115001, 1)  # ELM
+    machine += Centerline(filename="CC1-4")  # CC turns
 
     machine.ferritic.insert("Fi")
     # machine += inserts

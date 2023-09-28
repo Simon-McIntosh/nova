@@ -153,7 +153,7 @@ class CoilsNonAxisymmetyric(Plot, CoilDatabase, Scenario):
 
 if __name__ == "__main__":
     coil3d = CoilsNonAxisymmetyric(111003, 1)  # CC
-    coil3d += CoilsNonAxisymmetyric(115001, 1)  # ELM
+    # coil3d += CoilsNonAxisymmetyric(115001, 1)  # ELM
 
     coil3d.frame.vtkplot()
     coil3d._clear()

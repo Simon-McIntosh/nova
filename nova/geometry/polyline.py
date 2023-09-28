@@ -10,6 +10,7 @@ import pandas
 import scipy
 from vedo import Mesh
 
+from nova.geometry.frenet import Frenet
 from nova.geometry import line
 from nova.geometry.polygeom import Polygon
 from nova.geometry.rdp import rdp
@@ -527,6 +528,11 @@ class PolyLine(Plot):
             segment.plot3d()
         self.axes.set_aspect("equal")
 
+    @property
+    def frenet(self):
+        """Return frenet instance."""
+        return Frenet(self.points)
+
     def vtkplot(self):
         """Plot vtk centerline."""
         Mesh(*[segment.mesh for segment in self.segments]).show()
@@ -540,7 +546,7 @@ if __name__ == "__main__":
     curve = fiducial.data.centerline.data
     curve += 500 * fiducial.data.centerline_delta[3].data
     polyline = PolyLine(curve)
-    polyline.plot()
+    # polyline.plot()
 
     # arc = Arc(line.curve[:20])
     # arc.plot_fit()

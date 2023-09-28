@@ -24,8 +24,16 @@ class Centerline(Plot, CoilDatabase):
     """
 
     filename: str = ""
+    polygon: Polygon | dict[str, list] = field(
+        default_factory=lambda: {"o": [0, 0, 0.1, 0.1, 3]}
+    )
     datadir: str = "/mnt/share/coil_centerlines"
-    polygon: Polygon = field(default_factory=lambda: Polygon({"o": [0, 0, 0.1]}))
+
+    def __post_init__(self):
+        """Format polygon."""
+        if isinstance(self.polygon, dict):
+            self.polygon = Polygon(self.polygon)
+        super().__post_init__()
 
     @property
     def xls_file(self):
@@ -34,24 +42,27 @@ class Centerline(Plot, CoilDatabase):
 
     def build(self):
         """Load points from file and build coil centerline."""
-        self.data = 1e-3 * xarray.Dataset()
+        self.data = xarray.Dataset()
         self.data.coords["point"] = list("xyz")
         with pandas.ExcelFile(self.xls_file, engine="openpyxl") as xls:
-            points = self._read_sheet(xls).to_numpy()
+            points = 1e-3 * self._read_sheet(xls).to_numpy()
             self.data["points"] = ("index", "point"), points
         self.polyline = PolyLine(points)
         self.winding.insert(
-            self.polygon, points, name=self.filename, part=part_name(self.filename)
+            self.polygon,
+            points,
+            name=self.filename,
+            part=part_name(self.filename),
         )
 
     def _read_sheet(self, xls, sheet_name=0):
         """Read excel worksheet."""
-        sheet = pandas.read_excel(xls, sheet_name, usecols=[2, 3, 4])
+        sheet = pandas.read_excel(xls, sheet_name, usecols=[2, 3, 4], nrows=300)
         columns = {"X Coord": "x", "Y Coord": "y", "Z Coord": "z"}
         sheet.rename(columns=columns, inplace=True)
         return sheet
 
 
 if __name__ == "__main__":
-    centerline = Centerline(filename="CC1-4")
+    centerline = Centerline(filename="CC1-4", polygon={"s": [0, 0, 0.0148]})
     # centerline.build()

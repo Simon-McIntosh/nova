@@ -15,6 +15,7 @@ import trimesh
 import vedo
 import vtk
 
+from nova.geometry.frenet import Frenet
 from nova.geometry.polygon import Polygon
 from nova.geometry.rotate import to_vector, to_axes
 from nova.geometry.vtkgen import VtkFrame
@@ -337,14 +338,16 @@ class Section:
         self.origin = self.origin + delta
         self.points = self.points + delta
 
-    def sweep(self, path):
+    def sweep(self, path: np.ndarray, binormal: np.ndarray):
         """Sweep section along path."""
-        if not isinstance(path, pyvista.PolyData):
-            path = Path.from_points(path)
-        for i in range(path.n_points):
-            self.to_point(path.points[i])
-            axes = np.c_[path["cross"][i], path["tangent"][i], path["normal"][i]]
+        frenet = Frenet(path, binormal)
+        for i in range(len(path)):
+            self.to_point(frenet.points[i])
+            """
+            axes = np.c_[frenet.binormal[i], frenet.tangent[i], frenet.normal[i]]
             self.to_axes(axes)
+            """
+            self.to_vector(frenet.tangent[i], 1)
             self._append()
         return self
 
@@ -399,23 +402,16 @@ class Sweep(Cell):
         self,
         boundary: np.ndarray,
         path: np.ndarray,
-        cross: np.ndarray = np.array([0, 1, 0]),
+        binormal: np.ndarray = np.array([0, 0, 1]),
         delta: int = 0,
-        cap: bool = False,
         origin: np.ndarray = np.zeros(3, float),
         triad: np.ndarray = np.identity(3, float),
     ):
-        path = Path.from_points(path)
-        if len(path.points) == 2:  # and normal and cross vectors for line segment
-            normal = np.cross(cross, path["tangent"][0])
-            path["cross"][0] = path["cross"][1] = cross
-            path["normal"][0] = path["normal"][1] = normal
-
-        section = Section(boundary, origin, triad).sweep(path)
-        if np.isclose(path.points[0], path.points[-1]).all():
+        section = Section(boundary, origin, triad).sweep(path, binormal)
+        if np.isclose(path[0], path[-1]).all():
             link = np.mean([section.point_array[0], section.point_array[-1]], axis=0)
             section.point_array[0] = section.point_array[-1] = link
-        super().__init__(section.point_array, cap=self.cap)
+        super().__init__(section.point_array)
 
     def __str__(self):
         """Return volume name."""

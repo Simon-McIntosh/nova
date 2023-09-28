@@ -96,12 +96,12 @@ class Winding(CoilSetAttrs):
             index = self.frame.insert(*frame_data, iloc=iloc, **self.attrs)
 
         with self.insert_required([]):
-            polyline = PolyLine(path, boundary=poly.points, delta=self.delta)
+            self.polyline = PolyLine(path, boundary=poly.points, delta=self.delta)
             subattrs = (
                 self.attrs
                 | {"label": index[0], "frame": index[0], "delim": "_", "link": True}
-                | polyline.path_geometry
-                | polyline.volume_geometry
+                | self.polyline.path_geometry
+                | self.polyline.volume_geometry
             )
             self.subframe.insert(**subattrs)
         self.update_loc_indexer()

@@ -1206,7 +1206,7 @@ if __name__ == "__main__":
 
     machine += CoilsNonAxisymmetyric(111003, 1)  # CC
     machine += CoilsNonAxisymmetyric(115001, 1)  # ELM
-    machine += Centerline(filename="CC1-4")  # CC turns
+    machine += Centerline(filename="CC1-4", polygon={"s": [0, 0, 0.0148]})  # CC1-4 
 
     machine.ferritic.insert("Fi")
     # machine += inserts

@@ -83,7 +83,7 @@ class Winding(CoilSetAttrs):
         """
         if not isinstance(poly, Polygon):
             poly = Polygon(poly, name="sweep")
-        vtk = Sweep(poly.points, path)
+        vtk = Sweep(poly.points, path, align="vector")
         frame_data = self.vtk_data(vtk)
         self.attrs = additional | dict(
             section=poly.section,

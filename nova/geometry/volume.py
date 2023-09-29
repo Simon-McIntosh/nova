@@ -338,16 +338,25 @@ class Section:
         self.origin = self.origin + delta
         self.points = self.points + delta
 
-    def sweep(self, path: np.ndarray, binormal: np.ndarray):
+    def sweep(self, path: np.ndarray, binormal: np.ndarray, align: str):
         """Sweep section along path."""
         frenet = Frenet(path, binormal)
         for i in range(len(path)):
             self.to_point(frenet.points[i])
-            """
-            axes = np.c_[frenet.binormal[i], frenet.tangent[i], frenet.normal[i]]
-            self.to_axes(axes)
-            """
-            self.to_vector(frenet.tangent[i], 1)
+            match align:
+                case "axes":
+                    axes = np.c_[
+                        frenet.binormal[i], frenet.tangent[i], frenet.normal[i]
+                    ]
+                    self.to_axes(axes)
+                case "vector":
+                    sign = np.sign(np.array([0, 0, 1]) @ self.triad[0])
+                    if np.isclose(sign, 0):
+                        sign = 1
+                    self.to_vector(np.array([0, 0, sign * 1]), 0)
+                    self.to_vector(frenet.tangent[i], 1)
+                case _:
+                    raise ValueError(f"align {align} not in [vector or axes]")
             self._append()
         return self
 
@@ -403,11 +412,11 @@ class Sweep(Cell):
         boundary: np.ndarray,
         path: np.ndarray,
         binormal: np.ndarray = np.array([0, 0, 1]),
-        delta: int = 0,
+        align: str = "vector",
         origin: np.ndarray = np.zeros(3, float),
         triad: np.ndarray = np.identity(3, float),
     ):
-        section = Section(boundary, origin, triad).sweep(path, binormal)
+        section = Section(boundary, origin, triad).sweep(path, binormal, align)
         if np.isclose(path[0], path[-1]).all():
             link = np.mean([section.point_array[0], section.point_array[-1]], axis=0)
             section.point_array[0] = section.point_array[-1] = link

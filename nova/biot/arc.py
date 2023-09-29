@@ -35,7 +35,6 @@ class Arc(ArcConstants, Matrix):
     def __post_init__(self):
         """Load intergration constants."""
         super().__post_init__()
-        print("init")
 
         # use context manager to manage source and target attributes -> unwind on yield
         # define local attributes in local coordinate system

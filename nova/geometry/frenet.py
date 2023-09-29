@@ -14,7 +14,7 @@ class Frenet(Plot):
     """Compute Frenet-Serret coordinates for a 3D curve."""
 
     points: np.ndarray = field(repr=False)
-    binormal: np.ndarray | None = field(
+    binormal: np.ndarray = field(
         repr=False, default_factory=lambda: np.array([0, 1, 0])
     )
     normal: np.ndarray = field(init=False, repr=False)
@@ -62,19 +62,39 @@ class Frenet(Plot):
         """Return parametric length vector."""
         return np.r_[0, np.cumsum(self.segment_length) / self.length]
 
+    def _difference(self, vector):
+        """Return vector finite difference."""
+        return (vector[1:] - vector[:-1]) / self.segment_length[:, np.newaxis]
+
+    def _forward(self, difference):
+        """Return forward difference."""
+        return np.r_[difference, difference[-1:]]
+
+    def _backward(self, difference):
+        """Return backard difference."""
+        return np.r_[difference[:1], difference]
+
     def gradient(self, vector):
-        """Return gradient of vector."""
-        diff = (vector[1:] - vector[:-1]) / self.segment_length[:, np.newaxis]
-        return np.r_[diff[:1], diff]
+        """Return central difference gradient of vector."""
+        difference = self._difference(vector)
+        forward = self._forward(difference)
+        backward = self._backward(difference)
+        central = (forward + backward) / 2
+        central[0] = forward[0]
+        central[-1] = backward[-1]
+        return central
 
     def _from_gradient(self):
         """Build parametric Frenet coordinate system from segment gradients."""
         self.tangent = self.gradient(self.points)
+        self.tangent /= np.linalg.norm(self.tangent, axis=1)[:, np.newaxis]
         self.normal = self.gradient(self.tangent)
         self.curvature = np.linalg.norm(self.normal, axis=1)
         index = np.isclose(self.curvature, 0, atol=1e-5)
         self.normal[~index] /= self.curvature[~index, np.newaxis]
-        if index.any():
+        if index.all():  # straight line
+            self._from_binormal()
+        elif index.any():
             for i in range(3):
                 self.normal[index, i] = np.interp(
                     self.parametric_length[index],
@@ -88,55 +108,24 @@ class Frenet(Plot):
         )[:, np.newaxis] * self.tangent
         self.normal /= np.linalg.norm(self.normal, axis=1)[:, np.newaxis]
         self.binormal = np.cross(self.tangent, self.normal)
-        self.torsion = np.linalg.norm(self.gradient(self.binormal))
 
-        # self.normal /= self["curvature"][:, np.newaxis]
-        # self.binormal = np.cross(self.tangent, self.normal)
-        """
-        tck, parametric_length = splprep(self.points.T, k=2, s=0)
-        self.tangent = np.array(splev(parametric_length, tck, 1)).T / self.length
-        # self.tangent /= np.linalg.norm(self.tangent, axis=1)[:, np.newaxis]
-        self.normal = np.array(splev(parametric_length, tck, 2)).T / self.length**2
-        self["curvature"] = np.linalg.norm(self.normal, axis=1)
-        # self.normal /= self["curvature"][:, np.newaxis]
-        self.binormal = np.cross(self.tangent, self.normal)
-        b_tck = splprep(self.binormal.T, u=parametric_length, k=self.degree, s=0)[0]
-        self["torsion"] = np.linalg.norm(
-            np.array(splev(parametric_length, b_tck, 1)).T / self.length, axis=1
+        binorm_dot = self.gradient(self.binormal)
+        self.torsion = -np.linalg.norm(binorm_dot, axis=1) * np.sign(
+            np.einsum("ij,ij->i", binorm_dot, self.normal)
         )
-        index = np.isclose(
-            np.einsum("ij,ij->i", self.tangent[:-1], self.tangent[1:]),
-            0,
-            atol=1e-3,
-        )
-        print(np.einsum("ij,ij->i", self.tangent[:-1], self.tangent[1:]))
-        if index.any():
-            for i in range(3):
-                self.normal[index, i] = np.interp(
-                    parametric_length[index],
-                    parametric_length[~index],
-                    self.normal[~index, i],
-                    period=1,
-                )
-            self.normal[index] -= (
-                np.einsum("ij,ij->i", self.normal[index], self.tangent[index])
-                / np.einsum("ij,ij->i", self.tangent[index], self.tangent[index])
-            )[:, np.newaxis] * self.tangent[index]
-            self.binormal[index] = np.cross(
-                self.tangent[index], self.normal[index]
-            )
-            import matplotlib.pylab as plt
-
-            plt.plot(parametric_length, self["curvature"])
-            plt.plot(parametric_length[index], self["curvature"][index])
-        """
 
     def _from_binormal(self):
         """Build parametric coordinate system from two point path."""
-        self.tangent = (
-            np.ones((2, 1)) * (self.points[1] - self.points[0])[np.newaxis, :]
-        )
-        self.binormal = np.ones((2, 1)) * self.binormal[np.newaxis, :]
+        tangent = self.points[-1] - self.points[0]
+        tangent /= np.linalg.norm(tangent)
+        assert np.shape(self.binormal) == (3,)
+        binormal = self.binormal / np.linalg.norm(self.binormal)
+        if np.isclose(abs(tangent @ binormal), 1):
+            raise ValueError(
+                f"straight line tangent {tangent} alligned with binormal {binormal}"
+            )
+        self.tangent = np.ones((len(self), 1)) * tangent[np.newaxis, :]
+        self.binormal = np.ones((len(self), 1)) * self.binormal[np.newaxis, :]
         self.normal = np.cross(self.binormal, self.tangent)
 
     def _normalize(self):

@@ -63,7 +63,7 @@ class PolyGen(PolyShape):
         return np.min([width, height])
 
     @staticmethod
-    def disc(x_center, z_center, width, height=None, quad_segs=4):
+    def disc(x_center, z_center, width, height=None, quad_segs=16):
         """
         Return shapely.cirle.
 

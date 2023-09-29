@@ -86,14 +86,14 @@ def test_to_axes_to_axes():
 
 
 def test_sweep():
-    n_points, radius = 30, 5
+    n_points, radius = 60, 5
     width, depth = 0.6, 0.9
     points = np.zeros((n_points, 3))
     theta = np.linspace(0, 2 * np.pi, n_points)
     points[:, 0] = radius * np.cos(theta)
     points[:, 2] = radius * np.sin(theta)
     boundary = Polygon({"r": [0, 0, width, depth]}).points
-    coil = Sweep(boundary, points)
+    coil = Sweep(boundary, points, align="axes")
     coil.triangulate()
     volume = 2 * np.pi * radius * width * depth
     assert np.isclose(coil.volume(), volume, rtol=1e-2)

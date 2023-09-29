@@ -33,19 +33,19 @@ class Line:
         return vector / norm
 
     def compute_tangent(self):
-        """Compute centerline tangent as central diffrence."""
+        """Compute centerline tangent as central difference."""
         points = self.mesh.points
-        # forward diffrence
+        # forward difference
         forward = np.zeros(points.shape)
         forward[:-1] = points[1:] - points[:-1]
         forward[-1] = forward[0]
         forward = self.normalize(forward)
-        # backward diffrence
+        # backward difference
         backward = np.zeros(points.shape)
         backward[1:] = points[1:] - points[:-1]
         backward[0] = backward[-1]
         backward = self.normalize(backward)
-        # central diffrence
+        # central difference
         self.mesh["tangent"] = (forward + backward) / 2
         self.mesh["tangent"][0] = forward[0]
         self.mesh["tangent"][-1] = backward[-1]

@@ -42,7 +42,7 @@ def test_binormal_error():
     points[:, 1] = np.linspace(0, 3, 10)
     binormal = np.array([0, 1, 0])
     with pytest.raises(ValueError):
-        frenet = Frenet(points, binormal)
+        Frenet(points, binormal)
 
 
 def test_torsion():

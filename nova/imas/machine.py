@@ -1198,8 +1198,6 @@ if __name__ == "__main__":
         nwall=5,
     )
 
-    # machine.plasma.separatrix = {'e': [6.5, 0, 3, 4.5]}
-
     """
     from nova.imas.coils_non_axisymmetric import CoilsNonAxisymmetyric
     from nova.geometry.centerline import Centerline

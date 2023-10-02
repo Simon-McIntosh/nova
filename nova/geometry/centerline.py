@@ -63,16 +63,16 @@ class Centerline(Plot, CoilDatabase):
             name=self.filename,
             part=part_name(self.filename),
         )
-        self.store()
+        # self.store()
 
     def _read_sheet(self, xls, sheet_name=0):
         """Read excel worksheet."""
-        sheet = pandas.read_excel(xls, sheet_name, usecols=[2, 3, 4])
+        sheet = pandas.read_excel(xls, sheet_name, usecols=[2, 3, 4], nrows=300)
         columns = {"X Coord": "x", "Y Coord": "y", "Z Coord": "z"}
         sheet.rename(columns=columns, inplace=True)
         return sheet
 
 
 if __name__ == "__main__":
-    centerline = Centerline(filename="CC1-4", polygon={"s": [0, 0, 0.0148]})
+    centerline = Centerline(filename="CC1-4", polygon={"r": [0, 0, 0.148, 0.3]})
     # centerline.build()

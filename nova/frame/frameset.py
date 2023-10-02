@@ -40,7 +40,22 @@ class FrameSet(netCDF, FrameSetLoc):
     """Manage FrameSet instances."""
 
     base: list[str] = field(
-        repr=False, default_factory=lambda: ["x", "y", "z", "dx", "dy", "dz"]
+        repr=False,
+        default_factory=lambda: [
+            "x",
+            "y",
+            "z",
+            "r",
+            "ax",
+            "ay",
+            "az",
+            "nx",
+            "ny",
+            "nz",
+            "dx",
+            "dy",
+            "dz",
+        ],
     )
     required: list[str] = field(repr=False, default_factory=lambda: [])
     additional: list[str] = field(

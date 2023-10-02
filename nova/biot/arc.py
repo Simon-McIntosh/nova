@@ -50,6 +50,10 @@ class Arc(ArcConstants, Matrix):
         #    [0, 0, 1], coilset.subframe.loc[:, ['dx', 'dy', 'dz']]
         # )
 
+        # phi =
+
+        print(self.source("x").shape)
+
         self.rs = np.stack(
             [
                 self.source("x") + delta / 2 * self.source("dx")

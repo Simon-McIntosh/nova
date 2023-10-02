@@ -32,7 +32,7 @@ class Element(abc.ABC):
     name: ClassVar[str] = "base"
     keys: ClassVar[dict[str, list[str]]] = {
         "center": ["x", "y", "z"],
-        "axis": ["dx", "dy", "dz"],
+        "axis": ["ax", "ay", "az"],
         "normal": ["nx", "ny", "nz"],
         "start_point": ["x1", "y1", "z1"],
         "end_point": ["x2", "y2", "z2"],
@@ -177,7 +177,7 @@ class Arc(Plot, Element):
             self.arc_axes[2] = axis
         self.arc_axes[1] = np.cross(self.arc_axes[0], self.arc_axes[2])
         self.arc_axes /= np.linalg.norm(self.arc_axes, axis=1)[:, np.newaxis]
-        self.axis = self.normal = self.arc_axes[2]
+        self.axis = self.arc_axes[2]
 
     @staticmethod
     def fit_2d(points):
@@ -193,7 +193,6 @@ class Arc(Plot, Element):
         center = origin
         center[1] -= coef[0]
         radius = np.sqrt(chord**2 / 4 + coef[0] ** 2)
-
         points[:, 1] -= coef[0]
         assert np.allclose(radius, np.linalg.norm(points[0]))
         assert np.allclose(radius, np.linalg.norm(points[-1]))
@@ -224,6 +223,8 @@ class Arc(Plot, Element):
             @ self.arc_axes[2]
             * self.arc_axes[2]
         )
+        self.normal = self.points[0] - self.center
+        self.normal /= np.linalg.norm(self.normal)
         center_points = self.points_2d - center
         self.theta = np.unwrap(np.arctan2(center_points[:, 1], center_points[:, 0]))
         self.error = np.linalg.norm(self.points - self.points_fit, axis=1).std()
@@ -358,9 +359,12 @@ class PolyLine(Plot):
         "x",
         "y",
         "z",
-        "dx",
-        "dy",
-        "dz",
+        "ax",
+        "ay",
+        "az",
+        "nx",
+        "ny",
+        "nz",
         "x1",
         "y1",
         "z1",

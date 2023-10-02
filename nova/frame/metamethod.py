@@ -206,6 +206,15 @@ class CrossSection(MetaMethod):
 
 
 @dataclass
+class Reduce(MetaMethod):
+    """Calculate reduction indices for reduceat."""
+
+    name: str = field(init=False, default="biotreduce")
+
+    _subclass: ClassVar[str] = ".biot.reduce.Reduce"
+
+
+@dataclass
 class Shape(MetaMethod):
     """Shape methods for Biot Frame."""
 
@@ -215,9 +224,12 @@ class Shape(MetaMethod):
 
 
 @dataclass
-class Reduce(MetaMethod):
-    """Calculate reduction indices for reduceat."""
+class Space(MetaMethod):
+    """Coordinate coordinate transform methods."""
 
-    name: str = field(init=False, default="biotreduce")
+    name: str = field(init=False, default="space")
+    required: list[str] = field(
+        default_factory=lambda: ["ax", "ay", "az", "nx", "ny", "nz"]
+    )
 
-    _subclass: ClassVar[str] = ".biot.reduce.Reduce"
+    _subclass: ClassVar[str] = ".biot.space.Space"

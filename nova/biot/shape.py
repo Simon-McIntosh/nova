@@ -30,3 +30,6 @@ class Shape(metamethod.Shape):
         """Set source number, define frame as source."""
         self.target = number
         self.region = "source"
+
+    def set_transform(self, transform):
+        """Set coordinate transform matrix."""

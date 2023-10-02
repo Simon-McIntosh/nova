@@ -6,22 +6,42 @@ from nova.biot.arc import Arc
 from nova.frame.coilset import CoilSet
 
 
-@pytest.mark.skip("pending refactor of BiotFrame methods for 3D elements")
-def test_transform():
-    coilset = CoilSet(dwinding=0, field_attrs=["Bx"])
+@pytest.fixture
+def arc():
+    coilset = CoilSet()
     coilset.winding.insert(
         {"c": (0, 0, 0.5)}, np.array([[5, 0, 3.2], [0, 5, 3.2], [-5, 0, 3.2]])
     )
     coilset.winding.insert(
         {"c": (0, 0, 0.5)}, np.array([[5, 0, 3.2], [0, 0, -1.8], [-5, 0, 3.2]])
     )
-    arc = Arc(coilset.subframe)
-    assert np.allclose(arc.start_point, arc._to_global(arc._to_local(arc.start_point)))
-    assert np.isclose(
-        arc._to_local(arc.start_point)[0, 2], arc._to_local(arc.end_point)[0, 2]
+    return Arc(coilset.subframe)
+
+
+def test_transform_shape(arc):
+    assert np.shape(arc.source.space.transform) == (2, 3, 3)
+
+
+def test_end_points(arc):
+    assert np.allclose(arc.source.start_point, [5, 0, 3.2])
+    assert np.allclose(arc.source.end_point, [-5, 0, 3.2])
+
+
+def test_transform_roundtrip(arc):
+    assert np.allclose(
+        arc.source.start_point, arc._to_global(arc._to_local(arc.source.start_point))
     )
-    assert np.shape(arc.transform) == (2, 3, 3)
-    assert np.allclose(arc._to_local(arc.axis)[1], [0, 0, 1])
+
+
+def test_transform_local_plane(arc):
+    assert np.isclose(
+        arc._to_local(arc.source.start_point)[0, 2],
+        arc._to_local(arc.source.end_point)[0, 2],
+    )
+
+
+def test_transform_local_axis(arc):
+    assert np.allclose(arc._to_local(arc.source.axis)[1], [0, 0, 1])
 
 
 if __name__ == "__main__":

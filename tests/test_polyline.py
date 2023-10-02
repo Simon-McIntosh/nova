@@ -263,7 +263,7 @@ def test_line_geometry():
     line = Line(points)
     geom = line.geometry
     assert np.allclose(line.center, [geom[attr] for attr in ["x", "y", "z"]])
-    assert np.allclose(line.axis, [geom[attr] for attr in ["dx", "dy", "dz"]])
+    assert np.allclose(line.axis, [geom[attr] for attr in ["ax", "ay", "az"]])
     assert np.allclose(line.start_point, [geom[attr] for attr in ["x1", "y1", "z1"]])
     assert np.allclose(line.end_point, [geom[attr] for attr in ["x2", "y2", "z2"]])
 
@@ -357,6 +357,7 @@ def test_straight_line_normal():
     ]
     reference = np.zeros((3, 3))
     reference[:, 1] = 1
+    reference[1] = [0, 0, -1]
     assert len(polyline) == 3
     assert np.allclose(np.linalg.norm(normal, axis=1), np.ones(3))
     assert np.allclose(normal, reference)

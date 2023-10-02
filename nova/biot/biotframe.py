@@ -2,7 +2,7 @@
 import numpy as np
 
 from nova.frame.framespace import FrameSpace
-from nova.frame.metamethod import CrossSection, Shape, Reduce, PolyGeo
+from nova.frame.metamethod import CrossSection, Shape, Space, Reduce, PolyGeo
 
 
 # pylint: disable=too-many-ancestors
@@ -15,7 +15,7 @@ class BiotFrame(FrameSpace):
 
     def __init__(self, data=None, index=None, columns=None, attrs=None, **metadata):
         super().__init__(data, index, columns, attrs, **metadata)
-        self.frame_attrs(PolyGeo, Shape, CrossSection, Reduce)
+        self.frame_attrs(PolyGeo, Shape, Space, CrossSection, Reduce)
         for attr in self._metadata:
             setattr(self, attr, None)
 
@@ -25,7 +25,23 @@ class BiotFrame(FrameSpace):
             {
                 "required": ["x", "z"],
                 "additional": ["plasma", "nturn", "link", "segment", "frame"],
-                "array": ["x", "y", "z", "dx", "dy", "dz", "nturn", "plasma"],
+                "array": [
+                    "x",
+                    "y",
+                    "z",
+                    "r",
+                    "ax",
+                    "ay",
+                    "az",
+                    "nx",
+                    "ny",
+                    "nz",
+                    "dx",
+                    "dy",
+                    "dz",
+                    "nturn",
+                    "plasma",
+                ],
             }
         )
         super().update_metaframe(metadata)
@@ -65,16 +81,6 @@ class BiotFrame(FrameSpace):
     def delta_z(self):
         """Return normalized z-coordinate distance from PF coil centroid."""
         return (self.z - self.zo.values) / self.dz
-
-    @staticmethod
-    def _to_local(self, points: np.ndarray, transform: np.ndarray):
-        """Return point array mapped to local coordinate system."""
-        return np.einsum("ij,ijk->ik", points, transform)
-
-    @staticmethod
-    def _to_global(self, points: np.ndarray):
-        """Return point array mapped to global coordinate system."""
-        return np.einsum("ij,ikj->ik", points, self.transform)
 
 
 class Source(BiotFrame):
@@ -121,18 +127,28 @@ class Source(BiotFrame):
 
     @property
     def center(self):
-        """Return arc center."""
-        return np.c_[self.loc["x"], self.loc["y"], self.loc["z"]]
+        """Return element center."""
+        return np.c_[self.aloc["x"], self.aloc["y"], self.aloc["z"]]
 
     @property
     def start_point(self):
-        """Return arc start point."""
-        return np.c_[self.loc["x1"], self.loc["y1"], self.loc["z1"]]
+        """Return element start point."""
+        return np.c_[self.aloc["x1"], self.aloc["y1"], self.aloc["z1"]]
 
     @property
     def end_point(self):
-        """Return arc end point."""
-        return np.c_[self.loc["x2"], self.loc["y2"], self.loc["z2"]]
+        """Return element end point."""
+        return np.c_[self.aloc["x2"], self.aloc["y2"], self.aloc["z2"]]
+
+    @property
+    def axis(self):
+        """Return element axis."""
+        return np.c_[self.aloc["ax"], self.aloc["ay"], self.aloc["az"]]
+
+    @property
+    def normal(self):
+        """Return element normal."""
+        return np.c_[self.aloc["nx"], self.aloc["ny"], self.aloc["nz"]]
 
 
 class Target(BiotFrame):

@@ -1,5 +1,4 @@
 """Manage source and target frames."""
-from functools import cached_property
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -80,25 +79,13 @@ class GroupSet(Plot):
         #               in itertools.product(self.source.index,
         #                                    self.target.index)]
 
-    @cached_property
-    def axis(self):
-        """Return source element axis."""
-        return np.c_[self.source["ax"], self.source["ay"], self.source["az"]]
+    def _to_local(self, points: np.ndarray):
+        """Return point array (n, 3) mapped to local coordinate system."""
+        return np.einsum("ij,ijk->ik", points, self.source.space.transform)
 
-    @cached_property
-    def normal(self):
-        """Return source element normal."""
-        return np.c_[self.source["nx"], self.source["ny"], self.source["nz"]]
-
-    @cached_property
-    def transform(self):
-        """Return global to local coordinate mapping transfrom."""
-        transform = np.zeros((len(self.source), 3, 3))
-        transform[..., 0] = self.normal
-        transform[..., 1] = np.cross(self.axis, self.normal)
-        transform[..., 2] = self.axis
-        transform /= np.linalg.norm(transform, axis=1)[:, np.newaxis]
-        return transform
+    def _to_global(self, points: np.ndarray):
+        """Return point array (n, 3) mapped to global coordinate system."""
+        return np.einsum("ij,ikj->ik", points, self.source.space.transform)
 
     def plot(self, axes=None):
         """Plot source and target markers."""
@@ -117,5 +104,6 @@ if __name__ == "__main__":
     source = Source(
         {"x": [3, 3.4, 3.6], "z": [3.1, 3, 3.3], "dl": 0.3, "dt": 0.3, "section": "hex"}
     )
-    groupset = GroupSet(source, source)
+    target = Target(source)
+    groupset = GroupSet(source, target)
     groupset.plot()

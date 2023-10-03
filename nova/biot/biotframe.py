@@ -24,6 +24,7 @@ class BiotFrame(FrameSpace):
         self.metaframe.update(
             {
                 "required": ["x", "z"],
+                "base": ["x", "y", "z"],
                 "additional": ["plasma", "nturn", "link", "frame"],
                 "array": [
                     "x",

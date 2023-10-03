@@ -86,15 +86,6 @@ class GroupSet(Plot):
         self.transform = np.tile(
             self.source.space.transform, reps=(self.shape[0], 1, 1, 1)
         )
-        print(self.transform.shape)
-
-    def _to_local(self, points: np.ndarray):
-        """Return point array (n, 3) mapped to local coordinate system."""
-        return np.einsum("ij,ijk->ik", points, self.source.space.transform)
-
-    def _to_global(self, points: np.ndarray):
-        """Return point array (n, 3) mapped to global coordinate system."""
-        return np.einsum("ij,ikj->ik", points, self.source.space.transform)
 
     def plot(self, axes=None):
         """Plot source and target markers."""

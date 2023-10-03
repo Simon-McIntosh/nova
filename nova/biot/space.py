@@ -37,3 +37,11 @@ class Space(metamethod.Space):
         return np.c_[
             self.frame.aloc["nx"], self.frame.aloc["ny"], self.frame.aloc["nz"]
         ]
+
+    def to_local(self, points: np.ndarray):
+        """Return point array (n, 3) mapped to local coordinate system."""
+        return np.einsum("ij,ijk->ik", points, self.transform)
+
+    def to_global(self, points: np.ndarray):
+        """Return point array (n, 3) mapped to global coordinate system."""
+        return np.einsum("ij,ikj->ik", points, self.transform)

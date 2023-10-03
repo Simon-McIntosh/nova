@@ -24,7 +24,7 @@ class BiotFrame(FrameSpace):
         self.metaframe.update(
             {
                 "required": ["x", "z"],
-                "additional": ["plasma", "nturn", "link", "segment", "frame"],
+                "additional": ["plasma", "nturn", "link", "frame"],
                 "array": [
                     "x",
                     "y",
@@ -64,6 +64,10 @@ class BiotFrame(FrameSpace):
             matrix = np.transpose(matrix)
         return matrix
 
+    def stack(self, *args):
+        """Return stacked attribute array combining instance calls along last axis."""
+        return np.stack([self(attr) for attr in args], axis=-1)
+
     def set_target(self, number):
         """Set target number."""
         return self.biotshape.set_target(number)
@@ -91,6 +95,7 @@ class Source(BiotFrame):
         self.metaframe.update(
             {
                 "available": [
+                    "segment",
                     "section",
                     "poly",
                     "x1",
@@ -158,8 +163,9 @@ class Target(BiotFrame):
         """Extend metaframe update."""
         self.metaframe.update(
             {
-                "additional": ["xo", "zo"],
-                "array": ["x"],
+                "additional": ["xo", "zo", "dx", "dz"],
+                "array": ["x", "y", "z"],
+                "available": [],
             }
         )
         super().update_metaframe(metadata)

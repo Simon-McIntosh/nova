@@ -67,7 +67,8 @@ class DataArray(ArrayIndexer, DataFrame):
     def __repr__(self):
         """Propagate array variables prior to display."""
         self.update_frame()
-        return super().__repr__()
+        with self.setlock(True, "array"):
+            return super().__repr__()
 
     def unlink_array(self):
         """Unlink items in fast access dataarray cache."""

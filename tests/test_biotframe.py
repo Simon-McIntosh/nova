@@ -94,5 +94,11 @@ def test_biotreduce_indices_link():
     assert source.biotreduce.link == {3: [1, 1.0]}
 
 
+def test_stack():
+    biotframe = BiotFrame({"x": range(5), "z": range(5)})
+    biotframe.biotshape.set_target(3)
+    assert biotframe.stack("x", "z").shape == (3, 5, 2)
+
+
 if __name__ == "__main__":
     pytest.main([__file__])

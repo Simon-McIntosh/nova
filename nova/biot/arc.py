@@ -54,6 +54,13 @@ class Arc(ArcConstants, Matrix):
 
         print(self.source("x").shape)
 
+        coords = np.stack(
+            [self.source("x"), self.source("y"), self.source("z")], axis=-1
+        )
+        c_ = np.r_["2,3", self.source("x"), self.source("y"), self.source("z")]
+        print("coords", coords.shape, c_.shape)
+        # np.einsum('ijk,ijkm->ijm', )
+
         self.rs = np.stack(
             [
                 self.source("x") + delta / 2 * self.source("dx")

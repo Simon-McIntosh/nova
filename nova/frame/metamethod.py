@@ -178,7 +178,6 @@ class Select(MetaMethod):
         default_factory=lambda: [
             "active",
             "passive",
-            "plasma",
             "fix",
             "free",
             "ferritic",

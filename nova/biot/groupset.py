@@ -32,6 +32,7 @@ class GroupSet(Plot):
     target: Target = field(repr=False, default_factory=Target)
     turns: list[bool] = field(default_factory=lambda: [True, False])
     reduce: list[bool] = field(default_factory=lambda: [True, True])
+    transform: np.ndarray = field(init=False, repr=False)
 
     def __post_init__(self):
         """Format source and target biot frames."""
@@ -66,6 +67,7 @@ class GroupSet(Plot):
         """Assemble GroupSet."""
         self.set_shape()
         self.update_index()
+        self.build_transform()
 
     def set_shape(self):
         """Set source and target shapes."""
@@ -78,6 +80,13 @@ class GroupSet(Plot):
         # self.index = ['_'.join(label) for label
         #               in itertools.product(self.source.index,
         #                                    self.target.index)]
+
+    def build_transform(self):
+        """Build global to local coordinate transformation matrix (target, source)."""
+        self.transform = np.tile(
+            self.source.space.transform, reps=(self.shape[0], 1, 1, 1)
+        )
+        print(self.transform.shape)
 
     def _to_local(self, points: np.ndarray):
         """Return point array (n, 3) mapped to local coordinate system."""

@@ -152,10 +152,4 @@ if __name__ == "__main__":
     curve = fiducial.data.centerline.data
 
     frenet = Frenet(curve)
-    """
-    points = np.zeros((30, 3))
-    points[:, 0] = np.linspace(0, 50, len(points))
-    points[-15:, 1] = np.linspace(0, 50, 15)
-    frenet = Frenet(points)
-    """
     frenet.plot()

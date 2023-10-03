@@ -144,5 +144,11 @@ def test_subframe_plasma_index():
     assert list(coilset.loc["plasma", "plasma"]) == [True, True, True, True]
 
 
+def test_array_repr():
+    coilset = CoilSet(dcoil=-2, array=["x"])
+    coilset.coil.insert(1, [3, 4], required=["x", "z"])
+    _ = coilset.frame.__repr__()
+
+
 if __name__ == "__main__":
     pytest.main([__file__])

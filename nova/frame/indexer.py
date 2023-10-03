@@ -1,5 +1,6 @@
 """Extend pandas Indexer methods."""
 from abc import ABC, abstractmethod
+from functools import cached_property
 
 import pandas
 
@@ -66,22 +67,22 @@ class Indexer(ABC):
     def loc_mixin(self) -> object:
         """Return LocIndexer mixin."""
 
-    @property
+    @cached_property
     def loc(self):
         """Extend DataFrame.loc, restrict subspace access."""
         return self.indexer.loc("loc", self)
 
-    @property
+    @cached_property
     def iloc(self):
         """Extend DataFrame.iloc, restrict subspace access."""
         return self.indexer.iloc("iloc", self)
 
-    @property
+    @cached_property
     def at(self):
         """Extend DataFrame.at, restrict subspace access."""
         return self.indexer.at("at", self)
 
-    @property
+    @cached_property
     def iat(self):
         """Extend DataFrame.iat, restrict subspace access."""
         return self.indexer.iat("iat", self)

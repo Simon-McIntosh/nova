@@ -34,7 +34,7 @@ def test_ferritic():
 
 
 def test_select_subspace():
-    framespace = FrameSpace(Required=["x"], Available=["plasma"])
+    framespace = FrameSpace(Required=["x"], Available=["coil"])
     assert np.array(
         [
             attr in framespace.metaframe.subspace

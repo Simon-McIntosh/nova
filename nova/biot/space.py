@@ -14,15 +14,19 @@ class Space(metamethod.Space):
     name = "space"
 
     frame: FrameLink = field(repr=False)
-    transform: np.ndarray = field(init=False, repr=False)
+    axes: np.ndarray = field(init=False, repr=False)
+    origin: np.ndarray = field(init=False, repr=False)
 
     def initialize(self):
-        """Build global to local coordinate mapping transfrom."""
-        self.transform = np.zeros((len(self.frame), 3, 3))
-        self.transform[..., 0] = self.normal
-        self.transform[..., 1] = np.cross(self.axis, self.normal)
-        self.transform[..., 2] = self.axis
-        self.transform /= np.linalg.norm(self.transform, axis=1)[:, np.newaxis]
+        """Build local coordinate axes."""
+        self.axes = np.zeros((len(self.frame), 3, 3))
+        self.axes[..., 0] = self.normal
+        self.axes[..., 1] = np.cross(self.axis, self.normal)
+        self.axes[..., 2] = self.axis
+        self.axes /= np.linalg.norm(self.axes, axis=1)[:, np.newaxis]
+        self.origin = np.c_[
+            self.frame.aloc["x"], self.frame.aloc["y"], self.frame.aloc["z"]
+        ]
 
     @property
     def axis(self):
@@ -40,8 +44,8 @@ class Space(metamethod.Space):
 
     def to_local(self, points: np.ndarray):
         """Return point array (n, 3) mapped to local coordinate system."""
-        return np.einsum("ij,ijk->ik", points, self.transform)
+        return np.einsum("ij,ijk->ik", points, self.axes)
 
     def to_global(self, points: np.ndarray):
         """Return point array (n, 3) mapped to global coordinate system."""
-        return np.einsum("ij,ikj->ik", points, self.transform)
+        return np.einsum("ij,ikj->ik", points, self.axes)

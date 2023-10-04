@@ -1,10 +1,71 @@
 """Manage source and target frames."""
 from dataclasses import dataclass, field
+from functools import cached_property
 
 import numpy as np
 
 from nova.biot.biotframe import Source, Target
 from nova.graphics.plot import Plot
+
+
+@dataclass
+class CoordLocIndexer:
+    """Coordinate system indexer base class."""
+
+    source: Source = field(repr=False)
+    target: Target = field(repr=False)
+    coordinate_axes: np.ndarray = field(
+        repr=False, default_factory=lambda: np.array([])
+    )
+    coordinate_origin: np.ndarray = field(
+        repr=False, default_factory=lambda: np.array([])
+    )
+    data: dict[str, dict] = field(
+        repr=False, default_factory=lambda: {"source": {}, "target": {}}
+    )
+
+    def __getitem__(self, key):
+        """Return stacked point array transformed to source local coordinates."""
+        match key:
+            case (str(frame), str(attr)) if frame in ["source", "target"]:
+                return self.framedata(frame, attr)
+            case _:
+                raise KeyError(
+                    f"malformed key {key}, require " "[source | target, attr]"
+                )
+
+    def coordinate_list(self, attr: str) -> list[str]:
+        """Return coordinate list."""
+        primary_coordinate = next(coord for coord in "xyz" if coord in attr)
+        return [attr.replace(primary_coordinate, coord) for coord in "xyz"]
+
+    def framedata(self, frame: str, attr: str) -> np.ndarray:
+        """Return local frame data."""
+        try:
+            return self.data[frame][attr]
+        except KeyError:
+            coords = self.coordinate_list(attr)
+            points = self._local_stack(frame, coords)
+            self.data[frame] |= dict(zip(coords, (points[..., i] for i in range(3))))
+            return self.data[frame][attr]
+
+    def _local_stack(self, frame: str, coords: list[str]) -> np.ndarray:
+        """Return stacked point array in local coordinate system."""
+        points = getattr(self, frame).stack(*coords)
+        return self.to_local(points)
+
+    def to_local(self, points):
+        """Return 3d point array (target, source, 3) mapped to local coordinates."""
+        return np.einsum(
+            "...i,...ij->...j", points - self.coordinate_origin, self.coordinate_axes
+        )
+
+    def to_global(self, points):
+        """Return 3d point array (target, source, 3) mapped to global coordinates."""
+        return (
+            np.einsum("...i,...ji->...j", points, self.coordinate_axes)
+            + self.coordinate_origin
+        )
 
 
 @dataclass
@@ -32,7 +93,8 @@ class GroupSet(Plot):
     target: Target = field(repr=False, default_factory=Target)
     turns: list[bool] = field(default_factory=lambda: [True, False])
     reduce: list[bool] = field(default_factory=lambda: [True, True])
-    transform: np.ndarray = field(init=False, repr=False)
+    coordinate_axes: np.ndarray = field(init=False, repr=False)
+    coordinate_origin: np.ndarray = field(init=False, repr=False)
 
     def __post_init__(self):
         """Format source and target biot frames."""
@@ -66,7 +128,7 @@ class GroupSet(Plot):
     def assemble(self):
         """Assemble GroupSet."""
         self.set_shape()
-        self.update_index()
+        self.build_index()
         self.build_transform()
 
     def set_shape(self):
@@ -74,8 +136,8 @@ class GroupSet(Plot):
         self.source.set_target(len(self.target))
         self.target.set_source(len(self.source))
 
-    def update_index(self):
-        """Update index. Product of source and target biot frames."""
+    def build_index(self):
+        """Build index. Product of source and target biot frames."""
         self.index = range(len(self))
         # self.index = ['_'.join(label) for label
         #               in itertools.product(self.source.index,
@@ -83,8 +145,18 @@ class GroupSet(Plot):
 
     def build_transform(self):
         """Build global to local coordinate transformation matrix (target, source)."""
-        self.transform = np.tile(
-            self.source.space.transform, reps=(self.shape[0], 1, 1, 1)
+        self.coordinate_axes = np.tile(
+            self.source.space.axes, reps=(self.shape[0], 1, 1, 1)
+        )
+        self.coordinate_origin = np.tile(
+            self.source.space.origin, reps=(self.shape[0], 1, 1)
+        )
+
+    @cached_property
+    def local(self):
+        """Return source frame local coordinate stack indexer."""
+        return type("local", (CoordLocIndexer,), {})(
+            self.source, self.target, self.coordinate_axes, self.coordinate_origin
         )
 
     def plot(self, axes=None):
@@ -101,9 +173,13 @@ class GroupSet(Plot):
 
 
 if __name__ == "__main__":
-    source = Source(
-        {"x": [3, 3.4, 3.6], "z": [3.1, 3, 3.3], "dl": 0.3, "dt": 0.3, "section": "hex"}
-    )
-    target = Target(source)
+    from nova.geometry.polyline import PolyLine
+
+    points = np.array([[-2, 0, 0], [-1, 0, 0], [0, 1, 0], [1, 0, 0]], float)
+    polyline = PolyLine(points, minimum_arc_nodes=3)
+    source = Source(polyline.path_geometry)
+    target = Target({"x": np.linspace(5, 7.5, 10), "z": 0.5})
     groupset = GroupSet(source, target)
-    groupset.plot()
+
+    print(groupset.local["source", "x1"])
+    print(groupset.local["source", "x2"])

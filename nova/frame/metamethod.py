@@ -228,7 +228,7 @@ class Space(MetaMethod):
 
     name: str = field(init=False, default="space")
     required: list[str] = field(
-        default_factory=lambda: ["ax", "ay", "az", "nx", "ny", "nz"]
+        default_factory=lambda: ["x", "y", "z", "ax", "ay", "az", "nx", "ny", "nz"]
     )
 
     _subclass: ClassVar[str] = ".biot.space.Space"

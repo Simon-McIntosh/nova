@@ -80,8 +80,8 @@ def test_source_axes(source, axis, request):
     source = request.getfixturevalue(source)
     vector = {"n": [1, 0, 0], "a": [0, 0, 1]}[axis]
     points = source.stack(*[f"{axis}{coord}" for coord in "xyz"])
-    local_points = source.space.to_local(points[0])
-    global_points = source.space.to_global(local_points)
+    local_points = source.space._rotate_to_local(points[0])
+    global_points = source.space._rotate_to_global(local_points)
     assert np.allclose(local_points, np.tile(vector, (1, len(points))))
     assert np.allclose(points, global_points)
 

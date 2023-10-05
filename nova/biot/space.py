@@ -27,28 +27,47 @@ class Space(metamethod.Space, Plot3D):
         self.coordinate_axes /= np.linalg.norm(self.coordinate_axes, axis=1)[
             :, np.newaxis
         ]
-        self.origin = np.c_[
-            self.frame.aloc["x"], self.frame.aloc["y"], self.frame.aloc["z"]
-        ]
+        self.origin = self._column_stack(*list("xyz"))
+
+    def _column_stack(self, *args: tuple[str]):
+        """Return stacked array column vectors."""
+        return np.column_stack([self.frame.aloc[attr] for attr in args])
 
     @property
     def axis(self):
         """Return source element axis."""
-        return np.c_[
-            self.frame.aloc["ax"], self.frame.aloc["ay"], self.frame.aloc["az"]
-        ]
+        return self._column_stack("ax", "ay", "az")
 
     @property
     def normal(self):
         """Return source element normal."""
-        return np.c_[
-            self.frame.aloc["nx"], self.frame.aloc["ny"], self.frame.aloc["nz"]
-        ]
+        return self._column_stack("nx", "ny", "nz")
+
+    def _rotate_to_local(self, points: np.ndarray):
+        """Return point array (n, 3) aligned to local coordinate system."""
+        return np.einsum("ij,ijk->ik", points, self.coordinate_axes)
 
     def to_local(self, points: np.ndarray):
         """Return point array (n, 3) mapped to local coordinate system."""
-        return np.einsum("ij,ijk->ik", points, self.coordinate_axes)
+        return self._rotate_to_local(points - self.origin)
+
+    def _rotate_to_global(self, points: np.ndarray):
+        """Return point array (n, 3) aligned to global coordinate system."""
+        return np.einsum("ij,ikj->ik", points, self.coordinate_axes)
 
     def to_global(self, points: np.ndarray):
         """Return point array (n, 3) mapped to global coordinate system."""
-        return np.einsum("ij,ikj->ik", points, self.coordinate_axes)
+        return self._rotate_to_global(points) + self.origin
+
+    def plot(self):
+        """Plot 3d segments."""
+        start_points = self.to_local(self._column_stack("x1", "y1", "z1"))
+        end_points = self.to_local(self._column_stack("x2", "y2", "z2"))
+
+        print(start_points)
+        print(end_points)
+
+        """
+        for i, segment in enumerate(self.frame.segment):
+            print(segment, self.origin[i], points[0, i], points[1, i])
+        """

@@ -48,7 +48,7 @@ def test_coordinate_transform_local_plane(source):
 
 
 def test_coordinate_transform_local_axis(source):
-    assert np.allclose(source.space.to_local(source.axis)[1], [0, 0, 1])
+    assert np.allclose(source.space._rotate_to_local(source.axis)[1], [0, 0, 1])
 
 
 if __name__ == "__main__":

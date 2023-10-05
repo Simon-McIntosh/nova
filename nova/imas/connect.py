@@ -95,7 +95,7 @@ class Connect:
         command = [
             f"idscp {ids} -a -u {self.user} "
             f"-si {pulse} -ri {run} -d {self.machine} "
-            f"-so {pulse} -ro {run} -do {self.machine} "
+            f"-so {pulse} -ro {run} -do {self.machine.lower()} "
             f"-bo {self.backend}"
             for pulse, run in zip(frame.pulse, frame.run)
         ]
@@ -108,8 +108,8 @@ class Connect:
 
     def rsync(self):
         """Syncronize SDCC remote (user)/public with local IMAS database."""
-        public = f"/home/ITER/{self.username}/public/imasdb/{self.machine}/"
-        local = f"/home/{self.username}/imas/shared/imasdb/{self.machine}/"
+        public = f"/home/ITER/{self.username}/public/imasdb/{self.machine.lower()}/"
+        local = f"/home/{self.username}/imas/shared/imasdb/{self.machine.lower()}/"
         pathlib.Path(local).mkdir(parents=True, exist_ok=True)
         command = f"rsync -aP {self.cluster}:{public} {local}"
         subprocess.run(command.split())
@@ -226,8 +226,9 @@ if __name__ == "__main__":
     # machine.load_ids('pf_active')
     # print(machine.frame)
 
-    MachineDatabase(machine="iter_md", user="hosokam").sync_shot("111001/203")
-
+    iter_md = MachineDatabase(machine="ITER_MD", user="hosokam")
+    iter_md.sync_shot("111001/103")
+    iter_md.rsync()
     # ScenarioDatabase().sync_shot("135001/7")
     # ScenarioDatabase().rsync()
     # ScenarioDatabase(user='tribolp').sync_shot('135011/21')

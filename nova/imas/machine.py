@@ -631,7 +631,7 @@ class PoloidalFieldActive(CoilDatabase):
     """Manage active poloidal loop ids, pf_passive."""
 
     pulse: int = 111001
-    run: int = 202
+    run: int = 203
     occurrence: int = 0
     name: str = "pf_active"
 
@@ -1192,7 +1192,7 @@ if __name__ == "__main__":
         run,
         pf_active="iter_md",
         pf_passive=False,
-        elm=True,
+        elm=False,
         wall="iter_md",
         tplasma="hex",
         nwall=5,

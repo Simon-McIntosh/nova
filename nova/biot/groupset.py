@@ -180,6 +180,3 @@ if __name__ == "__main__":
     source = Source(polyline.path_geometry)
     target = Target({"x": np.linspace(5, 7.5, 10), "z": 0.5})
     groupset = GroupSet(source, target)
-
-    print(groupset.local["source", "x1"])
-    print(groupset.local["source", "x2"])

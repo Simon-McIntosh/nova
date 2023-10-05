@@ -228,7 +228,6 @@ if __name__ == "__main__":
 
     iter_md = MachineDatabase(machine="ITER_MD", user="hosokam")
     iter_md.sync_shot("111001/103")
-    iter_md.rsync()
     # ScenarioDatabase().sync_shot("135001/7")
     # ScenarioDatabase().rsync()
     # ScenarioDatabase(user='tribolp').sync_shot('135011/21')

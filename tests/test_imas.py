@@ -142,12 +142,11 @@ def test_geometry_update_run():
     assert pf_active == PoloidalFieldActive.default_ids_attrs() | dict(run=101)
 
 
-@pytest.mark.skip("pending iter_md run update")
 @mark["pf_active"]
 def test_geometry_pf_active_run_ids():
     database = Database(**ids_attrs["pf_active"])
     pf_active = Geometry(database.ids_data).pf_active
-    assert pf_active["run"] == ids_attrs["pf_active"]["run"]
+    assert pf_active["run"] == PoloidalFieldActive.run
 
 
 @mark["pf_active"]

@@ -484,6 +484,15 @@ class Plot2D(Plot):
         return Axes("2d")
 
 
+class Plot3D(Plot):
+    """Generate axes for 3d image objects."""
+
+    @cached_property
+    def mpl_axes(self):
+        """Override Plot.Axes instance."""
+        return Axes("3d")
+
+
 @dataclass
 class Animate(MoviePy, Plot):
     """Manage animation workflow."""

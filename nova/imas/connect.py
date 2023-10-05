@@ -222,12 +222,11 @@ class MachineDatabase(Connect):
 
 
 if __name__ == "__main__":
-    pass
     # machine = MachineDatabase().sync_ids()
     # machine.load_ids('pf_active')
     # print(machine.frame)
 
-    MachineDatabase(machine="iter_md").sync_shot("111003/1")
+    MachineDatabase(machine="iter_md", user="hosokam").sync_shot("111001/203")
 
     # ScenarioDatabase().sync_shot("135001/7")
     # ScenarioDatabase().rsync()

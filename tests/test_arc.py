@@ -25,7 +25,7 @@ def arc(source):
 
 
 def test_space_axes_shape(source):
-    assert np.shape(source.space.axes) == (2, 3, 3)
+    assert np.shape(source.space.coordinate_axes) == (2, 3, 3)
 
 
 def test_end_points(source):

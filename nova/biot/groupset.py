@@ -146,7 +146,7 @@ class GroupSet(Plot):
     def build_transform(self):
         """Build global to local coordinate transformation matrix (target, source)."""
         self.coordinate_axes = np.tile(
-            self.source.space.axes, reps=(self.shape[0], 1, 1, 1)
+            self.source.space.coordinate_axes, reps=(self.shape[0], 1, 1, 1)
         )
         self.coordinate_origin = np.tile(
             self.source.space.origin, reps=(self.shape[0], 1, 1)

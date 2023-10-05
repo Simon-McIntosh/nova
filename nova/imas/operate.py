@@ -195,14 +195,36 @@ if __name__ == "__main__":
         pf_active="iter_md",
         elm=True,
         dplasma=-2000,
-        ngrid=500,
-        tplasma="rect",
+        ngrid=2000,
+        tplasma="hex",
         limit=0.25,
         nlevelset=None,
         nwall=10,
         nforce=0,
         force_index="plasma",
     )
+
+    import pyvista as pv
+    import vedo
+
+    operate.itime = 50
+    psi = operate.grid.psi.reshape(-1)
+    points = np.stack(
+        [
+            operate.grid.data.x2d,
+            np.zeros_like(operate.grid.data.x2d),
+            operate.grid.data.z2d,
+        ],
+        axis=-1,
+    ).reshape(-1, 3)
+
+    mesh = pv.PolyData(points).delaunay_2d()
+    contours = mesh.contour(isosurfaces=71, scalars=operate.grid.psi.reshape(-1))
+
+    vedo.Mesh(contours, c="black").show()
+    operate.frame.vtkplot()
+
+    # grid.plot(show_edges=True)
 
     # operate.force.solve(0, index="plasma")
 
@@ -253,7 +275,7 @@ if __name__ == "__main__":
     # plot_force("vs3")
     # plot_force("vs3", Ivs3=5e3)
     # plot_force("mid elm")
-    plot_force("all elm")
+    # plot_force("all elm")
     # operate.loc["plasma", "nturn"] = 0
 
     # operate.force.plot()

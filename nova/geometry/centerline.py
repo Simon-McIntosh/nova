@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 import os
 
 import pandas
+from tqdm import tqdm
 import xarray
 
 from nova.geometry.polygeom import Polygon
@@ -54,25 +55,29 @@ class Centerline(Plot, CoilDatabase):
         self.data = xarray.Dataset()
         self.data.coords["point"] = list("xyz")
         with pandas.ExcelFile(self.xls_file, engine="openpyxl") as xls:
-            points = 1e-3 * self._read_sheet(xls).to_numpy()
-            self.data["points"] = ("index", "point"), points
-        self.polyline = PolyLine(points)
-        self.winding.insert(
-            self.polygon,
-            points,
-            name=self.filename,
-            part=part_name(self.filename),
-        )
-        # self.store()
+            for sheet_name in tqdm(xls.sheet_names, "loading coils"):
+                points = 1e-3 * self._read_sheet(xls, sheet_name).to_numpy()
+                self.data["points"] = ("index", "point"), points
+                self.polyline = PolyLine(points)
+                self.winding.insert(
+                    self.polygon,
+                    points,
+                    name=sheet_name,
+                    part=part_name(sheet_name),
+                    delim="",
+                )
+        self.store()
 
     def _read_sheet(self, xls, sheet_name=0):
         """Read excel worksheet."""
-        sheet = pandas.read_excel(xls, sheet_name, usecols=[2, 3, 4], nrows=300)
+        sheet = pandas.read_excel(xls, sheet_name, usecols=[2, 3, 4])
         columns = {"X Coord": "x", "Y Coord": "y", "Z Coord": "z"}
         sheet.rename(columns=columns, inplace=True)
         return sheet
 
 
 if __name__ == "__main__":
-    centerline = Centerline(filename="CC1-4", polygon={"r": [0, 0, 0.148, 0.3]})
+    centerline = Centerline(
+        filename="CC_EXTRATED_CENTERLINES", polygon={"s": [0, 0, 0.0148]}
+    )
     # centerline.build()

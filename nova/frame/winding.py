@@ -99,7 +99,7 @@ class Winding(CoilSetAttrs):
             self.polyline = PolyLine(path, boundary=poly.points, delta=self.delta)
             subattrs = (
                 self.attrs
-                | {"label": index[0], "frame": index[0], "delim": "_", "link": True}
+                | {"label": index[0], "frame": index[0], "link": True}
                 | self.polyline.path_geometry
                 | self.polyline.volume_geometry
             )

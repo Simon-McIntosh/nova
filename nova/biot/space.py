@@ -17,6 +17,7 @@ class Space(metamethod.Space, Plot3D):
     frame: FrameLink = field(repr=False)
     coordinate_axes: np.ndarray = field(init=False, repr=False)
     coordinate_origin: np.ndarray = field(init=False, repr=False)
+    quadrant_segments: int = 11
 
     def initialize(self):
         """Build local coordinate axes."""
@@ -59,11 +60,34 @@ class Space(metamethod.Space, Plot3D):
         """Return point array (n, 3) mapped to global coordinate system."""
         return self._rotate_to_global(points) + self.origin
 
+    def _plot_segment(self, i, start_point, end_point, local=False):
+        """Plot segment."""
+        segment = "arc"
+        match segment:
+            case "arc":
+                end_theta = np.arctan2(end_point[1], end_point[0])
+                if end_theta <= 0:
+                    end_theta += 2 * np.pi
+                point_number = int(self.quadrant_segments * end_theta * 2 / np.pi)
+                theta = np.linspace(0, end_theta, point_number)
+                points = (
+                    start_point[0]
+                    * np.c_[np.cos(theta), np.sin(theta), np.zeros_like(theta)]
+                )
+            case "line":
+                points = np.c_[start_point, end_point].T
+        print(points.shape, self.coordinate_axes.shape)
+        if not local:
+            points = np.einsum("ij,kj->ik", points, self.coordinate_axes[i])
+            points += self.origin[i]
+        self.axes.plot(*points.T)
+
     def plot(self):
         """Plot 3d segments."""
         start_points = self.to_local(self._column_stack("x1", "y1", "z1"))
         end_points = self.to_local(self._column_stack("x2", "y2", "z2"))
-
+        for i in enumerate(self.frame.segment):
+            self._plot_segment(i, start_points[i], end_points[i])
         print(start_points)
         print(end_points)
 

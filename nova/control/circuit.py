@@ -45,6 +45,7 @@ class Circuit(Plot, netCDF, FrameSetLoc):
         """Insert unsigned directed incidence matrix."""
         data = self.data.coords.to_dataset()
         data["circuit"] = [circuit]
+        print(connection.shape, 2 * self.data.dims["edge"])
         connection = connection[:, : 2 * self.data.dims["edge"]]
         data["incidence_matrix"] = ("node", "edge"), np.zeros(
             (self.data.dims["node"], self.data.dims["edge"])

@@ -405,18 +405,18 @@ class Cell(VtkFrame):
 
 
 class Sweep(Cell):
-    """Sweep boundary polygon along path."""
+    """Sweep boundary cross section along path."""
 
     def __init__(
         self,
-        boundary: np.ndarray,
+        cross_section: np.ndarray,
         path: np.ndarray,
         binormal: np.ndarray = np.array([0, 0, 1]),
         align: str = "vector",
         origin: np.ndarray = np.zeros(3, float),
         triad: np.ndarray = np.identity(3, float),
     ):
-        section = Section(boundary, origin, triad).sweep(path, binormal, align)
+        section = Section(cross_section, origin, triad).sweep(path, binormal, align)
         if np.isclose(path[0], path[-1]).all():
             link = np.mean([section.point_array[0], section.point_array[-1]], axis=0)
             section.point_array[0] = section.point_array[-1] = link

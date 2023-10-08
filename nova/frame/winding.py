@@ -49,7 +49,7 @@ class Winding(CoilSetAttrs):
     def set_conditional_attributes(self):
         """Set conditional attrs - not required for winding."""
 
-    def insert(self, poly, path, required=None, iloc=None, **additional):
+    def insert(self, path, cross_section, required=None, iloc=None, **additional):
         """
         Add 3D coils to frameset.
 
@@ -57,14 +57,15 @@ class Winding(CoilSetAttrs):
 
         Parameters
         ----------
-        poly :
+        path : npt.ArrayLike, shape(n,3)
+            Swept path.
+
+        cross_section :
             - shapely.geometry.Polygon
             - dict[str, list[float]], polyname: *args
             - list[float], shape(4,) bounding box [xmin, xmax, zmin, zmax]
             - array-like, shape(n,2) bounding loop [x, z]
 
-        path : npt.ArrayLike, shape(n,3)
-            Swept path.
 
         required : list[str]
             Required attribute names (args). The default is None.
@@ -81,22 +82,24 @@ class Winding(CoilSetAttrs):
             FrameSpace index.
 
         """
-        if not isinstance(poly, Polygon):
-            poly = Polygon(poly, name="sweep")
-        vtk = Sweep(poly.points, path, align="vector")
+        if not isinstance(cross_section, Polygon):
+            cross_section = Polygon(cross_section, name="sweep")
+        vtk = Sweep(cross_section.points, path, align="vector")
         frame_data = self.vtk_data(vtk)
         self.attrs = additional | dict(
-            section=poly.section,
+            section=cross_section.section,
             poly=TriShell(vtk).poly,
-            area=poly.area,
-            dl=poly.width,
-            dt=poly.height,
+            area=cross_section.area,
+            dl=cross_section.width,
+            dt=cross_section.height,
         )
         with self.insert_required(required):
             index = self.frame.insert(*frame_data, iloc=iloc, **self.attrs)
 
         with self.insert_required([]):
-            self.polyline = PolyLine(path, boundary=poly.points, delta=self.delta)
+            self.polyline = PolyLine(
+                path, cross_section=cross_section.points, delta=self.delta
+            )
             subattrs = (
                 self.attrs
                 | {"label": index[0], "frame": index[0], "link": True}

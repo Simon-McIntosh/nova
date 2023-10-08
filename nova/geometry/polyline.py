@@ -347,7 +347,7 @@ class PolyLine(Plot):
     """Decimate polyline using a hybrid arc/line-segment rdp algorithum."""
 
     points: np.ndarray = field(repr=False, default_factory=lambda: np.array([]))
-    boundary: np.ndarray = field(repr=False, default_factory=lambda: np.array([]))
+    cross_section: np.ndarray = field(repr=False, default_factory=lambda: np.array([]))
     delta: float = 0
     arc_eps: float = 1e-3
     line_eps: float = 2e-3
@@ -489,7 +489,7 @@ class PolyLine(Plot):
     def vtk(self) -> list[Cell]:
         """Retun list of vtk mesh segments swept along segment paths."""
         return [
-            Sweep(self.boundary, segment.path, segment.normal)
+            Sweep(self.cross_section, segment.path, segment.normal)
             for segment in self.segments
         ]
 
@@ -516,7 +516,7 @@ class PolyLine(Plot):
     @cached_property
     def volume_geometry(self) -> dict:
         """Return volume geometry attribute dict."""
-        if len(self.boundary) == 0:
+        if len(self.cross_section) == 0:
             return {}
         return {attr: getattr(self, attr) for attr in self.volume_attrs}
 

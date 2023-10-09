@@ -1190,7 +1190,7 @@ if __name__ == "__main__":
     machine = Machine(
         pulse,
         run,
-        pf_active=(111001, 103, "iter_md"),
+        pf_active=(111001, 203, "iter_md"),
         pf_passive=False,
         elm=False,
         wall="iter_md",

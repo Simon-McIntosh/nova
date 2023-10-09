@@ -302,7 +302,7 @@ class Arc(Plot, Element):
     @override
     def path(self):
         """Return arc path at sample resolution."""
-        resolution = np.max([3, int(self.quad_segs * self.central_angle / (2 * np.pi))])
+        resolution = np.max([3, int(self.quad_segs * self.central_angle / (np.pi / 2))])
         return self.sample(resolution)
 
 

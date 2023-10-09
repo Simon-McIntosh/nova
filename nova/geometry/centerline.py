@@ -32,7 +32,7 @@ class Centerline(Plot, Properties, CoilDatabase):
         default_factory=lambda: {"o": [0, 0, 0.1, 0.1, 3]}
     )
     minimum_arc_nodes: int = 4
-    quad_segs: int = 16
+    quad_segs: int = 32
     arc_eps: float = 1e-3
     line_eps: float = 2e-3
     rdp_eps: float = 1e-4
@@ -166,7 +166,7 @@ class Centerline(Plot, Properties, CoilDatabase):
         return self.ids_attrs | self.polyline_attrs | self.ids_metadata | self.yaml
 
     def build(self):
-        """Load points from file and build coil centerline."""
+        """Load points from file and build coil centerlines."""
         self.data = xarray.Dataset()
         self.data.coords["point"] = list("xyz")
         self.data["cross_section"] = (
@@ -174,26 +174,79 @@ class Centerline(Plot, Properties, CoilDatabase):
             "point",
         ), self.cross_section.points
         with pandas.ExcelFile(self.xls_file, engine="openpyxl") as xls:
-            for sheet_name in tqdm(xls.sheet_names, "loading coils"):
-                points = 1e-3 * self._read_sheet(xls, sheet_name).to_numpy()
-                self.data["points"] = ("point_index", "point"), points
+            self.data.coords["coil_name"] = xls.sheet_names
+            xls_points = {}
+            for coil_name in tqdm(xls.sheet_names, "loading coils"):
+                xls_points[coil_name] = (
+                    1e-3 * self._read_sheet(xls, coil_name).to_numpy()
+                )
                 self.winding.insert(
-                    points,
+                    xls_points[coil_name],
                     self.cross_section,
-                    name=sheet_name,
-                    part=part_name(sheet_name),
+                    name=coil_name,
+                    part=part_name(coil_name),
                     delim="",
                     **self.polyline_attrs,
                 )
+        self._store_point_data(xls_points)
+        self._store_segment_data()
+
         self.data.attrs = self.metadata
         # self.store()
 
     def _read_sheet(self, xls, sheet_name=0):
         """Read excel worksheet."""
-        sheet = pandas.read_excel(xls, sheet_name, usecols=[2, 3, 4], nrows=200)
+        sheet = pandas.read_excel(xls, sheet_name, usecols=[2, 3, 4], nrows=20)
         columns = {"X Coord": "x", "Y Coord": "y", "Z Coord": "z"}
         sheet.rename(columns=columns, inplace=True)
         return sheet
+
+    def _store_point_data(self, xls_points):
+        """Store xls point data to dataset."""
+        self.data["point_number"] = "coil_name", [
+            len(points) for points in xls_points.values()
+        ]
+        self.data.coords["point_index"] = range(self.data.point_number.max().data)
+        self.data["points"] = xarray.DataArray(
+            0.0,
+            coords=[self.data.coil_name, self.data.point_index, self.data.point],
+            dims=["coil_name", "point_index", "point"],
+        )
+        for coil_name, points in xls_points.items():
+            self.data["points"].sel(coil_name=coil_name)[: len(points)] = points
+
+    def _store_segment_data(self):
+        """Store subframe segment data to dataset."""
+        self.data.coords["segment_point"] = ["start_point", "intermediate_point"]
+        self.data["segment_number"] = "coil_name", [
+            len(self.loc[self.loc["frame"] == coil_name, :])
+            for coil_name in self.data.coil_name
+        ]
+        self.data.coords["segment_index"] = range(self.data.segment_number.max().data)
+        self.data["segment_type"] = xarray.DataArray(
+            "",
+            coords=[self.data.coil_name, self.data.segment_index],
+            dims=["coil_name", "segment_index"],
+        ).astype("<U20")
+        for attr in ["start_point", "intermediate_point", "end_point", "center"]:
+            self.data[attr] = xarray.DataArray(
+                0.0,
+                coords=[self.data.coil_name, self.data.segment_index, self.data.point],
+                dims=["coil_name", "segment_index", "point"],
+            )
+        points = {
+            "start_point": ["x1", "y1", "z1"],
+            "end_point": ["x2", "y2", "z2"],
+            "center": ["x", "y", "z"],
+        }
+        for coil_index in range(self.data.dims["coil_name"]):
+            index = self.loc["frame"] == self.data.coil_name[coil_index]
+            number = sum(index)
+            self.data["segment_type"][coil_index, :number] = self.loc[index, "segment"]
+            for point, cols in points.items():
+                self.data[point][coil_index, :number] = self.loc[index, cols]
+
+    # def _get_point(self, index, columns):
 
     def update_metadata(self, ids_entry: IdsEntry):
         """Update ids with instance metadata."""

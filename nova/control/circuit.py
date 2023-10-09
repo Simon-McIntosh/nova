@@ -45,8 +45,14 @@ class Circuit(Plot, netCDF, FrameSetLoc):
         """Insert unsigned directed incidence matrix."""
         data = self.data.coords.to_dataset()
         data["circuit"] = [circuit]
-        print(connection.shape, 2 * self.data.dims["edge"])
-        connection = connection[:, : 2 * self.data.dims["edge"]]
+        try:
+            assert connection.shape[1] == 2 * self.data.dims["edge"]
+        except AssertionError as error:
+            raise AssertionError(
+                "Connection matrix column length incompatable with edge vector "
+                f"{connection.shape[1]} != {2 * self.data.dims['edge']}\n"
+                f"{self.data.edge}"
+            ) from error
         data["incidence_matrix"] = ("node", "edge"), np.zeros(
             (self.data.dims["node"], self.data.dims["edge"])
         )

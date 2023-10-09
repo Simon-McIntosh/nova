@@ -19,7 +19,9 @@ def test_binormal():
 
 def test_single_arc():
     radius = 5.3
-    arc = Arc(np.array([(radius, 0, 0), (0, radius, 0), (-radius, 0, 0)], float))
+    arc = Arc(
+        np.array([(radius, 0, 0), (0, radius, 0), (-radius, 0, 0)], float), quad_segs=50
+    )
     frenet = Frenet(arc.path)
     assert np.allclose(frenet.curvature[2:-2], 1 / radius, atol=1e-3)
     assert np.allclose(frenet.torsion, 0)
@@ -50,7 +52,7 @@ def test_torsion():
         np.array([(1, 0, 0), (0, 1, 0), (-1, 0, 0), (-2, 0, 1), (-3, 0, 0)], float),
         resolution=10,
     )
-    frenet = Frenet(polyarc.curve)
+    frenet = Frenet(polyarc.path)
     assert ~np.allclose(frenet.torsion, 0)
 
 

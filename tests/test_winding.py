@@ -13,6 +13,8 @@ def test_rect_volume_poloidal_plane():
     coilset.winding.insert(
         5 * np.c_[np.cos(theta), np.zeros_like(theta), np.sin(theta)],
         {"rect": [0, 0, 0.3, 0.7]},
+        quad_segs=50,
+        align="axes",
     )
     volume = 0.3 * 0.7 * 2 * np.pi * 5
     assert np.isclose(coilset.frame.volume.iloc[0], volume, 1e-2)
@@ -25,6 +27,8 @@ def test_rect_volume_toroidal_plane():
     coilset.winding.insert(
         5 * np.c_[np.cos(theta), np.sin(theta), np.zeros_like(theta)],
         {"rect": [0, 0, 0.3, 0.7]},
+        quad_segs=50,
+        align="axes",
     )
     volume = 0.3 * 0.7 * 2 * np.pi * 5
     assert np.isclose(coilset.frame.volume.iloc[0], volume, 1e-2)

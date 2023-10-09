@@ -35,13 +35,28 @@ def test_points_on_polyarc():
         50,
     )
     for point in line.points:
-        delta = np.linalg.norm(line.curve - point[np.newaxis, :], axis=1)
+        delta = np.linalg.norm(line.path - point[np.newaxis, :], axis=1)
         assert np.min(delta) < 0.1
+
+
+def test_single_polyarc_path():
+    line = PolyArc(np.array([(1, 0.5, 0.1), (1.5, 1.1, 0.2), (2, 2, 0.5)]), 15)
+    assert len(line.path) == 15
+
+
+def test_multi_polyarc_path():
+    line = PolyArc(
+        np.array(
+            [(0, 0, 0), (1, 0.5, 0.1), (1.5, 1.1, 0.2), (2, 2, 0.5), (5, -0.25, 5.8)]
+        ),
+        28,
+    )
+    assert len(line.path) == 2 * 28 - 1
 
 
 def test_arc_length():
     line = PolyArc(np.array([(1, 0, 0), (0, 1, 0), (-1, 0, 0)]), 100)
-    arc = Arc(line.curve)
+    arc = Arc(line.path)
     assert np.isclose(arc.length, np.pi, atol=1e-3)
 
 
@@ -69,7 +84,7 @@ def test_match_single_arc():
     rng = np.random.default_rng(2025)
     points = rng.random((3, 3))
     line = PolyArc(points, 20)
-    arc = Arc(line.curve)
+    arc = Arc(line.path)
     assert arc.test
 
 
@@ -77,7 +92,7 @@ def test_missmatch_dual_arc():
     rng = np.random.default_rng(2025)
     points = rng.random((5, 3))
     line = PolyArc(points, 20)
-    arc = Arc(line.curve)
+    arc = Arc(line.path)
     assert not arc.test
 
 
@@ -85,7 +100,7 @@ def test_match_single_polyarc():
     rng = np.random.default_rng(2025)
     points = rng.random((5, 3))
     line = PolyArc(points, 100)
-    arc = Arc(line.curve[:100])
+    arc = Arc(line.path[:100])
     assert arc.test
 
 
@@ -93,7 +108,7 @@ def test_mismatch_single_polyarc_plus_one():
     rng = np.random.default_rng(2025)
     points = rng.random((5, 3))
     line = PolyArc(points, 100)
-    arc = Arc(line.curve[:101])
+    arc = Arc(line.path[:101])
     assert not arc.test
 
 
@@ -117,7 +132,7 @@ def test_line_line_arc_line_line():
     rng = np.random.default_rng(2025)
     points = rng.random((3, 3))
     points = np.append(
-        points[:-1], PolyArc(np.r_[points[-1:], rng.random((2, 3))], 5).curve, axis=0
+        points[:-1], PolyArc(np.r_[points[-1:], rng.random((2, 3))], 5).path, axis=0
     )
     points = np.append(points[:-1], rng.random((2, 3)), axis=0)
     polyline = PolyLine(points, arc_eps=1e-3, line_eps=1e-3, minimum_arc_nodes=4)
@@ -130,7 +145,7 @@ def test_decimate_single_arc():
     rng = np.random.default_rng(2025)
     points = rng.random((3, 3))
     line = PolyArc(points, 100)
-    polyline = PolyLine(line.curve)
+    polyline = PolyLine(line.path)
     assert len(polyline.segments) == 1
     assert isinstance(polyline.segments[0], Arc)
 
@@ -139,7 +154,7 @@ def test_decimate_dual_arc():
     rng = np.random.default_rng(2025)
     points = rng.random((5, 3))
     line = PolyArc(points, 100)
-    polyline = PolyLine(line.curve, arc_eps=1e-4)
+    polyline = PolyLine(line.path, arc_eps=1e-4)
     assert len(polyline.segments) == 2
     assert [isinstance(polyline.segments[0], Arc) for segment in polyline.segments] == [
         True,
@@ -150,7 +165,7 @@ def test_decimate_dual_arc():
 def test_single_arc_hd():
     rng = np.random.default_rng(2025)
     points = rng.random((3, 3))
-    polyline = PolyLine(PolyArc(points, 405).curve, arc_eps=1e-3, line_eps=5e-3)
+    polyline = PolyLine(PolyArc(points, 405).path, arc_eps=1e-3, line_eps=5e-3)
     assert len(polyline.segments) == 1
     assert np.sum([isinstance(segment, Arc) for segment in polyline.segments]) == 1
 
@@ -159,12 +174,12 @@ def test_decimate_polyline():
     rng = np.random.default_rng(2025)
     points = rng.random((3, 3))
     line = PolyArc(points, 100)
-    curve = line.curve
+    curve = line.path
     for i in range(2):
         points = rng.random((3, 3))
         line = PolyArc(points, 25)
         curve = np.append(curve, rng.random((2, 3)), axis=0)
-        curve = np.append(curve, line.curve, axis=0)
+        curve = np.append(curve, line.path, axis=0)
     polyline = PolyLine(curve, arc_eps=1e-4, line_eps=5e-4, minimum_arc_nodes=4)
     assert np.sum([isinstance(segment, Arc) for segment in polyline.segments]) == 3
     assert np.sum([isinstance(segment, Line) for segment in polyline.segments]) == 6
@@ -200,17 +215,17 @@ def test_polyarc_plot():
 def test_circle():
     theta = np.linspace(0, 2 * np.pi)
     points = 3.2 * np.c_[np.zeros_like(theta), np.cos(theta), np.sin(theta)]
-    curve = PolyLine(points)
-    assert len(curve.segments) == 1
-    with curve.test_plot():
-        curve.plot()
+    polyline = PolyLine(points)
+    assert len(polyline.segments) == 1
+    with polyline.test_plot():
+        polyline.plot()
 
 
 def test_ellipse():
     theta = np.linspace(0, 2 * np.pi, 250)
     points = np.c_[np.zeros_like(theta), 1.2 * np.cos(theta), 1.0 * np.sin(theta)]
-    curve = PolyLine(points)
-    assert len(curve.segments) > 1
+    polyline = PolyLine(points)
+    assert len(polyline.segments) > 1
 
 
 def test_line_3_point_error():
@@ -361,6 +376,21 @@ def test_straight_line_normal():
     assert len(polyline) == 3
     assert np.allclose(np.linalg.norm(normal, axis=1), np.ones(3))
     assert np.allclose(normal, reference)
+
+
+def test_polyline_nodes():
+    polyline = PolyLine(np.array([[-1, 0, -1], [-0.5, 1, -1], [0, 0, -1]]))
+    assert polyline.nodes.shape == (3, 3)
+
+
+def test_polyline_path():
+    polyline = PolyLine(
+        np.array([[-1, 0, -1], [-0.5, 0.5, -1], [-0.5, -0.5, -1]]), quad_segs=21
+    )
+    assert polyline.path.shape == (
+        int(21 * polyline.segments[0].central_angle / (2 * np.pi)),
+        3,
+    )
 
 
 if __name__ == "__main__":

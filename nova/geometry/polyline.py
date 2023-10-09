@@ -14,7 +14,7 @@ from nova.geometry.frenet import Frenet
 from nova.geometry import line
 from nova.geometry.polygeom import Polygon
 from nova.geometry.rdp import rdp
-from nova.geometry.volume import Cell, Path, Sweep, TriShell
+from nova.geometry.volume import Cell, Sweep, TriShell
 from nova.graphics.plot import Plot
 
 
@@ -22,7 +22,7 @@ from nova.graphics.plot import Plot
 class Element(abc.ABC):
     """Element base class."""
 
-    points: np.ndarray | None = field(default=None, repr=False)
+    points: np.ndarray = field(default_factory=lambda: np.ndarray([]), repr=False)
     normal: np.ndarray = field(default_factory=lambda: np.zeros(3))
     axis: np.ndarray = field(init=False, default_factory=lambda: np.zeros(3))
     center: np.ndarray = field(init=False, default_factory=lambda: np.zeros(3))
@@ -143,7 +143,7 @@ class Arc(Plot, Element):
     theta: float = field(init=False, repr=False)
     error: float = field(init=False)
     eps: float = 1e-8
-    resolution: int = 50
+    quad_segs: int = 16
 
     name: ClassVar[str] = "arc"
 
@@ -302,9 +302,7 @@ class Arc(Plot, Element):
     @override
     def path(self):
         """Return arc path at sample resolution."""
-        resolution = np.max(
-            [3, int(self.resolution * self.central_angle / (2 * np.pi))]
-        )
+        resolution = np.max([3, int(self.quad_segs * self.central_angle / (2 * np.pi))])
         return self.sample(resolution)
 
 
@@ -314,32 +312,32 @@ class PolyArc(Plot):
 
     points: np.ndarray
     resolution: int = 50
-    curve: np.ndarray = field(init=False)
+    path: np.ndarray = field(init=False)
 
     def __post_init__(self):
         """Build multi-arc polyline."""
         self.build()
 
     def build(self):
-        """Build multi arc curve."""
+        """Build multi arc path."""
         segment_number = (len(self.points) - 1) // 2
-        self.curve = np.zeros((segment_number * self.resolution, 3))
+        self.path = np.zeros((segment_number * self.resolution, 3))
         if segment_number > 1:
-            self.curve = self.curve[:-1]
+            self.path = self.path[:-1]
         for i in range(segment_number):
             points = self.points[slice(2 * i, 2 * i + 3)]
             start_index = i * self.resolution
             if i > 0:
                 start_index -= 1
-            self.curve[slice(start_index, start_index + self.resolution)] = Arc(
+            self.path[slice(start_index, start_index + self.resolution)] = Arc(
                 points
             ).sample(self.resolution)
 
     def plot(self):
         """Plot polyline."""
-        self.get_axes("2d")
-        self.axes.plot(self.points[:, 1], self.points[:, 2], "o")
-        self.axes.plot(self.curve[:, 1], self.curve[:, 2], "-")
+        self.set_axes("3d")
+        self.axes.plot(*self.points.T, "o")
+        self.axes.plot(*self.path.T, "-")
 
 
 @dataclass
@@ -348,11 +346,11 @@ class PolyLine(Plot):
 
     points: np.ndarray = field(repr=False, default_factory=lambda: np.array([]))
     cross_section: np.ndarray = field(repr=False, default_factory=lambda: np.array([]))
-    delta: float = 0
     arc_eps: float = 1e-3
     line_eps: float = 2e-3
     rdp_eps: float = 1e-4
     minimum_arc_nodes: int = 3
+    quad_segs: int = 16
     segments: list[Line | Arc] = field(init=False, repr=False, default_factory=list)
 
     path_attrs: ClassVar[list[str]] = [
@@ -382,7 +380,7 @@ class PolyLine(Plot):
 
     def __post_init__(self):
         """Decimate polyline."""
-        self.build()
+        self.decimate()
 
     def __getitem__(self, attr: str):
         """Return path geometry attribute."""
@@ -391,14 +389,6 @@ class PolyLine(Plot):
     def __len__(self):
         """Return segment number."""
         return len(self.segments)
-
-    def build(self):
-        """Decimate polyline."""
-        match self.delta:
-            case 0:
-                self.decimate()
-            case _:
-                self.interpolate()
 
     def fit_arc(self, points):
         """Return point index prior to first arc mis-match."""
@@ -413,7 +403,9 @@ class PolyLine(Plot):
     def append(self, points, normal):
         """Append points to segment list."""
         if len(points) >= self.minimum_arc_nodes:
-            self.segments.append(Arc(points, eps=self.arc_eps))
+            self.segments.append(
+                Arc(points, eps=self.arc_eps, quad_segs=self.quad_segs)
+            )
             return
         for i in range(len(points) - 1):
             self.segments.append(Line(points[i : i + 2], normal[i]))
@@ -440,14 +432,6 @@ class PolyLine(Plot):
                 self.segments[i] = segment.chord
         self.rdp_merge()
 
-    def interpolate(self):
-        """Interpolate mesh points."""
-        mesh = Path.from_points(self.points, delta=self.delta).mesh
-        self.segments = [
-            Line(mesh.points[i : i + 2], mesh["normal"][i])
-            for i in range(len(mesh.points) - 1)
-        ]
-
     def _rdp_line_segments(self, nodes, line_normal):
         """Return rdp reduced Line segments."""
         nodes = np.r_[nodes[::2], nodes[-1:]]
@@ -473,13 +457,24 @@ class PolyLine(Plot):
         segments.extend(self._rdp_line_segments(nodes, line_normal))
         self.segments = segments
 
+    def _stackattr(self, attr: str):
+        """Return stacked segment attribute."""
+        if len(self.segments) == 1:
+            return getattr(self.segments[0], attr)
+        return np.r_[
+            np.vstack([getattr(seg, attr)[:-1] for seg in self.segments]),
+            self.segments[-1].points[-1:],
+        ]
+
     @property
     def nodes(self):
         """Return segment nodes."""
-        return np.r_[
-            np.vstack([seg.nodes[:-1] for seg in self.segments]),
-            self.segments[-1].points[-1:],
-        ]
+        return self._stackattr("nodes")
+
+    @property
+    def path(self):
+        """Return quadseg resolved polyline path."""
+        return self._stackattr("path")
 
     def _to_list(self, attr: str):
         """Return segment attribute list."""
@@ -547,12 +542,7 @@ if __name__ == "__main__":
 
     fiducial = FiducialData("RE", fill=True)
 
-    curve = fiducial.data.centerline.data
-    curve += 500 * fiducial.data.centerline_delta[3].data
-    polyline = PolyLine(curve)
-    # polyline.plot()
-
-    # arc = Arc(line.curve[:20])
-    # arc.plot_fit()
-
-    # line.plot()
+    points = fiducial.data.centerline.data
+    points += 500 * fiducial.data.centerline_delta[3].data
+    polyline = PolyLine(points)
+    polyline.plot()

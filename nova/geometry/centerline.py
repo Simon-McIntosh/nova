@@ -9,7 +9,6 @@ from tqdm import tqdm
 import xarray
 
 from nova.geometry.polygeom import Polygon
-from nova.geometry.polyline import PolyLine
 from nova.graphics.plot import Plot
 from nova.imas.coil import part_name
 from nova.imas.database import Database, Ids, IdsEntry
@@ -33,6 +32,7 @@ class Centerline(Plot, Properties, CoilDatabase):
         default_factory=lambda: {"o": [0, 0, 0.1, 0.1, 3]}
     )
     minimum_arc_nodes: int = 4
+    quad_segs: int = 16
     arc_eps: float = 1e-3
     line_eps: float = 2e-3
     rdp_eps: float = 1e-4
@@ -133,6 +133,7 @@ class Centerline(Plot, Properties, CoilDatabase):
         """Return polyline attributes."""
         return {
             "minimum_arc_nodes": self.minimum_arc_nodes,
+            "quad_segs": self.quad_segs,
             "arc_eps": self.arc_eps,
             "line_eps": self.line_eps,
             "rdp_eps": self.rdp_eps,
@@ -176,13 +177,13 @@ class Centerline(Plot, Properties, CoilDatabase):
             for sheet_name in tqdm(xls.sheet_names, "loading coils"):
                 points = 1e-3 * self._read_sheet(xls, sheet_name).to_numpy()
                 self.data["points"] = ("point_index", "point"), points
-                self.polyline = PolyLine(points, **self.polyline_attrs)
                 self.winding.insert(
                     points,
                     self.cross_section,
                     name=sheet_name,
                     part=part_name(sheet_name),
                     delim="",
+                    **self.polyline_attrs,
                 )
         self.data.attrs = self.metadata
         # self.store()

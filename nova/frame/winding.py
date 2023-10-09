@@ -1,5 +1,6 @@
 """Manage 3D coil windings."""
 from dataclasses import dataclass, field
+from typing import ClassVar
 
 import numpy as np
 import vedo
@@ -15,7 +16,7 @@ from nova.geometry.volume import Sweep, TriShell
 class Winding(CoilSetAttrs):
     """Insert 3D coil winding."""
 
-    delta: float = 0.0
+    delta: float = -16  # quad_segs
     turn: str = "rectangle"
     segment: str = "winding"
     required: list[str] = field(
@@ -45,6 +46,14 @@ class Winding(CoilSetAttrs):
             "z2",
         ],
     )
+
+    polyline_attrs: ClassVar[list[str]] = [
+        "arc_eps",
+        "line_eps",
+        "rdp_eps",
+        "minimum_arc_nodes",
+        "quad_segs",
+    ]
 
     def set_conditional_attributes(self):
         """Set conditional attrs - not required for winding."""
@@ -84,7 +93,14 @@ class Winding(CoilSetAttrs):
         """
         if not isinstance(cross_section, Polygon):
             cross_section = Polygon(cross_section, name="sweep")
-        vtk = Sweep(cross_section.points, path, align="vector")
+        polyline_kwargs = {
+            attr: additional.pop(attr)
+            for attr in self.polyline_attrs
+            if attr in additional
+        }
+        align = additional.pop("align", "vector")
+        polyline = PolyLine(path, cross_section=cross_section.points, **polyline_kwargs)
+        vtk = Sweep(cross_section.points, polyline.path, align=align)
         frame_data = self.vtk_data(vtk)
         self.attrs = additional | dict(
             section=cross_section.section,
@@ -97,14 +113,11 @@ class Winding(CoilSetAttrs):
             index = self.frame.insert(*frame_data, iloc=iloc, **self.attrs)
 
         with self.insert_required([]):
-            self.polyline = PolyLine(
-                path, cross_section=cross_section.points, delta=self.delta
-            )
             subattrs = (
                 self.attrs
                 | {"label": index[0], "frame": index[0], "link": True}
-                | self.polyline.path_geometry
-                | self.polyline.volume_geometry
+                | polyline.path_geometry
+                | polyline.volume_geometry
             )
             self.subframe.insert(**subattrs)
         self.update_loc_indexer()

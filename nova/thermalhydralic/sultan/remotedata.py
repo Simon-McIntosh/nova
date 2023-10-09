@@ -13,7 +13,7 @@ class FTPData:
 
     _experiment: str = ""
     parent: str = "Daten"
-    server: str = "ftp.psi.ch"
+    server: str = "ftptrans.psi.ch"
     username: str = "sultan"
     password: str = "3g8S4Nbq"
     ftp_args: tuple[str] = field(init=False)

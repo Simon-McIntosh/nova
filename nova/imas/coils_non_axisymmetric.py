@@ -125,8 +125,8 @@ class CoilsNonAxisymmetyric(Plot, CoilDatabase, Scenario):
                     if i > 0:
                         name = f"name{i}"
                     self.winding.insert(
-                        polygon,
                         elements.points,
+                        polygon,
                         name=name,
                         part=part_name(coil),
                     )

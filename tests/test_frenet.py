@@ -20,7 +20,8 @@ def test_binormal():
 def test_single_arc():
     radius = 5.3
     arc = Arc(
-        np.array([(radius, 0, 0), (0, radius, 0), (-radius, 0, 0)], float), quad_segs=50
+        np.array([(radius, 0, 0), (0, radius, 0), (-radius, 0, 0)], float),
+        quadrant_segments=50,
     )
     frenet = Frenet(arc.path)
     assert np.allclose(frenet.curvature[2:-2], 1 / radius, atol=1e-3)

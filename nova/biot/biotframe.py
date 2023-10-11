@@ -15,7 +15,7 @@ class BiotFrame(FrameSpace):
 
     def __init__(self, data=None, index=None, columns=None, attrs=None, **metadata):
         super().__init__(data, index, columns, attrs, **metadata)
-        self.frame_attrs(PolyGeo, Shape, Space, CrossSection, Reduce)
+        self.frame_attrs(PolyGeo, Shape, CrossSection, Reduce)
         for attr in self._metadata:
             setattr(self, attr, None)
 
@@ -77,19 +77,13 @@ class BiotFrame(FrameSpace):
         """Set source number."""
         return self.biotshape.set_source(number)
 
-    @property
-    def delta_r(self):
-        """Return normalized r-coordinate distance from PF coil centroid."""
-        return (self.x - self.xo.values) / self.dx
-
-    @property
-    def delta_z(self):
-        """Return normalized z-coordinate distance from PF coil centroid."""
-        return (self.z - self.zo.values) / self.dz
-
 
 class Source(BiotFrame):
     """Extend BiotFrame with modified additional and available metadata."""
+
+    def __init__(self, data=None, index=None, columns=None, attrs=None, **metadata):
+        super().__init__(data, index, columns, attrs, **metadata)
+        self.frame_attrs(Space)
 
     def update_metaframe(self, metadata):
         """Extend metaframe update."""
@@ -170,6 +164,16 @@ class Target(BiotFrame):
             }
         )
         super().update_metaframe(metadata)
+
+    @property
+    def delta_r(self):
+        """Return normalized r-coordinate distance from PF coil centroid."""
+        return (self.x - self.xo.values) / self.dx
+
+    @property
+    def delta_z(self):
+        """Return normalized z-coordinate distance from PF coil centroid."""
+        return (self.z - self.zo.values) / self.dz
 
 
 if __name__ == "__main__":

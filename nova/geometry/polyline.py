@@ -143,7 +143,7 @@ class Arc(Plot, Element):
     theta: float = field(init=False, repr=False)
     error: float = field(init=False)
     eps: float = 1e-8
-    quad_segs: int = 16
+    quadrant_segments: int = 16
 
     name: ClassVar[str] = "arc"
 
@@ -302,7 +302,9 @@ class Arc(Plot, Element):
     @override
     def path(self):
         """Return arc path at sample resolution."""
-        resolution = np.max([3, int(self.quad_segs * self.central_angle / (np.pi / 2))])
+        resolution = np.max(
+            [3, int(self.quadrant_segments * self.central_angle / (np.pi / 2))]
+        )
         return self.sample(resolution)
 
 
@@ -350,7 +352,7 @@ class PolyLine(Plot):
     line_eps: float = 2e-3
     rdp_eps: float = 1e-4
     minimum_arc_nodes: int = 3
-    quad_segs: int = 16
+    quadrant_segments: int = 16
     segments: list[Line | Arc] = field(init=False, repr=False, default_factory=list)
 
     path_attrs: ClassVar[list[str]] = [
@@ -404,7 +406,7 @@ class PolyLine(Plot):
         """Append points to segment list."""
         if len(points) >= self.minimum_arc_nodes:
             self.segments.append(
-                Arc(points, eps=self.arc_eps, quad_segs=self.quad_segs)
+                Arc(points, eps=self.arc_eps, quadrant_segments=self.quadrant_segments)
             )
             return
         for i in range(len(points) - 1):

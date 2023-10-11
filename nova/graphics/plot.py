@@ -347,11 +347,12 @@ class Plot:
 
     @contextmanager
     def test_plot(self):
-        """Return plot close and ioff context managers."""
+        """Return plot, close plot, and reset interactive status."""
         _interactive = self.plt.isinteractive()
         self.plt.ioff()
         yield
         self.plt.close()
+        del self.plt
         if _interactive:
             self.plt.ion()
 
@@ -438,6 +439,12 @@ class Plot:
         self.axes = axes
         self.axes_style = style
         return self.axes
+
+    def set_box_aspect(self):
+        """Set equal aspect ratio for 3d axes."""
+        self.axes.set_box_aspect(
+            [np.ptp(getattr(self.axes, f"get_{attr}lim3d")()) for attr in "xyz"]
+        )
 
     def legend(self, *args, **Kwargs):
         """Expose axes legend."""

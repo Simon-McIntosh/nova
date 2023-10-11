@@ -12,7 +12,7 @@ except ImportError:
     ALException = None
 
 ids_attrs = dict(
-    pf_active=dict(pulse=111001, run=202, name="pf_active", machine="iter_md"),
+    pf_active=dict(pulse=111001, run=203, name="pf_active", machine="iter_md"),
     pf_active_iter=dict(pulse=105011, run=9, name="pf_active"),
     equilibrium=dict(pulse=130506, run=403, name="equilibrium"),
     equilibrium_pds=dict(pulse=135013, run=2, name="equilibrium"),

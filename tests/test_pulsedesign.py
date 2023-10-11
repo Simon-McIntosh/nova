@@ -86,24 +86,24 @@ def test_pf_active_ids_input(ids):
 
 @mark_imas
 def test_pf_active_ids_input_cache(ids):
-    pf_active_101 = Database(111001, 101, "iter_md", name="pf_active").ids_data
-    pf_active_202 = Database(111001, 202, "iter_md", name="pf_active").ids_data
-    design_101 = PulseDesign(
+    pf_active_103 = Database(111001, 103, "iter_md", name="pf_active").ids_data
+    pf_active_203 = Database(111001, 203, "iter_md", name="pf_active").ids_data
+    design_103 = PulseDesign(
         ids=ids,
         dplasma=-1,
         nwall=None,
         nlevelset=None,
-        pf_active={"ids": pf_active_101},
+        pf_active={"ids": pf_active_103},
     )
-    design_202 = PulseDesign(
+    design_203 = PulseDesign(
         ids=ids,
         dplasma=-1,
         nwall=None,
         nlevelset=None,
-        pf_active={"ids": pf_active_202},
+        pf_active={"ids": pf_active_203},
     )
     assert (
-        design_101.group_attrs["pf_active_md"] != design_202.group_attrs["pf_active_md"]
+        design_103.group_attrs["pf_active_md"] != design_203.group_attrs["pf_active_md"]
     )
 
 

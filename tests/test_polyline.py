@@ -385,10 +385,14 @@ def test_polyline_nodes():
 
 def test_polyline_path():
     polyline = PolyLine(
-        np.array([[-1, 0, -1], [-0.5, 0.5, -1], [-0.5, -0.5, -1]]), quad_segs=21
+        np.array([[-1, 0, -1], [-0.5, 0.5, -1], [-0.5, -0.5, -1]]), quadrant_segments=21
     )
     assert polyline.path.shape == (
-        int(21 * polyline.segments[0].central_angle / (2 * np.pi)),
+        int(
+            polyline.quadrant_segments
+            * polyline.segments[0].central_angle
+            / (np.pi / 2)
+        ),
         3,
     )
 

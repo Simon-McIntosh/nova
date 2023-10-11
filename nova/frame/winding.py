@@ -16,7 +16,7 @@ from nova.geometry.volume import Sweep, TriShell
 class Winding(CoilSetAttrs):
     """Insert 3D coil winding."""
 
-    delta: float = -16  # quad_segs
+    delta: float = 0
     turn: str = "rectangle"
     segment: str = "winding"
     required: list[str] = field(
@@ -27,7 +27,7 @@ class Winding(CoilSetAttrs):
         default_factory=lambda: {"label": "Swp", "part": "coil", "active": True},
     )
     attributes: list[str] = field(
-        init=False, default_factory=lambda: ["delta", "turn", "section", "segment"]
+        init=False, default_factory=lambda: ["turn", "section", "segment"]
     )
     array: list[str] = field(
         init=False,
@@ -52,7 +52,7 @@ class Winding(CoilSetAttrs):
         "line_eps",
         "rdp_eps",
         "minimum_arc_nodes",
-        "quad_segs",
+        "quadrant_segments",
     ]
 
     def set_conditional_attributes(self):

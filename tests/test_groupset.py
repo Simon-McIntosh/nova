@@ -86,5 +86,21 @@ def test_source_axes(source, axis, request):
     assert np.allclose(points, global_points)
 
 
+def test_space_plot(multiline):
+    space = multiline.space
+    with space.test_plot():
+        space.plot()
+
+
+def test_local_arc_start_point_theta(multiarc):
+    start_point = multiarc.space.to_local(multiarc.space.start_point)
+    theta = np.arctan2(start_point[:, 1], start_point[:, 0])
+    assert np.allclose(theta, 0)
+
+
+# def test_space_midpoint(multiline):
+#    assert space.midpoint == np.array([[], []])
+
+
 if __name__ == "__main__":
     pytest.main([__file__])

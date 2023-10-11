@@ -7,7 +7,6 @@ from typing import ClassVar
 import numpy as np
 from overrides import override
 import pandas
-import scipy
 from vedo import Mesh
 
 from nova.geometry.frenet import Frenet
@@ -164,18 +163,18 @@ class Arc(Plot, Element):
 
     def align(self):
         """Align point cloud to 2d plane."""
-        mean = np.mean(self.points, axis=0)
-        delta = self.points - mean[np.newaxis, :]
-        self.arc_axes = scipy.linalg.svd(delta)[2]
+        self.arc_axes = np.zeros((3, 3), float)
         self.arc_axes[0] = self.points[-1] - self.points[0]  # arc chord
-        if not np.allclose(
-            axis := np.cross(
+        self.arc_axes[1] = np.cross(
+            Frenet(self.points).binormal.mean(axis=0), self.arc_axes[0]
+        )
+        if np.allclose(self.arc_axes[1], 0):
+            binormal = np.cross(
                 self.arc_axes[0], np.mean(self.points[1:-1] - self.points[0], axis=0)
-            ),
-            0,
-        ):
-            self.arc_axes[2] = axis
-        self.arc_axes[1] = np.cross(self.arc_axes[0], self.arc_axes[2])
+            )
+            self.arc_axes[1] = np.cross(binormal, self.arc_axes[0])
+        self.arc_axes[2] = np.cross(self.arc_axes[0], self.arc_axes[1])
+        self.arc_axes[1] = np.cross(self.arc_axes[2], self.arc_axes[0])
         self.arc_axes /= np.linalg.norm(self.arc_axes, axis=1)[:, np.newaxis]
         self.axis = self.arc_axes[2]
 
@@ -185,6 +184,7 @@ class Arc(Plot, Element):
         chord = np.linalg.norm(points[-1] - points[0])
         origin = np.mean(np.c_[points[0], points[-1]], axis=1)
         points -= origin[np.newaxis, :]
+        print(points, chord)
         coef = np.linalg.lstsq(
             2 * points[:, 1:2],
             chord**2 / 4 - np.sum(points**2, axis=1),

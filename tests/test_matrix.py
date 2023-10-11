@@ -53,19 +53,11 @@ def test_force(itime):
         for i, name in enumerate(benchmark.profile.data.coil_name.data)
         if name in benchmark.force.coil_name[force_index]
     ]
-    print(
-        benchmark.force.fr[force_index]
-        / benchmark.profile["radial_force"][profile_index],
-    )
     assert np.allclose(
         benchmark.force.fr[force_index],
         benchmark.profile["radial_force"][profile_index],
         rtol=1e-1,
         atol=1e6,
-    )
-    print(
-        benchmark.force.fz[force_index]
-        / benchmark.profile["vertical_force"][profile_index],
     )
     assert np.allclose(
         benchmark.force.fz[force_index],

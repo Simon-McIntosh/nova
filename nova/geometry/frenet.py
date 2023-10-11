@@ -45,7 +45,6 @@ class Frenet(Plot):
                 self._from_gradient()
             case _:
                 raise IndexError("unable to extract coordinate system from points.")
-        # self._normalize()
 
     @cached_property
     def segment_length(self) -> np.ndarray:

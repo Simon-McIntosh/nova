@@ -52,8 +52,6 @@ class Arc(ArcConstants, Matrix):
 
         # phi =
 
-        print(self.source("x").shape)
-
         coords = np.stack(
             [self.source("x"), self.source("y"), self.source("z")], axis=-1
         )
@@ -89,20 +87,20 @@ if __name__ == "__main__":
 
     coilset = CoilSet(dwinding=0, field_attrs=["Bx"])
     coilset.winding.insert(
-        {"c": (0, 0, 0.5)},
         np.array([[5, 0, 3.2], [0, 5, 3.2], [-5, 0, 3.2]]),
-        nturn=2,
-    )
-    coilset.winding.insert(
         {"c": (0, 0, 0.5)},
-        np.array([[-5, 0, 3.2], [0, -5, 3.2], [5, 0, 3.2]]),
         nturn=2,
     )
     coilset.winding.insert(
-        {"c": (0, 0, 0.5)}, np.array([[-5, 0, 3.2], [0, 0, 8.2], [5, 0, 3.2]])
+        np.array([[-5, 0, 3.2], [0, -5, 3.2], [5, 0, 3.2]]),
+        {"c": (0, 0, 0.5)},
+        nturn=2,
     )
     coilset.winding.insert(
-        {"c": (0, 0, 0.5)}, np.array([[5, 0, 3.2], [0, 0, -1.8], [-5, 0, 3.2]])
+        np.array([[-5, 0, 3.2], [0, 0, 8.2], [5, 0, 3.2]]), {"c": (0, 0, 0.5)}
+    )
+    coilset.winding.insert(
+        np.array([[5, 0, 3.2], [0, 0, -1.8], [-5, 0, 3.2]]), {"c": (0, 0, 0.5)}
     )
     coilset.linkframe(["Swp0", "Swp1"])
     coilset.linkframe(["Swp2", "Swp3"])

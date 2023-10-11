@@ -292,7 +292,7 @@ def test_arc_points():
     arc = Arc(np.array([[1, 0.5, 0], [0, 0.5, 1], [0, 0.5, -1]]))
     assert arc.test
     assert np.allclose(arc.center, (0, 0.5, 0))
-    assert np.allclose(arc.axis, (0, 1, 0))
+    assert np.allclose(arc.axis, (0, -1, 0))
     assert np.allclose(arc.start_point, [1, 0.5, 0])
     assert np.allclose(arc.end_point, [0, 0.5, -1])
     assert np.isclose(arc.length, 2 * np.pi * 3 / 4)
@@ -395,6 +395,33 @@ def test_polyline_path():
         ),
         3,
     )
+
+
+def test_single_arc_positive_axis():
+    arc = Arc(np.array([(0, 5, 0), (0, 0, 5), (0, -5, 0)]))
+    assert np.allclose(arc.axis, (1, 0, 0))
+
+
+def test_single_arc_negative_axis():
+    arc = Arc(np.array([(-1, 0, 0), (0, 1, 0), (1, 0, 0)]))
+    assert np.allclose(arc.axis, (0, 0, -1))
+
+
+@pytest.mark.parametrize(
+    "points",
+    (
+        [(-1, 0, 0), (0, 1, 0), (1, 0, 0)],
+        [(1.2, 0, 0), (0, 1.2, 0), (-1.2, 0, 0)],
+        [(-1, 0, 0), (0, 1, 0), (0, -1, 0)],
+    ),
+)
+def test_single_arc_unit_orthogonal_axes(points):
+    axes = Arc(np.array(points)).arc_axes
+    for i in range(3):
+        assert np.isclose(np.linalg.norm(axes[i]), 1)
+    assert np.allclose(np.cross(axes[0], axes[1]), axes[2])
+    assert np.allclose(np.cross(axes[2], axes[0]), axes[1])
+    assert np.allclose(np.cross(axes[1], axes[2]), axes[0])
 
 
 if __name__ == "__main__":

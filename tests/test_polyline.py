@@ -4,7 +4,7 @@ import pytest
 
 from nova.geometry.polyline import Arc, Line, PolyArc, PolyLine
 from nova.imas.coils_non_axisymmetric import CoilsNonAxisymmetyric
-from nova.imas.utilities import mark
+from nova.imas.test_utilities import mark
 
 
 def test_2d_arc_radius():

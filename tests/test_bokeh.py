@@ -2,7 +2,7 @@ from bokeh.model import Model
 import pytest
 
 from nova.graphics.bokeh import IdsInput
-from nova.imas.utilities import ids_attrs, mark
+from nova.imas.test_utilities import ids_attrs, mark
 
 
 def test_attributes():

@@ -3,7 +3,7 @@ import pytest
 import numpy as np
 
 from nova.imas.database import IdsIndex
-from nova.imas.utilities import ids_attrs, load_ids, mark
+from nova.imas.test_utilities import ids_attrs, load_ids, mark
 
 
 @mark["pf_active_iter"]

@@ -7,7 +7,7 @@ from nova.imas.database import Database
 from nova.imas.equilibrium import EquilibriumData
 from nova.imas.extrapolate import Extrapolate
 from nova.imas.operate import Grid
-from nova.imas.utilities import ids_attrs, load_ids, mark
+from nova.imas.test_utilities import ids_attrs, load_ids, mark
 
 ids_attrs["CORSICA"] = dict(pulse=130506, run=403, name="equilibrium")
 mark["CORSICA"] = pytest.mark.skipif(

@@ -3,10 +3,10 @@ import numpy as np
 import pytest
 
 from nova.imas.database import Database, IdsEntry, IMAS_MODULE_NOT_FOUND
-from nova.imas.pulsedesign import Constraint, PulseDesign
+from nova.imas.pulsedesign import PulseDesign
 from nova.imas.equilibrium import EquilibriumData
 from nova.imas.sample import Sample
-from nova.imas.utilities import ids_attrs, mark
+from nova.imas.test_utilities import ids_attrs, mark
 
 mark_imas = pytest.mark.skipif(IMAS_MODULE_NOT_FOUND, reason="IMAS module unavailable")
 

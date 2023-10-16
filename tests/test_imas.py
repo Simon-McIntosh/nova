@@ -9,7 +9,7 @@ from nova.imas.machine import (
     PoloidalFieldPassive,
 )
 from nova.imas.pf_active import PF_Active
-from nova.imas.utilities import ids_attrs, load_ids, mark, ALException
+from nova.imas.test_utilities import ids_attrs, load_ids, mark, ALException
 
 
 @mark["pf_active"]

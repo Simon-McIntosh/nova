@@ -536,9 +536,9 @@ class PolyLine(Plot):
         """Return segment geometry as a pandas DataFrame."""
         return pandas.DataFrame(self.path_geometry | self.volume_geometry)
 
-    def plot(self, quadrant_segments=101):
+    def plot(self, quadrant_segments=101, axes=None):
         """Plot decimated polyline."""
-        self.set_axes("3d")
+        self.set_axes("3d", axes)
         self.axes.plot(*self.points.T)
         for segment in self.segments:
             segment.plot3d(quadrant_segments)

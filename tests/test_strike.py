@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from nova.geometry.strike import Strike
-from nova.imas.utilities import ids_attrs, mark
+from nova.imas.test_utilities import ids_attrs, mark
 
 
 @mark["wall"]

@@ -8,17 +8,16 @@ import numpy as np
 import pandas
 from tqdm import tqdm
 import xarray
-import yaml
+
 
 from nova.biot.biotframe import Source
-from nova.database.filepath import FilePath
 from nova.geometry.polygeom import Polygon
 from nova.geometry.section import Section
 from nova.graphics.plot import Plot
 from nova.imas.coil import part_name
-from nova.imas.database import Database, Ids, IdsEntry
+from nova.imas.database import Ids, IdsEntry
 from nova.imas.machine import CoilDatabase
-from nova.imas.metadata import Metadata, Properties
+from nova.imas.metadata import Properties
 
 
 @dataclass
@@ -67,117 +66,10 @@ class Centerline(Plot, Properties, CoilDatabase):
         for attr in self.centerline_attrs:
             if (value := getattr(self, attr)) is not None and value != 0:
                 self.ids_metadata[attr] = value
+
         self.ids_metadata |= self._base_metadata
         self._check_status()
         super().__post_init__()
-
-    @cached_property
-    def _base_metadata(self):
-        """Return base ids metadata."""
-        return {
-            "description": "An algoritum for the aproximation of CAD generated "
-            "multi-point conductor centerlines by a sequence of "
-            "straight-line and arc segments."
-            "See Also: nova.geometry.centerline.Centerline"
-        }
-
-    @cached_property
-    def ids_metadata(self):
-        """Return ids metadata."""
-        metadata = {
-            "CC_EXTRATED_CENTERLINES": {
-                "status": "active",
-                "pulse": 111003,
-                "run": 2,
-                "occurrence": 0,
-                "name": "coils_non_axisymmetric",
-                "system": "correction_coils",
-                "comment": "Ex-Vessel Coils (EVC) Systems (CC) - conductor centerlines",
-                "source": [
-                    "Reference: DET-07879",
-                    "Objects: Correction Coils + Feeders Centerlines Extraction for "
-                    "IMAS database",
-                    "Filename: CC_EXTRATED_CENTERLINES.xls",
-                    "Date: 05/10/2023",
-                    "Provider: Vincent Bontemps, vincent.bontemps@iter.org",
-                    "Contact: Guillaume Davin, Guillaume.Davin@iter.org",
-                ],
-                "replaces": "111003/1",
-                "reason_for_replacement": "update includes coil feeders and "
-                "resolves conductor centerlines with line and arc segments",
-            },
-            "CS1L": {
-                "status": "active",
-                "pulse": 0,
-                "run": 0,
-                "occurrence": 0,
-                "name": "coils_non_axisymmetric",
-                "system": "central_solenoid",
-                "comment": "* - conductor centerlines",
-                "source": [
-                    "Reference: DET-*",
-                    "Objects: *",
-                    "Filename: CS1L.xls",
-                    "Date: 12/10/2023",
-                    "Provider: Vincent Bontemps, vincent.bontemps@iter.org",
-                    "Contact: Guillaume Davin, Guillaume.Davin@iter.org",
-                ],
-                "replaces": "*",
-                "reason_for_replacement": "*",
-            },
-        }
-        try:
-            return metadata[self.filename]
-        except KeyError as error:
-            raise KeyError(
-                f"Entry for {self.filename} not present in self.metadata"
-            ) from error
-
-    def _check_status(self):
-        """Assert that machine description status status is set."""
-        assert len(self.ids_metadata["status"]) > 0
-
-    @property
-    def _base_yaml(self):
-        """Return base yaml dict."""
-        return {
-            attr: self.ids_metadata.get(attr, "")
-            for attr in ["status", "replaced_by", "replaces", "reason_for_replacement"]
-        } | {"backend": self.backend}
-
-    @property
-    def _correction_coils_yaml(self):
-        """Return correction coil machine description yaml metadata."""
-        return {
-            "ids": "coils_non_axisymmetric",
-            "pbs": "PBS-11",
-            "data_provider": self.provider.split(", ")[0],
-            "data_provider_email": self.provider.split(", ")[1],
-            "ro": "Fabrice Simon",
-            "ro_email": "Fabrice.Simon@iter.org",
-            "description": self.ids_metadata["comment"],
-            "provenance": self.ids_metadata["source"][0].split()[-1],
-        }
-
-    @property
-    def _central_solenoid_yaml(self):
-        """Return central solenoid machine description yaml metadata."""
-        return {
-            "ids": "coils_non_axisymmetric",
-            "pbs": "PBS-*",
-            "data_provider": self.provider.split(", ")[0],
-            "data_provider_email": self.provider.split(", ")[1],
-            "ro": "*",
-            "ro_email": "*",
-            "description": self.ids_metadata["comment"],
-            "provenance": self.ids_metadata["source"][0].split()[-1],
-        }
-
-    @property
-    def yaml(self):
-        """Return machine description yaml metadata."""
-        system = self.ids_metadata["system"]
-        return getattr(self, f"_{system}_yaml") | self._base_yaml
 
     @property
     def ids_attrs(self):
@@ -256,7 +148,7 @@ class Centerline(Plot, Properties, CoilDatabase):
 
     def _read_sheet(self, xls, sheet_name=0):
         """Read excel worksheet."""
-        sheet = pandas.read_excel(xls, sheet_name, usecols=[2, 3, 4])  # , nrows=20
+        sheet = pandas.read_excel(xls, sheet_name, usecols=[2, 3, 4], nrows=20)
         columns = {"X Coord": "x", "Y Coord": "y", "Z Coord": "z"}
         sheet.rename(columns=columns, inplace=True)
         return sheet
@@ -304,16 +196,6 @@ class Centerline(Plot, Properties, CoilDatabase):
                 index
             ]
 
-    def update_metadata(self, ids_entry: IdsEntry):
-        """Update ids with instance metadata."""
-        metadata = Metadata(ids_entry.ids_data)
-        comment = self.ids_metadata["comment"]
-        provenance = self.ids_metadata["source"]
-        metadata.put_properties(comment, homogeneous_time=2, provenance=provenance)
-        code_parameters = self.polyline_attrs
-        description = self.ids_metadata["description"]
-        metadata.put_code(code_parameters, description=description)
-
     def _set_ids_points(self, ids_node, name, points):
         """Fill element points."""
         ids_points = getattr(ids_node, name)
@@ -349,9 +231,18 @@ class Centerline(Plot, Properties, CoilDatabase):
                 ].data
                 self._set_ids_points(ids_elements, point_name, points)
             ids_cross_section = ids_coil.conductor[0].cross_section
+            normal = self.data.normal[coil_index, 0]
+            axis = self.data.axis[coil_index, 0]
+            start_axes = np.c_[normal, np.cross(axis, normal), axis].T
+            section.to_axes(start_axes)
 
-            print(section, ids_cross_section, ids_entry)
-            # section.to_axes()
+            points = (
+                section.points
+                + self.data.start_points[coil_index, 0].data[np.newaxis, :]
+            )
+            self.set_axes("3d")
+            self.axes.plot(*points.T)
+            print(coil_index, section, ids_cross_section)
 
         # print(ids_entry.ids_data.coil[0].conductor[0].elements.start_points.r)
 
@@ -421,31 +312,22 @@ class Centerline(Plot, Properties, CoilDatabase):
     def write_ids(self, **ids_attrs):
         """Write pulse design data to equilibrium ids."""
         ids_attrs = self.ids_attrs | ids_attrs
-        ids_entry = IdsEntry(ids_data=self.coils_non_axisymmetric_ids, **ids_attrs)
-        print(ids_entry)
-        # ids_entry.put_ids()
-        self.write_yaml(**ids_attrs)
+        # ids_entry = IdsEntry(ids_data=self.coils_non_axisymmetric_ids, **ids_attrs)
 
-    def write_yaml(self, **ids_attrs):
-        """Write machine description yaml file."""
-        ids_path = Database(**ids_attrs).ids_path
-        filepath = FilePath("md_summary.yaml", ids_path).filepath
-        with open(filepath, "w") as file:
-            yaml.dump(
-                {f"{ids_attrs['pulse']}/{ids_attrs['run']}": self.yaml},
-                file,
-                default_flow_style=False,
-                sort_keys=False,
-            )
+        # ids_entry.put_ids()
+        # self.write_yaml(**ids_attrs)
 
 
 if __name__ == "__main__":
     filename = "CC_EXTRATED_CENTERLINES"
-    filename = "CS1L"
-    centerline = Centerline(filename=filename, cross_section={"s": [0, 0, 0.0148]})
+
+    """
+    filename, cross_section = "CS1L"
+    centerline = Centerline(filename=filename)
     centerline.coils_non_axisymmetric_ids
     # centerline.build()
     from nova.geometry.polyline import PolyLine
 
     polyline = PolyLine(centerline.data.points[0].values)
-    polyline.plot()
+    polyline.plot(axes=centerline.axes)
+    """

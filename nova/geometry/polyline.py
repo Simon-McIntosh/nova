@@ -10,7 +10,6 @@ import pandas
 from vedo import Mesh
 
 from nova.geometry.frenet import Frenet
-from nova.geometry import line
 from nova.geometry.polygeom import Polygon
 from nova.geometry.rdp import rdp
 from nova.geometry.volume import Cell, Sweep, TriShell
@@ -121,7 +120,7 @@ class Line(Plot, Element):
         """Return line length."""
         return np.linalg.norm(self.points[1] - self.points[0])
 
-    def plot3d(self):
+    def plot3d(self, quadrant_segments=None):
         """Plot point and best-fit data."""
         self.get_axes("3d")
         self.axes.plot(*self.points.T, "k-o", ms=3)
@@ -137,10 +136,11 @@ class Line(Plot, Element):
 class Arc(Plot, Element):
     """Fit arc to 3d point cloud."""
 
-    arc_axes: np.ndarray = field(init=False)
-    radius: float = field(init=False)
+    arc_axes: np.ndarray = field(init=False, repr=False)
+    radius: float = field(init=False, repr=False)
+    center: np.ndarray = field(init=False, repr=False)
     theta: float = field(init=False, repr=False)
-    error: float = field(init=False)
+    error: float = field(init=False, repr=False)
     eps: float = 1e-8
     quadrant_segments: int = 16
 
@@ -157,17 +157,15 @@ class Arc(Plot, Element):
             self.points = points
         if self.points is None:
             return None
-        self.align()
         self.fit()
         return self
 
-    def align(self):
+    def align(self, normal):
         """Align point cloud to 2d plane."""
+        binormal = Frenet(self.points).binormal.mean(axis=0)
         self.arc_axes = np.zeros((3, 3), float)
-        self.arc_axes[0] = self.points[-1] - self.points[0]  # arc chord
-        self.arc_axes[1] = np.cross(
-            Frenet(self.points).binormal.mean(axis=0), self.arc_axes[0]
-        )
+        self.arc_axes[0] = normal
+        self.arc_axes[1] = np.cross(binormal, self.arc_axes[0])
         if np.allclose(self.arc_axes[1], 0):
             binormal = np.cross(
                 self.arc_axes[0], np.mean(self.points[1:-1] - self.points[0], axis=0)
@@ -176,35 +174,59 @@ class Arc(Plot, Element):
         self.arc_axes[2] = np.cross(self.arc_axes[0], self.arc_axes[1])
         self.arc_axes[1] = np.cross(self.arc_axes[2], self.arc_axes[0])
         self.arc_axes /= np.linalg.norm(self.arc_axes, axis=1)[:, np.newaxis]
+        self.normal = self.arc_axes[0]
         self.axis = self.arc_axes[2]
 
-    @staticmethod
-    def fit_2d(points):
-        """Return center and radius of best fit circle to polyline."""
+    def fit_2d(self):
+        """Update center and radius of best fit circle to points on plane."""
+        points = self.points_2d
         chord = np.linalg.norm(points[-1] - points[0])
         origin = np.mean(np.c_[points[0], points[-1]], axis=1)
         points -= origin[np.newaxis, :]
-        print(points, chord)
         coef = np.linalg.lstsq(
             2 * points[:, 1:2],
             chord**2 / 4 - np.sum(points**2, axis=1),
             rcond=None,
         )[0]
-        center = origin
-        center[1] -= coef[0]
-        radius = np.sqrt(chord**2 / 4 + coef[0] ** 2)
+        center_2d = origin
+        center_2d[1] -= coef[0]
+        self.radius = np.sqrt(chord**2 / 4 + coef[0] ** 2)
         points[:, 1] -= coef[0]
-        assert np.allclose(radius, np.linalg.norm(points[0]))
-        assert np.allclose(radius, np.linalg.norm(points[-1]))
-        return center, radius
+        assert np.allclose(self.radius, np.linalg.norm(points[0]))
+        assert np.allclose(self.radius, np.linalg.norm(points[-1]))
+        self.center = center_2d @ self.arc_axes[:2]
+        self.center += (
+            np.mean(np.c_[self.points[0], self.points[-1]].T, axis=0)
+            @ self.arc_axes[2]
+            * self.arc_axes[2]
+        )
+        self.normal = self.points[0] - self.center  # align normal to local start radius
+        self.normal /= np.linalg.norm(self.normal)
+        self.arc_axes = np.c_[
+            self.normal, np.cross(self.axis, self.normal), self.axis
+        ].T
+        center_points = self.points_2d - self.center_2d
+        self.theta = np.arctan2(center_points[:, 1], center_points[:, 0])
+        self.theta[self.theta < 0] += 2 * np.pi
+        self.theta = np.unwrap(self.theta)
+        self.error = np.linalg.norm(self.points - self.points_fit, axis=1).std()
+
+    def _to_local(self, points):
+        """Return points projected onto 2d plane."""
+        return np.c_[
+            np.einsum("j,ij->i", self.arc_axes[0], points),
+            np.einsum("j,ij->i", self.arc_axes[1], points),
+        ]
 
     @property
     def points_2d(self):
         """Return point locations projected onto 2d plane."""
-        return np.c_[
-            np.einsum("j,ij->i", self.arc_axes[0], self.points),
-            np.einsum("j,ij->i", self.arc_axes[1], self.points),
-        ]
+        return self._to_local(self.points)
+
+    @property
+    def center_2d(self):
+        """Return point locations projected onto 2d plane."""
+        return self._to_local(self.center[np.newaxis, :])
 
     @property
     def points_fit(self):
@@ -216,23 +238,13 @@ class Arc(Plot, Element):
 
     def fit(self):
         """Align local coordinate system and fit arc to plane point cloud."""
-        center, self.radius = self.fit_2d(self.points_2d)
-        self.center = center @ self.arc_axes[:2]
-        self.center += (
-            np.mean(np.c_[self.points[0], self.points[-1]].T, axis=0)
-            @ self.arc_axes[2]
-            * self.arc_axes[2]
-        )
-        self.normal = self.points[0] - self.center
-        self.normal /= np.linalg.norm(self.normal)
-        center_points = self.points_2d - center
-        self.theta = np.unwrap(np.arctan2(center_points[:, 1], center_points[:, 0]))
-        self.error = np.linalg.norm(self.points - self.points_fit, axis=1).std()
+        self.align(self.points[0] - self.points[-1])
+        self.fit_2d()
 
     @cached_property
     def central_angle(self):
         """Return the absolute angle subtended by arc from the arc's center."""
-        return abs(self.theta[-1] - self.theta[0])
+        return self.theta[-1] - self.theta[0]
 
     @cached_property
     def length(self):
@@ -242,7 +254,7 @@ class Arc(Plot, Element):
     @property
     def test(self):
         """Return status of normalized fit residual."""
-        return self.error / self.length < self.eps
+        return self.error / abs(self.length) < self.eps
 
     def sample(self, point_number=50):
         """Return sampled polyline."""
@@ -253,7 +265,7 @@ class Arc(Plot, Element):
         )
 
     @cached_property
-    def mid_point(self):
+    def intermediate_point(self):
         """Return arc mid-point."""
         return self.sample(3)[1]
 
@@ -261,7 +273,7 @@ class Arc(Plot, Element):
     @override
     def nodes(self):
         """Return best-fit node triple respecting start and end locations."""
-        return np.array([self.start_point, self.mid_point, self.end_point])
+        return np.array([self.start_point, self.intermediate_point, self.end_point])
 
     @cached_property
     def chord(self):
@@ -286,10 +298,12 @@ class Arc(Plot, Element):
         self.axes.plot(self.points[:, 0], self.points[:, 2], "o")
         self.axes.plot(self.points_fit[:, 0], self.points_fit[:, 2], "D")
 
-    def plot3d(self):
+    def plot3d(self, quadrant_segments=None):
         """Plot point and best-fit data."""
         self.get_axes("3d")
-        points = self.sample(21)
+        if quadrant_segments is None:
+            quadrant_segments = self.quadrant_segments
+        points = self.sample(quadrant_segments)
         self.axes.plot(*points.T)
         self.axes.plot(*self.nodes.T, "o", ms=3)
 
@@ -396,10 +410,11 @@ class PolyLine(Plot):
         """Return point index prior to first arc mis-match."""
         point_number = len(points)
         for i in range(self.minimum_arc_nodes, point_number + 1):
-            if not Arc(points[:i], eps=self.arc_eps).test:
-                if i > self.minimum_arc_nodes:
-                    return i - 1
-                return 2
+            if Arc(points[:i], eps=self.arc_eps).test:
+                continue
+            if i > self.minimum_arc_nodes:
+                return i - 1
+            return 2
         return point_number
 
     def append(self, points, normal):
@@ -417,8 +432,8 @@ class PolyLine(Plot):
         point_number = len(self.points)
         start = 0
         self.segments = []
-        line_normal = line.Line.from_points(self.points).mesh["cross"]
-        while start <= point_number - 3:
+        line_normal = -Frenet(self.points).normal
+        while start <= point_number - self.minimum_arc_nodes:
             number = self.fit_arc(self.points[start:])
             self.append(
                 self.points[start : start + number],
@@ -521,12 +536,12 @@ class PolyLine(Plot):
         """Return segment geometry as a pandas DataFrame."""
         return pandas.DataFrame(self.path_geometry | self.volume_geometry)
 
-    def plot(self):
+    def plot(self, quadrant_segments=101):
         """Plot decimated polyline."""
         self.set_axes("3d")
         self.axes.plot(*self.points.T)
         for segment in self.segments:
-            segment.plot3d()
+            segment.plot3d(quadrant_segments)
         self.axes.set_aspect("equal")
 
     @property

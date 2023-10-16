@@ -17,6 +17,8 @@ def part_name(name):
         return "elm"
     if name[-2:] == "CC" or name[:2] == "CC" or name[1:3] == "CC":
         return "cc"
+    if name[:2] == "CS":
+        return "cs"
     raise NotImplementedError(f"coil part not implemented for {name}")
 
 

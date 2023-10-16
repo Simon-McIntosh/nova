@@ -1,4 +1,3 @@
-from itertools import product
 import numpy as np
 import pytest
 from scipy.spatial.transform import Rotation
@@ -8,8 +7,9 @@ from nova.geometry.rotate import to_axes
 from nova.utilities.importmanager import skip_import
 
 with skip_import("vtk"):
+    from nova.geometry.section import Section
     from nova.geometry.vtkgen import VtkFrame
-    from nova.geometry.volume import Section, Cell, Sweep
+    from nova.geometry.volume import Cell, Sweep
 
 
 @pytest.fixture

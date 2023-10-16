@@ -824,6 +824,8 @@ class IdsIndex:
         node = ".".join(split_path[:-1])
         leaf = split_path[-1]
         match node.split(":"):
+            case ("",):
+                branch = self.ids_data
             case (str(node),):
                 branch = attrgetter(node)(self.ids_data)
             case (str(array), str(node)):
@@ -832,6 +834,8 @@ class IdsIndex:
             case _:
                 raise IndexError(f"invalid node {node}")
         match leaf.split(":"):
+            case ("",):
+                setattr(branch, value)
             case (str(leaf),):
                 setattr(branch, leaf, value)
             case str(stem), str(leaf):

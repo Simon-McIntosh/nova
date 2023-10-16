@@ -1,3 +1,4 @@
+from itertools import product
 import numpy as np
 import pytest
 
@@ -170,16 +171,16 @@ def test_single_arc_hd():
     assert np.sum([isinstance(segment, Arc) for segment in polyline.segments]) == 1
 
 
-def test_decimate_polyline():
+def test_decimate_polyline():  # [arc, line, line, line, arc, line, line, line, arc]
     rng = np.random.default_rng(2025)
     points = rng.random((3, 3))
-    line = PolyArc(points, 100)
-    curve = line.path
+    arc = PolyArc(points, 100)
+    curve = arc.path
     for i in range(2):
         points = rng.random((3, 3))
-        line = PolyArc(points, 25)
+        arc = PolyArc(points, 25)
         curve = np.append(curve, rng.random((2, 3)), axis=0)
-        curve = np.append(curve, line.path, axis=0)
+        curve = np.append(curve, arc.path, axis=0)
     polyline = PolyLine(curve, arc_eps=1e-4, line_eps=5e-4, minimum_arc_nodes=4)
     assert np.sum([isinstance(segment, Arc) for segment in polyline.segments]) == 3
     assert np.sum([isinstance(segment, Line) for segment in polyline.segments]) == 6
@@ -296,8 +297,27 @@ def test_arc_points():
     assert np.allclose(arc.start_point, [1, 0.5, 0])
     assert np.allclose(arc.end_point, [0, 0.5, -1])
     assert np.isclose(arc.length, 2 * np.pi * 3 / 4)
-    assert np.allclose(arc.mid_point, arc.sample(3)[1])
+    assert np.allclose(arc.intermediate_point, arc.sample(3)[1])
     assert np.isclose(arc.central_angle, 3 / 2 * np.pi)
+
+
+@pytest.mark.parametrize(
+    "start_theta, central_angle, radius",
+    product(
+        [0.5, 2 * np.pi / 3, -3 / 2 * np.pi, np.pi, -np.pi],
+        [0.5, 2 * np.pi / 3, -3 / 2 * np.pi, np.pi, -np.pi],
+        [0.3, 1.7],
+    ),
+)
+def test_shifted_arc_length(start_theta, central_angle, radius):
+    theta = np.linspace(start_theta, start_theta + central_angle, 4)
+    points = np.c_[
+        radius * np.cos(theta), radius * np.sin(theta), -3.3 * np.ones_like(theta)
+    ]
+    arc = Arc(points)
+    assert np.isclose(theta[-1] - theta[0], central_angle)
+    assert np.isclose(arc.central_angle, abs(central_angle))
+    assert np.isclose(arc.length, radius * abs(central_angle))
 
 
 def test_arc_points_fail():
@@ -371,8 +391,8 @@ def test_straight_line_normal():
         polyline._to_list("nx"), polyline._to_list("ny"), polyline._to_list("nz")
     ]
     reference = np.zeros((3, 3))
-    reference[:, 1] = 1
-    reference[1] = [0, 0, -1]
+    reference[:, 2] = -1
+    reference[2] = [1, 0, 0]
     assert len(polyline) == 3
     assert np.allclose(np.linalg.norm(normal, axis=1), np.ones(3))
     assert np.allclose(normal, reference)

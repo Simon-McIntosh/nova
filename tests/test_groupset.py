@@ -20,7 +20,7 @@ def multiline():
 @pytest.fixture
 def multiarc():
     points = np.array(
-        [[-1, 2, 0], [-1, 1, -2], [-1, 0, 0], [0, 1, 0], [1, 0, 0]], float
+        [[-1, 2, 0], [-1, 1, -1], [-1, 0, 0], [0, 1, 0], [1, 0, 0]], float
     )
     polyline = PolyLine(points, minimum_arc_nodes=3)
     source = Source(polyline.path_geometry)
@@ -98,8 +98,16 @@ def test_local_arc_start_point_theta(multiarc):
     assert np.allclose(theta, 0)
 
 
-# def test_space_midpoint(multiline):
-#    assert space.midpoint == np.array([[], []])
+@pytest.mark.parametrize(
+    "source, intermediate_point",
+    [
+        ("multiline", [[-1.5, 0.0, 0.0], [-0.5, 0.5, 0.0], [0.5, 0.5, 0.0]]),
+        ("multiarc", [[-1, 1, -1], [0, 1, 0]]),
+    ],
+)
+def test_space_intermediate_point(source, intermediate_point, request):
+    space = request.getfixturevalue(source).space
+    assert np.allclose(space.intermediate_point, intermediate_point)
 
 
 if __name__ == "__main__":

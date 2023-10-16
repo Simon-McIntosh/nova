@@ -66,11 +66,13 @@ class Code(Attrs):
     """Methods for retriving and formating code metadata."""
 
     parameter_dict: dict | None = None
+    description: str | None = None
     output_flag: list[int] | np.ndarray | None = None
 
     name: ClassVar[str] = "Nova"
     attributes: ClassVar[list[str]] = [
         "name",
+        "description",
         "commit",
         "version",
         "repository",
@@ -123,9 +125,9 @@ class Metadata:
         properties = Properties(comment, source, *args, **kwargs)
         properties.update(self.ids.ids_properties)
 
-    def put_code(self, parameter_dict=None, output_flag=None):
+    def put_code(self, parameter_dict=None, description=None, output_flag=None):
         """Update referances to Nova code."""
-        code = Code(parameter_dict, output_flag)
+        code = Code(parameter_dict, description, output_flag)
         code.update(self.ids.code)
 
 

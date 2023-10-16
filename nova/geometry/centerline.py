@@ -4,11 +4,16 @@ from functools import cached_property
 from typing import ClassVar
 import os
 
+import numpy as np
 import pandas
 from tqdm import tqdm
 import xarray
+import yaml
 
+from nova.biot.biotframe import Source
+from nova.database.filepath import FilePath
 from nova.geometry.polygeom import Polygon
+from nova.geometry.section import Section
 from nova.graphics.plot import Plot
 from nova.imas.coil import part_name
 from nova.imas.database import Database, Ids, IdsEntry
@@ -32,7 +37,7 @@ class Centerline(Plot, Properties, CoilDatabase):
         default_factory=lambda: {"o": [0, 0, 0.1, 0.1, 3]}
     )
     minimum_arc_nodes: int = 4
-    quad_segs: int = 32
+    quadrant_segments: int = 32
     arc_eps: float = 1e-3
     line_eps: float = 2e-3
     rdp_eps: float = 1e-4
@@ -47,6 +52,13 @@ class Centerline(Plot, Properties, CoilDatabase):
         "source",
         "provider",
     ]
+    subframe_attrs: ClassVar[dict[str, list[str]]] = {
+        "start_points": ["x1", "y1", "z1"],
+        "end_points": ["x2", "y2", "z2"],
+        "centres": ["x", "y", "z"],
+        "axis": ["ax", "ay", "az"],
+        "normal": ["nx", "ny", "nz"],
+    }
 
     def __post_init__(self):
         """Format cross_section."""
@@ -55,8 +67,19 @@ class Centerline(Plot, Properties, CoilDatabase):
         for attr in self.centerline_attrs:
             if (value := getattr(self, attr)) is not None and value != 0:
                 self.ids_metadata[attr] = value
+        self.ids_metadata |= self._base_metadata
         self._check_status()
         super().__post_init__()
+
+    @cached_property
+    def _base_metadata(self):
+        """Return base ids metadata."""
+        return {
+            "description": "An algoritum for the aproximation of CAD generated "
+            "multi-point conductor centerlines by a sequence of "
+            "straight-line and arc segments."
+            "See Also: nova.geometry.centerline.Centerline"
+        }
 
     @cached_property
     def ids_metadata(self):
@@ -64,8 +87,8 @@ class Centerline(Plot, Properties, CoilDatabase):
         metadata = {
             "CC_EXTRATED_CENTERLINES": {
                 "status": "active",
-                "pulse": 111004,
-                "run": 1,
+                "pulse": 111003,
+                "run": 2,
                 "occurrence": 0,
                 "name": "coils_non_axisymmetric",
                 "system": "correction_coils",
@@ -79,7 +102,29 @@ class Centerline(Plot, Properties, CoilDatabase):
                     "Provider: Vincent Bontemps, vincent.bontemps@iter.org",
                     "Contact: Guillaume Davin, Guillaume.Davin@iter.org",
                 ],
-            }
+                "replaces": "111003/1",
+                "reason_for_replacement": "update includes coil feeders and "
+                "resolves conductor centerlines with line and arc segments",
+            },
+            "CS1L": {
+                "status": "active",
+                "pulse": 0,
+                "run": 0,
+                "occurrence": 0,
+                "name": "coils_non_axisymmetric",
+                "system": "central_solenoid",
+                "comment": "* - conductor centerlines",
+                "source": [
+                    "Reference: DET-*",
+                    "Objects: *",
+                    "Filename: CS1L.xls",
+                    "Date: 12/10/2023",
+                    "Provider: Vincent Bontemps, vincent.bontemps@iter.org",
+                    "Contact: Guillaume Davin, Guillaume.Davin@iter.org",
+                ],
+                "replaces": "*",
+                "reason_for_replacement": "*",
+            },
         }
         try:
             return metadata[self.filename]
@@ -115,6 +160,20 @@ class Centerline(Plot, Properties, CoilDatabase):
         }
 
     @property
+    def _central_solenoid_yaml(self):
+        """Return central solenoid machine description yaml metadata."""
+        return {
+            "ids": "coils_non_axisymmetric",
+            "pbs": "PBS-*",
+            "data_provider": self.provider.split(", ")[0],
+            "data_provider_email": self.provider.split(", ")[1],
+            "ro": "*",
+            "ro_email": "*",
+            "description": self.ids_metadata["comment"],
+            "provenance": self.ids_metadata["source"][0].split()[-1],
+        }
+
+    @property
     def yaml(self):
         """Return machine description yaml metadata."""
         system = self.ids_metadata["system"]
@@ -133,7 +192,7 @@ class Centerline(Plot, Properties, CoilDatabase):
         """Return polyline attributes."""
         return {
             "minimum_arc_nodes": self.minimum_arc_nodes,
-            "quad_segs": self.quad_segs,
+            "quadrant_segments": self.quadrant_segments,
             "arc_eps": self.arc_eps,
             "line_eps": self.line_eps,
             "rdp_eps": self.rdp_eps,
@@ -169,6 +228,7 @@ class Centerline(Plot, Properties, CoilDatabase):
         """Load points from file and build coil centerlines."""
         self.data = xarray.Dataset()
         self.data.coords["point"] = list("xyz")
+        self.data.coords["cross_section_index"] = range(len(self.cross_section.points))
         self.data["cross_section"] = (
             "cross_section_index",
             "point",
@@ -196,7 +256,7 @@ class Centerline(Plot, Properties, CoilDatabase):
 
     def _read_sheet(self, xls, sheet_name=0):
         """Read excel worksheet."""
-        sheet = pandas.read_excel(xls, sheet_name, usecols=[2, 3, 4], nrows=20)
+        sheet = pandas.read_excel(xls, sheet_name, usecols=[2, 3, 4])  # , nrows=20
         columns = {"X Coord": "x", "Y Coord": "y", "Z Coord": "z"}
         sheet.rename(columns=columns, inplace=True)
         return sheet
@@ -217,7 +277,6 @@ class Centerline(Plot, Properties, CoilDatabase):
 
     def _store_segment_data(self):
         """Store subframe segment data to dataset."""
-        self.data.coords["segment_point"] = ["start_point", "intermediate_point"]
         self.data["segment_number"] = "coil_name", [
             len(self.loc[self.loc["frame"] == coil_name, :])
             for coil_name in self.data.coil_name
@@ -228,25 +287,22 @@ class Centerline(Plot, Properties, CoilDatabase):
             coords=[self.data.coil_name, self.data.segment_index],
             dims=["coil_name", "segment_index"],
         ).astype("<U20")
-        for attr in ["start_point", "intermediate_point", "end_point", "center"]:
+        for attr in list(self.subframe_attrs) + ["intermediate_points"]:
             self.data[attr] = xarray.DataArray(
                 0.0,
                 coords=[self.data.coil_name, self.data.segment_index, self.data.point],
                 dims=["coil_name", "segment_index", "point"],
             )
-        points = {
-            "start_point": ["x1", "y1", "z1"],
-            "end_point": ["x2", "y2", "z2"],
-            "center": ["x", "y", "z"],
-        }
+        intermediate_point = Source(self.subframe).space.intermediate_point
         for coil_index in range(self.data.dims["coil_name"]):
             index = self.loc["frame"] == self.data.coil_name[coil_index]
             number = sum(index)
             self.data["segment_type"][coil_index, :number] = self.loc[index, "segment"]
-            for point, cols in points.items():
+            for point, cols in self.subframe_attrs.items():
                 self.data[point][coil_index, :number] = self.loc[index, cols]
-
-    # def _get_point(self, index, columns):
+            self.data["intermediate_points"][coil_index, :number] = intermediate_point[
+                index
+            ]
 
     def update_metadata(self, ids_entry: IdsEntry):
         """Update ids with instance metadata."""
@@ -255,13 +311,52 @@ class Centerline(Plot, Properties, CoilDatabase):
         provenance = self.ids_metadata["source"]
         metadata.put_properties(comment, homogeneous_time=2, provenance=provenance)
         code_parameters = self.polyline_attrs
-        metadata.put_code(code_parameters)
+        description = self.ids_metadata["description"]
+        metadata.put_code(code_parameters, description=description)
+
+    def _set_ids_points(self, ids_node, name, points):
+        """Fill element points."""
+        ids_points = getattr(ids_node, name)
+        ids_points.r = np.linalg.norm(points[:, :2], axis=1)
+        ids_points.phi = np.arctan2(points[:, 1], points[:, 0])
+        ids_points.height = points[:, 2]
 
     @cached_property
     def coils_non_axisymmetric_ids(self) -> Ids:
-        """Return coils non axisymmetric ids."""
-        ids_entry = IdsEntry(**self.ids_attrs)
+        """Return populated coils non axisymmetric ids."""
+        ids_entry = IdsEntry(ids_node="coil", **self.ids_attrs)
         self.update_metadata(ids_entry)
+        ids_entry.ids.resize(self.data.dims["coil_name"])
+        section = Section(self.data.cross_section.data)
+
+        for coil_index, ids_coil in enumerate(ids_entry.ids):
+            ids_coil.name = self.data.coil_name[coil_index].data
+            ids_coil.conductor.resize(1)
+            ids_coil.conductor[0].turns = 1
+            ids_elements = ids_coil.conductor[0].elements
+            segment_number = self.data.segment_number[coil_index].data
+            ids_elements.types = self.data.segment_type[
+                coil_index, :segment_number
+            ].data
+            for point_name in [
+                "start_points",
+                "intermediate_points",
+                "end_points",
+                "centres",
+            ]:
+                points = getattr(self.data, point_name)[
+                    coil_index, :segment_number
+                ].data
+                self._set_ids_points(ids_elements, point_name, points)
+            ids_cross_section = ids_coil.conductor[0].cross_section
+
+            print(section, ids_cross_section, ids_entry)
+            # section.to_axes()
+
+        # print(ids_entry.ids_data.coil[0].conductor[0].elements.start_points.r)
+
+        #    ids_entry["name", :] = self.data.coil_name.data
+
         """
         with ids_entry.node("time_slice:global_quantities.*"):
             for attr in ["li_3", "psi_axis", "psi_boundary"]:
@@ -325,15 +420,32 @@ class Centerline(Plot, Properties, CoilDatabase):
 
     def write_ids(self, **ids_attrs):
         """Write pulse design data to equilibrium ids."""
-        if ids_attrs["occurrence"] is None:
-            ids_attrs["occurrence"] = Database(**ids_attrs).next_occurrence()
-        ids_attrs |= {"name": "equilibrium"}
-        ids_entry = IdsEntry(ids_data=self.equilibrium_ids, **ids_attrs)
-        ids_entry.put_ids()
+        ids_attrs = self.ids_attrs | ids_attrs
+        ids_entry = IdsEntry(ids_data=self.coils_non_axisymmetric_ids, **ids_attrs)
+        print(ids_entry)
+        # ids_entry.put_ids()
+        self.write_yaml(**ids_attrs)
+
+    def write_yaml(self, **ids_attrs):
+        """Write machine description yaml file."""
+        ids_path = Database(**ids_attrs).ids_path
+        filepath = FilePath("md_summary.yaml", ids_path).filepath
+        with open(filepath, "w") as file:
+            yaml.dump(
+                {f"{ids_attrs['pulse']}/{ids_attrs['run']}": self.yaml},
+                file,
+                default_flow_style=False,
+                sort_keys=False,
+            )
 
 
 if __name__ == "__main__":
-    centerline = Centerline(
-        filename="CC_EXTRATED_CENTERLINES", cross_section={"s": [0, 0, 0.0148]}
-    )
+    filename = "CC_EXTRATED_CENTERLINES"
+    filename = "CS1L"
+    centerline = Centerline(filename=filename, cross_section={"s": [0, 0, 0.0148]})
+    centerline.coils_non_axisymmetric_ids
     # centerline.build()
+    from nova.geometry.polyline import PolyLine
+
+    polyline = PolyLine(centerline.data.points[0].values)
+    polyline.plot()

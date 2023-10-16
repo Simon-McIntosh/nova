@@ -138,8 +138,15 @@ class IDS:
 
     @property
     def ids_attrs(self):
-        """Return dict of ids attributes."""
+        """Manage dict of ids attributes."""
         return {attr: getattr(self, attr) for attr in self.attrs}
+
+    @ids_attrs.setter
+    def ids_attrs(self, attrs: dict):
+        for attr, value in attrs.items():
+            if attr not in self.attrs:
+                raise AttributeError(f"attr {attr} not in self.attrs {self.attrs}")
+            setattr(self, attr, value)
 
     @classmethod
     def update_ids_attrs(cls, ids_attrs: bool | Ids):

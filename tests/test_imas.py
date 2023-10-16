@@ -1,6 +1,6 @@
 import pytest
 
-from nova.imas.database import Database
+from nova.imas.database import Database, IDS
 from nova.imas.equilibrium import EquilibriumData
 from nova.imas.machine import (
     Geometry,
@@ -10,6 +10,16 @@ from nova.imas.machine import (
 )
 from nova.imas.pf_active import PF_Active
 from nova.imas.test_utilities import ids_attrs, load_ids, mark, ALException
+
+
+def test_ids_attrs():
+    ids = IDS(45, run=7)
+    ids.ids_attrs = {"occurrence": 5}
+    assert ids.ids_attrs["pulse"] == 45
+    assert ids.ids_attrs["run"] == 7
+    assert ids.ids_attrs["occurrence"] == 5
+    with pytest.raises(AttributeError):
+        ids.ids_attrs = {"shot": 3}
 
 
 @mark["pf_active"]

@@ -2,7 +2,7 @@ from datetime import datetime
 import pytest
 
 
-from nova.imas.machinedescription import CADSource, YAML
+from nova.imas.datasource import CADSource, YAML
 
 
 @pytest.fixture

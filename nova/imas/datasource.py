@@ -11,36 +11,6 @@ from nova.imas.database import Database, IDS, IdsEntry
 from nova.imas.metadata import Metadata
 
 
-@dataclass
-class CADSource:
-    """Manage CAD source metadata."""
-
-    reference: str | None = None
-    objects: str | None = None
-    filename: str | None = None
-    date: datetime | str = field(default_factory=datetime.now)
-    provider: str = "Vincent Bontemps, vincent.bontemps@iter.org"
-    contact: str = "Guillaume Davin, Guillaume.Davin@iter.org"
-
-    def __post_init__(self):
-        """Convert data field to string."""
-        if isinstance(self.date, datetime):
-            self.date = self.date.strftime("%d/%m/%Y")
-
-    @property
-    def source(self):
-        """Manage CAD source metadata."""
-        return [
-            f"{cad_field.name.capitalize()}: {getattr(self, cad_field.name)}"
-            for cad_field in fields(CADSource)
-        ]
-
-    @source.setter
-    def source(self, data: dict):
-        for attr, value in data.items():
-            setattr(self, attr, value)
-
-
 class Contact(TypedDict):
     """Manage yaml contact."""
 
@@ -48,19 +18,12 @@ class Contact(TypedDict):
     email: str | None
 
 
-@dataclass
-class YAML(IDS):
-    """Manage machine description YAML data."""
+class Contacts:
+    """Manage contact attributes."""
 
-    pbs: int = 0
-    provider: Contact | str = "default_name, default_email"
-    officer: Contact | str = "default_name, default_email"
-    description: str | None = None
-    provenance: str | None = None
-
-    def __post_init__(self):
-        """Initialize contacts attribute."""
-        for attr in ["provider", "officer"]:
+    def update_contacts(self, *contacts: str):
+        """Update contact types."""
+        for attr in contacts:
             if isinstance(value := getattr(self, attr), str):
                 contact = dict(zip(["name", "email"], value.split(",")))
                 setattr(self, attr, contact)
@@ -76,6 +39,61 @@ class YAML(IDS):
                 raise NotImplementedError(f"{key} not implemented")
 
     @property
+    def data(self) -> dict:
+        """Return instance data."""
+        raise NotImplementedError
+
+
+@dataclass
+class CADSource(Contacts):
+    """Manage CAD source metadata."""
+
+    reference: str | None = None
+    objects: str | None = None
+    filename: str | None = None
+    date: datetime | str = field(default_factory=datetime.now)
+    provider: str = "Vincent Bontemps, vincent.bontemps@iter.org"
+    contact: str = "Guillaume Davin, Guillaume.Davin@iter.org"
+
+    def __post_init__(self):
+        """Convert data field to string."""
+        if isinstance(self.date, datetime):
+            self.date = self.date.strftime("%d/%m/%Y")
+        self.update_contacts("provider", "contact")
+
+    @property
+    def source(self):
+        """Manage CAD source metadata."""
+        return [
+            f"{cad_field.name.capitalize()}: {getattr(self, cad_field.name)}"
+            for cad_field in fields(CADSource)
+        ]
+
+    @property
+    def data(self) -> dict:
+        """Return CAD attribute."""
+        return {
+            cad_field.name: getattr(self, cad_field.name)
+            for cad_field in fields(CADSource)
+        }
+
+
+@dataclass
+class YAML(Contacts):
+    """Manage machine description YAML data."""
+
+    name: str | None = None
+    pbs: int = 0
+    provider: Contact | str = "default_name, default_email"
+    officer: Contact | str = "default_name, default_email"
+    description: str | None = None
+    provenance: str | None = None
+
+    def __post_init__(self):
+        """Initialize contacts attribute."""
+        self.update_contacts("provider", "officer")
+
+    @property
     def data(self):
         """Return yaml dict."""
         return {
@@ -89,13 +107,13 @@ class YAML(IDS):
             "provenance": self.provenance,
         }
 
-    def write(self, **ids_attrs):
+    def write(self):
         """Write machine description yaml file."""
-        ids_path = Database(**ids_attrs).ids_path
+        ids_path = Database(**self.ids_attrs).ids_path
         filepath = FilePath("md_summary.yaml", ids_path).filepath
         with open(filepath, "w") as file:
             yaml.dump(
-                {f"{ids_attrs['pulse']}/{ids_attrs['run']}": self.data},
+                {f"{self.pulse}/{self.run}": self.data},
                 file,
                 default_flow_style=False,
                 sort_keys=False,
@@ -123,6 +141,10 @@ class Properties:
 @dataclass
 class MachineDescription(IDS):
     """Manage machine description data."""
+
+    machine: str = "iter_md"
+    cad: CADSource = field(default_factory=CADSource)
+    yaml: YAML = field(default_factory=YAML)
 
     machine_description_attrs: ClassVar[list[str]] = [
         "status",
@@ -217,3 +239,23 @@ class MachineDescription(IDS):
             ) from error
 
         # "cross_section": "square, 0.0148": [0, 0, 0.0148]}
+
+
+@dataclass
+class DataSource:
+    """Manage machine description data source."""
+
+    ids: MachineDescription | dict = field(default_factory=MachineDescription)
+    cad: CADSource | dict = field(default_factory=CADSource)
+    yaml: YAML | dict = field(default_factory=YAML)
+
+    def __post_init__(self):
+        """Initialize data source attributes."""
+        for _field in fields(DataSource):
+            if isinstance(value := getattr(self, _field.name), dict):
+                setattr(self, _field.name, _field.default_factory(**value))
+
+    @property
+    def ids_attrs(self):
+        """Return machine description ids attributes."""
+        return self.ids.ids_attrs

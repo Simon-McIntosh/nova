@@ -16,12 +16,74 @@ from nova.geometry.section import Section
 from nova.graphics.plot import Plot
 from nova.imas.coil import part_name
 from nova.imas.database import Ids, IdsEntry
+from nova.imas.datasource import CADSource, DataSource, MachineDescription
 from nova.imas.machine import CoilDatabase
-from nova.imas.metadata import Properties
+
+data_source = {
+    "CC_EXTRATED_CENTERLINES": DataSource(
+        ids=MachineDescription(
+            pulse=111003, run=2, occurrence=0, name="coils_non_axisymmetric"
+        ),
+        cad=CADSource(
+            reference="DET-07879",
+            objects="Correction Coils + Feeders Centerlines Extraction "
+            "for IMAS database",
+            filename="CC_EXTRATED_CENTERLINES.xls",
+            date="05/10/2023",
+            provider="Vincent Bontemps, vincent.bontemps@iter.org",
+            contact="Guillaume Davin, Guillaume.Davin@iter.org",
+        ),
+    )
+}
+
+"""
+        {
+        "status": "active",
+        "pulse": 111003,
+        "run": 2,
+        "occurrence": 0,
+        "name": "coils_non_axisymmetric",
+        "system": "correction_coils",
+        "comment": "Ex-Vessel Coils (EVC) Systems (CC) - conductor centerlines",
+        "source": [
+            "Reference: DET-07879",
+            "Objects: Correction Coils + Feeders Centerlines Extraction for "
+            "IMAS database",
+            "Filename: CC_EXTRATED_CENTERLINES.xls",
+            "Date: 05/10/2023",
+            "Provider: Vincent Bontemps, vincent.bontemps@iter.org",
+            "Contact: Guillaume Davin, Guillaume.Davin@iter.org",
+        ],
+        "replaces": "111003/1",
+        "reason_for_replacement": "update includes coil feeders and "
+        "resolves conductor centerlines with line and arc segments",}
+"""
 
 
 @dataclass
-class Centerline(Plot, Properties, CoilDatabase):
+class PolylineAttrs:
+    """Group polyline attributes."""
+
+    minimum_arc_nodes: int = 4
+    quadrant_segments: int = 32
+    arc_eps: float = 1e-3
+    line_eps: float = 2e-3
+    rdp_eps: float = 1e-4
+
+    @property
+    def polyline_attrs(self):
+        """Return polyline attributes."""
+        return {
+            "minimum_arc_nodes": self.minimum_arc_nodes,
+            "quadrant_segments": self.quadrant_segments,
+            "arc_eps": self.arc_eps,
+            "line_eps": self.line_eps,
+            "rdp_eps": self.rdp_eps,
+        }
+
+
+@dataclass
+class Centerline(Plot, PolylineAttrs, CoilDatabase):  # Properties
     r"""Extract coil centerlines from CAD traces.
 
     Centerline source data is recived via email and and stored in a shared folder at:
@@ -35,11 +97,7 @@ class Centerline(Plot, Properties, CoilDatabase):
     cross_section: Polygon | dict[str, list] = field(
         default_factory=lambda: {"o": [0, 0, 0.1, 0.1, 3]}
     )
-    minimum_arc_nodes: int = 4
-    quadrant_segments: int = 32
-    arc_eps: float = 1e-3
-    line_eps: float = 2e-3
-    rdp_eps: float = 1e-4
+    source: DataSource = field(init=False, default_factory=DataSource)
     datadir: str = "/mnt/share/coil_centerlines"
 
     centerline_attrs: ClassVar[list[str]] = [
@@ -63,32 +121,9 @@ class Centerline(Plot, Properties, CoilDatabase):
         """Format cross_section."""
         if isinstance(self.cross_section, dict):
             self.cross_section = Polygon(self.cross_section)
-        for attr in self.centerline_attrs:
-            if (value := getattr(self, attr)) is not None and value != 0:
-                self.ids_metadata[attr] = value
-
-        self.ids_metadata |= self._base_metadata
-        self._check_status()
+        self.source = data_source[self.filename]
+        self.ids_attrs = self.source.ids_attrs
         super().__post_init__()
-
-    @property
-    def ids_attrs(self):
-        """Return ids attributes."""
-        return super().ids_attrs | {
-            attr: self.ids_metadata[attr]
-            for attr in ["pulse", "run", "occurrence", "name"]
-        }
-
-    @property
-    def polyline_attrs(self):
-        """Return polyline attributes."""
-        return {
-            "minimum_arc_nodes": self.minimum_arc_nodes,
-            "quadrant_segments": self.quadrant_segments,
-            "arc_eps": self.arc_eps,
-            "line_eps": self.line_eps,
-            "rdp_eps": self.rdp_eps,
-        }
 
     @property
     def group_attrs(self) -> dict:
@@ -112,9 +147,9 @@ class Centerline(Plot, Properties, CoilDatabase):
         return os.path.join(self.datadir, f"{self.filename}.xlsx")
 
     @property
-    def metadata(self):
-        """Return netCDF metadata."""
-        return self.ids_attrs | self.polyline_attrs | self.ids_metadata | self.yaml
+    def netcdf_attrs(self):
+        """Return netcdf attrs."""
+        return self.ids_attrs | self.polyline_attrs  # | self.ids_metadata | self.yaml
 
     def build(self):
         """Load points from file and build coil centerlines."""
@@ -143,7 +178,7 @@ class Centerline(Plot, Properties, CoilDatabase):
         self._store_point_data(xls_points)
         self._store_segment_data()
 
-        self.data.attrs = self.metadata
+        self.data.attrs = self.netcdf_attrs
         # self.store()
 
     def _read_sheet(self, xls, sheet_name=0):
@@ -321,13 +356,10 @@ class Centerline(Plot, Properties, CoilDatabase):
 if __name__ == "__main__":
     filename = "CC_EXTRATED_CENTERLINES"
 
-    """
-    filename, cross_section = "CS1L"
+    # filename, cross_section = "CS1L"
     centerline = Centerline(filename=filename)
-    centerline.coils_non_axisymmetric_ids
-    # centerline.build()
+    # centerline.coils_non_axisymmetric_ids
     from nova.geometry.polyline import PolyLine
 
     polyline = PolyLine(centerline.data.points[0].values)
-    polyline.plot(axes=centerline.axes)
-    """
+    polyline.plot()

@@ -1,5 +1,5 @@
 """Manage CAD centerlines."""
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from functools import cached_property
 from typing import ClassVar
 import os
@@ -16,15 +16,23 @@ from nova.geometry.section import Section
 from nova.graphics.plot import Plot
 from nova.imas.coil import part_name
 from nova.imas.database import Ids, IdsEntry
-from nova.imas.datasource import CADSource, DataSource, MachineDescription
+from nova.imas.datasource import CAD, DataSource
 from nova.imas.machine import CoilDatabase
+from nova.imas.metadata import Code
 
-data_source = {
+datasource = {
     "CC_EXTRATED_CENTERLINES": DataSource(
-        ids=MachineDescription(
-            pulse=111003, run=2, occurrence=0, name="coils_non_axisymmetric"
-        ),
-        cad=CADSource(
+        pulse=111003,
+        run=2,
+        name="coils_non_axisymmetric",
+        pbs=11,
+        provider="Simon McIntosh, simon.mcintosh@iter.org",
+        officer="Fabrice Simon, fabrice.simon@iter.org",
+        status="active",
+        replaces="111003/1",
+        reason_for_replacement="resolve conductor centerlines and include coil feeders",
+        cad=CAD(
+            cross_section={"square": [0, 0, 0.0148]},
             reference="DET-07879",
             objects="Correction Coils + Feeders Centerlines Extraction "
             "for IMAS database",
@@ -57,6 +65,29 @@ data_source = {
         "replaces": "111003/1",
         "reason_for_replacement": "update includes coil feeders and "
         "resolves conductor centerlines with line and arc segments",}
+
+    "CS1L": {
+        "status": "active",
+        "pulse": 0,
+        "run": 0,
+        "occurrence": 0,
+        "name": "coils_non_axisymmetric",
+        "system": "central_solenoid",
+        "comment": "* - conductor centerlines",
+        "source": [
+            "Reference: DET-*",
+            "Objects: *",
+            "Filename: CS1L.xls",
+            "Date: 12/10/2023",
+            "Provider: Vincent Bontemps, vincent.bontemps@iter.org",
+            "Contact: Guillaume Davin, Guillaume.Davin@iter.org",
+        ],
+        "replaces": "*",
+        "reason_for_replacement": "*",
+    },
+
+    "system": "correction_coils",
+    "comment": "Ex-Vessel Coils (EVC) Systems (CC) - conductor centerlines"
 """
 
 
@@ -83,7 +114,7 @@ class PolylineAttrs:
 
 
 @dataclass
-class Centerline(Plot, PolylineAttrs, CoilDatabase):  # Properties
+class Centerline(Plot, PolylineAttrs, CoilDatabase):
     r"""Extract coil centerlines from CAD traces.
 
     Centerline source data is recived via email and and stored in a shared folder at:
@@ -94,21 +125,14 @@ class Centerline(Plot, PolylineAttrs, CoilDatabase):  # Properties
     """
 
     filename: str = ""
-    cross_section: Polygon | dict[str, list] = field(
-        default_factory=lambda: {"o": [0, 0, 0.1, 0.1, 3]}
-    )
-    source: DataSource = field(init=False, default_factory=DataSource)
     datadir: str = "/mnt/share/coil_centerlines"
 
-    centerline_attrs: ClassVar[list[str]] = [
-        "pulse",
-        "run",
-        "machine",
-        "occurrence",
-        "comment",
-        "source",
-        "provider",
-    ]
+    description: ClassVar[str] = (
+        "An algoritum for the aproximation of CAD generated "
+        "multi-point conductor centerlines by a sequence of "
+        "straight-line and arc segments. "
+        "See Also: nova.geometry.centerline.Centerline"
+    )
     subframe_attrs: ClassVar[dict[str, list[str]]] = {
         "start_points": ["x1", "y1", "z1"],
         "end_points": ["x2", "y2", "z2"],
@@ -119,11 +143,30 @@ class Centerline(Plot, PolylineAttrs, CoilDatabase):  # Properties
 
     def __post_init__(self):
         """Format cross_section."""
-        if isinstance(self.cross_section, dict):
-            self.cross_section = Polygon(self.cross_section)
-        self.source = data_source[self.filename]
-        self.ids_attrs = self.source.ids_attrs
+        self.datasource = datasource[self.filename]
+        self.ids_attrs = self.datasource.ids_attrs
         super().__post_init__()
+
+    @cached_property
+    def datasource(self) -> DataSource:
+        """Return datasource instance."""
+        try:
+            return datasource[self.filename]
+        except KeyError as error:
+            raise KeyError(
+                f"filename {self.filename} not defined in "
+                f"datasource {datasource.keys()}"
+            ) from error
+
+    @cached_property
+    def cross_section(self):
+        """Return conductor cross-section from datasource."""
+        return Polygon(self.datasource.cad.cross_section)
+
+    @property
+    def code(self):
+        """Return code instance."""
+        return Code(description=self.description, parameter_dict=self.polyline_attrs)
 
     @property
     def group_attrs(self) -> dict:

@@ -2,35 +2,40 @@ from datetime import datetime
 import pytest
 
 
-from nova.imas.datasource import CADSource, YAML
+from nova.imas.datasource import (
+    CAD,
+    DataSource,
+    YAML,
+)
 
 
 @pytest.fixture
-def cad_source():
-    return CADSource()
+def cad():
+    return CAD(cross_section={"circle": [0, 0, 0.025]})
 
 
-def test_default_cad_source(cad_source):
-    assert len(cad_source.source) == 6
+def test_default_cad_source(cad):
+    assert len(cad.source) == 7
 
 
-def test_default_cad_source_fields(cad_source):
-    assert [attr.split(":")[0] for attr in cad_source.source] == [
-        "Reference",
-        "Objects",
-        "Filename",
-        "Date",
-        "Provider",
-        "Contact",
+def test_default_cad_source_fields(cad):
+    assert [attr.split(":")[0] for attr in cad.source] == [
+        "cross-section",
+        "reference",
+        "objects",
+        "filename",
+        "date",
+        "provider",
+        "contact",
     ]
 
 
-def test_default_date(cad_source):
-    assert cad_source.date == datetime.now().strftime("%d/%m/%Y")
+def test_default_date(cad):
+    assert cad.date == datetime.now().strftime("%d/%m/%Y")
 
 
 def test_source_date():
-    assert CADSource(date="27/7/2017").date == "27/7/2017"
+    assert CAD(cross_section={"s": [0, 0, 0.001]}, date="27/7/2017").date == "27/7/2017"
 
 
 def test_yaml_data():
@@ -43,6 +48,31 @@ def test_yaml_contacts():
     yaml = YAML(provider={"name": "a", "email": "a@b"}, officer="fred, fred@iter")
     assert yaml["provider", "email"] == "a@b"
     assert yaml["officer", "name"] == "fred"
+
+
+@pytest.fixture
+def datasource():
+    return DataSource(
+        pulse=111003,
+        run=2,
+        name="coils_non_axisymmetric",
+        pbs=11,
+        provider="Simon McIntosh, simon.mcintosh@iter.org",
+        officer="Fabrice Simon, fabrice.simon@iter.org",
+        status="active",
+        replaces="111003/1",
+        reason_for_replacement="resolve conductor centerlines and include coil feeders",
+        cad=CAD(
+            cross_section={"square": [0, 0, 0.0148]},
+            reference="DET-07879",
+            objects="Correction Coils + Feeders Centerlines Extraction "
+            "for IMAS database",
+            filename="CC_EXTRATED_CENTERLINES.xls",
+            date="05/10/2023",
+            provider="Vincent Bontemps, vincent.bontemps@iter.org",
+            contact="Guillaume Davin, Guillaume.Davin@iter.org",
+        ),
+    )
 
 
 '''

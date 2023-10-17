@@ -1,8 +1,8 @@
 """Update ids metadata."""
 from abc import ABC
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
 from datetime import datetime
-from typing import ClassVar
+from typing import ClassVar, get_args
 
 import git
 import numpy as np
@@ -31,13 +31,63 @@ class Attrs(ABC):
 
 
 @dataclass
-class Properties(Attrs):
+class Contact:
+    """Manage yaml contact."""
+
+    name: str
+    email: str
+
+    def __getitem__(self, attr: str) -> str:
+        """Provide dict-like lookup."""
+        return getattr(self, attr)
+
+
+class Contacts:
+    """Manage contact attributes."""
+
+    def __post_init__(self):
+        """Update contact types."""
+        self._update_contacts()
+        if hasattr(super(), "__post_init__"):
+            super().__post_init__()
+
+    def _update_contacts(self):
+        """Update contact types."""
+        for _field in fields(self):
+            if isinstance(value := getattr(self, _field.name), Contact):
+                continue
+            try:
+                if issubclass(Contact, get_args(_field.type)):
+                    if isinstance(value, str):
+                        value = dict(zip(["name", "email"], value.split(", ")))
+                    setattr(self, _field.name, Contact(**value))
+            except TypeError:
+                continue
+
+    def __getitem__(self, key):
+        """Return contact attribtes."""
+        match key:
+            case str(contact), str(attr):
+                return getattr(self, contact)[attr]
+            case str(attr):
+                return self.data[attr]
+            case _:
+                raise NotImplementedError(f"{key} not implemented")
+
+    @property
+    def data(self) -> dict:
+        """Return instance data."""
+        raise NotImplementedError
+
+
+@dataclass
+class Properties(Contacts, Attrs):
     """Manage imas ids_property attributes."""
 
     comment: str | None = None
     source: str | None = None
     homogeneous_time: int = 1
-    provider: str | None = "Simon McIntosh, simon.mcintosh@iter.org"
+    provider: Contact | str = "Simon McIntosh, simon.mcintosh@iter.org"
     provenance: list[str] | None = None
 
     attributes: ClassVar[list[str]] = [

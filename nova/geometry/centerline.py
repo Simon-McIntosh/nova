@@ -41,51 +41,33 @@ datasource = {
             provider="Vincent Bontemps, vincent.bontemps@iter.org",
             contact="Guillaume Davin, Guillaume.Davin@iter.org",
         ),
-    )
+    ),
+    "CS1L": DataSource(
+        pulse=0,
+        run=0,
+        name="coils_non_axisymmetric",
+        # system="central_solenoid",
+        # comment="* - conductor centerlines",
+        pbs=11,
+        provider="Simon McIntosh, simon.mcintosh@iter.org",
+        officer="Fabrice Simon, fabrice.simon@iter.org",
+        status="active",
+        replaces="",
+        reason_for_replacement="",
+        cad=CAD(
+            cross_section={"square": [0, 0, 0.0148]},
+            reference="DET-*",
+            objects="Correction Coils + Feeders Centerlines Extraction "
+            "for IMAS database",
+            filename="CS1L.xls",
+            date="12/10/2023",
+            provider="Vincent Bontemps, vincent.bontemps@iter.org",
+            contact="Guillaume Davin, Guillaume.Davin@iter.org",
+        ),
+    ),
 }
 
 """
-        {
-        "status": "active",
-        "pulse": 111003,
-        "run": 2,
-        "occurrence": 0,
-        "name": "coils_non_axisymmetric",
-        "system": "correction_coils",
-        "comment": "Ex-Vessel Coils (EVC) Systems (CC) - conductor centerlines",
-        "source": [
-            "Reference: DET-07879",
-            "Objects: Correction Coils + Feeders Centerlines Extraction for "
-            "IMAS database",
-            "Filename: CC_EXTRATED_CENTERLINES.xls",
-            "Date: 05/10/2023",
-            "Provider: Vincent Bontemps, vincent.bontemps@iter.org",
-            "Contact: Guillaume Davin, Guillaume.Davin@iter.org",
-        ],
-        "replaces": "111003/1",
-        "reason_for_replacement": "update includes coil feeders and "
-        "resolves conductor centerlines with line and arc segments",}
-
-    "CS1L": {
-        "status": "active",
-        "pulse": 0,
-        "run": 0,
-        "occurrence": 0,
-        "name": "coils_non_axisymmetric",
-        "system": "central_solenoid",
-        "comment": "* - conductor centerlines",
-        "source": [
-            "Reference: DET-*",
-            "Objects: *",
-            "Filename: CS1L.xls",
-            "Date: 12/10/2023",
-            "Provider: Vincent Bontemps, vincent.bontemps@iter.org",
-            "Contact: Guillaume Davin, Guillaume.Davin@iter.org",
-        ],
-        "replaces": "*",
-        "reason_for_replacement": "*",
-    },
-
     "system": "correction_coils",
     "comment": "Ex-Vessel Coils (EVC) Systems (CC) - conductor centerlines"
 """

@@ -11,16 +11,15 @@ from nova.imas.datasource import (
 
 @pytest.fixture
 def cad():
-    return CAD(cross_section={"circle": [0, 0, 0.025]})
+    return CAD()
 
 
-def test_default_cad_source(cad):
-    assert len(cad.source) == 7
+def test_default_cad_provenance(cad):
+    assert len(cad.provenance) == 6
 
 
 def test_default_cad_source_fields(cad):
-    assert [attr.split(":")[0] for attr in cad.source] == [
-        "cross-section",
+    assert [attr.split(":")[0] for attr in cad.provenance] == [
         "reference",
         "objects",
         "filename",
@@ -35,7 +34,7 @@ def test_default_date(cad):
 
 
 def test_source_date():
-    assert CAD(cross_section={"s": [0, 0, 0.001]}, date="27/7/2017").date == "27/7/2017"
+    assert CAD(date="27/7/2017").date == "27/7/2017"
 
 
 def test_yaml_data():
@@ -63,7 +62,6 @@ def datasource():
         replaces="111003/1",
         reason_for_replacement="resolve conductor centerlines and include coil feeders",
         cad=CAD(
-            cross_section={"square": [0, 0, 0.0148]},
             reference="DET-07879",
             objects="Correction Coils + Feeders Centerlines Extraction "
             "for IMAS database",
@@ -72,7 +70,16 @@ def datasource():
             provider="Vincent Bontemps, vincent.bontemps@iter.org",
             contact="Guillaume Davin, Guillaume.Davin@iter.org",
         ),
+        attributes={"cross_section": {"square": [0, 0, 0.0148]}},
     )
+
+
+def test_shared_attributes(datasource):
+    assert datasource.name == datasource["ids"]
+    assert datasource.provider == datasource.properties.provider
+    assert datasource.description == datasource.code.description
+    assert datasource.description == datasource.properties.comment
+    assert "ids" not in datasource.yaml_attrs
 
 
 '''

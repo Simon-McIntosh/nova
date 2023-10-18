@@ -155,6 +155,17 @@ extrapolate = "nova.imas.scripts:extrapolate"
 filepath = "nova.database.scripts:filepath"
 configure = "nova.scripts.configure:configure"
 
+
+[[tool.poetry.source]]
+name = "PyPI"
+priority = "primary"
+
+
+[[tool.poetry.source]]
+name = "iter"
+url = "https://pypi.iter.org/simple/"
+priority = "explicit"
+
 [tool.black]
 line-length = 88
 target-version = ['py310']

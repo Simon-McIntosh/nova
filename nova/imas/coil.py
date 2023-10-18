@@ -9,6 +9,19 @@ def coil_name(coil):
     return coil.identifier
 
 
+def full_coil_name(identifier: str):
+    """Return full coil name from identifier."""
+    match list(identifier):
+        case str(prefix), "C", "C", "_", str(i), "-", str(j) if prefix in "TMB":
+            position = dict(zip("TMB", ["Top", "Middle", "Bottom"]))[prefix]
+            return f"{position} Correction Coils, {prefix}CC-{i} and {prefix}CC-{j}"
+        case "C", "S", str(index), str(postfix):
+            position = dict(zip("UL", ["Upper", "Lower"]))[postfix]
+            return f"Central Solenoid Module {index} {position}"
+        case _:
+            raise NotImplementedError(f"coil name not implemented for {identifier}")
+
+
 def part_name(name):
     """Return coil part."""
     if not isinstance(name, str):

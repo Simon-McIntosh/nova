@@ -13,24 +13,6 @@ from nova.imas.database import Ids
 
 
 @dataclass
-class Attrs(ABC):
-    """Provide IdsData baseclass."""
-
-    attributes: ClassVar[list[str]] = []
-
-    def update(self, ids: object):
-        """Update code metadata."""
-        for attr in self.attributes:
-            try:
-                attribute = getattr(self, attr)
-            except AttributeError:
-                continue
-            if attribute is None:
-                continue
-            setattr(ids, attr, attribute)
-
-
-@dataclass
 class Contact:
     """Manage yaml contact."""
 
@@ -40,6 +22,10 @@ class Contact:
     def __getitem__(self, attr: str) -> str:
         """Provide dict-like lookup."""
         return getattr(self, attr)
+
+    def __str__(self):
+        """Return string representation."""
+        return f"{self.name}, {self.email}"
 
 
 class Contacts:
@@ -78,6 +64,32 @@ class Contacts:
     def data(self) -> dict:
         """Return instance data."""
         raise NotImplementedError
+
+
+@dataclass
+class Attrs(ABC):
+    """Provide IdsData baseclass."""
+
+    attributes: ClassVar[list[str]] = []
+
+    def __call__(self, **kwargs):
+        """Set value and return self."""
+        for attr, value in kwargs.items():
+            setattr(self, attr, value)
+        return self
+
+    def update(self, ids: Ids):
+        """Update code metadata."""
+        for attr in self.attributes:
+            try:
+                attribute = getattr(self, attr)
+            except AttributeError:
+                continue
+            if attribute is None:
+                continue
+            if isinstance(attribute, Contact):
+                attribute = str(attribute)
+            setattr(ids, attr, attribute)
 
 
 @dataclass

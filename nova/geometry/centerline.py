@@ -9,68 +9,58 @@ import pandas
 from tqdm import tqdm
 import xarray
 
-
 from nova.biot.biotframe import Source
+from nova.biot.space import Line, Arc
 from nova.geometry.polygeom import Polygon
 from nova.geometry.section import Section
 from nova.graphics.plot import Plot
-from nova.imas.coil import part_name
+from nova.imas.coil import full_coil_name, part_name
 from nova.imas.database import Ids, IdsEntry
 from nova.imas.datasource import CAD, DataSource
 from nova.imas.machine import CoilDatabase
-from nova.imas.metadata import Code
 
 datasource = {
     "CC_EXTRATED_CENTERLINES": DataSource(
         pulse=111003,
         run=2,
-        name="coils_non_axisymmetric",
-        pbs=11,
+        description="Ex-Vessel Coils (EVC) Systems (CC) - conductor centerlines",
         provider="Simon McIntosh, simon.mcintosh@iter.org",
         officer="Fabrice Simon, fabrice.simon@iter.org",
+        pbs=11,
         status="active",
         replaces="111003/1",
         reason_for_replacement="resolve conductor centerlines and include coil feeders",
         cad=CAD(
-            cross_section={"square": [0, 0, 0.0148]},
             reference="DET-07879",
             objects="Correction Coils + Feeders Centerlines Extraction "
             "for IMAS database",
-            filename="CC_EXTRATED_CENTERLINES.xls",
             date="05/10/2023",
             provider="Vincent Bontemps, vincent.bontemps@iter.org",
             contact="Guillaume Davin, Guillaume.Davin@iter.org",
         ),
+        attributes={"cross_section": {"square": [0, 0, 0.0148]}},
     ),
     "CS1L": DataSource(
         pulse=0,
         run=0,
-        name="coils_non_axisymmetric",
-        # system="central_solenoid",
-        # comment="* - conductor centerlines",
-        pbs=11,
+        description="Central Solenoid Modules - conductor centerlines",
         provider="Simon McIntosh, simon.mcintosh@iter.org",
-        officer="Fabrice Simon, fabrice.simon@iter.org",
+        officer="Thierry Schild, thierry.schild@iter.org",
+        pbs=11,
         status="active",
         replaces="",
         reason_for_replacement="",
         cad=CAD(
-            cross_section={"square": [0, 0, 0.0148]},
             reference="DET-*",
-            objects="Correction Coils + Feeders Centerlines Extraction "
+            objects="Central Solenoid Module CS1L + Feeders Centerlines Extraction "
             "for IMAS database",
-            filename="CS1L.xls",
             date="12/10/2023",
             provider="Vincent Bontemps, vincent.bontemps@iter.org",
             contact="Guillaume Davin, Guillaume.Davin@iter.org",
         ),
+        attributes={"cross_section": {"circle": [0, 0, 0.0163]}},
     ),
 }
-
-"""
-    "system": "correction_coils",
-    "comment": "Ex-Vessel Coils (EVC) Systems (CC) - conductor centerlines"
-"""
 
 
 @dataclass
@@ -107,6 +97,7 @@ class Centerline(Plot, PolylineAttrs, CoilDatabase):
     """
 
     filename: str = ""
+    name: str = "coils_non_axisymmetric"
     datadir: str = "/mnt/share/coil_centerlines"
 
     description: ClassVar[str] = (
@@ -126,6 +117,11 @@ class Centerline(Plot, PolylineAttrs, CoilDatabase):
     def __post_init__(self):
         """Format cross_section."""
         self.datasource = datasource[self.filename]
+        self.datasource.name = self.name
+        self.datasource.cad.filename = f"{self.filename}.xls"
+        self.datasource.code(
+            description=self.description, parameter_dict=self.polyline_attrs
+        )
         self.ids_attrs = self.datasource.ids_attrs
         super().__post_init__()
 
@@ -143,28 +139,12 @@ class Centerline(Plot, PolylineAttrs, CoilDatabase):
     @cached_property
     def cross_section(self):
         """Return conductor cross-section from datasource."""
-        return Polygon(self.datasource.cad.cross_section)
+        return Polygon(self.datasource.attributes["cross_section"])
 
     @property
-    def code(self):
-        """Return code instance."""
-        return Code(description=self.description, parameter_dict=self.polyline_attrs)
-
-    @property
-    def group_attrs(self) -> dict:
-        """
-        Return group attrs.
-
-        Replaces :func:`~nova.imas.database.CoilDatabase`.
-        """
-        assert isinstance(self.cross_section, Polygon)
-        return (
-            self.ids_attrs
-            | self.polyline_attrs
-            | {
-                "cross_section": self.cross_section.points,
-            }
-        )
+    def yaml_attrs(self) -> dict:
+        """Return datasource yaml attributes."""
+        return self.datasource.yaml_attrs
 
     @property
     def xls_file(self):
@@ -174,7 +154,16 @@ class Centerline(Plot, PolylineAttrs, CoilDatabase):
     @property
     def netcdf_attrs(self):
         """Return netcdf attrs."""
-        return self.ids_attrs | self.polyline_attrs  # | self.ids_metadata | self.yaml
+        return self.ids_attrs | self.polyline_attrs | self.yaml_attrs
+
+    @property
+    def group_attrs(self) -> dict:
+        """
+        Return group attrs.
+
+        Replaces :func:`~nova.imas.database.CoilDatabase`.
+        """
+        return self.netcdf_attrs | self.datasource.attributes
 
     def build(self):
         """Load points from file and build coil centerlines."""
@@ -202,7 +191,6 @@ class Centerline(Plot, PolylineAttrs, CoilDatabase):
                 )
         self._store_point_data(xls_points)
         self._store_segment_data()
-
         self.data.attrs = self.netcdf_attrs
         # self.store()
 
@@ -256,25 +244,25 @@ class Centerline(Plot, PolylineAttrs, CoilDatabase):
                 index
             ]
 
-    def _set_ids_points(self, ids_node, name, points):
+    def _set_ids_points(self, ids_node, name, points, attrs=["r", "phi", "z"]):
         """Fill element points."""
         ids_points = getattr(ids_node, name)
         ids_points.r = np.linalg.norm(points[:, :2], axis=1)
         ids_points.phi = np.arctan2(points[:, 1], points[:, 0])
-        ids_points.height = points[:, 2]
+        ids_points.z = points[:, 2]
 
     @cached_property
     def coils_non_axisymmetric_ids(self) -> Ids:
         """Return populated coils non axisymmetric ids."""
         ids_entry = IdsEntry(ids_node="coil", **self.ids_attrs)
-        self.update_metadata(ids_entry)
         ids_entry.ids.resize(self.data.dims["coil_name"])
         section = Section(self.data.cross_section.data)
-
         for coil_index, ids_coil in enumerate(ids_entry.ids):
-            ids_coil.name = self.data.coil_name[coil_index].data
+            ids_coil.identifier = str(self.data.coil_name[coil_index].data)
+            ids_coil.name = full_coil_name(ids_coil.identifier)
             ids_coil.conductor.resize(1)
             ids_coil.conductor[0].turns = 1
+            continue
             ids_elements = ids_coil.conductor[0].elements
             segment_number = self.data.segment_number[coil_index].data
             ids_elements.types = self.data.segment_type[
@@ -290,101 +278,39 @@ class Centerline(Plot, PolylineAttrs, CoilDatabase):
                     coil_index, :segment_number
                 ].data
                 self._set_ids_points(ids_elements, point_name, points)
-            ids_cross_section = ids_coil.conductor[0].cross_section
+            # rotate cross_section to start element tangent
             normal = self.data.normal[coil_index, 0]
             axis = self.data.axis[coil_index, 0]
-            start_axes = np.c_[normal, np.cross(axis, normal), axis].T
+            match self.data.segment_type[coil_index, 0].data:
+                case "line":
+                    start_axes = Line(axis, normal).axes
+                case "arc":
+                    start_axes = Arc(axis, normal).axes
+                case segment_type:
+                    raise NotImplementedError(
+                        f"segment type {segment_type} " "not implemented"
+                    )
             section.to_axes(start_axes)
-
-            points = (
-                section.points
-                + self.data.start_points[coil_index, 0].data[np.newaxis, :]
+            self._set_ids_points(
+                ids_coil.conductor[0],
+                "cross_section",
+                section.points,
+                ["delta_r", "delta_phi", "delta_z"],
             )
-            self.set_axes("3d")
-            self.axes.plot(*points.T)
-            print(coil_index, section, ids_cross_section)
-
-        # print(ids_entry.ids_data.coil[0].conductor[0].elements.start_points.r)
-
-        #    ids_entry["name", :] = self.data.coil_name.data
-
-        """
-        with ids_entry.node("time_slice:global_quantities.*"):
-            for attr in ["li_3", "psi_axis", "psi_boundary"]:
-                data = self._data[attr].data
-                if "psi" in attr:
-                    ids_entry[attr, :] = -data  # COCOS
-                else:
-                    ids_entry[attr, :] = data
-        with ids_entry.node("time_slice:global_quantities.magnetic_axis.*"):
-            for i, attr in enumerate("rz"):
-                ids_entry[attr, :] = self._data.magnetic_axis.data[:, i]
-        with ids_entry.node("time_slice:boundary_separatrix.*"):
-            for attr in self._data.attrs_0d:
-                ids_entry[attr, :] = self._data[attr].data
-            ids_entry["type", :] = self._data["boundary_type"].data
-            ids_entry["psi", :] = -self._data["psi_boundary"].data  # COCOS
-        with ids_entry.node("time_slice:boundary_separatrix.outline.*"):
-            for i, attr in enumerate("rz"):
-                ids_entry[attr, :] = self._data["boundary"].data[..., i]
-        with ids_entry.node("time_slice:boundary_separatrix.geometric_axis.*"):
-            for i, attr in enumerate("rz"):
-                ids_entry[attr, :] = self._data["geometric_axis"].data[:, i]
-        for itime in range(self.data.dims["time"]):
-            boundary = ids_entry.ids_data.time_slice[itime].boundary_separatrix
-            # boundary x_point
-            if self._data.x_point_number[itime].data > 0:
-                x_point = self._data.x_point[itime].data
-                boundary.x_point.resize(1)
-                boundary.x_point[0].r = x_point[0]
-                boundary.x_point[0].z = x_point[1]
-            # divertor strike points
-            if (number := self._data.strike_point_number[itime].data) > 0:
-                strike_point = self._data.strike_point[itime].data
-                boundary.strike_point.resize(number)
-                for point in range(number):
-                    boundary.strike_point[point].r = strike_point[point, 0]
-                    boundary.strike_point[point].z = strike_point[point, 1]
-            # profiles 1D
-
-            # profiles 2D
-            profiles_2d = ids_entry.ids_data.time_slice[itime].profiles_2d
-            profiles_2d.resize(1)
-            profiles_2d[0].type.name = "total"
-            profiles_2d[0].type.index = 0
-            profiles_2d[0].type.name = "total field and flux"
-            profiles_2d[0].grid_type.name = "rectangular"
-            profiles_2d[0].grid_type.index = 1
-            profiles_2d[0].grid_type.description = "cylindrical grid"
-            profiles_2d[0].grid.dim1 = self._data.r.data
-            profiles_2d[0].grid.dim2 = self._data.z.data
-            profiles_2d[0].r = self._data.r2d.data
-            profiles_2d[0].z = self._data.z2d.data
-            profiles_2d[0].psi = -self._data.psi2d[itime].data  # COCOS
-            # only write field for high order plasma elements
-            if self.tplasma == "rectangle":
-                profiles_2d[0].b_field_r = self._data.br2d[itime].data
-                profiles_2d[0].b_field_z = self._data.bz2d[itime].data
-            """
-
+        # update code and ids_properties nodes
+        self.datasource.update(ids_entry.ids_data)
         return ids_entry.ids_data
 
     def write_ids(self, **ids_attrs):
         """Write pulse design data to equilibrium ids."""
         ids_attrs = self.ids_attrs | ids_attrs
-        # ids_entry = IdsEntry(ids_data=self.coils_non_axisymmetric_ids, **ids_attrs)
-
-        # ids_entry.put_ids()
-        # self.write_yaml(**ids_attrs)
+        ids_entry = IdsEntry(ids_data=self.coils_non_axisymmetric_ids, **ids_attrs)
+        ids_entry.put_ids()
+        self.datasource.write_yaml()
 
 
 if __name__ == "__main__":
     filename = "CC_EXTRATED_CENTERLINES"
-
-    # filename, cross_section = "CS1L"
+    filename = "CS1L"
     centerline = Centerline(filename=filename)
-    # centerline.coils_non_axisymmetric_ids
-    from nova.geometry.polyline import PolyLine
-
-    polyline = PolyLine(centerline.data.points[0].values)
-    polyline.plot()
+    centerline.write_ids()

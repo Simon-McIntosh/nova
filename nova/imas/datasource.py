@@ -1,20 +1,19 @@
 """Manage the creation of machine description IDSs."""
 from dataclasses import dataclass, field, fields
 from datetime import datetime
+from functools import cached_property
 
 import yaml
 
 from nova.database.filepath import FilePath
-from nova.geometry.polygon import Polygon
 from nova.imas.database import Database, IDS
-from nova.imas.metadata import Contact, Contacts
+from nova.imas.metadata import Code, Contact, Contacts, Properties
 
 
 @dataclass
 class CAD(Contacts):
     """Manage CAD source metadata."""
 
-    cross_section: dict | Polygon
     reference: str | None = None
     objects: str | None = None
     filename: str | None = None
@@ -29,8 +28,8 @@ class CAD(Contacts):
         super().__post_init__()
 
     @property
-    def source(self):
-        """Manage CAD source metadata."""
+    def provenance(self):
+        """Manage CAD provenance metadata."""
         return [
             f"{cad_field.name.replace('_', '-')}: {getattr(self, cad_field.name)}"
             for cad_field in fields(CAD)
@@ -74,7 +73,7 @@ class YAML(Contacts, IDS):
             "reason_for_replacement": self.reason_for_replacement,
         }
 
-    def write(self):
+    def write_yaml(self):
         """Write machine description yaml file."""
         ids_path = Database(**self.ids_attrs).ids_path
         filepath = FilePath("md_summary.yaml", ids_path).filepath
@@ -92,11 +91,37 @@ class DataSource(YAML, IDS):
     """Manage machine description data source."""
 
     machine: str = "iter_md"
-    cad: CAD | dict = field(default_factory=CAD)
+    cad: CAD | dict = field(default_factory=dict)
+    attributes: dict = field(default_factory=dict)
 
     def __post_init__(self):
         """Initialize data source attributes."""
-        for _field in fields(DataSource):
-            if isinstance(value := getattr(self, _field.name), dict):
-                setattr(self, _field.name, _field.default_factory(**value))
+        if isinstance(self.cad, dict):
+            self.cad = CAD(**self.cad)
+        self.provenance = self.cad.reference
         super().__post_init__()
+
+    @cached_property
+    def yaml_attrs(self) -> dict:
+        """Return yaml attributes with the duplicated ids key dropped."""
+        return {attr: value for attr, value in self.data.items() if attr != "ids"}
+
+    @cached_property
+    def properties(self):
+        """Return properties instance."""
+        return Properties(
+            homogeneous_time=2,
+            comment=self.description,
+            provider=self.provider,
+            provenance=self.cad.provenance,
+        )
+
+    @cached_property
+    def code(self):
+        """Return code instance."""
+        return Code()
+
+    def update(self, ids):
+        """Update properties and code ids nodes."""
+        self.properties.update(ids.ids_properties)
+        self.code.update(ids.code)

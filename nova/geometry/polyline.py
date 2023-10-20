@@ -164,17 +164,17 @@ class Arc(Plot, Element):
         """Align point cloud to 2d plane."""
         binormal = Frenet(self.points).binormal.mean(axis=0)
         self.arc_axes = np.zeros((3, 3), float)
-        self.arc_axes[0] = normal
-        self.arc_axes[1] = np.cross(binormal, self.arc_axes[0])
-        if np.allclose(self.arc_axes[1], 0):
+        self.arc_axes[1] = normal
+        self.arc_axes[0] = np.cross(normal, binormal)
+        if np.allclose(self.arc_axes[0], 0):
             binormal = np.cross(
-                self.arc_axes[0], np.mean(self.points[1:-1] - self.points[0], axis=0)
+                np.mean(self.points[1:-1] - self.points[0], axis=0), self.arc_axes[1]
             )
-            self.arc_axes[1] = np.cross(binormal, self.arc_axes[0])
+            self.arc_axes[0] = np.cross(self.arc_axes[1], binormal)
         self.arc_axes[2] = np.cross(self.arc_axes[0], self.arc_axes[1])
         self.arc_axes[1] = np.cross(self.arc_axes[2], self.arc_axes[0])
         self.arc_axes /= np.linalg.norm(self.arc_axes, axis=1)[:, np.newaxis]
-        self.normal = self.arc_axes[0]
+        self.normal = self.arc_axes[1]
         self.axis = self.arc_axes[2]
 
     def fit_2d(self):
@@ -194,16 +194,16 @@ class Arc(Plot, Element):
         points[:, 1] -= coef[0]
         assert np.allclose(self.radius, np.linalg.norm(points[0]))
         assert np.allclose(self.radius, np.linalg.norm(points[-1]))
-        self.center = center_2d @ self.arc_axes[:2]
+        self.center = center_2d @ np.c_[-self.arc_axes[1], self.arc_axes[0]].T
         self.center += (
             np.mean(np.c_[self.points[0], self.points[-1]].T, axis=0)
             @ self.arc_axes[2]
             * self.arc_axes[2]
         )
-        self.normal = self.points[0] - self.center  # align normal to local start radius
+        self.normal = self.center - self.points[0]  # align normal to local start radius
         self.normal /= np.linalg.norm(self.normal)
         self.arc_axes = np.c_[
-            self.normal, np.cross(self.axis, self.normal), self.axis
+            np.cross(self.normal, self.axis), self.normal, self.axis
         ].T
         center_points = self.points_2d - self.center_2d
         self.theta = np.arctan2(center_points[:, 1], center_points[:, 0])
@@ -212,10 +212,10 @@ class Arc(Plot, Element):
         self.error = np.linalg.norm(self.points - self.points_fit, axis=1).std()
 
     def _to_local(self, points):
-        """Return points projected onto 2d plane."""
+        """Return points projected onto 2d plane (-normal, tangent)."""
         return np.c_[
+            np.einsum("j,ij->i", -self.arc_axes[1], points),
             np.einsum("j,ij->i", self.arc_axes[0], points),
-            np.einsum("j,ij->i", self.arc_axes[1], points),
         ]
 
     @property
@@ -232,18 +232,18 @@ class Arc(Plot, Element):
     def points_fit(self):
         """Return best-fit points in 3d space."""
         return self.center[np.newaxis, :] + self.radius * (
-            np.cos(self.theta)[:, np.newaxis] * self.arc_axes[np.newaxis, 0]
-            + np.sin(self.theta)[:, np.newaxis] * self.arc_axes[np.newaxis, 1]
+            np.cos(self.theta)[:, np.newaxis] * -self.arc_axes[np.newaxis, 1]
+            + np.sin(self.theta)[:, np.newaxis] * self.arc_axes[np.newaxis, 0]
         )
 
     def fit(self):
         """Align local coordinate system and fit arc to plane point cloud."""
-        self.align(self.points[0] - self.points[-1])
+        self.align(self.points[-1] - self.points[0])
         self.fit_2d()
 
     @cached_property
     def central_angle(self):
-        """Return the absolute angle subtended by arc from the arc's center."""
+        """Return the angle subtended by arc from the arc's center."""
         return self.theta[-1] - self.theta[0]
 
     @cached_property
@@ -260,8 +260,8 @@ class Arc(Plot, Element):
         """Return sampled polyline."""
         theta = np.linspace(self.theta[0], self.theta[-1], point_number)[:, np.newaxis]
         return self.center[np.newaxis, :] + self.radius * (
-            np.cos(theta) * self.arc_axes[0][np.newaxis, :]
-            + np.sin(theta) * self.arc_axes[1][np.newaxis, :]
+            np.cos(theta) * -self.arc_axes[1][np.newaxis, :]
+            + np.sin(theta) * self.arc_axes[0][np.newaxis, :]
         )
 
     @cached_property
@@ -432,7 +432,7 @@ class PolyLine(Plot):
         point_number = len(self.points)
         start = 0
         self.segments = []
-        line_normal = -Frenet(self.points).normal
+        line_normal = Frenet(self.points).normal
         while start <= point_number - self.minimum_arc_nodes:
             number = self.fit_arc(self.points[start:])
             self.append(

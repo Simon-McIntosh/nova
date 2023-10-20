@@ -13,8 +13,8 @@ from nova.graphics.plot import Plot3D
 class Segment:
     """Define segment start axes base class."""
 
-    axis: np.ndarray
     normal: np.ndarray
+    axis: np.ndarray
 
     @property
     def axes(self):
@@ -30,7 +30,7 @@ class Line(Segment):
     def axes(self):
         """Return line axes."""
         return np.stack(
-            [self.normal, self.axis, np.cross(self.normal, self.axis)], axis=1
+            [self.axis, self.normal, np.cross(self.axis, self.normal)], axis=1
         )
 
 
@@ -42,7 +42,7 @@ class Arc(Segment):
     def axes(self):
         """Return arc axes."""
         return np.stack(
-            [self.normal, np.cross(self.axis, self.normal), self.axis], axis=1
+            [np.cross(self.normal, self.axis), self.normal, self.axis], axis=1
         )
 
 
@@ -60,8 +60,8 @@ class Space(metamethod.Space, Plot3D):
     def initialize(self):
         """Build local coordinate axes."""
         self.coordinate_axes = np.zeros((len(self.frame), 3, 3))
-        self.coordinate_axes[..., 0] = self.normal
-        self.coordinate_axes[..., 1] = np.cross(self.axis, self.normal)
+        self.coordinate_axes[..., 0] = np.cross(self.normal, self.axis)
+        self.coordinate_axes[..., 1] = self.normal
         self.coordinate_axes[..., 2] = self.axis
         self.coordinate_axes /= np.linalg.norm(self.coordinate_axes, axis=1)[
             :, np.newaxis
@@ -117,10 +117,10 @@ class Space(metamethod.Space, Plot3D):
         """Return element intermediate point."""
         end_point = self.to_local(self.end_point)
         radius = np.linalg.norm(end_point, axis=1)
-        theta = np.arctan2(end_point[:, 1], end_point[:, 0])
+        theta = np.arctan2(end_point[:, 0], -end_point[:, 1])
         points = (
             radius[:, np.newaxis]
-            * np.c_[np.cos(theta / 2), np.sin(theta / 2), np.zeros_like(theta)]
+            * np.c_[np.sin(theta / 2), -np.cos(theta / 2), np.zeros_like(theta)]
         )
         if self._line_number > 0:
             points[self._line_index] = np.zeros((self._line_number, 3))
@@ -134,7 +134,7 @@ class Space(metamethod.Space, Plot3D):
     @property
     def _arc_tangent(self):
         """Return arc segment start tangents."""
-        return np.cross(self.axis[self._arc_index], self.normal[self._arc_index])
+        return np.cross(self.normal[self._arc_index], self.axis[self._arc_index])
 
     def _check_segment_types(self):
         """Assert all segment types in [line, arc]."""
@@ -153,10 +153,10 @@ class Space(metamethod.Space, Plot3D):
         self._check_segment_types()
         axes = np.zeros((len(self.frame), 3, 3))
         axes[self._line_index] = Line(
-            self.axis[self._line_index], self.normal[self._line_index]
+            self.normal[self._line_index], self.axis[self._line_index]
         ).axes
         axes[self._arc_index] = Arc(
-            self.axis[self._arc_index], self.normal[self._arc_index]
+            self.normal[self._arc_index], self.axis[self._arc_index]
         ).axes
         return axes
 

@@ -29,5 +29,7 @@ class PF_Passive(Plot, Scenario):
 
 if __name__ == "__main__":
     pulse, run = 105007, 9
-    PF_Passive(pulse, run)._clear()
+    pulse, run = 134173, 106  # DINA / JINTRAC
+
+    # PF_Passive(pulse, run)._clear()
     pf_passive = PF_Passive(pulse, run)

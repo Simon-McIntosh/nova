@@ -60,6 +60,26 @@ datasource = {
         ),
         attributes={"cross_section": {"circle": [0, 0, 0.0163]}},
     ),
+    "CS": DataSource(
+        pulse=111004,
+        run=1,
+        description="Central Solenoid Modules - conductor centerlines",
+        provider="Simon McIntosh, simon.mcintosh@iter.org",
+        officer="Thierry Schild, thierry.schild@iter.org",
+        pbs=11,
+        status="active",
+        replaces="",
+        reason_for_replacement="",
+        cad=CAD(
+            reference="DET-07879-A",
+            objects="Central Solenoid + Feeders Centerlines Extraction "
+            "for IMAS database",
+            date="19/10/2023",
+            provider="Vincent Bontemps, vincent.bontemps@iter.org",
+            contact="Guillaume Davin, Guillaume.Davin@iter.org",
+        ),
+        attributes={"cross_section": {"circle": [0, 0, 0.0163]}},
+    ),
 }
 
 
@@ -312,5 +332,6 @@ class Centerline(Plot, PolylineAttrs, CoilDatabase):
 if __name__ == "__main__":
     filename = "CC_EXTRATED_CENTERLINES"
     filename = "CS1L"
+    filename = "CS"
     centerline = Centerline(filename=filename)
     centerline.write_ids()

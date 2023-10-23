@@ -51,6 +51,8 @@ class PF_Active(Plot, Scenario):
         """Plot current timeseries."""
         self.set_axes("1d", axes=axes)
         self.axes.plot(self.data.time, 1e-3 * self.data.current, **kwargs)
+        self.axes.set_xlabel("$t$ s")
+        self.axes.set_ylabel("$I$ kA")
 
 
 if __name__ == "__main__":
@@ -65,8 +67,10 @@ if __name__ == "__main__":
     # pulse, run = 135011, 7
     pulse, run = 135013, 2
 
+    pulse, run = 135014, 1
+
     # pulse, run = 111001, 202
     # PF_Active(pulse, run, "iter")._clear()
-    # pf_active = PF_Active(pulse, run, "iter")
+    pf_active = PF_Active(pulse, run, "iter")
     # pf_active = PF_Active(105007, 9)  # b field max timed 135002, 5
-    # pf_active.plot()
+    pf_active.plot()

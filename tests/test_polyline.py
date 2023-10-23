@@ -391,8 +391,8 @@ def test_straight_line_normal():
         polyline._to_list("nx"), polyline._to_list("ny"), polyline._to_list("nz")
     ]
     reference = np.zeros((3, 3))
-    reference[:, 2] = -1
-    reference[2] = [1, 0, 0]
+    reference[:, 2] = 1
+    reference[2] = [-1, 0, 0]
     assert len(polyline) == 3
     assert np.allclose(np.linalg.norm(normal, axis=1), np.ones(3))
     assert np.allclose(normal, reference)

@@ -35,8 +35,8 @@ def test_line_start_axes():
     )
     source = Source(polyline.path_geometry)
     axes = source.space.start_axes
-    assert np.allclose(axes[0], [[0, -1, 0], [1, 0, 0], [0, 0, 1]])
-    assert np.allclose(axes[1], [[1, 0, 0], [0, 1, 0], [0, 0, 1]])
+    assert np.allclose(axes[0], [[1, 0, 0], [0, 1, 0], [0, 0, 1]])
+    assert np.allclose(axes[1], [[0, 1, 0], [-1, 0, 0], [0, 0, 1]])
 
 
 def test_arc_start_axes():
@@ -45,7 +45,7 @@ def test_arc_start_axes():
     )
     source = Source(polyline.path_geometry)
     axes = source.space.start_axes
-    assert np.allclose(axes[0], [[0, -1, 0], [1, 0, 0], [0, 0, 1]])
+    assert np.allclose(axes[0], [[1, 0, 0], [0, 1, 0], [0, 0, 1]])
 
 
 if __name__ == "__main__":

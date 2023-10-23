@@ -7,6 +7,7 @@ from typing import ClassVar
 import numpy as np
 from overrides import override
 import pandas
+import scipy
 from vedo import Mesh
 
 from nova.geometry.frenet import Frenet
@@ -162,7 +163,9 @@ class Arc(Plot, Element):
 
     def align(self, normal):
         """Align point cloud to 2d plane."""
-        binormal = Frenet(self.points).binormal.mean(axis=0)
+        points_delta = self.points - np.mean(self.points, axis=0)[np.newaxis, :]
+        svd_binormal = scipy.linalg.svd(points_delta)[2][2]
+        binormal = Frenet(self.points, svd_binormal).binormal.mean(axis=0)
         self.arc_axes = np.zeros((3, 3), float)
         self.arc_axes[1] = normal
         self.arc_axes[0] = np.cross(normal, binormal)
@@ -248,8 +251,8 @@ class Arc(Plot, Element):
 
     @cached_property
     def length(self):
-        """Return arc length."""
-        return self.radius * self.central_angle
+        """Return absolute arc length."""
+        return self.radius * abs(self.central_angle)
 
     @property
     def test(self):

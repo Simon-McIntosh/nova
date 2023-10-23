@@ -111,7 +111,7 @@ class Winding(CoilSetAttrs):
         )
         with self.insert_required(required):
             index = self.frame.insert(*frame_data, iloc=iloc, **self.attrs)
-
+        self.polyline = polyline
         with self.insert_required([]):
             subattrs = (
                 self.attrs

@@ -212,11 +212,11 @@ class Centerline(Plot, PolylineAttrs, CoilDatabase):
         self._store_point_data(xls_points)
         self._store_segment_data()
         self.data.attrs = self.netcdf_attrs
-        # self.store()
+        self.store()
 
     def _read_sheet(self, xls, sheet_name=0):
         """Read excel worksheet."""
-        sheet = pandas.read_excel(xls, sheet_name, usecols=[2, 3, 4], nrows=20)
+        sheet = pandas.read_excel(xls, sheet_name, usecols=[2, 3, 4])
         columns = {"X Coord": "x", "Y Coord": "y", "Z Coord": "z"}
         sheet.rename(columns=columns, inplace=True)
         return sheet
@@ -334,4 +334,4 @@ if __name__ == "__main__":
     filename = "CS1L"
     filename = "CS"
     centerline = Centerline(filename=filename)
-    centerline.write_ids()
+    # centerline.write_ids()

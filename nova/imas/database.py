@@ -678,6 +678,7 @@ class IdsIndex:
     (12,)
 
     Load equilibrium ids and initiate new instance of ids_index.
+
     >>> equilibrium = Database(pulse, run, name='equilibrium')
     >>> ids_index = IdsIndex(equilibrium.ids_data, 'time_slice')
 
@@ -768,14 +769,14 @@ class IdsIndex:
 
     def __getitem__(self, path: str) -> tuple[int, ...] | tuple[()]:
         """Return cached dimension length."""
-        _path = self.ids_path(path)
+        _path = self._ids_path(path)
         try:
             return self.shapes[_path]
         except KeyError:
             self.shapes[_path] = self._path_shape(path)
             return self[path]
 
-    def ids_path(self, path: str) -> str:
+    def _ids_path(self, path: str) -> str:
         """Return full ids path."""
         if self.ids_node is None:
             return path

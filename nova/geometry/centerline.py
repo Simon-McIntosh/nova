@@ -212,11 +212,11 @@ class Centerline(Plot, PolylineAttrs, CoilDatabase):
         self._store_point_data(xls_points)
         self._store_segment_data()
         self.data.attrs = self.netcdf_attrs
-        # self.store()
+        self.store()
 
     def _read_sheet(self, xls, sheet_name=0):
         """Read excel worksheet."""
-        sheet = pandas.read_excel(xls, sheet_name, usecols=[2, 3, 4], nrows=20)
+        sheet = pandas.read_excel(xls, sheet_name, usecols=[2, 3, 4], nrows=120)
         columns = {"X Coord": "x", "Y Coord": "y", "Z Coord": "z"}
         sheet.rename(columns=columns, inplace=True)
         return sheet
@@ -274,20 +274,32 @@ class Centerline(Plot, PolylineAttrs, CoilDatabase):
     @cached_property
     def coils_non_axisymmetric_ids(self) -> Ids:
         """Return populated coils non axisymmetric ids."""
-        ids_entry = IdsEntry(ids_node="coil", **self.ids_attrs)
-        ids_entry.ids.resize(self.data.dims["coil_name"])
+        ids_entry = IdsEntry(**self.ids_attrs, ids_node="coil")
+        ids_entry.ids_data.coil.resize(self.data.dims["coil_name"])
+
+        print(ids_entry.ids)
+        # print(ids_entry.array("coilstatic"))
+
+        with ids_entry.node("coil:*"):
+            ids_entry["turns", :] = 2.1 * np.ones(self.data.dims["coil_name"])
+
         section = Section(self.data.cross_section.data)
         for coil_index, ids_coil in enumerate(ids_entry.ids):
             ids_coil.identifier = str(self.data.coil_name[coil_index].data)
             ids_coil.name = full_coil_name(ids_coil.identifier)
+            ids_coil.turns = 1.0
             ids_coil.conductor.resize(1)
-            ids_coil.conductor[0].turns = 1
-            continue
+            with ids_entry.node("coil"):
+                print(ids_entry.array("turns"))
+
             ids_elements = ids_coil.conductor[0].elements
             segment_number = self.data.segment_number[coil_index].data
+
             ids_elements.types = self.data.segment_type[
                 coil_index, :segment_number
             ].data
+            continue
+
             for point_name in [
                 "start_points",
                 "intermediate_points",
@@ -334,4 +346,5 @@ if __name__ == "__main__":
     filename = "CS1L"
     filename = "CS"
     centerline = Centerline(filename=filename)
+    # print(centerline.coils_non_axisymmetric_ids.coil[0])
     centerline.write_ids()

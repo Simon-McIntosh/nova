@@ -839,7 +839,12 @@ class IdsIndex:
             case ("",):
                 branch = self.ids_data
             case (str(node),):
-                branch = attrgetter(node)(self.ids_data)
+                try:
+                    branch = attrgetter(node)(self.ids_data)[index]
+                except TypeError:
+                    branch = attrgetter(node)(self.ids_data)
+            case (str(array), ""):
+                branch = attrgetter(array)(self.ids_data)[index]
             case (str(array), str(node)):
                 trunk = attrgetter(array)(self.ids_data)[index]
                 branch = attrgetter(node)(trunk)

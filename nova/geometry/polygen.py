@@ -63,7 +63,7 @@ class PolyGen(PolyShape):
         return np.min([width, height])
 
     @staticmethod
-    def disc(x_center, z_center, width, height=None, quad_segs=16):
+    def disc(x_center, z_center, width, height=None, quadrant_segments=16):
         """
         Return shapely.cirle.
 
@@ -86,7 +86,7 @@ class PolyGen(PolyShape):
         diameter = PolyGen.boxbound(width, height)
         radius = diameter / 2
         point = shapely.geometry.Point(x_center, z_center)
-        buffer = point.buffer(radius, quad_segs=quad_segs)
+        buffer = point.buffer(radius, quad_segs=quadrant_segments)
         return shapely.geometry.Polygon(buffer)
 
     @staticmethod

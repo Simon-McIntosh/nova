@@ -9,6 +9,9 @@ from typing import ClassVar
 import fabric
 import numpy as np
 import pandas
+from tqdm import tqdm
+
+from nova.imas.database import Datafile
 
 
 @dataclass
@@ -32,6 +35,8 @@ class Connect:
         """Connect to cluster."""
         self.ssh = fabric.Connection(self.cluster)
         self.username = self.ssh.run("whoami", hide=True).stdout.strip()
+        if hasattr(super(), "__post_init__"):
+            super().__post_init__()
 
     @property
     def _module_load_string(self):
@@ -75,9 +80,9 @@ class Connect:
     def load_frame(self, key: str, value: str | int | float):
         """Load scenario summary to dataframe, filtered by key value pair."""
         columns = [col for col in self.columns if col not in self._space_columns]
+        if key not in columns:
+            columns.append(key)
         space_columns = [col for col in self._space_columns if col in self.columns]
-        space_columns.append(key)
-        columns.append(key)
         frame = self.to_dataframe(self.read_summary(",".join(columns), value))
         if len(space_columns) > 0:
             space_frame = self.to_dataframe(
@@ -87,7 +92,7 @@ class Connect:
                 frame[col] = space_frame.iloc[:, i]
         frame = frame.loc[frame[key] == value, :]
         frame = frame.astype(dict(pulse=int, run=int), errors="ignore")
-        self.frame = pandas.concat([self.frame, frame])
+        self.frame = pandas.concat([self.frame, frame], ignore_index=True)
         return self.frame
 
     def copy_command(self, frame: pandas.DataFrame, ids: str = ""):
@@ -124,7 +129,7 @@ class Connect:
 
 
 @dataclass
-class ScenarioDatabase(Connect):
+class ScenarioDatabase(Datafile, Connect):
     """Manage public and local scenario data."""
 
     command: str = "scenario_summary"
@@ -142,26 +147,38 @@ class ScenarioDatabase(Connect):
             "confinement",
         ]
     )
+    dirname: str = field(default=".nova.imas")
+    workflow: list[str] = field(
+        default_factory=lambda: ["CORSICA", "ASTRA", "DINA-IMAS"]
+    )
 
-    _default_workflow_names: ClassVar[list[str]] = ["CORSICA", "ASTRA", "DINA-IMAS"]
     _space_columns: ClassVar[list[str]] = ["ref_name", "confinement", "workflow"]
 
-    def _workflow(self, *workflow_names):
-        """Return workflow names."""
-        if len(workflow_names) == 0:
-            return self._workflow_names
-        return workflow_names
+    def __post_init__(self):
+        """Set file attributes."""
+        self.filename = self.command
+        self.workflow.sort()
+        self.group = ",".join(self.workflow)
+        super().__post_init__()
 
-    def load_workflow(self, *workflow_names):
+    def store(self):
+        """Store frame to netCDF file."""
+        self.data = self.frame.to_xarray()
+        super().store()
+
+    def load(self):
+        """Load frame from netCDF file."""
+        super().load()
+        self.frame = self.data.to_dataframe()
+
+    def build(self):
         """Load scenario workflows into frame."""
-        if len(workflow_names) == 0:
-            workflow_names = self._default_workflow_names
-        for workflow in self._workflow(workflow_names):
+        for workflow in tqdm(self.workflow, f"loading workflows {self.workflow}"):
             self.load_frame("workflow", workflow)
+        self.store()
 
-    def sync_workflow(self, *workflow_names):
+    def sync_workflow(self):
         """Sync scenario workflows with local repo."""
-        self.load_workflow(*workflow_names)
         self.module_run(self.copy_command(self.frame), hide=True)
         self.rsync()
 
@@ -249,7 +266,7 @@ if __name__ == "__main__":
     # scenario.sync_shot("115001/1")
 
     scenario = ScenarioDatabase()
-    scenario.load_frame("workflow", "DINA-IMAS")
+    # scenario.load_frame("workflow", "DINA-IMAS")
 
-    scenario.sync_workflow()
+    # scenario.sync_workflow()
     # ScenarioDatabase().sync_shot('135011/7')

@@ -89,5 +89,19 @@ def test_ids_node_length():
     assert ids_index.length == 5
 
 
+def test_set_coil_turns():
+    ids_index = IdsIndex(IDS(name="coils_non_axisymmetric").get_ids(), "coil")
+    ids_index.ids.resize(5)
+    ids_index["turns", :] = np.arange(5, 10)
+    assert np.allclose(ids_index.array("turns"), np.arange(5, 10))
+
+
+def test_set_coil_name():
+    ids_index = IdsIndex(IDS(name="coils_non_axisymmetric").get_ids(), "coil")
+    ids_index.ids.resize(3)
+    ids_index["name", :] = ["coila", "coilb", "coilc"]
+    assert list(ids_index.array("name")) == ["coila", "coilb", "coilc"]
+
+
 if __name__ == "__main__":
     pytest.main([__file__])

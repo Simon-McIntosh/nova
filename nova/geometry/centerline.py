@@ -15,7 +15,7 @@ from nova.geometry.polygeom import Polygon
 from nova.geometry.section import Section
 from nova.graphics.plot import Plot
 from nova.imas.coil import full_coil_name, part_name
-from nova.imas.database import Ids, IdsEntry
+from nova.imas.database import Ids, IdsEntry, IdsIndex
 from nova.imas.datasource import CAD, DataSource
 from nova.imas.machine import CoilDatabase
 
@@ -58,7 +58,7 @@ datasource = {
             provider="Vincent Bontemps, vincent.bontemps@iter.org",
             contact="Guillaume Davin, Guillaume.Davin@iter.org",
         ),
-        attributes={"cross_section": {"circle": [0, 0, 0.0163]}},
+        attributes={"cross_section": {"circle": [0, 0, 0.0163, 0.0163, 4]}},
     ),
     "CS": DataSource(
         pulse=111004,
@@ -78,7 +78,7 @@ datasource = {
             provider="Vincent Bontemps, vincent.bontemps@iter.org",
             contact="Guillaume Davin, Guillaume.Davin@iter.org",
         ),
-        attributes={"cross_section": {"circle": [0, 0, 0.0163]}},
+        attributes={"cross_section": {"circle": [0, 0, 0.0163, 0.0163, 4]}},
     ),
 }
 
@@ -267,53 +267,47 @@ class Centerline(Plot, PolylineAttrs, CoilDatabase):
     def _set_ids_points(self, ids_node, name, points, attrs=["r", "phi", "z"]):
         """Fill element points."""
         ids_points = getattr(ids_node, name)
-        ids_points.r = np.linalg.norm(points[:, :2], axis=1)
-        ids_points.phi = np.arctan2(points[:, 1], points[:, 0])
-        ids_points.z = points[:, 2]
+        setattr(ids_points, attrs[0], np.linalg.norm(points[:, :2], axis=1))
+        setattr(ids_points, attrs[1], np.arctan2(points[:, 1], points[:, 0]))
+        setattr(ids_points, attrs[2], points[:, 2])
 
     @cached_property
     def coils_non_axisymmetric_ids(self) -> Ids:
         """Return populated coils non axisymmetric ids."""
         ids_entry = IdsEntry(**self.ids_attrs, ids_node="coil")
-        ids_entry.ids_data.coil.resize(self.data.dims["coil_name"])
-
-        print(ids_entry.ids)
-        # print(ids_entry.array("coilstatic"))
-
-        with ids_entry.node("coil:*"):
-            ids_entry["turns", :] = 2.1 * np.ones(self.data.dims["coil_name"])
-
+        ids_entry.ids.resize(self.data.dims["coil_name"])
+        coil_name = [str(name) for name in self.data.coil_name.data]
+        ids_entry["identifier", :] = coil_name
+        ids_entry["name", :] = [full_coil_name(identifier) for identifier in coil_name]
+        ids_entry["turns", :] = np.ones(self.data.dims["coil_name"], float)
         section = Section(self.data.cross_section.data)
-        for coil_index, ids_coil in enumerate(ids_entry.ids):
-            ids_coil.identifier = str(self.data.coil_name[coil_index].data)
-            ids_coil.name = full_coil_name(ids_coil.identifier)
-            ids_coil.turns = 1.0
-            ids_coil.conductor.resize(1)
-            with ids_entry.node("coil"):
-                print(ids_entry.array("turns"))
-
-            ids_elements = ids_coil.conductor[0].elements
-            segment_number = self.data.segment_number[coil_index].data
-
-            ids_elements.types = self.data.segment_type[
-                coil_index, :segment_number
-            ].data
-            continue
-
-            for point_name in [
+        element_type = {"line": 1, "arc": 2}
+        for name, coil in zip(coil_name, ids_entry.ids):
+            coil.conductor.resize(1)
+            elements = IdsIndex(coil.conductor[0], "elements")
+            coil_data = self.data.sel(coil_name=name)
+            segment_number = coil_data.segment_number.data
+            elements["types"] = np.array(
+                [
+                    element_type[segment_type]
+                    for segment_type in coil_data.segment_type[:segment_number].data
+                ]
+            )
+            point_number = coil_data.point_number.data
+            for attr in [
                 "start_points",
                 "intermediate_points",
                 "end_points",
                 "centres",
             ]:
-                points = getattr(self.data, point_name)[
-                    coil_index, :segment_number
-                ].data
-                self._set_ids_points(ids_elements, point_name, points)
+                points = coil_data[attr][:point_number].data
+                self._set_ids_points(elements.ids, attr, points)
+
             # rotate cross_section to start element tangent
-            normal = self.data.normal[coil_index, 0]
-            axis = self.data.axis[coil_index, 0]
-            match self.data.segment_type[coil_index, 0].data:
+            # TODO update following merge of IMAS-4658
+            normal = coil_data.normal[0]
+            axis = coil_data.axis[0]
+            match coil_data.segment_type[0].data:
                 case "line":
                     start_axes = Line(axis, normal).axes
                 case "arc":
@@ -324,13 +318,13 @@ class Centerline(Plot, PolylineAttrs, CoilDatabase):
                     )
             section.to_axes(start_axes)
             self._set_ids_points(
-                ids_coil.conductor[0],
+                coil.conductor[0],
                 "cross_section",
                 section.points,
                 ["delta_r", "delta_phi", "delta_z"],
             )
+            print(coil.conductor[0])
         # update code and ids_properties nodes
-
         self.datasource.update(ids_entry.ids_data)
         return ids_entry.ids_data
 
@@ -348,8 +342,5 @@ if __name__ == "__main__":
     filename = "CS"
     centerline = Centerline(filename=filename)
 
-    ids_entry = IdsEntry(**centerline.ids_attrs, ids_node="coil")
-    ids_entry.ids.resize(2)
-
     # print(centerline.coils_non_axisymmetric_ids.coil[0])
-    # centerline.write_ids()
+    centerline.write_ids()

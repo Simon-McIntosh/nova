@@ -3,10 +3,12 @@ from dataclasses import dataclass, field
 from functools import cached_property
 from typing import ClassVar, final
 
+import json
 import numpy as np
 from scipy.spatial import ConvexHull
 
 from nova.biot.contour import Contour
+from nova.database.filepath import FilePath
 from nova.geometry.pointloop import PointLoop
 from nova.geometry.curve import LCFS
 from nova.geometry.strike import Strike
@@ -706,7 +708,7 @@ class EquilibriumData(Equilibrium, Profile2D, Profile1D, Parameter0D, Grid):
         if mask == 1:
             return np.ma.masked_array(data, self.mask(self.boundary))
 
-    def convex_hull(self):
+    def convex_hull(self, plot=True):
         """Return plasma boundary convex hull."""
         points = np.r_[
             *[
@@ -716,7 +718,18 @@ class EquilibriumData(Equilibrium, Profile2D, Profile1D, Parameter0D, Grid):
         ]
         hull = ConvexHull(points)
         vertices = np.append(hull.vertices, hull.vertices[0])
-        self.axes.plot(points[vertices, 0], points[vertices, 1], "C0")
+        if plot:
+            self.axes.plot(points[vertices, 0], points[vertices, 1], "C0")
+        return points[vertices]
+
+    def write_convex_hull(self):
+        """Write last closed flux surface separatrix data to file."""
+        points = self.convex_hull()
+        data = {"radius": points[:, 0].tolist(), "height": points[:, 1].tolist()}
+        filename = f"LCSF_convex_hull_{self.pulse}_{self.run}"
+        filepath = FilePath(filename, dirname=".nova").filepath.with_suffix(".json")
+        with open(filepath, "w", encoding="utf-8") as file:
+            json.dump(data, file, ensure_ascii=False, indent=4)
 
 
 if __name__ == "__main__":

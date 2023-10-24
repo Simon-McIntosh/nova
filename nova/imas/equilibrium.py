@@ -710,12 +710,13 @@ class EquilibriumData(Equilibrium, Profile2D, Profile1D, Parameter0D, Grid):
 
     def convex_hull(self, plot=True):
         """Return plasma boundary convex hull."""
-        points = np.r_[
-            *[
+        points = np.concatenate(
+            [
                 self.data.boundary[itime, : boundary_length.data]
                 for itime, boundary_length in enumerate(self.data.boundary_length)
-            ]
-        ]
+            ],
+            axis=0,
+        )
         hull = ConvexHull(points)
         vertices = np.append(hull.vertices, hull.vertices[0])
         if plot:
@@ -756,5 +757,4 @@ if __name__ == "__main__":
     equilibrium.time = 300
     equilibrium.plot_2d("psi", mask=0)
     equilibrium.plot_boundary(outline=False)
-    equilibrium.convex_hull()
     # equilibrium.plot_quiver()

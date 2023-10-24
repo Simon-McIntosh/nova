@@ -364,6 +364,7 @@ def test_fiducial_polyline_geometry_segments(cc_polyline):
         "line",
         "arc",
         "arc",
+        "arc",
     ]
 
 

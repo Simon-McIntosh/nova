@@ -330,6 +330,7 @@ class Centerline(Plot, PolylineAttrs, CoilDatabase):
                 ["delta_r", "delta_phi", "delta_z"],
             )
         # update code and ids_properties nodes
+
         self.datasource.update(ids_entry.ids_data)
         return ids_entry.ids_data
 
@@ -346,5 +347,9 @@ if __name__ == "__main__":
     filename = "CS1L"
     filename = "CS"
     centerline = Centerline(filename=filename)
+
+    ids_entry = IdsEntry(**centerline.ids_attrs, ids_node="coil")
+    ids_entry.ids.resize(2)
+
     # print(centerline.coils_non_axisymmetric_ids.coil[0])
-    centerline.write_ids()
+    # centerline.write_ids()

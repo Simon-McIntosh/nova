@@ -18,7 +18,7 @@ class Connect:
     command: str
     machine: str
     user: str = "public"
-    cluster: str = "sdcc-login01.iter.org"
+    cluster: str = "sdcc-login02.iter.org"
     backend: str = "HDF5"
     columns: list[str] = field(default_factory=lambda: [])
     frame: pandas.DataFrame = field(
@@ -54,7 +54,7 @@ class Connect:
         return frame.iloc[:, 0].unique()
 
     def to_dataframe(self, summary_string, delimiter=r"\s+"):
-        """Convert summart string to pandas dataframe."""
+        """Convert summary string to pandas dataframe."""
         for skip in [" NOTE"]:
             summary_string = re.sub(
                 rf"^{skip}.*\n?", "", summary_string, flags=re.MULTILINE
@@ -143,15 +143,25 @@ class ScenarioDatabase(Connect):
         ]
     )
 
+    _default_workflow_names: ClassVar[list[str]] = ["CORSICA", "ASTRA", "DINA-IMAS"]
     _space_columns: ClassVar[list[str]] = ["ref_name", "confinement", "workflow"]
+
+    def _workflow(self, *workflow_names):
+        """Return workflow names."""
+        if len(workflow_names) == 0:
+            return self._workflow_names
+        return workflow_names
+
+    def load_workflow(self, *workflow_names):
+        """Load scenario workflows into frame."""
+        if len(workflow_names) == 0:
+            workflow_names = self._default_workflow_names
+        for workflow in self._workflow(workflow_names):
+            self.load_frame("workflow", workflow)
 
     def sync_workflow(self, *workflow_names):
         """Sync scenario workflows with local repo."""
-        if len(workflow_names) == 0:
-            workflow_names = ["CORSICA", "ASTRA", "DINA-IMAS"]
-        for workflow in workflow_names:
-            self.load_frame("workflow", workflow)
-        # self.copy_frame('equilibrium', 'pf_active', 'pf_passive')
+        self.load_workflow(*workflow_names)
         self.module_run(self.copy_command(self.frame), hide=True)
         self.rsync()
 
@@ -160,7 +170,6 @@ class ScenarioDatabase(Connect):
         self.frame = pandas.DataFrame(
             np.array([s.split("/") for s in shot], int), columns=["pulse", "run"]
         )
-        # self.copy_frame('equilibrium', 'pf_active', 'pf_passive', 'magnetics')
         self.module_run(self.copy_command(self.frame), hide=True)
         self.rsync()
 
@@ -228,7 +237,7 @@ if __name__ == "__main__":
 
     # iter_md = MachineDatabase(machine="ITER_MD", user="hosokam")
     # iter_md.sync_shot("111001/203")
-    ScenarioDatabase().sync_shot("134173/106")
+    # ScenarioDatabase().sync_shot("134173/106")
     # ScenarioDatabase().sync_shot("135014/1")
     # ScenarioDatabase().rsync()
     # ScenarioDatabase(user='tribolp').sync_shot('135011/21')
@@ -236,10 +245,11 @@ if __name__ == "__main__":
     # ScenarioDatabase(user='dubrovm').sync_shot('105027/1')
 
     # ScenarioDatabase().sync_shot('105011/9')
-    scenario = ScenarioDatabase()
-    # scenario.sync_shot("115001/1")
-    # scenario.load_frame('workflow', 'DINA-IMAS')
-
     # scenario = ScenarioDatabase()
-    # scenario.sync_workflow("DINA-IMAS")
+    # scenario.sync_shot("115001/1")
+
+    scenario = ScenarioDatabase()
+    scenario.load_frame("workflow", "DINA-IMAS")
+
+    scenario.sync_workflow()
     # ScenarioDatabase().sync_shot('135011/7')

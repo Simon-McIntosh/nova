@@ -4,6 +4,7 @@ from functools import cached_property
 from typing import ClassVar, final
 
 import numpy as np
+from scipy.spatial import ConvexHull
 
 from nova.biot.contour import Contour
 from nova.geometry.pointloop import PointLoop
@@ -322,7 +323,7 @@ class Parameter0D(Scenario):
         lcfs_data["elongation_lower"] = lcfs_data["triangularity_inner"]
         return lcfs_data
 
-    def build_boundary_shape(self):
+    def build_boundary_shape(self, replace=True):
         """Build plasma shape parameters."""
         self.append("time", "psi", "boundary_separatrix", postfix="_boundary")
         self.append("time", "type", "boundary_separatrix", prefix="boundary_")
@@ -330,7 +331,7 @@ class Parameter0D(Scenario):
         lcfs_data = self.extract_shape_parameters()
         for attr in self.attrs_boundary:
             path = f"boundary_separatrix.{attr}"
-            if attr not in self.data and attr in lcfs_data:
+            if (replace or attr not in self.data and attr) in lcfs_data:
                 self.data[attr] = "time", lcfs_data[attr]
         path = "boundary_separatrix.geometric_axis"
         if (
@@ -358,7 +359,7 @@ class Profile1D(Scenario):
             "profiles_1d.f_df_dpsi"
         ):
             return
-        length = self.ids_index["profiles_1d.dpressure_dpsi"][0]
+        length = self.ids_index.get_shape("profiles_1d.dpressure_dpsi")[0]
         self.data["psi_norm"] = np.linspace(0, 1, length)
         if not self.ids_index.empty("profiles_1d.psi"):
             self.data["psi1d"] = ("time", "psi_norm"), self.ids_index.array(
@@ -705,6 +706,18 @@ class EquilibriumData(Equilibrium, Profile2D, Profile1D, Parameter0D, Grid):
         if mask == 1:
             return np.ma.masked_array(data, self.mask(self.boundary))
 
+    def convex_hull(self):
+        """Return plasma boundary convex hull."""
+        points = np.r_[
+            *[
+                self.data.boundary[itime, : boundary_length.data]
+                for itime, boundary_length in enumerate(self.data.boundary_length)
+            ]
+        ]
+        hull = ConvexHull(points)
+        vertices = np.append(hull.vertices, hull.vertices[0])
+        self.axes.plot(points[vertices, 0], points[vertices, 1], "C0")
+
 
 if __name__ == "__main__":
     # import doctest
@@ -730,4 +743,5 @@ if __name__ == "__main__":
     equilibrium.time = 300
     equilibrium.plot_2d("psi", mask=0)
     equilibrium.plot_boundary(outline=False)
+    equilibrium.convex_hull()
     # equilibrium.plot_quiver()

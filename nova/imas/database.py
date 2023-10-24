@@ -711,7 +711,6 @@ class IdsIndex:
     ids_data: ImasIds
     ids_node: str = "time_slice"
     transpose: bool = field(init=False, default=False)
-    length: int = field(init=False, default=0)
     shapes: dict[str, tuple[int, ...] | tuple[()]] = field(
         init=False, default_factory=dict
     )
@@ -762,19 +761,15 @@ class IdsIndex:
         if ids_node is not None:
             self.transpose = ids_node != "time_slice"
             self.ids_node = ids_node
-        try:
-            self.length = len(self.ids)
-        except (AttributeError, TypeError):
-            self.length = 0
 
-    def __getitem__(self, path: str) -> tuple[int, ...] | tuple[()]:
-        """Return cached dimension length."""
-        _path = self._ids_path(path)
+    @property
+    def length(self):
+        """Return ids_node length."""
         try:
-            return self.shapes[_path]
-        except KeyError:
-            self.shapes[_path] = self._path_shape(path)
-            return self[path]
+            return len(self.ids)
+        except (AttributeError, TypeError):
+            return 0
+        raise ValueError(f"unable determine ids_node length {self.ids_node}")
 
     def _ids_path(self, path: str) -> str:
         """Return full ids path."""
@@ -785,11 +780,20 @@ class IdsIndex:
     def shape(self, path) -> tuple[int, ...]:
         """Return attribute array shape."""
         if self.length == 0:
-            return self[path]
-        return (self.length,) + self[path]
+            return self.get_shape(path)
+        return (self.length,) + self.get_shape(path)
 
-    def _path_shape(self, path: str) -> tuple[int, ...] | tuple[()]:
-        """Return data shape at itime=0 on path."""
+    def get_shape(self, path: str) -> tuple[int, ...] | tuple[()]:
+        """Return cached dimension length."""
+        _path = self._ids_path(path)
+        try:
+            return self.shapes[_path]
+        except KeyError:
+            self.shapes[_path] = self._get_shape(path)
+            return self.get_shape(path)
+
+    def _get_shape(self, path: str) -> tuple[int, ...] | tuple[()]:
+        """Return data shape at index=0 on path."""
         match data := self.get_slice(0, path):
             case np.ndarray():
                 return data.shape
@@ -868,7 +872,7 @@ class IdsIndex:
 
     def vector(self, itime: int, path: str):
         """Return attribute data vector at itime."""
-        if len(self[path]) == 0:
+        if len(self.get_shape(path)) == 0:
             raise IndexError(
                 f"attribute {path} is 0-dimensional " "access with self.array(path)"
             )

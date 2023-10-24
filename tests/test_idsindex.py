@@ -2,7 +2,7 @@ import pytest
 
 import numpy as np
 
-from nova.imas.database import IdsIndex
+from nova.imas.database import IDS, IdsIndex
 from nova.imas.test_utilities import ids_attrs, load_ids, mark
 
 
@@ -81,6 +81,12 @@ def test_empty():
     ids_data = load_ids(**ids_attrs["pf_active_iter"]).ids_data
     ids_index = IdsIndex(ids_data, "coil")
     assert ids_index.empty("energy_limit_max")
+
+
+def test_ids_node_length():
+    ids_index = IdsIndex(IDS(name="coils_non_axisymmetric").get_ids(), "coil")
+    ids_index.ids.resize(5)
+    assert ids_index.length == 5
 
 
 if __name__ == "__main__":

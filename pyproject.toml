@@ -18,7 +18,7 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.10,<3.13"
+python = ">=3.10,<3.12"
 appdirs = ">=1.4.4"
 contourpy = ">=1.0.7"
 fsspec = ">=2023.5.0"
@@ -71,7 +71,9 @@ pandas-stubs = ">=2.0.1.230501"
 pandoc = ">=2.3"
 pyperf = ">=2.6.0"
 pytest-xdist = ">=3.3.1"
-pyqt5 = "<=5.15.2"
+#pyqt5 = "<=5.15.4"
+pyqt5-qt5 = "<=5.15.10"
+pyqtwebengine-qt5 = "<=5.15.10"
 snakeviz = ">=2.2.0"
 spyder = ">=5.4.3"
 spyder-unittest = ">=0.5.1"

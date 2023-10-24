@@ -936,7 +936,7 @@ class Geometry:
     >>> geometry.wall
     False
     >>> geometry.pf_active == PoloidalFieldActive.default_ids_attrs()
-    Truepf_active
+    True
     >>> geometry.pf_passive == PoloidalFieldPassive.default_ids_attrs()
     True
 

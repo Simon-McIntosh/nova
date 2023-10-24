@@ -333,7 +333,7 @@ class Parameter0D(Scenario):
         lcfs_data = self.extract_shape_parameters()
         for attr in self.attrs_boundary:
             path = f"boundary_separatrix.{attr}"
-            if (replace or attr not in self.data and attr) in lcfs_data:
+            if (replace or attr not in self.data) and attr in lcfs_data:
                 self.data[attr] = "time", lcfs_data[attr]
         path = "boundary_separatrix.geometric_axis"
         if (

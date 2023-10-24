@@ -34,12 +34,9 @@ class Arc(ArcConstants, Matrix):
     def __post_init__(self):
         """Load intergration constants."""
         super().__post_init__()
+        self.start_point = self.source.space.to_local("start_point")
 
-        coords = np.stack(
-            [self.source("x"), self.source("y"), self.source("z")], axis=-1
-        )
-        c_ = np.r_["2,3", self.source("x"), self.source("y"), self.source("z")]
-        print("coords", coords.shape, c_.shape)
+        print("start", self.start_point)
         # np.einsum('ijk,ijkm->ijm', )
 
         self.rs = np.stack(

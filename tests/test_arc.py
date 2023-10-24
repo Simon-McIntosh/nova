@@ -28,9 +28,14 @@ def test_space_axes_shape(source):
     assert np.shape(source.space.coordinate_axes) == (2, 3, 3)
 
 
-def test_end_points(source):
+def test_terminal_points(source):
     assert np.allclose(source.start_point, [5, 0, 3.2])
     assert np.allclose(source.end_point, [-5, 0, 3.2])
+
+
+def test_local_start_points(source):
+    start_point = source.space.start_point
+    assert np.allclose(source.space.to_local(start_point)[:, 1], 0)
 
 
 def test_coordinate_transform_roundtrip(source):

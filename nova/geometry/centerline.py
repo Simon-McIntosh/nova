@@ -216,7 +216,7 @@ class Centerline(Plot, PolylineAttrs, CoilDatabase):
 
     def _read_sheet(self, xls, sheet_name=0):
         """Read excel worksheet."""
-        sheet = pandas.read_excel(xls, sheet_name, usecols=[2, 3, 4], nrows=120)
+        sheet = pandas.read_excel(xls, sheet_name, usecols=[2, 3, 4])
         columns = {"X Coord": "x", "Y Coord": "y", "Z Coord": "z"}
         sheet.rename(columns=columns, inplace=True)
         return sheet
@@ -323,7 +323,6 @@ class Centerline(Plot, PolylineAttrs, CoilDatabase):
                 section.points,
                 ["delta_r", "delta_phi", "delta_z"],
             )
-            print(coil.conductor[0])
         # update code and ids_properties nodes
         self.datasource.update(ids_entry.ids_data)
         return ids_entry.ids_data
@@ -341,6 +340,4 @@ if __name__ == "__main__":
     filename = "CS1L"
     filename = "CS"
     centerline = Centerline(filename=filename)
-
-    # print(centerline.coils_non_axisymmetric_ids.coil[0])
-    centerline.write_ids()
+    # centerline.write_ids()

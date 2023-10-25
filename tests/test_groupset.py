@@ -78,7 +78,7 @@ def test_local_frame_roundtrip(groupset, frame):
 @pytest.mark.parametrize("source, axis", product(["multiline", "multiarc"], ["n", "a"]))
 def test_source_axes(source, axis, request):
     source = request.getfixturevalue(source)
-    vector = {"n": [0, 1, 0], "a": [0, 0, 1]}[axis]
+    vector = {"n": [-1, 0, 0], "a": [0, 0, 1]}[axis]
     points = source.stack(*[f"{axis}{coord}" for coord in "xyz"])
     local_points = source.space._rotate_to_local(points[0])
     global_points = source.space._rotate_to_global(local_points)
@@ -94,7 +94,7 @@ def test_space_plot(multiline):
 
 def test_local_arc_start_point_theta(multiarc):
     start_point = multiarc.space.to_local(multiarc.space.start_point)
-    theta = np.arctan2(start_point[:, 0], -start_point[:, 1])
+    theta = np.arctan2(start_point[:, 1], start_point[:, 0])
     assert np.allclose(theta, 0)
 
 

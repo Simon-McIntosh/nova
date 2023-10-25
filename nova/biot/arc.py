@@ -30,33 +30,13 @@ class Arc(ArcConstants, Matrix):
     """
 
     name: ClassVar[str] = "arc"  # element name
-    csys: str = "global"
 
     def __post_init__(self):
         """Load intergration constants."""
         super().__post_init__()
+        self.start_point = self.source.space.to_local("start_point")
 
-        # use context manager to manage source and target attributes -> unwind on yield
-        # define local attributes in local coordinate system
-        # map parameters back to global coordinates on solve
-
-        # start_point = self._to_global(self.start_point)
-        # print(start_point)
-        # transform = np.stack(
-        #    [self.source["dx"], self.source["dy"], self.source["dz"]], axis=-1
-        # )
-
-        ##Rmat = to_vector(
-        #    [0, 0, 1], coilset.subframe.loc[:, ['dx', 'dy', 'dz']]
-        # )
-
-        # phi =
-
-        coords = np.stack(
-            [self.source("x"), self.source("y"), self.source("z")], axis=-1
-        )
-        c_ = np.r_["2,3", self.source("x"), self.source("y"), self.source("z")]
-        print("coords", coords.shape, c_.shape)
+        print("start", self.start_point)
         # np.einsum('ijk,ijkm->ijm', )
 
         self.rs = np.stack(

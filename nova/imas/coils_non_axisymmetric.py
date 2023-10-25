@@ -7,6 +7,7 @@ import numpy as np
 from tqdm import tqdm
 
 from nova.geometry.polygeom import Polygon
+from nova.geometry.polyline import PolyLine
 from nova.graphics.plot import Plot
 from nova.imas.coil import coil_name, coil_names, part_name
 from nova.imas.database import ImasIds
@@ -19,10 +20,11 @@ from nova.imas.scenario import Scenario
 class Elements(Plot):
     """Manage conductor element data extracted from coils_non_axisymmetric IDS."""
 
+    elements: ImasIds = field(repr=False, default=None)
     points: np.ndarray = field(
         init=False, repr=False, default_factory=lambda: np.array([])
     )
-    elements: ImasIds = field(repr=False, default=None)
+    polyline: PolyLine = field(init=False, repr=False, default_factory=PolyLine)
     data: dict[str, np.ndarray] = field(init=False, repr=False, default_factory=dict)
 
     point_attrs: ClassVar[list[str]] = [
@@ -37,6 +39,8 @@ class Elements(Plot):
         for attr in self.point_attrs:
             self.data[attr] = self._to_array(getattr(self.elements, attr))
         self.points = self._extract_points()
+        self.polyline = self._extract_polyline()
+        self.polyline.points = self.points
 
     def __len__(self):
         """Return maximum length of arrays stored in data dict."""
@@ -72,9 +76,9 @@ class Elements(Plot):
         points = []
         for element_type, point_array in zip(self._type_array, self._point_array):
             match element_type:
-                case 1:
+                case 1:  # line
                     points.append(point_array[..., 0])
-                case 2:
+                case 2:  # arc
                     points.append(point_array[..., 0])
                     points.append(point_array[..., 1])
                 case _:
@@ -83,6 +87,29 @@ class Elements(Plot):
         return np.array(points)[
             np.sort(np.unique(points, return_index=True, axis=0)[1])
         ]
+
+    def _extract_polyline(self):
+        """Return segmented polyline."""
+        polyline = PolyLine(minimum_arc_nodes=3)
+        for element_type, point_array in zip(self._type_array, self._point_array):
+            match element_type:
+                case 1:  # line
+                    normal = point_array[..., 1] - point_array[..., 0]
+                    points = np.stack(
+                        [point_array[..., 0], point_array[..., 2]], axis=0
+                    )
+                    polyline.append(points, normal[np.newaxis, :])
+                case 2:  # arc
+                    points = np.stack(
+                        [point_array[..., 0], point_array[..., 1], point_array[..., 2]],
+                        axis=0,
+                    )
+                    polyline.append(points)
+                case _:
+                    raise NotImplementedError(
+                        f"element type {element_type} not implemented"
+                    )
+        return polyline
 
     def plot(self):
         """Plot polyline."""
@@ -124,11 +151,13 @@ class CoilsNonAxisymmetyric(Plot, CoilDatabase, Scenario):
                     points[name].extend(elements.points)
                     if i > 0:
                         name = f"name{i}"
+                    print(elements.polyline.to_frame())
                     self.winding.insert(
-                        elements.points,
-                        polygon,
+                        polyline=elements.polyline,
+                        cross_section=polygon,
                         name=name,
                         part=part_name(coil),
+                        delim="",
                     )
                     if i > 0:
                         self.linkframe([coil_name(coil), name])
@@ -152,7 +181,7 @@ class CoilsNonAxisymmetyric(Plot, CoilDatabase, Scenario):
 
 
 if __name__ == "__main__":
-    coil3d = CoilsNonAxisymmetyric(111003, 1)  # CC
+    coil3d = CoilsNonAxisymmetyric(111003, 2)  # CC
     # coil3d += CoilsNonAxisymmetyric(115001, 1)  # ELM
 
     coil3d.frame.vtkplot()

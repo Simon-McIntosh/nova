@@ -58,7 +58,15 @@ class Winding(CoilSetAttrs):
     def set_conditional_attributes(self):
         """Set conditional attrs - not required for winding."""
 
-    def insert(self, path, cross_section, required=None, iloc=None, **additional):
+    def insert(
+        self,
+        path=None,
+        cross_section=None,
+        polyline=None,
+        required=None,
+        iloc=None,
+        **additional,
+    ):
         """
         Add 3D coils to frameset.
 
@@ -66,7 +74,7 @@ class Winding(CoilSetAttrs):
 
         Parameters
         ----------
-        path : npt.ArrayLike, shape(n,3)
+        path : np.ndarray, shape(n,3)
             Swept path.
 
         cross_section :
@@ -91,15 +99,27 @@ class Winding(CoilSetAttrs):
             FrameSpace index.
 
         """
+        if cross_section is None or (path is None and polyline is None):
+            raise ValueError(
+                "winding.insert requires cross_section and "
+                "path or polyline attributes"
+            )
         if not isinstance(cross_section, Polygon):
             cross_section = Polygon(cross_section, name="sweep")
+
         polyline_kwargs = {
             attr: additional.pop(attr)
             for attr in self.polyline_attrs
             if attr in additional
         }
+        if path is not None:
+            polyline = PolyLine(
+                path, cross_section=cross_section.points, **polyline_kwargs
+            )
+        print(polyline.path_geometry)
+        print(polyline.volume_geometry)
+
         align = additional.pop("align", "vector")
-        polyline = PolyLine(path, cross_section=cross_section.points, **polyline_kwargs)
         vtk = Sweep(cross_section.points, polyline.path, align=align)
         frame_data = self.vtk_data(vtk)
         self.attrs = additional | dict(
@@ -111,7 +131,6 @@ class Winding(CoilSetAttrs):
         )
         with self.insert_required(required):
             index = self.frame.insert(*frame_data, iloc=iloc, **self.attrs)
-        self.polyline = polyline
         with self.insert_required([]):
             subattrs = (
                 self.attrs

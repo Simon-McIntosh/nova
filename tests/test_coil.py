@@ -7,7 +7,7 @@ from nova.imas.coil import full_coil_name
     "identifier,full_name",
     [
         ("TCC_1-4", "Top Correction Coils, TCC-1 and TCC-4"),
-        ("MCC_2-6", "Middle Correction Coils, MCC-2 and MCC-6"),
+        ("SCC_2-6", "Side Correction Coils, SCC-2 and SCC-6"),
         ("BCC_9-2", "Bottom Correction Coils, BCC-9 and BCC-2"),
         ("CS1U", "Central Solenoid Module 1 Upper"),
         ("CS3L", "Central Solenoid Module 3 Lower"),

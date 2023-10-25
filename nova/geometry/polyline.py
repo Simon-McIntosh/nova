@@ -399,7 +399,8 @@ class PolyLine(Plot):
 
     def __post_init__(self):
         """Decimate polyline."""
-        self.decimate()
+        if self.points.size > 0:
+            self.decimate()
 
     def __getitem__(self, attr: str):
         """Return path geometry attribute."""
@@ -408,6 +409,12 @@ class PolyLine(Plot):
     def __len__(self):
         """Return segment number."""
         return len(self.segments)
+
+    def __iadd__(self, other):
+        """Return polyline instance augmented by other."""
+        self.segments.extend(other.segments)
+        self.points = np.append(self.points, other.points)
+        return self
 
     def fit_arc(self, points):
         """Return point index prior to first arc mis-match."""
@@ -420,7 +427,7 @@ class PolyLine(Plot):
             return 2
         return point_number
 
-    def append(self, points, normal):
+    def append(self, points, normal=None):
         """Append points to segment list."""
         if len(points) >= self.minimum_arc_nodes:
             self.segments.append(
@@ -566,3 +573,6 @@ if __name__ == "__main__":
     points += 500 * fiducial.data.centerline_delta[3].data
     polyline = PolyLine(points)
     polyline.plot()
+
+    # poly = PolyLine()
+    # for segment in polyline.segments:

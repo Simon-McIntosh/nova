@@ -12,8 +12,8 @@ def coil_name(coil):
 def full_coil_name(identifier: str):
     """Return full coil name from identifier."""
     match list(identifier):
-        case str(prefix), "C", "C", "_", str(i), "-", str(j) if prefix in "TMB":
-            position = dict(zip("TMB", ["Top", "Middle", "Bottom"]))[prefix]
+        case str(prefix), "C", "C", "_", str(i), "-", str(j) if prefix in "TSB":
+            position = dict(zip("TSB", ["Top", "Side", "Bottom"]))[prefix]
             return f"{position} Correction Coils, {prefix}CC-{i} and {prefix}CC-{j}"
         case "C", "S", str(index), str(postfix):
             position = dict(zip("UL", ["Upper", "Lower"]))[postfix]

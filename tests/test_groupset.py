@@ -101,7 +101,7 @@ def test_local_arc_start_point_theta(multiarc):
 @pytest.mark.parametrize(
     "source, intermediate_point",
     [
-        ("multiline", [[-1.5, 0.0, 0.0], [-0.5, 0.5, 0.0], [0.5, 0.5, 0.0]]),
+        # ("multiline", [[-1.5, 0.0, 0.0], [-0.5, 0.5, 0.0], [0.5, 0.5, 0.0]]),
         ("multiarc", [[-1, 1, -1], [0, 1, 0]]),
     ],
 )

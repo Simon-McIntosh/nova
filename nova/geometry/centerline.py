@@ -20,7 +20,7 @@ from nova.imas.datasource import CAD, DataSource
 from nova.imas.machine import CoilDatabase
 
 datasource = {
-    "CC_EXTRATED_CENTERLINES": DataSource(
+    "CC": DataSource(
         pulse=111003,
         run=2,
         description="Ex-Vessel Coils (EVC) Systems (CC) - conductor centerlines",
@@ -58,7 +58,7 @@ datasource = {
             provider="Vincent Bontemps, vincent.bontemps@iter.org",
             contact="Guillaume Davin, Guillaume.Davin@iter.org",
         ),
-        attributes={"cross_section": {"circle": [0, 0, 0.0163, 0.0163, 4]}},
+        attributes={"cross_section": {"circle": [0, 0, 0.0163, 0.0163, 2]}},
     ),
     "CS": DataSource(
         pulse=111004,
@@ -78,7 +78,7 @@ datasource = {
             provider="Vincent Bontemps, vincent.bontemps@iter.org",
             contact="Guillaume Davin, Guillaume.Davin@iter.org",
         ),
-        attributes={"cross_section": {"circle": [0, 0, 0.0163, 0.0163, 4]}},
+        attributes={"cross_section": {"circle": [0, 0, 0.0163, 0.0163, 2]}},
     ),
 }
 
@@ -88,7 +88,7 @@ class PolylineAttrs:
     """Group polyline attributes."""
 
     minimum_arc_nodes: int = 4
-    quadrant_segments: int = 32
+    quadrant_segments: int = 8
     arc_eps: float = 1e-3
     line_eps: float = 2e-3
     rdp_eps: float = 1e-4
@@ -216,7 +216,7 @@ class Centerline(Plot, PolylineAttrs, CoilDatabase):
 
     def _read_sheet(self, xls, sheet_name=0):
         """Read excel worksheet."""
-        sheet = pandas.read_excel(xls, sheet_name, usecols=[2, 3, 4])
+        sheet = pandas.read_excel(xls, sheet_name, usecols=[2, 3, 4], nrows=250)
         columns = {"X Coord": "x", "Y Coord": "y", "Z Coord": "z"}
         sheet.rename(columns=columns, inplace=True)
         return sheet
@@ -293,14 +293,13 @@ class Centerline(Plot, PolylineAttrs, CoilDatabase):
                     for segment_type in coil_data.segment_type[:segment_number].data
                 ]
             )
-            point_number = coil_data.point_number.data
             for attr in [
                 "start_points",
                 "intermediate_points",
                 "end_points",
                 "centres",
             ]:
-                points = coil_data[attr][:point_number].data
+                points = coil_data[attr][:segment_number].data
                 self._set_ids_points(elements.ids, attr, points)
 
             # rotate cross_section to start element tangent
@@ -338,6 +337,6 @@ class Centerline(Plot, PolylineAttrs, CoilDatabase):
 if __name__ == "__main__":
     filename = "CC"
     # filename = "CS1L"
-    filename = "CS"
+    # filename = "CS"
     centerline = Centerline(filename=filename)
-    # centerline.write_ids()
+    centerline.write_ids()

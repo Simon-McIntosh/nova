@@ -58,7 +58,7 @@ class Space(metamethod.Space, Plot3D):
     quadrant_segments: int = 11
 
     def initialize(self):
-        """Build local coordinate axes."""
+        """Build local coordinate axes (-normal, tangent, binormal)."""
         self.coordinate_axes = np.zeros((len(self.frame), 3, 3))
         self.coordinate_axes[..., 0] = -self.normal
         self.coordinate_axes[..., 1] = np.cross(self.axis, -self.normal)
@@ -118,12 +118,15 @@ class Space(metamethod.Space, Plot3D):
         end_point = self.to_local(self.end_point)
         radius = np.linalg.norm(end_point, axis=1)
         theta = np.arctan2(end_point[:, 1], end_point[:, 0])
+        theta[theta < 0] += np.pi
         points = (
             radius[:, np.newaxis]
             * np.c_[np.cos(theta / 2), np.sin(theta / 2), np.zeros_like(theta)]
         )
-        if self._line_number > 0:
-            points[self._line_index] = np.zeros((self._line_number, 3))
+        if self._line_number > 0:  # line intermediate point defines Frenet normal
+            start_point = self.to_local(self.start_point)
+            points[self._line_index] = start_point[self._line_index]
+            points[self._line_index] += np.array([-1, 0, 0])[np.newaxis, :]
         return self.to_global(points)
 
     @property

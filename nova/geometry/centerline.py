@@ -323,7 +323,6 @@ class Centerline(Plot, PolylineAttrs, CoilDatabase):
                 section.points,
                 ["delta_r", "delta_phi", "delta_z"],
             )
-            print(coil.conductor[0])
         # update code and ids_properties nodes
         self.datasource.update(ids_entry.ids_data)
         return ids_entry.ids_data
@@ -337,8 +336,8 @@ class Centerline(Plot, PolylineAttrs, CoilDatabase):
 
 
 if __name__ == "__main__":
-    filename = "CC_EXTRATED_CENTERLINES"
-    filename = "CS1L"
+    filename = "CC"
+    # filename = "CS1L"
     filename = "CS"
     centerline = Centerline(filename=filename)
 

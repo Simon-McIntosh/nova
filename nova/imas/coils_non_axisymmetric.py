@@ -6,8 +6,10 @@ from typing import ClassVar
 import numpy as np
 from tqdm import tqdm
 
+from nova.biot.space import Segment
 from nova.geometry.polygeom import Polygon
 from nova.geometry.polyline import PolyLine
+from nova.geometry.section import Section
 from nova.graphics.plot import Plot
 from nova.imas.coil import coil_name, coil_names, part_name
 from nova.imas.database import ImasIds
@@ -46,12 +48,16 @@ class Elements(Plot):
         """Return maximum length of arrays stored in data dict."""
         return np.max([len(array) for array in self.data.values()])
 
-    def _to_array(self, ids_points):
+    def _to_array(self, ids_points, attrs=["r", "phi", "z"]):
         """Return cartesian point array from nested cylindrical ids structure."""
+        data = {
+            label: getattr(ids_points, attr)
+            for label, attr in zip(["r", "phi", "z"], attrs)
+        }
         return np.c_[
-            ids_points.r * np.cos(ids_points.phi),
-            ids_points.r * np.sin(ids_points.phi),
-            ids_points.z,
+            data["r"] * np.cos(data["phi"]),
+            data["r"] * np.sin(data["phi"]),
+            data["z"],
         ]
 
     @cached_property
@@ -111,6 +117,14 @@ class Elements(Plot):
                     )
         return polyline
 
+    @property
+    def start_axes(self):
+        """Return start axes."""
+        start_segment = self.polyline.segments[0]
+        return Segment(
+            start_segment.normal, start_segment.axis, start_segment.name
+        ).start_axes
+
     def plot(self):
         """Plot polyline."""
         self.set_axes("3d")
@@ -142,16 +156,18 @@ class CoilsNonAxisymmetyric(Plot, CoilDatabase, Scenario):
                 points[name] = []
                 for i, conductor in enumerate(coil.conductor):
                     elements = Elements(elements=conductor.elements)
-                    polygon = Polygon(
-                        np.c_[
-                            conductor.cross_section.delta_r,
-                            conductor.cross_section.delta_z,
-                        ]
+                    section = Section(
+                        elements._to_array(
+                            conductor.cross_section,
+                            attrs=["delta_r", "delta_phi", "delta_z"],
+                        ),
+                        triad=elements.start_axes,
                     )
                     points[name].extend(elements.points)
+                    section.to_axes(np.identity(3))
+                    polygon = Polygon(section.points[:, 1:])
                     if i > 0:
                         name = f"name{i}"
-                    print(elements.polyline.to_frame())
                     self.winding.insert(
                         polyline=elements.polyline,
                         cross_section=polygon,
@@ -181,8 +197,10 @@ class CoilsNonAxisymmetyric(Plot, CoilDatabase, Scenario):
 
 
 if __name__ == "__main__":
-    coil3d = CoilsNonAxisymmetyric(111003, 2)  # CC
+    cc_ids = CoilsNonAxisymmetyric(111003, 2)  # CC
+    cs_ids = CoilsNonAxisymmetyric(111004, 1)  # CS
     # coil3d += CoilsNonAxisymmetyric(115001, 1)  # ELM
 
-    coil3d.frame.vtkplot()
-    coil3d._clear()
+    # coil = cc_ids + cs_ids
+    # coil.frame.vtkplot()
+    # coil3d._clear()

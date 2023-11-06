@@ -366,7 +366,7 @@ class PolyLine(Plot):
     points: np.ndarray = field(repr=False, default_factory=lambda: np.array([]))
     cross_section: np.ndarray = field(repr=False, default_factory=lambda: np.array([]))
     arc_eps: float = 1e-3
-    line_eps: float = 2e-3
+    line_eps: float = 0.1  # minimum angle subtended by arc
     rdp_eps: float = 1e-4
     minimum_arc_nodes: int = 3
     quadrant_segments: int = 16
@@ -455,7 +455,7 @@ class PolyLine(Plot):
         for i, segment in enumerate(self.segments):
             if isinstance(segment, Line):
                 continue
-            if (segment.length - segment.chord.length) / segment.length < self.line_eps:
+            if abs(segment.central_angle) < self.line_eps:
                 self.segments[i] = segment.chord
         self.rdp_merge()
 

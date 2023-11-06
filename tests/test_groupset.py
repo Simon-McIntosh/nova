@@ -99,15 +99,17 @@ def test_local_arc_start_point_theta(multiarc):
 
 
 @pytest.mark.parametrize(
-    "source, intermediate_point",
+    "source, point",
     [
-        # ("multiline", [[-1.5, 0.0, 0.0], [-0.5, 0.5, 0.0], [0.5, 0.5, 0.0]]),
+        ("multiline", [[-2, 0, 0], [-1, 0, 0], [0, 1, 0]]),
         ("multiarc", [[-1, 1, -1], [0, 1, 0]]),
     ],
 )
-def test_space_intermediate_point(source, intermediate_point, request):
+def test_space_intermediate_point(source, point, request):
     space = request.getfixturevalue(source).space
-    assert np.allclose(space.intermediate_point, intermediate_point)
+    if source == "multiline":  # start point + normal
+        point += space.normal
+    assert np.allclose(space.intermediate_point, point)
 
 
 if __name__ == "__main__":

@@ -10,7 +10,7 @@ from tqdm import tqdm
 import xarray
 
 from nova.biot.biotframe import Source
-from nova.biot.space import Line, Arc
+from nova.biot.space import Segment
 from nova.geometry.polygeom import Polygon
 from nova.geometry.section import Section
 from nova.graphics.plot import Plot
@@ -88,9 +88,9 @@ class PolylineAttrs:
     """Group polyline attributes."""
 
     minimum_arc_nodes: int = 4
-    quadrant_segments: int = 8
+    quadrant_segments: int = 9
     arc_eps: float = 1e-3
-    line_eps: float = 2e-3
+    line_eps: float = 1e-1
     rdp_eps: float = 1e-4
 
     @property
@@ -206,7 +206,7 @@ class Centerline(Plot, PolylineAttrs, CoilDatabase):
                     self.cross_section,
                     name=coil_name,
                     part=part_name(coil_name),
-                    delim="",
+                    delim="-",
                     **self.polyline_attrs,
                 )
         self._store_point_data(xls_points)
@@ -216,7 +216,7 @@ class Centerline(Plot, PolylineAttrs, CoilDatabase):
 
     def _read_sheet(self, xls, sheet_name=0):
         """Read excel worksheet."""
-        sheet = pandas.read_excel(xls, sheet_name, usecols=[2, 3, 4], nrows=250)
+        sheet = pandas.read_excel(xls, sheet_name, usecols=[2, 3, 4])
         columns = {"X Coord": "x", "Y Coord": "y", "Z Coord": "z"}
         sheet.rename(columns=columns, inplace=True)
         return sheet
@@ -280,7 +280,8 @@ class Centerline(Plot, PolylineAttrs, CoilDatabase):
         ids_entry["identifier", :] = coil_name
         ids_entry["name", :] = [full_coil_name(identifier) for identifier in coil_name]
         ids_entry["turns", :] = np.ones(self.data.dims["coil_name"], float)
-        section = Section(self.data.cross_section.data)
+        section_triad = np.array([[0, -1, 0], [1, 0, 0], [0, 0, 1]])  # poly in xz plane
+        section = Section(self.data.cross_section.data, triad=section_triad)
         element_type = {"line": 1, "arc": 2}
         for name, coil in zip(coil_name, ids_entry.ids):
             coil.conductor.resize(1)
@@ -304,18 +305,14 @@ class Centerline(Plot, PolylineAttrs, CoilDatabase):
 
             # rotate cross_section to start element tangent
             # TODO update following merge of IMAS-4658
-            normal = coil_data.normal[0]
-            axis = coil_data.axis[0]
-            match coil_data.segment_type[0].data:
-                case "line":
-                    start_axes = Line(axis, normal).axes
-                case "arc":
-                    start_axes = Arc(axis, normal).axes
-                case segment_type:
-                    raise NotImplementedError(
-                        f"segment type {segment_type} " "not implemented"
-                    )
-            section.to_axes(start_axes)
+            start_segment = coil_data.isel(segment_index=0)
+            segment = Segment(
+                **{
+                    attr: start_segment[attr].data
+                    for attr in ["normal", "axis", "segment_type"]
+                }
+            )
+            section.to_axes(segment.start_axes)
             self._set_ids_points(
                 coil.conductor[0],
                 "cross_section",
@@ -329,14 +326,17 @@ class Centerline(Plot, PolylineAttrs, CoilDatabase):
     def write_ids(self, **ids_attrs):
         """Write pulse design data to equilibrium ids."""
         ids_attrs = self.ids_attrs | ids_attrs
-        ids_entry = IdsEntry(ids_data=self.coils_non_axisymmetric_ids, **ids_attrs)
-        ids_entry.put_ids()
+        IdsEntry(ids_data=self.coils_non_axisymmetric_ids, **ids_attrs).put_ids()
         self.datasource.write_yaml()
 
 
 if __name__ == "__main__":
-    filename = "CC"
-    # filename = "CS1L"
     # filename = "CS"
+    # filename = "CS1L"
+    filename = "CS"
     centerline = Centerline(filename=filename)
     centerline.write_ids()
+
+    # for filename in ["CC", "CS"]:
+    #   centerline = Centerline(filename=filename)
+    #   centerline.write_ids()

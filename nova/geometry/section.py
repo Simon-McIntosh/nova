@@ -42,7 +42,7 @@ class Section:
         self.triad = rotation.apply(self.triad)
 
     def to_axes(self, axes: np.ndarray):
-        """Rotate points to triad."""
+        """Rotate points to align triad with axes."""
         rotation = to_axes(axes, self.triad)
         self._rotate_points(rotation)
         self.triad = rotation.apply(self.triad.T).T

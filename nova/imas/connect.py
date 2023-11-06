@@ -111,7 +111,7 @@ class Connect:
         for ids in ids_names:
             self.module_run(self.copy_command(self.frame, ids), hide=hide)
 
-    def rsync(self):
+    def rsync(self, pulsedd_version=3):
         """Syncronize SDCC remote (user)/public with local IMAS database."""
         public = f"/home/ITER/{self.username}/public/imasdb/{self.machine.lower()}/"
         local = f"/home/{self.username}/imas/shared/imasdb/{self.machine.lower()}/"

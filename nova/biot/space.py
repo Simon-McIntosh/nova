@@ -15,11 +15,28 @@ class Segment:
 
     normal: np.ndarray
     axis: np.ndarray
+    segment_type: str | None = None
 
     @property
     def axes(self):
         """Return line axes."""
         raise NotImplementedError()
+
+    @property
+    def start_axes(self):
+        """Return single start axes."""
+        match self.segment_type:
+            case "line":
+                start_axes = Line(self.axis, self.normal).axes
+            case "arc":
+                start_axes = Arc(self.axis, self.normal).axes
+            case None:
+                raise ValueError("segment type not set")
+            case segment_type:
+                raise NotImplementedError(
+                    f"segment type {segment_type} " "not implemented"
+                )
+        return start_axes
 
 
 @dataclass
@@ -118,7 +135,7 @@ class Space(metamethod.Space, Plot3D):
         end_point = self.to_local(self.end_point)
         radius = np.linalg.norm(end_point, axis=1)
         theta = np.arctan2(end_point[:, 1], end_point[:, 0])
-        theta[theta < 0] += np.pi
+        theta[theta < 0] += 2 * np.pi
         points = (
             radius[:, np.newaxis]
             * np.c_[np.cos(theta / 2), np.sin(theta / 2), np.zeros_like(theta)]

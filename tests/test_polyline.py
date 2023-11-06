@@ -339,7 +339,7 @@ def cc_polyline():
     return PolyLine(
         points,
         arc_eps=1e-3,
-        line_eps=2e-3,
+        line_eps=1e-1,
         rdp_eps=1e-4,
         minimum_arc_nodes=3,
     )

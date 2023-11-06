@@ -112,12 +112,14 @@ class Winding(CoilSetAttrs):
             for attr in self.polyline_attrs
             if attr in additional
         }
-        if path is not None:
-            polyline = PolyLine(
-                path, cross_section=cross_section.points, **polyline_kwargs
-            )
-        print(polyline.path_geometry)
-        print(polyline.volume_geometry)
+        match polyline:
+            case PolyLine():
+                polyline.cross_section = cross_section.points
+            case _:
+                polyline = PolyLine(
+                    path, cross_section=cross_section.points, **polyline_kwargs
+                )
+        self.polyline = polyline
 
         align = additional.pop("align", "vector")
         vtk = Sweep(cross_section.points, polyline.path, align=align)
@@ -138,6 +140,7 @@ class Winding(CoilSetAttrs):
                 | polyline.path_geometry
                 | polyline.volume_geometry
             )
+            subattrs.pop("name", None)
             self.subframe.insert(**subattrs)
         self.update_loc_indexer()
         return index

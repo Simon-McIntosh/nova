@@ -4,7 +4,7 @@ from functools import cached_property
 from typing import ClassVar
 
 import numpy as np
-from scipy.special import ellipj, ellipkinc
+from scipy.special import ellipj
 
 from nova.biot.constants import Constants
 from nova.biot.matrix import Matrix
@@ -102,21 +102,19 @@ class Arc(Constants, Matrix):
             * (self.ck2_ * self.Kinc - (1 - self.k2_ / 2) * self.Winc)
         )
         index = abs(self.alpha) > np.pi / 2
-        print(
-            self.sign_alpha.shape,
-            index.shape,
-            Br_hat[index].shape,
-            Br_hat[np.newaxis, 2][index].shape,
-        )
-        Br_hat[index] = self.sign_alpha[index] * (2 * Br_hat[np.newaxis, 2][index])
+
+        _2pi = np.tile(Br_hat[np.newaxis, 2], (3, 1, 1))
+        assert np.allclose(_2pi[2], Br_hat[2])
+        Br_hat[index] = self.sign_alpha[index] * (2 * _2pi[index] - Br_hat[index])
+        print(Br_hat.shape)
         return Br_hat
 
     def _intergrate(self, data):
         return self.mu_0 / (2 * np.pi**2) * (data[1] - data[0])
 
     @cached_property
-    def Br(self):
-        """Return radial magnetic field coupling matrix."""
+    def _Br(self):
+        """Return local radial magnetic field coupling matrix."""
         return self._intergrate(self.Br_hat()) / (self.r * self.a * self.ck2)
 
 
@@ -128,11 +126,13 @@ if __name__ == "__main__":
         np.array([[5, 0, 2], [0, 5, 2], [-5, 0, 2]]),
         {"c": (0, 0, 0.5)},
         nturn=2,
+        minimum_arc_nodes=3,
     )
     coilset.winding.insert(
         np.array([[-5, 0, 2], [0, -5, 2], [5, 0, 2]]),
         {"c": (0, 0, 0.5)},
         nturn=2,
+        minimum_arc_nodes=3,
     )
     """
     coilset.winding.insert(
@@ -148,16 +148,6 @@ if __name__ == "__main__":
     coilset.grid.solve(2500, [1, 4.5, 0, 4])
 
     # coilset.subframe.vtkplot()
-
-    k = 0.3
-
-    theta = np.pi / 3
-
-    u = ellipkinc(theta, k**2)  # Jacobi amplitude
-
-    sn, cn, dn, ph = ellipj(u, k**2)
-
-    print(ph, theta)
 
     coilset.saloc["Ic"] = 1e3
     levels = coilset.grid.plot("br", nulls=False)

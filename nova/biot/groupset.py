@@ -14,6 +14,7 @@ class CoordLocIndexer:
 
     source: Source = field(repr=False)
     target: Target = field(repr=False)
+    coordinate_transform: str
     coordinate_axes: np.ndarray = field(
         repr=False, default_factory=lambda: np.array([])
     )
@@ -25,10 +26,10 @@ class CoordLocIndexer:
     )
 
     def __getitem__(self, key):
-        """Return stacked point array transformed to source local coordinates."""
+        """Return stacked point array transformed to local coordinates."""
         match key:
             case (str(frame), str(attr)) if frame in ["source", "target"]:
-                return self.framedata(frame, attr)
+                return self._getdata(frame, attr)
             case _:
                 raise KeyError(
                     f"malformed key {key}, require " "[source | target, attr]"
@@ -39,17 +40,17 @@ class CoordLocIndexer:
         primary_coordinate = next(coord for coord in "xyz" if coord in attr)
         return [attr.replace(primary_coordinate, coord) for coord in "xyz"]
 
-    def framedata(self, frame: str, attr: str) -> np.ndarray:
-        """Return local frame data."""
+    def _getdata(self, frame: str, attr: str) -> np.ndarray:
+        """Return coordinate system data."""
         try:
             return self.data[frame][attr]
         except KeyError:
             coords = self.coordinate_list(attr)
-            points = self._local_stack(frame, coords)
+            points = self._stack(frame, coords)
             self.data[frame] |= dict(zip(coords, (points[..., i] for i in range(3))))
             return self.data[frame][attr]
 
-    def _local_stack(self, frame: str, coords: list[str]) -> np.ndarray:
+    def _stack(self, frame: str, coords: list[str]) -> np.ndarray:
         """Return stacked point array in local coordinate system."""
         points = getattr(self, frame).stack(*coords)
         return self.to_local(points)
@@ -66,6 +67,11 @@ class CoordLocIndexer:
             np.einsum("...i,...ji->...j", points, self.coordinate_axes)
             + self.coordinate_origin
         )
+
+
+@dataclass
+class LocalCoordLocIndexer(CoordLocIndexer):
+    """Extend CoordLocIndexer to map source and target frames to local coordinates."""
 
 
 @dataclass
@@ -158,9 +164,24 @@ class GroupSet(Plot):
 
     @cached_property
     def local(self):
-        """Return source frame local coordinate stack indexer."""
+        """Return local coordinate stack indexer."""
         return type("local", (CoordLocIndexer,), {})(
-            self.source, self.target, self.coordinate_axes, self.coordinate_origin
+            self.source,
+            self.target,
+            "local",
+            self.coordinate_axes,
+            self.coordinate_origin,
+        )
+
+    @cached_property
+    def loc_global(self):
+        """Return global coordinate stack indexer."""
+        return type("local", (CoordLocIndexer,), {})(
+            self.source,
+            self.target,
+            "local",
+            self.coordinate_axes,
+            self.coordinate_origin,
         )
 
     def plot(self, axes=None):

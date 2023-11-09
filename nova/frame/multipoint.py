@@ -45,7 +45,7 @@ class MultiPoint(metamethod.MultiPoint):
         self.frame.loc[isna, "factor"] = self.frame.metaframe.default["factor"]
         isnumeric = np.array(
             [
-                isinstance(link, (int, float)) & ~isinstance(link, bool)
+                isinstance(link, (int, float)) & (not isinstance(link, bool))
                 for link in self.frame.link
             ],
             dtype=bool,

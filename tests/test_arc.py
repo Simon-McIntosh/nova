@@ -11,10 +11,14 @@ from nova.frame.coilset import CoilSet
 def source():
     coilset = CoilSet()
     coilset.winding.insert(
-        np.array([[5, 0, 3.2], [0, 5, 3.2], [-5, 0, 3.2]]), {"c": (0, 0, 0.5)}
+        np.array([[5, 0, 3.2], [0, 5, 3.2], [-5, 0, 3.2]]),
+        {"c": (0, 0, 0.5)},
+        minimum_arc_nodes=3,
     )
     coilset.winding.insert(
-        np.array([[5, 0, 3.2], [0, 0, -1.8], [-5, 0, 3.2]]), {"c": (0, 0, 0.5)}
+        np.array([[5, 0, 3.2], [0, 0, -1.8], [-5, 0, 3.2]]),
+        {"c": (0, 0, 0.5)},
+        minimum_arc_nodes=3,
     )
     return Source(coilset.subframe)
 

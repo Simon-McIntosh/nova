@@ -54,7 +54,7 @@ def test_torsion():
         resolution=10,
     )
     frenet = Frenet(polyarc.path)
-    assert ~np.allclose(frenet.torsion, 0)
+    assert not np.allclose(frenet.torsion, 0)
 
 
 @pytest.mark.parametrize(

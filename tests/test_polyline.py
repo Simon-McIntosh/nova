@@ -340,8 +340,8 @@ def cc_polyline():
         points,
         arc_eps=1e-3,
         line_eps=5e-2,
-        rdp_eps=1e-4,
-        minimum_arc_nodes=3,
+        rdp_eps=1e-3,
+        minimum_arc_nodes=4,
     )
 
 
@@ -354,9 +354,6 @@ def test_fiducial_polyline_geometry_segments(cc_polyline):
             for attr in cc_polyline.path_attrs
         ]
     )
-    print(cc_polyline)
-    print(cc_polyline.length)
-    print(np.sum(cc_polyline.length))
     assert cc_polyline.path_geometry["segment"] == [
         "arc",
         "arc",
@@ -407,7 +404,9 @@ def test_polyline_nodes():
 
 def test_polyline_path():
     polyline = PolyLine(
-        np.array([[-1, 0, -1], [-0.5, 0.5, -1], [-0.5, -0.5, -1]]), quadrant_segments=21
+        np.array([[-1, 0, -1], [-0.5, 0.5, -1], [-0.5, -0.5, -1]]),
+        quadrant_segments=21,
+        minimum_arc_nodes=3,
     )
     assert polyline.path.shape == (
         int(

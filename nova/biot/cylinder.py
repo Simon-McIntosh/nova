@@ -212,8 +212,6 @@ class Cylinder(CylinderConstants, Matrix):
 
     def _intergrate(self, data):
         """Return corner intergration."""
-        print(self.source("area"))
-
         return (
             self.mu_0
             / (2 * np.pi * self.source("area"))

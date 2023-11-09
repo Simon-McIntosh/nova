@@ -366,9 +366,9 @@ class PolyLine(Plot):
     points: np.ndarray = field(repr=False, default_factory=lambda: np.array([]))
     cross_section: np.ndarray = field(repr=False, default_factory=lambda: np.array([]))
     arc_eps: float = 1e-3
-    line_eps: float = 0.1  # minimum angle subtended by arc
-    rdp_eps: float = 1e-4
-    minimum_arc_nodes: int = 3
+    line_eps: float = 5e-2
+    rdp_eps: float = 1e-3
+    minimum_arc_nodes: int = 4
     quadrant_segments: int = 16
     segments: list[Line | Arc] = field(init=False, repr=False, default_factory=list)
 
@@ -576,7 +576,7 @@ if __name__ == "__main__":
     fiducial = FiducialData("RE", fill=True)
 
     points = fiducial.data.centerline.data
-    points += 500 * fiducial.data.centerline_delta[3].data
+    # points += 500 * fiducial.data.centerline_delta[3].data
     polyline = PolyLine(points)
     polyline.plot()
 

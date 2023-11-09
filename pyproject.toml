@@ -99,6 +99,9 @@ types-tqdm = "^4.66.0.2"
 dill = "^0.3.7"
 py-spy = ">=0.3.14"
 types-pyyaml = ">=6.0.12.12"
+vtk = "9.3.0.rc2"
+build = "^1.0.3"
+wheel = "^0.41.3"
 
 [tool.poetry.extras]
 ansys = [
@@ -136,7 +139,7 @@ test = [
   "tox",
 ]
 thermofluids = [
-  "coolprop", 
+  # "coolprop", 
   "ftputil", 
   "matplotlib",
   "openpyxl",

@@ -53,7 +53,7 @@ class Element(abc.ABC):
     @cached_property
     def geometry(self) -> dict:
         """Return geometry dict."""
-        return {"segment": self.name} | {
+        return {"segment": self.name, "length": self.length} | {
             key: value
             for attr, keys in self.keys.items()
             for key, value in self._to_dict(keys, attr).items()
@@ -389,6 +389,7 @@ class PolyLine(Plot):
         "y2",
         "z2",
         "segment",
+        "length",
     ]
     volume_attrs: ClassVar[list[str]] = [
         "vtk",
@@ -521,8 +522,13 @@ class PolyLine(Plot):
         return [TriShell(_vtk).poly for _vtk in self.vtk]
 
     @cached_property
+    def length(self) -> list[float]:
+        """Return list of segment lengths."""
+        return self._to_list("length")
+
+    @cached_property
     def area(self) -> list[float]:
-        """Return list of polygon arease projected to 2d poloiodal plane."""
+        """Return list of polygon areas projected to 2d poloiodal plane."""
         return [poly.area for poly in self.poly]
 
     @property

@@ -212,8 +212,10 @@ class Cylinder(CylinderConstants, Matrix):
 
     def _intergrate(self, data):
         """Return corner intergration."""
+        print(self.source("area"))
+
         return (
-            1
+            self.mu_0
             / (2 * np.pi * self.source("area"))
             * ((data[..., 2] - data[..., 3]) - (data[..., 1] - data[..., 0]))
         )
@@ -226,17 +228,17 @@ class Cylinder(CylinderConstants, Matrix):
     @property
     def Psi(self):
         """Return Psi array."""
-        return 2 * np.pi * self.mu_0 * self.target("x") * self.Aphi
+        return 2 * np.pi * self.target("x") * self.Aphi
 
     @cached_property
     def Br(self):
         """Return radial field array."""
-        return self.mu_0 * self._intergrate(self.Br_hat())
+        return self._intergrate(self.Br_hat())
 
     @cached_property
     def Bz(self):
         """Return vertical field array."""
-        return self.mu_0 * self._intergrate(self.Bz_hat())
+        return self._intergrate(self.Bz_hat())
 
 
 if __name__ == "__main__":

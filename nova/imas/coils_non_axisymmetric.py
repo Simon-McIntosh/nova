@@ -201,6 +201,6 @@ if __name__ == "__main__":
     cs_ids = CoilsNonAxisymmetyric(111004, 1)  # CS
     # coil3d += CoilsNonAxisymmetyric(115001, 1)  # ELM
 
-    # coil = cc_ids + cs_ids
-    # coil.frame.vtkplot()
+    coil = cc_ids + cs_ids
+    coil.frame.vtkplot()
     # coil3d._clear()

@@ -147,10 +147,21 @@ class Constants:
 
     @staticmethod
     def _ellip(kind: str, /, *args, out=None, shape=None, where=True):
+        """Return evaluation of scipy.special ellip{kind}."""
         if out is None:
             out = np.zeros_like(args[0], dtype=float, shape=shape)
         func = getattr(scipy.special, f"ellip{kind}")
         return func(*args, out=out, where=where)
+
+    @classmethod
+    def ellipkinc(cls, phi, m):
+        """Return incomplete elliptic intergral of the 1st kind."""
+        return cls._ellip("kinc", phi, m)
+
+    @classmethod
+    def ellipeinc(cls, phi, m):
+        """Return incomplete elliptic intergral of the 2nd kind."""
+        return cls._ellip("einc", phi, m)
 
     @classmethod
     def ellipk(cls, m):

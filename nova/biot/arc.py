@@ -13,15 +13,7 @@ from nova.biot.matrix import Matrix
 
 
 @dataclass
-class ArcConstants(Constants):
-    """Extend Constants class."""
-
-    alpha: ClassVar[float] = np.pi / 2
-    num: ClassVar[int] = 120
-
-
-@dataclass
-class Arc(ArcConstants, Matrix):
+class Arc(Constants, Matrix):
     """
     Extend Biot base class.
 
@@ -32,60 +24,128 @@ class Arc(ArcConstants, Matrix):
     name: ClassVar[str] = "arc"  # element name
 
     def __post_init__(self):
-        """Load intergration constants."""
+        """Load source and target geometry in local coordinate system."""
         super().__post_init__()
-        self.start_point = self.source.space.to_local("start_point")
+        self.rs = np.linalg.norm([self("source", "x1"), self("source", "y1")], axis=0)
+        self.zs = self("source", "z")
+        self.r = np.linalg.norm([self("target", "x"), self("target", "y")], axis=0)
+        self.z = self("target", "z")
+        self.phi = np.arctan2(self("target", "y"), self("target", "x"))
 
-        print("start", self.start_point)
-        # np.einsum('ijk,ijkm->ijm', )
-
-        self.rs = np.stack(
-            [
-                self.source("x") + delta / 2 * self.source("dx")
-                for delta in [-1, 1, 1, -1]
-            ],
-            axis=-1,
-        )
-        self.zs = np.stack(
-            [
-                self.source("z") + delta / 2 * self.source("dz")
-                for delta in [-1, -1, 1, 1]
-            ],
-            axis=-1,
-        )
-        self.r = np.stack([self.target("x") for _ in range(4)], axis=-1)
-        self.z = np.stack([self.target("z") for _ in range(4)], axis=-1)
+    def __getattr__(self, attr: str):
+        """Return attribute, reshape if attribute name has a trailing underscore."""
+        match attr[-1]:
+            case "_":
+                return getattr(self, attr[:-1])[np.newaxis]
+            case _:
+                raise AttributeError(f"Attribute {attr} not found.")
 
     @cached_property
-    def Bx(self):
-        """Return x-axis alligned field coupling matrix."""
-        return self.r[..., 0]
+    def alpha(self):
+        """Return system invariant angle alpha for start, end, and pi/2."""
+        phi_s = np.stack(
+            [
+                np.arctan2(self("source", "y1"), self("source", "x1")),
+                np.arctan2(self("source", "y2"), self("source", "x2")),
+            ]
+        )
+        return np.append(
+            (np.pi - (phi_s[:2] - self.phi[np.newaxis, :])) / 2,
+            np.pi / 2 * np.ones((1,) + self.shape),
+            axis=0,
+        )
+
+    @cached_property
+    def sign_alpha(self):
+        """Return sign(alpha)."""
+        return self.sign(self.alpha)
+
+    @cached_property
+    def Kinc(self):
+        """Return end point stacked incomplete elliptic intergral of the 1st kind."""
+        return np.stack([self.ellipkinc(abs(alpha), self.k2) for alpha in self.alpha])
+
+    @cached_property
+    def Einc(self):
+        """Return end point stacked incomplete elliptic intergral of the 2nd kind."""
+        return np.stack([self.ellipeinc(abs(alpha), self.k2) for alpha in self.alpha])
+
+    @cached_property
+    def Winc(self):
+        """Return end point stacked composite incomplete elliptic intergral."""
+        return np.stack(
+            [
+                self.Einc[i]
+                - self.k2
+                * self.ellipj["sn"][i]
+                * self.ellipj["cn"][i]
+                / self.ellipj["dn"][i]
+                for i in range(3)
+            ]
+        )
+
+    @cached_property
+    def ellipj(self):
+        """Return end point stacked jacobian elliptic functions."""
+        return dict(
+            zip(
+                ["sn", "cn", "dn", "ph"],
+                np.stack([ellipj(u, self.k2) for u in self.Kinc], axis=1),
+            )
+        )
+
+    def Br_hat(self):
+        """Return stacked radial magnetic field intergration coefficents."""
+        Br_hat = (
+            self.sign_alpha
+            * self.gamma_
+            * (self.ck2_ * self.Kinc - (1 - self.k2_ / 2) * self.Winc)
+        )
+        index = abs(self.alpha) > np.pi / 2
+        print(
+            self.sign_alpha.shape,
+            index.shape,
+            Br_hat[index].shape,
+            Br_hat[np.newaxis, 2][index].shape,
+        )
+        Br_hat[index] = self.sign_alpha[index] * (2 * Br_hat[np.newaxis, 2][index])
+        return Br_hat
+
+    def _intergrate(self, data):
+        return self.mu_0 / (2 * np.pi**2) * (data[1] - data[0])
+
+    @cached_property
+    def Br(self):
+        """Return radial magnetic field coupling matrix."""
+        return self._intergrate(self.Br_hat()) / (self.r * self.a * self.ck2)
 
 
 if __name__ == "__main__":
     from nova.frame.coilset import CoilSet
 
-    coilset = CoilSet(dwinding=0, field_attrs=["Bx"])
+    coilset = CoilSet(field_attrs=["Br"])
     coilset.winding.insert(
-        np.array([[5, 0, 3.2], [0, 5, 3.2], [-5, 0, 3.2]]),
+        np.array([[5, 0, 2], [0, 5, 2], [-5, 0, 2]]),
         {"c": (0, 0, 0.5)},
         nturn=2,
     )
     coilset.winding.insert(
-        np.array([[-5, 0, 3.2], [0, -5, 3.2], [5, 0, 3.2]]),
+        np.array([[-5, 0, 2], [0, -5, 2], [5, 0, 2]]),
         {"c": (0, 0, 0.5)},
         nturn=2,
     )
+    """
     coilset.winding.insert(
-        np.array([[-5, 0, 3.2], [0, 0, 8.2], [5, 0, 3.2]]), {"c": (0, 0, 0.5)}
+        np.array([[-5, 0, 2], [0, 0, 8.2], [5, 0, 2]]), {"c": (0, 0, 0.5)}
     )
     coilset.winding.insert(
-        np.array([[5, 0, 3.2], [0, 0, -1.8], [-5, 0, 3.2]]), {"c": (0, 0, 0.5)}
+        np.array([[5, 0, 2], [0, 0, -1.8], [-5, 0, 2]]), {"c": (0, 0, 0.5)}
     )
+    """
     coilset.linkframe(["Swp0", "Swp1"])
-    coilset.linkframe(["Swp2", "Swp3"])
+    # coilset.linkframe(["Swp2", "Swp3"])
 
-    coilset.grid.solve(500)
+    coilset.grid.solve(2500, [1, 4.5, 0, 4])
 
     # coilset.subframe.vtkplot()
 
@@ -98,3 +158,17 @@ if __name__ == "__main__":
     sn, cn, dn, ph = ellipj(u, k**2)
 
     print(ph, theta)
+
+    coilset.saloc["Ic"] = 1e3
+    levels = coilset.grid.plot("br", nulls=False)
+    axes = coilset.grid.axes
+
+    print(coilset.grid.br.max(), coilset.grid.br.min())
+
+    coilset = CoilSet(field_attrs=["Br"])
+    coilset.coil.insert({"c": (5, 2, 0.5)})
+    coilset.grid.solve(2500, [1, 4.5, 0, 4])
+    coilset.saloc["Ic"] = 1e3
+    coilset.grid.plot("br", nulls=False, colors="C1", axes=axes, levels=levels)
+
+    print(coilset.grid.br.max(), coilset.grid.br.min())

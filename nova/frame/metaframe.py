@@ -110,6 +110,7 @@ class MetaFrame(MetaSet):
             "dx": 0.0,
             "dy": 0.0,
             "dz": 0.0,
+            "length": 0.0,
             "area": 0.0,
             "volume": 0.0,
             "delta": 0.0,

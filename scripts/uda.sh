@@ -12,11 +12,11 @@ mkdir -p ${CURRF}/codacenv/lib
 
 export CODAC_ROOT=${CURRF}/codacenv
 
-#svn co https://svnpub.iter.org/codac/iter/codac/dev/units/m-arch-common-base/${DEFSVN} marchcommonbase
-#svn co https://svnpub.iter.org/codac/iter/codac/dev/units/m-arch-common-data/${DEFSVN} marchcommondata
-#svn co https://svnpub.iter.org/codac/iter/codac/dev/units/m-arch-common-wrap/${DEFSVN} marchcommonwrap
-#svn co https://svnpub.iter.org/codac/iter/codac/dev/units/m-uda-idam/${DEFSVN} mudaidam
-#svn co https://svnpub.iter.org/codac/iter/codac/dev/units/m-uda-client/${DEFSVN} mudaclient
+svn co https://svnpub.iter.org/codac/iter/codac/dev/units/m-arch-common-base/${DEFSVN} marchcommonbase
+svn co https://svnpub.iter.org/codac/iter/codac/dev/units/m-arch-common-data/${DEFSVN} marchcommondata
+svn co https://svnpub.iter.org/codac/iter/codac/dev/units/m-arch-common-wrap/${DEFSVN} marchcommonwrap
+svn co https://svnpub.iter.org/codac/iter/codac/dev/units/m-uda-idam/${DEFSVN} mudaidam
+svn co https://svnpub.iter.org/codac/iter/codac/dev/units/m-uda-client/${DEFSVN} mudaclient
 
 cd marchcommonbase
 mkdir -p ${CURRF}/codacenv/include/dan

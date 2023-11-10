@@ -264,8 +264,9 @@ if __name__ == "__main__":
     # ScenarioDatabase().sync_shot('105011/9')
     # scenario = ScenarioDatabase()
     # scenario.sync_shot("115001/1")
+    ScenarioDatabase(machine="mast_u").rsync()
 
-    scenario = ScenarioDatabase()
+    # scenario = ScenarioDatabase()
     # scenario.load_frame("workflow", "DINA-IMAS")
 
     # scenario.sync_workflow()

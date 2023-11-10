@@ -9,6 +9,11 @@ def coil_name(coil):
     return coil.identifier
 
 
+def coil_label(coil):
+    """Return verbose coil label."""
+    return coil.name
+
+
 def full_coil_name(identifier: str):
     """Return full coil name from identifier."""
     match list(identifier):
@@ -38,3 +43,8 @@ def part_name(name):
 def coil_names(coil_node: ImasIds) -> list[str]:
     """Return stripped coil name list."""
     return [coil_name(coil).strip() for coil in coil_node]
+
+
+def coil_labels(coil_node: ImasIds) -> list[str]:
+    """Return verbose coil labels."""
+    return [coil_label(coil).strip() for coil in coil_node]

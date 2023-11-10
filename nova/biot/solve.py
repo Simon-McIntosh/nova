@@ -165,6 +165,9 @@ class Solve(GroupSet):
             turns=self.turns,
             reduce=self.reduce,
         )
+        print(segment)
+        print(np.sum(source_index))
+        print(np.sum(plasma_index))
         for attr in self.attrs:
             matrix, target_plasma, plasma_source, plasma_plasma = generator.compute(
                 attr

@@ -686,7 +686,7 @@ class PoloidalFieldActive(CoilDatabase):
                 continue
             self.circuit.insert(circuit.identifier, circuit.connections)
 
-        self.circuit.link()  # link single loop circuits
+        # self.circuit.link()  # link single loop circuits
 
         if len(self.ids_data.supply) == 0:  # no supplies
             return
@@ -1168,8 +1168,8 @@ class Machine(CoilSet, Geometry, CoilData):
 
         if hasattr(super(), "build"):
             super().build()
-        self.solve_biot()
-        return self.store()
+        # self.solve_biot()
+        # return self.store()
 
     def load(self):
         """Load machine geometry and data."""
@@ -1187,13 +1187,16 @@ class Machine(CoilSet, Geometry, CoilData):
 if __name__ == "__main__":
     pulse, run = 105028, 1  # DINA
 
+    pulse, run = 45272, 1  # MastU
+
     machine = Machine(
         pulse,
         run,
-        pf_active="iter_md",
+        machine="mast_u",
+        pf_active=True,
         pf_passive=False,
         elm=False,
-        wall="iter_md",
+        wall=True,
         tplasma="hex",
         nwall=5,
     )

@@ -61,6 +61,14 @@ class Circuit(Plot, netCDF, FrameSetLoc):
         )
         self.data = xarray.concat([self.data, data], "circuit")
 
+    def _drop(self, data):
+        """Return data with empty rows and columns dropped."""
+        return data.where(data != 0, 0, drop=True)
+
+    def connect(self, circuit: str):
+        """Return connection matrix for nammed circuit."""
+        return self._drop(self.data.incidence_matrix.sel(circuit=circuit))
+
     def edge_list(self, circuit: str):
         """Return circuit edge list."""
         incidence_matrix = self.data["incidence_matrix"].sel(circuit=circuit)
@@ -73,11 +81,16 @@ class Circuit(Plot, netCDF, FrameSetLoc):
     def plot(self, circuit: str, axes=None):
         """Plot directed graph."""
         self.set_axes("2d", axes=axes)
+        # connect = self.connect(circuit)
         edge_list = self.edge_list(circuit)
         dig = networkx.DiGraph(edge_list.values())
         pos = networkx.planar_layout(dig)
         edge_labels = {edge_list[edge]: edge for edge in edge_list}
-        if len(edge_list) == 2:
+        nodes = np.unique([node for edge in edge_list for node in edge_list[edge]])
+        print(nodes)
+        print(edge_labels)
+        print(edge_list)
+        if len(edge_list) == 2 or len(nodes) == 2:
             networkx.draw_networkx_edges(dig, pos, connectionstyle="arc3,rad=0.15")
             networkx.draw_networkx_nodes(dig, pos)
             networkx.draw_networkx_labels(dig, pos)
@@ -208,6 +221,7 @@ class Circuit(Plot, netCDF, FrameSetLoc):
             loops = self.edge_loops(circuit)
             if len(loops) > 1:
                 continue
+            print(circuit)
             loop = loops[0]
             index, factor = [], []
             for edge, sign in zip(loop["edge"], loop["sign"]):

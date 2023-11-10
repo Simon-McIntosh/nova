@@ -2,7 +2,7 @@
 from dataclasses import dataclass, field
 
 from nova.graphics.plot import Plot
-from nova.imas.coil import coil_names
+from nova.imas.coil import coil_names, coil_labels
 from nova.imas.scenario import Scenario
 
 
@@ -16,18 +16,13 @@ class PF_Active(Plot, Scenario):
         default_factory=lambda: ["current", "b_field_max_timed"]
     )
 
-    @staticmethod
-    def coil_name(coil):
-        """Return coil identifier, return coil name if empty."""
-        if not coil.identifier:
-            return coil.name
-        return coil.identifier
-
     def build(self):
         """Build netCDF database using data extracted from imasdb."""
         name = coil_names(self.ids_data.coil)
+        label = coil_labels(self.ids_data.coil)
         with self.build_scenario():
             self.data.coords["coil_name"] = name
+            self.data.coords["coil_labels"] = label
             self.data.coords["coil_index"] = "coil_name", range(len(name))
             self.append(("time", "coil_name"), self.coil_attrs, "*.data")
             with self.ids_index.node("coil"):
@@ -69,8 +64,10 @@ if __name__ == "__main__":
 
     pulse, run = 135014, 1
 
+    pulse, run = 45272, 1
+
     # pulse, run = 111001, 202
     # PF_Active(pulse, run, "iter")._clear()
-    pf_active = PF_Active(pulse, run, "iter")
+    pf_active = PF_Active(pulse, run, "mast_u")
     # pf_active = PF_Active(105007, 9)  # b field max timed 135002, 5
     pf_active.plot()

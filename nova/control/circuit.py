@@ -87,9 +87,9 @@ class Circuit(Plot, netCDF, FrameSetLoc):
         pos = networkx.planar_layout(dig)
         edge_labels = {edge_list[edge]: edge for edge in edge_list}
         nodes = np.unique([node for edge in edge_list for node in edge_list[edge]])
-        print(nodes)
-        print(edge_labels)
-        print(edge_list)
+        # print(nodes)
+        # print(edge_labels)
+        # print(edge_list)
         if len(edge_list) == 2 or len(nodes) == 2:
             networkx.draw_networkx_edges(dig, pos, connectionstyle="arc3,rad=0.15")
             networkx.draw_networkx_nodes(dig, pos)
@@ -219,9 +219,8 @@ class Circuit(Plot, netCDF, FrameSetLoc):
         """Link single circuit coils."""
         for circuit in self.data.circuit.data:
             loops = self.edge_loops(circuit)
-            if len(loops) > 1:
+            if len(loops) != 1:
                 continue
-            print(circuit)
             loop = loops[0]
             index, factor = [], []
             for edge, sign in zip(loop["edge"], loop["sign"]):

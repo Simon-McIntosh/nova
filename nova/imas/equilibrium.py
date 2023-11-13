@@ -751,8 +751,10 @@ if __name__ == "__main__":
 
     pulse, run = 134173, 106  # DINA / JINTRAC
 
+    args = 45272, 1, "mast_u"  # MastU
+
     # EquilibriumData(pulse, run, occurrence=0)._clear()
-    equilibrium = EquilibriumData(pulse, run, occurrence=0)
+    equilibrium = EquilibriumData(*args, occurrence=0)
 
     equilibrium.time = 300
     equilibrium.plot_2d("psi", mask=0)

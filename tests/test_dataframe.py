@@ -156,7 +156,7 @@ def test_dataframe_name():
 
 
 def test_dataframe_name_offset():
-    dataframe = DataFrame(dict(x=range(3)), name="PF78")
+    dataframe = DataFrame(dict(x=range(3)), name="PF78", append=True)
     assert dataframe.index.to_list() == ["PF78", "PF79", "PF80"]
 
 

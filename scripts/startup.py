@@ -28,7 +28,7 @@ class Startup:
         options = {
             "display": {
                 "max_columns": 6,
-                "max_colwidth": 8,
+                "max_colwidth": 12,
                 "expand_frame_repr": False,  # Don't wrap to multiple pages
                 "max_rows": 16,
                 "max_seq_items": 50,  # Max length of printed sequence

@@ -1,5 +1,6 @@
 """Biot-Savart calculation base class."""
 from dataclasses import dataclass, field
+from functools import cached_property
 from itertools import zip_longest
 from typing import ClassVar
 
@@ -145,9 +146,19 @@ class Solve(GroupSet):
         for segment in tqdm(self.source_segment.unique(), ncols=65, desc=self.name):
             self.compute(segment)
 
+    @cached_property
+    def _frame_link(self):
+        """Return frame link."""
+        link = self.source.biotreduce.frame.link.copy()
+        link.loc[link == ""] = link.index[link == ""]
+        return link
+
     def source_index(self, segment):
         """Return source segment index."""
-        frame = self.source.frame[self.source_segment == segment]
+        frame = [
+            self._frame_link.loc[frame]
+            for frame in np.unique(self.source.frame[self.source_segment == segment])
+        ]
         return np.isin(self.get_index("source"), frame)
 
     def plasma_index(self, segment):
@@ -165,9 +176,6 @@ class Solve(GroupSet):
             turns=self.turns,
             reduce=self.reduce,
         )
-        print(segment)
-        print(np.sum(source_index))
-        print(np.sum(plasma_index))
         for attr in self.attrs:
             matrix, target_plasma, plasma_source, plasma_plasma = generator.compute(
                 attr

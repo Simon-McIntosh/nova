@@ -159,7 +159,7 @@ def test_insert_insert_label_switch():
 
 
 def test_named_multi_insert():
-    framelink = FrameLink(required=["x", "z"], label="CS", offset=11)
+    framelink = FrameLink(required=["x", "z"], label="CS", offset=11, append=True)
     framelink.insert([-4, -5], 1, Ic=6.5, name="PF4")
     framelink.insert([-4, -5], 2, Ic=6.5)
     framelink.insert([-4, -5], 3, Ic=6.5, name="PF0")
@@ -167,13 +167,13 @@ def test_named_multi_insert():
 
 
 def test_named_insert_no_number():
-    framelink = FrameLink(required=["x", "z"], label="CS", offset=11)
+    framelink = FrameLink(required=["x", "z"], label="CS", offset=11, append=True)
     framelink.insert([-4, -5], 1, Ic=6.5, name="PF")
     assert framelink.index.to_list() == ["PF11", "PF12"]
 
 
 def test_named_insert_number_not_trailing():
-    framelink = FrameLink(required=["x", "z"], label="CS", offset=11)
+    framelink = FrameLink(required=["x", "z"], label="CS", offset=11, append=True)
     framelink.insert([-4, -5], 1, Ic=6.5, name="CS_3_PF")
     assert framelink.index.to_list() == ["CS_3_PF11", "CS_3_PF12"]
 

@@ -113,7 +113,7 @@ class Arc(Constants, Matrix):
         return self.mu_0 / (2 * np.pi**2) * (data[1] - data[0])
 
     @cached_property
-    def _Br(self):
+    def Br(self):
         """Return local radial magnetic field coupling matrix."""
         return self._intergrate(self.Br_hat()) / (self.r * self.a * self.ck2)
 

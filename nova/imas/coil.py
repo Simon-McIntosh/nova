@@ -4,7 +4,7 @@ from nova.imas.database import ImasIds
 
 def coil_name(coil):
     """Return coil identifier, return coil name if empty."""
-    if not coil.identifier:
+    if " " not in coil.name:
         return coil.name
     return coil.identifier
 

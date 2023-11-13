@@ -6,13 +6,22 @@ from functools import cached_property
 from importlib import import_module
 import string
 from typing import ClassVar, TYPE_CHECKING
+from warnings import warn
 
 import numpy as np
 import xarray
 
 from nova.graphics.plot import Plot
 from nova.frame.coilset import CoilSet
-from nova.imas.database import CoilData, Database, IDS, Ids, IdsIndex, ImasIds
+from nova.imas.database import (
+    CoilData,
+    Database,
+    IDS,
+    Ids,
+    IdsIndex,
+    ImasIds,
+    EMPTY_FLOAT,
+)
 from nova.geometry.polygon import Polygon
 
 if TYPE_CHECKING:
@@ -314,6 +323,9 @@ class Element:
         self.name = self.ids.name.strip()
         self.identifier = self.ids.identifier.strip()
         self.nturn = self.ids.turns_with_sign
+        if np.isclose(self.nturn, EMPTY_FLOAT):
+            warn("nturn unset, setting turn number equal to one")
+            self.nturn = 1
         self.cross_section = CrossSection(self.ids.geometry)
 
     @property
@@ -608,6 +620,7 @@ class ActiveCoilData(IdsCoilData):
         if self.empty:
             return None
         self.data["nturn"] = self.data["nturn"]
+
         kwargs = {
             "active": True,
             "fix": False,
@@ -686,7 +699,7 @@ class PoloidalFieldActive(CoilDatabase):
                 continue
             self.circuit.insert(circuit.identifier, circuit.connections)
 
-        # self.circuit.link()  # link single loop circuits
+        self.circuit.link()  # link single loop circuits
 
         if len(self.ids_data.supply) == 0:  # no supplies
             return
@@ -1168,8 +1181,8 @@ class Machine(CoilSet, Geometry, CoilData):
 
         if hasattr(super(), "build"):
             super().build()
-        # self.solve_biot()
-        # return self.store()
+        self.solve_biot()
+        return self.store()
 
     def load(self):
         """Load machine geometry and data."""
@@ -1185,16 +1198,14 @@ class Machine(CoilSet, Geometry, CoilData):
 
 
 if __name__ == "__main__":
-    pulse, run = 105028, 1  # DINA
+    args = 105028, 1, "iter"  # DINA
 
-    pulse, run = 45272, 1  # MastU
+    args = 45272, 1, "mast_u"  # MastU
 
     machine = Machine(
-        pulse,
-        run,
-        machine="mast_u",
+        *args,
         pf_active=True,
-        pf_passive=False,
+        pf_passive=True,
         elm=False,
         wall=True,
         tplasma="hex",

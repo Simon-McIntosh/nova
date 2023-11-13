@@ -189,9 +189,10 @@ if __name__ == "__main__":
 
     # pulse, run = 130506, 403  # CORSICA
 
+    args = 45272, 1, "mast_u"  # MastU
+
     operate = Operate(
-        pulse,
-        run,
+        *args,
         pf_active="iter_md",
         elm=True,
         dplasma=-2000,
@@ -204,10 +205,12 @@ if __name__ == "__main__":
         force_index="plasma",
     )
 
+    operate.itime = 50
+
+    """
     import pyvista as pv
     import vedo
-
-    operate.itime = 50
+    
     psi = operate.grid.psi.reshape(-1)
     points = np.stack(
         [
@@ -223,6 +226,7 @@ if __name__ == "__main__":
 
     vedo.Mesh(contours, c="black").show()
     operate.frame.vtkplot()
+    """
 
     # grid.plot(show_edges=True)
 

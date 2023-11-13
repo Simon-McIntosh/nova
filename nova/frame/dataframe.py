@@ -74,6 +74,22 @@ class DataFrame(FrameAttrs):
             self.index.name = None
         self.metaframe.index = self.index
 
+    def _set_label(self, metatag, name):
+        if not metatag["append"]:
+            metatag["label"] = name
+            metatag["offset"] = 0
+            return
+        if metatag["delim"] and metatag["delim"] in name:
+            split_name = name.split(metatag["delim"])
+            metatag["label"] = metatag["delim"].join(split_name[:-1])
+            metatag["offset"] = int(split_name[-1])
+        else:
+            metatag["label"] = name.rstrip(string.digits)
+            try:
+                metatag["offset"] = int(name.lstrip(string.ascii_letters))
+            except ValueError:  # no trailing number, use default
+                pass
+
     def _set_offset(self, metatag):
         try:  # reverse search through frame index
             match = next(name for name in self.index[::-1] if metatag["label"] in name)
@@ -107,16 +123,7 @@ class DataFrame(FrameAttrs):
         if isinstance(name := metatag["name"], pandas.Index) or len(name) > 0:
             if pandas.api.types.is_list_like(name) or index_length == 1:
                 return self._check_index(name, index_length)
-            if metatag["delim"] and metatag["delim"] in name:
-                split_name = name.split(metatag["delim"])
-                metatag["label"] = metatag["delim"].join(split_name[:-1])
-                metatag["offset"] = int(split_name[-1])
-            else:
-                metatag["label"] = name.rstrip(string.digits)
-                try:
-                    metatag["offset"] = int(name.lstrip(string.ascii_letters))
-                except ValueError:  # no trailing number, use default
-                    pass
+            self._set_label(metatag, name)
         self._set_offset(metatag)
         label_delim = metatag["label"] + metatag["delim"]
         index = [f'{label_delim}{i+metatag["offset"]:d}' for i in range(index_length)]

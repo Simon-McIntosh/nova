@@ -22,14 +22,18 @@ def test_generate_single_float():
 
 def test_generate_multi():
     framelink = FrameLink(
-        {"x": range(3), "link": True}, name="coil1", metadata={"Required": ["x"]}
+        {"x": range(3), "link": True},
+        name="coil1",
+        metadata={"Required": ["x"], "append": True},
     )
     assert framelink.link.to_list() == ["", "coil1", "coil1"]
 
 
 def test_data_init_multipoint_true():
     data = pandas.DataFrame({"x": 3, "z": [3, 6, 8], "link": True})
-    framelink = FrameLink(data, name="Coil0", metadata={"Required": ["x", "z"]})
+    framelink = FrameLink(
+        data, name="Coil0", metadata={"Required": ["x", "z"], "append": True}
+    )
     assert framelink.link.to_list() == [
         "",
         "Coil0",
@@ -42,6 +46,7 @@ def test_insert_multipoint_default_false():
         {"x": [1, 3], "z": 0},
         link=False,
         name="Coil0",
+        append=True,
         metadata={"Required": ["x", "z"], "Additional": []},
     )
     framelink.insert(4, [7, 8], link=True)
@@ -58,6 +63,7 @@ def test_insert_multipoint_default_true():
         {"x": [1, 3], "z": 0},
         link=True,
         name="Coil0",
+        append=True,
         metadata={"Required": ["x", "z"], "Additional": []},
     )
     framelink.insert(4, [7, 8], link=True)
@@ -75,6 +81,7 @@ def test_insert_multipoint_default_float():
         factor=0.5,
         name="Coil0",
         link=True,
+        append=True,
         metadata={"Required": ["x", "z"], "Additional": []},
     )
     framelink.insert(4, [7, 8], link=True, factor=1)
@@ -90,7 +97,7 @@ def test_default_multipoint_true():
     framelink = FrameLink(
         link=True, metadata={"Required": ["x", "z"], "Additional": ["link"]}
     )
-    framelink.insert(4, [5, 7, 12], name="coil1")
+    framelink.insert(4, [5, 7, 12], name="coil1", append=True)
     assert framelink.link.to_list() == [
         "",
         "coil1",

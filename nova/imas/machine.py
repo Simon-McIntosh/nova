@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from functools import cached_property
 from importlib import import_module
+import itertools
 import string
 from typing import ClassVar, TYPE_CHECKING
 from warnings import warn
@@ -363,6 +364,8 @@ class FrameData(ABC):
     geometry_attrs: ClassVar[list[str]] = []
     loop_attrs: ClassVar[list[str]] = []
 
+    _count: ClassVar[itertools.count] = itertools.count(0)
+
     def __post_init__(self):
         """Init data dict."""
         self.data = {attr: [] for attr in self.attrs}
@@ -378,6 +381,11 @@ class FrameData(ABC):
         name = self.data["name"]
         if not isinstance(name, str):
             name = name[0]
+        if identifier == "" and name == "":
+            name = f"_{next(self._count)}"
+            print(name)
+            return name
+            # raise ValueError("Nether name nor identifier set.")
         if len(name.split()) == 1:
             return name
         label = "".join(name.split()[:2]).rstrip(string.punctuation)

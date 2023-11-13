@@ -279,12 +279,12 @@ if __name__ == "__main__":
     pulse, run = 135007, 4
     pulse, run = 135011, 7
     pulse, run = 135003, 5
-    pulse, run = 105028, 1  # Maksim
+    args = 105028, 1  # Maksim
     # pulse, run = 105027, 1  # Maksim
     # pulse, run = 135013, 2
 
-    PulseSchedule(pulse, run)._clear()
-    schedule = PulseSchedule(pulse, run)
+    # PulseSchedule(pulse, run)._clear()
+    schedule = PulseSchedule(*args)
 
     # schedule.time = 500
     schedule.plot_gaps()

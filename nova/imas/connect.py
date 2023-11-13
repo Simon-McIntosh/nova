@@ -99,7 +99,7 @@ class Connect:
         """Return ids copy string."""
         command = [
             f"idscp {ids} -a -u {self.user} "
-            f"-si {pulse} -ri {run} -d {self.machine} "
+            f"-si {pulse} -ri {run} -d {self.machine} -b HDF5 "
             f"-so {pulse} -ro {run} -do {self.machine.lower()} "
             f"-bo {self.backend}"
             for pulse, run in zip(frame.pulse, frame.run)
@@ -252,8 +252,8 @@ if __name__ == "__main__":
     # machine.load_ids('pf_active')
     # print(machine.frame)
 
-    # iter_md = MachineDatabase(machine="ITER_MD", user="hosokam")
-    # iter_md.sync_shot("111001/203")
+    iter_md = MachineDatabase(machine="ITER_MD")
+    iter_md.sync_shot("111003/2")
     # ScenarioDatabase().sync_shot("134173/106")
     # ScenarioDatabase().sync_shot("135014/1")
     # ScenarioDatabase().rsync()
@@ -264,7 +264,7 @@ if __name__ == "__main__":
     # ScenarioDatabase().sync_shot('105011/9')
     # scenario = ScenarioDatabase()
     # scenario.sync_shot("115001/1")
-    ScenarioDatabase(machine="mast_u").rsync()
+    # ScenarioDatabase(machine="mast_u").rsync()
 
     # scenario = ScenarioDatabase()
     # scenario.load_frame("workflow", "DINA-IMAS")

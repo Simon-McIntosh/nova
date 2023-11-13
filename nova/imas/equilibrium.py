@@ -109,12 +109,14 @@ class Parameter0D(Scenario):
         self.build_axis("boundary_separatrix.geometric_axis")
         self.build_axis("global_quantities.magnetic_axis")
         self.build_axis("global_quantities.current_centre")
+        """
         self.build_points("x_point")
         self.build_points("strike_point")
         self.build_boundary_type()
         self.build_boundary_outline()
         self.build_boundary_shape()
         self.build_beta_normal()
+        """
 
     def build_vacuum_field(self):
         """Build vacuum toroidal field."""
@@ -669,7 +671,7 @@ class EquilibriumData(Equilibrium, Profile2D, Profile1D, Parameter0D, Grid):
         with self.build_scenario():
             self.data.coords["point"] = ["r", "z"]
             super().build()
-            self.contour_build()
+            # self.contour_build()  # TODO remove !
         Wall().insert(self.data)  # insert wall and divertor structures
         return self
 
@@ -749,14 +751,16 @@ if __name__ == "__main__":
     # pulse, run = 135013, 2
     pulse, run = 135014, 1
 
-    pulse, run = 134173, 106  # DINA / JINTRAC
+    args = 134173, 106  # DINA / JINTRAC
 
-    args = 45272, 1, "mast_u"  # MastU
+    # args = 45272, 1, "mast_u"  # MastU
 
     # EquilibriumData(pulse, run, occurrence=0)._clear()
     equilibrium = EquilibriumData(*args, occurrence=0)
 
+    """
     equilibrium.time = 300
     equilibrium.plot_2d("psi", mask=0)
     equilibrium.plot_boundary(outline=False)
     # equilibrium.plot_quiver()
+    """

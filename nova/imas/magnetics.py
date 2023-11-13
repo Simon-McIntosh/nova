@@ -46,9 +46,11 @@ class Magnetics(Plot, Database):
 
     pulse: int = 150100
     run: int = 4
-    name: str = "magnetics"
-    user: str = "public"
     machine: str = "iter_md"
+    occurence: int = 0
+    user: str = "public"
+    name: str = "magnetics"
+
     data: dict[str, pandas.DataFrame] = field(
         init=False, repr=False, default_factory=dict
     )
@@ -155,6 +157,7 @@ class Magnetics(Plot, Database):
         """Extract overview from dataframe."""
         index, identifier, name, diagnostic_type, number = [], [], [], [], []
         for data_name in self["frame"].name.unique():
+            print("***", data_name)
             frame = self["frame"].loc[self["frame"].name == data_name, :]
             index.append(data_name.split(" ")[0].split(".")[1])
             identifier.append("-".join(frame.index[0].split("-")[:-1]))
@@ -221,18 +224,18 @@ class Magnetics(Plot, Database):
         """Plot diagnostics."""
         self.set_axes("2d", axes=axes)
         data = self["flux_loop"]
-
         for index in data.loc[data.group == "AD"].index:
             self.axes.plot(data.loc[index, "phi"], data.loc[index, "z"], "o-")
-            print(data.loc[index, "identifier"])
-            print(data.loc[index, "group"])
 
     def signal_types(self):
         """Add signal type information."""
 
 
 if __name__ == "__main__":
-    magnetics = Magnetics()
+    args = 45272, 1, "mast_u"
+
+    args = []
+    magnetics = Magnetics(*args)
     magnetics.plot()
     # print(magnetics['flux_loop'].loc[0, 'r'])
     # print(magnetics['summary'])

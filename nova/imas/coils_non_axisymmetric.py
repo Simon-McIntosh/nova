@@ -198,9 +198,9 @@ class CoilsNonAxisymmetyric(Plot, CoilDatabase, Scenario):
 
 if __name__ == "__main__":
     cc_ids = CoilsNonAxisymmetyric(111003, 2)  # CC
-    cs_ids = CoilsNonAxisymmetyric(111004, 1)  # CS
+    # cs_ids = CoilsNonAxisymmetyric(111004, 1)  # CS
     # coil3d += CoilsNonAxisymmetyric(115001, 1)  # ELM
 
-    coil = cc_ids + cs_ids
+    coil = cc_ids  # + cs_ids
     coil.frame.vtkplot()
     # coil3d._clear()

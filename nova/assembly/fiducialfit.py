@@ -1,92 +1,74 @@
-"""Perform fit for SM6 to fiducial mesurments."""
-
+"""Manage fitting algorithums for TF coils and SSAT sectors."""
 from dataclasses import dataclass, field
 from typing import ClassVar
 import warnings
 
 import matplotlib.pyplot as plt
 import numpy as np
-import seaborn as sns
 from scipy.optimize import minimize
 from scipy.spatial.transform import Rotation
+from tqdm import tqdm
 import xarray
 
-from nova.assembly.centerline import CenterLine
 from nova.assembly.fiducialdata import FiducialData
 from nova.assembly.fiducialplotter import FiducialPlotter
-from nova.assembly.gaussianprocessregressor import GaussianProcessRegressor
 from nova.assembly.transform import Rotate
 
 
 @dataclass
-class FiducialTransform:
-    """Perform optimal transforms fiting GPR fiducials to nominal targets."""
+class FiducialFit(FiducialData):
+    """Extend FiducialData class to include fitting algorithums."""
 
-    sector: int = 6
+    filename: str = "fiducial_fit"
     infer: bool = True
     method: str = "rms"
     n_samples: int = 10
-    files: dict[str, str] = field(default_factory=dict)
-    gpr: GaussianProcessRegressor = field(init=False, repr=False)
     data: xarray.Dataset = field(init=False, repr=False, default_factory=xarray.Dataset)
 
-    variance: ClassVar[float] = 1
     weights: ClassVar[list[float]] = [1, 1, 0.5]
 
-    def __post_init__(self):
-        """Load data."""
-        self.rotate = Rotate()
-        # self.spacial_analyzer = SpacialAnalyzer(sector=self.sector, files=self.files)
-        """
-        self.load_reference()
-        self.load_centerline()
-        self.load_gpr()
-        self.fit_reference()
+    @property
+    def fiduial_attrs(self):
+        """Extend fiducial_attrs to incude fit parameters."""
+        return super().fiducial_attrs | {
+            attr: getattr(self, attr)
+            for attr in ["infer", "method", "samples", "weights"]
+        }
+
+    def build(self):
+        """Extend build to include fiducial fitting."""
+        super().build()
+        self.data = self.data.rename(dict(space="cartesian"))
+        self.load_target()
+        self.load_measurement()
+        self.evaluate_gpr("measurement")
         self.fit()
-        """
 
-    def load_reference(self):
-        """Load reference sector data."""
-        self.data["reference"] = self.spacial_analyzer.reference_ccl
-        fiducial = (
-            FiducialData(fill=False)
-            .data.fiducial.drop(labels=["target_index"])
-            .rename(dict(target="fiducial"))
-            .sel(fiducial=self.data.reference.fiducial)
-        )
-        self.data["target_length"] = fiducial.target_length
-        self.data["target"] = self.spacial_analyzer.nominal_ccl
-        self.data["target_cylindrical"] = self.rotate.to_cylindrical(self.data.target)
-        self.data = self.data.sortby("target_length")
+    def load_target(self):
+        """Load target geometories in cylindrical coordinate system."""
+        dim = {"coil": self.data.dims["coil"]}
+        for attr in ["fiducial", "centerline"]:
+            self.data[f"{attr}_cylindrical"] = Rotate.to_cylindrical(
+                self.data[attr].expand_dims(dim, 0)
+            )
 
-    def load_centerline(self):
-        """Load geodesic centerline."""
-        centerline = CenterLine()
-        self.data["arc_length"] = centerline.mesh["arc_length"]
-        self.data["nominal_centerline"] = (
-            "arc_length",
-            "cartesian",
-        ), 1e3 * centerline.mesh.points
-        self.data["centerline"] = xarray.concat(
-            [self.data.nominal_centerline, self.data.nominal_centerline], dim="coil"
+    def load_measurement(self):
+        """Load reference measurements."""
+        dim = {"coil": self.data.dims["coil"]}
+        self.data["measurement"] = (
+            self.data.fiducial.expand_dims(dim, 0) + self.data.fiducial_delta
         )
-        self.data["centerline"][0] = self.rotate.anticlock(self.data["centerline"][0])
-        self.data["centerline"][1] = self.rotate.clock(self.data["centerline"][1])
-        self.data["centerline_cylindrical"] = self.rotate.to_cylindrical(
-            self.data.centerline
+        self.data["measurement_centerline"] = (
+            self.data.centerline.expand_dims(dim, 0) + self.data.centerline_delta
         )
 
-    def fit_reference(self):
-        """Evaluate gpr for reference fiducials."""
-        self.evaluate_gpr("reference", self.data.reference)
-
-    def evaluate_gpr(self, label: str, data_array: xarray.DataArray):
+    def evaluate_gpr(self, label: str):
         """Evaluate gpr in cylindrical coordinate system."""
-        delta = self.rotate.to_cylindrical(data_array) - self.data.target_cylindrical
-        target = f"{label}_target"
-        centerline = f"{label}_centerline"
-        sample = f"{label}_centerline_sample"
-        self.data[target] = xarray.zeros_like(self.data.target_cylindrical)
+        delta = Rotate.to_cylindrical(self.data[label]) - self.data.fiducial_cylindrical
+        fiducial = f"{label}_gpr"
+        centerline = f"{label}_gpr_centerline"
+        sample = f"{label}_gpr_sample"
+        self.data[fiducial] = xarray.zeros_like(self.data.fiducial_cylindrical)
         self.data[centerline] = xarray.zeros_like(self.data.centerline_cylindrical)
         self.data[sample] = (
             xarray.zeros_like(self.data[centerline])
@@ -95,8 +77,9 @@ class FiducialTransform:
         )
         for coil_index in range(self.data.dims["coil"]):
             for space_index in range(self.data.dims["cylindrical"]):
+                self.load_gpr(coil_index, space_index)
                 self.gpr.fit(delta[coil_index, :, space_index])
-                self.data[target][coil_index, :, space_index] = self.gpr.predict(
+                self.data[fiducial][coil_index, :, space_index] = self.gpr.predict(
                     self.data.target_length
                 )
                 self.data[centerline][coil_index, :, space_index] = self.gpr.predict(
@@ -105,17 +88,15 @@ class FiducialTransform:
                 self.data[sample][coil_index, :, space_index, :] = self.gpr.sample(
                     self.data.arc_length, self.n_samples
                 )
-        self.data[target] += self.data.target_cylindrical
+        self.data[fiducial] += self.data.fiducial_cylindrical
         self.data[centerline] += self.data.centerline_cylindrical
         self.data[sample] += self.data.centerline_cylindrical
-        for attr in [target, centerline]:
-            self.data[attr] = self.rotate.to_cartesian(self.data[attr])
+        for attr in [fiducial, centerline, sample]:
+            self.data[attr] = Rotate.to_cartesian(self.data[attr])
 
-    def plot_gpr(self, label: str, coil_index: int, n_samples=10):
+    def plot_gpr_samples(self, label: str, coil_index: int, n_samples=10):
         """Load gaussian process regressor."""
-        delta = (
-            self.rotate.to_cylindrical(self.data[label]) - self.data.target_cylindrical
-        )
+        delta = Rotate.to_cylindrical(self.data[label]) - self.data.target_cylindrical
         axes = plt.subplots(3, 1, sharex=True)[1]
         for space_index in range(self.data.dims["cylindrical"]):
             self.gpr.fit(delta[coil_index, :, space_index])
@@ -132,37 +113,13 @@ class FiducialTransform:
             coord = str(self.data.cylindrical[space_index].values)
             coord = coord.replace("phi", r"\phi")
             axes[space_index].set_ylabel(rf"${coord}$")
-        sns.despine()
         axes[-1].set_xlabel("arc length")
         axes[0].set_title(f"TF{self.data.coil[coil_index].values:1d}")
         plt.tight_layout()
         plt.savefig("gpr.png")
 
-    def plot_coil(self, label: str, coil_index: int, n_samples=10):
-        """Plot single coil."""
-        plotter = FiducialPlotter(self.data)
-        plotter(label, 2, coil_index=[coil_index])
-        if n_samples > 0:
-            self.gpr.sample(self.data.arc_length, n_samples)
-            plotter.axes[0].plot()
-        plotter.axes[0].set_title(f"TF{self.data.coil[coil_index].values:d}")
-        plt.savefig("coil.png")
-
-    def load_gpr(self):
-        """Load gaussian process regressor."""
-        self.gpr = GaussianProcessRegressor(self.data.target_length, self.variance)
-
-    @property
-    def points(self):
-        """Return reference points."""
-        if self.infer:  # use gpr inference
-            return self.data["reference_target"].copy()
-        return self.data["reference"].copy()
-
     def transform(self, x, points) -> xarray.DataArray:
-        """Return transformed sector."""
-        if points is None:
-            points = self.points
+        """Return points transformed by vector x."""
         points = points[:] + x[:3]
         if len(x) == 6:
             rotate = Rotation.from_euler("XYZ", x[-3:], degrees=True)
@@ -172,20 +129,20 @@ class FiducialTransform:
 
     def delta(self, points):
         """Return coil-frame deltas."""
-        return self.rotate.to_cylindrical(points) - self.data.target_cylindrical
+        return Rotate.to_cylindrical(points) - Rotate.to_cylindrical(self.data.fiducial)
 
     @staticmethod
     def error_vector(delta, method="rms"):
         """Return error vector."""
         error = np.zeros(3)
         if method == "rms":
-            error[0] = np.mean(delta[:, [5, 3, 4], 0] ** 2)
+            error[0] = np.mean(delta[..., [5, 3, 4], 0] ** 2)
             error[1] = np.mean(delta[..., 1] ** 2)
-            error[2] = np.mean(delta[:, [2, 1, -1, -2], 2] ** 2)
+            error[2] = np.mean(delta[..., [2, 1, -1, -2], 2] ** 2)
             return error
-        error[0] = np.max(abs(delta[:, [5, 3, 4], 0]))  # radial (A, B, H)
+        error[0] = np.max(abs(delta[..., [5, 3, 4], 0]))  # radial (A, B, H)
         error[1] = np.max(abs(delta[..., 1]))  # toroidal (all)
-        error[2] = np.max(abs(delta[:, [2, 1, -1, -2], 2]))  # (C, D, E, F)
+        error[2] = np.max(abs(delta[..., [2, 1, -1, -2], 2]))  # (C, D, E, F)
         return error
 
     def transform_error(self, x, points, method=None):
@@ -218,17 +175,50 @@ class FiducialTransform:
         """Return scalar mesure for fit error."""
         return getattr(self, f"{self.method}_transform_error")(x, points)
 
+    def points(self, coil):
+        """Return reference points."""
+        if self.infer:  # use gpr inference
+            return self.data["measurement_gpr"].sel(coil=coil)
+        return self.data["measurement"].sel(coil=coil)
+
     def fit(self):
         """Perform sector fit."""
-        xo = np.ones(6)
-        opt = minimize(self.scalar_error, xo, method="SLSQP", args=(None,))
-        if not opt.success:
-            warnings.warn(f"optimization failed {opt}")
-        self.data["opt_x"] = "transform", opt.x
-        self.data["fit"] = self.transform(opt.x, self.data.reference.copy())
-        self.evaluate_gpr("fit", self.data.fit)
+        self.data["fit"] = xarray.zeros_like(self.data.measurement)
+        self.data.coords["transform"] = ["x", "y", "z", "xx", "yy", "zz"]
+        self.data["opt_x"] = xarray.DataArray(
+            0.0,
+            coords=[self.data.coil, self.data.transform],
+            dims=["coil", "transform"],
+        )
+        self.data["fiducial_error"] = xarray.DataArray(
+            0.0,
+            coords=[self.data.coil],
+            dims=["coil"],
+        )
+        self.data["fit_error"] = xarray.DataArray(
+            0.0,
+            coords=[self.data.coil],
+            dims=["coil"],
+        )
+        for coil in tqdm(self.data.coil, "fitting coils"):
+            points = self.points(coil=coil)
+            xo = np.ones(self.data.dims["transform"])
+            opt = minimize(self.scalar_error, xo, method="SLSQP", args=(points,))
+            if not opt.success:
+                warnings.warn(f"optimization failed {opt}")
+            self.data["opt_x"].loc[{"coil": coil}] = opt.x
+            self.data["fit"].loc[{"coil": coil}] = self.transform(
+                opt.x, self.data.fiducial.copy()
+            )
+            self.data["fiducial_error"].loc[{"coil": coil}] = self.scalar_error(
+                xo, points
+            )
+            self.data["fit_error"].loc[{"coil": coil}] = self.scalar_error(
+                opt.x, points
+            )
+        self.evaluate_gpr("fit")
 
-    def plot(self, label: str, postfix=""):
+    def plot_fit(self, label: str, postfix=""):
         """Plot fits."""
         plotter = FiducialPlotter(self.data)
         plotter("target")
@@ -305,29 +295,15 @@ class FiducialTransform:
             fontsize="x-small",
         )
 
-    def write(self):
-        """Write fit to file."""
-        fit_ccl = self.data.fit
-        fit_ccl.attrs["group"] = "fit_ccl"
-        data = [fit_ccl]
-        try:
-            fit = self.transform(self.data.opt_x.values, self.spacial_analyzer.nominal)
-            fit.attrs["group"] = "fit"
-            data.append(fit)
-        except FileNotFoundError:
-            pass
-        self.spacial_analyzer.write(*data)
-
 
 if __name__ == "__main__":
-    transform = FiducialTransform(
-        6, True, method="rms", n_samples=5, files=dict(reference_ccl="reference_ccl")
-    )
-    # transform.plot('target')
-    # transform.plot('reference')
-    # transform.plot('fit')
-    # transform.plot_transform()
-    # transform.write()
+    phase = "FAT supplier"
+    # phase = "SSAT BR"
 
-    # transform.plot_gpr("reference", 0, n_samples=5)
-    # transform.plot_gpr('reference', 1)
+    fiducial = FiducialFit(phase=phase, fill=False)
+    # print(fiducial.data.target_cylindrical)
+
+    # fiducial.plot()
+
+    # coil = 4
+    # coil_index = fiducial.coil_index(coil)

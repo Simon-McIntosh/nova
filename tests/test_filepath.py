@@ -6,28 +6,14 @@ from pathlib import Path
 import pytest
 
 import nova
-from nova.database.filepath import FilePath
+from nova.database.filepath import Connect, FilePath, mark_ssh
 from nova.definitions import root_dir
-from nova.utilities.importmanager import mark_import
 
 
 IMAS_VERSION = os.environ.get("IMAS_VERSION", "")
-HOSTNAME = "sdcc-login01.iter.org"
+HOSTNAME = "sdcc-login02.iter.org"
 
-with mark_import("ssh") as mark_ssh:
-    import paramiko
-
-try:
-    client = paramiko.SSHClient()
-    client.load_system_host_keys()
-    client.connect(HOSTNAME)
-    VALID_HOST = True
-except:
-    VALID_HOST = False
-
-mark_connect = pytest.mark.skipif(
-    not VALID_HOST, reason=f"unable to connect to host {HOSTNAME}"
-)
+mark_connect = Connect(HOSTNAME).mark
 
 
 KEYPATH = dict(
@@ -121,10 +107,10 @@ def test_mkdepth_error():
 def clear(path):
     filepath = FilePath(parents=4)
     if filepath.fsys.isdir(path):
-        filepath.fsys.delete(path, True)
+        filepath.fsys.delete(path, True, 1)
     yield filepath
     if filepath.fsys.isdir(path):
-        filepath.fsys.delete(path, True)
+        filepath.fsys.delete(path, True, 1)
 
 
 @pytest.mark.parametrize("subpath", ["", "signal"])

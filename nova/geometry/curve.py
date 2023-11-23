@@ -304,7 +304,7 @@ class Squareness(Plot, PointGeometry):
                 raise IndexError(f"quadrant index {index} not 0-3")
 
     def quadrant_axis(self, index: int):
-        """Return loca quadrant axis."""
+        """Return local quadrant axis."""
         match index:
             case 0:  # upper_outer
                 return self.r_zmax, self.z_rmax

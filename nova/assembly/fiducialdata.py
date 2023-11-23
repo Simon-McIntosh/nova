@@ -1,5 +1,6 @@
 """Load ccl fiducial data for ITER TF coilset."""
 from dataclasses import dataclass, field
+from pathlib import Path
 import string
 from typing import ClassVar
 
@@ -13,21 +14,22 @@ from nova.assembly.fiducialccl import Fiducial, FiducialIDM, FiducialRE
 from nova.assembly.fiducialsector import FiducialSector
 from nova.assembly.gaussianprocessregressor import GaussianProcessRegressor
 from nova.assembly.plotter import Plotter
+from nova.database.netcdf import netCDF
 from nova.graphics.plot import Plot
 
 
 @dataclass
-class FiducialData(Plot, Plotter):
+class FiducialData(netCDF, Plot, Plotter):
     """Manage ccl fiducial data."""
 
+    filename: str = "fiducial_data"
+    dirname: Path | str = ".nova/sector_modules"
     fiducial: Fiducial | str = "Sector"
     phase: str = "SSAT BR"
     fill: bool = True
+    variance: float | str = 0.09
     sead: int = 2030
-    rawdata: dict[str, pandas.DataFrame] = field(
-        init=False, repr=False, default_factory=dict
-    )
-    data: xarray.Dataset = field(init=False, repr=False)
+    data: xarray.Dataset = field(init=False, repr=False, default_factory=xarray.Dataset)
     gpr: GaussianProcessRegressor = field(init=False, repr=False)
     mesh: pv.PolyData = field(init=False)
 
@@ -55,12 +57,38 @@ class FiducialData(Plot, Plotter):
 
     def __post_init__(self):
         """Load data."""
-        if not isinstance(self.fiducial, Fiducial):
-            self.fiducial = {
-                "RE": FiducialRE,
-                "IDM": FiducialIDM,
-                "Sector": FiducialSector,
-            }[self.fiducial]
+        super().__post_init__()
+        self.group = self.hash_attrs(self.fiducial_attrs)
+        self.load_build()
+
+    @property
+    def fiducial_attrs(self):
+        """Return fiducial attributes."""
+        return {
+            attr: getattr(self, attr)
+            for attr in ["fiducial", "phase", "fill", "variance", "sead"]
+        }
+
+    def load_build(self):
+        """Load or build dataset."""
+        try:
+            self.load()
+        except (FileNotFoundError, OSError):
+            self.build()
+            attrs = self.fiducial_attrs
+            for attr, value in attrs.items():
+                if isinstance(value, bool):
+                    attrs[attr] = int(value)
+            self.data.attrs = attrs
+            self.store()
+
+    def build(self):
+        """Build fiducial dataset."""
+        self._fiducial = {
+            "RE": FiducialRE,
+            "IDM": FiducialIDM,
+            "Sector": FiducialSector,
+        }[self.fiducial]
         self.build_dataset()
         if self.fill:
             self.backfill()
@@ -99,7 +127,7 @@ class FiducialData(Plot, Plotter):
                 "EU",
                 "JA",
                 "JA",
-                "JA",
+                "EU",
                 "JA",
                 "JA",
                 "EU",
@@ -178,7 +206,6 @@ class FiducialData(Plot, Plotter):
         target_length = self.data.arc_length[target_index].values
         self.data = self.data.assign_coords(target_length=("target", target_length))
         self.data = self.data.sortby("target_length")
-        self.gpr = GaussianProcessRegressor(self.data.target_length)
 
     def load_centerline(self):
         """Load geodesic centerline."""
@@ -191,7 +218,7 @@ class FiducialData(Plot, Plotter):
 
     def load_fiducial_deltas(self):
         """Load fiducial deltas."""
-        fiducial = self.fiducial(self.data.target, phase=self.phase)
+        fiducial = self._fiducial(self.data.target, phase=self.phase)
         delta, origin = fiducial.data
         self.data["coil"] = list(delta)
         self.data = self.data.assign_coords(origin=("coil", origin))
@@ -220,14 +247,17 @@ class FiducialData(Plot, Plotter):
                 self.data["centerline_delta"][
                     coil_index, :, space_index
                 ] = self.load_gpr(coil_index, space_index)
-        self.data.attrs["source"] = self.fiducial().source
+        self.data.attrs["source"] = self._fiducial().source
 
     def load_gpr(self, coil_index, space_index):
         """Return Gaussian Process regression."""
-        try:
-            variance = self.data.fiducial_variance[coil_index, :, space_index].data
-        except AttributeError:
-            variance = 0.09
+        match self.variance:
+            case "file":
+                variance = self.data.fiducial_variance[coil_index, :, space_index].data
+            case float():
+                variance = self.variance
+            case _:
+                raise ValueError(f"variance {self.variance} not file or float")
         self.gpr = GaussianProcessRegressor(self.data.target_length, variance=variance)
         return self.gpr.evaluate(
             self.data.arc_length, self.data.fiducial_delta[coil_index, :, space_index]
@@ -268,7 +298,7 @@ class FiducialData(Plot, Plotter):
             ],
         )
 
-    def plot(self, factor=400):
+    def plot(self, factor=250):
         """Plot fiudicial points on coil cenerline."""
         self.axes = self.set_axes("2d", nrows=1, ncols=2, sharey=True)
         for j in range(2):
@@ -305,7 +335,7 @@ class FiducialData(Plot, Plotter):
         """Return coil index."""
         return list(self.data.coil).index(coil)
 
-    def plot_single(self, coil_index, stage=3, factor=500, axes=None):
+    def plot_single(self, coil_index, stage=3, factor=250, axes=None):
         """Plot single fiducial curve."""
         self.set_axes(
             "2d",
@@ -356,7 +386,7 @@ class FiducialData(Plot, Plotter):
                     "d",
                     color="gray",
                 )
-        limits[1]["x"] = [-1000, 1000]
+        limits[1]["x"] = [-1100, 1100]
         self.axes_limit = limits
         # self.axes.set_title(f"TF{self.data.coil[coil_index].data} {self.phase}")
 
@@ -365,10 +395,10 @@ if __name__ == "__main__":
     phase = "FAT supplier"
     # phase = "SSAT BR"
 
-    fiducial = FiducialData("Sector", phase=phase, fill=False)
+    fiducial = FiducialData(fiducial="Sector", phase=phase, fill=False, variance=0.09)
     fiducial.plot()
 
-    coil = 12
+    coil = 4
     coil_index = fiducial.coil_index(coil)
 
     fiducial.plot_single(coil_index, 3)

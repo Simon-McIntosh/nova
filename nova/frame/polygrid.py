@@ -277,7 +277,9 @@ class PolyGrid(PolyCell, Plot):
         polys = [
             PolyFrame(
                 polytrim,
-                poly.metadata if poly.poly.within(buffer) else dict(name="polygon"),
+                metadata=poly.metadata
+                if poly.poly.within(buffer)
+                else {"name": "polygon"},
             )
             for poly in polys
             if (polytrim := poly.poly.intersection(buffer))
@@ -291,7 +293,7 @@ class PolyGrid(PolyCell, Plot):
         polys = self.polycells(coords)  # build trimmed cell polygons
         data = [[] for __ in range(len(polys))]
         for i, poly in enumerate(polys):
-            geom = PolyGeom(poly, "ring").geometry
+            geom = PolyGeom(poly, segment="ring").geometry
             data[i] = {name: geom[name] for name in self.columns}
         frame = pandas.DataFrame(data, columns=self.columns)
         frame["nturn"] = self.nturn * frame["area"] / frame["area"].sum()

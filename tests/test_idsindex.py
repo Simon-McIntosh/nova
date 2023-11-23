@@ -83,12 +83,14 @@ def test_empty():
     assert ids_index.empty("energy_limit_max")
 
 
+@mark["imas"]
 def test_ids_node_length():
     ids_index = IdsIndex(IDS(name="coils_non_axisymmetric").get_ids(), "coil")
     ids_index.ids.resize(5)
     assert ids_index.length == 5
 
 
+@mark["imas"]
 def test_set_coil_turns():
     ids_index = IdsIndex(IDS(name="coils_non_axisymmetric").get_ids(), "coil")
     ids_index.ids.resize(5)
@@ -96,6 +98,7 @@ def test_set_coil_turns():
     assert np.allclose(ids_index.array("turns"), np.arange(5, 10))
 
 
+@mark["imas"]
 def test_set_coil_name():
     ids_index = IdsIndex(IDS(name="coils_non_axisymmetric").get_ids(), "coil")
     ids_index.ids.resize(3)

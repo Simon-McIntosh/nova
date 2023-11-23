@@ -42,7 +42,7 @@ class TriShell:
     def __post_init__(self):
         """Create trimesh instance."""
         self.mesh.triangulate()
-        self.tri = trimesh.Trimesh(self.mesh.points(), faces=self.mesh.faces())
+        self.tri = trimesh.Trimesh(self.mesh.points(), faces=self.mesh.cells())
 
     @cached_property
     def _convex_hull(self) -> vedo.Mesh:

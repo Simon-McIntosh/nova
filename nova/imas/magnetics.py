@@ -157,7 +157,6 @@ class Magnetics(Plot, Database):
         """Extract overview from dataframe."""
         index, identifier, name, diagnostic_type, number = [], [], [], [], []
         for data_name in self["frame"].name.unique():
-            print("***", data_name)
             frame = self["frame"].loc[self["frame"].name == data_name, :]
             index.append(data_name.split(" ")[0].split(".")[1])
             identifier.append("-".join(frame.index[0].split("-")[:-1]))

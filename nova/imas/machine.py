@@ -79,7 +79,7 @@ class Outline(GeomData):
     @property
     def poly(self):
         """Return shapely polygon."""
-        return Polygon([self.data["r"], self.data["z"]]).poly
+        return Polygon([self.data["r"], self.data["z"]], metadata=self.data).poly
 
 
 @dataclass
@@ -88,6 +88,20 @@ class Rectangle(GeomData):
 
     name: str = "rectangle"
     attrs: ClassVar[list[str]] = ["r", "z", "width", "height"]
+
+    def __post_init__(self):
+        """Enforce positive dimensions."""
+        super().__post_init__()
+        for attr in [
+            "width",
+            "height",
+        ]:  # TODO remove negative check once MastU IDS fixed
+            if self.data[attr] <= 0:
+                self.data[attr] *= -1
+                warn(
+                    "negative width or height "
+                    f'{self.data["width"], self.data["height"]}'
+                )
 
     @property
     def poly(self):
@@ -100,7 +114,8 @@ class Rectangle(GeomData):
                     self.data["width"],
                     self.data["height"],
                 ]
-            }
+            },
+            metadata=self.data,
         ).poly
 
 
@@ -139,7 +154,7 @@ class Oblique(Plot, GeomData):
                 self.length_beta * np.cos(self.beta),
             ]
         )
-        return Polygon([radius, height]).poly
+        return Polygon([radius, height], metadata=self.data).poly
 
     @property
     def start(self):
@@ -236,7 +251,8 @@ class Annulus(GeomData):
                     self.data["width"],
                     self.data["factor"],
                 ]
-            }
+            },
+            metadata=self.data,
         ).poly
 
 
@@ -274,6 +290,9 @@ class CrossSection:
     def __post_init__(self):
         """Build geometry instance."""
         self.data = self.transform[self.ids.geometry_type](self.ids)
+        for attr in self.data.data:
+            if not np.isfinite(self.data.data[attr]):
+                self.data.data[attr] = 0.1  # TODO remove once MastU IDS is fixed
 
     def __getattr__(self, attr):
         """Return data attributes."""
@@ -383,8 +402,7 @@ class FrameData(ABC):
             name = name[0]
         if identifier == "" and name == "":
             name = f"_{next(self._count)}"
-            print(name)
-            return name
+            return name  # TODO remove return and raise error once MastU ids fixed
             # raise ValueError("Nether name nor identifier set.")
         if len(name.split()) == 1:
             return name
@@ -598,13 +616,13 @@ class PoloidalFieldPassive(CoilDatabase):
             polydata = PassivePolyCoilData()
             for i, ids_element in enumerate(ids_loop.element):
                 element = Element(ids_element, i)
-                if element.is_oblique() or element.is_thickline():
+                if element.is_thickline():  # element.is_oblique() or
                     shelldata.append(loop, element)
                     continue
                 if element.is_rectangular():
                     coildata.append(loop, element)
                     continue
-                if element.is_poly():
+                if element.is_oblique() or element.is_poly():
                     polydata.append(loop, element)
                     continue
                 raise NotImplementedError(
@@ -1189,7 +1207,7 @@ class Machine(CoilSet, Geometry, CoilData):
 
         if hasattr(super(), "build"):
             super().build()
-        self.solve_biot()
+        # self.solve_biot()
         return self.store()
 
     def load(self):
@@ -1213,7 +1231,7 @@ if __name__ == "__main__":
     machine = Machine(
         *args,
         pf_active=True,
-        pf_passive=True,
+        pf_passive=False,
         elm=False,
         wall=True,
         tplasma="hex",

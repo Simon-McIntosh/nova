@@ -64,10 +64,10 @@ if __name__ == "__main__":
 
     pulse, run = 135014, 1
 
-    pulse, run = 45272, 1
+    # pulse, run = 45272, 1, "mast_u"
 
     # pulse, run = 111001, 202
     # PF_Active(pulse, run, "iter")._clear()
-    pf_active = PF_Active(pulse, run, "mast_u")
+    pf_active = PF_Active(pulse, run)
     # pf_active = PF_Active(105007, 9)  # b field max timed 135002, 5
     pf_active.plot()

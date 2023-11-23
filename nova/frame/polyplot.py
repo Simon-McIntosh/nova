@@ -46,6 +46,11 @@ class Labels:
         index = self.get_index()
         self.frame.part[index]
         """
+        for name in self.frame.index[index]:
+            series = self.frame.loc[name, :]
+            self.axes.text(series.x, series.z, name)
+        """
+        """
 
         part_number = {p: sum(coil.part == p) for p in parts}
         # check for presence of field instance

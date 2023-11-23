@@ -13,7 +13,7 @@ try:
     IMAS_MODULE_NOT_FOUND = False
     EMPTY_INT = imasdef.EMPTY_INT
     EMPTY_FLOAT = imasdef.EMPTY_FLOAT
-except (ModuleNotFoundError, SystemExit):
+except (ImportError, ModuleNotFoundError, SystemExit):
     IMAS_MODULE_NOT_FOUND = True
     EMPTY_INT = -999999999
     EMPTY_FLOAT = -9e40

@@ -1,11 +1,9 @@
 """Manage PolyFrame geometrical data."""
 from collections import namedtuple
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from functools import cached_property
-from typing import Union
 
 import numpy as np
-import numpy.typing as npt
 import shapely.geometry
 
 from nova.geometry.polygon import PolyFrame
@@ -27,18 +25,8 @@ class PolyGeom(Polygon):
 
     """
 
-    poly: Union[
-        Polygon,
-        PolyFrame,
-        shapely.geometry.Polygon,
-        shapely.geometry.MultiPolygon,
-        dict[str, list[float]],
-        list[float],
-        npt.ArrayLike,
-    ] = field(repr=False)
     segment: str = "ring"
     loop_length: float = 0
-    name: str | None = field(init=False, default=None)
 
     def __post_init__(self):
         """Update loop length."""
@@ -217,10 +205,6 @@ class PolyGeom(Polygon):
             "area": self.area,
             "volume": self.volume,
             "rms": self.rms,
-            "poly": PolyFrame(self.poly, self.metadata),
+            "poly": PolyFrame(self.poly, metadata=self.metadata),
             "section": self.section,
         }
-
-
-if __name__ == "__main__":
-    geom = PolyGeom(Polygon({"hex": [3, 2, 0.1]})).geometry

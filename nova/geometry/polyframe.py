@@ -15,7 +15,16 @@ class PolyFrame(Plot, GeoFrame):
     """Geometry object for dataframe polygons."""
 
     poly: shapely.geometry.Polygon
+    name: str | None = None
     metadata: dict = field(default_factory=dict)
+
+    def __post_init__(self):
+        """Update instance name."""
+        super().__post_init__()
+        if self.name is None:
+            self.name = self.metadata.get("name", None)
+        else:
+            self.metadata["name"] = self.name
 
     def __eq__(self, other) -> bool:
         """Return result of comparison with other."""
@@ -34,11 +43,6 @@ class PolyFrame(Plot, GeoFrame):
         polygon = json.loads(data)
         metadata = polygon.pop("metadata", dict())
         return cls(shapely.geometry.shape(polygon), metadata)
-
-    @property
-    def name(self):
-        """Return polygon name."""
-        return self.metadata.get("name", "polyframe")
 
     @property
     def section(self):

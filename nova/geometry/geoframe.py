@@ -1,18 +1,22 @@
 """Baseclass for dataframe geometroy objects."""
 from abc import abstractmethod
+from dataclasses import dataclass
 
 
+@dataclass
 class GeoFrame:
     """Geometry object abstract base class."""
 
-    def __init__(self, **kwargs):
-        self.name = "geoframe"
+    def __post_init__(self):
+        """Propogate for cooperative inheritance."""
         if hasattr(super(), "__post_init__"):
             super().__post_init__()
 
     def __str__(self):
-        """Return name."""
-        return self.name
+        """Return name if set."""
+        if hasattr(self, "name"):
+            return self.name
+        return None
 
     @abstractmethod
     def __eq__(self, other):

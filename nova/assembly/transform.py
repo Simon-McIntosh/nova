@@ -32,7 +32,8 @@ class Rotate:
         """Return reveresed clocking transform."""
         return self.rotate(reverse=True).apply(vector)
 
-    def to_cylindrical(self, dataarray: xarray.DataArray) -> xarray.DataArray:
+    @staticmethod
+    def to_cylindrical(dataarray: xarray.DataArray) -> xarray.DataArray:
         """Retun dataarray transformed from cartesian to cylindrical coords."""
         phi = np.arctan2(dataarray[..., 1].data, dataarray[..., 0].data)
         dataarray = (
@@ -44,7 +45,8 @@ class Rotate:
         dataarray[..., 1] = dataarray[..., 0] * phi
         return dataarray
 
-    def to_cartesian(self, dataarray: xarray.DataArray) -> xarray.DataArray:
+    @staticmethod
+    def to_cartesian(dataarray: xarray.DataArray) -> xarray.DataArray:
         """Retun dataarray transformed from cylindrical to cartesian coords."""
         radius = dataarray[..., 0].data
         phi = dataarray[..., 1].data / radius

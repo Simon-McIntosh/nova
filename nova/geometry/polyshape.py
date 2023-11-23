@@ -20,7 +20,7 @@ class PolyShape:
         | dict.fromkeys(["hexagon", "hex", "hx", "h"], "hexagon")
     )
 
-    def _shape(self, section: str):
+    def _shape(self, section: str) -> str:
         """Return polygeom shape name from str input."""
         section = section.rstrip(string.digits)
         try:
@@ -32,7 +32,7 @@ class PolyShape:
             ) from error
 
     @property
-    def shape(self):
+    def shape(self) -> str | list[str]:
         """Return polygeom shape name."""
         if isinstance(self.section, list):
             return [self._shape(section) for section in self.section]

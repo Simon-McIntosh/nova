@@ -65,7 +65,7 @@ class PolyGeo(metamethod.PolyGeo):
                     poly[i] = Polygon({f"{section[i]}": poly_data[i]})
                     section[i] = poly[i].metadata["section"]
                 geometry = PolyGeom(
-                    poly[i], segment_data[i, 0], segment_data[i, 1]
+                    poly[i], segment=segment_data[i, 0], loop_length=segment_data[i, 1]
                 ).geometry
                 geom[i] = [geometry[feature] for feature in self.features]
             if poly_update.any():

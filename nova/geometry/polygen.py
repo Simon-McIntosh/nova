@@ -241,8 +241,3 @@ class PolyGen(PolyShape):
             for alpha in np.linspace(0, 2 * np.pi, 7)
         ]
         return shapely.geometry.Polygon(points)
-
-
-if __name__ == "__main__":
-    poly = PolyGen("hex")
-    print(poly(3, 4, 2))

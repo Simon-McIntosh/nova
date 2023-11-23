@@ -152,6 +152,9 @@ class SectorData(FilePath, SectorFile):
                     continue
                 for index, name in enumerate(self._coil_names(sheet)):
                     self.data[name][sheet] = self.read_frame(index, sheet)
+        for coil in self._coil_names("Nominal"):
+            if self.data[coil]["Nominal"].values.dtype == np.object_:
+                self.data.pop(coil)
 
     @cached_property
     def coil(self) -> list[str]:
@@ -177,6 +180,7 @@ class SectorData(FilePath, SectorFile):
                 try:
                     self.ccl[phase][coil].loc[:, nominal.columns] -= nominal
                 except TypeError:
+                    print("type error", coil, phase)
                     self.ccl[phase][coil].loc[:, nominal.columns] = 0.0
                 self.ccl[phase][coil] = self.ccl[phase][coil].rename(
                     columns={col: f"d{col}" for col in "xyz"}
@@ -240,6 +244,8 @@ class SectorData(FilePath, SectorFile):
             usecols=usecols,
             index_col=[0, 1, 2],
             keep_default_na=False,
+            na_values="",
+            dtype=dict.fromkeys(["X", "Y", "Z", "uX", "uY", "uZ"], float),
         )
         data = data.rename(
             columns={col: col.split(".")[0].lower() for col in data.columns}
@@ -256,7 +262,9 @@ class FiducialSector(Fiducial):
 
     phase: str = "FAT supplier"
     sector: dict[int, int] = field(init=False, default_factory=dict)
-    sectors: list[int] = field(default_factory=lambda: [*range(1, 9)])
+    sectors: dict[int, list] = field(
+        default_factory=lambda: dict.fromkeys(range(1, 9), [])
+    )
     variance: dict[str, pandas.DataFrame] | dict = field(
         init=False, default_factory=dict
     )
@@ -280,6 +288,7 @@ class FiducialSector(Fiducial):
         columns = ["dx", "dy", "dz"]
         for sector in self.sectors:
             data = SectorData(sector)
+            self.sectors[sector] = data.coil
             for coil, ccl in data.ccl[self.phase].items():
                 self.sector[coil] = sector
                 self.delta[coil] = ccl.loc[self.target, columns]
@@ -318,7 +327,7 @@ class FiducialSector(Fiducial):
 
 
 if __name__ == "__main__":
-    # sector = SectorData(8)
+    sector = SectorData(8)
 
     fiducial = FiducialSector(phase="FATsup")  # , sectors=[8]
     fiducial.compare("IDM")

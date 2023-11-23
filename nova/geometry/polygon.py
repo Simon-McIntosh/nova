@@ -32,38 +32,38 @@ class Polygon(PolyFrame):
         npt.ArrayLike,
     ]
     name: str | None = None
-    metadata: dict = field(init=False, default_factory=dict)
+    metadata: dict = field(default_factory=dict)
 
     def __post_init__(self):
         """Process input geometry."""
         self.correct_aspect()
-        self.metadata = self.extract()
-        if self.name is not None:
-            self.metadata |= dict(name=self.name)
-        self.name = self.metadata.get("name", None)
+        self.metadata |= self.extract()
         self.poly = self.translate()
         if hasattr(super(), "__post_init__"):
             super().__post_init__()
 
     def correct_aspect(self):
         """Correct bounds to equal aspect geometries."""
-        if isinstance(self.poly, dict):
-            for section in self.poly:
-                if PolyGen(section).shape in ["square", "disc"]:
-                    if len(self.poly[section]) == 4:
-                        length = PolyGen.boxbound(*self.poly[section][-2:])
-                        self.poly[section] = tuple(self.poly[section][:2]) + (length,)
+        if not isinstance(self.poly, dict):
+            return
+        for section in self.poly:
+            if (
+                PolyGen(section).shape in ["square", "disc"]
+                and len(self.poly[section]) == 4
+            ):
+                length = PolyGen.boxbound(*self.poly[section][-2:])
+                self.poly[section] = tuple(self.poly[section][:2]) + (length,)
 
     def extract(self) -> dict:
         """Return metadata extracted from input polygon."""
         if isinstance(self.poly, (Polygon, PolyFrame)):
             return self.poly.metadata
         if isinstance(self.poly, shapely.geometry.Polygon):
-            return dict(name="polygon")
+            return {"name": "polygon"}
         if isinstance(self.poly, shapely.geometry.MultiPolygon):
-            return dict(name="multipoly")
+            return {"name": "multipoly"}
         if isinstance(self.poly, dict):
-            metadata = dict(names=[PolyGen(name).shape for name in self.poly])
+            metadata = {"names": [PolyGen(name).shape for name in self.poly]}
             if len(self.poly) == 1:
                 metadata["name"] = metadata["names"][0]
                 metadata |= {
@@ -82,7 +82,7 @@ class Polygon(PolyFrame):
             metadata = self.bounding_box(*loop)
             metadata["section"] = metadata["name"]
             return metadata
-        return dict(name="polyloop")
+        return {"name": "polyloop"}
 
     def translate(self):
         """Translate input geometry to shapely.geometry.Polygon.

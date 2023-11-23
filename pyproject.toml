@@ -149,6 +149,10 @@ thermofluids = [
   "tables", 
   "xlrd",
 ]
+uda = [
+  "python-asyncio",
+  "async-property", 
+]
 vtk = [
   "alphashape",
   "meshio",

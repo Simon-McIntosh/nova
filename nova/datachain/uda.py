@@ -201,7 +201,7 @@ class UdaSample:
     time: float = 0
     duration: float = 1
     sample_number: int = 1
-    sample_type: str = "last"
+    sample_type: str | int = "last"
 
     @property
     def relative_start_time(self):
@@ -233,11 +233,13 @@ class UdaQuery(UdaInfo, UdaSample):
     def __post_init__(self):
         """Load variable generator."""
         super().__post_init__()
-        self.generator = (variable for variable in self.variables[:10])
+        self.generator = (variable for variable in self.variables)
 
-    def __call__(self, variable):
+    def __call__(self, variable):  # TODO treat adcP/I flag correctly
         """Return UDA query."""
-        return f"variable={variable},pulse={self.pulse},{self.sample}"
+        return (
+            f"variable={variable}/adcP,pulse={self.machine}:{self.pulse},{self.sample}"
+        )
 
     async def async_generator(self):
         """Return async variable generator."""
@@ -301,7 +303,7 @@ async def publish(query: UdaQuery, queue: asyncio.Queue):
     async for variable in query.async_generator():
         await queue.put(query(variable))
         logging.info(f"Published variable {variable}")
-        # await asyncio.sleep(0)
+        await asyncio.sleep(0)
 
 
 async def request(queue: asyncio.Queue):
@@ -310,21 +312,17 @@ async def request(queue: asyncio.Queue):
         query = await queue.get()
         logging.info(f"Requested variable {query}")
         async with UdaClient(query=query) as uda:
-            print(uda.handle)
-        # await asyncio.sleep(0)
+            data = uda.client.getDataAsDouble(uda.handle)
+            logging.info(f"Recived variable {len(data)}")
+            await asyncio.sleep(0)
         queue.task_done()
-
-    # async with UdaBase() as uda:
-    #    logging.info("UDA client is live")
-    #    print("*", uda.client.getLastPulse2("ITER:PCS/*"))
-    #    print(uda.client.getLastPulse2("ITER:PCS/*"))
 
 
 async def main():
     """Process diagnostic signals."""
     queue = asyncio.Queue()
 
-    query = UdaQuery(pulse_id=62, duration=1.5)
+    query = UdaQuery(pulse_id=62, duration=5, sample_number=5000, sample_type=1)
 
     producers = [asyncio.create_task(publish(query, queue)) for _ in range(10)]
     consumers = [asyncio.create_task(request(queue)) for _ in range(1000)]
@@ -339,5 +337,5 @@ if __name__ == "__main__":
     import time
 
     start_time = time.perf_counter()
-    # asyncio.run(main())
+    asyncio.run(main())
     print(f"run time {time.perf_counter() - start_time:1.3f}s")

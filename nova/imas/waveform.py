@@ -105,7 +105,7 @@ class Waveform(Animate, MachineDescription, PulseProfile):
     def plot(self, index="plasma", axes=None, **kwargs):
         """Plot machine and constraints."""
         super().plot(index=index, axes=axes, **kwargs)
-        # self.plasma.plot()  # TODO enable after separatrix plots...
+        self.plasma.plot()
 
     def residual(self, nturn):
         """Return psi grid residual."""

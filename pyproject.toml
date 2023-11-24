@@ -61,6 +61,7 @@ xlrd = {version = ">=2.0.1", optional = true}
 overrides = "^7.4.0"
 pytest-asyncio = {version = "^0.21.1", optional = true}
 async-property = {version = "^0.2.2", optional = true}
+nest-asyncio = {version = "^1.5.8", optional = true}
 
 [tool.poetry.group.dev.dependencies]
 asv = ">=0.5.1"
@@ -101,9 +102,10 @@ types-tqdm = "^4.66.0.2"
 dill = "^0.3.7"
 py-spy = ">=0.3.14"
 types-pyyaml = ">=6.0.12.12"
-vtk = "9.3.0.rc2"
+vtk = ">=9.3.0"
 build = "^1.0.3"
 wheel = "^0.41.3"
+
 
 [tool.poetry.extras]
 ansys = [
@@ -150,7 +152,7 @@ thermofluids = [
   "xlrd",
 ]
 uda = [
-  "python-asyncio",
+  "nest-asyncio",
   "async-property", 
 ]
 vtk = [

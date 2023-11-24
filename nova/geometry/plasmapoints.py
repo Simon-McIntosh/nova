@@ -477,7 +477,7 @@ class PlasmaPoints(ControlPoints):
 
     def plot(self, index=None, axes=None, **kwargs):
         """Plot control points and first wall."""
-        super().plot()
+        super().plot(index=None, axes=None, **kwargs)
         wall = Wall()
         for segment in wall.segments:
             self.axes.plot(

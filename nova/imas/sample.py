@@ -430,7 +430,6 @@ if __name__ == "__main__":
 
     # print(sample.data)
 
-    """
     sample.write_ids(**equilibrium.ids_attrs | {"occurrence": 1})
     sample.plot(
         [
@@ -442,7 +441,6 @@ if __name__ == "__main__":
             "triangularity_outer",
         ]
     )
-    """
 
     """
     sample.plot(

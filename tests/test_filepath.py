@@ -6,15 +6,21 @@ from pathlib import Path
 import pytest
 
 import nova
-from nova.database.filepath import Connect, FilePath, mark_ssh
+from nova.database.filepath import FilePath
 from nova.definitions import root_dir
+from nova.utilities.importmanager import mark_import
 
-
-IMAS_VERSION = os.environ.get("IMAS_VERSION", "")
 HOSTNAME = "sdcc-login02.iter.org"
 
-mark_connect = Connect(HOSTNAME).mark
+with mark_import("ssh") as mark_ssh:
+    from nova.database.connectssh import ConnectSSH
 
+    mark_connect = ConnectSSH(HOSTNAME).mark
+
+if any(mark_ssh.args[0]):
+    mark_connect = mark_ssh
+
+IMAS_VERSION = os.environ.get("IMAS_VERSION", "")
 
 KEYPATH = dict(
     nova=os.path.join(

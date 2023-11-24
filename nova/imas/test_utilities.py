@@ -2,14 +2,12 @@
 import pytest
 
 from nova.imas.database import Database
+from nova.utilities.importmanager import mark_import
 
-try:
+with mark_import("imas") as mark_imas:
     from imas.hli_exception import ALException
 
-    IMPORT_IMAS = True
-except ImportError:
-    IMPORT_IMAS = False
-    ALException = None
+IMPORT_IMAS = not any(mark_imas.args[0])
 
 ids_attrs = dict(
     pf_active=dict(pulse=111001, run=203, name="pf_active", machine="iter_md"),
@@ -36,7 +34,7 @@ def load_ids(*args, **kwargs):
         return False
 
 
-mark = {"imas": pytest.mark.skipif(not IMPORT_IMAS, reason="ImportError: imas")}
+mark = {"imas": mark_imas}
 for attr in ids_attrs:
     if not IMPORT_IMAS:
         mark[attr] = mark["imas"]

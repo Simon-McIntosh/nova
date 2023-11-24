@@ -1207,7 +1207,7 @@ class Machine(CoilSet, Geometry, CoilData):
 
         if hasattr(super(), "build"):
             super().build()
-        # self.solve_biot()
+        self.solve_biot()
         return self.store()
 
     def load(self):

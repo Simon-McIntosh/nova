@@ -1,18 +1,18 @@
 """Manage UDA data requests."""
+from __future__ import annotations
 import asyncio
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from functools import cached_property
 import logging
 import os
-import re
 
 from async_property import async_cached_property
 import nest_asyncio
 
-from nova.utilities.importmanager import mark_import
+from nova.utilities.importmanager import check_import
 
-with mark_import("codac_uda") as mark_uda:
+with check_import("codac_uda"):
     from uda_client_reader.uda_client_reader_python import UdaClientReaderPython
 
 nest_asyncio.apply()
@@ -24,56 +24,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-
-
-@dataclass
-class Diagnostic:
-    """Map diagnostic name to UDA variable."""
-
-    name: str
-    intergral: bool = True
-    group: str = field(init=False)
-    category: str = field(init=False)
-    index: int = field(init=False)
-
-    def __post_init__(self):
-        """Translate diagnostic name to uda variable."""
-        self.group, self.category, self.index = self.split(self.name)
-
-    @staticmethod
-    def split(name: str) -> tuple[str, str, int]:
-        """Return uda variable name from given diagnostic name."""
-        match re.split("[:.-]", name):  # IDS
-            case "55", str(group), "00", str(category), str(index):
-                return group, category, int(index)
-            case "D1", "H1", str(group), str(category), str(index):
-                return group[:-2], category, int(index)
-            case _:
-                raise NotImplementedError(
-                    f"Mapping for diagnostic name {name} " "not implemented."
-                )
-
-    @cached_property
-    def uda_name(self):
-        """Return uda attribute name."""
-        return f"D1-H1-{self.group}00:{self.category}-{self.index}"
-
-    @cached_property
-    def ids_name(self):
-        """Return ids attribute name."""
-        return f"55.{self.group}.00-{self.category}-{self.index}"
-
-    @property
-    def field_name(self):
-        """Return uda field name."""
-        if self.intergral:
-            return "adcI"
-        return "adcP"
-
-    @cached_property
-    def variable(self):
-        """Return uda variable including field name."""
-        return f"{self.uda_name}/{self.field_name}"
 
 
 @dataclass
@@ -233,7 +183,7 @@ class UdaQuery(UdaInfo, UdaSample):
     def __post_init__(self):
         """Load variable generator."""
         super().__post_init__()
-        self.generator = (variable for variable in self.variables)
+        self.generator = (variable for variable in self.variables[:3])
 
     def __call__(self, variable):  # TODO treat adcP/I flag correctly
         """Return UDA query."""
@@ -322,10 +272,10 @@ async def main():
     """Process diagnostic signals."""
     queue = asyncio.Queue()
 
-    query = UdaQuery(pulse_id=62, duration=5, sample_number=5000, sample_type=1)
+    query = UdaQuery(pulse_id=62, duration=5, sample_number=1, sample_type="last")
 
-    producers = [asyncio.create_task(publish(query, queue)) for _ in range(10)]
-    consumers = [asyncio.create_task(request(queue)) for _ in range(1000)]
+    producers = [asyncio.create_task(publish(query, queue)) for _ in range(1)]
+    consumers = [asyncio.create_task(request(queue)) for _ in range(100)]
 
     await asyncio.gather(*producers)
     await queue.join()

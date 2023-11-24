@@ -4,57 +4,12 @@ from dataclasses import dataclass, field
 from functools import wraps
 import os
 from pathlib import Path
-import pytest
 
 import appdirs
 import fsspec
 
 import nova
-from nova.datachain.uda import UdaClientReaderPython, UdaInfo
 from nova.definitions import root_dir
-from nova.utilities.importmanager import mark_import
-
-
-with mark_import("ssh") as mark_ssh:
-    import paramiko
-
-
-@dataclass
-class Connect:
-    """Methods to validate ssh server."""
-
-    hostname: str | tuple[str, int]
-    method: str = "ssh"
-
-    @property
-    def _ssh(self):
-        """Return True if connection to hostname is valid else False."""
-        try:
-            client = paramiko.SSHClient()
-            client.load_system_host_keys()
-            client.connect(self.hostname)
-            return True
-        except (NameError, paramiko.ssh_exception.socket.gaierror):
-            return False
-
-    @property
-    def _codac_uda(self):
-        """Return CODAC UDA connection status pytest decorator."""
-        if UdaClientReaderPython is None:
-            return False
-        try:
-            UdaInfo(self.hostname)
-            return True
-        except ConnectionError:
-            return False
-
-    @property
-    def mark(self):
-        """Return ssh connection pytest decorator."""
-        return pytest.mark.skipif(
-            not getattr(self, f"_{self.method}"),
-            reason=f"unable to connect via {self.method} to host {self.hostname}",
-        )
 
 
 def stardot(func):

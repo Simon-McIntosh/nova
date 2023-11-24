@@ -2,10 +2,19 @@ import asyncio
 import logging
 import pytest
 
-from nova.database.filepath import Connect
-from nova.datachain.uda import Diagnostic, UdaBase, UdaInfo, mark_uda
+from nova.datachain.diagnostic import Diagnostic
+from nova.utilities.importmanager import mark_import
 
-mark_connect = Connect(("10.153.0.254", 3090), "codac_uda").mark
+
+with mark_import("codac_uda") as mark_uda:
+    from nova.database.connectuda import ConnectUDA
+    from nova.datachain.uda import UdaBase, UdaInfo
+
+    mark_connect = ConnectUDA(("10.153.0.254", 3090)).mark
+
+if any(mark_uda.args[0]):
+    mark_connect = mark_uda
+
 
 logger = logging.getLogger()
 logger.setLevel(logging.ERROR)

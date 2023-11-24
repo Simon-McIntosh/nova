@@ -4,13 +4,21 @@ from dataclasses import dataclass
 from importlib import import_module
 import os
 
+THIRDPARTY = ["imas", "codac_uda"]
+
 
 def _report(dependencies: tuple[str, ...]):
     """Return module not found error meassage for dependency list."""
     dependency_list = f"{', '.join(dependencies)}"
+    third_party = ""
+    for dependancy in dependencies:
+        if dependancy.lower() in THIRDPARTY:
+            third_party += f"The external {dependancy.upper()} library is required. "
+
     return (
         f"Optional dependencies [{dependency_list}] not installed. "
-        f"pip install .[{dependency_list}]"
+        f"Try pip install .[{dependency_list}]. "
+        f"{third_party}"
     )
 
 
@@ -19,19 +27,20 @@ def check_import(*dependencies: str):
     """Check module import, raise if not found."""
     try:
         yield
-    except ModuleNotFoundError as error:
+    except (ImportError, ModuleNotFoundError) as error:
         raise ModuleNotFoundError(_report(dependencies)) from error
 
 
 @contextmanager
-def mark_import(*dependencies: str, skip=False):
+def mark_import(*dependencies: str, skip=None):
     """Return pytest mark, skip if not found."""
-    skip = []
+    if skip is None:
+        skip = []
     try:
         import pytest
 
         yield pytest.mark.skipif(skip, reason=_report(dependencies))
-    except ModuleNotFoundError:
+    except (ModuleNotFoundError, ImportError):
         skip.append(True)
 
 

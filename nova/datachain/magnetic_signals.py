@@ -353,8 +353,10 @@ if __name__ == "__main__":
         hostname=hostname,
     )
 
+    """
     for i, index in enumerate(np.array_split(signal.magnetics["frame"].index, 4)):
         signal.path = f"{dirname}machine_{i}"
         signal.build(index)
 
     signal.scp("access-xpoz.codac.iter.org", dirname)
+    """

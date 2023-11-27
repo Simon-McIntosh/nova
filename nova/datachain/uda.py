@@ -183,7 +183,7 @@ class UdaQuery(UdaInfo, UdaSample):
     def __post_init__(self):
         """Load variable generator."""
         super().__post_init__()
-        self.generator = (variable for variable in self.variables[:3])
+        self.generator = (variable for variable in self.variables)
 
     def __call__(self, variable):  # TODO treat adcP/I flag correctly
         """Return UDA query."""
@@ -272,7 +272,7 @@ async def main():
     """Process diagnostic signals."""
     queue = asyncio.Queue()
 
-    query = UdaQuery(pulse_id=62, duration=5, sample_number=1, sample_type="last")
+    query = UdaQuery(pulse_id=62, duration=5, sample_number=5000, sample_type=100)
 
     producers = [asyncio.create_task(publish(query, queue)) for _ in range(1)]
     consumers = [asyncio.create_task(request(queue)) for _ in range(100)]

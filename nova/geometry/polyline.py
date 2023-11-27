@@ -576,7 +576,7 @@ if __name__ == "__main__":
     fiducial = FiducialData("RE", fill=True)
 
     points = fiducial.data.centerline.data
-    # points += 500 * fiducial.data.centerline_delta[3].data
+    points += 500 * fiducial.data.centerline_delta[3].data
     polyline = PolyLine(points)
     polyline.plot()
 

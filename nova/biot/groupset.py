@@ -14,7 +14,6 @@ class CoordLocIndexer:
 
     source: Source = field(repr=False)
     target: Target = field(repr=False)
-    coordinate_transform: str
     coordinate_axes: np.ndarray = field(
         repr=False, default_factory=lambda: np.array([])
     )
@@ -35,11 +34,6 @@ class CoordLocIndexer:
                     f"malformed key {key}, require " "[source | target, attr]"
                 )
 
-    @cached_property
-    def transform(self):
-        """Return coodrinate transformer."""
-        return getattr(self, self.coordinate_transform)
-
     def coordinate_list(self, attr: str) -> list[str]:
         """Return coordinate list."""
         primary_coordinate = next(coord for coord in "xyz" if coord in attr)
@@ -58,7 +52,7 @@ class CoordLocIndexer:
     def _stack(self, frame: str, coords: list[str]) -> np.ndarray:
         """Return stacked point array in local coordinate system."""
         points = getattr(self, frame).stack(*coords)
-        return self.transform(points)
+        return self.to_local(points)
 
     def to_local(self, points):
         """Return 3d point array (target, source, 3) mapped to local coordinates."""
@@ -113,7 +107,7 @@ class GroupSet(Plot):
 
     def __call__(self, frame: str, attr: str):
         """Return attribute matrix, shape(target, source) from CoordLocIndexer."""
-        return self.loc_local[frame, attr]
+        return self.loc[frame, attr]
 
     def __len__(self):
         """Return interaction length."""
@@ -163,23 +157,11 @@ class GroupSet(Plot):
         )
 
     @cached_property
-    def loc_local(self):
+    def loc(self):
         """Return local coordinate stack indexer."""
-        return type("local_mapper", (CoordLocIndexer,), {})(
+        return type("coord_loc_indexer", (CoordLocIndexer,), {})(
             self.source,
             self.target,
-            "to_local",
-            self.coordinate_axes,
-            self.coordinate_origin,
-        )
-
-    @cached_property
-    def loc_global(self):
-        """Return global coordinate stack indexer."""
-        return type("global_mapper", (CoordLocIndexer,), {})(
-            self.source,
-            self.target,
-            "to_global",
             self.coordinate_axes,
             self.coordinate_origin,
         )

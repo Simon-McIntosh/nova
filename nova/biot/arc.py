@@ -61,14 +61,31 @@ class Arc(Constants, Matrix):
         return self.sign(self.alpha)
 
     @cached_property
+    def absolute_alpha(self):
+        """Return abs(alpha)."""
+        return abs(self.alpha)
+
+    @cached_property
+    def _index(self):
+        """Retrun abs alpha > pi/2 segment index."""
+        return self.absolute_alpha > np.pi / 2
+
+    @cached_property
+    def theta(self):
+        """Return segment angle."""
+        theta = self.absolute_alpha
+        theta[self._index] = np.pi - self.absolute_alpha[self._index]
+        return theta
+
+    @cached_property
     def Kinc(self):
         """Return end point stacked incomplete elliptic intergral of the 1st kind."""
-        return np.stack([self.ellipkinc(abs(alpha), self.k2) for alpha in self.alpha])
+        return np.stack([self.ellipkinc(theta, self.k2) for theta in self.theta])
 
     @cached_property
     def Einc(self):
         """Return end point stacked incomplete elliptic intergral of the 2nd kind."""
-        return np.stack([self.ellipeinc(abs(alpha), self.k2) for alpha in self.alpha])
+        return np.stack([self.ellipeinc(theta, self.k2) for theta in self.theta])
 
     @cached_property
     def Winc(self):
@@ -94,11 +111,6 @@ class Arc(Constants, Matrix):
             )
         )
 
-    @cached_property
-    def _index(self):
-        """Retrun abs alpha > pi/2 segment index."""
-        return abs(self.alpha) > np.pi / 2
-
     def _Bpi2(self, B_hat):
         """Index radial and toroidal magnetic fields for abs alpha > pi /2."""
         _2pi = np.tile(B_hat[np.newaxis, 2], (3, 1, 1))
@@ -113,46 +125,48 @@ class Arc(Constants, Matrix):
             self.sign_alpha
             * self.gamma_
             * (self.ck2_ * self.Kinc - (1 - self.k2_ / 2) * self.Winc)
-        ) / (self.r * self.a * self.ck2)
+        ) / (self.r_ * self.a_ * self.ck2_)
         return self._Bpi2(Br_hat)
 
     def _Bphi_hat(self):
         """Return stacked local toroidal magnetic field intergration coefficents."""
-        Bphi_hat = (-self.gamma * self.ck2_ / self.ellipj["dn"]) / (
-            self.r * self.a * self.ck2
+        Bphi_hat = (-self.gamma_ * self.ck2_ / self.ellipj["dn"]) / (
+            self.r_ * self.a_ * self.ck2_
         )
         return self._Bpi2(Bphi_hat)
 
     def _Bz_hat(self):
         """Return stacked local vertical magnetic field intergration coefficents."""
-        Bz_hat = (
+        print("***", self.sign_alpha.shape)
+        return (
             self.sign_alpha
             * (
-                self.r * self.ck2_ * self.Kinc
-                - (self.r - self.b * self.k2_ / 2) * self.Winc
+                self.r_ * self.ck2_ * self.Kinc
+                - (self.r_ - self.b_ * self.k2_ / 2) * self.Winc
             )
-        ) / (self.r * self.a * self.ck2)
-        Bz_hat[self._index] = 0  # TODO continue...
-
-        return np.zeros_like(self._Bphi_hat)
+        ) / (self.r_ * self.a_ * self.ck2_)
 
     def _intergrate(self, data):
-        return self.mu_0 / (2 * np.pi**2) * (data[1] - data[0])
+        return self.mu_0 / (2 * np.pi) * (data[1] - data[0])
 
     @cached_property
     def B_global(self):
         """Retrun gloval magnetic field vector."""
-        return np.stack(
-            [
-                self._intergrate(getattr(self, f"_B{attr}_hat")())
-                for attr in ["r", "phi"]
-            ]
+        return self.loc.to_global(
+            np.stack(
+                [
+                    self._intergrate(getattr(self, f"_B{attr}_hat")())
+                    for attr in ["r", "phi", "z"]
+                ],
+                axis=-1,
+            )
         )
 
     @cached_property
     def Br(self):
         """Return radial field component."""
-        return self.B_global[1]
+        print(self.B_global.shape)
+        return self.B_global[..., 2]
 
 
 if __name__ == "__main__":
@@ -162,13 +176,13 @@ if __name__ == "__main__":
     coilset.winding.insert(
         np.array([[5, 0, 2], [0, 5, 2], [-5, 0, 2]]),
         {"c": (0, 0, 0.5)},
-        nturn=2,
+        nturn=1,
         minimum_arc_nodes=3,
     )
     coilset.winding.insert(
         np.array([[-5, 0, 2], [0, -5, 2], [5, 0, 2]]),
         {"c": (0, 0, 0.5)},
-        nturn=2,
+        nturn=1,
         minimum_arc_nodes=3,
     )
     """
@@ -192,10 +206,10 @@ if __name__ == "__main__":
 
     print(coilset.grid.br.max(), coilset.grid.br.min())
 
-    coilset = CoilSet(field_attrs=["Br"])
-    coilset.coil.insert({"c": (5, 2, 0.5)})
-    coilset.grid.solve(2500, [1, 4.5, 0, 4])
-    coilset.saloc["Ic"] = 1e3
-    coilset.grid.plot("br", nulls=False, colors="C1", axes=axes, levels=levels)
+    circle_coilset = CoilSet(field_attrs=["Br"])
+    circle_coilset.coil.insert({"c": (5, 2, 0.5)})
+    circle_coilset.grid.solve(2500, [1, 4.5, 0, 4])
+    circle_coilset.saloc["Ic"] = 1e3
+    circle_coilset.grid.plot("br", nulls=False, colors="C1", axes=axes, levels=levels)
 
-    print(coilset.grid.br.max(), coilset.grid.br.min())
+    print(circle_coilset.grid.br.max(), circle_coilset.grid.br.min())

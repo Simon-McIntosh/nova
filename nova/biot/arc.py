@@ -94,28 +94,65 @@ class Arc(Constants, Matrix):
             )
         )
 
-    def Br_hat(self):
-        """Return stacked radial magnetic field intergration coefficents."""
+    @cached_property
+    def _index(self):
+        """Retrun abs alpha > pi/2 segment index."""
+        return abs(self.alpha) > np.pi / 2
+
+    def _Bpi2(self, B_hat):
+        """Index radial and toroidal magnetic fields for abs alpha > pi /2."""
+        _2pi = np.tile(B_hat[np.newaxis, 2], (3, 1, 1))
+        B_hat[self._index] = self.sign_alpha[self._index] * (
+            2 * _2pi[self._index] - B_hat[self._index]
+        )
+        return B_hat
+
+    def _Br_hat(self):
+        """Return stacked local radial magnetic field intergration coefficents."""
         Br_hat = (
             self.sign_alpha
             * self.gamma_
             * (self.ck2_ * self.Kinc - (1 - self.k2_ / 2) * self.Winc)
-        )
-        index = abs(self.alpha) > np.pi / 2
+        ) / (self.r * self.a * self.ck2)
+        return self._Bpi2(Br_hat)
 
-        _2pi = np.tile(Br_hat[np.newaxis, 2], (3, 1, 1))
-        assert np.allclose(_2pi[2], Br_hat[2])
-        Br_hat[index] = self.sign_alpha[index] * (2 * _2pi[index] - Br_hat[index])
-        print(Br_hat.shape)
-        return Br_hat
+    def _Bphi_hat(self):
+        """Return stacked local toroidal magnetic field intergration coefficents."""
+        Bphi_hat = (-self.gamma * self.ck2_ / self.ellipj["dn"]) / (
+            self.r * self.a * self.ck2
+        )
+        return self._Bpi2(Bphi_hat)
+
+    def _Bz_hat(self):
+        """Return stacked local vertical magnetic field intergration coefficents."""
+        Bz_hat = (
+            self.sign_alpha
+            * (
+                self.r * self.ck2_ * self.Kinc
+                - (self.r - self.b * self.k2_ / 2) * self.Winc
+            )
+        ) / (self.r * self.a * self.ck2)
+        Bz_hat[self._index] = 0  # TODO continue...
+
+        return np.zeros_like(self._Bphi_hat)
 
     def _intergrate(self, data):
         return self.mu_0 / (2 * np.pi**2) * (data[1] - data[0])
 
     @cached_property
+    def B_global(self):
+        """Retrun gloval magnetic field vector."""
+        return np.stack(
+            [
+                self._intergrate(getattr(self, f"_B{attr}_hat")())
+                for attr in ["r", "phi"]
+            ]
+        )
+
+    @cached_property
     def Br(self):
-        """Return local radial magnetic field coupling matrix."""
-        return self._intergrate(self.Br_hat()) / (self.r * self.a * self.ck2)
+        """Return radial field component."""
+        return self.B_global[1]
 
 
 if __name__ == "__main__":

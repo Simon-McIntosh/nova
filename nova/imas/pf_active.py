@@ -62,7 +62,7 @@ if __name__ == "__main__":
     # pulse, run = 135011, 7
     pulse, run = 135013, 2
 
-    pulse, run = 135014, 1
+    # pulse, run = 135014, 1
 
     # pulse, run = 45272, 1, "mast_u"
 

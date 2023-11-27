@@ -35,6 +35,11 @@ class CoordLocIndexer:
                     f"malformed key {key}, require " "[source | target, attr]"
                 )
 
+    @cached_property
+    def transform(self):
+        """Return coodrinate transformer."""
+        return getattr(self, self.coordinate_transform)
+
     def coordinate_list(self, attr: str) -> list[str]:
         """Return coordinate list."""
         primary_coordinate = next(coord for coord in "xyz" if coord in attr)
@@ -53,7 +58,7 @@ class CoordLocIndexer:
     def _stack(self, frame: str, coords: list[str]) -> np.ndarray:
         """Return stacked point array in local coordinate system."""
         points = getattr(self, frame).stack(*coords)
-        return self.to_local(points)
+        return self.transform(points)
 
     def to_local(self, points):
         """Return 3d point array (target, source, 3) mapped to local coordinates."""
@@ -67,11 +72,6 @@ class CoordLocIndexer:
             np.einsum("...i,...ji->...j", points, self.coordinate_axes)
             + self.coordinate_origin
         )
-
-
-@dataclass
-class LocalCoordLocIndexer(CoordLocIndexer):
-    """Extend CoordLocIndexer to map source and target frames to local coordinates."""
 
 
 @dataclass
@@ -112,8 +112,8 @@ class GroupSet(Plot):
         self.assemble()
 
     def __call__(self, frame: str, attr: str):
-        """Return attribute matrix, shape(target, source) from LocalCoordLoc indexer."""
-        return self.local[frame, attr]
+        """Return attribute matrix, shape(target, source) from CoordLocIndexer."""
+        return self.loc_local[frame, attr]
 
     def __len__(self):
         """Return interaction length."""
@@ -163,12 +163,12 @@ class GroupSet(Plot):
         )
 
     @cached_property
-    def local(self):
+    def loc_local(self):
         """Return local coordinate stack indexer."""
-        return type("local", (CoordLocIndexer,), {})(
+        return type("local_mapper", (CoordLocIndexer,), {})(
             self.source,
             self.target,
-            "local",
+            "to_local",
             self.coordinate_axes,
             self.coordinate_origin,
         )
@@ -176,10 +176,10 @@ class GroupSet(Plot):
     @cached_property
     def loc_global(self):
         """Return global coordinate stack indexer."""
-        return type("local", (CoordLocIndexer,), {})(
+        return type("global_mapper", (CoordLocIndexer,), {})(
             self.source,
             self.target,
-            "local",
+            "to_global",
             self.coordinate_axes,
             self.coordinate_origin,
         )

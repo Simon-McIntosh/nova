@@ -37,8 +37,15 @@ class PF_Passive(Plot, Scenario):
 if __name__ == "__main__":
     pulse, run = 105007, 9
     pulse, run = 134173, 106  # DINA / JINTRAC
+    pulse, run = 135013, 2
 
     # PF_Passive(pulse, run)._clear()
+    import time
+
+    start_time = time.perf_counter()
+    pf_passive = PF_Passive(pulse, run)
+    print(f"run time {time.perf_counter() - start_time:1.3f}s")
+
     pf_passive = PF_Passive(pulse, run)
     pf_passive.plot()
     pf_passive.axes.set_xlim([0, 60])

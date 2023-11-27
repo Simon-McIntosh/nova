@@ -53,16 +53,16 @@ def test_coordinate_axes_einsum_shape(groupset):
 
 
 def test_coord_loc(groupset):
-    assert len(groupset.local.data["source"]) == 0
-    assert len(groupset.local.data["target"]) == 0
-    assert groupset.local["source", "x"].shape == groupset.shape
-    assert list(groupset.local.data["source"].keys()) == ["x", "y", "z"]
+    assert len(groupset.loc_local.data["source"]) == 0
+    assert len(groupset.loc_local.data["target"]) == 0
+    assert groupset.loc_local["source", "x"].shape == groupset.shape
+    assert list(groupset.loc_local.data["source"].keys()) == ["x", "y", "z"]
 
 
 def test_source_coordinates_roundtrip(groupset):
     points = groupset.source.stack("x1", "y1", "z1")
-    local_points = groupset.local.to_local(points)
-    global_points = groupset.local.to_global(local_points)
+    local_points = groupset.loc_local.to_local(points)
+    global_points = groupset.loc_local.to_global(local_points)
     assert np.allclose(local_points[..., :2], 0)
     assert np.allclose(points, global_points)
 
@@ -70,8 +70,10 @@ def test_source_coordinates_roundtrip(groupset):
 @pytest.mark.parametrize("frame", ["source", "target"])
 def test_local_frame_roundtrip(groupset, frame):
     points = getattr(groupset, frame).stack(*list("xyz"))
-    local_points = np.stack([groupset.local[frame, attr] for attr in "xyz"], axis=-1)
-    global_points = groupset.local.to_global(local_points)
+    local_points = np.stack(
+        [groupset.loc_local[frame, attr] for attr in "xyz"], axis=-1
+    )
+    global_points = groupset.loc_local.to_global(local_points)
     assert np.allclose(points, global_points)
 
 

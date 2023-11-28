@@ -54,18 +54,26 @@ class CoordLocIndexer:
         points = getattr(self, frame).stack(*coords)
         return self.to_local(points)
 
+    def rotate(self, points: np.ndarray, coordinate_frame: str):
+        """Rotate points to coordinate frame."""
+        match coordinate_frame:
+            case "to_local":
+                return np.einsum("...i,...ij->...j", points, self.coordinate_axes)
+            case "to_global":
+                return np.einsum("...i,...ji->...j", points, self.coordinate_axes)
+            case _:
+                raise NotImplementedError(
+                    f"coordinate rotation to {coordinate_frame} "
+                    "frame not implemented"
+                )
+
     def to_local(self, points):
         """Return 3d point array (target, source, 3) mapped to local coordinates."""
-        return np.einsum(
-            "...i,...ij->...j", points - self.coordinate_origin, self.coordinate_axes
-        )
+        return self.rotate(points - self.coordinate_origin, "to_local")
 
     def to_global(self, points):
         """Return 3d point array (target, source, 3) mapped to global coordinates."""
-        return (
-            np.einsum("...i,...ji->...j", points, self.coordinate_axes)
-            + self.coordinate_origin
-        )
+        return self.rotate(points, "to_global") + self.coordinate_origin
 
 
 @dataclass

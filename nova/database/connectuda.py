@@ -15,7 +15,7 @@ class ConnectUDA(Connect):
     def __call__(self):
         """Implement instance call to check UDA connection."""
         try:
-            UdaInfo(self.hostname)
-            return True
+            uda = UdaInfo(self.hostname)
+            return uda.client.isConnected()
         except ConnectionError:
             return False

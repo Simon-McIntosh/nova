@@ -40,7 +40,6 @@ class UdaInfo:
         if not isinstance(self.client, UdaClientReaderPython):
             with self._catch_uda_error():
                 self.client = UdaClientReaderPython(*self.client)
-                self.client.isConnected()
 
     @contextmanager
     def _catch_uda_error(self):

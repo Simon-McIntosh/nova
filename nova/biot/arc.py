@@ -32,16 +32,6 @@ class Arc(Constants, Matrix):
         self.z = self("target", "z")
         self.phi = np.arctan2(self("target", "y"), self("target", "x"))
 
-    '''
-    def __getattr__(self, attr: str):
-        """Return attribute, reshape if attribute name has a trailing underscore."""
-        match attr[-1]:
-            case "_":
-                return getattr(self, attr[:-1])[np.newaxis]
-            case _:
-                raise AttributeError(f"Attribute {attr} not found.")
-    '''
-
     @cached_property
     def alpha(self):
         """Return system invariant angle alpha for start, end, and pi/2."""
@@ -51,17 +41,18 @@ class Arc(Constants, Matrix):
                 np.arctan2(self("source", "y2"), self("source", "x2")),
             ]
         )
-        return np.append(
-            (np.pi - (phi_s[:2] - self.phi[np.newaxis, :])) / 2,
-            np.zeros((1,) + self.shape),
-            np.pi / 2 * np.ones((1,) + self.shape),
+        return np.concatenate(
+            (
+                (np.pi - (phi_s - self.phi[np.newaxis])) / 2,
+                np.pi / 2 * np.ones((1,) + self.shape),
+            ),
             axis=0,
         )
 
     @cached_property
     def sign_alpha(self):
         """Return sign(alpha)."""
-        return self.sign(self.alpha)
+        return np.sign(self.alpha)
 
     @cached_property
     def abs_alpha(self):
@@ -100,7 +91,7 @@ class Arc(Constants, Matrix):
                 * self.ellipj["sn"][i]
                 * self.ellipj["cn"][i]
                 / self.ellipj["dn"][i]
-                for i in range(3)
+                for i in range(len(self.theta))
             ]
         )
 
@@ -116,7 +107,7 @@ class Arc(Constants, Matrix):
 
     def _Bpi2(self, B_hat):
         """Index radial and toroidal magnetic fields for abs alpha > pi /2."""
-        _pi2 = np.tile(B_hat[np.newaxis, 3], (3, 1, 1))
+        _pi2 = np.tile(B_hat[2, np.newaxis], (len(self.theta), 1, 1))
         B_hat[self._index] = self.sign_alpha[self._index] * (
             2 * _pi2[self._index] - B_hat[self._index]
         )
@@ -157,8 +148,8 @@ class Arc(Constants, Matrix):
     def _intergrate(self, data):
         return self.mu_0 / (np.pi**2) * (data[0] - data[1])
 
-    @cached_property
-    def _Bcyl(self):
+    @property
+    def _Bcylindrical(self):
         """Return local magnetic field in cylindrical coordinates."""
         return np.stack(
             [
@@ -169,26 +160,41 @@ class Arc(Constants, Matrix):
         )
 
     @property
-    def _Bcart(self):
-        """Return local magnetic field vector in cartesian frame."""
+    def to_cartesian(self):
+        """Return rotation matrix to map from a cylindrical to a cartesian frame."""
         return np.stack(
             [
-                self._Bcyl[0] * np.cos(self.phi) - self._Bcyl[1] * np.sin(self.phi),
-                self._Bcyl[0] * np.sin(self.phi) + self._Bcyl[1] * np.cos(self.phi),
-                self._Bcyl[2],
+                [np.cos(self.phi), -np.sin(self.phi), np.zeros_like(self.phi)],
+                [np.sin(self.phi), np.cos(self.phi), np.zeros_like(self.phi)],
+                [
+                    np.ones_like(self.phi),
+                    np.zeros_like(self.phi),
+                    np.zeros_like(self.phi),
+                ],
             ],
-            axis=-1,
+            axis=0,
         )
 
+    @property
+    def _Bcartesian(self):
+        """Return local magnetic field vector in cartesian frame."""
+        return np.einsum("mjk,imjk->jki", self._Bcylindrical, self.to_cartesian)
+
     @cached_property
-    def B_cart(self):
+    def Bfield(self):
         """Retrun global magnetic field vector."""
-        return self.loc.rotate(self._Bcart, "to_global")
+        return self.loc.rotate(self._Bcartesian, "to_global")
 
     @property
     def Br(self):
         """Return radial field component."""
-        return self.B_cart[..., 0]
+
+        for i in range(2):
+            print(i)
+            print(np.max(self.theta[i]))
+            print(np.min(self.theta[i]))
+
+        return self.Bfield[..., 0]
 
 
 if __name__ == "__main__":
@@ -196,14 +202,13 @@ if __name__ == "__main__":
 
     radius = 3.945
     height = 2
-    segment_number = 13
+    segment_number = 3
 
     theta = np.linspace(0, 2 * np.pi, 1 + 2 * segment_number)
     points = np.stack(
         [radius * np.cos(theta), radius * np.sin(theta), height * np.ones_like(theta)],
         axis=-1,
     )
-    print(points.shape)
 
     coilset = CoilSet(field_attrs=["Br"])
     for i in range(segment_number):
@@ -214,23 +219,20 @@ if __name__ == "__main__":
             minimum_arc_nodes=3,
         )
 
-    coilset.linkframe(["Swp0", "Swp1"])
-    # coilset.linkframe(["Swp2", "Swp3"])
-
     coilset.grid.solve(2500, [1, 0.9 * radius, 0, 4])
 
     # coilset.subframe.vtkplot()
 
-    coilset.saloc["Ic"] = 1e3
+    coilset.saloc["Ic"] = 5.3e3
     levels = coilset.grid.plot("br", nulls=False)
     axes = coilset.grid.axes
 
     print(coilset.grid.br.max(), coilset.grid.br.min())
 
     circle_coilset = CoilSet(field_attrs=["Br", "Bz"])
-    circle_coilset.coil.insert({"c": (radius, 2, 0.5)})
+    circle_coilset.coil.insert({"c": (radius, height, 0.5)})
     circle_coilset.grid.solve(2500, [1, 0.9 * radius, 0, 4])
-    circle_coilset.saloc["Ic"] = 1e3
+    circle_coilset.saloc["Ic"] = 5.3e3
     circle_coilset.grid.plot("br", nulls=False, colors="C1", axes=axes, levels=levels)
 
     print(circle_coilset.grid.br.max(), circle_coilset.grid.br.min())

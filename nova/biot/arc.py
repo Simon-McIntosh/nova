@@ -17,7 +17,7 @@ class Arc(Constants, Matrix):
     """
     Extend Biot base class.
 
-    Compute interaction for 3d arc filaments.
+    Compute interaction for 3d arc elements.
 
     """
 
@@ -214,14 +214,6 @@ if __name__ == "__main__":
             minimum_arc_nodes=3,
         )
 
-    """
-    coilset.winding.insert(
-        np.array([[-5, 0, 2], [0, 0, 8.2], [5, 0, 2]]), {"c": (0, 0, 0.5)}
-    )
-    coilset.winding.insert(
-        np.array([[5, 0, 2], [0, 0, -1.8], [-5, 0, 2]]), {"c": (0, 0, 0.5)}
-    )
-    """
     coilset.linkframe(["Swp0", "Swp1"])
     # coilset.linkframe(["Swp2", "Swp3"])
 

@@ -29,7 +29,12 @@ class DataAttrs:
 
 @dataclass
 class Dataset(ABC, netCDF, DataAttrs):
-    """Manage build, storage, and retrival of an xarray dataset."""
+    """
+    Manage build, storage, and retrival of an xarray dataset.
+
+    TFC ansys data is stored in an IO shared folder at:
+    \\\\io-ws-ccstore1\\ANSYS_Data\\mcintos\\sector_modules
+    """
 
     filename: str = "vault"
     basename: str = "root"

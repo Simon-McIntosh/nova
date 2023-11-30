@@ -188,12 +188,6 @@ class Arc(Constants, Matrix):
     @property
     def Br(self):
         """Return radial field component."""
-
-        for i in range(2):
-            print(i)
-            print(np.max(self.theta[i]))
-            print(np.min(self.theta[i]))
-
         return self.Bfield[..., 0]
 
 
@@ -214,12 +208,13 @@ if __name__ == "__main__":
     for i in range(segment_number):
         coilset.winding.insert(
             points[2 * i : 1 + 2 * (i + 1)],
-            {"c": (0, 0, 0.5)},
+            {"c": (0, 0, 0.05)},
             nturn=1,
             minimum_arc_nodes=3,
         )
 
     coilset.grid.solve(2500, [1, 0.9 * radius, 0, 4])
+    coilset.plot()
 
     # coilset.subframe.vtkplot()
 
@@ -230,7 +225,7 @@ if __name__ == "__main__":
     print(coilset.grid.br.max(), coilset.grid.br.min())
 
     circle_coilset = CoilSet(field_attrs=["Br", "Bz"])
-    circle_coilset.coil.insert({"c": (radius, height, 0.5)})
+    circle_coilset.coil.insert({"c": (radius, height, 0.05)})
     circle_coilset.grid.solve(2500, [1, 0.9 * radius, 0, 4])
     circle_coilset.saloc["Ic"] = 5.3e3
     circle_coilset.grid.plot("br", nulls=False, colors="C1", axes=axes, levels=levels)

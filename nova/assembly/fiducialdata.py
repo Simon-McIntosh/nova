@@ -162,7 +162,7 @@ class FiducialData(netCDF, Plot, Plotter):
     def build_mesh(self):
         """Build vtk mesh."""
         self.mesh = pv.PolyData()
-        centerline = pv.Spline(1e-3 * self.data.centerline)
+        centerline = pv.Spline(1e-3 * self.data.centerline_target)
         centerline["arc_length"] /= centerline["arc_length"][-1]
         for loc in self.data.location:
             if loc.coil == 19:
@@ -197,10 +197,12 @@ class FiducialData(netCDF, Plot, Plotter):
 
     def load_fiducials(self):
         """Load ccl fiducials."""
-        self.data["fiducial"] = (("target", "space"), self.fiducials())
+        self.data["fiducial_target"] = (("target", "space"), self.fiducials())
         target_index = [
-            np.argmin(np.linalg.norm(self.data.centerline[:-1] - fiducial, axis=1))
-            for fiducial in self.data.fiducial
+            np.argmin(
+                np.linalg.norm(self.data.centerline_target[:-1] - fiducial, axis=1)
+            )
+            for fiducial in self.data.fiducial_target
         ]
         self.data = self.data.assign_coords(target_index=("target", target_index))
         target_length = self.data.arc_length[target_index].values
@@ -211,7 +213,7 @@ class FiducialData(netCDF, Plot, Plotter):
         """Load geodesic centerline."""
         centerline = CenterLine()
         self.data["arc_length"] = centerline.mesh["arc_length"]
-        self.data["centerline"] = (
+        self.data["centerline_target"] = (
             ("arc_length", "space"),
             1e3 * centerline.mesh.points,
         )
@@ -303,23 +305,28 @@ class FiducialData(netCDF, Plot, Plotter):
         self.axes = self.set_axes("2d", nrows=1, ncols=2, sharey=True)
         for j in range(2):
             self.axes[j].plot(
-                self.data.centerline[:, 0], self.data.centerline[:, 2], "gray", ls="--"
+                self.data.centerline_target[:, 0],
+                self.data.centerline_target[:, 2],
+                "gray",
+                ls="--",
             )
         limits = self.axes_limit
         color = [0, 0]
         for i in range(self.data.dims["coil"]):
             j = 0 if self.data.origin[i] == "EU" else 1
             self.axes[j].plot(
-                self.data.centerline[:, 0]
+                self.data.centerline_target[:, 0]
                 + factor * self.data.centerline_delta[i, :, 0],
-                self.data.centerline[:, 2]
+                self.data.centerline_target[:, 2]
                 + factor * self.data.centerline_delta[i, :, 2],
                 color=f"C{color[j]}",
                 label=f"{self.data.coil[i].values:02d}",
             )
             self.axes[j].plot(
-                self.data.fiducial[:, 0] + factor * self.data.fiducial_delta[i, :, 0],
-                self.data.fiducial[:, 2] + factor * self.data.fiducial_delta[i, :, 2],
+                self.data.fiducial_target[:, 0]
+                + factor * self.data.fiducial_delta[i, :, 0],
+                self.data.fiducial_target[:, 2]
+                + factor * self.data.fiducial_delta[i, :, 2],
                 ".",
                 color=f"C{color[j]}",
             )
@@ -348,11 +355,14 @@ class FiducialData(netCDF, Plot, Plotter):
         )
         for ax, (i, j) in enumerate(zip((0, 1), (2, 2))):
             self.axes[ax].plot(
-                self.data.centerline[:, i], self.data.centerline[:, j], "gray", ls="--"
+                self.data.centerline_target[:, i],
+                self.data.centerline_target[:, j],
+                "gray",
+                ls="--",
             )
         limits = self.axes_limit
         for ax, (i, j) in enumerate(zip((0, 1), (2, 2))):
-            for fiducial in self.data.fiducial:
+            for fiducial in self.data.fiducial_target:
                 self.axes[ax].plot(fiducial[i], fiducial[j], "ko")
                 if ax == 0:
                     self.axes[ax].text(
@@ -360,23 +370,23 @@ class FiducialData(netCDF, Plot, Plotter):
                     )
             if stage > 0:
                 self.axes[ax].plot(
-                    self.data.fiducial[:, i]
+                    self.data.fiducial_target[:, i]
                     + factor * self.data.fiducial_delta[coil_index, :, i],
-                    self.data.fiducial[:, j]
+                    self.data.fiducial_target[:, j]
                     + factor * self.data.fiducial_delta[coil_index, :, j],
                     "C3o",
                 )
             if stage > 1:
                 self.axes[ax].plot(
-                    self.data.centerline[:, i]
+                    self.data.centerline_target[:, i]
                     + factor * self.data.centerline_delta[coil_index, :, i],
-                    self.data.centerline[:, j]
+                    self.data.centerline_target[:, j]
                     + factor * self.data.centerline_delta[coil_index, :, j],
                     color="gray",
                 )
             if stage > 2:
                 gpr_fiducial = (
-                    self.data.centerline
+                    self.data.centerline_target
                     + factor * self.data.centerline_delta[coil_index]
                 )
 

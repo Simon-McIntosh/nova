@@ -180,6 +180,16 @@ class Arc(Constants, Matrix):
         """Return local magnetic field vector in cartesian frame."""
         return np.einsum("mjk,imjk->jki", self._Bcylindrical, self.to_cartesian)
 
+    @property
+    def _Acartesian(self):
+        """Return local vector potential vector in cartesian frame."""
+        raise NotImplementedError  # TODO implement this...
+
+    @cached_property
+    def Afield(self):
+        """Return global vector potential."""
+        return self.loc.rotate(self._Acartesian, "to_global")
+
     @cached_property
     def Bfield(self):
         """Retrun global magnetic field vector."""
@@ -188,7 +198,11 @@ class Arc(Constants, Matrix):
     @property
     def Br(self):
         """Return radial field component."""
-        return self.Bfield[..., 0]
+        phi = np.arctan2(self.target("y"), self.target("x"))
+        return self.Bfield[..., 0] * np.cos(phi) + self.Bfield[..., 1] * np.sin(phi)
+
+    # @property
+    # def
 
 
 if __name__ == "__main__":

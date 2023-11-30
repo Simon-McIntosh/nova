@@ -114,7 +114,7 @@ class GroupSet(Plot):
         self.assemble()
 
     def __call__(self, frame: str, attr: str):
-        """Return attribute matrix, shape(target, source) from CoordLocIndexer."""
+        """Return attribute matrix, shape(target, source) from local CoordLocIndexer."""
         return self.loc[frame, attr]
 
     def __len__(self):

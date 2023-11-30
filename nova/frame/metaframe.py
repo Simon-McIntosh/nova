@@ -103,7 +103,7 @@ class MetaFrame(MetaSet):
             "nx": 1.0,
             "ny": 0.0,
             "nz": 0.0,
-            "segment": "ring",
+            "segment": "circle",
             "dl": 0.1,
             "dt": 0.1,
             "rms": 0.0,

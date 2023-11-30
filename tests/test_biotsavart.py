@@ -3,21 +3,21 @@ from numpy import allclose
 import numpy as np
 
 
-from nova.biot.matrix import Matrix
 from nova.biot.biotframe import BiotFrame
+from nova.biot.circle import Circle
 from nova.biot.grid import Grid
+from nova.biot.matrix import Matrix
 from nova.biot.point import Point
-from nova.biot.ring import Ring
 from nova.biot.solve import Solve
 from nova.frame.coilset import CoilSet
 
-segments = ["ring", "cylinder"]
+segments = ["circle", "cylinder"]
 
 
 def test_matrix_getitem():
     biotframe = BiotFrame()
     biotframe.insert(1, 7.3)
-    biot = Ring(biotframe, biotframe)
+    biot = Circle(biotframe, biotframe)
     assert np.isclose(biot["zs"].item(), 7.3)
 
 
@@ -46,7 +46,7 @@ def test_link_negative_factor():
     biotframe.insert(1, 0)
     biotframe.insert(1, 0)
     biotframe.multipoint.link(["C0", "C1"], -1)
-    biot = Ring(biotframe, biotframe, reduce=[True, True])
+    biot = Circle(biotframe, biotframe, reduce=[True, True])
     assert np.isclose(biot.compute("Psi")[0][0, 0], 0)
 
 
@@ -82,7 +82,7 @@ def test_ITER_subinductance_matrix(segment):
     coilset.coil.insert(
         1.722, 3.188, 0.719, 2.075, nturn=554, name="CS2U", part="CS", segment=segment
     )
-    biot = Ring(
+    biot = Circle(
         coilset.subframe, coilset.subframe, turns=[True, True], reduce=[True, True]
     )
     Mc_ddd = [
@@ -140,10 +140,10 @@ def test_solenoid_probe(segment):
     assert allclose(Bz_point, Bz_theory, atol=5e-3)
 
 
-def test_ring_ring_coil_pair():
+def test_circle_circle_coil_pair():
     coilset = CoilSet(dcoil=-10)
-    coilset.coil.insert(6.6, 0.1, 0.2, 0.2, Ic=-15e6, segment="ring")
-    coilset.coil.insert(6.6, 0.1, 0.2, 0.2, Ic=15e6, segment="ring")
+    coilset.coil.insert(6.6, 0.1, 0.2, 0.2, Ic=-15e6, segment="circle")
+    coilset.coil.insert(6.6, 0.1, 0.2, 0.2, Ic=15e6, segment="circle")
     coilset.point.solve([[8, 0]])
     assert np.isclose(coilset.point.psi, 0)
 
@@ -156,10 +156,10 @@ def test_cyliner_cylinder_coil_pair():
     assert np.isclose(coilset.point.psi, 0)
 
 
-def test_cylinder_ring_coil_pair():
+def test_cylinder_circle_coil_pair():
     coilset = CoilSet(dcoil=-1)
     coilset.coil.insert(6.6, 0, 0.2, 0.2, Ic=-15e6, segment="cylinder")
-    coilset.coil.insert(6.6, 0, 0.2, 0.2, Ic=15e6, segment="ring", delta=-10)
+    coilset.coil.insert(6.6, 0, 0.2, 0.2, Ic=15e6, segment="circle", delta=-10)
     coilset.point.solve([[7, 0]])
     assert np.isclose(coilset.point.psi, 0, atol=1e-3)
 

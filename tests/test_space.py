@@ -19,7 +19,7 @@ def polyline():
 
 def test_segments_not_implemented(polyline):
     path_geometry = polyline.path_geometry
-    path_geometry["segment"][-4:] = ["square", "circle", "ring", "ring"]
+    path_geometry["segment"][-1:] = ["circle"]
     with pytest.raises(NotImplementedError):
         Source(path_geometry).space.start_axes
 

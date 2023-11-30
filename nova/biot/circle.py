@@ -1,5 +1,5 @@
 """Biot-Savart calculation for complete circular filaments."""
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import ClassVar
 
 import numpy as np
@@ -99,7 +99,7 @@ class OffsetFilaments:
 
 
 @dataclass
-class Ring(Constants, Matrix):
+class Circle(Constants, Matrix):
     """
     Extend base class.
 
@@ -107,10 +107,19 @@ class Ring(Constants, Matrix):
 
     """
 
-    name: ClassVar[str] = "ring"  # element name
-    attrs: ClassVar[dict[str, str]] = dict(
-        rs="rms", zs="z", dx="dx", dz="dz", turnturn="turnturn", r="x", z="z"
+    attrs: dict[str, str] = field(
+        default_factory=lambda: {
+            "rs": "rms",
+            "zs": "z",
+            "dx": "dx",
+            "dz": "dz",
+            "turnturn": "turnturn",
+            "r": "x",
+            "z": "z",
+        }
     )
+
+    name: ClassVar[str] = "circle"  # element name
 
     def __post_init__(self):
         """Load intergration constants."""
@@ -159,16 +168,16 @@ if __name__ == "__main__":
 
     coilset = CoilSet(dcoil=-100, dplasma=-150)
     coilset.coil.insert(
-        5, 0.5, 0.01, 0.8, section="r", turn="r", nturn=300, segment="ring"
+        5, 0.5, 0.01, 0.8, section="r", turn="r", nturn=300, segment="circle"
     )
     coilset.coil.insert(
-        5.1, 0.5 + 0.4, 0.2, 0.01, section="r", turn="r", nturn=300, segment="ring"
+        5.1, 0.5 + 0.4, 0.2, 0.01, section="r", turn="r", nturn=300, segment="circle"
     )
     coilset.coil.insert(
-        5.1, 0.5 - 0.4, 0.2, 0.01, section="r", turn="r", nturn=300, segment="ring"
+        5.1, 0.5 - 0.4, 0.2, 0.01, section="r", turn="r", nturn=300, segment="circle"
     )
     coilset.coil.insert(
-        5.2, 0.5, 0.01, 0.8, section="r", turn="r", nturn=300, segment="ring"
+        5.2, 0.5, 0.01, 0.8, section="r", turn="r", nturn=300, segment="circle"
     )
     coilset.saloc["Ic"] = 5e3
 

@@ -34,15 +34,9 @@ if __name__ == "__main__":
         axis=-1,
     )
 
-    from nova.geometry.polyline import PolyLine
+    coilset = CoilSet(field_attrs=["Br"])
+    coilset.winding.insert(
+        points, {"c": (0, 0, 0.5)}, minimum_arc_nodes=len(points) + 1
+    )
 
-    coilset = CoilSet(available=["vtk"], delta=-1)
-
-    theta = np.linspace(0, 6 * np.pi, 200)
-    path = np.c_[2 * np.cos(theta), np.linspace(0, 3, len(theta)), 3 * np.sin(theta)]
-
-    coilset.winding.insert({"e": [0, 0, 0.25, 0.2]}, path, part="pf")
-
-    coilset.frame.vtkplot()
-
-    polyline = PolyLine(path)
+    coilset.grid.solve(2500, [1, 0.9 * radius, 0, 4])

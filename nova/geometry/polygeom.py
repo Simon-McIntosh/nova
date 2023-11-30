@@ -25,7 +25,7 @@ class PolyGeom(Polygon):
 
     """
 
-    segment: str = "ring"
+    segment: str = "circle"
     loop_length: float = 0
 
     def __post_init__(self):
@@ -41,8 +41,8 @@ class PolyGeom(Polygon):
     @cached_property
     def reference_length(self):
         """Return reference loop length."""
-        if self.segment in ["ring", "cylinder", "polygon"]:
-            return 2 * np.pi * self.centroid.x  # dy==ring circumference
+        if self.segment in ["circle", "cylinder", "polygon"]:
+            return 2 * np.pi * self.centroid.x  # dy==circle centerline circumference
         return 0
 
     @cached_property
@@ -158,14 +158,14 @@ class PolyGeom(Polygon):
             Root mean square radius (uniform current density current center).
 
         """
-        if self.segment != "ring":
+        if self.segment != "circle":
             return -1
         centroid_radius = self.centroid.x
         if self.section == "disc":
             return np.sqrt(centroid_radius**2 + self.length**2 / 16)  # disc
         if self.section in ["square", "rectangle"]:
             return np.sqrt(centroid_radius**2 + self.length**2 / 12)  # square
-        if self.section == "skin":
+        if self.section in ["skin", "ring"]:
             return np.sqrt(
                 (
                     self.length**2 * self.thickness**2 / 24

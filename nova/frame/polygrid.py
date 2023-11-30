@@ -293,7 +293,7 @@ class PolyGrid(PolyCell, Plot):
         polys = self.polycells(coords)  # build trimmed cell polygons
         data = [[] for __ in range(len(polys))]
         for i, poly in enumerate(polys):
-            geom = PolyGeom(poly, segment="ring").geometry
+            geom = PolyGeom(poly, segment="circle").geometry
             data[i] = {name: geom[name] for name in self.columns}
         frame = pandas.DataFrame(data, columns=self.columns)
         frame["nturn"] = self.nturn * frame["area"] / frame["area"].sum()

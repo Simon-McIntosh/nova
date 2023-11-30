@@ -60,13 +60,13 @@ def test_circular_cross_section():
     assert np.isclose(np.pi * 2.5**2 / 4, geom.area, rtol=1e-8)
 
 
-def test_ring_centroid():
-    geom = PolyGeom(Polygon(dict(rec=(4, 6, 0.1, 0.5))), segment="ring")
+def test_circle_centroid():
+    geom = PolyGeom(Polygon(dict(rec=(4, 6, 0.1, 0.5))), segment="circle")
     assert np.allclose(geom.centroid, [4, 0, 6])
 
 
-def test_ring_delta():
-    geom = PolyGeom(Polygon(dict(rec=(4, 6, 0.1, 0.5))), segment="ring")
+def test_circle_delta():
+    geom = PolyGeom(Polygon(dict(rec=(4, 6, 0.1, 0.5))), segment="circle")
     assert np.allclose(geom.segment_delta, [0.1, 2 * np.pi * 4, 0.5])
 
 

@@ -12,7 +12,7 @@ class Coil(PoloidalGrid):
     fill: bool = False
     turn: str = "rectangle"
     section: str = "rectangle"
-    segment: str = "ring"
+    segment: str = "circle"
     required: list[str] = field(default_factory=lambda: ["x", "z", "dl", "dt"])
     default: dict = field(
         init=False,

@@ -9,9 +9,9 @@ from tqdm import tqdm
 import xarray
 
 from nova.biot.arc import Arc
+from nova.biot.circle import Circle
 from nova.biot.cylinder import Cylinder
 from nova.biot.polygon import Polygon
-from nova.biot.ring import Ring
 from nova.biot.groupset import GroupSet
 
 
@@ -25,7 +25,7 @@ class Solve(GroupSet):
     data: xarray.Dataset = field(init=False, default_factory=xarray.Dataset)
 
     generator: ClassVar[dict] = {
-        "ring": Ring,
+        "circle": Circle,
         "cylinder": Cylinder,
         "polygon": Polygon,
         "arc": Arc,

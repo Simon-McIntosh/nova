@@ -207,7 +207,7 @@ class ShellSegment(ShellInterp):
         """Return subsegment dataframe."""
         data = [[] for __ in range(self.ndiv - 1)]
         for i, segment in enumerate(self.divide()):
-            geom = PolyGeom(segment.poly, segment="ring").geometry
+            geom = PolyGeom(segment.poly, segment="circle").geometry
             data[i] = {name: geom[name] for name in self.columns}
         frame = pandas.DataFrame(data, columns=self.columns)
         frame["nturn"] = frame["area"]

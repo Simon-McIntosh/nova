@@ -159,6 +159,13 @@ class FilePath:
         self.path = path.parent
         self.filename = path.name
 
+    def file(self, filename, extension: str | None = None):
+        """Return resolved filepath combining instance path, filename, and extension."""
+        filepath = self.path / self.filename
+        if extension is not None:
+            return filepath.with_suffix(extension)
+        return filepath
+
 
 if __name__ == "__main__":
     filepath = FilePath(parents=2, basename="root", filename="test")

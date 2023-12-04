@@ -272,7 +272,7 @@ if __name__ == "__main__":
     coilset.coil.insert(5.2, 0.5, 0.01, 0.8, segment='cylinder')
     """
     coilset.firstwall.insert(
-        5.1, 0.52, 0.05, 0.05, turn="s", tile=False, segment="ring"
+        5.1, 0.52, 0.05, 0.05, turn="s", tile=False, segment="circle"
     )
 
     coilset.saloc["Ic"] = 1

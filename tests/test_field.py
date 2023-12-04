@@ -40,7 +40,7 @@ def test_boundary_length_error():
         Sample(np.zeros((1, 2)))
 
 
-def test_boundary_ring_error():
+def test_boundary_loop_error():
     with pytest.raises(ValueError):
         Sample(np.array([[1, 2], [2, 2], [1, 2.1]]), closed=True)
 

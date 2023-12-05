@@ -226,7 +226,7 @@ def test_store_load_poly():
 
 def test_store_load_multipoly():
     coilset = CoilSet(dcoil=-3, dplasma=-8)
-    coilset.coil.insert(Polygon(dict(rect=(1, 2, 0.3, 0.6), disc=[4, 3, 0.5])))
+    coilset.coil.insert(Polygon({"rect": (1, 2, 0.3, 0.6), "disc": [4, 3, 0.5]}))
     with tempfile.NamedTemporaryFile() as tmp:
         coilset.filepath = tmp.name
         coilset.store()
@@ -391,6 +391,13 @@ def test_field_attrs():
     coilset = CoilSet(field_attrs=["Br", "Bx"], force_attrs=["Fc"])
     assert coilset.field_kwargs["attrs"] == ["Br", "Bx"]
     assert coilset.force_kwargs["attrs"] == ["Fc"]
+
+
+@pytest.mark.parametrize("section", ["c", "d", "disc", "dsk", "circle"])
+def test_coil_insert_dict(section):
+    coilset = CoilSet()
+    coilset.coil.insert({section: (3, 4, 0.05, 0.05)})
+    assert coilset.subframe.segment.iloc[0] == "circle"
 
 
 if __name__ == "__main__":

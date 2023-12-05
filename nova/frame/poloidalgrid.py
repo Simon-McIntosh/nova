@@ -5,6 +5,7 @@ import pandas
 
 from nova.frame.coilsetattrs import GridAttrs
 from nova.frame.polygrid import PolyGrid
+from nova.geometry.polygeom import PolyGeom
 
 
 @dataclass
@@ -44,6 +45,8 @@ class PoloidalGrid(GridAttrs):
             FrameSpace index.
 
         """
+        if isinstance(args[0], dict):
+            additional |= PolyGeom(args[0]).geometry
         self.attrs = additional
         with self.insert_required(required):
             index = self.frame.insert(*args, iloc=iloc, **self.attrs)

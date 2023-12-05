@@ -12,6 +12,13 @@ from nova.biot.matrix import Matrix
 # from nova.geometry.rotate import to_vector
 
 
+def arctan2(x1, x2):
+    """Return unwraped arctan2 operator."""
+    phi = np.arctan2(x1, x2)
+    phi[phi < 0] += 2 * np.pi
+    return phi
+
+
 @dataclass
 class Arc(Constants, Matrix):
     """
@@ -30,20 +37,32 @@ class Arc(Constants, Matrix):
         self.zs = self("source", "z")
         self.r = np.linalg.norm([self("target", "x"), self("target", "y")], axis=0)
         self.z = self("target", "z")
-        self.phi = np.arctan2(self("target", "y"), self("target", "x"))
+
+    @cached_property
+    def phi(self):
+        """Return global target toroidal angle."""
+        return arctan2(self.target("y"), self.target("x"))
+
+    @cached_property
+    def _phi(self):
+        """Return local target toroidal angle."""
+        return arctan2(self("target", "y"), self("target", "x"))
 
     @cached_property
     def alpha(self):
         """Return system invariant angle alpha for start, end, and pi/2."""
         phi_s = np.stack(
             [
-                np.arctan2(self("source", "y1"), self("source", "x1")),
-                np.arctan2(self("source", "y2"), self("source", "x2")),
+                arctan2(self("source", "y1"), self("source", "x1")),
+                arctan2(self("source", "y2"), self("source", "x2")),
             ]
         )
+        # alpha = (np.pi - (phi_s - self._phi[np.newaxis])) / 2
+        ##alpha[alpha < -np.pi / 2] += np.pi
+        # alpha[alpha > np.pi / 2] -= np.pi
         return np.concatenate(
             (
-                (np.pi - (phi_s - self.phi[np.newaxis])) / 2,
+                (np.pi - (phi_s - self._phi[np.newaxis])) / 2,
                 np.pi / 2 * np.ones((1,) + self.shape),
             ),
             axis=0,
@@ -70,6 +89,22 @@ class Arc(Constants, Matrix):
         theta = self.abs_alpha.copy()
         theta[self._index] = np.pi - self.abs_alpha[self._index]
         return theta
+
+    @property
+    def _cylindrical_to_cartesian(self):
+        """Return rotation matrix to map local cylindrical to local cartesian coords."""
+        return np.stack(
+            [
+                [np.cos(self._phi), -np.sin(self._phi), np.zeros_like(self._phi)],
+                [np.sin(self._phi), np.cos(self._phi), np.zeros_like(self._phi)],
+                [
+                    np.ones_like(self._phi),
+                    np.zeros_like(self._phi),
+                    np.zeros_like(self._phi),
+                ],
+            ],
+            axis=0,
+        )
 
     @cached_property
     def Kinc(self):
@@ -105,18 +140,39 @@ class Arc(Constants, Matrix):
             )
         )
 
-    def _Bpi2(self, B_hat):
-        """Index radial and toroidal magnetic fields for abs alpha > pi /2."""
-        _pi2 = np.tile(B_hat[2, np.newaxis], (len(self.theta), 1, 1))
-        B_hat[self._index] = self.sign_alpha[self._index] * (
-            2 * _pi2[self._index] - B_hat[self._index]
+    def _pi2(self, _hat):
+        """Index radial and toroidal fields for |alpha| > pi /2."""
+        _pi2 = np.tile(_hat[2, np.newaxis], (len(self.theta), 1, 1))
+        _hat[self._index] = self.sign_alpha[self._index] * (
+            2 * _pi2[self._index] - _hat[self._index]
         )
-        return B_hat
+        return _hat
 
     @cached_property
     def rack2(self):
         """Return r a ck2 coefficent product."""
         return self.r * self.a * self.ck2
+
+    @property
+    def _Ar_hat(self):
+        """Return stacked local radial vector potential intergration coefficents."""
+        return self.a / self.r * self.ellipj["dn"]
+
+    @property
+    def _Aphi_hat(self):
+        """Return stacked local toroidal vector potential intergration coefficents."""
+        Aphi_hat = (
+            self.a
+            / self.r
+            * self.sign_alpha
+            * ((1 - self.k2 / 2) * self.Kinc - self.Einc)
+        )
+        return self._pi2(Aphi_hat)
+
+    @property
+    def _Az_hat(self):
+        """Return stacked local vertical vector potential intergration coefficents."""
+        return np.zeros(((len(self.theta),) + self.shape))
 
     @property
     def _Br_hat(self):
@@ -126,7 +182,7 @@ class Arc(Constants, Matrix):
             * self.gamma
             * (self.ck2 * self.Kinc - (1 - self.k2 / 2) * self.Winc)
         ) / self.rack2
-        return self._Bpi2(Br_hat)
+        return self._pi2(Br_hat)
 
     @property
     def _Bphi_hat(self):
@@ -143,66 +199,50 @@ class Arc(Constants, Matrix):
                 - (self.r - self.b * self.k2 / 2) * self.Winc
             )
         ) / self.rack2
-        return self._Bpi2(Bz_hat)
+        return self._pi2(Bz_hat)
 
     def _intergrate(self, data):
-        return self.mu_0 / (np.pi**2) * (data[0] - data[1])
+        """Return intergral quantity."""
+        return self.mu_0 / (4 * np.pi) * (data[0] - data[1])
 
-    @property
-    def _Bcylindrical(self):
-        """Return local magnetic field in cylindrical coordinates."""
+    def _cylindrical_vector(self, attr: str):
+        """Return local cylindrical attribute vector."""
         return np.stack(
             [
-                self._intergrate(getattr(self, f"_B{attr}_hat"))
-                for attr in ["r", "phi", "z"]
+                self._intergrate(getattr(self, f"_{attr}{coord}_hat"))
+                for coord in ["r", "phi", "z"]
             ],
             axis=0,
         )
 
-    @property
-    def to_cartesian(self):
-        """Return rotation matrix to map from a cylindrical to a cartesian frame."""
-        return np.stack(
-            [
-                [np.cos(self.phi), -np.sin(self.phi), np.zeros_like(self.phi)],
-                [np.sin(self.phi), np.cos(self.phi), np.zeros_like(self.phi)],
-                [
-                    np.ones_like(self.phi),
-                    np.zeros_like(self.phi),
-                    np.zeros_like(self.phi),
-                ],
-            ],
-            axis=0,
+    def _cartesian_vector(self, attr: str):
+        """Return global cylindrical attribute vector."""
+        return np.einsum(
+            "mjk,imjk->jki",
+            self._cylindrical_vector(attr),
+            self._cylindrical_to_cartesian,
         )
-
-    @property
-    def _Bcartesian(self):
-        """Return local magnetic field vector in cartesian frame."""
-        return np.einsum("mjk,imjk->jki", self._Bcylindrical, self.to_cartesian)
-
-    @property
-    def _Acartesian(self):
-        """Return local vector potential vector in cartesian frame."""
-        raise NotImplementedError  # TODO implement this...
 
     @cached_property
     def Afield(self):
-        """Return global vector potential."""
-        return self.loc.rotate(self._Acartesian, "to_global")
+        """Return global vector potential in cartesian frame."""
+        return self.loc.rotate(self._cartesian_vector("A"), "to_global")
 
     @cached_property
     def Bfield(self):
-        """Retrun global magnetic field vector."""
-        return self.loc.rotate(self._Bcartesian, "to_global")
+        """Return global magnetic field vector."""
+        return self.loc.rotate(self._cartesian_vector("B"), "to_global")
 
     @property
     def Br(self):
         """Return radial field component."""
-        phi = np.arctan2(self.target("y"), self.target("x"))
-        return self.Bfield[..., 0] * np.cos(phi) + self.Bfield[..., 1] * np.sin(phi)
+        return self.Bfield[..., 0] * np.cos(self.phi) + self.Bfield[..., 1] * np.sin(
+            self.phi
+        )
 
-    # @property
-    # def
+    @property
+    def Aphi(self):
+        return self.Afield[..., 1]
 
 
 if __name__ == "__main__":
@@ -210,15 +250,15 @@ if __name__ == "__main__":
 
     radius = 3.945
     height = 2
-    segment_number = 3
+    segment_number = 1
 
-    theta = np.linspace(0, 2 * np.pi, 1 + 2 * segment_number)
+    theta = np.linspace(0, 2 * np.pi - 1e-6, 1 + 2 * segment_number)
     points = np.stack(
         [radius * np.cos(theta), radius * np.sin(theta), height * np.ones_like(theta)],
         axis=-1,
     )
 
-    coilset = CoilSet(field_attrs=["Br"])
+    coilset = CoilSet(field_attrs=["Br", "Aphi"])
     for i in range(segment_number):
         coilset.winding.insert(
             points[2 * i : 1 + 2 * (i + 1)],
@@ -232,16 +272,18 @@ if __name__ == "__main__":
 
     # coilset.subframe.vtkplot()
 
-    coilset.saloc["Ic"] = 5.3e3
-    levels = coilset.grid.plot("br", nulls=False)
+    coilset.saloc["Ic"] = 5.3e5
+    levels = coilset.grid.plot("br", nulls=False, colors="C2")
     axes = coilset.grid.axes
 
     print(coilset.grid.br.max(), coilset.grid.br.min())
 
-    circle_coilset = CoilSet(field_attrs=["Br", "Bz"])
-    circle_coilset.coil.insert({"c": (radius, height, 0.05)})
+    circle_coilset = CoilSet(field_attrs=["Br", "Bz", "Aphi"])
+    circle_coilset.coil.insert({"c": (radius, height, 0.05, 0.05)})
     circle_coilset.grid.solve(2500, [1, 0.9 * radius, 0, 4])
-    circle_coilset.saloc["Ic"] = 5.3e3
-    circle_coilset.grid.plot("br", nulls=False, colors="C1", axes=axes, levels=levels)
+    circle_coilset.saloc["Ic"] = 5.3e5
+    circle_coilset.grid.plot(
+        "br", nulls=False, colors="C0", axes=axes, levels=levels, linestyles="--"
+    )
 
     print(circle_coilset.grid.br.max(), circle_coilset.grid.br.min())

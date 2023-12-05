@@ -11,6 +11,7 @@ import xarray
 from nova.biot.arc import Arc
 from nova.biot.circle import Circle
 from nova.biot.cylinder import Cylinder
+from nova.biot.line import Line
 from nova.biot.polygon import Polygon
 from nova.biot.groupset import GroupSet
 
@@ -25,10 +26,11 @@ class Solve(GroupSet):
     data: xarray.Dataset = field(init=False, default_factory=xarray.Dataset)
 
     generator: ClassVar[dict] = {
+        "arc": Arc,
         "circle": Circle,
         "cylinder": Cylinder,
+        "line": Line,
         "polygon": Polygon,
-        "arc": Arc,
     }
 
     def __post_init__(self):

@@ -1,6 +1,10 @@
-import pytest
+from dataclasses import dataclass
+from functools import cached_property
+from itertools import product
 from numpy import allclose
 import numpy as np
+import pytest
+import scipy.special
 
 
 from nova.biot.biotframe import BiotFrame
@@ -10,8 +14,121 @@ from nova.biot.matrix import Matrix
 from nova.biot.point import Point
 from nova.biot.solve import Solve
 from nova.frame.coilset import CoilSet
+from nova.geometry.polyshape import PolyShape
 
 segments = ["circle", "cylinder"]
+
+
+def axial_vertical_field(radius, height, current):
+    """Return analytic axial vertical field."""
+    return (
+        Matrix.mu_0
+        * current
+        * radius**2
+        / (2 * (radius**2 + height**2) ** (3 / 2))
+    )
+
+
+@dataclass
+class AnalyticField:
+    """
+    Provide access to analytic magnetic field solutions.
+
+    Simple Analytic Expressions for the Magnetic Field of a Circular Current Loop
+
+    Analytic expressions for the magnetic induction and its spatial derivatives
+    for a circular loop carrying a static current are presented in Cartesian,
+    spherical and cylindrical coordinates.
+    The solutions are exact throughout all space outside the conductor.
+    """
+
+    radius: float
+    height: float
+    current: float
+    x: np.ndarray
+    y: np.ndarray
+    z: np.ndarray
+
+    def __post_init__(self):
+        """Initialize C coefficent."""
+        self.C = Matrix.mu_0 * self.current / np.pi
+        self.phi = np.arctan2(self.y, self.x)
+
+    @property
+    def p2(self):
+        """Return p2 coefficent."""
+        return self.x**2 + self.y**2
+
+    @property
+    def p(self):
+        """Return p coefficent."""
+        return np.sqrt(self.p2)
+
+    @property
+    def r2(self):
+        """Return r2 coefficent."""
+        return self.x**2 + self.y**2 + (self.z - self.height) ** 2
+
+    @property
+    def a2(self):
+        """Return a2 coefficent."""
+        return self.radius**2 + self.r2 - 2 * self.radius * self.p
+
+    @property
+    def b2(self):
+        """Return b2 coefficent."""
+        return self.radius**2 + self.r2 + 2 * self.radius * self.p
+
+    @property
+    def b(self):
+        """Return b coefficent."""
+        return np.sqrt(self.b2)
+
+    @property
+    def k2(self):
+        """Return k2 coefficient."""
+        return 1 - self.a2 / self.b2
+
+    @property
+    def gamma(self):
+        """Return gamma coefficient."""
+        return self.x**2 - self.y**2
+
+    @cached_property
+    def bx(self):
+        """Return x-component of magnetic field vector."""
+        return (
+            self.C
+            * self.x
+            * (self.z - self.height)
+            / (2 * self.a2 * self.b * self.p2)
+            * (
+                (self.radius**2 + self.r2) * scipy.special.ellipe(self.k2)
+                - self.a2 * scipy.special.ellipk(self.k2)
+            )
+        )
+
+    @cached_property
+    def by(self):
+        """Return y-component of magnetic field vector."""
+        return self.y / self.x * self.bx
+
+    @property
+    def br(self):
+        """Return radial magnetic field."""
+        return self.bx * np.cos(self.phi) - self.by * np.sin(self.phi)
+
+    @property
+    def bz(self):
+        """Return z-component of magnetic field vector."""
+        return (
+            self.C
+            / (2 * self.a2 * self.b)
+            * (
+                (self.radius**2 - self.r2) * scipy.special.ellipe(self.k2)
+                + self.a2 * scipy.special.ellipk(self.k2)
+            )
+        )
 
 
 def test_matrix_getitem():
@@ -184,6 +301,35 @@ def test_hemholtz_field(segment):
     assert np.isclose(coilset.point.bz[0], bz)
 
 
+@pytest.mark.parametrize("section", ["rectangle", "circle", "c", "disc", "r"])
+def test_coil_segment(section):
+    coilset = CoilSet()
+    coilset.coil.insert({section: [1, 0.5, 0.01, 0.01]}, Ic=1)
+    section = PolyShape(section).shape
+    assert coilset.frame.section.iloc[0] == section
+    assert (
+        coilset.subframe.segment.iloc[0]
+        == {
+            "disc": "circle",
+            "rectangle": "cylinder",
+        }[section]
+    )
+
+
+@pytest.mark.parametrize(
+    "section,radius,height",
+    product(["disc", "rectangle"], [2.1, 7.3, 12], [-3.2, 0, 7.3]),
+)
+def test_axial_vertical_field(section, radius, height):
+    current = 5.3e4
+    coilset = CoilSet()
+    coilset.coil.insert({section: [radius, height, 0.01, 0.01]}, Ic=current)
+    coilset.point.solve([[1e-6, 0]])
+    assert np.isclose(
+        coilset.point.bz[0], axial_vertical_field(radius, height, current)
+    )
+
+
 def test_coil_cylinder_isfinite_farfield():
     coilset = CoilSet(dcoil=-1)
     coilset.coil.insert(6.5, [-1, 0, 1], 0.4, 0.4, Ic=-15e6, segment="cylinder")
@@ -196,6 +342,24 @@ def test_coil_cylinder_isfinite_coil():
     coilset.coil.insert(0.3, 0, 0.15, 0.15, segment="cylinder", Ic=5e3)
     coilset.grid.solve(10**2, 0)
     assert np.isfinite(coilset.grid.psi).all()
+
+
+@pytest.mark.parametrize(
+    "section,radius,height,current",
+    product(["disc", "rectangle"], [2.1, 7.3, 12], [-3.2, 0, 7.3], [-1e4, 5.3e4]),
+)
+def test_magnetic_field_analytic_poloidal_plane(section, radius, height, current):
+    coilset = CoilSet()
+    coilset.coil.insert({section: [radius, height, 0.01, 0.01]}, Ic=current)
+    coilset.grid.solve(1e3, [1, 5, -3.2 + height, 4.1 + height])
+
+    x = coilset.grid.data.x2d.data
+    y = np.zeros_like(x)
+    z = coilset.grid.data.z2d.data
+    analytic = AnalyticField(radius, height, current, x, y, z)
+
+    assert np.allclose(coilset.grid.br_, analytic.br, atol=1e-4)
+    assert np.allclose(coilset.grid.bz_, analytic.bz, atol=1e-4)
 
 
 if __name__ == "__main__":

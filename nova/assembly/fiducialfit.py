@@ -317,7 +317,7 @@ if __name__ == "__main__":
 
     fiducial = FiducialFit(phase=phase, fill=False)
 
-    plotter = FiducialPlotter(fiducial.data)
+    # plotter = FiducialPlotter(fiducial.data)
 
     # fiducial.plot_fit("target")
     # print(fiducial.data.target_cyl)

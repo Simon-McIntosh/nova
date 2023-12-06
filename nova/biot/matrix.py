@@ -1,5 +1,6 @@
 """Biot-Savart calculation base class."""
 from dataclasses import dataclass, field
+from functools import cached_property
 from importlib import import_module
 from typing import ClassVar
 
@@ -15,6 +16,7 @@ class Matrix(GroupSet):
     data: dict[str, np.ndarray] = field(init=False, repr=False, default_factory=dict)
     attrs: dict[str, str] = field(default_factory=dict)
 
+    axisymmetric: ClassVar[bool] = True
     mu_0: ClassVar[float] = import_module("scipy.constants").mu_0
 
     def __post_init__(self):
@@ -33,25 +35,75 @@ class Matrix(GroupSet):
             return self.target
         return self.source
 
-    @property
-    def Br(self):
-        """Return radial field array."""
+    @cached_property
+    def phi(self):
+        """Return target poloidal angle."""
+        return np.arctan2(self.target.y, self.target.x)[:, np.newaxis]
+
+    def _Bx_hat(self):
+        """Return local intergration coefficent along x-axis."""
         raise NotImplementedError
+
+    def _By_hat(self):
+        """Return local intergration coefficent along y-axis."""
+        raise NotImplementedError
+
+    def _Bz_hat(self):
+        """Return local intergration coefficent along z-axis."""
+        raise NotImplementedError
+
+    def _intergrate(self, data):
+        """Return intergral property."""
+        raise NotImplementedError
+
+    def _vector(self, attr: str):
+        """Return global attribute vector stacked along last axis."""
+        local = np.stack(
+            [self._intergrate(getattr(self, f"_{attr}{coord}_hat")) for coord in "xyz"],
+            axis=-1,
+        )
+        return self.loc.rotate(local, "to_global")
+
+    @cached_property
+    def Avector(self):
+        """Return global vector potential in cartesian frame."""
+        if self.axisymmetric:
+            raise NotImplementedError
+        return self._vector("A")
+
+    @cached_property
+    def Bvector(self):
+        """Return stacked global magnetic field vector, axis=-1."""
+        if self.axisymmetric:
+            return np.stack(
+                [self.Br * np.cos(self.phi), self.Br * np.sin(self.phi), self.Bz],
+                axis=-1,
+            )
+        return self._vector("B")
 
     @property
     def Bx(self):
-        """Return x-field array."""
-        raise NotImplementedError
+        """Return x component of magnetic field vector."""
+        return self.Bvector[..., 0]
 
     @property
     def By(self):
-        """Return y-field array."""
-        raise NotImplementedError
+        """Return y component of magnetic field vector."""
+        return self.Bvector[..., 1]
 
     @property
     def Bz(self):
-        """Return vertical field array."""
-        raise NotImplementedError
+        """Return z component of magnetic field vector."""
+        if self.axisymmetric:
+            raise NotImplementedError
+        return self.Bvector[..., 2]
+
+    @property
+    def Br(self):
+        """Return radial field array."""
+        if self.axisymmetric:
+            raise NotImplementedError
+        return self.Bx * np.cos(self.phi) + self.By * np.sin(self.phi)
 
     @property
     def Fr(self):

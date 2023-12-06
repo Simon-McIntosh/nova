@@ -18,6 +18,7 @@ class Line(Matrix):
 
     """
 
+    axisymmetric: ClassVar[bool] = False
     name: ClassVar[str] = "line"  # element name
 
     @cached_property
@@ -64,7 +65,7 @@ class Line(Matrix):
 
     @property
     def _By_hat(self):
-        """Return stacked local x-coord magnetic field intergration coefficents."""
+        """Return stacked local y-coord magnetic field intergration coefficents."""
         return self.wi / (self.ri * self.a2**2) * -self.u2
 
     @property
@@ -73,27 +74,7 @@ class Line(Matrix):
 
     def _intergrate(self, data):
         """Return intergral quantity."""
-        return self.mu_0 / (np.pi**2) * (data[1] - data[0])
-
-    def _cartesian_vector(self, attr: str):
-        """Return local cylindrical attribute vector."""
-        return np.stack(
-            [self._intergrate(getattr(self, f"_{attr}{coord}_hat")) for coord in "xyz"],
-            axis=-1,
-        )
-
-    @cached_property
-    def Bfield(self):
-        """Return global magnetic field vector."""
-        return self.loc.rotate(self._cartesian_vector("B"), "to_global")
-
-    @property
-    def Br(self):
-        """Return radial field component."""
-        return self.Bfield[..., 0]
-        return self.Bfield[..., 0] * np.cos(self.phi) + self.Bfield[..., 1] * np.sin(
-            self.phi
-        )
+        return self.mu_0 / (4 * np.pi) * (data[1] - data[0])
 
 
 if __name__ == "__main__":

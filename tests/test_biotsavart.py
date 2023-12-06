@@ -116,7 +116,7 @@ class AnalyticField:
     @property
     def br(self):
         """Return radial magnetic field."""
-        return self.bx * np.cos(self.phi) - self.by * np.sin(self.phi)
+        return self.bx * np.cos(self.phi) + self.by * np.sin(self.phi)
 
     @property
     def bz(self):
@@ -251,7 +251,7 @@ def test_solenoid_probe(segment):
     )
     coilset.sloc["Ic"] = current
     point = Point(*coilset.frames)
-    point.solve((1e-9, 0))
+    point.solve(np.array([1e-9, 0]))
     Bz_theory = Matrix.mu_0 * nturn * current / height
     Bz_point = np.dot(point.data.Bz, coilset.sloc["Ic"])
     assert allclose(Bz_point, Bz_theory, atol=5e-3)
@@ -261,7 +261,7 @@ def test_circle_circle_coil_pair():
     coilset = CoilSet(dcoil=-10)
     coilset.coil.insert(6.6, 0.1, 0.2, 0.2, Ic=-15e6, segment="circle")
     coilset.coil.insert(6.6, 0.1, 0.2, 0.2, Ic=15e6, segment="circle")
-    coilset.point.solve([[8, 0]])
+    coilset.point.solve(np.array([[8, 0]]))
     assert np.isclose(coilset.point.psi, 0)
 
 
@@ -269,7 +269,7 @@ def test_cyliner_cylinder_coil_pair():
     coilset = CoilSet(dcoil=-1)
     coilset.coil.insert(6.6, 0.1, 0.2, 0.2, Ic=-15e6, segment="cylinder")
     coilset.coil.insert(6.6, 0.1, 0.2, 0.2, Ic=15e6, segment="cylinder", delta=-10)
-    coilset.point.solve([[8, 0]])
+    coilset.point.solve(np.array([8, 0]))
     assert np.isclose(coilset.point.psi, 0)
 
 
@@ -277,7 +277,7 @@ def test_cylinder_circle_coil_pair():
     coilset = CoilSet(dcoil=-1)
     coilset.coil.insert(6.6, 0, 0.2, 0.2, Ic=-15e6, segment="cylinder")
     coilset.coil.insert(6.6, 0, 0.2, 0.2, Ic=15e6, segment="circle", delta=-10)
-    coilset.point.solve([[7, 0]])
+    coilset.point.solve(np.array([7, 0]))
     assert np.isclose(coilset.point.psi, 0, atol=1e-3)
 
 
@@ -286,7 +286,7 @@ def test_hemholtz_flux(segment):
     coilset = CoilSet(dcoil=-2)
     coilset.coil.insert(1, [-0.5, 0.5], 0.01, 0.01, Ic=1, segment=segment)
     point_radius = 0.1
-    coilset.point.solve([[point_radius, 0]])
+    coilset.point.solve(np.array([point_radius, 0]))
     Bz = (4 / 5) ** (3 / 2) * Matrix.mu_0
     psi = Bz * np.pi * point_radius**2
     assert np.isclose(coilset.point.psi[0], psi)
@@ -296,7 +296,7 @@ def test_hemholtz_flux(segment):
 def test_hemholtz_field(segment):
     coilset = CoilSet(dcoil=-2)
     coilset.coil.insert(1, [-0.5, 0.5], 0.01, 0.01, Ic=1, segment=segment)
-    coilset.point.solve([[1e-3, 0]])
+    coilset.point.solve(np.array([1e-3, 0]))
     bz = (4 / 5) ** (3 / 2) * Matrix.mu_0
     assert np.isclose(coilset.point.bz[0], bz)
 
@@ -324,7 +324,7 @@ def test_axial_vertical_field(section, radius, height):
     current = 5.3e4
     coilset = CoilSet()
     coilset.coil.insert({section: [radius, height, 0.01, 0.01]}, Ic=current)
-    coilset.point.solve([[1e-6, 0]])
+    coilset.point.solve(np.array([1e-6, 0]))
     assert np.isclose(
         coilset.point.bz[0], axial_vertical_field(radius, height, current)
     )
@@ -360,6 +360,39 @@ def test_magnetic_field_analytic_poloidal_plane(section, radius, height, current
 
     assert np.allclose(coilset.grid.br_, analytic.br, atol=1e-4)
     assert np.allclose(coilset.grid.bz_, analytic.bz, atol=1e-4)
+
+
+@pytest.mark.parametrize(
+    "segment,radius,height,current",
+    product(["arc", "line"], [2.1, 7.3], [-3.2, 0, 7.3], [-1e4, 5.3e4]),
+)
+def test_magnetic_field_analytic_non_axisymmetric(segment, radius, height, current):
+    segment_number = 360
+    theta = np.linspace(0, 2 * np.pi, 1 + 2 * segment_number)
+    points = np.stack(
+        [radius * np.cos(theta), radius * np.sin(theta), height * np.ones_like(theta)],
+        axis=-1,
+    )
+    if segment == "line":
+        minimum_arc_nodes = len(points) + 1
+    else:
+        minimum_arc_nodes = 3
+    coilset = CoilSet(field_attrs=["Bx", "By", "Bz", "Br"])
+    coilset.winding.insert(
+        points, {"c": (0, 0, 0.25)}, minimum_arc_nodes=minimum_arc_nodes, Ic=current
+    )
+    grid = np.meshgrid(
+        np.linspace(-3.1, 5.1, 51), -2.5, np.linspace(-4.1, 1.7, 71), indexing="ij"
+    )
+    coilset.point.solve(np.stack(grid, axis=-1))
+    analytic = AnalyticField(radius, height, current, *grid)
+
+    for attr in coilset.field_attrs:
+        assert np.allclose(
+            getattr(coilset.point, attr.lower()),
+            getattr(analytic, attr.lower()).flatten(),
+            atol=1e-4,
+        )
 
 
 if __name__ == "__main__":

@@ -28,6 +28,7 @@ class Arc(Constants, Matrix):
 
     """
 
+    axisymmetric: ClassVar[bool] = False
     name: ClassVar[str] = "arc"  # element name
 
     def __post_init__(self):
@@ -57,9 +58,6 @@ class Arc(Constants, Matrix):
                 arctan2(self("source", "y2"), self("source", "x2")),
             ]
         )
-        # alpha = (np.pi - (phi_s - self._phi[np.newaxis])) / 2
-        ##alpha[alpha < -np.pi / 2] += np.pi
-        # alpha[alpha > np.pi / 2] -= np.pi
         return np.concatenate(
             (
                 (np.pi - (phi_s - self._phi[np.newaxis])) / 2,
@@ -174,7 +172,7 @@ class Arc(Constants, Matrix):
         """Return stacked local vertical vector potential intergration coefficents."""
         return np.zeros(((len(self.theta),) + self.shape))
 
-    @property
+    @cached_property
     def _Br_hat(self):
         """Return stacked local radial magnetic field intergration coefficents."""
         Br_hat = (
@@ -184,10 +182,20 @@ class Arc(Constants, Matrix):
         ) / self.rack2
         return self._pi2(Br_hat)
 
-    @property
+    @cached_property
     def _Bphi_hat(self):
         """Return stacked local toroidal magnetic field intergration coefficents."""
         return (-self.gamma * self.ck2 / self.ellipj["dn"]) / self.rack2
+
+    @property
+    def _Bx_hat(self):
+        """Return stacked local x-coordinate magnetic field intergration constants."""
+        return self._Br_hat * np.cos(self._phi) - self._Bphi_hat * np.sin(self._phi)
+
+    @property
+    def _By_hat(self):
+        """Return stacked local y-coordinate magnetic field intergration constants."""
+        return self._Br_hat * np.sin(self._phi) + self._Bphi_hat * np.cos(self._phi)
 
     @property
     def _Bz_hat(self):
@@ -205,60 +213,21 @@ class Arc(Constants, Matrix):
         """Return intergral quantity."""
         return self.mu_0 / (4 * np.pi) * (data[0] - data[1])
 
-    def _cylindrical_vector(self, attr: str):
-        """Return local cylindrical attribute vector."""
-        return np.stack(
-            [
-                self._intergrate(getattr(self, f"_{attr}{coord}_hat"))
-                for coord in ["r", "phi", "z"]
-            ],
-            axis=0,
-        )
-
-    def _cartesian_vector(self, attr: str):
-        """Return global cylindrical attribute vector."""
-        return np.einsum(
-            "mjk,imjk->jki",
-            self._cylindrical_vector(attr),
-            self._cylindrical_to_cartesian,
-        )
-
-    @cached_property
-    def Afield(self):
-        """Return global vector potential in cartesian frame."""
-        return self.loc.rotate(self._cartesian_vector("A"), "to_global")
-
-    @cached_property
-    def Bfield(self):
-        """Return global magnetic field vector."""
-        return self.loc.rotate(self._cartesian_vector("B"), "to_global")
-
-    @property
-    def Br(self):
-        """Return radial field component."""
-        return self.Bfield[..., 0] * np.cos(self.phi) + self.Bfield[..., 1] * np.sin(
-            self.phi
-        )
-
-    @property
-    def Aphi(self):
-        return self.Afield[..., 1]
-
 
 if __name__ == "__main__":
     from nova.frame.coilset import CoilSet
 
     radius = 3.945
     height = 2
-    segment_number = 1
+    segment_number = 5
 
-    theta = np.linspace(0, 2 * np.pi - 1e-6, 1 + 2 * segment_number)
+    theta = np.linspace(0, 2 * np.pi, 1 + 2 * segment_number)
     points = np.stack(
         [radius * np.cos(theta), radius * np.sin(theta), height * np.ones_like(theta)],
         axis=-1,
     )
 
-    coilset = CoilSet(field_attrs=["Br", "Aphi"])
+    coilset = CoilSet(field_attrs=["Bx", "Br", "Bz"])
     for i in range(segment_number):
         coilset.winding.insert(
             points[2 * i : 1 + 2 * (i + 1)],
@@ -273,17 +242,13 @@ if __name__ == "__main__":
     # coilset.subframe.vtkplot()
 
     coilset.saloc["Ic"] = 5.3e5
-    levels = coilset.grid.plot("br", nulls=False, colors="C2")
+    levels = coilset.grid.plot("bz", nulls=False, colors="C2")
     axes = coilset.grid.axes
-
-    print(coilset.grid.br.max(), coilset.grid.br.min())
 
     circle_coilset = CoilSet(field_attrs=["Br", "Bz", "Aphi"])
     circle_coilset.coil.insert({"c": (radius, height, 0.05, 0.05)})
     circle_coilset.grid.solve(2500, [1, 0.9 * radius, 0, 4])
     circle_coilset.saloc["Ic"] = 5.3e5
     circle_coilset.grid.plot(
-        "br", nulls=False, colors="C0", axes=axes, levels=levels, linestyles="--"
+        "bz", nulls=False, colors="C0", axes=axes, levels=levels, linestyles="--"
     )
-
-    print(circle_coilset.grid.br.max(), circle_coilset.grid.br.min())

@@ -35,14 +35,14 @@ def test_grid_shaped_array_address():
 def test_point_shaped_array():
     coilset = CoilSet(dcoil=-5, tcoil="hex")
     coilset.coil.insert(5, -2, 0.7, 0.5, Ic=10)
-    coilset.point.solve(((1, 2), (4, 5), (7, 3)))
+    coilset.point.solve(np.array([(1, 2), (4, 5), (7, 3)]))
     assert len(coilset.point.shape) == 1
 
 
 def test_point_shaped_array_address():
     coilset = CoilSet(dcoil=-5, tcoil="hex")
     coilset.coil.insert(5, -2, 0.7, 0.5, Ic=-10)
-    coilset.point.solve(((1, 12), (4, 5), (7, -3)))
+    coilset.point.solve(np.array([(1, 12), (4, 5), (7, -3)]))
     assert coilset.point.psi.ctypes.data == coilset.point.psi_.ctypes.data
 
 

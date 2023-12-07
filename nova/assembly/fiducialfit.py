@@ -1,5 +1,6 @@
 """Manage fitting algorithums for TF coils and SSAT sectors."""
 from dataclasses import dataclass, field
+from functools import cached_property
 from typing import ClassVar
 import warnings
 
@@ -55,17 +56,19 @@ class FiducialFit(FiducialData):
     def load_measurement(self):
         """Load reference measurements."""
         dim = {"coil": self.data.dims["coil"]}
-        self.data["measurement"] = (
+        self.data["fiducial"] = (
             self.data.fiducial_target.expand_dims(dim, 0) + self.data.fiducial_delta
+        )
+        self.data["centerline"] = (
+            self.data.centerline_target.expand_dims(dim, 0) + self.data.centerline_delta
         )
 
     def evaluate_gpr(self):
         """Evaluate gpr in cylindrical coordinate system."""
         delta = (
-            Rotate.to_cylindrical(self.data["measurement"])
-            - self.data.fiducial_target_cyl
+            Rotate.to_cylindrical(self.data["fiducial"]) - self.data.fiducial_target_cyl
         )
-        fiducial = "measurement_gpr"
+        fiducial = "fiducial_gpr"
         centerline = "centerline_gpr"
         sample = "sample_gpr"
         self.data[fiducial] = xarray.zeros_like(self.data.fiducial_target_cyl)
@@ -181,20 +184,19 @@ class FiducialFit(FiducialData):
     def point_name(self):
         """Return reference point name."""
         if self.infer:
-            return "measurement_gpr"
-        return "measurement"
+            return "fiducial_gpr"
+        return "fiducial"
 
     def points(self, coil):
         """Return reference points."""
-        if self.infer:  # use gpr inference
-            return self.data[self.point_name].sel(coil=coil)
         return self.data[self.point_name].sel(coil=coil)
 
     def fit(self):
         """Perform sector fit."""
         transform_attrs = [
-            "measurement",
-            "measurement_gpr",
+            "fiducial",
+            "centerline",
+            "fiducial_gpr",
             "centerline_gpr",
         ]
         for attr in transform_attrs:
@@ -217,7 +219,7 @@ class FiducialFit(FiducialData):
         )
         for coil in tqdm(self.data.coil, "fitting coils"):
             points = self.points(coil=coil)
-            xo = np.ones(self.data.dims["transform"])
+            xo = np.zeros(self.data.dims["transform"])
             opt = minimize(self.scalar_error, xo, method="SLSQP", args=(points,))
             if not opt.success:
                 warnings.warn(f"optimization failed {opt}")
@@ -226,38 +228,45 @@ class FiducialFit(FiducialData):
                 self.data[f"{attr}_fit"].loc[{"coil": coil}] = self.transform(
                     opt.x, self.data[attr].loc[{"coil": coil}].copy()
                 )
-            self.data["fiducial_error"].loc[{"coil": coil}] = self.scalar_error(
-                xo, points
-            )
-            self.data["fit_error"].loc[{"coil": coil}] = self.scalar_error(
-                opt.x, points
-            )
+            for post_fix in ["", "gpr"]:
+                error_attr = self.join("error", post_fix)
+                fiducial_attr = self.join("fiducial", post_fix)
+                fiducial_points = self.data[fiducial_attr].sel(coil=coil)
+                self.data[error_attr].loc[{"coil": coil}] = self.scalar_error(
+                    xo, fiducial_points
+                )
+                self.data[f"{error_attr}_fit"].loc[{"coil": coil}] = self.scalar_error(
+                    opt.x, fiducial_points
+                )
+
+    @cached_property
+    def plotter(self):
+        """Return FiducialPlotter instance."""
+        return FiducialPlotter(self.data)
 
     def plot_fit(self, label: str, postfix=""):
         """Plot fits."""
-        plotter = FiducialPlotter(self.data)
-        plotter("target")
+        self.plotter("target")
         if label != "target":
             stage = 1 + int(self.infer)
             stage = 2
-            plotter(label, stage)
-            plotter.axes[0].set_title(label + postfix)
-            self.text_fit(plotter.axes[0], label)
+            self.plotter(label, stage)
+            self.plotter.axes[0].set_title(label + postfix)
+            self.text_fit(self.plotter.axes[0], label)
         plt.tight_layout()
         plt.savefig("fit.png")
 
-    def plot_transform(self):
+    def plot_transform(self, coil_index=0):
         """Plot transform text."""
-        plotter = FiducialPlotter(self.data)
-        plotter("target")
-        self.text_transform(plotter.axes[0])
-        plotter.axes[0].set_title("transform: reference -> fit")
+        self.plotter("target")
+        self.text_transform(self.plotter.axes[0], coil_index)
+        self.plotter.axes[0].set_title("transform: reference -> fit")
         plt.tight_layout()
         # plt.savefig('fit.png')
 
-    def text_transform(self, axes):
+    def text_transform(self, axes, coil_index):
         """Display text transform."""
-        opt_x = self.data.opt_x.values
+        opt_x = self.data.opt_x[coil_index].values
         deg_to_mm = 1  # 10570*np.pi/180
         axes.text(
             0.8,
@@ -317,7 +326,8 @@ if __name__ == "__main__":
 
     fiducial = FiducialFit(phase=phase, fill=False)
 
-    # plotter = FiducialPlotter(fiducial.data)
+    fiducial.plot_fit("")
+    # fiducial.plot_transform()
 
     # fiducial.plot_fit("target")
     # print(fiducial.data.target_cyl)

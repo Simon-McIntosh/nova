@@ -156,6 +156,8 @@ class Axes:
     """Manage plot axes."""
 
     style: str = "2d"
+    nrows: int = 1
+    ncols: int = 1
     _fig: matplotlib.figure.Figure | None = field(init=False, repr=False, default=None)
     _axes: matplotlib.axes.Axes | None = field(init=False, repr=False, default=None)
 
@@ -219,6 +221,11 @@ class Axes:
             case "2d" | "3d":
                 axes.set_aspect("equal")
                 axes.axis("off")
+            case "plan":
+                axes.set_aspect("equal")
+                axes.axis("on")
+                axes.set_xticks([])
+                axes.set_yticks([])
             case _:
                 raise NotImplementedError(f"style {style} not implemented")
 
@@ -228,7 +235,7 @@ class Axes:
             style = self.style
         for axes in np.atleast_1d(self.axes):
             self._set_style(style, axes)
-        if style == "1d":
+        if style in ["1d", "plan"]:
             self.despine()
         self.style = style
 
@@ -321,7 +328,6 @@ class FancyArrowPatch3D(FancyArrowPatch):
     def draw(self, renderer):
         """Extend FancyArrowpatch for 3d renderer."""
         _points2d = proj3d.proj_transform(*self._points, renderer.M)
-        print(_points2d[0][:2], _points2d[1][:2])
         self.set_positions(_points2d[0][:2], _points2d[1][:2])
         super().draw(renderer)
 

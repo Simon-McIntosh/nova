@@ -1,124 +1,109 @@
 """Manage plotting methods for fiducial data."""
 from dataclasses import dataclass, field, InitVar
-from functools import cached_property
 from typing import ClassVar
 
-import matplotlib.pyplot as plt
-import seaborn as sns
+import numpy as np
 import xarray
 
 from nova.assembly.transform import Rotate
+from nova.graphics.plot import Plot
 
 
 @dataclass
-class FiducialPlotter:
+class FiducialPlotter(Plot):
     """Plot fidicual fit in cylindrical coordinates."""
 
     cartisean_data: InitVar[xarray.Dataset]
     data: xarray.Dataset = field(init=False, default_factory=xarray.Dataset)
     factor: float = 750
     fiducial_labels: bool = True
-    rotate: Rotate = field(init=False, default_factory=Rotate)
 
-    color: ClassVar[dict[str, str]] = dict(
-        fit="C1", fit_target="C0", reference="C4", reference_target="C6"
-    )
-    marker: ClassVar[dict[str, str]] = dict(
-        fit="X", fit_target="d", reference="X", reference_target="d"
-    )
+    color: ClassVar[dict[str, str]] = {
+        "": "C0",
+        "gpr": "C1",
+        "fit": "C4",
+        "gpr_fit": "C6",
+    }
+    marker: ClassVar[dict[str, str]] = {"": "o", "fit": "X", "gpr": "d", "gpr_fit": "X"}
 
     def __post_init__(self, data: xarray.Dataset):
         """Transform data to cylindrical coordinates."""
-        self.extract(data)
+        self.rotate(data)
+        self.set_axes(
+            "plan",
+            nrows=1,
+            ncols=2,
+            sharey=True,
+            gridspec_kw=dict(width_ratios=[2.5, 1]),
+        )
+        self.axes[0].set_xlabel("radius")
+        self.axes[0].set_ylabel("height")
+        self.axes[1].set_xlabel("toroidal")
 
-    def __call__(self, label: str = "target", stage: int = 2, coil_index=range(2)):
+    def __call__(self, label: str = "target", stage: int = 2, coil_index=0):
         """Plot fiducial and centerline fits."""
         if label == "target":
             return self.target()
         if stage > 0:
             self.fiducial(label, coil_index=coil_index)
-        if stage > 1:
-            self.fiducial(f"{label}_target", coil_index=coil_index)
-            self.centerline(label, coil_index=coil_index)
+            # self.centerline(label, coil_index=coil_index)
+        # if stage > 1:
+        #    self.fiducial(f"{label}_target", coil_index=coil_index)
+        #    self.centerline(label, coil_index=coil_index)
 
-    def extract(self, cartisean_data: xarray.Dataset):
-        """Extract cartisean data and map to cylindrical coordinates."""
+    @staticmethod
+    def join(name: str, post_fix: str):
+        """Return variable name with post_fix if set."""
+        if post_fix:
+            return "_".join([name, post_fix])
+        return name
+
+    def rotate(self, cartisean_data: xarray.Dataset):
+        """Rotate cartisean data to cylindrical coordinates."""
         self.data = xarray.Dataset()
-        self.data["fiducial_target"] = Rotate.to_cylindrical(
-            cartisean_data.fiducial_target
-        )
-        self.data["centerline_target"] = Rotate.to_cylindrical(
-            cartisean_data.centerline_target
-        )
-        for attr in ["reference", "fit"]:
-            if attr not in cartisean_data:
-                continue
-            self.data[attr] = (
-                self.rotate.to_cylindrical(cartisean_data[attr]) - self.data.fiducial
-            )
-            for norm in ["fiducial", "centerline"]:
-                self.data[f"{attr}_{norm}"] = (
-                    self.rotate.to_cylindrical(cartisean_data[f"{attr}_{norm}"])
-                    - self.data[norm]
+        for name in ["fiducial", "centerline"]:
+            target = "_".join([name, "target"])
+            self.data[target] = Rotate.to_cylindrical(cartisean_data[target])
+            for post_fix in ["", "gpr", "fit", "gpr_fit"]:
+                attr = self.join(name, post_fix)
+                self.data[attr] = (
+                    Rotate.to_cylindrical(cartisean_data[attr]) - self.data[target]
                 )
-            self.data[f"{attr}_centerline_sample"] = (
-                cartisean_data[f"{attr}_centerline_sample"] - self.data["centerline"]
-            )
-        self.data.fiducial[..., 1] = 0
-        self.data.centerline[..., 1] = 0
-
-    @cached_property
-    def axes(self):
-        """Return axes instance."""
-        axes = plt.subplots(1, 2, sharey=True, gridspec_kw=dict(width_ratios=[2.5, 1]))[
-            1
-        ]
-        axes[0].set_xlabel("radius")
-        axes[0].set_ylabel("height")
-        axes[1].set_xlabel("toroidal")
-        for i in range(2):
-            axes[i].axis("equal")
-            axes[i].set_xticks([])
-            axes[i].set_yticks([])
-            sns.despine()
-        return axes
 
     def plot_box(self, data_array: xarray.DataArray):
         """Plot bounding box around fiducial targets."""
 
-    '''
-    def fiducial(self, coil_index=range(2)):
+    def target(self):
         """Plot fiducial fiducial targets."""
-        for i in coil_index:
-            self.axes[0].plot(
-                self.data.centerline[i, :, 0],
-                self.data.centerline[i, :, 2],
-                "--",
-                color="gray",
-            )
-            self.axes[1].plot(
-                self.data.centerline[i, :, 1],
-                self.data.centerline[i, :, 2],
-                "--",
-                color="gray",
-            )
-            self.axes[0].plot(
-                self.data.fiducial[i, :, 0],
-                self.data.fiducial[i, :, 2],
-                "o",
-                color="gray",
-            )
-            self.axes[1].plot(
-                self.data.fiducial[i, :, 1],
-                self.data.fiducial[i, :, 2],
-                "o",
-                color="gray",
-            )
+        self.axes[0].plot(
+            self.data.centerline_target[:, 0],
+            self.data.centerline_target[:, 2],
+            "--",
+            color="gray",
+        )
+        self.axes[1].plot(
+            self.data.centerline_target[:, 1],
+            self.data.centerline_target[:, 2],
+            "--",
+            color="gray",
+        )
+        self.axes[0].plot(
+            self.data.fiducial_target[:, 0],
+            self.data.fiducial_target[:, 2],
+            "o",
+            color="gray",
+        )
+        self.axes[1].plot(
+            self.data.fiducial_target[:, 1],
+            self.data.fiducial_target[:, 2],
+            "o",
+            color="gray",
+        )
         if self.fiducial_labels:
             for radius, height, label in zip(
-                self.data.fiducial[0, :, 0],
-                self.data.fiducial[0, :, 2],
-                self.data.fiducial.values,
+                self.data.fiducial_target[:, 0],
+                self.data.fiducial_target[:, 2],
+                self.data.target.values,
             ):
                 self.axes[0].text(
                     radius,
@@ -132,44 +117,43 @@ class FiducialPlotter:
                 )
         self.axes[0].plot([800, 12000], [-8000, 8000], "w.")
         self.axes[1].plot([-2500, 2500], [-8000, 8000], "w.")
-    '''
 
-    def delta(self, label: str):
+    def delta(self, attr: str):
         """Return displacment delta multiplied by scale factor."""
-        return self.factor * self.data[f"{label}"]
+        return self.factor * self.data[attr]
 
-    def fiducial(self, label: str, coil_index=range(2)):
+    def fiducial(self, post_fix: str, coil_index=0):
         """Plot fiducial deltas."""
-        color = self.color.get(label, self.color[label.split("_")[0]])
-        marker = self.marker[label]
-        for i in coil_index:
-            delta = self.delta(label)
+        color = self.color[post_fix]
+        marker = self.marker[post_fix]
+        delta = self.delta(self.join("fiducial", post_fix))
+        for i in np.atleast_1d(coil_index):
             self.axes[0].plot(
-                self.data.fiducial[i, :, 0] + delta[i, :, 0],
-                self.data.fiducial[i, :, 2] + delta[i, :, 2],
+                self.data.fiducial_target[:, 0] + delta[i, :, 0],
+                self.data.fiducial_target[:, 2] + delta[i, :, 2],
                 color + marker,
             )
             self.axes[1].plot(
-                self.data.fiducial[i, :, 1] + delta[i, :, 1],
-                self.data.fiducial[i, :, 2] + delta[i, :, 2],
+                self.data.fiducial_target[:, 1] + delta[i, :, 1],
+                self.data.fiducial_target[:, 2] + delta[i, :, 2],
                 color + marker,
             )
 
-    def centerline(self, label: str, coil_index=range(2), samples=True):
+    def centerline(self, label: str, coil_index=0, samples=True):
         """Plot gpr centerline."""
         color = self.color[f"{label}_fiducial"]
         attr = f"{label}_centerline"
         if samples:
             attr += "_sample"
-        for i in coil_index:
+        for i in np.atleast_1d(coil_index):
             delta = self.delta(attr)
             self.axes[0].plot(
-                self.data.centerline[i, :, 0] + delta[i, :, 0],
-                self.data.centerline[i, :, 2] + delta[i, :, 2],
+                self.data.centerline_target[i, :, 0] + delta[i, :, 0],
+                self.data.centerline_target[i, :, 2] + delta[i, :, 2],
                 color=color,
             )
             self.axes[1].plot(
-                self.data.centerline[i, :, 1] + delta[i, :, 1],
-                self.data.centerline[i, :, 2] + delta[i, :, 2],
+                self.data.centerline_target[i, :, 1] + delta[i, :, 1],
+                self.data.centerline_target[i, :, 2] + delta[i, :, 2],
                 color=color,
             )

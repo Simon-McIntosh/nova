@@ -40,13 +40,12 @@ class FiducialPlotter(Plot):
         self.axes[0].set_ylabel("height")
         self.axes[1].set_xlabel("toroidal")
 
-    def __call__(self, label: str = "target", stage: int = 2, coil_index=0):
+    def __call__(self, post_fix: str, stage: int = 2, coil_index=0):
         """Plot fiducial and centerline fits."""
-        if label == "target":
-            return self.target()
+
         if stage > 0:
-            self.fiducial(label, coil_index=coil_index)
-            # self.centerline(label, coil_index=coil_index)
+            self.fiducial(post_fix, coil_index=coil_index)
+            self.centerline(post_fix, coil_index=coil_index)
         # if stage > 1:
         #    self.fiducial(f"{label}_target", coil_index=coil_index)
         #    self.centerline(label, coil_index=coil_index)
@@ -63,11 +62,17 @@ class FiducialPlotter(Plot):
         self.data = xarray.Dataset()
         for name in ["fiducial", "centerline"]:
             target = "_".join([name, "target"])
+            target_fit = "_".join([target, "fit"])
             self.data[target] = Rotate.to_cylindrical(cartisean_data[target])
+            self.data[target_fit] = Rotate.to_cylindrical(cartisean_data[target_fit])
             for post_fix in ["", "gpr", "fit", "gpr_fit"]:
                 attr = self.join(name, post_fix)
+                if post_fix[-3:] == "fit":
+                    target_attr = target_fit
+                else:
+                    target_attr = target
                 self.data[attr] = (
-                    Rotate.to_cylindrical(cartisean_data[attr]) - self.data[target]
+                    Rotate.to_cylindrical(cartisean_data[attr]) - self.data[target_attr]
                 )
 
     def plot_box(self, data_array: xarray.DataArray):
@@ -139,21 +144,31 @@ class FiducialPlotter(Plot):
                 color + marker,
             )
 
-    def centerline(self, label: str, coil_index=0, samples=True):
+    def centerline(self, post_fix: str, coil_index=0, samples=True):
         """Plot gpr centerline."""
-        color = self.color[f"{label}_fiducial"]
-        attr = f"{label}_centerline"
-        if samples:
-            attr += "_sample"
+        color = self.color[post_fix]
+        attr = self.join("centerline", post_fix)
+        # if samples:
+        #    attr += "_sample"
+        target_attr = "centerline_target"
+        if post_fix[-3:] == "fit":
+            target_attr += "_fit"
+
+        fit = post_fix[-3:] == "fit"
+
+        delta = self.delta(attr)
         for i in np.atleast_1d(coil_index):
-            delta = self.delta(attr)
+            if fit:
+                target = self.data["centerline_target_fit"][i]
+            else:
+                target = self.data["centerline_target"]
             self.axes[0].plot(
-                self.data.centerline_target[i, :, 0] + delta[i, :, 0],
-                self.data.centerline_target[i, :, 2] + delta[i, :, 2],
+                target[:, 0] + delta[i, :, 0],
+                target[:, 2] + delta[i, :, 2],
                 color=color,
             )
             self.axes[1].plot(
-                self.data.centerline_target[i, :, 1] + delta[i, :, 1],
-                self.data.centerline_target[i, :, 2] + delta[i, :, 2],
+                target[:, 1] + delta[i, :, 1],
+                target[:, 2] + delta[i, :, 2],
                 color=color,
             )

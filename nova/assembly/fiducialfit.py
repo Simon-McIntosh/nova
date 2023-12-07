@@ -137,29 +137,30 @@ class FiducialFit(FiducialData):
         )
 
     @staticmethod
-    def error_vector(delta, method="rms"):
+    def error_vector(delta, method):
         """Return error vector."""
         error = np.zeros(3)
-        if method == "rms":
-            error[0] = np.mean(delta[..., [5, 3, 4], 0] ** 2)
-            error[1] = np.mean(delta[..., 1] ** 2)
-            error[2] = np.mean(delta[..., [2, 1, -1, -2], 2] ** 2)
-            return error
-        error[0] = np.max(abs(delta[..., [5, 3, 4], 0]))  # radial (A, B, H)
-        error[1] = np.max(abs(delta[..., 1]))  # toroidal (all)
-        error[2] = np.max(abs(delta[..., [2, 1, -1, -2], 2]))  # (C, D, E, F)
+        match method:
+            case "rms":
+                error[0] = np.mean(delta[..., [5, 3, 4], 0] ** 2)
+                error[1] = np.mean(delta[..., 1] ** 2)
+                error[2] = np.mean(delta[..., [2, 1, -1, -2], 2] ** 2)
+            case "max":
+                error[0] = np.max(abs(delta[..., [5, 3, 4], 0]))  # radial (A, B, H)
+                error[1] = np.max(abs(delta[..., 1]))  # toroidal (all)
+                error[2] = np.max(abs(delta[..., [2, 1, -1, -2], 2]))  # (C, D, E, F)
+            case _:
+                raise NotImplementedError(f"Method {method} not implemented.")
         return error
 
-    def transform_error(self, x, points, method=None):
+    def transform_error(self, x, points, method):
         """Return transform error vector."""
-        if method is None:
-            method = self.method
         points = self.transform(x, points)
         return self.point_error(points, method)
 
-    def weighted_transform_error(self, x, points, method=None):
+    def weighted_transform_error(self, x, points, method):
         """Return weighted transform error vector."""
-        return self.transform_error(x, points, method="max") * self.weights
+        return self.transform_error(x, points, method=method) * self.weights
 
     def point_error(self, points, method=None):
         """Return error vector."""
@@ -191,32 +192,40 @@ class FiducialFit(FiducialData):
         """Return reference points."""
         return self.data[self.point_name].sel(coil=coil)
 
+    @staticmethod
+    def join(name: str, post_fix: str):
+        """Return variable name with post_fix if set."""
+        if post_fix:
+            return "_".join([name, post_fix])
+        return name
+
     def fit(self):
         """Perform sector fit."""
         transform_attrs = [
+            "fiducial_target",
+            "centerline_target",
             "fiducial",
             "centerline",
             "fiducial_gpr",
             "centerline_gpr",
         ]
         for attr in transform_attrs:
-            self.data[f"{attr}_fit"] = xarray.zeros_like(self.data[attr])
+            source_attr = attr.replace("_target", "")
+            self.data[f"{attr}_fit"] = xarray.zeros_like(self.data[source_attr])
         self.data.coords["transform"] = ["x", "y", "z", "xx", "yy", "zz"]
         self.data["opt_x"] = xarray.DataArray(
             0.0,
             coords=[self.data.coil, self.data.transform],
             dims=["coil", "transform"],
         )
-        self.data["fiducial_error"] = xarray.DataArray(
-            0.0,
-            coords=[self.data.coil],
-            dims=["coil"],
-        )
-        self.data["fit_error"] = xarray.DataArray(
-            0.0,
-            coords=[self.data.coil],
-            dims=["coil"],
-        )
+        for post_fix in ["", "gpr"]:
+            error_attr = self.join("error", post_fix)
+            self.data[error_attr] = xarray.DataArray(
+                0.0,
+                coords=[self.data.coil],
+                dims=["coil"],
+            )
+            self.data[f"{error_attr}_fit"] = xarray.zeros_like(self.data[error_attr])
         for coil in tqdm(self.data.coil, "fitting coils"):
             points = self.points(coil=coil)
             xo = np.zeros(self.data.dims["transform"])
@@ -225,9 +234,14 @@ class FiducialFit(FiducialData):
                 warnings.warn(f"optimization failed {opt}")
             self.data["opt_x"].loc[{"coil": coil}] = opt.x
             for attr in transform_attrs:
-                self.data[f"{attr}_fit"].loc[{"coil": coil}] = self.transform(
-                    opt.x, self.data[attr].loc[{"coil": coil}].copy()
-                )
+                try:
+                    self.data[f"{attr}_fit"].loc[{"coil": coil}] = self.transform(
+                        opt.x, self.data[attr].loc[{"coil": coil}].copy()
+                    )
+                except KeyError:
+                    self.data[f"{attr}_fit"].loc[{"coil": coil}] = self.transform(
+                        opt.x, self.data[attr].copy()
+                    )
             for post_fix in ["", "gpr"]:
                 error_attr = self.join("error", post_fix)
                 fiducial_attr = self.join("fiducial", post_fix)
@@ -242,17 +256,16 @@ class FiducialFit(FiducialData):
     @cached_property
     def plotter(self):
         """Return FiducialPlotter instance."""
-        return FiducialPlotter(self.data)
+        return FiducialPlotter(self.data, factor=500)
 
-    def plot_fit(self, label: str, postfix=""):
+    def plot_fit(self, postfix, coil_index):
         """Plot fits."""
-        self.plotter("target")
-        if label != "target":
-            stage = 1 + int(self.infer)
-            stage = 2
-            self.plotter(label, stage)
-            self.plotter.axes[0].set_title(label + postfix)
-            self.text_fit(self.plotter.axes[0], label)
+        self.plotter.target()
+        stage = 1 + int(self.infer)
+        stage = 2
+        self.plotter(postfix, stage, coil_index)
+        # self.plotter.axes[0].set_title(label + postfix)
+        # self.text_fit(self.plotter.axes[0], label)
         plt.tight_layout()
         plt.savefig("fit.png")
 
@@ -300,6 +313,7 @@ class FiducialFit(FiducialData):
 
     def text_fit(self, axes, label: str):
         """Display text transform."""
+        print(label)
         error_vector = getattr(self, f"{label}_error")
         error = dict(rms=np.sqrt(error_vector("rms")), max=error_vector("max"))
         text = ""
@@ -324,9 +338,9 @@ if __name__ == "__main__":
     phase = "FAT supplier"
     # phase = "SSAT BR"
 
-    fiducial = FiducialFit(phase=phase, fill=False)
+    fiducial = FiducialFit(phase=phase, infer=False, fill=False)
 
-    fiducial.plot_fit("")
+    fiducial.plot_fit("fit", 8)
     # fiducial.plot_transform()
 
     # fiducial.plot_fit("target")

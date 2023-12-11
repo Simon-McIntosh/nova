@@ -396,9 +396,9 @@ def test_magnetic_field_analytic_non_axisymmetric(segment, radius, height, curre
         )
 
 
-@pytest.mark.parametrize("sead,current", product([2015, 2025, 2038], [-1e3, 68e3]))
-def test_3d_arc(sead, current):
-    rng = np.random.default_rng(sead)
+@pytest.mark.parametrize("rng_sead,current", product([2015, 2025, 2038], [-1e3, 68e3]))
+def test_3d_line_arc(rng_sead, current):
+    rng = np.random.default_rng(rng_sead)
     segment = PolyLine(rng.uniform(-1, 1, (3, 3)), minimum_arc_nodes=3).segments[0]
 
     coilset = CoilSet(field_attrs=["Bx", "By", "Bz", "Br"])

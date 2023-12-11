@@ -14,9 +14,12 @@ class Fiducial(ABC):
     """Fiducial CCL base class."""
 
     target: list[str] = field(default_factory=lambda: list(string.ascii_uppercase[:8]))
-    delta: dict[int, pandas.DataFrame] | dict = field(init=False, default_factory=dict)
+    delta: dict[int, pandas.DataFrame] | dict = field(
+        init=False, default_factory=dict, repr=False
+    )
     origin: list[str] = field(
         init=False,
+        repr=False,
         default_factory=lambda: [
             "EU",
             "JA",

@@ -38,7 +38,6 @@ class Point(Plot, Operate):
             attrs=self.attrs,
             name=self.name,
         ).data
-        # insert coordinate data
         for coord in "xyz":
             self.data.coords[coord] = target[coord]
         super().post_solve()

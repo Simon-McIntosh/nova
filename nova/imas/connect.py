@@ -261,10 +261,11 @@ if __name__ == "__main__":
     # ScenarioDatabase(user='dubrovm').sync_shot('105028/1')
     # ScenarioDatabase(user='dubrovm').sync_shot('105027/1')
 
-    # ScenarioDatabase().sync_shot('105011/9')
+    ScenarioDatabase().sync_shot("134173/106")
     # scenario = ScenarioDatabase()
     # scenario.sync_shot("115001/1")
-    ScenarioDatabase(workflow=[], machine="mast_u").rsync()
+
+    # ScenarioDatabase(workflow=[], machine="mast_u").rsync()
 
     # scenario = ScenarioDatabase()
     # scenario.load_frame("workflow", "DINA-IMAS")

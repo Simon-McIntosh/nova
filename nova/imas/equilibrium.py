@@ -416,7 +416,10 @@ class Equilibrium(Chart, GetSlice):
     @property
     def boundary(self):
         """Return trimmed boundary contour."""
-        return self["boundary"][: int(self["boundary_length"])]
+        boundary = self["boundary"][: int(self["boundary_length"])]
+        if np.allclose(boundary[0], boundary[-1]):
+            return boundary
+        return np.append(boundary, boundary[:1], axis=0)
 
     def plot_0d(self, attr, axes=None):
         """Plot 0D parameter timeseries.

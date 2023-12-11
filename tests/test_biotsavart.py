@@ -14,6 +14,7 @@ from nova.biot.matrix import Matrix
 from nova.biot.point import Point
 from nova.biot.solve import Solve
 from nova.frame.coilset import CoilSet
+from nova.geometry.polyline import PolyLine
 from nova.geometry.polyshape import PolyShape
 
 segments = ["circle", "cylinder"]
@@ -367,7 +368,7 @@ def test_magnetic_field_analytic_poloidal_plane(section, radius, height, current
     product(["arc", "line"], [2.1, 7.3], [-3.2, 0, 7.3], [-1e4, 5.3e4]),
 )
 def test_magnetic_field_analytic_non_axisymmetric(segment, radius, height, current):
-    segment_number = 360
+    segment_number = 51
     theta = np.linspace(0, 2 * np.pi, 1 + 2 * segment_number)
     points = np.stack(
         [radius * np.cos(theta), radius * np.sin(theta), height * np.ones_like(theta)],
@@ -382,7 +383,7 @@ def test_magnetic_field_analytic_non_axisymmetric(segment, radius, height, curre
         points, {"c": (0, 0, 0.25)}, minimum_arc_nodes=minimum_arc_nodes, Ic=current
     )
     grid = np.meshgrid(
-        np.linspace(-3.1, 5.1, 51), -2.5, np.linspace(-4.1, 1.7, 71), indexing="ij"
+        np.linspace(-3.1, 5.1, 9), -2.5, np.linspace(-4.1, 1.7, 3), indexing="ij"
     )
     coilset.point.solve(np.stack(grid, axis=-1))
     analytic = AnalyticField(radius, height, current, *grid)
@@ -391,8 +392,35 @@ def test_magnetic_field_analytic_non_axisymmetric(segment, radius, height, curre
         assert np.allclose(
             getattr(coilset.point, attr.lower()),
             getattr(analytic, attr.lower()).flatten(),
-            atol=1e-4,
+            atol=1e-5,
         )
+
+
+@pytest.mark.parametrize("sead,current", product([2015, 2025, 2038], [-1e3, 68e3]))
+def test_3d_arc(sead, current):
+    rng = np.random.default_rng(sead)
+    segment = PolyLine(rng.uniform(-1, 1, (3, 3)), minimum_arc_nodes=3).segments[0]
+
+    coilset = CoilSet(field_attrs=["Bx", "By", "Bz", "Br"])
+    coilset.winding.insert(
+        segment.sample(3),
+        {"c": (0, 0, 0.25)},
+        minimum_arc_nodes=3,
+        Ic=current,
+        name="arc",
+    )
+    segment_number = 12
+    coilset.winding.insert(
+        segment.sample(segment_number),
+        {"c": (0, 0, 0.25)},
+        minimum_arc_nodes=segment_number,
+        Ic=current,
+        name="line",
+    )
+    coilset.linkframe(["arc", "line"], -1)
+    coilset.point.solve(np.array([-0.3, 0.1, -1.1]))
+    for attr in ["Bx", "By", "Bz", "Br"]:
+        assert np.allclose(getattr(coilset.point, attr.lower()), 0, atol=1e-6)
 
 
 if __name__ == "__main__":

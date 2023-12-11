@@ -235,7 +235,7 @@ class Operate(Data):
         Attr = attr.capitalize()
         self.check_plasma(Attr)
         if attr == Attr:
-            return self.array[attr]
+            return self.array[Attr]
         self.check_source(attr)
         return self.array[attr]
 

@@ -1,4 +1,5 @@
 """Load ccl fiducial data for ITER TF coilset."""
+from functools import cached_property
 from dataclasses import dataclass, field
 from pathlib import Path
 import string
@@ -82,13 +83,17 @@ class FiducialData(netCDF, Plot, Plotter):
             self.data.attrs = attrs
             self.store()
 
-    def build(self):
-        """Build fiducial dataset."""
-        self._fiducial = {
+    @cached_property
+    def dataset(self):
+        """Return source fiducial dataset."""
+        return {
             "RE": FiducialRE,
             "IDM": FiducialIDM,
             "Sector": FiducialSector,
         }[self.fiducial]
+
+    def build(self):
+        """Build fiducial dataset."""
         self.build_dataset()
         if self.fill:
             self.backfill()
@@ -220,7 +225,7 @@ class FiducialData(netCDF, Plot, Plotter):
 
     def load_fiducial_deltas(self):
         """Load fiducial deltas."""
-        fiducial = self._fiducial(self.data.target, phase=self.phase)
+        fiducial = self.dataset(self.data.target, phase=self.phase)
         delta, origin = fiducial.data
         self.data["coil"] = list(delta)
         self.data = self.data.assign_coords(origin=("coil", origin))
@@ -249,7 +254,7 @@ class FiducialData(netCDF, Plot, Plotter):
                 self.data["centerline_delta"][
                     coil_index, :, space_index
                 ] = self.load_gpr(coil_index, space_index)
-        self.data.attrs["source"] = self._fiducial().source
+        self.data.attrs["source"] = self.dataset().source
 
     def load_gpr(self, coil_index, space_index):
         """Return Gaussian Process regression."""

@@ -298,7 +298,7 @@ class Extrapolate(Operate):
     def annimate(self, duration: float, filename="extrapolate"):
         """Generate annimiation."""
         self.duration = duration
-        self.max_time = 150
+        self.max_time = 750
         animation = self.mpy.editor.VideoClip(self._make_frame, duration=duration)
         animation.write_gif(f"{filename}.gif", fps=10)
 
@@ -346,7 +346,7 @@ class Extrapolate(Operate):
             self["_current"][data_index] = self.sloc[index, ["Ic"]].squeeze().values
 
         # switch reference sign for vs3 loop (Upper to Lower)
-        self.data._current[:, -1] *= -1
+        self.data._current[:, -1] *= -1  # TODO fix this
 
         self.get_axes("1d")
         self.axes.plot(
@@ -380,6 +380,7 @@ if __name__ == "__main__":
     # pulse, run = 105028, 1  # DINA
     pulse, run = 135011, 7  # DINA
     # pulse, run = 135013, 2
+    pulse, run = 134173, 106  # DINA-JINTRAC
 
     extrapolate = Extrapolate(pulse, run, pf_passive=False, pf_active="iter_md")
 
@@ -389,13 +390,9 @@ if __name__ == "__main__":
 
     # extrapolate.plot_waveform()
 
-    extrapolate.itime = 0
+    extrapolate.time = 80
     extrapolate.plot_2d("psi", mask="map")
     plt.tight_layout()
-
-    from nova.imas.pf_passive import PF_Passive
-
-    pf_passive = PF_Passive(pulse, run)
 
     # plt.savefig('build.png')
 

@@ -129,7 +129,7 @@ class Matrix(GroupSet):
         Apply reduction summations.
 
         """
-        matrix = getattr(self, attr)
+        matrix = getattr(self, attr).copy()
         target_plasma = matrix[:, self.source.plasma]
         plasma_source = matrix[self.target.plasma]
         plasma_plasma = plasma_source[:, self.source.plasma]

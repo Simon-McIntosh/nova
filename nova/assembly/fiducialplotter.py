@@ -29,7 +29,11 @@ class FiducialPlotter(Plot):
     def __post_init__(self, data: xarray.Dataset):
         """Transform data to cylindrical coordinates."""
         self.rotate(data)
-        self.set_axes(
+        self.reset_axes()
+
+    def reset_axes(self):
+        """Extend Plot.set_axes."""
+        self.axes = super().set_axes(
             "plan",
             nrows=1,
             ncols=2,
@@ -62,17 +66,11 @@ class FiducialPlotter(Plot):
         self.data = xarray.Dataset()
         for name in ["fiducial", "centerline"]:
             target = "_".join([name, "target"])
-            target_fit = "_".join([target, "fit"])
             self.data[target] = Rotate.to_cylindrical(cartisean_data[target])
-            self.data[target_fit] = Rotate.to_cylindrical(cartisean_data[target_fit])
             for post_fix in ["", "gpr", "fit", "gpr_fit"]:
                 attr = self.join(name, post_fix)
-                if post_fix[-3:] == "fit":
-                    target_attr = target_fit
-                else:
-                    target_attr = target
                 self.data[attr] = (
-                    Rotate.to_cylindrical(cartisean_data[attr]) - self.data[target_attr]
+                    Rotate.to_cylindrical(cartisean_data[attr]) - self.data[target]
                 )
 
     def plot_box(self, data_array: xarray.DataArray):
@@ -150,18 +148,9 @@ class FiducialPlotter(Plot):
         attr = self.join("centerline", post_fix)
         # if samples:
         #    attr += "_sample"
-        target_attr = "centerline_target"
-        if post_fix[-3:] == "fit":
-            target_attr += "_fit"
-
-        fit = post_fix[-3:] == "fit"
-
+        target = self.data["centerline_target"]
         delta = self.delta(attr)
         for i in np.atleast_1d(coil_index):
-            if fit:
-                target = self.data["centerline_target_fit"][i]
-            else:
-                target = self.data["centerline_target"]
             self.axes[0].plot(
                 target[:, 0] + delta[i, :, 0],
                 target[:, 2] + delta[i, :, 2],

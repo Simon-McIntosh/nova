@@ -32,12 +32,3 @@ class Data(netCDF, FrameSetLoc):
     def post_solve(self):
         """Post process biot solution - extened by subclass."""
         self.data.attrs["classname"] = self.classname
-        """
-        try:
-            self.data.attrs["plasma_index"] = next(
-                self.frame.subspace.index.get_loc(name)
-                for name in self.subframe.frame[self.aloc["plasma"]].unique()
-            )
-        except StopIteration:
-            self.data.attrs["plasma_index"] = -1
-        """

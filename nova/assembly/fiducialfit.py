@@ -202,16 +202,13 @@ class FiducialFit(FiducialData):
     def fit(self):
         """Perform sector fit."""
         transform_attrs = [
-            "fiducial_target",
-            "centerline_target",
             "fiducial",
             "centerline",
             "fiducial_gpr",
             "centerline_gpr",
         ]
         for attr in transform_attrs:
-            source_attr = attr.replace("_target", "")
-            self.data[f"{attr}_fit"] = xarray.zeros_like(self.data[source_attr])
+            self.data[f"{attr}_fit"] = xarray.zeros_like(self.data[attr])
         self.data.coords["transform"] = ["x", "y", "z", "xx", "yy", "zz"]
         self.data["opt_x"] = xarray.DataArray(
             0.0,
@@ -234,14 +231,9 @@ class FiducialFit(FiducialData):
                 warnings.warn(f"optimization failed {opt}")
             self.data["opt_x"].loc[{"coil": coil}] = opt.x
             for attr in transform_attrs:
-                try:
-                    self.data[f"{attr}_fit"].loc[{"coil": coil}] = self.transform(
-                        opt.x, self.data[attr].loc[{"coil": coil}].copy()
-                    )
-                except KeyError:
-                    self.data[f"{attr}_fit"].loc[{"coil": coil}] = self.transform(
-                        opt.x, self.data[attr].copy()
-                    )
+                self.data[f"{attr}_fit"].loc[{"coil": coil}] = self.transform(
+                    opt.x, self.data[attr].loc[{"coil": coil}].copy()
+                )
             for post_fix in ["", "gpr"]:
                 error_attr = self.join("error", post_fix)
                 fiducial_attr = self.join("fiducial", post_fix)
@@ -258,47 +250,50 @@ class FiducialFit(FiducialData):
         """Return FiducialPlotter instance."""
         return FiducialPlotter(self.data, factor=500)
 
-    def plot_fit(self, postfix, coil_index):
+    def plot_fit(self, coil_index, postfix=""):
         """Plot fits."""
         self.plotter.target()
         stage = 1 + int(self.infer)
         stage = 2
         self.plotter(postfix, stage, coil_index)
-        # self.plotter.axes[0].set_title(label + postfix)
-        # self.text_fit(self.plotter.axes[0], label)
-        plt.tight_layout()
-        plt.savefig("fit.png")
+        title = f"Coil{self.data.coil[coil_index].data}"
+        title += f"\norigin:{self.data.origin[coil_index].data}"
+        title += f" phase:{self.phase}"
+        title += f"\ninfer:{self.infer} method: {self.method}"
+        self.plotter.axes[0].set_title(title, fontsize="large")
+        if postfix[-3:] == "fit":
+            self.text_fit(self.plotter.axes[0], coil_index)
+            self.text_transform(self.plotter.axes[0], coil_index)
 
     def plot_transform(self, coil_index=0):
         """Plot transform text."""
         self.plotter("target")
         self.text_transform(self.plotter.axes[0], coil_index)
         self.plotter.axes[0].set_title("transform: reference -> fit")
-        plt.tight_layout()
-        # plt.savefig('fit.png')
 
     def text_transform(self, axes, coil_index):
         """Display text transform."""
         opt_x = self.data.opt_x[coil_index].values
-        deg_to_mm = 1  # 10570*np.pi/180
+        deg_to_mm = 10570 * np.pi / 180
+        angle_unit = "mm"  # r"$^o$"
         axes.text(
-            0.8,
+            0.3,
             0.5,
             f"dx: {opt_x[0]:1.2f}mm\n"
             + f"dy: {opt_x[1]:1.2f}mm\n"
             + f"dz: {opt_x[2]:1.2f}mm\n"
-            + f"rx: {opt_x[3]*deg_to_mm:1.2e}"
-            + r"$^o$"
+            + f"rx: {opt_x[3]*deg_to_mm:1.2}"
+            + angle_unit
             + "\n"
-            + f"ry: {opt_x[4]*deg_to_mm:1.2e}"
-            + r"$^o$"
+            + f"ry: {opt_x[4]*deg_to_mm:1.2}"
+            + angle_unit
             + "\n"
-            + f"rz: {opt_x[5]*deg_to_mm:1.2e}"
-            + r"$^o$",
+            + f"rz: {opt_x[5]*deg_to_mm:1.2}"
+            + angle_unit,
             va="center",
             ha="left",
             transform=axes.transAxes,
-            fontsize="x-small",
+            fontsize="small",
         )
 
     def fit_error(self, method: str):
@@ -311,11 +306,15 @@ class FiducialFit(FiducialData):
         """Return reference error vector."""
         return self.point_error(self.data.reference.copy(), method)
 
-    def text_fit(self, axes, label: str):
+    def text_fit(self, axes, coil_index):
         """Display text transform."""
-        print(label)
-        error_vector = getattr(self, f"{label}_error")
-        error = dict(rms=np.sqrt(error_vector("rms")), max=error_vector("max"))
+        points = self.data[self.point_name][coil_index]
+        opt_x = self.data.opt_x[coil_index].data
+        self.transform_error(opt_x, points, "rms")
+        error = {
+            "rms": self.transform_error(opt_x, points, "rms"),
+            "max": self.transform_error(opt_x, points, "max"),
+        }
         text = ""
         for i, coordinate in enumerate(
             ["radial: A,B,H", "toroidal: all", "vertical: C,D,E,F"]
@@ -324,13 +323,13 @@ class FiducialFit(FiducialData):
             for method in ["rms", "max"]:
                 text += f"    {method}: {error[method][i]:1.2f}\n"
         axes.text(
-            0.8,
+            0.9,
             0.5,
             text,
             va="center",
             ha="left",
             transform=axes.transAxes,
-            fontsize="x-small",
+            fontsize="small",
         )
 
 
@@ -338,9 +337,25 @@ if __name__ == "__main__":
     phase = "FAT supplier"
     # phase = "SSAT BR"
 
-    fiducial = FiducialFit(phase=phase, infer=False, fill=False)
+    fiducial = FiducialFit(phase=phase, infer=True, fill=False, method="rms")
 
-    fiducial.plot_fit("fit", 8)
+    coil_index = 0
+    fiducial.plot_fit(coil_index)
+    fiducial.plot_fit(coil_index, "fit")
+
+    """
+    for coil in range(18):
+        try:
+            coil_index = fiducial.data.coil.sel(coil=coil).location.data
+        except (KeyError, IndexError):
+            continue
+        fiducial.plotter.reset_axes()
+        fiducial.plot_fit(coil_index)
+        fiducial.plot_fit(coil_index, "fit")
+        plt.tight_layout()
+        plt.savefig(f"IDM_TF{coil}_fit.png")
+    """
+
     # fiducial.plot_transform()
 
     # fiducial.plot_fit("target")

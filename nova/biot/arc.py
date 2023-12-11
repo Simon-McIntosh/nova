@@ -88,6 +88,7 @@ class Arc(Constants, Matrix):
         theta[self._index] = np.pi - self.abs_alpha[self._index]
         return theta
 
+    '''
     @property
     def _cylindrical_to_cartesian(self):
         """Return rotation matrix to map local cylindrical to local cartesian coords."""
@@ -103,6 +104,7 @@ class Arc(Constants, Matrix):
             ],
             axis=0,
         )
+    '''
 
     @cached_property
     def Kinc(self):

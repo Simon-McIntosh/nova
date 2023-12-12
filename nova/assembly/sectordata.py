@@ -80,18 +80,25 @@ class SectorData(FilePath, SectorFile):
             if self.data[coil]["Nominal"].values.dtype == np.object_:
                 self.data.pop(coil)
 
-    def append_data(self, sheet="FAT IO", coil_index=0):
+    def write(self, data, sheet="FAT IO", coil_index=0):
         """Append data to workbook."""
         with self.openbook():
-            index = self._coil_index(sheet)[coil_index]
+            xls_index = self._coil_index(sheet)[coil_index]
+            rows = slice(xls_index[0], xls_index[0] + data.shape[0])
+            cols = slice(xls_index[1], xls_index[1] + data.shape[1])
+            print(self.book)
+            worksheet = self.book[sheet]
+            print(worksheet[1:5])
+            print(rows, cols, data)
+            worksheet[rows, cols] = data
+            self.book.save(self._xls_file)
+            print(xls_index, self._xls_file)
+            print(worksheet.cell(xls_index))
 
-            data = pandas.DataFrame(np.ones((8, 6)))
-            data.to_excel(
-                self._xls_file,
-                sheet_name="FAT IO",
-                startrow=index[0] + 3,
-                startcol=index[1] + 1,
-            )
+            #    self._xls_file,
+            #    sheet_name="FAT IO",
+            #    startrow=index[0] + 3,
+            #    startcol=index[1] + 1,
 
     @cached_property
     def coil(self) -> list[str]:
@@ -131,8 +138,8 @@ class SectorData(FilePath, SectorFile):
     @contextmanager
     def openbook(self):
         """Manage access to source workbook."""
-        self.book = openpyxl.load_workbook(self.xls_file, data_only=True)
-        yield self.book
+        self.book = openpyxl.load_workbook(self.xls_file, data_only=False)
+        yield
         self.book.close()
 
     def locate(self, item: str, sheet: str):

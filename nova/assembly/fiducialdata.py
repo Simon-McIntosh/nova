@@ -15,6 +15,7 @@ from nova.assembly.fiducialccl import Fiducial, FiducialIDM, FiducialRE
 from nova.assembly.fiducialsector import FiducialSector
 from nova.assembly.gaussianprocessregressor import GaussianProcessRegressor
 from nova.assembly.plotter import Plotter
+from nova.assembly.sectordata import SectorData
 from nova.database.netcdf import netCDF
 from nova.graphics.plot import Plot
 
@@ -80,7 +81,7 @@ class FiducialData(netCDF, Plot, Plotter):
             for attr, value in attrs.items():
                 if isinstance(value, bool):
                     attrs[attr] = int(value)
-            self.data.attrs = attrs
+            self.data.attrs |= attrs
             self.store()
 
     @cached_property
@@ -90,7 +91,9 @@ class FiducialData(netCDF, Plot, Plotter):
             "RE": FiducialRE,
             "IDM": FiducialIDM,
             "Sector": FiducialSector,
-        }[self.fiducial]
+        }[
+            self.fiducial
+        ](self.data.target, phase=self.phase)
 
     def build(self):
         """Build fiducial dataset."""
@@ -225,22 +228,33 @@ class FiducialData(netCDF, Plot, Plotter):
 
     def load_fiducial_deltas(self):
         """Load fiducial deltas."""
-        fiducial = self.dataset(self.data.target, phase=self.phase)
-        delta, origin = fiducial.data
+        delta, origin = self.dataset.data
         self.data["coil"] = list(delta)
         self.data = self.data.assign_coords(origin=("coil", origin))
         self.data["fiducial_delta"] = (
             ("coil", "target", "space"),
             np.stack([delta[index].to_numpy(float) for index in delta], axis=0),
         )
-        if hasattr(fiducial, "variance"):
+        if hasattr(self.dataset, "variance"):
             self.data["fiducial_variance"] = ("coil", "target", "space"), np.stack(
                 [
-                    fiducial.variance[index].to_numpy(float)
-                    for index in fiducial.variance
+                    self.dataset.variance[index].to_numpy(float)
+                    for index in self.dataset.variance
                 ],
                 axis=0,
             )
+        if hasattr(self.dataset, "sectors"):
+            self.data.coords["sector"] = list(self.dataset.sectors)
+            self.data["coils"] = ("sector", "coil_index"), np.array(
+                list(self.dataset.sectors.values())
+            )
+            self.data["filename"] = "sector", [
+                SectorData(sector).filename for sector in self.dataset.sectors
+            ]
+            self.data["version"] = "sector", [
+                SectorData(sector).version for sector in self.dataset.sectors
+            ]
+
         self.data["centerline_delta"] = xarray.DataArray(
             0.0,
             coords=[
@@ -254,7 +268,7 @@ class FiducialData(netCDF, Plot, Plotter):
                 self.data["centerline_delta"][
                     coil_index, :, space_index
                 ] = self.load_gpr(coil_index, space_index)
-        self.data.attrs["source"] = self.dataset().source
+        self.data.attrs["source"] = self.dataset.source
 
     def load_gpr(self, coil_index, space_index):
         """Return Gaussian Process regression."""

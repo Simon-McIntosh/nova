@@ -13,6 +13,7 @@ import xarray
 
 from nova.assembly.fiducialdata import FiducialData
 from nova.assembly.fiducialplotter import FiducialPlotter
+from nova.assembly.sectordata import SectorData
 from nova.assembly.transform import Rotate
 
 
@@ -44,6 +45,14 @@ class FiducialFit(FiducialData):
         self.load_measurement()
         self.evaluate_gpr()
         self.fit()
+
+    def write(self, sheet="FAT IO"):
+        """Write fits to source xls files."""
+        data = np.ones((8, 3))
+        for sector in self.data.sector.data[:1]:
+            for coil_index, coil in enumerate(self.data.coils.sel(sector=sector).data):
+                sectordata = SectorData(sector)
+                sectordata.write(data, sheet=sheet, coil_index=coil_index)
 
     def load_target(self):
         """Load target geometories in cylindrical coordinate system."""
@@ -342,6 +351,8 @@ if __name__ == "__main__":
     coil_index = 0
     fiducial.plot_fit(coil_index)
     fiducial.plot_fit(coil_index, "fit")
+
+    fiducial.write()
 
     """
     for coil in range(18):

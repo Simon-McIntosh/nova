@@ -22,6 +22,7 @@ class FiducialFit(FiducialData):
     """Extend FiducialData class to include fitting algorithums."""
 
     filename: str = "fiducial_fit"
+    variance: float | str = "file"
     infer: bool = True
     method: str = "rms"
     samples: int = 10
@@ -43,16 +44,27 @@ class FiducialFit(FiducialData):
         self.data = self.data.rename(dict(space="cartesian"))
         self.load_target()
         self.load_measurement()
-        self.evaluate_gpr()
+        self.evaluate_gpr("fiducial", "gpr")
         self.fit()
+        self.evaluate_gpr("fiducial_fit", "fit_gpr")
 
     def write(self, sheet="FAT IO"):
         """Write fits to source xls files."""
-        data = np.ones((8, 3))
-        for sector in self.data.sector.data[:1]:
-            for coil_index, coil in enumerate(self.data.coils.sel(sector=sector).data):
-                sectordata = SectorData(sector)
-                sectordata.write(data, sheet=sheet, coil_index=coil_index)
+        for sector in tqdm(self.data.sector.data, "updating xls workbooks"):
+            sectordata = SectorData(sector)
+            coils = self.data.coils.sel(sector=sector)
+            with sectordata.openbook(), sectordata.savebook():
+                worksheet = sectordata.book[sheet]
+                for coil, xls_index in zip(coils, sectordata._coil_index(sheet)):
+                    data = self.data.fiducial_fit.sel(coil=coil).sortby("target").data
+                    std = (
+                        self.data.fiducial_fit_gpr_std.sel(coil=coil)
+                        .sortby("target")
+                        .data
+                    )
+                    sectordata.write(
+                        worksheet, xls_index, np.append(data, 2 * std, axis=1)
+                    )
 
     def load_target(self):
         """Load target geometories in cylindrical coordinate system."""
@@ -72,15 +84,15 @@ class FiducialFit(FiducialData):
             self.data.centerline_target.expand_dims(dim, 0) + self.data.centerline_delta
         )
 
-    def evaluate_gpr(self):
+    def evaluate_gpr(self, target="fiducial", postfix="gpr"):
         """Evaluate gpr in cylindrical coordinate system."""
-        delta = (
-            Rotate.to_cylindrical(self.data["fiducial"]) - self.data.fiducial_target_cyl
-        )
-        fiducial = "fiducial_gpr"
-        centerline = "centerline_gpr"
-        sample = "sample_gpr"
+        delta = Rotate.to_cylindrical(self.data[target]) - self.data.fiducial_target_cyl
+        fiducial = f"fiducial_{postfix}"
+        fiducial_std = f"fiducial_{postfix}_std"
+        centerline = f"centerline_{postfix}"
+        sample = f"sample_{postfix}"
         self.data[fiducial] = xarray.zeros_like(self.data.fiducial_target_cyl)
+        self.data[fiducial_std] = xarray.zeros_like(self.data.fiducial_target_cyl)
         self.data[centerline] = xarray.zeros_like(self.data.centerline_target_cyl)
         self.data[sample] = (
             xarray.zeros_like(self.data[centerline])
@@ -91,9 +103,10 @@ class FiducialFit(FiducialData):
             for space_index in range(self.data.dims["cylindrical"]):
                 self.load_gpr(coil_index, space_index)
                 self.gpr.fit(delta[coil_index, :, space_index])
-                self.data[fiducial][coil_index, :, space_index] = self.gpr.predict(
-                    self.data.target_length
-                )
+                (
+                    self.data[fiducial][coil_index, :, space_index],
+                    self.data[fiducial_std][coil_index, :, space_index],
+                ) = self.gpr.predict(self.data.target_length, return_std=True)
                 self.data[centerline][coil_index, :, space_index] = self.gpr.predict(
                     self.data.arc_length
                 )

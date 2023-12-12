@@ -72,7 +72,7 @@ class GaussianProcessRegressor:
             return np.linspace(self.period[0], self.period[1], x)
         return self.to_numpy(x)
 
-    def predict(self, x_mean):
+    def predict(self, x_mean, return_std=False):
         """Return mean Gaussian Process Regressor."""
         x_mean = self.x_space(x_mean)
         y_mean, y_std = self.regressor.predict(x_mean[:, np.newaxis], return_std=True)
@@ -83,6 +83,8 @@ class GaussianProcessRegressor:
         self.data["x_mean"] = x_mean
         self.data["y_mean"] = ("x_mean", y_mean)
         self.data["y_std"] = ("x_mean", y_std)
+        if return_std:
+            return y_mean, y_std
         return y_mean
 
     def sample(self, x_sample, n_samples: int):

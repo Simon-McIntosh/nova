@@ -183,7 +183,7 @@ class UdaQuery(UdaInfo, UdaSample):
     def __post_init__(self):
         """Load variable generator."""
         super().__post_init__()
-        self.generator = (variable for variable in self.variables[:1])
+        self.generator = (variable for variable in self.variables[:100])
 
     def __call__(self, variable):  # TODO treat adcP/I flag correctly asBitfield
         """Return UDA query."""
@@ -272,19 +272,19 @@ async def main():
     """Process diagnostic signals."""
     queue = asyncio.Queue()
 
-    query = UdaQuery(pulse_id=62, duration=5, sample_number=50, sample_type=1)
+    query = UdaQuery(pulse_id=62, duration=5, sample_number=5000, sample_type=1)
 
-    producers = [asyncio.create_task(publish(query, queue)) for _ in range(1)]
-    # consumers = [asyncio.create_task(request(queue)) for _ in range(1)]
-
-    from concurrent.futures import ProcessPoolExecutor
-
-    loop = asyncio.get_event_loop()
-
-    with ProcessPoolExecutor() as pool:
-        consumers = [await loop.run_in_executor(pool, request, queue) for _ in range(3)]
+    producers = [asyncio.create_task(publish(query, queue)) for _ in range(10)]
+    consumers = [asyncio.create_task(request(queue)) for _ in range(100)]
 
     """
+
+    # from concurrent.futures import ProcessPoolExecutor
+    # loop = asyncio.get_event_loop()
+    # with ProcessPoolExecutor() as pool:
+    #     consumers = [await loop.run_in_executor(pool, request, queue) 
+    # for _ in range(3)]
+
     consumers = []
 
     from aiomultiprocess import Pool

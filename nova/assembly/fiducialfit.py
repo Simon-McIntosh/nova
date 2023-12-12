@@ -65,6 +65,21 @@ class FiducialFit(FiducialData):
                     sectordata.write(
                         worksheet, xls_index, np.append(data, 2 * std, axis=1)
                     )
+                    opt_x = self.data.opt_x.sel(coil=coil)
+                    self._write_transform(worksheet, xls_index, opt_x)
+
+    def _write_transform(self, worksheet, xls_index, opt_x):
+        """Write transform to worksheet."""
+        worksheet.cell(xls_index[0] - 4, xls_index[1] + 2, "transform")
+        worksheet.cell(xls_index[0] - 5, xls_index[1] + 6, "Intrinsic Euler angles")
+        for j, (label, value) in enumerate(zip(opt_x.transform.data, opt_x.data)):
+            match len(label):
+                case 1:
+                    label = f"d{label} [mm]"
+                case 2:
+                    label = f"{label[0].upper()} [deg]"
+            worksheet.cell(xls_index[0] - 4, xls_index[1] + 3 + j, label)
+            worksheet.cell(xls_index[0] - 3, xls_index[1] + 3 + j, value)
 
     def load_target(self):
         """Load target geometories in cylindrical coordinate system."""

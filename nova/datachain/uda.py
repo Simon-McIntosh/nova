@@ -271,30 +271,10 @@ async def request(queue: asyncio.Queue):
 async def main():
     """Process diagnostic signals."""
     queue = asyncio.Queue()
-
     query = UdaQuery(pulse_id=62, duration=5, sample_number=5000, sample_type=1)
 
     producers = [asyncio.create_task(publish(query, queue)) for _ in range(10)]
     consumers = [asyncio.create_task(request(queue)) for _ in range(100)]
-
-    """
-
-    # from concurrent.futures import ProcessPoolExecutor
-    # loop = asyncio.get_event_loop()
-    # with ProcessPoolExecutor() as pool:
-    #     consumers = [await loop.run_in_executor(pool, request, queue) 
-    # for _ in range(3)]
-
-    consumers = []
-
-    from aiomultiprocess import Pool
-
-    get = asyncio.create_task(request(queue))
-
-    async with Pool() as pool:
-        async for result in pool.map(get, range(4)):
-            consumers.append(result)
-    """
 
     await asyncio.gather(*producers)
     await queue.join()

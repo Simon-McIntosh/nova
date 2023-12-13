@@ -335,7 +335,7 @@ if __name__ == "__main__":
     # filename = "CS1L"
     filename = "CS"
     centerline = Centerline(filename=filename)
-    centerline.write_ids()
+    # centerline.write_ids()
 
     # for filename in ["CC", "CS"]:
     #   centerline = Centerline(filename=filename)

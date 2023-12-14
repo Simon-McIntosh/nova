@@ -33,13 +33,14 @@ def test_pf_active_attrs():
 @mark["pf_active"]
 def test_pf_active_ids():
     ids = load_ids(**ids_attrs["pf_active"]).ids_data
-    assert ids.coil.array[0].identifier == "CS3U"
+    ids.coil.getAoSElement
+    assert ids.coil[0].identifier == "CS3U"
 
 
 @mark["pf_active"]
 def test_pf_active_properties():
     pf_active = Database(**ids_attrs["pf_active"])
-    assert "ITER_D_33NHXN" in pf_active.ids_data.ids_properties.source
+    assert "ITER_D_33NHXN" in pf_active.ids_data.ids_properties.source.value
 
 
 @mark["pf_active"]

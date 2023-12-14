@@ -96,7 +96,7 @@ class IDS:
         """Return IDS URI."""
         return (
             f"imas:{self.backend}?user={self.user};name={self.name};"
-            f"shot={self.pulse};run={self.run};"
+            f"pulse={self.pulse};run={self.run};"
             f"occurrence={self.occurrence};"
             f"database={self.machine};version={self.dd_version};"
         )
@@ -531,7 +531,7 @@ class Database(IDS):
             occurrence = self.occurrence
         with self.db_open() as db_entry:
             if len(ids_name) == 2:
-                return db_entry.partial_get(*ids_name, occurrence=occurrence)
+                return getattr(db_entry.get(ids_name[0]), ids_name[1])
             return db_entry.get(*ids_name, occurrence=occurrence)
 
     def next_occurrence(self, limit=10000) -> int:

@@ -5,22 +5,20 @@ from operator import attrgetter
 import os
 from typing import Any, ClassVar, Optional, Type
 
-try:
-    import imas
-    from imas.hli_exception import ALException
-    from imas.hli_utils import imasdef
-
-    IMAS_MODULE_NOT_FOUND = False
-    EMPTY_INT = imasdef.EMPTY_INT
-    EMPTY_FLOAT = imasdef.EMPTY_FLOAT
-except (ImportError, ModuleNotFoundError, SystemExit):
-    IMAS_MODULE_NOT_FOUND = True
-    EMPTY_INT = -999999999
-    EMPTY_FLOAT = -9e40
 import numpy as np
 import xxhash
 
 from nova.database.datafile import Datafile
+from nova.utilities.importmanager import check_import
+
+with check_import("imaspy"):
+    import imaspy
+
+from imas.hli_exception import ALException  # TODO use exception from IMASPy
+
+EMPTY_INT = imaspy.ids_defs.EMPTY_INT
+EMPTY_FLOAT = imaspy.ids_defs.EMPTY_FLOAT
+
 
 # _pylint: disable=too-many-ancestors
 
@@ -129,7 +127,7 @@ class IDS:
 
     def get_ids(self):
         """Return empty ids."""
-        return getattr(imas, self.name)()
+        return getattr(imaspy.IDSFactory(), self.name)()
 
     @classmethod
     def default_ids_attrs(cls) -> dict:
@@ -238,7 +236,7 @@ class DataAttrs:
     True
     >>> attrs['run'] != 403
     True
-    >>> attrs['ids'].__name__
+    >>> attrs['ids'].metadata.name
     'equilibrium'
 
     Attrs may be input as a list or tuple of args. This input is
@@ -486,17 +484,17 @@ class Database(IDS):
         Initialize database class directly from an ids.
 
         Set unknown pulse and run numbers to zero if unset
-        Update name to match ids.__name__
+        Update name to match ids.metadata.name
         """
         if self._unset_attrs:
             self.pulse = 0
             self.run = 0
-        if self.name is not None and self.name != self.ids_data.__name__:
+        if self.name is not None and self.name != self.ids_data.metadata.name:
             raise NameError(
                 f"missmatch between instance name {self.name} "
-                f"and ids_data {self.ids_data.__name__}"
+                f"and ids_data {self.ids_data.metadata.name}"
             )
-        self.name = self.ids_data.__name__
+        self.name = self.ids_data.metadata.name
 
     def _check_ids_attrs(self):
         """Confirm minimum working set of input attributes."""
@@ -541,7 +539,7 @@ class Database(IDS):
         ids_path = "ids_properties/homogeneous_time"
         for i in range(limit):
             try:
-                if self.get_ids(ids_path, i) == imas.imasdef.EMPTY_INT:
+                if self.get_ids(ids_path, i) == imaspy.ids_defs.EMPTY_INT:
                     return i
             except ALException:
                 return i
@@ -550,17 +548,15 @@ class Database(IDS):
     @property
     def backend_id(self):  # TODO remove once uri interface is released
         """Return backend id from backend."""
-        return getattr(imas.hli_utils.imasdef, f"{self.backend.upper()}_BACKEND")
+        return getattr(imaspy.ids_defs, f"{self.backend.upper()}_BACKEND")
 
     @contextmanager
     def _db_entry(self):
         """Yield database with context manager."""
-        if IMAS_MODULE_NOT_FOUND:
-            raise ImportError("imas module not found, try `ml load IMAS`")
-        db_entry = imas.DBEntry(
+        db_entry = imaspy.DBEntry(
             self.backend_id, self.machine, self.pulse, self.run, self.user
         )
-        # db_entry = imas.DBEntry()  # TODO uri update
+        # db_entry = imaspy.DBEntry()  # TODO uri update
         yield db_entry
         db_entry.close()
 
@@ -572,7 +568,7 @@ class Database(IDS):
                 db_entry.open()  # (uri=self.uri)  # TODO uri update
             except ALException as error:
                 raise ALException(
-                    f"malformed input to imas.DBEntry\n{error}\n"
+                    f"malformed input to imaspy.DBEntry\n{error}\n"
                     f"pulse {self.pulse}, "
                     f"run {self.run}, "
                     f"user {self.user}\n"
@@ -794,6 +790,8 @@ class IdsIndex:
 
     def _get_shape(self, path: str) -> tuple[int, ...] | tuple[()]:
         """Return data shape at index=0 on path."""
+        return self.get_slice(0, path).shape
+        """  # TODO remove if not required with imaspy 
         match data := self.get_slice(0, path):
             case np.ndarray():
                 return data.shape
@@ -802,8 +800,10 @@ class IdsIndex:
             case _ if isinstance(data, np.integer):
                 return ()
             case _:
+                print("***", data, type(data), data.shape)
                 raise ValueError(f"unable to determine data length {path} {data}")
         return ()
+        """
 
     def get(self, path: str):
         """Return attribute from ids path."""
@@ -1049,4 +1049,4 @@ class CoilData(IdsData):
 if __name__ == "__main__":
     import doctest
 
-    doctest.testmod(verbose=True)
+    doctest.testmod(verbose=False)

@@ -163,8 +163,7 @@ class FiducialFit(FiducialData):
         points = points[:] + x[:3]
         if len(x) == 6:
             rotate = Rotation.from_euler("XYZ", x[-3:], degrees=True)
-            for i in range(2):
-                points[i] = rotate.apply(points[i])
+            points[:] = rotate.apply(points)
         return points
 
     def delta(self, points):
@@ -376,7 +375,7 @@ if __name__ == "__main__":
 
     fiducial = FiducialFit(phase=phase, infer=True, fill=False, method="rms")
 
-    coil_index = 0
+    coil_index = 10
     fiducial.plot_fit(coil_index)
     fiducial.plot_fit(coil_index, "fit")
 

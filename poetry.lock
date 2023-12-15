@@ -2000,7 +2000,7 @@ files = [
 
 [[package]]
 name = "imaspy"
-version = "0.8.0+110.g898aef1"
+version = "0.8.0+122.geb7b64b"
 description = "Pythonic wrappers for the IMAS Access Layer"
 optional = true
 python-versions = ">=3.7"
@@ -2009,7 +2009,7 @@ develop = false
 
 [package.dependencies]
 click = "*"
-importlib_resources = "*"
+importlib-resources = "*"
 numpy = ">=1.15.4"
 packaging = "*"
 rich = "*"
@@ -2025,7 +2025,7 @@ test = ["asv", "matplotlib", "pytest (>=5.4.1)", "pytest-cov (>=0.6)", "pytest-r
 type = "git"
 url = "ssh://git@git.iter.org/imas/imaspy.git"
 reference = "develop"
-resolved_reference = "0e041d0ea2da40c46f1a26d5e03bd118b66f385b"
+resolved_reference = "eb7b64bbb9bb2a5d6d35f0006934690ac75a8da7"
 
 [[package]]
 name = "importlib-metadata"

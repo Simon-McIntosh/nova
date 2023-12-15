@@ -40,7 +40,7 @@ def test_pf_active_ids():
 @mark["pf_active"]
 def test_pf_active_properties():
     pf_active = Database(**ids_attrs["pf_active"])
-    assert "ITER_D_33NHXN" in pf_active.ids_data.ids_properties.source.value
+    assert "ITER_D_33NHXN" in pf_active.ids_data.ids_properties.source
 
 
 @mark["pf_active"]

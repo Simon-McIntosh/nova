@@ -531,8 +531,11 @@ class Database(IDS):
             occurrence = self.occurrence
         with self.db_open() as db_entry:
             if len(ids_name) == 2:
-                return getattr(db_entry.get(ids_name[0]), ids_name[1])
-            return db_entry.get(*ids_name, occurrence=occurrence)
+                return getattr(
+                    db_entry.get(ids_name[0], occurrence=occurrence, lazy=True),
+                    ids_name[1],
+                )
+            return db_entry.get(*ids_name, occurrence=occurrence, lazy=True)
 
     def next_occurrence(self, limit=10000) -> int:
         """Return index of next available occurrence."""

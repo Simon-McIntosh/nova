@@ -58,18 +58,18 @@ datasource = {
             provider="Vincent Bontemps, vincent.bontemps@iter.org",
             contact="Guillaume Davin, Guillaume.Davin@iter.org",
         ),
-        attributes={"cross_section": {"circle": [0, 0, 0.0163, 0.0163, 2]}},
+        attributes={"cross_section": {"circle": [0, 0, 0.0326, 0.0326, 2]}},
     ),
     "CS": DataSource(
         pulse=111004,
-        run=1,
+        run=2,
         description="Central Solenoid Modules - conductor centerlines",
         provider="Simon McIntosh, simon.mcintosh@iter.org",
         officer="Thierry Schild, thierry.schild@iter.org",
         pbs=11,
         status="active",
-        replaces="",
-        reason_for_replacement="",
+        replaces="111004,1",
+        reason_for_replacement="Correction to conductor radius.",
         cad=CAD(
             reference="DET-07879-A",
             objects="Central Solenoid + Feeders Centerlines Extraction "
@@ -78,7 +78,27 @@ datasource = {
             provider="Vincent Bontemps, vincent.bontemps@iter.org",
             contact="Guillaume Davin, Guillaume.Davin@iter.org",
         ),
-        attributes={"cross_section": {"circle": [0, 0, 0.0163, 0.0163, 2]}},
+        attributes={"cross_section": {"circle": [0, 0, 0.0326, 0.0326, 2]}},
+    ),
+    "PF": DataSource(
+        pulse=111005,
+        run=1,
+        description="Poloidal Field Coils - conductor centerlines",
+        provider="Simon McIntosh, simon.mcintosh@iter.org",
+        officer="Fabrice Simon, fabrice.simon@iter.org",
+        pbs=11,
+        status="active",
+        replaces="",
+        reason_for_replacement="",
+        cad=CAD(
+            reference="DET-078779-A",
+            objects="Poloidal Field Coils + Feeders Centerlines Extraction "
+            "for IMAS database",
+            date="29/11/2023",
+            provider="Vincent Bontemps, vincent.bontemps@iter.org",
+            contact="Nelson Gatos, nelson.gatos@iter.org",
+        ),
+        attributes={"cross_section": {"circle": [0, 0, 0.035, 0.035, 2]}},
     ),
 }
 
@@ -333,7 +353,9 @@ class Centerline(Plot, PolylineAttrs, CoilDatabase):
 if __name__ == "__main__":
     # filename = "CS"
     # filename = "CS1L"
-    filename = "CS"
+    # filename = "CS"
+    filename = "CC"
+
     centerline = Centerline(filename=filename)
     # centerline.write_ids()
 

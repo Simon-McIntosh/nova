@@ -33,7 +33,6 @@ def test_pf_active_attrs():
 @mark["pf_active"]
 def test_pf_active_ids():
     ids = load_ids(**ids_attrs["pf_active"]).ids_data
-    ids.coil.getAoSElement
     assert ids.coil[0].identifier == "CS3U"
 
 

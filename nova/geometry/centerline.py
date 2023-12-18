@@ -351,10 +351,11 @@ class Centerline(Plot, PolylineAttrs, CoilDatabase):
 
 
 if __name__ == "__main__":
-    filename = "CS"
+    # filename = "CS"
     # filename = "CS1L"
-    # filename = "CC"
-    # filename = "PF"
+    # filename = "CS"
+    filename = "CC"
+
     centerline = Centerline(filename=filename)
     # centerline.write_ids()
 

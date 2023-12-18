@@ -138,8 +138,8 @@ if __name__ == "__main__":
 
     benchmark = Benchmark(ngrid=None, tplasma="hex")
     benchmark.itime = -1
-    # benchmark.plot_force()
-    # benchmark.plot_field()
+    benchmark.plot_force()
+    benchmark.plot_field()
 
     benchmark.set_axes("2d")
     benchmark.plot()

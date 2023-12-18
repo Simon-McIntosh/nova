@@ -251,6 +251,7 @@ if __name__ == "__main__":
     # machine = MachineDatabase().sync_ids()
     # machine.load_ids('pf_active')
     # print(machine.frame)
+    MachineDatabase().rsync()
 
     # iter_md = MachineDatabase(machine="ITER_MD")
     # iter_md.sync_shot("111003/2")
@@ -261,7 +262,7 @@ if __name__ == "__main__":
     # ScenarioDatabase(user='dubrovm').sync_shot('105028/1')
     # ScenarioDatabase(user='dubrovm').sync_shot('105027/1')
 
-    ScenarioDatabase().sync_shot("134173/106")
+    # ScenarioDatabase().sync_shot("134173/106")
     # scenario = ScenarioDatabase()
     # scenario.sync_shot("115001/1")
 

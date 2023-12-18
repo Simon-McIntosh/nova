@@ -14,7 +14,6 @@ from nova.graphics.plot import Plot
 from nova.imas.coil import coil_name, coil_names, part_name
 from nova.imas.database import ImasIds
 from nova.imas.machine import CoilDatabase
-
 from nova.imas.scenario import Scenario
 
 

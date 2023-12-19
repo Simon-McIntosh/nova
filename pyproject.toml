@@ -107,6 +107,7 @@ types-pyyaml = ">=6.0.12.12"
 vtk = ">=9.3.0"
 build = ">=1.0.3"
 wheel = ">=0.41.3"
+numba = "^0.58.1"
 
 
 [tool.poetry.extras]

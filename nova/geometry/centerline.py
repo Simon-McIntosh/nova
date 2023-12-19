@@ -40,26 +40,6 @@ datasource = {
         ),
         attributes={"cross_section": {"square": [0, 0, 0.0148]}},
     ),
-    "CS1L": DataSource(
-        pulse=0,
-        run=0,
-        description="Central Solenoid Modules - conductor centerlines",
-        provider="Simon McIntosh, simon.mcintosh@iter.org",
-        officer="Thierry Schild, thierry.schild@iter.org",
-        pbs=11,
-        status="active",
-        replaces="",
-        reason_for_replacement="",
-        cad=CAD(
-            reference="DET-*",
-            objects="Central Solenoid Module CS1L + Feeders Centerlines Extraction "
-            "for IMAS database",
-            date="12/10/2023",
-            provider="Vincent Bontemps, vincent.bontemps@iter.org",
-            contact="Guillaume Davin, Guillaume.Davin@iter.org",
-        ),
-        attributes={"cross_section": {"circle": [0, 0, 0.0326, 0.0326, 2]}},
-    ),
     "CS": DataSource(
         pulse=111004,
         run=2,

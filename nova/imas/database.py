@@ -430,13 +430,18 @@ class Database(IDS):
         ) is not None:
             self.name = name
 
-    @property
-    def ids_data(self):
-        """Return ids data, lazy load."""
-        if self.ids is None:
-            self._check_ids_attrs()
-            self.ids = self.get_ids()
-        return self.ids
+    @contextmanager
+    def ids_data(self, mode="a", lazy=True):
+        """Open database and return ids."""
+        if self.ids is not None:
+            yield self.ids
+        with imaspy.DBEntry(self.uri, mode=mode) as db_entry:
+            yield db_entry.get(self.name, lazy=lazy)
+
+        # if self.ids is not None:
+        #    self._check_ids_attrs()
+        #    self.ids = self.get_ids()
+        # yield self.ids
 
     def load_database(self):
         """Load instance database attributes."""

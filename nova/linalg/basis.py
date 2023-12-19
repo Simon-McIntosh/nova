@@ -193,7 +193,7 @@ if __name__ == "__main__":
     #bernstein.plot()
 
     alpha = 0.05
-    bernstein = Bernstein(eq.data.dims['psi_norm'], 21)
+    bernstein = Bernstein(eq.data.sizes['psi_norm'], 21)
 
     matrix = bernstein.matrix.T @ bernstein.matrix
     matrix.flat[::matrix.shape[1]+1] += alpha
@@ -240,7 +240,7 @@ if __name__ == "__main__":
 
     plt.plot(bernstein.coordinate, data, 'o')
 
-    bernstein = Bernstein(eq.data.dims['psi_norm'], 7)
+    bernstein = Bernstein(eq.data.sizes['psi_norm'], 7)
     bernstein /= data
     bernstein.plot(axes=plt.gca())
 
@@ -309,10 +309,10 @@ if __name__ == "__main__":
     # reg /= data
 
     """
-    bernstein = Bernstein(eq.data.dims['psi_norm'], 7)
+    bernstein = Bernstein(eq.data.sizes['psi_norm'], 7)
 
-    err = np.zeros((len(eq.data[attr]), eq.data.dims['psi_norm']))
-    for i in range(eq.data.dims['time']):
+    err = np.zeros((len(eq.data[attr]), eq.data.sizes['psi_norm']))
+    for i in range(eq.data.sizes['time']):
         err[i] = eq.data[attr][i] - bernstein.forward(
             bernstein / eq.data[attr].data[i])
     """
@@ -330,7 +330,7 @@ if __name__ == "__main__":
 
     #data = C_ @ data
     #bernstein.matrix = C_ @ bernstein.matrix[:-1]
-    bernstein = Bernstein(eq.data.dims['psi_norm'], 7)
+    bernstein = Bernstein(eq.data.sizes['psi_norm'], 7)
 
     alpha = 0
     #matrix = C_ @ bernstein.matrix
@@ -417,7 +417,7 @@ if __name__ == "__main__":
     #plt.plot(bernstein.coordinate, data_[:-1])
     plt.plot(bernstein.coordinate, profile.data[:-1])
 
-    #bernstein = Bernstein(eq.data.dims['psi_norm'], 21)
+    #bernstein = Bernstein(eq.data.sizes['psi_norm'], 21)
     #lsq = scipy.optimize.lsq_linear(bernstein.matrix, profile)
 
 

@@ -102,7 +102,7 @@ class IdsInput(AutoComplete):
                     update_itime("value", -1, 0)
                 if itime is not None:
                     itime.value = 0
-                    itime.end = simulator.data.dims["time"] - 1
+                    itime.end = simulator.data.sizes["time"] - 1
                 self._update_button_status("load", "success")
             except (KeyError, ValueError, LinAlgError) as error:
                 warn(f"IDS load unsucsessful \n{error}")

@@ -93,8 +93,8 @@ class FiducialTransform:
             .expand_dims(dict(samples=self.n_samples), axis=-1)
             .copy()
         )
-        for coil_index in range(self.data.dims["coil"]):
-            for space_index in range(self.data.dims["cylindrical"]):
+        for coil_index in range(self.data.sizes["coil"]):
+            for space_index in range(self.data.sizes["cylindrical"]):
                 self.gpr.fit(delta[coil_index, :, space_index])
                 self.data[target][coil_index, :, space_index] = self.gpr.predict(
                     self.data.target_length
@@ -117,7 +117,7 @@ class FiducialTransform:
             self.rotate.to_cylindrical(self.data[label]) - self.data.target_cylindrical
         )
         axes = plt.subplots(3, 1, sharex=True)[1]
-        for space_index in range(self.data.dims["cylindrical"]):
+        for space_index in range(self.data.sizes["cylindrical"]):
             self.gpr.fit(delta[coil_index, :, space_index])
             self.gpr.predict(self.data.arc_length)
             self.gpr.plot(

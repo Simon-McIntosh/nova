@@ -341,7 +341,7 @@ class Extrapolate(Operate):
             np.where(self.data.coil_name.data == name)[0][0] for name in index
         ]
         self.data["_current"] = self.data.current.copy()
-        for itime in tqdm(range(self.data.dims["time"])):
+        for itime in tqdm(range(self.data.sizes["time"])):
             self.itime = itime
             self["_current"][data_index] = self.sloc[index, ["Ic"]].squeeze().values
 

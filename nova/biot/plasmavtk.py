@@ -26,8 +26,8 @@ class BiotPlasmaVTK(BiotPlasmaGrid):
 
     def build_mesh(self):
         """Build vtk mesh."""
-        points = np.c_[self.data.x, np.zeros(self.data.dims["x"]), self.data.z]
-        faces = np.c_[np.full(self.data.dims["tri_index"], 3), self.data.triangles]
+        points = np.c_[self.data.x, np.zeros(self.data.sizes["x"]), self.data.z]
+        faces = np.c_[np.full(self.data.sizes["tri_index"], 3), self.data.triangles]
         self.mesh = pyvista.PolyData(points, faces=faces)
 
     def plot(self, **kwargs):

@@ -46,15 +46,15 @@ class Circuit(Plot, netCDF, FrameSetLoc):
         data = self.data.coords.to_dataset()
         data["circuit"] = [circuit]
         try:
-            assert connection.shape[1] == 2 * self.data.dims["edge"]
+            assert connection.shape[1] == 2 * self.data.sizes["edge"]
         except AssertionError as error:
             raise AssertionError(
                 "Connection matrix column length incompatable with edge vector "
-                f"{connection.shape[1]} != {2 * self.data.dims['edge']}\n"
+                f"{connection.shape[1]} != {2 * self.data.sizes['edge']}\n"
                 f"{self.data.edge}"
             ) from error
         data["incidence_matrix"] = ("node", "edge"), np.zeros(
-            (self.data.dims["node"], self.data.dims["edge"])
+            (self.data.sizes["node"], self.data.sizes["edge"])
         )
         data["incidence_matrix"][: len(connection)] = (
             -connection[:, ::2] + connection[:, 1::2]
@@ -177,7 +177,7 @@ class Circuit(Plot, netCDF, FrameSetLoc):
         """Return loop conectivity matrix."""
         vector = self.data[column].data
         matrix = np.zeros(
-            (self.loop_number + self.link_number, self.data.dims[column]), float
+            (self.loop_number + self.link_number, self.data.sizes[column]), float
         )
         for i, loop in enumerate(self.loops):
             matrix[i] = np.sum(
@@ -200,7 +200,7 @@ class Circuit(Plot, netCDF, FrameSetLoc):
     def link_matrix(self):
         """Return single loop link matrix."""
         coils = self.data.coil.data
-        matrix = np.zeros((self.link_number, self.data.dims["coil"]), float)
+        matrix = np.zeros((self.link_number, self.data.sizes["coil"]), float)
         index = 0
         for link in self.links:
             reference = np.where(coils == link["edge"][0], link["sign"][0], 0)

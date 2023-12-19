@@ -194,7 +194,7 @@ if __name__ == "__main__":
 
     rng = np.random.default_rng(2025)
     data = profile.data.copy()
-    data += np.std(data) * (rng.random(eq.data.dims["psi_norm"]) - 0.5)
+    data += np.std(data) * (rng.random(eq.data.sizes["psi_norm"]) - 0.5)
 
     ols /= data
 
@@ -220,9 +220,9 @@ if __name__ == "__main__":
     rng = np.random.default_rng(2025)
 
     data = profile.data.copy()
-    data += 2 * np.std(data) * (rng.random(eq.data.dims['psi_norm']) - 0.5)
+    data += 2 * np.std(data) * (rng.random(eq.data.sizes['psi_norm']) - 0.5)
 
-    bernstein = Bernstein(eq.data.dims['psi_norm'], 21)
+    bernstein = Bernstein(eq.data.sizes['psi_norm'], 21)
     bernstein /= data
     bernstein.plot()
     """

@@ -311,8 +311,8 @@ if __name__ == "__main__":
     """
     index = abs(operate.data.ip.data) > 1e3
 
-    li_3 = np.zeros(operate.data.dims["time"])
-    for i in np.arange(operate.data.dims["time"])[index]:
+    li_3 = np.zeros(operate.data.sizes["time"])
+    for i in np.arange(operate.data.sizes["time"])[index]:
         operate.itime = i
         if operate["li_3"] == 0:
             continue

@@ -35,7 +35,7 @@ class FiducialError:
         self.data["translate"] = ["x", "y", "z", "rx", "ry", "rz"]
         self.data["fit_translate"] = (
             ("coil", "translate"),
-            np.zeros((self.data.dims["coil"], self.data.dims["translate"])),
+            np.zeros((self.data.sizes["coil"], self.data.sizes["translate"])),
         )
 
     def l2norm(self, candidate):
@@ -86,7 +86,7 @@ class FiducialError:
         """Fit coilset to baseline."""
         if radial_weight is not None:
             self.radial_weight = radial_weight
-        for index in range(self.data.dims["coil"]):
+        for index in range(self.data.sizes["coil"]):
             self.fit_coil(index)
 
     def plot(self, index, factor=500):

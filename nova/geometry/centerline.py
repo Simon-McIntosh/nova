@@ -274,7 +274,7 @@ class Centerline(Plot, PolylineAttrs, CoilDatabase):
                 dims=["coil_name", "segment_index", "point"],
             )
         intermediate_point = Source(self.subframe).space.intermediate_point
-        for coil_index in range(self.data.dims["coil_name"]):
+        for coil_index in range(self.data.sizes["coil_name"]):
             index = self.loc["frame"] == self.data.coil_name[coil_index]
             number = sum(index)
             self.data["segment_type"][coil_index, :number] = self.loc[index, "segment"]
@@ -295,11 +295,11 @@ class Centerline(Plot, PolylineAttrs, CoilDatabase):
     def coils_non_axisymmetric_ids(self) -> Ids:
         """Return populated coils non axisymmetric ids."""
         ids_entry = IdsEntry(**self.ids_attrs, ids_node="coil")
-        ids_entry.ids.resize(self.data.dims["coil_name"])
+        ids_entry.ids.resize(self.data.sizes["coil_name"])
         coil_name = [str(name) for name in self.data.coil_name.data]
         ids_entry["identifier", :] = coil_name
         ids_entry["name", :] = [full_coil_name(identifier) for identifier in coil_name]
-        ids_entry["turns", :] = np.ones(self.data.dims["coil_name"], float)
+        ids_entry["turns", :] = np.ones(self.data.sizes["coil_name"], float)
         section_triad = np.array([[0, -1, 0], [1, 0, 0], [0, 0, 1]])  # poly in xz plane
         section = Section(self.data.cross_section.data, triad=section_triad)
         element_type = {"line": 1, "arc": 2}

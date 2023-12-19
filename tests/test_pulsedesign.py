@@ -122,7 +122,7 @@ def test_sample_pds():
     sample = Sample(equilibrium.data, epsilon=0.75, savgol=None)
     design = PulseDesign(ids=sample.equilibrium_ids(), strike=True)
     design.itime = 0
-    assert design.data.dims["time"] == 15
+    assert design.data.sizes["time"] == 15
 
 
 if __name__ == "__main__":

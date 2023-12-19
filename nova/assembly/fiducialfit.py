@@ -83,7 +83,7 @@ class FiducialFit(FiducialData):
 
     def load_target(self):
         """Load target geometories in cylindrical coordinate system."""
-        dim = {"coil": self.data.dims["coil"]}
+        dim = {"coil": self.data.sizes["coil"]}
         for attr in ["fiducial_target", "centerline_target"]:
             self.data[f"{attr}_cyl"] = Rotate.to_cylindrical(
                 self.data[attr].expand_dims(dim, 0)
@@ -91,7 +91,7 @@ class FiducialFit(FiducialData):
 
     def load_measurement(self):
         """Load reference measurements."""
-        dim = {"coil": self.data.dims["coil"]}
+        dim = {"coil": self.data.sizes["coil"]}
         self.data["fiducial"] = (
             self.data.fiducial_target.expand_dims(dim, 0) + self.data.fiducial_delta
         )
@@ -114,8 +114,8 @@ class FiducialFit(FiducialData):
             .expand_dims(dict(samples=self.samples), axis=-1)
             .copy()
         )
-        for coil_index in range(self.data.dims["coil"]):
-            for space_index in range(self.data.dims["cylindrical"]):
+        for coil_index in range(self.data.sizes["coil"]):
+            for space_index in range(self.data.sizes["cylindrical"]):
                 self.load_gpr(coil_index, space_index)
                 self.gpr.fit(delta[coil_index, :, space_index])
                 (
@@ -138,7 +138,7 @@ class FiducialFit(FiducialData):
         """Load gaussian process regressor."""
         delta = Rotate.to_cylindrical(self.data[label]) - self.data.target_cyl
         axes = plt.subplots(3, 1, sharex=True)[1]
-        for space_index in range(self.data.dims["cylindrical"]):
+        for space_index in range(self.data.sizes["cylindrical"]):
             self.gpr.fit(delta[coil_index, :, space_index])
             self.gpr.predict(self.data.arc_length)
             self.gpr.plot(
@@ -262,7 +262,7 @@ class FiducialFit(FiducialData):
             self.data[f"{error_attr}_fit"] = xarray.zeros_like(self.data[error_attr])
         for coil in tqdm(self.data.coil, "fitting coils"):
             points = self.points(coil=coil)
-            xo = np.zeros(self.data.dims["transform"])
+            xo = np.zeros(self.data.sizes["transform"])
             opt = minimize(self.scalar_error, xo, method="SLSQP", args=(points,))
             if not opt.success:
                 warnings.warn(f"optimization failed {opt}")

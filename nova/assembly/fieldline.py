@@ -34,7 +34,7 @@ class FieldLine:
         gap = Gap(simulation)
         dataset = self.electromagnetic.load_dataset(simulation)
         self.predict(
-            gap.data["gap"], gap.data["roll"], gap.data["yaw"], dataset.dims["phi"]
+            gap.data["gap"], gap.data["roll"], gap.data["yaw"], dataset.sizes["phi"]
         )
         axes = plt.subplots(
             2, 1, sharex=False, sharey=False, gridspec_kw=dict(height_ratios=[1, 2])

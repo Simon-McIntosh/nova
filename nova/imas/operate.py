@@ -185,11 +185,11 @@ if __name__ == "__main__":
     # pulse, run = 105007, 9
     # pulse, run = 135007, 4
     # pulse, run = 105028, 1
-    pulse, run = 135013, 2
+    args = 135013, 2
 
-    # pulse, run = 130506, 403  # CORSICA
+    # args = 130506, 403  # CORSICA
 
-    args = 45272, 1, "mast_u"  # MastU
+    # args = 45272, 1, "mast_u"  # MastU
 
     operate = Operate(
         *args,

@@ -1243,6 +1243,6 @@ if __name__ == "__main__":
     machine += CoilsNonAxisymmetyric(111003, 2)  # CC
     machine += CoilsNonAxisymmetyric(115001, 1)  # ELM
 
-    machine.ferritic.insert("Fi")
+    # machine.ferritic.insert("Fi")
 
     machine.frame.vtkplot()

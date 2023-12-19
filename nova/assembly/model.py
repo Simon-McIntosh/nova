@@ -63,14 +63,14 @@ class ModelData(Dataset):
     @staticmethod
     def fft(data, axis=-2):
         """Apply fft to dataset."""
-        data.attrs["ncoil"] = data.dims["index"]
+        data.attrs["ncoil"] = data.sizes["index"]
         data.attrs["nyquist"] = data.ncoil // 2
         data["mode"] = range(data.nyquist + 1)
         data["coefficient"] = ["real", "imag", "amplitude", "phase"]
         dimensions = list(data.delta.dims)
         dimensions[axis] = "mode"
         dimensions = tuple(dimensions) + ("coefficient",)
-        data["fft"] = dimensions, np.zeros(tuple(data.dims[dim] for dim in dimensions))
+        data["fft"] = dimensions, np.zeros(tuple(data.sizes[dim] for dim in dimensions))
         coefficient = np.fft.rfft(data["delta"].data, axis=axis)
         data.fft[..., 0] = coefficient.real
         data.fft[..., 1] = coefficient.imag

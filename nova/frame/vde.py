@@ -291,7 +291,7 @@ class VDE(Axes, CoilSet):  # read_dina,
         delta_time = end_time - start_time
         time = start_time + delta_time * position / self.duration
         index = scipy.interpolate.interp1d(
-            self.data.time, range(self.data.dims["time"])
+            self.data.time, range(self.data.sizes["time"])
         )(time)
         return int(np.round(index))
 
@@ -326,8 +326,8 @@ class VDE(Axes, CoilSet):  # read_dina,
                 dims=["time", "target"],
                 coords=[self.probe.data.time, self.probe.data.target],
             )
-        tick = clock(self.data.dims["time"], header="Extracting waveform")
-        for i in range(self.data.dims["time"]):
+        tick = clock(self.data.sizes["time"], header="Extracting waveform")
+        for i in range(self.data.sizes["time"]):
             self.update(i, solve_grid=False)
             self.probe.data["psi"][i, :] = (
                 self.probe.data.Psi.values @ self.subframe.subspace["Ic"]
@@ -425,8 +425,8 @@ if __name__ == "__main__":
 
     # fit duck
     def fit():
-        tick = clock(vde.data.dims["time"], header="Extracting duck")
-        for index in range(vde.data.dims["time"]):
+        tick = clock(vde.data.sizes["time"], header="Extracting duck")
+        for index in range(vde.data.sizes["time"]):
             vde.update(index, solve_grid=False)
             duck.update(index, solve_grid=False)
             duck.sloc[~duck.sloc["coil"] & ~duck.sloc["free"], "Ic"] = 0

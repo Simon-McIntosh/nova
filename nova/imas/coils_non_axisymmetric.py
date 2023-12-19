@@ -181,9 +181,9 @@ class CoilsNonAxisymmetyric(Plot, CoilDatabase, Scenario):
             self.data.coords["point_index"] = np.arange(1, maximum_point_number + 1)
             self.data["points"] = ("coil_name", "point_index", "point"), np.zeros(
                 (
-                    self.data.dims["coil_name"],
-                    self.data.dims["point_index"],
-                    self.data.dims["point"],
+                    self.data.sizes["coil_name"],
+                    self.data.sizes["point_index"],
+                    self.data.sizes["point"],
                 )
             )
             self.data["points_length"] = "coil_name", [

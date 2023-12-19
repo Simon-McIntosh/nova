@@ -68,8 +68,8 @@ class GroundLoop(VDE):
         self.loop.data["_flux"] = xarray.DataArray(
             0.0, dims=["_time"], coords=[self.loop.data._time]
         )
-        tick = clock(self.loop.data.dims["_time"], header="Extracting loop waveform")
-        for i in range(self.loop.data.dims["_time"]):
+        tick = clock(self.loop.data.sizes["_time"], header="Extracting loop waveform")
+        for i in range(self.loop.data.sizes["_time"]):
             self.update(i, solve_grid=False)
             self.loop.data["_flux"][i] = (self.loop.data.Psi.values @ self.sloc["Ic"])[
                 0

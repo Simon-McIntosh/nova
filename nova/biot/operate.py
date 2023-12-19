@@ -111,7 +111,7 @@ class Operate(Data):
     @property
     def shape(self):
         """Return target shape."""
-        return (self.data.dims["target"],)
+        return (self.data.sizes["target"],)
 
     @contextmanager
     def solve_biot(self, number: int | float | None):
@@ -144,7 +144,7 @@ class Operate(Data):
             self.attrs = [self.attrs]
         self.index = self.data.get("index", xarray.DataArray([])).data
         self.classname = self.data.classname
-        self.number = self.data.dims["target"]
+        self.number = self.data.sizes["target"]
         for attr in np.array(self.attrs):
             attrs = [
                 _attr
@@ -171,9 +171,9 @@ class Operate(Data):
             if attr.capitalize() in self.attrs or attr == "bp":
                 if attr.islower():
                     if attr == "bp" and self.classname == "Field":
-                        self.array[attr] = np.zeros(self.data.dims["index"])
+                        self.array[attr] = np.zeros(self.data.sizes["index"])
                     else:
-                        self.array[attr] = np.zeros(self.data.dims["target"])
+                        self.array[attr] = np.zeros(self.data.sizes["target"])
                     if len(self.shape) == 1:
                         continue
                     ndarray = self.array[attr].reshape(self.shape)

@@ -1226,7 +1226,7 @@ class Machine(CoilSet, Geometry, CoilData):
 if __name__ == "__main__":
     args = 105028, 1, "iter"  # DINA
 
-    args = 45272, 1, "mast_u"  # MastU
+    # args = 45272, 1, "mast_u"  # MastU
 
     machine = Machine(
         *args,
@@ -1238,16 +1238,11 @@ if __name__ == "__main__":
         nwall=5,
     )
 
-    """
     from nova.imas.coils_non_axisymmetric import CoilsNonAxisymmetyric
-    from nova.geometry.centerline import Centerline
 
-    machine += CoilsNonAxisymmetyric(111003, 1)  # CC
+    machine += CoilsNonAxisymmetyric(111003, 2)  # CC
     machine += CoilsNonAxisymmetyric(115001, 1)  # ELM
-    machine += Centerline(filename="CC1-4", polygon={"s": [0, 0, 0.0148]})  # CC1-4 
 
-    machine.ferritic.insert("Fi")
-    # machine += inserts
+    # machine.ferritic.insert("Fi")
 
     machine.frame.vtkplot()
-    """

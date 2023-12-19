@@ -69,31 +69,34 @@ class Solve(GroupSet):
             coords=dict(
                 source=self.get_index("source"),
                 target=self.get_index("target"),
-                plasma=self.source.index[self.source.plasma].to_list(),
+                source_plasma=self.source.index[self.source.plasma].to_list(),
+                target_plasma=self.target.index[self.target.plasma].to_list(),
             )
         )
         self.data.attrs["attributes"] = self.attrs
         for row, col, prefix, postfix in zip(
-            ["target", "target", "plasma", "plasma"],
-            ["source", "plasma", "source", "plasma"],
+            ["target", "target", "target_plasma", "target_plasma"],
+            ["source", "source_plasma", "source", "source_plasma"],
             ["", "", "_", "_"],
             ["", "_", "", "_"],
         ):
-            if row == "plasma" and not target_plasma:
+            if row == "target_plasma" and not target_plasma:
                 continue
-            if col == "plasma" and not source_plasma:
+            if col == "source_plasma" and not source_plasma:
                 continue
+
             for attr in self.attrs:
                 self.data[f"{prefix}{attr}{postfix}"] = xarray.DataArray(
                     0.0, dims=[row, col], coords=[self.data[row], self.data[col]]
                 )
+
         for frame in ["source", "target"]:
             self.data.attrs[f"{frame}_plasma_index"] = self.get_plasma_index(frame)
 
         # self._initialize_svd('target', 'source')
         # self._initialize_svd('target', 'plasma', prefix='_')
         """
-        if self.data.dims['plasma'] < self.data.dims['target']:
+        if self.data.sizes['plasma'] < self.data.sizes['target']:
             sigma = 'plasma'
         else:
             sigma = 'target'
@@ -110,7 +113,7 @@ class Solve(GroupSet):
 
     def _initialize_svd(self, row: str, column: str, prefix=""):
         """Initialize svd data structures."""
-        if self.data.dims[column] < self.data.dims[row]:
+        if self.data.sizes[column] < self.data.sizes[row]:
             sigma = column
         else:
             sigma = row
@@ -193,7 +196,7 @@ class Solve(GroupSet):
     def decompose(self):
         """Compute plasma svd and update dataset."""
         for source, prefix in zip(["source", "plasma"], ["", "_"]):
-            if self.data.dims[source] < self.data.dims["target"]:
+            if self.data.sizes[source] < self.data.sizes["target"]:
                 sigma = source
             else:
                 sigma = "target"

@@ -85,7 +85,7 @@ class Defeature:
     def defeature(self):
         """Return clustered turning point dataset."""
         indices = []
-        index = np.arange(self.data.dims["time"])
+        index = np.arange(self.data.sizes["time"])
         for attr in self.features:
             array = np.c_[self.time, minmax_scale(self.data[attr].data)]
             mask = rdp(array, self.epsilon, return_mask=True)
@@ -172,7 +172,7 @@ class Sample(Plot, Defeature, Select):
         """Return re-sample factor."""
         match self.dtime:
             case int() if self.dtime < 0:
-                return -self.dtime / float(self.data.dims["time"])
+                return -self.dtime / float(self.data.sizes["time"])
             case int() | float() if self.dtime > 0:
                 return self.minimum_timestep / self.dtime
             case _:
@@ -204,7 +204,7 @@ class Sample(Plot, Defeature, Select):
         """Return dataset re-sampled using a polyphase filter."""
         updown = self.updown
         factor = updown[0] / updown[1]
-        ntime = int(np.ceil(self["uniform"].dims["time"] * factor))
+        ntime = int(np.ceil(self["uniform"].sizes["time"] * factor))
         time = np.linspace(self.data.time[0], self.data.time[-1], ntime)
         time_sample = xarray.Dataset(coords={"time": time})
         time_sample.coords["itime"] = "time", np.arange(len(time))
@@ -332,7 +332,7 @@ class Sample(Plot, Defeature, Select):
         ids_entry = IdsEntry(name="equilibrium")
         self.update_metadata(ids_entry, provenance=[self.data.attrs["equilibrium"]])
         ids_entry.ids_data.time = self.data.time.data
-        ids_entry.ids_data.time_slice.resize(self.data.dims["time"])
+        ids_entry.ids_data.time_slice.resize(self.data.sizes["time"])
         with ids_entry.node("time_slice:global_quantities.*"):
             for attr in ["ip", "li_3", "beta_normal"]:
                 ids_entry[attr, :] = self.data[attr].data
@@ -363,14 +363,14 @@ class Sample(Plot, Defeature, Select):
                 ids_entry[attr, :] = self.data.geometric_axis[:, i].data
 
         with ids_entry.node("time_slice:boundary_separatrix.x_point:*"):
-            for itime in range(self.data.dims["time"]):
+            for itime in range(self.data.sizes["time"]):
                 if self.data.x_point_number.data[itime] == 1:
                     ids_entry["r", itime] = self.data.x_point.data[itime, 0]
                     ids_entry["z", itime] = self.data.x_point.data[itime, 1]
 
         with ids_entry.node("time_slice:boundary_separatrix.strike_point:*"):
-            for itime in range(self.data.dims["time"]):
-                for i in range(self.data.dims["strike_point_index"])[::-1]:
+            for itime in range(self.data.sizes["time"]):
+                for i in range(self.data.sizes["strike_point_index"])[::-1]:
                     for j, attr in enumerate("rz"):
                         ids_entry[attr, itime, i] = self.data.strike_point.data[
                             itime, i, j
@@ -378,7 +378,7 @@ class Sample(Plot, Defeature, Select):
 
         # include profile data - to remove in future
         with ids_entry.node("time_slice:profiles_1d.*"):
-            for itime in range(self.data.dims["time"]):
+            for itime in range(self.data.sizes["time"]):
                 ids_entry["psi", itime] = self.data.psi1d.data[itime]
                 for attr in ["dpressure_dpsi", "f_df_dpsi"]:
                     ids_entry[attr, itime] = self.data[attr].data[itime]

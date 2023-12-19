@@ -145,7 +145,7 @@ class FiducialData(netCDF, Plot, Plotter):
         )
         rng = np.random.default_rng(self.sead)  # sead random number generator
         self.data = self.data.assign_coords(
-            clone=("coil", np.full(self.data.dims["coil"], -1))
+            clone=("coil", np.full(self.data.sizes["coil"], -1))
         )
         fill = []
         for DA in metadata.DA:
@@ -263,8 +263,8 @@ class FiducialData(netCDF, Plot, Plotter):
                 ("space", self.data.space.values),
             ],
         )
-        for coil_index in range(self.data.dims["coil"]):
-            for space_index in range(self.data.dims["space"]):
+        for coil_index in range(self.data.sizes["coil"]):
+            for space_index in range(self.data.sizes["space"]):
                 self.data["centerline_delta"][
                     coil_index, :, space_index
                 ] = self.load_gpr(coil_index, space_index)
@@ -331,7 +331,7 @@ class FiducialData(netCDF, Plot, Plotter):
             )
         limits = self.axes_limit
         color = [0, 0]
-        for i in range(self.data.dims["coil"]):
+        for i in range(self.data.sizes["coil"]):
             j = 0 if self.data.origin[i] == "EU" else 1
             self.axes[j].plot(
                 self.data.centerline_target[:, 0]

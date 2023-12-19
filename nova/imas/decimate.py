@@ -159,8 +159,8 @@ class Feature:
         plt.plot(self.data[feature_dim], self.data.feature.T)
 
         plt.despine()
-        nsignal = self.data.dims[self.signal_dim]
-        nfeature = self.data.dims["feature_index"]
+        nsignal = self.data.sizes[self.signal_dim]
+        nfeature = self.data.sizes["feature_index"]
         plt.title(
             f"signal reduction {nfeature} of {nsignal}"
             f" ({100 * nfeature/nsignal:1.1f}%)"
@@ -179,21 +179,21 @@ if __name__ == "__main__":
     feature.plot()
 
 
-# * data.dims['psi_norm']
+# * data.sizes['psi_norm']
 
 # plt.ylim([-0.001, 0.001])
 
 """
 #data = EquilibriumData(135011, 7).data
 
-basis = Bernstein(data.dims['psi_norm'], 3)
+basis = Bernstein(data.sizes['psi_norm'], 3)
 
-basis = Svd(data.dims['psi_norm'], 3)(data.f_df_dpsi)
+basis = Svd(data.sizes['psi_norm'], 3)(data.f_df_dpsi)
 
 ols = OdinaryLeastSquares(basis.matrix)
 
-model = np.zeros((data.dims['time'], basis.order+1))
-for itime in range(data.dims['time']):
+model = np.zeros((data.sizes['time'], basis.order+1))
+for itime in range(data.sizes['time']):
     model[itime] = ols / data.f_df_dpsi[itime].data
 
 

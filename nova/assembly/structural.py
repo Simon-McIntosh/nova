@@ -59,7 +59,7 @@ class Fourier(Points):
         super().initialize_dataset()
         self.data["response"] = ["radial", "tangential"]
         self.data["delta"] = ("scenario", "index", "response"), np.ones(
-            tuple(self.data.dims[dim] for dim in ["scenario", "index", "response"])
+            tuple(self.data.sizes[dim] for dim in ["scenario", "index", "response"])
         )
 
     def build(self):
@@ -117,7 +117,7 @@ class BaseTransform:
         _filter = self.response_coef / self.signal_coef
         _filter_dims = _filter.dims + ("coefficient",)
         self.data["filter"] = _filter_dims, np.zeros(
-            tuple(self.data.dims[dim] for dim in _filter_dims)
+            tuple(self.data.sizes[dim] for dim in _filter_dims)
         )
         self.data.filter[..., 0] = _filter.real
         self.data.filter[..., 1] = _filter.imag
@@ -268,12 +268,12 @@ class Model(ModelBase):
         fig, axes = plt.subplots(
             3, 1, sharex=True, sharey=False, gridspec_kw=dict(height_ratios=[2, 2, 2])
         )
-        width = 0.9 / transform.data.dims["signal"]
+        width = 0.9 / transform.data.sizes["signal"]
         color = ["C0", "C6", "C7"]
         for i, signal in enumerate(transform.data.signal.values):
             if np.allclose(transform.data[signal], 0):
                 continue
-            offset = width * (i - transform.data.dims["signal"] / 2)
+            offset = width * (i - transform.data.sizes["signal"] / 2)
             axes[0].bar(
                 transform.data.index + offset,
                 transform.data[signal],

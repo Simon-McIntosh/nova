@@ -385,7 +385,7 @@ class Assembly:
         """Plot gap error waveform."""
         if axes is None:
             axes = plt.subplots(1, 1)[1]
-        coef = np.zeros(self.data.dims["wavenumber"], dtype=complex)
+        coef = np.zeros(self.data.sizes["wavenumber"], dtype=complex)
         coef[0] = self.fft_coefficents[0]
         if not isinstance(wavenumber, Iterable):
             wavenumber = [wavenumber]
@@ -473,7 +473,7 @@ class Ensemble:
         """Load dataset."""
         self.data = xarray.open_dataset(self.filename)
         self.assembly.attrs = self.data.attrs
-        self.samples = self.data.dims["sample"]
+        self.samples = self.data.sizes["sample"]
         self.check_closure(drop=True)
 
     def locate(self, amplitude, wavenumber):
@@ -677,7 +677,7 @@ class Scenario(Ensemble):
 
     def generate_error(self, wavenumber, amplitude=1, phase=0):
         """Return Fourier mode error waveform."""
-        nfft = self.data.dims["gap_index"]
+        nfft = self.data.sizes["gap_index"]
         if wavenumber == 0 or (wavenumber == nfft // 2 and nfft % 2 == 0):
             amplitude *= 2  # repeated Nyquist coefficent for even waveforms
 
@@ -703,7 +703,7 @@ class Scenario(Ensemble):
 
     def plot_gap_array(self, modes=range(1, 5), phase=0):
         """Plot array of error waveforms for all Fourier modes."""
-        nfft = self.data.dims["gap_index"]
+        nfft = self.data.sizes["gap_index"]
         axes = plt.subplots(len(modes), 2, sharex=True, sharey="col")[1]
         k_wave = np.linspace(0, 17)
         for i, k in enumerate(modes):

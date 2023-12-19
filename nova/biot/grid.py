@@ -232,7 +232,7 @@ class Grid(BaseGrid):
     @property
     def shape(self):
         """Return grid shape."""
-        return self.data.dims["x"], self.data.dims["z"]
+        return self.data.sizes["x"], self.data.sizes["z"]
 
     def plot(self, attr="psi", axes=None, nulls=True, clabel=None, **kwargs):
         """Plot contours."""

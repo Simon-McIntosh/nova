@@ -34,17 +34,17 @@ class BaseData:
         """Return filtered deviation waveform."""
         fft = np.fft.rfft(waveform)
         if ripple:
-            fft = fft[: self.ncoil + 1] * 2 * self.ncoil / self.data.dims["sample_phi"]
+            fft = fft[: self.ncoil + 1] * 2 * self.ncoil / self.data.sizes["sample_phi"]
             fft[self.ncoil // 2 : self.ncoil] = 0
             return (
-                np.fft.irfft(fft, n=self.data.dims["phi"])
-                * self.data.dims["phi"]
+                np.fft.irfft(fft, n=self.data.sizes["phi"])
+                * self.data.sizes["phi"]
                 / (2 * self.ncoil)
             )
-        fft = fft[: self.ncoil // 2 + 1] * self.ncoil / self.data.dims["sample_phi"]
+        fft = fft[: self.ncoil // 2 + 1] * self.ncoil / self.data.sizes["sample_phi"]
         return (
-            np.fft.irfft(fft, n=self.data.dims["phi"])
-            * self.data.dims["phi"]
+            np.fft.irfft(fft, n=self.data.sizes["phi"])
+            * self.data.sizes["phi"]
             / self.ncoil
         )
 
@@ -62,11 +62,11 @@ class FieldData(BaseData, ModelData):
         self.data["coordinate"] = ["r", "phi", "z"]
         self.data["sample_phi"] = np.linspace(0, 2 * np.pi, 2 * ndiv)
         self.data["sample_field"] = ("coordinate", "sample_phi"), np.zeros(
-            (self.data.dims["coordinate"], self.data.dims["sample_phi"])
+            (self.data.sizes["coordinate"], self.data.sizes["sample_phi"])
         )
         self.data["phi"] = np.linspace(0, 2 * np.pi, ndiv)
         self.data["field"] = ("coordinate", "phi"), np.zeros(
-            (self.data.dims["coordinate"], self.data.dims["phi"])
+            (self.data.sizes["coordinate"], self.data.sizes["phi"])
         )
         self.data["ripple_field"] = xarray.zeros_like(self.data.field)
         for i, coordinate in enumerate(self.data.coordinate.values):
@@ -108,14 +108,14 @@ class DeviationData(BaseData):
         self.data["delta"] = xarray.DataArray(0.0, self.data.coords)
         self.data["sample_phi"] = np.linspace(0, 2 * np.pi, 2 * ndiv, endpoint=False)
         self.data["sample_deviation"] = ("simulation", "sample_phi"), np.zeros(
-            (self.data.dims["simulation"], 2 * ndiv)
+            (self.data.sizes["simulation"], 2 * ndiv)
         )
         self.data["phi"] = np.linspace(0, 2 * np.pi, ndiv, endpoint=False)
         self.data["deviation"] = ("simulation", "phi"), np.zeros(
-            (self.data.dims["simulation"], ndiv)
+            (self.data.sizes["simulation"], ndiv)
         )
         self.data["ripple_deviation"] = ("simulation", "phi"), np.zeros(
-            (self.data.dims["simulation"], ndiv)
+            (self.data.sizes["simulation"], ndiv)
         )
         for i, simulation in enumerate(self.simulations):
             self.data.sample_deviation[i] = self._load_data(simulation)

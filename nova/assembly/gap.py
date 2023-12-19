@@ -36,7 +36,7 @@ class GapData:
                 value = np.zeros((len(self.simulations), self.ncoil))
             self.data[signal] = ("simulation", "index"), value
         self.data["delta"] = ("simulation", "index", "signal"), np.zeros(
-            tuple(self.data.dims[dim] for dim in ["simulation", "index", "signal"])
+            tuple(self.data.sizes[dim] for dim in ["simulation", "index", "signal"])
         )
         for i, signal in enumerate(self.data.signal.values):
             self.data.delta[..., i] = self.data[signal]
@@ -85,7 +85,9 @@ class GapData:
         ).data
         for i in np.arange(1, self.data.nyquist + 1):
             waveform += amplitude[i] * np.cos(i * phi + phase[i])
-        plt.plot(phi * self.data.dims["index"] / (2 * np.pi) + 1, waveform, color=color)
+        plt.plot(
+            phi * self.data.sizes["index"] / (2 * np.pi) + 1, waveform, color=color
+        )
         plt.despine()
 
 
@@ -185,7 +187,7 @@ class WedgeGap(ModelData):
         ), np.einsum(
             "kl,ij->ijkl",
             self.data.reference,
-            np.ones((self.data.dims["simulation"], self.ncoil)),
+            np.ones((self.data.sizes["simulation"], self.ncoil)),
         )
         self.data.fiducial[..., 1] += self.data.point_offset
         self.data.fiducial[..., 1] -= self.data.mean_offset
@@ -200,7 +202,7 @@ class WedgeGap(ModelData):
         self.data.attrs["radius"] = self.data.reference[1:, 0].data.mean()
         self.data["angle"] = ["phi", "roll", "yaw"]
         self.data["rotate"] = ("simulation", "index", "angle"), np.zeros(
-            (self.data.dims["simulation"], self.ncoil, self.data.dims["angle"])
+            (self.data.sizes["simulation"], self.ncoil, self.data.sizes["angle"])
         )
         self.data["rotate"][..., 0] = self.data.mean_offset / self.data.radius
         self.data["rotate"][..., 1] = np.arctan2(

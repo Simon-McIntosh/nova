@@ -256,13 +256,13 @@ class CSmodulue(Material_Model):
         if num is None:
             num = self.coilset.frame.nturn[0]
             grid = Grid(number=num, limit=self.limit)
-            num = (grid.data.dims["x"] + 1) * (grid.data.dims["z"] + 1)
+            num = (grid.data.sizes["x"] + 1) * (grid.data.sizes["z"] + 1)
         grid = Grid(number=num, limit=self.limit)
         self.mesh = df.RectangleMesh(
             df.Point(bounds[:2]),
             df.Point(bounds[2:]),
-            grid.data.dims["x"],
-            grid.data.dims["z"],
+            grid.data.sizes["x"],
+            grid.data.sizes["z"],
         )
 
         self.x = df.SpatialCoordinate(self.mesh)

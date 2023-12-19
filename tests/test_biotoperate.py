@@ -11,8 +11,8 @@ def test_grid_shape():
     coilset.coil.insert(3, 0, 0.1, 0.1)
     coilset.grid.solve(10)
     assert coilset.grid.shape == (
-        coilset.grid.data.dims["x"],
-        coilset.grid.data.dims["z"],
+        coilset.grid.data.sizes["x"],
+        coilset.grid.data.sizes["z"],
     )
 
 

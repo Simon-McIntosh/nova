@@ -27,7 +27,7 @@ def test_data(shape):
     points = np.ones(shape)
     coilset.point.solve(points)
     point_number = np.prod(points.reshape(-1, points.shape[-1]).shape[:-1])
-    assert coilset.point.data.dims["target"] == point_number
+    assert coilset.point.data.sizes["target"] == point_number
     assert all([attr in coilset.point.data.coords for attr in "xyz"])
 
 

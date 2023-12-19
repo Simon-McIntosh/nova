@@ -112,7 +112,7 @@ class Trial(Dataset, TrialAttrs):
     def build_gap(self):
         """Build vault gap from radial and toroidal waveforms."""
         self.data["gap"] = ("sample", "index", "signal"), np.zeros(
-            (self.data.dims["sample"], self.ncoil, self.data.dims["signal"])
+            (self.data.sizes["sample"], self.ncoil, self.data.sizes["signal"])
         )
         self.data.gap[..., 0] = np.pi / self.ncoil * self.data["radial"]
         self.data.gap[:, :-1, 0] += np.pi / self.ncoil * self.data["radial"][:, 1:].data
@@ -253,7 +253,7 @@ class Vault(Trial):
     def predict_structure(self):
         """Run structural simulation."""
         self.data["structural"] = ("sample", "index", "signal"), np.zeros(
-            (self.samples, self.ncoil, self.data.dims["signal"])
+            (self.samples, self.ncoil, self.data.sizes["signal"])
         )
         if self.energize:
             gap = self.data.gap.sum(axis=-1)
@@ -278,7 +278,7 @@ class Vault(Trial):
             modes=self.modes
         )
         self.data["offset"] = ("sample", "coordinate"), np.zeros(
-            (self.data.dims["sample"], 2)
+            (self.data.sizes["sample"], 2)
         )
         offset = self.electromagnetic_model.axis_offset
         self.data["offset"][..., 0] = offset.real
@@ -366,7 +366,7 @@ class Vault(Trial):
         )[1]
         width = 0.8
 
-        signal_width = width / self.data.dims["component"]
+        signal_width = width / self.data.sizes["component"]
         for i, component in enumerate(self.data.component.values):
             signal = self.data[component]
             bar_offset = (i + 0.5) * signal_width - width / 2
@@ -487,7 +487,7 @@ class ErrorField(Trial):
         """Predict overlap error field."""
         self.data["plasma"] = self.model.data.plasma
         self.data["overlap"] = ("sample", "plasma"), np.zeros(
-            (self.samples, self.data.dims["plasma"])
+            (self.samples, self.data.sizes["plasma"])
         )
         radial = self.data.radial + self.data.radial_ccl
         tangential = self.data.tangential + self.data.tangential_ccl
@@ -533,7 +533,7 @@ class ErrorField(Trial):
         ):
             return self
         self.data["quantile_scan"] = ("component", "plasma"), np.ones(
-            (self.data.dims["component"], self.data.dims["plasma"])
+            (self.data.sizes["component"], self.data.sizes["plasma"])
         )
         for i, pdf in enumerate(self.pdf):
             theta = list(np.zeros(len(self.pdf)))

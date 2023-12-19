@@ -183,20 +183,20 @@ class Parameter0D(Scenario):
         max_length = max(len(point_function(itime)) for itime in self.data.itime.data)
         if max_length == 0:
             self.data[attr] = ("time", "point"), np.zeros(
-                (self.data.dims["time"], 2), float
+                (self.data.sizes["time"], 2), float
             )
-            self.data[f"{attr}_number"] = "time", np.zeros(self.data.dims["time"], int)
+            self.data[f"{attr}_number"] = "time", np.zeros(self.data.sizes["time"], int)
             return
         self.data[f"{attr}_index"] = range(max_length)
         self.data[attr] = ("time", f"{attr}_index", "point"), np.zeros(
             (
-                self.data.dims["time"],
-                self.data.dims[f"{attr}_index"],
-                self.data.dims["point"],
+                self.data.sizes["time"],
+                self.data.sizes[f"{attr}_index"],
+                self.data.sizes["point"],
             )
         )
         self.data[f"{attr}_number"] = "time", np.zeros(
-            self.data.dims["time"], dtype=int
+            self.data.sizes["time"], dtype=int
         )
         for itime in self.data.itime.data:
             points = point_function(itime)
@@ -286,13 +286,13 @@ class Parameter0D(Scenario):
         self.data["boundary_index"] = range(self.boundary_outline_length)
         self.data["boundary"] = ("time", "boundary_index", "point"), np.zeros(
             (
-                self.data.dims["time"],
-                self.data.dims["boundary_index"],
-                self.data.dims["point"],
+                self.data.sizes["time"],
+                self.data.sizes["boundary_index"],
+                self.data.sizes["point"],
             )
         )
         self.data["boundary_length"] = "time", np.zeros(
-            self.data.dims["time"], dtype=int
+            self.data.sizes["time"], dtype=int
         )
         for itime in self.data.itime.data:
             outline = self.boundary_outline(itime)
@@ -306,7 +306,7 @@ class Parameter0D(Scenario):
             return {}
         attrs = self.attrs_boundary + ["geometric_radius", "geometric_height"]
         lcfs_data = {
-            attr: np.zeros(self.data.dims["time"], float)
+            attr: np.zeros(self.data.sizes["time"], float)
             for attr in attrs
             if hasattr(LCFS, attr)
         }
@@ -369,7 +369,7 @@ class Profile1D(Scenario):
             )
         else:
             self.data["psi1d"] = ("time", "psi_norm"), np.tile(
-                self.data["psi_norm"].data, (self.data.dims["time"], 1)
+                self.data["psi_norm"].data, (self.data.sizes["time"], 1)
             )
         self.append(("time", "psi_norm"), self.attrs_1d, "profiles_1d")
         for itime in self.data.itime.data:  # normalize 1D profiles
@@ -417,7 +417,7 @@ class Equilibrium(Chart, GetSlice):
     def boundary(self):
         """Return trimmed boundary contour."""
         boundary = self["boundary"][: int(self["boundary_length"])]
-        if np.allclose(boundary[0], boundary[-1]):
+        if len(boundary) == 0 or np.allclose(boundary[0], boundary[-1]):
             return boundary
         return np.append(boundary, boundary[:1], axis=0)
 
@@ -522,7 +522,7 @@ class Equilibrium(Chart, GetSlice):
     @property
     def shape(self):
         """Return grid shape."""
-        return self.data.dims["r"], self.data.dims["z"]
+        return self.data.sizes["r"], self.data.sizes["z"]
 
     def mask(self, boundary: np.ndarray):
         """Return boundary mask."""

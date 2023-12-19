@@ -351,7 +351,7 @@ class PlasmaPoints(ControlPoints):
         """Return minimum wall normal point gap vector."""
         gap = np.zeros_like(self.data["time"])
         time_index = self.time_index
-        for i in range(self.data.dims["time"]):
+        for i in range(self.data.sizes["time"]):
             self.time_index = i
             self.clear_cache()
             gap[i] = np.min(self.point_gap(self.point_index))

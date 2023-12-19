@@ -129,7 +129,7 @@ class Base(ModelBase):
         dataset = self.load_dataset(simulation)
         radial = dataset.delta[:, 0]
         tangential = dataset.delta[:, 1]
-        self.predict(radial, tangential, dataset.dims["phi"])
+        self.predict(radial, tangential, dataset.sizes["phi"])
         axes = plt.subplots(
             3, 1, sharex=False, sharey=False, gridspec_kw=dict(height_ratios=[1, 1, 3])
         )[1]
@@ -168,7 +168,7 @@ class Model(Base):
         h_hat = (
             np.fft.rfft(dataset.deviation)[: self.data.nyquist + 1]
             * self.ncoil
-            / dataset.dims["phi"]
+            / dataset.sizes["phi"]
         )
         _filter = h_hat / r_hat
         self.data["filter"][1:, 0, 0] = _filter.real[1:]
@@ -180,15 +180,15 @@ class Model(Base):
         r_hat = np.fft.rfft(dataset.delta[:, 0])
         t_hat = np.fft.rfft(dataset.delta[:, 1])
         radial_deviation = (
-            np.fft.irfft(r_hat * self._filter("radial"), n=dataset.dims["phi"])
-            * dataset.dims["phi"]
+            np.fft.irfft(r_hat * self._filter("radial"), n=dataset.sizes["phi"])
+            * dataset.sizes["phi"]
             / self.ncoil
         )
         tangential_deviation = dataset.deviation - radial_deviation
         h_hat = (
             np.fft.rfft(tangential_deviation)[: self.data.nyquist + 1]
             * self.ncoil
-            / dataset.dims["phi"]
+            / dataset.sizes["phi"]
         )
         return h_hat / t_hat
 
@@ -242,7 +242,7 @@ class WaveModel(Base):
             h_hat = (
                 np.fft.rfft(dataset.deviation)[: self.data.nyquist + 1]
                 * self.ncoil
-                / dataset.dims["phi"]
+                / dataset.sizes["phi"]
             )
             result = scipy.optimize.minimize(
                 self.fit,

@@ -627,7 +627,7 @@ class PulseDesign(Animate, Plot1D, Control, ITER):
 
     def solve_waveform(self, verbose=False):
         """Solve current waveform."""
-        current = np.zeros((self.data.dims["time"], np.sum(self.saloc["free"])))
+        current = np.zeros((self.data.sizes["time"], np.sum(self.saloc["free"])))
 
         for itime in tqdm(
             self.data.itime.data[:-1], "solving current waveform", disable=~verbose
@@ -732,7 +732,7 @@ class PulseDesign(Animate, Plot1D, Control, ITER):
             coords=[data.time, data.strike_point_index, data.point],
             dims=["time", "strike_point_index", "point"],
         )
-        length = np.linspace(0, 1, data.dims["boundary_index"])
+        length = np.linspace(0, 1, data.sizes["boundary_index"])
         for itime in tqdm(self.data.itime.data, "Solving PDS waveform"):
             self.itime = itime
             data["psi2d"][itime] = self.levelset.psi_
@@ -797,7 +797,7 @@ class PulseDesign(Animate, Plot1D, Control, ITER):
         with ids_entry.node("time_slice:boundary_separatrix.geometric_axis.*"):
             for i, attr in enumerate("rz"):
                 ids_entry[attr, :] = self._data["geometric_axis"].data[:, i]
-        for itime in range(self.data.dims["time"]):
+        for itime in range(self.data.sizes["time"]):
             boundary = ids_entry.ids_data.time_slice[itime].boundary_separatrix
             # boundary x_point
             if self._data.x_point_number[itime].data > 0:

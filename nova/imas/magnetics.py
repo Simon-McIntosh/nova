@@ -4,7 +4,7 @@ from operator import attrgetter
 
 from functools import cached_property
 
-
+import imaspy
 from imaspy.ids_struct_array import IDSStructArray
 from imaspy.ids_toplevel import IDSToplevel
 
@@ -41,6 +41,9 @@ class AoS:
     @cached_property
     def data(self) -> xarray.Dataset:
         """Return AoS as xarray Dataset."""
+        for node in self.aos[0]:
+            if node.has_value:
+                print(node.metadata.name, node.metadata.data_type, node.shape)
 
 
 @dataclass
@@ -90,6 +93,8 @@ class Magnetics(Plot, CoilSet, CoilData, Scenario):
         self.aos = AoS(ids_data.flux_loop)
         print(self.aos["area.metadata.units"])
         data = xarray.Dataset(data)
+
+        imaspy.util.print_tree(ids_data.flux_loop[0], hide_empty_nodes=False)
         # print(flux_loop[0].name.metadata.units)
         # print(flux_loop[0].)
         # reduce(operator.ior, list_of_dicts, {})
@@ -119,11 +124,13 @@ class Magnetics(Plot, CoilSet, CoilData, Scenario):
 if __name__ == "__main__":
     magnetics = Magnetics()
 
+    magnetics.aos.data
+    """
     import imaspy
 
     db_entry = imaspy.DBEntry(magnetics.uri, "a")
     db_entry.open()
     ids_data = db_entry.get("magnetics")
     db_entry.close()
-
+    """
     magnetics._clear()

@@ -403,32 +403,33 @@ class DataAttrs:
         raise TypeError(f"malformed attrs: {type(self.ids_attrs)}")
 
 
+@dataclass
 class DBEntry(imaspy.DBEntry):
     """Extend imaspy.DBEntry to provide context aware access to ids data."""
 
     @cached_property
-    def name(self):
-        """Return ids name."""
-        return self.ids_attrs["name"]
+    def idsname(self):
+        """Return idsname."""
+        return self.uri.split("#")[1].split(":")[0].split("=")[1]
 
     def __enter__(self):
         """Extend imaspy DBEntry.enter."""
         super().__enter__()
-        return self.get(self.name)
+        return self.get(self.idsname)
 
-    def __exit__(self, ex_typ, ex_val, traceback):
-        """Extend imaspy.DBEntry.exit."""
-        super().__enter__()
+    # def __exit__(self, ex_typ, ex_val, traceback):
+    #    """Extend imaspy.DBEntry.exit."""
+    #    super().__exit__(ex_typ, ex_val, traceback)
 
-    def __call__(self, ids_name=None, *args, lazy=False, **kwargs):
+    def data(self, idsname=None, *args, lazy=False, **kwargs):
         """Return ids data from db_entry.get. Close ids if not lazy."""
-        if ids_name is None:
-            ids_name = self.name
-        ids_data = super().get(ids_name, *args, lazy=lazy, **kwargs)
+        if idsname is None:
+            idsname = self.idsname
+        ids = super().get(idsname, *args, lazy=lazy, **kwargs)
         if lazy:
-            return ids_data
+            return ids
         self.close()
-        return ids_data
+        return ids
 
     '''
     @contextmanager

@@ -10,14 +10,15 @@ from nova.imas.test_utilities import ids_attrs, mark
 @mark["equilibrium"]
 def test_lazy_ids_data():
     equilibrium = Database(**ids_attrs["equilibrium"])
-    print(equilibrium.name)
-
-    print(type(equilibrium.ids_data().time_slice[0].global_quantities.ip))
-    with equilibrium.ids_data as ids_data:
+    with equilibrium.load_ids as ids:
         assert isinstance(
-            ids_data.time_slice[0].global_quantities.ip, imaspy.ids_primitive.IDSFloat0D
+            ids.time_slice[0].global_quantities.ip, imaspy.ids_primitive.IDSFloat0D
         )
+
     assert equilibrium.ids is None
+
+    print(ids.time_slice[12].global_quantities.ip)
+    assert False
 
 
 if __name__ == "__main__":

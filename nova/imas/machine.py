@@ -1235,13 +1235,13 @@ if __name__ == "__main__":
         elm=False,
         wall=True,
         tplasma="hex",
-        nwall=5,
+        nwall=10,
     )
 
-    from nova.imas.coils_non_axisymmetric import CoilsNonAxisymmetyric
+    # from nova.imas.coils_non_axisymmetric import CoilsNonAxisymmetyric
 
-    machine += CoilsNonAxisymmetyric(111003, 2)  # CC
-    machine += CoilsNonAxisymmetyric(115001, 1)  # ELM
+    # machine += CoilsNonAxisymmetyric(111003, 2)  # CC
+    # machine += CoilsNonAxisymmetyric(115001, 1)  # ELM
 
     # machine.ferritic.insert("Fi")
 

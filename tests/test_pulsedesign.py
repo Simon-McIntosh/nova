@@ -2,13 +2,11 @@ import matplotlib.pylab
 import numpy as np
 import pytest
 
-from nova.imas.database import Database, IdsEntry, IMAS_MODULE_NOT_FOUND
+from nova.imas.database import Database, IdsEntry
 from nova.imas.pulsedesign import PulseDesign
 from nova.imas.equilibrium import EquilibriumData
 from nova.imas.sample import Sample
-from nova.imas.test_utilities import ids_attrs, mark
-
-mark_imas = pytest.mark.skipif(IMAS_MODULE_NOT_FOUND, reason="IMAS module unavailable")
+from nova.imas.test_utilities import ids_attrs, mark, mark_imaspy
 
 
 @pytest.fixture
@@ -55,7 +53,7 @@ def ids():
     return ids_entry.ids_data
 
 
-@mark_imas
+@mark_imaspy
 def test_ids_file_cache(ids):
     ids.time_slice[0].boundary_separatrix.psi = 66
     design_a = PulseDesign(ids=ids, dplasma=-1, nwall=None, nlevelset=None)
@@ -69,7 +67,7 @@ def test_ids_file_cache(ids):
     assert design_b["psi_boundary"] == 77
 
 
-@mark_imas
+@mark_imaspy
 def test_pf_active_ids_input(ids):
     design = PulseDesign(ids=ids, dplasma=-1, nwall=None, nlevelset=None)
     pf_active_ids = design.geometry["pf_active"](**design.pf_active).ids_data
@@ -84,7 +82,7 @@ def test_pf_active_ids_input(ids):
     design.update_metadata(ids_entry)
 
 
-@mark_imas
+@mark_imaspy
 def test_pf_active_ids_input_cache(ids):
     pf_active_103 = Database(111001, 103, "iter_md", name="pf_active").ids_data
     pf_active_203 = Database(111001, 203, "iter_md", name="pf_active").ids_data
@@ -107,7 +105,7 @@ def test_pf_active_ids_input_cache(ids):
     )
 
 
-@mark_imas
+@mark_imaspy
 def test_make_frame(ids):
     design = PulseDesign(ids=ids)
     design.itime = 0

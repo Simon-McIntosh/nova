@@ -4,7 +4,7 @@ from dataclasses import dataclass, field, fields, InitVar
 from functools import cached_property
 from operator import attrgetter
 import os
-from typing import Any, ClassVar, Optional, Type
+from typing import Any, Callable, ClassVar, Optional, Type
 
 import numpy as np
 import xxhash
@@ -14,8 +14,8 @@ from nova.utilities.importmanager import check_import
 
 with check_import("imaspy"):
     import imaspy
+    from imaspy.exception import ALException
 
-from imas.hli_exception import ALException  # TODO use exception from IMASPy
 
 EMPTY_INT = imaspy.ids_defs.EMPTY_INT
 EMPTY_FLOAT = imaspy.ids_defs.EMPTY_FLOAT
@@ -51,7 +51,6 @@ class URI:
 
     Parameters
     ----------
-
     scheme: {'imas'}, optional
         An imas data entry is identified with 'imas'.
 
@@ -404,42 +403,108 @@ class DataAttrs:
 
 
 @dataclass
+class Callstate:
+    """Manage db_entry callstate."""
+
+    args: tuple = ()
+    kwargs: dict = field(default_factory=dict)
+
+    def __call__(self, args, kwargs):
+        """Update callstate."""
+        self["args"] = args
+        self["kwargs"] = kwargs
+
+    def __setitem__(self, key, value):
+        """Update callstate attributes."""
+        match key:
+            case "args":
+                self.args += value
+            case "kwargs":
+                self.kwargs |= value
+            case _:
+                raise NotImplementedError(f"Mapping {key} not implemented")
+
+    def clear(self):
+        """Clear state."""
+        self.args = ()
+        self.kwargs.clear()
+
+
+@dataclass
 class DBEntry(imaspy.DBEntry):
     """Extend imaspy.DBEntry to provide context aware access to ids data."""
+
+    uri: str
+    mode: str
+    database: Callable
+    dd_version: str | None = None
+    xml_path: str | None = None
+    callstate: Callstate = field(init=False, repr=False, default_factory=Callstate)
+
+    def __post_init__(self):
+        """Extend imaspy and restrict to AL5."""
+        super().__init__(
+            self.uri, self.mode, dd_version=self.dd_version, xml_path=self.dd_version
+        )
 
     @cached_property
     def idsname(self):
         """Return idsname."""
         return self.uri.split("#")[1].split(":")[0].split("=")[1]
 
+    def __call__(self, *args, lazy=False, **kwargs):
+        """
+        Implement interface to db_entry get.
+
+        Parameters
+        ----------
+        lazy: {True, False}, optional
+            Lazy read flag.
+
+            - True: Retrun self. Update callstate and return self. Use with with.
+            - False: Return full ids and store on self.ids. Close db_entry.
+        """
+        if lazy is False:
+            return self.get_data(*args, lazy=False, **kwargs)
+        self.callstate(args, kwargs)
+        return self
+
+    def get(self, *args, **kwargs):
+        """Return data from db_entry."""
+        if "time_requested" in kwargs:
+            return super().get_slice(*args, **kwargs)
+        return super().get(*args, **kwargs)
+
+    @cached_property
+    def is_valid(self):
+        """Retrun True if ids_properties.homogeneous_time is set else False."""
+        try:
+            self.get_data(lazy=True)
+            return True
+        except RuntimeError:
+            return False
+
     def __enter__(self):
         """Extend imaspy DBEntry.enter."""
         super().__enter__()
-        return self.get(self.idsname)
+        return self.get(
+            self.idsname,
+            *self.callstate.args,
+            lazy=True,
+            **self.callstate.kwargs,
+        )
 
-    # def __exit__(self, ex_typ, ex_val, traceback):
-    #    """Extend imaspy.DBEntry.exit."""
-    #    super().__exit__(ex_typ, ex_val, traceback)
+    def close(self):
+        """Extend imaspy.db_entry.close. Clear callstate before exit."""
+        self.callstate.clear()
+        super().close()
 
-    def data(self, idsname=None, *args, lazy=False, **kwargs):
+    def get_data(self, *args, lazy=False, **kwargs):
         """Return ids data from db_entry.get. Close ids if not lazy."""
-        if idsname is None:
-            idsname = self.idsname
-        ids = super().get(idsname, *args, lazy=lazy, **kwargs)
-        if lazy:
-            return ids
-        self.close()
-        return ids
-
-    '''
-    @contextmanager
-    def ids_data(self, mode="a", lazy=True):
-        """Open database and return ids."""
-        if self.ids is not None:
-            yield self.ids
-        with imaspy.DBEntry(self.uri, mode=mode) as db_entry:
-            yield db_entry.get(self.name, lazy=lazy)
-    '''
+        self.database.ids = self.get(self.idsname, *args, lazy=lazy, **kwargs)
+        if lazy is False:
+            self.close()
+        return self.database.ids
 
 
 @dataclass
@@ -577,20 +642,30 @@ class Database(IDS):
             self.name = name
 
     @property
-    def load_ids(self):
-        """Return open database entry."""
-        return DBEntry(uri=self.uri, mode="a")
-        """
-        if self.ids is not None:
-            yield self.ids
-        with imaspy.DBEntry(self.uri, mode=mode) as db_entry:
-            yield db_entry.get(self.name, lazy=lazy)
-        """
+    def _unset_attrs(self) -> bool:
+        """Return True if any required input attributes are unset."""
+        return (
+            (self.pulse == 0 or self.pulse is None)
+            or (self.run == 0 or self.run is None)
+            or self.name is None
+        )
 
-        # if self.ids is not None:
-        #    self._check_ids_attrs()
-        #    self.ids = self.get_ids()
-        # yield self.ids
+    def _load_attrs_from_ids(self):
+        """
+        Initialize database class directly from an ids.
+
+        Set unknown pulse and run numbers to zero if unset
+        Update name to match ids.metadata.name
+        """
+        if self._unset_attrs:
+            self.pulse = 0
+            self.run = 0
+        if self.name is not None and self.name != self.ids_data.metadata.name:
+            raise NameError(
+                f"missmatch between instance name {self.name} "
+                f"and ids_data {self.ids_data.metadata.name}"
+            )
+        self.name = self.ids_data.metadata.name
 
     def load_database(self):
         """Load instance database attributes."""
@@ -624,32 +699,6 @@ class Database(IDS):
         if self.group is None and self.name is not None:
             self.group = self.name
 
-    @property
-    def _unset_attrs(self) -> bool:
-        """Return True if any required input attributes are unset."""
-        return (
-            (self.pulse == 0 or self.pulse is None)
-            or (self.run == 0 or self.run is None)
-            or self.name is None
-        )
-
-    def _load_attrs_from_ids(self):
-        """
-        Initialize database class directly from an ids.
-
-        Set unknown pulse and run numbers to zero if unset
-        Update name to match ids.metadata.name
-        """
-        if self._unset_attrs:
-            self.pulse = 0
-            self.run = 0
-        if self.name is not None and self.name != self.ids_data.metadata.name:
-            raise NameError(
-                f"missmatch between instance name {self.name} "
-                f"and ids_data {self.ids_data.metadata.name}"
-            )
-        self.name = self.ids_data.metadata.name
-
     def _check_ids_attrs(self):
         """Confirm minimum working set of input attributes."""
         if self._unset_attrs:
@@ -675,6 +724,11 @@ class Database(IDS):
         to generate a unique hex hash to label data within a netCDF file.
         """
         return self.ids_attrs
+
+    @property
+    def db_entry(self):
+        """Return nova.DBEntry instance."""
+        return DBEntry(uri=self.uri, mode="a", database=self)
 
     def get_ids(self, ids_path: Optional[str] = None, occurrence=None):
         """Return ids. Override IDS.get_ids. Extend name with ids_path."""

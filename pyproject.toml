@@ -245,7 +245,8 @@ implicit_reexport = true
 
 [[tool.mypy.overrides]]
 module = [
-    "imas",
+  "imas",
+  "imaspy",
 ]
 ignore_missing_imports = true
 

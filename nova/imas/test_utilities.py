@@ -4,10 +4,11 @@ import pytest
 from nova.imas.database import Database
 from nova.utilities.importmanager import mark_import
 
-with mark_import("imas") as mark_imas:
-    from imas.hli_exception import ALException
+with mark_import("imaspy") as mark_imaspy:
+    pass
+    # from imaspy.exception import ALException
 
-IMPORT_IMAS = not any(mark_imas.args[0])
+IMPORT_IMASPY = not any(mark_imaspy.args[0])
 
 ids_attrs = dict(
     pf_active=dict(pulse=111001, run=203, name="pf_active", machine="iter_md"),
@@ -24,19 +25,14 @@ ids_attrs = dict(
 
 def load_ids(*args, **kwargs):
     """Return database instance."""
-    if not IMPORT_IMAS:
+    if not IMPORT_IMASPY:
         return False
-    try:
-        database = Database(*args, **kwargs)
-        database.get_ids()
-        return database
-    except (ModuleNotFoundError, ALException):
-        return False
+    return Database(*args, **kwargs).db_entry.is_valid
 
 
-mark = {"imas": mark_imas}
+mark = {"imas": mark_imaspy}
 for attr in ids_attrs:
-    if not IMPORT_IMAS:
+    if not IMPORT_IMASPY:
         mark[attr] = mark["imas"]
         continue
     mark[attr] = pytest.mark.skipif(

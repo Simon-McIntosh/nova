@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from importlib import import_module
 import os
 
-THIRDPARTY = ["imas", "codac_uda"]
+THIRDPARTY = ["imas", "imaspy", "codac_uda"]
 
 
 def _report(dependencies: tuple[str, ...]):

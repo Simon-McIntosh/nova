@@ -4,12 +4,13 @@ from dataclasses import dataclass, field, fields, InitVar
 from functools import cached_property
 from operator import attrgetter
 import os
-from typing import Any, Callable, ClassVar, Optional, Type
+from typing import Any, ClassVar, Optional, Type
 
 import numpy as np
 import xxhash
 
 from nova.database.datafile import Datafile
+from nova.imas.callstate import DBEntry
 from nova.utilities.importmanager import check_import
 
 with check_import("imaspy"):
@@ -337,7 +338,7 @@ class DataAttrs:
     Attrs may be input as an ids. In this case attrs is returned with
     hashed pulse and run numbers in additional to the original ids attribute:
 
-    >>> attrs = DataAttrs(database.ids_data).attrs
+    >>> attrs = DataAttrs(database.ids).attrs
     >>> attrs['pulse'] != 130506
     True
     >>> attrs['run'] != 403
@@ -403,118 +404,13 @@ class DataAttrs:
 
 
 @dataclass
-class Callstate:
-    """Manage db_entry callstate."""
-
-    args: tuple = ()
-    kwargs: dict = field(default_factory=dict)
-
-    def __call__(self, args, kwargs):
-        """Update callstate."""
-        self["args"] = args
-        self["kwargs"] = kwargs
-
-    def __setitem__(self, key, value):
-        """Update callstate attributes."""
-        match key:
-            case "args":
-                self.args += value
-            case "kwargs":
-                self.kwargs |= value
-            case _:
-                raise NotImplementedError(f"Mapping {key} not implemented")
-
-    def clear(self):
-        """Clear state."""
-        self.args = ()
-        self.kwargs.clear()
-
-
-@dataclass
-class DBEntry(imaspy.DBEntry):
-    """Extend imaspy.DBEntry to provide context aware access to ids data."""
-
-    uri: str
-    mode: str
-    database: Callable
-    dd_version: str | None = None
-    xml_path: str | None = None
-    callstate: Callstate = field(init=False, repr=False, default_factory=Callstate)
-
-    def __post_init__(self):
-        """Extend imaspy and restrict to AL5."""
-        super().__init__(
-            self.uri, self.mode, dd_version=self.dd_version, xml_path=self.dd_version
-        )
-
-    @cached_property
-    def idsname(self):
-        """Return idsname."""
-        return self.uri.split("#")[1].split(":")[0].split("=")[1]
-
-    def __call__(self, *args, lazy=False, **kwargs):
-        """
-        Implement interface to db_entry get.
-
-        Parameters
-        ----------
-        lazy: {True, False}, optional
-            Lazy read flag.
-
-            - True: Retrun self. Update callstate and return self. Use with with.
-            - False: Return full ids and store on self.ids. Close db_entry.
-        """
-        if lazy is False:
-            return self.get_data(*args, lazy=False, **kwargs)
-        self.callstate(args, kwargs)
-        return self
-
-    def get(self, *args, **kwargs):
-        """Return data from db_entry."""
-        if "time_requested" in kwargs:
-            return super().get_slice(*args, **kwargs)
-        return super().get(*args, **kwargs)
-
-    @cached_property
-    def is_valid(self):
-        """Retrun True if ids_properties.homogeneous_time is set else False."""
-        try:
-            self.get_data(lazy=True)
-            return True
-        except RuntimeError:
-            return False
-
-    def __enter__(self):
-        """Extend imaspy DBEntry.enter."""
-        super().__enter__()
-        return self.get(
-            self.idsname,
-            *self.callstate.args,
-            lazy=True,
-            **self.callstate.kwargs,
-        )
-
-    def close(self):
-        """Extend imaspy.db_entry.close. Clear callstate before exit."""
-        self.callstate.clear()
-        super().close()
-
-    def get_data(self, *args, lazy=False, **kwargs):
-        """Return ids data from db_entry.get. Close ids if not lazy."""
-        self.database.ids = self.get(self.idsname, *args, lazy=lazy, **kwargs)
-        if lazy is False:
-            self.close()
-        return self.database.ids
-
-
-@dataclass
 class Database(IDS):
     """
     Methods to access IMAS database.
 
     Attributes
     ----------
-    ids_data: ImasIds
+    ids: ImasIds
         IMAS ids.
     ids_attrs: dict
         Ids attributes as dict with keys [pulse, run, machine, occurence,
@@ -557,7 +453,7 @@ class Database(IDS):
 
     Minimum input requred for Database is 'ids' or 'pulse', 'run' and 'name':
 
-    >>> Database().ids_data
+    >>> Database().ids
     Traceback (most recent call last):
         ...
     imas.hli_exception.ALException: When self.ids is None require:
@@ -566,7 +462,7 @@ class Database(IDS):
     Malformed inputs are thrown as TypeErrors:
 
     >>> malformed_database = Database(None, 403, name='equilibrium')
-    >>> malformed_database.ids_data
+    >>> malformed_database.ids
     Traceback (most recent call last):
         ...
     imas.hli_exception.ALException: When self.ids is None require:
@@ -575,7 +471,7 @@ class Database(IDS):
     The database class may also be initiated with an ids from which the
     name attribute may be recovered:
 
-    >>> database = Database(ids=equilibrium.ids_data)
+    >>> database = Database(ids=equilibrium.ids)
     >>> database.name
     'equilibrium'
 
@@ -632,6 +528,18 @@ class Database(IDS):
         self.load_database()
         self.update_filename()
 
+    @cached_property
+    def db_entry(self):
+        """Return nova.DBEntry instance."""
+        return DBEntry(uri=self.uri, mode="a", database=self)
+
+    def __enter__(self):
+        """Extend imaspy DBEntry.enter."""
+        return self.db_entry.__enter__()
+
+    def __exit__(self, exc_type, exc_val, traceback):
+        self.db_entry.__exit__(exc_type, exc_val, traceback)
+
     def rename(self):
         """Reset name to default if default is not None."""
         if (
@@ -660,12 +568,12 @@ class Database(IDS):
         if self._unset_attrs:
             self.pulse = 0
             self.run = 0
-        if self.name is not None and self.name != self.ids_data.metadata.name:
+        if self.name is not None and self.name != self.ids.metadata.name:
             raise NameError(
                 f"missmatch between instance name {self.name} "
-                f"and ids_data {self.ids_data.metadata.name}"
+                f"and ids.metadata.name {self.ids.metadata.name}"
             )
-        self.name = self.ids_data.metadata.name
+        self.name = self.ids.metadata.name
 
     def load_database(self):
         """Load instance database attributes."""
@@ -724,11 +632,6 @@ class Database(IDS):
         to generate a unique hex hash to label data within a netCDF file.
         """
         return self.ids_attrs
-
-    @property
-    def db_entry(self):
-        """Return nova.DBEntry instance."""
-        return DBEntry(uri=self.uri, mode="a", database=self)
 
     def get_ids(self, ids_path: Optional[str] = None, occurrence=None):
         """Return ids. Override IDS.get_ids. Extend name with ids_path."""
@@ -827,7 +730,7 @@ class Database(IDS):
         underway to provide ids hashes via the IMAS access layer.
         """
         xxh32 = xxhash.xxh32()
-        xxh32.update(str(self.ids_data))
+        xxh32.update(str(self.ids))
         return xxh32.intdigest()
 
 
@@ -838,7 +741,7 @@ class IdsIndex:
 
     Parameters
     ----------
-    ids_data : ImasIds
+    ids : ImasIds
         IMAS IDS (in-memory).
     ids_node : str
         Array extraction node.
@@ -862,10 +765,10 @@ class IdsIndex:
     >>> pulse, run = 105028, 1  # DINA scenario data
     >>> pf_active = Database(pulse, run, name='pf_active')
 
-    Initiate an instance of IdsIndex using ids_data from pf_active and
+    Initiate an instance of IdsIndex using ids from pf_active and
     specifying 'coil' as the array extraction node.
 
-    >>> ids_index = IdsIndex(pf_active.ids_data, 'coil')
+    >>> ids_index = IdsIndex(pf_active.ids, 'coil')
 
     Get first 5 coil names.
 
@@ -887,7 +790,7 @@ class IdsIndex:
     Load equilibrium ids and initiate new instance of ids_index.
 
     >>> equilibrium = Database(pulse, run, name='equilibrium')
-    >>> ids_index = IdsIndex(equilibrium.ids_data, 'time_slice')
+    >>> ids_index = IdsIndex(equilibrium.ids, 'time_slice')
 
     Get psi at itime=30 from profiles_1d and profiles_2d.
 
@@ -900,7 +803,7 @@ class IdsIndex:
 
     >>> pulse, run = 135007, 4  # DINA scenario including force data
     >>> pf_active = Database(pulse, run, name='pf_active')
-    >>> ids_index = IdsIndex(pf_active.ids_data, 'coil')
+    >>> ids_index = IdsIndex(pf_active.ids, 'coil')
 
     Use context manager to temporarily switch the ids_node to radial_force
     and vertical_force and extract force data at itime=100 from each node.
@@ -915,7 +818,7 @@ class IdsIndex:
 
     """
 
-    ids_data: ImasIds
+    ids: ImasIds
     ids_node: str = "time_slice"
     transpose: bool = field(init=False, default=False)
     shapes: dict[str, tuple[int, ...] | tuple[()]] = field(
@@ -944,8 +847,8 @@ class IdsIndex:
         Demonstrate use of context manager for switching active ids_node.
 
         >>> from nova.imas.database import IdsIndex
-        >>> ids_data = Database(135007, 4, name='pf_active').ids_data
-        >>> ids_index = IdsIndex(ids_data, 'coil')
+        >>> ids = Database(135007, 4, name='pf_active').ids
+        >>> ids_index = IdsIndex(ids, 'coil')
         >>> with ids_index.node('vertical_force'):
         ...     ids_index.array('force.data').shape
         (2338, 17)
@@ -957,10 +860,10 @@ class IdsIndex:
 
     @property
     def ids(self):
-        """Return ids_data node."""
+        """Return ids node."""
         if self.ids_node:
-            return attrgetter(self.ids_node)(self.ids_data)
-        return self.ids_data
+            return attrgetter(self.ids_node)(self.ids)
+        return self.ids
 
     @ids.setter
     def ids(self, ids_node: str | None):
@@ -1022,7 +925,7 @@ class IdsIndex:
 
     def resize(self, path: str, number: int):
         """Resize structured array."""
-        attrgetter(path)(self.ids_data).resize(number)
+        attrgetter(path)(self.ids).resize(number)
 
     def __setitem__(self, key, value):
         """Set attribute on ids path."""
@@ -1048,16 +951,16 @@ class IdsIndex:
         leaf = split_path[-1]
         match node.split(":"):
             case ("",):
-                branch = self.ids_data
+                branch = self.ids
             case (str(node),):
                 try:
-                    branch = attrgetter(node)(self.ids_data)[index]
+                    branch = attrgetter(node)(self.ids)[index]
                 except TypeError:
-                    branch = attrgetter(node)(self.ids_data)
+                    branch = attrgetter(node)(self.ids)
             case (str(array), ""):
-                branch = attrgetter(array)(self.ids_data)[index]
+                branch = attrgetter(array)(self.ids)[index]
             case (str(array), str(node)):
-                trunk = attrgetter(array)(self.ids_data)[index]
+                trunk = attrgetter(array)(self.ids)[index]
                 branch = attrgetter(node)(trunk)
             case _:
                 raise IndexError(f"invalid node {node}")
@@ -1125,7 +1028,7 @@ class IdsIndex:
             return False
 
     def empty(self, path: str):
-        """Return status based on first data point extracted from ids_data."""
+        """Return status based on first data point extracted from ids."""
         try:
             data = self.get_slice(0, path)
         except IndexError:
@@ -1167,20 +1070,20 @@ class IdsIndex:
 class IdsEntry(IdsIndex, IDS):
     """Methods to facilitate sane ids entry."""
 
-    ids_data: ImasIds = None
+    ids: ImasIds = None
     ids_node: str = ""
     database: Database | None = field(init=False, default=None)
 
     def __post_init__(self):
-        """Initialize ids_data and create database instance."""
-        if self.ids_data is None:
-            self.ids_data = self.get_ids()
-        self.database = Database(**self.ids_attrs, ids=self.ids_data)
+        """Initialize ids and create database instance."""
+        if self.ids is None:
+            self.ids = self.get_ids()
+        self.database = Database(**self.ids_attrs, ids=self.ids)
         super().__post_init__()
 
     def put_ids(self, occurrence=None):
         """Expose Database.put_ids."""
-        self.database.put_ids(self.ids_data, occurrence)
+        self.database.put_ids(self.ids, occurrence)
 
 
 @dataclass

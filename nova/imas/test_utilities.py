@@ -5,10 +5,10 @@ from nova.imas.database import Database
 from nova.utilities.importmanager import mark_import
 
 with mark_import("imaspy") as mark_imaspy:
-    pass
-    # from imaspy.exception import ALException
+    from imaspy.exception import ALException  # noqa
 
 IMPORT_IMASPY = not any(mark_imaspy.args[0])
+
 
 ids_attrs = dict(
     pf_active=dict(pulse=111001, run=203, name="pf_active", machine="iter_md"),
@@ -27,7 +27,7 @@ def load_ids(*args, **kwargs):
     """Return database instance."""
     if not IMPORT_IMASPY:
         return False
-    return Database(*args, **kwargs).db_entry.is_valid
+    return Database(*args, **kwargs)
 
 
 mark = {"imas": mark_imaspy}
@@ -36,5 +36,6 @@ for attr in ids_attrs:
         mark[attr] = mark["imas"]
         continue
     mark[attr] = pytest.mark.skipif(
-        not load_ids(**ids_attrs[attr]), reason=f"{attr} database unavalible"
+        not load_ids(**ids_attrs[attr]).db_entry.is_valid,
+        reason=f"{attr} database unavalible",
     )

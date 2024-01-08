@@ -1,6 +1,6 @@
 import pytest
 
-from nova.imas.database import Callstate
+from nova.imas.callstate import Callstate
 
 
 def test_attrs():

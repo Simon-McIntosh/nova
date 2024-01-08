@@ -31,11 +31,12 @@ def test_with_database_always_lazy():
 @mark["pf_active"]
 def test_database_keen():
     pf_active = Database(**ids_attrs["pf_active"])
-    ids_data = pf_active.db_entry.get_data()
+    ids_data = pf_active.db_entry.get_data(lazy=False)
     assert ids_data == pf_active.ids
     ids = pf_active.db_entry()
     assert ids == pf_active.ids
     ids = pf_active.db_entry()
+    pf_active.db_entry.close()
 
 
 @mark["pf_active"]
@@ -67,6 +68,17 @@ def test_db_entry():
 def test_db_entry_is_valid():
     assert Database(pulse=-1, run=-1, name="equilibrium").db_entry.is_valid is False
     assert Database(**ids_attrs["equilibrium"]).db_entry.is_valid is True
+
+
+@mark["equilibrium"]
+def test_db_entry_no_occurrences():
+    assert (
+        Database(
+            pulse=-1,
+            run=-1,
+        ).db_entry.list_all_occurrences("equilibrium")
+        == []
+    )
 
 
 if __name__ == "__main__":

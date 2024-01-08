@@ -32,14 +32,14 @@ def test_pf_active_attrs():
 
 @mark["pf_active"]
 def test_pf_active_ids():
-    ids = load_ids(**ids_attrs["pf_active"]).ids_data
-    assert ids.coil[0].identifier == "CS3U"
+    with load_ids(**ids_attrs["pf_active"]).db_entry as ids:
+        assert ids.coil[0].identifier == "CS3U"
 
 
 @mark["pf_active"]
 def test_pf_active_properties():
-    pf_active = Database(**ids_attrs["pf_active"])
-    assert "ITER_D_33NHXN" in pf_active.ids_data.ids_properties.source
+    with Database(**ids_attrs["pf_active"]).db_entry as ids:
+        assert "ITER_D_33NHXN" in ids.ids_properties.source
 
 
 @mark["pf_active"]
@@ -80,7 +80,7 @@ def test_equilibrium_attr_defaults():
 @mark["imas"]
 def test_database_minimum_required_input():
     with pytest.raises(ALException) as error:
-        Database().ids_data
+        Database().ids
     assert "When self.ids is None require:" in str(error.value)
 
 
@@ -88,14 +88,14 @@ def test_database_minimum_required_input():
 def test_database_malformed_input():
     with pytest.raises(ALException) as error:
         equilibrium = ids_attrs["equilibrium"] | dict(run=None)
-        Database(**equilibrium).ids_data
+        Database(**equilibrium).ids
     assert "When self.ids is None require:" in str(error.value)
 
 
 @mark["equilibrium"]
 def test_equilibrium_database_from_ids_str_hash():
     equilibrium_from_attrs = Database(**ids_attrs["equilibrium"])
-    equilibrium_from_ids = Database(ids=equilibrium_from_attrs.ids_data)
+    equilibrium_from_ids = Database(ids=equilibrium_from_attrs.ids)
     assert equilibrium_from_ids.name == ids_attrs["equilibrium"]["name"]
     assert equilibrium_from_ids.pulse != ids_attrs["equilibrium"]["pulse"]
     assert equilibrium_from_ids.run != ids_attrs["equilibrium"]["run"]
@@ -155,7 +155,7 @@ def test_geometry_update_run():
 @mark["pf_active"]
 def test_geometry_pf_active_run_ids():
     database = Database(**ids_attrs["pf_active"])
-    pf_active = Geometry(database.ids_data).pf_active
+    pf_active = Geometry(database.ids).pf_active
     assert pf_active["run"] == PoloidalFieldActive.run
 
 

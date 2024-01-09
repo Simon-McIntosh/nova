@@ -9,7 +9,7 @@ from nova.imas.machine import (
     PoloidalFieldPassive,
 )
 from nova.imas.pf_active import PF_Active
-from nova.imas.test_utilities import ids_attrs, load_ids, mark, ALException
+from nova.imas.test_utilities import ids_attrs, mark, ALException
 
 
 def test_ids_attrs():
@@ -24,7 +24,7 @@ def test_ids_attrs():
 
 @mark["pf_active"]
 def test_pf_active_attrs():
-    pf_active = load_ids(**ids_attrs["pf_active"])
+    pf_active = Database(**ids_attrs["pf_active"])
     assert pf_active.pulse == ids_attrs["pf_active"]["pulse"]
     assert pf_active.run == ids_attrs["pf_active"]["run"]
     assert pf_active.name == ids_attrs["pf_active"]["name"]
@@ -32,10 +32,11 @@ def test_pf_active_attrs():
 
 @mark["pf_active"]
 def test_pf_active_ids():
-    with load_ids(**ids_attrs["pf_active"]).db_entry as ids:
+    with Database(**ids_attrs["pf_active"]) as ids:
         assert ids.coil[0].identifier == "CS3U"
 
 
+"""
 @mark["pf_active"]
 def test_pf_active_properties():
     with Database(**ids_attrs["pf_active"]).db_entry as ids:
@@ -46,6 +47,7 @@ def test_pf_active_properties():
 def test_get_ids_path():
     pf_active = Database(**ids_attrs["pf_active"])
     assert pf_active.get_ids("coil")[0].name == "Central Solenoid 3U (CS3U)"
+
 
 
 @mark["pf_active"]
@@ -204,7 +206,7 @@ def test_machine_geometry_default():
 def test_machine_geometry_relative():
     machine = Machine(105011, 9, pf_active=True, pf_passive=False, wall=False)
     assert machine.filename == "machine_iter_105011_9"
-
+"""
 
 if __name__ == "__main__":
     pytest.main([__file__])

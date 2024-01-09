@@ -19,10 +19,10 @@ from nova.imas.database import (
     Database,
     IDS,
     Ids,
-    IdsIndex,
     ImasIds,
     EMPTY_FLOAT,
 )
+from nova.imas.ids_index import IdsIndex
 from nova.geometry.polygon import Polygon
 
 if TYPE_CHECKING:

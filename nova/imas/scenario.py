@@ -4,8 +4,9 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from functools import cached_property
 
-from nova.imas.database import IdsData, IdsIndex
+from nova.imas.database import IdsData
 from nova.imas.getslice import GetSlice
+from nova.imas.ids_index import IdsIndex
 
 
 @dataclass

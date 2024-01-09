@@ -1,7 +1,6 @@
 import pytest
 
 import imaspy
-import numpy as np
 
 from nova.imas.database import Database
 from nova.imas.test_utilities import ids_attrs, mark

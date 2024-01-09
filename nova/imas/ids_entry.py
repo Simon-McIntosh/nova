@@ -1,0 +1,25 @@
+"""Methods to manage sane ids entry."""
+from dataclasses import dataclass, field
+
+from nova.imas.database import Database, ImasIds
+from nova.imas.ids import IDS, IdsIndex
+
+
+@dataclass
+class IdsEntry(IdsIndex, IDS):
+    """Methods to facilitate sane ids entry."""
+
+    ids: ImasIds = None
+    ids_node: str = ""
+    database: Database | None = field(init=False, default=None)
+
+    def __post_init__(self):
+        """Initialize ids and create database instance."""
+        if self.ids is None:
+            self.ids = self.get_ids()
+        self.database = Database(**self.ids_attrs, ids=self.ids)
+        super().__post_init__()
+
+    def put_ids(self, occurrence=None):
+        """Expose Database.put_ids."""
+        self.database.put_ids(self.ids, occurrence)

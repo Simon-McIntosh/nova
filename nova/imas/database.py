@@ -2,15 +2,13 @@
 from contextlib import contextmanager
 from dataclasses import dataclass, field, fields, InitVar
 from functools import cached_property
-from operator import attrgetter
 import os
 from typing import Any, ClassVar, Optional, Type
 
-import numpy as np
 import xxhash
 
 from nova.database.datafile import Datafile
-from nova.imas.callstate import DBEntry
+from nova.imas.db_entry import DBEntry
 from nova.utilities.importmanager import check_import
 
 with check_import("imaspy"):
@@ -26,111 +24,6 @@ EMPTY_FLOAT = imaspy.ids_defs.EMPTY_FLOAT
 
 ImasIds = Any
 Ids = ImasIds | dict[str, int | str] | tuple[int | str]
-
-
-@dataclass
-class URI:
-    """
-    Manage IMAS Uniform Resource Identifiers.
-
-    Follows the URI standard definition from RFC-3986 but is not fully compliant.
-    The general URI structure is the following:
-
-        - scheme:[//authority]path[?query][#fragment].
-
-    For sake of clarity and coherence, it was decided to define a single unified scheme
-    for IMAS data resources (named imas) instead of defining different scheme for each
-    backend. This implies that the backend needs to be specified in another manner.
-    We opt for using the path part of the URI to specify the backend.
-
-    As a result, the structure of the IMAS URI is the following, with elements between
-    square brackets being optional:
-
-    imas:[//host/]backend?query[#fragment]
-
-    Each part of the URI are described in more details in the following subsections.
-
-    Parameters
-    ----------
-    scheme: {'imas'}, optional
-        An imas data entry is identified with 'imas'.
-
-
-    host: str, optional
-        Specify the address of the server on which the data is accessed.
-        The structure of the host is '[user@]server[:port]', where:
-
-    user is the username which will be recognized on the server to authenticate the
-    submitter to this request. This information is optional, for instance for if the
-    authentication is done by other means
-    (e.g. using PKI certificates in the case of UDA) or if the data server does not
-    require authentication;
-    server is the address of the server (typically the fully qualified domain name or
-                                         the IP of the server);
-    port is optional and can be used to specify a port number onto which sending the
-    requests to the server.
-    When the data is stored locally the host (localhost) is omitted.
-
-    Example: a host would typically be the address of a UDA server, with which the UDA
-    backend of the Access-Layer will send requests for data over the netwrok. A URI
-    would then look like: imas://uda.iter.org/uda?....
-
-    Backend
-    The backend is the name of the Access-Layer backend used to retrieve the stored
-    data, this name is given in lower case and is mandatory. Current possibilities are:
-        mdsplus, hdf5, ascii, memory and uda. Be aware that some backends may not be
-        available in a given install of the Access-Layer.
-
-    Query
-    A query is mandatory. It starts with ? and is composed of a list of semi-colon ;
-    (or ampersand &) separated pairs key=value. The following keys are standard and
-    recognized by all backends:
-
-    path: absolute path on the localhost where the data is stored;
-    shot, run, user, database, version: allowed for compatibility purpose with legacy
-    data-entry identifiers.
-    Note: if legacy identifiers are provided, they are always transformed into a
-    standard path before the query is being passed to the backend.
-
-    Other keys may exist, be optional or mandatory for a given backend. Please refer
-    to the latest documentation of the Access-Layer for more information on
-    backend-specific keys.
-
-    Fragment
-    In order to identify a subset from a given data-entry, a fragment can be added
-    to the URI. Such fragment, which starts with a hash #, is optional and
-    allows to identify a specific IDS, or a part of an IDS.
-
-    The structure of the fragment is #idsname[:occurrence][/idspath], where:
-
-    idsname is the type name of the IDS, given in lower case, is mandatory in fragments
-    and comes directly after the # delimiter;
-    occurrence is the occurrence of the IDS
-    (refer to the Access-Layer User Guide for more information), is optional and
-    comes after a colon : delimiter that links the occurrence to the IDS specified
-    before the delimiter;
-    idspath is the path from IDS root to the IDS subset that needs to be identified,
-    and is optional (in such case the fragment identifies the entire IDS structure).
-    Refer to the IDS path syntax document for more information.
-    """
-
-    scheame: str = "imas"
-    # host:
-
-    @cached_property
-    def ids_attrs(self) -> dict[str, str | int]:
-        """Return ids attributes from uri."""
-        return dict(
-            zip(
-                *np.array(
-                    [
-                        pair.split("=")
-                        for pair in self.uri.split("?")[-1].split(";")
-                        if "=" in pair
-                    ]
-                ).T
-            )
-        )
 
 
 @dataclass
@@ -265,146 +158,7 @@ class IDS:
 
 
 @dataclass
-class DataAttrs:
-    """
-    Methods to handle the formating of database attributes.
-
-    Parameters
-    ----------
-    attrs: bool | Database | Ids
-        Input attributes.
-    subclass: Type[Database], optional
-        Subclass instance or class. The default is Database.
-
-    Attributes
-    ----------
-    attrs: dict
-        Resolved attributes.
-
-    Raises
-    ------
-    TypeError
-        Malformed attrs input passed to class.
-
-    Examples
-    --------
-    Skip doctest if IMAS instalation or requisite IDS(s) not found.
-
-    >>> import pytest
-    >>> try:
-    ...     _ = Database(130506, 403).get_ids('equilibrium')
-    ...     _ = Database(130506, 403).get_ids('pf_active')
-    ... except:
-    ...     pytest.skip('IMAS not found or 130506/403 unavailable')
-
-    The get_ids_attrs method is used to resolve a full ids_attrs dict from
-    a partial input. If the input to get_ids_attrs is boolean then True
-    returns the instance's default':
-
-    >>> DataAttrs(True).attrs == Database.default_ids_attrs()
-    True
-
-    whilst False returns an empty dict:
-
-    >>> DataAttrs(False).attrs
-    False
-
-    Database attributes may be extracted from any class derived from Database:
-
-    >>> database = Database(130506, 403, 'iter', 0, name='equilibrium')
-    >>> DataAttrs(database).attrs == database.ids_attrs
-    True
-
-    Passing a fully defined attribute dict returns this input:
-
-    >>> attrs = dict(pulse=130506, run=403, occurrence=0, \
-                     name='pf_active', user='other', \
-                     machine='iter', backend='hdf5')
-    >>> DataAttrs(attrs).attrs == attrs
-    True
-
-    DataAttrs updates attrs with defaults for all missing values:
-
-    >>> _ = attrs.pop('user')
-    >>> DataAttrs(attrs).attrs == attrs | dict(user='public')
-    True
-
-    An additional example with attrs as a partial dict:
-
-    >>> attrs = DataAttrs(dict(pulse=3, run=4)).attrs
-    >>> attrs['pulse'], attrs['run'], attrs['machine']
-    (3, 4, 'iter')
-
-    Attrs may be input as an ids. In this case attrs is returned with
-    hashed pulse and run numbers in additional to the original ids attribute:
-
-    >>> attrs = DataAttrs(database.ids).attrs
-    >>> attrs['pulse'] != 130506
-    True
-    >>> attrs['run'] != 403
-    True
-    >>> attrs['ids'].metadata.name
-    'equilibrium'
-
-    Attrs may be input as a list or tuple of args. This input is
-    expanded by the passed subclass and must resolve to a valid ids. Partial
-    input is acepted as long as the defaults enable a correct resolution.
-
-    >>> DataAttrs(dict(pulse=130506, run=403,\
-                       name='equilibrium')).attrs == database.ids_attrs
-    True
-
-    Raises TypeError when input attrs are malformed:
-
-    >>> DataAttrs('equilibrium').attrs
-    Traceback (most recent call last):
-        ...
-    TypeError: malformed attrs: <class 'str'>
-
-    """
-
-    ids_attrs: Ids | bool | str
-    subclass: InitVar[Type[IDS]] = IDS
-    default_attrs: dict = field(init=False, default_factory=dict)
-
-    def __post_init__(self, subclass):
-        """Update database attributes."""
-        self.default_attrs = subclass.default_ids_attrs()
-
-    @property
-    def attrs(self) -> dict | bool:
-        """Return output from update_attrs."""
-        return self.update_ids_attrs()
-
-    def merge_ids_attrs(self, base_attrs: dict):
-        """Merge database attributes."""
-        attrs = self.update_ids_attrs({"name": self.default_attrs["name"]})
-        if isinstance(attrs, bool):
-            return attrs
-        return base_attrs | attrs
-
-    def update_ids_attrs(self, default_attrs=None) -> dict | bool:
-        """Return formated database attributes."""
-        if default_attrs is None:
-            default_attrs = self.default_attrs
-        if self.ids_attrs is False:
-            return False
-        if self.ids_attrs is True:
-            return default_attrs
-        if isinstance(self.ids_attrs, Database):
-            return self.ids_attrs.ids_attrs
-        if isinstance(self.ids_attrs, dict):
-            return default_attrs | self.ids_attrs
-        if hasattr(self.ids_attrs, "ids_properties"):  # IMAS ids
-            database = Database(**default_attrs, ids=self.ids_attrs)
-            return database.ids_attrs | {"ids": self.ids_attrs}
-        if isinstance(self.ids_attrs, list | tuple):
-            return default_attrs | dict(zip(Database.attrs, self.ids_attrs))
-        raise TypeError(f"malformed attrs: {type(self.ids_attrs)}")
-
-
-@dataclass
-class Database(IDS):
+class Database(DBEntry, IDS):
     """
     Methods to access IMAS database.
 
@@ -534,10 +288,11 @@ class Database(IDS):
         return DBEntry(uri=self.uri, mode="a", database=self)
 
     def __enter__(self):
-        """Extend imaspy DBEntry.enter."""
+        """Access imaspy DBEntry.enter."""
         return self.db_entry.__enter__()
 
     def __exit__(self, exc_type, exc_val, traceback):
+        """Patch."""
         self.db_entry.__exit__(exc_type, exc_val, traceback)
 
     def rename(self):
@@ -735,355 +490,142 @@ class Database(IDS):
 
 
 @dataclass
-class IdsIndex:
+class DataAttrs:
     """
-    Methods for indexing data as arrays from an ids.
+    Methods to handle the formating of database attributes.
 
     Parameters
     ----------
-    ids : ImasIds
-        IMAS IDS (in-memory).
-    ids_node : str
-        Array extraction node.
+    attrs: bool | Database | Ids
+        Input attributes.
+    subclass: Type[Database], optional
+        Subclass instance or class. The default is Database.
+
+    Attributes
+    ----------
+    attrs: dict
+        Resolved attributes.
+
+    Raises
+    ------
+    TypeError
+        Malformed attrs input passed to class.
 
     Examples
     --------
-    Check access to required IDS(s).
+    Skip doctest if IMAS instalation or requisite IDS(s) not found.
 
     >>> import pytest
     >>> try:
-    ...     _ = Database(105028, 1).get_ids('pf_active')
-    ...     _ = Database(105028, 1).get_ids('equilibrium')
-    ...     _ = Database(135007, 4).get_ids('pf_active')
+    ...     _ = Database(130506, 403).get_ids('equilibrium')
+    ...     _ = Database(130506, 403).get_ids('pf_active')
     ... except:
-    ...     pytest.skip('IMAS not installed or 105028/1, 135007/4 unavailable')
+    ...     pytest.skip('IMAS not found or 130506/403 unavailable')
 
-    First load an ids, accomplished here using the Database class from
-    nova.imas.database.
+    The get_ids_attrs method is used to resolve a full ids_attrs dict from
+    a partial input. If the input to get_ids_attrs is boolean then True
+    returns the instance's default':
 
-    >>> from nova.imas.database import Database, IdsIndex
-    >>> pulse, run = 105028, 1  # DINA scenario data
-    >>> pf_active = Database(pulse, run, name='pf_active')
+    >>> DataAttrs(True).attrs == Database.default_ids_attrs()
+    True
 
-    Initiate an instance of IdsIndex using ids from pf_active and
-    specifying 'coil' as the array extraction node.
+    whilst False returns an empty dict:
 
-    >>> ids_index = IdsIndex(pf_active.ids, 'coil')
+    >>> DataAttrs(False).attrs
+    False
 
-    Get first 5 coil names.
+    Database attributes may be extracted from any class derived from Database:
 
-    >>> ids_index.array('name')[:5]
-    array(['CS3U', 'CS2U', 'CS1', 'CS2L', 'CS3L'], dtype=object)
+    >>> database = Database(130506, 403, 'iter', 0, name='equilibrium')
+    >>> DataAttrs(database).attrs == database.ids_attrs
+    True
 
-    Get full array of current data (551 time slices for all 12 coils).
+    Passing a fully defined attribute dict returns this input:
 
-    >>> current = ids_index.array('current.data')
-    >>> current.shape
-    (551, 12)
+    >>> attrs = dict(pulse=130506, run=403, occurrence=0, \
+                     name='pf_active', user='other', \
+                     machine='iter', backend='hdf5')
+    >>> DataAttrs(attrs).attrs == attrs
+    True
 
-    Get vector of coil currents at single time slice (itime=320)
+    DataAttrs updates attrs with defaults for all missing values:
 
-    >>> current = ids_index.vector(320, 'current.data')
-    >>> current.shape
-    (12,)
+    >>> _ = attrs.pop('user')
+    >>> DataAttrs(attrs).attrs == attrs | dict(user='public')
+    True
 
-    Load equilibrium ids and initiate new instance of ids_index.
+    An additional example with attrs as a partial dict:
 
-    >>> equilibrium = Database(pulse, run, name='equilibrium')
-    >>> ids_index = IdsIndex(equilibrium.ids, 'time_slice')
+    >>> attrs = DataAttrs(dict(pulse=3, run=4)).attrs
+    >>> attrs['pulse'], attrs['run'], attrs['machine']
+    (3, 4, 'iter')
 
-    Get psi at itime=30 from profiles_1d and profiles_2d.
+    Attrs may be input as an ids. In this case attrs is returned with
+    hashed pulse and run numbers in additional to the original ids attribute:
 
-    >>> ids_index.vector(30, 'profiles_1d.psi').shape
-    (50,)
-    >>> ids_index.vector(30, 'profiles_2d.psi').shape
-    (65, 129)
+    >>> attrs = DataAttrs(database.ids).attrs
+    >>> attrs['pulse'] != 130506
+    True
+    >>> attrs['run'] != 403
+    True
+    >>> attrs['ids'].metadata.name
+    'equilibrium'
 
-    Load pf_active ids containing force data.
+    Attrs may be input as a list or tuple of args. This input is
+    expanded by the passed subclass and must resolve to a valid ids. Partial
+    input is acepted as long as the defaults enable a correct resolution.
 
-    >>> pulse, run = 135007, 4  # DINA scenario including force data
-    >>> pf_active = Database(pulse, run, name='pf_active')
-    >>> ids_index = IdsIndex(pf_active.ids, 'coil')
+    >>> DataAttrs(dict(pulse=130506, run=403,\
+                       name='equilibrium')).attrs == database.ids_attrs
+    True
 
-    Use context manager to temporarily switch the ids_node to radial_force
-    and vertical_force and extract force data at itime=100 from each node.
+    Raises TypeError when input attrs are malformed:
 
-    >>> with ids_index.node('radial_force'):
-    ...     ids_index.vector(100, 'force.data').shape
-    (12,)
-
-    >>> with ids_index.node('vertical_force'):
-    ...     ids_index.vector(100, 'force.data').shape
-    (17,)
+    >>> DataAttrs('equilibrium').attrs
+    Traceback (most recent call last):
+        ...
+    TypeError: malformed attrs: <class 'str'>
 
     """
 
-    ids: ImasIds
-    ids_node: str = "time_slice"
-    transpose: bool = field(init=False, default=False)
-    shapes: dict[str, tuple[int, ...] | tuple[()]] = field(
-        init=False, default_factory=dict
-    )
+    ids_attrs: Ids | bool | str
+    subclass: InitVar[Type[IDS]] = IDS
+    default_attrs: dict = field(init=False, default_factory=dict)
 
-    def __post_init__(self):
-        """Initialize ids node."""
-        self.ids = self.ids_node
-
-    @contextmanager
-    def node(self, ids_node: str):
-        """
-        Permit tempary change to an instance's ids_node.
-
-        Example
-        -------
-        Check access to required IDS(s).
-
-        >>> import pytest
-        >>> try:
-        ...     _ = Database(135007, 4).get_ids('pf_active')
-        ... except:
-        ...     pytest.skip('IMAS not installed or 135007/4 unavailable')
-
-        Demonstrate use of context manager for switching active ids_node.
-
-        >>> from nova.imas.database import IdsIndex
-        >>> ids = Database(135007, 4, name='pf_active').ids
-        >>> ids_index = IdsIndex(ids, 'coil')
-        >>> with ids_index.node('vertical_force'):
-        ...     ids_index.array('force.data').shape
-        (2338, 17)
-        """
-        _ids_node = self.ids_node
-        self.ids = ids_node
-        yield
-        self.ids = _ids_node
+    def __post_init__(self, subclass):
+        """Update database attributes."""
+        self.default_attrs = subclass.default_ids_attrs()
 
     @property
-    def ids(self):
-        """Return ids node."""
-        if self.ids_node:
-            return attrgetter(self.ids_node)(self.ids)
-        return self.ids
+    def attrs(self) -> dict | bool:
+        """Return output from update_attrs."""
+        return self.update_ids_attrs()
 
-    @ids.setter
-    def ids(self, ids_node: str | None):
-        """Update ids node."""
-        if ids_node is not None:
-            self.transpose = ids_node != "time_slice"
-            self.ids_node = ids_node
+    def merge_ids_attrs(self, base_attrs: dict):
+        """Merge database attributes."""
+        attrs = self.update_ids_attrs({"name": self.default_attrs["name"]})
+        if isinstance(attrs, bool):
+            return attrs
+        return base_attrs | attrs
 
-    @property
-    def length(self):
-        """Return ids_node length."""
-        try:
-            return len(self.ids)
-        except (AttributeError, TypeError):
-            return 0
-        raise ValueError(f"unable determine ids_node length {self.ids_node}")
-
-    def _ids_path(self, path: str) -> str:
-        """Return full ids path."""
-        if self.ids_node is None:
-            return path
-        return f"{self.ids_node}.{path}"
-
-    def shape(self, path) -> tuple[int, ...]:
-        """Return attribute array shape."""
-        if self.length == 0:
-            return self.get_shape(path)
-        return (self.length,) + self.get_shape(path)
-
-    def get_shape(self, path: str) -> tuple[int, ...] | tuple[()]:
-        """Return cached dimension length."""
-        _path = self._ids_path(path)
-        try:
-            return self.shapes[_path]
-        except KeyError:
-            self.shapes[_path] = self._get_shape(path)
-            return self.get_shape(path)
-
-    def _get_shape(self, path: str) -> tuple[int, ...] | tuple[()]:
-        """Return data shape at index=0 on path."""
-        return self.get_slice(0, path).shape
-        """  # TODO remove if not required with imaspy 
-        match data := self.get_slice(0, path):
-            case np.ndarray():
-                return data.shape
-            case float() | int() | str():
-                return ()
-            case _ if isinstance(data, np.integer):
-                return ()
-            case _:
-                print("***", data, type(data), data.shape)
-                raise ValueError(f"unable to determine data length {path} {data}")
-        return ()
-        """
-
-    def get(self, path: str):
-        """Return attribute from ids path."""
-        return attrgetter(path)(self.ids)
-
-    def resize(self, path: str, number: int):
-        """Resize structured array."""
-        attrgetter(path)(self.ids).resize(number)
-
-    def __setitem__(self, key, value):
-        """Set attribute on ids path."""
-        match key:
-            case str(attr):
-                index, subindex = 0, 0
-            case (str(attr), index):
-                subindex = 0
-            case (str(attr), index, int(subindex)):
-                pass
-            case _:
-                raise KeyError(f"invalid key {key}")
-
-        if isinstance(index, slice):
-            # recursive update for all indicies specified in slice.
-            for _index, _value in zip(range(len(value))[index], value[index]):
-                self.__setitem__((attr, _index, subindex), _value)
-            return
-
-        path = self.get_path(self.ids_node, attr)
-        split_path = path.split(".")
-        node = ".".join(split_path[:-1])
-        leaf = split_path[-1]
-        match node.split(":"):
-            case ("",):
-                branch = self.ids
-            case (str(node),):
-                try:
-                    branch = attrgetter(node)(self.ids)[index]
-                except TypeError:
-                    branch = attrgetter(node)(self.ids)
-            case (str(array), ""):
-                branch = attrgetter(array)(self.ids)[index]
-            case (str(array), str(node)):
-                trunk = attrgetter(array)(self.ids)[index]
-                branch = attrgetter(node)(trunk)
-            case _:
-                raise IndexError(f"invalid node {node}")
-        match leaf.split(":"):
-            case ("",):
-                setattr(branch, value)
-            case (str(leaf),):
-                setattr(branch, leaf, value)
-            case str(stem), str(leaf):
-                try:
-                    shoot = attrgetter(stem)(branch)[subindex]
-                except IndexError:
-                    attrgetter(stem)(branch).resize(subindex + 1)
-                    shoot = attrgetter(stem)(branch)[subindex]
-                setattr(shoot, leaf, value)
-            case _:
-                raise NotImplementedError(f"invalid leaf {leaf}")
-
-    def get_slice(self, index: int, path: str):
-        """Return attribute slice at node index."""
-        try:
-            return attrgetter(path)(self.ids[index])
-        except AttributeError:  # __structArray__
-            node, path = path.split(".", 1)
-            return attrgetter(path)(attrgetter(node)(self.ids[index])[0])
-        except TypeError:  # object is not subscriptable
-            return self.get(path)
-
-    def vector(self, itime: int, path: str):
-        """Return attribute data vector at itime."""
-        if len(self.get_shape(path)) == 0:
-            raise IndexError(
-                f"attribute {path} is 0-dimensional " "access with self.array(path)"
-            )
-        if self.transpose:
-            data = np.zeros(self.shape(path)[:-1], dtype=self.dtype(path))
-            for index in range(self.length):
-                try:
-                    data[index] = self.get_slice(index, path)[itime]
-                except (ValueError, IndexError):  # empty slice
-                    pass
-            return data
-        return self.get_slice(itime, path)
-
-    def array(self, path: str):
-        """Return attribute data array."""
-        if self.length == 0:
-            return self.get(path)
-        data = np.zeros(self.shape(path), dtype=self.dtype(path))
-        for index in range(self.length):
-            try:
-                data[index] = self.get_slice(index, path)
-            except ValueError:  # empty slice
-                pass
-        if self.transpose:
-            return data.T
-        return data
-
-    def valid(self, path: str):
-        """Return validity flag for ids path."""
-        try:
-            self.empty(path)
-            return True
-        except TypeError:
+    def update_ids_attrs(self, default_attrs=None) -> dict | bool:
+        """Return formated database attributes."""
+        if default_attrs is None:
+            default_attrs = self.default_attrs
+        if self.ids_attrs is False:
             return False
-
-    def empty(self, path: str):
-        """Return status based on first data point extracted from ids."""
-        try:
-            data = self.get_slice(0, path)
-        except IndexError:
-            return True
-        if hasattr(data, "flat"):
-            try:
-                data = data.flat[0]
-            except IndexError:
-                return True
-        try:  # string
-            return len(data) == 0
-        except TypeError:
-            return (
-                data is None or np.isclose(data, -9e40) or np.isclose(data, -999999999)
-            )
-
-    def dtype(self, path: str):
-        """Return data point type."""
-        if self.empty(path):
-            raise ValueError(f"data entry at {path} is empty")
-        data = self.get_slice(0, path)
-        if isinstance(data, str):
-            return object
-        if hasattr(data, "flat"):
-            return type(data.flat[0])
-        return type(data)
-
-    @staticmethod
-    def get_path(branch: str, attr: str) -> str:
-        """Return ids attribute path."""
-        if not branch:
-            return attr
-        if "*" in branch:
-            return branch.replace("*", attr)
-        return ".".join((branch, attr))
-
-
-@dataclass
-class IdsEntry(IdsIndex, IDS):
-    """Methods to facilitate sane ids entry."""
-
-    ids: ImasIds = None
-    ids_node: str = ""
-    database: Database | None = field(init=False, default=None)
-
-    def __post_init__(self):
-        """Initialize ids and create database instance."""
-        if self.ids is None:
-            self.ids = self.get_ids()
-        self.database = Database(**self.ids_attrs, ids=self.ids)
-        super().__post_init__()
-
-    def put_ids(self, occurrence=None):
-        """Expose Database.put_ids."""
-        self.database.put_ids(self.ids, occurrence)
+        if self.ids_attrs is True:
+            return default_attrs
+        if isinstance(self.ids_attrs, Database):
+            return self.ids_attrs.ids_attrs
+        if isinstance(self.ids_attrs, dict):
+            return default_attrs | self.ids_attrs
+        if hasattr(self.ids_attrs, "ids_properties"):  # IMAS ids
+            database = Database(**default_attrs, ids=self.ids_attrs)
+            return database.ids_attrs | {"ids": self.ids_attrs}
+        if isinstance(self.ids_attrs, list | tuple):
+            return default_attrs | dict(zip(Database.attrs, self.ids_attrs))
+        raise TypeError(f"malformed attrs: {type(self.ids_attrs)}")
 
 
 @dataclass

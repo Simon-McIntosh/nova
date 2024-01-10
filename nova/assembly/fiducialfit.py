@@ -84,17 +84,17 @@ class FiducialFit(FiducialData):
     def load_target(self):
         """Load target geometories in cylindrical coordinate system."""
         dim = {"coil": self.data.sizes["coil"]}
+
         for attr in ["fiducial_target", "centerline_target"]:
-            self.data[f"{attr}_cyl"] = Rotate.to_cylindrical(
-                self.data[attr].expand_dims(dim, 0)
-            )
+            data = self.data[attr]
+            if attr == "centerline_target":
+                data = data.expand_dims(dim, 0)
+            self.data[f"{attr}_cyl"] = Rotate.to_cylindrical(data)
 
     def load_measurement(self):
         """Load reference measurements."""
         dim = {"coil": self.data.sizes["coil"]}
-        self.data["fiducial"] = (
-            self.data.fiducial_target.expand_dims(dim, 0) + self.data.fiducial_delta
-        )
+        self.data["fiducial"] = self.data.fiducial_target + self.data.fiducial_delta
         self.data["centerline"] = (
             self.data.centerline_target.expand_dims(dim, 0) + self.data.centerline_delta
         )
@@ -121,7 +121,9 @@ class FiducialFit(FiducialData):
                 (
                     self.data[fiducial][coil_index, :, space_index],
                     self.data[fiducial_std][coil_index, :, space_index],
-                ) = self.gpr.predict(self.data.target_length, return_std=True)
+                ) = self.gpr.predict(
+                    self.data.target_length[coil_index], return_std=True
+                )
                 self.data[centerline][coil_index, :, space_index] = self.gpr.predict(
                     self.data.arc_length
                 )
@@ -167,10 +169,10 @@ class FiducialFit(FiducialData):
                 points[i] = rotate.apply(points[i])
         return points
 
-    def delta(self, points):
+    def delta(self, points, coil):
         """Return coil-frame deltas."""
         return Rotate.to_cylindrical(points) - Rotate.to_cylindrical(
-            self.data.fiducial_target
+            self.data.fiducial_target.loc[coil]
         )
 
     @staticmethod
@@ -190,33 +192,35 @@ class FiducialFit(FiducialData):
                 raise NotImplementedError(f"Method {method} not implemented.")
         return error
 
-    def transform_error(self, x, points, method):
+    def transform_error(self, x, points, coil, method):
         """Return transform error vector."""
         points = self.transform(x, points)
-        return self.point_error(points, method)
+        return self.point_error(points, coil, method)
 
-    def weighted_transform_error(self, x, points, method):
+    def weighted_transform_error(self, x, points, coil, method):
         """Return weighted transform error vector."""
-        return self.transform_error(x, points, method=method) * self.weights
+        return self.transform_error(x, points, coil, method=method) * self.weights
 
-    def point_error(self, points, method=None):
+    def point_error(self, points, coil, method=None):
         """Return error vector."""
         if method is None:
             method = self.method
-        delta = self.delta(points)
+        delta = self.delta(points, coil)
         return self.error_vector(delta, method)
 
-    def max_transform_error(self, x, points):
+    def max_transform_error(self, x, points, coil):
         """Return maximum error."""
-        return np.max(self.weighted_transform_error(x, points, method="max"))
+        return np.max(self.weighted_transform_error(x, points, coil, method="max"))
 
-    def rms_transform_error(self, x, points):
+    def rms_transform_error(self, x, points, coil):
         """Return mean error."""
-        return np.sqrt(np.mean(self.weighted_transform_error(x, points, method="rms")))
+        return np.sqrt(
+            np.mean(self.weighted_transform_error(x, points, coil, method="rms"))
+        )
 
-    def scalar_error(self, x, points):
+    def scalar_error(self, x, points, coil):
         """Return scalar mesure for fit error."""
-        return getattr(self, f"{self.method}_transform_error")(x, points)
+        return getattr(self, f"{self.method}_transform_error")(x, points, coil)
 
     @property
     def point_name(self):
@@ -263,7 +267,7 @@ class FiducialFit(FiducialData):
         for coil in tqdm(self.data.coil, "fitting coils"):
             points = self.points(coil=coil)
             xo = np.zeros(self.data.sizes["transform"])
-            opt = minimize(self.scalar_error, xo, method="SLSQP", args=(points,))
+            opt = minimize(self.scalar_error, xo, method="SLSQP", args=(points, coil))
             if not opt.success:
                 warnings.warn(f"optimization failed {opt}")
             self.data["opt_x"].loc[{"coil": coil}] = opt.x
@@ -276,10 +280,10 @@ class FiducialFit(FiducialData):
                 fiducial_attr = self.join("fiducial", post_fix)
                 fiducial_points = self.data[fiducial_attr].sel(coil=coil)
                 self.data[error_attr].loc[{"coil": coil}] = self.scalar_error(
-                    xo, fiducial_points
+                    xo, fiducial_points, coil
                 )
                 self.data[f"{error_attr}_fit"].loc[{"coil": coil}] = self.scalar_error(
-                    opt.x, fiducial_points
+                    opt.x, fiducial_points, coil
                 )
 
     @cached_property
@@ -289,7 +293,7 @@ class FiducialFit(FiducialData):
 
     def plot_fit(self, coil_index, postfix=""):
         """Plot fits."""
-        self.plotter.target()
+        self.plotter.target(coil_index)
         stage = 1 + int(self.infer)
         stage = 2
         self.plotter(postfix, stage, coil_index)
@@ -333,11 +337,13 @@ class FiducialFit(FiducialData):
             fontsize="small",
         )
 
+    '''
     def fit_error(self, method: str):
         """Return fit error vector."""
         return self.transform_error(
             self.data.opt_x.values, self.data.reference.copy(), method
         )
+    '''
 
     def reference_error(self, method: str):
         """Return reference error vector."""
@@ -347,10 +353,11 @@ class FiducialFit(FiducialData):
         """Display text transform."""
         points = self.data[self.point_name][coil_index]
         opt_x = self.data.opt_x[coil_index].data
-        self.transform_error(opt_x, points, "rms")
+        coil = self.data.coil[coil_index].data
+        self.transform_error(opt_x, points, coil, "rms")
         error = {
-            "rms": self.transform_error(opt_x, points, "rms"),
-            "max": self.transform_error(opt_x, points, "max"),
+            "rms": self.transform_error(opt_x, points, coil, "rms"),
+            "max": self.transform_error(opt_x, points, coil, "max"),
         }
         text = ""
         for i, coordinate in enumerate(
@@ -380,7 +387,7 @@ if __name__ == "__main__":
     fiducial.plot_fit(coil_index)
     fiducial.plot_fit(coil_index, "fit")
 
-    fiducial.write()
+    # fiducial.write()
 
     """
     for coil in range(18):

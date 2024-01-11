@@ -29,7 +29,7 @@ class Fiducial(ABC):
             "EU",
             "JA",
             "JA",
-            "EU",
+            "JA",
             "JA",
             "EU",
             "JA",

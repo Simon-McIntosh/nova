@@ -18,6 +18,9 @@ class FiducialSector(Fiducial):
     sectors: dict[int, list] = field(
         init=False, repr=False, default_factory=lambda: dict.fromkeys(range(1, 9), [])
     )
+    fiducial: dict[str, pandas.DataFrame] | dict = field(
+        init=False, repr=False, default_factory=dict
+    )
     variance: dict[str, pandas.DataFrame] | dict = field(
         init=False, repr=False, default_factory=dict
     )
@@ -30,6 +33,7 @@ class FiducialSector(Fiducial):
         super().__post_init__()
         self.source = "Reverse Engineering IDM datasets (xls workbooks)"
         self.origin = [self.origin[coil - 1] for coil in self.delta]
+        self._load_fiducials()
         self._load_variance()
 
     def _set_phase(self):
@@ -45,6 +49,17 @@ class FiducialSector(Fiducial):
             for coil, ccl in data.ccl[self.phase].items():
                 self.sector[coil] = sector
                 self.delta[coil] = ccl.loc[self.target, columns]
+
+    def _load_fiducials(self):
+        """Load unique fiducial targets."""
+        columns = ["x", "y", "z"]
+        for sector in self.sectors:
+            data = SectorData(sector)
+            for coil, fiducial in data.data.items():
+                nominal = fiducial["Nominal"]
+                nominal.index = nominal.index.droplevel([0, 1])
+                nominal.rename(index={"F'": "F"}, inplace=True)
+                self.fiducial[coil] = nominal.loc[self.target, columns]
 
     def _load_variance(self):
         columns = ["ux", "uy", "uz"]

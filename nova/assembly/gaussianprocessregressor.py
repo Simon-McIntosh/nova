@@ -23,7 +23,7 @@ class GaussianProcessRegressor:
     def __post_init__(self, x):
         """Init dataset."""
         x = self.to_numpy(x)
-        self.data = xarray.Dataset(coords=dict(x=x))
+        self.data = xarray.Dataset(coords={"x": x})
         self.build_regressor()
 
     def build_regressor(self):

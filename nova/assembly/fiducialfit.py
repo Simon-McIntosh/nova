@@ -83,20 +83,18 @@ class FiducialFit(FiducialData):
 
     def load_target(self):
         """Load target geometories in cylindrical coordinate system."""
-        dim = {"coil": self.data.sizes["coil"]}
-
+        self.data["centerline_target"] = (
+            xarray.DataArray(1, [("coil", self.data.coil.data)])
+            * self.data.centerline_target
+        )
         for attr in ["fiducial_target", "centerline_target"]:
-            data = self.data[attr]
-            if attr == "centerline_target":
-                data = data.expand_dims(dim, 0)
-            self.data[f"{attr}_cyl"] = Rotate.to_cylindrical(data)
+            self.data[f"{attr}_cyl"] = Rotate.to_cylindrical(self.data[attr])
 
     def load_measurement(self):
         """Load reference measurements."""
-        dim = {"coil": self.data.sizes["coil"]}
         self.data["fiducial"] = self.data.fiducial_target + self.data.fiducial_delta
         self.data["centerline"] = (
-            self.data.centerline_target.expand_dims(dim, 0) + self.data.centerline_delta
+            self.data.centerline_target + self.data.centerline_delta
         )
 
     def evaluate_gpr(self, target="fiducial", postfix="gpr"):
@@ -165,8 +163,7 @@ class FiducialFit(FiducialData):
         points = points[:] + x[:3]
         if len(x) == 6:
             rotate = Rotation.from_euler("XYZ", x[-3:], degrees=True)
-            for i in range(2):
-                points[i] = rotate.apply(points[i])
+            points[:] = rotate.apply(points.data)
         return points
 
     def delta(self, points, coil):
@@ -250,6 +247,8 @@ class FiducialFit(FiducialData):
         ]
         for attr in transform_attrs:
             self.data[f"{attr}_fit"] = xarray.zeros_like(self.data[attr])
+
+        # self.data["centerline_target_fit"] =
         self.data.coords["transform"] = ["x", "y", "z", "xx", "yy", "zz"]
         self.data["opt_x"] = xarray.DataArray(
             0.0,
@@ -337,14 +336,6 @@ class FiducialFit(FiducialData):
             fontsize="small",
         )
 
-    '''
-    def fit_error(self, method: str):
-        """Return fit error vector."""
-        return self.transform_error(
-            self.data.opt_x.values, self.data.reference.copy(), method
-        )
-    '''
-
     def reference_error(self, method: str):
         """Return reference error vector."""
         return self.point_error(self.data.reference.copy(), method)
@@ -376,6 +367,53 @@ class FiducialFit(FiducialData):
             fontsize="small",
         )
 
+    def _get_delta(self, attr, fit=True):
+        """Return ensemble deltas."""
+        source_attr = attr
+        if fit:
+            source_attr += "_fit"
+        return self.data[source_attr] - self.data[f"{attr}_target"]
+
+    def plot_ensemble(self, fit=True, factor=250):
+        """Plot fit ensemble."""
+        self.axes = self.set_axes("2d", nrows=1, ncols=2, sharey=True)
+        for j in range(2):
+            self.axes[j].plot(
+                self.data.centerline_target[0, :, 0],
+                self.data.centerline_target[0, :, 2],
+                "gray",
+                ls="--",
+            )
+        limits = self.axes_limit
+        color = [0, 0]
+
+        centerline_delta = self._get_delta("centerline", fit)
+        fiducial_delta = self._get_delta("fiducial", fit)
+
+        for i in range(self.data.sizes["coil"]):
+            j = 0 if self.data.origin[i] == "EU" else 1
+            self.axes[j].plot(
+                self.data.centerline_target[i, :, 0]
+                + factor * centerline_delta[i, :, 0],
+                self.data.centerline_target[i, :, 2]
+                + factor * centerline_delta[i, :, 2],
+                color=f"C{color[j]}",
+                label=f"{self.data.coil[i].values:02d}",
+            )
+            self.axes[j].plot(
+                self.data.fiducial_target[i, :, 0] + factor * fiducial_delta[i, :, 0],
+                self.data.fiducial_target[i, :, 2] + factor * fiducial_delta[i, :, 2],
+                ".",
+                color=f"C{color[j]}",
+            )
+            color[j] += 1
+        for j, origin in enumerate(["EU", "JA"]):
+            self.axes[j].legend(
+                fontsize="large", loc="center", bbox_to_anchor=[0.4, 0.5]
+            )
+            self.axes[j].set_title(f"{origin} {self.phase}")
+        self.axes_limit = limits
+
 
 if __name__ == "__main__":
     phase = "FAT supplier"
@@ -383,9 +421,11 @@ if __name__ == "__main__":
 
     fiducial = FiducialFit(phase=phase, infer=True, fill=False, method="rms")
 
-    coil_index = 0
+    coil_index = 16
     fiducial.plot_fit(coil_index)
     fiducial.plot_fit(coil_index, "fit")
+
+    fiducial.plot_ensemble(True, 250)
 
     # fiducial.write()
 

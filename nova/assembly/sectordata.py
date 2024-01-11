@@ -21,6 +21,7 @@ class SectorData(FilePath, SectorFile):
     dirname: Path | str = ".nova/sector_modules"
     data: dict = field(init=False, repr=False, default_factory=dict)
     ccl: dict = field(init=False, repr=False, default_factory=dict)
+    coil: list = field(init=False, default_factory=list)
 
     def __post_init__(self):
         """Load / build dataset."""
@@ -31,7 +32,7 @@ class SectorData(FilePath, SectorFile):
         """Load or build dataset."""
         try:
             self.load()
-        except (FileNotFoundError, OSError):
+        except (FileNotFoundError, OSError, EOFError):
             self.build()
 
     def load(self):
@@ -39,12 +40,14 @@ class SectorData(FilePath, SectorFile):
         with open(self.filepath.with_suffix(".pickle"), "rb") as file:
             self.data = pickle.load(file)
             self.ccl = pickle.load(file)
+            self.coil = pickle.load(file)
 
     def store(self):
         """Pickle data and ccl."""
         with open(self.filepath.with_suffix(".pickle"), "wb") as file:
             pickle.dump(self.data, file, protocol=5)
             pickle.dump(self.ccl, file, protocol=5)
+            pickle.dump(self.coil, file, protocol=5)
 
     def build(self):
         """Build mesurment dataset."""
@@ -76,8 +79,12 @@ class SectorData(FilePath, SectorFile):
                     continue
                 for index, name in enumerate(self._coil_names(sheet)):
                     self.data[name][sheet] = self.read_frame(index, sheet)
-        for coil in self._coil_names("Nominal"):
-            if self.data[coil]["Nominal"].values.dtype == np.object_:
+            self.coil = self._coil_names("Nominal")
+        for coil in self.coil:
+            if (
+                self.data[coil]["Nominal"].values.dtype == np.object_
+                or np.isnan(self.data[coil]["Nominal"].values).any()
+            ):
                 self.data.pop(coil)
 
     @contextmanager
@@ -93,11 +100,6 @@ class SectorData(FilePath, SectorFile):
                 worksheet.cell(i + xls_index[0] + 1, j + xls_index[1] + 3, data[i, j])
 
     @cached_property
-    def coil(self) -> list[str]:
-        """Return list of coil names."""
-        return [name for name in self.data]
-
-    @cached_property
     def phase(self) -> list[str]:
         """Return list of assembly phases."""
         return [phase for phase in self.data[self.coil[0]] if phase != "Nominal"]
@@ -110,6 +112,10 @@ class SectorData(FilePath, SectorFile):
         """Build ccl data."""
         self._initalize_ccl()
         for coil in self.coil:
+            if coil not in self.data:
+                for phase in self.phase:
+                    self.ccl[phase].pop(coil)
+                continue
             nominal = self.data[coil]["Nominal"]
             for phase in self.phase:
                 self.ccl[phase][coil] = self.data[coil][phase].loc[nominal.index]
@@ -193,4 +199,5 @@ class SectorData(FilePath, SectorFile):
 
 
 if __name__ == "__main__":
-    sector = SectorData(6)
+    sector = SectorData(9)
+    # sector.build()

@@ -156,7 +156,7 @@ class Transform:
     """Build transform dataset."""
 
     simulation: str
-    signal: str = None
+    signal: str | None = None
     scenario: str = "TFonly"
     data: xarray.Dataset = field(init=False, repr=False, default_factory=xarray.Dataset)
 

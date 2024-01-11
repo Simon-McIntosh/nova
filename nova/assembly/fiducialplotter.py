@@ -46,7 +46,6 @@ class FiducialPlotter(Plot):
 
     def __call__(self, post_fix: str, stage: int = 2, coil_index=0):
         """Plot fiducial and centerline fits."""
-
         if stage > 0:
             self.fiducial(post_fix, coil_index=coil_index)
             self.centerline(post_fix, coil_index=coil_index)
@@ -79,14 +78,14 @@ class FiducialPlotter(Plot):
     def target(self, coil_index):
         """Plot fiducial fiducial targets."""
         self.axes[0].plot(
-            self.data.centerline_target[:, 0],
-            self.data.centerline_target[:, 2],
+            self.data.centerline_target[coil_index, :, 0],
+            self.data.centerline_target[coil_index, :, 2],
             "--",
             color="gray",
         )
         self.axes[1].plot(
-            self.data.centerline_target[:, 1],
-            self.data.centerline_target[:, 2],
+            self.data.centerline_target[coil_index, :, 1],
+            self.data.centerline_target[coil_index, :, 2],
             "--",
             color="gray",
         )
@@ -152,12 +151,15 @@ class FiducialPlotter(Plot):
         delta = self.delta(attr)
         for i in np.atleast_1d(coil_index):
             self.axes[0].plot(
-                target[:, 0] + delta[i, :, 0],
-                target[:, 2] + delta[i, :, 2],
+                target[i, :, 0] + delta[i, :, 0],
+                target[i, :, 2] + delta[i, :, 2],
                 color=color,
             )
             self.axes[1].plot(
-                target[:, 1] + delta[i, :, 1],
-                target[:, 2] + delta[i, :, 2],
+                target[i, :, 1] + delta[i, :, 1],
+                target[i, :, 2] + delta[i, :, 2],
                 color=color,
             )
+
+    def plot3d(self, post_fix: str, coil_index=0):
+        """Plot 3d centerline."""

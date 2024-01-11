@@ -107,6 +107,11 @@ class UniformGap(ModelData):
     def read_gapfile(self):
         """Return gapfile as pandas.DataFrame."""
         self.filename = self.gapfile
+        print(self.path)
+        print(self.dirname)
+        print(self.basename)
+        print(self.hostname)
+
         gapfile = self.file(self.gapfile, extension=".txt")
         if self.gapfile in ["Gap_Size_18_Coils", "F4E_vgap"]:
             gapdata = pandas.read_csv(gapfile, skiprows=1, delim_whitespace=True)
@@ -254,4 +259,5 @@ class Gap:
 
 
 if __name__ == "__main__":
-    gap = Gap("w4")
+    gap = Gap("k0")
+    # gap = Gap("w4")

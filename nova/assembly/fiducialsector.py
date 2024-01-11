@@ -16,7 +16,7 @@ class FiducialSector(Fiducial):
     phase: str = "FAT supplier"
     sector: dict[int, int] = field(init=False, repr=False, default_factory=dict)
     sectors: dict[int, list] = field(
-        init=False, repr=False, default_factory=lambda: dict.fromkeys(range(1, 9), [])
+        init=False, repr=False, default_factory=lambda: dict.fromkeys(range(1, 10), [])
     )
     fiducial: dict[str, pandas.DataFrame] | dict = field(
         init=False, repr=False, default_factory=dict

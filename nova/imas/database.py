@@ -158,7 +158,7 @@ class IDS:
 
 
 @dataclass
-class Database(DBEntry, IDS):
+class Database(IDS):
     """
     Methods to access IMAS database.
 

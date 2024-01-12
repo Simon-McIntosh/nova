@@ -3,7 +3,17 @@ import pytest
 import imaspy
 
 from nova.imas.database import Database
+from nova.imas.db_entry import DBEntry
 from nova.imas.test_utilities import ids_attrs, mark
+
+
+def test_remote_uri():
+    uri = (
+        "imas://uda.iter.org:56565/uda?path=/work/imas/shared/imasdb/ITER/3/130506/403;"
+        "backend=hdf5;verbose=1;#idsname=equilibrium:occurrence=0"
+    )
+    with DBEntry(uri, "r") as ids:
+        assert ids.ids_properties.homogeneous_time == 1
 
 
 @mark["equilibrium"]

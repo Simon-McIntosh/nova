@@ -9,13 +9,13 @@ with check_import("imaspy"):
     import imaspy
 
 
-@dataclass(kw_only=True)
+@dataclass
 class DBEntry(imaspy.DBEntry):
     """Extend imaspy.DBEntry to provide context aware access to ids data."""
 
     uri: str
-    mode: str = "r"
-    # database: Callable
+    mode: str
+    database: None = None
     dd_version: str | None = None
     xml_path: str | None = None
     callstate: Callstate = field(init=False, repr=False, default_factory=Callstate)
@@ -79,6 +79,6 @@ class DBEntry(imaspy.DBEntry):
         super().close()
 
     def get_data(self, *args, lazy=False, **kwargs):
-        """Return ids data from db_entry.get. Close ids if not lazy."""
+        """Return ids data from db_entry.get."""
         self.database.ids = self.get(self.idsname, *args, lazy=lazy, **kwargs)
         return self.database.ids

@@ -16,7 +16,7 @@ class DataAttrs:
 
     name: str | None = None
     filename: str = "vault"
-    dirname: Path | str = "data/Assembly"
+    dirname: Path | str = ".nova/assembly"
     group: str | None = field(init=False, default=None)
 
     def __post_init__(self):
@@ -33,17 +33,17 @@ class Dataset(ABC, netCDF, DataAttrs):
     Manage build, storage, and retrival of an xarray dataset.
 
     TFC ansys data is stored in an IO shared folder at:
-    \\\\io-ws-ccstore1\\ANSYS_Data\\mcintos\\sector_modules
+    \\\\io-ws-ccstore1\\ANSYS_Data\\mcintos\\assembly
     """
 
     filename: str = "vault"
-    basename: str = "root"
+    # basename: str = "root"
+    dirname: str = ".nova/assembly"
     data: xarray.Dataset = field(init=False, repr=False, default_factory=xarray.Dataset)
 
     def __post_init__(self):
         """Load / build dataset."""
         super().__post_init__()
-        # self.set_path(self.datapath)
         try:
             self.load()
         except (FileNotFoundError, OSError, KeyError):

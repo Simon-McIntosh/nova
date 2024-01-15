@@ -9,17 +9,17 @@ import pandas
 import xarray
 
 from nova.assembly.model import ModelData
-import matplotlib.pyplot as plt
+from nova.graphics.plot import Plot1D
 
 
 @dataclass
-class GapData:
+class GapData(Plot1D):
     """Manage gap attributes."""
 
     simulations: list[str]
-    gap: npt.ArrayLike = None
-    roll: npt.ArrayLike = None
-    yaw: npt.ArrayLike = None
+    gap: npt.ArrayLike | None = None
+    roll: npt.ArrayLike | None = None
+    yaw: npt.ArrayLike | None = None
     data: xarray.Dataset = field(init=False, repr=False)
 
     ncoil: ClassVar[int] = 18
@@ -45,31 +45,31 @@ class GapData:
 
     def plot(self, simulation: str):
         """Plot gap waveforms."""
-        plt.figure()
-        plt.bar(
+        self.set_axes()
+        """
+        self.axes.bar(
             self.data.index,
             self.data.delta.sel(simulation=simulation, signal="tangential"),
             color="C0",
             label="tangential",
         )
-        plt.bar(
+        """
+        self.axes.bar(
             self.data.index,
             self.data.delta.sel(simulation=simulation, signal="gap"),
             width=0.5,
             color="C1",
             label="gap",
         )
-        self.plot_waveform("tangential", simulation, "C0")
+        # self.plot_waveform("tangential", simulation, "C0")
         self.plot_waveform("gap", simulation, "C1")
-        axis = plt.gca()
-        axis.xaxis.set_major_locator(MultipleLocator(2))
-        axis.xaxis.set_major_formatter(FormatStrFormatter("%d"))
-        axis.xaxis.set_minor_locator(MultipleLocator(1))
-        plt.despine()
-        plt.legend()
-        plt.xlabel("index")
-        plt.ylabel("length, mm")
-        plt.title(f"simulation: {simulation}")
+        self.axes.xaxis.set_major_locator(MultipleLocator(2))
+        self.axes.xaxis.set_major_formatter(FormatStrFormatter("%d"))
+        self.axes.xaxis.set_minor_locator(MultipleLocator(1))
+        self.axes.legend()
+        self.axes.set_xlabel("index")
+        self.axes.set_ylabel("length, mm")
+        self.plt.title(f"simulation: {simulation}")
 
     def plot_waveform(self, signal: str, simulation: str, color: str):
         """Plot fourier waveform."""
@@ -85,10 +85,9 @@ class GapData:
         ).data
         for i in np.arange(1, self.data.nyquist + 1):
             waveform += amplitude[i] * np.cos(i * phi + phase[i])
-        plt.plot(
+        self.axes.plot(
             phi * self.data.sizes["index"] / (2 * np.pi) + 1, waveform, color=color
         )
-        plt.despine()
 
 
 @dataclass
@@ -107,11 +106,6 @@ class UniformGap(ModelData):
     def read_gapfile(self):
         """Return gapfile as pandas.DataFrame."""
         self.filename = self.gapfile
-        print(self.path)
-        print(self.dirname)
-        print(self.basename)
-        print(self.hostname)
-
         gapfile = self.file(self.gapfile, extension=".txt")
         if self.gapfile in ["Gap_Size_18_Coils", "F4E_vgap"]:
             gapdata = pandas.read_csv(gapfile, skiprows=1, delim_whitespace=True)
@@ -140,7 +134,6 @@ class WedgeGap(ModelData):
         """Build gaps and calculate coil transformations."""
         self.build_dataset()
         self.build_transforms()
-        print(self.length)
         self.data = self.data.merge(
             GapData(
                 self.simulations,
@@ -233,7 +226,7 @@ class WedgeGap(ModelData):
         """Plot wedge gap distributions."""
         rotate = self.data.rotate.sel(simulation=simulation)
         for i in range(3):
-            plt.bar(range(18), rotate[:, i] * 180 / np.pi, width=0.8 - (i * 0.2))
+            self.axes.bar(range(18), rotate[:, i] * 180 / np.pi, width=0.8 - (i * 0.2))
 
 
 @dataclass
@@ -259,5 +252,5 @@ class Gap:
 
 
 if __name__ == "__main__":
-    gap = Gap("k0")
+    gap = Gap("k1")
     # gap = Gap("w4")

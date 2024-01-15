@@ -9,7 +9,7 @@ from nova.imas.machine import (
     PoloidalFieldPassive,
 )
 from nova.imas.pf_active import PF_Active
-from nova.imas.test_utilities import ids_attrs, load_ids, mark, ALException
+from nova.imas.test_utilities import ids_attrs, load_ids, mark
 
 
 def test_ids_attrs():
@@ -79,14 +79,18 @@ def test_equilibrium_attr_defaults():
 
 @mark["imas"]
 def test_database_minimum_required_input():
-    with pytest.raises(ALException) as error:
+    import imas
+
+    with pytest.raises(imas.hli_exception.ALException) as error:
         Database().ids_data
     assert "When self.ids is None require:" in str(error.value)
 
 
 @mark["equilibrium"]
 def test_database_malformed_input():
-    with pytest.raises(ALException) as error:
+    import imas
+
+    with pytest.raises(imas.hli_exception.ALException) as error:
         equilibrium = ids_attrs["equilibrium"] | dict(run=None)
         Database(**equilibrium).ids_data
     assert "When self.ids is None require:" in str(error.value)

@@ -759,9 +759,9 @@ if __name__ == "__main__":
     # EquilibriumData(pulse, run, occurrence=0)._clear()
     equilibrium = EquilibriumData(*args, occurrence=0)
 
-    """
     equilibrium.time = 300
     equilibrium.plot_2d("psi", mask=0)
+    """
     equilibrium.plot_boundary(outline=False)
     # equilibrium.plot_quiver()
     """

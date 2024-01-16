@@ -23,7 +23,8 @@ class TrialAttrs:
     component: list[str] = field(default_factory=list)
     theta: list[float] = field(default_factory=list)
     pdf: list[str] = field(default_factory=list)
-    nominal_gap: float = 2.0
+    adjust_gap: bool = True
+    max_nominal_gap: float = 2.0
     sead: int = 2025
 
     ncoil: ClassVar[int] = 18
@@ -39,13 +40,16 @@ class TrialAttrs:
         attrs = {}
         for attr in self.field_names:
             value = getattr(self, attr)
+            if isinstance(value, bool):
+                attrs[attr] = int(value)
+                continue
             if not isinstance(value, list):
                 attrs[attr] = value
         return attrs
 
 
 @dataclass
-class Trial(Dataset, TrialAttrs):
+class Trial(Dataset, TrialAttrs, Plot1D):
     """Run stastistical analysis on trial assemblies."""
 
     filename: str = "trial"
@@ -56,6 +60,18 @@ class Trial(Dataset, TrialAttrs):
         self.group = self.group_name
         self.rng = np.random.default_rng(self.sead)
         super().__post_init__()
+
+    @property
+    def nominal_gap(self):
+        """Retrun nominal gap."""
+        try:
+            return self.data.attrs["nominal_gap"]
+        except KeyError:
+            return self.max_nominal_gap
+
+    @nominal_gap.setter
+    def nominal_gap(self, nominal_gap):
+        self.data.attrs["nominal_gap"] = nominal_gap
 
     @property
     def group_name(self):
@@ -90,11 +106,23 @@ class Trial(Dataset, TrialAttrs):
             pdf = self.pdf[i]
             self.data[component] = ("sample", "index"), getattr(self, pdf)(theta)
 
+    @cached_property
+    def gap(self):
+        """Return gap samples."""
+        return self.data.gap.sum(axis=-1).data + self.nominal_gap
+
+    @cached_property
+    def cumulative_gap(self):
+        """Return cumulative gap."""
+        return self.gap.sum(axis=-1)
+
     def build_positive_gap(self, nmax=20, eps=1e-3):
         """Built gap waveform via iterative loop."""
         self.build_gap()
         for i in range(nmax):
-            gap = self.data.gap.sum(axis=-1).data + self.nominal_gap
+            if self.adjust_gap:
+                self.adjust_nominal_gap()
+            gap = self.gap
             sample_index = (gap < -eps).any(axis=1)
             if sample_index.sum() == 0:
                 print(f"positive gap iteration converged {i}")
@@ -120,6 +148,16 @@ class Trial(Dataset, TrialAttrs):
         self.data.gap[..., 1] = -self.data["tangential"]
         self.data.gap[:, :-1, 1] += self.data["tangential"][:, 1:].data
         self.data.gap[:, -1, 1] += self.data["tangential"][:, 0].data
+        try:
+            delattr(self, "gap")
+            delattr(self, "cumulative_gap")
+        except AttributeError:
+            pass
+
+    def adjust_nominal_gap(self):
+        """Adjust nominal gap to ensure a cumulative gap below threshold."""
+        gap_quantile = np.quantile(self.cumulative_gap, 0.99)
+        self.nominal_gap -= gap_quantile / self.ncoil - self.max_nominal_gap
 
     @contextmanager
     def timer(self):
@@ -155,6 +193,10 @@ class Trial(Dataset, TrialAttrs):
             text += "\n"
         text += "\n"
         text += f"samples: {self.samples:,}"
+        self.text(text)
+
+    def text(self, text):
+        """Add multi-line text to current axes."""
         self.axes.text(
             0.95,
             0.95,
@@ -166,13 +208,15 @@ class Trial(Dataset, TrialAttrs):
             bbox=dict(facecolor="w", boxstyle="round, pad=0.5", linewidth=0.5),
         )
 
-    def label_quantile(self, data, label: str, quantile=0.99, height=0.1, color="gray"):
+    def label_quantile(
+        self, data, label: str, qth=0.99, height=0.1, color="gray", precision=1.2
+    ):
         """Label quantile."""
         ylim = self.axes.get_ylim()
         yline = ylim[0] + np.array([0, height * (ylim[1] - ylim[0])])
-        quantile = np.quantile(data, quantile)
+        quantile = np.quantile(data, qth)
         self.axes.plot(quantile * np.ones(2), yline, "-", color="k", alpha=0.75)
-        text = rf"q(0.99): ${label}={quantile:1.2f}$"
+        text = rf"q({qth:1.2f}): ${label}={quantile:{precision}f}$"
         self.axes.text(
             quantile,
             yline[1],
@@ -353,6 +397,29 @@ class Vault(Trial, Plot1D):
 
         self.label_quantile(offset, r"\zeta")
         self.pdf_text()
+
+    def plot_gap(self):
+        """Plot gap PDF."""
+        self.set_axes()
+        self.axes.hist(self.gap.flatten(), bins=51, density=True, rwidth=0.8)
+        self.axes.set_yticks([])
+        self.axes.set_xlabel(r"ILIS gap, mm")
+        self.axes.set_ylabel(r"$P(gap)$")
+
+        self.label_quantile(self.gap, "gap", precision=1.1)
+        self.text(f"nominal_gap: {self.nominal_gap:1.2f}mm")
+
+    def plot_cumlative_gap(self):
+        """Plot cumalitive gap PDF."""
+        self.set_axes()
+        cumulative_gap = self.cumulative_gap
+        self.axes.hist(cumulative_gap, bins=51, density=True, rwidth=0.8)
+        self.axes.set_yticks([])
+        self.axes.set_xlabel(r"cumalative ILIS gap, mm")
+        self.axes.set_ylabel(r"$P(\Sigma gap)$")
+
+        self.label_quantile(cumulative_gap, r"\Sigma gap", precision=1.1)
+        self.text(f"nominal_gap: {self.nominal_gap:1.2f}mm")
 
     def plot_sample(self, quantile=0.99, offset=True, plot_deviation=False):
         """Plot waveforms from single sample."""
@@ -567,18 +634,20 @@ if __name__ == "__main__":
     # theta = [5, 5, 5, 10, 2, 2, 2.5]
     # theta = [0, 0, 0, 10, 0, 0, 0]
     theta = [1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 3]
-    vault = Vault(2_00_000, theta=theta)
+    vault = Vault(2_000_000, theta=theta, adjust_gap=True)
 
     #'radial', 'tangential', 'roll_length',
     #'yaw_length', 'radial_ccl', 'tangential_ccl', 'radial_wall'
 
     vault.plot()
     vault.plot_offset()
+    vault.plot_gap()
+    vault.plot_cumlative_gap()
 
-    vault.plot_sample(0.99, False)
+    # vault.plot_sample(0.99, False)
 
     # theta_error = [5, 5, 5, 2, 2, 2, 5, 10, 10]
-
+    """
     theta_error = [1.5, 1.5, 3, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5]
     # theta_error = [np.sqrt(3), np.sqrt(3), np.sqrt(3),
     #               1, 1, 1,
@@ -599,3 +668,4 @@ if __name__ == "__main__":
 
     # trial.plot_sample(0.99, False)
     # trial.plot_sample(0.99, True)
+    """

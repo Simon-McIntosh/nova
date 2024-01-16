@@ -1,7 +1,7 @@
 import pytest
 
 import numpy as np
-import matplotlib
+import matplotlib.pyplot
 
 from nova.assembly.gap import UniformGap, GapData
 
@@ -32,7 +32,7 @@ def test_plot_gapdata():
             ]
         ).T,
     )
-    with matplotlib.pylab.ioff():
+    with matplotlib.pyplot.ioff():
         gap_data.plot("c1")
 
 

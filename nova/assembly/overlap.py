@@ -43,7 +43,7 @@ class Model(Dataset):
 
     def build(self):
         """Load data extracted from Y26X3K_v1_0."""
-        data = netCDF("displace", directory="root", path=self.path).load().data
+        data = netCDF("displace", dirname=self.dirname).load().data
         self.data = xarray.Dataset(data.coords)
         self.data["coefficient"] = ["real", "imag"]
         self.data["signal_fft"] = xarray.DataArray(0.0, self.data.coords)

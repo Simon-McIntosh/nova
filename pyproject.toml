@@ -29,7 +29,7 @@ numpy = ">=1.26.0"
 pandas = ">=2.0.1"
 scipy = ">=1.10.1"
 shapely = ">=2.0.1"
-tqdm = {git = "https://github.com/jamate16/tqdm", rev = "fix-deprecation-warning-python3.12"}
+tqdm = "^4.66.1"
 xarray = ">=2023.5.0"
 xxhash = ">=3.2.0"
 alphashape = {version = ">=1.3.1", optional = true}

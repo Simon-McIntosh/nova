@@ -401,24 +401,38 @@ class Vault(Trial, Plot1D):
     def plot_gap(self):
         """Plot gap PDF."""
         self.set_axes()
-        self.axes.hist(self.gap.flatten(), bins=51, density=True, rwidth=0.8)
+        self.axes.hist(
+            self.gap.flatten(), bins=51, density=True, rwidth=0.8, color="C1"
+        )
         self.axes.set_yticks([])
         self.axes.set_xlabel(r"ILIS gap, mm")
         self.axes.set_ylabel(r"$P(gap)$")
 
         self.label_quantile(self.gap, "gap", precision=1.1)
+        lower_quantile = (self.gap <= 0.5).mean()
+        self.label_quantile(
+            self.gap, "gap", qth=lower_quantile, precision=1.1, height=0.5
+        )
+
         self.text(f"nominal_gap: {self.nominal_gap:1.2f}mm")
 
     def plot_cumlative_gap(self):
         """Plot cumalitive gap PDF."""
         self.set_axes()
-        cumulative_gap = self.cumulative_gap
-        self.axes.hist(cumulative_gap, bins=51, density=True, rwidth=0.8)
+        self.axes.hist(
+            self.cumulative_gap, bins=51, density=True, rwidth=0.8, color="C0"
+        )
         self.axes.set_yticks([])
-        self.axes.set_xlabel(r"cumalative ILIS gap, mm")
+        self.axes.set_xlabel(r"cumulative ILIS gap, mm")
         self.axes.set_ylabel(r"$P(\Sigma gap)$")
 
-        self.label_quantile(cumulative_gap, r"\Sigma gap", precision=1.1)
+        self.label_quantile(self.cumulative_gap, r"\Sigma gap", precision=1.1)
+        if self.adjust_gap is False:
+            qth = (self.cumulative_gap < self.max_nominal_gap * self.ncoil).mean()
+            self.label_quantile(
+                self.cumulative_gap, r"\Sigma gap", precision=1.1, qth=qth, height=1
+            )
+
         self.text(f"nominal_gap: {self.nominal_gap:1.2f}mm")
 
     def plot_sample(self, quantile=0.99, offset=True, plot_deviation=False):
@@ -634,7 +648,7 @@ if __name__ == "__main__":
     # theta = [5, 5, 5, 10, 2, 2, 2.5]
     # theta = [0, 0, 0, 10, 0, 0, 0]
     theta = [1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 3]
-    vault = Vault(2_000_000, theta=theta, adjust_gap=True)
+    vault = Vault(2_00_000, theta=theta, adjust_gap=True)
 
     #'radial', 'tangential', 'roll_length',
     #'yaw_length', 'radial_ccl', 'tangential_ccl', 'radial_wall'

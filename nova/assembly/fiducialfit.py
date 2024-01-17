@@ -26,6 +26,7 @@ class FiducialFit(FiducialData):
     infer: bool = True
     method: str = "rms"
     samples: int = 10
+    radial_offset: float = (33.04 - 36) / (2 * np.pi)
     data: xarray.Dataset = field(init=False, repr=False, default_factory=xarray.Dataset)
 
     weights: ClassVar[list[float]] = [1, 1, 0.5]
@@ -35,7 +36,7 @@ class FiducialFit(FiducialData):
         """Extend fiducial_attrs to incude fit parameters."""
         return super().fiducial_attrs | {
             attr: getattr(self, attr)
-            for attr in ["infer", "method", "samples", "weights"]
+            for attr in ["infer", "method", "samples", "radial_offset", "weights"]
         }
 
     def build(self):
@@ -168,8 +169,12 @@ class FiducialFit(FiducialData):
 
     def delta(self, points, coil):
         """Return coil-frame deltas."""
-        return Rotate.to_cylindrical(points) - Rotate.to_cylindrical(
-            self.data.fiducial_target.loc[coil]
+        offset = np.zeros_like(points)
+        offset[:, 0] -= self.radial_offset
+        return (
+            Rotate.to_cylindrical(points)
+            + offset
+            - Rotate.to_cylindrical(self.data.fiducial_target.loc[coil])
         )
 
     @staticmethod

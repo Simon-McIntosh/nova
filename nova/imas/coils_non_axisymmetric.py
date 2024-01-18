@@ -155,6 +155,11 @@ class CoilsNonAxisymmetyric(Plot, CoilDatabase, Scenario):
                 points[name] = []
                 for i, conductor in enumerate(coil.conductor):
                     elements = Elements(elements=conductor.elements)
+                    points[name].extend(elements.points)
+
+                    conductor.cross_section.resize(1)
+                    print(conductor.cross_section)
+
                     section = Section(
                         elements._to_array(
                             conductor.cross_section,
@@ -162,7 +167,6 @@ class CoilsNonAxisymmetyric(Plot, CoilDatabase, Scenario):
                         ),
                         triad=elements.start_axes,
                     )
-                    points[name].extend(elements.points)
                     section.to_axes(np.identity(3))
                     polygon = Polygon(section.points[:, 1:])
                     if i > 0:
@@ -196,10 +200,10 @@ class CoilsNonAxisymmetyric(Plot, CoilDatabase, Scenario):
 
 
 if __name__ == "__main__":
-    cc_ids = CoilsNonAxisymmetyric(111003, 2)  # CC
-    # cs_ids = CoilsNonAxisymmetyric(111004, 1)  # CS
-    # coil3d += CoilsNonAxisymmetyric(115001, 1)  # ELM
+    # cc_ids = CoilsNonAxisymmetyric(111003, 2)  # CC
+    cs_ids = CoilsNonAxisymmetyric(111004, 1)  # CS
+    # elm_ids = CoilsNonAxisymmetyric(115001, 1)  # ELM
 
-    coil = cc_ids  # + cs_ids
+    coil = cs_ids  # + cc_ids  # + cs_ids
     coil.frame.vtkplot()
     # coil3d._clear()

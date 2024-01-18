@@ -18,6 +18,7 @@ except (ImportError, ModuleNotFoundError, SystemExit):
     EMPTY_INT = -999999999
     EMPTY_FLOAT = -9e40
 import numpy as np
+from packaging import version
 import xxhash
 
 from nova.database.datafile import Datafile
@@ -70,6 +71,8 @@ class IDS:
     get_ids()
         Return bare ids.
 
+    dd_version()
+        Return DD version.
 
 
     """
@@ -82,7 +85,7 @@ class IDS:
     name: str | None = None
     backend: str = "hdf5"
 
-    dd_version: ClassVar[int] = 3
+    dd_major_version: ClassVar[int] = 3
     attrs: ClassVar[list[str]] = [
         "pulse",
         "run",
@@ -100,7 +103,7 @@ class IDS:
             f"imas:{self.backend}?user={self.user};name={self.name};"
             f"shot={self.pulse};run={self.run};"
             f"occurrence={self.occurrence};"
-            f"database={self.machine};version={self.dd_version};"
+            f"database={self.machine};version={self.dd_major_version};"
         )
 
     @property
@@ -113,7 +116,9 @@ class IDS:
     @property
     def database_path(self):
         """Return top level of database path."""
-        return os.path.join(self.home, "imasdb", self.machine, str(self.dd_version))
+        return os.path.join(
+            self.home, "imasdb", self.machine, str(self.dd_major_version)
+        )
 
     @property
     def ids_path(self) -> str:
@@ -551,6 +556,11 @@ class Database(IDS):
     def backend_id(self):  # TODO remove once uri interface is released
         """Return backend id from backend."""
         return getattr(imas.hli_utils.imasdef, f"{self.backend.upper()}_BACKEND")
+
+    @property
+    def dd_version(self) -> version.Version:
+        """Return DD version."""
+        return version.parse(imas.al_dd_version)
 
     @contextmanager
     def _db_entry(self):

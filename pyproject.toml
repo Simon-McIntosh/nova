@@ -63,6 +63,7 @@ overrides = "^7.4.0"
 pytest-asyncio = {version = "^0.21.1", optional = true}
 async-property = {version = "^0.2.2", optional = true}
 nest-asyncio = {version = "^1.5.8", optional = true}
+packaging = "^23.2"
 
 [tool.poetry.group.dev.dependencies]
 asv = ">=0.5.1"

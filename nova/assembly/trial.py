@@ -12,7 +12,7 @@ import xxhash
 from nova.assembly import structural, electromagnetic, overlap
 from nova.assembly.gap import WedgeGap
 from nova.assembly.model import Dataset
-import matplotlib.pyplot as plt
+from nova.graphics.plot import Plot1D
 
 
 @dataclass
@@ -23,7 +23,8 @@ class TrialAttrs:
     component: list[str] = field(default_factory=list)
     theta: list[float] = field(default_factory=list)
     pdf: list[str] = field(default_factory=list)
-    nominal_gap: float = 2.0
+    adjust_gap: bool = True
+    max_nominal_gap: float = 2.0
     sead: int = 2025
 
     ncoil: ClassVar[int] = 18
@@ -39,13 +40,16 @@ class TrialAttrs:
         attrs = {}
         for attr in self.field_names:
             value = getattr(self, attr)
+            if isinstance(value, bool):
+                attrs[attr] = int(value)
+                continue
             if not isinstance(value, list):
                 attrs[attr] = value
         return attrs
 
 
 @dataclass
-class Trial(Dataset, TrialAttrs):
+class Trial(Dataset, TrialAttrs, Plot1D):
     """Run stastistical analysis on trial assemblies."""
 
     filename: str = "trial"
@@ -56,6 +60,18 @@ class Trial(Dataset, TrialAttrs):
         self.group = self.group_name
         self.rng = np.random.default_rng(self.sead)
         super().__post_init__()
+
+    @property
+    def nominal_gap(self):
+        """Retrun nominal gap."""
+        try:
+            return self.data.attrs["nominal_gap"]
+        except KeyError:
+            return self.max_nominal_gap
+
+    @nominal_gap.setter
+    def nominal_gap(self, nominal_gap):
+        self.data.attrs["nominal_gap"] = nominal_gap
 
     @property
     def group_name(self):
@@ -90,11 +106,23 @@ class Trial(Dataset, TrialAttrs):
             pdf = self.pdf[i]
             self.data[component] = ("sample", "index"), getattr(self, pdf)(theta)
 
+    @cached_property
+    def gap(self):
+        """Return gap samples."""
+        return self.data.gap.sum(axis=-1).data + self.nominal_gap
+
+    @cached_property
+    def cumulative_gap(self):
+        """Return cumulative gap."""
+        return self.gap.sum(axis=-1)
+
     def build_positive_gap(self, nmax=20, eps=1e-3):
         """Built gap waveform via iterative loop."""
         self.build_gap()
         for i in range(nmax):
-            gap = self.data.gap.sum(axis=-1).data + self.nominal_gap
+            if self.adjust_gap:
+                self.adjust_nominal_gap()
+            gap = self.gap
             sample_index = (gap < -eps).any(axis=1)
             if sample_index.sum() == 0:
                 print(f"positive gap iteration converged {i}")
@@ -106,7 +134,7 @@ class Trial(Dataset, TrialAttrs):
         raise ValueError(
             f"gap itteration failure at iteration {nmax} "
             "negitive samples "
-            f"{100*sample_index.sum()/len(gap):1.0f}%"
+            f"{100 * sample_index.sum() / len(gap):1.0f}%"
         )
 
     def build_gap(self):
@@ -120,6 +148,16 @@ class Trial(Dataset, TrialAttrs):
         self.data.gap[..., 1] = -self.data["tangential"]
         self.data.gap[:, :-1, 1] += self.data["tangential"][:, 1:].data
         self.data.gap[:, -1, 1] += self.data["tangential"][:, 0].data
+        try:
+            delattr(self, "gap")
+            delattr(self, "cumulative_gap")
+        except AttributeError:
+            pass
+
+    def adjust_nominal_gap(self):
+        """Adjust nominal gap to ensure a cumulative gap below threshold."""
+        gap_quantile = np.quantile(self.cumulative_gap, 0.99)
+        self.nominal_gap -= gap_quantile / self.ncoil - self.max_nominal_gap
 
     @contextmanager
     def timer(self):
@@ -155,25 +193,31 @@ class Trial(Dataset, TrialAttrs):
             text += "\n"
         text += "\n"
         text += f"samples: {self.samples:,}"
-        plt.text(
+        self.text(text)
+
+    def text(self, text):
+        """Add multi-line text to current axes."""
+        self.axes.text(
             0.95,
             0.95,
             text,
             fontsize="x-small",
-            transform=plt.gca().transAxes,
+            transform=self.axes.transAxes,
             ha="right",
             va="top",
             bbox=dict(facecolor="w", boxstyle="round, pad=0.5", linewidth=0.5),
         )
 
-    def label_quantile(self, data, label: str, quantile=0.99, height=0.1, color="gray"):
+    def label_quantile(
+        self, data, label: str, qth=0.99, height=0.1, color="gray", precision=1.2
+    ):
         """Label quantile."""
-        ylim = plt.gca().get_ylim()
+        ylim = self.axes.get_ylim()
         yline = ylim[0] + np.array([0, height * (ylim[1] - ylim[0])])
-        quantile = np.quantile(data, quantile)
-        plt.plot(quantile * np.ones(2), yline, "-", color="k", alpha=0.75)
-        text = rf"q(0.99): ${label}={quantile:1.2f}$"
-        plt.text(
+        quantile = np.quantile(data, qth)
+        self.axes.plot(quantile * np.ones(2), yline, "-", color="k", alpha=0.75)
+        text = rf"q({qth:1.2f}): ${label}={quantile:{precision}f}$"
+        self.axes.text(
             quantile,
             yline[1],
             text,
@@ -187,7 +231,7 @@ class Trial(Dataset, TrialAttrs):
     def plot_pdf(self, bins=51):
         """Plot pdf."""
         pdf, edges = np.histogram(self.data.peaktopeak, bins, density=True)
-        plt.plot((edges[:-1] + edges[1:]) / 2, pdf)
+        self.axes.plot((edges[:-1] + edges[1:]) / 2, pdf)
 
     def sample(self, quantile, offset=True):
         """Return sample index closest to quantile."""
@@ -199,7 +243,7 @@ class Trial(Dataset, TrialAttrs):
 
 
 @dataclass
-class Vault(Trial):
+class Vault(Trial, Plot1D):
     """Run vault assembly Monte Carlo trials."""
 
     filename: str = "vault_trial"
@@ -311,8 +355,8 @@ class Vault(Trial):
 
     def plot(self, offset=True):
         """Plot peak to peak distribution."""
-        plt.figure()
-        plt.hist(
+        self.set_axes()
+        self.axes.hist(
             self.data.peaktopeak,
             bins=51,
             density=True,
@@ -321,7 +365,7 @@ class Vault(Trial):
             color="C1",
         )
         if offset:
-            plt.hist(
+            self.axes.hist(
                 self.data.peaktopeak_offset,
                 bins=51,
                 density=True,
@@ -330,85 +374,122 @@ class Vault(Trial):
                 color="C2",
                 label="magnetic axis",
             )
-            plt.legend(
+            self.axes.legend(
                 loc="center", bbox_to_anchor=(0.5, 1.05), ncol=2, fontsize="small"
             )
             self.label_quantile(
                 self.data.peaktopeak_offset, "H", color="C2", height=0.15
             )
         self.label_quantile(self.data.peaktopeak, "H", color="C1", height=0.04)
-        plt.despine()
-        axes = plt.gca()
-        axes.set_yticks([])
-        plt.xlabel(r"peak to peak deviation $H$, mm")
-        plt.ylabel(r"$P(H)$")
+        self.axes.set_yticks([])
+        self.axes.set_xlabel(r"peak to peak deviation $H$, mm")
+        self.axes.set_ylabel(r"$P(H)$")
         self.pdf_text()
 
     def plot_offset(self):
         """Plot pdf of field line axis offset."""
         offset = np.linalg.norm(self.data.offset, axis=-1)
-        plt.figure()
-        plt.hist(offset, bins=51, density=True, rwidth=0.8)
-        plt.despine()
-        axes = plt.gca()
-        axes.set_yticks([])
-        plt.xlabel(r"magnetic axis offset $\zeta$, mm")
-        plt.ylabel(r"$P(\zeta)$")
+        self.set_axes()
+        self.axes.hist(offset, bins=51, density=True, rwidth=0.8)
+        self.axes.set_yticks([])
+        self.axes.set_xlabel(r"magnetic axis offset $\zeta$, mm")
+        self.axes.set_ylabel(r"$P(\zeta)$")
 
         self.label_quantile(offset, r"\zeta")
         self.pdf_text()
 
+    def plot_gap(self):
+        """Plot gap PDF."""
+        self.set_axes()
+        self.axes.hist(
+            self.gap.flatten(), bins=51, density=True, rwidth=0.8, color="C1"
+        )
+        self.axes.set_yticks([])
+        self.axes.set_xlabel(r"ILIS gap, mm")
+        self.axes.set_ylabel(r"$P(gap)$")
+
+        self.label_quantile(self.gap, "gap", precision=1.1)
+        lower_quantile = (self.gap <= 0.5).mean()
+        self.label_quantile(
+            self.gap, "gap", qth=lower_quantile, precision=1.1, height=0.5
+        )
+
+        self.text(f"nominal_gap: {self.nominal_gap:1.2f}mm")
+
+    def plot_cumlative_gap(self):
+        """Plot cumalitive gap PDF."""
+        self.set_axes()
+        self.axes.hist(
+            self.cumulative_gap, bins=51, density=True, rwidth=0.8, color="C0"
+        )
+        self.axes.set_yticks([])
+        self.axes.set_xlabel(r"cumulative ILIS gap, mm")
+        self.axes.set_ylabel(r"$P(\Sigma gap)$")
+
+        self.label_quantile(self.cumulative_gap, r"\Sigma gap", precision=1.1)
+        if self.adjust_gap is False:
+            qth = (self.cumulative_gap < self.max_nominal_gap * self.ncoil).mean()
+            self.label_quantile(
+                self.cumulative_gap, r"\Sigma gap", precision=1.1, qth=qth, height=1
+            )
+
+        self.text(f"nominal_gap: {self.nominal_gap:1.2f}mm")
+
     def plot_sample(self, quantile=0.99, offset=True, plot_deviation=False):
         """Plot waveforms from single sample."""
         sample = self.sample(quantile, offset)
-        axes = plt.subplots(
-            3, 1, sharex=False, sharey=False, gridspec_kw=dict(height_ratios=[1, 1, 2])
-        )[1]
+        self.set_axes(
+            nrows=3,
+            ncols=1,
+            sharex=False,
+            sharey=False,
+            gridspec_kw=dict(height_ratios=[1, 1, 2]),
+        )
         width = 0.8
 
         signal_width = width / self.data.sizes["component"]
         for i, component in enumerate(self.data.component.values):
             signal = self.data[component]
             bar_offset = (i + 0.5) * signal_width - width / 2
-            axes[0].bar(
+            self.axes[0].bar(
                 self.data.index + bar_offset,
                 signal[sample],
-                color=f"C{i+1}",
+                color=f"C{i + 1}",
                 width=signal_width,
                 label=component,
             )
-            # axes[0].plot(self.data.index,
+            # self.axes[0].plot(self.data.index,
             #             self.theta[0] * (-1)**i *
             #             np.ones_like(self.data.index), 'C7--', alpha=0.5,
             #             lw=1.5)
-        axes[0].set_ylabel("vault")
-        axes[0].legend(fontsize="xx-small", bbox_to_anchor=(1, 1))
-        axes[0].set_xticks([])
+        self.axes[0].set_ylabel("vault")
+        self.axes[0].legend(fontsize="xx-small", bbox_to_anchor=(1, 1))
+        self.axes[0].set_xticks([])
 
         # signal_width = width / 3
         # for i, signal in ['gap', 'roll', 'yaw']
-        axes[1].bar(
+        self.axes[1].bar(
             self.data.index,
             self.data.gap[sample].sum(axis=-1) + self.data.nominal_gap,
             width=width,
             color="C0",
         )
-        axes[1].set_ylabel("gap")
-        axes[1].set_xticks([])
+        self.axes[1].set_ylabel("gap")
+        self.axes[1].set_xticks([])
 
         fieldline = self.electromagnetic_model.predict(
             self.data.electromagnetic[sample, :, 0],
             self.data.electromagnetic[sample, :, 1],
         )[0]
-        axes[2].plot(fieldline.phi, fieldline, "C6", label="fieldline")
+        self.axes[2].plot(fieldline.phi, fieldline, "C6", label="fieldline")
 
         ndiv = len(fieldline)
         wall_hat = np.fft.rfft(self.data.radial_wall[sample, :])
         firstwall = np.fft.irfft(wall_hat, ndiv) * ndiv / self.ncoil
         wall_hat[1] += self.electromagnetic_model.axis_offset[0] * (self.ncoil // 2)
         offset_firstwall = np.fft.irfft(wall_hat, ndiv) * ndiv / self.ncoil
-        axes[2].plot(fieldline.phi, firstwall, "-.", color="gray", label="wall")
-        axes[2].plot(
+        self.axes[2].plot(fieldline.phi, firstwall, "-.", color="gray", label="wall")
+        self.axes[2].plot(
             fieldline.phi, offset_firstwall, "-", color="gray", label="offset wall"
         )
 
@@ -421,25 +502,24 @@ class Vault(Trial):
             )
             peaktopeak = self.electromagnetic_model.peaktopeak(longwave)
             offset_peaktopeak = self.electromagnetic_model.peaktopeak(offset_longwave)
-            axes[2].plot(
+            self.axes[2].plot(
                 fieldline.phi, longwave, "-.C0", label=rf"$H_{{LW}}={peaktopeak:1.1f}$"
             )
-            axes[2].plot(
+            self.axes[2].plot(
                 fieldline.phi,
                 offset_longwave,
                 "-C0",
                 label=rf"offset $H_{{LW}}={offset_peaktopeak:1.1f}$",
             )
 
-        axes[2].legend(fontsize="xx-small", bbox_to_anchor=(1, 1))
-        axes[2].set_ylabel("deviation")
-        axes[2].set_xlabel(r"$\phi$")
-        plt.despine()
-        plt.suptitle(f"quantile={quantile} offset={offset}")
+        self.axes[2].legend(fontsize="xx-small", bbox_to_anchor=(1, 1))
+        self.axes[2].set_ylabel("deviation")
+        self.axes[2].set_xlabel(r"$\phi$")
+        self.plt.suptitle(f"quantile={quantile} offset={offset}")
 
 
 @dataclass
-class ErrorField(Trial):
+class ErrorField(Trial, Plot1D):
     """Run Monte Carlo error field trials."""
 
     filename: str = "errorfield_trial"
@@ -502,20 +582,18 @@ class ErrorField(Trial):
 
     def plot(self):
         """Plot overlap errorfield PDFs."""
-        plt.figure()
-        plt.hist(
+        self.set_axes()
+        self.axes.hist(
             self.data.overlap,
             bins=51,
             density=True,
             rwidth=0.9,
             label=[f"plasma {i}" for i in self.data.plasma.values],
         )
-        plt.legend(ncol=1, bbox_to_anchor=(0.27, 1), fontsize="x-small")
-        plt.despine()
-        axes = plt.gca()
-        axes.set_yticks([])
-        plt.xlabel(r"Overlap error field $B/B_{limit}$")
-        plt.ylabel(r"$P(B/B_{limit})$")
+        self.axes.legend(ncol=1, bbox_to_anchor=(0.27, 1), fontsize="x-small")
+        self.axes.set_yticks([])
+        self.axes.set_xlabel(r"Overlap error field $B/B_{limit}$")
+        self.axes.set_ylabel(r"$P(B/B_{limit})$")
         self.pdf_text()
 
         quantile_index = np.argmax(np.quantile(self.data.overlap, 0.99, axis=0))
@@ -553,35 +631,37 @@ class ErrorField(Trial):
         component = [
             component.replace("_", " ") for component in self.data.component.values
         ]
+        self.set_axes()
         for i, plasma in enumerate(self.data.plasma.values):
-            plt.bar(
+            self.axes.bar(
                 component,
                 self.data.quantile_scan[:, i],
                 width=0.8 - i * 0.2,
                 label=f"plasma {plasma}",
             )
-            plt.xticks(rotation=90)
-        plt.legend(fontsize="x-small")
-        plt.despine()
-        plt.ylabel(r"Overlap error field $B/B_{limit}$")
+            self.axes.set_xticks(rotation=90)
+        self.axes.legend(fontsize="x-small")
+        self.axes.set_ylabel(r"Overlap error field $B/B_{limit}$")
 
 
 if __name__ == "__main__":
     # theta = [5, 5, 5, 10, 2, 2, 2.5]
     # theta = [0, 0, 0, 10, 0, 0, 0]
     theta = [1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 3]
-    vault = Vault(2_000_000, theta=theta)
+    vault = Vault(2_00_000, theta=theta, adjust_gap=True)
 
     #'radial', 'tangential', 'roll_length',
     #'yaw_length', 'radial_ccl', 'tangential_ccl', 'radial_wall'
 
     vault.plot()
     vault.plot_offset()
+    vault.plot_gap()
+    vault.plot_cumlative_gap()
 
-    vault.plot_sample(0.99, False)
+    # vault.plot_sample(0.99, False)
 
     # theta_error = [5, 5, 5, 2, 2, 2, 5, 10, 10]
-
+    """
     theta_error = [1.5, 1.5, 3, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5]
     # theta_error = [np.sqrt(3), np.sqrt(3), np.sqrt(3),
     #               1, 1, 1,
@@ -602,3 +682,4 @@ if __name__ == "__main__":
 
     # trial.plot_sample(0.99, False)
     # trial.plot_sample(0.99, True)
+    """

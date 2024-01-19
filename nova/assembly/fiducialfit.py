@@ -26,6 +26,7 @@ class FiducialFit(FiducialData):
     infer: bool = True
     method: str = "rms"
     samples: int = 10
+    radial_offset: float = (33.04 - 36) / (2 * np.pi)
     data: xarray.Dataset = field(init=False, repr=False, default_factory=xarray.Dataset)
 
     weights: ClassVar[list[float]] = [1, 1, 0.5]
@@ -35,7 +36,7 @@ class FiducialFit(FiducialData):
         """Extend fiducial_attrs to incude fit parameters."""
         return super().fiducial_attrs | {
             attr: getattr(self, attr)
-            for attr in ["infer", "method", "samples", "weights"]
+            for attr in ["infer", "method", "samples", "radial_offset", "weights"]
         }
 
     def build(self):
@@ -83,20 +84,18 @@ class FiducialFit(FiducialData):
 
     def load_target(self):
         """Load target geometories in cylindrical coordinate system."""
-        dim = {"coil": self.data.sizes["coil"]}
+        self.data["centerline_target"] = (
+            xarray.DataArray(1, [("coil", self.data.coil.data)])
+            * self.data.centerline_target
+        )
         for attr in ["fiducial_target", "centerline_target"]:
-            self.data[f"{attr}_cyl"] = Rotate.to_cylindrical(
-                self.data[attr].expand_dims(dim, 0)
-            )
+            self.data[f"{attr}_cyl"] = Rotate.to_cylindrical(self.data[attr])
 
     def load_measurement(self):
         """Load reference measurements."""
-        dim = {"coil": self.data.sizes["coil"]}
-        self.data["fiducial"] = (
-            self.data.fiducial_target.expand_dims(dim, 0) + self.data.fiducial_delta
-        )
+        self.data["fiducial"] = self.data.fiducial_target + self.data.fiducial_delta
         self.data["centerline"] = (
-            self.data.centerline_target.expand_dims(dim, 0) + self.data.centerline_delta
+            self.data.centerline_target + self.data.centerline_delta
         )
 
     def evaluate_gpr(self, target="fiducial", postfix="gpr"):
@@ -121,7 +120,9 @@ class FiducialFit(FiducialData):
                 (
                     self.data[fiducial][coil_index, :, space_index],
                     self.data[fiducial_std][coil_index, :, space_index],
-                ) = self.gpr.predict(self.data.target_length, return_std=True)
+                ) = self.gpr.predict(
+                    self.data.target_length[coil_index], return_std=True
+                )
                 self.data[centerline][coil_index, :, space_index] = self.gpr.predict(
                     self.data.arc_length
                 )
@@ -163,13 +164,17 @@ class FiducialFit(FiducialData):
         points = points[:] + x[:3]
         if len(x) == 6:
             rotate = Rotation.from_euler("XYZ", x[-3:], degrees=True)
-            points[:] = rotate.apply(points)
+            points[:] = rotate.apply(points.data)
         return points
 
-    def delta(self, points):
+    def delta(self, points, coil):
         """Return coil-frame deltas."""
-        return Rotate.to_cylindrical(points) - Rotate.to_cylindrical(
-            self.data.fiducial_target
+        offset = np.zeros_like(points)
+        offset[:, 0] -= self.radial_offset
+        return (
+            Rotate.to_cylindrical(points)
+            + offset
+            - Rotate.to_cylindrical(self.data.fiducial_target.loc[coil])
         )
 
     @staticmethod
@@ -189,33 +194,35 @@ class FiducialFit(FiducialData):
                 raise NotImplementedError(f"Method {method} not implemented.")
         return error
 
-    def transform_error(self, x, points, method):
+    def transform_error(self, x, points, coil, method):
         """Return transform error vector."""
         points = self.transform(x, points)
-        return self.point_error(points, method)
+        return self.point_error(points, coil, method)
 
-    def weighted_transform_error(self, x, points, method):
+    def weighted_transform_error(self, x, points, coil, method):
         """Return weighted transform error vector."""
-        return self.transform_error(x, points, method=method) * self.weights
+        return self.transform_error(x, points, coil, method=method) * self.weights
 
-    def point_error(self, points, method=None):
+    def point_error(self, points, coil, method=None):
         """Return error vector."""
         if method is None:
             method = self.method
-        delta = self.delta(points)
+        delta = self.delta(points, coil)
         return self.error_vector(delta, method)
 
-    def max_transform_error(self, x, points):
+    def max_transform_error(self, x, points, coil):
         """Return maximum error."""
-        return np.max(self.weighted_transform_error(x, points, method="max"))
+        return np.max(self.weighted_transform_error(x, points, coil, method="max"))
 
-    def rms_transform_error(self, x, points):
+    def rms_transform_error(self, x, points, coil):
         """Return mean error."""
-        return np.sqrt(np.mean(self.weighted_transform_error(x, points, method="rms")))
+        return np.sqrt(
+            np.mean(self.weighted_transform_error(x, points, coil, method="rms"))
+        )
 
-    def scalar_error(self, x, points):
+    def scalar_error(self, x, points, coil):
         """Return scalar mesure for fit error."""
-        return getattr(self, f"{self.method}_transform_error")(x, points)
+        return getattr(self, f"{self.method}_transform_error")(x, points, coil)
 
     @property
     def point_name(self):
@@ -245,6 +252,8 @@ class FiducialFit(FiducialData):
         ]
         for attr in transform_attrs:
             self.data[f"{attr}_fit"] = xarray.zeros_like(self.data[attr])
+
+        # self.data["centerline_target_fit"] =
         self.data.coords["transform"] = ["x", "y", "z", "xx", "yy", "zz"]
         self.data["opt_x"] = xarray.DataArray(
             0.0,
@@ -262,7 +271,7 @@ class FiducialFit(FiducialData):
         for coil in tqdm(self.data.coil, "fitting coils"):
             points = self.points(coil=coil)
             xo = np.zeros(self.data.sizes["transform"])
-            opt = minimize(self.scalar_error, xo, method="SLSQP", args=(points,))
+            opt = minimize(self.scalar_error, xo, method="SLSQP", args=(points, coil))
             if not opt.success:
                 warnings.warn(f"optimization failed {opt}")
             self.data["opt_x"].loc[{"coil": coil}] = opt.x
@@ -275,10 +284,10 @@ class FiducialFit(FiducialData):
                 fiducial_attr = self.join("fiducial", post_fix)
                 fiducial_points = self.data[fiducial_attr].sel(coil=coil)
                 self.data[error_attr].loc[{"coil": coil}] = self.scalar_error(
-                    xo, fiducial_points
+                    xo, fiducial_points, coil
                 )
                 self.data[f"{error_attr}_fit"].loc[{"coil": coil}] = self.scalar_error(
-                    opt.x, fiducial_points
+                    opt.x, fiducial_points, coil
                 )
 
     @cached_property
@@ -288,7 +297,7 @@ class FiducialFit(FiducialData):
 
     def plot_fit(self, coil_index, postfix=""):
         """Plot fits."""
-        self.plotter.target()
+        self.plotter.target(coil_index)
         stage = 1 + int(self.infer)
         stage = 2
         self.plotter(postfix, stage, coil_index)
@@ -332,12 +341,6 @@ class FiducialFit(FiducialData):
             fontsize="small",
         )
 
-    def fit_error(self, method: str):
-        """Return fit error vector."""
-        return self.transform_error(
-            self.data.opt_x.values, self.data.reference.copy(), method
-        )
-
     def reference_error(self, method: str):
         """Return reference error vector."""
         return self.point_error(self.data.reference.copy(), method)
@@ -346,10 +349,11 @@ class FiducialFit(FiducialData):
         """Display text transform."""
         points = self.data[self.point_name][coil_index]
         opt_x = self.data.opt_x[coil_index].data
-        self.transform_error(opt_x, points, "rms")
+        coil = self.data.coil[coil_index].data
+        self.transform_error(opt_x, points, coil, "rms")
         error = {
-            "rms": self.transform_error(opt_x, points, "rms"),
-            "max": self.transform_error(opt_x, points, "max"),
+            "rms": self.transform_error(opt_x, points, coil, "rms"),
+            "max": self.transform_error(opt_x, points, coil, "max"),
         }
         text = ""
         for i, coordinate in enumerate(
@@ -368,6 +372,53 @@ class FiducialFit(FiducialData):
             fontsize="small",
         )
 
+    def _get_delta(self, attr, fit=True):
+        """Return ensemble deltas."""
+        source_attr = attr
+        if fit:
+            source_attr += "_fit"
+        return self.data[source_attr] - self.data[f"{attr}_target"]
+
+    def plot_ensemble(self, fit=True, factor=250):
+        """Plot fit ensemble."""
+        self.axes = self.set_axes("2d", nrows=1, ncols=2, sharey=True)
+        for j in range(2):
+            self.axes[j].plot(
+                self.data.centerline_target[0, :, 0],
+                self.data.centerline_target[0, :, 2],
+                "gray",
+                ls="--",
+            )
+        limits = self.axes_limit
+        color = [0, 0]
+
+        centerline_delta = self._get_delta("centerline", fit)
+        fiducial_delta = self._get_delta("fiducial", fit)
+
+        for i in range(self.data.sizes["coil"]):
+            j = 0 if self.data.origin[i] == "EU" else 1
+            self.axes[j].plot(
+                self.data.centerline_target[i, :, 0]
+                + factor * centerline_delta[i, :, 0],
+                self.data.centerline_target[i, :, 2]
+                + factor * centerline_delta[i, :, 2],
+                color=f"C{color[j]}",
+                label=f"{self.data.coil[i].values:02d}",
+            )
+            self.axes[j].plot(
+                self.data.fiducial_target[i, :, 0] + factor * fiducial_delta[i, :, 0],
+                self.data.fiducial_target[i, :, 2] + factor * fiducial_delta[i, :, 2],
+                ".",
+                color=f"C{color[j]}",
+            )
+            color[j] += 1
+        for j, origin in enumerate(["EU", "JA"]):
+            self.axes[j].legend(
+                fontsize="large", loc="center", bbox_to_anchor=[0.4, 0.5]
+            )
+            self.axes[j].set_title(f"{origin} {self.phase}")
+        self.axes_limit = limits
+
 
 if __name__ == "__main__":
     phase = "FAT supplier"
@@ -375,11 +426,13 @@ if __name__ == "__main__":
 
     fiducial = FiducialFit(phase=phase, infer=True, fill=False, method="rms")
 
-    coil_index = 10
+    coil_index = 16
     fiducial.plot_fit(coil_index)
     fiducial.plot_fit(coil_index, "fit")
 
-    fiducial.write()
+    fiducial.plot_ensemble(True, 250)
+
+    # fiducial.write()
 
     """
     for coil in range(18):

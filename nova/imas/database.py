@@ -4,7 +4,6 @@ from dataclasses import dataclass, field, fields, InitVar
 from functools import cached_property
 import os
 from typing import Any, ClassVar, Optional, Type
-
 import xxhash
 
 from nova.database.datafile import Datafile
@@ -68,6 +67,8 @@ class IDS:
     get_ids()
         Return bare ids.
 
+    dd_version()
+        Return DD version.
 
 
     """
@@ -80,7 +81,7 @@ class IDS:
     name: str | None = None
     backend: str = "hdf5"
 
-    dd_version: ClassVar[int] = 3
+    dd_major_version: ClassVar[int] = 3
     attrs: ClassVar[list[str]] = [
         "pulse",
         "run",
@@ -97,7 +98,7 @@ class IDS:
         return (
             f"imas:{self.backend}?user={self.user};"
             f"pulse={self.pulse};run={self.run};"
-            f"database={self.machine};version={self.dd_version};"
+            f"database={self.machine};version={self.dd_major_version};"
             f"#idsname={self.name}:occurrence={self.occurrence}"
         )
 
@@ -111,7 +112,9 @@ class IDS:
     @property
     def database_path(self):
         """Return top level of database path."""
-        return os.path.join(self.home, "imasdb", self.machine, str(self.dd_version))
+        return os.path.join(
+            self.home, "imasdb", self.machine, str(self.dd_major_version)
+        )
 
     @property
     def ids_path(self) -> str:

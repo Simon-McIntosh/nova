@@ -105,7 +105,7 @@ class FiducialData(netCDF, Plot, Plotter):
 
     def build_dataset(self):
         """Build xarray dataset."""
-        self.initialize_dataset()
+        self.initialize_data()
         self.load_centerline()
         self.load_fiducials()
         self.load_fiducial_deltas()
@@ -130,7 +130,7 @@ class FiducialData(netCDF, Plot, Plotter):
                 "EU",
                 "JA",
                 "JA",
-                "EU",
+                "JA",
                 "JA",
                 "EU",
                 "JA",
@@ -197,7 +197,7 @@ class FiducialData(netCDF, Plot, Plotter):
             coil["label"] = [label]
             self.mesh = self.mesh.merge(coil, merge_points=False)
 
-    def initialize_dataset(self):
+    def initialize_data(self):
         """Init xarray dataset."""
         self.data = xarray.Dataset(
             coords=dict(space=["x", "y", "z"], target=list(string.ascii_uppercase[:8]))
@@ -205,17 +205,49 @@ class FiducialData(netCDF, Plot, Plotter):
 
     def load_fiducials(self):
         """Load ccl fiducials."""
-        self.data["fiducial_target"] = (("target", "space"), self.fiducials())
+        self.data["fiducial_target"] = (
+            ("target", "space"),
+            self.fiducials().loc[self.data.target, :],
+        )
+
         target_index = [
             np.argmin(
                 np.linalg.norm(self.data.centerline_target[:-1] - fiducial, axis=1)
             )
             for fiducial in self.data.fiducial_target
         ]
+
         self.data = self.data.assign_coords(target_index=("target", target_index))
         target_length = self.data.arc_length[target_index].values
         self.data = self.data.assign_coords(target_length=("target", target_length))
         self.data = self.data.sortby("target_length")
+
+        delta, origin = self.dataset.data
+        self.data["coil"] = list(delta)
+        self.data = self.data.assign_coords(origin=("coil", origin))
+
+        for attr in ["fiducial_target", "target_length", "target_index"]:
+            self.data[attr] = (
+                xarray.DataArray(1, [("coil", self.data.coil.data)]) * self.data[attr]
+            )
+
+        if hasattr(self.dataset, "fiducial"):
+            for coil in self.data.coil.data:
+                self.data["fiducial_target"].loc[coil] = self.dataset.fiducial[
+                    coil
+                ].loc[self.data.target, :]
+
+                self.data["target_index"].loc[coil] = [
+                    np.argmin(
+                        np.linalg.norm(
+                            self.data.centerline_target[:-1] - fiducial, axis=1
+                        )
+                    )
+                    for fiducial in self.data["fiducial_target"].loc[coil]
+                ]
+                self.data["target_length"].loc[coil] = self.data.arc_length[
+                    self.data["target_index"].loc[coil]
+                ].values
 
     def load_centerline(self):
         """Load geodesic centerline."""
@@ -228,9 +260,7 @@ class FiducialData(netCDF, Plot, Plotter):
 
     def load_fiducial_deltas(self):
         """Load fiducial deltas."""
-        delta, origin = self.dataset.data
-        self.data["coil"] = list(delta)
-        self.data = self.data.assign_coords(origin=("coil", origin))
+        delta = self.dataset.data[0]
         self.data["fiducial_delta"] = (
             ("coil", "target", "space"),
             np.stack([delta[index].to_numpy(float) for index in delta], axis=0),
@@ -279,7 +309,9 @@ class FiducialData(netCDF, Plot, Plotter):
                 variance = self.variance
             case _:
                 raise ValueError(f"variance {self.variance} not file or float")
-        self.gpr = GaussianProcessRegressor(self.data.target_length, variance=variance)
+        self.gpr = GaussianProcessRegressor(
+            self.data.target_length[coil_index], variance=variance
+        )
         return self.gpr.evaluate(
             self.data.arc_length, self.data.fiducial_delta[coil_index, :, space_index]
         )
@@ -342,9 +374,9 @@ class FiducialData(netCDF, Plot, Plotter):
                 label=f"{self.data.coil[i].values:02d}",
             )
             self.axes[j].plot(
-                self.data.fiducial_target[:, 0]
+                self.data.fiducial_target[i, :, 0]
                 + factor * self.data.fiducial_delta[i, :, 0],
-                self.data.fiducial_target[:, 2]
+                self.data.fiducial_target[i, :, 2]
                 + factor * self.data.fiducial_delta[i, :, 2],
                 ".",
                 color=f"C{color[j]}",
@@ -425,8 +457,11 @@ if __name__ == "__main__":
     # phase = "SSAT BR"
 
     fiducial = FiducialData(fiducial="Sector", phase=phase, fill=False, variance=0.09)
+
+    # fiducial.load_fiducials()
     fiducial.plot()
 
+    """
     coil = 4
     coil_index = fiducial.coil_index(coil)
 
@@ -440,6 +475,7 @@ if __name__ == "__main__":
     fiducial.plot_gpr_array(coil_index, 3)
     fiducial.fig.tight_layout(pad=0.5)
     fiducial.savefig("gpr_array")
+    """
 
     # fiducial.plot()
     # fiducial.fig.tight_layout(pad=0)

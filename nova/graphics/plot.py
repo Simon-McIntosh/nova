@@ -588,7 +588,9 @@ class Animate(MoviePy, Plot):
         except AttributeError:
             return 0
 
-    def add_animation(self, attr: str, time, append=True, offset=True, **kwargs):
+    def add_animation(
+        self, attr: str, time, append=True, offset: bool | float = True, **kwargs
+    ):
         """Add moviepy animation segment."""
         num = kwargs.pop("num", 50)
         time = self._animation_time(time, append, num)
@@ -603,7 +605,7 @@ class Animate(MoviePy, Plot):
             data = np.r_[
                 [[time[0], np.nan]],
                 data,
-                [[time[-1] + 2 * np.finfo(np.float64).eps, np.nan]],
+                [[time[-1] + 2.0 * np.finfo(np.float_).eps, np.nan]],
             ]
         if attr in self._segments:
             data = np.r_[self._segments[attr], data]

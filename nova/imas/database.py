@@ -560,7 +560,10 @@ class Database(IDS):
     @property
     def dd_version(self) -> version.Version:
         """Return DD version."""
-        return version.parse(imas.al_dd_version)
+        try:
+            return version.parse(imas.al_dd_version)
+        except ValueError:
+            return version.parse("1")
 
     @contextmanager
     def _db_entry(self):

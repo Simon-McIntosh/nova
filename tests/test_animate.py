@@ -1,6 +1,7 @@
 from itertools import product
 import pytest
 
+import matplotlib.pylab
 import numpy as np
 
 from nova.graphics.plot import Animate
@@ -53,7 +54,8 @@ def test_plot_animation():
     animate.add_animation("elongation", 2, amplitude=0.2, offset=True)
     animate.add_animation("triangularity", 3, amplitude=0.2, offset=True, append=False)
     animate.add_animation("minor_radius", 2.5, amplitude=0.2, append=True)
-    animate.plot_animation()
+    with matplotlib.pylab.ioff():
+        animate.plot_animation()
     assert True
 
 

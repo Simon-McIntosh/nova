@@ -2215,6 +2215,17 @@ test = ["pickleshare", "pytest", "pytest-asyncio (<0.22)", "testpath"]
 test-extra = ["curio", "matplotlib (!=3.2.0)", "nbformat", "numpy (>=1.23)", "pandas", "pickleshare", "pytest", "pytest-asyncio (<0.22)", "testpath", "trio"]
 
 [[package]]
+name = "ipython-genutils"
+version = "0.2.0"
+description = "Vestigial utilities from IPython"
+optional = false
+python-versions = "*"
+files = [
+    {file = "ipython_genutils-0.2.0-py2.py3-none-any.whl", hash = "sha256:72dd37233799e619666c9f639a9da83c34013a73e8bbc79a7a6348d93c61fab8"},
+    {file = "ipython_genutils-0.2.0.tar.gz", hash = "sha256:eb2e116e75ecef9d4d228fdc66af54269afa26ab4463042e33785b887c628ba8"},
+]
+
+[[package]]
 name = "ipywidgets"
 version = "8.1.1"
 description = "Jupyter interactive widgets"
@@ -7320,4 +7331,4 @@ vtk = ["alphashape", "meshio", "pyvista", "trimesh", "vedo"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.13"
-content-hash = "3cd844c159eebfa758e81f29eb17ad5d62a32c8025c35af3f6a812aec4ab68d7"
+content-hash = "15fca0b69cd0c34668f7f60eec3aa6be853447c80bc1fe9c4affa9401012eabc"

@@ -26,6 +26,11 @@ Ids = ImasIds | dict[str, int | str] | tuple[int | str]
 
 
 @dataclass
+class DataEntry:
+    """Locate DataEntry on local or remote machine."""
+
+
+@dataclass
 class IDS:
     """High level IDS attributes.
 
@@ -279,11 +284,13 @@ class Database(IDS):
     group: str | None = field(default=None, repr=False)
     ids: ImasIds | None = field(repr=False, default=None)
 
+    '''
     def __post_init__(self):
         """Load parameters and set ids."""
         self.rename()
         self.load_database()
         self.update_filename()
+    '''
 
     @cached_property
     def db_entry(self):

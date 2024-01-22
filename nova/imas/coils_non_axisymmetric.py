@@ -6,6 +6,7 @@ from typing import ClassVar
 import numpy as np
 from tqdm import tqdm
 
+from nova.biot.biotframe import Source
 from nova.biot.space import Segment
 from nova.geometry.polygeom import Polygon
 from nova.geometry.polyline import PolyLine
@@ -156,10 +157,6 @@ class CoilsNonAxisymmetyric(Plot, CoilDatabase, Scenario):
                 for i, conductor in enumerate(coil.conductor):
                     elements = Elements(elements=conductor.elements)
                     points[name].extend(elements.points)
-
-                    conductor.cross_section.resize(1)
-                    print(conductor.cross_section)
-
                     section = Section(
                         elements._to_array(
                             conductor.cross_section,
@@ -198,12 +195,23 @@ class CoilsNonAxisymmetyric(Plot, CoilDatabase, Scenario):
             ):
                 self.data["points"].data[i, :number] = points[name]
 
+    def write_excel(self):
+        """Write coil centerline path to an excel file."""
+        # source = Source.
+        self.set_axes("3d")
+        for coil in self.frame.index:
+            index = coil == self.subframe.frame
+            space = Source(self.subframe.loc[index, :]).space
+            space.plot(axes=self.axes)
+
 
 if __name__ == "__main__":
     cc_ids = CoilsNonAxisymmetyric(111003, 2)  # CC
     # cs_ids = CoilsNonAxisymmetyric(111004, 1)  # CS
+
     # elm_ids = CoilsNonAxisymmetyric(115001, 1)  # ELM
 
-    coil = cc_ids  # + cc_ids  # + cs_ids
-    coil.frame.vtkplot()
+    # coil = elm_ids  # + cc_ids  # + cs_ids
+    # coil.plot()
+    # coil.frame.vtkplot()
     # coil3d._clear()

@@ -320,7 +320,10 @@ class Arc(Plot, Element):
     def path(self):
         """Return arc path at sample resolution."""
         resolution = np.max(
-            [3, int(self.quadrant_segments * self.central_angle / (np.pi / 2))]
+            [
+                self.quadrant_segments,
+                int(self.quadrant_segments * self.central_angle / (np.pi / 2)),
+            ]
         )
         return self.sample(resolution)
 
@@ -573,9 +576,9 @@ class PolyLine(Plot):
 if __name__ == "__main__":
     from nova.assembly.fiducialdata import FiducialData
 
-    fiducial = FiducialData("RE", fill=True)
+    fiducial = FiducialData(fiducial="RE")
 
-    points = fiducial.data.centerline.data
+    points = fiducial.data.centerline_target.data
     points += 500 * fiducial.data.centerline_delta[3].data
     polyline = PolyLine(points)
     polyline.plot()

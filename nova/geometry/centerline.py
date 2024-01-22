@@ -100,6 +100,26 @@ datasource = {
         ),
         attributes={"cross_section": {"circle": [0, 0, 0.035, 0.035, 2]}},
     ),
+    "VS3": DataSource(
+        pulse=111003,
+        run=2,
+        description="Poloidal Field Coils - conductor centerlines",
+        provider="Simon McIntosh, simon.mcintosh@iter.org",
+        officer="Nicola Mariani, nicola.mariani@iter.org",
+        pbs=11,
+        status="active",
+        replaces="111003/1",
+        reason_for_replacement="Geometry update and inclusion of arc elements.",
+        cad=CAD(
+            reference="IVC_EXTRACTION_bump.xls",
+            objects="Vertical Stablilty loop #3 Coils + Feeders Centerlines Extraction "
+            "for IMAS database",
+            date="05/102/2019",
+            provider="Vincent Bontemps, vincent.bontemps@iter.org",
+            contact="Vincent Bontemps, vincent.bontemps@iter.org",
+        ),
+        attributes={"cross_section": {"circle": [0, 0, 0.046, 0.046, 2]}},
+    ),
 }
 
 
@@ -308,6 +328,7 @@ class Centerline(Plot, PolylineAttrs, CoilDatabase):
             elements = IdsIndex(coil.conductor[0], "elements")
             coil_data = self.data.sel(coil_name=name)
             segment_number = coil_data.segment_number.data
+            elements["names"] = [f"{name}_{i}" for i in range(segment_number)]
             elements["types"] = np.array(
                 [
                     element_type[segment_type]
@@ -352,13 +373,21 @@ class Centerline(Plot, PolylineAttrs, CoilDatabase):
 
 if __name__ == "__main__":
     # filename = "CS"
-    # filename = "CS1L"
+    # filename = "PF"
     # filename = "CS"
-    filename = "CC"
+    filename = "VS3"
 
     centerline = Centerline(filename=filename)
+    centerline.plot()
     # centerline.write_ids()
 
-    # for filename in ["CC", "CS"]:
-    #   centerline = Centerline(filename=filename)
-    #   centerline.write_ids()
+    """
+
+    from nova.frame.coilset import CoilSet
+
+    coilset = CoilSet()
+    for filename in ["CC", "CS", "PF"]:
+        coilset += Centerline(filename=filename)
+
+    coilset.plot()
+    """

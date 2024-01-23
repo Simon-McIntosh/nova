@@ -321,7 +321,7 @@ class Arc(Plot, Element):
         """Return arc path at sample resolution."""
         resolution = np.max(
             [
-                self.quadrant_segments,
+                int(self.radius * self.central_angle * self.quadrant_segments),
                 int(self.quadrant_segments * self.central_angle / (np.pi / 2)),
             ]
         )

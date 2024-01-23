@@ -213,8 +213,9 @@ class Space(metamethod.Space, Plot3D):
 
     def _segment_path(self, index, local=False):
         """Return segment path sampled from local segment endpoints."""
-        _start_point, _end_point = self._start_point[index], self._end_point[index]
-        match self.frame.segment[index]:
+        _start_point = self._start_point[index]
+        _end_point = self._end_point[index]
+        match self.frame.segment.iloc[index]:
             case "arc":
                 end_theta = np.arctan2(_end_point[1], _end_point[0])
                 if end_theta <= 0:

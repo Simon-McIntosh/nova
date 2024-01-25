@@ -1,6 +1,11 @@
 """Manage IMAS Uniform Resource Identifiers."""
 from dataclasses import dataclass
 from functools import cached_property
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from nova.imas.dataentry import DataEntry
+
 import numpy as np
 
 
@@ -90,8 +95,12 @@ class URI:
     Refer to the IDS path syntax document for more information.
     """
 
-    scheame: str = "imas"
+    uri: str = ""
+
     # host:
+
+    def __call__(self, ids: DataEntry):
+        """Return uri from data entry."""
 
     @cached_property
     def ids_attrs(self) -> dict[str, str | int]:

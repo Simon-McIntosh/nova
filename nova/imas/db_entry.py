@@ -13,6 +13,9 @@ with check_import("imaspy"):
 class DBEntry(imaspy.DBEntry):
     """Extend imaspy.DBEntry to provide context aware access to ids data."""
 
+    # dd_version: Optional[str | Version] = None
+    # _uri: str = field(init=False, default="")
+
     uri: str
     mode: str
     database: None = None
@@ -23,7 +26,7 @@ class DBEntry(imaspy.DBEntry):
     def __post_init__(self):
         """Extend imaspy and restrict to AL5."""
         super().__init__(
-            self.uri, self.mode, dd_version=self.dd_version, xml_path=self.dd_version
+            self.uri, self.mode, dd_version=self.dd_version, xml_path=self.xml_path
         )
 
     @cached_property

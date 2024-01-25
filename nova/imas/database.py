@@ -4,10 +4,12 @@ from dataclasses import dataclass, field, fields, InitVar
 from functools import cached_property
 import os
 from typing import Any, ClassVar, Optional, Type
+
 import xxhash
 
 from nova.database.datafile import Datafile
 from nova.imas.db_entry import DBEntry
+from nova.imas.datadir import DataDir
 from nova.utilities.importmanager import check_import
 
 with check_import("imaspy"):
@@ -26,30 +28,14 @@ Ids = ImasIds | dict[str, int | str] | tuple[int | str]
 
 
 @dataclass
-class DataEntry:
-    """Locate DataEntry on local or remote machine."""
-
-
-@dataclass
-class IDS:
+class IDS(DataDir):
     """High level IDS attributes.
 
-    Parameters
-    ----------
-    pulse: int, optional (required when ids not set)
-        Pulse number. The default is 0.
-    run: int, optional (required when ids not set)
-        Run number. The default is 0.
-    machine: str, optional (required when ids not set)
-        Machine name. The default is iter.
-    occurrence: int, optional (required when ids not set)
-        Occurrence number. The default is 0.
-    user: str, optional (required when ids not set)
-        User name. The default is public.
     name: str, optional (required when ids not set)
         Ids name. The default is ''.
-    backend: str, optional (required when ids not set)
-        Access layer backend. The default is hdf5.
+    occurrence: int, optional (required when ids not set)
+        Occurrence number. The default is 0.
+
     ids: ImasIds, optional
         When set the ids parameter takes prefrence. The default is None.
 
@@ -61,11 +47,6 @@ class IDS:
     uri : str, read-only
         IDS unified resorce identifier.
 
-    home : os.Path, read-only
-        Path to IMAS database home.
-
-    ids_path : os.path, read-only
-        Path to IDS database entry.
 
     Methods
     -------
@@ -75,84 +56,24 @@ class IDS:
     dd_version()
         Return DD version.
 
-
     """
 
-    pulse: int = 0
-    run: int = 0
-    machine: str = "iter"
-    occurrence: int = 0
-    user: str = "public"
     name: str | None = None
-    backend: str = "hdf5"
+    occurrence: int = 0
 
-    dd_major_version: ClassVar[int] = 3
     attrs: ClassVar[list[str]] = [
-        "pulse",
-        "run",
-        "machine",
         "occurrence",
-        "user",
         "name",
-        "backend",
     ]
 
     @property
     def uri(self):
-        """Return IDS URI."""
-        return (
-            f"imas:{self.backend}?user={self.user};"
-            f"pulse={self.pulse};run={self.run};"
-            f"database={self.machine};version={self.dd_major_version};"
-            f"#idsname={self.name}:occurrence={self.occurrence}"
-        )
-
-    @property
-    def home(self):
-        """Return database root."""
-        if self.user == "public":
-            return os.path.join(os.environ["IMAS_HOME"], "shared")
-        return os.path.join(os.path.expanduser(f"~{self.user}"), "public")
-
-    @property
-    def database_path(self):
-        """Return top level of database path."""
-        return os.path.join(
-            self.home, "imasdb", self.machine, str(self.dd_major_version)
-        )
-
-    @property
-    def ids_path(self) -> str:
-        """Return path to database entry."""
-        match self.backend:
-            case str(backend) if backend == "hdf5":
-                return os.path.join(self.database_path, str(self.pulse), str(self.run))
-            case _:
-                raise NotImplementedError(
-                    f"not implemented for {self.backend}" " backend"
-                )
-        return ""
+        """Return IDS URI, Extend DataEntry.uri with name:occurrence fragment."""
+        return f"{super().uri}#idsname={self.name}:occurrence={self.occurrence}"
 
     def get_ids(self):
         """Return empty ids."""
         return getattr(imaspy.IDSFactory(), self.name)()
-
-    @classmethod
-    def default_ids_attrs(cls) -> dict:
-        """Return dict of default ids attributes."""
-        return {attr: getattr(cls, attr) for attr in cls.attrs}
-
-    @property
-    def ids_attrs(self):
-        """Manage dict of ids attributes."""
-        return {attr: getattr(self, attr) for attr in self.attrs}
-
-    @ids_attrs.setter
-    def ids_attrs(self, attrs: dict):
-        for attr, value in attrs.items():
-            if attr not in self.attrs:
-                raise AttributeError(f"attr {attr} not in self.attrs {self.attrs}")
-            setattr(self, attr, value)
 
     @classmethod
     def update_ids_attrs(cls, ids_attrs: bool | Ids):

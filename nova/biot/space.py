@@ -72,7 +72,7 @@ class Space(metamethod.Space, Plot3D):
     frame: FrameLink = field(repr=False)
     coordinate_axes: np.ndarray = field(init=False, repr=False)
     coordinate_origin: np.ndarray = field(init=False, repr=False)
-    quadrant_segments: int = 11
+    quadrant_segments: int = 21
 
     def initialize(self):
         """Build local coordinate axes (-normal, tangent, binormal)."""

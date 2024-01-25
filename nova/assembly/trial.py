@@ -648,7 +648,7 @@ if __name__ == "__main__":
     # theta = [5, 5, 5, 10, 2, 2, 2.5]
     # theta = [0, 0, 0, 10, 0, 0, 0]
     theta = [1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 3]
-    vault = Vault(2_00_000, theta=theta, adjust_gap=True)
+    vault = Vault(2_000_000, theta=theta, adjust_gap=True)
 
     #'radial', 'tangential', 'roll_length',
     #'yaw_length', 'radial_ccl', 'tangential_ccl', 'radial_wall'
@@ -661,7 +661,7 @@ if __name__ == "__main__":
     # vault.plot_sample(0.99, False)
 
     # theta_error = [5, 5, 5, 2, 2, 2, 5, 10, 10]
-    """
+
     theta_error = [1.5, 1.5, 3, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5]
     # theta_error = [np.sqrt(3), np.sqrt(3), np.sqrt(3),
     #               1, 1, 1,
@@ -682,4 +682,3 @@ if __name__ == "__main__":
 
     # trial.plot_sample(0.99, False)
     # trial.plot_sample(0.99, True)
-    """

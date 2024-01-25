@@ -4,6 +4,7 @@ from functools import cached_property
 from typing import ClassVar
 
 import numpy as np
+import openpyxl
 from tqdm import tqdm
 
 from nova.biot.biotframe import Source
@@ -144,6 +145,7 @@ class CoilsNonAxisymmetyric(Plot, CoilDatabase, Scenario):
 
     def build(self):
         """Build netCDF database using data extracted from imasdb."""
+        print("build")
         name = coil_names(self.ids_data.coil)
         with self.build_scenario():
             self.data.coords["coil_name"] = name
@@ -195,21 +197,35 @@ class CoilsNonAxisymmetyric(Plot, CoilDatabase, Scenario):
             ):
                 self.data["points"].data[i, :number] = points[name]
 
+    def _write_header(self, worksheet):
+        """Write worksheet header."""
+        for col, coord in enumerate("XYZ"):
+            worksheet.cell(1, col + 3, f"{coord} Coord")
+
+    def _write_data(self, worksheet, xls_index, data):
+        """Append data to workbook."""
+        self._write_header(worksheet)
+        for i in range(data.shape[0]):
+            for j in range(data.shape[1]):
+                worksheet.cell(i + xls_index[0], j + xls_index[1], data[i, j])
+
     def write_excel(self):
-        """Write coil centerline path to an excel file."""
-        # source = Source.
-        self.set_axes("3d")
-        for coil in self.frame.index:
-            index = coil == self.subframe.frame
-            space = Source(self.subframe.loc[index, :]).space
-            space.plot(axes=self.axes)
+        """Write centerline path to an excel file [mm]."""
+        workbook = openpyxl.Workbook()
+        for i, coil in enumerate(self.frame.index):
+            worksheet = workbook.create_sheet(coil, i)
+            index = self.subframe.index[self.subframe.frame == coil]
+            source = Source(self.subframe.loc[index, :].to_dict())
+            self._write_data(worksheet, (2, 3), 1e3 * source.space.path)
+        workbook.save(self.filepath.with_suffix(".xlsx"))
+        workbook.close()
 
 
 if __name__ == "__main__":
-    cc_ids = CoilsNonAxisymmetyric(111003, 2)  # CC
+    # cc_ids = CoilsNonAxisymmetyric(111003, 2)  # CC
     # cs_ids = CoilsNonAxisymmetyric(111004, 1)  # CS
 
-    # elm_ids = CoilsNonAxisymmetyric(115001, 1)  # ELM
+    elm_ids = CoilsNonAxisymmetyric(115001, 1)  # ELM
 
     # coil = elm_ids  # + cc_ids  # + cs_ids
     # coil.plot()

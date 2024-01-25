@@ -23,12 +23,14 @@ def full_coil_name(identifier: str):
         case "C", "S", str(index), str(postfix):
             position = dict(zip("UL", ["Upper", "Lower"]))[postfix]
             return f"Central Solenoid Module {index} {position}"
-        case "V", "S", str(position), *index:
+        case "V", str(position), *index:
             position = dict(zip("UL", ["Upper", "Lower"]))[position]
             return f"{position} Vertical Stability Coil {index}"
+        case "E", str(position), *index:
+            position = dict(zip("UML", ["Upper", "Middle", "Lower"]))[position]
+            return f"{position} ELM Coil {index}"
         case "P", "F", str(index):
             return f"Poloidal Field Coil {index}"
-        # case VS3
         case _:
             raise NotImplementedError(f"coil name not implemented for {identifier}")
 

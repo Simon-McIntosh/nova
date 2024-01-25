@@ -26,7 +26,7 @@ gitpython = ">=3.1.31"
 netcdf4 = ">=1.6.3"
 networkx = ">=3.1"
 numpy = ">=1.26.0"
-pandas = ">=2.0.1"
+pandas = "<2.2.0"
 scipy = ">=1.10.1"
 shapely = ">=2.0.1"
 tqdm = "^4.66.1"
@@ -109,6 +109,7 @@ vtk = ">=9.3.0"
 build = "^1.0.3"
 wheel = "^0.41.3"
 ipython-genutils = "^0.2.0"
+jax = "^0.4.23"
 
 
 [tool.poetry.extras]

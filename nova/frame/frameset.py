@@ -126,6 +126,7 @@ class FrameSet(netCDF, FrameSetLoc):
             subspace=["Imin", "Imax"],
             exclude=["frame", "Ic", "It", "fix", "free"],
             array=["coil"],
+            # name="frame",
             version=["index"],
         )
         self.frame.frame_attr(Select)
@@ -138,6 +139,7 @@ class FrameSet(netCDF, FrameSetLoc):
             exclude=["turn", "scale", "nfilament", "delta"],
             array=self.array,
             delim="_",
+            # name="subframe",
             version=["index", "nturn"],
         )
         self.subframe.frame_attr(Select, ["Ic"])

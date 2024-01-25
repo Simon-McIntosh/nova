@@ -33,6 +33,11 @@ class FrameAttrs(pandas.DataFrame):
         super().__init__(data, index, columns)
         self.update_metadata(data, columns, attrs, metadata)
 
+    # @property
+    # def name(self):
+    #    """Return metaframe name attribute."""
+    #    return self.attrs["metaframe"].name
+
     @property
     def version(self):
         """Return metaframe version container."""

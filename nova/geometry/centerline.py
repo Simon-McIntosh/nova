@@ -32,7 +32,7 @@ datasource = {
         reason_for_replacement="resolve conductor centerlines and include coil feeders",
         cad=CAD(
             reference="DET-07879",
-            objects="Correction Coils + Feeders Centerlines Extraction "
+            objects="Correction Coil + Feeder Centerline Extraction "
             "for IMAS database",
             date="05/10/2023",
             provider="Vincent Bontemps, vincent.bontemps@iter.org",
@@ -52,7 +52,7 @@ datasource = {
         reason_for_replacement="",
         cad=CAD(
             reference="DET-*",
-            objects="Central Solenoid Module CS1L + Feeders Centerlines Extraction "
+            objects="Central Solenoid Module CS1L + Feeder Centerline Extraction "
             "for IMAS database",
             date="12/10/2023",
             provider="Vincent Bontemps, vincent.bontemps@iter.org",
@@ -72,7 +72,7 @@ datasource = {
         reason_for_replacement="Correction to conductor radius.",
         cad=CAD(
             reference="DET-07879-A",
-            objects="Central Solenoid + Feeders Centerlines Extraction "
+            objects="Central Solenoid + Feeder Centerline Extraction "
             "for IMAS database",
             date="19/10/2023",
             provider="Vincent Bontemps, vincent.bontemps@iter.org",
@@ -92,7 +92,7 @@ datasource = {
         reason_for_replacement="",
         cad=CAD(
             reference="DET-078779-A",
-            objects="Poloidal Field Coils + Feeders Centerlines Extraction "
+            objects="Poloidal Field Coil + Feeder Centerline Extraction "
             "for IMAS database",
             date="29/11/2023",
             provider="Vincent Bontemps, vincent.bontemps@iter.org",
@@ -103,20 +103,40 @@ datasource = {
     "VS3": DataSource(
         pulse=111003,
         run=2,
-        description="Poloidal Field Coils - conductor centerlines",
+        description="Vertical Stability In-Vessel Coils - conductor centerlines",
         provider="Simon McIntosh, simon.mcintosh@iter.org",
         officer="Nicola Mariani, nicola.mariani@iter.org",
-        pbs=11,
+        pbs=15,
         status="active",
         replaces="111003/1",
         reason_for_replacement="Geometry update and inclusion of arc elements.",
         cad=CAD(
             reference="IVC_EXTRACTION_bump.xls",
-            objects="Vertical Stablilty loop #3 Coils + Feeders Centerlines Extraction "
+            objects="Vertical Stablilty loop #3 Coil + Feeder Centerline Extraction "
             "for IMAS database",
-            date="05/102/2019",
+            date="05/02/2019",
             provider="Vincent Bontemps, vincent.bontemps@iter.org",
             contact="Vincent Bontemps, vincent.bontemps@iter.org",
+        ),
+        attributes={"cross_section": {"circle": [0, 0, 0.046, 0.046, 2]}},
+    ),
+    "ELM": DataSource(
+        pulse=111001,
+        run=2,
+        description="ELM Coils - conductor centerlines",
+        provider="Simon McIntosh, simon.mcintosh@iter.org",
+        officer="Julien Laquiere, julien.laquiere@iter.org",
+        pbs=15,
+        status="active",
+        replaces="111003/1",
+        reason_for_replacement="Update corrects conductor radius and "
+        "includes arc elements extracted from source IDS multiline.",
+        cad=CAD(
+            reference="111001/1",
+            objects="ELM Coil Centerline Extraction " "for IMAS database",
+            date="23/01/2023",
+            provider="Masanari Hosokawa, masanari.hosokawa@iter.org",
+            contact="Simon McIntosh, simon.mcintosh@iter.org",
         ),
         attributes={"cross_section": {"circle": [0, 0, 0.046, 0.046, 2]}},
     ),
@@ -375,11 +395,15 @@ if __name__ == "__main__":
     # filename = "CS"
     # filename = "PF"
     # filename = "CS"
-    filename = "VS3"
+    # filename = "VS3"
+    filename = "ELM"
+    # centerline = Centerline(filename=filename)
+    # centerline.plot()
 
-    centerline = Centerline(filename=filename)
-    centerline.plot()
-    # centerline.write_ids()
+    for filename in tqdm(["CC", "CS", "PF", "VS3", "ELM"], "loading centerlines"):
+        centerline = Centerline(filename=filename)
+        centerline.plot()
+        centerline.write_ids()
 
     """
 

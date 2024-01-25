@@ -143,7 +143,7 @@ class Arc(Plot, Element):
     theta: float = field(init=False, repr=False)
     error: float = field(init=False, repr=False)
     eps: float = 1e-8
-    quadrant_segments: int = 16
+    quadrant_segments: int = 21
 
     name: ClassVar[str] = "arc"
 
@@ -321,7 +321,7 @@ class Arc(Plot, Element):
         """Return arc path at sample resolution."""
         resolution = np.max(
             [
-                int(self.radius * self.central_angle * self.quadrant_segments),
+                self.quadrant_segments,
                 int(self.quadrant_segments * self.central_angle / (np.pi / 2)),
             ]
         )

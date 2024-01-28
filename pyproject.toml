@@ -109,7 +109,7 @@ vtk = ">=9.3.0"
 build = "^1.0.3"
 wheel = "^0.41.3"
 ipython-genutils = "^0.2.0"
-jax = "^0.4.23"
+jax = {extras = ["cpu"], version =  "^0.4.23"}
 
 
 [tool.poetry.extras]

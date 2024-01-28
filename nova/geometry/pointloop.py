@@ -18,7 +18,7 @@ def point_in_polygon(point, polygon) -> int:
     Parameters
     ----------
     polygon: npt.ArrayLike, shape(:, 2)
-        Bounding polygon, must form closed loop.
+        Bounding polygon, must form a closed loop.
 
     point: npt.ArrayLike, shape(2)
         Point coordinates.

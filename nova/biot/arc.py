@@ -88,24 +88,6 @@ class Arc(Constants, Matrix):
         theta[self._index] = np.pi - self.abs_alpha[self._index]
         return theta
 
-    '''
-    @property
-    def _cylindrical_to_cartesian(self):
-        """Return rotation matrix to map local cylindrical to local cartesian coords."""
-        return np.stack(
-            [
-                [np.cos(self._phi), -np.sin(self._phi), np.zeros_like(self._phi)],
-                [np.sin(self._phi), np.cos(self._phi), np.zeros_like(self._phi)],
-                [
-                    np.ones_like(self._phi),
-                    np.zeros_like(self._phi),
-                    np.zeros_like(self._phi),
-                ],
-            ],
-            axis=0,
-        )
-    '''
-
     @cached_property
     def Kinc(self):
         """Return end point stacked incomplete elliptic intergral of the 1st kind."""

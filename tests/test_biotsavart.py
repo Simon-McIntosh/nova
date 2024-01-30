@@ -423,5 +423,17 @@ def test_3d_line_arc(rng_sead, current):
         assert np.allclose(getattr(coilset.point, attr.lower()), 0, atol=1e-6)
 
 
+def test_line_singularity():
+    segment_number = 30
+    x = np.linspace(0, 5, segment_number)
+    points = np.stack([x, np.zeros_like(x), np.zeros_like(x)], axis=-1)
+    coilset = CoilSet(field_attrs=["Bx", "By", "Bz"])
+    coilset.winding.insert(points, {"c": (0, 0, 0.25)}, Ic=1)
+    coilset.point.solve(np.c_[[0, 0, 0], [0, 0.25 / 2, 0], [0, 0.25, 0]].T)
+    assert coilset.point.bz[0] < coilset.point.bz[1]
+    assert coilset.point.bz[0] < coilset.point.bz[2]
+    assert coilset.point.bz[2] < coilset.point.bz[1]
+
+
 if __name__ == "__main__":
     pytest.main([__file__])

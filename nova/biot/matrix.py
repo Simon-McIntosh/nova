@@ -82,6 +82,21 @@ class Matrix(GroupSet):
         return self._vector("B")
 
     @property
+    def Ax(self):
+        """Return x component of magnetic vector potential."""
+        return self.Avector[..., 0]
+
+    @property
+    def Ay(self):
+        """Return y component of magnetic vector potential."""
+        return self.Avector[..., 1]
+
+    @property
+    def Az(self):
+        """Return z component of magnetic vector potential."""
+        return self.Avector[..., 2]
+
+    @property
     def Bx(self):
         """Return x component of magnetic field vector."""
         return self.Bvector[..., 0]

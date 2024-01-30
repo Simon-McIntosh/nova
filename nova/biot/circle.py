@@ -14,7 +14,7 @@ class OffsetFilaments:
 
     data: dict[str, np.ndarray]
 
-    fold_number: int = 0  # Number of e-foling lenghts within filament
+    fold_number: int = 0  # Number of e-folding lengths within filament
     merge_number: float = 1.5  # Merge radius, multiple of filament widths
     rms_offset: bool = True  # Maintain rms offset for filament pairs
 

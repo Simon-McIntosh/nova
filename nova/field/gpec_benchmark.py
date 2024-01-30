@@ -109,11 +109,19 @@ class Dataset(Plot2D, netCDF):
 if __name__ == "__main__":
     dataset = Dataset("EU")
 
-    dataset.plot()
+    # dataset.plot()
 
     # dataset.grid.plot()
 
     from nova.imas.coils_non_axisymmetric import CoilsNonAxisymmetyric
 
-    elm_ids = CoilsNonAxisymmetyric(115001, 2)
-    elm_ids.plot(axes=dataset.axes)
+    elm_ids = CoilsNonAxisymmetyric(
+        115001, 2, minimum_arc_nodes=1000, field_attrs=["Bx", "By", "Bz"]
+    )
+
+    # elm_ids.grid.solve(2e3, limit=dataset.grid.limit)
+    elm_ids.sloc["Ic"] = 0
+    elm_ids.sloc["Ic"][0] = 1
+
+    elm_ids.grid.plot("bz", levels=51, nulls=False)
+    elm_ids.plot(axes=elm_ids.grid.axes)

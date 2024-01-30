@@ -24,6 +24,7 @@ class Elements(Plot):
     """Manage conductor element data extracted from coils_non_axisymmetric IDS."""
 
     elements: ImasIds = field(repr=False, default=None)
+    minimum_arc_nodes: int = 3
     points: np.ndarray = field(
         init=False, repr=False, default_factory=lambda: np.array([])
     )
@@ -97,7 +98,7 @@ class Elements(Plot):
 
     def _extract_polyline(self):
         """Return segmented polyline."""
-        polyline = PolyLine(minimum_arc_nodes=3)
+        polyline = PolyLine(minimum_arc_nodes=self.minimum_arc_nodes)
         for element_type, point_array in zip(self._type_array, self._point_array):
             match element_type:
                 case 1:  # line
@@ -140,6 +141,7 @@ class CoilsNonAxisymmetyric(Plot, CoilDatabase, Scenario):
     run: int = 1
     name: str = "coils_non_axisymmetric"
     ids_node: str = "coil"
+    minimum_arc_nodes: int = 3
 
     coil_attrs: ClassVar[list[str]] = ["turns", "resistance"]
 
@@ -156,7 +158,10 @@ class CoilsNonAxisymmetyric(Plot, CoilDatabase, Scenario):
                 name = coil_name(coil)
                 points[name] = []
                 for i, conductor in enumerate(coil.conductor):
-                    elements = Elements(elements=conductor.elements)
+                    elements = Elements(
+                        elements=conductor.elements,
+                        minimum_arc_nodes=self.minimum_arc_nodes,
+                    )
                     points[name].extend(elements.points)
                     section = Section(
                         elements._to_array(
@@ -174,7 +179,7 @@ class CoilsNonAxisymmetyric(Plot, CoilDatabase, Scenario):
                         cross_section=polygon,
                         name=name,
                         part=part_name(coil),
-                        delim="",
+                        delim="_",
                     )
                     if i > 0:
                         self.linkframe([coil_name(coil), name])

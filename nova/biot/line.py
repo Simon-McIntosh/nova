@@ -50,7 +50,7 @@ class Line(Matrix):
 
     @cached_property
     def ri(self):
-        """Return stacked a2 coefficient."""
+        """Return stacked ri coefficient."""
         return np.sqrt(self.a2**2 + self.wi**2)
 
     @property

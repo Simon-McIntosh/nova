@@ -147,7 +147,10 @@ class PolyPlot(Plot, Properties, Labels, metamethod.PolyPlot, BasePlot):
         patch = []
         properties = self.patch_properties(self.frame.part, self.frame.area)
         basecolor = {part: properties[part]["facecolor"] for part in properties}
-        for polyframe, part in self.frame.loc[index, ["poly", "part"]].to_numpy():
+
+        for polyframe, part in zip(
+            self.frame.loc[index, "poly"], self.frame.loc[index, "part"]
+        ):
             patch_kwargs = properties[part].copy()
             if self.patchwork != 0:  # Shuffle basecolor
                 patch_kwargs["facecolor"] = self.shuffle(basecolor[part])

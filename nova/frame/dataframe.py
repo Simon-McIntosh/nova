@@ -59,9 +59,11 @@ class DataFrame(FrameAttrs):
     def __getitem__(self, col):
         """Extend DataFrame.__getitem__. (frame['*']) for cached geometry load."""
         if col in ["poly", "vtk"] and self.lock(col):
-            print(col)
             self.metaframe.lock[col] = False
-            self._loads(col)
+            try:
+                self._loads(col)
+            except (TypeError, KeyError):
+                pass
         return super().__getitem__(col)
 
     def geoframe(self, geo: str):

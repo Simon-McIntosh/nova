@@ -5,6 +5,7 @@ Created on Thu Jan 25 11:13:16 2024
 
 @author: mcintos
 """
+import jax
 import jax.numpy as jnp
 
 from jax import config
@@ -12,6 +13,8 @@ from jax import config
 import numpy as np
 
 from nova import xarray
+
+import matplotlib.pyplot as plt
 
 
 config.update("jax_debug_nans", True)
@@ -29,7 +32,7 @@ def test_rad():
     print(data)
 
 
-#  @jax.jit
+@jax.jit
 def sum_width(r, R):
     x_prime = jnp.abs(x - R) / r
     current_density = jnp.where(x_prime <= 1.0, 200 * (1 - x_prime), 0.0)
@@ -41,7 +44,6 @@ def sum_width(r, R):
 
 
 if __name__ == "__main__":
-    """
     grad = jax.grad(sum_width)
     r_vector = jnp.linspace(0.5, 6.0, 250)
     plt.plot(r_vector, [grad(r, 6.0) for r in r_vector])
@@ -54,6 +56,5 @@ if __name__ == "__main__":
         )
 
     plt.plot(r_vector, finite_grad)
-    """
 
-    test_rad()
+    # test_rad()

@@ -1,12 +1,33 @@
 """Biot-Savart calculation for line segments."""
 from dataclasses import dataclass, field
 
-from functools import cached_property
+from functools import cached_property, wraps
 from typing import ClassVar
 
 import numpy as np
 
 from nova.biot.matrix import Matrix
+
+
+def frame_factory(factor=1.4):
+    """Automatic loader for frame methods."""
+
+    def decorator(method):
+        """Return initialized frame method."""
+
+        @wraps(method)
+        def wrapper(self):
+            nonlocal frame_method
+            kwargs = {"name": method.__name__} | method(self)
+            try:
+                return frame_method(*self.frames, **kwargs)
+            except TypeError:  # import_module from DeferredImport.load()
+                frame_method = frame_method.load()
+                return frame_method(*self.frames, **kwargs)
+
+        return wrapper
+
+    return decorator
 
 
 @dataclass
@@ -24,7 +45,6 @@ class Line(Matrix):
     attrs: dict[str, str] = field(
         default_factory=lambda: {
             "dl": "dl",
-            "turnturn": "turnturn",
         }
     )
 

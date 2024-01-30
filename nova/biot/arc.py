@@ -1,5 +1,5 @@
 """Biot-Savart calculation for arc segments."""
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import cached_property
 from typing import ClassVar
 
@@ -31,6 +31,8 @@ class Arc(Constants, Matrix):
     axisymmetric: ClassVar[bool] = False
     name: ClassVar[str] = "arc"  # element name
 
+    attrs: dict[str, str] = field(default_factory=lambda: {"dl": "dl"})
+
     def __post_init__(self):
         """Load source and target geometry in local coordinate system."""
         super().__post_init__()
@@ -38,6 +40,22 @@ class Arc(Constants, Matrix):
         self.zs = self("source", "z")
         self.r = np.linalg.norm([self("target", "x"), self("target", "y")], axis=0)
         self.z = self("target", "z")
+
+    @cached_property
+    def gamma(self):
+        """Return gamma coefficient."""
+        return self.zs - self.z
+        factor = 1e12
+        r2 = self["dl"] ** 2 / 4
+        gamma = self.zs - self.z
+        a2 = (self.zs - self.z) ** 2 + (self.rs - self.r) ** 2
+        return np.where(a2 < r2, gamma * (factor + (1 - factor) * a2 / r2), gamma)
+
+    # @property
+    # @offset(1e12)
+    # def a2(self):
+    #    """Return a**2 coefficient."""
+    #    return super().a2
 
     @cached_property
     def phi(self):
@@ -150,6 +168,16 @@ class Arc(Constants, Matrix):
             * ((1 - self.k2 / 2) * self.Kinc - self.Einc)
         )
         return self._pi2(Aphi_hat)
+
+    @property
+    def _Ax_hat(self):
+        """Return stacked local x-coordinate vector potential intergration constants."""
+        return self._Ar_hat * np.cos(self._phi) - self._Aphi_hat * np.sin(self._phi)
+
+    @property
+    def _Ay_hat(self):
+        """Return stacked local y-coordinate vector potential intergration constants."""
+        return self._Ar_hat * np.sin(self._phi) + self._Aphi_hat * np.cos(self._phi)
 
     @property
     def _Az_hat(self):

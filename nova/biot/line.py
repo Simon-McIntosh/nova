@@ -1,33 +1,12 @@
 """Biot-Savart calculation for line segments."""
 from dataclasses import dataclass, field
 
-from functools import cached_property, wraps
+from functools import cached_property
 from typing import ClassVar
 
 import numpy as np
 
-from nova.biot.matrix import Matrix
-
-
-def frame_factory(factor=1.4):
-    """Automatic loader for frame methods."""
-
-    def decorator(method):
-        """Return initialized frame method."""
-
-        @wraps(method)
-        def wrapper(self):
-            nonlocal frame_method
-            kwargs = {"name": method.__name__} | method(self)
-            try:
-                return frame_method(*self.frames, **kwargs)
-            except TypeError:  # import_module from DeferredImport.load()
-                frame_method = frame_method.load()
-                return frame_method(*self.frames, **kwargs)
-
-        return wrapper
-
-    return decorator
+from nova.biot.matrix import Matrix, offset
 
 
 @dataclass
@@ -42,11 +21,7 @@ class Line(Matrix):
     axisymmetric: ClassVar[bool] = False
     name: ClassVar[str] = "line"  # element name
 
-    attrs: dict[str, str] = field(
-        default_factory=lambda: {
-            "dl": "dl",
-        }
-    )
+    attrs: dict[str, str] = field(default_factory=lambda: {"dl": "dl"})
 
     @cached_property
     def phi(self):
@@ -70,17 +45,11 @@ class Line(Matrix):
             [self("source", f"z{i}") - self("target", "z") for i in range(1, 3)]
         )
 
-    @property
-    def _a2(self):
+    @cached_property
+    @offset(factor=1e12)
+    def a2(self):
         """Return stacked a2 coefficient."""
         return np.sqrt(self.u2**2 + self.v2**2)
-
-    @cached_property
-    def a2(self):
-        """Return blended stacked a2 coefficient."""
-        r2 = self["dl"] ** 2 / 4
-        factor = 1e12
-        return np.where((a2 := self._a2) < r2, factor * r2 + a2 * (1 - factor), a2)
 
     @cached_property
     def ri(self):

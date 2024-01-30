@@ -1,12 +1,31 @@
 """Biot-Savart calculation base class."""
 from dataclasses import dataclass, field
-from functools import cached_property
+from functools import cached_property, wraps
 from importlib import import_module
 from typing import ClassVar
 
 import numpy as np
 
 from nova.biot.groupset import GroupSet
+
+
+def offset(factor=1):
+    """Offset filament source-target squared seperation vector."""
+
+    def decorator(method):
+        """Return function decorator."""
+
+        @wraps(method)
+        def wrapper(self):
+            """Retrun squared seperation distance with offset core."""
+            nonlocal factor
+            a2 = method(self)
+            r2 = self["dl"] ** 2 / 4
+            return np.where(a2 < r2, factor**2 * r2 + a2 * (1 - factor**2), a2)
+
+        return wrapper
+
+    return decorator
 
 
 @dataclass

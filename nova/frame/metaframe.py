@@ -46,6 +46,8 @@ class MetaSet(MetaArray):
             "array": False,
             "multipoint": False,
             "column": False,
+            "vtk": False,
+            "poly": False,
         }
     )
 

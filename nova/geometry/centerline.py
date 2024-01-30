@@ -121,14 +121,14 @@ datasource = {
         attributes={"cross_section": {"circle": [0, 0, 0.046, 0.046, 2]}},
     ),
     "ELM": DataSource(
-        pulse=111001,
+        pulse=115001,
         run=2,
         description="ELM Coils - conductor centerlines",
         provider="Simon McIntosh, simon.mcintosh@iter.org",
         officer="Julien Laquiere, julien.laquiere@iter.org",
         pbs=15,
         status="active",
-        replaces="111003/1",
+        replaces="115001/1",
         reason_for_replacement="Update corrects conductor radius and "
         "includes arc elements extracted from source IDS multiline.",
         cad=CAD(
@@ -400,10 +400,9 @@ if __name__ == "__main__":
     # centerline = Centerline(filename=filename)
     # centerline.plot()
 
-    for filename in tqdm(["CC", "CS", "PF", "VS3", "ELM"], "loading centerlines"):
-        centerline = Centerline(filename=filename)
-        centerline.plot()
-        centerline.write_ids()
+    centerline = Centerline(filename=filename)
+    centerline.plot()
+    centerline.write_ids()
 
     """
 

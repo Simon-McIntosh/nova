@@ -58,8 +58,8 @@ class Gridgen(Plot):
 
     ngrid: int | None = field(default=None)
     limit: np.ndarray | None = field(default=None)
-    xcoord: list[float] = field(init=False, repr=False)
-    zcoord: list[float] = field(init=False, repr=False)
+    xcoord: list[float] | None = field(default=None, repr=False)
+    zcoord: list[float] | None = field(default=None, repr=False)
     data: xarray.Dataset = field(init=False, repr=False)
 
     def __post_init__(self):

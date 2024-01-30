@@ -145,7 +145,6 @@ class CoilsNonAxisymmetyric(Plot, CoilDatabase, Scenario):
 
     def build(self):
         """Build netCDF database using data extracted from imasdb."""
-        print("build")
         name = coil_names(self.ids_data.coil)
         with self.build_scenario():
             self.data.coords["coil_name"] = name
@@ -225,7 +224,7 @@ if __name__ == "__main__":
     # cc_ids = CoilsNonAxisymmetyric(111003, 2)  # CC
     # cs_ids = CoilsNonAxisymmetyric(111004, 1)  # CS
 
-    elm_ids = CoilsNonAxisymmetyric(115001, 1)  # ELM
+    elm_ids = CoilsNonAxisymmetyric(115001, 2)  # ELM
 
     # coil = elm_ids  # + cc_ids  # + cs_ids
     # coil.plot()

@@ -89,6 +89,7 @@ class FrameSet(netCDF, FrameSetLoc):
             "volume",
         ],
     )
+    vtk: bool = True
 
     _available: ClassVar[list[str]] = [
         "link",

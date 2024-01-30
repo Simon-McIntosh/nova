@@ -27,7 +27,7 @@ def full_coil_name(identifier: str):
             position = dict(zip("UL", ["Upper", "Lower"]))[position]
             return f"{position} Vertical Stability Coil {index}"
         case "E", str(position), *index:
-            position = dict(zip("UML", ["Upper", "Middle", "Lower"]))[position]
+            position = dict(zip("UEL", ["Upper", "Middle", "Lower"]))[position]
             return f"{position} ELM Coil {index}"
         case "P", "F", str(index):
             return f"Poloidal Field Coil {index}"

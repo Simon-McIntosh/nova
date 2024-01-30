@@ -5,15 +5,13 @@ Created on Thu Jan 25 11:13:16 2024
 
 @author: mcintos
 """
-import jax
 import jax.numpy as jnp
 
 from jax import config
-import matplotlib.pyplot as plt
 
 import numpy as np
 
-# from nova.xarray import xarray
+from nova import xarray
 
 
 config.update("jax_debug_nans", True)
@@ -22,6 +20,13 @@ config.update("jax_debug_nans", True)
 x, dx = jnp.linspace(0, 12, 35, retstep=True)
 
 # def intergrate(current_density, delta_psi)
+
+
+def test_rad():
+    data = xarray.Dataset({"x": np.linspace(0, 3, 5), "y": np.linspace(0, 8, 5)})
+    print(data)
+    data.radius
+    print(data)
 
 
 #  @jax.jit
@@ -36,6 +41,7 @@ def sum_width(r, R):
 
 
 if __name__ == "__main__":
+    """
     grad = jax.grad(sum_width)
     r_vector = jnp.linspace(0.5, 6.0, 250)
     plt.plot(r_vector, [grad(r, 6.0) for r in r_vector])
@@ -48,3 +54,6 @@ if __name__ == "__main__":
         )
 
     plt.plot(r_vector, finite_grad)
+    """
+
+    test_rad()

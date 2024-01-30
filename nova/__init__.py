@@ -20,23 +20,25 @@ Public API in the main Nova namespace
 
 """
 
+__all__ = [
+    "xarray",
+]
+
 from importlib import metadata, import_module
 
+from .xarray import xarray
 
 try:
     __version__ = metadata.version(__package__ or __name__)
 except metadata.PackageNotFoundError:
     __version__ = "0.0.0"
+__all__.extend("__version__")
 
 submodules = [
     "imas",
 ]
-
-__all__ = [
-    "__version__",
-]
-
 __all__.extend(submodules)
+
 
 try:
     from numba import njit

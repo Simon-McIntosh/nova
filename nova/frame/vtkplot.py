@@ -5,13 +5,13 @@ import matplotlib
 import numpy as np
 import vedo
 
-from nova.graphics.plot import Properties
+from nova.graphics.plot import BasePlot, Properties
 import nova.frame.metamethod as metamethod
 from nova.frame.dataframe import DataFrame
 
 
 @dataclass
-class VtkPlot(metamethod.VtkPlot):
+class VtkPlot(metamethod.VtkPlot, BasePlot):
     """Methods for ploting 3D FrameSpace data."""
 
     name = "vtkplot"
@@ -31,16 +31,16 @@ class VtkPlot(metamethod.VtkPlot):
         if np.array(unset).any():
             self.frame.update_columns()
 
-    def __call__(self):
+    def __call__(self, index=slice(None), new=True, **kwargs):
         """Plot frame if not empty."""
         if not self.frame.empty:
-            return self.plot()
+            return self.plot(index, new=new, **kwargs)
 
-    def plot(self):
+    def plot(self, index=slice(None), **kwargs):
         """Plot vtk instances."""
         colors = matplotlib.rcParams["axes.prop_cycle"].by_key()["color"]
         self.frame.vtkgeo.generate_vtk()
-        index = self.frame.geotype("Geo", "vtk")
+        index = self.frame.geotype("Geo", "vtk") & self.get_index(index)
         color = {f"C{i}": c for i, c in enumerate(colors)}
         vtk = [
             vtk.c(color[Properties.get_facecolor(part)]).alpha(
@@ -49,4 +49,4 @@ class VtkPlot(metamethod.VtkPlot):
             for vtk, part in self.frame.loc[index, ["vtk", "part"]].values
         ]
         if len(vtk) > 0:
-            return vedo.show(*vtk, new=True)
+            return vedo.show(*vtk, **kwargs)

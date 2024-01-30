@@ -56,7 +56,7 @@ class GridCoord:
 class Gridgen(Plot):
     """Generate rectangular 2d grid."""
 
-    ngrid: int | None = field(default=None)
+    number: int | None = field(default=None)
     limit: np.ndarray | None = field(default=None)
     xcoord: list[float] | None = field(default=None, repr=False)
     zcoord: list[float] | None = field(default=None, repr=False)
@@ -74,15 +74,15 @@ class Gridgen(Plot):
         """Return grid coordinates."""
         if len(self.limit) == 2:  # grid coordinates
             xcoord, zcoord = self.limit
-            self.ngrid = len(xcoord) * len(zcoord)
+            self.number = len(xcoord) * len(zcoord)
             self.limit = [xcoord[0], xcoord[-1], zcoord[0], zcoord[-1]]
             return xcoord, zcoord
         if len(self.limit) == 4:  # grid limits
             xgrid = GridCoord(*self.limit[:2])
             zgrid = GridCoord(*self.limit[2:])
-            xgrid.num = xgrid.delta / np.sqrt(xgrid.delta * zgrid.delta / self.ngrid)
-            zgrid.num = self.ngrid / xgrid.num
-            self.ngrid = xgrid.num * zgrid.num
+            xgrid.num = xgrid.delta / np.sqrt(xgrid.delta * zgrid.delta / self.number)
+            zgrid.num = self.number / xgrid.num
+            self.number = xgrid.num * zgrid.num
             return xgrid(), zgrid()
         raise IndexError(f"len(limit) {len(self.limit)} not in [2, 4]")
 

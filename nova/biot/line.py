@@ -1,5 +1,5 @@
 """Biot-Savart calculation for line segments."""
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from functools import cached_property
 from typing import ClassVar
@@ -20,6 +20,13 @@ class Line(Matrix):
 
     axisymmetric: ClassVar[bool] = False
     name: ClassVar[str] = "line"  # element name
+
+    attrs: dict[str, str] = field(
+        default_factory=lambda: {
+            "dl": "dl",
+            "turnturn": "turnturn",
+        }
+    )
 
     @cached_property
     def phi(self):
@@ -43,15 +50,30 @@ class Line(Matrix):
             [self("source", f"z{i}") - self("target", "z") for i in range(1, 3)]
         )
 
-    @cached_property
-    def a2(self):
+    @property
+    def _a2(self):
         """Return stacked a2 coefficient."""
         return np.sqrt(self.u2**2 + self.v2**2)
 
     @cached_property
+    def a2(self):
+        """Return blended stacked a2 coefficient."""
+        r2 = self["dl"] ** 2 / 4
+        factor = 1e12
+        return np.where((a2 := self._a2) < r2, factor * r2 + a2 * (1 - factor), a2)
+
+    @cached_property
     def ri(self):
-        """Return stacked a2 coefficient."""
+        """Return stacked ri coefficient."""
         return np.sqrt(self.a2**2 + self.wi**2)
+
+    @property
+    def _Ax_hat(self):
+        return np.zeros((2,) + self.shape)
+
+    @property
+    def _Ay_hat(self):
+        return np.zeros((2,) + self.shape)
 
     @property
     def _Az_hat(self):

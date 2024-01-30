@@ -99,6 +99,7 @@ class Elements(Plot):
         """Return segmented polyline."""
         polyline = PolyLine(minimum_arc_nodes=3)
         for element_type, point_array in zip(self._type_array, self._point_array):
+            element_type = 1
             match element_type:
                 case 1:  # line
                     normal = point_array[..., 1] - point_array[..., 0]
@@ -156,7 +157,9 @@ class CoilsNonAxisymmetyric(Plot, CoilDatabase, Scenario):
                 name = coil_name(coil)
                 points[name] = []
                 for i, conductor in enumerate(coil.conductor):
-                    elements = Elements(elements=conductor.elements)
+                    elements = Elements(
+                        elements=conductor.elements,
+                    )
                     points[name].extend(elements.points)
                     section = Section(
                         elements._to_array(
@@ -174,7 +177,7 @@ class CoilsNonAxisymmetyric(Plot, CoilDatabase, Scenario):
                         cross_section=polygon,
                         name=name,
                         part=part_name(coil),
-                        delim="",
+                        delim="_",
                     )
                     if i > 0:
                         self.linkframe([coil_name(coil), name])

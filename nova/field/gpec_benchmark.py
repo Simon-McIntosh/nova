@@ -109,11 +109,43 @@ class Dataset(Plot2D, netCDF):
 if __name__ == "__main__":
     dataset = Dataset("EU")
 
-    dataset.plot()
+    # dataset.plot()
 
     # dataset.grid.plot()
 
     from nova.imas.coils_non_axisymmetric import CoilsNonAxisymmetyric
 
-    elm_ids = CoilsNonAxisymmetyric(115001, 2)
-    elm_ids.plot(axes=dataset.axes)
+    elm_ids = CoilsNonAxisymmetyric(
+        115001, 2, field_attrs=["Bx", "By", "Bz", "Ax", "Ay", "Az"]
+    )
+
+    resolve = True
+    if resolve:
+        elm_ids.grid.solve(5e3)
+        elm_ids._clear()
+        elm_ids.store()
+
+    elm_ids.sloc["Ic"] = 0
+    elm_ids.sloc["Ic"][8] = 1
+    elm_ids.sloc["Ic"][-1] = 1
+
+    elm_ids.grid.plot("ay", levels=31, nulls=False)
+    elm_ids.plot(axes=elm_ids.grid.axes)
+
+    import pyvista as pv
+    import vedo
+
+    points = np.stack(
+        [
+            elm_ids.grid.data.x2d,
+            np.zeros_like(elm_ids.grid.data.x2d),
+            elm_ids.grid.data.z2d,
+        ],
+        axis=-1,
+    ).reshape(-1, 3)
+
+    mesh = pv.PolyData(points).delaunay_2d()
+    contours = mesh.contour(isosurfaces=71, scalars=elm_ids.grid.ay.reshape(-1))
+
+    elm_ids.frame.vtkplot(["EU9B", "EL9B"])
+    vedo.Mesh(contours, c="black").show(new=False)

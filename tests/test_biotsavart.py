@@ -435,5 +435,34 @@ def test_line_singularity():
     assert coilset.point.bz[2] < coilset.point.bz[1]
 
 
+def test_arc_singularity():
+    segment_number = 301
+    theta, dtheta = np.linspace(0, np.pi, segment_number, retstep=True)
+    radius = 5.3
+    points = np.stack(
+        [radius * np.cos(theta), radius * np.sin(theta), np.zeros_like(theta)], axis=-1
+    )
+    coilset = CoilSet(field_attrs=["Bx", "By", "Bz"])
+    coilset.winding.insert(points, {"c": (0, 0, 0.25)}, Ic=1e6, minimum_arc_nodes=302)
+
+    number = 200
+    grid = np.stack(
+        [
+            np.linspace(-0.5, 0.5, number),
+            radius * np.ones(number),
+            np.zeros(number),
+        ],
+        axis=-1,
+    )
+    coilset.point.solve(grid)
+
+    coilset.point.set_axes("1d")
+    coilset.point.axes.plot(grid[:, 0], coilset.point.bz)
+    assert False
+
+
+test_arc_singularity()
+
+
 if __name__ == "__main__":
     pytest.main([__file__])

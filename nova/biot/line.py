@@ -6,7 +6,7 @@ from typing import ClassVar
 
 import numpy as np
 
-from nova.biot.matrix import Matrix, offset
+from nova.biot.matrix import Matrix
 
 
 @dataclass
@@ -46,7 +46,7 @@ class Line(Matrix):
         )
 
     @cached_property
-    @offset(factor=1e12)
+    # @offset(factor=1e12)
     def a2(self):
         """Return stacked a2 coefficient."""
         return np.sqrt(self.u2**2 + self.v2**2)
@@ -85,7 +85,7 @@ class Line(Matrix):
 
     def _intergrate(self, data):
         """Return intergral quantity."""
-        return self.mu_0 / (4 * np.pi) * (data[1] - data[0])
+        return 1 / (4 * np.pi) * (data[1] - data[0])
 
 
 if __name__ == "__main__":

@@ -119,19 +119,45 @@ if __name__ == "__main__":
         115001, 2, field_attrs=["Bx", "By", "Bz", "Ax", "Ay", "Az"]
     )
 
-    resolve = True
+    resolve = False
     if resolve:
         elm_ids.grid.solve(5e3, limit=dataset.grid.limit)
         elm_ids._clear()
         elm_ids.store()
 
-    elm_ids.sloc["Ic"] = 1
+    elm_ids.sloc["Ic"] = -1
     elm_ids.sloc["Ic"][8] = 1
     # elm_ids.sloc["Ic"][-1] = 1
 
-    elm_ids.grid.plot("ay", levels=31, nulls=False)
+    # elm_ids.grid.plot("bx", levels=31, nulls=False)
     elm_ids.plot(axes=elm_ids.grid.axes)
+    # elm_ids.frame.polyplot(axes=elm_ids.grid.axes, index=[8])
 
+    grid = elm_ids.grid
+    grid.axes.streamplot(grid.data.x.data, grid.data.z.data, grid.bx_.T, grid.bz_.T)
+
+    """
+    import scipy
+
+    psi = scipy.integrate.cumulative_simpson(grid.bx_, x=grid.data.x, axis=0, initial=0)
+    psi = scipy.integrate.cumulative_simpson(
+        psi + grid.bz_, x=grid.data.z, axis=1, initial=0
+    )
+    """
+    import scipy
+
+    def res(u):
+        rbf = scipy.interpolate.RectBivariateSpline(grid.data.x, grid.data.z, u)
+        u_xx = rbf.ev(grid.data.x2d, grid.data.z2d, dx=2)
+        u_zz = rbf.ev(grid.data.x2d, grid.data.z2d, dy=2)
+        return u_xx + u_zz - grid.ay_ + grid.ay_[0, 0]
+
+    xin = np.zeros_like(grid.ay_)
+    psi = scipy.optimize.newton_krylov(res, grid.ay_, iter=1000, verbose=True)
+
+    grid.axes.contour(grid.data.x.data, grid.data.z.data, psi.T)
+
+    """
     import pyvista as pv
     import vedo
 
@@ -145,7 +171,8 @@ if __name__ == "__main__":
     ).reshape(-1, 3)
 
     mesh = pv.PolyData(points).delaunay_2d()
-    contours = mesh.contour(isosurfaces=71, scalars=elm_ids.grid.bz.reshape(-1))
+    contours = mesh.contour(isosurfaces=71, scalars=elm_ids.grid.bx.reshape(-1))
 
-    elm_ids.frame.vtkplot()  # ["EU9B", "EL9B"])
+    elm_ids.frame.vtkplot(index=["EU9B", "EE9B", "EL9B"])
     vedo.Mesh(contours, c="black").show(new=False)
+    """

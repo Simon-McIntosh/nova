@@ -99,7 +99,6 @@ class Elements(Plot):
         """Return segmented polyline."""
         polyline = PolyLine(minimum_arc_nodes=3)
         for element_type, point_array in zip(self._type_array, self._point_array):
-            element_type = 1
             match element_type:
                 case 1:  # line
                     normal = point_array[..., 1] - point_array[..., 0]

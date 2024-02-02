@@ -390,7 +390,7 @@ if __name__ == "__main__":
 
     # extrapolate.plot_waveform()
 
-    extrapolate.time = 80
+    extrapolate.time = 0
     extrapolate.plot_2d("psi", mask="map")
     plt.tight_layout()
 

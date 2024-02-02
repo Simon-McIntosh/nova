@@ -6,7 +6,7 @@ from typing import ClassVar
 
 import numpy as np
 
-from nova.biot.matrix import Matrix, offset
+from nova.biot.matrix import Matrix
 
 
 @dataclass
@@ -46,7 +46,7 @@ class Line(Matrix):
         )
 
     @cached_property
-    @offset(factor=1e12)
+    # @offset(factor=1e12)
     def a2(self):
         """Return stacked a2 coefficient."""
         return np.sqrt(self.u2**2 + self.v2**2)

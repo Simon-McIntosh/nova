@@ -239,7 +239,7 @@ class Grid(BaseGrid):
         if len(self.data) == 0:
             return
         self.axes = axes
-        if nulls:
+        if nulls and hasattr(self, "psi"):
             super().plot(axes=axes)
         if isinstance(attr, str):
             attr = getattr(self, f"{attr}_")

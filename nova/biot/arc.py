@@ -9,13 +9,11 @@ from scipy.special import ellipj
 from nova.biot.constants import Constants
 from nova.biot.matrix import Matrix
 
-# from nova.geometry.rotate import to_vector
-
 
 def arctan2(x1, x2):
     """Return unwraped arctan2 operator."""
     phi = np.arctan2(x1, x2)
-    phi[phi < 0] += 2 * np.pi
+    phi[phi <= 0] += 2 * np.pi
     return phi
 
 
@@ -42,22 +40,6 @@ class Arc(Constants, Matrix):
         self.z = self("target", "z")
 
     @cached_property
-    def gamma(self):
-        """Return gamma coefficient."""
-        return self.zs - self.z
-        factor = 1e12
-        r2 = self["dl"] ** 2 / 4
-        gamma = self.zs - self.z
-        a2 = (self.zs - self.z) ** 2 + (self.rs - self.r) ** 2
-        return np.where(a2 < r2, gamma * (factor + (1 - factor) * a2 / r2), gamma)
-
-    # @property
-    # @offset(1e12)
-    # def a2(self):
-    #    """Return a**2 coefficient."""
-    #    return super().a2
-
-    @cached_property
     def phi(self):
         """Return global target toroidal angle."""
         return arctan2(self.target("y"), self.target("x"))
@@ -72,7 +54,7 @@ class Arc(Constants, Matrix):
         """Return system invariant angle alpha for start, end, and pi/2."""
         phi_s = np.stack(
             [
-                arctan2(self("source", "y1"), self("source", "x1")),
+                np.zeros(self.shape),
                 arctan2(self("source", "y2"), self("source", "x2")),
             ]
         )
@@ -223,7 +205,7 @@ class Arc(Constants, Matrix):
 
     def _intergrate(self, data):
         """Return intergral quantity."""
-        return self.mu_0 / (4 * np.pi) * (data[0] - data[1])
+        return 1 / (4 * np.pi) * (data[0] - data[1])
 
 
 if __name__ == "__main__":

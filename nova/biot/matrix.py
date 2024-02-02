@@ -87,7 +87,14 @@ class Matrix(GroupSet):
     def Avector(self):
         """Return global vector potential in cartesian frame."""
         if self.axisymmetric:
-            raise NotImplementedError
+            return np.stack(
+                [
+                    -self.Aphi * np.sin(self.phi),
+                    self.Aphi * np.cos(self.phi),
+                    np.zeros_like(self.phi),
+                ],
+                axis=-1,
+            )
         return self._vector("A")
 
     @cached_property
@@ -98,7 +105,7 @@ class Matrix(GroupSet):
                 [self.Br * np.cos(self.phi), self.Br * np.sin(self.phi), self.Bz],
                 axis=-1,
             )
-        return self._vector("B")
+        return self.mu_0 * self._vector("B")
 
     @property
     def Ax(self):

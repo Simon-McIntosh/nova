@@ -85,7 +85,7 @@ class Line(Matrix):
 
     def _intergrate(self, data):
         """Return intergral quantity."""
-        return self.mu_0 / (4 * np.pi) * (data[1] - data[0])
+        return 1 / (4 * np.pi) * (data[1] - data[0])
 
 
 if __name__ == "__main__":

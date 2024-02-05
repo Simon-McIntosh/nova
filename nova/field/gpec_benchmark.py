@@ -121,12 +121,18 @@ if __name__ == "__main__":
 
     resolve = False
     if resolve:
-        elm_ids.grid.solve(5e3, limit=dataset.grid.limit)
+        elm_ids.grid.solve(5e3, [2.5, 6, -4, 4])  # limit=dataset.grid.limit
         elm_ids._clear()
         elm_ids.store()
 
-    elm_ids.sloc["Ic"] = -1
-    elm_ids.sloc["Ic"][8] = 1
+    from nova.frame.coilset import CoilSet
+
+    elm_ids = CoilSet(field_attrs=["Bx", "By", "Bz", "Ax", "Ay", "Az", "Psi"])
+    elm_ids.coil.insert(8, 0, 0.5, 0.5)
+    elm_ids.grid.solve(5e3, [2.5, 12, -4, 4])
+
+    elm_ids.sloc["Ic"] = 1e3
+    # elm_ids.sloc["Ic"][8] = 1
     # elm_ids.sloc["Ic"][-1] = 1
 
     # elm_ids.grid.plot("bx", levels=31, nulls=False)
@@ -146,16 +152,35 @@ if __name__ == "__main__":
     """
     import scipy
 
-    def res(u):
+    A = np.stack([grid.ax_, grid.ay_, grid.az_], axis=-1)
+    B = np.stack([grid.bx_, grid.by_, grid.bz_], axis=-1)
+
+    def grad(u):
         rbf = scipy.interpolate.RectBivariateSpline(grid.data.x, grid.data.z, u)
-        u_xx = rbf.ev(grid.data.x2d, grid.data.z2d, dx=2)
-        u_zz = rbf.ev(grid.data.x2d, grid.data.z2d, dy=2)
-        return u_xx + u_zz - grid.ay_ + grid.ay_[0, 0]
+        ux = rbf.ev(grid.data.x2d, grid.data.z2d, dx=1)
+        uz = rbf.ev(grid.data.x2d, grid.data.z2d, dy=1)
+        return np.stack([ux, np.zeros_like(ux), uz], axis=-1)
 
-    xin = np.zeros_like(grid.ay_)
-    psi = scipy.optimize.newton_krylov(res, grid.ay_, iter=1000, verbose=True)
+    def res(alpha):
+        dalpha = grad(alpha)
 
-    grid.axes.contour(grid.data.x.data, grid.data.z.data, psi.T)
+        return np.linalg.norm(np.cross(dalpha, A / alpha[..., np.newaxis]) - B, axis=-1)
+
+    _u = grid.ay_
+    alpha = scipy.optimize.newton_krylov(res, _u, iter=20, verbose=True)
+
+    print(np.linalg.norm(res(alpha)))
+
+    dalpha = grad(alpha)
+    dbeta = A / alpha[..., np.newaxis]
+
+    assert np.allclose(np.cross(dalpha, dbeta), B, atol=1e-3)
+    assert np.allclose(alpha[..., np.newaxis] * dbeta, A, atol=1e-3)
+    assert np.allclose(np.einsum("ijk,ijk->ij", dbeta, A), 0, atol=1e-3)
+
+    grid.axes.contour(grid.data.x.data, grid.data.z.data, alpha.T, levels=51)
+
+    grid.plot("psi")
 
     """
     import pyvista as pv

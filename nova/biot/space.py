@@ -1,4 +1,5 @@
 """Coordinate system transform methods for BiotFrame."""
+
 from dataclasses import dataclass, field
 from functools import cached_property
 
@@ -211,7 +212,7 @@ class Space(metamethod.Space, Plot3D):
         """Return point array (n, 3) mapped to global coordinate system."""
         return self._rotate_to_global(points) + self.origin
 
-    def _segment_path(self, index, local=False):
+    def _segment_path(self, index, local=False, resolution=0):
         """Return segment path sampled from local segment endpoints."""
         _start_point = self._start_point[index]
         _end_point = self._end_point[index]
@@ -220,8 +221,10 @@ class Space(metamethod.Space, Plot3D):
                 end_theta = np.arctan2(_end_point[1], _end_point[0])
                 if end_theta <= 0:
                     end_theta += 2 * np.pi
+                radius = _start_point[0]
                 point_number = np.max(
                     [
+                        int(resolution * radius * end_theta),
                         self.quadrant_segments,
                         int(self.quadrant_segments * end_theta * 2 / np.pi),
                     ]
@@ -232,7 +235,10 @@ class Space(metamethod.Space, Plot3D):
                     * np.c_[np.cos(theta), np.sin(theta), np.zeros_like(theta)]
                 )
             case "line":
-                points = np.c_[_start_point, _end_point].T
+                line_length = np.linalg.norm(_end_point - _start_point)
+                point_number = np.max([int(resolution * line_length), 2])
+                points = np.linspace(_start_point, _end_point, point_number)
+                # points = np.c_[_start_point, _end_point].T
         if local:
             return points
         points = np.einsum("ij,kj->ik", points, self.coordinate_axes[index])
@@ -242,11 +248,17 @@ class Space(metamethod.Space, Plot3D):
     @cached_property
     def path(self):
         """Return quadrant segment resolved path."""
+        return self.centerline(resolution=0)
+
+    def centerline(self, resolution: int):
         if (segment_number := self.frame.shape[0]) == 1:
-            return self._segment_path(0)
+            return self._segment_path(0, local=False, resolution=resolution)
         return np.r_[
             np.vstack(
-                [self._segment_path(index)[:-1] for index in range(segment_number)]
+                [
+                    self._segment_path(index, local=False, resolution=resolution)[:-1]
+                    for index in range(segment_number)
+                ]
             ),
             self.end_point[-1:],
         ]

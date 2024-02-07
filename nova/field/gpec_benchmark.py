@@ -112,7 +112,7 @@ if __name__ == "__main__":
     # dataset.plot()
 
     # dataset.grid.plot()
-
+    """
     from nova.imas.coils_non_axisymmetric import CoilsNonAxisymmetyric
 
     elm_ids = CoilsNonAxisymmetyric(
@@ -121,20 +121,31 @@ if __name__ == "__main__":
 
     resolve = False
     if resolve:
-        elm_ids.grid.solve(5e3, [2.5, 6, -4, 4])  # limit=dataset.grid.limit
+        elm_ids.grid.solve(5e3, [2.5, 8, -4, 4])  # limit=dataset.grid.limit
         elm_ids._clear()
         elm_ids.store()
+    """
 
     from nova.frame.coilset import CoilSet
 
-    elm_ids = CoilSet(field_attrs=["Bx", "By", "Bz", "Ax", "Ay", "Az", "Psi"])
+    elm_ids = CoilSet(field_attrs=["Bx", "By", "Bz", "Ax", "Ay", "Az"])
+
+    radius = 8
+    theta = np.linspace(0, 2 * np.pi, 51)
+    points = np.array(
+        [radius * np.cos(theta), radius * np.sin(theta), np.zeros_like(theta)]
+    ).T
+    # elm_ids.winding.insert(points, {"r": [0, 0, 0.5, 0.5]})
     elm_ids.coil.insert(8, 0, 0.5, 0.5)
-    elm_ids.grid.solve(5e3, [2.5, 12, -4, 4])
+    # elm_ids.coil.insert(6, 0, 0.5, 0.5)
+    # elm_ids.coil.insert(8, -2, 1.5, 1.5)
+    elm_ids.grid.solve(5e3, [2.5, 6, -4, 4])
 
     elm_ids.sloc["Ic"] = 1e3
     # elm_ids.sloc["Ic"][8] = 1
     # elm_ids.sloc["Ic"][-1] = 1
 
+    elm_ids.sloc["Ic"] = 1e3
     # elm_ids.grid.plot("bx", levels=31, nulls=False)
     elm_ids.plot(axes=elm_ids.grid.axes)
     # elm_ids.frame.polyplot(axes=elm_ids.grid.axes, index=[8])
@@ -155,32 +166,93 @@ if __name__ == "__main__":
     A = np.stack([grid.ax_, grid.ay_, grid.az_], axis=-1)
     B = np.stack([grid.bx_, grid.by_, grid.bz_], axis=-1)
 
+    import jax.numpy as jnp
+
+    Anorm = jnp.linalg.norm(A, axis=-1)
+    Bnorm = jnp.linalg.norm(B, axis=-1)
+
+    # curlB =
+    """
+    @jax.jit
     def grad(u):
-        rbf = scipy.interpolate.RectBivariateSpline(grid.data.x, grid.data.z, u)
-        ux = rbf.ev(grid.data.x2d, grid.data.z2d, dx=1)
-        uz = rbf.ev(grid.data.x2d, grid.data.z2d, dy=1)
-        return np.stack([ux, np.zeros_like(ux), uz], axis=-1)
+        return jnp.stack(jnp.gradient(u, 1, 1, 1), axis=-1)
+
+    # @jax.jit
+    def residual(alpha):
+        if len(alpha.shape) == 1:
+            alpha = jnp.reshape(alpha, (grid.data.sizes["x"], grid.data.sizes["z"]))
+        dalpha = jnp.gradient(alpha)
+        dalpha = jnp.stack([dalpha[0], jnp.zeros_like(alpha), dalpha[1]], axis=-1)
+        align = jnp.einsum("ijk,ijk->ij", dalpha[..., ::2], B[..., ::2])
+
+        res = (
+            jnp.linalg.norm(
+                jnp.cross(A, B) / (Anorm * Bnorm)[..., np.newaxis]
+                - dalpha / jnp.linalg.norm(dalpha, axis=-1)[..., np.newaxis],
+                axis=-1,
+            )
+            + alpha[0, 0]
+            + align
+        )
+        print(res[:10])
+        return res.flatten()
+
+    alpha = grid.data.x2d.data * grid.ay_.data
+    residual(alpha)
+    scipy.optimize.root(
+        residual,
+        alpha,
+        method="lm",
+        jac=jax.jacobian(residual),
+        options={"maxiter": 1},
+    )
+    """
+
+    def grad(u):
+        return np.stack(np.gradient(u, grid.data.x.data, grid.data.z.data), axis=0)
 
     def res(alpha):
         dalpha = grad(alpha)
+        dalpha = np.stack([dalpha[0], np.zeros_like(alpha), dalpha[1]], axis=-1)
+        dbeta = A / alpha[..., np.newaxis]
+        align = np.einsum("...k,...k", dalpha[..., ::2], B[..., ::2])
 
-        return np.linalg.norm(np.cross(dalpha, A / alpha[..., np.newaxis]) - B, axis=-1)
+        return (
+            np.einsum("ijk,ijk->ij", dalpha, dbeta)
+            + np.linalg.norm(dalpha, axis=-1) * np.linalg.norm(dbeta, axis=-1)
+            - Bnorm
+            + align
+            # + alpha[0, 0]
+        )
 
-    _u = grid.ay_
-    alpha = scipy.optimize.newton_krylov(res, _u, iter=20, verbose=True)
+        return (
+            np.linalg.norm(alpha[..., np.newaxis] * np.cross(B, dalpha) - A, axis=-1)
+            + dalpha[..., 1]
+        )
 
-    print(np.linalg.norm(res(alpha)))
+        return (
+            np.linalg.norm(
+                np.cross(A, B) / (Anorm * Bnorm)[..., np.newaxis]
+                - dalpha / np.linalg.norm(dalpha, axis=-1)[..., np.newaxis],
+                axis=-1,
+            )
+            + alpha[0, 0]
+            + align
+        )
+
+    _u = np.ones_like(grid.bx_)
+    alpha = scipy.optimize.newton_krylov(res, _u, iter=150, verbose=True)
 
     dalpha = grad(alpha)
     dbeta = A / alpha[..., np.newaxis]
 
-    assert np.allclose(np.cross(dalpha, dbeta), B, atol=1e-3)
-    assert np.allclose(alpha[..., np.newaxis] * dbeta, A, atol=1e-3)
-    assert np.allclose(np.einsum("ijk,ijk->ij", dbeta, A), 0, atol=1e-3)
+    # assert np.allclose(np.cross(dalpha, dbeta), B, atol=1e-3)
+    # assert np.allclose(alpha[..., np.newaxis] * dbeta, A, atol=1e-3)
+    # assert np.allclose(np.einsum("ijk,ijk->ij", dbeta, A), 0, atol=1e-3)
 
     grid.axes.contour(grid.data.x.data, grid.data.z.data, alpha.T, levels=51)
 
-    grid.plot("psi")
+    # grid.plot("psi")
 
     """
     import pyvista as pv

@@ -135,12 +135,12 @@ class Arc(Constants, Matrix):
         """Return r a ck2 coefficent product."""
         return self.r * self.a * self.ck2
 
-    @property
+    @cached_property
     def _Ar_hat(self):
         """Return stacked local radial vector potential intergration coefficents."""
         return self.a / self.r * self.ellipj["dn"]
 
-    @property
+    @cached_property
     def _Aphi_hat(self):
         """Return stacked local toroidal vector potential intergration coefficents."""
         Aphi_hat = (

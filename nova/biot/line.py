@@ -46,7 +46,6 @@ class Line(Matrix):
         )
 
     @cached_property
-    # @offset(factor=1e12)
     def a2(self):
         """Return stacked a2 coefficient."""
         return np.sqrt(self.u2**2 + self.v2**2)

@@ -1,4 +1,5 @@
 """Manage 3D coil windings."""
+
 from dataclasses import dataclass, field
 from typing import ClassVar
 

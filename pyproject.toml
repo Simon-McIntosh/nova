@@ -66,6 +66,7 @@ async-property = {version = "^0.2.2", optional = true}
 nest-asyncio = {version = "^1.5.8", optional = true}
 packaging = "^23.2"
 h5py = "^3.10.0"
+jaxopt = "^0.8.3"
 
 [tool.poetry.group.dev.dependencies]
 asv = ">=0.5.1"

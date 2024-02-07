@@ -1,5 +1,6 @@
 """Biot-Savart calculation for complete circular filaments."""
 from dataclasses import dataclass, field
+from functools import cached_property
 from typing import ClassVar
 
 import numpy as np
@@ -119,6 +120,7 @@ class Circle(Constants, Matrix):
         }
     )
 
+    axisymmetric: ClassVar[bool] = True
     name: ClassVar[str] = "circle"  # element name
 
     def __post_init__(self):
@@ -128,17 +130,17 @@ class Circle(Constants, Matrix):
         for attr in ["rs", "zs", "r", "z"]:
             setattr(self, attr, self.data[attr])
 
-    @property
+    @cached_property
     def Aphi(self):
         """Return Aphi array."""
         return 1 / (2 * np.pi) * self.a / self.r * ((1 - self.k2 / 2) * self.K - self.E)
 
-    @property
+    @cached_property
     def Psi(self):
         """Return Psi array."""
         return 2 * np.pi * self.mu_0 * self.r * self.Aphi
 
-    @property
+    @cached_property
     def Br(self):
         """Return radial field array."""
         return (
@@ -149,7 +151,7 @@ class Circle(Constants, Matrix):
             / (self.a * self.r)
         )
 
-    @property
+    @cached_property
     def Bz(self):
         """Return vertical field array."""
         return (

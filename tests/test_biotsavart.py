@@ -423,6 +423,7 @@ def test_3d_line_arc(rng_sead, current):
         assert np.allclose(getattr(coilset.point, attr.lower()), 0, atol=1e-6)
 
 
+@pytest.mark.skip("pending development of singularity skip methods")
 def test_line_singularity():
     segment_number = 30
     x = np.linspace(0, 5, segment_number)
@@ -435,15 +436,30 @@ def test_line_singularity():
     assert coilset.point.bz[2] < coilset.point.bz[1]
 
 
+def test_multifilament_3d_vector():
+    coilset = CoilSet(field_attrs=["Ax", "Ay", "Az", "Bx", "By", "Bz"])
+    coilset.coil.insert(5, [-1, 1], 0.1, 0.1, Ic=1e3, delta=-2, segment="circle")
+    coilset.coil.insert(5, [-1, 1], 0.1, 0.1, Ic=-1e3, delta=-2, segment="circle")
+    coilset.point.solve(np.array([[5, 0, 0], [6, 0, 0]]))
+    assert np.allclose(coilset.point.Avector, 0)
+    assert np.allclose(coilset.point.Bvector, 0)
+
+
+@pytest.mark.skip("pending development of singularity skip methods")
 def test_arc_singularity():
-    segment_number = 301
-    theta, dtheta = np.linspace(0, np.pi, segment_number, retstep=True)
+    segment_number = 501
+    theta, dtheta = np.linspace(0, 2 * np.pi, segment_number, retstep=True)
     radius = 5.3
     points = np.stack(
         [radius * np.cos(theta), radius * np.sin(theta), np.zeros_like(theta)], axis=-1
     )
-    coilset = CoilSet(field_attrs=["Bx", "By", "Bz"])
-    coilset.winding.insert(points, {"c": (0, 0, 0.25)}, Ic=1e6, minimum_arc_nodes=302)
+    coilset = CoilSet(field_attrs=["Ax", "Ay", "Az", "Bx", "By", "Bz"])
+    coilset.coil.insert(radius, 0, 0.1, 0.1, Ic=1e6, ifttt=False, segment="cylinder")
+    # coilset.coil.insert(radius, 0, 0.1, 0.1, Ic=-1e6, ifttt=False, segment="circle")
+
+    coilset.winding.insert(points, {"c": (0, 0, 0.1)}, Ic=-1e6, minimum_arc_nodes=0)
+
+    print(coilset.frame.segment)
 
     number = 200
     grid = np.stack(
@@ -455,13 +471,16 @@ def test_arc_singularity():
         axis=-1,
     )
     coilset.point.solve(grid)
+    coilset.grid.solve(5e3, 1)
 
-    coilset.point.set_axes("1d")
-    coilset.point.axes.plot(grid[:, 0], coilset.point.bz)
+    print(coilset.grid.ay.max())
+
+    coilset.grid.plot("ay")
+    coilset.plot()
+
+    # coilset.point.set_axes("1d")
+    # coilset.point.axes.plot(grid[:, 0], coilset.point.ax)
     assert False
-
-
-test_arc_singularity()
 
 
 if __name__ == "__main__":

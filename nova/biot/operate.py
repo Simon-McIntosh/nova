@@ -239,6 +239,16 @@ class Operate(Data):
         self.check_source(attr)
         return self.array[attr]
 
+    @property
+    def Avector(self):
+        """Return magnetic vector potential."""
+        return np.stack([self.ax, self.ay, self.az], axis=-1)
+
+    @property
+    def Bvector(self):
+        """Return magnetic field vector."""
+        return np.stack([self.bx, self.by, self.bz], axis=-1)
+
     @cached_property
     def _source_version(self) -> list[str]:
         return [

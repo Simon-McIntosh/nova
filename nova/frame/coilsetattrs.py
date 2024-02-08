@@ -11,11 +11,14 @@ class CoilSetAttrs(ABC, FrameSetLoc):
     """CoilSetAttrs baseclass."""
 
     delta: float = -1
+    ifttt: bool = True
     name: str | None = None
     _attrs: dict = field(init=False, default_factory=dict, repr=False)
     default: dict = field(init=False, default_factory=lambda: {})
     link: bool = field(init=False, default=False)
-    attributes: list[str] = field(init=False, default_factory=lambda: ["delta"])
+    attributes: list[str] = field(
+        init=False, default_factory=lambda: ["delta", "ifttt"]
+    )
 
     @abstractmethod
     def insert(self, *args, required=None, iloc=None, **additional):
@@ -40,10 +43,15 @@ class CoilSetAttrs(ABC, FrameSetLoc):
 
         """
 
+    @property
+    def conditional_attributes(self):
+        """Return conditional attributes flag."""
+        return self.attrs.get("ifttt", True)
+
     @abstractmethod
     def set_conditional_attributes(self):
         """
-        Set conditional attributes.
+        Set conditional attributes. Enable with ifttt (if this then that) boolean flag.
 
         Example
         -------
@@ -76,7 +84,8 @@ class CoilSetAttrs(ABC, FrameSetLoc):
         self._attrs = self.default | attrs
         self.update_attrs()
         self.update_link()
-        self.set_conditional_attributes()
+        if self.conditional_attributes:
+            self.set_conditional_attributes()
 
     def update_attrs(self):
         """Update missing attrs with instance values."""
@@ -102,7 +111,15 @@ class GridAttrs(CoilSetAttrs):
     gridattrs: dict = field(init=False, default_factory=lambda: {})
     attributes: list[str] = field(
         init=False,
-        default_factory=lambda: ["trim", "fill", "delta", "turn", "section", "tile"],
+        default_factory=lambda: [
+            "trim",
+            "fill",
+            "delta",
+            "turn",
+            "section",
+            "tile",
+            "ifttt",
+        ],
     )
 
     @property
@@ -113,7 +130,8 @@ class GridAttrs(CoilSetAttrs):
     @attrs.setter
     def attrs(self, attrs):
         CoilSetAttrs.attrs.fset(self, attrs)
-        self.set_conditional_attributes()
+        if self.conditional_attributes:
+            self.set_conditional_attributes()
         self.gridattrs = {attr: self._attrs.pop(attr) for attr in self.gridattrs}
 
     @property

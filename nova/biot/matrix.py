@@ -91,7 +91,7 @@ class Matrix(GroupSet):
                 [
                     -self.Aphi * np.sin(self.phi),
                     self.Aphi * np.cos(self.phi),
-                    np.zeros_like(self.phi),
+                    np.zeros_like(self.Aphi),
                 ],
                 axis=-1,
             )

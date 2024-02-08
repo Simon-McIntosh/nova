@@ -163,10 +163,11 @@ class MetaFrame(MetaSet):
             "delim": "",
             "offset": 0,
             "append": False,
+            "ifttt": True,
         },
     )
     tag: list[str] = field(
-        default_factory=lambda: ["name", "label", "delim", "offset", "append"]
+        default_factory=lambda: ["name", "label", "delim", "offset", "append", "ifttt"]
     )
 
     def validate(self):

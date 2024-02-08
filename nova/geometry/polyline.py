@@ -433,7 +433,7 @@ class PolyLine(Plot):
 
     def append(self, points, normal=None):
         """Append points to segment list."""
-        if len(points) >= self.minimum_arc_nodes:
+        if len(points) >= self.minimum_arc_nodes and self.minimum_arc_nodes != 0:
             self.segments.append(
                 Arc(points, eps=self.arc_eps, quadrant_segments=self.quadrant_segments)
             )
@@ -447,7 +447,10 @@ class PolyLine(Plot):
         start = 0
         self.segments = []
         line_normal = Frenet(self.points).normal
-        while start <= point_number - self.minimum_arc_nodes:
+        while (
+            start <= point_number - self.minimum_arc_nodes
+            and self.minimum_arc_nodes != 0
+        ):
             number = self.fit_arc(self.points[start:])
             self.append(
                 self.points[start : start + number],

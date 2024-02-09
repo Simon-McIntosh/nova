@@ -1,4 +1,5 @@
 """Defeature vtk geometries extracted from ansys .rst files."""
+
 from dataclasses import dataclass
 from typing import Union
 

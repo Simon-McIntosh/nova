@@ -1,4 +1,5 @@
 """Generic Sultan DataClass methods."""
+
 import numpy as np
 
 

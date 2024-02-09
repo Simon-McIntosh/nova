@@ -1,4 +1,5 @@
 """Manage single instance polygon data."""
+
 from dataclasses import dataclass, field
 from typing import Union
 

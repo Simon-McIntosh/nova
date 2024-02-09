@@ -1,4 +1,5 @@
 """Perform post-processing analysis on Fourier perterbed TFC dataset."""
+
 from dataclasses import dataclass, field
 from typing import ClassVar
 

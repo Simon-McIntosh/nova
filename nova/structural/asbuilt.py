@@ -1,4 +1,5 @@
 """Manage IO as-built data."""
+
 from dataclasses import dataclass, field
 import os
 

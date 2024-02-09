@@ -1,4 +1,5 @@
 """Manage deferred import of biot methods."""
+
 __all__ = [
     "Field",
     "Force",

@@ -1,4 +1,5 @@
 """Postprocess Sultan test data."""
+
 from dataclasses import dataclass, field
 from typing import Optional
 from types import SimpleNamespace

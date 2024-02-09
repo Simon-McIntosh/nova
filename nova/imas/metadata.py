@@ -1,4 +1,5 @@
 """Update ids metadata."""
+
 from abc import ABC
 from dataclasses import dataclass, fields
 from datetime import datetime

@@ -1,4 +1,5 @@
 """Perform post-processing analysis on Fourier perterbed TFC dataset."""
+
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from pathlib import Path

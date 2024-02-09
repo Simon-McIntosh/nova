@@ -1,4 +1,5 @@
 """Grid methods."""
+
 from dataclasses import dataclass, field
 from typing import Union
 
@@ -277,9 +278,9 @@ class PolyGrid(PolyCell, Plot):
         polys = [
             PolyFrame(
                 polytrim,
-                metadata=poly.metadata
-                if poly.poly.within(buffer)
-                else {"name": "polygon"},
+                metadata=(
+                    poly.metadata if poly.poly.within(buffer) else {"name": "polygon"}
+                ),
             )
             for poly in polys
             if (polytrim := poly.poly.intersection(buffer))

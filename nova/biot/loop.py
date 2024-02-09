@@ -1,4 +1,5 @@
 """Build interaction matrix toroidal loops."""
+
 from dataclasses import dataclass
 
 from nova.biot.operate import Operate

@@ -1,4 +1,5 @@
 """Manage frame factroy methods."""
+
 from dataclasses import dataclass
 
 from nova.frame import Coil, Ferritic, FirstWall, Shell, Turn, Winding

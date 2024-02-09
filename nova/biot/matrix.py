@@ -1,4 +1,5 @@
 """Biot-Savart calculation base class."""
+
 from dataclasses import dataclass, field
 from functools import cached_property, wraps
 from importlib import import_module

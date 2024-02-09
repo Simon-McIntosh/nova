@@ -1,4 +1,5 @@
 """Methods for ploting FrameSpace data."""
+
 from dataclasses import dataclass, field
 from collections import Counter
 import colorsys

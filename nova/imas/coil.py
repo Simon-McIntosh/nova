@@ -1,4 +1,5 @@
 """Manage common coil data access methods."""
+
 from nova.imas.database import ImasIds
 
 

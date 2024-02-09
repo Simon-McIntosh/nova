@@ -1,4 +1,5 @@
 """Manage fast access dataframe attributes."""
+
 import numpy as np
 import pandas
 

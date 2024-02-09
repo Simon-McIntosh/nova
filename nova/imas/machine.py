@@ -1,4 +1,5 @@
 """Manage access to IMAS machine data."""
+
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
@@ -1115,10 +1116,12 @@ class Geometry:
     def geometry_attrs(self) -> dict:
         """Return geometry attributes."""
         return {
-            f"{attr}_md": value
-            if isinstance(value := getattr(self, attr), (bool, np.integer))
-            or "ids" not in value
-            else Database(ids=value["ids"]).ids_hash
+            f"{attr}_md": (
+                value
+                if isinstance(value := getattr(self, attr), (bool, np.integer))
+                or "ids" not in value
+                else Database(ids=value["ids"]).ids_hash
+            )
             for attr in self.geometry
         }
 

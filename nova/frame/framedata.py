@@ -1,4 +1,5 @@
 """Manage file data access for frame and biot instances."""
+
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 

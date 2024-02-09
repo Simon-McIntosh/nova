@@ -1,4 +1,5 @@
 """Manage strike point extraction."""
+
 from dataclasses import dataclass, field
 
 import numpy as np

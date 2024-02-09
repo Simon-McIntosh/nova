@@ -1,4 +1,5 @@
 """Manage user generated data."""
+
 import click
 import shutil
 

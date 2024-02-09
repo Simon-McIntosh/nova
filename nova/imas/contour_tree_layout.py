@@ -1,4 +1,5 @@
 """Develop layout for contour_tree within equilibrium ids."""
+
 from pprint import pprint
 
 tree: dict[str, dict] = {

@@ -1,4 +1,5 @@
 """Build windowed placement annimation."""
+
 from dataclasses import dataclass, field
 from typing import ClassVar
 

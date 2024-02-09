@@ -1,4 +1,5 @@
 """Manage unstructured kd-tree."""
+
 from dataclasses import dataclass
 
 import numpy as np

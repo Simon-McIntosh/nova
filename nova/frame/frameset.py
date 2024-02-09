@@ -1,4 +1,5 @@
 """Extend pandas.DataFrame to manage coil and subcoil data."""
+
 from dataclasses import dataclass, field
 from functools import cached_property
 from importlib import import_module

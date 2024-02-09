@@ -1,4 +1,5 @@
 """GGenerate quatrant plasma profile parameters."""
+
 from dataclasses import dataclass
 from functools import cached_property
 

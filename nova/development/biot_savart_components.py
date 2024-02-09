@@ -91,10 +91,7 @@ class Rectangle(Vectors):
             / 6
             * np.arcsinh(self.b2(alpha))
             * np.sin(2 * alpha)
-            * (
-                2 * self.r**2 * np.sin(2 * alpha) ** 2
-                + 3 * (self.rs**2 - self.r**2)
-            )
+            * (2 * self.r**2 * np.sin(2 * alpha) ** 2 + 3 * (self.rs**2 - self.r**2))
             - 1
             / 4
             * self.gamma

@@ -1,4 +1,5 @@
 """Biot-Savart calculation for complete circular cylinders."""
+
 from dataclasses import dataclass
 from functools import cached_property
 from typing import ClassVar
@@ -32,9 +33,7 @@ class CylinderConstants(Constants):
     @cached_property
     def v(self):
         """Return v coefficient."""
-        return 1 + self.k2 * (self.gamma**2 - self.b * self.r) / (
-            2 * self.r * self.rs
-        )
+        return 1 + self.k2 * (self.gamma**2 - self.b * self.r) / (2 * self.r * self.rs)
 
     def B2(self, phi):
         """Return B2 coefficient."""
@@ -80,10 +79,7 @@ class CylinderConstants(Constants):
             / 6
             * np.arcsinh(self.beta2(phi))
             * np.sin(2 * alpha)
-            * (
-                2 * self.r**2 * np.sin(2 * alpha) ** 2
-                + 3 * (self.rs**2 - self.r**2)
-            )
+            * (2 * self.r**2 * np.sin(2 * alpha) ** 2 + 3 * (self.rs**2 - self.r**2))
             - 1
             / 4
             * self.gamma

@@ -1,4 +1,5 @@
 """Impement rdp-like decimator for mixed linear / arc polylines."""
+
 import abc
 from dataclasses import dataclass, field
 from functools import cached_property

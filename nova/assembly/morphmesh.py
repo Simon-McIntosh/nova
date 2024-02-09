@@ -1,4 +1,5 @@
 """Apply RBF morphing to ITER coilset."""
+
 from dataclasses import dataclass
 import os
 from typing import Union

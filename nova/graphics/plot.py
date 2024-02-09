@@ -1,4 +1,5 @@
 """Methods for ploting FrameSpace data."""
+
 from __future__ import annotations
 from contextlib import contextmanager
 from dataclasses import dataclass, field

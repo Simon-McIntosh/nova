@@ -1,4 +1,5 @@
 """Benchmark error field calculation against GPEC code."""
+
 from dataclasses import dataclass
 from functools import cached_property
 

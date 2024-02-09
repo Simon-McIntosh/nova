@@ -1,4 +1,5 @@
 """Manage access to dynamic coil data data."""
+
 from dataclasses import dataclass, field
 
 from nova.graphics.plot import Plot

@@ -1,4 +1,5 @@
 """Manage access to remote data."""
+
 import os
 from dataclasses import dataclass, field
 from warnings import warn

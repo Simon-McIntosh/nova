@@ -1,4 +1,5 @@
 """Manage biot calculation for wall contours."""
+
 from dataclasses import dataclass, field
 
 import numpy as np

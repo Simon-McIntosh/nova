@@ -1,4 +1,5 @@
 """Manage diagnostic name mappings between IMAS and CODAC UDA."""
+
 from dataclasses import dataclass, field
 from functools import cached_property
 import re

@@ -1,4 +1,5 @@
 """Manage singluar value decomposition."""
+
 from dataclasses import dataclass, field
 
 import numpy as np

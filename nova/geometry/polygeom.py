@@ -1,4 +1,5 @@
 """Manage PolyFrame geometrical data."""
+
 from collections import namedtuple
 from dataclasses import dataclass
 from functools import cached_property
@@ -98,13 +99,7 @@ class PolyGeom(Polygon):
         if self.section == "rectangle":
             return self.length * self.thickness  # rectangle
         if self.section == "skin":  # thickness = 1-r/R
-            return (
-                np.pi
-                * self.length**2
-                * self.thickness
-                / 4
-                * (2 - self.thickness**2)
-            )
+            return np.pi * self.length**2 * self.thickness / 4 * (2 - self.thickness**2)
         if self.section == "hexagon":
             return 3 / 2 * self.height**2 / np.sqrt(3)
         return self.poly.area

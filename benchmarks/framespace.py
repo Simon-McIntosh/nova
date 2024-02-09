@@ -1,4 +1,5 @@
 """Benchmark framespace."""
+
 import os
 import timeit
 

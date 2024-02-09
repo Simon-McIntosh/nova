@@ -1,4 +1,5 @@
 """Generate polygons for CoilFrame instances."""
+
 from dataclasses import dataclass
 
 import shapely

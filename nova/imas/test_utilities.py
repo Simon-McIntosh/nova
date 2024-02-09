@@ -1,4 +1,5 @@
 """Manage test utility funcitons."""
+
 import pytest
 
 from nova.imas.database import Database

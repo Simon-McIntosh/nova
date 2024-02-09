@@ -39,9 +39,7 @@ def test_array_separatrix():
     coilset = CoilSet(dplasma=0.1)
     coilset.firstwall.insert([[1, 2, 2, 1, 1], [1, 1, 2, 2, 1]])
     coilset.plasma.separatrix = np.array([[1, 2, 1.5, 1], [0, 0, 2, 0]]).T
-    assert np.isclose(
-        coilset.subframe.area[coilset.subframe.ionize].sum(), 0.5**2, 0.1
-    )
+    assert np.isclose(coilset.subframe.area[coilset.subframe.ionize].sum(), 0.5**2, 0.1)
 
 
 def test_separatrix_nturn():

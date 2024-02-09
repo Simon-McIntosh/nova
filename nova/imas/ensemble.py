@@ -1,4 +1,5 @@
 """Access imas 1d profile data."""
+
 from dataclasses import dataclass, field
 from warnings import warn
 

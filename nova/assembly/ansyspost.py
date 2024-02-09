@@ -1,4 +1,5 @@
 """Post-process data from ansys result files."""
+
 from dataclasses import dataclass, field
 
 import ansys.dpf.core as dpf

@@ -1,4 +1,5 @@
 """Manage ensemble plots of fourier gaps structural model dataset."""
+
 from dataclasses import dataclass, field
 from typing import ClassVar
 

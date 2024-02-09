@@ -1,4 +1,5 @@
 """Biot-Savart intergration constants."""
+
 from dataclasses import dataclass, field
 from functools import cached_property, wraps
 from typing import ClassVar
@@ -227,9 +228,7 @@ class Constants:
             / (2 * self.r)
             for p in [1, 2]
         }
-        Pphi[3] = (
-            -self.rs / self.b * (self.rs - self.r) * (3 * self.r**2 - self.rs**2)
-        )
+        Pphi[3] = -self.rs / self.b * (self.rs - self.r) * (3 * self.r**2 - self.rs**2)
         return Pphi
 
     @cached_property

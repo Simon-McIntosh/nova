@@ -1,4 +1,5 @@
 """Build ITER coilset."""
+
 from dataclasses import dataclass, field
 import io
 

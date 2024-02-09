@@ -1,4 +1,5 @@
 """Methods for ploting 3D FrameSpace data."""
+
 from dataclasses import dataclass, field
 
 import matplotlib

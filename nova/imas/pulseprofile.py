@@ -1,4 +1,5 @@
 """Calculate plasma shape from pulse schedule."""
+
 from dataclasses import dataclass, field
 from functools import cached_property
 

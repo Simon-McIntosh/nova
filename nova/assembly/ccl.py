@@ -1,4 +1,5 @@
 """Apply structural deformation to TF coilset."""
+
 from dataclasses import dataclass, field
 import os
 

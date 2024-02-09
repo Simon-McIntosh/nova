@@ -1,4 +1,5 @@
 """Manage biot methods."""
+
 from dataclasses import dataclass, field
 
 from nova.biot import (

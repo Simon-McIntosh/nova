@@ -1,4 +1,5 @@
 """Basis function sets for use in regression analysis."""
+
 from abc import abstractmethod
 from dataclasses import dataclass, field
 from typing import ClassVar

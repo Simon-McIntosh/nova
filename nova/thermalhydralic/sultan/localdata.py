@@ -1,4 +1,5 @@
 """Manage local data directories."""
+
 from dataclasses import dataclass
 
 from nova.utilities.localdata import LocalData

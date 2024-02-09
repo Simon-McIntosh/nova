@@ -1,4 +1,5 @@
 """Methods to manage single shot Sultan waveform data."""
+
 from dataclasses import dataclass, field, InitVar
 from typing import Union
 from types import SimpleNamespace

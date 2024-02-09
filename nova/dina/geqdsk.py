@@ -7,6 +7,7 @@ format.
 Format of G-EQDSK file is specified here:
   https://fusion.gat.com/THEORY/efit/g_eqdsk.html
 """
+
 import numpy as np
 
 

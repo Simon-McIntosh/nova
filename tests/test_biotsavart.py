@@ -22,12 +22,7 @@ segments = ["circle", "cylinder"]
 
 def axial_vertical_field(radius, height, current):
     """Return analytic axial vertical field."""
-    return (
-        Matrix.mu_0
-        * current
-        * radius**2
-        / (2 * (radius**2 + height**2) ** (3 / 2))
-    )
+    return Matrix.mu_0 * current * radius**2 / (2 * (radius**2 + height**2) ** (3 / 2))
 
 
 @dataclass

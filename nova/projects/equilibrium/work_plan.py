@@ -1,4 +1,5 @@
 """Develop equilibrum reconstuction workplan."""
+
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from matplotlib.patches import Patch
@@ -279,9 +280,9 @@ class WorkPlan:
         data.loc[data.subtask == "shutdown", "color"] = "darkgray"
         if task is None:
             for i, assignment in enumerate(data.assignment.unique()[1:]):
-                data.loc[
-                    data.assignment == assignment, "color"
-                ] = f"C{i if i < 3 else i+1}"
+                data.loc[data.assignment == assignment, "color"] = (
+                    f"C{i if i < 3 else i+1}"
+                )
         else:
             for i, task in enumerate(tasks):
                 data.loc[data.task == task, "color"] = f"C{i if i < 3 else i+1}"

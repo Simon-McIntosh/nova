@@ -1,4 +1,5 @@
 """Extend DataFrame - add subspace."""
+
 from functools import cached_property
 
 import numpy as np

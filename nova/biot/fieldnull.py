@@ -1,4 +1,5 @@
 """Methods for calculating the position and value of x-points and o-points."""
+
 from dataclasses import dataclass, field
 
 import numpy as np

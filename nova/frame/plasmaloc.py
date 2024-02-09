@@ -1,4 +1,5 @@
 """Manage attribute access for classes implementing a plasma grid interface."""
+
 from dataclasses import dataclass
 from functools import cached_property
 

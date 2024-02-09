@@ -1,4 +1,5 @@
 """Manage IMAS database auto-complete lists."""
+
 import os
 import string
 

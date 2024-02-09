@@ -1,4 +1,5 @@
 """Manage source and target frames."""
+
 from dataclasses import dataclass, field
 from functools import cached_property
 

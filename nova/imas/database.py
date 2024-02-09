@@ -1,4 +1,5 @@
 """Manage access to IMAS database."""
+
 from contextlib import contextmanager
 from dataclasses import dataclass, field, fields, InitVar
 from operator import attrgetter

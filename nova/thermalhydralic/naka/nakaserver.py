@@ -1,4 +1,5 @@
 """Manage access to Naka server."""
+
 from dataclasses import dataclass, field
 
 import mechanize

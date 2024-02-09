@@ -1,4 +1,5 @@
 """Run Monte Carlo simulations for candidate vault assemblies."""
+
 from contextlib import contextmanager
 from dataclasses import dataclass, field, fields
 from functools import cached_property
@@ -327,10 +328,9 @@ class Vault(Trial, Plot1D):
         offset = self.electromagnetic_model.axis_offset
         self.data["offset"][..., 0] = offset.real
         self.data["offset"][..., 1] = -offset.imag
-        self.data[
-            "peaktopeak_offset"
-        ] = "sample", self.electromagnetic_model.peaktopeak(
-            modes=self.modes, axis_offset=True
+        self.data["peaktopeak_offset"] = (
+            "sample",
+            self.electromagnetic_model.peaktopeak(modes=self.modes, axis_offset=True),
         )
 
     def predict_wall(self):
@@ -347,10 +347,9 @@ class Vault(Trial, Plot1D):
         offset_deviation = (
             self.electromagnetic_model.fieldline.data - offset_firstwall.data
         )
-        self.data[
-            "peaktopeak_offset"
-        ] = "sample", self.electromagnetic_model.peaktopeak(
-            offset_deviation, modes=self.modes
+        self.data["peaktopeak_offset"] = (
+            "sample",
+            self.electromagnetic_model.peaktopeak(offset_deviation, modes=self.modes),
         )
 
     def plot(self, offset=True):

@@ -1,4 +1,5 @@
 """Methods to manage single shot Sultan waveform data."""
+
 from dataclasses import dataclass, field
 from typing import Union
 

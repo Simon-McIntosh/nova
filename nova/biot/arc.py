@@ -1,4 +1,5 @@
 """Biot-Savart calculation for arc segments."""
+
 from dataclasses import dataclass, field
 from functools import cached_property
 from typing import ClassVar

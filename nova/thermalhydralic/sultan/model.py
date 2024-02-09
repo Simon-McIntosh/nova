@@ -1,4 +1,5 @@
 """Manage linear time invariant model."""
+
 from dataclasses import dataclass, field, InitVar
 from typing import Union
 from collections.abc import Iterable

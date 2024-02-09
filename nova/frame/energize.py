@@ -1,4 +1,5 @@
 """Manage frame currents."""
+
 from dataclasses import dataclass, field
 
 import pandas

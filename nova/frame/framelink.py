@@ -1,4 +1,5 @@
 """Extend DataArray - add multipoint and link methods."""
+
 from contextlib import contextmanager
 from copy import copy
 from typing import Union

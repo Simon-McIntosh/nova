@@ -1,4 +1,5 @@
 """Examine equilibrium time slice data."""
+
 from dataclasses import dataclass, field
 
 import numpy as np

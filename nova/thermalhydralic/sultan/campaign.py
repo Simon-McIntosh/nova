@@ -1,4 +1,5 @@
 """Manage access to Sultan campaign metadata."""
+
 import os.path
 from dataclasses import dataclass, field
 import itertools

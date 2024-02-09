@@ -1,4 +1,5 @@
 """Shape methods for BiotFrame."""
+
 from dataclasses import dataclass, field
 
 import nova.frame.metamethod as metamethod

@@ -1,4 +1,5 @@
 """Manage contouring algorithums solved on a rectngular plasma grid."""
+
 from dataclasses import dataclass, field
 
 import numpy as np

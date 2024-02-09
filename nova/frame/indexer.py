@@ -1,4 +1,5 @@
 """Extend pandas Indexer methods."""
+
 from abc import ABC, abstractmethod
 from functools import cached_property
 

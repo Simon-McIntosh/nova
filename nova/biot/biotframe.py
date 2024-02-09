@@ -1,4 +1,5 @@
 """Biot specific Frame class."""
+
 import numpy as np
 
 from nova.frame.framespace import FrameSpace

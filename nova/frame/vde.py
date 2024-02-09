@@ -1,4 +1,5 @@
 """Read toroidal currents from DINA disruption simulations."""
+
 from dataclasses import dataclass, field
 import os
 

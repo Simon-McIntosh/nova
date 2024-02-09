@@ -1,4 +1,5 @@
 """Manage sultan shot."""
+
 import re
 from dataclasses import dataclass, field
 from types import SimpleNamespace

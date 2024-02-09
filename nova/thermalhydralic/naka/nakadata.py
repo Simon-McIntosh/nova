@@ -1,4 +1,5 @@
 """Manage local and remote naka test data."""
+
 import os
 from dataclasses import dataclass, field
 from typing import Union

@@ -1,4 +1,5 @@
 """Manage single instance polygon data as polyframe."""
+
 from dataclasses import dataclass, field
 from functools import cached_property
 

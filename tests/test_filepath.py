@@ -75,9 +75,11 @@ def test_path(path):
     default = filepath.basename
     paths = (path if len(path) > 0 else default for path in path.split("."))
     paths = (
-        getattr(appdirs, "_".join(path.split("_", 3)[:2]) + "_dir")()
-        if path[:4] in ["user", "site"]
-        else path
+        (
+            getattr(appdirs, "_".join(path.split("_", 3)[:2]) + "_dir")()
+            if path[:4] in ["user", "site"]
+            else path
+        )
         for path in paths
     )
     resolved_path = os.path.join(*(KEYPATH.get(path, path) for path in paths))

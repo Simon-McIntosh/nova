@@ -1,4 +1,5 @@
 """Manage ferromagnetic insert geometry."""
+
 from dataclasses import dataclass, field
 import os
 from string import digits

@@ -1,4 +1,5 @@
 """Extract time slices from equilibrium IDS."""
+
 from dataclasses import dataclass
 from functools import cached_property
 

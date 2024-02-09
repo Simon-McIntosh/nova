@@ -1,4 +1,5 @@
 """Extrapolate equilibria beyond separatrix."""
+
 import bisect
 from dataclasses import dataclass
 

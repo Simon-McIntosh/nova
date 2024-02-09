@@ -1,4 +1,5 @@
 """Manage control factroy methods."""
+
 from dataclasses import dataclass
 from functools import cached_property
 

@@ -1,4 +1,5 @@
 """Define curvilinear coordinates for 3D curves."""
+
 from dataclasses import dataclass, field, fields
 from functools import cached_property
 from typing import ClassVar

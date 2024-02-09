@@ -1,4 +1,5 @@
 """Manage access to current waveforms stored in pf_active and pf_passive."""
+
 from dataclasses import dataclass
 
 import numpy as np

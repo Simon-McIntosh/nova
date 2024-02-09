@@ -1,4 +1,5 @@
 """Manage script access to extrapolate class."""
+
 from importlib import import_module
 
 import click

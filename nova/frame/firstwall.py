@@ -1,4 +1,5 @@
 """Manage plasma attributes."""
+
 from dataclasses import dataclass, field
 
 import numpy as np

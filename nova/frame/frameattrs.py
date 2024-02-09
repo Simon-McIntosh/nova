@@ -1,4 +1,5 @@
 """Manage DataFrame metamethods."""
+
 from contextlib import contextmanager
 from typing import Collection, Any
 

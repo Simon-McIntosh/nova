@@ -1,4 +1,5 @@
 """Manage frame metadata."""
+
 from dataclasses import dataclass, field
 from typing import Iterable, Union
 

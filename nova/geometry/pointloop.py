@@ -3,6 +3,7 @@ Fast point(s)-in-polygon algorithum.
 
 code adapted from https://github.com/sasamil/PointInPolygon_Py/pointInside.
 """
+
 from dataclasses import dataclass
 
 import numpy as np

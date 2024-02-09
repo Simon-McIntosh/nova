@@ -1,4 +1,5 @@
 """Manage TFC fiducial data for coil and sector allignment."""
+
 from dataclasses import dataclass, field
 from typing import ClassVar
 

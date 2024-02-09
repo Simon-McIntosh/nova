@@ -1,4 +1,5 @@
 """Manage sultan shot."""
+
 from dataclasses import dataclass, field, InitVar
 from typing import Union
 

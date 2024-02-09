@@ -1,4 +1,5 @@
 """Manage access to non-axisymmetric coil data."""
+
 from dataclasses import dataclass, field
 from functools import cached_property
 from typing import ClassVar

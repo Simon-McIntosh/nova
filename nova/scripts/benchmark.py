@@ -1,4 +1,5 @@
 """Manage asv benchmark script parameters."""
+
 from contextlib import contextmanager
 import subprocess
 

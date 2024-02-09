@@ -1,4 +1,5 @@
 """Manage file data access for frame and biot instances."""
+
 from __future__ import annotations
 from dataclasses import dataclass, field
 from functools import wraps

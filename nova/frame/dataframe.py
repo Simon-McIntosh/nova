@@ -1,4 +1,5 @@
 """Subclass pandas.DataFrame."""
+
 from importlib import import_module
 import re
 import string

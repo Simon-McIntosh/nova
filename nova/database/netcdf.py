@@ -1,4 +1,5 @@
 """Facilitate structured access to netCDF data."""
+
 from dataclasses import dataclass, field
 import gc
 import os

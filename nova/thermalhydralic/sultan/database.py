@@ -1,4 +1,5 @@
 """Manage Sultan database. Unify local and remote data access."""
+
 import os
 from dataclasses import dataclass, field
 from pathlib import Path

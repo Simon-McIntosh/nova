@@ -1,4 +1,5 @@
 """Manage as-build TFC coil data."""
+
 from dataclasses import dataclass, field
 from typing import ClassVar
 
@@ -168,12 +169,12 @@ class AsBuilt:
     def hide(self, frame):
         """Hide untracked fiducials."""
         props = self.empty_like(frame)
-        props.loc[
-            (self.coil, list("CDEFG")), frame.columns[0]
-        ] = "color:white;background-color:white"
-        props.loc[
-            (self.coil, list("ABGH")), frame.columns[2]
-        ] = "color:white;background-color:white"
+        props.loc[(self.coil, list("CDEFG")), frame.columns[0]] = (
+            "color:white;background-color:white"
+        )
+        props.loc[(self.coil, list("ABGH")), frame.columns[2]] = (
+            "color:white;background-color:white"
+        )
         return props
 
     def html(self, frame="xyz"):

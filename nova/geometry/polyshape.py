@@ -1,4 +1,5 @@
 """Provide polyshape key completion."""
+
 from dataclasses import dataclass
 import string
 from typing import ClassVar

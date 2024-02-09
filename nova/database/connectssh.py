@@ -1,4 +1,5 @@
 """Manage connections to SSH servers."""
+
 from dataclasses import dataclass
 
 from nova.database.connect import Connect

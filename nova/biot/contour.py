@@ -1,4 +1,5 @@
 """Extract flux function coefficnets from poloidal flux contours."""
+
 from __future__ import annotations
 import bisect
 from dataclasses import dataclass, field, fields, InitVar

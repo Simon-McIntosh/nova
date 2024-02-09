@@ -1,4 +1,5 @@
 """Manage interface from PulseDesign class to pulsedesign app."""
+
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from functools import cached_property

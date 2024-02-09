@@ -593,7 +593,6 @@ class cosica_data(read_dina):
 
 
 class scenario_data(read_dina, interpolate, operate):
-
     """
     read DINA scenario data
 
@@ -881,7 +880,6 @@ class scenario_data(read_dina, interpolate, operate):
 
 
 class forcefield_data(read_dina, interpolate):
-
     """
     Attributes:
         data (pd.DataFrame): DINA raw data (load using read_scenario)

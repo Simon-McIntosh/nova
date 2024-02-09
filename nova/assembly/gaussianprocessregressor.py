@@ -1,4 +1,5 @@
 """Perform Gaussian Process Regression on Fiducial Data Points."""
+
 from dataclasses import dataclass, field, InitVar
 
 import numpy as np

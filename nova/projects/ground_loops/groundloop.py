@@ -1,4 +1,5 @@
 """Analysis of TF ground loops."""
+
 from dataclasses import dataclass
 
 from moviepy.video.io.bindings import mplfig_to_npimage

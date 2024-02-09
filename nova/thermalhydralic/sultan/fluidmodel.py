@@ -1,4 +1,5 @@
 """Apply LTI model to fluid timeseries."""
+
 from dataclasses import dataclass, field
 from typing import Union
 

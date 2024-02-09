@@ -1,4 +1,5 @@
 """Manage transient electromagnetic solutions."""
+
 from dataclasses import dataclass
 
 from nova.imas.database import Ids

@@ -1,4 +1,5 @@
 """AbstractBaseClass Extended FrameSpace._methods."""
+
 from dataclasses import dataclass, field
 from importlib import import_module
 from typing import ClassVar

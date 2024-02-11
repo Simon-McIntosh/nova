@@ -32,6 +32,8 @@ def full_coil_name(identifier: str):
             return f"{position} ELM Coil {index}"
         case "P", "F", str(index):
             return f"Poloidal Field Coil {index}"
+        case "T", "F", "_", str(coil_a), "_", str(coil_b):
+            return f"Toroidal Field Coil Pair, TF{coil_a} and TF{coil_b}"
         case _:
             raise NotImplementedError(f"coil name not implemented for {identifier}")
 
@@ -50,6 +52,8 @@ def part_name(name):
         return "cs"
     if name[:2] == "PF":
         return "pf"
+    if name[:2] == "TF":
+        return "tf"
     raise NotImplementedError(f"coil part not implemented for {name}")
 
 

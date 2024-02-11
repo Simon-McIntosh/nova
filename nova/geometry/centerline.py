@@ -133,13 +133,33 @@ datasource = {
         reason_for_replacement="Update corrects conductor radius and "
         "includes arc elements extracted from source IDS multiline.",
         cad=CAD(
-            reference="111001/1",
+            reference="115001/1",
             objects="ELM Coil Centerline Extraction " "for IMAS database",
             date="23/01/2023",
             provider="Masanari Hosokawa, masanari.hosokawa@iter.org",
             contact="Simon McIntosh, simon.mcintosh@iter.org",
         ),
         attributes={"cross_section": {"circle": [0, 0, 0.046, 0.046, 2]}},
+    ),
+    "TF": DataSource(
+        pulse=111002,
+        run=2,
+        description="TF Coils - conductor centerlines",
+        provider="Simon McIntosh, simon.mcintosh@iter.org",
+        officer="Sebastien Koczorowski, sebastien.koczorowski@iter.org",
+        pbs=11,
+        status="active",
+        replaces="111002/1",
+        reason_for_replacement="Update includes full centerline winding with feeders.",
+        cad=CAD(
+            reference="DET-07879-C",
+            objects="Toroidal Field Coil + Feeder Centerline Extraction "
+            "for IMAS database",
+            date="09/02/2024",
+            provider="Vincent Bontemps, vincent.bontemps@iter.org",
+            contact="Nelson Gatos, nelson.gatos@iter.org",
+        ),
+        attributes={"cross_section": {"circle": [0, 0, 0.0397, 0.0397, 2]}},
     ),
 }
 
@@ -397,13 +417,14 @@ if __name__ == "__main__":
     # filename = "PF"
     # filename = "CS"
     # filename = "VS3"
-    filename = "ELM"
-    # centerline = Centerline(filename=filename)
-    # centerline.plot()
-
+    # filename = "ELM"
+    filename = "TF"
     centerline = Centerline(filename=filename)
     centerline.plot()
-    centerline.write_ids()
+
+    # centerline = Centerline(filename=filename)
+    # centerline.plot()
+    # centerline.write_ids()
 
     """
 

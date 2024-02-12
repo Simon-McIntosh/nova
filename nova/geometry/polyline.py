@@ -145,6 +145,7 @@ class Arc(Plot, Element):
     error: float = field(init=False, repr=False)
     eps: float = 1e-8
     quadrant_segments: int = 21
+    arc_resolution: float = 1.5  # points per arc length
 
     name: ClassVar[str] = "arc"
 
@@ -322,6 +323,7 @@ class Arc(Plot, Element):
         """Return arc path at sample resolution."""
         resolution = np.max(
             [
+                int(self.arc_resolution * self.radius * self.central_angle),
                 self.quadrant_segments,
                 int(self.quadrant_segments * self.central_angle / (np.pi / 2)),
             ]
@@ -374,6 +376,7 @@ class PolyLine(Plot):
     rdp_eps: float = 1e-3
     minimum_arc_nodes: int = 4
     quadrant_segments: int = 16
+    arc_resolution: float = 1.5
     segments: list[Line | Arc] = field(init=False, repr=False, default_factory=list)
 
     path_attrs: ClassVar[list[str]] = [
@@ -436,7 +439,12 @@ class PolyLine(Plot):
         """Append points to segment list."""
         if len(points) >= self.minimum_arc_nodes and self.minimum_arc_nodes != 0:
             self.segments.append(
-                Arc(points, eps=self.arc_eps, quadrant_segments=self.quadrant_segments)
+                Arc(
+                    points,
+                    eps=self.arc_eps,
+                    quadrant_segments=self.quadrant_segments,
+                    arc_resolution=self.arc_resolution,
+                )
             )
             return
         for i in range(len(points) - 1):
@@ -526,7 +534,10 @@ class PolyLine(Plot):
     @cached_property
     def poly(self) -> list[Polygon]:
         """Return list of polygon objects for 3D coil projected to 2d poloidal plane."""
-        return [TriShell(_vtk).poly for _vtk in self.vtk]
+        return [
+            TriShell(vtk, ahull=segment.name == "arc", alpha=None).poly
+            for vtk, segment in zip(self.vtk, self.segments)
+        ]
 
     @cached_property
     def length(self) -> list[float]:

@@ -4,13 +4,14 @@ from dataclasses import dataclass, field
 from typing import ClassVar
 
 import numpy as np
+import shapely.ops
 import vedo
 
 from nova.frame.coilsetattrs import CoilSetAttrs
 from nova.geometry.polygeom import Polygon
 from nova.geometry.polyline import PolyLine
 
-from nova.geometry.volume import Sweep, TriShell
+from nova.geometry.volume import Sweep
 
 
 @dataclass
@@ -54,6 +55,7 @@ class Winding(CoilSetAttrs):
         "rdp_eps",
         "minimum_arc_nodes",
         "quadrant_segments",
+        "arc_resolution",
     ]
 
     def set_conditional_attributes(self):
@@ -125,9 +127,14 @@ class Winding(CoilSetAttrs):
         align = additional.pop("align", "vector")
         vtk = Sweep(cross_section.points, polyline.path, align=align)
         frame_data = self.vtk_data(vtk)
+        poly = Polygon(
+            shapely.ops.unary_union(
+                [polygon.poly for polygon in polyline.volume_geometry["poly"]]
+            )
+        )
         self.attrs = additional | dict(
             section=cross_section.section,
-            poly=TriShell(vtk).poly,
+            poly=poly,
             area=cross_section.area,
             dl=cross_section.width,
             dt=cross_section.height,

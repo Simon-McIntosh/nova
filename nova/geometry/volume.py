@@ -29,6 +29,7 @@ class TriShell:
     mesh: vedo.Mesh
     qhull: bool = False
     ahull: bool = False
+    alpha: float | None = 3.5
     features: ClassVar[list[str]] = [
         *"xyz",
         "dx",
@@ -149,7 +150,13 @@ class TriShell:
             keypoints = np.zeros((len(labels), 2))
             for i, label in enumerate(labels):
                 keypoints[i, :] = np.mean(poloidal[label == cluster.labels_, :], axis=0)
-            hull = alphashape(keypoints, 2.5)
+            if self.alpha is None:
+                alpha = 2 / np.sqrt(
+                    shapely.geometry.MultiPoint(poloidal).convex_hull.area
+                )
+            else:
+                alpha = self.alpha
+            hull = alphashape(keypoints, alpha)
             try:
                 return Polygon(hull, name="ahull")
             except (NotImplementedError, IndexError):

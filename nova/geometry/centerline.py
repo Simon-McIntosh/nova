@@ -169,7 +169,8 @@ class PolylineAttrs:
     """Group polyline attributes."""
 
     minimum_arc_nodes: int = 4
-    quadrant_segments: int = 9
+    quadrant_segments: int = 7
+    arc_resolution: float = 1.5
     arc_eps: float = 1e-3
     line_eps: float = 1e-1
     rdp_eps: float = 1e-4
@@ -180,6 +181,7 @@ class PolylineAttrs:
         return {
             "minimum_arc_nodes": self.minimum_arc_nodes,
             "quadrant_segments": self.quadrant_segments,
+            "arc_resolution": self.arc_resolution,
             "arc_eps": self.arc_eps,
             "line_eps": self.line_eps,
             "rdp_eps": self.rdp_eps,

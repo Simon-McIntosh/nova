@@ -28,7 +28,7 @@ class VtkGeo(metamethod.VtkGeo):
     )
     features: list[str] = field(init=False, default_factory=lambda: TriShell.features)
     qhull: ClassVar[list[str]] = ["panel"]
-    ahull: ClassVar[list[str]] = ["insert"]
+    ahull: ClassVar[list[str]] = ["insert", "winding", "arc"]
     geom: ClassVar[list[str]] = ["insert", "panel", "vtk", "stl"]
 
     def initialize(self):

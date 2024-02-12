@@ -1,6 +1,8 @@
+import functools
 import jax
 import jax.numpy as jnp
-import jaxopt
+
+# import jaxopt
 import numpy as np
 
 from nova.frame.coilset import CoilSet
@@ -11,26 +13,16 @@ ids.coil.insert(8, 0, 0.5, 0.5, Ic=1e4, segment="circle")
 ids.grid.solve(5e3, [2, 5, -2, 2])
 
 
-# @jax.jit
-def A(alpha):
-
+def poisson(x):
+    """Return result of matrix multiplication Ax."""
     divgrad = (
-        alpha[2:, 1:-1]
-        + alpha[:-2, 1:-1]
-        + alpha[1:-1, 2:]
-        + alpha[1:-1, :-2]
-        - 4 * alpha[1:-1, 1:-1]
+        x[2:, 1:-1] + x[:-2, 1:-1] + x[1:-1, 2:] + x[1:-1, :-2] - 4 * x[1:-1, 1:-1]
     )
+    grad_z = jnp.stack([x[:1, 1:] - x[:1, :-1], x[-1:, 1:] - x[-1:, :-1]])
+    grad_x = jnp.stack([x[1:, :1] - x[:-1, :1], x[1:, -1:] - x[:-1, -1:]])
 
-    grad_z = jnp.stack(
-        [alpha[:1, 1:] - alpha[:1, :-1], alpha[-1:, 1:] - alpha[-1:, :-1]]
-    )
-    grad_x = jnp.stack(
-        [alpha[1:, :1] - alpha[:-1, :1], alpha[1:, -1:] - alpha[:-1, -1:]]
-    )
-
-    rhs = jnp.zeros_like(alpha)
-    rhs = rhs.at[0, 0].set(alpha[0, 0])
+    rhs = jnp.zeros_like(x)
+    rhs = rhs.at[0, 0].set(x[0, 0])
     rhs = jax.lax.dynamic_update_slice(rhs, divgrad, (1, 1))
     rhs = jax.lax.dynamic_update_slice(rhs, grad_z[0], (0, 1))
     rhs = jax.lax.dynamic_update_slice(rhs, grad_z[1], (-1, 1))
@@ -38,40 +30,58 @@ def A(alpha):
     rhs = jax.lax.dynamic_update_slice(rhs, grad_x[1][:-1], (1, -1))
     return rhs
 
-    # nx_1
 
-    """
-    j = jax.lax.dynamic_update_slice(
-        j,
-,
-        (1, 1),
-    ) 
-    
-    # j = j.at[0, 0].set(alpha[0, 0])
-    j = j.at[0, -1].set(alpha[0, -1] - alpha[0, -3])
-    # j = j.at[-1, -1].set(alpha[-1, -1] - alpha[-1, -3])
-    # j = j.at[-1, 0].set(alpha[-1, 1] - alpha[-1, 0])
+dx = 3
 
-    # j = jax.lax.dynamic_update_slice(j, alpha[:-2, :1] - alpha[2:, :1], (1, 0))
-    # j = jax.lax.dynamic_update_slice(j, alpha[:-2, -1:] - alpha[2:, -1:], (1, -1))
-    j = jax.lax.dynamic_update_slice(j, alpha[:1, 2:] - alpha[:1, :-2], (0, 1))
-    # j = jax.lax.dynamic_update_slice(j, alpha[-1:, 2:] - alpha[-1:, :-2], (-1, 1))
 
-    
-    j[1:-1, 1:-1] = (
-        alpha[2:, 1:-1]
-        + alpha[:-2, 1:-1]
-        + alpha[1:-1, 2:]
-        + alpha[1:-1, :-2]
-        - 4 * alpha[1:-1, 1:-1]
+@functools.partial(jax.jit, static_argnames=["delta"])
+def grad(x, delta=(1,)):
+    """Return grad x."""
+    return jnp.stack(jnp.gradient(x, *delta))
+
+
+@jax.jit
+def dot(a, b):
+    """Return tenesor dot product taken across first dimension."""
+    return jnp.einsum("i...,i...->...", a, b)
+
+
+@functools.partial(jax.jit, static_argnames=["delta"])
+def laplacian(x, delta=(1,)):
+    """Return Laplacian of x."""
+    return jnp.sum(
+        jnp.stack(
+            [
+                jnp.gradient(jnp.gradient(x, *delta, axis=i), *delta, axis=i)
+                for i in range(x.ndim)
+            ],
+            axis=0,
+        ),
+        axis=0,
     )
 
-    j[:, 0] = alpha[:, 1] - alpha[:, 0]
-    j[:, -1] = alpha[:, -1] - alpha[:, -2]
-    j[0, :] = alpha[0, :] - alpha[1, :]
-    j[-1, :] = alpha[-2, :] - alpha[-1, :]
-    """
-    # return j
+
+# @jax.jit
+def solve(x):
+    """Return stacked matrix multiplication Ax."""
+    alpha, beta, gamma = x
+
+    rhs = jnp.zeros_like(x)
+
+    rhs = jax.lax.dynamic_update_slice(rhs, gamma * grad(alpha), (0, 0, 0))
+
+    # grad_alpha = jnp.gradient(alpha, dx)
+
+    # return jnp.stack([poisson(x) for x in x_stack])
+
+
+def update(rhs, div, grad, index, dx):
+    rhs = jax.lax.dynamic_update_slice(rhs, div_axb * dx**2, (index, 1, 1))
+    rhs = jax.lax.dynamic_update_slice(rhs, axb[:1, 1:, 2] * dx, (index, 0, 1))
+    rhs = jax.lax.dynamic_update_slice(rhs, axb[-1:, 1:, 2] * dx, (index, -1, 1))
+    rhs = jax.lax.dynamic_update_slice(rhs, axb[1:, :1, 0] * dx, (index, 1, 0))
+    rhs = jax.lax.dynamic_update_slice(rhs, axb[1:, -1:, 0] * dx, (index, 1, -1))
+    return rhs
 
 
 dx = np.diff(ids.grid.data.x[:2].data)[0]
@@ -86,12 +96,12 @@ axb = jnp.cross(vector_potential_hat, magnetic_field)
 div_axb = np.gradient(axb[..., 0], dx, axis=0, edge_order=2) + np.gradient(
     axb[..., 2], dx, axis=1, edge_order=2
 )
+
+
 rhs = jnp.zeros(ids.grid.shape)
-rhs = jax.lax.dynamic_update_slice(rhs, div_axb * dx**2, (1, 1))
-rhs = jax.lax.dynamic_update_slice(rhs, axb[:1, 1:, 2] * dx, (0, 1))
-rhs = jax.lax.dynamic_update_slice(rhs, axb[-1:, 1:, 2] * dx, (-1, 1))
-rhs = jax.lax.dynamic_update_slice(rhs, axb[1:, :1, 0] * dx, (1, 0))
-rhs = jax.lax.dynamic_update_slice(rhs, axb[1:, -1:, 0] * dx, (1, -1))
+rhs = update(
+    rhs,
+)
 
 """
 rhs = jnp.concatenate(
@@ -111,6 +121,7 @@ rhs = jnp.concatenate(
 )
 """
 
+"""
 
 sol = jaxopt.linear_solve.solve_normal_cg(A, rhs)
 
@@ -147,6 +158,7 @@ psi_xx = np.gradient(
 psi_zz = np.gradient(
     np.gradient(ids.grid.psi_, dx, axis=1, edge_order=2), dx, axis=1, edge_order=2
 )
+"""
 
 """
 levels = ids.grid.axes.contour(
@@ -163,7 +175,7 @@ ids.grid.axes.contour(
     linestyles="--",
     colors="C1",
 )
-"""
+
 
 grad_alpha_2d = np.gradient(sol, 2)
 grad_alpha = np.stack(
@@ -171,7 +183,7 @@ grad_alpha = np.stack(
 )
 B_sol = np.cross(grad_alpha, vector_potential_hat)
 
-"""
+
 ids.grid.axes.streamplot(
     ids.grid.data.x.data, ids.grid.data.z.data, B_sol[..., 0].T, B_sol[..., 2].T
 )

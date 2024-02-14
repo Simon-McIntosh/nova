@@ -241,14 +241,14 @@ class Operate(Data):
         return self.array[attr]
 
     @property
-    def Avector(self):
-        """Return magnetic vector potential."""
-        return np.stack([self.ax, self.ay, self.az], axis=-1)
+    def vector_potential(self):
+        """Return shaped vector potential vector stacked along first axis."""
+        return np.stack([self.ax_, self.ay_, self.az_], axis=0)
 
     @property
-    def Bvector(self):
-        """Return magnetic field vector."""
-        return np.stack([self.bx, self.by, self.bz], axis=-1)
+    def magnetic_field(self):
+        """Return shaped magnetic field vector stacked along first axis."""
+        return np.stack([self.bx_, self.by_, self.bz_], axis=0)
 
     @cached_property
     def _source_version(self) -> list[str]:

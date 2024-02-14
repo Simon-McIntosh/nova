@@ -376,12 +376,12 @@ class Extrapolate(Operate):
 
 
 if __name__ == "__main__":
-    # pulse, run = 114101, 41  # JINTRAC
+    pulse, run = 114101, 41  # JINTRAC
     # pulse, run = 130506, 403  # CORSICA
     # pulse, run = 105028, 1  # DINA
-    pulse, run = 135011, 7  # DINA
+    # pulse, run = 135011, 7  # DINA
     # pulse, run = 135013, 2
-    pulse, run = 134173, 106  # DINA-JINTRAC
+    # pulse, run = 134173, 106  # DINA-JINTRAC
 
     extrapolate = Extrapolate(pulse, run, pf_passive=False, pf_active="iter_md")
 

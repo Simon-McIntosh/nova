@@ -187,7 +187,7 @@ class BaseGrid(Chart, FieldNull, Operate):
 
 @dataclass
 class Grid(BaseGrid):
-    """Compute interaction across grid."""
+    """Compute interaction across 2d grid."""
 
     def solve(
         self,
@@ -217,6 +217,20 @@ class Grid(BaseGrid):
         self.data.coords["z"] = z2d[0]
         self.data.coords["x2d"] = (["x", "z"], x2d)
         self.data.coords["z2d"] = (["x", "z"], z2d)
+
+    def _delta(self, coordinate):
+        """Return grid spacing along coordinate."""
+        if coordinate not in self.data:
+            return None
+        points = self.data[coordinate].to_numpy()
+        delta = points[1] - points[0]
+        assert np.allclose(np.diff(points), delta)
+        return delta
+
+    @property
+    def delta(self):
+        """Return grid spacing along each dimension."""
+        return tuple(self._delta(coordinate) for coordinate in "xyz")
 
     @cached_property
     def pointloop(self):
@@ -255,4 +269,4 @@ class Grid(BaseGrid):
 
     def plot_grid(self):
         """Plot grid."""
-        Grid.plot(self)
+        Gridgen.plot(self)

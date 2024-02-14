@@ -1,4 +1,5 @@
-import functools
+from dataclasses import dataclass, field
+from functools import cached_property
 import jax
 import jax.numpy as jnp
 
@@ -8,254 +9,232 @@ import numpy as np
 from nova.frame.coilset import CoilSet
 
 
-ids = CoilSet(field_attrs=["Bx", "By", "Bz", "Ax", "Ay", "Az", "Psi"])
-ids.coil.insert(8, 0, 0.5, 0.5, Ic=1e4, segment="circle")
-ids.grid.solve(5e3, [2, 5, -2, 2])
+@jax.tree_util.register_pytree_node_class
+@dataclass
+class Clebsch:
+    """Calculate Clebsch potential fields A=alpha*nabla(beta)."""
+
+    delta: tuple[float]
+    vector_potential: np.ndarray | jnp.ndarray = field(repr=False)
+    magnetic_field: np.ndarray | jnp.ndarray = field(repr=False)
+
+    def tree_flatten(self):
+        """Return flattened pytree structure."""
+        children = (self.vector_potential, self.magnetic_field)
+        aux_data = (self.delta, self.axes, self.ndim, self._delta, self.shape)
+        return (children, aux_data)
+
+    @classmethod
+    def tree_unflatten(cls, aux_data, children):
+        """Rebuild instance from pytree variables."""
+        return cls(aux_data[0], *children)
+
+    @cached_property
+    def axes(self):
+        """Return active coordinate axes."""
+        return tuple(axis for axis, delta in enumerate(self.delta) if delta is not None)
+
+    @cached_property
+    def ndim(self):
+        """Return axis number."""
+        return len(self.axes)
+
+    @cached_property
+    def _delta(self):
+        """Return axes deltas."""
+        return tuple(self.delta[axis] for axis in self.axes)
+
+    @cached_property
+    def shape(self):
+        """Return data shape."""
+        return self.vector_potential.shape
+
+    @jax.jit
+    def dot(self, a, b):
+        """Return tenesor dot product taken across first dimension."""
+        print(a.shape)
+        print(b.shape)
+        return jnp.einsum("i...,i...", a, b)
+
+    @jax.jit
+    def grad(self, x):
+        """Return grad x."""
+        gradient = jnp.gradient(x, *self._delta)
+        if None in self.delta:
+            gradient.insert(self.delta.index(None), jnp.zeros_like(x))
+        return jnp.stack(gradient, axis=0)
+
+    @jax.jit
+    def vector_grad(self, x):
+        """Return stacked gradient of vector field."""
+        return jnp.stack([self.grad(x[i]) for i in range(x.shape[0])], axis=0)
+
+    @jax.jit
+    def div(self, x):
+        """Return div x."""
+        return jnp.sum(
+            jnp.stack(
+                [
+                    jnp.gradient(x[axis], self.delta[axis], axis=i)
+                    for i, axis in enumerate(self.axes)
+                ],
+                axis=0,
+            ),
+            axis=0,
+        )
+
+    @jax.jit
+    def laplacian(self, x):
+        """Return the Laplacian of x."""
+        return jnp.sum(
+            jnp.stack(
+                [
+                    jnp.gradient(
+                        jnp.gradient(x, self.delta[axis], axis=i),
+                        self.delta[axis],
+                        axis=i,
+                    )
+                    for i, axis in enumerate(self.axes)
+                ],
+                axis=0,
+            ),
+            axis=0,
+        )
+
+    @jax.jit
+    def matvec(self, x):
+        """Return stacked matrix multiplication Ax."""
+        alpha = x
+        return self._get_slice(self.grad(alpha))
+
+        alpha, beta, gamma = x.reshape(self.shape)
+        return jnp.ravel(
+            jnp.stack(
+                [
+                    self._get_slice(gamma * self.grad(alpha)),
+                    self._get_slice(alpha * self.grad(beta)),
+                    self._get_slice(
+                        jnp.cross(self.grad(alpha), self.grad(beta), 0, 0, 0)
+                    ),
+                ]
+            )
+        )
+
+    @jax.jit
+    def _get_slice(self, vector):
+        """Return core/edge mapping for the given vector field."""
+        result = self.div(vector)
+        for i, axis in enumerate(self.axes):
+            for face in [0, -1]:
+                print(i, axis, face)
+                offset = tuple(face if _axis == axis else 0 for _axis in self.axes)
+                update = jax.lax.index_in_dim(vector[axis], face, axis=i, keepdims=True)
+                print("update", update.shape)
+                print()
+                result = jax.lax.dynamic_update_slice(result, update, offset)
+        return result
+
+    @jax.jit
+    def rhs(self):
+        """Return right hand side of linear equation system Ax=y."""
+        B = self.magnetic_field / jnp.linalg.norm(self.magnetic_field, axis=0)
+        normal = jnp.stack([-B[2], B[1], B[0]])
+        return self._get_slice(normal)
+        return self._get_slice(
+            self.dot(
+                self.vector_grad(self.magnetic_field),
+                self.magnetic_field / jnp.linalg.norm(self.magnetic_field, axis=0),
+            )
+        )
+
+        return jnp.ravel(
+            jnp.stack(
+                [
+                    self._get_slice(
+                        self.dot(
+                            self.vector_grad(self.magnetic_field),
+                            self.magnetic_field / jnp.linalg.norm(self.magnetic_field),
+                        )
+                    ),
+                    self._get_slice(self.vector_potential),
+                    self._get_slice(self.magnetic_field),
+                ],
+                axis=0,
+            )
+        )
 
 
-def poisson(x):
-    """Return result of matrix multiplication Ax."""
-    divgrad = (
-        x[2:, 1:-1] + x[:-2, 1:-1] + x[1:-1, 2:] + x[1:-1, :-2] - 4 * x[1:-1, 1:-1]
+def test_laplacian():
+    ids = CoilSet(field_attrs=["Ax", "Ay", "Az", "Bx", "By", "Bz"])
+    ids.coil.insert(8, 0, 0.5, 0.5, Ic=1e4, segment="circle")
+    ids.grid.solve(1e2, [2, 8, -2, 2])
+    clebsch = Clebsch(
+        ids.grid.delta,
+        ids.grid.vector_potential,
+        ids.grid.magnetic_field,
     )
-    grad_z = jnp.stack([x[:1, 1:] - x[:1, :-1], x[-1:, 1:] - x[-1:, :-1]])
-    grad_x = jnp.stack([x[1:, :1] - x[:-1, :1], x[1:, -1:] - x[:-1, -1:]])
-
-    rhs = jnp.zeros_like(x)
-    rhs = rhs.at[0, 0].set(x[0, 0])
-    rhs = jax.lax.dynamic_update_slice(rhs, divgrad, (1, 1))
-    rhs = jax.lax.dynamic_update_slice(rhs, grad_z[0], (0, 1))
-    rhs = jax.lax.dynamic_update_slice(rhs, grad_z[1], (-1, 1))
-    rhs = jax.lax.dynamic_update_slice(rhs, grad_x[0][:-1], (1, 0))
-    rhs = jax.lax.dynamic_update_slice(rhs, grad_x[1][:-1], (1, -1))
-    return rhs
+    ay = clebsch.vector_potential[1]
+    assert np.allclose(clebsch.laplacian(ay), clebsch.div(clebsch.grad(ay)))
 
 
-dx = 3
+if __name__ == "__main__":
 
+    ids = CoilSet(field_attrs=["Bx", "By", "Bz", "Ax", "Ay", "Az", "Psi"])
+    ids.coil.insert(8, 0, 0.5, 0.5, Ic=1e4, segment="circle")
+    ids.grid.solve(5e2, [4, 12, -2, 2])
 
-@functools.partial(jax.jit, static_argnames=["delta"])
-def grad(x, delta=(1,)):
-    """Return grad x."""
-    return jnp.stack(jnp.gradient(x, *delta))
+    clebsch = Clebsch(
+        ids.grid.delta,
+        ids.grid.vector_potential,
+        ids.grid.magnetic_field,
+    )
 
+    # sol = jaxopt.linear_solve.solve_gmres(clebsch.matvec, clebsch.rhs())
 
-@jax.jit
-def dot(a, b):
-    """Return tenesor dot product taken across first dimension."""
-    return jnp.einsum("i...,i...->...", a, b)
+    ids.grid.set_axes("2d")
+    # ids.grid.axes.contour(ids.grid.data.x2d, ids.grid.data.z2d, sol, levels=51)
+    ids.grid.plot()
 
+    normal = clebsch.dot(
+        clebsch.vector_grad(clebsch.magnetic_field),
+        clebsch.magnetic_field / jnp.linalg.norm(clebsch.magnetic_field, axis=0),
+    )
 
-@functools.partial(jax.jit, static_argnames=["delta"])
-def laplacian(x, delta=(1,)):
-    """Return Laplacian of x."""
-    return jnp.sum(
+    B = clebsch.magnetic_field / jnp.linalg.norm(clebsch.magnetic_field, axis=0)
+
+    normal = jnp.stack([-B[2], B[1], B[0]])
+
+    # normal = jax.lax.dynamic_update_slice(
+    #    normal, normal[0] * ids.grid.data.x2d.data[jnp.newaxis], (0, 0, 0)
+    # )
+
+    # B = clebsch.magnetic_field
+    # Bdot = clebsch.dot(clebsch.vector_grad(B), B)
+    # normal = clebsch.dot(clebsch.vector_grad(Bdot), B)
+    # normal = np.cross(Bdot, Bdotdot, 0, 0, 0)
+    """
+    normal = jnp.sum(
         jnp.stack(
             [
-                jnp.gradient(jnp.gradient(x, *delta, axis=i), *delta, axis=i)
-                for i in range(x.ndim)
-            ],
-            axis=0,
+                clebsch.magnetic_field[0]
+                * jnp.gradient(clebsch.magnetic_field, clebsch.delta[0], axis=1),
+                clebsch.magnetic_field[2]
+                * jnp.gradient(clebsch.magnetic_field, clebsch.delta[2], axis=2),
+            ]
         ),
         axis=0,
     )
+    """
+    # normal = np.einsum("ji...,i...->j...", gradB, B)
 
+    # normal = jnp.sum(jnp.stack([gradB[:, i] * B[i] for i in range(3)]), axis=0)
+    # normal = clebsch.magnetic_field / jnp.linalg.norm(clebsch.magnetic_field, axis=0)
 
-# @jax.jit
-def solve(x):
-    """Return stacked matrix multiplication Ax."""
-    alpha, beta, gamma = x
+    ids.grid.axes.quiver(ids.grid.data.x2d, ids.grid.data.z2d, B[0], B[-1])
+    ids.grid.axes.quiver(ids.grid.data.x2d, ids.grid.data.z2d, normal[0], normal[-1])
+    # print(clebsch.solve(jnp.stack([ids.grid.psi_, ids.grid.psi_, ids.grid.psi_])))
+    # clebsch.laplacian(clebsch.vector_potential[1])
 
-    rhs = jnp.zeros_like(x)
-
-    rhs = jax.lax.dynamic_update_slice(rhs, gamma * grad(alpha), (0, 0, 0))
-
-    # grad_alpha = jnp.gradient(alpha, dx)
-
-    # return jnp.stack([poisson(x) for x in x_stack])
-
-
-def update(rhs, div, grad, index, dx):
-    rhs = jax.lax.dynamic_update_slice(rhs, div_axb * dx**2, (index, 1, 1))
-    rhs = jax.lax.dynamic_update_slice(rhs, axb[:1, 1:, 2] * dx, (index, 0, 1))
-    rhs = jax.lax.dynamic_update_slice(rhs, axb[-1:, 1:, 2] * dx, (index, -1, 1))
-    rhs = jax.lax.dynamic_update_slice(rhs, axb[1:, :1, 0] * dx, (index, 1, 0))
-    rhs = jax.lax.dynamic_update_slice(rhs, axb[1:, -1:, 0] * dx, (index, 1, -1))
-    return rhs
-
-
-dx = np.diff(ids.grid.data.x[:2].data)[0]
-
-vector_potential = jnp.stack([ids.grid.ax_, ids.grid.ay_, ids.grid.az_], axis=-1)
-vector_potential_hat = (
-    vector_potential / jnp.linalg.norm(vector_potential, axis=-1)[..., jnp.newaxis]
-)
-magnetic_field = jnp.stack([ids.grid.bx_, ids.grid.by_, ids.grid.bz_], axis=-1)
-
-axb = jnp.cross(vector_potential_hat, magnetic_field)
-div_axb = np.gradient(axb[..., 0], dx, axis=0, edge_order=2) + np.gradient(
-    axb[..., 2], dx, axis=1, edge_order=2
-)
-
-
-rhs = jnp.zeros(ids.grid.shape)
-rhs = update(
-    rhs,
-)
-
-"""
-rhs = jnp.concatenate(
-    [
-        axb[:, -1:, 2] * dx,
-        jnp.concatenate(
-            [
-                axb[:1, 1:-1, 0] * dx,
-                div_axb[1:-1, 1:-1] * dx**2,
-                axb[-1:, 1:-1, 0] * dx,
-            ],
-            axis=0,
-        ),
-        axb[:, :1, 2] * dx,
-    ],
-    axis=1,
-)
-"""
-
-"""
-
-sol = jaxopt.linear_solve.solve_normal_cg(A, rhs)
-
-print(A(rhs).shape)
-
-ids.grid.set_axes("2d")
-ids.grid.axes.contour(
-    ids.grid.data.x2d[1:-1, 1:-1],
-    ids.grid.data.z2d[1:-1, 1:-1],
-    sol[1:-1, 1:-1],
-    31,
-)
-ids.grid.plot()
-
-
-ids.grid.set_axes("1d")
-ids.grid.axes.plot(A(ids.grid.psi_)[0, 1:] / dx)
-ids.grid.axes.plot(np.gradient(ids.grid.psi_[0, 1:], dx), "C0--")
-
-
-ids.grid.axes.plot(A(ids.grid.psi_)[-1, 1:] / dx)
-ids.grid.axes.plot(np.gradient(ids.grid.psi_[-1, 1:], dx), "C1--")
-
-ids.grid.axes.plot(A(ids.grid.psi_)[1:-1, 0] / dx)
-ids.grid.axes.plot(np.gradient(ids.grid.psi_[1:-1, 0], dx), "C2--")
-
-ids.grid.axes.plot(A(ids.grid.psi_)[1:-1, -1] / dx)
-ids.grid.axes.plot(np.gradient(ids.grid.psi_[1:-1, -1], dx), "C3--")
-
-ids.grid.set_axes("2d")
-psi_xx = np.gradient(
-    np.gradient(ids.grid.psi_, dx, axis=0, edge_order=2), dx, axis=0, edge_order=2
-)
-psi_zz = np.gradient(
-    np.gradient(ids.grid.psi_, dx, axis=1, edge_order=2), dx, axis=1, edge_order=2
-)
-"""
-
-"""
-levels = ids.grid.axes.contour(
-    ids.grid.data.x2d[1:-1, 1:-1],
-    ids.grid.data.z2d[1:-1, 1:-1],
-    psi_xx[1:-1, 1:-1] + psi_zz[1:-1, 1:-1],
-    colors="C0",
-).levels
-ids.grid.axes.contour(
-    ids.grid.data.x2d[1:-1, 1:-1],
-    ids.grid.data.z2d[1:-1, 1:-1],
-    A(ids.grid.psi_)[1:-1, 1:-1] / dx**2,
-    levels=levels,
-    linestyles="--",
-    colors="C1",
-)
-
-
-grad_alpha_2d = np.gradient(sol, 2)
-grad_alpha = np.stack(
-    [grad_alpha_2d[0], np.zeros(ids.grid.shape), grad_alpha_2d[1]], -1
-)
-B_sol = np.cross(grad_alpha, vector_potential_hat)
-
-
-ids.grid.axes.streamplot(
-    ids.grid.data.x.data, ids.grid.data.z.data, B_sol[..., 0].T, B_sol[..., 2].T
-)
-
-ids.grid.axes.streamplot(
-    ids.grid.data.x.data, ids.grid.data.z.data, ids.grid.bx_.T, ids.grid.bz_.T
-)
-"""
-ids.grid.axes.contour(ids.grid.data.x2d, ids.grid.data.z2d, ids.grid.ay_)
-ids.grid.plot(colors="C2")
-# ids.grid.axes.plot(A(ids.grid.psi_)[-1, :])
-# ids.grid.axes.plot(A(ids.grid.psi_)[:, 0])
-# ids.grid.axes.plot(A(ids.grid.psi_)[:, -1])
-
-
-# ids.grid.set_axes("2d")
-# ids.grid.plot()
-
-"""
-print()
-print(j[:, :1])
-print(A(j)[1:, -1:])
-print(ids.grid.bx_[:, :1])
-# print(np.diff(ids.grid.bx_[:, :1], axis=0) * dx)
-# ids.grid.axes.contour(ids.grid.data.x2d, ids.grid.data.z2d, sol, 61)
-ids.grid.axes.contour(ids.grid.data.x2d, ids.grid.data.z2d, ids.grid.psi_, 61)
-
-ids.grid.set_axes("1d")
-ids.grid.axes.plot(ids.grid.psi_[0, 1:])
-
-ids.grid.set_axes("1d")
-ids.grid.axes.plot(A(ids.grid.psi_)[0, 1:] / (2 * dx))
-ids.grid.axes.plot(np.gradient(ids.grid.psi_[0, 1:], dx))
-ids.grid.axes.plot(-ids.grid.bx_[0, 1:], "--")
-# ids.grid.axes.plot(j[0, 1:])
-"""
-
-
-# alpha_o = ids.grid.ay_
-
-"""
-@jax.jit
-def residual_fun(alpha, x, z, bx, bz):
-    dalpha = jnp.gradient(alpha, 1, 1)
-    return jnp.linalg.norm(
-        jnp.stack([dalpha[1] - bx, -dalpha[0] - bz], axis=-1), axis=-1
+    ids.grid.axes.streamplot(
+        ids.grid.data.x.data, ids.grid.data.z.data, B[0].T, B[-1].T
     )
-"""
-
-"""
-alpha_x = scipy.integrate.cumulative_trapezoid(
-    ids.grid.bz_, ids.grid.data.x.data, initial=0, axis=0
-)
-alpha_z = scipy.integrate.cumulative_trapezoid(
-    -ids.grid.bx_, ids.grid.data.z.data, initial=0, axis=1
-)
-
-n2 = ids.grid.shape[1] // 2
-alpha = alpha_x[0, n2] + alpha_z[:, n2 : n2 + 1] + alpha_x - alpha_x[:, n2 : n2 + 1]
-"""
-
-# root = jaxopt.ScipyRootFinding("hybr", optimality_fun=res)
-# root.run(
-#    ids.grid.ay_, ids.grid.data.x.data, ids.grid.data.z.data, ids.grid.bx_,
-# ids.grid.bz_
-# )
-
-# gauss_newton = jaxopt.GaussNewton(residual_fun)
-# sol = gauss_newton.run(
-#    ids.grid.ay_, ids.grid.data.x.data, ids.grid.data.z.data, ids.grid.bx_,
-# ids.grid.bz_
-# )
-
-# ids.plot()
-# ids.grid.plot()

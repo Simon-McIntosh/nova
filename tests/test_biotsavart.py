@@ -436,8 +436,8 @@ def test_multifilament_3d_vector():
     coilset.coil.insert(5, [-1, 1], 0.1, 0.1, Ic=1e3, delta=-2, segment="circle")
     coilset.coil.insert(5, [-1, 1], 0.1, 0.1, Ic=-1e3, delta=-2, segment="circle")
     coilset.point.solve(np.array([[5, 0, 0], [6, 0, 0]]))
-    assert np.allclose(coilset.point.Avector, 0)
-    assert np.allclose(coilset.point.Bvector, 0)
+    assert np.allclose(coilset.point.vector_potential, 0)
+    assert np.allclose(coilset.point.magnetic_field, 0)
 
 
 @pytest.mark.skip("pending development of singularity skip methods")

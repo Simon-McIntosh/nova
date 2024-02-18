@@ -6,6 +6,7 @@ from functools import cached_property
 import numpy as np
 
 from nova.biot.biotframe import Source, Target
+from nova.frame.framespace import FrameSpace
 from nova.graphics.plot import Plot
 
 
@@ -98,8 +99,8 @@ class GroupSet(Plot):
 
     """
 
-    source: Source = field(repr=False, default_factory=Source)
-    target: Target = field(repr=False, default_factory=Target)
+    source: Source | FrameSpace = field(repr=False, default_factory=Source)
+    target: Target | FrameSpace = field(repr=False, default_factory=Target)
     turns: list[bool] = field(default_factory=lambda: [True, False])
     reduce: list[bool] = field(default_factory=lambda: [True, True])
     coordinate_axes: np.ndarray = field(init=False, repr=False)

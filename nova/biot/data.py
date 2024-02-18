@@ -12,7 +12,7 @@ class Data(netCDF, FrameSetLoc):
 
     attrs: list[str] = field(default_factory=lambda: ["Br", "Bz", "Psi"])
     number: int | float | None = field(default=None)
-    name: str | None = None
+    name: str = ""
     classname: str = field(init=False)
 
     def __post_init__(self):

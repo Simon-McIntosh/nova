@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nova"
-version = "2023.8.0"
+version = "2023.8.1"
 description = "Equilibrium generation and inference"
 authors = ["Simon McIntosh <simon.mcintosh@iter.org>"]
 license = "ITER GIP"
@@ -245,6 +245,8 @@ testpaths = [
  filterwarnings = [
   "once::Warning",
   "ignore:open:DeprecationWarning:imas",
+  "ignore:datetime.datetime.utcfromtimestamp:DeprecationWarning:dateutil",  # pandas <1.0 
+  "ignore:the matrix subclass is not the recommended:PendingDeprecationWarning:numpy"  # alphashape
 ]
 
 [tool.mypy]

@@ -4,5 +4,4 @@ __all__ = [
     "xarray",
 ]
 
-
 from .accessor import xarray

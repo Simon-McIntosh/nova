@@ -245,7 +245,7 @@ testpaths = [
  filterwarnings = [
   "once::Warning",
   "ignore:open:DeprecationWarning:imas",
-  "ignore:datetime.datetime.utcfromtimestamp:DeprecationWarning:dateutil",  # pandas <1.0 
+  "ignore:datetime.datetime.utcfromtimestamp:DeprecationWarning:dateutil",  # pandas <2.2 
   "ignore:the matrix subclass is not the recommended:PendingDeprecationWarning:numpy"  # alphashape
 ]
 

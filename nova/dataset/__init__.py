@@ -1,7 +1,7 @@
 """Load xarray accessors."""
 
 __all__ = [
-    "xarray",
+    "geometry",
 ]
 
-from .accessor import xarray
+from . import geometry

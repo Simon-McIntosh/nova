@@ -64,7 +64,6 @@ class Gridgen(Plot):
     def __post_init__(self):
         """Build grid coordinates."""
         if len(self.data) == 0:
-            print("generate")
             self.generate()
 
     def generate(self):

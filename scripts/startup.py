@@ -46,5 +46,4 @@ class Startup:
 
 if __name__ == "__main__":
     Startup()
-    print("startup")
     del Startup  # Clean up namespace in the interpreter

@@ -21,12 +21,12 @@ Public API in the main Nova namespace
 """
 
 __all__ = [
-    "xarray",
+    "geometry",
 ]
 
 from importlib import metadata, import_module
 
-from .xarray import xarray
+from .dataset import geometry
 
 try:
     __version__ = metadata.version(__package__ or __name__)

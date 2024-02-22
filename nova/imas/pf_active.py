@@ -61,7 +61,7 @@ if __name__ == "__main__":
     # pulse, run = 115002, 4
     pulse, run = 135007, 4
     # pulse, run = 135011, 7
-    pulse, run = 135013, 2
+    # pulse, run = 135013, 2
 
     # pulse, run = 135014, 1
 

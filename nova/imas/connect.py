@@ -24,13 +24,13 @@ class Connect:
     user: str = "public"
     cluster: str = "sdcc-login02.iter.org"
     backend: str = "HDF5"
+    modules: tuple[str] = ("IMAS",)
     columns: list[str] = field(default_factory=lambda: [])
     frame: pandas.DataFrame = field(
         init=False, repr=False, default_factory=pandas.DataFrame
     )
 
     _space_columns: ClassVar[list[str]] = []
-    _modules: ClassVar[tuple[str]] = ("IMAS",)
 
     def __post_init__(self):
         """Connect to cluster."""
@@ -42,7 +42,7 @@ class Connect:
     @property
     def _module_load_string(self):
         """Return module load command."""
-        return " && ".join([f"ml load {module}" for module in self._modules])
+        return " && ".join([f"ml load {module}" for module in self.modules])
 
     def module_run(self, command: str, hide=True):
         """Run command and return stdout."""
@@ -100,7 +100,7 @@ class Connect:
         """Return ids copy string."""
         command = [
             f"idscp {ids} -a -u {self.user} "
-            f"-si {pulse} -ri {run} -d {self.machine} -b HDF5 "
+            f"-si {pulse} -ri {run} -d {self.machine} -b MDSPLUS "
             f"-so {pulse} -ro {run} -do {self.machine.lower()} "
             f"-bo {self.backend}"
             for pulse, run in zip(frame.pulse, frame.run)
@@ -188,7 +188,7 @@ class ScenarioDatabase(Datafile, Connect):
         self.frame = pandas.DataFrame(
             np.array([s.split("/") for s in shot], int), columns=["pulse", "run"]
         )
-        self.module_run(self.copy_command(self.frame), hide=True)
+        self.module_run(self.copy_command(self.frame), hide=False)
         self.rsync()
 
 
@@ -252,11 +252,12 @@ if __name__ == "__main__":
     # machine = MachineDatabase().sync_ids()
     # machine.load_ids('pf_active')
     # print(machine.frame)
-    # MachineDatabase().rsync()
+    MachineDatabase(modules=("IMAS/3.37.0-4.11.0-2020b",)).sync_shot("111003/1")
 
     # iter_md = MachineDatabase(machine="ITER_MD")
     # iter_md.sync_shot("111003/2")
-    ScenarioDatabase().sync_shot("150601/2")
+    # ScenarioDatabase().sync_shot("111003/1")
+
     # ScenarioDatabase().sync_shot("135014/1")
     # ScenarioDatabase().rsync()
     # ScenarioDatabase(user='tribolp').sync_shot('135011/21')

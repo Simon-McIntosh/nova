@@ -1051,6 +1051,7 @@ if __name__ == "__main__":
         fps=5,
     )
     """
+
     design = PulseDesign(135013, 2, "iter", 1)
 
     # design.levelset.solve(limit=0.1, index="coil")

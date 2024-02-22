@@ -114,9 +114,9 @@ class Gridgen(Plot):
         self.data["X"] = (list("xyz"), X)
         self.data["Y"] = (list("xyz"), Y)
         self.data["Z"] = (list("xyz"), Z)
-        if len(coords["y"]) == 1:  # 2d grid
-            self.data["x2d"] = (["x", "z"], X[:, 0])
-            self.data["z2d"] = (["x", "z"], Z[:, 0])
+        # if len(coords["y"]) == 1:  # 2d grid
+        self.data["x2d"] = (["x", "z"], X[:, 0])
+        self.data["z2d"] = (["x", "z"], Z[:, 0])
 
     def __len__(self):
         """Return grid resolution."""
@@ -230,17 +230,17 @@ class Grid(BaseGrid):
         grid: xarray.Dataset = xarray.Dataset(),
     ):
         """Solve Biot interaction across grid."""
-        if len(grid) > 0:
-            assert all([attr in grid for attr in "XYZ"])
-            number = np.prod(grid.shape)
-            limit = None
-        else:
-            if number is None:
-                return
-            if isinstance(limit, (int, float)):
-                limit = Expand(self.subframe, index)(limit)
-            grid = Gridgen(number, limit).data
-        with self.solve_biot(number):
+        with self.solve_biot(number) as number:
+            if len(grid) > 0:
+                assert all([attr in grid for attr in "XYZ"])
+                number = np.prod(grid.shape)
+                limit = None
+            else:
+                if number is None:
+                    return
+                if isinstance(limit, (int, float)):
+                    limit = Expand(self.subframe, index)(limit)
+                grid = Gridgen(number, limit).data
             target = Target(
                 {attr.lower(): grid[attr].data.flatten() for attr in "XYZ"},
                 label="Grid",

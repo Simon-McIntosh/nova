@@ -418,9 +418,9 @@ if __name__ == "__main__":
     # filename = "CS"
     # filename = "PF"
     # filename = "CS"
-    # filename = "VS3"
+    filename = "VS3"
     # filename = "ELM"
-    filename = "TF"
+    # filename = "TF"
     centerline = Centerline(filename=filename)
     centerline.plot()
 

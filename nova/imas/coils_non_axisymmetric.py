@@ -3,6 +3,7 @@
 from dataclasses import dataclass, field
 from functools import cached_property
 from typing import ClassVar
+import warnings
 
 import numpy as np
 import openpyxl
@@ -161,15 +162,20 @@ class CoilsNonAxisymmetyric(Plot, CoilDatabase, Scenario):
                         elements=conductor.elements,
                     )
                     points[name].extend(elements.points)
-                    section = Section(
-                        elements._to_array(
-                            conductor.cross_section,
-                            attrs=["delta_r", "delta_phi", "delta_z"],
-                        ),
-                        triad=elements.start_axes,
-                    )
-                    section.to_axes(np.identity(3))
-                    polygon = Polygon(section.points[:, 1:])
+                    try:
+                        section = Section(
+                            elements._to_array(
+                                conductor.cross_section,
+                                attrs=["delta_r", "delta_phi", "delta_z"],
+                            ),
+                            triad=elements.start_axes,
+                        )
+                        section.to_axes(np.identity(3))
+                        polygon = Polygon(section.points[:, 1:])
+                    except AttributeError as error:
+                        warnings.warn(error.__str__())
+                        polygon = Polygon({"circle": [0, 0, 0.0397, 0.0397, 2]})
+
                     if i > 0:
                         name = f"name{i}"
                     self.winding.insert(
@@ -227,7 +233,9 @@ if __name__ == "__main__":
     # cc_ids = CoilsNonAxisymmetyric(111003, 2)  # CC
     # cs_ids = CoilsNonAxisymmetyric(111004, 1)  # CS
 
-    elm_ids = CoilsNonAxisymmetyric(115001, 2)  # ELM
+    # elm_ids = CoilsNonAxisymmetyric(115001, 2)  # ELM
+
+    tf_ids = CoilsNonAxisymmetyric(111003, 1)  # TF
 
     # coil = elm_ids  # + cc_ids  # + cs_ids
     # coil.plot()

@@ -450,7 +450,8 @@ class Database(IDS):
     @cached_property
     def ids_dd_version(self) -> version.Version:
         """Return DD version used to write the IDS."""
-        return version.parse(self.get_ids("ids_properties/version_put/data_dictionary"))
+        version_put = self.get_ids("ids_properties/version_put/data_dictionary")
+        return version.parse(version_put.split("-")[0])
 
     def load_database(self):
         """Load instance database attributes."""

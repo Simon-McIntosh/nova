@@ -53,6 +53,7 @@ class Arc(Constants, Matrix):
     @cached_property
     def alpha(self):
         """Return system invariant angle alpha for start, end, and pi/2."""
+        _phi = arctan2(self("target", "y"), self("target", "x"))[np.newaxis]
         phi_s = np.stack(
             [
                 np.zeros(self.shape),
@@ -61,7 +62,7 @@ class Arc(Constants, Matrix):
         )
         return np.concatenate(
             (
-                (np.pi - (phi_s - self._phi[np.newaxis])) / 2,
+                (np.pi - (phi_s - _phi)) / 2,
                 np.pi / 2 * np.ones((1,) + self.shape),
             ),
             axis=0,
@@ -123,9 +124,14 @@ class Arc(Constants, Matrix):
             )
         )
 
+    @property
+    def reps(self):
+        """Return tile reps for _pi2 operator."""
+        return (len(self.theta), 1, 1)
+
     def _pi2(self, _hat):
         """Index radial and toroidal fields for |alpha| > pi /2."""
-        _pi2 = np.tile(_hat[2, np.newaxis], (len(self.theta), 1, 1))
+        _pi2 = np.tile(_hat[2, np.newaxis], self.reps)
         _hat[self._index] = self.sign_alpha[self._index] * (
             2 * _pi2[self._index] - _hat[self._index]
         )

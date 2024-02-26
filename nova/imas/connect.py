@@ -24,7 +24,7 @@ class Connect:
     user: str = "public"
     cluster: str = "sdcc-login02.iter.org"
     backend: str = "HDF5"
-    modules: tuple[str] = ("IMAS",)
+    modules: tuple[str] = ("IMAS/3.40.1-5.1.0-foss-2023b",)
     columns: list[str] = field(default_factory=lambda: [])
     frame: pandas.DataFrame = field(
         init=False, repr=False, default_factory=pandas.DataFrame
@@ -100,7 +100,7 @@ class Connect:
         """Return ids copy string."""
         command = [
             f"idscp {ids} -a -u {self.user} "
-            f"-si {pulse} -ri {run} -d {self.machine} -b MDSPLUS "
+            f"-si {pulse} -ri {run} -d {self.machine} -b HDF5 "
             f"-so {pulse} -ro {run} -do {self.machine.lower()} "
             f"-bo {self.backend}"
             for pulse, run in zip(frame.pulse, frame.run)
@@ -112,7 +112,7 @@ class Connect:
         for ids in ids_names:
             self.module_run(self.copy_command(self.frame, ids), hide=hide)
 
-    def rsync(self, pulsedd_version=3):
+    def rsync(self):
         """Syncronize SDCC remote (user)/public with local IMAS database."""
         public = f"/home/ITER/{self.username}/public/imasdb/{self.machine.lower()}/"
         local = f"/home/{self.username}/imas/shared/imasdb/{self.machine.lower()}/"
@@ -252,7 +252,9 @@ if __name__ == "__main__":
     # machine = MachineDatabase().sync_ids()
     # machine.load_ids('pf_active')
     # print(machine.frame)
-    MachineDatabase(modules=("IMAS/3.37.0-4.11.0-2020b",)).sync_shot("111003/1")
+    # MachineDatabase(modules=("IMAS/3.37.0-4.11.0-2020b",)).sync_shot("111003/1")
+    # iter_md = MachineDatabase().sync_shot("115001/2")
+    MachineDatabase().rsync()
 
     # iter_md = MachineDatabase(machine="ITER_MD")
     # iter_md.sync_shot("111003/2")

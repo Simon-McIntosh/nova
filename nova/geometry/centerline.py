@@ -11,9 +11,8 @@ from tqdm import tqdm
 import xarray
 
 from nova.biot.biotframe import Source
-from nova.biot.space import Segment
+
 from nova.geometry.polygeom import Polygon
-from nova.geometry.section import Section
 from nova.graphics.plot import Plot
 from nova.imas.coil import full_coil_name, part_name
 from nova.imas.database import Ids, IdsEntry, IdsIndex
@@ -23,14 +22,15 @@ from nova.imas.machine import CoilDatabase
 datasource = {
     "CC": DataSource(
         pulse=111003,
-        run=2,
+        run=3,
         description="Ex-Vessel Coils (EVC) Systems (CC) - conductor centerlines",
         provider="Simon McIntosh, simon.mcintosh@iter.org",
         officer="Fabrice Simon, fabrice.simon@iter.org",
         pbs=11,
         status="active",
-        replaces="111003/1",
-        reason_for_replacement="resolve conductor centerlines and include coil feeders",
+        replaces="111003/2",
+        reason_for_replacement="Upgrade conductor cross-section description inline "
+        "with changes to the coils_non_axysymmetric IDS for DD verisions >= 3.34.0",
         cad=CAD(
             reference="DET-07879",
             objects="Correction Coil + Feeder Centerline Extraction "
@@ -102,14 +102,14 @@ datasource = {
         attributes={"cross_section": {"circle": [0, 0, 0.035, 0.035, 2]}},
     ),
     "VS3": DataSource(
-        pulse=111003,
+        pulse=115003,
         run=2,
         description="Vertical Stability In-Vessel Coils - conductor centerlines",
         provider="Simon McIntosh, simon.mcintosh@iter.org",
         officer="Nicola Mariani, nicola.mariani@iter.org",
         pbs=15,
         status="active",
-        replaces="111003/1",
+        replaces="115003/1",
         reason_for_replacement="Geometry update and inclusion of arc elements.",
         cad=CAD(
             reference="IVC_EXTRACTION_bump.xls",
@@ -119,7 +119,7 @@ datasource = {
             provider="Vincent Bontemps, vincent.bontemps@iter.org",
             contact="Vincent Bontemps, vincent.bontemps@iter.org",
         ),
-        attributes={"cross_section": {"circle": [0, 0, 0.046, 0.046, 2]}},
+        attributes={"cross_section": {"annulus": [0, 0, 0.046, 1 - 0.0339 / 0.046, 2]}},
     ),
     "ELM": DataSource(
         pulse=115001,
@@ -139,7 +139,7 @@ datasource = {
             provider="Masanari Hosokawa, masanari.hosokawa@iter.org",
             contact="Simon McIntosh, simon.mcintosh@iter.org",
         ),
-        attributes={"cross_section": {"circle": [0, 0, 0.046, 0.046, 2]}},
+        attributes={"cross_section": {"annulus": [0, 0, 0.046, 1 - 0.0339 / 0.046, 2]}},
     ),
     "TF": DataSource(
         pulse=111002,
@@ -363,12 +363,11 @@ class Centerline(Plot, PolylineAttrs, CoilDatabase):
         ids_entry["identifier", :] = coil_name
         ids_entry["name", :] = [full_coil_name(identifier) for identifier in coil_name]
         ids_entry["turns", :] = np.ones(self.data.sizes["coil_name"], float)
-        section_triad = np.array([[0, -1, 0], [1, 0, 0], [0, 0, 1]])  # poly in xz plane
-        section = Section(self.data.cross_section.data, triad=section_triad)
         element_type = {"line": 1, "arc": 2}
         for name, coil in zip(coil_name, ids_entry.ids):
             coil.conductor.resize(1)
-            elements = IdsIndex(coil.conductor[0], "elements")
+            conductor = coil.conductor[0]
+            elements = IdsIndex(conductor, "elements")
             coil_data = self.data.sel(coil_name=name)
             segment_number = coil_data.segment_number.data
             elements["names"] = [f"{name}_{i}" for i in range(segment_number)]
@@ -387,22 +386,33 @@ class Centerline(Plot, PolylineAttrs, CoilDatabase):
                 points = coil_data[attr][:segment_number].data
                 self._set_ids_points(elements.ids, attr, points)
 
-            # rotate cross_section to start element tangent
-            # TODO update following merge of IMAS-4658
-            start_segment = coil_data.isel(segment_index=0)
-            segment = Segment(
-                **{
-                    attr: start_segment[attr].data
-                    for attr in ["normal", "axis", "segment_type"]
-                }
-            )
-            section.to_axes(segment.start_axes)
-            self._set_ids_points(
-                coil.conductor[0],
-                "cross_section",
-                section.points,
-                ["delta_r", "delta_phi", "delta_z"],
-            )
+            conductor.cross_section.resize(1)
+            cross_section = conductor.cross_section[0]
+            match self.cross_section.name:
+                case "disc":
+                    cross_section.geometry_type.name = "circular"
+                    cross_section.geometry_type.index = 2
+                    cross_section.geometry_type.description = "Circle"
+                    cross_section.width = self.cross_section.width
+                case "square":
+                    cross_section.geometry_type.name = "square"
+                    cross_section.geometry_type.index = 4
+                    cross_section.geometry_type.description = "Square"
+                    cross_section.width = self.cross_section.width
+                case "skin" | "annulus":
+                    cross_section.geometry_type.name = "annulus"
+                    cross_section.geometry_type.index = 5
+                    cross_section.geometry_type.description = "Annulus"
+                    cross_section.width = self.cross_section.width
+                    radius = self.cross_section.width / 2
+                    cross_section.radius_inner = radius * (
+                        1 - self.cross_section.metadata["thickness"]
+                    )
+                case _:
+                    raise NotImplementedError(
+                        f"cross seciton {self.cross_section.name} not implemented"
+                    )
+
         # update code and ids_properties nodes
         self.datasource.update(ids_entry.ids_data)
         return ids_entry.ids_data
@@ -417,16 +427,16 @@ class Centerline(Plot, PolylineAttrs, CoilDatabase):
 if __name__ == "__main__":
     # filename = "CS"
     # filename = "PF"
-    # filename = "CS"
-    filename = "VS3"
-    # filename = "ELM"
+    # filename = "CC"
+    # filename = "VS3"
+    filename = "ELM"
     # filename = "TF"
     centerline = Centerline(filename=filename)
     centerline.plot()
 
     # centerline = Centerline(filename=filename)
     # centerline.plot()
-    # centerline.write_ids()
+    centerline.write_ids()
 
     """
 

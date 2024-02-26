@@ -3,10 +3,10 @@
 from dataclasses import dataclass, field
 from functools import cached_property
 from typing import ClassVar
-import warnings
 
 import numpy as np
 import openpyxl
+from packaging import version
 from tqdm import tqdm
 
 from nova.biot.biotframe import Source
@@ -135,7 +135,7 @@ class Elements(Plot):
 
 
 @dataclass
-class CoilsNonAxisymmetyric(Plot, CoilDatabase, Scenario):
+class CoilsNonAxisymmetric(Plot, CoilDatabase, Scenario):
     """Manage access to coils_non_axisymmetric ids."""
 
     pulse: int = 115001
@@ -162,7 +162,7 @@ class CoilsNonAxisymmetyric(Plot, CoilDatabase, Scenario):
                         elements=conductor.elements,
                     )
                     points[name].extend(elements.points)
-                    try:
+                    if self.ids_dd_version <= version.Version("3.39"):  # IDS version
                         section = Section(
                             elements._to_array(
                                 conductor.cross_section,
@@ -172,9 +172,29 @@ class CoilsNonAxisymmetyric(Plot, CoilDatabase, Scenario):
                         )
                         section.to_axes(np.identity(3))
                         polygon = Polygon(section.points[:, 1:])
-                    except AttributeError as error:
-                        warnings.warn(error.__str__())
-                        polygon = Polygon({"circle": [0, 0, 0.0397, 0.0397, 2]})
+                    else:
+                        cross_section = conductor.cross_section[0]
+                        match index := cross_section.geometry_type.index:
+                            case 2:
+                                assert cross_section.geometry_type.name == "circular"
+                                width = cross_section.width
+                                polygon = Polygon({"circle": [0, 0, width, width, 2]})
+                            case 4:
+                                assert cross_section.geometry_type.name == "square"
+                                width = cross_section.width
+                                polygon = Polygon({"square": [0, 0, width]})
+                            case 5:
+                                assert cross_section.geometry_type.name == "annulus"
+                                width = cross_section.width
+                                radius_inner = cross_section.radius_inner
+                                thickness = 1 - radius_inner / (width / 2)
+                                polygon = Polygon(
+                                    {"circle": [0, 0, width, thickness, 2]}
+                                )
+                            case _:
+                                raise NotImplementedError(
+                                    f"Geometry type index {index} not implemented."
+                                )
 
                     if i > 0:
                         name = f"name{i}"
@@ -230,12 +250,14 @@ class CoilsNonAxisymmetyric(Plot, CoilDatabase, Scenario):
 
 
 if __name__ == "__main__":
-    # cc_ids = CoilsNonAxisymmetyric(111003, 2)  # CC
-    # cs_ids = CoilsNonAxisymmetyric(111004, 1)  # CS
+    # cc_ids = CoilsNonAxisymmetric(111003, 2)  # CC
+    # cs_ids = CoilsNonAxisymmetric(111004, 1)  # CS
 
-    # elm_ids = CoilsNonAxisymmetyric(115001, 2)  # ELM
+    # elm_ids = CoilsNonAxisymmetric(115001, 2)  # ELM
 
-    tf_ids = CoilsNonAxisymmetyric(111003, 1)  # TF
+    ids = CoilsNonAxisymmetric(115001, 2)
+
+    ids.plot()
 
     # coil = elm_ids  # + cc_ids  # + cs_ids
     # coil.plot()

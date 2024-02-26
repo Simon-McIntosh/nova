@@ -56,6 +56,7 @@ class Winding(CoilSetAttrs):
         "minimum_arc_nodes",
         "quadrant_segments",
         "arc_resolution",
+        "filament",
     ]
 
     def set_conditional_attributes(self):
@@ -134,19 +135,24 @@ class Winding(CoilSetAttrs):
         )
         self.attrs = additional | dict(
             section=cross_section.section,
-            poly=poly,
             area=cross_section.area,
-            dl=cross_section.width,
-            dt=cross_section.height,
+            width=cross_section.width,
+            height=cross_section.height,
         )
         with self.insert_required(required):
-            index = self.frame.insert(*frame_data, iloc=iloc, **self.attrs)
+            index = self.frame.insert(*frame_data, iloc=iloc, poly=poly, **self.attrs)
         with self.insert_required([]):
             subattrs = (
                 self.attrs
                 | {"label": index[0], "frame": index[0], "link": True}
                 | polyline.path_geometry
                 | polyline.volume_geometry
+                | dict(
+                    zip(
+                        ("dx", "dy", "dz"),
+                        [getattr(polyline, f"delta_{attr}") for attr in "xyz"],
+                    )
+                )
             )
             subattrs.pop("name", None)
             self.subframe.insert(**subattrs)

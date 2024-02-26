@@ -10,6 +10,8 @@ from nova import njit
 from nova.biot.constants import Constants
 from nova.biot.matrix import Matrix
 
+from nova.biot.zeta import Zeta
+
 
 @njit(cache=True)
 def zeta(r, rs, z, zs, phi, delta):
@@ -29,41 +31,6 @@ class CylinderConstants(Constants):
 
     alpha: ClassVar[float] = np.pi / 2
     num: ClassVar[int] = 120
-
-    @cached_property
-    def v(self):
-        """Return v coefficient."""
-        return 1 + self.k2 * (self.gamma**2 - self.b * self.r) / (2 * self.r * self.rs)
-
-    def B2(self, phi):
-        """Return B2 coefficient."""
-        return self.rs**2 + self.r**2 - 2 * self.r * self.rs * np.cos(phi)
-
-    def D2(self, phi):
-        """Return D2 coefficient."""
-        return self.gamma**2 + self.B2(phi)
-
-    def G2(self, phi, shape=(...)):
-        """Return G2 coefficient."""
-        return self.gamma[shape] ** 2 + self.r[shape] ** 2 * np.sin(phi) ** 2
-
-    def beta1(self, phi, shape=(...)):
-        """Return beta1 coefficient."""
-        return (self.rs[shape] - self.r[shape] * np.cos(phi)) / np.sqrt(
-            self.G2(phi, shape)
-        )
-
-    def beta2(self, phi):
-        """Return beta2 coefficient."""
-        return self.gamma / np.sqrt(self.B2(phi))
-
-    def beta3(self, phi):
-        """Return beta3 coefficient."""
-        return (
-            self.gamma
-            * (self.rs - self.r * np.cos(phi))
-            / (self.r * np.sin(phi) * np.sqrt(self.D2(phi)))
-        )
 
     def Cphi_alpha(self, alpha):
         """Return Cphi(alpha) coefficient."""
@@ -102,43 +69,18 @@ class CylinderConstants(Constants):
             * (self.sign(self.rs - self.r) + 1)
         )
 
-    def _arcsinh_beta1(self, phi):
-        return np.arcsinh(
-            (self.rs - self.r * np.cos(phi))
-            / np.sqrt((self.zs - self.z) ** 2 + self.r**2 * np.sin(phi) ** 2)
-        )
-
     @cached_property
-    def zeta(self):
-        """Return zeta coefficient calculated using Romberg integration."""
+    def _zeta(self):
+        """Return zeta coefficient calculated using piecewise-constant."""
         phi, dphi = np.linspace(0, -2 * self.alpha, self.num + 1, retstep=True)
         phi = np.pi + phi[:-1] + dphi / 2
         dalpha = self.alpha / self.num
         return zeta(self.r, self.rs, self.z, self.zs, phi, dalpha)
 
-    @property
-    def Qr(self) -> dict[int, np.ndarray]:
-        """Return Qr(p) coefficient."""
-        Qr = {
-            p: (self.rs - (-1) ** p * self.c)
-            * self.np2[p]
-            * self.gamma**2
-            * self.c
-            / self.r
-            for p in [1, 2]
-        }
-        Qr[3] = np.zeros_like(self.r)
-        return Qr
-
-    @property
-    def Qz(self) -> dict[int, np.ndarray]:
-        """Return Qz(p) coefficient."""
-        Qz = {
-            p: (self.rs - (-1) ** p * self.c) * -2 * self.gamma * self.c * self.np2[p]
-            for p in [1, 2]
-        }
-        Qz[3] = self.gamma * self.b * (self.rs - self.r) * self.np2[3]
-        return Qz
+    @cached_property
+    def zeta(self):
+        """Return zeta coefficient calculated using jax trapezoid."""
+        return Zeta(self.rs, self.zs, self.r, self.z, self.alpha, 50)()
 
     @property
     def Dz(self):
@@ -252,13 +194,13 @@ if __name__ == "__main__":
 
     coilset.saloc["Ic"] = 1
 
-    coilset.aloc["nturn"] = 0
-    coilset.aloc["nturn"][64] = 1
+    # coilset.aloc["nturn"] = 0
+    # coilset.aloc["nturn"][64] = 1
 
-    coilset.grid.solve(1000, -0.75)
+    coilset.grid.solve(1000, 2.75)
     coilset.grid
     coilset.plot()
-    coilset.grid.plot("psi", colors="C1", nulls=False, clabel={})
+    levels = coilset.grid.plot("psi", colors="C0", nulls=False, clabel={})
     # coilset.grid.plot('ke', colors='C0', nulls=False, clabel={})
 
     coilset = CoilSet(dcoil=-1, dplasma=-(15**2))
@@ -277,6 +219,6 @@ if __name__ == "__main__":
     coilset.aloc["nturn"] = 0
     coilset.aloc["nturn"][64] = 1
 
-    coilset.grid.solve(1000, -0.75)
+    coilset.grid.solve(1000, 2.75)
 
-    coilset.grid.plot("psi", colors="C2", nulls=False, clabel={})
+    coilset.grid.plot("psi", colors="C2", nulls=False, clabel={}, levels=levels)

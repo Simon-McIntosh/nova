@@ -5,7 +5,7 @@ from functools import cached_property
 from typing import ClassVar
 
 import numpy as np
-from scipy.special import ellipj
+import scipy.special
 
 from nova.biot.constants import Constants
 from nova.biot.matrix import Matrix
@@ -83,12 +83,40 @@ class Arc(Constants, Matrix):
         """Retrun abs alpha > pi/2 segment index."""
         return self.abs_alpha > np.pi / 2
 
+    @property
+    def reps(self):
+        """Return tile reps for _pi2 operator."""
+        return (len(self.theta), 1, 1)
+
+    def _pi2(self, _hat):
+        """Index radial and toroidal fields for |alpha| > pi /2."""
+        _pi2 = np.tile(_hat[2, np.newaxis], self.reps)
+        _hat[self._index] = self.sign_alpha[self._index] * (
+            2 * _pi2[self._index] - _hat[self._index]
+        )
+        return _hat
+
+    @cached_property
+    def rack2(self):
+        """Return r a ck2 coefficent product."""
+        return self.r * self.a * self.ck2
+
     @cached_property
     def theta(self):
         """Return segment angle."""
         theta = self.abs_alpha.copy()
         theta[self._index] = np.pi - self.abs_alpha[self._index]
         return theta
+
+    @cached_property
+    def ellipj(self):
+        """Return end point stacked jacobian elliptic functions."""
+        return dict(
+            zip(
+                ["sn", "cn", "dn", "ph"],
+                np.stack([scipy.special.ellipj(u, self.k2) for u in self.Kinc], axis=1),
+            )
+        )
 
     @cached_property
     def Kinc(self):
@@ -115,32 +143,55 @@ class Arc(Constants, Matrix):
         )
 
     @cached_property
-    def ellipj(self):
-        """Return end point stacked jacobian elliptic functions."""
-        return dict(
-            zip(
-                ["sn", "cn", "dn", "ph"],
-                np.stack([ellipj(u, self.k2) for u in self.Kinc], axis=1),
+    def Ip(self) -> dict[int, np.ndarray]:
+        """Return I(np2) coefficent."""
+        Ip = {
+            p: -np.sqrt(abs(self.np2[p]))
+            / (2 * np.sqrt(self.k2 - self.np2[p]))
+            * np.log(
+                (
+                    np.sqrt(self.k2 - self.np2[p])
+                    - np.sqrt(abs(self.np2[p])) * self.ellipj["dn"]
+                )
+                ** 2
+                / (1 - self.np2[p] * self.ellipj["sn"] ** 2)
             )
-        )
-
-    @property
-    def reps(self):
-        """Return tile reps for _pi2 operator."""
-        return (len(self.theta), 1, 1)
-
-    def _pi2(self, _hat):
-        """Index radial and toroidal fields for |alpha| > pi /2."""
-        _pi2 = np.tile(_hat[2, np.newaxis], self.reps)
-        _hat[self._index] = self.sign_alpha[self._index] * (
-            2 * _pi2[self._index] - _hat[self._index]
-        )
-        return _hat
-
-    @cached_property
-    def rack2(self):
-        """Return r a ck2 coefficent product."""
-        return self.r * self.a * self.ck2
+            for p in range(1, 4)
+        }
+        for p in Ip:
+            Ip[p] = np.where(
+                (self.np2[p] > 0) & (self.np2[p] == self.k2),
+                1 / self.ellipj["dn"],
+                Ip[p],
+            )
+            Ip[p] = np.where(
+                (self.np2[p] > 0) & (self.np2[p] > self.k2),
+                np.sqrt(self.np2[p])
+                / (2 * np.sqrt(self.np2[p] - self.k2))
+                * np.log(
+                    (
+                        np.sqrt(self.np2[p] - self.k2)
+                        + np.sqrt(self.np2[p] * self.ellipj["dn"])
+                    )
+                    ** 2
+                    / (1 - self.np2[p] * self.ellipj["sn"] ** 2)
+                ),
+                Ip[p],
+            )
+            Ip[p] = np.where(
+                (self.np2[p] > 0) & (self.np2[p] < self.k2),
+                -np.sqrt(self.np2[p])
+                / (2 * np.sqrt(self.k2 - self.np2[p]))
+                * np.arcsin(
+                    2
+                    * np.sqrt(self.np2[p])
+                    * self.ellipj["dn"]
+                    * np.sqrt(self.k2 - self.np2[p])
+                    / (self.k2 * abs(1 - self.np2[p] * self.ellipj["sn"] ** 2))
+                ),
+                Ip[p],
+            )
+        return Ip
 
     @cached_property
     def _Ar_hat(self):
@@ -170,7 +221,8 @@ class Arc(Constants, Matrix):
 
     @property
     def _Az_hat(self):
-        """Return stacked local vertical vector potential intergration coefficents."""
+        """Return stacked local z-coordinate vector potential intergration constants."""
+        return np.zeros_like(self._Ar_hat)
         return np.zeros(((len(self.theta),) + self.shape))
 
     @cached_property

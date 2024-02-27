@@ -9,13 +9,13 @@ import numpy as np
 from nova.biot.arc import Arc
 from nova.biot.matrix import Matrix
 
-from nova.biot.constants import Zeta
+from nova.biot.zeta import Zeta
 
 
 @dataclass
 class Bow(Arc, Matrix):
     """
-    Extend Biot base class.
+    Extend filament Arc base class.
 
     Compute interaction for rectangular cross-section arc segments.
 
@@ -35,36 +35,61 @@ class Bow(Arc, Matrix):
             [self.zs + delta / 2 * self.source("height") for delta in [-1, -1, 1, 1]],
             axis=-1,
         )
-        self.r = np.stack([self.r for _ in range(4)], axis=-1)
-        self.z = np.stack([self.z for _ in range(4)], axis=-1)
+        for attr in ["r", "z", "alpha", "_phi"]:
+            setattr(self, attr, self._stack(attr))
 
-        print(self.alpha.shape)
-
-        print(Zeta(self.rs, self.zs, self.r, self.z, self.alpha).gamma)
-
-    def _stack(self, attr, axis=0):
-        """Return cross section attribute stacked along axis."""
-        return np.stack([getattr(super(), attr) for _ in range(4)], axis=axis)
-
-    @cached_property
-    def alpha(self):
-        """Return stacked system invariant angle."""
-        return self._stack("alpha", -1)
-
-    @cached_property
-    def _phi(self):
-        """Return stacked local target toroidal angle."""
-        return self._stack("_phi", -1)
+    def _stack(self, attr):
+        """Return cross section attribute stacked along last axis."""
+        try:
+            value = getattr(super(), attr)
+        except AttributeError:
+            value = getattr(self, attr)
+        return np.tile(value[..., np.newaxis], 4)
 
     @property
     def reps(self):
         """Return tile reps for _pi2 operator."""
         return (len(self.theta), 1, 1, 1)
 
-    @property
-    def _Az_hat(self):
-        """Return stacked local vertical vector potential intergration coefficents."""
-        return self._stack("_Az_hat", -1)
+    @cached_property
+    def zeta(self):
+        """Return zeta coefficient calculated using jax trapezoid method."""
+        return Zeta(self.rs, self.zs, self.r, self.z, self.alpha)()
+
+    @cached_property
+    def _Ar_hat(self):
+        """Return stacked local radial vector potential intergration coefficents."""
+        Ar_hat = (
+            self.Cr
+            + self.gamma
+            * self.a
+            / (6 * self.r)
+            * self.ellipj["dn"]
+            * ((2 * self.rs - self.r) + 2 * self.r * self.ellipj["sn"] ** 2)
+            + self.gamma / (6 * self.a * self.r) * self.p_sum(self.Pr, self.Ip)
+        )
+        return Ar_hat
+
+    @cached_property
+    def _Aphi_hat(self):
+        """Return stacked local toroidal vector potential intergration coefficents."""
+        Aphi_hat = (
+            self.Cphi
+            + self.gamma * self.r * self.zeta
+            + self.gamma
+            * self.a
+            / (6 * self.r)
+            * (
+                self.U * self.Kinc
+                - 2 * self.rs * self.Einc
+                + 2 * self.r * self.ellipj["sn"] * self.ellipj["cn"] * self.ellipj["dn"]
+            )
+            + self.gamma / (6 * self.a * self.r) * self.p_sum(self.Pphi, self.Pi)
+        )
+        print(np.prod(self.alpha.shape))
+        print(np.sum(self._index))
+        return Aphi_hat
+        return self._pi2(Aphi_hat)
 
     def _intergrate(self, data):
         """Return intergral quantity int dalpha dA."""
@@ -93,13 +118,21 @@ if __name__ == "__main__":
     for i in range(segment_number):
         coilset.winding.insert(
             points[2 * i : 1 + 2 * (i + 1)],
-            {"annulus": (0, 0, 0.05, 0.2)},
+            {"rect": (0, 0, 0.05, 0.03)},
             nturn=1,
             minimum_arc_nodes=3,
             Ic=1,
             filament=False,
+            ifttt=False,
         )
 
-    coilset.grid.solve(2500, [2, 3.8, 1, 3])
-    coilset.grid.plot("ay")
-    coilset.plot()
+    coilset.grid.solve(1500, 2)
+    coilset.grid.plot("ay", colors="C0")
+
+    cylinder = CoilSet(field_attrs=["Ax", "Ay", "Az", "Bx", "By", "Bz"])
+    cylinder.coil.insert(
+        {"rect": (radius, height, 0.05, 0.03)}, segment="cylinder", Ic=1
+    )
+    cylinder.grid.solve(1500, 2)
+    cylinder.grid.plot("ay", colors="C2")
+    cylinder.plot()

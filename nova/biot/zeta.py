@@ -5,7 +5,6 @@ from functools import cached_property
 import jax
 import jax.numpy as jnp
 import numpy as np
-import scipy
 
 
 @jax.tree_util.register_pytree_node_class
@@ -18,7 +17,7 @@ class Zeta:
     r: np.ndarray | jnp.ndarray = field(repr=False)
     z: np.ndarray | jnp.ndarray = field(repr=False)
     alpha: np.ndarray | jnp.ndarray = field(repr=False)
-    number: int = 150
+    number: int = 300
 
     def tree_flatten(self):
         """Return flattened pytree structure."""
@@ -32,6 +31,7 @@ class Zeta:
         return cls(*children, aux_data)
 
     @cached_property
+    @jax.jit
     def gamma(self):
         """Return gamma coefficent."""
         return self.zs - self.z
@@ -47,23 +47,23 @@ class Zeta:
         phi = jnp.pi - 2 * alpha
         return jnp.arcsinh((self.rs - self.r * jnp.cos(phi)) / jnp.sqrt(self.G2(phi)))
 
+    # @jax.jit
     def __call__(self):
         """Return zeta intergral."""
-        return scipy.integrate.quad_vec(self.arcsinh_beta_1, 0, self.alpha)
-
-        # alpha = jnp.linspace(0, self.alpha, self.number)
-        # return jax.scipy.integrate.trapezoid(
-        # self.arcsinh_beta_1(alpha), alpha, axis=0)
+        alpha = jnp.linspace(1e-8, self.alpha, self.number)
+        return jax.scipy.integrate.trapezoid(self.arcsinh_beta_1(alpha), alpha, axis=0)
 
 
 if __name__ == "__main__":
 
-    rs = np.linspace(1, 3)
-    zs = np.linspace(4, 7)
-    r = np.linspace(1, 3)
-    z = np.linspace(4, 7)
-    alpha = np.linspace(1, 3)
+    data = np.ones((3, 4))
+
+    rs = data
+    zs = data
+    r = data
+    z = data
+    alpha = data
 
     zeta = Zeta(rs, zs, r, z, alpha, 12)
 
-    print(zeta())
+    print(zeta().dtype)

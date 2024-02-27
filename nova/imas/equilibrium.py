@@ -758,6 +758,7 @@ if __name__ == "__main__":
     # args = 45272, 1, "mast_u"  # MastU
 
     # EquilibriumData(pulse, run, occurrence=0)._clear()
+
     equilibrium = EquilibriumData(*args, occurrence=0)
 
     equilibrium.time = 300

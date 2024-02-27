@@ -176,7 +176,7 @@ class PolyGen(PolyShape):
         return shapely.geometry.Polygon(polygon)
 
     @staticmethod
-    def skin(x_center, z_center, diameter, factor):
+    def skin(x_center, z_center, diameter, factor, quadrant_segments=16):
         """
         Return shapely.ring.
 
@@ -204,11 +204,13 @@ class PolyGen(PolyShape):
         """
         if factor <= 0 or factor > 1:
             raise ValueError("skin factor not 0 <= " f"{factor} <= 1")
-        disc_outer = PolyGen.disc(x_center, z_center, diameter)
+        disc_outer = PolyGen.disc(x_center, z_center, diameter, quadrant_segments)
         if factor == 1:
             return disc_outer
         scale = 1 - factor
-        disc_inner = PolyGen.disc(x_center, z_center, scale * diameter)
+        disc_inner = PolyGen.disc(
+            x_center, z_center, scale * diameter, quadrant_segments
+        )
         polygon = disc_outer.difference(disc_inner)
         return shapely.geometry.Polygon(polygon)
 

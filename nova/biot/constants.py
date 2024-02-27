@@ -11,6 +11,40 @@ import scipy.special
 # pylint: disable=no-member  # disable scipy.special module not found
 # pylint: disable=W0631  # disable short names
 
+import jax
+import jax.numpy as jnp
+
+
+@jax.tree_util.register_pytree_node_class
+@dataclass
+class Zeta:
+
+    rs: np.ndarray | jnp.ndarray = field(repr=False)
+    zs: np.ndarray | jnp.ndarray = field(repr=False)
+    r: np.ndarray | jnp.ndarray = field(repr=False)
+    z: np.ndarray | jnp.ndarray = field(repr=False)
+    alpha: np.ndarray | jnp.ndarray = field(repr=False)
+
+    def tree_flatten(self):
+        """Return flattened pytree structure."""
+        children = (self.rs, self.zs, self.r, self.z, self.alpha)
+        aux_data = ()
+        return (children, aux_data)
+
+    @classmethod
+    def tree_unflatten(cls, aux_data, children):
+        """Rebuild instance from pytree variables."""
+        return cls(*children)
+
+    @property
+    @jax.jit
+    def beta_1(self, alpha):
+        """Return gamma coefficent."""
+        phi = jnp.pi - 2 * alpha
+        gamma = self.zs - self.z
+        G2 = gamma**2 + self.r**2 * jnp.sin(phi) ** 2
+        return (self.rs - self.r * jnp.cos(phi)) / jnp.sqrt(G2)
+
 
 def unit_nudge(limit_factor=1.5, threshold_factor=3):
     """
@@ -87,6 +121,36 @@ class Constants:
         """Return sign of array -1 if x < 0 else 1."""
         return np.where(abs(x) > 1e4 * self.eps, np.sign(x), 0)
 
+    def B2(self, phi):
+        """Return B2 coefficient."""
+        return self.rs**2 + self.r**2 - 2 * self.r * self.rs * np.cos(phi)
+
+    def D2(self, phi):
+        """Return D2 coefficient."""
+        return self.gamma**2 + self.B2(phi)
+
+    def G2(self, phi, shape=(...)):
+        """Return G2 coefficient."""
+        return self.gamma[shape] ** 2 + self.r[shape] ** 2 * np.sin(phi) ** 2
+
+    def beta1(self, phi, shape=(...)):
+        """Return beta1 coefficient."""
+        return (self.rs[shape] - self.r[shape] * np.cos(phi)) / np.sqrt(
+            self.G2(phi, shape)
+        )
+
+    def beta2(self, phi):
+        """Return beta2 coefficient."""
+        return self.gamma / np.sqrt(self.B2(phi))
+
+    def beta3(self, phi):
+        """Return beta3 coefficient."""
+        return (
+            self.gamma
+            * (self.rs - self.r * np.cos(phi))
+            / (self.r * np.sin(phi) * np.sqrt(self.D2(phi)))
+        )
+
     @cached_property
     def gamma(self):
         """Return gamma coefficient."""
@@ -128,6 +192,11 @@ class Constants:
         return 1 - self.k2
 
     @cached_property
+    def v(self):
+        """Return v coefficient."""
+        return 1 + self.k2 * (self.gamma**2 - self.b * self.r) / (2 * self.r * self.rs)
+
+    @cached_property
     def K(self):
         """Return complete elliptic intergral of the 1st kind."""
         return self.ellipk(self.k2)
@@ -167,13 +236,11 @@ class Constants:
     @classmethod
     def ellipk(cls, m):
         """Return complete elliptic intergral of the 1st kind."""
-        # return scipy.special.ellipk(m)
         return cls._ellip("k", m)
 
     @classmethod
     def ellipe(cls, m):
         """Return complete elliptic intergral of the 2nd kind."""
-        # return scipy.special.ellipe(m)
         return cls._ellip("e", m)
 
     @classmethod
@@ -216,6 +283,30 @@ class Constants:
             2: (1 - self.eps) * 2 * self.r / (self.r + self.c),
             3: (1 - self.eps) * 4 * self.r * self.rs / self.b**2,
         }
+
+    @property
+    def Qr(self) -> dict[int, np.ndarray]:
+        """Return Qr(p) coefficient."""
+        Qr = {
+            p: (self.rs - (-1) ** p * self.c)
+            * self.np2[p]
+            * self.gamma**2
+            * self.c
+            / self.r
+            for p in [1, 2]
+        }
+        Qr[3] = np.zeros_like(self.r)
+        return Qr
+
+    @property
+    def Qz(self) -> dict[int, np.ndarray]:
+        """Return Qz(p) coefficient."""
+        Qz = {
+            p: (self.rs - (-1) ** p * self.c) * -2 * self.gamma * self.c * self.np2[p]
+            for p in [1, 2]
+        }
+        Qz[3] = self.gamma * self.b * (self.rs - self.r) * self.np2[3]
+        return Qz
 
     @cached_property
     def Pphi(self) -> dict[int, np.ndarray]:

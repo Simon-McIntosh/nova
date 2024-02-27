@@ -21,16 +21,16 @@ Public API in the main Nova namespace
 """
 
 __all__ = [
-    "xarray",
+    "geometry",
 ]
 
-from importlib import metadata, import_module
+import importlib
 
-from .xarray import xarray
+from .dataset import geometry
 
 try:
-    __version__ = metadata.version(__package__ or __name__)
-except metadata.PackageNotFoundError:
+    __version__ = importlib.metadata.version(__package__ or __name__)
+except importlib.metadata.PackageNotFoundError:
     __version__ = "0.0.0"
 __all__.extend("__version__")
 
@@ -66,7 +66,7 @@ def __dir__():
 
 def __getattr__(name):
     if name in submodules:
-        return import_module(f"nova.{name}")
+        return importlib.import_module(f"nova.{name}")
     else:
         try:
             return globals()[name]

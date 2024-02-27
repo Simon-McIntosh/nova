@@ -16,6 +16,7 @@ from nova.frame.error import GridError
 from nova.frame.framelink import FrameLink
 from nova.geometry.pointloop import PointLoop
 from nova.graphics.line import Chart
+from nova.utilities.time import timeit
 
 
 @dataclass
@@ -64,7 +65,6 @@ class Gridgen(Plot):
     def __post_init__(self):
         """Build grid coordinates."""
         if len(self.data) == 0:
-            print("generate")
             self.generate()
 
     def generate(self):
@@ -115,9 +115,9 @@ class Gridgen(Plot):
         self.data["X"] = (list("xyz"), X)
         self.data["Y"] = (list("xyz"), Y)
         self.data["Z"] = (list("xyz"), Z)
-        if len(coords["y"]) == 1:  # 2d grid
-            self.data["x2d"] = (["x", "z"], X[:, 0])
-            self.data["z2d"] = (["x", "z"], Z[:, 0])
+        # if len(coords["y"]) == 1:  # 2d grid
+        self.data["x2d"] = (["x", "z"], X[:, 0])
+        self.data["z2d"] = (["x", "z"], Z[:, 0])
 
     def __len__(self):
         """Return grid resolution."""
@@ -166,7 +166,16 @@ class Expand:
             self.index = getattr(self.frame, self.index)
             if sum(self.index) == 0:
                 raise GridError(index)
+        """
         poly = shapely.geometry.MultiPolygon(
+            [
+                polygon.poly
+                for polygon in self.frame.poly[self.index]
+                if isinstance(polygon.poly, shapely.geometry.Polygon)
+            ]
+        )
+        """
+        poly = shapely.ops.unary_union(
             [polygon.poly for polygon in self.frame.poly[self.index]]
         )
         self.limit = np.array([*poly.bounds[::2], *poly.bounds[1::2]])
@@ -223,6 +232,7 @@ class BaseGrid(Chart, FieldNull, Operate):
 class Grid(BaseGrid):
     """Compute interaction across regular grid."""
 
+    @timeit(repeat=1, number=1)
     def solve(
         self,
         number: int | None = None,
@@ -231,17 +241,15 @@ class Grid(BaseGrid):
         grid: xarray.Dataset = xarray.Dataset(),
     ):
         """Solve Biot interaction across grid."""
-        if len(grid) > 0:
-            assert all([attr in grid for attr in "XYZ"])
-            number = np.prod(grid.shape)
-            limit = None
-        else:
-            if number is None:
-                return
-            if isinstance(limit, (int, float)):
-                limit = Expand(self.subframe, index)(limit)
-            grid = Gridgen(number, limit).data
-        with self.solve_biot(number):
+        with self.solve_biot(number) as number:
+            if len(grid) > 0:
+                assert all([attr in grid for attr in "XYZ"])
+                self.number = np.prod(grid.X.shape)
+                limit = None
+            else:
+                if isinstance(limit, (int, float)):
+                    limit = Expand(self.subframe, index)(limit)
+                grid = Gridgen(number, limit).data
             target = Target(
                 {attr.lower(): grid[attr].data.flatten() for attr in "XYZ"},
                 label="Grid",
@@ -292,7 +300,16 @@ class Grid(BaseGrid):
             return self.data.sizes["x"], self.data.sizes["z"]
         return tuple(self.data.sizes[attr] for attr in "xyz")
 
-    def plot(self, attr="psi", axes=None, nulls=True, clabel=None, **kwargs):
+    def plot(
+        self,
+        attr="psi",
+        coords="xz",
+        index=slice(None),
+        axes=None,
+        nulls=True,
+        clabel=None,
+        **kwargs,
+    ):
         """Plot contours."""
         if len(self.data) == 0:
             return
@@ -300,9 +317,12 @@ class Grid(BaseGrid):
         if nulls and hasattr(self, "psi"):
             super().plot(axes=axes)
         if isinstance(attr, str):
-            attr = getattr(self, f"{attr}_")
+            attr = getattr(self, f"{attr}_")[index]
         QuadContourSet = self.axes.contour(
-            self.data.x, self.data.z, attr.T, **self.contour_kwargs(**kwargs)
+            self.data[coords[0]],
+            self.data[coords[1]],
+            attr.T,
+            **self.contour_kwargs(**kwargs),
         )
         if isinstance(kwargs.get("levels", None), int):
             self.levels = QuadContourSet.levels

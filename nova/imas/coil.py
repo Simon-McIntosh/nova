@@ -26,10 +26,10 @@ def full_coil_name(identifier: str):
             return f"Central Solenoid Module {index} {position}"
         case "V", str(position), *index:
             position = dict(zip("UL", ["Upper", "Lower"]))[position]
-            return f"{position} Vertical Stability Coil {index}"
+            return f"{position} Vertical Stability Coil {''.join(index)}"
         case "E", str(position), *index:
             position = dict(zip("UEL", ["Upper", "Middle", "Lower"]))[position]
-            return f"{position} ELM Coil {index}"
+            return f"{position} ELM Coil {''.join(index)}"
         case "P", "F", str(index):
             return f"Poloidal Field Coil {index}"
         case "T", "F", "_", str(coil_a), "_", str(coil_b):

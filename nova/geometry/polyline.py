@@ -377,6 +377,7 @@ class PolyLine(Plot):
     minimum_arc_nodes: int = 4
     quadrant_segments: int = 16
     arc_resolution: float = 1.5
+    filament: bool = True
     segments: list[Line | Arc] = field(init=False, repr=False, default_factory=list)
 
     path_attrs: ClassVar[list[str]] = [
@@ -521,6 +522,9 @@ class PolyLine(Plot):
 
     def _to_list(self, attr: str):
         """Return segment attribute list."""
+        if attr == "segment" and not self.filament:
+            thicken = {"arc": "bow", "line": "beam"}
+            return [thicken[segment[attr]] for segment in self.segments]
         return [segment[attr] for segment in self.segments]
 
     @cached_property
@@ -553,6 +557,31 @@ class PolyLine(Plot):
     def volume(self) -> list[float]:
         """Return subframe volume list."""
         return [_vtk.clone().triangulate().volume() for _vtk in self.vtk]
+
+    @cached_property
+    def bounds(self) -> np.ndarray:
+        """Return 3d bounding box coordinates for vtk volume objects."""
+        return np.c_[[_vtk.clone().triangulate().bounds() for _vtk in self.vtk]]
+
+    @cached_property
+    def delta(self) -> np.ndarray:
+        """Return 3d bounding box deltas for vtk volume objects."""
+        return self.bounds[:, 1::2] - self.bounds[:, ::2]
+
+    @property
+    def delta_x(self):
+        """Return bounding box x-coordinate delta."""
+        return self.delta[:, 0]
+
+    @property
+    def delta_y(self):
+        """Return bounding box y-coordinate delta."""
+        return self.delta[:, 1]
+
+    @property
+    def delta_z(self):
+        """Return bounding box z-coordinate delta."""
+        return self.delta[:, 2]
 
     @cached_property
     def path_geometry(self) -> dict:

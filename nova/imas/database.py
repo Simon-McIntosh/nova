@@ -2,6 +2,7 @@
 
 from contextlib import contextmanager
 from dataclasses import dataclass, field, fields, InitVar
+from functools import cached_property
 from operator import attrgetter
 import os
 from typing import Any, ClassVar, Optional, Type
@@ -446,6 +447,12 @@ class Database(IDS):
             self.ids = self.get_ids()
         return self.ids
 
+    @cached_property
+    def ids_dd_version(self) -> version.Version:
+        """Return DD version used to write the IDS."""
+        version_put = self.get_ids("ids_properties/version_put/data_dictionary")
+        return version.parse(version_put.split("-")[0])
+
     def load_database(self):
         """Load instance database attributes."""
         if self.ids is not None:
@@ -560,7 +567,7 @@ class Database(IDS):
 
     @property
     def dd_version(self) -> version.Version:
-        """Return DD version."""
+        """Return imas DD version."""
         try:
             return version.parse(imas.al_dd_version)
         except ValueError:

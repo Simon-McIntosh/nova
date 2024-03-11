@@ -9,6 +9,7 @@ import scipy.special
 
 from nova.biot.biotframe import BiotFrame
 from nova.biot.circle import Circle
+from nova.biot.constants import Constants
 from nova.biot.grid import Grid
 from nova.biot.matrix import Matrix
 from nova.biot.point import Point
@@ -380,6 +381,7 @@ def test_magnetic_field_analytic_non_axisymmetric(segment, radius, height, curre
     grid = np.meshgrid(
         np.linspace(-3.1, 5.1, 9), -2.5, np.linspace(-4.1, 1.7, 3), indexing="ij"
     )
+
     coilset.point.solve(np.stack(grid, axis=-1))
     analytic = AnalyticField(radius, height, current, *grid)
 
@@ -476,6 +478,26 @@ def test_arc_singularity():
     # coilset.point.set_axes("1d")
     # coilset.point.axes.plot(grid[:, 0], coilset.point.ax)
     assert False
+
+
+def test_ellipp_sympy():
+    """Test ellippi implementation.
+
+    Copied from https://github.com/scipy/scipy/pull/15787."""
+    n = np.array([-0.5, 0.0, 0.3, 1.3, -0.7])
+    m = np.array([0.0, 0.2, 0.4, 0.8, 0.5])
+    p_scipy = Constants.ellipp(n, m)
+    p_sympy = np.array([1.28254983, 1.6596236, 2.14879542, -1.7390616, 1.3902519])
+    assert np.allclose(p_scipy, p_sympy)
+
+
+def test_ellippinc_sympy():
+    n = np.array([-0.5, 0.0, 0.3, 1.3, -0.7])
+    m = np.array([0.0, 0.2, 0.4, 0.8, 0.5])
+    phi = np.array([-2.5, 0.0, 0.5, 5.5, 7.2])
+    p_scipy = Constants.ellippinc(phi, n, m)
+    p_sympy = np.array([0.60501809, 0.0, 0.52106308, -1.24837946, 0.84754152])
+    assert np.allclose(p_scipy, p_sympy)
 
 
 if __name__ == "__main__":

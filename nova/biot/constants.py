@@ -88,46 +88,6 @@ class Constants:
         return np.where(abs(x) > 1e4 * self.eps, np.sign(x), 0)
 
     @cached_property
-    def phi_(self):
-        """Return system variant angle."""
-        phi = np.pi - 2 * self.alpha
-        return np.where(abs(phi) > 1e4 * self.eps, phi, 1e4 * self.eps)
-
-    @property
-    def B2(self):
-        """Return B2 coefficient."""
-        return self.rs**2 + self.r**2 - 2 * self.r * self.rs * np.cos(self.phi_)
-
-    @property
-    def D2(self):
-        """Return D2 coefficient."""
-        return self.gamma**2 + self.B2
-
-    @property
-    def G2(self):
-        """Return G2 coefficient."""
-        return self.gamma**2 + self.r**2 * np.sin(self.phi_) ** 2
-
-    @property
-    def beta_1(self):
-        """Return beta 1 coefficient."""
-        return (self.rs - self.r * np.cos(self.phi_)) / np.sqrt(self.G2)
-
-    @property
-    def beta_2(self):
-        """Return beta 2 coefficient."""
-        return self.gamma / np.sqrt(self.B2)
-
-    @property
-    def beta_3(self):
-        """Return beta 3 coefficient."""
-        return (
-            self.gamma
-            * (self.rs - self.r * np.cos(self.phi_))
-            / (self.r * np.sin(self.phi_) * np.sqrt(self.D2))
-        )
-
-    @cached_property
     def gamma(self):
         """Return gamma coefficient."""
         return self.zs - self.z
@@ -220,82 +180,50 @@ class Constants:
         return cls._ellip("e", m)
 
     @classmethod
-    def ellippi(cls, n, m):
+    def elliprf(cls, x, y, z):
+        """Return completely-symmetric elliptic integral of the first kind."""
+        rf = scipy.special.elliprf(x, y, z)
+        # rf[(y == 0) | (y == 1)] = scipy.special.elliprc(0, 1)
+        return rf
+
+    @classmethod
+    def elliprj(cls, x, y, z, p):
+        """Retrun symmetric elliptic integral of the third kind."""
+        rj = scipy.special.elliprj(x, y, z, p)
+        # rj[y == p] = scipy.special.elliprd(x[y == p], z[y == p], p[y == p])
+        # rj[p == 1] = scipy.special.elliprd(x[p == 1], y[p == 1], 1)
+        return rj
+
+    @classmethod
+    def ellipp(cls, n, m):
         """
         Return complete elliptic intergral of the 3rd kind.
 
         Adapted from https://github.com/scipy/scipy/issues/4452.
         """
-        """
-        x, y, z, p = 0, 1-m, 1, 1-n
-        rf = cls._ellip('rf', x, y, z, shape=m.shape) #, where=(m < 1))
-        #cls._ellip('rc', 0, 1, out=rf, where=np.isclose(y, 1))
-        rj = cls._ellip('rj', x, y, z, p, shape=m.shape) #, where=(m < 1))
-        #cls._ellip('rd', x, z, p, out=rj, where=np.isclose(y, p))
-        #cls._ellip('rd', x, y, p, out=rj, where=np.isclose(p, 1))
-        return rf + rj * n / 3
-        """
-        x, y, z, p = 0, 1 - m, 1, 1 - n
-        rf = scipy.special.elliprf(x, y, z)
-        rf[(y == 0) | (y == 1)] = scipy.special.elliprc(0, 1)
-        rj = scipy.special.elliprj(x, y, z, p)
-        rj[y == p] = scipy.special.elliprd(x, z, p[y == p])
-        rj[p == 1] = scipy.special.elliprd(x, y[p == 1], 1)
+        x, y, z, p = np.zeros_like(n), 1 - m, np.ones_like(n), 1 - n
+        rf = cls.elliprf(x, y, z)
+        rj = cls.elliprj(x, y, z, p)
         return rf + rj * n / 3
 
-    @cached_property
-    def Cr(self):
-        """Return Cr coefficient."""
-        return (
-            1
-            / 2
-            * self.gamma
-            * self.a
-            * np.sqrt(1 - self.k2 * np.sin(self.alpha) ** 2)
-            * np.cos(2 * self.alpha)
-            - 1
-            / 6
-            * np.arcsinh(self.beta_2)
-            * np.cos(2 * self.alpha)
-            * (
-                2 * self.r**2 * np.cos(2 * self.alpha) ** 2
-                - 3 * (self.rs**2 + self.r**2)
-            )
-            - 1
-            / 4
-            * self.gamma
-            * self.r
-            * np.arcsinh(self.beta_1)
-            * (3 + np.cos(4 * self.alpha))
-            - 1 / 3 * self.r**2 * np.arctan(self.beta_3) * np.sin(2 * self.alpha) ** 3
-        )
+    @classmethod
+    def ellippinc(cls, phi, n, m):
+        """
+        Return incomplete elliptic intergral of the 3rd kind.
 
-    @cached_property
-    def Cphi(self):
-        """Return Cphi coefficient."""
-        return (
-            1
-            / 2
-            * self.gamma
-            * self.a
-            * np.sqrt(1 - self.k2 * np.sin(self.alpha) ** 2)
-            * -np.sin(2 * self.alpha)
-            - 1
-            / 6
-            * np.arcsinh(self.beta_2)
-            * np.sin(2 * self.alpha)
-            * (
-                2 * self.r**2 * np.sin(2 * self.alpha) ** 2
-                + 3 * (self.rs**2 - self.r**2)
-            )
-            - 1
-            / 4
-            * self.gamma
-            * self.r
-            * np.arcsinh(self.beta_1)
-            * -np.sin(4 * self.alpha)
-            - 1 / 3 * self.r**2 * np.arctan(self.beta_3) * -np.cos(2 * self.alpha) ** 3
-        )
+        Adapted from https://github.com/scipy/scipy/issues/4452.
+        """
+        nc = np.floor(phi / np.pi + 0.5)
+        phi -= nc * np.pi
+        sin_phi = np.sin(phi)
+        sin2_phi = sin_phi * sin_phi
+        sin3_phi = sin2_phi * sin_phi
+        x = 1 - sin2_phi
+        y = 1 - m * sin2_phi
+        z = np.ones_like(phi)
+        rf = cls.elliprf(x, y, z)
+        rj = cls.elliprj(x, y, z, 1 - n * sin2_phi)
+        return sin_phi * rf + sin3_phi * rj * n / 3
 
     # @unit_nudge()
     def _np2_2(self):
@@ -327,6 +255,16 @@ class Constants:
         }
         Qr[3] = np.zeros_like(self.r)
         return Qr
+
+    @property
+    def Qphi(self) -> dict[int, np.ndarray]:
+        """Return Qphi(p) coefficient."""
+        Qphi = {
+            p: (self.rs - (-1) ** p * self.c) * (-1) ** p * (self.c**2 + self.gamma**2)
+            for p in [1, 2]
+        }
+        Qphi[3] = np.zeros_like(self.r)
+        return Qphi
 
     @property
     def Qz(self) -> dict[int, np.ndarray]:
@@ -365,7 +303,7 @@ class Constants:
     @cached_property
     def Pi(self) -> dict[int, np.ndarray]:
         """Return complete elliptc intergral of the 3rd kind."""
-        return {p: self.ellippi(self.np2[p], self.k2) for p in range(1, 4)}
+        return {p: self.ellipp(self.np2[p], self.k2) for p in range(1, 4)}
 
     def p_sum(self, func_a, func_b):
         """Return p sum."""

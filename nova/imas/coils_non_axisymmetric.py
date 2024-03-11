@@ -3,6 +3,7 @@
 from dataclasses import dataclass, field
 from functools import cached_property
 from typing import ClassVar
+import warnings
 
 import numpy as np
 import openpyxl
@@ -163,15 +164,23 @@ class CoilsNonAxisymmetric(Plot, CoilDatabase, Scenario):
                     )
                     points[name].extend(elements.points)
                     if self.ids_dd_version <= version.Version("3.39"):  # IDS version
-                        section = Section(
-                            elements._to_array(
-                                conductor.cross_section,
-                                attrs=["delta_r", "delta_phi", "delta_z"],
-                            ),
-                            triad=elements.start_axes,
-                        )
-                        section.to_axes(np.identity(3))
-                        polygon = Polygon(section.points[:, 1:])
+                        try:
+                            section = Section(
+                                elements._to_array(
+                                    conductor.cross_section,
+                                    attrs=["delta_r", "delta_phi", "delta_z"],
+                                ),
+                                triad=elements.start_axes,
+                            )
+                            section.to_axes(np.identity(3))
+                            polygon = Polygon(section.points[:, 1:])
+                        except AttributeError as error:
+                            warnings.warn(
+                                "cross section structure unreachable for "
+                                f"ids written with dd {self.ids_dd_version} < 3.39. "
+                                f"{error.__str__()}"
+                            )
+                            polygon = Polygon({"c": [0, 0, 0.05]})
                     else:
                         cross_section = conductor.cross_section[0]
                         match index := cross_section.geometry_type.index:

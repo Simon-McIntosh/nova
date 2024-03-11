@@ -247,6 +247,8 @@ class Grid(BaseGrid):
                 self.number = np.prod(grid.X.shape)
                 limit = None
             else:
+                if number is None:
+                    return
                 if isinstance(limit, (int, float)):
                     limit = Expand(self.subframe, index)(limit)
                 grid = Gridgen(number, limit).data

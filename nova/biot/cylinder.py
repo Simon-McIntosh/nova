@@ -6,23 +6,10 @@ from typing import ClassVar
 
 import numpy as np
 
-from nova import njit
 from nova.biot.constants import Constants
 from nova.biot.matrix import Matrix
 
-from nova.biot.zeta import Zeta
-
-
-@njit(cache=True, fastmath=True, parallel=True)
-def zeta(r, rs, z, zs, phi, delta):
-    """Return zeta coefficent."""
-    result = np.zeros_like(r)
-    for i in np.arange(len(phi)):
-        result += np.arcsinh(
-            (rs - r * np.cos(phi[i]))
-            / np.sqrt((zs - z) ** 2 + r**2 * np.sin(phi[i]) ** 2)
-        )
-    return delta * result
+from nova.biot.zeta import Zeta, zeta
 
 
 @dataclass
@@ -53,10 +40,16 @@ class CylinderConstants(Constants):
         return zeta(self.r, self.rs, self.z, self.zs, phi, dalpha)
 
     @cached_property
-    def zeta(self):
+    def __zeta(self):
         """Return zeta coefficient calculated using jax trapezoid method."""
         alpha = self.alpha * np.ones(self.shape + (4,))
         return Zeta(self.rs, self.zs, self.r, self.z, alpha)()
+
+    @cached_property
+    def zeta(self):
+        """Return zeta coefficient calculated using numba trapezoid method."""
+        alpha = self.alpha * np.ones(self.shape + (4,))
+        return zeta(self.rs, self.r, self.gamma, alpha)
 
     @property
     def Dz(self):
@@ -157,7 +150,9 @@ class Cylinder(CylinderConstants, Matrix):
 if __name__ == "__main__":
     from nova.frame.coilset import CoilSet
 
-    coilset = CoilSet(dcoil=-1, dplasma=-1)  # (15**2)
+    coilset = CoilSet(
+        dcoil=-1, dplasma=-1, field_attrs=["Ax", "Ay", "Az", "Bx", "By", "Bz"]
+    )  # (15**2)
     """
     coilset.coil.insert(5, 0.5, 0.01, 0.8, segment='cylinder')
     coilset.coil.insert(5.1, 0.5+0.4, 0.2, 0.01, segment='cylinder')
@@ -175,10 +170,12 @@ if __name__ == "__main__":
 
     coilset.grid.solve(1000, 1.75)
     coilset.plot()
-    levels = coilset.grid.plot("psi", colors="C0", nulls=False, clabel={})
+    levels = coilset.grid.plot("bx", colors="C0", nulls=False, clabel={})
     axes = coilset.grid.axes
 
-    coilset = CoilSet(dcoil=-1, dplasma=-(50**2))
+    coilset = CoilSet(
+        dcoil=-1, dplasma=-(50**2), field_attrs=["Ax", "Ay", "Az", "Bx", "By", "Bz"]
+    )
     """
     coilset.coil.insert(5, 0.5, 0.01, 0.8, segment='cylinder')
     coilset.coil.insert(5.1, 0.5+0.4, 0.2, 0.01, segment='cylinder')
@@ -196,5 +193,5 @@ if __name__ == "__main__":
 
     coilset.grid.solve(1000, 1.75)
     coilset.grid.plot(
-        "psi", colors="C2", nulls=False, clabel={}, levels=levels, axes=axes
+        "bx", colors="C2", nulls=False, clabel={}, levels=levels, axes=axes
     )

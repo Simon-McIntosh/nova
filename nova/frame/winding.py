@@ -56,6 +56,7 @@ class Winding(CoilSetAttrs):
         "minimum_arc_nodes",
         "quadrant_segments",
         "arc_resolution",
+        "align",
         "filament",
     ]
 
@@ -125,7 +126,7 @@ class Winding(CoilSetAttrs):
                 )
         self.polyline = polyline
 
-        align = additional.pop("align", "vector")
+        align = polyline_kwargs.pop("align", PolyLine.align)
         vtk = Sweep(cross_section.points, polyline.path, align=align)
         frame_data = self.vtk_data(vtk)
         poly = Polygon(

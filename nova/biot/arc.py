@@ -14,7 +14,7 @@ from nova.biot.matrix import Matrix
 def arctan2(x1, x2):
     """Return unwraped arctan2 operator."""
     phi = np.arctan2(x1, x2)
-    phi[phi <= 0] += 2 * np.pi
+    phi[phi < 0] += 2 * np.pi
     return phi
 
 
@@ -53,10 +53,10 @@ class Arc(Constants, Matrix):
     @cached_property
     def alpha(self):
         """Return system invariant angle alpha for start, end, and pi/2."""
-        _phi = arctan2(self("target", "y"), self("target", "x"))[np.newaxis]
+        _phi = self._phi[np.newaxis]
         phi_s = np.stack(
             [
-                np.zeros(self.shape),
+                np.zeros(self.shape, dtype=float),
                 arctan2(self("source", "y2"), self("source", "x2")),
             ]
         )
@@ -68,45 +68,164 @@ class Arc(Constants, Matrix):
             axis=0,
         )
 
-    @cached_property
+    @property
     def sign_alpha(self):
         """Return sign(alpha)."""
         return np.sign(self.alpha)
 
-    @cached_property
+    @property
     def abs_alpha(self):
         """Return abs(alpha)."""
         return abs(self.alpha)
 
-    @cached_property
-    def _index(self):
-        """Retrun abs alpha > pi/2 segment index."""
+    @property
+    def _index_A(self):
+        """Return |alpha| <= pi/2 segment index."""
+        return self.abs_alpha <= np.pi / 2
+
+    @property
+    def _index_B(self):
+        """Return |alpha| > pi/2 segment index."""
         return self.abs_alpha > np.pi / 2
+
+    @property
+    def _pi2_mask(self):
+        """Return pi/2 mask."""
+        mask = np.ones_like(self.alpha, bool)
+        mask[-1] = False
+        return mask
+
+    @property
+    def _index_C(self):
+        return (self.abs_alpha > np.pi / 2) & (self.abs_alpha <= 3 * np.pi / 2)
+
+    @property
+    def _index_D(self):
+        """Return pi/2 < alpha <= 3pi/2 segment index."""
+        return (self.alpha > 3 * np.pi / 2) & (self.alpha <= 2 * np.pi) & self._pi2_mask
+
+    @cached_property
+    def _theta(self):
+        """Return signed segment angle."""
+        theta = np.zeros_like(self.alpha)
+        theta[self._index_A] = self.abs_alpha[self._index_A]
+        theta[self._index_C] = np.pi - self.abs_alpha[self._index_C]
+        theta[self._index_D] = 2 * np.pi - self.alpha[self._index_D]
+        return theta
+
+    @property
+    def sign_theta(self):
+        """Return sign(theta)."""
+        return np.sign(self._theta)
+
+    @property
+    def theta(self):
+        """Return absolute segment angle."""
+        return abs(self._theta)
+
+    @cached_property
+    def Phi(self):
+        """Return system variant angle."""
+        phi = np.pi - 2 * self.theta
+        return np.where(abs(phi) > 1e2 * self.eps, phi, 1e2 * self.eps)
+
+    @property
+    def B2(self):
+        """Return B2 coefficient."""
+        return self.rs**2 + self.r**2 - 2 * self.r * self.rs * np.cos(self.Phi)
+
+    @property
+    def D2(self):
+        """Return D2 coefficient."""
+        return self.gamma**2 + self.B2
+
+    @property
+    def G2(self):
+        """Return G2 coefficient."""
+        return self.gamma**2 + self.r**2 * np.sin(self.Phi) ** 2
+
+    @property
+    def beta_1(self):
+        """Return beta 1 coefficient."""
+        return (self.rs - self.r * np.cos(self.Phi)) / np.sqrt(self.G2)
+
+    @property
+    def beta_2(self):
+        """Return beta 2 coefficient."""
+        return self.gamma / np.sqrt(self.B2)
+
+    @property
+    def beta_3(self):
+        """Return beta 3 coefficient."""
+        return (
+            self.gamma
+            * (self.rs - self.r * np.cos(self.Phi))
+            / (self.r * np.sin(self.Phi) * np.sqrt(self.D2))
+        )
+
+    @cached_property
+    def Cr(self):
+        """Return Cr coefficient."""
+        return (
+            1
+            / 2
+            * self.gamma
+            * self.a
+            * np.sqrt(1 - self.k2 * np.sin(self.theta) ** 2)
+            * np.cos(2 * self.theta)
+            - 1
+            / 6
+            * np.arcsinh(self.beta_2)
+            * np.cos(2 * self.theta)
+            * (
+                2 * self.r**2 * np.cos(2 * self.theta) ** 2
+                - 3 * (self.rs**2 + self.r**2)
+            )
+            - 1
+            / 4
+            * self.gamma
+            * self.r
+            * np.arcsinh(self.beta_1)
+            * (3 + np.cos(4 * self.theta))
+            - 1 / 3 * self.r**2 * np.arctan(self.beta_3) * np.sin(2 * self.theta) ** 3
+        )
+
+    @cached_property
+    def Cphi(self):
+        """Return Cphi coefficient."""
+        return (
+            1
+            / 2
+            * self.gamma
+            * self.a
+            * np.sqrt(1 - self.k2 * np.sin(self.theta) ** 2)
+            * -np.sin(2 * self.theta)
+            - 1
+            / 6
+            * np.arcsinh(self.beta_2)
+            * np.sin(2 * self.theta)
+            * (
+                2 * self.r**2 * np.sin(2 * self.theta) ** 2
+                + 3 * (self.rs**2 - self.r**2)
+            )
+            - 1
+            / 4
+            * self.gamma
+            * self.r
+            * np.arcsinh(self.beta_1)
+            * -np.sin(4 * self.theta)
+            - 1 / 3 * self.r**2 * np.arctan(self.beta_3) * -np.cos(2 * self.theta) ** 3
+        )
 
     @property
     def reps(self):
         """Return tile reps for _pi2 operator."""
         return (len(self.theta), 1, 1)
 
-    def _pi2(self, _hat):
-        """Index radial and toroidal fields for |alpha| > pi /2."""
-        _pi2 = np.tile(_hat[2, np.newaxis], self.reps)
-        _hat[self._index] = self.sign_alpha[self._index] * (
-            2 * _pi2[self._index] - _hat[self._index]
-        )
-        return _hat
-
     @cached_property
     def rack2(self):
         """Return r a ck2 coefficent product."""
         return self.r * self.a * self.ck2
-
-    @cached_property
-    def theta(self):
-        """Return segment angle."""
-        theta = self.abs_alpha.copy()
-        theta[self._index] = np.pi - self.abs_alpha[self._index]
-        return theta
 
     @cached_property
     def ellipj(self):
@@ -129,6 +248,16 @@ class Arc(Constants, Matrix):
         return np.stack([self.ellipeinc(theta, self.k2) for theta in self.theta])
 
     @cached_property
+    def Pi_inc(self) -> dict[int, np.ndarray]:
+        """Return end point stacked incomplete elliptic intergral of the 3rd kind."""
+        return {
+            p: np.stack(
+                [self.ellippinc(theta, self.np2[p], self.k2) for theta in self.theta]
+            )
+            for p in range(1, 4)
+        }
+
+    @cached_property
     def Winc(self):
         """Return end point stacked composite incomplete elliptic intergral."""
         return np.stack(
@@ -145,33 +274,18 @@ class Arc(Constants, Matrix):
     @cached_property
     def Ip(self) -> dict[int, np.ndarray]:
         """Return I(np2) coefficent."""
-        Ip = {
-            p: -np.sqrt(abs(self.np2[p]))
-            / (2 * np.sqrt(self.k2 - self.np2[p]))
-            * np.log(
-                (
-                    np.sqrt(self.k2 - self.np2[p])
-                    - np.sqrt(abs(self.np2[p])) * self.ellipj["dn"]
-                )
-                ** 2
-                / (1 - self.np2[p] * self.ellipj["sn"] ** 2)
-            )
-            for p in range(1, 4)
-        }
+        zeros = np.zeros_like(self.k2)
+        ones = np.ones_like(self.k2)
+        Ip = {p: np.zeros_like(self.k2) for p in range(1, 4)}
         for p in Ip:
             Ip[p] = np.where(
-                (self.np2[p] > 0) & (self.np2[p] == self.k2),
-                1 / self.ellipj["dn"],
-                Ip[p],
-            )
-            Ip[p] = np.where(
-                (self.np2[p] > 0) & (self.np2[p] > self.k2),
-                np.sqrt(self.np2[p])
-                / (2 * np.sqrt(self.np2[p] - self.k2))
+                (sign := self.np2[p] <= 0),
+                -np.sqrt(abs(self.np2[p]))
+                / (2 * np.sqrt(self.k2 - self.np2[p], ones.copy(), where=sign))
                 * np.log(
                     (
-                        np.sqrt(self.np2[p] - self.k2)
-                        + np.sqrt(self.np2[p] * self.ellipj["dn"])
+                        np.sqrt(self.k2 - self.np2[p], ones.copy(), where=sign)
+                        - np.sqrt(abs(self.np2[p])) * self.ellipj["dn"]
                     )
                     ** 2
                     / (1 - self.np2[p] * self.ellipj["sn"] ** 2)
@@ -179,19 +293,65 @@ class Arc(Constants, Matrix):
                 Ip[p],
             )
             Ip[p] = np.where(
-                (self.np2[p] > 0) & (self.np2[p] < self.k2),
-                -np.sqrt(self.np2[p])
-                / (2 * np.sqrt(self.k2 - self.np2[p]))
+                (self.np2[p] > 0) & np.isclose(self.k2, self.np2[p]),
+                1 / self.ellipj["dn"],
+                Ip[p],
+            )
+            Ip[p] = np.where(
+                (sign := self.np2[p] > 0) & (diff := self.np2[p] > self.k2),
+                np.sqrt(self.np2[p], zeros.copy(), where=sign)
+                / (2 * np.sqrt(self.np2[p] - self.k2, ones.copy(), where=diff))
+                * np.log(
+                    (
+                        np.sqrt(self.np2[p] - self.k2, ones.copy(), where=diff)
+                        + np.sqrt(self.np2[p], zeros.copy(), where=sign)
+                        * self.ellipj["dn"]
+                    )
+                    ** 2
+                    / (1 - self.np2[p] * self.ellipj["sn"] ** 2)
+                ),
+                Ip[p],
+            )
+            Ip[p] = np.where(
+                (sign := self.np2[p] > 0) & (diff := self.np2[p] < self.k2),
+                -np.sqrt(self.np2[p], zeros.copy(), where=sign)
+                / (2 * np.sqrt(self.k2 - self.np2[p], ones.copy(), where=diff))
                 * np.arcsin(
                     2
-                    * np.sqrt(self.np2[p])
+                    * np.sqrt(self.np2[p], zeros.copy(), where=sign)
                     * self.ellipj["dn"]
-                    * np.sqrt(self.k2 - self.np2[p])
+                    * np.sqrt(self.k2 - self.np2[p], zeros.copy(), where=diff)
                     / (self.k2 * abs(1 - self.np2[p] * self.ellipj["sn"] ** 2))
                 ),
                 Ip[p],
             )
         return Ip
+
+    '''
+    def __exterior(self, _hat):
+        """Index radial and toroidal fields for |alpha| > pi /2."""
+        _pi2 = np.tile(_hat[2, np.newaxis], self.reps)
+        _hat[self._index_B] = self.sign_alpha[self._index_B] * (
+            2 * _pi2[self._index_B] - _hat[self._index_B]
+        )
+        return _hat
+    '''
+
+    def _exterior(self, _hat):
+        """Index radial and toroidal fields.
+
+        - pi/2 < |alpha| <= pi
+        - pi < alpha <= 3pi/2
+        - 3pi/2 < alpha <= 2pi
+
+        """
+        _hat_pi2 = np.tile(_hat[2, np.newaxis], self.reps)
+        _hat[self._index_C] = (
+            2 * _hat_pi2[self._index_C]
+            - self.sign_theta[self._index_C] * _hat[self._index_C]
+        )
+        _hat[self._index_D] = 4 * _hat_pi2[self._index_D] - _hat[self._index_D]
+        return _hat
 
     @cached_property
     def _Ar_hat(self):
@@ -207,7 +367,7 @@ class Arc(Constants, Matrix):
             * self.sign_alpha
             * ((1 - self.k2 / 2) * self.Kinc - self.Einc)
         )
-        return self._pi2(Aphi_hat)
+        return self.sign_alpha * self._exterior(Aphi_hat)
 
     @property
     def _Ax_hat(self):
@@ -223,7 +383,6 @@ class Arc(Constants, Matrix):
     def _Az_hat(self):
         """Return stacked local z-coordinate vector potential intergration constants."""
         return np.zeros_like(self._Ar_hat)
-        return np.zeros(((len(self.theta),) + self.shape))
 
     @cached_property
     def _Br_hat(self):
@@ -233,7 +392,7 @@ class Arc(Constants, Matrix):
             * self.gamma
             * (self.ck2 * self.Kinc - (1 - self.k2 / 2) * self.Winc)
         ) / self.rack2
-        return self._pi2(Br_hat)
+        return self.sign_alpha * self._exterior(Br_hat)
 
     @cached_property
     def _Bphi_hat(self):
@@ -260,7 +419,7 @@ class Arc(Constants, Matrix):
                 - (self.r - self.b * self.k2 / 2) * self.Winc
             )
         ) / self.rack2
-        return self._pi2(Bz_hat)
+        return self.sign_alpha * self._exterior(Bz_hat)
 
     def _intergrate(self, data):
         """Return intergral quantity."""
@@ -272,36 +431,66 @@ if __name__ == "__main__":
 
     radius = 3.945
     height = 2
-    segment_number = 5
+    segment_number = 1
 
-    theta = np.linspace(0, 2 * np.pi, 1 + 2 * segment_number)
+    length = 2 * np.pi
+    offset = 0.001
+
+    theta = offset + np.linspace(-length / 2, length / 2, 1 + 3 * segment_number)
     points = np.stack(
         [radius * np.cos(theta), radius * np.sin(theta), height * np.ones_like(theta)],
         axis=-1,
     )
 
-    coilset = CoilSet(field_attrs=["Bx", "Br", "Bz"])
+    coilset = CoilSet(field_attrs=["Bx", "Br", "Bz", "Ay"])
     for i in range(segment_number):
         coilset.winding.insert(
-            points[2 * i : 1 + 2 * (i + 1)],
-            {"c": (0, 0, 0.05)},
+            points[3 * i : 1 + 3 * (i + 1)],
+            {"s": (0, 0, 0.05)},
             nturn=1,
-            minimum_arc_nodes=3,
+            minimum_arc_nodes=4,
+            Ic=1e3,
         )
 
-    coilset.grid.solve(2500, [1, 0.9 * radius, 0, 4])
+    coilset.grid.solve(1500, 3.5)
     coilset.plot()
 
+    attr = "bx"
+
+    circle = CoilSet(field_attrs=["Bx", "Br", "Bz", "Ay"])
+    circle.coil.insert(
+        radius, height, 0.05, 0.05, ifttt=False, segment="cylinder", Ic=1e3
+    )
+    circle.grid.solve(1500, 3.5)
+    levels = circle.grid.plot(attr, levels=31, colors="C0", linestyles="--")
+
+    coilset.grid.plot(attr, colors="C1", levels=levels)
+
+    """
     # coilset.subframe.vtkplot()
 
     coilset.saloc["Ic"] = 5.3e5
-    levels = coilset.grid.plot("bz", nulls=False, colors="C2")
+    levels = coilset.grid.plot("ay", levels=21, nulls=False, colors="C2")
     axes = coilset.grid.axes
 
-    circle_coilset = CoilSet(field_attrs=["Br", "Bz", "Aphi"])
-    circle_coilset.coil.insert({"c": (radius, height, 0.05, 0.05)})
-    circle_coilset.grid.solve(2500, [1, 0.9 * radius, 0, 4])
-    circle_coilset.saloc["Ic"] = 5.3e5
-    circle_coilset.grid.plot(
-        "bz", nulls=False, colors="C0", axes=axes, levels=levels, linestyles="--"
+    segment_number = 81
+
+    theta = np.linspace(theta[0], theta[-1], 1 + 2 * segment_number)
+    points = np.stack(
+        [radius * np.cos(theta), radius * np.sin(theta), height * np.ones_like(theta)],
+        axis=-1,
     )
+
+    line = CoilSet(field_attrs=["Bz", "Ay"])
+    for i in range(segment_number):
+        line.winding.insert(
+            points[2 * i : 1 + 2 * (i + 1)],
+            {"s": (0, 0, 0.05)},
+            nturn=1,
+            minimum_arc_nodes=4,
+            Ic=5.3e5,
+        )
+
+    line.grid.solve(2500, 0.5)
+    line.grid.plot("ay", colors="C3", linestyles="--", levels=levels)
+    """

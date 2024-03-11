@@ -62,7 +62,7 @@ class Section:
             match align:
                 case "axes":
                     axes = np.c_[
-                        frenet.binormal[i], frenet.tangent[i], frenet.normal[i]
+                        -frenet.normal[i], frenet.tangent[i], frenet.binormal[i]
                     ]
                     self.to_axes(axes)
                 case "vector":

@@ -52,6 +52,11 @@ class Element(abc.ABC):
         return dict(zip(keys, getattr(self, attr)))
 
     @cached_property
+    def binormal(self):
+        """Return segment binormal."""
+        return np.cross(self.axis, self.normal)
+
+    @cached_property
     def geometry(self) -> dict:
         """Return geometry dict."""
         return {"segment": self.name, "length": self.length} | {
@@ -182,23 +187,8 @@ class Arc(Plot, Element):
         self.normal = self.arc_axes[1]
         self.axis = self.arc_axes[2]
 
-    def fit_2d(self):
-        """Update center and radius of best fit circle to points on plane."""
-        points = self.points_2d
-        chord = np.linalg.norm(points[-1] - points[0])
-        origin = np.mean(np.c_[points[0], points[-1]], axis=1)
-        points -= origin[np.newaxis, :]
-        coef = np.linalg.lstsq(
-            2 * points[:, 1:2],
-            chord**2 / 4 - np.sum(points**2, axis=1),
-            rcond=None,
-        )[0]
-        center_2d = origin
-        center_2d[1] -= coef[0]
-        self.radius = np.sqrt(chord**2 / 4 + coef[0] ** 2)
-        points[:, 1] -= coef[0]
-        assert np.allclose(self.radius, np.linalg.norm(points[0]))
-        assert np.allclose(self.radius, np.linalg.norm(points[-1]))
+    def _update_fit(self, center_2d):
+        """Update fit from centerpoint in 2d plane."""
         self.center = center_2d @ np.c_[-self.arc_axes[1], self.arc_axes[0]].T
         self.center += (
             np.mean(np.c_[self.points[0], self.points[-1]].T, axis=0)
@@ -214,7 +204,41 @@ class Arc(Plot, Element):
         self.theta = np.arctan2(center_points[:, 1], center_points[:, 0])
         self.theta[self.theta < 0] += 2 * np.pi
         self.theta = np.unwrap(self.theta)
+        self.theta -= self.theta[0]
+        if np.isclose(self.theta[0], self.theta[-1]):
+            self.theta[-1] += 2 * np.pi * np.sign(self.theta[1])
         self.error = np.linalg.norm(self.points - self.points_fit, axis=1).std()
+
+    def fit_2d_circle(self):
+        """Fit circle to a planar point set."""
+        points = self.points_2d[:-1]
+        coef = np.linalg.lstsq(
+            np.c_[points, np.ones_like(points[:, 0])],
+            np.sum(points**2, axis=1),
+            rcond=None,
+        )[0]
+        center_2d = coef[:2] / 2
+        self.radius = np.sqrt(coef[2] + np.sum(center_2d**2))
+        self._update_fit(center_2d)
+
+    def fit_2d_arc(self):
+        """Update center and radius of best fit circular arc to planar points."""
+        points = self.points_2d
+        chord = np.linalg.norm(points[-1] - points[0])
+        origin = np.mean(np.c_[points[0], points[-1]], axis=1)
+        points -= origin[np.newaxis, :]
+        coef = np.linalg.lstsq(
+            2 * points[:, 1:2],
+            chord**2 / 4 - np.sum(points**2, axis=1),
+            rcond=None,
+        )[0]
+        center_2d = origin
+        center_2d[1] -= coef[0]
+        self.radius = np.sqrt(chord**2 / 4 + coef[0] ** 2)
+        points[:, 1] -= coef[0]
+        assert np.allclose(self.radius, np.linalg.norm(points[0]))
+        assert np.allclose(self.radius, np.linalg.norm(points[-1]))
+        self._update_fit(center_2d)
 
     def _to_local(self, points):
         """Return points projected onto 2d plane (-normal, tangent)."""
@@ -243,23 +267,26 @@ class Arc(Plot, Element):
 
     def fit(self):
         """Align local coordinate system and fit arc to plane point cloud."""
+        if np.allclose(self.points[-1], self.points[0]):
+            self.align(self.points[len(self.points) // 2] - self.points[0])
+            return self.fit_2d_circle()
         self.align(self.points[-1] - self.points[0])
-        self.fit_2d()
+        return self.fit_2d_arc()
 
     @cached_property
     def central_angle(self):
-        """Return the angle subtended by arc from the arc's center."""
-        return self.theta[-1] - self.theta[0]
+        """Return the absolute angle subtended by arc from the arc's center."""
+        return abs(self.theta[-1] - self.theta[0])
 
     @cached_property
     def length(self):
         """Return absolute arc length."""
-        return self.radius * abs(self.central_angle)
+        return self.radius * self.central_angle
 
     @property
     def test(self):
         """Return status of normalized fit residual."""
-        return self.error / abs(self.length) < self.eps
+        return self.error / self.length < self.eps
 
     def sample(self, point_number=50):
         """Return sampled polyline."""
@@ -377,6 +404,7 @@ class PolyLine(Plot):
     minimum_arc_nodes: int = 4
     quadrant_segments: int = 16
     arc_resolution: float = 1.5
+    align: str = "axes"
     filament: bool = True
     segments: list[Line | Arc] = field(init=False, repr=False, default_factory=list)
 
@@ -472,7 +500,7 @@ class PolyLine(Plot):
         for i, segment in enumerate(self.segments):
             if isinstance(segment, Line):
                 continue
-            if abs(segment.central_angle) < self.line_eps:
+            if segment.central_angle < self.line_eps:
                 self.segments[i] = segment.chord
         self.rdp_merge()
 
@@ -531,7 +559,7 @@ class PolyLine(Plot):
     def vtk(self) -> list[Cell]:
         """Retun list of vtk mesh segments swept along segment paths."""
         return [
-            Sweep(self.cross_section, segment.path, segment.normal)
+            Sweep(self.cross_section, segment.path, segment.binormal, align=self.align)
             for segment in self.segments
         ]
 

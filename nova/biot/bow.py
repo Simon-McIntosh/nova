@@ -9,7 +9,7 @@ import numpy as np
 from nova.biot.arc import Arc
 from nova.biot.matrix import Matrix
 
-from nova.biot.zeta import Zeta
+from nova.biot.zeta import zeta
 
 
 @dataclass
@@ -46,15 +46,33 @@ class Bow(Arc, Matrix):
             value = getattr(self, attr)
         return np.tile(value[..., np.newaxis], 4)
 
+    @cached_property
+    def Dr(self):
+        """Return radial D coefficient."""
+        return self.r / 4 * np.sin(4 * self.theta) * np.arcsinh(self.beta_1)
+
+    @cached_property
+    def Dphi(self):
+        """Return toroidal D coefficient."""
+        return self.r / 4 * np.cos(4 * self.theta) * np.arcsinh(self.beta_1)
+
+    @cached_property
+    def Dz(self):
+        """Return vertical D coefficient."""
+        return self.r * (
+            np.sin(2 * self.theta) * np.arcsinh(self.beta_2)
+            + np.cos(2 * self.theta) * np.arctan(self.beta_3)
+        )
+
+    @cached_property
+    def zeta(self):
+        """Return zeta coefficient calculated using numba's trapezoid method."""
+        return zeta(self.rs, self.r, self.gamma, self.theta)
+
     @property
     def reps(self):
         """Return tile reps for _pi2 operator."""
         return (len(self.theta), 1, 1, 1)
-
-    @cached_property
-    def zeta(self):
-        """Return zeta coefficient calculated using jax trapezoid method."""
-        return Zeta(self.rs, self.zs, self.r, self.z, self.alpha)()
 
     @cached_property
     def _Ar_hat(self):
@@ -84,19 +102,56 @@ class Bow(Arc, Matrix):
                 - 2 * self.rs * self.Einc
                 + 2 * self.r * self.ellipj["sn"] * self.ellipj["cn"] * self.ellipj["dn"]
             )
-            + self.gamma / (6 * self.a * self.r) * self.p_sum(self.Pphi, self.Pi)
+            + self.gamma / (6 * self.a * self.r) * self.p_sum(self.Pphi, self.Pi_inc)
         )
-        print(np.prod(self.alpha.shape))
-        print(np.sum(self._index))
-        return Aphi_hat
-        return self._pi2(Aphi_hat)
+        return self.sign_alpha * self._exterior(Aphi_hat)
+
+    @cached_property
+    def _Br_hat(self):
+        """Return stacked local radial magnetic field intergration coefficents."""
+        Br_hat = (
+            self.Dr
+            + self.r * self.zeta
+            - self.a
+            / (2 * self.r)
+            * self.rs
+            * (
+                (self.Einc - self.v * self.Kinc)
+                + 2 * self.r * self.ellipj["sn"] * self.ellipj["cn"] * self.ellipj["dn"]
+            )
+            - 1 / (4 * self.a * self.r) * self.p_sum(self.Qr, self.Pi_inc)
+        )
+        return self.sign_alpha * self._exterior(Br_hat)
+
+    @cached_property
+    def _Bphi_hat(self):
+        """Return stacked local toroidal magnetic field intergration coefficents."""
+        return (
+            self.Dphi
+            - self.a
+            / (2 * self.r)
+            * self.ellipj["dn"]
+            * (self.b - 2 * self.r * self.ellipj["sn"] ** 2)
+            - 1 / (4 * self.a * self.r) * self.p_sum(self.Qphi, self.Ip)
+        )
+
+    @cached_property
+    def _Bz_hat(self):
+        """Return stacked local vertical magnetic field intergration coefficents."""
+        Bz_hat = (
+            self.Dz
+            + 2 * self.gamma * self.zeta
+            - self.a / (2 * self.r) * 3 / 2 * self.gamma * self.k2 * self.Kinc
+            - 1 / (4 * self.a * self.r) * self.p_sum(self.Qr, self.Pi_inc)
+        )
+        return self.sign_alpha * self._exterior(Bz_hat)
 
     def _intergrate(self, data):
         """Return intergral quantity int dalpha dA."""
         data = data[0] - data[1]
         return (
             1
-            / (2 * np.pi * self.source("area"))
+            / (4 * np.pi * self.source("area"))
             * ((data[..., 2] - data[..., 3]) - (data[..., 1] - data[..., 0]))
         )
 
@@ -106,19 +161,22 @@ if __name__ == "__main__":
 
     radius = 3.945
     height = 2
-    segment_number = 1
+    segment_number = 21
 
-    theta = np.linspace(0, 2 * np.pi, 1 + 2 * segment_number)
+    theta = np.linspace(0.02, 2 * np.pi - 0.02, 1 + 2 * segment_number)
     points = np.stack(
         [radius * np.cos(theta), radius * np.sin(theta), height * np.ones_like(theta)],
         axis=-1,
     )
 
-    coilset = CoilSet(field_attrs=["Ax", "Ay", "Az", "Bx", "By", "Bz"])
+    attr = "bz"
+    factor = 3
+
+    bow = CoilSet(field_attrs=["Ax", "Ay", "Az", "Bx", "By", "Bz"])
     for i in range(segment_number):
-        coilset.winding.insert(
+        bow.winding.insert(
             points[2 * i : 1 + 2 * (i + 1)],
-            {"rect": (0, 0, 0.05, 0.03)},
+            {"rect": (0, 0, 0.03, 0.03)},
             nturn=1,
             minimum_arc_nodes=3,
             Ic=1,
@@ -126,13 +184,43 @@ if __name__ == "__main__":
             ifttt=False,
         )
 
-    coilset.grid.solve(1500, 2)
-    coilset.grid.plot("ay", colors="C0")
+    bow.grid.solve(1500, factor)
 
-    cylinder = CoilSet(field_attrs=["Ax", "Ay", "Az", "Bx", "By", "Bz"])
-    cylinder.coil.insert(
-        {"rect": (radius, height, 0.05, 0.03)}, segment="cylinder", Ic=1
+    arc = CoilSet(field_attrs=["Ax", "Ay", "Az", "Bx", "By", "Bz"])
+    for i in range(segment_number):
+        arc.winding.insert(
+            points[2 * i : 1 + 2 * (i + 1)],
+            {"rect": (0, 0, 0.03, 0.03)},
+            nturn=1,
+            minimum_arc_nodes=3,
+            Ic=1,
+            filament=True,
+            ifttt=False,
+        )
+
+    arc.grid.solve(1500, factor)
+
+    line = CoilSet(field_attrs=["Ax", "Ay", "Az", "Bx", "By", "Bz"])
+    for i in range(segment_number):
+        line.winding.insert(
+            points[2 * i : 1 + 2 * (i + 1)],
+            {"rect": (0, 0, 0.03, 0.03)},
+            nturn=1,
+            minimum_arc_nodes=4,
+            Ic=1,
+            filament=True,
+            ifttt=False,
+        )
+    line.grid.solve(1500, factor)
+
+    circle = CoilSet(field_attrs=["Bx", "By", "Bz", "Ay"])
+    circle.coil.insert(
+        radius, height, 0.03, 0.03, ifttt=False, segment="cylinder", Ic=1
     )
-    cylinder.grid.solve(1500, 2)
-    cylinder.grid.plot("ay", colors="C2")
-    cylinder.plot()
+    circle.grid.solve(1500, factor)
+    levels = circle.grid.plot(attr, levels=31, colors="C3", linestyles="--")
+
+    levels = arc.grid.plot(attr, colors="C2", levels=51)
+    arc.plot()
+    bow.grid.plot(attr, colors="C0", linestyles="--")  # , levels=levels)
+    # line.grid.plot(attr, colors="C1", linestyles="--", levels=levels)

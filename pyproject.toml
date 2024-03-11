@@ -69,6 +69,8 @@ jaxopt = {version = "^0.8.3", optional = true}
 h5py = {version = "^3.10.0", optional = true}
 packaging = "^23.2"
 numba = {version = "^0.59.0", optional = true}
+tbb = {version = "^2021.11.0", optional = true}
+tbb-devel = {version = "^2021.11.0", optional = true}
 
 [tool.poetry.group.dev.dependencies]
 asv = ">=0.5.1"
@@ -142,6 +144,8 @@ imas = [
 jit = [
   "jax",
   "numba",
+  "tbb",
+  "tbb-devel",
 ]
 optimize = [
   "jaxopt",

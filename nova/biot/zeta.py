@@ -4,7 +4,39 @@ from functools import cached_property
 
 import jax
 import jax.numpy as jnp
+import numba
 import numpy as np
+
+
+@numba.jit
+def arcsinh_beta_1(rs, r, gamma, alpha):
+    """Return zeta intergrand."""
+    phi = np.pi - 2 * alpha
+    G2 = gamma**2 + r**2 * np.sin(phi) ** 2
+    return np.arcsinh((rs - r * np.cos(phi)) / np.sqrt(G2))
+
+
+@numba.jit(cache=True, parallel=True, fastmath=True)
+def zeta(rs, r, gamma, alpha, number=500):
+    """Evaluate zeta function."""
+    shape = rs.shape
+    rs = np.ravel(rs)
+    r = np.ravel(r)
+    gamma = np.ravel(gamma)
+    alpha = np.ravel(alpha)
+    length = len(rs)
+    result = np.full(length, 0.0)
+    for i in numba.prange(length):
+        if np.isclose(alpha[i], 0):
+            continue
+        num = np.max(np.array([2, int(abs(alpha[i]) * number)]))
+        dalpha = alpha[i] / (num - 1)
+        _alpha = np.linspace(0, alpha[i], num)[:-1] + dalpha / 2
+        intergrand = arcsinh_beta_1(rs[i], r[i], gamma[i], _alpha)
+        result[i] = abs(dalpha) * np.sum(intergrand)
+        # _alpha[0] = dalpha / 2
+        # result[i] = abs(dalpha) * intergrand[0] + np.trapz(intergrand[1:], _alpha[1:])
+    return result.reshape(shape)
 
 
 @jax.tree_util.register_pytree_node_class
@@ -64,6 +96,8 @@ if __name__ == "__main__":
     z = data
     alpha = data
 
-    zeta = Zeta(rs, zs, r, z, alpha, 12)
+    gamma = zs - z
+    zeta(rs, r, gamma, alpha)
+    # zeta = Zeta(rs, zs, r, z, alpha, 12)
 
-    print(zeta().dtype)
+    # print(zeta().dtype)

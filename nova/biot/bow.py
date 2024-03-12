@@ -47,16 +47,19 @@ class Bow(Arc, Matrix):
         return np.tile(value[..., np.newaxis], 4)
 
     @cached_property
+    @Arc.coefficent
     def Dr(self):
         """Return radial D coefficient."""
         return self.r / 4 * np.sin(4 * self.theta) * np.arcsinh(self.beta_1)
 
     @cached_property
+    @Arc.coefficent
     def Dphi(self):
         """Return toroidal D coefficient."""
         return self.r / 4 * np.cos(4 * self.theta) * np.arcsinh(self.beta_1)
 
     @cached_property
+    @Arc.coefficent
     def Dz(self):
         """Return vertical D coefficient."""
         return self.r * (
@@ -161,15 +164,15 @@ if __name__ == "__main__":
 
     radius = 3.945
     height = 2
-    segment_number = 21
+    segment_number = 1
 
-    theta = np.linspace(0.02, 2 * np.pi - 0.02, 1 + 2 * segment_number)
+    theta = np.linspace(-np.pi, np.pi, 1 + 2 * segment_number)
     points = np.stack(
         [radius * np.cos(theta), radius * np.sin(theta), height * np.ones_like(theta)],
         axis=-1,
     )
 
-    attr = "bz"
+    attr = "ay"
     factor = 3
 
     bow = CoilSet(field_attrs=["Ax", "Ay", "Az", "Bx", "By", "Bz"])
@@ -213,14 +216,18 @@ if __name__ == "__main__":
         )
     line.grid.solve(1500, factor)
 
-    circle = CoilSet(field_attrs=["Bx", "By", "Bz", "Ay"])
-    circle.coil.insert(
+    cylinder = CoilSet(field_attrs=["Bx", "By", "Bz", "Ay"])
+    cylinder.coil.insert(
         radius, height, 0.03, 0.03, ifttt=False, segment="cylinder", Ic=1
     )
-    circle.grid.solve(1500, factor)
-    levels = circle.grid.plot(attr, levels=31, colors="C3", linestyles="--")
+    # cylinder.grid.solve(1500, factor)
+    # levels = cylinder.grid.plot(attr, levels=31, colors="C3", linestyles="-")
 
-    levels = arc.grid.plot(attr, colors="C2", levels=51)
+    # assert np.allclose(getattr(cylinder.grid, attr), getattr(bow.grid, attr),
+    #                   atol=1e-2)
+
     arc.plot()
-    bow.grid.plot(attr, colors="C0", linestyles="--")  # , levels=levels)
+    levels = bow.grid.plot(attr, colors="C0", linestyles="--", levels=31)
+    arc.grid.plot(attr, colors="C2", levels=levels)
+
     # line.grid.plot(attr, colors="C1", linestyles="--", levels=levels)

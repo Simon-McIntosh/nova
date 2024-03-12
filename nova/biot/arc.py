@@ -1,8 +1,8 @@
 """Biot-Savart calculation for arc segments."""
 
 from dataclasses import dataclass, field
-from functools import cached_property
-from typing import ClassVar
+from functools import cached_property, wraps
+from typing import Callable, ClassVar
 
 import numpy as np
 import scipy.special
@@ -14,7 +14,7 @@ from nova.biot.matrix import Matrix
 def arctan2(x1, x2):
     """Return unwraped arctan2 operator."""
     phi = np.arctan2(x1, x2)
-    phi[phi < 0] += 2 * np.pi
+    phi[phi <= 0] += 2 * np.pi
     return phi
 
 
@@ -43,12 +43,12 @@ class Arc(Constants, Matrix):
     @cached_property
     def phi(self):
         """Return global target toroidal angle."""
-        return arctan2(self.target("y"), self.target("x"))
+        return np.arctan2(self.target("y"), self.target("x"))
 
     @cached_property
     def _phi(self):
         """Return local target toroidal angle."""
-        return arctan2(self("target", "y"), self("target", "x"))
+        return np.arctan2(self("target", "y"), self("target", "x"))
 
     @cached_property
     def alpha(self):
@@ -60,9 +60,20 @@ class Arc(Constants, Matrix):
                 arctan2(self("source", "y2"), self("source", "x2")),
             ]
         )
+
+        alpha = (np.pi - (phi_s - _phi)) / 2
+        print("\n")
+        for axis in range(2):
+            print(
+                f"alpha[{axis}]/pi min {alpha[axis].min()/np.pi:1.2f}, "
+                f"max {alpha[axis].max()/np.pi:1.2f}"
+            )
+        print("\n")
+
         return np.concatenate(
             (
                 (np.pi - (phi_s - _phi)) / 2,
+                np.zeros((1,) + self.shape),
                 np.pi / 2 * np.ones((1,) + self.shape),
             ),
             axis=0,
@@ -71,52 +82,83 @@ class Arc(Constants, Matrix):
     @property
     def sign_alpha(self):
         """Return sign(alpha)."""
-        return np.sign(self.alpha)
+        return np.where(self.alpha >= 0, 1, -1)
 
     @property
     def abs_alpha(self):
         """Return abs(alpha)."""
         return abs(self.alpha)
 
+    def coefficent(func: Callable):
+        """Return intergration coefficent evaluated from 0 to theta."""
+
+        @wraps(func)
+        def evaluate_coefficent(self):
+            result = func(self)
+            return result - result[-2]
+
+        return evaluate_coefficent
+
+    @cached_property
+    def _index_mask(self):
+        """Return index mask."""
+        mask = np.ones_like(self.alpha, bool)
+        mask[-2:] = False
+        return mask
+
+    def mask_index(func: Callable):
+        """Return index function with intergral limit mask."""
+
+        @wraps(func)
+        def apply_mask(self):
+            return func(self) & self._index_mask
+
+        return apply_mask
+
     @property
+    @mask_index
     def _index_A(self):
         """Return |alpha| <= pi/2 segment index."""
         return self.abs_alpha <= np.pi / 2
 
     @property
+    @mask_index
     def _index_B(self):
         """Return |alpha| > pi/2 segment index."""
         return self.abs_alpha > np.pi / 2
 
     @property
-    def _pi2_mask(self):
-        """Return pi/2 mask."""
-        mask = np.ones_like(self.alpha, bool)
-        mask[-1] = False
-        return mask
-
-    @property
+    @mask_index
     def _index_C(self):
         return (self.abs_alpha > np.pi / 2) & (self.abs_alpha <= 3 * np.pi / 2)
 
     @property
+    @mask_index
     def _index_D(self):
         """Return pi/2 < alpha <= 3pi/2 segment index."""
-        return (self.alpha > 3 * np.pi / 2) & (self.alpha <= 2 * np.pi) & self._pi2_mask
+        return (self.alpha > 3 * np.pi / 2) & (self.alpha <= 2 * np.pi)
 
     @cached_property
     def _theta(self):
         """Return signed segment angle."""
-        theta = np.zeros_like(self.alpha)
+        theta = self.alpha.copy()
         theta[self._index_A] = self.abs_alpha[self._index_A]
         theta[self._index_C] = np.pi - self.abs_alpha[self._index_C]
         theta[self._index_D] = 2 * np.pi - self.alpha[self._index_D]
+
+        print("\n")
+        for axis in range(2):
+            print(
+                f"theta[{axis}]/pi min {theta[axis].min()/np.pi:1.2f}, "
+                f"max {theta[axis].max()/np.pi:1.2f}"
+            )
+        print("\n")
         return theta
 
     @property
     def sign_theta(self):
         """Return sign(theta)."""
-        return np.sign(self._theta)
+        return np.where(self._theta >= 0, 1, -1)
 
     @property
     def theta(self):
@@ -127,7 +169,8 @@ class Arc(Constants, Matrix):
     def Phi(self):
         """Return system variant angle."""
         phi = np.pi - 2 * self.theta
-        return np.where(abs(phi) > 1e2 * self.eps, phi, 1e2 * self.eps)
+        sign = np.where(phi >= 0, 1, -1)
+        return np.where(sign * phi > 1e2 * self.eps, phi, sign * 1e2 * self.eps)
 
     @property
     def B2(self):
@@ -164,6 +207,7 @@ class Arc(Constants, Matrix):
         )
 
     @cached_property
+    @coefficent
     def Cr(self):
         """Return Cr coefficient."""
         return (
@@ -330,7 +374,7 @@ class Arc(Constants, Matrix):
     '''
     def __exterior(self, _hat):
         """Index radial and toroidal fields for |alpha| > pi /2."""
-        _pi2 = np.tile(_hat[2, np.newaxis], self.reps)
+        _pi2 = np.tile(_hat[-1, np.newaxis], self.reps)
         _hat[self._index_B] = self.sign_alpha[self._index_B] * (
             2 * _pi2[self._index_B] - _hat[self._index_B]
         )
@@ -345,7 +389,7 @@ class Arc(Constants, Matrix):
         - 3pi/2 < alpha <= 2pi
 
         """
-        _hat_pi2 = np.tile(_hat[2, np.newaxis], self.reps)
+        _hat_pi2 = np.tile(_hat[-1, np.newaxis], self.reps)
         _hat[self._index_C] = (
             2 * _hat_pi2[self._index_C]
             - self.sign_theta[self._index_C] * _hat[self._index_C]
@@ -364,7 +408,7 @@ class Arc(Constants, Matrix):
         Aphi_hat = (
             self.a
             / self.r
-            * self.sign_alpha
+            * self.sign_theta
             * ((1 - self.k2 / 2) * self.Kinc - self.Einc)
         )
         return self.sign_alpha * self._exterior(Aphi_hat)
@@ -388,7 +432,7 @@ class Arc(Constants, Matrix):
     def _Br_hat(self):
         """Return stacked local radial magnetic field intergration coefficents."""
         Br_hat = (
-            self.sign_alpha
+            self.sign_theta
             * self.gamma
             * (self.ck2 * self.Kinc - (1 - self.k2 / 2) * self.Winc)
         ) / self.rack2
@@ -413,7 +457,7 @@ class Arc(Constants, Matrix):
     def _Bz_hat(self):
         """Return stacked local vertical magnetic field intergration coefficents."""
         Bz_hat = (
-            self.sign_alpha
+            self.sign_theta
             * (
                 self.r * self.ck2 * self.Kinc
                 - (self.r - self.b * self.k2 / 2) * self.Winc
@@ -434,7 +478,7 @@ if __name__ == "__main__":
     segment_number = 1
 
     length = 2 * np.pi
-    offset = 0.001
+    offset = 0
 
     theta = offset + np.linspace(-length / 2, length / 2, 1 + 3 * segment_number)
     points = np.stack(
@@ -442,7 +486,7 @@ if __name__ == "__main__":
         axis=-1,
     )
 
-    coilset = CoilSet(field_attrs=["Bx", "Br", "Bz", "Ay"])
+    coilset = CoilSet(field_attrs=["Bx", "By", "Br", "Bz", "Ay"])
     for i in range(segment_number):
         coilset.winding.insert(
             points[3 * i : 1 + 3 * (i + 1)],
@@ -455,15 +499,16 @@ if __name__ == "__main__":
     coilset.grid.solve(1500, 3.5)
     coilset.plot()
 
-    attr = "bx"
+    attr = "ay"
 
-    circle = CoilSet(field_attrs=["Bx", "Br", "Bz", "Ay"])
+    circle = CoilSet(field_attrs=["Bx", "By", "Br", "Bz", "Ay"])
     circle.coil.insert(
         radius, height, 0.05, 0.05, ifttt=False, segment="cylinder", Ic=1e3
     )
     circle.grid.solve(1500, 3.5)
     levels = circle.grid.plot(attr, levels=31, colors="C0", linestyles="--")
 
+    # levels = 31
     coilset.grid.plot(attr, colors="C1", levels=levels)
 
     """

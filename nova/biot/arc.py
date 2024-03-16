@@ -14,7 +14,7 @@ from nova.biot.matrix import Matrix
 def arctan2(x1, x2):
     """Return unwraped arctan2 operator."""
     phi = np.arctan2(x1, x2)
-    phi[phi <= 0] += 2 * np.pi
+    phi[phi < 0] += 2 * np.pi
     return phi
 
 
@@ -60,6 +60,7 @@ class Arc(Constants, Matrix):
                 arctan2(self("source", "y2"), self("source", "x2")),
             ]
         )
+        assert np.allclose(np.arctan2(self("source", "y1"), self("source", "x1")), 0)
 
         alpha = (np.pi - (phi_s - _phi)) / 2
         print("\n")
@@ -173,31 +174,37 @@ class Arc(Constants, Matrix):
         return np.where(sign * phi > 1e2 * self.eps, phi, sign * 1e2 * self.eps)
 
     @property
+    # @coefficent
     def B2(self):
         """Return B2 coefficient."""
         return self.rs**2 + self.r**2 - 2 * self.r * self.rs * np.cos(self.Phi)
 
     @property
+    # @coefficent
     def D2(self):
         """Return D2 coefficient."""
         return self.gamma**2 + self.B2
 
     @property
+    # @coefficent
     def G2(self):
         """Return G2 coefficient."""
         return self.gamma**2 + self.r**2 * np.sin(self.Phi) ** 2
 
     @property
+    # @coefficent
     def beta_1(self):
         """Return beta 1 coefficient."""
         return (self.rs - self.r * np.cos(self.Phi)) / np.sqrt(self.G2)
 
     @property
+    # @coefficent
     def beta_2(self):
         """Return beta 2 coefficient."""
         return self.gamma / np.sqrt(self.B2)
 
     @property
+    # @coefficent
     def beta_3(self):
         """Return beta 3 coefficient."""
         return (
@@ -207,7 +214,7 @@ class Arc(Constants, Matrix):
         )
 
     @cached_property
-    @coefficent
+    # @coefficent
     def Cr(self):
         """Return Cr coefficient."""
         return (
@@ -235,6 +242,7 @@ class Arc(Constants, Matrix):
         )
 
     @cached_property
+    # @coefficent
     def Cphi(self):
         """Return Cphi coefficient."""
         return (
@@ -296,7 +304,7 @@ class Arc(Constants, Matrix):
         """Return end point stacked incomplete elliptic intergral of the 3rd kind."""
         return {
             p: np.stack(
-                [self.ellippinc(theta, self.np2[p], self.k2) for theta in self.theta]
+                [self.ellippinc(self.np2[p], theta, self.k2) for theta in self.theta]
             )
             for p in range(1, 4)
         }
@@ -478,7 +486,7 @@ if __name__ == "__main__":
     segment_number = 1
 
     length = 2 * np.pi
-    offset = 0
+    offset = 0.1
 
     theta = offset + np.linspace(-length / 2, length / 2, 1 + 3 * segment_number)
     points = np.stack(

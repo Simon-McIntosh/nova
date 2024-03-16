@@ -10,6 +10,7 @@ from tqdm import tqdm
 import xarray
 
 from nova.biot.arc import Arc
+from nova.biot.beam import Beam
 from nova.biot.bow import Bow
 from nova.biot.circle import Circle
 from nova.biot.cylinder import Cylinder
@@ -29,6 +30,7 @@ class Solve(GroupSet):
 
     generator: ClassVar[dict] = {
         "arc": Arc,
+        "beam": Beam,
         "bow": Bow,
         "circle": Circle,
         "cylinder": Cylinder,
@@ -54,7 +56,7 @@ class Solve(GroupSet):
                     f"in Biot.generator: {self.generator.keys()}"
                 )
             index = self.source.index[self.source_segment == segment]
-            for i, chunk in enumerate(self.group_segments(index, 100, index[-1])):
+            for i, chunk in enumerate(self.group_segments(index, 150, index[-1])):
                 self.source_segment.loc[list(chunk)] = f"{segment}_{i}"
 
     @staticmethod

@@ -361,7 +361,7 @@ def test_magnetic_field_analytic_poloidal_plane(section, radius, height, current
 
 @pytest.mark.parametrize(
     "segment,radius,height,current",
-    product(["arc", "line"], [2.1, 7.3], [-3.2, 0, 7.3], [-1e4, 5.3e4]),
+    product(["arc", "line", "bow"], [2.1, 7.3], [-3.2, 0, 7.3], [-1e4, 5.3e4]),
 )
 def test_magnetic_field_analytic_non_axisymmetric(segment, radius, height, current):
     segment_number = 51
@@ -480,24 +480,40 @@ def test_arc_singularity():
     assert False
 
 
-def test_ellipp_sympy():
-    """Test ellippi implementation.
+def test_ellipf():
+    m = np.array([0.0, 0.2, 0.4, 0.8, 0.5])
+    phi = np.array([-2.5, 0.0, 0.5, 5.5, 7.2])
+    p_scipy = Constants.ellipkinc(phi, m)
+    p_mpmath = np.array([-2.5, 0.0, 0.50827893, 8.17487571, 8.39751980])
+    assert np.allclose(p_scipy, p_mpmath)
+
+
+def test_ellipe():
+    m = np.array([0.0, 0.2, 0.4, 0.8, 0.5])
+    phi = np.array([-2.5, 0.0, 0.5, 5.5, 7.2])
+    p_scipy = Constants.ellipeinc(phi, m)
+    p_mpmath = np.array([-2.5, 0.0, 0.49195874, 3.99157413, 6.26205652])
+    assert np.allclose(p_scipy, p_mpmath)
+
+
+def test_ellipp():
+    """Test ellippi against mpmath implementation.
 
     Copied from https://github.com/scipy/scipy/pull/15787."""
     n = np.array([-0.5, 0.0, 0.3, 1.3, -0.7])
     m = np.array([0.0, 0.2, 0.4, 0.8, 0.5])
     p_scipy = Constants.ellipp(n, m)
-    p_sympy = np.array([1.28254983, 1.6596236, 2.14879542, -1.7390616, 1.3902519])
-    assert np.allclose(p_scipy, p_sympy)
+    p_mpmath = np.array([1.2825498, 1.6596236, 2.14879542, -1.7390616, 1.3902519])
+    assert np.allclose(p_scipy, p_mpmath)
 
 
-def test_ellippinc_sympy():
+def test_ellippinc():
     n = np.array([-0.5, 0.0, 0.3, 1.3, -0.7])
     m = np.array([0.0, 0.2, 0.4, 0.8, 0.5])
     phi = np.array([-2.5, 0.0, 0.5, 5.5, 7.2])
-    p_scipy = Constants.ellippinc(phi, n, m)
-    p_sympy = np.array([0.60501809, 0.0, 0.52106308, -1.24837946, 0.84754152])
-    assert np.allclose(p_scipy, p_sympy)
+    p_scipy = Constants.ellippinc(n, phi, m)
+    p_mpmath = np.array([-1.96008157, 0.0, 0.521063078, -8.20462585, 6.408549098])
+    assert np.allclose(p_scipy, p_mpmath)
 
 
 if __name__ == "__main__":

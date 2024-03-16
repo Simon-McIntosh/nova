@@ -47,19 +47,16 @@ class Bow(Arc, Matrix):
         return np.tile(value[..., np.newaxis], 4)
 
     @cached_property
-    @Arc.coefficent
     def Dr(self):
         """Return radial D coefficient."""
         return self.r / 4 * np.sin(4 * self.theta) * np.arcsinh(self.beta_1)
 
     @cached_property
-    @Arc.coefficent
     def Dphi(self):
         """Return toroidal D coefficient."""
         return self.r / 4 * np.cos(4 * self.theta) * np.arcsinh(self.beta_1)
 
     @cached_property
-    @Arc.coefficent
     def Dz(self):
         """Return vertical D coefficient."""
         return self.r * (
@@ -70,7 +67,12 @@ class Bow(Arc, Matrix):
     @cached_property
     def zeta(self):
         """Return zeta coefficient calculated using numba's trapezoid method."""
-        return zeta(self.rs, self.r, self.gamma, self.theta)
+        return zeta(
+            np.tile(self.rs, self.reps),
+            np.tile(self.r, self.reps),
+            np.tile(self.gamma, self.reps),
+            self.theta,
+        )
 
     @property
     def reps(self):
@@ -117,9 +119,8 @@ class Bow(Arc, Matrix):
             + self.r * self.zeta
             - self.a
             / (2 * self.r)
-            * self.rs
             * (
-                (self.Einc - self.v * self.Kinc)
+                self.rs * (self.Einc - self.v * self.Kinc)
                 + 2 * self.r * self.ellipj["sn"] * self.ellipj["cn"] * self.ellipj["dn"]
             )
             - 1 / (4 * self.a * self.r) * self.p_sum(self.Qr, self.Pi_inc)
@@ -145,7 +146,7 @@ class Bow(Arc, Matrix):
             self.Dz
             + 2 * self.gamma * self.zeta
             - self.a / (2 * self.r) * 3 / 2 * self.gamma * self.k2 * self.Kinc
-            - 1 / (4 * self.a * self.r) * self.p_sum(self.Qr, self.Pi_inc)
+            - 1 / (4 * self.a * self.r) * self.p_sum(self.Qz, self.Pi_inc)
         )
         return self.sign_alpha * self._exterior(Bz_hat)
 
@@ -155,7 +156,7 @@ class Bow(Arc, Matrix):
         return (
             1
             / (4 * np.pi * self.source("area"))
-            * ((data[..., 2] - data[..., 3]) - (data[..., 1] - data[..., 0]))
+            * ((data[..., 2] - data[..., 1]) - (data[..., 3] - data[..., 0]))
         )
 
 
@@ -166,48 +167,54 @@ if __name__ == "__main__":
     height = 2
     segment_number = 1
 
-    theta = np.linspace(-np.pi, np.pi, 1 + 2 * segment_number)
+    length = 2 * np.pi
+    offset = np.pi * 0 + 0.5
+
+    theta = offset + np.linspace(-length / 2, length / 2, 1 + 3 * segment_number)
+
     points = np.stack(
         [radius * np.cos(theta), radius * np.sin(theta), height * np.ones_like(theta)],
         axis=-1,
     )
 
     attr = "ay"
-    factor = 3
+    factor = 0.5
 
-    bow = CoilSet(field_attrs=["Ax", "Ay", "Az", "Bx", "By", "Bz"])
+    bow = CoilSet(field_attrs=["Ax", "Ay", "Az", "Bx", "By", "Bz", "Br"])
     for i in range(segment_number):
         bow.winding.insert(
-            points[2 * i : 1 + 2 * (i + 1)],
-            {"rect": (0, 0, 0.03, 0.03)},
+            points[3 * i : 1 + 3 * (i + 1)],
+            {"rect": (0, 0, 0.06, 0.03)},
             nturn=1,
-            minimum_arc_nodes=3,
+            minimum_arc_nodes=4,
             Ic=1,
             filament=False,
             ifttt=False,
         )
 
+    print("bow solve")
     bow.grid.solve(1500, factor)
 
-    arc = CoilSet(field_attrs=["Ax", "Ay", "Az", "Bx", "By", "Bz"])
+    arc = CoilSet(field_attrs=["Ax", "Ay", "Az", "Bx", "By", "Bz", "Br"])
     for i in range(segment_number):
         arc.winding.insert(
-            points[2 * i : 1 + 2 * (i + 1)],
-            {"rect": (0, 0, 0.03, 0.03)},
+            points[3 * i : 1 + 3 * (i + 1)],
+            {"rect": (0, 0, 0.06, 0.03)},
             nturn=1,
-            minimum_arc_nodes=3,
+            minimum_arc_nodes=4,
             Ic=1,
             filament=True,
             ifttt=False,
         )
 
+    print("arc solve")
     arc.grid.solve(1500, factor)
 
-    line = CoilSet(field_attrs=["Ax", "Ay", "Az", "Bx", "By", "Bz"])
+    line = CoilSet(field_attrs=["Ax", "Ay", "Az", "Bx", "By", "Bz", "Br"])
     for i in range(segment_number):
         line.winding.insert(
             points[2 * i : 1 + 2 * (i + 1)],
-            {"rect": (0, 0, 0.03, 0.03)},
+            {"rect": (0, 0, 0.06, 0.03)},
             nturn=1,
             minimum_arc_nodes=4,
             Ic=1,
@@ -216,18 +223,18 @@ if __name__ == "__main__":
         )
     line.grid.solve(1500, factor)
 
-    cylinder = CoilSet(field_attrs=["Bx", "By", "Bz", "Ay"])
+    cylinder = CoilSet(field_attrs=["Bx", "By", "Bz", "Ay", "Br"])
     cylinder.coil.insert(
-        radius, height, 0.03, 0.03, ifttt=False, segment="cylinder", Ic=1
+        radius, height, 0.06, 0.03, ifttt=False, segment="cylinder", Ic=1
     )
-    # cylinder.grid.solve(1500, factor)
-    # levels = cylinder.grid.plot(attr, levels=31, colors="C3", linestyles="-")
+    cylinder.grid.solve(1500, factor)
+    levels = cylinder.grid.plot(attr, levels=31, colors="C3", linestyles="-")
 
     # assert np.allclose(getattr(cylinder.grid, attr), getattr(bow.grid, attr),
     #                   atol=1e-2)
 
     arc.plot()
-    levels = bow.grid.plot(attr, colors="C0", linestyles="--", levels=31)
-    arc.grid.plot(attr, colors="C2", levels=levels)
+    levels = bow.grid.plot(attr, colors="C0", linestyles="--", levels=levels)
+    # arc.grid.plot(attr, colors="C2", linestyles="-.", levels=levels)
 
     # line.grid.plot(attr, colors="C1", linestyles="--", levels=levels)

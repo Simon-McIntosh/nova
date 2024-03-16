@@ -19,17 +19,17 @@ def arcsinh_beta_1(rs, r, gamma, alpha):
 @numba.jit(cache=True, parallel=True, fastmath=True)
 def zeta(rs, r, gamma, alpha, number=500):
     """Evaluate zeta function."""
-    shape = rs.shape
+    shape = alpha.shape
     rs = np.ravel(rs)
     r = np.ravel(r)
     gamma = np.ravel(gamma)
     alpha = np.ravel(alpha)
-    length = len(rs)
+    length = len(alpha)
     result = np.full(length, 0.0)
     for i in numba.prange(length):
         if np.isclose(alpha[i], 0):
             continue
-        num = np.max(np.array([2, int(abs(alpha[i]) * number)]))
+        num = np.max(np.array([3, int(abs(alpha[i]) * number)]))
         dalpha = alpha[i] / (num - 1)
         _alpha = np.linspace(0, alpha[i], num)[:-1] + dalpha / 2
         intergrand = arcsinh_beta_1(rs[i], r[i], gamma[i], _alpha)

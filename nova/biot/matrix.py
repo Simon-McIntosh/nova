@@ -143,6 +143,7 @@ class Matrix(GroupSet):
     @property
     def Br(self):
         """Return radial field array."""
+        print("Br")
         if self.axisymmetric:
             raise NotImplementedError
         return self.Bx * np.cos(self.phi) + self.By * np.sin(self.phi)

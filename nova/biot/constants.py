@@ -183,15 +183,15 @@ class Constants:
     def elliprf(cls, x, y, z):
         """Return completely-symmetric elliptic integral of the first kind."""
         rf = scipy.special.elliprf(x, y, z)
-        # rf[(y == 0) | (y == 1)] = scipy.special.elliprc(0, 1)
+        # rf[(y == 0) | (y == 1)] = scipy.special.elliprc(0, 1)  #
         return rf
 
     @classmethod
     def elliprj(cls, x, y, z, p):
         """Retrun symmetric elliptic integral of the third kind."""
         rj = scipy.special.elliprj(x, y, z, p)
-        # rj[y == p] = scipy.special.elliprd(x[y == p], z[y == p], p[y == p])
-        # rj[p == 1] = scipy.special.elliprd(x[p == 1], y[p == 1], 1)
+        # rj[y == p] = scipy.special.elliprd(x[y == p], z[y == p], p[y == p])  #
+        # rj[p == 1] = scipy.special.elliprd(x[p == 1], y[p == 1], 1)  #
         return rj
 
     @classmethod
@@ -207,23 +207,26 @@ class Constants:
         return rf + rj * n / 3
 
     @classmethod
-    def ellippinc(cls, phi, n, m):
+    def _ellippinc(cls, n, phi, m):
+        """Return first branch incomplete elliptic intergral of the 3rd kind."""
+        x = 1.0 - np.sin(phi) ** 2
+        y = 1.0 - m * np.sin(phi) ** 2
+        z = np.ones_like(phi)
+        rf = cls.elliprf(x, y, z)
+        rj = cls.elliprj(x, y, z, 1.0 - n * np.sin(phi) ** 2)
+        return np.sin(phi) * rf + np.sin(phi) ** 3 * rj * n / 3.0
+
+    @classmethod
+    def ellippinc(cls, n, phi, m):
         """
         Return incomplete elliptic intergral of the 3rd kind.
 
         Adapted from https://github.com/scipy/scipy/issues/4452.
         """
-        nc = np.floor(phi / np.pi + 0.5)
-        phi -= nc * np.pi
-        sin_phi = np.sin(phi)
-        sin2_phi = sin_phi * sin_phi
-        sin3_phi = sin2_phi * sin_phi
-        x = 1 - sin2_phi
-        y = 1 - m * sin2_phi
-        z = np.ones_like(phi)
-        rf = cls.elliprf(x, y, z)
-        rj = cls.elliprj(x, y, z, 1 - n * sin2_phi)
-        return sin_phi * rf + sin3_phi * rj * n / 3
+        k = (phi + np.pi / 2) // np.pi
+        assert np.all(abs(phi - k * np.pi) <= np.pi / 2)
+        assert np.all(m < 1)
+        return 2 * k * cls.ellipp(n, m) + cls._ellippinc(n, phi - k * np.pi, m)
 
     # @unit_nudge()
     def _np2_2(self):

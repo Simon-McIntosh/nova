@@ -7,7 +7,7 @@ import xarray
 from nova.imas.coils_non_axisymmetric import CoilsNonAxisymmetric
 
 
-ids = CoilsNonAxisymmetric(115001, 2, field_attrs=["Bx", "By", "Bz"])
+ids = CoilsNonAxisymmetric(115001, 2, field_attrs=["Bx", "By", "Bz", "Br"])
 
 ids.saloc["Ic"] = 1
 
@@ -21,7 +21,7 @@ grid["Y"] = ("x", "y", "z"), Y[..., np.newaxis]
 grid["Z"] = ("x", "y", "z"), np.zeros_like(X)[..., np.newaxis]
 
 
-solve = False
+solve = True
 if solve:
     ids.grid.solve(grid=grid)
     # ids.grid.solve(1e3, 1.2)
@@ -29,7 +29,7 @@ if solve:
 
 ids.plot()
 ids.set_axes("2d")
-ids.grid.plot("bz", coords="xy", index=(..., 0), levels=500)
+ids.grid.plot("br", coords="xy", index=(..., 0), levels=500)
 
 
 points = np.stack(
@@ -42,7 +42,7 @@ points = np.stack(
 ).reshape(-1, 3)
 
 mesh = pv.PolyData(points).delaunay_2d()
-contours = mesh.contour(isosurfaces=351, scalars=ids.grid.bz.reshape(-1))
+contours = mesh.contour(isosurfaces=351, scalars=ids.grid.br.reshape(-1))
 
 ids.frame.vtkplot()  # index=["EU9B", "EE9B", "EL9B"])
 vedo.Mesh(contours, c="black").show(new=False)

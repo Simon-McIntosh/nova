@@ -166,10 +166,14 @@ if __name__ == "__main__":
 
     radius = 3.945
     height = 2
-    segment_number = 251
+    segment_number = 4
 
-    attr = "bz"
-    factor = 5.5
+    attr = "ay"
+    factor = 2.25
+    Ic = 5.3e5
+
+    outer_width = 0.05
+    inner_width = 0.04
 
     theta = np.linspace(0, 2 * np.pi, segment_number)
     points = np.stack(
@@ -180,26 +184,32 @@ if __name__ == "__main__":
     coilset = CoilSet(field_attrs=["Ay", "Bx", "By", "Bz", "Br"])
     coilset.winding.insert(
         points,
-        {"r": (0, 0, 0.15, 0.05)},
-        minimum_arc_nodes=len(points) + 1,
+        {"sk": (0, 0, outer_width, 1 - inner_width / outer_width)},
+        minimum_arc_nodes=4,
         filament=False,
         ifttt=False,
     )
+    coilset.plot()
 
     coilset.point.solve(np.array([radius, height]))
 
     coilset.grid.solve(2500, factor)
 
-    coilset.saloc["Ic"] = 5.3e5
+    coilset.saloc["Ic"] = Ic
     axes = coilset.grid.axes
 
     cylinder = CoilSet(field_attrs=["Ay", "Bx", "By", "Bz", "Br"])
-    cylinder.coil.insert({"rect": (radius, height, 0.15, 0.05)})
-    cylinder.coil.insert({"rect": (radius, height, 0.12, 0.03)})
+    cylinder.coil.insert({"rect": (radius, height, 0.05, 0.05)})
+    cylinder.coil.insert({"rect": (radius, height, 0.04, 0.04)})
     # cylinder.linkframe(cylinder.frame.index, -1)
+
+    Ashell = outer_width**2 - inner_width**2
+    Jc = Ic / Ashell
     cylinder.grid.solve(2500, factor)
-    cylinder.saloc["Ic"] = 5.3e5 + 1e3, -1e5
-    levels = cylinder.grid.plot(attr, colors="C1", axes=axes, linestyles="--")
+    cylinder.saloc["Ic"] = Jc * outer_width**2, -Jc * inner_width**2
+    levels = cylinder.grid.plot(
+        attr, levels=31, colors="C1", axes=axes, linestyles="--"
+    )
 
     coilset.grid.plot(attr, colors="C0", levels=levels)
 

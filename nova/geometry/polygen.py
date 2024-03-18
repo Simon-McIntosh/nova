@@ -202,6 +202,7 @@ class PolyGen(PolyShape):
         shape : shapely.polygon
 
         """
+        print("sk")
         if factor <= 0 or factor > 1:
             raise ValueError("skin factor not 0 <= " f"{factor} <= 1")
         disc_outer = PolyGen.disc(x_center, z_center, diameter, quadrant_segments)

@@ -60,17 +60,6 @@ class Arc(Constants, Matrix):
                 arctan2(self("source", "y2"), self("source", "x2")),
             ]
         )
-        assert np.allclose(np.arctan2(self("source", "y1"), self("source", "x1")), 0)
-
-        alpha = (np.pi - (phi_s - _phi)) / 2
-        print("\n")
-        for axis in range(2):
-            print(
-                f"alpha[{axis}]/pi min {alpha[axis].min()/np.pi:1.2f}, "
-                f"max {alpha[axis].max()/np.pi:1.2f}"
-            )
-        print("\n")
-
         return np.concatenate(
             (
                 (np.pi - (phi_s - _phi)) / 2,
@@ -146,14 +135,6 @@ class Arc(Constants, Matrix):
         theta[self._index_A] = self.abs_alpha[self._index_A]
         theta[self._index_C] = np.pi - self.abs_alpha[self._index_C]
         theta[self._index_D] = 2 * np.pi - self.alpha[self._index_D]
-
-        print("\n")
-        for axis in range(2):
-            print(
-                f"theta[{axis}]/pi min {theta[axis].min()/np.pi:1.2f}, "
-                f"max {theta[axis].max()/np.pi:1.2f}"
-            )
-        print("\n")
         return theta
 
     @property

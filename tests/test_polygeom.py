@@ -60,6 +60,26 @@ def test_circular_cross_section():
     assert np.isclose(np.pi * 2.5**2 / 4, geom.area, rtol=1e-8)
 
 
+def test_skin_cross_section():
+    "check framespace area sum equals circle area"
+    inner_width = 0.04
+    outer_width = 0.05
+    factor = 1 - inner_width / outer_width
+    geom = PolyGeom(Polygon({"sk": (1.75, 0.5, outer_width, factor)}))
+    assert np.isclose(
+        np.pi * (outer_width**2 - inner_width**2) / 4, geom.area, rtol=1e-8
+    )
+
+
+def test_box_cross_section():
+    "check framespace area sum equals circle area"
+    inner_width = 0.04
+    outer_width = 0.05
+    factor = 1 - inner_width / outer_width
+    geom = PolyGeom(Polygon({"box": (1.75, 0.5, outer_width, factor)}))
+    assert np.isclose(outer_width**2 - inner_width**2, geom.area, rtol=1e-8)
+
+
 def test_circle_centroid():
     geom = PolyGeom(Polygon(dict(rec=(4, 6, 0.1, 0.5))), segment="circle")
     assert np.allclose(geom.centroid, [4, 0, 6])

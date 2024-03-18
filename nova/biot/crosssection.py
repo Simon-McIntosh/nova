@@ -35,7 +35,8 @@ class CrossSection(metamethod.CrossSection):
             "ellipse": "disc",
             "polygon": "square",
             "polyloop": "square",
-            "shell": "square",
+            "shell": "skin",
+            "box": "skin",
             "hexagon": "disc",
         },
     )

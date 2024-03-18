@@ -464,10 +464,10 @@ if __name__ == "__main__":
 
     radius = 3.945
     height = 2
-    segment_number = 1
+    segment_number = 12
 
     length = 2 * np.pi
-    offset = 0.1
+    offset = 0
 
     theta = offset + np.linspace(-length / 2, length / 2, 1 + 3 * segment_number)
     points = np.stack(
@@ -485,7 +485,7 @@ if __name__ == "__main__":
             Ic=1e3,
         )
 
-    coilset.grid.solve(1500, 3.5)
+    coilset.grid.solve(1500, 0.5)
     coilset.plot()
 
     attr = "ay"
@@ -494,7 +494,7 @@ if __name__ == "__main__":
     circle.coil.insert(
         radius, height, 0.05, 0.05, ifttt=False, segment="cylinder", Ic=1e3
     )
-    circle.grid.solve(1500, 3.5)
+    circle.grid.solve(1500, 0.5)
     levels = circle.grid.plot(attr, levels=31, colors="C0", linestyles="--")
 
     # levels = 31

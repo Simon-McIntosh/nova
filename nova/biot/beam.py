@@ -184,7 +184,7 @@ if __name__ == "__main__":
     coilset = CoilSet(field_attrs=["Ay", "Bx", "By", "Bz", "Br"])
     coilset.winding.insert(
         points,
-        {"sk": (0, 0, outer_width, 1 - inner_width / outer_width)},
+        {"box": (0, 0, outer_width, 1 - inner_width / outer_width)},
         minimum_arc_nodes=4,
         filament=False,
         ifttt=False,
@@ -196,21 +196,24 @@ if __name__ == "__main__":
     coilset.grid.solve(2500, factor)
 
     coilset.saloc["Ic"] = Ic
+
+    levels = coilset.grid.plot(attr, colors="C0", levels=31)
+
     axes = coilset.grid.axes
 
     cylinder = CoilSet(field_attrs=["Ay", "Bx", "By", "Bz", "Br"])
     cylinder.coil.insert({"rect": (radius, height, 0.05, 0.05)})
-    cylinder.coil.insert({"rect": (radius, height, 0.04, 0.04)})
+
+    # cylinder.coil.insert({"rect": (radius, height, 0.04, 0.04)})
     # cylinder.linkframe(cylinder.frame.index, -1)
 
     Ashell = outer_width**2 - inner_width**2
     Jc = Ic / Ashell
     cylinder.grid.solve(2500, factor)
-    cylinder.saloc["Ic"] = Jc * outer_width**2, -Jc * inner_width**2
+    cylinder.saloc["Ic"] = Ic  # Jc * outer_width**2, -Jc * inner_width**2
+
     levels = cylinder.grid.plot(
         attr, levels=31, colors="C1", axes=axes, linestyles="--"
     )
 
-    coilset.grid.plot(attr, colors="C0", levels=levels)
-
-    cylinder.plot()
+    # cylinder.plot()

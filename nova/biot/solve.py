@@ -190,6 +190,7 @@ class Solve(GroupSet):
             matrix, target_plasma, plasma_source, plasma_plasma = generator.compute(
                 attr
             )
+            print(source_index, matrix, segment)
             self.data[attr].loc[:, source_index] += matrix
             if np.prod(target_plasma.shape) > 0:
                 self.data[f"{attr}_"].loc[:, plasma_index] += target_plasma

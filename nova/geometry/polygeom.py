@@ -98,9 +98,10 @@ class PolyGeom(Polygon):
             return self.length**2  # square
         if self.section == "rectangle":
             return self.length * self.thickness  # rectangle
-        if self.section == "skin":  # thickness = 1-r/R
-            print("skin")
-            return np.pi * self.length**2 * self.thickness / 4 * (2 - self.thickness**2)
+        if self.section == "skin":  # circle with hole, thickness = 1-r/R
+            return np.pi / 4 * self.length**2 * self.thickness * (2 - self.thickness)
+        if self.section == "box":  # square with hole, thickness = 1-r/R
+            return self.length**2 * self.thickness * (2 - self.thickness)
         if self.section == "hexagon":
             return 3 / 2 * self.height**2 / np.sqrt(3)
         return self.poly.area

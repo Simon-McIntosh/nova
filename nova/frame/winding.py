@@ -104,6 +104,7 @@ class Winding(CoilSetAttrs):
             FrameSpace index.
 
         """
+        print(cross_section)
         if cross_section is None or (path is None and polyline is None):
             raise ValueError(
                 "winding.insert requires cross_section and "
@@ -134,6 +135,10 @@ class Winding(CoilSetAttrs):
                 [polygon.poly for polygon in polyline.volume_geometry["poly"]]
             )
         )
+        print("cross-section area", cross_section.metadata)
+        from nova.geometry.polygeom import PolyGeom
+
+        print(PolyGeom(cross_section).geometry)
         self.attrs = additional | dict(
             section=cross_section.section,
             area=cross_section.area,
@@ -156,7 +161,10 @@ class Winding(CoilSetAttrs):
                 )
             )
             subattrs.pop("name", None)
-            self.subframe.insert(**subattrs)
+            subindex = self.subframe.insert(**subattrs)
+
+            if cross_section.section in ["box"]:
+                self.subframe.insert(**subattrs | {"link": subindex[0], "factor": -0.5})
         self.update_loc_indexer()
         return index
 

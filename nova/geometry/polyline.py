@@ -430,7 +430,7 @@ class PolyLine(Plot):
     volume_attrs: ClassVar[list[str]] = [
         "vtk",
         "poly",
-        "area",
+        # "area",
         "volume",
     ]
 
@@ -579,6 +579,7 @@ class PolyLine(Plot):
     @cached_property
     def area(self) -> list[float]:
         """Return list of polygon areas projected to 2d poloiodal plane."""
+        print("area", [poly.area for poly in self.poly])
         return [poly.area for poly in self.poly]
 
     @property

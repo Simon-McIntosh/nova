@@ -155,7 +155,7 @@ class CoilsNonAxisymmetric(Plot, CoilDatabase, Scenario):
             self.data.coords["point"] = ["x", "y", "z"]
 
             points = {}
-            for coil in tqdm(self.ids_data.coil, "building coils non-axysymmetric"):
+            for coil in tqdm(self.ids_data.coil, "building coils non-axisymmetric"):
                 name = coil_name(coil)
                 points[name] = []
                 for i, conductor in enumerate(coil.conductor):
@@ -197,9 +197,7 @@ class CoilsNonAxisymmetric(Plot, CoilDatabase, Scenario):
                                 width = cross_section.width
                                 radius_inner = cross_section.radius_inner
                                 thickness = 1 - radius_inner / (width / 2)
-                                polygon = Polygon(
-                                    {"circle": [0, 0, width, thickness, 2]}
-                                )
+                                polygon = Polygon({"pipe": [0, 0, width, thickness, 2]})
                             case _:
                                 raise NotImplementedError(
                                     f"Geometry type index {index} not implemented."
@@ -264,7 +262,7 @@ if __name__ == "__main__":
 
     # elm_ids = CoilsNonAxisymmetric(115001, 2)  # ELM
 
-    ids = CoilsNonAxisymmetric(115001, 2)
+    ids = CoilsNonAxisymmetric(111006, 1)
 
     ids.plot()
 

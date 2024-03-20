@@ -148,6 +148,13 @@ class Matrix(GroupSet):
         return self.Bx * np.cos(self.phi) + self.By * np.sin(self.phi)
 
     @property
+    def Bphi(self):
+        """Return toroidal field array."""
+        if self.axisymmetric:
+            return np.zeros(self.shape, float)
+        return -self.Bx * np.sin(self.phi) + self.By * np.cos(self.phi)
+
+    @property
     def Fr(self):
         """Return radial force array."""
         return 2 * np.pi * self.target.x[:, np.newaxis] * self.Bz
@@ -207,7 +214,6 @@ class Matrix(GroupSet):
                 ref, factor = target_link[link]
                 matrix[ref] += factor * matrix[link]
                 target_plasma[ref] += factor * target_plasma[link]
-                # plasma[ref, :] += factor * plasma[link]
             matrix = np.delete(matrix, list(target_link), 0)
             target_plasma = np.delete(target_plasma, list(target_link), 0)
         return matrix, target_plasma, plasma_source, plasma_plasma

@@ -276,7 +276,9 @@ class Arc(Plot, Element):
     @cached_property
     def central_angle(self):
         """Return the absolute angle subtended by arc from the arc's center."""
-        return abs(self.theta[-1] - self.theta[0])
+        if (dtheta := abs(self.theta[-1] - self.theta[0])) <= 2 * np.pi:
+            return dtheta
+        return dtheta % (2 * np.pi)
 
     @cached_property
     def length(self):
@@ -403,8 +405,8 @@ class PolyLine(Plot):
     rdp_eps: float = 1e-3
     minimum_arc_nodes: int = 4
     quadrant_segments: int = 16
-    arc_resolution: float = 1.5
-    align: str = "axes"
+    arc_resolution: float = 0.25
+    align: str = "vector"
     filament: bool = True
     segments: list[Line | Arc] = field(init=False, repr=False, default_factory=list)
 

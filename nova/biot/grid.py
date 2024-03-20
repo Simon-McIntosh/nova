@@ -16,7 +16,6 @@ from nova.frame.error import GridError
 from nova.frame.framelink import FrameLink
 from nova.geometry.pointloop import PointLoop
 from nova.graphics.line import Chart
-from nova.utilities.time import timeit
 
 
 @dataclass
@@ -232,7 +231,6 @@ class BaseGrid(Chart, FieldNull, Operate):
 class Grid(BaseGrid):
     """Compute interaction across regular grid."""
 
-    @timeit(repeat=1, number=1)
     def solve(
         self,
         number: int | None = None,

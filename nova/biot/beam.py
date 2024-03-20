@@ -80,7 +80,7 @@ class Beam(Matrix):
         r = np.sqrt(self.ui**2 + self.vj**2 + self.wk**2)
         return dict(
             zip(
-                range(1, 7),
+                np.arange(1, 7),
                 [
                     self.wk / self.alpha,
                     self.ui / self.beta,
@@ -169,7 +169,7 @@ if __name__ == "__main__":
     segment_number = 4
 
     attr = "ay"
-    factor = 2.25
+    factor = 0.3
     Ic = 5.3e5
 
     outer_width = 0.05
@@ -189,6 +189,7 @@ if __name__ == "__main__":
         filament=False,
         ifttt=False,
     )
+
     coilset.plot()
 
     coilset.point.solve(np.array([radius, height]))
@@ -197,23 +198,22 @@ if __name__ == "__main__":
 
     coilset.saloc["Ic"] = Ic
 
-    levels = coilset.grid.plot(attr, colors="C0", levels=31)
+    levels = coilset.grid.plot(attr, colors="C0", levels=61)
 
     axes = coilset.grid.axes
 
     cylinder = CoilSet(field_attrs=["Ay", "Bx", "By", "Bz", "Br"])
-    cylinder.coil.insert({"rect": (radius, height, 0.05, 0.05)})
-
-    # cylinder.coil.insert({"rect": (radius, height, 0.04, 0.04)})
+    cylinder.coil.insert({"rect": (radius, height, outer_width, outer_width)})
+    cylinder.coil.insert({"rect": (radius, height, inner_width, inner_width)})
     # cylinder.linkframe(cylinder.frame.index, -1)
 
     Ashell = outer_width**2 - inner_width**2
     Jc = Ic / Ashell
     cylinder.grid.solve(2500, factor)
-    cylinder.saloc["Ic"] = Ic  # Jc * outer_width**2, -Jc * inner_width**2
+    cylinder.saloc["Ic"] = Jc * outer_width**2, -Jc * inner_width**2
 
     levels = cylinder.grid.plot(
-        attr, levels=31, colors="C1", axes=axes, linestyles="--"
+        attr, levels=levels, colors="C1", axes=axes, linestyles="--"
     )
 
     # cylinder.plot()

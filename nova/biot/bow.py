@@ -153,7 +153,6 @@ class Bow(Arc, Matrix):
     def _intergrate(self, data):
         """Return intergral quantity int dalpha dA."""
         data = data[0] - data[1]
-        print("bow", self.source("area").ravel()[0])
         return (
             1
             / (4 * np.pi * self.source("area"))

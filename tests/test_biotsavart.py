@@ -516,5 +516,52 @@ def test_ellippinc():
     assert np.allclose(p_scipy, p_mpmath)
 
 
+def test_box_section():
+    radius = 3.945
+    height = 2
+    outer_width = 0.05
+    inner_width = 0.04
+
+    attrs = ["Ay", "Br", "Bz"]
+    factor = 0.3
+    Ic = 5.3e5
+    ngrid = 30
+
+    theta = np.linspace(0, 2 * np.pi, 4)
+    points = np.stack(
+        [radius * np.cos(theta), radius * np.sin(theta), height * np.ones_like(theta)],
+        axis=-1,
+    )
+
+    coilset = CoilSet(field_attrs=attrs)
+    coilset.winding.insert(
+        points,
+        {"box": (0, 0, outer_width, 1 - inner_width / outer_width)},
+        minimum_arc_nodes=4,
+        filament=False,
+        ifttt=False,
+        Ic=Ic,
+    )
+
+    coilset.grid.solve(ngrid, factor)
+
+    multicoil = CoilSet(field_attrs=attrs)
+    multicoil.coil.insert({"rect": (radius, height, outer_width, outer_width)})
+    multicoil.coil.insert({"rect": (radius, height, inner_width, inner_width)})
+
+    Ashell = outer_width**2 - inner_width**2
+    Jc = Ic / Ashell
+    multicoil.grid.solve(ngrid, factor)
+    multicoil.saloc["Ic"] = Jc * outer_width**2, -Jc * inner_width**2
+
+    for attr in attrs:
+        assert np.allclose(
+            getattr(coilset.grid, attr.lower()),
+            getattr(multicoil.grid, attr.lower()),
+            atol=1e-4,
+            rtol=1e-4,
+        )
+
+
 if __name__ == "__main__":
     pytest.main([__file__])

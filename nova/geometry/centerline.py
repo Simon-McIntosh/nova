@@ -42,8 +42,8 @@ datasource = {
         attributes={"cross_section": {"square": [0, 0, 0.0148]}},
     ),
     "CS1L": DataSource(
-        pulse=0,
-        run=0,
+        pulse=111006,
+        run=1,
         description="Central Solenoid Modules - conductor centerlines",
         provider="Simon McIntosh, simon.mcintosh@iter.org",
         officer="Thierry Schild, thierry.schild@iter.org",
@@ -433,6 +433,9 @@ if __name__ == "__main__":
     # filename = "TF"
     # centerline = Centerline(filename=filename)
     # centerline.plot()
+    # centerline = Centerline(filename="CS1L")
+    # centerline.plot()
+    # centerline.write_ids()
 
     for filename in ["CS", "PF", "VS3", "ELM", "CC", "TF"]:
         print(filename)

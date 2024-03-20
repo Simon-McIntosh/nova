@@ -8,7 +8,7 @@ import shapely.ops
 import vedo
 
 from nova.frame.coilsetattrs import CoilSetAttrs
-from nova.geometry.polygeom import Polygon
+from nova.geometry.polygeom import Polygon, PolyGeom
 from nova.geometry.polyline import PolyLine
 
 from nova.geometry.volume import Sweep
@@ -104,14 +104,13 @@ class Winding(CoilSetAttrs):
             FrameSpace index.
 
         """
-        print(cross_section)
         if cross_section is None or (path is None and polyline is None):
             raise ValueError(
                 "winding.insert requires cross_section and "
                 "path or polyline attributes"
             )
-        if not isinstance(cross_section, Polygon):
-            cross_section = Polygon(cross_section, name="sweep")
+        if not isinstance(cross_section, PolyGeom):
+            cross_section = PolyGeom(cross_section, name="sweep")
 
         polyline_kwargs = {
             attr: additional.pop(attr)
@@ -135,10 +134,6 @@ class Winding(CoilSetAttrs):
                 [polygon.poly for polygon in polyline.volume_geometry["poly"]]
             )
         )
-        print("cross-section area", cross_section.metadata)
-        from nova.geometry.polygeom import PolyGeom
-
-        print(PolyGeom(cross_section).geometry)
         self.attrs = additional | dict(
             section=cross_section.section,
             area=cross_section.area,
@@ -164,7 +159,12 @@ class Winding(CoilSetAttrs):
             subindex = self.subframe.insert(**subattrs)
 
             if cross_section.section in ["box"]:
-                self.subframe.insert(**subattrs | {"link": subindex[0], "factor": -0.5})
+                subattrs["width"] *= 1 - cross_section.thickness
+                subattrs["height"] *= 1 - cross_section.thickness
+                self.subframe.insert(
+                    **subattrs
+                    | {"label": f"_{index[0]}", "link": subindex[0], "factor": -1}
+                )
         self.update_loc_indexer()
         return index
 

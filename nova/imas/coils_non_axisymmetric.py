@@ -100,7 +100,7 @@ class Elements(Plot):
 
     def _extract_polyline(self):
         """Return segmented polyline."""
-        polyline = PolyLine(minimum_arc_nodes=3)
+        polyline = PolyLine(minimum_arc_nodes=3, filament=True)
         for element_type, point_array in zip(self._type_array, self._point_array):
             match element_type:
                 case 1:  # line

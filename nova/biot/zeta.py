@@ -8,7 +8,7 @@ import numba
 import numpy as np
 
 
-@numba.jit
+@numba.njit(cache=True, fastmath=True)
 def arcsinh_beta_1(rs, r, gamma, alpha):
     """Return zeta intergrand."""
     phi = np.pi - 2 * alpha
@@ -16,8 +16,8 @@ def arcsinh_beta_1(rs, r, gamma, alpha):
     return np.arcsinh((rs - r * np.cos(phi)) / np.sqrt(G2))
 
 
-@numba.jit(cache=True, parallel=True, fastmath=True)
-def zeta(rs, r, gamma, alpha, number=500):
+@numba.njit(cache=True, parallel=False, fastmath=True)
+def zeta(rs, r, gamma, alpha, number=250):
     """Evaluate zeta function."""
     shape = alpha.shape
     rs = np.ravel(rs)
@@ -26,7 +26,7 @@ def zeta(rs, r, gamma, alpha, number=500):
     alpha = np.ravel(alpha)
     length = len(alpha)
     result = np.full(length, 0.0)
-    for i in numba.prange(length):
+    for i in range(length):
         if np.isclose(alpha[i], 0):
             continue
         num = np.max(np.array([3, int(abs(alpha[i]) * number)]))

@@ -42,9 +42,11 @@ class Reduce(metamethod.Reduce):
             if factor[i] == 1:
                 if index == indices[-1]:
                     continue
-                if index > indices[-1] and factor[i]:
+                if index > indices[-1] and factor[i] == 1:
                     indices.append(index)
                     continue
-            indices.append(i)
-            self.link[len(indices) - 1] = [int(indices.index(index)), factor[i]]
+            if i != indices[-1]:
+                indices.append(i)
+            if (len(indices) - 1) != int(indices.index(index)):
+                self.link[len(indices) - 1] = [int(indices.index(index)), factor[i]]
         return indices

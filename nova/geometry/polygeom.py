@@ -89,6 +89,21 @@ class PolyGeom(Polygon):
         """Return section characteristic thickness."""
         return self.metadata.get("thickness", None)
 
+    @property
+    def section(self):
+        """Return polygon section."""
+        return self.metadata.get("section", self.name)
+
+    @section.setter
+    def section(self, section):
+        """Update polygeom cross_section."""
+        self.metadata["section"] = section
+        for attr in ["area", "box", "rms"]:
+            try:
+                delattr(self, attr)
+            except AttributeError:
+                pass
+
     @cached_property
     def area(self):
         """Return polygon area."""

@@ -62,7 +62,7 @@ class MultiPoint(metamethod.MultiPoint):
                 factor = self.frame.factor
                 factor = factor[istrue | isnumeric][1:]
                 self.link(index, factor.values)
-        self.frame.link = self.frame.link.astype(str)
+        self.frame.loc[:, "link"] = [str(link) for link in self.frame.link]
         self.sort_link()
         self.build()
 
@@ -151,7 +151,7 @@ class MultiPoint(metamethod.MultiPoint):
                 f"len(factor={factor}) must == 1 for == len(index={index})-1"
             )
         for i in np.arange(1, index_number):
-            self.frame.at[index[i], "link"] = name
+            self.frame.at[index[i], "link"] = str(name)
             self.frame.at[index[i], "factor"] = factor[i - 1]
         if self.frame.lock("multipoint") is False:
             self.frame.__init__(self.frame, attrs=self.frame.attrs)

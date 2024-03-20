@@ -516,7 +516,8 @@ def test_ellippinc():
     assert np.allclose(p_scipy, p_mpmath)
 
 
-def test_box_section():
+@pytest.mark.parametrize("section", ["box", "skin"])
+def test_box_section(section):
     radius = 3.945
     height = 2
     outer_width = 0.05
@@ -527,21 +528,25 @@ def test_box_section():
     Ic = 5.3e5
     ngrid = 30
 
-    theta = np.linspace(0, 2 * np.pi, 4)
+    segment_number = 3
+
+    theta = np.linspace(0, 2 * np.pi, 1 + 3 * segment_number)
     points = np.stack(
         [radius * np.cos(theta), radius * np.sin(theta), height * np.ones_like(theta)],
         axis=-1,
     )
 
     coilset = CoilSet(field_attrs=attrs)
-    coilset.winding.insert(
-        points,
-        {"box": (0, 0, outer_width, 1 - inner_width / outer_width)},
-        minimum_arc_nodes=4,
-        filament=False,
-        ifttt=False,
-        Ic=Ic,
-    )
+    for i in range(segment_number):
+        coilset.winding.insert(
+            points[3 * i : 1 + 3 * (i + 1)],
+            {section: (0, 0, outer_width, 1 - inner_width / outer_width)},
+            nturn=1,
+            minimum_arc_nodes=4,
+            Ic=Ic,
+            filament=False,
+            ifttt=False,
+        )
 
     coilset.grid.solve(ngrid, factor)
 

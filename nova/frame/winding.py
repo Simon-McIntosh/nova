@@ -111,6 +111,8 @@ class Winding(CoilSetAttrs):
             )
         if not isinstance(cross_section, PolyGeom):
             cross_section = PolyGeom(cross_section, name="sweep")
+        if cross_section.section == "skin":
+            cross_section.section = "box"
 
         polyline_kwargs = {
             attr: additional.pop(attr)
@@ -157,14 +159,10 @@ class Winding(CoilSetAttrs):
             )
             subattrs.pop("name", None)
             subindex = self.subframe.insert(**subattrs)
-
-            if cross_section.section in ["box"]:
+            if cross_section.section in ["box"] and polyline.filament is False:
                 subattrs["width"] *= 1 - cross_section.thickness
                 subattrs["height"] *= 1 - cross_section.thickness
-                self.subframe.insert(
-                    **subattrs
-                    | {"label": f"_{index[0]}", "link": subindex[0], "factor": -1}
-                )
+                self.subframe.insert(**subattrs | {"link": subindex[0]}, factor=-1)
         self.update_loc_indexer()
         return index
 

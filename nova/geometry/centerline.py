@@ -433,15 +433,17 @@ if __name__ == "__main__":
     # filename = "TF"
     # centerline = Centerline(filename=filename)
     # centerline.plot()
-    centerline = Centerline(filename="CS1L")
+    centerline = Centerline(filename="TF")
     centerline.plot()
     centerline.write_ids()
-
+    """
     for filename in ["CS", "PF", "VS3", "ELM", "CC", "TF"]:
         print(filename)
         centerline = Centerline(filename=filename)
         centerline.plot()
         centerline.write_ids()
+
+    """
 
     # centerline = Centerline(filename=filename)
     # centerline.plot()

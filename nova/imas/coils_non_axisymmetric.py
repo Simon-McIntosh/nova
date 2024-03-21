@@ -205,6 +205,7 @@ class CoilsNonAxisymmetric(Plot, CoilDatabase, Scenario):
 
                     if i > 0:
                         name = f"name{i}"
+                    elements.polyline.cross_section = polygon.points
                     self.winding.insert(
                         polyline=elements.polyline,
                         cross_section=polygon,

@@ -24,7 +24,7 @@ class Overlap(Plot2D, Operate):
 
     """
 
-    attrs: list[str] = field(init=False, default_factory=lambda: ["Br", "Bz"])
+    attrs: list[str] = field(default_factory=lambda: ["Br", "Bz"])
     target: BiotFrame = field(init=False, repr=False)
 
     def __len__(self):
@@ -36,10 +36,39 @@ class Overlap(Plot2D, Operate):
         with self.solve_biot(number) as number:
             if number is not None:
 
-                print(points.shape)
+                shape = points.shape[:-1] + (number,)
+                radius = points[..., 0, np.newaxis]
+                height = points[..., 1, np.newaxis]
+                theta = np.linspace(0, 2 * np.pi, number, endpoint=False)
 
-                Target({"x": points[..., 0], "z": points[..., 1]})
-                Solve()
+                target = Target(
+                    {
+                        "x": (radius * np.cos(theta)).ravel(),
+                        "y": (radius * np.sin(theta)).ravel(),
+                        "z": (height * np.ones_like(theta)).ravel(),
+                    },
+                    label="Point",
+                )
+
+                point_data = Solve(
+                    self.subframe,
+                    target,
+                    reduce=[True, False],
+                    turns=[True, False],
+                    attrs=self.attrs,
+                    name=self.name,
+                ).data
+
+                fft_data = {}
+                for attr in point_data:
+                    data_ = point_data[attr].data.reshape(
+                        shape + (point_data.sizes["source"],)
+                    )
+                    print(data_.shape)
+                    assert np.allclose(data_[0, 0, :, 0], data_[0, 0, 0, 0])
+                    fft_data[attr] = data_
+
+                self.data = point_data
                 """
 
                 target = Target()
@@ -128,9 +157,10 @@ if __name__ == "__main__":
     coilset = CoilSet(noverlap=120)
 
     coilset.coil.insert(3, 4, 0.05, 0.05, ifttt=False, segment="cylinder", Ic=1e3)
+    coilset.coil.insert(3, 2, 0.05, 0.05, ifttt=False, segment="cylinder", Ic=1e3)
 
     points = np.stack(
-        np.meshgrid(np.linspace(3, 5, 21), np.linspace(-2, 2), 32, indexing="ij"),
+        np.meshgrid(np.linspace(3, 5, 21), np.linspace(-2, 2, 32), indexing="ij"),
         axis=-1,
     )
     coilset.overlap.solve(points)

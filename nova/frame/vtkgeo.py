@@ -47,7 +47,7 @@ class VtkGeo(metamethod.VtkGeo):
                     ahull=frame.segment.iloc[i] in self.ahull,
                 )
                 mesh = vedo.Mesh(
-                    [tri.vtk.points(), tri.vtk.cells()],
+                    [tri.vtk.vertices, tri.vtk.cells],
                     c=tri.vtk.c(),
                     alpha=tri.vtk.opacity(),
                 )

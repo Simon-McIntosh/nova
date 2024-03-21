@@ -37,6 +37,8 @@ class DataFrame(FrameAttrs):
     """
 
     _geoframe = {
+        "LineString": ".geometry.polyframe.PolyFrame",
+        "MultiLineString": ".geometry.polyframe.PolyFrame",
         "Polygon": ".geometry.polyframe.PolyFrame",
         "MultiPolygon": ".geometry.polyframe.PolyFrame",
         "VTK": ".geometry.vtkgen.VtkFrame",
@@ -308,7 +310,7 @@ class DataFrame(FrameAttrs):
                 continue
             try:
                 xframe[col].values = self._dumps(col)
-            except KeyError:
+            except (KeyError, AttributeError):
                 pass
         xframe.to_netcdf(filepath, group=group, mode=mode)
 

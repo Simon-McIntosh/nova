@@ -63,6 +63,13 @@ except (ModuleNotFoundError, ImportError):
 
     prange = range
 
+try:
+    import vedo
+
+    vedo.settings.default_backend = "vtk"
+except ModuleNotFoundError:
+    pass
+
 
 def __dir__():
     return __all__

@@ -156,14 +156,12 @@ class PolyPlot(Plot, Properties, Labels, metamethod.PolyPlot, BasePlot):
             if self.patchwork != 0:  # Shuffle basecolor
                 patch_kwargs["facecolor"] = self.shuffle(basecolor[part])
             patch_kwargs |= kwargs
-            try:  # MultiPolygon.
-                for _poly in polyframe.poly:
-                    assert False  # TODO remove branch if not triggered
-                    patch.append(self.patch(_poly.__geo_interface__, **patch_kwargs))
-            except (TypeError, AssertionError):  # Polygon.
+            try:  # Polygon or MultiPolygon.
                 patch.append(
                     self.patch(polyframe.poly.__geo_interface__, **patch_kwargs)
                 )
+            except ValueError:
+                pass
         patch_collection = self.mpl["PatchCollection"](patch, match_original=True)
         self.axes.add_collection(patch_collection)
         self.axes.autoscale_view()

@@ -29,7 +29,7 @@ class TriShell:
     mesh: vedo.Mesh
     qhull: bool = False
     ahull: bool = False
-    alpha: float | None = 3.5
+    alpha: float | None = 4.5
     features: ClassVar[list[str]] = [
         *"xyz",
         "dx",
@@ -44,13 +44,13 @@ class TriShell:
     def __post_init__(self):
         """Create trimesh instance."""
         self.mesh.triangulate()
-        self.tri = trimesh.Trimesh(self.mesh.points(), faces=self.mesh.cells())
+        self.tri = trimesh.Trimesh(self.mesh.vertices, faces=self.mesh.cells)
 
     @cached_property
     def _convex_hull(self) -> vedo.Mesh:
         """Return decimated convex hull."""
-        return vedo.ConvexHull(self.mesh.points()).decimate(
-            n=6, method="pro", boundaries=True
+        return vedo.ConvexHull(self.mesh.vertices).decimate_pro(
+            n=6, preserve_boundaries=True
         )
 
     @property
@@ -83,8 +83,8 @@ class TriShell:
     @property
     def rotate(self) -> Rotation:
         """Return PCA rotational transform."""
-        points = self._convex_hull.points()
-        triangles = np.array(self._convex_hull.cells())
+        points = self._convex_hull.vertices
+        triangles = np.array(self._convex_hull.cells)
         vertex = dict(
             a=points[triangles[:, 0]],
             b=points[triangles[:, 1]],
@@ -101,7 +101,7 @@ class TriShell:
         """Return optimal bounding box extents."""
         if rotate is None:
             rotate = self.rotate
-        points = self.rotate.inv().apply(self._convex_hull.points())
+        points = self.rotate.inv().apply(self._convex_hull.vertices)
         extent = np.max(points, axis=0) - np.min(points, axis=0)
         extent *= (self.volume / np.prod(extent)) ** (1 / 3)
         return extent
@@ -130,7 +130,7 @@ class TriShell:
     @property
     def poly(self):
         """Return polodial polygon."""
-        points = self.vtk.points()
+        points = self.vtk.vertices
         poloidal = np.zeros((len(points), 2))
         poloidal[:, 0] = np.linalg.norm(points[:, :2], axis=1)
         poloidal[:, 1] = points[:, 2]

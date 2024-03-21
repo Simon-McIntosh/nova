@@ -3,8 +3,31 @@ import pyvista as pv
 import vedo
 import xarray
 
+from tqdm import tqdm
 
+from nova.frame.coilset import CoilSet
 from nova.imas.coils_non_axisymmetric import CoilsNonAxisymmetric
+
+attrs = ["Bx", "By", "Bz", "Br", "Bphi"]
+datasource = {
+    "CC": (111003, 3),
+    "VS3": (115003, 2),
+    "ELM": (115001, 2),
+    "CS": (111004, 2),
+    "PF": (111005, 1),
+    "TF": (111002, 2),
+}
+
+coilset = CoilSet(filename="overlap", field_attrs=attrs)
+
+try:
+    coilset.load()
+except FileNotFoundError:
+    for coil, pulse_run in tqdm(datasource.items()):
+        coilset += CoilsNonAxisymmetric(*pulse_run, field_attrs=attrs)
+    coilset.store()
+
+coilset.frame.vtkplot()
 
 
 # ids = CoilsNonAxisymmetric(115001, 2, field_attrs=["Bx", "By", "Bz", "Br", "Bphi"])
@@ -28,7 +51,7 @@ solve = True
 if solve:
     ids.grid.solve(grid=grid)
     # ids.grid.solve(4e3, 1)
-    ids.store()
+    # ids.store()
 
 ids.plot()
 ids.set_axes("2d")
@@ -48,5 +71,5 @@ points = np.stack(
 mesh = pv.PolyData(points).delaunay_2d()
 contours = mesh.contour(isosurfaces=100, scalars=ids.grid.bphi.reshape(-1))
 
-ids.frame.vtkplot(decimate=100, new=True)  # index=["EU9B", "EE9B", "EL9B"])
+ids.frame.vtkplot(new=True)  # index=["EU9B", "EE9B", "EL9B"])
 vedo.Mesh(contours, c="black").show(new=False, rate=1)

@@ -37,7 +37,7 @@ class VtkPlot(metamethod.VtkPlot, BasePlot):
         if not self.frame.empty:
             return self.plot(index, new=new, **kwargs)
 
-    def plot(self, index=slice(None), decimate=2e4, **kwargs):
+    def plot(self, index=slice(None), decimate=1e5, **kwargs):
         """Plot vtk instances."""
         colors = matplotlib.rcParams["axes.prop_cycle"].by_key()["color"]
         self.frame.vtkgeo.generate_vtk()

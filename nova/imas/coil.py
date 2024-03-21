@@ -32,7 +32,8 @@ def full_coil_name(identifier: str):
             return f"{position} ELM Coil {''.join(index)}"
         case "P", "F", str(index):
             return f"Poloidal Field Coil {index}"
-        case "T", "F", "_", str(coil_a), "_", str(coil_b):
+        case "T", "F", "_", *index:
+            coil_a, coil_b = "".join(index).split("_", 2)
             return f"Toroidal Field Coil Pair, TF{coil_a} and TF{coil_b}"
         case _:
             raise NotImplementedError(f"coil name not implemented for {identifier}")

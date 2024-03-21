@@ -60,17 +60,17 @@ tox = {version = ">=4.6.4", optional = true}
 trimesh = {version = ">=3.21.7", optional = true}
 vedo = {version = "<2023.5.0", optional = true}
 xlrd = {version = ">=2.0.1", optional = true}
-overrides = "^7.4.0"
-pytest-asyncio = {version = "^0.21.1", optional = true}
-async-property = {version = "^0.2.2", optional = true}
-nest-asyncio = {version = "^1.5.8", optional = true}
-jax = {extras = ["cpu"], version =  "^0.4.23", optional = true}
-jaxopt = {version = "^0.8.3", optional = true}
-h5py = {version = "^3.10.0", optional = true}
-packaging = "^23.2"
-numba = {version = "^0.59.0", optional = true}
-tbb = {version = "^2021.11.0", optional = true}
-tbb-devel = {version = "^2021.11.0", optional = true}
+overrides = ">=7.4.0"
+pytest-asyncio = {version = ">=0.21.1", optional = true}
+async-property = {version = ">=0.2.2", optional = true}
+nest-asyncio = {version = ">=1.5.8", optional = true}
+jax = {extras = ["cpu"], version =  ">=0.4.23", optional = true}
+jaxopt = {version = ">=0.8.3", optional = true}
+h5py = {version = ">=3.10.0", optional = true}
+packaging = ">=23.2"
+numba = {version = ">=0.59.0", optional = true}
+tbb = {version = ">=2021.11.0", optional = true}
+tbb-devel = {version = ">=2021.11.0", optional = true}
 
 [tool.poetry.group.dev.dependencies]
 asv = ">=0.5.1"

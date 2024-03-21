@@ -15,6 +15,7 @@ from nova.biot import (
     LevelSet,
     Plasma,
     PlasmaGap,
+    Overlap,
 )
 from nova.biot.data import Data
 from nova.database.netcdf import netCDF
@@ -78,10 +79,11 @@ class BiotPlasma(BiotBase):
     nhex: Nbiot = None
     nwall: Nbiot = None
     nlevelset: Nbiot = None
+    noverlap: Nbiot = None
 
     def __post_init__(self):
         """Append biot attrs."""
-        self.append_biot_attrs(["nhex", "nwall", "nlevelset"])
+        self.append_biot_attrs(["nhex", "nwall", "nlevelset", "noverlap"])
         super().__post_init__()
 
     @frame_factory(Plasma)
@@ -113,6 +115,11 @@ class BiotPlasma(BiotBase):
     def plasmawall(self):
         """Return plasma firstwall biot instance."""
         return {"number": self.nwall, "attrs": ["Psi"]}
+
+    @frame_factory(Overlap)
+    def overlap(self):
+        """Return overlap error field biot instance."""
+        return {"number": self.noverlap}
 
 
 @dataclass

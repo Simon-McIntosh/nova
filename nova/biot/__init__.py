@@ -9,6 +9,7 @@ __all__ = [
     "Inductance",
     "LevelSet",
     "Loop",
+    "Overlap",
     "Plasma",
     "PlasmaGap",
     "PlasmaGrid",
@@ -28,6 +29,7 @@ if imp.defer:
     Inductance = imp.load(".inductance", "Inductance")
     LevelSet = imp.load(".levelset", "LevelSet")
     Loop = imp.load(".loop", "Loop")
+    Overlap = imp.load(".overlap", "Overlap")
     Plasma = imp.load(".plasma", "Plasma")
     PlasmaGap = imp.load(".plasmagap", "PlasmaGap")
     PlasmaGrid = imp.load(".plasmagrid", "PlasmaGrid")
@@ -41,6 +43,7 @@ else:
     from nova.biot.inductance import Inductance
     from nova.biot.levelset import LevelSet
     from nova.biot.loop import Loop
+    from nova.biot.overlap import Overlap
     from nova.biot.plasma import Plasma
     from nova.biot.plasmagap import PlasmaGap
     from nova.biot.plasmagrid import PlasmaGrid

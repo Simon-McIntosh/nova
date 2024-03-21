@@ -48,5 +48,5 @@ points = np.stack(
 mesh = pv.PolyData(points).delaunay_2d()
 contours = mesh.contour(isosurfaces=100, scalars=ids.grid.bphi.reshape(-1))
 
-ids.frame.vtkplot()  # index=["EU9B", "EE9B", "EL9B"])
-vedo.Mesh(contours, c="black").show(new=False)
+ids.frame.vtkplot(decimate=100, new=True)  # index=["EU9B", "EE9B", "EL9B"])
+vedo.Mesh(contours, c="black").show(new=False, rate=1)

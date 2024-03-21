@@ -1,14 +1,17 @@
+"""Evaluate zeta intergral for finite volume biot methods."""
+
 from dataclasses import dataclass, field
 
 from functools import cached_property
 
 import jax
 import jax.numpy as jnp
-import numba
 import numpy as np
 
+from nova import njit
 
-@numba.njit(cache=True, fastmath=True)
+
+@njit(cache=True, fastmath=True)
 def arcsinh_beta_1(rs, r, gamma, alpha):
     """Return zeta intergrand."""
     phi = np.pi - 2 * alpha
@@ -16,7 +19,7 @@ def arcsinh_beta_1(rs, r, gamma, alpha):
     return np.arcsinh((rs - r * np.cos(phi)) / np.sqrt(G2))
 
 
-@numba.njit(cache=True, parallel=False, fastmath=True)
+@njit(cache=True, parallel=False, fastmath=True)
 def zeta(rs, r, gamma, alpha, number=250):
     """Evaluate zeta function."""
     shape = alpha.shape

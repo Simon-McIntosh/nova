@@ -25,6 +25,7 @@ __all__ = [
 ]
 
 import importlib
+import os
 
 from .dataset import geometry
 
@@ -39,9 +40,10 @@ submodules = [
 ]
 __all__.extend(submodules)
 
+os.environ["NUMBA_THREADING_LAYER"] = "omp"
 
 try:
-    from numba import njit
+    from numba import njit, prange
 except (ModuleNotFoundError, ImportError):
     from functools import wraps
 
@@ -58,6 +60,8 @@ except (ModuleNotFoundError, ImportError):
             return wrapper
 
         return decorator
+
+    prange = range
 
 
 def __dir__():

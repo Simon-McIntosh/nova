@@ -114,6 +114,12 @@ class Overlap(Plot2D, Operate):
             case _:
                 raise NotImplementedError("overlap requires a 2d grid limit.")
 
+    def compose(self):
+        """Assemble overlap attributes."""
+        self.attrs = [
+            attr for attr in self.attrs if attr.split("_")[-1] not in ["real", "imag"]
+        ]
+
     def decompose(self):
         """Decompose Boit attributes."""
         self.data.coords["mode_number"] = np.arange(0, self.noverlap + 1)
@@ -170,6 +176,7 @@ class Overlap(Plot2D, Operate):
                     {attr.lower(): grid[attr].data.ravel() for attr in "XYZ"},
                     label="Point",
                 )
+                self.compose()
                 self.data = Solve(
                     self.subframe, target, attrs=self.attrs, name=self.name
                 ).data

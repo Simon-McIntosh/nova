@@ -1,8 +1,3 @@
-import numpy as np
-import pyvista as pv
-import vedo
-import xarray
-
 from tqdm import tqdm
 
 from nova.frame.coilset import CoilSet
@@ -30,6 +25,7 @@ except FileNotFoundError:
 coilset.frame.vtkplot()
 
 
+"""
 ids = CoilsNonAxisymmetric(111003, 3, field_attrs=["Bx", "By", "Bz", "Br", "Bphi"])
 
 # ids = CoilsNonAxisymmetric(115001, 2, field_attrs=["Bx", "By", "Bz", "Br", "Bphi"])
@@ -75,3 +71,4 @@ contours = mesh.contour(isosurfaces=750, scalars=ids.grid.bphi.reshape(-1))
 
 ids.frame.vtkplot(new=True)  # index=["EU9B", "EE9B", "EL9B"])
 vedo.Mesh(contours, c="black").show(new=False)
+"""

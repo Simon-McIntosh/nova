@@ -134,7 +134,7 @@ if __name__ == "__main__":
         "ELM": (115001, 2),
     }
 
-    coilset = CoilSet(filename="gpec_benchmark", noverlap=30)
+    coilset = CoilSet(filename="gpec_benchmark", noverlap=360)
 
     try:
         coilset.load()

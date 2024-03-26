@@ -202,6 +202,9 @@ if __name__ == "__main__":
 
     levels = coilset.grid.plot(attr, colors="C0", levels=61)
 
+    add = CoilSet()
+    add += coilset
+
     axes = coilset.grid.axes
 
     cylinder = CoilSet(field_attrs=["Ay", "Bx", "By", "Bz", "Br"])

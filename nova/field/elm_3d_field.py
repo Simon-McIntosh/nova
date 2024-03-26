@@ -30,9 +30,11 @@ except FileNotFoundError:
 coilset.frame.vtkplot()
 
 
+ids = CoilsNonAxisymmetric(111003, 3, field_attrs=["Bx", "By", "Bz", "Br", "Bphi"])
+
 # ids = CoilsNonAxisymmetric(115001, 2, field_attrs=["Bx", "By", "Bz", "Br", "Bphi"])
 # ids = CoilsNonAxisymmetric(111006, 1, field_attrs=["Bx", "By", "Bz", "Br", "Bphi"])
-ids = CoilsNonAxisymmetric(111004, 2, field_attrs=["Bx", "By", "Bz", "Br", "Bphi"])
+# ids = CoilsNonAxisymmetric(111004, 2, field_attrs=["Bx", "By", "Bz", "Br", "Bphi"])
 
 
 ids.saloc["Ic"] = 1
@@ -69,7 +71,7 @@ points = np.stack(
 ).reshape(-1, 3)
 
 mesh = pv.PolyData(points).delaunay_2d()
-contours = mesh.contour(isosurfaces=100, scalars=ids.grid.bphi.reshape(-1))
+contours = mesh.contour(isosurfaces=750, scalars=ids.grid.bphi.reshape(-1))
 
 ids.frame.vtkplot(new=True)  # index=["EU9B", "EE9B", "EL9B"])
-vedo.Mesh(contours, c="black").show(new=False, rate=1)
+vedo.Mesh(contours, c="black").show(new=False)

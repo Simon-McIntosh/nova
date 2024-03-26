@@ -29,7 +29,13 @@ class Winding(CoilSetAttrs):
         default_factory=lambda: {"label": "Swp", "part": "coil", "active": True},
     )
     attributes: list[str] = field(
-        init=False, default_factory=lambda: ["turn", "section", "segment", "length"]
+        init=False,
+        default_factory=lambda: [
+            "turn",
+            "section",
+            "segment",
+            "length",
+        ],
     )
     array: list[str] = field(
         init=False,

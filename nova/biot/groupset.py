@@ -143,7 +143,7 @@ class GroupSet(Plot):
         """Assemble GroupSet."""
         self.set_shape()
         self.build_index()
-        self.build_transform()
+        # self.build_transform()
 
     def set_shape(self):
         """Set source and target shapes."""

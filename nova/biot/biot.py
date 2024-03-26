@@ -13,9 +13,9 @@ from nova.biot import (
     Field,
     Force,
     LevelSet,
+    Overlap,
     Plasma,
     PlasmaGap,
-    Overlap,
 )
 from nova.biot.data import Data
 from nova.database.netcdf import netCDF
@@ -79,11 +79,10 @@ class BiotPlasma(BiotBase):
     nhex: Nbiot = None
     nwall: Nbiot = None
     nlevelset: Nbiot = None
-    noverlap: Nbiot = None
 
     def __post_init__(self):
         """Append biot attrs."""
-        self.append_biot_attrs(["nhex", "nwall", "nlevelset", "noverlap"])
+        self.append_biot_attrs(["nhex", "nwall", "nlevelset"])
         super().__post_init__()
 
     @frame_factory(Plasma)
@@ -115,11 +114,6 @@ class BiotPlasma(BiotBase):
     def plasmawall(self):
         """Return plasma firstwall biot instance."""
         return {"number": self.nwall, "attrs": ["Psi"]}
-
-    @frame_factory(Overlap)
-    def overlap(self):
-        """Return overlap error field biot instance."""
-        return {"number": self.noverlap}
 
 
 @dataclass
@@ -184,10 +178,11 @@ class Biot(BiotPlasma, BiotCoil, BiotGap):
     """Expose biot methods as cached properties."""
 
     ngrid: Nbiot = None
+    noverlap: Nbiot = None
 
     def __post_init__(self):
         """Append biot attrs."""
-        self.append_biot_attrs(["ngrid"])
+        self.append_biot_attrs(["ngrid", "noverlap"])
         super().__post_init__()
 
     @property
@@ -201,6 +196,11 @@ class Biot(BiotPlasma, BiotCoil, BiotGap):
     def grid(self):
         """Return grid biot instance."""
         return {"number": self.ngrid} | self.field_kwargs
+
+    @frame_factory(Overlap)
+    def overlap(self):
+        """Return overlap error field biot instance."""
+        return {"ngrid": self.ngrid, "noverlap": self.noverlap}
 
     @frame_factory(Point)
     def point(self):

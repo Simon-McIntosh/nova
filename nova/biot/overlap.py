@@ -3,10 +3,11 @@
 from dataclasses import dataclass, field
 
 import numpy as np
+import scipy
+import xarray
 
-
-from nova.biot.biotframe import BiotFrame
 from nova.biot.biotframe import Target
+from nova.biot.grid import Gridgen, Expand
 from nova.biot.operate import Operate
 from nova.biot.solve import Solve
 from nova.graphics.plot import Plot2D
@@ -24,88 +25,177 @@ class Overlap(Plot2D, Operate):
 
     """
 
+    ngrid: int | None = None
+    noverlap: int | None = None
     attrs: list[str] = field(default_factory=lambda: ["Br", "Bz"])
-    target: BiotFrame = field(init=False, repr=False)
-
-    def __len__(self):
-        """Return force patch number."""
-        return len(self.data.get("x", []))
-
-    def solve(self, points: np.ndarray, number=None):
-        """Extract boundary and solve magnetic field around coil perimeter."""
-        with self.solve_biot(number) as number:
-            if number is not None:
-
-                shape = points.shape[:-1] + (number,)
-                radius = points[..., 0, np.newaxis]
-                height = points[..., 1, np.newaxis]
-                theta = np.linspace(0, 2 * np.pi, number, endpoint=False)
-
-                target = Target(
-                    {
-                        "x": (radius * np.cos(theta)).ravel(),
-                        "y": (radius * np.sin(theta)).ravel(),
-                        "z": (height * np.ones_like(theta)).ravel(),
-                    },
-                    label="Point",
-                )
-
-                point_data = Solve(
-                    self.subframe,
-                    target,
-                    reduce=[True, False],
-                    turns=[True, False],
-                    attrs=self.attrs,
-                    name=self.name,
-                ).data
-
-                fft_data = {}
-                for attr in point_data:
-                    data_ = point_data[attr].data.reshape(
-                        shape + (point_data.sizes["source"],)
-                    )
-                    print(data_.shape)
-                    assert np.allclose(data_[0, 0, :, 0], data_[0, 0, 0, 0])
-                    fft_data[attr] = data_
-
-                self.data = point_data
-                """
-
-                target = Target()
-                target.insert()
-                points = np._r[points[-1:], points, points[:1]]
-                print(points.shape)
-                self.target = PolyTarget(
-                    *self.frames, index=self.frame_index, delta=-number
-                ).target
-                self.data = Solve(
-                    self.subframe,
-                    self.target,
-                    reduce=[True, False],
-                    turns=[True, False],
-                    attrs=self.attrs,
-                    name=self.name,
-                ).data
-                self.data.coords["index"] = (
-                    "target",
-                    self.Loc[self.frame_index, "subref"],
-                )
-                self.data.coords["xo"] = "target", self.Loc[self.frame_index, "x"]
-                self.data.coords["zo"] = "target", self.Loc[self.frame_index, "z"]
-                self.data.coords["x"] = self.target.x
-                self.data.coords["z"] = self.target.z
-                """
 
     @property
-    def coil_name(self):
-        """Return target coil names."""
-        return self.data.target.data
+    def number(self) -> tuple[int] | None:
+        """Manage poloidal and toroidal grid number."""
+        if self.ngrid is None or self.noverlap is None:
+            return None
+        return self.ngrid, self.noverlap
 
-    def plot_points(self, axes=None, **kwargs):
-        """Plot force intergration points."""
+    @number.setter
+    def number(self, number: int | tuple[int]):
+        match number:
+            case (int() | float(), int() | float()):
+                self.ngrid, self.noverlap = number
+            case int() | float():
+                self.ngrid = number
+
+    @property
+    def nphi(self):
+        """Return toroidal grid number."""
+        return 2 * self.noverlap
+
+    @property
+    def phi(self):
+        """Return phi grid coordinate."""
+        return np.linspace(0, 2 * np.pi, self.nphi)
+
+    def _generate(self, limit, index, grid):
+        """Generate simulation grid."""
+        if len(grid) > 0:
+            assert all([attr in grid for attr in "rz"])
+            assert np.ndim(grid.r) == 1
+            self.ngrid = np.prod(grid.r.shape)
+            boundary = np.c_[grid.r, grid.z]
+            assert np.allclose(boundary[0], boundary[-1])
+            if "theta" not in grid:
+                tangent = np.zeros_like(boundary)
+                tangent[0] = tangent[-1] = boundary[1] - boundary[-1]
+                tangent[1:-1] = boundary[2:] - boundary[:-2]
+                grid.coords["theta"] = np.unwrap(
+                    np.arctan2(-tangent[:, 0], tangent[:, 1])
+                )
+            grid.coords["phi"] = self.phi
+            grid["X"] = ("theta", "phi"), grid.r.data[:, np.newaxis] * np.cos(self.phi)
+            grid["Y"] = ("theta", "phi"), grid.r.data[:, np.newaxis] * np.sin(self.phi)
+            grid["Z"] = ("theta", "phi"), grid.r.data[:, np.newaxis] * np.ones(
+                self.nphi, float
+            )
+            grid.attrs["space_shape"] = (grid.sizes["theta"], self.nphi)
+            grid.attrs["frequency_shape"] = (grid.sizes["theta"], self.noverlap + 1)
+            return grid
+        if self.number is None:
+            return None
+        if isinstance(limit, (int, float)):
+            limit = Expand(self.subframe, index)(limit)
+        match len(limit):
+            case 2 | 4:  # 2d grid limits
+                gridgen = Gridgen(self.ngrid, limit)
+                grid = xarray.Dataset(
+                    coords={
+                        "r": gridgen.data.x.data,
+                        "phi": self.phi,
+                        "z": gridgen.data.z.data,
+                    }
+                )
+                Radius, Phi, Height = np.meshgrid(
+                    grid.r, grid.phi, grid.z, indexing="ij"
+                )
+                grid["R"] = ("r", "phi", "z"), Radius
+                grid["Phi"] = ("r", "phi", "z"), Phi
+                grid["X"] = ("r", "phi", "z"), Radius * np.cos(Phi)
+                grid["Y"] = ("r", "phi", "z"), Radius * np.sin(Phi)
+                grid["Z"] = ("r", "phi", "z"), Height
+                grid.attrs["space_shape"] = (
+                    gridgen.shape[0],
+                    self.nphi,
+                    gridgen.shape[1],
+                )
+                grid.attrs["frequency_shape"] = (
+                    gridgen.shape[0],
+                    self.noverlap + 1,
+                    gridgen.shape[1],
+                )
+                return grid
+            case _:
+                raise NotImplementedError("overlap requires a 2d grid limit.")
+
+    def decompose(self):
+        """Decompose Boit attributes."""
+        self.data.coords["mode_number"] = np.arange(0, self.noverlap + 1)
+        shape = self.data.space_shape + (self.data.sizes["source"],)
+        attrs = []
+        for attr in self.attrs:
+            variable = self.data[attr].data.reshape(shape)
+            coef = scipy.fft.rfft(variable, axis=1).reshape(-1, shape[-1])
+            self.data[f"{attr}_real"] = ("frequency", "source"), np.real(coef)
+            self.data[f"{attr}_imag"] = ("frequency", "source"), np.imag(coef)
+            attrs.extend([f"{attr}_real", f"{attr}_imag"])
+        self.attrs.extend(attrs)
+
+    def solve(
+        self,
+        number: int | tuple[int, int] | None = None,
+        limit: float | np.ndarray | None = 0,
+        index: str | slice | np.ndarray = slice(None),
+        grid: xarray.Dataset = xarray.Dataset(),
+    ):
+        """
+        Extract solve magnetic field across grid.
+
+        Parameters
+        ----------
+        number : int | tuple[int, int] | None, optional
+            Grid resolution [poloidal, toroidal]. The default is None which resolves to
+            [Biot.ngrid, Biot.noverlap].
+
+            - int: poloidal resolution if len(grid) == 0, else toroidal resolution
+            - tuple[int, int]: poloidal and toroidal resolution
+
+        limit : float | np.ndarray | None, optional
+
+            float: grid expantion factor beyond coil limits. The default is 0.
+            np.ndarray: Radial and vertical limits for poloidal grid.
+
+        index : str | slice | np.ndarray, optional
+            Coil index used by grid expantion factor routine when type(limit) is float.
+            The default is slice(None).
+        grid : xarray.Dataset, optional
+            Poloidal grid. The default is xarray.Dataset().
+
+        Returns
+        -------
+        None.
+
+        """
+        self.number = number
+        grid = self._generate(limit, index, grid)
+        with self.solve_biot(number) as number:
+            if number is not None:
+                target = Target(
+                    {attr.lower(): grid[attr].data.ravel() for attr in "XYZ"},
+                    label="Point",
+                )
+                self.data = Solve(
+                    self.subframe, target, attrs=self.attrs, name=self.name
+                ).data
+                self.data = self.data.merge(
+                    grid, compat="override", combine_attrs="drop_conflicts"
+                )
+                self.decompose()
+
+    @property
+    def shape(self):
+        """Return grid shape."""
+        return self.data.space_shape
+
+    @property
+    def shapes(self):
+        """Extend operator shapes with frequency domain."""
+        return super().shapes | {"frequency": self.data.frequency_shape}
+
+    def plot(self, attr, mode=0, axes=None):
+        """Plot error field component."""
         self.get_axes("2d", axes=axes)
-        kwargs = dict(marker="o", linestyle="", color="C2", ms=4) | kwargs
-        self.axes.plot(self.data.coords["x"], self.data.coords["z"], **kwargs)
+        self.axes.contour(
+            self.data.R[:, 0],
+            self.data.Z[:, 0],
+            np.log(getattr(self, f"{attr}_")[:, mode]),
+        )
 
     '''
     def bar(self, attr: str, index=slice(None), axes=None, **kwargs):
@@ -118,7 +208,7 @@ class Overlap(Plot2D, Operate):
         self.axes.set_xticklabels(names, rotation=90, ha="center")
         label = {"fr": "radial", "fz": "vertical"}
         self.axes.set_ylabel(f"{label[attr]} force MN")
-    '''
+    
 
     def plot(self, scale=1, norm=None, axes=None, **kwargs):
         """Plot force vectors and intergration points."""
@@ -148,19 +238,17 @@ class Overlap(Plot2D, Operate):
         )
         self.axes.add_collection(collections)
         return norm
+    '''
 
 
 if __name__ == "__main__":
 
-    from nova.frame.coilset import CoilSet
+    from nova.imas.coils_non_axisymmetric import CoilsNonAxisymmetric
 
-    coilset = CoilSet(noverlap=120)
+    coilset = CoilsNonAxisymmetric(115001, 2, ngrid=500, noverlap=5)
+    coilset.saloc["Ic"] = 1e3
 
-    coilset.coil.insert(3, 4, 0.05, 0.05, ifttt=False, segment="cylinder", Ic=1e3)
-    coilset.coil.insert(3, 2, 0.05, 0.05, ifttt=False, segment="cylinder", Ic=1e3)
+    coilset.overlap.solve(limit=1.5)
 
-    points = np.stack(
-        np.meshgrid(np.linspace(3, 5, 21), np.linspace(-2, 2, 32), indexing="ij"),
-        axis=-1,
-    )
-    coilset.overlap.solve(points)
+    coilset.plot()
+    coilset.overlap.plot("br_abs", 5)

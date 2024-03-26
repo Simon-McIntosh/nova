@@ -70,9 +70,9 @@ def test_columns():
 def test_columns_metaframe_update():
     framelink = FrameLink(
         metadata={"Required": ["x", "z", "dl"], "Additional": ["rms"]},
-        columns=["x", "dt"],
+        columns=["x", "z", "dl", "dt"],
     )
-    framelink.insert(4, dt=[5, 7, 12])
+    framelink.insert(4, 1, 3.2, dt=[5, 7, 12])
     framelink = FrameLink(framelink, columns=["x", "dt", "dl"])
     assert framelink.columns.to_list() == ["x", "dt", "dl"]
 

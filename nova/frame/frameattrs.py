@@ -34,11 +34,6 @@ class FrameAttrs(pandas.DataFrame):
         super().__init__(data, index, columns)
         self.update_metadata(data, columns, attrs, metadata)
 
-    # @property
-    # def name(self):
-    #    """Return metaframe name attribute."""
-    #    return self.attrs["metaframe"].name
-
     @property
     def version(self):
         """Return metaframe version container."""
@@ -167,7 +162,7 @@ class FrameAttrs(pandas.DataFrame):
 
     def match_columns(self):
         """Intersect metaframe.required with self.columns if not empty."""
-        if not self.columns.empty:
+        if not self.columns.empty and len(self) > 0:
             required = [
                 attr for attr in self.metaframe.required if attr in self.columns
             ]

@@ -42,6 +42,7 @@ class Matrix(GroupSet):
     def __post_init__(self):
         """Initialize input data."""
         super().__post_init__()
+        self.build_transform()
         for attr in self.attrs:
             self.data[attr] = self.get_frame(attr)(self.attrs[attr])
 

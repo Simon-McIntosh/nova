@@ -125,9 +125,9 @@ class Gridgen(Plot):
     @property
     def shape(self):
         """Return grid shape."""
-        if len(self.ycoord) == 1:
-            return len(self.xcoord), len(self.zcoord)
-        return len(self.xcoord), len(self.ycoord), len(self.zcoord)
+        if self.data.sizes["y"] == 1:
+            return self.data.sizes["x"], self.data.sizes["z"]
+        return self.data.sizes["x"], self.data.sizes["y"], self.data.sizes["z"]
 
     def plot(self, axes=None, **kwargs):
         """Plot 2d grid."""
@@ -243,7 +243,6 @@ class Grid(BaseGrid):
             if len(grid) > 0:
                 assert all([attr in grid for attr in "XYZ"])
                 self.number = np.prod(grid.X.shape)
-                limit = None
             else:
                 if number is None:
                     return

@@ -116,7 +116,8 @@ class Circle(Constants, Matrix):
             "dx": "dx",
             "dz": "dz",
             "turnturn": "turnturn",
-            "r": "x",
+            "x": "x",
+            "y": "y",
             "z": "z",
         }
     )
@@ -127,6 +128,7 @@ class Circle(Constants, Matrix):
     def __post_init__(self):
         """Load intergration constants."""
         super().__post_init__()
+        self.data["r"] = np.linalg.norm([self["x"], self["y"]], axis=0)
         OffsetFilaments(self.data)
         for attr in ["rs", "zs", "r", "z"]:
             setattr(self, attr, self.data[attr])

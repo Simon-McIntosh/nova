@@ -50,6 +50,8 @@ class BiotFrame(FrameSpace):
 
     def __call__(self, attr):
         """Return attribute matrix, shape(target, source)."""
+        if attr == "r":
+            return np.linalg.norm([self("x"), self("y")], axis=0)
         region = self.biotshape.region
         if self.biotshape.region == "":
             raise IndexError(

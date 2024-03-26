@@ -11,7 +11,7 @@ class Data(netCDF, FrameSetLoc):
     """Biot solution abstract base class."""
 
     attrs: list[str] = field(default_factory=lambda: ["Br", "Bz", "Psi"])
-    number: int | float | None = field(default=None)
+    number: int | tuple[int] | None = field(default=None)
     name: str = ""
     classname: str = field(init=False)
 

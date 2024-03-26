@@ -97,6 +97,7 @@ class Operate(Data):
     index: np.ndarray = field(init=False, repr=False)
     operator: dict[str, BiotOp] = field(init=False, default_factory=dict, repr=False)
     array: dict = field(init=False, repr=False, default_factory=dict)
+    _attrs: list[str] = field(init=False, repr=False, default_factory=list)
 
     @property
     def rank(self):
@@ -113,6 +114,17 @@ class Operate(Data):
     def shape(self):
         """Return target shape."""
         return (self.data.sizes["target"],)
+
+    @property
+    def shapes(self) -> dict[str, int]:
+        """Return target shapes for multiple domains."""
+        return {"space": self.shape}
+
+    def domain(self, attr: str) -> str:
+        """Return domain identifier."""
+        if attr.split("_")[-1] in ["real", "imag", "abs", "phase"]:
+            return "frequency"
+        return "space"
 
     @contextmanager
     def solve_biot(self, number: int | float | None):
@@ -156,31 +168,43 @@ class Operate(Data):
             self.operator[attr] = BiotOp(
                 self.aloc, self.saloc, self.classname, self.index, dataset
             )
+        self.load_derived()
         self.load_version()
         self.load_arrays()
+
+    def load_derived(self):
+        """Load derived attributes."""
+        if "Br" in self.attrs and "Bz" in self.attrs:
+            self._attrs.append("bp")
+        for attr in np.unique([attr.split("_")[0] for attr in self.attrs]):
+            if f"{attr}_real" in self.attrs and f"{attr}_imag" in self.attrs:
+                self._attrs.extend([f"{attr.lower()}_abs", f"{attr.lower()}_phase"])
 
     def load_version(self):
         """Initialize biot version identifiers."""
         self.version |= {attr: self.data.attrs.get(attr, None) for attr in self.attrs}
         self.version |= {attr.lower(): None for attr in self.attrs}
-        if "Br" in self.attrs and "Bz" in self.attrs:
-            self.version["bp"] = None
+        self.version |= {attr: None for attr in self._attrs}
 
     def load_arrays(self):
         """Link data arrays."""
         for attr in self.version:
-            if attr.capitalize() in self.attrs or attr == "bp":
-                if attr.islower():
-                    if attr == "bp" and self.classname == "Field":
-                        self.array[attr] = np.zeros(self.data.sizes["index"])
-                    else:
-                        self.array[attr] = np.zeros(self.data.sizes["target"])
-                    if len(self.shape) == 1:
-                        continue
-                    ndarray = self.array[attr].reshape(self.shape)
-                    self.array[f"{attr}_"] = ndarray
+            if attr.capitalize() in self.attrs or attr in self._attrs:
+                if attr.istitle():
+                    self.array[attr] = self.operator[attr].matrix
                     continue
-                self.array[attr] = self.operator[attr].matrix
+                match attr:
+                    case "bp" if self.classname == "Field":
+                        self.array[attr] = np.zeros(self.data.sizes["index"])
+                    case str() if self.domain(attr) == "frequency":
+                        self.array[attr] = np.zeros(self.data.sizes["frequency"])
+                    case _:
+                        self.array[attr] = np.zeros(self.data.sizes["target"])
+                if len(self.shapes[self.domain(attr)]) == 1:
+                    continue
+                ndarray = self.array[attr].reshape(self.shapes[self.domain(attr)])
+                self.array[f"{attr}_"] = ndarray
+                continue
 
     @cached_property
     def source_plasma_index(self):
@@ -194,9 +218,8 @@ class Operate(Data):
 
     def update_turns(self, Attr: str, svd=True):
         """Update plasma turns."""
-        if self.source_plasma_index == -1 and self.target_plasma_index == -1:
-            return
-        self.operator[Attr].update_turns(svd)
+        if self.source_plasma_index != -1 or self.target_plasma_index != -1:
+            self.operator[Attr].update_turns(svd)
         self.version[Attr] = self.data.attrs[Attr] = self.subframe.version["nturn"]
 
     def calculate_norm(self):
@@ -206,33 +229,64 @@ class Operate(Data):
             return np.maximum.reduceat(result, self.index)
         return result
 
-    def get_norm(self):
+    def _get_norm(self):
         """Return cached field L2 norm."""
         if (version := self.aloc_hash["Ic"]) != self.version["bp"]:
             self.version["bp"] = version
             self.array["bp"][:] = self.calculate_norm()
         return self.array["bp"]
 
+    def calculate_abs(self, attr):
+        """Return cached complex amplitude."""
+        return np.linalg.norm(
+            [getattr(self, f"{attr}_real"), getattr(self, f"{attr}_imag")], axis=0
+        )
+
+    def calculate_phase(self, attr):
+        """Return cached complex amplitude."""
+        return np.arctan2(
+            getattr(self, f"{attr}_imag"),
+            getattr(self, f"{attr}_real"),
+        )
+
+    def get_derived(self, attr):
+        """Return cached derived attribute."""
+        if (version := self.aloc_hash["Ic"]) != self.version[attr]:
+            self.version[attr] = version
+            match attr:
+                case "bp":
+                    self.array["bp"][:] = self.calculate_norm()
+                case str() if attr[-3:] == "abs":
+                    self.array[attr][:] = self.calculate_abs(attr.split("_")[0])
+                case str() if attr[-5:] == "phase":
+                    self.array[attr][:] = self.calculate_phase(attr.split("_")[0])
+                case _:
+                    raise NotImplementedError(
+                        f"calculation for derived attr {attr}" "not implemented."
+                    )
+        return self.array[attr]
+
     def __getattr__(self, attr):
         """Return variable data - lazy evaluation - cached."""
         attr = attr.replace("_field_", "")
         if attr.islower() and attr[-1] == "_":  # return shaped array
-            if len(self.shape) == 1:
+            domain = self.domain(attr[:-1])
+            if len(shape := self.shapes[domain]) == 1:
                 return getattr(self, attr[:-1])
-            self.array[attr][:] = getattr(self, attr[:-1]).reshape(self.shape)
+            self.array[attr][:] = getattr(self, attr[:-1]).reshape(shape)
             return self.array[attr]
         if attr not in (
             avalible := [
                 attr
                 for attr in self.version
-                if attr.capitalize() in self.attrs or attr == "bp"
+                if attr.capitalize() in self.attrs or attr in self._attrs
             ]
         ):
             raise AttributeError(f"Attribute {attr} " f"not defined in {avalible}.")
         if len(self.data) == 0:
             return self.array[attr]
-        if attr == "bp":
-            return self.get_norm()
+        if attr in self._attrs:
+            return self.get_derived(attr)
         Attr = attr.capitalize()
         self.check_plasma(Attr)
         if attr == Attr:

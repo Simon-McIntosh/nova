@@ -86,7 +86,7 @@ class Cylinder(CylinderConstants, Matrix):
             ],
             axis=-1,
         )
-        self.r = np.stack([self.target("x") for _ in range(4)], axis=-1)
+        self.r = np.stack([self.target("r") for _ in range(4)], axis=-1)
         self.z = np.stack([self.target("z") for _ in range(4)], axis=-1)
 
     def Aphi_hat(self):
@@ -134,7 +134,7 @@ class Cylinder(CylinderConstants, Matrix):
     @property
     def Psi(self):
         """Return Psi array."""
-        return 2 * np.pi * self.mu_0 * self.target("x") * self.Aphi
+        return 2 * np.pi * self.mu_0 * self.target("r") * self.Aphi
 
     @cached_property
     def Br(self):

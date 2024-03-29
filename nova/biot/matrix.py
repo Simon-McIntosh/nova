@@ -98,6 +98,10 @@ class Matrix(GroupSet):
         for attr in self.attrs:
             self.data[attr] = self.get_frame(attr)(self.attrs[attr])
 
+    def __call__(self, frame: str, attr: str):
+        """Return attribute matrix, shape(target, source) from local CoordLocIndexer."""
+        return self.loc[frame, attr]
+
     def __getitem__(self, attr):
         """Return attributes from data."""
         return self.data[attr]

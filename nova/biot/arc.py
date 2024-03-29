@@ -466,6 +466,8 @@ if __name__ == "__main__":
     )
 
     coilset = CoilSet(field_attrs=["Bx", "By", "Br", "Bz", "Ay"])
+    coilset.coil.insert(radius, height, 0.05, 0.05, ifttt=False, segment="arc", Ic=1e3)
+    """
     for i in range(segment_number):
         coilset.winding.insert(
             points[3 * i : 1 + 3 * (i + 1)],
@@ -474,7 +476,7 @@ if __name__ == "__main__":
             minimum_arc_nodes=4,
             Ic=1e3,
         )
-
+    """
     coilset.grid.solve(1500, 0.5)
     coilset.plot()
 

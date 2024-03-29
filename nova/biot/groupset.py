@@ -44,10 +44,6 @@ class GroupSet(Plot):
         self.set_flags()
         self.assemble()
 
-    def __call__(self, frame: str, attr: str):
-        """Return attribute matrix, shape(target, source) from local CoordLocIndexer."""
-        return self.loc[frame, attr]
-
     def __len__(self):
         """Return interaction length."""
         return np.prod(self.shape)

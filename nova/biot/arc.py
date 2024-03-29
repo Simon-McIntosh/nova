@@ -36,7 +36,7 @@ class Arc(Constants, Matrix):
         """Load source and target geometry in local coordinate system."""
         super().__post_init__()
         self.rs = np.linalg.norm([self("source", "x1"), self("source", "y1")], axis=0)
-        self.zs = self("source", "z")
+        self.zs = self("source", "z1")
         self.r = np.linalg.norm([self("target", "x"), self("target", "y")], axis=0)
         self.z = self("target", "z")
 
@@ -359,16 +359,6 @@ class Arc(Constants, Matrix):
                 Ip[p],
             )
         return Ip
-
-    '''
-    def __exterior(self, _hat):
-        """Index radial and toroidal fields for |alpha| > pi /2."""
-        _pi2 = np.tile(_hat[-1, np.newaxis], self.reps)
-        _hat[self._index_B] = self.sign_alpha[self._index_B] * (
-            2 * _pi2[self._index_B] - _hat[self._index_B]
-        )
-        return _hat
-    '''
 
     def _exterior(self, _hat):
         """Index radial and toroidal fields.

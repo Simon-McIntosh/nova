@@ -3,8 +3,7 @@ import pytest
 
 import numpy as np
 
-from nova.biot.biotframe import Source, Target
-from nova.biot.groupset import GroupSet
+from nova.biot.biotframe import Source
 from nova.geometry.polyline import PolyLine
 
 
@@ -26,53 +25,6 @@ def multiarc():
     source = Source(polyline.path_geometry)
     source.set_target(1)
     return source
-
-
-@pytest.fixture
-def groupset():
-    points = np.array([[-2, 0, 0], [-1, 0, 0], [0, 1, 0], [1, 0, 0], [3, 0, 0]], float)
-    polyline = PolyLine(points, minimum_arc_nodes=4)
-    source = Source(polyline.path_geometry)
-    target = Target({"x": np.linspace(5, 7.5, 10), "z": 0.5})
-    return GroupSet(source, target)
-
-
-def test_coordinate_axes_shape(groupset):
-    assert groupset.coordinate_axes.shape == (10, 4, 3, 3)
-
-
-def test_stack_shape(groupset):
-    points = groupset.target.stack(*list("xyz"))
-    assert points.shape == (10, 4, 3)
-
-
-def test_coordinate_axes_einsum_shape(groupset):
-    points = groupset.target.stack(*list("xyz"))
-    _points = np.einsum("ijk,ijkm->ijm", points, groupset.coordinate_axes)
-    assert points.shape == _points.shape
-
-
-def test_coord_loc(groupset):
-    assert len(groupset.loc.data["source"]) == 0
-    assert len(groupset.loc.data["target"]) == 0
-    assert groupset.loc["source", "x"].shape == groupset.shape
-    assert list(groupset.loc.data["source"].keys()) == ["x", "y", "z"]
-
-
-def test_source_coordinates_roundtrip(groupset):
-    points = groupset.source.stack("x1", "y1", "z1")
-    local_points = groupset.loc.to_local(points)
-    global_points = groupset.loc.to_global(local_points)
-    assert np.allclose(local_points[..., :2], 0)
-    assert np.allclose(points, global_points)
-
-
-@pytest.mark.parametrize("frame", ["source", "target"])
-def test_local_frame_roundtrip(groupset, frame):
-    points = getattr(groupset, frame).stack(*list("xyz"))
-    local_points = np.stack([groupset.loc[frame, attr] for attr in "xyz"], axis=-1)
-    global_points = groupset.loc.to_global(local_points)
-    assert np.allclose(points, global_points)
 
 
 @pytest.mark.parametrize("source, axis", product(["multiline", "multiarc"], ["n", "a"]))

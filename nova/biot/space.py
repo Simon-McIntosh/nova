@@ -84,7 +84,7 @@ class Space(metamethod.Space, Plot3D):
         self.coordinate_axes /= np.linalg.norm(self.coordinate_axes, axis=1)[
             :, np.newaxis
         ]
-        self.origin = self._column_stack(*list("xyz"))
+        self.origin = self._column_stack("x0", "y0", "z0")
 
     def _column_stack(self, *args: tuple[str]):
         """Return stacked array column vectors."""
@@ -251,6 +251,7 @@ class Space(metamethod.Space, Plot3D):
         return self.centerline(resolution=0)
 
     def centerline(self, resolution: int):
+        """Return element centerline."""
         if (segment_number := self.frame.shape[0]) == 1:
             return self._segment_path(0, local=False, resolution=resolution)
         return np.r_[

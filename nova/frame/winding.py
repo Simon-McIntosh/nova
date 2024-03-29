@@ -22,7 +22,7 @@ class Winding(CoilSetAttrs):
     turn: str = "rectangle"
     segment: str = "winding"
     required: list[str] = field(
-        default_factory=lambda: ["x", "y", "z", "dx", "dy", "dz", "volume", "vtk"]
+        default_factory=lambda: ["x0", "y0", "z0", "dx", "dy", "dz", "volume", "vtk"]
     )
     default: dict = field(
         init=False,
@@ -40,9 +40,9 @@ class Winding(CoilSetAttrs):
     array: list[str] = field(
         init=False,
         default_factory=lambda: [
-            "x",
-            "y",
-            "z",
+            "x0",
+            "y0",
+            "z0",
             "dx",
             "dy",
             "dz",

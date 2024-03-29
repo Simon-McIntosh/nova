@@ -352,8 +352,8 @@ class PolyTarget(FrameSet):
                 target = self.loc[index, :]
             self.target.insert(
                 target,
-                xo=self.frame.loc[name, "x"],
-                zo=self.frame.loc[name, "z"],
+                x0=self.frame.loc[name, "x"],
+                z0=self.frame.loc[name, "z"],
                 link=True,
                 label=name,
                 delim="_",

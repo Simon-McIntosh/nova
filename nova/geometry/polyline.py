@@ -31,7 +31,7 @@ class Element(abc.ABC):
 
     name: ClassVar[str] = "base"
     keys: ClassVar[dict[str, list[str]]] = {
-        "center": ["x", "y", "z"],
+        "center": ["x0", "y0", "z0"],
         "axis": ["ax", "ay", "az"],
         "normal": ["nx", "ny", "nz"],
         "start_point": ["x1", "y1", "z1"],
@@ -411,9 +411,9 @@ class PolyLine(Plot):
     segments: list[Line | Arc] = field(init=False, repr=False, default_factory=list)
 
     path_attrs: ClassVar[list[str]] = [
-        "x",
-        "y",
-        "z",
+        "x0",
+        "y0",
+        "z0",
         "ax",
         "ay",
         "az",

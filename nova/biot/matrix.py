@@ -1,32 +1,82 @@
 """Biot-Savart calculation base class."""
 
 from dataclasses import dataclass, field
-from functools import cached_property, wraps
+from functools import cached_property
 from importlib import import_module
 from typing import ClassVar
 
 import numpy as np
 
+from nova.biot.biotframe import Source, Target
 from nova.biot.groupset import GroupSet
 
 
-def offset(factor=1):
-    """Offset filament source-target squared seperation vector."""
+@dataclass
+class CoordLocIndexer:
+    """Coordinate system indexer base class."""
 
-    def decorator(method):
-        """Return function decorator."""
+    source: Source = field(repr=False)
+    target: Target = field(repr=False)
+    coordinate_axes: np.ndarray = field(
+        repr=False, default_factory=lambda: np.array([])
+    )
+    coordinate_origin: np.ndarray = field(
+        repr=False, default_factory=lambda: np.array([])
+    )
+    data: dict[str, dict] = field(
+        repr=False, default_factory=lambda: {"source": {}, "target": {}}
+    )
 
-        @wraps(method)
-        def wrapper(self):
-            """Retrun squared seperation distance with offset core."""
-            nonlocal factor
-            a2 = method(self)
-            r2 = self["dl"] ** 2 / 4
-            return np.where(a2 < r2, factor**2 * r2 + a2 * (1 - factor**2), a2)
+    def __getitem__(self, key):
+        """Return stacked point array transformed to local coordinates."""
+        match key:
+            case (str(frame), str(attr)) if frame in ["source", "target"]:
+                return self._getdata(frame, attr)
+            case _:
+                raise KeyError(
+                    f"malformed key {key}, require " "[source | target, attr]"
+                )
 
-        return wrapper
+    def coordinate_list(self, attr: str) -> list[str]:
+        """Return coordinate list."""
+        primary_coordinate = next(coord for coord in "xyz" if coord in attr)
+        return [attr.replace(primary_coordinate, coord) for coord in "xyz"]
 
-    return decorator
+    def _getdata(self, frame: str, attr: str) -> np.ndarray:
+        """Return coordinate system data."""
+        try:
+            return self.data[frame][attr]
+        except KeyError:
+            coords = self.coordinate_list(attr)
+            points = self._stack(frame, coords)
+            self.data[frame] |= dict(zip(coords, (points[..., i] for i in range(3))))
+            return self.data[frame][attr]
+
+    def _stack(self, frame: str, coords: list[str]) -> np.ndarray:
+        """Return stacked point array in local coordinate system."""
+        points = getattr(self, frame).stack(*coords)
+        return self.to_local(points)
+
+    def rotate(self, points: np.ndarray, coordinate_frame: str):
+        """Rotate points to coordinate frame."""
+        match coordinate_frame:
+            case "to_local":
+                return np.einsum("...i,...ij->...j", points, self.coordinate_axes)
+            case "to_global":
+                return np.einsum("...i,...ji->...j", points, self.coordinate_axes)
+            case _:
+                raise NotImplementedError(
+                    f"coordinate rotation to {coordinate_frame} "
+                    "frame not implemented"
+                )
+
+    def to_local(self, points):
+        """Return 3d point array (target, source, 3) mapped to local coordinates."""
+        return self.rotate(points - self.coordinate_origin, "to_local")
+
+    def to_global(self, points):
+        """Return 3d point array (target, source, 3) mapped to global coordinates."""
+        return self.rotate(points, "to_global") + self.coordinate_origin
 
 
 @dataclass
@@ -35,6 +85,8 @@ class Matrix(GroupSet):
 
     data: dict[str, np.ndarray] = field(init=False, repr=False, default_factory=dict)
     attrs: dict[str, str] = field(default_factory=dict)
+    coordinate_axes: np.ndarray = field(init=False, repr=False)
+    coordinate_origin: np.ndarray = field(init=False, repr=False)
 
     axisymmetric: ClassVar[bool] = True
     mu_0: ClassVar[float] = import_module("scipy.constants").mu_0
@@ -49,6 +101,25 @@ class Matrix(GroupSet):
     def __getitem__(self, attr):
         """Return attributes from data."""
         return self.data[attr]
+
+    def build_transform(self):
+        """Build global to local coordinate transformation matrix (target, source)."""
+        self.coordinate_axes = np.tile(
+            self.source.space.coordinate_axes, reps=(self.shape[0], 1, 1, 1)
+        )
+        self.coordinate_origin = np.tile(
+            self.source.space.origin, reps=(self.shape[0], 1, 1)
+        )
+
+    @cached_property
+    def loc(self):
+        """Return local coordinate stack indexer."""
+        return type("coord_loc_indexer", (CoordLocIndexer,), {})(
+            self.source,
+            self.target,
+            self.coordinate_axes,
+            self.coordinate_origin,
+        )
 
     def get_frame(self, attr: str):
         """Return source or target frame associated with attr."""

@@ -187,12 +187,12 @@ class Target(BiotFrame):
     @property
     def delta_r(self):
         """Return normalized r-coordinate distance from PF coil centroid."""
-        return (self.x - self.x0.values) / self.dx
+        return (self.x - self.x0) / self.dx
 
     @property
     def delta_z(self):
         """Return normalized z-coordinate distance from PF coil centroid."""
-        return (self.z - self.z0.values) / self.dz
+        return (self.z - self.z0) / self.dz
 
 
 if __name__ == "__main__":

@@ -47,6 +47,21 @@ class FrameSet(netCDF, FrameSetLoc):
             "y",
             "z",
             "r",
+        ],
+    )
+    required: list[str] = field(repr=False, default_factory=lambda: [])
+    additional: list[str] = field(
+        repr=False,
+        default_factory=lambda: [
+            "x0",
+            "y0",
+            "z0",
+            "x1",
+            "y1",
+            "z1",
+            "x2",
+            "y2",
+            "z2",
             "ax",
             "ay",
             "az",
@@ -56,12 +71,6 @@ class FrameSet(netCDF, FrameSetLoc):
             "dx",
             "dy",
             "dz",
-        ],
-    )
-    required: list[str] = field(repr=False, default_factory=lambda: [])
-    additional: list[str] = field(
-        repr=False,
-        default_factory=lambda: [
             "turn",
             "frame",
             "plasma",
@@ -126,7 +135,28 @@ class FrameSet(netCDF, FrameSetLoc):
             additional=self.additional,
             available=self.available,
             subspace=["Imin", "Imax"],
-            exclude=["frame", "Ic", "It", "fix", "free"],
+            exclude=[
+                "frame",
+                "Ic",
+                "It",
+                "fix",
+                "free",
+                "x0",
+                "y0",
+                "z0",
+                "x1",
+                "y1",
+                "z1",
+                "x2",
+                "y2",
+                "z2",
+                "ax",
+                "ay",
+                "az",
+                "nx",
+                "ny",
+                "nz",
+            ],
             array=["coil"],
             version=["index"],
         )

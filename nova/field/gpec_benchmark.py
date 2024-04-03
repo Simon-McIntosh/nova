@@ -127,14 +127,14 @@ if __name__ == "__main__":
     from nova.frame.coilset import CoilSet
     from nova.imas.coils_non_axisymmetric import CoilsNonAxisymmetric
 
-    dataset = Dataset("TCC")
+    dataset = Dataset("EU")
 
     datasource = {
-        "CC": (111003, 3),
+        # "CC": (111003, 3),
         "ELM": (115001, 2),
     }
 
-    coilset = CoilSet(filename="gpec_benchmark", noverlap=360)
+    coilset = CoilSet(filename="gpec_benchmark", noverlap=30)
 
     try:
         coilset.load()
@@ -143,3 +143,10 @@ if __name__ == "__main__":
             coilset += CoilsNonAxisymmetric(*pulse_run)
         coilset.overlap.solve(grid=dataset.grid)
         coilset.store()
+
+    coilset.sloc["Ic"][:9] = dataset.data.current
+
+    coilset.overlap.set_axes("1d")
+    coilset.overlap.axes.plot(coilset.overlap.bz_.T)
+    coilset.overlap.axes.plot(coilset.overlap.data.theta, coilset.overlap.bz_[:, 3])
+    coilset.overlap.axes.plot(dataset.data.theta, dataset.data.bn_real)

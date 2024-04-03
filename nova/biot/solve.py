@@ -56,7 +56,7 @@ class Solve(GroupSet):
                     f"in Biot.generator: {self.generator.keys()}"
                 )
             index = self.source.index[self.source_segment == segment]
-            for i, chunk in enumerate(self.group_segments(index, 50, index[-1])):
+            for i, chunk in enumerate(self.group_segments(index, 500, index[-1])):
                 self.source_segment.loc[list(chunk)] = f"{segment}_{i}"
 
     @staticmethod

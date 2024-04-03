@@ -30,14 +30,14 @@ class Overlap(Plot2D, Operate):
     attrs: list[str] = field(default_factory=lambda: ["Br", "Bz"])
 
     @property
-    def number(self) -> tuple[int] | None:
+    def number(self) -> tuple[int, int] | None:
         """Manage poloidal and toroidal grid number."""
         if self.ngrid is None or self.noverlap is None:
             return None
         return self.ngrid, self.noverlap
 
     @number.setter
-    def number(self, number: int | tuple[int]):
+    def number(self, number: int | tuple[int, int] | None):
         match number:
             case (int() | float(), int() | float()):
                 self.ngrid, self.noverlap = number
@@ -124,6 +124,14 @@ class Overlap(Plot2D, Operate):
         """Decompose Boit attributes."""
         self.data.coords["mode_number"] = np.arange(0, self.noverlap + 1)
         shape = self.data.space_shape + (self.data.sizes["source"],)
+        if np.all([attr in self.data for attr in ["Br", "Bz", "theta"]]):
+            self.attrs.append("Bn")
+            theta = np.tile(
+                self.data.theta.data, (1,) + self.data.space_shape[1:]
+            ).ravel()[:, np.newaxis]
+            self.data["Bn"] = self.data["Br"] * np.cos(theta) + self.data[
+                "Bz"
+            ] * np.sin(theta)
         attrs = []
         for attr in self.attrs:
             variable = self.data[attr].data.reshape(shape)
@@ -135,7 +143,7 @@ class Overlap(Plot2D, Operate):
 
     def solve(
         self,
-        number: int | tuple[int, int] | None = None,
+        number: int | tuple[int] | None = None,
         limit: float | np.ndarray | None = 0,
         index: str | slice | np.ndarray = slice(None),
         grid: xarray.Dataset = xarray.Dataset(),

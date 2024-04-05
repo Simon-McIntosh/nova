@@ -52,7 +52,7 @@ class Overlap(Plot2D, Operate):
     @property
     def phi(self):
         """Return phi grid coordinate."""
-        return np.linspace(0, 2 * np.pi, self.nphi)
+        return np.linspace(0, 2 * np.pi, self.nphi, endpoint=False)
 
     def _generate(self, limit, index, grid):
         """Generate simulation grid."""
@@ -61,18 +61,22 @@ class Overlap(Plot2D, Operate):
             assert np.ndim(grid.r) == 1
             self.ngrid = np.prod(grid.r.shape)
             boundary = np.c_[grid.r, grid.z]
-            assert np.allclose(boundary[0], boundary[-1])
-            if "theta" not in grid:
-                tangent = np.zeros_like(boundary)
+            tangent = np.zeros_like(boundary)
+            tangent[1:-1] = boundary[2:] - boundary[:-2]
+            if np.allclose(boundary[0], boundary[-1]):
                 tangent[0] = tangent[-1] = boundary[1] - boundary[-1]
-                tangent[1:-1] = boundary[2:] - boundary[:-2]
-                grid.coords["theta"] = np.unwrap(
-                    np.arctan2(-tangent[:, 0], tangent[:, 1])
-                )
+            else:
+                tangent[0] = boundary[1] - boundary[0]
+                tangent[-1] = boundary[-1] - boundary[-2]
+            tangent = np.insert(tangent, 1, np.zeros(len(tangent)), axis=1)
+            normal = np.cross(tangent, np.array([[0, 1, 0]]))
+            grid.coords["point"] = list("rz")
+            grid["normal"] = ("theta", "point"), normal[:, ::2]
+            grid["normal"] /= np.linalg.norm(grid["normal"], axis=1)[:, np.newaxis]
             grid.coords["phi"] = self.phi
             grid["X"] = ("theta", "phi"), grid.r.data[:, np.newaxis] * np.cos(self.phi)
             grid["Y"] = ("theta", "phi"), grid.r.data[:, np.newaxis] * np.sin(self.phi)
-            grid["Z"] = ("theta", "phi"), grid.r.data[:, np.newaxis] * np.ones(
+            grid["Z"] = ("theta", "phi"), grid.z.data[:, np.newaxis] * np.ones(
                 self.nphi, float
             )
             grid.attrs["space_shape"] = (grid.sizes["theta"], self.nphi)
@@ -125,17 +129,24 @@ class Overlap(Plot2D, Operate):
         self.data.coords["mode_number"] = np.arange(0, self.noverlap + 1)
         shape = self.data.space_shape + (self.data.sizes["source"],)
         if np.all([attr in self.data for attr in ["Br", "Bz", "theta"]]):
+            self.data["Bn"] = ("target", "source"), np.einsum(
+                "ij,ij...->i...",
+                self.data.normal,
+                np.stack(
+                    [
+                        self.data["Br"].data.reshape(shape),
+                        self.data["Bz"].data.reshape(shape),
+                    ],
+                    axis=1,
+                ),
+            ).reshape((self.data.sizes["target"], self.data.sizes["source"]))
             self.attrs.append("Bn")
-            theta = np.tile(
-                self.data.theta.data, (1,) + self.data.space_shape[1:]
-            ).ravel()[:, np.newaxis]
-            self.data["Bn"] = self.data["Br"] * np.cos(theta) + self.data[
-                "Bz"
-            ] * np.sin(theta)
         attrs = []
         for attr in self.attrs:
             variable = self.data[attr].data.reshape(shape)
-            coef = scipy.fft.rfft(variable, axis=1).reshape(-1, shape[-1])
+            coef = scipy.fft.rfft(variable, norm="forward", axis=1).reshape(
+                -1, shape[-1]
+            )
             self.data[f"{attr}_real"] = ("frequency", "source"), np.real(coef)
             self.data[f"{attr}_imag"] = ("frequency", "source"), np.imag(coef)
             attrs.extend([f"{attr}_real", f"{attr}_imag"])
@@ -260,7 +271,7 @@ if __name__ == "__main__":
 
     from nova.imas.coils_non_axisymmetric import CoilsNonAxisymmetric
 
-    coilset = CoilsNonAxisymmetric(115001, 2, ngrid=500, noverlap=5)
+    coilset = CoilsNonAxisymmetric(115001, 2, ngrid=500, noverlap=80)
     coilset.saloc["Ic"] = 1e3
 
     coilset.overlap.solve(limit=1.5)

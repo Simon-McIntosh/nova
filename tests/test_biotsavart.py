@@ -558,7 +558,6 @@ def test_box_section(section):
     Jc = Ic / Ashell
     multicoil.grid.solve(ngrid, factor)
     multicoil.saloc["Ic"] = Jc * outer_width**2, -Jc * inner_width**2
-
     for attr in attrs:
         assert np.allclose(
             getattr(coilset.grid, attr.lower()),

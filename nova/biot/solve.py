@@ -49,14 +49,14 @@ class Solve(GroupSet):
     def check_segments(self):
         """Check for segment in self.generator."""
         self.source_segment = self.source.segment.copy()
-        for segment in self.source_segment.unique():
+        for segment in self.source.segment.unique():
             if segment not in self.generator:
                 raise NotImplementedError(
                     f"segment <{segment}> not implemented "
                     f"in Biot.generator: {self.generator.keys()}"
                 )
             index = self.source.index[self.source_segment == segment]
-            for i, chunk in enumerate(self.group_segments(index, 500, index[-1])):
+            for i, chunk in enumerate(self.group_segments(index, 25, index[-1])):
                 self.source_segment.loc[list(chunk)] = f"{segment}_{i}"
 
     @staticmethod

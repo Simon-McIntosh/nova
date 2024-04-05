@@ -37,7 +37,7 @@ class VtkPlot(metamethod.VtkPlot, BasePlot):
         if not self.frame.empty:
             return self.plot(index, new=new, **kwargs)
 
-    def plot(self, index=slice(None), decimate=1e5, **kwargs):
+    def plot(self, index=slice(None), decimate=1e5, plotter=None, **kwargs):
         """Plot vtk instances."""
         colors = matplotlib.rcParams["axes.prop_cycle"].by_key()["color"]
         self.frame.vtkgeo.generate_vtk()
@@ -52,4 +52,6 @@ class VtkPlot(metamethod.VtkPlot, BasePlot):
         if decimate is not None:
             vtk = [_vtk.decimate(n=decimate, preserve_volume=True) for _vtk in vtk]
         if len(vtk) > 0:
+            if plotter is not None:
+                return plotter.add(vtk)
             return vedo.show(*vtk, **kwargs)

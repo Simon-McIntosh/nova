@@ -355,19 +355,19 @@ class Database(IDS):
 
     Minimum input requred for Database is 'ids' or 'pulse', 'run' and 'name':
 
-    >>> Database().ids_data
+    >>> Database().ids_data  # doctest: +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):
         ...
-    imas.hli_exception.ALException: When self.ids is None require:
+    ALException: When self.ids is None require:
     pulse (0 > 0) & run (0 > 0) & name (None != None)
 
     Malformed inputs are thrown as TypeErrors:
 
     >>> malformed_database = Database(None, 403, name='equilibrium')
-    >>> malformed_database.ids_data
+    >>> malformed_database.ids_data  # doctest: +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):
         ...
-    imas.hli_exception.ALException: When self.ids is None require:
+    ALException: When self.ids is None require:
     pulse (None > 0) & run (403 > 0) & name (equilibrium != None)
 
     The database class may also be initiated with an ids from which the
@@ -514,7 +514,7 @@ class Database(IDS):
     def _check_ids_attrs(self):
         """Confirm minimum working set of input attributes."""
         if self._unset_attrs:
-            raise ALException(
+            raise imas.hli_exception.ALException(
                 f"When self.ids is None require:\n"
                 f"pulse ({self.pulse} > 0) & run ({self.run} > 0) & "
                 f"name ({self.name} != None)"

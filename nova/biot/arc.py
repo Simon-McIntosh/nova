@@ -152,7 +152,7 @@ class Arc(Constants, Matrix):
         """Return system variant angle."""
         phi = np.pi - 2 * self.theta
         sign = np.where(phi >= 0, 1, -1)
-        return np.where(sign * phi > 1e2 * self.eps, phi, sign * 1e2 * self.eps)
+        return np.where(sign * phi > 1e4 * self.eps, phi, sign * 1e4 * self.eps)
 
     @property
     # @coefficent
@@ -423,16 +423,6 @@ class Arc(Constants, Matrix):
         return (-self.gamma * self.ck2 / self.ellipj["dn"]) / self.rack2
 
     @property
-    def _Bx_hat(self):
-        """Return stacked local x-coordinate magnetic field intergration constants."""
-        return self._Br_hat * np.cos(self._phi) - self._Bphi_hat * np.sin(self._phi)
-
-    @property
-    def _By_hat(self):
-        """Return stacked local y-coordinate magnetic field intergration constants."""
-        return self._Br_hat * np.sin(self._phi) + self._Bphi_hat * np.cos(self._phi)
-
-    @property
     def _Bz_hat(self):
         """Return stacked local vertical magnetic field intergration coefficents."""
         Bz_hat = (
@@ -443,6 +433,16 @@ class Arc(Constants, Matrix):
             )
         ) / self.rack2
         return self.sign_alpha * self._exterior(Bz_hat)
+
+    @property
+    def _Bx_hat(self):
+        """Return stacked local x-coordinate magnetic field intergration constants."""
+        return self._Br_hat * np.cos(self._phi) - self._Bphi_hat * np.sin(self._phi)
+
+    @property
+    def _By_hat(self):
+        """Return stacked local y-coordinate magnetic field intergration constants."""
+        return self._Br_hat * np.sin(self._phi) + self._Bphi_hat * np.cos(self._phi)
 
     def _intergrate(self, data):
         """Return intergral quantity."""

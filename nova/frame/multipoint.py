@@ -83,7 +83,13 @@ class MultiPoint(metamethod.MultiPoint):
         self.indexer = list(range_index[self.frame.link == ""])
         self.index = self.frame.index[self.indexer]
         ref = self.frame.index.get_indexer(self.frame.link)
-        ref[ref == -1] = 0
+        if any(ref == -1):
+            split = [name.split("_")[0] for name in self.frame.index]
+            ref[ref == -1] = [
+                split.index(link) if link in split else 0
+                for i, link in enumerate(self.frame.link)
+                if ref[i] == -1
+            ]
         ref[self.indexer] = range_index[self.indexer]
         self.frame.ref = ref
         subref = np.zeros(len(self.frame), dtype=int)

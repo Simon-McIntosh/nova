@@ -208,7 +208,7 @@ class Operate(Data):
                         self.array[attr] = np.zeros(self.data.sizes["target"])
                 print(attr, self.domain(attr), self.data.sizes)
 
-                if len(self.shapes[self.domain(attr)]) == 1:
+                if len(self.data.sizes[self.domain(attr)]) == 1:
                     continue
                 ndarray = self.array[attr].reshape(self.shapes[self.domain(attr)])
                 self.array[f"{attr}_"] = ndarray

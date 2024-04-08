@@ -72,16 +72,17 @@ class FilePath:
             return
         match dirname.split("."):
             case [str(path)] if path[:1] == os.path.sep:
+                print(path[:1], os.path.sep)
                 self.path = Path(dirname.replace("*", "."))
             case [str(path), *subpath] if path[:1] != os.path.sep:
                 if path == "":
                     path = str(self.basename)
                 path = self._resolve_absolute(path)
-                self.path = Path(".".join((path, *subpath)))
+                self.path = ".".join((path, *subpath))
             case [str(path), str(subpath), *rest]:
                 subpath = self._resolve_relative(subpath)
                 path = os.path.join(path, str(subpath))
-                self.path = Path(".".join((path, *rest)))
+                self.path = ".".join((path, *rest))
             case _:
                 raise IndexError(f"unable to match dirname {dirname}")
 

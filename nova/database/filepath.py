@@ -70,11 +70,11 @@ class FilePath:
             self.dirname = dirname
             self.checkpath()
             return
+        absolute_path = os.path.isabs(dirname)
         match dirname.split("."):
-            case [str(path)] if path[:1] == os.path.sep:
-                print(path[:1], os.path.sep)
+            case [str(path)] if absolute_path:
                 self.path = Path(dirname.replace("*", "."))
-            case [str(path), *subpath] if path[:1] != os.path.sep:
+            case [str(path), *subpath] if not absolute_path:
                 if path == "":
                     path = str(self.basename)
                 path = self._resolve_absolute(path)

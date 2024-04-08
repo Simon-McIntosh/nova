@@ -77,11 +77,11 @@ class FilePath:
                 if path == "":
                     path = str(self.basename)
                 path = self._resolve_absolute(path)
-                self.path = ".".join((path, *subpath))
+                self.path = Path(".".join((path, *subpath)))
             case [str(path), str(subpath), *rest]:
                 subpath = self._resolve_relative(subpath)
                 path = os.path.join(path, str(subpath))
-                self.path = ".".join((path, *rest))
+                self.path = Path(".".join((path, *rest)))
             case _:
                 raise IndexError(f"unable to match dirname {dirname}")
 
@@ -172,5 +172,8 @@ if __name__ == "__main__":
     filepath = FilePath(parents=2, basename="root", filename="test")
     filepath.path = ".nova"
 
-    filepath.filepath = "/home/mcintos/Code/nova/nova/2022.3.0/tests"
-    filepath.filename
+    # filepath.filepath = "/home/mcintos/Code/nova/nova/2022.3.0/tests"
+
+    # filepath.filepath =
+
+    print(filepath.filepath)

@@ -17,9 +17,9 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Physics",
 ]
 
-[tool.poetry.build]
-script = "build.py"
-generate-setup-file = true
+#[tool.poetry.build]
+#script = "build.py"
+#generate-setup-file = true
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.13"

@@ -60,7 +60,7 @@ class ExtensionBuilder(build_ext):
         extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
         cmake_args = [
             "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=" + extdir,
-            "-DPYTHON_EXECUTABLE=" + sys.executable,
+            # "-DPYTHON_EXECUTABLE=" + sys.executable,
         ]
 
         cfg = "Debug" if self.debug else "Release"
@@ -77,7 +77,7 @@ class ExtensionBuilder(build_ext):
             cmake_args += ["-DCMAKE_BUILD_TYPE=" + cfg]
             build_args += ["--", "-j4"]
         cmake_args += ["-DPYTHON_INCLUDE_DIR={}".format(sysconfig.get_path("include"))]
-
+        # cmake_args += ["-DCMAKE_INSTALL_PREFIX={}".format()]
         env = os.environ.copy()
         env["CXXFLAGS"] = '{} -DVERSION_INFO=\\"{}\\"'.format(
             env.get("CXXFLAGS", ""), self.distribution.get_version()
@@ -88,7 +88,7 @@ class ExtensionBuilder(build_ext):
             ["cmake", ext.sourcedir] + cmake_args, cwd=self.build_temp, env=env
         )
         subprocess.check_call(
-            ["cmake", "--build", "."] + build_args, cwd=self.build_temp
+            ["cmake", "--build", "."] + build_args, cwd=self.build_temp, env=env
         )
 
 
@@ -96,8 +96,8 @@ def build(setup_kwargs: Dict[str, Any]) -> None:
     """Build IMAS al-python."""
     ext_modules = [
         CMakeExtension(
-            "project.package.pybind11_extension",
-            sourcedir="project/package/pybind11_extension",
+            "al_python",
+            sourcedir="../al-python",
         )
     ]
     setup_kwargs.update(

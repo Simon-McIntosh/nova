@@ -118,13 +118,17 @@ class Operate(Data):
     @property
     def shapes(self) -> dict[str, int]:
         """Return target shapes for multiple domains."""
-        return {"space": self.shape}
+        return {"target": (self.data.sizes["target"],)}
 
     def domain(self, attr: str) -> str:
         """Return domain identifier."""
-        if attr.split("_")[-1] in ["real", "imag", "abs", "phase"]:
-            return "frequency"
-        return "space"
+        match attr.split("_"):
+            case "bmn", str():
+                return "target_mn"
+            case str(), postfix if postfix in ["real", "imag", "abs", "phase"]:
+                return "target_n"
+            case _:
+                return "target"
 
     @contextmanager
     def solve_biot(self, number: int | float | None):
@@ -196,10 +200,14 @@ class Operate(Data):
                 match attr:
                     case "bp" if self.classname == "Field":
                         self.array[attr] = np.zeros(self.data.sizes["index"])
-                    case str() if self.domain(attr) == "frequency":
-                        self.array[attr] = np.zeros(self.data.sizes["frequency"])
+                    case str() if self.domain(attr) == "target_n":
+                        self.array[attr] = np.zeros(self.data.sizes["target_n"])
+                    case str() if self.domain(attr) == "target_mn":
+                        self.array[attr] = np.zeros(self.data.sizes["target_mn"])
                     case _:
                         self.array[attr] = np.zeros(self.data.sizes["target"])
+                print(attr, self.domain(attr), self.data.sizes)
+
                 if len(self.shapes[self.domain(attr)]) == 1:
                     continue
                 ndarray = self.array[attr].reshape(self.shapes[self.domain(attr)])

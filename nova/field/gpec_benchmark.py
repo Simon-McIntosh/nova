@@ -128,14 +128,14 @@ if __name__ == "__main__":
     from nova.imas.coils_non_axisymmetric import CoilsNonAxisymmetric
 
     dataset = Dataset("EU")
-    # dataset.grid = dataset.grid.isel(theta=range(0, 80))
+    dataset.grid = dataset.grid.isel(theta=range(0, 21))
 
     datasource = {
         # "CC": (111003, 3),
         "ELM": (115001, 2),
     }
 
-    coilset = CoilSet(filename="gpec_benchmark", noverlap=80)
+    coilset = CoilSet(filename="gpec_benchmark", noverlap=3)
 
     try:
         coilset.load()
@@ -148,14 +148,14 @@ if __name__ == "__main__":
     coilset.sloc["Ic"][:9] = dataset.data.current / 6
     # coilset.sloc["Ic"] = 0
     # coilset.sloc["Ic"][1] = 1e3
-    mode = 3
+    mode = 2
 
     coilset.overlap.set_axes("1d")
     coilset.overlap.axes.plot(
         coilset.overlap.data.theta, coilset.overlap.bn_abs_[:, mode], label="NOVA"
     )
     bn_abs = np.linalg.norm([dataset.data.bn_real, dataset.data.bn_imag], axis=0)
-    bn_abs[1:] *= 2
+    bn_abs[1:] /= 2
 
     coilset.overlap.axes.plot(
         dataset.data.theta,
@@ -170,14 +170,11 @@ if __name__ == "__main__":
     coilset.frame.polyplot(slice(0, 9))
     coilset.overlap.axes.plot(coilset.overlap.data.r, coilset.overlap.data.z)
 
+    coilset.overlap.set_axes("1d")
+    coilset.overlap.axes.bar(range(20), coilset.overlap.bmn_abs_[:, mode])
+    """
     import pyvista
     import vedo
-
-    points = np.stack(
-        [coilset.overlap.data.X, coilset.overlap.data.Y, coilset.overlap.data.Z],
-        axis=-1,
-    ).reshape(-1, 3)
-    grid = pyvista.PolyData(points).delaunay_2d(alpha=0.5)
 
     grid = pyvista.StructuredGrid(
         coilset.overlap.data.X.data.swapaxes(0, 1),
@@ -187,18 +184,9 @@ if __name__ == "__main__":
 
     contours = grid.contour(isosurfaces=75, scalars=coilset.overlap.bn)
 
-    # vedo.Mesh(contours, c="black").show(new=False, interactive=True, axes=2)
-    # grid.plot()
-
     plt = vedo.Plotter(axes=0)
     plt.add(vedo.Mesh(contours).c("white"))
     plt.add(vedo.Mesh(grid).c("gray").alpha(1))
-
-    coilset.frame.vtkplot(slice(0, 18), new=True, interactive=False, plotter=plt)
-
+    coilset.frame.vtkplot(new=True, interactive=False, plotter=plt)
     plt.show()
-
-    pl = pyvista.Plotter()
-    pl.add_mesh(grid, opacity=0.85)
-    pl.add_mesh(contours, color="white", line_width=1)
-    pl.show()
+    """

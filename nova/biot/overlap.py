@@ -47,12 +47,12 @@ class Overlap(Plot2D, Operate):
     @property
     def nphi(self):
         """Return toroidal grid number."""
-        return 2 * self.noverlap
+        return 2 * self.noverlap + 1
 
     @property
     def phi(self):
         """Return phi grid coordinate."""
-        return np.linspace(0, 2 * np.pi, self.nphi, endpoint=False)
+        return np.linspace(0, 2 * np.pi, self.nphi, endpoint=True)
 
     def _generate(self, limit, index, grid):
         """Generate simulation grid."""
@@ -70,17 +70,18 @@ class Overlap(Plot2D, Operate):
                 tangent[-1] = boundary[-1] - boundary[-2]
             tangent = np.insert(tangent, 1, np.zeros(len(tangent)), axis=1)
             normal = np.cross(tangent, np.array([[0, 1, 0]]))
-            grid.coords["point"] = list("rz")
-            grid["normal"] = ("theta", "point"), normal[:, ::2]
+            grid.coords["axes"] = list("rz")
+            grid["normal"] = ("theta", "axes"), normal[:, ::2]
             grid["normal"] /= np.linalg.norm(grid["normal"], axis=1)[:, np.newaxis]
             grid.coords["phi"] = self.phi
             grid["X"] = ("theta", "phi"), grid.r.data[:, np.newaxis] * np.cos(self.phi)
             grid["Y"] = ("theta", "phi"), grid.r.data[:, np.newaxis] * np.sin(self.phi)
-            grid["Z"] = ("theta", "phi"), grid.z.data[:, np.newaxis] * np.ones(
-                self.nphi, float
+            grid["Z"] = ("theta", "phi"), grid.z.data[:, np.newaxis] * np.ones_like(
+                self.phi
             )
-            grid.attrs["space_shape"] = (grid.sizes["theta"], self.nphi)
-            grid.attrs["frequency_shape"] = (grid.sizes["theta"], self.noverlap + 1)
+            grid.attrs["shape_space"] = (grid.sizes["theta"], self.nphi)
+            grid.attrs["shape_n"] = (grid.sizes["theta"], self.noverlap + 1)
+            grid.attrs["shape_mn"] = (grid.sizes["theta"] - 1, self.noverlap + 1)
             return grid
         if self.number is None:
             return None
@@ -104,12 +105,12 @@ class Overlap(Plot2D, Operate):
                 grid["X"] = ("r", "phi", "z"), Radius * np.cos(Phi)
                 grid["Y"] = ("r", "phi", "z"), Radius * np.sin(Phi)
                 grid["Z"] = ("r", "phi", "z"), Height
-                grid.attrs["space_shape"] = (
+                grid.attrs["shape_space"] = (
                     gridgen.shape[0],
                     self.nphi,
                     gridgen.shape[1],
                 )
-                grid.attrs["frequency_shape"] = (
+                grid.attrs["shape_n"] = (
                     gridgen.shape[0],
                     self.noverlap + 1,
                     gridgen.shape[1],
@@ -127,7 +128,7 @@ class Overlap(Plot2D, Operate):
     def decompose(self):
         """Decompose Boit attributes."""
         self.data.coords["mode_number"] = np.arange(0, self.noverlap + 1)
-        shape = self.data.space_shape + (self.data.sizes["source"],)
+        shape = self.data.shape_space + (self.data.sizes["source"],)
         if np.all([attr in self.data for attr in ["Br", "Bz", "theta"]]):
             self.data["Bn"] = ("target", "source"), np.einsum(
                 "ij,ij...->i...",
@@ -144,12 +145,28 @@ class Overlap(Plot2D, Operate):
         attrs = []
         for attr in self.attrs:
             variable = self.data[attr].data.reshape(shape)
-            coef = scipy.fft.rfft(variable, norm="forward", axis=1).reshape(
-                -1, shape[-1]
+            coef_n = scipy.fft.rfft(variable[:, :-1], norm="forward", axis=1)
+
+            self.data[f"{attr}_real"] = ("target_n", "source"), np.real(
+                coef_n.reshape(-1, shape[-1])
             )
-            self.data[f"{attr}_real"] = ("frequency", "source"), np.real(coef)
-            self.data[f"{attr}_imag"] = ("frequency", "source"), np.imag(coef)
+            self.data[f"{attr}_imag"] = ("target_n", "source"), np.imag(
+                coef_n.reshape(-1, shape[-1])
+            )
             attrs.extend([f"{attr}_real", f"{attr}_imag"])
+
+            if attr == "Bn":
+                coef_mn = scipy.fft.fftshift(
+                    scipy.fft.fft(coef_n[:-1], norm="forward", axis=0), axes=0
+                )
+                self.data["Bmn_real"] = ("target_mn", "source"), np.real(
+                    coef_mn.reshape(-1, shape[-1])
+                )
+                self.data["Bmn_imag"] = ("target_mn", "source"), np.imag(
+                    coef_mn.reshape(-1, shape[-1])
+                )
+                attrs.extend(["Bmn_real", "Bmn_imag"])
+
         self.attrs.extend(attrs)
 
     def solve(
@@ -207,12 +224,15 @@ class Overlap(Plot2D, Operate):
     @property
     def shape(self):
         """Return grid shape."""
-        return self.data.space_shape
+        return self.data.shape_space
 
     @property
     def shapes(self):
         """Extend operator shapes with frequency domain."""
-        return super().shapes | {"frequency": self.data.frequency_shape}
+        return super().shapes | {
+            "target_n": self.data.shape_n,
+            "target_mn": self.data.shape_mn,
+        }
 
     def plot(self, attr, mode=0, axes=None):
         """Plot error field component."""

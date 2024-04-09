@@ -115,6 +115,7 @@ class Overlap(Plot2D, Operate):
                     self.noverlap + 1,
                     gridgen.shape[1],
                 )
+                grid.attrs["shape_mn"] = ()
                 return grid
             case _:
                 raise NotImplementedError("overlap requires a 2d grid limit.")

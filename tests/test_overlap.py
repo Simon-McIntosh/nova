@@ -37,7 +37,5 @@ def test_symetric(segment):
         assert np.allclose(getattr(coilset.overlap, f"{attr.lower()}_abs_")[:, 1:], 0)
 
 
-test_symetric("circle")
-
 if __name__ == "__main__":
     pytest.main([__file__])

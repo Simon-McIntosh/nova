@@ -118,7 +118,7 @@ class Operate(Data):
     @property
     def shapes(self) -> dict[str, int]:
         """Return target shapes for multiple domains."""
-        return {"target": (self.data.sizes["target"],)}
+        return {"target": self.shape}
 
     def domain(self, attr: str) -> str:
         """Return domain identifier."""
@@ -200,17 +200,13 @@ class Operate(Data):
                 match attr:
                     case "bp" if self.classname == "Field":
                         self.array[attr] = np.zeros(self.data.sizes["index"])
-                    case str() if self.domain(attr) == "target_n":
-                        self.array[attr] = np.zeros(self.data.sizes["target_n"])
-                    case str() if self.domain(attr) == "target_mn":
-                        self.array[attr] = np.zeros(self.data.sizes["target_mn"])
+                    case str():
+                        self.array[attr] = np.zeros(self.data.sizes[self.domain(attr)])
                     case _:
-                        self.array[attr] = np.zeros(self.data.sizes["target"])
-                print(attr, self.domain(attr), self.data.sizes)
-
-                if len(self.data.sizes[self.domain(attr)]) == 1:
+                        raise TypeError(f"type(attr) {type(attr)} is not str")
+                if len(shape := self.shapes[self.domain(attr)]) == 1:
                     continue
-                ndarray = self.array[attr].reshape(self.shapes[self.domain(attr)])
+                ndarray = self.array[attr].reshape(shape)
                 self.array[f"{attr}_"] = ndarray
                 continue
 

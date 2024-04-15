@@ -2123,6 +2123,20 @@ files = [
 ]
 
 [[package]]
+name = "imas"
+version = "5.2.0"
+description = "IMAS High Level Interface for Python."
+optional = true
+python-versions = "<4,>=3.6"
+files = [
+    {file = "imas-5.2.0-py3-none-any.whl", hash = "sha256:45e998d8ae45316a3de938dc342d12ebdb71ef74a70f6c8b39914c5e824832f5"},
+]
+
+[package.source]
+type = "file"
+url = "dist/imas-5.2.0-py3-none-any.whl"
+
+[[package]]
 name = "imaspy"
 version = "1.0.0+16.g9ab1b38"
 description = "Pythonic wrappers for the IMAS Access Layer"
@@ -7692,7 +7706,7 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 ansys = ["ansys-dpf-core", "ansys-dpf-post", "fortranformat", "openpyxl"]
 ferritic = ["meshio", "pyvista", "scikit-learn", "trimesh", "vedo"]
 graphics = ["bokeh", "descartes", "matplotlib", "moviepy", "seaborn"]
-imas = ["h5py", "imaspy"]
+imas = ["h5py", "imas", "imaspy"]
 jit = ["jax", "numba", "tbb", "tbb-devel"]
 optimize = ["jaxopt", "pylops", "scikit-learn"]
 structural = ["matplotlib", "pyquaternion"]
@@ -7704,4 +7718,4 @@ vtk = ["alphashape", "meshio", "pyvista", "trimesh", "vedo"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.13"
-content-hash = "ed5f5bded8cc2a7e8193cf3ddf5c9022af03a982eb23150722dc81b80659f362"
+content-hash = "03ce156a1c3b0c8b006ebc746f5b92430773aa66790849fb4d6637fdcd0cd2d5"

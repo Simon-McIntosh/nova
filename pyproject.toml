@@ -17,24 +17,38 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Physics",
 ]
 
+exclude = [
+  "nova/assembly/*.py",
+  "nova/design/*.py",
+  "nova/development/*.py",
+  "nova/dina/*.py",
+  "nova/projects/*.py",
+  "nova/structural/*.py",
+  "nova/thermalhydralic/*.py",
+  "nova/utilities/*.py", 
+]
+
 include = [
-  {path = "imas", format = "wheel"},
-  {path = "identifiers", format = "wheel"},
-  {path = "al_lowlevel", format = "wheel"},
-  {path = "al_lowlevel/*.so", format = "wheel"},
+  {path = "**/*.so", format = "wheel"},
+  #{path = "imas", format = "wheel"},
+  #{path = "identifiers", format = "wheel"},
+  #{path = "al_lowlevel", format = "wheel"},
 ]
 
-packages = [
-  { include = "nova" }, 
-  { include = "imas", format = "wheel"},
-  { include = "identifiers", format = "wheel"},
-  { include = "al_lowlevel", format = "wheel"},
+#packages = [
+#  { include = "nova" }, 
+#  { include = "imas", format = "wheel"},
+#  { include = "identifiers", format = "wheel"},
+#  { include = "al_lowlevel", format = "wheel"},
+#]
 
-]
+#[build-system]
+#build-backend = "poetry.masonry.api"
+#requires = ["poetry-core", "setuptools", "build"]
 
 [build-system]
-build-backend = "poetry.masonry.api"
-requires = ["poetry-core", "setuptools", "build"]
+requires = ["scikit-build-core"]
+build-backend = "scikit_build_core.build"
 
 [tool.poetry.build]
 script = "build.py"
@@ -93,7 +107,7 @@ packaging = ">=23.2"
 numba = {version = ">=0.59.0", optional = true}
 tbb = {version = ">=2021.11.0", optional = true}
 tbb-devel = {version = ">=2021.11.0", optional = true}
-
+imas = {file = "dist/imas-5.2.0-py3-none-any.whl", optional=true, markers = "extra == 'imas'"}
 
 [tool.poetry.group.dev.dependencies]
 asv = ">=0.5.1"
@@ -165,6 +179,7 @@ graphics = [
   "seaborn",
 ]
 imas = [
+  "imas",
   "imaspy",
   "h5py",
 ]

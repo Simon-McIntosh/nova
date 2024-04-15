@@ -13,8 +13,8 @@ import zipfile
 class CMakeExtension(Extension):
     """Extend setuptools Extension to build cmake source."""
 
-    def __init__(self, name: str, sourcedir: str = "") -> None:
-        super().__init__(name, sources=[])
+    def __init__(self, name: str, sourcedir: str = "", **kwargs) -> None:
+        super().__init__(name, sources=[], **kwargs)
         self.sourcedir = str(Path(sourcedir).resolve())
 
 
@@ -48,15 +48,12 @@ class BuildExt(build_ext):
             ["cmake", "--build", "."] + build_args, cwd=self.build_temp
         )
 
-    def _copy(self):
+    def copy_whl(self):
         """Copy imas and al-lowlevel wheels to project nova/imas/."""
-        imas_dir = Path(self.build_temp).parent.parent / "imas"
-        if imas_dir.is_dir():
-            shutil.rmtree(imas_dir)
-        imas_dir.mkdir()
+        dist_dir = Path(self.build_temp).parent.parent / "dist"
+        dist_dir.mkdir(exist_ok=True)
         for wheel in glob.glob("**/*.whl", root_dir=self.build_temp, recursive=True):
-            name = f"{Path(wheel).name.split('-')[0]}.whl"
-            shutil.copy(Path(self.build_temp) / wheel, imas_dir / name)
+            shutil.copy(Path(self.build_temp) / wheel, dist_dir / Path(wheel).name)
 
     def unzip(self):
         """Unzip al-python wheels to project root."""
@@ -66,36 +63,40 @@ class BuildExt(build_ext):
                 members = [name for name in whl.namelist() if "dist-info" not in name]
                 whl.extractall(root_dir, members)
 
-    def copy(self):
+    def copy_lib(self):
         """Copy shared libraries to venv/lib -> update LD_LIBRARY_PATH to include."""
-        library_dir = Path(os.environ["VIRTUAL_ENV"]) / "lib"
-        shutil.copytree(self.build_lib, library_dir, dirs_exist_ok=True)
+        lib_dir = Path(self.build_temp).parent.parent / "lib"
+        shutil.copytree(self.build_lib, lib_dir, dirs_exist_ok=True)
 
 
 def build():
     """Build IMAS python access layer."""
-    ext_modules = [CMakeExtension("al_python", sourcedir="../al-python")]
-    distribution = Distribution({"ext_modules": ext_modules})
+    ext_modules = [
+        CMakeExtension(
+            "al_python", sourcedir="../al-python", runtime_library_dirs=["lib"]
+        )
+    ]
+    distribution = Distribution({"name": "al_python", "ext_modules": ext_modules})
+    distribution.package_dir = {"imas": "al_python"}
+
     cmd = BuildExt(distribution)
     cmd.ensure_finalized()
     cmd.run()
     cmd.unzip()
-    cmd.copy()
+    cmd.copy_lib()
+    cmd.copy_whl()
 
-    """
-    for output in cmd.get_outputs():
-        relative_extension = os.path.relpath(output, cmd.build_lib)
-        print(output, relative_extension)
-        if not os.path.exists(output):
-            continue
-
-    shutil.copyfile(output, relative_extension)
-    mode = os.stat(relative_extension).st_mode
-    mode |= (mode & 0o444) >> 2
-    os.chmod(relative_extension, mode)
-    """
+    print(cmd.get_outputs())
 
 
 if __name__ == "__main__":
     if Path("../al-python").is_dir():
         build()
+        """
+        # awaiting https://github.com/python-poetry/poetry/issues/5983
+        python = f"{os.environ['VIRTUAL_ENV']}/bin/python"
+        for module in ["imas", "al_lowlevel"]:
+            subprocess.check_call(
+                [python, "-m", "pip", "install", "--find-links", "dist/", module]
+            )
+        """

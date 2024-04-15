@@ -25,11 +25,15 @@ include = [
 
 packages = [
   { include = "nova" }, 
-  { include = "imas", format = "wheel" },
-  { include = "identifiers", format = "wheel" },
-  { include = "al_lowlevel", format = "wheel" },
+  { include = "imas", format = "wheel"},
+  { include = "identifiers", format = "wheel"},
+  { include = "al_lowlevel", format = "wheel"},
 
 ]
+
+[build-system]
+build-backend = "poetry.masonry.api"
+requires = ["poetry-core", "setuptools", "build"]
 
 [tool.poetry.build]
 script = "build.py"
@@ -75,7 +79,6 @@ seaborn = {version = ">=0.12.2", optional = true}
 tables = {version = ">=3.8.0", optional = true}
 tox = {version = ">=4.6.4", optional = true}
 trimesh = {version = ">=3.21.7", optional = true}
-#vedo = {version = "<2023.5.0", optional = true}
 vedo = {version = ">=2023.5.0", optional = true}
 xlrd = {version = ">=2.0.1", optional = true}
 overrides = ">=7.4.0"
@@ -89,7 +92,7 @@ packaging = ">=23.2"
 numba = {version = ">=0.59.0", optional = true}
 tbb = {version = ">=2021.11.0", optional = true}
 tbb-devel = {version = ">=2021.11.0", optional = true}
-# imas = {path = "build/imas"}
+
 
 [tool.poetry.group.dev.dependencies]
 asv = ">=0.5.1"
@@ -316,9 +319,4 @@ exclude_lines = [
   "raise NotImplementedError",
   "if __name__ == .__main__.:",
 ]
-
-[build-system]
-build-backend = "poetry.masonry.api"
-requires = ["poetry >= 1.5, <2", "poetry-core", "setuptools", "build"]
-
 

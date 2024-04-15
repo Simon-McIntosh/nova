@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 from setuptools import Distribution, Extension
 from setuptools.command.build_ext import build_ext
+import shutil
 import subprocess
 import zipfile
 
@@ -47,6 +48,16 @@ class BuildExt(build_ext):
             ["cmake", "--build", "."] + build_args, cwd=self.build_temp
         )
 
+    def copy(self):
+        """Copy imas and al-lowlevel wheels to project nova/imas/."""
+        imas_dir = Path(self.build_temp).parent.parent / "imas"
+        if imas_dir.is_dir():
+            shutil.rmtree(imas_dir)
+        imas_dir.mkdir()
+        for wheel in glob.glob("**/*.whl", root_dir=self.build_temp, recursive=True):
+            name = f"{Path(wheel).name.split('-')[0]}.whl"
+            shutil.copy(Path(self.build_temp) / wheel, imas_dir / name)
+
     def unzip(self):
         """Unzip al-python wheels to project root."""
         root_dir = Path(self.build_temp).parent.parent
@@ -59,13 +70,14 @@ class BuildExt(build_ext):
 def build():
     """Build IMAS python access layer."""
     ext_modules = [CMakeExtension("al_python", sourcedir="../al-python")]
-
     distribution = Distribution({"ext_modules": ext_modules})
     cmd = BuildExt(distribution)
     cmd.ensure_finalized()
     cmd.run()
+    # cmd.copy()
     cmd.unzip()
 
 
 if __name__ == "__main__":
-    build()
+    if Path("../al-python").is_dir():
+        build()

@@ -21,6 +21,7 @@ include = [
   {path = "imas", format = "wheel"},
   {path = "identifiers", format = "wheel"},
   {path = "al_lowlevel", format = "wheel"},
+  {path = "al_lowlevel/*.so", format = "wheel"},
 ]
 
 packages = [
@@ -139,6 +140,7 @@ ipython-genutils = "^0.2.0"
 mpmath = "^1.3.0"
 setuptools = "^69.2.0"
 setuptools-cpp = "^0.1.0"
+auditwheel = "^6.0.0"
 
 
 [tool.poetry.extras]

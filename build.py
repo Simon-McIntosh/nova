@@ -48,7 +48,7 @@ class BuildExt(build_ext):
             ["cmake", "--build", "."] + build_args, cwd=self.build_temp
         )
 
-    def copy(self):
+    def _copy(self):
         """Copy imas and al-lowlevel wheels to project nova/imas/."""
         imas_dir = Path(self.build_temp).parent.parent / "imas"
         if imas_dir.is_dir():
@@ -66,6 +66,11 @@ class BuildExt(build_ext):
                 members = [name for name in whl.namelist() if "dist-info" not in name]
                 whl.extractall(root_dir, members)
 
+    def copy(self):
+        """Copy shared libraries to venv/lib -> update LD_LIBRARY_PATH to include."""
+        library_dir = Path(os.environ["VIRTUAL_ENV"]) / "lib"
+        shutil.copytree(self.build_lib, library_dir, dirs_exist_ok=True)
+
 
 def build():
     """Build IMAS python access layer."""
@@ -74,8 +79,21 @@ def build():
     cmd = BuildExt(distribution)
     cmd.ensure_finalized()
     cmd.run()
-    # cmd.copy()
     cmd.unzip()
+    cmd.copy()
+
+    """
+    for output in cmd.get_outputs():
+        relative_extension = os.path.relpath(output, cmd.build_lib)
+        print(output, relative_extension)
+        if not os.path.exists(output):
+            continue
+
+    shutil.copyfile(output, relative_extension)
+    mode = os.stat(relative_extension).st_mode
+    mode |= (mode & 0o444) >> 2
+    os.chmod(relative_extension, mode)
+    """
 
 
 if __name__ == "__main__":

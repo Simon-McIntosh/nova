@@ -17,15 +17,22 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Physics",
 ]
 
-include = [{path = "imas/lib/*.so", format = "wheel"}]
+include = [
+  {path = "imas", format = "wheel"},
+  {path = "identifiers", format = "wheel"},
+  {path = "al_lowlevel", format = "wheel"},
+]
 
 packages = [
   { include = "nova" }, 
-  { include = "imas", from = "build/temp.linux-x86_64-cpython-311", format = "wheel" },
+  { include = "imas", format = "wheel" },
+  { include = "identifiers", format = "wheel" },
+  { include = "al_lowlevel", format = "wheel" },
+
 ]
 
-#[tool.poetry.build]
-#script = "build.py"
+[tool.poetry.build]
+script = "build.py"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.13"

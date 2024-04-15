@@ -1,13 +1,12 @@
 """Build IMAS Access Layer."""
 
+import glob
 import os
 from pathlib import Path
 from setuptools import Distribution, Extension
 from setuptools.command.build_ext import build_ext
-
-import shutil
-
 import subprocess
+import zipfile
 
 
 class CMakeExtension(Extension):
@@ -48,41 +47,24 @@ class BuildExt(build_ext):
             ["cmake", "--build", "."] + build_args, cwd=self.build_temp
         )
 
-    def copy(self):
-        """Copy build_temp to build/imas."""
-        imas_temp = Path(self.build_temp) / "imas"
-        imas_module = Path(self.build_temp).parent.parent / "imas"
-        if imas_module.is_dir():
-            shutil.rmtree(imas_module)
-        shutil.copytree(imas_temp, imas_module)
-        imas_lib = imas_module / "lib"
-        if imas_lib.is_dir():
-            shutil.rmtree(imas_lib)
-        shutil.copytree(self.build_lib, imas_lib)
+    def unzip(self):
+        """Unzip al-python wheels to project root."""
+        root_dir = Path(self.build_temp).parent.parent
+        for wheel in glob.glob("**/*.whl", root_dir=self.build_temp, recursive=True):
+            with zipfile.ZipFile(Path(self.build_temp) / wheel, "r") as whl:
+                members = [name for name in whl.namelist() if "dist-info" not in name]
+                whl.extractall(root_dir, members)
 
 
 def build():
     """Build IMAS python access layer."""
-    ext_modules = [CMakeExtension("imas", sourcedir="../al-python")]
+    ext_modules = [CMakeExtension("al_python", sourcedir="../al-python")]
 
     distribution = Distribution({"ext_modules": ext_modules})
-    # distribution.package_dir = {"": "extended"}
     cmd = BuildExt(distribution)
     cmd.ensure_finalized()
     cmd.run()
-    cmd.copy()
-
-    """
-    for output in cmd.get_outputs():
-        relative_extension = os.path.relpath(output, cmd.build_lib)
-        print("output", output)
-        print("re", relative_extension)
-        print(os.listdir())
-        shutil.copyfile(output, relative_extension)
-        mode = os.stat(relative_extension).st_mode
-        mode |= (mode & 0o444) >> 2
-        os.chmod(relative_extension, mode)
-    """
+    cmd.unzip()
 
 
 if __name__ == "__main__":

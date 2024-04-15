@@ -35,8 +35,9 @@
 /build/
 
 # IMAS al-python folder 
-/al-python/
+/al_lowlevel/
 /imas/
+/identifiers/
 
 # tmp folder
 /tmp/

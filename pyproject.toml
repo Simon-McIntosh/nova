@@ -28,30 +28,9 @@ exclude = [
   "nova/utilities/*.py", 
 ]
 
-include = [
-  {path = "**/*.so", format = "wheel"},
-  #{path = "imas", format = "wheel"},
-  #{path = "identifiers", format = "wheel"},
-  #{path = "al_lowlevel", format = "wheel"},
-]
-
-#packages = [
-#  { include = "nova" }, 
-#  { include = "imas", format = "wheel"},
-#  { include = "identifiers", format = "wheel"},
-#  { include = "al_lowlevel", format = "wheel"},
-#]
-
-#[build-system]
-#build-backend = "poetry.masonry.api"
-#requires = ["poetry-core", "setuptools", "build"]
-
 [build-system]
-requires = ["scikit-build-core"]
-build-backend = "scikit_build_core.build"
-
-[tool.poetry.build]
-script = "build.py"
+requires = ["poetry-core>=1.8", "setuptools", "build"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.13"
@@ -107,7 +86,7 @@ packaging = ">=23.2"
 numba = {version = ">=0.59.0", optional = true}
 tbb = {version = ">=2021.11.0", optional = true}
 tbb-devel = {version = ">=2021.11.0", optional = true}
-imas = {file = "dist/imas-5.2.0-py3-none-any.whl", optional=true, markers = "extra == 'imas'"}
+# imas = {file = "dist/imas-5.2.0-py3-none-any.whl", optional=true, markers = "extra == 'imas'"}
 
 [tool.poetry.group.dev.dependencies]
 asv = ">=0.5.1"
@@ -179,7 +158,7 @@ graphics = [
   "seaborn",
 ]
 imas = [
-  "imas",
+  #"imas",
   "imaspy",
   "h5py",
 ]

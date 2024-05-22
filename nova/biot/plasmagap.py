@@ -1,4 +1,5 @@
 """Manage biot calculation plasma gap flux probes."""
+
 from dataclasses import dataclass, field
 from functools import cached_property
 

@@ -1,4 +1,5 @@
 """Manage vtk instances within DataFrame.poly."""
+
 import json
 import numpy as np
 import vedo
@@ -18,8 +19,8 @@ class VtkFrame(vedo.Mesh, GeoFrame):
         return json.dumps(
             {
                 "type": "VTK",
-                "points": self.points().tolist(),
-                "cells": np.array(self.cells(), dtype=int).tolist(),
+                "points": self.vertices.tolist(),
+                "cells": np.array(self.cells, dtype=int).tolist(),
                 "color": self.color().tolist(),
                 "opacity": self.opacity(),
             }

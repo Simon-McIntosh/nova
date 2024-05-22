@@ -1,4 +1,5 @@
 """Manage Sultan testplan."""
+
 from dataclasses import dataclass, field
 from types import SimpleNamespace
 

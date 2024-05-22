@@ -1,4 +1,5 @@
 """Manage poloidal grids."""
+
 from dataclasses import dataclass, field
 
 import pandas

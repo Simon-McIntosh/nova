@@ -1,4 +1,5 @@
 """Flow charts for Monte Carlo analysis of TFC vault assembly."""
+
 from dataclasses import dataclass, field
 from IPython.display import Image, display
 from typing import ClassVar

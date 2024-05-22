@@ -1,4 +1,5 @@
 """Methods for visulizing 2d and 3d polygons."""
+
 import numpy as np
 from matplotlib.collections import PolyCollection
 import matplotlib.pyplot as plt

@@ -1,6 +1,8 @@
 """Basis function sets for use in regression analysis."""
+
 from abc import abstractmethod
 from dataclasses import dataclass, field
+from functools import cached_property
 from typing import ClassVar
 
 import numpy as np
@@ -54,6 +56,11 @@ class Basis(Plot1D, LinearSample):
     def basis(self, term: int):
         """Return ith term basis."""
 
+    @cached_property
+    def function(self):
+        """Return basis function for given order."""
+        return np.stack([self.basis(i) for i in range(self.order + 1)])
+
     def plot(self, model=None, **kwargs):
         """Plot set of basis functions evaluated for coordinate."""
         self.axes = kwargs.pop("axes", None)
@@ -61,6 +68,7 @@ class Basis(Plot1D, LinearSample):
             model = np.ones(self.order + 1)
         for i, coef in enumerate(model):
             self.axes.plot(self.coordinate, coef * self.basis(i), **kwargs)
+        self.axes.plot(self.coordinate, np.dot(model, self.function), "k")
         self.axes.set_xlabel("coordinate")
         self.axes.set_ylabel("basis")
         self.axes.set_title(self.name)

@@ -1,4 +1,5 @@
 """Manage kd-tree selection methods."""
+
 from dataclasses import dataclass, field
 from functools import cached_property
 

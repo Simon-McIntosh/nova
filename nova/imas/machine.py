@@ -1,4 +1,5 @@
 """Manage access to IMAS machine data."""
+
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
@@ -291,7 +292,9 @@ class CrossSection:
         """Build geometry instance."""
         self.data = self.transform[self.ids.geometry_type](self.ids)
         for attr in self.data.data:
-            if not np.isfinite(self.data.data[attr]):
+            if isinstance(self.data.data[attr], float) and not np.isfinite(
+                self.data.data[attr]
+            ):
                 self.data.data[attr] = 0.1  # TODO remove once MastU IDS is fixed
 
     def __getattr__(self, attr):
@@ -1115,10 +1118,12 @@ class Geometry:
     def geometry_attrs(self) -> dict:
         """Return geometry attributes."""
         return {
-            f"{attr}_md": value
-            if isinstance(value := getattr(self, attr), (bool, np.integer))
-            or "ids" not in value
-            else Database(ids=value["ids"]).ids_hash
+            f"{attr}_md": (
+                value
+                if isinstance(value := getattr(self, attr), (bool, np.integer))
+                or "ids" not in value
+                else Database(ids=value["ids"]).ids_hash
+            )
             for attr in self.geometry
         }
 
@@ -1189,7 +1194,7 @@ class Machine(CoilSet, Geometry, CoilData):
     def solve_biot(self):
         """Solve biot instances."""
         if self.sloc["plasma"].sum() > 0:
-            boundary = self.geometry["wall"](**self.wall).boundary  # segment(0)
+            boundary = self.geometry["wall"](**self.wall).boundary
             self.plasma.solve(boundary)
         self.inductance.solve()
         self.field.solve()
@@ -1230,12 +1235,14 @@ if __name__ == "__main__":
 
     machine = Machine(
         *args,
-        pf_active=True,
-        pf_passive=False,
+        pf_active="iter_md",
+        pf_passive="iter_md",
         elm=False,
-        wall=True,
-        tplasma="hex",
+        wall="iter_md",
+        tplasma="r",
         nwall=10,
+        dplasma=-2000,
+        ngrid=2000,
     )
 
     # from nova.imas.coils_non_axisymmetric import CoilsNonAxisymmetyric

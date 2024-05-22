@@ -1,4 +1,5 @@
 """Manage access to non-axisymmetric coil data."""
+
 from dataclasses import dataclass
 from typing import ClassVar
 

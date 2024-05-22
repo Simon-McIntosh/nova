@@ -1,4 +1,5 @@
 """Build poloidal field coil from individual turns."""
+
 from dataclasses import dataclass, field
 
 import numpy as np

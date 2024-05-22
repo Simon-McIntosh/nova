@@ -1,4 +1,5 @@
 """Biot-Savart intergration constants."""
+
 from dataclasses import dataclass, field
 from functools import cached_property, wraps
 from typing import ClassVar
@@ -127,6 +128,11 @@ class Constants:
         return 1 - self.k2
 
     @cached_property
+    def v(self):
+        """Return v coefficient."""
+        return 1 + self.k2 * (self.gamma**2 - self.b * self.r) / (2 * self.r * self.rs)
+
+    @cached_property
     def K(self):
         """Return complete elliptic intergral of the 1st kind."""
         return self.ellipk(self.k2)
@@ -166,38 +172,61 @@ class Constants:
     @classmethod
     def ellipk(cls, m):
         """Return complete elliptic intergral of the 1st kind."""
-        # return scipy.special.ellipk(m)
         return cls._ellip("k", m)
 
     @classmethod
     def ellipe(cls, m):
         """Return complete elliptic intergral of the 2nd kind."""
-        # return scipy.special.ellipe(m)
         return cls._ellip("e", m)
 
     @classmethod
-    def ellippi(cls, n, m):
+    def elliprf(cls, x, y, z):
+        """Return completely-symmetric elliptic integral of the first kind."""
+        rf = scipy.special.elliprf(x, y, z)
+        # rf[(y == 0) | (y == 1)] = scipy.special.elliprc(0, 1)  #
+        return rf
+
+    @classmethod
+    def elliprj(cls, x, y, z, p):
+        """Retrun symmetric elliptic integral of the third kind."""
+        rj = scipy.special.elliprj(x, y, z, p)
+        # rj[y == p] = scipy.special.elliprd(x[y == p], z[y == p], p[y == p])  #
+        # rj[p == 1] = scipy.special.elliprd(x[p == 1], y[p == 1], 1)  #
+        return rj
+
+    @classmethod
+    def ellipp(cls, n, m):
         """
         Return complete elliptic intergral of the 3rd kind.
 
         Adapted from https://github.com/scipy/scipy/issues/4452.
         """
-        """
-        x, y, z, p = 0, 1-m, 1, 1-n
-        rf = cls._ellip('rf', x, y, z, shape=m.shape) #, where=(m < 1))
-        #cls._ellip('rc', 0, 1, out=rf, where=np.isclose(y, 1))
-        rj = cls._ellip('rj', x, y, z, p, shape=m.shape) #, where=(m < 1))
-        #cls._ellip('rd', x, z, p, out=rj, where=np.isclose(y, p))
-        #cls._ellip('rd', x, y, p, out=rj, where=np.isclose(p, 1))
+        x, y, z, p = np.zeros_like(n), 1 - m, np.ones_like(n), 1 - n
+        rf = cls.elliprf(x, y, z)
+        rj = cls.elliprj(x, y, z, p)
         return rf + rj * n / 3
+
+    @classmethod
+    def _ellippinc(cls, n, phi, m):
+        """Return first branch incomplete elliptic intergral of the 3rd kind."""
+        x = 1.0 - np.sin(phi) ** 2
+        y = 1.0 - m * np.sin(phi) ** 2
+        z = np.ones_like(phi)
+        rf = cls.elliprf(x, y, z)
+        rj = cls.elliprj(x, y, z, 1.0 - n * np.sin(phi) ** 2)
+        return np.sin(phi) * rf + np.sin(phi) ** 3 * rj * n / 3.0
+
+    @classmethod
+    def ellippinc(cls, n, phi, m):
         """
-        x, y, z, p = 0, 1 - m, 1, 1 - n
-        rf = scipy.special.elliprf(x, y, z)
-        rf[(y == 0) | (y == 1)] = scipy.special.elliprc(0, 1)
-        rj = scipy.special.elliprj(x, y, z, p)
-        rj[y == p] = scipy.special.elliprd(x, z, p[y == p])
-        rj[p == 1] = scipy.special.elliprd(x, y[p == 1], 1)
-        return rf + rj * n / 3
+        Return incomplete elliptic intergral of the 3rd kind.
+
+        Adapted from https://github.com/scipy/scipy/issues/4452.
+        """
+        k = (phi + np.pi / 2) // np.pi
+        assert np.all(abs(phi - k * np.pi) <= np.pi / 2)
+        assert np.all(m < 1)
+        return 2 * k * cls.ellipp(n, m) + cls._ellippinc(n, phi - k * np.pi, m)
 
     # @unit_nudge()
     def _np2_2(self):
@@ -216,9 +245,53 @@ class Constants:
             3: (1 - self.eps) * 4 * self.r * self.rs / self.b**2,
         }
 
+    @property
+    def Qr(self) -> dict[int, np.ndarray]:
+        """Return Qr(p) coefficient."""
+        Qr = {
+            p: (self.rs - (-1) ** p * self.c)
+            * self.np2[p]
+            * self.gamma**2
+            * self.c
+            / self.r
+            for p in [1, 2]
+        }
+        Qr[3] = np.zeros_like(self.r)
+        return Qr
+
+    @property
+    def Qphi(self) -> dict[int, np.ndarray]:
+        """Return Qphi(p) coefficient."""
+        Qphi = {
+            p: (self.rs - (-1) ** p * self.c) * (-1) ** p * (self.c**2 + self.gamma**2)
+            for p in [1, 2]
+        }
+        Qphi[3] = np.zeros_like(self.r)
+        return Qphi
+
+    @property
+    def Qz(self) -> dict[int, np.ndarray]:
+        """Return Qz(p) coefficient."""
+        Qz = {
+            p: (self.rs - (-1) ** p * self.c) * -2 * self.gamma * self.c * self.np2[p]
+            for p in [1, 2]
+        }
+        Qz[3] = self.gamma * self.b * (self.rs - self.r) * self.np2[3]
+        return Qz
+
+    @cached_property
+    def Pr(self) -> dict[int, np.ndarray]:
+        """Return Pr(p) coefficient."""
+        Pr = {
+            p: (self.rs - (-1) ** p * self.c) * (-1) ** p * (self.c**2 + 5 * self.r**2)
+            for p in [1, 2]
+        }
+        Pr[3] = -self.rs * (self.rs**2 + 3 * self.r**2)
+        return Pr
+
     @cached_property
     def Pphi(self) -> dict[int, np.ndarray]:
-        """Return Pphi coefficient, q in [1, 2, 3]."""
+        """Return Pphi(p) coefficient."""
         Pphi = {
             p: (self.rs - (-1) ** p * self.c)
             * self.np2[p]
@@ -227,19 +300,17 @@ class Constants:
             / (2 * self.r)
             for p in [1, 2]
         }
-        Pphi[3] = (
-            -self.rs / self.b * (self.rs - self.r) * (3 * self.r**2 - self.rs**2)
-        )
+        Pphi[3] = -self.rs / self.b * (self.rs - self.r) * (3 * self.r**2 - self.rs**2)
         return Pphi
 
     @cached_property
     def Pi(self) -> dict[int, np.ndarray]:
         """Return complete elliptc intergral of the 3rd kind."""
-        return {p: self.ellippi(self.np2[p], self.k2) for p in range(1, 4)}
+        return {p: self.ellipp(self.np2[p], self.k2) for p in range(1, 4)}
 
-    def p_sum(self, func):
+    def p_sum(self, func_a, func_b):
         """Return p sum."""
-        result = np.zeros_like(self.r)
+        result = np.zeros_like(func_b[1])
         for p in range(1, 4):
-            result += (-1) ** p * func[p] * self.Pi[p]
+            result += (-1) ** p * func_a[p] * func_b[p]
         return result

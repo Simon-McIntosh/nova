@@ -1,4 +1,5 @@
 """Methods to aid computational assembly studies for the TF cage."""
+
 from abc import ABC, abstractmethod
 from collections import Iterable
 import datetime

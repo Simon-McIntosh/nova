@@ -8,6 +8,7 @@ Python implementation of the Ramer-Douglas-Peucker algorithm.
 :license: MIT, see LICENSE.txt for more details.
 
 """
+
 from functools import partial
 import numpy as np
 import sys

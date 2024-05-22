@@ -1,4 +1,5 @@
 """Manage overlap errorfield calculations."""
+
 from dataclasses import dataclass
 from typing import ClassVar
 

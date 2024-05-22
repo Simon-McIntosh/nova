@@ -1,4 +1,5 @@
 """Manage local data files."""
+
 from dataclasses import dataclass
 import glob
 import os

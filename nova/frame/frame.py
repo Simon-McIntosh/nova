@@ -1,4 +1,5 @@
 """Manage frame factroy methods."""
+
 from dataclasses import dataclass
 
 from nova.frame import Coil, Ferritic, FirstWall, Shell, Turn, Winding
@@ -31,14 +32,14 @@ class Frame(FrameSet):
     @property
     def frameset_attrs(self):
         """Return frame attributes."""
-        return dict(
-            dcoil=self.dcoil,
-            dplasma=self.dplasma,
-            dshell=self.dshell,
-            tcoil=self.tcoil,
-            tplasma=self.tplasma,
-            delta=self.delta,
-        )
+        return {
+            "dcoil": self.dcoil,
+            "dplasma": self.dplasma,
+            "dshell": self.dshell,
+            "tcoil": self.tcoil,
+            "tplasma": self.tplasma,
+            "delta": self.delta,
+        }
 
     @frameset_attrs.setter
     def frameset_attrs(self, attrs: dict[str, int | float | str]):

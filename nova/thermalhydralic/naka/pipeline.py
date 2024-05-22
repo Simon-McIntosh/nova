@@ -1,4 +1,5 @@
 """Manage data pipeline."""
+
 from dataclasses import dataclass, field
 
 

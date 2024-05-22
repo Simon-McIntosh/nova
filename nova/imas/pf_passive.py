@@ -1,4 +1,5 @@
 """Manage access to dynamic pf passive data."""
+
 from dataclasses import dataclass, field
 
 

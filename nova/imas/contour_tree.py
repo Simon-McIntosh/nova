@@ -1,4 +1,5 @@
 """Calculate contour trees using the TTK."""
+
 import numpy as np
 import pyvista
 

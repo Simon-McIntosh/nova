@@ -9,6 +9,7 @@ import scipy.special
 
 from nova.biot.biotframe import BiotFrame
 from nova.biot.circle import Circle
+from nova.biot.constants import Constants
 from nova.biot.grid import Grid
 from nova.biot.matrix import Matrix
 from nova.biot.point import Point
@@ -22,12 +23,7 @@ segments = ["circle", "cylinder"]
 
 def axial_vertical_field(radius, height, current):
     """Return analytic axial vertical field."""
-    return (
-        Matrix.mu_0
-        * current
-        * radius**2
-        / (2 * (radius**2 + height**2) ** (3 / 2))
-    )
+    return Matrix.mu_0 * current * radius**2 / (2 * (radius**2 + height**2) ** (3 / 2))
 
 
 @dataclass
@@ -365,7 +361,7 @@ def test_magnetic_field_analytic_poloidal_plane(section, radius, height, current
 
 @pytest.mark.parametrize(
     "segment,radius,height,current",
-    product(["arc", "line"], [2.1, 7.3], [-3.2, 0, 7.3], [-1e4, 5.3e4]),
+    product(["arc", "line", "bow"], [2.1, 7.3], [-3.2, 0, 7.3], [-1e4, 5.3e4]),
 )
 def test_magnetic_field_analytic_non_axisymmetric(segment, radius, height, current):
     segment_number = 51
@@ -385,6 +381,7 @@ def test_magnetic_field_analytic_non_axisymmetric(segment, radius, height, curre
     grid = np.meshgrid(
         np.linspace(-3.1, 5.1, 9), -2.5, np.linspace(-4.1, 1.7, 3), indexing="ij"
     )
+
     coilset.point.solve(np.stack(grid, axis=-1))
     analytic = AnalyticField(radius, height, current, *grid)
 
@@ -421,6 +418,153 @@ def test_3d_line_arc(rng_sead, current):
     coilset.point.solve(np.array([-0.3, 0.1, -1.1]))
     for attr in ["Bx", "By", "Bz", "Br"]:
         assert np.allclose(getattr(coilset.point, attr.lower()), 0, atol=1e-6)
+
+
+@pytest.mark.skip("pending development of singularity skip methods")
+def test_line_singularity():
+    segment_number = 30
+    x = np.linspace(0, 5, segment_number)
+    points = np.stack([x, np.zeros_like(x), np.zeros_like(x)], axis=-1)
+    coilset = CoilSet(field_attrs=["Bx", "By", "Bz"])
+    coilset.winding.insert(points, {"c": (0, 0, 0.25)}, Ic=1)
+    coilset.point.solve(np.c_[[0, 0, 0], [0, 0.25 / 2, 0], [0, 0.25, 0]].T)
+    assert coilset.point.bz[0] < coilset.point.bz[1]
+    assert coilset.point.bz[0] < coilset.point.bz[2]
+    assert coilset.point.bz[2] < coilset.point.bz[1]
+
+
+def test_multifilament_3d_vector():
+    coilset = CoilSet(field_attrs=["Ax", "Ay", "Az", "Bx", "By", "Bz"])
+    coilset.coil.insert(5, [-1, 1], 0.1, 0.1, Ic=1e3, delta=-2, segment="circle")
+    coilset.coil.insert(5, [-1, 1], 0.1, 0.1, Ic=-1e3, delta=-2, segment="circle")
+    coilset.point.solve(np.array([[5, 0, 0], [6, 0, 0]]))
+    assert np.allclose(coilset.point.vector_potential, 0)
+    assert np.allclose(coilset.point.magnetic_field, 0)
+
+
+@pytest.mark.skip("pending development of singularity skip methods")
+def test_arc_singularity():
+    segment_number = 501
+    theta, dtheta = np.linspace(0, 2 * np.pi, segment_number, retstep=True)
+    radius = 5.3
+    points = np.stack(
+        [radius * np.cos(theta), radius * np.sin(theta), np.zeros_like(theta)], axis=-1
+    )
+    coilset = CoilSet(field_attrs=["Ax", "Ay", "Az", "Bx", "By", "Bz"])
+    coilset.coil.insert(radius, 0, 0.1, 0.1, Ic=1e6, ifttt=False, segment="cylinder")
+    # coilset.coil.insert(radius, 0, 0.1, 0.1, Ic=-1e6, ifttt=False, segment="circle")
+
+    coilset.winding.insert(points, {"c": (0, 0, 0.1)}, Ic=-1e6, minimum_arc_nodes=0)
+
+    print(coilset.frame.segment)
+
+    number = 200
+    grid = np.stack(
+        [
+            np.linspace(-0.5, 0.5, number),
+            radius * np.ones(number),
+            np.zeros(number),
+        ],
+        axis=-1,
+    )
+    coilset.point.solve(grid)
+    coilset.grid.solve(5e3, 1)
+
+    print(coilset.grid.ay.max())
+
+    coilset.grid.plot("ay")
+    coilset.plot()
+
+    # coilset.point.set_axes("1d")
+    # coilset.point.axes.plot(grid[:, 0], coilset.point.ax)
+    assert False
+
+
+def test_ellipf():
+    m = np.array([0.0, 0.2, 0.4, 0.8, 0.5])
+    phi = np.array([-2.5, 0.0, 0.5, 5.5, 7.2])
+    p_scipy = Constants.ellipkinc(phi, m)
+    p_mpmath = np.array([-2.5, 0.0, 0.50827893, 8.17487571, 8.39751980])
+    assert np.allclose(p_scipy, p_mpmath)
+
+
+def test_ellipe():
+    m = np.array([0.0, 0.2, 0.4, 0.8, 0.5])
+    phi = np.array([-2.5, 0.0, 0.5, 5.5, 7.2])
+    p_scipy = Constants.ellipeinc(phi, m)
+    p_mpmath = np.array([-2.5, 0.0, 0.49195874, 3.99157413, 6.26205652])
+    assert np.allclose(p_scipy, p_mpmath)
+
+
+def test_ellipp():
+    """Test ellippi against mpmath implementation.
+
+    Copied from https://github.com/scipy/scipy/pull/15787."""
+    n = np.array([-0.5, 0.0, 0.3, 1.3, -0.7])
+    m = np.array([0.0, 0.2, 0.4, 0.8, 0.5])
+    p_scipy = Constants.ellipp(n, m)
+    p_mpmath = np.array([1.2825498, 1.6596236, 2.14879542, -1.7390616, 1.3902519])
+    assert np.allclose(p_scipy, p_mpmath)
+
+
+def test_ellippinc():
+    n = np.array([-0.5, 0.0, 0.3, 1.3, -0.7])
+    m = np.array([0.0, 0.2, 0.4, 0.8, 0.5])
+    phi = np.array([-2.5, 0.0, 0.5, 5.5, 7.2])
+    p_scipy = Constants.ellippinc(n, phi, m)
+    p_mpmath = np.array([-1.96008157, 0.0, 0.521063078, -8.20462585, 6.408549098])
+    assert np.allclose(p_scipy, p_mpmath)
+
+
+@pytest.mark.parametrize("section", ["box", "skin"])
+def test_box_section(section):
+    radius = 3.945
+    height = 2
+    outer_width = 0.05
+    inner_width = 0.04
+
+    attrs = ["Ay", "Br", "Bz"]
+    factor = 0.3
+    Ic = 5.3e5
+    ngrid = 30
+
+    segment_number = 3
+
+    theta = np.linspace(0, 2 * np.pi, 1 + 3 * segment_number)
+    points = np.stack(
+        [radius * np.cos(theta), radius * np.sin(theta), height * np.ones_like(theta)],
+        axis=-1,
+    )
+
+    coilset = CoilSet(field_attrs=attrs)
+    for i in range(segment_number):
+        coilset.winding.insert(
+            points[3 * i : 1 + 3 * (i + 1)],
+            {section: (0, 0, outer_width, 1 - inner_width / outer_width)},
+            nturn=1,
+            minimum_arc_nodes=4,
+            Ic=Ic,
+            filament=False,
+            ifttt=False,
+        )
+
+    coilset.grid.solve(ngrid, factor)
+
+    multicoil = CoilSet(field_attrs=attrs)
+    multicoil.coil.insert({"rect": (radius, height, outer_width, outer_width)})
+    multicoil.coil.insert({"rect": (radius, height, inner_width, inner_width)})
+
+    Ashell = outer_width**2 - inner_width**2
+    Jc = Ic / Ashell
+    multicoil.grid.solve(ngrid, factor)
+    multicoil.saloc["Ic"] = Jc * outer_width**2, -Jc * inner_width**2
+    for attr in attrs:
+        assert np.allclose(
+            getattr(coilset.grid, attr.lower()),
+            getattr(multicoil.grid, attr.lower()),
+            atol=1e-4,
+            rtol=1e-4,
+        )
 
 
 if __name__ == "__main__":

@@ -1,4 +1,5 @@
 """Generate polygons for CoilFrame instances."""
+
 from dataclasses import dataclass
 
 import shapely
@@ -175,7 +176,7 @@ class PolyGen(PolyShape):
         return shapely.geometry.Polygon(polygon)
 
     @staticmethod
-    def skin(x_center, z_center, diameter, factor):
+    def skin(x_center, z_center, diameter, factor, quadrant_segments=16):
         """
         Return shapely.ring.
 
@@ -203,12 +204,53 @@ class PolyGen(PolyShape):
         """
         if factor <= 0 or factor > 1:
             raise ValueError("skin factor not 0 <= " f"{factor} <= 1")
-        disc_outer = PolyGen.disc(x_center, z_center, diameter)
+        disc_outer = PolyGen.disc(
+            x_center, z_center, diameter, quadrant_segments=quadrant_segments
+        )
         if factor == 1:
             return disc_outer
         scale = 1 - factor
-        disc_inner = PolyGen.disc(x_center, z_center, scale * diameter)
+        disc_inner = PolyGen.disc(
+            x_center, z_center, scale * diameter, quadrant_segments=quadrant_segments
+        )
         polygon = disc_outer.difference(disc_inner)
+        return shapely.geometry.Polygon(polygon)
+
+    @staticmethod
+    def box(x_center, z_center, width, factor):
+        """
+        Return shapely.box.
+
+        Parameters
+        ----------
+        x_center : float
+            Ring center, x-coordinate.
+        z_center : float
+            Ring center, z-coordinate.
+        width : float
+            External width.
+        factor : float
+            factor = 1-inner_width/width. Must be greater than 0 and less than 1.
+            Use square for factor=1.
+
+        Raises
+        ------
+        ValueError
+            factor outside range 0-1.
+
+        Returns
+        -------
+        shape : shapely.polygon
+
+        """
+        if factor <= 0 or factor > 1:
+            raise ValueError("box factor not 0 <= " f"{factor} <= 1")
+        box_outer = PolyGen.square(x_center, z_center, width)
+        if np.isclose(factor, 1):
+            return box_outer
+        scale = 1 - factor
+        box_inner = PolyGen.square(x_center, z_center, scale * width)
+        polygon = box_outer.difference(box_inner)
         return shapely.geometry.Polygon(polygon)
 
     @staticmethod

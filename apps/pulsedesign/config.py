@@ -1,4 +1,5 @@
 """Manage default configuration parameters."""
+
 from dataclasses import dataclass
 from nova.imas import database
 

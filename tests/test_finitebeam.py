@@ -190,9 +190,7 @@ def test_cantilever_point_load(plot=False):
     tb.add_nodal_load(0, "fz", P)
     tb.solve()
     # analytic solution
-    tb.analytic["v"] = (
-        P / (6 * tb.EI) * (2 * tb.L**3 - 3 * tb.L**2 * tb.x + tb.x**3)
-    )
+    tb.analytic["v"] = P / (6 * tb.EI) * (2 * tb.L**3 - 3 * tb.L**2 * tb.x + tb.x**3)
     tb.analytic["m"] = P * tb.x
     tb.analytic["s"] = P * np.ones(len(tb.x))
     # assert

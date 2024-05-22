@@ -1,4 +1,5 @@
 """Manage fft EM proxy."""
+
 from dataclasses import dataclass, field
 
 import numpy as np

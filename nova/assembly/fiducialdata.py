@@ -1,4 +1,5 @@
 """Load ccl fiducial data for ITER TF coilset."""
+
 from functools import cached_property
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -295,9 +296,9 @@ class FiducialData(netCDF, Plot, Plotter):
         )
         for coil_index in range(self.data.sizes["coil"]):
             for space_index in range(self.data.sizes["space"]):
-                self.data["centerline_delta"][
-                    coil_index, :, space_index
-                ] = self.load_gpr(coil_index, space_index)
+                self.data["centerline_delta"][coil_index, :, space_index] = (
+                    self.load_gpr(coil_index, space_index)
+                )
         self.data.attrs["source"] = self.dataset.source
 
     def load_gpr(self, coil_index, space_index):

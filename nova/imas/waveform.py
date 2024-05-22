@@ -1,4 +1,5 @@
 """Generate coil voltage and current waveforms to suport pulse design."""
+
 from dataclasses import dataclass
 
 import numpy as np

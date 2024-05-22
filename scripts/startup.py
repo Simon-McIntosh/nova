@@ -20,7 +20,7 @@ class Startup:
     def seaborn():
         """Set seaborn context."""
         sns.set_context("talk")
-        mpl.rcParams["figure.figsize"] = np.array([5, 3.5]) / 0.394
+        mpl.rcParams["figure.figsize"] = np.array([6, 3.5]) / 0.394
 
     @staticmethod
     def pandas():
@@ -46,5 +46,4 @@ class Startup:
 
 if __name__ == "__main__":
     Startup()
-    print("startup")
     del Startup  # Clean up namespace in the interpreter

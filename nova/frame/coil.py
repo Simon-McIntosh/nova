@@ -1,4 +1,5 @@
 """Mesh poloidal coils."""
+
 from dataclasses import dataclass, field
 
 from nova.frame.poloidalgrid import PoloidalGrid

@@ -1,4 +1,5 @@
 """Manage DataFrame metamethods."""
+
 from contextlib import contextmanager
 from typing import Collection, Any
 
@@ -161,7 +162,7 @@ class FrameAttrs(pandas.DataFrame):
 
     def match_columns(self):
         """Intersect metaframe.required with self.columns if not empty."""
-        if not self.columns.empty:
+        if not self.columns.empty and len(self) > 0:
             required = [
                 attr for attr in self.metaframe.required if attr in self.columns
             ]

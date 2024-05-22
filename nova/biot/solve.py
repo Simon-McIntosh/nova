@@ -1,4 +1,5 @@
 """Biot-Savart calculation base class."""
+
 from dataclasses import dataclass, field
 from functools import cached_property
 from itertools import zip_longest
@@ -9,6 +10,8 @@ from tqdm import tqdm
 import xarray
 
 from nova.biot.arc import Arc
+from nova.biot.beam import Beam
+from nova.biot.bow import Bow
 from nova.biot.circle import Circle
 from nova.biot.cylinder import Cylinder
 from nova.biot.line import Line
@@ -27,6 +30,8 @@ class Solve(GroupSet):
 
     generator: ClassVar[dict] = {
         "arc": Arc,
+        "beam": Beam,
+        "bow": Bow,
         "circle": Circle,
         "cylinder": Cylinder,
         "line": Line,
@@ -44,14 +49,14 @@ class Solve(GroupSet):
     def check_segments(self):
         """Check for segment in self.generator."""
         self.source_segment = self.source.segment.copy()
-        for segment in self.source_segment.unique():
+        for segment in self.source.segment.unique():
             if segment not in self.generator:
                 raise NotImplementedError(
                     f"segment <{segment}> not implemented "
                     f"in Biot.generator: {self.generator.keys()}"
                 )
             index = self.source.index[self.source_segment == segment]
-            for i, chunk in enumerate(self.group_segments(index, 50, index[-1])):
+            for i, chunk in enumerate(self.group_segments(index, 25, index[-1])):
                 self.source_segment.loc[list(chunk)] = f"{segment}_{i}"
 
     @staticmethod

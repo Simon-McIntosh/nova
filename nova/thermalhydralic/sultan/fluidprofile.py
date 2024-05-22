@@ -1,4 +1,5 @@
 """Fit state-space model to sultan thermal-hydralic step resonse."""
+
 from dataclasses import dataclass, field, InitVar
 from typing import Union
 

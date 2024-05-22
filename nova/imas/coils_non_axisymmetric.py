@@ -1,11 +1,16 @@
 """Manage access to non-axisymmetric coil data."""
+
 from dataclasses import dataclass, field
 from functools import cached_property
 from typing import ClassVar
+import warnings
 
 import numpy as np
+import openpyxl
+from packaging import version
 from tqdm import tqdm
 
+from nova.biot.biotframe import Source
 from nova.biot.space import Segment
 from nova.geometry.polygeom import Polygon
 from nova.geometry.polyline import PolyLine
@@ -95,7 +100,7 @@ class Elements(Plot):
 
     def _extract_polyline(self):
         """Return segmented polyline."""
-        polyline = PolyLine(minimum_arc_nodes=3)
+        polyline = PolyLine(minimum_arc_nodes=3, filament=True)
         for element_type, point_array in zip(self._type_array, self._point_array):
             match element_type:
                 case 1:  # line
@@ -131,7 +136,7 @@ class Elements(Plot):
 
 
 @dataclass
-class CoilsNonAxisymmetyric(Plot, CoilDatabase, Scenario):
+class CoilsNonAxisymmetric(Plot, CoilDatabase, Scenario):
     """Manage access to coils_non_axisymmetric ids."""
 
     pulse: int = 115001
@@ -150,33 +155,63 @@ class CoilsNonAxisymmetyric(Plot, CoilDatabase, Scenario):
             self.data.coords["point"] = ["x", "y", "z"]
 
             points = {}
-            for coil in tqdm(self.ids_data.coil, "building coils non-axysymmetric"):
+            for coil in tqdm(self.ids_data.coil, "building coils non-axisymmetric"):
                 name = coil_name(coil)
                 points[name] = []
                 for i, conductor in enumerate(coil.conductor):
-                    elements = Elements(elements=conductor.elements)
-                    points[name].extend(elements.points)
-
-                    conductor.cross_section.resize(1)
-                    print(conductor.cross_section)
-
-                    section = Section(
-                        elements._to_array(
-                            conductor.cross_section,
-                            attrs=["delta_r", "delta_phi", "delta_z"],
-                        ),
-                        triad=elements.start_axes,
+                    elements = Elements(
+                        elements=conductor.elements,
                     )
-                    section.to_axes(np.identity(3))
-                    polygon = Polygon(section.points[:, 1:])
+                    points[name].extend(elements.points)
+                    if self.ids_dd_version <= version.Version("3.39"):  # IDS version
+                        try:
+                            section = Section(
+                                elements._to_array(
+                                    conductor.cross_section,
+                                    attrs=["delta_r", "delta_phi", "delta_z"],
+                                ),
+                                triad=elements.start_axes,
+                            )
+                            section.to_axes(np.identity(3))
+                            polygon = Polygon(section.points[:, 1:])
+                        except AttributeError as error:
+                            warnings.warn(
+                                "cross section structure unreachable for "
+                                f"ids written with dd {self.ids_dd_version} < 3.39. "
+                                f"{error.__str__()}"
+                            )
+                            polygon = Polygon({"c": [0, 0, 0.05]})
+                    else:
+                        cross_section = conductor.cross_section[0]
+                        match index := cross_section.geometry_type.index:
+                            case 2:
+                                assert cross_section.geometry_type.name == "circular"
+                                width = cross_section.width
+                                polygon = Polygon({"circle": [0, 0, width, width, 2]})
+                            case 4:
+                                assert cross_section.geometry_type.name == "square"
+                                width = cross_section.width
+                                polygon = Polygon({"square": [0, 0, width]})
+                            case 5:
+                                assert cross_section.geometry_type.name == "annulus"
+                                width = cross_section.width
+                                radius_inner = cross_section.radius_inner
+                                thickness = 1 - radius_inner / (width / 2)
+                                polygon = Polygon({"pipe": [0, 0, width, thickness, 2]})
+                            case _:
+                                raise NotImplementedError(
+                                    f"Geometry type index {index} not implemented."
+                                )
+
                     if i > 0:
                         name = f"name{i}"
+                    elements.polyline.cross_section = polygon.points
                     self.winding.insert(
                         polyline=elements.polyline,
                         cross_section=polygon,
                         name=name,
                         part=part_name(coil),
-                        delim="",
+                        delim="_",
                     )
                     if i > 0:
                         self.linkframe([coil_name(coil), name])
@@ -198,12 +233,41 @@ class CoilsNonAxisymmetyric(Plot, CoilDatabase, Scenario):
             ):
                 self.data["points"].data[i, :number] = points[name]
 
+    def _write_header(self, worksheet):
+        """Write worksheet header."""
+        for col, coord in enumerate("XYZ"):
+            worksheet.cell(1, col + 3, f"{coord} Coord")
+
+    def _write_data(self, worksheet, xls_index, data):
+        """Append data to workbook."""
+        self._write_header(worksheet)
+        for i in range(data.shape[0]):
+            for j in range(data.shape[1]):
+                worksheet.cell(i + xls_index[0], j + xls_index[1], data[i, j])
+
+    def write_excel(self):
+        """Write centerline path to an excel file [mm]."""
+        workbook = openpyxl.Workbook()
+        for i, coil in enumerate(self.frame.index):
+            worksheet = workbook.create_sheet(coil, i)
+            index = self.subframe.index[self.subframe.frame == coil]
+            source = Source(self.subframe.loc[index, :].to_dict())
+            self._write_data(worksheet, (2, 3), 1e3 * source.space.path)
+        workbook.save(self.filepath.with_suffix(".xlsx"))
+        workbook.close()
+
 
 if __name__ == "__main__":
-    cc_ids = CoilsNonAxisymmetyric(111003, 2)  # CC
-    # cs_ids = CoilsNonAxisymmetyric(111004, 1)  # CS
-    # elm_ids = CoilsNonAxisymmetyric(115001, 1)  # ELM
+    # cc_ids = CoilsNonAxisymmetric(111003, 2)  # CC
+    # cs_ids = CoilsNonAxisymmetric(111004, 1)  # CS
 
-    coil = cc_ids  # + cc_ids  # + cs_ids
-    coil.frame.vtkplot()
+    # elm_ids = CoilsNonAxisymmetric(115001, 2)  # ELM
+
+    ids = CoilsNonAxisymmetric(111006, 1)
+
+    ids.plot()
+
+    # coil = elm_ids  # + cc_ids  # + cs_ids
+    # coil.plot()
+    # coil.frame.vtkplot()
     # coil3d._clear()

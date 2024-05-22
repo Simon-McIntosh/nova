@@ -1,4 +1,5 @@
 """Manage the creation of machine description IDSs."""
+
 from dataclasses import dataclass, field, fields
 from datetime import datetime
 from functools import cached_property

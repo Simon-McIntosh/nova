@@ -1,12 +1,13 @@
-[tool.poetry]
-name = "nova"
-version = "2023.8.0"
+[project]
+name = "nova-stella"
+dynamic = [ "version" ]
 description = "Equilibrium generation and inference"
-authors = ["Simon McIntosh <simon.mcintosh@iter.org>"]
-license = "ITER GIP"
+license = { text = "ITER GIP" }
 readme = "README.md"
-homepage = "https://git.iter.org/projects/EQ/repos/nova/"
-repository = "https://git.iter.org/projects/EQ/repos/nova/"
+requires-python = ">=3.10"
+authors = [
+    { name = "Simon McIntosh", email = "simon.mcintosh@iter.org" }, 
+]
 keywords = ["equilibrium", "generation", "reconstruction", "inference", "plasma", "Biot-Savart", "mesh-free"]
 classifiers = [
   "Development Status :: 3 - Alpha",
@@ -14,59 +15,77 @@ classifiers = [
   "License :: Other/Proprietary License",
   "Natural Language :: English",
   "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
   "Topic :: Scientific/Engineering :: Physics",
+]
+urls.Homepage = "https://git.iter.org/projects/EQ/repos/nova/"
+urls.Repository = "https://git.iter.org/projects/EQ/repos/nova/"
+dependencies = [
+    "appdirs>=1.4.4",
+    "contourpy>=1.0.7",
+    "fsspec>=2023.5.0",
+    "gitpython>=3.1.31",
+    "netcdf4>=1.6.3",
+    "networkx>=3.1",
+    "numpy>=1.26.0",
+    "overrides>=7.4.0",
+    "packaging>=23.2",
+    "pandas<2.2.0",
+    "scipy>=1.10.1",
+    "shapely>=2.0.1",
+    "tqdm>=4.66.1",
+    "xarray>=2023.5.0",
+    "xxhash>=3.2.0",
+]
+
+[project.optional-dependencies]
+ansys = [ "ansys-dpf-core>=0.8.1", "ansys-dpf-post>=0.4.0", "fortranformat>=1.2.2", "openpyxl>=3.1.2" ]
+bamboo = [ "coverage2clover>=4.0.0", "tox>=4.6.4" ]
+ferritic = [ "alphashape>=1.3.1", "meshio>=5.3.4", "pyvista>=0.39.1", "trimesh>=3.21.7", "vedo>=2023.5.0", "scikit-learn>=1.2.2" ]
+graphics = [ "bokeh>=3.1.1", "descartes>=1.1.0", "moviepy>=1.0.3", "matplotlib>=3.7.1", "seaborn>=0.12.2" ]
+imas = [ "imaspy@git+ssh://git@git.iter.org/imas/imaspy.git#develop", "h5py>=3.10.0" ]
+jit = [ "jax[cpu]>=0.4.23", "numba>=0.59.0", "tbb>=2021.11.0", "tbb-devel>=2021.11.0" ]
+optimize = [ "jaxopt>=0.8.3", "pylops>=2.1.0", "scikit-learn>=1.2.2" ]
+structural = [ "matplotlib>=3.7.1", "pyquaternion>=0.9.9" ]
+test = [ "pytest", "pytest-cov>=4.1.0", "pytest-asyncio>=0.21.1" ]
+thermofluids = [ "coolprop>=6.6.0", "ftputil>=5.0.4", "matplotlib>=3.7.1", "openpyxl>=3.1.2", "tables>=3.8.0", "xlrd>=2.0.1" ]
+uda = [ "nest-asyncio>=1.5.8", "async-property>=0.2.2" ]
+
+[project.scripts]
+benchmark = "nova.scripts.benchmark:benchmark"
+extrapolate = "nova.imas.scripts:extrapolate"
+filepath = "nova.database.scripts:filepath"
+configure = "nova.scripts.configure:configure"
+
+[build-system]
+requires = [
+    "poetry-core@git+https://github.com/radoering/poetry-core.git@pep621-support", 
+    "poetry-dynamic-versioning==1.3.0",
+]
+build-backend = "poetry_dynamic_versioning.backend"
+
+[tool.poetry]
+name = "nova-stella"  # TODO remove once poetry_dynamic_versioning is fixed
+version = "0.0.0"
+packages = [
+    {include = "nova"}
+]
+exclude = [
+  "nova/ansys",
+  "nova/assembly",
+  "nova/design",
+  "nova/development",
+  "nova/dina",
+  "nova/projects",
+  "nova/structural",
+  "nova/thermalhydralic",
+  "nova/utilities", 
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.10,<3.13"
-appdirs = ">=1.4.4"
-contourpy = ">=1.0.7"
-fsspec = ">=2023.5.0"
-gitpython = ">=3.1.31"
-netcdf4 = ">=1.6.3"
-networkx = ">=3.1"
-numpy = ">=1.26.0"
-pandas = ">=2.0.1"
-scipy = ">=1.10.1"
-shapely = ">=2.0.1"
-tqdm = "^4.66.1"
-xarray = ">=2023.5.0"
-xxhash = ">=3.2.0"
-alphashape = {version = ">=1.3.1", optional = true}
-ansys-dpf-core = {version = ">=0.8.1", optional = true}
-ansys-dpf-post = {version = ">=0.4.0", optional = true}
-bokeh = {version = ">=3.1.1", optional = true}
-coolprop = {version = ">=6.6.0", optional = true}
-coverage2clover = {version = ">=4.0.0", optional = true}
-descartes = {version = ">=1.1.0", optional = true}
-fortranformat = {version = ">=1.2.2", optional = true}
-ftputil = {version = ">=5.0.4", optional = true}
-imaspy = {git = "ssh://git@git.iter.org/imas/imaspy.git", branch = "develop", optional = true}
-matplotlib = {version = ">=3.7.1", optional = true}
-meshio = {version = ">=5.3.4", optional = true}
-moviepy = {version = ">=1.0.3", optional = true}
-nlopt = {version = ">=2.7.1", optional = true}
-openpyxl = {version = ">=3.1.2", optional = true}
-pylops = {version = ">=2.1.0", optional = true}
-pyquaternion = {version = ">=0.9.9", optional = true}
-pytest = {version = ">=7.3.1", optional = true}
-pytest-cov = {version = ">=4.1.0", optional = true}
-pyvista = {version = ">=0.39.1", optional = true}
-scikit-learn = {version = ">=1.2.2", optional = true}
-seaborn = {version = ">=0.12.2", optional = true}
-tables = {version = ">=3.8.0", optional = true}
-tox = {version = ">=4.6.4", optional = true}
-trimesh = {version = ">=3.21.7", optional = true}
-vedo = {version = "<2023.5.0", optional = true}
-xlrd = {version = ">=2.0.1", optional = true}
-overrides = "^7.4.0"
-pytest-asyncio = {version = "^0.21.1", optional = true}
-async-property = {version = "^0.2.2", optional = true}
-nest-asyncio = {version = "^1.5.8", optional = true}
-packaging = "^23.2"
-h5py = "^3.10.0"
-pint = "^0.23"
-jax = {extras = ["cuda11_local"], version = "^0.4.23", source = "jax"}
+python = ">=3.10,<4.0"
 
 [tool.poetry.group.dev.dependencies]
 asv = ">=0.5.1"
@@ -74,7 +93,6 @@ fabric = ">=3.0.1"
 jupyter = ">=1.0.0"
 line-profiler = ">=4.0.3"
 lizard = ">=1.17.10"
-mypy = ">=1.3.0"
 pandas-stubs = ">=2.0.1.230501"
 pandoc = ">=2.3"
 pyperf = ">=2.6.0"
@@ -94,7 +112,7 @@ black = ">=23.3.0"
 ruff = ">=0.0.270"
 sphinx-rtd-theme = ">=1.2.2"
 sphinx = ">=6"
-pylsp-mypy = ">=0.6.7"
+# pylsp-mypy = ">=0.6.7"
 coverage = {extras = ["toml"], version = ">=7.2.7"}
 pdoc = ">=14.0.0"
 openpyxl = ">=3.1.2"
@@ -111,78 +129,14 @@ vtk = ">=9.3.0"
 build = "^1.0.3"
 wheel = "^0.41.3"
 ipython-genutils = "^0.2.0"
-numba = "^0.58.1"
-
-[tool.poetry.extras]
-ansys = [
-  "ansys-dpf-core", 
-  "ansys-dpf-post", 
-  "fortranformat", 
-  "openpyxl"
-]
-ferritic = [
-  "meshio",
-  "pyvista",
-  "scikit-learn",
-  "trimesh",
-  "vedo", 
-]
-graphics = [
-  "bokeh",
-  "descartes",
-  "matplotlib",
-  "moviepy", 
-  "seaborn",
-]
-imaspy = [
-  "imaspy",
-]
-optimize = [
-  "pylops",
-  "scikit-learn",
-]
-structural = [
-  "matplotlib",
-  "pyquaternion",
-]
-test = [
-  "coverage2clover",
-  "pytest",
-  "pytest-cov",
-  "pytest-asyncio",
-  "tox",
-]
-thermofluids = [
-  "coolprop", 
-  "ftputil", 
-  "matplotlib",
-  "openpyxl",
-  "tables", 
-  "xlrd",
-]
-uda = [
-  "nest-asyncio",
-  "async-property",
-]
-vtk = [
-  "alphashape",
-  "meshio",
-  "pyvista",
-  "trimesh",
-  "vedo",
-]
-
-[tool.poetry.scripts]
-benchmark = "nova.scripts.benchmark:benchmark"
-extrapolate = "nova.imas.scripts:extrapolate"
-filepath = "nova.database.scripts:filepath"
-configure = "nova.scripts.configure:configure"
-
+mpmath = "^1.3.0"
+setuptools = "^69.2.0"
+setuptools-cpp = "^0.1.0"
+auditwheel = "^6.0.0"
 
 [[tool.poetry.source]]
 name = "PyPI"
 priority = "primary"
-
 
 [[tool.poetry.source]]
 name = "iter"
@@ -199,11 +153,8 @@ line-length = 88
 target-version = ['py310']
 
 [tool.ruff]
-select = ["E", "F"]
-ignore = []
-
-fixable = ["A", "B", "C", "D", "E", "F", "G", "I", "N", "Q", "S", "T", "W", "ANN", "ARG", "BLE", "COM", "DJ", "DTZ", "EM", "ERA", "EXE", "FBT", "ICN", "INP", "ISC", "NPY", "PD", "PGH", "PIE", "PL", "PT", "PTH", "PYI", "RET", "RSE", "RUF", "SIM", "SLF", "TCH", "TID", "TRY", "UP", "YTT"]
-unfixable = []
+target-version = "py310"
+line-length = 88
 
 exclude = [
     "design",
@@ -221,12 +172,14 @@ exclude = [
     "dist",
 ]
 
-line-length = 88
-dummy-variable-rgx = ">=(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
-target-version = "py310"
+lint.select = ["E", "F"]
+lint.ignore = []
 
-[tool.ruff.mccabe]
-max-complexity = 10
+lint.fixable = ["A", "B", "C", "D", "E", "F", "G", "I", "N", "Q", "S", "T", "W", "ANN", "ARG", "BLE", "COM", "DJ", "DTZ", "EM", "ERA", "EXE", "FBT", "ICN", "INP", "ISC", "NPY", "PD", "PGH", "PIE", "PL", "PT", "PTH", "PYI", "RET", "RSE", "RUF", "SIM", "SLF", "TCH", "TID", "TRY", "UP", "YTT"]
+lint.unfixable = []
+lint.dummy-variable-rgx = ">=(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+lint.mccabe.max-complexity = 10
 
 [tool.pytest.ini_options]
 addopts = "-rfEs --doctest-modules --ignore=tests/test_sultan.py"
@@ -243,6 +196,8 @@ testpaths = [
  filterwarnings = [
   "once::Warning",
   "ignore:open:DeprecationWarning:imas",
+  "ignore:datetime.datetime.utcfromtimestamp:DeprecationWarning:dateutil",  # pandas <2.2 
+  "ignore:the matrix subclass is not the recommended:PendingDeprecationWarning:numpy"  # alphashape
 ]
 
 [tool.mypy]
@@ -289,7 +244,15 @@ exclude_lines = [
   "if __name__ == .__main__.:",
 ]
 
-[build-system]
-requires = ["poetry >= 1.5, <2"]
-build-backend = "poetry.masonry.api"
+[tool.poetry-dynamic-versioning]
+enable = true
+vcs = "git"
+pattern  = "^(?P<base>\\d+\\.\\d+\\.\\d+)(-?((?P<stage>[a-zA-Z]+)\\.?(?P<revision>\\d+)?))?"
+format-jinja = """
+    {%- if distance == 0 -%}
+        {{- base -}}
+    {%- else -%}
+        {{- base }}.dev{{ distance }}+g{{commit}}
+    {%- endif -%}
+"""
 

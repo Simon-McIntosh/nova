@@ -1,4 +1,5 @@
 """Coordinate system transform methods for BiotFrame."""
+
 from dataclasses import dataclass, field
 from functools import cached_property
 
@@ -72,7 +73,7 @@ class Space(metamethod.Space, Plot3D):
     frame: FrameLink = field(repr=False)
     coordinate_axes: np.ndarray = field(init=False, repr=False)
     coordinate_origin: np.ndarray = field(init=False, repr=False)
-    quadrant_segments: int = 11
+    quadrant_segments: int = 21
 
     def initialize(self):
         """Build local coordinate axes (-normal, tangent, binormal)."""
@@ -83,7 +84,7 @@ class Space(metamethod.Space, Plot3D):
         self.coordinate_axes /= np.linalg.norm(self.coordinate_axes, axis=1)[
             :, np.newaxis
         ]
-        self.origin = self._column_stack(*list("xyz"))
+        self.origin = self._column_stack("x0", "y0", "z0")
 
     def _column_stack(self, *args: tuple[str]):
         """Return stacked array column vectors."""
@@ -105,9 +106,19 @@ class Space(metamethod.Space, Plot3D):
         return self._column_stack("x1", "y1", "z1")
 
     @cached_property
+    def _start_point(self):
+        """Return start point in local coordinate system."""
+        return self.to_local(self.start_point)
+
+    @cached_property
     def end_point(self):
         """Return element end point."""
         return self._column_stack("x2", "y2", "z2")
+
+    @cached_property
+    def _end_point(self):
+        """Return end point in local coordinate system."""
+        return self.to_local(self.end_point)
 
     @cached_property
     def _arc_index(self):
@@ -145,6 +156,11 @@ class Space(metamethod.Space, Plot3D):
             points[self._line_index] = start_point[self._line_index]
             points[self._line_index] += np.array([-1, 0, 0])[np.newaxis, :]
         return self.to_global(points)
+
+    @cached_property
+    def _intermediate_point(self):
+        """Return intermediate point in local coordinate system."""
+        return self.to_local(self.intermediate_point)
 
     @property
     def _line_tangent(self):
@@ -196,26 +212,61 @@ class Space(metamethod.Space, Plot3D):
         """Return point array (n, 3) mapped to global coordinate system."""
         return self._rotate_to_global(points) + self.origin
 
-    def _plot_segment(self, i, start_point, end_point, local=False):
-        """Plot segment from end points given in local coordinates."""
-        segment = "arc"
-        match segment:
+    def _segment_path(self, index, local=False, resolution=0):
+        """Return segment path sampled from local segment endpoints."""
+        _start_point = self._start_point[index]
+        _end_point = self._end_point[index]
+        match self.frame.segment.iloc[index]:
             case "arc":
-                end_theta = np.arctan2(end_point[1], end_point[0])
+                end_theta = np.arctan2(_end_point[1], _end_point[0])
                 if end_theta <= 0:
                     end_theta += 2 * np.pi
-                point_number = int(self.quadrant_segments * end_theta * 2 / np.pi)
+                radius = _start_point[0]
+                point_number = np.max(
+                    [
+                        int(resolution * radius * end_theta),
+                        self.quadrant_segments,
+                        int(self.quadrant_segments * end_theta * 2 / np.pi),
+                    ]
+                )
                 theta = np.linspace(0, end_theta, point_number)
                 points = (
-                    start_point[0]
+                    _start_point[0]
                     * np.c_[np.cos(theta), np.sin(theta), np.zeros_like(theta)]
                 )
             case "line":
-                points = np.c_[start_point, end_point].T
-        if not local:
-            points = np.einsum("ij,kj->ik", points, self.coordinate_axes[i])
-            points += self.origin[i]
-        self.axes.plot(*points.T)
+                line_length = np.linalg.norm(_end_point - _start_point)
+                point_number = np.max([int(resolution * line_length), 2])
+                points = np.linspace(_start_point, _end_point, point_number)
+                # points = np.c_[_start_point, _end_point].T
+        if local:
+            return points
+        points = np.einsum("ij,kj->ik", points, self.coordinate_axes[index])
+        points += self.origin[index]
+        return points
+
+    @cached_property
+    def path(self):
+        """Return quadrant segment resolved path."""
+        return self.centerline(resolution=0)
+
+    def centerline(self, resolution: int):
+        """Return element centerline."""
+        if (segment_number := self.frame.shape[0]) == 1:
+            return self._segment_path(0, local=False, resolution=resolution)
+        return np.r_[
+            np.vstack(
+                [
+                    self._segment_path(index, local=False, resolution=resolution)[:-1]
+                    for index in range(segment_number)
+                ]
+            ),
+            self.end_point[-1:],
+        ]
+
+    def _plot_segment(self, index, local=False):
+        """Plot segment from end points given in local coordinates."""
+        self.axes.plot(*self._segment_path(index, local).T)
 
     def _plot_points(self, *points, local=False):
         """Plot segment point."""
@@ -227,11 +278,9 @@ class Space(metamethod.Space, Plot3D):
     def plot(self, local=False, axes=None):
         """Plot 3d segments."""
         self.set_axes("3d", axes)
-        start_point = self.to_local(self.start_point)
-        intermediate_point = self.to_local(self.intermediate_point)
-        end_point = self.to_local(self.end_point)
-        for i in range(len(self.frame.segment)):
-            self._plot_segment(i, start_point[i], end_point[i], local=local)
-        self._plot_points(start_point, intermediate_point, end_point, local=local)
-        self.axes.plot(*self.intermediate_point.T, "s")
+        for index in range(len(self.frame.segment)):
+            self._plot_segment(index, local=local)
+        self._plot_points(
+            self._start_point, self._intermediate_point, self._end_point, local=local
+        )
         self.set_box_aspect()

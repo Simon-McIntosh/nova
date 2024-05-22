@@ -1,4 +1,5 @@
 """Manage mulit-point constraints."""
+
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -61,7 +62,7 @@ class MultiPoint(metamethod.MultiPoint):
                 factor = self.frame.factor
                 factor = factor[istrue | isnumeric][1:]
                 self.link(index, factor.values)
-        self.frame.link = self.frame.link.astype(str)
+        self.frame.loc[:, "link"] = [str(link) for link in self.frame.link]
         self.sort_link()
         self.build()
 
@@ -82,7 +83,13 @@ class MultiPoint(metamethod.MultiPoint):
         self.indexer = list(range_index[self.frame.link == ""])
         self.index = self.frame.index[self.indexer]
         ref = self.frame.index.get_indexer(self.frame.link)
-        ref[ref == -1] = 0
+        if any(ref == -1):
+            split = [name.split("_")[0] for name in self.frame.index]
+            ref[ref == -1] = [
+                split.index(link) if link in split else 0
+                for i, link in enumerate(self.frame.link)
+                if ref[i] == -1
+            ]
         ref[self.indexer] = range_index[self.indexer]
         self.frame.ref = ref
         subref = np.zeros(len(self.frame), dtype=int)
@@ -150,7 +157,7 @@ class MultiPoint(metamethod.MultiPoint):
                 f"len(factor={factor}) must == 1 for == len(index={index})-1"
             )
         for i in np.arange(1, index_number):
-            self.frame.at[index[i], "link"] = name
+            self.frame.at[index[i], "link"] = str(name)
             self.frame.at[index[i], "factor"] = factor[i - 1]
         if self.frame.lock("multipoint") is False:
             self.frame.__init__(self.frame, attrs=self.frame.attrs)

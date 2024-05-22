@@ -63,4 +63,4 @@ def test_store_load():
 
 
 if __name__ == "__main__":
-    pytest.main([__file__])
+    pytest.main([__file__, "-W error::PendingDeprecationWarning", "-vvv"])

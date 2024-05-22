@@ -1,4 +1,5 @@
 """Biot-Savart calculation for complete circular cylinders."""
+
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from functools import cached_property
@@ -105,8 +106,8 @@ class Polygon(PolygonConstants, Matrix):
     name: ClassVar[str] = "polygon"  # element name
     attrs: ClassVar[dict[str, str]] = dict(area="area")
     metadata: ClassVar[dict[str, list]] = dict(
-        required=["ref", "rv1", "rv2", "zv1", "zv2"],
-        additional=[],
+        Required=["ref", "rv1", "rv2", "zv1", "zv2"],
+        additional=["factor"],
         available=[],
         array=["ref"],
         base=[],
@@ -115,6 +116,12 @@ class Polygon(PolygonConstants, Matrix):
     def __post_init__(self):
         """Initialize biotset and edgeframe."""
         super().__post_init__()
+
+        print(self("source", "x"))
+        print(self.source("x"))
+        print(self.source.space.origin)
+
+        assert False
         self.build()
 
     def __getattr__(self, attr):
@@ -147,7 +154,7 @@ class Polygon(PolygonConstants, Matrix):
                 continue
             self.data[attr] = self.edge(attr)
         with self.target_edge():
-            attrs = dict(r="x", z="z")
+            attrs = {"r": "x", "z": "z"}
             for attr in attrs:
                 setattr(self, attr, self.target(attrs[attr]))
         self.reduction_matrix = np.zeros((len(self.edge), len(self.source)), dtype=bool)
@@ -155,20 +162,22 @@ class Polygon(PolygonConstants, Matrix):
             self.reduction_matrix[:, i] = self.edge.loc[:, "ref"] == i
         self.rs = self.r1 + self.b1 * self.gamma
         #  self.r1 @ self.reduction_matrix).compute()
-        print(self.beta1(0).shape)
         assert False
 
 
 if __name__ == "__main__":
     from nova.frame.coilset import CoilSet
 
-    coilset = CoilSet(dcoil=-1, nplasma=150)
+    coilset = CoilSet(dcoil=-1, dplasma=-150)
+    # coilset.coil.insert(
+    #    [5, 6], 0.5, 0.2, 0.2, section="h", turn="r", nturn=300, segment="polygon"
+    # )
     coilset.coil.insert(
-        [5, 6], 0.5, 0.2, 0.2, section="h", turn="r", nturn=300, segment="polygon"
-    )
-    coilset.coil.insert(
-        5.5, 0.5, 0.6, 0.6, section="c", turn="r", nturn=300, segment="polygon"
+        {"c": [5.5, 0.5, 0.6, 0.6, 1]},
+        turn="r",
+        nturn=300,
+        segment="polygon",
     )
     coilset.plot()
 
-    coilset.grid.solve(100)
+    coilset.grid.solve(9)

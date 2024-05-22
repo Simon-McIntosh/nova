@@ -1,4 +1,5 @@
 """Manage as-designed coil winding pack descriptors."""
+
 from dataclasses import dataclass, field
 
 import numpy as np

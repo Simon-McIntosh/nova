@@ -3,7 +3,7 @@ import numpy as np
 import pytest
 
 from nova.geometry.polyline import Arc, Line, PolyArc, PolyLine
-from nova.imas.coils_non_axisymmetric import CoilsNonAxisymmetyric
+from nova.imas.coils_non_axisymmetric import CoilsNonAxisymmetric
 from nova.imas.test_utilities import mark
 
 
@@ -278,7 +278,7 @@ def test_line_geometry():
     points = rng.random((2, 3))
     line = Line(points)
     geom = line.geometry
-    assert np.allclose(line.center, [geom[attr] for attr in ["x", "y", "z"]])
+    assert np.allclose(line.center, [geom[attr] for attr in ["x0", "y0", "z0"]])
     assert np.allclose(line.axis, [geom[attr] for attr in ["ax", "ay", "az"]])
     assert np.allclose(line.start_point, [geom[attr] for attr in ["x1", "y1", "z1"]])
     assert np.allclose(line.end_point, [geom[attr] for attr in ["x2", "y2", "z2"]])
@@ -333,7 +333,7 @@ def test_arc_name():
 @pytest.fixture
 def cc_polyline():
     """Return TF coil centerline."""
-    coil = CoilsNonAxisymmetyric(111003, 1)
+    coil = CoilsNonAxisymmetric(111003, 1)
     number = coil.data.points_length[0].data
     points = coil.data.points[0, :number].data
     return PolyLine(

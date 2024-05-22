@@ -1,4 +1,5 @@
 """Biot data storage class."""
+
 from dataclasses import dataclass, field
 
 from nova.database.netcdf import netCDF
@@ -10,8 +11,8 @@ class Data(netCDF, FrameSetLoc):
     """Biot solution abstract base class."""
 
     attrs: list[str] = field(default_factory=lambda: ["Br", "Bz", "Psi"])
-    number: int | float | None = field(default=None)
-    name: str | None = None
+    number: int | tuple[int] | None = field(default=None)
+    name: str = ""
     classname: str = field(init=False)
 
     def __post_init__(self):

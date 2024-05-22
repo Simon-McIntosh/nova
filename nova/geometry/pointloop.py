@@ -3,6 +3,7 @@ Fast point(s)-in-polygon algorithum.
 
 code adapted from https://github.com/sasamil/PointInPolygon_Py/pointInside.
 """
+
 from dataclasses import dataclass
 
 import numpy as np
@@ -18,7 +19,7 @@ def point_in_polygon(point, polygon) -> int:
     Parameters
     ----------
     polygon: npt.ArrayLike, shape(:, 2)
-        Bounding polygon, must form closed loop.
+        Bounding polygon, must form a closed loop.
 
     point: npt.ArrayLike, shape(2)
         Point coordinates.

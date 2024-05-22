@@ -1,4 +1,5 @@
 """Biot specific Frame class."""
+
 import numpy as np
 
 from nova.frame.framespace import FrameSpace
@@ -24,13 +25,23 @@ class BiotFrame(FrameSpace):
         self.metaframe.update(
             {
                 "required": ["x", "z"],
-                "base": ["x", "y", "z"],
+                "base": [
+                    "x",
+                    "y",
+                    "z",
+                    "x0",
+                    "y0",
+                    "z0",
+                ],
                 "additional": ["plasma", "nturn", "link", "frame"],
                 "array": [
                     "x",
                     "y",
                     "z",
                     "r",
+                    "x0",
+                    "y0",
+                    "z0",
                     "ax",
                     "ay",
                     "az",
@@ -49,6 +60,8 @@ class BiotFrame(FrameSpace):
 
     def __call__(self, attr):
         """Return attribute matrix, shape(target, source)."""
+        if attr == "r":
+            return np.linalg.norm([self("x"), self("y")], axis=0)
         region = self.biotshape.region
         if self.biotshape.region == "":
             raise IndexError(
@@ -93,6 +106,9 @@ class Source(BiotFrame):
                     "segment",
                     "section",
                     "poly",
+                    "x0",
+                    "y0",
+                    "z0",
                     "x1",
                     "y1",
                     "z1",
@@ -107,6 +123,9 @@ class Source(BiotFrame):
                     "nz",
                 ],
                 "array": [
+                    "x0",
+                    "y0",
+                    "z0",
                     "x1",
                     "y1",
                     "z1",
@@ -128,7 +147,7 @@ class Source(BiotFrame):
     @property
     def center(self):
         """Return element center."""
-        return np.c_[self.aloc["x"], self.aloc["y"], self.aloc["z"]]
+        return np.c_[self.aloc["x0"], self.aloc["y0"], self.aloc["z0"]]
 
     @property
     def start_point(self):
@@ -158,7 +177,7 @@ class Target(BiotFrame):
         """Extend metaframe update."""
         self.metaframe.update(
             {
-                "additional": ["xo", "zo", "dx", "dz"],
+                "additional": ["x0", "z0", "dx", "dz"],
                 "array": ["x", "y", "z"],
                 "available": [],
             }
@@ -168,12 +187,12 @@ class Target(BiotFrame):
     @property
     def delta_r(self):
         """Return normalized r-coordinate distance from PF coil centroid."""
-        return (self.x - self.xo.values) / self.dx
+        return (self.x - self.x0) / self.dx
 
     @property
     def delta_z(self):
         """Return normalized z-coordinate distance from PF coil centroid."""
-        return (self.z - self.zo.values) / self.dz
+        return (self.z - self.z0) / self.dz
 
 
 if __name__ == "__main__":

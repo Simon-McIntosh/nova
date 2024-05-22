@@ -1,4 +1,5 @@
 """Provide linear operators for regression analysis."""
+
 from abc import abstractmethod
 from dataclasses import dataclass, field
 

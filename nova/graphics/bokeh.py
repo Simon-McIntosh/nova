@@ -1,4 +1,5 @@
 """Manage Bokeh widgets."""
+
 from dataclasses import dataclass, field
 from functools import cached_property
 import os

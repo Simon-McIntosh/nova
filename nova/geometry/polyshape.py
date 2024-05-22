@@ -1,4 +1,5 @@
 """Provide polyshape key completion."""
+
 from dataclasses import dataclass
 import string
 from typing import ClassVar
@@ -14,7 +15,8 @@ class PolyShape:
         | dict.fromkeys(["ellipse", "ellip", "el", "e"], "ellipse")
         | dict.fromkeys(["square", "sq", "s"], "square")
         | dict.fromkeys(["rectangle", "rect", "rec", "r"], "rectangle")
-        | dict.fromkeys(["skin", "sk", "ring", "annulus"], "skin")
+        | dict.fromkeys(["skin", "sk", "ring", "annulus", "pipe"], "skin")
+        | dict.fromkeys(["box", "b"], "box")
         | dict.fromkeys(["polygon", "poly", "oblique"], "polygon")
         | dict.fromkeys(["shell", "shl", "sh"], "shell")
         | dict.fromkeys(["hexagon", "hex", "hx", "h"], "hexagon")

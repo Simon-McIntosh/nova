@@ -1,4 +1,5 @@
 """Caching methods to enable fast access to xarray attributes."""
+
 from dataclasses import dataclass, field
 
 import xarray

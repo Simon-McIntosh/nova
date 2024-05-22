@@ -1,4 +1,5 @@
 """Manage subframe access."""
+
 from dataclasses import dataclass, field
 from functools import cached_property
 

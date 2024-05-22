@@ -1,4 +1,5 @@
 """Interpolate equilibria within separatrix."""
+
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
@@ -197,7 +198,7 @@ if __name__ == "__main__":
         elm=True,
         dplasma=-2000,
         ngrid=2000,
-        tplasma="hex",
+        tplasma="r",
         limit=0.25,
         nlevelset=None,
         nwall=10,

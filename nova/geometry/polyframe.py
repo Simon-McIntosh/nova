@@ -1,4 +1,5 @@
 """Manage single instance polygon data as polyframe."""
+
 from dataclasses import dataclass, field
 from functools import cached_property
 
@@ -85,6 +86,11 @@ class PolyFrame(Plot, GeoFrame):
         return np.diff(self.zlim)[0]
 
     @cached_property
+    def thichness(self):
+        """Return polygon thickness."""
+        return self.metadata.get("thickness", self.height)
+
+    @cached_property
     def box_area(self):
         """Return bounding box area."""
         if np.isclose((area := self.width * self.height), 0):
@@ -98,8 +104,8 @@ class PolyFrame(Plot, GeoFrame):
 
     @cached_property
     def points(self):
-        """Return polygon points."""
-        boundary = self.poly.boundary.xy
+        """Return exterior boundary points."""
+        boundary = self.poly.exterior.xy
         return np.c_[boundary[0], np.zeros(len(boundary[0])), boundary[1]]
 
     @cached_property

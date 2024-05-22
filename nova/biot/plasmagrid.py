@@ -1,4 +1,5 @@
 """Generate grid and solution methods for hexagonal plasma filaments."""
+
 from dataclasses import dataclass, field
 from functools import cached_property
 from importlib import import_module

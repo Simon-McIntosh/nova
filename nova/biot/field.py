@@ -1,4 +1,5 @@
 """Solve maximum field on coil perimiter."""
+
 from dataclasses import dataclass, field
 
 import numpy as np

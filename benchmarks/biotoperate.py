@@ -1,4 +1,5 @@
 """Benchmark biotoperate."""
+
 import os
 import timeit
 

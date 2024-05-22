@@ -1,4 +1,5 @@
 """Manage CoilFrame metadata."""
+
 from abc import ABC
 from dataclasses import dataclass, field, fields
 
@@ -22,9 +23,11 @@ class MetaData(ABC):
     def types(self) -> dict[str, type]:
         """Return field types."""
         return {
-            field.name: typing.get_origin(field.type)
-            if isinstance(field.type, typing.GenericAlias)
-            else field.type
+            field.name: (
+                typing.get_origin(field.type)
+                if isinstance(field.type, typing.GenericAlias)
+                else field.type
+            )
             for field in fields(self)
         }
 

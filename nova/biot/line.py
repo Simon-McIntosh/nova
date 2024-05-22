@@ -1,5 +1,6 @@
 """Biot-Savart calculation for line segments."""
-from dataclasses import dataclass
+
+from dataclasses import dataclass, field
 
 from functools import cached_property
 from typing import ClassVar
@@ -20,6 +21,8 @@ class Line(Matrix):
 
     axisymmetric: ClassVar[bool] = False
     name: ClassVar[str] = "line"  # element name
+
+    attrs: dict[str, str] = field(default_factory=lambda: {"dl": "dl"})
 
     @cached_property
     def phi(self):
@@ -50,8 +53,16 @@ class Line(Matrix):
 
     @cached_property
     def ri(self):
-        """Return stacked a2 coefficient."""
+        """Return stacked ri coefficient."""
         return np.sqrt(self.a2**2 + self.wi**2)
+
+    @property
+    def _Ax_hat(self):
+        return np.zeros((2,) + self.shape)
+
+    @property
+    def _Ay_hat(self):
+        return np.zeros((2,) + self.shape)
 
     @property
     def _Az_hat(self):
@@ -74,7 +85,7 @@ class Line(Matrix):
 
     def _intergrate(self, data):
         """Return intergral quantity."""
-        return self.mu_0 / (4 * np.pi) * (data[1] - data[0])
+        return 1 / (4 * np.pi) * (data[1] - data[0])
 
 
 if __name__ == "__main__":
@@ -90,22 +101,22 @@ if __name__ == "__main__":
         axis=-1,
     )
 
-    coilset = CoilSet(field_attrs=["Br"])
+    coilset = CoilSet(field_attrs=["Br", "Ay"])
     coilset.winding.insert(
         points, {"c": (0, 0, 0.5)}, minimum_arc_nodes=len(points) + 1
     )
     coilset.grid.solve(2500, [1, 0.9 * radius, 0, 4])
 
     coilset.saloc["Ic"] = 5.3e5
-    levels = coilset.grid.plot("br", nulls=False)
+    levels = coilset.grid.plot("ay", nulls=False, colors="C0")
     axes = coilset.grid.axes
 
     print(coilset.grid.br.max(), coilset.grid.br.min())
 
-    circle_coilset = CoilSet(field_attrs=["Br", "Bz", "Aphi"])
+    circle_coilset = CoilSet(field_attrs=["Br", "Bz", "Aphi", "Ay"])
     circle_coilset.coil.insert({"c": (radius, height, 0.05)})
     circle_coilset.grid.solve(2500, [1, 0.9 * radius, 0, 4])
     circle_coilset.saloc["Ic"] = 5.3e5
-    circle_coilset.grid.plot("br", nulls=False, colors="C1", axes=axes, levels=levels)
+    circle_coilset.grid.plot("ay", nulls=False, colors="C1", axes=axes, linestyles="--")
 
     print(circle_coilset.grid.br.max(), circle_coilset.grid.br.min())

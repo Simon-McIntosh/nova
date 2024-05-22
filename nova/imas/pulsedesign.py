@@ -1,4 +1,5 @@
 """Generate feed-forward coil current waveforms from pulse schedule IDS."""
+
 from dataclasses import dataclass, field
 from functools import cached_property
 from typing import ClassVar
@@ -647,9 +648,11 @@ class PulseDesign(Animate, Plot1D, Control, ITER):
         provenance = [self.uri]
         provenance.extend(
             [
-                IDS(*value.split(",")).uri
-                if not isinstance(value, (int, np.integer))
-                else f"imas:ids?name={attr[:-3]};hash={value}"
+                (
+                    IDS(*value.split(",")).uri
+                    if not isinstance(value, (int, np.integer))
+                    else f"imas:ids?name={attr[:-3]};hash={value}"
+                )
                 for attr, value in self.data.attrs.items()
                 if attr[-3:] == "_md"
             ]
@@ -1048,6 +1051,7 @@ if __name__ == "__main__":
         fps=5,
     )
     """
+
     design = PulseDesign(135013, 2, "iter", 1)
 
     # design.levelset.solve(limit=0.1, index="coil")

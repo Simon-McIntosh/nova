@@ -1,4 +1,5 @@
 """Generate and benchmark force and field coupling matricies."""
+
 from dataclasses import dataclass
 from functools import cached_property
 

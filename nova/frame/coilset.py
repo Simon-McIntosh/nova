@@ -1,4 +1,5 @@
 """Construct coilset with frameset and biot factories."""
+
 from dataclasses import dataclass, field
 
 from nova.biot.biot import Biot

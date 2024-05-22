@@ -1,4 +1,5 @@
 """Build example sheild mesh."""
+
 import gmsh
 import os
 

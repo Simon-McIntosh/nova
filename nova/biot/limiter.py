@@ -1,4 +1,5 @@
 """Methods for calculating wall flux position and value."""
+
 from dataclasses import dataclass, field
 
 import xarray

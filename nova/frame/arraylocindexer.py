@@ -1,4 +1,5 @@
 """Manage fast indexed access to frame arrays."""
+
 from dataclasses import dataclass, field
 
 import numpy as np

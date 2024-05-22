@@ -1,4 +1,5 @@
 """Load magnetics from machine description IDS."""
+
 from dataclasses import dataclass
 from operator import attrgetter
 

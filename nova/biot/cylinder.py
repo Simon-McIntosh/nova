@@ -1,25 +1,15 @@
 """Biot-Savart calculation for complete circular cylinders."""
+
 from dataclasses import dataclass
 from functools import cached_property
 from typing import ClassVar
 
 import numpy as np
 
-from nova import njit
 from nova.biot.constants import Constants
 from nova.biot.matrix import Matrix
 
-
-@njit(cache=True)
-def zeta(r, rs, z, zs, phi, delta):
-    """Return zeta coefficent."""
-    result = np.zeros_like(r)
-    for i in np.arange(len(phi)):
-        result += np.arcsinh(
-            (rs - r * np.cos(phi[i]))
-            / np.sqrt((zs - z) ** 2 + r**2 * np.sin(phi[i]) ** 2)
-        )
-    return delta * result
+from nova.biot.zeta import Zeta, zeta
 
 
 @dataclass
@@ -27,71 +17,6 @@ class CylinderConstants(Constants):
     """Extend Constants class."""
 
     alpha: ClassVar[float] = np.pi / 2
-    num: ClassVar[int] = 120
-
-    @cached_property
-    def v(self):
-        """Return v coefficient."""
-        return 1 + self.k2 * (self.gamma**2 - self.b * self.r) / (
-            2 * self.r * self.rs
-        )
-
-    def B2(self, phi):
-        """Return B2 coefficient."""
-        return self.rs**2 + self.r**2 - 2 * self.r * self.rs * np.cos(phi)
-
-    def D2(self, phi):
-        """Return D2 coefficient."""
-        return self.gamma**2 + self.B2(phi)
-
-    def G2(self, phi, shape=(...)):
-        """Return G2 coefficient."""
-        return self.gamma[shape] ** 2 + self.r[shape] ** 2 * np.sin(phi) ** 2
-
-    def beta1(self, phi, shape=(...)):
-        """Return beta1 coefficient."""
-        return (self.rs[shape] - self.r[shape] * np.cos(phi)) / np.sqrt(
-            self.G2(phi, shape)
-        )
-
-    def beta2(self, phi):
-        """Return beta2 coefficient."""
-        return self.gamma / np.sqrt(self.B2(phi))
-
-    def beta3(self, phi):
-        """Return beta3 coefficient."""
-        return (
-            self.gamma
-            * (self.rs - self.r * np.cos(phi))
-            / (self.r * np.sin(phi) * np.sqrt(self.D2(phi)))
-        )
-
-    def Cphi_alpha(self, alpha):
-        """Return Cphi(alpha) coefficient."""
-        phi = np.pi - 2 * alpha
-        return (
-            1
-            / 2
-            * self.gamma
-            * self.a
-            * np.sqrt(1 - self.k2 * np.sin(alpha) ** 2)
-            * -np.sin(2 * alpha)
-            - 1
-            / 6
-            * np.arcsinh(self.beta2(phi))
-            * np.sin(2 * alpha)
-            * (
-                2 * self.r**2 * np.sin(2 * alpha) ** 2
-                + 3 * (self.rs**2 - self.r**2)
-            )
-            - 1
-            / 4
-            * self.gamma
-            * self.r
-            * np.arcsinh(self.beta1(phi))
-            * -np.sin(4 * alpha)
-            - 1 / 3 * self.r**2 * np.arctan(self.beta3(phi)) * -np.cos(2 * alpha) ** 3
-        )
 
     @cached_property
     def Cphi(self):
@@ -106,43 +31,25 @@ class CylinderConstants(Constants):
             * (self.sign(self.rs - self.r) + 1)
         )
 
-    def _arcsinh_beta1(self, phi):
-        return np.arcsinh(
-            (self.rs - self.r * np.cos(phi))
-            / np.sqrt((self.zs - self.z) ** 2 + self.r**2 * np.sin(phi) ** 2)
-        )
+    @cached_property
+    def _zeta(self):
+        """Return zeta coefficient calculated using piecewise-constant."""
+        phi, dphi = np.linspace(0, -2 * self.alpha, self.number + 1, retstep=True)
+        phi = np.pi + phi[:-1] + dphi / 2
+        dalpha = self.alpha / self.number
+        return zeta(self.r, self.rs, self.z, self.zs, phi, dalpha)
+
+    @cached_property
+    def __zeta(self):
+        """Return zeta coefficient calculated using jax trapezoid method."""
+        alpha = self.alpha * np.ones(self.shape + (4,))
+        return Zeta(self.rs, self.zs, self.r, self.z, alpha)()
 
     @cached_property
     def zeta(self):
-        """Return zeta coefficient calculated using Romberg integration."""
-        phi, dphi = np.linspace(0, -2 * self.alpha, self.num + 1, retstep=True)
-        phi = np.pi + phi[:-1] + dphi / 2
-        dalpha = self.alpha / self.num
-        return zeta(self.r, self.rs, self.z, self.zs, phi, dalpha)
-
-    @property
-    def Qr(self) -> dict[int, np.ndarray]:
-        """Return Qr(p) coefficient."""
-        Qr = {
-            p: (self.rs - (-1) ** p * self.c)
-            * self.np2[p]
-            * self.gamma**2
-            * self.c
-            / self.r
-            for p in [1, 2]
-        }
-        Qr[3] = np.zeros_like(self.r)
-        return Qr
-
-    @property
-    def Qz(self) -> dict[int, np.ndarray]:
-        """Return Qz(p) coefficient."""
-        Qz = {
-            p: (self.rs - (-1) ** p * self.c) * -2 * self.gamma * self.c * self.np2[p]
-            for p in [1, 2]
-        }
-        Qz[3] = self.gamma * self.b * (self.rs - self.r) * self.np2[3]
-        return Qz
+        """Return zeta coefficient calculated using numba trapezoid method."""
+        alpha = self.alpha * np.ones(self.shape + (4,))
+        return zeta(self.rs, self.r, self.gamma, alpha)
 
     @property
     def Dz(self):
@@ -159,6 +66,7 @@ class Cylinder(CylinderConstants, Matrix):
 
     """
 
+    axisymmetric: ClassVar[bool] = True
     name: ClassVar[str] = "cylinder"  # element name
 
     def __post_init__(self):
@@ -178,7 +86,7 @@ class Cylinder(CylinderConstants, Matrix):
             ],
             axis=-1,
         )
-        self.r = np.stack([self.target("x") for _ in range(4)], axis=-1)
+        self.r = np.stack([self.target("r") for _ in range(4)], axis=-1)
         self.z = np.stack([self.target("z") for _ in range(4)], axis=-1)
 
     def Aphi_hat(self):
@@ -190,7 +98,7 @@ class Cylinder(CylinderConstants, Matrix):
             * self.a
             / (6 * self.r)
             * (self.U * self.K - 2 * self.rs * self.E)
-            + self.gamma / (6 * self.a * self.r) * self.p_sum(self.Pphi)
+            + self.gamma / (6 * self.a * self.r) * self.p_sum(self.Pphi, self.Pi)
         )
 
     def Br_hat(self):
@@ -198,7 +106,7 @@ class Cylinder(CylinderConstants, Matrix):
         return (
             self.r * self.zeta
             - self.a / (2 * self.r) * self.rs * (self.E - self.v * self.K)
-            - 1 / (4 * self.a * self.r) * self.p_sum(self.Qr)
+            - 1 / (4 * self.a * self.r) * self.p_sum(self.Qr, self.Pi)
         )
 
     def Bz_hat(self):
@@ -207,13 +115,13 @@ class Cylinder(CylinderConstants, Matrix):
             self.Dz
             + 2 * self.gamma * self.zeta
             - self.a / (2 * self.r) * 3 / 2 * self.gamma * self.k2 * self.K
-            - 1 / (4 * self.a * self.r) * self.p_sum(self.Qz)
+            - 1 / (4 * self.a * self.r) * self.p_sum(self.Qz, self.Pi)
         )
 
     def _intergrate(self, data):
         """Return corner intergration."""
         return (
-            self.mu_0
+            1
             / (2 * np.pi * self.source("area"))
             * ((data[..., 2] - data[..., 3]) - (data[..., 1] - data[..., 0]))
         )
@@ -226,23 +134,25 @@ class Cylinder(CylinderConstants, Matrix):
     @property
     def Psi(self):
         """Return Psi array."""
-        return 2 * np.pi * self.target("x") * self.Aphi
+        return 2 * np.pi * self.mu_0 * self.target("r") * self.Aphi
 
     @cached_property
     def Br(self):
         """Return radial field array."""
-        return self._intergrate(self.Br_hat())
+        return self.mu_0 * self._intergrate(self.Br_hat())
 
     @cached_property
     def Bz(self):
         """Return vertical field array."""
-        return self._intergrate(self.Bz_hat())
+        return self.mu_0 * self._intergrate(self.Bz_hat())
 
 
 if __name__ == "__main__":
     from nova.frame.coilset import CoilSet
 
-    coilset = CoilSet(dcoil=-1, dplasma=-(15**2))
+    coilset = CoilSet(
+        dcoil=-1, dplasma=-1, field_attrs=["Ax", "Ay", "Az", "Bx", "By", "Bz"]
+    )  # (15**2)
     """
     coilset.coil.insert(5, 0.5, 0.01, 0.8, segment='cylinder')
     coilset.coil.insert(5.1, 0.5+0.4, 0.2, 0.01, segment='cylinder')
@@ -250,21 +160,22 @@ if __name__ == "__main__":
     coilset.coil.insert(5.2, 0.5, 0.01, 0.8, segment='cylinder')
     """
     coilset.firstwall.insert(
-        5.1, 0.52, 0.05, 0.05, turn="s", tile=False, segment="cylinder"
+        5.1, 0.52, 0.05, 0.15, turn="r", tile=False, segment="cylinder"
     )
 
     coilset.saloc["Ic"] = 1
 
-    coilset.aloc["nturn"] = 0
-    coilset.aloc["nturn"][64] = 1
+    # coilset.aloc["nturn"] = 0
+    # coilset.aloc["nturn"][64] = 1
 
-    coilset.grid.solve(1000, -0.75)
-    coilset.grid
+    coilset.grid.solve(1000, 1.75)
     coilset.plot()
-    coilset.grid.plot("psi", colors="C1", nulls=False, clabel={})
-    # coilset.grid.plot('ke', colors='C0', nulls=False, clabel={})
+    levels = coilset.grid.plot("bx", colors="C0", nulls=False, clabel={})
+    axes = coilset.grid.axes
 
-    coilset = CoilSet(dcoil=-1, dplasma=-(15**2))
+    coilset = CoilSet(
+        dcoil=-1, dplasma=-(50**2), field_attrs=["Ax", "Ay", "Az", "Bx", "By", "Bz"]
+    )
     """
     coilset.coil.insert(5, 0.5, 0.01, 0.8, segment='cylinder')
     coilset.coil.insert(5.1, 0.5+0.4, 0.2, 0.01, segment='cylinder')
@@ -272,14 +183,15 @@ if __name__ == "__main__":
     coilset.coil.insert(5.2, 0.5, 0.01, 0.8, segment='cylinder')
     """
     coilset.firstwall.insert(
-        5.1, 0.52, 0.05, 0.05, turn="s", tile=False, segment="circle"
+        5.1, 0.52, 0.05, 0.15, turn="r", tile=False, segment="circle", ifttt=False
     )
-
+    coilset.plot()
     coilset.saloc["Ic"] = 1
 
-    coilset.aloc["nturn"] = 0
-    coilset.aloc["nturn"][64] = 1
+    # coilset.aloc["nturn"] = 0
+    # coilset.aloc["nturn"][64] = 1
 
-    coilset.grid.solve(1000, -0.75)
-
-    coilset.grid.plot("psi", colors="C2", nulls=False, clabel={})
+    coilset.grid.solve(1000, 1.75)
+    coilset.grid.plot(
+        "bx", colors="C2", nulls=False, clabel={}, levels=levels, axes=axes
+    )

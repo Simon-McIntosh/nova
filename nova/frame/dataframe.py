@@ -1,4 +1,5 @@
 """Subclass pandas.DataFrame."""
+
 from importlib import import_module
 import re
 import string
@@ -36,6 +37,8 @@ class DataFrame(FrameAttrs):
     """
 
     _geoframe = {
+        "LineString": ".geometry.polyframe.PolyFrame",
+        "MultiLineString": ".geometry.polyframe.PolyFrame",
         "Polygon": ".geometry.polyframe.PolyFrame",
         "MultiPolygon": ".geometry.polyframe.PolyFrame",
         "VTK": ".geometry.vtkgen.VtkFrame",
@@ -55,6 +58,16 @@ class DataFrame(FrameAttrs):
     @property
     def _constructor_sliced(self):
         return Series
+
+    def __getitem__(self, col):
+        """Extend DataFrame.__getitem__. (frame['*']) for cached geometry load."""
+        if col in ["poly", "vtk"] and self.lock(col):
+            self.metaframe.lock[col] = False
+            try:
+                self._loads(col)
+            except (TypeError, KeyError):
+                pass
+        return super().__getitem__(col)
 
     def geoframe(self, geo: str):
         """Return geoframe."""
@@ -297,7 +310,7 @@ class DataFrame(FrameAttrs):
                 continue
             try:
                 xframe[col].values = self._dumps(col)
-            except KeyError:
+            except (KeyError, AttributeError):
                 pass
         xframe.to_netcdf(filepath, group=group, mode=mode)
 
@@ -308,10 +321,8 @@ class DataFrame(FrameAttrs):
             metadata = self.insert_metadata(data.attrs)
             self.__init__(data.to_dataframe(), **metadata)
         for col in ["poly", "vtk"]:
-            try:
-                self._loads(col)
-            except KeyError:
-                pass
+            if col in self:
+                self.metaframe.lock[col] = True
         self.update_version()
         return self
 

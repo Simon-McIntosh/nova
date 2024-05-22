@@ -1,4 +1,5 @@
 """Baseclass for dataframe geometroy objects."""
+
 from abc import abstractmethod
 from dataclasses import dataclass
 

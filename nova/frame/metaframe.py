@@ -1,4 +1,5 @@
 """Manage frame metadata."""
+
 from dataclasses import dataclass, field
 from typing import Iterable, Union
 
@@ -46,6 +47,8 @@ class MetaSet(MetaArray):
             "array": False,
             "multipoint": False,
             "column": False,
+            "vtk": False,
+            "poly": False,
         }
     )
 
@@ -88,9 +91,9 @@ class MetaFrame(MetaSet):
             "y": 0.0,
             "z": 0.0,
             "r": 0.0,
-            "xo": 0.0,
-            "yo": 0.0,
-            "zo": 0.0,
+            "x0": 0.0,
+            "y0": 0.0,
+            "z0": 0.0,
             "x1": 0.0,
             "y1": 0.0,
             "z1": 0.0,
@@ -110,6 +113,8 @@ class MetaFrame(MetaSet):
             "dx": 0.0,
             "dy": 0.0,
             "dz": 0.0,
+            "width": 0.0,
+            "height": 0.0,
             "length": 0.0,
             "area": 0.0,
             "volume": 0.0,
@@ -161,10 +166,11 @@ class MetaFrame(MetaSet):
             "delim": "",
             "offset": 0,
             "append": False,
+            "ifttt": True,
         },
     )
     tag: list[str] = field(
-        default_factory=lambda: ["name", "label", "delim", "offset", "append"]
+        default_factory=lambda: ["name", "label", "delim", "offset", "append", "ifttt"]
     )
 
     def validate(self):

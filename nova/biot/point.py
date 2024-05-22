@@ -1,4 +1,5 @@
 """Build interaction matrix for a set of poloidal points."""
+
 from dataclasses import dataclass
 from typing import ClassVar
 

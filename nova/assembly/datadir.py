@@ -1,4 +1,5 @@
 """Manage Ansys simulation data directories."""
+
 from dataclasses import dataclass
 import os
 

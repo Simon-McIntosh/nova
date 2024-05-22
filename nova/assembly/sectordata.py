@@ -1,4 +1,5 @@
 """Manage access to IDM TFC metrology data."""
+
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from functools import cached_property

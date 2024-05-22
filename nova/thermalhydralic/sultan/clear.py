@@ -1,4 +1,5 @@
 """Remove all local data."""
+
 import os
 
 from nova.definitions import root_dir

@@ -1,4 +1,5 @@
 """Manage sultan point data."""
+
 from dataclasses import dataclass, field
 from typing import Union
 from types import SimpleNamespace

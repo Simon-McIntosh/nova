@@ -1,4 +1,5 @@
 """Example implementation of CS force limit."""
+
 from dataclasses import dataclass
 from typing import ClassVar
 

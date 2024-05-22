@@ -1,4 +1,5 @@
 """Generate deformed geometries based on fiducial data."""
+
 from dataclasses import dataclass, field
 
 import pyvista as pv

@@ -1,4 +1,5 @@
 """Manage access to Naka datafiles."""
+
 import os
 import json
 from dataclasses import dataclass, field

@@ -1,4 +1,5 @@
 """Query sector metrology datasets."""
+
 from dataclasses import dataclass
 from functools import cached_property
 from glob import glob

@@ -1,4 +1,5 @@
 """Manage methods related to plasma profiles."""
+
 import bisect
 from dataclasses import dataclass, field
 from functools import cached_property

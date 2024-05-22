@@ -20,26 +20,30 @@ Public API in the main Nova namespace
 
 """
 
-from importlib import metadata, import_module
+__all__ = [
+    "geometry",
+]
 
+import importlib
+import os
+
+from .dataset import geometry
 
 try:
-    __version__ = metadata.version(__package__ or __name__)
-except metadata.PackageNotFoundError:
+    __version__ = importlib.metadata.version(__package__ or __name__)
+except importlib.metadata.PackageNotFoundError:
     __version__ = "0.0.0"
+__all__.extend("__version__")
 
 submodules = [
     "imas",
 ]
-
-__all__ = [
-    "__version__",
-]
-
 __all__.extend(submodules)
 
+os.environ["NUMBA_THREADING_LAYER"] = "omp"
+
 try:
-    from numba import njit
+    from numba import njit, prange
 except (ModuleNotFoundError, ImportError):
     from functools import wraps
 
@@ -57,6 +61,15 @@ except (ModuleNotFoundError, ImportError):
 
         return decorator
 
+    prange = range
+
+try:
+    import vedo
+
+    vedo.settings.default_backend = "vtk"
+except ModuleNotFoundError:
+    pass
+
 
 def __dir__():
     return __all__
@@ -64,7 +77,7 @@ def __dir__():
 
 def __getattr__(name):
     if name in submodules:
-        return import_module(f"nova.{name}")
+        return importlib.import_module(f"nova.{name}")
     else:
         try:
             return globals()[name]

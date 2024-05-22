@@ -1,4 +1,5 @@
 """Manage inport and export of SpacialAnalyzer point groups."""
+
 from dataclasses import dataclass, field
 from functools import cached_property
 from typing import ClassVar

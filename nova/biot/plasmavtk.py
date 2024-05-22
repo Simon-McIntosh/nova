@@ -1,4 +1,5 @@
 """Extend plasma grid plotting with ."""
+
 from dataclasses import dataclass, field
 from typing import ClassVar
 

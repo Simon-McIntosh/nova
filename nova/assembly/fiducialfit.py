@@ -1,4 +1,5 @@
 """Manage fitting algorithums for TF coils and SSAT sectors."""
+
 from dataclasses import dataclass, field
 from functools import cached_property
 from typing import ClassVar

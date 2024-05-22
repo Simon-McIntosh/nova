@@ -1,4 +1,5 @@
 """Geometric VTK methods for FrameSpace class."""
+
 from dataclasses import dataclass, field
 from typing import ClassVar
 
@@ -27,7 +28,7 @@ class VtkGeo(metamethod.VtkGeo):
     )
     features: list[str] = field(init=False, default_factory=lambda: TriShell.features)
     qhull: ClassVar[list[str]] = ["panel"]
-    ahull: ClassVar[list[str]] = ["insert"]
+    ahull: ClassVar[list[str]] = ["insert", "winding", "arc"]
     geom: ClassVar[list[str]] = ["insert", "panel", "vtk", "stl"]
 
     def initialize(self):
@@ -46,7 +47,7 @@ class VtkGeo(metamethod.VtkGeo):
                     ahull=frame.segment.iloc[i] in self.ahull,
                 )
                 mesh = vedo.Mesh(
-                    [tri.vtk.points(), tri.vtk.cells()],
+                    [tri.vtk.vertices, tri.vtk.cells],
                     c=tri.vtk.c(),
                     alpha=tri.vtk.opacity(),
                 )

@@ -1,4 +1,5 @@
 """Load ids data as xarray datasets."""
+
 from abc import abstractmethod
 from contextlib import contextmanager
 from dataclasses import dataclass
@@ -27,9 +28,9 @@ class Scenario(GetSlice, IdsData):
         self.data.attrs[self.name] = ",".join(
             [str(value) for value in self.ids_attrs.values()]
         )
-        self.data.attrs[
-            "homogeneous_time"
-        ] = self.ids_data.ids_properties.homogeneous_time
+        self.data.attrs["homogeneous_time"] = (
+            self.ids_data.ids_properties.homogeneous_time
+        )
         if self.data.attrs["homogeneous_time"] == 1:
             self.data.coords["time"] = self.ids_data.time
             self.data.coords["itime"] = "time", range(len(self.data["time"]))

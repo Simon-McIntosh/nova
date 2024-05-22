@@ -1,4 +1,5 @@
 """Calculate placement error from fiducial data."""
+
 from dataclasses import dataclass, field
 
 from collections.abc import Iterable

@@ -1,4 +1,5 @@
 """Methods for managing Twente data."""
+
 import os
 import sys
 from dataclasses import dataclass, InitVar

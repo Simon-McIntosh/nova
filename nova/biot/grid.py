@@ -1,4 +1,5 @@
 """Generate grids for BiotGrid methods."""
+
 from dataclasses import dataclass, field
 from functools import cached_property
 
@@ -54,49 +55,82 @@ class GridCoord:
 
 @dataclass
 class Gridgen(Plot):
-    """Generate rectangular 2d grid."""
+    """Generate rectangular 2d or 3d grid."""
 
-    ngrid: int | None = field(default=None)
+    number: int | None = field(default=None)
     limit: np.ndarray | None = field(default=None)
-    xcoord: list[float] = field(init=False, repr=False)
-    zcoord: list[float] = field(init=False, repr=False)
-    data: xarray.Dataset = field(init=False, repr=False)
+    data: xarray.Dataset = field(init=False, repr=False, default_factory=xarray.Dataset)
 
     def __post_init__(self):
         """Build grid coordinates."""
-        self.xcoord, self.zcoord = self.generate()
-        self.data = xarray.Dataset(coords=dict(x=self.xcoord, z=self.zcoord))
-        x2d, z2d = np.meshgrid(self.data.x, self.data.z, indexing="ij")
-        self.data["x2d"] = (["x", "z"], x2d)
-        self.data["z2d"] = (["x", "z"], z2d)
+        if len(self.data) == 0:
+            self.generate()
 
     def generate(self):
         """Return grid coordinates."""
-        if len(self.limit) == 2:  # grid coordinates
-            xcoord, zcoord = self.limit
-            self.ngrid = len(xcoord) * len(zcoord)
-            self.limit = [xcoord[0], xcoord[-1], zcoord[0], zcoord[-1]]
-            return xcoord, zcoord
-        if len(self.limit) == 4:  # grid limits
-            xgrid = GridCoord(*self.limit[:2])
-            zgrid = GridCoord(*self.limit[2:])
-            xgrid.num = xgrid.delta / np.sqrt(xgrid.delta * zgrid.delta / self.ngrid)
-            zgrid.num = self.ngrid / xgrid.num
-            self.ngrid = xgrid.num * zgrid.num
-            return xgrid(), zgrid()
-        raise IndexError(f"len(limit) {len(self.limit)} not in [2, 4]")
+        match len(self.limit):
+            case 2:  # 2d grid coordinates
+                xcoord, zcoord = self.limit
+                self.number = len(xcoord) * len(zcoord)
+                self.limit = [xcoord[0], xcoord[-1], zcoord[0], zcoord[-1]]
+                coords = dict(zip("xyz", [xcoord, [0], zcoord]))
+            case 3:  # 3d grid coordinates
+                xcoord, ycoord, zcoord = self.limit
+                self.number = len(xcoord) * len(ycoord) * len(zcoord)
+                self.limit = [
+                    xcoord[0],
+                    xcoord[-1],
+                    ycoord[0],
+                    ycoord[-1],
+                    zcoord[0],
+                    zcoord[-1],
+                ]
+                coords = dict(zip("xyz", [xcoord, ycoord, zcoord]))
+            case 4:  # 2d grid limits
+                xgrid = GridCoord(*self.limit[:2])
+                zgrid = GridCoord(*self.limit[2:])
+                xgrid.num = xgrid.delta / np.sqrt(
+                    xgrid.delta * zgrid.delta / self.number
+                )
+                zgrid.num = self.number / xgrid.num
+                self.number = xgrid.num * zgrid.num
+                coords = dict(zip("xyz", [xgrid(), [0], zgrid()]))
+            case 6:  # 3d grid limits
+                xgrid = GridCoord(*self.limit[:2])
+                ygrid = GridCoord(*self.limit[2:4])
+                zgrid = GridCoord(*self.limit[-2:])
+                grid_volume = xgrid.delta * ygrid.delta * zgrid.delta
+                grid_delta = (grid_volume / self.number) ** (1 / 3)
+                xgrid.num = xgrid.delta / grid_delta
+                ygrid.num = ygrid.delta / grid_delta
+                zgrid.num = self.number / (xgrid.num * ygrid.num)
+                self.number = xgrid.num * ygrid.num * zgrid.num
+                coords = dict(zip("xyz", [xgrid(), ygrid(), zgrid()]))
+            case _:
+                raise IndexError(f"len(limit) {len(self.limit)} not in [2, 3, 4, 6]")
+
+        self.data = xarray.Dataset(coords=coords)
+        X, Y, Z = np.meshgrid(self.data.x, self.data.y, self.data.z, indexing="ij")
+        self.data["X"] = (list("xyz"), X)
+        self.data["Y"] = (list("xyz"), Y)
+        self.data["Z"] = (list("xyz"), Z)
+        # if len(coords["y"]) == 1:  # 2d grid
+        self.data["x2d"] = (["x", "z"], X[:, 0])
+        self.data["z2d"] = (["x", "z"], Z[:, 0])
 
     def __len__(self):
         """Return grid resolution."""
-        return len(self.xcoord) * len(self.zcoord)
+        return np.prod(self.shape)
 
     @property
     def shape(self):
         """Return grid shape."""
-        return len(self.xcoord), len(self.zcoord)
+        if self.data.sizes["y"] == 1:
+            return self.data.sizes["x"], self.data.sizes["z"]
+        return self.data.sizes["x"], self.data.sizes["y"], self.data.sizes["z"]
 
     def plot(self, axes=None, **kwargs):
-        """Plot grid."""
+        """Plot 2d grid."""
         self.axes = axes  # set plot axes
         kwargs = {
             "linewidth": 0.4,
@@ -131,7 +165,16 @@ class Expand:
             self.index = getattr(self.frame, self.index)
             if sum(self.index) == 0:
                 raise GridError(index)
+        """
         poly = shapely.geometry.MultiPolygon(
+            [
+                polygon.poly
+                for polygon in self.frame.poly[self.index]
+                if isinstance(polygon.poly, shapely.geometry.Polygon)
+            ]
+        )
+        """
+        poly = shapely.ops.unary_union(
             [polygon.poly for polygon in self.frame.poly[self.index]]
         )
         self.limit = np.array([*poly.bounds[::2], *poly.bounds[1::2]])
@@ -186,36 +229,56 @@ class BaseGrid(Chart, FieldNull, Operate):
 
 @dataclass
 class Grid(BaseGrid):
-    """Compute interaction across grid."""
+    """Compute interaction across regular grid."""
 
     def solve(
         self,
-        number: int,
-        limit: float | np.ndarray = 0,
+        number: int | None = None,
+        limit: float | np.ndarray | None = 0,
         index: str | slice | np.ndarray = slice(None),
+        grid: xarray.Dataset = xarray.Dataset(),
     ):
         """Solve Biot interaction across grid."""
         with self.solve_biot(number) as number:
-            if number is not None:
+            if len(grid) > 0:
+                assert all([attr in grid for attr in "XYZ"])
+                self.number = np.prod(grid.X.shape)
+            else:
+                if number is None:
+                    return
                 if isinstance(limit, (int, float)):
                     limit = Expand(self.subframe, index)(limit)
-                grid = Gridgen(number, limit)
-                self.solve2d(grid.data.x2d.values, grid.data.z2d.values)
+                grid = Gridgen(number, limit).data
+            target = Target(
+                {attr.lower(): grid[attr].data.flatten() for attr in "XYZ"},
+                label="Grid",
+            )
+            self.data = Solve(
+                self.subframe,
+                target,
+                reduce=[True, False],
+                name=self.name,
+                attrs=self.attrs,
+            ).data
+            self.data = self.data.merge(
+                grid, compat="override", combine_attrs="drop_conflicts"
+            )
 
-    def solve2d(self, x2d, z2d):
-        """Solve interaction across rectangular grid."""
-        target = Target(dict(x=x2d.flatten(), z=z2d.flatten()), label="Grid")
-        self.data = Solve(
-            self.subframe,
-            target,
-            reduce=[True, False],
-            name=self.name,
-            attrs=self.attrs,
-        ).data
-        self.data.coords["x"] = x2d[:, 0]
-        self.data.coords["z"] = z2d[0]
-        self.data.coords["x2d"] = (["x", "z"], x2d)
-        self.data.coords["z2d"] = (["x", "z"], z2d)
+    def _delta(self, coordinate):
+        """Return grid spacing along coordinate."""
+        if coordinate not in self.data:
+            return None
+        points = self.data[coordinate].to_numpy()
+        if len(points) == 1:
+            return None
+        delta = points[1] - points[0]
+        assert np.allclose(np.diff(points), delta)
+        return delta
+
+    @property
+    def delta(self):
+        """Return grid spacing along each dimension."""
+        return tuple(self._delta(coordinate) for coordinate in "xyz")
 
     @cached_property
     def pointloop(self):
@@ -232,19 +295,33 @@ class Grid(BaseGrid):
     @property
     def shape(self):
         """Return grid shape."""
-        return self.data.sizes["x"], self.data.sizes["z"]
+        if self.data.sizes["y"] == 1:
+            return self.data.sizes["x"], self.data.sizes["z"]
+        return tuple(self.data.sizes[attr] for attr in "xyz")
 
-    def plot(self, attr="psi", axes=None, nulls=True, clabel=None, **kwargs):
+    def plot(
+        self,
+        attr="psi",
+        coords="xz",
+        index=slice(None),
+        axes=None,
+        nulls=True,
+        clabel=None,
+        **kwargs,
+    ):
         """Plot contours."""
         if len(self.data) == 0:
             return
         self.axes = axes
-        if nulls:
+        if nulls and hasattr(self, "psi"):
             super().plot(axes=axes)
         if isinstance(attr, str):
-            attr = getattr(self, f"{attr}_")
+            attr = getattr(self, f"{attr}_")[index]
         QuadContourSet = self.axes.contour(
-            self.data.x, self.data.z, attr.T, **self.contour_kwargs(**kwargs)
+            self.data[coords[0]],
+            self.data[coords[1]],
+            attr.T,
+            **self.contour_kwargs(**kwargs),
         )
         if isinstance(kwargs.get("levels", None), int):
             self.levels = QuadContourSet.levels
@@ -254,4 +331,4 @@ class Grid(BaseGrid):
 
     def plot_grid(self):
         """Plot grid."""
-        Grid.plot(self)
+        Gridgen.plot(self)

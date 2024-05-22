@@ -1,4 +1,5 @@
 """Cross-ection methods for BiotFrame."""
+
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -34,7 +35,8 @@ class CrossSection(metamethod.CrossSection):
             "ellipse": "disc",
             "polygon": "square",
             "polyloop": "square",
-            "shell": "square",
+            "shell": "skin",
+            "box": "skin",
             "hexagon": "disc",
         },
     )
@@ -42,9 +44,11 @@ class CrossSection(metamethod.CrossSection):
     def initialize(self):
         """Calculate section self inductance factors."""
         biot_section = [
-            section
-            if section in self.section_factor
-            else self.section_key.get(section, None)
+            (
+                section
+                if section in self.section_factor
+                else self.section_key.get(section, None)
+            )
             for section in self.frame.section
         ]
         undefined = [section is None for section in biot_section]

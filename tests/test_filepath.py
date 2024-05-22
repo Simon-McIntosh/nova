@@ -4,6 +4,8 @@ import fsspec
 import os
 from pathlib import Path
 import pytest
+import sys
+import tempfile
 
 import nova
 from nova.database.filepath import FilePath
@@ -20,7 +22,12 @@ with mark_import("ssh") as mark_ssh:
 if any(mark_ssh.args[0]):
     mark_connect = mark_ssh
 
+mark_win32 = pytest.mark.skipif(
+    sys.platform == "win32", reason="Skip ssh filesystem check on win32 platform"
+)
+
 IMAS_VERSION = os.environ.get("IMAS_VERSION", "")
+TEMPDIR = tempdir = tempfile.gettempdir()
 
 KEYPATH = dict(
     nova=os.path.join(
@@ -32,8 +39,8 @@ KEYPATH = dict(
 
 
 def test_filepath():
-    filepath = FilePath(filename="tmp.nc", dirname="/tmp")
-    assert filepath.filepath == Path("/tmp/tmp.nc")
+    filepath = FilePath(filename="tmp.nc", dirname=TEMPDIR)
+    assert filepath.filepath == Path(TEMPDIR) / "tmp.nc"
 
 
 def test_filepath_error():
@@ -75,9 +82,11 @@ def test_path(path):
     default = filepath.basename
     paths = (path if len(path) > 0 else default for path in path.split("."))
     paths = (
-        getattr(appdirs, "_".join(path.split("_", 3)[:2]) + "_dir")()
-        if path[:4] in ["user", "site"]
-        else path
+        (
+            getattr(appdirs, "_".join(path.split("_", 3)[:2]) + "_dir")()
+            if path[:4] in ["user", "site"]
+            else path
+        )
         for path in paths
     )
     resolved_path = os.path.join(*(KEYPATH.get(path, path) for path in paths))
@@ -89,6 +98,7 @@ def test_local_filesystem():
     assert isinstance(filepath.fsys, fsspec.implementations.local.LocalFileSystem)
 
 
+@mark_win32
 @mark_ssh
 @mark_connect
 def test_ssh_filesystem():
@@ -121,7 +131,7 @@ def clear(path):
 
 @pytest.mark.parametrize("subpath", ["", "signal"])
 def test_checkdir(subpath):
-    path = "/tmp/_filepath/data"
+    path = Path(TEMPDIR) / "_filepath" / "data"
     with clear(path) as filepath:
         filepath.path = path
         filepath.path /= subpath
@@ -129,6 +139,7 @@ def test_checkdir(subpath):
         assert filepath.is_path()
 
 
+@mark_win32
 @mark_ssh
 @mark_connect
 def test_checkdir_ssh():

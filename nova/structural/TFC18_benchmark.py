@@ -1,4 +1,5 @@
 """Manage TFC18 benchmarks."""
+
 from collections import Iterable
 from dataclasses import dataclass, field
 from typing import Union

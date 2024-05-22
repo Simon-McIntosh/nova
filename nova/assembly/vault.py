@@ -1,4 +1,5 @@
 """Create assembly graphics."""
+
 from abc import abstractmethod
 from dataclasses import dataclass, field
 

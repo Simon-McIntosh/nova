@@ -1,4 +1,5 @@
 """Index heating in sultan shots."""
+
 from dataclasses import dataclass, field
 from types import SimpleNamespace
 

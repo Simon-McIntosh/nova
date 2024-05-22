@@ -1,4 +1,5 @@
 """Build convolution animation."""
+
 from dataclasses import dataclass, field
 
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter

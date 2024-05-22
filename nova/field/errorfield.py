@@ -1,4 +1,5 @@
 """Manage error field database."""
+
 from dataclasses import dataclass, field
 from typing import ClassVar
 
@@ -17,7 +18,7 @@ from nova.imas.metadata import Metadata
 
 @dataclass
 class ErrorField(Plot, Datafile):
-    """Interpolate field dataset to first wall and decompose."""
+    """Interpolate field dataset to separatrix and decompose."""
 
     filename: str
     surface: str | None = None

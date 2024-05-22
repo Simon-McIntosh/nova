@@ -1,4 +1,5 @@
 """Manage post install configuration for virtual environments."""
+
 from pathlib import Path
 import sys
 from textwrap import dedent

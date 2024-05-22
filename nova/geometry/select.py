@@ -1,4 +1,5 @@
 """Manage selection algorithms."""
+
 import numpy as np
 
 from nova import njit
@@ -66,7 +67,7 @@ def quadratic_wall(w_cluster, psi_cluster):
     coefficient_matrix = np.column_stack(
         (w_cluster**2, w_cluster, np.ones_like(w_cluster))
     )
-    coefficients = np.linalg.lstsq(coefficient_matrix, psi_cluster, rcond=None)[0]
+    coefficients = np.linalg.lstsq(coefficient_matrix, psi_cluster)[0]
     return coefficients
 
 
@@ -131,7 +132,7 @@ def quadratic_surface(x_cluster, z_cluster, psi_cluster):
             np.ones_like(x_cluster),
         )
     )
-    coefficients = np.linalg.lstsq(coefficient_matrix, psi_cluster, rcond=None)[0]
+    coefficients = np.linalg.lstsq(coefficient_matrix, psi_cluster)[0]
     return coefficients
 
 

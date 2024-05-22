@@ -1,4 +1,5 @@
 """Solve intergral coil forces."""
+
 from dataclasses import dataclass, field
 
 import numpy as np

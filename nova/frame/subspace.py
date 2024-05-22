@@ -1,4 +1,5 @@
 """Manage frame subspace."""
+
 import pandas
 import numpy as np
 

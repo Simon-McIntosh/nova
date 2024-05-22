@@ -1,4 +1,5 @@
 """Short script to demonstrate non-homogeneous interpolation errors."""
+
 from dataclasses import dataclass, field
 from functools import cached_property
 

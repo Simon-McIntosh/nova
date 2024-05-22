@@ -1,4 +1,5 @@
 """Implemet geometric methods on vtk lines."""
+
 from dataclasses import dataclass, field
 
 import numpy as np

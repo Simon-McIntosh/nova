@@ -1,4 +1,5 @@
 """Run Monte Carlo simulations for candidate vault assemblies."""
+
 from contextlib import contextmanager
 from dataclasses import dataclass, field, fields
 from functools import cached_property
@@ -327,10 +328,9 @@ class Vault(Trial, Plot1D):
         offset = self.electromagnetic_model.axis_offset
         self.data["offset"][..., 0] = offset.real
         self.data["offset"][..., 1] = -offset.imag
-        self.data[
-            "peaktopeak_offset"
-        ] = "sample", self.electromagnetic_model.peaktopeak(
-            modes=self.modes, axis_offset=True
+        self.data["peaktopeak_offset"] = (
+            "sample",
+            self.electromagnetic_model.peaktopeak(modes=self.modes, axis_offset=True),
         )
 
     def predict_wall(self):
@@ -347,10 +347,9 @@ class Vault(Trial, Plot1D):
         offset_deviation = (
             self.electromagnetic_model.fieldline.data - offset_firstwall.data
         )
-        self.data[
-            "peaktopeak_offset"
-        ] = "sample", self.electromagnetic_model.peaktopeak(
-            offset_deviation, modes=self.modes
+        self.data["peaktopeak_offset"] = (
+            "sample",
+            self.electromagnetic_model.peaktopeak(offset_deviation, modes=self.modes),
         )
 
     def plot(self, offset=True):
@@ -648,7 +647,7 @@ if __name__ == "__main__":
     # theta = [5, 5, 5, 10, 2, 2, 2.5]
     # theta = [0, 0, 0, 10, 0, 0, 0]
     theta = [1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 3]
-    vault = Vault(2_00_000, theta=theta, adjust_gap=True)
+    vault = Vault(2_000_000, theta=theta, adjust_gap=True)
 
     #'radial', 'tangential', 'roll_length',
     #'yaw_length', 'radial_ccl', 'tangential_ccl', 'radial_wall'
@@ -661,7 +660,7 @@ if __name__ == "__main__":
     # vault.plot_sample(0.99, False)
 
     # theta_error = [5, 5, 5, 2, 2, 2, 5, 10, 10]
-    """
+
     theta_error = [1.5, 1.5, 3, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5]
     # theta_error = [np.sqrt(3), np.sqrt(3), np.sqrt(3),
     #               1, 1, 1,
@@ -682,4 +681,3 @@ if __name__ == "__main__":
 
     # trial.plot_sample(0.99, False)
     # trial.plot_sample(0.99, True)
-    """

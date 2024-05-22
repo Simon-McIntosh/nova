@@ -1,4 +1,5 @@
 """Manage deferred import of frame methods."""
+
 __all__ = ["Coil", "Ferritic", "FirstWall", "Shell", "Turn", "Winding"]
 
 from nova.utilities.importmanager import ImportManager

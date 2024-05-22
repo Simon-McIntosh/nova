@@ -1,4 +1,5 @@
 """Manage biot methods."""
+
 from dataclasses import dataclass, field
 
 from nova.biot import (
@@ -12,6 +13,7 @@ from nova.biot import (
     Field,
     Force,
     LevelSet,
+    Overlap,
     Plasma,
     PlasmaGap,
 )
@@ -176,10 +178,11 @@ class Biot(BiotPlasma, BiotCoil, BiotGap):
     """Expose biot methods as cached properties."""
 
     ngrid: Nbiot = None
+    noverlap: Nbiot = None
 
     def __post_init__(self):
         """Append biot attrs."""
-        self.append_biot_attrs(["ngrid"])
+        self.append_biot_attrs(["ngrid", "noverlap"])
         super().__post_init__()
 
     @property
@@ -193,6 +196,11 @@ class Biot(BiotPlasma, BiotCoil, BiotGap):
     def grid(self):
         """Return grid biot instance."""
         return {"number": self.ngrid} | self.field_kwargs
+
+    @frame_factory(Overlap)
+    def overlap(self):
+        """Return overlap error field biot instance."""
+        return {"ngrid": self.ngrid, "noverlap": self.noverlap}
 
     @frame_factory(Point)
     def point(self):

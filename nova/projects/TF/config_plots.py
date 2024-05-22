@@ -7,7 +7,6 @@ from nova.config import Setup
 import numpy as np
 import seaborn as sns
 import pylab as pl
-from DEMOxlsx import DEMO
 from nova.radial_build import RB
 from amigo import geom
 

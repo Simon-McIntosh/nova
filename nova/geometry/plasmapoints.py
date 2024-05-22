@@ -1,4 +1,5 @@
 """Manage methods related to plasma profile control points."""
+
 from dataclasses import dataclass, field
 from functools import cached_property
 

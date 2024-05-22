@@ -1,4 +1,5 @@
 """Load magnetics from machine description."""
+
 from dataclasses import dataclass, field
 from typing import ClassVar
 

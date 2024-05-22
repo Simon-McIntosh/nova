@@ -1,4 +1,5 @@
 """Manage file data access for frame and biot instances."""
+
 from __future__ import annotations
 from dataclasses import dataclass, field
 from functools import wraps
@@ -69,10 +70,11 @@ class FilePath:
             self.dirname = dirname
             self.checkpath()
             return
+        absolute_path = os.path.isabs(dirname)
         match dirname.split("."):
-            case [str(path)] if path[:1] == os.path.sep:
+            case [str(path)] if absolute_path:
                 self.path = Path(dirname.replace("*", "."))
-            case [str(path), *subpath] if path[:1] != os.path.sep:
+            case [str(path), *subpath] if not absolute_path:
                 if path == "":
                     path = str(self.basename)
                 path = self._resolve_absolute(path)
@@ -171,5 +173,8 @@ if __name__ == "__main__":
     filepath = FilePath(parents=2, basename="root", filename="test")
     filepath.path = ".nova"
 
-    filepath.filepath = "/home/mcintos/Code/nova/nova/2022.3.0/tests"
-    filepath.filename
+    # filepath.filepath = "/home/mcintos/Code/nova/nova/2022.3.0/tests"
+
+    # filepath.filepath =
+
+    print(filepath.filepath)

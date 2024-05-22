@@ -1,4 +1,5 @@
 """Extend pylops regression class."""
+
 from dataclasses import dataclass
 
 from pylops import LinearOperator

@@ -1,4 +1,5 @@
 """Manage fiducial ccl data sources."""
+
 from abc import abstractmethod, ABC
 from dataclasses import dataclass, field
 import string

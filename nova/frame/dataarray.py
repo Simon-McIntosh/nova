@@ -1,4 +1,5 @@
 """Manage fast access dataframe attributes."""
+
 import numpy as np
 import pandas
 
@@ -86,7 +87,10 @@ class DataArray(ArrayIndexer, DataFrame):
         if data is None:
             data = self.metaframe.data
         for attr in data:
-            data[attr][:] = np.nan
+            try:
+                data[attr][:] = np.nan
+            except ValueError:
+                pass
 
     def update_frame(self):
         """Extend DataFrame.update_frame, transfer metaarray.data to frame."""

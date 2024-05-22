@@ -1,4 +1,5 @@
 """Extend pandas.DataFrame to manage coil and subcoil data."""
+
 from dataclasses import dataclass, field
 from functools import cached_property
 from importlib import import_module
@@ -46,6 +47,21 @@ class FrameSet(netCDF, FrameSetLoc):
             "y",
             "z",
             "r",
+        ],
+    )
+    required: list[str] = field(repr=False, default_factory=lambda: [])
+    additional: list[str] = field(
+        repr=False,
+        default_factory=lambda: [
+            "x0",
+            "y0",
+            "z0",
+            "x1",
+            "y1",
+            "z1",
+            "x2",
+            "y2",
+            "z2",
             "ax",
             "ay",
             "az",
@@ -55,12 +71,6 @@ class FrameSet(netCDF, FrameSetLoc):
             "dx",
             "dy",
             "dz",
-        ],
-    )
-    required: list[str] = field(repr=False, default_factory=lambda: [])
-    additional: list[str] = field(
-        repr=False,
-        default_factory=lambda: [
             "turn",
             "frame",
             "plasma",
@@ -89,6 +99,7 @@ class FrameSet(netCDF, FrameSetLoc):
             "volume",
         ],
     )
+    vtk: bool = True
 
     _available: ClassVar[list[str]] = [
         "link",
@@ -124,7 +135,13 @@ class FrameSet(netCDF, FrameSetLoc):
             additional=self.additional,
             available=self.available,
             subspace=["Imin", "Imax"],
-            exclude=["frame", "Ic", "It", "fix", "free"],
+            exclude=[
+                "frame",
+                "Ic",
+                "It",
+                "fix",
+                "free",
+            ],
             array=["coil"],
             version=["index"],
         )

@@ -1,10 +1,11 @@
 """Manage access to IMAS database."""
+
 from contextlib import contextmanager
 from dataclasses import dataclass, field, fields, InitVar
 from functools import cached_property
 import os
+import packaging
 from typing import Any, ClassVar, Optional, Type
-
 import xxhash
 
 from nova.database.datafile import Datafile
@@ -13,12 +14,10 @@ from nova.imas.datadir import DataDir
 from nova.utilities.importmanager import check_import
 
 with check_import("imaspy"):
-    import imaspy
-    from imaspy.exception import ALException
+    import imaspy as imas
 
-
-EMPTY_INT = imaspy.ids_defs.EMPTY_INT
-EMPTY_FLOAT = imaspy.ids_defs.EMPTY_FLOAT
+EMPTY_INT = imas.ids_defs.EMPTY_INT
+EMPTY_FLOAT = imas.ids_defs.EMPTY_FLOAT
 
 
 # _pylint: disable=too-many-ancestors
@@ -73,7 +72,7 @@ class IDS(DataDir):
 
     def get_ids(self):
         """Return empty ids."""
-        return getattr(imaspy.IDSFactory(), self.name)()
+        return getattr(imas.IDSFactory(), self.name)()
 
     @classmethod
     def update_ids_attrs(cls, ids_attrs: bool | Ids):
@@ -111,7 +110,7 @@ class Database(IDS):
         Imas module not found. IMAS access layer not loaded or installed.
     TypeError
         Malformed imput passed to database instance.
-    imas.hli_exceptionALException
+    imas.exception.ALException
         Insufficient parameters passed to define ids.
         self.ids is None and pulse, run, and name set to defaults or None.
 
@@ -136,19 +135,21 @@ class Database(IDS):
 
     Minimum input requred for Database is 'ids' or 'pulse', 'run' and 'name':
 
+    >>> Database().ids_data  # doctest: +IGNORE_EXCEPTION_DETAIL
     >>> Database().ids
     Traceback (most recent call last):
         ...
-    imas.hli_exception.ALException: When self.ids is None require:
+    imas.exception.ALException: When self.ids is None require:
     pulse (0 > 0) & run (0 > 0) & name (None != None)
 
     Malformed inputs are thrown as TypeErrors:
 
     >>> malformed_database = Database(None, 403, name='equilibrium')
+    >>> malformed_database.ids_data  # doctest: +IGNORE_EXCEPTION_DETAIL
     >>> malformed_database.ids
     Traceback (most recent call last):
         ...
-    imas.hli_exception.ALException: When self.ids is None require:
+    imas.exception.ALException: When self.ids is None require:
     pulse (None > 0) & run (403 > 0) & name (equilibrium != None)
 
     The database class may also be initiated with an ids from which the
@@ -219,7 +220,7 @@ class Database(IDS):
         return DBEntry(uri=self.uri, mode="a", database=self)
 
     def __enter__(self):
-        """Access imaspy DBEntry.enter."""
+        """Access imas DBEntry.enter."""
         return self.db_entry.__enter__()
 
     def __exit__(self, exc_type, exc_val, traceback):
@@ -261,6 +262,12 @@ class Database(IDS):
             )
         self.name = self.ids.metadata.name
 
+    @cached_property
+    def ids_dd_version(self) -> packaging.version.Version:
+        """Return DD version used to write the IDS."""
+        version_put = self.get_ids("ids_properties/version_put/data_dictionary")
+        return packaging.version.parse(version_put.split("-")[0])
+
     def load_database(self):
         """Load instance database attributes."""
         if self.ids is not None:
@@ -296,7 +303,7 @@ class Database(IDS):
     def _check_ids_attrs(self):
         """Confirm minimum working set of input attributes."""
         if self._unset_attrs:
-            raise ALException(
+            raise imas.exception.ALException(
                 f"When self.ids is None require:\n"
                 f"pulse ({self.pulse} > 0) & run ({self.run} > 0) & "
                 f"name ({self.name} != None)"
@@ -339,24 +346,33 @@ class Database(IDS):
         ids_path = "ids_properties/homogeneous_time"
         for i in range(limit):
             try:
-                if self.get_ids(ids_path, i) == imaspy.ids_defs.EMPTY_INT:
+                if self.get_ids(ids_path, i) == imas.ids_defs.EMPTY_INT:
                     return i
-            except ALException:
+            except imas.exception.ALException:
                 return i
         raise IndexError(f"no empty occurrences found for i < {limit}")
 
     @property
     def backend_id(self):  # TODO remove once uri interface is released
         """Return backend id from backend."""
-        return getattr(imaspy.ids_defs, f"{self.backend.upper()}_BACKEND")
+        return getattr(imas.hli_utils.imasdef, f"{self.backend.upper()}_BACKEND")
+
+    @property
+    def dd_version(self) -> packaging.version.Version:
+        """Return imas DD version."""
+        try:
+            return packaging.version.parse(imas.al_dd_version)
+        except ValueError:
+            return packaging.version.parse("1")
+        return getattr(imas.ids_defs, f"{self.backend.upper()}_BACKEND")
 
     @contextmanager
     def _db_entry(self):
         """Yield database with context manager."""
-        db_entry = imaspy.DBEntry(
+        db_entry = imas.DBEntry(
             self.backend_id, self.machine, self.pulse, self.run, self.user
         )
-        # db_entry = imaspy.DBEntry()  # TODO uri update
+        # db_entry = imas.DBEntry()  # TODO uri update
         yield db_entry
         db_entry.close()
 
@@ -366,9 +382,9 @@ class Database(IDS):
         with self._db_entry() as db_entry:
             try:
                 db_entry.open()  # (uri=self.uri)  # TODO uri update
-            except ALException as error:
-                raise ALException(
-                    f"malformed input to imaspy.DBEntry\n{error}\n"
+            except imas.exception.ALException as error:
+                raise imas.exception.ALException(
+                    f"malformed input to imas.DBEntry\n{error}\n"
                     f"pulse {self.pulse}, "
                     f"run {self.run}, "
                     f"user {self.user}\n"

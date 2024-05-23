@@ -1,8 +1,9 @@
 """Methods to manage sane ids entry."""
+
 from dataclasses import dataclass, field
 
-from nova.imas.database import Database, ImasIds
-from nova.imas.ids import IDS, IdsIndex
+from nova.imas.database import Database, IDS, ImasIds
+from nova.imas.ids_index import IdsIndex
 
 
 @dataclass

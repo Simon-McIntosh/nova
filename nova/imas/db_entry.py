@@ -1,4 +1,5 @@
 """Manage access to IMAS database via DBEntry class."""
+
 from dataclasses import dataclass, field
 from functools import cached_property
 
@@ -28,10 +29,12 @@ class DBEntry(imaspy.DBEntry):
         super().__init__(
             self.uri, self.mode, dd_version=self.dd_version, xml_path=self.xml_path
         )
+        if self.ids_name is not None:
+            self.callstate["kwargs"] = {"ids_name": self.ids_name}
 
     @cached_property
-    def idsname(self):
-        """Return idsname."""
+    def ids_name(self):
+        """Return ids_name."""
         return self.uri.split("#")[1].split(":")[0].split("=")[1]
 
     def __call__(self, *args, lazy=False, **kwargs):
@@ -70,7 +73,6 @@ class DBEntry(imaspy.DBEntry):
         """Extend imaspy DBEntry.enter."""
         super().__enter__()
         return self.get(
-            self.idsname,
             *self.callstate.args,
             lazy=True,
             **self.callstate.kwargs,
@@ -83,5 +85,5 @@ class DBEntry(imaspy.DBEntry):
 
     def get_data(self, *args, lazy=False, **kwargs):
         """Return ids data from db_entry.get."""
-        self.database.ids = self.get(self.idsname, *args, lazy=lazy, **kwargs)
+        self.database.ids = self.get(*args, lazy=lazy, **kwargs)
         return self.database.ids

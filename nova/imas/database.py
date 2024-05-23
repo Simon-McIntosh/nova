@@ -9,8 +9,8 @@ from typing import Any, ClassVar, Optional, Type
 import xxhash
 
 from nova.database.datafile import Datafile
+from nova.imas.dataset import Dataset
 from nova.imas.db_entry import DBEntry
-from nova.imas.datadir import DataDir
 from nova.utilities.importmanager import check_import
 
 with check_import("imaspy"):
@@ -27,76 +27,23 @@ Ids = ImasIds | dict[str, int | str] | tuple[int | str]
 
 
 @dataclass
-class IDS(DataDir):
-    """High level IDS attributes.
+class Database(Dataset):
+    """Methods to access an IMAS Database entry.
 
     name: str, optional (required when ids not set)
         Ids name. The default is ''.
     occurrence: int, optional (required when ids not set)
         Occurrence number. The default is 0.
-
     ids: ImasIds, optional
         When set the ids parameter takes prefrence. The default is None.
 
     Attributes
     ----------
-    ids_attrs : dict
+    ids_attrs: dict
         Ids attributes as dict with keys [pulse, run, machine, occurence,
                                           user, name, backend]
     uri : str, read-only
         IDS unified resorce identifier.
-
-
-    Methods
-    -------
-    get_ids()
-        Return bare ids.
-
-    dd_version()
-        Return DD version.
-
-    """
-
-    name: str | None = None
-    occurrence: int = 0
-
-    attrs: ClassVar[list[str]] = [
-        "occurrence",
-        "name",
-    ]
-
-    @property
-    def uri(self):
-        """Return IDS URI, Extend DataEntry.uri with name:occurrence fragment."""
-        return f"{super().uri}#idsname={self.name}:occurrence={self.occurrence}"
-
-    def get_ids(self):
-        """Return empty ids."""
-        return getattr(imas.IDSFactory(), self.name)()
-
-    @classmethod
-    def update_ids_attrs(cls, ids_attrs: bool | Ids):
-        """Return class attributes."""
-        return DataAttrs(ids_attrs, cls).attrs
-
-    @classmethod
-    def merge_ids_attrs(cls, ids_attrs: bool | Ids, base_attrs: dict):
-        """Return merged class attributes."""
-        return DataAttrs(ids_attrs, cls).merge_ids_attrs(base_attrs)
-
-
-@dataclass
-class Database(IDS):
-    """
-    Methods to access IMAS database.
-
-    Attributes
-    ----------
-    ids: ImasIds
-        IMAS ids.
-    ids_attrs: dict
-        Ids attributes as dict with keys [pulse, run, machine, occurence,
-                                          user, name, backend]
 
     Notes
     -----
@@ -116,7 +63,7 @@ class Database(IDS):
 
     Examples
     --------
-    Skip doctest if IMAS instalation or requisite IDS(s) not found.
+    Skip doctest if IMAS instalation or requisite Database(s) not found.
 
     >>> import pytest
     >>> try:
@@ -133,7 +80,7 @@ class Database(IDS):
     >>> equilibrium.user, equilibrium.machine, equilibrium.backend
     ('public', 'iter', 'hdf5')
 
-    Minimum input requred for Database is 'ids' or 'pulse', 'run' and 'name':
+    Minimum input requred for Database is 'ids' or 'pulse', 'run', and 'name':
 
     >>> Database().ids_data  # doctest: +IGNORE_EXCEPTION_DETAIL
     >>> Database().ids
@@ -202,9 +149,16 @@ class Database(IDS):
 
     """
 
+    name: str | None = None
+    occurrence: int = 0
     filename: str = field(default="", repr=False)
     group: str | None = field(default=None, repr=False)
     ids: ImasIds | None = field(repr=False, default=None)
+
+    attrs: ClassVar[list[str]] = [
+        "occurrence",
+        "name",
+    ]
 
     '''
     def __post_init__(self):
@@ -213,6 +167,21 @@ class Database(IDS):
         self.load_database()
         self.update_filename()
     '''
+
+    @property
+    def uri(self):
+        """Return IDS URI, Extend DataEntry.uri with name:occurrence fragment."""
+        return f"{super().uri}#idsname={self.name}:occurrence={self.occurrence}"
+
+    @classmethod
+    def update_ids_attrs(cls, ids_attrs: bool | Ids):
+        """Return class attributes."""
+        return DataAttrs(ids_attrs, cls).attrs
+
+    @classmethod
+    def merge_ids_attrs(cls, ids_attrs: bool | Ids, base_attrs: dict):
+        """Return merged class attributes."""
+        return DataAttrs(ids_attrs, cls).merge_ids_attrs(base_attrs)
 
     @cached_property
     def db_entry(self):
@@ -327,19 +296,20 @@ class Database(IDS):
         return self.ids_attrs
 
     def get_ids(self, ids_path: Optional[str] = None, occurrence=None):
-        """Return ids. Override IDS.get_ids. Extend name with ids_path."""
+        """Return ids. Extend name with ids_path."""
         ids_name = "/".join(
             (item for item in [self.name, ids_path] if item is not None)
         ).split("/", 1)
         if occurrence is None:
             occurrence = self.occurrence
-        with self.db_open() as db_entry:
+        self.db_entry.callstate["kwargs"] = {
+            "ids_name": ids_name[0],
+            "occurrence": occurrence,
+        }
+        with self.db_entry as ids:
             if len(ids_name) == 2:
-                return getattr(
-                    db_entry.get(ids_name[0], occurrence=occurrence, lazy=True),
-                    ids_name[1],
-                )
-            return db_entry.get(*ids_name, occurrence=occurrence, lazy=True)
+                return getattr(ids, ids_name[1])
+            return ids
 
     def next_occurrence(self, limit=10000) -> int:
         """Return index of next available occurrence."""
@@ -356,15 +326,6 @@ class Database(IDS):
     def backend_id(self):  # TODO remove once uri interface is released
         """Return backend id from backend."""
         return getattr(imas.hli_utils.imasdef, f"{self.backend.upper()}_BACKEND")
-
-    @property
-    def dd_version(self) -> packaging.version.Version:
-        """Return imas DD version."""
-        try:
-            return packaging.version.parse(imas.al_dd_version)
-        except ValueError:
-            return packaging.version.parse("1")
-        return getattr(imas.ids_defs, f"{self.backend.upper()}_BACKEND")
 
     @contextmanager
     def _db_entry(self):
@@ -536,7 +497,7 @@ class DataAttrs:
     """
 
     ids_attrs: Ids | bool | str
-    subclass: InitVar[Type[IDS]] = IDS
+    subclass: InitVar[Type[Database]] = Database
     default_attrs: dict = field(init=False, default_factory=dict)
 
     def __post_init__(self, subclass):

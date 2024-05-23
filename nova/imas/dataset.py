@@ -1,15 +1,22 @@
 """Manage access to IMAS data entry."""
-from dataclasses import dataclass, field
-from functools import cached_property
+
+from dataclasses import dataclass
+import logging
 import os
+from packaging.version import Version
 from typing import ClassVar
 
-from packaging.version import Version
+from nova.utilities.importmanager import check_import
+
+with check_import("imaspy"):
+    import imaspy as imas
+
+logging.basicConfig(level=logging.WARNING)
 
 
 @dataclass
-class DataDir:
-    """Locate Data Dir on a local or remote machine using a pulse-run layout.
+class Dataset:
+    """Locate an IDS dataset on a local or remote machine using a pulse-run layout.
 
     Parameters
     ----------
@@ -34,6 +41,9 @@ class DataDir:
 
     ids_path : os.path, read-only
         Path to IDS database entry.
+
+    dd_version : Version
+        Data Dictionary version.
     """
 
     pulse: int = 0
@@ -41,19 +51,34 @@ class DataDir:
     machine: str = "iter"
     user: str = "public"
     backend: str = "hdf5"
-    dd_version: str = field(default_factory=lambda: os.environ["IMAS_VERSION"])
+    dd_version: Version | str | None = None
 
     dir_attrs: ClassVar[list[str]] = ["pulse", "run", "machine", "user", "backend"]
 
+    def __post_init__(self):
+        """Set dd_version."""
+        self.version = self.dd_version
+
     @property
-    def attrs(self):
+    def version(self):
+        """Return a Version instance of dd_version."""
+        return self.dd_version
+
+    @version.setter
+    def version(self, dd_version: Version | str | None):
+        if isinstance(dd_version, Version):
+            dd_version = str(dd_version)
+        self.dd_version = Version(imas.IDSFactory(dd_version).version)
+
+    @property
+    def attrs(self) -> list[str]:
         """Return data dir attributes. Subclass to append."""
         return self.dir_attrs
 
     @classmethod
     def default_ids_attrs(cls) -> dict:
         """Return dict of default ids attributes."""
-        return {attr: getattr(cls, attr) for attr in cls.attrs}
+        return {attr: getattr(cls, attr) for attr in cls.dir_attrs}
 
     @property
     def ids_attrs(self):
@@ -67,18 +92,13 @@ class DataDir:
                 raise AttributeError(f"attr {attr} not in self.attrs {self.attrs}")
             setattr(self, attr, value)
 
-    @cached_property
-    def _dd_version(self):
-        """Return a Version instance of dd_version."""
-        return Version(self.dd_version)
-
     @property
     def uri(self):
         """Return IDS URI."""
         return (
             f"imas:{self.backend}?user={self.user};"
             f"pulse={self.pulse};run={self.run};"
-            f"database={self.machine};version={self._dd_version.major};"
+            f"database={self.machine};version={self.dd_version.major};"
         )
 
     @property
@@ -92,7 +112,7 @@ class DataDir:
     def database_path(self):
         """Return top level of database path."""
         return os.path.join(
-            self.home, "imasdb", self.machine, str(self._dd_version.major)
+            self.home, "imasdb", self.machine, str(self.dd_version.major)
         )
 
     @property

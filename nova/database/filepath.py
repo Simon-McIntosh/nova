@@ -170,8 +170,8 @@ class FilePath:
 
 
 if __name__ == "__main__":
-    filepath = FilePath(parents=2, basename="root", filename="test")
-    filepath.path = ".nova"
+    filepath = FilePath(parents=2, filename="test")
+    filepath.path = "nova"
 
     # filepath.filepath = "/home/mcintos/Code/nova/nova/2022.3.0/tests"
 

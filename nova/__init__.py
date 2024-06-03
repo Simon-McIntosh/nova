@@ -30,7 +30,7 @@ import os
 from .dataset import geometry
 
 try:
-    __version__ = importlib.metadata.version(__package__ or __name__)
+    __version__ = importlib.metadata.version("nova-stella")
 except importlib.metadata.PackageNotFoundError:
     __version__ = "0.0.0"
 __all__.extend("__version__")

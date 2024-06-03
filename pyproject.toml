@@ -249,21 +249,5 @@ enable = true
 vcs = "git"
 style = "semver"
 pattern  = "^(?P<base>\\d+\\.\\d+\\.\\d+)(-?((?P<stage>[a-zA-Z]+)\\.?(?P<revision>\\d+)?))?"
-#format-jinja = """
-#    {%- if distance == 0 -%}
-#        {{- base -}}
-#    {%- else -%}
-#        {{- base }}.dev{{ distance }}+g{{commit}}
-#    {%- endif -%}
-#"""
-
-[tool.poetry-dynamic-versioning.files."nova/_version.py"]
-persistent-substitution = true
-initial-content = """
-  # These version placeholders will be replaced later during substitution.
-  __version__ = "0.0.0"
-  __version_tuple__ = (0, 0, 0)
-"""
-
-
+format = "{base}+{distance}.{commit}"
 

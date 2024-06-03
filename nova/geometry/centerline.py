@@ -435,7 +435,7 @@ if __name__ == "__main__":
     # centerline.plot()
     centerline = Centerline(filename="ELM")
     centerline.plot()
-    centerline.write_ids()
+    # centerline.write_ids()
     """
     for filename in ["CS", "PF", "VS3", "ELM", "CC", "TF"]:
         print(filename)

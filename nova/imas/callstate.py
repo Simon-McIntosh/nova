@@ -1,4 +1,5 @@
 """Manage access to IMAS database via DBEntry class."""
+
 from dataclasses import dataclass, field
 
 

@@ -41,6 +41,10 @@ submodules = [
 __all__.extend(submodules)
 
 os.environ["NUMBA_THREADING_LAYER"] = "omp"
+os.environ["IMAS_HOME"] = os.environ.get(
+    "IMAS_HOME", os.path.join(os.path.expanduser("~"), "imas")
+)
+os.environ["HDF5_USE_FILE_LOCKING"] = os.environ.get("HDF5_USE_FILE_LOCKING", "False")
 
 try:
     from numba import njit, prange

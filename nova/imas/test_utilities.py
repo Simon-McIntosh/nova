@@ -5,10 +5,10 @@ import pytest
 from nova.imas.database import Database
 from nova.utilities.importmanager import mark_import
 
-with mark_import("imaspy") as mark_imaspy:
+with mark_import("imaspy") as mark_imas:
     from imaspy.exception import ALException  # noqa
 
-IMPORT_IMASPY = not any(mark_imaspy.args[0])
+IMPORT_IMAS = not any(mark_imas.args[0])
 
 
 ids_attrs = dict(
@@ -26,14 +26,14 @@ ids_attrs = dict(
 
 def load_ids(*args, **kwargs):
     """Return database instance."""
-    if not IMPORT_IMASPY:
+    if not IMPORT_IMAS:
         return False
     return Database(*args, **kwargs)
 
 
-mark = {"imas": mark_imaspy}
+mark = {"imas": mark_imas}
 for attr in ids_attrs:
-    if not IMPORT_IMASPY:
+    if not IMPORT_IMAS:
         mark[attr] = mark["imas"]
         continue
     mark[attr] = pytest.mark.skipif(

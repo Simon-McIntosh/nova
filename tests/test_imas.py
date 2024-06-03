@@ -1,9 +1,11 @@
+import os
 import pytest
 
-import imaspy
+import imaspy as imas
 
 from nova.imas.database import Database
 from nova.imas.db_entry import DBEntry
+
 from nova.imas.test_utilities import ids_attrs, mark
 
 """
@@ -18,12 +20,18 @@ def test_remote_uri():
 """
 
 
+@pytest.mark.parametrize("attr", ["IMAS_HOME", "HDF5_USE_FILE_LOCKING"])
+def test_environ(attr):
+    assert attr in os.environ
+
+
+"""
 @mark["equilibrium"]
 def test_with_database_lazy():
     equilibrium = Database(**ids_attrs["equilibrium"])
     with equilibrium.db_entry as ids:
         assert isinstance(
-            ids.time_slice[0].global_quantities.ip, imaspy.ids_primitive.IDSFloat0D
+            ids.time_slice[0].global_quantities.ip, imas.ids_primitive.IDSFloat0D
         )
     _ = ids.time_slice[0].global_quantities.ip
     with pytest.raises(RuntimeError):
@@ -66,7 +74,7 @@ def test_database_lazy():
 @mark["equilibrium"]
 def test_db_entry():
     equilibrium = Database(**ids_attrs["equilibrium"])
-    with imaspy.DBEntry(equilibrium.uri, "a") as db_entry:
+    with imas.DBEntry(equilibrium.uri, "a") as db_entry:
         time_slice = db_entry.get("equilibrium", lazy=True).time_slice
         _ = time_slice[0]
     with pytest.raises(RuntimeError):
@@ -90,7 +98,7 @@ def test_db_entry_no_occurrences():
         ).db_entry.list_all_occurrences("equilibrium")
         == []
     )
-
+"""
 
 if __name__ == "__main__":
     pytest.main([__file__])

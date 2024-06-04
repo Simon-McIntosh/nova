@@ -236,6 +236,7 @@ os.path.join(userhome, 'public', 'imasdb', 'iter', '3', '1', '2')
         """Return URI build from IDSBase parameters."""
         if self.has_default_attrs:
             return ""
+        self.check_ids_attrs()
         return (
             f"imas:{self.backend}?user={self.user};"
             f"pulse={self.pulse};run={self.run};"
@@ -284,7 +285,7 @@ os.path.join(userhome, 'public', 'imasdb', 'iter', '3', '1', '2')
             or self.name is None
         )
 
-    def _check_ids_attrs(self):
+    def check_ids_attrs(self):
         """Confirm minimum working set of input attributes."""
         if self._unset_attrs:
             raise imas.exception.ALException(
@@ -333,7 +334,7 @@ class Datastore(IDSBase):  # noqa: D207
 
     The datastore may be identified via ether IDS attributes.
 
-    >>> Datastore(101).uri != ''
+    >>> Datastore(101, 1, 'pf_active').uri != ''
     True
 
     or an explicit uri>
@@ -399,7 +400,7 @@ class Dataset(Datastore):  # noqa: D207
 
     Parameters
     ----------
-    mode: str. optional
+    mode: str | None. optional
         DBEntry file access mode. The default is ``"r"``.
               - ``"r"``: Open an existing data entry. Raises an error when the data
                 entry does not exist.
@@ -438,16 +439,25 @@ but 6 were given
     The minimum input requred for Database is 'ids' or 'uri',
     'pulse', 'run', and 'name':
 
-    >>> Dataset()
+    >>> Dataset(uri='imas:hdf5?path=/tmp', mode=None, dd_version='3.22.0')
+    Dataset(dd_version=<Version('3.22.0')>, uri='imas:hdf5?path=/tmp', \
+mode=None, ids=None)
+
+    >>> Dataset(pulse=101)
     Traceback (most recent call last):
         ...
     imas_core.exception.ALException: When self.ids is None require:
-    pulse (0 > 0) & run (0 > 0) & name (None != None)
+    pulse (101 > 0) & run (0 > 0) & name (None != None)
+
+    >>> Dataset()
+    Traceback (most recent call last):
+        ...
+    ValueError: No URI provided.
 
     Dataset instances can produce empty IDSs.
 
-    >>> dataset = Dataset(name='equilibrium', dd_version='3.22.0', mode='x')
-    >>> equilibrium = dataset.initialize_ids()
+    >>> dataset = Dataset(1, 1, name='equilibrium', dd_version='3.22.0', mode=None)
+    >>> equilibrium = dataset.new_ids()
     >>> equilibrium.has_value
     False
     >>> equilibrium.metadata.name == 'equilibrium'
@@ -551,7 +561,7 @@ but 6 were given
 
     """
 
-    mode: str = "r"  # Open an existing data entry. Raise error if not present.
+    mode: str | None = "r"  # Open an existing data entry. Raise error if not present.
     ids: IDSToplevel | None
     _ids: IDSToplevel | None = field(init=False, repr=False, default=None)
 
@@ -559,6 +569,12 @@ but 6 were given
         """Load ids."""
         super().__post_init__()
         self._open()
+
+    def check_ids_attrs(self):
+        """Extend to skip IDS attrs check when ids is not None."""
+        if self.ids is not None:
+            return
+        super().check_ids_attrs()
 
     def get(
         self,
@@ -575,6 +591,10 @@ but 6 were given
         self.ids = self.db_entry.get(self.name, self.occurrence, lazy=lazy)
         return self.ids
 
+    def put(self, ids: IDSToplevel, occurrence: int = 0):
+        """Write ids to database entry."""
+        self.db_entry.put(ids, occurrence)
+
     def _open(self):
         """Return."""
         if self.ids is not None:
@@ -587,8 +607,14 @@ but 6 were given
     @cached_property
     def db_entry(self):
         """Return imas.DBEntry instance."""
-        self._check_ids_attrs()
         return imas.DBEntry(uri=self.uri, mode=self.mode)
+
+    @property
+    def is_valid(self):
+        """Return database entry validity flag."""
+        # try:
+        imas.DBEntry(uri=self.uri, mode="r").get(self.name, self.occurrence)
+        # _mode = self.mode
 
     def __enter__(self):
         """Return DBEntry IDS with context."""
@@ -618,8 +644,8 @@ but 6 were given
             self.get(lazy=False)
         return self.ids._xxhash()
 
-    def initialize_ids(self, name: Optional[str] = None) -> None:
-        """Return empty ids and update name, and ids attributes."""
+    def new_ids(self, name: Optional[str] = None) -> None:
+        """Return a new ids from IDSFactory and update name, and ids attributes."""
         if name is not None:
             self.name = name
         self.ids = imas.IDSFactory(version=str(self.dd_version)).new(self.name)

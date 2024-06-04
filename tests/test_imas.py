@@ -1,12 +1,10 @@
 import os
 import pytest
+import tempfile
 
-import imaspy as imas
+from nova.imas.dataset import Dataset
 
-from nova.imas.database import Database
-from nova.imas.db_entry import DBEntry
-
-from nova.imas.test_utilities import ids_attrs, mark
+# from nova.imas.test_utilities import ids_attrs, mark
 
 """
 def test_remote_uri():
@@ -23,6 +21,21 @@ def test_remote_uri():
 @pytest.mark.parametrize("attr", ["IMAS_HOME", "HDF5_USE_FILE_LOCKING"])
 def test_environ(attr):
     assert attr in os.environ
+
+
+def test_is_valid():
+
+    with tempfile.TemporaryDirectory() as name:
+        dataset = Dataset(uri=f"imas:hdf5?path={name}", mode="x")
+        ids = dataset.new_ids("pf_active")
+        ids.ids_properties.homogeneous_time = 1
+
+        dataset.db_entry.put(ids)
+
+        # print(Dataset(uri=f"imas:hdf5?path={tmp.name}").is_valid)
+
+        # ids.ids_properties.homogeneous_time = 1
+        # print(ids.has_value)
 
 
 """

@@ -8,4 +8,5 @@ __all__ = [
     "ImasIds",
 ]
 
-from .database import CoilData, Database, Ids, IdsData, ImasIds
+from .database import CoilData, Database, IdsData
+from .dataset import Ids, ImasIds

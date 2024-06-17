@@ -37,6 +37,16 @@ def test_is_valid():
         # ids.ids_properties.homogeneous_time = 1
         # print(ids.has_value)
 
+    import tempfile
+
+    import imaspy as imas
+
+    name = "\\Users\\mcintos\\AppData\\Local\\Temp\\tmpfjgzef5_"
+    db_entry = imas.DBEntry(uri=f"imas:hdf5?path={name}", mode="a")
+    ids = imas.IDSFactory().new("pf_active")
+    ids.ids_properties.homogeneous_time = 1
+    db_entry.put(ids)
+
 
 """
 @mark["equilibrium"]

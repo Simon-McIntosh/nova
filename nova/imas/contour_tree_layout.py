@@ -20,17 +20,31 @@ tree["o_point_index [:]"] = "list[int]"
 tree: dict[str, dict] = {
     "doc": "A structure to describe the topological connectivity of the "
     "poloidal flux map critical points as an undirected graph. "
+    "Critical points are ether local extremum (o-points) "
+    "or saddle points (x-points) of the poloidal flux map. "
+    "X-points have zero gradients in orthogonal directions but are not "
+    "local extremum of the poloidal flux map whilst O-points are. "
 }
 tree["node [structure]"] = {
-    "doc": "Nodes of a contour tree are ether local extremum (o-points) "
-    "or saddle points (x-points) of the poloidal flux map. "
-    "A contour tree node is defined by its critical type and point index. "
-    "A critical type of 1 references a saddle topology with the point index "
-    "identifying node in the x-point array of structures. "
-    "A critical type of 0 or 2 references a local extremum with the point index "
-    "identifying node in the o-point array of structures.",
+    "doc": "A contour tree node is defined by its critical type and position within "
+    "the poloidal plane. A critical type of 1 references an x-point whilst "
+    "a critical type of 0 or 2 references an o-point. "
+    "Both X-points and O-points are rarely coincident with nodes defining the "
+    "poloidal upon which the poloidal flux map is defined. "
+    "The order in which the critical points are stored in the node structure is only "
+    "important for the primary plasma O-point and X-points. "
+    "If present, the primary plasma O-point should be placed in the first position "
+    "in the node structure. If present, the primary plasma X-point should second "
+    "position in the node strucutre. ",
+    "radius": "float",
+    "height": "float",
+    "psi": "float",
     "critical_type [:]": "0-minimum, 1-saddle, 2-maximum",
-    "point_index [:]": "int",
+    "levelset [structure]": {
+        "doc": "Single poloidal flux contour incuding critical point. (x-point only)",
+        "radius [:]": "float",
+        "height [:]": "float",
+    },
 }
 tree["edge [structure"] = {
     "doc": "Edges connect nodes to one another. "
@@ -81,6 +95,8 @@ time_slice["o_point [array of structures]"] = {
     "psi": "float",
     "critical_type": "0-minimum, 2-maximum",
 }
+del time_slice["x_point [array of structures]"]
+del time_slice["o_point [array of structures]"]
 time_slice["contour_tree"] = tree
 
 pprint(time_slice, indent=1, depth=50, compact=False, width=90, sort_dicts=False)

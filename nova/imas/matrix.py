@@ -3,7 +3,8 @@
 from dataclasses import dataclass
 from functools import cached_property
 
-from nova.imas.database import Database, Ids
+from nova.imas.database import Database
+from nova.imas.dataset import Ids
 from nova.imas.operate import Operate
 from nova.imas.profiles import Profile
 

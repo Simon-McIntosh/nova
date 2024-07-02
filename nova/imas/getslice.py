@@ -24,7 +24,7 @@ class GetSlice:
             super().__post_init__()
         self.itime = self.time_index
 
-    def get(self, key: str):
+    def get_data(self, key: str):
         """Regulate access to imas dataset."""
         data = self.data[self.match(key)][self.itime].data
         try:
@@ -37,7 +37,7 @@ class GetSlice:
         try:
             return self._cache[key]
         except KeyError:
-            self._cache[key] = self.get(key)
+            self._cache[key] = self.get_data(key)
             return self._cache[key]
 
     def __setitem__(self, key: str, value):

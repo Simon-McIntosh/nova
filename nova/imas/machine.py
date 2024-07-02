@@ -15,14 +15,8 @@ import xarray
 
 from nova.graphics.plot import Plot
 from nova.frame.coilset import CoilSet
-from nova.imas.database import (
-    CoilData,
-    Database,
-    IDS,
-    Ids,
-    ImasIds,
-    EMPTY_FLOAT,
-)
+from nova.imas.database import CoilData, Database
+from nova.imas.dataset import IdsBase, Ids, ImasIds, EMPTY_FLOAT
 from nova.imas.ids_index import IdsIndex
 from nova.geometry.polygon import Polygon
 
@@ -58,7 +52,7 @@ class GeomData:
         """Extract attributes from ids and store in data."""
         data = getattr(self.ids, self.name)
         for attr in self.attrs:
-            self.data[attr] = getattr(data, attr)
+            self.data[attr] = getattr(data, attr).value
 
     def __getattr__(self, attr: str):
         """Return attributes from data."""
@@ -270,7 +264,7 @@ class ThickLine(GeomData):
         data = getattr(self.ids, self.name)
         for attr, label in zip(["start", "end"], ["first", "second"]):
             point = getattr(data, f"{label}_point")
-            self.data[attr] = np.array([point.r, point.z])
+            self.data[attr] = np.array([point.r.value, point.z.value])
 
 
 @dataclass
@@ -290,7 +284,7 @@ class CrossSection:
 
     def __post_init__(self):
         """Build geometry instance."""
-        self.data = self.transform[self.ids.geometry_type](self.ids)
+        self.data = self.transform[self.ids.geometry_type.value](self.ids)
         for attr in self.data.data:
             if isinstance(self.data.data[attr], float) and not np.isfinite(
                 self.data.data[attr]
@@ -313,9 +307,9 @@ class Loop:
 
     def __post_init__(self):
         """Extract data from loop ids."""
-        self.name = self.ids.name.strip()
+        self.name = self.ids.name.value.strip()
         self.label = self.name.rstrip(string.digits + "_")
-        self.resistance = self.ids.resistance
+        self.resistance = self.ids.resistance.value
 
 
 @dataclass
@@ -327,7 +321,7 @@ class ActiveLoop(Loop):
     def __post_init__(self):
         """Extract data from loop ids."""
         super().__post_init__()
-        self.identifier = self.ids.identifier
+        self.identifier = self.ids.identifier.value
 
 
 @dataclass
@@ -343,9 +337,9 @@ class Element:
 
     def __post_init__(self):
         """Extract element data from ids."""
-        self.name = self.ids.name.strip()
-        self.identifier = self.ids.identifier.strip()
-        self.nturn = self.ids.turns_with_sign
+        self.name = self.ids.name.value.strip()
+        self.identifier = self.ids.identifier.value.strip()
+        self.nturn = self.ids.turns_with_sign.value
         if np.isclose(self.nturn, EMPTY_FLOAT):
             warn("nturn unset, setting turn number equal to one")
             self.nturn = 1
@@ -589,7 +583,7 @@ class CoilDatabase(CoilSet, CoilData):
     @cached_property
     def ids_index(self):
         """Return cached ids_index instance."""
-        return IdsIndex(self.ids_data, self.ids_node)
+        return IdsIndex(self.ids, self.ids_node)
 
     @property
     def group_attrs(self) -> dict:
@@ -612,7 +606,7 @@ class PoloidalFieldPassive(CoilDatabase):
 
     def build(self):
         """Build pf passive geometroy."""
-        for ids_loop in getattr(self.ids_data, "loop"):
+        for ids_loop in getattr(self.ids, "loop"):
             loop = Loop(ids_loop)
             shelldata = PassiveShellData()
             coildata = PassiveCoilData()
@@ -685,7 +679,7 @@ class PoloidalFieldActive(CoilDatabase):
     def build_coil(self):
         """Build pf active coil geometry."""
         maximum_current = {}
-        for ids_loop in getattr(self.ids_data, "coil"):
+        for ids_loop in getattr(self.ids, "coil"):
             loop = ActiveLoop(ids_loop)
             coildata = ActiveCoilData()
             polydata = ActivePolyCoilData()
@@ -710,7 +704,7 @@ class PoloidalFieldActive(CoilDatabase):
             polydata.insert(constructor)
             current_limit_max = ids_loop.current_limit_max
             if len(current_limit_max) > 0:
-                maximum_current[ids_loop.identifier] = current_limit_max[-1, 0]
+                maximum_current[ids_loop.identifier.value] = current_limit_max[-1, 0]
         self.frame.loc[:, ["Imax"]] = maximum_current
         self.frame.loc[:, ["Imin"]] = {
             coil: -limit for coil, limit in maximum_current.items()
@@ -718,19 +712,19 @@ class PoloidalFieldActive(CoilDatabase):
 
     def build_circuit(self):
         """Build circuit influence matrix."""
-        if len(self.ids_data.circuit) == 0:  # no circuit
+        if len(self.ids.circuit) == 0:  # no circuit
             return
-        supply = [supply.identifier for supply in self.ids_data.supply]
-        nodes = max(len(circuit.connections) for circuit in self.ids_data.circuit)
+        supply = [supply.identifier.value for supply in self.ids.supply]
+        nodes = max(len(circuit.connections) for circuit in self.ids.circuit)
         self.circuit.initialize(supply, nodes)
-        for circuit in getattr(self.ids_data, "circuit"):
+        for circuit in getattr(self.ids, "circuit"):
             if len(circuit.connections) == 0:
                 continue
-            self.circuit.insert(circuit.identifier, circuit.connections)
+            self.circuit.insert(circuit.identifier.value, circuit.connections.value)
 
         self.circuit.link()  # link single loop circuits
 
-        if len(self.ids_data.supply) == 0:  # no supplies
+        if len(self.ids.supply) == 0:  # no supplies
             return
         with self.ids_index.node("supply"):
             name = self.ids_index.array("identifier")
@@ -760,7 +754,7 @@ class ContourData(Plot):
 
     def append(self, unit):
         """Append contour data."""
-        self.data[unit.name] = np.array([unit.outline.r, unit.outline.z]).T
+        self.data[unit.name.value] = np.array([unit.outline.r, unit.outline.z]).T
 
     def plot(self, axes=None):
         """Plot contours."""
@@ -826,13 +820,13 @@ class Wall(CoilDatabase):
 
     pulse: int = 116000
     run: int = 2
-    occurrence: int = 0
     name: str = "wall"
+    occurrence: int = 0
 
     @cached_property
     def limiter(self):
         """Return limiter units."""
-        return getattr(self.ids_data, "description_2d").array[0].limiter
+        return getattr(self.ids, "description_2d")[0].limiter
 
     @cached_property
     def boundary(self):
@@ -888,6 +882,7 @@ class ELM(CoilDatabase):
     run: int = 0
     occurrence: int = 0
     name: str = "elm"
+    mode: str | None = None
 
     def build(self):
         """Build axisymmetric elm coil geometry."""
@@ -967,8 +962,8 @@ class Geometry:
     >>> import pytest
     >>> from nova.imas.database import Database
     >>> try:
-    ...     _ = Database(111001, 202, 'iter_md').get_ids('pf_active')
-    ...     _ = Database(115005, 2, 'iter_md').get_ids('pf_passive')
+    ...     _ = Database(111001, 202, 'pf_active', machine='iter_md')
+    ...     _ = Database(115005, 2, 'pf_passive', machine='iter_md')
     ... except:
     ...     pytest.skip('IMAS not found or 111001/202, 115005/2 unavailable')
 
@@ -990,8 +985,8 @@ class Geometry:
 
     Specify pf_active as an ids with pulse, run, and name:
 
-    >>> database = Database(111001, 202, 'iter_md', name='pf_active')
-    >>> pf_active = Geometry(database.ids_data).pf_active
+    >>> database = Database(111001, 202, 'pf_active', machine='iter_md')
+    >>> pf_active = Geometry(database.ids).pf_active
     >>> pf_active['pulse'] == 111001
     True
 
@@ -1080,7 +1075,7 @@ class Geometry:
 
         >>> wall_md = geometry.get_ids_attrs('iter_md', Wall)
         >>> list(wall_md.values())
-        [116000, 2, 'iter_md', 0, 'public', 'wall', 'hdf5']
+        [116000, 2, 'wall', 0, 'iter_md', 'public', 'hdf5']
 
         Extend geometry instance with an `ids_attrs` attribute.
 
@@ -1089,19 +1084,19 @@ class Geometry:
         Confrim that new attrs overide the defaults profided by `Wall`.
 
         >>> list(geometry.get_ids_attrs(True, Wall).values())
-        [20, 25, 'iter_md', 0, 'public', 'wall', 'hdf5']
+        [20, 25, 'wall', 0, 'iter_md', 'public', 'hdf5']
 
         Request ids_attrs with a dict input replacing machine and occurence.
 
         >>> attrs = {'machine': 'iter', 'occurrence': 3}
         >>> list(geometry.get_ids_attrs(attrs, Wall).values())
-        [20, 25, 'iter', 3, 'public', 'wall', 'hdf5']
+        [20, 25, 'wall', 3, 'iter', 'public', 'hdf5']
 
         Request ids_attrs with a tuple input replacing the first 4 IDS attrs.
 
-        >>> attrs = (20, 38, 'demo', 42)
+        >>> attrs = (20, 38, 'pf_passive', 3)
         >>> list(geometry.get_ids_attrs(attrs, Wall).values())
-        [20, 38, 'demo', 42, 'public', 'wall', 'hdf5']
+        [20, 38, 'pf_passive', 3, 'iter_md', 'public', 'hdf5']
         """
         match attrs:
             case "iter_md":  # update from iter_md
@@ -1131,6 +1126,8 @@ class Geometry:
 @dataclass
 class Machine(CoilSet, Geometry, CoilData):
     """Manage ITER machine geometry."""
+
+    mode: str | None = None
 
     @property
     def metadata(self):
@@ -1169,7 +1166,7 @@ class Machine(CoilSet, Geometry, CoilData):
                 self._format_geometry_attrs(attr)
                 for attr in metadata[geometry].split(",")
             ]
-            setattr(self, geometry[:-3], dict(zip(IDS.attrs, values)))
+            setattr(self, geometry[:-3], dict(zip(IdsBase.database_attrs, values)))
         assert attr_hash == self.hash_attrs(self.group_attrs)
 
     @staticmethod
@@ -1229,20 +1226,25 @@ class Machine(CoilSet, Geometry, CoilData):
 
 
 if __name__ == "__main__":
-    args = 105028, 1, "iter"  # DINA
 
-    # args = 45272, 1, "mast_u"  # MastU
+    import doctest
+
+    doctest.testmod(verbose=False)
+
+    kwargs = {"pulse": 105028, "run": 1, "machine": "iter"}  # DINA
+    # kwargs = {"pulse": 45272, "run": 1, "machine": "mast_u"}  # MastU
 
     machine = Machine(
-        *args,
+        **kwargs,
         pf_active="iter_md",
-        pf_passive="iter_md",
+        pf_passive=False,
         elm=False,
-        wall="iter_md",
-        tplasma="r",
+        wall=True,
+        tplasma="h",
         nwall=10,
         dplasma=-2000,
         ngrid=2000,
+        ninductance=-0.05,
     )
 
     # from nova.imas.coils_non_axisymmetric import CoilsNonAxisymmetyric

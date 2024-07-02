@@ -20,7 +20,7 @@ class Scenario(GetSlice, IdsData):
     @cached_property
     def ids_index(self):
         """Return cached ids_index instance."""
-        return IdsIndex(self.ids_data, self.ids_node)
+        return IdsIndex(self.ids, self.ids_node)
 
     @contextmanager
     def build_scenario(self):
@@ -28,14 +28,12 @@ class Scenario(GetSlice, IdsData):
         self.data.attrs[self.name] = ",".join(
             [str(value) for value in self.ids_attrs.values()]
         )
-        self.data.attrs["homogeneous_time"] = (
-            self.ids_data.ids_properties.homogeneous_time
-        )
+        self.data.attrs["homogeneous_time"] = self.ids.ids_properties.homogeneous_time
         if self.data.attrs["homogeneous_time"] == 1:
-            self.data.coords["time"] = self.ids_data.time
+            self.data.coords["time"] = self.ids.time
             self.data.coords["itime"] = "time", range(len(self.data["time"]))
         yield
-        if self.pulse != 0 and self.run != 0:  # don't store passed ids_data
+        if self.pulse != 0 and self.run != 0:  # don't store passed ids
             self.store()
 
     def append(
@@ -45,10 +43,10 @@ class Scenario(GetSlice, IdsData):
         branch="",
         prefix="",
         postfix="",
-        ids_node=None,
+        # ids_node=None,
     ):
         """Append xarray dataset with ids attributes."""
-        self.ids = ids_node
+        # self.ids_node = ids_node
         if isinstance(attrs, str):
             attrs = [attrs]
         for attr in attrs:

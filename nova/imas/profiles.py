@@ -100,7 +100,7 @@ class Profile(Equilibrium, GetSlice, IdsData):
 
 if __name__ == "__main__":
     pulse, run = 135013, 2
-    profile = Profile(pulse, run, "iter", 0)
+    profile = Profile(pulse, run, machine="iter")
     profile.time = 300
     profile.plot_profile(attr="ff_prime")
 

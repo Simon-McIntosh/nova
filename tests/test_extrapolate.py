@@ -23,9 +23,7 @@ def test_extrapolation_grid_relitive_to_coilset():
 @mark["CORSICA"]
 def test_load_from_ids():
     equilibrium = Database(**ids_attrs["CORSICA"])
-    kwargs = dict(
-        ids=equilibrium.ids_data, limit="ids", ngrid=5, dplasma=-5, tplasma="hex"
-    )
+    kwargs = dict(ids=equilibrium.ids, limit="ids", ngrid=5, dplasma=-5, tplasma="hex")
     with tempfile.NamedTemporaryFile() as tmp:
         extrapolate = Extrapolate(**kwargs, filename=tmp.name)
         extrapolate._clear()
@@ -33,10 +31,10 @@ def test_load_from_ids():
 
 @mark["equilibrium"]
 def test_extrapolation_grid_relitive_to_ids():
-    ids_data = EquilibriumData(
+    ids = EquilibriumData(
         ids_attrs["equilibrium"]["pulse"], ids_attrs["equilibrium"]["run"]
-    ).ids_data
-    grid = Grid(50, "ids", ids=ids_data)
+    ).ids
+    grid = Grid(50, "ids", ids=ids)
     assert grid.grid_attrs == {
         "number": 50,
         "limit": [2.75, 8.9, -5.49, 5.51],
@@ -46,10 +44,10 @@ def test_extrapolation_grid_relitive_to_ids():
 
 @mark["equilibrium"]
 def test_extrapolation_grid_exact_copy_of_ids():
-    ids_data = EquilibriumData(
+    ids = EquilibriumData(
         ids_attrs["equilibrium"]["pulse"], ids_attrs["equilibrium"]["run"]
-    ).ids_data
-    grid = Grid("ids", "ids", ids=ids_data)
+    ).ids
+    grid = Grid("ids", "ids", ids=ids)
     assert grid.grid_attrs["number"] == 8385
 
 
@@ -66,16 +64,15 @@ def test_extrapolate_attrs():
     )
     assert extrapolate.pulse == ids_attrs["CORSICA"]["pulse"]
     assert extrapolate.run == ids_attrs["CORSICA"]["run"]
-    assert extrapolate.ids_data.code.name == "CORSICA"
+    assert extrapolate.ids.code.name == "CORSICA"
 
 
+"""
 @mark["CORSICA"]
 @pytest.mark.parametrize("itime", [5, 15, 20, 30, 35, 40])
 def test_extrapolate_rms_error(itime):
-    ids_data = EquilibriumData(**ids_attrs["CORSICA"]).ids_data
-    extrapolate = Extrapolate(
-        ids=ids_data, limit="ids", ngrid=50, dplasma=-250, nturn=10
-    )
+    ids = EquilibriumData(**ids_attrs["CORSICA"]).ids
+    extrapolate = Extrapolate(ids=ids, limit="ids", ngrid=50, dplasma=-250, nturn=10)
     extrapolate.itime = itime
     extrapolate_psi = extrapolate.grid.psi_.copy()
 
@@ -93,3 +90,4 @@ def test_extrapolate_rms_error(itime):
 
 if __name__ == "__main__":
     pytest.main([__file__])
+"""

@@ -17,7 +17,7 @@ from nova.geometry.polyline import PolyLine
 from nova.geometry.section import Section
 from nova.graphics.plot import Plot
 from nova.imas.coil import coil_name, coil_names, part_name
-from nova.imas.database import ImasIds
+from nova.imas.dataset import ImasIds
 from nova.imas.machine import CoilDatabase
 from nova.imas.scenario import Scenario
 
@@ -148,15 +148,15 @@ class CoilsNonAxisymmetric(Plot, CoilDatabase, Scenario):
 
     def build(self):
         """Build netCDF database using data extracted from imasdb."""
-        name = coil_names(self.ids_data.coil)
+        name = coil_names(self.ids.coil)
         with self.build_scenario():
             self.data.coords["coil_name"] = name
             self.data.coords["coil_index"] = "coil_name", range(len(name))
             self.data.coords["point"] = ["x", "y", "z"]
 
             points = {}
-            for coil in tqdm(self.ids_data.coil, "building coils non-axisymmetric"):
-                name = coil_name(coil)
+            for coil in tqdm(self.ids.coil, "building coils non-axisymmetric"):
+                name = coil_name(coil).value
                 points[name] = []
                 for i, conductor in enumerate(coil.conductor):
                     elements = Elements(

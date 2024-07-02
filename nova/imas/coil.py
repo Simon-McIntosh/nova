@@ -1,6 +1,6 @@
 """Manage common coil data access methods."""
 
-from nova.imas.database import ImasIds
+from nova.imas.dataset import ImasIds
 
 
 def coil_name(coil):

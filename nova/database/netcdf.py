@@ -18,9 +18,9 @@ class netCDF(FilePath):
     group: str | None = field(default=None, repr=False)
     data: xarray.Dataset = field(default_factory=xarray.Dataset, repr=False)
 
-    def __post_init__(self):
-        """Forward post init for for cooperative inheritance."""
-        super().__post_init__()
+    # def __post_init__(self):
+    #    """Forward post init for for cooperative inheritance."""
+    #    super().__post_init__()
 
     @FilePath.filepath.getter  # type: ignore
     def filepath(self):
@@ -60,7 +60,7 @@ class netCDF(FilePath):
         xxh32.update(str(attrs))
         return xxh32.hexdigest()
 
-    def mode(self, mode=None) -> str:
+    def get_mode(self, mode=None) -> str:
         """Return file access mode."""
         if mode is not None:
             return mode
@@ -70,7 +70,7 @@ class netCDF(FilePath):
 
     def store(self, mode=None):
         """Store data as group within netCDF file."""
-        mode = self.mode(mode)
+        mode = self.get_mode(mode)
         if self.host is not None:  # remote write
             with self.fsys.open(str(self.filepath), mode + "b") as file:
                 self.data.to_netcdf(file, mode=mode, group=self.group)

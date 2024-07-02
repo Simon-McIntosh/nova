@@ -432,7 +432,7 @@ class Equilibrium(Chart, GetSlice):
         >>> import pytest
         >>> from nova.imas.database import Database
         >>> try:
-        ...     _ = Database(130506, 403).get_ids('equilibrium')
+        ...     _ = Database(130506, 403, 'equilibrium').get()
         ... except:
         ...     pytest.skip('IMAS not found or 130506/403 unavailable')
 
@@ -487,7 +487,7 @@ class Equilibrium(Chart, GetSlice):
         >>> import pytest
         >>> from nova.imas.database import Database
         >>> try:
-        ...     _ = Database(130506, 403).get_ids('equilibrium')
+        ...     _ = Database(130506, 403).get('equilibrium')
         ... except:
         ...     pytest.skip('IMAS not found or 130506/403 unavailable')
 
@@ -543,7 +543,7 @@ class Equilibrium(Chart, GetSlice):
         >>> import pytest
         >>> from nova.imas.database import Database
         >>> try:
-        ...     _ = Database(130506, 403).get_ids('equilibrium')
+        ...     _ = Database(130506, 403).get('equilibrium')
         ... except:
         ...     pytest.skip('IMAS not found or 130506/403 unavailable')
 
@@ -639,7 +639,7 @@ class EquilibriumData(Equilibrium, Profile2D, Profile1D, Parameter0D, Grid):
     >>> import pytest
     >>> from nova.imas.database import Database
     >>> try:
-    ...     _ = Database(130506, 403).get_ids('equilibrium')
+    ...     _ = Database(130506, 403).get('equilibrium')
     ... except:
     ...     pytest.skip('IMAS not found or 130506/403 unavailable')
 
@@ -739,6 +739,7 @@ class EquilibriumData(Equilibrium, Profile2D, Profile1D, Parameter0D, Grid):
 
 if __name__ == "__main__":
     # import doctest
+
     # doctest.testmod()
 
     pulse, run = 105028, 1  # DINA -10MA divertor PCS

@@ -4,14 +4,14 @@ import pytest
 from nova.imas.matrix import Benchmark
 
 try:
-    import imas
+    import imaspy as imas
 except ImportError:
-    pytest.skip("IMAS module unavailable", allow_module_level=True)
+    pytest.skip("IMASPy module unavailable", allow_module_level=True)
 
 
 try:
     benchmark = Benchmark(dplasma=-150, nfield=15, nforce=100, ngrid=None)
-except imas.ids_base.ALException:
+except imas.exception.ALException:
     pytest.skip(
         "Requisite IDSs unavailable. "
         "Unable to initiate matrix benchmark, skipping tests",

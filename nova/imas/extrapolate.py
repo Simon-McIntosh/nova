@@ -106,8 +106,8 @@ class Extrapolate(Operate):
     >>> import pytest
     >>> from nova.imas.database import Database
     >>> try:
-    ...     _ = Database(130506, 403).get_ids('equilibrium')
-    ...     _ = Database(111001, 202, 'iter_md').get_ids('pf_active')
+    ...     _ = Database(130506, 403, 'equilibrium')
+    ...     _ = Database(111001, 202, 'pf_active', machine='iter_md')
     ... except:
     ...     pytest.skip('IMAS not found or 130506/403, 111001/202 unavailable')
 
@@ -122,7 +122,7 @@ class Extrapolate(Operate):
 
     The equilibrium ids is read from file and stored as an ids attribute:
 
-    >>> extrapolate.get_ids('equilibrium').code.name
+    >>> extrapolate.get('equilibrium').code.name.value
     'CORSICA'
 
     To run code as an **IMAS actor**,
@@ -135,7 +135,7 @@ class Extrapolate(Operate):
 
     then pass this ids to the Extrapolate class:
 
-    >>> extrapolate = Extrapolate(ids=equilibrium.ids_data, limit='ids',
+    >>> extrapolate = Extrapolate(ids=equilibrium.ids, limit='ids',
     ...                           ngrid=500, dplasma=-100, tplasma='hex')
     >>> extrapolate.itime = 20
     >>> extrapolate.itime
@@ -143,6 +143,8 @@ class Extrapolate(Operate):
 
     """
 
+    name: str = "equilibrium"
+    mode: str = "r"
     gamma: float = 9e-6
     nturn: int = 0
 
@@ -256,12 +258,12 @@ class Extrapolate(Operate):
         >>> import pytest
         >>> from nova.imas.database import Database
         >>> try:
-        ...     _ = Database(130506, 403).get_ids('equilibrium')
+        ...     _ = Database(130506, 403, 'equilibrium')
         ... except:
         ...     pytest.skip('IMAS not found or 130506/403 unavailable')
 
-        >>> equilibrium = Database(130506, 403, name='equilibrium')
-        >>> extrapolate = Extrapolate(ids=equilibrium.ids_data, limit='ids',
+        >>> equilibrium = Database(130506, 403, 'equilibrium')
+        >>> extrapolate = Extrapolate(ids=equilibrium.ids, limit='ids',
         ...                           ngrid=500, dplasma=-100, tplasma='hex')
 
         Skip doctest if graphics dependencies are not available.
@@ -376,6 +378,12 @@ class Extrapolate(Operate):
 
 
 if __name__ == "__main__":
+
+    import doctest
+
+    doctest.testmod(verbose=False)
+
+    """
     pulse, run = 114101, 41  # JINTRAC
     # pulse, run = 130506, 403  # CORSICA
     # pulse, run = 105028, 1  # DINA
@@ -384,6 +392,7 @@ if __name__ == "__main__":
     # pulse, run = 134173, 106  # DINA-JINTRAC
 
     extrapolate = Extrapolate(pulse, run, pf_passive=False, pf_active="iter_md")
+    extrapolate.ids
 
     import matplotlib.pylab as plt
 
@@ -401,3 +410,4 @@ if __name__ == "__main__":
     # extrapolate.plasmagrid.plot()
 
     # extrapolate.annimate(5, filename=filename)
+    """

@@ -1,4 +1,5 @@
 """Manage IMAS high level IDS attributes."""
+
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from operator import attrgetter
@@ -6,7 +7,7 @@ from operator import attrgetter
 import numpy as np
 
 
-from nova.imas.database import ImasIds
+from nova.imas.dataset import IDSToplevel
 
 
 @dataclass
@@ -26,19 +27,20 @@ class IdsIndex:
     Check access to required IDS(s).
 
     >>> import pytest
+    >>> from nova.imas.database import Database
     >>> try:
-    ...     _ = Database(105028, 1).get_ids('pf_active')
-    ...     _ = Database(105028, 1).get_ids('equilibrium')
-    ...     _ = Database(135007, 4).get_ids('pf_active')
+    ...     _ = Database(105028, 1, 'pf_active')
+    ...     _ = Database(105028, 1, 'equilibrium')
+    ...     _ = Database(135007, 4, 'pf_active')
     ... except:
     ...     pytest.skip('IMAS not installed or 105028/1, 135007/4 unavailable')
 
     First load an ids, accomplished here using the Database class from
     nova.imas.database.
 
-    >>> from nova.imas.database import Database, IdsIndex
+    >>> from nova.imas.ids_index import IdsIndex
     >>> pulse, run = 105028, 1  # DINA scenario data
-    >>> pf_active = Database(pulse, run, name='pf_active')
+    >>> pf_active = Database(pulse, run, 'pf_active')
 
     Initiate an instance of IdsIndex using ids from pf_active and
     specifying 'coil' as the array extraction node.
@@ -84,25 +86,54 @@ class IdsIndex:
     and vertical_force and extract force data at itime=100 from each node.
 
     >>> with ids_index.node('radial_force'):
-    ...     ids_index.vector(100, 'force.data').shape
+    ...     print(ids_index.vector(100, 'force.data').shape)
     (12,)
 
     >>> with ids_index.node('vertical_force'):
-    ...     ids_index.vector(100, 'force.data').shape
+    ...     print(ids_index.vector(100, 'force.data').shape)
     (17,)
 
     """
 
-    ids: ImasIds
-    ids_node: str = "time_slice"
+    ids: IDSToplevel
+    ids_node: str | None = "time_slice"
     transpose: bool = field(init=False, default=False)
     shapes: dict[str, tuple[int, ...] | tuple[()]] = field(
         init=False, default_factory=dict
     )
+    _ids: IDSToplevel | None = field(init=False, repr=False, default=None)
+    _ids_node: str | None = field(init=False, repr=False, default="time_slice")
 
-    def __post_init__(self):
-        """Initialize ids node."""
-        self.ids = self.ids_node
+    # def __post_init__(self):
+    #    """Initialize ids node."""
+    #    if self._ids is None:
+    #        raise AttributeError("required attribute 'ids' not set")
+
+    @property  # type: ignore[no-redef]
+    def ids(self):  # noqa
+        """Manage ids."""
+        if self._ids_node:
+            return attrgetter(self.ids_node)(self._ids)
+        return self._ids
+
+    @ids.setter
+    def ids(self, ids: IDSToplevel):
+        if type(ids) is property:
+            ids = self._ids
+        self._ids = ids
+
+    @property  # type: ignore[no-redef]
+    def ids_node(self) -> str | None:  # noqa
+        """Manage ids_node."""
+        return self._ids_node
+
+    @ids_node.setter
+    def ids_node(self, ids_node: str | None):
+        if type(ids_node) is property:
+            ids_node = self._ids_node
+        if ids_node is not None:
+            self.transpose = ids_node != "time_slice"
+            self._ids_node = ids_node
 
     @contextmanager
     def node(self, ids_node: str):
@@ -114,38 +145,25 @@ class IdsIndex:
         Check access to required IDS(s).
 
         >>> import pytest
+        >>> from nova.imas.database import Database
         >>> try:
-        ...     _ = Database(135007, 4).get_ids('pf_active')
+        ...     _ = Database(135007, 4, 'pf_active')
         ... except:
         ...     pytest.skip('IMAS not installed or 135007/4 unavailable')
 
         Demonstrate use of context manager for switching active ids_node.
 
-        >>> from nova.imas.database import IdsIndex
+        >>> from nova.imas.ids_index import IdsIndex
         >>> ids = Database(135007, 4, name='pf_active').ids
         >>> ids_index = IdsIndex(ids, 'coil')
         >>> with ids_index.node('vertical_force'):
-        ...     ids_index.array('force.data').shape
+        ...     print(ids_index.array('force.data').shape)
         (2338, 17)
         """
         _ids_node = self.ids_node
-        self.ids = ids_node
+        self.ids_node = ids_node
         yield
-        self.ids = _ids_node
-
-    @property
-    def ids(self):
-        """Return ids node."""
-        if self.ids_node:
-            return attrgetter(self.ids_node)(self.ids)
-        return self.ids
-
-    @ids.setter
-    def ids(self, ids_node: str | None):
-        """Update ids node."""
-        if ids_node is not None:
-            self.transpose = ids_node != "time_slice"
-            self.ids_node = ids_node
+        self.ids_node = _ids_node
 
     @property
     def length(self):
@@ -180,19 +198,6 @@ class IdsIndex:
     def _get_shape(self, path: str) -> tuple[int, ...] | tuple[()]:
         """Return data shape at index=0 on path."""
         return self.get_slice(0, path).shape
-        """  # TODO remove if not required with imaspy 
-        match data := self.get_slice(0, path):
-            case np.ndarray():
-                return data.shape
-            case float() | int() | str():
-                return ()
-            case _ if isinstance(data, np.integer):
-                return ()
-            case _:
-                print("***", data, type(data), data.shape)
-                raise ValueError(f"unable to determine data length {path} {data}")
-        return ()
-        """
 
     def get(self, path: str):
         """Return attribute from ids path."""
@@ -202,8 +207,9 @@ class IdsIndex:
         """Resize structured array."""
         attrgetter(path)(self.ids).resize(number)
 
-    def __setitem__(self, key, value):
-        """Set attribute on ids path."""
+    @staticmethod
+    def get_index(key):
+        """Return formated item key."""
         match key:
             case str(attr):
                 index, subindex = 0, 0
@@ -213,6 +219,11 @@ class IdsIndex:
                 pass
             case _:
                 raise KeyError(f"invalid key {key}")
+        return attr, index, subindex
+
+    def __setitem__(self, key, value):
+        """Set attribute on ids path."""
+        attr, index, subindex = self.get_index(key)
 
         if isinstance(index, slice):
             # recursive update for all indicies specified in slice.
@@ -229,13 +240,13 @@ class IdsIndex:
                 branch = self.ids
             case (str(node),):
                 try:
-                    branch = attrgetter(node)(self.ids)[index]
+                    branch = attrgetter(node)(self._ids)[index]
                 except TypeError:
-                    branch = attrgetter(node)(self.ids)
+                    branch = attrgetter(node)(self._ids)
             case (str(array), ""):
-                branch = attrgetter(array)(self.ids)[index]
+                branch = attrgetter(array)(self._ids)[index]
             case (str(array), str(node)):
-                trunk = attrgetter(array)(self.ids)[index]
+                trunk = attrgetter(array)(self._ids)[index]
                 branch = attrgetter(node)(trunk)
             case _:
                 raise IndexError(f"invalid node {node}")
@@ -261,7 +272,7 @@ class IdsIndex:
         except AttributeError:  # __structArray__
             node, path = path.split(".", 1)
             return attrgetter(path)(attrgetter(node)(self.ids[index])[0])
-        except TypeError:  # object is not subscriptable
+        except ValueError:  # Invalid node name
             return self.get(path)
 
     def vector(self, itime: int, path: str):
@@ -274,24 +285,26 @@ class IdsIndex:
             data = np.zeros(self.shape(path)[:-1], dtype=self.dtype(path))
             for index in range(self.length):
                 try:
-                    data[index] = self.get_slice(index, path)[itime]
+                    data[index] = self.get_slice(index, path).value[itime]
                 except (ValueError, IndexError):  # empty slice
                     pass
             return data
-        return self.get_slice(itime, path)
+        return self.get_slice(itime, path).value
 
     def array(self, path: str):
         """Return attribute data array."""
         if self.length == 0:
-            return self.get(path)
-        data = np.zeros(self.shape(path), dtype=self.dtype(path))
+            return self.get(path).value
+        dtype = self.dtype(path)
+        data = np.zeros(self.shape(path), dtype)
         for index in range(self.length):
             try:
-                data[index] = self.get_slice(index, path)
+                data[index] = self.get_slice(index, path).value
             except ValueError:  # empty slice
                 pass
         if self.transpose:
             return data.T
+
         return data
 
     def valid(self, path: str):
@@ -324,7 +337,7 @@ class IdsIndex:
         """Return data point type."""
         if self.empty(path):
             raise ValueError(f"data entry at {path} is empty")
-        data = self.get_slice(0, path)
+        data = self.get_slice(0, path).value
         if isinstance(data, str):
             return object
         if hasattr(data, "flat"):
@@ -339,3 +352,10 @@ class IdsIndex:
         if "*" in branch:
             return branch.replace("*", attr)
         return ".".join((branch, attr))
+
+
+if __name__ == "__main__":
+
+    import doctest
+
+    doctest.testmod(verbose=False)

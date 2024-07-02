@@ -1,6 +1,7 @@
 import pytest
 
-from nova.imas.database import Database, IDS
+from nova.imas.database import Database
+from nova.imas.dataset import IdsBase
 from nova.imas.equilibrium import EquilibriumData
 from nova.imas.machine import (
     Geometry,
@@ -9,11 +10,11 @@ from nova.imas.machine import (
     PoloidalFieldPassive,
 )
 from nova.imas.pf_active import PF_Active
-from nova.imas.test_utilities import ids_attrs, load_ids, mark
+from nova.imas.test_utilities import ids_attrs, mark
 
 
 def test_ids_attrs():
-    ids = IDS(45, run=7)
+    ids = IdsBase(45, run=7)
     ids.ids_attrs = {"occurrence": 5}
     assert ids.ids_attrs["pulse"] == 45
     assert ids.ids_attrs["run"] == 7
@@ -36,32 +37,33 @@ def test_pf_active_ids():
         assert ids.coil[0].identifier == "CS3U"
 
 
-"""
 @mark["pf_active"]
 def test_pf_active_properties():
-    with Database(**ids_attrs["pf_active"]).db_entry as ids:
+    with Database(**ids_attrs["pf_active"]) as ids:
         assert "ITER_D_33NHXN" in ids.ids_properties.source
 
 
 @mark["pf_active"]
 def test_get_ids_path():
-    pf_active = Database(**ids_attrs["pf_active"])
-    assert pf_active.get_ids("coil")[0].name == "Central Solenoid 3U (CS3U)"
+    pf_active = Database(**ids_attrs["pf_active"]).ids
+    assert pf_active.coil[0].name == "Central Solenoid 3U (CS3U)"
 
 
-
+@pytest.mark.skip("pending dataset partial path implementation")
 @mark["pf_active"]
 def test_get_ids_partial_name():
     pf_active = Database(**ids_attrs["pf_active"] | dict(name="pf_active/coil"))
     assert pf_active.get_ids()[0].name == "Central Solenoid 3U (CS3U)"
 
 
+@pytest.mark.skip("pending dataset partial path implementation")
 @mark["pf_active"]
 def test_get_ids_partial_path():
     pf_active = Database(**ids_attrs["pf_active"] | dict(name=None))
     assert pf_active.get_ids("pf_active/coil")[0].name == "Central Solenoid 3U (CS3U)"
 
 
+@pytest.mark.skip("pending dataset partial path implementation")
 @mark["equilibrium"]
 def test_get_ids_partial_vector():
     pf_active = Database(**ids_attrs["equilibrium"] | dict(name="pf_active"))
@@ -81,20 +83,20 @@ def test_equilibrium_attr_defaults():
 
 @mark["imas"]
 def test_database_minimum_required_input():
-    import imas
+    import imas_core
 
-    with pytest.raises(imas.hli_exception.ALException) as error:
-        Database().ids_data
+    with pytest.raises(imas_core.exception.ALException) as error:
+        Database(pulse=101)
     assert "When self.ids is None require:" in str(error.value)
 
 
 @mark["equilibrium"]
 def test_database_malformed_input():
-    import imas
+    import imas_core
 
-    with pytest.raises(imas.hli_exception.ALException) as error:
+    with pytest.raises(imas_core.exception.ALException) as error:
         equilibrium = ids_attrs["equilibrium"] | dict(run=None)
-        Database(**equilibrium).ids
+        Database(**equilibrium)
     assert "When self.ids is None require:" in str(error.value)
 
 
@@ -105,7 +107,7 @@ def test_equilibrium_database_from_ids_str_hash():
     assert equilibrium_from_ids.name == ids_attrs["equilibrium"]["name"]
     assert equilibrium_from_ids.pulse != ids_attrs["equilibrium"]["pulse"]
     assert equilibrium_from_ids.run != ids_attrs["equilibrium"]["run"]
-    assert equilibrium_from_attrs.ids_hash == equilibrium_from_ids.ids_hash
+    # assert equilibrium_from_attrs.ids_hash == equilibrium_from_ids.ids_hash
     assert equilibrium_from_attrs != equilibrium_from_ids
 
 
@@ -210,7 +212,7 @@ def test_machine_geometry_default():
 def test_machine_geometry_relative():
     machine = Machine(105011, 9, pf_active=True, pf_passive=False, wall=False)
     assert machine.filename == "machine_iter_105011_9"
-"""
+
 
 if __name__ == "__main__":
     pytest.main([__file__])

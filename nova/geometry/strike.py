@@ -7,7 +7,7 @@ from shapely import intersects, intersection
 from shapely.geometry import MultiLineString, MultiPoint, Point
 
 from nova.graphics.plot import Plot
-from nova.imas.database import Ids
+from nova.imas.dataset import Ids
 from nova.imas.machine import Geometry
 
 

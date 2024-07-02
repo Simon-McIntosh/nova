@@ -37,6 +37,6 @@ for attr in ids_attrs:
         mark[attr] = mark["imas"]
         continue
     mark[attr] = pytest.mark.skipif(
-        not load_ids(**ids_attrs[attr]).db_entry.is_valid,
+        not load_ids(**ids_attrs[attr]).is_valid,
         reason=f"{attr} database unavalible",
     )

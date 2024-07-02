@@ -3,30 +3,30 @@ import pytest
 
 import getpass
 
-from nova.imas.datadir import DataDir
+from nova.imas.dataset import IdsBase
 
 
 def test_data_entry():
-    datadir = DataDir()
+    datadir = IdsBase()
     print(datadir.uri)
 
 
 def test_home_public():
-    datadir = DataDir(user="public")
+    datadir = IdsBase(user="public")
     assert datadir.home == os.path.join(os.environ["IMAS_HOME"], "shared")
 
 
 def test_home_user():
     user = getpass.getuser()
-    datadir = DataDir(user=user)
+    datadir = IdsBase(user=user)
     home = os.path.expanduser(f"~{user}")
     assert datadir.home == os.path.join(home, "public")
 
 
 def test_ids_path():
-    DataDir(backend="hdf5").ids_path
+    IdsBase(backend="hdf5").ids_path
     with pytest.raises(NotImplementedError):
-        DataDir(backend="mdsplus").ids_path
+        IdsBase(backend="mdsplus").ids_path
 
 
 if __name__ == "__main__":

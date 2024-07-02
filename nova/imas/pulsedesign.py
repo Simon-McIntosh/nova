@@ -15,8 +15,10 @@ from nova.graphics.plot import Animate, Plot
 
 from nova.geometry.plasmapoints import PlasmaPoints
 
-from nova.imas.database import Database, IDS, Ids, IdsEntry
+from nova.imas.database import Database
+from nova.imas.dataset import IdsBase, Ids
 from nova.imas.equilibrium import EquilibriumData
+from nova.imas.ids_entry import IdsEntry
 from nova.imas.machine import Machine
 from nova.imas.metadata import Metadata
 from nova.imas.profiles import Profile
@@ -363,7 +365,7 @@ class PulseDesign(Animate, Plot1D, Control, ITER):
 
     See Also
     --------
-    `nova.imas.database.IDS` :
+    `nova.imas.dataset.IdsBase` :
         For a list of attributes and their definitons to be used in place of
         the `ids` keyword when referancing the source equilibrium `ids` that
         should be read from file.
@@ -640,7 +642,7 @@ class PulseDesign(Animate, Plot1D, Control, ITER):
 
     def update_metadata(self, ids_entry: IdsEntry):
         """Update ids with instance metadata."""
-        metadata = Metadata(ids_entry.ids_data)
+        metadata = Metadata(ids_entry.ids)
         comment = (
             "Coil current waveforms to match 4-point bounding-box "
             "separatrix targets."
@@ -649,7 +651,7 @@ class PulseDesign(Animate, Plot1D, Control, ITER):
         provenance.extend(
             [
                 (
-                    IDS(*value.split(",")).uri
+                    IdsBase(*value.split(",")).uri
                     if not isinstance(value, (int, np.integer))
                     else f"imas:ids?name={attr[:-3]};hash={value}"
                 )

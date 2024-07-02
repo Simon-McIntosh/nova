@@ -18,6 +18,9 @@ logging.basicConfig(level=logging.WARNING)
 ImasIds = Any
 Ids = ImasIds | dict[str, int | str] | tuple[int | str]
 
+EMPTY_INT = imas.ids_defs.EMPTY_INT
+EMPTY_FLOAT = imas.ids_defs.EMPTY_FLOAT
+
 
 @dataclass(kw_only=True)
 class DDVersion:
@@ -77,18 +80,18 @@ class DDVersion:
 
 
 @dataclass
-class IDSBase(DDVersion):  # noqa: D207
+class IdsBase(DDVersion):  # noqa: D207
     """Manage IDS filesystem index attributes.
 
     Parameters
     ----------
-    pulse: int, optional (required when ids not set)
+    pulse: int, optional
         Pulse number. The default is 0.
-    run: int, optional (required when ids not set)
+    run: int, optional
         Run number. The default is 0.
-    name: str, optional (required when ids not set)
+    name: str, optional
         Ids name. The default is None.
-    occurrence: int, optional (required when ids not set)
+    occurrence: int, optional
         Occurrence number. The default is 0.
 
     _: KW_ONLY
@@ -113,22 +116,22 @@ class IDSBase(DDVersion):  # noqa: D207
 
     Examples
     --------
-    The IDSBase class manages the following filesystem index IDS attributes.
+    The IdsBase class manages the following filesystem index IDS attributes.
 
-    >>> IDSBase().attrs
+    >>> IdsBase().attrs
     ['pulse', 'run', 'name', 'occurrence', 'machine', 'user', 'backend']
-    >>> list(Dataset.default_ids_attrs().keys()) == IDSBase().attrs
+    >>> list(Dataset.default_ids_attrs().keys()) == IdsBase().attrs
     True
 
     Attributes may be set positionaly or as keyword arguments.
 
-    >>> ids = IDSBase(100, run=12)
+    >>> ids = IdsBase(100, run=12)
     >>> ids.pulse, ids.run
     (100, 12)
 
-    IDSBase attributes may be accessed from instance.
+    IdsBase attributes may be accessed from instance.
 
-    >>> equilibrium = IDSBase(130506, 403, 'equilibrium')
+    >>> equilibrium = IdsBase(130506, 403, 'equilibrium')
     >>> equilibrium.pulse, equilibrium.run, equilibrium.name
     (130506, 403, 'equilibrium')
     >>> equilibrium.user, equilibrium.machine, equilibrium.backend
@@ -153,34 +156,35 @@ class IDSBase(DDVersion):  # noqa: D207
     AttributeError: attr shot not in self.attrs ['pulse', 'run', 'name', 'occurrence', \
 'machine', 'user', 'backend']
 
-    The has_default_attrs property may be used to check if any IDSattrs have been set.
+    The has_default_attrs property may be used to check if
+    any IDSattrs have been set.
 
-    >>> IDSBase().has_default_attrs
+    >>> IdsBase().has_default_attrs
     True
-    >>> IDSBase(pulse=7).has_default_attrs
+    >>> IdsBase(pulse=7).has_default_attrs
     False
 
     The home, database_path, and ids_path properties are set based on the user value.
 
     >>> import os
     >>> imashome = os.environ['IMAS_HOME']
-    >>> IDSBase(user='public').home == os.path.join(imashome, "shared")
+    >>> IdsBase(user='public').home == os.path.join(imashome, "shared")
     True
     >>> userhome = os.path.expanduser("~username")
-    >>> IDSBase(user='username').home == os.path.join(userhome, "public")
+    >>> IdsBase(user='username').home == os.path.join(userhome, "public")
     True
     >>> path = os.path.join(userhome, "public", "imasdb", "iter", "3")
-    >>> IDSBase(user='username', machine='iter', dd_version='3.22.0').database_path\
+    >>> IdsBase(user='username', machine='iter', dd_version='3.22.0').database_path\
 == path
     True
-    >>> idsattrs = IDSBase(1, 2, user='username', machine='iter', dd_version='3.22.0')
+    >>> idsattrs = IdsBase(1, 2, user='username', machine='iter', dd_version='3.22.0')
     >>> idsattrs.ids_path == \
 os.path.join(userhome, 'public', 'imasdb', 'iter', '3', '1', '2')
     True
 
     Check for the existance of an IDS and set mode accordingly.
 
-    >>> IDSBase(1, 3, 'pf_active').is_empty
+    >>> IdsBase(1, 3, 'pf_active').is_empty
     True
 
     """
@@ -194,7 +198,7 @@ os.path.join(userhome, 'public', 'imasdb', 'iter', '3', '1', '2')
     user: str = field(repr=False, default="public")
     backend: str = field(repr=False, default="hdf5")
 
-    index_attrs: ClassVar[list[str]] = [
+    database_attrs: ClassVar[list[str]] = [
         "pulse",
         "run",
         "name",
@@ -204,18 +208,35 @@ os.path.join(userhome, 'public', 'imasdb', 'iter', '3', '1', '2')
         "backend",
     ]
 
+    def new_ids(self, name: Optional[str] = None) -> None:
+        """Return a new ids from IDSFactory and update name, and ids attributes."""
+        if name is not None:
+            self.name = name
+        return imas.IDSFactory(version=str(self.dd_version)).new(self.name)
+
+    @property
+    def ids(self):
+        """Return new ids from IDSFactory."""
+        return self.new_ids()
+
     @property
     def attrs(self) -> list[str]:
-        """Return IDS filesystem index attributes. Subclass to append."""
-        return self.index_attrs
+        """Return IDS attribute list. Subclass to append."""
+        return self.database_attrs
 
     @classmethod
-    def default_ids_attrs(cls) -> dict:
+    def default_ids_attrs(cls, exclude=None) -> dict:
         """Return dict of default ids attributes."""
-        return {attr: getattr(cls, attr) for attr in cls.index_attrs}
+        if exclude is None:
+            exclude = []
+        return {
+            attr: getattr(cls, attr)
+            for attr in cls.database_attrs
+            if attr not in exclude
+        }
 
     @property
-    def ids_attrs(self):
+    def ids_attrs(self) -> dict:
         """Manage dict of ids attributes."""
         return {attr: getattr(self, attr) for attr in self.attrs}
 
@@ -226,15 +247,26 @@ os.path.join(userhome, 'public', 'imasdb', 'iter', '3', '1', '2')
                 raise AttributeError(f"attr {attr} not in self.attrs {self.attrs}")
             setattr(self, attr, value)
 
+    def _compare_attrs(self, attrs: dict):
+        """Return comparison of other attrs with self."""
+        return {attr: getattr(self, attr) for attr in attrs} == attrs
+
+    @property
+    def has_base_attrs(self):
+        """Return True if database attrs are equal to base class defaults."""
+        base_attrs = IdsBase.default_ids_attrs(exclude=["name", "occurrence"])
+        return self._compare_attrs(base_attrs)
+
     @property
     def has_default_attrs(self):
-        """Return True if IDSattrs are default, else False."""
-        return self.ids_attrs == self.default_ids_attrs()
+        """Return True if database attrs are default, else False."""
+        default_attrs = self.default_ids_attrs(exclude=["name", "occurrence"])
+        return self._compare_attrs(default_attrs)
 
     @property
     def uri(self):
-        """Return URI build from IDSBase parameters."""
-        if self.has_default_attrs:
+        """Return URI build from IdsBase parameters."""
+        if self.has_base_attrs:
             return ""
         self.check_ids_attrs()
         return (
@@ -279,10 +311,8 @@ os.path.join(userhome, 'public', 'imasdb', 'iter', '3', '1', '2')
     @property
     def _unset_attrs(self) -> bool:
         """Return True if any required input attributes are unset."""
-        return (
-            (self.pulse == 0 or self.pulse is None)
-            or (self.run == 0 or self.run is None)
-            or self.name is None
+        return (self.pulse == 0 or self.pulse is None) or (
+            self.run == 0 or self.run is None
         )
 
     def check_ids_attrs(self):
@@ -313,13 +343,13 @@ os.path.join(userhome, 'public', 'imasdb', 'iter', '3', '1', '2')
 
 
 @dataclass(kw_only=True)
-class Datastore(IDSBase):  # noqa: D207
+class Datastore(IdsBase):  # noqa: D207
     """Locate IDS datastore. Manage URI and dd_version attributes.
 
     Parameters
     ----------
     uri : str. optional
-        IDS unified resorce identifier. The default is constructed from IDSBase.
+        IDS unified resorce identifier. The default is constructed from IdsBase.
 
     Examples
     --------
@@ -362,6 +392,8 @@ class Datastore(IDSBase):  # noqa: D207
 
     def __post_init__(self):
         """Update Datastore URI."""
+        if hasattr(super(), "__post_init__"):
+            super().__post_init__()
         self._update_uri()
 
     def _update_uri(self):
@@ -372,14 +404,14 @@ class Datastore(IDSBase):  # noqa: D207
             case str():
                 if not self.has_default_attrs:
                     raise AttributeError(
-                        f"Set ether IDSBase {self.ids_attrs} or " f"uri {self.uri}"
+                        f"Set ether IdsBase {self.ids_attrs} or " f"uri {self.uri}"
                     )
             case _:
                 raise TypeError(f"type(uri) {type(self.uri)} is not str")
 
     @property  # type: ignore[no-redef]
     def uri(self) -> str:  # noqa
-        """Overide IDSBase uri. Return Datastore URI."""
+        """Overide IdsBase uri. Return Datastore URI."""
         return self._uri
 
     @uri.setter
@@ -425,7 +457,7 @@ class Dataset(Datastore):  # noqa: D207
 
     Examples
     --------
-    The Dataset class extends IDSBase adding attributes and methods for locating an IDS
+    The Dataset class extends IdsBase adding attributes and methods for locating an IDS
     dataset.
 
     Arguments in positions > 4 are keyword only.
@@ -439,9 +471,9 @@ but 6 were given
     The minimum input requred for Database is 'ids' or 'uri',
     'pulse', 'run', and 'name':
 
-    >>> Dataset(uri='imas:hdf5?path=/tmp', mode=None, dd_version='3.22.0')
+    >>> Dataset(uri='imas:hdf5?path=/tmp', dd_version='3.22.0')
     Dataset(dd_version=<Version('3.22.0')>, uri='imas:hdf5?path=/tmp', \
-mode=None, ids=None)
+mode='r', lazy=True, ids=None)
 
     >>> Dataset(pulse=101)
     Traceback (most recent call last):
@@ -449,14 +481,14 @@ mode=None, ids=None)
     imas_core.exception.ALException: When self.ids is None require:
     pulse (101 > 0) & run (0 > 0) & name (None != None)
 
-    >>> Dataset()
+    >>> Dataset().get()
     Traceback (most recent call last):
         ...
     ValueError: No URI provided.
 
     Dataset instances can produce empty IDSs.
 
-    >>> dataset = Dataset(1, 1, name='equilibrium', dd_version='3.22.0', mode=None)
+    >>> dataset = Dataset(1, 1, name='equilibrium', dd_version='3.22.0')
     >>> equilibrium = dataset.new_ids()
     >>> equilibrium.has_value
     False
@@ -469,7 +501,7 @@ mode=None, ids=None)
 
     Accessing an data entry that can not be found will raise a ImasCoreBackendException.
 
-    >>> Dataset(1, 1, 'pf_active') # doctest: +IGNORE_EXCEPTION_DETAIL
+    >>> Dataset(1, 1, 'pf_active').get() # doctest: +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):
         ...
     ImasCoreBackendException
@@ -512,11 +544,11 @@ mode=None, ids=None)
     >>> ids_dataset = Dataset(ids=dataset.ids)
     >>> ids_dataset.name
     'equilibrium'
-    >>> ids_dataset.uri == ""
+    >>> ids_dataset.has_default_attrs
     True
     >>> ids_dataset = Dataset(ids=dataset.ids, uri='imas:hdf5?')
     >>> ids_dataset.name, ids_dataset.uri, ids_dataset.has_default_attrs
-    ('equilibrium', 'imas:hdf5?', False)
+    ('equilibrium', 'imas:hdf5?', True)
 
     Other database attributes such as pulse and run, are
     not avalable when an ids is passed. These values are set to their default values.
@@ -561,18 +593,20 @@ mode=None, ids=None)
 
     """
 
-    mode: str | None = "r"  # Open an existing data entry. Raise error if not present.
-    ids: IDSToplevel | None
+    mode: str | None = "r"
+    lazy: bool = True
+    ids: IDSToplevel | None = field(default=None)
     _ids: IDSToplevel | None = field(init=False, repr=False, default=None)
 
     def __post_init__(self):
         """Load ids."""
         super().__post_init__()
-        self._open()
+        if self._ids is not None:
+            self.name = self._ids.metadata.name
 
     def check_ids_attrs(self):
-        """Extend to skip IDS attrs check when ids is not None."""
-        if self.ids is not None:
+        """Extend to skip IDS attrs check when ids is not None or mode is None."""
+        if self._ids is not None or self.mode is None:
             return
         super().check_ids_attrs()
 
@@ -581,28 +615,21 @@ mode=None, ids=None)
         name: Optional[str] = None,
         occurrence: Optional[int] = None,
         *,
-        lazy=True,
+        lazy: Optional[bool] = None,
     ) -> IDSToplevel:
         """Return IDS from Dataset."""
         if name is not None:
             self.name = name
         if occurrence is not None:
             self.occurrence = occurrence
-        self.ids = self.db_entry.get(self.name, self.occurrence, lazy=lazy)
+        if lazy is not None:
+            self.lazy = lazy
+        self.ids = self.db_entry.get(self.name, self.occurrence, lazy=self.lazy)
         return self.ids
 
     def put(self, ids: IDSToplevel, occurrence: int = 0):
         """Write ids to database entry."""
         self.db_entry.put(ids, occurrence)
-
-    def _open(self):
-        """Return."""
-        if self.ids is not None:
-            self.name = self.ids.metadata.name
-            return
-        match self.mode:
-            case "r":
-                self.get()
 
     @cached_property
     def db_entry(self):
@@ -612,9 +639,11 @@ mode=None, ids=None)
     @property
     def is_valid(self):
         """Return database entry validity flag."""
-        # try:
-        imas.DBEntry(uri=self.uri, mode="r").get(self.name, self.occurrence)
-        # _mode = self.mode
+        try:
+            imas.DBEntry(uri=self.uri, mode="r").get(self.name, self.occurrence)
+            return True
+        except (imas.exception.ALException, imas.exception.DataEntryException):
+            return False
 
     def __enter__(self):
         """Return DBEntry IDS with context."""
@@ -629,6 +658,11 @@ mode=None, ids=None)
     @property  # type: ignore[no-redef]
     def ids(self) -> IDSToplevel:  # noqa
         """Manage ids attribute."""
+        if self._ids is None and self.uri:
+            try:
+                self._ids = self.get()
+            except (imas.exception.ALException, AttributeError):
+                pass
         return self._ids
 
     @ids.setter
@@ -643,13 +677,6 @@ mode=None, ids=None)
         if self.ids._lazy:
             self.get(lazy=False)
         return self.ids._xxhash()
-
-    def new_ids(self, name: Optional[str] = None) -> None:
-        """Return a new ids from IDSFactory and update name, and ids attributes."""
-        if name is not None:
-            self.name = name
-        self.ids = imas.IDSFactory(version=str(self.dd_version)).new(self.name)
-        return self.ids
 
     @classmethod
     def update_ids_attrs(cls, ids_attrs: bool | Ids):
@@ -667,6 +694,20 @@ mode=None, ids=None)
         if isinstance(attrs := cls.update_ids_attrs(ids_attrs), dict):
             return cls(**attrs)
         return False
+
+    def next_occurrence(self, limit=10000) -> int:
+        """Return index of next available occurrence."""
+        raise NotImplementedError
+        """
+        ids_path = "ids_properties/homogeneous_time"
+        for i in range(limit):
+            try:
+                if self.get_ids(ids_path, i) == imas.ids_defs.EMPTY_INT:
+                    return i
+            except imas.exception.ALException:
+                return i
+        raise IndexError(f"no empty occurrences found for i < {limit}")
+        """
 
 
 @dataclass
@@ -768,8 +809,8 @@ class DataAttrs:  # noqa: D207
 
     """
 
-    ids_attrs: Ids | bool | str
-    subclass: InitVar[Type[IDSBase]] = IDSBase
+    ids_attrs: Ids | bool | str | list | tuple
+    subclass: InitVar[Type[IdsBase]] = IdsBase
     default_attrs: dict = field(init=False, default_factory=dict)
 
     def __post_init__(self, subclass):
@@ -796,7 +837,7 @@ class DataAttrs:  # noqa: D207
             return False
         if self.ids_attrs is True:
             return default_attrs
-        if isinstance(self.ids_attrs, IDSBase):
+        if isinstance(self.ids_attrs, IdsBase):
             return self.ids_attrs.ids_attrs
         if isinstance(self.ids_attrs, dict):
             return default_attrs | self.ids_attrs
@@ -804,7 +845,7 @@ class DataAttrs:  # noqa: D207
             dataset = Dataset(**default_attrs, ids=self.ids_attrs)
             return dataset.ids_attrs | {"ids": self.ids_attrs}
         if isinstance(self.ids_attrs, list | tuple):
-            return default_attrs | dict(zip(Dataset.attrs, self.ids_attrs))
+            return default_attrs | dict(zip(Dataset.database_attrs, self.ids_attrs))
         raise TypeError(f"malformed attrs: {type(self.ids_attrs)}")
 
 

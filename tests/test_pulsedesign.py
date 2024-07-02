@@ -2,20 +2,21 @@ import matplotlib.pylab
 import numpy as np
 import pytest
 
-from nova.imas.database import Database, IdsEntry
+from nova.imas.database import Database
+from nova.imas.ids_entry import IdsEntry
 from nova.imas.pulsedesign import PulseDesign
 from nova.imas.equilibrium import EquilibriumData
 from nova.imas.sample import Sample
-from nova.imas.test_utilities import ids_attrs, mark, mark_imaspy
+from nova.imas.test_utilities import ids_attrs, mark, mark_imas
 
 
 @pytest.fixture
 def ids():
     ids_entry = IdsEntry(name="equilibrium")
     time = [1.5, 19, 110, 600, 670]
-    ids_entry.ids_data.time = time
-    ids_entry.ids_data.time_slice.resize(len(time))
-    ids_entry.ids_data.ids_properties.homogeneous_time = 1
+    ids_entry.ids.time = time
+    ids_entry.ids.time_slice.resize(len(time))
+    ids_entry.ids.ids_properties.homogeneous_time = 1
     with ids_entry.node("time_slice:boundary_separatrix.*"):
         ids_entry["type", :] = [0, 1, 1, 1, 1]
         ids_entry["psi", :] = [107.8, 73.5, 17.4, -13.7, -7.5]
@@ -50,10 +51,10 @@ def ids():
                 [1.7, 0.6, 0.1, -0.0, -0.1],
             ]
         )
-    return ids_entry.ids_data
+    return ids_entry.ids
 
 
-@mark_imaspy
+@mark_imas
 def test_ids_file_cache(ids):
     ids.time_slice[0].boundary_separatrix.psi = 66
     design_a = PulseDesign(ids=ids, dplasma=-1, nwall=None, nlevelset=None)
@@ -67,10 +68,10 @@ def test_ids_file_cache(ids):
     assert design_b["psi_boundary"] == 77
 
 
-@mark_imaspy
+@mark_imas
 def test_pf_active_ids_input(ids):
     design = PulseDesign(ids=ids, dplasma=-1, nwall=None, nlevelset=None)
-    pf_active_ids = design.geometry["pf_active"](**design.pf_active).ids_data
+    pf_active_ids = design.geometry["pf_active"](**design.pf_active).ids
     design = PulseDesign(
         ids=ids,
         dplasma=-1,
@@ -82,10 +83,10 @@ def test_pf_active_ids_input(ids):
     design.update_metadata(ids_entry)
 
 
-@mark_imaspy
+@mark_imas
 def test_pf_active_ids_input_cache(ids):
-    pf_active_103 = Database(111001, 103, "iter_md", name="pf_active").ids_data
-    pf_active_203 = Database(111001, 203, "iter_md", name="pf_active").ids_data
+    pf_active_103 = Database(111001, 103, "iter_md", name="pf_active").ids
+    pf_active_203 = Database(111001, 203, "iter_md", name="pf_active").ids
     design_103 = PulseDesign(
         ids=ids,
         dplasma=-1,
@@ -105,7 +106,7 @@ def test_pf_active_ids_input_cache(ids):
     )
 
 
-@mark_imaspy
+@mark_imas
 def test_make_frame(ids):
     design = PulseDesign(ids=ids)
     design.itime = 0

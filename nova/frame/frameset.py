@@ -217,7 +217,7 @@ class FrameSet(netCDF, FrameSetLoc):
 
     def store(self, vtk=True):
         """Store frame, subframe and methods as groups within netCDF file."""
-        self.frame.store(self.filepath, self.subgroup("frame"), self.mode(), vtk)
+        self.frame.store(self.filepath, self.subgroup("frame"), self.get_mode(), vtk)
         self.subframe.store(self.filepath, self.subgroup("subframe"), "a", vtk)
         for attr in self.__dict__:
             data = getattr(self, attr)

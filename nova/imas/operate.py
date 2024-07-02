@@ -8,7 +8,8 @@ import numpy as np
 from scipy.constants import mu_0
 
 from nova.biot.biot import Nbiot
-from nova.imas.database import Ids, IdsIndex, ImasIds
+from nova.imas.dataset import Ids, ImasIds
+from nova.imas.ids_index import IdsIndex
 from nova.imas.machine import Machine
 from nova.imas.profiles import Profile
 
@@ -48,7 +49,7 @@ class Grid:
     >>> from nova.imas.database import Database
     >>> from nova.imas.equilibrium import EquilibriumData
     >>> try:
-    ...     _ = Database(130506, 403).get_ids('equilibrium')
+    ...     _ = Database(130506, 403, 'equilibrium').get()
     ... except:
     ...     pytest.skip('IMAS not found or 130506/403 unavailable')
 
@@ -58,11 +59,11 @@ class Grid:
 
     Specify grid relitive to equilibrium ids.
     >>> equilibrium = EquilibriumData(130506, 403)
-    >>> Grid(50, 'ids', ids=equilibrium.ids_data).grid_attrs
+    >>> Grid(50, 'ids', ids=equilibrium.ids).grid_attrs
     {'number': 50, 'limit': [2.75, 8.9, -5.49, 5.51], 'index': 'plasma'}
 
     Extract exact grid from equilibrium ids.
-    >>> grid = Grid('ids', 'ids', ids=equilibrium.ids_data)
+    >>> grid = Grid('ids', 'ids', ids=equilibrium.ids)
     >>> grid.grid_attrs['number']
     8385
 
@@ -119,7 +120,7 @@ class Grid:
 
 
 @dataclass
-class Operate(Profile, Grid, Machine):
+class Operate(Grid, Profile, Machine):
     """
     Extend Machine with default values for Operate class.
 
@@ -183,6 +184,11 @@ class Operate(Profile, Grid, Machine):
 
 
 if __name__ == "__main__":
+
+    import doctest
+
+    doctest.testmod(verbose=False)
+
     # pulse, run = 105007, 9
     # pulse, run = 135007, 4
     # pulse, run = 105028, 1
@@ -198,7 +204,7 @@ if __name__ == "__main__":
         elm=True,
         dplasma=-2000,
         ngrid=2000,
-        tplasma="r",
+        tplasma="h",
         limit=0.25,
         nlevelset=None,
         nwall=10,

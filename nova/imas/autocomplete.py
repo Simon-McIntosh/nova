@@ -3,10 +3,10 @@
 import os
 import string
 
-from nova.imas.database import IDS
+from nova.imas.dataset import IdsBase
 
 
-class AutoComplete(IDS):
+class AutoComplete(IdsBase):
     """IMAS database auto-completer."""
 
     @staticmethod

@@ -31,3 +31,5 @@ class Inductance(Plot, Operate):
         self.axes = axes
         kwargs = dict(marker="o", linestyle="") | kwargs
         self.axes.plot(self.subframe["x"], self.subframe["z"], **kwargs)
+        kwargs = dict(marker=".", linestyle="", color="C1") | kwargs
+        self.axes.plot(self.target["x"], self.target["z"], **kwargs)

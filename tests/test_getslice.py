@@ -57,12 +57,14 @@ def test_float_copy():
 
 
 @pytest.mark.parametrize("time_index", [1, -1])
-def test_get(data, time_index):
+def test_get_data(data, time_index):
     getslice = GetSlice(data)
     getslice.itime = time_index
     assert getslice.time_index == time_index
     assert getslice.itime == time_index
-    assert np.isclose(getslice.get("elongation"), DATA["elongation"][1][time_index])
+    assert np.isclose(
+        getslice.get_data("elongation"), DATA["elongation"][1][time_index]
+    )
     assert getslice._cache == {
         attr: getslice._cache.get(attr, None) for attr in getslice.persist
     }

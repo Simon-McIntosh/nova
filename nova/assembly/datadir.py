@@ -11,7 +11,7 @@ class DataDir:
     """Manage file paths."""
 
     folder: str
-    file: str = None
+    file: str | None = None
     subset: str = "all"
     data_dir: str = "data/Ansys"
     rst_dir: str = "//io-ws-ccstore1/ANSYS_Data/mcintos"

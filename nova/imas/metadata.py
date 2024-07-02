@@ -10,7 +10,7 @@ import numpy as np
 import pandas
 
 import nova
-from nova.imas.database import Ids
+from nova.imas.dataset import Ids
 
 
 @dataclass
@@ -195,9 +195,9 @@ class Metadata:
 
 
 if __name__ == "__main__":
-    import imas
+    import imaspy as imas
 
-    ids = imas.equilibrium()
+    ids = imas.IDSFactory().equilibrium()
 
     metadata = Metadata(ids)
     metadata.put_properties(

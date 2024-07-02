@@ -7,7 +7,8 @@ from functools import cached_property
 import yaml
 
 from nova.database.filepath import FilePath
-from nova.imas.database import Database, IDS
+from nova.imas.database import Database
+from nova.imas.dataset import IdsBase
 from nova.imas.metadata import Code, Contact, Contacts, Properties
 
 
@@ -45,7 +46,7 @@ class CAD(Contacts):
 
 
 @dataclass
-class YAML(Contacts, IDS):
+class YAML(Contacts, IdsBase):
     """Manage machine description YAML data."""
 
     pbs: int = 0
@@ -88,7 +89,7 @@ class YAML(Contacts, IDS):
 
 
 @dataclass
-class DataSource(YAML, IDS):
+class DataSource(YAML, IdsBase):
     """Manage machine description data source."""
 
     machine: str = "iter_md"

@@ -83,9 +83,9 @@ class MetaData(ABC):
                         )
                 if replace:
                     setattr(self, attribute, value)
-                elif types[attribute] == dict:
+                elif types[attribute] is dict:
                     getattr(self, attribute).update(value)
-                elif types[attribute] == list:
+                elif types[attribute] is list:
                     getattr(self, attribute).extend(
                         [
                             attr

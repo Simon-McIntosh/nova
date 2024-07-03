@@ -67,7 +67,6 @@ def test_extrapolate_attrs():
     assert extrapolate.ids.code.name == "CORSICA"
 
 
-"""
 @mark["CORSICA"]
 @pytest.mark.parametrize("itime", [5, 15, 20, 30, 35, 40])
 def test_extrapolate_rms_error(itime):
@@ -90,4 +89,3 @@ def test_extrapolate_rms_error(itime):
 
 if __name__ == "__main__":
     pytest.main([__file__])
-"""

@@ -102,7 +102,7 @@ class Grid:
                 f"Require IMAS ids when limit:{self.limit} "
                 f"or ngrid:{self.ngrid} == 'ids'"
             )
-        ids_index = IdsIndex(self.ids)
+        ids_index = IdsIndex(self.ids, "time_slice")
         index = ids_index.get_slice(0, "profiles_2d.grid_type.index")
         grid = ids_index.get_slice(0, "profiles_2d.grid")
         if self.limit == "ids":  # Load grid limit from equilibrium ids.

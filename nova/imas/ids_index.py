@@ -95,14 +95,14 @@ class IdsIndex:
 
     """
 
-    ids: IDSToplevel
-    ids_node: str | None = "time_slice"
+    ids: IDSToplevel = field(default=None)
+    ids_node: str = ""
     transpose: bool = field(init=False, default=False)
     shapes: dict[str, tuple[int, ...] | tuple[()]] = field(
         init=False, default_factory=dict
     )
     _ids: IDSToplevel | None = field(init=False, repr=False, default=None)
-    _ids_node: str | None = field(init=False, repr=False, default="time_slice")
+    _ids_node: str = field(init=False, repr=False, default="")
 
     # def __post_init__(self):
     #    """Initialize ids node."""

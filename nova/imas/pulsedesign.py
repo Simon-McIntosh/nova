@@ -402,17 +402,18 @@ class PulseDesign(Animate, Plot1D, Control, ITER):
     import IdsEntry and instantiate as an equilibrium `ids`.
 
     >>> import pytest
-    >>> from nova.imas.database import IdsEntry, IMAS_MODULE_NOT_FOUND
-    >>> if IMAS_MODULE_NOT_FOUND:
+    >>> from nova.imas.ids_entry import IdsEntry
+    >>> from nova.imas.test_utilities import IMPORT_IMAS
+    >>> if not IMPORT_IMAS:
     ...     pytest.skip('imas module not found')
     >>> ids_entry = IdsEntry(name='equilibrium')
 
     Define time vector, size time_slice, and define homogeneous_time.
 
     >>> time = [1.5, 19, 110, 600, 670]
-    >>> ids_entry.ids_data.time = time
-    >>> ids_entry.ids_data.time_slice.resize(len(time))
-    >>> ids_entry.ids_data.ids_properties.homogeneous_time = 1
+    >>> ids_entry.ids.time = time
+    >>> ids_entry.ids.time_slice.resize(len(time))
+    >>> ids_entry.ids.ids_properties.homogeneous_time = 1
 
     Populate boundary_separatrix node. Low precision used here for readability.
 
@@ -453,7 +454,7 @@ class PulseDesign(Animate, Plot1D, Control, ITER):
 
     Instantiate PulseDesign using source equilibrium ids.
 
-    >>> design = PulseDesign(ids=ids_entry.ids_data)
+    >>> design = PulseDesign(ids=ids_entry.ids)
 
     Set time instance to update constraints and solve external currents.
 
@@ -487,6 +488,7 @@ class PulseDesign(Animate, Plot1D, Control, ITER):
     gamma: float = 1e-12
     field_weight: float | int = 50
     name: str = "equilibrium"
+    lazy: bool = False
 
     def __post_init__(self):
         """Cache input dataset."""
@@ -651,7 +653,7 @@ class PulseDesign(Animate, Plot1D, Control, ITER):
         provenance.extend(
             [
                 (
-                    IdsBase(*value.split(",")).uri
+                    IdsBase(**dict(zip(IdsBase.database_attrs, value.split(",")))).uri
                     if not isinstance(value, (int, np.integer))
                     else f"imas:ids?name={attr[:-3]};hash={value}"
                 )
@@ -669,10 +671,8 @@ class PulseDesign(Animate, Plot1D, Control, ITER):
     @cached_property
     def _data(self) -> xarray.Dataset:
         """Return cached waveform dataset."""
-        attrs_0d = [
-            "li_3",
-            "psi_axis",
-            "psi_boundary",
+        attrs_0d = ["li_3", "psi_axis", "psi_boundary"]
+        attrs_boundary_seperatrix = [
             "minor_radius",
             "elongation",
             "triangularity",
@@ -721,7 +721,7 @@ class PulseDesign(Animate, Plot1D, Control, ITER):
             coords=[data.time, data.boundary_index, data.point],
             dims=["time", "boundary_index", "point"],
         )
-        for attr in attrs_0d:
+        for attr in attrs_0d + attrs_boundary_seperatrix:
             data[attr] = xarray.DataArray(0.0, coords=[data.time], dims=["time"])
         for axis in ["magnetic_axis", "geometric_axis"]:
             data[axis] = xarray.DataArray(
@@ -748,7 +748,7 @@ class PulseDesign(Animate, Plot1D, Control, ITER):
             data["vertical_force"][itime] = self.force.fz
             data["field"][itime] = self.field.bp
             data["boundary"][itime] = self.plasma.boundary(length)
-            for attr in attrs_0d:
+            for attr in attrs_0d + attrs_boundary_seperatrix:
                 data[attr][itime] = getattr(self.plasma, attr)
             data["magnetic_axis"][itime] = self.plasma.magnetic_axis
             data["boundary_type"][itime] = int(not self.plasma.limiter)
@@ -762,25 +762,26 @@ class PulseDesign(Animate, Plot1D, Control, ITER):
             if (n_points := len(strike_points)) > 0:
                 data["strike_point"][itime, :n_points] = strike_points
         data.attrs["attrs_0d"] = attrs_0d
+        data.attrs["attrs_boundary_seperatrix"] = attrs_boundary_seperatrix
         return data
 
     @cached_property
     def pf_active_ids(self) -> Ids:
         """Return waveform pf_active ids."""
-        pf_active_md = Database(**self.pf_active)  # type: ignore
-        ids_entry = IdsEntry(ids_data=pf_active_md.ids_data, name="pf_active")
+        pf_active_md = Database(**self.pf_active, lazy=False)  # type: ignore
+        ids_entry = IdsEntry(ids=pf_active_md.ids, name="pf_active")
         self.update_metadata(ids_entry)
-        ids_entry.ids_data.time = self._data.time.data
+        ids_entry.ids.time = self._data.time.data
         with ids_entry.node("coil:*.data"):
             ids_entry["current", :] = self._data["current"].data.T
-        return ids_entry.ids_data
+        return ids_entry.ids
 
     @cached_property
     def equilibrium_ids(self) -> Ids:
         """Return waveform equilibrium ids."""
-        ids_entry = IdsEntry(ids_data=self.ids_data, name="equilibrium")
+        ids_entry = IdsEntry(ids=self.ids, name="equilibrium")
         self.update_metadata(ids_entry)
-        ids_entry.ids_data.time = self._data.time.data
+        ids_entry.ids.time = self._data.time.data
         with ids_entry.node("time_slice:global_quantities.*"):
             for attr in ["li_3", "psi_axis", "psi_boundary"]:
                 data = self._data[attr].data
@@ -791,8 +792,11 @@ class PulseDesign(Animate, Plot1D, Control, ITER):
         with ids_entry.node("time_slice:global_quantities.magnetic_axis.*"):
             for i, attr in enumerate("rz"):
                 ids_entry[attr, :] = self._data.magnetic_axis.data[:, i]
-        with ids_entry.node("time_slice:boundary_separatrix.*"):
+        with ids_entry.node("time_slice:global_quantities.*"):
             for attr in self._data.attrs_0d:
+                ids_entry[attr, :] = self._data[attr].data
+        with ids_entry.node("time_slice:boundary_separatrix.*"):
+            for attr in self._data.attrs_boundary_seperatrix:
                 ids_entry[attr, :] = self._data[attr].data
             ids_entry["type", :] = self._data["boundary_type"].data
             ids_entry["psi", :] = -self._data["psi_boundary"].data  # COCOS
@@ -803,7 +807,7 @@ class PulseDesign(Animate, Plot1D, Control, ITER):
             for i, attr in enumerate("rz"):
                 ids_entry[attr, :] = self._data["geometric_axis"].data[:, i]
         for itime in range(self.data.sizes["time"]):
-            boundary = ids_entry.ids_data.time_slice[itime].boundary_separatrix
+            boundary = ids_entry.ids.time_slice[itime].boundary_separatrix
             # boundary x_point
             if self._data.x_point_number[itime].data > 0:
                 x_point = self._data.x_point[itime].data
@@ -820,7 +824,7 @@ class PulseDesign(Animate, Plot1D, Control, ITER):
             # profiles 1D
 
             # profiles 2D
-            profiles_2d = ids_entry.ids_data.time_slice[itime].profiles_2d
+            profiles_2d = ids_entry.ids.time_slice[itime].profiles_2d
             profiles_2d.resize(1)
             profiles_2d[0].type.name = "total"
             profiles_2d[0].type.index = 0
@@ -838,14 +842,14 @@ class PulseDesign(Animate, Plot1D, Control, ITER):
                 profiles_2d[0].b_field_r = self._data.br2d[itime].data
                 profiles_2d[0].b_field_z = self._data.bz2d[itime].data
 
-        return ids_entry.ids_data
+        return ids_entry.ids
 
     def write_ids(self, **ids_attrs):
         """Write pulse design data to equilibrium ids."""
         if ids_attrs["occurrence"] is None:
             ids_attrs["occurrence"] = Database(**ids_attrs).next_occurrence()
         ids_attrs |= {"name": "equilibrium"}
-        ids_entry = IdsEntry(ids_data=self.equilibrium_ids, **ids_attrs)
+        ids_entry = IdsEntry(ids=self.equilibrium_ids, **ids_attrs)
         ids_entry.put_ids()
 
     def plot_waveform(self):
@@ -1042,6 +1046,11 @@ class BenchmarkDesign(PulseDesign):
 
 
 if __name__ == "__main__":
+
+    import doctest
+
+    doctest.testmod()
+
     """
     design = AnimateDesign(
         135013,
@@ -1053,7 +1062,7 @@ if __name__ == "__main__":
         fps=5,
     )
     """
-
+    """
     design = PulseDesign(135013, 2, "iter", 1)
 
     # design.levelset.solve(limit=0.1, index="coil")
@@ -1079,6 +1088,7 @@ if __name__ == "__main__":
     # design.make_frame(84 / 5)
 
     # design.animate()
+    """
 
     """
     design.itime = 5

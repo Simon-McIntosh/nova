@@ -601,6 +601,7 @@ mode='r', lazy=True, ids=None)
     def __post_init__(self):
         """Load ids."""
         super().__post_init__()
+        self._get_ids()
         if self._ids is not None:
             self.name = self._ids.metadata.name
 
@@ -655,14 +656,17 @@ mode='r', lazy=True, ids=None)
         self.db_entry.__exit__(exc_type, exc_val, traceback)
         del self.db_entry
 
+    def _get_ids(self):
+        """Get ids."""
+        if self._ids is None and self.uri and self.name is not None:
+            self._ids = self.get()
+
     @property  # type: ignore[no-redef]
     def ids(self) -> IDSToplevel:  # noqa
         """Manage ids attribute."""
-        if self._ids is None and self.uri:
-            try:
-                self._ids = self.get()
-            except (imas.exception.ALException, AttributeError):
-                pass
+        self._get_ids()
+        # except (imas.exception.ALException, AttributeError, TypeError):
+        #    pass
         return self._ids
 
     @ids.setter

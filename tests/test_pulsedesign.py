@@ -71,7 +71,7 @@ def test_ids_file_cache(ids):
 @mark_imas
 def test_pf_active_ids_input(ids):
     design = PulseDesign(ids=ids, dplasma=-1, nwall=None, nlevelset=None)
-    pf_active_ids = design.geometry["pf_active"](**design.pf_active).ids
+    pf_active_ids = design.geometry["pf_active"](**design.pf_active, lazy=False).ids
     design = PulseDesign(
         ids=ids,
         dplasma=-1,
@@ -85,8 +85,12 @@ def test_pf_active_ids_input(ids):
 
 @mark_imas
 def test_pf_active_ids_input_cache(ids):
-    pf_active_103 = Database(111001, 103, "pf_active", machine="iter_md").ids
-    pf_active_203 = Database(111001, 203, "pf_active", machine="iter_md").ids
+    pf_active_103 = Database(
+        111001, 103, "pf_active", machine="iter_md", lazy=False
+    ).ids
+    pf_active_203 = Database(
+        111001, 203, "pf_active", machine="iter_md", lazy=False
+    ).ids
     design_103 = PulseDesign(
         ids=ids,
         dplasma=-1,

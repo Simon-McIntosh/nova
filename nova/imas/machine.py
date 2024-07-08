@@ -15,7 +15,7 @@ import xarray
 
 from nova.graphics.plot import Plot
 from nova.frame.coilset import CoilSet
-from nova.imas.database import CoilData
+from nova.imas.database import CoilData, Database
 from nova.imas.dataset import IdsBase, Ids, ImasIds, EMPTY_FLOAT
 from nova.imas.ids_index import IdsIndex
 from nova.geometry.polygon import Polygon
@@ -1117,7 +1117,7 @@ class Geometry:
                 value
                 if isinstance(value := getattr(self, attr), (bool, np.integer))
                 or "ids" not in value
-                else "ids"  # Database(ids=value["ids"]).ids_hash
+                else Database(ids=value["ids"]).ids_hash
             )
             for attr in self.geometry
         }
@@ -1126,8 +1126,6 @@ class Geometry:
 @dataclass
 class Machine(CoilSet, Geometry, CoilData):
     """Manage ITER machine geometry."""
-
-    mode: str | None = None
 
     @property
     def metadata(self):
@@ -1151,7 +1149,6 @@ class Machine(CoilSet, Geometry, CoilData):
     @metadata.setter
     def metadata(self, metadata: dict):
         """Set instance metadata, assert consistent attr_hash."""
-        print(self.group_attrs)
         attr_hash = self.hash_attrs(self.group_attrs)
         for attr in self.coilset_attrs:
             setattr(self, attr, metadata[attr])
@@ -1159,7 +1156,6 @@ class Machine(CoilSet, Geometry, CoilData):
             if geometry not in metadata:
                 setattr(self, geometry[:-3], False)
                 continue
-            print(geometry, metadata[geometry])
             if isinstance(metadata[geometry], np.integer):
                 setattr(self, geometry[:-3], metadata[geometry])
                 continue
@@ -1168,7 +1164,6 @@ class Machine(CoilSet, Geometry, CoilData):
                 for attr in metadata[geometry].split(",")
             ]
             setattr(self, geometry[:-3], dict(zip(IdsBase.database_attrs, values)))
-        print(self.group_attrs)
         assert attr_hash == self.hash_attrs(self.group_attrs)
 
     @staticmethod
@@ -1254,6 +1249,6 @@ if __name__ == "__main__":
     # machine += CoilsNonAxisymmetyric(111003, 2)  # CC
     # machine += CoilsNonAxisymmetyric(115001, 1)  # ELM
 
-    machine.ferritic.insert("Fi")
+    # machine.ferritic.insert("Fi")
 
     machine.frame.vtkplot()

@@ -1,5 +1,6 @@
 """Manage access to IMAS data entry."""
 
+import binascii
 from dataclasses import dataclass, field, InitVar, KW_ONLY
 from functools import cached_property
 import logging
@@ -635,6 +636,8 @@ mode='r', lazy=True, ids=None)
     @cached_property
     def db_entry(self):
         """Return imas.DBEntry instance."""
+        if not self.uri:
+            raise ValueError("No URI provided.")
         return imas.DBEntry(uri=self.uri, mode=self.mode)
 
     @property
@@ -659,14 +662,16 @@ mode='r', lazy=True, ids=None)
     def _get_ids(self):
         """Get ids."""
         if self._ids is None and self.uri and self.name is not None:
-            self._ids = self.get()
+            try:
+                self._ids = self.get()
+            except imas.exception.ALException:
+                self._ids = None
+                pass
 
     @property  # type: ignore[no-redef]
     def ids(self) -> IDSToplevel:  # noqa
         """Manage ids attribute."""
         self._get_ids()
-        # except (imas.exception.ALException, AttributeError, TypeError):
-        #    pass
         return self._ids
 
     @ids.setter
@@ -680,7 +685,7 @@ mode='r', lazy=True, ids=None)
         """Return xx_hash of ids data."""
         if self.ids._lazy:
             self.get(lazy=False)
-        return self.ids._xxhash()
+        return int(binascii.hexlify(self.ids._xxhash()).decode(), 16)
 
     @classmethod
     def update_ids_attrs(cls, ids_attrs: bool | Ids):

@@ -40,18 +40,15 @@ def test_has_value():
 
 
 def test_is_valid():
-    dataset = Dataset(-1, -2, "pf_active", mode="x")
+    dataset = Dataset(-1, -2, "pf_active")
     assert not dataset.is_valid
-
-    import tempfile
-
-    import imaspy as imas
-
-    name = "\\Users\\mcintos\\AppData\\Local\\Temp\\tmpfjgzef5_"
-    db_entry = imas.DBEntry(uri=f"imas:hdf5?path={name}", mode="a")
-    ids = imas.IDSFactory().new("pf_active")
-    ids.ids_properties.homogeneous_time = 1
-    db_entry.put(ids)
+    with tempfile.TemporaryDirectory() as name:
+        db_entry = imas.DBEntry(uri=f"imas:hdf5?path={name}", mode="a")
+        ids = imas.IDSFactory().new("pf_active")
+        ids.ids_properties.homogeneous_time = 1
+        db_entry.put(ids)
+        dataset = Dataset(uri=f"imas:hdf5?path={name}", name="pf_active")
+        assert dataset.is_valid
 
 
 @mark["equilibrium"]

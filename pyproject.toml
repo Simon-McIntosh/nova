@@ -70,7 +70,7 @@ graphics = [
   "seaborn>=0.12.2",
 ]
 imas = [
-  "imas-core @ git+ssh://git@git.iter.org/imas/al-core.git@bugfix/remove-build-dir",
+  "imas-core @ git+https://https://git.iter.org/scm/imas/al-core.git@bugfix/remove-build-dir",
   "imaspy @ git+ssh://git@git.iter.org/imas/imaspy.git@feature/nc",
   "h5py>=3.10.0",
 ]

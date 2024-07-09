@@ -1244,11 +1244,11 @@ if __name__ == "__main__":
         ninductance=-0.05,
     )
 
-    # from nova.imas.coils_non_axisymmetric import CoilsNonAxisymmetyric
+    # from nova.imas.coils_non_axisymmetric import CoilsNonAxisymmetric
 
-    # machine += CoilsNonAxisymmetyric(111003, 2)  # CC
-    # machine += CoilsNonAxisymmetyric(115001, 1)  # ELM
+    # machine += CoilsNonAxisymmetric(111003, 2)  # CC
+    # machine += CoilsNonAxisymmetric(115001, 1)  # ELM
 
-    # machine.ferritic.insert("Fi")
+    machine.ferritic.insert("Fi")
 
     machine.frame.vtkplot()

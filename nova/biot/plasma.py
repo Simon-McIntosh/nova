@@ -28,7 +28,7 @@ class Plasma(Plot, netCDF, PlasmaLoc):
     grid: PlasmaGrid = field(repr=False, default_factory=PlasmaGrid)
     wall: PlasmaWall = field(repr=False, default_factory=PlasmaWall)
     levelset: LevelSet = field(repr=False, default_factory=LevelSet)
-    lcfs: LCFS | None = field(init=False, default=None)
+    lcfs: LCFS | None = field(init=False, repr=False, default=None)
 
     def __post_init__(self):
         """Update subframe metadata."""
@@ -74,6 +74,7 @@ class Plasma(Plot, netCDF, PlasmaLoc):
         self.levelset.check_plasma("Psi")
         if (
             self.version["lcfs"] is None
+            or self.levelset.version["psi"]
             or self.version["lcfs"] != self.levelset.version["psi"]
         ):
             self.update_lcfs()
@@ -195,7 +196,7 @@ class Plasma(Plot, netCDF, PlasmaLoc):
     def separatrix(self):
         """Return plasma separatrix, the convex hull of active filaments."""
         index = self.loc["plasma", "nturn"] > 0
-        points = self.loc["plasma", ["x", "z"]][index].values
+        points = self.loc["plasma", ["x", "z"]].values[index]
         hull = scipy.spatial.ConvexHull(points)
         vertices = np.append(hull.vertices, hull.vertices[0])
         convexhull = points[vertices]

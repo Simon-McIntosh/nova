@@ -664,7 +664,7 @@ mode='r', lazy=True, ids=None)
         if self._ids is None and self.uri and self.name is not None:
             try:
                 self._ids = self.get()
-            except imas.exception.ALException:
+            except (imas.exception.ALException, imas.exception.UnknownDDVersion):
                 self._ids = None
                 pass
 

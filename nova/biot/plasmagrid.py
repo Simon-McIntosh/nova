@@ -63,6 +63,7 @@ class PlasmaGrid(BaseGrid, PlasmaLoc):
             case 0:
                 raise PlasmaTopologyError("no o-points found within first wall")
             case _:
+                return 0
                 raise PlasmaTopologyError(
                     "multiple o-points found within first wall {self.data_o}"
                 )

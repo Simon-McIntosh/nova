@@ -16,8 +16,9 @@ def test_remote_uri():
         "imas://uda.iter.org:56565/uda?path=/work/imas/shared/imasdb/ITER/3/131048/2;"
         "backend=hdf5;verbose=1;#idsname=equilibrium:occurrence=0"
     )
-    with DBEntry(uri, "r") as ids:
-        print(ids)
+    with imas.DBEntry(uri, "r") as db:
+        ids = db.get('equilibrium')
+        print('\n', ids.ids_properties.homogeneous_time, '\n')
         #assert ids.ids_properties.homogeneous_time == 1
 """
 

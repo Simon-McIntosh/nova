@@ -18,10 +18,6 @@ class netCDF(FilePath):
     group: str | None = field(default=None, repr=False)
     data: xarray.Dataset = field(default_factory=xarray.Dataset, repr=False)
 
-    # def __post_init__(self):
-    #    """Forward post init for for cooperative inheritance."""
-    #    super().__post_init__()
-
     @FilePath.filepath.getter  # type: ignore
     def filepath(self):
         """Extend FilePath.filepath to include netCDF suffix."""

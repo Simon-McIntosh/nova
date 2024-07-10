@@ -65,7 +65,7 @@ class Plasma(Plot, netCDF, PlasmaLoc):
         """Update last closed flux surface."""
         if len(self.levelset) == 0:
             raise RuntimeError("solve levelset - nlevelset is None")
-        points = self.levelset(self.psi_boundary)
+        points = self.levelset(self.psi_lcfs)
         mask = self.grid.x_mask(points[:, 1])
         self.lcfs = LCFS(points[mask])
 
@@ -155,6 +155,12 @@ class Plasma(Plot, netCDF, PlasmaLoc):
         if self.polarity < 0:
             return np.min([self.psi_x, self.psi_w])
         return np.max([self.psi_x, self.psi_w])
+
+    @property
+    def psi_lcfs(self):
+        """Return polodial flux at psi_norm==0.99."""
+        psi_axis = self.psi_axis
+        return 0.99 * (self.psi_boundary - psi_axis) + psi_axis
 
     @property
     def strike_points(self):
@@ -252,3 +258,4 @@ class Plasma(Plot, netCDF, PlasmaLoc):
         if levels is None:
             self.grid.plot(**kwargs)
         self.wall.plot(limitflux=False)
+        return levels

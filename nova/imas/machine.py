@@ -520,10 +520,11 @@ class PassiveShellData(Plot, FrameData):
         for attr in self.geometry_attrs:
             self.data[attr][-1].append(getattr(geometry, attr))
 
-    def insert(self, shell: Shell):
+    def insert(self, shell: Shell, **kwargs):
         """Insert data into shell instance."""
         if self.empty:
             return
+
         for i in range(len(self)):
             thickness = np.mean(self.data["thickness"][i])
             index = shell.insert(
@@ -533,6 +534,7 @@ class PassiveShellData(Plot, FrameData):
                 rho=0,
                 name=self.coil_name,
                 part=self.part,
+                **kwargs,
             )
             self.update_resistivity(
                 index, shell.frame, shell.subframe, self.data["resistance"][i]
@@ -627,7 +629,7 @@ class PoloidalFieldPassive(CoilDatabase):
                 )
             coildata.insert(self.coil, delta=-1)
             polydata.insert(self.coil, delta=-10)
-            shelldata.insert(self.shell)
+            shelldata.insert(self.shell, delta=-3)
 
 
 @dataclass
@@ -1149,8 +1151,9 @@ class Machine(CoilSet, Geometry, CoilData):
     @metadata.setter
     def metadata(self, metadata: dict):
         """Set instance metadata, assert consistent attr_hash."""
-        attr_hash = self.hash_attrs(self.group_attrs)
-        for attr in self.coilset_attrs:
+        for attr in self.frameset_attrs:
+            setattr(self, attr, metadata[attr])
+        for attr in metadata.keys() & self._biot_attrs.keys():
             setattr(self, attr, metadata[attr])
         for geometry in self.geometry_attrs:
             if geometry not in metadata:
@@ -1164,7 +1167,7 @@ class Machine(CoilSet, Geometry, CoilData):
                 for attr in metadata[geometry].split(",")
             ]
             setattr(self, geometry[:-3], dict(zip(IdsBase.database_attrs, values)))
-        assert attr_hash == self.hash_attrs(self.group_attrs)
+        assert self.group == self.hash_attrs(self.group_attrs)
 
     @staticmethod
     def _format_geometry_attrs(attr: str) -> str | int | float:
@@ -1234,14 +1237,14 @@ if __name__ == "__main__":
     machine = Machine(
         **kwargs,
         pf_active="iter_md",
-        pf_passive=False,
+        pf_passive="iter_md",
         elm=False,
         wall=True,
         tplasma="h",
         nwall=10,
+        ninductance=10,
         dplasma=-2000,
         ngrid=2000,
-        ninductance=-0.05,
     )
 
     # from nova.imas.coils_non_axisymmetric import CoilsNonAxisymmetric
@@ -1249,6 +1252,6 @@ if __name__ == "__main__":
     # machine += CoilsNonAxisymmetric(111003, 2)  # CC
     # machine += CoilsNonAxisymmetric(115001, 1)  # ELM
 
-    machine.ferritic.insert("Fi")
+    # machine.ferritic.insert("Fi")
 
-    machine.frame.vtkplot()
+    # machine.frame.vtkplot()

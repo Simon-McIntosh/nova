@@ -187,9 +187,11 @@ class Biot(BiotPlasma, BiotCoil, BiotGap):
 
     @property
     def biot_attrs(self):
-        """Return frame attributes."""
+        """Return biot attributes."""
         return {
-            attr: value for attr, value in self._biot_attrs.items() if value is not None
+            attr: value
+            for attr in self._biot_attrs
+            if (value := getattr(self, attr)) is not None
         }
 
     @frame_factory(Grid)

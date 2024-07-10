@@ -383,7 +383,7 @@ class LCFS(Elongation, Triangularity, Squareness, Plot):
         """Return attribute shape vector."""
         return np.array([getattr(self, attr) for attr in attrs])
 
-    def plot(self, label=False):
+    def plot(self, label=False, quadrants=False):
         """Plot last closed flux surface and key geometrical points."""
         self.get_axes("2d")
         self.axes.plot(*self.points.T, color="k", alpha=0.25)
@@ -396,9 +396,10 @@ class LCFS(Elongation, Triangularity, Squareness, Plot):
             self.axes.plot(self.r_zmax, self.z_max, "o", label="Zmax")
             self.axes.plot(self.r_zmin, self.z_min, "o", label="Zmin")
             self.axes.legend(loc="center")
-        self.plot_quadrants(self.axes)
-        for quadrant in range(4):
-            self.axes.plot(*self.quadrant_point(quadrant), "k.", ms=8)
+        if quadrants:
+            self.plot_quadrants(self.axes)
+            for quadrant in range(4):
+                self.axes.plot(*self.quadrant_point(quadrant), "k.", ms=8)
 
 
 if __name__ == "__main__":

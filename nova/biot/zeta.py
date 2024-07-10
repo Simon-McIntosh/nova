@@ -11,7 +11,7 @@ import numpy as np
 from nova import njit, prange
 
 
-@njit(cache=True, fastmath=True)
+@njit(cache=True, fastmath=True, nogil=True)
 def arcsinh_beta_1(rs, r, gamma, alpha):
     """Return zeta intergrand."""
     phi = np.pi - 2 * alpha
@@ -19,7 +19,7 @@ def arcsinh_beta_1(rs, r, gamma, alpha):
     return np.arcsinh((rs - r * np.cos(phi)) / np.sqrt(G2))
 
 
-@njit(cache=True, parallel=True, fastmath=True)
+@njit(cache=True, parallel=True, fastmath=True, nogil=True)
 def zeta(rs, r, gamma, alpha, number=500):
     """Evaluate zeta function."""
     shape = alpha.shape

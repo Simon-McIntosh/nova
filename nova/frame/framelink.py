@@ -201,7 +201,7 @@ class FrameLink(LinkIndexer, DataArray):
         if index is None:
             index = self.index
         self.multipoint.drop(index)
-        super().drop(index, inplace=True)
+        super().drop(index=index, inplace=True)
         self.__init__(self, attrs=self.attrs)
         self.update_version()
 

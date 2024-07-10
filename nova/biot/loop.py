@@ -21,9 +21,9 @@ class Loop(Plot, Operate):
             attrs=["Psi"],
             name=self.name,
         ).data
-        # insert grid data
-        self.data.coords["x"] = target.x.values
-        self.data.coords["z"] = target.z.values
+        # insert target data
+        self.data.coords["x"] = target.x
+        self.data.coords["z"] = target.z
         super().post_solve()
 
     def plot(self, axes=None, **kwargs):

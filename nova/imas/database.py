@@ -152,7 +152,8 @@ class CoilData(IdsData):
 
     def __post_init__(self):
         """Update filename and group."""
-        self.group = self.hash_attrs(self.group_attrs)
+        if self.group is None:
+            self.group = self.hash_attrs(self.group_attrs)
         super().__post_init__()
 
     @property

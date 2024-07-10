@@ -32,15 +32,15 @@ class CylinderConstants(Constants):
         )
 
     @cached_property
-    def _zeta(self):
-        """Return zeta coefficient calculated using piecewise-constant."""
+    def __zeta(self):
+        """Return zeta coefficient calculated using piecewise-constant intergration."""
         phi, dphi = np.linspace(0, -2 * self.alpha, self.number + 1, retstep=True)
         phi = np.pi + phi[:-1] + dphi / 2
         dalpha = self.alpha / self.number
         return zeta(self.r, self.rs, self.z, self.zs, phi, dalpha)
 
     @cached_property
-    def __zeta(self):
+    def _zeta(self):
         """Return zeta coefficient calculated using jax trapezoid method."""
         alpha = self.alpha * np.ones(self.shape + (4,))
         return Zeta(self.rs, self.zs, self.r, self.z, alpha)()

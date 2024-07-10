@@ -341,4 +341,4 @@ class Operate(Data):
     def __setitem__(self, attr: str, value: np.ndarray):
         """Update array attribute in-place."""
         self.array[attr][:] = value.copy()
-        self.version[attr] = None
+        # self.version[attr] = None

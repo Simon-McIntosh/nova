@@ -37,8 +37,12 @@ class VtkPlot(metamethod.VtkPlot, BasePlot):
         if not self.frame.empty:
             return self.plot(index, new=new, **kwargs)
 
-    def plot(self, index=slice(None), decimate=1e5, plotter=None, **kwargs):
+    def plot(self, index=slice(None), decimate=1e5, plotter=None, cut=None, **kwargs):
         """Plot vtk instances."""
+        if cut is None:
+            cut = []
+        if cut is True:
+            cut = self.frame.loc[:, "part"].unique()
         colors = matplotlib.rcParams["axes.prop_cycle"].by_key()["color"]
         self.frame.vtkgeo.generate_vtk()
         index = self.frame.geotype("Geo", "vtk") & self.get_index(index)
@@ -48,6 +52,10 @@ class VtkPlot(metamethod.VtkPlot, BasePlot):
                 Properties.get_alpha(part)
             )
             for vtk, part in self.frame.loc[index, ["vtk", "part"]].values
+        ]
+        vtk = [
+            (vtk[i].cut_with_plane(normal=[0, 1, 0]) if part in cut else vtk[i])
+            for i, part in enumerate(self.frame.loc[index, ["part"]].values)
         ]
         if decimate is not None:
             vtk = [_vtk.decimate(n=decimate, preserve_volume=True) for _vtk in vtk]

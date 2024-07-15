@@ -3,6 +3,7 @@
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from operator import attrgetter
+import re
 
 import numpy as np
 
@@ -104,17 +105,25 @@ class IdsIndex:
     _ids: IDSToplevel | None = field(init=False, repr=False, default=None)
     _ids_node: str = field(init=False, repr=False, default="")
 
-    # def __post_init__(self):
-    #    """Initialize ids node."""
-    #    if self._ids is None:
-    #        raise AttributeError("required attribute 'ids' not set")
-
     @property  # type: ignore[no-redef]
     def ids(self):  # noqa
         """Manage ids."""
         if self._ids_node:
-            return attrgetter(self.ids_node)(self._ids)
+            return self.get_node(self._ids, self._ids_node)
+            # return attrgetter(self.ids_node)(self._ids)
         return self._ids
+
+    def get_node(self, ids, ids_node: str):
+        """Return ids node."""
+        match re.split(r"\[|\]", ids_node.strip("."), 2):
+            case [""]:
+                return ids
+            case [str(node)]:
+                return attrgetter(node)(ids)
+            case [str(node), str(index), subnode]:
+                return self.get_node(attrgetter(node)(ids)[int(index)], subnode)
+            case _:
+                raise IndexError(f"unable to get {ids_node} from {ids}")
 
     @ids.setter
     def ids(self, ids: IDSToplevel):
@@ -268,7 +277,8 @@ class IdsIndex:
     def get_slice(self, index: int, path: str):
         """Return attribute slice at node index."""
         try:
-            return attrgetter(path)(self.ids[index])
+            # return attrgetter(path)(self.ids[index])
+            return self.get_node(self.ids[index], path)
         except AttributeError:  # __structArray__
             node, path = path.split(".", 1)
             return attrgetter(path)(attrgetter(node)(self.ids[index])[0])

@@ -22,9 +22,9 @@ class Connect:
     command: str
     machine: str
     user: str = "public"
-    cluster: str = "sdcc-login03.iter.org"
+    cluster: str = "sdcc-login04.iter.org"
     backend: str = "HDF5"
-    modules: tuple[str] = ("IMAS/3.41.0-4.11.10-intel-2020b",)
+    modules: tuple[str] = ("IMAS/3.41.0-2024.07-foss-2023b",)
     columns: list[str] = field(default_factory=lambda: [])
     frame: pandas.DataFrame = field(
         init=False, repr=False, default_factory=pandas.DataFrame
@@ -253,7 +253,7 @@ if __name__ == "__main__":
     # machine.load_ids('pf_active')
     # print(machine.frame)
     # MachineDatabase(modules=("IMAS/3.37.0-4.11.0-2020b",)).sync_shot("111003/1")
-    MachineDatabase().sync_shot("111001/103")
+    # MachineDatabase().sync_shot("111001/103")
     # MachineDatabase().rsync()
 
     # iter_md = MachineDatabase(machine="ITER_MD")
@@ -261,7 +261,7 @@ if __name__ == "__main__":
     # ScenarioDatabase().sync_shot("111003/1")
 
     # ScenarioDatabase().sync_shot("111001/103")
-    # ScenarioDatabase().rsync()
+    ScenarioDatabase(machine="west").rsync()
     # ScenarioDatabase(user='tribolp').sync_shot('135011/21')
     # ScenarioDatabase(user='dubrovm').sync_shot('105028/1')
     # ScenarioDatabase(user='dubrovm').sync_shot('105027/1')

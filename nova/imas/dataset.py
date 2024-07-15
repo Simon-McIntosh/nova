@@ -312,9 +312,7 @@ os.path.join(userhome, 'public', 'imasdb', 'iter', '3', '1', '2')
     @property
     def _unset_attrs(self) -> bool:
         """Return True if any required input attributes are unset."""
-        return (self.pulse == 0 or self.pulse is None) or (
-            self.run == 0 or self.run is None
-        )
+        return (self.pulse == 0 or self.pulse is None) or (self.run is None)
 
     def check_ids_attrs(self):
         """Confirm minimum working set of input attributes."""

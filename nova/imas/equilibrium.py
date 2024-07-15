@@ -251,7 +251,7 @@ class Parameter0D(Scenario):
             step = 2 * np.mean(segment)
             index = np.arange(len(segment))[segment > step]
             if len(index) > 0:
-                loops = np.split(boundary, index)
+                loops = [loop for loop in np.split(boundary, index) if len(loop) > 2]
                 loop_index = np.argmin(
                     [np.linalg.norm(loop[-1] - loop[0]) for loop in loops]
                 )
@@ -663,6 +663,8 @@ class EquilibriumData(Equilibrium, Profile2D, Profile1D, Parameter0D, Grid):
 
     """
 
+    # name: str = "equilibrium"
+
     def __post_init__(self):
         """Set instance name."""
         self.name = "equilibrium"
@@ -670,7 +672,17 @@ class EquilibriumData(Equilibrium, Profile2D, Profile1D, Parameter0D, Grid):
 
     def build(self):
         """Build netCDF database using data extracted from imasdb."""
-        with self.build_scenario():
+        match self.homogeneous_time:
+            case 0:
+                time_node = "time_slice"
+            case 1:
+                time_node = ""
+            case _:
+                raise NotImplementedError(
+                    f"homogeneous_time={self.homogeneous_time} not implemented"
+                )
+
+        with self.build_scenario(time_node):
             self.data.coords["point"] = ["r", "z"]
             super().build()
             self.contour_build()
@@ -760,9 +772,11 @@ if __name__ == "__main__":
 
     # EquilibriumData(pulse, run, occurrence=0)._clear()
 
-    equilibrium = EquilibriumData(*args, occurrence=0)
+    kwargs = {"pulse": 57410, "run": 0, "machine": "west"}  # WEST
 
-    equilibrium.time = 300
+    equilibrium = EquilibriumData(**kwargs, occurrence=0)
+
+    equilibrium.itime = 60
     equilibrium.plot_2d("psi", mask=0)
     """
     equilibrium.plot_boundary(outline=False)

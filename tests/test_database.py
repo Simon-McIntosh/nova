@@ -86,7 +86,7 @@ def test_database_minimum_required_input():
     import imas_core
 
     with pytest.raises(imas_core.exception.ALException) as error:
-        Database(pulse=101)
+        Database(run=101)
     assert "When self.ids is None require:" in str(error.value)
 
 

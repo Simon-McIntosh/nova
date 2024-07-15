@@ -82,7 +82,7 @@ class FrameSet(netCDF, FrameSetLoc):
         ],
     )
     available: list[str] = field(repr=False, default_factory=list)
-    subspace: list[str] = field(repr=False, default_factory=lambda: ["Ic"])
+    subspace: list[str] = field(repr=False, default_factory=lambda: ["Ic", "part"])
     array: list[str] = field(
         repr=False,
         default_factory=lambda: [

@@ -444,7 +444,7 @@ class FrameData(ABC):
             return "vs3j"
         if "VS" in label:
             return "vs3"
-        return ""
+        return "pf"
 
     @staticmethod
     def update_resistivity(index, frame, subframe, resistance):
@@ -454,6 +454,16 @@ class FrameData(ABC):
         for name in index:
             subindex = subframe.frame == name
             subframe.loc[subindex, "rho"] = rho[name]
+        subframe.update_frame()
+
+    @staticmethod
+    def update_passive_turns(index, frame, subframe):
+        """Update turns to match cross-sectional area."""
+        frame.loc[index, "nturn"] = frame.loc[index, "area"]
+        for name in index:
+            subindex = subframe.frame == name
+            subframe.loc[subindex, "nturn"] = subframe.loc[subindex, "area"]
+        subframe.update_frame()
 
 
 @dataclass
@@ -565,7 +575,9 @@ class PassiveCoilData(IdsCoilData):
             "name": self.coil_name,
             "section": self.data["section"],
         } | kwargs
-        return super().insert(constructor, **kwargs)
+        index = super().insert(constructor, **kwargs)
+        self.update_passive_turns(index, *constructor.frames)
+        return index
 
 
 @dataclass
@@ -1194,6 +1206,7 @@ class Machine(CoilSet, Geometry, CoilData):
             boundary = self.geometry["wall"](**self.wall).boundary
             self.plasma.solve(boundary)
         self.inductance.solve()
+        self.grid.solve()
         self.field.solve()
         self.force.solve()
 
@@ -1231,9 +1244,11 @@ if __name__ == "__main__":
 
     doctest.testmod(verbose=False)
 
-    kwargs = {"pulse": 105028, "run": 1, "machine": "iter"}  # DINA
+    # kwargs = {"pulse": 105028, "run": 1, "machine": "iter"}  # DINA
     # kwargs = {"pulse": 45272, "run": 1, "machine": "mast_u"}  # MastU
-
+    kwargs = {"pulse": 57410, "run": 0, "machine": "west"}  # WEST
+    machine = Machine(**kwargs, pf_active=True, pf_passive=False, wall=True)
+    """
     machine = Machine(
         **kwargs,
         pf_active="iter_md",
@@ -1246,6 +1261,7 @@ if __name__ == "__main__":
         dplasma=-2000,
         ngrid=2000,
     )
+    """
 
     # from nova.imas.coils_non_axisymmetric import CoilsNonAxisymmetric
 

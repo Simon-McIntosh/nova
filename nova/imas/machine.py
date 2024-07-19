@@ -20,6 +20,7 @@ from nova.imas.dataset import IdsBase, Ids, ImasIds, EMPTY_FLOAT
 from nova.imas.ids_index import IdsIndex
 from nova.geometry.polygon import Polygon
 
+
 if TYPE_CHECKING:
     from nova.frame.shell import Shell
 
@@ -31,12 +32,13 @@ class GeomData:
     """Geometry data baseclass."""
 
     ids: ImasIds = field(repr=False)
-    data: dict[str, int | float] = field(init=False, repr=False, default_factory=dict)
+    data: dict[str, int | float] = field(repr=False, default_factory=dict)
     attrs: ClassVar[list[str]] = []
 
     def __post_init__(self):
         """Extract attributes from ids."""
-        self.extract()
+        if not self.data:
+            self.extract()
 
     @property
     @abstractmethod
@@ -92,11 +94,8 @@ class Rectangle(GeomData):
             "height",
         ]:  # TODO remove negative check once MastU IDS fixed
             if self.data[attr] <= 0:
+                warn(f"negative {attr} {self.data[attr]}")
                 self.data[attr] *= -1
-                warn(
-                    "negative width or height "
-                    f'{self.data["width"], self.data["height"]}'
-                )
 
     @property
     def poly(self):
@@ -284,7 +283,22 @@ class CrossSection:
 
     def __post_init__(self):
         """Build geometry instance."""
-        self.data = self.transform[self.ids.geometry_type.value](self.ids)
+        try:
+            self.data = self.transform[self.ids.geometry_type.value](self.ids)
+        except KeyError as error:
+            if self.ids.geometry_type.value == -999999999:
+                default_geometry_type = 1  # remove once WEST pf_passive is fixed
+                warn(f"geometry type unset, fixing value to {default_geometry_type}")
+                self.data = self.transform[default_geometry_type](self.ids)
+            else:
+                raise KeyError from error
+        if self.data.name == "outline" and len(self.data.data["r"]) == 1:  # WEST data
+            for attr in "rz":
+                self.data.data[attr] = self.data.data[attr][0]
+            for attr in ["width", "height"]:
+                self.data.data[attr] = 0.05
+            self.data = Rectangle(None, self.data.data)
+
         for attr in self.data.data:
             if isinstance(self.data.data[attr], float) and not np.isfinite(
                 self.data.data[attr]
@@ -329,7 +343,7 @@ class Element:
     """Poloidal element."""
 
     ids: ImasIds = field(repr=False)
-    index: int = 0
+    index: int
     name: str = field(init=False)
     identifier: str = field(init=False)
     nturn: float = field(init=False)
@@ -351,8 +365,8 @@ class Element:
         return self.cross_section.name
 
     def is_poly(self) -> bool:
-        """Return True if geometry.name == 'oblique' or 'annulus'."""
-        return self.section in ["oblique", "annulus"]
+        """Return True if geometry.name == 'oblique' or 'annulus' or 'outline'."""
+        return self.section in ["oblique", "annulus", "outline"]
 
     def is_rectangular(self) -> bool:
         """Return geometry.name == 'rectangle'."""
@@ -405,6 +419,8 @@ class FrameData(ABC):
             return name
         label = "".join(name.split()[:2]).rstrip(string.punctuation)
         digit = name.split()[-1].lstrip(string.ascii_letters + string.punctuation)
+        if digit == "":
+            return name
         return "".join([part for part in [label, digit] if part != ""])
 
     @property
@@ -572,11 +588,11 @@ class PassiveCoilData(IdsCoilData):
             return None
         kwargs = {
             "active": False,
-            "name": self.coil_name,
+            "name": self.data["name"],
             "section": self.data["section"],
         } | kwargs
         index = super().insert(constructor, **kwargs)
-        self.update_passive_turns(index, *constructor.frames)
+        # self.update_passive_turns(index, *constructor.frames)
         return index
 
 
@@ -627,13 +643,13 @@ class PoloidalFieldPassive(CoilDatabase):
             polydata = PassivePolyCoilData()
             for i, ids_element in enumerate(ids_loop.element):
                 element = Element(ids_element, i)
-                if element.is_thickline():  # element.is_oblique() or
+                if element.is_thickline():
                     shelldata.append(loop, element)
                     continue
                 if element.is_rectangular():
                     coildata.append(loop, element)
                     continue
-                if element.is_oblique() or element.is_poly():
+                if element.is_poly():
                     polydata.append(loop, element)
                     continue
                 raise NotImplementedError(
@@ -678,7 +694,7 @@ class ActivePolyCoilData(ActiveCoilData):
 
 @dataclass
 class PoloidalFieldActive(CoilDatabase):
-    """Manage active poloidal loop ids, pf_passive."""
+    """Manage active poloidal loop ids, pf_active."""
 
     pulse: int = 111001
     run: int = 203
@@ -822,10 +838,10 @@ class Contour(Plot):
         self.loop = np.append(self.loop, self.loop[:1], axis=0)
         assert import_module("shapely.geometry").LinearRing(self.loop).is_valid
 
-    def plot(self, axes=None):
+    def plot(self, axes=None, color="k", **kwargs):
         """Plot closed contour."""
-        self.set_axes("2d", axes=axes)
-        self.axes.plot(*self.loop.T, "C3-")
+        self.get_axes("2d", axes=axes)
+        self.axes.plot(*self.loop.T, color=color, **kwargs)
 
 
 @dataclass
@@ -839,16 +855,21 @@ class Wall(CoilDatabase):
 
     @cached_property
     def limiter(self):
-        """Return limiter units."""
+        """Return limiter."""
         return getattr(self.ids, "description_2d")[0].limiter
 
     @cached_property
-    def boundary(self):
-        """Return closed firstwall boundary contour."""
+    def contour(self):
+        """Return closed firstwall contour instance."""
         firstwall = ContourData()
         for unit in self.limiter.unit:
             firstwall.append(unit)
-        return Contour(firstwall.data).loop
+        return Contour(firstwall.data)
+
+    @cached_property
+    def boundary(self):
+        """Return contour boundary loop."""
+        return self.contour.loop
 
     def segment(self, index=0):
         """Return indexed firstwall segment."""
@@ -875,8 +896,8 @@ class Wall(CoilDatabase):
 
     def insert(self, data: xarray.Dataset):
         """Insert wall and divertor geometory into dataset structure."""
-        for i, attr in enumerate(["wall", "divertor"]):
-            data[attr] = (f"{attr}_index", "point"), self.segment(i)
+        for i, (attr, segment) in enumerate(zip(["wall", "divertor"], self.segments)):
+            data[attr] = (f"{attr}_index", "point"), segment
             index = np.arange(data[attr].shape[0])
             data.coords[f"{attr}_index"] = index
         data.attrs["wall_md"] = ",".join(
@@ -1247,7 +1268,11 @@ if __name__ == "__main__":
     # kwargs = {"pulse": 105028, "run": 1, "machine": "iter"}  # DINA
     # kwargs = {"pulse": 45272, "run": 1, "machine": "mast_u"}  # MastU
     kwargs = {"pulse": 57410, "run": 0, "machine": "west"}  # WEST
-    machine = Machine(**kwargs, pf_active=True, pf_passive=False, wall=True)
+
+    machine = Machine(
+        **kwargs, pf_active=True, pf_passive={"occurrence": 0}, wall=True, tplasma="h"
+    )
+
     """
     machine = Machine(
         **kwargs,

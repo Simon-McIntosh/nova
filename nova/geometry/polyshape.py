@@ -20,6 +20,7 @@ class PolyShape:
         | dict.fromkeys(["polygon", "poly", "oblique"], "polygon")
         | dict.fromkeys(["shell", "shl", "sh"], "shell")
         | dict.fromkeys(["hexagon", "hex", "hx", "h"], "hexagon")
+        | dict.fromkeys(["outline"], "outline")
     )
 
     def _shape(self, section: str) -> str:

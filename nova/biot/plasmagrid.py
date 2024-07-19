@@ -199,9 +199,11 @@ class PlasmaGrid(BaseGrid, PlasmaLoc):
             )
         if isinstance(attr, str):
             attr = getattr(self, attr)
+        label = kwargs.pop("label", "")
         contour = self.axes.tricontour(
             self.data.x, self.data.z, self.data.triangles, attr, **kwargs
         )
+        self.label_contour(label, **kwargs)
         if clabel:
             self.axes.clabel(
                 contour,
@@ -210,3 +212,4 @@ class PlasmaGrid(BaseGrid, PlasmaLoc):
                 fmt=self._label_format,
                 fontsize="small",
             )
+        return contour.levels

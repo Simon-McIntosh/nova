@@ -35,6 +35,7 @@ class Datafile(netCDF):
             self.load()
         except (FileNotFoundError, OSError):
             self.build()
+            self.store()
 
     @abstractmethod
     def build(self):

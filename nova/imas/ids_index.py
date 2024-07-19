@@ -109,19 +109,18 @@ class IdsIndex:
     def ids(self):  # noqa
         """Manage ids."""
         if self._ids_node:
-            return self.get_node(self._ids, self._ids_node)
-            # return attrgetter(self.ids_node)(self._ids)
+            return self.attrgetter(self._ids, self._ids_node)
         return self._ids
 
-    def get_node(self, ids, ids_node: str):
-        """Return ids node."""
+    def attrgetter(self, ids, ids_node: str):
+        """Return attribute from ids node."""
         match re.split(r"\[|\]", ids_node.strip("."), 2):
             case [""]:
                 return ids
             case [str(node)]:
                 return attrgetter(node)(ids)
             case [str(node), str(index), subnode]:
-                return self.get_node(attrgetter(node)(ids)[int(index)], subnode)
+                return self.attrgetter(attrgetter(node)(ids)[int(index)], subnode)
             case _:
                 raise IndexError(f"unable to get {ids_node} from {ids}")
 
@@ -277,8 +276,7 @@ class IdsIndex:
     def get_slice(self, index: int, path: str):
         """Return attribute slice at node index."""
         try:
-            # return attrgetter(path)(self.ids[index])
-            return self.get_node(self.ids[index], path)
+            return self.attrgetter(self.ids[index], path)
         except AttributeError:  # __structArray__
             node, path = path.split(".", 1)
             return attrgetter(path)(attrgetter(node)(self.ids[index])[0])

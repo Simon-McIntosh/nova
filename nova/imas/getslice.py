@@ -26,7 +26,9 @@ class GetSlice:
 
     def get_data(self, key: str):
         """Regulate access to imas dataset."""
-        data = self.data[self.match(key)][self.itime].data
+        var = self.data[self.match(key)]
+        assert var.dims[0] == "time"
+        data = var[self.itime].data
         try:
             return data.item()
         except ValueError:
@@ -65,7 +67,7 @@ class GetSlice:
     def itime(self):
         """Manage solution time index."""
         if self.time_index is None:
-            raise IndexError("itime is None")
+            self.time_index = 0
         return self.time_index
 
     @itime.setter

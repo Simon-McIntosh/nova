@@ -19,7 +19,7 @@ class Strike(Plot):
     indices: tuple[int] = (1,)
     limiter: MultiLineString = field(default_factory=MultiLineString)
     contour: MultiLineString = field(default_factory=MultiLineString)
-    point: Point | MultiPoint | None = field(init=False, default=None)
+    point: Point | MultiPoint | None = field(init=False, default=MultiPoint)
     intersects: bool = field(init=False, default=False)
 
     def __post_init__(self):
@@ -27,7 +27,10 @@ class Strike(Plot):
         geometry = Geometry(False, False, wall=self.wall)
         wall = geometry.geometry["wall"](**geometry.wall, dplasma=-1)
         self.wall = wall.ids_attrs
-        segments = [wall.segment(index) for index in self.indices]
+        try:
+            segments = [wall.segment(index) for index in self.indices]
+        except IndexError:
+            segments = wall.segments
         self.limiter = MultiLineString(segments)
 
     def update(self, lines):
@@ -37,7 +40,7 @@ class Strike(Plot):
         if self.intersects:
             self.point = intersection(self.limiter, self.contour, 0)
         else:
-            self.point = None
+            self.point = MultiPoint()
         return self
 
     @property
@@ -69,4 +72,3 @@ if __name__ == "__main__":
     strike = Strike(indices=(1,)).update([np.array([(3.5, -3), (7, -3)])])
     strike.plot()
     print(strike.points)
-    #

@@ -4,11 +4,13 @@ from dataclasses import dataclass, field
 from functools import cached_property
 from typing import ClassVar, final
 
+from imaspy.exception import DataEntryException
 import json
 import numpy as np
 from scipy.spatial import ConvexHull
 
 from nova.biot.contour import Contour
+from nova.biot.grid import Gridgen
 from nova.database.filepath import FilePath
 from nova.geometry.pointloop import PointLoop
 from nova.geometry.curve import LCFS
@@ -28,16 +30,20 @@ class Grid(Scenario):
         super().build()
         if self.ids_index.empty("profiles_2d.grid_type.index"):
             return
-        index = self.ids_index.get_slice(0, "profiles_2d.grid_type.index")
-        grid = self.ids_index.get_slice(0, "profiles_2d.grid")
-        grid_type = index
-        if grid_type == -999999999:  # unset
-            grid_type = 1
-        if grid_type == 1:
-            return self.rectangular_grid(grid)
-        raise NotImplementedError(f"grid type {grid_type} not implemented.")
+        grid_type = np.unique(self.ids_index.array("profiles_2d.grid_type.index"))
+        if len(grid_type) > 1:
+            raise NotImplementedError(
+                f"multiple grid types found within time_slice {grid_type}"
+            )
+        grid_type = grid_type[0]
 
-    def rectangular_grid(self, grid):
+        match grid_type:
+            case 1 | -999999999:  # unset
+                return self.build_rectangular_grid()
+            case _:
+                raise NotImplementedError(f"grid type {grid_type} not implemented.")
+
+    def build_rectangular_grid(self):
         """
         Store rectangular grid.
 
@@ -45,10 +51,32 @@ class Grid(Scenario):
         In this case the position arrays should not be
         filled since they are redundant with grid/dim1 and dim2.
         """
-        self.data["r"], self.data["z"] = grid.dim1, grid.dim2
-        r2d, z2d = np.meshgrid(self.data["r"], self.data["z"], indexing="ij")
+        self.data["r"] = ("time", "dim1"), self.ids_index.array("profiles_2d.grid.dim1")
+        self.data["z"] = ("time", "dim2"), self.ids_index.array("profiles_2d.grid.dim2")
+        self.data["r2d"] = ("time", "dim1", "dim2"), np.zeros(
+            (self.data.sizes["time"], self.data.sizes["dim1"], self.data.sizes["dim2"]),
+            float,
+        )
+        self.data["z2d"] = ("time", "dim1", "dim2"), np.zeros(
+            (self.data.sizes["time"], self.data.sizes["dim1"], self.data.sizes["dim2"]),
+            float,
+        )
+
+        for i in range(self.data.sizes["time"]):
+            self.data["r2d"][i], self.data["z2d"][i] = np.meshgrid(
+                self.data["r"][i], self.data["z"][i], indexing="ij"
+            )
+
+        """
+        print(self.data["r"].shape)
+        r2d, z2d = np.meshgrid(
+            self.data["r"], self.data["z"], indexing="ij", sparse=True
+        )
+        print(r2d.shape, z2d.shape)
         self.data["r2d"] = ("r", "z"), r2d
         self.data["z2d"] = ("r", "z"), z2d
+        assert False
+        """
 
 
 @dataclass
@@ -248,7 +276,7 @@ class Parameter0D(Scenario):
         x_point = self.data.x_point[itime].data
         limiter = np.allclose(x_point, (0, 0))
         if limiter:  # limiter
-            step = 2 * np.mean(segment)
+            step = 2 * np.max(segment)
             index = np.arange(len(segment))[segment > step]
             if len(index) > 0:
                 loops = [loop for loop in np.split(boundary, index) if len(loop) > 2]
@@ -260,7 +288,7 @@ class Parameter0D(Scenario):
         mask = self.x_mask(itime, boundary[:, 1])
         if sum(mask) == 0:
             psi2d = self.ids_index.get_slice(itime, "profiles_2d.psi")
-            contour = Contour(self.data.r2d, self.data.z2d, psi2d)
+            contour = Contour(self["r2d"], self["z2d"], psi2d)
             psi_boundary = self.ids_index.get_slice(itime, "boundary_separatrix.psi")
             boundary = contour.closedlevelset(psi_boundary).points
             mask = self.x_mask(itime, boundary[:, 1])
@@ -407,7 +435,35 @@ class Profile2D(Scenario):
     def build(self):
         """Build profile 2d data and store to xarray data structure."""
         super().build()
-        self.append(("time", "r", "z"), self.attrs_2d, "profiles_2d", postfix="2d")
+        self.append(
+            ("time", "dim1", "dim2"), self.attrs_2d, "profiles_2d", postfix="2d"
+        )
+        self.build_gdd()
+
+    def build_gdd(self):
+        """Build profile 2d data from gdd object."""
+        with self.ids_index.node(
+            "grids_ggd[0].grid[0].space[0].objects_per_dimension[0].object"
+        ):
+            if self.ids_index.empty("geometry"):
+                return
+            nodes = self.ids_index.array("geometry")
+            self.data.coords["node_index"] = range(nodes.shape[1])
+            self.data["r2d"] = "node_index", nodes[0]
+            self.data["z2d"] = "node_index", nodes[1]
+
+        with self.ids_index.node(
+            "grids_ggd[0].grid[0].space[0].objects_per_dimension[2].object"
+        ):
+            nodes = self.ids_index.array("nodes")
+            self.data.coords["tri_index"] = range(nodes.shape[1])
+            self.data["triangles"] = ("tri_index", "node"), self.ids_index.array(
+                "nodes"
+            ).T
+
+        self.append(
+            ("time", "node_index"), self.attrs_2d, "ggd[0].*[0].values", postfix="2d"
+        )
 
 
 @dataclass
@@ -462,6 +518,7 @@ class Equilibrium(Chart, GetSlice):
         self.axes.plot(boundary[:, 0], boundary[:, 1], color, alpha=0.85)
         if self["x_point_number"] == 1:
             self.axes.plot(*self["x_point"], "x", ms=6, mec="C3", mew=1)
+        self.axes.plot(*self["magnetic_axis"], "o", ms=3, mec="C3", mew=1)
         if outline:
             self.axes.plot(*self.outline(self.itime).T, "C3")
 
@@ -515,15 +572,13 @@ class Equilibrium(Chart, GetSlice):
     @cached_property
     def mask_2d(self):
         """Return pointloop instance, used to check loop membership."""
-        points = np.array(
-            [self.data.r2d.data.flatten(), self.data.z2d.data.flatten()]
-        ).T
+        points = np.array([self["r2d"].data.flatten(), self["z2d"].data.flatten()]).T
         return PointLoop(points)
 
     @property
     def shape(self):
         """Return grid shape."""
-        return self.data.sizes["r"], self.data.sizes["z"]
+        return self.data.sizes["dim1"], self.data.sizes["dim2"]
 
     def mask(self, boundary: np.ndarray):
         """Return boundary mask."""
@@ -533,7 +588,7 @@ class Equilibrium(Chart, GetSlice):
         """Return data array."""
         return self[f"{attr}2d"]
 
-    def plot_2d(self, attr="psi", mask=0, axes=None, **kwargs):
+    def plot_2d(self, attr="psi", mask=0, axes=None, label="", clabel=False, **kwargs):
         """Plot 2d profile.
 
         Examples
@@ -571,18 +626,55 @@ class Equilibrium(Chart, GetSlice):
 
         """
         self.set_axes("2d", axes=axes)
+        plot_mesh = kwargs.pop("plot_mesh", False)
         kwargs = self.contour_kwargs(**kwargs)
-        QuadContourSet = self.axes.contour(
-            self.data.r, self.data.z, self.data_2d(attr, mask).T, **kwargs
+        contour_set = self._plot_2d(attr, mask, self.axes, plot_mesh, **kwargs)
+        self.label_contour(label, **kwargs)
+        if clabel:
+            self.axes.clabel(contour_set, inline=1, fontsize="x-small")
+        return contour_set.levels
+
+    @property
+    def _plot_2d(self):
+        """Return 2d plotting function."""
+        if "triangles" in self.data:
+            return self.plot_tri
+        return self.plot_quad
+
+    def plot_tri(self, attr="psi", mask=0, axes=None, plot_mesh=False, **kwargs):
+        """Plot tri contours."""
+        self.set_axes("2d", axes=axes)
+        if plot_mesh:
+            self.axes.triplot(
+                self.data.r2d,
+                self.data.z2d,
+                self.data.triangles,
+                lw=0.5,
+                color="C0",
+                alpha=0.2,
+            )
+        return self.axes.tricontour(
+            self.data.r2d,
+            self.data.z2d,
+            self.data_2d(attr, mask),
+            **kwargs,
         )
-        return QuadContourSet.levels
+
+    def plot_quad(self, attr="psi", mask=0, axes=None, plot_mesh=False, **kwargs):
+        """Plot quad contours."""
+        self.set_axes("2d", axes=axes)
+        if plot_mesh:
+            Gridgen(limit=[self["r"], self["z"]]).plot()
+        return self.axes.contour(
+            self["r"], self["z"], self.data_2d(attr, mask).T, **kwargs
+        )
 
     def plot_quiver(self, axes=None, skip=5):
         """Create magnetic field quiver plot."""
         self.get_axes("2d", axes=axes)
         self.axes.quiver(
-            self.data.r2d[::skip, ::skip],
-            self.data.z2d[::skip, ::skip],
+            self["r2d"][::skip, ::skip],
+            self["z2d"][::skip, ::skip],
             self["b_field_r2d"][::skip, ::skip],
             self["b_field_z2d"][::skip, ::skip],
             pivot="mid",
@@ -663,8 +755,6 @@ class EquilibriumData(Equilibrium, Profile2D, Profile1D, Parameter0D, Grid):
 
     """
 
-    # name: str = "equilibrium"
-
     def __post_init__(self):
         """Set instance name."""
         self.name = "equilibrium"
@@ -686,13 +776,21 @@ class EquilibriumData(Equilibrium, Profile2D, Profile1D, Parameter0D, Grid):
             self.data.coords["point"] = ["r", "z"]
             super().build()
             self.contour_build()
-        Wall().insert(self.data)  # insert wall and divertor structures
+        try:
+            self.wall.insert(self.data)  # insert wall and divertor structures
+        except DataEntryException:
+            pass
         return self
+
+    @cached_property
+    def wall(self):
+        """Return wall instance."""
+        return Wall(uri=self.uri)
 
     @cached_property
     def strike(self):
         """Return divertor strike instance."""
-        return Strike(indices=(1,))
+        return Strike(self.wall.ids, indices=(1,))
 
     def contour_build(self):
         """Re-build geometry components from psi2d contour if not present."""
@@ -706,7 +804,7 @@ class EquilibriumData(Equilibrium, Profile2D, Profile1D, Parameter0D, Grid):
         """Return strike point array at itime."""
         if self.data.x_point_number[itime].data == 0:
             return np.array([])
-        contour = Contour(self.data.r2d, self.data.z2d, self.data.psi2d[itime])
+        contour = Contour(self["r2d"], self["z2d"], self.data.psi2d[itime])
         levelset = contour.levelset(self.data.psi_boundary[itime])
         self.strike.update([surface.points for surface in levelset])
         if len(strike_points := self.strike.points) == 2:
@@ -774,11 +872,30 @@ if __name__ == "__main__":
 
     kwargs = {"pulse": 57410, "run": 0, "machine": "west"}  # WEST
 
-    equilibrium = EquilibriumData(**kwargs, occurrence=0)
+    time = 35
 
-    equilibrium.itime = 60
-    equilibrium.plot_2d("psi", mask=0)
-    """
-    equilibrium.plot_boundary(outline=False)
-    # equilibrium.plot_quiver()
-    """
+    nice = EquilibriumData(**kwargs, occurrence=0)
+
+    nice.time = time
+    levels = nice.plot_2d(
+        "psi", mask=0, plot_mesh=False, colors="C0", label=r"$\psi$ NICE", clabel=True
+    )
+    nice.plot_boundary(outline=False)
+
+    chease = EquilibriumData(**kwargs, occurrence=3)
+
+    chease.time = time
+
+    levels = chease.plot_2d(
+        "psi",
+        mask=0,
+        plot_mesh=False,
+        axes=nice.axes,
+        colors="C1",
+        clabel=True,
+        label=r"$\psi$ CHEASE",
+    )
+    chease.plot_boundary(outline=False)
+    chease.wall.contour.plot(color="k", linewidth=1.5)
+
+    # chease.plot_quiver()

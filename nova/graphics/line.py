@@ -46,3 +46,16 @@ class Chart(Line):
             )
             | kwargs
         )
+
+    def label_contour(self, label="", **kwargs):
+        """Add label to contour plot."""
+        if label:
+            label_kwargs = {
+                attr[:-1]: kwargs[attr]
+                for attr in ["colors", "linewidths", "linestyles"]
+            }
+            self.axes.add_line(
+                self.mpl["lines"].Line2D([], [], label=label, **label_kwargs)
+            )
+            loc = kwargs.get("loc", "upper right")
+            self.legend(loc=loc)

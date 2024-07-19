@@ -237,7 +237,7 @@ class Plasma(Plot, netCDF, PlasmaLoc):
         self.ionize = mask
         self.nturn = self.area / np.sum(self.area)
 
-    def plot(self, turns=True, axes=None, **kwargs):
+    def plot(self, attr="psi", turns=True, axes=None, **kwargs):
         """Plot separatirx as polygon patch."""
         self.axes = axes
         if turns:
@@ -254,8 +254,8 @@ class Plasma(Plot, netCDF, PlasmaLoc):
                         zorder=-10,
                     )
                 )
-        levels = self.levelset.plot(**kwargs)
+        levels = self.levelset.plot(attr, **kwargs)
         if levels is None:
-            self.grid.plot(**kwargs)
+            levels = self.grid.plot(attr, **kwargs)
         self.wall.plot(limitflux=False)
         return levels

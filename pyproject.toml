@@ -70,8 +70,8 @@ graphics = [
   "seaborn>=0.12.2",
 ]
 imas = [
-  "imas-core @ git+ssh://git.iter.org/imas/al-core.git@feature/windows-hdf5",
-  "imaspy @ git+ssh://git@git.iter.org/imas/imaspy.git@feature/nc",
+  "imas-core @ git+ssh://git.iter.org/imas/al-core.git@main",
+  "imaspy @ git+ssh://git@git.iter.org/imas/imaspy.git@develop",
   "h5py>=3.10.0",
 ]
 jit = [

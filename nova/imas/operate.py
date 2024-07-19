@@ -149,7 +149,7 @@ class Operate(Grid, Profile, Machine):
     def solve_biot(self):
         """Extend machine solve biot to include extrapolation grid."""
         super().solve_biot()
-        self.grid.solve(**self.grid_attrs)
+        # self.grid.solve(**self.grid_attrs)
 
     def update(self):
         """Extend itime update."""
@@ -162,6 +162,8 @@ class Operate(Grid, Profile, Machine):
         try:
             self.sloc["coil", "Ic"] = self["current"]
             self.sloc["plasma", "Ic"] = self["ip"]
+            if "passive_current" in self.data:
+                self.sloc["passive", "Ic"] = self["passive_current"]
         except KeyError:  # data unavailable
             return
 
@@ -185,9 +187,9 @@ class Operate(Grid, Profile, Machine):
 
 if __name__ == "__main__":
 
-    import doctest
+    # import doctest
 
-    doctest.testmod(verbose=False)
+    # doctest.testmod(verbose=False)
 
     # pulse, run = 105007, 9
     # pulse, run = 135007, 4
@@ -198,10 +200,26 @@ if __name__ == "__main__":
 
     # args = 45272, 1, "mast_u"  # MastU
 
+    kwargs = {
+        "pulse": 57410,
+        "run": 0,
+        "machine": "west",
+        "pf_passive": {"occurrence": 0},
+    }  # WEST
+
     operate = Operate(
-        *args,
-        pf_active="iter_md",
-        elm=True,
+        **kwargs,
+        pf_active=True,
+        wall=True,
+        dplasma=-2000,
+        tplasma="h",
+    )
+    """
+    operate = Operate(
+        **kwargs,
+        pf_active=True,
+        wall=True,
+        elm=False,
         dplasma=-2000,
         ngrid=2000,
         tplasma="h",
@@ -211,8 +229,33 @@ if __name__ == "__main__":
         nforce=0,
         force_index="plasma",
     )
+    """
 
-    operate.itime = 50
+    operate.time = 35
+
+    # attr = "j_tor"
+    attr = "psi"
+    levels = operate.plot_2d(attr, colors="C1", label="NICE")
+
+    # levels = -levels[::-1] + 2.3
+    operate.plasma.plot(attr, colors="C0", label="NOVA")
+
+    """
+    j_tor = (
+        operate.aloc["plasma", "Ic"]
+        * operate.aloc["plasma", "nturn"]
+        / operate.aloc["plasma", "area"]
+    )
+    operate.axes.tricontour(
+        operate.plasmagrid.data.x.data,
+        operate.plasmagrid.data.z.data,
+        j_tor,
+        levels=levels,
+        colors="C0",
+    )
+    """
+
+    # operate.grid.plot(attr, levels=levels, colors="C0")
 
     """
     import pyvista as pv

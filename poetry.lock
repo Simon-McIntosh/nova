@@ -2130,7 +2130,7 @@ files = [
 
 [[package]]
 name = "imas-core"
-version = "5.2.5.dev8+g44f6ad3"
+version = "5.2.6"
 description = "Python bindings to the IMAS Access Layer core"
 optional = true
 python-versions = "<4,>=3.6"
@@ -2138,7 +2138,7 @@ files = []
 develop = false
 
 [package.dependencies]
-numpy = "1.26.4"
+numpy = "<2"
 
 [package.extras]
 cov = ["coverage2clover", "pytest-cov"]
@@ -2147,12 +2147,12 @@ test = ["pytest (>=8)"]
 [package.source]
 type = "git"
 url = "ssh://git.iter.org/imas/al-core.git"
-reference = "bugfix/remove-build-dir"
-resolved_reference = "44f6ad30246d326ce1c9e0013b555a2a63fe497b"
+reference = "main"
+resolved_reference = "ee38887d894a5b164792391bd9c138ce8ed8ee81"
 
 [[package]]
 name = "imaspy"
-version = "1.0.0+184.g2d9b61a"
+version = "1.0.0+192.g6d5e958"
 description = "Pythonic wrappers for the IMAS Access Layer"
 optional = true
 python-versions = ">=3.7"
@@ -2178,8 +2178,8 @@ test = ["asv (==0.6.1)", "matplotlib", "pint", "pytest (>=5.4.1)", "pytest-cov (
 [package.source]
 type = "git"
 url = "ssh://git@git.iter.org/imas/imaspy.git"
-reference = "feature/nc"
-resolved_reference = "f534c77cd1384e9afd12890b01105811a50c2778"
+reference = "develop"
+resolved_reference = "6d5e9589f49e3a7198705e5f869ab48c83cf7f24"
 
 [[package]]
 name = "importlib-metadata"
@@ -2461,8 +2461,8 @@ files = [
 jaxlib = ">=0.4.27,<=0.4.30"
 ml-dtypes = ">=0.2.0"
 numpy = [
-    {version = ">=1.22", markers = "python_version < \"3.11\""},
     {version = ">=1.23.2", markers = "python_version >= \"3.11\" and python_version < \"3.12\""},
+    {version = ">=1.22", markers = "python_version < \"3.11\""},
     {version = ">=1.26.0", markers = "python_version >= \"3.12\""},
 ]
 opt-einsum = "*"
@@ -3661,8 +3661,8 @@ files = [
 
 [package.dependencies]
 numpy = [
-    {version = ">=1.21.2", markers = "python_version >= \"3.10\" and python_version < \"3.11\""},
     {version = ">=1.23.3", markers = "python_version >= \"3.11\" and python_version < \"3.12\""},
+    {version = ">=1.21.2", markers = "python_version >= \"3.10\" and python_version < \"3.11\""},
     {version = ">=1.26.0", markers = "python_version >= \"3.12\""},
 ]
 
@@ -4292,8 +4292,8 @@ files = [
 
 [package.dependencies]
 numpy = [
-    {version = ">=1.22.4,<2", markers = "python_version < \"3.11\""},
     {version = ">=1.23.2,<2", markers = "python_version == \"3.11\""},
+    {version = ">=1.22.4,<2", markers = "python_version < \"3.11\""},
     {version = ">=1.26.0,<2", markers = "python_version >= \"3.12\""},
 ]
 python-dateutil = ">=2.8.2"
@@ -5015,8 +5015,8 @@ files = [
 astroid = ">=3.2.2,<=3.3.0-dev0"
 colorama = {version = ">=0.4.5", markers = "sys_platform == \"win32\""}
 dill = [
-    {version = ">=0.2", markers = "python_version < \"3.11\""},
     {version = ">=0.3.6", markers = "python_version >= \"3.11\" and python_version < \"3.12\""},
+    {version = ">=0.2", markers = "python_version < \"3.11\""},
     {version = ">=0.3.7", markers = "python_version >= \"3.12\""},
 ]
 isort = ">=4.2.5,<5.13.0 || >5.13.0,<6"
@@ -7829,4 +7829,4 @@ uda = ["async-property", "nest-asyncio"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<4.0"
-content-hash = "efdb3a9580b8acac14465253c9e0bf9a903cd85a3739eb5c7aa1c236a15938e4"
+content-hash = "72b95d542b5112fecd8a0b2235788259455112921df34aa6026cbfe36a1c8d4f"

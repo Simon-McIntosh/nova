@@ -4,11 +4,12 @@ from dataclasses import dataclass
 from functools import cached_property
 
 import numpy as np
-from scipy.interpolate import interp1d, RectBivariateSpline
+from scipy.interpolate import interp1d, RBFInterpolator, RectBivariateSpline
 
 from nova.imas.database import IdsData
 from nova.imas.equilibrium import Equilibrium, EquilibriumData
 from nova.imas.getslice import GetSlice
+from nova.imas.pf_passive import PF_Passive
 from nova.imas.pf_active import PF_Active
 
 
@@ -19,8 +20,11 @@ class Profile(Equilibrium, GetSlice, IdsData):
     def __post_init__(self):
         """Build and merge ids datasets."""
         super().__post_init__()
-        self.load_data(PF_Active)
+        self.load_data(PF_Active, **self.pf_active)
+        self.load_data(PF_Passive, **self.pf_passive)
+        print("*** before eq load")
         self.load_data(EquilibriumData)
+        print("*** after eq load")
 
     def update(self):
         """Clear cache following update to itime. Extend as required."""
@@ -65,7 +69,12 @@ class Profile(Equilibrium, GetSlice, IdsData):
 
     def _rbs(self, attr):
         """Return 2D RectBivariateSpline interpolant."""
-        return RectBivariateSpline(self.data.r, self.data.z, self[attr]).ev
+        try:
+            return RectBivariateSpline(self.data.r, self.data.z, self[attr]).ev
+        except AttributeError:
+            return lambda radius, height: RBFInterpolator(
+                np.c_[self.data.r2d, self.data.z2d], self[attr]
+            )(np.c_[radius, height])
 
     def _interp1d(self, x, y):
         """Return 1D interpolant."""

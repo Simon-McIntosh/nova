@@ -170,7 +170,8 @@ class ScenarioDatabase(Datafile, Connect):
     def load(self):
         """Load frame from netCDF file."""
         super().load()
-        self.frame = self.data.to_dataframe()
+        if len(self.data) > 0:
+            self.frame = self.data.to_dataframe()
 
     def build(self):
         """Load scenario workflows into frame."""
@@ -261,7 +262,7 @@ if __name__ == "__main__":
     # ScenarioDatabase().sync_shot("111003/1")
 
     # ScenarioDatabase().sync_shot("111001/103")
-    ScenarioDatabase(machine="west").rsync()
+    ScenarioDatabase(machine="aug", workflow=[]).rsync()
     # ScenarioDatabase(user='tribolp').sync_shot('135011/21')
     # ScenarioDatabase(user='dubrovm').sync_shot('105028/1')
     # ScenarioDatabase(user='dubrovm').sync_shot('105027/1')

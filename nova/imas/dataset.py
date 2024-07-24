@@ -627,8 +627,12 @@ mode='r', lazy=True, ids=None)
         self.ids = self.db_entry.get(self.name, self.occurrence, lazy=self.lazy)
         return self.ids
 
-    def put(self, ids: IDSToplevel, occurrence: int = 0):
+    def put(self, ids: Optional[IDSToplevel] = None, occurrence: Optional[int] = None):
         """Write ids to database entry."""
+        if ids is None:
+            ids = self.ids
+        if occurrence is None:
+            occurrence = self.occurrence
         self.db_entry.put(ids, occurrence)
 
     @cached_property

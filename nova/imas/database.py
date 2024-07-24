@@ -121,15 +121,11 @@ class IdsData(Datafile, Database):
         if self.ids is not None:  # override when using ids input
             self.data = data
             return
-
         if hasattr(self.data, "time") and hasattr(data, "time"):
             data = data.interp({"time": self.data.time}, assume_sorted=True)
-
-        print("pre merge")
         self.data = data.merge(
             self.data, compat="override", combine_attrs="drop_conflicts"
         )
-        print("post merge")
 
 
 @dataclass

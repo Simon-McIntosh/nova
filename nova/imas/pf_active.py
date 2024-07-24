@@ -19,8 +19,6 @@ class PF_Active(Plot, Scenario):
 
     def build(self):
         """Build netCDF database using data extracted from imasdb."""
-        print(self.uri)
-        print(self.pulse, self.run, self.name)
         name = coil_names(self.ids.coil)
         label = coil_labels(self.ids.coil)
         with self.build_scenario():
@@ -71,7 +69,10 @@ if __name__ == "__main__":
 
     # pulse, run = 111001, 202
     # PF_Active(pulse, run, "iter")._clear()
-    pf_active = PF_Active(pulse, run)
+
+    kwargs = {"pulse": 57410, "run": 0, "machine": "west", "occurrence": 1}  # WEST
+
+    pf_active = PF_Active(**kwargs)
     pf_active.build()
     # pf_active = PF_Active(105007, 9)  # b field max timed 135002, 5
     pf_active.plot()

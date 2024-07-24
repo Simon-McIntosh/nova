@@ -625,14 +625,25 @@ class Equilibrium(Chart, GetSlice):
         >>> levels = equilibrium.plot_2d('j_tor')
 
         """
-        self.set_axes("2d", axes=axes)
+        self.get_axes("2d", axes=axes)
         plot_mesh = kwargs.pop("plot_mesh", False)
         kwargs = self.contour_kwargs(**kwargs)
         contour_set = self._plot_2d(attr, mask, self.axes, plot_mesh, **kwargs)
+        self.plot_wall()
+        if attr == "psi":
+            self.plot_boundary()
         self.label_contour(label, **kwargs)
         if clabel:
             self.axes.clabel(contour_set, inline=1, fontsize="x-small")
         return contour_set.levels
+
+    def plot_wall(self, axes=None, **kwargs):
+        """Plot wall contour."""
+        self.get_axes("2d", axes)
+        kwargs = (
+            dict(marker=None, linestyle="-", ms=4, color="gray", linewidth=1.5) | kwargs
+        )
+        self.axes.plot(self.data.wall[:, 0], self.data.wall[:, 1], **kwargs)
 
     @property
     def _plot_2d(self):
@@ -872,9 +883,9 @@ if __name__ == "__main__":
 
     kwargs = {"pulse": 57410, "run": 0, "machine": "west"}  # WEST
 
-    time = 35
+    time = 32.24
 
-    nice = EquilibriumData(**kwargs, occurrence=0)
+    nice = EquilibriumData(**kwargs, occurrence=1)
 
     nice.time = time
     levels = nice.plot_2d(
@@ -888,7 +899,6 @@ if __name__ == "__main__":
 
     levels = chease.plot_2d(
         "psi",
-        mask=0,
         plot_mesh=False,
         axes=nice.axes,
         colors="C1",

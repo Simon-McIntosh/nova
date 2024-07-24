@@ -205,14 +205,24 @@ if __name__ == "__main__":
         "run": 0,
         "machine": "west",
         "pf_passive": {"occurrence": 0},
+        "pf_active": {"occurrence": 0},
     }  # WEST
+
+    kwargs = {
+        "pulse": 17151,
+        "run": 3,
+        "machine": "aug",
+        "pf_passive": False,
+        "pf_active": True,
+    }  # AUG
 
     operate = Operate(
         **kwargs,
-        pf_active=True,
         wall=True,
         dplasma=-2000,
         tplasma="h",
+        nwall=3,
+        ngrid=2e4,
     )
     """
     operate = Operate(
@@ -231,14 +241,20 @@ if __name__ == "__main__":
     )
     """
 
-    operate.time = 35
+    operate.itime = 2
 
     # attr = "j_tor"
     attr = "psi"
+    operate.plot()
+    operate.plot_2d()
+
     levels = operate.plot_2d(attr, colors="C1", label="NICE")
 
     # levels = -levels[::-1] + 2.3
-    operate.plasma.plot(attr, colors="C0", label="NOVA")
+    operate.sloc[0, "Ic"] *= 0
+    operate.plot()
+    operate.plasma.plot(attr, levels=levels)
+    levels = operate.grid.plot(attr, colors="C2", label="NOVA")
 
     """
     j_tor = (

@@ -431,7 +431,7 @@ if __name__ == "__main__":
     fiducial.plot_fit(coil_index)
     fiducial.plot_fit(coil_index, "fit")
 
-    fiducial.plot_ensemble(True, 250)
+    # fiducial.plot_ensemble(True, 250)
 
     # fiducial.write()
 

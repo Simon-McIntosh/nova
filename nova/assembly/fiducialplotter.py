@@ -160,7 +160,9 @@ class FiducialPlotter(Plot):
                 target[i, :, 1] + delta[i, :, 1],
                 target[i, :, 2] + delta[i, :, 2],
                 color=color,
+                label=post_fix,
             )
+        self.axes[1].legend(loc="upper right")
 
     def plot3d(self, post_fix: str, coil_index=0):
         """Plot 3d centerline."""

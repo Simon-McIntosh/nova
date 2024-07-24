@@ -25,13 +25,14 @@ class PlasmaLoc(FrameSetLoc):
 
     def check_cached(self, attr):
         """Check validity of cached attribute."""
+        assert False, "called check cached"
         self.check("psi")
         if self.version[attr] != self.version["psi"]:
             self._clear_cache([attr])
             self.version[attr] = self.version["psi"]
 
     @cached_property
-    def _slice(self):
+    def slice_(self):
         """Return plasma filament slice."""
         start = bisect(self.aloc["plasma"], True)
         number = bisect_right(~self.aloc["plasma"][start:], False)
@@ -40,62 +41,62 @@ class PlasmaLoc(FrameSetLoc):
         return slice(start, start + number)
 
     @cached_property
-    def _nturn(self):
+    def nturn_(self):
         """Return a view of the plasma's nturn array."""
-        return self.aloc["nturn"][self._slice]
+        return self.aloc["nturn"][self.slice_]
 
     @cached_property
-    def _ionize(self):
+    def ionize_(self):
         """Return a view of the plasma's ionize array."""
-        return self.aloc["ionize"][self._slice]
+        return self.aloc["ionize"][self.slice_]
 
     @cached_property
-    def _area(self):
+    def area_(self):
         """Return a view of the plasma's area array."""
-        return self.aloc["area"][self._slice]
+        return self.aloc["area"][self.slice_]
 
     @cached_property
-    def _radius(self):
+    def radius_(self):
         """Return a view of the plasma's radial filiment cooridnate."""
-        return self.aloc["x"][self._slice]
+        return self.aloc["x"][self.slice_]
 
     @cached_property
-    def _height(self):
+    def height_(self):
         """Return a view of the plasma's vertical filiment cooridnate."""
-        return self.aloc["z"][self._slice]
+        return self.aloc["z"][self.slice_]
 
     @property
     def nturn(self):
         """Manage ionized plasma turn attribute."""
-        return self._nturn[self.ionize]
+        return self.nturn_[self.ionize]
 
     @nturn.setter
     def nturn(self, nturn):
-        self._nturn[self.ionize] = nturn
+        self.nturn_[self.ionize] = nturn
         self.update_aloc_hash("nturn")
 
     @property
     def ionize(self):
         """Manage plasma ionization property."""
-        return self._ionize
+        return self.ionize_
 
     @ionize.setter
     def ionize(self, mask):
-        self._nturn[:] = 0
-        self._ionize[:] = mask
+        self.nturn_[:] = 0
+        self.ionize_[:] = mask
         self._clear_cache(["area", "radius", "height"])
 
     @cached_property
     def area(self):
         """Return ionized area."""
-        return self._area[self._ionize]
+        return self.area_[self.ionize_]
 
     @cached_property
     def radius(self):
         """Return ionized radius."""
-        return self._radius[self._ionize]
+        return self.radius_[self.ionize_]
 
     @cached_property
     def height(self):
         """Return ionized radius."""
-        return self._height[self._ionize]
+        return self.height_[self.ionize_]

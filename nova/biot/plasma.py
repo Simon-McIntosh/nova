@@ -111,6 +111,7 @@ class Plasma(Plot, netCDF, PlasmaLoc):
     def psi_axis(self):
         """Return on-axis poloidal flux."""
         return self.grid["o_psi"]
+        self.grid.__getitem__
 
     @property
     def magnetic_axis(self):
@@ -142,14 +143,24 @@ class Plasma(Plot, netCDF, PlasmaLoc):
         """Return boundary poloidal flux."""
         if self.grid.x_point_number == 0:
             return self.psi_w
-        w_height = self.wall.w_point[1]
         x_height = self.grid.x_points[:, 1]
         o_height = self.grid["o_point"][1]
         x_bounds = [np.min(x_height), np.max(x_height)]
+        w_height = self.wall.w_point[1]
         if x_bounds[0] > o_height:
             x_bounds[0] = -np.inf
         if x_bounds[1] < o_height:
             x_bounds[1] = np.inf
+
+        # self.wall.psi = np.where(
+        #    (self.wall["z"] < (x_bounds[0] + 0.25 * (o_height - x_bounds[0]))),
+        #    -52,
+        #    self.wall.psi,
+        # )
+        # print("boundary")
+        # self.wall.psi[-100:] = -52
+        # self.wall.version["limitflux"] = None
+
         if w_height < x_bounds[0] or w_height > x_bounds[1]:
             return self.psi_x
         if self.polarity < 0:
@@ -158,9 +169,9 @@ class Plasma(Plot, netCDF, PlasmaLoc):
 
     @property
     def psi_lcfs(self):
-        """Return polodial flux at psi_norm==0.99."""
+        """Return polodial flux at psi_norm==0.999."""
         psi_axis = self.psi_axis
-        return 0.99 * (self.psi_boundary - psi_axis) + psi_axis
+        return 0.999 * (self.psi_boundary - psi_axis) + psi_axis
 
     @property
     def strike_points(self):

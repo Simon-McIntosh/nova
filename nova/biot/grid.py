@@ -306,6 +306,7 @@ class Grid(BaseGrid):
         index=slice(None),
         axes=None,
         nulls=True,
+        label="",
         clabel=None,
         **kwargs,
     ):
@@ -317,14 +318,16 @@ class Grid(BaseGrid):
             super().plot(axes=axes)
         if isinstance(attr, str):
             attr = getattr(self, f"{attr}_")[index]
+        contour_kwargs = self.contour_kwargs(**kwargs)
         QuadContourSet = self.axes.contour(
             self.data[coords[0]],
             self.data[coords[1]],
             attr.T,
-            **self.contour_kwargs(**kwargs),
+            **contour_kwargs,
         )
         if isinstance(kwargs.get("levels", None), int):
             self.levels = QuadContourSet.levels
+        self.label_contour(label, **contour_kwargs)
         if clabel is not None:
             self.axes.clabel(QuadContourSet, **clabel)
         return np.array(QuadContourSet.levels)

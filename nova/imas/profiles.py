@@ -20,11 +20,9 @@ class Profile(Equilibrium, GetSlice, IdsData):
     def __post_init__(self):
         """Build and merge ids datasets."""
         super().__post_init__()
-        self.load_data(PF_Active, **self.pf_active)
-        self.load_data(PF_Passive, **self.pf_passive)
-        print("*** before eq load")
         self.load_data(EquilibriumData)
-        print("*** after eq load")
+        self.load_data(PF_Active, **self.pf_active)
+        self.load_data(PF_Passive)  # , **self.pf_passive
 
     def update(self):
         """Clear cache following update to itime. Extend as required."""
@@ -70,8 +68,8 @@ class Profile(Equilibrium, GetSlice, IdsData):
     def _rbs(self, attr):
         """Return 2D RectBivariateSpline interpolant."""
         try:
-            return RectBivariateSpline(self.data.r, self.data.z, self[attr]).ev
-        except AttributeError:
+            return RectBivariateSpline(self["r"], self["z"], self[attr]).ev
+        except KeyError:
             return lambda radius, height: RBFInterpolator(
                 np.c_[self.data.r2d, self.data.z2d], self[attr]
             )(np.c_[radius, height])

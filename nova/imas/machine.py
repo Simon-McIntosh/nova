@@ -781,17 +781,25 @@ class ContourData(Plot):
     """Extract contour data from ids."""
 
     data: dict[str, np.ndarray] = field(init=False, default_factory=dict)
+    count: itertools.count = field(init=False, default_factory=itertools.count)
 
     def append(self, unit):
         """Append contour data."""
-        self.data[unit.name.value] = np.array([unit.outline.r, unit.outline.z]).T
+        if (name := unit.name.value) == "":
+            name = f"limiter_{next(self.count)}"
+        self.data[name] = np.c_[unit.outline.r, unit.outline.z]
+        if unit.closed == 1 and not np.allclose(
+            self.data[name][0], self.data[name][-1]
+        ):
+            self.data[name] = np.append(self.data[name], self.data[name][:1], axis=0)
 
-    def plot(self, axes=None):
+    def plot(self, axes=None, legend=False):
         """Plot contours."""
-        self.axes.set_axes("2d", axes=axes)
-        for component in self.data.items():
-            self.axes.plot(*self.data[component].T, label=component)
-        self.axes.legend()
+        self.set_axes("2d", axes=axes)
+        for component, contour in self.data.items():
+            self.axes.plot(*contour.T, label=component)
+        if legend:
+            self.axes.legend()
 
 
 @dataclass
@@ -836,7 +844,38 @@ class Contour(Plot):
         while len(self.segments) > 0:
             self.select()
         self.loop = np.append(self.loop, self.loop[:1], axis=0)
-        assert import_module("shapely.geometry").LinearRing(self.loop).is_valid
+
+        if not import_module("shapely.geometry").LinearRing(self.loop).is_valid:
+            ro, zo = 1.6, 0
+            self.set_axes("2d")
+
+            points = []
+            import alphashape
+            import shapely
+
+            for contour in self.data.values():
+
+                line = shapely.LineString(
+                    np.c_[contour[:, 0] - ro, contour[:, 1] - zo]
+                ).segmentize(0.01)
+
+                theta = np.arctan2(line.xy[1], line.xy[0])
+                inverse_radius = 1 / np.linalg.norm(np.c_[*line.xy], axis=1)
+                x = inverse_radius * np.cos(theta)
+                z = inverse_radius * np.sin(theta)
+
+                points.append(np.c_[x, z])
+
+                self.axes.plot(x, z, ".")
+
+            points = np.concatenate(points, axis=0)
+
+            poly = alphashape.alphashape(points, 3)
+
+            self.axes.plot(*poly.boundary.xy)
+            print(poly)
+            print(points.shape)
+            assert False
 
     def plot(self, axes=None, color="k", **kwargs):
         """Plot closed contour."""
@@ -864,6 +903,7 @@ class Wall(CoilDatabase):
         firstwall = ContourData()
         for unit in self.limiter.unit:
             firstwall.append(unit)
+        firstwall.plot()
         return Contour(firstwall.data)
 
     @cached_property
@@ -1057,7 +1097,7 @@ class Geometry:
             super().__post_init__()
 
     def set_filename(self):
-        """Set filename when all geometry attrs is str or False."""
+        """Set filename when all geometry attrs are str or False."""
         if (
             np.all(
                 [
@@ -1268,10 +1308,8 @@ if __name__ == "__main__":
     # kwargs = {"pulse": 105028, "run": 1, "machine": "iter"}  # DINA
     # kwargs = {"pulse": 45272, "run": 1, "machine": "mast_u"}  # MastU
     kwargs = {"pulse": 57410, "run": 0, "machine": "west"}  # WEST
-
-    machine = Machine(
-        **kwargs, pf_active=True, pf_passive={"occurrence": 0}, wall=True, tplasma="h"
-    )
+    kwargs = {"pulse": 17151, "run": 3, "machine": "aug", "pf_passive": False}
+    machine = Machine(**kwargs, pf_active=True, wall=True, tplasma="h")
 
     """
     machine = Machine(

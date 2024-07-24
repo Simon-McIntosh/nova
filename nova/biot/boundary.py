@@ -11,7 +11,7 @@ kwargs = {
     "pulse": 135013,
     "run": 2,
     "machine": "iter",
-    "pf_passive": False,
+    "pf_passive": True,
     "pf_active": True,
 }
 
@@ -25,7 +25,7 @@ operate = Operate(
     nlevelset=2e3,
 )
 
-operate.time = 150
+operate.time = 2.5
 # operate.plasma.plot()
 
 """
@@ -156,8 +156,8 @@ def psi_residual(psi):
     return operate.plasma.psi - psi
 
 
-operate.sloc["PF6", "Ic"] *= 1
-operate.sloc["PF4", "Ic"] *= 0.95
+# operate.sloc["PF6", "Ic"] *= 1
+# operate.sloc["PF4", "Ic"] *= 0.95
 
 # operate.set_axes("1d")
 
@@ -168,7 +168,7 @@ operate.sloc["PF4", "Ic"] *= 0.95
 # operate.plot()
 # operate.plasma.lcfs.plot()
 
-levels = operate.plot_2d(colors="C2", label="DINA")
+levels = operate.plot_2d(colors="gray", label="DINA")
 levels = -levels[::-1]
 
 # operate.plasma.plot(levels=levels, colors="black")
@@ -179,8 +179,9 @@ operate.plasma.wall.plot(limitflux=True)
 operate.plasma.psi = newton_krylov(psi_residual, operate.plasma.psi, verbose=True)
 with operate.plasma.profile(operate.p_prime, operate.ff_prime):
     operate.plasma.separatrix = operate.plasma.psi_lcfs
-operate.plasma.plot(levels=levels, colors="C1", label="NOVA")
+operate.plasma.plot(levels=levels, colors="C6", label="NOVA")
 
+operate.plot()
 """
 for _ in range(10):
     coilset.plasma.separatrix = coilset.plasma.psi_lcfs

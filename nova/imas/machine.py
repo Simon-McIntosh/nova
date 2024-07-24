@@ -903,7 +903,6 @@ class Wall(CoilDatabase):
         firstwall = ContourData()
         for unit in self.limiter.unit:
             firstwall.append(unit)
-        firstwall.plot()
         return Contour(firstwall.data)
 
     @cached_property

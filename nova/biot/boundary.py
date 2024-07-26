@@ -168,6 +168,7 @@ def psi_residual(psi):
 # operate.plot()
 # operate.plasma.lcfs.plot()
 
+
 levels = operate.plot_2d(colors="gray", label="DINA")
 levels = -levels[::-1]
 

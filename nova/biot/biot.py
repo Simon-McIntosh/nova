@@ -79,6 +79,8 @@ class BiotPlasma(BiotBase):
     nhex: Nbiot = None
     nwall: Nbiot = None
     nlevelset: Nbiot = None
+    # p_prime: Callable | None = 5
+    # ff_prime: Callable | None = None
 
     def __post_init__(self):
         """Append biot attrs."""
@@ -93,6 +95,8 @@ class BiotPlasma(BiotBase):
             "grid": self.plasmagrid,
             "wall": self.plasmawall,
             "levelset": self.levelset,
+            "p_prime": self.p_prime,
+            "ff_prime": self.ff_prime,
         }
 
     @frame_factory(HexGrid)

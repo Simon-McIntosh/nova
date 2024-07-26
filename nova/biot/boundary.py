@@ -3,7 +3,6 @@
 import numpy as np
 
 from scipy.constants import mu_0
-from scipy.optimize import newton_krylov
 
 from nova.imas.operate import Operate
 
@@ -15,79 +14,22 @@ kwargs = {
     "pf_active": True,
 }
 
+kwargs = {
+    "pulse": 57410,
+    "run": 0,
+    "machine": "west",
+    "pf_passive": {"occurrence": 0},
+    "pf_active": {"occurrence": 0},
+}
+
 
 operate = Operate(
     **kwargs,
-    dplasma=-2000,
     tplasma="h",
     nwall=-0.2,
     ngrid=None,
     nlevelset=2e3,
 )
-
-operate.time = 2.5
-# operate.plasma.plot()
-
-"""
-from sklearn.gaussian_process import GaussianProcessRegressor
-from sklearn.gaussian_process.kernels import RBF, ConstantKernel
-
-kernel = ConstantKernel(1e-8, (1e-11, 1e-3)) * RBF(
-    length_scale=1.0, length_scale_bounds=(0.1, 10.0)
-)
-gpr = GaussianProcessRegressor(kernel=kernel, random_state=0)
-
-_slice = operate.plasma._slice
-gpr.fit(
-    np.c_[operate.aloc["x"][_slice], operate.aloc["z"][_slice]],
-    operate.aloc["nturn"][_slice],
-)
-
-operate.plasma.plot("_nturn", colors="k")
-
-
-operate.plasma._nturn = gpr.predict(
-    np.c_[operate.plasma._radius, operate.plasma._height]
-)
-
-operate.plasma.plot("_nturn", colors="C0", linestyles="--")
-
-operate.grid['psi'] = gpr.predict(
-    np.c_[operate.grid.data.x2d.data.flatten(), operate.grid.data.z2d.data.flatten()]
-)
-operate.grid.plot(nulls=False)
-"""
-
-"""    
-
-coilset = CoilSet(
-    filename="boundary", dcoil=-1, dplasma=-500, tplasma="h", nlevelset=1e3, nwall=5
-)
-
-
-def build(coilset):
-    coilset.firstwall.insert({"e": [6.2, 0.0, 2.7, 3.0]})
-    coilset.coil.insert(6.2, [2, -2], 0.25, 0.25, link=True)
-    coilset.coil.insert(8, [-0.5, 0.5], 0.25, 0.25, link=True)
-    coilset.coil.insert(7, [-1.5, 1.5], 0.25, 0.25, link=True, factor=-1)
-
-    coilset.plasma.solve()
-    coilset.store()
-
-
-try:
-    coilset.load()
-except FileNotFoundError:
-    build(coilset)
-
-seperatrix = {"e": [6.2, 0, 1, 1.6]}
-coilset.plasma.separatrix = seperatrix
-
-coilset.sloc[1, "Ic"] = 1e2
-coilset.sloc[2, "Ic"] = -600
-coilset.sloc["plasma", "Ic"] = 2e3
-
-"""
 
 
 def nturn_residual(nturn):
@@ -129,29 +71,28 @@ def nturn_residual(nturn):
 def psi_residual(psi):
     """Return psi residual."""
     operate.plasma.psi = psi  # update flux map
-    with operate.plasma.profile(operate.p_prime, operate.ff_prime):
-        operate.plasma.separatrix = operate.plasma.psi_lcfs
-        """
-        psi_axis = self.psi_axis
-        psi_boundary = self.psi_boundary
 
-        # calculate psi_norm
-        psi_norm = (self.grid.psi - psi_axis) / (psi_boundary - psi_axis)
+    """
+    psi_axis = self.psi_axis
+    psi_boundary = self.psi_boundary
 
-        # set seperatrix
-        self.separatrix = self.psi_lcfs
+    # calculate psi_norm
+    psi_norm = (self.grid.psi - psi_axis) / (psi_boundary - psi_axis)
 
-        # update plasma current
-        psi_norm = psi_norm[self.ionize]
+    # set seperatrix
+    self.separatrix = self.psi_lcfs
 
-        current_density = self.radius * operate.p_prime(psi_norm) + operate.ff_prime(
-            psi_norm
-        ) / (mu_0 * self.radius)
-        current_density *= -2 * np.pi
-        current = current_density * self.area
+    # update plasma current
+    psi_norm = psi_norm[self.ionize]
 
-        self.nturn = current / current.sum()
-        """
+    current_density = self.radius * operate.p_prime(psi_norm) + operate.ff_prime(
+        psi_norm
+    ) / (mu_0 * self.radius)
+    current_density *= -2 * np.pi
+    current = current_density * self.area
+
+    self.nturn = current / current.sum()
+    """
 
     return operate.plasma.psi - psi
 
@@ -168,7 +109,14 @@ def psi_residual(psi):
 # operate.plot()
 # operate.plasma.lcfs.plot()
 
-levels = operate.plot_2d(colors="gray", label="DINA")
+print(operate.p_prime)
+print(operate.ff_prime)
+operate.time = 38
+
+operate.p_prime
+
+"""
+levels = operate.plot_2d(colors="gray", label=kwargs["machine"].upper())
 levels = -levels[::-1]
 
 # operate.plasma.plot(levels=levels, colors="black")
@@ -179,9 +127,10 @@ operate.plasma.wall.plot(limitflux=True)
 operate.plasma.psi = newton_krylov(psi_residual, operate.plasma.psi, verbose=True)
 with operate.plasma.profile(operate.p_prime, operate.ff_prime):
     operate.plasma.separatrix = operate.plasma.psi_lcfs
-operate.plasma.plot(levels=levels, colors="C6", label="NOVA")
+operate.plasma.plot(colors="C6", label="NOVA", nulls=False)  # levels=levels,
+"""
 
-operate.plot()
+# operate.plot()
 """
 for _ in range(10):
     coilset.plasma.separatrix = coilset.plasma.psi_lcfs

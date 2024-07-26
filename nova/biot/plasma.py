@@ -3,6 +3,7 @@
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from functools import cached_property
+from typing import Callable
 
 import numpy as np
 from scipy.constants import mu_0
@@ -21,10 +22,50 @@ from nova.geometry.strike import Strike
 
 
 @dataclass
+class Flux:
+    """Manage equilibrium flux functions."""
+
+    p_prime: Callable | None = field(default=None)
+    ff_prime: Callable | None = field(default=None)
+    _p_prime: Callable | None = field(init=False, repr=False, default=None)
+    _ff_prime: Callable | None = field(init=False, repr=False, default=None)
+
+    @property  # type: ignore[no-redef]
+    def p_prime(self) -> Callable:  # noqa
+        """Manage p_prime flux function."""
+        if self._p_prime is None:
+            raise ValueError("p_prime is None.")
+        return self._p_prime
+
+    @p_prime.setter
+    def p_prime(self, p_prime: Callable | None):
+        if type(p_prime) is property:
+            p_prime = self._p_prime
+        if p_prime is not None:
+            self._p_prime = p_prime
+
+    @property  # type: ignore[no-redef]
+    def ff_prime(self) -> Callable:  # noqa
+        """Manage ff_prime flux function."""
+        if self._ff_prime is None:
+            raise ValueError("ff_prime is None.")
+        return self._ff_prime
+
+    @ff_prime.setter
+    def ff_prime(self, ff_prime: Callable | None):
+        if type(ff_prime) is property:
+            ff_prime = self._ff_prime
+        if ff_prime is not None:
+            self._ff_prime = ff_prime
+
+
+@dataclass
 class Plasma(Plot, netCDF, PlasmaLoc):
     """Set plasma separatix, ionize plasma filaments."""
 
     name: str = "plasma"
+    p_prime: Callable | None = field(default=None)
+    ff_prime: Callable | None = field(default=None)
     grid: PlasmaGrid = field(repr=False, default_factory=PlasmaGrid)
     wall: PlasmaWall = field(repr=False, default_factory=PlasmaWall)
     levelset: LevelSet = field(repr=False, default_factory=LevelSet)
@@ -106,6 +147,8 @@ class Plasma(Plot, netCDF, PlasmaLoc):
     def psi(self, psi):
         self.grid["psi"] = psi[: self.psi_index[0]]
         self.wall["psi"] = psi[slice(*self.psi_index[0:2])]
+        with self.profile():
+            self.separatrix = self.psi_lcfs
 
     @property
     def psi_axis(self):
@@ -151,16 +194,6 @@ class Plasma(Plot, netCDF, PlasmaLoc):
             x_bounds[0] = -np.inf
         if x_bounds[1] < o_height:
             x_bounds[1] = np.inf
-
-        # self.wall.psi = np.where(
-        #    (self.wall["z"] < (x_bounds[0] + 0.25 * (o_height - x_bounds[0]))),
-        #    -52,
-        #    self.wall.psi,
-        # )
-        # print("boundary")
-        # self.wall.psi[-100:] = -52
-        # self.wall.version["limitflux"] = None
-
         if w_height < x_bounds[0] or w_height > x_bounds[1]:
             return self.psi_x
         if self.polarity < 0:
@@ -192,18 +225,27 @@ class Plasma(Plot, netCDF, PlasmaLoc):
         return (psi - psi_axis) / (psi_boundary - psi_axis)
 
     @contextmanager
-    def profile(self, p_prime, ff_prime):
+    def profile(self, p_prime=None, ff_prime=None):
         """Update plasma current distribution."""
+        if p_prime is not None:
+            self.p_prime = p_prime
+        if ff_prime is not None:
+            self.ff_prime = ff_prime
         try:
             psi_norm = self.normalize(self.grid.psi)
         except IndexError:
             psi_norm = None
+        print(f"p_prime {self.p_prime}")
         yield  # update separatrix
-        if psi_norm is not None:
+        if (
+            psi_norm is not None
+            and self.p_prime is not None
+            and self.ff_prime is not None
+        ):
             psi_norm = psi_norm[self.ionize]
-            current_density = self.radius * p_prime(psi_norm) + ff_prime(psi_norm) / (
-                mu_0 * self.radius
-            )
+            current_density = self.radius * self.p_prime(psi_norm) + self.ff_prime(
+                psi_norm
+            ) / (mu_0 * self.radius)
             current_density *= -2 * np.pi
             current = current_density * self.area
             current = abs(current)  # TODO investigate further - reverse current rejoins

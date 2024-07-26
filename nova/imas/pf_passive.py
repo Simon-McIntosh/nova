@@ -40,8 +40,8 @@ if __name__ == "__main__":
     # pulse, run = 134173, 106  # DINA / JINTRAC
     pulse, run = 135013, 2
 
-    kwargs = {"pulse": 57410, "run": 0, "machine": "west", "occurrence": 1}  # WEST
+    kwargs = {"pulse": 57410, "run": 0, "machine": "west", "occurrence": 0}  # WEST
 
     pf_passive = PF_Passive(**kwargs)
     pf_passive.plot()
-    pf_passive.axes.set_xlim([0, 60])
+    # pf_passive.axes.set_xlim([0, 60])

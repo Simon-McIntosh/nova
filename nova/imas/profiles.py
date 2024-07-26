@@ -1,7 +1,6 @@
 """Extract time slices from equilibrium IDS."""
 
 from dataclasses import dataclass
-from functools import cached_property
 
 import numpy as np
 from scipy.interpolate import interp1d, RBFInterpolator, RectBivariateSpline
@@ -17,12 +16,18 @@ from nova.imas.pf_active import PF_Active
 class Profile(Equilibrium, GetSlice, IdsData):
     """Interpolation of profiles from an equilibrium time slice."""
 
+    # p_prime: Callable | None = field(init=False, default=None)
+    # ff_prime: Callable | None = field(init=False, default=None)
+
     def __post_init__(self):
         """Build and merge ids datasets."""
         super().__post_init__()
         self.load_data(EquilibriumData)
         self.load_data(PF_Active, **self.pf_active)
-        self.load_data(PF_Passive)  # , **self.pf_passive
+        self.load_data(PF_Passive, **self.pf_passive)
+        self.p_prime = self._interp1d(self.data.psi_norm, self["p_prime"])
+        self.ff_prime = self._interp1d(self.data.psi_norm, self["ff_prime"])
+        print("pp", self.p_prime)
 
     def update(self):
         """Clear cache following update to itime. Extend as required."""
@@ -77,16 +82,6 @@ class Profile(Equilibrium, GetSlice, IdsData):
     def _interp1d(self, x, y):
         """Return 1D interpolant."""
         return interp1d(x, y, kind="quadratic", fill_value="extrapolate")
-
-    @cached_property
-    def p_prime(self):
-        """Return cached p prime 1D interpolant."""
-        return self._interp1d(self.data.psi_norm, self["p_prime"])
-
-    @cached_property
-    def ff_prime(self):
-        """Return cached ff prime 1D interpolant."""
-        return self._interp1d(self.data.psi_norm, self["ff_prime"])
 
     def plot_profile(self, attr="p_prime", axes=None):
         """Plot flux function interpolants."""

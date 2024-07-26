@@ -138,7 +138,7 @@ class Operate(Grid, Profile, Machine):
 
     pf_active: Ids | bool | str = True
     pf_passive: Ids | bool | str = False
-    wall: Ids | bool | str = "iter_md"
+    wall: Ids | bool | str = True
     dplasma: int | float = -2500
 
     @property
@@ -207,7 +207,7 @@ if __name__ == "__main__":
         "pf_passive": {"occurrence": 0},
         "pf_active": {"occurrence": 0},
     }  # WEST
-
+    """
     kwargs = {
         "pulse": 17151,
         "run": 3,
@@ -215,7 +215,7 @@ if __name__ == "__main__":
         "pf_passive": False,
         "pf_active": True,
     }  # AUG
-
+    """
     operate = Operate(
         **kwargs,
         wall=True,
@@ -241,19 +241,19 @@ if __name__ == "__main__":
     )
     """
 
-    operate.itime = 2
+    operate.time = 33
 
     # attr = "j_tor"
     attr = "psi"
-    operate.plot()
-    operate.plot_2d()
+    # operate.plot()
+    operate.plot_2d(attr)
 
     levels = operate.plot_2d(attr, colors="C1", label="NICE")
 
-    # levels = -levels[::-1] + 2.3
-    operate.sloc[0, "Ic"] *= 0
+    levels = -levels[::-1] + 2.3
+    # operate.sloc[0, "Ic"] *= 0
     operate.plot()
-    operate.plasma.plot(attr, levels=levels)
+    # operate.plasma.plot(attr)
     levels = operate.grid.plot(attr, colors="C2", label="NOVA")
 
     """

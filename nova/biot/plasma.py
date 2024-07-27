@@ -1,27 +1,29 @@
 """Forward free-boundary equilibrium solver."""
 
 from contextlib import contextmanager
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, InitVar
 from functools import cached_property
 
 import numpy as np
 from scipy.constants import mu_0
 from scipy.interpolate import interp1d
+from scipy.optimize import newton_krylov
 import scipy.spatial
 
 from nova.database.netcdf import netCDF
+from nova.biot.flux import Flux
 from nova.biot.levelset import LevelSet
 from nova.biot.plasmagrid import PlasmaGrid
 from nova.biot.plasmawall import PlasmaWall
-from nova.graphics.plot import Plot
 from nova.frame.plasmaloc import PlasmaLoc
 from nova.geometry.curve import LCFS
 from nova.geometry.polygon import Polygon
 from nova.geometry.strike import Strike
+from nova.graphics.plot import Plot
 
 
 @dataclass
-class Plasma(Plot, netCDF, PlasmaLoc):
+class Plasma(Plot, netCDF, Flux, PlasmaLoc):
     """Set plasma separatix, ionize plasma filaments."""
 
     name: str = "plasma"
@@ -29,9 +31,11 @@ class Plasma(Plot, netCDF, PlasmaLoc):
     wall: PlasmaWall = field(repr=False, default_factory=PlasmaWall)
     levelset: LevelSet = field(repr=False, default_factory=LevelSet)
     lcfs: LCFS | None = field(init=False, repr=False, default=None)
+    fluxfunctions: InitVar[dict] = field(repr=False, default=None)
 
-    def __post_init__(self):
-        """Update subframe metadata."""
+    def __post_init__(self, fluxfunctions):
+        """Link flux functions and update subframe metadata."""
+        self.fluxfunctions = fluxfunctions
         self.subframe.metaframe.metadata = {
             "additional": ["plasma", "ionize", "area", "nturn"],
             "array": ["plasma", "ionize", "area", "nturn", "x", "z"],
@@ -98,16 +102,6 @@ class Plasma(Plot, netCDF, PlasmaLoc):
         return np.cumsum([self.grid.number, self.wall.number])
 
     @property
-    def psi(self):
-        """Manage concatenated array of grid and wall flux values."""
-        return np.r_[self.grid.psi, self.wall.psi]
-
-    @psi.setter
-    def psi(self, psi):
-        self.grid["psi"] = psi[: self.psi_index[0]]
-        self.wall["psi"] = psi[slice(*self.psi_index[0:2])]
-
-    @property
     def psi_axis(self):
         """Return on-axis poloidal flux."""
         return self.grid["o_psi"]
@@ -151,16 +145,6 @@ class Plasma(Plot, netCDF, PlasmaLoc):
             x_bounds[0] = -np.inf
         if x_bounds[1] < o_height:
             x_bounds[1] = np.inf
-
-        # self.wall.psi = np.where(
-        #    (self.wall["z"] < (x_bounds[0] + 0.25 * (o_height - x_bounds[0]))),
-        #    -52,
-        #    self.wall.psi,
-        # )
-        # print("boundary")
-        # self.wall.psi[-100:] = -52
-        # self.wall.version["limitflux"] = None
-
         if w_height < x_bounds[0] or w_height > x_bounds[1]:
             return self.psi_x
         if self.polarity < 0:
@@ -192,22 +176,46 @@ class Plasma(Plot, netCDF, PlasmaLoc):
         return (psi - psi_axis) / (psi_boundary - psi_axis)
 
     @contextmanager
-    def profile(self, p_prime, ff_prime):
+    def profile(self):
         """Update plasma current distribution."""
         try:
             psi_norm = self.normalize(self.grid.psi)
         except IndexError:
             psi_norm = None
         yield  # update separatrix
-        if psi_norm is not None:
+        try:  # update plasma currnet
             psi_norm = psi_norm[self.ionize]
-            current_density = self.radius * p_prime(psi_norm) + ff_prime(psi_norm) / (
-                mu_0 * self.radius
-            )
+            current_density = self.radius * self.p_prime(psi_norm) + self.ff_prime(
+                psi_norm
+            ) / (mu_0 * self.radius)
             current_density *= -2 * np.pi
             current = current_density * self.area
             current = abs(current)  # TODO investigate further - reverse current rejoins
             self.nturn = current / current.sum()
+        except NotImplementedError:  # flux functions are not implemented
+            pass
+
+    @property
+    def psi(self):
+        """Manage concatenated array of grid and wall flux values."""
+        return np.r_[self.grid.psi, self.wall.psi]
+
+    @psi.setter
+    def psi(self, psi):
+        self.grid["psi"] = psi[: self.psi_index[0]]
+        self.wall["psi"] = psi[slice(*self.psi_index[0:2])]
+        with self.profile():
+            self.separatrix = self.psi_lcfs
+
+    def solve_flux(self, **kwargs):
+        """Solve for equilibrium poloidal flux across plasma grid and boundary."""
+
+        def flux_residual(psi):
+            """Return flux residual."""
+            self.psi = psi
+            return self.psi - psi
+
+        self.psi = newton_krylov(flux_residual, self.psi, **kwargs)
 
     @property
     def separatrix(self):

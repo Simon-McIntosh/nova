@@ -1283,7 +1283,6 @@ class Machine(CoilSet, Geometry, CoilData):
         if hasattr(super(), "build"):
             super().build()
         self.solve_biot()
-        return self.store()
 
     def load(self):
         """Load machine geometry and data."""
@@ -1307,7 +1306,7 @@ if __name__ == "__main__":
     # kwargs = {"pulse": 105028, "run": 1, "machine": "iter"}  # DINA
     # kwargs = {"pulse": 45272, "run": 1, "machine": "mast_u"}  # MastU
     kwargs = {"pulse": 57410, "run": 0, "machine": "west"}  # WEST
-    kwargs = {"pulse": 17151, "run": 3, "machine": "aug", "pf_passive": False}
+    # kwargs = {"pulse": 17151, "run": 3, "machine": "aug", "pf_passive": False}
     machine = Machine(**kwargs, pf_active=True, wall=True, tplasma="h")
 
     """

@@ -1,12 +1,15 @@
 """Extract time slices from equilibrium IDS."""
 
 from dataclasses import dataclass
-from functools import cached_property
+from typing import Callable
 
 import numpy as np
 from scipy.interpolate import interp1d, RBFInterpolator, RectBivariateSpline
 
+from nova.biot.plasma import Flux
 from nova.imas.database import IdsData
+
+# from nova.imas.dataset import Ids
 from nova.imas.equilibrium import Equilibrium, EquilibriumData
 from nova.imas.getslice import GetSlice
 from nova.imas.pf_passive import PF_Passive
@@ -14,28 +17,25 @@ from nova.imas.pf_active import PF_Active
 
 
 @dataclass
-class Profile(Equilibrium, GetSlice, IdsData):
+class Profile(Flux, Equilibrium, GetSlice, IdsData):
     """Interpolation of profiles from an equilibrium time slice."""
+
+    # equilibrium: Ids | bool | str = False
+    # pf_active: Ids | bool | str = False
+    # pf_passive: Ids | bool | str = False
 
     def __post_init__(self):
         """Build and merge ids datasets."""
         super().__post_init__()
         self.load_data(EquilibriumData)
-        self.load_data(PF_Active, **self.pf_active)
-        self.load_data(PF_Passive)  # , **self.pf_passive
+        self.load_data(PF_Active)
+        self.load_data(PF_Passive)
 
-    def update(self):
-        """Clear cache following update to itime. Extend as required."""
-        super().update()
-        self.clear_cached_properties()
-
-    def clear_cached_properties(self):
-        """Clear cached properties."""
-        for attr in ["p_prime", "ff_prime"]:
-            try:
-                delattr(self, attr)
-            except AttributeError:
-                pass
+    def fluxfunctions(self, attr) -> Callable:
+        """Retrun flux function interpolant for attr."""
+        if attr in ["p_prime", "ff_prime"]:
+            return self._interp1d(self.data.psi_norm, self[attr])
+        return super().flux_interpolant(attr)
 
     @property
     def psi_axis(self):
@@ -78,16 +78,6 @@ class Profile(Equilibrium, GetSlice, IdsData):
         """Return 1D interpolant."""
         return interp1d(x, y, kind="quadratic", fill_value="extrapolate")
 
-    @cached_property
-    def p_prime(self):
-        """Return cached p prime 1D interpolant."""
-        return self._interp1d(self.data.psi_norm, self["p_prime"])
-
-    @cached_property
-    def ff_prime(self):
-        """Return cached ff prime 1D interpolant."""
-        return self._interp1d(self.data.psi_norm, self["ff_prime"])
-
     def plot_profile(self, attr="p_prime", axes=None):
         """Plot flux function interpolants."""
         self.set_axes("1d", axes=axes)
@@ -110,5 +100,3 @@ if __name__ == "__main__":
     profile = Profile(pulse, run, machine="iter")
     profile.time = 300
     profile.plot_profile(attr="ff_prime")
-
-    profile.plot_2d()

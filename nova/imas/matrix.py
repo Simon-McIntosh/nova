@@ -15,6 +15,7 @@ class Matrix(Operate):
 
     pulse: int = 135014
     run: int = 1
+    equilibrium: Ids | bool | str = True
     pf_active: Ids | bool | str = "iter_md"
     time_index: int = 315
     nforce: int | float = 500

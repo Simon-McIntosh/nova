@@ -18,6 +18,7 @@ from nova.biot import (
     PlasmaGap,
 )
 from nova.biot.data import Data
+from nova.biot.flux import Flux
 from nova.database.netcdf import netCDF
 from nova.frame.frameset import FrameSet, frame_factory
 
@@ -73,7 +74,7 @@ class BiotBase(FrameSet):
 
 
 @dataclass
-class BiotPlasma(BiotBase):
+class BiotPlasma(Flux, BiotBase):
     """Group plasma biot methods."""
 
     nhex: Nbiot = None
@@ -93,6 +94,7 @@ class BiotPlasma(BiotBase):
             "grid": self.plasmagrid,
             "wall": self.plasmawall,
             "levelset": self.levelset,
+            "fluxfunctions": self.fluxfunctions,
         }
 
     @frame_factory(HexGrid)

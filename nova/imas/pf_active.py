@@ -46,7 +46,12 @@ class PF_Active(Plot, Scenario):
     def plot(self, axes=None, **kwargs):
         """Plot current timeseries."""
         self.set_axes("1d", axes=axes)
-        self.axes.plot(self.data.time, 1e-3 * self.data.current, **kwargs)
+        self.axes.plot(
+            self.data.time,
+            1e-3 * self.data.current,
+            label=self.data.coil_name.data,
+            **kwargs,
+        )
         self.axes.set_xlabel("$t$ s")
         self.axes.set_ylabel("$I$ kA")
 
@@ -70,9 +75,10 @@ if __name__ == "__main__":
     # pulse, run = 111001, 202
     # PF_Active(pulse, run, "iter")._clear()
 
-    kwargs = {"pulse": 57410, "run": 0, "machine": "west", "occurrence": 1}  # WEST
+    kwargs = {"pulse": 57410, "run": 0, "machine": "west", "occurrence": 0}  # WEST
 
     pf_active = PF_Active(**kwargs)
-    pf_active.build()
+    # pf_active.build()
     # pf_active = PF_Active(105007, 9)  # b field max timed 135002, 5
     pf_active.plot()
+    pf_active.axes.legend()

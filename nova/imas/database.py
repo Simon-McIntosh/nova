@@ -110,6 +110,13 @@ class IdsData(Datafile, Database):
         """Load data from IdsClass and merge."""
         if self.pulse == 0 and self.run == 0 and self.ids is None:
             return
+        name = ids_class.__name__.lower()
+        if hasattr(self, name):
+            match getattr(self, name):
+                case False:
+                    return
+                case dict(class_attrs):
+                    ids_attrs = class_attrs | ids_attrs
         if self.ids is not None:
             ids_attrs = {"ids": self.ids}
         else:

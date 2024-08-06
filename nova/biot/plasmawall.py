@@ -49,14 +49,14 @@ class PlasmaWall(Limiter, Point):
         """Return first wall boundary."""
         return self.Loc["plasma", "poly"][0].boundary
 
-    def solve(self, boundary=None):
+    def solve(self, number=None, boundary=None):
         """Solve Biot wall-pannel nodes with a delta subpannel spacing."""
-        if self.number is None:
-            return
         if boundary is None:
             boundary = self.boundary
-        sample = Sample(boundary, delta=-self.number)
-        super().solve(np.c_[sample["radius"], sample["height"]])
+        with self.solve_biot(number) as number:
+            if number is not None:
+                sample = Sample(boundary, delta=-number)
+                super().solve(np.c_[sample["radius"], sample["height"]])
 
     def plot(self, axes=None, limitflux=False, **kwargs):
         """Plot wall pannels."""

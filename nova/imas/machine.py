@@ -565,6 +565,7 @@ class PassiveShellData(Plot, FrameData):
             self.update_resistivity(
                 index, shell.frame, shell.subframe, self.data["resistance"][i]
             )
+            self.update_passive_turns(index, *shell.frames)
         self.reset()
 
     def plot(self, axes=None):
@@ -592,7 +593,7 @@ class PassiveCoilData(IdsCoilData):
             "section": self.data["section"],
         } | kwargs
         index = super().insert(constructor, **kwargs)
-        # self.update_passive_turns(index, *constructor.frames)
+        self.update_passive_turns(index, *constructor.frames)
         return index
 
 
@@ -655,9 +656,9 @@ class PoloidalFieldPassive(CoilDatabase):
                 raise NotImplementedError(
                     f"geometory {element.section} " "not implemented"
                 )
-            coildata.insert(self.coil, delta=-1)
+            coildata.insert(self.coil, delta=self.dcoil)
             polydata.insert(self.coil, delta=-10)
-            shelldata.insert(self.shell, delta=-3)
+            shelldata.insert(self.shell, delta=self.dshell)
 
 
 @dataclass
@@ -723,9 +724,7 @@ class PoloidalFieldActive(CoilDatabase):
                 if element.is_poly():
                     polydata.append(loop, element)
                     continue
-                raise NotImplementedError(
-                    f"geometory {element.name} " "not implemented"
-                )
+                raise NotImplementedError(f"geometry {element.name} " "not implemented")
             if len(ids_loop.element) == 1:
                 constructor = self.coil
             else:
@@ -1014,7 +1013,7 @@ class ELM(CoilDatabase):
 
 
 @dataclass
-class Geometry:
+class Geometry(IdsBase):
     """
     Manage IDS coil geometry attributes.
 
@@ -1043,7 +1042,7 @@ class Geometry:
 
     Dissable wall geometry via boolean input:
 
-    >>> geometry = Geometry(wall=False)
+    >>> geometry = Geometry(wall=False, pf_active='iter_md', pf_passive='iter_md')
     >>> geometry.wall
     False
     >>> geometry.pf_active == PoloidalFieldActive.default_ids_attrs()
@@ -1053,14 +1052,14 @@ class Geometry:
 
     Modify pf_active attrs via dict input:
 
-    >>> pf_active = Geometry(pf_active=dict(run=101)).pf_active
-    >>> pf_active == PoloidalFieldActive.default_ids_attrs() | dict(run=101)
+    >>> pf_active = Geometry(pf_active={'run': 101}).pf_active
+    >>> pf_active == geometry.ids_attrs | {'run': 101, 'name': 'pf_active'}
     True
 
     Specify pf_active as an ids with pulse, run, and name:
 
     >>> database = Database(111001, 202, 'pf_active', machine='iter_md')
-    >>> pf_active = Geometry(database.ids).pf_active
+    >>> pf_active = Geometry(ids=database.ids, pf_active='iter_md').pf_active
     >>> pf_active['pulse'] == 111001
     True
 
@@ -1108,92 +1107,23 @@ class Geometry:
         ):
             self.filename = "machine_description"
 
-    def get_ids_attrs(self, attrs, geometry) -> dict:
-        """Return default ids attributes.
-
-        Parameters
-        ----------
-        attrs : Ids | bool | str
-            Descriptor for geometry ids.
-
-        geometry : IDS
-            Geometry class derived from IDS parent. When `attrs` != 'iter_md'
-            child classes of the geometry class that define an `ids_attrs`
-            attribute (such as the `nova.imas.Database`) merge the `attrs`
-            parameter with `ids_attrs` with `attrs` taking priority in
-            cases where an IDS attribute is pressent in both.
-
-        Returns
-        -------
-        dict[str, int | str]
-            IDS descriptor containing all the parameters required by the
-            `nova.imas.database.IDS` class \
-            (pulse, run, machine, occurrence, user, name, backend).
-            The `attrs` attribute is matched according to its type and value
-            as follows:
-
-                - 'iter_md' : Return default IDS stored in `ids_attrs` \
-                    attribute of the 'geometry' class.
-                - True : Return  `geometry.ids_attrs` | `self.ids_attrs`
-                - dict[str, int | str] : Return `geometry.ids_attrs` | attrs
-                - tuple[int | str] : Return `geometry.ids_attrs` | \
-                    `IDS(*attrs)`
-
-        Examples
-        --------
-        Instantiate the geometry class.
-
-        >>> geometry = Geometry()
-
-        Get default IDS for ITER's wall.
-
-        >>> wall_md = geometry.get_ids_attrs('iter_md', Wall)
-        >>> list(wall_md.values())
-        [116000, 2, 'wall', 0, 'iter_md', 'public', 'hdf5']
-
-        Extend geometry instance with an `ids_attrs` attribute.
-
-        >>> geometry.ids_attrs = wall_md | {'pulse': 20, 'run': 25}
-
-        Confrim that new attrs overide the defaults profided by `Wall`.
-
-        >>> list(geometry.get_ids_attrs(True, Wall).values())
-        [20, 25, 'wall', 0, 'iter_md', 'public', 'hdf5']
-
-        Request ids_attrs with a dict input replacing machine and occurence.
-
-        >>> attrs = {'machine': 'iter', 'occurrence': 3}
-        >>> list(geometry.get_ids_attrs(attrs, Wall).values())
-        [20, 25, 'wall', 3, 'iter', 'public', 'hdf5']
-
-        Request ids_attrs with a tuple input replacing the first 4 IDS attrs.
-
-        >>> attrs = (20, 38, 'pf_passive', 3)
-        >>> list(geometry.get_ids_attrs(attrs, Wall).values())
-        [20, 38, 'pf_passive', 3, 'iter_md', 'public', 'hdf5']
-        """
-        match attrs:
-            case "iter_md":  # update from iter_md
-                ids_attrs = geometry.update_ids_attrs(True)
-            case str():
-                raise ValueError(f"attr str input {attrs} != iter_md")
-            case attrs if hasattr(self, "ids_attrs") and self.ids is None:
-                ids_attrs = geometry.merge_ids_attrs(attrs, self.ids_attrs)
-            case attrs:
-                ids_attrs = geometry.update_ids_attrs(attrs)
-        return ids_attrs
+    @property
+    def _dataset_attrs(self) -> list[str]:
+        """Return list of dataset attributes names."""
+        return list(self.geometry)
 
     @property
-    def geometry_attrs(self) -> dict:
-        """Return geometry attributes."""
+    def dataset_attrs(self) -> dict:
+        """Return dataset attributes."""
         return {
-            f"{attr}_md": (
+            attr: (
                 value
-                if isinstance(value := getattr(self, attr), (bool, np.integer))
+                if isinstance(value := getattr(self, attr), bool)
+                or np.issubdtype(type(value), np.integer)
                 or "ids" not in value
                 else Database(ids=value["ids"]).ids_hash
             )
-            for attr in self.geometry
+            for attr in self._dataset_attrs
         }
 
 
@@ -1211,8 +1141,8 @@ class Machine(CoilSet, Geometry, CoilData):
                 A change in the metadata group hash has been detected.
         """
         metadata = self.coilset_attrs
-        for geometry in self.geometry_attrs:
-            if (attrs := self.geometry_attrs[geometry]) is False:
+        for geometry in self.dataset_attrs:
+            if (attrs := self.dataset_attrs[geometry]) is False:
                 continue
             if isinstance(attrs, (int, bytes, str)):  # ids input
                 metadata[geometry] = attrs
@@ -1223,26 +1153,27 @@ class Machine(CoilSet, Geometry, CoilData):
     @metadata.setter
     def metadata(self, metadata: dict):
         """Set instance metadata, assert consistent attr_hash."""
+        print(self.group_attrs)
         for attr in self.frameset_attrs:
             setattr(self, attr, metadata[attr])
         for attr in metadata.keys() & self._biot_attrs.keys():
             setattr(self, attr, metadata[attr])
-        for geometry in self.geometry_attrs:
-            if geometry not in metadata:
-                setattr(self, geometry[:-3], False)
+        for attr in self.dataset_attrs:
+            if attr not in metadata:
+                setattr(self, attr, False)
                 continue
-            if isinstance(metadata[geometry], np.integer):
-                setattr(self, geometry[:-3], metadata[geometry])
+            if isinstance(metadata[attr], np.integer):
+                setattr(self, attr, metadata[attr])
                 continue
             values = [
-                self._format_geometry_attrs(attr)
-                for attr in metadata[geometry].split(",")
+                self._format_dataset_attrs(attr) for attr in metadata[attr].split(",")
             ]
-            setattr(self, geometry[:-3], dict(zip(IdsBase.database_attrs, values)))
+            setattr(self, attr, dict(zip(IdsBase.database_attrs, values)))
+        print(self.group_attrs)
         assert self.group == self.hash_attrs(self.group_attrs)
 
     @staticmethod
-    def _format_geometry_attrs(attr: str) -> str | int | float:
+    def _format_dataset_attrs(attr: str) -> str | int | float:
         """Return formated attr. Try int conversion except return str."""
         if "." in attr:
             return float(attr)
@@ -1258,13 +1189,13 @@ class Machine(CoilSet, Geometry, CoilData):
 
         Extends :func:`~nova.imas.database.CoilData.group_attrs`.
         """
-        return self.coilset_attrs | self.geometry_attrs
+        return self.coilset_attrs | self.dataset_attrs
 
     def solve_biot(self):
         """Solve biot instances."""
         if self.sloc["plasma"].sum() > 0:
             boundary = self.geometry["wall"](**self.wall).boundary
-            self.plasma.solve(boundary)
+            self.plasma.solve(boundary=boundary)
         self.inductance.solve()
         self.grid.solve()
         self.field.solve()
@@ -1292,7 +1223,8 @@ class Machine(CoilSet, Geometry, CoilData):
 
     def store(self):
         """Store frameset, biot attributes and metadata."""
-        self.data.attrs = self.metadata | self.data.attrs
+        self.data.attrs |= self.metadata
+
         super().store()
         return self
 
@@ -1303,12 +1235,23 @@ if __name__ == "__main__":
 
     doctest.testmod(verbose=False)
 
-    # kwargs = {"pulse": 105028, "run": 1, "machine": "iter"}  # DINA
+    kwargs = {"pulse": 105028, "run": 1, "machine": "iter_md"}  # DINA
+    kwargs = {"pulse": 105028, "run": 1, "machine": "iter"}  # DINA
     # kwargs = {"pulse": 45272, "run": 1, "machine": "mast_u"}  # MastU
-    kwargs = {"pulse": 57410, "run": 0, "machine": "west"}  # WEST
+    # kwargs = {"pulse": 57410, "run": 0, "machine": "west"}  # WEST
     # kwargs = {"pulse": 17151, "run": 3, "machine": "aug", "pf_passive": False}
-    machine = Machine(**kwargs, pf_active=True, wall=True, tplasma="h")
 
+    machine = Machine(
+        **kwargs,
+        pf_active=True,
+        pf_passive=True,
+        wall=True,
+        tplasma="h",
+        ninductance=10,
+        dshell=1.5,
+    )
+
+    machine.plot()
     """
     machine = Machine(
         **kwargs,

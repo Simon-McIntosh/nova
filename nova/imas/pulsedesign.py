@@ -177,6 +177,9 @@ class Constraint(Plot):
 class Control(PlasmaPoints, Profile):
     """Extract control points and flux profiles from equilibrium data."""
 
+    equilibrium: Ids | bool | str = True
+    pf_active: Ids | bool | str = "iter_md"
+    pf_passive: Ids | bool | str = False
     constraint: Constraint = field(init=False, default_factory=Constraint, repr=False)
 
     def update_constraints(self, psi=0):
@@ -621,7 +624,7 @@ class PulseDesign(Animate, Plot1D, Control, ITER):
         }
         for _ in range(3):
             self.solve_current()
-            with self.plasma.profile(self.p_prime, self.ff_prime):
+            with self.plasma.profile():
                 self.plasma.separatrix = self.plasma.psi_boundary
         self.solve_current()
 

@@ -1,15 +1,15 @@
 """Extract time slices from equilibrium IDS."""
 
 from dataclasses import dataclass
-from typing import Callable
+from typing import Callable, ClassVar
 
 import numpy as np
 from scipy.interpolate import interp1d, RBFInterpolator, RectBivariateSpline
 
 from nova.biot.plasma import Flux
-from nova.imas.database import IdsData
+from nova.imas.database import CoilData
+from nova.imas.dataset import Ids
 
-# from nova.imas.dataset import Ids
 from nova.imas.equilibrium import Equilibrium, EquilibriumData
 from nova.imas.getslice import GetSlice
 from nova.imas.pf_passive import PF_Passive
@@ -17,25 +17,44 @@ from nova.imas.pf_active import PF_Active
 
 
 @dataclass
-class Profile(Flux, Equilibrium, GetSlice, IdsData):
+class Profile(Flux, Equilibrium, GetSlice, CoilData):
     """Interpolation of profiles from an equilibrium time slice."""
 
-    # equilibrium: Ids | bool | str = False
-    # pf_active: Ids | bool | str = False
-    # pf_passive: Ids | bool | str = False
+    equilibrium: Ids | bool | str = True
+    pf_active: Ids | bool | str = False
+    pf_passive: Ids | bool | str = False
+
+    dataset: ClassVar[dict] = {
+        "equilibrium": EquilibriumData,
+        "pf_active": PF_Active,
+        "pf_passive": PF_Passive,
+    }
 
     def __post_init__(self):
         """Build and merge ids datasets."""
+        for attr, IdsClass in self.dataset.items():
+            if isinstance(ids_attrs := getattr(self, attr), str):
+                continue
+            setattr(self, attr, self.get_ids_attrs(ids_attrs, IdsClass))
         super().__post_init__()
-        self.load_data(EquilibriumData)
-        self.load_data(PF_Active)
-        self.load_data(PF_Passive)
+
+    def build(self):
+        """Merge dataset data."""
+        super().build()
+        for IdsClass in self.dataset.values():
+            self.load_data(IdsClass)
+
+    @property
+    def _dataset_attrs(self) -> list[str]:
+        """Extend Machine dataset attributes."""
+        attrs = super()._dataset_attrs
+        return attrs + [attr for attr in self.dataset if attr not in attrs]
 
     def fluxfunctions(self, attr) -> Callable:
         """Retrun flux function interpolant for attr."""
         if attr in ["p_prime", "ff_prime"]:
             return self._interp1d(self.data.psi_norm, self[attr])
-        return super().flux_interpolant(attr)
+        return super().fluxfunctions(attr)
 
     @property
     def psi_axis(self):
@@ -97,6 +116,6 @@ class Profile(Flux, Equilibrium, GetSlice, IdsData):
 
 if __name__ == "__main__":
     pulse, run = 135013, 2
-    profile = Profile(pulse, run, machine="iter")
+    profile = Profile(pulse, run, machine="iter", equilibrium=True)
     profile.time = 300
     profile.plot_profile(attr="ff_prime")

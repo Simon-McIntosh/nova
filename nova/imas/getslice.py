@@ -67,7 +67,7 @@ class GetSlice:
     def itime(self):
         """Manage solution time index."""
         if self.time_index is None:
-            self.time_index = 0
+            raise IndexError("itime is None")
         return self.time_index
 
     @itime.setter

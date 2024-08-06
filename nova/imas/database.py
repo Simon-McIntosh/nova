@@ -5,7 +5,7 @@ from functools import cached_property
 import packaging
 
 from nova.database.datafile import Datafile
-from nova.imas.dataset import Dataset
+from nova.imas.dataset import Dataset, imas
 
 
 # _pylint: disable=too-many-ancestors
@@ -66,8 +66,8 @@ class Database(Dataset):
         """Return base filename."""
         classname = f"{self.__class__.__name__.lower()}".replace("data", "")
         classname = classname.replace("poloidalfield", "pf_")
-        # if classname == self.name:
-        #    return self.machine
+        if classname == self.name:
+            return self.machine
         return f"{classname}_{self.machine}"
 
     def update_filename(self):
@@ -82,6 +82,8 @@ class Database(Dataset):
             self.filename = self.classname
         if self.group is None and self.name is not None:
             self.group = self.name
+            if self.ids is not None:
+                self.group += f"_{Dataset(ids=self.ids).ids_hash}"
 
     @property
     def group_attrs(self):
@@ -110,23 +112,24 @@ class IdsData(Datafile, Database):
         """Load data from IdsClass and merge."""
         if self.pulse == 0 and self.run == 0 and self.ids is None:
             return
-        name = ids_class.__name__.lower()
+        name = ids_attrs["name"] = ids_class.__name__.lower().replace("data", "")
         if hasattr(self, name):
             match getattr(self, name):
                 case False:
                     return
                 case dict(class_attrs):
                     ids_attrs = class_attrs | ids_attrs
-        if self.ids is not None:
+        if self.ids is not None and self.name == name:
             ids_attrs = {"ids": self.ids}
         else:
             ids_attrs = self.ids_attrs | ids_attrs
         try:
             data = ids_class(**ids_attrs).data
-        except NameError:  # name missmatch when loading from ids node
-            return
-        if self.ids is not None:  # override when using ids input
-            self.data = data
+        except imas.exception.DataEntryException:
+            return  # name missmatch when loading from ids node or IDS not found
+        if self.ids is not None and self.name == name:  # override when using ids input
+            setattr(self, name, Database(ids=self.ids).ids_hash)
+            self.data = data.copy()
             return
         if hasattr(self.data, "time") and hasattr(data, "time"):
             data = data.interp({"time": self.data.time}, assume_sorted=True)

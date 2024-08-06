@@ -61,7 +61,7 @@ class Plasma(Plot, netCDF, Flux, PlasmaLoc):
 
     def solve(self, boundary=None):
         """Solve interaction matricies across plasma grid."""
-        self.wall.solve(boundary)
+        self.wall.solve(boundary=boundary)
         self.grid.solve()
         self.levelset.solve()
 

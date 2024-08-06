@@ -156,21 +156,22 @@ def test_geometry_boolean_input():
 
 
 def test_geometry_update_run():
-    pf_active = Geometry(pf_active=dict(run=101)).pf_active
+    pf_active_md = PoloidalFieldActive.default_ids_attrs()
+    pf_active = Geometry(**pf_active_md, pf_active=dict(run=101)).pf_active
     assert pf_active == PoloidalFieldActive.default_ids_attrs() | dict(run=101)
 
 
 @mark["pf_active"]
 def test_geometry_pf_active_run_ids():
     database = Database(**ids_attrs["pf_active"])
-    pf_active = Geometry(database.ids).pf_active
+    pf_active = Geometry(ids=database.ids, pf_active="iter_md").pf_active
     assert pf_active["run"] == PoloidalFieldActive.run
 
 
 @mark["pf_active"]
 def test_geometry_pf_active_as_itterable():
     pulse_run = (ids_attrs["pf_active"]["pulse"], ids_attrs["pf_active"]["run"])
-    pf_active = Geometry(pf_active=pulse_run).pf_active
+    pf_active = Geometry(pf_active=pulse_run, machine="iter_md").pf_active
     assert all(
         pf_active[attr] == ids_attrs["pf_active"][attr]
         for attr in ids_attrs["pf_active"]

@@ -38,18 +38,19 @@ class Matrix(Operate):
         self.grid.plot()
         self.plasma.wall.plot(limitflux=False)
         self.force.plot(scale=2)
+        self.plasma.plot()
 
 
 @dataclass
 class Benchmark(Matrix):
-    """Benchmark EM coupling matricies with other IDS."""
+    """Benchmark EM coupling matricies with another IDS."""
 
     profile_ids: Ids = (135007, 4)
 
     def __post_init__(self):
         """Generate profile instance."""
         self.profile_ids = Database.update_ids_attrs(self.profile_ids)
-        self.profile = Profile(**self.profile_ids)
+        self.profile = Profile(**self.profile_ids, pf_active=True)
         super().__post_init__()
         self.update_plasma_shape()
 
@@ -91,6 +92,20 @@ class Benchmark(Matrix):
         self.sloc["coil", "Ic"] = 0
         self.sloc[self.sloc_index, "Ic"] = self.profile["current"][self.profile_index]
         self.sloc["plasma", "Ic"] = self.profile["ip"]
+
+    def plot_current(self):
+        """Plot timeslice current comparison."""
+        self.set_axes("1d")
+        self.axes.bar(
+            self.loc["coil", :].index, self.loc["coil", "Ic"] * 1e-3, label="matrix"
+        )
+        self.axes.bar(
+            self.profile.data.coil_name,
+            self.profile["current"] * 1e-3,
+            width=0.6,
+            label="ids",
+        )
+        self.axes[0].legend()
 
     def plot_force(self):
         """Plot timeslice force benchmark."""
@@ -140,7 +155,7 @@ if __name__ == "__main__":
     # matrix.write()
 
     benchmark = Benchmark(ngrid=None, tplasma="hex")
-    benchmark.itime = -1
+    benchmark.itime = 0
     benchmark.plot_force()
     benchmark.plot_field()
 

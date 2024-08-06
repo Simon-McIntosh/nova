@@ -165,6 +165,8 @@ class Solve(GroupSet):
 
     def source_index(self, segment):
         """Return source segment index."""
+        if not self.source.reduce:
+            return self.source.index[self.source_segment == segment]
         frame = [
             self._frame_link.loc[frame]
             for frame in np.unique(self.source.frame[self.source_segment == segment])

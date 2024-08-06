@@ -33,6 +33,6 @@ class Flux:
 
     def update(self):
         """Clear flux function cache."""
-        if hasattr(super(), "update"):
-            super().update
         self._clear_flux_function_cache()
+        if hasattr(super(), "update"):
+            super().update()

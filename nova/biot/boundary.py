@@ -35,7 +35,7 @@ operate = Operate(
 operate.time = 250
 
 # operate.sloc["PF6", "Ic"] *= 1
-# operate.sloc["PF4", "Ic"] *= 0.95
+# operate.sloc["PF4", "Ic"] *= 1.2
 
 
 # operate.plasma.separatrix = {"e": [6.2, 0.5, 3, 4.6]}

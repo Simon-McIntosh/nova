@@ -16,6 +16,7 @@ with check_import("imaspy"):
 
 logging.basicConfig(level=logging.WARNING)
 
+
 ImasIds = Any
 Ids = ImasIds | dict[str, int | str] | tuple[int | str]
 
@@ -340,6 +341,76 @@ os.path.join(userhome, 'public', 'imasdb', 'iter', '3', '1', '2')
             )
         self.name = self.ids.metadata.name
 
+    def get_ids_attrs(self, attrs, other) -> dict:
+        """Return ids attributes from other.
+
+        Parameters
+        ----------
+        attrs : Ids | bool | str
+            Descriptor for geometry ids.
+        other : Dataset
+            Other Dataset class
+
+        Returns
+        -------
+        dict[str, int | str]
+            IDS descriptor containing all the parameters required by the
+            `nova.imas.database.IDS` class \
+            (pulse, run, machine, occurrence, user, name, backend).
+            The `attrs` attribute is matched according to its type and value
+            as follows:
+
+                - 'iter_md' : Return default IDS stored in `ids_attrs` \
+                    attribute of the 'geometry' class.
+                - True : Return  `geometry.ids_attrs` | `self.ids_attrs`
+                - dict[str, int | str] : Return `geometry.ids_attrs` | attrs
+                - tuple[int | str] : Return `geometry.ids_attrs` | \
+                    `IDS(*attrs)`
+
+        Examples
+        --------
+        Get default IDS for ITER's wall.
+
+        >>> from nova.imas.machine import Wall
+        >>> dataset = Dataset()
+        >>> wall_md = dataset.get_ids_attrs('iter_md', Wall)
+        >>> list(wall_md.values())
+        [116000, 2, 'wall', 0, 'iter_md', 'public', 'hdf5']
+
+        Extend geometry instance with an `ids_attrs` attribute.
+
+        >>> dataset.ids_attrs = wall_md | {'pulse': 20, 'run': 25}
+
+        Confrim that new attrs overide the defaults profided by `Wall`.
+
+        >>> list(dataset.get_ids_attrs(True, Wall).values())
+        [20, 25, 'wall', 0, 'iter_md', 'public', 'hdf5']
+
+        Request ids_attrs with a dict input replacing machine and occurence.
+
+        >>> attrs = {'machine': 'iter', 'occurrence': 3}
+        >>> list(dataset.get_ids_attrs(attrs, Wall).values())
+        [20, 25, 'wall', 3, 'iter', 'public', 'hdf5']
+
+        Request ids_attrs with a tuple input replacing the first 4 IDS attrs.
+
+        >>> attrs = (20, 38, 'pf_passive', 3)
+        >>> list(dataset.get_ids_attrs(attrs, Wall).values())
+        [20, 38, 'pf_passive', 3, 'iter_md', 'public', 'hdf5']
+        """
+        other_name = other.__name__.lower().replace("data", "")
+        match attrs:
+            case "iter_md":  # update from iter_md
+                return other.update_ids_attrs(True)
+            case str():
+                raise ValueError(f"attr str input {attrs} != iter_md")
+            case True if self.ids is not None and self.name == other_name:
+                return Dataset(ids=self.ids).ids_hash
+            case attrs if hasattr(self, "ids_attrs"):
+                return other.merge_ids_attrs(attrs, self.ids_attrs)
+            case _:
+                return other.update_ids_attrs(attrs)
+
 
 @dataclass(kw_only=True)
 class Datastore(IdsBase):  # noqa: D207
@@ -474,11 +545,11 @@ but 6 were given
     Dataset(dd_version=<Version('3.22.0')>, uri='imas:hdf5?path=/tmp', \
 mode='r', lazy=True, ids=None)
 
-    >>> Dataset(pulse=101)
+    >>> Dataset(run=101)
     Traceback (most recent call last):
         ...
     imas_core.exception.ALException: When self.ids is None require:
-    pulse (101 > 0) & run (0 > 0) & name (None != None)
+    pulse (0 > 0) & run (101 > 0) & name (None != None)
 
     >>> Dataset().get()
     Traceback (most recent call last):
@@ -666,6 +737,7 @@ mode='r', lazy=True, ids=None)
         if self._ids is None and self.uri and self.name is not None:
             try:
                 self._ids = self.get()
+                self.name = self._ids.metadata.name
             except (imas.exception.ALException, imas.exception.UnknownDDVersion):
                 self._ids = None
                 pass

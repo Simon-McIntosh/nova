@@ -9,6 +9,16 @@ from nova.imas.equilibrium import EquilibriumData
 from nova.imas.sample import Sample
 from nova.imas.test_utilities import ids_attrs, mark, mark_imas
 
+biot_attrs = {
+    "dplasma": -1,
+    "nwall": None,
+    "nlevelset": None,
+    "ngrid": None,
+    "nfield": None,
+    "nforce": None,
+    "tplasma": "h",
+}
+
 
 @pytest.fixture
 def ids():
@@ -57,11 +67,11 @@ def ids():
 @mark_imas
 def test_ids_file_cache(ids):
     ids.time_slice[0].boundary_separatrix.psi = 66
-    design_a = PulseDesign(ids=ids, dplasma=-1, nwall=None, nlevelset=None)
+    design_a = PulseDesign(ids=ids, **biot_attrs)
     design_a.time_index = 0
 
     ids.time_slice[0].boundary_separatrix.psi = 77
-    design_b = PulseDesign(ids=ids, dplasma=-1, nwall=None, nlevelset=None)
+    design_b = PulseDesign(ids=ids, **biot_attrs)
     design_b.time_index = 0
 
     assert design_a["psi_boundary"] == 66
@@ -70,15 +80,9 @@ def test_ids_file_cache(ids):
 
 @mark_imas
 def test_pf_active_ids_input(ids):
-    design = PulseDesign(ids=ids, dplasma=-1, nwall=None, nlevelset=None)
+    design = PulseDesign(ids=ids, **biot_attrs)
     pf_active_ids = design.geometry["pf_active"](**design.pf_active, lazy=False).ids
-    design = PulseDesign(
-        ids=ids,
-        dplasma=-1,
-        nwall=None,
-        nlevelset=None,
-        pf_active={"ids": pf_active_ids},
-    )
+    design = PulseDesign(ids=ids, pf_active={"ids": pf_active_ids}, **biot_attrs)
     ids_entry = IdsEntry(name="pf_active")
     design.update_metadata(ids_entry)
 
@@ -91,28 +95,16 @@ def test_pf_active_ids_input_cache(ids):
     pf_active_203 = Database(
         111001, 203, "pf_active", machine="iter_md", lazy=False
     ).ids
-    design_103 = PulseDesign(
-        ids=ids,
-        dplasma=-1,
-        nwall=None,
-        nlevelset=None,
-        pf_active={"ids": pf_active_103},
-    )
-    design_203 = PulseDesign(
-        ids=ids,
-        dplasma=-1,
-        nwall=None,
-        nlevelset=None,
-        pf_active={"ids": pf_active_203},
-    )
-    assert (
-        design_103.group_attrs["pf_active_md"] != design_203.group_attrs["pf_active_md"]
-    )
+    design_103 = PulseDesign(ids=ids, pf_active={"ids": pf_active_103}, **biot_attrs)
+    design_203 = PulseDesign(ids=ids, pf_active={"ids": pf_active_203}, **biot_attrs)
+    assert design_103.group_attrs["pf_active"] != design_203.group_attrs["pf_active"]
 
 
 @mark_imas
 def test_make_frame(ids):
-    design = PulseDesign(ids=ids)
+    design = PulseDesign(
+        ids=ids, **dict(biot_attrs | {"nlevelset": 1e3, "nwall": 3, "dplasma": -1e3})
+    )
     design.itime = 0
     design.add_animation("time", 10, ramp=100)
     with matplotlib.pylab.ioff():
@@ -122,9 +114,8 @@ def test_make_frame(ids):
 @mark["equilibrium_pds"]
 def test_sample_pds():
     equilibrium = EquilibriumData(**ids_attrs["equilibrium_pds"])
-    sample = Sample(equilibrium.data, epsilon=0.75, savgol=None)
+    sample = Sample(equilibrium.data, epsilon=0.25, savgol=None)
     design = PulseDesign(ids=sample.equilibrium_ids(), strike=True)
-    design.itime = 0
     assert design.data.sizes["time"] == 15
 
 

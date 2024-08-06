@@ -4,8 +4,13 @@ import bisect
 from dataclasses import dataclass
 
 import numpy as np
+import pandas
+
 from tqdm import tqdm
 
+from nova.biot.biot import Nbiot
+from nova.imas.dataset import Ids, ImasIds
+from nova.imas.ids_index import IdsIndex
 from nova.imas.operate import Operate
 from nova.linalg.regression import MoorePenrose
 
@@ -14,7 +19,109 @@ from nova.linalg.regression import MoorePenrose
 
 
 @dataclass
-class Extrapolate(Operate):
+class Grid:
+    """
+    Specify interpolation grid.
+
+    Parameters
+    ----------
+    ngrid : {int, 'ids'}, optional
+        Grid dimension. The default is 5000.
+
+        - int: use input to set aproximate total node number
+        - ids: aproximate total node number extracted from equilibrium ids.
+    limit : {float, list[float], 'ids'}, optional
+        Grid bounds. The default is 0.25.
+
+        - float: expansion relative to coilset index. Must be greater than -1.
+        - list[float]: explicit grid bounds [rmin, rmax, zmin, zmax].
+        - ids: bounds extracted from from equilibrium ids.
+    index : {'plasma', 'coil', slice, pandas.Index}
+        Filament index from which relative grid limits are set.
+    ids: ImasIds, optional
+        IMAS IDS required for equilibrium derived grid dimensions.
+        The default is None
+
+    Examples
+    --------
+    Skip doctest if IMAS instalation or requisite IDS(s) not found.
+
+    >>> import pytest
+    >>> from nova.imas.database import Database
+    >>> from nova.imas.equilibrium import EquilibriumData
+    >>> try:
+    ...     _ = Database(130506, 403, 'equilibrium').get()
+    ... except:
+    ...     pytest.skip('IMAS not found or 130506/403 unavailable')
+
+    Manualy specify grid relitive to coilset:
+    >>> Grid(100, 0, 'coil').grid_attrs
+    {'number': 100, 'limit': 0, 'index': 'coil'}
+
+    Specify grid relitive to equilibrium ids.
+    >>> equilibrium = EquilibriumData(130506, 403)
+    >>> Grid(50, 'ids', ids=equilibrium.ids).grid_attrs
+    {'number': 50, 'limit': [2.75, 8.9, -5.49, 5.51], 'index': 'plasma'}
+
+    Extract exact grid from equilibrium ids.
+    >>> grid = Grid('ids', 'ids', ids=equilibrium.ids)
+    >>> grid.grid_attrs['number']
+    8385
+
+    Raises attribute error when grid initialied with unset data attribute:
+    >>> Grid(1000, 'ids', 'coil')
+    Traceback (most recent call last):
+        ...
+    AttributeError: Require IMAS ids when limit:ids or ngrid:1000 == 'ids'
+
+    """
+
+    ngrid: Nbiot = 5000
+    limit: float | list[float] | str = 0.25
+    index: str | slice | pandas.Index = "plasma"
+    ids: ImasIds | None = None
+
+    def __post_init__(self):
+        """Update grid attributes for equilibrium derived properties."""
+        self.update_grid()
+        if hasattr(super(), "__post_init__"):
+            super().__post_init__()
+
+    @property
+    def grid_attrs(self) -> dict:
+        """Return grid attributes."""
+        return {"number": self.ngrid} | {
+            attr: getattr(self, attr) for attr in ["limit", "index"]
+        }
+
+    def update_grid(self):
+        """Update grid limits."""
+        if self.limit != "ids" and self.ngrid != "ids":
+            return
+        if self.ids is None:
+            raise AttributeError(
+                f"Require IMAS ids when limit:{self.limit} "
+                f"or ngrid:{self.ngrid} == 'ids'"
+            )
+        ids_index = IdsIndex(self.ids, "time_slice")
+        index = ids_index.get_slice(0, "profiles_2d.grid_type.index")
+        grid = ids_index.get_slice(0, "profiles_2d.grid")
+        if self.limit == "ids":  # Load grid limit from equilibrium ids.
+            if index != 1:
+                raise TypeError(
+                    "ids limits only valid for rectangular grids" f"{index} != 1"
+                )
+            limit = [grid.dim1, grid.dim2]
+            if self.ngrid == "ids":
+                self.limit = limit
+            else:
+                self.limit = [limit[0][0], limit[0][-1], limit[1][0], limit[1][-1]]
+        if self.ngrid == "ids":
+            self.ngrid = len(grid.dim1) * len(grid.dim2)
+
+
+@dataclass
+class Extrapolate(Grid, Operate):
     r"""
     An interface class for the extrapolation of an equilibrium IDS.
 
@@ -115,7 +222,7 @@ class Extrapolate(Operate):
 
     >>> from nova.imas.extrapolate import Extrapolate
     >>> pulse, run = 130506, 403  # CORSICA equilibrium solution
-    >>> extrapolate = Extrapolate(pulse, run, pf_active='iter_md',
+    >>> extrapolate = Extrapolate(pulse, run, pf_active='iter_md', wall='iter_md',
     ...                           ngrid=10, dplasma=-10, tplasma='hex')
     >>> extrapolate.pulse, extrapolate.run
     (130506, 403)
@@ -144,6 +251,7 @@ class Extrapolate(Operate):
     """
 
     name: str = "equilibrium"
+    pf_active: Ids | bool | str = "iter_md"
     mode: str = "r"
     gamma: float = 9e-6
     nturn: int = 0
@@ -152,6 +260,16 @@ class Extrapolate(Operate):
         """Load equilibrium and coilset."""
         super().__post_init__()
         self.select_free_coils()
+
+    @property
+    def group_attrs(self):
+        """Return group attributes."""
+        return super().group_attrs | self.grid_attrs
+
+    def solve_biot(self):
+        """Extend machine solve biot to include extrapolation grid."""
+        super().solve_biot()
+        self.grid.solve(**self.grid_attrs)
 
     def select_free_coils(self):
         """Assign free coils."""
@@ -379,11 +497,10 @@ class Extrapolate(Operate):
 
 if __name__ == "__main__":
 
-    import doctest
+    # import doctest
 
-    doctest.testmod(verbose=False)
+    # doctest.testmod(verbose=False)
 
-    """
     pulse, run = 114101, 41  # JINTRAC
     # pulse, run = 130506, 403  # CORSICA
     # pulse, run = 105028, 1  # DINA
@@ -391,8 +508,14 @@ if __name__ == "__main__":
     # pulse, run = 135013, 2
     # pulse, run = 134173, 106  # DINA-JINTRAC
 
-    extrapolate = Extrapolate(pulse, run, pf_passive=False, pf_active="iter_md")
-    extrapolate.ids
+    extrapolate = Extrapolate(
+        pulse,
+        run,
+        pf_active="iter_md",
+        pf_passive=False,
+        wall="iter_md",
+        tplasma="h",
+    )
 
     import matplotlib.pylab as plt
 
@@ -410,4 +533,3 @@ if __name__ == "__main__":
     # extrapolate.plasmagrid.plot()
 
     # extrapolate.annimate(5, filename=filename)
-    """

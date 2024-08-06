@@ -28,15 +28,19 @@ class Grid(Scenario):
     def build(self):
         """Build grid from single timeslice and store in data."""
         super().build()
-        if self.ids_index.empty("profiles_2d.grid_type.index"):
+        if self.ids_index.empty("profiles_2d.r") or self.ids_index.empty(
+            "profiles_2d.z"
+        ):
             return
-        grid_type = np.unique(self.ids_index.array("profiles_2d.grid_type.index"))
+        try:
+            grid_type = np.unique(self.ids_index.array("profiles_2d.grid_type.index"))
+        except ValueError:
+            grid_type = [1]  # default to grid_type == 1 when index is unset
         if len(grid_type) > 1:
             raise NotImplementedError(
                 f"multiple grid types found within time_slice {grid_type}"
             )
         grid_type = grid_type[0]
-
         match grid_type:
             case 1 | -999999999:  # unset
                 return self.build_rectangular_grid()
@@ -66,17 +70,6 @@ class Grid(Scenario):
             self.data["r2d"][i], self.data["z2d"][i] = np.meshgrid(
                 self.data["r"][i], self.data["z"][i], indexing="ij"
             )
-
-        """
-        print(self.data["r"].shape)
-        r2d, z2d = np.meshgrid(
-            self.data["r"], self.data["z"], indexing="ij", sparse=True
-        )
-        print(r2d.shape, z2d.shape)
-        self.data["r2d"] = ("r", "z"), r2d
-        self.data["z2d"] = ("r", "z"), z2d
-        assert False
-        """
 
 
 @dataclass
@@ -150,7 +143,7 @@ class Parameter0D(Scenario):
         with self.ids_index.node("vacuum_toroidal_field"):
             if self.ids_index.empty("r0") or self.ids_index.empty("b0"):
                 return
-            self.data.attrs["r0"] = self.ids_index.get("r0")
+            self.data.attrs["r0"] = self.ids_index.get("r0").value
             self.data["b0"] = "time", self.ids_index.array("b0")
 
     def build_beta_normal(self):
@@ -288,7 +281,7 @@ class Parameter0D(Scenario):
         mask = self.x_mask(itime, boundary[:, 1])
         if sum(mask) == 0:
             psi2d = self.ids_index.get_slice(itime, "profiles_2d.psi")
-            contour = Contour(self["r2d"], self["z2d"], psi2d)
+            contour = Contour(self.data.r2d[itime], self.data.z2d[itime], psi2d)
             psi_boundary = self.ids_index.get_slice(itime, "boundary_separatrix.psi")
             boundary = contour.closedlevelset(psi_boundary).points
             mask = self.x_mask(itime, boundary[:, 1])
@@ -629,7 +622,8 @@ class Equilibrium(Chart, GetSlice):
         plot_mesh = kwargs.pop("plot_mesh", False)
         kwargs = self.contour_kwargs(**kwargs)
         contour_set = self._plot_2d(attr, mask, self.axes, plot_mesh, **kwargs)
-        self.plot_wall()
+        if "wall" in self.data:
+            self.plot_wall()
         if attr == "psi":
             self.plot_boundary()
         self.label_contour(label, **kwargs)
@@ -766,6 +760,8 @@ class EquilibriumData(Equilibrium, Profile2D, Profile1D, Parameter0D, Grid):
 
     """
 
+    name: str = "equilibrium"
+
     def __post_init__(self):
         """Set instance name."""
         self.name = "equilibrium"
@@ -815,7 +811,9 @@ class EquilibriumData(Equilibrium, Profile2D, Profile1D, Parameter0D, Grid):
         """Return strike point array at itime."""
         if self.data.x_point_number[itime].data == 0:
             return np.array([])
-        contour = Contour(self["r2d"], self["z2d"], self.data.psi2d[itime])
+        contour = Contour(
+            self.data.r2d[itime], self.data.z2d[itime], self.data.psi2d[itime]
+        )
         levelset = contour.levelset(self.data.psi_boundary[itime])
         self.strike.update([surface.points for surface in levelset])
         if len(strike_points := self.strike.points) == 2:
@@ -872,14 +870,20 @@ if __name__ == "__main__":
     # pulse, run = 130506, 403  # CORSICA
     # pulse, run = 134173, 106
 
-    args = 135013, 2
+    pulse, run = 135013, 2
     # pulse, run = 135014, 1
+
+    # pulse, run = 114101, 41  # JINTRAC
 
     # args = 134173, 106  # DINA / JINTRAC
 
     # args = 45272, 1, "mast_u"  # MastU
 
-    # EquilibriumData(pulse, run, occurrence=0)._clear()
+    equilibrium = EquilibriumData(pulse, run)
+    equilibrium.itime = 10
+    equilibrium.plot_2d()
+
+    r"""
 
     kwargs = {"pulse": 57410, "run": 0, "machine": "west"}  # WEST
 
@@ -909,3 +913,4 @@ if __name__ == "__main__":
     chease.wall.contour.plot(color="k", linewidth=1.5)
 
     # chease.plot_quiver()
+    """

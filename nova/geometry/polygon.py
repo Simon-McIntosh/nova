@@ -139,6 +139,10 @@ class Polygon(PolyFrame):
                 f"loop: {loop}\n"
                 "require [xmin, xmax, zmin, zmax]"
             )
+        print(self.poly)
+        print(loop)
+        print(np.array(self.poly))
+        print(type(self.poly))
         if loop.shape[1] != 2:
             loop = loop.T
         if loop.ndim == 2 and loop.shape[1] == 2:  # loop

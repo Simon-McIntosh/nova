@@ -28,8 +28,8 @@ class Grid(Scenario):
     def build(self):
         """Build grid from single timeslice and store in data."""
         super().build()
-        if self.ids_index.empty("profiles_2d.r") or self.ids_index.empty(
-            "profiles_2d.z"
+        if self.ids_index.empty("profiles_2d.grid.dim1") or self.ids_index.empty(
+            "profiles_2d.grid.dim2"
         ):
             return
         try:
@@ -879,7 +879,9 @@ if __name__ == "__main__":
 
     # args = 45272, 1, "mast_u"  # MastU
 
-    equilibrium = EquilibriumData(pulse, run)
+    kwargs = {"pulse": 17151, "run": 4, "machine": "aug"}
+
+    equilibrium = EquilibriumData(**kwargs)
     equilibrium.itime = 10
     equilibrium.plot_2d()
 

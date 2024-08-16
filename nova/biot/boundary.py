@@ -20,6 +20,8 @@ kwargs = {
 }
 """
 
+kwargs = {"pulse": 17151, "run": 4, "machine": "aug"}
+
 
 operate = Operate(
     **kwargs,
@@ -32,7 +34,7 @@ operate = Operate(
 
 # psi_residual(operate.plasma.psi)
 
-operate.time = 250
+operate.time = 4
 
 # operate.sloc["PF6", "Ic"] *= 1
 # operate.sloc["PF4", "Ic"] *= 1.2

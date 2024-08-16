@@ -43,8 +43,7 @@ class AoS:
     def data(self) -> xarray.Dataset:
         """Return AoS as xarray Dataset."""
         for node in self.aos[0]:
-            if node.has_value:
-                print(node.metadata.name, node.metadata.data_type, node.shape)
+            print(node.metadata.name, node.metadata.data_type)
 
 
 @dataclass
@@ -60,8 +59,7 @@ class Magnetics(Plot, CoilSet, CoilData, Scenario):
 
     def build(self):
         """Build magnetics data."""
-        with self.ids_data() as ids_data:
-            self.flux_loop(ids_data)
+        self.flux_loop(self.ids)
 
         """
         with self.build_scenario():
@@ -76,7 +74,6 @@ class Magnetics(Plot, CoilSet, CoilData, Scenario):
 
     def from_AoS(self, *names: str, dims: str | tuple[str], array: IDSStructArray):
         """Return data unpacked from from an IMAS Array of Structures."""
-
         return {
             name: (
                 dims,
@@ -86,16 +83,16 @@ class Magnetics(Plot, CoilSet, CoilData, Scenario):
             for name in names
         }
 
-    def flux_loop(self, ids_data: IDSToplevel):
+    def flux_loop(self, ids: IDSToplevel):
         """Return flux loop Dataset."""
-        flux_loop = ids_data.flux_loop
+        flux_loop = ids.flux_loop
         data = self.from_AoS("name", "identifier", dims="name", array=flux_loop)
 
-        self.aos = AoS(ids_data.flux_loop)
+        self.aos = AoS(ids.flux_loop)
         print(self.aos["area.metadata.units"])
         data = xarray.Dataset(data)
 
-        imaspy.util.print_tree(ids_data.flux_loop[0], hide_empty_nodes=False)
+        imaspy.util.print_tree(ids.flux_loop[0], hide_empty_nodes=False)
         # print(flux_loop[0].name.metadata.units)
         # print(flux_loop[0].)
         # reduce(operator.ior, list_of_dicts, {})

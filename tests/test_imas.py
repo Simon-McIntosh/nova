@@ -48,6 +48,7 @@ def test_is_valid():
         ids = imas.IDSFactory().new("pf_active")
         ids.ids_properties.homogeneous_time = 1
         db_entry.put(ids)
+        db_entry.close()
         dataset = Dataset(uri=f"imas:hdf5?path={name}", name="pf_active")
         assert dataset.is_valid
 

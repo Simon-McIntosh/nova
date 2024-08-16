@@ -1153,7 +1153,6 @@ class Machine(CoilSet, Geometry, CoilData):
     @metadata.setter
     def metadata(self, metadata: dict):
         """Set instance metadata, assert consistent attr_hash."""
-        print(self.group_attrs)
         for attr in self.frameset_attrs:
             setattr(self, attr, metadata[attr])
         for attr in metadata.keys() & self._biot_attrs.keys():
@@ -1169,7 +1168,6 @@ class Machine(CoilSet, Geometry, CoilData):
                 self._format_dataset_attrs(attr) for attr in metadata[attr].split(",")
             ]
             setattr(self, attr, dict(zip(IdsBase.database_attrs, values)))
-        print(self.group_attrs)
         assert self.group == self.hash_attrs(self.group_attrs)
 
     @staticmethod

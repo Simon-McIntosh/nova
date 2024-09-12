@@ -341,7 +341,7 @@ class PolyTarget(FrameSet):
         """Build poly-target."""
         for name in self.Loc[self.index, :].index:
             index = self.loc["frame"] == name
-            if self.loc[name, "coil"]:
+            if self.loc[name, "coil"] | self.loc[name, "passive"]:
                 target = PolyGrid(
                     self.Loc[name, "poly"],
                     turn="rectangle",

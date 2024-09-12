@@ -1,32 +1,58 @@
 """Group fieldnull categorization algorithms."""
 
-from dataclasses import dataclass
-from functools import partial
+from dataclasses import dataclass, field
 import jax
 import jax.numpy as jnp
 
 from nova.jax import select
+from nova.jax.tree_util import Pytree
 
 
 @dataclass
 @jax.tree_util.register_pytree_node_class
-class Null:
-    """Locate and label field nulls on structured and unstructured grids."""
+class NullBase(Pytree):
+    """Null pytree base class."""
 
-    stencil: jnp.ndarray
-    coordinate_stencil: jnp.ndarray
-    maxsize: int = 5
+    coordinate: jnp.ndarray = field(repr=False)
+
+    def __post_init__(self):
+        """Calculate node number."""
+        self.node_number = self.coordinate.shape[0]
 
     def tree_flatten(self):
         """Return flattened pytree."""
-        children = (self.stencil, self.coordinate_stencil)
-        aux_data = {"maxsize": self.maxsize}
-        return (children, aux_data)
+        children = (self.coordinate,)
+        return (children, {})
 
-    @classmethod
-    def tree_unflatten(cls, aux_data, children):
-        """Return unflattened pytree."""
-        return cls(*children, **aux_data)
+
+@dataclass
+@jax.tree_util.register_pytree_node_class
+class Null1D(NullBase):
+    """Locate and label field nulls on 1D loop."""
+
+    @jax.jit
+    def __call__(self, psi, polarity):
+        """Return subgrid interpolated field null."""
+        return select.wall_flux(
+            self.coordinate[:, 0], self.coordinate[:, 1], psi, polarity
+        )
+
+
+@dataclass
+@jax.tree_util.register_pytree_node_class
+class Null2D(NullBase):
+    """Locate and label field nulls on structured and unstructured grids."""
+
+    stencil: jnp.ndarray = field(repr=False)
+    coordinate_stencil: jnp.ndarray = field(repr=False)
+    maxsize: int = 5
+
+    @jax.jit
+    def __call__(self, psi):
+        """Return subgrid interpolated field nulls."""
+        psi_stencil = psi[self.stencil]
+        number, cluster = self.categorize(psi_stencil)
+        return jax.vmap(self.interpolate, (0, 0))(number, cluster)
 
     @staticmethod
     @jax.jit
@@ -85,19 +111,9 @@ class Null:
 
         return jax.lax.scan(subnull, 0, cluster)[1]
 
-    @partial(jax.jit, static_argnums=2)
-    def o_point(self, psi, item):
-        """Return o_point."""
-        psi_stencil = psi[self.stencil]
-        index = jnp.argmin(psi_stencil[:, 0])
-        cluster = jnp.c_[
-            self.coordinate_stencil[index], psi_stencil[index, :, jnp.newaxis]
-        ]
-        return select.subnull(cluster.T)[item]
-
-    @jax.jit
-    def update(self, psi):
-        """Return subgrid interpolated field nulls."""
-        psi_stencil = psi[self.stencil]
-        number, cluster = self.categorize(psi_stencil)
-        return jax.vmap(self.interpolate, (0, 0))(number, cluster)
+    def tree_flatten(self):
+        """Return flattened pytree."""
+        children, aux_data = super().tree_flatten()
+        children += (self.stencil, self.coordinate_stencil)
+        aux_data |= {"maxsize": self.maxsize}
+        return (children, aux_data)

@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from functools import cached_property
 from importlib import import_module
 
+import jax.numpy as jnp
 import numpy as np
 from shapely.geometry.linestring import LineString
 
@@ -52,8 +53,8 @@ class PlasmaGrid(BaseGrid, PlasmaLoc):
                 raise PlasmaTopologyError("no x-points within first wall")
         x_psi = self.x_psi.copy()
         if self.o_point_number > 0:
-            x_psi - self.o_psi[0]
-        return np.argmax(self.polarity * (x_psi))
+            x_psi -= self.o_psi[0]
+        return np.nanargmax(self.polarity * (x_psi))
 
     def _o_point_index(self):
         """Return plasma o-point index."""
@@ -145,7 +146,7 @@ class PlasmaGrid(BaseGrid, PlasmaLoc):
         if self.x_point_number == 0 or self.o_point_number == 0:
             return mask
         o_point = self.o_points[0]
-        for x_point in self.x_points:
+        for x_point in self.x_points[: self.x_point_number]:
             if x_point[1] < o_point[1]:
                 mask &= z_plasma > x_point[1]
             else:
@@ -162,7 +163,8 @@ class PlasmaGrid(BaseGrid, PlasmaLoc):
     def ionize_mask(self, index):
         """Return plasma filament selection mask."""
         match index:
-            case int(psi) | float(psi):
+            # case int(psi) | float(psi):
+            case psi if isinstance(psi, (int, float, jnp.ndarray)):
                 z_plasma = self.aloc["plasma", "z"]
                 mask = self.psi_mask(psi)
                 try:
@@ -182,11 +184,12 @@ class PlasmaGrid(BaseGrid, PlasmaLoc):
                     return self.pointloop.update(index)
 
     def _label_format(self, value):
-        return f"{1e3*value:1.1f}"
+        return f"{1e3 * value : 1.1f}"
 
-    def plot(self, attr="psi", clabel=False, **kwargs):
+    def plot(self, attr="psi", clabel=False, nulls=True, **kwargs):
         """Plot poloidal flux contours."""
-        super().plot(axes=kwargs.get("axes", None))
+        if nulls and hasattr(self, "psi"):
+            super().plot(axes=kwargs.get("axes", None))
         kwargs = self.contour_kwargs(**kwargs)
         if kwargs.pop("plot_mesh", False):
             self.axes.triplot(

@@ -10,7 +10,8 @@ import seaborn as sns
 import xarray
 
 from nova.biot.array import Array
-from nova.jax.null import Null
+from nova.jax.null import Null2D
+from nova.jax.target import Target
 
 
 @dataclass
@@ -18,17 +19,35 @@ class FieldNull(Array):
     """Calculate positions of all field nulls."""
 
     data: xarray.Dataset = field(repr=False, default_factory=xarray.Dataset)
-    array_attrs: list[str] = field(
-        default_factory=lambda: ["x", "z", "stencil", "stencil_index"]
-    )
-    maxsize: int = 6
-    data_o: dict[str, np.ndarray] = field(init=False, default_factory=dict, repr=False)
-    data_x: dict[str, np.ndarray] = field(init=False, default_factory=dict, repr=False)
+    maxsize: int = 5
+    data_o: jnp.ndarray | None = field(init=False, repr=False, default=None)
+    data_x: jnp.ndarray | None = field(init=False, repr=False, default=None)
 
-    def __post_init__(self):
-        """Instigate jax Null class."""
-        self.null = Null(
-            jnp.array(self.stencil), jnp.array(self.coordinate_stencil), self.maxsize
+    @property
+    def coordinate(self):
+        """Return flat grid coordinate array."""
+        if "stencil" in self.data:
+            return jnp.c_[self.data.x, self.data.z]
+        return jnp.c_[self.data.x2d.data.ravel(), self.data.z2d.data.ravel()]
+
+    @cached_property
+    def null(self):
+        """Return jax null instance."""
+        return Null2D(
+            self.coordinate,
+            jnp.array(self.stencil),
+            jnp.array(self.coordinate_stencil),
+            self.maxsize,
+        )
+
+    @cached_property
+    def target(self):
+        """Return poloidal flux jax grid target."""
+        return Target(
+            jnp.array(self.data["Psi"]),
+            jnp.array(self.data["Psi_"]),
+            self.null,
+            source_plasma_index=self.data.source_plasma_index,
         )
 
     @cached_property
@@ -58,14 +77,7 @@ class FieldNull(Array):
 
     def update_null(self, psi):
         """Update null points."""
-        return self.null.update(psi)
-        # nulls = nulls[number]
-        # print(nulls)
-
-        # for null, mask in zip("ox", [mask_o, mask_x]):
-        #    setattr(self, f"data_{null}", self.update_mask(mask, psi))
-
-    # return {"index": index, "points": points, "psi": psi[index]}
+        self.data_o, self.data_x = self.null(psi)
 
     @staticmethod
     def _unique(nulls, decimals=3):
@@ -98,45 +110,42 @@ class FieldNull(Array):
         self.get_axes(axes)
         if self.o_point_number > 0:
             self.axes.plot(
-                *self.data_o["points"].T, "o", ms=4, mec="C3", mew=1, mfc="none"
+                *self.data_o[:, :2].T, "o", ms=4, mec="C3", mew=1, mfc="none"
             )
         if self.x_point_number > 0:
             self.axes.plot(
-                *self.data_x["points"].T, "x", ms=6, mec="C3", mew=1, mfc="none"
+                *self.data_x[:, :2].T, "x", ms=6, mec="C3", mew=1, mfc="none"
             )
 
     @property
     def o_points(self):
         """Return o-point locations."""
-        return self.data_o["points"]
+        return self.data_o[:, :2]
 
     @property
     def o_psi(self):
         """Return flux values at o-point locations."""
-        return self.data_o["psi"]
+        return self.data_o[:, 2]
 
     @property
     def o_point_number(self):
         """Return o-point number."""
-        return len(self.o_psi)
+        return jnp.sum(~jnp.isnan(self.o_psi))
 
     @property
     def x_points(self):
         """Return x-point locations."""
-        return self.data_x["points"]
+        return self.data_x[:, :2]
 
     @property
     def x_psi(self):
         """Return flux values at x-point locations."""
-        return self.data_x["psi"]
+        return self.data_x[:, 2]
 
     @property
     def x_point_number(self):
         """Return x-point number."""
-        return len(self.x_psi)
-
-    # def update_mask(self):
-    #    return {"index": index, "points": points, "psi": psi[index]}
+        return jnp.sum(~jnp.isnan(self.x_psi))
 
 
 if __name__ == "__main__":
@@ -196,33 +205,7 @@ if __name__ == "__main__":
     plt.axis("equal")
     plt.axis("off")
 
-    plt.plot(
-        fieldnull.null.o_point(psi_1d, 0), fieldnull.null.o_point(psi_1d, 1), "C3o"
-    )
-
-    @dataclass
-    @jax.tree_util.register_pytree_node_class
-    class Operate:
-        """Locate and label field nulls on structured and unstructured grids."""
-
-        Psi: jnp.ndarray
-
-        def tree_flatten(self):
-            """Return flattened pytree."""
-            children = (self.Psi,)
-            aux_data = {}
-            return (children, aux_data)
-
-        @classmethod
-        def tree_unflatten(cls, aux_data, children):
-            """Return unflattened pytree."""
-            return cls(*children, **aux_data)
-
-        @jax.jit
-        def psi(self, currents):
-            return jnp.matmul(self.Psi, currents)
-
-    opp = Operate(plasmagrid.Psi.data)
+    plt.plot(*fieldnull.null(psi_1d)[0][:, :2].T, "C3o")
 
     Psi = plasmagrid.Psi.data
     null = fieldnull.null
@@ -230,12 +213,12 @@ if __name__ == "__main__":
     @jax.jit
     def o_point(currents):
         psi = jnp.matmul(Psi, currents)
-        return null.update(psi)[0][0, 0]
+        return null(psi)[0][0, 0]
 
-    d_o_point = jax.jacfwd(o_point)
-    dd_o_point = jax.jacfwd(d_o_point)
+    d_o_point = jax.grad(o_point)
+    # dd_o_point = jax.jacfwd(d_o_point)
 
-    factor = np.linspace(0.8, 1.2, 500)
+    factor = np.linspace(0, 2, 3000)
 
     radius = np.zeros_like(factor)
     gradient = np.zeros_like(factor)

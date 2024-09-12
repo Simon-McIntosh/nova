@@ -283,4 +283,8 @@ if __name__ == "__main__":
     coilset.plot()
     coilset.grid.plot()
 
+    def o_point(Ic):
+        coilset.sloc["Ic"] = Ic
+        return coilset.grid.o_points[0]
+
     # coilset.grid.plot(levels=np.sort(coilset.grid.x_psi))

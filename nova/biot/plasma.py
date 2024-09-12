@@ -43,6 +43,7 @@ class Plasma(Plot, netCDF, Flux, PlasmaLoc):
         self.subframe.update_columns()
         super().__post_init__()
         self.version["lcfs"] = None
+        self.version["wall"] = None
 
     @cached_property
     def strike(self):
@@ -54,6 +55,8 @@ class Plasma(Plot, netCDF, Flux, PlasmaLoc):
         match attr:
             case "lcfs":
                 self._check_lcfs()
+            # case "w_point" | "psi_w":
+            #    self._check_wall()
         try:
             return super().__getattribute__(attr)
         except AttributeError:
@@ -84,6 +87,29 @@ class Plasma(Plot, netCDF, Flux, PlasmaLoc):
             self.update_lcfs()
             self.version["lcfs"] = self.levelset.version["psi"]
 
+    def update_wall(self):
+        """Update wall mask."""
+        o_point = self.grid["o_point"]
+        for x_point in self.grid.x_points[: self.grid.x_point_number]:
+            if x_point[1] < o_point[1]:
+                self.wall["psi"] = np.where(
+                    self.wall["z"] < x_point[1], np.nan, self.wall["psi"]
+                )
+            # if x_point[1] > o_point[1]:
+            #    self.wall["psi"] = np.where(
+            #        self.wall["z"] > x_point[1], np.nan, self.wall["psi"]
+            #    )
+        self.wall.version["limitflux"] = None
+
+    def _check_wall(self):
+        """Check validity of wall mask, update mask if nessisary."""
+        if (
+            self.version["wall"] is None
+            or self.version["wall"] != self.wall.version["psi"]
+        ):
+            self.update_wall()
+            self.version["wall"] = self.wall.version["psi"]
+
     @property
     def li_3(self):
         """Return normalized plasma inductance."""
@@ -105,7 +131,6 @@ class Plasma(Plot, netCDF, Flux, PlasmaLoc):
     def psi_axis(self):
         """Return on-axis poloidal flux."""
         return self.grid["o_psi"]
-        self.grid.__getitem__
 
     @property
     def magnetic_axis(self):
@@ -128,6 +153,11 @@ class Plasma(Plot, netCDF, Flux, PlasmaLoc):
         return self.wall["w_psi"]
 
     @property
+    def w_point(self):
+        """Return wall limiter poloidal flux."""
+        return self.wall["w_point"]
+
+    @property
     def limiter(self):
         """Return True if plasma is in a limter state."""
         return np.isclose(self.psi_boundary, self.psi_w)
@@ -139,8 +169,8 @@ class Plasma(Plot, netCDF, Flux, PlasmaLoc):
             return self.psi_w
         x_height = self.grid.x_points[:, 1]
         o_height = self.grid["o_point"][1]
-        x_bounds = [np.min(x_height), np.max(x_height)]
-        w_height = self.wall.w_point[1]
+        x_bounds = [np.nanmin(x_height), np.nanmax(x_height)]
+        w_height = self.w_point[1]
         if x_bounds[0] > o_height:
             x_bounds[0] = -np.inf
         if x_bounds[1] < o_height:
@@ -276,5 +306,5 @@ class Plasma(Plot, netCDF, Flux, PlasmaLoc):
         levels = self.levelset.plot(attr, **kwargs)
         if levels is None:
             levels = self.grid.plot(attr, **kwargs)
-        self.wall.plot(limitflux=False)
+        self.wall.plot(nulls=kwargs.get("nulls", False))
         return levels

@@ -115,7 +115,9 @@ class Connect:
     def rsync(self):
         """Syncronize SDCC remote (user)/public with local IMAS database."""
         public = f"/home/ITER/{self.username}/public/imasdb/{self.machine.lower()}/"
-        local = f"/home/{self.username}/imas/shared/imasdb/{self.machine.lower()}/"
+        local = pathlib.Path.home() / pathlib.Path(
+            f"imas/shared/imasdb/{self.machine.lower()}/"
+        )
         pathlib.Path(local).mkdir(parents=True, exist_ok=True)
         command = f"rsync -aP {self.cluster}:{public} {local}"
         subprocess.run(command.split())
@@ -250,6 +252,7 @@ class MachineDatabase(Connect):
 
 
 if __name__ == "__main__":
+    pass
     # machine = MachineDatabase().sync_ids()
     # machine.load_ids('pf_active')
     # print(machine.frame)
@@ -262,7 +265,7 @@ if __name__ == "__main__":
     # ScenarioDatabase().sync_shot("111003/1")
 
     # ScenarioDatabase().sync_shot("111001/103")
-    ScenarioDatabase(machine="west", workflow=[]).rsync()
+    # ScenarioDatabase(machine="west", workflow=[]).rsync()
     # ScenarioDatabase(user='tribolp').sync_shot('135011/21')
     # ScenarioDatabase(user='dubrovm').sync_shot('105028/1')
     # ScenarioDatabase(user='dubrovm').sync_shot('105027/1')

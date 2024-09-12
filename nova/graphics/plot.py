@@ -31,13 +31,17 @@ class Properties:
     edgecolor: str = "white"
     alpha: ClassVar[dict[str, float]] = {"plasma": 0.25}
     facecolor: ClassVar[dict[str, str]] = {
-        "vs3": "C0",
+        "vs": "C2",
+        "vs3": "C2",
+        "vf": "C2",
         "vs3j": "C3",
-        "cs": "C0",
+        "cs": "C7",
+        "oh": "C0",
         "pf": "C0",
         "trs": "C3",
         "dir": "C3",
         "vv": "C3",
+        "passive": "C3",
         "vvin": "C3",
         "vvout": "C3",
         "bb": "C7",

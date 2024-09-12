@@ -56,6 +56,7 @@ def bisect_2d(vector, value):
     return index
 
 
+@jax.jit
 def length_2d(x_coordinate, z_coordinate):
     """Return the cumalative length of a 2d polyline."""
     points = jnp.column_stack((x_coordinate, z_coordinate))
@@ -63,6 +64,7 @@ def length_2d(x_coordinate, z_coordinate):
     return jnp.append(0, delta.cumsum())
 
 
+@jax.jit
 def quadratic_wall(w_cluster, psi_cluster):
     """Return psi quatratic coefficients."""
     coefficient_matrix = jnp.column_stack(
@@ -72,11 +74,13 @@ def quadratic_wall(w_cluster, psi_cluster):
     return coefficients
 
 
+@jax.jit
 def wall_length(coef):
     """Return location of wall null."""
     return -coef[1] / (2 * coef[0])
 
 
+@jax.jit
 def wall_coordinate(w_coordinate, x_cluster, z_cluster, w_cluster):
     """Return wall coordinates."""
     x_coordinate = jnp.interp(w_coordinate, w_cluster, x_cluster)
@@ -84,28 +88,28 @@ def wall_coordinate(w_coordinate, x_cluster, z_cluster, w_cluster):
     return x_coordinate, z_coordinate
 
 
+@jax.jit
 def wall_index(psi_wall):
     """Return cluster index and roll."""
-    index = jnp.argmax(psi_wall)
-    if index == 0:
-        return index + 1, 1
-    if index == len(psi_wall) - 1:
-        return index - 1, -1
-    return index, 0
+    index = jnp.nanargmax(psi_wall)
+    offset = jnp.piecewise(index, [index == 0, index == len(psi_wall) - 1], [1, -1, 0])
+    return index + offset, offset
 
 
-def wall_flux(x_wall, z_wall, psi_wall, polarity=1):
+@jax.jit
+def wall_cluster(index, roll, value):
+    """Return cluster of 3 points bounding wall index."""
+    value = jnp.where(roll != 0, jnp.roll(value, roll), value)
+    return jax.lax.dynamic_slice(value, [index - 1], 3)
+
+
+@jax.jit
+def wall_flux(x_wall, z_wall, psi_wall, polarity):
     """Return sub-panel wall flux coordinates and value."""
-    if polarity == 0:  # zero plasma current
-        return 0, 0, 0
     index, roll = wall_index(polarity * psi_wall)
-    if roll != 0:
-        x_wall = jnp.roll(x_wall, roll)
-        z_wall = jnp.roll(z_wall, roll)
-        psi_wall = jnp.roll(psi_wall, roll)
-    x_cluster = x_wall[index - 1 : index + 2]
-    z_cluster = z_wall[index - 1 : index + 2]
-    psi_cluster = psi_wall[index - 1 : index + 2]
+    x_cluster = wall_cluster(index, roll, x_wall)
+    z_cluster = wall_cluster(index, roll, z_wall)
+    psi_cluster = wall_cluster(index, roll, psi_wall)
     w_cluster = length_2d(x_cluster, z_cluster)
     coef = quadratic_wall(w_cluster, psi_cluster)
     w_coordinate = wall_length(coef)
@@ -113,7 +117,17 @@ def wall_flux(x_wall, z_wall, psi_wall, polarity=1):
     x_coordinate, z_coordinate = wall_coordinate(
         w_coordinate, x_cluster, z_cluster, w_cluster
     )
-    return x_coordinate, z_coordinate, psi
+    condlist = [
+        coef[0] > 0,
+        coef[0] < 0,
+    ]
+    choicelist = [-1, 1]
+    null_type = jax.numpy.select(condlist, choicelist, default=jnp.nan)
+    return jnp.where(
+        polarity != 0,
+        jnp.r_[x_coordinate, z_coordinate, psi, null_type],
+        jnp.nan * jnp.ones(4),
+    )
 
 
 @jax.jit
@@ -147,9 +161,9 @@ def null_type(coefficients, atol=1e-12):
 
         - 0: saddle
             :math:`4AB - E^2 < 0`
-        - 1: minimum
+        - -1: minimum
             :math:`A>0` and :math:`B>0`
-        - 2: maximum
+        - 1: maximum
             :math:`A<0` and :math:`B<0`
 
     Raises
@@ -164,7 +178,7 @@ def null_type(coefficients, atol=1e-12):
         (coefficients[0] > 0) & (coefficients[1] > 0),
         (coefficients[0] < 0) & (coefficients[1] < 0),
     ]
-    choicelist = [-1, 0, 1, 2]
+    choicelist = [jnp.nan, 0, -1, 1]
     return jax.numpy.select(condlist, choicelist, default=-11)
 
 

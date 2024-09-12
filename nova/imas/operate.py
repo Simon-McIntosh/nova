@@ -85,6 +85,12 @@ if __name__ == "__main__":
     # args = 45272, 1, "mast_u"  # MastU
 
     kwargs = {
+        "pulse": 135013,
+        "run": 2,
+        "machine": "iter",
+    }  # DINA
+
+    kwargs = {
         "pulse": 57410,
         "run": 0,
         "machine": "west",
@@ -125,7 +131,7 @@ if __name__ == "__main__":
     )
     """
 
-    operate.time = 33
+    operate.time = 40
 
     # attr = "j_tor"
     attr = "psi"
@@ -134,11 +140,41 @@ if __name__ == "__main__":
 
     levels = operate.plot_2d(attr, colors="C1", label="NICE")
 
-    levels = -levels[::-1] + 2.3
+    levels = -levels[::-1]  # + 2.3
     # operate.sloc[0, "Ic"] *= 0
     operate.plot()
     # operate.plasma.plot(attr)
-    levels = operate.grid.plot(attr, colors="C2", label="NOVA")
+    operate.plasmagrid.plot(
+        attr,
+        levels=levels,
+        colors="C2",
+        label="NOVA",
+        nulls=None,
+        linestyles="--",
+    )
+
+    operate.grid.set_axes("1d")
+    operate.grid.axes.plot(
+        operate.data.time, -operate.data.psi_boundary, "C0", label="NICE"
+    )
+    operate.grid.axes.plot(
+        operate.data.time,
+        -operate.data.psi_axis,
+        "C0--",
+    )
+
+    psi_boundary = np.zeros_like(operate.data.psi_boundary)
+    psi_axis = np.zeros_like(operate.data.psi_axis)
+    for i, time in enumerate(operate.data.time.data):
+        operate.itime = i
+        psi_boundary[i] = operate.plasmagrid.x_psi[0]
+        psi_axis[i] = operate.plasmagrid.o_psi[0]
+        print(i)
+    operate.grid.axes.plot(operate.data.time, psi_boundary, "C1", label="NOVA")
+    operate.grid.axes.plot(operate.data.time, psi_axis, "C1--")
+    operate.grid.axes.set_xlabel("time, s")
+    operate.grid.axes.set_ylabel(r"$\Psi$, Wb")
+    operate.grid.axes.legend()
 
     """
     j_tor = (

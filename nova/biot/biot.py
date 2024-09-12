@@ -220,3 +220,8 @@ class Biot(BiotPlasma, BiotCoil, BiotGap):
     def loop(self):
         """Return biot loop instance."""
         return self.field_kwargs
+
+    @frame_factory(Loop)
+    def poloidal_flux_loop(self):
+        """Return poloidal flux loop instance."""
+        return {"attrs": ["Psi"]}

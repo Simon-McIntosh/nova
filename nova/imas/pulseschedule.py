@@ -130,9 +130,7 @@ class PulseSchedule(Plot, Scenario):
             if not self.ids_index.empty("identifier"):
                 gap_id = self.ids_index.array("identifier")
             else:
-                gap_id = [
-                    f"gap_{i}" for i in range(len(self.ids_data.position_control.gap))
-                ]
+                gap_id = [f"gap_{i}" for i in range(len(self.ids.position_control.gap))]
             self.data.coords["gap_index"] = range(len(gap_id))
             self.data.coords["gap_id"] = "gap_index", gap_id
             if not self.ids_index.empty("name"):
@@ -280,14 +278,14 @@ if __name__ == "__main__":
     pulse, run = 135007, 4
     pulse, run = 135011, 7
     pulse, run = 135003, 5
-    args = 105028, 1  # Maksim
+    # args = 105028, 1  # Maksim
     # pulse, run = 105027, 1  # Maksim
     # pulse, run = 135013, 2
 
     # PulseSchedule(pulse, run)._clear()
-    schedule = PulseSchedule(*args)
+    schedule = PulseSchedule(pulse, run, dd_version="3.38.0")
 
-    # schedule.time = 500
+    schedule.time = 500
     schedule.plot_gaps()
 
     # schedule.plot_profile()

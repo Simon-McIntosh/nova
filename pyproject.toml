@@ -76,7 +76,7 @@ imas = [
   "h5py>=3.10.0",
 ]
 jit = [
-  "jax[cpu]>=0.4.23",
+  "jax[cuda12_local]>=0.4.31",
   "numba>=0.59.0",
   "tbb>=2021.11.0",
   "tbb-devel>=2021.11.0",
@@ -106,8 +106,10 @@ requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning>=1.0.0,<2.0.0"]
 build-backend = "poetry_dynamic_versioning.backend"
 
 [tool.poetry]
-name = "nova-stella" # TODO remove once poetry_dynamic_versioning is fixed
+#name = "nova-stella" # TODO remove once poetry_dynamic_versioning is fixed
 version = "0.0.0"
+#authors = ["Simon McIntosh <simon.mcintosh@iter.org>"]
+#description = "Equilibrium generation and inference"
 packages = [{ include = "nova" }]
 exclude = [
   "nova/ansys",
@@ -186,10 +188,10 @@ name = "iter"
 url = "https://pypi.iter.org/simple/"
 priority = "explicit"
 
-[[tool.poetry.source]]
-name = "jax"
-url = "https://storage.googleapis.com/jax-releases/jax_cuda_releases.html"
-priority = "explicit"
+#[[tool.poetry.source]]
+#name = "jax"
+#url = "https://storage.googleapis.com/jax-releases/jax_cuda_releases.html"
+#priority = "explicit"
 
 [tool.black]
 line-length = 88

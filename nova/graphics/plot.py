@@ -46,7 +46,7 @@ class Properties:
         "vvout": "C3",
         "bb": "C7",
         "plasma": "C4",
-        "cryo": "C5",
+        "cryo": "C7",
         "fi": "C2",
         "tf": "C7",
         "elm": "C3",

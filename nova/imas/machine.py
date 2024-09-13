@@ -448,7 +448,7 @@ class FrameData(ABC):
         label = self.coil_name
         if isinstance(label, list):
             label = label[0]
-        if "VES" in label or "VV" in label:
+        if "VES" in label or "VV" in label or "Vacuum" in label:
             return "vv"
         if "passive" in label:
             return "passive"
@@ -466,6 +466,9 @@ class FrameData(ABC):
             return "vs3j"
         if "VS" in label:
             return "vs3"
+        if "cryo" in label.lower():
+            return "cryo"
+
         return "pf"
 
     @staticmethod
@@ -1279,7 +1282,8 @@ class Machine(CoilSet, Diagnostics, Geometry, CoilData):
                 self += coilset
         for attr, diagnostic in self.diagnostic.items():
             diagnostic_attrs = getattr(self, attr)
-            diagnostic(**diagnostic_attrs).insert(self)
+            if isinstance(diagnostic_attrs, dict):
+                diagnostic(**diagnostic_attrs).insert(self)
 
         if hasattr(super(), "build"):
             super().build()

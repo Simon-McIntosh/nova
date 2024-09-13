@@ -22,13 +22,16 @@ class Plasma(Pytree):
     wall: Target
     p_prime: Basis
     ff_prime: Basis
-    source_current: jnp.ndarray = field(repr=False)
+    current: jnp.ndarray = field(repr=False)
     area: jnp.ndarray = field(repr=False)
+    plasma_index: int
     polarity: int
 
     def __post_init__(self):
         """Generate topology instance."""
         self.topology = Topology(self.grid.null, self.wall.null)
+        self.net_plasma_current = self.current[self.plasma_index]
+        self.external_current = self.current.at[self.plasma_index].set(0.0)
 
     @jax.jit
     def __call__(self, psi: jnp.ndarray):
@@ -48,15 +51,16 @@ class Plasma(Pytree):
             psi_norm
         ) + self.ff_prime(psi_norm) / (mu_0 * self.grid.coordinate[:, 0])
         current_density *= -2 * jnp.pi
-        plasma_current = current_density * self.area
-        return jnp.where(ionize, plasma_current, 0)
+        plasma_current = jnp.where(ionize, current_density * self.area, 0)
+        plasma_current *= self.net_plasma_current / jnp.sum(plasma_current)
+        return plasma_current
 
     @cached_property
     def external(self):
         """Return external flux map."""
         return jnp.r_[
-            self.grid.external(self.source_current),
-            self.wall.external(self.source_current),
+            self.grid.external(self.external_current),
+            self.wall.external(self.external_current),
         ]
 
     @jax.jit
@@ -74,8 +78,8 @@ class Plasma(Pytree):
             self.wall,
             self.p_prime,
             self.ff_prime,
-            self.source_current,
+            self.current,
             self.area,
         )
-        aux_data = {"polarity": self.polarity}
+        aux_data = {"plasma_index": self.plasma_index, "polarity": self.polarity}
         return (children, aux_data)

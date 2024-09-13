@@ -17,7 +17,6 @@ class Target(Pytree):
     source_target: jnp.ndarray = field(repr=False)
     plasma_target: jnp.ndarray = field(repr=False)
     null: Null1D | Null2D
-    source_plasma_index: int
 
     @property
     def coordinate(self):
@@ -30,10 +29,9 @@ class Target(Pytree):
         return self.null.node_number
 
     @jax.jit
-    def external(self, source_current: jnp.ndarray):
+    def external(self, external_current: jnp.ndarray):
         """Return external poloidal flux map."""
-        source_current = source_current.at[self.source_plasma_index].set(0.0)
-        return self.source_target @ source_current
+        return self.source_target @ external_current
 
     @jax.jit
     def internal(self, plasma_current: jnp.ndarray):
@@ -43,5 +41,5 @@ class Target(Pytree):
     def tree_flatten(self):
         """Return flattened pytree."""
         children = (self.source_target, self.plasma_target, self.null)
-        aux_data = {"source_plasma_index": self.source_plasma_index}
+        aux_data = {}
         return (children, aux_data)

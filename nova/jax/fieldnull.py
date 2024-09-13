@@ -47,7 +47,6 @@ class FieldNull(Array):
             jnp.array(self.data["Psi"]),
             jnp.array(self.data["Psi_"]),
             self.null,
-            source_plasma_index=self.data.source_plasma_index,
         )
 
     @cached_property

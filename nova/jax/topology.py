@@ -5,6 +5,7 @@ from functools import partial
 import jax
 import jax.numpy as jnp
 
+from nova.graphics.plot import Plot2D
 from nova.jax.null import Null1D, Null2D
 from nova.jax.tree_util import Pytree
 
@@ -150,13 +151,19 @@ class Topology(Pytree):
         return self.x_mask(data_o, vmap_x) & self.psi_mask(polarity, psi_grid, psi_lcfs)
 
     @jax.jit
-    def update(self, psi, polarity):
-        """Return normalized poloidal flux and ionization mask."""
-        # split poloidal flux map into grid and wall zones
+    def split_flux_map(self, psi):
+        """Return poloidal flux maps split into grid and wall zones."""
         psi_grid = jax.lax.dynamic_slice_in_dim(psi, 0, self.grid.node_number)
         psi_wall = jax.lax.dynamic_slice_in_dim(
             psi, self.grid.node_number, self.wall.node_number
         )
+        return psi_grid, psi_wall
+
+    @jax.jit
+    def update(self, psi, polarity):
+        """Return normalized poloidal flux and ionization mask."""
+        # split flux map into grid and wall zones
+        psi_grid, psi_wall = self.split_flux_map(psi)
         # calculate flux map topology
         vmap_o, vmap_x = self.grid(psi_grid)
         data_o = self.o_point_data(vmap_o, polarity)
@@ -167,6 +174,19 @@ class Topology(Pytree):
         psi_lcfs = self.psi_lcfs(data_o[2], data_b[2])
         ionize = self.ionize(data_o, vmap_x, polarity, psi_grid, psi_lcfs)
         return psi_norm, ionize
+
+    def plot(self, psi, polarity, axes=None):
+        """Plot flux map including stationary points."""
+        psi_grid, psi_wall = self.split_flux_map(psi)
+        vmap_o, vmap_x = self.grid(psi_grid)
+        data_o = self.o_point_data(vmap_o, polarity)
+        data_x = self.x_point_data(vmap_x, polarity, data_o[2])
+        data_w = self.wall(psi_wall, polarity)
+        # plot stationary points
+        axes = Plot2D().get_axes(axes=axes)
+        axes.plot(*data_o[:2], "C0o")
+        axes.plot(*data_x[:2], "C0x")
+        axes.plot(*data_w[:2], "C0d")
 
     def tree_flatten(self):
         """Return flattened pytree."""

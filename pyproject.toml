@@ -72,7 +72,7 @@ graphics = [
   "seaborn>=0.12.2",
 ]
 imas = [
-  "imaspy @ git+ssh://git@git.iter.org/imas/imaspy.git@develop",
+  "imaspy[imas-core] @ git+ssh://git@git.iter.org/imas/imaspy.git@develop",
   "h5py>=3.10.0",
 ]
 jit = [
@@ -102,8 +102,10 @@ filepath = "nova.database.scripts:filepath"
 configure = "nova.scripts.configure:configure"
 
 [build-system]
-requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning>=1.0.0,<2.0.0"]
-build-backend = "poetry_dynamic_versioning.backend"
+requires = ["poetry-core @ git+https://github.com/radoering/poetry-core.git@pep621-support"]
+#"poetry-dynamic-versioning @ git+https://github.com/mtkennerly/poetry-dynamic-versioning.git@poetry-pep621"
+
+build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "nova-stella" # TODO remove once poetry_dynamic_versioning is fixed

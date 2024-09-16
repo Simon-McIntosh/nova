@@ -106,10 +106,10 @@ requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning>=1.0.0,<2.0.0"]
 build-backend = "poetry_dynamic_versioning.backend"
 
 [tool.poetry]
-#name = "nova-stella" # TODO remove once poetry_dynamic_versioning is fixed
+name = "nova-stella" # TODO remove once poetry_dynamic_versioning is fixed
 version = "0.0.0"
-#authors = ["Simon McIntosh <simon.mcintosh@iter.org>"]
-#description = "Equilibrium generation and inference"
+authors = ["Simon McIntosh <simon.mcintosh@iter.org>"]
+description = "Equilibrium generation and inference"
 packages = [{ include = "nova" }]
 exclude = [
   "nova/ansys",

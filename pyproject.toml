@@ -33,7 +33,6 @@ dependencies = [
   "contourpy>=1.0.7",
   "fsspec>=2023.5.0",
   "gitpython>=3.1.31",
-  "imaspy[imas-core] @ git+ssh://git@git.iter.org/imas/imaspy.git@develop",
   "netcdf4>=1.6.3",
   "networkx>=3.1",
   "numpy>=1.26",

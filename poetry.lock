@@ -2225,7 +2225,7 @@ files = [
 name = "imas-core"
 version = "5.3.0"
 description = "Python bindings to the IMAS Access Layer core"
-optional = false
+optional = true
 python-versions = "<4,>=3.6"
 files = []
 develop = false
@@ -2247,7 +2247,7 @@ resolved_reference = "69e97a4e4206c945deec07dd9b7363e7a7009fbe"
 name = "imaspy"
 version = "1.1.0"
 description = "Pythonic wrappers for the IMAS Access Layer"
-optional = false
+optional = true
 python-versions = ">=3.7"
 files = []
 develop = false
@@ -7420,4 +7420,4 @@ uda = ["async-property", "nest-asyncio"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<4.0"
-content-hash = "a0ea03e160442907f5715817855dc00e86e4dad3a9fca4d41eaa14949852ad7d"
+content-hash = "d5ab1bc1e866d758bd5e20c4c83b18b6f78c752a7c57057dc595e949bcb3a07e"

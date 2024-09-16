@@ -2222,28 +2222,6 @@ files = [
 ]
 
 [[package]]
-name = "imas-core"
-version = "5.3.0"
-description = "Python bindings to the IMAS Access Layer core"
-optional = true
-python-versions = "<4,>=3.6"
-files = []
-develop = false
-
-[package.dependencies]
-numpy = "<2"
-
-[package.extras]
-cov = ["coverage2clover", "pytest-cov"]
-test = ["pytest (>=8)"]
-
-[package.source]
-type = "git"
-url = "ssh://git@git.iter.org/imas/al-core.git"
-reference = "main"
-resolved_reference = "69e97a4e4206c945deec07dd9b7363e7a7009fbe"
-
-[[package]]
 name = "imaspy"
 version = "1.1.0"
 description = "Pythonic wrappers for the IMAS Access Layer"
@@ -2254,7 +2232,6 @@ develop = false
 
 [package.dependencies]
 click = "*"
-imas-core = {git = "ssh://git@git.iter.org/imas/al-core.git", rev = "main", optional = true, markers = "extra == \"imas-core\""}
 numpy = ">=1.15.4,<2"
 packaging = "*"
 rich = "*"
@@ -7420,4 +7397,4 @@ uda = ["async-property", "nest-asyncio"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<4.0"
-content-hash = "d5ab1bc1e866d758bd5e20c4c83b18b6f78c752a7c57057dc595e949bcb3a07e"
+content-hash = "d1e9afbca32a52ddd2efab91beea5d2e81b95c7fb2674d1d4e8626364e569742"

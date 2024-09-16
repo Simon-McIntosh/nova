@@ -6,7 +6,6 @@ from functools import cached_property
 import jax
 import jax.numpy as jnp
 import numpy as np
-import seaborn as sns
 import xarray
 
 from nova.biot.array import Array
@@ -179,7 +178,6 @@ if __name__ == "__main__":
 
     fieldnull.update_null(psi_1d)
 
-    sns.set_theme("notebook", "ticks")
     plt.figure(figsize=(9, 7))
 
     plt.triplot(
@@ -243,7 +241,6 @@ if __name__ == "__main__":
     axes[0].set_ylabel(r"radius $m$")
     axes[1].set_xlabel(r"Ics1 $kA$")
     axes[1].set_ylabel(r"$\frac{dr}{dI_{CS1}}$ $mA^{-1}$")
-    sns.despine()
 
     """
 

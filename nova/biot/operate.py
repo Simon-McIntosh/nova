@@ -154,6 +154,7 @@ class Operate(Data):
         if isinstance(self.attrs, str):
             self.attrs = [self.attrs]
         self.index = self.data.get("index", xarray.DataArray([])).data
+        print(self.data)
         self.classname = self.data.classname
         self.number = self.data.sizes["target"]
         # operators = Operators(self.data)

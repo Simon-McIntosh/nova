@@ -220,10 +220,10 @@ if __name__ == "__main__":
 
     levels = operate.plasma.plot(colors="C0")
 
-    operate.sloc["PF4", "Ic"] *= 1.2
+    # operate.sloc["PF4", "Ic"] *= 1.2
 
     psi = jnp.array(operate.plasma.psi)
-    operate.plasma.grid["psi"] = 0.1 * plasma(psi)[: plasma.grid.node_number]
+    # operate.plasma.grid["psi"] = 0.1 * plasma(psi)[: plasma.grid.node_number]
 
     operate.plasma.solve_flux(verbose=True, f_rtol=1e-6)
     operate.plasma.plot(levels=levels, colors="C2")

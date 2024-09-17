@@ -177,8 +177,6 @@ setuptools = "^69.2.0"
 setuptools-cpp = "^0.1.0"
 auditwheel = "^6.0.0"
 pretty = "^0.1"
-tensorboard-plugin-profile = "^2.17.0"
-tensorflow-cpu = "^2.17.0"
 timer = "^0.3.0"
 
 [[tool.poetry.source]]

@@ -4,7 +4,6 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from functools import cached_property
-from importlib import import_module
 import itertools
 import string
 from typing import ClassVar, TYPE_CHECKING
@@ -852,38 +851,6 @@ class Contour(Plot):
         while len(self.segments) > 0:
             self.select()
         self.loop = np.append(self.loop, self.loop[:1], axis=0)
-
-        if not import_module("shapely.geometry").LinearRing(self.loop).is_valid:
-            ro, zo = 1.6, 0
-            self.set_axes("2d")
-
-            points = []
-            import alphashape
-            import shapely
-
-            for contour in self.data.values():
-
-                line = shapely.LineString(
-                    np.c_[contour[:, 0] - ro, contour[:, 1] - zo]
-                ).segmentize(0.01)
-
-                theta = np.arctan2(line.xy[1], line.xy[0])
-                inverse_radius = 1 / np.linalg.norm(np.c_[*line.xy], axis=1)
-                x = inverse_radius * np.cos(theta)
-                z = inverse_radius * np.sin(theta)
-
-                points.append(np.c_[x, z])
-
-                self.axes.plot(x, z, ".")
-
-            points = np.concatenate(points, axis=0)
-
-            poly = alphashape.alphashape(points, 3)
-
-            self.axes.plot(*poly.boundary.xy)
-            print(poly)
-            print(points.shape)
-            assert False
 
     def plot(self, axes=None, color="k", **kwargs):
         """Plot closed contour."""

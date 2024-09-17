@@ -72,11 +72,12 @@ graphics = [
   "seaborn>=0.12.2",
 ]
 imas = [
-  "imaspy[imas-core] @ git+ssh://git@git.iter.org/imas/imaspy.git@develop",
+  "imaspy @ git+ssh://git@git.iter.org/imas/imaspy.git@develop",
+  "imas-core @ git+ssh://git@git.iter.org/imas/al-core.git@feature/cython_cmake",
   "h5py>=3.10.0",
 ]
 jit = [
-  "jax[cuda12_local]>=0.4.31",
+  "jax[cpu]>=0.4.31",  # cuda12_local
   "numba>=0.59.0",
   "tbb>=2021.11.0",
   "tbb-devel>=2021.11.0",
@@ -188,10 +189,10 @@ name = "iter"
 url = "https://pypi.iter.org/simple/"
 priority = "explicit"
 
-#[[tool.poetry.source]]
-#name = "jax"
-#url = "https://storage.googleapis.com/jax-releases/jax_cuda_releases.html"
-#priority = "explicit"
+[[tool.poetry.source]]
+name = "jax"
+url = "https://storage.googleapis.com/jax-releases/jax_cuda_releases.html"
+priority = "explicit"
 
 [tool.black]
 line-length = 88

@@ -180,6 +180,7 @@ class Biot(BiotPlasma, BiotCoil, BiotGap):
     """Expose biot methods as cached properties."""
 
     ngrid: Nbiot = None
+    limit: list[int | float] | None = None
     noverlap: Nbiot = None
 
     def __post_init__(self):

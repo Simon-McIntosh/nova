@@ -177,8 +177,6 @@ class TetVol(TriShell):
 
     def load_volume(self):
         """Compute volume from closed surface mesh."""
-        import trimesh
-
         with tempfile.NamedTemporaryFile(suffix=".msh") as tmp:
             trimesh.interfaces.gmsh.to_volume(self.tri, file_name=tmp.name)
             msh = meshio.read(tmp.name)

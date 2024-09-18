@@ -1166,7 +1166,7 @@ class Diagnostics(IdsBase):
 
 
 @dataclass
-class Machine(CoilSet, Diagnostics, Geometry, CoilData):
+class Machine(CoilSet, Geometry, CoilData):  # Diagnostics,
     """Manage ITER machine geometry."""
 
     @property
@@ -1232,9 +1232,9 @@ class Machine(CoilSet, Diagnostics, Geometry, CoilData):
         if self.sloc["plasma"].sum() > 0:
             boundary = self.geometry["wall"](**self.wall).boundary
             self.plasma.solve(boundary=boundary)
-        self.poloidal_flux_loop.solve()
+        # self.poloidal_flux_loop.solve()
         self.inductance.solve()
-        self.grid.solve()
+        self.grid.solve(limit=self.limit)
         self.field.solve()
         self.force.solve()
 
@@ -1247,10 +1247,12 @@ class Machine(CoilSet, Diagnostics, Geometry, CoilData):
             if isinstance(geometry_attrs, dict):
                 coilset = geometry(**geometry_attrs, **self.frameset_attrs)
                 self += coilset
+        """
         for attr, diagnostic in self.diagnostic.items():
             diagnostic_attrs = getattr(self, attr)
             if isinstance(diagnostic_attrs, dict):
                 diagnostic(**diagnostic_attrs).insert(self)
+        """
 
         if hasattr(super(), "build"):
             super().build()

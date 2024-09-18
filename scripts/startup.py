@@ -19,8 +19,8 @@ class Startup:
     @staticmethod
     def seaborn():
         """Set seaborn context."""
-        sns.set_context("notebook")
-        mpl.rcParams["figure.figsize"] = np.array([6, 5]) / 0.394
+        sns.set_context("poster")
+        mpl.rcParams["figure.figsize"] = 1.3 * np.array([6, 5]) / 0.394
 
     @staticmethod
     def pandas():

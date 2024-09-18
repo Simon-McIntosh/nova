@@ -9,6 +9,7 @@ import numpy as np
 import xarray
 
 from nova.biot.array import Array
+from nova.graphics.plot import Axes
 from nova.jax.null import Null2D
 from nova.jax.target import Target
 
@@ -215,7 +216,7 @@ if __name__ == "__main__":
     d_o_point = jax.grad(o_point)
     # dd_o_point = jax.jacfwd(d_o_point)
 
-    factor = np.linspace(0, 2, 3000)
+    factor = np.linspace(0, 0.75, 2500)
 
     radius = np.zeros_like(factor)
     gradient = np.zeros_like(factor)
@@ -231,14 +232,19 @@ if __name__ == "__main__":
         gradient[i] = np.asarray(d_o_point(I_dynamic))[coil_index]
         # curve[i] = np.asarray(dd_o_point(currents, 0))[coil_index]
 
-    axes = plt.subplots(2, 1, figsize=(9, 7), sharex=True)[1]
-    axes[0].plot(1e-3 * factor * Io, radius)
+    # axes = plt.subplots(2, 1, figsize=(9, 7), sharex=True)[1]
+
+    axes = Axes().generate("1d", 2, 1, figsize=(9, 7), sharex=True)
+    axes[0].plot(1e-3 * factor * Io, radius, "C3")
     axes[1].plot(
-        1e-3 * factor * Io, np.gradient(radius, factor * Io), "C1", label="numeric"
+        1e-3 * factor * Io,
+        np.gradient(radius, factor * Io),
+        "C0",
+        label="finite diffrence",
     )
-    axes[1].plot(1e-3 * factor * Io, gradient, "C0", label="jax")
-    axes[1].legend()
-    axes[0].set_ylabel(r"radius $m$")
+    axes[1].plot(1e-3 * factor * Io, gradient, "C1", label="automatic-differention")
+    axes[1].legend(loc="lower right")
+    axes[0].set_ylabel(r"o-point radius $m$")
     axes[1].set_xlabel(r"Ics1 $kA$")
     axes[1].set_ylabel(r"$\frac{dr}{dI_{CS1}}$ $mA^{-1}$")
 

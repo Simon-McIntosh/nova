@@ -9,7 +9,7 @@ repos:
       - id: poetry-export
         args: ["--extras", "ferritic",
                "--extras", "graphics",
-               "--extras", "imas-core",
+               "--extras", "imas",
                "--extras", "jit",
                "--extras", "optimize",
                "--extras", "test",

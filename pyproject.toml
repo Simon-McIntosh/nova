@@ -77,7 +77,7 @@ imas = [
   "h5py>=3.10.0",
 ]
 jit = [
-  "jax[cpu]>=0.4.31",  # cuda12_local
+  "jax[cuda12]>=0.4.31",  # cuda12_local
   "numba>=0.59.0",
   "tbb>=2021.11.0",
   "tbb-devel>=2021.11.0",

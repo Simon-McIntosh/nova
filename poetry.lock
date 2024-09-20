@@ -2181,7 +2181,7 @@ resolved_reference = "7aa4a95f0cb400deb5eb95f292472213642ddf96"
 name = "imaspy"
 version = "1.1.0+2.gf1a1ec8"
 description = "Pythonic wrappers for the IMAS Access Layer"
-optional = false
+optional = true
 python-versions = ">=3.7"
 files = []
 develop = false
@@ -3095,7 +3095,7 @@ files = [
 name = "markdown-it-py"
 version = "3.0.0"
 description = "Python port of markdown-it. Markdown parsing, done right!"
-optional = false
+optional = true
 python-versions = ">=3.8"
 files = [
     {file = "markdown-it-py-3.0.0.tar.gz", hash = "sha256:e3f60a94fa066dc52ec76661e37c851cb232d92f9886b15cb560aaada2df8feb"},
@@ -3265,7 +3265,7 @@ traitlets = "*"
 name = "mdurl"
 version = "0.1.2"
 description = "Markdown URL utilities"
-optional = false
+optional = true
 python-versions = ">=3.7"
 files = [
     {file = "mdurl-0.1.2-py3-none-any.whl", hash = "sha256:84008a41e51615a49fc9966191ff91509e3c40b939176e643fd50a5c2196b8f8"},
@@ -5315,7 +5315,7 @@ files = [
 name = "rich"
 version = "13.8.1"
 description = "Render rich text, tables, progress bars, syntax highlighting, markdown and more to the terminal"
-optional = false
+optional = true
 python-versions = ">=3.7.0"
 files = [
     {file = "rich-13.8.1-py3-none-any.whl", hash = "sha256:1760a3c0848469b97b558fc61c85233e3dafb69c7a071b4d60c38099d3cd4c06"},
@@ -6901,7 +6901,7 @@ ansys = ["ansys-dpf-core", "ansys-dpf-post", "fortranformat", "openpyxl"]
 bamboo = ["coverage2clover", "tox"]
 ferritic = ["alphashape", "meshio", "pyvista", "scikit-learn", "trimesh", "vedo"]
 graphics = ["bokeh", "descartes", "matplotlib", "moviepy"]
-imas-core = ["h5py", "imas-core"]
+imas = ["h5py", "imas-core", "imaspy"]
 jit = ["jax", "numba", "tbb", "tbb-devel"]
 optimize = ["jaxopt", "pylops", "scikit-learn"]
 sst = ["f90nml"]
@@ -6913,4 +6913,4 @@ uda = ["async-property", "nest-asyncio"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<4.0"
-content-hash = "d98c4eeff03c15b213490317a7cb522b47f47d025343318764be44a5a320556a"
+content-hash = "1e7b6fd47d209ad11bdc945608b74f3b1e27be1b68a54af2b430a843bca8c614"

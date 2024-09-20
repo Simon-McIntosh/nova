@@ -3,6 +3,7 @@
 import logging
 from timer import timer
 
+import argparse
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -17,6 +18,11 @@ logging.basicConfig(level=logging.INFO, force=True)
 timer.set_level(logging.INFO)
 jax.config.update("jax_enable_x64", True)
 
+parser = argparse.ArgumentParser()
+parser.add_argument("--dirname", default=".nova", help="set cache dir")
+args = parser.parse_args()
+
+print(args.dirname)
 
 kwargs = {
     "pulse": 135013,
@@ -47,7 +53,7 @@ operate = Operate(
     limit=[3.0, 9.0, -6.0, 6.0],
     nlevelset=None,
     ngap=21,
-    dirname="C:/Users/mcintos",
+    dirname=args.dirname,
 )
 
 

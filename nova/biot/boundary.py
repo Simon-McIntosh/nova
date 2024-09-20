@@ -4,7 +4,6 @@ import logging
 from timer import timer
 
 import argparse
-import jax
 import jax.numpy as jnp
 import numpy as np
 import optimistix as optx
@@ -16,14 +15,11 @@ logger = logging.getLogger()
 logging.basicConfig(level=logging.INFO, force=True)
 
 timer.set_level(logging.INFO)
-jax.config.update("jax_enable_x64", True)
+# jax.config.update("jax_enable_x64", True)
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--dirname", default=".nova", help="set cache dir")
 args = parser.parse_args()
-
-print("***", args.dirname)
-assert False
 
 kwargs = {
     "pulse": 135013,
@@ -90,8 +86,8 @@ levels = -operate.plot_2d(
 )[::-1]
 
 # solve Newton-Krylov
-with timer("plasma.solve_flux"):
-    operate.plasma.solve_flux(verbose=True, f_rtol=1e-1, f_tol=1e-1)
+# with timer("plasma.solve_flux"):
+#    operate.plasma.solve_flux(verbose=True, f_rtol=1e-1, f_tol=1e-1)
 
 print(f"Krylov solve {optx.two_norm(flux_residual(operate.plasma.psi))}")
 

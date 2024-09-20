@@ -87,8 +87,8 @@ levels = -operate.plot_2d(
 )[::-1]
 
 # solve Newton-Krylov
-# with timer("plasma.solve_flux"):
-#    operate.plasma.solve_flux(verbose=True, f_rtol=1e-1, f_tol=1e-1)
+with timer("plasma.solve_flux"):
+    operate.plasma.solve_flux(verbose=True, f_rtol=1e-1, f_tol=1e-1)
 
 print(f"Krylov solve {optx.two_norm(flux_residual(operate.plasma.psi))}")
 

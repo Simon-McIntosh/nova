@@ -22,9 +22,6 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--dirname", default=".nova", help="set cache dir")
 args = parser.parse_args()
 
-print("***", args.dirname)
-assert False
-
 kwargs = {
     "pulse": 135013,
     "run": 2,

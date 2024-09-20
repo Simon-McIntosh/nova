@@ -4,6 +4,7 @@ import logging
 from timer import timer
 
 import argparse
+import jax
 import jax.numpy as jnp
 import numpy as np
 import optimistix as optx
@@ -15,7 +16,7 @@ logger = logging.getLogger()
 logging.basicConfig(level=logging.INFO, force=True)
 
 timer.set_level(logging.INFO)
-# jax.config.update("jax_enable_x64", True)
+jax.config.update("jax_enable_x64", True)
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--dirname", default=".nova", help="set cache dir")

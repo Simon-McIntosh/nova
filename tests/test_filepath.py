@@ -12,7 +12,7 @@ from nova.database.filepath import FilePath
 from nova.definitions import root_dir
 from nova.utilities.importmanager import mark_import
 
-HOSTNAME = "sdcc-login02.iter.org"
+HOSTNAME = "sdcc-login04.iter.org"
 
 with mark_import("ssh") as mark_ssh:
     from nova.database.connectssh import ConnectSSH

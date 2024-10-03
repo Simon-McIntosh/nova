@@ -700,6 +700,8 @@ mode='r', lazy=True, ids=None)
         lazy: Optional[bool] = None,
     ) -> IDSToplevel:
         """Return IDS from Dataset."""
+        if self._ids is not None:
+            return self._ids
         if name is not None:
             self.name = name
         if occurrence is not None:

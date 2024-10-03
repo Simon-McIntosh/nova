@@ -1,7 +1,6 @@
 """Manage fast access dataframe attributes."""
 
 import numpy as np
-import jax.numpy as jnp
 import pandas
 
 from nova.frame.dataframe import DataFrame
@@ -135,7 +134,7 @@ class DataArray(ArrayIndexer, DataFrame):
         except KeyError as keyerror:
             if not pandas.api.types.is_list_like(value):
                 value = self.format_value(col, value)
-                value = jnp.full(len(self), value, dtype=type(value))
+                value = np.full(len(self), value, dtype=type(value))
             elif len(value) != len(self):
                 raise IndexError(
                     f"input length {len(value)} != {len(self)}"

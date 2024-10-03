@@ -78,7 +78,7 @@ class netCDF(FilePath):
 
     def load(self):
         """Load dataset from file."""
-        with xarray.open_dataset(self.filepath, group=self.group, cache=False) as data:
+        with xarray.open_dataset(self.filepath, group=self.group, cache=True) as data:
             data.load()
             self.data = self.data.merge(
                 data, combine_attrs="drop_conflicts", compat="override"

@@ -69,9 +69,9 @@ def test_nturn_skip_Psi_update():
     coilset.firstwall.insert(dict(o=[5, 1, 5]), Ic=15e6)
     coilset.plasmagrid.solve()
     coilset.sloc["Ic"] = 1
-    psi_hash = coilset.aloc_hash["nturn"]
     psi = coilset.plasmagrid.psi
-    coilset.plasma.separatrix = dict(o=[5, 1, 2.5])
+    coilset.plasma.separatrix = dict(o=[5.1, 1, 2.5])
+    psi_hash = coilset.aloc_hash["nturn"]
     coilset.plasmagrid.version["Psi"] = psi_hash  # skip update
     assert np.allclose(coilset.plasmagrid.psi, psi)
 
@@ -91,9 +91,9 @@ def test_nturn_skip_current_update():
     coilset.firstwall.insert(dict(o=[5, 1, 5]), Ic=15e6)
     coilset.plasmagrid.solve()
     coilset.sloc["Ic"] = 1
-    current_hash = coilset.aloc_hash["Ic"]
     psi = coilset.plasmagrid.psi
     coilset.sloc["Ic"] = 2
+    current_hash = coilset.aloc_hash["Ic"]
     coilset.plasmagrid.version["psi"] = current_hash  # skip updated
     assert np.allclose(coilset.plasmagrid.psi, psi)
 

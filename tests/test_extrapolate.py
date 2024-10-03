@@ -35,6 +35,10 @@ def test_load_from_ids():
         extrapolate._clear()
 
 
+test_load_from_ids()
+assert False
+
+
 @mark["equilibrium"]
 def test_extrapolation_grid_relitive_to_ids():
     ids = EquilibriumData(

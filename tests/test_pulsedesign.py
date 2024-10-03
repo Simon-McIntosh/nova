@@ -20,7 +20,7 @@ biot_attrs = {
 }
 
 
-@pytest.fixture
+@pytest.fixture()
 def ids():
     ids_entry = IdsEntry(name="equilibrium")
     time = [1.5, 19, 110, 600, 670]
@@ -114,10 +114,11 @@ def test_make_frame(ids):
 @mark["equilibrium_pds"]
 def test_sample_pds():
     equilibrium = EquilibriumData(**ids_attrs["equilibrium_pds"])
-    sample = Sample(equilibrium.data, epsilon=0.25, savgol=None)
-    design = PulseDesign(ids=sample.equilibrium_ids(), strike=True)
-    assert design.data.sizes["time"] == 15
+    sample = Sample(equilibrium.data, epsilon=0.75, savgol=None)
+    design = PulseDesign(ids=sample.equilibrium_ids(), **biot_attrs)
+    assert design.data.sizes["time"] == 16
 
 
 if __name__ == "__main__":
-    pytest.main([__file__])
+    # pytest.main([__file__])
+    test_sample_pds()

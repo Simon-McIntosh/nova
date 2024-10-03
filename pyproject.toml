@@ -77,7 +77,7 @@ imas = [
   "h5py>=3.10.0",
 ]
 jit = [
-  "jax[cuda12]==0.4.27",  # cuda12_local
+  "jax[cpu]==0.4.27",  # cuda12_local
   "numba>=0.59.0",
   "tbb>=2021.11.0",
   "tbb-devel>=2021.11.0",
@@ -103,10 +103,12 @@ filepath = "nova.database.scripts:filepath"
 configure = "nova.scripts.configure:configure"
 
 [build-system]
-requires = ["poetry-core @ git+https://github.com/radoering/poetry-core.git@pep621-support"]
-#"poetry-dynamic-versioning @ git+https://github.com/mtkennerly/poetry-dynamic-versioning.git@poetry-pep621"
+requires = [
+  "poetry-core @ git+https://github.com/radoering/poetry-core.git@pep621-support",
+  "poetry-dynamic-versioning @ git+https://github.com/mtkennerly/poetry-dynamic-versioning.git@poetry-pep621",
+]
 
-build-backend = "poetry.core.masonry.api"
+build-backend = "poetry_dynamic_versioning.backend"  # "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "nova-stella" # TODO remove once poetry_dynamic_versioning is fixed
@@ -178,6 +180,13 @@ setuptools-cpp = "^0.1.0"
 auditwheel = "^6.0.0"
 pretty = "^0.1"
 timer = "^0.3.0"
+pprofile = "^2.2.0"
+intake = "^2.0.7"
+zarr = "^2.18.3"
+fsspec = "^2024.9.0"
+s3fs = "^2024.9.0"
+intake-xarray = "^0.7.0"
+intake-parquet = "^0.3.0"
 
 [[tool.poetry.source]]
 name = "PyPI"
@@ -272,6 +281,8 @@ lint.dummy-variable-rgx = ">=(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 lint.mccabe.max-complexity = 10
 
 [tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 addopts = "-rfEs --doctest-modules --ignore=tests/test_sultan.py"
 norecursedirs = ".git __pycache__"
 testpaths = [

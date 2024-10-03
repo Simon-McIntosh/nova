@@ -127,10 +127,10 @@ class Operate(Data):
     @contextmanager
     def solve_biot(self, number: int | float | None):
         """Manage biot solution - update number and execute post_solve."""
-        if number is not None and number != 0:
+        if number is not None:
             self.number = number
         yield self.number
-        if self.number is not None and number != 0:
+        if self.number is not None:
             self.post_solve()
 
     def post_solve(self):
@@ -156,7 +156,6 @@ class Operate(Data):
         self.index = self.data.get("index", xarray.DataArray([])).data
         self.classname = self.data.classname
         self.number = self.data.sizes["target"]
-        # operators = Operators(self.data)
         for attr in np.array(self.attrs):
             attrs = [
                 _attr
@@ -219,9 +218,6 @@ class Operate(Data):
         """Update plasma turns."""
         if self.source_plasma_index != -1 or self.target_plasma_index != -1:
             self.operator[Attr].update_turns(svd)
-            # self.array[Attr] = self.operator[Attr].update_plasma_turns(
-            #    self.aloc["plasma", "nturn"]
-            # )
         self.version[Attr] = self.data.attrs[Attr] = self.subframe.version["nturn"]
 
     def calculate_norm(self):
@@ -291,12 +287,10 @@ class Operate(Data):
             return self.get_derived(attr)
         Attr = attr.capitalize()
         self.check_plasma(Attr)
-        # self.operator[Attr].update_plasma_turns(self.aloc["plasma", "nturn"])
         if attr == Attr:
             return self.operator[Attr].source_target
         self.check_source(attr)
         return self.array[attr]
-        # return self.operator[Attr].evaluate(self.saloc["Ic"])
 
     @property
     def vector_potential(self):

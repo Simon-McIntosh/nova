@@ -906,6 +906,7 @@ class Wall(CoilDatabase):
 
     def build(self):
         """Build plasma bound by firstwall contour."""
+        print(self.ids_attrs)
         self.firstwall.insert(self.boundary)
 
     def insert(self, data: xarray.Dataset):

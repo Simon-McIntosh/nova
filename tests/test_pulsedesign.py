@@ -120,5 +120,4 @@ def test_sample_pds():
 
 
 if __name__ == "__main__":
-    # pytest.main([__file__])
-    test_sample_pds()
+    pytest.main([__file__])

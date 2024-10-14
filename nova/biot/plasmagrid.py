@@ -161,6 +161,8 @@ class PlasmaGrid(BaseGrid, PlasmaLoc):
 
     def ionize_mask(self, index):
         """Return plasma filament selection mask."""
+        print(index, type(index))
+
         match index:
             case int(psi) | float(psi):
                 # case psi if isinstance(psi, (int, float, np.ndarray)):

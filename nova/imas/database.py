@@ -82,7 +82,7 @@ class Database(Dataset):
             self.filename = self.classname
         if self.group is None and self.name is not None:
             self.group = self.name
-            if self.ids is not None:
+            if self.ids is not None and not self.lazy:
                 self.group += f"_{Dataset(ids=self.ids).ids_hash}"
 
     @property
@@ -125,7 +125,7 @@ class IdsData(Datafile, Database):
             ids_attrs = self.ids_attrs | ids_attrs
         try:
             data = ids_class(**ids_attrs).data
-        except imas.exception.DataEntryException:
+        except (NameError, imas.exception.DataEntryException):
             return  # name missmatch when loading from ids node or IDS not found
         if self.ids is not None and self.name == name:  # override when using ids input
             setattr(self, name, Database(ids=self.ids).ids_hash)

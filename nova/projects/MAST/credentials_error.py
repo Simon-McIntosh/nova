@@ -18,7 +18,7 @@ storage_options = {
 
 sources_df = catalog.index.level1.sources().read()
 
-shot_id = 30420
+shot_id = 30419
 # shot_id = 30471
 sources_df = sources_df.loc[sources_df.shot_id == shot_id]
 

@@ -342,7 +342,7 @@ os.path.join(userhome, 'public', 'imasdb', 'iter', '3', '1', '2')
         self.name = self.ids.metadata.name
 
     def get_ids_attrs(self, attrs, other) -> dict:
-        """Return ids attributes from other.
+        r"""Return ids attributes from other.
 
         Parameters
         ----------
@@ -732,7 +732,9 @@ mode='r', lazy=True, ids=None)
     def is_valid(self):
         """Return database entry validity flag."""
         try:
-            imas.DBEntry(uri=self.uri, mode="r").get(self.name, self.occurrence)
+            db_entry = imas.DBEntry(uri=self.uri, mode="r")
+            db_entry.get(self.name, self.occurrence)
+            db_entry.close()  # win32
             return True
         except (imas.exception.ALException, imas.exception.DataEntryException):
             return False
@@ -745,6 +747,11 @@ mode='r', lazy=True, ids=None)
     def __exit__(self, exc_type, exc_val, traceback):
         """Delete db_entry cached property on exit."""
         self.db_entry.__exit__(exc_type, exc_val, traceback)
+        del self.db_entry
+
+    def close(self):
+        """Close db_entry and remove from cache."""
+        self.db_entry.close()
         del self.db_entry
 
     def _get_ids(self):

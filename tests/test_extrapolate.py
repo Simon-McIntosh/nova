@@ -10,7 +10,7 @@ from nova.imas.test_utilities import ids_attrs, load_ids, mark
 
 ids_attrs["CORSICA"] = dict(pulse=130506, run=403, name="equilibrium")
 mark["CORSICA"] = pytest.mark.skipif(
-    not load_ids(**ids_attrs["CORSICA"]), reason="CORSICA database unavalible"
+    not load_ids(**ids_attrs["CORSICA"]).is_valid, reason="CORSICA database unavalible"
 )
 
 
@@ -21,7 +21,7 @@ def test_extrapolation_grid_relitive_to_coilset():
 
 @mark["CORSICA"]
 def test_load_from_ids():
-    equilibrium = Database(**ids_attrs["CORSICA"])
+    equilibrium = Database(**ids_attrs["CORSICA"], lazy=False)
     kwargs = dict(
         ids=equilibrium.ids,
         limit="ids",
@@ -33,10 +33,6 @@ def test_load_from_ids():
     with tempfile.NamedTemporaryFile() as tmp:
         extrapolate = Extrapolate(**kwargs, filename=tmp.name)
         extrapolate._clear()
-
-
-test_load_from_ids()
-assert False
 
 
 @mark["equilibrium"]
@@ -84,7 +80,7 @@ def test_extrapolate_attrs():
 @mark["CORSICA"]
 @pytest.mark.parametrize("itime", [5, 15, 20, 30, 35, 40])
 def test_extrapolate_rms_error(itime):
-    ids = EquilibriumData(**ids_attrs["CORSICA"]).ids
+    ids = EquilibriumData(**ids_attrs["CORSICA"], lazy=False).ids
     extrapolate = Extrapolate(
         ids=ids, limit="ids", ngrid=50, dplasma=-250, nturn=10, wall="iter_md"
     )
@@ -102,6 +98,9 @@ def test_extrapolate_rms_error(itime):
     maxmin = equilibrium_psi_norm.max() - equilibrium_psi_norm.min()
     assert error / maxmin < 0.05
 
+
+test_extrapolate_rms_error(5)
+assert False
 
 if __name__ == "__main__":
     pytest.main([__file__])

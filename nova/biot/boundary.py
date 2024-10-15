@@ -1,14 +1,18 @@
 """Develop boundary transition elements."""
 
+import scipy.interpolate
 from nova.imas.operate import Operate
 
 kwargs = {
     "pulse": 135013,
     "run": 2,
     "machine": "iter",
-    "pf_passive": True,
+    "pf_passive": False,
     "pf_active": True,
 }
+
+# kwargs = {"pulse": 17151, "run": 4, "machine": "aug"}
+
 
 """
 kwargs = {
@@ -22,11 +26,12 @@ kwargs = {
 
 
 operate = Operate(
-    **kwargs,
-    tplasma="h",
+    tplasma="r",
+    dplasma=-2e3,
     nwall=-0.2,
     ngrid=None,
     nlevelset=2e3,
+    **kwargs,
 )
 
 
@@ -35,13 +40,18 @@ operate = Operate(
 operate.time = 250
 
 # operate.sloc["PF6", "Ic"] *= 1
-# operate.sloc["PF4", "Ic"] *= 1.2
+operate.sloc["PF4", "Ic"] *= 1
+
+
+operate.plasma.p_prime = scipy.interpolate.interp1d(
+    operate.data["psi_norm"], operate.data["psi_norm"] * operate["dpressure_dpsi"]
+)
 
 
 # operate.plasma.separatrix = {"e": [6.2, 0.5, 3, 4.6]}
 operate.plasma.solve_flux(verbose=True)
 
-levels = operate.plot_2d(label="DINA")
+levels = operate.plot_2d(label="DINA", colors="C2")
 levels = -levels[::-1]
 
 # operate.plasma.plot(levels=levels, colors="black")
@@ -49,7 +59,7 @@ levels = -levels[::-1]
 
 
 operate.plasma.wall.plot(limitflux=True)
-operate.plasma.plot(colors="C6", label="NOVA", levels=levels, nulls=False)
+operate.plasma.plot(colors="C1", label="NOVA", levels=levels, nulls=True)
 
 
 """

@@ -863,9 +863,11 @@ class Contour(Plot):
                 x = inverse_radius * np.cos(theta)
                 z = inverse_radius * np.sin(theta)
 
+                # x, z = line.xy[0], line.xy[1]
+
                 points.append(np.c_[x, z])
 
-                self.axes.plot(x, z, ".")
+                self.axes.plot(x, z, "-")
 
             points = np.concatenate(points, axis=0)
 
@@ -1153,7 +1155,6 @@ class Machine(CoilSet, Geometry, CoilData):
     @metadata.setter
     def metadata(self, metadata: dict):
         """Set instance metadata, assert consistent attr_hash."""
-        print(self.group_attrs)
         for attr in self.frameset_attrs:
             setattr(self, attr, metadata[attr])
         for attr in metadata.keys() & self._biot_attrs.keys():
@@ -1169,7 +1170,6 @@ class Machine(CoilSet, Geometry, CoilData):
                 self._format_dataset_attrs(attr) for attr in metadata[attr].split(",")
             ]
             setattr(self, attr, dict(zip(IdsBase.database_attrs, values)))
-        print(self.group_attrs)
         assert self.group == self.hash_attrs(self.group_attrs)
 
     @staticmethod
@@ -1239,16 +1239,15 @@ if __name__ == "__main__":
     kwargs = {"pulse": 105028, "run": 1, "machine": "iter"}  # DINA
     # kwargs = {"pulse": 45272, "run": 1, "machine": "mast_u"}  # MastU
     # kwargs = {"pulse": 57410, "run": 0, "machine": "west"}  # WEST
-    # kwargs = {"pulse": 17151, "run": 3, "machine": "aug", "pf_passive": False}
+    kwargs = {"pulse": 17151, "run": 4, "machine": "aug"}
 
     machine = Machine(
-        **kwargs,
         pf_active=True,
-        pf_passive=True,
+        pf_passive=False,
         wall=True,
         tplasma="h",
-        ninductance=10,
-        dshell=1.5,
+        ninductance=None,
+        **kwargs,
     )
 
     machine.plot()

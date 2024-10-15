@@ -262,7 +262,7 @@ if __name__ == "__main__":
     # ScenarioDatabase().sync_shot("111003/1")
 
     # ScenarioDatabase().sync_shot("111001/103")
-    ScenarioDatabase(machine="west", workflow=[]).rsync()
+    ScenarioDatabase(machine="aug", workflow=[]).rsync()
     # ScenarioDatabase(user='tribolp').sync_shot('135011/21')
     # ScenarioDatabase(user='dubrovm').sync_shot('105028/1')
     # ScenarioDatabase(user='dubrovm').sync_shot('105027/1')

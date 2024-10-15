@@ -10,21 +10,11 @@ import xarray
 from nova.biot.data import Data
 from nova.frame.framesetloc import ArrayLocIndexer
 
-
-'''
-@numba.njit(fastmath=True, parallel=True)
-def matmul(A, B):
-    """Perform fast matmul operation."""
-    row_number = len(A)
-    vector = np.empty(row_number, dtype=numba.float64)
-    for i in numba.prange(row_number):  # pylint: disable=not-an-iterable
-        vector[i] = np.dot(A[i], B)
-    return vector
-'''
+# from nova.jax.operate import Operator, Operators
 
 
 @dataclass
-class BiotOp:
+class Operator:
     """Fast array opperations for Biot Data arrays."""
 
     aloc: ArrayLocIndexer
@@ -36,15 +26,15 @@ class BiotOp:
     def __post_init__(self, dataset):
         """Extract matrix, plasma_matrices, and plasma indicies from dataset."""
         attr = list(dataset.data_vars)[0]
-        self.matrix = dataset[attr].data
+        self.source_target = dataset[attr].data
         self.source_plasma_index = dataset.attrs["source_plasma_index"]
         self.target_plasma_index = dataset.attrs["target_plasma_index"]
         if source_plasma := self.source_plasma_index != -1:
-            self.matrix_ = dataset[f"{attr}_"].data
+            self.plasma_target = dataset[f"{attr}_"].data
         if target_plasma := self.target_plasma_index != -1:
-            self._matrix = dataset[f"_{attr}"].data
+            self.source_plasma = dataset[f"_{attr}"].data
         if source_plasma and target_plasma:
-            self._matrix_ = dataset[f"_{attr}_"].data
+            self.plasma_plasma = dataset[f"_{attr}_"].data
 
         """
         #  perform svd order reduction
@@ -58,7 +48,7 @@ class BiotOp:
 
     def evaluate(self):
         """Return interaction."""
-        result = self.matrix @ self.saloc["Ic"]
+        result = self.source_target @ self.saloc["Ic"]
         if self.classname == "Force":
             return self.saloc["Ic"][self.index] * result
         return result
@@ -79,12 +69,16 @@ class BiotOp:
         """
         plasma_nturn = self.plasma_nturn
         if update_source := self.source_plasma_index != -1:
-            self.matrix[:, self.source_plasma_index] = self.matrix_ @ plasma_nturn
+            self.source_target[:, self.source_plasma_index] = (
+                self.plasma_target @ plasma_nturn
+            )
         if update_target := self.target_plasma_index != -1:
-            self.matrix[self.target_plasma_index, :] = plasma_nturn @ self._matrix
+            self.source_target[self.target_plasma_index, :] = (
+                plasma_nturn @ self.source_plasma
+            )
         if update_source and update_target:
-            self.matrix[self.target_plasma_index, self.source_plasma_index] = (
-                plasma_nturn @ self._matrix_ @ plasma_nturn
+            self.source_target[self.target_plasma_index, self.source_plasma_index] = (
+                plasma_nturn @ self.plasma_plasma @ plasma_nturn
             )
 
 
@@ -95,7 +89,7 @@ class Operate(Data):
     version: dict[str, int | None] = field(init=False, repr=False, default_factory=dict)
     svd_rank: int = field(init=False, default=0)
     index: np.ndarray = field(init=False, repr=False)
-    operator: dict[str, BiotOp] = field(init=False, default_factory=dict, repr=False)
+    operator: dict[str, Operator] = field(init=False, default_factory=dict, repr=False)
     array: dict = field(init=False, repr=False, default_factory=dict)
     _attrs: list[str] = field(init=False, repr=False, default_factory=list)
 
@@ -133,10 +127,10 @@ class Operate(Data):
     @contextmanager
     def solve_biot(self, number: int | float | None):
         """Manage biot solution - update number and execute post_solve."""
-        if number is not None:
+        if number is not None and number != 0:
             self.number = number
         yield self.number
-        if self.number is not None:
+        if self.number is not None and number != 0:
             self.post_solve()
 
     def post_solve(self):
@@ -160,16 +154,19 @@ class Operate(Data):
         if isinstance(self.attrs, str):
             self.attrs = [self.attrs]
         self.index = self.data.get("index", xarray.DataArray([])).data
+        print(self.data)
         self.classname = self.data.classname
         self.number = self.data.sizes["target"]
+        # operators = Operators(self.data)
         for attr in np.array(self.attrs):
+            # self.operator[attr] = operators[attr]
             attrs = [
                 _attr
                 for _attr in [attr, f"_{attr}", f"{attr}_", f"_{attr}_"]
                 if _attr in self.data
             ]
             dataset = self.data[attrs]
-            self.operator[attr] = BiotOp(
+            self.operator[attr] = Operator(
                 self.aloc, self.saloc, self.classname, self.index, dataset
             )
         self.load_derived()
@@ -195,7 +192,7 @@ class Operate(Data):
         for attr in self.version:
             if attr.capitalize() in self.attrs or attr in self._attrs:
                 if attr.istitle():
-                    self.array[attr] = self.operator[attr].matrix
+                    self.array[attr] = self.operator[attr].source_target
                     continue
                 match attr:
                     case "bp" if self.classname == "Field":
@@ -224,6 +221,9 @@ class Operate(Data):
         """Update plasma turns."""
         if self.source_plasma_index != -1 or self.target_plasma_index != -1:
             self.operator[Attr].update_turns(svd)
+            # self.array[Attr] = self.operator[Attr].update_plasma_turns(
+            #    self.aloc["plasma", "nturn"]
+            # )
         self.version[Attr] = self.data.attrs[Attr] = self.subframe.version["nturn"]
 
     def calculate_norm(self):
@@ -271,7 +271,7 @@ class Operate(Data):
         return self.array[attr]
 
     def __getattr__(self, attr):
-        """Return variable data - lazy evaluation - cached."""
+        """Return variable data."""
         attr = attr.replace("_field_", "")
         if attr.islower() and attr[-1] == "_":  # return shaped array
             domain = self.domain(attr[:-1])
@@ -293,10 +293,12 @@ class Operate(Data):
             return self.get_derived(attr)
         Attr = attr.capitalize()
         self.check_plasma(Attr)
+        # self.operator[Attr].update_plasma_turns(self.aloc["plasma", "nturn"])
         if attr == Attr:
-            return self.array[Attr]
+            return self.operator[Attr].source_target
         self.check_source(attr)
         return self.array[attr]
+        # return self.operator[Attr].evaluate(self.saloc["Ic"])
 
     @property
     def vector_potential(self):
@@ -327,7 +329,7 @@ class Operate(Data):
         """Check source current, re-evaluate if requried."""
         if self.version[attr] != (version := self.aloc_hash["Ic"]):
             self.version[attr] = version
-            self.array[attr][:] = self.operator[attr.capitalize()].evaluate()
+            self.array[attr] = self.operator[attr.capitalize()].evaluate()
 
     def check(self, attr: str):
         """Check plasma and source attributes."""
@@ -340,5 +342,5 @@ class Operate(Data):
 
     def __setitem__(self, attr: str, value: np.ndarray):
         """Update array attribute in-place."""
-        self.array[attr][:] = value.copy()
+        self.array[attr] = value.copy()
         # self.version[attr] = None

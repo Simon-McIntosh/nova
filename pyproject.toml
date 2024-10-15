@@ -44,6 +44,8 @@ dependencies = [
   "tqdm>=4.66.1",
   "xarray>=2023.5.0",
   "xxhash>=3.2.0",
+  "optax (>=0.2.3,<0.3.0)",
+  "optimistix (>=0.0.7,<0.0.8)",
 ]
 
 [project.optional-dependencies]
@@ -74,12 +76,13 @@ imas = [
   "h5py>=3.10.0",
 ]
 jit = [
-  "jax[cpu]>=0.4.23",
+  "jax[cuda12_local]>=0.4.31",
   "numba>=0.59.0",
   "tbb>=2021.11.0",
   "tbb-devel>=2021.11.0",
 ]
 optimize = ["jaxopt>=0.8.3", "pylops>=2.1.0", "scikit-learn>=1.2.2"]
+sst = ["f90nml>=1.4.4"]
 structural = ["matplotlib>=3.7.1", "pyquaternion>=0.9.9"]
 test = ["pytest", "pytest-cov>=4.1.0", "pytest-asyncio>=0.21.1"]
 thermofluids = [
@@ -103,8 +106,10 @@ requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning>=1.0.0,<2.0.0"]
 build-backend = "poetry_dynamic_versioning.backend"
 
 [tool.poetry]
-name = "nova-stella" # TODO remove once poetry_dynamic_versioning is fixed
+#name = "nova-stella" # TODO remove once poetry_dynamic_versioning is fixed
 version = "0.0.0"
+#authors = ["Simon McIntosh <simon.mcintosh@iter.org>"]
+#description = "Equilibrium generation and inference"
 packages = [{ include = "nova" }]
 exclude = [
   "nova/ansys",
@@ -132,13 +137,14 @@ pandas-stubs = ">=2.0.1.230501"
 pandoc = ">=2.3"
 pyperf = ">=2.6.0"
 pytest-xdist = ">=3.3.1"
-pyqt5-qt5 = "<=5.15.10"
-pyqtwebengine-qt5 = "<=5.15.10"
+# pyqt5-qt5 = "<=5.15.10"
+# pyqtwebengine-qt5 = "<=5.15.10"
 snakeviz = ">=2.2.0"
-spyder = ">=5.4.3"
-spyder-unittest = ">=0.5.1"
-spyder-line-profiler = ">=0.3.1"
-spyder-memory-profiler = ">=0.2.1"
+# spyder = ">=5.4.3"
+# spyder-unittest = ">=0.5.1"
+# spyder-line-profiler = ">=0.3.1"
+# spyder-memory-profiler = ">=0.2.1"
+spyder_kernels = ">=3.0.0,<3.1.0"
 tuna = ">=0.5.11"
 virtualenv = ">=20.23.0"
 jupyterlab = ">=4.0.0"
@@ -169,6 +175,9 @@ setuptools = "^69.2.0"
 setuptools-cpp = "^0.1.0"
 auditwheel = "^6.0.0"
 pretty = "^0.1"
+tensorboard-plugin-profile = "^2.17.0"
+tensorflow-cpu = "^2.17.0"
+timer = "^0.3.0"
 
 [[tool.poetry.source]]
 name = "PyPI"
@@ -179,10 +188,10 @@ name = "iter"
 url = "https://pypi.iter.org/simple/"
 priority = "explicit"
 
-[[tool.poetry.source]]
-name = "jax"
-url = "https://storage.googleapis.com/jax-releases/jax_cuda_releases.html"
-priority = "explicit"
+#[[tool.poetry.source]]
+#name = "jax"
+#url = "https://storage.googleapis.com/jax-releases/jax_cuda_releases.html"
+#priority = "explicit"
 
 [tool.black]
 line-length = 88

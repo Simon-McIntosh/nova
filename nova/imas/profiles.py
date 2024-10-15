@@ -1,10 +1,15 @@
 """Extract time slices from equilibrium IDS."""
 
 from dataclasses import dataclass
+from functools import cached_property
 from typing import Callable, ClassVar
 
+import jax.numpy as jnp
 import numpy as np
-from scipy.interpolate import interp1d, RBFInterpolator, RectBivariateSpline
+
+# from scipy.interpolate import griddata, interp1d, RBFInterpolator, RectBivariateSpline
+import scipy.interpolate
+import scipy.spatial
 
 from nova.biot.plasma import Flux
 from nova.imas.database import CoilData
@@ -14,6 +19,7 @@ from nova.imas.equilibrium import Equilibrium, EquilibriumData
 from nova.imas.getslice import GetSlice
 from nova.imas.pf_passive import PF_Passive
 from nova.imas.pf_active import PF_Active
+from nova.jax.basis import Interp
 
 
 @dataclass
@@ -53,7 +59,8 @@ class Profile(Flux, Equilibrium, GetSlice, CoilData):
     def fluxfunctions(self, attr) -> Callable:
         """Retrun flux function interpolant for attr."""
         if attr in ["p_prime", "ff_prime"]:
-            return self._interp1d(self.data.psi_norm, self[attr])
+            # return self._interp1d(self.data.psi_norm, self[attr])
+            return Interp(jnp.array(self.data.psi_norm)) / jnp.array(self[attr])
         return super().fluxfunctions(attr)
 
     @property
@@ -84,18 +91,31 @@ class Profile(Flux, Equilibrium, GetSlice, CoilData):
         """Return cached 2D RectBivariateSpline j_tor2d interpolant."""
         return self._rbs("j_tor2d")
 
+    @cached_property
+    def delaunay(self):
+        """Return Delaunay triangulation of unstructured equilibrium grid."""
+        return scipy.spatial.Delaunay(np.c_[self.data.r2d, self.data.z2d])
+
     def _rbs(self, attr):
         """Return 2D RectBivariateSpline interpolant."""
         try:
-            return RectBivariateSpline(self["r"], self["z"], self[attr]).ev
+            return scipy.interpolate.RectBivariateSpline(
+                self["r"], self["z"], self[attr]
+            ).ev
         except KeyError:
-            return lambda radius, height: RBFInterpolator(
-                np.c_[self.data.r2d, self.data.z2d], self[attr]
-            )(np.c_[radius, height])
+            return scipy.interpolate.LinearNDInterpolator(self.delaunay, self[attr])
+            # return lambda radius, height: griddata(
+            #    np.c_[self.data.r2d, self.data.z2d], self[attr], np.c_[radius, height]
+            # )
+            # return lambda radius, height: RBFInterpolator(
+            #    np.c_[self.data.r2d, self.data.z2d], self[attr]
+            # )(np.c_[radius, height])
 
     def _interp1d(self, x, y):
         """Return 1D interpolant."""
-        return interp1d(x, y, kind="quadratic", fill_value="extrapolate")
+        return scipy.interpolate.interp1d(
+            x, y, kind="quadratic", fill_value="extrapolate"
+        )
 
     def plot_profile(self, attr="p_prime", axes=None):
         """Plot flux function interpolants."""

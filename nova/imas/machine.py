@@ -15,7 +15,7 @@ import xarray
 
 from nova.graphics.plot import Plot
 from nova.frame.coilset import CoilSet
-from nova.imas.database import CoilData, Database
+from nova.imas.database import CoilData, Database, IdsData
 from nova.imas.dataset import IdsBase, Ids, ImasIds, EMPTY_FLOAT
 from nova.imas.ids_index import IdsIndex
 from nova.geometry.polygon import Polygon
@@ -448,18 +448,27 @@ class FrameData(ABC):
         label = self.coil_name
         if isinstance(label, list):
             label = label[0]
-        if "VES" in label or "VV" in label:
+        if "VES" in label or "VV" in label or "Vacuum" in label:
             return "vv"
+        if "passive" in label:
+            return "passive"
         if "TRI" in label or "Tri" in label:
             return "trs"
         if label == "INB_RAIL" or "Div" in label:
             return "dir"
+        if "TR" in label:
+            return "oh"
+        if "VF" in label:
+            return "vf"
         if "CS" in label or "PF" in label:
             return label[:2].lower()
         if "SS" in label:
             return "vs3j"
         if "VS" in label:
             return "vs3"
+        if "cryo" in label.lower():
+            return "cryo"
+
         return "pf"
 
     @staticmethod
@@ -565,7 +574,7 @@ class PassiveShellData(Plot, FrameData):
             self.update_resistivity(
                 index, shell.frame, shell.subframe, self.data["resistance"][i]
             )
-            self.update_passive_turns(index, *shell.frames)
+            # self.update_passive_turns(index, *shell.frames)
         self.reset()
 
     def plot(self, axes=None):
@@ -593,7 +602,7 @@ class PassiveCoilData(IdsCoilData):
             "section": self.data["section"],
         } | kwargs
         index = super().insert(constructor, **kwargs)
-        self.update_passive_turns(index, *constructor.frames)
+        # self.update_passive_turns(index, *constructor.frames)
         return index
 
 
@@ -946,6 +955,52 @@ class Wall(CoilDatabase):
 
 
 @dataclass
+class Magnetics(IdsData):
+    """Manage magnetics diagnostic ids, magnetics."""
+
+    pulse: int = 0
+    run: int = 0
+    occurrence: int = 0
+    name: str = "magnetics"
+    machine: str = "iter_md"
+    ids_node: str = ""
+
+    flux_loop_type: ClassVar[dict] = {"poloidal_flux_loop": 1}
+
+    @cached_property
+    def ids_index(self):
+        """Return cached ids_index instance."""
+        return IdsIndex(self.ids, self.ids_node)
+
+    def extract(self):
+        """Retun magnetics diagnostic geometry."""
+        # extract data from IDS
+        with self.ids_index.node("flux_loop"):
+            name = self.ids_index.array("name")
+            radius = self.ids_index.array("position.r")
+            height = self.ids_index.array("position.z")
+            type_index = self.ids_index.array("type.index")
+        # build dataset
+        diagnostic_data = {}
+        for diagnostic_name, diagnostic_type in self.flux_loop_type.items():
+            index = diagnostic_type == type_index
+            if sum(index) == 0:
+                continue
+            diagnostic_data[diagnostic_name] = {
+                "x": radius[index],
+                "z": height[index],
+                "name": name[index],
+                "segment": "circle",
+            }
+        return diagnostic_data
+
+    def insert(self, coilset: CoilSet):
+        """Insert diagnostics into coilset."""
+        for diagnostic, data in self.extract().items():
+            getattr(coilset, diagnostic).insert(**data)
+
+
+@dataclass
 class ELM(CoilDatabase):
     """Construct axisymetric ELM coils.
 
@@ -1130,7 +1185,23 @@ class Geometry(IdsBase):
 
 
 @dataclass
-class Machine(CoilSet, Geometry, CoilData):
+class Diagnostics(IdsBase):
+    """Manage diagnostic mesurments."""
+
+    magnetics: Ids | bool | str = False
+    diagnostic: ClassVar[dict] = {"magnetics": Magnetics}
+
+    def __post_init__(self):
+        """Map geometry parameters to dict attributes."""
+        for attr, diagnostic in self.diagnostic.items():
+            ids_attrs = self.get_ids_attrs(getattr(self, attr), diagnostic)
+            setattr(self, attr, ids_attrs)
+        if hasattr(super(), "__post_init__"):
+            super().__post_init__()
+
+
+@dataclass
+class Machine(CoilSet, Diagnostics, Geometry, CoilData):
     """Manage ITER machine geometry."""
 
     @property
@@ -1196,6 +1267,7 @@ class Machine(CoilSet, Geometry, CoilData):
         if self.sloc["plasma"].sum() > 0:
             boundary = self.geometry["wall"](**self.wall).boundary
             self.plasma.solve(boundary=boundary)
+        self.poloidal_flux_loop.solve()
         self.inductance.solve()
         self.grid.solve()
         self.field.solve()
@@ -1210,10 +1282,15 @@ class Machine(CoilSet, Geometry, CoilData):
             if isinstance(geometry_attrs, dict):
                 coilset = geometry(**geometry_attrs, **self.frameset_attrs)
                 self += coilset
+        for attr, diagnostic in self.diagnostic.items():
+            diagnostic_attrs = getattr(self, attr)
+            if isinstance(diagnostic_attrs, dict):
+                diagnostic(**diagnostic_attrs).insert(self)
 
         if hasattr(super(), "build"):
             super().build()
         self.solve_biot()
+        self.store()
 
     def load(self):
         """Load machine geometry and data."""
@@ -1224,7 +1301,6 @@ class Machine(CoilSet, Geometry, CoilData):
     def store(self):
         """Store frameset, biot attributes and metadata."""
         self.data.attrs |= self.metadata
-
         super().store()
         return self
 
@@ -1236,7 +1312,7 @@ if __name__ == "__main__":
     doctest.testmod(verbose=False)
 
     kwargs = {"pulse": 105028, "run": 1, "machine": "iter_md"}  # DINA
-    kwargs = {"pulse": 105028, "run": 1, "machine": "iter"}  # DINA
+    # kwargs = {"pulse": 105028, "run": 1, "machine": "iter"}  # DINA
     # kwargs = {"pulse": 45272, "run": 1, "machine": "mast_u"}  # MastU
     # kwargs = {"pulse": 57410, "run": 0, "machine": "west"}  # WEST
     kwargs = {"pulse": 17151, "run": 4, "machine": "aug"}
@@ -1246,8 +1322,9 @@ if __name__ == "__main__":
         pf_passive=False,
         wall=True,
         tplasma="h",
-        ninductance=None,
-        **kwargs,
+        ninductance=10,
+        dshell=1.5,
+        ngrid=2e3,
     )
 
     machine.plot()

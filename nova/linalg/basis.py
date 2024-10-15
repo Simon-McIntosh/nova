@@ -157,9 +157,9 @@ class Svd(Basis, SvdAttrs):
 
 
 if __name__ == "__main__":
-    bernstein = Bernstein(50, 21)
+    bernstein = Bernstein(131, 21)
     print(bernstein.shape)
-    # bernstein.plot()
+    bernstein.plot()
 
     """
 

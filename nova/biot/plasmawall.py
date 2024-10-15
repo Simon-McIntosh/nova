@@ -20,6 +20,15 @@ class PlasmaWall(Limiter, Point):
         super().__post_init__()
         self.version["limitflux"] = None
 
+    '''
+    @cached_property
+    def length(self):
+        """Return loop length."""
+        points = np.c_[self.data.x, self.data.z]
+        segment_length = np.linalg.norm(points[1:] - points[:-1], axis=1)
+        return np.append(0, np.cumsum(segment_length))
+    '''
+
     def __getattribute__(self, attr):
         """Extend getattribute to intercept field null data access."""
         match attr:
@@ -31,6 +40,14 @@ class PlasmaWall(Limiter, Point):
         """Check validity of upstream data -> update limiter flux."""
         self.check("psi")
         if self.version["limitflux"] != self.version["psi"]:
+            """
+            index = ~np.isnan(self.psi)
+            self.psi = np.where(
+                index,
+                self.psi,
+                np.interp(self.length, self.length[index], self.psi[index]),
+            )
+            """
             self.update_wall(self.psi, self.polarity)
             self.version["limitflux"] = self.version["psi"]
 
@@ -58,7 +75,7 @@ class PlasmaWall(Limiter, Point):
                 sample = Sample(boundary, delta=-number)
                 super().solve(np.c_[sample["radius"], sample["height"]])
 
-    def plot(self, axes=None, limitflux=False, **kwargs):
+    def plot(self, axes=None, nulls=False, **kwargs):
         """Plot wall pannels."""
         if len(self.data) == 0:
             return
@@ -67,5 +84,5 @@ class PlasmaWall(Limiter, Point):
             dict(marker=None, linestyle="-", ms=4, color="gray", linewidth=1.5) | kwargs
         )
         self.axes.plot(self.data.x, self.data.z, **kwargs)
-        if limitflux:
+        if nulls:
             super().plot(axes=axes)

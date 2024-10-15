@@ -466,16 +466,27 @@ class Datastore(IdsBase):  # noqa: D207
             super().__post_init__()
         self._update_uri()
 
+    def _append_uri_fragment(self, fragment: str):
+        """Append fragment to uri."""
+        index = self.uri.find("#")
+        if index == -1:
+            index = None
+        if index:
+            fragment = self.uri[index + 1 :] + f":{fragment}"
+        return self.uri[slice(0, index)] + f"#{fragment}"
+
     def _update_uri(self):
         """Validate URI."""
         match self.uri:
             case "":
                 self.uri = super().uri
-            case str():
+            case str(uri):
                 if not self.has_default_attrs:
                     raise AttributeError(
                         f"Set ether IdsBase {self.ids_attrs} or " f"uri {self.uri}"
                     )
+                if "idsname" not in uri and self.name is not None:
+                    self.uri = self._append_uri_fragment(f"idsname={self.name}")
             case _:
                 raise TypeError(f"type(uri) {type(self.uri)} is not str")
 
@@ -711,7 +722,9 @@ mode='r', lazy=True, ids=None)
         """Return imas.DBEntry instance."""
         if not self.uri:
             raise ValueError("No URI provided.")
-        return imas.DBEntry(uri=self.uri, mode=self.mode)
+        return imas.DBEntry(
+            uri=self.uri, mode=self.mode, dd_version=str(self.dd_version)
+        )
 
     @property
     def is_valid(self):
@@ -738,7 +751,11 @@ mode='r', lazy=True, ids=None)
             try:
                 self._ids = self.get()
                 self.name = self._ids.metadata.name
-            except (imas.exception.ALException, imas.exception.UnknownDDVersion):
+            except (
+                imas.exception.ALException,
+                imas.exception.UnknownDDVersion,
+                imas.exception.DataEntryException,
+            ):
                 self._ids = None
                 pass
 

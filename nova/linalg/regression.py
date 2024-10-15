@@ -136,7 +136,7 @@ class OdinaryLeastSquares(RegressionBase):
 
     @staticmethod
     def _lstsq(matrix, data):
-        """Calcuate inverse vir numpy's lstsq method."""
+        """Calcuate inverse via numpy's lstsq method."""
         return np.linalg.lstsq(matrix, data, rcond=None)[0]
 
     def _inverse(self):
@@ -207,6 +207,7 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
+
     """
 
     #berstein.plot()

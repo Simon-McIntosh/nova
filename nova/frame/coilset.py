@@ -93,7 +93,7 @@ if __name__ == "__main__":
 
     coilset.plot()
 
-    coilset.grid.plot(levels=51, nulls=False)
+    coilset.grid.plot(levels=51)  # , nulls=False
     coilset.plasma.plot(levels=coilset.grid.levels)
     coilset.plasmagrid.plot(levels=coilset.grid.levels, colors="C6")
 

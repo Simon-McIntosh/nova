@@ -46,5 +46,5 @@ class Point(Plot, Operate):
     def plot(self, axes=None, **kwargs):
         """Plot points."""
         self.axes = axes
-        kwargs = dict(marker="o", linestyle="", color="C1") | kwargs
+        kwargs = dict(marker="x", linestyle="", color="black") | kwargs
         self.axes.plot(self.data.coords["x"], self.data.coords["z"], **kwargs)

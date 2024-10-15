@@ -145,6 +145,7 @@ class MetaFrame(MetaSet):
             "passive": False,
             "free": False,
             "coil": True,
+            "loop": False,
             "ionize": False,
             "acloss": False,
             "ferritic": False,

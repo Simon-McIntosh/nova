@@ -60,6 +60,7 @@ class Select(metamethod.Select):
             "fix",
             "free",
             "ferritic",
+            "loop",
         ],
     )
     avalible: list[str] = field(init=False, default_factory=list)
@@ -73,12 +74,13 @@ class Select(metamethod.Select):
         if not self.generate:
             return
         self.add_label("active", "active")
-        self.add_label("passive", None, "active")
+        self.add_label("passive", None, ["active", "loop"])
         self.add_label("plasma", "plasma")
-        self.add_label("coil", None, ["ferritic", "passive", "plasma"])
+        self.add_label("coil", None, ["ferritic", "passive", "plasma", "loop"])
         self.add_label("fix", "fix")
         self.add_label("free", None, "fix")
         self.add_label("ferritic", "ferritic")
+        self.add_label("loop", "loop")
         self.update_metaframe()
         self.update_columns()
         super().__post_init__()

@@ -4,7 +4,6 @@ from dataclasses import dataclass, field
 from functools import cached_property
 from importlib import import_module
 
-import jax.numpy as jnp
 import numpy as np
 from shapely.geometry.linestring import LineString
 
@@ -162,9 +161,11 @@ class PlasmaGrid(BaseGrid, PlasmaLoc):
 
     def ionize_mask(self, index):
         """Return plasma filament selection mask."""
+        print(index, type(index))
+
         match index:
-            # case int(psi) | float(psi):
-            case psi if isinstance(psi, (int, float, jnp.ndarray)):
+            case int(psi) | float(psi):
+                # case psi if isinstance(psi, (int, float, np.ndarray)):
                 z_plasma = self.aloc["plasma", "z"]
                 mask = self.psi_mask(psi)
                 try:

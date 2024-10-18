@@ -82,7 +82,7 @@ class Zeta:
         phi = jnp.pi - 2 * alpha
         return jnp.arcsinh((self.rs - self.r * jnp.cos(phi)) / jnp.sqrt(self.G2(phi)))
 
-    # @jax.jit
+    @jax.jit
     def __call__(self):
         """Return zeta intergral."""
         alpha = jnp.linspace(1e-8, self.alpha, self.number)

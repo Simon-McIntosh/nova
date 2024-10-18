@@ -38,19 +38,31 @@ def test_has_value():
         dataset.db_entry.put(ids)
         pf_active = dataset.get()
         assert pf_active.ids_properties.homogeneous_time == 0
+        dataset.db_entry.close()  # win32
 
 
 def test_is_valid():
     dataset = Dataset(-1, -2, "pf_active")
     assert not dataset.is_valid
     with tempfile.TemporaryDirectory() as name:
+        # put ids
         db_entry = imas.DBEntry(uri=f"imas:hdf5?path={name}", mode="a")
         ids = imas.IDSFactory().new("pf_active")
         ids.ids_properties.homogeneous_time = 1
         db_entry.put(ids)
-        db_entry.close()
-        dataset = Dataset(uri=f"imas:hdf5?path={name}", name="pf_active")
+        db_entry.close()  # win32
+
+        # get ids
+        db_entry = imas.DBEntry(uri=f"imas:hdf5?path={name}", mode="r")
+        ids = db_entry.get("pf_active")
+        assert ids.ids_properties.homogeneous_time == 1
+        db_entry.close()  # win32
+
+        # check ids
+        dataset = Dataset(uri=f"imas:hdf5?path={name}", mode="r")
+        dataset.get("pf_active")
         assert dataset.is_valid
+        dataset.close()  # win32
 
 
 @mark["equilibrium"]

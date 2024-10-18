@@ -7,9 +7,7 @@ repos:
     rev: 352edf0bcd4adb0a1dcb2f62701b221917aca656
     hooks:
       - id: poetry-export
-        args: ["--extras", "ferritic",
-               "--extras", "graphics",
-               "--extras", "imas",
+        args: ["--extras", "imas",
                "--extras", "jit",
                "--extras", "optimize",
                "--extras", "test",

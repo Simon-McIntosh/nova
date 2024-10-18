@@ -3,7 +3,10 @@ import pytest
 
 import getpass
 
-from nova.imas.dataset import Datastore, IdsBase
+from nova.utilities.importmanager import skip_import
+
+with skip_import("imas"):
+    from nova.imas.dataset import Datastore, IdsBase
 
 
 def test_data_entry():

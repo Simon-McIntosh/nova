@@ -35,7 +35,7 @@ class Properties:
         "vs3": "C2",
         "vf": "C2",
         "vs3j": "C3",
-        "cs": "C7",
+        "cs": "C0",
         "oh": "C0",
         "pf": "C0",
         "trs": "C3",

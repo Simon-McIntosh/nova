@@ -7,6 +7,7 @@ import jax.numpy as jnp
 import xarray
 
 from nova.biot.array import Array
+from nova.geometry import select
 from nova.graphics.plot import Plot
 from nova.jax.null import Null1D
 from nova.jax.target import Target
@@ -46,7 +47,8 @@ class Limiter(Plot, Array):
 
     def update_wall(self, psi, polarity):
         """Update calculation of field nulls."""
-        x_coord, z_coord, psi, _ = self.null(psi, polarity)
+        # x_coord, z_coord, psi, _ = self.null(psi, polarity)
+        x_coord, z_coord, psi = select.wall_flux(self["x"], self["z"], psi, polarity)
         self.data_w = dict(psi=psi, point=(x_coord, z_coord))
 
     def plot(self, axes=None):

@@ -4,7 +4,6 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from functools import cached_property
-from importlib import import_module
 import itertools
 import string
 from typing import ClassVar, TYPE_CHECKING
@@ -853,40 +852,6 @@ class Contour(Plot):
             self.select()
         self.loop = np.append(self.loop, self.loop[:1], axis=0)
 
-        if not import_module("shapely.geometry").LinearRing(self.loop).is_valid:
-            ro, zo = 1.6, 0
-            self.set_axes("2d")
-
-            points = []
-            import alphashape
-            import shapely
-
-            for contour in self.data.values():
-
-                line = shapely.LineString(
-                    np.c_[contour[:, 0] - ro, contour[:, 1] - zo]
-                ).segmentize(0.01)
-
-                theta = np.arctan2(line.xy[1], line.xy[0])
-                inverse_radius = 1 / np.linalg.norm(np.c_[*line.xy], axis=1)
-                x = inverse_radius * np.cos(theta)
-                z = inverse_radius * np.sin(theta)
-
-                # x, z = line.xy[0], line.xy[1]
-
-                points.append(np.c_[x, z])
-
-                self.axes.plot(x, z, "-")
-
-            points = np.concatenate(points, axis=0)
-
-            poly = alphashape.alphashape(points, 3)
-
-            self.axes.plot(*poly.boundary.xy)
-            print(poly)
-            print(points.shape)
-            assert False
-
     def plot(self, axes=None, color="k", **kwargs):
         """Plot closed contour."""
         self.get_axes("2d", axes=axes)
@@ -941,6 +906,7 @@ class Wall(CoilDatabase):
 
     def build(self):
         """Build plasma bound by firstwall contour."""
+        print(self.ids_attrs)
         self.firstwall.insert(self.boundary)
 
     def insert(self, data: xarray.Dataset):
@@ -1201,7 +1167,7 @@ class Diagnostics(IdsBase):
 
 
 @dataclass
-class Machine(CoilSet, Diagnostics, Geometry, CoilData):
+class Machine(CoilSet, Geometry, CoilData):  # Diagnostics,
     """Manage ITER machine geometry."""
 
     @property
@@ -1267,9 +1233,9 @@ class Machine(CoilSet, Diagnostics, Geometry, CoilData):
         if self.sloc["plasma"].sum() > 0:
             boundary = self.geometry["wall"](**self.wall).boundary
             self.plasma.solve(boundary=boundary)
-        self.poloidal_flux_loop.solve()
+        # self.poloidal_flux_loop.solve()
         self.inductance.solve()
-        self.grid.solve()
+        self.grid.solve(limit=self.limit)
         self.field.solve()
         self.force.solve()
 
@@ -1282,10 +1248,12 @@ class Machine(CoilSet, Diagnostics, Geometry, CoilData):
             if isinstance(geometry_attrs, dict):
                 coilset = geometry(**geometry_attrs, **self.frameset_attrs)
                 self += coilset
+        """
         for attr, diagnostic in self.diagnostic.items():
             diagnostic_attrs = getattr(self, attr)
             if isinstance(diagnostic_attrs, dict):
                 diagnostic(**diagnostic_attrs).insert(self)
+        """
 
         if hasattr(super(), "build"):
             super().build()
@@ -1315,11 +1283,12 @@ if __name__ == "__main__":
     # kwargs = {"pulse": 105028, "run": 1, "machine": "iter"}  # DINA
     # kwargs = {"pulse": 45272, "run": 1, "machine": "mast_u"}  # MastU
     # kwargs = {"pulse": 57410, "run": 0, "machine": "west"}  # WEST
-    kwargs = {"pulse": 17151, "run": 4, "machine": "aug"}
+    # kwargs = {"pulse": 17151, "run": 3, "machine": "aug", "pf_passive": False}
 
     machine = Machine(
+        **kwargs,
         pf_active=True,
-        pf_passive=False,
+        pf_passive=True,
         wall=True,
         tplasma="h",
         ninductance=10,

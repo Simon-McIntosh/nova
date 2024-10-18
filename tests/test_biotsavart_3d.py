@@ -94,9 +94,23 @@ def test_segment_field_attrs_non_axisymmetric(theta, angle_rng, plot=False):
 
 
 if __name__ == "__main__":
-    pytest.main([__file__])
+    # pytest.main([__file__])
+
+    test_segment_field_attrs_axisymmetric(("arc", "line"), 3.1)
+
+    """
+    import pprofile
+
+    profiler = pprofile.Profile()
+    with profiler:
+        test_segment_field_attrs_non_axisymmetric(0.1 * np.pi, 3)
+    # Process profile content: generate a cachegrind file and send it to user.
+
+    # You can also write the result to the console:
+    profiler.print_stats()
 
     # test_segment_field_attrs_axisymmetric(("circle", "line"), 3.1, False)
+    """
 
 """
 def vtk(coilset):

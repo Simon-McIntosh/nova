@@ -3,8 +3,10 @@
 import logging
 from timer import timer
 
+import argparse
 import jax
 import jax.numpy as jnp
+import numpy as np
 import optimistix as optx
 
 from nova.jax.plasma import Plasma
@@ -16,6 +18,9 @@ logging.basicConfig(level=logging.INFO, force=True)
 timer.set_level(logging.INFO)
 jax.config.update("jax_enable_x64", True)
 
+parser = argparse.ArgumentParser()
+parser.add_argument("--dirname", default=".nova", help="set cache dir")
+args = parser.parse_args()
 
 kwargs = {
     "pulse": 135013,
@@ -43,10 +48,13 @@ kwargs = {
 
 operate = Operate(
     **kwargs,
-    tplasma="r",
+    tplasma="h",
     nwall=-0.2,
-    ngrid=None,
+    ngrid=5e3,
+    limit=[3.0, 9.0, -6.0, 6.0],
     nlevelset=None,
+    ngap=21,
+    dirname=args.dirname,
 )
 
 
@@ -75,6 +83,27 @@ plasma = Plasma(
     operate.polarity,
 )
 
+# plot DINA solution
+levels = -operate.plot_2d(
+    colors="C0",
+    label=f"DINA ({kwargs['pulse']}|{kwargs['run']} time={operate.time:1.0f}s)",
+)[::-1]
+
+# solve Newton-Krylov
+with timer("plasma.solve_flux"):
+    operate.plasma.solve_flux(verbose=True, f_rtol=1e-1, f_tol=1e-1)
+
+print(f"Krylov solve {optx.two_norm(flux_residual(operate.plasma.psi))}")
+
+operate.grid.plot(
+    colors="k",
+    label="Jacobian-Free Newton-Krylov",
+    levels=levels,
+    nulls=False,
+)
+
+# Newton solve
+operate.time = 300
 solver = optx.Newton(rtol=1e-1, atol=1e-1)
 psi = jnp.array(operate.plasma.psi)
 
@@ -83,24 +112,25 @@ with timer("optx.root_find"):
 
 print(f"Newton L2 {optx.two_norm(flux_residual(sol.value))}")
 
-levels = -operate.plot_2d(label="DINA")[::-1]
-
-operate.plasmagrid["psi"] = sol.value[: plasma.grid.node_number]
-operate.plasma.plot(colors="C0", label="optx", levels=levels, nulls=True)
-operate.plasmagrid.plot(colors="C0", levels=[operate.plasma.psi_lcfs])
-
-with timer("plasma.solve_flux"):
-    operate.plasma.solve_flux(verbose=True)
-
-print(f"Krylov solve {optx.two_norm(flux_residual(operate.plasma.psi))}")
-
-
-operate.plasma.plot(
-    colors="C6", linestyles="--", label="NOVA", levels=levels, nulls=True
+# plot optx sol
+plasma_current = plasma.plasma_current(sol.value)
+operate.plasma.ionize = np.array(plasma_current, bool)
+operate.plasma.nturn = np.array(plasma_current)[plasma_current != 0]
+operate.plasma.nturn /= np.sum(operate.plasma.nturn)
+operate.grid.plot(
+    colors="C6",
+    linestyles="--",
+    label="Auto-diff Newton (jax, optimistix)",
+    levels=levels,
+    nulls=False,
 )
-operate.plasmagrid.plot(colors="C0", levels=[operate.plasma.psi_lcfs])
 
-plasma.topology.plot(operate.plasma.psi, operate.polarity)
+operate.grid.legend(loc="upper center", bbox_to_anchor=(0.5, 1.14))
+
+# operate.plasmagrid["psi"] = sol.value[: plasma.grid.node_number]
+# operate.plasma.plot()
+# operate.plasmagrid.plot(colors="C0", levels=[operate.plasma.psi_lcfs])
+
 
 # sol = scipy.optimize.root(plasma.residual, psi, jac=jac, tol=1e-3)
 # print(sol)

@@ -5,6 +5,8 @@ from contextlib import contextmanager
 from dataclasses import dataclass, field
 from functools import cached_property
 
+import numpy as np
+
 from nova.imas.database import IdsData
 from nova.imas.getslice import GetSlice
 from nova.imas.ids_index import IdsIndex
@@ -42,7 +44,7 @@ class Scenario(GetSlice, IdsData):
             with self.ids_index.node(self.time_node):
                 time = self.ids_index.array("time")
                 self.data.coords["time"] = time
-                self.data.coords["itime"] = range(len(time))
+                self.data.coords["itime"] = np.arange(len(time), dtype=int)
 
     @cached_property
     def homogeneous_time(self):

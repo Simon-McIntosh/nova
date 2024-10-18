@@ -1,6 +1,7 @@
 """Extend DataFrame - add subspace."""
 
 from functools import cached_property
+import os
 
 import numpy as np
 
@@ -65,7 +66,9 @@ class FrameSpace(SpaceIndexer, FrameLink):
 
     def __init__(self, data=None, index=None, columns=None, attrs=None, **metadata):
         super().__init__(data, index, columns, attrs, **metadata)
-        self.frame_attrs(PolyGeo, VtkGeo, PolyPlot, VtkPlot)
+        self.frame_attrs(PolyGeo, PolyPlot)
+        if os.environ.get("NOVA_VTK", 'True"') != "False":
+            self.frame_attrs(VtkGeo, VtkPlot)
         self.attrs["subspace"] = SubSpace(self)
         self.update_version()
 

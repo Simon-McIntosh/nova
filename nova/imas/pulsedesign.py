@@ -636,7 +636,6 @@ class PulseDesign(Animate, Plot1D, Control, ITER):
     def solve_waveform(self, verbose=False):
         """Solve current waveform."""
         current = np.zeros((self.data.sizes["time"], np.sum(self.saloc["free"])))
-
         for itime in tqdm(
             self.data.itime.data[:-1], "solving current waveform", disable=~verbose
         ):

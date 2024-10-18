@@ -321,17 +321,19 @@ def test_biotdata_numpy():
         coilset = CoilSet(dplasma=-3)
         coilset.firstwall.insert(3, -0.5, 0.95, 0.95)
         coilset.grid.solve(10, 0.05)
-        assert isinstance(coilset.grid.operator["Psi"].matrix, np.ndarray)
+        assert isinstance(coilset.grid.operator["Psi"].source_target, np.ndarray)
 
 
 def test_biot_link_dataarray_dataset():
     coilset = CoilSet(dplasma=-20)
     coilset.firstwall.insert(3, -0.5, 0.95, 0.95)
     coilset.grid.solve(10, 0.05)
-    Psi = coilset.grid.operator["Psi"].matrix.copy()
+    Psi = coilset.grid.operator["Psi"].source_target.copy()
     coilset.plasma.separatrix = ((2.5, -1), (3.5, -1), (3, 0))
     coilset.grid.update_turns("Psi")
-    assert (coilset.grid.operator["Psi"].matrix == coilset.grid.data["Psi"]).all()
+    assert (
+        coilset.grid.operator["Psi"].source_target == coilset.grid.data["Psi"]
+    ).all()
     assert (Psi != coilset.grid.data["Psi"]).any()
 
 

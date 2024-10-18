@@ -11,7 +11,7 @@ from nova.biot.biotframe import Target
 from nova.biot.operate import Operate
 from nova.biot.solve import Solve
 
-# from nova.biot.fieldnull import FieldNull
+from nova.biot.fieldnull import FieldNull
 
 from nova.graphics.plot import Plot
 from nova.frame.error import GridError
@@ -19,7 +19,7 @@ from nova.frame.framelink import FrameLink
 from nova.geometry.pointloop import PointLoop
 from nova.graphics.line import Chart
 
-from nova.jax.fieldnull import FieldNull
+# from nova.jax.fieldnull import FieldNull
 
 
 @dataclass
@@ -212,7 +212,7 @@ class BaseGrid(Chart, FieldNull, Operate):
         """Check validity of upstream data, update field null if nessisary."""
         self.check("psi")
         if self.version["fieldnull"] != self.version["psi"]:
-            self.update_null(self.psi)
+            self.update_null(self.psi_)
             self.version["fieldnull"] = self.version["psi"]
 
     def __getattribute__(self, attr):

@@ -90,7 +90,7 @@ class UdaInfo:
     def update_uri(self):
         """Update URI resolving wildcards."""
         with self._catch_uda_error():
-            self.uri = self.client.getLastPulse2(self._uri)
+            self.uri = self.client.getLastPulse2(self._uri, "")
 
     async def aupdate_uri(self):
         """Return async resolved URI."""
@@ -284,6 +284,7 @@ async def main():
 
 
 if __name__ == "__main__":
+
     import time
 
     start_time = time.perf_counter()

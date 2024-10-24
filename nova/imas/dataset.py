@@ -268,14 +268,16 @@ os.path.join(userhome, 'public', 'imasdb', 'iter', '3', '1', '2')
     @property
     def uri(self):
         """Return URI build from IdsBase parameters."""
+        print(self.ids_attrs)
         if self.has_base_attrs:
+            print("** has base")
             return ""
         self.check_ids_attrs()
         return (
             f"imas:{self.backend}?user={self.user};"
             f"pulse={self.pulse};run={self.run};"
             f"database={self.machine};version={self.dd_version.major};"
-            f"#idsname={self.name}:occurrence={self.occurrence}"
+            f"#{self.name}:{self.occurrence}"
         )
 
     @property
@@ -473,7 +475,7 @@ class Datastore(IdsBase):  # noqa: D207
             index = None
         if index:
             fragment = self.uri[index + 1 :] + f":{fragment}"
-        return self.uri[slice(0, index)] + f"#{fragment}"
+        return f"{self.uri[slice(0, index)]}#{fragment}"
 
     def _update_uri(self):
         """Validate URI."""
@@ -485,8 +487,10 @@ class Datastore(IdsBase):  # noqa: D207
                     raise AttributeError(
                         f"Set ether IdsBase {self.ids_attrs} or " f"uri {self.uri}"
                     )
-                if "idsname" not in uri and self.name is not None:
-                    self.uri = self._append_uri_fragment(f"idsname={self.name}")
+                if "#" not in uri and self.name is not None:
+                    self.uri += f"#{self.name}"
+                if ":" not in uri.split("#")[1] and self.occurrence >= 1:
+                    self.uri += f":{self.occurence}"
             case _:
                 raise TypeError(f"type(uri) {type(self.uri)} is not str")
 
@@ -597,7 +601,7 @@ mode='r', lazy=True, ids=None)
 
     Access to a lazy-loaded IDS is avaiable on instances created in a read mode='r'.
 
-    >>> dataset = Dataset(130506, 403, 'equilibrium')
+    >>> dataset = Dataset(130506, 403, 'equilibrium', lazy=True)
     >>> dataset.ids.code.name == 'CORSICA'
     True
 
@@ -700,14 +704,19 @@ mode='r', lazy=True, ids=None)
         lazy: Optional[bool] = None,
     ) -> IDSToplevel:
         """Return IDS from Dataset."""
-        if self._ids is not None:
-            return self._ids
         if name is not None:
             self.name = name
         if occurrence is not None:
             self.occurrence = occurrence
         if lazy is not None:
             self.lazy = lazy
+        if (
+            self._ids is not None
+            and name is self.name
+            and occurrence == self.ocurrence
+            and lazy == self.lazy
+        ):
+            return self._ids
         self.ids = self.db_entry.get(self.name, self.occurrence, lazy=self.lazy)
         return self.ids
 

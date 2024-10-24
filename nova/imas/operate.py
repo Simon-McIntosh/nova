@@ -169,7 +169,6 @@ if __name__ == "__main__":
         operate.itime = i
         psi_boundary[i] = operate.plasmagrid.x_psi[0]
         psi_axis[i] = operate.plasmagrid.o_psi[0]
-        print(i)
     operate.grid.axes.plot(operate.data.time, psi_boundary, "C1", label="NOVA")
     operate.grid.axes.plot(operate.data.time, psi_axis, "C1--")
     operate.grid.axes.set_xlabel("time, s")

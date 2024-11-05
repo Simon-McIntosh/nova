@@ -467,7 +467,8 @@ class FrameData(ABC):
             return "vs3"
         if "cryo" in label.lower():
             return "cryo"
-
+        if "FPPC" in label:
+            return "ivc"
         return "pf"
 
     @staticmethod
@@ -793,9 +794,9 @@ class ContourData(Plot):
     def append(self, unit):
         """Append contour data."""
         if (name := unit.name.value) == "":
-            name = f"limiter_{next(self.count)}"
-        self.data[name] = np.c_[unit.outline.r, unit.outline.z]
-        if unit.closed == 1 and not np.allclose(
+            name = f"vessel_{next(self.count)}"
+        self.data[name] = np.c_[unit.annular.centreline.r, unit.annular.centreline.z]
+        if unit.annular.centreline.closed == 1 and not np.allclose(
             self.data[name][0], self.data[name][-1]
         ):
             self.data[name] = np.append(self.data[name], self.data[name][:1], axis=0)
@@ -868,15 +869,16 @@ class Wall(CoilDatabase):
     occurrence: int = 0
 
     @cached_property
-    def limiter(self):
-        """Return limiter."""
-        return getattr(self.ids, "description_2d")[0].limiter
+    def vessel(self):
+        """Return vessel."""
+        # return getattr(self.ids, "description_2d")[0].limiter
+        return getattr(self.ids, "description_2d")[0].vessel  # DDv4
 
     @cached_property
     def contour(self):
         """Return closed firstwall contour instance."""
         firstwall = ContourData()
-        for unit in self.limiter.unit:
+        for unit in self.vessel.unit:
             firstwall.append(unit)
         return Contour(firstwall.data)
 
@@ -888,13 +890,16 @@ class Wall(CoilDatabase):
     def segment(self, index=0):
         """Return indexed firstwall segment."""
         return np.array(
-            [self.limiter.unit[index].outline.r, self.limiter.unit[index].outline.z]
-        ).T
+            [
+                self.vessel.unit[index].annular.centreline.r,
+                self.vessel.unit[index].annular.centreline.z,
+            ]
+        ).T  # DDv4
 
     @cached_property
     def segments(self):
         """Return first wall segments."""
-        return [self.segment(i) for i in range(len(self.limiter.unit))]
+        return [self.segment(i) for i in range(len(self.vessel.unit))]
 
     @cached_property
     def outline(self):
@@ -906,7 +911,6 @@ class Wall(CoilDatabase):
 
     def build(self):
         """Build plasma bound by firstwall contour."""
-        print(self.ids_attrs)
         self.firstwall.insert(self.boundary)
 
     def insert(self, data: xarray.Dataset):

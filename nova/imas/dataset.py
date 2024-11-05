@@ -787,6 +787,8 @@ mode='r', lazy=True, ids=None)
     def ids(self, ids: IDSToplevel):
         if type(ids) is property:
             ids = self._ids
+            # self.ids_attrs = IdsBase.default_ids_attrs()
+            # TODO check this (ids inport)
         self._ids = ids
 
     @cached_property

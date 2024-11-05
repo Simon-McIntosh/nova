@@ -69,10 +69,8 @@ ansys = [
 ]
 bamboo = ["coverage2clover>=4.0.0", "tox>=4.6.4"]
 imas = [
-  #"imaspy @ git+ssh://git@git.iter.org/imas/imaspy.git@main",
-  "imaspy @ ../imaspy",
-  #"imas-core @ git+ssh://git@git.iter.org/imas/al-core.git@main",
-  "imas-core @ ../al-core",
+  "imaspy @ git+ssh://git@git.iter.org/imas/imaspy.git",
+  "imas-core @ git+ssh://git@git.iter.org/imas/al-core.git",
   "h5py>=3.10.0",
 ]
 jit = [
@@ -101,14 +99,17 @@ filepath = "nova.database.scripts:filepath"
 configure = "nova.scripts.configure:configure"
 
 [build-system]
-requires = ["poetry-core>1.9"]
-build-backend = "poetry.core.masonry.api"
+requires = [
+  "poetry-core @ git+https://github.com/radoering/poetry-core.git@pep621-support",
+  "poetry-dynamic-versioning>=1.4"
+]
+build-backend = "poetry_dynamic_versioning.backend"
 
 [tool.poetry]
 name = "nova-stella" 
 version = "0.0.0"
-authors = ["Simon McIntosh <simon.mcintosh@iter.org>"]
-description = "Equilibrium generation and inference"
+#authors = ["Simon McIntosh <simon.mcintosh@iter.org>"]
+#description = "Equilibrium generation and inference"
 packages = [{ include = "nova" }]
 exclude = [
   "nova/ansys",
@@ -138,7 +139,7 @@ pytest-xdist = ">=3.3.1"
 # pyqt5-qt5 = "<=5.15.10"
 # pyqtwebengine-qt5 = "<=5.15.10"
 snakeviz = ">=2.2.0"
-# spyder = ">=5.4.3"
+# spyder = "<6"
 # spyder-unittest = ">=0.5.1"
 # spyder-line-profiler = ">=0.3.1"
 # spyder-memory-profiler = ">=0.2.1"

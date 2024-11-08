@@ -26,9 +26,12 @@ kwargs = {
     "pulse": 135013,
     "run": 2,
     "machine": "iter",
-    "pf_passive": True,
+    "pf_passive": False,
     "pf_active": True,
 }
+
+# kwargs = {"pulse": 17151, "run": 4, "machine": "aug"}
+
 
 """
 kwargs = {

@@ -1,4 +1,7 @@
 """Manage IMAS Uniform Resource Identifiers."""
+
+from __future__ import annotations
+
 from dataclasses import dataclass
 from functools import cached_property
 from typing import TYPE_CHECKING
@@ -17,7 +20,7 @@ class URI:
     Follows the URI standard definition from RFC-3986 but is not fully compliant.
     The general URI structure is the following:
 
-        - scheme:[//authority]path[?query][#fragment].
+        - scheme:[//authority/]path[?query][#fragment].
 
     For sake of clarity and coherence, it was decided to define a single unified scheme
     for IMAS data resources (named imas) instead of defining different scheme for each
@@ -35,7 +38,6 @@ class URI:
     ----------
     scheme: {'imas'}, optional
         An imas data entry is identified with 'imas'.
-
 
     host: str, optional
         Specify the address of the server on which the data is accessed.
@@ -97,22 +99,75 @@ class URI:
 
     uri: str = ""
 
-    # host:
-
     def __call__(self, ids: DataEntry):
         """Return uri from data entry."""
+        raise NotImplementedError
+
+    def __getitem__(self, key: str):
+        """Return item from query."""
+        item = self.query[key]
+        if key in ["pulse", "run"]:
+            return int(item)
+        return item
+
+    @property
+    def scheme(self) -> str:
+        """Return uri scheme."""
+        return self.uri.split(":", 2)[0]
+
+    @property
+    def authority(self) -> str:
+        """Return uri authority."""
+        if "//" in self.uri:
+            return self.uri.split("//", 2)[1].split("/", 2)[0]
+        return None
+
+    @property
+    def path(self):
+        """Return uri path."""
+        return self.uri.split("?")[0].split("#")[0].split("/")[-1].split(":")[-1]
 
     @cached_property
-    def ids_attrs(self) -> dict[str, str | int]:
-        """Return ids attributes from uri."""
-        return dict(
-            zip(
-                *np.array(
-                    [
-                        pair.split("=")
-                        for pair in self.uri.split("?")[-1].split(";")
-                        if "=" in pair
-                    ]
-                ).T
+    def query(self) -> dict | None:
+        """Return uri query."""
+        if "?" in self.uri:
+            return dict(
+                zip(
+                    *np.array(
+                        [
+                            pair.split("=")
+                            for pair in self.uri.split("?")[-1].split("#")[0].split(";")
+                            if len(pair) > 0
+                        ]
+                    ).T
+                )
             )
-        )
+        return None
+
+    @cached_property
+    def fragment(self) -> str | None:
+        """Return uri fragment."""
+        if "#" in self.uri:
+            return self.uri.split("#")[1]
+        return None
+
+    @property
+    def name(self) -> str | None:
+        """Return ids name from fragment."""
+        if self.fragment is None:
+            return None
+        return self.fragment.split(":")[0].split("/")[0]
+
+    @property
+    def occurrence(self) -> str | None:
+        """Return ids occurence from uri fragment."""
+        if self.fragment is None or ":" not in self.fragment:
+            return None
+        return self.fragment.split(":")[1].split("/")[0]
+
+    @property
+    def ids_path(self) -> str | None:
+        """Return ids path from uri fragment."""
+        if self.fragment is None or "/" not in self.fragment:
+            return None
+        return "/".join(self.fragment.split("/")[1:])

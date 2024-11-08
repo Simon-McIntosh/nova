@@ -65,16 +65,23 @@ def test_extrapolation_grid_raises():
 
 @mark["CORSICA"]
 def test_extrapolate_attrs():
-    extrapolate = Extrapolate(
-        **ids_attrs["CORSICA"],
-        dplasma=-1,
-        tplasma="hex",
-        pf_active="iter_md",
-        wall="iter_md",
-    )
+    with tempfile.NamedTemporaryFile() as tmp:
+        extrapolate = Extrapolate(
+            **ids_attrs["CORSICA"],
+            dplasma=-1,
+            tplasma="hex",
+            pf_active="iter_md",
+            wall=False,
+            ngrid=None,
+            filename=tmp.name,
+        )
     assert extrapolate.pulse == ids_attrs["CORSICA"]["pulse"]
     assert extrapolate.run == ids_attrs["CORSICA"]["run"]
     assert extrapolate.ids.code.name == "CORSICA"
+
+
+test_extrapolate_attrs()
+assert False
 
 
 @mark["CORSICA"]
@@ -98,9 +105,6 @@ def test_extrapolate_rms_error(itime):
     maxmin = equilibrium_psi_norm.max() - equilibrium_psi_norm.min()
     assert error / maxmin < 0.05
 
-
-test_extrapolate_rms_error(5)
-assert False
 
 if __name__ == "__main__":
     pytest.main([__file__])

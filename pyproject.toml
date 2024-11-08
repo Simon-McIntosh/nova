@@ -4,7 +4,7 @@ dynamic = ["version"]
 description = "Equilibrium generation and inference"
 license = { text = "ITER GIP" }
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.10,<4"
 authors = [{ name = "Simon McIntosh", email = "simon.mcintosh@iter.org" }]
 keywords = [
   "equilibrium",
@@ -69,7 +69,7 @@ ansys = [
 ]
 bamboo = ["coverage2clover>=4.0.0", "tox>=4.6.4"]
 imas = [
-  "imaspy @ git+ssh://git@git.iter.org/imas/imaspy.git@develop",
+  "imaspy @ git+ssh://git@git.iter.org/imas/imaspy.git",
   "imas-core @ git+ssh://git@git.iter.org/imas/al-core.git",
   "h5py>=3.10.0",
 ]
@@ -79,6 +79,7 @@ jit = [
   "tbb>=2021.11.0",
   "tbb-devel>=2021.11.0",
 ]
+naka = ["nakamap @ git+https://github.com/Simon-McIntosh/nakamap.git"]
 optimize = ["jaxopt>=0.8.3", "pylops>=2.1.0"]
 test = ["pytest", "pytest-cov>=4.1.0", "pytest-asyncio>=0.21.1"]
 thermofluids = [
@@ -100,16 +101,15 @@ configure = "nova.scripts.configure:configure"
 [build-system]
 requires = [
   "poetry-core @ git+https://github.com/radoering/poetry-core.git@pep621-support",
-  "poetry-dynamic-versioning @ git+https://github.com/mtkennerly/poetry-dynamic-versioning.git@poetry-pep621",
+  "poetry-dynamic-versioning>=1.4"
 ]
-
-build-backend = "poetry_dynamic_versioning.backend"  # "poetry.core.masonry.api"
+build-backend = "poetry_dynamic_versioning.backend"
 
 [tool.poetry]
-name = "nova-stella" # TODO remove once poetry_dynamic_versioning is fixed
+name = "nova-stella" 
 version = "0.0.0"
-authors = ["Simon McIntosh <simon.mcintosh@iter.org>"]
-description = "Equilibrium generation and inference"
+#authors = ["Simon McIntosh <simon.mcintosh@iter.org>"]
+#description = "Equilibrium generation and inference"
 packages = [{ include = "nova" }]
 exclude = [
   "nova/ansys",
@@ -139,7 +139,7 @@ pytest-xdist = ">=3.3.1"
 # pyqt5-qt5 = "<=5.15.10"
 # pyqtwebengine-qt5 = "<=5.15.10"
 snakeviz = ">=2.2.0"
-# spyder = ">=5.4.3"
+# spyder = "<6"
 # spyder-unittest = ">=0.5.1"
 # spyder-line-profiler = ">=0.3.1"
 # spyder-memory-profiler = ">=0.2.1"

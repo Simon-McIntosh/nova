@@ -34,8 +34,10 @@ class Datafile(netCDF):
         try:
             self.load()
         except (FileNotFoundError, OSError):
+            if self.ids is None:
+                self.get()
             self.build()
-            # self.store()
+            self.store()
 
     @abstractmethod
     def build(self):

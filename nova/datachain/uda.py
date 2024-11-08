@@ -90,7 +90,7 @@ class UdaInfo:
     def update_uri(self):
         """Update URI resolving wildcards."""
         with self._catch_uda_error():
-            self.uri = self.client.getLastPulse2(self._uri)
+            self.uri = self.client.getLastPulse2(self._uri, "")
 
     async def aupdate_uri(self):
         """Return async resolved URI."""
@@ -259,31 +259,32 @@ async def publish(query: UdaQuery, queue: asyncio.Queue):
 
 async def request(queue: asyncio.Queue):
     """Request items from queue."""
-    while True:
-        query = await queue.get()
-        logging.info(f"Requested variable {query}")
-        async with UdaClient(query=query) as uda:
-            data = uda.client.getDataAsDouble(uda.handle)
-            logging.info(f"Recived variable {len(data)}")
-            await asyncio.sleep(0)
-        queue.task_done()
+    # while True:
+    query = await queue.get()
+    logging.info(f"Requested variable {query}")
+    async with UdaClient(query=query) as uda:
+        data = uda.client.getDataAsDouble(uda.handle)
+        logging.info(f"Recived variable {len(data)}")
+        await asyncio.sleep(0)
+    queue.task_done()
 
 
 async def main():
     """Process diagnostic signals."""
     queue = asyncio.Queue()
-    query = UdaQuery(pulse_id=62, duration=5, sample_number=5000, sample_type=1)
+    query = UdaQuery(pulse_id=62, duration=5, sample_number=1, sample_type=1)
 
     producers = [asyncio.create_task(publish(query, queue)) for _ in range(10)]
     consumers = [asyncio.create_task(request(queue)) for _ in range(100)]
 
     await asyncio.gather(*producers)
-    await queue.join()
+    # await queue.join()
     for consumer in consumers:
         consumer.cancel()
 
 
 if __name__ == "__main__":
+
     import time
 
     start_time = time.perf_counter()

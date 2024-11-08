@@ -123,7 +123,7 @@ if __name__ == "__main__":
     wedge.mesh = wedge.mesh.clip_box([-15, 15, -15, 15, -15, 0], invert=False)
     # wedge.mesh = wedge.mesh.clip_box([-5, 5, -5, 5, -0.5, 0], invert=False)
 
-    wedge.animate("corrected_full", view="xy", zoom=1.3, opacity=0.75)
+    # wedge.animate("corrected_full", view="xy", zoom=1.3, opacity=0.75)
 
     # wedge.warp()
 

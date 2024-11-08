@@ -339,7 +339,7 @@ class Cell(VtkFrame):
 
 
 class Sweep(Cell):
-    """Sweep boundary cross section along path."""
+    """Sweep boundary cross-section along path."""
 
     def __init__(
         self,

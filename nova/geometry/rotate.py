@@ -149,6 +149,10 @@ def normalize(vector):
     """Return normalized vector."""
     return vector / np.linalg.norm(vector)
 
+def by_angle(axis: np.ndarray, angle: float):
+    """Return rotation instance that rotates a vector by angle about axis."""
+    axis = normalize(axis)
+    return Rotation.from_rotvec(angle * axis)
 
 def to_vector(axis: np.ndarray, vector: np.ndarray):
     """Return rotation instance that aligns vector to axis."""

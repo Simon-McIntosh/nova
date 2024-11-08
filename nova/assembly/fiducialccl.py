@@ -30,7 +30,7 @@ class Fiducial(ABC):
             "EU",
             "JA",
             "JA",
-            "JA",
+            "EU",
             "JA",
             "EU",
             "JA",
@@ -44,6 +44,7 @@ class Fiducial(ABC):
         ],
     )
     source: str = ""
+    sectors: dict[list] = field(default_factory=dict)
 
     def __post_init__(self):
         """Load avalible fiducial deltas."""

@@ -127,10 +127,11 @@ class Line(Plot, Element):
         """Return line length."""
         return np.linalg.norm(self.points[1] - self.points[0])
 
-    def plot3d(self, quadrant_segments=None):
+    def plot3d(self, quadrant_segments=None, **kwargs):
         """Plot point and best-fit data."""
         self.get_axes("3d")
-        self.axes.plot(*self.points.T, "k-o", ms=3)
+        kwargs = {"color": "k", "linestyle": "-", "marker": "o", "ms": 3} | kwargs
+        self.axes.plot(*self.points.T, **kwargs)
 
     @property
     @override
@@ -337,9 +338,9 @@ class Arc(Plot, Element):
         self.get_axes("3d")
         if quadrant_segments is None:
             quadrant_segments = self.quadrant_segments
-        points = self.sample(quadrant_segments)
-        self.axes.plot(*points.T)
-        self.axes.plot(*self.nodes.T, "o", ms=3)
+        quadrant_points = self.sample(quadrant_segments)
+        self.axes.plot(*quadrant_points.T)
+        # self.axes.plot(*self.nodes.T, "o", ms=3)
 
     def plot_fit(self):
         """Plot best-fit arc and point cloud."""
@@ -455,7 +456,7 @@ class PolyLine(Plot):
         return self
 
     def fit_arc(self, points):
-        """Return point index prior to first arc mis-match."""
+        """Return point index prior to first arc mismatch."""
         point_number = len(points)
         for i in range(self.minimum_arc_nodes, point_number + 1):
             if Arc(points[:i], eps=self.arc_eps).test:
@@ -515,7 +516,7 @@ class PolyLine(Plot):
         return [Line(nodes[i : i + 2], line_normal[i]) for i in range(len(nodes) - 1)]
 
     def rdp_merge(self):
-        """Merge multiple line segments using the rdp algorithum."""
+        """Merge multiple line segments using the rdp algorithm."""
         segments, nodes, line_normal = [], [], []
         for segment in self.segments:
             match segment:
@@ -558,7 +559,7 @@ class PolyLine(Plot):
 
     @cached_property
     def vtk(self) -> list[Cell]:
-        """Retun list of vtk mesh segments swept along segment paths."""
+        """Return list of vtk mesh segments swept along segment paths."""
         return [
             Sweep(self.cross_section, segment.path, segment.binormal, align=self.align)
             for segment in self.segments
@@ -628,13 +629,14 @@ class PolyLine(Plot):
         """Return segment geometry as a pandas DataFrame."""
         return pandas.DataFrame(self.path_geometry | self.volume_geometry)
 
-    def plot(self, quadrant_segments=101, axes=None):
+    def plot(self, quadrant_segments=101, axes=None, **kwargs):
         """Plot decimated polyline."""
         self.set_axes("3d", axes)
-        self.axes.plot(*self.points.T)
+        self.axes.plot(*self.points.T, "--", color="gray")
         for segment in self.segments:
             segment.plot3d(quadrant_segments)
         self.axes.set_aspect("equal")
+        self.plt.tight_layout(pad=0)
 
     @property
     def frenet(self):

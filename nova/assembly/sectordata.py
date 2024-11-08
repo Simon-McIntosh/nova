@@ -200,5 +200,5 @@ class SectorData(FilePath, SectorFile):
 
 
 if __name__ == "__main__":
-    sector = SectorData(9)
+    sector = SectorData(7)
     # sector.build()

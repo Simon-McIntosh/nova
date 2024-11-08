@@ -50,7 +50,7 @@ class FiducialFit(FiducialData):
         self.fit()
         self.evaluate_gpr("fiducial_fit", "fit_gpr")
 
-    def write(self, sheet="FAT IO"):
+    def write(self, sheet: str):
         """Write fits to source xls files."""
         for sector in tqdm(self.data.sector.data, "updating xls workbooks"):
             sectordata = SectorData(sector)
@@ -85,10 +85,10 @@ class FiducialFit(FiducialData):
 
     def load_target(self):
         """Load target geometories in cylindrical coordinate system."""
-        self.data["centerline_target"] = (
-            xarray.DataArray(1, [("coil", self.data.coil.data)])
-            * self.data.centerline_target
-        )
+        # self.data["centerline_target"] = (
+        #    xarray.DataArray(1, [("coil", self.data.coil.data)])
+        #    * self.data.centerline_target
+        # )
         for attr in ["fiducial_target", "centerline_target"]:
             self.data[f"{attr}_cyl"] = Rotate.to_cylindrical(self.data[attr])
 
@@ -300,11 +300,10 @@ class FiducialFit(FiducialData):
         """Plot fits."""
         self.plotter.target(coil_index)
         stage = 1 + int(self.infer)
-        stage = 2
         self.plotter(postfix, stage, coil_index)
         title = f"Coil{self.data.coil[coil_index].data}"
         title += f"\norigin:{self.data.origin[coil_index].data}"
-        title += f" phase:{self.phase}"
+        title += f" phase:{self.phase.split()[0]}"
         title += f"\ninfer:{self.infer} method: {self.method}"
         self.plotter.axes[0].set_title(title, fontsize="large")
         if postfix[-3:] == "fit":
@@ -313,7 +312,7 @@ class FiducialFit(FiducialData):
 
     def plot_transform(self, coil_index=0):
         """Plot transform text."""
-        self.plotter("target")
+        self.plotter("fit")
         self.text_transform(self.plotter.axes[0], coil_index)
         self.plotter.axes[0].set_title("transform: reference -> fit")
 
@@ -351,9 +350,8 @@ class FiducialFit(FiducialData):
         points = self.data[self.point_name][coil_index]
         opt_x = self.data.opt_x[coil_index].data
         coil = self.data.coil[coil_index].data
-        self.transform_error(opt_x, points, coil, "rms")
         error = {
-            "rms": self.transform_error(opt_x, points, coil, "rms"),
+            "rms": np.sqrt(self.transform_error(opt_x, points, coil, "rms")),
             "max": self.transform_error(opt_x, points, coil, "max"),
         }
         text = ""
@@ -380,9 +378,9 @@ class FiducialFit(FiducialData):
             source_attr += "_fit"
         return self.data[source_attr] - self.data[f"{attr}_target"]
 
-    def plot_ensemble(self, fit=True, factor=250):
+    def plot_ensemble(self, fit=True, factor=250, axes=None, color=None):
         """Plot fit ensemble."""
-        self.axes = self.set_axes("2d", nrows=1, ncols=2, sharey=True)
+        self.axes = self.set_axes("2d", nrows=1, ncols=2, sharey=True, axes=axes)
         for j in range(2):
             self.axes[j].plot(
                 self.data.centerline_target[0, :, 0],
@@ -391,7 +389,8 @@ class FiducialFit(FiducialData):
                 ls="--",
             )
         limits = self.axes_limit
-        color = [0, 0]
+        if color is None:
+            color = [0, 0]
 
         centerline_delta = self._get_delta("centerline", fit)
         fiducial_delta = self._get_delta("fiducial", fit)
@@ -413,27 +412,40 @@ class FiducialFit(FiducialData):
                 color=f"C{color[j]}",
             )
             color[j] += 1
+        """
         for j, origin in enumerate(["EU", "JA"]):
             self.axes[j].legend(
                 fontsize="large", loc="center", bbox_to_anchor=[0.4, 0.5]
             )
-            self.axes[j].set_title(f"{origin} {self.phase}")
+            # self.axes[j].set_title(f"{origin} {self.phase}")
+        """
+        limits[0]["x"] = [1500, 11000]
+        limits[1]["x"] = [1500, 11000]
+        limits[0]["y"] = [-8000, 8000]
+        limits[1]["y"] = [-8000, 8000]
         self.axes_limit = limits
 
 
 if __name__ == "__main__":
     phase = "FAT supplier"
-    # phase = "SSAT BR"
+    phase = "SSAT AR"
 
-    fiducial = FiducialFit(phase=phase, infer=True, fill=False, method="rms")
+    fiducial = FiducialFit(phase=phase, sectors={7: [8, 9]}, fill=False, infer=True)
+    fiducial.plot_gpr_array(1, 2)
 
-    coil_index = 16
-    fiducial.plot_fit(coil_index)
-    fiducial.plot_fit(coil_index, "fit")
+    for coil_index in [0, 1]:
+        fiducial.plot_fit(coil_index)
+        fiducial.plot_fit(coil_index, "fit")
+        del fiducial.plotter
 
     # fiducial.plot_ensemble(True, 250)
 
-    # fiducial.write()
+    fiducial.write("SSAT AR target")
+
+    # print deltas
+    coil_index = 0
+    opt_x = fiducial.data.opt_x[coil_index].values
+    # delta = fiducial.delta()
 
     """
     for coil in range(18):

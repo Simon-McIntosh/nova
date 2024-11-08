@@ -323,18 +323,18 @@ class Grid(BaseGrid):
         if isinstance(attr, str):
             attr = getattr(self, f"{attr}_")[index]
         contour_kwargs = self.contour_kwargs(**kwargs)
-        QuadContourSet = self.axes.contour(
+        quad_contour_set = self.axes.contour(
             self.data[coords[0]],
             self.data[coords[1]],
             attr.T,
             **contour_kwargs,
         )
         if isinstance(kwargs.get("levels", None), int):
-            self.levels = QuadContourSet.levels
+            self.levels = quad_contour_set.levels
         self.label_contour(label, **contour_kwargs)
         if clabel is not None:
-            self.axes.clabel(QuadContourSet, **clabel)
-        return np.array(QuadContourSet.levels)
+            self.axes.clabel(quad_contour_set, **clabel)
+        return np.array(quad_contour_set.levels)
 
     def plot_grid(self):
         """Plot grid."""

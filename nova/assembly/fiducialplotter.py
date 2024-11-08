@@ -3,6 +3,7 @@
 from dataclasses import dataclass, field, InitVar
 from typing import ClassVar
 
+import matplotlib
 import numpy as np
 import xarray
 
@@ -16,8 +17,9 @@ class FiducialPlotter(Plot):
 
     cartisean_data: InitVar[xarray.Dataset]
     data: xarray.Dataset = field(init=False, default_factory=xarray.Dataset)
-    factor: float = 750
+    factor: float = 500
     fiducial_labels: bool = True
+    axes: matplotlib.axes.Axes | None = None
 
     color: ClassVar[dict[str, str]] = {
         "": "C0",
@@ -29,8 +31,10 @@ class FiducialPlotter(Plot):
 
     def __post_init__(self, data: xarray.Dataset):
         """Transform data to cylindrical coordinates."""
+        self.radial_offset = data.radial_offset
         self.rotate(data)
-        self.reset_axes()
+        if self.axes is None:
+            self.reset_axes()
 
     def reset_axes(self):
         """Extend Plot.set_axes."""
@@ -45,8 +49,10 @@ class FiducialPlotter(Plot):
         self.axes[0].set_ylabel("height")
         self.axes[1].set_xlabel("toroidal")
 
-    def __call__(self, post_fix: str, stage: int = 2, coil_index=0):
+    def __call__(self, post_fix: str, stage: int = 2, coil_index=0, axes=None):
         """Plot fiducial and centerline fits."""
+        if axes is not None:
+            self.axes = axes
         if stage > 0:
             self.fiducial(post_fix, coil_index=coil_index)
             self.centerline(post_fix, coil_index=coil_index)
@@ -79,7 +85,8 @@ class FiducialPlotter(Plot):
     def target(self, coil_index):
         """Plot fiducial fiducial targets."""
         self.axes[0].plot(
-            self.data.centerline_target[coil_index, :, 0],
+            self.data.centerline_target[coil_index, :, 0]
+            + self.factor * self.radial_offset,
             self.data.centerline_target[coil_index, :, 2],
             "--",
             color="gray",
@@ -125,44 +132,52 @@ class FiducialPlotter(Plot):
         """Return displacment delta multiplied by scale factor."""
         return self.factor * self.data[attr]
 
-    def fiducial(self, post_fix: str, coil_index=0):
+    def fiducial(self, post_fix: str = "", coil_index=0, **kwargs):
         """Plot fiducial deltas."""
         color = self.color[post_fix]
         marker = self.marker[post_fix]
+        kwargs = {"color": color, "marker": marker, "linestyle": ""} | kwargs
         delta = self.delta(self.join("fiducial", post_fix))
         for i in np.atleast_1d(coil_index):
             self.axes[0].plot(
                 self.data.fiducial_target[i, :, 0] + delta[i, :, 0],
                 self.data.fiducial_target[i, :, 2] + delta[i, :, 2],
-                color + marker,
+                **kwargs,
             )
             self.axes[1].plot(
                 self.data.fiducial_target[i, :, 1] + delta[i, :, 1],
                 self.data.fiducial_target[i, :, 2] + delta[i, :, 2],
-                color + marker,
+                **kwargs,
             )
 
-    def centerline(self, post_fix: str, coil_index=0, samples=True):
+    def centerline(
+        self, post_fix: str = "", coil_index=0, samples=True, label=None, **kwargs
+    ):
         """Plot gpr centerline."""
         color = self.color[post_fix]
+        kwargs = {"color": color} | kwargs
         attr = self.join("centerline", post_fix)
         # if samples:
         #    attr += "_sample"
         target = self.data["centerline_target"]
         delta = self.delta(attr)
+        if label is None:
+            label = post_fix
+        if not label:
+            label = "measurement"
         for i in np.atleast_1d(coil_index):
             self.axes[0].plot(
                 target[i, :, 0] + delta[i, :, 0],
                 target[i, :, 2] + delta[i, :, 2],
-                color=color,
+                **kwargs,
             )
             self.axes[1].plot(
                 target[i, :, 1] + delta[i, :, 1],
                 target[i, :, 2] + delta[i, :, 2],
-                color=color,
-                label=post_fix,
+                label=label,
+                **kwargs,
             )
-        self.axes[1].legend(loc="upper right")
+        self.axes[1].legend(loc="center", bbox_to_anchor=(0, 1, 1, 0.1), ncol=2)
 
     def plot3d(self, post_fix: str, coil_index=0):
         """Plot 3d centerline."""

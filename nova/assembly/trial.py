@@ -199,8 +199,8 @@ class Trial(Dataset, TrialAttrs, Plot1D):
     def text(self, text):
         """Add multi-line text to current axes."""
         self.axes.text(
-            0.95,
-            0.95,
+            1.0,
+            0.8,
             text,
             fontsize="x-small",
             transform=self.axes.transAxes,

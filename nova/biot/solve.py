@@ -56,12 +56,12 @@ class Solve(GroupSet):
                     f"in Biot.generator: {self.generator.keys()}"
                 )
             index = self.source.index[self.source_segment == segment]
-            for i, chunk in enumerate(self.group_segments(index, 131, index[-1])):
+            for i, chunk in enumerate(self.group_segments(index, 500, index[-1])):
                 self.source_segment.loc[list(chunk)] = f"{segment}_{i}"
 
     @staticmethod
     def group_segments(iterable, length, fillvalue):
-        """Return grouped itterable."""
+        """Return grouped iterable."""
         length = min([length, len(iterable)])
         args = length * [iter(iterable)]
         return zip_longest(*args, fillvalue=fillvalue)

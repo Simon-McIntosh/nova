@@ -411,7 +411,7 @@ class Assembly(Sector):
 
 
 if __name__ == "__main__":
-    assembly = Sector()
+    assembly = Assembly(radius=0.824 - 0.1)
     assembly.plot()
     # assembly.movie()
     # wedge = ErrorWedge(0.824, 0, 0.2, np.pi/9, error=dict(delta_radius=-0.1))

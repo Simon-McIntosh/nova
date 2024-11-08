@@ -3,10 +3,11 @@
 from dataclasses import dataclass, field
 
 import numpy as np
+import scipy.interpolate
 import vedo
 
 from nova.geometry.frenet import Frenet
-from nova.geometry.rotate import to_vector, to_axes
+from nova.geometry.rotate import to_vector, to_axes, by_angle
 from nova.geometry.vtkgen import VtkFrame
 
 
@@ -36,6 +37,12 @@ class Section:
         self.points = rotation.apply(self.points)
         self.points += self.origin
 
+    def by_angle(self, axis: np.ndarray, angle: float):
+        """Rotate points by angle about axis."""
+        rotation = by_angle(axis, angle)
+        self._rotate_points(rotation)
+        self.triad = rotation.apply(self.triad)
+
     def to_vector(self, vector: np.ndarray, coord: int):
         """Rotate points to vector."""
         rotation = to_vector(self.triad[coord], vector)
@@ -57,6 +64,29 @@ class Section:
     def sweep(self, path: np.ndarray, binormal: np.ndarray, align: str):
         """Sweep section along path."""
         frenet = Frenet(path, binormal)
+
+        triad = np.identity(3)
+        normal = np.zeros((len(path), 3))
+        for i in range(len(path)):
+            rotation = to_vector(triad[0], frenet.tangent[i])
+            triad = rotation.apply(triad)
+            normal[i] = -triad[0]
+
+        normal = frenet.project(normal, triad[1][np.newaxis])
+        twist = np.arccos(
+            np.clip(
+                np.dot(normal[0], normal[-1]),
+                -1.0,
+                1.0,
+            )
+        )
+
+        # untwist = scipy.interpolate.interp1d(
+        #    [0, 1], [0, -2 * twist], fill_value="extrapolate"
+        # )
+        # angle = 0
+
+        delta = -13 * twist / len(path)
         for i in range(len(path)):
             self.to_point(frenet.points[i])
             match align:
@@ -71,6 +101,12 @@ class Section:
                         sign = 1
                     self.to_vector(np.array([0, 0, sign * 1]), 0)
                     self.to_vector(frenet.tangent[i], 1)
+                case "twist":
+                    # delta = untwist(frenet.parametric_length[i]) - angle
+                    # angle = untwist(frenet.parametric_length[i])
+                    self.by_angle(frenet.tangent[i], -delta)
+                    self.to_vector(frenet.tangent[i], 1)
+
                 case _:
                     raise ValueError(f"align {align} not in [vector or axes]")
             self._append()

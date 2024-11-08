@@ -6,6 +6,7 @@ from typing import ClassVar
 
 import numpy as np
 import pyvista
+import scipy.integrate
 
 from nova.graphics.plot import Plot
 
@@ -133,15 +134,60 @@ class Frenet(Plot):
         for axis in self.frenet_attrs:
             self.data[axis] /= np.linalg.norm(self[axis], axis=1)[:, np.newaxis]
 
-    def plot(self, scale=1):
+    @staticmethod
+    def project(vector, tangent):
+        """Return a normalized vector projected onto a tangent plane."""
+        vector = (
+            vector - np.einsum("ij,ij->i", vector, tangent)[:, np.newaxis] * tangent
+        )
+        return vector / np.linalg.norm(vector, axis=1)[:, np.newaxis]
+
+    @cached_property
+    def twist(self):
+        """Return twist angle."""
+
+        tangent = self.tangent[:-1] + self.tangent[1:]
+        tangent /= np.linalg.norm(tangent, axis=1)[:, np.newaxis]
+
+        delta = (
+            np.arccos(
+                np.clip(
+                    np.einsum(
+                        "ij,ij->i",
+                        self.project(self.normal[:-1], tangent),
+                        self.project(self.normal[1:], tangent),
+                    ),
+                    -1.0,
+                    1.0,
+                )
+            ),
+        )
+
+        return np.r_[0, delta[0]]
+
+    def plot(self, scale=1, plotter=None):
         """Plot polyline."""
         mesh = pyvista.MultipleLines(self.points)
         mag = scale * self.length / len(self)
-        plotter = pyvista.Plotter()
+        if plotter is None:
+            plotter = pyvista.Plotter()
         for axis, color in zip(self.frenet_attrs, ["blue", "orange", "green"]):
             plotter.add_arrows(self.points, getattr(self, axis), mag=mag, color=color)
         plotter.add_mesh(mesh)
         plotter.show()
+
+    def plot_components(self, axes=None):
+        """Plot Frenet components along normalized path."""
+        axes = self.set_axes("1d", nrows=3, axes=axes)
+        axes[0].plot(self.parametric_length, self.curvature)
+        axes[1].plot(self.parametric_length, self.torsion)
+
+        axes[2].plot(
+            self.parametric_length,
+            scipy.integrate.cumulative_trapezoid(
+                self.torsion, self.parametric_length, initial=0
+            ),
+        )
 
 
 if __name__ == "__main__":

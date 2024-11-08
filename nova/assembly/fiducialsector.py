@@ -17,7 +17,7 @@ class FiducialSector(Fiducial):
     phase: str = "FAT supplier"
     sector: dict[int, int] = field(init=False, repr=False, default_factory=dict)
     sectors: dict[int, list] = field(
-        init=False, repr=False, default_factory=lambda: dict.fromkeys(range(1, 10), [])
+        init=True, repr=False, default_factory=lambda: dict.fromkeys(range(1, 10), [])
     )
     fiducial: dict[str, pandas.DataFrame] | dict = field(
         init=False, repr=False, default_factory=dict
@@ -26,7 +26,11 @@ class FiducialSector(Fiducial):
         init=False, repr=False, default_factory=dict
     )
 
-    sheets: ClassVar[dict[str, str]] = {"FATsup": "FAT supplier", "SSAT": "SSAT BR"}
+    sheets: ClassVar[dict[str, str]] = {
+        "FATsup": "FAT supplier",
+        "SSAT": "SSAT BR",
+        "FAT": "FAT supplier",
+    }
 
     def __post_init__(self):
         """Propogate origin."""
@@ -96,9 +100,8 @@ class FiducialSector(Fiducial):
 
 
 if __name__ == "__main__":
-    fiducial = FiducialSector(phase="FATsup")  # , sectors=[8]
-    # fiducial.compare("IDM")
-    # fiducial.plot()
+    fiducial = FiducialSector(phase="SSAT BR", sectors={7: [8, 9]})  # , sectors=[8]
+    fiducial.compare("RE")
 
     # for coil, ccl in fiducial.delta.items():
     #    print(f"Coil {coil}")

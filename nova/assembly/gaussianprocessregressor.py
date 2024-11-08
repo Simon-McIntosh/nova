@@ -111,7 +111,15 @@ class GaussianProcessRegressor:
         return self.predict(x)
 
     def plot(
-        self, stage=2, axes=None, text=True, marker="o", color="C3", line_color="gray"
+        self,
+        stage=2,
+        axes=None,
+        text=True,
+        label="fiducial_data",
+        marker="o",
+        marker_color="C3",
+        line_color="gray",
+        fill_color="k",
     ):
         """Plot current GP regression."""
         if axes is None:
@@ -120,10 +128,11 @@ class GaussianProcessRegressor:
             self.data.x,
             self.data.y,
             marker=marker,
-            color=color,
+            color=marker_color,
+            alpha=0.5,
             s=30,
             zorder=10,
-            label="fiducial data",
+            label=label,
         )
         if stage > 0:
             axes.plot(self.data.x_mean, self.data.y_mean, line_color, lw=2, zorder=9)
@@ -133,15 +142,15 @@ class GaussianProcessRegressor:
                 self.data.y_mean - 2 * self.data.y_std,
                 self.data.y_mean + 2 * self.data.y_std,
                 alpha=0.15,
-                color="k",
+                color=fill_color,
                 label="95% confidence",
             )
         if stage > 2:
             data_y = self.predict(self.data.x)
-            axes.plot(self.data.x, data_y, "d", color="gray")
+            axes.plot(self.data.x, data_y, "d", color=marker_color, alpha=0.5)
 
         if text:
-            # plt.despine()
+            plt.despine()
             plt.xlabel("arc length")
             plt.ylabel("displacement, mm")
             plt.title(self.regressor.kernel_)

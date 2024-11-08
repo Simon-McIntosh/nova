@@ -207,7 +207,6 @@ class Centerline(Plot, PolylineAttrs, CoilDatabase):
         "An algoritum for the aproximation of CAD generated "
         "multi-point conductor centerlines by a sequence of "
         "straight-line and arc segments. "
-        "See Also: nova.geometry.centerline.Centerline"
     )
     subframe_attrs: ClassVar[dict[str, list[str]]] = {
         "start_points": ["x1", "y1", "z1"],

@@ -23,7 +23,9 @@ class SectorFile:
     sector: int
     filename: str = ""
     version: str | int = "latest"
-    datadir: str = "/mnt/share/sector_modules"
+    datadir: str = "C:/Users/mcintos/AppData/Local/nova/sector_modules"
+    # datadir: str = "//io-ws-ccstore1/ANSYS_Data/mcintos/sector_modules"
+    # "/mnt/share/sector_modules"
 
     def __post_init__(self):
         """Locate source datafiles."""

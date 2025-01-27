@@ -57,13 +57,27 @@ class Grid(Scenario):
         """
         self.data["r"] = ("time", "dim1"), self.ids_index.array("profiles_2d.grid.dim1")
         self.data["z"] = ("time", "dim2"), self.ids_index.array("profiles_2d.grid.dim2")
-        self.data["r2d"] = ("time", "dim1", "dim2"), np.zeros(
-            (self.data.sizes["time"], self.data.sizes["dim1"], self.data.sizes["dim2"]),
-            float,
+        self.data["r2d"] = (
+            ("time", "dim1", "dim2"),
+            np.zeros(
+                (
+                    self.data.sizes["time"],
+                    self.data.sizes["dim1"],
+                    self.data.sizes["dim2"],
+                ),
+                float,
+            ),
         )
-        self.data["z2d"] = ("time", "dim1", "dim2"), np.zeros(
-            (self.data.sizes["time"], self.data.sizes["dim1"], self.data.sizes["dim2"]),
-            float,
+        self.data["z2d"] = (
+            ("time", "dim1", "dim2"),
+            np.zeros(
+                (
+                    self.data.sizes["time"],
+                    self.data.sizes["dim1"],
+                    self.data.sizes["dim2"],
+                ),
+                float,
+            ),
         )
 
         for i in range(self.data.sizes["time"]):
@@ -119,9 +133,10 @@ class Parameter0D(Scenario):
         attr = path.split(".")[-1]
         if any(self.ids_index.empty(f"{path}.{label}") for label in "rz"):
             return
-        self.data[attr] = ("time", "point"), np.c_[
-            self.ids_index.array(f"{path}.r"), self.ids_index.array(f"{path}.z")
-        ]
+        self.data[attr] = (
+            ("time", "point"),
+            np.c_[self.ids_index.array(f"{path}.r"), self.ids_index.array(f"{path}.z")],
+        )
 
     def build(self):
         """Build 0D parameter timeseries."""
@@ -154,9 +169,14 @@ class Parameter0D(Scenario):
         if any(attr not in self.data for attr in attrs):
             return
         data = {attr: self.data[attr].data for attr in attrs}
-        self.data["beta_normal"] = "time", 100 * data["beta_tor"] * data[
-            "minor_radius"
-        ] * data["b0"] / (1e-6 * data["ip"])
+        self.data["beta_normal"] = (
+            "time",
+            100
+            * data["beta_tor"]
+            * data["minor_radius"]
+            * data["b0"]
+            / (1e-6 * data["ip"]),
+        )
 
     def outline(self, itime):
         """Return boundary outline."""
@@ -204,21 +224,26 @@ class Parameter0D(Scenario):
             point_function = getattr(self, f"{attr}_array")
         max_length = max(len(point_function(itime)) for itime in self.data.itime.data)
         if max_length == 0:
-            self.data[attr] = ("time", "point"), np.zeros(
-                (self.data.sizes["time"], 2), float
+            self.data[attr] = (
+                ("time", "point"),
+                np.zeros((self.data.sizes["time"], 2), float),
             )
             self.data[f"{attr}_number"] = "time", np.zeros(self.data.sizes["time"], int)
             return
         self.data[f"{attr}_index"] = range(max_length)
-        self.data[attr] = ("time", f"{attr}_index", "point"), np.zeros(
-            (
-                self.data.sizes["time"],
-                self.data.sizes[f"{attr}_index"],
-                self.data.sizes["point"],
-            )
+        self.data[attr] = (
+            ("time", f"{attr}_index", "point"),
+            np.zeros(
+                (
+                    self.data.sizes["time"],
+                    self.data.sizes[f"{attr}_index"],
+                    self.data.sizes["point"],
+                )
+            ),
         )
-        self.data[f"{attr}_number"] = "time", np.zeros(
-            self.data.sizes["time"], dtype=int
+        self.data[f"{attr}_number"] = (
+            "time",
+            np.zeros(self.data.sizes["time"], dtype=int),
         )
         for itime in self.data.itime.data:
             points = point_function(itime)
@@ -240,15 +265,20 @@ class Parameter0D(Scenario):
     def build_boundary_type(self):
         """Build boundary limiter type."""
         if not self.ids_index.empty("boundary_separatrix.type"):
-            self.data["boundary_type"] = "time", self.ids_index.array(
-                "boundary_separatrix.type"
+            self.data["boundary_type"] = (
+                "time",
+                self.ids_index.array("boundary_separatrix.type"),
             )
             return
         if self.ids_index.empty("boundary_separatrix.x_point"):
             return
-        self.data["boundary_type"] = "time", [
-            int(not np.allclose(x_point, (0, 0))) for x_point in self.data.x_point.data
-        ]
+        self.data["boundary_type"] = (
+            "time",
+            [
+                int(not np.allclose(x_point, (0, 0)))
+                for x_point in self.data.x_point.data
+            ],
+        )
 
     def x_mask(self, itime: int, outline_z: np.ndarray, eps=0):
         """Return boundary x-point mask."""
@@ -306,15 +336,19 @@ class Parameter0D(Scenario):
         if self.boundary_outline_length == 0:
             return
         self.data["boundary_index"] = range(self.boundary_outline_length)
-        self.data["boundary"] = ("time", "boundary_index", "point"), np.zeros(
-            (
-                self.data.sizes["time"],
-                self.data.sizes["boundary_index"],
-                self.data.sizes["point"],
-            )
+        self.data["boundary"] = (
+            ("time", "boundary_index", "point"),
+            np.zeros(
+                (
+                    self.data.sizes["time"],
+                    self.data.sizes["boundary_index"],
+                    self.data.sizes["point"],
+                )
+            ),
         )
-        self.data["boundary_length"] = "time", np.zeros(
-            self.data.sizes["time"], dtype=int
+        self.data["boundary_length"] = (
+            "time",
+            np.zeros(self.data.sizes["time"], dtype=int),
         )
         for itime in self.data.itime.data:
             outline = self.boundary_outline(itime)
@@ -386,12 +420,14 @@ class Profile1D(Scenario):
         length = self.ids_index.get_shape("profiles_1d.dpressure_dpsi")[0]
         self.data["psi_norm"] = np.linspace(0, 1, length)
         if not self.ids_index.empty("profiles_1d.psi"):
-            self.data["psi1d"] = ("time", "psi_norm"), self.ids_index.array(
-                "profiles_1d.psi"
+            self.data["psi1d"] = (
+                ("time", "psi_norm"),
+                self.ids_index.array("profiles_1d.psi"),
             )
         else:
-            self.data["psi1d"] = ("time", "psi_norm"), np.tile(
-                self.data["psi_norm"].data, (self.data.sizes["time"], 1)
+            self.data["psi1d"] = (
+                ("time", "psi_norm"),
+                np.tile(self.data["psi_norm"].data, (self.data.sizes["time"], 1)),
             )
         self.append(("time", "psi_norm"), self.attrs_1d, "profiles_1d")
         for itime in self.data.itime.data:  # normalize 1D profiles
@@ -450,9 +486,10 @@ class Profile2D(Scenario):
         ):
             nodes = self.ids_index.array("nodes")
             self.data.coords["tri_index"] = range(nodes.shape[1])
-            self.data["triangles"] = ("tri_index", "node"), self.ids_index.array(
-                "nodes"
-            ).T
+            self.data["triangles"] = (
+                ("tri_index", "node"),
+                self.ids_index.array("nodes").T,
+            )
 
         self.append(
             ("time", "node_index"), self.attrs_2d, "ggd[0].*[0].values", postfix="2d"
@@ -880,6 +917,7 @@ if __name__ == "__main__":
     # args = 45272, 1, "mast_u"  # MastU
 
     kwargs = {"pulse": 17151, "run": 4, "machine": "aug"}
+    # kwargs = {"pulse": 110501, "run": 3}
 
     equilibrium = EquilibriumData(**kwargs)
     equilibrium.itime = 10

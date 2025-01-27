@@ -388,7 +388,7 @@ os.path.join(userhome, 'public', 'imasdb', 'iter', '3', '1', '2')
         >>> list(dataset.get_ids_attrs(True, Wall).values())
         [20, 25, 'wall', 0, 'iter_md', 'public', 'hdf5']
 
-        Request ids_attrs with a dict input replacing machine and occurence.
+        Request ids_attrs with a dict input replacing machine and occurrence.
 
         >>> attrs = {'machine': 'iter', 'occurrence': 3}
         >>> list(dataset.get_ids_attrs(attrs, Wall).values())
@@ -489,8 +489,8 @@ class Datastore(IdsBase):  # noqa: D207
                     )
                 if "#" not in uri and self.name is not None:
                     self.uri += f"#{self.name}"
-                if ":" not in uri.split("#")[1] and self.occurrence >= 1:
-                    self.uri += f":{self.occurence}"
+                if "#" in uri and ":" not in uri.split("#")[1] and self.occurrence >= 1:
+                    self.uri += f":{self.occurrence}"
             case _:
                 raise TypeError(f"type(uri) {type(self.uri)} is not str")
 
@@ -713,7 +713,7 @@ mode='r', lazy=True, ids=None)
         if (
             self._ids is not None
             and name is self.name
-            and occurrence == self.ocurrence
+            and occurrence == self.occurrence
             and lazy == self.lazy
         ):
             return self._ids

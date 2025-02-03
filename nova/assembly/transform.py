@@ -1,6 +1,7 @@
 """Manage assembly transforms."""
 
 from dataclasses import dataclass
+from typing import ClassVar
 
 import numpy as np
 import scipy.spatial.transform
@@ -12,6 +13,8 @@ class Rotate:
     """Provide clocking transform."""
 
     ncoil: int = 18
+
+    radius: ClassVar[float] = 2700
 
     def rotate(self, reverse=False):
         """Return clocking rotation transform about z-axis."""
@@ -40,17 +43,17 @@ class Rotate:
         dataarray = (
             dataarray.copy()
             .rename(dict(cartesian="cylindrical"))
-            .assign_coords(dict(cylindrical=["r", "rphi", "z"]))
+            .assign_coords(dict(cylindrical=["r", "ro_phi", "z"]))
         )
         dataarray[..., 0] = np.linalg.norm(dataarray[..., :2], axis=-1)
-        dataarray[..., 1] = dataarray[..., 0] * phi
+        dataarray[..., 1] = Rotate.radius * phi  # dataarray[..., 0] * phi
         return dataarray
 
     @staticmethod
     def to_cartesian(dataarray: xarray.DataArray) -> xarray.DataArray:
         """Retun dataarray transformed from cylindrical to cartesian coords."""
         radius = dataarray[..., 0].data
-        phi = dataarray[..., 1].data / radius
+        phi = dataarray[..., 1].data / Rotate.radius  # radius
         dataarray = (
             dataarray.copy()
             .rename(dict(cylindrical="cartesian"))
@@ -62,4 +65,5 @@ class Rotate:
 
 
 if __name__ == "__main__":
+
     print(Rotate().anticlock(Rotate().clock([1, 2, 3])))

@@ -13,6 +13,7 @@ import xarray
 
 from nova.assembly.centerline import CenterLine
 from nova.assembly.fiducialccl import Fiducial, FiducialIDM, FiducialRE
+from nova.assembly.fiducialilis import FiducialIlis
 from nova.assembly.fiducialsector import FiducialSector
 from nova.assembly.gaussianprocessregressor import GaussianProcessRegressor
 from nova.assembly.plotter import Plotter
@@ -34,6 +35,8 @@ class FiducialData(netCDF, Plot, Plotter):
     )
     fill: bool = True
     variance: float | str = 0.09
+    ilis: bool = True
+    ilis_pcr: bool = True
     sead: int = 2030
     data: xarray.Dataset = field(init=False, repr=False, default_factory=xarray.Dataset)
     gpr: GaussianProcessRegressor = field(init=False, repr=False)
@@ -72,8 +75,8 @@ class FiducialData(netCDF, Plot, Plotter):
         """Return fiducial attributes."""
         return {
             attr: getattr(self, attr)
-            for attr in ["fiducial", "phase", "fill", "variance", "sead"]
-        } | {"sectors": list(self.sectors)}
+            for attr in ["fiducial", "phase", "fill", "variance", "ilis", "sead"]
+        } | {"coils": [coil for coils in self.sectors.values() for coil in coils]}
 
     def load_build(self):
         """Load or build dataset."""
@@ -81,12 +84,6 @@ class FiducialData(netCDF, Plot, Plotter):
             self.load()
         except (FileNotFoundError, OSError):
             self.build()
-            attrs = self.fiducial_attrs
-            for attr, value in attrs.items():
-                if isinstance(value, bool):
-                    attrs[attr] = int(value)
-            self.data.attrs |= attrs
-            self.store()
 
     @cached_property
     def dataset(self):
@@ -95,9 +92,7 @@ class FiducialData(netCDF, Plot, Plotter):
             "RE": FiducialRE,
             "IDM": FiducialIDM,
             "Sector": FiducialSector,
-        }[
-            self.fiducial
-        ](self.data.target, phase=self.phase, sectors=self.sectors)
+        }[self.fiducial](self.data.target, phase=self.phase, sectors=self.sectors)
 
     def build(self):
         """Build fiducial dataset."""
@@ -106,6 +101,16 @@ class FiducialData(netCDF, Plot, Plotter):
             self.backfill()
         self.locate_coils()
         self.build_mesh()
+        self.store()
+
+    def store(self):
+        """Extend store method to include attribute hash"""
+        attrs = self.fiducial_attrs
+        for attr, value in attrs.items():
+            if isinstance(value, bool):
+                attrs[attr] = int(value)
+        self.data.attrs |= attrs
+        super().store()
 
     def build_dataset(self):
         """Build xarray dataset."""
@@ -275,25 +280,55 @@ class FiducialData(netCDF, Plot, Plotter):
             ("coil", "target", "space"),
             np.stack([delta[index].to_numpy(float) for index in delta], axis=0),
         )
+        if hasattr(self.dataset, "ilis") and self.ilis:
+            # adjust nose fiducials to mean ilis plane
+            target = ["B", "H", "A"]
+            ilis = FiducialIlis(self.dataset.ilis, pcr=self.ilis_pcr)
+            # map fiducial deltas onto coil
+            data = (self.data["fiducial_delta"] + self.data["fiducial_target"]).sel(
+                target=target
+            )
+            # convert to pandas DataFrame
+            dataframe = pandas.concat(
+                {coil: data.sel(coil=coil).to_pandas() for coil in data.coil.data}
+            )
+            dataframe.index.set_names(["coil", "target"], inplace=True)
+            # save projection transform to instance
+            self.fiducial_ilis = ilis
+            # project to ilis plane
+            dataframe = ilis.project(dataframe)
+            for i, (_, frame) in enumerate(dataframe.groupby("coil")):
+                data.data[i] = frame.values  # reassign data
+            # update fiducial deltas with tagets aligned to ilis midplane
+            self.data["fiducial_delta"].loc[:, target] = data - self.data[
+                "fiducial_target"
+            ].sel(target=target)
+
         if hasattr(self.dataset, "variance"):
-            self.data["fiducial_variance"] = ("coil", "target", "space"), np.stack(
-                [
-                    self.dataset.variance[index].to_numpy(float)
-                    for index in self.dataset.variance
-                ],
-                axis=0,
+            self.data["fiducial_variance"] = (
+                ("coil", "target", "space"),
+                np.stack(
+                    [
+                        self.dataset.variance[index].to_numpy(float)
+                        for index in self.dataset.variance
+                    ],
+                    axis=0,
+                ),
             )
         if hasattr(self.dataset, "sectors"):
             self.data.coords["sector"] = list(self.dataset.sectors)
-            self.data["coils"] = ("sector", "coil_index"), np.array(
-                list(self.dataset.sectors.values())
+            self.data["coils"] = (
+                ("sector", "coil_index"),
+                np.array(list(self.dataset.sectors.values())),
             )
-            self.data["filename"] = "sector", [
-                SectorData(sector).filename for sector in self.dataset.sectors
-            ]
-            self.data["version"] = "sector", [
-                SectorData(sector).version for sector in self.dataset.sectors
-            ]
+            self.data["filename"] = (
+                "sector",
+                [SectorData(sector).filename for sector in self.dataset.sectors],
+            )
+            self.data["version"] = (
+                "sector",
+                [SectorData(sector).version for sector in self.dataset.sectors],
+            )
 
         self.data["centerline_delta"] = xarray.DataArray(
             0.0,

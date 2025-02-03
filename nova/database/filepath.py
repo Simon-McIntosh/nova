@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 from functools import wraps
 import os
 from pathlib import Path
+import sys
 
 import appdirs
 import fsspec
@@ -167,6 +168,24 @@ class FilePath:
         if extension is not None:
             return filepath.with_suffix(extension)
         return filepath
+
+    def _clear(self):
+        """Clear datafile at self.filepath."""
+        if os.path.isfile(self.filepath):
+            os.remove(self.filepath)
+
+    @property
+    def clear(self):
+        """Clear cached datafile at self.filepath."""
+        if os.path.isfile(self.filepath):
+            remove = input(
+                "Confirm removal of the following cached datafile:"
+                f"\n{self.filepath}\nProceed (Y/n)?"
+            )
+            if remove == "" or remove.lower() == "y":
+                os.remove(self.filepath)
+            return
+        sys.stdout.write(f"Cached datafile clear:\n{self.filepath}")
 
 
 if __name__ == "__main__":

@@ -44,7 +44,7 @@ class Fiducial(ABC):
         ],
     )
     source: str = ""
-    sectors: dict[list] = field(default_factory=dict)
+    sectors: dict[list] | list[int] = field(default_factory=dict)
 
     def __post_init__(self):
         """Load avalible fiducial deltas."""

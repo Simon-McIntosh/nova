@@ -49,6 +49,7 @@ class FiducialFit(FiducialData):
         self.evaluate_gpr("fiducial", "gpr")
         self.fit()
         self.evaluate_gpr("fiducial_fit", "fit_gpr")
+        self.store()
 
     def write(self, sheet: str):
         """Write fits to source xls files."""
@@ -56,19 +57,111 @@ class FiducialFit(FiducialData):
             sectordata = SectorData(sector)
             coils = self.data.coils.sel(sector=sector)
             with sectordata.openbook(), sectordata.savebook():
+                last_sheet = sectordata.book.sheetnames[-1]
+                sectordata.book.create_sheet(sheet)
                 worksheet = sectordata.book[sheet]
-                for coil, xls_index in zip(coils, sectordata._coil_index(sheet)):
+                for coil, coil_index, fiducial_index, ilis_p, ilis_m in zip(
+                    coils.data,
+                    sectordata._coil_index(last_sheet),
+                    sectordata.locate("Fiducial", last_sheet),
+                    sectordata.locate("ILIS +1 side", last_sheet),
+                    sectordata.locate("ILIS -1 side", last_sheet),
+                ):
                     data = self.data.fiducial_fit.sel(coil=coil).sortby("target").data
                     std = (
                         self.data.fiducial_fit_gpr_std.sel(coil=coil)
                         .sortby("target")
                         .data
                     )
+                    # write coil header
                     sectordata.write(
-                        worksheet, xls_index, np.append(data, 2 * std, axis=1)
+                        worksheet,
+                        coil_index,
+                        np.array(
+                            [["Coil", "Point", "Name", "X", "Y", "Z", "uX", "uY", "uZ"]]
+                        ),
+                    )
+                    sectordata.write(
+                        worksheet,
+                        coil_index,
+                        np.array([[coil]]),
+                        offset=(1, 0),
+                    )
+                    sectordata.write(
+                        worksheet,
+                        coil_index,
+                        np.array([["CCL"]]),
+                        offset=(1, 1),
+                    )
+                    sectordata.write(
+                        worksheet,
+                        coil_index,
+                        sectordata.data[coil]["Nominal"]
+                        .index.get_level_values("Name")
+                        .values[:, np.newaxis],
+                        # self.data.target.sortby("target").data[:, np.newaxis],
+                        offset=(1, 2),
+                    )
+                    # write ccl data
+                    sectordata.write(
+                        worksheet,
+                        coil_index,
+                        np.append(data, 2 * std, axis=1),
+                        offset=(1, 3),
                     )
                     opt_x = self.data.opt_x.sel(coil=coil)
-                    self._write_transform(worksheet, xls_index, opt_x)
+                    self._write_transform(worksheet, coil_index, opt_x)
+                    # write fiducial header
+                    sectordata.write(
+                        worksheet,
+                        fiducial_index,
+                        np.array([["Fiducial"]]),
+                    )
+                    sectordata.write(
+                        worksheet,
+                        fiducial_index,
+                        self.dataset.case[coil]
+                        .index.get_level_values("Name")
+                        .values[:, np.newaxis],
+                        offset=(0, 1),
+                    )
+                    # write transformed case fiducial data
+                    sectordata.write(
+                        worksheet,
+                        fiducial_index,
+                        self.transform(
+                            opt_x.data,
+                            self.dataset.case[coil].loc[:, ["x", "y", "z"]].values,
+                        ),
+                        offset=(0, 2),
+                    )
+
+                    # write ilis
+                    for side, xls_index in zip(["+1", "-1"], [ilis_p, ilis_m]):
+                        ilis_data = self.dataset.ilis.loc[
+                            (self.dataset.ilis.coil == coil)
+                            & (self.dataset.ilis.feature == f"ILIS {side}")
+                        ]
+                        sectordata.write(
+                            worksheet,
+                            xls_index,
+                            np.array([[f"ILIS {side} side"]]),
+                        )
+                        sectordata.write(
+                            worksheet,
+                            xls_index,
+                            ilis_data.Name.values[:, np.newaxis],
+                            offset=(0, 1),
+                        )
+                        # write transformed ilis data
+                        sectordata.write(
+                            worksheet,
+                            xls_index,
+                            self.transform(
+                                opt_x.data, ilis_data.loc[:, ["x", "y", "z"]].values
+                            ),
+                            offset=(0, 2),
+                        )
 
     def _write_transform(self, worksheet, xls_index, opt_x):
         """Write transform to worksheet."""
@@ -144,7 +237,11 @@ class FiducialFit(FiducialData):
             self.gpr.fit(delta[coil_index, :, space_index])
             self.gpr.predict(self.data.arc_length)
             self.gpr.plot(
-                axes[space_index], text=False, marker="X", color="C1", line_color="C0"
+                axes[space_index],
+                text=False,
+                marker="X",
+                marker_color="C1",
+                line_color="C0",
             )
             if samples > 0:
                 self.gpr.sample(self.data.arc_length, samples)
@@ -185,7 +282,10 @@ class FiducialFit(FiducialData):
         match method:
             case "rms":
                 error[0] = np.mean(delta[..., [5, 3, 4], 0] ** 2)
-                error[1] = np.mean(delta[..., 1] ** 2)
+                # error[1] = np.mean(delta[..., 1] ** 2)
+                # error[1] = np.mean(delta[..., [0, 1, 5, 3, 4, -1], 1] ** 2)
+                error[1] = np.mean(delta[..., [0, 5, 3, 4], 1] ** 2)
+
                 error[2] = np.mean(delta[..., [2, 1, -1, -2], 2] ** 2)
             case "max":
                 error[0] = np.max(abs(delta[..., [5, 3, 4], 0]))  # radial (A, B, H)
@@ -234,7 +334,18 @@ class FiducialFit(FiducialData):
 
     def points(self, coil):
         """Return reference points."""
-        return self.data[self.point_name].sel(coil=coil)
+        points = self.data[self.point_name].sel(coil=coil)
+        if self.infer:  # project gpr fiducials to ILIS mid-plane
+            target = ["B", "H", "A"]
+            points.loc[target] = self.data.fiducial.sel(coil=coil).loc[target]
+            """
+            frame = points.to_pandas()
+            frame["coil"] = np.array(coil)
+            points.loc[target].data = (
+                self.fiducial_ilis.project(frame).loc[target].values
+            )
+            """
+        return points
 
     @staticmethod
     def join(name: str, post_fix: str):
@@ -272,7 +383,14 @@ class FiducialFit(FiducialData):
         for coil in tqdm(self.data.coil, "fitting coils"):
             points = self.points(coil=coil)
             xo = np.zeros(self.data.sizes["transform"])
-            opt = minimize(self.scalar_error, xo, method="SLSQP", args=(points, coil))
+            opt = minimize(
+                self.scalar_error,
+                xo,
+                method="SLSQP",
+                # options={"ftol": 1e-4},
+                args=(points, coil),
+            )
+            print(opt)
             if not opt.success:
                 warnings.warn(f"optimization failed {opt}")
             self.data["opt_x"].loc[{"coil": coil}] = opt.x
@@ -305,6 +423,7 @@ class FiducialFit(FiducialData):
         title += f"\norigin:{self.data.origin[coil_index].data}"
         title += f" phase:{self.phase.split()[0]}"
         title += f"\ninfer:{self.infer} method: {self.method}"
+        title += f"\nilis:{self.ilis} pcr: {self.ilis_pcr}"
         self.plotter.axes[0].set_title(title, fontsize="large")
         if postfix[-3:] == "fit":
             self.text_fit(self.plotter.axes[0], coil_index)
@@ -324,16 +443,16 @@ class FiducialFit(FiducialData):
         axes.text(
             0.3,
             0.5,
-            f"dx: {opt_x[0]:1.2f}mm\n"
-            + f"dy: {opt_x[1]:1.2f}mm\n"
-            + f"dz: {opt_x[2]:1.2f}mm\n"
-            + f"rx: {opt_x[3]*deg_to_mm:1.2}"
+            f"dx: {opt_x[0]:1.3f}mm\n"
+            + f"dy: {opt_x[1]:1.3f}mm\n"
+            + f"dz: {opt_x[2]:1.3f}mm\n"
+            + f"rx: {opt_x[3]*deg_to_mm:1.3}"
             + angle_unit
             + "\n"
-            + f"ry: {opt_x[4]*deg_to_mm:1.2}"
+            + f"ry: {opt_x[4]*deg_to_mm:1.3}"
             + angle_unit
             + "\n"
-            + f"rz: {opt_x[5]*deg_to_mm:1.2}"
+            + f"rz: {opt_x[5]*deg_to_mm:1.3}"
             + angle_unit,
             va="center",
             ha="left",
@@ -347,9 +466,10 @@ class FiducialFit(FiducialData):
 
     def text_fit(self, axes, coil_index):
         """Display text transform."""
-        points = self.data[self.point_name][coil_index]
         opt_x = self.data.opt_x[coil_index].data
         coil = self.data.coil[coil_index].data
+        # points = self.data[self.point_name][coil_index]
+        points = self.points(coil)
         error = {
             "rms": np.sqrt(self.transform_error(opt_x, points, coil, "rms")),
             "max": self.transform_error(opt_x, points, coil, "max"),
@@ -428,19 +548,30 @@ class FiducialFit(FiducialData):
 
 if __name__ == "__main__":
     phase = "FAT supplier"
-    phase = "SSAT AR"
+    phase = "SSAT BR"
+    # 7: [8, 9]
+    # 6: [12, 13]
 
-    fiducial = FiducialFit(phase=phase, sectors={7: [8, 9]}, fill=False, infer=True)
-    fiducial.plot_gpr_array(1, 2)
+    fiducial = FiducialFit(
+        phase=phase,
+        sectors={6: [12]},
+        fill=False,
+        infer=True,
+        ilis=True,
+        ilis_pcr=True,
+    )
+    fiducial.build()
 
-    for coil_index in [0, 1]:
+    fiducial.plot_gpr_array(0, 2)
+
+    for coil_index in range(fiducial.data.sizes["coil"]):
         fiducial.plot_fit(coil_index)
         fiducial.plot_fit(coil_index, "fit")
         del fiducial.plotter
 
     # fiducial.plot_ensemble(True, 250)
 
-    fiducial.write("SSAT AR target")
+    fiducial.write("SSAT target")
 
     # print deltas
     coil_index = 0

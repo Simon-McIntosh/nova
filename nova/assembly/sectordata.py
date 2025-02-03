@@ -11,8 +11,9 @@ import numpy as np
 import openpyxl
 import pandas
 
-from nova.assembly.sectorfile import SectorFile
 from nova.database.filepath import FilePath
+from nova.database.netcdf import netCDF
+from nova.assembly.sectorfile import SectorFile
 
 
 @dataclass
@@ -22,12 +23,31 @@ class SectorData(FilePath, SectorFile):
     dirname: Path | str = ".nova/sector_modules"
     data: dict = field(init=False, repr=False, default_factory=dict)
     ccl: dict = field(init=False, repr=False, default_factory=dict)
-    coil: list = field(init=False, default_factory=list)
 
     def __post_init__(self):
         """Load / build dataset."""
         super().__post_init__()
-        self.load_build()
+        with self.select():
+            self.load_build()
+
+    @FilePath.filepath.getter  # type: ignore
+    def filepath(self):
+        """Extend FilePath.filepath to include pickle suffix."""
+        return super().filepath.with_suffix(".pickle")
+
+    @contextmanager
+    def select(self):
+        """Load coil subset if coil is not empty."""
+        coil = self.coil.copy()
+        yield
+        if coil:  # select coil subset
+            assert set(coil).issubset(self.coil)
+            self.coil = coil
+            self.data = {name: data for name, data in self.data.items() if name in coil}
+            self.ccl = {
+                stage: {name: data for name, data in ccl.items() if name in coil}
+                for stage, ccl in self.ccl.items()
+            }
 
     def load_build(self):
         """Load or build dataset."""
@@ -94,11 +114,15 @@ class SectorData(FilePath, SectorFile):
         yield
         self.book.save(self._xls_file)
 
-    def write(self, worksheet, xls_index, data):
+    def write(self, worksheet, xls_index, data, offset=(0, 0)):
         """Append data to workbook."""
         for i in range(data.shape[0]):
             for j in range(data.shape[1]):
-                worksheet.cell(i + xls_index[0] + 1, j + xls_index[1] + 3, data[i, j])
+                worksheet.cell(
+                    i + xls_index[0] + offset[0],
+                    j + xls_index[1] + offset[1],
+                    data[i, j],
+                )
 
     @cached_property
     def phase(self) -> list[str]:
@@ -119,6 +143,8 @@ class SectorData(FilePath, SectorFile):
                 continue
             nominal = self.data[coil]["Nominal"]
             for phase in self.phase:
+                if phase not in self.data[coil]:
+                    continue
                 self.ccl[phase][coil] = self.data[coil][phase].loc[nominal.index]
                 try:
                     self.ccl[phase][coil].loc[:, nominal.columns] -= nominal
@@ -141,7 +167,7 @@ class SectorData(FilePath, SectorFile):
         yield
         self.book.close()
 
-    def locate(self, item: str, sheet: str):
+    def locate(self, item: str, sheet: str, number=2):
         """Return item row/column locations in worksheet."""
         index = []
         for col in self.book[sheet].iter_cols():
@@ -149,7 +175,7 @@ class SectorData(FilePath, SectorFile):
                 if cell.value == item:
                     index.append((cell.row, cell.column))
                     break
-        assert len(index) == 2
+        # assert len(index) == number
         return index
 
     def _coil_index(self, sheet: str):
@@ -196,9 +222,17 @@ class SectorData(FilePath, SectorFile):
         data.index.rename(
             [name.split(".")[0] for name in data.index.names], inplace=True
         )
+        data.dropna(how="all", inplace=True)
+        data.index = pandas.MultiIndex.from_frame(data.index.to_frame().ffill())
         return data
 
 
 if __name__ == "__main__":
-    sector = SectorData(7)
+    sector = SectorData(7, [])
+    dataframe = sector.data[8]["SSAT BR"]
+
+    dataframe.dropna(how="all", inplace=True)
+
+    # print(dataframe.xs("ILIS +1 side", level=1))
+    # dataframe.dropna(how='all', inplace=True)
     # sector.build()

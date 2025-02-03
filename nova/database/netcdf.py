@@ -2,8 +2,6 @@
 
 from dataclasses import dataclass, field
 import gc
-import os
-import sys
 
 import xarray
 import xxhash
@@ -31,24 +29,6 @@ class netCDF(FilePath):
         if len(subgroup) == 0:
             return None
         return "/".join(subgroup)
-
-    def _clear(self):
-        """Clear datafile at self.filepath."""
-        if os.path.isfile(self.filepath):
-            os.remove(self.filepath)
-
-    @property
-    def clear(self):
-        """Clear cached datafile at self.filepath."""
-        if os.path.isfile(self.filepath):
-            remove = input(
-                "Confirm removal of the following cached datafile:"
-                f"\n{self.filepath}\nProceed (Y/n)?"
-            )
-            if remove == "" or remove.lower() == "y":
-                os.remove(self.filepath)
-            return
-        sys.stdout.write(f"Cached datafile clear:\n{self.filepath}")
 
     def hash_attrs(self, attrs: dict) -> str:
         """Return xxh32 hex hash of attrs dict."""

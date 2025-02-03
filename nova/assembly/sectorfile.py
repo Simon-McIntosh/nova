@@ -1,6 +1,6 @@
 """Query sector metrology datasets."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import cached_property
 from glob import glob
 from pathlib import Path
@@ -21,6 +21,7 @@ class SectorFile:
     """
 
     sector: int
+    coil: list = field(default_factory=list)
     filename: str = ""
     version: str | int = "latest"
     datadir: str = "C:/Users/mcintos/AppData/Local/nova/sector_modules"

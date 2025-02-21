@@ -8,11 +8,10 @@ import altair as alt
 import itertools
 import numpy as np
 import pandas
-import sklearn.decomposition
-import sklearn.covariance
 
 from nova.assembly.fiducialccl import Fiducial, FiducialRE, FiducialIDM
 from nova.assembly.fiducialilis import FiducialIlis
+from nova.assembly.ilisnominal import NominalIlis
 from nova.assembly.sectordata import SectorData
 
 alt.renderers.enable("html")
@@ -117,12 +116,20 @@ class FiducialSector(Fiducial):
         # identifiy dataset
         points.loc[:, "id"] = next(count)
 
-        # identify outliers  # EmpiricalCovariance
-        cov = sklearn.covariance.MinCovDet(random_state=2025).fit(
+        """
+        # identify outliers  #  # MinCovDet(random_state=2025)
+        from sklearn.neighbors import LocalOutlierFactor
+
+        clf = LocalOutlierFactor(n_neighbors=20, contamination=0.1)
+        points.loc[:, "outlier_factor"] = clf.fit_predict(
+            points.loc[:, ["x", "y", "z"]]
+        )
+
+        cov = sklearn.covariance.MinCovDet().fit(
             points.loc[:, ["x", "y", "z"]]
         )
         points.loc[:, "mahalanobis"] = cov.mahalanobis(points.loc[:, ["x", "y", "z"]])
-
+        """
         points.loc[:, "feature"] = f"ILIS {ilis}"
         points.reset_index(inplace=True)
 
@@ -183,7 +190,7 @@ class FiducialSector(Fiducial):
 
 if __name__ == "__main__":
     sectors = {7: [8, 9]}
-    sectors = {6: [12]}  # , 13
+    sectors = {6: [12, 13]}  # , 13
     # sectors = [6]
     fiducial = FiducialSector(phase="SSAT target", sectors=sectors)  # , sectors=[8]
     # fiducial.compare("RE")
@@ -212,16 +219,31 @@ if __name__ == "__main__":
 
     ccl = pandas.concat([ccl_a, ccl_b], axis=0)
     """
+    
 
-    data = pandas.merge(fiducial.ilis, ccl, how="outer")
+    ilis = FiducialIlis(fiducial.ilis)
+    nominal = NominalIlis()
+
+    print(nominal.angle_to_xz(ilis.planes))
+
+    print(nominal.angle_to_xz(nominal.planes))
+
+    print("***")
+
+    print(nominal.analize_offsets(fiducial.ilis))
+
+    print(nominal.analize_offsets(ilis.planes))
+
+    print("***")
+
+    data = pandas.merge(ilis.data, ccl, how="outer")
 
     # data.loc[:, 'ro_phi'] = data.x
 
     data.loc[data.feature == "CCL", "type"] = "original"
     ccl_points = data.loc[data.feature == "CCL", :].copy()
 
-
-    ilis = FiducialIlis(fiducial.ilis)
+    # ilis =
 
     # data.loc[:, ["x", "y", "z"]] = ilis.project(data)
     # data.loc[:, "r"] = np.linalg.norm(data.loc[:, ["x", "y"]], axis=1)
@@ -235,9 +257,13 @@ if __name__ == "__main__":
     ].map(lambda name: f"{name}'")
     data.loc[data.feature == "CCL", "type"] = "projected"
 
+    print(data.columns)
+
     data = pandas.concat([data, ccl_points])
 
-    #data.loc[:, "ro_phi"] = data.y
+    print(data.columns)
+
+    # data.loc[:, "ro_phi"] = data.y
 
     base = alt.Chart(data, width=125, height=175)
 
@@ -245,7 +271,8 @@ if __name__ == "__main__":
         "ILIS": alt.FieldOneOfPredicate(
             field="feature", oneOf=[f"ILIS {sign}1" for sign in ["+", "-"]]
         ),
-        "ILIS_outlier": alt.datum.mahalanobis > ilis.outlier_limit,
+        "ILIS_outlier": alt.datum.outlier,
+        # "ILIS_outlier": alt.datum.outlier_factor < 0,
         "CCL": alt.datum.feature == "CCL",
     }
 
@@ -256,14 +283,14 @@ if __name__ == "__main__":
             x="ro_phi",
             y="z",
             color=alt.Color("r").title("radius").scale(scheme="blueorange"),
-            tooltip=["Name"],
+            tooltip=["Name", "offset"],
         )
     )
 
     fit = (
         base.mark_line()
         .transform_filter(select["ILIS"])
-        .transform_filter(alt.datum.mahalanobis < ilis.outlier_limit)
+        .transform_filter(select["ILIS_outlier"])
         .transform_regression("z", "ro_phi", groupby=["coil", "ilis"])
         .mark_line(color="gray")
         .encode(x="ro_phi", y="z")
@@ -272,7 +299,7 @@ if __name__ == "__main__":
     outlier = (
         base.mark_circle(size=80, color="red", filled=False)
         .transform_filter(select["ILIS_outlier"])
-        .encode(x="ro_phi", y="z", tooltip=["Name"])
+        .encode(x="ro_phi", y="z", tooltip=["Name", "offset"])
     )
 
     ccl_points = (
@@ -329,4 +356,24 @@ if __name__ == "__main__":
         .configure_axis(grid=False)
         .configure_view(stroke=None)
     )
+    """
+
+    """
+    import vedo
+
+    ilis = FiducialIlis(fiducial.ilis)
+
+    points = data.loc[:, ['x', 'y', 'z', 'r', 'ro_phi']].copy()
+    #points.loc[:, 'r'] /= 6000
+    #points.loc[:, 'z'] /= 20
+    points['offset'] = 0
+
+    coil = 13
+    plane = 'ILIS -1'
+
+    index = (data.feature == plane) & (data.coil == coil)
+
+    points.loc[index, 'offset'] = 500* ilis.offset(points.loc[index], (coil, plane))
+
+    vedo.Points(points.loc[index, ['r', 'z', 'offset']]).generate_delaunay2d(tol=0.000001).c('green').show(axes=1).close()
     """

@@ -84,6 +84,7 @@ class FiducialData(netCDF, Plot, Plotter):
             self.load()
         except (FileNotFoundError, OSError):
             self.build()
+            self.store()
 
     @cached_property
     def dataset(self):
@@ -101,16 +102,15 @@ class FiducialData(netCDF, Plot, Plotter):
             self.backfill()
         self.locate_coils()
         self.build_mesh()
-        self.store()
+        self._update_attrs()
 
-    def store(self):
-        """Extend store method to include attribute hash"""
+    def _update_attrs(self):
+        """Add attributes to data."""
         attrs = self.fiducial_attrs
         for attr, value in attrs.items():
             if isinstance(value, bool):
                 attrs[attr] = int(value)
         self.data.attrs |= attrs
-        super().store()
 
     def build_dataset(self):
         """Build xarray dataset."""
@@ -273,6 +273,11 @@ class FiducialData(netCDF, Plot, Plotter):
             1e3 * centerline.mesh.points,
         )
 
+    @cached_property
+    def fiducial_ilis(self):
+        """Return FiducialIlis instance."""
+        return FiducialIlis(self.dataset.ilis, pcr=self.ilis_pcr)
+
     def load_fiducial_deltas(self):
         """Load fiducial deltas."""
         delta = self.dataset.data[0]
@@ -283,7 +288,6 @@ class FiducialData(netCDF, Plot, Plotter):
         if hasattr(self.dataset, "ilis") and self.ilis:
             # adjust nose fiducials to mean ilis plane
             target = ["B", "H", "A"]
-            ilis = FiducialIlis(self.dataset.ilis, pcr=self.ilis_pcr)
             # map fiducial deltas onto coil
             data = (self.data["fiducial_delta"] + self.data["fiducial_target"]).sel(
                 target=target
@@ -293,10 +297,8 @@ class FiducialData(netCDF, Plot, Plotter):
                 {coil: data.sel(coil=coil).to_pandas() for coil in data.coil.data}
             )
             dataframe.index.set_names(["coil", "target"], inplace=True)
-            # save projection transform to instance
-            self.fiducial_ilis = ilis
             # project to ilis plane
-            dataframe = ilis.project(dataframe)
+            dataframe = self.fiducial_ilis.project(dataframe)
             for i, (_, frame) in enumerate(dataframe.groupby("coil")):
                 data.data[i] = frame.values  # reassign data
             # update fiducial deltas with tagets aligned to ilis midplane
@@ -355,7 +357,8 @@ class FiducialData(netCDF, Plot, Plotter):
             case _:
                 raise ValueError(f"variance {self.variance} not file or float")
         self.gpr = GaussianProcessRegressor(
-            self.data.target_length[coil_index], variance=variance
+            self.data.target_length[coil_index],
+            variance=variance,
         )
         return self.gpr.evaluate(
             self.data.arc_length, self.data.fiducial_delta[coil_index, :, space_index]

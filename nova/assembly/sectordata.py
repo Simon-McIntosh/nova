@@ -12,7 +12,6 @@ import openpyxl
 import pandas
 
 from nova.database.filepath import FilePath
-from nova.database.netcdf import netCDF
 from nova.assembly.sectorfile import SectorFile
 
 

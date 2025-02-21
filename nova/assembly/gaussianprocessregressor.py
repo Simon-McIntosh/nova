@@ -41,7 +41,9 @@ class GaussianProcessRegressor:
             )
             kernel = expsinesquared + constant
             self.regressor = sklearn.gaussian_process.GaussianProcessRegressor(
-                kernel=kernel, alpha=self.variance
+                kernel=kernel,
+                alpha=self.variance,
+                random_state=2025,
             )
 
     @staticmethod

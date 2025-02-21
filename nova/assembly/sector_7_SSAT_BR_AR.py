@@ -6,16 +6,20 @@ from nova.assembly.fiducialfit import FiducialFit
 from nova.assembly.fiducialplotter import FiducialPlotter
 from nova.assembly.transform import Rotate
 
+sectors = {7: [8, 9]}
+
+sectors = {6: [12, 13]}
+
 coil_index = 1
 
-ssat_br = FiducialFit(phase="SSAT BR", sectors={7: [8, 9]}, fill=False)
+ssat_br = FiducialFit(phase="SSAT target", sectors=sectors, fill=False)
 plot_br = FiducialPlotter(ssat_br.data)
 
 plot_br.target(coil_index)
 plot_br.fiducial("fit", color="C0", coil_index=coil_index)
 plot_br.centerline("fit", label="SSAT BR target", color="C0", coil_index=coil_index)
 
-ssat_ar = FiducialFit(phase="SSAT AR", sectors={7: [8, 9]}, fill=False)
+ssat_ar = FiducialFit(phase="SSAT AR", sectors=sectors, fill=False)
 plot_ar = FiducialPlotter(ssat_ar.data, axes=plot_br.axes)
 plot_ar.fiducial(color="C1", coil_index=coil_index)
 plot_ar.centerline(label="SSAT AR mesurment", color="C1", coil_index=coil_index)
@@ -48,8 +52,9 @@ def to_pandas(data, target="fiducial"):
 
 # print(to_pandas(ssat_br.data, target="fiducial_fit_gpr"))
 
-print(to_pandas(ssat_br.data, target="fiducial_fit_gpr"))
+# print(to_pandas(ssat_br.data, target="fiducial_fit_gpr"))
 
+pd.options.display.precision = 3
 print(to_pandas(ssat_ar.data, target="fiducial_gpr"))
 
 ssat_br.plot_gpr_array(coil_index, 3)

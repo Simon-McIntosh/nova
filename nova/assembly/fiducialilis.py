@@ -4,19 +4,17 @@ from functools import cached_property
 
 import numpy as np
 import pandas
-import sklearn.decomposition
+
+from nova.assembly.ilisnominal import NominalIlis
 
 
 @dataclass
 class FiducialIlis:
-    """Intersection Line Intersection Surface class.
-
-    A class to handle intersection line and surface calculations.
-    """
+    """Fit planes to Ilis points"""
 
     data: pandas.DataFrame = field(repr=False)
     pcr: bool = True  # incorporate pcr data for ILIS offsets
-    outlier_limit: float = 20
+    # outlier_limit: float = 20
     planes: pandas.DataFrame = field(init=False)
 
     deviation: ClassVar[dict[int, list]] = {
@@ -42,8 +40,27 @@ class FiducialIlis:
 
     def __post_init__(self):
         """Build geometry from input data."""
-        self.data = self.data.loc[self.data.mahalanobis < self.outlier_limit, :]
+        self._identify_outliers()
         self._extract_planes()
+
+    def _identify_outliers(self):
+        """Identify outliers in input point-cloud ILIS plane mesurment sets."""
+        self.planes = NominalIlis.fit_plane(
+            self.data
+        )  # use a temporary set of planes for outlier detection algorithum
+
+        outlier = self.data.groupby(["coil", "feature"], group_keys=False).apply(
+            lambda x: pandas.Series(self._detect(x, x.name, 3))
+        )
+        self.data.loc[:, "outlier"] = outlier.reset_index(drop=True)
+
+        self.data.loc[:, "offset"] = (
+            self.data.groupby(["coil", "feature"], group_keys=False)
+            .apply(
+                lambda x: pandas.Series(self.offset(x.loc[:, ["x", "y", "z"]], x.name))
+            )
+            .reset_index(drop=True)
+        )
 
     @cached_property
     def ilis_offset(self):
@@ -62,7 +79,8 @@ class FiducialIlis:
 
     def _extract_planes(self):
         """Extract ilis and center planes from input data."""
-        pca = sklearn.decomposition.PCA(3)
+        """
+        pca = sklearn.decomposition.PCA(3, random_state=2025)
         normals = (
             self.data.loc[:, ["x", "y", "z"]]
             .groupby([self.data.coil, self.data.feature])
@@ -72,19 +90,48 @@ class FiducialIlis:
                 )
             )
         )
-        points = self.data.loc[:, ["x", "y", "z"]].groupby(self.data.feature).mean()
+        points = (
+            self.data.loc[:, ["x", "y", "z"]]
+            .groupby([self.data.coil, self.data.feature])
+            .mean()
+        )
         self.planes = points.join(normals).join(
             self.ilis_offset, how="inner", on=["coil", "feature"]
         )
+
+        print(NominalIlis.fit_plane(self.data))
+        """
+        self.planes = NominalIlis.fit_plane(self.data).join(
+            self.ilis_offset, how="inner", on=["coil", "feature"]
+        )
+
         if self.pcr:  # offset ilis planes by deviation
             self.planes.loc[:, ["x", "y", "z"]] -= (
                 self.planes.loc[:, "offset"].values[:, np.newaxis]
                 * self.planes.loc[:, ["nx", "ny", "nz"]].values
             )
+
+        def intersect(planes):
+            """Intersect planes to find midplane."""
+            points = planes.loc[:, ["x", "y", "z"]].copy().values
+            normals = planes.loc[:, ["nx", "ny", "nz"]].copy().values
+            dot_normals = np.dot(*normals)
+            distance = np.einsum("ij,ij->i", points, normals)
+            coef = np.linalg.solve(
+                np.array([[1, dot_normals], [dot_normals, 1]]), distance
+            )
+            point = coef @ normals
+            midplane = planes.mean(axis=0)
+            midplane.loc[["x", "y", "z"]] = point
+            return midplane
+
+        midplane = self.planes.groupby(level=0).apply(lambda x: intersect(x))
+        """
         midplane = self.planes.groupby(level=0).mean()
         midplane.loc[:, ["nx", "ny", "nz"]] = midplane.loc[:, ["nx", "ny", "nz"]].agg(
             lambda x: x / np.linalg.norm(x), axis=1
         )
+        """
         midplane.loc[:, "feature"] = "ILIS 0"
         midplane.set_index("feature", append=True, inplace=True)
         self.planes = pandas.concat([self.planes, midplane]).sort_index()
@@ -97,11 +144,40 @@ class FiducialIlis:
             lambda x: self._project(x.loc[:, ["x", "y", "z"]], (x.name, plane))
         )
 
+    def _detect(self, points, plane, standard_deviations=3):
+        """Detect outliers in points relative to plane."""
+        offset = self.offset(points, plane, return_normal=False)
+        dist = np.abs(offset)
+        std = np.std(dist)
+        threshold = standard_deviations * std
+        outliers = dist > threshold
+
+        return outliers
+
+    def offset(self, points, plane, return_normal=False):
+        """Return signed offset between points and plane."""
+
+        if isinstance(plane, (pandas.Index, tuple)):
+            plane = self.planes.loc[plane]
+
+        normal = plane.loc[["nx", "ny", "nz"]].values
+        point = plane.loc[["x", "y", "z"]].values
+
+        # Ensure normal is normalized
+        normal = normal / np.linalg.norm(normal, axis=0)
+
+        # Calculate signed distance from each point to plane
+        v = points.loc[:, ["x", "y", "z"]] - point
+        offset = np.dot(v, normal)
+        if return_normal:
+            return offset, normal
+        return offset
+
     def _project(
         self, points: pandas.DataFrame, plane: pandas.DataFrame | pandas.Index | tuple
     ) -> pandas.DataFrame:
         """Project points onto midplane (ILIS 0)."""
-
+        """
         if isinstance(plane, (pandas.Index, tuple)):
             plane = self.planes.loc[plane]
 
@@ -114,10 +190,10 @@ class FiducialIlis:
         # Calculate signed distance from each point to plane
         v = points - point
         dist = np.dot(v, normal)
-
+        """
+        offset, normal = self.offset(points, plane, return_normal=True)
         # Project by subtracting distance along normal
-        projected = points - np.outer(dist, normal)
-
+        projected = points - np.outer(offset, normal)
         return projected
 
 
@@ -128,4 +204,4 @@ if __name__ == "__main__":
 
     ilis = FiducialIlis(fiducial.ilis)
 
-    print(ilis.project(ilis.planes, "ILIS 0"))
+    # print(ilis.project(ilis.planes, "ILIS 0"))

@@ -49,24 +49,30 @@ class FiducialFit(FiducialData):
         self.evaluate_gpr("fiducial", "gpr")
         self.fit()
         self.evaluate_gpr("fiducial_fit", "fit_gpr")
-        self.store()
 
     def write(self, sheet: str):
         """Write fits to source xls files."""
         for sector in tqdm(self.data.sector.data, "updating xls workbooks"):
             sectordata = SectorData(sector)
             coils = self.data.coils.sel(sector=sector)
+
             with sectordata.openbook(), sectordata.savebook():
-                last_sheet = sectordata.book.sheetnames[-1]
-                sectordata.book.create_sheet(sheet)
+                if sheet not in sectordata.book.sheetnames:
+                    sectordata.book.create_sheet(sheet)
+                    last_sheet = sectordata.book.sheetnames[-1]
+                else:
+                    last_sheet = sectordata.book.sheetnames[-2]
                 worksheet = sectordata.book[sheet]
-                for coil, coil_index, fiducial_index, ilis_p, ilis_m in zip(
-                    coils.data,
-                    sectordata._coil_index(last_sheet),
-                    sectordata.locate("Fiducial", last_sheet),
-                    sectordata.locate("ILIS +1 side", last_sheet),
-                    sectordata.locate("ILIS -1 side", last_sheet),
-                ):
+
+                workcell = {
+                    "coil": sectordata._coil_index(last_sheet),
+                    "fiducial": sectordata.locate("Fiducial", last_sheet),
+                    "ilis_p": sectordata.locate("ILIS +1 side", last_sheet),
+                    "ilis_m": sectordata.locate("ILIS -1 side", last_sheet),
+                }
+
+                for coil in coils.data:
+                    cell_index = sectordata.coil.index(coil)
                     data = self.data.fiducial_fit.sel(coil=coil).sortby("target").data
                     std = (
                         self.data.fiducial_fit_gpr_std.sel(coil=coil)
@@ -76,26 +82,26 @@ class FiducialFit(FiducialData):
                     # write coil header
                     sectordata.write(
                         worksheet,
-                        coil_index,
+                        workcell["coil"][cell_index],
                         np.array(
                             [["Coil", "Point", "Name", "X", "Y", "Z", "uX", "uY", "uZ"]]
                         ),
                     )
                     sectordata.write(
                         worksheet,
-                        coil_index,
+                        workcell["coil"][cell_index],
                         np.array([[coil]]),
                         offset=(1, 0),
                     )
                     sectordata.write(
                         worksheet,
-                        coil_index,
+                        workcell["coil"][cell_index],
                         np.array([["CCL"]]),
                         offset=(1, 1),
                     )
                     sectordata.write(
                         worksheet,
-                        coil_index,
+                        workcell["coil"][cell_index],
                         sectordata.data[coil]["Nominal"]
                         .index.get_level_values("Name")
                         .values[:, np.newaxis],
@@ -105,21 +111,23 @@ class FiducialFit(FiducialData):
                     # write ccl data
                     sectordata.write(
                         worksheet,
-                        coil_index,
+                        workcell["coil"][cell_index],
                         np.append(data, 2 * std, axis=1),
                         offset=(1, 3),
                     )
                     opt_x = self.data.opt_x.sel(coil=coil)
-                    self._write_transform(worksheet, coil_index, opt_x)
+                    self._write_transform(
+                        worksheet, workcell["coil"][cell_index], opt_x
+                    )
                     # write fiducial header
                     sectordata.write(
                         worksheet,
-                        fiducial_index,
+                        workcell["fiducial"][cell_index],
                         np.array([["Fiducial"]]),
                     )
                     sectordata.write(
                         worksheet,
-                        fiducial_index,
+                        workcell["fiducial"][cell_index],
                         self.dataset.case[coil]
                         .index.get_level_values("Name")
                         .values[:, np.newaxis],
@@ -128,7 +136,7 @@ class FiducialFit(FiducialData):
                     # write transformed case fiducial data
                     sectordata.write(
                         worksheet,
-                        fiducial_index,
+                        workcell["fiducial"][cell_index],
                         self.transform(
                             opt_x.data,
                             self.dataset.case[coil].loc[:, ["x", "y", "z"]].values,
@@ -137,7 +145,13 @@ class FiducialFit(FiducialData):
                     )
 
                     # write ilis
-                    for side, xls_index in zip(["+1", "-1"], [ilis_p, ilis_m]):
+                    for side, xls_index in zip(
+                        ["+1", "-1"],
+                        [
+                            workcell["ilis_p"][cell_index],
+                            workcell["ilis_m"][cell_index],
+                        ],
+                    ):
                         ilis_data = self.dataset.ilis.loc[
                             (self.dataset.ilis.coil == coil)
                             & (self.dataset.ilis.feature == f"ILIS {side}")
@@ -259,6 +273,7 @@ class FiducialFit(FiducialData):
 
     def transform(self, x, points) -> xarray.DataArray:
         """Return points transformed by vector x."""
+        points = points.copy()
         points = points[:] + x[:3]
         if len(x) == 6:
             rotate = Rotation.from_euler("XYZ", x[-3:], degrees=True)
@@ -335,16 +350,19 @@ class FiducialFit(FiducialData):
     def points(self, coil):
         """Return reference points."""
         points = self.data[self.point_name].sel(coil=coil)
-        if self.infer:  # project gpr fiducials to ILIS mid-plane
+        if self.infer:
             target = ["B", "H", "A"]
-            points.loc[target] = self.data.fiducial.sel(coil=coil).loc[target]
-            """
+            # points.loc[target] = self.data.fiducial.sel(coil=coil).loc[target]
+            # project gpr fiducials to ILIS mid-plane
             frame = points.to_pandas()
             frame["coil"] = np.array(coil)
-            points.loc[target].data = (
-                self.fiducial_ilis.project(frame).loc[target].values
+            _points = self.fiducial_ilis.project(frame).loc[target]
+            _phi = np.arctan2(_points.y, _points.x)
+            radius = np.sqrt(
+                points.loc[target, "x"] ** 2 + points.loc[target, "y"] ** 2
             )
-            """
+            points.loc[target, "x"] = radius * np.cos(_phi)
+            points.loc[target, "y"] = radius * np.sin(_phi)
         return points
 
     @staticmethod
@@ -365,7 +383,6 @@ class FiducialFit(FiducialData):
         for attr in transform_attrs:
             self.data[f"{attr}_fit"] = xarray.zeros_like(self.data[attr])
 
-        # self.data["centerline_target_fit"] =
         self.data.coords["transform"] = ["x", "y", "z", "xx", "yy", "zz"]
         self.data["opt_x"] = xarray.DataArray(
             0.0,
@@ -387,10 +404,8 @@ class FiducialFit(FiducialData):
                 self.scalar_error,
                 xo,
                 method="SLSQP",
-                # options={"ftol": 1e-4},
                 args=(points, coil),
             )
-            print(opt)
             if not opt.success:
                 warnings.warn(f"optimization failed {opt}")
             self.data["opt_x"].loc[{"coil": coil}] = opt.x
@@ -554,11 +569,11 @@ if __name__ == "__main__":
 
     fiducial = FiducialFit(
         phase=phase,
-        sectors={6: [12]},
+        sectors={6: [13]},
         fill=False,
         infer=True,
         ilis=True,
-        ilis_pcr=True,
+        ilis_pcr=False,
     )
     fiducial.build()
 

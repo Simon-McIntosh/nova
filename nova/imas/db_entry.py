@@ -7,8 +7,8 @@ from nova.imas.callstate import Callstate
 from nova.imas.dataset import Ids
 from nova.utilities.importmanager import check_import
 
-with check_import("imaspy"):
-    import imaspy as imas
+with check_import("imas"):
+    import imas
 
 
 @dataclass
@@ -23,7 +23,7 @@ class DBEntry(imas.DBEntry):
     callstate: Callstate = field(init=False, repr=False, default_factory=Callstate)
 
     def __post_init__(self):
-        """Extend imaspy and restrict operation to AL5."""
+        """Extend imas and restrict operation to AL5."""
         super().__init__(
             self.uri, self.mode, dd_version=self.dd_version, xml_path=self.xml_path
         )
@@ -60,7 +60,7 @@ class DBEntry(imas.DBEntry):
             return False
 
     def __enter__(self):
-        """Return open ids. Extend imaspy DBEntry.enter."""
+        """Return open ids. Extend imas DBEntry.enter."""
         super().__enter__()
         return self.get(
             *self.callstate.args,
@@ -69,7 +69,7 @@ class DBEntry(imas.DBEntry):
         )
 
     def close(self):
-        """Extend imaspy.db_entry.close. Clear callstate before exit."""
+        """Extend imas.db_entry.close. Clear callstate before exit."""
         self.callstate.clear()
         super().close()
 

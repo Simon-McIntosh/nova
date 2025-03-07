@@ -4,7 +4,7 @@ import pytest
 from nova.imas.matrix import Benchmark
 
 try:
-    import imaspy as imas
+    import imas
 except ImportError:
     pytest.skip("IMASPy module unavailable", allow_module_level=True)
 

@@ -2,7 +2,7 @@ import pytest
 
 import numpy as np
 
-import imaspy as imas
+import imas
 
 from nova.imas.dataset import IdsBase
 from nova.imas.ids_index import IdsIndex

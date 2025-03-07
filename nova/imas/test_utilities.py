@@ -5,8 +5,8 @@ import pytest
 from nova.imas.database import Database
 from nova.utilities.importmanager import mark_import
 
-with mark_import("imaspy") as mark_imas:
-    from imaspy.exception import ALException  # noqa
+with mark_import("imas") as mark_imas:
+    from imas.exception import ALException  # noqa
 
 IMPORT_IMAS = not any(mark_imas.args[0])
 

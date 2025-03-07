@@ -5,9 +5,9 @@ from operator import attrgetter
 
 from functools import cached_property
 
-import imaspy
-from imaspy.ids_struct_array import IDSStructArray
-from imaspy.ids_toplevel import IDSToplevel
+import imas
+from imas.ids_struct_array import IDSStructArray
+from imas.ids_toplevel import IDSToplevel
 
 import xarray
 
@@ -92,7 +92,7 @@ class Magnetics(Plot, CoilSet, CoilData, Scenario):
         print(self.aos["area.metadata.units"])
         data = xarray.Dataset(data)
 
-        imaspy.util.print_tree(ids.flux_loop[0], hide_empty_nodes=False)
+        imas.util.print_tree(ids.flux_loop[0], hide_empty_nodes=False)
         # print(flux_loop[0].name.metadata.units)
         # print(flux_loop[0].)
         # reduce(operator.ior, list_of_dicts, {})
@@ -124,9 +124,9 @@ if __name__ == "__main__":
 
     magnetics.aos.data
     """
-    import imaspy
+    import imas
 
-    db_entry = imaspy.DBEntry(magnetics.uri, "a")
+    db_entry = imas.DBEntry(magnetics.uri, "a")
     db_entry.open()
     ids_data = db_entry.get("magnetics")
     db_entry.close()

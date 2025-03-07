@@ -195,7 +195,7 @@ class Metadata:
 
 
 if __name__ == "__main__":
-    import imaspy as imas
+    import imas
 
     ids = imas.IDSFactory().equilibrium()
 

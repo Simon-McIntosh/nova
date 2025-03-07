@@ -2,7 +2,7 @@ import os
 import pytest
 import tempfile
 
-import imaspy as imas
+import imas
 import numpy as np
 
 from nova.imas.dataset import Dataset

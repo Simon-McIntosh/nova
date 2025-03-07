@@ -10,9 +10,9 @@ from typing import Any, ClassVar, Optional, Type
 
 from nova.utilities.importmanager import check_import
 
-with check_import("imaspy"):
-    import imaspy as imas
-    from imaspy.ids_toplevel import IDSToplevel
+with check_import("imas"):
+    import imas
+    from imas.ids_toplevel import IDSToplevel
 
 logging.basicConfig(level=logging.WARNING)
 

@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from functools import cached_property
 from typing import ClassVar, final
 
-from imaspy.exception import DataEntryException
+from imas.exception import DataEntryException
 import json
 import numpy as np
 from scipy.spatial import ConvexHull

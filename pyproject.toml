@@ -70,7 +70,7 @@ ansys = [
 ]
 bamboo = ["coverage2clover>=4.0.0", "tox>=4.6.4"]
 imas = [
-  "imaspy @ git+ssh://git@git.iter.org/imas/imaspy.git",
+  "imas-python @ git+https://github.com/maarten-ic/imas-python.git@feature/to-xarray",
   "imas-core @ git+ssh://git@git.iter.org/imas/al-core.git",
   "h5py>=3.10.0",
 ]

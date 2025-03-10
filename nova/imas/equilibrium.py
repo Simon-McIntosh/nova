@@ -919,7 +919,7 @@ if __name__ == "__main__":
     kwargs = {"pulse": 17151, "run": 4, "machine": "aug"}
     # kwargs = {"pulse": 110501, "run": 3}
 
-    equilibrium = EquilibriumData(**kwargs)
+    equilibrium = EquilibriumData(**kwargs, dd_version='3.42.0', lazy=False)
     equilibrium.itime = 10
     equilibrium.plot_2d()
 

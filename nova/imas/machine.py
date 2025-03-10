@@ -1284,7 +1284,7 @@ if __name__ == "__main__":
     doctest.testmod(verbose=False)
 
     kwargs = {"pulse": 105028, "run": 1, "machine": "iter_md"}  # DINA
-    # kwargs = {"pulse": 105028, "run": 1, "machine": "iter"}  # DINA
+    kwargs = {"pulse": 105028, "run": 1, "machine": "iter"}  # DINA
     # kwargs = {"pulse": 45272, "run": 1, "machine": "mast_u"}  # MastU
     # kwargs = {"pulse": 57410, "run": 0, "machine": "west"}  # WEST
     # kwargs = {"pulse": 17151, "run": 3, "machine": "aug", "pf_passive": False}
@@ -1292,8 +1292,8 @@ if __name__ == "__main__":
     machine = Machine(
         **kwargs,
         pf_active=True,
-        pf_passive=True,
-        wall=True,
+        pf_passive=False,
+        wall=False,
         tplasma="h",
         ninductance=10,
         dshell=1.5,

@@ -257,7 +257,7 @@ if __name__ == "__main__":
     # machine.load_ids('pf_active')
     # print(machine.frame)
     # MachineDatabase(modules=("IMAS/3.37.0-4.11.0-2020b",)).sync_shot("111003/1")
-    # MachineDatabase().sync_shot("111001/103")
+    MachineDatabase().sync_shot("111001/204")
     # MachineDatabase().rsync()
 
     # iter_md = MachineDatabase(machine="ITER_MD")
@@ -265,7 +265,7 @@ if __name__ == "__main__":
     # ScenarioDatabase().sync_shot("111003/1")
 
     # ScenarioDatabase().sync_shot("111001/103")
-    ScenarioDatabase(machine="aug", workflow=[]).rsync()
+    # ScenarioDatabase(machine="aug", workflow=[]).rsync()
     # ScenarioDatabase(machine="west", workflow=[]).rsync()
     # ScenarioDatabase(user='tribolp').sync_shot('135011/21')
     # ScenarioDatabase(user='dubrovm').sync_shot('105028/1')

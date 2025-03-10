@@ -77,7 +77,7 @@ if __name__ == "__main__":
 
     kwargs = {"pulse": 57410, "run": 0, "machine": "west", "occurrence": 0}  # WEST
 
-    pf_active = PF_Active(**kwargs)
+    pf_active = PF_Active(**kwargs, dd_version='3.42.0', lazy=False)
     # pf_active.build()
     # pf_active = PF_Active(105007, 9)  # b field max timed 135002, 5
     pf_active.plot()

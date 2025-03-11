@@ -32,9 +32,7 @@ class FiducialSector(Fiducial):
     variance: dict[str, pandas.DataFrame] | dict = field(
         init=False, repr=False, default_factory=dict
     )
-    ilis: dict[str, pandas.DataFrame] | dict = field(
-        init=False, repr=False, default_factory=dict
-    )
+    ilis: pandas.DataFrame = field(init=False, repr=False, default_factory=dict)
 
     sheets: ClassVar[dict[str, str]] = {
         "FATsup": "FAT supplier",
@@ -190,9 +188,9 @@ class FiducialSector(Fiducial):
 
 if __name__ == "__main__":
     sectors = {7: [8, 9]}
-    sectors = {6: [12, 13]}  # , 13
+    # sectors = {6: [12, 13]}  # , 13
     # sectors = [6]
-    fiducial = FiducialSector(phase="SSAT target", sectors=sectors)  # , sectors=[8]
+    fiducial = FiducialSector(phase="In-pit target", sectors=sectors)  # , sectors=[8]
     # fiducial.compare("RE")
 
     ccl = pandas.concat(fiducial.delta).rename(
@@ -219,14 +217,14 @@ if __name__ == "__main__":
 
     ccl = pandas.concat([ccl_a, ccl_b], axis=0)
     """
-    
 
-    ilis = FiducialIlis(fiducial.ilis)
+    ilis = FiducialIlis(fiducial.ilis, pcr=False)
     nominal = NominalIlis()
 
     print(nominal.angle_to_xz(ilis.planes))
+    print(nominal.angle_to_xy(ilis.planes))
 
-    print(nominal.angle_to_xz(nominal.planes))
+    # print(nominal.angle_to_xz(nominal.planes))
 
     print("***")
 

@@ -39,21 +39,22 @@ class Rotate:
     @staticmethod
     def to_cylindrical(dataarray: xarray.DataArray) -> xarray.DataArray:
         """Retun dataarray transformed from cartesian to cylindrical coords."""
+        radius = np.linalg.norm(dataarray[..., :2], axis=-1)
         phi = np.arctan2(dataarray[..., 1].data, dataarray[..., 0].data)
         dataarray = (
             dataarray.copy()
             .rename(dict(cartesian="cylindrical"))
             .assign_coords(dict(cylindrical=["r", "ro_phi", "z"]))
         )
-        dataarray[..., 0] = np.linalg.norm(dataarray[..., :2], axis=-1)
-        dataarray[..., 1] = Rotate.radius * phi  # dataarray[..., 0] * phi
+        dataarray[..., 0] = radius
+        dataarray[..., 1] = radius * phi  # Rotate.radius * phi  #
         return dataarray
 
     @staticmethod
     def to_cartesian(dataarray: xarray.DataArray) -> xarray.DataArray:
         """Retun dataarray transformed from cylindrical to cartesian coords."""
         radius = dataarray[..., 0].data
-        phi = dataarray[..., 1].data / Rotate.radius  # radius
+        phi = dataarray[..., 1].data / radius  # Rotate.radius  # radius
         dataarray = (
             dataarray.copy()
             .rename(dict(cylindrical="cartesian"))
@@ -65,5 +66,4 @@ class Rotate:
 
 
 if __name__ == "__main__":
-
     print(Rotate().anticlock(Rotate().clock([1, 2, 3])))

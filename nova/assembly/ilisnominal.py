@@ -66,15 +66,30 @@ class NominalIlis:
         """Return the processed DataFrame."""
         return self._data
 
-    @staticmethod
-    def angle_to_xz(planes: pandas.DataFrame):
+    @classmethod
+    def angle_to_xz(cls, planes: pandas.DataFrame):
         """Reutrn angle in degrees of planes grouped by `feature` to xz plane."""
-        return (
-            planes[["nx", "ny", "nz"]]
-            .groupby("feature")
-            .apply(
-                lambda x: np.degrees(np.arccos(x @ np.array([0, 1, 0], dtype=float)))
-            )
+        return planes[["nx", "ny", "nz"]].apply(
+            lambda x: np.degrees(cls.dihedral_angle(x, np.array([0, 1, 0]))),
+            axis=1,
+        )
+    
+    @classmethod
+    def angle_to_xy(cls, planes: pandas.DataFrame):
+        """Reutrn angle in degrees of planes grouped by `feature` to xz plane."""
+        return planes[["nx", "ny", "nz"]].apply(
+            lambda x: np.degrees(cls.dihedral_angle(x, np.array([0, 0, 1]))),
+            axis=1,
+        )
+
+    @staticmethod
+    def dihedral_angle(n1, n2) -> float:
+        """Return the signed dihedral angle between two planes."""
+        n0 = np.cross(n1, n2)
+        n01 = np.cross(n0, n1)
+        n02 = np.cross(n0, n2)
+        return np.arccos(
+            (n01 @ n02) / (np.linalg.norm(n01) * np.linalg.norm(n02)), dtype=float
         )
 
     @cached_property
@@ -153,11 +168,8 @@ class NominalIlis:
 
     def analize_offsets(self, points):
         """Return offset statstistics between points and plane."""
-        return (
-            points.groupby(["coil", "feature"]).apply(
-                lambda x: self.get_offset(x, x.name).agg(["min", "max", "mean", "std"])
-            )
-            # .(["min", "max", "mean", "std"])
+        return points.groupby(["coil", "feature"]).apply(
+            lambda x: self.get_offset(x, x.name).agg(["min", "max", "mean", "std"])
         )
 
 

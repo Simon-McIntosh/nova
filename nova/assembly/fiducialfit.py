@@ -59,9 +59,7 @@ class FiducialFit(FiducialData):
             with sectordata.openbook(), sectordata.savebook():
                 if sheet not in sectordata.book.sheetnames:
                     sectordata.book.create_sheet(sheet)
-                    last_sheet = sectordata.book.sheetnames[-1]
-                else:
-                    last_sheet = sectordata.book.sheetnames[-2]
+                last_sheet = sectordata.book.sheetnames[-2]
                 worksheet = sectordata.book[sheet]
 
                 workcell = {
@@ -277,17 +275,23 @@ class FiducialFit(FiducialData):
         points = points[:] + x[:3]
         if len(x) == 6:
             rotate = Rotation.from_euler("XYZ", x[-3:], degrees=True)
-            points[:] = rotate.apply(points.data)
+            try:
+                for coil in points.coil:
+                    points.loc[{"coil": coil}] = rotate.apply(
+                        points.sel(coil=coil).data
+                    )
+            except (AttributeError, TypeError):
+                points[:] = rotate.apply(points.data)
         return points
 
-    def delta(self, points, coil):
+    def delta(self, points):
         """Return coil-frame deltas."""
         offset = np.zeros_like(points)
         offset[:, 0] -= self.radial_offset
         return (
             Rotate.to_cylindrical(points)
             + offset
-            - Rotate.to_cylindrical(self.data.fiducial_target.loc[coil])
+            - Rotate.to_cylindrical(self.data.fiducial_target.loc[points.coil])
         )
 
     @staticmethod
@@ -297,9 +301,11 @@ class FiducialFit(FiducialData):
         match method:
             case "rms":
                 error[0] = np.mean(delta[..., [5, 3, 4], 0] ** 2)
-                # error[1] = np.mean(delta[..., 1] ** 2)
+                toroidal_weight = np.ones_like(delta[..., 1])
+                toroidal_weight[3:6] = 10  # factor x10 for toroidal ILIS fiducials
+                error[1] = np.mean((toroidal_weight * delta[..., 1]) ** 2)
                 # error[1] = np.mean(delta[..., [0, 1, 5, 3, 4, -1], 1] ** 2)
-                error[1] = np.mean(delta[..., [0, 5, 3, 4], 1] ** 2)
+                # error[1] = np.mean(delta[..., [0, 5, 3, 4], 1] ** 2)
 
                 error[2] = np.mean(delta[..., [2, 1, -1, -2], 2] ** 2)
             case "max":
@@ -310,35 +316,33 @@ class FiducialFit(FiducialData):
                 raise NotImplementedError(f"Method {method} not implemented.")
         return error
 
-    def transform_error(self, x, points, coil, method):
+    def transform_error(self, x, points, method):
         """Return transform error vector."""
         points = self.transform(x, points)
-        return self.point_error(points, coil, method)
+        return self.point_error(points, method)
 
-    def weighted_transform_error(self, x, points, coil, method):
+    def weighted_transform_error(self, x, points, method):
         """Return weighted transform error vector."""
-        return self.transform_error(x, points, coil, method=method) * self.weights
+        return self.transform_error(x, points, method=method) * self.weights
 
-    def point_error(self, points, coil, method=None):
+    def point_error(self, points, method=None):
         """Return error vector."""
         if method is None:
             method = self.method
-        delta = self.delta(points, coil)
+        delta = self.delta(points)
         return self.error_vector(delta, method)
 
-    def max_transform_error(self, x, points, coil):
+    def max_transform_error(self, x, points):
         """Return maximum error."""
-        return np.max(self.weighted_transform_error(x, points, coil, method="max"))
+        return np.max(self.weighted_transform_error(x, points, method="max"))
 
-    def rms_transform_error(self, x, points, coil):
+    def rms_transform_error(self, x, points):
         """Return mean error."""
-        return np.sqrt(
-            np.mean(self.weighted_transform_error(x, points, coil, method="rms"))
-        )
+        return np.sqrt(np.mean(self.weighted_transform_error(x, points, method="rms")))
 
-    def scalar_error(self, x, points, coil):
+    def scalar_error(self, x, points):
         """Return scalar mesure for fit error."""
-        return getattr(self, f"{self.method}_transform_error")(x, points, coil)
+        return getattr(self, f"{self.method}_transform_error")(x, points)
 
     @property
     def point_name(self):
@@ -398,13 +402,16 @@ class FiducialFit(FiducialData):
             )
             self.data[f"{error_attr}_fit"] = xarray.zeros_like(self.data[error_attr])
         for coil in tqdm(self.data.coil, "fitting coils"):
-            points = self.points(coil=coil)
+            points = xarray.concat(
+                [self.points(coil=coil) for coil in self.data.coil], "coil"
+            )
+            # points = self.points(coil=coil)
             xo = np.zeros(self.data.sizes["transform"])
             opt = minimize(
                 self.scalar_error,
                 xo,
                 method="SLSQP",
-                args=(points, coil),
+                args=(points,),
             )
             if not opt.success:
                 warnings.warn(f"optimization failed {opt}")
@@ -418,10 +425,10 @@ class FiducialFit(FiducialData):
                 fiducial_attr = self.join("fiducial", post_fix)
                 fiducial_points = self.data[fiducial_attr].sel(coil=coil)
                 self.data[error_attr].loc[{"coil": coil}] = self.scalar_error(
-                    xo, fiducial_points, coil
+                    xo, fiducial_points
                 )
                 self.data[f"{error_attr}_fit"].loc[{"coil": coil}] = self.scalar_error(
-                    opt.x, fiducial_points, coil
+                    opt.x, fiducial_points
                 )
 
     @cached_property
@@ -461,13 +468,13 @@ class FiducialFit(FiducialData):
             f"dx: {opt_x[0]:1.3f}mm\n"
             + f"dy: {opt_x[1]:1.3f}mm\n"
             + f"dz: {opt_x[2]:1.3f}mm\n"
-            + f"rx: {opt_x[3]*deg_to_mm:1.3}"
+            + f"rx: {opt_x[3] * deg_to_mm:1.3}"
             + angle_unit
             + "\n"
-            + f"ry: {opt_x[4]*deg_to_mm:1.3}"
+            + f"ry: {opt_x[4] * deg_to_mm:1.3}"
             + angle_unit
             + "\n"
-            + f"rz: {opt_x[5]*deg_to_mm:1.3}"
+            + f"rz: {opt_x[5] * deg_to_mm:1.3}"
             + angle_unit,
             va="center",
             ha="left",
@@ -486,8 +493,8 @@ class FiducialFit(FiducialData):
         # points = self.data[self.point_name][coil_index]
         points = self.points(coil)
         error = {
-            "rms": np.sqrt(self.transform_error(opt_x, points, coil, "rms")),
-            "max": self.transform_error(opt_x, points, coil, "max"),
+            "rms": np.sqrt(self.transform_error(opt_x, points, "rms")),
+            "max": self.transform_error(opt_x, points, "max"),
         }
         text = ""
         for i, coordinate in enumerate(
@@ -564,16 +571,17 @@ class FiducialFit(FiducialData):
 if __name__ == "__main__":
     phase = "FAT supplier"
     phase = "SSAT BR"
+    phase = "SSAT AL"
     # 7: [8, 9]
     # 6: [12, 13]
 
     fiducial = FiducialFit(
         phase=phase,
-        sectors={6: [13]},
+        sectors={7: [8, 9]},
         fill=False,
         infer=True,
         ilis=True,
-        ilis_pcr=False,
+        ilis_pcr=True,
     )
     fiducial.build()
 
@@ -586,7 +594,7 @@ if __name__ == "__main__":
 
     # fiducial.plot_ensemble(True, 250)
 
-    fiducial.write("SSAT target")
+    fiducial.write("In-pit target")
 
     # print deltas
     coil_index = 0
@@ -614,4 +622,25 @@ if __name__ == "__main__":
     # fiducial.plot()
 
     # coil = 4
-    # coil_index = fiducial.coil_index(coil)
+
+    import pandas as pd
+
+    def to_pandas(data, target="fiducial"):
+        """Evaluate fit to fiducial target."""
+        target_cyl = data.fiducial_target_cyl.copy()
+        target_cyl.loc[..., "r"] += data.radial_offset
+        delta = Rotate.to_cylindrical(data[target]) - target_cyl
+        delta = Rotate.to_cartesian(delta)
+        frames = []
+        for coil in data.coil.values:
+            frame = delta.sel(coil=coil).to_pandas()  # .sortby("target")
+            frame.loc[["C", "D", "E", "F", "G"], frame.columns[0]] = ""
+            frame.loc[["A", "B", "G", "H"], "z"] = ""
+            frame.columns = pd.MultiIndex.from_product(
+                [[f"Coil {coil}"], frame.columns]
+            )
+            frames.append(frame)
+        return pd.concat(frames, axis=1)
+
+    pd.options.display.precision = 3
+    print(to_pandas(fiducial.data, target="fiducial_fit"))

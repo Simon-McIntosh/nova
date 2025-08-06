@@ -5,7 +5,7 @@ from functools import cached_property
 from glob import glob
 from pathlib import Path
 
-import numpy as np
+from packaging.version import Version
 
 
 @dataclass
@@ -23,8 +23,9 @@ class SectorFile:
     sector: int
     coil: list = field(default_factory=list)
     filename: str = ""
-    version: str | int = "latest"
+    version: str | float = "latest"
     datadir: str = "C:/Users/mcintos/AppData/Local/nova/sector_modules"
+    private: bool = False
     # datadir: str = "//io-ws-ccstore1/ANSYS_Data/mcintos/sector_modules"
     # "/mnt/share/sector_modules"
 
@@ -46,9 +47,9 @@ class SectorFile:
         self.sector = self._get_sector(self.filename)
 
     @staticmethod
-    def _get_version(filename: str) -> float:
-        """Return filename version."""
-        return float(filename.split("v")[-1].split(".")[0].replace("_", "."))
+    def _get_version(filename: str) -> str:
+        """Return filename version as string for proper version comparison."""
+        return filename.split("v")[-1].split(".")[0].replace("_", ".")
 
     @staticmethod
     def _get_sector(filename: str) -> int:
@@ -64,8 +65,8 @@ class SectorFile:
         ]
 
     @cached_property
-    def versions(self) -> list[float]:
-        """Return version list."""
+    def versions(self) -> list[str]:
+        """Return version list as strings for proper semantic version comparison."""
         versions = [self._get_version(filename) for filename in self.filenames]
         if len(versions) == 0:
             raise FileNotFoundError(
@@ -79,8 +80,15 @@ class SectorFile:
         """Locate source datafile and update filename and version."""
         match self.version:
             case "latest":
-                index = np.argmax(self.versions)
+                # Use packaging.version for proper semantic version comparison
+                parsed_versions = [Version(v) for v in self.versions]
+                max_version = max(parsed_versions)
+                index = self.versions.index(str(max_version))
             case int() | float():
+                # Convert numeric version to string for comparison
+                target_version = str(self.version)
+                index = self.versions.index(target_version)
+            case str():
                 index = self.versions.index(self.version)
             case _:
                 raise ValueError(
@@ -88,3 +96,6 @@ class SectorFile:
                 )
         self.filename = self.filenames[index]
         self.version = self.versions[index]
+
+        if self.private:
+            self.filename = "_" + self.filename  # in-work data

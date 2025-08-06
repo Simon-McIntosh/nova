@@ -30,7 +30,7 @@ class FiducialFit(FiducialData):
     radial_offset: float = (33.04 - 36) / (2 * np.pi)
     data: xarray.Dataset = field(init=False, repr=False, default_factory=xarray.Dataset)
 
-    weights: ClassVar[list[float]] = [1, 1, 0.5]
+    weights: ClassVar[list[float]] = [1, 1, 0.25]
 
     @property
     def fiducial_attrs(self):
@@ -71,7 +71,13 @@ class FiducialFit(FiducialData):
 
                 for coil in coils.data:
                     cell_index = sectordata.coil.index(coil)
+                    opt_x = self.data.opt_x.sel(coil=coil)
                     data = self.data.fiducial_fit.sel(coil=coil).sortby("target").data
+
+                    data = self.transform(
+                        opt_x.data,
+                        self.data.fiducial.sel(coil=coil).sortby("target").data,
+                    )
                     std = (
                         self.data.fiducial_fit_gpr_std.sel(coil=coil)
                         .sortby("target")
@@ -113,7 +119,7 @@ class FiducialFit(FiducialData):
                         np.append(data, 2 * std, axis=1),
                         offset=(1, 3),
                     )
-                    opt_x = self.data.opt_x.sel(coil=coil)
+
                     self._write_transform(
                         worksheet, workcell["coil"][cell_index], opt_x
                     )
@@ -301,13 +307,21 @@ class FiducialFit(FiducialData):
         match method:
             case "rms":
                 error[0] = np.mean(delta[..., [5, 3, 4], 0] ** 2)
-                toroidal_weight = np.ones_like(delta[..., 1])
-                toroidal_weight[3:6] = 10  # factor x10 for toroidal ILIS fiducials
-                error[1] = np.mean((toroidal_weight * delta[..., 1]) ** 2)
+
+                # toroidal_weight = np.ones_like(delta[..., 1])
+                # toroidal_weight[3:6] = 10  # factor x10 for toroidal ILIS fiducials
+                # error[1] = np.mean((toroidal_weight * delta[..., 1]) ** 2)
                 # error[1] = np.mean(delta[..., [0, 1, 5, 3, 4, -1], 1] ** 2)
-                # error[1] = np.mean(delta[..., [0, 5, 3, 4], 1] ** 2)
+
+                # reduced toroidal constraint set
+                error[1] = np.mean(delta[..., [0, 5, 3, 4], 1] ** 2)
 
                 error[2] = np.mean(delta[..., [2, 1, -1, -2], 2] ** 2)
+
+                # drop F and C z constraint
+                #error[2] = np.mean(delta[..., [1, 0, -1], 2] ** 2)
+
+
             case "max":
                 error[0] = np.max(abs(delta[..., [5, 3, 4], 0]))  # radial (A, B, H)
                 error[1] = np.max(abs(delta[..., 1]))  # toroidal (all)
@@ -341,7 +355,7 @@ class FiducialFit(FiducialData):
         return np.sqrt(np.mean(self.weighted_transform_error(x, points, method="rms")))
 
     def scalar_error(self, x, points):
-        """Return scalar mesure for fit error."""
+        """Return scalar measure for fit error."""
         return getattr(self, f"{self.method}_transform_error")(x, points)
 
     @property
@@ -353,13 +367,17 @@ class FiducialFit(FiducialData):
 
     def points(self, coil):
         """Return reference points."""
-        points = self.data[self.point_name].sel(coil=coil)
+        points = self.data[self.point_name].sel(coil=coil).copy()
         if self.infer:
+            #if len(self.dataset.ilis) == 0:
+            ##    raise Warning("ILIS data not found")
+            #    return points
             target = ["B", "H", "A"]
             # points.loc[target] = self.data.fiducial.sel(coil=coil).loc[target]
             # project gpr fiducials to ILIS mid-plane
             frame = points.to_pandas()
             frame["coil"] = np.array(coil)
+            
             _points = self.fiducial_ilis.project(frame).loc[target]
             _phi = np.arctan2(_points.y, _points.x)
             radius = np.sqrt(
@@ -367,6 +385,7 @@ class FiducialFit(FiducialData):
             )
             points.loc[target, "x"] = radius * np.cos(_phi)
             points.loc[target, "y"] = radius * np.sin(_phi)
+
         return points
 
     @staticmethod
@@ -403,9 +422,10 @@ class FiducialFit(FiducialData):
             self.data[f"{error_attr}_fit"] = xarray.zeros_like(self.data[error_attr])
         for coil in tqdm(self.data.coil, "fitting coils"):
             points = xarray.concat(
-                [self.points(coil=coil) for coil in self.data.coil], "coil"
+                [self.points(coil=coil).copy() for coil in self.data.coil], "coil"
             )
             # points = self.points(coil=coil)
+            # TODO fix for single vs sector
             xo = np.zeros(self.data.sizes["transform"])
             opt = minimize(
                 self.scalar_error,
@@ -570,14 +590,17 @@ class FiducialFit(FiducialData):
 
 if __name__ == "__main__":
     phase = "FAT supplier"
+    phase = "FAT IO"
     phase = "SSAT BR"
-    phase = "SSAT AL"
-    # 7: [8, 9]
-    # 6: [12, 13]
+    # phase = "SSAT target"
+    # phase = "SSAT AL"
+    sectors = {7: [8, 9]}
+    sectors = {6: [12, 13]}
+    sectors = {5: [16]}
 
     fiducial = FiducialFit(
         phase=phase,
-        sectors={7: [8, 9]},
+        sectors=sectors,
         fill=False,
         infer=True,
         ilis=True,
@@ -594,7 +617,8 @@ if __name__ == "__main__":
 
     # fiducial.plot_ensemble(True, 250)
 
-    fiducial.write("In-pit target")
+    # fiducial.write("In-pit target")
+    fiducial.write("SSAT target")
 
     # print deltas
     coil_index = 0

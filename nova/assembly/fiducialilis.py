@@ -18,24 +18,24 @@ class FiducialIlis:
     planes: pandas.DataFrame = field(init=False)
 
     deviation: ClassVar[dict[int, list]] = {
-        1: [],
-        2: [],
-        3: [],
-        4: [],
-        5: [],
-        6: [],
-        7: [],
+        1: [np.nan, np.nan],
+        2: [0, 0],
+        3: [-0.1, 0],
+        4: [0.1, 0],
+        5: [1.5, 0],
+        6: [0, 0],
+        7: [0, 0],
         8: [-1, 0],
         9: [0, 1],
-        10: [],
-        11: [],
+        10: [0.15, 0],
+        11: [0, -0.15],
         12: [0, -1.5],
         13: [0, 0],
-        14: [],
-        15: [],
-        16: [],
-        17: [],
-        18: [],
+        14: [0, 0],
+        15: [0, 0],
+        16: [0, 0.2],
+        17: [np.nan, np.nan],
+        18: [0, 0],
     }  # ilis deviation [positive side, negative side]
 
     def __post_init__(self):
@@ -52,15 +52,26 @@ class FiducialIlis:
         outlier = self.data.groupby(["coil", "feature"], group_keys=False).apply(
             lambda x: pandas.Series(self._detect(x, x.name, 3))
         )
+
+        # Ensure consistent flat Series output regardless of number of coil types
+        if isinstance(outlier, pandas.DataFrame):
+            # For single coil case: flatten the DataFrame to a Series
+            outlier = outlier.stack().droplevel(-1)
+
         self.data.loc[:, "outlier"] = outlier.reset_index(drop=True)
 
-        self.data.loc[:, "offset"] = (
-            self.data.groupby(["coil", "feature"], group_keys=False)
-            .apply(
-                lambda x: pandas.Series(self.offset(x.loc[:, ["x", "y", "z"]], x.name))
-            )
-            .reset_index(drop=True)
+
+        offset = self.data.groupby(["coil", "feature"], group_keys=False).apply(
+            lambda x: pandas.Series(self.offset(x.loc[:, ["x", "y", "z"]], x.name))
         )
+
+        # Ensure consistent flat Series output regardless of number of coil types
+        if isinstance(offset, pandas.DataFrame):
+            # For single coil case: flatten the DataFrame to a Series
+            offset = offset.stack().droplevel(-1)
+
+        self.data.loc[:, "offset"] = offset.reset_index(drop=True)
+        
 
     @cached_property
     def ilis_offset(self):

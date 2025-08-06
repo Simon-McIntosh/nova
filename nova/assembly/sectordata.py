@@ -78,7 +78,7 @@ class SectorData(FilePath, SectorFile):
     @property
     def xls_file(self):
         """Return xls filename."""
-        return os.path.join(self.datadir, f"{self.filename}.xlsx")
+        return os.path.join(self.datadir, f"{self.filename}.xlsx") 
 
     @property
     def _xls_file(self):
@@ -126,7 +126,11 @@ class SectorData(FilePath, SectorFile):
     @cached_property
     def phase(self) -> list[str]:
         """Return list of assembly phases."""
-        return [phase for phase in self.data[self.coil[0]] if phase != "Nominal"]
+        all_phases = set(self.data[self.coil[0]].keys()) | set(
+            self.data[self.coil[1]].keys()
+        )
+        return [phase for phase in all_phases if phase != "Nominal"]
+        # return [phase for phase in self.data[self.coil[1]] if phase != "Nominal"]
 
     def _initalize_ccl(self):
         """Init ccl as bare nested dict with assembly stage entries."""
@@ -227,10 +231,15 @@ class SectorData(FilePath, SectorFile):
 
 
 if __name__ == "__main__":
-    sector = SectorData(7, [])
-    dataframe = sector.data[8]["SSAT BR"]
+    sector = SectorData(
+        5, [5], filename="Sector_Module_#5_CCL_as-built_data_8L34J6_v4_3"
+    )
+    sector.build()
 
-    dataframe.dropna(how="all", inplace=True)
+    print(sector.data[5]["SSAT BR"])
+    # dataframe = sector.data[8]["SSAT BR"]
+
+    # dataframe.dropna(how="all", inplace=True)
 
     # print(dataframe.xs("ILIS +1 side", level=1))
     # dataframe.dropna(how='all', inplace=True)

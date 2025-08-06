@@ -245,9 +245,9 @@ class FiducialData(netCDF, Plot, Plotter):
                 xarray.DataArray(1, [("coil", self.data.coil.data)]) * self.data[attr]
             )
 
-        if hasattr(self.dataset, "fiducial"):
+        if hasattr(self.dataset, "fiducial_target"):
             for coil in self.data.coil.data:
-                self.data["fiducial_target"].loc[coil] = self.dataset.fiducial[
+                self.data["fiducial_target"].loc[coil] = self.dataset.fiducial_target[
                     coil
                 ].loc[self.data.target, :]
 
@@ -298,7 +298,7 @@ class FiducialData(netCDF, Plot, Plotter):
             )
             dataframe.index.set_names(["coil", "target"], inplace=True)
             # project to ilis plane
-            dataframe = self.fiducial_ilis.project(dataframe)
+            # dataframe = self.fiducial_ilis.project(dataframe) (project on demand in points method)
             for i, (_, frame) in enumerate(dataframe.groupby("coil")):
                 data.data[i] = frame.values  # reassign data
             # update fiducial deltas with tagets aligned to ilis midplane

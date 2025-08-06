@@ -4,7 +4,7 @@ dynamic = ["version"]
 description = "Equilibrium generation and inference"
 license = { text = "ITER GIP" }
 readme = "README.md"
-requires-python = ">=3.10,<4"
+requires-python = ">=3.11,<4"
 authors = [{ name = "Simon McIntosh", email = "simon.mcintosh@iter.org" }]
 keywords = [
   "equilibrium",
@@ -41,7 +41,7 @@ dependencies = [
   "moviepy>=1.0.3",
   "netcdf4>=1.6.3",
   "networkx>=3.1",
-  "numpy>=1.26",
+  "numpy (>=1.26,<2.0.0)",
   "overrides>=7.4.0",
   "packaging>=23.2",
   "pandas<2.2.0",
@@ -59,6 +59,7 @@ dependencies = [
   "optax (>=0.2.3,<0.3.0)",
   "optimistix (>=0.0.7,<0.0.8)",
   "altair (>=5.5.0,<6.0.0)",
+  "openpyxl>=3.1.5",
 ]
 
 [project.optional-dependencies]
@@ -70,17 +71,17 @@ ansys = [
 ]
 bamboo = ["coverage2clover>=4.0.0", "tox>=4.6.4"]
 imas = [
-  "imas-python @ git+https://github.com/maarten-ic/imas-python.git@feature/to-xarray",
-  "imas-core @ git+ssh://git@git.iter.org/imas/al-core.git",
+  "imas-python",
+  #"imas-core @ git+ssh://git@git.iter.org/imas/al-core.git",
   "h5py>=3.10.0",
 ]
 jit = [
-  "jax[cpu]==0.4.27",  # cuda12_local
+  "jax[cpu]==0.4.27",     # cuda12_local
   "numba>=0.59.0",
   "tbb>=2021.11.0",
   "tbb-devel>=2021.11.0",
 ]
-naka = ["nakamap @ git+https://github.com/Simon-McIntosh/nakamap.git"]
+# naka = ["nakamap @ git+https://github.com/Simon-McIntosh/nakamap.git"]
 optimize = ["jaxopt>=0.8.3", "pylops>=2.1.0"]
 test = ["pytest", "pytest-cov>=4.1.0", "pytest-asyncio>=0.21.1"]
 thermofluids = [
@@ -93,6 +94,20 @@ thermofluids = [
 ]
 uda = ["nest-asyncio>=1.5.8", "async-property>=0.2.2"]
 
+[dependency-groups]
+dev = [
+  # Code formatting and linting
+  "black>=23.0.0",
+  "ruff>=0",
+  "mypy>=1.15.0",
+  "pre-commit>=4.2.0",
+  "tqdm-stubs>=0.2.1",
+  # Interactive development
+  "ipython>=9.2.0",
+  "ipykernel>=6.29.5",
+  "ipywidgets>=8.1.7",
+]
+
 [project.scripts]
 benchmark = "nova.scripts.benchmark:benchmark"
 extrapolate = "nova.imas.scripts:extrapolate"
@@ -100,15 +115,12 @@ filepath = "nova.database.scripts:filepath"
 configure = "nova.scripts.configure:configure"
 
 [build-system]
-requires = [
-  "poetry-core>=2.0",
-  "poetry-dynamic-versioning>=1.4"
-]
+requires = ["poetry-core>=2.0", "poetry-dynamic-versioning>=1.4"]
 build-backend = "poetry_dynamic_versioning.backend"
 
 [tool.poetry]
-name = "nova-stella" 
-version = "0.0.0"
+name = "nova-stella"
+version = "0.11.0+154.71865452"
 #authors = ["Simon McIntosh <simon.mcintosh@iter.org>"]
 #description = "Equilibrium generation and inference"
 packages = [{ include = "nova" }]
@@ -128,7 +140,7 @@ poetry-dynamic-versioning = { version = ">=1.0.0,<2.0.0", extras = ["plugin"] }
 poetry-plugin-shell = { version = ">=1.0.0,<2.0.0", extras = ["plugin"] }
 
 [tool.poetry.dependencies]
-python = ">=3.10,<4.0"
+python = ">=3.11,<4.0"
 
 [tool.poetry.group.dev.dependencies]
 asv = ">=0.5.1"
@@ -181,7 +193,7 @@ pretty = "^0.1"
 timer = "^0.3.0"
 pprofile = "^2.2.0"
 intake = "^2.0.7"
-zarr = "^2.18.3"
+zarr = ">=3.0.0,<4.0.0"
 fsspec = "^2024.9.0"
 s3fs = "^2024.9.0"
 intake-xarray = "^0.7.0"
@@ -342,7 +354,7 @@ exclude_lines = [
 ]
 
 [tool.poetry-dynamic-versioning]
-enable = true
+enable = false
 vcs = "git"
 style = "semver"
 pattern = "^(?P<base>\\d+\\.\\d+\\.\\d+)(-?((?P<stage>[a-zA-Z]+)\\.?(?P<revision>\\d+)?))?"

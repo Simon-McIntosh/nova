@@ -26,6 +26,7 @@ class FiducialSector(Fiducial):
     sectors: dict[int, list] | list[int] = field(
         init=True, repr=False, default_factory=lambda: dict.fromkeys(range(1, 10), [])
     )
+    private: bool = False
     fiducial_target: dict[str, pandas.DataFrame] | dict = field(
         init=False, repr=False, default_factory=dict
     )
@@ -59,7 +60,7 @@ class FiducialSector(Fiducial):
         """Implement load deltas abstractmethod."""
         columns = ["dx", "dy", "dz"]
         for sector, coil in self.sectors.items():
-            data = SectorData(sector, coil)
+            data = SectorData(sector, coil, private=self.private)
             print(data.filename)
             self.sectors[sector] = data.coil
             for coil, ccl in data.ccl[self.phase].items():
@@ -70,7 +71,7 @@ class FiducialSector(Fiducial):
         """Load unique fiducial targets."""
         columns = ["x", "y", "z"]
         for sector, coil in self.sectors.items():
-            data = SectorData(sector, coil)
+            data = SectorData(sector, coil, private=self.private)
             for coil, fiducial_target in data.data.items():
                 nominal = fiducial_target["Nominal"]
                 nominal.index = nominal.index.droplevel([0, 1])
@@ -80,7 +81,7 @@ class FiducialSector(Fiducial):
     def _load_variance(self):
         columns = ["ux", "uy", "uz"]
         for sector, coil in self.sectors.items():
-            data = SectorData(sector, coil)
+            data = SectorData(sector, coil, private=self.private)
             for coil, ccl in data.ccl[self.phase].items():
                 two_sigma = ccl.loc[self.target, columns]
                 self.variance[coil] = (two_sigma / 2) ** 2
@@ -93,7 +94,7 @@ class FiducialSector(Fiducial):
         columns = ["x", "y", "z"]
         self.case = {}
         for sector, coil in self.sectors.items():
-            data = SectorData(sector, coil)
+            data = SectorData(sector, coil, private=self.private)
             for coil, fiducial in data.data.items():
                 self.case[coil] = (
                     fiducial[self.phase].xs("Fiducial", level=1).loc[:, columns]
@@ -137,7 +138,7 @@ class FiducialSector(Fiducial):
         columns = ["x", "y", "z"]
         ilis = {}
         for sector, coil in self.sectors.items():
-            data = SectorData(sector, coil)
+            data = SectorData(sector, coil, private=self.private)
             for coil, fiducial in data.data.items():
                 ilis[coil] = 2 * [[]]
                 for i, key in enumerate(["ILIS +1 side", "ILIS -1 side"]):
@@ -187,11 +188,19 @@ class FiducialSector(Fiducial):
 
 
 if __name__ == "__main__":
+
+    #phase = "SSAT BR"
+    phase = 'SSAT target'
+    #phase = "SSAT AL"
+    #phase="In-pit target"
+
     sectors = {7: [8, 9]}
-    # sectors = {6: [12, 13]}  # , 13
-    # sectors = [6]
-    fiducial = FiducialSector(phase="In-pit target", sectors=sectors)  # , sectors=[8]
-    # fiducial.compare("RE")
+    sectors = {6: [12, 13]} 
+    sectors = {5: [16, 5]}
+
+
+    fiducial = FiducialSector(phase=phase, sectors=sectors, private=True)  # , sectors=[8]
+    fiducial.compare("RE")
 
     ccl = pandas.concat(fiducial.delta).rename(
         {"dx": "x", "dy": "y", "dz": "z"}, axis=1
@@ -213,7 +222,7 @@ if __name__ == "__main__":
     ccl_a.loc[:, "ilis"] = fiducial.ilis.type.iloc[-1]
 
     ccl_b = ccl.copy()
-    ccl_b.loc[:, "ilis"] = fiducial.ilis.type.iloc[0]
+    ccl_b.loc[:, "ilis"] = fiducial.ilis.type.iloc[0]j
 
     ccl = pandas.concat([ccl_a, ccl_b], axis=0)
     """
@@ -253,13 +262,10 @@ if __name__ == "__main__":
     data.loc[data.feature == "CCL", "Name"] = data.loc[
         data.feature == "CCL", "Name"
     ].map(lambda name: f"{name}'")
+    
     data.loc[data.feature == "CCL", "type"] = "projected"
 
-    print(data.columns)
-
     data = pandas.concat([data, ccl_points])
-
-    print(data.columns)
 
     # data.loc[:, "ro_phi"] = data.y
 

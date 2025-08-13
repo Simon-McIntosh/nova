@@ -50,11 +50,14 @@ class FiducialFit(FiducialData):
         self.fit()
         self.evaluate_gpr("fiducial_fit", "fit_gpr")
 
-    def write(self, sheet: str):
+    def write(self, sheet: str, opt_x=None):
         """Write fits to source xls files."""
         for sector in tqdm(self.data.sector.data, "updating xls workbooks"):
             sectordata = SectorData(sector)
             coils = self.data.coils.sel(sector=sector)
+
+            if opt_x is None:
+                opt_x = self.data.opt_x
 
             with sectordata.openbook(), sectordata.savebook():
                 if sheet not in sectordata.book.sheetnames:
@@ -71,13 +74,8 @@ class FiducialFit(FiducialData):
 
                 for coil in coils.data:
                     cell_index = sectordata.coil.index(coil)
-                    opt_x = self.data.opt_x.sel(coil=coil)
-                    data = self.data.fiducial_fit.sel(coil=coil).sortby("target").data
+                    opt_x_coil = opt_x.sel(coil=coil)
 
-                    data = self.transform(
-                        opt_x.data,
-                        self.data.fiducial.sel(coil=coil).sortby("target").data,
-                    )
                     std = (
                         self.data.fiducial_fit_gpr_std.sel(coil=coil)
                         .sortby("target")
@@ -112,16 +110,23 @@ class FiducialFit(FiducialData):
                         # self.data.target.sortby("target").data[:, np.newaxis],
                         offset=(1, 2),
                     )
-                    # write ccl data
+                    # write transformed ccl data
                     sectordata.write(
                         worksheet,
                         workcell["coil"][cell_index],
-                        np.append(data, 2 * std, axis=1),
+                        np.append(
+                            self.transform(
+                                opt_x_coil.data,
+                                self.data.fiducial.sel(coil=coil).sortby("target").data,
+                            ),
+                            2 * std,
+                            axis=1,
+                        ),
                         offset=(1, 3),
                     )
 
                     self._write_transform(
-                        worksheet, workcell["coil"][cell_index], opt_x
+                        worksheet, workcell["coil"][cell_index], opt_x_coil
                     )
                     # write fiducial header
                     sectordata.write(
@@ -142,7 +147,7 @@ class FiducialFit(FiducialData):
                         worksheet,
                         workcell["fiducial"][cell_index],
                         self.transform(
-                            opt_x.data,
+                            opt_x_coil.data,
                             self.dataset.case[coil].loc[:, ["x", "y", "z"]].values,
                         ),
                         offset=(0, 2),
@@ -176,7 +181,8 @@ class FiducialFit(FiducialData):
                             worksheet,
                             xls_index,
                             self.transform(
-                                opt_x.data, ilis_data.loc[:, ["x", "y", "z"]].values
+                                opt_x_coil.data,
+                                ilis_data.loc[:, ["x", "y", "z"]].values,
                             ),
                             offset=(0, 2),
                         )
@@ -319,8 +325,7 @@ class FiducialFit(FiducialData):
                 error[2] = np.mean(delta[..., [2, 1, -1, -2], 2] ** 2)
 
                 # drop F and C z constraint
-                #error[2] = np.mean(delta[..., [1, 0, -1], 2] ** 2)
-
+                # error[2] = np.mean(delta[..., [1, 0, -1], 2] ** 2)
 
             case "max":
                 error[0] = np.max(abs(delta[..., [5, 3, 4], 0]))  # radial (A, B, H)
@@ -369,7 +374,7 @@ class FiducialFit(FiducialData):
         """Return reference points."""
         points = self.data[self.point_name].sel(coil=coil).copy()
         if self.infer:
-            #if len(self.dataset.ilis) == 0:
+            # if len(self.dataset.ilis) == 0:
             ##    raise Warning("ILIS data not found")
             #    return points
             target = ["B", "H", "A"]
@@ -377,7 +382,7 @@ class FiducialFit(FiducialData):
             # project gpr fiducials to ILIS mid-plane
             frame = points.to_pandas()
             frame["coil"] = np.array(coil)
-            
+
             _points = self.fiducial_ilis.project(frame).loc[target]
             _phi = np.arctan2(_points.y, _points.x)
             radius = np.sqrt(
@@ -592,11 +597,12 @@ if __name__ == "__main__":
     phase = "FAT supplier"
     phase = "FAT IO"
     phase = "SSAT BR"
+    phase = "SSAT AR2"
     # phase = "SSAT target"
     # phase = "SSAT AL"
     sectors = {7: [8, 9]}
     sectors = {6: [12, 13]}
-    sectors = {5: [16]}
+    sectors = {5: [16, 5]}
 
     fiducial = FiducialFit(
         phase=phase,
@@ -618,7 +624,7 @@ if __name__ == "__main__":
     # fiducial.plot_ensemble(True, 250)
 
     # fiducial.write("In-pit target")
-    fiducial.write("SSAT target")
+    # fiducial.write("SSAT target")
 
     # print deltas
     coil_index = 0
@@ -652,7 +658,7 @@ if __name__ == "__main__":
     def to_pandas(data, target="fiducial"):
         """Evaluate fit to fiducial target."""
         target_cyl = data.fiducial_target_cyl.copy()
-        target_cyl.loc[..., "r"] += data.radial_offset
+        target_cyl.loc[..., "r"] += 1e-9  # data.radial_offset
         delta = Rotate.to_cylindrical(data[target]) - target_cyl
         delta = Rotate.to_cartesian(delta)
         frames = []
@@ -667,4 +673,6 @@ if __name__ == "__main__":
         return pd.concat(frames, axis=1)
 
     pd.options.display.precision = 3
-    print(to_pandas(fiducial.data, target="fiducial_fit"))
+    #print(to_pandas(fiducial.data, target="fiducial_fit"))
+
+    print(to_pandas(fiducial.data, target="fiducial_gpr"))

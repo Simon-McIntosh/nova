@@ -285,6 +285,7 @@ class FiducialData(netCDF, Plot, Plotter):
             ("coil", "target", "space"),
             np.stack([delta[index].to_numpy(float) for index in delta], axis=0),
         )
+        '''
         if hasattr(self.dataset, "ilis") and self.ilis:
             # adjust nose fiducials to mean ilis plane
             target = ["B", "H", "A"]
@@ -305,6 +306,7 @@ class FiducialData(netCDF, Plot, Plotter):
             self.data["fiducial_delta"].loc[:, target] = data - self.data[
                 "fiducial_target"
             ].sel(target=target)
+        '''
 
         if hasattr(self.dataset, "variance"):
             self.data["fiducial_variance"] = (

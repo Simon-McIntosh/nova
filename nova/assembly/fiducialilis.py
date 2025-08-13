@@ -22,7 +22,7 @@ class FiducialIlis:
         2: [0, 0],
         3: [-0.1, 0],
         4: [0.1, 0],
-        5: [1.5, 0],
+        5: [1.5, 0 + 0.1],  # reduce inter-sector gap
         6: [0, 0],
         7: [0, 0],
         8: [-1, 0],
@@ -33,7 +33,7 @@ class FiducialIlis:
         13: [0, 0],
         14: [0, 0],
         15: [0, 0],
-        16: [0, 0.2],
+        16: [0 + 0.1, 0.2],
         17: [np.nan, np.nan],
         18: [0, 0],
     }  # ilis deviation [positive side, negative side]
@@ -60,7 +60,6 @@ class FiducialIlis:
 
         self.data.loc[:, "outlier"] = outlier.reset_index(drop=True)
 
-
         offset = self.data.groupby(["coil", "feature"], group_keys=False).apply(
             lambda x: pandas.Series(self.offset(x.loc[:, ["x", "y", "z"]], x.name))
         )
@@ -71,7 +70,6 @@ class FiducialIlis:
             offset = offset.stack().droplevel(-1)
 
         self.data.loc[:, "offset"] = offset.reset_index(drop=True)
-        
 
     @cached_property
     def ilis_offset(self):

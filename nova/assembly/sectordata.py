@@ -232,7 +232,7 @@ class SectorData(FilePath, SectorFile):
 
 if __name__ == "__main__":
     sector = SectorData(
-        5, [5], filename="Sector_Module_#5_CCL_as-built_data_8L34J6_v4_3"
+        5, [5], private=True
     )
     sector.build()
 

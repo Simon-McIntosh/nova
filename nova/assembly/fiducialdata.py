@@ -33,6 +33,7 @@ class FiducialData(netCDF, Plot, Plotter):
     sectors: dict[int, list] = field(
         init=True, repr=False, default_factory=lambda: dict.fromkeys(range(1, 10), [])
     )
+    private: bool = False
     fill: bool = True
     variance: float | str = 0.09
     ilis: bool = True
@@ -93,7 +94,12 @@ class FiducialData(netCDF, Plot, Plotter):
             "RE": FiducialRE,
             "IDM": FiducialIDM,
             "Sector": FiducialSector,
-        }[self.fiducial](self.data.target, phase=self.phase, sectors=self.sectors)
+        }[self.fiducial](
+            self.data.target,
+            phase=self.phase,
+            sectors=self.sectors,
+            private=self.private,
+        )
 
     def build(self):
         """Build fiducial dataset."""
@@ -285,7 +291,7 @@ class FiducialData(netCDF, Plot, Plotter):
             ("coil", "target", "space"),
             np.stack([delta[index].to_numpy(float) for index in delta], axis=0),
         )
-        '''
+        """
         if hasattr(self.dataset, "ilis") and self.ilis:
             # adjust nose fiducials to mean ilis plane
             target = ["B", "H", "A"]
@@ -306,7 +312,7 @@ class FiducialData(netCDF, Plot, Plotter):
             self.data["fiducial_delta"].loc[:, target] = data - self.data[
                 "fiducial_target"
             ].sel(target=target)
-        '''
+        """
 
         if hasattr(self.dataset, "variance"):
             self.data["fiducial_variance"] = (
@@ -327,11 +333,17 @@ class FiducialData(netCDF, Plot, Plotter):
             )
             self.data["filename"] = (
                 "sector",
-                [SectorData(sector).filename for sector in self.dataset.sectors],
+                [
+                    SectorData(sector, private=self.private).filename
+                    for sector in self.dataset.sectors
+                ],
             )
             self.data["version"] = (
                 "sector",
-                [SectorData(sector).version for sector in self.dataset.sectors],
+                [
+                    SectorData(sector, private=self.private).version
+                    for sector in self.dataset.sectors
+                ],
             )
 
         self.data["centerline_delta"] = xarray.DataArray(

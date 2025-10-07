@@ -20,9 +20,10 @@ from nova.assembly.transform import Rotate
 
 @dataclass
 class FiducialFit(FiducialData):
-    """Extend FiducialData class to include fitting algorithums."""
+    """Extend FiducialData class to include fitting algorithms."""
 
     filename: str = "fiducial_fit"
+    private: bool = False
     variance: float | str = "file"
     infer: bool = True
     method: str = "rms"
@@ -374,9 +375,9 @@ class FiducialFit(FiducialData):
         """Return reference points."""
         points = self.data[self.point_name].sel(coil=coil).copy()
         if self.infer:
-            # if len(self.dataset.ilis) == 0:
-            ##    raise Warning("ILIS data not found")
-            #    return points
+            if len(self.dataset.ilis) == 0:
+                Warning("ILIS data not found")
+                return points
             target = ["B", "H", "A"]
             # points.loc[target] = self.data.fiducial.sel(coil=coil).loc[target]
             # project gpr fiducials to ILIS mid-plane
@@ -468,7 +469,7 @@ class FiducialFit(FiducialData):
         self.plotter(postfix, stage, coil_index)
         title = f"Coil{self.data.coil[coil_index].data}"
         title += f"\norigin:{self.data.origin[coil_index].data}"
-        title += f" phase:{self.phase.split()[0]}"
+        title += f" phase:{self.phase}"
         title += f"\ninfer:{self.infer} method: {self.method}"
         title += f"\nilis:{self.ilis} pcr: {self.ilis_pcr}"
         self.plotter.axes[0].set_title(title, fontsize="large")
@@ -597,11 +598,16 @@ if __name__ == "__main__":
     phase = "FAT supplier"
     phase = "FAT IO"
     phase = "SSAT BR"
-    phase = "SSAT AR2"
+    phase = "SSAT AL"
+    # phase = "SSAT AR2"
+
+    # phase = "TFGS landing"
+    # phase = "M0607"
+
     # phase = "SSAT target"
     # phase = "SSAT AL"
-    sectors = {7: [8, 9]}
-    sectors = {6: [12, 13]}
+    # sectors = {7: [8, 9]}
+    # sectors = {6: [12, 13]}
     sectors = {5: [16, 5]}
 
     fiducial = FiducialFit(
@@ -615,6 +621,7 @@ if __name__ == "__main__":
     fiducial.build()
 
     fiducial.plot_gpr_array(0, 2)
+    fiducial.plot_gpr_array(1, 2)
 
     for coil_index in range(fiducial.data.sizes["coil"]):
         fiducial.plot_fit(coil_index)
@@ -623,8 +630,8 @@ if __name__ == "__main__":
 
     # fiducial.plot_ensemble(True, 250)
 
-    # fiducial.write("In-pit target")
     # fiducial.write("SSAT target")
+    fiducial.write("In-pit target")
 
     # print deltas
     coil_index = 0
@@ -655,11 +662,11 @@ if __name__ == "__main__":
 
     import pandas as pd
 
-    def to_pandas(data, target="fiducial"):
-        """Evaluate fit to fiducial target."""
-        target_cyl = data.fiducial_target_cyl.copy()
+    def to_pandas(data, target="fiducial", datum="fiducial_target"):
+        """Evaluate fit of target to datum."""
+        target_cyl = Rotate.to_cylindrical(data[target])
         target_cyl.loc[..., "r"] += 1e-9  # data.radial_offset
-        delta = Rotate.to_cylindrical(data[target]) - target_cyl
+        delta = target_cyl - Rotate.to_cylindrical(data[datum])
         delta = Rotate.to_cartesian(delta)
         frames = []
         for coil in data.coil.values:
@@ -673,6 +680,6 @@ if __name__ == "__main__":
         return pd.concat(frames, axis=1)
 
     pd.options.display.precision = 3
-    #print(to_pandas(fiducial.data, target="fiducial_fit"))
+    # print(to_pandas(fiducial.data, target="fiducial_fit"))
 
     print(to_pandas(fiducial.data, target="fiducial_gpr"))

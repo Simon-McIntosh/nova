@@ -190,18 +190,18 @@ class FiducialSector(Fiducial):
 
 if __name__ == "__main__":
     # phase = "SSAT BR"
-    phase = "SSAT target"
+    # phase = "SSAT target"
     # phase = "SSAT AL"
-    phase = "SSAT AR2"
-    #phase = "SSAT AR target"
-    # phase="In-pit target"
+    # phase = "SSAT AR2"
+    # phase = "SSAT AR target"
+    phase="In-pit target"
 
     sectors = {7: [8, 9]}
     sectors = {6: [12, 13]}
     sectors = {5: [16, 5]}
 
     fiducial = FiducialSector(
-        phase=phase, sectors=sectors, private=False, version="5.1"
+        phase=phase, sectors=sectors, private=True, version="7.1"
     )  # , sectors=[8]
     fiducial.compare("IDM")
 

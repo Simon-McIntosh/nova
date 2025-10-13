@@ -21,19 +21,19 @@ class FiducialIlis:
         1: [np.nan, np.nan],
         2: [0, 0],
         3: [-0.1, 0],
-        4: [0.1, 0],
+        4: [0.15 + 0.4, 0],  # reduce inter-sector gap
         5: [1.5, 0 + 0.1],  # reduce inter-sector gap
         6: [0, 0],
         7: [0, 0],
         8: [-1, 0],
         9: [0, 1],
-        10: [0.15, 0],
-        11: [0, -0.15],
+        10: [0.1, 0],
+        11: [0, -0.15 + 0.4],  # reduce inter-sector gap
         12: [0, -1.5],
         13: [0, 0],
         14: [0, 0],
         15: [0, 0],
-        16: [0 + 0.1, 0.2],
+        16: [0 + 0.1, 0.2],  # reduce inter-sector gap
         17: [np.nan, np.nan],
         18: [0, 0],
     }  # ilis deviation [positive side, negative side]
@@ -44,10 +44,10 @@ class FiducialIlis:
         self._extract_planes()
 
     def _identify_outliers(self):
-        """Identify outliers in input point-cloud ILIS plane mesurment sets."""
+        """Identify outliers in input point-cloud ILIS plane measurement sets."""
         self.planes = NominalIlis.fit_plane(
             self.data
-        )  # use a temporary set of planes for outlier detection algorithum
+        )  # use a temporary set of planes for outlier detection algorithm
 
         outlier = self.data.groupby(["coil", "feature"], group_keys=False).apply(
             lambda x: pandas.Series(self._detect(x, x.name, 3))
@@ -86,6 +86,19 @@ class FiducialIlis:
             ]
         ).set_index(["coil", "feature"])
 
+    @staticmethod
+    def intersect(planes):
+        """Intersect planes to find midplane."""
+        points = planes.loc[:, ["x", "y", "z"]].copy().values
+        normals = planes.loc[:, ["nx", "ny", "nz"]].copy().values
+        dot_normals = np.dot(*normals)
+        distance = np.einsum("ij,ij->i", points, normals)
+        coef = np.linalg.solve(np.array([[1, dot_normals], [dot_normals, 1]]), distance)
+        point = coef @ normals
+        midplane = planes.mean(axis=0)
+        midplane.loc[["x", "y", "z"]] = point
+        return midplane
+
     def _extract_planes(self):
         """Extract ilis and center planes from input data."""
         """
@@ -120,21 +133,7 @@ class FiducialIlis:
                 * self.planes.loc[:, ["nx", "ny", "nz"]].values
             )
 
-        def intersect(planes):
-            """Intersect planes to find midplane."""
-            points = planes.loc[:, ["x", "y", "z"]].copy().values
-            normals = planes.loc[:, ["nx", "ny", "nz"]].copy().values
-            dot_normals = np.dot(*normals)
-            distance = np.einsum("ij,ij->i", points, normals)
-            coef = np.linalg.solve(
-                np.array([[1, dot_normals], [dot_normals, 1]]), distance
-            )
-            point = coef @ normals
-            midplane = planes.mean(axis=0)
-            midplane.loc[["x", "y", "z"]] = point
-            return midplane
-
-        midplane = self.planes.groupby(level=0).apply(lambda x: intersect(x))
+        midplane = self.planes.groupby(level=0).apply(lambda x: self.intersect(x))
         """
         midplane = self.planes.groupby(level=0).mean()
         midplane.loc[:, ["nx", "ny", "nz"]] = midplane.loc[:, ["nx", "ny", "nz"]].agg(

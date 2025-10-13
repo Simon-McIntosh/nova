@@ -78,7 +78,7 @@ class SectorData(FilePath, SectorFile):
     @property
     def xls_file(self):
         """Return xls filename."""
-        return os.path.join(self.datadir, f"{self.filename}.xlsx") 
+        return os.path.join(self.datadir, f"{self.filename}.xlsx")
 
     @property
     def _xls_file(self):
@@ -231,9 +231,7 @@ class SectorData(FilePath, SectorFile):
 
 
 if __name__ == "__main__":
-    sector = SectorData(
-        5, [5], private=True
-    )
+    sector = SectorData(5, [5], private=True)
     sector.build()
 
     print(sector.data[5]["SSAT BR"])

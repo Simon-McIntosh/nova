@@ -189,20 +189,19 @@ class FiducialSector(Fiducial):
 
 
 if __name__ == "__main__":
-    # phase = "SSAT BR"
-    # phase = "SSAT target"
+    phase = "SSAT BR"
+    phase = "SSAT target"
     # phase = "SSAT AL"
     # phase = "SSAT AR2"
     # phase = "SSAT AR target"
-    phase="In-pit target"
+    # phase="In-pit target"
 
     sectors = {7: [8, 9]}
     sectors = {6: [12, 13]}
     sectors = {5: [16, 5]}
+    sectors = {8: [4, 11]}
 
-    fiducial = FiducialSector(
-        phase=phase, sectors=sectors, private=True, version="7.1"
-    )  # , sectors=[8]
+    fiducial = FiducialSector(phase=phase, sectors=sectors, private=True)
     fiducial.compare("IDM")
 
     ccl = pandas.concat(fiducial.delta).rename(
@@ -233,8 +232,122 @@ if __name__ == "__main__":
     ilis = FiducialIlis(fiducial.ilis, pcr=False)
     nominal = NominalIlis()
 
-    print(nominal.angle_to_xz(ilis.planes))
-    print(nominal.angle_to_xy(ilis.planes))
+    from nova.assembly.transform import Rotate
+    from scipy.interpolate import griddata
+
+    rotate = Rotate()
+
+    def clock(plane, coil, cords=[("x", "y", "z")]):
+        if list(sectors.values())[0].index(coil) == 0:
+            transform = rotate.anticlock
+        else:
+            transform = rotate.clock
+
+        for c in cords:
+            plane.loc[:, c] = transform(plane.loc[:, c])
+        return plane
+
+    sector_index = [
+        (coil, plane)
+        for coil, plane in zip(list(sectors.values())[0], ("ILIS +1", "ILIS -1"))
+    ]
+
+    sector_planes = ilis.planes.groupby(["coil"], group_keys=False).apply(
+        lambda x: clock(x, x.name, cords=[("x", "y", "z"), ("nx", "ny", "nz")])
+    )
+
+    sector_data = ilis.data.groupby(["coil"], group_keys=False).apply(
+        lambda x: clock(x, x.name)
+    )
+
+    # sector_data.groupby(["coil"]).apply(lambda x: griddata(x.loc[:, ('x', 'y', 'z')])
+
+    # coils = ilis.data.coil.unique()
+
+    # print(nominal.angle_to_xz(ilis.planes))
+    # print(nominal.angle_to_xy(ilis.planes))
+
+    midplane = ilis.intersect(sector_planes.loc[sector_index])
+
+    grid_r, grid_z = np.mgrid[
+        slice(ilis.data.r.min(), ilis.data.r.max(), 20j),
+        slice(ilis.data.z.min(), ilis.data.z.max(), 40j),
+    ]
+
+    offset = []
+    offset_data_list = []
+    
+    for coil, feature in sector_index:
+        plane_index = (sector_data.coil == coil) & (sector_data.feature == feature)
+        plane_offset = ilis.offset(
+            sector_data.loc[plane_index, ("x", "y", "z")], midplane
+        )
+
+        offset.append(griddata(
+            sector_data.loc[plane_index, ("r", "z")],
+            plane_offset,
+            (grid_r, grid_z),
+            method="linear",
+        ))
+        
+        # Store offset data for plotting
+        plane_data = sector_data.loc[plane_index, ["r", "z"]].copy()
+        plane_data["offset"] = plane_offset
+        plane_data["coil"] = coil
+        plane_data["feature"] = feature
+        offset_data_list.append(plane_data)
+    
+    # Combine all offset data
+    offset_df = pandas.concat(offset_data_list, ignore_index=True)
+    
+    # Create first and last plane dataframes
+    first_plane = offset_df[offset_df["feature"] == sector_index[0][1]].copy()
+    
+    last_plane = offset_df[offset_df["feature"] == sector_index[-1][1]].copy()
+
+    gap_plane = pandas.DataFrame({'r': grid_r.flatten(), 'z': grid_z.flatten(), 
+                                  "offset": offset[1].flatten() - offset[0].flatten()})
+    gap_plane["coil"] = 0
+    gap_plane["feature"] = 'Gap'
+    
+    # Combine all data for plotting
+    plot_data = pandas.concat([first_plane, gap_plane, last_plane], ignore_index=True)
+    
+    # Create three-column Altair chart with synced tooltips
+    base = alt.Chart(plot_data).mark_circle(size=60)
+    
+    chart = base.encode(
+        x=alt.X("r:Q", title="Radius (r)", scale=alt.Scale(domain=[2000, 3200])),
+        y=alt.Y("z:Q", title="Height (z)"),
+        color=alt.Color(
+            "offset:Q",
+            title="Offset",
+            scale=alt.Scale(scheme="redblue"),
+        ),
+        tooltip=[
+            alt.Tooltip("coil:N", title="Coil"),
+            alt.Tooltip("r:Q", title="r", format=".2f"),
+            alt.Tooltip("z:Q", title="z", format=".2f"),
+            alt.Tooltip("offset:Q", title="Offset", format=".4f"),
+        ],
+        facet=alt.Facet(
+            "feature:N",
+            title=None,
+            header=alt.Header(labelFontSize=12),
+            sort=["ILIS +1", "Gap", "ILIS -1"]
+        )
+    ).properties(
+        width=250,
+        height=300
+    ).resolve_scale(
+        color="independent"
+    ).configure_axis(
+        grid=True
+    ).interactive()
+    
+    chart.show()
+
+
 
     # print(nominal.angle_to_xz(nominal.planes))
 
@@ -253,12 +366,14 @@ if __name__ == "__main__":
     data.loc[data.feature == "CCL", "type"] = "original"
     ccl_points = data.loc[data.feature == "CCL", :].copy()
 
-    # ilis =
+    ccl_index = data.feature == "CCL"
 
-    # data.loc[:, ["x", "y", "z"]] = ilis.project(data)
-    # data.loc[:, "r"] = np.linalg.norm(data.loc[:, ["x", "y"]], axis=1)
-    # data.loc[:, "phi"] = np.arctan2(data.y, data.x)
-    # data.loc[:, "ro_phi"] = 2600 * data.loc[:, "phi"]
+    data.loc[ccl_index, ["x", "y", "z"]] = ilis.project(data.loc[ccl_index, :])
+    data.loc[ccl_index, "r"] = np.linalg.norm(data.loc[ccl_index, ["x", "y"]], axis=1)
+    data.loc[ccl_index, "phi"] = np.arctan2(
+        data.loc[ccl_index, "y"], data.loc[ccl_index, "x"]
+    )
+    data.loc[ccl_index, "ro_phi"] = 2600 * data.loc[ccl_index, "phi"]
 
     # data.loc[:, "phi"] -= data.loc[:, "phi"].mean()
 

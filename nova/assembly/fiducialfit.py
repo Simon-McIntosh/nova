@@ -7,6 +7,7 @@ import warnings
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 from scipy.optimize import minimize
 from scipy.spatial.transform import Rotation
 from tqdm import tqdm
@@ -32,10 +33,16 @@ class FiducialFit(FiducialData):
     data: xarray.Dataset = field(init=False, repr=False, default_factory=xarray.Dataset)
 
     weights: ClassVar[list[float]] = [1, 1, 0.25]
+    fiducial_index: ClassVar[dict[str, list[int]]] = {
+        "radial": [5, 3, 4],  # ILIS fiducials
+        # "toroidal": slice(None),  # toroidal (all)
+        "toroidal": [0, 5, 3, 4],  # reduced toroidal constraint set
+        "vertical": [2, 1, -1, -2],  # vertical C, D and E, F
+    }
 
     @property
     def fiducial_attrs(self):
-        """Extend fiducial_attrs to incude fit parameters."""
+        """Extend fiducial_attrs to include fit parameters."""
         return super().fiducial_attrs | {
             attr: getattr(self, attr)
             for attr in ["infer", "method", "samples", "radial_offset", "weights"]
@@ -285,7 +292,7 @@ class FiducialFit(FiducialData):
     def transform(self, x, points) -> xarray.DataArray:
         """Return points transformed by vector x."""
         points = points.copy()
-        points = points[:] + x[:3]
+        points += x[:3]
         if len(x) == 6:
             rotate = Rotation.from_euler("XYZ", x[-3:], degrees=True)
             try:
@@ -300,7 +307,7 @@ class FiducialFit(FiducialData):
     def delta(self, points):
         """Return coil-frame deltas."""
         offset = np.zeros_like(points)
-        offset[:, 0] -= self.radial_offset
+        offset[..., 0] -= self.radial_offset
         return (
             Rotate.to_cylindrical(points)
             + offset
@@ -311,27 +318,42 @@ class FiducialFit(FiducialData):
     def error_vector(delta, method):
         """Return error vector."""
         error = np.zeros(3)
+
         match method:
             case "rms":
-                error[0] = np.mean(delta[..., [5, 3, 4], 0] ** 2)
+                error[0] = np.mean(
+                    delta[..., FiducialFit.fiducial_index["radial"], 0] ** 2
+                )
 
                 # toroidal_weight = np.ones_like(delta[..., 1])
                 # toroidal_weight[3:6] = 10  # factor x10 for toroidal ILIS fiducials
                 # error[1] = np.mean((toroidal_weight * delta[..., 1]) ** 2)
                 # error[1] = np.mean(delta[..., [0, 1, 5, 3, 4, -1], 1] ** 2)
 
-                # reduced toroidal constraint set
-                error[1] = np.mean(delta[..., [0, 5, 3, 4], 1] ** 2)
+                error[1] = np.mean(
+                    (delta[..., FiducialFit.fiducial_index["toroidal"], 1] ** 2)
+                )
 
-                error[2] = np.mean(delta[..., [2, 1, -1, -2], 2] ** 2)
+                # reduced toroidal constraint set
+                # error[1] = np.mean(delta[..., [0, 5, 3, 4], 1] ** 2)
+
+                error[2] = np.mean(
+                    delta[..., FiducialFit.fiducial_index["vertical"], 2] ** 2
+                )
 
                 # drop F and C z constraint
                 # error[2] = np.mean(delta[..., [1, 0, -1], 2] ** 2)
 
             case "max":
-                error[0] = np.max(abs(delta[..., [5, 3, 4], 0]))  # radial (A, B, H)
-                error[1] = np.max(abs(delta[..., 1]))  # toroidal (all)
-                error[2] = np.max(abs(delta[..., [2, 1, -1, -2], 2]))  # (C, D, E, F)
+                error[0] = np.max(
+                    abs(delta[..., FiducialFit.fiducial_index["radial"], 0])
+                )
+                error[1] = np.max(
+                    abs(delta[..., FiducialFit.fiducial_index["toroidal"], 1])
+                )
+                error[2] = np.max(
+                    abs(delta[..., FiducialFit.fiducial_index["vertical"], 2])
+                )
             case _:
                 raise NotImplementedError(f"Method {method} not implemented.")
         return error
@@ -593,12 +615,42 @@ class FiducialFit(FiducialData):
         limits[1]["y"] = [-8000, 8000]
         self.axes_limit = limits
 
+    @staticmethod
+    def mask_frame(frame) -> pd.DataFrame:
+        """Mask non-controlled fiducial deltas."""
+        for axis, index_axis in zip(("xyz"), FiducialFit.fiducial_index.keys()):
+            mask = [
+                target
+                for target in frame.index
+                if target not in frame.index[FiducialFit.fiducial_index[index_axis]]
+            ]
+            frame.loc[mask, axis] = ""
+        return frame
+    
+    @staticmethod
+    def to_pandas(data, target="fiducial", datum="fiducial_target"):
+        """Evaluate fit of target to datum."""
+        target_cyl = Rotate.to_cylindrical(data[target])
+        target_cyl.loc[..., "r"] -= data.radial_offset
+        delta = target_cyl - Rotate.to_cylindrical(data[datum])
+        delta = Rotate.to_cartesian(delta)
+        frames = []
+        for coil in data.coil.values:
+            frame = delta.sel(coil=coil).to_pandas()  # .sortby("target")
+            frame = fiducial.mask_frame(frame)
+            frame.columns = pd.MultiIndex.from_product(
+                [[f"Coil {coil}"], frame.columns]
+            )
+            frames.append(frame)
+        return pd.concat(frames, axis=1)
+
 
 if __name__ == "__main__":
     phase = "FAT supplier"
     phase = "FAT IO"
     phase = "SSAT BR"
-    phase = "SSAT AL"
+    #phase = "SSAT target"
+    # phase = "SSAT AL"
     # phase = "SSAT AR2"
 
     # phase = "TFGS landing"
@@ -609,6 +661,7 @@ if __name__ == "__main__":
     # sectors = {7: [8, 9]}
     # sectors = {6: [12, 13]}
     sectors = {5: [16, 5]}
+    sectors = {8: [11]}
 
     fiducial = FiducialFit(
         phase=phase,
@@ -617,11 +670,12 @@ if __name__ == "__main__":
         infer=True,
         ilis=True,
         ilis_pcr=True,
+        method="rms",
     )
     fiducial.build()
 
-    fiducial.plot_gpr_array(0, 2)
-    fiducial.plot_gpr_array(1, 2)
+    for i in range(fiducial.data.sizes["coil"]):
+        fiducial.plot_gpr_array(i, 2)
 
     for coil_index in range(fiducial.data.sizes["coil"]):
         fiducial.plot_fit(coil_index)
@@ -630,8 +684,8 @@ if __name__ == "__main__":
 
     # fiducial.plot_ensemble(True, 250)
 
-    # fiducial.write("SSAT target")
-    fiducial.write("In-pit target")
+    fiducial.write("SSAT target")
+    # fiducial.write("In-pit target")
 
     # print deltas
     coil_index = 0
@@ -660,26 +714,11 @@ if __name__ == "__main__":
 
     # coil = 4
 
-    import pandas as pd
-
-    def to_pandas(data, target="fiducial", datum="fiducial_target"):
-        """Evaluate fit of target to datum."""
-        target_cyl = Rotate.to_cylindrical(data[target])
-        target_cyl.loc[..., "r"] += 1e-9  # data.radial_offset
-        delta = target_cyl - Rotate.to_cylindrical(data[datum])
-        delta = Rotate.to_cartesian(delta)
-        frames = []
-        for coil in data.coil.values:
-            frame = delta.sel(coil=coil).to_pandas()  # .sortby("target")
-            frame.loc[["C", "D", "E", "F", "G"], frame.columns[0]] = ""
-            frame.loc[["A", "B", "G", "H"], "z"] = ""
-            frame.columns = pd.MultiIndex.from_product(
-                [[f"Coil {coil}"], frame.columns]
-            )
-            frames.append(frame)
-        return pd.concat(frames, axis=1)
-
     pd.options.display.precision = 3
     # print(to_pandas(fiducial.data, target="fiducial_fit"))
 
-    print(to_pandas(fiducial.data, target="fiducial_gpr"))
+    print(FiducialFit.to_pandas(fiducial.data, target="fiducial_fit_gpr"))
+
+    print(FiducialFit.to_pandas(fiducial.data, target="fiducial_fit"))
+
+    print(FiducialFit.to_pandas(fiducial.data, target="fiducial_fit_gpr"))

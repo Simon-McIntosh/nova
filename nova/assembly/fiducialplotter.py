@@ -98,7 +98,8 @@ class FiducialPlotter(Plot):
             color="gray",
         )
         self.axes[0].plot(
-            self.data.fiducial_target[coil_index, :, 0],
+            self.data.fiducial_target[coil_index, :, 0]
+            + self.factor * self.radial_offset,
             self.data.fiducial_target[coil_index, :, 2],
             "o",
             color="gray",

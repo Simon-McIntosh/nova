@@ -40,6 +40,44 @@ class FiducialFit(FiducialData):
         "vertical": [2, 1, -1, -2],  # vertical C, D and E, F
     }
 
+    # --- Clocking infrastructure for sector fits ---
+
+    @property
+    def is_sector(self) -> bool:
+        """True if fitting multiple coils as a sector."""
+        return self.data.sizes["coil"] > 1
+
+    @cached_property
+    def _rotate(self) -> Rotate:
+        """Return Rotate instance for sector clocking."""
+        return Rotate()
+
+    def _coil_index(self, coil) -> int:
+        """Return index of coil in sector (0 = first, 1 = second)."""
+        return list(self.data.coil.values).index(int(coil))
+
+    def clock_coil(self, data: np.ndarray, coil) -> np.ndarray:
+        """Clock data to sector frame. Identity for single-coil fits.
+        
+        First coil in sector: anticlock (-half_angle)
+        Second coil in sector: clock (+half_angle)
+        """
+        if not self.is_sector:
+            return data
+        if self._coil_index(coil) == 0:
+            return self._rotate.anticlock(data)
+        return self._rotate.clock(data)
+
+    def unclock_coil(self, data: np.ndarray, coil) -> np.ndarray:
+        """Unclock data from sector frame. Identity for single-coil fits."""
+        if not self.is_sector:
+            return data
+        if self._coil_index(coil) == 0:
+            return self._rotate.clock(data)  # reverse of anticlock
+        return self._rotate.anticlock(data)  # reverse of clock
+
+    # --- End clocking infrastructure ---
+
     @property
     def fiducial_attrs(self):
         """Extend fiducial_attrs to include fit parameters."""
@@ -57,6 +95,16 @@ class FiducialFit(FiducialData):
         self.evaluate_gpr("fiducial", "gpr")
         self.fit()
         self.evaluate_gpr("fiducial_fit", "fit_gpr")
+
+    def _sector_transform(self, opt_x: np.ndarray, points: np.ndarray, coil) -> np.ndarray:
+        """Apply transform in sector frame: clock → transform → unclock.
+        
+        For single-coil fits, clocking is identity.
+        For sector fits, transform was computed in clocked frame.
+        """
+        clocked = self.clock_coil(points, coil)
+        transformed = self.transform(opt_x, clocked)
+        return self.unclock_coil(transformed, coil)
 
     def write(self, sheet: str, opt_x=None):
         """Write fits to source xls files."""
@@ -118,14 +166,15 @@ class FiducialFit(FiducialData):
                         # self.data.target.sortby("target").data[:, np.newaxis],
                         offset=(1, 2),
                     )
-                    # write transformed ccl data
+                    # write transformed ccl data (sector: clock → transform → unclock)
                     sectordata.write(
                         worksheet,
                         workcell["coil"][cell_index],
                         np.append(
-                            self.transform(
+                            self._sector_transform(
                                 opt_x_coil.data,
                                 self.data.fiducial.sel(coil=coil).sortby("target").data,
+                                coil,
                             ),
                             2 * std,
                             axis=1,
@@ -154,9 +203,10 @@ class FiducialFit(FiducialData):
                     sectordata.write(
                         worksheet,
                         workcell["fiducial"][cell_index],
-                        self.transform(
+                        self._sector_transform(
                             opt_x_coil.data,
                             self.dataset.case[coil].loc[:, ["x", "y", "z"]].values,
+                            coil,
                         ),
                         offset=(0, 2),
                     )
@@ -184,13 +234,14 @@ class FiducialFit(FiducialData):
                             ilis_data.Name.values[:, np.newaxis],
                             offset=(0, 1),
                         )
-                        # write transformed ilis data
+                        # write transformed ilis data (sector: clock → transform → unclock)
                         sectordata.write(
                             worksheet,
                             xls_index,
-                            self.transform(
+                            self._sector_transform(
                                 opt_x_coil.data,
                                 ilis_data.loc[:, ["x", "y", "z"]].values,
+                                coil,
                             ),
                             offset=(0, 2),
                         )
@@ -305,13 +356,37 @@ class FiducialFit(FiducialData):
         return points
 
     def delta(self, points):
-        """Return coil-frame deltas."""
+        """Return coil-frame deltas in clocked sector frame."""
         offset = np.zeros_like(points)
         offset[..., 0] -= self.radial_offset
+
+        # Clock both points and targets for sector fits
+        points_clocked = points.copy()
+        targets = self.data.fiducial_target.loc[points.coil].copy()
+        targets_clocked = targets.copy()
+
+        if self.is_sector:
+            # Check if points has multiple coils or a single coil
+            coil_dim = points.coil
+            if coil_dim.ndim == 0:
+                # Single coil scalar (0-d array)
+                coil = int(coil_dim)
+                points_clocked[:] = self.clock_coil(points.values, coil)
+                targets_clocked[:] = self.clock_coil(targets.values, coil)
+            else:
+                # Multi-coil array
+                for coil in coil_dim.values:
+                    points_clocked.loc[{"coil": coil}] = self.clock_coil(
+                        points.sel(coil=coil).values, coil
+                    )
+                    targets_clocked.loc[{"coil": coil}] = self.clock_coil(
+                        targets.sel(coil=coil).values, coil
+                    )
+
         return (
-            Rotate.to_cylindrical(points)
+            Rotate.to_cylindrical(points_clocked)
             + offset
-            - Rotate.to_cylindrical(self.data.fiducial_target.loc[points.coil])
+            - Rotate.to_cylindrical(targets_clocked)
         )
 
     @staticmethod
@@ -394,12 +469,12 @@ class FiducialFit(FiducialData):
         return "fiducial"
 
     def points(self, coil):
-        """Return reference points."""
+        """Return reference points (clocked for sector fits)."""
         points = self.data[self.point_name].sel(coil=coil).copy()
         if self.infer:
             if len(self.dataset.ilis) == 0:
                 Warning("ILIS data not found")
-                return points
+                return self._maybe_clock_points(points, coil)
             target = ["B", "H", "A"]
             # points.loc[target] = self.data.fiducial.sel(coil=coil).loc[target]
             # project gpr fiducials to ILIS mid-plane
@@ -414,6 +489,13 @@ class FiducialFit(FiducialData):
             points.loc[target, "x"] = radius * np.cos(_phi)
             points.loc[target, "y"] = radius * np.sin(_phi)
 
+        return self._maybe_clock_points(points, coil)
+
+    def _maybe_clock_points(self, points, coil):
+        """Clock points for sector fits, identity otherwise."""
+        if self.is_sector:
+            points = points.copy()
+            points[:] = self.clock_coil(points.values, coil)
         return points
 
     @staticmethod
@@ -467,8 +549,9 @@ class FiducialFit(FiducialData):
                 warnings.warn(f"optimization failed {opt}")
             self.data["opt_x"].loc[{"coil": coil}] = opt.x
             for attr in transform_attrs:
-                self.data[f"{attr}_fit"].loc[{"coil": coil}] = self.transform(
-                    opt.x, self.data[attr].loc[{"coil": coil}].copy()
+                # For sector fits: clock → transform → unclock
+                self.data[f"{attr}_fit"].loc[{"coil": coil}] = self._sector_transform(
+                    opt.x, self.data[attr].loc[{"coil": coil}].copy().data, coil
                 )
             for post_fix in ["", "gpr"]:
                 error_attr = self.join("error", post_fix)

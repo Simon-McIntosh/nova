@@ -106,8 +106,26 @@ class FiducialFit(FiducialData):
         transformed = self.transform(opt_x, clocked)
         return self.unclock_coil(transformed, coil)
 
-    def write(self, sheet: str, opt_x=None):
-        """Write fits to source xls files."""
+    def write(self, sheet: str, opt_x=None, reference_phase: str = None):
+        """Write fits to source xls files.
+        
+        Args:
+            sheet: Target sheet name to write to.
+            opt_x: Optional transform to apply. Uses fitted transform if None.
+            reference_phase: Phase to load ILIS data from. If None, uses self.phase.
+                            For in-silico transforms, set this to the reference phase
+                            (e.g., 'SSAT AL') to ensure gap preservation.
+        """
+        # Load reference ILIS if different from fitted phase
+        if reference_phase and reference_phase != self.phase:
+            from nova.assembly.fiducialsector import FiducialSector
+            ref_dataset = FiducialSector(
+                phase=reference_phase, sectors=self.sectors, private=self.private
+            )
+            ilis_source = ref_dataset.ilis
+        else:
+            ilis_source = self.dataset.ilis
+
         for sector in tqdm(self.data.sector.data, "updating xls workbooks"):
             sectordata = SectorData(sector)
             coils = self.data.coils.sel(sector=sector)
@@ -219,9 +237,9 @@ class FiducialFit(FiducialData):
                             workcell["ilis_m"][cell_index],
                         ],
                     ):
-                        ilis_data = self.dataset.ilis.loc[
-                            (self.dataset.ilis.coil == coil)
-                            & (self.dataset.ilis.feature == f"ILIS {side}")
+                        ilis_data = ilis_source.loc[
+                            (ilis_source.coil == coil)
+                            & (ilis_source.feature == f"ILIS {side}")
                         ]
                         sectordata.write(
                             worksheet,
@@ -340,19 +358,24 @@ class FiducialFit(FiducialData):
         plt.tight_layout()
         plt.savefig("gpr.png")
 
-    def transform(self, x, points) -> xarray.DataArray:
+    def transform(self, x, points):
         """Return points transformed by vector x."""
         points = points.copy()
         points += x[:3]
         if len(x) == 6:
             rotate = Rotation.from_euler("XYZ", x[-3:], degrees=True)
             try:
+                # xarray with coil dimension
                 for coil in points.coil:
                     points.loc[{"coil": coil}] = rotate.apply(
                         points.sel(coil=coil).data
                     )
             except (AttributeError, TypeError):
-                points[:] = rotate.apply(points.data)
+                # numpy array or xarray without coil dimension
+                if hasattr(points, 'values'):
+                    points[:] = rotate.apply(points.values)
+                else:
+                    points[:] = rotate.apply(points)
         return points
 
     def delta(self, points):
@@ -469,12 +492,12 @@ class FiducialFit(FiducialData):
         return "fiducial"
 
     def points(self, coil):
-        """Return reference points (clocked for sector fits)."""
+        """Return reference points (lab frame - clocking handled by delta())."""
         points = self.data[self.point_name].sel(coil=coil).copy()
         if self.infer:
             if len(self.dataset.ilis) == 0:
                 Warning("ILIS data not found")
-                return self._maybe_clock_points(points, coil)
+                return points
             target = ["B", "H", "A"]
             # points.loc[target] = self.data.fiducial.sel(coil=coil).loc[target]
             # project gpr fiducials to ILIS mid-plane
@@ -489,13 +512,6 @@ class FiducialFit(FiducialData):
             points.loc[target, "x"] = radius * np.cos(_phi)
             points.loc[target, "y"] = radius * np.sin(_phi)
 
-        return self._maybe_clock_points(points, coil)
-
-    def _maybe_clock_points(self, points, coil):
-        """Clock points for sector fits, identity otherwise."""
-        if self.is_sector:
-            points = points.copy()
-            points[:] = self.clock_coil(points.values, coil)
         return points
 
     @staticmethod

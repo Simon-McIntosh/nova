@@ -106,29 +106,16 @@ class FiducialFit(FiducialData):
         transformed = self.transform(opt_x, clocked)
         return self.unclock_coil(transformed, coil)
 
-    def write(self, sheet: str, opt_x=None, reference_phase: str = None):
+    def write(self, sheet: str, opt_x=None):
         """Write fits to source xls files.
         
         Args:
             sheet: Target sheet name to write to.
             opt_x: Optional transform to apply. Uses fitted transform if None.
-            reference_phase: Phase to load ILIS data from. If None, uses self.phase.
-                            For in-silico transforms, set this to the reference phase
-                            (e.g., 'SSAT AL') to ensure gap preservation.
+        
+        Note: For derived phases (in-silico transforms), use write_rigid_body() instead.
         """
-        # Load reference data if different from fitted phase
-        if reference_phase and reference_phase != self.phase:
-            from nova.assembly.fiducialsector import FiducialSector
-            ref_dataset = FiducialSector(
-                phase=reference_phase, sectors=self.sectors, private=self.private
-            )
-            ilis_source = ref_dataset.ilis
-            case_source = ref_dataset.case
-            fiducial_source = ref_dataset  # For CCL data
-        else:
-            ilis_source = self.dataset.ilis
-            case_source = self.dataset.case
-            fiducial_source = None  # Use self.data
+        ilis_source = self.dataset.ilis
 
         for sector in tqdm(self.data.sector.data, "updating xls workbooks"):
             sectordata = SectorData(sector)
@@ -268,21 +255,20 @@ class FiducialFit(FiducialData):
                             offset=(0, 2),
                         )
 
-    def write_rigid_body(self, target_sheet: str, reference_phase: str):
-        """Write target phase as rigid body transform of reference phase.
+    def write_rigid_body(self, target_sheet: str):
+        """Write target phase as rigid body transform of fitted phase.
         
-        For in-silico transforms where target = rigid_body(reference).
-        Uses reference phase ILIS/CCL data, applies reference fit + rigid body.
+        For in-silico transforms where target = rigid_body(fitted_phase).
+        Uses fitted phase ILIS/CCL data, applies rigid body transform.
         
         Args:
             target_sheet: Sheet name to write (e.g., 'In-pit target')
-            reference_phase: Phase to use as reference (e.g., 'SSAT AL')
         """
         from nova.assembly.fiducialsector import FiducialSector
         
-        # Load reference data
+        # Load fitted phase data as reference
         ref_dataset = FiducialSector(
-            phase=reference_phase, sectors=self.sectors, private=self.private
+            phase=self.phase, sectors=self.sectors, private=self.private
         )
         
         # Compute rigid body transform from reference CCL to target CCL
@@ -299,7 +285,7 @@ class FiducialFit(FiducialData):
                     pts.append(self.clock_coil(ccl, coil))
                 return np.vstack(pts)
             
-            ccl_ref = get_clocked_ccl(reference_phase)
+            ccl_ref = get_clocked_ccl(self.phase)
             ccl_tgt = get_clocked_ccl(target_sheet)
             
             # Fit rigid body transform

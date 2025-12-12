@@ -35,7 +35,7 @@ class FiducialFit(FiducialData):
     weights: ClassVar[list[float]] = [1, 1, 0.25]
     fiducial_index: ClassVar[dict[str, list[int]]] = {
         "radial": [5, 3, 4],  # ILIS fiducials
-        # "toroidal": slice(None),  # toroidal (all)
+        #"toroidal": slice(None),  # toroidal (all)
         "toroidal": [0, 5, 3, 4],  # reduced toroidal constraint set
         "vertical": [2, 1, -1, -2],  # vertical C, D and E, F
     }
@@ -331,7 +331,7 @@ class FiducialFit(FiducialData):
                 # error[1] = np.mean(delta[..., [0, 1, 5, 3, 4, -1], 1] ** 2)
 
                 error[1] = np.mean(
-                    (delta[..., FiducialFit.fiducial_index["toroidal"], 1] ** 2)
+                    delta[..., FiducialFit.fiducial_index["toroidal"], 1] ** 2
                 )
 
                 # reduced toroidal constraint set
@@ -460,7 +460,9 @@ class FiducialFit(FiducialData):
                 xo,
                 method="SLSQP",
                 args=(points,),
+                options={'ftol': 1e-6},
             )
+            print(opt)
             if not opt.success:
                 warnings.warn(f"optimization failed {opt}")
             self.data["opt_x"].loc[{"coil": coil}] = opt.x
@@ -626,7 +628,7 @@ class FiducialFit(FiducialData):
             ]
             frame.loc[mask, axis] = ""
         return frame
-    
+
     @staticmethod
     def to_pandas(data, target="fiducial", datum="fiducial_target"):
         """Evaluate fit of target to datum."""
@@ -649,8 +651,9 @@ if __name__ == "__main__":
     phase = "FAT supplier"
     phase = "FAT IO"
     phase = "SSAT BR"
-    #phase = "SSAT target"
-    # phase = "SSAT AL"
+    phase = "SSAT target"
+    phase = "SSAT AR"
+    phase = "SSAT AL"
     # phase = "SSAT AR2"
 
     # phase = "TFGS landing"
@@ -660,8 +663,8 @@ if __name__ == "__main__":
     # phase = "SSAT AL"
     # sectors = {7: [8, 9]}
     # sectors = {6: [12, 13]}
-    sectors = {5: [16, 5]}
-    sectors = {8: [11]}
+    # sectors = {5: [16]} # 16, 5
+    sectors = {8: [4, 11]}
 
     fiducial = FiducialFit(
         phase=phase,
@@ -672,7 +675,7 @@ if __name__ == "__main__":
         ilis_pcr=True,
         method="rms",
     )
-    fiducial.build()
+    #fiducial.build()
 
     for i in range(fiducial.data.sizes["coil"]):
         fiducial.plot_gpr_array(i, 2)
@@ -684,8 +687,9 @@ if __name__ == "__main__":
 
     # fiducial.plot_ensemble(True, 250)
 
-    fiducial.write("SSAT target")
-    # fiducial.write("In-pit target")
+    #fiducial.write("_SSAT AL")
+    # fiducial.write("SSAT target")
+    fiducial.write("In-pit target")
 
     # print deltas
     coil_index = 0

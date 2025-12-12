@@ -208,7 +208,7 @@ class FiducialIlis:
 if __name__ == "__main__":
     from nova.assembly.fiducialsector import FiducialSector
 
-    fiducial = FiducialSector(phase="SSAT BR", sectors={7: [8, 9]})
+    fiducial = FiducialSector(phase="SSAT AL", sectors={8: [4, 11]})
 
     ilis = FiducialIlis(fiducial.ilis)
 

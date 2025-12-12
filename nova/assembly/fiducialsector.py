@@ -191,10 +191,11 @@ class FiducialSector(Fiducial):
 if __name__ == "__main__":
     phase = "SSAT BR"
     phase = "SSAT target"
-    # phase = "SSAT AL"
+    phase = "SSAT AR"
+    phase = "SSAT AL"
     # phase = "SSAT AR2"
     # phase = "SSAT AR target"
-    # phase="In-pit target"
+    phase = "In-pit target"
 
     sectors = {7: [8, 9]}
     sectors = {6: [12, 13]}
@@ -276,6 +277,7 @@ if __name__ == "__main__":
 
     offset = []
     offset_data_list = []
+    grid_y_list = []
 
     for coil, feature in sector_index:
         plane_index = (sector_data.coil == coil) & (sector_data.feature == feature)
@@ -293,11 +295,20 @@ if __name__ == "__main__":
         )
 
         # Store offset data for plotting
-        plane_data = sector_data.loc[plane_index, ["r", "z"]].copy()
+        plane_data = sector_data.loc[plane_index, ["Name", "r", "z"]].copy()
         plane_data["offset"] = plane_offset
         plane_data["coil"] = coil
         plane_data["feature"] = feature
         offset_data_list.append(plane_data)
+
+        plane = sector_planes.loc[(coil, feature)]
+        print(plane.nx)
+        grid_y_list.append(
+            plane.y
+            - (plane.nx * (grid_r - plane.x) + plane.nz * (grid_z - plane.z)) / plane.ny
+        )
+
+    grid_y = grid_y_list[1] - grid_y_list[0]
 
     # Combine all offset data
     offset_df = pandas.concat(offset_data_list, ignore_index=True)
@@ -311,7 +322,8 @@ if __name__ == "__main__":
         {
             "r": grid_r.flatten(),
             "z": grid_z.flatten(),
-            "offset": offset[1].flatten() - offset[0].flatten(),
+            #"offset": offset[1].flatten() - offset[0].flatten(),
+            "offset": grid_y.flatten(),
         }
     )
     gap_plane["coil"] = 0
@@ -334,6 +346,7 @@ if __name__ == "__main__":
             ),
             tooltip=[
                 alt.Tooltip("coil:N", title="Coil"),
+                alt.Tooltip("Name"),
                 alt.Tooltip("r:Q", title="r", format=".2f"),
                 alt.Tooltip("z:Q", title="z", format=".2f"),
                 alt.Tooltip("offset:Q", title="Offset", format=".4f"),

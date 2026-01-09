@@ -322,8 +322,8 @@ if __name__ == "__main__":
         {
             "r": grid_r.flatten(),
             "z": grid_z.flatten(),
-            #"offset": offset[1].flatten() - offset[0].flatten(),
-            "offset": grid_y.flatten(),
+            "offset": offset[1].flatten() - offset[0].flatten(),
+            # "offset": grid_y.flatten(),
         }
     )
     gap_plane["coil"] = 0
@@ -514,5 +514,6 @@ if __name__ == "__main__":
 
     points.loc[index, 'offset'] = 500* ilis.offset(points.loc[index], (coil, plane))
 
-    vedo.Points(points.loc[index, ['r', 'z', 'offset']]).generate_delaunay2d(tol=0.000001).c('green').show(axes=1).close()
+    vedo.Points(points.loc[index, ['r', 'z', 'offset']]).generate_delaunay2d(
+        tol=0.000001).c('green').show(axes=1).close()
     """

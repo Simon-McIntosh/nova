@@ -92,6 +92,7 @@ midplane = ilis.intersect(sector_planes.loc[sector_index])
 ```
 
 The midplane has:
+
 - **Point**: Average of the two ILIS plane centers
 - **Normal**: Average of the two ILIS plane normals (pointing in ±y direction)
 
@@ -104,11 +105,13 @@ offset = ilis.offset(sector_data.loc[plane_index, ('x', 'y', 'z')], midplane)
 ```
 
 The `offset()` method computes:
+
 ```
 offset = (point - midplane_point) · midplane_normal
 ```
 
 This gives:
+
 - **ILIS +1**: Negative offset (below midplane in y)
 - **ILIS -1**: Positive offset (above midplane in y)
 
@@ -121,6 +124,7 @@ gap = offset[ILIS -1] - offset[ILIS +1]
 ```
 
 Since ILIS +1 has negative offset and ILIS -1 has positive offset:
+
 ```
 gap = (+0.92) - (-0.92) ≈ 1.84 mm
 ```
@@ -181,26 +185,26 @@ Legend: `[coil]` = installed, `(coil)` = not installed, `S#` = sector module num
 The `location` list in `FiducialData` defines the authoritative mapping from pit position
 (0-17) to coil number. Each position is 20° apart toroidally.
 
-| Position | Angle | Coil | Sector | Notes |
-|----------|-------|------|--------|-------|
-| 0        | 0°    | 14   | -      | Not installed |
-| 1        | 20°   | 15   | -      | Not installed |
-| 2        | 40°   | 10   | -      | Not installed |
-| 3        | 60°   | 17   | -      | Not installed |
-| 4        | 80°   | 6    | -      | Not installed |
-| 5        | 100°  | 7    | -      | Not installed |
-| 6        | 120°  | 2    | -      | Not installed |
-| 7        | 140°  | 3    | -      | Not installed |
-| **8**    | **160°** | **16** | **S5** | First coil |
-| **9**    | **180°** | **5**  | **S5** | Second coil |
-| **10**   | **200°** | **12** | **S6** | First coil |
-| **11**   | **220°** | **13** | **S6** | Second coil |
-| **12**   | **240°** | **8**  | **S7** | First coil |
-| **13**   | **260°** | **9**  | **S7** | Second coil |
-| **14**   | **280°** | **4**  | **S8** | First coil |
-| **15**   | **300°** | **11** | **S8** | Second coil |
-| 16       | 320°  | 18   | -      | Not installed |
-| 17       | 340°  | 1    | -      | Not installed |
+| Position | Angle    | Coil   | Sector | Notes         |
+| -------- | -------- | ------ | ------ | ------------- |
+| 0        | 0°       | 14     | -      | Not installed |
+| 1        | 20°      | 15     | -      | Not installed |
+| 2        | 40°      | 10     | -      | Not installed |
+| 3        | 60°      | 17     | -      | Not installed |
+| 4        | 80°      | 6      | -      | Not installed |
+| 5        | 100°     | 7      | -      | Not installed |
+| 6        | 120°     | 2      | -      | Not installed |
+| 7        | 140°     | 3      | -      | Not installed |
+| **8**    | **160°** | **16** | **S5** | First coil    |
+| **9**    | **180°** | **5**  | **S5** | Second coil   |
+| **10**   | **200°** | **12** | **S6** | First coil    |
+| **11**   | **220°** | **13** | **S6** | Second coil   |
+| **12**   | **240°** | **8**  | **S7** | First coil    |
+| **13**   | **260°** | **9**  | **S7** | Second coil   |
+| **14**   | **280°** | **4**  | **S8** | First coil    |
+| **15**   | **300°** | **11** | **S8** | Second coil   |
+| 16       | 320°     | 18     | -      | Not installed |
+| 17       | 340°     | 1      | -      | Not installed |
 
 **Note**: Coils 4 and 10 were incorrectly swapped in the original `location` list.
 This was corrected in January 2026 based on analysis of PCR ILIS deviation data
@@ -209,12 +213,12 @@ adjacent to sector 7 (not isolated at position 2).
 
 ### Sector Module to Pit Position Mapping
 
-| Sector Module | Coils | Pit Positions | Angular Range | Adjacent to |
-|---------------|-------|---------------|---------------|-------------|
-| 5             | 16, 5 | 8, 9          | 160°-180°     | Sector 6    |
-| 6             | 12, 13| 10, 11        | 200°-220°     | Sectors 5, 7|
-| 7             | 8, 9  | 12, 13        | 240°-260°     | Sectors 6, 8|
-| 8             | 4, 11 | 14, 15        | 280°-300°     | Sector 7    |
+| Sector Module | Coils  | Pit Positions | Angular Range | Adjacent to  |
+| ------------- | ------ | ------------- | ------------- | ------------ |
+| 5             | 16, 5  | 8, 9          | 160°-180°     | Sector 6     |
+| 6             | 12, 13 | 10, 11        | 200°-220°     | Sectors 5, 7 |
+| 7             | 8, 9   | 12, 13        | 240°-260°     | Sectors 6, 8 |
+| 8             | 4, 11  | 14, 15        | 280°-300°     | Sector 7     |
 
 ### Contiguous Installed Cluster (160°-300°)
 
@@ -234,25 +238,26 @@ Coil:      16 ── 5 ── 12 ── 13 ── 8 ── 9 ── 4 ── 11
 
 Three inter-sector gaps exist between adjacent installed coils:
 
-| Gap | From Sector | To Sector | Coil Pair | ILIS Surfaces | Verified |
-|-----|-------------|-----------|-----------|---------------|----------|
-| 5→6 | 5 (second)  | 6 (first) | 5 → 12    | 5 ILIS +1 ↔ 12 ILIS -1 | ✓ |
-| 6→7 | 6 (second)  | 7 (first) | 13 → 8    | 13 ILIS +1 ↔ 8 ILIS -1 | ✓ |
-| 7→8 | 7 (second)  | 8 (first) | 9 → 4     | 9 ILIS +1 ↔ 4 ILIS -1  | ✓ |
+| Gap | From Sector | To Sector | Coil Pair | ILIS Surfaces          | Verified |
+| --- | ----------- | --------- | --------- | ---------------------- | -------- |
+| 5→6 | 5 (second)  | 6 (first) | 5 → 12    | 5 ILIS +1 ↔ 12 ILIS -1 | ✓        |
+| 6→7 | 6 (second)  | 7 (first) | 13 → 8    | 13 ILIS +1 ↔ 8 ILIS -1 | ✓        |
+| 7→8 | 7 (second)  | 8 (first) | 9 → 4     | 9 ILIS +1 ↔ 4 ILIS -1  | ✓        |
 
 ## Measured Intra-Sector Gap Statistics (In-pit Phase)
 
-| Sector | Coils  | Mean Gap (mm) | Std (mm) | Range (mm)   |
-|--------|--------|---------------|----------|--------------|
-| 5      | 16-5   | 0.933         | 0.158    | 0.59 - 1.33  |
-| 6      | 12-13  | 1.911         | 0.229    | 1.34 - 2.35  |
-| 7      | 8-9    | 0.830         | 0.147    | 0.33 - 1.06  |
-| 8      | 4-11   | 1.883         | 0.116    | 1.67 - 2.16  |
-| **Overall** |    | **1.389**     | **0.588**| 0.33 - 2.35  |
+| Sector      | Coils | Mean Gap (mm) | Std (mm)  | Range (mm)  |
+| ----------- | ----- | ------------- | --------- | ----------- |
+| 5           | 16-5  | 0.933         | 0.158     | 0.59 - 1.33 |
+| 6           | 12-13 | 1.911         | 0.229     | 1.34 - 2.35 |
+| 7           | 8-9   | 0.830         | 0.147     | 0.33 - 1.06 |
+| 8           | 4-11  | 1.883         | 0.116     | 1.67 - 2.16 |
+| **Overall** |       | **1.389**     | **0.588** | 0.33 - 2.35 |
 
 The pooled within-sector standard deviation is 0.168 mm.
 
 **Variance interpretation:**
+
 - **Within-sector spatial variation**: ~0.17 mm (pooled std) - how gap varies across the ILIS surface
 - **Between-sector systematic variation**: ~0.59 mm - differences in mean gap between sector modules
 
@@ -260,12 +265,12 @@ The pooled within-sector standard deviation is 0.168 mm.
 
 Three inter-sector gaps exist between physically adjacent coils in the pit:
 
-| Gap | Coil Pair | Mean Gap (mm) | Std (mm) |
-|-----|-----------|---------------|----------|
-| 5→6 | 5 → 12    | TBD           | TBD      |
-| 6→7 | 13 → 8    | TBD           | TBD      |
-| 7→8 | 9 → 4     | TBD           | TBD      |
-| **Mean** |       | **TBD**       | **TBD**  |
+| Gap      | Coil Pair | Mean Gap (mm) | Std (mm) |
+| -------- | --------- | ------------- | -------- |
+| 5→6      | 5 → 12    | TBD           | TBD      |
+| 6→7      | 13 → 8    | TBD           | TBD      |
+| 7→8      | 9 → 4     | TBD           | TBD      |
+| **Mean** |           | **TBD**       | **TBD**  |
 
 Inter-sector gaps are generally larger than intra-sector gaps.
 

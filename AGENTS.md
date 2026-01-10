@@ -21,19 +21,19 @@ git commit -m 'type: description'
 
 ## Quick Reference
 
-| Task | Command |
-|------|---------|
-| Commit changes | `uv run git commit -m 'type: description'` |
-| Run Python | `uv run python <script>` |
-| Run tests | `uv run pytest` |
-| Run tests with coverage | `uv run pytest --cov=nova` |
-| Lint/format | `uv run ruff check --fix . && uv run ruff format .` |
-| Sync dependencies | `uv sync --extra test` |
-| Sync all extras | `uv sync --all-extras` |
-| Add dependency | `uv add <package>` |
-| Add dev dependency | `uv add --dev <package>` |
-| Launch Spyder | `uv run spyder &` |
-| Run Bokeh app | `uv run bokeh serve apps/pulsedesign` |
+| Task                    | Command                                             |
+| ----------------------- | --------------------------------------------------- |
+| Commit changes          | `uv run git commit -m 'type: description'`          |
+| Run Python              | `uv run python <script>`                            |
+| Run tests               | `uv run pytest`                                     |
+| Run tests with coverage | `uv run pytest --cov=nova`                          |
+| Lint/format             | `uv run ruff check --fix . && uv run ruff format .` |
+| Sync dependencies       | `uv sync --extra test`                              |
+| Sync all extras         | `uv sync --all-extras`                              |
+| Add dependency          | `uv add <package>`                                  |
+| Add dev dependency      | `uv add --dev <package>`                            |
+| Launch Spyder           | `uv run spyder &`                                   |
+| Run Bokeh app           | `uv run bokeh serve apps/pulsedesign`               |
 
 ## Project Overview
 
@@ -46,13 +46,13 @@ git commit -m 'type: description'
 
 ### Key Modules
 
-| Module | Purpose |
-|--------|---------|
-| `nova.imas` | IMAS data model interface (IDS access, database connections) |
+| Module          | Purpose                                                                                                                                                                                                                        |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `nova.imas`     | IMAS data model interface (IDS access, database connections)                                                                                                                                                                   |
 | `nova.assembly` | ITER TF coil assembly analysis (Monte Carlo, fiducials, deformations). See [nova/assembly/README.md](nova/assembly/README.md) for detailed documentation on coordinate systems, gap calculations, and installed sector layout. |
-| `nova.biot` | Biot-Savart integral calculations |
-| `nova.frame` | FrameSpace types for electromagnetic components |
-| `nova.database` | netCDF storage, filepath management |
+| `nova.biot`     | Biot-Savart integral calculations                                                                                                                                                                                              |
+| `nova.frame`    | FrameSpace types for electromagnetic components                                                                                                                                                                                |
+| `nova.database` | netCDF storage, filepath management                                                                                                                                                                                            |
 
 ### Data Caching
 
@@ -91,14 +91,14 @@ git push
 
 **Commit message format:**
 
-| Type | Purpose |
-|------|---------|
-| `feat` | New feature |
-| `fix` | Bug fix |
+| Type       | Purpose            |
+| ---------- | ------------------ |
+| `feat`     | New feature        |
+| `fix`      | Bug fix            |
 | `refactor` | Code restructuring |
-| `docs` | Documentation |
-| `test` | Test changes |
-| `chore` | Maintenance |
+| `docs`     | Documentation      |
+| `test`     | Test changes       |
+| `chore`    | Maintenance        |
 
 **Breaking changes**: Add `BREAKING CHANGE:` footer in the body (not `type!:` suffix).
 
@@ -126,6 +126,7 @@ uv run pytest -v
 Cursor remote agents often work in auto-created worktrees. Follow this workflow for clean commits:
 
 **Step 1: Commit in the worktree**
+
 ```bash
 cd /path/to/worktree
 
@@ -141,6 +142,7 @@ uv run git commit -m 'type: description'
 **Step 2: Cherry-pick to main workspace**
 
 The `jax` branch is typically checked out in the primary workspace, so cherry-pick:
+
 ```bash
 cd /home/ITER/mcintos/Code/nova
 git cherry-pick <commit-hash-from-worktree>
@@ -148,6 +150,7 @@ git push
 ```
 
 **Step 3: Clean up worktree**
+
 ```bash
 cd /path/to/worktree
 git checkout -- .  # Discard any remaining changes
@@ -246,6 +249,7 @@ except IOError:
 ## Philosophy
 
 This is a **research project** focused on ITER assembly support:
+
 - Prioritize correctness over backward compatibility
 - Write code as if it's always been this way
 - Avoid legacy naming patterns

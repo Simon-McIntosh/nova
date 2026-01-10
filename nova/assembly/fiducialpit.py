@@ -1082,6 +1082,406 @@ class FiducialPit(Plot1D):
 
         print(f"\n{'=' * 60}\n")
 
+    def position_statistics(
+        self,
+        assembly_phase: int | None = None,
+        prefer_tfgs_landing: bool = True,
+    ) -> tuple[pandas.DataFrame, alt.Chart]:
+        """Calculate position statistics from installed sectors.
+
+        Extracts coil position parameters using TFGS Landing phase when available,
+        falling back to In-pit target phase otherwise. Calculates sample statistics
+        and variance estimates with confidence intervals.
+
+        Parameters
+        ----------
+        assembly_phase : int | None
+            Number of sectors to include (5=sector 5 only, 6=sectors 5-6, etc.).
+            If None, uses all installed sectors.
+        prefer_tfgs_landing : bool
+            If True, prefer TFGS Landing phase over In-pit target when available.
+
+        Returns
+        -------
+        tuple[pandas.DataFrame, alt.Chart]
+            DataFrame with position statistics and Altair chart visualization.
+        """
+        from nova.assembly.sectordata import SectorData
+
+        # Map assembly phase to sectors
+        sector_order = [5, 6, 7, 8]  # Installation order
+        if assembly_phase is not None:
+            if assembly_phase < 5 or assembly_phase > 8:
+                raise ValueError(f"assembly_phase must be 5-8, got {assembly_phase}")
+            n_sectors = assembly_phase - 4
+            active_sectors = sector_order[:n_sectors]
+        else:
+            active_sectors = list(self.sectors.keys())
+
+        # Trial.py reference windows (half-widths for uniform distributions)
+        # From Vault class: theta: [1.5, 1.5, 3, 3, 2, 2, 5]
+        # Maps to: radial, tangential, roll_length, yaw_length,
+        #          radial_ccl, tangential_ccl, radial_wall
+        trial_windows = {
+            "radial": 1.5,
+            "tangential": 1.5,
+            "vertical": 1.5,  # Not in trial but similar to translations
+            "roll_length": 3.0,
+            "yaw_length": 3.0,
+            "pitch_length": 3.0,  # Similar to other rotation lengths
+        }
+
+        # Collect position data from each sector
+        all_positions = []
+
+        for sector in active_sectors:
+            coils = self.sectors.get(sector, [])
+            if not coils:
+                continue
+
+            # Determine best phase to use
+            try:
+                sd = SectorData(sector, private=self.private)
+                available_phases = sd.phase
+            except (FileNotFoundError, KeyError):
+                continue
+
+            # Prefer TFGS Landing if available and requested
+            phase_to_use = self.phase
+            if prefer_tfgs_landing:
+                for tfgs_phase in ["TFGS Landing", "TFGS landing"]:
+                    if tfgs_phase in available_phases:
+                        phase_to_use = tfgs_phase
+                        break
+
+            try:
+                sector_data = FiducialSector(
+                    phase=phase_to_use,
+                    sectors={sector: coils},
+                    private=self.private,
+                )
+                positions = sector_data.extract_coil_positions(pcr=self.pcr)
+                # Reset index to make 'coil' a column
+                positions = positions.reset_index()
+                positions["sector"] = sector
+                positions["phase"] = phase_to_use
+                all_positions.append(positions)
+            except (FileNotFoundError, KeyError, ValueError) as e:
+                print(f"Warning: Could not extract positions for sector {sector}: {e}")
+
+        if not all_positions:
+            raise ValueError("No position data available")
+
+        # Combine all positions
+        data = pandas.concat(all_positions, ignore_index=True)
+
+        # Calculate statistics for each parameter
+        params = [
+            "radial",
+            "tangential",
+            "vertical",
+            "roll_length",
+            "yaw_length",
+            "pitch_length",
+        ]
+        stats = []
+
+        for param in params:
+            values = data[param].dropna()
+            if len(values) == 0:
+                continue
+
+            sample_mean = values.mean()
+            sample_std = values.std(ddof=1)
+            sample_var = values.var(ddof=1)
+
+            # Chi-squared confidence interval for variance
+            # (n-1)*s^2 / chi2_upper < sigma^2 < (n-1)*s^2 / chi2_lower
+            from scipy import stats as sp_stats
+
+            alpha = 0.05
+            df = len(values) - 1
+            if df > 0:
+                chi2_lower = sp_stats.chi2.ppf(alpha / 2, df)
+                chi2_upper = sp_stats.chi2.ppf(1 - alpha / 2, df)
+                var_lower = df * sample_var / chi2_upper
+                var_upper = df * sample_var / chi2_lower
+                std_lower = np.sqrt(var_lower)
+                std_upper = np.sqrt(var_upper)
+            else:
+                std_lower = std_upper = np.nan
+
+            # Trial window half-width
+            trial_hw = trial_windows.get(param, np.nan)
+
+            stats.append(
+                {
+                    "parameter": param,
+                    "n": len(values),
+                    "mean": sample_mean,
+                    "std": sample_std,
+                    "std_lower_95": std_lower,
+                    "std_upper_95": std_upper,
+                    "trial_halfwidth": trial_hw,
+                }
+            )
+
+        stats_df = pandas.DataFrame(stats)
+
+        # Build data for Altair chart
+        chart_data = []
+        for _, row in data.iterrows():
+            for param in params:
+                if pandas.notna(row.get(param)):
+                    chart_data.append(
+                        {
+                            "coil": int(row["coil"]),
+                            "sector": int(row["sector"]),
+                            "phase": row["phase"],
+                            "parameter": param,
+                            "value": row[param],
+                        }
+                    )
+
+        chart_df = pandas.DataFrame(chart_data)
+
+        # Add statistics to chart data
+        for _, stat_row in stats_df.iterrows():
+            param = stat_row["parameter"]
+            chart_df.loc[chart_df["parameter"] == param, "mean"] = stat_row["mean"]
+            chart_df.loc[chart_df["parameter"] == param, "std"] = stat_row["std"]
+            chart_df.loc[chart_df["parameter"] == param, "std_lower_95"] = stat_row[
+                "std_lower_95"
+            ]
+            chart_df.loc[chart_df["parameter"] == param, "std_upper_95"] = stat_row[
+                "std_upper_95"
+            ]
+            chart_df.loc[chart_df["parameter"] == param, "trial_halfwidth"] = stat_row[
+                "trial_halfwidth"
+            ]
+
+        # Create Altair chart
+        chart = self._build_position_chart(chart_df, stats_df, len(active_sectors))
+
+        return stats_df, chart
+
+    def _build_position_chart(
+        self,
+        chart_df: pandas.DataFrame,
+        stats_df: pandas.DataFrame,
+        n_sectors: int,
+    ) -> alt.Chart:
+        """Build Altair visualization for position statistics.
+
+        Creates a 3x2 grid with translations on top row and rotations on bottom.
+
+        Parameters
+        ----------
+        chart_df : pandas.DataFrame
+            Per-coil position data
+        stats_df : pandas.DataFrame
+            Summary statistics
+        n_sectors : int
+            Number of sectors included
+
+        Returns
+        -------
+        alt.Chart
+            Altair chart object
+        """
+        # Parameter layout: 3x2 grid
+        # Top row: radial, tangential, vertical
+        # Bottom row: roll_length, yaw_length, pitch_length
+        param_order = [
+            "radial",
+            "tangential",
+            "vertical",
+            "roll_length",
+            "yaw_length",
+            "pitch_length",
+        ]
+        row_map = {
+            "radial": 0,
+            "tangential": 0,
+            "vertical": 0,
+            "roll_length": 1,
+            "yaw_length": 1,
+            "pitch_length": 1,
+        }
+        col_map = {
+            "radial": 0,
+            "tangential": 1,
+            "vertical": 2,
+            "roll_length": 0,
+            "yaw_length": 1,
+            "pitch_length": 2,
+        }
+
+        chart_df = chart_df.copy()
+        chart_df["row"] = chart_df["parameter"].map(row_map)
+        chart_df["col"] = chart_df["parameter"].map(col_map)
+
+        # Base chart
+        base = alt.Chart(chart_df).properties(width=180, height=150)
+
+        # Bars for each coil value
+        bars = base.mark_bar(opacity=0.7).encode(
+            x=alt.X("coil:O", title="Coil"),
+            y=alt.Y("value:Q", title="mm"),
+            color=alt.Color(
+                "sector:N",
+                scale=alt.Scale(scheme="category10"),
+                legend=alt.Legend(title="Sector"),
+            ),
+            tooltip=["coil", "sector", "phase", "value"],
+        )
+
+        # Mean line (dashed black)
+        mean_rule = base.mark_rule(color="black", strokeDash=[4, 4]).encode(
+            y="mean(mean):Q",
+        )
+
+        # Trial window lines (±half-width as dashed red lines)
+        # Use transform to create both positive and negative lines
+        trial_upper = base.mark_rule(
+            color="red", strokeDash=[2, 2], opacity=0.7
+        ).encode(
+            y="mean(trial_halfwidth):Q",
+        )
+        trial_lower = (
+            base.transform_calculate(neg_trial="-datum.trial_halfwidth")
+            .mark_rule(color="red", strokeDash=[2, 2], opacity=0.7)
+            .encode(y="mean(neg_trial):Q")
+        )
+
+        # Std bands using error bars
+        std_band = base.mark_errorbar(extent="stdev", color="gray").encode(
+            y=alt.Y("value:Q"),
+        )
+
+        # Combined chart - layer bars, mean, std, trial lines, then facet
+        combined = bars + mean_rule + std_band + trial_upper + trial_lower
+
+        chart = combined.facet(
+            row=alt.Row("row:O", title=None, header=alt.Header(labels=False)),
+            column=alt.Column(
+                "parameter:N",
+                title=None,
+                sort=param_order,
+            ),
+        )
+
+        # Add title
+        chart = chart.properties(
+            title=alt.TitleParams(
+                text=f"Coil Position Statistics ({n_sectors} sectors)",
+                subtitle=[
+                    "Top: translations (mm) | Bottom: rotation lengths (mm)",
+                    "Black dashed: mean | Red dashed: trial.py windows",
+                ],
+            )
+        )
+
+        return chart
+
+    def plot_position_evolution(
+        self,
+        prefer_tfgs_landing: bool = True,
+    ) -> alt.Chart:
+        """Plot how position statistics evolve as sectors are installed.
+
+        Creates charts showing variance estimates with confidence intervals
+        for each assembly phase (5, 6, 7, 8 sectors).
+
+        Parameters
+        ----------
+        prefer_tfgs_landing : bool
+            If True, prefer TFGS Landing phase over In-pit target.
+
+        Returns
+        -------
+        alt.Chart
+            Altair chart showing variance evolution
+        """
+        evolution_data = []
+
+        for phase in range(5, 9):
+            try:
+                # Only include sectors up to this phase
+                available_sectors = {
+                    k: v for k, v in self.sectors.items() if k <= phase
+                }
+                if not available_sectors:
+                    continue
+
+                stats_df, _ = self.position_statistics(
+                    assembly_phase=phase,
+                    prefer_tfgs_landing=prefer_tfgs_landing,
+                )
+
+                for _, row in stats_df.iterrows():
+                    evolution_data.append(
+                        {
+                            "assembly_phase": phase,
+                            "n_coils": int(row["n"]),
+                            "parameter": row["parameter"],
+                            "std": row["std"],
+                            "std_lower_95": row["std_lower_95"],
+                            "std_upper_95": row["std_upper_95"],
+                            "trial_halfwidth": row["trial_halfwidth"],
+                        }
+                    )
+            except (ValueError, KeyError) as e:
+                print(f"Warning: Phase {phase}: {e}")
+
+        if not evolution_data:
+            raise ValueError("No evolution data available")
+
+        evo_df = pandas.DataFrame(evolution_data)
+
+        # Parameter layout
+        param_order = [
+            "radial",
+            "tangential",
+            "vertical",
+            "roll_length",
+            "yaw_length",
+            "pitch_length",
+        ]
+
+        base = alt.Chart(evo_df).properties(width=150, height=120)
+
+        # Std estimate with confidence interval
+        line = base.mark_line(point=True).encode(
+            x=alt.X("assembly_phase:O", title="Sectors installed"),
+            y=alt.Y("std:Q", title="σ (mm)"),
+            color=alt.value("steelblue"),
+        )
+
+        band = base.mark_area(opacity=0.3).encode(
+            x="assembly_phase:O",
+            y="std_lower_95:Q",
+            y2="std_upper_95:Q",
+        )
+
+        # Trial reference line
+        trial_line = base.mark_rule(color="red", strokeDash=[2, 2]).encode(
+            y="mean(trial_halfwidth):Q",
+        )
+
+        chart = (band + line + trial_line).facet(
+            column=alt.Column("parameter:N", sort=param_order, title=None),
+        )
+
+        chart = chart.properties(
+            title=alt.TitleParams(
+                text="Variance Evolution with Assembly Progress",
+                subtitle="Blue: estimated σ with 95% CI | Red: trial.py window",
+            )
+        )
+
+        return chart
+
 
 if __name__ == "__main__":
     # Sectors 5, 6, 7 are adjacent in the pit
@@ -1103,6 +1503,20 @@ if __name__ == "__main__":
 
     # Print summary
     pit.print_summary()
+
+    # Position statistics with TFGS Landing preference
+    print("\n" + "=" * 60)
+    print("Position Statistics (preferring TFGS Landing phase)")
+    print("=" * 60)
+    stats_df, position_chart = pit.position_statistics(prefer_tfgs_landing=True)
+    print(stats_df.to_string())
+
+    # Show evolution chart
+    evolution_chart = pit.plot_position_evolution()
+    evolution_chart.show()
+
+    # Show position chart
+    position_chart.show()
 
     # Plot gaps
     pit.plot_gaps()

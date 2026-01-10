@@ -560,13 +560,10 @@ class FiducialPit(Plot1D):
                         coil_first, coil_second, sector_a, pair
                     )
                 else:
-                    # Inter-sector gap - skip for now
-                    # TODO: Implement inter-sector gap calculation
-                    print(
-                        f"Skipping inter-sector gap {coil_first}-{coil_second} "
-                        f"(sectors {sector_a}-{sector_b})"
+                    # Inter-sector gap
+                    result = self._calculate_inter_sector_gap(
+                        coil_first, coil_second, sector_a, sector_b, pair
                     )
-                    continue
 
                 gaps.append(result)
 
@@ -667,6 +664,188 @@ class FiducialPit(Plot1D):
         plane_second = sector_planes.loc[(coil_second, feature_second)]
         pcr_first = plane_first.get("offset", 0)
         pcr_second = plane_second.get("offset", 0)
+
+        return {
+            "coil_first": coil_first,
+            "coil_second": coil_second,
+            "gap_type": pair["gap_type"],
+            "sector_a": pair["sector_a"],
+            "sector_b": pair["sector_b"],
+            "position": pair["position"],
+            "gap_mean": gap_mean,
+            "gap_std": gap_std,
+            "offset_first_mean": offsets[0]["mean"],
+            "offset_first_std": offsets[0]["std"],
+            "offset_second_mean": offsets[1]["mean"],
+            "offset_second_std": offsets[1]["std"],
+            "points_first": offsets[0]["count"],
+            "points_second": offsets[1]["count"],
+            "pcr_first": pcr_first,
+            "pcr_second": pcr_second,
+        }
+
+    def _calculate_inter_sector_gap(
+        self,
+        coil_first: int,
+        coil_second: int,
+        sector_a: int,
+        sector_b: int,
+        pair: dict,
+    ) -> dict:
+        """Calculate gap between two coils from adjacent sectors.
+
+        For inter-sector gaps, the gap is formed by:
+        - First sector's second coil ILIS +1 (faces toward next sector)
+        - Next sector's first coil ILIS -1 (faces toward previous sector)
+
+        The key difference from intra-sector is the rotation direction:
+        - For intra-sector: first coil anticlocks (+10°), second clocks (-10°)
+          to meet at sector midplane (y≈0 in sector coords)
+        - For inter-sector: first coil clocks (-10°), second anticlocks (+10°)
+          to meet at the inter-sector boundary
+
+        Sector coordinate system has y-axis pointing radially outward at sector
+        midplane, so both cases result in the gap-forming ILIS surfaces meeting
+        at y≈0 after transformation.
+
+        Parameters
+        ----------
+        coil_first : int
+            First coil number (second coil of sector_a, lower position)
+        coil_second : int
+            Second coil number (first coil of sector_b, higher position)
+        sector_a : int
+            First sector number
+        sector_b : int
+            Second sector number
+        pair : dict
+            Gap pair metadata
+
+        Returns
+        -------
+        dict
+            Gap measurement results
+        """
+        # For inter-sector gaps:
+        # - coil_first is the second coil of sector_a, contributes ILIS +1
+        # - coil_second is the first coil of sector_b, contributes ILIS -1
+        feature_first = "ILIS +1"
+        feature_second = "ILIS -1"
+
+        # Process each sector's data separately with FiducialIlis
+        ilis_a = FiducialIlis(self.sector_data[sector_a].ilis, pcr=self.pcr)
+        ilis_b = FiducialIlis(self.sector_data[sector_b].ilis, pcr=self.pcr)
+
+        # For inter-sector gaps, the clocking is OPPOSITE to intra-sector:
+        # - coil_first (second in sector_a, at +10° from midplane) needs to reach
+        #   gap at midplane + 20°, so rotates by +10° more = anticlock
+        # - coil_second (first in sector_b, at -10° from midplane) needs to reach
+        #   gap at midplane - 20°, so rotates by -10° more = clock
+
+        def clock_planes(planes):
+            """Apply clock transform (-10°) to planes."""
+            planes = planes.copy()
+            planes.loc[:, ["x", "y", "z"]] = self.rotate.clock(
+                planes.loc[:, ["x", "y", "z"]].values
+            )
+            planes.loc[:, ["nx", "ny", "nz"]] = self.rotate.clock(
+                planes.loc[:, ["nx", "ny", "nz"]].values
+            )
+            return planes
+
+        def anticlock_planes(planes):
+            """Apply anticlock transform (+10°) to planes."""
+            planes = planes.copy()
+            planes.loc[:, ["x", "y", "z"]] = self.rotate.anticlock(
+                planes.loc[:, ["x", "y", "z"]].values
+            )
+            planes.loc[:, ["nx", "ny", "nz"]] = self.rotate.anticlock(
+                planes.loc[:, ["nx", "ny", "nz"]].values
+            )
+            return planes
+
+        def clock_data(data):
+            """Apply clock transform (-10°) to point cloud data."""
+            data = data.copy()
+            data.loc[:, ["x", "y", "z"]] = self.rotate.clock(
+                data.loc[:, ["x", "y", "z"]].values
+            )
+            return data
+
+        def anticlock_data(data):
+            """Apply anticlock transform (+10°) to point cloud data."""
+            data = data.copy()
+            data.loc[:, ["x", "y", "z"]] = self.rotate.anticlock(
+                data.loc[:, ["x", "y", "z"]].values
+            )
+            return data
+
+        # Apply transforms: coil_first anticlocks (+10°), coil_second clocks (-10°)
+        planes_first = anticlock_planes(ilis_a.planes.loc[[coil_first]])
+        data_first = anticlock_data(ilis_a.data[ilis_a.data.coil == coil_first].copy())
+
+        planes_second = clock_planes(ilis_b.planes.loc[[coil_second]])
+        data_second = clock_data(ilis_b.data[ilis_b.data.coil == coil_second].copy())
+
+        # Extract the specific ILIS planes for the gap
+        plane_first = planes_first.loc[(coil_first, feature_first)]
+        plane_second = planes_second.loc[(coil_second, feature_second)]
+
+        # Create combined planes DataFrame for intersection
+        sector_index = [
+            (coil_first, feature_first),
+            (coil_second, feature_second),
+        ]
+        rotated_planes = pandas.DataFrame(
+            [plane_first, plane_second],
+            index=pandas.MultiIndex.from_tuples(
+                sector_index, names=["coil", "feature"]
+            ),
+        )
+
+        # Calculate midplane
+        midplane = FiducialIlis.intersect(rotated_planes)
+
+        # Filter point cloud data for the specific ILIS features
+        data_first_filtered = data_first[data_first.feature == feature_first]
+        data_second_filtered = data_second[data_second.feature == feature_second]
+
+        # Calculate offsets from midplane
+        offsets = []
+        for data_rotated, coil, feature in [
+            (data_first_filtered, coil_first, feature_first),
+            (data_second_filtered, coil_second, feature_second),
+        ]:
+            if data_rotated.empty:
+                offsets.append(
+                    {"coil": coil, "feature": feature, "mean": 0, "std": 0, "count": 0}
+                )
+                continue
+
+            # Calculate offset using midplane
+            normal = midplane.loc[["nx", "ny", "nz"]].values
+            normal = normal / np.linalg.norm(normal)
+            point = midplane.loc[["x", "y", "z"]].values
+            v = data_rotated[["x", "y", "z"]].values - point
+            plane_offset = np.dot(v, normal)
+
+            offsets.append(
+                {
+                    "coil": coil,
+                    "feature": feature,
+                    "mean": plane_offset.mean(),
+                    "std": plane_offset.std(),
+                    "count": len(plane_offset),
+                }
+            )
+
+        # Gap = second offset - first offset
+        gap_mean = offsets[1]["mean"] - offsets[0]["mean"]
+        gap_std = np.sqrt(offsets[0]["std"] ** 2 + offsets[1]["std"] ** 2)
+
+        # Get PCR deviation offsets from original (unclocked) planes
+        pcr_first = ilis_a.planes.loc[(coil_first, feature_first)].get("offset", 0)
+        pcr_second = ilis_b.planes.loc[(coil_second, feature_second)].get("offset", 0)
 
         return {
             "coil_first": coil_first,

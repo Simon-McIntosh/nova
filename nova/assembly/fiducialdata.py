@@ -43,26 +43,29 @@ class FiducialData(netCDF, Plot, Plotter):
     gpr: GaussianProcessRegressor = field(init=False, repr=False)
     mesh: pv.PolyData = field(init=False, repr=False)
 
+    # Toroidal pit position (0-17) to coil number mapping.
+    # Position 0 is at 0° toroidal, each position is 20° apart.
+    # Note: Coils 4 and 10 were originally swapped in error; corrected Jan 2026.
     location: ClassVar[list[int]] = [
-        14,
-        15,
-        4,
-        17,
-        6,
-        7,
-        2,
-        3,
-        16,
-        5,
-        12,
-        13,
-        8,
-        9,
-        10,
-        11,
-        18,
-        1,
-        19,
+        14,  # position 0 (0°)
+        15,  # position 1 (20°)
+        10,  # position 2 (40°) - was incorrectly 4
+        17,  # position 3 (60°)
+        6,  # position 4 (80°)
+        7,  # position 5 (100°)
+        2,  # position 6 (120°)
+        3,  # position 7 (140°)
+        16,  # position 8 (160°) - Sector 5
+        5,  # position 9 (180°) - Sector 5
+        12,  # position 10 (200°) - Sector 6
+        13,  # position 11 (220°) - Sector 6
+        8,  # position 12 (240°) - Sector 7
+        9,  # position 13 (260°) - Sector 7
+        4,  # position 14 (280°) - Sector 8, was incorrectly 10
+        11,  # position 15 (300°) - Sector 8
+        18,  # position 16 (320°)
+        1,  # position 17 (340°)
+        19,  # spare coil (not installed)
     ]
 
     def __post_init__(self):
@@ -305,7 +308,8 @@ class FiducialData(netCDF, Plot, Plotter):
             )
             dataframe.index.set_names(["coil", "target"], inplace=True)
             # project to ilis plane
-            # dataframe = self.fiducial_ilis.project(dataframe) (project on demand in points method)
+            # project on demand in points method:
+            # dataframe = self.fiducial_ilis.project(dataframe)
             for i, (_, frame) in enumerate(dataframe.groupby("coil")):
                 data.data[i] = frame.values  # reassign data
             # update fiducial deltas with tagets aligned to ilis midplane

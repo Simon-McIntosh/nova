@@ -196,13 +196,14 @@ if __name__ == "__main__":
     # phase = "SSAT AR2"
     # phase = "SSAT AR target"
     phase = "In-pit target"
+    # phase = "TFGS Landing"
 
     sectors = {7: [8, 9]}
     sectors = {6: [12, 13]}
     sectors = {5: [16, 5]}
     sectors = {8: [4, 11]}
 
-    fiducial = FiducialSector(phase=phase, sectors=sectors, private=True)
+    fiducial = FiducialSector(phase=phase, sectors=sectors, private=False)
     fiducial.compare("IDM")
 
     ccl = pandas.concat(fiducial.delta).rename(

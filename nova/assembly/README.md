@@ -127,56 +127,102 @@ gap = (+0.92) - (-0.92) ≈ 1.84 mm
 
 ## Installed Sector Layout (In-Pit Phase)
 
-As of January 2026, four sectors (5, 6, 7, 8) are installed in the ITER pit.
+As of January 2026, four sector modules (5, 6, 7, 8) have delivered coils to the ITER pit.
 
-### Sector Coil Mapping
+### Full Torus Coil Positions
 
-| Sector | First Coil | Second Coil | Angular Position |
-|--------|------------|-------------|------------------|
-| 8      | 4          | 11          | 80°-120°         |
-| 7      | 8          | 9           | 120°-160°        |
-| 6      | 12         | 13          | 160°-200°        |
-| 5      | 16         | 5           | 200°-240°        |
-
-### Coil Adjacency (Verified from ILIS Gap Data)
-
-The coil numbering is **not based on angular position** - it follows a manufacturing/delivery convention. However, the adjacency has been verified from ILIS gap calculations:
+Coil numbering follows **manufacturing order**, NOT angular position. The `location` list in
+`FiducialPit` defines the mapping from position index (0-17) to coil number.
 
 ```
-Anticlockwise direction →
+                           0° (Port 1)
+                              │
+                            (14)
+                      15            [4]
+                     (no)           S8
+               18                         17
+              (no)                       (no)
 
-    Sector 8      Sector 7      Sector 6      Sector 5
-┌─────────────┬─────────────┬─────────────┬─────────────┐
-│  4  ──  11  │  8  ──  9   │ 12  ──  13  │ 16  ──  5   │
-└─────────────┴─────────────┴─────────────┴─────────────┘
-     intra         inter         intra         inter         intra         inter         intra
-              ↑            ↑             ↑             ↑
-          gap 8-7      gap 7-6       gap 6-5       gap 5-?
-         (11↔8)       (9↔12)       (13↔16)      (5↔next)
+         1                                      6
+       (no)                                   (no)
+
+                      ITER PIT
+                   (top view)
+
+       [11]                                     7
+        S8                                    (no)
+       300°                                  100°
+
+           10                               2
+          (no)                            (no)
+
+             [9]                       3
+              S7                     (no)
+             260°                   140°
+
+                [8]               [16]
+                 S7                S5
+                240°              160°
+
+                   [13]       [5]
+                    S6         S5
+                   220°       180°
+                       [12]
+                        S6
+                       200°
+                          │
+                        180°
 ```
 
-**Coil sequence around the machine (anticlockwise):**
+Legend: `[coil]` = installed, `(coil)` = not installed, `S#` = sector module number
+
+### Sector Module to Pit Position Mapping
+
+| Sector Module | Coils | Pit Positions | Angular Range | Adjacent? |
+|---------------|-------|---------------|---------------|-----------|
+| 5             | 16, 5 | 8, 9          | 160°-180°     | Yes (to 6) |
+| 6             | 12, 13| 10, 11        | 200°-220°     | Yes (to 5,7) |
+| 7             | 8, 9  | 12, 13        | 240°-260°     | Yes (to 6) |
+| 8             | 4, 11 | 2, 15         | 40°, 300°     | **NO - SPLIT!** |
+
+### Critical Finding: Sector 8 Coils are NOT Adjacent
+
+**Sector Module 8** contains coils 4 and 11, which were measured together as a sector module unit.
+However, in the pit they are installed at **opposite positions**:
+
+- **Coil 4**: Position 2 (40°) - isolated, no adjacent installed coils
+- **Coil 11**: Position 15 (300°) - isolated, no adjacent installed coils
+
+This means:
+1. The intra-sector gap for Sector 8 (4↔11) was measured during sector assembly, not in-pit
+2. Neither coil from Sector 8 is adjacent to the main 5-6-7 cluster
+3. **No inter-sector gaps exist involving Sector 8 coils** in the current installation
+
+### Contiguous Installed Cluster (160°-260°)
+
+The only contiguous cluster of installed coils spans 100° from position 8 to 13:
+
 ```
-... ── 4 ── 11 ── 8 ── 9 ── 12 ── 13 ── 16 ── 5 ── ...
-       └──S8──┘   └──S7──┘   └───S6───┘   └──S5──┘
+Position:   8     9     10    11    12    13
+Angle:    160°  180°  200°  220°  240°  260°
+Coil:      16 ── 5 ── 12 ── 13 ── 8 ── 9
+            └─S5─┘     └─S6──┘    └─S7─┘
+                 ↑           ↑
+              Gap 5-6     Gap 6-7
+            (inter)      (inter)
 ```
 
-### Inter-Sector Gap Interfaces
+### Verified Inter-Sector Gap Interfaces
 
-| Gap | From Sector | To Sector | Coil Pair | ILIS Surfaces |
-|-----|-------------|-----------|-----------|---------------|
-| 8→7 | 8 (second)  | 7 (first) | 11 → 8    | 11 ILIS +1 ↔ 8 ILIS -1 |
-| 7→6 | 7 (second)  | 6 (first) | 9 → 12    | 9 ILIS +1 ↔ 12 ILIS -1 |
-| 6→5 | 6 (second)  | 5 (first) | 13 → 16   | 13 ILIS +1 ↔ 16 ILIS -1 |
+Only two inter-sector gaps exist between adjacent installed coils:
 
-### Notes on Sector 8 Coil Numbering
+| Gap | From Sector | To Sector | Coil Pair | ILIS Surfaces | Verified |
+|-----|-------------|-----------|-----------|---------------|----------|
+| 5→6 | 5 (second)  | 6 (first) | 5 → 12    | 5 ILIS +1 ↔ 12 ILIS -1 | ✓ |
+| 6→7 | 6 (second)  | 7 (first) | 13 → 8    | 13 ILIS +1 ↔ 8 ILIS -1 | ✓ |
 
-Sector 8 contains coils [4, 11], which is anomalous compared to other sectors:
-- Sectors 6, 7 have sequential coil numbers (12-13, 8-9)
-- Sector 5 wraps around (16-5)
-- Sector 8 has non-sequential numbers (4-11)
-
-The adjacency of coil 11 to coil 8 (sector 7) has been verified via inter-sector gap calculation (~2.5 mm gap). The coil numbering appears to follow manufacturing order rather than angular position.
+**Previous inter-sector gap calculations for 7→8 and 8→5 were INVALID** because those coil
+pairs are not physically adjacent in the pit.
 
 ## Measured Intra-Sector Gap Statistics (In-pit Phase)
 
@@ -196,12 +242,15 @@ The pooled within-sector standard deviation is 0.168 mm.
 
 ## Measured Inter-Sector Gap Statistics (In-pit Phase)
 
+Only gaps between physically adjacent coils in the pit are valid:
+
 | Gap | Coil Pair | Mean Gap (mm) | Std (mm) |
 |-----|-----------|---------------|----------|
-| 8→7 | 11 → 8    | 2.460         | 0.228    |
-| 7→6 | 9 → 12    | 3.595         | 0.120    |
-| 6→5 | 13 → 16   | 2.251         | 0.136    |
-| **Overall** |   | **2.769**     | **0.723**|
+| 5→6 | 5 → 12    | 2.336         | 0.126    |
+| 6→7 | 13 → 8    | 2.330         | 0.208    |
+| **Mean** |       | **2.333**     | **0.167**|
+
+Inter-sector gaps (~2.33 mm) are larger than intra-sector gaps (~1.39 mm).
 
 Inter-sector gaps are generally larger than intra-sector gaps (mean 2.77 mm vs 1.39 mm).
 

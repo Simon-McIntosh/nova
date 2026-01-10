@@ -1082,11 +1082,12 @@ class FiducialPit(Plot1D):
 
         print(f"\n{'=' * 60}\n")
 
-    def _get_latest_phase(self, sector: int) -> str:
-        """Return the latest measurement phase from a sector workbook.
+    def _get_phases_newest_first(self, sector: int) -> list[str]:
+        """Return measurement phases from a sector workbook, newest first.
 
-        The latest phase is the last sheet in the workbook (excluding Metadata
-        and Nominal).
+        Reads all sheets from the workbook and returns them in reverse order,
+        so the most recent phase is first. This allows fallback to earlier
+        phases if the latest doesn't contain required data.
 
         Parameters
         ----------
@@ -1095,8 +1096,8 @@ class FiducialPit(Plot1D):
 
         Returns
         -------
-        str
-            Name of the latest measurement phase
+        list[str]
+            Phase names ordered from newest to oldest
         """
         import openpyxl
         from nova.assembly.sectorfile import SectorFile
@@ -1106,7 +1107,7 @@ class FiducialPit(Plot1D):
         book = openpyxl.load_workbook(filepath, read_only=True)
         sheets = [sh for sh in book.sheetnames if sh not in ["Metadata", "Nominal"]]
         book.close()
-        return sheets[-1] if sheets else self.phase
+        return list(reversed(sheets)) if sheets else [self.phase]
 
     def position_statistics(
         self,
@@ -1176,36 +1177,45 @@ class FiducialPit(Plot1D):
             except (FileNotFoundError, KeyError):
                 continue
 
-            # Select phase based on strategy
+            # Build list of phases to try (in priority order)
+            phases_to_try: list[str] = []
             match phase_selection:
                 case "latest":
-                    phase_to_use = self._get_latest_phase(sector)
+                    # Try phases from newest to oldest until one works
+                    phases_to_try = self._get_phases_newest_first(sector)
                 case "tfgs_landing":
-                    phase_to_use = self.phase
                     for tfgs_phase in ["TFGS Landing", "TFGS landing"]:
                         if tfgs_phase in available_phases:
-                            phase_to_use = tfgs_phase
-                            break
+                            phases_to_try.append(tfgs_phase)
+                    phases_to_try.append(self.phase)  # fallback
                 case "in_pit":
-                    phase_to_use = "In-pit target"
+                    phases_to_try = ["In-pit target"]
                 case _:
                     # Use exact phase name provided
-                    phase_to_use = phase_selection
+                    phases_to_try = [phase_selection]
 
-            try:
-                sector_data = FiducialSector(
-                    phase=phase_to_use,
-                    sectors={sector: coils},
-                    private=self.private,
-                )
-                positions = sector_data.extract_coil_positions(pcr=self.pcr)
-                # Reset index to make 'coil' a column
-                positions = positions.reset_index()
-                positions["sector"] = sector
-                positions["phase"] = phase_to_use
-                all_positions.append(positions)
-            except (FileNotFoundError, KeyError, ValueError) as e:
-                print(f"Warning: Could not extract positions for sector {sector}: {e}")
+            # Try each phase until extraction succeeds
+            extraction_success = False
+            for phase_to_use in phases_to_try:
+                try:
+                    sector_data = FiducialSector(
+                        phase=phase_to_use,
+                        sectors={sector: coils},
+                        private=self.private,
+                    )
+                    positions = sector_data.extract_coil_positions(pcr=self.pcr)
+                    # Reset index to make 'coil' a column
+                    positions = positions.reset_index()
+                    positions["sector"] = sector
+                    positions["phase"] = phase_to_use
+                    all_positions.append(positions)
+                    extraction_success = True
+                    break  # Success, move to next sector
+                except (FileNotFoundError, KeyError, ValueError):
+                    continue  # Try next phase
+
+            if not extraction_success:
+                print(f"Warning: No valid phase found for sector {sector}")
 
         if not all_positions:
             raise ValueError("No position data available")

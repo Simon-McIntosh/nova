@@ -1374,12 +1374,18 @@ class FiducialPit(Plot1D):
         chart_df["row"] = chart_df["parameter"].map(row_map)
         chart_df["col"] = chart_df["parameter"].map(col_map)
 
+        # Order coils by toroidal position (from location list)
+        # Installed coils at positions 8-15: [16, 5, 12, 13, 8, 9, 4, 11]
+        coil_toroidal_order = [
+            coil for coil in self.location if coil in chart_df["coil"].values
+        ]
+
         # Base chart
         base = alt.Chart(chart_df).properties(width=180, height=150)
 
         # Bars for each coil value
         bars = base.mark_bar(opacity=0.7).encode(
-            x=alt.X("coil:O", title="Coil"),
+            x=alt.X("coil:O", title="Coil", sort=coil_toroidal_order),
             y=alt.Y("value:Q", title="mm"),
             color=alt.Color(
                 "sector:N",

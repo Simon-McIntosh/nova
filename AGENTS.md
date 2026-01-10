@@ -49,7 +49,7 @@ git commit -m 'type: description'
 | Module | Purpose |
 |--------|---------|
 | `nova.imas` | IMAS data model interface (IDS access, database connections) |
-| `nova.assembly` | ITER TF coil assembly analysis (Monte Carlo, fiducials, deformations) |
+| `nova.assembly` | ITER TF coil assembly analysis (Monte Carlo, fiducials, deformations). See [nova/assembly/README.md](nova/assembly/README.md) for detailed documentation on coordinate systems, gap calculations, and installed sector layout. |
 | `nova.biot` | Biot-Savart integral calculations |
 | `nova.frame` | FrameSpace types for electromagnetic components |
 | `nova.database` | netCDF storage, filepath management |
@@ -173,6 +173,20 @@ git checkout -- .  # Discard any remaining changes
 - Don't use double quotes with special characters in commits
 - Don't use `List[str]`, `Union[X, Y]`, or `isinstance(e, (X, Y))`
 - Don't use "new", "refactored", "enhanced" in names
+
+### Windows-Specific
+
+On Windows, avoid f-string escaping issues in `uv run python -c "..."` commands:
+
+```python
+# Wrong - causes syntax errors on Windows
+print(f'Gap: mean={r["key"]:.3f}')
+
+# Correct - use % formatting or separate variable
+print('Gap: mean=%.3f' % r['key'])
+```
+
+The backslash escapes in f-strings within `-c` commands cause parsing failures.
 
 ## Project Structure
 

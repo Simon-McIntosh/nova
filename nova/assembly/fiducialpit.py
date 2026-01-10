@@ -1170,7 +1170,8 @@ class FiducialPit(Plot1D):
         Parameters
         ----------
         assembly_phase : int | None
-            Number of sectors to include (5=sector 5 only, 6=sectors 5-6, etc.).
+            Number of sectors to include in installation order (1-4).
+            Phase 1=SM6, 2=SM6+SM7, 3=SM6+SM7+SM5, 4=all four sectors.
             If None, uses all installed sectors.
 
         Returns
@@ -1178,13 +1179,13 @@ class FiducialPit(Plot1D):
         tuple[pandas.DataFrame, alt.Chart]
             DataFrame with position statistics and Altair chart visualization.
         """
-        # Map assembly phase to sectors
-        sector_order = [5, 6, 7, 8]  # Installation order
+        # Map assembly phase to sectors (in installation order: 6, 7, 5, 8)
+        # Based on git history: SM6 Feb 2025, SM7 Mar 2025, SM5 Aug 2025, SM8 Oct 2025
+        sector_order = [6, 7, 5, 8]
         if assembly_phase is not None:
-            if assembly_phase < 5 or assembly_phase > 8:
-                raise ValueError(f"assembly_phase must be 5-8, got {assembly_phase}")
-            n_sectors = assembly_phase - 4
-            active_sectors = sector_order[:n_sectors]
+            if assembly_phase < 1 or assembly_phase > 4:
+                raise ValueError(f"assembly_phase must be 1-4, got {assembly_phase}")
+            active_sectors = sector_order[:assembly_phase]
         else:
             active_sectors = list(self.sectors.keys())
 
@@ -1449,15 +1450,9 @@ class FiducialPit(Plot1D):
         """
         evolution_data = []
 
-        for phase in range(5, 9):
+        # Assembly phases 1-4 correspond to installation order: 6, 7, 5, 8
+        for phase in range(1, 5):
             try:
-                # Only include sectors up to this phase
-                available_sectors = {
-                    k: v for k, v in self.sectors.items() if k <= phase
-                }
-                if not available_sectors:
-                    continue
-
                 stats_df, _ = self.position_statistics(
                     assembly_phase=phase,
                 )

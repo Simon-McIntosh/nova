@@ -1082,24 +1082,54 @@ class FiducialPit(Plot1D):
 
         print(f"\n{'=' * 60}\n")
 
+    def _get_latest_phase(self, sector: int) -> str:
+        """Return the latest measurement phase from a sector workbook.
+
+        The latest phase is the last sheet in the workbook (excluding Metadata
+        and Nominal).
+
+        Parameters
+        ----------
+        sector : int
+            Sector number
+
+        Returns
+        -------
+        str
+            Name of the latest measurement phase
+        """
+        import openpyxl
+        from nova.assembly.sectorfile import SectorFile
+
+        sf = SectorFile(sector=sector, private=self.private)
+        filepath = sf.datadir + "/" + sf.filename + ".xlsx"
+        book = openpyxl.load_workbook(filepath, read_only=True)
+        sheets = [sh for sh in book.sheetnames if sh not in ["Metadata", "Nominal"]]
+        book.close()
+        return sheets[-1] if sheets else self.phase
+
     def position_statistics(
         self,
         assembly_phase: int | None = None,
-        prefer_tfgs_landing: bool = True,
+        phase_selection: str = "tfgs_landing",
     ) -> tuple[pandas.DataFrame, alt.Chart]:
         """Calculate position statistics from installed sectors.
 
-        Extracts coil position parameters using TFGS Landing phase when available,
-        falling back to In-pit target phase otherwise. Calculates sample statistics
-        and variance estimates with confidence intervals.
+        Extracts coil position parameters using the specified phase selection
+        strategy. Calculates sample statistics and variance estimates with
+        confidence intervals.
 
         Parameters
         ----------
         assembly_phase : int | None
             Number of sectors to include (5=sector 5 only, 6=sectors 5-6, etc.).
             If None, uses all installed sectors.
-        prefer_tfgs_landing : bool
-            If True, prefer TFGS Landing phase over In-pit target when available.
+        phase_selection : str
+            Phase selection strategy:
+            - "latest": Use the last sheet from each workbook (most recent data)
+            - "tfgs_landing": Prefer TFGS Landing phase, fall back to In-pit target
+            - "in_pit": Use In-pit target phase
+            - Any other string: Use that exact phase name
 
         Returns
         -------
@@ -1139,20 +1169,28 @@ class FiducialPit(Plot1D):
             if not coils:
                 continue
 
-            # Determine best phase to use
+            # Determine best phase to use based on selection strategy
             try:
                 sd = SectorData(sector, private=self.private)
                 available_phases = sd.phase
             except (FileNotFoundError, KeyError):
                 continue
 
-            # Prefer TFGS Landing if available and requested
-            phase_to_use = self.phase
-            if prefer_tfgs_landing:
-                for tfgs_phase in ["TFGS Landing", "TFGS landing"]:
-                    if tfgs_phase in available_phases:
-                        phase_to_use = tfgs_phase
-                        break
+            # Select phase based on strategy
+            match phase_selection:
+                case "latest":
+                    phase_to_use = self._get_latest_phase(sector)
+                case "tfgs_landing":
+                    phase_to_use = self.phase
+                    for tfgs_phase in ["TFGS Landing", "TFGS landing"]:
+                        if tfgs_phase in available_phases:
+                            phase_to_use = tfgs_phase
+                            break
+                case "in_pit":
+                    phase_to_use = "In-pit target"
+                case _:
+                    # Use exact phase name provided
+                    phase_to_use = phase_selection
 
             try:
                 sector_data = FiducialSector(
@@ -1386,7 +1424,7 @@ class FiducialPit(Plot1D):
 
     def plot_position_evolution(
         self,
-        prefer_tfgs_landing: bool = True,
+        phase_selection: str = "tfgs_landing",
     ) -> alt.Chart:
         """Plot how position statistics evolve as sectors are installed.
 
@@ -1395,8 +1433,8 @@ class FiducialPit(Plot1D):
 
         Parameters
         ----------
-        prefer_tfgs_landing : bool
-            If True, prefer TFGS Landing phase over In-pit target.
+        phase_selection : str
+            Phase selection strategy (see position_statistics for options).
 
         Returns
         -------
@@ -1416,7 +1454,7 @@ class FiducialPit(Plot1D):
 
                 stats_df, _ = self.position_statistics(
                     assembly_phase=phase,
-                    prefer_tfgs_landing=prefer_tfgs_landing,
+                    phase_selection=phase_selection,
                 )
 
                 for _, row in stats_df.iterrows():
@@ -1504,15 +1542,15 @@ if __name__ == "__main__":
     # Print summary
     pit.print_summary()
 
-    # Position statistics with TFGS Landing preference
+    # Position statistics with latest phase from each workbook
     print("\n" + "=" * 60)
-    print("Position Statistics (preferring TFGS Landing phase)")
+    print("Position Statistics (latest phase from each workbook)")
     print("=" * 60)
-    stats_df, position_chart = pit.position_statistics(prefer_tfgs_landing=True)
+    stats_df, position_chart = pit.position_statistics(phase_selection="latest")
     print(stats_df.to_string())
 
     # Show evolution chart
-    evolution_chart = pit.plot_position_evolution()
+    evolution_chart = pit.plot_position_evolution(phase_selection="latest")
     evolution_chart.show()
 
     # Show position chart

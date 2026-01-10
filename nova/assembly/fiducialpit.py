@@ -85,13 +85,61 @@ class FiducialPit(Plot1D):
         self._build_gap_pairs()
         self._calculate_nominal_gaps()
 
+    def _resolve_phase(self, sector: int) -> str:
+        """Resolve phase selection strategy to actual phase name.
+
+        Supports both literal phase names and selection strategies:
+        - "latest": Most recent sheet with valid data
+        - "tfgs_landing": TFGS Landing phase, fallback to In-pit target
+        - "in_pit": In-pit target phase
+        - Any other string: Use as literal phase name
+        """
+        from nova.assembly.sectordata import SectorData
+
+        match self.phase:
+            case "latest":
+                phases_to_try = self._get_phases_newest_first(sector)
+            case "tfgs_landing":
+                try:
+                    sd = SectorData(sector, private=self.private)
+                    available = sd.phase
+                except (FileNotFoundError, KeyError):
+                    available = []
+                phases_to_try = []
+                for tfgs in ["TFGS Landing", "TFGS landing"]:
+                    if tfgs in available:
+                        phases_to_try.append(tfgs)
+                phases_to_try.append("In-pit target")
+            case "in_pit":
+                phases_to_try = ["In-pit target"]
+            case _:
+                return self.phase  # Literal phase name
+
+        # Try each phase until one works (has ILIS data)
+        for phase in phases_to_try:
+            try:
+                fs = FiducialSector(
+                    phase=phase,
+                    sectors={sector: self.sectors[sector]},
+                    private=self.private,
+                )
+                # Check that ILIS data exists for position extraction
+                if len(fs.ilis) > 0:
+                    return phase
+            except (FileNotFoundError, KeyError, ValueError):
+                continue
+        return phases_to_try[0] if phases_to_try else "In-pit target"
+
     def _load_sectors(self):
         """Load fiducial data for each sector."""
         self.sector_data: dict[int, FiducialSector] = {}
+        self._resolved_phases: dict[int, str] = {}
         for sector, coils in self.sectors.items():
             try:
+                resolved = self._resolve_phase(sector)
+                self._resolved_phases[sector] = resolved
                 self.sector_data[sector] = FiducialSector(
-                    phase=self.phase,
+                    phase=resolved,
                     sectors={sector: coils},
                     private=self.private,
                 )
@@ -1112,33 +1160,24 @@ class FiducialPit(Plot1D):
     def position_statistics(
         self,
         assembly_phase: int | None = None,
-        phase_selection: str = "tfgs_landing",
     ) -> tuple[pandas.DataFrame, alt.Chart]:
         """Calculate position statistics from installed sectors.
 
-        Extracts coil position parameters using the specified phase selection
-        strategy. Calculates sample statistics and variance estimates with
-        confidence intervals.
+        Extracts coil position parameters using the phase configured at
+        class initialization. Calculates sample statistics and variance
+        estimates with confidence intervals.
 
         Parameters
         ----------
         assembly_phase : int | None
             Number of sectors to include (5=sector 5 only, 6=sectors 5-6, etc.).
             If None, uses all installed sectors.
-        phase_selection : str
-            Phase selection strategy:
-            - "latest": Use the last sheet from each workbook (most recent data)
-            - "tfgs_landing": Prefer TFGS Landing phase, fall back to In-pit target
-            - "in_pit": Use In-pit target phase
-            - Any other string: Use that exact phase name
 
         Returns
         -------
         tuple[pandas.DataFrame, alt.Chart]
             DataFrame with position statistics and Altair chart visualization.
         """
-        from nova.assembly.sectordata import SectorData
-
         # Map assembly phase to sectors
         sector_order = [5, 6, 7, 8]  # Installation order
         if assembly_phase is not None:
@@ -1162,60 +1201,25 @@ class FiducialPit(Plot1D):
             "pitch_length": 3.0,  # Similar to other rotation lengths
         }
 
-        # Collect position data from each sector
+        # Collect position data from each sector using already-loaded sector_data
         all_positions = []
 
         for sector in active_sectors:
-            coils = self.sectors.get(sector, [])
-            if not coils:
+            if sector not in self.sector_data:
                 continue
 
-            # Determine best phase to use based on selection strategy
+            sector_data = self.sector_data[sector]
+            phase_used = self._resolved_phases.get(sector, self.phase)
+
             try:
-                sd = SectorData(sector, private=self.private)
-                available_phases = sd.phase
-            except (FileNotFoundError, KeyError):
-                continue
-
-            # Build list of phases to try (in priority order)
-            phases_to_try: list[str] = []
-            match phase_selection:
-                case "latest":
-                    # Try phases from newest to oldest until one works
-                    phases_to_try = self._get_phases_newest_first(sector)
-                case "tfgs_landing":
-                    for tfgs_phase in ["TFGS Landing", "TFGS landing"]:
-                        if tfgs_phase in available_phases:
-                            phases_to_try.append(tfgs_phase)
-                    phases_to_try.append(self.phase)  # fallback
-                case "in_pit":
-                    phases_to_try = ["In-pit target"]
-                case _:
-                    # Use exact phase name provided
-                    phases_to_try = [phase_selection]
-
-            # Try each phase until extraction succeeds
-            extraction_success = False
-            for phase_to_use in phases_to_try:
-                try:
-                    sector_data = FiducialSector(
-                        phase=phase_to_use,
-                        sectors={sector: coils},
-                        private=self.private,
-                    )
-                    positions = sector_data.extract_coil_positions(pcr=self.pcr)
-                    # Reset index to make 'coil' a column
-                    positions = positions.reset_index()
-                    positions["sector"] = sector
-                    positions["phase"] = phase_to_use
-                    all_positions.append(positions)
-                    extraction_success = True
-                    break  # Success, move to next sector
-                except (FileNotFoundError, KeyError, ValueError):
-                    continue  # Try next phase
-
-            if not extraction_success:
-                print(f"Warning: No valid phase found for sector {sector}")
+                positions = sector_data.extract_coil_positions(pcr=self.pcr)
+                # Reset index to make 'coil' a column
+                positions = positions.reset_index()
+                positions["sector"] = sector
+                positions["phase"] = phase_used
+                all_positions.append(positions)
+            except (KeyError, ValueError) as e:
+                print(f"Warning: Could not extract positions for sector {sector}: {e}")
 
         if not all_positions:
             raise ValueError("No position data available")
@@ -1432,19 +1436,11 @@ class FiducialPit(Plot1D):
 
         return chart
 
-    def plot_position_evolution(
-        self,
-        phase_selection: str = "tfgs_landing",
-    ) -> alt.Chart:
+    def plot_position_evolution(self) -> alt.Chart:
         """Plot how position statistics evolve as sectors are installed.
 
         Creates charts showing variance estimates with confidence intervals
         for each assembly phase (5, 6, 7, 8 sectors).
-
-        Parameters
-        ----------
-        phase_selection : str
-            Phase selection strategy (see position_statistics for options).
 
         Returns
         -------
@@ -1464,7 +1460,6 @@ class FiducialPit(Plot1D):
 
                 stats_df, _ = self.position_statistics(
                     assembly_phase=phase,
-                    phase_selection=phase_selection,
                 )
 
                 for _, row in stats_df.iterrows():
@@ -1552,15 +1547,15 @@ if __name__ == "__main__":
     # Print summary
     pit.print_summary()
 
-    # Position statistics with latest phase from each workbook
+    # Position statistics using the phase configured at init
     print("\n" + "=" * 60)
-    print("Position Statistics (latest phase from each workbook)")
+    print("Position Statistics")
     print("=" * 60)
-    stats_df, position_chart = pit.position_statistics(phase_selection="latest")
+    stats_df, position_chart = pit.position_statistics()
     print(stats_df.to_string())
 
     # Show evolution chart
-    evolution_chart = pit.plot_position_evolution(phase_selection="latest")
+    evolution_chart = pit.plot_position_evolution()
     evolution_chart.show()
 
     # Show position chart

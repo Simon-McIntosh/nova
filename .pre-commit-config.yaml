@@ -1,25 +1,7 @@
 repos:
-  #- repo: https://github.com/radoering/poetry
-  #  rev: 352edf0bcd4adb0a1dcb2f62701b221917aca656
-      #hooks:
-      #- id: poetry-check
-  - repo: https://github.com/radoering/poetry
-    rev: 352edf0bcd4adb0a1dcb2f62701b221917aca656
-    hooks:
-      - id: poetry-export
-        args: ["--extras", "imas",
-               "--extras", "jit",
-               "--extras", "optimize",
-               "--extras", "test",
-               "--extras", "uda",
-               "--without-hashes", 
-               "-f", "requirements.txt", "-o", "requirements.txt"]
-        verbose: true
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.2.1
+    rev: v0.9.2
     hooks:
-      - id: ruff   
-  - repo: https://github.com/psf/black
-    rev: 24.1.1
-    hooks:
-      - id: black
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format

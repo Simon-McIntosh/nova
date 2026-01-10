@@ -187,6 +187,154 @@ class FiducialSector(Fiducial):
                 print(f"\ncoil #{coil}")
                 print(change)
 
+    def extract_coil_positions(self, pcr: bool = True) -> pandas.DataFrame:
+        """Extract coil position parameters for trial.py Monte Carlo simulations.
+
+        Projects inboard CCL fiducials (A, B, H) onto the ILIS midplane, then
+        extracts position and orientation parameters from the projected points.
+
+        Sector module coordinates:
+        - x: radial (positive outward)
+        - y: tangential (positive toward increasing phi)
+        - z: vertical (positive upward)
+
+        Parameters extracted (all in mm):
+        - radial: Radial displacement from projected CCL fiducial H
+        - tangential: Tangential displacement from projected CCL fiducial H
+        - vertical: Vertical displacement from CCL fiducial H
+        - roll_length: Roll-induced tangential offset at reference length
+          (from dy gradient along z, i.e., A→B tangential difference)
+        - yaw_length: Yaw-induced tangential offset at reference length
+          (from dy gradient along x, i.e., H→G tangential difference)
+        - pitch_length: Pitch-induced radial offset at reference length
+          (from dx gradient along z, i.e., A→B radial difference)
+
+        Parameters
+        ----------
+        pcr : bool
+            Apply PCR deviation corrections to ILIS planes
+
+        Returns
+        -------
+        pandas.DataFrame
+            Position parameters indexed by coil number
+        """
+        from nova.assembly.fiducialdata import FiducialData
+
+        if self.ilis.empty:
+            raise ValueError("No ILIS data available for position extraction")
+
+        # Reference lengths for converting angles to offsets (from WedgeGap.length)
+        length = {"pitch": 8.0, "roll": 9.5, "yaw": 8.0}  # m
+
+        # Get nominal fiducial positions
+        fiducial_nominal = FiducialData.fiducials()
+
+        # Create FiducialIlis instance for plane fitting and projection
+        ilis = FiducialIlis(self.ilis, pcr=pcr)
+
+        # Build absolute CCL positions (nominal + delta) for projection
+        inboard_targets = ["A", "B", "H"]
+
+        results = []
+        sector_coils = list(self.delta.keys())
+
+        for coil in sector_coils:
+            ccl_delta = self.delta[coil]
+            ccl_nominal = self.fiducial_target.get(coil, fiducial_nominal)
+
+            # Build absolute positions for inboard CCL targets
+            ccl_abs = pandas.DataFrame(
+                index=inboard_targets,
+                columns=["x", "y", "z"],
+                dtype=float,
+            )
+            for target in inboard_targets:
+                if target in ccl_delta.index:
+                    ccl_abs.loc[target] = (
+                        ccl_nominal.loc[target, ["x", "y", "z"]]
+                        + ccl_delta.loc[target, ["dx", "dy", "dz"]].values
+                    )
+
+            # Add coil column for projection groupby
+            ccl_abs["coil"] = coil
+
+            # Project inboard CCL points onto ILIS midplane
+            projected = ilis.project(ccl_abs, plane="ILIS 0")
+
+            # Calculate deltas from nominal (projected - nominal)
+            delta_projected = pandas.DataFrame(
+                index=inboard_targets,
+                columns=["dx", "dy", "dz"],
+                dtype=float,
+            )
+            for target in inboard_targets:
+                delta_projected.loc[target] = (
+                    projected.loc[target].values - ccl_nominal.loc[target].values
+                )
+
+            # Get outboard CCL delta (not projected, used for yaw)
+            delta_g = ccl_delta.loc["G"] if "G" in ccl_delta.index else None
+
+            # --- Extract position parameters ---
+            # Radial: dx at H (projected)
+            radial = delta_projected.loc["H", "dx"]
+
+            # Tangential: dy at H (projected onto ILIS midplane)
+            tangential = delta_projected.loc["H", "dy"]
+
+            # Vertical: dz at H (original, not affected by projection)
+            vertical = ccl_delta.loc["H", "dz"] if "H" in ccl_delta.index else np.nan
+
+            # Roll: rotation about radial (x) axis
+            # Measured from dy gradient along z (A→B tangential difference)
+            # roll_angle = (dy_B - dy_A) / (z_B - z_A)
+            z_a = fiducial_nominal.loc["A", "z"]
+            z_b = fiducial_nominal.loc["B", "z"]
+            dy_a = delta_projected.loc["A", "dy"]
+            dy_b = delta_projected.loc["B", "dy"]
+            roll_rad = (dy_b - dy_a) / (z_b - z_a)
+            roll_length_val = roll_rad * length["roll"] * 1e3  # mm
+
+            # Yaw: rotation about vertical (z) axis
+            # Measured from dy gradient along x (H→G tangential difference)
+            # yaw_angle = (dy_G - dy_H) / (x_G - x_H)
+            if delta_g is not None:
+                x_h = fiducial_nominal.loc["H", "x"]
+                x_g = fiducial_nominal.loc["G", "x"]
+                dy_h = delta_projected.loc["H", "dy"]
+                dy_g = delta_g["dy"]
+                yaw_rad = (dy_g - dy_h) / (x_g - x_h)
+                yaw_length_val = yaw_rad * length["yaw"] * 1e3  # mm
+            else:
+                yaw_length_val = np.nan
+
+            # Pitch: rotation about tangential (y) axis
+            # Measured from dx gradient along z (A→B radial difference)
+            # pitch_angle = (dx_B - dx_A) / (z_B - z_A)
+            dx_a = delta_projected.loc["A", "dx"]
+            dx_b = delta_projected.loc["B", "dx"]
+            pitch_rad = (dx_b - dx_a) / (z_b - z_a)
+            pitch_length_val = pitch_rad * length["pitch"] * 1e3  # mm
+
+            is_first = sector_coils.index(coil) == 0
+
+            results.append(
+                {
+                    "coil": coil,
+                    "sector": self.sector.get(coil),
+                    "is_first": is_first,
+                    "radial": radial,
+                    "tangential": tangential,
+                    "vertical": vertical,
+                    "roll_length": roll_length_val,
+                    "yaw_length": yaw_length_val,
+                    "pitch_length": pitch_length_val,
+                }
+            )
+
+        return pandas.DataFrame(results).set_index("coil").sort_index()
+
 
 if __name__ == "__main__":
     phase = "SSAT BR"

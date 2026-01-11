@@ -2429,6 +2429,9 @@ if __name__ == "__main__":
     # Show evolution chart
     evolution_fig, evolution_axes = pit.plot_position_evolution()
 
+    # Show alignment window evolution (more intuitive than variance)
+    alignment_fig, alignment_axes = pit.plot_alignment_evolution()
+
     # Plot gaps
     pit.plot_gaps()
 

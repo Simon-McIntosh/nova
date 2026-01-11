@@ -233,12 +233,16 @@ class FiducialSector(Fiducial):
         - tangential: Tangential displacement from projected CCL fiducial H (midplane)
         - vertical: RMS vertical displacement from outer CCL fiducials (C, D, E, F)
           Matches FiducialFit.fiducial_index["vertical"] constraint points
-        - roll_length: Roll-induced tangential offset at reference length
+        - roll_length: Roll-induced tangential offset at A-B span (~7.4m)
           (from dy gradient along z, i.e., A→B tangential difference)
-        - yaw_length: Yaw-induced tangential offset at reference length
+        - yaw_length: Yaw-induced tangential offset at H-G span (~8.0m)
           (from dy gradient along x, i.e., H→G tangential difference)
-        - pitch_length: Pitch-induced radial offset at reference length
+        - pitch_length: Pitch-induced radial offset at A-B span (~7.4m)
           (from dx gradient along z, i.e., A→B radial difference)
+
+        These values can be compared directly with trial.py alignment tolerances:
+        - radial/tangential: Uniform(±1.5mm)
+        - roll_length/yaw_length: Uniform(±3mm)
 
         Parameters
         ----------
@@ -255,11 +259,22 @@ class FiducialSector(Fiducial):
         if self.ilis.empty:
             raise ValueError("No ILIS data available for position extraction")
 
-        # Reference lengths for converting angles to offsets (from WedgeGap.length)
-        length = {"pitch": 8.0, "roll": 9.5, "yaw": 8.0}  # m
-
         # Get nominal fiducial positions
         fiducial_nominal = FiducialData.fiducials()
+
+        # Reference lengths based on actual CCL fiducial spans
+        # Used to convert rotation angles to equivalent displacements (mm)
+        # for comparison with trial.py alignment tolerances
+        z_a = fiducial_nominal.loc["A", "z"]
+        z_b = fiducial_nominal.loc["B", "z"]
+        x_h = fiducial_nominal.loc["H", "x"]
+        x_g = fiducial_nominal.loc["G", "x"]
+
+        length = {
+            "pitch": abs(z_b - z_a) / 1e3,  # A-B vertical span (m) ~7.4m
+            "roll": abs(z_b - z_a) / 1e3,  # A-B vertical span (m) ~7.4m
+            "yaw": abs(x_g - x_h) / 1e3,  # H-G radial span (m) ~8.0m
+        }
 
         # Create FiducialIlis instance for plane fitting and projection
         ilis = FiducialIlis(self.ilis, pcr=pcr)

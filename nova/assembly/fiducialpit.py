@@ -2165,7 +2165,7 @@ class FiducialPit(Plot1D):
 
                     # Axis formatting
                     ax.set_xlim(0.5, 4.5)
-                    ax.set_ylim(0, 2 * expected_std)
+                    ax.set_ylim(0, 1.2 * expected_std)
                     ax.set_xticks([1, 2, 3, 4])
                     ax.set_xticklabels(x_labels)
 

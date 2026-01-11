@@ -1665,16 +1665,17 @@ class FiducialPit(Plot1D):
             active_sectors = list(self.sectors.keys())
 
         # Trial.py reference windows (half-widths for uniform distributions)
-        # From Vault class: theta: [1.5, 1.5, 3, 3, 2, 2, 5]
-        # Maps to: radial, tangential, roll_length, yaw_length,
-        #          radial_ccl, tangential_ccl, radial_wall
+        # Updated 2026-01-11 to match current trial parameters:
+        # ErrorField theta: [1.5, 1.5, 3, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5]
+        # Maps to: radial, tangential, vertical, radial_ccl, tangential_ccl,
+        #          vertical_ccl, pitch_length, roll_length, yaw_length
         trial_windows = {
             "radial": 1.5,
             "tangential": 1.5,
-            "vertical": 1.5,  # Not in trial but similar to translations
-            "roll_length": 3.0,
-            "yaw_length": 3.0,
-            "pitch_length": 3.0,  # Similar to other rotation lengths
+            "vertical": 3.0,  # Height tolerance is larger
+            "roll_length": 1.5,
+            "yaw_length": 1.5,
+            "pitch_length": 1.5,
         }
 
         # Collect position data from each sector using already-loaded sector_data

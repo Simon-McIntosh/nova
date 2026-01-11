@@ -13,6 +13,7 @@ import xxhash
 from nova.assembly import structural, electromagnetic, overlap
 from nova.assembly.gap import WedgeGap
 from nova.assembly.model import Dataset
+from nova.assembly.trial_manifest import TrialManifest
 from nova.graphics.plot import Plot1D
 
 
@@ -81,6 +82,74 @@ class Trial(Dataset, TrialAttrs, Plot1D):
         self.xxh32.update(np.array(list(self.attrs.values()) + self.theta + self.pdf))
         return self.xxh32.hexdigest()
 
+    @classmethod
+    def from_manifest(
+        cls,
+        name: str | None = None,
+        trial_type: str = "vault",
+        samples: int | None = None,
+        **kwargs,
+    ) -> "Trial":
+        """Load trial from manifest by name or create with parameters.
+
+        Parameters
+        ----------
+        name : str | None
+            Simulation label to load from manifest
+        trial_type : str
+            Type of trial: 'vault' or 'error_field'
+        samples : int | None
+            Override samples from manifest
+        **kwargs
+            Additional parameters passed to Trial/TrialManifest
+
+        Returns
+        -------
+        Trial
+            Trial instance with loaded parameters
+
+        Examples
+        --------
+        >>> trial = Vault.from_manifest("baseline_2021")
+        >>> trial = Vault.from_manifest("tight_tolerances_2026", samples=500000)
+        """
+        manifest = TrialManifest(name=name, trial_type=trial_type, **kwargs)
+
+        # Override samples if provided
+        if samples is not None:
+            manifest.samples = samples
+
+        return cls(
+            samples=manifest.samples,
+            theta=manifest.theta,
+            component=manifest.components,
+            pdf=manifest.pdf,
+            **kwargs,
+        )
+
+    def save_to_manifest(self, name: str, description: str = "") -> None:
+        """Save current trial parameters to manifest.
+
+        Parameters
+        ----------
+        name : str
+            Label for the simulation
+        description : str
+            Human-readable description
+        """
+        trial_type = "error_field" if "vertical" in self.component else "vault"
+        manifest = TrialManifest(
+            name=name,
+            trial_type=trial_type,
+            samples=self.samples,
+            theta=self.theta,
+            components=self.component,
+            pdf=self.pdf,
+            description=description,
+        )
+        manifest.save()
+        print(f"Saved to manifest: {name} (hash: {manifest.hash})")
+
     def normal(self, variance: float):
         """Return sample with normal distribution."""
         scale = np.sqrt(variance)
@@ -140,8 +209,11 @@ class Trial(Dataset, TrialAttrs, Plot1D):
 
     def build_gap(self):
         """Build vault gap from radial and toroidal waveforms."""
-        self.data["gap"] = ("sample", "index", "signal"), np.zeros(
-            (self.data.sizes["sample"], self.ncoil, self.data.sizes["signal"])
+        self.data["gap"] = (
+            ("sample", "index", "signal"),
+            np.zeros(
+                (self.data.sizes["sample"], self.ncoil, self.data.sizes["signal"])
+            ),
         )
         self.data.gap[..., 0] = np.pi / self.ncoil * self.data["radial"]
         self.data.gap[:, :-1, 0] += np.pi / self.ncoil * self.data["radial"][:, 1:].data
@@ -180,7 +252,7 @@ class Trial(Dataset, TrialAttrs, Plot1D):
                     if attr == "t":
                         text += r"$r$"
                         attr = r"\phi"
-                    text += rf'$\Delta {attr}_{{{component.split("_")[0]}}}$'
+                    text += rf"$\Delta {attr}_{{{component.split('_')[0]}}}$"
                 else:
                     text += component.split("_")[-1]
             else:
@@ -297,8 +369,9 @@ class Vault(Trial, Plot1D):
 
     def predict_structure(self):
         """Run structural simulation."""
-        self.data["structural"] = ("sample", "index", "signal"), np.zeros(
-            (self.samples, self.ncoil, self.data.sizes["signal"])
+        self.data["structural"] = (
+            ("sample", "index", "signal"),
+            np.zeros((self.samples, self.ncoil, self.data.sizes["signal"])),
         )
         if self.energize:
             gap = self.data.gap.sum(axis=-1)
@@ -319,11 +392,13 @@ class Vault(Trial, Plot1D):
         self.electromagnetic_model.predict(
             self.data.electromagnetic[..., 0], self.data.electromagnetic[..., 1]
         )
-        self.data["peaktopeak"] = "sample", self.electromagnetic_model.peaktopeak(
-            modes=self.modes
+        self.data["peaktopeak"] = (
+            "sample",
+            self.electromagnetic_model.peaktopeak(modes=self.modes),
         )
-        self.data["offset"] = ("sample", "coordinate"), np.zeros(
-            (self.data.sizes["sample"], 2)
+        self.data["offset"] = (
+            ("sample", "coordinate"),
+            np.zeros((self.data.sizes["sample"], 2)),
         )
         offset = self.electromagnetic_model.axis_offset
         self.data["offset"][..., 0] = offset.real
@@ -341,8 +416,9 @@ class Vault(Trial, Plot1D):
         wall_hat[..., 1] += self.electromagnetic_model.axis_offset * (self.ncoil // 2)
         offset_firstwall = np.fft.irfft(wall_hat, ndiv) * ndiv / self.ncoil
         deviation = self.electromagnetic_model.fieldline.data - firstwall.data
-        self.data["peaktopeak"] = "sample", self.electromagnetic_model.peaktopeak(
-            deviation, modes=self.modes
+        self.data["peaktopeak"] = (
+            "sample",
+            self.electromagnetic_model.peaktopeak(deviation, modes=self.modes),
         )
         offset_deviation = (
             self.electromagnetic_model.fieldline.data - offset_firstwall.data
@@ -566,8 +642,9 @@ class ErrorField(Trial, Plot1D):
     def predict(self):
         """Predict overlap error field."""
         self.data["plasma"] = self.model.data.plasma
-        self.data["overlap"] = ("sample", "plasma"), np.zeros(
-            (self.samples, self.data.sizes["plasma"])
+        self.data["overlap"] = (
+            ("sample", "plasma"),
+            np.zeros((self.samples, self.data.sizes["plasma"])),
         )
         radial = self.data.radial + self.data.radial_ccl
         tangential = self.data.tangential + self.data.tangential_ccl
@@ -610,8 +687,9 @@ class ErrorField(Trial, Plot1D):
             and self.data.attrs.get("quantile", None) == quantile
         ):
             return self
-        self.data["quantile_scan"] = ("component", "plasma"), np.ones(
-            (self.data.sizes["component"], self.data.sizes["plasma"])
+        self.data["quantile_scan"] = (
+            ("component", "plasma"),
+            np.ones((self.data.sizes["component"], self.data.sizes["plasma"])),
         )
         for i, pdf in enumerate(self.pdf):
             theta = list(np.zeros(len(self.pdf)))

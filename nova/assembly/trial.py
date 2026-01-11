@@ -4,7 +4,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass, field, fields
 from functools import cached_property
 from time import time
-from typing import ClassVar, Union
+from typing import ClassVar, Self, Union
 
 import numpy as np
 import xarray
@@ -88,7 +88,7 @@ class Trial(Dataset, TrialAttrs, Plot1D):
         name: str | None = None,
         samples: int | None = None,
         **kwargs,
-    ) -> "Trial":
+    ) -> Self:
         """Load trial from manifest by name or create with parameters.
 
         Parameters

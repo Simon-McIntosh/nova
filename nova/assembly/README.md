@@ -292,18 +292,156 @@ fiducial = FiducialSector(
 
 ### FiducialIlis
 
-Processes ILIS point cloud data and provides gap calculation utilities.
+Processes ILIS point cloud data and provides gap calculation utilities. The class handles
+PCR (Post-Construction Review) deviation corrections that account for manufacturing
+variations in ILIS surface positions.
 
 ```python
 from nova.assembly.fiducialilis import FiducialIlis
 
+# Initialize with PCR corrections enabled (recommended for accurate gaps)
 ilis = FiducialIlis(fiducial.ilis, pcr=True)
+
+# Access fitted plane parameters
+planes = ilis.planes  # DataFrame with x, y, z, nx, ny, nz per (coil, feature)
+
+# Access raw point cloud data
+data = ilis.data  # DataFrame with r, z, x, y, z per measured point
 
 # Get midplane between two surfaces
 midplane = ilis.intersect(planes.loc[sector_index])
 
 # Calculate offset from points to a reference plane
 offset = ilis.offset(points, midplane)
+```
+
+#### PCR Deviation Corrections
+
+The `FiducialIlis` class includes measured deviations from ITER's Post-Construction
+Review (PCR) process. These corrections adjust the nominal ILIS plane positions based
+on actual manufacturing measurements:
+
+```python
+# PCR deviations are stored per coil as [ILIS +1 offset, ILIS -1 offset] in mm
+FiducialIlis.deviation = {
+    4: [-0.22, 0.11],   # Coil 4: ILIS +1 shifted -0.22mm, ILIS -1 shifted +0.11mm
+    5: [-0.13, -0.08],
+    # ... etc
+}
+```
+
+When `pcr=True`, the plane positions are adjusted by shifting along their normals:
+
+```python
+plane['x'] += deviation * plane['nx']
+plane['y'] += deviation * plane['ny']
+plane['z'] += deviation * plane['nz']
+```
+
+This correction is essential for accurate gap calculations as manufacturing
+variations can introduce ±0.5mm offsets.
+
+### Correct Method for Intercoil Gap Calculation
+
+**IMPORTANT**: Gap calculations must use the actual ILIS point cloud data, not
+projections onto best-fit planes. The correct methodology:
+
+#### Step 1: Clock Point Cloud Data to Sector Midplane
+
+Transform both plane parameters and raw point cloud data to the sector reference frame:
+
+```python
+from nova.assembly.transform import Rotate
+
+rotate = Rotate()
+
+def clock(data, coil):
+    """Clock data to sector midplane based on coil position."""
+    if coil in first_coils:  # First coil at +10°
+        return rotate.anticlock(data)
+    else:  # Second coil at -10°
+        return rotate.clock(data)
+
+sector_planes = ilis.planes.groupby('coil', group_keys=False).apply(
+    lambda x: clock(x, x.name, cords=[('x', 'y', 'z'), ('nx', 'ny', 'nz')])
+)
+sector_data = ilis.data.groupby('coil', group_keys=False).apply(
+    lambda x: clock(x, x.name)
+)
+```
+
+#### Step 2: Compute Midplane from Clocked Planes
+
+```python
+sector_index = [(first_coil, 'ILIS +1'), (second_coil, 'ILIS -1')]
+midplane = ilis.intersect(sector_planes.loc[sector_index])
+midplane_point = midplane[['x', 'y', 'z']].values
+midplane_normal = midplane[['nx', 'ny', 'nz']].values
+```
+
+#### Step 3: Compute Offsets from Point Cloud (NOT Plane Projection)
+
+```python
+from scipy.interpolate import griddata
+import numpy as np
+
+# Create evaluation grid
+grid_r, grid_z = np.meshgrid(r_values, z_values)
+
+offset_grids = []
+for coil, feature in sector_index:
+    # Get actual point cloud for this ILIS surface
+    mask = (sector_data.coil == coil) & (sector_data.feature == feature)
+    plane_data = sector_data.loc[mask]
+
+    # Compute perpendicular offset from each point to midplane
+    v = plane_data[['x', 'y', 'z']].values - midplane_point
+    point_offsets = np.dot(v, midplane_normal.T).ravel()
+
+    # Interpolate point cloud offsets to regular grid
+    offset_grid = griddata(
+        plane_data[['r', 'z']].values,
+        point_offsets,
+        (grid_r, grid_z),
+        method='linear'
+    )
+    offset_grids.append(offset_grid)
+
+# Gap is difference between the two surfaces
+gap = offset_grids[1] - offset_grids[0]
+```
+
+#### Why This Method is Correct
+
+The previous (incorrect) approach projected grid points onto best-fit ILIS planes
+and then computed offsets. This introduced systematic errors because:
+
+1. Best-fit planes average out surface variations
+2. Projecting onto tilted planes then computing midplane offset double-counts geometry
+3. Errors of ~0.7mm were observed in gap statistics
+
+The correct approach uses actual measured point positions directly, preserving
+the true surface geometry and eliminating projection artifacts.
+
+### FiducialPit
+
+Multi-sector gap analysis combining data from all installed sectors in the pit:
+
+```python
+from nova.assembly.fiducialpit import FiducialPit
+
+# Analyze gaps for installed sectors
+pit = FiducialPit(
+    phase='In-pit target',
+    sectors={5: [16, 5], 6: [12, 13], 7: [8, 9], 8: [4, 11]},
+    pcr=True
+)
+
+# Get gap statistics summary
+gap_stats = pit.gap_statistics()
+
+# Plot gap heatmap for a specific sector
+pit.plot_intra_sector_gap(sector=8)
 ```
 
 ### Rotate

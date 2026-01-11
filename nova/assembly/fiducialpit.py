@@ -688,43 +688,50 @@ class FiducialPit(Plot1D):
             slice(ilis.data.z.min(), ilis.data.z.max(), 40j),
         ]
 
-        # Compute gap at each grid point using best-fit planes
-        # For a best-fit plane with point p and normal n, the offset of a query
-        # point q from the midplane is computed by:
-        # 1. Project q onto the best-fit plane to get q'
-        # 2. Compute offset of q' from the midplane
-        # This is equivalent to computing the plane-midplane separation at (r, z)
+        # Compute gap using point cloud data interpolated to regular grid
+        # This matches the FiducialSector methodology which directly uses
+        # actual ILIS measurements rather than best-fit plane projections
         midplane_point = midplane.loc[["x", "y", "z"]].values
         midplane_normal = midplane.loc[["nx", "ny", "nz"]].values
         midplane_normal = midplane_normal / np.linalg.norm(midplane_normal)
 
-        def compute_plane_offset_to_midplane(plane, grid_r, grid_z):
-            """Compute offset from best-fit plane to midplane at each grid point.
+        # Clock point cloud data to sector midplane (same as planes)
+        def clock_data(data, coil):
+            data = data.copy()
+            is_first = sector_coils.index(coil) == 0
+            transform = self.rotate.anticlock if is_first else self.rotate.clock
+            data.loc[:, ["x", "y", "z"]] = transform(
+                data.loc[:, ["x", "y", "z"]].values
+            )
+            return data
 
-            For each (r, z), create a 3D point and project it onto the best-fit
-            plane, then compute the signed distance to the midplane.
-            """
-            plane_point = plane.loc[["x", "y", "z"]].values
-            plane_normal = plane.loc[["nx", "ny", "nz"]].values
-            plane_normal = plane_normal / np.linalg.norm(plane_normal)
+        sector_data = ilis.data.groupby(["coil"], group_keys=False).apply(
+            lambda x: clock_data(x, x.name)
+        )
 
-            # Create 3D grid points (in clocked frame: x ≈ r, y ≈ 0)
-            grid_x = grid_r
-            grid_y = np.zeros_like(grid_r)
-            grid_points = np.stack([grid_x, grid_y, grid_z], axis=-1)
+        from scipy.interpolate import griddata
 
-            # Project grid points onto the best-fit plane
-            v = grid_points - plane_point
-            dist_to_plane = np.dot(v, plane_normal)
-            projected = grid_points - dist_to_plane[..., np.newaxis] * plane_normal
+        offset_grids = []
+        for coil, feature in sector_index:
+            # Get point cloud for this ILIS surface
+            plane_mask = (sector_data.coil == coil) & (sector_data.feature == feature)
+            plane_data = sector_data.loc[plane_mask]
 
-            # Compute offset of projected points from midplane
-            v_mid = projected - midplane_point
-            offset = np.dot(v_mid, midplane_normal)
-            return offset
+            # Compute offset of each point from midplane
+            v = plane_data.loc[:, ["x", "y", "z"]].values - midplane_point
+            point_offsets = np.dot(v, midplane_normal)
 
-        offset_first = compute_plane_offset_to_midplane(plane_first, grid_r, grid_z)
-        offset_second = compute_plane_offset_to_midplane(plane_second, grid_r, grid_z)
+            # Interpolate to regular grid
+            offset_grid = griddata(
+                plane_data.loc[:, ["r", "z"]].values,
+                point_offsets,
+                (grid_r, grid_z),
+                method="linear",
+            )
+            offset_grids.append(offset_grid)
+
+        offset_first = offset_grids[0]
+        offset_second = offset_grids[1]
 
         # Gap at each grid point = offset_second - offset_first
         gap_grid = offset_second - offset_first
@@ -879,7 +886,13 @@ class FiducialPit(Plot1D):
         # Calculate midplane
         midplane = FiducialIlis.intersect(rotated_planes)
 
-        # Get grid bounds from point cloud data
+        # Compute gap using point cloud data interpolated to regular grid
+        # This matches the FiducialSector methodology
+        midplane_point = midplane.loc[["x", "y", "z"]].values
+        midplane_normal = midplane.loc[["nx", "ny", "nz"]].values
+        midplane_normal = midplane_normal / np.linalg.norm(midplane_normal)
+
+        # Get filtered point cloud data for each surface
         data_first_filtered = data_first[data_first.feature == feature_first].copy()
         data_second_filtered = data_second[data_second.feature == feature_second].copy()
         all_data = pandas.concat([data_first_filtered, data_second_filtered])
@@ -890,34 +903,25 @@ class FiducialPit(Plot1D):
             slice(all_data.z.min(), all_data.z.max(), 40j),
         ]
 
-        # Compute gap at each grid point using best-fit planes
-        midplane_point = midplane.loc[["x", "y", "z"]].values
-        midplane_normal = midplane.loc[["nx", "ny", "nz"]].values
-        midplane_normal = midplane_normal / np.linalg.norm(midplane_normal)
+        from scipy.interpolate import griddata
 
-        def compute_plane_offset_to_midplane(plane, grid_r, grid_z):
-            """Compute offset from best-fit plane to midplane at each grid point."""
-            plane_point = plane.loc[["x", "y", "z"]].values
-            plane_normal = plane.loc[["nx", "ny", "nz"]].values
-            plane_normal = plane_normal / np.linalg.norm(plane_normal)
+        offset_grids = []
+        for data_subset in [data_first_filtered, data_second_filtered]:
+            # Compute offset of each point from midplane
+            v = data_subset.loc[:, ["x", "y", "z"]].values - midplane_point
+            point_offsets = np.dot(v, midplane_normal)
 
-            # Create 3D grid points (in clocked frame: x ≈ r, y ≈ 0)
-            grid_x = grid_r
-            grid_y = np.zeros_like(grid_r)
-            grid_points = np.stack([grid_x, grid_y, grid_z], axis=-1)
+            # Interpolate to regular grid
+            offset_grid = griddata(
+                data_subset.loc[:, ["r", "z"]].values,
+                point_offsets,
+                (grid_r, grid_z),
+                method="linear",
+            )
+            offset_grids.append(offset_grid)
 
-            # Project grid points onto the best-fit plane
-            v = grid_points - plane_point
-            dist_to_plane = np.dot(v, plane_normal)
-            projected = grid_points - dist_to_plane[..., np.newaxis] * plane_normal
-
-            # Compute offset of projected points from midplane
-            v_mid = projected - midplane_point
-            offset = np.dot(v_mid, midplane_normal)
-            return offset
-
-        offset_first = compute_plane_offset_to_midplane(plane_first, grid_r, grid_z)
-        offset_second = compute_plane_offset_to_midplane(plane_second, grid_r, grid_z)
+        offset_first = offset_grids[0]
+        offset_second = offset_grids[1]
 
         # Gap at each grid point = offset_second - offset_first
         gap_grid = offset_second - offset_first
@@ -1041,10 +1045,6 @@ class FiducialPit(Plot1D):
 
         midplane = ilis.intersect(sector_planes.loc[sector_index])
 
-        # Get best-fit plane objects
-        plane_first = sector_planes.loc[(coil_first, feature_first)]
-        plane_second = sector_planes.loc[(coil_second, feature_second)]
-
         # Get data extents for z range (r and z are rotationally invariant)
         data_first = ilis.data[
             (ilis.data.coil == coil_first) & (ilis.data.feature == feature_first)
@@ -1068,35 +1068,50 @@ class FiducialPit(Plot1D):
 
         z_range = np.linspace(z_min + z_margin, z_max - z_margin, n_points)
 
-        # Compute gap profile using best-fit planes
+        # Compute gap profile using point cloud data interpolated to profile line
         midplane_point = midplane.loc[["x", "y", "z"]].values
         midplane_normal = midplane.loc[["nx", "ny", "nz"]].values
         midplane_normal = midplane_normal / np.linalg.norm(midplane_normal)
 
-        def compute_plane_offset_at_rz(plane, radius, z_range):
-            """Compute offset from best-fit plane to midplane along z at fixed r."""
-            plane_point = plane.loc[["x", "y", "z"]].values
-            plane_normal = plane.loc[["nx", "ny", "nz"]].values
-            plane_normal = plane_normal / np.linalg.norm(plane_normal)
+        # Clock point cloud data to sector midplane
+        def clock_data(data, coil):
+            data = data.copy()
+            is_first = sector_coils.index(coil) == 0
+            transform = self.rotate.anticlock if is_first else self.rotate.clock
+            data.loc[:, ["x", "y", "z"]] = transform(
+                data.loc[:, ["x", "y", "z"]].values
+            )
+            return data
 
-            # Create 3D points (in clocked frame: x ≈ r, y ≈ 0)
-            n_points = len(z_range)
-            query_x = np.full(n_points, radius)
-            query_y = np.zeros(n_points)
-            query_points = np.column_stack([query_x, query_y, z_range])
+        sector_data = ilis.data.groupby(["coil"], group_keys=False).apply(
+            lambda x: clock_data(x, x.name)
+        )
 
-            # Project query points onto the best-fit plane
-            v = query_points - plane_point
-            dist_to_plane = np.dot(v, plane_normal)
-            projected = query_points - dist_to_plane[:, np.newaxis] * plane_normal
+        from scipy.interpolate import griddata
 
-            # Compute offset of projected points from midplane
-            v_mid = projected - midplane_point
-            offset = np.dot(v_mid, midplane_normal)
-            return offset
+        # Sample gap at the specified radius along z
+        offset_profiles = []
+        for coil, feature in sector_index:
+            # Get point cloud for this ILIS surface
+            plane_mask = (sector_data.coil == coil) & (sector_data.feature == feature)
+            plane_data = sector_data.loc[plane_mask]
 
-        offset_first = compute_plane_offset_at_rz(plane_first, radius, z_range)
-        offset_second = compute_plane_offset_at_rz(plane_second, radius, z_range)
+            # Compute offset of each point from midplane
+            v = plane_data.loc[:, ["x", "y", "z"]].values - midplane_point
+            point_offsets = np.dot(v, midplane_normal)
+
+            # Interpolate to profile line at fixed radius
+            profile_points = np.column_stack([np.full_like(z_range, radius), z_range])
+            offset_profile = griddata(
+                plane_data.loc[:, ["r", "z"]].values,
+                point_offsets,
+                profile_points,
+                method="linear",
+            )
+            offset_profiles.append(offset_profile)
+
+        offset_first = offset_profiles[0]
+        offset_second = offset_profiles[1]
 
         # Gap = offset_second - offset_first
         gap_profile = offset_second - offset_first
@@ -1194,35 +1209,32 @@ class FiducialPit(Plot1D):
 
         z_range = np.linspace(z_min + z_margin, z_max - z_margin, n_points)
 
-        # Compute gap profile using best-fit planes
+        # Compute gap profile using point cloud data interpolated to profile line
         midplane_point = midplane.loc[["x", "y", "z"]].values
         midplane_normal = midplane.loc[["nx", "ny", "nz"]].values
         midplane_normal = midplane_normal / np.linalg.norm(midplane_normal)
 
-        def compute_plane_offset_at_rz(plane, radius, z_range):
-            """Compute offset from best-fit plane to midplane along z at fixed r."""
-            plane_point = plane.loc[["x", "y", "z"]].values
-            plane_normal = plane.loc[["nx", "ny", "nz"]].values
-            plane_normal = plane_normal / np.linalg.norm(plane_normal)
+        from scipy.interpolate import griddata
 
-            # Create 3D points (in clocked frame: x ≈ r, y ≈ 0)
-            n_pts = len(z_range)
-            query_x = np.full(n_pts, radius)
-            query_y = np.zeros(n_pts)
-            query_points = np.column_stack([query_x, query_y, z_range])
+        # Sample gap at the specified radius along z
+        offset_profiles = []
+        for data_subset in [data_first_filtered, data_second_filtered]:
+            # Compute offset of each point from midplane
+            v = data_subset.loc[:, ["x", "y", "z"]].values - midplane_point
+            point_offsets = np.dot(v, midplane_normal)
 
-            # Project query points onto the best-fit plane
-            v = query_points - plane_point
-            dist_to_plane = np.dot(v, plane_normal)
-            projected = query_points - dist_to_plane[:, np.newaxis] * plane_normal
+            # Interpolate to profile line at fixed radius
+            profile_points = np.column_stack([np.full_like(z_range, radius), z_range])
+            offset_profile = griddata(
+                data_subset.loc[:, ["r", "z"]].values,
+                point_offsets,
+                profile_points,
+                method="linear",
+            )
+            offset_profiles.append(offset_profile)
 
-            # Compute offset of projected points from midplane
-            v_mid = projected - midplane_point
-            offset = np.dot(v_mid, midplane_normal)
-            return offset
-
-        offset_first = compute_plane_offset_at_rz(plane_first, radius, z_range)
-        offset_second = compute_plane_offset_at_rz(plane_second, radius, z_range)
+        offset_first = offset_profiles[0]
+        offset_second = offset_profiles[1]
 
         # Gap = offset_second - offset_first
         gap_profile = offset_second - offset_first

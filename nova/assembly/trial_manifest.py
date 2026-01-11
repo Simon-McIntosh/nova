@@ -120,6 +120,24 @@ class TrialManifest:
             ]
         )
 
+    def _get_defaults(self) -> dict:
+        """Get default values for trial type from manifest."""
+        defaults = self._manifest.get("defaults", {}).get(self.trial_type, {})
+        return defaults
+
+    def _apply_defaults(self) -> None:
+        """Apply default values from manifest for missing parameters."""
+        defaults = self._get_defaults()
+        if self.components is None:
+            self.components = defaults.get("components")
+        if self.pdf is None:
+            self.pdf = defaults.get("pdf")
+        if self.trial_type == "vault":
+            if "adjust_gap" in defaults and self.adjust_gap is True:
+                self.adjust_gap = defaults.get("adjust_gap", True)
+            if "max_nominal_gap" in defaults:
+                self.max_nominal_gap = defaults.get("max_nominal_gap", 2.0)
+
     def _resolve_parameters(self) -> None:
         """Resolve parameters from name, hash, or direct input."""
         simulations = self._manifest.get("simulations", {})
@@ -135,6 +153,7 @@ class TrialManifest:
                     self.samples = trial_data.get("samples")
                 if self.theta is None:
                     self.theta = trial_data.get("theta")
+                # Components/pdf from trial data or defaults
                 if self.components is None:
                     self.components = trial_data.get("components")
                 if self.pdf is None:
@@ -146,6 +165,9 @@ class TrialManifest:
                         self.max_nominal_gap = trial_data["max_nominal_gap"]
                 if not self.description:
                     self.description = entry.get("description", "")
+
+                # Apply defaults for any still-missing values
+                self._apply_defaults()
 
                 # Validate hash if stored
                 stored_hash = trial_data.get("hash")
@@ -160,6 +182,7 @@ class TrialManifest:
 
         # Case 2: Name provided but not in manifest - require parameters
         if self.name is not None and self.name not in simulations:
+            self._apply_defaults()
             if not self._has_parameters():
                 raise ValueError(
                     f"Simulation '{self.name}' not found in manifest. "
@@ -168,19 +191,21 @@ class TrialManifest:
             return
 
         # Case 3: No name, but parameters provided - find by hash
-        if self.name is None and self._has_parameters():
-            computed_hash = self._compute_hash()
-            for sim_name, entry in simulations.items():
-                trial_data = entry.get(self.trial_type, {})
-                if trial_data.get("hash") == computed_hash:
-                    self.name = sim_name
-                    self.description = entry.get("description", "")
-                    return
-            # No match found - fail if no name given
-            raise ValueError(
-                f"No simulation found with hash {computed_hash}. "
-                "Provide a name to create a new entry."
-            )
+        if self.name is None:
+            self._apply_defaults()
+            if self._has_parameters():
+                computed_hash = self._compute_hash()
+                for sim_name, entry in simulations.items():
+                    trial_data = entry.get(self.trial_type, {})
+                    if trial_data.get("hash") == computed_hash:
+                        self.name = sim_name
+                        self.description = entry.get("description", "")
+                        return
+                # No match found - fail if no name given
+                raise ValueError(
+                    f"No simulation found with hash {computed_hash}. "
+                    "Provide a name to create a new entry."
+                )
 
         # Case 4: Neither name nor complete parameters
         if self.name is None and not self._has_parameters():

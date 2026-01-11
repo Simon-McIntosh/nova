@@ -229,9 +229,10 @@ class FiducialSector(Fiducial):
         - z: vertical (positive upward)
 
         Parameters extracted (all in mm):
-        - radial: Radial displacement from projected CCL fiducial H
-        - tangential: Tangential displacement from projected CCL fiducial H
-        - vertical: Vertical displacement from CCL fiducial H
+        - radial: Radial displacement from projected CCL fiducial H (midplane)
+        - tangential: Tangential displacement from projected CCL fiducial H (midplane)
+        - vertical: RMS vertical displacement from outer CCL fiducials (C, D, E, F)
+          Matches FiducialFit.fiducial_index["vertical"] constraint points
         - roll_length: Roll-induced tangential offset at reference length
           (from dy gradient along z, i.e., A→B tangential difference)
         - yaw_length: Yaw-induced tangential offset at reference length
@@ -313,8 +314,22 @@ class FiducialSector(Fiducial):
             # Tangential: dy at H (projected onto ILIS midplane)
             tangential = delta_projected.loc["H", "dy"]
 
-            # Vertical: dz at H (original, not affected by projection)
-            vertical = ccl_delta.loc["H", "dz"] if "H" in ccl_delta.index else np.nan
+            # Vertical: RMS of dz from outer fiducials (C, D, E, F)
+            # Matches FiducialFit.fiducial_index["vertical"] = [2, 1, -1, -2]
+            vertical_targets = ["C", "D", "E", "F"]
+            vertical_deltas = []
+            for target in vertical_targets:
+                if target in ccl_delta.index:
+                    vertical_deltas.append(ccl_delta.loc[target, "dz"])
+            if vertical_deltas:
+                vertical = np.sqrt(np.mean(np.array(vertical_deltas) ** 2))
+                # Preserve sign: use mean if all same sign, else RMS magnitude
+                if all(d >= 0 for d in vertical_deltas) or all(
+                    d <= 0 for d in vertical_deltas
+                ):
+                    vertical = np.mean(vertical_deltas)
+            else:
+                vertical = np.nan
 
             # Roll: rotation about radial (x) axis
             # Measured from dy gradient along z (A→B tangential difference)

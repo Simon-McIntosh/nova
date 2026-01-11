@@ -192,10 +192,16 @@ class Trial(Dataset, TrialAttrs, Plot1D):
         # Merge with any additional kwargs
         trial_kwargs.update(kwargs)
 
+        # Pre-load measured positions before construction when force=True
+        # This ensures fixed_coils is available during build in __post_init__
+        if manifest.measured_sectors is not None and force:
+            fixed_coils = cls._load_fixed_coils_from_sectors(manifest.measured_sectors)
+            trial_kwargs["fixed_coils"] = fixed_coils
+
         trial = cls(**trial_kwargs)
 
-        # Load measured coil positions if sectors specified
-        if trial.measured_sectors is not None:
+        # Load measured coil positions if sectors specified (for non-force case)
+        if trial.measured_sectors is not None and trial.fixed_coils is None:
             trial._load_measured_positions()
 
         return trial
@@ -288,6 +294,60 @@ class Trial(Dataset, TrialAttrs, Plot1D):
         trial.fixed_coils = fixed_coils
 
         return trial
+
+    @staticmethod
+    def _load_fixed_coils_from_sectors(
+        measured_sectors: list[int], pit_kwargs: dict | None = None
+    ) -> dict:
+        """Load fixed coil values from FiducialPit for given sectors.
+
+        Static method that can be called before instance creation to
+        pre-populate fixed_coils when force=True.
+
+        Parameters
+        ----------
+        measured_sectors : list[int]
+            List of sector numbers (5, 6, 7, 8) to load
+        pit_kwargs : dict | None
+            Arguments passed to FiducialPit
+
+        Returns
+        -------
+        dict
+            fixed_coils dict mapping trial_index to component values
+        """
+        from nova.assembly.fiducialpit import FiducialPit
+
+        # Default sector to coil mapping
+        sector_coils = {
+            5: [16, 5],
+            6: [12, 13],
+            7: [8, 9],
+            8: [4, 11],
+        }
+
+        if pit_kwargs is None:
+            sectors = {
+                s: sector_coils[s] for s in measured_sectors if s in sector_coils
+            }
+            pit_kwargs = {
+                "sectors": sectors,
+                "phase": "latest",
+                "pcr": True,
+            }
+
+        pit = FiducialPit(**pit_kwargs)
+        positions = pit.extract_trial_positions()
+
+        fixed_coils = {}
+        for _, row in positions.iterrows():
+            trial_idx = int(row["trial_index"])
+            fixed_coils[trial_idx] = {
+                col: row[col]
+                for col in positions.columns
+                if col not in ["trial_index", "coil", "sector"]
+            }
+        return fixed_coils
 
     def _load_measured_positions(self, pit_kwargs: dict | None = None) -> None:
         """Load measured positions from FiducialPit for measured_sectors.
@@ -1369,10 +1429,12 @@ class ErrorField(Trial, Plot1D):
 
 
 if __name__ == "__main__":
-    trial_name = "S4_refine_pit_2026"
+    trial_name = "S4_hybrid_pit_2026"
+    samples = 200_000
+    force = True
 
     # Load baseline_2021 from manifest (should use cache)
-    vault = Vault.from_manifest(trial_name, samples=200_000, force=True)
+    vault = Vault.from_manifest(trial_name, samples=samples, force=force)
     print(f"Vault hash: {vault.group_name}")
 
     vault.plot()
@@ -1380,7 +1442,7 @@ if __name__ == "__main__":
     vault.plot_gap()
     vault.plot_cumlative_gap()
 
-    error = ErrorField.from_manifest(trial_name, samples=200_000, force=True)
+    error = ErrorField.from_manifest(trial_name, samples=samples, force=force)
     print(f"ErrorField hash: {error.group_name}")
 
     error.plot()

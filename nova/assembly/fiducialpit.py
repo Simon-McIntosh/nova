@@ -689,17 +689,42 @@ class FiducialPit(Plot1D):
         # Calculate midplane by intersecting the two clocked planes
         midplane = ilis.intersect(sector_planes.loc[sector_index])
 
-        # Get plane objects for PCR offsets
+        # Get best-fit plane objects
         plane_first = sector_planes.loc[(coil_first, feature_first)]
         plane_second = sector_planes.loc[(coil_second, feature_second)]
 
-        # Create regular grid for sampling (matching fiducialsector approach)
+        # Calculate gap_mean as the plane-to-plane distance between best-fit planes
+        # This is the distance between plane points along the midplane normal
+        midplane_normal = midplane.loc[["nx", "ny", "nz"]].values
+        midplane_normal = midplane_normal / np.linalg.norm(midplane_normal)
+
+        point_first = plane_first.loc[["x", "y", "z"]].values
+        point_second = plane_second.loc[["x", "y", "z"]].values
+
+        # Gap = projection of (point_second - point_first) onto midplane normal
+        gap_mean = float(np.dot(point_second - point_first, midplane_normal))
+
+        # Calculate gap_std from point cloud deviations around the best-fit planes
+        # This shows the variation in the actual measurements
+        deviations = []
+        for coil, feature in sector_index:
+            plane_mask = (sector_data_clocked.coil == coil) & (
+                sector_data_clocked.feature == feature
+            )
+            plane_data = sector_data_clocked.loc[plane_mask]
+            plane = sector_planes.loc[(coil, feature)]
+            # Offset of points from their own best-fit plane
+            point_offsets = ilis.offset(plane_data[["x", "y", "z"]], plane)
+            deviations.extend(point_offsets.tolist())
+
+        gap_std = float(np.std(deviations)) if deviations else 0.0
+
+        # Calculate min/max from grid sampling for compatibility
         grid_r, grid_z = np.mgrid[
             slice(ilis.data.r.min(), ilis.data.r.max(), 20j),
             slice(ilis.data.z.min(), ilis.data.z.max(), 40j),
         ]
 
-        # Calculate offsets and interpolate to grid for each surface
         grid_offsets = []
         for coil, feature in sector_index:
             plane_mask = (sector_data_clocked.coil == coil) & (
@@ -708,7 +733,6 @@ class FiducialPit(Plot1D):
             plane_data = sector_data_clocked.loc[plane_mask]
             plane_offset = ilis.offset(plane_data[["x", "y", "z"]], midplane)
 
-            # Interpolate offsets onto regular grid
             grid_offset = griddata(
                 plane_data[["r", "z"]].values,
                 plane_offset,
@@ -717,45 +741,12 @@ class FiducialPit(Plot1D):
             )
             grid_offsets.append(grid_offset)
 
-        # Gap at each grid point = offset_second - offset_first
         gap_grid = grid_offsets[1] - grid_offsets[0]
-
-        # Compute statistics from grid (excludes NaN from interpolation boundaries)
         valid_mask = ~np.isnan(gap_grid)
         valid_gaps = gap_grid[valid_mask]
-        gap_mean = float(np.mean(valid_gaps))
-        gap_std = float(np.std(valid_gaps))
-        gap_min = float(np.min(valid_gaps))
-        gap_max = float(np.max(valid_gaps))
 
-        # Gap at equatorial midplane (z=0): interpolate directly at z=0
-        r_range = np.linspace(ilis.data.r.min(), ilis.data.r.max(), 20)
-        z0_points = np.column_stack([r_range, np.zeros_like(r_range)])
-
-        # Interpolate each surface offset at z=0
-        midplane_offsets = []
-        for coil, feature in sector_index:
-            plane_mask = (sector_data_clocked.coil == coil) & (
-                sector_data_clocked.feature == feature
-            )
-            plane_data = sector_data_clocked.loc[plane_mask]
-            plane_offset = ilis.offset(plane_data[["x", "y", "z"]], midplane)
-
-            z0_offset = griddata(
-                plane_data[["r", "z"]].values,
-                plane_offset,
-                z0_points,
-                method="linear",
-            )
-            midplane_offsets.append(z0_offset)
-
-        # Gap at z=0 = offset_second - offset_first
-        gap_z0 = midplane_offsets[1] - midplane_offsets[0]
-        valid_z0 = gap_z0[~np.isnan(gap_z0)]
-        if len(valid_z0) > 0:
-            gap_midplane = float(np.mean(valid_z0))
-        else:
-            gap_midplane = gap_mean
+        gap_min = float(np.min(valid_gaps)) if len(valid_gaps) > 0 else gap_mean
+        gap_max = float(np.max(valid_gaps)) if len(valid_gaps) > 0 else gap_mean
 
         # Get PCR deviation offsets if available
         pcr_first = plane_first.get("offset", 0)
@@ -768,12 +759,11 @@ class FiducialPit(Plot1D):
             "sector_a": pair["sector_a"],
             "sector_b": pair["sector_b"],
             "position": pair["position"],
-            "gap_midplane": gap_midplane,
             "gap_mean": gap_mean,
             "gap_std": gap_std,
             "gap_min": gap_min,
             "gap_max": gap_max,
-            "grid_points": len(valid_gaps),
+            "grid_points": len(valid_gaps) if len(valid_gaps) > 0 else 0,
             "pcr_first": pcr_first,
             "pcr_second": pcr_second,
         }
@@ -900,86 +890,80 @@ class FiducialPit(Plot1D):
         # Calculate midplane
         midplane = FiducialIlis.intersect(rotated_planes)
 
+        # Calculate gap_mean as the plane-to-plane distance between best-fit planes
+        midplane_normal = midplane.loc[["nx", "ny", "nz"]].values
+        midplane_normal = midplane_normal / np.linalg.norm(midplane_normal)
+
+        point_first = plane_first.loc[["x", "y", "z"]].values
+        point_second = plane_second.loc[["x", "y", "z"]].values
+
+        # Gap = projection of (point_second - point_first) onto midplane normal
+        gap_mean = float(np.dot(point_second - point_first, midplane_normal))
+
         # Filter point cloud data for the specific ILIS features
         data_first_filtered = data_first[data_first.feature == feature_first].copy()
         data_second_filtered = data_second[data_second.feature == feature_second].copy()
 
-        # Combine data to get common grid bounds
-        all_data = pandas.concat([data_first_filtered, data_second_filtered])
-
-        # Create regular grid for sampling (matching fiducialsector approach)
-        grid_r, grid_z = np.mgrid[
-            slice(all_data.r.min(), all_data.r.max(), 20j),
-            slice(all_data.z.min(), all_data.z.max(), 40j),
-        ]
-
-        # Calculate offsets and interpolate to grid for each surface
-        def calculate_offset(data):
-            """Calculate offset from midplane for point cloud data."""
-            normal = midplane.loc[["nx", "ny", "nz"]].values
+        # Calculate gap_std from point cloud deviations around the best-fit planes
+        def calculate_plane_offset(data, plane):
+            """Calculate offset of points from their best-fit plane."""
+            normal = plane.loc[["nx", "ny", "nz"]].values
             normal = normal / np.linalg.norm(normal)
-            point = midplane.loc[["x", "y", "z"]].values
+            point = plane.loc[["x", "y", "z"]].values
             v = data[["x", "y", "z"]].values - point
             return np.dot(v, normal)
 
-        grid_offsets = []
-        for data_filtered in [data_first_filtered, data_second_filtered]:
-            if data_filtered.empty:
-                grid_offsets.append(np.full_like(grid_r, np.nan))
-                continue
+        deviations = []
+        if not data_first_filtered.empty:
+            offsets_first = calculate_plane_offset(data_first_filtered, plane_first)
+            deviations.extend(offsets_first.tolist())
+        if not data_second_filtered.empty:
+            offsets_second = calculate_plane_offset(data_second_filtered, plane_second)
+            deviations.extend(offsets_second.tolist())
 
-            plane_offset = calculate_offset(data_filtered)
+        gap_std = float(np.std(deviations)) if deviations else 0.0
 
-            # Interpolate offsets onto regular grid
-            grid_offset = griddata(
-                data_filtered[["r", "z"]].values,
-                plane_offset,
-                (grid_r, grid_z),
-                method="linear",
-            )
-            grid_offsets.append(grid_offset)
+        # Calculate min/max from grid sampling for compatibility
+        all_data = pandas.concat([data_first_filtered, data_second_filtered])
 
-        # Gap at each grid point = offset_second - offset_first
-        gap_grid = grid_offsets[1] - grid_offsets[0]
+        if not all_data.empty:
+            grid_r, grid_z = np.mgrid[
+                slice(all_data.r.min(), all_data.r.max(), 20j),
+                slice(all_data.z.min(), all_data.z.max(), 40j),
+            ]
 
-        # Compute statistics from grid (excludes NaN from interpolation boundaries)
-        valid_mask = ~np.isnan(gap_grid)
-        valid_gaps = gap_grid[valid_mask]
-        if len(valid_gaps) > 0:
-            gap_mean = float(np.mean(valid_gaps))
-            gap_std = float(np.std(valid_gaps))
-            gap_min = float(np.min(valid_gaps))
-            gap_max = float(np.max(valid_gaps))
+            def calculate_midplane_offset(data):
+                """Calculate offset from midplane for point cloud data."""
+                normal = midplane_normal
+                point = midplane.loc[["x", "y", "z"]].values
+                v = data[["x", "y", "z"]].values - point
+                return np.dot(v, normal)
 
-            # Gap at equatorial midplane (z=0): interpolate directly at z=0
-            r_range = np.linspace(all_data.r.min(), all_data.r.max(), 20)
-            z0_points = np.column_stack([r_range, np.zeros_like(r_range)])
-
-            # Interpolate each surface offset at z=0
-            midplane_offsets = []
+            grid_offsets = []
             for data_filtered in [data_first_filtered, data_second_filtered]:
                 if data_filtered.empty:
-                    midplane_offsets.append(np.full(len(r_range), np.nan))
+                    grid_offsets.append(np.full_like(grid_r, np.nan))
                     continue
 
-                plane_offset = calculate_offset(data_filtered)
-                z0_offset = griddata(
+                plane_offset = calculate_midplane_offset(data_filtered)
+                grid_offset = griddata(
                     data_filtered[["r", "z"]].values,
                     plane_offset,
-                    z0_points,
+                    (grid_r, grid_z),
                     method="linear",
                 )
-                midplane_offsets.append(z0_offset)
+                grid_offsets.append(grid_offset)
 
-            # Gap at z=0 = offset_second - offset_first
-            gap_z0 = midplane_offsets[1] - midplane_offsets[0]
-            valid_z0 = gap_z0[~np.isnan(gap_z0)]
-            if len(valid_z0) > 0:
-                gap_midplane = float(np.mean(valid_z0))
-            else:
-                gap_midplane = gap_mean
+            gap_grid = grid_offsets[1] - grid_offsets[0]
+            valid_mask = ~np.isnan(gap_grid)
+            valid_gaps = gap_grid[valid_mask]
+
+            gap_min = float(np.min(valid_gaps)) if len(valid_gaps) > 0 else gap_mean
+            gap_max = float(np.max(valid_gaps)) if len(valid_gaps) > 0 else gap_mean
+            n_grid_points = len(valid_gaps) if len(valid_gaps) > 0 else 0
         else:
-            gap_mean = gap_std = gap_min = gap_max = gap_midplane = 0.0
+            gap_min = gap_max = gap_mean
+            n_grid_points = 0
 
         # Get PCR deviation offsets from original (unclocked) planes
         pcr_first = ilis_a.planes.loc[(coil_first, feature_first)].get("offset", 0)
@@ -992,12 +976,11 @@ class FiducialPit(Plot1D):
             "sector_a": pair["sector_a"],
             "sector_b": pair["sector_b"],
             "position": pair["position"],
-            "gap_midplane": gap_midplane,
             "gap_mean": gap_mean,
             "gap_std": gap_std,
             "gap_min": gap_min,
             "gap_max": gap_max,
-            "grid_points": len(valid_gaps),
+            "grid_points": n_grid_points,
             "pcr_first": pcr_first,
             "pcr_second": pcr_second,
         }
@@ -1376,7 +1359,7 @@ class FiducialPit(Plot1D):
     def plot_gaps(self, figsize=(12, 8)):
         """Plot gap measurements as bar chart with min/max range markers.
 
-        Shows gap_midplane (mean gap at z=0) as bar height with horizontal
+        Shows gap_mean (plane-to-plane distance) as bar height with horizontal
         lines indicating [gap_min, gap_max] range from grid samples.
         Colored by gap type (within/between-sector).
         """
@@ -1404,8 +1387,8 @@ class FiducialPit(Plot1D):
                 gap_type = row["gap_type"]
                 label = labels_map[gap_type] if gap_type not in plotted_types else None
 
-                # Use gap_midplane (mean gap at z=0) as bar height
-                gap_value = row["gap_midplane"]
+                # Use gap_mean (plane-to-plane distance) as bar height
+                gap_value = row["gap_mean"]
 
                 ax.bar(
                     x[i],
@@ -1498,7 +1481,7 @@ class FiducialPit(Plot1D):
 
             # Add value labels at top of bar
             for i, (_, row) in enumerate(self.gaps.iterrows()):
-                gap_value = row.gap_midplane
+                gap_value = row.gap_mean
                 ax.annotate(
                     f"{gap_value:.2f}",
                     xy=(i, gap_value),
@@ -1541,8 +1524,8 @@ class FiducialPit(Plot1D):
                 else:
                     subset = self.gaps[self.gaps["gap_type"] == gap_type]
                 if not subset.empty:
-                    means.append(subset["gap_midplane"].mean())
-                    stds.append(subset["gap_midplane"].std())
+                    means.append(subset["gap_mean"].mean())
+                    stds.append(subset["gap_mean"].std())
                 else:
                     means.append(0)
                     stds.append(0)

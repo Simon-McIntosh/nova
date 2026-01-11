@@ -1115,12 +1115,22 @@ class FiducialPit(Plot1D):
             plane_data = sector_data_clocked.loc[plane_mask]
             plane_offset = ilis.offset(plane_data[["x", "y", "z"]], midplane)
 
+            # Use linear interpolation, fill NaN with nearest neighbor
             offset_interp = griddata(
                 plane_data[["r", "z"]].values,
                 plane_offset,
                 query_points,
                 method="linear",
             )
+            nan_mask = np.isnan(offset_interp)
+            if nan_mask.any():
+                offset_nearest = griddata(
+                    plane_data[["r", "z"]].values,
+                    plane_offset,
+                    query_points[nan_mask],
+                    method="nearest",
+                )
+                offset_interp[nan_mask] = offset_nearest
             profile_offsets.append(offset_interp)
 
         # Gap = offset_second - offset_first
@@ -1226,12 +1236,22 @@ class FiducialPit(Plot1D):
                 continue
 
             plane_offset = calculate_offset(data_filtered)
+            # Use linear interpolation, fill NaN with nearest neighbor
             offset_interp = griddata(
                 data_filtered[["r", "z"]].values,
                 plane_offset,
                 query_points,
                 method="linear",
             )
+            nan_mask = np.isnan(offset_interp)
+            if nan_mask.any():
+                offset_nearest = griddata(
+                    data_filtered[["r", "z"]].values,
+                    plane_offset,
+                    query_points[nan_mask],
+                    method="nearest",
+                )
+                offset_interp[nan_mask] = offset_nearest
             profile_offsets.append(offset_interp)
 
         gap_profile = profile_offsets[1] - profile_offsets[0]

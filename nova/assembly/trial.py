@@ -28,6 +28,7 @@ class TrialAttrs:
     adjust_gap: bool = True
     max_nominal_gap: float = 2.0
     sead: int = 2025
+    measured_sectors: list[int] | None = field(default=None)
     fixed_coils: dict | None = field(default=None, repr=False)
 
     ncoil: ClassVar[int] = 18
@@ -78,9 +79,17 @@ class Trial(Dataset, TrialAttrs, Plot1D):
 
     @property
     def group_name(self):
-        """Return group name as xxh32 hex hash."""
+        """Return group name as xxh32 hex hash.
+
+        The hash includes measured_sectors only when specified, so existing
+        cached data for simulations without measured sectors is preserved.
+        """
         self.xxh32.reset()
-        self.xxh32.update(np.array(list(self.attrs.values()) + self.theta + self.pdf))
+        hash_data = list(self.attrs.values()) + self.theta + self.pdf
+        # Include measured_sectors in hash only if specified
+        if self.measured_sectors is not None:
+            hash_data.extend(sorted(self.measured_sectors))
+        self.xxh32.update(np.array(hash_data))
         return self.xxh32.hexdigest()
 
     @classmethod
@@ -128,6 +137,10 @@ class Trial(Dataset, TrialAttrs, Plot1D):
             "pdf": manifest.pdf,
         }
 
+        # Add measured_sectors if specified
+        if manifest.measured_sectors is not None:
+            trial_kwargs["measured_sectors"] = manifest.measured_sectors
+
         # Add vault-specific parameters
         if trial_type == "vault":
             trial_kwargs["adjust_gap"] = manifest.adjust_gap
@@ -136,7 +149,13 @@ class Trial(Dataset, TrialAttrs, Plot1D):
         # Merge with any additional kwargs
         trial_kwargs.update(kwargs)
 
-        return cls(**trial_kwargs)
+        trial = cls(**trial_kwargs)
+
+        # Load measured coil positions if sectors specified
+        if trial.measured_sectors is not None:
+            trial._load_measured_positions()
+
+        return trial
 
     def save_to_manifest(self, name: str, description: str = "") -> None:
         """Save current trial parameters to manifest.
@@ -226,6 +245,57 @@ class Trial(Dataset, TrialAttrs, Plot1D):
         trial.fixed_coils = fixed_coils
 
         return trial
+
+    def _load_measured_positions(self, pit_kwargs: dict | None = None) -> None:
+        """Load measured positions from FiducialPit for measured_sectors.
+
+        Populates self.fixed_coils with measured values for coils in the
+        specified measured_sectors. Called automatically by from_manifest
+        when measured_sectors is specified in the manifest.
+
+        Parameters
+        ----------
+        pit_kwargs : dict | None
+            Arguments passed to FiducialPit. If None, builds sectors dict
+            from self.measured_sectors using default coil assignments.
+        """
+        from nova.assembly.fiducialpit import FiducialPit
+
+        if self.measured_sectors is None:
+            return
+
+        # Default sector to coil mapping
+        sector_coils = {
+            5: [16, 5],
+            6: [12, 13],
+            7: [8, 9],
+            8: [4, 11],
+        }
+
+        if pit_kwargs is None:
+            # Build sectors dict from measured_sectors
+            sectors = {
+                s: sector_coils[s] for s in self.measured_sectors if s in sector_coils
+            }
+            pit_kwargs = {
+                "sectors": sectors,
+                "phase": "latest",
+                "pcr": True,
+            }
+
+        # Load pit data and extract trial-formatted positions
+        pit = FiducialPit(**pit_kwargs)
+        positions = pit.extract_trial_positions()
+
+        # Convert to fixed_coils dict format
+        self.fixed_coils = {}
+        for _, row in positions.iterrows():
+            trial_idx = int(row["trial_index"])
+            self.fixed_coils[trial_idx] = {
+                col: row[col]
+                for col in positions.columns
+                if col not in ["trial_index", "coil", "sector"]
+            }
 
     def normal(self, variance: float):
         """Return sample with normal distribution."""

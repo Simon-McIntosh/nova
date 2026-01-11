@@ -64,7 +64,9 @@ simulations:
   # Hybrid simulations (2026) - updated from pit measurements
   # ==========================================================================
 
-  hybrid_2026:
+  # Updated tolerance windows based on L_upper_18 from measured data
+  # All coils sampled, but with tighter tolerances where data supports it
+  updated_2026:
     description: "Updated tolerances from L_upper_18 of installed sectors (Jan 2026)"
     date: "2026-01-11"
     error_field:
@@ -74,3 +76,13 @@ simulations:
       # CCL values kept at baseline (normal distributions)
       samples: 2000000
       theta: [1.3, 1.0, 1.5, 1.5, 1.5, 1.5, 0.6, 0.4, 1.2]
+
+  # Hybrid trial: measured positions for installed sectors, sampled for rest
+  # measured_sectors field specifies which sectors use pit measurements
+  hybrid_pit_2026:
+    description: "Measured positions for S5-8, sampled for remaining coils"
+    date: "2026-01-11"
+    error_field:
+      samples: 2000000
+      theta: [1.5, 1.5, 3.0, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5]
+      measured_sectors: [5, 6, 7, 8]

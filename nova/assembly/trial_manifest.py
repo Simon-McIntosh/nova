@@ -47,6 +47,7 @@ class TrialManifest:
     pdf: list[str] | None = None
     adjust_gap: bool = True
     max_nominal_gap: float = 2.0
+    measured_sectors: list[int] | None = None
     description: str = ""
     manifest_path: Path | None = None
 
@@ -123,6 +124,9 @@ class TrialManifest:
                     self.components = trial_data.get("components")
                 if self.pdf is None:
                     self.pdf = trial_data.get("pdf")
+                # Measured sectors (optional - coils to load from pit)
+                if self.measured_sectors is None:
+                    self.measured_sectors = trial_data.get("measured_sectors")
                 if self.trial_type == "vault":
                     if "adjust_gap" in trial_data:
                         self.adjust_gap = trial_data["adjust_gap"]

@@ -2043,6 +2043,74 @@ class FiducialPit(Plot1D):
 
         return result
 
+    def print_implied_halfwidths(self) -> pandas.DataFrame:
+        """Print implied alignment half-widths from measured data.
+
+        For a uniform distribution on [-L, L], σ = L/√3.
+        Therefore L_implied = σ × √3.
+
+        The upper 95% CI gives the conservative estimate of alignment window:
+        L_upper_95 = σ_upper_95 × √3
+
+        Returns
+        -------
+        pandas.DataFrame
+            Tabulated implied half-widths with confidence intervals.
+        """
+        from tabulate import tabulate
+
+        stats_df, _ = self.position_statistics(plot=False)
+        sqrt3 = np.sqrt(3)
+
+        rows = []
+        for _, row in stats_df.iterrows():
+            param = row["parameter"]
+            n = int(row["n"])
+            std = row["std"]
+            std_upper = row["std_upper_95"]
+            tolerance = row["trial_halfwidth"]
+
+            # Implied half-widths: L = σ × √3
+            implied_L = std * sqrt3
+            implied_L_upper = std_upper * sqrt3
+
+            # Margin: how much below tolerance
+            margin = tolerance - implied_L_upper
+
+            rows.append(
+                {
+                    "parameter": param,
+                    "n": n,
+                    "σ": f"{std:.3f}",
+                    "σ_upper_95": f"{std_upper:.3f}",
+                    "L_implied": f"{implied_L:.2f}",
+                    "L_upper_95": f"{implied_L_upper:.2f}",
+                    "tolerance": f"{tolerance:.1f}",
+                    "margin": f"{margin:.2f}",
+                    "status": "✓" if margin > 0 else "✗",
+                }
+            )
+
+        result_df = pandas.DataFrame(rows)
+
+        print("\n" + "=" * 80)
+        print("Implied Alignment Half-Widths (L = σ × √3)")
+        print("=" * 80)
+        print(f"\nSamples: n = {rows[0]['n']} coils")
+        print("\nIf upper 95% CI (L_upper_95) < tolerance, we have 95% confidence")
+        print("that alignment is better than the tolerance assumption.\n")
+        print(
+            tabulate(
+                result_df,
+                headers="keys",
+                tablefmt="simple",
+                showindex=False,
+            )
+        )
+        print("\n" + "=" * 80)
+
+        return result_df
+
     def plot_position_evolution(self) -> tuple[plt.Figure, np.ndarray]:
         """Plot how position statistics evolve as sectors are installed.
 
@@ -2163,9 +2231,9 @@ class FiducialPit(Plot1D):
                     # Add title as subplot title
                     ax.set_title(param_labels[param])
 
-                    # Axis formatting
+                    # Axis formatting - use 2x tolerance limit (3mm or 6mm)
                     ax.set_xlim(0.5, 4.5)
-                    ax.set_ylim(0, 2 * expected_std)
+                    ax.set_ylim(0, 2 * trial_hw)
                     ax.set_xticks([1, 2, 3, 4])
                     ax.set_xticklabels(x_labels)
 

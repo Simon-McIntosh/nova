@@ -12,7 +12,6 @@ from rich.progress import (
     TaskProgressColumn,
     TextColumn,
     TimeElapsedColumn,
-    TimeRemainingColumn,
 )
 
 
@@ -21,8 +20,7 @@ class TrialProgress:
     """Progress monitor for Monte Carlo trial simulations.
 
     Provides rich console progress tracking for trial build operations.
-    Supports both step-based progress (discrete stages) and iterative
-    progress (loops with known iteration counts).
+    Shows current step with progress bar and elapsed time.
 
     Parameters
     ----------
@@ -45,9 +43,10 @@ class TrialProgress:
     description: str = "Trial"
     console: Console | None = field(default=None, repr=False)
     _progress: Progress | None = field(default=None, init=False, repr=False)
-    _main_task: int | None = field(default=None, init=False, repr=False)
+    _task: int | None = field(default=None, init=False, repr=False)
     _start_time: float = field(default=0.0, init=False, repr=False)
     _steps: list[str] = field(default_factory=list, init=False, repr=False)
+    _total_steps: int = field(default=0, init=False, repr=False)
     _current_step: int = field(default=0, init=False, repr=False)
 
     def __post_init__(self):
@@ -60,13 +59,12 @@ class TrialProgress:
         self._start_time = time()
         self._progress = Progress(
             SpinnerColumn(),
-            TextColumn("{task.description}", style="bold blue"),
+            TextColumn("{task.description}", style="bold cyan"),
             BarColumn(bar_width=20),
             TaskProgressColumn(),
             TimeElapsedColumn(),
-            TimeRemainingColumn(),
             console=self.console,
-            transient=False,
+            transient=True,
         )
         self._progress.__enter__()
         return self
@@ -74,9 +72,6 @@ class TrialProgress:
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Complete progress tracking and show summary."""
         if self._progress is not None:
-            # Ensure main task shows 100% completion
-            if self._main_task is not None:
-                self._progress.update(self._main_task, completed=len(self._steps))
             self._progress.__exit__(exc_type, exc_val, exc_tb)
         elapsed = time() - self._start_time
         if exc_type is None:
@@ -99,11 +94,8 @@ class TrialProgress:
             Self for method chaining
         """
         self._steps = steps
+        self._total_steps = len(steps)
         self._current_step = 0
-        if self._progress is not None:
-            self._main_task = self._progress.add_task(
-                f"[cyan]{self.description}", total=len(steps)
-            )
         return self
 
     @contextmanager
@@ -115,7 +107,7 @@ class TrialProgress:
         name : str
             Description of the step
         total : int | None
-            If provided, creates a sub-progress bar for iterations
+            If provided, shows iteration progress within the step
 
         Yields
         ------
@@ -126,23 +118,24 @@ class TrialProgress:
             yield None
             return
 
-        # Update main task description
-        step_desc = f"[cyan]{self.description}[/] → {name}"
-        if self._main_task is not None:
-            self._progress.update(self._main_task, description=step_desc)
+        self._current_step += 1
+        step_info = f"({self._current_step}/{self._total_steps})"
+        step_desc = f"{self.description} → {name} {step_info}"
+
+        # Remove previous task and create new one for this step
+        if self._task is not None:
+            self._progress.remove_task(self._task)
+
+        step_total = total if total is not None else 1
+        self._task = self._progress.add_task(step_desc, total=step_total)
 
         if total is not None:
-            # Create sub-task for iterations
-            sub_task = self._progress.add_task(f"  {name}", total=total)
-            yield StepTask(self._progress, sub_task)
-            self._progress.update(sub_task, completed=total)
+            yield StepTask(self._progress, self._task)
         else:
             yield None
 
-        # Advance main task
-        self._current_step += 1
-        if self._main_task is not None:
-            self._progress.update(self._main_task, advance=1)
+        # Mark step complete
+        self._progress.update(self._task, completed=step_total)
 
 
 @dataclass

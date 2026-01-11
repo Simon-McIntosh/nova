@@ -1665,14 +1665,14 @@ class FiducialPit(Plot1D):
             active_sectors = list(self.sectors.keys())
 
         # Trial.py reference windows (half-widths for uniform distributions)
-        # Updated 2026-01-11 to match current trial parameters:
-        # ErrorField theta: [1.5, 1.5, 3, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5]
-        # Maps to: radial, tangential, vertical, radial_ccl, tangential_ccl,
-        #          vertical_ccl, pitch_length, roll_length, yaw_length
+        # From trial_manifest.yml baseline_2021 error_field simulation:
+        # theta: [1.5, 1.5, 3.0, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5]
+        # components: [radial, tangential, vertical, radial_ccl, tangential_ccl,
+        #              vertical_ccl, pitch_length, roll_length, yaw_length]
         trial_windows = {
             "radial": 1.5,
             "tangential": 1.5,
-            "vertical": 3.0,  # Height tolerance is larger
+            "vertical": 3.0,  # Larger tolerance for height
             "roll_length": 1.5,
             "yaw_length": 1.5,
             "pitch_length": 1.5,

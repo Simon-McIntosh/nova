@@ -1756,6 +1756,25 @@ class FiducialPit(Plot1D):
             expected_std_lower_18 = expected_std * np.sqrt(df_target / chi2_upper_18)
             expected_std_upper_18 = expected_std * np.sqrt(df_target / chi2_lower_18)
 
+            # Implied alignment window from measured data
+            # If L_implied = σ_measured * √3, this is the half-width that would
+            # produce the observed std if data were uniformly distributed
+            implied_halfwidth = sample_std * np.sqrt(3)
+
+            # Project implied half-width to n=18 with 95% CI
+            # The sample variance scales with chi-squared, so the implied L scales too
+            implied_hw_lower = (
+                std_lower * np.sqrt(3) if not np.isnan(std_lower) else np.nan
+            )
+            implied_hw_upper = (
+                std_upper * np.sqrt(3) if not np.isnan(std_upper) else np.nan
+            )
+
+            # Expected implied half-width at n=18 (using current estimate as true σ)
+            implied_hw_18 = sample_std * np.sqrt(3)
+            implied_hw_lower_18 = implied_hw_18 * np.sqrt(df_target / chi2_upper_18)
+            implied_hw_upper_18 = implied_hw_18 * np.sqrt(df_target / chi2_lower_18)
+
             stats.append(
                 {
                     "parameter": param,
@@ -1768,6 +1787,12 @@ class FiducialPit(Plot1D):
                     "expected_std": expected_std,
                     "expected_std_lower_18": expected_std_lower_18,
                     "expected_std_upper_18": expected_std_upper_18,
+                    "implied_halfwidth": implied_halfwidth,
+                    "implied_hw_lower_95": implied_hw_lower,
+                    "implied_hw_upper_95": implied_hw_upper,
+                    "implied_hw_18": implied_hw_18,
+                    "implied_hw_lower_18": implied_hw_lower_18,
+                    "implied_hw_upper_18": implied_hw_upper_18,
                 }
             )
 
@@ -1969,6 +1994,54 @@ class FiducialPit(Plot1D):
             fig.tight_layout()
 
             return fig, axes
+
+    def implied_alignment_windows(self) -> pandas.DataFrame:
+        """Calculate implied alignment windows from measured data.
+
+        For a uniform distribution within ±L, the standard deviation is σ = L/√3.
+        Inverting: L_implied = σ_measured × √3.
+
+        This shows what alignment window would produce the observed spread
+        if coils were uniformly distributed within that window.
+
+        Returns
+        -------
+        pandas.DataFrame
+            DataFrame with implied half-widths, 95% CIs, and n=18 projections.
+        """
+        stats_df, _ = self.position_statistics(plot=False)
+
+        # Extract relevant columns for display
+        result = stats_df[
+            [
+                "parameter",
+                "n",
+                "std",
+                "trial_halfwidth",
+                "implied_halfwidth",
+                "implied_hw_lower_95",
+                "implied_hw_upper_95",
+                "implied_hw_lower_18",
+                "implied_hw_upper_18",
+            ]
+        ].copy()
+
+        # Rename for clarity
+        result = result.rename(
+            columns={
+                "trial_halfwidth": "tolerance_L",
+                "implied_halfwidth": "implied_L",
+                "implied_hw_lower_95": "L_lower_95",
+                "implied_hw_upper_95": "L_upper_95",
+                "implied_hw_lower_18": "L_lower_n18",
+                "implied_hw_upper_18": "L_upper_n18",
+            }
+        )
+
+        # Add utilization ratio (implied_L / tolerance_L)
+        result["utilization"] = result["implied_L"] / result["tolerance_L"]
+
+        return result
 
     def plot_position_evolution(self) -> tuple[plt.Figure, np.ndarray]:
         """Plot how position statistics evolve as sectors are installed.

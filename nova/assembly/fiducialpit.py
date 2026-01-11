@@ -1801,153 +1801,158 @@ class FiducialPit(Plot1D):
         tuple[plt.Figure, np.ndarray]
             Matplotlib figure and axes array
         """
-        # Parameter layout: 2 rows x 3 cols
-        # Top row: radial, tangential, vertical (translations)
-        # Bottom row: roll_length, yaw_length, pitch_length (rotations)
-        param_grid = [
-            ["radial", "tangential", "vertical"],
-            ["roll_length", "yaw_length", "pitch_length"],
-        ]
+        with sns.plotting_context("poster"):
+            # Parameter layout: 2 rows x 3 cols
+            # Top row: radial, tangential, vertical (translations)
+            # Bottom row: roll_length, yaw_length, pitch_length (rotations)
+            param_grid = [
+                ["radial", "tangential", "vertical"],
+                ["roll_length", "yaw_length", "pitch_length"],
+            ]
 
-        # Display labels with underscores replaced by spaces
-        param_labels = {p: p.replace("_", " ") for p in sum(param_grid, [])}
+            # Display labels with underscores replaced by spaces
+            param_labels = {p: p.replace("_", " ") for p in sum(param_grid, [])}
 
-        # Installation order for sectors
-        sector_order = [6, 7, 5, 8]
+            # Installation order for sectors
+            sector_order = [6, 7, 5, 8]
 
-        # Order coils by sector installation order, then by position within sector
-        coil_order = []
-        for sector in sector_order:
-            sector_coils = chart_df[chart_df["sector"] == sector]["coil"].unique()
-            # Sort by toroidal position within sector
-            sector_coils_sorted = sorted(
-                sector_coils, key=lambda c: self.location.index(c)
-            )
-            coil_order.extend(sector_coils_sorted)
+            # Order coils by sector installation order, then by position within sector
+            coil_order = []
+            for sector in sector_order:
+                sector_coils = chart_df[chart_df["sector"] == sector]["coil"].unique()
+                # Sort by toroidal position within sector
+                sector_coils_sorted = sorted(
+                    sector_coils, key=lambda c: self.location.index(c)
+                )
+                coil_order.extend(sector_coils_sorted)
 
-        # Assign colors by installation order
-        sector_colors = {s: f"C{i}" for i, s in enumerate(sector_order)}
+            # Assign colors by installation order
+            sector_colors = {s: f"C{i}" for i, s in enumerate(sector_order)}
 
-        # Create figure with 2x3 grid
-        axes = self.mpl_axes.generate(style="1d", nrows=2, ncols=3, figsize=(10, 5))
-        fig = self.mpl_axes.fig
+            # Create figure with 2x3 grid
+            axes = self.mpl_axes.generate(style="1d", nrows=2, ncols=3, figsize=(10, 5))
+            fig = self.mpl_axes.fig
 
-        # Trial windows for reference lines
-        trial_windows = {
-            "radial": 1.5,
-            "tangential": 1.5,
-            "vertical": 1.5,
-            "roll_length": 3.0,
-            "yaw_length": 3.0,
-            "pitch_length": 3.0,
-        }
+            # Trial windows for reference lines
+            trial_windows = {
+                "radial": 1.5,
+                "tangential": 1.5,
+                "vertical": 1.5,
+                "roll_length": 3.0,
+                "yaw_length": 3.0,
+                "pitch_length": 3.0,
+            }
 
-        for row_idx, row_params in enumerate(param_grid):
-            for col_idx, param in enumerate(row_params):
-                ax = axes[row_idx, col_idx]
-                param_data = chart_df[chart_df["parameter"] == param]
+            for row_idx, row_params in enumerate(param_grid):
+                for col_idx, param in enumerate(row_params):
+                    ax = axes[row_idx, col_idx]
+                    param_data = chart_df[chart_df["parameter"] == param]
 
-                if param_data.empty:
-                    ax.set_visible(False)
-                    continue
-
-                # Plot bars for each coil
-                x_positions = np.arange(len(coil_order))
-                bar_width = 0.8
-
-                for i, coil in enumerate(coil_order):
-                    coil_data = param_data[param_data["coil"] == coil]
-                    if coil_data.empty:
+                    if param_data.empty:
+                        ax.set_visible(False)
                         continue
-                    value = coil_data["value"].iloc[0]
-                    sector = coil_data["sector"].iloc[0]
-                    ax.bar(
-                        i,
-                        value,
-                        width=bar_width,
-                        color=sector_colors[sector],
-                        edgecolor="none",
-                        alpha=0.8,
+
+                    # Plot bars for each coil
+                    x_positions = np.arange(len(coil_order))
+                    bar_width = 0.8
+
+                    for i, coil in enumerate(coil_order):
+                        coil_data = param_data[param_data["coil"] == coil]
+                        if coil_data.empty:
+                            continue
+                        value = coil_data["value"].iloc[0]
+                        sector = coil_data["sector"].iloc[0]
+                        ax.bar(
+                            i,
+                            value,
+                            width=bar_width,
+                            color=sector_colors[sector],
+                            edgecolor="none",
+                            alpha=0.8,
+                        )
+
+                    # Add trial window lines with limit labels
+                    trial_hw = trial_windows.get(param, 1.5)
+                    ax.axhline(
+                        trial_hw, color="C3", linestyle=":", linewidth=1, alpha=0.7
+                    )
+                    ax.axhline(
+                        -trial_hw, color="C3", linestyle=":", linewidth=1, alpha=0.7
                     )
 
-                # Add trial window lines with limit labels
-                trial_hw = trial_windows.get(param, 1.5)
-                ax.axhline(trial_hw, color="C3", linestyle=":", linewidth=1, alpha=0.7)
-                ax.axhline(-trial_hw, color="C3", linestyle=":", linewidth=1, alpha=0.7)
+                    # Axis formatting - set xlim first so we can position text
+                    ax.set_xlim(-0.5, len(coil_order) - 0.5)
 
-                # Axis formatting - set xlim first so we can position text
-                ax.set_xlim(-0.5, len(coil_order) - 0.5)
+                    # Add limit label above upper line, right-aligned within plot
+                    ax.text(
+                        len(coil_order) - 0.6,
+                        trial_hw,
+                        f"limit {trial_hw:.1f}mm",
+                        ha="right",
+                        va="bottom",
+                        fontsize=7,
+                        color="C3",
+                    )
 
-                # Add limit label above upper line, right-aligned within plot
-                ax.text(
-                    len(coil_order) - 0.6,
-                    trial_hw,
-                    f"limit {trial_hw:.1f}mm",
-                    ha="right",
-                    va="bottom",
-                    fontsize=7,
-                    color="C3",
-                )
+                    # Add title inside plot, upper right
+                    ax.text(
+                        0.97,
+                        0.95,
+                        param_labels[param],
+                        transform=ax.transAxes,
+                        ha="right",
+                        va="top",
+                        fontsize=10,
+                    )
 
-                # Add title inside plot, upper right
-                ax.text(
-                    0.97,
-                    0.95,
-                    param_labels[param],
-                    transform=ax.transAxes,
-                    ha="right",
-                    va="top",
-                    fontsize=10,
-                    fontweight="bold",
-                )
+                    # Only show x-axis labels on bottom row
+                    if row_idx == 1:
+                        ax.set_xticks(x_positions)
+                        ax.set_xticklabels(coil_order, fontsize=8)
+                        ax.set_xlabel("TF coil", fontsize=9)
+                    else:
+                        ax.set_xticks([])
 
-                # Only show x-axis labels on bottom row
-                if row_idx == 1:
-                    ax.set_xticks(x_positions)
-                    ax.set_xticklabels(coil_order, fontsize=8)
-                    ax.set_xlabel("TF coil", fontsize=9)
-                else:
-                    ax.set_xticks([])
+                    # Only show y-axis label on leftmost column
+                    if col_idx == 0:
+                        ax.set_ylabel("alignment, mm", fontsize=9)
 
-                # Only show y-axis label on leftmost column
-                if col_idx == 0:
-                    ax.set_ylabel("alignment, mm", fontsize=9)
+            # Despine all axes
+            self.mpl_axes.despine(axes.flatten())
 
-        # Despine all axes
-        self.mpl_axes.despine(axes.flatten())
+            # Add legend for sectors in installation order
+            handles = []
+            labels = []
+            for s in sector_order:
+                if s in chart_df["sector"].values:
+                    # Check if this sector uses target phase
+                    sector_phases = chart_df[chart_df["sector"] == s]["phase"].unique()
+                    is_target = any("target" in p.lower() for p in sector_phases)
+                    suffix = " (target)" if is_target else ""
+                    handles.append(
+                        plt.Line2D(
+                            [0], [0], color=sector_colors[s], linewidth=6, alpha=0.8
+                        )
+                    )
+                    labels.append(f"Sector {s}{suffix}")
+            fig.legend(
+                handles,
+                labels,
+                loc="upper center",
+                bbox_to_anchor=(0.5, 0.98),
+                frameon=False,
+                fontsize=8,
+                ncol=len(handles),
+            )
 
-        # Add legend for sectors in installation order
-        handles = []
-        labels = []
-        for s in sector_order:
-            if s in chart_df["sector"].values:
-                # Check if this sector uses target phase
-                sector_phases = chart_df[chart_df["sector"] == s]["phase"].unique()
-                is_target = any("target" in p.lower() for p in sector_phases)
-                suffix = " (target)" if is_target else ""
-                handles.append(
-                    plt.Line2D([0], [0], color=sector_colors[s], linewidth=6, alpha=0.8)
-                )
-                labels.append(f"Sector {s}{suffix}")
-        fig.legend(
-            handles,
-            labels,
-            loc="upper center",
-            bbox_to_anchor=(0.5, 0.98),
-            frameon=False,
-            fontsize=8,
-            ncol=len(handles),
-        )
+            fig.suptitle(
+                "Coil Position Statistics",
+                fontsize=11,
+                y=1.02,
+            )
+            fig.tight_layout(rect=[0, 0, 1, 0.95])
 
-        fig.suptitle(
-            "Coil Position Statistics",
-            fontsize=11,
-            fontweight="bold",
-            y=1.02,
-        )
-        fig.tight_layout(rect=[0, 0, 1, 0.95])
-
-        return fig, axes
+            return fig, axes
 
     def plot_position_evolution(self) -> tuple[plt.Figure, np.ndarray]:
         """Plot how position statistics evolve as sectors are installed.

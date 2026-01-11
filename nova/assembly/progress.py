@@ -74,6 +74,9 @@ class TrialProgress:
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Complete progress tracking and show summary."""
         if self._progress is not None:
+            # Ensure main task shows 100% completion
+            if self._main_task is not None:
+                self._progress.update(self._main_task, completed=len(self._steps))
             self._progress.__exit__(exc_type, exc_val, exc_tb)
         elapsed = time() - self._start_time
         if exc_type is None:

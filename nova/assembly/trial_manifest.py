@@ -135,43 +135,30 @@ class TrialManifest:
             # Apply defaults first to get components
             self._apply_defaults()
 
-            # Load shared theta dict from simulation level
-            if self.theta is None and "theta" in entry:
-                theta_source = entry["theta"]
-                if isinstance(theta_source, dict) and self.components:
-                    self.theta = self._extract_theta_list(theta_source, self.components)
-                elif isinstance(theta_source, list):
-                    # Legacy format: list at simulation level
-                    self.theta = theta_source
+            # Load shared parameters from simulation level
+            if self.samples is None:
+                self.samples = entry.get("samples")
+            if self.measured_sectors is None:
+                self.measured_sectors = entry.get("measured_sectors")
 
-            # Override with trial-specific theta if present (legacy support)
+            # Load theta dict and extract list for this trial type
+            if self.theta is None and "theta" in entry:
+                theta_dict = entry["theta"]
+                if self.components:
+                    self.theta = self._extract_theta_list(theta_dict, self.components)
+
+            # Trial-specific overrides (samples only)
             if trial_data:
-                if self.samples is None:
-                    self.samples = trial_data.get("samples")
-                # Trial-specific theta overrides shared theta (legacy support)
-                if "theta" in trial_data:
-                    theta_source = trial_data["theta"]
-                    if isinstance(theta_source, dict) and self.components:
-                        self.theta = self._extract_theta_list(
-                            theta_source, self.components
-                        )
-                    elif isinstance(theta_source, list):
-                        self.theta = theta_source
-                # Components/pdf from trial data or defaults
-                if self.components is None:
-                    self.components = trial_data.get("components")
-                if self.pdf is None:
-                    self.pdf = trial_data.get("pdf")
-                # Measured sectors (optional - coils to load from pit)
-                if self.measured_sectors is None:
-                    self.measured_sectors = trial_data.get("measured_sectors")
+                if "samples" in trial_data:
+                    self.samples = trial_data["samples"]
                 if self.trial_type == "vault":
                     if "adjust_gap" in trial_data:
                         self.adjust_gap = trial_data["adjust_gap"]
                     if "max_nominal_gap" in trial_data:
                         self.max_nominal_gap = trial_data["max_nominal_gap"]
-                if not self.description:
-                    self.description = entry.get("description", "")
+
+            if not self.description:
+                self.description = entry.get("description", "")
             return
 
         # Case 2: Name provided but not in manifest - require parameters
@@ -270,17 +257,24 @@ class TrialManifest:
 
         results = []
         for name, entry in manifest.get("simulations", {}).items():
+            # Get shared samples from simulation level
+            shared_samples = entry.get("samples")
+
             for tt in ["vault", "error_field"]:
                 if trial_type is not None and tt != trial_type:
                     continue
-                if tt in entry:
+                # Check if trial type is supported (has entry or uses defaults)
+                trial_data = entry.get(tt, {})
+                samples = trial_data.get("samples", shared_samples)
+                if samples is not None:
                     results.append(
                         {
                             "name": name,
                             "trial_type": tt,
                             "description": entry.get("description", ""),
                             "date": entry.get("date"),
-                            "samples": entry[tt].get("samples"),
+                            "samples": samples,
+                            "measured_sectors": entry.get("measured_sectors"),
                         }
                     )
         return results

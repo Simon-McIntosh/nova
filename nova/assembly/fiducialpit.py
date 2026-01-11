@@ -1890,14 +1890,14 @@ class FiducialPit(Plot1D):
             # Assign colors by installation order
             sector_colors = {s: f"C{i}" for i, s in enumerate(sector_order)}
 
-            # Trial windows for reference lines
+            # Trial windows for reference lines (from baseline_2021 error_field)
             trial_windows = {
                 "radial": 1.5,
                 "tangential": 1.5,
-                "vertical": 1.5,
-                "roll_length": 3.0,
-                "yaw_length": 3.0,
-                "pitch_length": 3.0,
+                "vertical": 3.0,
+                "roll_length": 1.5,
+                "yaw_length": 1.5,
+                "pitch_length": 1.5,
             }
 
             for row_idx, row_params in enumerate(param_grid):

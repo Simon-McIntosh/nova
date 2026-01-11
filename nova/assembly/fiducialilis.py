@@ -22,18 +22,18 @@ class FiducialIlis:
         2: [0, 0],
         3: [-0.1, 0],
         4: [0.15 + 0.4, 0],  # reduce inter-sector gap
-        5: [1.5, 0 + 0.1],  # reduce inter-sector gap
+        5: [1.5, 0 + 0.1],  # S5+ reduce inter-sector gap
         6: [0, 0],
         7: [0, 0],
-        8: [-1, 0],
-        9: [0, 1],
+        8: [-1, 0],  # S7-
+        9: [0, 1],  # S7+
         10: [0.1, 0],
         11: [0, -0.15 + 0.4],  # reduce inter-sector gap
-        12: [0, -1.5],
-        13: [0, 0],
+        12: [0, -1.5], # S6-
+        13: [0, 0],  # S6+ 
         14: [0, 0],
         15: [0, 0],
-        16: [0 + 0.1, 0.2],  # reduce inter-sector gap
+        16: [0 + 0.1, 0.2],  # S5- reduce inter-sector gap
         17: [np.nan, np.nan],
         18: [0, 0],
     }  # ilis deviation [positive side, negative side]

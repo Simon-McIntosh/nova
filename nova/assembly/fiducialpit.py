@@ -1098,16 +1098,29 @@ class FiducialPit(Plot1D):
 
         midplane = ilis.intersect(sector_planes.loc[sector_index])
 
-        # Use inner radius if not specified, nudged inward to stay within convex hull
-        if radius is None:
-            r_min = ilis.data.r.min()
-            r_max = ilis.data.r.max()
-            radius = r_min + 0.01 * (r_max - r_min)
+        # Get data for each surface to find intersection of extents
+        data_first = sector_data_clocked[
+            (sector_data_clocked.coil == coil_first)
+            & (sector_data_clocked.feature == feature_first)
+        ]
+        data_second = sector_data_clocked[
+            (sector_data_clocked.coil == coil_second)
+            & (sector_data_clocked.feature == feature_second)
+        ]
 
-        # Create z range spanning the ILIS data, nudged inward
-        z_min = ilis.data.z.min()
-        z_max = ilis.data.z.max()
-        z_margin = 0.01 * (z_max - z_min)
+        # Use intersection of data extents to stay within convex hull of both surfaces
+        r_min = max(data_first.r.min(), data_second.r.min())
+        r_max = min(data_first.r.max(), data_second.r.max())
+        z_min = max(data_first.z.min(), data_second.z.min())
+        z_max = min(data_first.z.max(), data_second.z.max())
+
+        # Apply 5% margin to ensure we're well inside both convex hulls
+        r_margin = 0.05 * (r_max - r_min)
+        z_margin = 0.05 * (z_max - z_min)
+
+        if radius is None:
+            radius = r_min + r_margin
+
         z_range = np.linspace(z_min + z_margin, z_max - z_margin, n_points)
         query_points = np.column_stack([np.full(n_points, radius), z_range])
 
@@ -1205,21 +1218,23 @@ class FiducialPit(Plot1D):
 
         midplane = FiducialIlis.intersect(rotated_planes)
 
-        # Combine data to get z range
+        # Filter data for each surface
         data_first_filtered = data_first[data_first.feature == feature_first].copy()
         data_second_filtered = data_second[data_second.feature == feature_second].copy()
-        all_data = pandas.concat([data_first_filtered, data_second_filtered])
 
-        # Use inner radius if not specified, nudged inward to stay within convex hull
+        # Use intersection of data extents to stay within convex hull of both surfaces
+        r_min = max(data_first_filtered.r.min(), data_second_filtered.r.min())
+        r_max = min(data_first_filtered.r.max(), data_second_filtered.r.max())
+        z_min = max(data_first_filtered.z.min(), data_second_filtered.z.min())
+        z_max = min(data_first_filtered.z.max(), data_second_filtered.z.max())
+
+        # Apply 5% margin to ensure we're well inside both convex hulls
+        r_margin = 0.05 * (r_max - r_min)
+        z_margin = 0.05 * (z_max - z_min)
+
         if radius is None:
-            r_min = all_data.r.min()
-            r_max = all_data.r.max()
-            radius = r_min + 0.01 * (r_max - r_min)
+            radius = r_min + r_margin
 
-        # Create z range nudged inward to stay within convex hull
-        z_min = all_data.z.min()
-        z_max = all_data.z.max()
-        z_margin = 0.01 * (z_max - z_min)
         z_range = np.linspace(z_min + z_margin, z_max - z_margin, n_points)
         query_points = np.column_stack([np.full(n_points, radius), z_range])
 
@@ -1302,7 +1317,7 @@ class FiducialPit(Plot1D):
                     color="C1",
                     marker="o",
                     edgecolor="k",
-                    label="Measured",
+                    label="Measured (feeler gauge)",
                     zorder=5,
                 )
 
@@ -1310,7 +1325,6 @@ class FiducialPit(Plot1D):
             ax.set_ylabel("Gap (mm)")
             ax.set_title(f"Gap Profile: Coils {coil_first}-{coil_second}")
             ax.legend()
-            ax.axhline(0, color="gray", linewidth=0.5)
 
             sns.despine(ax=ax)
             fig.tight_layout()
@@ -2148,18 +2162,14 @@ if __name__ == "__main__":
     pit.plot_statistics()
 
     # compare gaps
-    # Extract gap profile for S7 (coils 8-9) at inner radius
-    profile = pit.gap_profile(8, 9)
 
-    # Create measurement DataFrame
+    # Create measurement DataFrame S7 (coils 8-9)
     measurements = pandas.DataFrame(
         {
             "z": [4469, 3575, 2681, 1788, 0, -1788, -2681, -3575, -4465],
             "gap": [0.72, 0.78, 0.75, 0.64, 0.45, 0.48, 0.55, 0.86, 0.9],
         }
     )
-
-    # Plot with measurements overlay
     fig, ax = pit.plot_gap_profile(8, 9, measurements=measurements)
 
     plt.show()

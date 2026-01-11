@@ -2136,4 +2136,19 @@ if __name__ == "__main__":
     # Plot statistics
     pit.plot_statistics()
 
+    # compare gaps
+    # Extract gap profile for S7 (coils 8-9) at inner radius
+    profile = pit.gap_profile(8, 9)
+
+    # Create measurement DataFrame
+    measurements = pandas.DataFrame(
+        {
+            "z": [4469, 3575, 2681, 1788, 0, -1788, -2681, -3575, -4465],
+            "gap": [0.72, 0.78, 0.75, 0.64, 0.45, 0.48, 0.55, 0.86, 0.9],
+        }
+    )
+
+    # Plot with measurements overlay
+    fig, ax = pit.plot_gap_profile(8, 9, measurements=measurements)
+
     plt.show()

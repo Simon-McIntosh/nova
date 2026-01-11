@@ -2044,6 +2044,40 @@ class FiducialPit(Plot1D):
 
         return result
 
+    def position_summary(self) -> pandas.DataFrame:
+        """Return simplified position statistics summary.
+
+        Shows only the key columns needed to assess alignment:
+        - parameter: alignment component name
+        - n: number of coils
+        - mean: mean position offset (mm)
+        - tolerance: assumed alignment window half-width (mm)
+        - implied_L: implied alignment window from measured σ (mm)
+        - L_upper_95: conservative 95% CI upper bound for implied L (mm)
+        - margin: tolerance - L_upper_95 (positive = within spec)
+
+        Returns
+        -------
+        pandas.DataFrame
+            Simplified statistics table
+        """
+        stats_df, _ = self.position_statistics(plot=False)
+        sqrt3 = np.sqrt(3)
+
+        summary = pandas.DataFrame(
+            {
+                "parameter": stats_df["parameter"],
+                "n": stats_df["n"].astype(int),
+                "mean": stats_df["mean"].round(2),
+                "tolerance": stats_df["trial_halfwidth"],
+                "implied_L": (stats_df["std"] * sqrt3).round(2),
+                "L_upper_95": (stats_df["std_upper_95"] * sqrt3).round(2),
+            }
+        )
+        summary["margin"] = (summary["tolerance"] - summary["L_upper_95"]).round(2)
+
+        return summary
+
     def print_implied_halfwidths(self) -> pandas.DataFrame:
         """Print implied alignment half-widths from measured data.
 
@@ -2424,7 +2458,7 @@ if __name__ == "__main__":
     print("Position Statistics")
     print("=" * 60)
     stats_df, (position_fig, position_axes) = pit.position_statistics()
-    print(stats_df.to_string())
+    print(pit.position_summary().to_string(index=False))
 
     # Show evolution chart
     evolution_fig, evolution_axes = pit.plot_position_evolution()

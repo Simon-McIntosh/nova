@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas
 import scipy.spatial.transform
+from scipy.interpolate import griddata
 
 import seaborn as sns
 
@@ -688,33 +689,75 @@ class FiducialPit(Plot1D):
         # Calculate midplane by intersecting the two clocked planes
         midplane = ilis.intersect(sector_planes.loc[sector_index])
 
-        # Calculate offsets from midplane for each ILIS surface
-        offsets = []
+        # Get plane objects for PCR offsets
+        plane_first = sector_planes.loc[(coil_first, feature_first)]
+        plane_second = sector_planes.loc[(coil_second, feature_second)]
+
+        # Create regular grid for sampling (matching fiducialsector approach)
+        grid_r, grid_z = np.mgrid[
+            slice(ilis.data.r.min(), ilis.data.r.max(), 20j),
+            slice(ilis.data.z.min(), ilis.data.z.max(), 40j),
+        ]
+
+        # Calculate offsets and interpolate to grid for each surface
+        grid_offsets = []
         for coil, feature in sector_index:
             plane_mask = (sector_data_clocked.coil == coil) & (
                 sector_data_clocked.feature == feature
             )
-            plane_offset = ilis.offset(
-                sector_data_clocked.loc[plane_mask, ["x", "y", "z"]], midplane
-            )
-            offsets.append(
-                {
-                    "coil": coil,
-                    "feature": feature,
-                    "mean": plane_offset.mean(),
-                    "std": plane_offset.std(),
-                    "count": len(plane_offset),
-                }
-            )
+            plane_data = sector_data_clocked.loc[plane_mask]
+            plane_offset = ilis.offset(plane_data[["x", "y", "z"]], midplane)
 
-        # Gap = second offset - first offset
-        # Midplane is between them, so offsets have opposite signs
-        gap_mean = offsets[1]["mean"] - offsets[0]["mean"]
-        gap_std = np.sqrt(offsets[0]["std"] ** 2 + offsets[1]["std"] ** 2)
+            # Interpolate offsets onto regular grid
+            grid_offset = griddata(
+                plane_data[["r", "z"]].values,
+                plane_offset,
+                (grid_r, grid_z),
+                method="linear",
+            )
+            grid_offsets.append(grid_offset)
+
+        # Gap at each grid point = offset_second - offset_first
+        gap_grid = grid_offsets[1] - grid_offsets[0]
+
+        # Compute statistics from grid (excludes NaN from interpolation boundaries)
+        valid_mask = ~np.isnan(gap_grid)
+        valid_gaps = gap_grid[valid_mask]
+        gap_mean = float(np.mean(valid_gaps))
+        gap_std = float(np.std(valid_gaps))
+        gap_min = float(np.min(valid_gaps))
+        gap_max = float(np.max(valid_gaps))
+
+        # Gap at equatorial midplane (z=0): interpolate directly at z=0
+        r_range = np.linspace(ilis.data.r.min(), ilis.data.r.max(), 20)
+        z0_points = np.column_stack([r_range, np.zeros_like(r_range)])
+
+        # Interpolate each surface offset at z=0
+        midplane_offsets = []
+        for coil, feature in sector_index:
+            plane_mask = (sector_data_clocked.coil == coil) & (
+                sector_data_clocked.feature == feature
+            )
+            plane_data = sector_data_clocked.loc[plane_mask]
+            plane_offset = ilis.offset(plane_data[["x", "y", "z"]], midplane)
+
+            z0_offset = griddata(
+                plane_data[["r", "z"]].values,
+                plane_offset,
+                z0_points,
+                method="linear",
+            )
+            midplane_offsets.append(z0_offset)
+
+        # Gap at z=0 = offset_second - offset_first
+        gap_z0 = midplane_offsets[1] - midplane_offsets[0]
+        valid_z0 = gap_z0[~np.isnan(gap_z0)]
+        if len(valid_z0) > 0:
+            gap_midplane = float(np.mean(valid_z0))
+        else:
+            gap_midplane = gap_mean
 
         # Get PCR deviation offsets if available
-        plane_first = sector_planes.loc[(coil_first, feature_first)]
-        plane_second = sector_planes.loc[(coil_second, feature_second)]
         pcr_first = plane_first.get("offset", 0)
         pcr_second = plane_second.get("offset", 0)
 
@@ -725,14 +768,12 @@ class FiducialPit(Plot1D):
             "sector_a": pair["sector_a"],
             "sector_b": pair["sector_b"],
             "position": pair["position"],
+            "gap_midplane": gap_midplane,
             "gap_mean": gap_mean,
             "gap_std": gap_std,
-            "offset_first_mean": offsets[0]["mean"],
-            "offset_first_std": offsets[0]["std"],
-            "offset_second_mean": offsets[1]["mean"],
-            "offset_second_std": offsets[1]["std"],
-            "points_first": offsets[0]["count"],
-            "points_second": offsets[1]["count"],
+            "gap_min": gap_min,
+            "gap_max": gap_max,
+            "grid_points": len(valid_gaps),
             "pcr_first": pcr_first,
             "pcr_second": pcr_second,
         }
@@ -860,41 +901,85 @@ class FiducialPit(Plot1D):
         midplane = FiducialIlis.intersect(rotated_planes)
 
         # Filter point cloud data for the specific ILIS features
-        data_first_filtered = data_first[data_first.feature == feature_first]
-        data_second_filtered = data_second[data_second.feature == feature_second]
+        data_first_filtered = data_first[data_first.feature == feature_first].copy()
+        data_second_filtered = data_second[data_second.feature == feature_second].copy()
 
-        # Calculate offsets from midplane
-        offsets = []
-        for data_rotated, coil, feature in [
-            (data_first_filtered, coil_first, feature_first),
-            (data_second_filtered, coil_second, feature_second),
-        ]:
-            if data_rotated.empty:
-                offsets.append(
-                    {"coil": coil, "feature": feature, "mean": 0, "std": 0, "count": 0}
-                )
-                continue
+        # Combine data to get common grid bounds
+        all_data = pandas.concat([data_first_filtered, data_second_filtered])
 
-            # Calculate offset using midplane
+        # Create regular grid for sampling (matching fiducialsector approach)
+        grid_r, grid_z = np.mgrid[
+            slice(all_data.r.min(), all_data.r.max(), 20j),
+            slice(all_data.z.min(), all_data.z.max(), 40j),
+        ]
+
+        # Calculate offsets and interpolate to grid for each surface
+        def calculate_offset(data):
+            """Calculate offset from midplane for point cloud data."""
             normal = midplane.loc[["nx", "ny", "nz"]].values
             normal = normal / np.linalg.norm(normal)
             point = midplane.loc[["x", "y", "z"]].values
-            v = data_rotated[["x", "y", "z"]].values - point
-            plane_offset = np.dot(v, normal)
+            v = data[["x", "y", "z"]].values - point
+            return np.dot(v, normal)
 
-            offsets.append(
-                {
-                    "coil": coil,
-                    "feature": feature,
-                    "mean": plane_offset.mean(),
-                    "std": plane_offset.std(),
-                    "count": len(plane_offset),
-                }
+        grid_offsets = []
+        for data_filtered in [data_first_filtered, data_second_filtered]:
+            if data_filtered.empty:
+                grid_offsets.append(np.full_like(grid_r, np.nan))
+                continue
+
+            plane_offset = calculate_offset(data_filtered)
+
+            # Interpolate offsets onto regular grid
+            grid_offset = griddata(
+                data_filtered[["r", "z"]].values,
+                plane_offset,
+                (grid_r, grid_z),
+                method="linear",
             )
+            grid_offsets.append(grid_offset)
 
-        # Gap = second offset - first offset
-        gap_mean = offsets[1]["mean"] - offsets[0]["mean"]
-        gap_std = np.sqrt(offsets[0]["std"] ** 2 + offsets[1]["std"] ** 2)
+        # Gap at each grid point = offset_second - offset_first
+        gap_grid = grid_offsets[1] - grid_offsets[0]
+
+        # Compute statistics from grid (excludes NaN from interpolation boundaries)
+        valid_mask = ~np.isnan(gap_grid)
+        valid_gaps = gap_grid[valid_mask]
+        if len(valid_gaps) > 0:
+            gap_mean = float(np.mean(valid_gaps))
+            gap_std = float(np.std(valid_gaps))
+            gap_min = float(np.min(valid_gaps))
+            gap_max = float(np.max(valid_gaps))
+
+            # Gap at equatorial midplane (z=0): interpolate directly at z=0
+            r_range = np.linspace(all_data.r.min(), all_data.r.max(), 20)
+            z0_points = np.column_stack([r_range, np.zeros_like(r_range)])
+
+            # Interpolate each surface offset at z=0
+            midplane_offsets = []
+            for data_filtered in [data_first_filtered, data_second_filtered]:
+                if data_filtered.empty:
+                    midplane_offsets.append(np.full(len(r_range), np.nan))
+                    continue
+
+                plane_offset = calculate_offset(data_filtered)
+                z0_offset = griddata(
+                    data_filtered[["r", "z"]].values,
+                    plane_offset,
+                    z0_points,
+                    method="linear",
+                )
+                midplane_offsets.append(z0_offset)
+
+            # Gap at z=0 = offset_second - offset_first
+            gap_z0 = midplane_offsets[1] - midplane_offsets[0]
+            valid_z0 = gap_z0[~np.isnan(gap_z0)]
+            if len(valid_z0) > 0:
+                gap_midplane = float(np.mean(valid_z0))
+            else:
+                gap_midplane = gap_mean
+        else:
+            gap_mean = gap_std = gap_min = gap_max = gap_midplane = 0.0
 
         # Get PCR deviation offsets from original (unclocked) planes
         pcr_first = ilis_a.planes.loc[(coil_first, feature_first)].get("offset", 0)
@@ -907,14 +992,12 @@ class FiducialPit(Plot1D):
             "sector_a": pair["sector_a"],
             "sector_b": pair["sector_b"],
             "position": pair["position"],
+            "gap_midplane": gap_midplane,
             "gap_mean": gap_mean,
             "gap_std": gap_std,
-            "offset_first_mean": offsets[0]["mean"],
-            "offset_first_std": offsets[0]["std"],
-            "offset_second_mean": offsets[1]["mean"],
-            "offset_second_std": offsets[1]["std"],
-            "points_first": offsets[0]["count"],
-            "points_second": offsets[1]["count"],
+            "gap_min": gap_min,
+            "gap_max": gap_max,
+            "grid_points": len(valid_gaps),
             "pcr_first": pcr_first,
             "pcr_second": pcr_second,
         }
@@ -923,6 +1006,305 @@ class FiducialPit(Plot1D):
     def gaps(self) -> pandas.DataFrame:
         """Return cached gap calculations."""
         return self.calculate_gaps()
+
+    def gap_profile(
+        self,
+        coil_first: int,
+        coil_second: int,
+        radius: float | None = None,
+        n_points: int = 100,
+    ) -> pandas.DataFrame:
+        """Extract gap profile along z at a specific radius.
+
+        Parameters
+        ----------
+        coil_first : int
+            First coil number
+        coil_second : int
+            Second coil number
+        radius : float, optional
+            Radius at which to extract profile. If None, uses inner ILIS radius.
+        n_points : int
+            Number of points along z
+
+        Returns
+        -------
+        pandas.DataFrame
+            Gap profile with columns: z, gap, r
+        """
+        # Find the gap pair
+        pair = None
+        for p in self.gap_pairs:
+            if p["coil_plus"] == coil_first and p["coil_minus"] == coil_second:
+                pair = p
+                break
+            if p["coil_plus"] == coil_second and p["coil_minus"] == coil_first:
+                pair = p
+                coil_first, coil_second = coil_second, coil_first
+                break
+
+        if pair is None:
+            raise ValueError(f"No gap pair found for coils {coil_first}-{coil_second}")
+
+        sector_a = pair["sector_a"]
+        sector_b = pair["sector_b"]
+
+        if sector_a == sector_b:
+            return self._gap_profile_intra(
+                coil_first, coil_second, sector_a, radius, n_points
+            )
+        else:
+            return self._gap_profile_inter(
+                coil_first, coil_second, sector_a, sector_b, radius, n_points
+            )
+
+    def _gap_profile_intra(
+        self,
+        coil_first: int,
+        coil_second: int,
+        sector: int,
+        radius: float | None,
+        n_points: int,
+    ) -> pandas.DataFrame:
+        """Extract gap profile for intra-sector gap."""
+        feature_first = "ILIS +1"
+        feature_second = "ILIS -1"
+
+        sector_coils = list(self.sector_data[sector].delta.keys())
+        sector_data = self.sector_data[sector]
+        ilis = FiducialIlis(sector_data.ilis, pcr=self.pcr)
+
+        # Clock planes and data to midplane
+        def clock_group(planes, coil):
+            is_first = sector_coils.index(coil) == 0
+            return self._clock_planes(planes, coil, is_first)
+
+        sector_planes = ilis.planes.groupby(["coil"], group_keys=False).apply(
+            lambda x: clock_group(x, x.name)
+        )
+
+        def clock_data_group(data, coil):
+            is_first = sector_coils.index(coil) == 0
+            return self._clock_transform(data, coil, is_first)
+
+        sector_data_clocked = ilis.data.groupby(["coil"], group_keys=False).apply(
+            lambda x: clock_data_group(x, x.name)
+        )
+
+        sector_index = [
+            (coil_first, feature_first),
+            (coil_second, feature_second),
+        ]
+
+        midplane = ilis.intersect(sector_planes.loc[sector_index])
+
+        # Use inner radius if not specified
+        if radius is None:
+            radius = ilis.data.r.min()
+
+        # Create z range spanning the ILIS data
+        z_range = np.linspace(ilis.data.z.min(), ilis.data.z.max(), n_points)
+        query_points = np.column_stack([np.full(n_points, radius), z_range])
+
+        # Interpolate each surface offset at the query points
+        profile_offsets = []
+        for coil, feature in sector_index:
+            plane_mask = (sector_data_clocked.coil == coil) & (
+                sector_data_clocked.feature == feature
+            )
+            plane_data = sector_data_clocked.loc[plane_mask]
+            plane_offset = ilis.offset(plane_data[["x", "y", "z"]], midplane)
+
+            offset_interp = griddata(
+                plane_data[["r", "z"]].values,
+                plane_offset,
+                query_points,
+                method="linear",
+            )
+            profile_offsets.append(offset_interp)
+
+        # Gap = offset_second - offset_first
+        gap_profile = profile_offsets[1] - profile_offsets[0]
+
+        return pandas.DataFrame({"z": z_range, "gap": gap_profile, "r": radius})
+
+    def _gap_profile_inter(
+        self,
+        coil_first: int,
+        coil_second: int,
+        sector_a: int,
+        sector_b: int,
+        radius: float | None,
+        n_points: int,
+    ) -> pandas.DataFrame:
+        """Extract gap profile for inter-sector gap."""
+        feature_first = "ILIS +1"
+        feature_second = "ILIS -1"
+
+        ilis_a = FiducialIlis(self.sector_data[sector_a].ilis, pcr=self.pcr)
+        ilis_b = FiducialIlis(self.sector_data[sector_b].ilis, pcr=self.pcr)
+
+        def clock_planes(planes):
+            planes = planes.copy()
+            planes.loc[:, ["x", "y", "z"]] = self.rotate.clock(
+                planes.loc[:, ["x", "y", "z"]].values
+            )
+            planes.loc[:, ["nx", "ny", "nz"]] = self.rotate.clock(
+                planes.loc[:, ["nx", "ny", "nz"]].values
+            )
+            return planes
+
+        def anticlock_planes(planes):
+            planes = planes.copy()
+            planes.loc[:, ["x", "y", "z"]] = self.rotate.anticlock(
+                planes.loc[:, ["x", "y", "z"]].values
+            )
+            planes.loc[:, ["nx", "ny", "nz"]] = self.rotate.anticlock(
+                planes.loc[:, ["nx", "ny", "nz"]].values
+            )
+            return planes
+
+        def clock_data(data):
+            data = data.copy()
+            data.loc[:, ["x", "y", "z"]] = self.rotate.clock(
+                data.loc[:, ["x", "y", "z"]].values
+            )
+            return data
+
+        def anticlock_data(data):
+            data = data.copy()
+            data.loc[:, ["x", "y", "z"]] = self.rotate.anticlock(
+                data.loc[:, ["x", "y", "z"]].values
+            )
+            return data
+
+        planes_first = anticlock_planes(ilis_a.planes.loc[[coil_first]])
+        data_first = anticlock_data(ilis_a.data[ilis_a.data.coil == coil_first].copy())
+
+        planes_second = clock_planes(ilis_b.planes.loc[[coil_second]])
+        data_second = clock_data(ilis_b.data[ilis_b.data.coil == coil_second].copy())
+
+        plane_first = planes_first.loc[(coil_first, feature_first)]
+        plane_second = planes_second.loc[(coil_second, feature_second)]
+
+        sector_index = [
+            (coil_first, feature_first),
+            (coil_second, feature_second),
+        ]
+        rotated_planes = pandas.DataFrame(
+            [plane_first, plane_second],
+            index=pandas.MultiIndex.from_tuples(
+                sector_index, names=["coil", "feature"]
+            ),
+        )
+
+        midplane = FiducialIlis.intersect(rotated_planes)
+
+        # Combine data to get z range
+        data_first_filtered = data_first[data_first.feature == feature_first].copy()
+        data_second_filtered = data_second[data_second.feature == feature_second].copy()
+        all_data = pandas.concat([data_first_filtered, data_second_filtered])
+
+        # Use inner radius if not specified
+        if radius is None:
+            radius = all_data.r.min()
+
+        z_range = np.linspace(all_data.z.min(), all_data.z.max(), n_points)
+        query_points = np.column_stack([np.full(n_points, radius), z_range])
+
+        def calculate_offset(data):
+            normal = midplane.loc[["nx", "ny", "nz"]].values
+            normal = normal / np.linalg.norm(normal)
+            point = midplane.loc[["x", "y", "z"]].values
+            v = data[["x", "y", "z"]].values - point
+            return np.dot(v, normal)
+
+        profile_offsets = []
+        for data_filtered in [data_first_filtered, data_second_filtered]:
+            if data_filtered.empty:
+                profile_offsets.append(np.full(n_points, np.nan))
+                continue
+
+            plane_offset = calculate_offset(data_filtered)
+            offset_interp = griddata(
+                data_filtered[["r", "z"]].values,
+                plane_offset,
+                query_points,
+                method="linear",
+            )
+            profile_offsets.append(offset_interp)
+
+        gap_profile = profile_offsets[1] - profile_offsets[0]
+
+        return pandas.DataFrame({"z": z_range, "gap": gap_profile, "r": radius})
+
+    def plot_gap_profile(
+        self,
+        coil_first: int,
+        coil_second: int,
+        radius: float | None = None,
+        measurements: pandas.DataFrame | None = None,
+        figsize: tuple = (10, 8),
+    ) -> tuple[plt.Figure, plt.Axes]:
+        """Plot gap profile along z at a specific radius.
+
+        Parameters
+        ----------
+        coil_first : int
+            First coil number
+        coil_second : int
+            Second coil number
+        radius : float, optional
+            Radius at which to extract profile. If None, uses inner ILIS radius.
+        measurements : pandas.DataFrame, optional
+            Measured gap data with columns 'z' and 'gap' to overlay
+        figsize : tuple
+            Figure size
+
+        Returns
+        -------
+        tuple[plt.Figure, plt.Axes]
+            Figure and axes
+        """
+        profile = self.gap_profile(coil_first, coil_second, radius=radius)
+
+        with sns.plotting_context("poster"):
+            fig, ax = plt.subplots(figsize=figsize)
+
+            # Plot interpolated gap profile
+            valid = ~profile["gap"].isna()
+            ax.plot(
+                profile.loc[valid, "z"],
+                profile.loc[valid, "gap"],
+                "-",
+                color="C0",
+                linewidth=2,
+                label=f"Predicted (r={profile['r'].iloc[0]:.0f} mm)",
+            )
+
+            # Overlay measurements if provided
+            if measurements is not None:
+                ax.scatter(
+                    measurements["z"],
+                    measurements["gap"],
+                    s=100,
+                    color="C1",
+                    marker="o",
+                    edgecolor="k",
+                    label="Measured",
+                    zorder=5,
+                )
+
+            ax.set_xlabel("z (mm)")
+            ax.set_ylabel("Gap (mm)")
+            ax.set_title(f"Gap Profile: Coils {coil_first}-{coil_second}")
+            ax.legend()
+            ax.axhline(0, color="gray", linewidth=0.5)
+
+            sns.despine(ax=ax)
+            fig.tight_layout()
+
+        return fig, ax
 
     def statistics(self, gap_type: str | None = None) -> pandas.DataFrame:
         """Calculate summary statistics for gap measurements.
@@ -966,100 +1348,146 @@ class FiducialPit(Plot1D):
 
         return pandas.concat(results)
 
-    def plot_gaps(self, figsize=(10, 6)):
-        """Plot gap measurements as bar chart with error bars.
+    def plot_gaps(self, figsize=(12, 8)):
+        """Plot gap measurements as bar chart with min/max range markers.
 
-        Shows gap_mean ± gap_std for each gap pair,
-        colored by gap type (within/between-sector).
+        Shows gap_midplane (mean gap at z=0) as bar height with horizontal
+        lines indicating [gap_min, gap_max] range from grid samples.
+        Colored by gap type (within/between-sector).
         """
         if self.gaps.empty:
             print("No gaps to plot")
             return
 
-        fig, ax = plt.subplots(figsize=figsize)
-        colors = {"intra-sector": "C0", "inter-sector": "C1"}
-        labels_map = {"intra-sector": "within-sector", "inter-sector": "between-sector"}
+        with sns.plotting_context("poster"):
+            fig, ax = plt.subplots(figsize=figsize)
+            colors = {"intra-sector": "C0", "inter-sector": "C1"}
+            labels_map = {
+                "intra-sector": "within-sector",
+                "inter-sector": "between-sector",
+            }
 
-        bar_labels = [
-            f"{row.coil_first}-{row.coil_second}" for _, row in self.gaps.iterrows()
-        ]
-        x = np.arange(len(bar_labels))
+            bar_labels = [
+                f"{row.coil_first}-{row.coil_second}" for _, row in self.gaps.iterrows()
+            ]
+            x = np.arange(len(bar_labels))
+            bar_width = 0.8
 
-        # Create bars with legend labels for first occurrence of each type
-        plotted_types = set()
-        for i, (_, row) in enumerate(self.gaps.iterrows()):
-            gap_type = row["gap_type"]
-            label = labels_map[gap_type] if gap_type not in plotted_types else None
-            ax.bar(
-                x[i],
-                row["gap_mean"],
-                yerr=row["gap_std"],
-                color=colors[gap_type],
-                alpha=0.8,
-                edgecolor="k",
-                capsize=3,
-                label=label,
+            # Create bars with legend labels for first occurrence of each type
+            plotted_types = set()
+            for i, (_, row) in enumerate(self.gaps.iterrows()):
+                gap_type = row["gap_type"]
+                label = labels_map[gap_type] if gap_type not in plotted_types else None
+
+                # Use gap_midplane (mean gap at z=0) as bar height
+                gap_value = row["gap_midplane"]
+
+                ax.bar(
+                    x[i],
+                    gap_value,
+                    width=bar_width,
+                    color=colors[gap_type],
+                    alpha=0.8,
+                    edgecolor="k",
+                    label=label,
+                )
+
+                # Add min/max range markers as dark gray horizontal lines
+                ax.hlines(
+                    row["gap_min"],
+                    x[i] - bar_width / 3,
+                    x[i] + bar_width / 3,
+                    colors="darkgray",
+                    linewidth=2,
+                )
+                ax.hlines(
+                    row["gap_max"],
+                    x[i] - bar_width / 3,
+                    x[i] + bar_width / 3,
+                    colors="darkgray",
+                    linewidth=2,
+                )
+                # Connect min/max with vertical line
+                ax.vlines(
+                    x[i],
+                    row["gap_min"],
+                    row["gap_max"],
+                    colors="darkgray",
+                    linewidth=1,
+                )
+
+                plotted_types.add(gap_type)
+
+                # Add sector label at base of within-sector (intra-sector) bars
+                if gap_type == "intra-sector":
+                    sector = int(row["sector_a"])
+                    ax.text(
+                        x[i],
+                        0.05,
+                        f"S{sector}",
+                        ha="center",
+                        va="bottom",
+                        fontsize=24,
+                        color="lightgray",
+                        fontweight="bold",
+                    )
+
+            ax.set_xticks(x)
+            ax.set_xticklabels(bar_labels, rotation=45, ha="right")
+            ax.set_xlabel("Gap (coil-coil)")
+            ax.set_ylabel("Gap (mm)")
+            ax.set_title(f"Pit Gap Analysis - {self.phase}")
+
+            # Add target lines with text labels on the right side (not in legend)
+            xlim = ax.get_xlim()
+            ax.axhline(
+                self.within_sector_target,
+                color="C0",
+                linestyle="--",
+                alpha=0.7,
             )
-            plotted_types.add(gap_type)
-
-        ax.set_xticks(x)
-        ax.set_xticklabels(bar_labels, rotation=45, ha="right")
-        ax.set_xlabel("Gap (coil-coil)")
-        ax.set_ylabel("Gap (mm)")
-        ax.set_title(f"Pit Gap Analysis - {self.phase}")
-
-        # Add target lines with text labels (no legend)
-        xlim = ax.get_xlim()
-        ax.axhline(
-            self.within_sector_target,
-            color="C0",
-            linestyle="--",
-            alpha=0.7,
-        )
-        ax.text(
-            xlim[1],
-            self.within_sector_target,
-            f" within: {self.within_sector_target:.1f}",
-            va="center",
-            ha="left",
-            color="C0",
-            fontsize=9,
-        )
-        ax.axhline(
-            self.between_sector_target,
-            color="C1",
-            linestyle="--",
-            alpha=0.7,
-        )
-        ax.text(
-            xlim[1],
-            self.between_sector_target,
-            f" between: {self.between_sector_target:.1f}",
-            va="center",
-            ha="left",
-            color="C1",
-            fontsize=9,
-        )
-        ax.legend(fontsize="small", loc="upper left")
-        ax.axhline(0, color="gray", linewidth=0.5)
-
-        # Add value labels
-        for i, (_, row) in enumerate(self.gaps.iterrows()):
-            ax.annotate(
-                f"{row.gap_mean:.2f}",
-                xy=(i, row.gap_mean),
-                xytext=(0, 3 if row.gap_mean >= 0 else -12),
-                textcoords="offset points",
-                ha="center",
-                va="bottom" if row.gap_mean >= 0 else "top",
-                fontsize=8,
+            ax.text(
+                xlim[1],
+                self.within_sector_target,
+                f" {self.within_sector_target:.1f}",
+                va="center",
+                ha="left",
+                color="C0",
             )
+            ax.axhline(
+                self.between_sector_target,
+                color="C1",
+                linestyle="--",
+                alpha=0.7,
+            )
+            ax.text(
+                xlim[1],
+                self.between_sector_target,
+                f" {self.between_sector_target:.1f}",
+                va="center",
+                ha="left",
+                color="C1",
+            )
+            ax.legend(loc="upper left")
+            ax.axhline(0, color="gray", linewidth=0.5)
 
-        sns.despine(ax=ax)
-        fig.tight_layout()
+            # Add value labels at top of bar
+            for i, (_, row) in enumerate(self.gaps.iterrows()):
+                gap_value = row.gap_midplane
+                ax.annotate(
+                    f"{gap_value:.2f}",
+                    xy=(i, gap_value),
+                    xytext=(0, 5),
+                    textcoords="offset points",
+                    ha="center",
+                    va="bottom",
+                )
+
+            sns.despine(ax=ax)
+            fig.tight_layout()
         return fig, ax
 
-    def plot_statistics(self, figsize=(8, 6)):
+    def plot_statistics(self, figsize=(10, 7)):
         """Plot summary statistics as bar chart with error bars.
 
         Shows mean gap ± between-gap std for each gap type.
@@ -1068,63 +1496,69 @@ class FiducialPit(Plot1D):
             print("No statistics to plot")
             return
 
-        fig, ax = plt.subplots(figsize=figsize)
+        with sns.plotting_context("poster"):
+            fig, ax = plt.subplots(figsize=figsize)
 
-        gap_types = ["intra-sector", "inter-sector", "combined"]
-        colors = {"intra-sector": "C0", "inter-sector": "C1", "combined": "C2"}
-        labels_map = {
-            "intra-sector": "within-sector",
-            "inter-sector": "between-sector",
-            "combined": "combined",
-        }
-        x = np.arange(len(gap_types))
+            gap_types = ["intra-sector", "inter-sector", "combined"]
+            colors = {"intra-sector": "C0", "inter-sector": "C1", "combined": "C2"}
+            labels_map = {
+                "intra-sector": "within-sector",
+                "inter-sector": "between-sector",
+                "combined": "combined",
+            }
+            x = np.arange(len(gap_types))
 
-        means = []
-        stds = []
-        for gap_type in gap_types:
-            if gap_type == "combined":
-                subset = self.gaps
-            else:
-                subset = self.gaps[self.gaps["gap_type"] == gap_type]
-            if not subset.empty:
-                means.append(subset["gap_mean"].mean())
-                stds.append(subset["gap_mean"].std())
-            else:
-                means.append(0)
-                stds.append(0)
+            means = []
+            stds = []
+            for gap_type in gap_types:
+                if gap_type == "combined":
+                    subset = self.gaps
+                else:
+                    subset = self.gaps[self.gaps["gap_type"] == gap_type]
+                if not subset.empty:
+                    means.append(subset["gap_midplane"].mean())
+                    stds.append(subset["gap_midplane"].std())
+                else:
+                    means.append(0)
+                    stds.append(0)
 
-        bar_colors = [colors[gt] for gt in gap_types]
-        display_labels = [labels_map[gt] for gt in gap_types]
-        ax.bar(
-            x, means, yerr=stds, capsize=5, alpha=0.8, edgecolor="k", color=bar_colors
-        )
-        ax.set_xticks(x)
-        ax.set_xticklabels(display_labels)
-        ax.set_ylabel("Gap (mm)")
-        ax.set_title(f"Gap Statistics Summary - {self.phase}")
-        ax.axhline(0, color="gray", linewidth=0.5)
+            bar_colors = [colors[gt] for gt in gap_types]
+            display_labels = [labels_map[gt] for gt in gap_types]
+            ax.bar(
+                x,
+                means,
+                yerr=stds,
+                capsize=5,
+                alpha=0.8,
+                edgecolor="k",
+                color=bar_colors,
+            )
+            ax.set_xticks(x)
+            ax.set_xticklabels(display_labels)
+            ax.set_ylabel("Gap (mm)")
+            ax.set_title(f"Gap Statistics Summary - {self.phase}")
+            ax.axhline(0, color="gray", linewidth=0.5)
 
-        # Add limit line with text label (no legend)
-        xlim = ax.get_xlim()
-        ax.axhline(
-            self.gap_limit,
-            color="C3",
-            linestyle="--",
-            alpha=0.7,
-        )
-        ax.text(
-            xlim[1],
-            self.gap_limit,
-            f" limit: {self.gap_limit:.1f}",
-            va="center",
-            ha="left",
-            color="C3",
-            fontsize=9,
-        )
+            # Add limit line with text label (no legend)
+            xlim = ax.get_xlim()
+            ax.axhline(
+                self.gap_limit,
+                color="C3",
+                linestyle="--",
+                alpha=0.7,
+            )
+            ax.text(
+                xlim[1],
+                self.gap_limit,
+                f" limit: {self.gap_limit:.1f}",
+                va="center",
+                ha="left",
+                color="C3",
+            )
 
-        sns.despine(ax=ax)
-        fig.tight_layout()
-        return fig, ax
+            sns.despine(ax=ax)
+            fig.tight_layout()
+            return fig, ax
 
     def print_summary(self):
         """Print formatted summary of gap statistics."""

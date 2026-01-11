@@ -87,7 +87,13 @@ simulations:
   S4_hybrid_pit_2026:
     description: "Measured positions for S5-8, sampled for remaining coils"
     date: "2026-01-11"
+    vault:
+      # theta matched with S4_refine_pit_2026 for consistency
+      # [radial, tangential, roll_length, yaw_length, radial_ccl, tangential_ccl, radial_wall]
+      samples: 200000
+      theta: [1.3, 1.0, 0.4, 1.2, 1.5, 1.5, 3.0]
+      measured_sectors: [5, 6, 7, 8]
     error_field:
       samples: 2000000
-      theta: [1.5, 1.5, 3.0, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5]
+      theta: [1.3, 1.0, 1.5, 1.5, 1.5, 1.5, 0.6, 0.4, 1.2]
       measured_sectors: [5, 6, 7, 8]

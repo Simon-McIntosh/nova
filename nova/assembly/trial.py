@@ -28,6 +28,7 @@ class TrialAttrs:
     adjust_gap: bool = True
     max_nominal_gap: float = 2.0
     sead: int = 2025
+    fixed_coils: dict | None = field(default=None, repr=False)
 
     ncoil: ClassVar[int] = 18
 
@@ -160,6 +161,72 @@ class Trial(Dataset, TrialAttrs, Plot1D):
         manifest.save()
         print(f"Saved to manifest: {name}")
 
+    @classmethod
+    def from_pit(
+        cls,
+        name: str | None = None,
+        samples: int | None = None,
+        pit_kwargs: dict | None = None,
+        **kwargs,
+    ) -> Self:
+        """Create hybrid trial with fixed values from installed pit sectors.
+
+        Loads measured coil positions from FiducialPit and injects them
+        as fixed values for installed coils. Remaining coils are sampled
+        from distributions defined by the manifest.
+
+        Parameters
+        ----------
+        name : str | None
+            Manifest simulation label for theta/pdf parameters
+        samples : int | None
+            Override samples from manifest
+        pit_kwargs : dict | None
+            Arguments passed to FiducialPit (sectors, phase, pcr, etc.)
+            If None, uses default installed sectors.
+        **kwargs
+            Additional parameters passed to Trial
+
+        Returns
+        -------
+        Trial
+            Trial instance with fixed_coils populated from pit measurements
+
+        Examples
+        --------
+        >>> error = ErrorField.from_pit("baseline_2021", samples=100000)
+        >>> error.build()  # Uses measured values for 8 installed coils
+        """
+        from nova.assembly.fiducialpit import FiducialPit
+
+        # Default pit configuration for currently installed sectors
+        if pit_kwargs is None:
+            pit_kwargs = {
+                "sectors": {6: [12, 13], 7: [8, 9], 5: [16, 5], 8: [4, 11]},
+                "phase": "latest",
+                "pcr": True,
+            }
+
+        # Load pit data and extract trial-formatted positions
+        pit = FiducialPit(**pit_kwargs)
+        positions = pit.extract_trial_positions()
+
+        # Convert to fixed_coils dict format
+        fixed_coils = {}
+        for _, row in positions.iterrows():
+            trial_idx = int(row["trial_index"])
+            fixed_coils[trial_idx] = {
+                col: row[col]
+                for col in positions.columns
+                if col not in ["trial_index", "coil", "sector"]
+            }
+
+        # Create trial via from_manifest with fixed_coils injected
+        trial = cls.from_manifest(name=name, samples=samples, **kwargs)
+        trial.fixed_coils = fixed_coils
+
+        return trial
+
     def normal(self, variance: float):
         """Return sample with normal distribution."""
         scale = np.sqrt(variance)
@@ -170,7 +237,16 @@ class Trial(Dataset, TrialAttrs, Plot1D):
         return self.rng.uniform(-bound, bound, size=(self.samples, self.ncoil))
 
     def build_signal(self):
-        """Build input distributions."""
+        """Build input distributions.
+
+        If fixed_coils is set, measured values are injected for specified
+        coil indices. Fixed coils use their measured values (broadcast across
+        all samples) while remaining coils are sampled from distributions.
+
+        The fixed_coils dict should have structure:
+            {trial_index: {component: value, ...}, ...}
+        where trial_index is 0-17 and component names match self.component.
+        """
         self.data = xarray.Dataset(attrs=self.attrs)
         self.data["sample"] = range(self.samples)
         self.data["index"] = range(self.ncoil)
@@ -184,7 +260,15 @@ class Trial(Dataset, TrialAttrs, Plot1D):
         for i, component in enumerate(self.component):
             theta = self.theta[i]
             pdf = self.pdf[i]
-            self.data[component] = ("sample", "index"), getattr(self, pdf)(theta)
+            samples = getattr(self, pdf)(theta)
+
+            # Inject fixed values for measured coils
+            if self.fixed_coils is not None:
+                for trial_idx, coil_data in self.fixed_coils.items():
+                    if component in coil_data:
+                        samples[:, trial_idx] = coil_data[component]
+
+            self.data[component] = ("sample", "index"), samples
 
     @cached_property
     def gap(self):

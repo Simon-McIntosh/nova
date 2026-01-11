@@ -2080,6 +2080,75 @@ class FiducialPit(Plot1D):
 
         return summary
 
+    def extract_trial_positions(self) -> pandas.DataFrame:
+        """Extract per-coil positions for hybrid trial integration.
+
+        Returns measured position parameters for each installed coil,
+        formatted for injection into Trial.build_signal(). Uses the
+        location mapping from FiducialData to convert coil numbers to
+        trial array indices (0-17).
+
+        Returns
+        -------
+        pandas.DataFrame
+            Columns: trial_index, coil, radial, tangential, vertical,
+            pitch_length, roll_length, yaw_length. One row per installed coil.
+
+        Notes
+        -----
+        Trial uses position index (0-17) as array index, where position i
+        corresponds to toroidal angle i*20°. The location list maps
+        position index to coil number: location[index] = coil_number.
+        """
+        all_positions = []
+
+        for sector in self.sectors:
+            if sector not in self.sector_data:
+                continue
+
+            sector_data = self.sector_data[sector]
+            try:
+                positions = sector_data.extract_coil_positions(pcr=self.pcr)
+                positions = positions.reset_index()
+                positions["sector"] = sector
+                all_positions.append(positions)
+            except (KeyError, ValueError) as e:
+                print(f"Warning: Could not extract positions for sector {sector}: {e}")
+
+        if not all_positions:
+            raise ValueError("No position data available")
+
+        data = pandas.concat(all_positions, ignore_index=True)
+
+        # Map coil numbers to trial indices using location list
+        trial_indices = []
+        for coil in data["coil"]:
+            try:
+                trial_idx = self.location.index(coil)
+                trial_indices.append(trial_idx)
+            except ValueError:
+                trial_indices.append(-1)  # Invalid
+
+        data["trial_index"] = trial_indices
+
+        # Filter to valid indices and select relevant columns
+        data = data[data["trial_index"] >= 0]
+
+        # Component names matching ErrorField.component
+        components = [
+            "radial",
+            "tangential",
+            "vertical",
+            "pitch_length",
+            "roll_length",
+            "yaw_length",
+        ]
+
+        result = data[["trial_index", "coil", "sector"] + components].copy()
+        result = result.sort_values("trial_index").reset_index(drop=True)
+
+        return result
+
     def print_implied_halfwidths(self) -> pandas.DataFrame:
         """Print implied alignment half-widths from measured data.
 

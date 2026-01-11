@@ -1901,6 +1901,10 @@ class FiducialPit(Plot1D):
                     # Remove x-ticks (info is in the legend)
                     ax.set_xticks([])
 
+                    # Only show x-label on bottom row
+                    if row_idx == 1:
+                        ax.set_xlabel("TF Coil")
+
                     # Only show y-axis label on leftmost column
                     if col_idx == 0:
                         ax.set_ylabel("alignment (mm)")

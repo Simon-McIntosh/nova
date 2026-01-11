@@ -54,8 +54,38 @@ class FiducialSector(Fiducial):
         self._load_ilis()
 
     def _set_phase(self):
-        """Expand short string phase label."""
+        """Expand short string phase label or resolve 'latest' to actual phase.
+
+        For 'latest', finds the newest phase that contains valid ILIS data.
+        Priority: TFGS phases > In-pit target > last sheet in workbook.
+        """
         self.phase = self.sheets.get(self.phase, self.phase)
+        if self.phase == "latest":
+            # Resolve 'latest' by getting phases from the first sector
+            first_sector = next(iter(self.sectors.keys()))
+            data = SectorData(
+                first_sector,
+                self.sectors[first_sector],
+                private=self.private,
+                version=self.version,
+            )
+            # Try in-pit phases first (preferred for installed coils)
+            # Include various TFGS sheet naming conventions
+            preferred_phases = [
+                "AFTER TFGS landing",
+                "TFGS Landing",
+                "TFGS landing",
+                "In-pit target",
+            ]
+            for phase in preferred_phases:
+                if phase in data.phase:
+                    self.phase = phase
+                    return
+            # Fallback to last sheet in workbook order
+            if data.phase:
+                self.phase = data.phase[-1]
+            else:
+                self.phase = "In-pit target"  # Ultimate fallback
 
     def _load_deltas(self):
         """Implement load deltas abstractmethod."""

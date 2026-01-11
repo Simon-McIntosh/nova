@@ -125,12 +125,14 @@ class SectorData(FilePath, SectorFile):
 
     @cached_property
     def phase(self) -> list[str]:
-        """Return list of assembly phases."""
-        all_phases = set(self.data[self.coil[0]].keys()) | set(
-            self.data[self.coil[1]].keys()
-        )
-        return [phase for phase in all_phases if phase != "Nominal"]
-        # return [phase for phase in self.data[self.coil[1]] if phase != "Nominal"]
+        """Return list of assembly phases in workbook order (newest last)."""
+        # Preserve sheet order from workbook (dict keys maintain insertion order)
+        # Union both coils' phases while maintaining order
+        phases = list(self.data[self.coil[0]].keys())
+        for phase in self.data[self.coil[1]].keys():
+            if phase not in phases:
+                phases.append(phase)
+        return [phase for phase in phases if phase != "Nominal"]
 
     def _initalize_ccl(self):
         """Init ccl as bare nested dict with assembly stage entries."""

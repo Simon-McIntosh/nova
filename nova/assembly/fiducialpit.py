@@ -109,7 +109,8 @@ class FiducialPit(Plot1D):
                 except (FileNotFoundError, KeyError):
                     available = []
                 phases_to_try = []
-                for tfgs in ["TFGS Landing", "TFGS landing"]:
+                # Include various TFGS sheet naming conventions
+                for tfgs in ["AFTER TFGS landing", "TFGS Landing", "TFGS landing"]:
                     if tfgs in available:
                         phases_to_try.append(tfgs)
                 phases_to_try.append("In-pit target")
@@ -146,6 +147,7 @@ class FiducialPit(Plot1D):
                     sectors={sector: coils},
                     private=self.private,
                 )
+                print(f"Sector {sector}: loaded phase '{resolved}'")
             except (FileNotFoundError, KeyError) as e:
                 print(f"Warning: Could not load sector {sector}: {e}")
 
@@ -1196,7 +1198,8 @@ class FiducialPit(Plot1D):
         book = openpyxl.load_workbook(filepath, read_only=True)
         sheets = [sh for sh in book.sheetnames if sh not in ["Metadata", "Nominal"]]
         book.close()
-        return list(reversed(sheets)) if sheets else [self.phase]
+        # Return sheets in reverse order (newest first), fallback to In-pit target
+        return list(reversed(sheets)) if sheets else ["In-pit target"]
 
     def position_statistics(
         self,

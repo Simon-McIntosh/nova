@@ -61,7 +61,7 @@ class TrialProgress:
         self._progress = Progress(
             SpinnerColumn(),
             TextColumn("{task.description}", style="bold blue"),
-            BarColumn(bar_width=30),
+            BarColumn(bar_width=20),
             TaskProgressColumn(),
             TimeElapsedColumn(),
             TimeRemainingColumn(),

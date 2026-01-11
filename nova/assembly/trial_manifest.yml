@@ -2,11 +2,13 @@
 # Named parameter sets for Monte Carlo simulations
 #
 # Structure:
-#   - defaults: Fixed components and pdfs for each trial type
-#   - simulations: Named parameter sets (theta, samples)
+#   - defaults: Fixed parameters for each trial type (used in hash computation)
+#   - simulations: Named parameter sets with variable theta/samples
 #
-# The cache hash is computed at runtime by Trial.group_name from all
-# instance attributes. This manifest only stores the variable parameters.
+# The cache hash is computed at runtime by Trial.group_name from:
+#   attrs.values() + theta + pdf
+# where attrs includes: samples, adjust_gap, max_nominal_gap, sead
+# plus class-specific fields: modes, energize, wall (Vault only)
 
 defaults:
   vault:
@@ -14,9 +16,16 @@ defaults:
     pdf: [uniform, uniform, uniform, uniform, normal, normal, uniform]
     adjust_gap: true
     max_nominal_gap: 2.0
+    sead: 2025
+    modes: 3
+    energize: 1
+    wall: 1
   error_field:
     components: [radial, tangential, vertical, radial_ccl, tangential_ccl, vertical_ccl, pitch_length, roll_length, yaw_length]
     pdf: [uniform, uniform, uniform, normal, normal, normal, uniform, uniform, uniform]
+    adjust_gap: true
+    max_nominal_gap: 2.0
+    sead: 2025
 
 simulations:
   # ==========================================================================

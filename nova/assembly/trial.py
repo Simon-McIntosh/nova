@@ -86,7 +86,6 @@ class Trial(Dataset, TrialAttrs, Plot1D):
     def from_manifest(
         cls,
         name: str | None = None,
-        trial_type: str = "vault",
         samples: int | None = None,
         **kwargs,
     ) -> "Trial":
@@ -96,8 +95,6 @@ class Trial(Dataset, TrialAttrs, Plot1D):
         ----------
         name : str | None
             Simulation label to load from manifest
-        trial_type : str
-            Type of trial: 'vault' or 'error_field'
         samples : int | None
             Override samples from manifest
         **kwargs
@@ -111,21 +108,34 @@ class Trial(Dataset, TrialAttrs, Plot1D):
         Examples
         --------
         >>> trial = Vault.from_manifest("baseline_2021")
-        >>> trial = Vault.from_manifest("tight_tolerances_2026", samples=500000)
+        >>> trial = ErrorField.from_manifest("baseline_2021", samples=500000)
         """
+        # Determine trial_type from class name
+        trial_type = "error_field" if cls.__name__ == "ErrorField" else "vault"
+
         manifest = TrialManifest(name=name, trial_type=trial_type, **kwargs)
 
         # Override samples if provided
         if samples is not None:
             manifest.samples = samples
 
-        return cls(
-            samples=manifest.samples,
-            theta=manifest.theta,
-            component=manifest.components,
-            pdf=manifest.pdf,
-            **kwargs,
-        )
+        # Build kwargs for Trial constructor
+        trial_kwargs = {
+            "samples": manifest.samples,
+            "theta": manifest.theta,
+            "component": manifest.components,
+            "pdf": manifest.pdf,
+        }
+
+        # Add vault-specific parameters
+        if trial_type == "vault":
+            trial_kwargs["adjust_gap"] = manifest.adjust_gap
+            trial_kwargs["max_nominal_gap"] = manifest.max_nominal_gap
+
+        # Merge with any additional kwargs
+        trial_kwargs.update(kwargs)
+
+        return cls(**trial_kwargs)
 
     def save_to_manifest(self, name: str, description: str = "") -> None:
         """Save current trial parameters to manifest.
@@ -148,7 +158,7 @@ class Trial(Dataset, TrialAttrs, Plot1D):
             description=description,
         )
         manifest.save()
-        print(f"Saved to manifest: {name} (hash: {manifest.hash})")
+        print(f"Saved to manifest: {name}")
 
     def normal(self, variance: float):
         """Return sample with normal distribution."""
@@ -629,7 +639,6 @@ class ErrorField(Trial, Plot1D):
     def __post_init__(self):
         """Initialize model instances."""
         self.model = overlap.Model()
-        print(self.group_name)
         super().__post_init__()
 
     def build(self):
@@ -723,31 +732,18 @@ class ErrorField(Trial, Plot1D):
 
 
 if __name__ == "__main__":
-    # theta = [5, 5, 5, 10, 2, 2, 2.5]
-    # theta = [0, 0, 0, 10, 0, 0, 0]
-    theta = [1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 3]
-    vault = Vault(2_000_00, theta=theta, adjust_gap=True)
-
-    #'radial', 'tangential', 'roll_length',
-    #'yaw_length', 'radial_ccl', 'tangential_ccl', 'radial_wall'
+    # Load baseline_2021 from manifest (should use cache)
+    vault = Vault.from_manifest("baseline_2021")
+    print(f"Vault hash: {vault.group_name}")
 
     vault.plot()
     vault.plot_offset()
     vault.plot_gap()
     vault.plot_cumlative_gap()
 
-    # vault.plot_sample(0.99, False)
+    error = ErrorField.from_manifest("baseline_2021")
+    print(f"ErrorField hash: {error.group_name}")
 
-    # theta_error = [5, 5, 5, 2, 2, 2, 5, 10, 10]
-
-    theta_error = [1.5, 1.5, 3, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5]
-    # theta_error = [np.sqrt(3), np.sqrt(3), np.sqrt(3),
-    #               1, 1, 1,
-    #               np.sqrt(3), np.sqrt(3), np.sqrt(3)]
-    # theta_error = list(3*np.ones(9))
-    error = ErrorField(2_000_000, theta=theta_error)
-
-    # error.plot_scan()
     error.plot()
 
     # trial.plot_offset()

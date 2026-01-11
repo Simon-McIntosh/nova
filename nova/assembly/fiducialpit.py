@@ -2054,7 +2054,8 @@ class FiducialPit(Plot1D):
         - tolerance: assumed alignment window half-width (mm)
         - implied_L: implied alignment window from measured σ (mm)
         - L_upper_95: conservative 95% CI upper bound for implied L (mm)
-        - margin: tolerance - L_upper_95 (positive = within spec)
+        - L_upper_18: projected 95% CI upper bound at n=18 coils (mm)
+        - margin: tolerance - L_upper_95 (positive = within spec, negative = over)
 
         Returns
         -------
@@ -2072,6 +2073,7 @@ class FiducialPit(Plot1D):
                 "tolerance": stats_df["trial_halfwidth"],
                 "implied_L": (stats_df["std"] * sqrt3).round(2),
                 "L_upper_95": (stats_df["std_upper_95"] * sqrt3).round(2),
+                "L_upper_18": stats_df["implied_hw_upper_18"].round(2),
             }
         )
         summary["margin"] = (summary["tolerance"] - summary["L_upper_95"]).round(2)

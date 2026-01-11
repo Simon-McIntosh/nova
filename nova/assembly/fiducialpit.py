@@ -1619,7 +1619,8 @@ class FiducialPit(Plot1D):
     def position_statistics(
         self,
         assembly_phase: int | None = None,
-    ) -> tuple[pandas.DataFrame, tuple[plt.Figure, np.ndarray]]:
+        plot: bool = True,
+    ) -> tuple[pandas.DataFrame, tuple[plt.Figure, np.ndarray] | None]:
         """Calculate position statistics from installed sectors.
 
         Extracts coil position parameters using the phase configured at
@@ -1632,11 +1633,14 @@ class FiducialPit(Plot1D):
             Number of sectors to include in installation order (1-4).
             Phase 1=SM6, 2=SM6+SM7, 3=SM6+SM7+SM5, 4=all four sectors.
             If None, uses all installed sectors.
+        plot : bool
+            Whether to generate the matplotlib chart. Default True.
 
         Returns
         -------
-        tuple[pandas.DataFrame, tuple[plt.Figure, np.ndarray]]
+        tuple[pandas.DataFrame, tuple[plt.Figure, np.ndarray] | None]
             DataFrame with position statistics and matplotlib figure/axes.
+            Returns None for chart if plot=False.
         """
         # Map assembly phase to sectors (in installation order: 6, 7, 5, 8)
         # Based on git history: SM6 Feb 2025, SM7 Mar 2025, SM5 Aug 2025, SM8 Oct 2025
@@ -1773,7 +1777,10 @@ class FiducialPit(Plot1D):
             ]
 
         # Create Altair chart
-        chart = self._build_position_chart(chart_df, stats_df, len(active_sectors))
+        if plot:
+            chart = self._build_position_chart(chart_df, stats_df, len(active_sectors))
+        else:
+            chart = None
 
         return stats_df, chart
 
@@ -1848,7 +1855,6 @@ class FiducialPit(Plot1D):
                         continue
 
                     # Plot bars for each coil
-                    x_positions = np.arange(len(coil_order))
                     bar_width = 0.8
 
                     for i, coil in enumerate(coil_order):
@@ -1892,13 +1898,8 @@ class FiducialPit(Plot1D):
                     # Add title as subplot title
                     ax.set_title(param_labels[param])
 
-                    # Only show x-axis labels on bottom row
-                    if row_idx == 1:
-                        ax.set_xticks(x_positions)
-                        ax.set_xticklabels(coil_order, rotation=45, ha="right")
-                        ax.set_xlabel("TF coil")
-                    else:
-                        ax.set_xticks([])
+                    # Remove x-ticks (info is in the legend)
+                    ax.set_xticks([])
 
                     # Only show y-axis label on leftmost column
                     if col_idx == 0:
@@ -1957,6 +1958,7 @@ class FiducialPit(Plot1D):
             try:
                 stats_df, _ = self.position_statistics(
                     assembly_phase=phase,
+                    plot=False,
                 )
 
                 for _, row in stats_df.iterrows():

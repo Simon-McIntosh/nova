@@ -71,6 +71,9 @@ class Trial(Dataset, TrialAttrs, Plot1D):
         """Set dataset group for netCDF file load/store."""
         self.group = self.group_name
         self.rng = np.random.default_rng(self.sead)
+        # Initialize FilePath (sets fsys) before potential early build
+        self.host = self.hostname
+        self.path = self.dirname
         if self.force:
             self.build()
         else:
@@ -958,7 +961,7 @@ class ErrorField(Trial, Plot1D):
 
 if __name__ == "__main__":
     # Load baseline_2021 from manifest (should use cache)
-    vault = Vault.from_manifest("baseline_2021", samples=50_000)
+    vault = Vault.from_manifest("baseline_2021", samples=50_000, force=True)
     print(f"Vault hash: {vault.group_name}")
 
     vault.plot()

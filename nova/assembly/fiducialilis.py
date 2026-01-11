@@ -29,8 +29,8 @@ class FiducialIlis:
         9: [0, 1],  # S7+
         10: [0.1, 0],
         11: [0, -0.15 + 0.4],  # reduce inter-sector gap
-        12: [0, -1.5], # S6-
-        13: [0, 0],  # S6+ 
+        12: [0, -1.5],  # S6-
+        13: [0, 0],  # S6+
         14: [0, 0],
         15: [0, 0],
         16: [0 + 0.1, 0.2],  # S5- reduce inter-sector gap
@@ -70,6 +70,16 @@ class FiducialIlis:
             offset = offset.stack().droplevel(-1)
 
         self.data.loc[:, "offset"] = offset.reset_index(drop=True)
+
+    @property
+    def outliers(self):
+        """Return DataFrame of detected outlier points."""
+        return self.data[self.data.outlier]
+
+    @property
+    def n_outliers(self):
+        """Return count of outliers by coil and feature."""
+        return self.data.groupby(["coil", "feature"])["outlier"].sum()
 
     @cached_property
     def ilis_offset(self):
@@ -123,7 +133,9 @@ class FiducialIlis:
 
         print(NominalIlis.fit_plane(self.data))
         """
-        self.planes = NominalIlis.fit_plane(self.data).join(
+        # Filter out outliers for plane fitting
+        filtered_data = self.data[~self.data.outlier]
+        self.planes = NominalIlis.fit_plane(filtered_data).join(
             self.ilis_offset, how="inner", on=["coil", "feature"]
         )
 
@@ -153,12 +165,32 @@ class FiducialIlis:
         )
 
     def _detect(self, points, plane, standard_deviations=3):
-        """Detect outliers in points relative to plane."""
+        """Detect outliers in points relative to plane.
+
+        Outliers are detected using two criteria:
+        1. Points > N standard deviations from the best-fit plane
+        2. Points with signed offset inconsistent with their ILIS side
+           (e.g., a point labeled +ILIS but located on the -ILIS side)
+        """
         offset = self.offset(points, plane, return_normal=False)
         dist = np.abs(offset)
         std = np.std(dist)
         threshold = standard_deviations * std
-        outliers = dist > threshold
+        outliers_distance = dist > threshold
+
+        # Check for sign consistency: +ILIS points should have positive y (approx)
+        # and -ILIS points should have negative y in the raw data
+        feature = plane[1] if isinstance(plane, tuple) else plane
+        if "+1" in str(feature):
+            # ILIS +1 points should generally have positive y
+            outliers_sign = points["y"].values < -50  # Allow some tolerance
+        elif "-1" in str(feature):
+            # ILIS -1 points should generally have negative y
+            outliers_sign = points["y"].values > 50  # Allow some tolerance
+        else:
+            outliers_sign = np.zeros(len(points), dtype=bool)
+
+        outliers = outliers_distance | outliers_sign
 
         return outliers
 

@@ -214,7 +214,7 @@ class Axes:
         sns = import_module("seaborn")
         if axes is None:
             axes = self.axes
-        for _axes in np.atleast_1d(axes):
+        for _axes in np.atleast_1d(axes).flatten():
             sns.despine(ax=_axes)
 
     @staticmethod
@@ -239,7 +239,7 @@ class Axes:
         """Set axes style."""
         if style is None:
             style = self.style
-        for axes in np.atleast_1d(self.axes):
+        for axes in np.atleast_1d(self.axes).flatten():
             self._set_style(style, axes)
         if style in ["1d", "plan"]:
             self.despine()
@@ -407,7 +407,7 @@ class Plot:
                 _point,
                 _point + _length,
                 mutation_scale=1,
-                arrowstyle="simple,head_length=0.4, head_width=0.3," " tail_width=0.1",
+                arrowstyle="simple,head_length=0.4, head_width=0.3, tail_width=0.1",
                 shrinkA=0,
                 shrinkB=0,
             )

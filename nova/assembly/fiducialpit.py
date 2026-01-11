@@ -8,11 +8,12 @@ from dataclasses import dataclass, field
 from functools import cached_property
 from typing import ClassVar
 
-import altair as alt
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas
 import scipy.spatial.transform
+
+import seaborn as sns
 
 from nova.assembly.fiducialdata import FiducialData
 from nova.assembly.fiducialilis import FiducialIlis
@@ -20,8 +21,6 @@ from nova.assembly.fiducialsector import FiducialSector
 from nova.assembly.ilisnominal import NominalIlis
 from nova.assembly.transform import Rotate
 from nova.graphics.plot import Plot1D
-
-alt.renderers.enable("html")
 
 
 def rotate_to_angle(vector: np.ndarray, angle: float) -> np.ndarray:
@@ -66,8 +65,12 @@ class FiducialPit(Plot1D):
     private: bool = False
 
     # Target gap specifications (mm)
-    intra_sector_target: float = 2.0  # Target gap within a sector
-    inter_sector_target: float = 1.5  # Target gap between sectors (smaller)
+    # Cumulative gap limit: 36mm, cumulative gap target: 33mm
+    # Within-sector gaps are 0.4mm smaller, between-sector gaps 0.4mm larger
+    # so the average equals 33/18 ≈ 1.833mm
+    within_sector_target: float = 33 / 18 - 0.4  # Target gap within a sector
+    between_sector_target: float = 33 / 18 + 0.4  # Target gap between sectors
+    gap_limit: float = 2.0  # Single gap limit (cumulative 36mm / 18 gaps)
 
     # Toroidal position of each coil index - imported from FiducialData
     # to maintain single source of truth
@@ -965,7 +968,7 @@ class FiducialPit(Plot1D):
         """Plot gap measurements as bar chart with error bars.
 
         Shows gap_mean ± gap_std for each gap pair,
-        colored by gap type (intra/inter-sector).
+        colored by gap type (within/between-sector).
         """
         if self.gaps.empty:
             print("No gaps to plot")
@@ -973,44 +976,69 @@ class FiducialPit(Plot1D):
 
         fig, ax = plt.subplots(figsize=figsize)
         colors = {"intra-sector": "C0", "inter-sector": "C1"}
+        labels_map = {"intra-sector": "within-sector", "inter-sector": "between-sector"}
 
-        labels = [
+        bar_labels = [
             f"{row.coil_first}-{row.coil_second}" for _, row in self.gaps.iterrows()
         ]
-        x = np.arange(len(labels))
-        bar_colors = [colors[gt] for gt in self.gaps["gap_type"]]
+        x = np.arange(len(bar_labels))
 
-        ax.bar(
-            x,
-            self.gaps["gap_mean"].values,
-            yerr=self.gaps["gap_std"].values,
-            color=bar_colors,
-            alpha=0.8,
-            edgecolor="k",
-            capsize=3,
-        )
+        # Create bars with legend labels for first occurrence of each type
+        plotted_types = set()
+        for i, (_, row) in enumerate(self.gaps.iterrows()):
+            gap_type = row["gap_type"]
+            label = labels_map[gap_type] if gap_type not in plotted_types else None
+            ax.bar(
+                x[i],
+                row["gap_mean"],
+                yerr=row["gap_std"],
+                color=colors[gap_type],
+                alpha=0.8,
+                edgecolor="k",
+                capsize=3,
+                label=label,
+            )
+            plotted_types.add(gap_type)
 
         ax.set_xticks(x)
-        ax.set_xticklabels(labels, rotation=45, ha="right")
+        ax.set_xticklabels(bar_labels, rotation=45, ha="right")
         ax.set_xlabel("Gap (coil-coil)")
         ax.set_ylabel("Gap (mm)")
         ax.set_title(f"Pit Gap Analysis - {self.phase}")
 
+        # Add target lines with text labels (no legend)
+        xlim = ax.get_xlim()
         ax.axhline(
-            self.intra_sector_target,
+            self.within_sector_target,
             color="C0",
             linestyle="--",
-            alpha=0.5,
-            label=f"intra target: {self.intra_sector_target}",
+            alpha=0.7,
+        )
+        ax.text(
+            xlim[1],
+            self.within_sector_target,
+            f" within: {self.within_sector_target:.1f}",
+            va="center",
+            ha="left",
+            color="C0",
+            fontsize=9,
         )
         ax.axhline(
-            self.inter_sector_target,
+            self.between_sector_target,
             color="C1",
             linestyle="--",
-            alpha=0.5,
-            label=f"inter target: {self.inter_sector_target}",
+            alpha=0.7,
         )
-        ax.legend(fontsize="small")
+        ax.text(
+            xlim[1],
+            self.between_sector_target,
+            f" between: {self.between_sector_target:.1f}",
+            va="center",
+            ha="left",
+            color="C1",
+            fontsize=9,
+        )
+        ax.legend(fontsize="small", loc="upper left")
         ax.axhline(0, color="gray", linewidth=0.5)
 
         # Add value labels
@@ -1025,6 +1053,7 @@ class FiducialPit(Plot1D):
                 fontsize=8,
             )
 
+        sns.despine(ax=ax)
         fig.tight_layout()
         return fig, ax
 
@@ -1040,6 +1069,12 @@ class FiducialPit(Plot1D):
         fig, ax = plt.subplots(figsize=figsize)
 
         gap_types = ["intra-sector", "inter-sector", "combined"]
+        colors = {"intra-sector": "C0", "inter-sector": "C1", "combined": "C2"}
+        labels_map = {
+            "intra-sector": "within-sector",
+            "inter-sector": "between-sector",
+            "combined": "combined",
+        }
         x = np.arange(len(gap_types))
 
         means = []
@@ -1056,30 +1091,36 @@ class FiducialPit(Plot1D):
                 means.append(0)
                 stds.append(0)
 
-        ax.bar(x, means, yerr=stds, capsize=5, alpha=0.8, edgecolor="k")
+        bar_colors = [colors[gt] for gt in gap_types]
+        display_labels = [labels_map[gt] for gt in gap_types]
+        ax.bar(
+            x, means, yerr=stds, capsize=5, alpha=0.8, edgecolor="k", color=bar_colors
+        )
         ax.set_xticks(x)
-        ax.set_xticklabels(gap_types)
+        ax.set_xticklabels(display_labels)
         ax.set_ylabel("Gap (mm)")
         ax.set_title(f"Gap Statistics Summary - {self.phase}")
         ax.axhline(0, color="gray", linewidth=0.5)
 
-        # Add target lines
+        # Add limit line with text label (no legend)
+        xlim = ax.get_xlim()
         ax.axhline(
-            self.intra_sector_target,
-            color="C0",
+            self.gap_limit,
+            color="C3",
             linestyle="--",
-            alpha=0.5,
-            label=f"intra target: {self.intra_sector_target}",
+            alpha=0.7,
         )
-        ax.axhline(
-            self.inter_sector_target,
-            color="C1",
-            linestyle="--",
-            alpha=0.5,
-            label=f"inter target: {self.inter_sector_target}",
+        ax.text(
+            xlim[1],
+            self.gap_limit,
+            f" limit: {self.gap_limit:.1f}",
+            va="center",
+            ha="left",
+            color="C3",
+            fontsize=9,
         )
-        ax.legend()
 
+        sns.despine(ax=ax)
         fig.tight_layout()
         return fig, ax
 
@@ -1160,7 +1201,7 @@ class FiducialPit(Plot1D):
     def position_statistics(
         self,
         assembly_phase: int | None = None,
-    ) -> tuple[pandas.DataFrame, alt.Chart]:
+    ) -> tuple[pandas.DataFrame, tuple[plt.Figure, np.ndarray]]:
         """Calculate position statistics from installed sectors.
 
         Extracts coil position parameters using the phase configured at
@@ -1176,8 +1217,8 @@ class FiducialPit(Plot1D):
 
         Returns
         -------
-        tuple[pandas.DataFrame, alt.Chart]
-            DataFrame with position statistics and Altair chart visualization.
+        tuple[pandas.DataFrame, tuple[plt.Figure, np.ndarray]]
+            DataFrame with position statistics and matplotlib figure/axes.
         """
         # Map assembly phase to sectors (in installation order: 6, 7, 5, 8)
         # Based on git history: SM6 Feb 2025, SM7 Mar 2025, SM5 Aug 2025, SM8 Oct 2025
@@ -1323,8 +1364,8 @@ class FiducialPit(Plot1D):
         chart_df: pandas.DataFrame,
         stats_df: pandas.DataFrame,
         n_sectors: int,
-    ) -> alt.Chart:
-        """Build Altair visualization for position statistics.
+    ) -> tuple[plt.Figure, np.ndarray]:
+        """Build matplotlib visualization for position statistics.
 
         Creates a 3x2 grid with translations on top row and rotations on bottom.
 
@@ -1339,122 +1380,172 @@ class FiducialPit(Plot1D):
 
         Returns
         -------
-        alt.Chart
-            Altair chart object
+        tuple[plt.Figure, np.ndarray]
+            Matplotlib figure and axes array
         """
-        # Parameter layout: 3x2 grid
-        # Top row: radial, tangential, vertical
-        # Bottom row: roll_length, yaw_length, pitch_length
-        param_order = [
-            "radial",
-            "tangential",
-            "vertical",
-            "roll_length",
-            "yaw_length",
-            "pitch_length",
-        ]
-        row_map = {
-            "radial": 0,
-            "tangential": 0,
-            "vertical": 0,
-            "roll_length": 1,
-            "yaw_length": 1,
-            "pitch_length": 1,
-        }
-        col_map = {
-            "radial": 0,
-            "tangential": 1,
-            "vertical": 2,
-            "roll_length": 0,
-            "yaw_length": 1,
-            "pitch_length": 2,
-        }
-
-        chart_df = chart_df.copy()
-        chart_df["row"] = chart_df["parameter"].map(row_map)
-        chart_df["col"] = chart_df["parameter"].map(col_map)
-
-        # Order coils by toroidal position using the location array
-        # self.location maps position index to coil number
-        coil_toroidal_order = [
-            coil for coil in self.location if coil in chart_df["coil"].values
+        # Parameter layout: 2 rows x 3 cols
+        # Top row: radial, tangential, vertical (translations)
+        # Bottom row: roll_length, yaw_length, pitch_length (rotations)
+        param_grid = [
+            ["radial", "tangential", "vertical"],
+            ["roll_length", "yaw_length", "pitch_length"],
         ]
 
-        # Base chart
-        base = alt.Chart(chart_df).properties(width=180, height=150)
+        # Display labels with underscores replaced by spaces
+        param_labels = {p: p.replace("_", " ") for p in sum(param_grid, [])}
 
-        # Bars for each coil value
-        bars = base.mark_bar(opacity=0.7).encode(
-            x=alt.X("coil:O", title="Coil", sort=coil_toroidal_order),
-            y=alt.Y("value:Q", title="mm"),
-            color=alt.Color(
-                "sector:N",
-                scale=alt.Scale(scheme="category10"),
-                legend=alt.Legend(title="Sector"),
-            ),
-            tooltip=["coil", "sector", "phase", "value"],
-        )
+        # Installation order for sectors
+        sector_order = [6, 7, 5, 8]
 
-        # Mean line (dashed black)
-        mean_rule = base.mark_rule(color="black", strokeDash=[4, 4]).encode(
-            y="mean(mean):Q",
-        )
-
-        # Trial window lines (±half-width as dashed red lines)
-        # Use transform to create both positive and negative lines
-        trial_upper = base.mark_rule(
-            color="red", strokeDash=[2, 2], opacity=0.7
-        ).encode(
-            y="mean(trial_halfwidth):Q",
-        )
-        trial_lower = (
-            base.transform_calculate(neg_trial="-datum.trial_halfwidth")
-            .mark_rule(color="red", strokeDash=[2, 2], opacity=0.7)
-            .encode(y="mean(neg_trial):Q")
-        )
-
-        # Std bands using error bars
-        std_band = base.mark_errorbar(extent="stdev", color="gray").encode(
-            y=alt.Y("value:Q"),
-        )
-
-        # Combined chart - layer bars, mean, std, trial lines, then facet
-        combined = bars + mean_rule + std_band + trial_upper + trial_lower
-
-        chart = combined.facet(
-            row=alt.Row("row:O", title=None, header=alt.Header(labels=False)),
-            column=alt.Column(
-                "parameter:N",
-                title=None,
-                sort=param_order,
-            ),
-        )
-
-        # Add title
-        chart = chart.properties(
-            title=alt.TitleParams(
-                text=f"Coil Position Statistics ({n_sectors} sectors)",
-                subtitle=[
-                    "Top: translations (mm) | Bottom: rotation lengths (mm)",
-                    "Black dashed: mean | Red dashed: trial.py windows",
-                ],
+        # Order coils by sector installation order, then by position within sector
+        coil_order = []
+        for sector in sector_order:
+            sector_coils = chart_df[chart_df["sector"] == sector]["coil"].unique()
+            # Sort by toroidal position within sector
+            sector_coils_sorted = sorted(
+                sector_coils, key=lambda c: self.location.index(c)
             )
+            coil_order.extend(sector_coils_sorted)
+
+        # Assign colors by installation order
+        sector_colors = {s: f"C{i}" for i, s in enumerate(sector_order)}
+
+        # Create figure with 2x3 grid
+        axes = self.mpl_axes.generate(style="1d", nrows=2, ncols=3, figsize=(10, 5))
+        fig = self.mpl_axes.fig
+
+        # Trial windows for reference lines
+        trial_windows = {
+            "radial": 1.5,
+            "tangential": 1.5,
+            "vertical": 1.5,
+            "roll_length": 3.0,
+            "yaw_length": 3.0,
+            "pitch_length": 3.0,
+        }
+
+        for row_idx, row_params in enumerate(param_grid):
+            for col_idx, param in enumerate(row_params):
+                ax = axes[row_idx, col_idx]
+                param_data = chart_df[chart_df["parameter"] == param]
+
+                if param_data.empty:
+                    ax.set_visible(False)
+                    continue
+
+                # Plot bars for each coil
+                x_positions = np.arange(len(coil_order))
+                bar_width = 0.8
+
+                for i, coil in enumerate(coil_order):
+                    coil_data = param_data[param_data["coil"] == coil]
+                    if coil_data.empty:
+                        continue
+                    value = coil_data["value"].iloc[0]
+                    sector = coil_data["sector"].iloc[0]
+                    ax.bar(
+                        i,
+                        value,
+                        width=bar_width,
+                        color=sector_colors[sector],
+                        edgecolor="none",
+                        alpha=0.8,
+                    )
+
+                # Add trial window lines with limit labels
+                trial_hw = trial_windows.get(param, 1.5)
+                ax.axhline(trial_hw, color="C3", linestyle=":", linewidth=1, alpha=0.7)
+                ax.axhline(-trial_hw, color="C3", linestyle=":", linewidth=1, alpha=0.7)
+
+                # Axis formatting - set xlim first so we can position text
+                ax.set_xlim(-0.5, len(coil_order) - 0.5)
+
+                # Add limit label above upper line, right-aligned within plot
+                ax.text(
+                    len(coil_order) - 0.6,
+                    trial_hw,
+                    f"limit {trial_hw:.1f}mm",
+                    ha="right",
+                    va="bottom",
+                    fontsize=7,
+                    color="C3",
+                )
+
+                # Add title inside plot, upper right
+                ax.text(
+                    0.97,
+                    0.95,
+                    param_labels[param],
+                    transform=ax.transAxes,
+                    ha="right",
+                    va="top",
+                    fontsize=10,
+                    fontweight="bold",
+                )
+
+                # Only show x-axis labels on bottom row
+                if row_idx == 1:
+                    ax.set_xticks(x_positions)
+                    ax.set_xticklabels(coil_order, fontsize=8)
+                    ax.set_xlabel("TF coil", fontsize=9)
+                else:
+                    ax.set_xticks([])
+
+                # Only show y-axis label on leftmost column
+                if col_idx == 0:
+                    ax.set_ylabel("alignment, mm", fontsize=9)
+
+        # Despine all axes
+        self.mpl_axes.despine(axes.flatten())
+
+        # Add legend for sectors in installation order
+        handles = []
+        labels = []
+        for s in sector_order:
+            if s in chart_df["sector"].values:
+                # Check if this sector uses target phase
+                sector_phases = chart_df[chart_df["sector"] == s]["phase"].unique()
+                is_target = any("target" in p.lower() for p in sector_phases)
+                suffix = " (target)" if is_target else ""
+                handles.append(
+                    plt.Line2D([0], [0], color=sector_colors[s], linewidth=6, alpha=0.8)
+                )
+                labels.append(f"Sector {s}{suffix}")
+        fig.legend(
+            handles,
+            labels,
+            loc="upper center",
+            bbox_to_anchor=(0.5, 0.98),
+            frameon=False,
+            fontsize=8,
+            ncol=len(handles),
         )
 
-        return chart
+        fig.suptitle(
+            "Coil Position Statistics",
+            fontsize=11,
+            fontweight="bold",
+            y=1.02,
+        )
+        fig.tight_layout(rect=[0, 0, 1, 0.95])
 
-    def plot_position_evolution(self) -> alt.Chart:
+        return fig, axes
+
+    def plot_position_evolution(self) -> tuple[plt.Figure, np.ndarray]:
         """Plot how position statistics evolve as sectors are installed.
 
         Creates charts showing variance estimates with confidence intervals
-        for each assembly phase (5, 6, 7, 8 sectors).
+        for each assembly phase (1-4 sectors).
 
         Returns
         -------
-        alt.Chart
-            Altair chart showing variance evolution
+        tuple[plt.Figure, np.ndarray]
+            Matplotlib figure and axes array
         """
         evolution_data = []
+
+        # Sector installation order: 6, 7, 5, 8
+        sector_order = [6, 7, 5, 8]
 
         # Assembly phases 1-4 correspond to installation order: 6, 7, 5, 8
         for phase in range(1, 5):
@@ -1467,6 +1558,7 @@ class FiducialPit(Plot1D):
                     evolution_data.append(
                         {
                             "assembly_phase": phase,
+                            "sector": sector_order[phase - 1],
                             "n_coils": int(row["n"]),
                             "parameter": row["parameter"],
                             "std": row["std"],
@@ -1483,64 +1575,107 @@ class FiducialPit(Plot1D):
 
         evo_df = pandas.DataFrame(evolution_data)
 
-        # Parameter layout
-        param_order = [
-            "radial",
-            "tangential",
-            "vertical",
-            "roll_length",
-            "yaw_length",
-            "pitch_length",
+        # Parameter layout: 2 rows x 3 cols
+        param_grid = [
+            ["radial", "tangential", "vertical"],
+            ["roll_length", "yaw_length", "pitch_length"],
         ]
 
-        base = alt.Chart(evo_df).properties(width=150, height=120)
+        # Create figure with 2x3 grid
+        axes = self.mpl_axes.generate(style="1d", nrows=2, ncols=3, figsize=(10, 5))
+        fig = self.mpl_axes.fig
 
-        # Std estimate with confidence interval
-        line = base.mark_line(point=True).encode(
-            x=alt.X("assembly_phase:O", title="Sectors installed"),
-            y=alt.Y("std:Q", title="σ (mm)"),
-            color=alt.value("steelblue"),
+        # X-axis labels as sector numbers
+        x_labels = [str(s) for s in sector_order]
+
+        for row_idx, row_params in enumerate(param_grid):
+            for col_idx, param in enumerate(row_params):
+                ax = axes[row_idx, col_idx]
+                param_data = evo_df[evo_df["parameter"] == param]
+
+                if param_data.empty:
+                    ax.set_visible(False)
+                    continue
+
+                phases = param_data["assembly_phase"].values
+                std_vals = param_data["std"].values
+                std_lower = param_data["std_lower_95"].values
+                std_upper = param_data["std_upper_95"].values
+                trial_hw = param_data["trial_halfwidth"].iloc[0]
+
+                # Plot confidence interval band
+                ax.fill_between(
+                    phases, std_lower, std_upper, color="C0", alpha=0.25, linewidth=0
+                )
+
+                # Plot std line with markers
+                ax.plot(phases, std_vals, "o-", color="C0", markersize=5, linewidth=1.5)
+
+                # Trial reference line with limit label
+                ax.axhline(trial_hw, color="C3", linestyle=":", linewidth=1, alpha=0.7)
+                ax.text(
+                    4.4,
+                    trial_hw,
+                    f"limit {trial_hw:.1f}mm",
+                    ha="right",
+                    va="bottom",
+                    fontsize=7,
+                    color="C3",
+                )
+
+                # Add title inside plot, upper right
+                param_label = param.replace("_", " ")
+                ax.text(
+                    0.97,
+                    0.95,
+                    param_label,
+                    transform=ax.transAxes,
+                    ha="right",
+                    va="top",
+                    fontsize=10,
+                )
+
+                # Axis formatting
+                ax.set_xlim(0.5, 4.5)
+                ax.set_ylim(0, 2 * trial_hw)
+                ax.set_xticks([1, 2, 3, 4])
+                ax.set_xticklabels(x_labels)
+
+                # Only show x-axis labels on bottom row
+                if row_idx == 1:
+                    ax.set_xlabel("Sector", fontsize=9)
+
+                # Only show y-axis label on leftmost column
+                if col_idx == 0:
+                    ax.set_ylabel("σ, mm", fontsize=9)
+
+        # Despine all axes
+        self.mpl_axes.despine(axes.flatten())
+
+        fig.suptitle(
+            "Variance Evolution with Assembly Progress",
+            fontsize=11,
+            fontweight="bold",
         )
+        fig.tight_layout(rect=[0, 0, 1, 0.95])
 
-        band = base.mark_area(opacity=0.3).encode(
-            x="assembly_phase:O",
-            y="std_lower_95:Q",
-            y2="std_upper_95:Q",
-        )
-
-        # Trial reference line
-        trial_line = base.mark_rule(color="red", strokeDash=[2, 2]).encode(
-            y="mean(trial_halfwidth):Q",
-        )
-
-        chart = (band + line + trial_line).facet(
-            column=alt.Column("parameter:N", sort=param_order, title=None),
-        )
-
-        chart = chart.properties(
-            title=alt.TitleParams(
-                text="Variance Evolution with Assembly Progress",
-                subtitle="Blue: estimated σ with 95% CI | Red: trial.py window",
-            )
-        )
-
-        return chart
+        return fig, axes
 
 
 if __name__ == "__main__":
     # Sectors 5, 6, 7 are adjacent in the pit
     # Sector 8 contains coils 4 and 11 (coil 11 is adjacent to sector 7)
     sectors = {
-        5: [16, 5],
         6: [12, 13],
         7: [8, 9],
+        5: [16, 5],
         8: [4, 11],
     }
 
     # Load pit data
     pit = FiducialPit(
         sectors=sectors,
-        phase="In-pit target",
+        phase="latest",
         pcr=True,
         private=False,
     )
@@ -1552,20 +1687,16 @@ if __name__ == "__main__":
     print("\n" + "=" * 60)
     print("Position Statistics")
     print("=" * 60)
-    stats_df, position_chart = pit.position_statistics()
+    stats_df, (position_fig, position_axes) = pit.position_statistics()
     print(stats_df.to_string())
 
     # Show evolution chart
-    evolution_chart = pit.plot_position_evolution()
-    evolution_chart.show()
-
-    # Show position chart
-    position_chart.show()
+    evolution_fig, evolution_axes = pit.plot_position_evolution()
 
     # Plot gaps
     pit.plot_gaps()
-    plt.show()
 
     # Plot statistics
     pit.plot_statistics()
+
     plt.show()

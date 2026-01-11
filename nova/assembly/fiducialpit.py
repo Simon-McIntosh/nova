@@ -2386,7 +2386,7 @@ class FiducialPit(Plot1D):
 
                     # Only show y-axis label on leftmost column
                     if col_idx == 0:
-                        ax.set_ylabel("alignment window (mm)")
+                        ax.set_ylabel("tolerance (mm)")
 
             # Despine all axes
             for ax in axes.flatten():

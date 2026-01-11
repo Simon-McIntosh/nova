@@ -5,7 +5,6 @@ from datetime import date
 from pathlib import Path
 from typing import ClassVar
 
-import xxhash
 import yaml
 
 
@@ -13,17 +12,8 @@ import yaml
 class TrialManifest:
     """Manage trial simulation manifest.
 
-    Provides parameter tracking, hash-based caching, and reproducibility
-    for Monte Carlo trial simulations.
-
-    Initialization modes:
-    1. By name only: Load existing simulation by label
-    2. By hash only: Load existing simulation by hash
-    3. By parameters only: Match existing or fail if no name given
-    4. By name + parameters: Create new or update existing entry
-    5. By name + hash: Validate hash matches stored parameters
-
-    The hash cannot be set explicitly - it is computed from parameters.
+    Provides named parameter sets for Monte Carlo trial simulations.
+    The cache hash is computed at runtime by Trial.group_name.
 
     Parameters
     ----------
@@ -47,11 +37,6 @@ class TrialManifest:
         Human-readable description
     manifest_path : Path | None
         Path to manifest YAML file
-
-    Attributes
-    ----------
-    hash : str
-        Computed xxhash32 of input parameters (read-only)
     """
 
     name: str | None = None
@@ -66,7 +51,6 @@ class TrialManifest:
     manifest_path: Path | None = None
 
     _manifest: dict = field(init=False, repr=False, default_factory=dict)
-    _hash: str | None = field(init=False, repr=False, default=None)
 
     DEFAULT_MANIFEST: ClassVar[Path] = Path(__file__).parent / "trial_manifest.yml"
 
@@ -89,25 +73,6 @@ class TrialManifest:
         """Save manifest to YAML file."""
         with open(self.manifest_path, "w") as f:
             yaml.dump(self._manifest, f, default_flow_style=False, sort_keys=False)
-
-    def _compute_hash(self) -> str:
-        """Compute hash from current parameters."""
-        hasher = xxhash.xxh32()
-        hasher.update(str(self.samples).encode())
-        hasher.update(str(self.theta).encode())
-        hasher.update(str(self.components).encode())
-        hasher.update(str(self.pdf).encode())
-        if self.trial_type == "vault":
-            hasher.update(str(self.adjust_gap).encode())
-            hasher.update(str(self.max_nominal_gap).encode())
-        return hasher.hexdigest()
-
-    @property
-    def hash(self) -> str | None:
-        """Return computed hash (read-only)."""
-        if self._hash is None and self._has_parameters():
-            self._hash = self._compute_hash()
-        return self._hash
 
     def _has_parameters(self) -> bool:
         """Check if required parameters are set."""
@@ -168,16 +133,6 @@ class TrialManifest:
 
                 # Apply defaults for any still-missing values
                 self._apply_defaults()
-
-                # Validate hash if stored
-                stored_hash = trial_data.get("hash")
-                if stored_hash and self._has_parameters():
-                    computed = self._compute_hash()
-                    if stored_hash != computed:
-                        raise ValueError(
-                            f"Hash mismatch for '{self.name}': "
-                            f"stored={stored_hash}, computed={computed}"
-                        )
             return
 
         # Case 2: Name provided but not in manifest - require parameters
@@ -190,72 +145,13 @@ class TrialManifest:
                 )
             return
 
-        # Case 3: No name, but parameters provided - find by hash
+        # Case 3: No name - require parameters for new entry
         if self.name is None:
             self._apply_defaults()
-            if self._has_parameters():
-                computed_hash = self._compute_hash()
-                for sim_name, entry in simulations.items():
-                    trial_data = entry.get(self.trial_type, {})
-                    if trial_data.get("hash") == computed_hash:
-                        self.name = sim_name
-                        self.description = entry.get("description", "")
-                        return
-                # No match found - fail if no name given
+            if not self._has_parameters():
                 raise ValueError(
-                    f"No simulation found with hash {computed_hash}. "
-                    "Provide a name to create a new entry."
+                    "Must provide either a simulation name or complete parameters."
                 )
-
-        # Case 4: Neither name nor complete parameters
-        if self.name is None and not self._has_parameters():
-            raise ValueError(
-                "Must provide either a simulation name or complete parameters."
-            )
-
-    @classmethod
-    def from_hash(
-        cls,
-        hash_value: str,
-        trial_type: str = "vault",
-        manifest_path: Path | None = None,
-    ) -> "TrialManifest":
-        """Load simulation by hash.
-
-        Parameters
-        ----------
-        hash_value : str
-            The hash to search for
-        trial_type : str
-            Type of trial: 'vault' or 'error_field'
-        manifest_path : Path | None
-            Path to manifest YAML file
-
-        Returns
-        -------
-        TrialManifest
-            Manifest instance with loaded parameters
-
-        Raises
-        ------
-        ValueError
-            If no simulation with the given hash is found
-        """
-        path = manifest_path or cls.DEFAULT_MANIFEST
-        with open(path) as f:
-            manifest = yaml.safe_load(f) or {}
-
-        simulations = manifest.get("simulations", {})
-        for sim_name, entry in simulations.items():
-            trial_data = entry.get(trial_type, {})
-            if trial_data.get("hash") == hash_value:
-                return cls(
-                    name=sim_name,
-                    trial_type=trial_type,
-                    manifest_path=path,
-                )
-
-        raise ValueError(f"No simulation found with hash {hash_value}")
 
     def save(self) -> None:
         """Save current parameters to manifest.
@@ -285,9 +181,6 @@ class TrialManifest:
         entry[self.trial_type] = {
             "samples": self.samples,
             "theta": self.theta,
-            "components": self.components,
-            "pdf": self.pdf,
-            "hash": self.hash,
         }
         if self.trial_type == "vault":
             entry[self.trial_type]["adjust_gap"] = self.adjust_gap
@@ -304,7 +197,6 @@ class TrialManifest:
             "theta": self.theta,
             "components": self.components,
             "pdf": self.pdf,
-            "hash": self.hash,
             "description": self.description,
         }
         if self.trial_type == "vault":
@@ -346,7 +238,6 @@ class TrialManifest:
                             "trial_type": tt,
                             "description": entry.get("description", ""),
                             "date": entry.get("date"),
-                            "hash": entry[tt].get("hash"),
                             "samples": entry[tt].get("samples"),
                         }
                     )
@@ -359,7 +250,6 @@ class TrialManifest:
         print(f"\n{'=' * 60}")
         print(f"Trial: {self.name or '(unnamed)'}")
         print(f"Type: {self.trial_type}")
-        print(f"Hash: {self.hash or '(not computed)'}")
         print(f"Description: {self.description or '(none)'}")
         print(f"{'=' * 60}\n")
 

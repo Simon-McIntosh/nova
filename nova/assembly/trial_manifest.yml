@@ -1,12 +1,12 @@
 # Trial simulation manifest
-# Links simulation parameters to cached results via hash
+# Named parameter sets for Monte Carlo simulations
 #
 # Structure:
 #   - defaults: Fixed components and pdfs for each trial type
-#   - simulations: Named parameter sets with computed hashes
+#   - simulations: Named parameter sets (theta, samples)
 #
-# The hash is computed from (samples, adjust_gap, max_nominal_gap, seed, theta, pdf)
-# and serves as the group name in the netCDF cache file.
+# The cache hash is computed at runtime by Trial.group_name from all
+# instance attributes. This manifest only stores the variable parameters.
 
 defaults:
   vault:
@@ -29,11 +29,9 @@ simulations:
     vault:
       samples: 200000
       theta: [1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 3.0]
-      hash: 41ecd9e6
     error_field:
       samples: 2000000
       theta: [1.5, 1.5, 3.0, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5]
-      hash: 00df8a45
 
   wide_tolerances_2021:
     description: "Wide tolerance study - from commented parameters"
@@ -41,11 +39,9 @@ simulations:
     vault:
       samples: 100000
       theta: [1.5, 1.5, 3.0, 3.0, 2.0, 2.0, 5.0]
-      hash: 967b983c
     error_field:
       samples: 2000000
       theta: [5.0, 5.0, 5.0, 2.0, 2.0, 2.0, 5.0, 10.0, 10.0]
-      hash: 42956fad
 
   # From commented parameters: uniform 3mm for all
   uniform_3mm:
@@ -54,4 +50,3 @@ simulations:
     error_field:
       samples: 2000000
       theta: [3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0]
-      hash: 055e66bb

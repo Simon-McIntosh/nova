@@ -104,6 +104,25 @@ class TrialManifest:
             if "max_nominal_gap" in defaults:
                 self.max_nominal_gap = defaults.get("max_nominal_gap", 2.0)
 
+    def _extract_theta_list(
+        self, theta_dict: dict[str, float], components: list[str]
+    ) -> list[float]:
+        """Extract theta list from dict in component order.
+
+        Parameters
+        ----------
+        theta_dict : dict[str, float]
+            Mapping of component name to theta value
+        components : list[str]
+            Ordered list of components for this trial type
+
+        Returns
+        -------
+        list[float]
+            Theta values in component order
+        """
+        return [theta_dict.get(comp, 1.5) for comp in components]
+
     def _resolve_parameters(self) -> None:
         """Resolve parameters from name, hash, or direct input."""
         simulations = self._manifest.get("simulations", {})
@@ -113,12 +132,31 @@ class TrialManifest:
             entry = simulations[self.name]
             trial_data = entry.get(self.trial_type, {})
 
+            # Apply defaults first to get components
+            self._apply_defaults()
+
+            # Load shared theta dict from simulation level
+            if self.theta is None and "theta" in entry:
+                theta_source = entry["theta"]
+                if isinstance(theta_source, dict) and self.components:
+                    self.theta = self._extract_theta_list(theta_source, self.components)
+                elif isinstance(theta_source, list):
+                    # Legacy format: list at simulation level
+                    self.theta = theta_source
+
+            # Override with trial-specific theta if present (legacy support)
             if trial_data:
-                # Load stored parameters if not explicitly provided
                 if self.samples is None:
                     self.samples = trial_data.get("samples")
-                if self.theta is None:
-                    self.theta = trial_data.get("theta")
+                # Trial-specific theta overrides shared theta (legacy support)
+                if "theta" in trial_data:
+                    theta_source = trial_data["theta"]
+                    if isinstance(theta_source, dict) and self.components:
+                        self.theta = self._extract_theta_list(
+                            theta_source, self.components
+                        )
+                    elif isinstance(theta_source, list):
+                        self.theta = theta_source
                 # Components/pdf from trial data or defaults
                 if self.components is None:
                     self.components = trial_data.get("components")
@@ -134,9 +172,6 @@ class TrialManifest:
                         self.max_nominal_gap = trial_data["max_nominal_gap"]
                 if not self.description:
                     self.description = entry.get("description", "")
-
-                # Apply defaults for any still-missing values
-                self._apply_defaults()
             return
 
         # Case 2: Name provided but not in manifest - require parameters

@@ -1098,12 +1098,17 @@ class FiducialPit(Plot1D):
 
         midplane = ilis.intersect(sector_planes.loc[sector_index])
 
-        # Use inner radius if not specified
+        # Use inner radius if not specified, nudged inward to stay within convex hull
         if radius is None:
-            radius = ilis.data.r.min()
+            r_min = ilis.data.r.min()
+            r_max = ilis.data.r.max()
+            radius = r_min + 0.01 * (r_max - r_min)
 
-        # Create z range spanning the ILIS data
-        z_range = np.linspace(ilis.data.z.min(), ilis.data.z.max(), n_points)
+        # Create z range spanning the ILIS data, nudged inward
+        z_min = ilis.data.z.min()
+        z_max = ilis.data.z.max()
+        z_margin = 0.01 * (z_max - z_min)
+        z_range = np.linspace(z_min + z_margin, z_max - z_margin, n_points)
         query_points = np.column_stack([np.full(n_points, radius), z_range])
 
         # Interpolate each surface offset at the query points
@@ -1115,22 +1120,12 @@ class FiducialPit(Plot1D):
             plane_data = sector_data_clocked.loc[plane_mask]
             plane_offset = ilis.offset(plane_data[["x", "y", "z"]], midplane)
 
-            # Use linear interpolation, fill NaN with nearest neighbor
             offset_interp = griddata(
                 plane_data[["r", "z"]].values,
                 plane_offset,
                 query_points,
                 method="linear",
             )
-            nan_mask = np.isnan(offset_interp)
-            if nan_mask.any():
-                offset_nearest = griddata(
-                    plane_data[["r", "z"]].values,
-                    plane_offset,
-                    query_points[nan_mask],
-                    method="nearest",
-                )
-                offset_interp[nan_mask] = offset_nearest
             profile_offsets.append(offset_interp)
 
         # Gap = offset_second - offset_first
@@ -1215,11 +1210,17 @@ class FiducialPit(Plot1D):
         data_second_filtered = data_second[data_second.feature == feature_second].copy()
         all_data = pandas.concat([data_first_filtered, data_second_filtered])
 
-        # Use inner radius if not specified
+        # Use inner radius if not specified, nudged inward to stay within convex hull
         if radius is None:
-            radius = all_data.r.min()
+            r_min = all_data.r.min()
+            r_max = all_data.r.max()
+            radius = r_min + 0.01 * (r_max - r_min)
 
-        z_range = np.linspace(all_data.z.min(), all_data.z.max(), n_points)
+        # Create z range nudged inward to stay within convex hull
+        z_min = all_data.z.min()
+        z_max = all_data.z.max()
+        z_margin = 0.01 * (z_max - z_min)
+        z_range = np.linspace(z_min + z_margin, z_max - z_margin, n_points)
         query_points = np.column_stack([np.full(n_points, radius), z_range])
 
         def calculate_offset(data):
@@ -1236,22 +1237,12 @@ class FiducialPit(Plot1D):
                 continue
 
             plane_offset = calculate_offset(data_filtered)
-            # Use linear interpolation, fill NaN with nearest neighbor
             offset_interp = griddata(
                 data_filtered[["r", "z"]].values,
                 plane_offset,
                 query_points,
                 method="linear",
             )
-            nan_mask = np.isnan(offset_interp)
-            if nan_mask.any():
-                offset_nearest = griddata(
-                    data_filtered[["r", "z"]].values,
-                    plane_offset,
-                    query_points[nan_mask],
-                    method="nearest",
-                )
-                offset_interp[nan_mask] = offset_nearest
             profile_offsets.append(offset_interp)
 
         gap_profile = profile_offsets[1] - profile_offsets[0]

@@ -1742,6 +1742,20 @@ class FiducialPit(Plot1D):
             # Trial window half-width
             trial_hw = trial_windows.get(param, np.nan)
 
+            # Expected σ for uniform distribution: σ = L/√3
+            expected_std = trial_hw / np.sqrt(3)
+
+            # Expected 95% CI bounds for σ with n=18 samples
+            # Using chi-squared: s² ~ σ²·χ²(n-1)/(n-1)
+            n_target = 18
+            df_target = n_target - 1
+            chi2_lower_18 = sp_stats.chi2.ppf(alpha / 2, df_target)
+            chi2_upper_18 = sp_stats.chi2.ppf(1 - alpha / 2, df_target)
+            # σ_lower = σ_true * sqrt((n-1)/χ²_upper)
+            # σ_upper = σ_true * sqrt((n-1)/χ²_lower)
+            expected_std_lower_18 = expected_std * np.sqrt(df_target / chi2_upper_18)
+            expected_std_upper_18 = expected_std * np.sqrt(df_target / chi2_lower_18)
+
             stats.append(
                 {
                     "parameter": param,
@@ -1751,6 +1765,9 @@ class FiducialPit(Plot1D):
                     "std_lower_95": std_lower,
                     "std_upper_95": std_upper,
                     "trial_halfwidth": trial_hw,
+                    "expected_std": expected_std,
+                    "expected_std_lower_18": expected_std_lower_18,
+                    "expected_std_upper_18": expected_std_upper_18,
                 }
             )
 
@@ -1988,6 +2005,9 @@ class FiducialPit(Plot1D):
                             "std_lower_95": row["std_lower_95"],
                             "std_upper_95": row["std_upper_95"],
                             "trial_halfwidth": row["trial_halfwidth"],
+                            "expected_std": row["expected_std"],
+                            "expected_std_lower_18": row["expected_std_lower_18"],
+                            "expected_std_upper_18": row["expected_std_upper_18"],
                         }
                     )
             except (ValueError, KeyError) as e:
@@ -2003,6 +2023,9 @@ class FiducialPit(Plot1D):
             ["radial", "tangential", "vertical"],
             ["roll_length", "yaw_length", "pitch_length"],
         ]
+
+        # Expected σ for uniform distribution: σ = L/√3 where L is half-width
+        sqrt3 = np.sqrt(3)
 
         with sns.plotting_context("poster"):
             fig, axes = plt.subplots(2, 3, figsize=(14, 8))
@@ -2028,7 +2051,24 @@ class FiducialPit(Plot1D):
                     std_upper = param_data["std_upper_95"].values
                     trial_hw = param_data["trial_halfwidth"].iloc[0]
 
-                    # Plot confidence interval band
+                    # Expected σ for uniform distribution within tolerance ±L
+                    # σ = L/√3 where L is the half-width
+                    expected_std = trial_hw / sqrt3
+
+                    # Get expected 95% CI bounds for n=18 samples
+                    expected_std_lower_18 = param_data["expected_std_lower_18"].iloc[0]
+                    expected_std_upper_18 = param_data["expected_std_upper_18"].iloc[0]
+
+                    # Plot expected 95% CI band for n=18 (target)
+                    ax.axhspan(
+                        expected_std_lower_18,
+                        expected_std_upper_18,
+                        color="C3",
+                        alpha=0.15,
+                        linewidth=0,
+                    )
+
+                    # Plot measured confidence interval band
                     ax.fill_between(
                         phases,
                         std_lower,
@@ -2043,16 +2083,16 @@ class FiducialPit(Plot1D):
                         phases, std_vals, "o-", color="C0", markersize=8, linewidth=2
                     )
 
-                    # Trial reference line
+                    # Expected σ reference line (uniform distribution)
                     ax.axhline(
-                        trial_hw, color="C3", linestyle="--", linewidth=1, alpha=0.7
+                        expected_std, color="C3", linestyle="--", linewidth=1, alpha=0.7
                     )
 
-                    # Add limit label on right side
+                    # Add label showing formula: L/√3
                     ax.text(
                         4.5,
-                        trial_hw,
-                        f" {trial_hw:.1f}",
+                        expected_std,
+                        f" {trial_hw:.1f}/√3",
                         va="center",
                         ha="left",
                         color="C3",
@@ -2063,7 +2103,7 @@ class FiducialPit(Plot1D):
 
                     # Axis formatting
                     ax.set_xlim(0.5, 4.5)
-                    ax.set_ylim(0, 2 * trial_hw)
+                    ax.set_ylim(0, 2 * expected_std)
                     ax.set_xticks([1, 2, 3, 4])
                     ax.set_xticklabels(x_labels)
 

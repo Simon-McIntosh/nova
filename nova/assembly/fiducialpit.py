@@ -2158,4 +2158,39 @@ if __name__ == "__main__":
     )
     fig, ax = pit.plot_gap_profile(12, 13, measurements=measurements_s6)
 
+    # Create measurement DataFrame S6-S7 (coils 13-8, inter-sector)
+    measurements_s6_s7 = pandas.DataFrame(
+        {
+            "z": [
+                4469,
+                4029,
+                2975,
+                2518,
+                2496,
+                2076,
+                1512,
+                1482,
+                -3517,
+                -3972,
+                -4032,
+                -4465,
+            ],
+            "gap": [
+                1.85,
+                1.85,
+                1.75,
+                1.7,
+                1.65,
+                1.65,
+                1.6,
+                1.6,
+                1.85,
+                1.95,
+                1.95,
+                1.95,
+            ],
+        }
+    )
+    fig, ax = pit.plot_gap_profile(13, 8, measurements=measurements_s6_s7)
+
     plt.show()

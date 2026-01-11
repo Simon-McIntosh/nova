@@ -1785,7 +1785,7 @@ class FiducialPit(Plot1D):
     ) -> tuple[plt.Figure, np.ndarray]:
         """Build matplotlib visualization for position statistics.
 
-        Creates a 3x2 grid with translations on top row and rotations on bottom.
+        Creates a 2x3 grid with translations on top row and rotations on bottom.
 
         Parameters
         ----------
@@ -1802,9 +1802,9 @@ class FiducialPit(Plot1D):
             Matplotlib figure and axes array
         """
         with sns.plotting_context("poster"):
+            fig, axes = plt.subplots(2, 3, figsize=(14, 8))
+
             # Parameter layout: 2 rows x 3 cols
-            # Top row: radial, tangential, vertical (translations)
-            # Bottom row: roll_length, yaw_length, pitch_length (rotations)
             param_grid = [
                 ["radial", "tangential", "vertical"],
                 ["roll_length", "yaw_length", "pitch_length"],
@@ -1820,7 +1820,6 @@ class FiducialPit(Plot1D):
             coil_order = []
             for sector in sector_order:
                 sector_coils = chart_df[chart_df["sector"] == sector]["coil"].unique()
-                # Sort by toroidal position within sector
                 sector_coils_sorted = sorted(
                     sector_coils, key=lambda c: self.location.index(c)
                 )
@@ -1828,10 +1827,6 @@ class FiducialPit(Plot1D):
 
             # Assign colors by installation order
             sector_colors = {s: f"C{i}" for i, s in enumerate(sector_order)}
-
-            # Create figure with 2x3 grid
-            axes = self.mpl_axes.generate(style="1d", nrows=2, ncols=3, figsize=(10, 5))
-            fig = self.mpl_axes.fig
 
             # Trial windows for reference lines
             trial_windows = {
@@ -1867,65 +1862,57 @@ class FiducialPit(Plot1D):
                             value,
                             width=bar_width,
                             color=sector_colors[sector],
-                            edgecolor="none",
+                            edgecolor="k",
                             alpha=0.8,
                         )
 
-                    # Add trial window lines with limit labels
+                    # Add trial window lines
                     trial_hw = trial_windows.get(param, 1.5)
                     ax.axhline(
-                        trial_hw, color="C3", linestyle=":", linewidth=1, alpha=0.7
+                        trial_hw, color="C3", linestyle="--", linewidth=1, alpha=0.7
                     )
                     ax.axhline(
-                        -trial_hw, color="C3", linestyle=":", linewidth=1, alpha=0.7
+                        -trial_hw, color="C3", linestyle="--", linewidth=1, alpha=0.7
                     )
 
-                    # Axis formatting - set xlim first so we can position text
+                    # Axis formatting
                     ax.set_xlim(-0.5, len(coil_order) - 0.5)
 
-                    # Add limit label above upper line, right-aligned within plot
+                    # Add limit label on right side
+                    xlim = ax.get_xlim()
                     ax.text(
-                        len(coil_order) - 0.6,
+                        xlim[1],
                         trial_hw,
-                        f"limit {trial_hw:.1f}mm",
-                        ha="right",
-                        va="bottom",
-                        fontsize=7,
+                        f" {trial_hw:.1f}",
+                        va="center",
+                        ha="left",
                         color="C3",
                     )
 
-                    # Add title inside plot, upper right
-                    ax.text(
-                        0.97,
-                        0.95,
-                        param_labels[param],
-                        transform=ax.transAxes,
-                        ha="right",
-                        va="top",
-                        fontsize=10,
-                    )
+                    # Add title as subplot title
+                    ax.set_title(param_labels[param])
 
                     # Only show x-axis labels on bottom row
                     if row_idx == 1:
                         ax.set_xticks(x_positions)
-                        ax.set_xticklabels(coil_order, fontsize=8)
-                        ax.set_xlabel("TF coil", fontsize=9)
+                        ax.set_xticklabels(coil_order, rotation=45, ha="right")
+                        ax.set_xlabel("TF coil")
                     else:
                         ax.set_xticks([])
 
                     # Only show y-axis label on leftmost column
                     if col_idx == 0:
-                        ax.set_ylabel("alignment, mm", fontsize=9)
+                        ax.set_ylabel("alignment (mm)")
 
             # Despine all axes
-            self.mpl_axes.despine(axes.flatten())
+            for ax in axes.flatten():
+                sns.despine(ax=ax)
 
             # Add legend for sectors in installation order
             handles = []
             labels = []
             for s in sector_order:
                 if s in chart_df["sector"].values:
-                    # Check if this sector uses target phase
                     sector_phases = chart_df[chart_df["sector"] == s]["phase"].unique()
                     is_target = any("target" in p.lower() for p in sector_phases)
                     suffix = " (target)" if is_target else ""
@@ -1939,18 +1926,13 @@ class FiducialPit(Plot1D):
                 handles,
                 labels,
                 loc="upper center",
-                bbox_to_anchor=(0.5, 0.98),
+                bbox_to_anchor=(0.5, 1.0),
                 frameon=False,
-                fontsize=8,
                 ncol=len(handles),
             )
 
-            fig.suptitle(
-                "Coil Position Statistics",
-                fontsize=11,
-                y=1.02,
-            )
-            fig.tight_layout(rect=[0, 0, 1, 0.95])
+            fig.suptitle("Coil Position Statistics", y=1.04)
+            fig.tight_layout()
 
             return fig, axes
 
@@ -2004,85 +1986,85 @@ class FiducialPit(Plot1D):
             ["roll_length", "yaw_length", "pitch_length"],
         ]
 
-        # Create figure with 2x3 grid
-        axes = self.mpl_axes.generate(style="1d", nrows=2, ncols=3, figsize=(10, 5))
-        fig = self.mpl_axes.fig
+        with sns.plotting_context("poster"):
+            fig, axes = plt.subplots(2, 3, figsize=(14, 8))
 
-        # X-axis labels as sector numbers
-        x_labels = [str(s) for s in sector_order]
+            # X-axis labels as sector numbers
+            x_labels = [str(s) for s in sector_order]
 
-        for row_idx, row_params in enumerate(param_grid):
-            for col_idx, param in enumerate(row_params):
-                ax = axes[row_idx, col_idx]
-                param_data = evo_df[evo_df["parameter"] == param]
+            # Display labels with underscores replaced by spaces
+            param_labels = {p: p.replace("_", " ") for p in sum(param_grid, [])}
 
-                if param_data.empty:
-                    ax.set_visible(False)
-                    continue
+            for row_idx, row_params in enumerate(param_grid):
+                for col_idx, param in enumerate(row_params):
+                    ax = axes[row_idx, col_idx]
+                    param_data = evo_df[evo_df["parameter"] == param]
 
-                phases = param_data["assembly_phase"].values
-                std_vals = param_data["std"].values
-                std_lower = param_data["std_lower_95"].values
-                std_upper = param_data["std_upper_95"].values
-                trial_hw = param_data["trial_halfwidth"].iloc[0]
+                    if param_data.empty:
+                        ax.set_visible(False)
+                        continue
 
-                # Plot confidence interval band
-                ax.fill_between(
-                    phases, std_lower, std_upper, color="C0", alpha=0.25, linewidth=0
-                )
+                    phases = param_data["assembly_phase"].values
+                    std_vals = param_data["std"].values
+                    std_lower = param_data["std_lower_95"].values
+                    std_upper = param_data["std_upper_95"].values
+                    trial_hw = param_data["trial_halfwidth"].iloc[0]
 
-                # Plot std line with markers
-                ax.plot(phases, std_vals, "o-", color="C0", markersize=5, linewidth=1.5)
+                    # Plot confidence interval band
+                    ax.fill_between(
+                        phases,
+                        std_lower,
+                        std_upper,
+                        color="C0",
+                        alpha=0.25,
+                        linewidth=0,
+                    )
 
-                # Trial reference line with limit label
-                ax.axhline(trial_hw, color="C3", linestyle=":", linewidth=1, alpha=0.7)
-                ax.text(
-                    4.4,
-                    trial_hw,
-                    f"limit {trial_hw:.1f}mm",
-                    ha="right",
-                    va="bottom",
-                    fontsize=7,
-                    color="C3",
-                )
+                    # Plot std line with markers
+                    ax.plot(
+                        phases, std_vals, "o-", color="C0", markersize=8, linewidth=2
+                    )
 
-                # Add title inside plot, upper right
-                param_label = param.replace("_", " ")
-                ax.text(
-                    0.97,
-                    0.95,
-                    param_label,
-                    transform=ax.transAxes,
-                    ha="right",
-                    va="top",
-                    fontsize=10,
-                )
+                    # Trial reference line
+                    ax.axhline(
+                        trial_hw, color="C3", linestyle="--", linewidth=1, alpha=0.7
+                    )
 
-                # Axis formatting
-                ax.set_xlim(0.5, 4.5)
-                ax.set_ylim(0, 2 * trial_hw)
-                ax.set_xticks([1, 2, 3, 4])
-                ax.set_xticklabels(x_labels)
+                    # Add limit label on right side
+                    ax.text(
+                        4.5,
+                        trial_hw,
+                        f" {trial_hw:.1f}",
+                        va="center",
+                        ha="left",
+                        color="C3",
+                    )
 
-                # Only show x-axis labels on bottom row
-                if row_idx == 1:
-                    ax.set_xlabel("Sector", fontsize=9)
+                    # Add title as subplot title
+                    ax.set_title(param_labels[param])
 
-                # Only show y-axis label on leftmost column
-                if col_idx == 0:
-                    ax.set_ylabel("σ, mm", fontsize=9)
+                    # Axis formatting
+                    ax.set_xlim(0.5, 4.5)
+                    ax.set_ylim(0, 2 * trial_hw)
+                    ax.set_xticks([1, 2, 3, 4])
+                    ax.set_xticklabels(x_labels)
 
-        # Despine all axes
-        self.mpl_axes.despine(axes.flatten())
+                    # Only show x-axis labels on bottom row
+                    if row_idx == 1:
+                        ax.set_xlabel("Sector")
 
-        fig.suptitle(
-            "Variance Evolution with Assembly Progress",
-            fontsize=11,
-            fontweight="bold",
-        )
-        fig.tight_layout(rect=[0, 0, 1, 0.95])
+                    # Only show y-axis label on leftmost column
+                    if col_idx == 0:
+                        ax.set_ylabel("σ (mm)")
 
-        return fig, axes
+            # Despine all axes
+            for ax in axes.flatten():
+                sns.despine(ax=ax)
+
+            fig.suptitle("Variance Evolution with Assembly Progress", y=1.02)
+            fig.tight_layout()
+
+            return fig, axes
 
 
 if __name__ == "__main__":

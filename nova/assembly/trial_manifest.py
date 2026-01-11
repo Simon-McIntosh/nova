@@ -186,6 +186,9 @@ class TrialManifest:
             "samples": self.samples,
             "theta": self.theta,
         }
+        # Save measured_sectors only when specified
+        if self.measured_sectors is not None:
+            entry[self.trial_type]["measured_sectors"] = self.measured_sectors
         if self.trial_type == "vault":
             entry[self.trial_type]["adjust_gap"] = self.adjust_gap
             entry[self.trial_type]["max_nominal_gap"] = self.max_nominal_gap

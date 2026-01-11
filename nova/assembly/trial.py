@@ -31,6 +31,7 @@ class TrialAttrs:
     sead: int = 2025
     measured_sectors: list[int] | None = field(default=None)
     fixed_coils: dict | None = field(default=None, repr=False)
+    force: bool = field(default=False, repr=False)
 
     ncoil: ClassVar[int] = 18
 
@@ -42,8 +43,12 @@ class TrialAttrs:
     @property
     def attrs(self):
         """Return trial attrs."""
+        # Exclude transient fields from serialization
+        exclude = {"fixed_coils", "force"}
         attrs = {}
         for attr in self.field_names:
+            if attr in exclude:
+                continue
             value = getattr(self, attr)
             if value is None:
                 continue
@@ -66,7 +71,10 @@ class Trial(Dataset, TrialAttrs, Plot1D):
         """Set dataset group for netCDF file load/store."""
         self.group = self.group_name
         self.rng = np.random.default_rng(self.sead)
-        super().__post_init__()
+        if self.force:
+            self.build()
+        else:
+            super().__post_init__()
 
     @property
     def nominal_gap(self):
@@ -100,6 +108,7 @@ class Trial(Dataset, TrialAttrs, Plot1D):
         cls,
         name: str | None = None,
         samples: int | None = None,
+        force: bool = False,
         **kwargs,
     ) -> Self:
         """Load trial from manifest by name or create with parameters.
@@ -110,6 +119,8 @@ class Trial(Dataset, TrialAttrs, Plot1D):
             Simulation label to load from manifest
         samples : int | None
             Override samples from manifest
+        force : bool
+            Force rebuild even if cached data exists
         **kwargs
             Additional parameters passed to Trial/TrialManifest
 
@@ -122,6 +133,7 @@ class Trial(Dataset, TrialAttrs, Plot1D):
         --------
         >>> trial = Vault.from_manifest("baseline_2021")
         >>> trial = ErrorField.from_manifest("baseline_2021", samples=500000)
+        >>> trial = Vault.from_manifest("baseline_2021", force=True)  # rebuild
         """
         # Determine trial_type from class name
         trial_type = "error_field" if cls.__name__ == "ErrorField" else "vault"
@@ -138,6 +150,7 @@ class Trial(Dataset, TrialAttrs, Plot1D):
             "theta": manifest.theta,
             "component": manifest.components,
             "pdf": manifest.pdf,
+            "force": force,
         }
 
         # Add measured_sectors if specified
@@ -945,7 +958,7 @@ class ErrorField(Trial, Plot1D):
 
 if __name__ == "__main__":
     # Load baseline_2021 from manifest (should use cache)
-    vault = Vault.from_manifest("baseline_2021", samples=200_000)
+    vault = Vault.from_manifest("baseline_2021", samples=50_000)
     print(f"Vault hash: {vault.group_name}")
 
     vault.plot()

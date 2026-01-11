@@ -29,7 +29,7 @@ class TrialAttrs:
     adjust_gap: bool = True
     max_nominal_gap: float = 2.0
     sead: int = 2025
-    chunk_size: int | None = field(default=None, repr=False)
+    chunk_size: int = field(default=50_000, repr=False)
     measured_sectors: list[int] | None = field(default=None)
     fixed_coils: dict | None = field(default=None, repr=False)
     force: bool = field(default=False, repr=False)
@@ -44,15 +44,11 @@ class TrialAttrs:
     @property
     def n_chunks(self) -> int:
         """Return number of chunks for processing."""
-        if self.chunk_size is None:
-            return 1
         return (self.samples + self.chunk_size - 1) // self.chunk_size
 
     @property
     def chunk_ranges(self) -> list[tuple[int, int]]:
         """Return list of (start, end) tuples for each chunk."""
-        if self.chunk_size is None:
-            return [(0, self.samples)]
         ranges = []
         for i in range(self.n_chunks):
             start = i * self.chunk_size
@@ -666,7 +662,7 @@ class Vault(Trial, Plot1D):
 
     def build(self):
         """Build Monte Carlo dataset."""
-        if self.chunk_size is not None:
+        if self.samples > self.chunk_size:
             return self.build_chunked()
         return self.build_full()
 
@@ -1207,7 +1203,7 @@ class ErrorField(Trial, Plot1D):
 
     def build(self):
         """Build Monte Carlo dataset."""
-        if self.chunk_size is not None:
+        if self.samples > self.chunk_size:
             return self.build_chunked()
         return self.build_full()
 

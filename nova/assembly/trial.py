@@ -45,6 +45,8 @@ class TrialAttrs:
         attrs = {}
         for attr in self.field_names:
             value = getattr(self, attr)
+            if value is None:
+                continue
             if isinstance(value, bool):
                 attrs[attr] = int(value)
                 continue
@@ -943,7 +945,7 @@ class ErrorField(Trial, Plot1D):
 
 if __name__ == "__main__":
     # Load baseline_2021 from manifest (should use cache)
-    vault = Vault.from_manifest("baseline_2021")
+    vault = Vault.from_manifest("baseline_2021", samples=200_000)
     print(f"Vault hash: {vault.group_name}")
 
     vault.plot()

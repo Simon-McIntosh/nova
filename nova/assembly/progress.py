@@ -12,7 +12,6 @@ from rich.progress import (
     TaskProgressColumn,
     TextColumn,
     TimeElapsedColumn,
-    TimeRemainingColumn,
 )
 
 
@@ -60,13 +59,10 @@ class TrialProgress:
         self._start_time = time()
         self._progress = Progress(
             SpinnerColumn(),
-            TextColumn("[bold blue]{task.description}"),
-            BarColumn(bar_width=40),
+            TextColumn("{task.description}", style="bold blue"),
+            BarColumn(bar_width=20),
             TaskProgressColumn(),
-            TextColumn("•"),
             TimeElapsedColumn(),
-            TextColumn("•"),
-            TimeRemainingColumn(),
             console=self.console,
             transient=False,
         )

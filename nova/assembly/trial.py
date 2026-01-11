@@ -832,6 +832,7 @@ class Vault(Trial, Plot1D):
         peaktopeak = np.zeros(self.samples)
         peaktopeak_offset = np.zeros(self.samples)
         offset = np.zeros((self.samples, 2))
+        gap = np.zeros((self.samples, self.ncoil, 2))  # Store gap for plotting
 
         for chunk_idx, (start, end) in enumerate(self.chunk_ranges):
             n_samples = end - start
@@ -844,6 +845,7 @@ class Vault(Trial, Plot1D):
             peaktopeak[start:end] = chunk_results["peaktopeak"]
             peaktopeak_offset[start:end] = chunk_results["peaktopeak_offset"]
             offset[start:end] = chunk_results["offset"]
+            gap[start:end] = chunk_results["gap"]
 
             if progress_task is not None:
                 progress_task.advance()
@@ -852,6 +854,7 @@ class Vault(Trial, Plot1D):
         self.data["peaktopeak"] = "sample", peaktopeak
         self.data["peaktopeak_offset"] = "sample", peaktopeak_offset
         self.data["offset"] = ("sample", "coordinate"), offset
+        self.data["gap"] = ("sample", "index", "signal"), gap
         self.data.attrs["nominal_gap"] = self.nominal_gap
 
     def _process_single_chunk(
@@ -931,10 +934,22 @@ class Vault(Trial, Plot1D):
             )
 
         axis_offset = self.electromagnetic_model.axis_offset
+
+        # Build gap components array (before nominal_gap addition, for storage)
+        # This matches what build_gap() stores in self.data.gap
+        gap_components = np.zeros((n_samples, self.ncoil, 2))
+        gap_components[..., 0] = np.pi / self.ncoil * signals["radial"]
+        gap_components[:, :-1, 0] += np.pi / self.ncoil * signals["radial"][:, 1:]
+        gap_components[:, -1, 0] += np.pi / self.ncoil * signals["radial"][:, 0]
+        gap_components[..., 1] = -tangential
+        gap_components[:, :-1, 1] += tangential[:, 1:]
+        gap_components[:, -1, 1] += tangential[:, 0]
+
         return {
             "peaktopeak": peaktopeak,
             "peaktopeak_offset": peaktopeak_offset,
             "offset": np.column_stack([axis_offset.real, -axis_offset.imag]),
+            "gap": gap_components,
         }
 
     def predict_structure(self):

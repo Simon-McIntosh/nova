@@ -257,12 +257,12 @@ class Axes:
         self._fig = fig
 
     @property
-    def axes(self):
+    def axes(self) -> matplotlib.axes.Axes:
         """Manage plot axes."""
         if self._axes is None:
             self.gca()
             self.set_style()
-        return self._axes
+        return self._axes  # type: ignore[return-value]
 
     @axes.setter
     def axes(self, axes):
@@ -423,7 +423,7 @@ class Plot:
         return self.mpl_axes.fig
 
     @property
-    def axes(self):
+    def axes(self) -> matplotlib.axes.Axes:
         """Expose mpl axes instance."""
         return self.mpl_axes.axes
 

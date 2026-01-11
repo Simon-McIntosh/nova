@@ -2113,12 +2113,49 @@ if __name__ == "__main__":
     # compare gaps
 
     # Create measurement DataFrame S7 (coils 8-9)
-    measurements = pandas.DataFrame(
+    measurements_s7 = pandas.DataFrame(
         {
             "z": [4469, 3575, 2681, 1788, 0, -1788, -2681, -3575, -4465],
             "gap": [0.72, 0.78, 0.75, 0.64, 0.45, 0.48, 0.55, 0.86, 0.9],
         }
     )
-    fig, ax = pit.plot_gap_profile(8, 9, measurements=measurements)
+    fig, ax = pit.plot_gap_profile(8, 9, measurements=measurements_s7)
+
+    # Create measurement DataFrame S6 (coils 12-13)
+    measurements_s6 = pandas.DataFrame(
+        {
+            "z": [
+                4469,
+                4029,
+                2975,
+                2518,
+                2496,
+                2076,
+                1512,
+                1482,
+                1000,
+                -3517,
+                -3972,
+                -4032,
+                -4465,
+            ],
+            "gap": [
+                1.2,
+                1.35,
+                1.75,
+                1.75,
+                1.8,
+                1.9,
+                2.05,
+                2.05,
+                2.1,
+                2.05,
+                2.05,
+                1.9,
+                1.85,
+            ],
+        }
+    )
+    fig, ax = pit.plot_gap_profile(12, 13, measurements=measurements_s6)
 
     plt.show()

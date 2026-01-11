@@ -2128,20 +2128,9 @@ class FiducialPit(Plot1D):
                     # σ = L/√3 where L is the half-width
                     expected_std = trial_hw / sqrt3
 
-                    # Get expected 95% CI bounds for n=18 samples
-                    expected_std_lower_18 = param_data["expected_std_lower_18"].iloc[0]
-                    expected_std_upper_18 = param_data["expected_std_upper_18"].iloc[0]
-
-                    # Plot expected 95% CI band for n=18 (target)
-                    ax.axhspan(
-                        expected_std_lower_18,
-                        expected_std_upper_18,
-                        color="C3",
-                        alpha=0.15,
-                        linewidth=0,
-                    )
-
-                    # Plot measured confidence interval band
+                    # Plot measured 95% confidence interval band
+                    # If upper bound < expected_std, we have 95% confidence
+                    # that alignment is better than tolerance assumption
                     ax.fill_between(
                         phases,
                         std_lower,

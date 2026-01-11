@@ -1341,7 +1341,7 @@ class FiducialPit(Plot1D):
     def plot_gaps(self, figsize=(12, 8)):
         """Plot gap measurements as bar chart with min/max range markers.
 
-        Shows gap_midplane (mean gap at z=0) as bar height with horizontal
+        Shows gap_mean (mean gap across ILIS surface) as bar height with horizontal
         lines indicating [gap_min, gap_max] range from grid samples.
         Colored by gap type (within/between-sector).
         """
@@ -1369,8 +1369,8 @@ class FiducialPit(Plot1D):
                 gap_type = row["gap_type"]
                 label = labels_map[gap_type] if gap_type not in plotted_types else None
 
-                # Use gap_midplane (mean gap at z=0) as bar height
-                gap_value = row["gap_midplane"]
+                # Use gap_mean (mean gap across ILIS surface) as bar height
+                gap_value = row["gap_mean"]
 
                 ax.bar(
                     x[i],
@@ -1463,7 +1463,7 @@ class FiducialPit(Plot1D):
 
             # Add value labels at top of bar
             for i, (_, row) in enumerate(self.gaps.iterrows()):
-                gap_value = row.gap_midplane
+                gap_value = row.gap_mean
                 ax.annotate(
                     f"{gap_value:.2f}",
                     xy=(i, gap_value),
@@ -1506,8 +1506,8 @@ class FiducialPit(Plot1D):
                 else:
                     subset = self.gaps[self.gaps["gap_type"] == gap_type]
                 if not subset.empty:
-                    means.append(subset["gap_midplane"].mean())
-                    stds.append(subset["gap_midplane"].std())
+                    means.append(subset["gap_mean"].mean())
+                    stds.append(subset["gap_mean"].std())
                 else:
                     means.append(0)
                     stds.append(0)

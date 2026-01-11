@@ -2255,6 +2255,148 @@ class FiducialPit(Plot1D):
 
             return fig, axes
 
+    def plot_alignment_evolution(self) -> tuple[plt.Figure, np.ndarray]:
+        """Plot implied alignment window evolution as sectors are installed.
+
+        Shows L = σ × √3 (implied uniform half-width) instead of variance,
+        making it easier to compare directly with tolerance specifications.
+
+        For a uniform distribution on [-L, L], σ = L/√3.
+        Inverting: L_implied = σ_measured × √3.
+
+        Returns
+        -------
+        tuple[plt.Figure, np.ndarray]
+            Matplotlib figure and axes array
+        """
+        evolution_data = []
+
+        # Sector installation order: 6, 7, 5, 8
+        sector_order = [6, 7, 5, 8]
+
+        sqrt3 = np.sqrt(3)
+
+        # Assembly phases 1-4 correspond to installation order: 6, 7, 5, 8
+        for phase in range(1, 5):
+            try:
+                stats_df, _ = self.position_statistics(
+                    assembly_phase=phase,
+                    plot=False,
+                )
+
+                for _, row in stats_df.iterrows():
+                    # Convert σ to implied L = σ × √3
+                    evolution_data.append(
+                        {
+                            "assembly_phase": phase,
+                            "sector": sector_order[phase - 1],
+                            "n_coils": int(row["n"]),
+                            "parameter": row["parameter"],
+                            "implied_L": row["std"] * sqrt3,
+                            "L_lower_95": row["std_lower_95"] * sqrt3,
+                            "L_upper_95": row["std_upper_95"] * sqrt3,
+                            "tolerance_L": row["trial_halfwidth"],
+                        }
+                    )
+            except (ValueError, KeyError) as e:
+                print(f"Warning: Phase {phase}: {e}")
+
+        if not evolution_data:
+            raise ValueError("No evolution data available")
+
+        evo_df = pandas.DataFrame(evolution_data)
+
+        # Parameter layout: 2 rows x 3 cols
+        param_grid = [
+            ["radial", "tangential", "vertical"],
+            ["roll_length", "yaw_length", "pitch_length"],
+        ]
+
+        with sns.plotting_context("poster"):
+            fig, axes = plt.subplots(2, 3, figsize=(14, 8))
+
+            # X-axis labels as sector numbers
+            x_labels = [str(s) for s in sector_order]
+
+            # Display labels with underscores replaced by spaces
+            param_labels = {p: p.replace("_", " ") for p in sum(param_grid, [])}
+
+            for row_idx, row_params in enumerate(param_grid):
+                for col_idx, param in enumerate(row_params):
+                    ax = axes[row_idx, col_idx]
+                    param_data = evo_df[evo_df["parameter"] == param]
+
+                    if param_data.empty:
+                        ax.set_visible(False)
+                        continue
+
+                    phases = param_data["assembly_phase"].values
+                    implied_L = param_data["implied_L"].values
+                    L_lower = param_data["L_lower_95"].values
+                    L_upper = param_data["L_upper_95"].values
+                    tolerance = param_data["tolerance_L"].iloc[0]
+
+                    # Plot 95% confidence interval band
+                    ax.fill_between(
+                        phases,
+                        L_lower,
+                        L_upper,
+                        color="C0",
+                        alpha=0.25,
+                        linewidth=0,
+                    )
+
+                    # Plot implied L line with markers
+                    ax.plot(
+                        phases,
+                        implied_L,
+                        "o-",
+                        color="C0",
+                        markersize=8,
+                        linewidth=2,
+                    )
+
+                    # Tolerance reference line
+                    ax.axhline(
+                        tolerance, color="C3", linestyle="--", linewidth=1, alpha=0.7
+                    )
+
+                    # Add tolerance label on right side
+                    ax.text(
+                        4.5,
+                        tolerance,
+                        f" {tolerance:.1f}",
+                        va="center",
+                        ha="left",
+                        color="C3",
+                    )
+
+                    # Add title as subplot title
+                    ax.set_title(param_labels[param])
+
+                    # Axis formatting - use 2x tolerance limit
+                    ax.set_xlim(0.5, 4.5)
+                    ax.set_ylim(0, 2 * tolerance)
+                    ax.set_xticks([1, 2, 3, 4])
+                    ax.set_xticklabels(x_labels)
+
+                    # Only show x-axis labels on bottom row
+                    if row_idx == 1:
+                        ax.set_xlabel("Sector")
+
+                    # Only show y-axis label on leftmost column
+                    if col_idx == 0:
+                        ax.set_ylabel("alignment window (mm)")
+
+            # Despine all axes
+            for ax in axes.flatten():
+                sns.despine(ax=ax)
+
+            fig.suptitle("Implied Alignment Window Evolution", y=1.02)
+            fig.tight_layout()
+
+            return fig, axes
+
 
 if __name__ == "__main__":
     # Sectors 5, 6, 7 are adjacent in the pit

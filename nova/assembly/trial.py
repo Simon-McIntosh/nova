@@ -13,6 +13,7 @@ import xxhash
 from nova.assembly import structural, electromagnetic, overlap
 from nova.assembly.gap import WedgeGap
 from nova.assembly.model import Dataset
+from nova.assembly.progress import TrialProgress
 from nova.assembly.trial_manifest import TrialManifest
 from nova.graphics.plot import Plot1D
 
@@ -350,8 +351,18 @@ class Trial(Dataset, TrialAttrs, Plot1D):
         """Return cumulative gap."""
         return self.gap.sum(axis=-1)
 
-    def build_positive_gap(self, nmax=20, eps=1e-3):
-        """Built gap waveform via iterative loop."""
+    def build_positive_gap(self, nmax=20, eps=1e-3, progress_task=None):
+        """Built gap waveform via iterative loop.
+
+        Parameters
+        ----------
+        nmax : int
+            Maximum number of iterations
+        eps : float
+            Convergence tolerance for negative gaps
+        progress_task : StepTask | None
+            Optional progress task for tracking iterations
+        """
         self.build_gap()
         for i in range(nmax):
             if self.adjust_gap:
@@ -359,12 +370,15 @@ class Trial(Dataset, TrialAttrs, Plot1D):
             gap = self.gap
             sample_index = (gap < -eps).any(axis=1)
             if sample_index.sum() == 0:
-                print(f"positive gap iteration converged {i}")
+                if progress_task is not None:
+                    progress_task.update(completed=nmax)
                 return
             offset = gap[sample_index]
             offset[offset >= 0] = 0
             self.data.tangential[sample_index] += offset
             self.build_gap()
+            if progress_task is not None:
+                progress_task.advance()
         raise ValueError(
             f"gap itteration failure at iteration {nmax} "
             "negitive samples "
@@ -402,6 +416,25 @@ class Trial(Dataset, TrialAttrs, Plot1D):
         start_time = time()
         yield
         print(f"build time {time() - start_time:1.0f}s")
+
+    @contextmanager
+    def progress(self, steps: list[str]):
+        """Track build progress with rich display.
+
+        Parameters
+        ----------
+        steps : list[str]
+            Names of the build steps to track
+
+        Yields
+        ------
+        TrialProgress
+            Progress monitor with step() context manager
+        """
+        description = f"{self.__class__.__name__} ({self.samples:,} samples)"
+        with TrialProgress(description) as monitor:
+            monitor.configure(steps)
+            yield monitor
 
     def pdf_text(self, wall=False, fancy=False):
         """Return pdf text label."""
@@ -522,14 +555,31 @@ class Vault(Trial, Plot1D):
 
     def build(self):
         """Build Monte Carlo dataset."""
-        with self.timer():
-            self.build_signal()
-            self.build_positive_gap()
-            self.predict_structure()
-            self.predict_electromagnetic()
+        steps = [
+            "Signal generation",
+            "Gap optimization",
+            "Structural",
+            "Electromagnetic",
+        ]
+        if self.wall:
+            steps.append("Wall prediction")
+        steps.append("Store results")
+
+        with self.progress(steps) as monitor:
+            with monitor.step("Signal generation"):
+                self.build_signal()
+            with monitor.step("Gap optimization", total=20) as task:
+                self.build_positive_gap(progress_task=task)
+            with monitor.step("Structural"):
+                self.predict_structure()
+            with monitor.step("Electromagnetic"):
+                self.predict_electromagnetic()
             if self.wall:
-                self.predict_wall()
-        return self.store()
+                with monitor.step("Wall prediction"):
+                    self.predict_wall()
+            with monitor.step("Store results"):
+                self.store()
+        return self
 
     def predict_structure(self):
         """Run structural simulation."""
@@ -797,10 +847,16 @@ class ErrorField(Trial, Plot1D):
 
     def build(self):
         """Build Monte Carlo dataset."""
-        with self.timer():
-            self.build_signal()
-            self.predict()
-        return self.store()
+        steps = ["Signal generation", "Overlap prediction", "Store results"]
+
+        with self.progress(steps) as monitor:
+            with monitor.step("Signal generation"):
+                self.build_signal()
+            with monitor.step("Overlap prediction"):
+                self.predict()
+            with monitor.step("Store results"):
+                self.store()
+        return self
 
     def predict(self):
         """Predict overlap error field."""

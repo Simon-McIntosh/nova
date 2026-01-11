@@ -1529,21 +1529,12 @@ class FiducialPit(Plot1D):
             ax.set_title(f"Gap Statistics Summary - {self.phase}")
             ax.axhline(0, color="gray", linewidth=0.5)
 
-            # Add limit line with text label (no legend)
-            xlim = ax.get_xlim()
+            # Add limit line (dark gray, no text label)
             ax.axhline(
                 self.gap_limit,
-                color="C3",
+                color="darkgray",
                 linestyle="--",
-                alpha=0.7,
-            )
-            ax.text(
-                xlim[1],
-                self.gap_limit,
-                f" limit: {self.gap_limit:.1f}",
-                va="center",
-                ha="left",
-                color="C3",
+                linewidth=1.5,
             )
 
             sns.despine(ax=ax)

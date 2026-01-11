@@ -4,7 +4,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass, field, fields
 from functools import cached_property
 from time import time
-from typing import ClassVar, Self, Union
+from typing import ClassVar, Self
 
 import numpy as np
 import xarray
@@ -119,7 +119,7 @@ class Trial(Dataset, TrialAttrs, Plot1D):
         # Include measured_sectors in hash only if specified
         if self.measured_sectors is not None:
             hash_data.extend(sorted(self.measured_sectors))
-        self.xxh32.update(np.array(hash_data))
+        self.xxh32.update(np.array(hash_data).tobytes())
         return self.xxh32.hexdigest()
 
     @classmethod
@@ -648,8 +648,8 @@ class Vault(Trial, Plot1D):
         ]
     )
     modes: int = 3
-    energize: Union[int, bool] = True
-    wall: bool = True
+    energize: int | bool = True
+    wall: int | bool = True
 
     def __post_init__(self):
         """Initialize model instances."""
@@ -1369,8 +1369,10 @@ class ErrorField(Trial, Plot1D):
 
 
 if __name__ == "__main__":
+    trial_name = "S4_refine_pit_2026"
+
     # Load baseline_2021 from manifest (should use cache)
-    vault = Vault.from_manifest("baseline_2021", samples=200_000, force=True)
+    vault = Vault.from_manifest(trial_name, samples=200_000, force=True)
     print(f"Vault hash: {vault.group_name}")
 
     vault.plot()
@@ -1378,7 +1380,7 @@ if __name__ == "__main__":
     vault.plot_gap()
     vault.plot_cumlative_gap()
 
-    error = ErrorField.from_manifest("baseline_2021", samples=200_000, force=True)
+    error = ErrorField.from_manifest(trial_name, samples=200_000, force=True)
     print(f"ErrorField hash: {error.group_name}")
 
     error.plot()

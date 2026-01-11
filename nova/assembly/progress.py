@@ -64,7 +64,7 @@ class TrialProgress:
             TaskProgressColumn(),
             TimeElapsedColumn(),
             console=self.console,
-            transient=True,
+            transient=False,
         )
         self._progress.__enter__()
         return self

@@ -29,6 +29,7 @@ class TrialAttrs:
     adjust_gap: bool = True
     max_nominal_gap: float = 2.0
     sead: int = 2025
+    chunk_size: int | None = field(default=None, repr=False)
     measured_sectors: list[int] | None = field(default=None)
     fixed_coils: dict | None = field(default=None, repr=False)
     force: bool = field(default=False, repr=False)
@@ -39,6 +40,25 @@ class TrialAttrs:
     def field_names(self):
         """Return list of field names."""
         return [attr.name for attr in fields(TrialAttrs)]
+
+    @property
+    def n_chunks(self) -> int:
+        """Return number of chunks for processing."""
+        if self.chunk_size is None:
+            return 1
+        return (self.samples + self.chunk_size - 1) // self.chunk_size
+
+    @property
+    def chunk_ranges(self) -> list[tuple[int, int]]:
+        """Return list of (start, end) tuples for each chunk."""
+        if self.chunk_size is None:
+            return [(0, self.samples)]
+        ranges = []
+        for i in range(self.n_chunks):
+            start = i * self.chunk_size
+            end = min((i + 1) * self.chunk_size, self.samples)
+            ranges.append((start, end))
+        return ranges
 
     @property
     def attrs(self):
@@ -112,6 +132,7 @@ class Trial(Dataset, TrialAttrs, Plot1D):
         name: str | None = None,
         samples: int | None = None,
         force: bool = False,
+        chunk_size: int | None = None,
         **kwargs,
     ) -> Self:
         """Load trial from manifest by name or create with parameters.
@@ -124,6 +145,8 @@ class Trial(Dataset, TrialAttrs, Plot1D):
             Override samples from manifest
         force : bool
             Force rebuild even if cached data exists
+        chunk_size : int | None
+            Process samples in chunks of this size for memory efficiency
         **kwargs
             Additional parameters passed to Trial/TrialManifest
 
@@ -137,11 +160,12 @@ class Trial(Dataset, TrialAttrs, Plot1D):
         >>> trial = Vault.from_manifest("baseline_2021")
         >>> trial = ErrorField.from_manifest("baseline_2021", samples=500000)
         >>> trial = Vault.from_manifest("baseline_2021", force=True)  # rebuild
+        >>> trial = Vault.from_manifest("baseline_2021", chunk_size=50000)
         """
         # Determine trial_type from class name
         trial_type = "error_field" if cls.__name__ == "ErrorField" else "vault"
 
-        manifest = TrialManifest(name=name, trial_type=trial_type, **kwargs)
+        manifest = TrialManifest(name=name, trial_type=trial_type)
 
         # Override samples if provided
         if samples is not None:
@@ -155,6 +179,10 @@ class Trial(Dataset, TrialAttrs, Plot1D):
             "pdf": manifest.pdf,
             "force": force,
         }
+
+        # Add chunk_size if specified
+        if chunk_size is not None:
+            trial_kwargs["chunk_size"] = chunk_size
 
         # Add measured_sectors if specified
         if manifest.measured_sectors is not None:
@@ -324,6 +352,71 @@ class Trial(Dataset, TrialAttrs, Plot1D):
     def uniform(self, bound: float):
         """Return sample with uniform distribution."""
         return self.rng.uniform(-bound, bound, size=(self.samples, self.ncoil))
+
+    def normal_chunk(self, variance: float, n_samples: int):
+        """Return chunk of samples with normal distribution."""
+        scale = np.sqrt(variance)
+        return self.rng.normal(scale=scale, size=(n_samples, self.ncoil))
+
+    def uniform_chunk(self, variance: float, n_samples: int):
+        """Return chunk of samples with uniform distribution."""
+        return self.rng.uniform(-variance, variance, size=(n_samples, self.ncoil))
+
+    def reset_rng(self):
+        """Reset RNG to initial seed state."""
+        self.rng = np.random.default_rng(self.sead)
+
+    def generate_chunk_signals(self, n_samples: int) -> dict[str, np.ndarray]:
+        """Generate signal arrays for a chunk of samples.
+
+        This consumes RNG in a different order than non-chunked builds,
+        producing statistically equivalent but not bit-for-bit identical
+        results. For exact reproducibility, use file caching with non-chunked
+        builds.
+
+        Parameters
+        ----------
+        n_samples : int
+            Number of samples to generate for this chunk
+
+        Returns
+        -------
+        dict[str, np.ndarray]
+            Dictionary mapping component names to signal arrays of shape
+            (n_samples, ncoil)
+        """
+        # Temporarily override self.samples for generation
+        original_samples = self.samples
+        self.samples = n_samples
+
+        signals = {}
+        for i, component in enumerate(self.component):
+            theta = self.theta[i]
+            pdf = self.pdf[i]
+            samples = getattr(self, pdf)(theta)
+
+            # Inject fixed values for measured coils
+            if self.fixed_coils is not None:
+                for trial_idx, coil_data in self.fixed_coils.items():
+                    if component in coil_data:
+                        samples[:, trial_idx] = coil_data[component]
+
+            signals[component] = samples
+
+        # Restore original samples count
+        self.samples = original_samples
+        return signals
+
+    def initialize_dataset(self):
+        """Initialize empty dataset with coordinates but no signal data."""
+        self.data = xarray.Dataset(attrs=self.attrs)
+        self.data["sample"] = range(self.samples)
+        self.data["index"] = range(self.ncoil)
+        self.data["component"] = self.component
+        self.data["signal"] = ["radial", "tangential"]
+        self.data["coordinate"] = ["x", "y"]
+        self.data["theta"] = "component", self.theta
+        self.data["pdf"] = "component", self.pdf
 
     def build_signal(self):
         """Build input distributions.
@@ -573,6 +666,12 @@ class Vault(Trial, Plot1D):
 
     def build(self):
         """Build Monte Carlo dataset."""
+        if self.chunk_size is not None:
+            return self.build_chunked()
+        return self.build_full()
+
+    def build_full(self):
+        """Build Monte Carlo dataset (non-chunked, all in memory)."""
         steps = [
             "Signal generation",
             "Gap optimization",
@@ -598,6 +697,249 @@ class Vault(Trial, Plot1D):
             with monitor.step("Store results"):
                 self.store()
         return self
+
+    def build_chunked(self):
+        """Build Monte Carlo dataset in chunks for memory efficiency.
+
+        Processes samples in chunks to reduce peak memory usage. Signal
+        generation occurs chunk-by-chunk, consuming RNG in a different order
+        than non-chunked builds. Results are statistically equivalent but
+        not bit-for-bit identical to non-chunked builds with the same seed.
+
+        For exact reproducibility, use file caching: run non-chunked once
+        with `force=True`, then reload cached results.
+
+        Uses two-pass approach when adjust_gap=True:
+        - Pass 1: Generate signals and compute gap statistics
+        - Pass 2: Regenerate signals and run full pipeline with fixed nominal_gap
+
+        Uses single-pass when adjust_gap=False.
+        """
+        n_chunks = self.n_chunks
+
+        if self.adjust_gap:
+            # Two-pass approach for adjust_gap=True
+            steps = [
+                f"Pass 1: Gap calibration ({n_chunks} chunks)",
+                f"Pass 2: Processing ({n_chunks} chunks)",
+                "Store results",
+            ]
+        else:
+            steps = [
+                f"Processing ({n_chunks} chunks)",
+                "Store results",
+            ]
+
+        with self.progress(steps) as monitor:
+            if self.adjust_gap:
+                # Pass 1: Compute gap statistics to determine nominal_gap
+                with monitor.step(
+                    f"Pass 1: Gap calibration ({n_chunks} chunks)", total=n_chunks
+                ) as task:
+                    self._calibrate_gap_chunked(task)
+
+                # Reset RNG for second pass
+                self.reset_rng()
+
+                # Pass 2: Full processing with fixed nominal_gap
+                with monitor.step(
+                    f"Pass 2: Processing ({n_chunks} chunks)", total=n_chunks
+                ) as task:
+                    self._process_chunks(task)
+            else:
+                # Single pass when adjust_gap=False
+                with monitor.step(
+                    f"Processing ({n_chunks} chunks)", total=n_chunks
+                ) as task:
+                    self._process_chunks(task)
+
+            with monitor.step("Store results"):
+                self.store()
+
+        return self
+
+    def _calibrate_gap_chunked(self, progress_task=None):
+        """Pass 1: Compute gap statistics across all chunks.
+
+        Collects cumulative gap values to compute the 99th percentile
+        needed for nominal_gap adjustment.
+
+        NOTE: Uses chunk-by-chunk signal generation for memory efficiency.
+        Results are statistically equivalent but not bit-for-bit identical
+        to non-chunked builds. For exact reproducibility, use file caching.
+        """
+        all_cumulative_gaps = []
+
+        for start, end in self.chunk_ranges:
+            n_samples = end - start
+            signals = self.generate_chunk_signals(n_samples)
+
+            # Compute gap for this chunk
+            chunk_gap = self._compute_chunk_gap(signals, n_samples)
+            cumulative = chunk_gap.sum(axis=1)  # Sum across coils
+            all_cumulative_gaps.append(cumulative)
+
+            if progress_task is not None:
+                progress_task.advance()
+
+        # Compute global quantile
+        all_cumulative = np.concatenate(all_cumulative_gaps)
+        gap_quantile = np.quantile(all_cumulative, 0.99)
+        self._calibrated_nominal_gap = self.max_nominal_gap - (
+            gap_quantile / self.ncoil - self.max_nominal_gap
+        )
+
+    def _compute_chunk_gap(
+        self, signals: dict[str, np.ndarray], n_samples: int
+    ) -> np.ndarray:
+        """Compute gap values for a chunk of signals.
+
+        Returns array of shape (n_samples, ncoil) with total gap per coil.
+        """
+        radial = signals["radial"]
+        tangential = signals["tangential"]
+
+        # Gap computation matching build_gap logic
+        gap = np.zeros((n_samples, self.ncoil, 2))
+
+        # Radial component
+        gap[..., 0] = np.pi / self.ncoil * radial
+        gap[:, :-1, 0] += np.pi / self.ncoil * radial[:, 1:]
+        gap[:, -1, 0] += np.pi / self.ncoil * radial[:, 0]
+
+        # Tangential component
+        gap[..., 1] = -tangential
+        gap[:, :-1, 1] += tangential[:, 1:]
+        gap[:, -1, 1] += tangential[:, 0]
+
+        return gap.sum(axis=-1) + self.nominal_gap
+
+    def _process_chunks(self, progress_task=None):
+        """Process all chunks and accumulate results.
+
+        NOTE: Uses chunk-by-chunk signal generation for memory efficiency.
+        Results are statistically equivalent but not bit-for-bit identical
+        to non-chunked builds. For exact reproducibility, use file caching.
+        """
+        # Save calibrated nominal_gap before initialize_dataset overwrites it
+        calibrated_nominal_gap = getattr(
+            self, "_calibrated_nominal_gap", self.max_nominal_gap
+        )
+
+        # Initialize output arrays
+        self.initialize_dataset()
+
+        # Restore calibrated nominal_gap
+        self.nominal_gap = calibrated_nominal_gap
+
+        # Pre-allocate result arrays
+        peaktopeak = np.zeros(self.samples)
+        peaktopeak_offset = np.zeros(self.samples)
+        offset = np.zeros((self.samples, 2))
+
+        for chunk_idx, (start, end) in enumerate(self.chunk_ranges):
+            n_samples = end - start
+            signals = self.generate_chunk_signals(n_samples)
+
+            # Process chunk
+            chunk_results = self._process_single_chunk(signals, n_samples)
+
+            # Store results
+            peaktopeak[start:end] = chunk_results["peaktopeak"]
+            peaktopeak_offset[start:end] = chunk_results["peaktopeak_offset"]
+            offset[start:end] = chunk_results["offset"]
+
+            if progress_task is not None:
+                progress_task.advance()
+
+        # Store final results in dataset
+        self.data["peaktopeak"] = "sample", peaktopeak
+        self.data["peaktopeak_offset"] = "sample", peaktopeak_offset
+        self.data["offset"] = ("sample", "coordinate"), offset
+        self.data.attrs["nominal_gap"] = self.nominal_gap
+
+    def _process_single_chunk(
+        self, signals: dict[str, np.ndarray], n_samples: int
+    ) -> dict[str, np.ndarray]:
+        """Process a single chunk through the full pipeline.
+
+        Returns dict with peaktopeak, peaktopeak_offset, offset arrays.
+        """
+        # Compute gap with adjustment for negative values
+        gap = self._compute_chunk_gap(signals, n_samples)
+
+        # Adjust tangential to eliminate negative gaps
+        tangential = signals["tangential"].copy()
+        for _ in range(20):
+            sample_index = (gap < -1e-3).any(axis=1)
+            if sample_index.sum() == 0:
+                break
+            offset_gap = gap[sample_index]
+            offset_gap[offset_gap >= 0] = 0
+            tangential[sample_index] += offset_gap
+            # Recompute gap
+            gap = np.zeros((n_samples, self.ncoil, 2))
+            gap[..., 0] = np.pi / self.ncoil * signals["radial"]
+            gap[:, :-1, 0] += np.pi / self.ncoil * signals["radial"][:, 1:]
+            gap[:, -1, 0] += np.pi / self.ncoil * signals["radial"][:, 0]
+            gap[..., 1] = -tangential
+            gap[:, :-1, 1] += tangential[:, 1:]
+            gap[:, -1, 1] += tangential[:, 0]
+            gap = gap.sum(axis=-1) + self.nominal_gap
+
+        # Structural prediction
+        structural = np.zeros((n_samples, self.ncoil, 2))
+        if self.energize:
+            gap_sum = gap  # Already summed
+            roll = signals["roll_length"] - tangential
+            yaw = signals["yaw_length"] - tangential
+            for i, signal_name in enumerate(["radial", "tangential"]):
+                structural[..., i] = self.structural_model.predict(
+                    signal_name, gap_sum, roll, yaw
+                )
+
+        # Electromagnetic prediction
+        electromagnetic = structural.copy()
+        electromagnetic[..., 0] += signals["radial"]
+        electromagnetic[..., 1] += tangential
+        electromagnetic[..., 0] += signals["radial_ccl"]
+        electromagnetic[..., 1] += signals["tangential_ccl"]
+
+        self.electromagnetic_model.predict(
+            electromagnetic[..., 0], electromagnetic[..., 1]
+        )
+
+        # Compute peaktopeak
+        if self.wall:
+            ndiv = self.electromagnetic_model.fieldline.shape[1]
+            wall_hat = np.fft.rfft(signals["radial_wall"])
+            firstwall = np.fft.irfft(wall_hat, ndiv) * ndiv / self.ncoil
+            wall_hat[..., 1] += self.electromagnetic_model.axis_offset * (
+                self.ncoil // 2
+            )
+            offset_firstwall = np.fft.irfft(wall_hat, ndiv) * ndiv / self.ncoil
+            deviation = self.electromagnetic_model.fieldline.data - firstwall
+            peaktopeak = self.electromagnetic_model.peaktopeak(
+                deviation, modes=self.modes
+            )
+            offset_deviation = (
+                self.electromagnetic_model.fieldline.data - offset_firstwall
+            )
+            peaktopeak_offset = self.electromagnetic_model.peaktopeak(
+                offset_deviation, modes=self.modes
+            )
+        else:
+            peaktopeak = self.electromagnetic_model.peaktopeak(modes=self.modes)
+            peaktopeak_offset = self.electromagnetic_model.peaktopeak(
+                modes=self.modes, axis_offset=True
+            )
+
+        axis_offset = self.electromagnetic_model.axis_offset
+        return {
+            "peaktopeak": peaktopeak,
+            "peaktopeak_offset": peaktopeak_offset,
+            "offset": np.column_stack([axis_offset.real, -axis_offset.imag]),
+        }
 
     def predict_structure(self):
         """Run structural simulation."""
@@ -865,6 +1207,12 @@ class ErrorField(Trial, Plot1D):
 
     def build(self):
         """Build Monte Carlo dataset."""
+        if self.chunk_size is not None:
+            return self.build_chunked()
+        return self.build_full()
+
+    def build_full(self):
+        """Build Monte Carlo dataset (non-chunked, all in memory)."""
         steps = ["Signal generation", "Overlap prediction", "Store results"]
 
         with self.progress(steps) as monitor:
@@ -875,6 +1223,56 @@ class ErrorField(Trial, Plot1D):
             with monitor.step("Store results"):
                 self.store()
         return self
+
+    def build_chunked(self):
+        """Build Monte Carlo dataset in chunks for memory efficiency."""
+        n_chunks = self.n_chunks
+        step_label = f"Processing ({n_chunks} chunks)"
+        steps = [step_label, "Store results"]
+
+        with self.progress(steps) as monitor:
+            with monitor.step(step_label, total=n_chunks) as task:
+                self._process_chunks_errorfield(task)
+            with monitor.step("Store results"):
+                self.store()
+        return self
+
+    def _process_chunks_errorfield(self, progress_task=None):
+        """Process all chunks for error field calculation.
+
+        NOTE: Uses chunk-by-chunk signal generation for memory efficiency.
+        Results are statistically equivalent but not bit-for-bit identical
+        to non-chunked builds. For exact reproducibility, use file caching.
+        """
+        # Initialize dataset
+        self.initialize_dataset()
+        self.data["plasma"] = self.model.data.plasma
+        n_plasma = self.data.sizes["plasma"]
+
+        # Pre-allocate result array
+        overlap_results = np.zeros((self.samples, n_plasma))
+
+        for start, end in self.chunk_ranges:
+            n_samples = end - start
+            signals = self.generate_chunk_signals(n_samples)
+
+            # Compute overlap for this chunk
+            radial = signals["radial"] + signals["radial_ccl"]
+            tangential = signals["tangential"] + signals["tangential_ccl"]
+            vertical = signals["vertical"] + signals["vertical_ccl"]
+            pitch = signals["pitch_length"] / (1e3 * WedgeGap.length["pitch"])
+            roll = signals["roll_length"] / (1e3 * WedgeGap.length["roll"])
+            yaw = signals["yaw_length"] / (1e3 * WedgeGap.length["yaw"])
+
+            for i, plasma in enumerate(self.data.plasma.values):
+                overlap_results[start:end, i] = self.model.predict(
+                    plasma, radial, tangential, vertical, pitch, roll, yaw
+                )
+
+            if progress_task is not None:
+                progress_task.advance()
+
+        self.data["overlap"] = ("sample", "plasma"), overlap_results
 
     def predict(self):
         """Predict overlap error field."""
@@ -961,7 +1359,7 @@ class ErrorField(Trial, Plot1D):
 
 if __name__ == "__main__":
     # Load baseline_2021 from manifest (should use cache)
-    vault = Vault.from_manifest("baseline_2021", samples=50_000, force=True)
+    vault = Vault.from_manifest("baseline_2021", samples=200_000, force=True)
     print(f"Vault hash: {vault.group_name}")
 
     vault.plot()
@@ -969,7 +1367,7 @@ if __name__ == "__main__":
     vault.plot_gap()
     vault.plot_cumlative_gap()
 
-    error = ErrorField.from_manifest("baseline_2021")
+    error = ErrorField.from_manifest("baseline_2021", samples=200_000, force=True)
     print(f"ErrorField hash: {error.group_name}")
 
     error.plot()

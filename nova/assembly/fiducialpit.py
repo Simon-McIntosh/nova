@@ -1979,12 +1979,12 @@ class FiducialPit(Plot1D):
                     # Remove x-ticks
                     ax.set_xticks([])
 
-                    # Add sector labels near y=0, positioned based on bar direction
+                    # Add sector labels positioned past smallest bar
                     # Get tick label font size for consistent sizing
                     tick_fontsize = plt.rcParams["xtick.labelsize"]
-                    # Small vertical offset to avoid overlapping bars
+                    # Padding beyond bar edge for label placement
                     ylim = ax.get_ylim()
-                    label_offset = (ylim[1] - ylim[0]) * 0.03
+                    label_padding = (ylim[1] - ylim[0]) * 0.03
                     for sector in sector_order:
                         if sector not in sector_coil_indices:
                             continue
@@ -1995,30 +1995,28 @@ class FiducialPit(Plot1D):
                         values = sector_values.get(sector, [])
                         if not values:
                             continue
-                        # Determine dominant direction
-                        # If bars point both ways, use the smaller magnitude
+                        # Place label on side with smallest deviation
                         pos_vals = [v for v in values if v > 0]
                         neg_vals = [v for v in values if v < 0]
                         if pos_vals and neg_vals:
-                            # Mixed: align based on smaller bar
-                            max_pos = max(pos_vals)
-                            min_neg = min(neg_vals)
-                            # Smaller bar determines placement
-                            if abs(max_pos) <= abs(min_neg):
-                                # Smaller bar is positive, label goes below
-                                y_pos = -label_offset
-                                va = "top"
-                            else:
-                                # Smaller bar is negative, label goes above
-                                y_pos = label_offset
+                            # Bars on both sides: place on side with smallest deviation
+                            min_pos = min(pos_vals)
+                            max_neg = max(neg_vals)  # closest to zero
+                            if abs(min_pos) <= abs(max_neg):
+                                # Smallest is positive: label above
+                                y_pos = min_pos + label_padding
                                 va = "bottom"
+                            else:
+                                # Smallest is negative: label below
+                                y_pos = max_neg - label_padding
+                                va = "top"
                         elif pos_vals:
-                            # All positive: label below bars
-                            y_pos = -label_offset
+                            # All positive: label below zero
+                            y_pos = -label_padding
                             va = "top"
                         else:
-                            # All negative: label above bars
-                            y_pos = label_offset
+                            # All negative: label above zero
+                            y_pos = label_padding
                             va = "bottom"
                         ax.text(
                             x_center,

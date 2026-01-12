@@ -189,10 +189,10 @@ class QuartileAnalysis(Plot1D):
         qa_data = self.build_quartile_analysis()
         self.data = self.data.merge(qa_data, compat="override")
 
-        # Delete existing group to allow dimension size changes, then store
-        if hasattr(self, "delete_group"):
-            self.delete_group()  # type: ignore[attr-defined]
-        if hasattr(self, "store"):
+        # Use store_overwrite to handle dimension size changes in netCDF
+        if hasattr(self, "store_overwrite"):
+            self.store_overwrite()  # type: ignore[attr-defined]
+        elif hasattr(self, "store"):
             self.store()  # type: ignore[attr-defined]
         return self
 

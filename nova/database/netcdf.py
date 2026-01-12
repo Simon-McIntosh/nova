@@ -63,11 +63,30 @@ class netCDF(FilePath):
         try:
             import h5py
 
-            with h5py.File(self.filepath, "a") as f:
-                if self.group in f:
+            filepath = str(self.filepath)
+            with h5py.File(filepath, "a") as f:
+                # Handle both 'group' and '/group' formats
+                group_key = self.group.lstrip("/")
+                if group_key in f:
+                    del f[group_key]
+                elif self.group in f:
                     del f[self.group]
-        except (ImportError, OSError):
-            pass  # h5py not available or file locked
+        except (ImportError, OSError, KeyError):
+            pass  # h5py not available, file locked, or group not found
+        return self
+
+    def store_overwrite(self):
+        """Store data, overwriting the group if it exists."""
+        self.delete_group()
+        # Use append mode if file exists (other groups preserved), else write
+        mode = "a" if self.is_file() else "w"
+        if self.host is not None:
+            with self.fsys.open(str(self.filepath), mode + "b") as file:
+                self.data.to_netcdf(file, mode=mode, group=self.group)
+        else:
+            self.data.to_netcdf(self.filepath, mode=mode, group=self.group)
+        self.data.close()
+        gc.collect()
         return self
 
     def load(self):

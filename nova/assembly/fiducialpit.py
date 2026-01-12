@@ -2275,17 +2275,29 @@ class FiducialPit(Plot1D):
 
         return result_df
 
-    def plot_position_evolution(self) -> tuple[plt.Figure, np.ndarray]:
+    def plot_position_evolution(
+        self, predict: bool = False
+    ) -> tuple[plt.Figure, np.ndarray]:
         """Plot how position statistics evolve as sectors are installed.
 
         Creates charts showing variance estimates with confidence intervals
         for each assembly phase (1-4 sectors).
+
+        Parameters
+        ----------
+        predict : bool, optional
+            If True, extend plots to 9 sectors showing projected CI
+            contraction assuming frozen measured variance. Dark gray shows
+            the frozen variance line, light gray shows the shrinking CI.
+            Default is False.
 
         Returns
         -------
         tuple[plt.Figure, np.ndarray]
             Matplotlib figure and axes array
         """
+        from scipy import stats as scipy_stats
+
         evolution_data = []
 
         # Sector installation order: 6, 7, 5, 8
@@ -2332,11 +2344,15 @@ class FiducialPit(Plot1D):
         # Expected σ for uniform distribution: σ = L/√3 where L is half-width
         sqrt3 = np.sqrt(3)
 
+        # Determine x-axis extent based on predict flag
+        max_phase = 9 if predict else 4
+        x_labels = [str(s) for s in sector_order]
+        if predict:
+            # Extend labels for future sectors (placeholder numbers)
+            x_labels = x_labels + [str(i) for i in range(5, 10)]
+
         with sns.plotting_context("poster"):
             fig, axes = plt.subplots(2, 3, figsize=(14, 8))
-
-            # X-axis labels as sector numbers
-            x_labels = [str(s) for s in sector_order]
 
             # Display labels with underscores replaced by spaces
             param_labels = {p: p.replace("_", " ") for p in sum(param_grid, [])}
@@ -2360,9 +2376,51 @@ class FiducialPit(Plot1D):
                     # σ = L/√3 where L is the half-width
                     expected_std = trial_hw / sqrt3
 
+                    # Plot predicted CI contraction if requested
+                    if predict:
+                        # Get final measured values
+                        final_std = std_vals[-1]
+                        final_n = param_data["n_coils"].iloc[-1]
+
+                        # Project to phases 5-9 (10-18 coils, 2 per sector)
+                        pred_phases = np.arange(5, 10)
+                        pred_n = np.array([final_n + 2 * i for i in range(1, 6)])
+
+                        # CI for σ using chi-squared distribution
+                        # σ_lower = σ * sqrt((n-1) / chi2_upper)
+                        # σ_upper = σ * sqrt((n-1) / chi2_lower)
+                        pred_lower = []
+                        pred_upper = []
+                        for n in pred_n:
+                            chi2_lower = scipy_stats.chi2.ppf(0.025, n - 1)
+                            chi2_upper = scipy_stats.chi2.ppf(0.975, n - 1)
+                            pred_lower.append(final_std * np.sqrt((n - 1) / chi2_upper))
+                            pred_upper.append(final_std * np.sqrt((n - 1) / chi2_lower))
+
+                        pred_lower = np.array(pred_lower)
+                        pred_upper = np.array(pred_upper)
+
+                        # Light gray band: shrinking CI with frozen variance
+                        ax.fill_between(
+                            pred_phases,
+                            pred_lower,
+                            pred_upper,
+                            color="gray",
+                            alpha=0.2,
+                            linewidth=0,
+                        )
+
+                        # Dark gray line: frozen variance assumption
+                        ax.plot(
+                            pred_phases,
+                            [final_std] * len(pred_phases),
+                            "--",
+                            color="gray",
+                            linewidth=2,
+                            alpha=0.7,
+                        )
+
                     # Plot measured 95% confidence interval band
-                    # If upper bound < expected_std, we have 95% confidence
-                    # that alignment is better than tolerance assumption
                     ax.fill_between(
                         phases,
                         std_lower,
@@ -2383,8 +2441,9 @@ class FiducialPit(Plot1D):
                     )
 
                     # Add label showing formula: L/√3
+                    label_x = max_phase + 0.5
                     ax.text(
-                        4.5,
+                        label_x,
                         expected_std,
                         f" {trial_hw:.1f}/√3",
                         va="center",
@@ -2396,10 +2455,10 @@ class FiducialPit(Plot1D):
                     ax.set_title(param_labels[param])
 
                     # Axis formatting - use 2x tolerance limit (3mm or 6mm)
-                    ax.set_xlim(0.5, 4.5)
+                    ax.set_xlim(0.5, max_phase + 0.5)
                     ax.set_ylim(0, 2 * trial_hw)
-                    ax.set_xticks([1, 2, 3, 4])
-                    ax.set_xticklabels(x_labels)
+                    ax.set_xticks(list(range(1, max_phase + 1)))
+                    ax.set_xticklabels(x_labels[:max_phase])
 
                     # Only show x-axis labels on bottom row
                     if row_idx == 1:
@@ -2418,7 +2477,9 @@ class FiducialPit(Plot1D):
 
             return fig, axes
 
-    def plot_alignment_evolution(self) -> tuple[plt.Figure, np.ndarray]:
+    def plot_alignment_evolution(
+        self, predict: bool = False
+    ) -> tuple[plt.Figure, np.ndarray]:
         """Plot implied alignment window evolution as sectors are installed.
 
         Shows L = σ × √3 (implied uniform half-width) instead of variance,
@@ -2427,11 +2488,21 @@ class FiducialPit(Plot1D):
         For a uniform distribution on [-L, L], σ = L/√3.
         Inverting: L_implied = σ_measured × √3.
 
+        Parameters
+        ----------
+        predict : bool, optional
+            If True, extend plots to 9 sectors showing projected CI
+            contraction assuming frozen measured variance. Dark gray shows
+            the frozen implied L line, light gray shows the shrinking CI.
+            Default is False.
+
         Returns
         -------
         tuple[plt.Figure, np.ndarray]
             Matplotlib figure and axes array
         """
+        from scipy import stats as scipy_stats
+
         evolution_data = []
 
         # Sector installation order: 6, 7, 5, 8
@@ -2475,11 +2546,15 @@ class FiducialPit(Plot1D):
             ["roll_length", "yaw_length", "pitch_length"],
         ]
 
+        # Determine x-axis extent based on predict flag
+        max_phase = 9 if predict else 4
+        x_labels = [str(s) for s in sector_order]
+        if predict:
+            # Extend labels for future sectors (placeholder numbers)
+            x_labels = x_labels + [str(i) for i in range(5, 10)]
+
         with sns.plotting_context("poster"):
             fig, axes = plt.subplots(2, 3, figsize=(14, 8))
-
-            # X-axis labels as sector numbers
-            x_labels = [str(s) for s in sector_order]
 
             # Display labels with underscores replaced by spaces
             param_labels = {p: p.replace("_", " ") for p in sum(param_grid, [])}
@@ -2498,6 +2573,54 @@ class FiducialPit(Plot1D):
                     L_lower = param_data["L_lower_95"].values
                     L_upper = param_data["L_upper_95"].values
                     tolerance = param_data["tolerance_L"].iloc[0]
+
+                    # Plot predicted CI contraction if requested
+                    if predict:
+                        # Get final measured values
+                        final_L = implied_L[-1]
+                        final_std = final_L / sqrt3  # Convert back to σ
+                        final_n = param_data["n_coils"].iloc[-1]
+
+                        # Project to phases 5-9 (10-18 coils, 2 per sector)
+                        pred_phases = np.arange(5, 10)
+                        pred_n = np.array([final_n + 2 * i for i in range(1, 6)])
+
+                        # CI for σ using chi-squared distribution, then convert to L
+                        # σ_lower = σ * sqrt((n-1) / chi2_upper)
+                        # σ_upper = σ * sqrt((n-1) / chi2_lower)
+                        # L = σ × √3
+                        pred_L_lower = []
+                        pred_L_upper = []
+                        for n in pred_n:
+                            chi2_lower = scipy_stats.chi2.ppf(0.025, n - 1)
+                            chi2_upper = scipy_stats.chi2.ppf(0.975, n - 1)
+                            std_lower = final_std * np.sqrt((n - 1) / chi2_upper)
+                            std_upper = final_std * np.sqrt((n - 1) / chi2_lower)
+                            pred_L_lower.append(std_lower * sqrt3)
+                            pred_L_upper.append(std_upper * sqrt3)
+
+                        pred_L_lower = np.array(pred_L_lower)
+                        pred_L_upper = np.array(pred_L_upper)
+
+                        # Light gray band: shrinking CI with frozen variance
+                        ax.fill_between(
+                            pred_phases,
+                            pred_L_lower,
+                            pred_L_upper,
+                            color="gray",
+                            alpha=0.2,
+                            linewidth=0,
+                        )
+
+                        # Dark gray line: frozen implied L assumption
+                        ax.plot(
+                            pred_phases,
+                            [final_L] * len(pred_phases),
+                            "--",
+                            color="gray",
+                            linewidth=2,
+                            alpha=0.7,
+                        )
 
                     # Plot 95% confidence interval band
                     ax.fill_between(
@@ -2525,8 +2648,9 @@ class FiducialPit(Plot1D):
                     )
 
                     # Add tolerance label on right side
+                    label_x = max_phase + 0.5
                     ax.text(
-                        4.5,
+                        label_x,
                         tolerance,
                         f" {tolerance:.1f}",
                         va="center",
@@ -2538,10 +2662,10 @@ class FiducialPit(Plot1D):
                     ax.set_title(param_labels[param])
 
                     # Axis formatting - use 2x tolerance limit
-                    ax.set_xlim(0.5, 4.5)
+                    ax.set_xlim(0.5, max_phase + 0.5)
                     ax.set_ylim(0, 2 * tolerance)
-                    ax.set_xticks([1, 2, 3, 4])
-                    ax.set_xticklabels(x_labels)
+                    ax.set_xticks(list(range(1, max_phase + 1)))
+                    ax.set_xticklabels(x_labels[:max_phase])
 
                     # Only show x-axis labels on bottom row
                     if row_idx == 1:

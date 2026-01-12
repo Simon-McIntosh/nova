@@ -2381,17 +2381,20 @@ class FiducialPit(Plot1D):
                         # Get final measured values
                         final_std = std_vals[-1]
                         final_n = param_data["n_coils"].iloc[-1]
+                        final_std_lower = std_lower[-1]
+                        final_std_upper = std_upper[-1]
 
-                        # Project to phases 5-9 (10-18 coils, 2 per sector)
-                        pred_phases = np.arange(5, 10)
-                        pred_n = np.array([final_n + 2 * i for i in range(1, 6)])
+                        # Project from phase 4 to 9 (start at 4 for continuity)
+                        pred_phases = np.arange(4, 10)
+                        # n_coils: 8, 10, 12, 14, 16, 18
+                        pred_n = np.array([final_n + 2 * i for i in range(6)])
 
                         # CI for σ using chi-squared distribution
                         # σ_lower = σ * sqrt((n-1) / chi2_upper)
                         # σ_upper = σ * sqrt((n-1) / chi2_lower)
-                        pred_lower = []
-                        pred_upper = []
-                        for n in pred_n:
+                        pred_lower = [final_std_lower]  # Start with current CI
+                        pred_upper = [final_std_upper]
+                        for n in pred_n[1:]:
                             chi2_lower = scipy_stats.chi2.ppf(0.025, n - 1)
                             chi2_upper = scipy_stats.chi2.ppf(0.975, n - 1)
                             pred_lower.append(final_std * np.sqrt((n - 1) / chi2_upper))
@@ -2458,7 +2461,9 @@ class FiducialPit(Plot1D):
                     ax.set_xlim(0.5, max_phase + 0.5)
                     ax.set_ylim(0, 2 * trial_hw)
                     ax.set_xticks(list(range(1, max_phase + 1)))
-                    ax.set_xticklabels(x_labels[:max_phase])
+                    # Only label measured sectors (1-4), blank for predicted
+                    tick_labels = x_labels[:4] + [""] * (max_phase - 4)
+                    ax.set_xticklabels(tick_labels)
 
                     # Only show x-axis labels on bottom row
                     if row_idx == 1:
@@ -2580,18 +2585,21 @@ class FiducialPit(Plot1D):
                         final_L = implied_L[-1]
                         final_std = final_L / sqrt3  # Convert back to σ
                         final_n = param_data["n_coils"].iloc[-1]
+                        final_L_lower = L_lower[-1]
+                        final_L_upper = L_upper[-1]
 
-                        # Project to phases 5-9 (10-18 coils, 2 per sector)
-                        pred_phases = np.arange(5, 10)
-                        pred_n = np.array([final_n + 2 * i for i in range(1, 6)])
+                        # Project from phase 4 to 9 (start at 4 for continuity)
+                        pred_phases = np.arange(4, 10)
+                        # n_coils: 8, 10, 12, 14, 16, 18
+                        pred_n = np.array([final_n + 2 * i for i in range(6)])
 
                         # CI for σ using chi-squared distribution, then convert to L
                         # σ_lower = σ * sqrt((n-1) / chi2_upper)
                         # σ_upper = σ * sqrt((n-1) / chi2_lower)
                         # L = σ × √3
-                        pred_L_lower = []
-                        pred_L_upper = []
-                        for n in pred_n:
+                        pred_L_lower = [final_L_lower]  # Start with current CI
+                        pred_L_upper = [final_L_upper]
+                        for n in pred_n[1:]:
                             chi2_lower = scipy_stats.chi2.ppf(0.025, n - 1)
                             chi2_upper = scipy_stats.chi2.ppf(0.975, n - 1)
                             std_lower = final_std * np.sqrt((n - 1) / chi2_upper)
@@ -2665,7 +2673,9 @@ class FiducialPit(Plot1D):
                     ax.set_xlim(0.5, max_phase + 0.5)
                     ax.set_ylim(0, 2 * tolerance)
                     ax.set_xticks(list(range(1, max_phase + 1)))
-                    ax.set_xticklabels(x_labels[:max_phase])
+                    # Only label measured sectors (1-4), blank for predicted
+                    tick_labels = x_labels[:4] + [""] * (max_phase - 4)
+                    ax.set_xticklabels(tick_labels)
 
                     # Only show x-axis labels on bottom row
                     if row_idx == 1:
@@ -2713,11 +2723,14 @@ if __name__ == "__main__":
     stats_df, (position_fig, position_axes) = pit.position_statistics()
     print(pit.position_summary().to_string(index=False))
 
+    # include predictions in evolution chart
+    predict = True
+
     # Show evolution chart
-    evolution_fig, evolution_axes = pit.plot_position_evolution()
+    evolution_fig, evolution_axes = pit.plot_position_evolution(predict)
 
     # Show alignment window evolution (more intuitive than variance)
-    alignment_fig, alignment_axes = pit.plot_alignment_evolution()
+    alignment_fig, alignment_axes = pit.plot_alignment_evolution(predict)
 
     # Plot gaps
     pit.plot_gaps()

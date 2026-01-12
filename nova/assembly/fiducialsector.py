@@ -400,7 +400,7 @@ if __name__ == "__main__":
     phase = "SSAT BR"
     phase = "SSAT target"
     phase = "SSAT AR"
-    phase = "SSAT AL"
+    # phase = "SSAT AL"
     # phase = "SSAT AR2"
     # phase = "SSAT AR target"
     phase = "In-pit target"
@@ -542,6 +542,8 @@ if __name__ == "__main__":
     plot_data = pandas.concat([first_plane, gap_plane, last_plane], ignore_index=True)
 
     # Create three-column Altair chart with synced tooltips
+    sector_number = next(iter(sectors.keys()))
+    offset_chart_title = f"Sector {sector_number} - {phase}"
     base = alt.Chart(plot_data).mark_circle(size=60)
 
     chart = (
@@ -562,7 +564,7 @@ if __name__ == "__main__":
             ],
             facet=alt.Facet(
                 "feature:N",
-                title=None,
+                title=offset_chart_title,
                 header=alt.Header(labelFontSize=12),
                 sort=["ILIS +1", "Gap", "ILIS -1"],
             ),
@@ -678,9 +680,13 @@ if __name__ == "__main__":
 
     chart = scatter + outlier + ccl_points + ccl_text
 
+    ilis_chart_title = f"Sector {sector_number} - {phase}"
     chart = (
         chart.facet(
-            row="coil", column=alt.Column("feature").sort(["ILIS -1", "CCL", "ILIS +1"])
+            row="coil",
+            column=alt.Column("feature", title=ilis_chart_title).sort(
+                ["ILIS -1", "CCL", "ILIS +1"]
+            ),
         )
         .configure_axis(grid=False)
         .interactive()

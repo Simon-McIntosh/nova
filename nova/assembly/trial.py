@@ -552,7 +552,7 @@ class Trial(Dataset, TrialAttrs, Plot1D):
         """Add multi-line text to current axes."""
         self.axes.text(
             1.0,
-            0.8,
+            0.95,
             text,
             fontsize="x-small",
             transform=self.axes.transAxes,
@@ -646,7 +646,7 @@ class Vault(Trial, QuartileAnalysis, Plot1D):
         self.structural_model = structural.Model()
         self.electromagnetic_model = electromagnetic.Model()
         super().__post_init__()
-        self.ensure_quartile_analysis(force=self.force)
+        # self.ensure_quartile_analysis(force=self.force)
 
     @property
     def quartile_components(self) -> list[str]:
@@ -964,7 +964,7 @@ class ErrorField(Trial, QuartileAnalysis, Plot1D):
         """Initialize model instances."""
         self.model = overlap.Model()
         super().__post_init__()
-        self.ensure_quartile_analysis(force=self.force)
+        # self.ensure_quartile_analysis(force=self.force)
 
     @property
     def quartile_components(self) -> list[str]:
@@ -1079,8 +1079,8 @@ class ErrorField(Trial, QuartileAnalysis, Plot1D):
 
 if __name__ == "__main__":
     trial_name = "baseline_2021"
-    # trial_name = "S4_refine_pit_2026"
-    # trial_name = "S4_hybrid_pit_2026"
+    trial_name = "S4_refine_pit_2026"
+    trial_name = "S4_hybrid_pit_2026"
     samples = 200_000
     force = True
 
@@ -1088,12 +1088,13 @@ if __name__ == "__main__":
     vault = Vault.from_manifest(trial_name, samples=samples, force=force)
     print(f"Vault hash: {vault.group_name}")
 
-    vault.plot()
-    vault.plot_offset()
-    vault.plot_gap()
-    vault.plot_cumlative_gap()
-    vault.plot_quartile("peaktopeak")
-    vault.plot_quartile_summary()
+    import seaborn as sns
+
+    with sns.plotting_context("talk"):
+        vault.plot()
+        vault.plot_offset()
+        vault.plot_gap()
+        vault.plot_cumlative_gap()
 
     error = ErrorField.from_manifest(trial_name, samples=samples, force=force)
     print(f"ErrorField hash: {error.group_name}")

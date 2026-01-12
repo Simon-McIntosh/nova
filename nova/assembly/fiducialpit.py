@@ -1454,7 +1454,6 @@ class FiducialPit(Plot1D):
             ax.set_xticklabels(bar_labels, rotation=45, ha="right")
             ax.set_xlabel("Gap (coil-coil)")
             ax.set_ylabel("Gap (mm)")
-            ax.set_title(f"Pit Gap Analysis - {self.phase}")
 
             # Add target lines with text labels on the right side (not in legend)
             xlim = ax.get_xlim()
@@ -1555,7 +1554,6 @@ class FiducialPit(Plot1D):
             ax.set_xticks(x)
             ax.set_xticklabels(display_labels)
             ax.set_ylabel("Gap (mm)")
-            ax.set_title(f"Gap Statistics Summary - {self.phase}")
             ax.axhline(0, color="gray", linewidth=0.5)
 
             # Add limit line (dark gray, no text label)
@@ -2485,13 +2483,12 @@ class FiducialPit(Plot1D):
 
                     # Only show y-axis label on leftmost column
                     if col_idx == 0:
-                        ax.set_ylabel("σ (mm)")
+                        ax.set_ylabel("σ, mm")
 
             # Despine all axes
             for ax in axes.flatten():
                 sns.despine(ax=ax)
 
-            fig.suptitle("Variance Evolution with Assembly Progress", y=1.02)
             fig.tight_layout()
 
             return fig, axes
@@ -2703,7 +2700,6 @@ class FiducialPit(Plot1D):
             for ax in axes.flatten():
                 sns.despine(ax=ax)
 
-            fig.suptitle("Implied Alignment Window Evolution", y=1.02)
             fig.tight_layout()
 
             return fig, axes

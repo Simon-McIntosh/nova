@@ -56,6 +56,20 @@ class netCDF(FilePath):
         gc.collect()
         return self
 
+    def delete_group(self):
+        """Delete group from netCDF file if it exists."""
+        if not self.is_file() or self.group is None:
+            return self
+        try:
+            import h5py
+
+            with h5py.File(self.filepath, "a") as f:
+                if self.group in f:
+                    del f[self.group]
+        except (ImportError, OSError):
+            pass  # h5py not available or file locked
+        return self
+
     def load(self):
         """Load dataset from file."""
         with xarray.open_dataset(self.filepath, group=self.group, cache=True) as data:

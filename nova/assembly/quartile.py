@@ -189,7 +189,9 @@ class QuartileAnalysis(Plot1D):
         qa_data = self.build_quartile_analysis()
         self.data = self.data.merge(qa_data, compat="override")
 
-        # Store updated dataset (self.store() is provided by Trial mixin)
+        # Delete existing group to allow dimension size changes, then store
+        if hasattr(self, "delete_group"):
+            self.delete_group()  # type: ignore[attr-defined]
         if hasattr(self, "store"):
             self.store()  # type: ignore[attr-defined]
         return self

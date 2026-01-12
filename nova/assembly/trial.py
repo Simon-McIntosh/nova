@@ -603,7 +603,6 @@ class Vault(Trial, QuartileAnalysis, Plot1D):
     quartile_metrics: dict[str, str] = field(
         default_factory=lambda: {
             "peaktopeak": "peaktopeak",
-            "peaktopeak_offset": "peaktopeak_offset",
             "cumulative_gap": "cumulative_gap",
             "axis_offset": "axis_offset",
         },

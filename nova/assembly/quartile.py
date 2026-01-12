@@ -235,7 +235,7 @@ class QuartileAnalysis(Plot1D):
         ncols = min(4, n_components)
         nrows = (n_components + ncols - 1) // ncols
 
-        self.set_axes(nrows=nrows, ncols=ncols, figsize=figsize)
+        self.set_axes(nrows=nrows, ncols=ncols, figsize=figsize, sharey=True)
         axes = np.atleast_1d(self.axes).flatten()
 
         metric_data = self.data[f"qa_{metric}"].values
@@ -311,7 +311,9 @@ class QuartileAnalysis(Plot1D):
         n_components = len(components)
         n_metrics = len(qa_metrics)
 
-        self.set_axes(nrows=n_metrics, ncols=1, figsize=figsize, sharex=True)
+        self.set_axes(
+            nrows=n_metrics, ncols=1, figsize=figsize, sharex=True, sharey=True
+        )
         axes = np.atleast_1d(self.axes).flatten()
 
         x = np.arange(n_components)

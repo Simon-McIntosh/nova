@@ -6,7 +6,7 @@ intra-sector gaps using ILIS planes and CCL points.
 
 from dataclasses import dataclass, field
 from functools import cached_property
-from typing import ClassVar
+from typing import ClassVar, Literal, overload
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -1644,6 +1644,20 @@ class FiducialPit(Plot1D):
         book.close()
         # Return sheets in reverse order (newest first), fallback to In-pit target
         return list(reversed(sheets)) if sheets else ["In-pit target"]
+
+    @overload
+    def position_statistics(
+        self,
+        assembly_phase: int | None = None,
+        plot: Literal[True] = True,
+    ) -> tuple[pandas.DataFrame, tuple[plt.Figure, np.ndarray]]: ...
+
+    @overload
+    def position_statistics(
+        self,
+        assembly_phase: int | None = None,
+        plot: Literal[False] = ...,
+    ) -> tuple[pandas.DataFrame, None]: ...
 
     def position_statistics(
         self,

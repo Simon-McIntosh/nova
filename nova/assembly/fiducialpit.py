@@ -1972,38 +1972,53 @@ class FiducialPit(Plot1D):
                     # Remove x-ticks
                     ax.set_xticks([])
 
-                    # Add sector labels positioned based on data direction
-                    # Only add labels on bottom row to avoid clutter
-                    if row_idx == 1:
-                        ylim = ax.get_ylim()
-                        label_offset = (ylim[1] - ylim[0]) * 0.08
-                        for sector in sector_order:
-                            if sector not in sector_coil_indices:
-                                continue
-                            indices = sector_coil_indices[sector]
-                            if not indices:
-                                continue
-                            x_center = (indices[0] + indices[-1]) / 2
-                            # Determine label placement based on mean value
-                            values = sector_values.get(sector, [])
-                            mean_val = np.mean(values) if values else 0
-                            # Place label on opposite side of mean displacement
-                            if mean_val >= 0:
-                                y_pos = ylim[0] + label_offset
+                    # Add sector labels at y=0, positioned based on bar direction
+                    # Get tick label font size for consistent sizing
+                    tick_fontsize = plt.rcParams["xtick.labelsize"]
+                    for sector in sector_order:
+                        if sector not in sector_coil_indices:
+                            continue
+                        indices = sector_coil_indices[sector]
+                        if not indices:
+                            continue
+                        x_center = (indices[0] + indices[-1]) / 2
+                        values = sector_values.get(sector, [])
+                        if not values:
+                            continue
+                        # Determine dominant direction
+                        # If bars point both ways, use the smaller magnitude
+                        pos_vals = [v for v in values if v > 0]
+                        neg_vals = [v for v in values if v < 0]
+                        if pos_vals and neg_vals:
+                            # Mixed: align based on smaller bar
+                            max_pos = max(pos_vals)
+                            min_neg = min(neg_vals)
+                            # Smaller bar determines placement
+                            if abs(max_pos) <= abs(min_neg):
+                                # Smaller bar is positive, label goes above
                                 va = "bottom"
                             else:
-                                y_pos = ylim[1] - label_offset
+                                # Smaller bar is negative, label goes below
                                 va = "top"
-                            ax.text(
-                                x_center,
-                                y_pos,
-                                f"S{sector}",
-                                ha="center",
-                                va=va,
-                                fontsize=10,
-                                color=label_color,
-                                fontweight="bold",
-                            )
+                        elif pos_vals:
+                            # All positive: label below (top of label at y=0)
+                            va = "top"
+                        else:
+                            # All negative: label above (bottom of label at y=0)
+                            va = "bottom"
+                        ax.text(
+                            x_center,
+                            0,
+                            f"S{sector}",
+                            ha="center",
+                            va=va,
+                            fontsize=tick_fontsize,
+                            color=label_color,
+                            fontweight="bold",
+                        )
+
+                    # Only show x-label on bottom row
+                    if row_idx == 1:
                         ax.set_xlabel("TF Coil")
 
                     # Only show y-axis label on leftmost column

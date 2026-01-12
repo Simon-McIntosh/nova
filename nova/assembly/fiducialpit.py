@@ -150,11 +150,20 @@ class FiducialPit(Plot1D):
             except (FileNotFoundError, KeyError) as e:
                 print(f"Warning: Could not load sector {sector}: {e}")
 
-    def _sector_label(self, sector: int) -> str:
-        """Return sector label, bracketed if from target phase."""
+    def _sector_label(self, sector: int) -> tuple[str, str]:
+        """Return sector label and color based on phase type.
+
+        Returns
+        -------
+        tuple[str, str]
+            (label, color) where color is light gray for target phase,
+            dark gray for installed (TFGS Landing) phase.
+        """
         phase = self._resolved_phases.get(sector, self.phase)
         is_target = "target" in phase.lower()
-        return f"(S{sector})" if is_target else f"S{sector}"
+        label = f"S{sector}"
+        color = "#b0b0b0" if is_target else "#606060"  # light gray / dark gray
+        return label, color
 
     @cached_property
     def coils(self) -> list[int]:
@@ -1429,14 +1438,15 @@ class FiducialPit(Plot1D):
                 # Add sector label at base of within-sector (intra-sector) bars
                 if gap_type == "intra-sector":
                     sector = int(row["sector_a"])
+                    label, label_color = self._sector_label(sector)
                     ax.text(
                         x[i],
                         0.05,
-                        self._sector_label(sector),
+                        label,
                         ha="center",
                         va="bottom",
                         fontsize=24,
-                        color="lightgray",
+                        color=label_color,
                         fontweight="bold",
                     )
 
@@ -1915,9 +1925,6 @@ class FiducialPit(Plot1D):
                 "pitch_length": 1.5,
             }
 
-            # Label color (light gray)
-            label_color = "#9a9a9a"
-
             for row_idx, row_params in enumerate(param_grid):
                 for col_idx, param in enumerate(row_params):
                     ax = axes[row_idx, col_idx]
@@ -2018,14 +2025,15 @@ class FiducialPit(Plot1D):
                             # All negative: label above zero
                             y_pos = label_padding
                             va = "bottom"
+                        label, sector_label_color = self._sector_label(sector)
                         ax.text(
                             x_center,
                             y_pos,
-                            self._sector_label(sector),
+                            label,
                             ha="center",
                             va=va,
                             fontsize=tick_fontsize,
-                            color=label_color,
+                            color=sector_label_color,
                             fontweight="bold",
                         )
 

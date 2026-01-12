@@ -61,18 +61,58 @@ class netCDF(FilePath):
         if not self.is_file() or self.group is None:
             return self
         try:
-            import h5py
+            import netCDF4
 
             filepath = str(self.filepath)
-            with h5py.File(filepath, "a") as f:
+            with netCDF4.Dataset(filepath, "r+") as nc:
                 # Handle both 'group' and '/group' formats
                 group_key = self.group.lstrip("/")
-                if group_key in f:
-                    del f[group_key]
-                elif self.group in f:
-                    del f[self.group]
-        except (ImportError, OSError, KeyError):
-            pass  # h5py not available, file locked, or group not found
+                if group_key in nc.groups:
+                    # netCDF4 doesn't support deleting groups directly,
+                    # so we need to recreate the file without this group
+                    pass  # Fall through to file recreation approach
+                else:
+                    return self  # Group doesn't exist, nothing to delete
+        except (ImportError, OSError):
+            pass
+
+        # Fallback: recreate file without the target group
+        try:
+            # Load all other groups, delete file, rewrite without target group
+            import netCDF4
+
+            filepath = str(self.filepath)
+            group_key = self.group.lstrip("/")
+
+            # Get list of all groups
+            with netCDF4.Dataset(filepath, "r") as nc:
+                groups = list(nc.groups.keys())
+
+            if group_key not in groups:
+                return self  # Group doesn't exist
+
+            # Load data from all OTHER groups
+            other_data = {}
+            for grp in groups:
+                if grp != group_key:
+                    with xarray.open_dataset(filepath, group=grp) as ds:
+                        other_data[grp] = ds.load()
+
+            # Delete the file
+            import os
+
+            os.remove(filepath)
+
+            # Rewrite all other groups
+            for grp, ds in other_data.items():
+                mode = "w" if not self.is_file() else "a"
+                ds.to_netcdf(filepath, mode=mode, group=grp)
+                ds.close()
+
+        except (ImportError, OSError, KeyError) as e:
+            import warnings
+
+            warnings.warn(f"Failed to delete group: {e}")
         return self
 
     def store_overwrite(self):

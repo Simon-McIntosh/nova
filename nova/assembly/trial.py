@@ -1429,9 +1429,10 @@ class ErrorField(Trial, Plot1D):
 
 
 if __name__ == "__main__":
+    trial_name = "S4_refine_pit_2026"
     trial_name = "S4_hybrid_pit_2026"
     samples = 200_000
-    force = True
+    force = False
 
     # Load baseline_2021 from manifest (should use cache)
     vault = Vault.from_manifest(trial_name, samples=samples, force=force)

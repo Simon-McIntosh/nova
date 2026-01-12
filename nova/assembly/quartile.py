@@ -179,6 +179,12 @@ class QuartileAnalysis(Plot1D):
         if not force and self.load_quartile_analysis():
             return self
 
+        # Remove old qa_* variables and dimensions before rebuilding
+        qa_vars = [v for v in self.data.data_vars if v.startswith("qa_")]
+        qa_coords = [c for c in self.data.coords if c.startswith("qa_")]
+        if qa_vars or qa_coords:
+            self.data = self.data.drop_vars(qa_vars + qa_coords, errors="ignore")
+
         # Build and merge into main dataset
         qa_data = self.build_quartile_analysis()
         self.data = self.data.merge(qa_data, compat="override")

@@ -191,6 +191,8 @@ print('Gap: mean=%.3f' % r['key'])
 
 The backslash escapes in f-strings within `-c` commands cause parsing failures.
 
+Use `git status` instead of `get_changed_files` tool (not available on Windows).
+
 ## Project Structure
 
 ```

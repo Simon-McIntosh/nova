@@ -1880,15 +1880,23 @@ class FiducialPit(Plot1D):
 
             # Order coils by sector installation order, then by position within sector
             coil_order = []
+            sector_coil_indices: dict[int, list[int]] = {}
             for sector in sector_order:
                 sector_coils = chart_df[chart_df["sector"] == sector]["coil"].unique()
                 sector_coils_sorted = sorted(
                     sector_coils, key=lambda c: self.location.index(c)
                 )
+                start_idx = len(coil_order)
                 coil_order.extend(sector_coils_sorted)
+                end_idx = len(coil_order)
+                sector_coil_indices[sector] = list(range(start_idx, end_idx))
 
-            # Assign colors by installation order
-            sector_colors = {s: f"C{i}" for i, s in enumerate(sector_order)}
+            # Alternating light/dark blue for sector pairs
+            light_blue = "#6BAED6"
+            dark_blue = "#2171B5"
+            sector_colors = {}
+            for i, sector in enumerate(sector_order):
+                sector_colors[sector] = light_blue if i % 2 == 0 else dark_blue
 
             # Trial windows for reference lines (from baseline_2021 error_field)
             trial_windows = {
@@ -1899,6 +1907,9 @@ class FiducialPit(Plot1D):
                 "yaw_length": 1.5,
                 "pitch_length": 1.5,
             }
+
+            # Label color
+            label_color = "#4a4a4a"
 
             for row_idx, row_params in enumerate(param_grid):
                 for col_idx, param in enumerate(row_params):
@@ -1912,19 +1923,24 @@ class FiducialPit(Plot1D):
                     # Plot bars for each coil
                     bar_width = 0.8
 
+                    # Track values per sector for label placement
+                    sector_values: dict[int, list[float]] = {
+                        s: [] for s in sector_order
+                    }
+
                     for i, coil in enumerate(coil_order):
                         coil_data = param_data[param_data["coil"] == coil]
                         if coil_data.empty:
                             continue
                         value = coil_data["value"].iloc[0]
                         sector = coil_data["sector"].iloc[0]
+                        sector_values[sector].append(value)
                         ax.bar(
                             i,
                             value,
                             width=bar_width,
                             color=sector_colors[sector],
-                            edgecolor="k",
-                            alpha=0.8,
+                            edgecolor="none",
                         )
 
                     # Add trial window lines
@@ -1953,11 +1969,41 @@ class FiducialPit(Plot1D):
                     # Add title as subplot title
                     ax.set_title(param_labels[param])
 
-                    # Remove x-ticks (info is in the legend)
+                    # Remove x-ticks
                     ax.set_xticks([])
 
-                    # Only show x-label on bottom row
+                    # Add sector labels positioned based on data direction
+                    # Only add labels on bottom row to avoid clutter
                     if row_idx == 1:
+                        ylim = ax.get_ylim()
+                        label_offset = (ylim[1] - ylim[0]) * 0.08
+                        for sector in sector_order:
+                            if sector not in sector_coil_indices:
+                                continue
+                            indices = sector_coil_indices[sector]
+                            if not indices:
+                                continue
+                            x_center = (indices[0] + indices[-1]) / 2
+                            # Determine label placement based on mean value
+                            values = sector_values.get(sector, [])
+                            mean_val = np.mean(values) if values else 0
+                            # Place label on opposite side of mean displacement
+                            if mean_val >= 0:
+                                y_pos = ylim[0] + label_offset
+                                va = "bottom"
+                            else:
+                                y_pos = ylim[1] - label_offset
+                                va = "top"
+                            ax.text(
+                                x_center,
+                                y_pos,
+                                f"S{sector}",
+                                ha="center",
+                                va=va,
+                                fontsize=10,
+                                color=label_color,
+                                fontweight="bold",
+                            )
                         ax.set_xlabel("TF Coil")
 
                     # Only show y-axis label on leftmost column
@@ -1968,30 +2014,7 @@ class FiducialPit(Plot1D):
             for ax in axes.flatten():
                 sns.despine(ax=ax)
 
-            # Add legend for sectors in installation order
-            handles = []
-            labels = []
-            for s in sector_order:
-                if s in chart_df["sector"].values:
-                    sector_phases = chart_df[chart_df["sector"] == s]["phase"].unique()
-                    is_target = any("target" in p.lower() for p in sector_phases)
-                    suffix = " (target)" if is_target else ""
-                    handles.append(
-                        plt.Line2D(
-                            [0], [0], color=sector_colors[s], linewidth=6, alpha=0.8
-                        )
-                    )
-                    labels.append(f"Sector {s}{suffix}")
-            fig.legend(
-                handles,
-                labels,
-                loc="upper center",
-                bbox_to_anchor=(0.5, 1.0),
-                frameon=False,
-                ncol=len(handles),
-            )
-
-            fig.suptitle("Coil Position Statistics", y=1.04)
+            fig.suptitle("Coil Position Statistics", y=1.02)
             fig.tight_layout()
 
             return fig, axes

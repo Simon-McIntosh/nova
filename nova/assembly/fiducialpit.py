@@ -150,6 +150,12 @@ class FiducialPit(Plot1D):
             except (FileNotFoundError, KeyError) as e:
                 print(f"Warning: Could not load sector {sector}: {e}")
 
+    def _sector_label(self, sector: int) -> str:
+        """Return sector label, bracketed if from target phase."""
+        phase = self._resolved_phases.get(sector, self.phase)
+        is_target = "target" in phase.lower()
+        return f"(S{sector})" if is_target else f"S{sector}"
+
     @cached_property
     def coils(self) -> list[int]:
         """Return list of all coils across loaded sectors."""
@@ -1426,7 +1432,7 @@ class FiducialPit(Plot1D):
                     ax.text(
                         x[i],
                         0.05,
-                        f"S{sector}",
+                        self._sector_label(sector),
                         ha="center",
                         va="bottom",
                         fontsize=24,
@@ -1534,6 +1540,7 @@ class FiducialPit(Plot1D):
                 alpha=0.8,
                 edgecolor="k",
                 color=bar_colors,
+                error_kw={"ecolor": "lightgray", "capthick": 2},
             )
             ax.set_xticks(x)
             ax.set_xticklabels(display_labels)
@@ -2016,7 +2023,7 @@ class FiducialPit(Plot1D):
                         ax.text(
                             x_center,
                             y_pos,
-                            f"S{sector}",
+                            self._sector_label(sector),
                             ha="center",
                             va=va,
                             fontsize=tick_fontsize,
@@ -2536,7 +2543,7 @@ class FiducialPit(Plot1D):
 
                     # Only show y-axis label on leftmost column
                     if col_idx == 0:
-                        ax.set_ylabel("tolerance (mm)")
+                        ax.set_ylabel("tolerance, mm")
 
             # Despine all axes
             for ax in axes.flatten():

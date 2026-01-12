@@ -629,10 +629,10 @@ class Trial(Dataset, TrialAttrs, Plot1D):
                 pdf = rf"$\mathcal{{U}}\,(\pm{theta:1.1f})$"
             text += ": " + pdf
             text += "\n"
-        text += "\n"
-        text += f"samples: {self.samples:,}\n"
         n_measured = len(self.measured_sectors) if self.measured_sectors else 0
-        text += f"measured_sectors: {n_measured}"
+        text += f"measured_sectors: {n_measured}\n"
+        text += "\n"
+        text += f"samples: {self.samples:,}"
         self.text(text)
 
     def text(self, text):

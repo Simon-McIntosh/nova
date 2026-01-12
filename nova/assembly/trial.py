@@ -76,6 +76,8 @@ class Trial(Dataset, TrialAttrs, Plot1D):
         self.host = self.hostname
         self.path = self.dirname
         if self.force:
+            # Delete existing group to allow dimension changes (e.g., n_bins)
+            self.delete_group()
             self.build()
         else:
             super().__post_init__()
@@ -1079,7 +1081,7 @@ if __name__ == "__main__":
     trial_name = "baseline_2021"
     # trial_name = "S4_refine_pit_2026"
     # trial_name = "S4_hybrid_pit_2026"
-    samples = 500_000
+    samples = 200_000
     force = True
 
     # Load baseline_2021 from manifest (should use cache)

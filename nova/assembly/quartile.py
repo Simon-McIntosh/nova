@@ -36,7 +36,7 @@ class QuartileAnalysis(Plot1D):
         - quartile_components: property returning list of component names
     """
 
-    n_bins: ClassVar[int] = 20
+    n_bins: ClassVar[int] = 10
     quartile_level: ClassVar[float] = 0.99
 
     # Override in subclasses via field or property

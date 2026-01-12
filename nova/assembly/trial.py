@@ -14,6 +14,7 @@ from nova.assembly import structural, electromagnetic, overlap
 from nova.assembly.gap import WedgeGap
 from nova.assembly.model import Dataset
 from nova.assembly.progress import TrialProgress
+from nova.assembly.quartile import QuartileAnalysis
 from nova.assembly.trial_manifest import TrialManifest
 from nova.graphics.plot import Plot1D
 
@@ -629,7 +630,9 @@ class Trial(Dataset, TrialAttrs, Plot1D):
             text += ": " + pdf
             text += "\n"
         text += "\n"
-        text += f"samples: {self.samples:,}"
+        text += f"samples: {self.samples:,}\n"
+        n_measured = len(self.measured_sectors) if self.measured_sectors else 0
+        text += f"measured_sectors: {n_measured}"
         self.text(text)
 
     def text(self, text):
@@ -680,10 +683,22 @@ class Trial(Dataset, TrialAttrs, Plot1D):
 
 
 @dataclass
-class Vault(Trial, Plot1D):
+class Vault(Trial, QuartileAnalysis, Plot1D):
     """Run vault assembly Monte Carlo trials."""
 
     filename: str = "vault_trial"
+
+    # QuartileAnalysis configuration
+    quartile_metrics: dict[str, str] = field(
+        default_factory=lambda: {
+            "peaktopeak": "peaktopeak",
+            "peaktopeak_offset": "peaktopeak_offset",
+            "cumulative_gap": "cumulative_gap",
+            "axis_offset": "axis_offset",
+        },
+        repr=False,
+    )
+
     component: list[str] = field(
         default_factory=lambda: [
             "radial",
@@ -719,6 +734,22 @@ class Vault(Trial, Plot1D):
         self.structural_model = structural.Model()
         self.electromagnetic_model = electromagnetic.Model()
         super().__post_init__()
+
+    @property
+    def quartile_components(self) -> list[str]:
+        """Return components for quartile analysis binning."""
+        return list(self.data.component.values)
+
+    def _get_metric_data(self, metric: str) -> np.ndarray:
+        """Return data array for quartile analysis metrics.
+
+        Handles special metrics that require computation from stored data.
+        """
+        if metric == "cumulative_gap":
+            return self.cumulative_gap
+        if metric == "axis_offset":
+            return np.linalg.norm(self.data.offset.values, axis=-1)
+        return self.data[metric].values
 
     def build(self):
         """Build Monte Carlo dataset."""
@@ -1239,10 +1270,19 @@ class Vault(Trial, Plot1D):
 
 
 @dataclass
-class ErrorField(Trial, Plot1D):
+class ErrorField(Trial, QuartileAnalysis, Plot1D):
     """Run Monte Carlo error field trials."""
 
     filename: str = "errorfield_trial"
+
+    # QuartileAnalysis configuration
+    quartile_metrics: dict[str, str] = field(
+        default_factory=lambda: {
+            "overlap": "overlap_max",
+        },
+        repr=False,
+    )
+
     component: list[str] = field(
         default_factory=lambda: [
             "radial",
@@ -1275,6 +1315,21 @@ class ErrorField(Trial, Plot1D):
         """Initialize model instances."""
         self.model = overlap.Model()
         super().__post_init__()
+
+    @property
+    def quartile_components(self) -> list[str]:
+        """Return components for quartile analysis binning."""
+        return list(self.data.component.values)
+
+    def _get_metric_data(self, metric: str) -> np.ndarray:
+        """Return data array for quartile analysis metrics.
+
+        Handles special metrics that require computation from stored data.
+        """
+        if metric == "overlap_max":
+            # Maximum overlap across all plasma configurations
+            return self.data.overlap.values.max(axis=-1)
+        return self.data[metric].values
 
     def build(self):
         """Build Monte Carlo dataset."""
@@ -1430,7 +1485,7 @@ class ErrorField(Trial, Plot1D):
 
 if __name__ == "__main__":
     trial_name = "baseline_2021"
-    # trial_name = "S4_refine_pit_2026"
+    trial_name = "S4_refine_pit_2026"
     trial_name = "S4_hybrid_pit_2026"
     samples = 200_000
     force = False

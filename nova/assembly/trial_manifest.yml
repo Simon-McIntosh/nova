@@ -35,7 +35,7 @@ simulations:
   baseline_2021:
     description: "Original ITER TF coil tolerancing analysis - baseline assumptions"
     date: "2021-01-01"
-    samples: 200000
+    samples: 2000000
     theta:
       radial: 1.5
       tangential: 1.5

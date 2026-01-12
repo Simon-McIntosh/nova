@@ -1908,8 +1908,8 @@ class FiducialPit(Plot1D):
                 "pitch_length": 1.5,
             }
 
-            # Label color
-            label_color = "#4a4a4a"
+            # Label color (light gray)
+            label_color = "#9a9a9a"
 
             for row_idx, row_params in enumerate(param_grid):
                 for col_idx, param in enumerate(row_params):
@@ -1972,9 +1972,12 @@ class FiducialPit(Plot1D):
                     # Remove x-ticks
                     ax.set_xticks([])
 
-                    # Add sector labels at y=0, positioned based on bar direction
+                    # Add sector labels near y=0, positioned based on bar direction
                     # Get tick label font size for consistent sizing
                     tick_fontsize = plt.rcParams["xtick.labelsize"]
+                    # Small vertical offset to avoid overlapping bars
+                    ylim = ax.get_ylim()
+                    label_offset = (ylim[1] - ylim[0]) * 0.03
                     for sector in sector_order:
                         if sector not in sector_coil_indices:
                             continue
@@ -1995,20 +1998,24 @@ class FiducialPit(Plot1D):
                             min_neg = min(neg_vals)
                             # Smaller bar determines placement
                             if abs(max_pos) <= abs(min_neg):
-                                # Smaller bar is positive, label goes above
-                                va = "bottom"
-                            else:
-                                # Smaller bar is negative, label goes below
+                                # Smaller bar is positive, label goes below
+                                y_pos = -label_offset
                                 va = "top"
+                            else:
+                                # Smaller bar is negative, label goes above
+                                y_pos = label_offset
+                                va = "bottom"
                         elif pos_vals:
-                            # All positive: label below (top of label at y=0)
+                            # All positive: label below bars
+                            y_pos = -label_offset
                             va = "top"
                         else:
-                            # All negative: label above (bottom of label at y=0)
+                            # All negative: label above bars
+                            y_pos = label_offset
                             va = "bottom"
                         ax.text(
                             x_center,
-                            0,
+                            y_pos,
                             f"S{sector}",
                             ha="center",
                             va=va,

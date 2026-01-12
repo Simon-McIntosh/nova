@@ -734,6 +734,7 @@ class Vault(Trial, QuartileAnalysis, Plot1D):
         self.structural_model = structural.Model()
         self.electromagnetic_model = electromagnetic.Model()
         super().__post_init__()
+        self.ensure_quartile_analysis()
 
     @property
     def quartile_components(self) -> list[str]:
@@ -1315,6 +1316,7 @@ class ErrorField(Trial, QuartileAnalysis, Plot1D):
         """Initialize model instances."""
         self.model = overlap.Model()
         super().__post_init__()
+        self.ensure_quartile_analysis()
 
     @property
     def quartile_components(self) -> list[str]:

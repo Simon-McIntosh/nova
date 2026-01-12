@@ -645,7 +645,7 @@ class Vault(Trial, QuartileAnalysis, Plot1D):
         self.structural_model = structural.Model()
         self.electromagnetic_model = electromagnetic.Model()
         super().__post_init__()
-        self.ensure_quartile_analysis()
+        self.ensure_quartile_analysis(force=self.force)
 
     @property
     def quartile_components(self) -> list[str]:
@@ -963,7 +963,7 @@ class ErrorField(Trial, QuartileAnalysis, Plot1D):
         """Initialize model instances."""
         self.model = overlap.Model()
         super().__post_init__()
-        self.ensure_quartile_analysis()
+        self.ensure_quartile_analysis(force=self.force)
 
     @property
     def quartile_components(self) -> list[str]:
@@ -1078,10 +1078,10 @@ class ErrorField(Trial, QuartileAnalysis, Plot1D):
 
 if __name__ == "__main__":
     trial_name = "baseline_2021"
-    trial_name = "S4_refine_pit_2026"
-    trial_name = "S4_hybrid_pit_2026"
-    samples = 200_000
-    force = False
+    # trial_name = "S4_refine_pit_2026"
+    # trial_name = "S4_hybrid_pit_2026"
+    samples = 500_000
+    force = True
 
     # Load baseline_2021 from manifest (should use cache)
     vault = Vault.from_manifest(trial_name, samples=samples, force=force)

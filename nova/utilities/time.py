@@ -100,12 +100,14 @@ def timeit(_func=None, *, repeat=1, number=1000, file=sys.stdout):
                 # processes interfering with your timing accuracy."
                 best = min(trials) / number
                 print(
-                    "Best of {} trials with {} function"
-                    " calls per trial:".format(repeat, number)
+                    "Best of {} trials with {} function calls per trial:".format(
+                        repeat, number
+                    )
                 )
                 print(
-                    "Function `{}` ran in average"
-                    " of {:0.3f} seconds.".format(func.__name__, best),
+                    "Function `{}` ran in average of {:0.3f} seconds.".format(
+                        func.__name__, best
+                    ),
                     end="\n\n",
                     file=file,
                 )
@@ -167,7 +169,7 @@ class clock(object):
     def stop(self):
         if self.time:
             elapsed = time.time() - self.to
-            txt = f"{{:{55+self.nint+self.width}}}"  # flush
+            txt = f"{{:{55 + self.nint + self.width}}}"  # flush
             txt = txt.format(f"\rtotal elapsed time {elapsed:1.4f}s")
             self.write(txt)
             self.write("\n")

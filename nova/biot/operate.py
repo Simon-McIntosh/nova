@@ -260,7 +260,7 @@ class Operate(Data):
                     self.array[attr][:] = self.calculate_phase(attr.split("_")[0])
                 case _:
                     raise NotImplementedError(
-                        f"calculation for derived attr {attr}" "not implemented."
+                        f"calculation for derived attr {attr}not implemented."
                     )
         return self.array[attr]
 
@@ -280,7 +280,7 @@ class Operate(Data):
                 if attr.capitalize() in self.attrs or attr in self._attrs
             ]
         ):
-            raise AttributeError(f"Attribute {attr} " f"not defined in {avalible}.")
+            raise AttributeError(f"Attribute {attr} not defined in {avalible}.")
         if len(self.data) == 0:
             return self.array[attr]
         if attr in self._attrs:

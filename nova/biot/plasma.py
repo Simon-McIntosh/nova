@@ -281,7 +281,7 @@ class Plasma(Plot, netCDF, Flux, PlasmaLoc):
             mask = self.grid.ionize_mask(index)
         except (AttributeError, StopIteration) as error:
             raise AttributeError(
-                "use coilset.firstwall.insert " "to define plasma rejoin"
+                "use coilset.firstwall.insert to define plasma rejoin"
             ) from error
         self.ionize = mask
         self.nturn = self.area / np.sum(self.area)

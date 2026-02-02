@@ -48,7 +48,7 @@ class MorphAnsys:
         """Check for tfc18 root dir."""
         if not os.path.isdir(self.root_dir):
             raise FileNotFoundError(
-                f"APDL root dir {self.root_dir} not found." " Pull project from gitlab"
+                f"APDL root dir {self.root_dir} not found. Pull project from gitlab"
             )
 
     def cdread(self):

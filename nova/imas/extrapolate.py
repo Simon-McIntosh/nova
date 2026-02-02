@@ -109,7 +109,7 @@ class Grid:
         if self.limit == "ids":  # Load grid limit from equilibrium ids.
             if index != 1:
                 raise TypeError(
-                    "ids limits only valid for rectangular grids" f"{index} != 1"
+                    f"ids limits only valid for rectangular grids{index} != 1"
                 )
             limit = [grid.dim1, grid.dim2]
             if self.ngrid == "ids":
@@ -496,7 +496,6 @@ class Extrapolate(Grid, Operate):
 
 
 if __name__ == "__main__":
-
     # import doctest
 
     # doctest.testmod(verbose=False)

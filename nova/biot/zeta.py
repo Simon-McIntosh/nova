@@ -90,7 +90,6 @@ class Zeta:
 
 
 if __name__ == "__main__":
-
     data = np.ones((3, 4))
 
     rs = data

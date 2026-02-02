@@ -79,7 +79,6 @@ class Magnetics:
 
 
 if __name__ == "__main__":
-
     mag = Magnetics()
     data = mag.build()
     # dataset = xarray.Dataset()

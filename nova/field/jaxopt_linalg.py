@@ -160,7 +160,6 @@ def test_laplacian():
 
 
 if __name__ == "__main__":
-
     ids = CoilSet(field_attrs=["Bx", "By", "Bz", "Ax", "Ay", "Az"])
     radius = 9
     theta = np.linspace(0, 2 * np.pi)
@@ -316,7 +315,7 @@ if __name__ == "__main__":
 
 
 
-    
+
     B = clebsch.magnetic_field / jnp.linalg.norm(clebsch.magnetic_field, axis=0)
 
     normal = jnp.stack([-B[2], B[1], B[0]])

@@ -59,8 +59,11 @@ class Fourier(Points):
         """Extend points initialize dataset."""
         super().initialize_dataset()
         self.data["response"] = ["radial", "tangential"]
-        self.data["delta"] = ("scenario", "index", "response"), np.ones(
-            tuple(self.data.sizes[dim] for dim in ["scenario", "index", "response"])
+        self.data["delta"] = (
+            ("scenario", "index", "response"),
+            np.ones(
+                tuple(self.data.sizes[dim] for dim in ["scenario", "index", "response"])
+            ),
         )
 
     def build(self):
@@ -117,8 +120,9 @@ class BaseTransform:
         """Build signal filter."""
         _filter = self.response_coef / self.signal_coef
         _filter_dims = _filter.dims + ("coefficient",)
-        self.data["filter"] = _filter_dims, np.zeros(
-            tuple(self.data.sizes[dim] for dim in _filter_dims)
+        self.data["filter"] = (
+            _filter_dims,
+            np.zeros(tuple(self.data.sizes[dim] for dim in _filter_dims)),
         )
         self.data.filter[..., 0] = _filter.real
         self.data.filter[..., 1] = _filter.imag

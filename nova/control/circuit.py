@@ -54,8 +54,9 @@ class Circuit(Plot, netCDF, FrameSetLoc):
                 f"{connection.shape[1]} != {2 * self.data.sizes['edge']}\n"
                 f"{self.data.edge}"
             ) from error
-        data["incidence_matrix"] = ("node", "edge"), np.zeros(
-            (self.data.sizes["node"], self.data.sizes["edge"])
+        data["incidence_matrix"] = (
+            ("node", "edge"),
+            np.zeros((self.data.sizes["node"], self.data.sizes["edge"])),
         )
         data["incidence_matrix"][: len(connection)] = (
             -connection[:, ::2] + connection[:, 1::2]
@@ -127,7 +128,7 @@ class Circuit(Plot, netCDF, FrameSetLoc):
                 if pair[::-1] in edge_nodes:
                     sign[i] = -1
                     continue
-                raise IndexError(f"node pair {pair} " f"not in edge nodes {edge_nodes}")
+                raise IndexError(f"node pair {pair} not in edge nodes {edge_nodes}")
             loops.append(dict(edge=edge, sign=sign))
         return loops
 

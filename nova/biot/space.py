@@ -35,7 +35,7 @@ class Segment:
                 raise ValueError("segment type not set")
             case segment_type:
                 raise NotImplementedError(
-                    f"segment type {segment_type} " "not implemented"
+                    f"segment type {segment_type} not implemented"
                 )
         return start_axes
 

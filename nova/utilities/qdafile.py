@@ -96,7 +96,7 @@ class QDAfile(object):
 
     """
 
-    _fileid = {b"\x00\x06": 6, b"\x00\x08": 8, b"\x00\x0C": 12}
+    _fileid = {b"\x00\x06": 6, b"\x00\x08": 8, b"\x00\x0c": 12}
     _dtypes = {0: ">f4", 3: ">f8", 4: ">i4", ">f4": 0, ">f8": 3, ">i4": 4}
 
     def __init__(self, arg=None, **kwargs):
@@ -247,9 +247,9 @@ class QDAfile(object):
 
     def _tofile(self, fh):
         """Write data to an open file."""
-        fh.write(b"\x00\x0C")
+        fh.write(b"\x00\x0c")
         fh.write(struct.pack(">h", self.columns))
-        fh.write(b"\x00\x0E\x01\x02\x00\x05\x00\x01")
+        fh.write(b"\x00\x0e\x01\x02\x00\x05\x00\x01")
         fh.write(b"\x00" * (512 - 12))
         func = str if sys.version[0] == "2" else lambda x: bytes(x, "ascii")
         for r in self.rows:
@@ -262,7 +262,7 @@ class QDAfile(object):
         for i, (r, t, h) in enumerate(zip(self.rows, self.dtypes, self.headers)):
             self.data[i, 0:r].astype(t).tofile(fh, format=t)
             fh.write(b"\x00\x01" * r)
-            fh.write(b"\x0E\x02\x01\x00\x05\x00\x00\x01")
+            fh.write(b"\x0e\x02\x01\x00\x05\x00\x00\x01")
             h = func(h)
             fh.write(h + b"\x00" * (128 - len(h)))
 

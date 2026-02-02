@@ -33,9 +33,7 @@ class CoordLocIndexer:
             case (str(frame), str(attr)) if frame in ["source", "target"]:
                 return self._getdata(frame, attr)
             case _:
-                raise KeyError(
-                    f"malformed key {key}, require " "[source | target, attr]"
-                )
+                raise KeyError(f"malformed key {key}, require [source | target, attr]")
 
     def coordinate_list(self, attr: str) -> list[str]:
         """Return coordinate list."""
@@ -66,8 +64,7 @@ class CoordLocIndexer:
                 return np.einsum("...i,...ji->...j", points, self.coordinate_axes)
             case _:
                 raise NotImplementedError(
-                    f"coordinate rotation to {coordinate_frame} "
-                    "frame not implemented"
+                    f"coordinate rotation to {coordinate_frame} frame not implemented"
                 )
 
     def to_local(self, points):

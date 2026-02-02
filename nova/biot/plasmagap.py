@@ -78,8 +78,9 @@ class PlasmaGap(Plot, Proximate, Operate):
         self.data["z"] = "target", target["z"]
         self.data["x2d"] = ("name", "nodes"), probes[..., 0]
         self.data["z2d"] = ("name", "nodes"), probes[..., 1]
-        self.data["index"] = ("name", "nodes"), np.reshape(
-            range(self.data.sizes["target"]), self.shape
+        self.data["index"] = (
+            ("name", "nodes"),
+            np.reshape(range(self.data.sizes["target"]), self.shape),
         )
         super().post_solve()
 

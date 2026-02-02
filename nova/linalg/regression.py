@@ -63,10 +63,10 @@ class RegressionBase:
         if model is None:
             if self.model is not None:
                 return
-            raise AttributeError("model not set, " "unable to solve forward model")
+            raise AttributeError("model not set, unable to solve forward model")
         if len(model) != self.shape[1]:
             raise IndexError(
-                f"model length {len(model)} != " f"matrix.shape[1] {self.shape[1]}"
+                f"model length {len(model)} != matrix.shape[1] {self.shape[1]}"
             )
         self.model = model
 
@@ -102,10 +102,10 @@ class RegressionBase:
         if data is None:
             if self.data is not None:
                 return
-            raise AttributeError("data not set, " "unable to solve inverse problem")
+            raise AttributeError("data not set, unable to solve inverse problem")
         if len(data) != self.shape[0]:
             raise IndexError(
-                f"len(data) {len(data)} != " f"matrix.shape[0] {self.shape[0]}"
+                f"len(data) {len(data)} != matrix.shape[0] {self.shape[0]}"
             )
         if not isinstance(data, np.ndarray):
             raise TypeError(f"type(data) {type(data)} is not ndarray")
@@ -207,7 +207,6 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-
     """
 
     #berstein.plot()

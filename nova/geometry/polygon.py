@@ -126,7 +126,7 @@ class Polygon(PolyFrame):
             poly = shapely.ops.unary_union(polys)
             if not poly.is_valid:
                 raise AttributeError(
-                    "non-overlapping polygons specified in " f"{self.poly}"
+                    f"non-overlapping polygons specified in {self.poly}"
                 )
             return poly
         loop = np.array(self.poly)  # to numpy array
@@ -144,7 +144,7 @@ class Polygon(PolyFrame):
         if loop.ndim == 2 and loop.shape[1] == 2:  # loop
             return shapely.geometry.Polygon(shapely.geometry.LinearRing(loop))
         raise IndexError(
-            "malformed bounding loop\n" f"shape(loop): {loop.shape}\n" "require (n,2)"
+            f"malformed bounding loop\nshape(loop): {loop.shape}\nrequire (n,2)"
         )
 
     @staticmethod

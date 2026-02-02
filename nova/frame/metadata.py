@@ -109,7 +109,7 @@ class MetaData(ABC):
         }
         if type_error:
             raise TypeError(
-                "attributes initialized with incorrect type:\n" f"{type_error}"
+                f"attributes initialized with incorrect type:\n{type_error}"
             )
 
     def clear(self, attribute):

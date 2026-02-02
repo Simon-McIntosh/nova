@@ -648,8 +648,7 @@ class PulseDesign(Animate, Plot1D, Control, ITER):
         """Update ids with instance metadata."""
         metadata = Metadata(ids_entry.ids)
         comment = (
-            "Coil current waveforms to match 4-point bounding-box "
-            "separatrix targets."
+            "Coil current waveforms to match 4-point bounding-box separatrix targets."
         )
         provenance = [self.uri]
         provenance.extend(
@@ -1048,7 +1047,6 @@ class BenchmarkDesign(PulseDesign):
 
 
 if __name__ == "__main__":
-
     import doctest
 
     doctest.testmod()

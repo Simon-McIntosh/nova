@@ -94,7 +94,7 @@ class PoloidalLimit:
         if index is None:
             if not hasattr(self, "coil"):
                 raise IndexError(
-                    "coil_index must be specified " "when coilset not present"
+                    "coil_index must be specified when coilset not present"
                 )
             else:
                 index = self.coil.index
@@ -158,7 +158,7 @@ class PoloidalLimit:
         else:  # no limit
             CSsum_limit = [-self._bound, self._bound]
         return CSsum_limit
-    
+
     def get_CSaxial_limit(self):
         CSaxial_limit = np.zeros((self.nCS + 1, 2))
         for i in range(self.nCS + 1):  # gaps, top-bottom

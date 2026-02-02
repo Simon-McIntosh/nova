@@ -143,8 +143,9 @@ class Feature:
         self.data = xarray.Dataset(attrs=self.attrs)
         self.data["signal"] = signal
         self.data["scale"] = Scale(signal)[self.scaler]
-        self.data["pairwise"] = (self.signal_dim, self.signal_dim), self.pairwise(
-            self.data["scale"]
+        self.data["pairwise"] = (
+            (self.signal_dim, self.signal_dim),
+            self.pairwise(self.data["scale"]),
         )
         self.data.coords["feature_index"] = self.extract_features()
         self.data["feature"] = self.data.scale[self.data.feature_index]
@@ -163,7 +164,7 @@ class Feature:
         nfeature = self.data.sizes["feature_index"]
         plt.title(
             f"signal reduction {nfeature} of {nsignal}"
-            f" ({100 * nfeature/nsignal:1.1f}%)"
+            f" ({100 * nfeature / nsignal:1.1f}%)"
         )
 
 

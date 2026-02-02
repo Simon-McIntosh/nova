@@ -233,7 +233,7 @@ class MachineData(CoilSet, pythonIO):
             )[13:]
 
             for rib in range(4):
-                self.data[f"cryostatR{rib+1}"] = self.read_sheet(
+                self.data[f"cryostatR{rib + 1}"] = self.read_sheet(
                     "Cryostat & CST", 8 + rib * 5, np.arange(7, 11), nrows=2
                 )
 

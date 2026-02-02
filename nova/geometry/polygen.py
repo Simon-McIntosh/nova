@@ -203,7 +203,7 @@ class PolyGen(PolyShape):
 
         """
         if factor <= 0 or factor > 1:
-            raise ValueError("skin factor not 0 <= " f"{factor} <= 1")
+            raise ValueError(f"skin factor not 0 <= {factor} <= 1")
         disc_outer = PolyGen.disc(
             x_center, z_center, diameter, quadrant_segments=quadrant_segments
         )
@@ -244,7 +244,7 @@ class PolyGen(PolyShape):
 
         """
         if factor <= 0 or factor > 1:
-            raise ValueError("box factor not 0 <= " f"{factor} <= 1")
+            raise ValueError(f"box factor not 0 <= {factor} <= 1")
         box_outer = PolyGen.square(x_center, z_center, width)
         if np.isclose(factor, 1):
             return box_outer

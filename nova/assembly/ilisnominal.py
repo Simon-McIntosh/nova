@@ -73,7 +73,7 @@ class NominalIlis:
             lambda x: np.degrees(cls.dihedral_angle(x, np.array([0, 1, 0]))),
             axis=1,
         )
-    
+
     @classmethod
     def angle_to_xy(cls, planes: pandas.DataFrame):
         """Reutrn angle in degrees of planes grouped by `feature` to xz plane."""

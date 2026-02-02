@@ -136,7 +136,7 @@ class CCL(DataDir, Plotter):
             cpoint = (points[1:] + points[:-1]) / 2  # centerpoint
             vector = points[1:] - points[:-1]
             data = dict(
-                coil=np.full(n_seg, f"TF{coil+1}"),
+                coil=np.full(n_seg, f"TF{coil + 1}"),
                 cluster=np.full(n_seg, cluster),
                 nturn=np.full(n_seg, nturn),
                 x=cpoint[:, 0],

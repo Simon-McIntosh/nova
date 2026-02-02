@@ -139,7 +139,7 @@ class DataFrame(FrameAttrs):
             self._set_label(metatag, name)
         self._set_offset(metatag)
         label_delim = metatag["label"] + metatag["delim"]
-        index = [f'{label_delim}{i+metatag["offset"]:d}' for i in range(index_length)]
+        index = [f"{label_delim}{i + metatag['offset']:d}" for i in range(index_length)]
         if metatag["delim"] and metatag["label"] not in self.index:
             index[0] = metatag["label"]
         return self._check_index(index, index_length)
@@ -208,8 +208,7 @@ class DataFrame(FrameAttrs):
         taken = [name in self.index for name in index]
         if np.array(taken).any():
             raise IndexError(
-                f"{np.array(index)[taken]} "
-                f"already defined in self.index: {self.index}"
+                f"{np.array(index)[taken]} already defined in self.index: {self.index}"
             )
         return index
 

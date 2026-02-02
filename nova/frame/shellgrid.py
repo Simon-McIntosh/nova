@@ -254,7 +254,7 @@ class ShellGrid(ShellSegment):
         for i, subframe in enumerate(self.subframe):
             PolyPlot(
                 DataFrame(subframe, additional=["part"]),
-            )(facecolor=f"C{i%10}")
+            )(facecolor=f"C{i % 10}")
 
 
 if __name__ == "__main__":

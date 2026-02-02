@@ -218,16 +218,20 @@ class CoilsNonAxisymmetric(Plot, CoilDatabase, Scenario):
                 points[name] = np.array(points[name])
             maximum_point_number = np.max([len(_points) for _points in points.values()])
             self.data.coords["point_index"] = np.arange(1, maximum_point_number + 1)
-            self.data["points"] = ("coil_name", "point_index", "point"), np.zeros(
-                (
-                    self.data.sizes["coil_name"],
-                    self.data.sizes["point_index"],
-                    self.data.sizes["point"],
-                )
+            self.data["points"] = (
+                ("coil_name", "point_index", "point"),
+                np.zeros(
+                    (
+                        self.data.sizes["coil_name"],
+                        self.data.sizes["point_index"],
+                        self.data.sizes["point"],
+                    )
+                ),
             )
-            self.data["points_length"] = "coil_name", [
-                len(_points) for _points in points.values()
-            ]
+            self.data["points_length"] = (
+                "coil_name",
+                [len(_points) for _points in points.values()],
+            )
             for i, (number, name) in enumerate(
                 zip(self.data["points_length"].data, self.data["coil_name"].data)
             ):

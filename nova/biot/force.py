@@ -109,7 +109,7 @@ class Force(Plot1D, Operate):
                 (x, z),
                 (x + dx, z + dz),
                 mutation_scale=1,
-                arrowstyle="simple,head_length=0.4, head_width=0.3," " tail_width=0.1",
+                arrowstyle="simple,head_length=0.4, head_width=0.3, tail_width=0.1",
                 shrinkA=0,
                 shrinkB=0,
             )

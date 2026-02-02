@@ -63,9 +63,12 @@ class SectorTransform:
         centerline = CenterLine()
         self.data["arc_length"] = centerline.mesh["arc_length"]
         self.data["nominal_centerline"] = (
-            "arc_length",
-            "cartesian",
-        ), 1e3 * centerline.mesh.points
+            (
+                "arc_length",
+                "cartesian",
+            ),
+            1e3 * centerline.mesh.points,
+        )
         self.data["centerline"] = xarray.concat(
             [self.data.nominal_centerline, self.data.nominal_centerline], dim="coil"
         )
@@ -259,13 +262,13 @@ class SectorTransform:
             f"dx: {opt_x[0]:1.2f}mm\n"
             + f"dy: {opt_x[1]:1.2f}mm\n"
             + f"dz: {opt_x[2]:1.2f}mm\n"
-            + f"rx: {opt_x[3]*deg_to_mm:1.2e}"
+            + f"rx: {opt_x[3] * deg_to_mm:1.2e}"
             + r"$^o$"
             + "\n"
-            + f"ry: {opt_x[4]*deg_to_mm:1.2e}"
+            + f"ry: {opt_x[4] * deg_to_mm:1.2e}"
             + r"$^o$"
             + "\n"
-            + f"rz: {opt_x[5]*deg_to_mm:1.2e}"
+            + f"rz: {opt_x[5] * deg_to_mm:1.2e}"
             + r"$^o$",
             va="center",
             ha="left",

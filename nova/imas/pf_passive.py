@@ -21,8 +21,9 @@ class PF_Passive(Plot, Scenario):
             if len(self.ids.loop) == 0:
                 return self
             self.data.coords["loop_name"] = self.ids_index.array("name")
-            self.data.coords["loop_index"] = "loop_name", range(
-                self.data.sizes["loop_name"]
+            self.data.coords["loop_index"] = (
+                "loop_name",
+                range(self.data.sizes["loop_name"]),
             )
             self.append(("time", "loop_name"), self.loop_attrs, prefix="passive_")
         return self

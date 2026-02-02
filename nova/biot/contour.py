@@ -116,7 +116,7 @@ class Contour(Line):
             case np.ndarray():
                 return self.levels
             case _:
-                raise TypeError("levels has incorect type " f"{type(self.levels)}")
+                raise TypeError(f"levels has incorect type {type(self.levels)}")
 
     def update_loc(self):
         """Update loc indexer."""

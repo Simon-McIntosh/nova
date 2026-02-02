@@ -208,7 +208,7 @@ class ITERgeom(CoilSet):
                 PF6	4.3340	-7.4765	1.5590	1.1075	459.36	0.120	24.0e3
                 """
             )
-        raise IndexError(f'source {self.metadata["source"]} not found')
+        raise IndexError(f"source {self.metadata['source']} not found")
 
 
 if __name__ == "__main__":
@@ -217,7 +217,7 @@ if __name__ == "__main__":
     index = coilset.subframe.frame == "VS3U"
     index |= coilset.subframe.frame == "VS3Uj"
     coilset.plot(index)
-    
+
     coilset.ferritic.insert("Fi", multiframe=False, label="Fi", offset=1)
     coilset.plasma.insert({"ellip": [6.5, 0.5, 4.5, 6.5]})
     coilset.shell.insert(

@@ -41,8 +41,9 @@ class AsBuilt:
             )
         )
         for attr, csys in zip(["xyz", "rpz"], ["cartesian", "cylindrical"]):
-            self.data[attr] = ("coil", "fiducial", csys), np.zeros(
-                (len(self.coil), 8, 3)
+            self.data[attr] = (
+                ("coil", "fiducial", csys),
+                np.zeros((len(self.coil), 8, 3)),
             )
 
     def load_nominal(self):

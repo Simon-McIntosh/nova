@@ -44,18 +44,24 @@ class Wedge(Plot2D):
         self.data = xarray.Dataset(attrs=self.attrs)
         self.data["boundary_index"] = range(len(phi))
         self.data["boundary_coord"] = ["x", "y", "radius", "phi"]
-        self.data["boundary"] = ("boundary_coord", "boundary_index"), [
-            radius * np.cos(phi),
-            radius * np.sin(phi),
-            radius,
-            phi,
-        ]
-        self.data["centroid"] = "boundary_coord", [
-            self.radius * np.cos(self.phi),
-            self.radius * np.sin(self.phi),
-            self.radius,
-            self.phi,
-        ]
+        self.data["boundary"] = (
+            ("boundary_coord", "boundary_index"),
+            [
+                radius * np.cos(phi),
+                radius * np.sin(phi),
+                radius,
+                phi,
+            ],
+        )
+        self.data["centroid"] = (
+            "boundary_coord",
+            [
+                self.radius * np.cos(self.phi),
+                self.radius * np.sin(self.phi),
+                self.radius,
+                self.phi,
+            ],
+        )
 
     @property
     def attrs(self):
@@ -113,9 +119,10 @@ class BaseVault:
                 coil_coord=["radius", "phi", "delta_radius", "delta_phi"],
             )
         )
-        self.data["coil"] = ("coil_index", "coil_coord"), np.array(
-            [self.radius, self.phi, self.delta_radius, self.delta_phi]
-        ).T
+        self.data["coil"] = (
+            ("coil_index", "coil_coord"),
+            np.array([self.radius, self.phi, self.delta_radius, self.delta_phi]).T,
+        )
         wedge = []
         for coil in self.data.coil:
             wedge.append(Wedge(*coil.data).data)

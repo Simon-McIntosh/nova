@@ -68,20 +68,28 @@ class Dataset(Plot2D, netCDF):
 
     def _store_grid(self, dataframe):
         """Store dataframe with grid data format."""
-        self.data["r2d"] = ("r", "z"), dataframe.r.values.reshape(
-            self.data.nr, self.data.nz
+        self.data["r2d"] = (
+            ("r", "z"),
+            dataframe.r.values.reshape(self.data.nr, self.data.nz),
         )
         self.data.coords["r"] = self.data["r2d"].data[:, 0]
-        self.data["z2d"] = ("r", "z"), dataframe.z.values.reshape(
-            self.data.nr, self.data.nz
+        self.data["z2d"] = (
+            ("r", "z"),
+            dataframe.z.values.reshape(self.data.nr, self.data.nz),
         )
         self.data.coords["z"] = self.data["z2d"].data[0, :]
         self.data.coords["complex"] = ["real", "imag"]
         for attr in ["b_r", "b_phi", "b_z"]:
-            self.data[attr.replace("_", "")] = ("r", "z", "complex"), np.stack(
-                [dataframe[f"real({attr})"].values, dataframe[f"imag({attr})"].values],
-                axis=-1,
-            ).reshape(self.data.nr, self.data.nz, 2)
+            self.data[attr.replace("_", "")] = (
+                ("r", "z", "complex"),
+                np.stack(
+                    [
+                        dataframe[f"real({attr})"].values,
+                        dataframe[f"imag({attr})"].values,
+                    ],
+                    axis=-1,
+                ).reshape(self.data.nr, self.data.nz, 2),
+            )
 
     def _store_surface(self, dataframe):
         """Store dataframe with a control surface data format."""
@@ -121,7 +129,6 @@ class Dataset(Plot2D, netCDF):
 
 
 if __name__ == "__main__":
-
     from tqdm import tqdm
 
     from nova.frame.coilset import CoilSet

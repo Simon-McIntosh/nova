@@ -247,7 +247,11 @@ class Arc(Constants, Matrix):
             * self.r
             * np.arcsinh(self.beta_1)
             * -np.sin(4 * self.theta)
-            - 1 / 3 * self.r**2 * np.arctan(self.beta_3) * -np.cos(2 * self.theta) ** 3
+            - 1
+            / 3
+            * self.r**2
+            * np.arctan(self.beta_3)
+            * -(np.cos(2 * self.theta) ** 3)
         )
 
     @property

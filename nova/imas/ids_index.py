@@ -287,7 +287,7 @@ class IdsIndex:
         """Return attribute data vector at itime."""
         if len(self.get_shape(path)) == 0:
             raise IndexError(
-                f"attribute {path} is 0-dimensional " "access with self.array(path)"
+                f"attribute {path} is 0-dimensional access with self.array(path)"
             )
         if self.transpose:
             data = np.zeros(self.shape(path)[:-1], dtype=self.dtype(path))
@@ -363,7 +363,6 @@ class IdsIndex:
 
 
 if __name__ == "__main__":
-
     import doctest
 
     doctest.testmod(verbose=False)

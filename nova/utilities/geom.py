@@ -64,7 +64,7 @@ def rdp_extract(x, y, eps=1e-2, dx=None, dx_window=None, scale=None, plot=False)
     if plot:
         plt.plot(xo, yo, "C0")
         for i in range(len(x_rdp) - 1):
-            plt.plot(x_rdp[i : i + 2], y_rdp[i : i + 2], f"C{6+i%2}o-")
+            plt.plot(x_rdp[i : i + 2], y_rdp[i : i + 2], f"C{6 + i % 2}o-")
     return x_rdp, y_rdp
 
 
@@ -315,7 +315,7 @@ def elipsoid(theta, xo, zo, A, k, delta):
 
 
 def loop_area(X, Z, plot=False):
-    print("You are using geom.loop_area. Consider using geom.polyarea /" "instead :).")
+    print("You are using geom.loop_area. Consider using geom.polyarea /instead :).")
     X, Z = theta_sort(X, Z, origin="top")
     Z -= np.min(Z)
     imin, imax = np.argmin(X), np.argmax(X)

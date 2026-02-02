@@ -29,7 +29,7 @@ class Diagnostic:
                 return group[:-2], category, int(index)
             case _:
                 raise NotImplementedError(
-                    f"Mapping for diagnostic name {name} " "not implemented."
+                    f"Mapping for diagnostic name {name} not implemented."
                 )
 
     @cached_property

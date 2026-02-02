@@ -56,7 +56,7 @@ class FilePath:
                 self.fsys = fsspec.filesystem("file")
             case _:
                 raise NotImplementedError(
-                    "filesystem for hostname " f"{hostname} not implemented"
+                    f"filesystem for hostname {hostname} not implemented"
                 )
         self.hostname = hostname
 

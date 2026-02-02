@@ -193,7 +193,7 @@ class ShieldSector(ShieldCad):
         frame = FrameSpace(**self.frame_metadata)
         for vtk in tqdm(
             base_frame.loc[:, "vtk"],
-            f"rotating baseframe {self.base_sector} " f"to {self.sector}",
+            f"rotating baseframe {self.base_sector} to {self.sector}",
         ):
             vtk = vtk.clone().rotate(degrees, axis=(0, 0, 1), point=(0, 0, 0))
             frame += self.frame_data(vtk)

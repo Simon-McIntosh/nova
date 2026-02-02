@@ -434,7 +434,7 @@ if __name__ == "__main__":
     # drop coils with no ilis
     ccl = ccl[ccl.coil.map(lambda x, coils=fiducial.ilis.coil.unique(): x in coils)]
 
-    """ 
+    """
     ccl_a = ccl.copy()
     ccl_a.loc[:, "ilis"] = fiducial.ilis.type.iloc[-1]
 

@@ -45,7 +45,7 @@ class Sample(Plot):
         """Perform input sanity checks."""
         if self.number <= 0:
             raise IndexError(
-                f"boundary length {len(self.boundary)} " "must be greater than 1"
+                f"boundary length {len(self.boundary)} must be greater than 1"
             )
         if self.closed and not np.allclose(self.boundary[0], self.boundary[-1]):
             raise ValueError("boundary does not form closed loop")

@@ -1079,8 +1079,8 @@ class ErrorField(Trial, QuartileAnalysis, Plot1D):
 
 if __name__ == "__main__":
     trial_name = "baseline_2021"
-    trial_name = "S4_refine_pit_2026"
-    trial_name = "S4_hybrid_pit_2026"
+    # trial_name = "S4_refine_pit_2026"
+    # trial_name = "S4_hybrid_pit_2026"
     samples = 200_000
     force = True
 

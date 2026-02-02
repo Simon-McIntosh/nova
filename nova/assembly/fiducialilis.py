@@ -19,8 +19,8 @@ class FiducialIlis:
 
     deviation: ClassVar[dict[int, list]] = {
         1: [np.nan, np.nan],
-        2: [0, 0],
-        3: [-0.1, 0],
+        2: [0 + 0.4, 0],
+        3: [-0.1, 0 + 0.4],
         4: [0.15 + 0.4, 0],  # reduce inter-sector gap
         5: [1.5, 0 + 0.1],  # S5+ reduce inter-sector gap
         6: [0, 0],
@@ -49,8 +49,11 @@ class FiducialIlis:
             self.data
         )  # use a temporary set of planes for outlier detection algorithm
 
+        # Reset index to ensure unique indices for proper assignment
+        self.data = self.data.reset_index(drop=True)
+
         outlier = self.data.groupby(["coil", "feature"], group_keys=False).apply(
-            lambda x: pandas.Series(self._detect(x, x.name, 3))
+            lambda x: pandas.Series(self._detect(x, x.name, 3), index=x.index)
         )
 
         # Ensure consistent flat Series output regardless of number of coil types
@@ -58,10 +61,12 @@ class FiducialIlis:
             # For single coil case: flatten the DataFrame to a Series
             outlier = outlier.stack().droplevel(-1)
 
-        self.data.loc[:, "outlier"] = outlier.reset_index(drop=True)
+        self.data.loc[:, "outlier"] = outlier
 
         offset = self.data.groupby(["coil", "feature"], group_keys=False).apply(
-            lambda x: pandas.Series(self.offset(x.loc[:, ["x", "y", "z"]], x.name))
+            lambda x: pandas.Series(
+                self.offset(x.loc[:, ["x", "y", "z"]], x.name), index=x.index
+            )
         )
 
         # Ensure consistent flat Series output regardless of number of coil types
@@ -69,7 +74,7 @@ class FiducialIlis:
             # For single coil case: flatten the DataFrame to a Series
             offset = offset.stack().droplevel(-1)
 
-        self.data.loc[:, "offset"] = offset.reset_index(drop=True)
+        self.data.loc[:, "offset"] = offset
 
     @property
     def outliers(self):
@@ -145,7 +150,14 @@ class FiducialIlis:
                 * self.planes.loc[:, ["nx", "ny", "nz"]].values
             )
 
-        midplane = self.planes.groupby(level=0).apply(lambda x: self.intersect(x))
+        def _compute_midplane(planes_group):
+            """Compute midplane from ILIS +1 and -1 planes, or use single plane."""
+            if len(planes_group) >= 2:
+                return self.intersect(planes_group)
+            # Single plane: use it as the midplane (best available estimate)
+            return planes_group.iloc[0]
+
+        midplane = self.planes.groupby(level=0).apply(_compute_midplane)
         """
         midplane = self.planes.groupby(level=0).mean()
         midplane.loc[:, ["nx", "ny", "nz"]] = midplane.loc[:, ["nx", "ny", "nz"]].agg(
@@ -167,10 +179,12 @@ class FiducialIlis:
     def _detect(self, points, plane, standard_deviations=3):
         """Detect outliers in points relative to plane.
 
-        Outliers are detected using two criteria:
-        1. Points > N standard deviations from the best-fit plane
+        Outliers are detected using three criteria:
+        1. Points > N standard deviations from the best-fit plane (perpendicular)
         2. Points with signed offset inconsistent with their ILIS side
            (e.g., a point labeled +ILIS but located on the -ILIS side)
+        3. Points > N MAD from the median tangential position, or exceeding
+           an absolute threshold based on expected ILIS geometry
         """
         offset = self.offset(points, plane, return_normal=False)
         dist = np.abs(offset)
@@ -190,7 +204,49 @@ class FiducialIlis:
         else:
             outliers_sign = np.zeros(len(points), dtype=bool)
 
-        outliers = outliers_distance | outliers_sign
+        # Check for tangential outliers using robust statistics (MAD)
+        # Use stored phi (mean-subtracted per-plane) if available, else compute
+        if "phi" in points.columns:
+            phi = points["phi"].values
+        else:
+            phi = np.arctan2(points["y"].values, points["x"].values)
+            phi = phi - np.median(phi)  # Center for detection
+
+        outliers_tangential = np.zeros(len(points), dtype=bool)
+
+        # Iterative outlier detection: refine median/MAD after removing outliers
+        for _ in range(3):  # Max 3 iterations
+            clean_mask = ~outliers_tangential
+            if clean_mask.sum() < 10:  # Need enough points for statistics
+                break
+            phi_clean = phi[clean_mask]
+            phi_median = np.median(phi_clean)
+            phi_deviation = np.abs(phi - phi_median)
+            # Median Absolute Deviation (MAD) - robust measure of spread
+            mad = np.median(np.abs(phi_clean - phi_median))
+            # Scale factor for consistency with normal distribution std
+            mad_scaled = 1.4826 * mad if mad > 0 else 1e-6
+            new_outliers = phi_deviation > standard_deviations * mad_scaled
+            if np.array_equal(new_outliers, outliers_tangential):
+                break  # Converged
+            outliers_tangential = new_outliers
+
+        # Absolute threshold fallback: clean ILIS data has phi std ~0.15 mrad
+        # Flag any point > 3 mrad from mode (catches bimodal contamination)
+        # Use mode approximation: value with most points in small neighborhood
+        phi_sorted = np.sort(phi)
+        n = len(phi_sorted)
+        if n > 20:
+            # Find densest region (mode) using rolling window
+            window = max(5, n // 10)
+            densities = phi_sorted[window:] - phi_sorted[:-window]
+            mode_idx = np.argmin(densities) + window // 2
+            phi_mode = phi_sorted[mode_idx]
+            absolute_threshold = 0.003  # 3 mrad absolute limit
+            outliers_absolute = np.abs(phi - phi_mode) > absolute_threshold
+            outliers_tangential = outliers_tangential | outliers_absolute
+
+        outliers = outliers_distance | outliers_sign | outliers_tangential
 
         return outliers
 

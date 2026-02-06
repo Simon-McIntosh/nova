@@ -30,6 +30,7 @@ class FiducialFit(FiducialData):
     method: str = "rms"
     samples: int = 10
     radial_offset: float = (33.04 - 36) / (2 * np.pi)
+    coupled: bool = True
     data: xarray.Dataset = field(init=False, repr=False, default_factory=xarray.Dataset)
 
     weights: ClassVar[list[float]] = [1, 1, 0.25]
@@ -44,8 +45,8 @@ class FiducialFit(FiducialData):
 
     @property
     def is_sector(self) -> bool:
-        """True if fitting multiple coils as a sector."""
-        return self.data.sizes["coil"] > 1
+        """True if fitting multiple coils as a coupled sector."""
+        return self.coupled and self.data.sizes["coil"] > 1
 
     @cached_property
     def _rotate(self) -> Rotate:
@@ -714,11 +715,14 @@ class FiducialFit(FiducialData):
             )
             self.data[f"{error_attr}_fit"] = xarray.zeros_like(self.data[error_attr])
         for coil in tqdm(self.data.coil, "fitting coils"):
-            points = xarray.concat(
-                [self.points(coil=coil).copy() for coil in self.data.coil], "coil"
-            )
-            # points = self.points(coil=coil)
-            # TODO fix for single vs sector
+            if self.is_sector:
+                # Coupled sector fit: use points from all coils
+                points = xarray.concat(
+                    [self.points(coil=c).copy() for c in self.data.coil], "coil"
+                )
+            else:
+                # Individual coil fit: use only this coil's points
+                points = self.points(coil=coil)
             xo = np.zeros(self.data.sizes["transform"])
             opt = minimize(
                 self.scalar_error,
@@ -931,7 +935,7 @@ if __name__ == "__main__":
     # sectors = {6: [12, 13]}
     # sectors = {5: [16]} # 16, 5
     # sectors = {8: [4, 11]}
-    sectors = {4: [2]}
+    sectors = {4: [2, 3]}
 
     fiducial = FiducialFit(
         phase=phase,
@@ -941,6 +945,7 @@ if __name__ == "__main__":
         ilis=True,
         ilis_pcr=True,
         method="rms",
+        coupled=False,
     )
     fiducial.build()
 

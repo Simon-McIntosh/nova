@@ -410,11 +410,7 @@ if __name__ == "__main__":
     sectors = {6: [12, 13]}
     sectors = {5: [16, 5]}
     sectors = {8: [4, 11]}
-    sectors = {
-        4: [
-            2,
-        ]
-    }
+    sectors = {4: [2, 3]}
 
     fiducial = FiducialSector(phase=phase, sectors=sectors, private=True)
     fiducial.compare("IDM")

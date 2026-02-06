@@ -19,8 +19,8 @@ class FiducialIlis:
 
     deviation: ClassVar[dict[int, list]] = {
         1: [np.nan, np.nan],
-        2: [0 + 0.4, 0],
-        3: [-0.1, 0 + 0.4],
+        2: [0 + 0.4, 0],  # reduce inter-sector gap
+        3: [-0.1, 0 + 0.4],  # reduce inter-sector gap
         4: [0.15 + 0.4, 0],  # reduce inter-sector gap
         5: [1.5, 0 + 0.1],  # S5+ reduce inter-sector gap
         6: [0, 0],

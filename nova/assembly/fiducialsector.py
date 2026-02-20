@@ -8,11 +8,13 @@ import altair as alt
 import itertools
 import numpy as np
 import pandas
+from scipy.spatial.transform import Rotation
 
 from nova.assembly.fiducialccl import Fiducial, FiducialRE, FiducialIDM
 from nova.assembly.fiducialilis import FiducialIlis
 from nova.assembly.ilisnominal import NominalIlis
 from nova.assembly.sectordata import SectorData
+from nova.assembly.transform import Rotate
 
 alt.renderers.enable("html")
 
@@ -195,6 +197,377 @@ class FiducialSector(Fiducial):
                 for points in ilis.values()
             ]
         )
+
+    def _clock_coil(self, data: np.ndarray, coil: int) -> np.ndarray:
+        """Clock coil data to sector midplane frame.
+
+        First coil in sector: anticlock (+10°)
+        Second coil in sector: clock (-10°)
+        """
+        rotate = Rotate()
+        all_coils = list(self.delta.keys())
+        if all_coils.index(coil) == 0:
+            return rotate.anticlock(data)
+        return rotate.clock(data)
+
+    def _unclock_coil(self, data: np.ndarray, coil: int) -> np.ndarray:
+        """Unclock coil data from sector midplane frame to coil-local."""
+        rotate = Rotate()
+        all_coils = list(self.delta.keys())
+        if all_coils.index(coil) == 0:
+            return rotate.clock(data)  # reverse of anticlock
+        return rotate.anticlock(data)  # reverse of clock
+
+    def augment_ilis(
+        self,
+        reference_phase: str = "In-pit target",
+        reference_version: str | None = None,
+    ):
+        """Augment partial ILIS data using hybrid CCL + ILIS rigid body recovery.
+
+        All computations are performed in the sector midplane frame
+        (coils clocked to common frame) to ensure intra-sector gap
+        invariance. The pattern follows fiducialfit.write_rigid_body:
+        clock → transform → unclock.
+
+        Parameters
+        ----------
+        reference_phase : str
+            Phase with complete ILIS data (default: "In-pit target")
+        reference_version : str | None
+            Workbook version for reference data. If None, uses the version
+            that has the reference phase with full ILIS data.
+        """
+        # Identify which ILIS surfaces are present
+        expected_features = {"ILIS +1", "ILIS -1"}
+        all_coils = list(self.delta.keys())
+        present = {}
+        for coil in all_coils:
+            coil_data = self.ilis[self.ilis.coil == coil] if len(self.ilis) else None
+            if coil_data is not None and len(coil_data) > 0:
+                present[coil] = set(coil_data.feature.unique())
+            else:
+                present[coil] = set()
+
+        missing = {coil: expected_features - feats for coil, feats in present.items()}
+        if not any(missing.values()):
+            return  # All surfaces present, nothing to augment
+
+        # Find a version with complete reference ILIS data
+        ref_version = reference_version or self._find_reference_version(reference_phase)
+        sector = next(iter(self.sectors.keys()))
+        ref = FiducialSector(
+            phase=reference_phase,
+            sectors={sector: all_coils},
+            version=ref_version,
+            private=self.private,
+        )
+
+        # Verify reference has complete ILIS
+        for coil in all_coils:
+            ref_coil = ref.ilis[ref.ilis.coil == coil]
+            ref_feats = set(ref_coil.feature.unique()) if len(ref_coil) else set()
+            if ref_feats != expected_features:
+                warn(
+                    f"Reference phase '{reference_phase}' v{ref_version} "
+                    f"missing ILIS for coil {coil}: {expected_features - ref_feats}"
+                )
+
+        # Step 1: Sector-level CCL Kabsch in clocked sector frame
+        R_ccl, t_ccl = self._compute_ccl_kabsch(ref)
+
+        # Step 2: ILIS correction from measured surfaces (in clocked frame)
+        measured_surfaces = []
+        for coil, feats in present.items():
+            for feat in feats:
+                measured_surfaces.append((coil, feat))
+
+        delta_R, delta_t = self._compute_ilis_correction(
+            ref, R_ccl, t_ccl, measured_surfaces
+        )
+
+        # Step 3: Augmented transform (sector frame)
+        R_aug = delta_R @ R_ccl
+        t_aug = t_ccl + delta_t
+
+        # Step 4: clock → transform → unclock reference ILIS point clouds
+        augmented_frames = []
+        self._augmented_surfaces: set[tuple] = set()
+        if isinstance(self.ilis, pandas.DataFrame) and len(self.ilis) > 0:
+            count_start = int(self.ilis.id.max()) + 1
+        else:
+            count_start = 0
+        count = itertools.count(count_start)
+
+        for coil in all_coils:
+            for feat in sorted(missing[coil]):
+                ref_mask = (ref.ilis.coil == coil) & (ref.ilis.feature == feat)
+                ref_points = ref.ilis.loc[ref_mask].copy()
+                if ref_points.empty:
+                    continue
+
+                # clock → transform → unclock
+                xyz_ref = ref_points[["x", "y", "z"]].values
+                clocked = self._clock_coil(xyz_ref, coil)
+                transformed = (R_aug @ clocked.T).T + t_aug
+                xyz_aug = self._unclock_coil(transformed, coil)
+
+                ref_points.loc[:, ["x", "y", "z"]] = xyz_aug
+                ref_points.loc[:, "r"] = np.linalg.norm(
+                    ref_points[["x", "y"]].values, axis=1
+                )
+                ref_points.loc[:, "phi"] = np.arctan2(
+                    ref_points.y.values, ref_points.x.values
+                )
+                ref_points.loc[:, "phi"] -= ref_points.phi.mean()
+                ref_points.loc[:, "ro_phi"] = 2600 * ref_points.phi.values
+                ref_points.loc[:, "id"] = next(count)
+
+                augmented_frames.append(ref_points)
+                self._augmented_surfaces.add((coil, feat))
+
+                print(
+                    f"  Augmented coil {coil} {feat}: "
+                    f"{len(ref_points)} points from reference"
+                )
+
+        if augmented_frames:
+            if isinstance(self.ilis, pandas.DataFrame) and len(self.ilis) > 0:
+                self.ilis = pandas.concat(
+                    [self.ilis] + augmented_frames, ignore_index=True
+                )
+            else:
+                self.ilis = pandas.concat(augmented_frames, ignore_index=True)
+
+        n_measured = sum(len(f) for f in present.values())
+        n_missing = sum(len(f) for f in missing.values())
+        print(
+            f"ILIS augmentation: {n_measured} measured, "
+            f"{n_missing} recovered from reference"
+        )
+
+    def _find_reference_version(self, reference_phase: str) -> str:
+        """Find the latest workbook version containing the reference phase."""
+        from nova.assembly.sectorfile import SectorFile
+        from packaging.version import Version
+
+        sector = next(iter(self.sectors.keys()))
+        sf = SectorFile(sector=sector, private=self.private)
+
+        # Try versions from newest to oldest, skipping current
+        current = Version(self.version) if self.version != "latest" else None
+        parsed_versions = [Version(v) for v in sf.versions]
+
+        for ver in sorted(parsed_versions, reverse=True):
+            if current and ver == current:
+                continue
+            ver_str = str(ver)
+            try:
+                test = SectorData(
+                    sector,
+                    list(self.sectors[sector]),
+                    version=ver_str,
+                    private=self.private,
+                )
+                if reference_phase in test.phase:
+                    # Check ILIS completeness
+                    test_fs = FiducialSector(
+                        phase=reference_phase,
+                        sectors={sector: list(self.sectors[sector])},
+                        version=ver_str,
+                        private=self.private,
+                    )
+                    all_have_ilis = all(
+                        len(test_fs.ilis[test_fs.ilis.coil == c]) > 0
+                        for c in self.sectors[sector]
+                    )
+                    if all_have_ilis:
+                        print(f"Using reference version {ver_str}")
+                        return ver_str
+            except (FileNotFoundError, KeyError):
+                continue
+
+        # Fallback to current version
+        return self.version
+
+    def _compute_ccl_kabsch(
+        self, ref: "FiducialSector"
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Compute sector-level SVD/Kabsch rigid body from CCL fiducials.
+
+        All CCL positions are clocked to sector midplane frame before
+        computing the Kabsch alignment, following the pattern from
+        fiducialfit.write_rigid_body.
+
+        Returns
+        -------
+        R : ndarray (3, 3)
+            Rotation matrix (sector frame) from reference to current
+        t : ndarray (3,)
+            Translation vector (sector frame) from reference to current
+        """
+        ref_pts = []
+        cur_pts = []
+        for coil in self.delta:
+            if coil not in ref.delta:
+                continue
+            targets = list(self.delta[coil].index)
+            for target in targets:
+                if target not in ref.delta[coil].index:
+                    continue
+
+                ref_nominal = ref.fiducial_target[coil].loc[target, ["x", "y", "z"]]
+                ref_delta = ref.delta[coil].loc[target, ["dx", "dy", "dz"]]
+                ref_abs = ref_nominal.values + ref_delta.values
+
+                cur_nominal = self.fiducial_target[coil].loc[target, ["x", "y", "z"]]
+                cur_delta = self.delta[coil].loc[target, ["dx", "dy", "dz"]]
+                cur_abs = cur_nominal.values + cur_delta.values
+
+                # Clock to sector midplane frame
+                ref_pts.append(self._clock_coil(ref_abs, coil))
+                cur_pts.append(self._clock_coil(cur_abs, coil))
+
+        ref_pts = np.array(ref_pts, dtype=float)
+        cur_pts = np.array(cur_pts, dtype=float)
+
+        # Kabsch algorithm
+        ref_c = ref_pts.mean(axis=0)
+        cur_c = cur_pts.mean(axis=0)
+
+        H = (ref_pts - ref_c).T @ (cur_pts - cur_c)
+        U, _, Vt = np.linalg.svd(H)
+
+        d = np.linalg.det(Vt.T @ U.T)
+        S = np.diag([1, 1, np.sign(d)])
+        R = Vt.T @ S @ U.T
+
+        t = cur_c - R @ ref_c
+
+        # Report quality
+        transformed = (R @ ref_pts.T).T + t
+        residuals = cur_pts - transformed
+        rms = np.sqrt(np.mean(residuals**2))
+        euler = Rotation.from_matrix(R).as_euler("XYZ", degrees=False)
+        print(
+            f"CCL Kabsch: RMS={rms:.3f} mm, "
+            f"t=({t[0]:.3f}, {t[1]:.3f}, {t[2]:.3f}) mm, "
+            f"euler=({euler[0] * 1e6:.1f}, {euler[1] * 1e6:.1f}, "
+            f"{euler[2] * 1e6:.1f}) urad"
+        )
+
+        return R, t
+
+    def _compute_ilis_correction(
+        self,
+        ref: "FiducialSector",
+        R_ccl: np.ndarray,
+        t_ccl: np.ndarray,
+        measured_surfaces: list[tuple],
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Compute angular and offset corrections from measured ILIS surfaces.
+
+        All normals and positions are clocked to sector midplane frame
+        before comparison, consistent with the sector-frame Kabsch.
+
+        Parameters
+        ----------
+        ref : FiducialSector
+            Reference phase data with complete ILIS
+        R_ccl : ndarray (3, 3)
+            CCL Kabsch rotation (sector frame)
+        t_ccl : ndarray (3,)
+            CCL Kabsch translation (sector frame)
+        measured_surfaces : list of (coil, feature) tuples
+            Surfaces with measured ILIS data
+
+        Returns
+        -------
+        delta_R : ndarray (3, 3)
+            Residual rotation correction (sector frame)
+        delta_t : ndarray (3,)
+            Residual translation correction (sector frame)
+        """
+        if not measured_surfaces:
+            return np.eye(3), np.zeros(3)
+
+        # Fit planes to measured and reference ILIS data (coil-local frames)
+        measured_ilis = FiducialIlis(self.ilis, pcr=False)
+        ref_ilis = FiducialIlis(ref.ilis, pcr=False)
+
+        delta_angles = []
+        delta_offsets = []
+
+        for coil, feature in measured_surfaces:
+            try:
+                meas_plane = measured_ilis.planes.loc[(coil, feature)]
+                ref_plane = ref_ilis.planes.loc[(coil, feature)]
+            except KeyError:
+                continue
+
+            # Clock reference normal and point to sector frame
+            n_ref = self._clock_coil(
+                ref_plane[["nx", "ny", "nz"]].values.astype(float).reshape(1, 3),
+                coil,
+            ).ravel()
+            n_predicted = R_ccl @ n_ref
+            n_predicted /= np.linalg.norm(n_predicted)
+
+            # Clock measured normal to sector frame
+            n_measured = self._clock_coil(
+                meas_plane[["nx", "ny", "nz"]].values.astype(float).reshape(1, 3),
+                coil,
+            ).ravel()
+            n_measured /= np.linalg.norm(n_measured)
+
+            # Rotation from predicted to measured normal
+            cross = np.cross(n_predicted, n_measured)
+            sin_angle = np.linalg.norm(cross)
+            cos_angle = np.dot(n_predicted, n_measured)
+
+            if sin_angle > 1e-10:
+                axis = cross / sin_angle
+                angle = np.arctan2(sin_angle, cos_angle)
+                delta_angles.append((axis, angle))
+
+            # Clock reference and measured positions to sector frame
+            p_ref = self._clock_coil(
+                ref_plane[["x", "y", "z"]].values.astype(float).reshape(1, 3),
+                coil,
+            ).ravel()
+            p_predicted = R_ccl @ p_ref + t_ccl
+
+            p_measured = self._clock_coil(
+                meas_plane[["x", "y", "z"]].values.astype(float).reshape(1, 3),
+                coil,
+            ).ravel()
+
+            # Normal-direction offset
+            offset = np.dot(p_measured - p_predicted, n_measured)
+            delta_offsets.append(offset * n_measured)
+
+        if delta_angles:
+            avg_rotvec = np.zeros(3)
+            for axis, angle in delta_angles:
+                avg_rotvec += axis * angle
+            avg_rotvec /= len(delta_angles)
+            delta_R = Rotation.from_rotvec(avg_rotvec).as_matrix()
+
+            angle_mag = np.linalg.norm(avg_rotvec)
+            print(
+                f"ILIS correction: {angle_mag * 1e6:.1f} urad angular, "
+                f"{len(delta_angles)} surface(s)"
+            )
+        else:
+            delta_R = np.eye(3)
+
+        if delta_offsets:
+            delta_t = np.mean(delta_offsets, axis=0)
+            print(f"ILIS offset correction: {np.linalg.norm(delta_t):.3f} mm")
+        else:
+            delta_t = np.zeros(3)
+
+        return delta_R, delta_t
 
     def compare(self, source="RE"):
         """Compare fiducial sector data with previous RE dataset."""
@@ -404,15 +777,16 @@ if __name__ == "__main__":
     # phase = "SSAT AR2"
     # phase = "SSAT AR target"
     # phase = "In-pit target"
-    # phase = "TFGS Landing"
+    phase = "TFGS Landing"
+    phase = "AFTER TFGS landing"
 
     sectors = {7: [8, 9]}
     sectors = {6: [12, 13]}
     sectors = {5: [16, 5]}
     sectors = {8: [4, 11]}
-    sectors = {4: [2, 3]}
+    # sectors = {4: [2, 3]}
 
-    fiducial = FiducialSector(phase=phase, sectors=sectors, private=True)
+    fiducial = FiducialSector(phase=phase, sectors=sectors, private=False)
     fiducial.compare("IDM")
 
     ccl = pandas.concat(fiducial.delta).rename(

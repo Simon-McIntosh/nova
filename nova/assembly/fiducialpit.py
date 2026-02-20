@@ -62,6 +62,7 @@ class FiducialPit(Plot1D):
     phase: str = "In-pit target"
     pcr: bool = True
     private: bool = False
+    augment: bool = True
 
     # Target gap specifications (mm)
     # Cumulative gap limit: 36mm, cumulative gap target: 33mm
@@ -146,6 +147,25 @@ class FiducialPit(Plot1D):
                     sectors={sector: coils},
                     private=self.private,
                 )
+                # Augment partial ILIS data if enabled
+                if self.augment:
+                    expected = {"ILIS +1", "ILIS -1"}
+                    all_coils = list(self.sector_data[sector].delta.keys())
+                    ilis = self.sector_data[sector].ilis
+                    has_partial = False
+                    for c in all_coils:
+                        coil_ilis = ilis[ilis.coil == c] if len(ilis) else None
+                        coil_feats = (
+                            set(coil_ilis.feature.unique())
+                            if coil_ilis is not None and len(coil_ilis) > 0
+                            else set()
+                        )
+                        if coil_feats != expected:
+                            has_partial = True
+                            break
+                    if has_partial:
+                        print(f"Sector {sector}: augmenting partial ILIS data")
+                        self.sector_data[sector].augment_ilis()
                 print(f"Sector {sector}: loaded phase '{resolved}'")
             except (FileNotFoundError, KeyError) as e:
                 print(f"Warning: Could not load sector {sector}: {e}")

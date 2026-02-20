@@ -11,6 +11,8 @@ from functools import cached_property
 import numpy as np
 import pandas
 
+from scipy.spatial.transform import Rotation
+
 from nova.assembly.fiducialilis import FiducialIlis
 from nova.assembly.fiducialpit import FiducialPit
 from nova.assembly.ilisnominal import NominalIlis
@@ -167,6 +169,131 @@ class SectorOverview:
         return pandas.DataFrame(rows)
 
     @cached_property
+    def sector_transforms(self) -> pandas.DataFrame:
+        """Rigid body transforms from target to measurement phase per sector.
+
+        Decomposes each sector's corrected transform into CCL Kabsch
+        and ILIS correction components, reported as Euler angles
+        (roll, pitch, yaw) and translations. The corrected transform
+        represents the installation error for each sector.
+        """
+        rows = []
+        for sector, sd in self.pit.sector_data.items():
+            transform = getattr(sd, "_transform", None)
+            if transform is None:
+                continue
+            phase = self.pit._resolved_phases.get(sector, self.phase)
+            ref_phase = getattr(sd, "_reference_phase", "In-pit target")
+            coils = list(sd.delta.keys())
+            for label, R_key, t_key in [
+                ("Kabsch", "R_ccl", "t_ccl"),
+                ("ILIS correction", "delta_R", "delta_t"),
+                ("Corrected", "R_aug", "t_aug"),
+            ]:
+                euler = Rotation.from_matrix(transform[R_key]).as_euler("XYZ") * 1e6
+                t = transform[t_key]
+                rows.append(
+                    {
+                        "sector": sector,
+                        "coils": str(coils),
+                        "reference": ref_phase,
+                        "phase": phase,
+                        "component": label,
+                        "roll_urad": euler[0],
+                        "pitch_urad": euler[1],
+                        "yaw_urad": euler[2],
+                        "tx_mm": t[0],
+                        "ty_mm": t[1],
+                        "tz_mm": t[2],
+                    }
+                )
+        return pandas.DataFrame(rows)
+
+    @cached_property
+    def gap_contributions(self) -> pandas.DataFrame:
+        """Decompose gap deviations into tangential (mean) and roll (tilt).
+
+        Mean gap deviation is driven by tangential displacements from
+        datum.  The gap tilt (variation with height) is driven by coil
+        roll.  Values are expressed in the gap frame where positive
+        widens the gap or tilts it wider at the top.
+        """
+        gd = self.gap_deviations
+        pos = self.coil_positions
+        if gd.empty or pos.empty:
+            return pandas.DataFrame()
+
+        from nova.assembly.fiducialdata import FiducialData
+
+        nom = FiducialData.fiducials()
+        z_span = abs(nom.loc["B", "z"] - nom.loc["A", "z"])
+
+        rows = []
+        for _, gap in gd.iterrows():
+            c1, c2 = int(gap.coil_first), int(gap.coil_second)
+
+            p1 = pos[pos.coil == c1]
+            p2 = pos[pos.coil == c2]
+            if p1.empty or p2.empty:
+                continue
+            p1 = p1.iloc[0]
+            p2 = p2.iloc[0]
+
+            # Tangential contributions in gap frame (positive = widens gap)
+            # c1 ILIS +1 side faces gap: +tangential widens
+            # c2 ILIS -1 side faces gap: +tangential narrows
+            tan_first = float(p1.tangential)
+            tan_second = -float(p2.tangential)
+
+            # Linear fit of gap vs z to extract tilt
+            z_vals, g_vals = [], []
+            for z_key, g_key in [
+                ("z_bottom", "gap_bottom"),
+                ("z_middle", "gap_middle"),
+                ("z_top", "gap_top"),
+            ]:
+                z = gap.get(z_key, np.nan)
+                g = gap.get(g_key, np.nan)
+                if not np.isnan(g) and not np.isnan(z):
+                    z_vals.append(z)
+                    g_vals.append(g)
+
+            if len(z_vals) >= 2:
+                z_arr = np.array(z_vals)
+                g_arr = np.array(g_vals)
+                slope, _ = np.polyfit(z_arr, g_arr, 1)
+                z_meas = z_arr[-1] - z_arr[0]
+                tilt = slope * z_meas
+            else:
+                tilt = np.nan
+                z_meas = 0
+
+            # Roll contributions to tilt in gap frame (positive = wider at top)
+            # Scale roll_length (defined over A-B span) to measurement span
+            scale = z_meas / z_span if z_span > 0 else 0
+            roll_first = float(p1.roll_length) * scale
+            roll_second = -float(p2.roll_length) * scale
+
+            rows.append(
+                {
+                    "gap": gap.label,
+                    "gap_type": gap.gap_type,
+                    "coil_first": c1,
+                    "coil_second": c2,
+                    "gap_mean": gap.gap_mean,
+                    "target": gap.target,
+                    "dev": gap.gap_mean - gap.target,
+                    "tan_first": tan_first,
+                    "tan_second": tan_second,
+                    "tilt": tilt,
+                    "roll_first": roll_first,
+                    "roll_second": roll_second,
+                }
+            )
+
+        return pandas.DataFrame(rows)
+
+    @cached_property
     def gaps(self) -> pandas.DataFrame:
         """Inter and intra-sector gap measurements."""
         return self.pit.gaps
@@ -260,45 +387,98 @@ class SectorOverview:
             ]
             lines.append(fmt.to_string(index=False, float_format="%.1f"))
 
-        # Gap measurements
-        lines.append("\nGap Measurements (mm, inner edge):")
-        lines.append("-" * 72)
-        gd = self.gap_deviations
-        if not gd.empty:
-            hdr = "  %-8s  %-14s  %10s  %7s  %7s  %7s" % (
+        # Sector installation transforms
+        transforms = self.sector_transforms
+        if not transforms.empty:
+            lines.append("\nSector Installation Transforms:")
+            lines.append(
+                "  Corrected = Kabsch + ILIS correction (installation error per sector)"
+            )
+            lines.append("-" * 72)
+            for sector in sorted(transforms.sector.unique()):
+                st = transforms[transforms.sector == sector]
+                ref = st.iloc[0].reference
+                phase = st.iloc[0].phase
+                coils = st.iloc[0].coils
+                lines.append("  S%d: %s -> %s (coils %s)" % (sector, ref, phase, coils))
+                hdr = "    %-17s  %8s  %8s  %8s  %8s  %8s  %8s" % (
+                    "component",
+                    "roll",
+                    "pitch",
+                    "yaw",
+                    "tx",
+                    "ty",
+                    "tz",
+                )
+                units = "    %-17s  %8s  %8s  %8s  %8s  %8s  %8s" % (
+                    "",
+                    "(urad)",
+                    "(urad)",
+                    "(urad)",
+                    "(mm)",
+                    "(mm)",
+                    "(mm)",
+                )
+                lines.append(hdr)
+                lines.append(units)
+                lines.append("    " + "-" * len(hdr.strip()))
+                for _, row in st.iterrows():
+                    lines.append(
+                        "    %-17s  %+8.1f  %+8.1f  %+8.1f  %+8.3f  %+8.3f  %+8.3f"
+                        % (
+                            row.component,
+                            row.roll_urad,
+                            row.pitch_urad,
+                            row.yaw_urad,
+                            row.tx_mm,
+                            row.ty_mm,
+                            row.tz_mm,
+                        )
+                    )
+                lines.append("")
+
+        # Gap analysis: mean deviation (tangential) and tilt (roll)
+        contrib = self.gap_contributions
+        if not contrib.empty:
+            lines.append("\nGap Analysis (mm, inner edge):")
+            lines.append("-" * 72)
+            hdr = "  %-5s  %-14s  %6s  %6s  %+7s  %+7s" % (
                 "gap",
                 "type",
-                "z(mm)",
-                "gap",
+                "mean",
                 "target",
                 "dev",
+                "tilt",
             )
             lines.append(hdr)
             lines.append("  " + "-" * len(hdr.strip()))
-            for _, row in gd.iterrows():
-                target = row.target
-                for i, (z_key, g_key) in enumerate(
-                    [
-                        ("z_bottom", "gap_bottom"),
-                        ("z_middle", "gap_middle"),
-                        ("z_top", "gap_top"),
-                    ]
-                ):
-                    z_val = row.get(z_key, np.nan)
-                    g_val = row.get(g_key, np.nan)
-                    if np.isnan(g_val):
-                        continue
-                    dev = g_val - target
-                    label = row.label if i == 0 else ""
-                    gtype = row.gap_type if i == 0 else ""
-                    lines.append(
-                        "  %-8s  %-14s  %+10.0f  %7.3f  %7.3f  %+7.3f"
-                        % (label, gtype, z_val, g_val, target, dev)
+            for _, row in contrib.iterrows():
+                c1, c2 = int(row.coil_first), int(row.coil_second)
+                tilt_str = "%+7.3f" % row.tilt if not np.isnan(row.tilt) else "    n/a"
+                lines.append(
+                    "  %-5s  %-14s  %6.3f  %6.3f  %+7.3f  %s"
+                    % (
+                        row.gap,
+                        row.gap_type,
+                        row.gap_mean,
+                        row.target,
+                        row.dev,
+                        tilt_str,
                     )
+                )
+                # Attribution: tangential -> dev, roll -> tilt
+                lines.append(
+                    "         coil %2d  tangential %+6.3f          "
+                    "roll %+6.3f" % (c1, row.tan_first, row.roll_first)
+                )
+                lines.append(
+                    "         coil %2d  tangential %+6.3f          "
+                    "roll %+6.3f" % (c2, row.tan_second, row.roll_second)
+                )
 
             # Cumulative gap assessment
-            cum_gap = gd.gap_mean.sum()
-            n_gaps = len(gd)
+            cum_gap = contrib.gap_mean.sum()
+            n_gaps = len(contrib)
             projected_cum = cum_gap * 18 / n_gaps if n_gaps > 0 else 0
             lines.append(
                 "\n  Measured cumulative gap (%d of 18): %.2f mm" % (n_gaps, cum_gap)

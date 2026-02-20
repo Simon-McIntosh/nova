@@ -33,8 +33,6 @@ class SectorOverview:
         Phase selection strategy ('latest', literal phase name)
     pcr : bool
         Apply PCR deviation corrections
-    augment : bool
-        Augment partial ILIS data using hybrid CCL+ILIS recovery
     private : bool
         Use private (in-work) data files
     """
@@ -44,7 +42,6 @@ class SectorOverview:
     )
     phase: str = "latest"
     pcr: bool = True
-    augment: bool = True
     private: bool = False
 
     def __post_init__(self):
@@ -54,7 +51,6 @@ class SectorOverview:
             phase=self.phase,
             pcr=self.pcr,
             private=self.private,
-            augment=self.augment,
         )
         self.nominal = NominalIlis()
         self.rotate = Rotate()
@@ -267,24 +263,43 @@ class SectorOverview:
         # Gap measurements
         lines.append("\nGap Measurements (mm):")
         lines.append("-" * 72)
+        lines.append("  deviation = measured gap - target gap")
         gd = self.gap_deviations
         if not gd.empty:
             lines.append(
-                "  %-8s  %-14s  %7s  %7s  %7s  %7s"
-                % ("gap", "type", "mean", "std", "target", "dev")
+                "  %-8s  %-14s  %-9s  %7s  %7s  %7s  %7s"
+                % ("gap", "type", "height", "mean", "std", "target", "dev")
             )
             for _, row in gd.iterrows():
+                target = row.target
+                # Overall mean
                 lines.append(
-                    "  %-8s  %-14s  %7.3f  %7.3f  %7.3f  %+7.3f"
+                    "  %-8s  %-14s  %-9s  %7.3f  %7.3f  %7.3f  %+7.3f"
                     % (
                         row.label,
                         row.gap_type,
+                        "all",
                         row.gap_mean,
                         row.gap_std,
-                        row.target,
+                        target,
                         row.deviation,
                     )
                 )
+                # Height stations
+                for station, z_key, g_key in [
+                    ("bottom", "z_bottom", "gap_bottom"),
+                    ("middle", "z_middle", "gap_middle"),
+                    ("top", "z_top", "gap_top"),
+                ]:
+                    z_val = row.get(z_key, np.nan)
+                    g_val = row.get(g_key, np.nan)
+                    if not np.isnan(g_val):
+                        dev = g_val - target
+                        z_label = "%s(%+.0f)" % (station, z_val)
+                        lines.append(
+                            "  %-8s  %-14s  %-9s  %7.3f  %7s  %7.3f  %+7.3f"
+                            % ("", "", z_label, g_val, "", target, dev)
+                        )
 
             # Cumulative gap assessment
             cum_gap = gd.gap_mean.sum()
@@ -311,6 +326,5 @@ if __name__ == "__main__":
         sectors={5: [16, 5], 6: [12, 13], 7: [8, 9], 8: [4, 11]},
         phase="latest",
         pcr=True,
-        augment=True,
     )
     overview.print_summary()

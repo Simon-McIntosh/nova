@@ -30,6 +30,7 @@ class FiducialSector(Fiducial):
     )
     version: str = "latest"
     private: bool = False
+    augment: bool = True
     fiducial_target: dict[str, pandas.DataFrame] | dict = field(
         init=False, repr=False, default_factory=dict
     )
@@ -54,6 +55,8 @@ class FiducialSector(Fiducial):
         self._load_variance()
         self._load_case()
         self._load_ilis()
+        if self.augment:
+            self.augment_ilis()
 
     def _set_phase(self):
         """Expand short string phase label or resolve 'latest' to actual phase.
@@ -261,6 +264,7 @@ class FiducialSector(Fiducial):
             sectors={sector: all_coils},
             version=ref_version,
             private=self.private,
+            augment=False,
         )
 
         # Verify reference has complete ILIS
@@ -376,6 +380,7 @@ class FiducialSector(Fiducial):
                         sectors={sector: list(self.sectors[sector])},
                         version=ver_str,
                         private=self.private,
+                        augment=False,
                     )
                     all_have_ilis = all(
                         len(test_fs.ilis[test_fs.ilis.coil == c]) > 0
@@ -778,7 +783,6 @@ if __name__ == "__main__":
     # phase = "SSAT AR target"
     # phase = "In-pit target"
     phase = "TFGS Landing"
-    phase = "AFTER TFGS landing"
 
     sectors = {7: [8, 9]}
     sectors = {6: [12, 13]}

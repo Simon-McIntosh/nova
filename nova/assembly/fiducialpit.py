@@ -62,7 +62,6 @@ class FiducialPit(Plot1D):
     phase: str = "In-pit target"
     pcr: bool = True
     private: bool = False
-    augment: bool = True
 
     # Target gap specifications (mm)
     # Cumulative gap limit: 36mm, cumulative gap target: 33mm
@@ -126,6 +125,7 @@ class FiducialPit(Plot1D):
                     phase=phase,
                     sectors={sector: self.sectors[sector]},
                     private=self.private,
+                    augment=False,
                 )
                 # Check that ILIS data exists for position extraction
                 if len(fs.ilis) > 0:
@@ -147,25 +147,6 @@ class FiducialPit(Plot1D):
                     sectors={sector: coils},
                     private=self.private,
                 )
-                # Augment partial ILIS data if enabled
-                if self.augment:
-                    expected = {"ILIS +1", "ILIS -1"}
-                    all_coils = list(self.sector_data[sector].delta.keys())
-                    ilis = self.sector_data[sector].ilis
-                    has_partial = False
-                    for c in all_coils:
-                        coil_ilis = ilis[ilis.coil == c] if len(ilis) else None
-                        coil_feats = (
-                            set(coil_ilis.feature.unique())
-                            if coil_ilis is not None and len(coil_ilis) > 0
-                            else set()
-                        )
-                        if coil_feats != expected:
-                            has_partial = True
-                            break
-                    if has_partial:
-                        print(f"Sector {sector}: augmenting partial ILIS data")
-                        self.sector_data[sector].augment_ilis()
                 print(f"Sector {sector}: loaded phase '{resolved}'")
             except (FileNotFoundError, KeyError) as e:
                 print(f"Warning: Could not load sector {sector}: {e}")
@@ -602,6 +583,64 @@ class FiducialPit(Plot1D):
         )
         return planes
 
+    @staticmethod
+    def _height_station_gaps(
+        gap_grid: np.ndarray, grid_z: np.ndarray
+    ) -> dict[str, float]:
+        """Compute mean gap at bottom, middle, and top height stations.
+
+        Averages gap values across all radial samples at each z-station.
+
+        Parameters
+        ----------
+        gap_grid : ndarray (n_r, n_z)
+            Gap values on regular grid
+        grid_z : ndarray (n_r, n_z)
+            z-coordinates of grid points
+
+        Returns
+        -------
+        dict with keys gap_bottom, gap_middle, gap_top, z_bottom, z_middle,
+        z_top giving the mean gap and z-coordinate at each station.
+        """
+        # Mean gap at each z-column (average across radial samples)
+        import warnings
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", RuntimeWarning)
+            z_profile = np.nanmean(gap_grid, axis=0)
+        z_values = grid_z[0, :]  # z is constant along axis 0
+
+        # Find valid (non-NaN) range
+        valid = ~np.isnan(z_profile)
+        if valid.sum() < 3:
+            return {
+                "gap_bottom": np.nan,
+                "gap_middle": np.nan,
+                "gap_top": np.nan,
+                "z_bottom": np.nan,
+                "z_middle": np.nan,
+                "z_top": np.nan,
+            }
+
+        valid_indices = np.where(valid)[0]
+        i_min, i_max = valid_indices[0], valid_indices[-1]
+        n_valid = i_max - i_min + 1
+
+        # Bottom, middle, top indices within valid range
+        i_bottom = i_min + n_valid // 6
+        i_middle = (i_min + i_max) // 2
+        i_top = i_max - n_valid // 6
+
+        return {
+            "gap_bottom": float(z_profile[i_bottom]),
+            "gap_middle": float(z_profile[i_middle]),
+            "gap_top": float(z_profile[i_top]),
+            "z_bottom": float(z_values[i_bottom]),
+            "z_middle": float(z_values[i_middle]),
+            "z_top": float(z_values[i_top]),
+        }
+
     def calculate_gaps(self) -> pandas.DataFrame:
         """Calculate gaps between adjacent coils using point cloud projection.
 
@@ -779,6 +818,9 @@ class FiducialPit(Plot1D):
         gap_min = float(np.min(valid_gaps))
         gap_max = float(np.max(valid_gaps))
 
+        # Height station gap means
+        height_gaps = self._height_station_gaps(gap_grid, grid_z)
+
         # Get PCR deviation offsets if available
         pcr_first = plane_first.get("offset", 0)
         pcr_second = plane_second.get("offset", 0)
@@ -797,6 +839,7 @@ class FiducialPit(Plot1D):
             "grid_points": len(valid_gaps),
             "pcr_first": pcr_first,
             "pcr_second": pcr_second,
+            **height_gaps,
         }
 
     def _calculate_inter_sector_gap(
@@ -972,6 +1015,9 @@ class FiducialPit(Plot1D):
         else:
             gap_mean = gap_std = gap_min = gap_max = 0.0
 
+        # Height station gap means
+        height_gaps = self._height_station_gaps(gap_grid, grid_z)
+
         # Get PCR deviation offsets from original (unclocked) planes
         pcr_first = ilis_a.planes.loc[(coil_first, feature_first)].get("offset", 0)
         pcr_second = ilis_b.planes.loc[(coil_second, feature_second)].get("offset", 0)
@@ -990,6 +1036,7 @@ class FiducialPit(Plot1D):
             "grid_points": len(valid_gaps),
             "pcr_first": pcr_first,
             "pcr_second": pcr_second,
+            **height_gaps,
         }
 
     @cached_property
@@ -1608,7 +1655,7 @@ class FiducialPit(Plot1D):
         print("-" * 60)
         for pair in self.gap_pairs:
             print(
-                f"  {pair['coil_plus']:2d} ↔ {pair['coil_minus']:2d}  "
+                f"  {pair['coil_plus']:2d} <-> {pair['coil_minus']:2d}  "
                 f"({pair['gap_type']:12s}) "
                 f"sectors {pair['sector_a']}-{pair['sector_b']}"
             )
@@ -1618,8 +1665,8 @@ class FiducialPit(Plot1D):
         if not self.gaps.empty:
             for _, row in self.gaps.iterrows():
                 print(
-                    f"  {row.coil_first:2.0f} ↔ {row.coil_second:2.0f}: "
-                    f"{row.gap_mean:6.3f} ± {row.gap_std:.3f} mm "
+                    f"  {row.coil_first:2.0f} <-> {row.coil_second:2.0f}: "
+                    f"{row.gap_mean:6.3f} +/- {row.gap_std:.3f} mm "
                     f"({row.gap_type})"
                 )
 
@@ -2290,7 +2337,7 @@ class FiducialPit(Plot1D):
         result_df = pandas.DataFrame(rows)
 
         print("\n" + "=" * 80)
-        print("Implied Alignment Half-Widths (L = σ × √3)")
+        print("Implied Alignment Half-Widths (L = sigma * sqrt(3))")
         print("=" * 80)
         print(f"\nSamples: n = {rows[0]['n']} coils")
         print("\nIf upper 95% CI (L_upper_95) < tolerance, we have 95% confidence")

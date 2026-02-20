@@ -253,8 +253,7 @@ class FiducialSector(Fiducial):
                 present[coil] = set()
 
         missing = {coil: expected_features - feats for coil, feats in present.items()}
-        if not any(missing.values()):
-            return  # All surfaces present, nothing to augment
+        has_missing = any(missing.values())
 
         # Find a version with complete reference ILIS data
         ref_version = reference_version or self._find_reference_version(reference_phase)
@@ -267,15 +266,17 @@ class FiducialSector(Fiducial):
             augment=False,
         )
 
-        # Verify reference has complete ILIS
-        for coil in all_coils:
-            ref_coil = ref.ilis[ref.ilis.coil == coil]
-            ref_feats = set(ref_coil.feature.unique()) if len(ref_coil) else set()
-            if ref_feats != expected_features:
-                warn(
-                    f"Reference phase '{reference_phase}' v{ref_version} "
-                    f"missing ILIS for coil {coil}: {expected_features - ref_feats}"
-                )
+        # Verify reference has complete ILIS (required for augmentation)
+        if has_missing:
+            for coil in all_coils:
+                ref_coil = ref.ilis[ref.ilis.coil == coil]
+                ref_feats = set(ref_coil.feature.unique()) if len(ref_coil) else set()
+                if ref_feats != expected_features:
+                    warn(
+                        f"Reference phase '{reference_phase}' v{ref_version} "
+                        f"missing ILIS for coil {coil}: "
+                        f"{expected_features - ref_feats}"
+                    )
 
         # Step 1: Sector-level CCL Kabsch in clocked sector frame
         R_ccl, t_ccl = self._compute_ccl_kabsch(ref)
@@ -294,7 +295,64 @@ class FiducialSector(Fiducial):
         R_aug = delta_R @ R_ccl
         t_aug = t_ccl + delta_t
 
-        # Step 4: clock → transform → unclock reference ILIS point clouds
+        # Store transform components for downstream access
+        self._transform = {
+            "R_ccl": R_ccl,
+            "t_ccl": t_ccl,
+            "delta_R": delta_R,
+            "delta_t": delta_t,
+            "R_aug": R_aug,
+            "t_aug": t_aug,
+        }
+        self._reference_phase = reference_phase
+
+        # Report Euler angle comparison (roll=Rx, pitch=Ry, yaw=Rz)
+        euler_ccl = Rotation.from_matrix(R_ccl).as_euler("XYZ") * 1e6
+        euler_aug = Rotation.from_matrix(R_aug).as_euler("XYZ") * 1e6
+        euler_delta = Rotation.from_matrix(delta_R).as_euler("XYZ") * 1e6
+        print(
+            f"Euler angles (roll, pitch, yaw) [urad]:\n"
+            f"  CCL Kabsch:   ({euler_ccl[0]:.1f}, "
+            f"{euler_ccl[1]:.1f}, {euler_ccl[2]:.1f})\n"
+            f"  ILIS delta:   ({euler_delta[0]:.1f}, "
+            f"{euler_delta[1]:.1f}, {euler_delta[2]:.1f})\n"
+            f"  Corrected:    ({euler_aug[0]:.1f}, "
+            f"{euler_aug[1]:.1f}, {euler_aug[2]:.1f})"
+        )
+
+        if not has_missing:
+            return
+
+        # Step 4: Correct CCL deltas with ILIS-constrained rigid body
+        # Apply incremental correction (delta_R, delta_t) to measured
+        # CCL positions about their centroid, preserving per-fiducial
+        # residuals while updating the rigid body component.
+        cur_pts_clocked = []
+        for coil in all_coils:
+            for target in self.delta[coil].index:
+                cur_nominal = self.fiducial_target[coil].loc[target, ["x", "y", "z"]]
+                cur_delta = self.delta[coil].loc[target, ["dx", "dy", "dz"]]
+                cur_pos = cur_nominal.values + cur_delta.values
+                cur_pts_clocked.append(
+                    self._clock_coil(cur_pos.reshape(1, 3), coil).ravel()
+                )
+        cur_centroid = np.mean(cur_pts_clocked, axis=0)
+
+        for coil in all_coils:
+            for target in self.delta[coil].index:
+                cur_nominal = self.fiducial_target[coil].loc[target, ["x", "y", "z"]]
+                cur_delta = self.delta[coil].loc[target, ["dx", "dy", "dz"]]
+                cur_pos = cur_nominal.values + cur_delta.values
+
+                clocked = self._clock_coil(cur_pos.reshape(1, 3), coil).ravel()
+                corrected = delta_R @ (clocked - cur_centroid) + cur_centroid + delta_t
+                unclocked = self._unclock_coil(corrected.reshape(1, 3), coil).ravel()
+
+                self.delta[coil].loc[target, ["dx", "dy", "dz"]] = (
+                    unclocked - cur_nominal.values
+                )
+
+        # Step 5: clock → transform → unclock reference ILIS point clouds
         augmented_frames = []
         self._augmented_surfaces: set[tuple] = set()
         if isinstance(self.ilis, pandas.DataFrame) and len(self.ilis) > 0:
@@ -595,6 +653,30 @@ class FiducialSector(Fiducial):
                 print(f"\ncoil #{coil}")
                 print(change)
 
+    def ccl_deviation(self) -> pandas.DataFrame:
+        """Return measurement-datum deviation masked to constrained directions.
+
+        Uses FiducialFit.fiducial_index to blank unconstrained cells:
+            - radial (dx): F, D, E
+            - toroidal (dy): A, F, D, E
+            - vertical (dz): C, D, F, E
+        """
+        from nova.assembly.fiducialfit import FiducialFit
+
+        targets = list(self.target)
+        frames = []
+        for coil, delta in self.delta.items():
+            frame = delta[["dx", "dy", "dz"]].copy()
+            for axis, key in zip("xyz", FiducialFit.fiducial_index):
+                constrained = [targets[i] for i in FiducialFit.fiducial_index[key]]
+                mask = frame.index.difference(constrained)
+                frame.loc[mask, f"d{axis}"] = np.nan
+            frame.columns = pandas.MultiIndex.from_product(
+                [[f"Coil {coil}"], frame.columns]
+            )
+            frames.append(frame)
+        return pandas.concat(frames, axis=1)
+
     def extract_coil_positions(self, pcr: bool = True) -> pandas.DataFrame:
         """Extract coil position parameters for trial.py Monte Carlo simulations.
 
@@ -785,13 +867,17 @@ if __name__ == "__main__":
     phase = "TFGS Landing"
 
     sectors = {7: [8, 9]}
-    sectors = {6: [12, 13]}
-    sectors = {5: [16, 5]}
+    # sectors = {6: [12, 13]}
+    # sectors = {5: [16, 5]}
     sectors = {8: [4, 11]}
     # sectors = {4: [2, 3]}
 
     fiducial = FiducialSector(phase=phase, sectors=sectors, private=False)
     fiducial.compare("IDM")
+
+    deviation = fiducial.ccl_deviation()
+    print("\nCCL deviation (measurement - datum), constrained dirs only:")
+    print(deviation.to_string())
 
     ccl = pandas.concat(fiducial.delta).rename(
         {"dx": "x", "dy": "y", "dz": "z"}, axis=1

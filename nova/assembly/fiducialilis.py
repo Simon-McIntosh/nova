@@ -52,29 +52,23 @@ class FiducialIlis:
         # Reset index to ensure unique indices for proper assignment
         self.data = self.data.reset_index(drop=True)
 
-        outlier = self.data.groupby(["coil", "feature"], group_keys=False).apply(
-            lambda x: pandas.Series(self._detect(x, x.name, 3), index=x.index)
-        )
-
-        # Ensure consistent flat Series output regardless of number of coil types
-        if isinstance(outlier, pandas.DataFrame):
-            # For single coil case: flatten the DataFrame to a Series
-            outlier = outlier.stack().droplevel(-1)
-
-        self.data.loc[:, "outlier"] = outlier
-
-        offset = self.data.groupby(["coil", "feature"], group_keys=False).apply(
-            lambda x: pandas.Series(
-                self.offset(x.loc[:, ["x", "y", "z"]], x.name), index=x.index
+        outlier_parts = []
+        offset_parts = []
+        for (coil, feature), group in self.data.groupby(["coil", "feature"]):
+            outlier_parts.append(
+                pandas.Series(
+                    self._detect(group, (coil, feature), 3), index=group.index
+                )
             )
-        )
+            offset_parts.append(
+                pandas.Series(
+                    self.offset(group.loc[:, ["x", "y", "z"]], (coil, feature)),
+                    index=group.index,
+                )
+            )
 
-        # Ensure consistent flat Series output regardless of number of coil types
-        if isinstance(offset, pandas.DataFrame):
-            # For single coil case: flatten the DataFrame to a Series
-            offset = offset.stack().droplevel(-1)
-
-        self.data.loc[:, "offset"] = offset
+        self.data.loc[:, "outlier"] = pandas.concat(outlier_parts)
+        self.data.loc[:, "offset"] = pandas.concat(offset_parts)
 
     @property
     def outliers(self):

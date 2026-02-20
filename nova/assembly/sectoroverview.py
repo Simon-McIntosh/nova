@@ -211,12 +211,11 @@ class SectorOverview:
 
     @cached_property
     def gap_contributions(self) -> pandas.DataFrame:
-        """Decompose gap deviations into tangential (mean) and roll (tilt).
+        """Decompose gap deviations into tangential (mean gap) and roll (wedge).
 
         Mean gap deviation is driven by tangential displacements from
-        datum.  The gap tilt (variation with height) is driven by coil
-        roll.  Values are expressed in the gap frame where positive
-        widens the gap or tilts it wider at the top.
+        datum.  The wedge (gap variation with height) is driven by coil
+        roll.  Positive wedge means the gap is wider at the top.
         """
         gd = self.gap_deviations
         pos = self.coil_positions
@@ -239,11 +238,9 @@ class SectorOverview:
             p1 = p1.iloc[0]
             p2 = p2.iloc[0]
 
-            # Tangential contributions in gap frame (positive = widens gap)
-            # c1 ILIS +1 side faces gap: +tangential widens
-            # c2 ILIS -1 side faces gap: +tangential narrows
+            # Raw tangential displacements from datum
             tan_first = float(p1.tangential)
-            tan_second = -float(p2.tangential)
+            tan_second = float(p2.tangential)
 
             # Linear fit of gap vs z to extract tilt
             z_vals, g_vals = [], []
@@ -268,24 +265,23 @@ class SectorOverview:
                 tilt = np.nan
                 z_meas = 0
 
-            # Roll contributions to tilt in gap frame (positive = wider at top)
-            # Scale roll_length (defined over A-B span) to measurement span
+            # Raw roll displacements scaled to measurement span
             scale = z_meas / z_span if z_span > 0 else 0
             roll_first = float(p1.roll_length) * scale
-            roll_second = -float(p2.roll_length) * scale
+            roll_second = float(p2.roll_length) * scale
 
             rows.append(
                 {
-                    "gap": gap.label,
+                    "pair": gap.label,
                     "gap_type": gap.gap_type,
                     "coil_first": c1,
                     "coil_second": c2,
                     "gap_mean": gap.gap_mean,
                     "target": gap.target,
-                    "dev": gap.gap_mean - gap.target,
+                    "mean_gap": gap.gap_mean - gap.target,
                     "tan_first": tan_first,
                     "tan_second": tan_second,
-                    "tilt": tilt,
+                    "wedge": tilt,
                     "roll_first": roll_first,
                     "roll_second": roll_second,
                 }
@@ -442,38 +438,40 @@ class SectorOverview:
         if not contrib.empty:
             lines.append("\nGap Analysis (mm, inner edge):")
             lines.append("-" * 72)
-            hdr = "  %-5s  %-14s  %6s  %6s  %+7s  %+7s" % (
-                "gap",
+            hdr = "  %-5s  %-14s  %6s  %6s  %8s  %+7s" % (
+                "pair",
                 "type",
                 "mean",
                 "target",
-                "dev",
-                "tilt",
+                "mean gap",
+                "wedge",
             )
             lines.append(hdr)
             lines.append("  " + "-" * len(hdr.strip()))
             for _, row in contrib.iterrows():
                 c1, c2 = int(row.coil_first), int(row.coil_second)
-                tilt_str = "%+7.3f" % row.tilt if not np.isnan(row.tilt) else "    n/a"
+                wedge_str = (
+                    "%+7.3f" % row.wedge if not np.isnan(row.wedge) else "    n/a"
+                )
                 lines.append(
-                    "  %-5s  %-14s  %6.3f  %6.3f  %+7.3f  %s"
+                    "  %-5s  %-14s  %6.3f  %6.3f  %+8.3f  %s"
                     % (
-                        row.gap,
+                        row.pair,
                         row.gap_type,
                         row.gap_mean,
                         row.target,
-                        row.dev,
-                        tilt_str,
+                        row.mean_gap,
+                        wedge_str,
                     )
                 )
                 # Attribution: tangential -> dev, roll -> tilt
                 lines.append(
-                    "         coil %2d  tangential %+6.3f          "
-                    "roll %+6.3f" % (c1, row.tan_first, row.roll_first)
+                    "  %5s  %14s  %14s  %+8.3f  %+7.3f"
+                    % ("", "", "coil %d" % c1, row.tan_first, row.roll_first)
                 )
                 lines.append(
-                    "         coil %2d  tangential %+6.3f          "
-                    "roll %+6.3f" % (c2, row.tan_second, row.roll_second)
+                    "  %5s  %14s  %14s  %+8.3f  %+7.3f"
+                    % ("", "", "coil %d" % c2, row.tan_second, row.roll_second)
                 )
 
             # Cumulative gap assessment

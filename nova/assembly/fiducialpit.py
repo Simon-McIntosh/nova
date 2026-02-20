@@ -587,9 +587,10 @@ class FiducialPit(Plot1D):
     def _height_station_gaps(
         gap_grid: np.ndarray, grid_z: np.ndarray
     ) -> dict[str, float]:
-        """Compute mean gap at bottom, middle, and top height stations.
+        """Compute gap at bottom, middle, and top height stations.
 
-        Averages gap values across all radial samples at each z-station.
+        Uses the inner edge (innermost radial row with valid data)
+        rather than averaging across all radial samples.
 
         Parameters
         ----------
@@ -601,14 +602,17 @@ class FiducialPit(Plot1D):
         Returns
         -------
         dict with keys gap_bottom, gap_middle, gap_top, z_bottom, z_middle,
-        z_top giving the mean gap and z-coordinate at each station.
+        z_top giving the inner-edge gap and z-coordinate at each station.
         """
-        # Mean gap at each z-column (average across radial samples)
-        import warnings
-
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", RuntimeWarning)
-            z_profile = np.nanmean(gap_grid, axis=0)
+        # Inner edge gap profile (innermost radial row with valid data)
+        z_profile = None
+        for i in range(gap_grid.shape[0]):
+            row = gap_grid[i, :]
+            if np.sum(~np.isnan(row)) >= 3:
+                z_profile = row
+                break
+        if z_profile is None:
+            z_profile = np.full(gap_grid.shape[1], np.nan)
         z_values = grid_z[0, :]  # z is constant along axis 0
 
         # Find valid (non-NaN) range

@@ -261,45 +261,40 @@ class SectorOverview:
             lines.append(fmt.to_string(index=False, float_format="%.1f"))
 
         # Gap measurements
-        lines.append("\nGap Measurements (mm):")
+        lines.append("\nGap Measurements (mm, inner edge):")
         lines.append("-" * 72)
-        lines.append("  deviation = measured gap - target gap")
         gd = self.gap_deviations
         if not gd.empty:
-            lines.append(
-                "  %-8s  %-14s  %-9s  %7s  %7s  %7s  %7s"
-                % ("gap", "type", "height", "mean", "std", "target", "dev")
+            hdr = "  %-8s  %-14s  %10s  %7s  %7s  %7s" % (
+                "gap",
+                "type",
+                "z(mm)",
+                "gap",
+                "target",
+                "dev",
             )
+            lines.append(hdr)
+            lines.append("  " + "-" * len(hdr.strip()))
             for _, row in gd.iterrows():
                 target = row.target
-                # Overall mean
-                lines.append(
-                    "  %-8s  %-14s  %-9s  %7.3f  %7.3f  %7.3f  %+7.3f"
-                    % (
-                        row.label,
-                        row.gap_type,
-                        "all",
-                        row.gap_mean,
-                        row.gap_std,
-                        target,
-                        row.deviation,
-                    )
-                )
-                # Height stations
-                for station, z_key, g_key in [
-                    ("bottom", "z_bottom", "gap_bottom"),
-                    ("middle", "z_middle", "gap_middle"),
-                    ("top", "z_top", "gap_top"),
-                ]:
+                for i, (z_key, g_key) in enumerate(
+                    [
+                        ("z_bottom", "gap_bottom"),
+                        ("z_middle", "gap_middle"),
+                        ("z_top", "gap_top"),
+                    ]
+                ):
                     z_val = row.get(z_key, np.nan)
                     g_val = row.get(g_key, np.nan)
-                    if not np.isnan(g_val):
-                        dev = g_val - target
-                        z_label = "%s(%+.0f)" % (station, z_val)
-                        lines.append(
-                            "  %-8s  %-14s  %-9s  %7.3f  %7s  %7.3f  %+7.3f"
-                            % ("", "", z_label, g_val, "", target, dev)
-                        )
+                    if np.isnan(g_val):
+                        continue
+                    dev = g_val - target
+                    label = row.label if i == 0 else ""
+                    gtype = row.gap_type if i == 0 else ""
+                    lines.append(
+                        "  %-8s  %-14s  %+10.0f  %7.3f  %7.3f  %+7.3f"
+                        % (label, gtype, z_val, g_val, target, dev)
+                    )
 
             # Cumulative gap assessment
             cum_gap = gd.gap_mean.sum()

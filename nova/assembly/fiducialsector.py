@@ -879,6 +879,27 @@ if __name__ == "__main__":
     print("\nCCL deviation (measurement - datum), constrained dirs only:")
     print(deviation.to_string())
 
+    # Cylindrical deviation using FiducialFit's delta() method
+    from nova.assembly.fiducialassess import FiducialAssess
+
+    assess = FiducialAssess(
+        phase=phase,
+        sectors=sectors,
+        fill=False,
+        infer=True,
+        ilis=True,
+        ilis_pcr=True,
+        method="rms",
+        coupled=False,
+    )
+    assess.build()
+
+    print("\nCylindrical deviation (dr, r*dphi, dz), constrained dirs only:")
+    print(assess.deviation("fiducial").to_string())
+
+    print("\nError summary (constrained fiducials):")
+    print(assess.summary("fiducial").to_string())
+
     ccl = pandas.concat(fiducial.delta).rename(
         {"dx": "x", "dy": "y", "dz": "z"}, axis=1
     ) + pandas.concat(fiducial.fiducial_target)

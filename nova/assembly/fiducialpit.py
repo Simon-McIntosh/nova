@@ -1107,102 +1107,11 @@ class FiducialPit(Plot1D):
         radius: float | None,
         n_points: int,
     ) -> pandas.DataFrame:
-        """Extract gap profile for intra-sector gap."""
-        feature_first = "ILIS +1"
-        feature_second = "ILIS -1"
+        """Extract gap profile for intra-sector gap.
 
-        sector_coils = list(self.sector_data[sector].delta.keys())
-        sector_data = self.sector_data[sector]
-        ilis = FiducialIlis(sector_data.ilis, pcr=self.pcr)
-
-        # Clock planes and data to midplane
-        def clock_group(planes, coil):
-            is_first = sector_coils.index(coil) == 0
-            return self._clock_planes(planes, coil, is_first)
-
-        sector_planes = ilis.planes.groupby(["coil"], group_keys=False).apply(
-            lambda x: clock_group(x, x.name)
-        )
-
-        sector_index = [
-            (coil_first, feature_first),
-            (coil_second, feature_second),
-        ]
-
-        midplane = ilis.intersect(sector_planes.loc[sector_index])
-
-        # Get data extents for z range (r and z are rotationally invariant)
-        data_first = ilis.data[
-            (ilis.data.coil == coil_first) & (ilis.data.feature == feature_first)
-        ]
-        data_second = ilis.data[
-            (ilis.data.coil == coil_second) & (ilis.data.feature == feature_second)
-        ]
-
-        # Use intersection of data extents
-        r_min = max(data_first.r.min(), data_second.r.min())
-        r_max = min(data_first.r.max(), data_second.r.max())
-        z_min = max(data_first.z.min(), data_second.z.min())
-        z_max = min(data_first.z.max(), data_second.z.max())
-
-        # Apply 5% margin
-        r_margin = 0.05 * (r_max - r_min)
-        z_margin = 0.05 * (z_max - z_min)
-
-        if radius is None:
-            radius = r_min + r_margin
-
-        z_range = np.linspace(z_min + z_margin, z_max - z_margin, n_points)
-
-        # Compute gap profile using point cloud data interpolated to profile line
-        midplane_point = midplane.loc[["x", "y", "z"]].values
-        midplane_normal = midplane.loc[["nx", "ny", "nz"]].values
-        midplane_normal = midplane_normal / np.linalg.norm(midplane_normal)
-
-        # Clock point cloud data to sector midplane
-        def clock_data(data, coil):
-            data = data.copy()
-            is_first = sector_coils.index(coil) == 0
-            transform = self.rotate.anticlock if is_first else self.rotate.clock
-            data.loc[:, ["x", "y", "z"]] = transform(
-                data.loc[:, ["x", "y", "z"]].values
-            )
-            return data
-
-        sector_data = ilis.data.groupby(["coil"], group_keys=False).apply(
-            lambda x: clock_data(x, x.name)
-        )
-
-        from scipy.interpolate import griddata
-
-        # Sample gap at the specified radius along z
-        offset_profiles = []
-        for coil, feature in sector_index:
-            # Get point cloud for this ILIS surface
-            plane_mask = (sector_data.coil == coil) & (sector_data.feature == feature)
-            plane_data = sector_data.loc[plane_mask]
-
-            # Compute offset of each point from midplane
-            v = plane_data.loc[:, ["x", "y", "z"]].values - midplane_point
-            point_offsets = np.dot(v, midplane_normal)
-
-            # Interpolate to profile line at fixed radius
-            profile_points = np.column_stack([np.full_like(z_range, radius), z_range])
-            offset_profile = griddata(
-                plane_data.loc[:, ["r", "z"]].values,
-                point_offsets,
-                profile_points,
-                method="linear",
-            )
-            offset_profiles.append(offset_profile)
-
-        offset_first = offset_profiles[0]
-        offset_second = offset_profiles[1]
-
-        # Gap = offset_second - offset_first
-        gap_profile = offset_second - offset_first
-
-        return pandas.DataFrame({"z": z_range, "gap": gap_profile, "r": radius})
+        Delegates to FiducialSector.gap_profile.
+        """
+        return self.sector_data[sector].gap_profile(radius=radius, n_points=n_points)
 
     def _gap_profile_inter(
         self,

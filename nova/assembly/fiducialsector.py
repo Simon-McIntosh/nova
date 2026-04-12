@@ -257,6 +257,22 @@ class FiducialSector(Fiducial):
 
         # Find a version with complete reference ILIS data
         ref_version = reference_version or self._find_reference_version(reference_phase)
+        if ref_version is None and reference_phase != self.phase:
+            # Fall back to current phase as reference
+            warn(
+                f"No workbook version found with phase '{reference_phase}' "
+                f"for sector {next(iter(self.sectors.keys()))}. "
+                f"Falling back to current phase '{self.phase}'."
+            )
+            reference_phase = self.phase
+            ref_version = self._find_reference_version(reference_phase)
+        if ref_version is None:
+            warn(
+                f"No workbook version found with phase '{reference_phase}' "
+                f"for sector {next(iter(self.sectors.keys()))}. "
+                "Skipping ILIS augmentation."
+            )
+            return
         sector = next(iter(self.sectors.keys()))
         ref = FiducialSector(
             phase=reference_phase,
@@ -408,7 +424,7 @@ class FiducialSector(Fiducial):
             f"{n_missing} recovered from reference"
         )
 
-    def _find_reference_version(self, reference_phase: str) -> str:
+    def _find_reference_version(self, reference_phase: str) -> str | None:
         """Find the latest workbook version containing the reference phase."""
         from nova.assembly.sectorfile import SectorFile
         from packaging.version import Version
@@ -450,8 +466,21 @@ class FiducialSector(Fiducial):
             except (FileNotFoundError, KeyError):
                 continue
 
-        # Fallback to current version
-        return self.version
+        # Also check current version
+        try:
+            sector = next(iter(self.sectors.keys()))
+            test = SectorData(
+                sector,
+                list(self.sectors[sector]),
+                version=self.version,
+                private=self.private,
+            )
+            if reference_phase in test.phase:
+                return self.version
+        except (FileNotFoundError, KeyError):
+            pass
+
+        return None
 
     def _compute_ccl_kabsch(
         self, ref: "FiducialSector"
@@ -855,6 +884,182 @@ class FiducialSector(Fiducial):
 
         return pandas.DataFrame(results).set_index("coil").sort_index()
 
+    def gap_profile(
+        self,
+        radius: float | None = None,
+        n_points: int = 100,
+    ) -> pandas.DataFrame:
+        """Extract intra-sector gap profile along z at a specific radius.
+
+        Computes the gap between facing ILIS surfaces of adjacent coils
+        in this sector, evaluated along a vertical line at fixed radius.
+
+        Parameters
+        ----------
+        radius : float, optional
+            Radius at which to extract profile. If None, uses inner ILIS radius.
+        n_points : int
+            Number of points along z.
+
+        Returns
+        -------
+        pandas.DataFrame
+            Gap profile with columns: z, gap, r
+        """
+        from scipy.interpolate import griddata
+
+        coil_list = list(self.delta.keys())
+        if len(coil_list) < 2:
+            raise ValueError("Gap profile requires two coils in sector")
+
+        coil_first, coil_second = coil_list[0], coil_list[1]
+        feature_first, feature_second = "ILIS +1", "ILIS -1"
+        rotate = Rotate()
+
+        ilis = FiducialIlis(self.ilis, pcr=False)
+
+        # Clock planes and data to sector midplane
+        def clock_planes(planes, coil):
+            planes = planes.copy()
+            is_first = coil_list.index(coil) == 0
+            transform = rotate.anticlock if is_first else rotate.clock
+            planes.loc[:, ["x", "y", "z"]] = transform(
+                planes.loc[:, ["x", "y", "z"]].values
+            )
+            planes.loc[:, ["nx", "ny", "nz"]] = transform(
+                planes.loc[:, ["nx", "ny", "nz"]].values
+            )
+            return planes
+
+        def clock_data(data, coil):
+            data = data.copy()
+            is_first = coil_list.index(coil) == 0
+            transform = rotate.anticlock if is_first else rotate.clock
+            data.loc[:, ["x", "y", "z"]] = transform(
+                data.loc[:, ["x", "y", "z"]].values
+            )
+            return data
+
+        sector_planes = ilis.planes.groupby(["coil"], group_keys=False).apply(
+            lambda x: clock_planes(x, x.name)
+        )
+
+        sector_data = ilis.data.groupby(["coil"], group_keys=False).apply(
+            lambda x: clock_data(x, x.name)
+        )
+
+        sector_index = [
+            (coil_first, feature_first),
+            (coil_second, feature_second),
+        ]
+
+        midplane = ilis.intersect(sector_planes.loc[sector_index])
+
+        # Get data extents for z range
+        data_first = ilis.data[
+            (ilis.data.coil == coil_first) & (ilis.data.feature == feature_first)
+        ]
+        data_second = ilis.data[
+            (ilis.data.coil == coil_second) & (ilis.data.feature == feature_second)
+        ]
+
+        r_min = max(data_first.r.min(), data_second.r.min())
+        r_max = min(data_first.r.max(), data_second.r.max())
+        z_min = max(data_first.z.min(), data_second.z.min())
+        z_max = min(data_first.z.max(), data_second.z.max())
+
+        r_margin = 0.05 * (r_max - r_min)
+        z_margin = 0.05 * (z_max - z_min)
+
+        if radius is None:
+            radius = r_min + r_margin
+
+        z_range = np.linspace(z_min + z_margin, z_max - z_margin, n_points)
+
+        midplane_point = midplane.loc[["x", "y", "z"]].values
+        midplane_normal = midplane.loc[["nx", "ny", "nz"]].values
+        midplane_normal = midplane_normal / np.linalg.norm(midplane_normal)
+
+        offset_profiles = []
+        for coil, feature in sector_index:
+            plane_mask = (sector_data.coil == coil) & (sector_data.feature == feature)
+            plane_data = sector_data.loc[plane_mask]
+
+            v = plane_data.loc[:, ["x", "y", "z"]].values - midplane_point
+            point_offsets = np.dot(v, midplane_normal)
+
+            profile_points = np.column_stack([np.full_like(z_range, radius), z_range])
+            offset_profile = griddata(
+                plane_data.loc[:, ["r", "z"]].values,
+                point_offsets,
+                profile_points,
+                method="linear",
+            )
+            offset_profiles.append(offset_profile)
+
+        gap_profile = offset_profiles[1] - offset_profiles[0]
+
+        return pandas.DataFrame({"z": z_range, "gap": gap_profile, "r": radius})
+
+    def plot_gap_profile(
+        self,
+        radius: float | None = None,
+        n_points: int = 100,
+        measurements: pandas.DataFrame | None = None,
+    ):
+        """Plot intra-sector gap profile along z at inner radius.
+
+        Parameters
+        ----------
+        radius : float, optional
+            Radius at which to extract profile. If None, uses inner ILIS radius.
+        n_points : int
+            Number of points along z.
+        measurements : pandas.DataFrame, optional
+            Measured gap data with columns 'z' and 'gap' to overlay.
+
+        Returns
+        -------
+        tuple[Figure, Axes]
+        """
+        import matplotlib.pyplot as plt
+
+        profile = self.gap_profile(radius=radius, n_points=n_points)
+        coil_list = list(self.delta.keys())
+
+        fig, ax = plt.subplots(figsize=(10, 8))
+        valid = ~profile["gap"].isna()
+        ax.plot(
+            profile.loc[valid, "z"],
+            profile.loc[valid, "gap"],
+            "-",
+            linewidth=2,
+            label=f"Predicted (r={profile['r'].iloc[0]:.0f} mm)",
+        )
+
+        if measurements is not None:
+            ax.scatter(
+                measurements["z"],
+                measurements["gap"],
+                s=100,
+                color="C1",
+                marker="o",
+                edgecolor="k",
+                label="Measured",
+                zorder=5,
+            )
+
+        mean_gap = profile.loc[valid, "gap"].mean()
+        ax.axhline(mean_gap, ls="--", color="gray", label=f"Mean: {mean_gap:.2f} mm")
+
+        ax.set_xlabel("z (mm)")
+        ax.set_ylabel("Gap (mm)")
+        ax.set_title(f"Gap Profile: Coils {coil_list[0]}-{coil_list[1]}")
+        ax.legend()
+        fig.tight_layout()
+
+        return fig, ax
+
 
 if __name__ == "__main__":
     phase = "SSAT BR"
@@ -864,15 +1069,16 @@ if __name__ == "__main__":
     # phase = "SSAT AR2"
     # phase = "SSAT AR target"
     # phase = "In-pit target"
-    phase = "TFGS Landing"
+    # phase = "TFGS Landing"
 
     sectors = {7: [8, 9]}
     # sectors = {6: [12, 13]}
     # sectors = {5: [16, 5]}
     sectors = {8: [4, 11]}
     # sectors = {4: [2, 3]}
+    sectors = {1: [14, 15]}
 
-    fiducial = FiducialSector(phase=phase, sectors=sectors, private=False)
+    fiducial = FiducialSector(phase=phase, sectors=sectors, private=True)
     fiducial.compare("IDM")
 
     deviation = fiducial.ccl_deviation()
@@ -891,6 +1097,7 @@ if __name__ == "__main__":
         ilis_pcr=True,
         method="rms",
         coupled=False,
+        private=True,
     )
     assess.build()
 
@@ -899,6 +1106,12 @@ if __name__ == "__main__":
 
     print("\nError summary (constrained fiducials):")
     print(assess.summary("fiducial").to_string())
+
+    # Gap profile at inner radius
+    if len(list(fiducial.delta.keys())) >= 2:
+        profile = fiducial.gap_profile()
+        print(f"\nMean gap: {profile.gap.mean():.3f} mm")
+        fiducial.plot_gap_profile()
 
     ccl = pandas.concat(fiducial.delta).rename(
         {"dx": "x", "dy": "y", "dz": "z"}, axis=1

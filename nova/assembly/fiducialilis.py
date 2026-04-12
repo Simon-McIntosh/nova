@@ -31,8 +31,8 @@ class FiducialIlis:
         11: [0, -0.15 + 0.4],  # reduce inter-sector gap
         12: [0, -1.5],  # S6-
         13: [0, 0],  # S6+
-        14: [0, 0],
-        15: [0, 0],
+        14: [0 + 0.4, 0],  # reduce inter-sector gap
+        15: [0, 0 + 0.4],  # reduce inter-sector gap
         16: [0 + 0.1, 0.2],  # S5- reduce inter-sector gap
         17: [np.nan, np.nan],
         18: [0, 0],

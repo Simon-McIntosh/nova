@@ -935,7 +935,8 @@ if __name__ == "__main__":
     # sectors = {6: [12, 13]}
     # sectors = {5: [16]} # 16, 5
     # sectors = {8: [4, 11]}
-    sectors = {4: [2, 3]}
+    # sectors = {4: [2, 3]}
+    sectors = {1: [14, 15]}
 
     fiducial = FiducialFit(
         phase=phase,

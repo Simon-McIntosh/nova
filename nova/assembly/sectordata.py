@@ -127,11 +127,12 @@ class SectorData(FilePath, SectorFile):
     def phase(self) -> list[str]:
         """Return list of assembly phases in workbook order (newest last)."""
         # Preserve sheet order from workbook (dict keys maintain insertion order)
-        # Union both coils' phases while maintaining order
+        # Union all coils' phases while maintaining order
         phases = list(self.data[self.coil[0]].keys())
-        for phase in self.data[self.coil[1]].keys():
-            if phase not in phases:
-                phases.append(phase)
+        for coil in self.coil[1:]:
+            for phase in self.data[coil].keys():
+                if phase not in phases:
+                    phases.append(phase)
         return [phase for phase in phases if phase != "Nominal"]
 
     def _initalize_ccl(self):

@@ -148,7 +148,6 @@ class FieldNull(Array):
 
 
 if __name__ == "__main__":
-
     import matplotlib.pyplot as plt
 
     plasmagrid = xarray.open_dataset("plasmagrid.nc")

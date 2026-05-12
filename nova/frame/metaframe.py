@@ -65,7 +65,7 @@ class MetaSet(MetaArray):
             assert self.hascol(attr, col)
         except AssertionError as hasnot:
             raise AssertionError(
-                f"{col} not in metaframe.{attr}: " f"{getattr(self, attr)}"
+                f"{col} not in metaframe.{attr}: {getattr(self, attr)}"
             ) from hasnot
 
 

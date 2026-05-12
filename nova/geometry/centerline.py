@@ -33,8 +33,7 @@ datasource = {
         "with changes to the coils_non_axysymmetric IDS for DD verisions >= 3.34.0",
         cad=CAD(
             reference="DET-07879",
-            objects="Correction Coil + Feeder Centerline Extraction "
-            "for IMAS database",
+            objects="Correction Coil + Feeder Centerline Extraction for IMAS database",
             date="05/10/2023",
             provider="Vincent Bontemps, vincent.bontemps@iter.org",
             contact="Guillaume Davin, Guillaume.Davin@iter.org",
@@ -73,8 +72,7 @@ datasource = {
         reason_for_replacement="Correction to conductor radius.",
         cad=CAD(
             reference="DET-07879-A",
-            objects="Central Solenoid + Feeder Centerline Extraction "
-            "for IMAS database",
+            objects="Central Solenoid + Feeder Centerline Extraction for IMAS database",
             date="19/10/2023",
             provider="Vincent Bontemps, vincent.bontemps@iter.org",
             contact="Guillaume Davin, Guillaume.Davin@iter.org",
@@ -134,7 +132,7 @@ datasource = {
         "includes arc elements extracted from source IDS multiline.",
         cad=CAD(
             reference="115001/1",
-            objects="ELM Coil Centerline Extraction " "for IMAS database",
+            objects="ELM Coil Centerline Extraction for IMAS database",
             date="23/01/2023",
             provider="Masanari Hosokawa, masanari.hosokawa@iter.org",
             contact="Simon McIntosh, simon.mcintosh@iter.org",
@@ -273,9 +271,12 @@ class Centerline(Plot, PolylineAttrs, CoilDatabase):
         self.data.coords["point"] = list("xyz")
         self.data.coords["cross_section_index"] = range(len(self.cross_section.points))
         self.data["cross_section"] = (
-            "cross_section_index",
-            "point",
-        ), self.cross_section.points
+            (
+                "cross_section_index",
+                "point",
+            ),
+            self.cross_section.points,
+        )
         with pandas.ExcelFile(self.xls_file, engine="openpyxl") as xls:
             self.data.coords["coil_name"] = xls.sheet_names
             xls_points = {}
@@ -305,9 +306,10 @@ class Centerline(Plot, PolylineAttrs, CoilDatabase):
 
     def _store_point_data(self, xls_points):
         """Store xls point data to dataset."""
-        self.data["point_number"] = "coil_name", [
-            len(points) for points in xls_points.values()
-        ]
+        self.data["point_number"] = (
+            "coil_name",
+            [len(points) for points in xls_points.values()],
+        )
         self.data.coords["point_index"] = range(self.data.point_number.max().data)
         self.data["points"] = xarray.DataArray(
             0.0,
@@ -319,10 +321,13 @@ class Centerline(Plot, PolylineAttrs, CoilDatabase):
 
     def _store_segment_data(self):
         """Store subframe segment data to dataset."""
-        self.data["segment_number"] = "coil_name", [
-            len(self.loc[self.loc["frame"] == coil_name, :])
-            for coil_name in self.data.coil_name
-        ]
+        self.data["segment_number"] = (
+            "coil_name",
+            [
+                len(self.loc[self.loc["frame"] == coil_name, :])
+                for coil_name in self.data.coil_name
+            ],
+        )
         self.data.coords["segment_index"] = range(self.data.segment_number.max().data)
         self.data["segment_type"] = xarray.DataArray(
             "",

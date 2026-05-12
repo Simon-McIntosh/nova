@@ -5,6 +5,7 @@ Created on Thu Jan 25 11:13:16 2024
 
 @author: mcintos
 """
+
 import jax
 import jax.numpy as jnp
 

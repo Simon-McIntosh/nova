@@ -4,7 +4,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass, field, fields
 from functools import cached_property
 from time import time
-from typing import ClassVar, Union
+from typing import ClassVar, Self
 
 import numpy as np
 import xarray
@@ -13,6 +13,9 @@ import xxhash
 from nova.assembly import structural, electromagnetic, overlap
 from nova.assembly.gap import WedgeGap
 from nova.assembly.model import Dataset
+from nova.assembly.progress import TrialProgress
+from nova.assembly.quartile import QuartileAnalysis
+from nova.assembly.trial_manifest import TrialManifest
 from nova.graphics.plot import Plot1D
 
 
@@ -27,6 +30,9 @@ class TrialAttrs:
     adjust_gap: bool = True
     max_nominal_gap: float = 2.0
     sead: int = 2025
+    measured_sectors: list[int] | None = field(default=None)
+    fixed_coils: dict | None = field(default=None, repr=False)
+    force: bool = field(default=False, repr=False)
 
     ncoil: ClassVar[int] = 18
 
@@ -38,9 +44,15 @@ class TrialAttrs:
     @property
     def attrs(self):
         """Return trial attrs."""
+        # Exclude transient fields from serialization
+        exclude = {"fixed_coils", "force"}
         attrs = {}
         for attr in self.field_names:
+            if attr in exclude:
+                continue
             value = getattr(self, attr)
+            if value is None:
+                continue
             if isinstance(value, bool):
                 attrs[attr] = int(value)
                 continue
@@ -60,7 +72,15 @@ class Trial(Dataset, TrialAttrs, Plot1D):
         """Set dataset group for netCDF file load/store."""
         self.group = self.group_name
         self.rng = np.random.default_rng(self.sead)
-        super().__post_init__()
+        # Initialize FilePath (sets fsys) before potential early build
+        self.host = self.hostname
+        self.path = self.dirname
+        if self.force:
+            # Delete existing group to allow dimension changes (e.g., n_bins)
+            self.delete_group()
+            self.build()
+        else:
+            super().__post_init__()
 
     @property
     def nominal_gap(self):
@@ -76,10 +96,288 @@ class Trial(Dataset, TrialAttrs, Plot1D):
 
     @property
     def group_name(self):
-        """Return group name as xxh32 hex hash."""
+        """Return group name as xxh32 hex hash.
+
+        The hash includes measured_sectors only when specified, so existing
+        cached data for simulations without measured sectors is preserved.
+        """
         self.xxh32.reset()
-        self.xxh32.update(np.array(list(self.attrs.values()) + self.theta + self.pdf))
+        hash_data = list(self.attrs.values()) + self.theta + self.pdf
+        # Include measured_sectors in hash only if specified
+        if self.measured_sectors is not None:
+            hash_data.extend(sorted(self.measured_sectors))
+        self.xxh32.update(np.array(hash_data).tobytes())
         return self.xxh32.hexdigest()
+
+    @classmethod
+    def from_manifest(
+        cls,
+        name: str | None = None,
+        samples: int | None = None,
+        force: bool = False,
+        **kwargs,
+    ) -> Self:
+        """Load trial from manifest by name or create with parameters.
+
+        Parameters
+        ----------
+        name : str | None
+            Simulation label to load from manifest
+        samples : int | None
+            Override samples from manifest
+        force : bool
+            Force rebuild even if cached data exists
+        **kwargs
+            Additional parameters passed to Trial/TrialManifest
+
+        Returns
+        -------
+        Trial
+            Trial instance with loaded parameters
+
+        Examples
+        --------
+        >>> trial = Vault.from_manifest("baseline_2021")
+        >>> trial = ErrorField.from_manifest("baseline_2021", samples=500000)
+        >>> trial = Vault.from_manifest("baseline_2021", force=True)  # rebuild
+        """
+        # Determine trial_type from class name
+        trial_type = "error_field" if cls.__name__ == "ErrorField" else "vault"
+
+        manifest = TrialManifest(name=name, trial_type=trial_type)
+
+        # Override samples if provided
+        if samples is not None:
+            manifest.samples = samples
+
+        # Build kwargs for Trial constructor
+        trial_kwargs = {
+            "samples": manifest.samples,
+            "theta": manifest.theta,
+            "component": manifest.components,
+            "pdf": manifest.pdf,
+            "force": force,
+        }
+
+        # Add measured_sectors if specified
+        if manifest.measured_sectors is not None:
+            trial_kwargs["measured_sectors"] = manifest.measured_sectors
+
+        # Add vault-specific parameters
+        if trial_type == "vault":
+            trial_kwargs["adjust_gap"] = manifest.adjust_gap
+            trial_kwargs["max_nominal_gap"] = manifest.max_nominal_gap
+
+        # Merge with any additional kwargs
+        trial_kwargs.update(kwargs)
+
+        # Pre-load measured positions before construction when force=True
+        # This ensures fixed_coils is available during build in __post_init__
+        if manifest.measured_sectors is not None and force:
+            fixed_coils = cls._load_fixed_coils_from_sectors(manifest.measured_sectors)
+            trial_kwargs["fixed_coils"] = fixed_coils
+
+        trial = cls(**trial_kwargs)
+
+        # Load measured coil positions if sectors specified (for non-force case)
+        if trial.measured_sectors is not None and trial.fixed_coils is None:
+            trial._load_measured_positions()
+
+        return trial
+
+    def save_to_manifest(self, name: str, description: str = "") -> None:
+        """Save current trial parameters to manifest.
+
+        Parameters
+        ----------
+        name : str
+            Label for the simulation
+        description : str
+            Human-readable description
+        """
+        trial_type = "error_field" if "vertical" in self.component else "vault"
+        manifest = TrialManifest(
+            name=name,
+            trial_type=trial_type,
+            samples=self.samples,
+            theta=self.theta,
+            components=self.component,
+            pdf=self.pdf,
+            description=description,
+        )
+        manifest.save()
+        print(f"Saved to manifest: {name}")
+
+    @classmethod
+    def from_pit(
+        cls,
+        name: str | None = None,
+        samples: int | None = None,
+        pit_kwargs: dict | None = None,
+        **kwargs,
+    ) -> Self:
+        """Create hybrid trial with fixed values from installed pit sectors.
+
+        Loads measured coil positions from FiducialPit and injects them
+        as fixed values for installed coils. Remaining coils are sampled
+        from distributions defined by the manifest.
+
+        Parameters
+        ----------
+        name : str | None
+            Manifest simulation label for theta/pdf parameters
+        samples : int | None
+            Override samples from manifest
+        pit_kwargs : dict | None
+            Arguments passed to FiducialPit (sectors, phase, pcr, etc.)
+            If None, uses default installed sectors.
+        **kwargs
+            Additional parameters passed to Trial
+
+        Returns
+        -------
+        Trial
+            Trial instance with fixed_coils populated from pit measurements
+
+        Examples
+        --------
+        >>> error = ErrorField.from_pit("baseline_2021", samples=100000)
+        >>> error.build()  # Uses measured values for 8 installed coils
+        """
+        from nova.assembly.fiducialpit import FiducialPit
+
+        # Default pit configuration for currently installed sectors
+        if pit_kwargs is None:
+            pit_kwargs = {
+                "sectors": {6: [12, 13], 7: [8, 9], 5: [16, 5], 8: [4, 11]},
+                "phase": "latest",
+                "pcr": True,
+            }
+
+        # Load pit data and extract trial-formatted positions
+        pit = FiducialPit(**pit_kwargs)
+        positions = pit.extract_trial_positions()
+
+        # Convert to fixed_coils dict format
+        fixed_coils = {}
+        for _, row in positions.iterrows():
+            trial_idx = int(row["trial_index"])
+            fixed_coils[trial_idx] = {
+                col: row[col]
+                for col in positions.columns
+                if col not in ["trial_index", "coil", "sector"]
+            }
+
+        # Create trial via from_manifest with fixed_coils injected
+        trial = cls.from_manifest(name=name, samples=samples, **kwargs)
+        trial.fixed_coils = fixed_coils
+
+        return trial
+
+    @staticmethod
+    def _load_fixed_coils_from_sectors(
+        measured_sectors: list[int], pit_kwargs: dict | None = None
+    ) -> dict:
+        """Load fixed coil values from FiducialPit for given sectors.
+
+        Static method that can be called before instance creation to
+        pre-populate fixed_coils when force=True.
+
+        Parameters
+        ----------
+        measured_sectors : list[int]
+            List of sector numbers (5, 6, 7, 8) to load
+        pit_kwargs : dict | None
+            Arguments passed to FiducialPit
+
+        Returns
+        -------
+        dict
+            fixed_coils dict mapping trial_index to component values
+        """
+        from nova.assembly.fiducialpit import FiducialPit
+
+        # Default sector to coil mapping
+        sector_coils = {
+            5: [16, 5],
+            6: [12, 13],
+            7: [8, 9],
+            8: [4, 11],
+        }
+
+        if pit_kwargs is None:
+            sectors = {
+                s: sector_coils[s] for s in measured_sectors if s in sector_coils
+            }
+            pit_kwargs = {
+                "sectors": sectors,
+                "phase": "latest",
+                "pcr": True,
+            }
+
+        pit = FiducialPit(**pit_kwargs)
+        positions = pit.extract_trial_positions()
+
+        fixed_coils = {}
+        for _, row in positions.iterrows():
+            trial_idx = int(row["trial_index"])
+            fixed_coils[trial_idx] = {
+                col: row[col]
+                for col in positions.columns
+                if col not in ["trial_index", "coil", "sector"]
+            }
+        return fixed_coils
+
+    def _load_measured_positions(self, pit_kwargs: dict | None = None) -> None:
+        """Load measured positions from FiducialPit for measured_sectors.
+
+        Populates self.fixed_coils with measured values for coils in the
+        specified measured_sectors. Called automatically by from_manifest
+        when measured_sectors is specified in the manifest.
+
+        Parameters
+        ----------
+        pit_kwargs : dict | None
+            Arguments passed to FiducialPit. If None, builds sectors dict
+            from self.measured_sectors using default coil assignments.
+        """
+        from nova.assembly.fiducialpit import FiducialPit
+
+        if self.measured_sectors is None:
+            return
+
+        # Default sector to coil mapping
+        sector_coils = {
+            5: [16, 5],
+            6: [12, 13],
+            7: [8, 9],
+            8: [4, 11],
+        }
+
+        if pit_kwargs is None:
+            # Build sectors dict from measured_sectors
+            sectors = {
+                s: sector_coils[s] for s in self.measured_sectors if s in sector_coils
+            }
+            pit_kwargs = {
+                "sectors": sectors,
+                "phase": "latest",
+                "pcr": True,
+            }
+
+        # Load pit data and extract trial-formatted positions
+        pit = FiducialPit(**pit_kwargs)
+        positions = pit.extract_trial_positions()
+
+        # Convert to fixed_coils dict format
+        self.fixed_coils = {}
+        for _, row in positions.iterrows():
+            trial_idx = int(row["trial_index"])
+            self.fixed_coils[trial_idx] = {
+                col: row[col]
+                for col in positions.columns
+                if col not in ["trial_index", "coil", "sector"]
+            }
 
     def normal(self, variance: float):
         """Return sample with normal distribution."""
@@ -91,7 +389,16 @@ class Trial(Dataset, TrialAttrs, Plot1D):
         return self.rng.uniform(-bound, bound, size=(self.samples, self.ncoil))
 
     def build_signal(self):
-        """Build input distributions."""
+        """Build input distributions.
+
+        If fixed_coils is set, measured values are injected for specified
+        coil indices. Fixed coils use their measured values (broadcast across
+        all samples) while remaining coils are sampled from distributions.
+
+        The fixed_coils dict should have structure:
+            {trial_index: {component: value, ...}, ...}
+        where trial_index is 0-17 and component names match self.component.
+        """
         self.data = xarray.Dataset(attrs=self.attrs)
         self.data["sample"] = range(self.samples)
         self.data["index"] = range(self.ncoil)
@@ -105,7 +412,15 @@ class Trial(Dataset, TrialAttrs, Plot1D):
         for i, component in enumerate(self.component):
             theta = self.theta[i]
             pdf = self.pdf[i]
-            self.data[component] = ("sample", "index"), getattr(self, pdf)(theta)
+            samples = getattr(self, pdf)(theta)
+
+            # Inject fixed values for measured coils
+            if self.fixed_coils is not None:
+                for trial_idx, coil_data in self.fixed_coils.items():
+                    if component in coil_data:
+                        samples[:, trial_idx] = coil_data[component]
+
+            self.data[component] = ("sample", "index"), samples
 
     @cached_property
     def gap(self):
@@ -117,8 +432,18 @@ class Trial(Dataset, TrialAttrs, Plot1D):
         """Return cumulative gap."""
         return self.gap.sum(axis=-1)
 
-    def build_positive_gap(self, nmax=20, eps=1e-3):
-        """Built gap waveform via iterative loop."""
+    def build_positive_gap(self, nmax=20, eps=1e-3, progress_task=None):
+        """Built gap waveform via iterative loop.
+
+        Parameters
+        ----------
+        nmax : int
+            Maximum number of iterations
+        eps : float
+            Convergence tolerance for negative gaps
+        progress_task : StepTask | None
+            Optional progress task for tracking iterations
+        """
         self.build_gap()
         for i in range(nmax):
             if self.adjust_gap:
@@ -126,12 +451,15 @@ class Trial(Dataset, TrialAttrs, Plot1D):
             gap = self.gap
             sample_index = (gap < -eps).any(axis=1)
             if sample_index.sum() == 0:
-                print(f"positive gap iteration converged {i}")
+                if progress_task is not None:
+                    progress_task.update(completed=nmax)
                 return
             offset = gap[sample_index]
             offset[offset >= 0] = 0
             self.data.tangential[sample_index] += offset
             self.build_gap()
+            if progress_task is not None:
+                progress_task.advance()
         raise ValueError(
             f"gap itteration failure at iteration {nmax} "
             "negitive samples "
@@ -140,8 +468,11 @@ class Trial(Dataset, TrialAttrs, Plot1D):
 
     def build_gap(self):
         """Build vault gap from radial and toroidal waveforms."""
-        self.data["gap"] = ("sample", "index", "signal"), np.zeros(
-            (self.data.sizes["sample"], self.ncoil, self.data.sizes["signal"])
+        self.data["gap"] = (
+            ("sample", "index", "signal"),
+            np.zeros(
+                (self.data.sizes["sample"], self.ncoil, self.data.sizes["signal"])
+            ),
         )
         self.data.gap[..., 0] = np.pi / self.ncoil * self.data["radial"]
         self.data.gap[:, :-1, 0] += np.pi / self.ncoil * self.data["radial"][:, 1:].data
@@ -167,6 +498,25 @@ class Trial(Dataset, TrialAttrs, Plot1D):
         yield
         print(f"build time {time() - start_time:1.0f}s")
 
+    @contextmanager
+    def progress(self, steps: list[str]):
+        """Track build progress with rich display.
+
+        Parameters
+        ----------
+        steps : list[str]
+            Names of the build steps to track
+
+        Yields
+        ------
+        TrialProgress
+            Progress monitor with step() context manager
+        """
+        description = f"{self.__class__.__name__} ({self.samples:,} samples)"
+        with TrialProgress(description) as monitor:
+            monitor.configure(steps)
+            yield monitor
+
     def pdf_text(self, wall=False, fancy=False):
         """Return pdf text label."""
         text = ""
@@ -180,7 +530,7 @@ class Trial(Dataset, TrialAttrs, Plot1D):
                     if attr == "t":
                         text += r"$r$"
                         attr = r"\phi"
-                    text += rf'$\Delta {attr}_{{{component.split("_")[0]}}}$'
+                    text += rf"$\Delta {attr}_{{{component.split('_')[0]}}}$"
                 else:
                     text += component.split("_")[-1]
             else:
@@ -192,6 +542,8 @@ class Trial(Dataset, TrialAttrs, Plot1D):
                 pdf = rf"$\mathcal{{U}}\,(\pm{theta:1.1f})$"
             text += ": " + pdf
             text += "\n"
+        n_measured = len(self.measured_sectors) if self.measured_sectors else 0
+        text += f"measured_sectors: {n_measured}\n"
         text += "\n"
         text += f"samples: {self.samples:,}"
         self.text(text)
@@ -200,7 +552,7 @@ class Trial(Dataset, TrialAttrs, Plot1D):
         """Add multi-line text to current axes."""
         self.axes.text(
             1.0,
-            0.8,
+            0.95,
             text,
             fontsize="x-small",
             transform=self.axes.transAxes,
@@ -244,10 +596,21 @@ class Trial(Dataset, TrialAttrs, Plot1D):
 
 
 @dataclass
-class Vault(Trial, Plot1D):
+class Vault(Trial, QuartileAnalysis, Plot1D):
     """Run vault assembly Monte Carlo trials."""
 
     filename: str = "vault_trial"
+
+    # QuartileAnalysis configuration
+    quartile_metrics: dict[str, str] = field(
+        default_factory=lambda: {
+            "peaktopeak": "peaktopeak",
+            "cumulative_gap": "cumulative_gap",
+            "axis_offset": "axis_offset",
+        },
+        repr=False,
+    )
+
     component: list[str] = field(
         default_factory=lambda: [
             "radial",
@@ -272,8 +635,8 @@ class Vault(Trial, Plot1D):
         ]
     )
     modes: int = 3
-    energize: Union[int, bool] = True
-    wall: bool = True
+    energize: int | bool = True
+    wall: int | bool = True
 
     def __post_init__(self):
         """Initialize model instances."""
@@ -283,22 +646,57 @@ class Vault(Trial, Plot1D):
         self.structural_model = structural.Model()
         self.electromagnetic_model = electromagnetic.Model()
         super().__post_init__()
+        # self.ensure_quartile_analysis(force=self.force)
+
+    @property
+    def quartile_components(self) -> list[str]:
+        """Return components for quartile analysis binning."""
+        return list(self.data.component.values)
+
+    def _get_metric_data(self, metric: str) -> np.ndarray:
+        """Return data array for quartile analysis metrics.
+
+        Handles special metrics that require computation from stored data.
+        """
+        if metric == "cumulative_gap":
+            return self.cumulative_gap
+        if metric == "axis_offset":
+            return np.linalg.norm(self.data.offset.values, axis=-1)
+        return self.data[metric].values
 
     def build(self):
         """Build Monte Carlo dataset."""
-        with self.timer():
-            self.build_signal()
-            self.build_positive_gap()
-            self.predict_structure()
-            self.predict_electromagnetic()
+        steps = [
+            "Signal generation",
+            "Gap optimization",
+            "Structural",
+            "Electromagnetic",
+        ]
+        if self.wall:
+            steps.append("Wall prediction")
+        steps.append("Store results")
+
+        with self.progress(steps) as monitor:
+            with monitor.step("Signal generation"):
+                self.build_signal()
+            with monitor.step("Gap optimization", total=20) as task:
+                self.build_positive_gap(progress_task=task)
+            with monitor.step("Structural"):
+                self.predict_structure()
+            with monitor.step("Electromagnetic"):
+                self.predict_electromagnetic()
             if self.wall:
-                self.predict_wall()
-        return self.store()
+                with monitor.step("Wall prediction"):
+                    self.predict_wall()
+            with monitor.step("Store results"):
+                self.store()
+        return self
 
     def predict_structure(self):
         """Run structural simulation."""
-        self.data["structural"] = ("sample", "index", "signal"), np.zeros(
-            (self.samples, self.ncoil, self.data.sizes["signal"])
+        self.data["structural"] = (
+            ("sample", "index", "signal"),
+            np.zeros((self.samples, self.ncoil, self.data.sizes["signal"])),
         )
         if self.energize:
             gap = self.data.gap.sum(axis=-1)
@@ -319,11 +717,13 @@ class Vault(Trial, Plot1D):
         self.electromagnetic_model.predict(
             self.data.electromagnetic[..., 0], self.data.electromagnetic[..., 1]
         )
-        self.data["peaktopeak"] = "sample", self.electromagnetic_model.peaktopeak(
-            modes=self.modes
+        self.data["peaktopeak"] = (
+            "sample",
+            self.electromagnetic_model.peaktopeak(modes=self.modes),
         )
-        self.data["offset"] = ("sample", "coordinate"), np.zeros(
-            (self.data.sizes["sample"], 2)
+        self.data["offset"] = (
+            ("sample", "coordinate"),
+            np.zeros((self.data.sizes["sample"], 2)),
         )
         offset = self.electromagnetic_model.axis_offset
         self.data["offset"][..., 0] = offset.real
@@ -341,8 +741,9 @@ class Vault(Trial, Plot1D):
         wall_hat[..., 1] += self.electromagnetic_model.axis_offset * (self.ncoil // 2)
         offset_firstwall = np.fft.irfft(wall_hat, ndiv) * ndiv / self.ncoil
         deviation = self.electromagnetic_model.fieldline.data - firstwall.data
-        self.data["peaktopeak"] = "sample", self.electromagnetic_model.peaktopeak(
-            deviation, modes=self.modes
+        self.data["peaktopeak"] = (
+            "sample",
+            self.electromagnetic_model.peaktopeak(deviation, modes=self.modes),
         )
         offset_deviation = (
             self.electromagnetic_model.fieldline.data - offset_firstwall.data
@@ -518,10 +919,19 @@ class Vault(Trial, Plot1D):
 
 
 @dataclass
-class ErrorField(Trial, Plot1D):
+class ErrorField(Trial, QuartileAnalysis, Plot1D):
     """Run Monte Carlo error field trials."""
 
     filename: str = "errorfield_trial"
+
+    # QuartileAnalysis configuration
+    quartile_metrics: dict[str, str] = field(
+        default_factory=lambda: {
+            "overlap": "overlap_max",
+        },
+        repr=False,
+    )
+
     component: list[str] = field(
         default_factory=lambda: [
             "radial",
@@ -553,21 +963,43 @@ class ErrorField(Trial, Plot1D):
     def __post_init__(self):
         """Initialize model instances."""
         self.model = overlap.Model()
-        print(self.group_name)
         super().__post_init__()
+        # self.ensure_quartile_analysis(force=self.force)
+
+    @property
+    def quartile_components(self) -> list[str]:
+        """Return components for quartile analysis binning."""
+        return list(self.data.component.values)
+
+    def _get_metric_data(self, metric: str) -> np.ndarray:
+        """Return data array for quartile analysis metrics.
+
+        Handles special metrics that require computation from stored data.
+        """
+        if metric == "overlap_max":
+            # Maximum overlap across all plasma configurations
+            return self.data.overlap.values.max(axis=-1)
+        return self.data[metric].values
 
     def build(self):
         """Build Monte Carlo dataset."""
-        with self.timer():
-            self.build_signal()
-            self.predict()
-        return self.store()
+        steps = ["Signal generation", "Overlap prediction", "Store results"]
+
+        with self.progress(steps) as monitor:
+            with monitor.step("Signal generation"):
+                self.build_signal()
+            with monitor.step("Overlap prediction"):
+                self.predict()
+            with monitor.step("Store results"):
+                self.store()
+        return self
 
     def predict(self):
         """Predict overlap error field."""
         self.data["plasma"] = self.model.data.plasma
-        self.data["overlap"] = ("sample", "plasma"), np.zeros(
-            (self.samples, self.data.sizes["plasma"])
+        self.data["overlap"] = (
+            ("sample", "plasma"),
+            np.zeros((self.samples, self.data.sizes["plasma"])),
         )
         radial = self.data.radial + self.data.radial_ccl
         tangential = self.data.tangential + self.data.tangential_ccl
@@ -610,8 +1042,9 @@ class ErrorField(Trial, Plot1D):
             and self.data.attrs.get("quantile", None) == quantile
         ):
             return self
-        self.data["quantile_scan"] = ("component", "plasma"), np.ones(
-            (self.data.sizes["component"], self.data.sizes["plasma"])
+        self.data["quantile_scan"] = (
+            ("component", "plasma"),
+            np.ones((self.data.sizes["component"], self.data.sizes["plasma"])),
         )
         for i, pdf in enumerate(self.pdf):
             theta = list(np.zeros(len(self.pdf)))
@@ -645,31 +1078,27 @@ class ErrorField(Trial, Plot1D):
 
 
 if __name__ == "__main__":
-    # theta = [5, 5, 5, 10, 2, 2, 2.5]
-    # theta = [0, 0, 0, 10, 0, 0, 0]
-    theta = [1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 3]
-    vault = Vault(2_000_00, theta=theta, adjust_gap=True)
+    trial_name = "baseline_2021"
+    # trial_name = "S4_refine_pit_2026"
+    # trial_name = "S4_hybrid_pit_2026"
+    samples = 200_000
+    force = True
 
-    #'radial', 'tangential', 'roll_length',
-    #'yaw_length', 'radial_ccl', 'tangential_ccl', 'radial_wall'
+    # Load baseline_2021 from manifest (should use cache)
+    vault = Vault.from_manifest(trial_name, samples=samples, force=force)
+    print(f"Vault hash: {vault.group_name}")
 
-    vault.plot()
-    vault.plot_offset()
-    vault.plot_gap()
-    vault.plot_cumlative_gap()
+    import seaborn as sns
 
-    # vault.plot_sample(0.99, False)
+    with sns.plotting_context("talk"):
+        vault.plot()
+        vault.plot_offset()
+        vault.plot_gap()
+        vault.plot_cumlative_gap()
 
-    # theta_error = [5, 5, 5, 2, 2, 2, 5, 10, 10]
+    error = ErrorField.from_manifest(trial_name, samples=samples, force=force)
+    print(f"ErrorField hash: {error.group_name}")
 
-    theta_error = [1.5, 1.5, 3, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5]
-    # theta_error = [np.sqrt(3), np.sqrt(3), np.sqrt(3),
-    #               1, 1, 1,
-    #               np.sqrt(3), np.sqrt(3), np.sqrt(3)]
-    # theta_error = list(3*np.ones(9))
-    error = ErrorField(2_000_000, theta=theta_error)
-
-    # error.plot_scan()
     error.plot()
 
     # trial.plot_offset()

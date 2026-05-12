@@ -36,7 +36,7 @@ class Decompose:
             self.rank += full_rank
             if self.rank <= 0:
                 raise ValueError(
-                    f"rank {full_rank-self.rank} >= full rank " f"{full_rank}"
+                    f"rank {full_rank - self.rank} >= full rank {full_rank}"
                 )
         self.rank = min(self.rank, full_rank)
 

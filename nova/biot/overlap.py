@@ -76,8 +76,9 @@ class Overlap(Plot2D, Operate):
             grid.coords["phi"] = self.phi
             grid["X"] = ("theta", "phi"), grid.r.data[:, np.newaxis] * np.cos(self.phi)
             grid["Y"] = ("theta", "phi"), grid.r.data[:, np.newaxis] * np.sin(self.phi)
-            grid["Z"] = ("theta", "phi"), grid.z.data[:, np.newaxis] * np.ones_like(
-                self.phi
+            grid["Z"] = (
+                ("theta", "phi"),
+                grid.z.data[:, np.newaxis] * np.ones_like(self.phi),
             )
             grid.attrs["shape_space"] = (grid.sizes["theta"], self.nphi)
             grid.attrs["shape_n"] = (grid.sizes["theta"], self.noverlap + 1)
@@ -131,28 +132,33 @@ class Overlap(Plot2D, Operate):
         self.data.coords["mode_number"] = np.arange(0, self.noverlap + 1)
         shape = self.data.shape_space + (self.data.sizes["source"],)
         if np.all([attr in self.data for attr in ["Br", "Bz", "theta"]]):
-            self.data["Bn"] = ("target", "source"), np.einsum(
-                "ij,ij...->i...",
-                self.data.normal,
-                np.stack(
-                    [
-                        self.data["Br"].data.reshape(shape),
-                        self.data["Bz"].data.reshape(shape),
-                    ],
-                    axis=1,
-                ),
-            ).reshape((self.data.sizes["target"], self.data.sizes["source"]))
+            self.data["Bn"] = (
+                ("target", "source"),
+                np.einsum(
+                    "ij,ij...->i...",
+                    self.data.normal,
+                    np.stack(
+                        [
+                            self.data["Br"].data.reshape(shape),
+                            self.data["Bz"].data.reshape(shape),
+                        ],
+                        axis=1,
+                    ),
+                ).reshape((self.data.sizes["target"], self.data.sizes["source"])),
+            )
             self.attrs.append("Bn")
         attrs = []
         for attr in self.attrs:
             variable = self.data[attr].data.reshape(shape)
             coef_n = scipy.fft.rfft(variable[:, :-1], norm="forward", axis=1)
 
-            self.data[f"{attr}_real"] = ("target_n", "source"), np.real(
-                coef_n.reshape(-1, shape[-1])
+            self.data[f"{attr}_real"] = (
+                ("target_n", "source"),
+                np.real(coef_n.reshape(-1, shape[-1])),
             )
-            self.data[f"{attr}_imag"] = ("target_n", "source"), np.imag(
-                coef_n.reshape(-1, shape[-1])
+            self.data[f"{attr}_imag"] = (
+                ("target_n", "source"),
+                np.imag(coef_n.reshape(-1, shape[-1])),
             )
             attrs.extend([f"{attr}_real", f"{attr}_imag"])
 
@@ -160,11 +166,13 @@ class Overlap(Plot2D, Operate):
                 coef_mn = scipy.fft.fftshift(
                     scipy.fft.fft(coef_n[:-1], norm="forward", axis=0), axes=0
                 )
-                self.data["Bmn_real"] = ("target_mn", "source"), np.real(
-                    coef_mn.reshape(-1, shape[-1])
+                self.data["Bmn_real"] = (
+                    ("target_mn", "source"),
+                    np.real(coef_mn.reshape(-1, shape[-1])),
                 )
-                self.data["Bmn_imag"] = ("target_mn", "source"), np.imag(
-                    coef_mn.reshape(-1, shape[-1])
+                self.data["Bmn_imag"] = (
+                    ("target_mn", "source"),
+                    np.imag(coef_mn.reshape(-1, shape[-1])),
                 )
                 attrs.extend(["Bmn_real", "Bmn_imag"])
 
@@ -255,7 +263,7 @@ class Overlap(Plot2D, Operate):
         self.axes.set_xticklabels(names, rotation=90, ha="center")
         label = {"fr": "radial", "fz": "vertical"}
         self.axes.set_ylabel(f"{label[attr]} force MN")
-    
+
 
     def plot(self, scale=1, norm=None, axes=None, **kwargs):
         """Plot force vectors and intergration points."""
@@ -289,7 +297,6 @@ class Overlap(Plot2D, Operate):
 
 
 if __name__ == "__main__":
-
     from nova.imas.coils_non_axisymmetric import CoilsNonAxisymmetric
 
     coilset = CoilsNonAxisymmetric(115001, 2, ngrid=500, noverlap=80)

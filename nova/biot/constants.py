@@ -44,7 +44,7 @@ def unit_nudge(limit_factor=1.5, threshold_factor=3):
         and limit_factor > threshold_factor
     ):
         raise ValueError(
-            "limit_factor > threshold_factor " f"{limit_factor} > {threshold_factor}"
+            f"limit_factor > threshold_factor {limit_factor} > {threshold_factor}"
         )
 
     def decorator(method):

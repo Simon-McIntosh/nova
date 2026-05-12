@@ -38,9 +38,12 @@ class PF_Active(Plot, Scenario):
                     if self.ids_index.empty("force.data"):
                         continue
                     self.data[f"{force}_force"] = (
-                        "time",
-                        "coil_name",
-                    ), self.ids_index.array("force.data")[:, :coil_number]
+                        (
+                            "time",
+                            "coil_name",
+                        ),
+                        self.ids_index.array("force.data")[:, :coil_number],
+                    )
         return self
 
     def plot(self, axes=None, **kwargs):
@@ -77,7 +80,7 @@ if __name__ == "__main__":
 
     kwargs = {"pulse": 57410, "run": 0, "machine": "west", "occurrence": 0}  # WEST
 
-    pf_active = PF_Active(**kwargs, dd_version='3.42.0', lazy=False)
+    pf_active = PF_Active(**kwargs, dd_version="3.42.0", lazy=False)
     # pf_active.build()
     # pf_active = PF_Active(105007, 9)  # b field max timed 135002, 5
     pf_active.plot()

@@ -109,18 +109,21 @@ class PulseSchedule(Plot, Scenario):
             return
         if "point" not in self.data:
             self.data.coords["point"] = ["r", "z"]
-        self.data.coords["gap_tail"] = ("gap_index", "point"), np.c_[
-            self.ids_index.array("r"), self.ids_index.array("z")
-        ]
+        self.data.coords["gap_tail"] = (
+            ("gap_index", "point"),
+            np.c_[self.ids_index.array("r"), self.ids_index.array("z")],
+        )
         if not self.ids_index.empty("angle"):
             self.data.coords["gap_angle"] = "gap_index", self.ids_index.array("angle")
         else:
-            self.data.coords["gap_angle"] = "gap_index", self._angle(
-                self.ids_index.array("r"), self.ids_index.array("z")
+            self.data.coords["gap_angle"] = (
+                "gap_index",
+                self._angle(self.ids_index.array("r"), self.ids_index.array("z")),
             )
-        self.data.coords["gap_vector"] = ("gap_index", "point"), np.c_[
-            np.cos(self.data.gap_angle), np.sin(self.data.gap_angle)
-        ]
+        self.data.coords["gap_vector"] = (
+            ("gap_index", "point"),
+            np.c_[np.cos(self.data.gap_angle), np.sin(self.data.gap_angle)],
+        )
 
     def build_gaps(self):
         """Build firstwall gaps."""
@@ -137,23 +140,28 @@ class PulseSchedule(Plot, Scenario):
                 self.data.coords["gap_name"] = "gap_index", self.ids_index.array("name")
             self.build_gap_reference()
             if self.data.homogeneous_time == 1:
-                self.data["gap"] = ("time", "gap_index"), self.ids_index.array(
-                    "value.reference.data"
+                self.data["gap"] = (
+                    ("time", "gap_index"),
+                    self.ids_index.array("value.reference.data"),
                 )
             else:
                 for index in self.data.gap_index.data:
                     path = "value.reference"
                     attr = f"gap{index}"
                     coordinate = self.time_coordinate(path, attr, index)
-                    self.data[attr] = coordinate, self.ids_index.get_slice(
-                        index, path + ".data"
+                    self.data[attr] = (
+                        coordinate,
+                        self.ids_index.get_slice(index, path + ".data"),
                     )
 
     def build_derived(self):
         """Build derived attributes."""
         if "loop_voltage" in self.data:
-            self.data["loop_psi"] = "time", -scipy.integrate.cumulative_trapezoid(
-                self.data.loop_voltage, self.data.time, initial=0
+            self.data["loop_psi"] = (
+                "time",
+                -scipy.integrate.cumulative_trapezoid(
+                    self.data.loop_voltage, self.data.time, initial=0
+                ),
             )
             self.data["loop_psi"] -= self.data.loop_psi[-1] / 2
 
@@ -239,7 +247,7 @@ class PulseSchedule(Plot, Scenario):
             patch(
                 (x, z),
                 (x + dx, z + dz),
-                arrowstyle="|-|," "widthA=0.075, angleA=0, widthB=0.075, angleB=0",
+                arrowstyle="|-|,widthA=0.075, angleA=0, widthB=0.075, angleB=0",
                 shrinkA=0,
                 shrinkB=0,
             )

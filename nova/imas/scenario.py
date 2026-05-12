@@ -61,7 +61,7 @@ class Scenario(GetSlice, IdsData):
                 return "time"
             case 2:  # constant IDS
                 raise ValueError(
-                    "no time coordinate for constant IDS " "(homogeneous_time=2)."
+                    "no time coordinate for constant IDS (homogeneous_time=2)."
                 )
 
     @cached_property

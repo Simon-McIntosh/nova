@@ -188,7 +188,6 @@ class Plasma(Pytree):
 
 
 if __name__ == "__main__":
-
     from nova.imas.operate import Operate
 
     # plasmagrid = xarray.open_dataset("plasmagrid.nc")

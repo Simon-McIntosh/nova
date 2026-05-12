@@ -663,7 +663,7 @@ class PoloidalFieldPassive(CoilDatabase):
                     polydata.append(loop, element)
                     continue
                 raise NotImplementedError(
-                    f"geometory {element.section} " "not implemented"
+                    f"geometory {element.section} not implemented"
                 )
             coildata.insert(self.coil, delta=self.dcoil)
             polydata.insert(self.coil, delta=-10)
@@ -733,7 +733,7 @@ class PoloidalFieldActive(CoilDatabase):
                 if element.is_poly():
                     polydata.append(loop, element)
                     continue
-                raise NotImplementedError(f"geometry {element.name} " "not implemented")
+                raise NotImplementedError(f"geometry {element.name} not implemented")
             if len(ids_loop.element) == 1:
                 constructor = self.coil
             else:
@@ -1278,7 +1278,6 @@ class Machine(CoilSet, Geometry, CoilData):  # Diagnostics,
 
 
 if __name__ == "__main__":
-
     import doctest
 
     doctest.testmod(verbose=False)

@@ -70,7 +70,6 @@ class Operate(Profile, Machine):
 
 
 if __name__ == "__main__":
-
     # import doctest
 
     # doctest.testmod(verbose=False)
@@ -195,7 +194,7 @@ if __name__ == "__main__":
     """
     import pyvista as pv
     import vedo
-    
+
     psi = operate.grid.psi.reshape(-1)
     points = np.stack(
         [
@@ -255,9 +254,9 @@ if __name__ == "__main__":
         operate.plot("vs3")
 
         operate.axes.set_title(
-            f"{mode}: {1e-3*current:1.1f}kA \n"
+            f"{mode}: {1e-3 * current:1.1f}kA \n"
             + "contours: $B_r$ mT \n"
-            + rf" $\Delta f_z$: {1e-6*delta_fz:1.2f}MN"
+            + rf" $\Delta f_z$: {1e-6 * delta_fz:1.2f}MN"
         )
         return
 

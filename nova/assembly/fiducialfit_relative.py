@@ -26,6 +26,7 @@ for coil in coils:
 
 opt_x = xarray.concat(transforms, dim="coil")
 
+
 def single_coil_transform(opt_x: xarray.DataArray, free_coil: int):
     """Calculate single coil transform from two coil fits."""
 
@@ -51,6 +52,7 @@ def single_coil_transform(opt_x: xarray.DataArray, free_coil: int):
     opt_x.loc[other_coil, :] = 0
 
     return opt_x
+
 
 single_opt_x = single_coil_transform(opt_x, 16)
 

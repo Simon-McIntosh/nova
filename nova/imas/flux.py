@@ -82,7 +82,7 @@ if __name__ == "__main__":
     index = contour.plot_fit(0.4, operate.normalize)
     """
 
-    """
+    r"""
     plt.figure()
     operate.plot('plasma')
 

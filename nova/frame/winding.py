@@ -112,8 +112,7 @@ class Winding(CoilSetAttrs):
         """
         if cross_section is None or (path is None and polyline is None):
             raise ValueError(
-                "winding.insert requires cross_section and "
-                "path or polyline attributes"
+                "winding.insert requires cross_section and path or polyline attributes"
             )
         if not isinstance(cross_section, PolyGeom):
             cross_section = PolyGeom(cross_section, name="sweep")

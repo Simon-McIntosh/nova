@@ -6,7 +6,7 @@ class ColumnError(IndexError):
 
     def __init__(self, name):
         super().__init__(
-            "Column access via a new attribute name " f"{name} is not allowed."
+            f"Column access via a new attribute name {name} is not allowed."
         )
 
 

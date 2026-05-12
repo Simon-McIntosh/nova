@@ -62,12 +62,14 @@ class FieldData(BaseData, ModelData):
         self.data["index"] = np.arange(1, self.ncoil + 1)
         self.data["coordinate"] = ["r", "phi", "z"]
         self.data["sample_phi"] = np.linspace(0, 2 * np.pi, 2 * ndiv)
-        self.data["sample_field"] = ("coordinate", "sample_phi"), np.zeros(
-            (self.data.sizes["coordinate"], self.data.sizes["sample_phi"])
+        self.data["sample_field"] = (
+            ("coordinate", "sample_phi"),
+            np.zeros((self.data.sizes["coordinate"], self.data.sizes["sample_phi"])),
         )
         self.data["phi"] = np.linspace(0, 2 * np.pi, ndiv)
-        self.data["field"] = ("coordinate", "phi"), np.zeros(
-            (self.data.sizes["coordinate"], self.data.sizes["phi"])
+        self.data["field"] = (
+            ("coordinate", "phi"),
+            np.zeros((self.data.sizes["coordinate"], self.data.sizes["phi"])),
         )
         self.data["ripple_field"] = xarray.zeros_like(self.data.field)
         for i, coordinate in enumerate(self.data.coordinate.values):
@@ -108,15 +110,18 @@ class DeviationData(BaseData):
         self.data["response"] = ["radial", "tangential"]
         self.data["delta"] = xarray.DataArray(0.0, self.data.coords)
         self.data["sample_phi"] = np.linspace(0, 2 * np.pi, 2 * ndiv, endpoint=False)
-        self.data["sample_deviation"] = ("simulation", "sample_phi"), np.zeros(
-            (self.data.sizes["simulation"], 2 * ndiv)
+        self.data["sample_deviation"] = (
+            ("simulation", "sample_phi"),
+            np.zeros((self.data.sizes["simulation"], 2 * ndiv)),
         )
         self.data["phi"] = np.linspace(0, 2 * np.pi, ndiv, endpoint=False)
-        self.data["deviation"] = ("simulation", "phi"), np.zeros(
-            (self.data.sizes["simulation"], ndiv)
+        self.data["deviation"] = (
+            ("simulation", "phi"),
+            np.zeros((self.data.sizes["simulation"], ndiv)),
         )
-        self.data["ripple_deviation"] = ("simulation", "phi"), np.zeros(
-            (self.data.sizes["simulation"], ndiv)
+        self.data["ripple_deviation"] = (
+            ("simulation", "phi"),
+            np.zeros((self.data.sizes["simulation"], ndiv)),
         )
         for i, simulation in enumerate(self.simulations):
             self.data.sample_deviation[i] = self._load_data(simulation)

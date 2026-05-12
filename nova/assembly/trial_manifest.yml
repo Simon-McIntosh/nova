@@ -1,0 +1,126 @@
+# Trial simulation manifest
+# Named parameter sets for Monte Carlo simulations
+#
+# Structure:
+#   - defaults: Fixed parameters for each trial type (components, pdf, vault settings)
+#   - simulations: Named parameter sets with shared theta dict, samples, measured_sectors
+#
+# The cache hash is computed at runtime by Trial.group_name from:
+#   attrs.values() + theta + pdf
+# where attrs includes: samples, adjust_gap, max_nominal_gap, sead
+# plus class-specific fields: modes, energize, wall (Vault only)
+
+defaults:
+  vault:
+    components: [radial, tangential, roll_length, yaw_length, radial_ccl, tangential_ccl, radial_wall]
+    pdf: [uniform, uniform, uniform, uniform, normal, normal, uniform]
+    adjust_gap: true
+    max_nominal_gap: 2.0
+    sead: 2025
+    modes: 3
+    energize: 1
+    wall: 1
+  error_field:
+    components: [radial, tangential, vertical, radial_ccl, tangential_ccl, vertical_ccl, pitch_length, roll_length, yaw_length]
+    pdf: [uniform, uniform, uniform, normal, normal, normal, uniform, uniform, uniform]
+    adjust_gap: true
+    max_nominal_gap: 2.0
+    sead: 2025
+
+simulations:
+  # ==========================================================================
+  # Historical simulations (2021) - original tolerancing analysis
+  # ==========================================================================
+
+  baseline_2021:
+    description: "Original ITER TF coil tolerancing analysis - baseline assumptions"
+    date: "2021-01-01"
+    samples: 2000000
+    theta:
+      radial: 1.5
+      tangential: 1.5
+      vertical: 3.0
+      radial_ccl: 1.5
+      tangential_ccl: 1.5
+      vertical_ccl: 1.5
+      pitch_length: 1.5
+      roll_length: 1.5
+      yaw_length: 1.5
+      radial_wall: 3.0
+    error_field:
+      samples: 2000000
+
+  wide_tolerances_2021:
+    description: "Wide tolerance study - from commented parameters"
+    date: "2021-01-01"
+    samples: 100000
+    theta:
+      radial: 5.0
+      tangential: 5.0
+      vertical: 5.0
+      radial_ccl: 2.0
+      tangential_ccl: 2.0
+      vertical_ccl: 2.0
+      pitch_length: 5.0
+      roll_length: 10.0
+      yaw_length: 10.0
+      radial_wall: 5.0
+    error_field:
+      samples: 2000000 
+
+  uniform_3mm:
+    description: "Uniform 3mm tolerance study - from commented parameters"
+    date: null
+    samples: 2000000
+    theta:
+      radial: 3.0
+      tangential: 3.0
+      vertical: 3.0
+      radial_ccl: 3.0
+      tangential_ccl: 3.0
+      vertical_ccl: 3.0
+      pitch_length: 3.0
+      roll_length: 3.0
+      yaw_length: 3.0
+      radial_wall: 3.0
+
+  # ==========================================================================
+  # Hybrid simulations (2026) - updated from pit measurements
+  # ==========================================================================
+
+  S4_refine_pit_2026:
+    description: "Updated tolerances from L_upper_18 of installed sectors (Jan 2026)"
+    date: "2026-01-11"
+    samples: 200000
+    theta:
+      radial: 1.5
+      tangential: 1.5
+      vertical: 3.0
+      radial_ccl: 1.5
+      tangential_ccl: 1.5
+      vertical_ccl: 1.5
+      pitch_length: 1.0
+      roll_length: 0.5
+      yaw_length: 1.5
+      radial_wall: 3.0
+    error_field:
+      samples: 2000000
+
+  S4_hybrid_pit_2026:
+    description: "Measured positions for S5-8, sampled for remaining coils"
+    date: "2026-01-11"
+    samples: 200000
+    measured_sectors: [5, 6, 7, 8]
+    theta:
+      radial: 1.5
+      tangential: 1.5
+      vertical: 3.0
+      radial_ccl: 1.5
+      tangential_ccl: 1.5
+      vertical_ccl: 1.5
+      pitch_length: 1.0
+      roll_length: 0.5
+      yaw_length: 1.5
+      radial_wall: 3.0
+    error_field:
+      samples: 2000000

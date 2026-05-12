@@ -24,7 +24,7 @@ __all__ = [
     "geometry",
 ]
 
-import importlib 
+import importlib
 import importlib.metadata
 import os
 

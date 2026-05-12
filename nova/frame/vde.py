@@ -494,7 +494,7 @@ if __name__ == "__main__":
         plt.ylabel(r"$\dot{B_z}$ Ts$^{-1}$")
         plt.despine()
         rel_err = np.max(abs(vde_dbdt - duck_dbdt)) / np.max(abs(vde_dbdt))
-        plt.title(f'{vde.folder.replace("_", " ")} {1e2*rel_err:1.1f}%')
+        plt.title(f"{vde.folder.replace('_', ' ')} {1e2 * rel_err:1.1f}%")
 
     def plot_currents():
         plot_frame(0.362)

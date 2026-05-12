@@ -3,7 +3,6 @@
 from dataclasses import dataclass, field
 
 import numpy as np
-import scipy.interpolate
 import vedo
 
 from nova.geometry.frenet import Frenet

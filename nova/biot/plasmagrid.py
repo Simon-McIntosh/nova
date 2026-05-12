@@ -185,7 +185,7 @@ class PlasmaGrid(BaseGrid, PlasmaLoc):
                     return self.pointloop.update(index)
 
     def _label_format(self, value):
-        return f"{1e3 * value : 1.1f}"
+        return f"{1e3 * value: 1.1f}"
 
     def plot(self, attr="psi", clabel=False, nulls=True, **kwargs):
         """Plot poloidal flux contours."""

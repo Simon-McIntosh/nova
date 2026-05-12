@@ -36,8 +36,11 @@ class GapData(Plot1D):
             if value is None:
                 value = np.zeros((len(self.simulations), self.ncoil))
             self.data[signal] = ("simulation", "index"), value
-        self.data["delta"] = ("simulation", "index", "signal"), np.zeros(
-            tuple(self.data.sizes[dim] for dim in ["simulation", "index", "signal"])
+        self.data["delta"] = (
+            ("simulation", "index", "signal"),
+            np.zeros(
+                tuple(self.data.sizes[dim] for dim in ["simulation", "index", "signal"])
+            ),
         )
         for i, signal in enumerate(self.data.signal.values):
             self.data.delta[..., i] = self.data[signal]
@@ -159,49 +162,71 @@ class WedgeGap(ModelData):
     def build_transforms(self):
         """Calculate coil transforms to produce wedge gaps."""
         nominal_gap = self.data.point_gap.sum(axis=1) / self.ncoil
-        self.data["gap"] = ("simulation", "index"), (
-            self.data.point_gap[..., :2].sum(axis=-1) + 2 * self.data.point_gap[..., 2]
-        ).data / 4
+        self.data["gap"] = (
+            ("simulation", "index"),
+            (
+                self.data.point_gap[..., :2].sum(axis=-1)
+                + 2 * self.data.point_gap[..., 2]
+            ).data
+            / 4,
+        )
         delta = self.data.point_gap - nominal_gap.data[:, np.newaxis, :]
         self.data["point_offset"] = xarray.zeros_like(self.data.point_gap)
         self.data.point_offset[:, 1:] = np.cumsum(delta[:, :-1], axis=1).data
         self.data["point_offset"] += self.data.point_offset[:, -1] + delta[:, -1]
-        self.data["mean_offset"] = ("simulation", "index"), (
-            self.data.point_offset[..., :2].sum(axis=-1)
-            + 2 * self.data.point_offset[..., 2]
-        ).data / 4
+        self.data["mean_offset"] = (
+            ("simulation", "index"),
+            (
+                self.data.point_offset[..., :2].sum(axis=-1)
+                + 2 * self.data.point_offset[..., 2]
+            ).data
+            / 4,
+        )
         self.data["coordinate"] = ["x", "y", "z"]
-        self.data["reference"] = ("point", "coordinate"), 1e3 * np.array(
-            [
-                [2.31300792, 0, 4.74626384],
-                [2.31044582, 0, -4.67900054],
-                [3.20624393, 0, 0],
-            ]
+        self.data["reference"] = (
+            ("point", "coordinate"),
+            1e3
+            * np.array(
+                [
+                    [2.31300792, 0, 4.74626384],
+                    [2.31044582, 0, -4.67900054],
+                    [3.20624393, 0, 0],
+                ]
+            ),
         )
         self.data["fiducial"] = (
-            "simulation",
-            "index",
-            "point",
-            "coordinate",
-        ), np.einsum(
-            "kl,ij->ijkl",
-            self.data.reference,
-            np.ones((self.data.sizes["simulation"], self.ncoil)),
+            (
+                "simulation",
+                "index",
+                "point",
+                "coordinate",
+            ),
+            np.einsum(
+                "kl,ij->ijkl",
+                self.data.reference,
+                np.ones((self.data.sizes["simulation"], self.ncoil)),
+            ),
         )
         self.data.fiducial[..., 1] += self.data.point_offset
         self.data.fiducial[..., 1] -= self.data.mean_offset
-        self.data["normal"] = ("simulation", "index", "coordinate"), np.cross(
-            self.data.fiducial[..., 2, :] - self.data.fiducial[..., 0, :],
-            self.data.fiducial[..., 1, :] - self.data.fiducial[..., 0, :],
-            axis=-1,
+        self.data["normal"] = (
+            ("simulation", "index", "coordinate"),
+            np.cross(
+                self.data.fiducial[..., 2, :] - self.data.fiducial[..., 0, :],
+                self.data.fiducial[..., 1, :] - self.data.fiducial[..., 0, :],
+                axis=-1,
+            ),
         )
         self.data["normal"] /= np.linalg.norm(self.data["normal"], axis=-1)[
             ..., np.newaxis
         ]
         self.data.attrs["radius"] = self.data.reference[1:, 0].data.mean()
         self.data["angle"] = ["phi", "roll", "yaw"]
-        self.data["rotate"] = ("simulation", "index", "angle"), np.zeros(
-            (self.data.sizes["simulation"], self.ncoil, self.data.sizes["angle"])
+        self.data["rotate"] = (
+            ("simulation", "index", "angle"),
+            np.zeros(
+                (self.data.sizes["simulation"], self.ncoil, self.data.sizes["angle"])
+            ),
         )
         self.data["rotate"][..., 0] = self.data.mean_offset / self.data.radius
         self.data["rotate"][..., 1] = np.arctan2(

@@ -30,12 +30,13 @@ class FiducialFit(FiducialData):
     method: str = "rms"
     samples: int = 10
     radial_offset: float = (33.04 - 36) / (2 * np.pi)
+    coupled: bool = True
     data: xarray.Dataset = field(init=False, repr=False, default_factory=xarray.Dataset)
 
     weights: ClassVar[list[float]] = [1, 1, 0.25]
     fiducial_index: ClassVar[dict[str, list[int]]] = {
         "radial": [5, 3, 4],  # ILIS fiducials
-        #"toroidal": slice(None),  # toroidal (all)
+        # "toroidal": slice(None),  # toroidal (all)
         "toroidal": [0, 5, 3, 4],  # reduced toroidal constraint set
         "vertical": [2, 1, -1, -2],  # vertical C, D and E, F
     }
@@ -44,8 +45,8 @@ class FiducialFit(FiducialData):
 
     @property
     def is_sector(self) -> bool:
-        """True if fitting multiple coils as a sector."""
-        return self.data.sizes["coil"] > 1
+        """True if fitting multiple coils as a coupled sector."""
+        return self.coupled and self.data.sizes["coil"] > 1
 
     @cached_property
     def _rotate(self) -> Rotate:
@@ -58,7 +59,7 @@ class FiducialFit(FiducialData):
 
     def clock_coil(self, data: np.ndarray, coil) -> np.ndarray:
         """Clock data to sector frame. Identity for single-coil fits.
-        
+
         First coil in sector: anticlock (-half_angle)
         Second coil in sector: clock (+half_angle)
         """
@@ -96,9 +97,11 @@ class FiducialFit(FiducialData):
         self.fit()
         self.evaluate_gpr("fiducial_fit", "fit_gpr")
 
-    def _sector_transform(self, opt_x: np.ndarray, points: np.ndarray, coil) -> np.ndarray:
+    def _sector_transform(
+        self, opt_x: np.ndarray, points: np.ndarray, coil
+    ) -> np.ndarray:
         """Apply transform in sector frame: clock → transform → unclock.
-        
+
         For single-coil fits, clocking is identity.
         For sector fits, transform was computed in clocked frame.
         """
@@ -108,11 +111,11 @@ class FiducialFit(FiducialData):
 
     def write(self, sheet: str, opt_x=None):
         """Write fits to source xls files.
-        
+
         Args:
             sheet: Target sheet name to write to.
             opt_x: Optional transform to apply. Uses fitted transform if None.
-        
+
         Note: For derived phases (in-silico transforms), use write_rigid_body() instead.
         """
         ilis_source = self.dataset.ilis
@@ -257,37 +260,37 @@ class FiducialFit(FiducialData):
 
     def write_rigid_body(self, target_sheet: str):
         """Write target phase as rigid body transform of fitted phase.
-        
+
         For in-silico transforms where target = rigid_body(fitted_phase).
         Uses fitted phase ILIS/CCL data, applies rigid body transform.
-        
+
         Args:
             target_sheet: Sheet name to write (e.g., 'In-pit target')
         """
         from nova.assembly.fiducialsector import FiducialSector
-        
+
         # Load fitted phase data as reference
         ref_dataset = FiducialSector(
             phase=self.phase, sectors=self.sectors, private=self.private
         )
-        
+
         # Compute rigid body transform from reference CCL to target CCL
         for sector in tqdm(self.data.sector.data, "writing rigid body transform"):
             sectordata = SectorData(sector, private=self.private)
             coils = self.data.coils.sel(sector=sector).data
-            
+
             # Get CCL from both phases (clocked to sector frame)
             def get_clocked_ccl(phase):
                 pts = []
                 for i, coil in enumerate(coils):
                     df = sectordata.data[coil][phase]
-                    ccl = df.xs('CCL', level=1)[['x', 'y', 'z']].values
+                    ccl = df.xs("CCL", level=1)[["x", "y", "z"]].values
                     pts.append(self.clock_coil(ccl, coil))
                 return np.vstack(pts)
-            
+
             ccl_ref = get_clocked_ccl(self.phase)
             ccl_tgt = get_clocked_ccl(target_sheet)
-            
+
             # Fit rigid body transform
             src_c, tgt_c = ccl_ref.mean(0), ccl_tgt.mean(0)
             H = (ccl_ref - src_c).T @ (ccl_tgt - tgt_c)
@@ -297,79 +300,137 @@ class FiducialFit(FiducialData):
                 Vt[-1] *= -1
                 R = Vt.T @ U.T
             t = tgt_c - R @ src_c
-            
+
             # Check residuals
             transformed = (R @ ccl_ref.T).T + t
-            rms = np.sqrt(np.mean((ccl_tgt - transformed)**2))
+            rms = np.sqrt(np.mean((ccl_tgt - transformed) ** 2))
             print(f"  Rigid body RMS: {rms:.6f} mm, t={t}")
-            
+
             # Now write: apply reference fit + rigid body to reference data
             with sectordata.openbook(), sectordata.savebook():
                 if target_sheet not in sectordata.book.sheetnames:
                     sectordata.book.create_sheet(target_sheet)
                 last_sheet = sectordata.book.sheetnames[-2]
                 worksheet = sectordata.book[target_sheet]
-                
+
                 workcell = {
                     "coil": sectordata._coil_index(last_sheet),
                     "fiducial": sectordata.locate("Fiducial", last_sheet),
                     "ilis_p": sectordata.locate("ILIS +1 side", last_sheet),
                     "ilis_m": sectordata.locate("ILIS -1 side", last_sheet),
                 }
-                
+
                 for coil in coils:
                     cell_index = sectordata.coil.index(coil)
                     opt_x_coil = self.data.opt_x.sel(coil=coil)
-                    
+
                     # Rigid body only (reference data is already fitted)
                     def rigid_transform(pts, coil):
                         clocked = self.clock_coil(pts, coil)
                         rigid = (R @ np.asarray(clocked).T).T + t
                         return self.unclock_coil(rigid, coil)
-                    
+
                     # Write CCL (reference data is already fitted, just apply rigid body)
-                    ref_ccl = ref_dataset.delta[coil].values + ref_dataset.fiducial_target[coil].values
-                    ccl_transformed = rigid_transform(ref_ccl, coil)
-                    
-                    std = self.data.fiducial_fit_gpr_std.sel(coil=coil).sortby("target").data
-                    sectordata.write(
-                        worksheet, workcell["coil"][cell_index],
-                        np.array([["Coil", "Point", "Name", "X", "Y", "Z", "uX", "uY", "uZ"]]),
+                    ref_ccl = (
+                        ref_dataset.delta[coil].values
+                        + ref_dataset.fiducial_target[coil].values
                     )
-                    sectordata.write(worksheet, workcell["coil"][cell_index], np.array([[coil]]), offset=(1, 0))
-                    sectordata.write(worksheet, workcell["coil"][cell_index], np.array([["CCL"]]), offset=(1, 1))
+                    ccl_transformed = rigid_transform(ref_ccl, coil)
+
+                    std = (
+                        self.data.fiducial_fit_gpr_std.sel(coil=coil)
+                        .sortby("target")
+                        .data
+                    )
                     sectordata.write(
-                        worksheet, workcell["coil"][cell_index],
-                        sectordata.data[coil]["Nominal"].index.get_level_values("Name").values[:, np.newaxis],
+                        worksheet,
+                        workcell["coil"][cell_index],
+                        np.array(
+                            [["Coil", "Point", "Name", "X", "Y", "Z", "uX", "uY", "uZ"]]
+                        ),
+                    )
+                    sectordata.write(
+                        worksheet,
+                        workcell["coil"][cell_index],
+                        np.array([[coil]]),
+                        offset=(1, 0),
+                    )
+                    sectordata.write(
+                        worksheet,
+                        workcell["coil"][cell_index],
+                        np.array([["CCL"]]),
+                        offset=(1, 1),
+                    )
+                    sectordata.write(
+                        worksheet,
+                        workcell["coil"][cell_index],
+                        sectordata.data[coil]["Nominal"]
+                        .index.get_level_values("Name")
+                        .values[:, np.newaxis],
                         offset=(1, 2),
                     )
                     sectordata.write(
-                        worksheet, workcell["coil"][cell_index],
+                        worksheet,
+                        workcell["coil"][cell_index],
                         np.append(ccl_transformed, 2 * std, axis=1),
                         offset=(1, 3),
                     )
-                    
-                    self._write_transform(worksheet, workcell["coil"][cell_index], opt_x_coil)
-                    
+
+                    self._write_transform(
+                        worksheet, workcell["coil"][cell_index], opt_x_coil
+                    )
+
                     # Write case fiducials
-                    sectordata.write(worksheet, workcell["fiducial"][cell_index], np.array([["Fiducial"]]))
                     sectordata.write(
-                        worksheet, workcell["fiducial"][cell_index],
-                        ref_dataset.case[coil].index.get_level_values("Name").values[:, np.newaxis],
+                        worksheet,
+                        workcell["fiducial"][cell_index],
+                        np.array([["Fiducial"]]),
+                    )
+                    sectordata.write(
+                        worksheet,
+                        workcell["fiducial"][cell_index],
+                        ref_dataset.case[coil]
+                        .index.get_level_values("Name")
+                        .values[:, np.newaxis],
                         offset=(0, 1),
                     )
-                    case_transformed = rigid_transform(ref_dataset.case[coil].loc[:, ["x", "y", "z"]].values, coil)
-                    sectordata.write(worksheet, workcell["fiducial"][cell_index], case_transformed, offset=(0, 2))
-                    
+                    case_transformed = rigid_transform(
+                        ref_dataset.case[coil].loc[:, ["x", "y", "z"]].values, coil
+                    )
+                    sectordata.write(
+                        worksheet,
+                        workcell["fiducial"][cell_index],
+                        case_transformed,
+                        offset=(0, 2),
+                    )
+
                     # Write ILIS
-                    for side, xls_index in zip(["+1", "-1"], [workcell["ilis_p"][cell_index], workcell["ilis_m"][cell_index]]):
+                    for side, xls_index in zip(
+                        ["+1", "-1"],
+                        [
+                            workcell["ilis_p"][cell_index],
+                            workcell["ilis_m"][cell_index],
+                        ],
+                    ):
                         ilis_data = ref_dataset.ilis.loc[
-                            (ref_dataset.ilis.coil == coil) & (ref_dataset.ilis.feature == f"ILIS {side}")
+                            (ref_dataset.ilis.coil == coil)
+                            & (ref_dataset.ilis.feature == f"ILIS {side}")
                         ]
-                        sectordata.write(worksheet, xls_index, np.array([[f"ILIS {side} side"]]))
-                        sectordata.write(worksheet, xls_index, ilis_data.Name.values[:, np.newaxis], offset=(0, 1))
-                        ilis_transformed = rigid_transform(ilis_data.loc[:, ["x", "y", "z"]].values, coil)
-                        sectordata.write(worksheet, xls_index, ilis_transformed, offset=(0, 2))
+                        sectordata.write(
+                            worksheet, xls_index, np.array([[f"ILIS {side} side"]])
+                        )
+                        sectordata.write(
+                            worksheet,
+                            xls_index,
+                            ilis_data.Name.values[:, np.newaxis],
+                            offset=(0, 1),
+                        )
+                        ilis_transformed = rigid_transform(
+                            ilis_data.loc[:, ["x", "y", "z"]].values, coil
+                        )
+                        sectordata.write(
+                            worksheet, xls_index, ilis_transformed, offset=(0, 2)
+                        )
 
     def _write_transform(self, worksheet, xls_index, opt_x):
         """Write transform to worksheet."""
@@ -479,7 +540,7 @@ class FiducialFit(FiducialData):
                     )
             except (AttributeError, TypeError):
                 # numpy array or xarray without coil dimension
-                if hasattr(points, 'values'):
+                if hasattr(points, "values"):
                     points[:] = rotate.apply(points.values)
                 else:
                     points[:] = rotate.apply(points)
@@ -654,18 +715,21 @@ class FiducialFit(FiducialData):
             )
             self.data[f"{error_attr}_fit"] = xarray.zeros_like(self.data[error_attr])
         for coil in tqdm(self.data.coil, "fitting coils"):
-            points = xarray.concat(
-                [self.points(coil=coil).copy() for coil in self.data.coil], "coil"
-            )
-            # points = self.points(coil=coil)
-            # TODO fix for single vs sector
+            if self.is_sector:
+                # Coupled sector fit: use points from all coils
+                points = xarray.concat(
+                    [self.points(coil=c).copy() for c in self.data.coil], "coil"
+                )
+            else:
+                # Individual coil fit: use only this coil's points
+                points = self.points(coil=coil)
             xo = np.zeros(self.data.sizes["transform"])
             opt = minimize(
                 self.scalar_error,
                 xo,
                 method="SLSQP",
                 args=(points,),
-                options={'ftol': 1e-6},
+                options={"ftol": 1e-6},
             )
             print(opt)
             if not opt.success:
@@ -857,9 +921,9 @@ if __name__ == "__main__":
     phase = "FAT supplier"
     phase = "FAT IO"
     phase = "SSAT BR"
-    phase = "SSAT target"
-    phase = "SSAT AR"
-    phase = "SSAT AL"
+    # phase = "SSAT target"
+    # phase = "SSAT AR"
+    # phase = "SSAT AL"
     # phase = "SSAT AR2"
 
     # phase = "TFGS landing"
@@ -870,7 +934,9 @@ if __name__ == "__main__":
     # sectors = {7: [8, 9]}
     # sectors = {6: [12, 13]}
     # sectors = {5: [16]} # 16, 5
-    sectors = {8: [4, 11]}
+    # sectors = {8: [4, 11]}
+    # sectors = {4: [2, 3]}
+    sectors = {1: [14, 15]}
 
     fiducial = FiducialFit(
         phase=phase,
@@ -880,8 +946,9 @@ if __name__ == "__main__":
         ilis=True,
         ilis_pcr=True,
         method="rms",
+        coupled=False,
     )
-    #fiducial.build()
+    fiducial.build()
 
     for i in range(fiducial.data.sizes["coil"]):
         fiducial.plot_gpr_array(i, 2)
@@ -893,9 +960,9 @@ if __name__ == "__main__":
 
     # fiducial.plot_ensemble(True, 250)
 
-    #fiducial.write("_SSAT AL")
-    # fiducial.write("SSAT target")
-    fiducial.write("In-pit target")
+    # fiducial.write("_SSAT AL")
+    fiducial.write("SSAT target")
+    # fiducial.write("In-pit target")
 
     # print deltas
     coil_index = 0

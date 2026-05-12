@@ -200,7 +200,6 @@ class BSpline(Fit, Bernstein):
 
 
 if __name__ == "__main__":
-
     bspline = BSpline(x := jnp.linspace(0, 1, 21), order=7)
     data = -(3 * x**5) + 3 * x**2 + -4 * x + 4
     poly = bspline / data

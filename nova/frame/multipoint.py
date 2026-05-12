@@ -106,7 +106,7 @@ class MultiPoint(metamethod.MultiPoint):
             names = self.frame.index[self.frame.frame == name]
             if len(names) == 0:
                 raise IndexError(
-                    f"name {name} not listed in frame " f"{np.unique(self.frame.frame)}"
+                    f"name {name} not listed in frame {np.unique(self.frame.frame)}"
                 )
             subindex.extend(names)
             subfactor.extend(fact * np.ones(len(names)))

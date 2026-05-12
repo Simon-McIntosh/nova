@@ -31,7 +31,7 @@ class Ensemble(netCDF, Plot1D, EnsembleAttrs):
 
     def __post_init__(self):
         """Set filepath."""
-        self.group = f'{self.name}/{self.workflow.replace("-", "_")}'
+        self.group = f"{self.name}/{self.workflow.replace('-', '_')}"
         self.set_path(self.datapath)
         try:
             self.load()
@@ -81,7 +81,7 @@ class Ensemble(netCDF, Plot1D, EnsembleAttrs):
         for i in self.data.index.data:
             index = self.data.subindex == i
             data = self.data[attr][index].data[::100]
-            color = f"C{i%10}" if _color is None else _color
+            color = f"C{i % 10}" if _color is None else _color
             self.axes.plot(
                 self.data.psi_norm.data,
                 data.T,

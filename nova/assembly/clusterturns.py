@@ -69,7 +69,7 @@ class ClusterTurns:
             axes = plt.subplots(1, 1)[1]
         for i in range(self.n_clusters):
             index = self.clusters == i
-            color = f"C{i%10}"
+            color = f"C{i % 10}"
             axes.plot(
                 self.turns[index, 0],
                 self.turns[index, 1],

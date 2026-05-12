@@ -301,9 +301,7 @@ os.path.join(userhome, 'public', 'imasdb', 'iter', '3', '1', '2')
             case str(backend) if backend == "hdf5":
                 return os.path.join(self.database_path, str(self.pulse), str(self.run))
             case _:
-                raise NotImplementedError(
-                    f"not implemented for {self.backend}" " backend"
-                )
+                raise NotImplementedError(f"not implemented for {self.backend} backend")
 
     @property
     def is_empty(self):
@@ -485,7 +483,7 @@ class Datastore(IdsBase):  # noqa: D207
             case str(uri):
                 if not self.has_default_attrs:
                     raise AttributeError(
-                        f"Set ether IdsBase {self.ids_attrs} or " f"uri {self.uri}"
+                        f"Set ether IdsBase {self.ids_attrs} or uri {self.uri}"
                     )
                 if "#" not in uri and self.name is not None:
                     self.uri += f"#{self.name}"

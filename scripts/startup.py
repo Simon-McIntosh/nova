@@ -1,7 +1,6 @@
 """Configure python environment."""
 
 import matplotlib as mpl
-import numpy as np
 import pandas
 import seaborn as sns
 import warnings

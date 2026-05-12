@@ -77,8 +77,9 @@ class ErrorField(Plot, Datafile):
         self.data.coords["phi"] = self._reshape(data.phi, shape)[0, :, 0]
         self.data.coords["height"] = self._reshape(data.z, shape)[0, 0, :]
         for attr in ["Br", "Bphi", "Bz"]:
-            self.data[f"grid_{attr}"] = ("radius", "phi", "height"), self._reshape(
-                data[attr], shape
+            self.data[f"grid_{attr}"] = (
+                ("radius", "phi", "height"),
+                self._reshape(data[attr], shape),
             )
 
     def build_surface(self):
@@ -95,22 +96,30 @@ class ErrorField(Plot, Datafile):
         normal /= np.linalg.norm(normal, axis=1)[:, np.newaxis]
         self.data.coords["index"] = np.arange(len(data))
         self.data.coords["coordinate"] = ["radius", "height"]
-        self.data.coords["surface"] = ("index", "coordinate"), np.c_[
-            data.radius, data.height
-        ]
-        self.data.coords["normal"] = ("index", "coordinate"), np.c_[
-            normal[:, 0], normal[:, 2]
-        ]
+        self.data.coords["surface"] = (
+            ("index", "coordinate"),
+            np.c_[data.radius, data.height],
+        )
+        self.data.coords["normal"] = (
+            ("index", "coordinate"),
+            np.c_[normal[:, 0], normal[:, 2]],
+        )
 
     def compose(self):
         """Interpolate field components to control surface."""
         for attr in ["Br", "Bphi", "Bz"]:
-            self.data[attr] = ("index", "phi"), self.data[f"grid_{attr}"].interp(
-                dict(radius=self.data.surface[:, 0], height=self.data.surface[:, 1])
-            ).data
+            self.data[attr] = (
+                ("index", "phi"),
+                self.data[f"grid_{attr}"]
+                .interp(
+                    dict(radius=self.data.surface[:, 0], height=self.data.surface[:, 1])
+                )
+                .data,
+            )
         field = np.stack([self.data.Br, self.data.Bz], axis=-1)
-        self.data["Bn"] = ("index", "phi"), np.einsum(
-            "ik,ijk->ij", self.data.normal, field
+        self.data["Bn"] = (
+            ("index", "phi"),
+            np.einsum("ik,ijk->ij", self.data.normal, field),
         )
 
     def decompose(self):
@@ -135,7 +144,7 @@ class ErrorField(Plot, Datafile):
                 (x, z),
                 (x + dx, z + dz),
                 mutation_scale=0.5,
-                arrowstyle="simple,head_length=0.4, head_width=0.3," " tail_width=0.1",
+                arrowstyle="simple,head_length=0.4, head_width=0.3, tail_width=0.1",
                 shrinkA=0,
                 shrinkB=0,
             )

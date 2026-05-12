@@ -103,7 +103,7 @@ class LocalData:
             directory = getattr(self, f"{directory_prefix}_directory")
         except AttributeError as error:
             raise AttributeError(
-                "directory prefix undefined " f"{directory_prefix}"
+                f"directory prefix undefined {directory_prefix}"
             ) from error
         filepath = os.path.join(directory, file)
         localfile = ""

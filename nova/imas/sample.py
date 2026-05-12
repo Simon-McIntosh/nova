@@ -179,9 +179,7 @@ class Sample(Plot, Defeature, Select):
             case int() | float() if self.dtime > 0:
                 return self.minimum_timestep / self.dtime
             case _:
-                raise ValueError(
-                    f"dtime {self.dtime} is " "not a negative int or float"
-                )
+                raise ValueError(f"dtime {self.dtime} is not a negative int or float")
 
     @property
     def updown(self) -> tuple[int, int]:
@@ -299,7 +297,7 @@ class Sample(Plot, Defeature, Select):
             for attr in ["li_3", "beta_normal"]:
                 ids_entry[attr] = self.data[attr].data
 
-        with ids_entry.node("position_control.geometric_axis." "*.reference.data"):
+        with ids_entry.node("position_control.geometric_axis.*.reference.data"):
             for i, attr in enumerate("rz"):
                 ids_entry[attr] = self.data.geometric_axis[:, i].data
 
@@ -361,7 +359,7 @@ class Sample(Plot, Defeature, Select):
             ):
                 ids_entry[tmp_attr, :] = self.data[attr].data
 
-        with ids_entry.node("time_slice:boundary_separatrix." "geometric_axis.*"):
+        with ids_entry.node("time_slice:boundary_separatrix.geometric_axis.*"):
             for i, attr in enumerate("rz"):
                 ids_entry[attr, :] = self.data.geometric_axis[:, i].data
 
@@ -407,7 +405,7 @@ class Sample(Plot, Defeature, Select):
                 ids = self.pulse_schedule_ids()
             case _:
                 raise NotImplementedError(
-                    "write_ids not implemented for " f'ids_name {ids_attrs["name"]}'
+                    f"write_ids not implemented for ids_name {ids_attrs['name']}"
                 )
         if ids_attrs["occurrence"] is None:
             ids_attrs["occurrence"] = Database(**ids_attrs).next_occurrence()

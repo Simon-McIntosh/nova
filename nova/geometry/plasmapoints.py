@@ -440,7 +440,7 @@ class PlasmaPoints(ControlPoints):
                 return -radii[0]
             case _:
                 raise NotImplementedError(
-                    f'boundary type {self["boundary_type"]} not implemented'
+                    f"boundary type {self['boundary_type']} not implemented"
                 )
 
     def fit(self):

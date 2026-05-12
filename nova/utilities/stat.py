@@ -96,7 +96,7 @@ class histopeaks:  # extract peaks from discrete PDF data
                 ax[1].text(
                     self.time[ind[1]],
                     1e-6 * Ip[ind[1]],
-                    " flattop $\Delta t$={:1.0f}s".format(dt),
+                    r" flattop $\Delta t$={:1.0f}s".format(dt),
                     ha="left",
                     va="bottom",
                     color="C{:d}".format(i + 1),

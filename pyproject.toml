@@ -44,6 +44,7 @@ dependencies = [
   "overrides>=7.4.0",
   "packaging>=23.2",
   "pandas<2.2.0",
+  "pillow>=12.3.0",
   "pyquaternion>=0.9.9",
   "pyvista>=0.39.1",
   "seaborn>=0.12.2",

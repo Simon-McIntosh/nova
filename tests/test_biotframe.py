@@ -57,7 +57,7 @@ def test_section_keyerror():
 
 
 def test_target_shape():
-    biotframe = BiotFrame(range(3), range(3))
+    biotframe = BiotFrame({"x": range(3), "z": range(3)})
     biotframe.biotshape.set_target(12)
     assert biotframe.biotshape.source == 3
     assert biotframe.biotshape.target == 12
@@ -65,7 +65,7 @@ def test_target_shape():
 
 
 def test_source_shape():
-    biotframe = BiotFrame(range(2), range(2))
+    biotframe = BiotFrame({"x": range(2), "z": range(2)})
     biotframe.biotshape.set_source(6)
     assert biotframe.biotshape.source == 6
     assert biotframe.biotshape.target == 2
@@ -73,7 +73,7 @@ def test_source_shape():
 
 
 def test_region_not_set_errot():
-    biotframe = BiotFrame(range(2), range(2))
+    biotframe = BiotFrame({"x": range(2), "z": range(2)})
     with pytest.raises(IndexError):
         biotframe("x")
 
@@ -90,7 +90,7 @@ def test_biotreduce_indices_link():
         label="Coil",
         link=["", "Coil3", "", "", "", "Coil4", "", ""],
     )
-    assert source.biotreduce.indices == [0, 1, 2, 3, 4, 6, 7]
+    assert list(source.biotreduce.indices) == [0, 1, 2, 3, 4, 6, 7]
     assert source.biotreduce.link == {3: [1, 1.0]}
 
 

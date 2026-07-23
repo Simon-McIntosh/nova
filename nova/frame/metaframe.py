@@ -3,8 +3,6 @@
 from dataclasses import dataclass, field
 from typing import Iterable, Union
 
-import pandas
-
 import numpy as np
 
 from nova.frame.metadata import MetaData
@@ -16,7 +14,9 @@ from nova.frame.metadata import MetaData
 class MetaArray(MetaData):
     """Manage DataFrame metadata - accessed via DataFrame['attrs']."""
 
-    index: pandas.Index = field(repr=False, default_factory=lambda: pandas.Index([]))
+    index: np.ndarray = field(
+        repr=False, default_factory=lambda: np.array([], dtype=object)
+    )
     data: dict[str, Iterable[Union[str, int, float]]] = field(
         init=False, default_factory=dict
     )
@@ -29,8 +29,14 @@ class MetaArray(MetaData):
 
     @property
     def dataframe(self):
-        """Return DataFrame representation of fast access data arrays."""
-        return pandas.DataFrame(self.data, index=self.index)
+        """Return pandas.DataFrame view of fast access data arrays.
+
+        Interchange shim: pandas is imported lazily so the columnar core has
+        no hard pandas dependency.
+        """
+        import pandas
+
+        return pandas.DataFrame(self.data, index=np.asarray(self.index))
 
 
 @dataclass

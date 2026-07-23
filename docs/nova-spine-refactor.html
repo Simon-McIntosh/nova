@@ -17,8 +17,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-23">
-<meta name="plan-version" content="8">
-<meta name="plan-impl" content="0.18">
+<meta name="plan-version" content="9">
+<meta name="plan-impl" content="0.3">
 </head>
 <body>
   <main class="plan-doc">
@@ -206,15 +206,19 @@
     dual-run window observed; dedicated assembly-port plan authored; extraction sign-off recorded here.</p>
 
     <h2 id="s3">§3 — Columnar frame core</h2>
-    <p><strong>Evidence (2026-07-23, in progress):</strong> on the target stack (py 3.14, numpy 2,
-    pandas 3.0.5) the existing 7-deep pandas subclass tower is broken outright — 53 of the frame-scope
-    tests fail with <code>RecursionError</code> under pandas 3.0's rewritten internals — so the direct
-    columnar rewrite is a necessity, not an optimisation, and "no slower than the pandas path" is
-    benchmarked against the old-stack reference (the pandas path cannot run on the new stack).
-    Foundation landed on develop (merge <code>3ecccf1d</code>): typed columnar store primitives
-    (<code>nova/frame/columnar.py</code>, 23 tests) and a pandas-decoupled metadata layer; the
-    dataframe→dataarray→framelink→framespace chain rewrite lands as one coherent green unit (partials
-    would break <code>nova.biot.biotframe</code>, which subclasses <code>FrameSpace</code>).</p>
+    <p><strong>Core landed 2026-07-23 (merge <code>829c0700</code>); coilset-level tail in
+    flight.</strong> The 7-deep pandas subclass tower — broken outright on the target stack (53
+    frame-scope tests failing with <code>RecursionError</code> under pandas 3.0's rewritten
+    internals, so the rewrite was a necessity, not an optimisation) — is replaced by explicit
+    accessors over a struct-of-arrays <code>ColumnStore</code> (index ndarray + column dict +
+    schema; <code>nova/frame/columnar.py</code> + chain rewrite, net +1218/−1487, leaner than what
+    it replaced). Frame acceptance surface: <strong>0 failed / 168 passed</strong> (baseline: 53
+    failed / 92 passed); MetaFrame schema, energization, link reduction, subspace projection,
+    selection and the polygon metamethod carried near-verbatim; pandas only in lazy interchange
+    shims. Coil construction ≈ 12 µs/coil (n=5000); the "no slower than pandas" gate is vacuously
+    met (the pandas path cannot run on this stack) — absolute numbers are the record, old-stack
+    reference pending. Remaining in-section: frameset/framesetloc/getslice persistence tier
+    (unblocked by the fsspec restore) and the biot-seam fixes from integration triage.</p>
     <p>Port the frame layer onto a typed columnar store, preserving the public API surface consumers actually
     use (<code>insert</code>, <code>Loc/sLoc/loc/sloc</code> label indexers, <code>aloc/saloc</code> array
     accessors, <code>+=</code> union, <code>store/load</code>):</p>
@@ -643,7 +647,7 @@ Done-when
      target floors/deps, pushed; import backlog for §3 documented honestly.
   2. Repo-local refactor + assembly-port plans scaffolded.
   3. §2 collapsed in the umbrella plan; impl advanced; this followup resolved.</pre>
-    <p class="r-fu-outcome">develop 2.0 bootstrap landed — commit 59ee0303 (416 files, −71,974 LOC): leave-set + dependent tests deleted with zero dangling references; pyproject reset to py>=3.14/numpy>=2 lean core, pandas out of core, hatch-vcs pinned to numeric tags; np.float_ fixed; honest import backlog recorded (57/186 modules clean; matplotlib 69 / fsspec 17 / jax 14 dominate). Plan scaffolds already satisfied by nova-spine-refactor (in nova) + norma-data-provenance.</p>
+    <p class="r-fu-outcome">develop 2.0 bootstrap landed — commit 59ee0303 (416 files, −71,974 LOC): leave-set + dependent tests deleted with zero dangling references; pyproject reset to py&gt;=3.14/numpy&gt;=2 lean core, pandas out of core, hatch-vcs pinned to numeric tags; np.float_ fixed; honest import backlog recorded (57/186 modules clean; matplotlib 69 / fsspec 17 / jax 14 dominate). Plan scaffolds already satisfied by nova-spine-refactor (in nova) + norma-data-provenance.</p>
     </article>
 <article class="r-fu" data-id="f-int-05" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-23" data-recommends-skill="/reckon-ship nova-spine-refactor §3" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Land the §3 columnar frame core and §4 unified kernel set (fleet in flight)</h4>

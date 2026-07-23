@@ -104,6 +104,12 @@ class DataFrame:
             )
             self._store.index = Index(list(index))
         else:
+            if index is None and source_index is not None:
+                # a frame input carries its own labels; adopt them unless they
+                # are only a default positional index (then defer to build_index)
+                labels = [str(label) for label in np.asarray(source_index)]
+                if labels != [str(position) for position in range(len(labels))]:
+                    index = labels
             if length == 0 and index is not None:
                 length = len(list(index))
             built_index = self._build_index(length, index)

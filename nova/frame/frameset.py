@@ -6,9 +6,10 @@ from importlib import import_module
 from typing import ClassVar
 
 import netCDF4
-import pandas
+import numpy as np
 
 from nova.database.netcdf import netCDF
+from nova.frame.dataframe import DataFrame
 from nova.frame.framedata import FrameData
 from nova.frame.framesetloc import FrameSetLoc
 from nova.frame.framespace import FrameSpace
@@ -170,10 +171,12 @@ class FrameSet(netCDF, FrameSetLoc):
         columns = [
             col for col in ["link", "part", "segment", "nturn"] if col in self.frame
         ]
-        superframe = pandas.DataFrame(self.Loc[:, columns])
-        superframe["Ic"] = self.sloc["Ic"][self.frame.subref]
-        superframe["It"] = superframe["Ic"] * superframe["nturn"]
-        return superframe
+        data = {col: np.asarray(self.Loc[:, col]) for col in columns}
+        current = np.asarray(self.sloc["Ic"])[np.asarray(self.frame.subref)]
+        data["Ic"] = current
+        if "nturn" in data:
+            data["It"] = current * np.asarray(data["nturn"], dtype=float)
+        return DataFrame(data, index=list(self.frame.index))
 
     @staticmethod
     def import_method(name: str, package: str | None):

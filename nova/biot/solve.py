@@ -15,7 +15,6 @@ from nova.biot.bow import Bow
 from nova.biot.circle import Circle
 from nova.biot.cylinder import Cylinder
 from nova.biot.line import Line
-from nova.biot.polygon import Polygon
 from nova.biot.groupset import GroupSet
 
 
@@ -35,7 +34,6 @@ class Solve(GroupSet):
         "circle": Circle,
         "cylinder": Cylinder,
         "line": Line,
-        "polygon": Polygon,
     }
 
     def __post_init__(self):
@@ -148,7 +146,7 @@ class Solve(GroupSet):
         """Return matrix coordinate, reduce if flag True."""
         biotframe = getattr(self, frame)
         if biotframe.reduce:
-            return biotframe.biotreduce.index.to_list()
+            return list(biotframe.biotreduce.index)
         return biotframe.index.to_list()
 
     def compose(self):

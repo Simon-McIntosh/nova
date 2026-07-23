@@ -536,8 +536,26 @@ class DataFrame:
             columns = {name: np.asarray(dataset[name]) for name in dataset.data_vars}
             index = np.asarray(dataset["index"]).astype(str)
         self.__init__(columns, index=list(index), **metadata)
+        for col in ("poly", "vtk"):
+            if col in self.columns:
+                self._loads(col)
         self.update_version()
         return self
+
+    def _loads(self, col):
+        """Rebuild geometry objects in a column from stored json strings."""
+        import json
+
+        def parse(geom):
+            if not geom:
+                return geom
+            try:
+                geo = json.loads(geom)["type"]
+            except (TypeError, ValueError, KeyError):
+                return geom  # not json-encoded geometry (e.g. a vtk blob)
+            return self.geoframe(geo).loads(geom)
+
+        self.loc[:, col] = [parse(geom) for geom in list(self[col])]
 
     def _extract_metadata(self):
         """Return schema metadata with the version promoted to a list."""

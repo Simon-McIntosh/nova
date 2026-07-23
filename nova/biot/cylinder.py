@@ -6,57 +6,28 @@ from typing import ClassVar
 
 import numpy as np
 
-from nova.biot.constants import Constants
+from nova.biot.greens import corner_fields
 from nova.biot.matrix import Matrix
 
-from nova.biot.zeta import zeta
-
 
 @dataclass
-class CylinderConstants(Constants):
-    """Extend Constants class."""
-
-    alpha: ClassVar[float] = np.pi / 2
-
-    @cached_property
-    def Cphi(self):
-        """Return Cphi intergration constant evaluated between 0 and pi/2."""
-        return (
-            -1
-            / 3
-            * self.r**2
-            * np.pi
-            / 2
-            * self.sign(self.gamma)
-            * (self.sign(self.rs - self.r) + 1)
-        )
-
-    @cached_property
-    def zeta(self):
-        """Return zeta coefficient from the midpoint-quadrature integral."""
-        alpha = self.alpha * np.ones(self.shape + (4,))
-        return zeta(self.rs, self.r, self.gamma, alpha)
-
-    @property
-    def Dz(self):
-        """Return Dz coefficient."""
-        return 3 / self.r * self.Cphi
-
-
-@dataclass
-class Cylinder(CylinderConstants, Matrix):
+class Cylinder(Matrix):
     """
     Extend Biot base class.
 
     Compute interaction for rectangular section complete toroidal conductors.
-
+    The per-corner antiderivative coefficients come from the canonical
+    axisymmetric kernel :func:`nova.biot.greens.corner_fields`; this class
+    stacks the section corners against the targets, integrates the four-corner
+    definite-integral rule, and normalises per ampere of total conductor
+    current.
     """
 
     axisymmetric: ClassVar[bool] = True
     name: ClassVar[str] = "cylinder"  # element name
 
     def __post_init__(self):
-        """Load intergration constants."""
+        """Stack section corners against targets."""
         super().__post_init__()
         self.rs = np.stack(
             [
@@ -75,34 +46,10 @@ class Cylinder(CylinderConstants, Matrix):
         self.r = np.stack([self.target("r") for _ in range(4)], axis=-1)
         self.z = np.stack([self.target("z") for _ in range(4)], axis=-1)
 
-    def Aphi_hat(self):
-        """Return vector potential intergration coefficient."""
-        return (
-            self.Cphi
-            + self.gamma * self.r * self.zeta
-            + self.gamma
-            * self.a
-            / (6 * self.r)
-            * (self.U * self.K - 2 * self.rs * self.E)
-            + self.gamma / (6 * self.a * self.r) * self.p_sum(self.Pphi, self.Pi)
-        )
-
-    def Br_hat(self):
-        """Return radial magnetic field intergration coefficient."""
-        return (
-            self.r * self.zeta
-            - self.a / (2 * self.r) * self.rs * (self.E - self.v * self.K)
-            - 1 / (4 * self.a * self.r) * self.p_sum(self.Qr, self.Pi)
-        )
-
-    def Bz_hat(self):
-        """Return vertical magnetic field intergration coefficient."""
-        return (
-            self.Dz
-            + 2 * self.gamma * self.zeta
-            - self.a / (2 * self.r) * 3 / 2 * self.gamma * self.k2 * self.K
-            - 1 / (4 * self.a * self.r) * self.p_sum(self.Qz, self.Pi)
-        )
+    @cached_property
+    def _corners(self):
+        """Return (Aphi_hat, Br_hat, Bz_hat) per corner from the canonical kernel."""
+        return corner_fields(self.rs, self.zs, self.r, self.z)
 
     def _intergrate(self, data):
         """Return corner intergration."""
@@ -115,7 +62,7 @@ class Cylinder(CylinderConstants, Matrix):
     @cached_property
     def Aphi(self):
         """Return Aphi array."""
-        return self._intergrate(self.Aphi_hat())
+        return self._intergrate(self._corners[0])
 
     @property
     def Psi(self):
@@ -125,12 +72,12 @@ class Cylinder(CylinderConstants, Matrix):
     @cached_property
     def Br(self):
         """Return radial field array."""
-        return self.mu_0 * self._intergrate(self.Br_hat())
+        return self.mu_0 * self._intergrate(self._corners[1])
 
     @cached_property
     def Bz(self):
         """Return vertical field array."""
-        return self.mu_0 * self._intergrate(self.Bz_hat())
+        return self.mu_0 * self._intergrate(self._corners[2])
 
 
 if __name__ == "__main__":

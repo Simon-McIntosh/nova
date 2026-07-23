@@ -157,13 +157,16 @@ def _zeta(
     return dalpha * integrand.sum(axis=-1)
 
 
-def _corner_fields(
+def corner_fields(
     rs: np.ndarray, zs: np.ndarray, r: np.ndarray, z: np.ndarray
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Antiderivative coefficients (Aphi_hat, Br_hat, Bz_hat) at one corner set.
 
     All inputs broadcast to the same shape ``(..., 4)`` -- target coordinates
-    repeated over the four source-section corners.
+    repeated over the four source-section corners.  This is the shared
+    axisymmetric corner antiderivative: :func:`cylinder_greens` combines it
+    over one ring's four corners, and the dataclass cylinder kernel drives it
+    with per-source corner stacks.
     """
     gamma = zs - z
     a2 = gamma**2 + (rs + r) ** 2
@@ -250,7 +253,7 @@ def cylinder_greens(
     r4 = np.repeat(tr[..., None], 4, axis=-1)
     z4 = np.repeat(tz[..., None], 4, axis=-1)
 
-    aphi_hat, br_hat, bz_hat = _corner_fields(rs, zs, r4, z4)
+    aphi_hat, br_hat, bz_hat = corner_fields(rs, zs, r4, z4)
     area = da * dz
 
     def corner(data: np.ndarray) -> np.ndarray:
@@ -306,6 +309,7 @@ __all__ = [
     "MU0",
     "greens_psi",
     "greens_bz_br",
+    "corner_fields",
     "cylinder_greens",
     "hybrid_greens",
 ]

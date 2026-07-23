@@ -5,7 +5,6 @@ from dataclasses import dataclass, field
 import numpy as np
 
 import nova.frame.metamethod as metamethod
-from nova.frame.dataframe import DataFrame
 from nova.geometry.polygeom import PolyGeom
 from nova.geometry.polygon import Polygon
 
@@ -20,7 +19,7 @@ class PolyGeo(metamethod.PolyGeo):
 
     name = "polygeo"
 
-    frame: DataFrame = field(repr=False)
+    frame: object = field(repr=False)
     required: list[str] = field(default_factory=lambda: ["segment", "section", "poly"])
     additional: list[str] = field(
         default_factory=lambda: ["dl", "dt", "rms", "area", "volume"]
@@ -46,33 +45,45 @@ class PolyGeo(metamethod.PolyGeo):
 
     def initialize(self):
         """Init sectional polygon data."""
-        index = self.frame.index[
+        segment = np.asarray(self.frame["segment"], dtype=object)
+        section = np.asarray(self.frame["section"], dtype=object)
+        mask = (
             ~self.frame.geotype("Geo", "poly")
             & ~self.frame.geotype("Json", "poly")
-            & (self.frame.segment != "")
-            & (self.frame.segment != "winding")
-            & (self.frame.section != "")
-        ]
-        if (index_length := len(index)) > 0:
-            section = self.frame.loc[index, "section"].values
-            poly_data = self.frame.loc[index, ["x", "z", "dl", "dt"]].values
-            segment_data = self.frame.loc[index, ["segment", "dy"]].values
-            poly = self.frame.loc[index, "poly"].values
-            poly_update = self.frame.loc[index, "poly"].isna()
-            geom = np.empty((index_length, len(self.features)), dtype=float)
-            # itterate over index - generate poly as required
-            for i in range(index_length):
-                if poly_update.iloc[i]:
-                    poly[i] = Polygon({f"{section[i]}": poly_data[i]})
-                    section[i] = poly[i].metadata["section"]
-                geometry = PolyGeom(
-                    poly[i], segment=segment_data[i, 0], loop_length=segment_data[i, 1]
-                ).geometry
-                geom[i] = [geometry[feature] for feature in self.features]
-            if poly_update.any():
-                self.frame.loc[index, "poly"] = poly
-            self.frame.loc[index, self.features] = geom
-            self.frame.loc[index, "section"] = section
+            & (segment != "")
+            & (segment != "winding")
+            & (section != "")
+        )
+        index = np.flatnonzero(mask)
+        index_length = len(index)
+        if index_length == 0:
+            return
+        coordinates = {
+            attr: np.asarray(self.frame[attr], dtype=float)
+            for attr in ["x", "z", "dl", "dt", "dy"]
+        }
+        poly = np.asarray(self.frame["poly"], dtype=object).copy()
+        section = section.copy()
+        geom = np.empty((index_length, len(self.features)), dtype=float)
+        for k, i in enumerate(index):
+            if poly[i] is None:
+                poly[i] = Polygon(
+                    {
+                        f"{section[i]}": [
+                            coordinates[a][i] for a in ["x", "z", "dl", "dt"]
+                        ]
+                    }
+                )
+                section[i] = poly[i].metadata["section"]
+            geometry = PolyGeom(
+                poly[i], segment=segment[i], loop_length=coordinates["dy"][i]
+            ).geometry
+            geom[k] = [geometry[feature] for feature in self.features]
+        with self.frame.setlock(True, ["subspace", "array"]):
+            self.frame["poly"][index] = poly[index]
+            self.frame["section"][index] = section[index]
+            for feature_index, feature in enumerate(self.features):
+                self.frame[feature][index] = geom[:, feature_index]
 
     def limit(self, index):
         """Return coil limits [xmin, xmax, zmin, zmax]."""

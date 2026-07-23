@@ -1,112 +1,90 @@
-"""Manage frame subspace."""
+"""Frame subspace: the independent degrees of freedom of a linked frame.
 
-import pandas
+Multi-point links reduce a frame to a smaller set of independent rows (the
+link heads). ``SubSpace`` holds the subspace columns for those rows; the
+parent :class:`~nova.frame.framespace.FrameSpace` projects them back onto the
+full frame through the ``subref`` / ``factor`` mapping.
+"""
+
+from __future__ import annotations
+
 import numpy as np
 
-from nova.frame.metaframe import MetaFrame
+from nova.frame.columnar import Index
 from nova.frame.error import SubSpaceKeyError
-from nova.frame.framelink import FrameLink, LinkLocMixin, LinkIndexer
+from nova.frame.framelink import FrameLink
+from nova.frame.metaframe import MetaFrame
 
 # pylint: disable=too-many-ancestors
 
 
-class SubspaceLocMixin(LinkLocMixin):
-    """Extend set/getitem methods for loc, iloc, at, and iat accessors."""
-
-    def __setitem__(self, key, value):
-        """Raise error when subspace variable is not found."""
-        col = self.obj.get_col(key)
-        if self.obj.lock("subspace") is False:
-            if not self.obj.hascol("subspace", col) and isinstance(col, str):
-                raise SubSpaceKeyError(col, self.obj.metaframe.subspace)
-        return super().__setitem__(key, value)
-
-    def __getitem__(self, key):
-        """Raise error when single key subspace variable is not found."""
-        col = self.obj.get_col(key)
-        if self.obj.lock("subspace") is False:
-            if not self.obj.hascol("subspace", col) and isinstance(col, str):
-                raise SubSpaceKeyError(col, self.obj.metaframe.subspace)
-        return super().__getitem__(key)
-
-
-class SubSpaceIndexer(LinkIndexer):
-    """Extend pandas indexer."""
-
-    @property
-    def loc_mixin(self):
-        """Return LocIndexer mixins."""
-        return SubspaceLocMixin
-
-
-class SubSpace(SubSpaceIndexer, FrameLink):
-    """Manage frame subspace, extract independent rows for subspace columns."""
+class SubSpace(FrameLink):
+    """Independent-row projection of a frame's subspace columns."""
 
     def __init__(self, frame):
+        """Build the subspace frame from a parent frame's independent rows."""
         index = self.get_subindex(frame)
         columns = self.get_subcolumns(frame)
         array = self.get_subarray(frame, columns)
         metaframe = MetaFrame(
-            index,
+            Index(index),
             required=[],
-            additional=columns,
+            additional=list(columns),
             available=[],
             subspace=[],
             array=array,
             lock=frame.metaframe.lock,
         )
+        labels = list(np.asarray(index))
+        if columns and labels:
+            data = {col: np.asarray(frame.loc[list(labels), col]) for col in columns}
+        else:
+            data = {}
         super().__init__(
-            pandas.DataFrame(frame.loc[index, columns]),
-            index=index,
-            columns=columns,
+            data,
+            index=labels if labels else None,
+            columns=list(columns),
             attrs={"metaframe": metaframe},
         )
         self.update_subspace(frame)
-        self.update_columns()
-
-    def __getattr__(self, name):
-        """Extend pandas.DataFrame.__getattr__. (frame.*)."""
-        if name not in self.attrs:
-            self.check_column(name)
-        return super().__getattr__(name)
 
     def __setitem__(self, col, value):
-        """Raise error when subspace variable is set directly from frame."""
-        if self.lock("subspace") is False:
-            if not self.hascol("subspace", col):
-                raise SubSpaceKeyError(col, self.metaframe.subspace)
-        return super().__setitem__(col, value)
+        """Reject writes to columns not declared as subspace attributes."""
+        if self.lock("subspace") is False and not self.hascol("subspace", col):
+            raise SubSpaceKeyError(col, self.metaframe.subspace)
+        super().__setitem__(col, value)
 
     @staticmethod
     def get_subindex(frame):
-        """Return subspace index."""
-        if not hasattr(frame, "multipoint"):
+        """Return the independent-row index (multipoint link heads)."""
+        if not frame.hasattrs("multipoint"):
             return frame.index
-        if frame.multipoint.index.empty:
+        if len(frame.multipoint.index) == 0:
             return frame.index
         return frame.multipoint.index
 
     @staticmethod
     def get_subcolumns(frame):
-        """Return subspace columns."""
+        """Return the subspace columns present in the frame."""
         if frame.columns.empty:
-            return frame.metaframe.subspace
+            return list(frame.metaframe.subspace)
         subspace = frame.metaframe.subspace
-        if np.array([attr in subspace for attr in frame]).any():
-            with frame.setlock(None, "subspace"):  # update metaframe
-                frame.metaframe.metadata = {"additional": frame.metaframe.subspace}
+        if any(attr in frame for attr in subspace):
+            with frame.setlock(None, "subspace"):
+                frame.metaframe.metadata = {"additional": subspace}
             frame.update_columns()
             return [attr for attr in subspace if attr in frame]
         return []
 
     @staticmethod
     def get_subarray(frame, columns):
-        """Return subarray - fast access variables."""
+        """Return the array-group columns present in the subspace columns."""
         return [attr for attr in frame.metaframe.array if attr in columns]
 
     def update_subspace(self, frame):
-        """Update frame and subspace metadata."""
+        """Record the subspace column set on both frames."""
         subspace = list(self.columns)
+        subspace = [col for col in subspace if col in self.metaframe.additional]
         if subspace:
             self.metaframe.metadata = {"Subspace": subspace}
             frame.metaframe.metadata = {"subspace": subspace}

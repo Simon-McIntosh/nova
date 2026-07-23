@@ -41,6 +41,11 @@ class Vector(np.ndarray):
         return self.view(np.ndarray)
 
     @property
+    def iloc(self):
+        """Return the vector itself for positional element access."""
+        return self
+
+    @property
     def empty(self) -> bool:
         """Return True when the vector holds no elements."""
         return self.size == 0
@@ -114,7 +119,10 @@ def coerce(value: Any, default: Any, length: int | None = None) -> np.ndarray:
     length
         When set, scalar input is broadcast to this length.
     """
-    dtype = None if default is None else _dtype_of(default)
+    if isinstance(value, np.ndarray) and value.ndim == 0:
+        value = value.item()  # unwrap 0-d arrays to a python scalar
+    # a None default marks a polymorphic column (geometry, link) -> object dtype
+    dtype = object if default is None else _dtype_of(default)
     if is_list_like(value):
         array = np.array(list(value), dtype=dtype)
     else:
@@ -177,7 +185,9 @@ class ColumnStore:
     @staticmethod
     def _infer_length(columns: Mapping[str, Iterable], index) -> int:
         """Return the row count implied by the longest list-like column."""
-        lengths = [len(list(value)) for value in columns.values() if is_list_like(value)]
+        lengths = [
+            len(list(value)) for value in columns.values() if is_list_like(value)
+        ]
         if lengths:
             return int(max(lengths))
         if index is not None:
@@ -253,9 +263,7 @@ class ColumnStore:
             if iloc is None:
                 columns[name] = np.concatenate([left, right])
             else:
-                columns[name] = np.concatenate(
-                    [left[:iloc], right, left[iloc:]]
-                )
+                columns[name] = np.concatenate([left[:iloc], right, left[iloc:]])
         if iloc is None:
             index = np.concatenate([self.index.values, other.index.values])
         else:

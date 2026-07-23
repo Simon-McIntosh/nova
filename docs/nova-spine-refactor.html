@@ -258,10 +258,14 @@
     one pure-numpy implementation (JAX optional); pandas fully severed from <code>nova/biot</code>
     (grep-clean); reduction on numpy int arrays. Three latent hard-import bugs fixed on the way
     (jax in <code>zeta</code>/<code>limiter</code>, vedo/pyvista/openpyxl in geometry/imas — masked
-    for years by the fat 1.x environment). Residual, gated on §3's frame chain: BiotFrame
-    provider-protocol rebind and the analytic validation lane (solenoid/inductance/3-D) — every
-    remaining failure traces to the pandas MetaFrame tower, none to <code>nova/biot</code>
-    (4 elliptic-integral tests already pass; 138 tests collect).</p>
+    for years by the fat 1.x environment). Operator assembly rebound onto the columnar store
+    (merge <code>c975e836</code>): all pandas idioms in <code>solve.py</code>/<code>space.py</code>
+    replaced with the columnar API, and §4 analytic correctness confirmed <em>independently of the
+    CoilSet tier</em> by driving dict-built Source/Target straight into the kernels — dataclass
+    Cylinder == <code>cylinder_greens</code> to 1.3e-10; a 2-ring Solve ensemble == the canonical
+    Greens to 1e-9 (pinned in <code>tests/test_biotcylinder.py</code>; 53 biot tests green).
+    Residual: the full CoilSet validation lane (solenoid/inductance/3-D, reduce/link + plasma
+    paths) — gated solely on §3's coilset-construction tranche, in flight.</p>
     <ul>
       <li>Lift near-verbatim from nova: <code>constants.py</code> (elliptic/coefficient library),
       <code>circle</code>, <code>cylinder</code>, <code>arc</code>, <code>bow</code>, <code>line</code>,

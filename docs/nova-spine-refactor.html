@@ -206,6 +206,15 @@
     dual-run window observed; dedicated assembly-port plan authored; extraction sign-off recorded here.</p>
 
     <h2 id="s3">§3 — Columnar frame core</h2>
+    <p><strong>Evidence (2026-07-23, in progress):</strong> on the target stack (py 3.14, numpy 2,
+    pandas 3.0.5) the existing 7-deep pandas subclass tower is broken outright — 53 of the frame-scope
+    tests fail with <code>RecursionError</code> under pandas 3.0's rewritten internals — so the direct
+    columnar rewrite is a necessity, not an optimisation, and "no slower than the pandas path" is
+    benchmarked against the old-stack reference (the pandas path cannot run on the new stack).
+    Foundation landed on develop (merge <code>3ecccf1d</code>): typed columnar store primitives
+    (<code>nova/frame/columnar.py</code>, 23 tests) and a pandas-decoupled metadata layer; the
+    dataframe→dataarray→framelink→framespace chain rewrite lands as one coherent green unit (partials
+    would break <code>nova.biot.biotframe</code>, which subclasses <code>FrameSpace</code>).</p>
     <p>Port the frame layer onto a typed columnar store, preserving the public API surface consumers actually
     use (<code>insert</code>, <code>Loc/sLoc/loc/sloc</code> label indexers, <code>aloc/saloc</code> array
     accessors, <code>+=</code> union, <code>store/load</code>):</p>

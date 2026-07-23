@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="archive">
+  <meta name="plan-slug" content="nova-spine-refactor-s2-landed">
+  <meta name="plan-title" content="Assembly protection baseline + branch restructure — landed">
+  <meta name="plan-status" content="historical">
+  <meta name="plan-modified" content="2026-07-23">
+  <title>Assembly protection baseline + branch restructure — landed | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Assembly protection baseline &amp; branch restructure — landed</h1>
+    <p><strong>2026-07-23.</strong> The priority-zero protection of the live SSAT / in-pit
+    fitting code landed as a characterization harness, and the nova line was restructured into
+    the gitflow split the spine refactor runs on. Everything below is on GitHub
+    (<code>Simon-McIntosh/nova</code>); the baseline is recoverable three ways (protected branch,
+    immutable tag, and the goldens themselves).</p>
+
+    <section class="card">
+      <h2>Quick status</h2>
+      <table>
+        <thead><tr><th>Deliverable</th><th>State</th></tr></thead>
+        <tbody>
+          <tr><td>Characterization harness (1&nbsp;µm tolerance gate)</td><td>✓ green — 35 passed, 4 visible skips</td></tr>
+          <tr><td>Canonical goldens + manifest (env-lock, sha256 fingerprints)</td><td>✓ 7 entries, deterministic across reruns</td></tr>
+          <tr><td><code>main</code> fast-forwarded to the goldens-green commit</td><td>✓ default branch</td></tr>
+          <tr><td><code>legacy/v1</code> + tag <code>v1-assembly-baseline</code></td><td>✓ branch-protected (no force-push / no deletion)</td></tr>
+          <tr><td><code>jax</code> retired; dependabot PRs retargeted</td><td>✓ 5 PRs re-based onto <code>main</code></td></tr>
+          <tr><td><code>develop</code> 2.0 line cut</td><td>◑ cut &amp; pushed (== baseline); bootstrap content pending</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>Branch topology</h2>
+      <svg viewBox="0 0 720 240" role="img" aria-label="Branch topology after restructure"
+           style="max-width:100%;height:auto;font-family:sans-serif;font-size:13px">
+        <line x1="60" y1="70" x2="660" y2="70" stroke="#888" stroke-width="2"/>
+        <circle cx="120" cy="70" r="6" fill="#4c8bf5"/>
+        <circle cx="360" cy="70" r="9" fill="#2ec26b"/>
+        <text x="120" y="52" text-anchor="middle" fill="#888">50a75e9 (old tip)</text>
+        <text x="360" y="48" text-anchor="middle" fill="#2ec26b">e31fb6d — goldens green</text>
+        <text x="675" y="74" fill="#4c8bf5" font-weight="bold">main</text>
+        <line x1="360" y1="70" x2="360" y2="140" stroke="#b060d0" stroke-width="2"/>
+        <circle cx="360" cy="140" r="7" fill="#b060d0"/>
+        <text x="372" y="145" fill="#b060d0">legacy/v1 🔒 + tag v1-assembly-baseline</text>
+        <line x1="360" y1="70" x2="520" y2="200" stroke="#e08a2b" stroke-width="2" stroke-dasharray="4 3"/>
+        <circle cx="520" cy="200" r="7" fill="#e08a2b"/>
+        <text x="532" y="205" fill="#e08a2b">develop — 2.0 refactor line (cut)</text>
+        <text x="60" y="230" fill="#888">jax branch retired (content preserved on main + legacy/v1 + tag)</text>
+      </svg>
+    </section>
+
+    <section class="card">
+      <h2>Harness coverage</h2>
+      <p>Tolerance gate: 1&nbsp;µm absolute on millimetre positions/gaps/deviations; per-quantity
+      classes (angles, coefficients, hyperparameters) elsewhere. A sha256 fingerprint per output
+      is a change-detector only — a mismatch triggers the tolerance comparison, so the gate
+      survives BLAS / dependency bumps.</p>
+      <table>
+        <thead><tr><th>Lane</th><th>What it pins</th></tr></thead>
+        <tbody>
+          <tr><td>component (goldens)</td><td>gap Fourier proxy; IDM / reverse-engineering / as-built CCL fiducial deltas; nominal fiducial frame; uniform + base-assembly vault geometry</td></tr>
+          <tr><td>kernel</td><td>periodic GP regression + determinism; clocking &amp; cylindrical transforms; fit error-vectors; Fourier coefficient identity; fit-configuration constants</td></tr>
+          <tr><td>invariance</td><td>offset / cyclic-relabelling invariance of the spectrum; cylindrical radius under clocking</td></tr>
+          <tr><td>skipped (visible)</td><td>SSAT / in-pit sector fits (IO-share workbooks); ANSYS vault spectral proxy; heavy winding-pack mesh build — all pending fixtures via the data registry</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>Commit &amp; refs</h2>
+      <table>
+        <thead><tr><th>Ref</th><th>Points at</th></tr></thead>
+        <tbody>
+          <tr><td>harness commit</td><td><code>e31fb6df</code> — test(assembly): characterization harness with 1 micron tolerance gate</td></tr>
+          <tr><td><code>main</code> / <code>legacy/v1</code> / <code>develop</code></td><td><code>e31fb6df</code></td></tr>
+          <tr><td>tag <code>v1-assembly-baseline</code></td><td><code>e31fb6df</code></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>What's next — finish the develop 2.0 bootstrap</h2>
+      <p>develop is cut and pushed. Remaining bootstrap steps (a follow-on run):</p>
+      <ul>
+        <li>Delete the leave-set (<code>nova/{assembly,structural,thermalhydralic,dina,design,projects,development,ansys}</code>,
+        ~63k LOC) — verified safe: <code>nova/ansys</code> is the only keep→leave coupling and it
+        is in the delete set, so zero dangling imports remain. (The bulk deletion is
+        safety-classifier-gated; run it via an in-session <code>!</code> command or a Bash
+        permission rule.)</li>
+        <li>Apply the one-line <code>np.float_ → np.float64</code> fix (<code>nova/graphics/plot.py:614</code>,
+        confirmed the sole occurrence in the keep set).</li>
+        <li>Reset <code>pyproject</code> to the 2.0 target: python ≥ 3.14, numpy ≥ 2, lean core
+        dependency set, pandas moved out of core. Note: the lean-core "fast lane green" is
+        genuinely §3–§9 work (the core still imports pandas/matplotlib broadly today), so develop
+        lands as a bootstrapped skeleton with green tracked into §3.</li>
+        <li>Scaffold the repo-local refactor plan and the assembly-port (norma) plan — the latter
+        carrying the fitting-cluster inventory and the discovered source issues (pyvista
+        <code>cell_points</code> drift, the <code>private=</code> kwarg fan-out, the always-true
+        sector-coupling branch).</li>
+      </ul>
+    </section>
+  </main>
+</body>
+</html>

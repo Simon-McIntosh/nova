@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="nova-spine-refactor">
   <meta name="plan-title" content="Nova Spine Refactor (in-place)">
   <meta name="plan-summary" content="In-place refactor of nova into the pandas-free physics spine (python≥3.14): 2.0 core on develop, live 1.x assembly line protected by µm-tolerance characterization goldens, hardened assembly extraction to its own nova-free repo">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="XL">
   <meta name="plan-tier" content="opus">
@@ -17,7 +17,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-23">
-<meta name="plan-version" content="6">
+<meta name="plan-version" content="7">
+<meta name="plan-impl" content="0.14">
 </head>
 <body>
   <main class="plan-doc">
@@ -53,6 +54,19 @@
     </ul>
 
     <h2 id="s2">§2 — Nova branch restructure and 2.0 bootstrap</h2>
+    <p class="landed-summary"><strong>◑ branch restructure landed 2026-07-23; 2.0 bootstrap in
+    progress.</strong> <code>main</code> fast-forwarded to the goldens-green commit
+    <code>e31fb6df</code> (now the default branch); <code>legacy/v1</code> + tag
+    <code>v1-assembly-baseline</code> branch-protected (enforce-admins, no force-push, no deletion);
+    <code>jax</code> retired with 5 dependabot PRs retargeted to <code>main</code>;
+    <code>develop</code> cut and pushed (== baseline). <strong>Remaining (followup f-int-04):</strong>
+    delete the leave-set (verified safe — <code>nova/ansys</code> is the only keep→leave coupling and
+    travels with it), the one-line <code>np.float_</code> fix, reset the develop pyproject to the 2.0
+    floors (py&nbsp;≥&nbsp;3.14, numpy&nbsp;≥&nbsp;2, pandas out of core), and scaffold the repo-local
+    refactor + norma-port plans. The bulk deletion is safety-classifier-gated (run via <code>!</code>
+    or a Bash permission rule); lean-core "fast lane green" is genuinely §3–§9 work, so develop lands
+    as a bootstrapped skeleton. Full record:
+    <a href="archive/nova-spine-refactor-s2-landed.html">§2/§2a landed</a>.</p>
     <p><strong>Branch model (upstream is Simon-McIntosh/nova on GitHub — verified not a fork of
     iterorganization; the git.iter.org URL exists only in pyproject metadata, no such remote is configured).</strong>
     Housekeeping first: the live line is currently the <code>jax</code> branch, 196 commits ahead of a stale
@@ -97,6 +111,16 @@
     reckon synced in nova with the repo-local refactor plan scaffolded.</p>
 
     <h2 id="s2a">§2a — Assembly protection and port program (priority)</h2>
+    <p class="landed-summary"><strong>✓ landed 2026-07-23.</strong> Characterization harness green
+    — 35 passed / 4 visible skips; 7 deterministic goldens (gap Fourier proxy, IDM/RE/as-built CCL
+    fiducial deltas, nominal fiducial frame, uniform + base-assembly vault geometry) under the
+    1&nbsp;µm tolerance gate + sha256 fingerprint manifest (commit <code>e31fb6df</code>). Baseline
+    frozen at <code>legacy/v1</code> + tag <code>v1-assembly-baseline</code>. The SSAT/in-pit sector
+    fits, the ANSYS vault spectral proxy and the heavy winding-pack build are <em>visible skips</em>
+    pending off-repo fixtures via the data registry; discovered source issues (pyvista
+    <code>cell_points</code> drift, a <code>private=</code> kwarg fan-out, an always-true
+    sector-coupling branch) are recorded for the norma port. Full record:
+    <a href="archive/nova-spine-refactor-s2-landed.html">§2/§2a landed</a>.</p>
     <p><strong>Protected scope:</strong> the GP-interpolation and coil-fitting cluster for SSAT and in-pit
     operations — <code>nova/assembly/gaussianprocessregressor.py</code>, <code>fiducialfit.py</code>,
     <code>fiducialfit_relative.py</code>, <code>fiducialpit.py</code> (2.8k), <code>fiducialsector.py</code>
@@ -496,7 +520,7 @@ Done-when
   4. followup written into plan + this followup marked resolved</pre>
     <p class="r-fu-outcome">Superseded by the §2a rework (2026-07-23): acceptance gate relaxed from byte-identity to 1 µm tolerance (3 dp mm, below measurement noise) with the hash manifest retained as fingerprint; scope extended to the vault spectral proxy + structural; plan renamed nova-spine-refactor. Replaced by the updated baseline followup.</p>
     </article>
-<article class="r-fu" data-id="f-int-03" data-status="open" data-tier="opus" data-written-by="smc/session 2026-07-23" data-written-at="2026-07-23" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-int-03" data-status="resolved" data-tier="opus" data-written-by="smc/session 2026-07-23" data-written-at="2026-07-23" data-recommends-skill="" data-resolved-at="2026-07-23T10:45:50+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Assembly characterization baseline + nova branch restructure (§2a then §2)</h4>
     <div class="r-fu-body"><p>Execute §2a's protection baseline first — characterization harness with the 1 µm tolerance gate over the full protected scope (GP/fiducial fitting, winding pack, vault spectral proxy, gap asymmetry) — then the §2 branch surgery. The data-registry decision (GHCR/ORAS recommended) should be locked before the corpus push step but does not block harness authoring.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -534,6 +558,70 @@ Done-when
   3. develop cut (leave-set removed, floors reset py&gt;=3.14/numpy&gt;=2); reckon
      synced in nova; repo-local refactor + assembly-port plans scaffolded
   4. followup written into plan + this followup marked resolved</pre>
+    <p class="r-fu-outcome">§2a + §2 branch restructure landed (commit e31fb6df). Characterization harness green — 35 passed / 4 visible skips; 7 deterministic goldens (gap Fourier proxy, IDM/RE/as-built CCL fiducial deltas, nominal fiducial frame, uniform + base-assembly vault geometry) with a 1 µm tolerance gate + sha256 fingerprint manifest. main fast-forwarded to the goldens-green commit (now default); legacy/v1 + tag v1-assembly-baseline branch-protected (enforce-admins, no force-push/deletion); jax retired with 5 dependabot PRs retargeted to main; develop cut and pushed (== baseline). Full record: docs/archive/nova-spine-refactor-s2-landed.html. Sector/pit fits, ANSYS vault Fourier proxy and heavy winding-pack build are visible skips pending off-repo fixtures. Remaining develop 2.0 bootstrap tracked in the new followup.</p>
+    </article>
+<article class="r-fu" data-id="f-int-04" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-23" data-recommends-skill="/reckon-ship nova-spine-refactor §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Finish the develop 2.0 bootstrap (leave-set deletion, lean pyproject, plan scaffolds)</h4>
+    <div class="r-fu-body"><p>The protection baseline and branch restructure landed; develop is cut and pushed (== the goldens-green baseline e31fb6df). What remains is the develop 2.0 bootstrap: delete the leave-set, reset the dependency floors, and scaffold the repo-local plans. The bulk leave-set deletion is safety-classifier-gated — run it via an in-session <code>!</code> command or add a Bash permission rule for <code>git rm</code>.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    nova-spine-refactor (http://127.0.0.1:8765/nova/nova-spine-refactor.html)
+Section: §2 (develop 2.0 bootstrap remainder)
+Tier:    opus
+
+Context
+  §2a (characterization harness, 1 µm gate) and the §2 branch restructure are
+  landed at commit e31fb6df: main (default) fast-forwarded to the goldens-green
+  commit; legacy/v1 + tag v1-assembly-baseline branch-protected; jax retired
+  (5 dependabot PRs retargeted to main); develop cut and pushed (== baseline).
+  This finishes the develop 2.0 bootstrap.
+
+State to read
+  docs/nova-spine-refactor.html §2 (bootstrap spec) + §7 (ISN/ISNC fork-RC pins)
+  docs/archive/nova-spine-refactor-s2-landed.html (what landed)
+  tests/characterization/README.md (harness scope + discovered source issues)
+  pyproject.toml (current broad dep set to lean down)
+
+Work (on the develop branch)
+  1. Delete the leave-set: nova/{assembly,structural,thermalhydralic,dina,
+     design,projects,development,ansys} (~63k LOC). VERIFIED SAFE — nova/ansys
+     is the only keep-&gt;leave coupling (nova/ansys/dpf.py imports nova.assembly)
+     and it is in the delete set, so zero dangling imports remain; confirm with
+     grep after. The bulk `git rm -r` is safety-classifier-gated: run via an
+     in-session `!` command or add a Bash permission rule for git rm.
+  2. Apply the one-line np.float_ -&gt; np.float64 fix (nova/graphics/plot.py:614;
+     confirmed the sole keep-set occurrence).
+  3. Reset pyproject to the 2.0 target: requires-python &gt;= 3.14, numpy &gt;= 2,
+     lean core deps (numpy, scipy, xarray, zarr, netcdf4, shapely, contourpy,
+     xxhash, appdirs, imas-python, h5py, tqdm, packaging), pandas moved out of
+     core to a dev/interchange extra, extras for jax/matplotlib/pyvista+vedo/
+     numba/bokeh; drop dead deps (optax, descartes, altair, pillow, rich,
+     moviepy...). Defer the imas-standard-names / -catalog fork-RC pin mechanics
+     to §7. Prune the wheel/coverage exclude lists (now redundant) and ruff/
+     black target-version to py314.
+  4. Verification is honest, not faked: py3.14 is provisionable via uv
+     (cpython-3.14.2 installed). The lean-core &quot;fast lane green&quot; is genuinely
+     §3-§9 work — the core still imports pandas/matplotlib broadly today — so
+     develop lands as a bootstrapped skeleton; report which core modules block a
+     clean numpy2/py3.14 import as the starting backlog for §3, rather than
+     claiming green.
+  5. Scaffold two repo-local plans with reckon-create: a nova refactor plan
+     (structuring §3-§9) and the assembly-port (norma) plan carrying the
+     fitting-cluster inventory and the discovered source issues to fix during
+     the port: pyvista cell_points drift (centerline.py:43, ccl.py:131,
+     coilcage.py:69 -&gt; get_cell(...).points shim), the private= kwarg fan-out in
+     FiducialData.dataset, and the always-true sector-coupling branch
+     (fiducialdata.py:332). Include the GHCR/ORAS data-registry setup (locked
+     decision) for the recorded corpus.
+
+Constraints
+  Branch: develop. Commit + push each coherent change; no AI co-author trailer.
+  reckon is already synced in nova (no reckon-sync needed).
+
+Done-when
+  1. develop: leave-set removed, np.float_ fixed, pyproject reset to the 2.0
+     target floors/deps, pushed; import backlog for §3 documented honestly.
+  2. Repo-local refactor + assembly-port plans scaffolded.
+  3. §2 collapsed in the umbrella plan; impl advanced; this followup resolved.</pre>
     </article>
 </section>
 

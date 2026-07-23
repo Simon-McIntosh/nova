@@ -5,7 +5,6 @@ from functools import cached_property
 from typing import ClassVar
 
 import numpy as np
-import pyvista
 import scipy.integrate
 
 from nova.graphics.plot import Plot
@@ -167,6 +166,8 @@ class Frenet(Plot):
 
     def plot(self, scale=1, plotter=None):
         """Plot polyline."""
+        import pyvista
+
         mesh = pyvista.MultipleLines(self.points)
         mag = scale * self.length / len(self)
         if plotter is None:

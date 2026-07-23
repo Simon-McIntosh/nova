@@ -6,7 +6,6 @@ from typing import ClassVar
 import warnings
 
 import numpy as np
-import openpyxl
 from packaging import version
 from tqdm import tqdm
 
@@ -251,6 +250,8 @@ class CoilsNonAxisymmetric(Plot, CoilDatabase, Scenario):
 
     def write_excel(self):
         """Write centerline path to an excel file [mm]."""
+        import openpyxl
+
         workbook = openpyxl.Workbook()
         for i, coil in enumerate(self.frame.index):
             worksheet = workbook.create_sheet(coil, i)

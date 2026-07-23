@@ -8,7 +8,6 @@ from typing import ClassVar, override
 import numpy as np
 import pandas
 import scipy
-from vedo import Mesh
 
 from nova.geometry.frenet import Frenet
 from nova.geometry.polygeom import Polygon
@@ -644,6 +643,8 @@ class PolyLine(Plot):
 
     def vtkplot(self):
         """Plot vtk centerline."""
+        from vedo import Mesh
+
         Mesh(*[segment.mesh for segment in self.segments]).show()
 
 

@@ -29,10 +29,15 @@ class FrameSpace(FrameLink):
 
     def __init__(self, data=None, index=None, columns=None, attrs=None, **metadata):
         """Build the frame, load geometry, then build the subspace."""
+        previous = self.__dict__.get("attrs", {}).get("subspace")
         super().__init__(data, index, columns, attrs, **metadata)
         self.frame_attrs(PolyGeo, PolyPlot)
         if os.environ.get("NOVA_VTK", "True") != "False":
             self.frame_attrs(VtkGeo, VtkPlot)
+        if previous is not None and previous is not data:
+            # the rebuilt frame gets a fresh subspace; poison the detached one
+            # so a caller's held sloc view reads as invalid, not silently stale
+            self._poison_store(previous._store)
         self.attrs["subspace"] = SubSpace(self)
 
     def _subspace_active(self, col) -> bool:

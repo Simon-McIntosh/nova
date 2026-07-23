@@ -124,6 +124,12 @@ source = "vcs"
 
 [tool.hatch.version.raw-options]
 version_scheme = "post-release"
+# only numeric tags carry versions; milestone tags (e.g. v1-assembly-baseline) are ignored
+tag_regex = "^(?P<version>[vV]?\\d+(?:\\.\\d+){0,2})$"
+git_describe_command = [
+  "git", "describe", "--dirty", "--tags", "--long",
+  "--match", "[0-9]*",
+]
 
 [tool.hatch.build.hooks.vcs]
 version-file = "nova/_version.py"

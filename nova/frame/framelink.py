@@ -16,6 +16,7 @@ import numpy as np
 
 from nova.frame.columnar import ColumnStore, Vector, is_list_like
 from nova.frame.dataarray import DataArray
+from nova.frame.dataframe import DataFrame
 from nova.frame.metamethod import Energize, MultiPoint, Select
 
 # pylint: disable=too-many-ancestors
@@ -96,7 +97,7 @@ class FrameLink(DataArray):
     @staticmethod
     def isframe(obj, dataframe=True) -> bool:
         """Return True when obj is a frame (or a pandas.DataFrame interchange)."""
-        if isinstance(obj, FrameLink):
+        if isinstance(obj, DataFrame):  # columnar frame, including FrameLink
             return True
         if dataframe and hasattr(obj, "columns") and hasattr(obj, "to_dict"):
             return True

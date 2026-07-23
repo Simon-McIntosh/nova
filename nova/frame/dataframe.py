@@ -236,23 +236,27 @@ class DataFrame:
             return self._check_index(list(index), length)
         return self.build_index(length)
 
-    def build_index(self, length, **kwargs):
-        """Return a label index constructed from length and tag defaults."""
+    def build_index(self, count, **kwargs):
+        """Return a label index of ``count`` rows from the tag defaults.
+
+        ``count`` is positional (never a keyword) so a ``length`` tag carried
+        in ``kwargs`` cannot collide with it.
+        """
         metatag = {
             key: kwargs.get(key, self.metaframe.default[key])
             for key in self.metaframe.tag
         }
         name = metatag["name"]
         if is_list_like(name) or (isinstance(name, str) and len(name) > 0):
-            if is_list_like(name) or length == 1:
-                return self._check_index(name, length)
+            if is_list_like(name) or count == 1:
+                return self._check_index(name, count)
             self._set_label(metatag, name)
         self._set_offset(metatag)
         label_delim = metatag["label"] + metatag["delim"]
-        index = [f"{label_delim}{i + metatag['offset']:d}" for i in range(length)]
+        index = [f"{label_delim}{i + metatag['offset']:d}" for i in range(count)]
         if metatag["delim"] and metatag["label"] not in self.index:
             index[0] = metatag["label"]
-        return self._check_index(index, length)
+        return self._check_index(index, count)
 
     def _set_label(self, metatag, name):
         """Split a name into label + offset per the append / delim policy."""

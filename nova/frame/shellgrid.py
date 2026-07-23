@@ -3,7 +3,6 @@
 from dataclasses import dataclass, field
 
 import numpy as np
-import pandas
 import scipy.interpolate
 from shapely import geometry
 
@@ -210,17 +209,19 @@ class ShellSegment(ShellInterp):
         for i, segment in enumerate(self.divide()):
             geom = PolyGeom(segment.poly, segment="circle").geometry
             data[i] = {name: geom[name] for name in self.columns}
-        frame = pandas.DataFrame(data, columns=self.columns)
-        frame["nturn"] = frame["area"]
-        return frame
+        columns = {name: [row[name] for row in data] for name in self.columns}
+        columns["nturn"] = np.asarray(columns["area"], dtype=float)
+        # positional index: an anonymous geometry table, labels come from the
+        # consuming insert's label / delim tags
+        return DataFrame(columns, index=range(len(data)))
 
 
 @dataclass
 class ShellGrid(ShellSegment):
     """Subdivide shell segment."""
 
-    frame: pandas.DataFrame = field(init=False)
-    subframe: list[pandas.DataFrame] = field(init=False)
+    frame: DataFrame = field(init=False)
+    subframe: list[DataFrame] = field(init=False)
 
     def __post_init__(self):
         """Generate shell geometory."""

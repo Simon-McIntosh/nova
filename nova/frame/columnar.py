@@ -95,6 +95,11 @@ class Index(Vector):
         """Return unique labels preserving first-seen order."""
         return np.asarray(list(dict.fromkeys(self.values.tolist())), dtype=object)
 
+    def isin(self, values) -> np.ndarray:
+        """Return a boolean mask of labels present in values."""
+        lookup = set(np.asarray(list(values), dtype=object).tolist())
+        return np.array([label in lookup for label in self.values], dtype=bool)
+
     @property
     def name(self):
         """Return None - index carries no name (pandas parity)."""

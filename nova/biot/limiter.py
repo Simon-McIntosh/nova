@@ -3,14 +3,11 @@
 from dataclasses import dataclass, field
 from functools import cached_property
 
-import jax.numpy as jnp
 import xarray
 
 from nova.biot.array import Array
 from nova.geometry import select
 from nova.graphics.plot import Plot
-from nova.jax.null import Null1D
-from nova.jax.target import Target
 
 
 @dataclass
@@ -24,11 +21,19 @@ class Limiter(Plot, Array):
     @cached_property
     def null(self):
         """Return jax backed null instance."""
+        import jax.numpy as jnp  # noqa: PLC0415
+
+        from nova.jax.null import Null1D  # noqa: PLC0415
+
         return Null1D(jnp.c_[self["x"], self["z"]])
 
     @cached_property
     def target(self):
         """Return jax backed poloidal flux wall target."""
+        import jax.numpy as jnp  # noqa: PLC0415
+
+        from nova.jax.target import Target  # noqa: PLC0415
+
         return Target(
             jnp.array(self.data["Psi"]),
             jnp.array(self.data["Psi_"]),

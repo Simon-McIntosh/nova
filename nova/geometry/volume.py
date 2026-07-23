@@ -141,8 +141,8 @@ class TriShell:
             except ImportError as error:
                 raise ImportError(
                     "Generation of ahull poloidal polygons "
-                    "requires nova['mesh']\n"
-                    "pip install nova['mesh']"
+                    "requires the viz extra\n"
+                    "pip install nova-stella[viz]"
                 ) from error
             cluster = DBSCAN(eps=1e-3, min_samples=1)
             cluster.fit(poloidal)

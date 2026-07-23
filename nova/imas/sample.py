@@ -4,8 +4,6 @@ from dataclasses import dataclass, field
 from functools import cached_property
 
 import numpy as np
-from sklearn.cluster import DBSCAN
-from sklearn.preprocessing import minmax_scale
 import scipy.signal
 import xarray
 
@@ -87,6 +85,8 @@ class Defeature:
 
     def defeature(self):
         """Return clustered turning point dataset."""
+        from sklearn.preprocessing import minmax_scale
+
         indices = []
         index = np.arange(self.data.sizes["time"])
         for attr in self.features:
@@ -100,6 +100,8 @@ class Defeature:
 
     def _cluster(self, indices):
         """Apply DBSCAN clustering algorithum to indices."""
+        from sklearn.cluster import DBSCAN
+
         time = self.time[indices]
         clustering = DBSCAN(eps=self.cluster, min_samples=1).fit(time)
         labels = np.unique(clustering.labels_)
@@ -244,6 +246,8 @@ class Sample(Plot, Defeature, Select):
         data = self[sample]
         value = data[attr]
         if scale:
+            from sklearn.preprocessing import minmax_scale
+
             value = minmax_scale(value, axis=0)
         self.axes.plot(data.time, value, **kwargs)
 

@@ -215,10 +215,15 @@
     it replaced). Frame acceptance surface: <strong>0 failed / 168 passed</strong> (baseline: 53
     failed / 92 passed); MetaFrame schema, energization, link reduction, subspace projection,
     selection and the polygon metamethod carried near-verbatim; pandas only in lazy interchange
-    shims. Coil construction ≈ 12 µs/coil (n=5000); the "no slower than pandas" gate is vacuously
-    met (the pandas path cannot run on this stack) — absolute numbers are the record, old-stack
-    reference pending. Remaining in-section: frameset/framesetloc/getslice persistence tier
-    (unblocked by the fsspec restore) and the biot-seam fixes from integration triage.</p>
+    shims. Benchmark (dual-path <code>benchmarks/coil_construction.py</code>, same machine;
+    old-stack pandas reference vs columnar): construct 81→36 µs/coil at n=100 (columnar 2.3×
+    faster), parity at n=500, 2.7→16.2 µs/coil at n=5000 (6× slower — per-row cost flat instead
+    of amortising); column reads 0.026→0.325 ms (12–23× slower, both read forms identical —
+    subspace re-inflation suspected instead of a cached view). <strong>Open §3 performance
+    residual</strong>, assigned: read path to O(cached view), bulk construct within ~2× of the
+    reference at n=5000 (plasma grids make that regime a production path). Also remaining:
+    the coilset-construction tier port (poloidalgrid/polygrid/shellgrid/coilset/framedata +
+    FrameSet.store/load) — in flight; it gates the biot assembly lane.</p>
     <p>Port the frame layer onto a typed columnar store, preserving the public API surface consumers actually
     use (<code>insert</code>, <code>Loc/sLoc/loc/sloc</code> label indexers, <code>aloc/saloc</code> array
     accessors, <code>+=</code> union, <code>store/load</code>):</p>

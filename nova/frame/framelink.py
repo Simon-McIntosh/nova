@@ -152,12 +152,18 @@ class FrameLink(DataArray):
     def concatenate(self, insert, iloc=None):
         """Concatenate an assembled insert with self, then reinitialise."""
         store = ColumnStore(
-            {name: np.asarray(self[name]) for name in self.columns},
+            {
+                name: np.asarray(self._store.get(name))
+                for name in self._store.column_names()
+            },
             index=list(self.index),
             defaults=self._store_defaults(),
         )
         insert_store = ColumnStore(
-            {name: np.asarray(insert[name]) for name in insert.columns},
+            {
+                name: np.asarray(insert._store.get(name))
+                for name in insert._store.column_names()
+            },
             index=list(insert.index),
             defaults=self._store_defaults(),
         )
@@ -310,7 +316,10 @@ class FrameLink(DataArray):
         positions = [self.index.get_loc(name) for name in index if name in self.index]
         self._store.drop(positions)
         self.__init__(
-            {name: np.asarray(self[name]) for name in self.columns},
+            {
+                name: np.asarray(self._store.get(name))
+                for name in self._store.column_names()
+            },
             index=list(self.index),
             attrs={"metaframe": self.metaframe},
         )

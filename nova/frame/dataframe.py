@@ -67,7 +67,12 @@ class DataFrame:
             return {}, None
         if isinstance(data, DataFrame):
             names = columns if columns is not None else data.columns.to_list()
-            frame = {name: np.asarray(data[name]) for name in names if name in data}
+            # read the raw store, not data[name] (which would inflate subspace)
+            frame = {
+                name: np.asarray(data._store.get(name))
+                for name in names
+                if name in data
+            }
             return frame, data.index.values
         if hasattr(data, "columns") and hasattr(data, "to_dict"):
             # pandas.DataFrame interchange input

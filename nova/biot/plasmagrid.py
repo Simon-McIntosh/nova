@@ -159,7 +159,7 @@ class PlasmaGrid(BaseGrid, PlasmaLoc):
         """Return pointloop instance, used to check loop membership."""
         if self.saloc["plasma"].sum() == 0:
             raise AttributeError("No plasma filaments found.")
-        return PointLoop(self.loc["plasma", ["x", "z"]].to_numpy())
+        return PointLoop(np.c_[self.aloc["plasma", "x"], self.aloc["plasma", "z"]])
 
     def ionize_mask(self, index):
         """Return plasma filament selection mask."""

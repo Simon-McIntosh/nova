@@ -141,7 +141,7 @@ uv run git commit -m 'type: description'
 
 **Step 2: Cherry-pick to main workspace**
 
-The `jax` branch is typically checked out in the primary workspace, so cherry-pick:
+The `main` branch is checked out in the primary workspace, so cherry-pick:
 
 ```bash
 cd /home/ITER/mcintos/Code/nova
@@ -155,6 +155,28 @@ git push
 cd /path/to/worktree
 git checkout -- .  # Discard any remaining changes
 ```
+
+### Reckon plans & branch policy (transitional refactor split)
+
+The spine refactor runs a temporary two-branch split — an explicit exception to
+trunk-based work, for its duration:
+
+- **`main`** — live 1.x line and the **default branch**. The assembly tree and
+  the **norma** (assembly-metrology) data-provenance work live here, and **all
+  reckon plans live here**.
+- **`develop`** — the 2.0 physics-spine core; the leave set
+  (`assembly`, `structural`, `thermalhydralic`, `dina`, `design`, `projects`,
+  `development`, `ansys`) is deleted here.
+- **`legacy/v1`** + tag **`v1-assembly-baseline`** — the frozen goldens-green
+  baseline, branch-protected (no force-push, no deletion).
+
+The reckon server serves the primary checkout's **working tree** (see
+`~/Code/reckon/AGENTS.md`), so **keep the primary checkout on `main`** — that is
+where plans render coherently and where norma/assembly work happens, so it needs
+no branch switching. Do **`develop` (2.0-core) code work in a git worktree**
+(`git worktree add ../nova-develop develop`), never by switching the primary
+checkout off `main`. Commit and push plan edits in the same session so live plan
+state never depends on an un-pushed file on the wrong branch.
 
 ## Rules
 

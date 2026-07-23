@@ -14,7 +14,7 @@ from nova.frame.metadata import MetaData
 class MetaArray(MetaData):
     """Manage DataFrame metadata - accessed via DataFrame['attrs']."""
 
-    index: np.ndarray = field(
+    index: object = field(
         repr=False, default_factory=lambda: np.array([], dtype=object)
     )
     data: dict[str, Iterable[Union[str, int, float]]] = field(

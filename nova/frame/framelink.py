@@ -163,6 +163,7 @@ class FrameLink(DataArray):
 
     def concatenate(self, *inserts, iloc=None):
         """Concatenate assembled insert(s) with self, then reinitialise."""
+        detached = self._store  # the store the rebuild will replace (copied below)
         store = ColumnStore(
             {
                 name: np.asarray(self._store.get(name))
@@ -188,6 +189,7 @@ class FrameLink(DataArray):
         self.__init__(
             columns, index=list(store.index), attrs={"metaframe": self.metaframe}
         )
+        self._poison_store(detached)  # invalidate views held from before the insert
         self.update_version()
         return self
 

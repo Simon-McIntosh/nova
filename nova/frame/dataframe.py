@@ -56,6 +56,19 @@ class DataFrame:
 
     # -- construction helpers ------------------------------------------------
 
+    @staticmethod
+    def _poison_store(store):
+        """Fill a detached store's float arrays with NaN.
+
+        A row insert rebuilds the store, detaching the arrays a caller may
+        still hold from ``loc`` / ``sloc``; poisoning those float columns turns
+        a silently-stale read into an obvious one. Only used where the surviving
+        store is a fresh copy, so the live data is never touched.
+        """
+        for array in store.columns.values():
+            if array.dtype.kind == "f":
+                array[:] = np.nan
+
     def _as_dict(self, data, columns):
         """Return (column dict, source index) for the input data.
 

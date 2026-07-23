@@ -239,6 +239,20 @@
     <code>nova.frame</code>.</p>
 
     <h2 id="s4">§4 — Biot kernels and operator assembly</h2>
+    <p><strong>Evidence (2026-07-23, in progress — kernel tier landed on develop, merges
+    <code>b764ff3b</code>/<code>4d7c96fd</code>):</strong> polygon conductor kernel ported back from
+    imas-ambix (<code>gs/polygon.py</code> → <code>nova/biot/polygon.py</code>, replacing the stub)
+    with 22 golden-value tests — rectangle-reduction agrees with the cylinder kernel at 1e-10,
+    filament-tiling oracle at 5e-5 (1e-4 shear/thin-plate), Ampère circulation −µ0 at 1e-6, vertex
+    invariance 1e-13. A canonical corner-antiderivative module (<code>greens.py</code>) now drives
+    both the functional and dataclass cylinder paths (bit-identical, ≤4 ulp); zeta consolidated to
+    one pure-numpy implementation (JAX optional); pandas fully severed from <code>nova/biot</code>
+    (grep-clean); reduction on numpy int arrays. Three latent hard-import bugs fixed on the way
+    (jax in <code>zeta</code>/<code>limiter</code>, vedo/pyvista/openpyxl in geometry/imas — masked
+    for years by the fat 1.x environment). Residual, gated on §3's frame chain: BiotFrame
+    provider-protocol rebind and the analytic validation lane (solenoid/inductance/3-D) — every
+    remaining failure traces to the pandas MetaFrame tower, none to <code>nova/biot</code>
+    (4 elliptic-integral tests already pass; 138 tests collect).</p>
     <ul>
       <li>Lift near-verbatim from nova: <code>constants.py</code> (elliptic/coefficient library),
       <code>circle</code>, <code>cylinder</code>, <code>arc</code>, <code>bow</code>, <code>line</code>,

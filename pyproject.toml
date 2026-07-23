@@ -60,6 +60,7 @@ dependencies = [
   "optimistix (>=0.0.7,<0.0.8)",
   "altair (>=5.5.0,<6.0.0)",
   "openpyxl>=3.1.5",
+  "pyyaml>=6.0",
   "rich>=14.1.0",
 ]
 

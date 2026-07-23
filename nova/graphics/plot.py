@@ -611,7 +611,7 @@ class Animate(MoviePy, Plot):
             data = np.r_[
                 [[time[0], np.nan]],
                 data,
-                [[time[-1] + 2.0 * np.finfo(np.float_).eps, np.nan]],
+                [[time[-1] + 2.0 * np.finfo(np.float64).eps, np.nan]],
             ]
         if attr in self._segments:
             data = np.r_[self._segments[attr], data]

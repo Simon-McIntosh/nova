@@ -1,4 +1,0 @@
-pit.gaps	full sector/pit build needs the IO-share sector-module workbooks (Sector_Module_#*.xlsx) or a cached fiducial_data.nc fixture; provide via the assembly data registry
-sector.fit.ssat	full sector/pit build needs the IO-share sector-module workbooks (Sector_Module_#*.xlsx) or a cached fiducial_data.nc fixture; provide via the assembly data registry
-vault.fourier_proxy	vault spectral proxy needs an ANSYS install: ValueError
-windingpack.uniform	heavy pyvista mesh build (multi-MB vtk); opt in with NOVA_CHARACTERIZATION_HEAVY=1

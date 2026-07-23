@@ -648,15 +648,3 @@ class PolyLine(Plot):
         Mesh(*[segment.mesh for segment in self.segments]).show()
 
 
-if __name__ == "__main__":
-    from nova.assembly.fiducialdata import FiducialData
-
-    fiducial = FiducialData(fiducial="RE")
-
-    points = fiducial.data.centerline_target.data
-    points += 500 * fiducial.data.centerline_delta[3].data
-    polyline = PolyLine(points)
-    polyline.plot()
-
-    # poly = PolyLine()
-    # for segment in polyline.segments:

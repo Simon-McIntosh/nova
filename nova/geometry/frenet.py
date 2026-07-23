@@ -190,12 +190,3 @@ class Frenet(Plot):
         )
 
 
-if __name__ == "__main__":
-    from nova.assembly.fiducialdata import FiducialData
-
-    fiducial = FiducialData("RE", fill=True)
-
-    curve = fiducial.data.centerline.data
-
-    frenet = Frenet(curve)
-    frenet.plot()

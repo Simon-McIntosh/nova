@@ -4,7 +4,7 @@ dynamic = ["version"]
 description = "Equilibrium generation and inference"
 license = { text = "ITER GIP" }
 readme = "README.md"
-requires-python = ">=3.11,<3.13"
+requires-python = ">=3.14"
 authors = [{ name = "Simon McIntosh", email = "simon.mcintosh@iter.org" }]
 keywords = [
   "equilibrium",
@@ -21,79 +21,38 @@ classifiers = [
   "License :: Other/Proprietary License",
   "Natural Language :: English",
   "Operating System :: OS Independent",
-  "Programming Language :: Python :: 3.11",
-  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.14",
   "Topic :: Scientific/Engineering :: Physics",
 ]
-urls.Homepage = "https://git.iter.org/projects/EQ/repos/nova/"
-urls.Repository = "https://git.iter.org/projects/EQ/repos/nova/"
+urls.Homepage = "https://github.com/Simon-McIntosh/nova"
+urls.Repository = "https://github.com/Simon-McIntosh/nova"
 dependencies = [
-  "alphashape>=1.3.1",
   "appdirs>=1.4.4",
-  "bokeh>=3.1.1",
-  "contourpy>=1.0.7",
-  "descartes>=1.1.0",
-  "fsspec>=2023.5.0",
-  "gitpython>=3.1.31",
-  "matplotlib>=3.7.1",
-  "meshio>=5.3.4",
-  "moviepy>=1.0.3",
-  "netcdf4>=1.6.3",
-  "networkx>=3.1",
-  "numpy (>=1.26,<2.0.0)",
-  "overrides>=7.4.0",
+  "contourpy>=1.3",
+  "h5py>=3.10",
+  "imas-python>=2.0",
+  "netcdf4>=1.7",
+  "numpy>=2",
   "packaging>=23.2",
-  "pandas<2.2.0",
-  "pillow>=12.3.0",
-  "pyquaternion>=0.9.9",
-  "pyvista>=0.39.1",
-  "seaborn>=0.12.2",
-  "scipy>=1.10.1",
-  "scikit-learn>=1.2.2",
+  "scipy>=1.14",
   "shapely>=2.0.1",
   "tqdm>=4.66.1",
-  "trimesh>=3.21.7",
-  "vedo>=2023.5.0",
-  "xarray>=2023.5.0",
+  "xarray>=2024.10",
   "xxhash>=3.2.0",
-  "optax (>=0.2.3,<0.3.0)",
-  "optimistix (>=0.0.7,<0.0.8)",
-  "altair (>=5.5.0,<6.0.0)",
-  "openpyxl>=3.1.5",
-  "rich>=14.1.0",
+  "zarr>=3",
 ]
 
 [project.optional-dependencies]
-ansys = [
-  "ansys-dpf-core>=0.8.1",
-  "ansys-dpf-post>=0.4.0",
-  "fortranformat>=1.2.2",
-  "openpyxl>=3.1.2",
+bokeh = ["bokeh>=3.6"]
+interchange = ["pandas>=2.2"]
+jax = [
+  "jax[cuda12]>=0.5; sys_platform == 'linux'",
+  "jax>=0.5; sys_platform != 'linux'",
 ]
-bamboo = ["coverage2clover>=4.0.0", "tox>=4.6.4"]
-imas = [
-  "imas-python",
-  #"imas-core @ git+ssh://git@git.iter.org/imas/al-core.git",
-  "h5py>=3.10.0",
-]
-jit = [
-  "jax[cpu]==0.4.27",     # cuda12_local
-  "numba>=0.59.0",
-  "tbb>=2021.11.0",
-  "tbb-devel>=2021.11.0",
-]
-# naka = ["nakamap @ git+https://github.com/Simon-McIntosh/nakamap.git"]
-optimize = ["jaxopt>=0.8.3", "pylops>=2.1.0"]
+matplotlib = ["matplotlib>=3.10"]
+numba = ["numba>=0.61"]
 test = ["pytest", "pytest-cov>=4.1.0", "pytest-asyncio>=0.21.1"]
-thermofluids = [
-  "coolprop>=6.6.0",
-  "ftputil>=5.0.4",
-  "matplotlib>=3.7.1",
-  "openpyxl>=3.1.2",
-  "tables>=3.8.0",
-  "xlrd>=2.0.1",
-]
-uda = ["nest-asyncio>=1.5.8", "async-property>=0.2.2"]
+viz = ["pyvista>=0.44", "vedo>=2024.5.0"]
 
 [dependency-groups]
 dev = [
@@ -124,38 +83,32 @@ source = "vcs"
 
 [tool.hatch.version.raw-options]
 version_scheme = "post-release"
+# only numeric release tags carry versions; skip marker tags like v1-assembly-baseline
+git_describe_command = [
+  "git",
+  "describe",
+  "--dirty",
+  "--tags",
+  "--long",
+  "--match",
+  "[0-9]*.[0-9]*",
+]
 
 [tool.hatch.build.hooks.vcs]
 version-file = "nova/_version.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["nova"]
-exclude = [
-  "nova/ansys",
-  "nova/assembly",
-  "nova/design",
-  "nova/development",
-  "nova/dina",
-  "nova/projects",
-  "nova/structural",
-  "nova/thermalhydralic",
-]
 
 [tool.black]
 line-length = 88
-target-version = ['py311']
+target-version = ['py314']
 
 [tool.ruff]
-target-version = "py311"
+target-version = "py314"
 line-length = 88
 
 exclude = [
-  "design",
-  "development",
-  "dina",
-  "projects",
-  "structural",
-  "thermalhydralic",
   "tests",
   ".git",
   ".mypy_cache",
@@ -222,7 +175,7 @@ lint.mccabe.max-complexity = 10
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
-addopts = "-rfEs --doctest-modules --ignore=tests/test_sultan.py"
+addopts = "-rfEs --doctest-modules"
 norecursedirs = ".git __pycache__"
 testpaths = [
   "tests",
@@ -236,8 +189,6 @@ testpaths = [
 filterwarnings = [
   "once::Warning",
   "ignore:open:DeprecationWarning:imas",
-  "ignore:datetime.datetime.utcfromtimestamp:DeprecationWarning:dateutil",             # pandas <2.2 
-  "ignore:the matrix subclass is not the recommended:PendingDeprecationWarning:numpy", # alphashape
 ]
 
 [tool.mypy]
@@ -259,15 +210,7 @@ strict = false
 [tool.coverage.run]
 branch = true
 omit = [
-  "nova/ansys/*",
-  "nova/assembly/*",
-  "nova/design/*",
-  "nova/development/*",
-  "nova/dina/*",
-  "nova/obsolete/*",
-  "nova/projects/*",
   "nova/scripts/*",
-  "nova/thermalhydralic/*",
   "nova/utilities/*",
 ]
 
@@ -280,5 +223,3 @@ exclude_lines = [
   "raise NotImplementedError",
   "if __name__ == .__main__.:",
 ]
-
-

@@ -54,11 +54,15 @@ class Shell(GridAttrs):
         with self.insert_required(required):
             shellgrid = ShellGrid(*args, delta=self.attrs["delta"])
             index = self.frame.insert(shellgrid.frame, iloc=iloc, **self.attrs)
-        frame = self.frame.loc[index, :]
+        framedata = self.row_records(self.frame, index)
         subframe = []
         for i, name in enumerate(index):
-            data = frame.iloc[i].to_dict()
-            data |= {"label": name, "frame": name, "delim": "_", "link": True}
+            data = framedata[i] | {
+                "label": name,
+                "frame": name,
+                "delim": "_",
+                "link": True,
+            }
             subframe.append(
                 self.subframe.assemble(shellgrid.subframe[i], **data, **self.subattrs)
             )

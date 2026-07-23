@@ -5,6 +5,18 @@ import numpy as np
 from nova.frame.framespace import FrameSpace
 
 
+def test_concatenate_does_not_inflate_subspace():
+    """A second insert must snapshot the raw store, not inflate a subspace
+    column the subspace projection does not carry (regression: 'plasma'
+    KeyError during concatenate that gated the biot assembly lane)."""
+    framespace = FrameSpace(Required=["x"], Available=["active"], Array=["plasma"])
+    framespace.insert(range(2), active=True)
+    framespace.insert(range(2), active=False)  # concatenate on a non-empty frame
+    framespace.insert(3, plasma=True)
+    assert framespace.hascol("subspace", "plasma")
+    assert list(framespace.plasma) == [False, False, False, False, True]
+
+
 def test_drop_subspace():
     framespace = FrameSpace(
         Required=["x", "z"], label="PF", Additional=["Ic"], Subspace=["Ic"]

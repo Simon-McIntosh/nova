@@ -29,6 +29,7 @@ urls.Repository = "https://github.com/Simon-McIntosh/nova"
 dependencies = [
   "appdirs>=1.4.4",
   "contourpy>=1.3",
+  "fsspec>=2024.10",
   "h5py>=3.10",
   "imas-python>=2.0",
   "netcdf4>=1.7",

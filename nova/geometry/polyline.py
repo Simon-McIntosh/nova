@@ -3,10 +3,9 @@
 import abc
 from dataclasses import dataclass, field
 from functools import cached_property
-from typing import ClassVar
+from typing import ClassVar, override
 
 import numpy as np
-from overrides import override
 import pandas
 import scipy
 from vedo import Mesh

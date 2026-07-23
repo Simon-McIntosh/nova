@@ -178,7 +178,7 @@ class Space(metamethod.Space, Plot3D):
             assert len(self.frame) == self._arc_number + self._line_number
         except AssertionError as error:
             error_index = ~self._arc_index & ~self._line_index
-            error_types = self.frame.segment[error_index].unique()
+            error_types = np.unique(np.asarray(self.frame["segment"])[error_index])
             raise NotImplementedError(
                 f"segment types {error_types} not implemented"
             ) from error

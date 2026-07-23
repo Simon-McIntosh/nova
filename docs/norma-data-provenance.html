@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"    content="nova">
+  <meta name="reckon-type"     content="plan">
+  <meta name="plan-slug"       content="norma-data-provenance">
+  <meta name="plan-title"      content="Norma Data Provenance, Persistence & Fit Testing">
+  <meta name="plan-summary"    content="Git-safe versioning of ITER coil-alignment measurements, a commit-hash-keyed provenance/run-record model, and a two-tier replay suite that unit-tests every recorded fit against its goldens within 1 micron">
+  <meta name="plan-status"     content="draft">
+  <meta name="plan-roi"        content="high">
+  <meta name="plan-effort"     content="XL">
+  <meta name="plan-tier"       content="opus">
+  <meta name="plan-owner"      content="Simon McIntosh">
+  <meta name="plan-depends-on" content="nova-spine-refactor">
+  <title>Norma Data Provenance, Persistence &amp; Fit Testing | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — Objective and scope</h2>
+    <p>The recorded coil-fit corpus is among the most valuable data nova touches: it is the
+    measured, as-built alignment of ITER's toroidal-field coils during SSAT and in-pit assembly.
+    Today those measurements live only as opaque <code>.xlsx</code> downloads on a Windows/IO
+    share, the fits that consume them leave no durable provenance, and there is no way to prove
+    that a fit produced last year still reproduces today. This plan designs the full system that
+    fixes all three, and that travels with the assembly code when it extracts to the
+    <strong>norma</strong> repository (the assembly-metrology sibling of nova; see
+    <code>nova-spine-refactor</code>).</p>
+    <p>Three coupled goals:</p>
+    <ul>
+      <li><strong>Provenance.</strong> Every fit ever performed becomes an immutable
+      <em>run record</em> keyed by the <strong>git commit hash of the code that produced it</strong>
+      (plus a dirty flag), the resolved dependency lock, the content digests of every input, and the
+      hash of the fit configuration. Given a result, you can always answer "which code, which data,
+      which settings produced this?".</li>
+      <li><strong>Persistence.</strong> The measurements are versioned in a
+      <strong>git-safe, human-diffable canonical form</strong> at full float precision, with the bulk
+      corpus content-addressed in an OCI registry (GHCR via ORAS — locked in
+      <code>nova-spine-refactor</code>) so nothing valuable lives only in a spreadsheet on one laptop.</li>
+      <li><strong>Testing.</strong> A <strong>two-tier replay suite unit-tests past fits across the
+      complete dataset</strong>: the fast tier re-runs every recorded fit with current code and
+      compares to its stored goldens within 1&nbsp;µm; the on-demand tier reconstructs the recorded
+      commit's environment to prove the record itself is faithful.</li>
+    </ul>
+    <p>This plan <strong>depends on</strong> <code>nova-spine-refactor</code> (the §2a characterization
+    harness and the branch restructure are its foundation) and reuses that harness's canonicalization,
+    tolerance-class and manifest machinery rather than reinventing them.</p>
+
+    <h2 id="s2">§2 — Data sources and the transaction boundary</h2>
+    <p>There are two recorded-data sources, neither currently in-repo:</p>
+    <ul>
+      <li><strong>Per-sector IDM workbooks</strong> — <code>Sector_Module_#N_..._vMAJ_MIN.xlsx</code>
+      (e.g. <code>Sector_Module_#1_CCL_as-built_data_8LMK6A_v8_1.xlsx</code>), read today via
+      <code>openpyxl.load_workbook</code> + <code>pandas.read_excel(sheet_name=&lt;phase&gt;, index_col=[0,1,2])</code>.
+      Each sheet is an assembly phase ("In-pit target", "SSAT&nbsp;BR", "TFGS Landing", …); "Metadata"/"Nominal"
+      are excluded from the fit read. The filename encodes an IDM document id (<code>8LMK6A</code>) and a
+      version (<code>vMAJ_MIN</code>); a leading <code>_</code> marks a <code>private</code> (in-work) revision.</li>
+      <li><strong>Nominal ILIS point cloud</strong> — <code>ILIS_nominal.txt</code> on a UNC share, read
+      by <code>NominalIlis</code> via <code>pandas.read_csv</code>.</li>
+    </ul>
+    <p>The design introduces <strong>one transaction boundary</strong> — a transcoder that is the single
+    place spreadsheets enter or leave the system. On ingest it reads <em>openpyxl cell values</em> (full
+    float precision, never display strings) and emits the canonical form (§3); on egress it can rebuild a
+    workbook for interchange. Everything downstream — fits, tests, training — reads only the canonical
+    form. The transcoder is also exactly the fixture-seeder the characterization harness needs to unblock
+    the currently-skipped <code>sector.fit</code>/<code>pit.gaps</code> lanes.</p>
+
+    <figure>
+      <svg viewBox="0 0 940 330" role="img"
+           aria-label="Data and provenance flow from IDM spreadsheets through the transcoder to the canonical dataset, fits, run records and the replay tests"
+           style="max-width:100%;height:auto;font-family:system-ui,sans-serif">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#555"/>
+          </marker>
+          <marker id="arrdash" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#b3261e"/>
+          </marker>
+        </defs>
+        <!-- stage boxes -->
+        <g font-size="13" fill="#1a1a1a" text-anchor="middle">
+          <rect x="10"  y="28" width="164" height="58" rx="4" fill="#ffffff" stroke="#888"/>
+          <text x="92" y="52">IDM sources</text><text x="92" y="70" font-size="11" fill="#555">.xlsx · ILIS .txt</text>
+
+          <rect x="206" y="28" width="164" height="58" rx="4" fill="#ffffff" stroke="#888"/>
+          <text x="288" y="52">Transcoder</text><text x="288" y="70" font-size="11" fill="#555">cell-values ⇄ canonical</text>
+
+          <rect x="402" y="28" width="164" height="58" rx="4" fill="#ffffff" stroke="#2b6cb0" stroke-width="2"/>
+          <text x="484" y="52">Canonical dataset</text><text x="484" y="70" font-size="11" fill="#555">git-diffable + manifest</text>
+
+          <rect x="598" y="28" width="150" height="58" rx="4" fill="#ffffff" stroke="#888"/>
+          <text x="673" y="52">Fit engine</text><text x="673" y="70" font-size="11" fill="#555">pinned fit-config</text>
+
+          <rect x="780" y="28" width="150" height="58" rx="4" fill="#ffffff" stroke="#2b6cb0" stroke-width="2"/>
+          <text x="855" y="49">Run record</text><text x="855" y="66" font-size="11" fill="#555">+ outputs → ORAS</text><text x="855" y="80" font-size="11" fill="#555">(by digest)</text>
+        </g>
+        <!-- arrows between stages -->
+        <g stroke="#555" stroke-width="1.5" marker-end="url(#arr)" fill="none">
+          <line x1="174" y1="57" x2="204" y2="57"/>
+          <line x1="370" y1="57" x2="400" y2="57"/>
+          <line x1="566" y1="57" x2="596" y2="57"/>
+          <line x1="748" y1="57" x2="778" y2="57"/>
+        </g>
+        <!-- provenance key callout -->
+        <g>
+          <rect x="560" y="150" width="370" height="82" rx="4" fill="#f4f8fc" stroke="#2b6cb0"/>
+          <rect x="560" y="150" width="5" height="82" fill="#2b6cb0"/>
+          <text x="576" y="172" font-size="12.5" fill="#1a1a1a" font-weight="bold">Every fit keyed by</text>
+          <text x="576" y="192" font-size="12" fill="#1a1a1a">· code git-sha (+dirty)   · uv.lock hash</text>
+          <text x="576" y="210" font-size="12" fill="#1a1a1a">· input-data digests   · fit-config hash</text>
+          <text x="576" y="226" font-size="11" fill="#555">→ the record is the provenance anchor for replay</text>
+        </g>
+        <line x1="855" y1="86" x2="855" y2="148" stroke="#2b6cb0" stroke-width="1.5" marker-end="url(#arr)" fill="none"/>
+        <!-- testing box -->
+        <g>
+          <rect x="150" y="258" width="360" height="52" rx="4" fill="#ffffff" stroke="#b3261e" stroke-width="2"/>
+          <text x="330" y="280" font-size="13" fill="#1a1a1a" text-anchor="middle" font-weight="bold">Replay &amp; regression</text>
+          <text x="330" y="298" font-size="12" fill="#555" text-anchor="middle">re-fit, compare within 1 µm</text>
+        </g>
+        <!-- dashed feedback into testing -->
+        <g stroke="#b3261e" stroke-width="1.3" stroke-dasharray="5 3" marker-end="url(#arrdash)" fill="none">
+          <path d="M484,86 L484,240 L400,240 L400,256"/>
+          <path d="M620,232 L560,250 L470,256"/>
+        </g>
+        <text x="470" y="325" font-size="11.5" fill="#333" text-anchor="middle">Fig 1 — one transaction boundary (the transcoder); every fit emits a commit-hash-keyed run record; tests replay the record against its goldens.</text>
+      </svg>
+    </figure>
+
+    <h2 id="s3">§3 — Canonical git-safe format</h2>
+    <p>The <code>.xlsx</code> are zip blobs: opaque to <code>git diff</code>, conflating measurement
+    data with presentation, and merge-hostile. The canonical form is <strong>long/tidy text</strong> —
+    one row per atomic measurement — so a change to a single fiducial shows as a single changed line in
+    review. Proposed columns (validated against the real workbook in §2's followup):</p>
+    <ul>
+      <li><code>sector</code>, <code>coil</code>, <code>phase</code> (assembly phase / sheet),
+      <code>feature</code> (fiducial or ILIS point id), <code>axis</code> (x/y/z or r/rphi/z),
+      <code>value</code> (float64, full precision), <code>units</code> (mm),
+      and the source keys <code>idm_doc</code>, <code>version</code>, <code>private</code>.</li>
+    </ul>
+    <p>Hard requirements on the format, whichever encoding is chosen (see the canonical-format decision):</p>
+    <ul>
+      <li><strong>Lossless round-trip</strong> xlsx→canonical→xlsx at full float precision, proven by a
+      round-trip test (bit-exact on the numeric cell values, never on display strings).</li>
+      <li><strong>Deterministic serialization</strong> — sorted keys, fixed float formatting
+      (<code>repr</code>-round-trippable), stable row order — so re-emitting an unchanged dataset yields a
+      byte-identical file and an empty diff.</li>
+      <li><strong>Content-addressable</strong> — a sha256 over the canonical bytes is the digest the run
+      record and the ORAS registry reference.</li>
+    </ul>
+    <p>Long-format CSV is the most diffable but verbose; Parquet is compact and exactly typed but binary
+    (needs a CSV sibling or an ORAS-only home to stay git-friendly). The choice is a locked-later decision;
+    the <em>schema</em> above is format-independent.</p>
+
+    <h2 id="s4">§4 — Provenance model and run records</h2>
+    <p>Every production alignment emits an immutable <strong>run record</strong> — a small JSON document
+    (an extension of the characterization harness's manifest entry) that is the single source of truth for
+    "how this fit was produced":</p>
+    <ul>
+      <li><code>fit_id</code> — stable identifier (sector · phase · campaign · sequence).</li>
+      <li><code>code_git_sha</code> + <code>code_dirty</code> — the exact commit the fit ran on, and
+      whether the working tree was dirty. <strong>This is the commit-hash key the whole test system turns
+      on.</strong></li>
+      <li><code>uv_lock_sha256</code> — digest of the resolved <code>uv.lock</code>, pinning the dependency
+      closure (numpy/scipy/scikit-learn/… whose last bits move a fit).</li>
+      <li><code>input_digests</code> — sha256 of every canonical input consumed (the measurements, the
+      nominal ILIS cloud), so inputs are pinned by content, not path.</li>
+      <li><code>fit_config_sha256</code> — digest of the declarative fit configuration (§5).</li>
+      <li><code>outputs</code> — canonical output artifacts (positions, gaps, deviations, ILIS planes) with
+      their per-quantity tolerance class and sha256, stored in ORAS by digest.</li>
+      <li><code>env</code> — single-thread BLAS flag + key package versions; <code>operator</code>,
+      <code>timestamp</code>.</li>
+    </ul>
+    <p>Records are append-only and content-addressed: a fit is <em>replayable by construction</em> — restore
+    the lock, check out the sha, pull the input digests, re-run, compare within tolerance. The records live
+    beside the goldens and are pushed to the registry; the small, stable reference set is committed in-repo so
+    history is legible without the registry.</p>
+
+    <h2 id="s5">§5 — Fit configuration as versioned declarative files</h2>
+    <p>Fit parameters must never live only in a script or a notebook. Per-coil / per-campaign fit
+    configurations — GP length-scales and nuggets, weighting vectors (e.g. <code>[1, 1, 0.25]</code>),
+    constraint switches, the <code>fiducial_index</code> constraint sets, <code>radial_offset</code>,
+    augment/reference-version choices, the RNG seeds (<code>random_state=2025</code>, <code>sead</code>) —
+    become <strong>schema-validated declarative files</strong> (YAML or TOML; locked-later). Their sha256
+    enters the run record, so a fit's settings are as reproducible as its code and data. This is the same
+    provenance pattern nova's IMAS metadata stamping already uses, applied to metrology.</p>
+
+    <h2 id="s6">§6 — Dataset versioning and storage</h2>
+    <p>Two homes, chosen by size and stability, unified by content digests so items can move between them
+    without breaking any reference:</p>
+    <ul>
+      <li><strong>In-repo (git):</strong> the canonical form of the small, stable <em>reference</em> sets
+      that the fast test lane needs — a handful of sector/phase fixtures and their goldens. Diffable,
+      reviewable, travels with the code. These are "the record" and are never converted away.</li>
+      <li><strong>GHCR via ORAS (locked decision):</strong> the full measurement corpus and all historical
+      run-record outputs, pushed as OCI artifacts with immutable content digests and per-campaign tags.
+      Private packages under existing GitHub auth, CI-pullable, no repo bloat. The manifest references items
+      <em>by digest</em>, so the registry choice is swappable and in-repo↔registry moves are transparent.</li>
+    </ul>
+    <p>Rejected: git-lfs (couples data churn to the repo, quota-priced) and vendoring xlsx snapshots (opaque,
+    merge-hostile, schema-drift). The Excel originals are retained as the human ingest surface but are never
+    the canonical artifact.</p>
+
+    <h2 id="s7">§7 — Testing past fits (two-tier, commit-hash keyed)</h2>
+    <p>The registry enumerates <strong>every fit ever recorded</strong> — each an immutable run record (§4).
+    The suite iterates the whole registry; "complete dataset" means the full enumeration, with a
+    representative subset in the fast lane and the full set in the nightly / extraction gate.</p>
+    <ul>
+      <li><strong>Tier 1 — current-code regression (fast, CI default).</strong> For each record, re-run the
+      fit with <em>current</em> code, the record's pinned inputs (pulled from ORAS by digest) and its
+      fit-config, and compare outputs to the record's canonical goldens at the tolerance table (1&nbsp;µm on
+      mm; per-quantity elsewhere). Green ⇒ current code reproduces every historical alignment within
+      measurement noise. The stored <code>code_git_sha</code> documents which code produced the original;
+      a divergence is triaged by diffing <code>HEAD</code> against that sha — the commit hash makes the
+      regression <em>actionable</em>, not just red.</li>
+      <li><strong>Tier 2 — historical replay (on-demand, audit / extraction gate).</strong> Reconstruct the
+      recorded environment: <code>git worktree add</code> at <code>code_git_sha</code>, rebuild from the
+      recorded <code>uv.lock</code>, re-run, and confirm the record reproduces. This proves the record itself
+      is faithful and that the sha is meaningful. It is expensive (old wheels, old interpreters) and runs
+      selectively.</li>
+    </ul>
+    <p><strong>Honesty about feasibility ("if possible").</strong> Very old commits may not rebuild — a wheel
+    or interpreter may be gone. Tier 2 therefore <em>degrades gracefully and visibly</em>: a record that
+    passes Tier 1 but whose historical environment cannot be reconstructed is reported as
+    "reproduced by current code; historical env unreconstructable", logged in the run record, never silently
+    skipped. The invariant we can always hold is Tier 1: current code reproduces the stored goldens within
+    1&nbsp;µm. All of this reuses the §2a harness's canonicalization, tolerance and manifest code — a run
+    record <em>is</em> a manifest entry plus <code>{git-sha, uv.lock hash, fit-config hash, operator}</code>.</p>
+
+    <h2 id="s8">§8 — Integration with the characterization harness</h2>
+    <p>The <code>nova-spine-refactor</code> §2a harness already provides the substrate: canonical
+    <code>.npz</code> serialization, the tolerance classes (1&nbsp;µm on mm; angle/coefficient/hyperparameter
+    elsewhere), the sha256-fingerprint manifest and the single-thread env-lock. This plan extends it rather
+    than duplicating it: the fit registry is the manifest with provenance fields added, and seeding the
+    transcoder's canonical fixtures unblocks the harness's currently-skipped <code>sector.fit.ssat</code> and
+    <code>pit.gaps</code> lanes (they skip today only because the workbooks are off-repo). The discovered
+    source issues recorded there (pyvista <code>cell_points</code> drift; the <code>private=</code> kwarg
+    fan-out; the always-true sector-coupling branch) are fixed as part of standing up the norma fit path.</p>
+
+    <h2 id="s9">§9 — Branch and repository model (and the planning snag)</h2>
+    <p><strong>Current branch setup</strong> (after <code>nova-spine-refactor</code> §2, on
+    <code>Simon-McIntosh/nova</code>):</p>
+    <ul>
+      <li><code>main</code> — the live 1.x line and the <strong>default branch</strong>. The assembly tree
+      (<code>nova/assembly</code>, <code>nova/structural</code>) lives here and assembly work continues here
+      uninterrupted. Carries the reckon plans.</li>
+      <li><code>legacy/v1</code> + tag <code>v1-assembly-baseline</code> — the frozen goldens-green baseline,
+      branch-protected (no force-push, no deletion).</li>
+      <li><code>develop</code> — the 2.0 physics-spine line, cut from the baseline; the assembly tree is
+      deleted here.</li>
+    </ul>
+
+    <figure>
+      <svg viewBox="0 0 900 250" role="img"
+           aria-label="Branch topology: main carries assembly and plans; legacy/v1 frozen; develop deletes assembly; norma extracts from main by git filter-repo"
+           style="max-width:100%;height:auto;font-family:system-ui,sans-serif">
+        <defs>
+          <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#2b6cb0"/>
+          </marker>
+        </defs>
+        <!-- main line -->
+        <line x1="40" y1="60" x2="560" y2="60" stroke="#555" stroke-width="2"/>
+        <circle cx="130" cy="60" r="6" fill="#2b6cb0"/>
+        <circle cx="330" cy="60" r="6" fill="#2b6cb0"/>
+        <text x="40" y="44" font-size="12.5" fill="#1a1a1a">main — live 1.x · assembly + plans + provenance work</text>
+        <text x="130" y="90" font-size="10.5" fill="#555" text-anchor="middle">baseline</text>
+        <text x="330" y="90" font-size="10.5" fill="#555" text-anchor="middle">plan record</text>
+        <!-- legacy/v1 -->
+        <line x1="130" y1="60" x2="130" y2="130" stroke="#7a52a3" stroke-width="1.6"/>
+        <circle cx="130" cy="130" r="5" fill="#7a52a3"/>
+        <text x="142" y="134" font-size="12" fill="#7a52a3">legacy/v1 🔒 + tag v1-assembly-baseline (frozen)</text>
+        <!-- develop -->
+        <line x1="130" y1="60" x2="330" y2="195" stroke="#e08a2b" stroke-width="1.6" stroke-dasharray="5 3"/>
+        <circle cx="330" cy="195" r="5" fill="#e08a2b"/>
+        <text x="342" y="199" font-size="12" fill="#c9761d">develop — 2.0 core (assembly deleted; use a worktree)</text>
+        <!-- norma repo box + extraction arrow -->
+        <rect x="640" y="30" width="230" height="62" rx="4" fill="#f4f8fc" stroke="#2b6cb0" stroke-width="2"/>
+        <text x="755" y="55" font-size="13" fill="#1a1a1a" text-anchor="middle" font-weight="bold">norma repo</text>
+        <text x="755" y="74" font-size="11" fill="#555" text-anchor="middle">assembly + provenance + harness</text>
+        <path d="M560,60 L638,61" stroke="#2b6cb0" stroke-width="1.6" marker-end="url(#a2)" fill="none"/>
+        <text x="600" y="34" font-size="10.5" fill="#2b6cb0" text-anchor="middle">git filter-repo</text>
+        <text x="600" y="120" font-size="11" fill="#333">nova/assembly + nova/structural + data trees — full history</text>
+        <text x="40" y="225" font-size="11.5" fill="#333">Fig 2 — norma work runs on <tspan font-weight="bold">main</tspan> until extraction, then continues on norma's own main. Plans stay on main; do develop code work in a separate worktree.</text>
+      </svg>
+    </figure>
+
+    <p><strong>Which branch the norma work runs on: <code>main</code>.</strong> The assembly code and the
+    recorded corpus live on <code>main</code>; <code>main</code> is the live line where assembly work
+    continues; and <code>develop</code> is actively deleting the assembly tree, so it is the wrong home.
+    All the work in this plan — transcoder, canonical format, run records, fit-config files, the replay
+    suite — is authored and committed on <code>main</code> until norma extracts to its own repository (by
+    <code>git filter-repo</code> from <code>main</code>/<code>legacy/v1</code>, carrying full history), after
+    which it continues on norma's own <code>main</code> and this plan is re-homed there via
+    <code>reckon-sync</code>.</p>
+
+    <p><strong>The planning snag, and how we avoid it.</strong> The reckon docs-server serves the
+    <em>working-tree</em> plan HTML of the registered checkout as canonical. If that checkout switches
+    between <code>main</code> and <code>develop</code>, the served plan state flips — and an uncommitted
+    plan edit on the wrong branch silently corrupts canonical state. The rule that removes the hazard:</p>
+    <ul>
+      <li><strong>Plans live on <code>main</code> only.</strong> All plan authoring and updates happen while
+      the registered checkout is on <code>main</code>. Commit and push plan edits in the same session (a
+      binding reckon rule) so live state never depends on an un-pushed file.</li>
+      <li><strong>Do <code>develop</code> (2.0 core) code work in a separate <code>git worktree</code></strong>
+      (<code>git worktree add ../nova-develop develop</code>) — never by switching the reckon checkout's
+      branch. Code lands on <code>develop</code> in its own tree; plans stay on <code>main</code>.</li>
+      <li><strong>Norma work needs no switching at all:</strong> it and its plan both live on
+      <code>main</code>, in one tree. That is the whole reason the norma work runs on <code>main</code>.</li>
+    </ul>
+
+    <h2 id="s10">§10 — Sequencing and rollout</h2>
+    <ol>
+      <li><strong>Access + schema validation.</strong> With laptop access up, enumerate
+      <code>sector_modules/</code>, open a real <code>Sector_Module_#N</code> workbook, and validate the §3
+      long-format schema against its actual sheet/index layout (behaviour-preserving against
+      <code>SectorData</code>/<code>SectorFile</code>).</li>
+      <li><strong>Transcoder + canonical format.</strong> Implement the single transaction boundary
+      (openpyxl cell-values ⇄ canonical) with the lossless round-trip test; lock the canonical-format and
+      fit-config-format decisions.</li>
+      <li><strong>Registry + provenance.</strong> Wire GHCR/ORAS push/pull; define the run-record schema;
+      commit the small reference fixtures in-repo. This also seeds the harness fixtures that unblock the
+      skipped sector/pit lanes.</li>
+      <li><strong>Replay suite.</strong> Build Tier 1 (current-code regression over the registry) and Tier 2
+      (sha-worktree historical replay), reusing the §2a harness machinery.</li>
+      <li><strong>Extraction.</strong> When the suite is green and the corpus is versioned by digest, extract
+      norma via <code>git filter-repo</code> and re-home this plan.</li>
+    </ol>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+
+      <div class="r-dec" data-key="canonical-format" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Canonical git-safe encoding for the measurement dataset. Long-format CSV/TSV
+        (maximally diffable, verbose, needs disciplined float formatting) — recommended for the in-repo
+        reference sets; Parquet + a CSV sibling (compact, exactly typed, but binary — the CSV carries the
+        diff); or JSON-per-fit (self-describing, nested, noisier diffs).</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="long-csv">long-format CSV/TSV (recommended)</button>
+          <button class="r-opt" data-value="parquet-csv">Parquet + CSV sibling</button>
+          <button class="r-opt" data-value="json-per-fit">JSON per fit</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+
+      <div class="r-dec" data-key="inrepo-vs-registry" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">What lives in-repo vs ORAS-only. Reference fixtures + goldens in-repo and the full
+        corpus + historical outputs in ORAS by digest (recommended); everything in ORAS with only digests
+        in-repo; or everything in-repo (rejected earlier as repo-bloating, but listed for completeness).</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="refs-inrepo-corpus-oras">refs in-repo, corpus in ORAS (recommended)</button>
+          <button class="r-opt" data-value="digests-only-inrepo">digests-only in-repo, all blobs in ORAS</button>
+          <button class="r-opt" data-value="all-inrepo">everything in-repo</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+
+      <div class="r-dec" data-key="replay-strategy" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Past-fit testing strategy. Two-tier — fast current-code regression against goldens
+        plus on-demand sha-worktree historical replay (recommended); current-code regression only (cheaper,
+        does not prove the record's own env); or full sha-checkout replay for every record (most rigorous,
+        often infeasible for old envs).</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="two-tier">two-tier: regression + on-demand replay (recommended)</button>
+          <button class="r-opt" data-value="regression-only">current-code regression only</button>
+          <button class="r-opt" data-value="full-replay">full sha-checkout replay always</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+
+      <div class="r-dec" data-key="fit-config-format" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Declarative fit-configuration file format (schema-validated; hash enters the run
+        record). YAML (readable, comments, ubiquitous) or TOML (stricter typing, no ambiguity)?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="yaml">YAML</button>
+          <button class="r-opt" data-value="toml">TOML</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-ndp-01" data-status="open" data-tier="opus"
+               data-written-by="reckon-create" data-written-at="2026-07-23" data-recommends-skill="/reckon-ship norma-data-provenance §2">
+        <h4 class="r-fu-title">Validate the canonical schema against a real Sector_Module workbook, then build the transcoder</h4>
+        <div class="r-fu-body"><p>Blocked on laptop access (the reverse SSH tunnel to the WSL host that
+        mounts <code>C:/Users/mcintos/AppData/Local/nova/sector_modules/</code> must be up). Once in,
+        enumerate the workbook set, dump the real sheet/index structure of
+        <code>Sector_Module_#1_CCL_as-built_data_8LMK6A_v8_1.xlsx</code>, validate the §3 long-format schema
+        against it, then implement the ingest/egress transcoder with the lossless round-trip test and lock
+        the canonical-format and fit-config-format decisions.</p></div>
+        <pre class="r-fu-prompt">Project: nova
+Plan:    norma-data-provenance (http://localhost:8765/nova/norma-data-provenance.html)
+Section: §2 (transaction boundary) + §3 (canonical format)
+Tier:    opus
+
+Context
+  This plan designs norma's data-provenance/persistence/testing system. Work runs
+  on the `main` branch (assembly tree + plans live there; develop deletes assembly).
+  First concrete step: ground the canonical schema in the REAL workbook, then build
+  the single transaction boundary. Honour the locked GHCR/ORAS registry decision;
+  surface the open canonical-format / fit-config-format / replay-strategy decisions.
+
+State to read  (code / data — not the plan)
+  ~/Code/nova/nova/assembly/sectordata.py, sectorfile.py   (the read contract:
+    openpyxl.load_workbook + pandas.read_excel(sheet_name=<phase>, index_col=[0,1,2]);
+    versioned filenames Sector_Module_#N_..._vMAJ_MIN.xlsx; leading _ = private)
+  ~/Code/nova/nova/assembly/ilisnominal.py                 (ILIS_nominal.txt reader)
+  ~/Code/nova/tests/characterization/  (harness: canonicalization, tolerance, manifest to reuse)
+  The real workbook on the laptop:
+    /mnt/c/Users/mcintos/AppData/Local/nova/sector_modules/*.xlsx  (via WSL over the SSH tunnel)
+
+Access
+  The laptop reverse tunnel must be up (see the tunnel discussion; imas-codex tunnel
+  / iter-reverse-tunnel). Auto-detect the reverse-shell port, ssh in, read read-only.
+
+Scope locks / constraints
+  Read openpyxl CELL VALUES (full float precision), never display strings. Canonical
+  serialization must be deterministic (sorted keys, fixed float formatting) and prove a
+  bit-exact xlsx→canonical→xlsx round-trip on numeric values. Reuse the §2a harness
+  machinery; do not reinvent tolerance/manifest code. Branch: main. Commit + push each
+  coherent change; no AI co-author trailer.
+
+Done-when
+  1. Real workbook structure documented; §3 schema validated/adjusted against it
+  2. Transcoder implemented with a passing lossless round-trip test
+  3. canonical-format + fit-config-format decisions locked
+  4. Followup written for §4/§6 (run records + registry) + this followup resolved</pre>
+      </article>
+    </section>
+
+  </main>
+</body>
+</html>

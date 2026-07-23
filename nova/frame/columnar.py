@@ -35,6 +35,10 @@ class Vector(np.ndarray):
         """Return column values as a python list."""
         return self.tolist()
 
+    def to_numpy(self) -> np.ndarray:
+        """Return the underlying ndarray without the Vector view."""
+        return self.view(np.ndarray)
+
     @property
     def values(self) -> np.ndarray:
         """Return the underlying ndarray without the Vector view."""

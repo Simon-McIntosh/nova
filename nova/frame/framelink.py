@@ -83,6 +83,17 @@ class FrameLink(DataArray):
     # -- union operators -----------------------------------------------------
 
     @staticmethod
+    def _default_index(frame) -> bool:
+        """Return True when a frame carries only the default positional index.
+
+        A default index (``0, 1, 2, …``, from either a pandas RangeIndex or the
+        columnar store's auto-labels) carries no naming intent, so an insert
+        should derive row labels from the label / delim tags instead.
+        """
+        labels = [str(label) for label in np.asarray(frame.index)]
+        return labels == [str(position) for position in range(len(labels))]
+
+    @staticmethod
     def isframe(obj, dataframe=True) -> bool:
         """Return True when obj is a frame (or a pandas.DataFrame interchange)."""
         if isinstance(obj, FrameLink):
@@ -149,8 +160,8 @@ class FrameLink(DataArray):
         index = self.build_index(length, **kwargs) if length else []
         return FrameLink(data, index=index, attrs={"metaframe": self.metaframe})
 
-    def concatenate(self, insert, iloc=None):
-        """Concatenate an assembled insert with self, then reinitialise."""
+    def concatenate(self, *inserts, iloc=None):
+        """Concatenate assembled insert(s) with self, then reinitialise."""
         store = ColumnStore(
             {
                 name: np.asarray(self._store.get(name))
@@ -159,18 +170,19 @@ class FrameLink(DataArray):
             index=list(self.index),
             defaults=self._store_defaults(),
         )
-        insert_store = ColumnStore(
-            {
-                name: np.asarray(insert._store.get(name))
-                for name in insert._store.column_names()
-            },
-            index=list(insert.index),
-            defaults=self._store_defaults(),
-        )
-        if len(store) == 0:
-            store = insert_store
-        else:
-            store.concatenate(insert_store, iloc=iloc)
+        for insert in inserts:
+            insert_store = ColumnStore(
+                {
+                    name: np.asarray(insert._store.get(name))
+                    for name in insert._store.column_names()
+                },
+                index=list(insert.index),
+                defaults=self._store_defaults(),
+            )
+            if len(store) == 0:
+                store = insert_store
+            else:
+                store.concatenate(insert_store, iloc=iloc)
         columns = {name: store.get(name) for name in store.column_names()}
         self.__init__(
             columns, index=list(store.index), attrs={"metaframe": self.metaframe}
@@ -198,7 +210,10 @@ class FrameLink(DataArray):
         args = [np.asarray(frame[col]) for col in required]
         for attr in required:
             kwargs.pop(attr, None)
-        kwargs["name"] = np.asarray(frame.index)
+        if not self._default_index(frame):
+            # a frame carrying meaningful labels supplies the row names; a
+            # default positional index defers naming to the label / delim tags
+            kwargs["name"] = np.asarray(frame.index)
         kwargs |= {
             col: np.asarray(frame[col])
             for col in self.metaframe.columns

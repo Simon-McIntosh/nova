@@ -54,6 +54,10 @@ class Vector(np.ndarray):
         """Return True when the vector holds no elements."""
         return self.size == 0
 
+    def unique(self) -> np.ndarray:
+        """Return unique values preserving first-seen order."""
+        return np.asarray(list(dict.fromkeys(self.tolist())), dtype=self.dtype)
+
 
 class Index(Vector):
     """String label index supporting position lookup.

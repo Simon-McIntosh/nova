@@ -144,7 +144,17 @@ class MultiPoint(metamethod.MultiPoint):
             self.frame.at[index[i], "link"] = str(name)
             self.frame.at[index[i], "factor"] = factor[i - 1]
         if self.frame.lock("multipoint") is False:
-            self.frame.__init__(self.frame, attrs=self.frame.attrs)
+            # snapshot the store before reinitialising: __init__ clears _store
+            # before reading its data, so a bare self-reinit would empty the frame
+            columns = {
+                name: np.asarray(self.frame._store.get(name))
+                for name in self.frame._store.column_names()
+            }
+            self.frame.__init__(
+                columns,
+                index=list(self.frame.index),
+                attrs={"metaframe": self.frame.metaframe},
+            )
 
     def drop(self, index):
         """Reset links referencing dropped rows, then rebuild."""

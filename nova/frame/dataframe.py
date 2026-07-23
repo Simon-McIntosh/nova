@@ -104,6 +104,12 @@ class DataFrame:
             )
             self._store.index = Index(list(index))
         else:
+            if index is None and source_index is not None:
+                # a frame input carries its own labels; adopt them unless they
+                # are only a default positional index (then defer to build_index)
+                labels = [str(label) for label in np.asarray(source_index)]
+                if labels != [str(position) for position in range(len(labels))]:
+                    index = labels
             if length == 0 and index is not None:
                 length = len(list(index))
             built_index = self._build_index(length, index)
@@ -530,8 +536,26 @@ class DataFrame:
             columns = {name: np.asarray(dataset[name]) for name in dataset.data_vars}
             index = np.asarray(dataset["index"]).astype(str)
         self.__init__(columns, index=list(index), **metadata)
+        for col in ("poly", "vtk"):
+            if col in self.columns:
+                self._loads(col)
         self.update_version()
         return self
+
+    def _loads(self, col):
+        """Rebuild geometry objects in a column from stored json strings."""
+        import json
+
+        def parse(geom):
+            if not geom:
+                return geom
+            try:
+                geo = json.loads(geom)["type"]
+            except (TypeError, ValueError, KeyError):
+                return geom  # not json-encoded geometry (e.g. a vtk blob)
+            return self.geoframe(geo).loads(geom)
+
+        self.loc[:, col] = [parse(geom) for geom in list(self[col])]
 
     def _extract_metadata(self):
         """Return schema metadata with the version promoted to a list."""

@@ -35,9 +35,16 @@ class ArrayLocIndexer:
         return len(self.attrs)
 
     def _rows(self, selector):
-        """Resolve a row selector to positions against the frame index."""
+        """Resolve a row selector to positions, a boolean mask or a label."""
         if isinstance(selector, str):
-            return self.frame.index.get_loc(selector)
+            if selector in self.frame:  # boolean column name (e.g. "plasma")
+                return np.asarray(self.frame[selector], dtype=bool)
+            try:
+                return self.frame.index.get_loc(selector)
+            except KeyError:
+                if "part" in self.frame:
+                    return np.asarray(self.frame["part"]) == selector
+                raise
         return selector
 
     def __getitem__(self, key):

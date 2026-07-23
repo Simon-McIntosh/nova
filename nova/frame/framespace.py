@@ -57,7 +57,22 @@ class FrameSpace(FrameLink):
         """Reject direct writes to a protected subspace column."""
         if self._subspace_active(col):
             raise SpaceKeyError("loc", col)
+        if col == "It" and self._energized("It") and self._subspace_active("Ic"):
+            # It couples onto a subspace-protected Ic; divert the derived current
+            # onto the independent-row subspace rather than the locked frame
+            current = np.asarray(value, dtype=float) / np.asarray(
+                self["nturn"], dtype=float
+            )
+            self._set_subspace_current(current)
+            return
         super().__setitem__(col, value)
+
+    def _set_subspace_current(self, current):
+        """Write a frame-aligned current array onto the subspace Ic column."""
+        current = np.broadcast_to(np.asarray(current, dtype=float), len(self))
+        positions = self.index.get_indexer(self.subspace.index)
+        with self.subspace.setlock(True, "subspace"):
+            self.subspace["Ic"] = current[positions]
 
     def __getattr__(self, name):
         """Inflate a subspace column accessed as an attribute."""
@@ -94,7 +109,7 @@ class FrameSpace(FrameLink):
             value = value[subref]
             if col == "Ic":
                 value = value * np.asarray(self["factor"], dtype=float)
-        except (KeyError, IndexError, TypeError):
+        except KeyError, IndexError, TypeError:
             pass
         with self.setlock(True, "subspace"):
             super().__setitem__(col, value.view(Vector))

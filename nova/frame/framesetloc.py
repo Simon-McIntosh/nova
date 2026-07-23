@@ -109,8 +109,20 @@ class LocIndexer:
         rows, col = self._split(key)
         self._check(col, setting=True)
         index = LabelAccessor(self.frame)._rows(rows)
+        whole = isinstance(index, slice) and index == slice(None, None, None)
+        energized = getattr(self.frame, "_energized", None)
+        if energized is not None and energized(col):
+            # It is derived from Ic * nturn, so it has no backing store array to
+            # write through; route the assignment onto Ic via the frame setter
+            if whole:
+                self.frame[col] = value
+            else:
+                derived = np.asarray(self.frame[col]).copy()
+                derived[index] = value
+                self.frame[col] = derived
+            return
         column = self.frame[col]
-        if isinstance(index, slice) and index == slice(None, None, None):
+        if whole:
             column[:] = value  # length-checked in place (ValueError on mismatch)
         else:
             column[index] = value

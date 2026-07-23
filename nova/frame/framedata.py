@@ -3,8 +3,7 @@
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 
-import pandas
-
+from nova.frame.columnar import is_list_like
 from nova.frame.framespace import FrameSpace
 
 
@@ -19,6 +18,40 @@ class FrameData:
     def frames(self):
         """Return frame and subframe."""
         return self.frame, self.subframe
+
+    @staticmethod
+    def row_records(frame, index, columns=None):
+        """Return per-label ``{column: value}`` records read from a frame.
+
+        Replaces the pandas ``frame.loc[index, :].iloc[i].to_dict()`` idiom:
+        each requested column is read once (inflating any subspace column) and
+        sampled by the integer position of every label in ``index``.
+        """
+        names = (
+            list(frame.columns)
+            if columns is None
+            else [col for col in columns if col in frame]
+        )
+        arrays = {name: frame[name] for name in names}
+        positions = [frame.index.get_loc(name) for name in index]
+        return [
+            {name: arrays[name][position] for name in names} for position in positions
+        ]
+
+    @staticmethod
+    def broadcast_row(mapping, position, length):
+        """Return a row view of ``mapping``, sampling per-row list-like values.
+
+        Mirrors constructing a table from a scalar-or-column mapping and reading
+        one row: a value whose length matches ``length`` is indexed at
+        ``position``; a scalar (or any other value) is passed through unchanged.
+        """
+        return {
+            key: value[position]
+            if is_list_like(value) and len(value) == length
+            else value
+            for key, value in mapping.items()
+        }
 
     @frames.setter
     def frames(self, frames):
@@ -101,7 +134,7 @@ class FrameData:
         """
         if index is None:  # drop all coils
             index = self.coil.index
-        if not pandas.api.types.is_list_like(index):
+        if not is_list_like(index):
             index = [index]
         loc = self.get_loc(index)
         for name in index:
@@ -130,7 +163,7 @@ class FrameData:
         """
         if index is None:
             index = self.coil.index
-        elif not pandas.api.types.is_list_like(index):
+        elif not is_list_like(index):
             index = [index]
         self.coil.translate(index, dx, dz)
         for name in index:

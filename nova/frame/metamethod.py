@@ -5,14 +5,13 @@ from importlib import import_module
 from typing import ClassVar
 
 import numpy as np
-import pandas
 
 
 @dataclass
 class MetaMethod:
     """Manage DataFrame methods."""
 
-    frame: pandas.DataFrame = field(repr=False)
+    frame: object = field(repr=False)
     required: list[str] = field(default_factory=list)
     base: list[str] = field(default_factory=list)
     additional: list[str] = field(default_factory=list)

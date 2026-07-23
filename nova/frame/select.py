@@ -4,7 +4,6 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-from nova.frame.dataframe import DataFrame
 import nova.frame.metamethod as metamethod
 
 
@@ -49,7 +48,7 @@ class Select(metamethod.Select):
 
     name = "select"
 
-    frame: DataFrame = field(repr=False)
+    frame: object = field(repr=False)
     additional: list[str] = field(
         init=False,
         default_factory=lambda: [
@@ -166,6 +165,8 @@ class Select(metamethod.Select):
 
 
 if __name__ == "__main__":
+    from nova.frame.dataframe import DataFrame
+
     dataframe = DataFrame(
         {
             "x": range(4),

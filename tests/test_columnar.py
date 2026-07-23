@@ -132,9 +132,7 @@ def test_store_concatenate_fills_missing_columns_with_default():
 
 
 def test_store_drop():
-    store = ColumnStore(
-        {"x": [1, 2, 3]}, index=["a", "b", "c"], defaults={"x": 0.0}
-    )
+    store = ColumnStore({"x": [1, 2, 3]}, index=["a", "b", "c"], defaults={"x": 0.0})
     store.drop([1])
     assert store.index.to_list() == ["a", "c"]
     assert store.get("x").to_list() == [1, 3]

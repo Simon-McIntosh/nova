@@ -5,6 +5,7 @@ import pytest
 import pandas
 import xxhash
 
+from nova.frame.columnar import ColumnStore
 from nova.frame.dataframe import DataFrame
 from nova.frame.error import ColumnError
 
@@ -14,8 +15,9 @@ def test_instance():
     assert isinstance(dataframe, DataFrame)
 
 
-def test_dataframe_subclass():
-    assert issubclass(DataFrame, pandas.DataFrame)
+def test_dataframe_columnar_store():
+    dataframe = DataFrame({"x": range(3)}, Required=["x"])
+    assert isinstance(dataframe._store, ColumnStore)
 
 
 def test_init_metadata():

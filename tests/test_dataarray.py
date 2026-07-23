@@ -3,7 +3,6 @@ import tempfile
 
 import pytest
 import numpy as np
-import pandas
 import xxhash
 
 from nova.frame.dataarray import DataArray
@@ -42,11 +41,11 @@ def test_set_slice_on_array_variable():
     assert list(dataarray.x) == [1, 6, 7]
 
 
-def test_warn_set_slice_on_frame():
+def test_masked_loc_assignment_writes_selected_rows():
     dataarray = DataArray({"x": [3, 2, 5, 7, 6], "z": 0}, Array=["x"])
     index = dataarray.x < 4
-    with pytest.warns(pandas.errors.SettingWithCopyWarning):
-        dataarray.loc[index, :].x = 5
+    dataarray.loc[index, "x"] = 5
+    assert dataarray.x.to_list() == [5, 5, 5, 7, 6]
 
 
 def test_set_slice_on_col():

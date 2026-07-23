@@ -146,7 +146,7 @@ class Solve(GroupSet):
         """Return matrix coordinate, reduce if flag True."""
         biotframe = getattr(self, frame)
         if biotframe.reduce:
-            return biotframe.biotreduce.index.to_list()
+            return list(biotframe.biotreduce.index)
         return biotframe.index.to_list()
 
     def compose(self):

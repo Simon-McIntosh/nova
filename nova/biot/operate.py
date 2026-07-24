@@ -10,11 +10,9 @@ import xarray
 from nova.biot.data import Data
 from nova.frame.framesetloc import ArrayLocIndexer
 
-# from nova.jax.operate import Operator, Operators
-
 
 @dataclass
-class Operator:
+class NumpyOperator:
     """Fast array opperations for Biot Data arrays."""
 
     aloc: ArrayLocIndexer
@@ -80,6 +78,12 @@ class Operator:
             self.source_target[self.target_plasma_index, self.source_plasma_index] = (
                 plasma_nturn @ self.plasma_plasma @ plasma_nturn
             )
+
+
+try:  # jitted operator is the primary path; numpy is the fallback
+    from nova.jax.operate import BiotOperator as Operator
+except ImportError:  # jax extra absent
+    Operator = NumpyOperator
 
 
 @dataclass

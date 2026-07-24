@@ -1,4 +1,12 @@
-"""Jax backed free-boundary equilibrium solver."""
+"""Jitted flux operator for the forward free-boundary equilibrium solve.
+
+The eager Newton-Krylov path in :mod:`nova.equilibrium.forward` drives the
+plasma component's write-then-read cycle; this module carries the same
+free-boundary map as a fixed-shape JAX pytree, so the residual is
+differentiable and a batch of slices can be solved under ``vmap``. It is kept
+apart from :mod:`nova.equilibrium.forward` so importing the eager solver does
+not require the optional jax extra.
+"""
 
 from dataclasses import dataclass, field
 from functools import cached_property
@@ -15,8 +23,19 @@ from nova.jax.topology import Topology
 
 @dataclass
 @jax.tree_util.register_pytree_node_class
-class Plasma(Pytree):
-    """Update plasma current."""
+class ForwardFluxOperator(Pytree):
+    """Map a trial poloidal flux to the flux its plasma current generates.
+
+    The total flux on the concatenated grid and wall targets is the sum of the
+    external contribution (all conductors except the plasma) and the internal
+    contribution of the plasma filaments, whose current follows from the trial
+    flux through the flux functions :math:`p'(\\psi_N)` and
+    :math:`FF'(\\psi_N)`. The plasma current is rescaled to the prescribed net
+    current, so the free-boundary fixed point conserves :math:`I_p`.
+
+    A root of :meth:`residual` is a free-boundary equilibrium. All fluxes are
+    total poloidal fluxes, :math:`\\Phi = 2 \\pi R A_\\phi` in Wb.
+    """
 
     grid: Target
     wall: Target
@@ -28,7 +47,7 @@ class Plasma(Pytree):
     polarity: int
 
     def __post_init__(self):
-        """Generate topology instance."""
+        """Generate topology instance and split plasma from external current."""
         self.topology = Topology(self.grid.null, self.wall.null)
         self.net_plasma_current = self.current[self.plasma_index]
         self.external_current = self.current.at[self.plasma_index].set(0.0)

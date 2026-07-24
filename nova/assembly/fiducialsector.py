@@ -4,7 +4,6 @@ from dataclasses import dataclass, field
 from typing import ClassVar
 from warnings import warn
 
-import altair as alt
 import itertools
 import numpy as np
 import pandas
@@ -12,11 +11,12 @@ from scipy.spatial.transform import Rotation
 
 from nova.assembly.fiducialccl import Fiducial, FiducialRE, FiducialIDM
 from nova.assembly.fiducialilis import FiducialIlis
-from nova.assembly.ilisnominal import NominalIlis
 from nova.assembly.sectordata import SectorData
 from nova.assembly.transform import Rotate
 
-alt.renderers.enable("html")
+# ILIS reference radius (mm) used to express toroidal position as an arc
+# length ro * phi, matching the value seeded when the point clouds are loaded.
+ILIS_RADIUS = 2600
 
 
 @dataclass
@@ -1060,218 +1060,241 @@ class FiducialSector(Fiducial):
 
         return fig, ax
 
+    def ccl_cylindrical(
+        self, targets: tuple[str, ...] = ("A", "B", "H")
+    ) -> pandas.DataFrame:
+        """Return inboard CCL fiducial positions in cylindrical sector coords.
 
-if __name__ == "__main__":
-    phase = "SSAT BR"
-    phase = "SSAT target"
-    # phase = "SSAT AR"
-    # phase = "SSAT AL"
-    # phase = "SSAT AR2"
-    # phase = "SSAT AR target"
-    # phase = "In-pit target"
-    # phase = "TFGS Landing"
+        Combines each coil's measured CCL deltas with their nominal targets,
+        adds cylindrical columns (``r``, ``phi``, ``ro_phi``), restricts to the
+        inboard CCL fiducials and to the coils that carry ILIS point clouds
+        (the surfaces the downstream midplane analysis needs).
 
-    sectors = {7: [8, 9]}
-    # sectors = {6: [12, 13]}
-    # sectors = {5: [16, 5]}
-    sectors = {8: [4, 11]}
-    # sectors = {4: [2, 3]}
-    sectors = {1: [14, 15]}
+        Returns
+        -------
+        pandas.DataFrame
+            Long-format CCL points with columns
+            ``Name, x, y, z, r, phi, ro_phi, coil, feature``.
+        """
+        ccl = pandas.concat(self.delta).rename(
+            {"dx": "x", "dy": "y", "dz": "z"}, axis=1
+        ) + pandas.concat(self.fiducial_target)
+        ccl.loc[:, "r"] = np.linalg.norm(ccl.loc[:, ["x", "y"]], axis=1)
+        ccl.loc[:, "phi"] = np.arctan2(ccl.y, ccl.x)
+        ccl.loc[:, "ro_phi"] = ILIS_RADIUS * ccl.phi
+        ccl.loc[:, "coil"] = ccl.index.get_level_values(0)
+        ccl = ccl.droplevel(0)
+        ccl.reset_index(inplace=True, names="Name")
+        ccl = ccl.loc[ccl.Name.map(lambda name: name in targets)]
+        ccl.loc[:, "feature"] = "CCL"
 
-    fiducial = FiducialSector(phase=phase, sectors=sectors, private=True)
-    fiducial.compare("IDM")
+        # drop coils with no ILIS surfaces
+        ilis_coils = self.ilis.coil.unique() if len(self.ilis) else []
+        ccl = ccl[ccl.coil.map(lambda coil: coil in ilis_coils)]
+        return ccl
 
-    deviation = fiducial.ccl_deviation()
-    print("\nCCL deviation (measurement - datum), constrained dirs only:")
-    print(deviation.to_string())
+    def _clock_frame(self, frame: pandas.DataFrame, coil, cords) -> pandas.DataFrame:
+        """Clock the named coordinate blocks of a frame to the sector frame.
 
-    # Cylindrical deviation using FiducialFit's delta() method
-    from nova.assembly.fiducialassess import FiducialAssess
+        First coil in the sector rotates anticlock, the second clock, matching
+        :meth:`_clock_coil`. ``cords`` is an iterable of column-name tuples,
+        each rotated as a rigid vector block (e.g. positions and normals).
+        """
+        rotate = Rotate()
+        coil_list = list(self.delta.keys())
+        transform = rotate.anticlock if coil_list.index(coil) == 0 else rotate.clock
+        frame = frame.copy()
+        for cord in cords:
+            columns = list(cord)
+            frame.loc[:, columns] = transform(frame.loc[:, columns].values)
+        return frame
 
-    assess = FiducialAssess(
-        phase=phase,
-        sectors=sectors,
-        fill=False,
-        infer=True,
-        ilis=True,
-        ilis_pcr=True,
-        method="rms",
-        coupled=False,
-        private=True,
-    )
-    assess.build()
+    def sector_offset_grid(
+        self,
+        n_r: int = 20,
+        n_z: int = 40,
+        pcr: bool = False,
+    ) -> tuple[pandas.DataFrame, list[str]]:
+        """Return ILIS surface offsets sampled on an (r, z) grid, sector frame.
 
-    print("\nCylindrical deviation (dr, r*dphi, dz), constrained dirs only:")
-    print(assess.deviation("fiducial").to_string())
+        Clocks each coil's ILIS planes and point clouds into the shared sector
+        midplane frame. For a two-coil sector the facing surfaces (the ``+1``
+        side of the first coil and the ``-1`` side of the second) are
+        intersected to define the inter-coil midplane; each surface's signed
+        offset from that midplane is interpolated onto an ``(r, z)`` grid and
+        the two are differenced to give the gap plane. For a single-coil sector
+        both ILIS surfaces are measured against the coil's own midplane and no
+        gap is formed.
 
-    print("\nError summary (constrained fiducials):")
-    print(assess.summary("fiducial").to_string())
+        Parameters
+        ----------
+        n_r, n_z : int
+            Grid resolution in radius and height.
+        pcr : bool
+            Apply PCR deviation corrections to the ILIS planes.
 
-    # Gap profile at inner radius
-    if len(list(fiducial.delta.keys())) >= 2:
-        profile = fiducial.gap_profile()
-        print(f"\nMean gap: {profile.gap.mean():.3f} mm")
-        fiducial.plot_gap_profile()
+        Returns
+        -------
+        plot_data : pandas.DataFrame
+            Long-format offsets with columns ``Name, r, z, offset, coil,
+            feature`` (plus a ``Gap`` feature for the two-coil case).
+        facet_sort : list[str]
+            Feature order for facetted display.
+        """
+        from scipy.interpolate import griddata
 
-    ccl = pandas.concat(fiducial.delta).rename(
-        {"dx": "x", "dy": "y", "dz": "z"}, axis=1
-    ) + pandas.concat(fiducial.fiducial_target)
-    ccl.loc[:, "r"] = np.linalg.norm(ccl.loc[:, ["x", "y"]], axis=1)
-    ccl.loc[:, "phi"] = np.arctan2(ccl.y, ccl.x)
-    ccl.loc[:, "ro_phi"] = 2600 * ccl.phi
-    ccl.loc[:, "coil"] = ccl.index.get_level_values(0)
-    ccl = ccl.droplevel(0)
-    ccl.reset_index(inplace=True, names="Name")
-    ccl = ccl.loc[ccl.Name.map(lambda i: i in ["A", "B", "H"])]
-    ccl.loc[:, "feature"] = "CCL"
+        ilis = FiducialIlis(self.ilis, pcr=pcr)
+        coil_list = list(self.delta.keys())
 
-    # drop coils with no ilis
-    ccl = ccl[ccl.coil.map(lambda x, coils=fiducial.ilis.coil.unique(): x in coils)]
+        sector_planes = ilis.planes.groupby(["coil"], group_keys=False).apply(
+            lambda x: self._clock_frame(
+                x, x.name, cords=(("x", "y", "z"), ("nx", "ny", "nz"))
+            )
+        )
+        sector_data = ilis.data.groupby(["coil"], group_keys=False).apply(
+            lambda x: self._clock_frame(x, x.name, cords=(("x", "y", "z"),))
+        )
 
-    """
-    ccl_a = ccl.copy()
-    ccl_a.loc[:, "ilis"] = fiducial.ilis.type.iloc[-1]
-
-    ccl_b = ccl.copy()
-    ccl_b.loc[:, "ilis"] = fiducial.ilis.type.iloc[0]j
-
-    ccl = pandas.concat([ccl_a, ccl_b], axis=0)
-    """
-
-    ilis = FiducialIlis(fiducial.ilis, pcr=False)
-    nominal = NominalIlis()
-
-    from nova.assembly.transform import Rotate
-    from scipy.interpolate import griddata
-
-    rotate = Rotate()
-
-    def clock(plane, coil, cords=[("x", "y", "z")]):
-        if list(sectors.values())[0].index(coil) == 0:
-            transform = rotate.anticlock
-        else:
-            transform = rotate.clock
-
-        for c in cords:
-            plane.loc[:, c] = transform(plane.loc[:, c])
-        return plane
-
-    coil_list = list(sectors.values())[0]
-    has_two_coils = len(coil_list) >= 2
-
-    sector_planes = ilis.planes.groupby(["coil"], group_keys=False).apply(
-        lambda x: clock(x, x.name, cords=[("x", "y", "z"), ("nx", "ny", "nz")])
-    )
-
-    sector_data = ilis.data.groupby(["coil"], group_keys=False).apply(
-        lambda x: clock(x, x.name)
-    )
-
-    grid_r, grid_z = np.mgrid[
-        slice(ilis.data.r.min(), ilis.data.r.max(), 20j),
-        slice(ilis.data.z.min(), ilis.data.z.max(), 40j),
-    ]
-
-    if has_two_coils:
-        # Two-coil gap analysis: intersect facing ILIS planes from adjacent coils
-        sector_index = [
-            (coil, plane) for coil, plane in zip(coil_list, ("ILIS +1", "ILIS -1"))
+        # z-clocking leaves r and z invariant, so the grid bounds are stable
+        grid_r, grid_z = np.mgrid[
+            slice(ilis.data.r.min(), ilis.data.r.max(), complex(0, n_r)),
+            slice(ilis.data.z.min(), ilis.data.z.max(), complex(0, n_z)),
         ]
 
-        midplane = ilis.intersect(sector_planes.loc[sector_index])
+        if len(coil_list) >= 2:
+            # Two-coil gap analysis: intersect facing ILIS planes
+            sector_index = [
+                (coil, plane) for coil, plane in zip(coil_list, ("ILIS +1", "ILIS -1"))
+            ]
+            midplane = ilis.intersect(sector_planes.loc[sector_index])
 
-        offset = []
-        offset_data_list = []
-        grid_y_list = []
-
-        for coil, feature in sector_index:
-            plane_index = (sector_data.coil == coil) & (sector_data.feature == feature)
-            plane_offset = ilis.offset(
-                sector_data.loc[plane_index, ("x", "y", "z")], midplane
-            )
-
-            offset.append(
-                griddata(
-                    sector_data.loc[plane_index, ("r", "z")],
-                    plane_offset,
-                    (grid_r, grid_z),
-                    method="linear",
+            offset = []
+            offset_data_list = []
+            for coil, feature in sector_index:
+                plane_index = (sector_data.coil == coil) & (
+                    sector_data.feature == feature
                 )
+                plane_offset = ilis.offset(
+                    sector_data.loc[plane_index, ["x", "y", "z"]], midplane
+                )
+                offset.append(
+                    griddata(
+                        sector_data.loc[plane_index, ["r", "z"]],
+                        plane_offset,
+                        (grid_r, grid_z),
+                        method="linear",
+                    )
+                )
+                plane_data = sector_data.loc[plane_index, ["Name", "r", "z"]].copy()
+                plane_data["offset"] = plane_offset
+                plane_data["coil"] = coil
+                plane_data["feature"] = feature
+                offset_data_list.append(plane_data)
+
+            offset_df = pandas.concat(offset_data_list, ignore_index=True)
+            first_plane = offset_df[offset_df["feature"] == sector_index[0][1]].copy()
+            last_plane = offset_df[offset_df["feature"] == sector_index[-1][1]].copy()
+
+            gap_plane = pandas.DataFrame(
+                {
+                    "r": grid_r.flatten(),
+                    "z": grid_z.flatten(),
+                    "offset": offset[1].flatten() - offset[0].flatten(),
+                }
             )
+            gap_plane["coil"] = 0
+            gap_plane["feature"] = "Gap"
 
-            # Store offset data for plotting
-            plane_data = sector_data.loc[plane_index, ["Name", "r", "z"]].copy()
-            plane_data["offset"] = plane_offset
-            plane_data["coil"] = coil
-            plane_data["feature"] = feature
-            offset_data_list.append(plane_data)
-
-            plane = sector_planes.loc[(coil, feature)]
-            print(plane.nx)
-            grid_y_list.append(
-                plane.y
-                - (plane.nx * (grid_r - plane.x) + plane.nz * (grid_z - plane.z))
-                / plane.ny
+            plot_data = pandas.concat(
+                [first_plane, gap_plane, last_plane], ignore_index=True
             )
+            facet_sort = ["ILIS +1", "Gap", "ILIS -1"]
+        else:
+            # Single-coil: both ILIS planes relative to the coil's own midplane
+            coil = coil_list[0]
+            sector_index = [(coil, "ILIS +1"), (coil, "ILIS -1")]
+            coil_midplane = ilis.planes.loc[(coil, "ILIS 0")]
 
-        grid_y = grid_y_list[1] - grid_y_list[0]
+            offset_data_list = []
+            for _, feature in sector_index:
+                plane_index = (sector_data.coil == coil) & (
+                    sector_data.feature == feature
+                )
+                plane_offset = ilis.offset(
+                    sector_data.loc[plane_index, ["x", "y", "z"]], coil_midplane
+                )
+                plane_data = sector_data.loc[plane_index, ["Name", "r", "z"]].copy()
+                plane_data["offset"] = plane_offset
+                plane_data["coil"] = coil
+                plane_data["feature"] = feature
+                offset_data_list.append(plane_data)
 
-        # Combine all offset data
-        offset_df = pandas.concat(offset_data_list, ignore_index=True)
+            plot_data = pandas.concat(offset_data_list, ignore_index=True)
+            facet_sort = ["ILIS +1", "ILIS -1"]
 
-        # Create first and last plane dataframes
-        first_plane = offset_df[offset_df["feature"] == sector_index[0][1]].copy()
-        last_plane = offset_df[offset_df["feature"] == sector_index[-1][1]].copy()
+        return plot_data, facet_sort
 
-        gap_plane = pandas.DataFrame(
-            {
-                "r": grid_r.flatten(),
-                "z": grid_z.flatten(),
-                "offset": offset[1].flatten() - offset[0].flatten(),
-            }
+    def project_ccl_to_midplane(self, pcr: bool = False) -> pandas.DataFrame:
+        """Merge ILIS points with inboard CCL fiducials projected to the midplane.
+
+        Returns the ILIS point cloud together with both the original and the
+        ILIS-midplane projected inboard CCL fiducials (A, B, H). Projected
+        copies are renamed with a trailing prime and tagged ``type='projected'``
+        (originals ``type='original'``), with cylindrical columns recomputed for
+        the projected positions.
+
+        Parameters
+        ----------
+        pcr : bool
+            Apply PCR deviation corrections to the ILIS planes.
+        """
+        ilis = FiducialIlis(self.ilis, pcr=pcr)
+        ccl = self.ccl_cylindrical()
+
+        data = pandas.merge(ilis.data, ccl, how="outer")
+
+        data.loc[data.feature == "CCL", "type"] = "original"
+        ccl_points = data.loc[data.feature == "CCL", :].copy()
+
+        ccl_index = data.feature == "CCL"
+        data.loc[ccl_index, ["x", "y", "z"]] = ilis.project(data.loc[ccl_index, :])
+        data.loc[ccl_index, "r"] = np.linalg.norm(
+            data.loc[ccl_index, ["x", "y"]], axis=1
         )
-        gap_plane["coil"] = 0
-        gap_plane["feature"] = "Gap"
-
-        # Combine all data for plotting
-        plot_data = pandas.concat(
-            [first_plane, gap_plane, last_plane], ignore_index=True
+        data.loc[ccl_index, "phi"] = np.arctan2(
+            data.loc[ccl_index, "y"], data.loc[ccl_index, "x"]
         )
-        facet_sort = ["ILIS +1", "Gap", "ILIS -1"]
+        data.loc[ccl_index, "ro_phi"] = ILIS_RADIUS * data.loc[ccl_index, "phi"]
 
-    else:
-        # Single-coil analysis: show both ILIS planes relative to coil's own midplane
-        print("Single coil analysis: gap calculation skipped (requires 2 coils)")
+        data.loc[data.feature == "CCL", "Name"] = data.loc[
+            data.feature == "CCL", "Name"
+        ].map(lambda name: f"{name}'")
+        data.loc[data.feature == "CCL", "type"] = "projected"
 
-        coil = coil_list[0]
-        sector_index = [(coil, "ILIS +1"), (coil, "ILIS -1")]
+        return pandas.concat([data, ccl_points])
 
-        # Use coil's own midplane for offset calculations
-        coil_midplane = ilis.planes.loc[(coil, "ILIS 0")]
 
-        offset_data_list = []
-        for _, feature in sector_index:
-            plane_index = (sector_data.coil == coil) & (sector_data.feature == feature)
-            plane_offset = ilis.offset(
-                sector_data.loc[plane_index, ("x", "y", "z")], coil_midplane
-            )
-            plane_data = sector_data.loc[plane_index, ["Name", "r", "z"]].copy()
-            plane_data["offset"] = plane_offset
-            plane_data["coil"] = coil
-            plane_data["feature"] = feature
-            offset_data_list.append(plane_data)
+def sector_offset_chart(
+    plot_data: pandas.DataFrame,
+    facet_sort: list[str],
+    title: str,
+    radius_domain: tuple[float, float] = (2000, 3200),
+):
+    """Return a facetted altair scatter of per-surface ILIS offsets.
 
-        plot_data = pandas.concat(offset_data_list, ignore_index=True)
-        facet_sort = ["ILIS +1", "ILIS -1"]
+    Constructs (never shows) the chart; altair is imported lazily so importing
+    this module does not require the optional charting dependency.
+    """
+    import altair as alt
 
-    # Create Altair chart
-    sector_number = next(iter(sectors.keys()))
-    offset_chart_title = f"Sector {sector_number} - {phase}"
     base = alt.Chart(plot_data).mark_circle(size=60)
-
-    chart = (
+    return (
         base.encode(
-            x=alt.X("r:Q", title="Radius (r)", scale=alt.Scale(domain=[2000, 3200])),
+            x=alt.X(
+                "r:Q",
+                title="Radius (r)",
+                scale=alt.Scale(domain=list(radius_domain)),
+            ),
             y=alt.Y("z:Q", title="Height (z)"),
             color=alt.Color(
                 "offset:Q",
@@ -1287,7 +1310,7 @@ if __name__ == "__main__":
             ],
             facet=alt.Facet(
                 "feature:N",
-                title=offset_chart_title,
+                title=title,
                 header=alt.Header(labelFontSize=12),
                 sort=facet_sort,
             ),
@@ -1298,47 +1321,16 @@ if __name__ == "__main__":
         .interactive()
     )
 
-    chart.show()
 
-    # print(nominal.angle_to_xz(nominal.planes))
+def ilis_scatter_chart(data: pandas.DataFrame, title: str):
+    """Return a facetted altair scatter of ILIS points and projected CCL.
 
-    print("***")
+    Constructs (never shows) the chart; altair is imported lazily. ``data`` is
+    the frame returned by :meth:`FiducialSector.project_ccl_to_midplane`.
+    """
+    import altair as alt
 
-    print(nominal.analize_offsets(fiducial.ilis))
-
-    print(nominal.analize_offsets(ilis.planes))
-
-    print("***")
-
-    data = pandas.merge(ilis.data, ccl, how="outer")
-
-    # data.loc[:, 'ro_phi'] = data.x
-
-    data.loc[data.feature == "CCL", "type"] = "original"
-    ccl_points = data.loc[data.feature == "CCL", :].copy()
-
-    ccl_index = data.feature == "CCL"
-
-    data.loc[ccl_index, ["x", "y", "z"]] = ilis.project(data.loc[ccl_index, :])
-    data.loc[ccl_index, "r"] = np.linalg.norm(data.loc[ccl_index, ["x", "y"]], axis=1)
-    data.loc[ccl_index, "phi"] = np.arctan2(
-        data.loc[ccl_index, "y"], data.loc[ccl_index, "x"]
-    )
-    data.loc[ccl_index, "ro_phi"] = 2600 * data.loc[ccl_index, "phi"]
-
-    # data.loc[:, "phi"] -= data.loc[:, "phi"].mean()
-
-    data.loc[data.feature == "CCL", "Name"] = data.loc[
-        data.feature == "CCL", "Name"
-    ].map(lambda name: f"{name}'")
-
-    data.loc[data.feature == "CCL", "type"] = "projected"
-
-    data = pandas.concat([data, ccl_points])
-
-    # data.loc[:, "ro_phi"] = data.y
-
-    # Calculate x-axis scale from clean (non-outlier) ILIS data
+    # x-axis scale from clean (non-outlier) ILIS data; outliers may clip
     ilis_mask = data.feature.isin(["ILIS +1", "ILIS -1"])
     clean_mask = ilis_mask & (~data.outlier.fillna(False))
     if clean_mask.sum() > 0:
@@ -1349,7 +1341,7 @@ if __name__ == "__main__":
             clean_ro_phi.max() + ro_phi_margin,
         ]
     else:
-        ro_phi_domain = None  # Use automatic scaling
+        ro_phi_domain = None
 
     base = alt.Chart(data, width=125, height=175)
 
@@ -1358,11 +1350,9 @@ if __name__ == "__main__":
             field="feature", oneOf=[f"ILIS {sign}1" for sign in ["+", "-"]]
         ),
         "ILIS_outlier": alt.datum.outlier,
-        # "ILIS_outlier": alt.datum.outlier_factor < 0,
         "CCL": alt.datum.feature == "CCL",
     }
 
-    # X-axis with scale based on clean data (outliers may appear clipped)
     x_scale = (
         alt.X("ro_phi", scale=alt.Scale(domain=ro_phi_domain, clamp=True))
         if ro_phi_domain
@@ -1380,15 +1370,6 @@ if __name__ == "__main__":
         )
     )
 
-    fit = (
-        base.mark_line()
-        .transform_filter(select["ILIS"])
-        .transform_filter(select["ILIS_outlier"])
-        .transform_regression("z", "ro_phi", groupby=["coil", "ilis"])
-        .mark_line(color="gray")
-        .encode(x=x_scale, y="z")
-    )
-
     outlier = (
         base.mark_circle(size=80, color="red", filled=False)
         .transform_filter(select["ILIS_outlier"])
@@ -1403,7 +1384,6 @@ if __name__ == "__main__":
             y="z",
             tooltip=["Name", "ro_phi", "y"],
             shape=alt.Shape("type"),
-            # color=alt.Color("transform").scale(scheme="set2"),
         )
     )
 
@@ -1413,65 +1393,78 @@ if __name__ == "__main__":
         .encode(text="Name", x=x_scale, y="z")
     )
 
-    # row=alt.Row("coil:N"),
-    # column=alt.Column("ilis:N").sort(["-1", "1"]),
-    # color="r:Q",
-    # tooltip=["Name", "r", "phi"],
-    # ).show()
-
-    # fit = base
-
     chart = scatter + outlier + ccl_points + ccl_text
-
-    ilis_chart_title = f"Sector {sector_number} - {phase}"
-    chart = (
+    return (
         chart.facet(
             row="coil",
-            column=alt.Column("feature", title=ilis_chart_title).sort(
+            column=alt.Column("feature", title=title).sort(
                 ["ILIS -1", "CCL", "ILIS +1"]
             ),
         )
         .configure_axis(grid=False)
         .interactive()
     )
-    chart.resolve_scale(x="shared", y="shared", color="shared").show()
+
+
+def analyze_sector(
+    phase: str,
+    sectors: dict[int, list[int]],
+    *,
+    private: bool = False,
+    source: str = "IDM",
+    plot: bool = False,
+) -> FiducialSector:
+    """Build a sector's fiducial dataset and report its deviation analyses.
+
+    Constructs a :class:`FiducialSector`, compares its CCL deltas against the
+    prior dataset, and prints the constrained CCL and cylindrical deviations
+    plus the error summary (via :class:`FiducialAssess`). For a two-coil sector
+    the mean intra-sector gap is reported. With ``plot`` set the offset-grid and
+    ILIS scatter charts are constructed (the returned charts are not shown).
     """
-    chart = chart.mark_circle(size=60).encode(
-        x="ro_phi",
-        y="z",
-        # row=alt.Row("coil"),
-        # column=alt.Column("ilis").sort(["-1", "1"]),
-        color="r",
-        tooltip=["Name", "r", "phi"],
+    from nova.assembly.fiducialassess import FiducialAssess
+
+    fiducial = FiducialSector(phase=phase, sectors=sectors, private=private)
+    fiducial.compare(source)
+
+    print("\nCCL deviation (measurement - datum), constrained dirs only:")
+    print(fiducial.ccl_deviation().to_string())
+
+    assess = FiducialAssess(
+        phase=phase,
+        sectors=sectors,
+        fill=False,
+        infer=True,
+        ilis=True,
+        ilis_pcr=True,
+        method="rms",
+        coupled=False,
+        private=private,
     )
-    # chart += chart.mark_circle(size=80, color="red").encode()
+    assess.build()
 
-    chart = chart.transform_regression("ro_phi", "z").mark_line()
+    print("\nCylindrical deviation (dr, r*dphi, dz), constrained dirs only:")
+    print(assess.deviation("fiducial").to_string())
+    print("\nError summary (constrained fiducials):")
+    print(assess.summary("fiducial").to_string())
 
-    chart = (
-        chart.resolve_scale(x="shared", y="shared")
-        .configure_axis(grid=False)
-        .configure_view(stroke=None)
+    if len(fiducial.delta) >= 2:
+        profile = fiducial.gap_profile()
+        print(f"\nMean gap: {profile.gap.mean():.3f} mm")
+
+    if plot:
+        title = f"Sector {next(iter(sectors))} - {phase}"
+        plot_data, facet_sort = fiducial.sector_offset_grid()
+        sector_offset_chart(plot_data, facet_sort, title)
+        ilis_scatter_chart(fiducial.project_ccl_to_midplane(), title)
+
+    return fiducial
+
+
+if __name__ == "__main__":
+    analyze_sector(
+        phase="SSAT target",
+        sectors={1: [14, 15]},
+        private=True,
+        plot=True,
     )
-    """
-
-    """
-    import vedo
-
-    ilis = FiducialIlis(fiducial.ilis)
-
-    points = data.loc[:, ['x', 'y', 'z', 'r', 'ro_phi']].copy()
-    #points.loc[:, 'r'] /= 6000
-    #points.loc[:, 'z'] /= 20
-    points['offset'] = 0
-
-    coil = 13
-    plane = 'ILIS -1'
-
-    index = (data.feature == plane) & (data.coil == coil)
-
-    points.loc[index, 'offset'] = 500* ilis.offset(points.loc[index], (coil, plane))
-
-    vedo.Points(points.loc[index, ['r', 'z', 'offset']]).generate_delaunay2d(
-        tol=0.000001).c('green').show(axes=1).close()
-    """

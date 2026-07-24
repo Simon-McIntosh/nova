@@ -243,9 +243,11 @@
     Retrieval exercised off-laptop 2026-07-24: both artifacts pulled + digest-verified on
     SDCC; automatic resolver/sync landed (<code>nova/assembly/provenance/corpus.py</code>,
     commit <code>507ba732</code>) — corpus materializes from GHCR by pinned digest on any
-    machine. <strong>Remaining:</strong> raw <code>ILIS_nominal.txt</code> is IO-share-only
-    and SMB is firewalled from SDCC (2026-07-24) — copy from the laptop / IO office network;
-    the preserved <code>ILIS_nominal.pickle</code> meanwhile feeds the test lane. Full
+    machine. Raw <code>ILIS_nominal.txt</code> — long the one IO-share-only residual — is now
+    <strong>reconstructed from the preserved cloud and committed git-diffable</strong> in the
+    in-repo reference set (norma <code>8e232e4</code>): a bit-identical round-trip
+    (reader(txt) == preserved pickle) makes it the committed backup behind the warm pickle
+    cache, rebuilding that cache when it is missing or corrupt. Full
     records: <a href="archive/norma-data-provenance-s2-s6-landed.html">§2–§6 landed</a>,
     <a href="archive/norma-data-provenance-s7-tier2-landed.html">§6/§7 completion wave</a>.</p>
     <p>Original design (retained). Two homes, chosen by size and stability, unified by content

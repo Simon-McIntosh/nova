@@ -2,14 +2,15 @@
 
 CrossSection dispatches poloidal geometry through a
 :class:`~nova.imas.machine.MachineGeometryReader` provider so an IMAS IDS node
-and a (FAIR-MAST) zarr source are interchangeable. These tests exercise the
-default IMAS provider on a synthetic IDS-shaped node and a dict-backed provider
-standing in for a columnar/zarr source, and assert both yield the same section.
+and a flat tabular source (a FAIR-MAST zarr row, a columnar record) are
+interchangeable. These tests exercise the default IMAS provider on a synthetic
+IDS-shaped node and the packaged :class:`~nova.imas.machine.
+TabularGeometryReader`, and assert both yield the same section.
 """
 
 import numpy as np
 
-from nova.imas.machine import CrossSection, GeomData, MachineGeometryReader
+from nova.imas.machine import CrossSection, TabularGeometryReader
 from nova.imas.test_utilities import mark
 
 
@@ -38,22 +39,23 @@ def _imas_rectangle():
     )
 
 
-class DictGeometryReader(MachineGeometryReader):
-    """Present a plain dict (a columnar/zarr-style source) through the seam."""
+def _imas_annulus():
+    """Return a synthetic IMAS geometry node for an annular element."""
+    return _Node(
+        geometry_type=_Value(5),
+        annulus=_Node(
+            r=_Value(1.5),
+            z=_Value(-0.4),
+            radius_inner=_Value(0.05),
+            radius_outer=_Value(0.1),
+        ),
+    )
 
-    @property
-    def geometry_type(self) -> int:
-        return self.source["geometry_type"]
 
-    def section(self, geometry: type[GeomData]) -> GeomData:
-        data = {attr: self.source[attr] for attr in geometry.attrs}
-        return geometry(None, data)
+class TabularCrossSection(CrossSection):
+    """CrossSection wired to the tabular provider instead of IMAS."""
 
-
-class DictCrossSection(CrossSection):
-    """CrossSection wired to the dict-backed provider instead of IMAS."""
-
-    reader = DictGeometryReader
+    reader = TabularGeometryReader
 
 
 @mark["imas"]
@@ -67,13 +69,38 @@ def test_imas_reader_dispatches_rectangle():
 @mark["imas"]
 def test_reader_seam_is_interchangeable():
     imas_section = CrossSection(_imas_rectangle())
-    dict_source = {
-        "geometry_type": 2,
-        "r": 4.0,
-        "z": 0.5,
-        "width": 0.2,
-        "height": 0.3,
-    }
-    dict_section = DictCrossSection(dict_source)
-    assert dict_section.name == imas_section.name == "rectangle"
-    assert np.isclose(dict_section.area, imas_section.area)
+    tabular_section = TabularCrossSection(
+        {"geometry_type": 2, "r": 4.0, "z": 0.5, "width": 0.2, "height": 0.3}
+    )
+    assert tabular_section.name == imas_section.name == "rectangle"
+    assert np.isclose(tabular_section.area, imas_section.area)
+
+
+@mark["imas"]
+def test_tabular_annulus_matches_imas_normalisation():
+    """The annulus record normalises identically through either provider."""
+    imas_section = CrossSection(_imas_annulus())
+    tabular_section = TabularCrossSection(
+        {
+            "geometry_type": 5,
+            "r": 1.5,
+            "z": -0.4,
+            "radius_inner": 0.05,
+            "radius_outer": 0.1,
+        }
+    )
+    assert tabular_section.name == imas_section.name == "annulus"
+    assert tabular_section.data.data["width"] == imas_section.data.data["width"]
+    assert np.isclose(tabular_section.area, imas_section.area)
+
+
+@mark["imas"]
+def test_tabular_reader_reports_missing_attribute():
+    """A record missing a required attribute fails loudly, never fabricates."""
+    record = {"geometry_type": 2, "r": 4.0, "z": 0.5, "width": 0.2}
+    try:
+        TabularCrossSection(record)
+    except KeyError as error:
+        assert "height" in str(error)
+    else:
+        raise AssertionError("missing attribute must raise KeyError")

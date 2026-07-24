@@ -303,6 +303,38 @@ class ImasGeometryReader(MachineGeometryReader):
 
 
 @dataclass
+class TabularGeometryReader(MachineGeometryReader):
+    """Present a flat mapping record through the reader seam.
+
+    The provider skeleton for facility geometry tables that are not IMAS
+    IDSs — a FAIR-MAST zarr row, a columnar record, or any per-element
+    mapping carrying ``geometry_type`` plus the section's attributes as flat
+    scalar fields. A facility plugin normalises its native store into such
+    records and drives :class:`CrossSection` through this reader; the
+    facility tables themselves stay with the plugin.
+
+    A record missing a required attribute raises ``KeyError`` naming the
+    attribute — verify-and-flag, never a fabricated geometry value.
+    """
+
+    @property
+    def geometry_type(self) -> int:
+        """Return the geometry-type index read from the record."""
+        return int(self.source["geometry_type"])
+
+    def section(self, geometry: type[GeomData]) -> GeomData:
+        """Build the section from the record's flat attribute fields."""
+        try:
+            data = {attr: self.source[attr] for attr in geometry.attrs}
+        except KeyError as error:
+            raise KeyError(
+                f"tabular geometry record missing attribute {error.args[0]!r} "
+                f"required by section {geometry.name!r}"
+            ) from None
+        return geometry(None, data)
+
+
+@dataclass
 class CrossSection:
     """Manage poloidal cross-sections."""
 
@@ -324,13 +356,13 @@ class CrossSection:
         geometry_type = reader.geometry_type
         try:
             self.data = reader.section(self.transform[geometry_type])
-        except KeyError as error:
+        except KeyError:
             if geometry_type == -999999999:
                 default_geometry_type = 1  # remove once WEST pf_passive is fixed
                 warn(f"geometry type unset, fixing value to {default_geometry_type}")
                 self.data = reader.section(self.transform[default_geometry_type])
             else:
-                raise KeyError from error
+                raise
         if self.data.name == "outline" and len(self.data.data["r"]) == 1:  # WEST data
             for attr in "rz":
                 self.data.data[attr] = self.data.data[attr][0]

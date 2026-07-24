@@ -32,7 +32,7 @@
           <tr><td><code>main</code> fast-forwarded to the goldens-green commit</td><td>✓ default branch</td></tr>
           <tr><td><code>legacy/v1</code> + tag <code>v1-assembly-baseline</code></td><td>✓ branch-protected (no force-push / no deletion)</td></tr>
           <tr><td><code>jax</code> retired; dependabot PRs retargeted</td><td>✓ 5 PRs re-based onto <code>main</code></td></tr>
-          <tr><td><code>develop</code> 2.0 line cut</td><td>◑ cut &amp; pushed (== baseline); bootstrap content pending</td></tr>
+          <tr><td><code>develop</code> 2.0 line cut</td><td>✓ cut, pushed and bootstrapped — leave-set removed, 2.0 floors set (<code>59ee0303</code>)</td></tr>
         </tbody>
       </table>
     </section>
@@ -87,25 +87,44 @@
     </section>
 
     <section class="card">
-      <h2>What's next — finish the develop 2.0 bootstrap</h2>
-      <p>develop is cut and pushed. Remaining bootstrap steps (a follow-on run):</p>
+      <h2>develop 2.0 bootstrap — landed 2026-07-23</h2>
+      <p>Commit <code>59ee0303</code> on <code>develop</code> (416 files, −71,974 LOC), authored in
+      the <code>../nova-develop</code> worktree while the primary checkout stayed on
+      <code>main</code>:</p>
       <ul>
-        <li>Delete the leave-set (<code>nova/{assembly,structural,thermalhydralic,dina,design,projects,development,ansys}</code>,
-        ~63k LOC) — verified safe: <code>nova/ansys</code> is the only keep→leave coupling and it
-        is in the delete set, so zero dangling imports remain. (The bulk deletion is
-        safety-classifier-gated; run it via an in-session <code>!</code> command or a Bash
-        permission rule.)</li>
-        <li>Apply the one-line <code>np.float_ → np.float64</code> fix (<code>nova/graphics/plot.py:614</code>,
-        confirmed the sole occurrence in the keep set).</li>
-        <li>Reset <code>pyproject</code> to the 2.0 target: python ≥ 3.14, numpy ≥ 2, lean core
-        dependency set, pandas moved out of core. Note: the lean-core "fast lane green" is
-        genuinely §3–§9 work (the core still imports pandas/matplotlib broadly today), so develop
-        lands as a bootstrapped skeleton with green tracked into §3.</li>
-        <li>Scaffold the repo-local refactor plan and the assembly-port (norma) plan — the latter
-        carrying the fitting-cluster inventory and the discovered source issues (pyvista
-        <code>cell_points</code> drift, the <code>private=</code> kwarg fan-out, the always-true
-        sector-coupling branch).</li>
+        <li><strong>Leave-set deleted</strong> — <code>nova/{assembly,structural,thermalhydralic,dina,design,projects,development,ansys}</code>
+        plus their dependent tests (<code>tests/characterization/</code>, <code>test_assembly</code>,
+        <code>test_transform</code>, <code>test_finitebeam</code>, <code>test_finiteframe</code>,
+        <code>test_sultan</code>). Post-delete grep confirms zero live references; three
+        <code>__main__</code> demo blocks that referenced deleted modules were trimmed
+        (<code>geometry/frenet.py</code>, <code>geometry/polyline.py</code>, <code>frame/itergeom.py</code>).</li>
+        <li><strong>2.0 floors set</strong> — python ≥ 3.14, numpy ≥ 2; lean core (numpy, scipy,
+        xarray, zarr, netcdf4, shapely, contourpy, xxhash, appdirs, imas-python, h5py, tqdm,
+        packaging); pandas out of core (an <code>interchange</code> extra; still transitively
+        present via xarray); extras for jax/matplotlib/viz/numba/bokeh; dead deps dropped; the
+        stale <code>requirements.txt</code> export removed (no consumers); hatch-vcs describe
+        pinned to numeric release tags (the <code>v1-assembly-baseline</code> marker tag broke
+        version parsing — the same fix landed independently on <code>main</code> as
+        <code>5fb2edae</code>); <code>np.float_ → np.float64</code> applied.</li>
+        <li><strong>Honest import backlog</strong> (py 3.14.2, lean env): 57 / 186 keep-set modules
+        import clean; 129 fail, dominated by matplotlib (69 — §8's guard work), fsspec (17 —
+        <code>nova.database</code>; dependency decision for §6), jax (14 — extra, §5),
+        pyvista/vedo (7 — viz extra), plus a long tail (sklearn, networkx, pyquaternion, meshio,
+        seaborn, astropy, …). Test collection: 118 collect, 111 files error on fat deps — the
+        starting backlog for §3–§9, not claimed green.</li>
+        <li><strong>Plan scaffolds</strong> — already satisfied: the umbrella execution plan
+        (<code>nova-spine-refactor</code>) lives in nova, and the assembly-port program is the
+        existing <code>norma-data-provenance</code> plan carrying the discovered source issues.</li>
       </ul>
+    </section>
+
+    <section class="card">
+      <h2>What's next — §3 columnar frame core ∥ §4 kernel unification</h2>
+      <p>Independent workstreams meeting at the frame provider protocol
+      (<code>aloc/saloc</code> + label lookups): the pandas-free columnar frame store, and the
+      unified Biot kernel set with the polygon conductor kernel ported back from imas-ambix
+      (<code>gs/polygon.py</code> + its golden-value tests). Both run in detached worktrees off
+      <code>develop</code>, reviewed and merged by the orchestrating session.</p>
     </section>
   </main>
 </body>

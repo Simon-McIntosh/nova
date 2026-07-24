@@ -17,8 +17,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-23">
-<meta name="plan-version" content="7">
-<meta name="plan-impl" content="0.14">
+<meta name="plan-version" content="9">
+<meta name="plan-impl" content="0.3">
 </head>
 <body>
   <main class="plan-doc">
@@ -54,18 +54,16 @@
     </ul>
 
     <h2 id="s2">§2 — Nova branch restructure and 2.0 bootstrap</h2>
-    <p class="landed-summary"><strong>◑ branch restructure landed 2026-07-23; 2.0 bootstrap in
-    progress.</strong> <code>main</code> fast-forwarded to the goldens-green commit
-    <code>e31fb6df</code> (now the default branch); <code>legacy/v1</code> + tag
-    <code>v1-assembly-baseline</code> branch-protected (enforce-admins, no force-push, no deletion);
-    <code>jax</code> retired with 5 dependabot PRs retargeted to <code>main</code>;
-    <code>develop</code> cut and pushed (== baseline). <strong>Remaining (followup f-int-04):</strong>
-    delete the leave-set (verified safe — <code>nova/ansys</code> is the only keep→leave coupling and
-    travels with it), the one-line <code>np.float_</code> fix, reset the develop pyproject to the 2.0
-    floors (py&nbsp;≥&nbsp;3.14, numpy&nbsp;≥&nbsp;2, pandas out of core), and scaffold the repo-local
-    refactor + norma-port plans. The bulk deletion is safety-classifier-gated (run via <code>!</code>
-    or a Bash permission rule); lean-core "fast lane green" is genuinely §3–§9 work, so develop lands
-    as a bootstrapped skeleton. Full record:
+    <p class="landed-summary"><strong>✓ landed 2026-07-23.</strong> Branch restructure at
+    <code>e31fb6df</code>: <code>main</code> (default) fast-forwarded to the goldens-green commit;
+    <code>legacy/v1</code> + tag <code>v1-assembly-baseline</code> branch-protected; <code>jax</code>
+    retired (5 dependabot PRs retargeted); <code>develop</code> cut. Bootstrap at
+    <code>59ee0303</code> on <code>develop</code> (416 files, −71,974 LOC): leave-set + dependent
+    tests deleted (zero dangling references confirmed by grep), pyproject reset to
+    py&nbsp;≥&nbsp;3.14 / numpy&nbsp;≥&nbsp;2 lean core with pandas out of core, hatch-vcs pinned to
+    numeric tags, <code>np.float_</code> fixed. Honest backlog: 57/186 keep-set modules import clean
+    on the lean py3.14 env (matplotlib 69, fsspec 17, jax 14 dominate the failures) — green is
+    §3–§9 work. Full record:
     <a href="archive/nova-spine-refactor-s2-landed.html">§2/§2a landed</a>.</p>
     <p><strong>Branch model (upstream is Simon-McIntosh/nova on GitHub — verified not a fork of
     iterorganization; the git.iter.org URL exists only in pyproject metadata, no such remote is configured).</strong>
@@ -208,6 +206,24 @@
     dual-run window observed; dedicated assembly-port plan authored; extraction sign-off recorded here.</p>
 
     <h2 id="s3">§3 — Columnar frame core</h2>
+    <p><strong>Core landed 2026-07-23 (merge <code>829c0700</code>); coilset-level tail in
+    flight.</strong> The 7-deep pandas subclass tower — broken outright on the target stack (53
+    frame-scope tests failing with <code>RecursionError</code> under pandas 3.0's rewritten
+    internals, so the rewrite was a necessity, not an optimisation) — is replaced by explicit
+    accessors over a struct-of-arrays <code>ColumnStore</code> (index ndarray + column dict +
+    schema; <code>nova/frame/columnar.py</code> + chain rewrite, net +1218/−1487, leaner than what
+    it replaced). Frame acceptance surface: <strong>0 failed / 168 passed</strong> (baseline: 53
+    failed / 92 passed); MetaFrame schema, energization, link reduction, subspace projection,
+    selection and the polygon metamethod carried near-verbatim; pandas only in lazy interchange
+    shims. Benchmark (dual-path <code>benchmarks/coil_construction.py</code>, same machine;
+    old-stack pandas reference vs columnar): construct 81→36 µs/coil at n=100 (columnar 2.3×
+    faster), parity at n=500, 2.7→16.2 µs/coil at n=5000 (6× slower — per-row cost flat instead
+    of amortising); column reads 0.026→0.325 ms (12–23× slower, both read forms identical —
+    subspace re-inflation suspected instead of a cached view). <strong>Open §3 performance
+    residual</strong>, assigned: read path to O(cached view), bulk construct within ~2× of the
+    reference at n=5000 (plasma grids make that regime a production path). Also remaining:
+    the coilset-construction tier port (poloidalgrid/polygrid/shellgrid/coilset/framedata +
+    FrameSet.store/load) — in flight; it gates the biot assembly lane.</p>
     <p>Port the frame layer onto a typed columnar store, preserving the public API surface consumers actually
     use (<code>insert</code>, <code>Loc/sLoc/loc/sloc</code> label indexers, <code>aloc/saloc</code> array
     accessors, <code>+=</code> union, <code>store/load</code>):</p>
@@ -232,6 +248,24 @@
     <code>nova.frame</code>.</p>
 
     <h2 id="s4">§4 — Biot kernels and operator assembly</h2>
+    <p><strong>Evidence (2026-07-23, in progress — kernel tier landed on develop, merges
+    <code>b764ff3b</code>/<code>4d7c96fd</code>):</strong> polygon conductor kernel ported back from
+    imas-ambix (<code>gs/polygon.py</code> → <code>nova/biot/polygon.py</code>, replacing the stub)
+    with 22 golden-value tests — rectangle-reduction agrees with the cylinder kernel at 1e-10,
+    filament-tiling oracle at 5e-5 (1e-4 shear/thin-plate), Ampère circulation −µ0 at 1e-6, vertex
+    invariance 1e-13. A canonical corner-antiderivative module (<code>greens.py</code>) now drives
+    both the functional and dataclass cylinder paths (bit-identical, ≤4 ulp); zeta consolidated to
+    one pure-numpy implementation (JAX optional); pandas fully severed from <code>nova/biot</code>
+    (grep-clean); reduction on numpy int arrays. Three latent hard-import bugs fixed on the way
+    (jax in <code>zeta</code>/<code>limiter</code>, vedo/pyvista/openpyxl in geometry/imas — masked
+    for years by the fat 1.x environment). Operator assembly rebound onto the columnar store
+    (merge <code>c975e836</code>): all pandas idioms in <code>solve.py</code>/<code>space.py</code>
+    replaced with the columnar API, and §4 analytic correctness confirmed <em>independently of the
+    CoilSet tier</em> by driving dict-built Source/Target straight into the kernels — dataclass
+    Cylinder == <code>cylinder_greens</code> to 1.3e-10; a 2-ring Solve ensemble == the canonical
+    Greens to 1e-9 (pinned in <code>tests/test_biotcylinder.py</code>; 53 biot tests green).
+    Residual: the full CoilSet validation lane (solenoid/inductance/3-D, reduce/link + plasma
+    paths) — gated solely on §3's coilset-construction tranche, in flight.</p>
     <ul>
       <li>Lift near-verbatim from nova: <code>constants.py</code> (elliptic/coefficient library),
       <code>circle</code>, <code>cylinder</code>, <code>arc</code>, <code>bow</code>, <code>line</code>,
@@ -560,7 +594,7 @@ Done-when
   4. followup written into plan + this followup marked resolved</pre>
     <p class="r-fu-outcome">§2a + §2 branch restructure landed (commit e31fb6df). Characterization harness green — 35 passed / 4 visible skips; 7 deterministic goldens (gap Fourier proxy, IDM/RE/as-built CCL fiducial deltas, nominal fiducial frame, uniform + base-assembly vault geometry) with a 1 µm tolerance gate + sha256 fingerprint manifest. main fast-forwarded to the goldens-green commit (now default); legacy/v1 + tag v1-assembly-baseline branch-protected (enforce-admins, no force-push/deletion); jax retired with 5 dependabot PRs retargeted to main; develop cut and pushed (== baseline). Full record: docs/archive/nova-spine-refactor-s2-landed.html. Sector/pit fits, ANSYS vault Fourier proxy and heavy winding-pack build are visible skips pending off-repo fixtures. Remaining develop 2.0 bootstrap tracked in the new followup.</p>
     </article>
-<article class="r-fu" data-id="f-int-04" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-23" data-recommends-skill="/reckon-ship nova-spine-refactor §2" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-int-04" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-23" data-recommends-skill="/reckon-ship nova-spine-refactor §2" data-resolved-at="2026-07-23T21:10:29+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Finish the develop 2.0 bootstrap (leave-set deletion, lean pyproject, plan scaffolds)</h4>
     <div class="r-fu-body"><p>The protection baseline and branch restructure landed; develop is cut and pushed (== the goldens-green baseline e31fb6df). What remains is the develop 2.0 bootstrap: delete the leave-set, reset the dependency floors, and scaffold the repo-local plans. The bulk leave-set deletion is safety-classifier-gated — run it via an in-session <code>!</code> command or add a Bash permission rule for <code>git rm</code>.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -622,6 +656,42 @@ Done-when
      target floors/deps, pushed; import backlog for §3 documented honestly.
   2. Repo-local refactor + assembly-port plans scaffolded.
   3. §2 collapsed in the umbrella plan; impl advanced; this followup resolved.</pre>
+    <p class="r-fu-outcome">develop 2.0 bootstrap landed — commit 59ee0303 (416 files, −71,974 LOC): leave-set + dependent tests deleted with zero dangling references; pyproject reset to py&gt;=3.14/numpy&gt;=2 lean core, pandas out of core, hatch-vcs pinned to numeric tags; np.float_ fixed; honest import backlog recorded (57/186 modules clean; matplotlib 69 / fsspec 17 / jax 14 dominate). Plan scaffolds already satisfied by nova-spine-refactor (in nova) + norma-data-provenance.</p>
+    </article>
+<article class="r-fu" data-id="f-int-05" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-23" data-recommends-skill="/reckon-ship nova-spine-refactor §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Land the §3 columnar frame core and §4 unified kernel set (fleet in flight)</h4>
+    <div class="r-fu-body"><p>The develop 2.0 bootstrap is landed (59ee0303). §3 (pandas-free columnar frame store) and §4 (unified Biot kernels + polygon conductor kernel ported back from imas-ambix gs/polygon.py with its golden-value tests) are running as parallel opus workers in detached worktrees off develop, reviewed and merged by the orchestrating session. If the session ends before they land, re-dispatch from this followup.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    nova-spine-refactor (http://127.0.0.1:8765/nova/nova-spine-refactor.html)
+Section: §3 + §4 (parallel), then §5/§6
+Tier:    opus
+
+Context
+  develop is bootstrapped at 59ee0303 (leave-set deleted, py&gt;=3.14/numpy&gt;=2 lean
+  core). §3 rebuilds nova/frame as the direct columnar store (locked decision);
+  §4 unifies the Biot kernels and ports the polygon conductor kernel back from
+  imas-ambix (imas_ambix/gs/polygon.py + tests/gs/test_polygon.py,
+  test_operator_polygon.py) replacing nova/biot/polygon.py in place. The two
+  meet at the frame provider protocol (aloc/saloc + label lookups; reduce
+  indices as numpy int arrays).
+
+State to read
+  docs/nova-spine-refactor.html §3, §4 (specs)
+  docs/archive/nova-spine-refactor-s2-landed.html (bootstrap record + import backlog)
+
+Constraints
+  All 2.0 code work in worktrees off develop — never switch the primary checkout
+  (main; reckon serves its working tree). TDD: donor/existing tests come first.
+  Kernel modules import numpy+scipy only; zero pandas in nova.frame outside lazy
+  interchange shims. Commit + push develop after review; no AI co-author trailer.
+
+Done-when
+  1. Frame test files pass against the columnar store; coil-construction
+     micro-benchmark no slower than the pandas path.
+  2. Ambix polygon golden-value tests pass in nova; analytic validation tests
+     (solenoid, inductance goldens, 3-D elements) pass.
+  3. §3/§4 collapsed in the plan with quantitative results; impl advanced;
+     this followup resolved; §5/§6 followup queued.</pre>
     </article>
 </section>
 

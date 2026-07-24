@@ -1077,37 +1077,60 @@ class ErrorField(Trial, QuartileAnalysis, Plot1D):
         self.axes.set_ylabel(r"Overlap error field $B/B_{limit}$")
 
 
-if __name__ == "__main__":
-    trial_name = "baseline_2021"
-    # trial_name = "S4_refine_pit_2026"
-    # trial_name = "S4_hybrid_pit_2026"
-    samples = 200_000
-    force = True
+def build_vault(name: str, *, samples: int | None = None, force: bool = False) -> Vault:
+    """Build the vault Monte Carlo trial for a named manifest entry."""
+    return Vault.from_manifest(name, samples=samples, force=force)
 
-    # Load baseline_2021 from manifest (should use cache)
-    vault = Vault.from_manifest(trial_name, samples=samples, force=force)
-    print(f"Vault hash: {vault.group_name}")
 
+def build_error_field(
+    name: str, *, samples: int | None = None, force: bool = False
+) -> ErrorField:
+    """Build the error-field Monte Carlo trial for a named manifest entry."""
+    return ErrorField.from_manifest(name, samples=samples, force=force)
+
+
+def plot_vault(vault: Vault, *, context: str = "talk") -> Vault:
+    """Render the vault distribution, offset, gap and cumulative-gap plots.
+
+    The seaborn plotting context is applied around the four vault plots so the
+    figures share consistent typography.
+    """
     import seaborn as sns
 
-    with sns.plotting_context("talk"):
+    with sns.plotting_context(context):
         vault.plot()
         vault.plot_offset()
         vault.plot_gap()
         vault.plot_cumlative_gap()
+    return vault
 
-    error = ErrorField.from_manifest(trial_name, samples=samples, force=force)
-    print(f"ErrorField hash: {error.group_name}")
 
-    error.plot()
+def run_trials(
+    name: str,
+    *,
+    samples: int | None = None,
+    force: bool = False,
+    plot: bool = False,
+    context: str = "talk",
+) -> tuple[Vault, ErrorField]:
+    """Build the vault and error-field trials for a named manifest entry.
 
-    # trial.plot_offset()
+    Constructs both the :class:`Vault` and :class:`ErrorField` trials from the
+    manifest entry ``name`` and returns them. When ``plot`` is set the vault
+    distribution plots (under the seaborn ``context``) and the error-field
+    overlap plot are rendered.
+    """
+    vault = build_vault(name, samples=samples, force=force)
+    error_field = build_error_field(name, samples=samples, force=force)
+    if plot:
+        plot_vault(vault, context=context)
+        error_field.plot()
+    return vault, error_field
 
-    # case -> 1.7/0.3, 2.1/0.8
-    # roll -> 0.2/0.1
-    # yaw -> 0.2/0.2
-    # ccl -> 1.4/0.9, 1.7/0.8
-    # wall -> 3.2 / 3.2
 
-    # trial.plot_sample(0.99, False)
-    # trial.plot_sample(0.99, True)
+if __name__ == "__main__":
+    vault, error_field = run_trials(
+        "baseline_2021", samples=200_000, force=True, plot=True
+    )
+    print(f"Vault hash: {vault.group_name}")
+    print(f"ErrorField hash: {error_field.group_name}")

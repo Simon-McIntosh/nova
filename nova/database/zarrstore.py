@@ -83,10 +83,20 @@ class ZarrStore(FilePath):
         return self.store(mode=self.get_mode())
 
     def load(self):
-        """Load a group from the zarr store and merge it into data."""
-        with xarray.open_zarr(
-            self._mapper(), group=self.group, consolidated=False
-        ) as data:
+        """Load a group from the zarr store and merge it into data.
+
+        A missing store or absent group signals a cache miss as
+        :class:`FileNotFoundError` so callers can treat every backend
+        uniformly; zarr otherwise reports an absent group as a
+        :class:`zarr.errors.GroupNotFoundError` (a ``ValueError``).
+        """
+        try:
+            data = xarray.open_zarr(
+                self._mapper(), group=self.group, consolidated=False
+            )
+        except zarr.errors.NodeNotFoundError as error:
+            raise FileNotFoundError(str(self.filepath)) from error
+        with data:
             data.load()
             self.data = self.data.merge(
                 data, combine_attrs="drop_conflicts", compat="override"

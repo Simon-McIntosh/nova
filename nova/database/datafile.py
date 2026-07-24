@@ -1,17 +1,21 @@
-"""Manage access to netCDF data."""
+"""Manage cached access to the identity-cache data store."""
 
 from abc import abstractmethod
 from dataclasses import dataclass
 
-from nova.database.netcdf import netCDF
+from nova.database.zarrstore import ZarrStore
 
 
 @dataclass
-class Datafile(netCDF):
+class Datafile(ZarrStore):
     """
-    Provide cached acces to netCDF data.
+    Provide cached access to the identity-cache data store.
 
-    Extends netCDF class via the provision of load and store methods.
+    The identity cache -- compiled frames and solved operators keyed by a
+    content hash of the source identity -- persists through zarr, whose native
+    group eviction avoids the whole-file rewrite the netCDF backend requires.
+    netCDF remains available through :class:`~nova.database.netcdf.netCDF` for
+    interchange and export. Extends the store with load and build methods.
 
     """
 

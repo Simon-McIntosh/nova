@@ -315,6 +315,39 @@ def test_cache_stale_entry_replaced_in_place(tmp_path):
     xarray.testing.assert_identical(reader.data, rebuilt)
 
 
+def test_datafile_caches_through_zarr(tmp_path):
+    # the identity-cache tier (Datafile) persists compiled data through zarr:
+    # a cold build stores, a warm load reuses the group without rebuilding, and
+    # a differing group is a cache miss that rebuilds.
+    from dataclasses import dataclass
+
+    from nova.database.datafile import Datafile
+
+    builds = []
+
+    @dataclass
+    class Cache(Datafile):
+        ids: object = None
+        name: str | None = None
+
+        def build(self):
+            builds.append(self.group)
+            self.data = xarray.Dataset(
+                {"psi": ("node", np.linspace(0.0, 1.0, 6))}, attrs={"machine": "iter"}
+            )
+
+    cold = Cache(filename="identity", dirname=str(tmp_path), group="abc123")
+    assert cold.filepath.suffix == ".zarr"
+    assert builds == ["abc123"]
+
+    warm = Cache(filename="identity", dirname=str(tmp_path), group="abc123")
+    assert builds == ["abc123"]  # warm load did not rebuild
+    xarray.testing.assert_identical(warm.data, cold.data)
+
+    Cache(filename="identity", dirname=str(tmp_path), group="different")
+    assert builds == ["abc123", "different"]  # cache miss rebuilds
+
+
 @mark["imas"]
 def test_machine_cache_folds_dd_version(monkeypatch, tmp_path):
     # A machine description compiles several source IDSs into frames and solved

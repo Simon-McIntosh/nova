@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="mast-catalog-gpu-solve">
+  <meta name="plan-title"     content="MAST Catalog GPU Solve — full-catalog equilibria in ~1 hour on 8×H200">
+  <meta name="plan-summary"   content="Nova's short-term capability goal: reconstruct equilibria for ALL timesteps of all 11,573 MAST L2 shots in ~1 hour on the 8×H200 node — batched jitted reconstruction (moment seed → profile solve → topology labels), multi-device sharding, streaming zarr IO, labeled outputs persisted.">
+  <meta name="plan-status"    content="active">
+  <meta name="plan-roi"       content="high">
+  <meta name="plan-effort"    content="XL">
+  <meta name="plan-tier"      content="opus">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-depends-on" content="physics-spine-adoption,mast-machine-description">
+  <title>MAST Catalog GPU Solve | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — Goal and throughput budget</h2>
+    <p><strong>Reconstruct the full MAST L2 catalog — all 11,573 shots, every timestep — in
+    ~1&nbsp;hour on the 8×H200 node.</strong> This is nova's short-term capability goal and the
+    design driver for the batched solver family: nova is expected to do large-scale GPU solves and
+    labeling work as a first-class function, not as an afterthought.</p>
+    <p>The budget, using the locked scope (all L2 shots) and a slice census to be pinned in stage
+    L0: at an estimated 300–600 equilibrium timesteps per shot the catalog is roughly
+    <strong>3.5–7&nbsp;M slices</strong>; one hour therefore demands
+    <strong>~1,000–2,000 slices/s aggregate ≈ 125–250 slices/s per GPU</strong>. Today's
+    reference point is the ambix CPU spine at 6.8–10.6&nbsp;s per slice end-to-end
+    (spine_bench v0 heldout set) — a factor of ~10<sup>4</sup> per device. That factor is
+    plausible precisely because the whole solve was rebuilt fixed-shape and vmap-safe: the ambix
+    FSA GPU capability probe already ran batch-1024 flux-surface kernels in ~5&nbsp;ms with
+    ≤1.1×10<sup>−13</sup> CPU disagreement, and nova's jitted operator/topology stack pins
+    batched==per-slice at 10<sup>−10</sup>. The gap to close is architectural (batching the Picard
+    loop and the IO), not numerical.</p>
+
+    <figure>
+      <svg viewBox="0 0 900 300" role="img" style="max-width:100%;height:auto;font-family:system-ui">
+        <text x="450" y="22" text-anchor="middle" font-size="15" font-weight="600" fill="#111">Per-device throughput ladder — where the 10⁴ comes from</text>
+        <!-- axis -->
+        <line x1="120" y1="250" x2="860" y2="250" stroke="#bbb" stroke-width="1"/>
+        <!-- bars: log scale slices/s/device: 0.00012 (CPU e2e) -> jit single ~1? -> batched ~50 -> target 250 -->
+        <!-- log positions: use x for stage, bar height ∝ log10(slices/s) offset -->
+        <rect x="150" y="230" width="120" height="20" fill="none" stroke="#8a1f1f" stroke-width="1.5"/>
+        <text x="210" y="222" text-anchor="middle" font-size="12" fill="#8a1f1f">~0.1–0.15 slice/s</text>
+        <text x="210" y="268" text-anchor="middle" font-size="12" fill="#333">CPU spine (measured)</text>
+        <rect x="330" y="180" width="120" height="70" fill="none" stroke="#8a5a00" stroke-width="1.5"/>
+        <text x="390" y="172" text-anchor="middle" font-size="12" fill="#8a5a00">O(1–10) slice/s</text>
+        <text x="390" y="268" text-anchor="middle" font-size="12" fill="#333">jitted solve, batch=1</text>
+        <rect x="510" y="110" width="120" height="140" fill="none" stroke="#1a4a6b" stroke-width="1.5"/>
+        <text x="570" y="102" text-anchor="middle" font-size="12" fill="#1a4a6b">O(10²) slice/s</text>
+        <text x="570" y="268" text-anchor="middle" font-size="12" fill="#333">vmap batch ≥ 1024</text>
+        <rect x="690" y="70" width="120" height="180" fill="none" stroke="#1a6b3c" stroke-width="1.5"/>
+        <text x="750" y="62" text-anchor="middle" font-size="12" fill="#1a6b3c">125–250 slice/s sustained</text>
+        <text x="750" y="268" text-anchor="middle" font-size="12" fill="#333">+ streamed IO (target)</text>
+        <text x="450" y="292" text-anchor="middle" font-size="11.5" fill="#555">bar height ∝ log throughput per device; each step is measured before the next is attempted (L0 → L3)</text>
+      </svg>
+      <figcaption>The ladder: every rung is a measured checkpoint, so a shortfall is localised to
+      one architectural step (jit overhead, batch scaling, or IO starvation) instead of surfacing
+      only in the final run.</figcaption>
+    </figure>
+
+    <h2 id="s2">§2 — Solve architecture</h2>
+    <p>Per-slice pipeline, all stages fixed-shape and batched with a leading slice axis:</p>
+    <ol>
+      <li><strong>Seed:</strong> <code>ReconstructMoment</code> (centroid-order disc seed +
+      gated quadrupole) from the sensor signature — cheap, well-conditioned, embarrassingly
+      batchable.</li>
+      <li><strong>Solve:</strong> <code>ReconstructProfile</code> — the measurement-constrained
+      free-boundary solve (profile ladder <code>n_pressure</code>/<code>n_diamagnetic</code>,
+      soft priors incl. the harmonic annulus anchor and passive columns), Picard/Newton iterated
+      to a fixed iteration budget with a converged mask (fixed shape — non-converged slices are
+      masked, never branched on). The batched-Newton work explored in ambix
+      (<code>docs/batched-newton-accelerator.html</code>, <code>docs/differentiable-solve-accelerator.html</code>)
+      is the accelerator reference.</li>
+      <li><strong>Label:</strong> nova's JAX topology/connectivity stack (nulls, LCFS, masks,
+      flux-surface bins) — already batched and pinned batched==per-slice.</li>
+      <li><strong>Persist:</strong> ψ grids (optionally decimated), profiles, boundary, labels,
+      convergence diagnostics → zarr label store via nova.io, standard-name keyed.</li>
+    </ol>
+    <ul>
+      <li><strong>Sharding:</strong> single-process <code>jax.sharding</code> over 8 devices
+      (data-parallel over the slice axis) as primary; per-GPU SLURM array over shot ranges as the
+      robust fallback. Nova currently has zero multi-device code — this plan adds it.</li>
+      <li><strong>Batching unit:</strong> slices are pooled across shots per campaign (one MD
+      version → one operator set → one compiled solve); shots differ only in input rows, so
+      cross-shot pooling keeps batches full.</li>
+      <li><strong>IO:</strong> inputs pre-staged through nova.io ingest (coil currents, sensor
+      signals, Ip per slice — kB/slice, not the raw store) into solve-ready zarr shards; H200
+      node-local staging so the solve never waits on the WAN mirror.</li>
+      <li><strong>Precision:</strong> fp64 baseline (H200 fp64 is strong); a mixed-precision
+      variant is an optimisation decision taken only against measured accuracy deltas on the
+      parity gate.</li>
+    </ul>
+
+    <h2 id="s3">§3 — Stages</h2>
+    <ol>
+      <li><strong>L0 — census + single-slice parity.</strong> Pin the exact slice count (the
+      denominator of the goal); jitted ReconstructMoment/ReconstructProfile match the eager path
+      on the spine_bench heldout set to tolerance. Deliverable: the real throughput requirement
+      and a parity gate.</li>
+      <li><strong>L1 — single-GPU batched throughput.</strong> vmap'd solve at batch 256–4096 on
+      one H200; measure slices/s vs batch, identify the knee; profile Picard iteration count
+      distribution (the fixed budget must cover the tail without wasting the bulk). Gate:
+      ≥ the per-GPU target on flat-top slices.</li>
+      <li><strong>L2 — 8-GPU scaling + IO pipeline.</strong> Sharded solve + streamed input
+      shards + async zarr writes; sustained aggregate ≥ 1,000–2,000 slices/s over a
+      multi-campaign rehearsal (≥ 100 shots). Gate: scaling efficiency ≥ 80% of 8× and no IO
+      starvation.</li>
+      <li><strong>L3 — full catalog run.</strong> The production run: all shots, all slices,
+      labeled store persisted + a quality report (convergence rates, residual distributions,
+      per-campaign breakdown) — the catalog becomes nova's labeling substrate.</li>
+    </ol>
+    <p><em>Done-when (plan):</em> L3 complete — full-catalog labeled equilibrium store produced in
+    a wall-clock hour-scale run on the 8×H200 node, with the quality report and rerun recipe
+    committed.</p>
+
+    <h2 id="s4">§4 — Compute constraints (SDCC)</h2>
+    <ul>
+      <li>The H200 node (98dci4-gpu-0003, partition <code>betelgeuse</code>) requires
+      <code>--reservation=gpu_0003_grpA</code> (ReqResv=YES); the reservation holds CPUs only —
+      all 8 H200s are requestable through it. Filling the whole server is by agreement with the
+      group-B team; check <code>sinfo -p betelgeuse -o "%l"</code> before long runs.</li>
+      <li>The 1-hour target conveniently matches debug-queue discipline, but betelgeuse is not a
+      debug partition — verify the time limit before the L3 run; chunk by campaign if needed
+      (the solve is trivially resumable at shard granularity).</li>
+      <li><code>TMPDIR=/tmp</code> on compute nodes; input shards staged node-local before the
+      run.</li>
+      <li>The interim imas-codex embed server may hold one H200 while titan is drained — L3
+      scheduling coordinates around it (7-GPU runs are fine; the ladder numbers scale
+      linearly).</li>
+    </ul>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="catalog-scope" data-choice="all-l2-shots" data-by="smc" data-when="2026-07-24T13:30:00+00:00">
+        <p class="r-dec-q">What counts as the "full MAST catalog" for the 1-hour goal?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="all-l2-shots">all 11,573 L2 shots, all timesteps</button>
+          <button class="r-opt" data-value="training-grade">training-grade subset (~5k shots)</button>
+        </p>
+        <p class="r-dec-rat">User selection 2026-07-24: the hard target — every FAIR-MAST level-2
+        shot, every magnetics timestep. Sizes the batched-solver design; the training-grade subset
+        falls out as a filter on the labeled store, not a smaller run.</p>
+      </div>
+      <div class="r-dec" data-key="sharding-strategy" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Multi-GPU strategy: single-process jax.sharding over 8 devices
+        (one compiled program, best batch pooling, new machinery for nova) vs per-GPU process
+        array over shot ranges (zero new JAX machinery, robust, slightly worse pooling)?
+        Recommendation: measure L1 first; take sharding only if the single-program path is clean,
+        else the process array is a perfectly good L3 vehicle.</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="jax-sharding">single-process jax.sharding</button>
+          <button class="r-opt" data-value="process-array">per-GPU process array</button>
+          <button class="r-opt" data-value="decide-at-l2">decide at L2 from L1 evidence</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+      <div class="r-dec" data-key="output-store" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Output format for the labeled catalog: standard-name-keyed zarr label
+        store (nova.io native, streams well, feeds ambix training directly) vs equilibrium IDSs
+        per shot (IMAS-interoperable, heavier) vs both (zarr primary + IDS egress on demand via
+        nova.io)?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="zarr-primary">zarr label store primary</button>
+          <button class="r-opt" data-value="ids-per-shot">equilibrium IDS per shot</button>
+          <button class="r-opt" data-value="zarr-plus-ids-egress">zarr primary + IDS egress on demand</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+      <div class="r-dec" data-key="convergence-policy" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Fixed-iteration-budget policy for the batched Picard/Newton loop: one
+        global budget sized to the tail (simple, wastes bulk throughput), or a two-pass scheme
+        (short budget for all → re-solve the non-converged residue with a long budget)? Two-pass
+        is the likely winner if the iteration-count distribution from L1 is heavy-tailed.</p>
+        <p class="r-dec-rat"></p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-mcg-01" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-24">
+        <h4 class="r-fu-title">L0 — catalog slice census + jitted-solve parity gate</h4>
+        <div class="r-fu-body"><p>First rung, runnable before the solver ports complete: pin the
+        catalog's true slice count (turning the 1-hour goal into an exact slices/s requirement)
+        and stand up the parity gate the whole ladder measures against. Blocked on
+        physics-spine-adoption wave 3 (ReconstructProfile) for the full gate; the census +
+        ReconstructMoment parity half can run as soon as wave 2 lands.</p></div>
+        <pre class="r-fu-prompt">Project: nova
+Plan:    mast-catalog-gpu-solve (http://127.0.0.1:8765/nova/mast-catalog-gpu-solve.html)
+Section: §3 L0
+Tier:    opus
+
+Context
+  The 1-hour/8xH200 goal needs its denominator pinned: how many equilibrium
+  timesteps does the full 11,573-shot L2 catalog actually hold, per campaign?
+  And the ladder needs its parity gate: jitted == eager on the spine_bench
+  heldout set before any throughput number means anything.
+
+State to read
+  docs/mast-catalog-gpu-solve.html §1-§3 (this plan)
+  docs/physics-spine-adoption.html §3 (solver port status)
+  ~/Code/imas-ambix/imas_ambix/spine_bench/ (heldout set, baseline numbers)
+  ~/Code/imas-ambix/docs/data-acquisition.html (L2 store layout for the census)
+
+Scope locks / constraints
+  Census via the FAIR-MAST catalog metadata / mirrored zarr attrs — do not
+  bulk-download signal data for counting. Parity tolerance pre-registered
+  before measuring. GPU work on betelgeuse needs --reservation=gpu_0003_grpA;
+  census + CPU parity need no GPU at all.
+
+Done-when
+  1. Slice census committed: total + per-campaign counts; the goal restated
+     as an exact aggregate slices/s requirement in §1.
+  2. Parity gate green: jitted ReconstructMoment (and ReconstructProfile when
+     available) match eager on the heldout set to the registered tolerance.
+  3. L1 followup written with the measured requirement; this one resolved.</pre>
+      </article>
+    </section>
+
+  </main>
+</body>
+</html>

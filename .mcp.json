@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "imas-cx": {
+      "type": "stdio",
+      "command": "uv",
+      "args": [
+        "run",
+        "--project",
+        "/home/ITER/mcintos/Code/imas-codex",
+        "imas-codex",
+        "serve"
+      ]
+    }
+  }
+}

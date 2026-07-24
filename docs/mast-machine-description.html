@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="mast-machine-description">
+  <meta name="plan-title"     content="MAST Machine Description — DDv4 IDS set + standard-name data maps">
+  <meta name="plan-summary"   content="Author a proper MAST machine-description IDS set (pf_active, pf_passive, wall, magnetics, tf) that nova's magnetic model builds from — DDv4-native (COCOS 17), Standard Name conventions — with per-campaign versioning and validated data maps/transformations from the FAIR-MAST/efm sources. Multi-session program.">
+  <meta name="plan-status"    content="active">
+  <meta name="plan-roi"       content="high">
+  <meta name="plan-effort"    content="XL">
+  <meta name="plan-tier"      content="opus">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-depends-on" content="nova-spine-refactor">
+  <meta name="plan-blocks"    content="mast-catalog-gpu-solve">
+  <title>MAST Machine Description | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — Objective</h2>
+    <p>Nova's magnetic model must build the MAST machine from a <strong>proper machine-description
+    IDS set</strong> — not from ambix's ad-hoc per-campaign geometry tables. This plan defines and
+    authors that set: DDv4-native (DDv4 is COCOS&nbsp;17), keyed to the IMAS Standard Name
+    conventions, versioned per campaign, and validated end-to-end by building nova operators from
+    it and reproducing the sensor forward model the ambix vacuum campaigns already pinned. It also
+    delivers the <strong>data maps and transformations</strong> that carry the FAIR-MAST / efm
+    source quantities onto DDv4 semantics — the ingest side of the same contract.</p>
+    <p><strong>This is a multi-session program</strong> — the stages in §4 are deliberately sized
+    so no single session attempts the whole set. The dependent
+    <code>mast-catalog-gpu-solve</code> plan consumes the result:
+    <code>Machine.build</code> from MAST MD → biot operators → batched reconstruction of the full
+    catalog.</p>
+
+    <figure>
+      <svg viewBox="0 0 900 250" role="img" style="max-width:100%;height:auto;font-family:system-ui">
+        <text x="450" y="22" text-anchor="middle" font-size="15" font-weight="600" fill="#111">MAST machine-description pipeline</text>
+        <!-- sources -->
+        <rect x="20" y="52" width="190" height="80" fill="none" stroke="#888" stroke-width="1"/>
+        <text x="115" y="72" text-anchor="middle" font-size="13" font-weight="600" fill="#111">Sources</text>
+        <text x="115" y="92" text-anchor="middle" font-size="11.5" fill="#333">FAIR-MAST L2 zarr (efm)</text>
+        <text x="115" y="108" text-anchor="middle" font-size="11.5" fill="#333">ambix gs/geometry.py tables</text>
+        <text x="115" y="124" text-anchor="middle" font-size="11.5" fill="#333">UKAEA drawings / silop refs</text>
+        <!-- maps -->
+        <rect x="260" y="52" width="190" height="80" fill="none" stroke="#888" stroke-width="1"/>
+        <text x="355" y="72" text-anchor="middle" font-size="13" font-weight="600" fill="#111">Data maps</text>
+        <text x="355" y="92" text-anchor="middle" font-size="11.5" fill="#333">name maps → Standard Names</text>
+        <text x="355" y="108" text-anchor="middle" font-size="11.5" fill="#333">COCOS id → COCOS 17 transform</text>
+        <text x="355" y="124" text-anchor="middle" font-size="11.5" fill="#333">units / sign / geometry checks</text>
+        <!-- IDS set -->
+        <rect x="500" y="40" width="190" height="104" fill="none" stroke="#1a6b3c" stroke-width="1.5"/>
+        <text x="595" y="60" text-anchor="middle" font-size="13" font-weight="600" fill="#1a6b3c">DDv4 MD IDS set</text>
+        <text x="595" y="80" text-anchor="middle" font-size="11.5" fill="#333">pf_active · pf_passive · wall</text>
+        <text x="595" y="96" text-anchor="middle" font-size="11.5" fill="#333">magnetics · tf</text>
+        <text x="595" y="112" text-anchor="middle" font-size="11.5" fill="#333">per-campaign versions</text>
+        <text x="595" y="128" text-anchor="middle" font-size="11.5" fill="#333">(coil drift ≲ 13 mm)</text>
+        <!-- consumers -->
+        <rect x="740" y="52" width="140" height="80" fill="none" stroke="#888" stroke-width="1"/>
+        <text x="810" y="72" text-anchor="middle" font-size="13" font-weight="600" fill="#111">Consumers</text>
+        <text x="810" y="92" text-anchor="middle" font-size="11.5" fill="#333">Machine.build</text>
+        <text x="810" y="108" text-anchor="middle" font-size="11.5" fill="#333">biot operators</text>
+        <text x="810" y="124" text-anchor="middle" font-size="11.5" fill="#333">catalog GPU solve</text>
+        <!-- arrows -->
+        <line x1="210" y1="92" x2="258" y2="92" stroke="#555" stroke-width="1.2" marker-end="url(#arr)"/>
+        <line x1="450" y1="92" x2="498" y2="92" stroke="#555" stroke-width="1.2" marker-end="url(#arr)"/>
+        <line x1="690" y1="92" x2="738" y2="92" stroke="#555" stroke-width="1.2" marker-end="url(#arr)"/>
+        <defs><marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#555"/></marker></defs>
+        <!-- validation loop -->
+        <path d="M810 132 L810 200 L355 200 L355 136" fill="none" stroke="#8a5a00" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#arr2)"/>
+        <defs><marker id="arr2" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#8a5a00"/></marker></defs>
+        <text x="580" y="192" text-anchor="middle" font-size="11.5" fill="#8a5a00">validation loop: operator parity vs ambix tables + vacuum-shot sensor forward model</text>
+      </svg>
+      <figcaption>Sources → maps → DDv4 IDS set → nova consumers, closed by the parity/validation
+      loop (§5). The maps are a deliverable equal to the IDSs — they are what makes the catalog
+      signals readable against the same semantics.</figcaption>
+    </figure>
+
+    <h2 id="s2">§2 — The IDS set</h2>
+    <table>
+      <thead><tr><th>IDS</th><th>Content for MAST</th><th>Primary source</th></tr></thead>
+      <tbody>
+        <tr><td><code>pf_active</code></td><td>PF coil geometry (winding-pack outlines, turns),
+          circuit topology, supplies; the solenoid (P1) with its response conventions. Per-campaign
+          coil positions (efm coil geometry drifts up to ~13&nbsp;mm between campaigns).</td>
+          <td>efm via FAIR-MAST; ambix <code>gs/geometry.py</code> campaign tables</td></tr>
+        <tr><td><code>pf_passive</code></td><td>Vessel and case conducting elements — the passive
+          loops the PassiveCircuit model builds L/R from; two-section element geometry; nominal
+          resistances with the calibration multipliers referenced, not baked in.</td>
+          <td>efm passive-element boxes; ambix passive tables + calibrated R provenance</td></tr>
+        <tr><td><code>wall</code></td><td>Limiter contour + vessel 2D outline (the in-polygon masks
+          the topology reads use).</td><td>efm limiter arrays; ambix ivc_geometry</td></tr>
+        <tr><td><code>magnetics</code></td><td>Flux loops and pickup coils: positions, orientation
+          angles, effective areas, names — the sensor set the reconstruction fits. Includes the
+          per-campaign validity masks (dead/renamed channels).</td>
+          <td>efm/silop sensor tables (silop positions are campaign-stable)</td></tr>
+        <tr><td><code>tf</code></td><td>TF conductor description sufficient for the rod-current
+          F = R·B_φ convention used by profile solves.</td><td>efm scalars + drawings</td></tr>
+      </tbody>
+    </table>
+    <p>Scope guard: no iron-core IDS (MAST has none) and no 3-D conductor description in v1 —
+    axisymmetric MD only, matching what the equilibrium solvers consume. Diagnostics beyond
+    magnetics (Thomson etc.) are out of scope here; they enter through the signal-ingest maps
+    when the transport priors need them.</p>
+
+    <h2 id="s3">§3 — Conventions: DDv4, COCOS 17, Standard Names</h2>
+    <ul>
+      <li><strong>DDv4-native authoring.</strong> The MD is written once, in a pinned DDv4 version
+      (decision below), with <code>ids_properties/version_put</code> carrying it; consumers open
+      with the matching <code>dd_version</code> — never auto-converted.</li>
+      <li><strong>COCOS 17 is the target convention</strong> (DDv4's). The source side must be
+      <em>identified, not assumed</em>: stage 1 includes a COCOS identification audit of the
+      efm/FAIR-MAST quantities (known landmark: the MAST convention has ψ_axis &gt; ψ_boundary;
+      ambix carries total flux Φ = 2πRA_φ [Wb]). Every map records the source COCOS id and the
+      exact transform applied (sign flips on ψ/Ip/B_φ/q, 2π factors), and a round-trip test pins
+      each one.</li>
+      <li><strong>Standard Names.</strong> Signal and MD quantities key to the IMAS Standard Names
+      (ISN machinery + ISNC catalog, per the locked io-contract-home decision in
+      nova-spine-refactor): the maps are authored against ISN's published schema, missing names
+      are contributed to the catalog fork (as beta_normal was), and nova.io's resolver serves
+      them. Facility-specific name maps (efm/FAIR-MAST → standard name) live with the mapping
+      layer, not inside nova.</li>
+    </ul>
+
+    <h2 id="s4">§4 — Stages (one session each, roughly)</h2>
+    <ol>
+      <li><strong>Inventory + COCOS audit.</strong> Enumerate every geometry/sensor quantity the
+      ambix tables and FAIR-MAST L2 store carry; identify source COCOS and units per quantity;
+      produce the map skeleton (source path → DDv4 path → standard name → transform). Deliverable:
+      a research doc with the full quantity ledger + the campaign-fingerprint inventory (which
+      campaigns need distinct MD versions).</li>
+      <li><strong>pf_active + wall + tf.</strong> Author the coil/limiter/TF IDSs for a pilot
+      campaign; nova <code>Machine.build</code> compiles them through the
+      <code>MachineGeometryReader</code> seam; coil-to-sensor and coil-to-grid operators reproduce
+      the ambix geometry-table operators to tight tolerance.</li>
+      <li><strong>magnetics.</strong> Sensor set with orientations/areas + per-campaign validity;
+      vacuum-shot forward model (coil currents → predicted sensor signals) matches the ambix
+      vacuum-campaign pins.</li>
+      <li><strong>pf_passive.</strong> Passive element set; PassiveCircuit L matrix from the MD
+      matches the ambix two-section flux-linkage build; calibrated-R provenance referenced.</li>
+      <li><strong>Campaign fan-out + registry.</strong> Generate MD versions for all campaigns in
+      the catalog (automated from the stage-1 fingerprints); store per the registry decision
+      below; document the pulse-range → MD-version keying.</li>
+      <li><strong>Ingest maps for the solve inputs.</strong> The catalog solve's per-slice inputs
+      (coil currents, sensor signals, Rogowski Ip) mapped through nova.io with standard-name keys
+      and COCOS transforms; round-trip validated on a pilot shot set.</li>
+    </ol>
+    <p><em>Done-when (plan):</em> all six stages landed; a MAST shot can be taken from FAIR-MAST
+    source to a nova operator set + solve-ready input bundle using only the MD IDSs and the maps —
+    no ambix geometry tables on the path.</p>
+
+    <h2 id="s5">§5 — Validation gates</h2>
+    <ul>
+      <li><strong>Operator parity:</strong> MD-built biot operators vs ambix geometry-table
+      operators — element-wise agreement to a stated tolerance on a pilot campaign, then per
+      campaign.</li>
+      <li><strong>Vacuum forward model:</strong> coil-only shots reproduce measured magnetics to
+      the ambix vacuum-campaign residual levels (the strongest end-to-end test of geometry +
+      orientation + signs).</li>
+      <li><strong>IDS validity:</strong> every authored IDS passes <code>validate()</code> in the
+      pinned DDv4; every map has a COCOS round-trip test.</li>
+      <li><strong>Reconstruction smoke:</strong> ReconstructMoment on a handful of flat-top slices
+      lands the boundary within the tolerance the ambix disc-read cohort established.</li>
+    </ul>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="dd-version-pin" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Which DDv4 version to pin for the MD authoring (and therefore for every
+        consumer open)? Latest stable at stage-2 time is the default recommendation; the pin is
+        recorded in the MD registry and in the maps.</p>
+        <p class="r-dec-rat"></p>
+      </div>
+      <div class="r-dec" data-key="md-registry" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Where do the authored MD IDS files live and how are they versioned?
+        Candidates: GHCR OCI artifacts via ORAS (matches the norma corpus pattern — immutable
+        digests, campaign tags, CI-pullable); in-repo under a size budget (MD is small — likely
+        &lt;10 MB total); or a dedicated mast-md repository.</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="ghcr-oras">GHCR OCI artifacts (ORAS)</button>
+          <button class="r-opt" data-value="in-repo">in-repo data/ under size budget</button>
+          <button class="r-opt" data-value="dedicated-repo">dedicated mast-md repo</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+      <div class="r-dec" data-key="campaign-keying" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Campaign → MD-version keying: one MD per campaign fingerprint (the
+        ambix geometry-signature approach carried over), or one MD per named campaign with the
+        fingerprint as a consistency check? Determines how many MD versions the registry carries
+        and how consumers select one from a shot number.</p>
+        <p class="r-dec-rat"></p>
+      </div>
+      <div class="r-dec" data-key="map-home" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Where do the MAST facility maps (efm/FAIR-MAST path → standard name →
+        COCOS transform) live? The io-contract-home decision puts facility maps with the mapping
+        layer (codex emits facility maps against ISN's schema); the pragmatic near-term options are
+        the imas-codex MAST map set, an ambix-side plugin table, or a maps/ tree beside the MD
+        registry.</p>
+        <p class="r-dec-rat"></p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-mmd-01" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-24">
+        <h4 class="r-fu-title">Stage 1 — quantity inventory + COCOS identification audit</h4>
+        <div class="r-fu-body"><p>The foundation session: enumerate every geometry/sensor quantity
+        in the ambix campaign tables and the FAIR-MAST L2 store, identify source COCOS and units
+        per quantity, fingerprint the campaigns, and emit the map skeleton as a research doc. The
+        registry/keying/map-home decisions should be locked at the end of this stage with the
+        evidence in hand.</p></div>
+        <pre class="r-fu-prompt">Project: nova
+Plan:    mast-machine-description (http://127.0.0.1:8765/nova/mast-machine-description.html)
+Section: §4 stage 1
+Tier:    opus
+
+Context
+  First session of the MAST MD program. Everything downstream (IDS authoring,
+  maps, catalog solve) keys off this inventory; do it exhaustively and land it
+  as a research doc, not code.
+
+State to read
+  ~/Code/imas-ambix/imas_ambix/gs/geometry.py (per-campaign tables, campaign
+    fingerprints, sensor exclusion rules)
+  ~/Code/imas-ambix/imas_ambix/gs/imas_geometry.py + ivc_geometry.py
+  ~/Code/imas-ambix/docs/data-acquisition.html (FAIR-MAST endpoints + zarr layout)
+  ~/Code/imas-ambix/docs/cocos-convention-hardening.html (prior COCOS work)
+  imas-dd MCP tools (DDv4 paths for pf_active/pf_passive/wall/magnetics/tf;
+    COCOS field lists; standard-name search)
+
+Scope locks / constraints
+  Read-only toward both repos this stage. DDv4 is COCOS 17 (target); source
+  COCOS must be IDENTIFIED per quantity with evidence, never assumed. Multi-
+  session program: stage 1 only — no IDS authoring yet.
+
+Done-when
+  1. Research doc in nova docs/ with the full quantity ledger: source path →
+     DDv4 path → standard name (or gap) → units → source COCOS → transform.
+  2. Campaign fingerprint inventory: how many distinct MDs the catalog needs.
+  3. Registry / campaign-keying / map-home decisions locked with rationale.
+  4. Stage-2 followup written; this followup resolved.</pre>
+      </article>
+    </section>
+
+  </main>
+</body>
+</html>

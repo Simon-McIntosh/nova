@@ -3,7 +3,7 @@
 import abc
 from dataclasses import dataclass, field
 from functools import cached_property
-from typing import ClassVar, override
+from typing import TYPE_CHECKING, ClassVar, override
 
 import numpy as np
 import pandas
@@ -12,8 +12,10 @@ import scipy
 from nova.geometry.frenet import Frenet
 from nova.geometry.polygeom import Polygon
 from nova.geometry.rdp import rdp
-from nova.geometry.volume import Cell, Sweep, TriShell
 from nova.graphics.plot import Plot
+
+if TYPE_CHECKING:
+    from nova.geometry.volume import Cell
 
 
 @dataclass
@@ -556,8 +558,10 @@ class PolyLine(Plot):
         return [segment[attr] for segment in self.segments]
 
     @cached_property
-    def vtk(self) -> list[Cell]:
+    def vtk(self) -> list["Cell"]:
         """Return list of vtk mesh segments swept along segment paths."""
+        from nova.geometry.volume import Sweep
+
         return [
             Sweep(self.cross_section, segment.path, segment.binormal, align=self.align)
             for segment in self.segments
@@ -566,6 +570,8 @@ class PolyLine(Plot):
     @cached_property
     def poly(self) -> list[Polygon]:
         """Return list of polygon objects for 3D coil projected to 2d poloidal plane."""
+        from nova.geometry.volume import TriShell
+
         return [
             TriShell(vtk, ahull=segment.name == "arc", alpha=None).poly
             for vtk, segment in zip(self.vtk, self.segments)
@@ -646,5 +652,3 @@ class PolyLine(Plot):
         from vedo import Mesh
 
         Mesh(*[segment.mesh for segment in self.segments]).show()
-
-

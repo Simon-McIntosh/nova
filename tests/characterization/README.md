@@ -35,6 +35,10 @@ the harness survives BLAS and dependency bumps without re-baselining ceremony.
 - `_manifest.py` — read/write `goldens/manifest.json`.
 - `_registry.py` / `_entrypoints.py` — the characterized entry points.
 - `_skips.py` — runtime probes deciding whether a blocked entry can run here.
+- `_fixtures.py` — rebuild the sector-module workbooks from the in-repo canonical
+  units and redirect the reader at that cache (no assembly-source edits).
+- `_replay.py` / `test_replay.py` — Tier-1 replay: re-run a recorded fit with
+  current code and re-check it against the golden the run record pinned.
 - `test_kernel.py` — synthetic primitives (GP, transforms, Fourier identity,
   error vectors), millisecond, no data files.
 - `test_invariance.py` — physical symmetries (offset/relabelling invariance,
@@ -60,16 +64,23 @@ anywhere.
 
 Green in-repo today (goldens committed): the gap Fourier proxy, the IDM /
 reverse-engineering / as-built CCL fiducial deltas, the nominal fiducial frame,
-the uniform and base-assembly vault geometry, plus the synthetic kernel and
-invariance lanes.
+the uniform and base-assembly vault geometry, the **SSAT sector fit**
+(`sector.fit.ssat`), plus the synthetic kernel and invariance lanes.
+
+`sector.fit.ssat` rebuilds the released sector-7 workbook (v15_0) from its
+committed canonical unit and fits the SSAT BR phase against it. The lane is
+also the first Tier-1 replay pilot: its run record
+(`data/Assembly/run_records/sector.fit.ssat.yaml`) binds the golden to the
+canonical-unit input digest, the fit configuration, and the environment.
 
 Registered as **visible skips** — the fixtures live off-repo and are staged via
 the assembly data registry, not silently omitted:
 
-- `sector.fit.ssat`, `pit.gaps` — the SSAT / in-pit sector fits need the
-  per-sector IDM workbooks (`Sector_Module_#*.xlsx`) from the IO share, plus the
-  nominal ILIS point cloud from `//io-ws-ccstore1`. Stage those (or a cached
-  `fiducial_data.nc`) and the entries produce goldens with no code change.
+- `pit.gaps` — the sector-module workbooks are now provided in-repo, but the
+  in-pit gap integration additionally fits every coil against a nominal ILIS
+  point cloud (`ILIS_nominal.txt` on `//io-ws-ccstore1`, or a cached
+  `ILIS_nominal.pickle`) that is not part of the canonical corpus. Stage that
+  reference and the lane produces a golden with no code change.
 - `vault.fourier_proxy` — the ANSYS-backed spectral extraction needs an ANSYS
   install (`AWP_ROOT*`). The vault *geometry* it sits on is characterized above.
 - `windingpack.uniform` — the pyvista mesh build is heavy and its multi-MB vtk

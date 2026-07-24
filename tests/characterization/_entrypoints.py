@@ -25,6 +25,10 @@ from ._registry import EntryPoint
 GAP_UNIFORM_INPUT = "data/Assembly/constant_adaptive_fourier.txt"
 GAP_VELOCITY_INPUT = "data/Assembly/Gap_Size_18_Coils.txt"
 ASBUILT_INPUT = "input/ITER/TFC18_asbuilt.xlsx"
+# Released sector-7 canonical unit that seeds the SSAT sector fit.
+SECTOR7_UNIT = (
+    "data/Assembly/sector_modules/Sector_Module_#7_CCL_as-built_data_8NR9J7_v15_0.csv"
+)
 
 
 # --- runnable, in-repo-reproducible ---------------------------------------
@@ -83,15 +87,34 @@ def _run_base_assembly_vault():
 
 
 def _run_sector_fit():
+    # SSAT-phase CCL fiducial deltas for the sector-7 coil pair, fitted from the
+    # rebuilt sector-module workbook. The corpus keeps the released sector-7 unit
+    # (v15_0) and one in-work snapshot (_v9_4); the released v15_0 book carries the
+    # SSAT BR phase with complete ILIS surfaces, so the fit runs against it with
+    # private=False. (The authored private=True cannot resolve here: version
+    # resolution globs released names to find the in-work sibling, and no released
+    # v9_4 book is in the corpus.) With complete ILIS the augment step leaves the
+    # CCL deltas unchanged, so the released-book fit is the faithful result.
+    from . import _fixtures
+
+    _fixtures.ensure_sector_cache()
     from nova.assembly.fiducialsector import FiducialSector
 
-    return FiducialSector(phase="SSAT BR", sectors={7: [8, 9]}, private=True).delta
+    return FiducialSector(
+        phase="SSAT BR", sectors={7: [8, 9]}, private=False, augment=True
+    ).delta
 
 
 def _run_pit_gaps():
+    from . import _fixtures
+
+    _fixtures.ensure_sector_cache()
     from nova.assembly.fiducialpit import FiducialPit
 
-    return FiducialPit(sectors={7: [8, 9]}).gaps
+    gaps = FiducialPit(sectors={7: [8, 9]}).gaps
+    # Drop the non-numeric classification column so the result canonicalizes to
+    # pure numeric arrays; the numeric gap geometry is what the gate protects.
+    return gaps.drop(columns=[c for c in ["gap_type"] if c in gaps.columns])
 
 
 def _run_vault_fourier_proxy():
@@ -185,7 +208,7 @@ def build_registry() -> list[EntryPoint]:
             id="sector.fit.ssat",
             callable="nova.assembly.fiducialsector:FiducialSector",
             run=_run_sector_fit,
-            inputs=(),
+            inputs=(SECTOR7_UNIT,),
             tolerances_default="length_mm",
             skip_reason=_skips.sector_modules_absent,
         ),
@@ -195,7 +218,7 @@ def build_registry() -> list[EntryPoint]:
             run=_run_pit_gaps,
             inputs=(),
             tolerances_default="length_mm",
-            skip_reason=_skips.sector_modules_absent,
+            skip_reason=_skips.pit_fixtures_absent,
         ),
         EntryPoint(
             id="vault.fourier_proxy",

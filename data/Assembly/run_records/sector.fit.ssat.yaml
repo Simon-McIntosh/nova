@@ -1,7 +1,7 @@
-code_dirty: true
-code_git_sha: cfa196ed7db3beb272920bd8d8a840020c146051
+code_dirty: false
+code_git_sha: 2e5759390d03e8ce5e2f88ad793cc524d6adc19e
 env:
-  blas_single_thread: true
+  blas_single_thread: false
   packages:
     numpy: 1.26.4
     openpyxl: 3.1.5
@@ -22,5 +22,5 @@ outputs:
 - digest: sha256:79edf3931c8ef19f70e6785ed5bc0df612955acbfacb3727197b40e3fe2f622d
   name: '9'
   tolerance_class: length_mm
-timestamp: '2026-07-24T06:05:34.933657+00:00'
+timestamp: '2026-07-24T14:28:49.876350+00:00'
 uv_lock_sha256: sha256:9fe45cbf5dbc0cf042669a68a0c181377565f9c62befb0e319bbd3e8582ad2ec

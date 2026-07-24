@@ -1,0 +1,467 @@
+anomalies:
+- 'TFGS Landing: non-numeric value in uncertainty column at row 20, axis x, block column 4'
+- 'TFGS Landing: formula cell without cached value at row 20, block column 4, axes ux'
+- 'TFGS Landing: non-numeric value in uncertainty column at row 21, axis x, block column 4'
+- 'TFGS Landing: formula cell without cached value at row 21, block column 4, axes ux'
+- 'TFGS Landing: non-numeric value in uncertainty column at row 22, axis x, block column 4'
+- 'TFGS Landing: formula cell without cached value at row 22, block column 4, axes ux'
+- 'TFGS Landing: non-numeric value in uncertainty column at row 23, axis x, block column 4'
+- 'TFGS Landing: formula cell without cached value at row 23, block column 4, axes ux'
+- 'TFGS Landing: non-numeric value in uncertainty column at row 24, axis x, block column 4'
+- 'TFGS Landing: formula cell without cached value at row 24, block column 4, axes ux'
+- 'TFGS Landing: non-numeric value in uncertainty column at row 25, axis x, block column 4'
+- 'TFGS Landing: formula cell without cached value at row 25, block column 4, axes ux'
+- 'TFGS Landing: non-numeric value in uncertainty column at row 26, axis x, block column 4'
+- 'TFGS Landing: formula cell without cached value at row 26, block column 4, axes ux'
+- 'TFGS Landing: non-numeric value in uncertainty column at row 27, axis x, block column 4'
+- 'TFGS Landing: formula cell without cached value at row 27, block column 4, axes ux'
+- 'TFGS Landing: non-numeric value in uncertainty column at row 28, axis x, block column 4'
+- 'TFGS Landing: formula cell without cached value at row 28, block column 4, axes ux'
+- 'TFGS Landing: non-numeric value in uncertainty column at row 29, axis x, block column 4'
+- 'TFGS Landing: formula cell without cached value at row 29, block column 4, axes ux'
+- 'TFGS Landing: non-numeric value in uncertainty column at row 30, axis x, block column 4'
+- 'TFGS Landing: formula cell without cached value at row 30, block column 4, axes ux'
+csv_sha256: sha256:a209da220b47a4e8bca137262cf59e38bd4f65995b75845f8c6a8c627e3ad7bb
+filename_meta:
+  idm_doc: 8L34J6
+  private: false
+  revision_prefix: ''
+  sector: 5
+  version: '8.2'
+metadata_text:
+- col: 4
+  row: 2
+  text: Metadata per Assembly step
+- col: 4
+  row: 9
+  text: 'TF Numbering and place in Tokamak: '
+- col: 12
+  row: 9
+  text: 3-ball model for Magnets (PBS 11) (4WD43V)
+- col: 4
+  row: 10
+  text: Values are given in mm
+- col: 2
+  row: 12
+  text: Nominal
+- col: 7
+  row: 12
+  text: FAT With Supplier fitting
+- col: 12
+  row: 12
+  text: FAT With IO fitting
+- col: 2
+  row: 15
+  text: Traceability
+- col: 7
+  row: 15
+  text: Traceability
+- col: 12
+  row: 15
+  text: Traceability
+- col: 2
+  row: 16
+  text: 'All CCL points nominals are coming from 1101CA_003350 : TF FIDUCIAL MARKS TOLERANCES (27TWKL).
+
+    Fiducials don''t have nominal as their nominal position is functional, they are used to track the evolution of the CCL points.'
+- col: 7
+  row: 16
+  text: Sectors
+- col: 8
+  row: 16
+  text: TFCs
+- col: 9
+  row: 16
+  text: Traceability to FAT DI
+- col: 10
+  row: 16
+  text: Pages
+- col: 12
+  row: 16
+  text: Sectors
+- col: 13
+  row: 16
+  text: TFCs
+- col: 14
+  row: 16
+  text: Traceability to SCOD fitting
+- col: 15
+  row: 16
+  text: Pages
+- col: 7
+  row: 17
+  text: S05
+- col: 8
+  row: 17
+  text: TFC 16
+- col: 9
+  row: 17
+  text: JADA-11107-3MR0006 CFAD Final Inspection of JA07 (TF16) (TOSHIBA) (4CVF5A)
+- col: 10
+  row: 17
+  text: 4CVF5A, pages 51-56
+- col: 12
+  row: 17
+  text: S05
+- col: 13
+  row: 17
+  text: TFC 16
+- col: 8
+  row: 18
+  text: TFC 05
+- col: 9
+  row: 18
+  text: TF05_CCL_Positioning_and_Tolerance_Check_v2.0 (4HMUWH)
+- col: 10
+  row: 18
+  text: 4HMUWH, pages 26-29
+- col: 13
+  row: 18
+  text: TFC 05
+- col: 2
+  row: 20
+  text: Fitting
+- col: 7
+  row: 20
+  text: Fitting
+- col: 12
+  row: 20
+  text: Fitting
+- col: 2
+  row: 21
+  text: Not relevant
+- col: 7
+  row: 21
+  text: The fitting is based on the CCL. The priority is given to the strait leg (A,B and H)
+- col: 12
+  row: 21
+  text: To be filled by SCOD
+- col: 2
+  row: 25
+  text: Reference system
+- col: 7
+  row: 25
+  text: Uncertainties
+- col: 12
+  row: 25
+  text: Reference system
+- col: 2
+  row: 26
+  text: 'All values are reported in the TF coils CCL datum system, eg:
+
+    The X is in the coil midplane
+
+    The Z nominal for H is 0mm'
+- col: 7
+  row: 26
+  text: 'CCL  uncertainty (TF16): JADA-11107-3MR0006 CFAD Final Inspection of JA07 (TF16) (TOSHIBA) (4CVF5A)'
+- col: 12
+  row: 26
+  text: 'All values are reported in the TF coils CCL datum system, eg:
+
+    The X is in the coil midplane
+
+    The Z nominal for H is 0mm'
+- col: 7
+  row: 27
+  text: 'CCL  uncertainty (TF05): TF05_CCL_Positioning_and_Tolerance_Check_v2.0 (4HMUWH)'
+- col: 7
+  row: 28
+  text: 'Fiducials  uncertainty (TF16): TO7# 8.1.9.1 TFC 16 (JA07) FAT data quality analysis (6CDSZB)'
+- col: 7
+  row: 29
+  text: 'Fiducials  uncertainty (TF05): TO7# 8.1.2.2 TFC 5 Survey data quality analysis (FAT) (5D68XH v1.0)'
+- col: 7
+  row: 30
+  text: 'Fiducials  repetability (TF16): CWP0093 - IWP06_DynMetrologyAssessmentRegardingTFC16'
+- col: 7
+  row: 31
+  text: 'Fiducials  repetability (TF05): CWP0140_IWP04_DynMetrologyAssessmentRegardingTFC05_28-09-21'
+- col: 7
+  row: 34
+  text: Reference system
+- col: 7
+  row: 35
+  text: 'All values are reported in the TF coils CCL datum system, eg:
+
+    The X is in the coil midplane
+
+    The Z nominal for H is 0mm'
+- col: 2
+  row: 76
+  text: SSAT Al (After Landing)
+- col: 2
+  row: 79
+  text: Traceability
+- col: 2
+  row: 80
+  text: Sectors
+- col: 3
+  row: 80
+  text: TFCs
+- col: 4
+  row: 80
+  text: Traceability to SCOD fitting
+- col: 5
+  row: 80
+  text: Pages
+- col: 2
+  row: 81
+  text: S05
+- col: 3
+  row: 81
+  text: TFC 16
+- col: 3
+  row: 82
+  text: TFC 05
+- col: 2
+  row: 84
+  text: Fitting
+- col: 2
+  row: 85
+  text: The data are the achieved position of TF 16 an TF 05 after landing. Data are   aligned to SSAT target. The ILIS points measures are from the  SSAT BR measures.
+- col: 2
+  row: 89
+  text: Reference system
+- col: 2
+  row: 90
+  text: 'All values are reported in the TF coils CCL datum system, eg:
+
+    The X is in the coil midplane
+
+    The Z nominal for H is 0mm'
+schema: nova-coil-metrology-canonical/1
+sheets:
+- blocks:
+  - coil: 16
+    has_uncertainty: false
+    header_col: 4
+    header_row: 6
+    transform: null
+    width: 6
+  - coil: 5
+    has_uncertainty: false
+    header_col: 17
+    header_row: 6
+    transform: null
+    width: 6
+  name: Nominal
+- blocks:
+  - coil: 16
+    has_uncertainty: true
+    header_col: 4
+    header_row: 6
+    transform: null
+    width: 9
+  - coil: 5
+    has_uncertainty: true
+    header_col: 17
+    header_row: 6
+    transform: null
+    width: 9
+  name: FAT supplier
+- blocks:
+  - coil: 16
+    has_uncertainty: true
+    header_col: 4
+    header_row: 6
+    transform:
+      label_col: 6
+      label_row: 2
+      populated: true
+    width: 9
+  - coil: 5
+    has_uncertainty: true
+    header_col: 17
+    header_row: 6
+    transform:
+      label_col: 19
+      label_row: 2
+      populated: true
+    width: 9
+  name: FAT IO
+- blocks:
+  - coil: 16
+    has_uncertainty: true
+    header_col: 4
+    header_row: 6
+    transform:
+      label_col: 6
+      label_row: 2
+      populated: true
+    width: 9
+  - coil: 5
+    has_uncertainty: true
+    header_col: 17
+    header_row: 6
+    transform:
+      label_col: 19
+      label_row: 2
+      populated: true
+    width: 9
+  name: SSAT BR
+- blocks:
+  - coil: 16
+    has_uncertainty: true
+    header_col: 4
+    header_row: 6
+    transform:
+      label_col: 6
+      label_row: 2
+      populated: true
+    width: 9
+  - coil: 5
+    has_uncertainty: true
+    header_col: 17
+    header_row: 6
+    transform:
+      label_col: 19
+      label_row: 2
+      populated: true
+    width: 9
+  name: SSAT target
+- blocks:
+  - coil: 16
+    has_uncertainty: true
+    header_col: 4
+    header_row: 6
+    transform:
+      label_col: 6
+      label_row: 2
+      populated: true
+    width: 9
+  - coil: 5
+    has_uncertainty: true
+    header_col: 17
+    header_row: 6
+    transform:
+      label_col: 19
+      label_row: 2
+      populated: true
+    width: 9
+  name: SSAT AR
+- blocks:
+  - coil: 16
+    has_uncertainty: true
+    header_col: 4
+    header_row: 6
+    transform:
+      label_col: 6
+      label_row: 2
+      populated: true
+    width: 9
+  - coil: 5
+    has_uncertainty: true
+    header_col: 17
+    header_row: 6
+    transform:
+      label_col: 19
+      label_row: 2
+      populated: true
+    width: 9
+  name: SSAT AR2
+- blocks:
+  - coil: 16
+    has_uncertainty: true
+    header_col: 4
+    header_row: 6
+    transform:
+      label_col: 6
+      label_row: 2
+      populated: true
+    width: 9
+  - coil: 5
+    has_uncertainty: true
+    header_col: 17
+    header_row: 6
+    transform:
+      label_col: 19
+      label_row: 2
+      populated: true
+    width: 9
+  name: SSAT AR3
+- blocks:
+  - coil: 16
+    has_uncertainty: true
+    header_col: 4
+    header_row: 6
+    transform:
+      label_col: 6
+      label_row: 2
+      populated: true
+    width: 9
+  - coil: 5
+    has_uncertainty: true
+    header_col: 17
+    header_row: 6
+    transform:
+      label_col: 19
+      label_row: 2
+      populated: true
+    width: 9
+  name: SSAT AR4
+- blocks:
+  - coil: 16
+    has_uncertainty: true
+    header_col: 4
+    header_row: 6
+    transform:
+      label_col: 6
+      label_row: 2
+      populated: false
+    width: 9
+  - coil: 5
+    has_uncertainty: true
+    header_col: 17
+    header_row: 6
+    transform:
+      label_col: 19
+      label_row: 2
+      populated: false
+    width: 9
+  name: SSAT AL
+- blocks:
+  - coil: 16
+    has_uncertainty: true
+    header_col: 4
+    header_row: 6
+    transform:
+      label_col: 6
+      label_row: 2
+      populated: true
+    width: 9
+  - coil: 5
+    has_uncertainty: true
+    header_col: 17
+    header_row: 6
+    transform:
+      label_col: 19
+      label_row: 2
+      populated: true
+    width: 9
+  name: In-pit target
+- blocks:
+  - coil: 16
+    has_uncertainty: true
+    header_col: 4
+    header_row: 6
+    transform:
+      label_col: 6
+      label_row: 2
+      populated: false
+    width: 9
+  - coil: 5
+    has_uncertainty: true
+    header_col: 17
+    header_row: 6
+    transform:
+      label_col: 19
+      label_row: 2
+      populated: false
+    width: 9
+  name: TFGS Landing
+source:
+  filename: Sector_Module_#5_CCL_as-built_data_8L34J6_v8_2.xlsx
+  mtime: '2026-02-20T17:19:55.690303+00:00'
+  sha256: sha256:5bbdd817f22b0e70f675a70ac8e88a86351f92ba6b7fa896cdb4924f6d115472
+  size: 730617

@@ -4,20 +4,22 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="nova">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="physics-spine-adoption">
-  <meta name="plan-title"     content="Physics Spine Adoption — solver nomenclature + ambix model ports">
-  <meta name="plan-summary"   content="Nova becomes the home of the full physics spine (equilibrium, circuits, transport): apply the locked problem×representation solver nomenclature, port the remaining ambix physics models as nova-style dataclasses on native nova types (torch current diffusion → JAX), and rewire imas-ambix to consume the spine as a dependency">
-  <meta name="plan-status"    content="active">
-  <meta name="plan-roi"       content="high">
-  <meta name="plan-effort"    content="XL">
-  <meta name="plan-tier"      content="opus">
-  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="physics-spine-adoption">
+  <meta name="plan-title" content="Physics Spine Adoption — solver nomenclature + ambix model ports">
+  <meta name="plan-summary" content="Nova becomes the home of the full physics spine (equilibrium, circuits, transport): apply the locked problem×representation solver nomenclature, port the remaining ambix physics models as nova-style dataclasses on native nova types (torch current diffusion → JAX), and rewire imas-ambix to consume the spine as a dependency">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="XL">
+  <meta name="plan-tier" content="opus">
+  <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-depends-on" content="nova-spine-refactor">
-  <meta name="plan-blocks"    content="mast-catalog-gpu-solve">
+  <meta name="plan-blocks" content="mast-catalog-gpu-solve">
   <title>Physics Spine Adoption | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-07-24">
+<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
@@ -247,81 +249,81 @@ nova/transport/current_diffusion.py  CurrentDiffusion      (ambix current_diffus
     archive.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="solver-nomenclature" data-choice="problem-representation" data-by="smc" data-when="2026-07-24T13:30:00+00:00">
-        <p class="r-dec-q">Naming grammar for the solver zoo — how are solver/model types named so
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="solver-nomenclature" data-choice="problem-representation" data-by="smc" data-when="2026-07-24T13:30:00+00:00">
+    <p class="r-dec-q">Naming grammar for the solver zoo — how are solver/model types named so
         the growing family stays unambiguous?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="problem-representation">problem × representation, domain packages</button>
-          <button class="r-opt" data-value="representation-first">representation-first classes</button>
-          <button class="r-opt" data-value="flat-namespace">single flat nova/solve namespace</button>
-        </p>
-        <p class="r-dec-rat">User selection 2026-07-24: two-axis constructor — problem token
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="problem-representation">problem × representation, domain packages</button>
+      <button class="r-opt" data-value="representation-first">representation-first classes</button>
+      <button class="r-opt" data-value="flat-namespace">single flat nova/solve namespace</button>
+      </p>
+    <p class="r-dec-rat">User selection 2026-07-24: two-axis constructor — problem token
         (forward / inverse / reconstruct / evolve) × representation token (profile / moment /
         harmonic / circuit / grid / filament), classes ProblemRepresentation in domain packages
         nova/equilibrium, nova/circuit, nova/transport. New combinations name themselves; the §2
         matrix is the registry.</p>
-      </div>
-      <div class="r-dec" data-key="disc-rename" data-choice="current-moment-merged" data-by="smc" data-when="2026-07-24T13:30:00+00:00">
-        <p class="r-dec-q">Rename for the ambix staged-disc boundary read (uniform current disc +
+    </div>
+<div class="r-dec" data-key="disc-rename" data-choice="current-moment-merged" data-by="smc" data-when="2026-07-24T13:30:00+00:00">
+    <p class="r-dec-q">Rename for the ambix staged-disc boundary read (uniform current disc +
         gated quadrupole)?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="current-moment-merged">current_moment, merged with boundary_moment</button>
-          <button class="r-opt" data-value="shafranov-moment">shafranov_moment</button>
-          <button class="r-opt" data-value="dipole">dipole</button>
-          <button class="r-opt" data-value="keep-disc">keep disc as its own model</button>
-        </p>
-        <p class="r-dec-rat">User selection 2026-07-24: fold boundary_disc + boundary_moment into
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="current-moment-merged">current_moment, merged with boundary_moment</button>
+      <button class="r-opt" data-value="shafranov-moment">shafranov_moment</button>
+      <button class="r-opt" data-value="dipole">dipole</button>
+      <button class="r-opt" data-value="keep-disc">keep disc as its own model</button>
+      </p>
+    <p class="r-dec-rat">User selection 2026-07-24: fold boundary_disc + boundary_moment into
         one ReconstructMoment model with a MomentOrder ladder — the uniform disc is the self-sized
         CENTROID-order seed, its gated quadrupole the next rung. Zakharov–Shafranov current-moment
-        terminology; "dipole" under-describes, "shafranov_moment" collides with the Shafranov
+        terminology; &quot;dipole&quot; under-describes, &quot;shafranov_moment&quot; collides with the Shafranov
         vertical-field/shift naming in the diagnostics.</p>
-      </div>
-      <div class="r-dec" data-key="dof-naming" data-choice="multipole-words" data-by="smc" data-when="2026-07-24T13:30:00+00:00">
-        <p class="r-dec-q">How are basis sizes / prior DOFs named (replacing k=2, k=4)?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="multipole-words">multipole words + explicit counts</button>
-          <button class="r-opt" data-value="numeric-order">numeric order behind a named field</button>
-          <button class="r-opt" data-value="physics-words">invented physics-quantity words</button>
-        </p>
-        <p class="r-dec-rat">User selection 2026-07-24: MomentOrder enum (CENTROID / QUADRUPOLE /
+    </div>
+<div class="r-dec" data-key="dof-naming" data-choice="multipole-words" data-by="smc" data-when="2026-07-24T13:30:00+00:00">
+    <p class="r-dec-q">How are basis sizes / prior DOFs named (replacing k=2, k=4)?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="multipole-words">multipole words + explicit counts</button>
+      <button class="r-opt" data-value="numeric-order">numeric order behind a named field</button>
+      <button class="r-opt" data-value="physics-words">invented physics-quantity words</button>
+      </p>
+    <p class="r-dec-rat">User selection 2026-07-24: MomentOrder enum (CENTROID / QUADRUPOLE /
         OCTUPOLE), profile ladder as n_pressure / n_diamagnetic, circuit modes as n_modes. No bare
         k anywhere in public API or symbol names.</p>
-      </div>
-      <div class="r-dec" data-key="topology-labeller" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">ReconstructProfile topology reads: unify on nova's JAX
+    </div>
+<div class="r-dec" data-key="topology-labeller" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">ReconstructProfile topology reads: unify on nova&#x27;s JAX
         connectivity/topology stack (vmap-safe, GPU-batchable — required by the catalog goal), or
         keep a host scipy.ndimage labeller path for the eager/debug lane alongside it?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="jax-only">JAX stack only (recommended)</button>
-          <button class="r-opt" data-value="jax-primary-scipy-debug">JAX primary + scipy debug lane</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-      <div class="r-dec" data-key="transport-scope" data-choice="nova-owns-transport-jax" data-by="smc" data-when="2026-07-24T13:30:00+00:00">
-        <p class="r-dec-q">Where does the current-diffusion transport model live, and in what
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="jax-only">JAX stack only (recommended)</button>
+      <button class="r-opt" data-value="jax-primary-scipy-debug">JAX primary + scipy debug lane</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="transport-scope" data-choice="nova-owns-transport-jax" data-by="smc" data-when="2026-07-24T13:30:00+00:00">
+    <p class="r-dec-q">Where does the current-diffusion transport model live, and in what
         framework?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="nova-owns-transport-jax">nova/transport, JAX</button>
-          <button class="r-opt" data-value="stay-ambix-torch">stays in ambix on torch</button>
-        </p>
-        <p class="r-dec-rat">User direction 2026-07-24: nova is the home of the full physics spine
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="nova-owns-transport-jax">nova/transport, JAX</button>
+      <button class="r-opt" data-value="stay-ambix-torch">stays in ambix on torch</button>
+      </p>
+    <p class="r-dec-rat">User direction 2026-07-24: nova is the home of the full physics spine
         including transport; the ambix torch prototype translates to JAX for consistency with the
         rest of the library. Torch remains an ambix-only (ML-tier) dependency.</p>
-      </div>
-    </section>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-psa-01" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-24">
-        <h4 class="r-fu-title">Wave 1 — package scaffolding, forward/inverse renames, coupling-generator unification</h4>
-        <div class="r-fu-body"><p>First shippable increment: stand up
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-psa-01" data-status="resolved" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-24" data-recommends-skill="" data-resolved-at="2026-07-24T21:25:13+00:00" data-resolved-by="smc">
+    <h4 class="r-fu-title">Wave 1 — package scaffolding, forward/inverse renames, coupling-generator unification</h4>
+    <div class="r-fu-body"><p>First shippable increment: stand up
         <code>nova/equilibrium</code> / <code>nova/circuit</code> / <code>nova/transport</code>,
         move the existing forward and inverse solvers behind the ForwardProfile / InverseDesign
         names (alias shims kept until ambix re-points), unify the coupling generator beside
         nova.biot's Solve/Matrix tier, and register ambix's imas_geometry reader against the
         MachineGeometryReader seam. Resolve the open topology-labeller decision before wave 3.</p></div>
-        <pre class="r-fu-prompt">Project: nova
+    <pre class="r-fu-prompt">Project: nova
 Plan:    physics-spine-adoption (http://127.0.0.1:8765/nova/physics-spine-adoption.html)
 Section: §6 wave 1 (scaffolding + renames), prep for waves 2-3
 Tier:    opus
@@ -353,8 +355,105 @@ Done-when
      nova.biot, with ambix gs/operator.py golden parity tests.
   3. imas_geometry registered as a MachineGeometryReader provider.
   4. Followup for wave 2 written; this followup resolved.</pre>
-      </article>
-    </section>
+    <p class="r-fu-outcome">Superseded by the 8-hour fleet-session brief (f-psa-02) — wave 1 is folded into it as worker A/B step 1 plus orchestrator scope.</p>
+    </article>
+<article class="r-fu" data-id="f-psa-02" data-status="open" data-tier="opus" data-written-by="smc/session 2026-07-24" data-written-at="2026-07-24" data-recommends-skill="/reckon-ship physics-spine-adoption §6" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">8-hour fleet session — land wave 1 + the wave-2 model ports (orchestrator + 2 opus workers)</h4>
+    <div class="r-fu-body"><p>One full working session sized for ~8 hours: a Fable orchestrator with <strong>two opus workers</strong> in detached worktrees off nova <code>develop</code>, disjoint write scopes (worker A: <code>nova/equilibrium/**</code>; worker B: <code>nova/circuit/**</code> + <code>nova/transport/**</code>). Target: wave 1 fully landed and the four independent wave-2 donor ports (ReconstructMoment, ReconstructHarmonic, PassiveCircuit, CurrentDiffusion→JAX) landed with donor tests green, ScreeningCircuit as stretch. Ambix stays read-only — donor deletion + re-pointing is wave 3. Resolve the open topology-labeller decision during the session (it gates the wave-3 ReconstructProfile re-architecture).</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    physics-spine-adoption (http://127.0.0.1:8765/nova/physics-spine-adoption.html)
+Section: §6 waves 1+2 (8-hour fleet session)
+Tier:    opus (orchestrator: fable; 2x opus workers)
+
+Context
+  Nomenclature is locked (plan §2); nova develop carries the full spine
+  (nova-spine-refactor §3-§9 landed; full lane 1361/0/104, fast lane ~56 s).
+  This session lands wave 1 (packages + renames) and the four independent
+  wave-2 donor ports in parallel. Ambix is READ-ONLY throughout — donor
+  deletion and the ambix re-point are wave 3.
+
+Orchestration (binding)
+  Primary checkout stays on main (reckon serves it). Create two detached
+  worktrees off develop (e.g. ../nova-w-equilibrium, ../nova-w-circuit).
+  Embed the parallel-safety preamble from ~/.agents/AGENTS.md verbatim in
+  every worker dispatch, plus each worker&#x27;s exclusive write scope and its
+  peer&#x27;s scope. Workers commit in their worktrees; orchestrator reviews
+  (git show --stat + targeted diffs), merges into develop, pushes after each
+  coherent increment — never batch a day&#x27;s work into one merge. Update this
+  plan&#x27;s §3 table + impl on main as each port lands (commit plan edits same
+  session). Tests run on the login node (uv run pytest, file-capture method;
+  fast lane &lt;60 s) — no SLURM needed for this session.
+
+Worker A — scope: nova/equilibrium/** + its tests (+ alias shims ONLY in
+  nova/biot/plasma.py, nova/imas/pulsedesign.py, nova/jax/plasma.py)
+  1. Scaffold nova/equilibrium; move the forward free-boundary solve
+     (nova/biot/plasma.py solve_flux orchestration + nova/jax Plasma) behind
+     ForwardProfile and the pulsedesign solver core (solve_current/
+     optimize_current/residual + Constraint machinery) behind InverseDesign.
+     Pure moves + renames, alias shims keep old paths importable, existing
+     tests follow the moves and stay green.
+  2. Port ReconstructMoment: merge donor boundary_disc.py + boundary_moment.py
+     (~/Code/imas-ambix/imas_ambix/latent/) into equilibrium/moment.py per the
+     §3 table — MomentOrder enum (CENTROID/QUADRUPOLE/OCTUPOLE), the uniform
+     disc as the self-sized CENTROID seed, monomial ladder for the general
+     orders; Greens columns from nova.biot kernels (cell-&gt;sensor, cell-&gt;grid),
+     NOT PatchBasis; whitened LSQ + Rogowski anchor preserved. Donor tests
+     first (discover under ~/Code/imas-ambix/tests/, e.g. test_boundary_*).
+  3. Port ReconstructHarmonic: boundary_harmonic.py + the annulus soft-prior
+     row builder from boundary_prior.py into equilibrium/harmonic.py; the
+     ring-function basis and pole-placement rules port intact.
+
+Worker B — scope: nova/circuit/** + nova/transport/** + their tests
+  1. Scaffold both packages.
+  2. Port PassiveCircuit: temporal_operator.py (PassiveEigenbasis,
+     build_passive_circuit_system, drive linkage, reduce, ZOH propagation) +
+     passive_resistance.py (identifiability ladder, case-current holdback
+     contract) into circuit/passive.py; L matrices from nova.biot inductance
+     kernels; machine-agnostic region rules verbatim; donor tests first.
+  3. Port CurrentDiffusion (torch -&gt; JAX): current_diffusion.py into
+     transport/current_diffusion.py — implicit theta-scheme tridiagonal
+     diffuse_psi as a jitted fp64 Thomas/lax solve; flux_surface_geometry on
+     nova&#x27;s flux-surface-connectivity bins; EtaProfile, project_coefficients
+     (NNLS), flux_budget as numpy/JAX dataclasses. Keep the TORAX-form
+     verification test; pin torch-vs-jax parity on a frozen case before
+     deleting nothing (donors stay).
+  4. Stretch: ScreeningCircuit (plasma_screening.py -&gt; circuit/screening.py;
+     needs EtaProfile; n_modes naming; keep the nested-circle analytic pin
+     shared with CurrentDiffusion).
+
+Orchestrator (own scope, between reviews)
+  - Coupling-generator unification: one builder (circuit classification +
+    channel merge, donors gs/operator.py classify_circuits + circuits.py)
+    beside nova.biot&#x27;s Solve/Matrix tier, with golden parity tests against
+    ambix artifacts. Reassign to whichever worker finishes early via an
+    explicit scope extension if reviews saturate.
+  - Register ambix imas_geometry.py reading pattern against nova&#x27;s
+    MachineGeometryReader seam (provider skeleton; MAST tables stay ambix).
+  - Surface the open topology-labeller decision to the user mid-session and
+    lock it (gates wave 3).
+
+Scope locks / constraints (non-decision)
+  Style contract plan §5: frozen-config dataclasses, columnar frame/xarray/
+  pytrees, numpy+scipy+jax only (NO torch, NO pandas), conventions preserved
+  (total flux Phi = 2*pi*R*A_phi [Wb], explicit mu0, raw SI), module
+  docstrings carried and renamed. No bare k in any public API or symbol.
+  ReconstructProfile (gs_solve) is OUT OF SCOPE this session (wave 3).
+  Do not edit imas-ambix. No AI co-author trailers; verify before every push.
+
+Done-when
+  1. Wave 1 landed: packages + ForwardProfile/InverseDesign with shims; full
+     nova suite green.
+  2. ReconstructMoment, PassiveCircuit, CurrentDiffusion landed with donor
+     tests green in nova (ReconstructHarmonic expected; ScreeningCircuit
+     stretch); torch-vs-jax CurrentDiffusion parity pinned.
+  3. Coupling generator unified with golden parity tests (or explicitly
+     re-banked with reason).
+  4. develop pushed; fast lane still &lt;60 s; §3 port table updated per row;
+     impl advanced; topology-labeller decision locked or escalated; this
+     followup resolved; wave-3 followup queued (ReconstructProfile
+     re-architecture + ambix rewiring + donor deletion).</pre>
+    </article>
+</section>
 
   </main>
 </body>

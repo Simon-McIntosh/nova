@@ -113,10 +113,21 @@
       with the matching <code>dd_version</code> — never auto-converted.</li>
       <li><strong>COCOS 17 is the target convention</strong> (DDv4's). The source side must be
       <em>identified, not assumed</em>: stage 1 includes a COCOS identification audit of the
-      efm/FAIR-MAST quantities (known landmark: the MAST convention has ψ_axis &gt; ψ_boundary;
-      ambix carries total flux Φ = 2πRA_φ [Wb]). Every map records the source COCOS id and the
-      exact transform applied (sign flips on ψ/Ip/B_φ/q, 2π factors), and a round-trip test pins
-      each one.</li>
+      efm/FAIR-MAST quantities (known landmarks: the MAST convention has ψ_axis &gt; ψ_boundary;
+      ambix carries total flux Φ = 2πRA_φ [Wb]; the working hypothesis is
+      <strong>COCOS&nbsp;3</strong> — to be confirmed against real data, never assumed). Every map
+      records the source COCOS id and the exact transform applied (sign flips on ψ/Ip/B_φ/q,
+      2π factors), and a round-trip test pins each one.</li>
+      <li><strong>FAIR-MAST's IMAS dd-path metadata is untrusted for signs.</strong> The catalog
+      carries dd-path tags, but this was early tagging work on the FAIR-MAST side: the tags are
+      useful as <em>candidate</em> path hints for the maps and must never be taken as evidence of
+      sign convention or COCOS. Sign/COCOS resolution is done empirically on our side —
+      <code>~/Code/imas-codex/imas_codex/cocos/</code> provides the machinery
+      (<code>calculator.py</code>: Sauter &amp; Medvedev CPC 184 (2013) Table-I parameters +
+      COCOS determination from equilibrium quantities, Eq. 23; <code>transforms.py</code>:
+      convention-to-convention transforms; <code>loaders.py</code>: IDS/EQDSK equilibrium
+      loading). The audit loads sample shots, computes the implied COCOS from consistent
+      (ψ, Ip, B_φ, q) combinations, and pins the verdict with tests.</li>
       <li><strong>Standard Names.</strong> Signal and MD quantities key to the IMAS Standard Names
       (ISN machinery + ISNC catalog, per the locked io-contract-home decision in
       nova-spine-refactor): the maps are authored against ISN's published schema, missing names
@@ -124,6 +135,39 @@
       them. Facility-specific name maps (efm/FAIR-MAST → standard name) live with the mapping
       layer, not inside nova.</li>
     </ul>
+
+    <h3 id="s3a">§3a — MCP tooling for implementing agents (binding)</h3>
+    <p>Two MCP servers are wired for this repo and every implementing agent MUST use them instead
+    of grepping DD XML or guessing paths/names:</p>
+    <ul>
+      <li><strong><code>imas-dd</code></strong> (https://imas-dd.iter.org/mcp) — the Data
+      Dictionary authority. Verified useful here:
+      <code>search_dd_paths</code> (hybrid search with units/coordinates/cluster context; supports
+      <code>dd_version</code> 3/4 filters and facility cross-references),
+      <code>check_dd_paths</code> (existence + typo/rename suggestions — validate every authored
+      path), <code>get_ids_summary</code> (per-IDS structure for pf_active / pf_passive / wall /
+      magnetics / tf), <code>get_dd_cocos_fields</code> (COCOS-dependent fields grouped by
+      transformation type, e.g. the pf_active ip_like current triplet — the checklist for the
+      sign audit), <code>get_dd_version_context</code> / <code>get_dd_migration_guide</code>
+      (rename chains and sign-convention changes between DD versions),
+      <code>get_dd_versions</code> (current: 4.1.1). Its standard-name index is a stub — do not
+      use it for names.</li>
+      <li><strong><code>imas-cx</code></strong> (imas-codex serve; registered in this repo's
+      <code>.mcp.json</code>) — the standard-name resolver and facility layer:
+      <code>search_standard_names</code> / <code>list_standard_names</code> /
+      <code>fetch_standard_names</code> (real catalog with grammar decomposition and per-name
+      COCOS metadata — e.g. <code>poloidal_magnetic_flux</code> is tagged psi_like/COCOS 17;
+      <code>cocos_type</code> filters enumerate the sign-sensitive names),
+      <code>check_standard_names</code> (validate names before writing maps),
+      <code>search_signals</code> / <code>get_facility_coverage</code> (facility-signal search
+      with data-access templates — use <code>facility="mast-u"</code> as the nearest configured
+      facility and note MAST-classic gaps), <code>search_code</code> / <code>search_docs</code>
+      (find prior mapping/COCOS work in the codex graph).</li>
+    </ul>
+    <p>Missing standard names discovered during mapping are contributed through the ISN/ISNC fork
+    flow (the io-contract-home decision), not invented locally. ISN's <code>fastmcp</code> core
+    dependency is a known packaging wart (flagged for the fork: move to an <code>[mcp]</code>
+    extra) but does not block this plan — name resolution runs through imas-cx.</p>
 
     <h2 id="s4">§4 — Stages (one session each, roughly)</h2>
     <ol>
@@ -223,25 +267,44 @@ Context
   as a research doc, not code.
 
 State to read
+  docs/mast-machine-description.html §3 + §3a (conventions + MCP tooling — binding)
   ~/Code/imas-ambix/imas_ambix/gs/geometry.py (per-campaign tables, campaign
     fingerprints, sensor exclusion rules)
   ~/Code/imas-ambix/imas_ambix/gs/imas_geometry.py + ivc_geometry.py
   ~/Code/imas-ambix/docs/data-acquisition.html (FAIR-MAST endpoints + zarr layout)
   ~/Code/imas-ambix/docs/cocos-convention-hardening.html (prior COCOS work)
-  imas-dd MCP tools (DDv4 paths for pf_active/pf_passive/wall/magnetics/tf;
-    COCOS field lists; standard-name search)
+  ~/Code/imas-codex/imas_codex/cocos/ (calculator/transforms/loaders — the
+    empirical COCOS identification machinery)
+
+Tools (MANDATORY — use the MCP servers, do not grep DD XML or guess names)
+  imas-dd:  search_dd_paths + check_dd_paths (DDv4 target paths, validated),
+    get_ids_summary (pf_active/pf_passive/wall/magnetics/tf structure),
+    get_dd_cocos_fields (the sign-audit checklist per IDS),
+    get_dd_version_context (rename/sign history). Its standard-name index is
+    a stub — never use it for names.
+  imas-cx:  search/list/fetch/check_standard_names (the real catalog, with
+    per-name COCOS metadata + cocos_type filters), search_signals +
+    get_facility_coverage (facility="mast-u"), search_code/search_docs
+    (prior COCOS + mapping work in the codex graph).
 
 Scope locks / constraints
   Read-only toward both repos this stage. DDv4 is COCOS 17 (target); source
-  COCOS must be IDENTIFIED per quantity with evidence, never assumed. Multi-
-  session program: stage 1 only — no IDS authoring yet.
+  COCOS must be IDENTIFIED per quantity with evidence, never assumed —
+  FAIR-MAST's dd-path metadata tags are early tagging work and are UNTRUSTED
+  for sign conventions (candidate path hints only). Working hypothesis:
+  MAST data is COCOS 3; confirm by loading sample equilibria and computing
+  the implied COCOS from consistent (psi, Ip, B_phi, q) combinations with
+  imas_codex.cocos.calculator; pin the verdict with tests. Multi-session
+  program: stage 1 only — no IDS authoring yet.
 
 Done-when
   1. Research doc in nova docs/ with the full quantity ledger: source path →
      DDv4 path → standard name (or gap) → units → source COCOS → transform.
-  2. Campaign fingerprint inventory: how many distinct MDs the catalog needs.
-  3. Registry / campaign-keying / map-home decisions locked with rationale.
-  4. Stage-2 followup written; this followup resolved.</pre>
+  2. Empirical COCOS verdict for the MAST sources (hypothesis: COCOS 3)
+     with the (psi, Ip, B_phi, q) evidence and a pinned test.
+  3. Campaign fingerprint inventory: how many distinct MDs the catalog needs.
+  4. Registry / campaign-keying / map-home decisions locked with rationale.
+  5. Stage-2 followup written; this followup resolved.</pre>
       </article>
     </section>
 

@@ -433,6 +433,30 @@
     <p><em>Done-when:</em> imas-ambix imports the spine from the package; no physics kernels remain in-tree;
     spine_bench numbers match pre-split baselines; full ambix test suite green.</p>
 
+    <h3 id="s10a">§10a — Scope clarification and detailed plans (2026-07-24)</h3>
+    <p>User direction 2026-07-24: <strong>nova is the home of the full physics spine, including
+    transport</strong> — the ambix torch current-diffusion prototype translates to JAX and moves in
+    (nova doing physics does not mean no GPU: large-scale GPU solves and labeling are first-class
+    nova work). Ported models are refactored to nova style (dataclasses, native nova data types)
+    under the locked solver nomenclature (problem × representation —
+    ForwardProfile / InverseDesign / ReconstructMoment / ReconstructHarmonic / ReconstructProfile /
+    PassiveCircuit / ScreeningCircuit / CurrentDiffusion in
+    <code>nova/equilibrium</code> · <code>nova/circuit</code> · <code>nova/transport</code>).
+    §10's detail now lives in three dedicated plans:</p>
+    <ul>
+      <li><a href="physics-spine-adoption.html"><code>physics-spine-adoption</code></a> — the
+      nomenclature (locked decisions), model-by-model port table (incl. the disc → current_moment
+      merge and the gs_solve → ReconstructProfile re-architecture), style contract, 3-wave
+      sequencing, and the ambix rewiring. Executes f-int-09's work.</li>
+      <li><a href="mast-machine-description.html"><code>mast-machine-description</code></a> — the
+      DDv4-native (COCOS 17) MAST machine-description IDS set + standard-name data maps with
+      empirical source-COCOS identification (multi-session program; FAIR-MAST dd-path tags
+      untrusted for signs).</li>
+      <li><a href="mast-catalog-gpu-solve.html"><code>mast-catalog-gpu-solve</code></a> — the
+      short-term capability goal: all 11,573 MAST L2 shots, every timestep, reconstructed in
+      ~1 hour on 8×H200.</li>
+    </ul>
+
     <h2 id="s11">§11 — Convergence: assembly extraction and return to single trunk</h2>
     <p>End state under the locked in-place route: the assembly project (GP fitting + SSAT/in-pit, per §2a's
     hardened extraction) lives in its own repository and, where it needs frame/geometry/graphics services,

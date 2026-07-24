@@ -17,8 +17,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-24">
-<meta name="plan-version" content="10">
-<meta name="plan-impl" content="0.45">
+<meta name="plan-version" content="11">
+<meta name="plan-impl" content="0.55">
 </head>
 <body>
   <main class="plan-doc">
@@ -210,99 +210,39 @@
     versioned in the registry by digest; the new assembly repo passes the manifest at the 1&nbsp;µm gate;
     dual-run window observed; dedicated assembly-port plan authored; extraction sign-off recorded here.</p>
 
-    <h2 id="s3">§3 — Columnar frame core</h2>
-    <p><strong>Core landed 2026-07-23 (merge <code>829c0700</code>); coilset-level tail in
-    flight.</strong> The 7-deep pandas subclass tower — broken outright on the target stack (53
-    frame-scope tests failing with <code>RecursionError</code> under pandas 3.0's rewritten
-    internals, so the rewrite was a necessity, not an optimisation) — is replaced by explicit
-    accessors over a struct-of-arrays <code>ColumnStore</code> (index ndarray + column dict +
-    schema; <code>nova/frame/columnar.py</code> + chain rewrite, net +1218/−1487, leaner than what
-    it replaced). Frame acceptance surface: <strong>0 failed / 168 passed</strong> (baseline: 53
-    failed / 92 passed); MetaFrame schema, energization, link reduction, subspace projection,
-    selection and the polygon metamethod carried near-verbatim; pandas only in lazy interchange
-    shims. Benchmark (dual-path <code>benchmarks/coil_construction.py</code>, same machine;
-    old-stack pandas reference vs columnar): construct 81→36 µs/coil at n=100 (columnar 2.3×
-    faster), parity at n=500, 2.7→16.2 µs/coil at n=5000 (6× slower — per-row cost flat instead
-    of amortising); column reads 0.026→0.325 ms (12–23× slower, both read forms identical —
-    subspace re-inflation suspected instead of a cached view). The coilset-construction tier is
-    <strong>landed</strong> (merges <code>8498f454</code>/<code>0a858e9b</code>/<code>e26d764b</code>):
-    poloidalgrid/polygrid/shellgrid/coilset/framedata/frameset/shell/turn ported off pandas;
-    test_framesetloc 0/20 → 20/20; test_frameset, test_getslice, test_frameconstruction green;
-    scoped poison-on-rebuild restored for detached array views. <strong>Two frame-core items
-    remain</strong> (both precisely characterised, spend-limit interrupted):
-    (a) <em>id-stable cached array views</em> — repeated <code>loc/sloc</code> reads must return the
-    same cached Vector until a topology mutation invalidates it (decision locked 2026-07-24:
-    reinstate the cached-live-array contract, do not rewrite the tests); fixes
-    <code>test_coilset::test_array_views_solve</code> AND the 12–23× read cost (one mechanism);
-    (b) <em>link→ref re-derivation on rebuild-from-columns</em> — a linked frame rebuilt from its
-    column dict derives ref [0,0,2,1] where coil.insert produced [0,0,2,2] (inconsistent: one coil's
-    filaments must share a ref); fails 7 test_biotsavart reduction tests (hemholtz, coil pairs,
-    multifilament). Bare repros for both are in the resume followup.</p>
-    <p>Port the frame layer onto a typed columnar store, preserving the public API surface consumers actually
-    use (<code>insert</code>, <code>Loc/sLoc/loc/sloc</code> label indexers, <code>aloc/saloc</code> array
-    accessors, <code>+=</code> union, <code>store/load</code>):</p>
-    <ul>
-      <li>Carry near-verbatim: <code>MetaFrame</code> (schema, ~90 column defaults, column groups, locks,
-      version hashes), <code>Energize</code> (It ⇄ Ic·nturn), <code>SubSpace</code> (independent-DOF projection
-      with <code>subref/factor</code> mapping), <code>Select</code>, <code>MultiPoint</code>, the metamethod
-      loader.</li>
-      <li>Replace: the 7-deep pandas subclass tower and the runtime-manufactured private-API indexers
-      (<code>nova/frame/indexer.py</code>) with explicit accessor objects over
-      <code>{index: ndarray, columns: dict[str, ndarray], schema}</code> — the shape the hot path already has in
-      <code>metaframe.data</code>. Row insertion becomes array concatenation; label lookup is index
-      <code>get_loc</code> + slice.</li>
-      <li>Shims: <code>to_pandas()</code> / <code>to_xarray()</code> exports; xarray→netCDF/zarr persistence for
-      frames at rest (replacing the pandas round-trip in <code>frameset.store</code>).</li>
-      <li>Geometry columns (shapely <code>poly</code>, vtk) stay object-typed columns with the existing lazy
-      loads.</li>
-    </ul>
-    <p><em>Done-when:</em> nova's frame test files (test_frameset, test_framespace, test_framelink,
-    test_dataarray, test_energize, test_select, test_multipoint, …) pass against the new store; a coil-construction
-    micro-benchmark shows construction no slower than the pandas path; zero pandas imports in
-    <code>nova.frame</code>.</p>
+    <section id="s3-landed" class="section-landed">
+    <h2 id="s3"><span class="badge badge-shipped">✓ landed 2026-07-24</span> §3 — Columnar frame core</h2>
+    <p class="landed-summary">
+    Frame layer rebuilt pandas-free on a struct-of-arrays <code>ColumnStore</code> with explicit
+    accessors (necessity, not optimisation: pandas 3.0 broke the 7-deep subclass tower outright —
+    53 RecursionError failures at baseline). Acceptance: frame surface + subspace + coilset
+    <strong>0 failed</strong> (test_coilset 49/49, test_framesetloc 20/20, test_subspace 39/39);
+    id-stable cached live views landed (per-column view cache, in-place column writes, NaN-poison
+    on topology rebuild). Benchmark vs old-stack reference: read <code>loc[:,"Ic"]</code> n=5000
+    <strong>0.325 → 0.009 ms</strong> (ref 0.026 — 3× faster than pandas); bulk insert
+    <strong>16.2 → 3.4 µs/coil</strong> (1.24× ref; two O(n²)/list-round-trip hot spots removed).
+    Full record: <a href="archive/nova-spine-refactor-s3s4-landed.html">§3/§4 landed</a>
+    (merges <code>829c0700</code>/<code>8498f454</code>/<code>0a858e9b</code>/<code>e26d764b</code>,
+    closure <code>995d7792</code>). Residual: <code>nova/__init__</code> eager dataset import
+    (lands with §6); vtkgeo pandas idioms (§8).</p>
+    </section>
 
-    <h2 id="s4">§4 — Biot kernels and operator assembly</h2>
-    <p><strong>Evidence (2026-07-23, in progress — kernel tier landed on develop, merges
-    <code>b764ff3b</code>/<code>4d7c96fd</code>):</strong> polygon conductor kernel ported back from
-    imas-ambix (<code>gs/polygon.py</code> → <code>nova/biot/polygon.py</code>, replacing the stub)
-    with 22 golden-value tests — rectangle-reduction agrees with the cylinder kernel at 1e-10,
-    filament-tiling oracle at 5e-5 (1e-4 shear/thin-plate), Ampère circulation −µ0 at 1e-6, vertex
-    invariance 1e-13. A canonical corner-antiderivative module (<code>greens.py</code>) now drives
-    both the functional and dataclass cylinder paths (bit-identical, ≤4 ulp); zeta consolidated to
-    one pure-numpy implementation (JAX optional); pandas fully severed from <code>nova/biot</code>
-    (grep-clean); reduction on numpy int arrays. Three latent hard-import bugs fixed on the way
-    (jax in <code>zeta</code>/<code>limiter</code>, vedo/pyvista/openpyxl in geometry/imas — masked
-    for years by the fat 1.x environment). Operator assembly rebound onto the columnar store
-    (merge <code>c975e836</code>): all pandas idioms in <code>solve.py</code>/<code>space.py</code>
-    replaced with the columnar API, and §4 analytic correctness confirmed <em>independently of the
-    CoilSet tier</em> by driving dict-built Source/Target straight into the kernels — dataclass
-    Cylinder == <code>cylinder_greens</code> to 1.3e-10; a 2-ring Solve ensemble == the canonical
-    Greens to 1e-9 (pinned in <code>tests/test_biotcylinder.py</code>; 53 biot tests green).
-    The CoilSet validation lane then closed almost entirely (merge <code>a8edb892</code>): plasma
-    paths (pointloop, separatrix hull, firstwall boundary, plasma-grid target) adapted to the
-    columnar part selector — <code>test_biotsavart_3d</code> <strong>39/39</strong>,
-    test_biotoperate + test_biotmatrix + test_matrix green, test_biotframe 12/12, biot kernel
-    suites 53. Residual: the 7 <code>test_biotsavart</code> reduction tests gated on §3's
-    link→ref re-derivation gap (frame-side), then a final lane confirmation + the ITER
-    sub-inductance goldens sweep.</p>
-    <ul>
-      <li>Lift near-verbatim from nova: <code>constants.py</code> (elliptic/coefficient library),
-      <code>circle</code>, <code>cylinder</code>, <code>arc</code>, <code>bow</code>, <code>line</code>,
-      <code>beam</code> kernels; <code>matrix.py</code> turns/reduce/link reduction with the four-block plasma
-      decomposition; <code>solve.py</code> ensemble assembly.</li>
-      <li>Adopt from ambix as canonical: <code>gs/polygon.py</code> (Urankar Part V polygon sections — nova's
-      stub is not ported) and the <code>hybrid_greens</code> near/far blending contract; reconcile with nova's
-      cylinder so exactly one kernel set remains.</li>
-      <li>Sever pandas: replace <code>BiotFrame</code> with a small data-provider protocol
-      (<code>frame(attr) → (target, source) ndarray</code>, <code>aloc/saloc</code>, reduce indices/links);
-      <code>reduce.py</code>'s pandas Index becomes numpy int arrays.</li>
-      <li>Consolidate <code>zeta</code> to a single implementation (JAX-compatible numpy; numba dropped from
-      core).</li>
-      <li>Vectorise the per-angle Python-level stacking in the arc/bow kernels if profiling shows them hot.</li>
-    </ul>
-    <p><em>Done-when:</em> nova's analytic validation tests (solenoid fields, ITER sub-inductance goldens,
-    3-D element tests) and ambix's kernel golden-value tests pass against the unified kernel set; kernel modules
-    import with numpy+scipy only.</p>
+    <section id="s4-landed" class="section-landed">
+    <h2 id="s4"><span class="badge badge-shipped">✓ landed 2026-07-24</span> §4 — Biot kernels and operator assembly</h2>
+    <p class="landed-summary">
+    One canonical kernel set on numpy+scipy only: polygon conductor kernel ported back from
+    imas-ambix (22 golden tests, 1e-10..1e-4 agreement; Ampère circulation −µ0 at 1e-6), canonical
+    corner-antiderivative <code>greens.py</code> driving both cylinder paths (≤4 ulp), zeta
+    consolidated, pandas grep-clean in <code>nova/biot</code>, operator assembly rebound columnar
+    (Solve == Greens at 1e-9). Validation lane closed 2026-07-24 after the frame-side link→ref
+    fix (<code>dad5ee53</code> — row labels carried through the per-segment source rebuild):
+    <strong>test_biotsavart 129/129</strong> incl. the ITER sub-inductance goldens and the 7
+    reduction tests, test_biotsavart_3d 39/39, biotoperate/biotmatrix/matrix green — named lane
+    total <strong>520 passed / 0 failed</strong>. Full record:
+    <a href="archive/nova-spine-refactor-s3s4-landed.html">§3/§4 landed</a>
+    (merges <code>b764ff3b</code>/<code>c975e836</code>/<code>a8edb892</code>, closure
+    <code>dad5ee53</code>). Arc/bow per-angle vectorisation deferred until profiling shows it hot.</p>
+    </section>
 
     <h2 id="s5">§5 — Batched evaluation and topology (JAX)</h2>
     <ul>
@@ -713,7 +653,7 @@ Done-when
      this followup resolved; §5/§6 followup queued.</pre>
     <p class="r-fu-outcome">§3 core + construction tier and §4 kernels + assembly rebind landed on develop (38 commits, tip a8edb892). Frame: 0/168-fail acceptance surface vs 53 RecursionError baseline (pandas 3.0 breaks the old tower outright); construction tier ported (test_framesetloc 0/20→20/20, test_coilset 5/49→46/49). Biot: polygon kernel ported from ambix (22 golden tests, 1e-10..1e-4 agreement), canonical Greens module, assembly rebound columnar (Solve==greens at 1e-9), plasma paths adapted — test_biotsavart_3d 39/39, biotoperate/biotmatrix/matrix green. Two frame-core items remain (id-stable cached views; link→ref re-derivation — 7 reduction tests) — run interrupted by the org monthly spend limit with both workers down; resume prompt in the next followup.</p>
     </article>
-<article class="r-fu" data-id="f-int-06" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-24" data-recommends-skill="/reckon-ship nova-spine-refactor §3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-int-06" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-24" data-recommends-skill="/reckon-ship nova-spine-refactor §3" data-resolved-at="2026-07-24T06:01:29+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Close the two frame-core gaps (id-stable cached views; link→ref re-derivation), confirm the validation lane, then §5–§9</h4>
     <div class="r-fu-body"><p>Spend-limit interruption point: develop tip <code>a8edb892</code> (38 commits since bootstrap). Across the whole §3+§4 surface exactly two precisely-characterised frame-core items remain, then the lane confirmation closes both sections; §5–§9 follow. Worktrees <code>../nova-develop</code> (orchestrator), <code>../nova-w-frame</code>, <code>../nova-w-biot</code> are all clean and merged — safe to reuse or remove.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -768,6 +708,76 @@ Done-when
   2. Full §3/§4 lane green; ITER sub-inductance goldens pass.
   3. §3+§4 collapsed with archive HTML; impl advanced; this followup resolved;
      §5/§6 followup queued.</pre>
+    <p class="r-fu-outcome">§3+§4 closed and collapsed (develop 59ee0303..8a9becc1, 43 commits). Item A: id-stable cached views landed (995d7792) — per-column view cache + in-place set; read 0.325→0.009 ms (target ≤0.03; 3× faster than the pandas reference), bulk insert 16.2→3.4 µs/coil (1.24× ref) after removing two O(n²)/list-round-trip hot spots. Item B: link→ref fixed frame-side (dad5ee53) — row labels carried through the per-segment source rebuild; regression pinned in test_biotframe. Lane: 520 passed / 0 failed incl. ITER sub-inductance goldens; test_subspace 11 fails → 39/39, test_force + test_uri fixed en route. Full suite 1300 passed / 17 failed / 4 errors — all residuals verified pre-existing, banked §6/§8/§9 items. Archive: docs/archive/nova-spine-refactor-s3s4-landed.html.</p>
+    </article>
+<article class="r-fu" data-id="f-int-07" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-24" data-recommends-skill="/reckon-ship nova-spine-refactor §5" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Ship §5 batched JAX evaluation ∥ §6 machine description + zarr identity cache, then §7/§8, then §9</h4>
+    <div class="r-fu-body"><p>§3/§4 are closed and collapsed (develop tip <code>8a9becc1</code>; lane 520/0). §5 (jitted pytree operator primary + merged vmap-safe topology stacks + ambix gs_solve port) and §6 (IMAS layer on the columnar store + content-hash zarr identity cache, decision locked) have disjoint write scopes (nova/jax vs nova/imas+nova/database) and run as parallel opus workers in detached worktrees off develop; §7 (nova.io + ISN/ISNC fork-RC pins) ∥ §8 (plotting mixins, matplotlib/seaborn-free core imports, vtkgeo rework) follow, then §9 closes the fast lane. Banked residuals to absorb: vtkgeo pandas idioms + test_vtk/ferritic/winding/animate (§8); pulsedesign imas_core fixtures + machinedata/itergeom/vde read_csv (§6); bokeh/jax_basis/extrapolate collection errors → importmanager skips (§5/§6/§9); nova/__init__ eager dataset import (§6).</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    nova-spine-refactor (http://127.0.0.1:8765/nova/nova-spine-refactor.html)
+Section: §5 + §6 (parallel), then §7 + §8 (parallel), then §9
+Tier:    opus
+
+Context
+  develop tip 8a9becc1: §3 columnar frame core and §4 unified Biot kernels are
+  landed and collapsed (lane 520 passed / 0 failed; archive
+  docs/archive/nova-spine-refactor-s3s4-landed.html). §5-§9 remain. All 2.0
+  code work in detached worktrees off develop (primary checkout stays on main;
+  reckon serves its working tree). TDD; donor/ambix tests come first.
+
+Wave 1 (parallel, disjoint scopes)
+  §5 worker — scope nova/jax/**, tests/test_jax_*.py, tests/test_topology.py:
+    jitted pytree operator (evaluate/evaluate_external/update_plasma_turns)
+    primary with numpy Operate fallback (keep xxhash invalidation contract);
+    merge nova jax/null.py+topology.py with ambix stencil_nulls/
+    connectivity_boundary/flux_surface_connectivity/topology (read-only donors
+    in ~/Code/imas-ambix/imas_ambix/latent/) into one fixed-shape vmap-safe
+    set with a leading batch axis; port ambix gs_solve.py + staged-disc and
+    prior boundary reads; fix test_jax_basis collection (importmanager skips
+    without the jax extra).
+  §6 worker — scope nova/imas/**, nova/database/**, their tests:
+    carry dataset.py ladder/uri/db_entry/metadata onto the columnar store;
+    CrossSection dispatch + Machine.build-&gt;solve_biot-&gt;store orchestration;
+    identity cache on zarr (LOCKED decision) with canonical sorted-typed key
+    serialisation incl. DD version, group eviction, cold-&gt;warm bit-identical
+    round-trip + stale-key regression tests; replace machinedata/itergeom/vde
+    pandas.read_csv; pulsedesign fixtures synthetic or visible-skip;
+    drop nova/__init__ eager dataset import (pulls pandas/xarray).
+
+Wave 2 (parallel, after wave-1 merge)
+  §7 worker — scope nova/io/** (new), pyproject.toml: ingest/egress
+    transcoders + zarr signal store + round-trip validators; ISN/ISNC fork-RC
+    pins (test-PyPI wheels via uv explicit index primary, git-tag fallback —
+    locked decision); zarr-&gt;IDS-&gt;validate()-&gt;zarr CI round-trip.
+  §8 worker — scope nova/graphics/**, nova/frame/vtkgeo.py, polyplot,
+    matplotlib-import guards across core: fieldless Plot mixins as the single
+    plotting attachment; matplotlib/seaborn optional with clear guards
+    (test_animate); vtkgeo columnar rework (test_vtk 8, test_ferritic 7,
+    test_winding 1 currently failing on the loc[rows,:] pandas idiom).
+
+Wave 3 (§9, orchestrator or single worker)
+  importmanager skip pattern uniform (bokeh/extrapolate collection errors);
+  DB-bound tests on bundled synthetic HDF5; default lane &lt; 60 s no-network;
+  fix text_netcdf.py filename typo + empty test_arrayloc.py; port asv
+  benchmarks and record baselines.
+
+Constraints
+  Parallel-safety preamble + exclusive write scopes in every worker prompt
+  (workers commit in detached worktrees, orchestrator reviews + merges +
+  pushes develop); no AI co-author trailers; plan edits on main committed and
+  pushed same session.
+
+Done-when
+  1. §5: jit==numpy to tolerance; batched topology == per-slice; ambix latent
+     tests green in nova.
+  2. §6: cache round-trip bit-identical + stale-key regression green; ITER
+     machine description compiles (or visibly skips without imas env).
+  3. §7: MAST/ITER shot ingests once, re-reads &gt;=100x AL full-get; egress IDS
+     validates.
+  4. §8: core import graph matplotlib-free; vtk/ferritic/winding/animate green.
+  5. §9: full default suite green under budget; benchmarks recorded.
+  6. Each section collapsed on landing with per-stage archive HTML; impl
+     advanced stepwise; this followup resolved; §10/§11 followup queued.</pre>
     </article>
 </section>
 

@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="archive">
+  <meta name="plan-slug" content="nova-spine-refactor-s3s4-landed">
+  <meta name="plan-title" content="Columnar frame core + unified Biot kernels — landed">
+  <meta name="plan-status" content="historical">
+  <meta name="plan-modified" content="2026-07-24">
+  <title>Columnar frame core + unified Biot kernels — landed | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>§3 columnar frame core &amp; §4 unified Biot kernels — landed</h1>
+    <p><strong>2026-07-24.</strong> The frame layer runs pandas-free on a struct-of-arrays
+    columnar store with id-stable cached views, and the Biot tier runs on one canonical kernel
+    set with the polygon conductor kernel ported back from imas-ambix. 43 commits on
+    <code>develop</code> (<code>59ee0303..8a9becc1</code>), authored in detached
+    worktrees while the primary checkout stayed on <code>main</code>.</p>
+
+    <section class="card">
+      <h2>Quick status</h2>
+      <table>
+        <thead><tr><th>Deliverable</th><th>State</th></tr></thead>
+        <tbody>
+          <tr><td>Columnar frame core (store + accessors + metamethods)</td><td>✓ frame acceptance surface 168/168 (baseline: 53 RecursionError under pandas 3.0)</td></tr>
+          <tr><td>Coilset construction tier</td><td>✓ test_coilset 49/49; test_framesetloc 20/20</td></tr>
+          <tr><td>Id-stable cached array views (live-array contract)</td><td>✓ per-column view cache; in-place column writes; NaN-poison on rebuild</td></tr>
+          <tr><td>Link→ref derivation stable across rebuild-from-columns</td><td>✓ row labels carried through the per-segment source rebuild</td></tr>
+          <tr><td>Polygon conductor kernel (from imas-ambix)</td><td>✓ 22 golden-value tests, 1e-10..1e-4 agreement</td></tr>
+          <tr><td>Canonical Greens module driving cylinder paths</td><td>✓ bit-identical ≤ 4 ulp; Solve == Greens at 1e-9</td></tr>
+          <tr><td>ITER sub-inductance goldens + analytic validation</td><td>✓ test_biotsavart 129/129 (+2 visible skips)</td></tr>
+          <tr><td>Pandas severed from nova.frame / nova.biot</td><td>✓ grep-clean outside lazy interchange shims</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>Benchmarks — dual-path coil construction (same machine)</h2>
+      <table>
+        <thead><tr><th>Metric</th><th>old stack (pandas 1.x ref)</th><th>columnar (pre-close)</th><th>columnar (landed)</th></tr></thead>
+        <tbody>
+          <tr><td>construct, n=100</td><td>81 µs/coil</td><td>36 µs/coil</td><td>21.5 µs/coil</td></tr>
+          <tr><td>construct, n=5000</td><td>2.7 µs/coil</td><td>16.2 µs/coil</td><td><strong>3.35 µs/coil</strong> (1.24× ref; target ≤ 2×)</td></tr>
+          <tr><td>read <code>loc[:, "Ic"]</code>, n=5000</td><td>0.026 ms</td><td>0.325 ms</td><td><strong>0.009 ms</strong> (target ≤ 0.03; 3× faster than ref)</td></tr>
+        </tbody>
+      </table>
+      <p>The read win and the id-stability fix are one mechanism: <code>ColumnStore.get</code>
+      serves a cached per-column <code>Vector</code>; <code>set</code> writes in place when dtype
+      and length match (held views stay live); full-slice accessor reads return the cached view.
+      The construct win removed two O(n²)/list-round-trip hot spots
+      (<code>_check_index</code> linear-scan membership; <code>coerce</code> list conversion of
+      ndarray input).</p>
+    </section>
+
+    <section class="card">
+      <h2>The two closure items (spend-limit interruption point)</h2>
+      <table>
+        <thead><tr><th>Item</th><th>Root cause</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>(a) id-stable cached array views<br><code>test_array_views_solve</code></td>
+            <td>every <code>_store.get</code> minted a fresh <code>Vector</code> view; subspace
+            reads re-inflated through a coerce copy each call (0.325 ms)</td>
+            <td>per-column view cache on <code>ColumnStore</code>; in-place <code>set</code>;
+            cache dies with the store on topology rebuild so poisoned views read NaN
+            (decision honoured: cached-live-array contract reinstated, tests unchanged)</td>
+          </tr>
+          <tr>
+            <td>(b) link→ref re-derivation<br>7 <code>test_biotsavart</code> reduction tests</td>
+            <td>the per-segment source rebuild in <code>solve.py</code> passed a bare column
+            dict — row labels lost, and the carried <code>link</code> labels collided with the
+            fresh auto-labels (ref [0,0,2,1] where insert derived [0,0,2,2])</td>
+            <td>slice by column but carry the donor index (the 1.x <code>to_dict()</code> was
+            label-keyed — the columnar port dropped this); regression pinned in
+            <code>test_biotframe.py::test_labeled_rebuild_ref_consistent</code>; reduce.py
+            untouched per adjudication</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>Validation lane — 2026-07-24</h2>
+      <p>The named §3/§4 lane (biotoperate, biotsavart, biotsavart_3d, biotmatrix, matrix,
+      coilset, the full frame surface incl. subspace, biotframe, columnar, force, uri):
+      <strong>520 passed / 0 failed</strong>, 4 skips (2 pending singularity-skip methods,
+      2 env-gated matrix benchmarks). Full repo suite: 1300 passed / 17 failed / 4 errors /
+      79 skipped — every residual is a banked §6/§8/§9 item verified pre-existing at the
+      interruption tip: vtkgeo pandas idioms (test_vtk 8, test_ferritic 7, test_winding 1),
+      seaborn styling guard (test_animate 1), imas_core live-DB setup (test_pulsedesign 4
+      errors), plus 3 files ignored at collection on missing optional extras
+      (bokeh / jax / imas_core — the §9 importmanager work). En route the closure also
+      fixed 13 pre-existing frame/imas failures outside the two named items: the subspace
+      surface (test_subspace 11/31 → 39/39 — energize coupling on the subspace frame,
+      partial-write SpaceKeyError guards, ValueError on length mismatch, DataFrame.shape),
+      RowSelection.__len__ (test_force), and the Datastore idsname= fragment contract
+      (test_uri).</p>
+    </section>
+
+    <section class="card">
+      <h2>Commit series (43 commits, develop)</h2>
+      <table>
+        <thead><tr><th>Merge / commit</th><th>What landed</th></tr></thead>
+        <tbody>
+          <tr><td><code>3ecccf1d</code></td><td>columnar store primitives + metadata pandas decoupling</td></tr>
+          <tr><td><code>b764ff3b</code></td><td>unified Biot kernel set: polygon conductor kernel, canonical Greens, numpy reduction, zeta consolidation</td></tr>
+          <tr><td><code>829c0700</code></td><td>pandas-free columnar frame core (net +1218/−1487 vs the 7-deep subclass tower)</td></tr>
+          <tr><td><code>f708bae3</code></td><td>frameset Loc/sLoc/loc/sloc columnar accessors + dual-path construction benchmark</td></tr>
+          <tr><td><code>c975e836</code></td><td>operator assembly rebound onto the columnar store; kernel correctness pinned independent of CoilSet</td></tr>
+          <tr><td><code>8498f454</code> / <code>0a858e9b</code> / <code>e26d764b</code></td><td>coil-construction tier port (poloidalgrid/polygrid/shellgrid/coilset/framedata/frameset/shell/turn); detached-view poison-on-insert</td></tr>
+          <tr><td><code>a8edb892</code></td><td>plasma-path columnar adaptations (pointloop, separatrix hull, firstwall boundary, plasma-grid target)</td></tr>
+          <tr><td><code>dad5ee53</code></td><td>link→ref closure: row labels carried through the per-segment source rebuild</td></tr>
+          <tr><td><code>995d7792</code></td><td>id-stable cached views + store-level read/construct hot-spot removal + subspace surface fixes</td></tr>
+          <tr><td><code>8a9becc1</code></td><td>Datastore idsname= uri fragments; debug prints dropped</td></tr>
+        </tbody>
+      </table>
+      <p>Also on the way through: three latent hard-import bugs fixed (jax in
+      <code>zeta</code>/<code>limiter</code>, vedo/pyvista/openpyxl in geometry/imas — masked for
+      years by the fat 1.x environment); sklearn deferred to call sites; heritage recovery merged
+      (<code>61f86176</code>, nova-heritage-recovery plan).</p>
+    </section>
+
+    <section class="card">
+      <h2>Banked for later sections</h2>
+      <ul>
+        <li><code>vtkgeo.py</code> pandas idioms + eager vedo import (§8)</li>
+        <li><code>machinedata/itergeom/vde</code> pandas.read_csv IO (§6/§7)</li>
+        <li><code>test_winding</code> descartes; collection errors on optional extras
+        (bokeh, jax, imas_core at module level) — importmanager skip pattern (§8/§9)</li>
+        <li><code>nova/__init__</code> eager dataset import pulling pandas/xarray (§3 tail, lands with §6's dataset rework)</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>What's next — §5 batched JAX evaluation ∥ §6 machine description + identity cache</h2>
+      <p>Independent workstreams: the jitted pytree operator as primary evaluation path with the
+      merged nova/ambix topology stacks and a leading batch axis (§5), and the IMAS machine
+      description compilation with the content-hash zarr identity cache (§6, zarr decision
+      locked). Then §7 (nova.io + ISN/ISNC fork-RC pins) ∥ §8 (plotting mixins, matplotlib-free
+      core imports), and §9 (fast-lane test/benchmark transfer) closes the spine.</p>
+    </section>
+  </main>
+</body>
+</html>

@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-24">
-<meta name="plan-version" content="17">
+<meta name="plan-version" content="18">
 <meta name="plan-impl" content="0.9">
 </head>
 <body>
@@ -124,6 +124,36 @@
     <code>cell_points</code> drift, a <code>private=</code> kwarg fan-out, an always-true
     sector-coupling branch) are recorded for the norma port. Full record:
     <a href="archive/nova-spine-refactor-s2-landed.html">§2/§2a landed</a>.</p>
+
+    <p class="landed-summary"><strong>✓ extraction sign-off 2026-07-24.</strong> The hardened
+    sequence's remaining gates (6) and (7) are now automated in the extracted repository. norma
+    carries <code>.github/workflows/ci.yml</code> with two jobs, both green on <code>main</code>
+    (<a href="https://github.com/Simon-McIntosh/norma/actions/runs/30126947615">run
+    30126947615</a>): <code>gate</code> replays the metrology lanes — <strong>228 passed / 13
+    visible skips, 0 failed</strong> — and <code>self-contained</code> builds the wheel, installs it
+    into a bare venv and runs the pure-function lanes from outside the checkout
+    (<strong>11 passed</strong>), proving the package imports and runs with no dependency back into
+    nova. Prerequisite hardening landed as norma <code>04cc4168</code>: the hard
+    <code>import ansys.dpf.core</code> in <code>nova/assembly/ansyspost.py</code> is deferred behind
+    a placeholder that raises on first attribute access, so the fiducial, trial and transform lanes
+    collect and run without the proprietary stack (241 collected, up from 234 with two collection
+    errors). Workflow landed as norma <code>23782909</code>.</p>
+
+    <p><strong>Two qualifications on the sign-off, recorded rather than papered over.</strong>
+    <em>The dual-run window in gate (6) is one-sided:</em> nova has no test CI to run alongside — the
+    repository carries no <code>.github</code> tree, and its only Actions activity is GitHub-native
+    Dependabot and dependency-graph updates. The nova-side half of the harness gate remains the
+    locally-recorded 2026-07-23 green (35 passed / 4 skips at <code>e31fb6df</code>); what is now
+    continuously enforced is the extracted repository's replay. <em>The corpus lanes are still
+    skipped in CI:</em> the measured corpus is a private GHCR artifact whose package-repository link
+    points at nova, and GitHub exposes no API to grant a second repository's
+    <code>GITHUB_TOKEN</code> read access to a user-owned private package. The workflow therefore
+    authenticates with a <code>read:packages</code> token supplied as the repo secret
+    <code>CORPUS_READ_TOKEN</code>, and skips the pull when that secret is absent — which it is
+    today, accounting for 5 of the 13 skips (the pit-gap ILIS reference, the off-repo canonical
+    snapshot, three transcode lanes). Adding the secret promotes those five from skip to executed
+    with no workflow change.</p>
+
     <p><strong>Protected scope:</strong> the GP-interpolation and coil-fitting cluster for SSAT and in-pit
     operations — <code>nova/assembly/gaussianprocessregressor.py</code>, <code>fiducialfit.py</code>,
     <code>fiducialfit_relative.py</code>, <code>fiducialpit.py</code> (2.8k), <code>fiducialsector.py</code>
@@ -208,7 +238,10 @@
     dedicated repo-local plan; this section holds the baseline protocol and its gates.</p>
     <p><em>Done-when:</em> harness + manifest green on nova main; baseline tag + protected branch exist; corpus
     versioned in the registry by digest; the new assembly repo passes the manifest at the 1&nbsp;µm gate;
-    dual-run window observed; dedicated assembly-port plan authored; extraction sign-off recorded here.</p>
+    dual-run window observed; dedicated assembly-port plan authored; extraction sign-off recorded here.
+    <strong>All satisfied</strong> as of the 2026-07-24 sign-off above, with the dual-run window
+    qualified one-sided (nova has no test CI) and the corpus lanes skipped in norma CI pending the
+    <code>CORPUS_READ_TOKEN</code> secret.</p>
 
     <section id="s3-landed" class="section-landed">
     <h2 id="s3"><span class="badge badge-shipped">✓ landed 2026-07-24</span> §3 — Columnar frame core</h2>
@@ -901,7 +934,7 @@ Done-when
   3. §10 collapsed in this plan with archive HTML; impl advanced; this
      followup resolved; §11 (convergence) followup queued.</pre>
     </article>
-<article class="r-fu" data-id="f-int-10" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-24T16:20:00+00:00" data-recommends-skill="/reckon-ship nova-spine-refactor §2a" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-int-10" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-24T16:20:00+00:00" data-recommends-skill="/reckon-ship nova-spine-refactor §2a" data-resolved-at="2026-07-24T21:18:11+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Stand up norma CI (replay gate) + self-containment install check — clears §2a extraction-gate steps 6–7</h4>
     <div class="r-fu-body"><p>§2a's hardened extraction sequence names two remaining gate steps that were never specified beyond a bullet: (6) a dual-run window with <em>both</em> CIs green, and (7) an install check. norma has <strong>no CI yet</strong> (filter-repo did not carry <code>.github</code>). This followup specifies and executes both, in the norma repo. Step 6: a GitHub Actions workflow running norma's replay gate (characterization + provenance + canonical + fiducial/assembly/transform lanes) against the GHCR corpus pulled by pinned digest, with ANSYS/heavy/Tier-2 as visible opt-in skips. Step 7 (reframed — norma is NOT shipped on PyPI): a self-containment job that builds the wheel, installs it into a clean venv, and imports <code>nova.assembly</code>/<code>nova.structural</code>/<code>nova.dataset</code> + runs a corpus-free pure-function subset, proving zero dangling dependency back into the parent — an install gate, never a publish. Prerequisite hardening: guard the hard <code>import ansys.dpf.core</code> in <code>ansyspost.py</code> so the fiducial/trial/transform lanes collect without proprietary ANSYS (mirrors the spine's matplotlib-optional pattern). Clearing these lets the §2a extraction sign-off be recorded; the §11 forward-deletion seal (develop→main) then waits only on §10 ambix adoption (f-int-09).</p></div>
     <pre class="r-fu-prompt">Project: norma (~/Code/norma, live at github.com/Simon-McIntosh/norma; private)
@@ -980,6 +1013,7 @@ Done-when
   4. This followup resolved. NOTE: the §11 develop→main forward-deletion seal
      remains additionally gated on §10 ambix adoption (f-int-09) — steps 6–7
      clear the extraction half only.</pre>
+    <p class="r-fu-outcome">norma CI stood up and green; §2a extraction sign-off recorded. norma .github/workflows/ci.yml (commit 23782909) runs two jobs on push/PR to main — gate: the metrology replay lanes at 228 passed / 13 visible skips / 0 failed; self-contained: uv build the wheel, install into a bare venv, import nova.assembly/nova.structural/nova.dataset and run the pure-function lanes (test_transform + TestErrorVector/TestTransform/TestMaskFrame) from a staging dir where the source tree is not importable, 11 passed — proving zero dependency back into nova. Verified green on GitHub: https://github.com/Simon-McIntosh/norma/actions/runs/30126796442 (first authored version) and https://github.com/Simon-McIntosh/norma/actions/runs/30126947615 (current, after bumping the actions off the deprecated Node 20 runtime). Prerequisite hardening: norma 04cc4168 defers the hard `import ansys.dpf.core` in nova/assembly/ansyspost.py behind a placeholder that raises on first attribute access, plus postponed annotations so the dataclass field types no longer need the real module — collection goes from 234 tests + 2 collection errors to 241 tests clean without the ansys extra. Sign-off prose committed in nova docs/nova-spine-refactor.html §2a. TWO QUALIFICATIONS recorded in the sign-off rather than papered over: (1) the gate-(6) dual-run window is one-sided — nova has no test CI at all (no .github tree; only GitHub-native Dependabot/dependency-graph runs), so the nova-side half remains the locally-recorded 2026-07-23 green at e31fb6df; (2) the corpus lanes still skip in CI — the private GHCR package norma-corpus is repo-linked to nova and GitHub exposes no API to grant norma's GITHUB_TOKEN read access to a user-owned private package, so the workflow authenticates with a read:packages PAT as repo secret CORPUS_READ_TOKEN and skips the pull when absent (5 of the 13 skips). Secret creation needs an interactive GitHub session; tracked as f-int-11.</p>
     </article>
 <article class="r-fu" data-id="f-int-11" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-24T16:45:00+00:00" data-recommends-skill="/reckon-ship nova-spine-refactor §11" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">§11 convergence: forward-delete the assembly tree from nova main (develop→main) and return to single trunk</h4>
@@ -1034,6 +1068,68 @@ Done-when
      history + legacy/v1 + v1-assembly-baseline intact and recoverable.
   2. nova main lanes green; no dangling imports.
   3. Single-trunk restored; §11 recorded; plan set shipped.</pre>
+    </article>
+<article class="r-fu" data-id="f-int-11" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-24T21:35:00+00:00" data-recommends-skill="/reckon-ship nova-spine-refactor §2a" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Add the CORPUS_READ_TOKEN secret so norma CI replays against the real measured corpus</h4>
+    <div class="r-fu-body"><p>norma CI is green but corpus-blind: 5 of its 13 skips exist only because the measured sector-module corpus cannot be pulled in Actions. The private GHCR package <code>ghcr.io/simon-mcintosh/norma-corpus</code> is repo-linked to <em>nova</em>, and GitHub offers no API to grant a second repository's <code>GITHUB_TOKEN</code> read access to a user-owned private package — only the package's own settings page can. The workflow already handles this: it authenticates with <code>secrets.CORPUS_READ_TOKEN</code> and skips the pull steps when that secret is absent. Supplying the secret (or, alternatively, granting norma Actions access from the package settings page and switching the login to <code>GITHUB_TOKEN</code>) promotes the pit-gap ILIS reference lane, the off-repo canonical snapshot lane and three transcode lanes from skip to executed, with no workflow change. Both routes need an interactive GitHub session, so an agent cannot complete them unaided.</p></div>
+    <pre class="r-fu-prompt">Project: norma (~/Code/norma, github.com/Simon-McIntosh/norma; private) and the GHCR package ghcr.io/simon-mcintosh/norma-corpus
+Plan:    nova-spine-refactor §2a (CI corpus authentication)
+Tier:    sonnet
+
+Context
+  norma CI (.github/workflows/ci.yml, job `gate`) is green at 228 passed /
+  13 visible skips. Five of those skips are not opt-in by design — they are
+  the corpus-dependent lanes (pit-gap ILIS reference, off-repo canonical
+  snapshot, three canonical-transcode lanes) skipping because the measured
+  corpus cannot be materialized in Actions. The corpus is a private OCI
+  artifact whose package-repository link points at Simon-McIntosh/nova, and
+  GitHub exposes no REST endpoint to grant another repository&#x27;s GITHUB_TOKEN
+  read access to a user-owned private package (/user/packages/container/
+  norma-corpus/actions-access returns 404). The workflow already anticipates
+  this: the oras install, oras login and corpus-sync steps are all guarded by
+  `if: env.CORPUS_READ_TOKEN != &#x27;&#x27;`.
+
+State to read
+  ~/Code/norma/.github/workflows/ci.yml (the header documents the choice and
+    the three guarded steps)
+  ~/Code/norma/nova/assembly/provenance/corpus.py (sync/resolve_corpus; the
+    pinned appdata + canonical digests the pull uses)
+  ~/Code/norma/data/Assembly/corpus_manifest.yaml (verification digests)
+
+Work
+  Pick ONE of the two routes and drive it to a green corpus-enabled run.
+  Route A (secret, no workflow change): the user mints a classic PAT (or a
+    fine-grained token) carrying `read:packages`, then
+      gh secret set CORPUS_READ_TOKEN -R Simon-McIntosh/norma
+    Re-run the latest CI (`gh run rerun &lt;id&gt; -R Simon-McIntosh/norma`) and
+    confirm the oras login + `Materialize the measured corpus by pinned
+    digest` steps execute and the five lanes flip from SKIPPED to passed.
+  Route B (package access, small workflow change): from the norma-corpus
+    package settings page, grant Simon-McIntosh/norma read Actions access,
+    then change the workflow&#x27;s login to use the built-in token
+    (oras login ghcr.io -u ${{ github.actor }} with secrets.GITHUB_TOKEN on
+    stdin) and drop the CORPUS_READ_TOKEN guards. Add `packages: read` to the
+    job&#x27;s `permissions` block. Verify the same way.
+  Either way: report the run URL, the new passed/skipped counts, and which
+  five lanes changed state. If corpus verification fails on the pulled tree,
+  that is a real digest-drift finding — surface it rather than loosening the
+  check.
+
+Constraints
+  Branch main in norma; commit + push any workflow change immediately; no AI
+  co-author trailers. Do not weaken corpus verification or convert a failing
+  lane back into a skip to get green. Both routes need an interactive GitHub
+  session for the token/settings step — ask the user for that step rather
+  than inventing a workaround.
+
+Done-when
+  1. norma CI&#x27;s gate job materializes the corpus from GHCR by pinned digest.
+  2. The five corpus-dependent lanes execute and pass; remaining skips are
+     only the ANSYS / heavy-mesh / Tier-2 / GHCR-integration opt-ins.
+  3. The run URL and counts recorded; §2a&#x27;s sign-off qualification about the
+     skipped corpus lanes updated or removed accordingly.
+  4. This followup resolved.
+</pre>
     </article>
 </section>
 

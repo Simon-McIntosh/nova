@@ -246,7 +246,7 @@ class FiducialFit(FiducialData):
                             ilis_data.Name.values[:, np.newaxis],
                             offset=(0, 1),
                         )
-                        # write transformed ilis data (sector: clock → transform → unclock)
+                        # transformed ilis data (sector: clock→transform→unclock)
                         sectordata.write(
                             worksheet,
                             xls_index,
@@ -330,7 +330,7 @@ class FiducialFit(FiducialData):
                         rigid = (R @ np.asarray(clocked).T).T + t
                         return self.unclock_coil(rigid, coil)
 
-                    # Write CCL (reference data is already fitted, just apply rigid body)
+                    # CCL: reference data is already fitted; apply rigid body
                     ref_ccl = (
                         ref_dataset.delta[coil].values
                         + ref_dataset.fiducial_target[coil].values
@@ -909,93 +909,81 @@ class FiducialFit(FiducialData):
         frames = []
         for coil in data.coil.values:
             frame = delta.sel(coil=coil).to_pandas()  # .sortby("target")
-            frame = fiducial.mask_frame(frame)
+            frame = FiducialFit.mask_frame(frame)
             frame.columns = pd.MultiIndex.from_product(
                 [[f"Coil {coil}"], frame.columns]
             )
             frames.append(frame)
         return pd.concat(frames, axis=1)
 
+    def delta_summary(self, target: str = "fiducial_fit_gpr") -> pd.DataFrame:
+        """Return per-coil fit deltas of target relative to the fiducial targets."""
+        return self.to_pandas(self.data, target=target)
 
-if __name__ == "__main__":
-    phase = "FAT supplier"
-    phase = "FAT IO"
-    phase = "SSAT BR"
-    # phase = "SSAT target"
-    # phase = "SSAT AR"
-    # phase = "SSAT AL"
-    # phase = "SSAT AR2"
+    def plot_summary(self, gpr_stage: int = 2):
+        """Plot the per-coil GPR arrays and fit overlays for every coil."""
+        for coil_index in range(self.data.sizes["coil"]):
+            self.plot_gpr_array(coil_index, gpr_stage)
+        for coil_index in range(self.data.sizes["coil"]):
+            self.plot_fit(coil_index)
+            self.plot_fit(coil_index, "fit")
+            del self.plotter
 
-    # phase = "TFGS landing"
-    # phase = "M0607"
 
-    # phase = "SSAT target"
-    # phase = "SSAT AL"
-    # sectors = {7: [8, 9]}
-    # sectors = {6: [12, 13]}
-    # sectors = {5: [16]} # 16, 5
-    # sectors = {8: [4, 11]}
-    # sectors = {4: [2, 3]}
-    sectors = {1: [14, 15]}
+def fit_sector(
+    phase: str,
+    sectors: dict[int, list[int]],
+    *,
+    fill: bool = False,
+    infer: bool = True,
+    ilis: bool = True,
+    ilis_pcr: bool = True,
+    method: str = "rms",
+    coupled: bool = False,
+    private: bool = False,
+    write_sheet: str | None = None,
+    plot: bool = False,
+) -> FiducialFit:
+    """Fit coils or coupled sectors for an assembly phase and return the fit.
 
-    fiducial = FiducialFit(
+    Builds a :class:`FiducialFit` (load targets and measurements, evaluate the
+    GPR inference, run the rigid-body optimization), optionally renders the
+    per-coil summary plots, and optionally writes the fitted geometry back to
+    the sector workbooks under ``write_sheet``.
+    """
+    fit = FiducialFit(
         phase=phase,
         sectors=sectors,
+        fill=fill,
+        infer=infer,
+        ilis=ilis,
+        ilis_pcr=ilis_pcr,
+        method=method,
+        coupled=coupled,
+        private=private,
+    )
+    fit.build()
+    if plot:
+        fit.plot_summary()
+    if write_sheet is not None:
+        fit.write(write_sheet)
+    return fit
+
+
+if __name__ == "__main__":
+    fiducial = fit_sector(
+        phase="SSAT BR",
+        sectors={1: [14, 15]},
         fill=False,
         infer=True,
         ilis=True,
         ilis_pcr=True,
         method="rms",
         coupled=False,
+        write_sheet="SSAT target",
+        plot=True,
     )
-    fiducial.build()
-
-    for i in range(fiducial.data.sizes["coil"]):
-        fiducial.plot_gpr_array(i, 2)
-
-    for coil_index in range(fiducial.data.sizes["coil"]):
-        fiducial.plot_fit(coil_index)
-        fiducial.plot_fit(coil_index, "fit")
-        del fiducial.plotter
-
-    # fiducial.plot_ensemble(True, 250)
-
-    # fiducial.write("_SSAT AL")
-    fiducial.write("SSAT target")
-    # fiducial.write("In-pit target")
-
-    # print deltas
-    coil_index = 0
-    opt_x = fiducial.data.opt_x[coil_index].values
-    # delta = fiducial.delta()
-
-    """
-    for coil in range(18):
-        try:
-            coil_index = fiducial.data.coil.sel(coil=coil).location.data
-        except (KeyError, IndexError):
-            continue
-        fiducial.plotter.reset_axes()
-        fiducial.plot_fit(coil_index)
-        fiducial.plot_fit(coil_index, "fit")
-        plt.tight_layout()
-        plt.savefig(f"IDM_TF{coil}_fit.png")
-    """
-
-    # fiducial.plot_transform()
-
-    # fiducial.plot_fit("target")
-    # print(fiducial.data.target_cyl)
-
-    # fiducial.plot()
-
-    # coil = 4
 
     pd.options.display.precision = 3
-    # print(to_pandas(fiducial.data, target="fiducial_fit"))
-
-    print(FiducialFit.to_pandas(fiducial.data, target="fiducial_fit_gpr"))
-
-    print(FiducialFit.to_pandas(fiducial.data, target="fiducial_fit"))
-
-    print(FiducialFit.to_pandas(fiducial.data, target="fiducial_fit_gpr"))
+    print(fiducial.delta_summary("fiducial_fit_gpr"))
+    print(fiducial.delta_summary("fiducial_fit"))

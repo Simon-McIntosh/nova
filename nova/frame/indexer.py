@@ -11,6 +11,7 @@ from __future__ import annotations
 import numpy as np
 
 from nova.frame.columnar import is_list_like
+from nova.frame.error import SpaceKeyError
 
 
 class Accessor:
@@ -72,17 +73,25 @@ class Accessor:
         """Return the selected column values."""
         rows, col = self._split(key)
         column = self.frame[self._column(col)]
-        return column[self._rows(rows)]
+        rows = self._rows(rows)
+        if isinstance(rows, slice) and rows == slice(None, None, None):
+            return column  # the store's id-stable cached view, not a new slice
+        return column[rows]
 
     def __setitem__(self, key, value):
         """Assign to the selected column values, in place on the store."""
         rows, col = self._split(key)
         col = self._column(col)
         rows = self._rows(rows)
-        column = self.frame[col]
         if isinstance(rows, slice) and rows == slice(None, None, None):
+            # route through the frame setter without touching the store first,
+            # so subspace / column guards raise before any read
             self.frame[col] = value
             return
+        subspace_active = getattr(self.frame, "_subspace_active", None)
+        if subspace_active is not None and subspace_active(col):
+            raise SpaceKeyError("loc", col)
+        column = self.frame[col]
         column[rows] = value  # in-place view write-back to the store
 
 

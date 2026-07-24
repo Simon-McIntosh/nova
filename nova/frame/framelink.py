@@ -40,7 +40,9 @@ class FrameLink(DataArray):
             return False
         return (
             self.hascol("energize", "It")
-            and not self.hascol("subspace", "It")
+            # a frame that projects It through a subspace serves the inflated
+            # column; the subspace frame itself (no projection) derives It
+            and not (self.hasattrs("subspace") and self.hascol("subspace", "It"))
             and self.lock("energize") is False
             and "Ic" in self._store
             and "nturn" in self._store

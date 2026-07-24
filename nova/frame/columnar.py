@@ -136,7 +136,11 @@ def coerce(value: Any, default: Any, length: int | None = None) -> np.ndarray:
         value = value.item()  # unwrap 0-d arrays to a python scalar
     # a None default marks a polymorphic column (geometry, link) -> object dtype
     dtype = object if default is None else _dtype_of(default)
-    if is_list_like(value):
+    if isinstance(value, np.ndarray) and value.ndim == 1 and dtype is not object:
+        # typed fast path: copy without the list round-trip (the store owns
+        # its arrays, so the copy keeps donor frames unaliased)
+        array = np.array(value, dtype=dtype, subok=False)
+    elif is_list_like(value):
         array = np.array(list(value), dtype=dtype)
     else:
         if length is None:
@@ -147,7 +151,7 @@ def coerce(value: Any, default: Any, length: int | None = None) -> np.ndarray:
         else:
             array = np.full(length, value, dtype=dtype)
     if length is not None and array.shape[0] != length:
-        raise IndexError(f"input length {array.shape[0]} != {length}")
+        raise ValueError(f"input length {array.shape[0]} != {length}")
     return array
 
 
@@ -182,6 +186,7 @@ class ColumnStore:
         """Initialise the store from column data and an optional index."""
         self.defaults: dict[str, Any] = dict(defaults or {})
         self.columns: dict[str, np.ndarray] = {}
+        self._views: dict[str, Vector] = {}
         columns = dict(columns or {})
         length = self._infer_length(columns, index)
         for name, value in columns.items():
@@ -199,7 +204,9 @@ class ColumnStore:
     def _infer_length(columns: Mapping[str, Iterable], index) -> int:
         """Return the row count implied by the longest list-like column."""
         lengths = [
-            len(list(value)) for value in columns.values() if is_list_like(value)
+            len(value) if hasattr(value, "__len__") else len(list(value))
+            for value in columns.values()
+            if is_list_like(value)
         ]
         if lengths:
             return int(max(lengths))
@@ -227,12 +234,37 @@ class ColumnStore:
         return list(self.columns)
 
     def get(self, name: str) -> Vector:
-        """Return a column as a Vector."""
-        return self.columns[name].view(Vector)
+        """Return a column as a Vector, id-stable across reads.
+
+        The view is cached per column: repeated reads return the same live
+        Vector until the backing array is replaced (length / dtype change or a
+        store rebuild), so callers may hold it across in-place writes.
+        """
+        try:
+            return self._views[name]
+        except KeyError:
+            view = self.columns[name].view(Vector)
+            self._views[name] = view
+            return view
 
     def set(self, name: str, value) -> None:
-        """Set a column, coercing to the schema dtype and row length."""
-        self.columns[name] = coerce(value, self.defaults.get(name), len(self.index))
+        """Set a column, coercing to the schema dtype and row length.
+
+        Writes land in place when the coerced value matches the stored array's
+        dtype and length, keeping held column views live; otherwise the array
+        is replaced and any cached view evicted.
+        """
+        array = coerce(value, self.defaults.get(name), len(self.index))
+        stored = self.columns.get(name)
+        if (
+            stored is not None
+            and stored.dtype == array.dtype
+            and stored.shape == array.shape
+        ):
+            stored[...] = array
+            return
+        self.columns[name] = array
+        self._views.pop(name, None)
 
     def loc(self, label) -> int | np.ndarray:
         """Return the integer position(s) for a label, slice or boolean mask.
@@ -285,6 +317,7 @@ class ColumnStore:
             )
         self.columns = columns
         self.index = Index(index)
+        self._views.clear()
 
     def drop(self, positions: Iterable[int]) -> None:
         """Drop rows at the given integer positions in place."""
@@ -293,3 +326,4 @@ class ColumnStore:
         for name in self.columns:
             self.columns[name] = self.columns[name][keep]
         self.index = Index(self.index.values[keep])
+        self._views.clear()

@@ -79,7 +79,7 @@ def test_coerce_str_object_dtype():
 
 
 def test_coerce_length_mismatch():
-    with pytest.raises(IndexError):
+    with pytest.raises(ValueError):
         coerce([1, 2, 3], 0.0, length=2)
 
 

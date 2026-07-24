@@ -26,6 +26,10 @@ class RowSelection:
         """Return the labels of the selected rows."""
         return Vector(np.asarray(self.frame.index)[self.rows])
 
+    def __len__(self) -> int:
+        """Return the number of selected rows."""
+        return len(self.index)
+
 
 @dataclass
 class ColumnSelection:

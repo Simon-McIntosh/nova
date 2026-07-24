@@ -234,7 +234,11 @@ class DataFrame:
         """Return the row count implied by the longest list-like column."""
         if not data:
             return 0
-        lengths = [len(list(v)) for v in data.values() if is_list_like(v)]
+        lengths = [
+            len(v) if hasattr(v, "__len__") else len(list(v))
+            for v in data.values()
+            if is_list_like(v)
+        ]
         return int(max(lengths)) if lengths else 1
 
     def _build_index(self, length, index):
@@ -314,10 +318,11 @@ class DataFrame:
                 f"missmatch between len(index) {len(index)} and "
                 f"maximum length data column {length}"
             )
-        if len(index) != len(np.unique(index)):
+        if len(index) != len(set(index)):
             raise IndexError(f"index not unique {index}")
-        taken = [name in self.index for name in index]
-        if np.array(taken).any():
+        existing = set(self.index.tolist())
+        taken = [name in existing for name in index]
+        if any(taken):
             raise IndexError(
                 f"{np.array(index)[taken]} already defined in self.index: {self.index}"
             )
@@ -339,6 +344,11 @@ class DataFrame:
     def empty(self) -> bool:
         """Return True when the frame holds no rows."""
         return len(self._store) == 0
+
+    @property
+    def shape(self) -> tuple[int, int]:
+        """Return (rows, columns)."""
+        return self._store.shape
 
     def __len__(self) -> int:
         """Return the number of rows."""
@@ -568,7 +578,7 @@ class DataFrame:
                 return geom
             try:
                 geo = json.loads(geom)["type"]
-            except (TypeError, ValueError, KeyError):
+            except TypeError, ValueError, KeyError:
                 return geom  # not json-encoded geometry (e.g. a vtk blob)
             return self.geoframe(geo).loads(geom)
 
@@ -624,7 +634,10 @@ class DataFrame:
 
     def __repr__(self):
         """Return a concise representation of the frame."""
-        return f"{type(self).__name__}(index={self.index.to_list()!r}, columns={self.columns.to_list()!r})"
+        return (
+            f"{type(self).__name__}(index={self.index.to_list()!r}, "
+            f"columns={self.columns.to_list()!r})"
+        )
 
 
 if __name__ == "__main__":

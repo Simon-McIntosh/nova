@@ -10,7 +10,7 @@
   <meta name="plan-summary" content="Git-safe versioning of ITER coil-alignment measurements, a commit-hash-keyed provenance/run-record model, and a two-tier replay suite that unit-tests every recorded fit against its goldens within 1 micron">
   <meta name="plan-status" content="shipped">
   <meta name="plan-modified" content="2026-07-24">
-  <meta name="plan-version" content="6">
+  <meta name="plan-version" content="7">
   <meta name="plan-impl" content="1.0">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="XL">
@@ -643,7 +643,7 @@ Done-when
   4. This followup resolved; plan set to shipped</pre>
     <p class="r-fu-outcome">§10 landed 2026-07-24. Post-processing refactor: fiducialpit (6f08cd18, 15 tests), fiducialsector (dd949031, 14 tests, altair lazy + dead-column bug fixed), trial (7be8db02, 22 tests, heavy-netCDF paths visibly skipped) — all additive on nova main, goldens untouched. Extraction: norma carved to github.com/Simon-McIntosh/norma via git filter-repo (721 commits, assembly+structural+dataset+28-module support closure+tests+data/Assembly+input/ITER); package metadata retargeted, testpaths narrowed. §10.5 gate green in the new repo — 241 passed / 8 opt-in skips; Tier-2 opt-in degrades visibly on the pre-rewrite pilot sha (Tier-1 invariant holds). Extraction exposed+fixed the recorded pyvista port bugs (get_cell().points at 3 sites; portable centerline rebuild — norma 182abb6c). Raw ILIS_nominal.txt still IO-share-only. Full record: docs/archive/norma-data-provenance-s10-landed.html.</p>
     </article>
-<article class="r-fu" data-id="f-ndp-04" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-24T15:40:00+00:00" data-recommends-skill="/reckon-sync" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ndp-04" data-status="resolved" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-24T15:40:00+00:00" data-recommends-skill="/reckon-sync" data-resolved-at="2026-07-24T19:42:14+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Push norma to GitHub and reckon-sync the re-homed plan (classifier-gated user step)</h4>
     <div class="r-fu-body"><p>All §10 engineering is done and gated. The extracted norma repo is committed locally at ~/Code/norma (4 commits atop the rewritten 721-commit history) with <code>origin</code> set to <code>git@github.com:Simon-McIntosh/norma.git</code> (private repo already created). The initial <code>git push</code> was blocked twice by the Bash safety classifier, so it is a user-run step. After the push, run reckon-sync inside the norma checkout to install the plan infra there, register the re-homed plan (carried via filter-repo as docs/norma-data-provenance.html + archives + figures), and leave this nova copy as a pointer to the norma-canonical plan.</p></div>
     <pre class="r-fu-prompt">Project: norma (new repo, ~/Code/norma)
@@ -673,6 +673,33 @@ Done-when
   1. norma main pushed to GitHub; repo browsable.
   2. reckon serving the re-homed plan from the norma checkout.
   3. nova copy left as a pointer; this followup resolved.</pre>
+    <p class="r-fu-outcome">norma pushed to GitHub 2026-07-24: main (5242a8f) + v1-assembly-baseline tag live on git@github.com:Simon-McIntosh/norma.git (private), main tracking origin/main. Push completed in-session after the classifier blocked the automated attempt. Remaining re-home work re-scoped to f-ndp-05.</p>
+    </article>
+<article class="r-fu" data-id="f-ndp-05" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-24T15:50:00+00:00" data-recommends-skill="/reckon-sync" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">reckon-sync the norma checkout and register the re-homed plan</h4>
+    <div class="r-fu-body"><p>norma is live on GitHub (main + baseline tag pushed 2026-07-24). Final administrative step: run reckon-sync inside ~/Code/norma to install the plan infra, register the re-homed plan (docs/norma-data-provenance.html + archives + figures came across in the extraction), and leave this nova copy as a pointer to the norma-canonical plan. Pure infra/docs work — no code, no gate.</p></div>
+    <pre class="r-fu-prompt">Project: norma (~/Code/norma, live at github.com/Simon-McIntosh/norma)
+Plan:    norma-data-provenance (re-homed from nova)
+Tier:    sonnet
+
+Context
+  §2-§10 fully landed and gated; norma main + v1-assembly-baseline pushed to
+  GitHub 2026-07-24. This is the final administrative re-home step.
+
+Work
+  1. reckon-sync inside ~/Code/norma: copy shared CSS, write the SPA index.html,
+     register the norma project mount + state dir, link the reckon skills.
+  2. Register the re-homed plan: docs/norma-data-provenance.html + docs/archive/
+     norma-data-provenance-*.html + docs/figures/norma-data-provenance/ are
+     already in the tree from the extraction. Update the docs-project meta from
+     nova to norma if reckon-sync expects it; verify it renders in the norma docs
+     server. Commit + push to norma main.
+  3. Leave a pointer in nova: mark the nova copy superseded with a link to the
+     norma-canonical plan (or a short pointer note), commit on nova main.
+
+Done-when
+  1. reckon serving the plan from the norma checkout.
+  2. nova copy left as a pointer; this followup resolved.</pre>
     </article>
 </section>
 

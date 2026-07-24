@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="archive">
+  <meta name="plan-slug" content="nova-spine-refactor-s5s6s8-landed">
+  <meta name="plan-title" content="JAX batch tier, zarr identity cache, plotting mixins — landed">
+  <meta name="plan-status" content="historical">
+  <meta name="plan-modified" content="2026-07-24">
+  <title>JAX batch tier, zarr identity cache, plotting mixins — landed | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>§5 / §6 / §8 first wave — landed</h1>
+    <p><strong>2026-07-24.</strong> Three parallel opus workers in detached worktrees off
+    <code>develop</code>, reviewed and merged by the orchestrating session (merges
+    <code>16b00bac</code> / <code>179a4e37</code> / <code>5787d3ce</code>), plus the orchestrator's
+    arc/zeta vectorisation (<code>949528d6</code>) and the numba lstsq toolchain fix
+    (<code>045e92ec</code>). §8 closed outright; §5 and §6 landed their test-pinned cores with
+    precisely-characterised remainders.</p>
+
+    <section class="card">
+      <h2>Quick status</h2>
+      <table>
+        <thead><tr><th>Deliverable</th><th>State</th></tr></thead>
+        <tbody>
+          <tr><td>§8 matplotlib-free plotting mixins + columnar vtk geometry</td><td>✓ closed — acceptance 17 failed/25 passed → 43/0 (animate, vtk, ferritic, winding); core import graph pinned matplotlib/seaborn/vedo-free (test_plot_import)</td></tr>
+          <tr><td>§5 jitted operator agreement + batched topology</td><td>✓ landed — jit==numpy evaluate 2.8e-14, update_turns 1.7e-21; batched==per-slice pinned; stencil-null locator ported (5 tests); test_fieldnull 61 failed → 32 passed on the jax stack</td></tr>
+          <tr><td>§6 canonical cache keys + zarr identity store</td><td>✓ landed — sorted/type-tagged keys (1 vs 1.0 vs "1" vs True discriminated), DD version in the hash, native zarr group eviction; 8 round-trip/stale-key tests; pulsedesign/extrapolate errors → visible skips</td></tr>
+          <tr><td>Arc/bow per-angle vectorisation (§4 amendment, user directive)</td><td>✓ landed — limit-point stacks broadcast; zeta quadrature grouped; bow solve 12.9 → 5.9 s; kernel goldens + 4-ulp greens gate green</td></tr>
+          <tr><td>numba lstsq toolchain break (py3.14/numpy2/numba 0.61)</td><td>✓ fixed — float rcond in njit quadratic fits; test_wallflux + test_plasma 44 failures → 51 passed</td></tr>
+          <tr><td>seaborn dependency gap</td><td>✓ fixed — ships with the matplotlib extra</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>Worker commits</h2>
+      <table>
+        <thead><tr><th>Worker</th><th>Commits</th></tr></thead>
+        <tbody>
+          <tr><td>§5 (nova/jax)</td><td><code>a14bf542</code> basis-test skips · <code>6e367076</code> batched topology (+vmap test) · <code>2d492502</code> jit-vs-numpy pinning · <code>54da7bde</code> fieldnull → jax stack · <code>58657c35</code> stencil-null locator (ambix donor)</td></tr>
+          <tr><td>§6 (nova/imas + database)</td><td><code>2c721ce6</code> DD-pinned fixtures + live-DB gating · <code>a9c80cac</code> lazy package init · <code>8e336847</code> canonical keys + ZarrStore · <code>caea8c82</code> pandas-free code-parameter table</td></tr>
+          <tr><td>§8 (graphics + vtk)</td><td><code>77f5d3ff</code> matplotlib-free mixins · <code>4b603cfd</code> columnar vtkgeo/vtkplot · <code>c6eb7fc9</code> multi-column loc + DataFrame.copy · <code>44030151</code> ferritic off whole-row loc · <code>0856d9f1</code> import-graph guard test</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>§5 remainder (banked, characterised)</h2>
+      <ul>
+        <li><strong>Primary-path flip:</strong> the jax operator is verified drop-in equivalent; the
+        integration point is the commented import at <code>nova/biot/operate.py:13</code> —
+        flipping the matmul path while keeping the xxhash/version-counter gating needs a
+        nova/biot-scoped change.</li>
+        <li><strong>Ambix topology cascade:</strong> <code>connectivity_boundary</code> +
+        <code>topology</code> donors need <code>equilibrium_labels</code> (+ scipy.ndimage);
+        <code>flux_surface_connectivity</code> is self-contained but its tests cascade through
+        <code>current_diffusion</code> + <code>wall_mask</code>.</li>
+        <li><strong>Free-boundary GS solver:</strong> <code>gs_solve.py</code> (114 KB) pulls the
+        whole <code>imas_ambix.gs</code> package + <code>latent.topology</code> +
+        <code>wall_mask</code> — a port program of its own.</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>§6 remainder (banked, needs live iter_md DBs)</h2>
+      <ul>
+        <li>Machine composite key (<code>machine.py</code> group_attrs) does not yet fold in the DD
+        version (base Database identity does); needs a store+restore round-trip against real DBs.</li>
+        <li>MachineGeometryReader seam + CrossSection dispatch re-point; pandas→columnar for the
+        ingest IO modules (io_magnetics, magnetic_diagnostics, extrapolate,
+        machinedata/itergeom/vde read_csv).</li>
+        <li>Frame/biot store layer still netCDF-backed; ZarrStore is tested and ready as the
+        backend when that layer is touched.</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>Validation</h2>
+      <p>Full merged suite (extras env: test/matplotlib/numba/viz/interchange + seaborn):
+      <strong>1265 passed / 0 failed / 103 skipped</strong> (develop tip <code>045e92ec</code>) —
+      every skip is a visible environment gate (live iter_md DBs, SULTAN FTP credentials,
+      singularity-method TODOs). §3/§4 lane re-verified green by every worker before merge. The
+      only excluded file is <code>test_bokeh.py</code> (bokeh extra not installed — §9's
+      importmanager sweep).</p>
+    </section>
+
+    <section class="card">
+      <h2>What's next</h2>
+      <p>§7 (nova.io + ISN/ISNC fork-RC pins) and §9 (fast-lane test/benchmark transfer) are the
+      unstarted sections; the §5/§6 remainders above close alongside them. The 3-D program
+      (exact flux couplings, PF offsets/tilts, toroidally averaged reconstruction metrics, zeta
+      fast path) is scaffolded as <a href="/nova/nova-3d-native.html">nova-3d-native</a>.</p>
+    </section>
+  </main>
+</body>
+</html>

@@ -6,9 +6,7 @@ import glob
 import itertools
 from pathlib import Path
 
-import io
-import pandas
-import xarray
+import numpy as np
 
 
 @dataclass
@@ -20,18 +18,30 @@ class Magnetics:
     )
 
     @property
-    def _magnetics_xlsx(self):
-        """Retrun magnetics positions xlsx context manager."""
-        return pandas.ExcelFile(
-            self.datadir / "List_of_Current_Magnetic_Coil_Positions_24V7KU_v2_11.xlsx",
-            engine="openpyxl",
+    def _magnetics_xlsx(self) -> Path:
+        """Return the magnetics positions workbook path."""
+        return (
+            self.datadir / "List_of_Current_Magnetic_Coil_Positions_24V7KU_v2_11.xlsx"
         )
 
     @cached_property
-    def loops(self):
-        """Return loops metadata."""
-        with self._magnetics_xlsx as xls:
-            return pandas.read_excel(xls, "Loops")
+    def loops(self) -> list[str]:
+        """Return the loop names from the first column of the Loops sheet."""
+        import openpyxl
+
+        workbook = openpyxl.load_workbook(
+            self._magnetics_xlsx, read_only=True, data_only=True
+        )
+        try:
+            sheet = workbook["Loops"]
+            names = [
+                row[0]
+                for row in sheet.iter_rows(min_row=2, max_col=1, values_only=True)
+                if row[0] is not None
+            ]
+        finally:
+            workbook.close()
+        return names
 
     @cached_property
     def _loop_names(self):
@@ -39,7 +49,7 @@ class Magnetics:
         return {
             key: list(group)
             for key, group in itertools.groupby(
-                self.loops.iloc[:, 0].values, lambda name: name.split(".")[1]
+                self.loops, lambda name: name.split(".")[1]
             )
         }
 
@@ -47,19 +57,18 @@ class Magnetics:
         """Return loop name list for diagnostic group."""
         return self._loop_names[group]
 
-    def _read_text_file(self, filepath: str):
+    def _read_text_file(self, filepath: str) -> list[np.ndarray]:
+        """Return the whitespace/comma separated xyz blocks of a loop file."""
         data = []
-        with open(filepath, "r") as f:
+        with open(filepath, "r") as file:
             for block in (
                 line
-                for newline, line in itertools.groupby(f, lambda line: line[0] == "\n")
+                for newline, line in itertools.groupby(
+                    file, lambda line: line[0] == "\n"
+                )
                 if not newline
             ):
-                data.append(
-                    pandas.read_csv(
-                        io.StringIO("".join(block)), header=None, names=["x", "y", "z"]
-                    )
-                )
+                data.append(np.atleast_2d(np.genfromtxt(block, delimiter=",")))
         return data
 
     @cached_property
@@ -81,5 +90,3 @@ class Magnetics:
 if __name__ == "__main__":
     mag = Magnetics()
     data = mag.build()
-    # dataset = xarray.Dataset()
-    dataset = xarray.DataArray(data)

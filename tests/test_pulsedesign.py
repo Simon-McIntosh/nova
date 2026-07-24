@@ -7,7 +7,7 @@ from nova.imas.ids_entry import IdsEntry
 from nova.imas.pulsedesign import PulseDesign
 from nova.imas.equilibrium import EquilibriumData
 from nova.imas.sample import Sample
-from nova.imas.test_utilities import ids_attrs, mark, mark_imas
+from nova.imas.test_utilities import ids_attrs, mark
 
 biot_attrs = {
     "dplasma": -1,
@@ -22,7 +22,10 @@ biot_attrs = {
 
 @pytest.fixture()
 def ids():
-    ids_entry = IdsEntry(name="equilibrium")
+    # time_slice/boundary_separatrix, which PulseDesign reads, exists in the
+    # 3.x data dictionary but was removed in 4.x; build the synthetic entry in
+    # the version the equilibrium layer targets so the fixture is self-consistent.
+    ids_entry = IdsEntry(name="equilibrium", dd_version="3.42.0")
     time = [1.5, 19, 110, 600, 670]
     ids_entry.ids.time = time
     ids_entry.ids.time_slice.resize(len(time))
@@ -64,7 +67,7 @@ def ids():
     return ids_entry.ids
 
 
-@mark_imas
+@mark["pf_active"]
 def test_ids_file_cache(ids):
     ids.time_slice[0].boundary_separatrix.psi = 66
     design_a = PulseDesign(ids=ids, **biot_attrs)
@@ -78,7 +81,7 @@ def test_ids_file_cache(ids):
     assert design_b["psi_boundary"] == 77
 
 
-@mark_imas
+@mark["pf_active"]
 def test_pf_active_ids_input(ids):
     design = PulseDesign(ids=ids, **biot_attrs)
     pf_active_ids = design.geometry["pf_active"](**design.pf_active, lazy=False).ids
@@ -87,7 +90,7 @@ def test_pf_active_ids_input(ids):
     design.update_metadata(ids_entry)
 
 
-@mark_imas
+@mark["pf_active"]
 def test_pf_active_ids_input_cache(ids):
     pf_active_103 = Database(
         111001, 103, "pf_active", machine="iter_md", lazy=False
@@ -100,7 +103,7 @@ def test_pf_active_ids_input_cache(ids):
     assert design_103.group_attrs["pf_active"] != design_203.group_attrs["pf_active"]
 
 
-@mark_imas
+@mark["pf_active"]
 def test_make_frame(ids):
     design = PulseDesign(
         ids=ids, **dict(biot_attrs | {"nlevelset": 1e3, "nwall": 3, "dplasma": -1e3})

@@ -3,9 +3,9 @@
 import numpy as np
 import pytest
 
-from nova.utilities.importmanager import mark_import
+from nova.utilities.importmanager import skip_import
 
-with mark_import("imas_standard_names") as mark_isn:
+with skip_import("imas_standard_names"):
     import imas_standard_names  # noqa: F401
 
     from nova.io.egress import IdsEgress
@@ -73,7 +73,6 @@ def store(tmp_path):
     )
 
 
-@mark_isn
 def test_tensorize_keys_by_standard_name():
     ingest = IdsIngest(resolver=StandardNameResolver())
     dataset = ingest.tensorize(
@@ -91,7 +90,6 @@ def test_tensorize_keys_by_standard_name():
     assert dataset["plasma_current"].attrs.get("units")
 
 
-@mark_isn
 def test_ingest_is_cache_keyed(store):
     ingest = IdsIngest(resolver=StandardNameResolver())
     assert not store.cached()
@@ -102,7 +100,6 @@ def test_ingest_is_cache_keyed(store):
     assert np.allclose(reread["time"].values, TIME)
 
 
-@mark_isn
 def test_roundtrip_zarr_to_ids_validate(store, tmp_path):
     resolver = StandardNameResolver()
     IdsIngest(resolver=resolver).ingest(build_equilibrium(), SPECS, store)

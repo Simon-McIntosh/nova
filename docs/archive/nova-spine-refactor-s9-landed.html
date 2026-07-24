@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="nova-spine-refactor-s9-landed">
+  <meta name="plan-title" content="Nova Spine Refactor — §9 landed + §6 closed">
+  <meta name="plan-summary" content="Per-stage record: §9 fast lane (56 s default, zero exclusions, asv baselines) and the §6 final closure (frames+operators through zarr, pandas-free frame ingest)">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>§9 landed + §6 closed | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+  <h1>§9 landed + §6 closed — fast lane and the zarr store tier</h1>
+  <p>Landed 2026-07-24 on <code>develop</code> (merges: §6 closure <code>nova-w-frame</code> commits
+  <code>f7ed3ad1</code>/<code>7d02cd4c</code>, §9 <code>06f8b91f</code> with worker commits
+  <code>88118f11</code>/<code>7274ea9a</code>/<code>d1dffd2c</code>/<code>bb8eb01b</code>/<code>81a76a03</code>;
+  orchestrator fix <code>f37fa3fa</code>). Final combined verification at tip <code>06f8b91f</code>:
+  <strong>full lane 1361 passed / 0 failed / 104 skipped</strong> (304 s);
+  <strong>default fast lane 885 passed / 78 skipped / 493 deselected in 56.4 s</strong> —
+  under the 60 s budget, no network, zero collection exclusions. Umbrella plan:
+  <a href="/nova/nova-spine-refactor.html">nova-spine-refactor</a>.</p>
+
+  <h2>§6 final closure — frames + operators through zarr</h2>
+  <table>
+    <thead><tr><th>Item</th><th>Status</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>FrameSet/biot-Data store base → zarr</td><td>✅ shipped <code>f7ed3ad1</code></td>
+        <td>Frame, subframe and each solved operator persist as named groups in one .zarr store;
+        re-storing a group evicts and rewrites only that group (netCDF forced a whole-file rewrite).
+        Frame string columns via stable fixed-length encoding; clearing a cached store removes the
+        directory. Round-trip + eviction pinned in tests/test_frameset.py (+72 lines).</td></tr>
+      <tr><td>machinedata / itergeom / vde pandas removal</td><td>✅ shipped <code>7d02cd4c</code></td>
+        <td>The ITER geometry-ingest modules under <code>nova/frame</code> rebuilt off pandas
+        (read_csv → numpy/columnar); import-guard test tests/test_frame_ingest_import.py.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>§9 fast lane — quick status</h2>
+  <table>
+    <thead><tr><th>Item</th><th>Status</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>Zero collection exclusions</td><td>✅ shipped <code>88118f11</code></td>
+        <td>test_bokeh (the last <code>--ignore</code>) now degrades via the uniform importmanager
+        skip pattern; <code>pytest tests/ --collect-only</code> → 1453 items, 0 errors, 0 flags.
+        Bare-env degradation verified in isolated venvs per extra tier.</td></tr>
+      <tr><td>Fast/slow marker scheme</td><td>✅ shipped <code>7274ea9a</code></td>
+        <td>Default addopts carry <code>-m "not slow"</code> — bare <code>pytest</code> IS the fast
+        lane (56.4 s); <code>pytest -m "slow or not slow"</code> runs everything. Slow set applied
+        centrally in the root conftest (curated file list — no test files edited); MPLBACKEND=Agg
+        forced session-wide; live-data nova.imas doctests gated behind a pulse-availability probe —
+        exposing and gating 3 pre-existing doctest failures that live-data runs had masked.</td></tr>
+      <tr><td>Donor test bugs</td><td>✅ shipped <code>88118f11</code></td>
+        <td>Never-collected <code>text_netcdf.py</code> (typo, dead APIs) replaced by
+        tests/test_netcdf.py — 4 real store/load round-trip tests; empty test_arrayloc.py deleted
+        (aloc surface covered in test_frameconstruction / test_biotoperate / test_jax_operate).</td></tr>
+      <tr><td>asv benchmarks + baselines</td><td>✅ shipped <code>d1dffd2c</code>–<code>81a76a03</code></td>
+        <td>Cross-process cache paths fixed so asv setup_cache resolves identically per process; API
+        drift fixed (field magnitude via <code>bp</code>). Full asv suite runs clean; baselines
+        recorded in <code>benchmarks/BASELINE.md</code> (biotoperate solve 963 ms, update_turns
+        205–290 ms across svd_rank; framespace get/set 2.3–43 µs; framesetloc indexer sweep;
+        standalone: construct 2.1–16.7 ms, io_ingest warm re-read 142×).</td></tr>
+      <tr><td>Core viz leak (orchestrator)</td><td>✅ fixed <code>f37fa3fa</code></td>
+        <td><code>nova/geometry/volume.py</code>'s viz-tier imports (meshio/pyvista/vedo/vtk/trimesh)
+        leaked into core via <code>polyline.py</code>, breaking collection of 6 core test files
+        without the viz extra — volume imports deferred to the two consuming properties
+        (vtkgeo's established lazy pattern); viz-free import verified by blocked-module test.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Count reconciliation</h2>
+  <p>Baseline 1351/0/93 (tip <code>045e92ec</code> + wave 1). Full lane now 1361/0/104:
+  +6 = w-frame zarr round-trip/eviction + frame-ingest guard tests, +4 = test_netcdf round-trips;
+  +11 skips = bokeh module now collected-but-skipped plus offline gating of the live-data doctests
+  and standard-name-dependent tests. Zero failures; no test lost or weakened — budget met by
+  gating, not deletion.</p>
+
+  <h2>What's next</h2>
+  <p>§10 — ambix adoption (executed in the imas-ambix checkout): nova 2.0 as a dependency, gs/ and
+  latent physics tier move (incl. the re-banked gs_solve re-architecture onto nova.biot kernels),
+  coupling-generator unification. Then §11 convergence on norma extraction. Env followups parked in
+  the umbrella plan: fork wheel publish → pin flip; iter_md public-path/is_valid layout;
+  dd_version/user threading from Machine to geometry sources.</p>
+
+</main>
+</body>
+</html>

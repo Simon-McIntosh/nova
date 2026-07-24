@@ -17,8 +17,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-24">
-<meta name="plan-version" content="14">
-<meta name="plan-impl" content="0.8">
+<meta name="plan-version" content="15">
+<meta name="plan-impl" content="0.9">
 </head>
 <body>
   <main class="plan-doc">
@@ -265,45 +265,25 @@
     <a href="archive/nova-spine-refactor-s5s6-closed.html">§5 closed / §6 remainders</a>.</p>
     </section>
 
-    <h2 id="s6">§6 — Machine description and identity cache</h2>
-    <p><strong>Cache tier landed 2026-07-24</strong> (merge <code>179a4e37</code>; full record:
-    <a href="archive/nova-spine-refactor-s5s6s8-landed.html">§5/§6/§8 landed</a>): canonical cache
-    keys (sorted, type-tagged — 1 / 1.0 / "1" / True discriminated), DD version folded into the
-    base identity, <code>nova/database/zarrstore.py</code> with native group eviction replacing the
-    whole-file netCDF rewrite (8 round-trip + stale-key regression tests); package init made lazy
-    (<code>import nova</code> is pandas/xarray-free); pulsedesign/extrapolate live-DB errors are now
-    visible skips with DD-pinned synthetic fixtures (equilibrium fixture pinned to DD 3.42.0).
-    <strong>Remainders landed 2026-07-24</strong> (merge <code>d8f7c1ef</code>; record:
-    <a href="archive/nova-spine-refactor-s5s6-closed.html">§5 closed / §6 remainders</a>): DD version
-    folded into the Machine composite key (bit-identical round-trip + stale-key tests; validated
-    against live iter_md pf_active), <code>MachineGeometryReader</code> seam with CrossSection
-    dispatch re-pointed (all 20 live pf_active elements dispatch), io_magnetics /
-    magnetic_diagnostics / extrapolate pandas-free with an import-guard test, and the Datafile
-    identity tier caching through zarr with group eviction.
-    <strong>Remaining (final closure, in flight):</strong> the frames+operators store tier —
-    <code>FrameSet.store/load</code> nested netCDF4-group model → zarr groups +
-    <code>nova/biot/data.py</code> base swap — and pandas removal from
-    <code>nova/frame</code>'s machinedata/itergeom/vde; plus two env followups (public-path
-    <code>is_valid</code> layout, threading dd_version/user from Machine to geometry sources).</p>
-    <ul>
-      <li>Carry nova's IMAS layer: <code>dataset.py</code> ladder (identity attrs, URI, lazy DBEntry access,
-      content hashing), <code>uri.py</code>, <code>db_entry.py</code>, <code>metadata.py</code> provenance
-      stamping, <code>coils_non_axisymmetric.py</code>.</li>
-      <li>Carry the <code>CrossSection</code> geometry_type dispatch with its multi-machine fallbacks
-      (documented); re-point the frame-insert path at the columnar store; keep the
-      <code>Machine.build → solve_biot → store</code> orchestration.</li>
-      <li>Identity cache: keep content-hash keys (identity attrs + per-source IDS content hashes + Biot
-      discretisation) and version-segmented cache paths; harden with canonical key serialisation (sorted,
-      typed — not <code>str(dict)</code>); include the DD version in the hash; back with zarr (or retain netCDF
-      groups — see decision) so eviction doesn't rewrite whole files. Cache both compiled frames and solved
-      operators, as nova does today.</li>
-      <li>Register ambix's <code>imas_geometry.py</code> reader against the same
-      <code>MachineGeometryReader</code>-style seam so IMAS and FAIR-MAST zarr sources are interchangeable
-      providers; MAST-specific tables (circuits, eras, sensors) remain in ambix as a machine plugin.</li>
-    </ul>
-    <p><em>Done-when:</em> an ITER machine description compiles from IDSs into frames + solved operators, round-trips
-    through the cache (cold build → warm load bit-identical), and a deliberate geometry perturbation changes the
-    key (stale-reuse regression test — the failure mode ambix's .npz caches already exhibited).</p>
+    <section id="s6-landed" class="section-landed">
+    <h2 id="s6"><span class="badge badge-shipped">✓ landed 2026-07-24</span> §6 — Machine description and identity cache</h2>
+    <p class="landed-summary">
+    Closed 2026-07-24 in three landings. Cache tier (merge <code>179a4e37</code>): canonical
+    typed cache keys with DD version, <code>ZarrStore</code> group eviction, lazy package init.
+    Remainders (merge <code>d8f7c1ef</code>): DD version in the Machine composite key
+    (bit-identical round-trip + stale-key tests, validated on live iter_md pf_active),
+    <code>MachineGeometryReader</code> seam re-pointing CrossSection dispatch, pandas-free
+    io_magnetics/magnetic_diagnostics/extrapolate, Datafile identity tier through zarr.
+    Final closure (merge <code>06f8b91f</code>): <strong>compiled frames + solved operators persist
+    as zarr groups</strong> — FrameSet/biot-Data store base swapped off netCDF, per-group eviction
+    replacing whole-file rewrites (round-trip + eviction tests) — and
+    <code>nova/frame</code>'s machinedata/itergeom/vde rebuilt pandas-free with an import guard.
+    Records: <a href="archive/nova-spine-refactor-s5s6s8-landed.html">cache tier</a> ·
+    <a href="archive/nova-spine-refactor-s5s6-closed.html">remainders</a> ·
+    <a href="archive/nova-spine-refactor-s9-landed.html">final closure</a>. Env followups parked:
+    iter_md public-path <code>is_valid</code> layout; dd_version/user threading from Machine to
+    geometry sources.</p>
+    </section>
 
     <section id="s7-landed" class="section-landed">
     <h2 id="s7"><span class="badge badge-shipped">✓ landed 2026-07-24</span> §7 — IMAS IO layer (standard names)</h2>
@@ -389,23 +369,22 @@
     assessed and skipped (chain already terminates correctly; no failing signal).</p>
     </section>
 
-    <h2 id="s9">§9 — Test and benchmark transfer (fast lane)</h2>
-    <ul>
-      <li>Transfer nova's ~72 keep-set test files and ambix's gs/latent physics tests (~20 files + latent suite)
-      alongside their components; adopt nova's <code>importmanager</code> skip/mark pattern uniformly so optional
-      extras (jax, viz, imas) degrade to skips, never collection errors.</li>
-      <li>Rebuild the 8 genuinely DB-bound nova tests (live ITER pulse/run or UDA URIs) on bundled synthetic
-      HDF5 fixtures written by imas-python at build time; the ~9 tests that only needed <code>import imas</code>
-      transfer directly.</li>
-      <li>Speed budget: default lane target &lt; 60 s on a login node — matplotlib tests forced to Agg,
-      cache-writing tests confined to tmp fixtures, pyvista/vedo tests behind a viz marker excluded by default.
-      Fix the donor bugs on the way through: the never-collected <code>text_netcdf.py</code> filename typo, the
-      empty <code>test_arrayloc.py</code>.</li>
-      <li>Port nova's asv benchmarks (operator assembly, framespace, biotoperate) and wire the ambix
-      spine-bench harness against the new package.</li>
-    </ul>
-    <p><em>Done-when:</em> full default suite green and under budget with no network; coverage spans frame core,
-    kernels, operators, topology, machine build, cache, IO; benchmarks recorded as the baseline.</p>
+    <section id="s9-landed" class="section-landed">
+    <h2 id="s9"><span class="badge badge-shipped">✓ landed 2026-07-24</span> §9 — Test and benchmark transfer (fast lane)</h2>
+    <p class="landed-summary">
+    Fast lane shipped (merge <code>06f8b91f</code>): bare <code>pytest</code> IS the default lane —
+    <strong>885 passed / 78 skipped in 56.4 s</strong>, no network, zero collection exclusions
+    (test_bokeh skip-guarded; 1453 items collect with 0 errors; bare-env degradation verified in
+    isolated venvs per extra). Full lane <code>pytest -m "slow or not slow"</code>:
+    <strong>1361 passed / 0 failed / 104 skipped</strong> (304 s) — budget met by gating (central
+    conftest slow-set, Agg backend, live-data doctest probe), no test deleted or weakened; 3
+    pre-existing doctest failures that live-data runs masked are now gated. Donor bugs fixed
+    (<code>text_netcdf.py</code> → real test_netcdf round-trips; empty test_arrayloc removed);
+    core viz leak fixed (<code>volume.py</code> imports deferred, <code>f37fa3fa</code>); asv suite
+    runs clean with baselines in <code>benchmarks/BASELINE.md</code> (biotoperate solve 963 ms;
+    io_ingest warm re-read 142×). Full record:
+    <a href="archive/nova-spine-refactor-s9-landed.html">§9 landed + §6 closed</a>.</p>
+    </section>
 
     <h2 id="s10">§10 — Ambix adoption</h2>
     <ul>
@@ -824,7 +803,7 @@ Done-when
      advanced stepwise; this followup resolved; §10/§11 followup queued.</pre>
     <p class="r-fu-outcome">Wave 1+ landed (develop 8a9becc1..045e92ec): §8 CLOSED (matplotlib-free import graph pinned; vtkgeo/ferritic columnar; acceptance 17 fails → 43/0); §5 core landed (jit==numpy 2.8e-14; batched==per-slice pinned; stencil nulls ported; fieldnull → jax stack) with primary-path flip + ambix topology cascade + gs_solve banked; §6 cache tier landed (canonical typed keys + DD version, ZarrStore group eviction, 8 round-trip/stale-key tests, lazy package init) with Machine-key/geometry-seam/ingest-IO deferred to live-DB access. Also: arc/bow vectorisation (949528d6, bow 12.9→5.9 s — user directive), numba lstsq toolchain fix (44 fails recovered), seaborn → matplotlib extra. FULL SUITE GREEN: 1265 passed / 0 failed / 103 skipped (test_bokeh excluded — §9). Archive: docs/archive/nova-spine-refactor-s5s6s8-landed.html. nova-3d-native plan scaffolded (exact 3-D flux couplings; zeta fast path).</p>
     </article>
-<article class="r-fu" data-id="f-int-08" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-24" data-recommends-skill="/reckon-ship nova-spine-refactor §7" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-int-08" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-24" data-recommends-skill="/reckon-ship nova-spine-refactor §7" data-resolved-at="2026-07-24T12:55:17+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Ship §7 (nova.io + ISN/ISNC fork-RC pins) and §9 (fast-lane transfer); absorb the §5/§6 remainders</h4>
     <div class="r-fu-body"><p>Wave 1+ is merged and the full suite is green (1265/0/103, tip <code>045e92ec</code>). Remaining spine work: §7 (nova.io ingest/egress transcoders + zarr signal store + fork-RC pins — ISN v0.8.0rc56 / ISNC v0.2.0rc63; ISN fastmcp→[mcp] extra hardening still open), §9 (importmanager sweep incl. test_bokeh, DB-bound fixtures, &lt;60 s default lane, asv benchmarks), and the banked §5/§6 remainders (jit primary-path flip at nova/biot/operate.py:13; ambix connectivity/gs_solve port cascade; Machine composite-key DD version + geometry seam + ingest-IO pandas removal, all needing live iter_md DBs). §10 (ambix adoption) follows in the imas-ambix checkout; §11 closes on norma extraction.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -879,6 +858,48 @@ Done-when
   3. §5/§6 remainders landed or explicitly re-banked with reasons.
   4. Sections collapsed with archive HTML; impl advanced; this followup
      resolved; §10 (ambix adoption) followup queued.</pre>
+    <p class="r-fu-outcome">§7 + §9 landed and §5/§6 closed (develop 045e92ec..06f8b91f, 5 workers over 2 waves). §7: nova.io shipped — standard-name resolver over ISN/ISNC, zarr SignalStore keyed by URI+DD, ingest/egress with in-lane validate() round-trip, warm re-read 120-142x AL full-get; git-tag pins in an io extra (test.pypi wheels unpublished — ISN fastmcp weight + missing catalog.db flagged as fork work; beta_normal = genuine ISNC contribution). §5 closed: jit operator primary with numpy fallback + xxhash gating; connectivity/flux-surface/wall-mask ported vmap-safe (batched==per-slice 1e-10); gs_solve re-banked to §10 with closure evidence. §6 closed: Machine key carries DD version (live iter_md validated); MachineGeometryReader seam; compiled frames + solved operators persist as zarr groups with per-group eviction; frame/imas ingest IO pandas-free. §9: default lane 885/78 in 56.4 s, zero exclusions; full lane 1361/0/104; asv baselines in benchmarks/BASELINE.md; core viz leak fixed (f37fa3fa). Archives: s7-landed, s5s6-closed, s9-landed.</p>
+    </article>
+<article class="r-fu" data-id="f-int-09" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-24" data-recommends-skill="/reckon-ship nova-spine-refactor §10" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Ship §10 ambix adoption (nova 2.0 dependency, gs/latent move incl. the gs_solve re-architecture)</h4>
+    <div class="r-fu-body"><p>§3–§9 are landed on nova develop (tip <code>06f8b91f</code>; full lane 1361/0/104, fast lane 56 s). §10 executes in the <strong>imas-ambix checkout</strong>: add nova 2.0 as a dependency, move <code>gs/</code> + the latent physics tier onto the spine deleting donor copies, re-point the tokenizer seam, and unify the coupling generators. The re-banked gs_solve lands here — re-architected onto nova.biot's kernels (its ambix closure pulls FAIR-MAST paths + torch current_diffusion; evidence in the §5/§6 archive). Register ambix's imas_geometry reader against nova's MachineGeometryReader seam. Env followups parked in nova: ISN/ISNC fork wheel publish → pin flip; iter_md public-path is_valid layout; dd_version/user threading from Machine to geometry sources.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    nova-spine-refactor (http://127.0.0.1:8765/nova/nova-spine-refactor.html)
+Section: §10 — Ambix adoption (executed in ~/Code/imas-ambix)
+Tier:    opus
+
+Context
+  nova develop tip 06f8b91f: §3-§9 landed (full lane 1361/0/104; fast lane 56 s;
+  archives s3s4, s5s6s8, s7, s5s6-closed, s9 in docs/archive/). nova.io, the
+  jitted primary path, the connectivity stack, the zarr store tier and the fast
+  lane are all in place. §10 moves ambix onto the spine, in the imas-ambix
+  checkout (its own branch discipline; read ~/Code/imas-ambix/AGENTS.md first).
+
+Work
+  1. Add nova 2.0 as an imas-ambix dependency (git or path pin until a nova
+     release exists; plan the pin flip).
+  2. Move gs/ and the latent physics tier per the split table in
+     ~/Code/imas-ambix/docs/nova-scoping-review.html, deleting donor copies as
+     each lands (retire dead gs/elliptic.py and test-only modules).
+     gs_solve is re-architected onto nova.biot kernels (do NOT re-extract
+     hybrid_greens — nova/biot/cylinder.py + greens.py already own it);
+     host topology labeller (scipy classify/lcfs_contour) and torch
+     current_diffusion stay ambix-side or port deliberately.
+  3. Re-point the tokenizer seam (geometry features) and statespace/eval
+     consumers at the package API; torch decoders remain in ambix as thin
+     wrappers over the spine&#x27;s numpy/JAX math.
+  4. Coupling-generator unification per the EM-consolidation review (one
+     builder owning circuit classification + channel merge).
+  5. Register ambix&#x27;s imas_geometry.py reader against nova&#x27;s
+     MachineGeometryReader seam (IMAS and FAIR-MAST zarr sources as
+     interchangeable providers; MAST tables stay in ambix as a plugin).
+
+Done-when
+  1. imas-ambix imports the spine from the package; no physics kernels remain
+     in-tree; donor copies deleted.
+  2. spine_bench numbers match pre-split baselines; full ambix suite green.
+  3. §10 collapsed in this plan with archive HTML; impl advanced; this
+     followup resolved; §11 (convergence) followup queued.</pre>
     </article>
 </section>
 

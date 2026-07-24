@@ -91,9 +91,11 @@ class Database(Dataset):
         Return database attributes.
 
         Group attrs used by :func:`~nova.database.filepath.FilePath.hash_attrs`
-        to generate a unique hex hash to label data within a netCDF file.
+        to generate a unique hex hash labelling cached data. The data
+        dictionary version is folded into the identity so that the same
+        pulse/run read under a different DD version cannot reuse a stale entry.
         """
-        return self.ids_attrs
+        return self.ids_attrs | {"dd_version": str(self.dd_version)}
 
 
 @dataclass

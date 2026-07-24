@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from nova.frame.columnar import is_list_like
+from nova.frame.columnar import Vector, is_list_like
 from nova.frame.error import SpaceKeyError
 
 
@@ -72,15 +72,34 @@ class Accessor:
     def __getitem__(self, key):
         """Return the selected column values."""
         rows, col = self._split(key)
+        if is_list_like(col):
+            return self._multi_column_get(rows, col)
         column = self.frame[self._column(col)]
         rows = self._rows(rows)
         if isinstance(rows, slice) and rows == slice(None, None, None):
             return column  # the store's id-stable cached view, not a new slice
         return column[rows]
 
+    def _multi_column_get(self, rows, cols):
+        """Return several columns stacked along the last axis.
+
+        Serves ``loc[rows, [c1, c2, ...]]``: a scalar row yields a 1-D vector
+        across the columns, a row selection a 2-D ``(rows, columns)`` block.
+        """
+        rows = self._rows(rows)
+        whole = isinstance(rows, slice) and rows == slice(None, None, None)
+        selected = [
+            np.asarray(self.frame[self._column(col)])[slice(None) if whole else rows]
+            for col in cols
+        ]
+        return Vector(np.stack(selected, axis=-1))
+
     def __setitem__(self, key, value):
         """Assign to the selected column values, in place on the store."""
         rows, col = self._split(key)
+        if is_list_like(col):
+            self._multi_column_set(rows, col, value)
+            return
         col = self._column(col)
         rows = self._rows(rows)
         if isinstance(rows, slice) and rows == slice(None, None, None):
@@ -93,6 +112,18 @@ class Accessor:
             raise SpaceKeyError("loc", col)
         column = self.frame[col]
         column[rows] = value  # in-place view write-back to the store
+
+    def _multi_column_set(self, rows, cols, value):
+        """Assign several columns from a per-column last axis, in place."""
+        rows = self._rows(rows)
+        value = np.asarray(value)
+        subspace_active = getattr(self.frame, "_subspace_active", None)
+        for position, col in enumerate(cols):
+            name = self._column(col)
+            if subspace_active is not None and subspace_active(name):
+                raise SpaceKeyError("loc", name)
+            column = self.frame[name]
+            column[rows] = value[..., position] if value.ndim else value
 
 
 class LabelAccessor(Accessor):

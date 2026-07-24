@@ -400,6 +400,16 @@ class DataFrame:
             return self._store.get(col)
         return default
 
+    def copy(self):
+        """Return a copy of the frame with independent column storage.
+
+        The frame is rebuilt through its own constructor, which duplicates the
+        column arrays (typed columns are copied, object columns get a fresh
+        reference array) and rebinds any subspace / geometry metamethods to the
+        new instance. Writes to the copy therefore never reach the original.
+        """
+        return type(self)(self, index=list(self.index))
+
     def check_column(self, name):
         """Raise ColumnError for a schema column absent from the store."""
         if name in self.metaframe.default and name not in self._store:

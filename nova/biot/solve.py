@@ -10,6 +10,7 @@ import xarray
 
 from nova.biot.arc import Arc
 from nova.biot.beam import Beam
+from nova.biot.biotframe import Source
 from nova.biot.bow import Bow
 from nova.biot.circle import Circle
 from nova.biot.cylinder import Cylinder
@@ -187,12 +188,18 @@ class Solve(GroupSet):
         source_index = self.source_index(segment)
         plasma_index = self.plasma_index(segment)
         segment_mask = self.source_segment == segment
-        source_dict = {
-            col: np.asarray(self.source[col])[segment_mask]
-            for col in self.source.columns
-        }
+        # slice by column but keep the row labels: link stores row labels, so
+        # a label-less rebuild re-derives ref against fresh auto-labels and can
+        # split one coil's filaments across reduction indices
+        source = Source(
+            {
+                col: np.asarray(self.source[col])[segment_mask]
+                for col in self.source.columns
+            },
+            index=list(np.asarray(self.source.index)[segment_mask]),
+        )
         generator = self.generator[segment.split("_")[0]](
-            source_dict,
+            source,
             self.target,
             turns=self.turns,
             reduce=self.reduce,

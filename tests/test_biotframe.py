@@ -94,6 +94,26 @@ def test_biotreduce_indices_link():
     assert source.biotreduce.link == {3: [1, 1.0]}
 
 
+def test_labeled_rebuild_ref_consistent():
+    """A labeled column-dict rebuild reproduces the donor frame's ref indices.
+
+    The link column stores row labels: rebuilding without the donor index
+    re-derives ref against fresh auto-labels, which can split one coil's
+    filaments across reduction indices.
+    """
+    from nova.frame.coilset import CoilSet
+
+    coilset = CoilSet(dcoil=-2)
+    coilset.coil.insert(1, [-0.5, 0.5], 0.01, 0.01, segment="circle")
+    donor = coilset.subframe
+    assert list(np.asarray(donor.ref)) == [0, 0, 2, 2]
+    rebuilt = Source(
+        {col: np.asarray(donor[col]) for col in donor.columns},
+        index=list(donor.index),
+    )
+    assert list(np.asarray(rebuilt.ref)) == [0, 0, 2, 2]
+
+
 def test_stack():
     biotframe = BiotFrame({"x": range(5), "z": range(5)})
     biotframe.biotshape.set_target(3)

@@ -1228,9 +1228,17 @@ class Machine(CoilSet, Geometry, CoilData):  # Diagnostics,
         """
         Return group attrs.
 
-        Extends :func:`~nova.imas.database.CoilData.group_attrs`.
+        Extends :func:`~nova.imas.database.CoilData.group_attrs`. The data
+        dictionary version is folded into the composite identity so a machine
+        description assembled under a differing DD version cannot reuse a stale
+        cache entry, mirroring the per-source fold in
+        :func:`~nova.imas.database.Database.group_attrs`.
         """
-        return self.coilset_attrs | self.dataset_attrs
+        return (
+            self.coilset_attrs
+            | self.dataset_attrs
+            | {"dd_version": str(self.dd_version)}
+        )
 
     def solve_biot(self):
         """Solve biot instances."""

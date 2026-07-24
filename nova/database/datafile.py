@@ -33,8 +33,11 @@ class Datafile(netCDF):
         """
         try:
             self.load()
-        except (FileNotFoundError, OSError):
-            if self.ids is None:
+        except FileNotFoundError, OSError:
+            # A single-IDS source populates self.ids via get() before build;
+            # a composite (a machine description assembled from several sources)
+            # carries no name of its own and builds directly from its sources.
+            if self.ids is None and self.name is not None:
                 self.get()
             self.build()
             self.store()

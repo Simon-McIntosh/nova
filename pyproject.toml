@@ -99,6 +99,8 @@ dev = [
   "mypy>=1.15.0,<1.17.0",
   "pre-commit>=4.2.0",
   "tqdm-stubs>=0.2.1",
+  # Benchmark harness (asv suite under benchmarks/)
+  "asv>=0.6",
   # Interactive development
   "ipython>=9.2.0",
   "ipykernel>=6.29.5",
@@ -219,8 +221,14 @@ lint.mccabe.max-complexity = 10
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
-addopts = "-rfEs --doctest-modules"
+# Default invocation is the fast lane: everything except tests marked `slow`.
+# Run the whole suite with `pytest -m "slow or not slow"` (the command-line -m
+# overrides the one prepended here).
+addopts = "-rfEs --doctest-modules -m 'not slow'"
 norecursedirs = ".git __pycache__"
+markers = [
+  "slow: heavy tests excluded from the default fast lane (numerical sweeps, jax jit/vmap/grad, signal-store round-trips, structural solves, live-data integration); run them with `pytest -m \"slow or not slow\"`",
+]
 testpaths = [
   "tests",
   "nova/imas/database.py",

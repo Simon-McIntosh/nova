@@ -39,7 +39,7 @@ def build(count: int) -> FrameSpace:
     return framespace
 
 
-def time_call(func, *args, repeats: int = 20) -> float:
+def _best_time_ms(func, *args, repeats: int = 20) -> float:
     """Return the best per-call time in milliseconds over ``repeats`` runs."""
     timer = timeit.Timer(lambda: func(*args))
     return 1e3 * min(timer.repeat(repeats, number=1))
@@ -50,15 +50,15 @@ def main() -> None:
     build(10)  # warm import / lazy geometry
     print("coil construction (public FrameSpace.insert surface)")
     for count in (100, 500, 1000, 5000):
-        construct_ms = time_call(build, count)
+        construct_ms = _best_time_ms(build, count)
         print(
             f"  n={count:5d}  construct {construct_ms:8.2f} ms"
             f"  ({1e3 * construct_ms / count:6.2f} us/coil)"
         )
 
     framespace = build(5000)
-    read_loc = time_call(lambda: framespace.loc[:, "Ic"], repeats=200)
-    read_attr = time_call(lambda: framespace.Ic, repeats=200)
+    read_loc = _best_time_ms(lambda: framespace.loc[:, "Ic"], repeats=200)
+    read_attr = _best_time_ms(lambda: framespace.Ic, repeats=200)
     print(f"  read loc[:, 'Ic'] on n=5000: {read_loc:.3f} ms/call")
     print(f"  read .Ic          on n=5000: {read_attr:.3f} ms/call")
 

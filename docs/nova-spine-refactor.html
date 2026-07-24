@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-24">
-<meta name="plan-version" content="15">
+<meta name="plan-version" content="16">
 <meta name="plan-impl" content="0.9">
 </head>
 <body>
@@ -900,6 +900,86 @@ Done-when
   2. spine_bench numbers match pre-split baselines; full ambix suite green.
   3. §10 collapsed in this plan with archive HTML; impl advanced; this
      followup resolved; §11 (convergence) followup queued.</pre>
+    </article>
+<article class="r-fu" data-id="f-int-10" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-24T16:20:00+00:00" data-recommends-skill="/reckon-ship nova-spine-refactor §2a" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Stand up norma CI (replay gate) + self-containment install check — clears §2a extraction-gate steps 6–7</h4>
+    <div class="r-fu-body"><p>§2a's hardened extraction sequence names two remaining gate steps that were never specified beyond a bullet: (6) a dual-run window with <em>both</em> CIs green, and (7) an install check. norma has <strong>no CI yet</strong> (filter-repo did not carry <code>.github</code>). This followup specifies and executes both, in the norma repo. Step 6: a GitHub Actions workflow running norma's replay gate (characterization + provenance + canonical + fiducial/assembly/transform lanes) against the GHCR corpus pulled by pinned digest, with ANSYS/heavy/Tier-2 as visible opt-in skips. Step 7 (reframed — norma is NOT shipped on PyPI): a self-containment job that builds the wheel, installs it into a clean venv, and imports <code>nova.assembly</code>/<code>nova.structural</code>/<code>nova.dataset</code> + runs a corpus-free pure-function subset, proving zero dangling dependency back into the parent — an install gate, never a publish. Prerequisite hardening: guard the hard <code>import ansys.dpf.core</code> in <code>ansyspost.py</code> so the fiducial/trial/transform lanes collect without proprietary ANSYS (mirrors the spine's matplotlib-optional pattern). Clearing these lets the §2a extraction sign-off be recorded; the §11 forward-deletion seal (develop→main) then waits only on §10 ambix adoption (f-int-09).</p></div>
+    <pre class="r-fu-prompt">Project: norma (~/Code/norma, live at github.com/Simon-McIntosh/norma; private)
+Plan:    nova-spine-refactor §2a extraction-gate steps 6–7 (executed in the norma repo)
+Tier:    opus
+
+Context
+  norma was extracted from nova by git filter-repo and is live on GitHub, but
+  has NO CI (.github was not carried). The §10.5 replay gate is proven green
+  locally (241 passed / 8 opt-in skips; commit history 5242a8f..8e232e4). This
+  followup automates that gate in norma CI (§2a step 6) and adds a
+  self-containment install check (§2a step 7, reframed — norma is not published
+  to PyPI). It closes the extraction-gate so the §2a sign-off can be recorded.
+
+State to read (in ~/Code/norma)
+  pyproject.toml (requires-python &gt;=3.11,&lt;3.13; extras test/imas/ansys; wheel
+    packages=[&quot;nova&quot;])
+  nova/assembly/provenance/corpus.py (GHCR resolver: resolve_corpus/sync/
+    preserved_pickle; CORPUS_REPO=ghcr.io/simon-mcintosh/norma-corpus; pins the
+    appdata + canonical digests)
+  data/Assembly/corpus_manifest.yaml (the verified digests CI pulls by)
+  tests/characterization, tests/provenance, tests/canonical,
+    tests/test_fiducial*.py, tests/test_assembly.py, tests/test_transform.py
+  nova/assembly/ansyspost.py + nova/structural/ansyspost.py (the hard
+    `import ansys.dpf.core` that makes trial/transform lanes need the ansys
+    extra to even collect)
+
+Work
+  1. ANSYS import guard (prerequisite): make `import ansys.dpf.core` in both
+     ansyspost.py modules lazy/guarded (import inside the methods that use dpf,
+     or a module-level try/except that defers the failure to first use), so the
+     fiducial/trial/transform/characterization lanes COLLECT and RUN without the
+     proprietary ANSYS stack. The genuinely ANSYS-dependent tests stay visible
+     opt-in skips. Confirm `uv run --extra test pytest --collect-only` is clean.
+  2. Corpus auth in CI: the corpus is a private GHCR package under the user
+     account, so the workflow GITHUB_TOKEN cannot read it by default. Either (a)
+     add a repo secret CORPUS_READ_TOKEN (a PAT with read:packages) and
+     `oras login ghcr.io -u &lt;user&gt; -p $CORPUS_READ_TOKEN`, or (b) link the
+     norma-corpus package to the norma repo with read access and use
+     GITHUB_TOKEN. Document the choice in the workflow.
+  3. .github/workflows/ci.yml — job `gate` (ubuntu-latest, python 3.12):
+     checkout; astral-sh/setup-uv; `uv sync --extra test --extra imas`; install
+     oras; oras login (step 2); `uv run pytest tests/characterization
+     tests/provenance tests/canonical tests/test_fiducialfit.py
+     tests/test_fiducialpit.py tests/test_fiducialsector.py tests/test_trial.py
+     tests/test_assembly.py tests/test_transform.py -q`. Expect green with only
+     the ANSYS/heavy-mesh/Tier-2/GHCR-integration opt-in skips. The corpus
+     resolver materializes the measured tree from GHCR by pinned digest.
+  4. .github/workflows/ci.yml — job `self-contained` (ubuntu-latest): `uv build`
+     the wheel; create a fresh venv (`python -m venv /tmp/vv`); `pip install
+     dist/*.whl`; run `python -c &quot;import nova.assembly, nova.structural,
+     nova.dataset&quot;`; run a corpus-free pure-function subset (e.g. the
+     TestErrorVector/TestTransform/TestMaskFrame classes and
+     tests/test_transform.py pure tests) against the installed package to prove
+     it imports and runs with ZERO dependency back into nova 2.0. This wheel is
+     an install gate only — it is never published.
+  5. Trigger on push + pull_request to main; add a status badge to README.
+  6. Dual-run window (§2a step 6): once norma CI is green and nova CI is green
+     concurrently over a short window, record the §2a extraction sign-off in
+     ~/Code/nova/docs/nova-spine-refactor.html §2a (the sign-off line the
+     section&#x27;s done-when calls for), committed + pushed on nova main.
+
+Constraints
+  Branch main in norma (trunk-based; read ~/Code/norma/AGENTS.md if present).
+  Commit + push each coherent change; no AI co-author trailers. Plan edits to
+  nova-spine-refactor happen in the nova checkout (main), committed same session.
+  Never modify existing goldens.
+
+Done-when
+  1. ANSYS import guarded; non-ANSYS lanes collect + run without the ansys extra.
+  2. norma .github/workflows/ci.yml: `gate` job green on the GHCR-pulled corpus
+     (opt-in skips only) and `self-contained` job green (wheel builds, installs
+     into a clean venv, imports + smoke tests pass; not published).
+  3. Both CIs observed green over a dual-run window; §2a extraction sign-off
+     recorded in nova-spine-refactor §2a.
+  4. This followup resolved. NOTE: the §11 develop→main forward-deletion seal
+     remains additionally gated on §10 ambix adoption (f-int-09) — steps 6–7
+     clear the extraction half only.</pre>
     </article>
 </section>
 

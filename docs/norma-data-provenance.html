@@ -10,8 +10,8 @@
   <meta name="plan-summary"    content="Git-safe versioning of ITER coil-alignment measurements, a commit-hash-keyed provenance/run-record model, and a two-tier replay suite that unit-tests every recorded fit against its goldens within 1 micron">
   <meta name="plan-status"     content="active">
   <meta name="plan-modified"   content="2026-07-24">
-  <meta name="plan-version"    content="2">
-  <meta name="plan-impl"       content="0.6">
+  <meta name="plan-version"    content="3">
+  <meta name="plan-impl"       content="0.8">
   <meta name="plan-roi"        content="high">
   <meta name="plan-effort"     content="XL">
   <meta name="plan-tier"       content="opus">
@@ -256,8 +256,18 @@
     merge-hostile, schema-drift). The Excel originals are retained as the human ingest surface but are never
     the canonical artifact.</p>
 
-    <h2 id="s7">§7 — Testing past fits (two-tier, commit-hash keyed)</h2>
-    <p>The registry enumerates <strong>every fit ever recorded</strong> — each an immutable run record (§4).
+    <h2 id="s7">§7 — Testing past fits (two-tier, commit-hash keyed)
+      <span class="badge badge-shipped">◑ Tier 1 landed 2026-07-24</span></h2>
+    <p class="landed-summary"><strong>◑ Tier 1 landed 2026-07-24</strong> (commit
+    <code>36e1c5e8</code>). Replay runner enumerates
+    <code>data/Assembly/run_records/*.yaml</code>, resolves input digests against canonical
+    units, re-runs with current code and compares at the record's tolerance classes — pilot
+    record <code>sector.fit.ssat</code> replays green with ~1e-12 headroom vs the 1&nbsp;µm
+    gate. Tier 2 (sha-worktree historical replay) is a named visible-skip placeholder, queued
+    in followup f-ndp-02. Full record:
+    <a href="archive/norma-data-provenance-s7-s8-landed.html">§7–§8 landed</a>.</p>
+    <p>Original specification (retained). The registry enumerates <strong>every fit ever
+    recorded</strong> — each an immutable run record (§4).
     The suite iterates the whole registry; "complete dataset" means the full enumeration, with a
     representative subset in the fast lane and the full set in the nightly / extraction gate.</p>
     <ul>
@@ -282,8 +292,18 @@
     1&nbsp;µm. All of this reuses the §2a harness's canonicalization, tolerance and manifest code — a run
     record <em>is</em> a manifest entry plus <code>{git-sha, uv.lock hash, fit-config hash, operator}</code>.</p>
 
-    <h2 id="s8">§8 — Integration with the characterization harness</h2>
-    <p>The <code>nova-spine-refactor</code> §2a harness already provides the substrate: canonical
+    <h2 id="s8">§8 — Integration with the characterization harness
+      <span class="badge badge-shipped">✓ landed 2026-07-24</span></h2>
+    <p class="landed-summary"><strong>✓ landed 2026-07-24</strong> (commit
+    <code>36e1c5e8</code>). Canonical fixtures now seed the harness (egress → xlsx cache,
+    corpus-digest namespaced): <code>sector.fit.ssat</code> unskipped and GREEN with a new
+    additive golden (SM#7 v15_0; the authored <code>private=True</code> is unresolvable —
+    documented); <code>pit.gaps</code> stays a visible skip with the precise reason (off-corpus
+    nominal ILIS cloud). Suite 132 passed / 4 visible skips in 8.5&nbsp;s; three source issues
+    recorded for the norma port. Full record:
+    <a href="archive/norma-data-provenance-s7-s8-landed.html">§7–§8 landed</a>.</p>
+    <p>Original specification (retained). The <code>nova-spine-refactor</code> §2a harness
+    already provides the substrate: canonical
     <code>.npz</code> serialization, the tolerance classes (1&nbsp;µm on mm; angle/coefficient/hyperparameter
     elsewhere), the sha256-fingerprint manifest and the single-thread env-lock. This plan extends it rather
     than duplicating it: the fit registry is the manifest with provenance fields added, and seeding the

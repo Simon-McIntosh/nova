@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="archive">
+  <meta name="plan-slug" content="norma-data-provenance-s10-landed">
+  <meta name="plan-title" content="Post-processing refactor + norma repo extraction — landed">
+  <meta name="plan-status" content="historical">
+  <meta name="plan-modified" content="2026-07-24">
+  <title>norma-data-provenance §10 — refactor + extraction | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>norma-data-provenance — §10 rollout: post-processing refactor + repository extraction (2026-07-24)</h1>
+    <p>The final rollout wave. Three hot post-processing modules were lifted out of
+    their <code>__main__</code> blocks under unit test by a parallel fleet, then the
+    assembly-metrology tree was extracted from nova into its own repository
+    (<a href="https://github.com/Simon-McIntosh/norma">Simon-McIntosh/norma</a>) with full
+    history via <code>git filter-repo</code>, and the two-tier replay suite was proven green
+    in the new repo — the §10.5 extraction gate.</p>
+
+    <h2>Post-processing refactor (parallel fleet, all on nova main)</h2>
+    <table>
+      <thead><tr><th>Module</th><th>What was lifted</th><th>Tests</th><th>Commit</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>fiducialpit.py</code><br>(2814 lines; 58 commits/yr — hottest)</td>
+          <td>127-line <code>__main__</code> → thin <code>analyze_pit(...)</code> call.
+          Typed driver + <code>PitAnalysis</code> dataclass (pit, statistics, summary,
+          <code>figures</code> dict); the three hard-coded S7/S6/S6-S7 feeler-gauge
+          gap tables moved into a documented <code>measured_gap_profiles()</code>;
+          <code>DEFAULT_PIT_SECTORS</code> constant. No <code>plt.show()</code> in
+          library code — figures returned.</td>
+          <td>15 (pure + fixture-gated)</td>
+          <td><code>6f08cd18</code></td>
+        </tr>
+        <tr>
+          <td><code>fiducialsector.py</code><br>(1477 lines; 21 commits/yr)</td>
+          <td>Large exploratory <code>__main__</code> → <code>analyze_sector(...)</code>.
+          Coherent analyses lifted to methods: <code>ccl_cylindrical()</code>,
+          <code>sector_offset_grid()</code> (two-coil gap + single-coil fallback),
+          <code>project_ccl_to_midplane()</code>, and chart builders returning objects.
+          altair made a lazy import (module import no longer needs the charting stack);
+          dead regression-groupby column bug fixed; <code>ILIS_RADIUS</code> named;
+          dead vedo/exploration dropped.</td>
+          <td>14 (pure + fixture-gated)</td>
+          <td><code>dd949031</code></td>
+        </tr>
+        <tr>
+          <td><code>trial.py</code><br>(1113 lines; 25 commits/yr)</td>
+          <td><code>__main__</code> → <code>run_trials(...)</code>. Typed drivers
+          <code>build_vault</code>/<code>build_error_field</code>/<code>plot_vault</code>;
+          seaborn context handled inside plot helpers; safe <code>force=False</code>
+          library default. Heavy 12&nbsp;GB-netCDF driver paths gated behind visible
+          skips naming the missing artifact; dead tolerance-comment block dropped.</td>
+          <td>22 (18 pass / 4 visible skips)</td>
+          <td><code>7be8db02</code></td>
+        </tr>
+      </tbody>
+    </table>
+    <p>All three landed additively (goldens untouched); nova assembly-surface lane green.</p>
+
+    <h2>Repository extraction (§10.5)</h2>
+    <p>norma was carved from nova with <code>git filter-repo</code> carrying full history for
+    the assembly-metrology surface and its narrow support closure, computed by a static
+    import walk from the assembly/structural/tests seeds:</p>
+    <ul>
+      <li><strong>Carried:</strong> <code>nova/assembly</code>, <code>nova/structural</code>,
+      <code>nova/dataset</code>, and the 28 support modules the closure needs
+      (<code>graphics</code>, seven <code>frame</code>, eight <code>geometry</code>,
+      <code>database/{filepath,netcdf}</code>, <code>utilities/{geom,importmanager,time}</code>,
+      <code>definitions.py</code>); the assembly test set
+      (<code>characterization</code>, <code>canonical</code>, <code>provenance</code>,
+      <code>test_fiducial*</code>, <code>test_trial</code>, <code>test_assembly</code>,
+      <code>test_transform</code>, <code>test_finite{beam,frame}</code>);
+      <code>data/Assembly</code>, <code>input/ITER</code>; this plan HTML + its archives + figures.</li>
+      <li><strong>Result:</strong> 721 commits of history preserved, 17.4&nbsp;MiB pack.
+      Package metadata retargeted (name <code>norma</code>, assembly-metrology description,
+      GitHub URLs); pytest <code>testpaths</code> narrowed to the carried tests; wheel/coverage
+      exclude lists (which named the now-absent trees) pruned.</li>
+    </ul>
+
+    <h3>Port fixes surfaced by extraction</h3>
+    <p>Removing the untracked derived <code>TF_CL.vtk</code> cache exposed the latent pyvista
+    issues the plan had recorded for the port (commit <code>182abb6c</code> in norma):</p>
+    <ul>
+      <li><code>mesh.cell_points(i)</code> (removed in pyvista 0.48) → <code>get_cell(i).points</code>
+      at all three call sites (<code>ccl.py</code>, <code>centerline.py</code>, <code>coilcage.py</code>).</li>
+      <li><code>CenterLine.load()</code> caught only <code>FileNotFoundError</code>, but pyvista
+      raises <code>ValueError</code> for an absent file, so the deterministic rebuild-from-winding-pack
+      path never triggered. Now gated on file existence — the geometry regenerates cleanly on a fresh clone.</li>
+    </ul>
+
+    <h3>§10.5 gate — replay suite green in norma</h3>
+    <p>From a fresh clone with the derived vtk absent:
+    <strong>241 passed / 8 skipped</strong> (<code>uv run --extra test --extra imas --extra ansys pytest</code>);
+    every skip is an environment opt-in (ANSYS vault proxy, heavy pyvista mesh,
+    Tier-2 flag, GHCR-integration flag, 12&nbsp;GB trial netCDFs). Tier-2 opt-in
+    (<code>NOVA_TIER2_REPLAY=1</code>): Tier-1 replay passes; the historical-env stage degrades
+    <em>visibly</em> — the pilot record's <code>code_git_sha</code> is a nova-history sha unreachable
+    from norma's rewritten history ("reproduced by current code; historical env unreconstructable
+    [resolve-sha]"), reported not silently skipped. The Tier-1 invariant — current code reproduces
+    the goldens within 1&nbsp;µm — holds, which is the gate.</p>
+
+    <h2>Residuals</h2>
+    <ul>
+      <li><strong>norma push + reckon re-home:</strong> the local norma repo is fully committed
+      (4 commits atop the rewritten history) with <code>origin</code> set to
+      <code>git@github.com:Simon-McIntosh/norma.git</code>; the initial <code>git push</code> was
+      blocked by the Bash safety classifier and is a user-run step
+      (<code>! git -C ~/Code/norma push -u origin main</code>). reckon-sync in norma + registering
+      the re-homed plan follows the push.</li>
+      <li><strong>Raw <code>ILIS_nominal.txt</code>:</strong> still IO-share-only (SMB firewalled
+      from SDCC, 2026-07-24); the corpus-preserved pickle feeds the test lane. IO-network/laptop errand.</li>
+      <li><strong>Pilot-record provenance across the rewrite:</strong> new norma-native run records
+      will carry norma shas; the existing pilot record remains a nova-history reference (Tier-1 still
+      green against it). Optional: recapture the pilot on a norma commit for a fully norma-native Tier-2.</li>
+      <li><strong>Optional, previously banked:</strong> tighter fit-manifest attribution (map
+      (sector, phase) → generating commits); resolve the no-transform "SSAT AR target" sheet in
+      private unit #7 v9_4.</li>
+    </ul>
+  </main>
+</body>
+</html>

@@ -232,6 +232,33 @@
         }
       ]
     },
+    "sector.fit.ssat": {
+      "arrays": {
+        "8": {
+          "shape": [
+            8,
+            3
+          ],
+          "tolerance": "length_mm"
+        },
+        "9": {
+          "shape": [
+            8,
+            3
+          ],
+          "tolerance": "length_mm"
+        }
+      },
+      "artifact": "goldens/sector.fit.ssat.npz",
+      "artifact_sha256": "8b84bb34ee1ff52883a00450802f15bff140d8c560fb2f7934e28a14c75bfece",
+      "callable": "nova.assembly.fiducialsector:FiducialSector",
+      "inputs": [
+        {
+          "path": "data/Assembly/sector_modules/Sector_Module_#7_CCL_as-built_data_8NR9J7_v15_0.csv",
+          "sha256": "29cf90c71875a621b3c1b76637aa718cb96643dc6ca13f37afdd734cead17d63"
+        }
+      ]
+    },
     "structural.asbuilt.ccl_deltas": {
       "arrays": {
         "11": {

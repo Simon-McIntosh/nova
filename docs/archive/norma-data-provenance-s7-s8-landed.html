@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="archive">
+  <meta name="plan-slug" content="norma-data-provenance-s7-s8-landed">
+  <meta name="plan-title" content="Tier-1 replay + harness integration — landed">
+  <meta name="plan-status" content="historical">
+  <meta name="plan-modified" content="2026-07-24">
+  <title>norma-data-provenance §7–§8 landed | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>norma-data-provenance — §7/§8 landed (2026-07-24)</h1>
+    <p>Tier-1 replay foundation and harness integration landed in commit
+    <code>36e1c5e8</code> (+666/−15, all additive to the protection baseline — no existing
+    golden, manifest entry, or expectation touched). Suite after landing:
+    <strong>132 passed, 4 visible skips, 8.5&nbsp;s</strong> (characterization + canonical +
+    provenance) under the pinned single-thread env.</p>
+
+    <h2>Outcomes</h2>
+    <table>
+      <thead><tr><th>Item</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td>Fixture seeding without xlsx in git</td>
+        <td><code>tests/characterization/_fixtures.py</code>: in-repo canonical units →
+        <code>egress_workbook</code> → xlsx cache at
+        <code>~/.cache/nova-characterization/sector_modules</code>, corpus-digest namespaced
+        (self-invalidating); <code>SectorData</code>/<code>SectorFile</code> redirected at the
+        cache; skip probe accepts canonical units as fixtures.</td></tr>
+        <tr><td><code>sector.fit.ssat</code> lane</td>
+        <td><strong>Unskipped, green.</strong> Pinned to released SM#7 v15_0
+        (<code>private=False</code>): the authored <code>private=True</code> cannot resolve —
+        version discovery globs released names then prefixes <code>_</code>, and no
+        <code>_…_v15_0</code> exists. Verified <code>augment</code> on/off gives identical
+        deltas. New golden <code>goldens/sector.fit.ssat.npz</code> (coils 8, 9 — 8×3 deltas,
+        <code>length_mm</code> tolerance), manifest +27 lines additive.</td></tr>
+        <tr><td><code>pit.gaps</code> lane</td>
+        <td><strong>Visible skip, reason now precise:</strong> sector workbooks are present but
+        <code>FiducialPit</code> hard-depends on the off-corpus nominal ILIS cloud
+        (<code>ILIS_nominal.txt</code> on the IO share). Unblocks when the raw cloud (preferred)
+        or the preserved <code>ILIS_nominal.pickle</code> is brought under the corpus.</td></tr>
+        <tr><td>Tier-1 replay</td>
+        <td><code>_replay.py</code> + <code>test_replay.py</code>: enumerates
+        <code>data/Assembly/run_records/*.yaml</code>, resolves input digests against canonical
+        units (absent → visible skip), re-runs with current code, checks the record's pinned
+        golden digests and compares at the record's tolerance classes. Replay residual
+        headroom ~1e-12 vs the 1&nbsp;µm gate.</td></tr>
+        <tr><td>Pilot run records</td>
+        <td>First real records emitted: <code>data/Assembly/run_records/sector.fit.ssat.yaml</code>
+        (+ its <code>fitconfig.yaml</code>) — input digest <code>sha256:29cf90c7…</code> (SM#7
+        v15_0 unit), env captured with git sha + uv.lock digest,
+        <code>blas_single_thread: true</code>, operator
+        <code>characterization-harness</code>.</td></tr>
+        <tr><td>Tier 2</td>
+        <td>Named skip placeholder only (checkout <code>code_git_sha</code>, restore recorded
+        lock, replay) — queued in the plan followup.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Figures</h2>
+    <figure>
+      <img src="/nova/figures/norma-data-provenance/sector_ssat_deltas.png"
+           alt="Per-fiducial SSAT BR fitted deltas for coils 8 and 9" style="max-width:100%">
+      <figcaption>Fig 1 — SSAT BR fitted deltas per fiducial, coils 8 and 9 (SM#7 v15_0).</figcaption>
+    </figure>
+    <figure>
+      <img src="/nova/figures/norma-data-provenance/replay_residual_gate.png"
+           alt="Tier-1 replay residuals against the 1 micron gate" style="max-width:100%">
+      <figcaption>Fig 2 — Tier-1 replay max|Δ| vs the 1&nbsp;µm gate (~1e-12 headroom).</figcaption>
+    </figure>
+
+    <h2>Source issues recorded for the norma port (harness stayed source-read-only)</h2>
+    <ul>
+      <li><code>sectorfile.py:59-65,100-101</code> — private-version resolution requires a
+      released sibling of the target version to exist before the <code>_</code> prefix is
+      applied; blocks <code>private=True</code> when only the in-work snapshot exists.</li>
+      <li><code>fiducialpit.py:84</code> → <code>ilisnominal.py:32,44</code> — hard dependency
+      on the off-corpus nominal ILIS point cloud.</li>
+      <li><code>FiducialPit.gaps</code> carries a non-numeric <code>gap_type</code> column that
+      breaks float canonicalization; the harness drops the classification column.</li>
+    </ul>
+  </main>
+</body>
+</html>

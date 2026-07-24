@@ -10,8 +10,8 @@
   <meta name="plan-summary"    content="Git-safe versioning of ITER coil-alignment measurements, a commit-hash-keyed provenance/run-record model, and a two-tier replay suite that unit-tests every recorded fit against its goldens within 1 micron">
   <meta name="plan-status"     content="active">
   <meta name="plan-modified"   content="2026-07-24">
-  <meta name="plan-version"    content="2">
-  <meta name="plan-impl"       content="0.6">
+  <meta name="plan-version"    content="4">
+  <meta name="plan-impl"       content="0.85">
   <meta name="plan-roi"        content="high">
   <meta name="plan-effort"     content="XL">
   <meta name="plan-tier"       content="opus">
@@ -229,16 +229,19 @@
     provenance pattern nova's IMAS metadata stamping already uses, applied to metrology.</p>
 
     <h2 id="s6">§6 — Dataset versioning and storage
-      <span class="badge badge-shipped">◑ landed 2026-07-24 (push staged)</span></h2>
-    <p class="landed-summary"><strong>◑ landed 2026-07-24.</strong> Preservation manifest
+      <span class="badge badge-shipped">✓ landed 2026-07-24</span></h2>
+    <p class="landed-summary"><strong>✓ landed 2026-07-24.</strong> Preservation manifest
     committed (<code>data/Assembly/corpus_manifest.yaml</code>, 126 files digested incl. the
     two 12&nbsp;GB trial netCDFs, verified 0 missing/changed/new, commit <code>8df0ed67</code>);
-    in-repo reference set committed (7 canonical units, latest public per sector + private
-    _#7 v9_4, commit <code>1419b735</code>); verified byte-identical local snapshot + tarball.
-    <strong>Remaining:</strong> the GHCR/ORAS offsite push is staged as
-    <code>bash ~/.local/share/norma/push-corpus.sh</code> — session permission classifier
-    blocked <code>oras</code>, so it is user-run; and <code>ILIS_nominal.txt</code> must be
-    copied from the IO share when reachable. Full record:
+    in-repo reference set committed (7 canonical units, commit <code>1419b735</code>); corpus
+    offsite in GHCR via ORAS:
+    <code>ghcr.io/simon-mcintosh/norma-corpus:appdata-snapshot-2026-07-23</code>
+    (manifest digest <code>sha256:6507c376…56ec8cd</code>, verified source snapshot, tarball
+    sha256 <code>2f4f277f…</code>) and
+    <code>:canonical-2026-07-24</code> (85-unit canonical transcode, manifest digest
+    <code>sha256:9870e261…c9df60</code>, tarball sha256 <code>742a0bdd…</code>).
+    <strong>Remaining:</strong> <code>ILIS_nominal.txt</code> must be copied from the IO share
+    when reachable. Full record:
     <a href="archive/norma-data-provenance-s2-s6-landed.html">§2–§6 landed</a>.</p>
     <p>Original design (retained). Two homes, chosen by size and stability, unified by content
     digests so items can move between them
@@ -256,8 +259,18 @@
     merge-hostile, schema-drift). The Excel originals are retained as the human ingest surface but are never
     the canonical artifact.</p>
 
-    <h2 id="s7">§7 — Testing past fits (two-tier, commit-hash keyed)</h2>
-    <p>The registry enumerates <strong>every fit ever recorded</strong> — each an immutable run record (§4).
+    <h2 id="s7">§7 — Testing past fits (two-tier, commit-hash keyed)
+      <span class="badge badge-shipped">◑ Tier 1 landed 2026-07-24</span></h2>
+    <p class="landed-summary"><strong>◑ Tier 1 landed 2026-07-24</strong> (commit
+    <code>36e1c5e8</code>). Replay runner enumerates
+    <code>data/Assembly/run_records/*.yaml</code>, resolves input digests against canonical
+    units, re-runs with current code and compares at the record's tolerance classes — pilot
+    record <code>sector.fit.ssat</code> replays green with ~1e-12 headroom vs the 1&nbsp;µm
+    gate. Tier 2 (sha-worktree historical replay) is a named visible-skip placeholder, queued
+    in followup f-ndp-02. Full record:
+    <a href="archive/norma-data-provenance-s7-s8-landed.html">§7–§8 landed</a>.</p>
+    <p>Original specification (retained). The registry enumerates <strong>every fit ever
+    recorded</strong> — each an immutable run record (§4).
     The suite iterates the whole registry; "complete dataset" means the full enumeration, with a
     representative subset in the fast lane and the full set in the nightly / extraction gate.</p>
     <ul>
@@ -282,8 +295,18 @@
     1&nbsp;µm. All of this reuses the §2a harness's canonicalization, tolerance and manifest code — a run
     record <em>is</em> a manifest entry plus <code>{git-sha, uv.lock hash, fit-config hash, operator}</code>.</p>
 
-    <h2 id="s8">§8 — Integration with the characterization harness</h2>
-    <p>The <code>nova-spine-refactor</code> §2a harness already provides the substrate: canonical
+    <h2 id="s8">§8 — Integration with the characterization harness
+      <span class="badge badge-shipped">✓ landed 2026-07-24</span></h2>
+    <p class="landed-summary"><strong>✓ landed 2026-07-24</strong> (commit
+    <code>36e1c5e8</code>). Canonical fixtures now seed the harness (egress → xlsx cache,
+    corpus-digest namespaced): <code>sector.fit.ssat</code> unskipped and GREEN with a new
+    additive golden (SM#7 v15_0; the authored <code>private=True</code> is unresolvable —
+    documented); <code>pit.gaps</code> stays a visible skip with the precise reason (off-corpus
+    nominal ILIS cloud). Suite 132 passed / 4 visible skips in 8.5&nbsp;s; three source issues
+    recorded for the norma port. Full record:
+    <a href="archive/norma-data-provenance-s7-s8-landed.html">§7–§8 landed</a>.</p>
+    <p>Original specification (retained). The <code>nova-spine-refactor</code> §2a harness
+    already provides the substrate: canonical
     <code>.npz</code> serialization, the tolerance classes (1&nbsp;µm on mm; angle/coefficient/hyperparameter
     elsewhere), the sha256-fingerprint manifest and the single-thread env-lock. This plan extends it rather
     than duplicating it: the fit registry is the manifest with provenance fields added, and seeding the
@@ -508,15 +531,15 @@ Done-when
       <article class="r-fu" data-id="f-ndp-02" data-status="open" data-tier="opus"
                data-written-by="reckon-ship" data-written-at="2026-07-24" data-recommends-skill="/reckon-ship norma-data-provenance §7">
         <h4 class="r-fu-title">Complete the replay program: ORAS corpus push, Tier-2 replay, registry-wide enumeration</h4>
-        <div class="r-fu-body"><p>§7/§8 Tier-1 foundation + pilot run records + harness-lane
-        unskip were dispatched in-session (see the §7 landed state when recorded). What
-        remains: (1) run the staged offsite push
-        (<code>bash ~/.local/share/norma/push-corpus.sh</code>) and record the GHCR digests in
-        the plan; (2) push the 85-unit canonical corpus as a second ORAS artifact; (3) Tier-2
-        historical replay (sha-worktree + recorded uv.lock rebuild, graceful visible
-        degradation); (4) copy <code>ILIS_nominal.txt</code> from the IO share when reachable
-        and bring it under the manifest; (5) extraction gate per §10 step 5 once the spine's
-        assembly extraction is ready.</p></div>
+        <div class="r-fu-body"><p>Updated 2026-07-24: the offsite pushes are DONE — both the
+        verified snapshot (<code>:appdata-snapshot-2026-07-23</code>,
+        <code>sha256:6507c376…</code>) and the 85-unit canonical corpus
+        (<code>:canonical-2026-07-24</code>, <code>sha256:9870e261…</code>) live in
+        <code>ghcr.io/simon-mcintosh/norma-corpus</code>. What remains: (1) Tier-2 historical
+        replay (sha-worktree + recorded uv.lock rebuild, graceful visible degradation);
+        (2) copy <code>ILIS_nominal.txt</code> from the IO share when reachable, bring it under
+        the manifest + registry, and unskip the <code>pit.gaps</code> lane; (3) extraction gate
+        per §10 step 5 once the spine's assembly extraction is ready.</p></div>
         <pre class="r-fu-prompt">Project: nova
 Plan:    norma-data-provenance (http://127.0.0.1:8765/nova/norma-data-provenance.html)
 Section: §6 remainder + §7 Tier 2

@@ -43,9 +43,17 @@ def pyvista_cell_points_drifted() -> str | None:
 
 
 def sector_modules_absent() -> str | None:
-    """Reason if the recorded sector-module workbooks / cache are not present."""
+    """Reason if the sector-module fixtures cannot be provided here.
+
+    Runnable when the in-repo canonical units can be transcoded to workbooks,
+    or when facility workbooks / cached datasets are already staged. Only a
+    genuine absence of all of those is a visible skip.
+    """
+    from . import _fixtures
+
+    if _fixtures.sector_modules_available():
+        return None
     candidates = [
-        repo_root() / "data" / "Assembly" / "sector_modules",
         Path.home() / ".local" / "share" / "nova" / "sector_modules",
     ]
     for base in candidates:
@@ -54,10 +62,44 @@ def sector_modules_absent() -> str | None:
         if base.is_dir() and any(base.glob("*.nc")):
             return None
     return (
-        "full sector/pit build needs the IO-share sector-module workbooks "
-        "(Sector_Module_#*.xlsx) or a cached fiducial_data.nc fixture; provide via "
-        "the assembly data registry"
+        "full sector/pit build needs the in-repo canonical units "
+        "(data/Assembly/sector_modules/*.csv) with the workbook transcoder, the "
+        "IO-share workbooks (Sector_Module_#*.xlsx), or a cached fiducial_data.nc"
     )
+
+
+def nominal_ilis_absent() -> str | None:
+    """Reason if the nominal ILIS point cloud fixture is not available.
+
+    The pit-gap integration fits every coil's ILIS surfaces against a nominal
+    ILIS point cloud (``ILIS_nominal.txt`` on the facility share, or a cached
+    ``ILIS_nominal.pickle``). That reference is not part of the in-repo
+    canonical corpus, so its absence is a visible skip distinct from the
+    sector-module workbooks.
+    """
+    from nova.database.filepath import FilePath
+
+    try:
+        cached = Path(
+            FilePath("ILIS_nominal.pickle", dirname=".nova/sector_modules").filepath
+        )
+    except Exception:  # noqa: BLE001 - cache path resolution should never block
+        cached = None
+    if cached is not None and cached.exists():
+        return None
+    share = Path("//io-ws-ccstore1/ANSYS_Data/mcintos/sector_modules/ILIS_nominal.txt")
+    if share.exists():
+        return None
+    return (
+        "pit-gap integration needs the nominal ILIS point cloud "
+        "(ILIS_nominal.txt from the IO share, or a cached ILIS_nominal.pickle); "
+        "sector-module workbooks are present but this reference is off-corpus"
+    )
+
+
+def pit_fixtures_absent() -> str | None:
+    """Reason if either the sector modules or the nominal ILIS reference is absent."""
+    return sector_modules_absent() or nominal_ilis_absent()
 
 
 def windingpack_heavy() -> str | None:

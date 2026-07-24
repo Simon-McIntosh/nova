@@ -220,21 +220,29 @@ class FilePath:
             return filepath.with_suffix(extension)
         return filepath
 
+    def _remove(self):
+        """Remove the cached datafile, whether a single file or a store dir."""
+        if os.path.isdir(self.filepath):  # grouped zarr store is a directory
+            import shutil
+
+            shutil.rmtree(self.filepath)
+        elif os.path.isfile(self.filepath):
+            os.remove(self.filepath)
+
     def _clear(self):
         """Clear datafile at self.filepath."""
-        if os.path.isfile(self.filepath):
-            os.remove(self.filepath)
+        self._remove()
 
     @property
     def clear(self):
         """Clear cached datafile at self.filepath."""
-        if os.path.isfile(self.filepath):
+        if os.path.isfile(self.filepath) or os.path.isdir(self.filepath):
             remove = input(
                 "Confirm removal of the following cached datafile:"
                 f"\n{self.filepath}\nProceed (Y/n)?"
             )
             if remove == "" or remove.lower() == "y":
-                os.remove(self.filepath)
+                self._remove()
             return
         sys.stdout.write(f"Cached datafile clear:\n{self.filepath}")
 

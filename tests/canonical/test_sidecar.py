@@ -97,13 +97,13 @@ def test_metadata_text_and_anomalies(tmp_path):
             points=[
                 {"group": "CCL", "name": "A", "xyz": (1.0, 2.0, 3.0)},
                 None,
-                {"group": "Fiducial", "name": "B", "xyz": (4.0, 5.0, 6.0)},
+                {"group": None, "name": "B", "xyz": (4.0, 5.0, 6.0)},
             ],
         )
 
     doc = _build(_parse(tmp_path, [("SSAT BR", build)], metadata_text=[(1, 1, "note")]))
     assert {"row": 1, "col": 1, "text": "note"} in doc["metadata_text"]
-    assert any("spacer row" in note for note in doc["anomalies"])
+    assert any("forward-filled across blank" in note for note in doc["anomalies"])
     assert all(note.startswith("SSAT BR: ") for note in doc["anomalies"])
 
 

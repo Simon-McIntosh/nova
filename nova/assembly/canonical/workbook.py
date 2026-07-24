@@ -340,16 +340,23 @@ def _read_block(
         if not any(present):
             pending_spacers.append(row)
             continue
-        if retained and pending_spacers:
-            for spacer_row in pending_spacers:
-                anomalies.append(
-                    f"spacer row {spacer_row} inside coil block at "
-                    f"column {header_col} (header row {header_row})"
-                )
-        pending_spacers = []
 
         point_raw = values.get((row, header_col + _OFF_POINT))
         name_raw = values.get((row, header_col + _OFF_NAME))
+
+        # A blank gap between two data rows is benign when the following row
+        # re-labels its point group; it is an anomaly only when that row omits
+        # the label, so the group is forward-filled across the gap and may
+        # leak into a section it does not belong to.
+        group_present = point_raw is not None and str(point_raw).strip() != ""
+        if retained and pending_spacers and not group_present:
+            anomalies.append(
+                f"point group forward-filled across blank row(s) "
+                f"{pending_spacers[0]}-{pending_spacers[-1]} into row {row} "
+                f"at block column {header_col}"
+            )
+        pending_spacers = []
+
         coil_value = values.get((row, header_col))
         if block.coil is None and coil_value is not None:
             number, is_text = _coerce_number(coil_value)

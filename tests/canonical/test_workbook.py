@@ -105,7 +105,7 @@ def test_forward_fill_point_group(tmp_path):
     assert [f.name_raw for f in fids] == ["A", "B", "C"]
 
 
-def test_spacer_row_dropped_and_flagged(tmp_path):
+def test_spacer_between_labelled_groups_is_benign(tmp_path):
     def build(ws):
         synthetic.write_block(
             ws,
@@ -121,8 +121,32 @@ def test_spacer_row_dropped_and_flagged(tmp_path):
 
     path = _save(tmp_path, synthetic.build_workbook([("SSAT BR", build)]))
     sheet = workbook.parse_workbook(path).sheets[0]
+    # spacer dropped, both points kept, no forward-fill leak flagged
     assert len(sheet.blocks[0].fiducials) == 2
-    assert any("spacer row" in note for note in sheet.anomalies)
+    assert not any("forward-filled" in note for note in sheet.anomalies)
+
+
+def test_spacer_that_forward_fills_group_is_flagged(tmp_path):
+    def build(ws):
+        synthetic.write_block(
+            ws,
+            header_row=6,
+            header_col=4,
+            coil=14,
+            points=[
+                {"group": "CCL", "name": "A", "xyz": (1.0, 2.0, 3.0)},
+                None,
+                {"group": None, "name": "B", "xyz": (4.0, 5.0, 6.0)},
+            ],
+        )
+
+    path = _save(tmp_path, synthetic.build_workbook([("SSAT BR", build)]))
+    sheet = workbook.parse_workbook(path).sheets[0]
+    fids = sheet.blocks[0].fiducials
+    assert len(fids) == 2
+    # the unlabelled row inherits CCL across the blank gap
+    assert fids[1].point_group_raw == "CCL"
+    assert any("forward-filled across blank" in note for note in sheet.anomalies)
 
 
 def test_formula_cell_without_cache_flagged(tmp_path):

@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="archive">
+  <meta name="plan-slug" content="norma-data-provenance-s2-s6-landed">
+  <meta name="plan-title" content="Data provenance foundations — landed">
+  <meta name="plan-status" content="historical">
+  <meta name="plan-modified" content="2026-07-24">
+  <title>norma-data-provenance §2–§6 landed | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>norma-data-provenance — §2–§6 landed (2026-07-24)</h1>
+    <p>Corpus survey, preservation, the xlsx⇄canonical transcoder, and the YAML
+    provenance substrate all landed on <code>main</code> in one session, executed by a
+    three-worker Opus fleet under TDD with the orchestrator verifying every landing.
+    94 new tests pass (57 provenance + 37 canonical) in under 4&nbsp;s.</p>
+
+    <h2>Quick status</h2>
+    <table>
+      <thead><tr><th>Item</th><th>Status</th><th>Evidence</th></tr></thead>
+      <tbody>
+        <tr><td>§2 corpus survey (89 workbooks, schema grounded in real data)</td>
+            <td>✓ shipped</td><td>3 figures below; survey.yaml/md (session scratchpad)</td></tr>
+        <tr><td>§2/§3 transcoder + canonical long-CSV format</td>
+            <td>✓ shipped</td><td><code>nova/assembly/canonical/</code>, 37 tests,
+            byte-identical round-trip proven</td></tr>
+        <tr><td>§4/§5 run records + YAML fit configs</td>
+            <td>✓ shipped</td><td><code>nova/assembly/provenance/</code>, 57 tests</td></tr>
+        <tr><td>§6 preservation manifest + in-repo reference units</td>
+            <td>✓ shipped</td><td><code>data/Assembly/corpus_manifest.yaml</code> (126 files),
+            7 canonical units committed</td></tr>
+        <tr><td>§6 offsite corpus push (GHCR/ORAS)</td>
+            <td>◑ staged</td><td>verified snapshot + tarball + one-command driver;
+            push is user-run (session permission classifier blocked oras)</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Outcomes</h2>
+    <table>
+      <thead><tr><th>Deliverable</th><th>Commits</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Build repair: <code>main</code> could not build (milestone tag
+          <code>v1-assembly-baseline</code> broke hatch-vcs version parsing)</td>
+          <td><code>5fb2edae</code></td>
+          <td>numeric-only tag matching; <code>uv run</code> restored</td>
+        </tr>
+        <tr>
+          <td>Corpus survey — 89 xlsx across sector_modules, IDM/, gauss; six sectors
+          (SM#1,4,5,6,7,8)</td>
+          <td>figures in <code>35cec5f2</code></td>
+          <td>Schema validated against every workbook. Key finds: 574 formula cells whose
+          measurements the legacy pandas reader silently drops; 512 unmodelled rigid-body
+          transform blocks; 6-col vs 9-col header bifurcation; label chaos
+          ("Mesured&nbsp;", "F'"); 3 Excel lock stubs</td>
+        </tr>
+        <tr>
+          <td>Provenance substrate — streaming sha256 digests, deterministic YAML io,
+          filename metadata parser, preservation manifest build/verify, schema-validated
+          <code>FitConfig</code>, immutable <code>RunRecord</code> + environment capture</td>
+          <td><code>4bcc8437</code> <code>5ceb2f84</code> <code>76abfaa5</code>
+          <code>35cec5f2</code> <code>4147e4ef</code> <code>011235eb</code>
+          <code>49d44941</code></td>
+          <td>57 tests green in 0.8&nbsp;s; pure stdlib+yaml+packaging; digests are
+          <code>sha256:&lt;hex&gt;</code> everywhere</td>
+        </tr>
+        <tr>
+          <td>Transcoder — the single transaction boundary: structural parser (dual
+          data_only loads), long-format rows + deterministic CSV codec, YAML sidecar with
+          egress layout, egress workbook rebuild, directory sweep</td>
+          <td><code>5cd4becb</code> <code>f24c3d7c</code> <code>1a7b0208</code>
+          <code>3d4bb388</code></td>
+          <td>37 tests green; workbook→canonical→workbook→canonical byte-identical;
+          formula-cell measurements captured (SM#7 v9_4 VLOOKUP uncertainty
+          1.0629560774803892 recovered — legacy NaN'd it); SM#1 v8_1: 10&nbsp;734 rows,
+          0 anomalies</td>
+        </tr>
+        <tr>
+          <td>Full-corpus transcode — 85/85 workbooks (80 public + 5 IDM), zero failures</td>
+          <td>—</td>
+          <td>63&nbsp;MB canonical at <code>~/.local/share/norma/canonical-2026-07-24/</code></td>
+        </tr>
+        <tr>
+          <td>Preservation — verified byte-identical snapshot of the AppData corpus
+          (124 files, 57&nbsp;MB) + sha256 of the two 12&nbsp;GB <code>*_trial.nc</code>;
+          YAML manifest committed and verified green (0 missing/changed/new)</td>
+          <td><code>8df0ed67</code></td>
+          <td>snapshot at <code>~/.local/share/norma/snapshot-2026-07-23/</code>; manifest
+          126 entries</td>
+        </tr>
+        <tr>
+          <td>In-repo reference units — latest public canonical unit per sector + private
+          _#7 v9_4 (the fit-lane fixture)</td>
+          <td><code>1419b735</code></td>
+          <td>14 files, 7.9&nbsp;MB diffable CSV/YAML</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Canonical schema (as implemented)</h2>
+    <p>Long format, one row per atomic value:
+    <code>coil,phase,record_kind,point_group,point_group_raw,feature,feature_raw,axis,value,uncertainty,units,is_formula</code>
+    — <code>record_kind∈{fiducial,transform}</code>; fiducial axes x,y,z (mm), transform axes
+    dx,dy,dz (mm) / rx,ry,rz (deg); 2σ uncertainty as a column, not an axis; raw labels
+    preserved beside normalized ones; repr-round-trip float formatting; sidecar
+    <code>&lt;stem&gt;.meta.yaml</code> carries source identity + digests + egress layout +
+    Metadata-sheet traceability text; sha256 over CSV bytes is the content address.</p>
+
+    <h2>Figures</h2>
+    <figure>
+      <img src="/nova/figures/norma-data-provenance/corpus_timeline.png"
+           alt="Corpus timeline: workbook mtime vs version per sector" style="max-width:100%">
+      <figcaption>Fig 1 — corpus timeline: 89 workbooks, six sectors, 2025→2026 revisions.</figcaption>
+    </figure>
+    <figure>
+      <img src="/nova/figures/norma-data-provenance/phase_presence_matrix.png"
+           alt="Assembly-phase presence per workbook" style="max-width:100%">
+      <figcaption>Fig 2 — sheet/phase presence matrix: the phase set is open (typos, SM#5-only
+      SSAT AR2/3/4), so phase names are carried verbatim.</figcaption>
+    </figure>
+    <figure>
+      <img src="/nova/figures/norma-data-provenance/phase_row_population.png"
+           alt="Row population per assembly phase" style="max-width:100%">
+      <figcaption>Fig 3 — per-phase fiducial row population across the corpus.</figcaption>
+    </figure>
+
+    <h2>Risks and residuals</h2>
+    <ul>
+      <li><strong>Offsite push pending:</strong> the GHCR/ORAS push of the snapshot tarball is
+      staged (<code>bash ~/.local/share/norma/push-corpus.sh</code>) — until run, the corpus
+      exists on the laptop disk (two copies) only.</li>
+      <li><strong><code>ILIS_nominal.txt</code> gap:</strong> the raw ILIS nominal cloud lives only
+      on the IO share (<code>//io-ws-ccstore1/ANSYS_Data/mcintos/sector_modules</code>); locally
+      only the processed pickle exists. Pull a copy next time the IO network is reachable.</li>
+      <li><strong>Formula-cell recovery:</strong> canonical ingest captures the 574
+      formula-cached measurements the legacy reader drops; downstream fits still use the legacy
+      reader until the norma port re-points them at canonical units.</li>
+    </ul>
+
+    <h2>What's next</h2>
+    <p>§7/§8 (Tier-1 replay foundation, pilot run records, unskipping the
+    <code>sector.fit.ssat</code>/<code>pit.gaps</code> harness lanes) dispatched in-session;
+    Tier-2 historical replay, the full ORAS registry wiring, and extraction gating follow —
+    see the plan's open followup.</p>
+  </main>
+</body>
+</html>

@@ -11,13 +11,12 @@ stage which swings the boundary.
 import numpy as np
 import pytest
 
+from nova.equilibrium.measurement import Magnetics, SliceMeasurement
 from nova.equilibrium.moment import (
     CurrentCells,
-    Magnetics,
     MomentConfig,
     MomentOrder,
     ReconstructMoment,
-    SliceMeasurement,
     build_moment_basis,
     limiter_radial_extent,
     moment_terms,

@@ -14,13 +14,12 @@ just inside the wall. No machine data and no external files.
 
 import numpy as np
 
+from nova.equilibrium.measurement import Magnetics, SliceMeasurement
 from nova.equilibrium.moment import (
     CurrentCells,
-    Magnetics,
     MomentConfig,
     MomentOrder,
     ReconstructMoment,
-    SliceMeasurement,
 )
 from nova.utilities.importmanager import skip_import
 

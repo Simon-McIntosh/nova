@@ -51,12 +51,16 @@ the spine. Conventions: total poloidal flux :math:`\\Phi = 2 \\pi R A_\\phi`
 
 from dataclasses import dataclass, field
 from enum import IntEnum
-from functools import cached_property
 
 import numpy as np
 from scipy.optimize import minimize
 
 from nova.biot.greens import hybrid_greens
+from nova.equilibrium.measurement import (
+    Magnetics,
+    SliceMeasurement,
+    whitened_solve,
+)
 
 
 class MomentOrder(IntEnum):
@@ -214,35 +218,6 @@ class CurrentCells:
         )
 
 
-@dataclass(frozen=True)
-class Magnetics:
-    """External magnetic diagnostic geometry, in measurement row order.
-
-    ``angle`` is the poloidal orientation of a field probe [deg]; flux-loop
-    rows ignore it. Keeping one row order for the geometry and the measurement
-    vectors is what makes every design matrix row-aligned with the data.
-    """
-
-    r: np.ndarray
-    z: np.ndarray
-    angle: np.ndarray
-    flux_loop: np.ndarray
-
-    @property
-    def number(self) -> int:
-        """Return the sensor count."""
-        return int(np.asarray(self.r).size)
-
-    def project(self, psi: np.ndarray, br: np.ndarray, bz: np.ndarray) -> np.ndarray:
-        """Return each sensor's reading of a per-ampere field: flux or field."""
-        angle = np.deg2rad(np.asarray(self.angle, dtype=np.float64))
-        return np.where(
-            np.asarray(self.flux_loop, dtype=bool),
-            psi,
-            br * np.cos(angle) + bz * np.sin(angle),
-        )
-
-
 def sensor_coupling(cells: CurrentCells, magnetics: Magnetics) -> np.ndarray:
     """Return the ``(n_sensor, n_cells)`` per-ampere cell-to-sensor coupling."""
     columns = []
@@ -327,33 +302,6 @@ def ring_shift_rms(
     return float(np.sqrt(np.mean((interpolated - radius) ** 2)))
 
 
-def _whitened_solve(
-    response: np.ndarray, target: np.ndarray, weight: np.ndarray, ridge: float
-) -> tuple[np.ndarray, np.ndarray]:
-    """Solve a whitened, column-normalised ridge least-squares system.
-
-    Whitening by the per-row measurement scale puts every channel on comparable
-    terms; normalising the columns means the ridge is a dimensionless numerical
-    floor rather than a prior that biases the fit toward small amplitudes. The
-    returned covariance is in the raw coefficient frame.
-    """
-    weighted = response * weight[:, None]
-    column_norm = np.linalg.norm(weighted, axis=0)
-    column_norm = np.where(column_norm > 0.0, column_norm, 1.0)
-    normalised = weighted / column_norm[None, :]
-    count = normalised.shape[1]
-    if count == 0:
-        return np.zeros(0), np.zeros((0, 0))
-    gram = normalised.T @ normalised + ridge * np.eye(count)
-    coefficients = np.linalg.solve(gram, normalised.T @ (target * weight))
-    coefficients = coefficients / column_norm
-    try:
-        covariance = np.linalg.pinv(gram) / np.outer(column_norm, column_norm)
-    except np.linalg.LinAlgError:  # degenerate response
-        covariance = np.full((count, count), np.nan)
-    return coefficients, covariance
-
-
 @dataclass(frozen=True)
 class MomentConfig:
     """Reconstruction knobs; the defaults are the validated configuration."""
@@ -396,47 +344,6 @@ class MomentConfig:
 
     gate_shift_fraction: float = 0.15
     """Accept a residual stage only below this boundary shift / seed radius."""
-
-
-@dataclass(frozen=True)
-class SliceMeasurement:
-    """One time slice of external magnetics, in ``Magnetics`` row order.
-
-    ``measured`` may carry NaN on absent channels; those rows must be masked
-    out. ``vacuum`` is the coil-only prediction on the same rows, so
-    ``measured - vacuum`` is the plasma signature the fit sees. ``scale`` is the
-    per-row measurement scale the whitening divides by.
-    """
-
-    measured: np.ndarray
-    vacuum: np.ndarray
-    mask: np.ndarray
-    scale: np.ndarray
-    plasma_current: float
-    vacuum_flux: np.ndarray | None = field(default=None, repr=False)
-    """Coil-only flux on the reconstruction grid [Wb], for the boundary push."""
-
-    @cached_property
-    def weight(self) -> np.ndarray:
-        """Return the whitening weight, zero on untrusted rows."""
-        keep = np.asarray(self.mask, dtype=bool)
-        weight = np.zeros(keep.size)
-        weight[keep] = 1.0 / np.maximum(
-            np.asarray(self.scale, dtype=np.float64)[keep], 1e-12
-        )
-        return weight
-
-    @cached_property
-    def signature(self) -> np.ndarray:
-        """Return the plasma sensor signature ``measured - vacuum``.
-
-        Absent channels carry NaN and are masked out by a zero weight, but
-        ``NaN * 0`` would still poison the least squares, so they are zeroed
-        here first.
-        """
-        return np.nan_to_num(
-            np.asarray(self.measured, dtype=np.float64)
-        ) - np.nan_to_num(np.asarray(self.vacuum, dtype=np.float64))
 
 
 @dataclass
@@ -585,7 +492,7 @@ class ReconstructMoment:
             monopole = None
             shape_response = response
 
-        coefficients, covariance = _whitened_solve(
+        coefficients, covariance = whitened_solve(
             shape_response, target, weight, config.ridge
         )
         if config.ip_anchor:
@@ -815,7 +722,7 @@ class ReconstructMoment:
         )
         quadrupole = basis[:, 3:6]
         residual = measurement.signature - self.sensor_coupling @ seed_current
-        coefficients, _covariance = _whitened_solve(
+        coefficients, _covariance = whitened_solve(
             self.sensor_coupling @ quadrupole,
             residual,
             measurement.weight,

@@ -1,11 +1,19 @@
 """Benchmark framespace."""
 
 import os
+import tempfile
 import timeit
 
 import numpy as np
 
 from nova.frame.framespace import FrameSpace
+
+# Fixed absolute cache path: asv re-imports this module in a separate process
+# for setup_cache and for each benchmark, so the path must resolve identically
+# in every process (a randomised mkdtemp would differ per process).
+_CACHE_DIR = os.path.join(tempfile.gettempdir(), "nova_asv_framespace")
+os.makedirs(_CACHE_DIR, exist_ok=True)
+_CACHE_FILE = os.path.join(_CACHE_DIR, "framespace.nc")
 
 
 class Current:
@@ -17,7 +25,7 @@ class Current:
     @property
     def filename(self):
         """Return coilset filename."""
-        return "./framecurrent_frame.nc"
+        return _CACHE_FILE
 
     def setup_cache(self):
         """Build reference coilset."""

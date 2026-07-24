@@ -1,22 +1,29 @@
 """Benchmark biotoperate."""
 
 import os
+import tempfile
 import timeit
 
 from nova.database.filepath import FilePath
 from nova.frame.coilset import CoilSet
+
+# Fixed absolute cache directory: asv re-imports this module in a separate
+# process for setup_cache and for each benchmark, so the path must resolve
+# identically in every process (a randomised mkdtemp would differ per process).
+_CACHE_DIR = os.path.join(tempfile.gettempdir(), "nova_asv_biotoperate")
+os.makedirs(_CACHE_DIR, exist_ok=True)
 
 
 class PlasmaGrid:
     """Benchmark biotoperate methods - plasmagrid base class."""
 
     timer = timeit.default_timer
-    dirname = ".nova"
+    dirname = _CACHE_DIR
 
     @property
     def filename(self):
         """Return coilset filename."""
-        return "./plasmagrid_coilset"
+        return "plasmagrid_coilset"
 
     @property
     def filepath(self):
@@ -37,7 +44,7 @@ class PlasmaGrid:
 
     def setup(self):
         """Load coilset from file."""
-        self.coilset = CoilSet().load()
+        self.coilset = CoilSet(filename=self.filename, dirname=self.dirname).load()
 
 
 class PlasmaTurns(PlasmaGrid):
@@ -49,7 +56,7 @@ class PlasmaTurns(PlasmaGrid):
 
     def setup(self, svd_rank):
         """Load coilset from file and set svd rank."""
-        self.coilset = CoilSet(filename=self.filename).load()
+        self.coilset = CoilSet(filename=self.filename, dirname=self.dirname).load()
         self.coilset.plasmagrid.svd_rank = svd_rank
 
     def time_update_turns(self, svd_rank):

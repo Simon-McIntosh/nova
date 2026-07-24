@@ -315,5 +315,79 @@ def test_cache_stale_entry_replaced_in_place(tmp_path):
     xarray.testing.assert_identical(reader.data, rebuilt)
 
 
+def test_datafile_caches_through_zarr(tmp_path):
+    # the identity-cache tier (Datafile) persists compiled data through zarr:
+    # a cold build stores, a warm load reuses the group without rebuilding, and
+    # a differing group is a cache miss that rebuilds.
+    from dataclasses import dataclass
+
+    from nova.database.datafile import Datafile
+
+    builds = []
+
+    @dataclass
+    class Cache(Datafile):
+        ids: object = None
+        name: str | None = None
+
+        def build(self):
+            builds.append(self.group)
+            self.data = xarray.Dataset(
+                {"psi": ("node", np.linspace(0.0, 1.0, 6))}, attrs={"machine": "iter"}
+            )
+
+    cold = Cache(filename="identity", dirname=str(tmp_path), group="abc123")
+    assert cold.filepath.suffix == ".zarr"
+    assert builds == ["abc123"]
+
+    warm = Cache(filename="identity", dirname=str(tmp_path), group="abc123")
+    assert builds == ["abc123"]  # warm load did not rebuild
+    xarray.testing.assert_identical(warm.data, cold.data)
+
+    Cache(filename="identity", dirname=str(tmp_path), group="different")
+    assert builds == ["abc123", "different"]  # cache miss rebuilds
+
+
+@mark["imas"]
+def test_machine_cache_folds_dd_version(monkeypatch, tmp_path):
+    # A machine description compiles several source IDSs into frames and solved
+    # operators keyed by the composite machine identity. Stand in for the source
+    # read with a synthetic two-coil insert so the cache round-trip exercises the
+    # real store/load path without a database, then confirm the data-dictionary
+    # version participates in the composite key so a differing version cannot
+    # silently reuse a stale entry.
+    def synthetic_build(self, **frameset_attrs):
+        self.frameset_attrs = frameset_attrs
+        self.clear_frameset()
+        self.coil.insert({"r": [4.0, 0.5, 0.2, 0.3]}, name="C1", part="pf", Ic=1e3)
+        self.coil.insert({"r": [5.0, -0.5, 0.2, 0.3]}, name="C2", part="pf", Ic=1e3)
+        self.inductance.solve()
+        self.store()
+
+    monkeypatch.setattr(Machine, "build", synthetic_build)
+    config = dict(
+        machine="iter_md",
+        pf_active=False,
+        pf_passive=False,
+        wall=False,
+        ninductance=5,
+        dirname=str(tmp_path),
+    )
+
+    cold = Machine(105011, 9, dd_version="3.40.0", **config)
+    assert "dd_version" in cold.group_attrs
+    assert len(cold.frame) == 2
+
+    # a warm load reuses the cache group and is bit-identical to the cold build
+    warm = Machine(105011, 9, dd_version="3.40.0", **config)
+    assert warm.group == cold.group
+    assert len(warm.frame) == 2
+    xarray.testing.assert_identical(warm.data, cold.data)
+
+    # a differing DD version changes the composite key -- no stale reuse
+    stale = Machine(105011, 9, dd_version="3.42.0", **config)
+    assert stale.group != cold.group
+
+
 if __name__ == "__main__":
     pytest.main([__file__])

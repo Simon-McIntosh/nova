@@ -4,7 +4,6 @@ import bisect
 from dataclasses import dataclass
 
 import numpy as np
-import pandas
 
 from tqdm import tqdm
 
@@ -36,7 +35,7 @@ class Grid:
         - float: expansion relative to coilset index. Must be greater than -1.
         - list[float]: explicit grid bounds [rmin, rmax, zmin, zmax].
         - ids: bounds extracted from from equilibrium ids.
-    index : {'plasma', 'coil', slice, pandas.Index}
+    index : {'plasma', 'coil', slice, numpy.ndarray}
         Filament index from which relative grid limits are set.
     ids: ImasIds, optional
         IMAS IDS required for equilibrium derived grid dimensions.
@@ -78,7 +77,7 @@ class Grid:
 
     ngrid: Nbiot = 5000
     limit: float | list[float] | str = 0.25
-    index: str | slice | pandas.Index = "plasma"
+    index: str | slice | np.ndarray = "plasma"
     ids: ImasIds | None = None
 
     def __post_init__(self):
@@ -170,7 +169,7 @@ class Extrapolate(Grid, Operate):
         - float: expansion relative to coilset index. Must be greater than -1.
         - list[float]: explicit grid bounds [rmin, rmax, zmin, zmax].
         - ids: bounds extracted from from equilibrium ids.
-    index : {'plasma', 'coil', slice, pandas.Index}
+    index : {'plasma', 'coil', slice, numpy.ndarray}
         Filament index from which relative grid limits are set.
 
     Attributes

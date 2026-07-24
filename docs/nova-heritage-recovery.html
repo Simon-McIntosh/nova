@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="nova-heritage-recovery">
+  <meta name="plan-title"     content="Nova Heritage Recovery">
+  <meta name="plan-summary"   content="Recover, repair and test the non-assembly 1.x heritage on the 2.0 line: SULTAN thermo-hydraulic and cold-test pipelines, the low-order beam solver, G-EQDSK interchange, and the fenics/MAST example galleries">
+  <meta name="plan-status"    content="active">
+  <meta name="plan-roi"       content="mid">
+  <meta name="plan-effort"    content="L">
+  <meta name="plan-tier"      content="opus">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-impl"      content="0.25">
+  <title>Nova Heritage Recovery | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — Objective and disposition record</h2>
+    <p>The develop 2.0 bootstrap deleted the whole 1.x leave-set in one recoverable commit. The
+    assembly-metrology line (GP fiducial fitting, SSAT/in-pit) definitively extracts to
+    <strong>norma</strong> — that is unchanged. This plan governs everything else: the deleted
+    non-assembly work was investigated module-by-module (three parallel read-only reviews over the
+    <code>v1-assembly-baseline</code> content), dispositioned with the owner, and the keep-set
+    recovered onto <code>develop</code>. The dominant evidence: the deleted tree splits into a
+    <em>dead generation</em> (~90 files importing <code>nep</code>/<code>amigo</code> — external
+    packages that no longer exist anywhere, so those files were already broken on the live 1.x line)
+    and a <em>live generation</em> worth keeping. Nothing dropped here is lost — git history and the
+    protected baseline retain every file.</p>
+
+    <figure>
+      <svg viewBox="0 0 920 300" role="img"
+           aria-label="Disposition of the deleted 1.x leave-set: recovered to develop, extracted to norma, or left in git history"
+           style="max-width:100%;height:auto;font-family:system-ui,sans-serif">
+        <rect x="10" y="110" width="180" height="66" rx="4" fill="#ffffff" stroke="#555"/>
+        <text x="100" y="138" font-size="13.5" fill="#1a1a1a" text-anchor="middle" font-weight="bold">1.x leave-set</text>
+        <text x="100" y="157" font-size="12" fill="#333" text-anchor="middle">~72k LOC, 8 packages</text>
+        <g stroke="#555" stroke-width="1.4" fill="none">
+          <path d="M190,127 C260,127 260,52 330,52"/>
+          <path d="M190,143 C260,143 260,152 330,152"/>
+          <path d="M190,159 C260,159 260,252 330,252"/>
+        </g>
+        <rect x="330" y="22" width="580" height="60" rx="4" fill="#ffffff" stroke="#2b6cb0" stroke-width="1.6"/>
+        <text x="344" y="44" font-size="13" fill="#1a1a1a" font-weight="bold">KEEP → recovered on develop (61f86176)</text>
+        <text x="344" y="63" font-size="12" fill="#333">thermalhydralic (SULTAN·naka·twente·cold-test) · beam solver (finiteframe/properties/catenary)</text>
+        <text x="344" y="78" font-size="12" fill="#333">io/geqdsk · examples/{fenics,mast} · extras: thermofluids, naka, fenics, mast</text>
+        <rect x="330" y="122" width="580" height="60" rx="4" fill="#ffffff" stroke="#7a52a3" stroke-width="1.6"/>
+        <text x="344" y="144" font-size="13" fill="#1a1a1a" font-weight="bold">NORMA → travels with the assembly extraction (stays on main until then)</text>
+        <text x="344" y="163" font-size="12" fill="#333">structural/{asbuilt,coilcage,ansysdelta,_decimate,morph_dev} · ansys/dpf.py</text>
+        <text x="344" y="178" font-size="12" fill="#333">projects/AsBuilt (TFC18 as-built studies)</text>
+        <rect x="330" y="222" width="580" height="60" rx="4" fill="#ffffff" stroke="#888" stroke-width="1.4"/>
+        <text x="344" y="244" font-size="13" fill="#1a1a1a" font-weight="bold">HISTORY → dropped (git + protected baseline retain everything)</text>
+        <text x="344" y="263" font-size="12" fill="#333">design (dead DEMO suite) · dead-gen projects (IVC·TF·SOFE·VDE·ML·profile) · development</text>
+        <text x="344" y="278" font-size="12" fill="#333">dina readers (geqdsk kept) · ACloss/CSI/CSM one-shots · sultan/obsolete · read_IDM (credentials)</text>
+        <text x="460" y="296" font-size="11.5" fill="#333" text-anchor="middle">Fig 1 — three-way disposition of the deleted 1.x content; only the top box lives on develop.</text>
+      </svg>
+    </figure>
+
+    <p><strong>Relationship to the spine refactor:</strong> this work rides the same
+    <code>develop</code> branch as <code>nova-spine-refactor</code> §3–§9 but touches disjoint
+    packages (<code>nova/thermalhydralic</code>, the beam-solver files, <code>nova/io</code>,
+    <code>examples/</code>). The recovered cluster never imported <code>nova.frame</code> — it uses
+    pandas DataFrames as its own containers — so it neither blocks nor is blocked by the columnar
+    frame work. Constraints here are deliberately <em>lighter</em> than the spine core (§6).</p>
+
+    <h2 id="s2">§2 — Recovered baseline</h2>
+    <p class="landed-summary"><strong>✓ landed 2026-07-24</strong> (commit <code>61f86176</code> on
+    <code>develop</code>). Restored from the baseline: the full SULTAN pipeline + naka + twente +
+    cold-test analysis (<code>nova/thermalhydralic</code>, obsolete/ and the import-time
+    <code>response.py</code> script pruned; <code>fitresponse.py</code> dropped — importless scratch,
+    no consumers; <code>lumpedparameter.py</code> rewritten to the bare <code>LumpedCapacitance</code>
+    class); the low-order beam solver (<code>finiteframe</code>/<code>properties</code>/<code>catenary</code>,
+    <code>np.in1d→np.isin</code> for numpy 2) with its two test files <strong>15/15 green</strong> on
+    py3.14/numpy2; <code>nova/io/geqdsk.py</code> (pure-numpy G-EQDSK read/write);
+    <code>examples/fenics</code> + <code>examples/mast</code> galleries (lint-excluded). Hardcoded
+    PSI/QST credentials scrubbed to environment lookups (<code>SULTAN_FTP_USER/PASSWORD</code>,
+    <code>NAKA_USERID/PASSWORD</code>); <code>test_sultan</code> skips cleanly offline (2 skips).
+    Import smoke: 18/23 recovered modules clean — the 5 failures are exactly the §3 repair set.
+    Extras added: <code>thermofluids</code> (coolprop, ftputil, nlopt, openpyxl, pymupdf, regex,
+    tables, xlrd), <code>naka</code>, <code>fenics</code> (pip-installable meshing stack; dolfinx is
+    conda/spack-provisioned), <code>mast</code>.</p>
+
+    <h2 id="s3">§3 — SULTAN repair (finish the in-flight 1.x refactor)</h2>
+    <p>The 1.x tree was abandoned mid-refactor: a <code>SultanIO</code> base class and
+    <code>Fluid</code>/<code>FluidResponse</code> classes were deleted and never replaced, leaving
+    four recovered modules non-importable — <code>sultan/fluidprofile.py</code>,
+    <code>sultan/field.py</code>, <code>sultan/sultanspectrum.py</code>,
+    <code>twente/twentedata.py</code>. <code>SourceData</code> is the evident successor to
+    SultanIO's role.</p>
+    <ul>
+      <li><strong>Reconstruct or re-parent.</strong> Recover the deleted base from git history
+      (pre-deletion sultan commits) as the starting point, then re-parent the four subclasses onto
+      the surviving <code>SourceData</code>/<code>DataBase</code>/<code>PandasHDF</code> stack —
+      whichever yields the smaller diff. The fluid step-response + spectrum physics is the payload;
+      without it the AC-loss story is incomplete.</li>
+      <li><strong>cold_test import repair:</strong> <code>nova.plot.addtext</code> no longer exists —
+      re-point at the surviving graphics helpers (or inline the line-label helper); replace seaborn
+      styling with plain matplotlib; extract the ~220-line commented scratch <code>__main__</code>
+      into an example. The class and its campaign date map stay.</li>
+      <li><strong>frequencyresponse bug:</strong> writes <code>self.data</code>, reads
+      <code>self._data</code> — fix and pin with the §4 test.</li>
+      <li><strong>matplotlib guards:</strong> the recovered modules import pyplot unguarded at module
+      top level (<code>fitfluid</code>, <code>frequencyresponse</code>, <code>cold_test</code>).
+      Defer into plot methods or use the existing <code>nova.utilities.importmanager</code> pattern —
+      no new mechanism.</li>
+    </ul>
+    <p><em>Done-when:</em> all recovered <code>nova/thermalhydralic</code> modules import on the lean
+    core + <code>thermofluids</code> extra (matplotlib not required); the residual lint debt in the
+    cluster (26 findings, dominated by cold_test and properties E741) is cleared or explicitly
+    waived per file.</p>
+
+    <h2 id="s4">§4 — Hermetic test program</h2>
+    <p><code>test_sultan</code> was dark in CI for one reason: it dials PSI's FTP server at
+    collection time. The recovery target is a suite that never touches the network:</p>
+    <ul>
+      <li><strong>Offline cache path for <code>FTPData</code>/<code>DataBase</code>:</strong> when
+      credentials are absent, serve from the local cache (<code>data/Sultan/</code> — the cached-zip
+      pattern already established there) and never dial out. This single change turns the suite from
+      CI-dark to CI-green.</li>
+      <li><strong>Fixtures:</strong> bundle one or two small cached SULTAN <code>.dat</code> shots
+      (e.g. from ITER/JACS/JACS_13) for Campaign/Phase/Trial/Sample/SourceData/SampleData/Profile;
+      a trimmed cold-test CSV under <code>data/CSM/</code>; a small <code>.geqdsk</code> file.</li>
+      <li><strong>Synthetic tests (no fixtures needed):</strong> the four Model LTI tests (already
+      offline); <code>FitFluid.optimize</code> on a synthetic step waveform (nlopt convergence +
+      steady state); <code>LumpedCapacitance.fit_hA</code> on a synthetic RC decay with analytic
+      tau; <code>FrequencyResponse</code> append/plot headless after the §3 bug fix.</li>
+      <li><strong>geqdsk round-trip:</strong> read→write→read equality on the bundled fixture — the
+      only §2 module that justifies full library treatment gets it.</li>
+      <li><strong>Beam solver:</strong> already green (15 tests, hermetic by construction) — the
+      regression gate for any future touch.</li>
+    </ul>
+    <p><em>Done-when:</em> the whole recovered surface runs green in a network-less environment with
+    the <code>thermofluids</code> extra; no test dials any server at collection or run time.</p>
+
+    <h2 id="s5">§5 — Example galleries and salvage register</h2>
+    <ul>
+      <li><strong>Import-smoke the galleries:</strong> <code>examples/fenics</code> (dolfinx
+      magnetostatics + gmsh meshing; dolfinx provisioned externally — skip the check cleanly when
+      absent; the shield examples additionally need off-repo STEP files and stay data-gated) and
+      <code>examples/mast</code> (equilibrium ML studies behind the <code>mast</code> extra; external
+      intake catalog — import-check only, never a data run in CI).</li>
+      <li><strong>Salvage register (recover on demand, from history):</strong> the live-generation
+      study scripts — <code>gauss/decimate.py</code>, <code>ground_loops/groundloop.py</code>,
+      <code>DINA/check_blanket_geometry.py</code>, <code>CSstack/premag_currents.py</code> — and the
+      beam-solver reference cases in <code>projects/beam</code> (strip dead imports on the way in).</li>
+      <li><strong>Concept note (owner decision 2026-07-24):</strong> the free-boundary inverse-design
+      intent of 1.x <code>design/inverse.py</code> is worth reimplementing on the 2.0 core one day;
+      the code itself is dead (DEMO-era, unvendored deps) and stays in history. Track as an idea, not
+      a port.</li>
+    </ul>
+
+    <h2 id="s6">§6 — Constraints and hygiene register (lighter than the core)</h2>
+    <ul>
+      <li><strong>Heavy deps behind extras, always:</strong> the core dependency set is untouched by
+      this plan. Recovered features degrade to clean skips/errors when their extra is absent.</li>
+      <li><strong>pandas tolerated, flagged:</strong> the thermal cluster uses pandas DataFrames as
+      its native containers and never imported <code>nova.frame</code> — no conflict with the
+      columnar core. A later migration to the columnar store is optional modernization, not a
+      recovery gate.</li>
+      <li><strong>Credential hygiene:</strong> source-embedded credentials were scrubbed on recovery,
+      but they remain in git history (PSI SULTAN FTP, QST Naka, and the dropped
+      <code>read_IDM</code>'s IDM account). <strong>Rotate those passwords</strong>; treat the
+      history copies as public.</li>
+      <li><strong>Server liveness caveats:</strong> the Naka scraper targets an internal QST server
+      (likely VPN-only or gone) on a legacy <code>mechanize</code> stack — kept for provenance, gated
+      behind its extra, documented as unverified. SULTAN FTP is treated as fixture-source only.</li>
+      <li><strong>Naming/lint:</strong> recovered code keeps its 1.x style where harmless (E741
+      single-letter section-property names in <code>properties.py</code>); the §3 repair clears the
+      real defects. <code>examples/</code> is lint-excluded by design.</li>
+    </ul>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="design-disposition" data-choice="salvage-concept" data-by="smc" data-when="2026-07-24T05:00:00+00:00">
+        <p class="r-dec-q">nova/design/ disposition — the directory is the DEMO/SOFE-era
+        design-optimisation suite, dead on import (removed 1.x modules + the unvendored amigo
+        package); nothing ITER-facing works.</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="drop">drop to history</button>
+          <button class="r-opt chosen" data-value="salvage-concept">salvage inverse-design concept only</button>
+          <button class="r-opt" data-value="recover">recover as-is</button>
+        </p>
+        <p class="r-dec-rat">Owner 2026-07-24: record the free-boundary inverse-design intent as a
+        future 2.0 reimplementation idea (§5 concept note); the code stays in history.</p>
+      </div>
+      <div class="r-dec" data-key="mast-disposition" data-choice="examples" data-by="smc" data-when="2026-07-24T05:00:00+00:00">
+        <p class="r-dec-q">projects/MAST/ — most recently active deleted directory (2025-02, ML
+        equilibrium-reconstruction studies; sklearn + intake against an external catalog).</p>
+        <p class="r-dec-opts">
+          <button class="r-opt chosen" data-value="examples">keep as examples/mast behind an extra</button>
+          <button class="r-opt" data-value="ambix">relocate to imas-ambix later</button>
+          <button class="r-opt" data-value="history">history only</button>
+        </p>
+        <p class="r-dec-rat">Owner 2026-07-24: recover as an import-checked gallery; no CI data runs.</p>
+      </div>
+      <div class="r-dec" data-key="dina-readers" data-choice="drop" data-by="smc" data-when="2026-07-24T05:00:00+00:00">
+        <p class="r-dec-q">DINA scenario-reader family (read_scenario + waveform/read_plasma;
+        pandas + astropy; external data; stale nova.frame.IO imports). geqdsk.py is kept regardless.</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="defer">defer — recover on need</button>
+          <button class="r-opt" data-value="recover">recover + repair now</button>
+          <button class="r-opt chosen" data-value="drop">drop outright</button>
+        </p>
+        <p class="r-dec-rat">Owner 2026-07-24: history only; geqdsk.py is the interchange keeper.</p>
+      </div>
+      <div class="r-dec" data-key="sultan-satellites" data-choice="full-cluster" data-by="smc" data-when="2026-07-24T05:00:00+00:00">
+        <p class="r-dec-q">SULTAN-adjacent satellites: twente/ (PDF-mining hysteresis data, needs the
+        SultanIO repair) and naka/ (QST reader; legacy mechanize scraper, server liveness doubtful).</p>
+        <p class="r-dec-opts">
+          <button class="r-opt chosen" data-value="full-cluster">full cluster incl. twente + naka</button>
+          <button class="r-opt" data-value="core-plus-naka-data">sultan core + naka data model only</button>
+          <button class="r-opt" data-value="core-only">sultan core only</button>
+        </p>
+        <p class="r-dec-rat">Owner 2026-07-24: recover both; credentials scrubbed to env vars, naka
+        scraper gated behind its own extra with a dead-server caveat.</p>
+      </div>
+      <div class="r-dec" data-key="cold-test-home" data-choice="nova" data-by="reckon-ship" data-when="2026-07-24T05:00:00+00:00">
+        <p class="r-dec-q">Where does the CSM cold-test analysis live — nova or norma? It measures
+        strain/displacement/temperature during CS-coil cold tests.</p>
+        <p class="r-dec-opts">
+          <button class="r-opt chosen" data-value="nova">nova (thermo-mechanical qualification physics)</button>
+          <button class="r-opt" data-value="norma">norma (assembly metrology)</button>
+        </p>
+        <p class="r-dec-rat">Investigation verdict 2026-07-24: coil qualification physics, not
+        assembly fit-up metrology — recovered to nova/thermalhydralic/cold_test.py.</p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-nhr-01" data-status="open" data-tier="opus"
+               data-written-by="reckon-create" data-written-at="2026-07-24"
+               data-recommends-skill="/reckon-ship nova-heritage-recovery §3">
+        <h4 class="r-fu-title">Execute the SULTAN repair and the hermetic test program (§3 + §4)</h4>
+        <div class="r-fu-body"><p>The recovered baseline is landed (<code>61f86176</code>); the two
+        repair sections are ready to execute together — the §4 tests are the acceptance gate for the
+        §3 repairs. Work in a worktree off develop; disjoint from the spine-refactor §3/§4 closure
+        (nova/frame, nova/biot).</p></div>
+        <pre class="r-fu-prompt">Project: nova
+Plan:    nova-heritage-recovery (http://127.0.0.1:8765/nova/nova-heritage-recovery.html)
+Section: §3 + §4
+Tier:    opus
+
+Context
+  Heritage baseline recovered on develop (61f86176): SULTAN/naka/twente/cold-test
+  cluster, beam solver (15 tests green), geqdsk, example galleries. Five modules
+  are known non-importable (the abandoned 1.x SultanIO refactor) and the sultan
+  tests are FTP-gated. This run finishes the repair and makes the suite hermetic.
+
+State to read  (code / data — not the plan)
+  nova/thermalhydralic/sultan/{fluidprofile,field,sultanspectrum}.py  (broken:
+    import the deleted SultanIO/Fluid base)
+  nova/thermalhydralic/twente/twentedata.py  (same)
+  nova/thermalhydralic/cold_test.py  (stale nova.plot.addtext import + seaborn)
+  nova/thermalhydralic/sultan/{sourcedata,sampledata,sultandata,database,
+    remotedata}.py  (the surviving stack to re-parent onto)
+  git log --oneline --follow -- nova/thermalhydralic/sultan  on legacy/v1
+    (find the pre-deletion SultanIO implementation in history)
+  tests/test_sultan.py  (FTP-gated skip at collection; 4 Model tests offline)
+  nova/io/geqdsk.py  (needs a round-trip test + small fixture)
+  data/Sultan/ cached-zip pattern (commit eb3a5864 on the 1.x line)
+
+Scope locks / constraints
+  Branch develop via a worktree; primary checkout stays on main. Disjoint from
+  the spine closure work (do not touch nova/frame, nova/biot). Heavy deps stay
+  behind the thermofluids/naka extras; matplotlib deferred to plot methods via
+  the existing importmanager pattern. No network at test collection or run time.
+  Commit + push each coherent change; no AI co-author trailer.
+
+Done-when
+  1. All recovered thermalhydralic modules import on lean core + thermofluids
+     (import-smoke test committed).
+  2. Hermetic suite green offline: Model LTI, synthetic FitFluid + Lumped-
+     Capacitance + FrequencyResponse (bug fixed), fixture-backed Campaign/
+     Trial/Sample lane, cold_test CSV smoke, geqdsk round-trip.
+  3. Lint debt in the cluster cleared or explicitly waived per file.
+  4. §3 + §4 collapsed in the plan with counts; impl advanced; this followup
+     resolved; §5 (galleries + salvage register) followup queued.</pre>
+      </article>
+    </section>
+
+  </main>
+</body>
+</html>

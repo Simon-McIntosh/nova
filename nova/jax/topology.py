@@ -175,6 +175,18 @@ class Topology(Pytree):
         ionize = self.ionize(data_o, vmap_x, polarity, psi_grid, psi_lcfs)
         return psi_norm, ionize
 
+    @jax.jit
+    def update_batch(self, psi, polarity):
+        """Return :meth:`update` mapped over a leading batch axis.
+
+        The flux map gains a leading shot/time axis (psi has shape
+        ``(batch, node)``); the fixed-size null bounds keep every slice the
+        same shape so the categorisation vmaps cleanly. The returned
+        ``(psi_norm, ionize)`` pair carries the same leading axis and is
+        identical, slice for slice, to calling :meth:`update` per slice.
+        """
+        return jax.vmap(self.update, in_axes=(0, None))(psi, polarity)
+
     def plot(self, psi, polarity, axes=None):
         """Plot flux map including stationary points."""
         psi_grid, psi_wall = self.split_flux_map(psi)

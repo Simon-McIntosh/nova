@@ -1,14 +1,16 @@
 """Manage jax backed operator classes."""
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, InitVar
 from functools import cached_property
 from typing import NamedTuple
 
 import jax
 import jax.numpy as jnp
+import numpy as np
 from scipy.constants import mu_0
 import xarray
 
+from nova.frame.framesetloc import ArrayLocIndexer
 from nova.jax.basis import Basis
 from nova.jax.tree_util import Pytree
 from nova.jax.target import Target
@@ -117,6 +119,55 @@ class Operators:
             self.data.target_plasma_index,
             self.data.classname,
         )
+
+
+@dataclass
+class BiotOperator:
+    """Jitted operator presenting the numpy operator's mutating interface.
+
+    Wraps the jitted pytree :class:`Operator` so it drops into the biot
+    version-counter cache in place of the eager numpy operator: the
+    source-target matmul and plasma-turn update run through jitted code while
+    the ``source_target`` matrix and the ``evaluate``/``update_turns`` surface
+    stay in the mutating shape Operate's invalidation contract drives. The
+    plasma row/column are always re-derived from the pristine coupling
+    matrices, so repeated turn updates carry no accumulated state.
+    """
+
+    aloc: ArrayLocIndexer
+    saloc: ArrayLocIndexer
+    classname: str
+    index: np.ndarray
+    dataset: InitVar[xarray.Dataset]
+
+    def __post_init__(self, dataset):
+        """Build the jitted operator and link the mutable source-target."""
+        attr = list(dataset.data_vars)[0]
+        self._operator = Operators(dataset)[attr]
+        self.source_plasma_index = self._operator.source_plasma_index
+        self.target_plasma_index = self._operator.target_plasma_index
+        # source_target stays a live view into the dataset array so a plasma-turn
+        # update propagates back to data[attr], as the numpy operator did.
+        self.source_target = dataset[attr].data
+
+    def evaluate(self):
+        """Return the source-target interaction for the current currents."""
+        source_current = jnp.asarray(self.saloc["Ic"])
+        result = self._operator.evaluate(
+            jnp.asarray(self.source_target), source_current
+        )
+        return np.asarray(result)
+
+    @property
+    def plasma_nturn(self):
+        """Return plasma turns."""
+        return self.aloc["nturn"][self.aloc["plasma"]]
+
+    def update_turns(self, svd=True):
+        """Re-derive the plasma row/column of the source-target matrix in place."""
+        plasma_nturn = jnp.asarray(self.plasma_nturn)
+        updated = np.asarray(self._operator.update_plasma_turns(plasma_nturn))
+        self.source_target[...] = updated
 
 
 @dataclass

@@ -268,9 +268,7 @@ os.path.join(userhome, 'public', 'imasdb', 'iter', '3', '1', '2')
     @property
     def uri(self):
         """Return URI build from IdsBase parameters."""
-        print(self.ids_attrs)
         if self.has_base_attrs:
-            print("** has base")
             return ""
         self.check_ids_attrs()
         return (
@@ -485,8 +483,8 @@ class Datastore(IdsBase):  # noqa: D207
                     raise AttributeError(
                         f"Set ether IdsBase {self.ids_attrs} or uri {self.uri}"
                     )
-                if "#" not in uri and self.name is not None:
-                    self.uri += f"#{self.name}"
+                if self.name is not None and f"idsname={self.name}" not in uri:
+                    self.uri = self._append_uri_fragment(f"idsname={self.name}")
                 if "#" in uri and ":" not in uri.split("#")[1] and self.occurrence >= 1:
                     self.uri += f":{self.occurrence}"
             case _:
@@ -743,7 +741,7 @@ mode='r', lazy=True, ids=None)
             db_entry.get(self.name, self.occurrence)
             db_entry.close()  # win32
             return True
-        except (imas.exception.ALException, imas.exception.DataEntryException):
+        except imas.exception.ALException, imas.exception.DataEntryException:
             return False
 
     def __enter__(self):

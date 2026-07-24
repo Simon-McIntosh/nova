@@ -87,12 +87,20 @@ def nominal_ilis_absent() -> str | None:
         cached = None
     if cached is not None and cached.exists():
         return None
+    try:
+        from nova.assembly.provenance import corpus
+
+        if corpus.preserved_pickle("ILIS_nominal.pickle") is not None:
+            return None
+    except Exception:  # noqa: BLE001 - corpus support is optional
+        pass
     share = Path("//io-ws-ccstore1/ANSYS_Data/mcintos/sector_modules/ILIS_nominal.txt")
     if share.exists():
         return None
     return (
         "pit-gap integration needs the nominal ILIS point cloud "
-        "(ILIS_nominal.txt from the IO share, or a cached ILIS_nominal.pickle); "
+        "(ILIS_nominal.txt from the IO share, a corpus-preserved "
+        "ILIS_nominal.pickle, or a cached ILIS_nominal.pickle); "
         "sector-module workbooks are present but this reference is off-corpus"
     )
 

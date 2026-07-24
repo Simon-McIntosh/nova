@@ -232,6 +232,21 @@
         }
       ]
     },
+    "pit.gaps": {
+      "arrays": {
+        "value": {
+          "shape": [
+            1,
+            18
+          ],
+          "tolerance": "length_mm"
+        }
+      },
+      "artifact": "goldens/pit.gaps.npz",
+      "artifact_sha256": "f16d37d95aa9b176b0deff6fe775c72c8453d868e5bd94a809f8d2648827ee33",
+      "callable": "nova.assembly.fiducialpit:FiducialPit",
+      "inputs": []
+    },
     "sector.fit.ssat": {
       "arrays": {
         "8": {

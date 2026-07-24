@@ -40,13 +40,33 @@ class NominalIlis:
         ).filepath
         if self._cache_file.exists():
             self._data = pandas.read_pickle(self._cache_file)
-        else:
-            filepath = FilePath(self.filename, dirname=self.dirname).filepath
-            self._data = pandas.read_csv(
-                filepath, sep=",", header=0, names=["name", "x", "y", "z"]
-            )
-            self._process_data()
-            self._data.to_pickle(self._cache_file)
+            return
+        preserved = self._preserved_pickle()
+        if preserved is not None:
+            # The corpus keeps the processed point cloud as a pickle; load it
+            # directly rather than re-reading the facility-share CSV, which is
+            # unreachable off the facility network.
+            self._data = pandas.read_pickle(preserved)
+            return
+        filepath = FilePath(self.filename, dirname=self.dirname).filepath
+        self._data = pandas.read_csv(
+            filepath, sep=",", header=0, names=["name", "x", "y", "z"]
+        )
+        self._process_data()
+        self._data.to_pickle(self._cache_file)
+
+    def _preserved_pickle(self) -> Path | None:
+        """Return the corpus-preserved point-cloud pickle, if one resolves.
+
+        The raw ``ILIS_nominal.txt`` lives only on the IO share; the preserved
+        pickle in the metrology corpus is the same processed cloud and is the
+        source of record on machines without the share.
+        """
+        try:
+            from nova.assembly.provenance import corpus
+        except Exception:  # noqa: BLE001 - corpus support is optional
+            return None
+        return corpus.preserved_pickle(Path(self.filename).stem + ".pickle")
 
     def clear_cache(self):
         """Clear cache file."""
@@ -103,9 +123,11 @@ class NominalIlis:
             planes[["nx", "ny", "nz"]]
             .groupby("feature", group_keys=False)
             .apply(
-                lambda x: sign * x
-                if (sign := np.sign(int(x.name.split()[-1]))) in [-1, 1]
-                else x
+                lambda x: (
+                    sign * x
+                    if (sign := np.sign(int(x.name.split()[-1]))) in [-1, 1]
+                    else x
+                )
             )
         )
         planes.loc[:, ["nx", "ny", "nz"]] /= np.linalg.norm(

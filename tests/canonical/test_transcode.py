@@ -8,9 +8,15 @@ import openpyxl
 import pytest
 
 from nova.assembly.canonical import transcode
+from nova.assembly.provenance import corpus
 from tests.canonical import synthetic
 
-_CORPUS = Path("/mnt/c/Users/mcintos/AppData/Local/nova/sector_modules")
+# The measured workbooks live off-repo in the metrology corpus. Resolve a local
+# copy if one is staged; when nothing resolves, the real-corpus tests below skip
+# on the non-existent path rather than failing.
+_CORPUS = corpus.resolve_corpus("appdata") or Path(
+    "/mnt/c/Users/mcintos/AppData/Local/nova/sector_modules"
+)
 _TARGET = _CORPUS / "Sector_Module_#1_CCL_as-built_data_8LMK6A_v8_1.xlsx"
 # A workbook carrying cached-value formula cells (uncertainty columns).
 _FORMULA_TARGET = _CORPUS / "Sector_Module_#7_CCL_as-built_data_8NR9J7_v9_4.xlsx"

@@ -7,7 +7,6 @@ from typing import ClassVar, get_args
 
 import git
 import numpy as np
-import pandas
 
 import nova
 from nova.imas.dataset import Ids
@@ -151,10 +150,14 @@ class Code(Attrs):
 
     @property
     def parameters(self):
-        """Return code parameters as HTML table."""
+        """Return code parameters as an HTML table."""
         if self.parameter_dict is None:
             return None
-        return pandas.Series(self.parameter_dict).to_frame().to_html()
+        rows = "".join(
+            f"<tr><th>{key}</th><td>{value}</td></tr>"
+            for key, value in self.parameter_dict.items()
+        )
+        return f"<table>{rows}</table>"
 
     @parameters.setter
     def parameters(self, parameters: dict):

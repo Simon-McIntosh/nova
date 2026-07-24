@@ -2685,130 +2685,193 @@ class FiducialPit(Plot1D):
             return fig, axes
 
 
-if __name__ == "__main__":
-    # Sectors 5, 6, 7 are adjacent in the pit
-    # Sector 8 contains coils 4 and 11 (coil 11 is adjacent to sector 7)
-    sectors = {
-        6: [12, 13],
-        7: [8, 9],
-        5: [16, 5],
-        8: [4, 11],
+# Sectors 5-6-7-8 are contiguous in the pit; sector 8 carries coils 4 and 11,
+# with coil 11 adjacent to sector 7. Installation order is 6, 7, 5, 8.
+DEFAULT_PIT_SECTORS: dict[int, list[int]] = {
+    6: [12, 13],
+    7: [8, 9],
+    5: [16, 5],
+    8: [4, 11],
+}
+
+
+def measured_gap_profiles() -> dict[tuple[int, int], pandas.DataFrame]:
+    """Return feeler-gauge gap measurements recorded during pit installation.
+
+    Each entry maps an ordered coil pair to a frame of measured gap (mm)
+    versus station height ``z`` (mm): the intra-sector pairs S7 (8-9) and
+    S6 (12-13), and the inter-sector S6-S7 pair (13-8). Fresh frames are
+    built on each call so callers may mutate the result freely.
+    """
+    return {
+        (8, 9): pandas.DataFrame(
+            {
+                "z": [4469, 3575, 2681, 1788, 0, -1788, -2681, -3575, -4465],
+                "gap": [0.72, 0.78, 0.75, 0.64, 0.45, 0.48, 0.55, 0.86, 0.9],
+            }
+        ),
+        (12, 13): pandas.DataFrame(
+            {
+                "z": [
+                    4469,
+                    4029,
+                    2975,
+                    2518,
+                    2496,
+                    2076,
+                    1512,
+                    1482,
+                    1000,
+                    -3517,
+                    -3972,
+                    -4032,
+                    -4465,
+                ],
+                "gap": [
+                    1.2,
+                    1.35,
+                    1.75,
+                    1.75,
+                    1.8,
+                    1.9,
+                    2.05,
+                    2.05,
+                    2.1,
+                    2.05,
+                    2.05,
+                    1.9,
+                    1.85,
+                ],
+            }
+        ),
+        (13, 8): pandas.DataFrame(
+            {
+                "z": [
+                    4469,
+                    4029,
+                    2975,
+                    2518,
+                    2496,
+                    2076,
+                    1512,
+                    1482,
+                    -3517,
+                    -3972,
+                    -4032,
+                    -4465,
+                ],
+                "gap": [
+                    1.85,
+                    1.85,
+                    1.75,
+                    1.7,
+                    1.65,
+                    1.65,
+                    1.6,
+                    1.6,
+                    1.85,
+                    1.95,
+                    1.95,
+                    1.95,
+                ],
+            }
+        ),
     }
 
-    # Load pit data
-    pit = FiducialPit(
-        sectors=sectors,
+
+@dataclass
+class PitAnalysis:
+    """Artifacts produced by :func:`analyze_pit`.
+
+    Attributes
+    ----------
+    pit : FiducialPit
+        The constructed pit integrator.
+    position_statistics : pandas.DataFrame
+        Full per-parameter position statistics table.
+    position_summary : pandas.DataFrame
+        The simplified alignment-margin summary.
+    figures : dict[str, object]
+        Rendered figures keyed by chart name (empty when ``plot=False``).
+        Each value is the ``(figure, axes)`` tuple returned by the plotter.
+    """
+
+    pit: FiducialPit
+    position_statistics: pandas.DataFrame
+    position_summary: pandas.DataFrame
+    figures: dict[str, object] = field(default_factory=dict)
+
+
+def analyze_pit(
+    sectors: dict[int, list[int]] | None = None,
+    *,
+    phase: str = "latest",
+    pcr: bool = True,
+    private: bool = False,
+    predict: bool = True,
+    gap_profiles: dict[tuple[int, int], pandas.DataFrame] | None = None,
+    plot: bool = True,
+    verbose: bool = False,
+) -> PitAnalysis:
+    """Build a :class:`FiducialPit` and run the standard pit gap analysis.
+
+    Constructs the pit for ``sectors`` (defaulting to the contiguous
+    5-6-7-8 cluster), computes the position statistics and their summary
+    and -- when ``plot`` is set -- renders the position, evolution,
+    alignment, gap, and statistics charts plus a measured-versus-predicted
+    gap profile for every entry in ``gap_profiles`` (defaulting to
+    :func:`measured_gap_profiles`).
+
+    No figure is shown: every rendered figure is returned in
+    :attr:`PitAnalysis.figures` for the caller to display or save.
+    """
+    if sectors is None:
+        sectors = DEFAULT_PIT_SECTORS
+    if gap_profiles is None:
+        gap_profiles = measured_gap_profiles()
+
+    pit = FiducialPit(sectors=sectors, phase=phase, pcr=pcr, private=private)
+
+    if verbose:
+        pit.print_summary()
+        print("\n" + "=" * 60)
+        print("Position Statistics")
+        print("=" * 60)
+
+    # Position statistics using the phase configured at init.
+    stats_df, position_fig = pit.position_statistics(plot=plot)
+    summary = pit.position_summary()
+    if verbose:
+        print(summary.to_string(index=False))
+
+    figures: dict[str, object] = {}
+    if plot:
+        figures["position"] = position_fig
+        figures["evolution"] = pit.plot_position_evolution(predict)
+        figures["alignment"] = pit.plot_alignment_evolution(predict)
+        figures["gaps"] = pit.plot_gaps()
+        figures["statistics"] = pit.plot_statistics()
+        for (coil_first, coil_second), measurements in gap_profiles.items():
+            figures[f"gap_profile_{coil_first}_{coil_second}"] = pit.plot_gap_profile(
+                coil_first, coil_second, measurements=measurements
+            )
+
+    return PitAnalysis(
+        pit=pit,
+        position_statistics=stats_df,
+        position_summary=summary,
+        figures=figures,
+    )
+
+
+if __name__ == "__main__":
+    pandas.options.display.precision = 3
+    analyze_pit(
         phase="latest",
         pcr=True,
         private=False,
+        predict=True,
+        plot=True,
+        verbose=True,
     )
-
-    # Print summary
-    pit.print_summary()
-
-    # Position statistics using the phase configured at init
-    print("\n" + "=" * 60)
-    print("Position Statistics")
-    print("=" * 60)
-    stats_df, (position_fig, position_axes) = pit.position_statistics()
-    print(pit.position_summary().to_string(index=False))
-
-    # include predictions in evolution chart
-    predict = True
-
-    # Show evolution chart
-    evolution_fig, evolution_axes = pit.plot_position_evolution(predict)
-
-    # Show alignment window evolution (more intuitive than variance)
-    alignment_fig, alignment_axes = pit.plot_alignment_evolution(predict)
-
-    # Plot gaps
-    pit.plot_gaps()
-
-    # Plot statistics
-    pit.plot_statistics()
-
-    # compare gaps
-
-    # Create measurement DataFrame S7 (coils 8-9)
-    measurements_s7 = pandas.DataFrame(
-        {
-            "z": [4469, 3575, 2681, 1788, 0, -1788, -2681, -3575, -4465],
-            "gap": [0.72, 0.78, 0.75, 0.64, 0.45, 0.48, 0.55, 0.86, 0.9],
-        }
-    )
-    fig, ax = pit.plot_gap_profile(8, 9, measurements=measurements_s7)
-
-    # Create measurement DataFrame S6 (coils 12-13)
-    measurements_s6 = pandas.DataFrame(
-        {
-            "z": [
-                4469,
-                4029,
-                2975,
-                2518,
-                2496,
-                2076,
-                1512,
-                1482,
-                1000,
-                -3517,
-                -3972,
-                -4032,
-                -4465,
-            ],
-            "gap": [
-                1.2,
-                1.35,
-                1.75,
-                1.75,
-                1.8,
-                1.9,
-                2.05,
-                2.05,
-                2.1,
-                2.05,
-                2.05,
-                1.9,
-                1.85,
-            ],
-        }
-    )
-    fig, ax = pit.plot_gap_profile(12, 13, measurements=measurements_s6)
-
-    # Create measurement DataFrame S6-S7 (coils 13-8, inter-sector)
-    measurements_s6_s7 = pandas.DataFrame(
-        {
-            "z": [
-                4469,
-                4029,
-                2975,
-                2518,
-                2496,
-                2076,
-                1512,
-                1482,
-                -3517,
-                -3972,
-                -4032,
-                -4465,
-            ],
-            "gap": [
-                1.85,
-                1.85,
-                1.75,
-                1.7,
-                1.65,
-                1.65,
-                1.6,
-                1.6,
-                1.85,
-                1.95,
-                1.95,
-                1.95,
-            ],
-        }
-    )
-    fig, ax = pit.plot_gap_profile(13, 8, measurements=measurements_s6_s7)
-
     plt.show()

@@ -241,7 +241,11 @@
     total <strong>520 passed / 0 failed</strong>. Full record:
     <a href="archive/nova-spine-refactor-s3s4-landed.html">§3/§4 landed</a>
     (merges <code>b764ff3b</code>/<code>c975e836</code>/<code>a8edb892</code>, closure
-    <code>dad5ee53</code>). Arc/bow per-angle vectorisation deferred until profiling shows it hot.</p>
+    <code>dad5ee53</code>). <em>Amendment 2026-07-24:</em> the arc/bow per-angle vectorisation
+    landed (<code>949528d6</code> — limit-point stacks broadcast through scipy; zeta quadrature
+    grouped, bow solve 12.9 → 5.9 s at 10×2000, values within a couple ulp) as the on-ramp to the
+    <a href="/nova/nova-3d-native.html">nova-3d-native</a> plan (exact 3-D flux couplings, PF
+    offsets/tilts, toroidally averaged reconstruction metrics, zeta fast path).</p>
     </section>
 
     <h2 id="s5">§5 — Batched evaluation and topology (JAX)</h2>

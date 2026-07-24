@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="nova-3d-native">
+  <meta name="plan-title"     content="Nova 3D-Native Field and Coupling Tier">
+  <meta name="plan-summary"   content="Exact 3D flux couplings (3D coils and 3D loops) on the vectorised x/y/z field kernels: PF offsets and tilts, toroidally averaged metrics feeding axisymmetric reconstruction, and a fast-path treatment of the zeta integral">
+  <meta name="plan-status"    content="draft">
+  <meta name="plan-roi"       content="high">
+  <meta name="plan-effort"    content="L">
+  <meta name="plan-tier"      content="opus">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-depends-on" content="nova-spine-refactor">
+  <title>Nova 3D-Native Field and Coupling Tier | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — Objective and substrate</h2>
+    <p><strong>Point the nova physics spine at a 3D-native implementation.</strong> The substrate
+    already exists (user direction 2026-07-24): the unified Biot tier solves the <strong>x, y, z
+    components of field and vector potential for true 3-D elements</strong> — arc, bow, line and
+    beam kernels, validated by <code>test_biotsavart_3d</code> (39/39) and the analytic 3-D element
+    tests — and the per-angle Python-level stacking in the arc/bow kernels is now vectorised
+    (limit-point axes broadcast through scipy's incomplete elliptic functions; the zeta midpoint
+    quadrature runs in grouped blocks — bow grid solves 2.2× faster, values within a couple ulp of
+    the element-wise reference). What is missing is not capability but <em>assembly</em>: the
+    collapsed, vectorised 3-D field predictors are not yet exposed as exact coupling operators
+    between arbitrary 3-D conductors and 3-D observation loops, and their outputs are not yet
+    folded back as toroidally averaged metrics for the axisymmetric reconstruction path.</p>
+    <svg viewBox="0 0 760 210" role="img" aria-label="3D-native tier pipeline"
+         style="max-width:100%;height:auto;font-family:system-ui;font-size:13px">
+      <defs>
+        <marker id="arr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M0,0 L8,4 L0,8 z" fill="#444"/>
+        </marker>
+      </defs>
+      <rect x="8"   y="30" width="160" height="64" fill="none" stroke="#888" stroke-width="1"/>
+      <text x="88"  y="52" text-anchor="middle" fill="#222" font-weight="600">3-D elements</text>
+      <text x="88"  y="70" text-anchor="middle" fill="#444">arc · bow · line · beam</text>
+      <text x="88"  y="86" text-anchor="middle" fill="#444">(x,y,z) A and B — landed</text>
+      <rect x="208" y="30" width="160" height="64" fill="none" stroke="#888" stroke-width="1"/>
+      <text x="288" y="52" text-anchor="middle" fill="#222" font-weight="600">Coupling operators</text>
+      <text x="288" y="70" text-anchor="middle" fill="#444">M = ∮ A·dl exact flux</text>
+      <text x="288" y="86" text-anchor="middle" fill="#444">3-D coil ↔ 3-D loop</text>
+      <rect x="408" y="30" width="160" height="64" fill="none" stroke="#888" stroke-width="1"/>
+      <text x="488" y="52" text-anchor="middle" fill="#222" font-weight="600">Perturbations</text>
+      <text x="488" y="70" text-anchor="middle" fill="#444">PF offsets + tilts</text>
+      <text x="488" y="86" text-anchor="middle" fill="#444">rigid-body ensembles</text>
+      <rect x="608" y="30" width="144" height="64" fill="none" stroke="#2a7a4b" stroke-width="1.5"/>
+      <text x="680" y="52" text-anchor="middle" fill="#222" font-weight="600">n = 0 averages</text>
+      <text x="680" y="70" text-anchor="middle" fill="#444">toroidal mean metrics</text>
+      <text x="680" y="86" text-anchor="middle" fill="#2a7a4b">→ axisymmetric recon</text>
+      <line x1="168" y1="62" x2="204" y2="62" stroke="#444" stroke-width="1.2" marker-end="url(#arr)"/>
+      <line x1="368" y1="62" x2="404" y2="62" stroke="#444" stroke-width="1.2" marker-end="url(#arr)"/>
+      <line x1="568" y1="62" x2="604" y2="62" stroke="#444" stroke-width="1.2" marker-end="url(#arr)"/>
+      <rect x="208" y="130" width="160" height="48" fill="none" stroke="#888" stroke-width="1" stroke-dasharray="4 3"/>
+      <text x="288" y="150" text-anchor="middle" fill="#444">zeta fast path (§2)</text>
+      <text x="288" y="166" text-anchor="middle" fill="#444">quadrature / surrogate</text>
+      <line x1="288" y1="130" x2="288" y2="98" stroke="#444" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#arr)"/>
+      <text x="380" y="203" text-anchor="middle" fill="#555">The landed kernel tier feeds three new capabilities; the zeta fast path removes the one remaining quadrature hot spot.</text>
+    </svg>
+
+    <h2 id="s2">§2 — The zeta integral: analytical treatment</h2>
+    <p><strong>Question (user, 2026-07-24): can 𝔍(α) = ∫₀^α arcsinh β₁(α′) dα′ (Urankar eq. 9b) be
+    solved directly?</strong> Assessment: a classical closed form does not exist, and Urankar's
+    "evades an analytical treatment" still stands — but the cost can be cut by an order of
+    magnitude without giving up exactness guarantees.</p>
+    <ul>
+      <li><strong>Why the closed form fails.</strong> Integrating by parts removes the arcsinh:
+      𝔍(α) = α·arcsinh β₁(α) − ∫₀^α α′ (d/dα′ arcsinh β₁) dα′. The remaining integrand is
+      algebraic — rational in cos φ, sin φ over the two radicals √(γ² + r² sin²φ) and
+      √(γ² + B²(φ)) — and each <em>unweighted</em> term reduces to incomplete elliptic integrals
+      F, E, Π by the standard u = cos φ substitutions. The obstruction is the explicit α′ weight:
+      it produces integrals <em>of</em> incomplete elliptic integrals (∫ F(φ,k) dφ terms), which
+      lie outside the Legendre family — elliptic-polylogarithm territory. Every other term of the
+      Urankar Part III/V antiderivatives reduces; this one is genuinely transcendental in the
+      classical special-function basis.</li>
+      <li><strong>Option A — spectral quadrature (recommended first step).</strong> The integrand
+      is smooth (analytic away from the conductor surface), so fixed-order Gauss–Legendre
+      converges spectrally: 16–48 nodes replace the current ~500 midpoint panels per unit α at
+      equal or better accuracy — a further ~10–30× on the zeta term, and <em>fixed node count
+      means fixed shapes</em>, exactly what the JAX/vmap path wants (the existing JAX
+      <code>Zeta</code> already uses fixed-count trapezoid; Gauss–Legendre strictly dominates it).
+      Near-conductor targets (β₁ gradient spike) get a tanh-sinh or split-interval fallback.
+      Gate: match the midpoint reference at ≤1e-12 relative across a scan of (rs/r, γ/r, α);
+      re-baseline the greens ulp fingerprints to tolerance gates where they pin quadrature
+      internals rather than physics.</li>
+      <li><strong>Option B — by-parts hybrid.</strong> Evaluate the boundary term
+      α·arcsinh β₁(α) exactly, reduce the elliptic-reducible pieces of the remainder to F/E/Π
+      (already computed for the neighbouring terms), and quadrature only the small
+      elliptic-polylog residue — a smoother, smaller integrand needing very few nodes. More
+      derivation work; combine with A if profiling still shows zeta hot after A.</li>
+      <li><strong>Option C — Chebyshev surrogate ("build the special function").</strong>
+      Nondimensionalised, ζ depends on three reduced variables (rs/r, γ/r, α); a precomputed
+      Chebyshev tensor grid evaluates to ~1e-12 in a handful of fused multiply-adds, fully
+      vectorised and jit-friendly. Best asymptotic cost; adds a table artifact + build step.
+      Appropriate once the 3-D coupling operators make zeta the dominant remaining term.</li>
+      <li><strong>Option D — harmonic expansions</strong> (cylindrical/toroidal harmonic series à
+      la Walstrom/Selvaggi): analytic term-by-term integrals, excellent in the far zone, poor
+      convergence near the conductor — useful as a far-field fast path only, not a replacement.</li>
+    </ul>
+    <p><em>Done-when:</em> a quadrature decision is locked; the chosen fast path lands with a
+    tolerance-gated equivalence suite against the midpoint reference (and the greens corner
+    fingerprints migrated from ulp-pinning to physics-tolerance gates); bow/arc solve cost
+    re-measured and recorded.</p>
+
+    <h2 id="s3">§3 — Exact flux couplings: 3-D coils and 3-D loops</h2>
+    <p>Expose the kernel tier as coupling operators: the exact mutual flux between any 3-D
+    conductor (arc/bow/line/beam paths, finite section) and any 3-D observation loop, via the
+    vector-potential line integral M = (1/I) ∮ A·dl over the loop path — reusing the already-solved
+    (Ax, Ay, Az) predictors so no new physics enters, only a loop-path quadrature and the
+    reduction machinery. Validation oracles: coaxial circular pairs against the Maxwell/Neumann
+    analytic mutual inductance; the ITER sub-inductance goldens recovered as the axisymmetric
+    special case; reciprocity (M_ij = M_ji) and translation/rotation invariance as property
+    tests. This is the general replacement for axisymmetric-only inductance assembly and the
+    basis for non-axisymmetric sensor modelling (saddle loops, partial Rogowskis).</p>
+    <p><em>Done-when:</em> a coupling API (loop ↔ coil, coil ↔ coil) passes the analytic oracles
+    at kernel-golden tolerances; reciprocity and invariance property tests green; axisymmetric
+    limit reproduces the existing inductance matrix.</p>
+
+    <h2 id="s4">§4 — PF coil offsets and tilts</h2>
+    <p>Rigid-body perturbations of nominally axisymmetric coils: each PF/CS coil takes an optional
+    (Δx, Δy, Δz, tilt-axis, tilt-angle) transform applied to its source geometry before kernel
+    evaluation — an axisymmetric coil becomes a general 3-D arc ensemble, which the kernels
+    already integrate exactly. Couplings from §3 then give exact perturbed flux at sensors and
+    loops, supporting error-field and as-installed studies with the metrology inputs norma
+    produces. Batched evaluation (leading perturbation-ensemble axis, spine §5's vmap machinery)
+    makes Monte-Carlo tolerance studies cheap.</p>
+    <p><em>Done-when:</em> perturbed-coil couplings agree with the unperturbed path at zero
+    offset/tilt to machine precision; first-order sensitivity against analytic small-displacement
+    expansions for a circular loop; a batched perturbation ensemble evaluates through vmap with
+    fixed shapes.</p>
+
+    <h2 id="s5">§5 — Toroidally averaged metrics for axisymmetric reconstruction</h2>
+    <p>Fold the 3-D predictions back into the axisymmetric world: toroidal (n = 0) averages of the
+    3-D fields on the poloidal grid — averaged Green's functions, averaged sensor responses, and
+    averaged flux couplings — supplied as drop-in replacements wherever the reconstruction stack
+    consumes axisymmetric operators. A perturbed or genuinely 3-D coil set then supports an
+    axisymmetric reconstruction with the 3-D content correctly averaged rather than ignored, and
+    the n ≠ 0 residual is available as a diagnostic sideband.</p>
+    <p><em>Done-when:</em> for an unperturbed axisymmetric machine the averaged operators equal
+    the native axisymmetric ones to quadrature tolerance; for a tilted-coil case the averaged
+    operator matches a brute-force dense-toroidal-sampling reference; the reconstruction seam
+    accepts either operator source unchanged.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="zeta-fast-path" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Zeta fast path (§2): Gauss–Legendre spectral quadrature first
+        (recommended — smallest change, fixed shapes for JAX, ~10–30× on the zeta term), the
+        by-parts hybrid (more derivation, fewest nodes), or go straight to the Chebyshev surrogate
+        (best asymptotic cost, adds a table artifact)? Options compose: A now, B/C if profiling
+        still shows zeta hot after the §3 coupling operators land.</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="gauss-legendre">Gauss–Legendre first</button>
+          <button class="r-opt" data-value="by-parts-hybrid">by-parts hybrid</button>
+          <button class="r-opt" data-value="chebyshev-surrogate">Chebyshev surrogate</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+      <div class="r-dec" data-key="coupling-formulation" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Coupling formulation (§3): vector-potential line integral M = ∮ A·dl
+        over the observation loop (recommended — reuses the solved A predictors, one quadrature)
+        or the Neumann double line integral (symmetric by construction, but re-integrates the
+        source and duplicates kernel work)?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="vector-potential">∮ A·dl on the loop</button>
+          <button class="r-opt" data-value="neumann-double">Neumann double integral</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-3d-01" data-status="open" data-tier="opus"
+               data-written-by="reckon-create" data-written-at="2026-07-24"
+               data-recommends-skill="/reckon-ship nova-3d-native §2">
+        <h4 class="r-fu-title">Lock the zeta fast-path decision and land the §2 quadrature study</h4>
+        <div class="r-fu-body"><p>First shippable increment: the Gauss–Legendre vs midpoint
+        equivalence scan over (rs/r, γ/r, α), the near-conductor fallback characterisation, and
+        the greens fingerprint migration from ulp-pins to tolerance gates — unblocking the §3
+        coupling operators on a fast, fixed-shape zeta.</p></div>
+        <pre class="r-fu-prompt">Project: nova
+Plan:    nova-3d-native (http://127.0.0.1:8765/nova/nova-3d-native.html)
+Section: §2
+Tier:    opus
+
+Context
+  The 3-D element kernels are landed and vectorised on develop
+  (nova-spine-refactor §4 + the arc/zeta vectorisation commit); zeta's grouped
+  midpoint quadrature is the one remaining quadrature hot spot. This increment
+  locks the fast-path decision with data and lands the chosen path.
+
+State to read
+  nova/biot/zeta.py (grouped midpoint quadrature, numpy + JAX forms)
+  nova/biot/greens.py (_zeta at points=785; corner-field ulp fingerprints)
+  tests/test_biotgreens.py (4-ulp corner gate to migrate to tolerance)
+  benchmarks (bow grid solve timing in the s3s4 archive)
+
+Scope locks / constraints
+  Work in a worktree off develop; primary checkout stays on main. TDD: the
+  equivalence scan is authored as a test before the fast path replaces the
+  default. Accuracy gate <= 1e-12 relative vs the midpoint reference across
+  the (rs/r, gamma/r, alpha) scan; near-conductor cases get an explicit
+  fallback with its own gate.
+
+Done-when
+  1. Decision zeta-fast-path locked with the scan evidence in the plan.
+  2. Chosen fast path lands; bow/arc solve re-timed and recorded.
+  3. greens fingerprints migrated to physics-tolerance gates; kernel lane green.
+  4. Followup written into plan + this followup resolved.</pre>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

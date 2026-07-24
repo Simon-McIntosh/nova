@@ -1,6 +1,6 @@
 {
     "biotoperate.PlasmaEvaluate.time_field_magnitude": {
-        "code": "class PlasmaEvaluate:\n    def time_field_magnitude(self):\n        \"\"\"Time computation of radial field.\"\"\"\n        return self.coilset.plasmagrid.bn\n\nclass PlasmaGrid:\n    def setup(self):\n        \"\"\"Load coilset from file.\"\"\"\n        self.coilset = CoilSet(filename=self.filename, dirname=self.dirname).load()\n\n    def setup_cache(self):\n        \"\"\"Build reference coilset.\"\"\"\n        coilset = CoilSet(dplasma=-500, filename=self.filename, dirname=self.dirname)\n        coilset.firstwall.insert({\"ellip\": [4.2, -0.4, 1.25, 4.2]}, turn=\"hex\")\n        coilset.plasmagrid.solve()\n        coilset.plasmagrid.svd_rank = 75\n        coilset.store()",
+        "code": "class PlasmaEvaluate:\n    def time_field_magnitude(self):\n        \"\"\"Time computation of poloidal field magnitude.\"\"\"\n        return self.coilset.plasmagrid.bp\n\nclass PlasmaGrid:\n    def setup(self):\n        \"\"\"Load coilset from file.\"\"\"\n        self.coilset = CoilSet(filename=self.filename, dirname=self.dirname).load()\n\n    def setup_cache(self):\n        \"\"\"Build reference coilset.\"\"\"\n        coilset = CoilSet(dplasma=-500, filename=self.filename, dirname=self.dirname)\n        coilset.firstwall.insert({\"ellip\": [4.2, -0.4, 1.25, 4.2]}, turn=\"hex\")\n        coilset.plasmagrid.solve()\n        coilset.plasmagrid.svd_rank = 75\n        coilset.store()",
         "min_run_count": 2,
         "name": "biotoperate.PlasmaEvaluate.time_field_magnitude",
         "number": 5000,
@@ -12,7 +12,7 @@
         "setup_cache_key": "biotoperate:33",
         "type": "time",
         "unit": "seconds",
-        "version": "2c3b5b87c06de63a27d2a069d8773c52d315f9f902717685ebb2f923797205fe",
+        "version": "3deb2d56a417c7b00b3b6d9138bd6f29cf2b9d55aba14583b4c300a8d6e55552",
         "warmup_time": -1
     },
     "biotoperate.PlasmaEvaluate.time_flux_function": {

@@ -142,11 +142,9 @@ def test_biotreduce():
     biotframe.insert(range(3), 2, link=False)
     biotframe.insert(range(3), 3, link=True)
     biotframe.multipoint.link(["Coil0", "Coil11", "Coil2", "Coil8"])
-    assert biotframe.biotreduce.indices == [0, 1, 2, 3, 6, 7, 8, 9, 11]
+    assert list(biotframe.biotreduce.indices) == [0, 1, 2, 3, 6, 7, 8, 9, 11]
     assert list(biotframe.biotreduce.link) == [2, 6, 8]
-    assert biotframe.biotreduce.index.to_list() == [
-        f"Coil{i}" for i in [0, 1, 3, 6, 7, 9]
-    ]
+    assert list(biotframe.biotreduce.index) == [f"Coil{i}" for i in [0, 1, 3, 6, 7, 9]]
 
 
 def test_subframe_lock():

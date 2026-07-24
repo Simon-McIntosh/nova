@@ -250,8 +250,8 @@ class Plasma(Plot, netCDF, Flux, PlasmaLoc):
     @property
     def separatrix(self):
         """Return plasma separatrix, the convex hull of active filaments."""
-        index = self.loc["plasma", "nturn"] > 0
-        points = self.loc["plasma", ["x", "z"]].values[index]
+        index = np.asarray(self.aloc["plasma", "nturn"]) > 0
+        points = np.c_[self.aloc["plasma", "x"], self.aloc["plasma", "z"]][index]
         hull = scipy.spatial.ConvexHull(points)
         vertices = np.append(hull.vertices, hull.vertices[0])
         convexhull = points[vertices]

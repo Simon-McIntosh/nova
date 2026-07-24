@@ -72,8 +72,10 @@ class PlasmaGrid(BaseGrid, PlasmaLoc):
         """Solve Biot interaction across plasma grid."""
         if self.sloc["plasma"].sum() == 0:
             raise GridError("plasma")
-        target = Target(self.loc["plasma", ["x", "z", "poly"]].to_dict())
-        wall = self.Loc["plasma", "poly"].iloc[0].poly.boundary
+        target = Target(
+            {attr: self.aloc["plasma", attr] for attr in ["x", "z", "poly"]}
+        )
+        wall = self.aloc["plasma", "poly"][0].poly.boundary
         self.data = Solve(
             self.subframe,
             target,
@@ -157,7 +159,7 @@ class PlasmaGrid(BaseGrid, PlasmaLoc):
         """Return pointloop instance, used to check loop membership."""
         if self.saloc["plasma"].sum() == 0:
             raise AttributeError("No plasma filaments found.")
-        return PointLoop(self.loc["plasma", ["x", "z"]].to_numpy())
+        return PointLoop(np.c_[self.aloc["plasma", "x"], self.aloc["plasma", "z"]])
 
     def ionize_mask(self, index):
         """Return plasma filament selection mask."""

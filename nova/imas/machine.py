@@ -266,11 +266,49 @@ class ThickLine(GeomData):
 
 
 @dataclass
+class MachineGeometryReader(ABC):
+    """Provider seam presenting a poloidal geometry element to CrossSection.
+
+    Decouples the geometry-type dispatch and attribute extraction from the
+    backing store so that an IMAS IDS geometry node and a (FAIR-MAST) zarr
+    source are interchangeable providers of the same :class:`GeomData`
+    sections. A concrete reader reports the element's geometry type and builds
+    the requested section from whatever it wraps.
+    """
+
+    source: object = field(repr=False)
+
+    @property
+    @abstractmethod
+    def geometry_type(self) -> int:
+        """Return the poloidal geometry-type index of the element."""
+
+    @abstractmethod
+    def section(self, geometry: type[GeomData]) -> GeomData:
+        """Return the ``geometry`` section built from the backing source."""
+
+
+@dataclass
+class ImasGeometryReader(MachineGeometryReader):
+    """Present an IMAS geometry IDS node through the reader seam."""
+
+    @property
+    def geometry_type(self) -> int:
+        """Return the geometry-type index read from the IDS node."""
+        return self.source.geometry_type.value
+
+    def section(self, geometry: type[GeomData]) -> GeomData:
+        """Build the section by extracting attributes from the IDS node."""
+        return geometry(self.source)
+
+
+@dataclass
 class CrossSection:
     """Manage poloidal cross-sections."""
 
     ids: ImasIds = field(repr=False)
     data: GeomData = field(init=False)
+    reader: ClassVar[type[MachineGeometryReader]] = ImasGeometryReader
     transform: ClassVar[dict[int, object]] = {
         1: Outline,
         2: Rectangle,
@@ -281,14 +319,16 @@ class CrossSection:
     }
 
     def __post_init__(self):
-        """Build geometry instance."""
+        """Build geometry instance through the reader seam."""
+        reader = self.reader(self.ids)
+        geometry_type = reader.geometry_type
         try:
-            self.data = self.transform[self.ids.geometry_type.value](self.ids)
+            self.data = reader.section(self.transform[geometry_type])
         except KeyError as error:
-            if self.ids.geometry_type.value == -999999999:
+            if geometry_type == -999999999:
                 default_geometry_type = 1  # remove once WEST pf_passive is fixed
                 warn(f"geometry type unset, fixing value to {default_geometry_type}")
-                self.data = self.transform[default_geometry_type](self.ids)
+                self.data = reader.section(self.transform[default_geometry_type])
             else:
                 raise KeyError from error
         if self.data.name == "outline" and len(self.data.data["r"]) == 1:  # WEST data

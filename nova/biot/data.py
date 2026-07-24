@@ -2,12 +2,12 @@
 
 from dataclasses import dataclass, field
 
-from nova.database.netcdf import netCDF
+from nova.database.zarrstore import ZarrStore
 from nova.frame.framesetloc import FrameSetLoc
 
 
 @dataclass
-class Data(netCDF, FrameSetLoc):
+class Data(ZarrStore, FrameSetLoc):
     """Biot solution abstract base class."""
 
     attrs: list[str] = field(default_factory=lambda: ["Br", "Bz", "Psi"])

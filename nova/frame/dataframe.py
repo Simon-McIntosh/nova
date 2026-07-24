@@ -551,8 +551,13 @@ class DataFrame:
             return array.astype(str)
         return array
 
+    @staticmethod
+    def _is_zarr(filepath) -> bool:
+        """Return True when the path targets a grouped zarr store."""
+        return str(filepath).endswith(".zarr")
+
     def store(self, filepath, group=None, mode="w", vtk=False):
-        """Store the frame as a netCDF group via xarray."""
+        """Store the frame as a group within a zarr store or netCDF file."""
         dataset = self.to_xarray()
         dataset.attrs = self._extract_metadata()
         for col in ["poly", "vtk"]:
@@ -561,13 +566,38 @@ class DataFrame:
                 continue
             if col in self.columns:
                 dataset[col] = ("index", self._dumps(col))
+        if self._is_zarr(filepath):
+            # replace the group in place so a rebuilt frame never inherits a
+            # stale variable from a wider prior schema, and siblings are kept
+            import os
+
+            import zarr
+
+            from nova.database.zarrstore import suppress_unstable_string_spec
+
+            if os.path.isdir(filepath):
+                root = zarr.open_group(store=str(filepath), mode="a")
+                if root.get(group) is not None:
+                    del root[group]
+                zarr_mode = "a"
+            else:
+                zarr_mode = "w"  # create the store with its first group
+            with suppress_unstable_string_spec():
+                dataset.to_zarr(
+                    str(filepath), group=group, mode=zarr_mode, consolidated=False
+                )
+            return
         dataset.to_netcdf(filepath, group=group, mode=mode)
 
     def load(self, filepath, group=None):
-        """Load the frame from a netCDF group via xarray."""
+        """Load the frame from a group within a zarr store or netCDF file."""
         import xarray
 
-        with xarray.open_dataset(filepath, group=group, cache=False) as dataset:
+        if self._is_zarr(filepath):
+            context = xarray.open_zarr(str(filepath), group=group, consolidated=False)
+        else:
+            context = xarray.open_dataset(filepath, group=group, cache=False)
+        with context as dataset:
             dataset.load()
             metadata = self._insert_metadata(dict(dataset.attrs))
             columns = {name: np.asarray(dataset[name]) for name in dataset.data_vars}

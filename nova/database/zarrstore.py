@@ -8,13 +8,32 @@ rewrite the netCDF backend is forced into. netCDF remains available through
 :class:`~nova.database.netcdf.netCDF` for interchange and export.
 """
 
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 import gc
+import warnings
 
 import xarray
 import zarr
 
 from nova.database.filepath import FilePath
+
+
+@contextmanager
+def suppress_unstable_string_spec():
+    """Silence zarr's warning that fixed-length string arrays lack a v3 spec.
+
+    Frame labels, links and serialised geometry persist as fixed-length
+    unicode, for which zarr v3 has no settled on-disk specification yet. The
+    store backs a cache that is rebuilt from source whenever its identity key
+    changes, so a future change to zarr's string encoding costs a rebuild, not
+    data loss -- the caveat the warning guards against does not apply here.
+    """
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            "ignore", message=".*does not have a Zarr V3 specification.*"
+        )
+        yield
 
 
 @dataclass
@@ -58,15 +77,30 @@ class ZarrStore(FilePath):
 
     def store(self, mode=None):
         """Store data as a group within the zarr store."""
-        self.data.to_zarr(
-            self._mapper(),
-            group=self.group,
-            mode=self.get_mode(mode),
-            consolidated=False,
-        )
+        with suppress_unstable_string_spec():
+            self.data.to_zarr(
+                self._mapper(),
+                group=self.group,
+                mode=self.get_mode(mode),
+                consolidated=False,
+            )
         self.data.close()
         gc.collect()
         return self
+
+    def group_names(self, *subgroups: str) -> list[str]:
+        """Return the child group names beneath the compound subgroup path.
+
+        Enumerates the named groups written into the store so a loader can
+        discover which method groups were persisted without reading them.
+        Returns an empty list when the store or the path is absent.
+        """
+        if not self.is_store():
+            return []
+        root = zarr.open_group(store=self._mapper(), mode="r")
+        path = self.subgroup(*subgroups)
+        node = root if path is None else root[path]
+        return list(node.group_keys())
 
     def delete_group(self):
         """Evict a cache group via a native zarr delete, keeping its siblings."""

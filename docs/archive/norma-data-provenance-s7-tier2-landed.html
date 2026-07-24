@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="archive">
+  <meta name="plan-slug" content="norma-data-provenance-s7-tier2-landed">
+  <meta name="plan-title" content="Tier-2 replay, corpus sync, fit manifest, fiducial-fit refactor — landed">
+  <meta name="plan-status" content="historical">
+  <meta name="plan-modified" content="2026-07-24">
+  <title>norma-data-provenance §6/§7 completion wave | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>norma-data-provenance — §6/§7 completion wave (2026-07-24, SDCC)</h1>
+    <p>First wave executed from the ITER SDCC login node rather than the laptop. Verified
+    the GHCR corpus is retrievable off-laptop, closed the storage program's sync gap,
+    completed Tier-2 historical replay end-to-end, produced the full historical
+    fit-parameter manifest, and lifted the fiducial-fit driver out of its
+    <code>__main__</code> block under unit test. Suite grew
+    <strong>129 passed / 7 skipped → 173 passed / 4 skipped</strong> with zero failures;
+    every remaining skip is an environment opt-in (ANSYS, heavy mesh, Tier-2 flag,
+    GHCR-integration flag).</p>
+
+    <figure>
+      <img src="/nova/figures/norma-data-provenance/replay_wave_summary.png"
+           alt="Suite pass/skip evolution across the wave, and recorded fits per sector from the manifest"
+           style="max-width:100%">
+      <figcaption>Fig 1 — left: suite evolution on SDCC across the wave; right: the 512
+      recorded fits per sector enumerated by the fit manifest.</figcaption>
+    </figure>
+
+    <h2>Outcomes</h2>
+    <table>
+      <thead><tr><th>Item</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td>GHCR retrieval exercised off-laptop</td>
+        <td>Both artifacts pulled to <code>~/.local/share/norma/</code> on SDCC via
+        <code>oras</code> under the <code>gh</code> token; all four digests byte-verified
+        against the plan record (manifests <code>sha256:6507c376…</code> /
+        <code>sha256:9870e261…</code>, tarballs <code>2f4f277f…</code> /
+        <code>742a0bdd…</code>). The snapshot carries
+        <code>sector_modules/ILIS_nominal.pickle</code>.</td></tr>
+        <tr><td>Corpus resolver + auto-sync (commit <code>507ba732</code>)</td>
+        <td><code>nova/assembly/provenance/corpus.py</code>: resolve via
+        <code>$NOVA_CORPUS_ROOT</code> → <code>~/.local/share/norma</code> → legacy
+        AppData mount; materialize from GHCR by pinned digest with manifest verification
+        when absent. Transcode corpus tests rewired at the resolver — the 3
+        "measured corpus not mounted" skips now run green on SDCC.</td></tr>
+        <tr><td><code>pit.gaps</code> lane (same commit)</td>
+        <td><strong>Unskipped, green.</strong> <code>NominalIlis</code> falls back to the
+        corpus-preserved <code>ILIS_nominal.pickle</code> when the IO share is
+        unreachable; additive golden <code>pit.gaps.npz</code>. The raw
+        <code>ILIS_nominal.txt</code> remains IO-share-only: SMB (445/139) to
+        <code>io-ws-ccstore1.iter.org</code> is firewalled from SDCC (checked
+        2026-07-24) — copy it next time on the IO office network / laptop.</td></tr>
+        <tr><td>Tier-2 historical replay (commit <code>64780f2e</code>)</td>
+        <td>Five named stages (resolve-sha worktree, verify-lock, sync-deps frozen
+        uv env, run-entrypoint subprocess, compare via the shared Tier-1 core) with
+        graceful <em>visible</em> degradation naming the failing stage; same-sha fast
+        path; opt-in via <code>NOVA_TIER2_REPLAY=1</code>. Original dirty-tree pilot
+        record degraded honestly at run-entrypoint; after recapturing the record from a
+        clean tree (<code>e46be651</code>, <code>code_dirty: false</code> at
+        <code>2e575939</code>) the <strong>full replay passes end-to-end: 3 passed in
+        31&nbsp;s</strong>.</td></tr>
+        <tr><td>Historical fit-parameter manifest (commit <code>a23ef791</code>)</td>
+        <td><code>data/Assembly/fit_manifest.yaml</code> +
+        <code>nova/assembly/provenance/fithistory.py</code> (15 tests):
+        <strong>85 workbooks, 265 fit sheets, 512 fits</strong> — every fit's recorded
+        6-DOF transform (dx,dy,dz + intrinsic Euler rx,ry,rz per coil) plus an
+        <code>inferred: true</code> parameter-epoch attribution mined from the
+        <code>fiducialfit.py</code>/<code>gaussianprocessregressor.py</code> git history
+        (10 epochs, 2023-12-12 → 2026-04-12: weights [1,1,0.5]→[1,1,0.25], radial_offset
+        0→−0.47110, toroidal constraint all→[0,5,3,4], GPR seed pinned 2025, coupled
+        switch 2026-02-06). Regeneration is byte-identical over an unchanged corpus.
+        Flagged: mtime-based attribution is an upper bound; one no-transform
+        "SSAT AR target" sheet in private unit #7 v9_4
+        (<code>name_signal_without_fit</code>).</td></tr>
+        <tr><td>Fiducial-fit refactor (commit <code>2e575939</code>)</td>
+        <td>The hand-edited <code>__main__</code> analysis lifted into a typed
+        <code>fit_sector()</code> driver + <code>plot_summary()</code> /
+        <code>delta_summary()</code> methods; fixed the latent module-global reference in
+        <code>FiducialFit.to_pandas</code> (NameError outside the script context).
+        13 unit tests in <code>tests/test_fiducialfit.py</code> cover error_vector,
+        transform, mask_frame, the driver fit (objective decrease, opt_x shape/finite)
+        and a workbook write round-trip into the private <code>_</code>-sibling — all
+        against workbooks rebuilt from the in-repo canonical units. Full suite green
+        (173/4), goldens untouched.</td></tr>
+        <tr><td>Hot-file audit (refactor priority ranking)</td>
+        <td>Assembly files by commits in the 12 months pre-refactor:
+        <code>fiducialpit.py</code> 58, <code>trial.py</code> 25,
+        <code>fiducialsector.py</code> 21, <code>fiducialfit.py</code> 12 (now
+        refactored), <code>fiducialilis.py</code> 10. The pit/sector/trial trio is the
+        queued post-processing refactor scope; each still carries a large
+        <code>__main__</code> block.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Residuals</h2>
+    <ul>
+      <li>Raw <code>ILIS_nominal.txt</code>: IO-share-only; SMB firewalled from SDCC
+      (dated note 2026-07-24). The preserved pickle covers the test lane.</li>
+      <li>Fit-manifest attribution: mtime is an upper bound on each fit's date; tighter
+      per-sheet attribution would need mapping (sector, phase) to the generating
+      sector-fit commits.</li>
+      <li>Post-processing refactor (fiducialpit / fiducialsector / trial) queued.</li>
+      <li>§10.5 extraction gate: wire when the spine's assembly extraction begins.</li>
+    </ul>
+  </main>
+</body>
+</html>

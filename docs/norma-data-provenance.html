@@ -4,18 +4,18 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"    content="nova">
-  <meta name="reckon-type"     content="plan">
-  <meta name="plan-slug"       content="norma-data-provenance">
-  <meta name="plan-title"      content="Norma Data Provenance, Persistence & Fit Testing">
-  <meta name="plan-summary"    content="Git-safe versioning of ITER coil-alignment measurements, a commit-hash-keyed provenance/run-record model, and a two-tier replay suite that unit-tests every recorded fit against its goldens within 1 micron">
-  <meta name="plan-status"     content="active">
-  <meta name="plan-modified"   content="2026-07-24">
-  <meta name="plan-version"    content="4">
-  <meta name="plan-impl"       content="0.85">
-  <meta name="plan-roi"        content="high">
-  <meta name="plan-effort"     content="XL">
-  <meta name="plan-tier"       content="opus">
-  <meta name="plan-owner"      content="Simon McIntosh">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="norma-data-provenance">
+  <meta name="plan-title" content="Norma Data Provenance, Persistence &amp; Fit Testing">
+  <meta name="plan-summary" content="Git-safe versioning of ITER coil-alignment measurements, a commit-hash-keyed provenance/run-record model, and a two-tier replay suite that unit-tests every recorded fit against its goldens within 1 micron">
+  <meta name="plan-status" content="active">
+  <meta name="plan-modified" content="2026-07-24">
+  <meta name="plan-version" content="5">
+  <meta name="plan-impl" content="0.95">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="XL">
+  <meta name="plan-tier" content="opus">
+  <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-depends-on" content="nova-spine-refactor">
   <title>Norma Data Provenance, Persistence &amp; Fit Testing | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
@@ -240,9 +240,14 @@
     sha256 <code>2f4f277f…</code>) and
     <code>:canonical-2026-07-24</code> (85-unit canonical transcode, manifest digest
     <code>sha256:9870e261…c9df60</code>, tarball sha256 <code>742a0bdd…</code>).
-    <strong>Remaining:</strong> <code>ILIS_nominal.txt</code> must be copied from the IO share
-    when reachable. Full record:
-    <a href="archive/norma-data-provenance-s2-s6-landed.html">§2–§6 landed</a>.</p>
+    Retrieval exercised off-laptop 2026-07-24: both artifacts pulled + digest-verified on
+    SDCC; automatic resolver/sync landed (<code>nova/assembly/provenance/corpus.py</code>,
+    commit <code>507ba732</code>) — corpus materializes from GHCR by pinned digest on any
+    machine. <strong>Remaining:</strong> raw <code>ILIS_nominal.txt</code> is IO-share-only
+    and SMB is firewalled from SDCC (2026-07-24) — copy from the laptop / IO office network;
+    the preserved <code>ILIS_nominal.pickle</code> meanwhile feeds the test lane. Full
+    records: <a href="archive/norma-data-provenance-s2-s6-landed.html">§2–§6 landed</a>,
+    <a href="archive/norma-data-provenance-s7-tier2-landed.html">§6/§7 completion wave</a>.</p>
     <p>Original design (retained). Two homes, chosen by size and stability, unified by content
     digests so items can move between them
     without breaking any reference:</p>
@@ -260,15 +265,18 @@
     the canonical artifact.</p>
 
     <h2 id="s7">§7 — Testing past fits (two-tier, commit-hash keyed)
-      <span class="badge badge-shipped">◑ Tier 1 landed 2026-07-24</span></h2>
-    <p class="landed-summary"><strong>◑ Tier 1 landed 2026-07-24</strong> (commit
-    <code>36e1c5e8</code>). Replay runner enumerates
-    <code>data/Assembly/run_records/*.yaml</code>, resolves input digests against canonical
-    units, re-runs with current code and compares at the record's tolerance classes — pilot
-    record <code>sector.fit.ssat</code> replays green with ~1e-12 headroom vs the 1&nbsp;µm
-    gate. Tier 2 (sha-worktree historical replay) is a named visible-skip placeholder, queued
-    in followup f-ndp-02. Full record:
-    <a href="archive/norma-data-provenance-s7-s8-landed.html">§7–§8 landed</a>.</p>
+      <span class="badge badge-shipped">✓ landed 2026-07-24 (both tiers)</span></h2>
+    <p class="landed-summary"><strong>✓ Both tiers landed 2026-07-24.</strong> Tier 1
+    (commit <code>36e1c5e8</code>): registry-wide current-code regression, pilot green with
+    ~1e-12 headroom vs the 1&nbsp;µm gate. Tier 2 (commit <code>64780f2e</code>): five-stage
+    historical replay (sha-worktree, verified lock, frozen uv env rebuild, subprocess re-run,
+    shared compare) with visible per-stage degradation, opt-in via
+    <code>NOVA_TIER2_REPLAY=1</code> — full pass end-to-end (3 passed, 31&nbsp;s) against the
+    clean-tree pilot record recaptured at <code>2e575939</code> (<code>e46be651</code>).
+    Fit-parameter history manifest landed alongside (<code>a23ef791</code>): 85 workbooks,
+    265 fit sheets, 512 fits with 10 mined parameter epochs. Full records:
+    <a href="archive/norma-data-provenance-s7-s8-landed.html">§7–§8 landed</a>,
+    <a href="archive/norma-data-provenance-s7-tier2-landed.html">§6/§7 completion wave</a>.</p>
     <p>Original specification (retained). The registry enumerates <strong>every fit ever
     recorded</strong> — each an immutable run record (§4).
     The suite iterates the whole registry; "complete dataset" means the full enumeration, with a
@@ -406,91 +414,85 @@
     </ol>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-
-      <div class="r-dec" data-key="canonical-format" data-choice="long-csv" data-by="reckon-ship" data-when="2026-07-24T07:30:00+00:00">
-        <p class="r-dec-q">Canonical git-safe encoding for the measurement dataset. Long-format CSV/TSV
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="canonical-format" data-choice="long-csv" data-by="reckon-ship" data-when="2026-07-24T07:30:00+00:00">
+    <p class="r-dec-q">Canonical git-safe encoding for the measurement dataset. Long-format CSV/TSV
         (maximally diffable, verbose, needs disciplined float formatting) — recommended for the in-repo
         reference sets; Parquet + a CSV sibling (compact, exactly typed, but binary — the CSV carries the
         diff); or JSON-per-fit (self-describing, nested, noisier diffs).</p>
-        <p class="r-dec-opts">
-          <button class="r-opt chosen" data-value="long-csv">long-format CSV/TSV (recommended)</button>
-          <button class="r-opt" data-value="parquet-csv">Parquet + CSV sibling</button>
-          <button class="r-opt" data-value="json-per-fit">JSON per fit</button>
-        </p>
-        <p class="r-dec-rat">Locked 2026-07-24 at implementation: long-format CSV, one row per
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="long-csv">long-format CSV/TSV (recommended)</button>
+      <button class="r-opt" data-value="parquet-csv">Parquet + CSV sibling</button>
+      <button class="r-opt" data-value="json-per-fit">JSON per fit</button>
+      </p>
+    <p class="r-dec-rat">Locked 2026-07-24 at implementation: long-format CSV, one row per
         atomic value, repr-round-trip float formatting, LF/UTF-8/minimal quoting; YAML sidecar
         per unit for provenance and egress layout. Byte-identical round-trip and determinism
         proven by the transcoder test suite; sha256 over the CSV bytes is the content
         address the run records and registry reference.</p>
-      </div>
-
-      <div class="r-dec" data-key="inrepo-vs-registry" data-choice="refs-inrepo-corpus-oras" data-by="reckon-ship" data-when="2026-07-24T07:30:00+00:00">
-        <p class="r-dec-q">What lives in-repo vs ORAS-only. Reference fixtures + goldens in-repo and the full
+    </div>
+<div class="r-dec" data-key="inrepo-vs-registry" data-choice="refs-inrepo-corpus-oras" data-by="reckon-ship" data-when="2026-07-24T07:30:00+00:00">
+    <p class="r-dec-q">What lives in-repo vs ORAS-only. Reference fixtures + goldens in-repo and the full
         corpus + historical outputs in ORAS by digest (recommended); everything in ORAS with only digests
         in-repo; or everything in-repo (rejected earlier as repo-bloating, but listed for completeness).</p>
-        <p class="r-dec-opts">
-          <button class="r-opt chosen" data-value="refs-inrepo-corpus-oras">refs in-repo, corpus in ORAS (recommended)</button>
-          <button class="r-opt" data-value="digests-only-inrepo">digests-only in-repo, all blobs in ORAS</button>
-          <button class="r-opt" data-value="all-inrepo">everything in-repo</button>
-        </p>
-        <p class="r-dec-rat">Locked 2026-07-24 as executed: 7 canonical reference units
-        (latest public per sector + the private _#7 v9_4 fit fixture, 7.9&nbsp;MB diffable
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="refs-inrepo-corpus-oras">refs in-repo, corpus in ORAS (recommended)</button>
+      <button class="r-opt" data-value="digests-only-inrepo">digests-only in-repo, all blobs in ORAS</button>
+      <button class="r-opt" data-value="all-inrepo">everything in-repo</button>
+      </p>
+    <p class="r-dec-rat">Locked 2026-07-24 as executed: 7 canonical reference units
+        (latest public per sector + the private _#7 v9_4 fit fixture, 7.9 MB diffable
         text) committed in-repo; the full 85-unit canonical corpus + the verified source
         snapshot live outside the repo and go to GHCR by digest via the staged ORAS driver.
         Everything referenced by sha256 so items can move homes without breaking records.</p>
-      </div>
-
-      <div class="r-dec" data-key="replay-strategy" data-choice="two-tier" data-by="reckon-ship" data-when="2026-07-24T07:30:00+00:00">
-        <p class="r-dec-q">Past-fit testing strategy. Two-tier — fast current-code regression against goldens
+    </div>
+<div class="r-dec" data-key="replay-strategy" data-choice="two-tier" data-by="reckon-ship" data-when="2026-07-24T07:30:00+00:00">
+    <p class="r-dec-q">Past-fit testing strategy. Two-tier — fast current-code regression against goldens
         plus on-demand sha-worktree historical replay (recommended); current-code regression only (cheaper,
-        does not prove the record's own env); or full sha-checkout replay for every record (most rigorous,
+        does not prove the record&#x27;s own env); or full sha-checkout replay for every record (most rigorous,
         often infeasible for old envs).</p>
-        <p class="r-dec-opts">
-          <button class="r-opt chosen" data-value="two-tier">two-tier: regression + on-demand replay (recommended)</button>
-          <button class="r-opt" data-value="regression-only">current-code regression only</button>
-          <button class="r-opt" data-value="full-replay">full sha-checkout replay always</button>
-        </p>
-        <p class="r-dec-rat">Locked 2026-07-24: two-tier as specified in §7 — Tier 1
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="two-tier">two-tier: regression + on-demand replay (recommended)</button>
+      <button class="r-opt" data-value="regression-only">current-code regression only</button>
+      <button class="r-opt" data-value="full-replay">full sha-checkout replay always</button>
+      </p>
+    <p class="r-dec-rat">Locked 2026-07-24: two-tier as specified in §7 — Tier 1
         current-code regression over the run-record registry at the tolerance table (CI
         default), Tier 2 sha-worktree historical replay on demand with visible degradation
         when an old environment cannot be rebuilt. Tier-1 foundation + pilot records are the
         in-flight §7/§8 work; Tier 2 is a queued followup.</p>
-      </div>
-
-      <div class="r-dec" data-key="fit-config-format" data-choice="yaml" data-by="smc" data-when="2026-07-24T07:30:00+00:00">
-        <p class="r-dec-q">Declarative fit-configuration file format (schema-validated; hash enters the run
+    </div>
+<div class="r-dec" data-key="fit-config-format" data-choice="yaml" data-by="smc" data-when="2026-07-24T07:30:00+00:00">
+    <p class="r-dec-q">Declarative fit-configuration file format (schema-validated; hash enters the run
         record). YAML (readable, comments, ubiquitous) or TOML (stricter typing, no ambiguity)?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt chosen" data-value="yaml">YAML</button>
-          <button class="r-opt" data-value="toml">TOML</button>
-        </p>
-        <p class="r-dec-rat">User direction 2026-07-24 ("use yaml for manifests"): YAML for
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="yaml">YAML</button>
+      <button class="r-opt" data-value="toml">TOML</button>
+      </p>
+    <p class="r-dec-rat">User direction 2026-07-24 (&quot;use yaml for manifests&quot;): YAML for
         all manifests, fit configurations, run records and sidecars, emitted exclusively
         through the deterministic canonical-YAML io (sorted keys, block style,
         repr-round-trippable floats) so every YAML artifact is byte-stable and hashable.</p>
-      </div>
-    </section>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-ndp-01" data-status="resolved" data-tier="opus"
-               data-written-by="reckon-create" data-written-at="2026-07-23" data-recommends-skill="/reckon-ship norma-data-provenance §2"
-               data-resolved-at="2026-07-24T07:35:00+00:00" data-resolved-by="reckon-ship">
-        <h4 class="r-fu-title">Validate the canonical schema against a real Sector_Module workbook, then build the transcoder</h4>
-        <div class="r-fu-body"><p>Blocked on laptop access (the reverse SSH tunnel to the WSL host that
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-ndp-01" data-status="resolved" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-23" data-recommends-skill="/reckon-ship norma-data-provenance §2" data-resolved-at="2026-07-24T07:35:00+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Validate the canonical schema against a real Sector_Module workbook, then build the transcoder</h4>
+    <div class="r-fu-body"><p>Blocked on laptop access (the reverse SSH tunnel to the WSL host that
         mounts <code>C:/Users/mcintos/AppData/Local/nova/sector_modules/</code> must be up). Once in,
         enumerate the workbook set, dump the real sheet/index structure of
         <code>Sector_Module_#1_CCL_as-built_data_8LMK6A_v8_1.xlsx</code>, validate the §3 long-format schema
         against it, then implement the ingest/egress transcoder with the lossless round-trip test and lock
         the canonical-format and fit-config-format decisions.</p></div>
-        <pre class="r-fu-prompt">Project: nova
+    <pre class="r-fu-prompt">Project: nova
 Plan:    norma-data-provenance (http://localhost:8765/nova/norma-data-provenance.html)
 Section: §2 (transaction boundary) + §3 (canonical format)
 Tier:    opus
 
 Context
-  This plan designs norma's data-provenance/persistence/testing system. Work runs
+  This plan designs norma&#x27;s data-provenance/persistence/testing system. Work runs
   on the `main` branch (assembly tree + plans live there; develop deletes assembly).
   First concrete step: ground the canonical schema in the REAL workbook, then build
   the single transaction boundary. Honour the locked GHCR/ORAS registry decision;
@@ -498,7 +500,7 @@ Context
 
 State to read  (code / data — not the plan)
   ~/Code/nova/nova/assembly/sectordata.py, sectorfile.py   (the read contract:
-    openpyxl.load_workbook + pandas.read_excel(sheet_name=<phase>, index_col=[0,1,2]);
+    openpyxl.load_workbook + pandas.read_excel(sheet_name=, index_col=[0,1,2]);
     versioned filenames Sector_Module_#N_..._vMAJ_MIN.xlsx; leading _ = private)
   ~/Code/nova/nova/assembly/ilisnominal.py                 (ILIS_nominal.txt reader)
   ~/Code/nova/tests/characterization/  (harness: canonicalization, tolerance, manifest to reuse)
@@ -521,17 +523,16 @@ Done-when
   2. Transcoder implemented with a passing lossless round-trip test
   3. canonical-format + fit-config-format decisions locked
   4. Followup written for §4/§6 (run records + registry) + this followup resolved</pre>
-        <p class="r-fu-outcome">§2–§6 landed 2026-07-24 (local client with direct AppData
+    <p class="r-fu-outcome">§2–§6 landed 2026-07-24 (local client with direct AppData
         access — no tunnel needed). 89 workbooks surveyed; transcoder shipped with
         byte-identical round-trip (37 tests); provenance substrate shipped (57 tests);
         preservation manifest (126 files) + 7 canonical reference units committed; verified
         local snapshot + staged ORAS push. All four decisions locked. Full record:
         docs/archive/norma-data-provenance-s2-s6-landed.html.</p>
-      </article>
-      <article class="r-fu" data-id="f-ndp-02" data-status="open" data-tier="opus"
-               data-written-by="reckon-ship" data-written-at="2026-07-24" data-recommends-skill="/reckon-ship norma-data-provenance §7">
-        <h4 class="r-fu-title">Complete the replay program: ORAS corpus push, Tier-2 replay, registry-wide enumeration</h4>
-        <div class="r-fu-body"><p>Updated 2026-07-24: the offsite pushes are DONE — both the
+    </article>
+<article class="r-fu" data-id="f-ndp-02" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-24" data-recommends-skill="/reckon-ship norma-data-provenance §7" data-resolved-at="2026-07-24T14:32:05+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Complete the replay program: ORAS corpus push, Tier-2 replay, registry-wide enumeration</h4>
+    <div class="r-fu-body"><p>Updated 2026-07-24: the offsite pushes are DONE — both the
         verified snapshot (<code>:appdata-snapshot-2026-07-23</code>,
         <code>sha256:6507c376…</code>) and the 85-unit canonical corpus
         (<code>:canonical-2026-07-24</code>, <code>sha256:9870e261…</code>) live in
@@ -540,7 +541,7 @@ Done-when
         (2) copy <code>ILIS_nominal.txt</code> from the IO share when reachable, bring it under
         the manifest + registry, and unskip the <code>pit.gaps</code> lane; (3) extraction gate
         per §10 step 5 once the spine's assembly extraction is ready.</p></div>
-        <pre class="r-fu-prompt">Project: nova
+    <pre class="r-fu-prompt">Project: nova
 Plan:    norma-data-provenance (http://127.0.0.1:8765/nova/norma-data-provenance.html)
 Section: §6 remainder + §7 Tier 2
 Tier:    opus
@@ -563,10 +564,10 @@ Work
   2. Push the canonical corpus (~/.local/share/norma/canonical-2026-07-24) as
      ghcr.io/simon-mcintosh/norma-corpus:canonical-2026-07-24 via oras.
   3. Tier-2 replay: git worktree at record.code_git_sha, rebuild from recorded
-     uv.lock, re-run, compare; visible "env unreconstructable" degradation path.
+     uv.lock, re-run, compare; visible &quot;env unreconstructable&quot; degradation path.
   4. ILIS_nominal.txt: copy from //io-ws-ccstore1/ANSYS_Data/mcintos/sector_modules
      when the IO network is reachable; add to manifest + snapshot + ORAS.
-  5. When the spine's assembly extraction begins, wire the §10.5 extraction gate
+  5. When the spine&#x27;s assembly extraction begins, wire the §10.5 extraction gate
      (replay suite green in the norma repo against the same records).
 
 Constraints
@@ -578,8 +579,55 @@ Done-when
   2. Tier-2 runner exists with a passing pilot + visible-degradation test
   3. ILIS raw source preserved or its absence re-flagged with a dated note
   4. Plan updated (impl, section collapse) + this followup resolved</pre>
-      </article>
-    </section>
+    <p class="r-fu-outcome">§6 remainder + §7 Tier 2 landed 2026-07-24 from SDCC. GHCR retrieval exercised off-laptop (all four digests verified); corpus resolver+sync landed (507ba732); pit.gaps unskipped from the preserved ILIS pickle; Tier-2 five-stage historical replay landed (64780f2e) and passes end-to-end against the clean-tree pilot record (e46be651); fit-parameter manifest landed (a23ef791: 85 workbooks, 265 fit sheets, 512 fits, 10 parameter epochs); fiducialfit main block lifted into a tested driver (2e575939). Suite 173 passed / 4 opt-in skips. Raw ILIS_nominal.txt re-flagged 2026-07-24: SMB to io-ws-ccstore1 firewalled from SDCC — laptop/IO-network errand. Full record: docs/archive/norma-data-provenance-s7-tier2-landed.html.</p>
+    </article>
+<article class="r-fu" data-id="f-ndp-03" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-24" data-recommends-skill="/reckon-ship norma-data-provenance §10" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Post-processing refactor (pit/sector/trial), ILIS raw recovery, extraction gate + norma repo split</h4>
+    <div class="r-fu-body"><p>Remaining program work: (1) refactor the hot post-processing classes under unit test — <code>fiducialpit.py</code> (58 commits/yr, 2814 lines), <code>fiducialsector.py</code> (21, 1477), <code>trial.py</code> (25) — lifting their <code>__main__</code> blocks per the fiducialfit pattern (2e575939); (2) copy raw <code>ILIS_nominal.txt</code> from the IO share when on the IO network (SMB firewalled from SDCC, noted 2026-07-24), add to manifest + snapshot + GHCR; (3) optional: tighten fit-manifest attribution by mapping (sector, phase) to generating commits, and resolve the no-transform 'SSAT AR target' sheet in private unit #7 v9_4; (4) §10.5: extract norma to its own repo (git filter-repo from main, full history), re-home this plan via reckon-sync, gate on the replay suite green in the new repo.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    norma-data-provenance (http://127.0.0.1:8765/nova/norma-data-provenance.html)
+Section: §10 rollout remainder (post-processing refactor + extraction)
+Tier:    opus
+
+Context
+  §2-§8 fully landed (Tier 1+2 replay green end-to-end; corpus in GHCR with
+  auto-sync; fit manifest a23ef791; fiducialfit refactored 2e575939). This
+  followup covers the remaining rollout: post-processing refactor, ILIS raw
+  recovery, and the norma repo extraction.
+
+State to read
+  docs/archive/norma-data-provenance-s7-tier2-landed.html (wave record + hot-file ranking)
+  nova/assembly/fiducialfit.py (the fit_sector driver pattern to replicate)
+  nova/assembly/fiducialpit.py, fiducialsector.py, trial.py (targets; __main__ blocks)
+  tests/test_fiducialfit.py (the unit-test pattern: canonical-unit fixtures,
+    private-sibling write round-trip, tmp-datadir redirection)
+
+Work
+  1. fiducialpit / fiducialsector / trial: lift __main__ logic into typed
+     drivers/methods; strict unit tests against workbooks rebuilt from the
+     in-repo canonical units; characterization suite must stay green (goldens
+     untouched, additive only).
+  2. ILIS_nominal.txt (IO network only): copy from
+     //io-ws-ccstore1/ANSYS_Data/mcintos/sector_modules, digest into
+     corpus_manifest.yaml, add to the snapshot + push a new GHCR tag.
+  3. Extraction (when 1 is green): git filter-repo from main carrying
+     nova/assembly + nova/structural + data/Assembly + tests (characterization,
+     canonical, provenance, fiducialfit) full history; create
+     github.com/Simon-McIntosh/norma; run the full replay suite in the new repo
+     against the same run records (the §10.5 gate); reckon-sync + re-home this
+     plan; leave a pointer in nova.
+
+Constraints
+  Branch main until extraction; YAML via provenance.yamlio; never modify
+  existing goldens; pull --no-rebase before push; no AI co-author trailers.
+
+Done-when
+  1. Three post-processing modules refactored + tested, suite green
+  2. ILIS raw source under the manifest + registry (or re-flagged with date)
+  3. norma repo live with the replay suite green, plan re-homed
+  4. This followup resolved; plan set to shipped</pre>
+    </article>
+</section>
 
   </main>
 </body>

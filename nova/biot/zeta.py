@@ -43,18 +43,30 @@ def zeta(
     of ``alpha``.
     """
     shape = np.shape(alpha)
-    rs = np.ravel(rs)
-    r = np.ravel(r)
-    gamma = np.ravel(gamma)
-    alpha = np.ravel(alpha)
-    result = np.zeros(len(alpha))
-    for i in range(len(alpha)):
-        if np.isclose(alpha[i], 0.0):
-            continue
-        num = max(3, int(abs(alpha[i]) * number))
-        dalpha = alpha[i] / (num - 1)
-        nodes = np.linspace(0.0, alpha[i], num)[:-1] + dalpha / 2.0  # midpoints
-        result[i] = abs(dalpha) * np.sum(_arcsinh_beta_1(rs[i], r[i], gamma[i], nodes))
+    broadcast = np.broadcast(rs, r, gamma, alpha)
+    rs, r, gamma, alpha = (
+        np.ravel(np.broadcast_to(array, broadcast.shape))
+        for array in (rs, r, gamma, alpha)
+    )
+    result = np.zeros(alpha.size)
+    active = ~np.isclose(alpha, 0.0)
+    num = np.maximum(3, (np.abs(alpha) * number).astype(int))
+    # elements sharing a panel count integrate as one vectorised block, so the
+    # Python-level cost scales with the number of distinct panel counts, not
+    # with the element count
+    for count in np.unique(num[active]):
+        index = np.flatnonzero(active & (num == count))
+        dalpha = alpha[index] / (count - 1)
+        # linspace with an array stop keeps the node arithmetic identical to
+        # the former element-wise evaluation; C order keeps the row reduction
+        # pairwise so the sums match it too
+        nodes = np.ascontiguousarray(
+            np.linspace(0.0, alpha[index], count, axis=-1)[:, :-1]
+        ) + dalpha[:, np.newaxis] / 2.0  # midpoints
+        integrand = _arcsinh_beta_1(
+            rs[index, np.newaxis], r[index, np.newaxis], gamma[index, np.newaxis], nodes
+        )
+        result[index] = np.abs(dalpha) * integrand.sum(axis=1)
     return result.reshape(shape)
 
 

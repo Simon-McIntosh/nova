@@ -266,47 +266,37 @@ class Arc(Constants, Matrix):
 
     @cached_property
     def ellipj(self):
-        """Return end point stacked jacobian elliptic functions."""
+        """Return end point stacked jacobian elliptic functions.
+
+        The limit-point axis broadcasts through scipy directly: Kinc carries
+        the leading (start, end, 0, pi/2) axis over the (target, source) k2.
+        """
         return dict(
-            zip(
-                ["sn", "cn", "dn", "ph"],
-                np.stack([scipy.special.ellipj(u, self.k2) for u in self.Kinc], axis=1),
-            )
+            zip(["sn", "cn", "dn", "ph"], scipy.special.ellipj(self.Kinc, self.k2))
         )
 
     @cached_property
     def Kinc(self):
         """Return end point stacked incomplete elliptic intergral of the 1st kind."""
-        return np.stack([self.ellipkinc(theta, self.k2) for theta in self.theta])
+        return self.ellipkinc(self.theta, self.k2)
 
     @cached_property
     def Einc(self):
         """Return end point stacked incomplete elliptic intergral of the 2nd kind."""
-        return np.stack([self.ellipeinc(theta, self.k2) for theta in self.theta])
+        return self.ellipeinc(self.theta, self.k2)
 
     @cached_property
     def Pi_inc(self) -> dict[int, np.ndarray]:
         """Return end point stacked incomplete elliptic intergral of the 3rd kind."""
         return {
-            p: np.stack(
-                [self.ellippinc(self.np2[p], theta, self.k2) for theta in self.theta]
-            )
-            for p in range(1, 4)
+            p: self.ellippinc(self.np2[p], self.theta, self.k2) for p in range(1, 4)
         }
 
     @cached_property
     def Winc(self):
         """Return end point stacked composite incomplete elliptic intergral."""
-        return np.stack(
-            [
-                self.Einc[i]
-                - self.k2
-                * self.ellipj["sn"][i]
-                * self.ellipj["cn"][i]
-                / self.ellipj["dn"][i]
-                for i in range(len(self.theta))
-            ]
-        )
+        ellipj = self.ellipj
+        return self.Einc - self.k2 * ellipj["sn"] * ellipj["cn"] / ellipj["dn"]
 
     @cached_property
     def Ip(self) -> dict[int, np.ndarray]:

@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="nova-spine-refactor-s7-landed">
+  <meta name="plan-title" content="Nova Spine Refactor — §7 landed">
+  <meta name="plan-summary" content="Per-stage record: §7 IMAS IO layer (nova.io) — standard-name zarr signal store, ingest/egress transcoders, ISN/ISNC fork-RC pins">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>§7 landed — IMAS IO layer | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+  <h1>§7 landed — IMAS IO layer (nova.io + ISN/ISNC fork-RC pins)</h1>
+  <p>Landed 2026-07-24 on <code>develop</code> (merge <code>d6fd6d21</code>; worker commits
+  <code>1df367cc</code> resolver + pins, <code>40794d6f</code> store/ingest/egress/streaming +
+  round-trip, <code>dfa084a5</code> benchmark). Base <code>045e92ec</code>. Umbrella plan:
+  <a href="/nova/nova-spine-refactor.html">nova-spine-refactor</a>.</p>
+
+  <h2>Quick status</h2>
+  <table>
+    <thead><tr><th>Item</th><th>Status</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>Standard-name resolver (ISN/ISNC consumption)</td><td>✅ shipped</td>
+        <td>Three-tier resolution: catalog hit → grammar-provisional → UnknownStandardName;
+        provisional signals namespaced <code>provisional/&lt;name&gt;</code>, never a nova-side YAML.</td></tr>
+      <tr><td>Zarr signal store + ingest transcoder</td><td>✅ shipped</td>
+        <td><code>SignalStore(ZarrStore)</code> (reuses §6 zarr tier read-only), group keyed by
+        hash of {URI, DD version}; whole-IDS get() + bulk extraction; COCOS/units/provenance as attrs.</td></tr>
+      <tr><td>Egress builder</td><td>✅ shipped</td>
+        <td>IDS assembly via IDSFactory + single put(); <code>validate()</code> passes;
+        zarr → IDS → validate() → zarr round-trip in the default lane (DD-pinned synthetic fixture).</td></tr>
+      <tr><td>Warm re-read benchmark</td><td>✅ gate met</td>
+        <td>AL full-get 999.29 ms → warm zarr re-read 8.30 ms = <strong>120.4×</strong>
+        (target ≥100×; synthetic 500-slice equilibrium; <code>benchmarks/io_ingest.py</code>).</td></tr>
+      <tr><td>ISN/ISNC dependency pins</td><td>✅ shipped (fallback path)</td>
+        <td>Git-tag pins in a new <code>io</code> extra: ISN <code>v0.8.0rc56</code>,
+        ISNC <code>v0.2.0rc64</code> (test.pypi wheels 404 — primary path pending fork publish).</td></tr>
+      <tr><td>Streaming seam</td><td>✅ interface only (per spec)</td>
+        <td>Typed <code>SignalStream</code> Protocol compatible with a memory-backend
+        <code>put_slice</code> feed; no implementation.</td></tr>
+    </tbody>
+  </table>
+  <p><strong>Suite:</strong> 1272 passed / 0 failed / 103 skipped (286 s, extras env incl.
+  <code>io</code>, test_bokeh excluded) — baseline 1265/0/103 + exactly the 7 new io tests.</p>
+
+  <h2>Load-bearing findings</h2>
+  <ul>
+    <li><strong>ISN's <code>fastmcp~=3.2.0</code> hard dependency drags an MCP server stack</strong>
+    (starlette/uvicorn/httpx/authlib/python-multipart). Mitigation here: ISN/ISNC live in the
+    <code>io</code> extra, not core; <code>nova.io</code> modules import cleanly without the extra and
+    io tests skip via <code>mark_import("imas_standard_names")</code>. The fork-hardening item
+    (fastmcp → <code>[mcp]</code> extra) remains open in the ISN fork before upstream release.</li>
+    <li><strong>Git-tag installs do not deliver the built ISNC catalog.</strong> ISNC ships no
+    <code>catalog.db</code> in a source install (it is a CI/wheel artifact) and ISN's build hook does
+    not bundle the full standard-names tree — so a git-tag install exposes only ISN's 41-name bundled
+    reference catalog + the grammar. Measured on 10 real equilibrium names: 2 catalog hits,
+    7 grammar-provisional, 1 unknown. Full coverage needs the test-PyPI wheel path (carries
+    <code>catalog.db</code>) — prioritise the fork wheel publish so the pins can flip to the primary path.</li>
+    <li><strong>ISNC fork contribution identified:</strong> <code>beta_normal</code> (normalized beta)
+    is rejected by the grammar and absent from the full catalog (only <code>poloidal_beta</code> exists).
+    Seven other equilibrium names (magnetic-axis coordinates, boundary flux, internal inductance,
+    poloidal beta, q-axis, toroidal current density) are present in the ISNC equilibrium YAML and are
+    delivery gaps only — they become catalog hits under a wheel install.</li>
+  </ul>
+
+  <h2>Deferred / noted</h2>
+  <ul>
+    <li>Egress reconstruction exercised for time_slice scalar-over-time signals (the round-trip gate);
+    broader node reconstruction (e.g. pf_active coil arrays) is a straightforward consumer-driven extension.</li>
+    <li>Pre-existing ruff E741 lints in vendored <code>nova/io/geqdsk.py</code> (freegs) untouched.</li>
+    <li>Non-fatal ResourceWarning from ISN's StandardNameCatalog sqlite handle under pytest — originates
+    in the ISN fork; flagged, not papered over.</li>
+  </ul>
+
+  <h2>What's next</h2>
+  <p>§9 fast lane (importmanager sweep incl. test_bokeh, DB-bound fixtures, &lt;60 s default lane,
+  asv benchmarks) plus the §5/§6 remainder landings; then §10 ambix adoption. Tracked in the umbrella
+  plan's followups.</p>
+
+</main>
+</body>
+</html>

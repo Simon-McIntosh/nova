@@ -17,8 +17,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-24">
-<meta name="plan-version" content="12">
-<meta name="plan-impl" content="0.7">
+<meta name="plan-version" content="13">
+<meta name="plan-impl" content="0.75">
 </head>
 <body>
   <main class="plan-doc">
@@ -310,7 +310,20 @@
     through the cache (cold build → warm load bit-identical), and a deliberate geometry perturbation changes the
     key (stale-reuse regression test — the failure mode ambix's .npz caches already exhibited).</p>
 
-    <h2 id="s7">§7 — IMAS IO layer (standard names)</h2>
+    <section id="s7-landed" class="section-landed">
+    <h2 id="s7"><span class="badge badge-shipped">✓ landed 2026-07-24</span> §7 — IMAS IO layer (standard names)</h2>
+    <p class="landed-summary">
+    <code>nova.io</code> shipped (merge <code>d6fd6d21</code>): three-tier standard-name resolver
+    (catalog → grammar-provisional → unknown; no nova-side YAML), <code>SignalStore</code> on the §6
+    zarr tier keyed by {URI, DD version}, ingest/egress transcoders with
+    zarr → IDS → <code>validate()</code> → zarr round-trip in the default lane, streaming seam as a
+    typed Protocol. Warm re-read <strong>120.4×</strong> the AL full-get (999.3 → 8.3 ms; gate ≥100×).
+    Suite 1272/0/103 (baseline + 7 io tests). ISN/ISNC pinned as git tags (<code>v0.8.0rc56</code> /
+    <code>v0.2.0rc64</code>) in a new <code>io</code> extra — ISN's fastmcp hard dep drags a server
+    stack, and git-tag installs omit the built ISNC <code>catalog.db</code>, so the test-PyPI wheel
+    publish in the forks is the open flip condition; <code>beta_normal</code> identified as a genuine
+    ISNC contribution. Full record:
+    <a href="archive/nova-spine-refactor-s7-landed.html">§7 landed</a>.</p>
     <ul>
       <li><strong>Name semantics come from ISN/ISNC — nova owns no standard-name schema.</strong> The
       controlled vocabulary, grammar, units authority, and DD-path links live in the already-managed
@@ -362,6 +375,7 @@
     <p><em>Done-when:</em> a MAST or ITER test shot ingests once and re-reads at cached-store speed (≥100×
     the AL full-get, per the measured baseline); a synthetic run's results egress as a valid IMAS equilibrium
     IDS readable by imas-python at the written DD version.</p>
+    </section>
 
     <section id="s8-landed" class="section-landed">
     <h2 id="s8"><span class="badge badge-shipped">✓ landed 2026-07-24</span> §8 — Plotting mixins</h2>

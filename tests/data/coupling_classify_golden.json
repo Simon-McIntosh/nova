@@ -1,0 +1,948 @@
+{
+ "source": "imas_ambix.gs.operator.classify_circuits + circuits.to_dict()",
+ "match_radius_m": 0.08,
+ "machine": {
+  "schema": "mast-pf-circuits-v0",
+  "source": "efitpp-jet/utilities/machine/mast/inputPreparation/standard_input/pfSystems.xml (23 pfCircuit / 24 pfCoil / 23 pfSupply, MAST \u2014 not MAST-U); cross-validated against efm fcoil_circ/fcoil_xmult and raw amc channel presence (docs/mast-coil-circuits.html)",
+  "n_active_circuits": 13,
+  "n_case_circuits": 10,
+  "active_circuits": [
+   {
+    "circuit_id": 1,
+    "name": "ohmic",
+    "coil_label": "sol",
+    "pf_coil_names": [
+     "solenoid1",
+     "solenoid2"
+    ],
+    "series": true,
+    "supply_id": 1,
+    "supply_signal_name": "amc_sol current",
+    "supply_scaling_a": 1000.0,
+    "amc_channel_prefix": "sol",
+    "l1_feed_channel": null,
+    "l1_coil_channel": "sol_current"
+   },
+   {
+    "circuit_id": 2,
+    "name": "P2IU",
+    "coil_label": "p2iu",
+    "pf_coil_names": [
+     "p2iu"
+    ],
+    "series": false,
+    "supply_id": 2,
+    "supply_signal_name": "amc_p2iu feed current",
+    "supply_scaling_a": 12000.0,
+    "amc_channel_prefix": "p2iu",
+    "l1_feed_channel": "p2iu_feed_current",
+    "l1_coil_channel": "p2iu_coil_current"
+   },
+   {
+    "circuit_id": 3,
+    "name": "P2OU",
+    "coil_label": "p2ou",
+    "pf_coil_names": [
+     "p2ou"
+    ],
+    "series": false,
+    "supply_id": 3,
+    "supply_signal_name": "amc_p2ou feed current",
+    "supply_scaling_a": 8000.0,
+    "amc_channel_prefix": "p2ou",
+    "l1_feed_channel": "p2ou_feed_current",
+    "l1_coil_channel": "p2ou_coil_current"
+   },
+   {
+    "circuit_id": 4,
+    "name": "P2IL",
+    "coil_label": "p2il",
+    "pf_coil_names": [
+     "p2il"
+    ],
+    "series": false,
+    "supply_id": 4,
+    "supply_signal_name": "amc_p2il feed current",
+    "supply_scaling_a": 12000.0,
+    "amc_channel_prefix": "p2il",
+    "l1_feed_channel": "p2il_feed_current",
+    "l1_coil_channel": "p2il_coil_current"
+   },
+   {
+    "circuit_id": 5,
+    "name": "P2OL",
+    "coil_label": "p2ol",
+    "pf_coil_names": [
+     "p2ol"
+    ],
+    "series": false,
+    "supply_id": 5,
+    "supply_signal_name": "amc_p2ol feed current",
+    "supply_scaling_a": 8000.0,
+    "amc_channel_prefix": "p2ol",
+    "l1_feed_channel": "p2ol_feed_current",
+    "l1_coil_channel": "p2ol_coil_current"
+   },
+   {
+    "circuit_id": 6,
+    "name": "P3U",
+    "coil_label": "p3u",
+    "pf_coil_names": [
+     "p3u"
+    ],
+    "series": false,
+    "supply_id": 6,
+    "supply_signal_name": "amc_p3u feed current",
+    "supply_scaling_a": 8000.0,
+    "amc_channel_prefix": "p3u",
+    "l1_feed_channel": "p3u_feed_current",
+    "l1_coil_channel": "p3u_coil_current"
+   },
+   {
+    "circuit_id": 7,
+    "name": "P3L",
+    "coil_label": "p3l",
+    "pf_coil_names": [
+     "p3l"
+    ],
+    "series": false,
+    "supply_id": 7,
+    "supply_signal_name": "amc_p3l feed current",
+    "supply_scaling_a": 8000.0,
+    "amc_channel_prefix": "p3l",
+    "l1_feed_channel": "p3l_feed_current",
+    "l1_coil_channel": "p3l_coil_current"
+   },
+   {
+    "circuit_id": 8,
+    "name": "P4U",
+    "coil_label": "p4u",
+    "pf_coil_names": [
+     "p4u"
+    ],
+    "series": false,
+    "supply_id": 8,
+    "supply_signal_name": "amc_p4u feed current",
+    "supply_scaling_a": 23000.0,
+    "amc_channel_prefix": "p4u",
+    "l1_feed_channel": "p4u_feed_current",
+    "l1_coil_channel": "p4u_coil_current"
+   },
+   {
+    "circuit_id": 9,
+    "name": "P4L",
+    "coil_label": "p4l",
+    "pf_coil_names": [
+     "p4l"
+    ],
+    "series": false,
+    "supply_id": 9,
+    "supply_signal_name": "amc_p4l feed current",
+    "supply_scaling_a": 23000.0,
+    "amc_channel_prefix": "p4l",
+    "l1_feed_channel": "p4l_feed_current",
+    "l1_coil_channel": "p4l_coil_current"
+   },
+   {
+    "circuit_id": 10,
+    "name": "P5U",
+    "coil_label": "p5u",
+    "pf_coil_names": [
+     "p5u"
+    ],
+    "series": false,
+    "supply_id": 10,
+    "supply_signal_name": "amc_p5u feed current",
+    "supply_scaling_a": 23000.0,
+    "amc_channel_prefix": "p5u",
+    "l1_feed_channel": "p5u_feed_current",
+    "l1_coil_channel": "p5u_coil_current"
+   },
+   {
+    "circuit_id": 11,
+    "name": "P5L",
+    "coil_label": "p5l",
+    "pf_coil_names": [
+     "p5l"
+    ],
+    "series": false,
+    "supply_id": 11,
+    "supply_signal_name": "amc_p5l feed current",
+    "supply_scaling_a": 23000.0,
+    "amc_channel_prefix": "p5l",
+    "l1_feed_channel": "p5l_feed_current",
+    "l1_coil_channel": "p5l_coil_current"
+   },
+   {
+    "circuit_id": 12,
+    "name": "P6U",
+    "coil_label": "p6u",
+    "pf_coil_names": [
+     "p6u"
+    ],
+    "series": false,
+    "supply_id": 12,
+    "supply_signal_name": "amc_p6u current",
+    "supply_scaling_a": 1000.0,
+    "amc_channel_prefix": "p6u",
+    "l1_feed_channel": null,
+    "l1_coil_channel": "p6u_current"
+   },
+   {
+    "circuit_id": 13,
+    "name": "P6L",
+    "coil_label": "p6l",
+    "pf_coil_names": [
+     "p6l"
+    ],
+    "series": false,
+    "supply_id": 13,
+    "supply_signal_name": "amc_p6l current",
+    "supply_scaling_a": 1000.0,
+    "amc_channel_prefix": "p6l",
+    "l1_feed_channel": null,
+    "l1_coil_channel": "p6l_current"
+   }
+  ],
+  "case_circuits": [
+   {
+    "circuit_id": 14,
+    "name": "P2U case current",
+    "coils_encased": "P2U (P2IU+P2OU)",
+    "supply_id": 14,
+    "supply_signal_name": "amc_p2u case current",
+    "supply_scaling_a": 1000.0,
+    "l1_case_channel": "p2u_case_current",
+    "constrained_zero": false,
+    "geometry_confusable_with": "p2iu"
+   },
+   {
+    "circuit_id": 15,
+    "name": "P2L case current",
+    "coils_encased": "P2L (P2IL+P2OL)",
+    "supply_id": 15,
+    "supply_signal_name": "amc_p2l case current",
+    "supply_scaling_a": 1000.0,
+    "l1_case_channel": "p2l_case_current",
+    "constrained_zero": false,
+    "geometry_confusable_with": "p2il"
+   },
+   {
+    "circuit_id": 16,
+    "name": "P3U case current",
+    "coils_encased": "P3U",
+    "supply_id": 16,
+    "supply_signal_name": "amc_p3u case current",
+    "supply_scaling_a": 1000.0,
+    "l1_case_channel": "p3u_case_current",
+    "constrained_zero": false,
+    "geometry_confusable_with": "p3u"
+   },
+   {
+    "circuit_id": 17,
+    "name": "P3L case current",
+    "coils_encased": "P3L",
+    "supply_id": 17,
+    "supply_signal_name": "amc_p3l case current",
+    "supply_scaling_a": 1000.0,
+    "l1_case_channel": "p3l_case_current",
+    "constrained_zero": false,
+    "geometry_confusable_with": "p3l"
+   },
+   {
+    "circuit_id": 18,
+    "name": "P4U case current",
+    "coils_encased": "P4U",
+    "supply_id": 18,
+    "supply_signal_name": "amc_p4u case current",
+    "supply_scaling_a": 1000.0,
+    "l1_case_channel": "p4u_case_current",
+    "constrained_zero": false,
+    "geometry_confusable_with": "p4u"
+   },
+   {
+    "circuit_id": 19,
+    "name": "P4L case current",
+    "coils_encased": "P4L",
+    "supply_id": 19,
+    "supply_signal_name": "amc_p4l case current",
+    "supply_scaling_a": 1000.0,
+    "l1_case_channel": "p4l_case_current",
+    "constrained_zero": false,
+    "geometry_confusable_with": "p4l"
+   },
+   {
+    "circuit_id": 20,
+    "name": "P5U case current",
+    "coils_encased": "P5U",
+    "supply_id": 20,
+    "supply_signal_name": "amc_p5u case current",
+    "supply_scaling_a": 1000.0,
+    "l1_case_channel": "p5u_case_current",
+    "constrained_zero": false,
+    "geometry_confusable_with": "p5u"
+   },
+   {
+    "circuit_id": 21,
+    "name": "P5L case current",
+    "coils_encased": "P5L",
+    "supply_id": 21,
+    "supply_signal_name": "amc_p5l case current",
+    "supply_scaling_a": 1000.0,
+    "l1_case_channel": "p5l_case_current",
+    "constrained_zero": false,
+    "geometry_confusable_with": "p5l"
+   },
+   {
+    "circuit_id": 22,
+    "name": "P6U case current",
+    "coils_encased": "P6U",
+    "supply_id": 22,
+    "supply_signal_name": "amc_p6u case current",
+    "supply_scaling_a": 0.0,
+    "l1_case_channel": null,
+    "constrained_zero": true,
+    "geometry_confusable_with": "p6u"
+   },
+   {
+    "circuit_id": 23,
+    "name": "P6L case current",
+    "coils_encased": "P6L",
+    "supply_id": 23,
+    "supply_signal_name": "amc_p6l case current",
+    "supply_scaling_a": 0.0,
+    "l1_case_channel": null,
+    "constrained_zero": true,
+    "geometry_confusable_with": "p6l"
+   }
+  ]
+ },
+ "coil_centroids": {
+  "sol": [
+   0.14,
+   0.0
+  ],
+  "p2iu": [
+   0.475,
+   1.75
+  ],
+  "p2il": [
+   0.475,
+   -1.75
+  ],
+  "p2ou": [
+   0.528,
+   1.72
+  ],
+  "p2ol": [
+   0.527,
+   -1.71
+  ],
+  "p3u": [
+   1.1,
+   1.1
+  ],
+  "p3l": [
+   1.1,
+   -1.09
+  ],
+  "p4u": [
+   1.5,
+   1.1
+  ],
+  "p4l": [
+   1.5,
+   -1.1
+  ],
+  "p5u": [
+   1.65,
+   0.5
+  ],
+  "p5l": [
+   1.65,
+   -0.5
+  ],
+  "p6u": [
+   1.43,
+   0.9
+  ],
+  "p6l": [
+   1.43,
+   -0.9
+  ]
+ },
+ "coil_channels": {
+  "sol": "sol_current",
+  "p2iu": "p2iu_coil_current",
+  "p2il": "p2il_coil_current",
+  "p2ou": "p2ou_coil_current",
+  "p2ol": "p2ol_coil_current",
+  "p3u": "p3u_coil_current",
+  "p3l": "p3l_coil_current",
+  "p4u": "p4u_coil_current",
+  "p4l": "p4l_coil_current",
+  "p5u": "p5u_coil_current",
+  "p5l": "p5l_coil_current",
+  "p6u": "p6u_current",
+  "p6l": "p6l_current"
+ },
+ "fixtures": {
+  "p4u_active_and_case": {
+   "filaments": [
+    {
+     "r": 1.5,
+     "z": 1.1,
+     "turns": 1.0,
+     "width": 0.01,
+     "height": 0.01,
+     "circuit": 8,
+     "xmult": 1.0
+    },
+    {
+     "r": 1.52,
+     "z": 1.1,
+     "turns": 1.0,
+     "width": 0.01,
+     "height": 0.01,
+     "circuit": 18,
+     "xmult": 1.0
+    }
+   ],
+   "channels": [
+    "p4u_coil_current",
+    "p4u_case_current"
+   ],
+   "classes": [
+    {
+     "circuit": 8,
+     "centroid_r": 1.5,
+     "centroid_z": 1.1,
+     "n_filament": 1,
+     "sum_xmult": 1.0,
+     "role": "known_pf",
+     "coil_label": "p4u",
+     "amc_channel": "p4u_coil_current",
+     "flag": ""
+    },
+    {
+     "circuit": 18,
+     "centroid_r": 1.52,
+     "centroid_z": 1.1,
+     "n_filament": 1,
+     "sum_xmult": 1.0,
+     "role": "known_case",
+     "coil_label": "p4u_case",
+     "amc_channel": "p4u_case_current",
+     "flag": ""
+    }
+   ]
+  },
+  "p4u_case_channel_absent": {
+   "filaments": [
+    {
+     "r": 1.5,
+     "z": 1.1,
+     "turns": 1.0,
+     "width": 0.01,
+     "height": 0.01,
+     "circuit": 8,
+     "xmult": 1.0
+    },
+    {
+     "r": 1.52,
+     "z": 1.1,
+     "turns": 1.0,
+     "width": 0.01,
+     "height": 0.01,
+     "circuit": 18,
+     "xmult": 1.0
+    }
+   ],
+   "channels": [
+    "p4u_coil_current"
+   ],
+   "classes": [
+    {
+     "circuit": 8,
+     "centroid_r": 1.5,
+     "centroid_z": 1.1,
+     "n_filament": 1,
+     "sum_xmult": 1.0,
+     "role": "known_pf",
+     "coil_label": "p4u",
+     "amc_channel": "p4u_coil_current",
+     "flag": ""
+    },
+    {
+     "circuit": 18,
+     "centroid_r": 1.52,
+     "centroid_z": 1.1,
+     "n_filament": 1,
+     "sum_xmult": 1.0,
+     "role": "inferred_passive",
+     "coil_label": "",
+     "amc_channel": "",
+     "flag": "case circuit 'P4U case current' (id=18) channel 'p4u_case_current' absent from this campaign \u2192 INFERRED"
+    }
+   ]
+  },
+  "p6u_case_injected_channel": {
+   "filaments": [
+    {
+     "r": 1.43,
+     "z": 0.9,
+     "turns": 1.0,
+     "width": 0.01,
+     "height": 0.01,
+     "circuit": 12,
+     "xmult": 1.0
+    },
+    {
+     "r": 1.45,
+     "z": 0.9,
+     "turns": 1.0,
+     "width": 0.01,
+     "height": 0.01,
+     "circuit": 22,
+     "xmult": 1.0
+    }
+   ],
+   "channels": [
+    "p6u_current",
+    "p6u_case_current"
+   ],
+   "classes": [
+    {
+     "circuit": 12,
+     "centroid_r": 1.43,
+     "centroid_z": 0.9,
+     "n_filament": 1,
+     "sum_xmult": 1.0,
+     "role": "known_pf",
+     "coil_label": "p6u",
+     "amc_channel": "p6u_current",
+     "flag": ""
+    },
+    {
+     "circuit": 22,
+     "centroid_r": 1.45,
+     "centroid_z": 0.9,
+     "n_filament": 1,
+     "sum_xmult": 1.0,
+     "role": "inferred_passive",
+     "coil_label": "",
+     "amc_channel": "",
+     "flag": "case circuit 'P6U case current' (id=22) constrained to zero by pfSystems.xml (no amc channel) \u2192 INFERRED"
+    }
+   ]
+  },
+  "p6l_case_no_channel": {
+   "filaments": [
+    {
+     "r": 1.43,
+     "z": -0.9,
+     "turns": 1.0,
+     "width": 0.01,
+     "height": 0.01,
+     "circuit": 13,
+     "xmult": 1.0
+    },
+    {
+     "r": 1.41,
+     "z": -0.9,
+     "turns": 1.0,
+     "width": 0.01,
+     "height": 0.01,
+     "circuit": 23,
+     "xmult": 1.0
+    }
+   ],
+   "channels": [
+    "p6l_current"
+   ],
+   "classes": [
+    {
+     "circuit": 13,
+     "centroid_r": 1.43,
+     "centroid_z": -0.9,
+     "n_filament": 1,
+     "sum_xmult": 1.0,
+     "role": "known_pf",
+     "coil_label": "p6l",
+     "amc_channel": "p6l_current",
+     "flag": ""
+    },
+    {
+     "circuit": 23,
+     "centroid_r": 1.41,
+     "centroid_z": -0.9,
+     "n_filament": 1,
+     "sum_xmult": 1.0,
+     "role": "inferred_passive",
+     "coil_label": "",
+     "amc_channel": "",
+     "flag": "case circuit 'P6L case current' (id=23) constrained to zero by pfSystems.xml (no amc channel) \u2192 INFERRED"
+    }
+   ]
+  },
+  "all_13_active": {
+   "filaments": [
+    {
+     "r": 0.14,
+     "z": 0.0,
+     "turns": 1.0,
+     "width": 0.01,
+     "height": 0.01,
+     "circuit": 1,
+     "xmult": 1.0
+    },
+    {
+     "r": 0.475,
+     "z": 1.75,
+     "turns": 1.0,
+     "width": 0.01,
+     "height": 0.01,
+     "circuit": 2,
+     "xmult": 1.0
+    },
+    {
+     "r": 0.528,
+     "z": 1.72,
+     "turns": 1.0,
+     "width": 0.01,
+     "height": 0.01,
+     "circuit": 3,
+     "xmult": 1.0
+    },
+    {
+     "r": 0.475,
+     "z": -1.75,
+     "turns": 1.0,
+     "width": 0.01,
+     "height": 0.01,
+     "circuit": 4,
+     "xmult": 1.0
+    },
+    {
+     "r": 0.527,
+     "z": -1.71,
+     "turns": 1.0,
+     "width": 0.01,
+     "height": 0.01,
+     "circuit": 5,
+     "xmult": 1.0
+    },
+    {
+     "r": 1.1,
+     "z": 1.1,
+     "turns": 1.0,
+     "width": 0.01,
+     "height": 0.01,
+     "circuit": 6,
+     "xmult": 1.0
+    },
+    {
+     "r": 1.1,
+     "z": -1.09,
+     "turns": 1.0,
+     "width": 0.01,
+     "height": 0.01,
+     "circuit": 7,
+     "xmult": 1.0
+    },
+    {
+     "r": 1.5,
+     "z": 1.1,
+     "turns": 1.0,
+     "width": 0.01,
+     "height": 0.01,
+     "circuit": 8,
+     "xmult": 1.0
+    },
+    {
+     "r": 1.5,
+     "z": -1.1,
+     "turns": 1.0,
+     "width": 0.01,
+     "height": 0.01,
+     "circuit": 9,
+     "xmult": 1.0
+    },
+    {
+     "r": 1.65,
+     "z": 0.5,
+     "turns": 1.0,
+     "width": 0.01,
+     "height": 0.01,
+     "circuit": 10,
+     "xmult": 1.0
+    },
+    {
+     "r": 1.65,
+     "z": -0.5,
+     "turns": 1.0,
+     "width": 0.01,
+     "height": 0.01,
+     "circuit": 11,
+     "xmult": 1.0
+    },
+    {
+     "r": 1.43,
+     "z": 0.9,
+     "turns": 1.0,
+     "width": 0.01,
+     "height": 0.01,
+     "circuit": 12,
+     "xmult": 1.0
+    },
+    {
+     "r": 1.43,
+     "z": -0.9,
+     "turns": 1.0,
+     "width": 0.01,
+     "height": 0.01,
+     "circuit": 13,
+     "xmult": 1.0
+    }
+   ],
+   "channels": [
+    "sol_current",
+    "p2iu_coil_current",
+    "p2ou_coil_current",
+    "p2il_coil_current",
+    "p2ol_coil_current",
+    "p3u_coil_current",
+    "p3l_coil_current",
+    "p4u_coil_current",
+    "p4l_coil_current",
+    "p5u_coil_current",
+    "p5l_coil_current",
+    "p6u_current",
+    "p6l_current"
+   ],
+   "classes": [
+    {
+     "circuit": 1,
+     "centroid_r": 0.14,
+     "centroid_z": 0.0,
+     "n_filament": 1,
+     "sum_xmult": 1.0,
+     "role": "known_pf",
+     "coil_label": "sol",
+     "amc_channel": "sol_current",
+     "flag": ""
+    },
+    {
+     "circuit": 2,
+     "centroid_r": 0.475,
+     "centroid_z": 1.75,
+     "n_filament": 1,
+     "sum_xmult": 1.0,
+     "role": "known_pf",
+     "coil_label": "p2iu",
+     "amc_channel": "p2iu_coil_current",
+     "flag": ""
+    },
+    {
+     "circuit": 3,
+     "centroid_r": 0.528,
+     "centroid_z": 1.72,
+     "n_filament": 1,
+     "sum_xmult": 1.0,
+     "role": "known_pf",
+     "coil_label": "p2ou",
+     "amc_channel": "p2ou_coil_current",
+     "flag": ""
+    },
+    {
+     "circuit": 4,
+     "centroid_r": 0.475,
+     "centroid_z": -1.75,
+     "n_filament": 1,
+     "sum_xmult": 1.0,
+     "role": "known_pf",
+     "coil_label": "p2il",
+     "amc_channel": "p2il_coil_current",
+     "flag": ""
+    },
+    {
+     "circuit": 5,
+     "centroid_r": 0.527,
+     "centroid_z": -1.71,
+     "n_filament": 1,
+     "sum_xmult": 1.0,
+     "role": "known_pf",
+     "coil_label": "p2ol",
+     "amc_channel": "p2ol_coil_current",
+     "flag": ""
+    },
+    {
+     "circuit": 6,
+     "centroid_r": 1.1,
+     "centroid_z": 1.1,
+     "n_filament": 1,
+     "sum_xmult": 1.0,
+     "role": "known_pf",
+     "coil_label": "p3u",
+     "amc_channel": "p3u_coil_current",
+     "flag": ""
+    },
+    {
+     "circuit": 7,
+     "centroid_r": 1.1,
+     "centroid_z": -1.09,
+     "n_filament": 1,
+     "sum_xmult": 1.0,
+     "role": "known_pf",
+     "coil_label": "p3l",
+     "amc_channel": "p3l_coil_current",
+     "flag": ""
+    },
+    {
+     "circuit": 8,
+     "centroid_r": 1.5,
+     "centroid_z": 1.1,
+     "n_filament": 1,
+     "sum_xmult": 1.0,
+     "role": "known_pf",
+     "coil_label": "p4u",
+     "amc_channel": "p4u_coil_current",
+     "flag": ""
+    },
+    {
+     "circuit": 9,
+     "centroid_r": 1.5,
+     "centroid_z": -1.1,
+     "n_filament": 1,
+     "sum_xmult": 1.0,
+     "role": "known_pf",
+     "coil_label": "p4l",
+     "amc_channel": "p4l_coil_current",
+     "flag": ""
+    },
+    {
+     "circuit": 10,
+     "centroid_r": 1.65,
+     "centroid_z": 0.5,
+     "n_filament": 1,
+     "sum_xmult": 1.0,
+     "role": "known_pf",
+     "coil_label": "p5u",
+     "amc_channel": "p5u_coil_current",
+     "flag": ""
+    },
+    {
+     "circuit": 11,
+     "centroid_r": 1.65,
+     "centroid_z": -0.5,
+     "n_filament": 1,
+     "sum_xmult": 1.0,
+     "role": "known_pf",
+     "coil_label": "p5l",
+     "amc_channel": "p5l_coil_current",
+     "flag": ""
+    },
+    {
+     "circuit": 12,
+     "centroid_r": 1.43,
+     "centroid_z": 0.9,
+     "n_filament": 1,
+     "sum_xmult": 1.0,
+     "role": "known_pf",
+     "coil_label": "p6u",
+     "amc_channel": "p6u_current",
+     "flag": ""
+    },
+    {
+     "circuit": 13,
+     "centroid_r": 1.43,
+     "centroid_z": -0.9,
+     "n_filament": 1,
+     "sum_xmult": 1.0,
+     "role": "known_pf",
+     "coil_label": "p6l",
+     "amc_channel": "p6l_current",
+     "flag": ""
+    }
+   ]
+  },
+  "redundant_merge": {
+   "filaments": [
+    {
+     "r": 1.5,
+     "z": 1.1,
+     "turns": 1.0,
+     "width": 0.01,
+     "height": 0.01,
+     "circuit": 8,
+     "xmult": 1.0
+    },
+    {
+     "r": 1.505,
+     "z": 1.1,
+     "turns": 1.0,
+     "width": 0.01,
+     "height": 0.01,
+     "circuit": 88,
+     "xmult": 1.0
+    }
+   ],
+   "channels": [
+    "p4u_coil_current"
+   ],
+   "classes": [
+    {
+     "circuit": 8,
+     "centroid_r": 1.5,
+     "centroid_z": 1.1,
+     "n_filament": 1,
+     "sum_xmult": 1.0,
+     "role": "known_pf",
+     "coil_label": "p4u",
+     "amc_channel": "p4u_coil_current",
+     "flag": ""
+    },
+    {
+     "circuit": 88,
+     "centroid_r": 1.505,
+     "centroid_z": 1.1,
+     "n_filament": 1,
+     "sum_xmult": 1.0,
+     "role": "known_pf",
+     "coil_label": "p4u",
+     "amc_channel": "p4u_coil_current",
+     "flag": ""
+    }
+   ]
+  },
+  "far_passive": {
+   "filaments": [
+    {
+     "r": 1.9,
+     "z": 0.0,
+     "turns": 1.0,
+     "width": 0.01,
+     "height": 0.01,
+     "circuit": 40,
+     "xmult": 1.0
+    }
+   ],
+   "channels": [
+    "p4u_coil_current"
+   ],
+   "classes": [
+    {
+     "circuit": 40,
+     "centroid_r": 1.9,
+     "centroid_z": 0.0,
+     "n_filament": 1,
+     "sum_xmult": 1.0,
+     "role": "inferred_passive",
+     "coil_label": "",
+     "amc_channel": "",
+     "flag": ""
+    }
+   ]
+  }
+ }
+}

@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-24">
-<meta name="plan-version" content="16">
+<meta name="plan-version" content="17">
 <meta name="plan-impl" content="0.9">
 </head>
 <body>
@@ -980,6 +980,60 @@ Done-when
   4. This followup resolved. NOTE: the §11 develop→main forward-deletion seal
      remains additionally gated on §10 ambix adoption (f-int-09) — steps 6–7
      clear the extraction half only.</pre>
+    </article>
+<article class="r-fu" data-id="f-int-11" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-24T16:45:00+00:00" data-recommends-skill="/reckon-ship nova-spine-refactor §11" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">§11 convergence: forward-delete the assembly tree from nova main (develop→main) and return to single trunk</h4>
+    <div class="r-fu-body"><p>The seal, by forward deletion (never a history rewrite — <code>legacy/v1</code> + <code>v1-assembly-baseline</code> stay the permanent frozen copy in nova history; norma carries an independent full copy). <code>develop</code> already has the assembly tree removed (<code>59ee0303</code>); merging <code>develop→main</code> drops it from main's working tree while all history and the protected baseline remain. GATED on both preconditions: (a) §10 ambix adoption green (f-int-09), and (b) the §2a extraction sign-off recorded once norma CI + self-containment are green over a dual-run window (f-int-10). Fully recoverable: <code>git checkout v1-assembly-baseline -- nova/assembly</code> restores any file; no SHA churn.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    nova-spine-refactor §11 (convergence / seal)
+Tier:    opus
+
+Context
+  End-state move under the locked in-place route. norma is the canonical
+  assembly-metrology home (github.com/Simon-McIntosh/norma; §10.5 gate green).
+  This section performs the nova-side seal by FORWARD DELETION only — do NOT
+  filter-branch/rewrite nova history; legacy/v1 + v1-assembly-baseline are the
+  permanent frozen copy and are branch-protected.
+
+  HARD PRECONDITIONS (both must be recorded before this runs):
+    - f-int-09 §10 ambix adoption green (imas-ambix imports the spine; full
+      ambix suite green; spine_bench matches baselines).
+    - f-int-10 §2a extraction sign-off: norma CI (replay gate from GHCR) +
+      self-containment install check green over a dual-run window with nova CI.
+  If either is not yet recorded, STOP — this is the (rare) prerequisite-unmet
+  hard stop; report and wait.
+
+State to read
+  docs/nova-spine-refactor.html §2, §2a, §11 (branch model + hardened sequence)
+  docs/archive/nova-spine-refactor-s2-landed.html (the develop deletion 59ee0303)
+
+Work
+  1. Confirm both preconditions are recorded (§2a sign-off line present; f-int-09
+     resolved). Confirm norma main + v1-assembly-baseline are live and the gate
+     is green.
+  2. Merge develop→main: git checkout main; git pull --no-rebase origin main;
+     git merge --no-ff develop -m &#x27;Merge develop: 2.0 spine to main, assembly
+     extracted to norma&#x27;. develop&#x27;s assembly deletion stands; main&#x27;s assembly
+     tree (78 + 16 files) drops from the working tree. Resolve any conflicts in
+     favour of develop for spine files; assembly paths simply leave.
+  3. Verify: nova main fast lane green (&lt;60 s), full lane green; grep confirms no
+     dangling imports into the deleted tree; the reckon plans still serve.
+  4. Return to single-trunk: retire the two-branch AGENTS.md exception; keep
+     legacy/v1 + tag as archaeology + the cross-check oracle. develop may be
+     retired or kept as the integration branch per preference.
+  5. Record the §11 convergence outcome in the plan; set nova-spine-refactor
+     shipped; leave legacy/v1 + tag documented as the frozen 1.x line.
+
+Constraints
+  Forward deletion only — NO history rewrite, NO force-push, never touch the
+  protected legacy/v1 or the baseline tag. Commit + push; no AI co-author
+  trailers. Plan edits committed same session.
+
+Done-when
+  1. develop merged to main; assembly tree gone from main&#x27;s working tree; full
+     history + legacy/v1 + v1-assembly-baseline intact and recoverable.
+  2. nova main lanes green; no dangling imports.
+  3. Single-trunk restored; §11 recorded; plan set shipped.</pre>
     </article>
 </section>
 

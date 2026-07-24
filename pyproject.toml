@@ -57,7 +57,7 @@ jax = [
   "jax[cuda12]>=0.5; sys_platform == 'linux'",
   "jax>=0.5; sys_platform != 'linux'",
 ]
-matplotlib = ["matplotlib>=3.10"]
+matplotlib = ["matplotlib>=3.10", "seaborn>=0.13"]
 numba = ["numba>=0.61"]
 test = ["pytest", "pytest-cov>=4.1.0", "pytest-asyncio>=0.21.1"]
 thermofluids = [

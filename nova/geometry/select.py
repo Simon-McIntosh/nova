@@ -67,7 +67,9 @@ def quadratic_wall(w_cluster, psi_cluster):
     coefficient_matrix = np.column_stack(
         (w_cluster**2, w_cluster, np.ones_like(w_cluster))
     )
-    coefficients = np.linalg.lstsq(coefficient_matrix, psi_cluster, rcond=None)[0]
+    # numba's gelsd binding requires a float rcond; negative selects the
+    # machine-precision default (numpy's rcond=None equivalent)
+    coefficients = np.linalg.lstsq(coefficient_matrix, psi_cluster, rcond=-1.0)[0]
     return coefficients
 
 
@@ -132,7 +134,9 @@ def quadratic_surface(x_cluster, z_cluster, psi_cluster):
             np.ones_like(x_cluster),
         )
     )
-    coefficients = np.linalg.lstsq(coefficient_matrix, psi_cluster, rcond=None)[0]
+    # numba's gelsd binding requires a float rcond; negative selects the
+    # machine-precision default (numpy's rcond=None equivalent)
+    coefficients = np.linalg.lstsq(coefficient_matrix, psi_cluster, rcond=-1.0)[0]
     return coefficients
 
 

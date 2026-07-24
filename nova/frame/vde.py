@@ -5,9 +5,6 @@ import os
 
 import numpy as np
 
-from moviepy.editor import VideoClip
-from moviepy.video.io.bindings import mplfig_to_npimage
-import pandas as pd
 import scipy
 import shapely
 import xarray
@@ -187,8 +184,13 @@ class VDE(Axes, CoilSet):  # read_dina,
         """Insert plasma filaments."""
         machine = MachineData()
         machine.load_data()
-        fw = pd.concat((machine.data["firstwall"], machine.data["divertor"]))
-        self.plasma.insert(fw.to_numpy(), name="Plasma", part="plasma")
+        fw = np.vstack(
+            [
+                np.column_stack([machine.data[part]["x"], machine.data[part]["z"]])
+                for part in ("firstwall", "divertor")
+            ]
+        )
+        self.plasma.insert(fw, name="Plasma", part="plasma")
 
     def read_transient(self):
         """Return transient current data."""
@@ -303,6 +305,8 @@ class VDE(Axes, CoilSet):  # read_dina,
         index = self.get_index(position)
         self.update(index)
         self.plot()
+        from moviepy.video.io.bindings import mplfig_to_npimage
+
         return mplfig_to_npimage(plt.gcf())
 
     def make_movie(self, prefix=None, make_frame=None):
@@ -315,6 +319,8 @@ class VDE(Axes, CoilSet):  # read_dina,
         file = os.path.join(self.directory, "../animations", filename)
         plt.figure(figsize=(5, 7), facecolor="white")
         make_frame(0)
+        from moviepy.editor import VideoClip
+
         animation = VideoClip(make_frame, duration=self.duration)
         animation.write_videofile(file, fps=self.fps)
 
@@ -458,6 +464,8 @@ if __name__ == "__main__":
             linewidths=2,
         )
         duck.point.plot(marker="*", color="C1", ms=10)
+        from moviepy.video.io.bindings import mplfig_to_npimage
+
         return mplfig_to_npimage(plt.gcf())
 
     def animate():

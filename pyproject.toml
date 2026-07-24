@@ -47,6 +47,18 @@ dependencies = [
 
 [project.optional-dependencies]
 bokeh = ["bokeh>=3.6"]
+# Standard-name semantics for the zarr signal store live in the managed
+# imas-standard-names (name API, pint units) + imas-standard-names-catalog
+# (data-only SQLite catalog). Both are isolated behind this extra: ISN
+# currently hard-depends on fastmcp, which drags an MCP server stack
+# (starlette/uvicorn/httpx/authlib) that the store consumers -- name lookup
+# and units only -- never touch. nova.io imports gate on this extra so the
+# core import graph stays free of the server stack. Pinned to the fork RCs
+# converging on the first upstream release; flip to PyPI ranges on release.
+io = [
+  "imas-standard-names @ git+https://github.com/Simon-McIntosh/IMAS-Standard-Names.git@v0.8.0rc56",
+  "imas-standard-names-catalog @ git+https://github.com/Simon-McIntosh/imas-standard-names-catalog.git@v0.2.0rc64",
+]
 # dolfinx itself is conda/spack-provisioned (no PyPI wheels); this extra
 # carries only the pip-installable meshing stack the fenics examples use
 fenics = ["gmsh>=4.12", "pygmsh>=7.1"]
@@ -102,6 +114,12 @@ configure = "nova.scripts.configure:configure"
 [build-system]
 requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
+
+# The io extra pins the standard-name forks by git tag until they release to
+# PyPI; hatchling rejects direct (git-URL) references in dependencies without
+# this opt-in. Drops out when the pins flip to PyPI ranges on upstream release.
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [tool.hatch.version]
 source = "vcs"

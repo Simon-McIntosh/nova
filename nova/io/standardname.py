@@ -138,11 +138,15 @@ class StandardNameResolver:
         """
         entry = self.catalog.get(name)
         if entry is not None:
+            # Metadata-kind entries (loci, groupings) carry no unit; only
+            # quantity entries do. Read defensively so both resolve.
+            unit = getattr(entry, "unit", None)
+            kind = getattr(entry, "kind", None)
             return Resolution(
                 name=name,
-                unit=str(entry.unit),
-                kind=str(entry.kind),
-                status=str(entry.status),
+                unit=None if unit is None else str(unit),
+                kind=None if kind is None else str(kind),
+                status=str(getattr(entry, "status", "active")),
                 source=NameSource.CATALOG,
             )
         try:

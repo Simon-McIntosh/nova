@@ -17,8 +17,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-24">
-<meta name="plan-version" content="13">
-<meta name="plan-impl" content="0.75">
+<meta name="plan-version" content="14">
+<meta name="plan-impl" content="0.8">
 </head>
 <body>
   <main class="plan-doc">
@@ -248,34 +248,22 @@
     offsets/tilts, toroidally averaged reconstruction metrics, zeta fast path).</p>
     </section>
 
-    <h2 id="s5">§5 — Batched evaluation and topology (JAX)</h2>
-    <p><strong>Core landed 2026-07-24</strong> (merge <code>16b00bac</code>; full record:
-    <a href="archive/nova-spine-refactor-s5s6s8-landed.html">§5/§6/§8 landed</a>): jitted operator
-    pinned against the numpy path on a real cached operator (evaluate 2.8e-14, update_turns
-    1.7e-21); batched topology over a leading shot/time axis with batched == per-slice pinned;
-    ambix's stencil-null locator ported (5 tests, finite <code>jax.grad</code>); test_fieldnull
-    retargeted onto the jax select/null stack (61 failed → 32 passed — the serial numba path is
-    retired). <strong>Remaining:</strong> flip the primary path at <code>nova/biot/operate.py:13</code>
-    (jax operator verified drop-in; keep the xxhash gating), the ambix
-    connectivity/flux-surface-topology cascade (needs equilibrium_labels + wall_mask +
-    current_diffusion donors), and the free-boundary GS solver port (pulls the whole
-    <code>imas_ambix.gs</code> package — its own increment).</p>
-    <ul>
-      <li>Make <code>nova/jax/operate.py</code>'s jitted pytree operator (evaluate, evaluate_external,
-      update_plasma_turns) the primary evaluation path, with the numpy <code>Operate</code> as fallback; keep
-      the xxhash/version-counter invalidation contract.</li>
-      <li>Merge the two JAX topology stacks — nova's <code>jax/null.py + jax/topology.py</code>
-      (Kuijper categorisation, limiter/diverted adjudication) and ambix's <code>stencil_nulls</code>,
-      <code>connectivity_boundary</code>, <code>flux_surface_connectivity</code>, <code>topology</code> — into
-      one fixed-shape, vmap-safe module set; the serial numba <code>fieldnull</code> is not ported.</li>
-      <li>Add the missing batch dimension: <code>vmap</code> evaluation + topology over a leading shot/time
-      axis; validate fixed-size null bounds across a MAST shot corpus.</li>
-      <li>Bring over ambix's free-boundary GS solver (<code>latent/gs_solve.py</code>) and the staged-disc and
-      prior boundary reads as the spine's solve/read tier.</li>
-    </ul>
-    <p><em>Done-when:</em> jitted evaluate/update-turns agree with the numpy path to tolerance on cached
-    operators; a batched (B-shots) topology call returns identical results to per-slice calls; existing ambix
-    latent-physics tests pass in the new home.</p>
+    <section id="s5-landed" class="section-landed">
+    <h2 id="s5"><span class="badge badge-shipped">✓ landed 2026-07-24</span> §5 — Batched evaluation and topology (JAX)</h2>
+    <p class="landed-summary">
+    Closed 2026-07-24 (core merge <code>16b00bac</code>, closure merge <code>76373e66</code>). The
+    jitted pytree operator is now the <strong>primary evaluation path</strong> (<code>BiotOperator</code>
+    presents the numpy operator's mutating surface — live-view <code>source_target</code>, in-place
+    <code>update_turns</code> write-back — with pure-numpy fallback and the xxhash gating
+    regression-tested; biot parity lane 249/2). Device-native
+    connectivity_boundary / flux_surface_connectivity / wall_mask ported vmap-safe with
+    batched==per-slice pinned at 1e-10 (18 tests); the flip re-enabled the jax-path tests
+    (suite 1265→1351 passed, 93 skipped). The free-boundary GS solver port was
+    <strong>re-banked to §10</strong>: its closure pulls FAIR-MAST facility paths, the torch
+    current-diffusion host stack, and would duplicate nova.biot's own cylinder kernels — a
+    re-architecture, not a port. Full record:
+    <a href="archive/nova-spine-refactor-s5s6-closed.html">§5 closed / §6 remainders</a>.</p>
+    </section>
 
     <h2 id="s6">§6 — Machine description and identity cache</h2>
     <p><strong>Cache tier landed 2026-07-24</strong> (merge <code>179a4e37</code>; full record:
@@ -285,11 +273,18 @@
     whole-file netCDF rewrite (8 round-trip + stale-key regression tests); package init made lazy
     (<code>import nova</code> is pandas/xarray-free); pulsedesign/extrapolate live-DB errors are now
     visible skips with DD-pinned synthetic fixtures (equilibrium fixture pinned to DD 3.42.0).
-    <strong>Remaining (needs live iter_md DBs):</strong> fold the DD version into the Machine
-    composite key (store+restore round-trip), the MachineGeometryReader seam + CrossSection
-    dispatch re-point, pandas→columnar for the ingest IO modules
-    (io_magnetics/magnetic_diagnostics/extrapolate/machinedata/itergeom/vde), and wiring ZarrStore
-    into the frame/biot store layer.</p>
+    <strong>Remainders landed 2026-07-24</strong> (merge <code>d8f7c1ef</code>; record:
+    <a href="archive/nova-spine-refactor-s5s6-closed.html">§5 closed / §6 remainders</a>): DD version
+    folded into the Machine composite key (bit-identical round-trip + stale-key tests; validated
+    against live iter_md pf_active), <code>MachineGeometryReader</code> seam with CrossSection
+    dispatch re-pointed (all 20 live pf_active elements dispatch), io_magnetics /
+    magnetic_diagnostics / extrapolate pandas-free with an import-guard test, and the Datafile
+    identity tier caching through zarr with group eviction.
+    <strong>Remaining (final closure, in flight):</strong> the frames+operators store tier —
+    <code>FrameSet.store/load</code> nested netCDF4-group model → zarr groups +
+    <code>nova/biot/data.py</code> base swap — and pandas removal from
+    <code>nova/frame</code>'s machinedata/itergeom/vde; plus two env followups (public-path
+    <code>is_valid</code> layout, threading dd_version/user from Machine to geometry sources).</p>
     <ul>
       <li>Carry nova's IMAS layer: <code>dataset.py</code> ladder (identity attrs, URI, lazy DBEntry access,
       content hashing), <code>uri.py</code>, <code>db_entry.py</code>, <code>metadata.py</code> provenance

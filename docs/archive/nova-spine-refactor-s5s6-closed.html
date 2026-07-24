@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="nova-spine-refactor-s5s6-closed">
+  <meta name="plan-title" content="Nova Spine Refactor — §5 closed / §6 remainders">
+  <meta name="plan-summary" content="Per-stage record: §5 closure (jit primary path, connectivity cascade, GS-solve re-bank) and the §6 remainder landings (machine DD-version key, geometry seam, pandas-free ingest IO, zarr identity tier)">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>§5 closed / §6 remainders — nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+  <h1>§5 closed / §6 remainders landed</h1>
+  <p>Landed 2026-07-24 on <code>develop</code> (merges <code>76373e66</code> §5,
+  <code>d8f7c1ef</code> §6; base <code>045e92ec</code>). Combined suite after all wave-1 merges
+  (incl. §7): <strong>1351 passed / 0 failed / 93 skipped</strong> (275 s, extras env incl. jax+io,
+  test_bokeh excluded) vs 1265/0/103 baseline — the skip reduction is the jitted-operator flip
+  re-enabling jax-path tests. Umbrella plan:
+  <a href="/nova/nova-spine-refactor.html">nova-spine-refactor</a>; §5/§6 core landings:
+  <a href="nova-spine-refactor-s5s6s8-landed.html">s5s6s8 record</a>.</p>
+
+  <h2>§5 closure — quick status</h2>
+  <table>
+    <thead><tr><th>Item</th><th>Status</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>Jit primary-path flip (<code>nova/biot/operate.py</code>)</td><td>✅ shipped <code>5c821417</code></td>
+        <td>New <code>nova/jax/operate.py::BiotOperator</code> wraps the jitted pytree operator behind the
+        numpy operator's mutating surface — <code>source_target</code> stays a live view and
+        <code>update_turns</code> writes back in place (pinned by two mutation tests). Import-guard
+        selection with pure-numpy <code>NumpyOperator</code> fallback; xxhash/version-counter contract
+        untouched and regression-tested. Biot parity lane 249 passed / 2 skipped.</td></tr>
+      <tr><td>Connectivity/topology cascade</td><td>✅ shipped <code>dc89a33a</code></td>
+        <td><code>connectivity_boundary</code>, <code>flux_surface_connectivity</code>,
+        <code>wall_mask</code>, <code>equilibrium_labels</code> ported device-native (fixed-shape,
+        vmap-safe, leading batch axis). 18 tests incl. batched==per-slice pins at 1e-10 on both device
+        entry points and jit/vmap/grad + contour-free AST gates.</td></tr>
+      <tr><td>Free-boundary GS solver port</td><td>⏸ re-banked</td>
+        <td>No coherent standalone increment: <code>gs.operator → gs.geometry → data.paths</code> is the
+        FAIR-MAST mirror layer (facility plugin tables); topology reads sit on ambix's host
+        scipy.ndimage labeller (also the torch <code>current_diffusion</code> dep); and
+        <code>gs.cylinder.hybrid_greens</code> is a re-extraction of nova.biot's own cylinder kernel —
+        wiring gs_solve onto nova's kernels is a re-architecture, not a port. Re-planned under §10
+        (ambix adoption), where the gs package moves wholesale onto the spine.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>§6 remainder landings — quick status</h2>
+  <table>
+    <thead><tr><th>Item</th><th>Status</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>Machine composite-key DD version</td><td>✅ shipped <code>08ee1260</code></td>
+        <td><code>str(dd_version)</code> folded into <code>Machine.group_attrs</code>; synthetic
+        build→store→warm-load bit-identical + stale-key test. Live iter_md validation: pf_active
+        111001/203 (14 coils, DDv3.39) — key carries live content hash + DD version; DD 3.40→3.42
+        changes the group, same config is stable. Real bug fixed en route: <code>load_build</code>
+        called <code>self.get()</code> on composite Machines with no own IDS.</td></tr>
+      <tr><td>MachineGeometryReader seam</td><td>✅ shipped <code>d6f90188</code></td>
+        <td><code>MachineGeometryReader</code> ABC + <code>ImasGeometryReader</code> default;
+        CrossSection dispatch re-pointed with all multi-machine fallbacks preserved. IMAS-shaped node
+        and dict-backed provider yield identical sections (CI test); all 20 live iter_md pf_active
+        elements dispatch through the seam.</td></tr>
+      <tr><td>Ingest-IO pandas removal (nova/imas)</td><td>✅ shipped <code>e12156bd</code></td>
+        <td>extrapolate / io_magnetics / magnetic_diagnostics grep-clean of pandas, no pandas/openpyxl
+        binding at import (guard test). Note: a wholesale pandas import block is impossible — xarray
+        imports pandas unconditionally. <code>machinedata/itergeom/vde</code> turned out to live under
+        <code>nova/frame</code> — handed to the §6-closure wave.</td></tr>
+      <tr><td>ZarrStore wiring — identity tier</td><td>◐ partial <code>e954b1d2</code></td>
+        <td>Datafile identity-cache tier (IdsData/CoilData/errorfield) caches through zarr with native
+        group eviction; missing store/group normalised to FileNotFoundError. Cold→warm bit-identical +
+        cache-miss rebuild test. <strong>Compiled frames + solved operators still persist via
+        netCDF</strong> — handoff: <code>nova/biot/data.py</code> base swap (likely clean) and the real
+        port, <code>FrameSet.store/load</code>'s nested netCDF4-group model → zarr groups.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Environment findings (followup candidates)</h2>
+  <ul>
+    <li>This machine's iter_md lives at <code>$IMAS_HOME/imasdb</code> (no <code>shared/</code> subdir)
+    with DDv3 data, while nova's public-user path expects <code>$IMAS_HOME/shared/imasdb</code> and
+    Machine defaults to DDv4/public — so the <code>is_valid</code> DB gates resolve invalid even with
+    data present (the 93 skips persist by design). Live validation used <code>user='mcintos'</code> +
+    explicit <code>dd_version='3.40.0'</code>.</li>
+    <li>Machine.build does not thread <code>dd_version</code>/<code>user</code> through to its geometry
+    sources — a full public-URI cold Machine build is env-blocked; composite key + seam were validated
+    against a live IDS handle directly.</li>
+    <li>Pre-existing dead code: <code>io_magnetics.Magnetics</code> calls an undefined
+    <code>self.get_ids()</code> — left broken, out of wave scope.</li>
+  </ul>
+
+  <h2>What's next</h2>
+  <p>Wave 2: §9 fast lane (importmanager sweep incl. test_bokeh, DB-bound fixtures, &lt;60 s default
+  lane, asv benchmarks) in parallel with the §6 frame-tier closure (FrameSet/biot-Data zarr port +
+  nova/frame pandas removal). Then §10 (ambix adoption, incl. the gs re-architecture) in the
+  imas-ambix checkout.</p>
+
+</main>
+</body>
+</html>

@@ -82,8 +82,8 @@ class PlasmaEvaluate(PlasmaGrid):
         return self.coilset.plasmagrid.br
 
     def time_field_magnitude(self):
-        """Time computation of radial field."""
-        return self.coilset.plasmagrid.bn
+        """Time computation of poloidal field magnitude."""
+        return self.coilset.plasmagrid.bp
 
 
 class PlasmaOperate(PlasmaGrid):

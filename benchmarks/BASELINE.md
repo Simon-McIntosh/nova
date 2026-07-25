@@ -92,3 +92,55 @@ accuracy columns and the near/far + order-vs-distance evidence are archived in
 Tiled assembly (`nova/biot/tiledassembly.py`): ~48 B/pair (vs 267 B/pair
 through the ≤500-source chunking), 16-core scaling 8.78×; measured 16-core
 rate 107 µs/pair ⇒ projected 2000-cell exact-everywhere polygon build 7.1 min.
+
+## tiled backend — one JAX trace on CPU and GPU vs the process pool
+
+Recorded 2026-07-25. Driver: `benchmarks/tiled_backend.py`. Same operator
+throughout: 320 hex cells × their own centres = 102,400 pairs, 64 tiles of
+40×40, exact-everywhere 16×48 rule, block 16; median of 3 fresh processes.
+Parity numpy↔jax: worst absolute deviation 2.6e-17 (CPU) / 5.8e-17 (GPU)
+through the assembled zarr stores; one compilation per build.
+
+CPU node (sun_debug, 16 cores):
+
+| variant | seconds | µs/pair | compile s |
+|---|---|---|---|
+| numpy 1 core | 95.49 | 932.6 | — |
+| numpy 8 cores | 16.44 | 160.6 | — |
+| numpy 16 cores | 11.54 | 112.7 | — |
+| jax scan (16 cores, 1 process) | 19.82 | 193.6 | 1.57 |
+| jax vmap (16 cores, 1 process) | 8.07 | 78.8 | 1.25 |
+
+GPU node (betelgeuse, H200 NVL):
+
+| variant | seconds | µs/pair | compile s |
+|---|---|---|---|
+| numpy 8 cores (same node) | 9.36 | 91.4 | — |
+| jax vmap | 0.76 | 7.4 | 1.54 |
+| jax scan | 1.11 | 10.8 | 2.12 |
+
+Tile-size sweep (H200, vmap, 160 cells): 400 pairs/tile → 15.68 µs/pair /
+131 MB device high-water; 1,600 → 7.18 / 864 MB; 6,400 → 2.83 / 1.43 GB
+(1.3% of the 112.6 GB card). `TilePlan.peak_bytes` does NOT bound a batched
+tile — budget models for device batching must be calibrated from these
+measured high-water marks.
+
+Projected 2000-cell exact-everywhere build (4e6 pairs): 7.5 min at 16 numpy
+cores; 5.3 min jax vmap on the same 16 cores in one process; ~30 s on one
+H200 at 40×40 tiles; ~11 s at 80×80.
+
+## three-band polygon-section coupling (opt-in: PolySection.configured(banded=True))
+
+Recorded 2026-07-25 (sun_debug node; drivers were throwaway — acceptance
+sweeps live in `tests/test_biotbandedcoupling.py`). Bands by distance to the
+section contour: 16×48 rule inside 2.2 contour radii, 8×24 to the far seam,
+moment-corrected filament beyond (second + third moments; the third-moment
+term is a bit-exact no-op on symmetric sections). Far seam 6.8 radii for
+section skew ≤ 1e-3, else 16.0.
+
+Per-pair cost (hexagon / wall-clipped): near 871/1012 µs, mid 255/298 µs,
+far filament 2.5/5.0 µs; whole 2339-target column 13.1/52.0 µs/pair vs
+869/1008 exact-everywhere — **66× / 19× cheaper per column**. Banded node
+count 1.20% / 4.28% of exact. Worst per-component error beyond the near band
+≤ 1.7e-7 of local |B| (≤ 6.8e-9 on ψ contour maps); the near band is
+bit-identical to the production 16×48 rule. Seam jumps ≤ 1.6e-7 of local.

@@ -8,6 +8,9 @@ spine evaluates:
 * rectangular finite section -- :func:`cylinder_greens` (uniform current spread
   over a rectangular cross-section, smooth everywhere including inside the
   conductor);
+* second-moment corrected filament -- :func:`moment_filament` (centroid
+  filament plus the section's quadrupole term, the only far-field form that
+  converges to a finite section for a full ring);
 * near/far blend -- :func:`hybrid_greens` (finite-area form near the section,
   cheap point-filament form beyond a standoff band).
 
@@ -261,6 +264,208 @@ def cylinder_greens(
     return psi, br, bz
 
 
+# --- second-moment corrected filament ---------------------------------
+
+
+def section_centroid(vertices: np.ndarray) -> np.ndarray:
+    """Return the polygon's ``(r, z)`` AREA centroid [m].
+
+    The area centroid, not the mean of the vertices: the two coincide only for a
+    section with a symmetry that pairs its corners, and a filament placed at the
+    vertex mean of a trapezoidal or wall-clipped section carries a first-moment
+    (dipole) error that no second-moment correction can absorb.
+    """
+    v = np.asarray(vertices, dtype=np.float64)
+    r, z = v[:, 0], v[:, 1]
+    r_next, z_next = np.roll(r, -1), np.roll(z, -1)
+    cross = r * z_next - r_next * z
+    area = 0.5 * cross.sum()
+    return np.array(
+        [
+            float(np.sum((r + r_next) * cross) / (6.0 * area)),
+            float(np.sum((z + z_next) * cross) / (6.0 * area)),
+        ]
+    )
+
+
+def second_moments(vertices: np.ndarray) -> tuple[float, float, float]:
+    """Return the area-normalised second central moments ``(Irr, Izz, Irz)`` [m^2].
+
+    Closed polygon (shoelace) formulae about the section's area centroid, not a
+    sampled approximation: they feed a correction term that is itself only parts
+    in ten thousand of the coupling, so a percent-level moment would swamp the
+    thing it corrects.
+    """
+    v = np.asarray(vertices, dtype=np.float64)
+    v = v - section_centroid(v)
+    r, z = v[:, 0], v[:, 1]
+    r_next, z_next = np.roll(r, -1), np.roll(z, -1)
+    cross = r * z_next - r_next * z
+    area = 0.5 * cross.sum()
+    irr = float(np.sum((r**2 + r * r_next + r_next**2) * cross) / 12.0 / area)
+    izz = float(np.sum((z**2 + z * z_next + z_next**2) * cross) / 12.0 / area)
+    irz = float(
+        np.sum((r * z_next + 2.0 * r * z + 2.0 * r_next * z_next + r_next * z) * cross)
+        / 24.0
+        / area
+    )
+    return irr, izz, irz
+
+
+# Degree-3-exact barycentric rule on a triangle (weights summing to one), used to
+# integrate the cubic monomials of the third moments over a fan triangulation of
+# the section.  Exact for the integrand, so the moments carry no quadrature error.
+_TRIANGLE_RULE = (
+    ((1.0 / 3.0, 1.0 / 3.0), -27.0 / 48.0),
+    ((0.2, 0.2), 25.0 / 48.0),
+    ((0.6, 0.2), 25.0 / 48.0),
+    ((0.2, 0.6), 25.0 / 48.0),
+)
+
+
+def third_moments(vertices: np.ndarray) -> tuple[float, float, float, float]:
+    """Return the area-normalised third central moments, ``(Irrr, Irrz, Irzz,
+    Izzz)`` [m^3].
+
+    The section's skew.  It vanishes for any section symmetric about its own
+    centroid -- a regular hexagonal plasma cell -- and survives for one clipped by
+    the first wall, where it is the leading residual of a quadrupole-corrected
+    filament.
+
+    Integrated over a fan triangulation from the centroid with a degree-3-exact
+    triangle rule, so the result is exact for the cubic integrand (the signed fan
+    decomposition is valid for any simple polygon, concave included).
+    """
+    v = np.asarray(vertices, dtype=np.float64)
+    v = v - section_centroid(v)
+    start, end = v, np.roll(v, -1, axis=0)
+    signed_area = 0.5 * (start[:, 0] * end[:, 1] - end[:, 0] * start[:, 1])
+    moment = np.zeros(4)
+    for (towards_start, towards_end), weight in _TRIANGLE_RULE:
+        point = towards_start * start + towards_end * end
+        r, z = point[:, 0], point[:, 1]
+        monomial = np.array([r**3, r * r * z, r * z * z, z**3])
+        moment += weight * (monomial * signed_area).sum(axis=1)
+    return tuple(moment / signed_area.sum())
+
+
+# Source-position step for the curvature difference, in section radii.  The
+# truncation error of the second difference falls as step^2 and the round-off
+# amplification rises as step^-2; balanced against the smallest scale the ring
+# Green's function varies over, the optimum sits a few parts in a thousand of the
+# section size, and the resulting correction bottoms out near 1e-10 relative.  A
+# step tied to the section rather than fixed keeps that true for a millimetre
+# section as well as a metre one.
+_MOMENT_STEP = 2.0e-3
+
+
+def moment_filament(
+    target_r: np.ndarray,
+    target_z: np.ndarray,
+    vertices: np.ndarray,
+    *,
+    step: float | None = None,
+    order: int = 3,
+    cross_moment: bool = True,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """(psi, B_R, B_Z) per ampere: centroid filament corrected by the section moments.
+
+    ``vertices`` -- ``(n, 2)`` polygon ``(r, z)`` corners, either orientation, no
+    repeated closing vertex.  Spreading unit current over a finite section shifts
+    the coupling by the section's moments contracted with the derivatives of the
+    ring Green's function in the SOURCE position,
+
+        f_section = f(centroid) + (1/2) sum_ij m_ij d2f + (1/6) sum_ijk m_ijk d3f,
+
+    with ``m`` the area-normalised central moments.  ``order=2`` keeps the
+    quadrupole term alone, ``order=3`` adds the section's skew.
+
+    The quadrupole term is what makes a far-field filament viable at all.  For a
+    full toroidal ring the curvature it multiplies is set by the MAJOR radius
+    rather than by the distance to the target, so a BARE centroid filament does
+    not converge to the section at any standoff -- its relative error flattens
+    onto a floor of order ``(a / R0)^2``.  Carrying the quadrupole removes that
+    floor for five Green's-function evaluations, nine when the cross moment
+    survives.
+
+    The skew term matters only for a section without centroid symmetry.  A
+    regular hexagonal plasma cell has no third moments and pays nothing for the
+    request; a cell clipped by the first wall does, and there the quadrupole form
+    alone stalls two orders above one part in a million at the distances a
+    far-field band starts at -- a third-order residual whose decay is too slow for
+    a wider band to recover.  Thirteen evaluations with it.
+
+    ``cross_moment=False`` forces the diagonal-only quadrupole even on an
+    asymmetric section, which is how the cross term's contribution is isolated.
+    Derivatives are central differences on a step tied to the section scale; see
+    ``_MOMENT_STEP``.
+    """
+    target_r = np.asarray(target_r, dtype=np.float64)
+    target_z = np.asarray(target_z, dtype=np.float64)
+    v = np.asarray(vertices, dtype=np.float64)
+    centre = section_centroid(v)
+    irr, izz, irz = second_moments(v)
+    radius = float(np.max(np.hypot(*(v - centre).T)))
+    if step is None:
+        step = _MOMENT_STEP * radius
+
+    evaluated: dict[tuple[int, int], np.ndarray] = {}
+
+    def at(dr: int, dz: int) -> np.ndarray:
+        """Return ``(psi, Br, Bz)`` with the source offset by whole steps."""
+        if (dr, dz) not in evaluated:
+            source_r = centre[0] + dr * step
+            source_z = centre[1] + dz * step
+            psi = greens_psi(target_r, target_z, source_r, source_z)
+            bz, br = greens_bz_br(target_r, target_z, source_r, source_z)
+            evaluated[dr, dz] = np.array([psi, br, bz])
+        return evaluated[dr, dz]
+
+    value = at(0, 0)
+    scale = max(abs(irr), abs(izz))
+    correction = 0.5 * (
+        irr * (at(1, 0) - 2.0 * value + at(-1, 0))
+        + izz * (at(0, 1) - 2.0 * value + at(0, -1))
+    )
+    if cross_moment and abs(irz) > 1e-12 * scale:
+        correction += 0.25 * irz * (at(1, 1) - at(1, -1) - at(-1, 1) + at(-1, -1))
+    correction /= step**2
+
+    if order >= 3:
+        mrrr, mrrz, mrzz, mzzz = third_moments(v)
+        # a section symmetric about its centroid has none, to round-off; asking
+        # for the term then costs nothing rather than adding difference noise
+        if max(abs(mrrr), abs(mrrz), abs(mrzz), abs(mzzz)) > 1e-12 * radius**3:
+            skew = (
+                mrrr * (at(2, 0) - 2.0 * at(1, 0) + 2.0 * at(-1, 0) - at(-2, 0))
+                + mzzz * (at(0, 2) - 2.0 * at(0, 1) + 2.0 * at(0, -1) - at(0, -2))
+                + 3.0
+                * mrrz
+                * (
+                    at(1, 1)
+                    - 2.0 * at(0, 1)
+                    + at(-1, 1)
+                    - at(1, -1)
+                    + 2.0 * at(0, -1)
+                    - at(-1, -1)
+                )
+                + 3.0
+                * mrzz
+                * (
+                    at(1, 1)
+                    - 2.0 * at(1, 0)
+                    + at(1, -1)
+                    - at(-1, 1)
+                    + 2.0 * at(-1, 0)
+                    - at(-1, -1)
+                )
+            )
+            correction += skew / (12.0 * step**3)
+
+    corrected = value + correction
+    return corrected[0], corrected[1], corrected[2]
+
+
 def hybrid_greens(
     target_r: np.ndarray,
     target_z: np.ndarray,
@@ -303,4 +508,7 @@ __all__ = [
     "corner_fields",
     "cylinder_greens",
     "hybrid_greens",
+    "section_centroid",
+    "second_moments",
+    "moment_filament",
 ]

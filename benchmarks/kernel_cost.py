@@ -84,6 +84,31 @@ def _hybrid(tr, tz):
     return _time(hybrid_greens, tr, tz, R0, Z0, *RECT)
 
 
+def _polysection(tr, tz):
+    """The shipped element path: PolySection at its exact-everywhere default."""
+    from nova.biot.polysection import PolySection
+
+    return _time(PolySection.section_greens, tr, tz, hexagon())
+
+
+def _zeta(tr, tz):
+    """The arc-conductor zeta quadrature, at the bow element's four corners.
+
+    Bow is a non-axisymmetric arc element, so it is not a candidate for the
+    axisymmetric plasma coupling and is measured here only for context. Driving
+    it needs a full arc Source frame; its cost is dominated by this integral, so
+    this is a lower bound on its per-pair cost rather than the element total.
+    """
+    from nova.biot.zeta import zeta
+
+    corners = 4
+    rs = np.repeat((tr + 0.05)[:, None], corners, axis=1)
+    r = np.repeat(tr[:, None], corners, axis=1)
+    gamma = np.repeat(tz[:, None], corners, axis=1) + 0.02
+    alpha = np.full_like(rs, np.pi / 2.0)
+    return _time(lambda: (zeta(rs, r, gamma, alpha),) * 3)
+
+
 def _polygon(tr, tz, section, n_panels, n_nodes, block):
     from nova.biot.polygon import polygon_greens
 
@@ -153,6 +178,8 @@ def _blocks():
 
 VARIANTS: dict[str, object] = {
     "point": lambda tr, tz: _point(tr, tz, section=hexagon()),
+    "polysection_element": _polysection,
+    "zeta_bow_corners": _zeta,
     "cylinder_rect": _cylinder,
     "hybrid_rect": _hybrid,
     "polygon_rect_16x48": lambda tr, tz: _polygon(tr, tz, rectangle(), 16, 48, 64),
@@ -169,7 +196,10 @@ VARIANTS: dict[str, object] = {
 
 def main(name: str) -> None:
     tr, tz = targets()
-    seconds, (psi, br, bz) = VARIANTS[name](tr, tz)  # type: ignore[operator]
+    seconds, result = VARIANTS[name](tr, tz)  # type: ignore[operator]
+    psi, br, bz = (
+        np.atleast_1d(np.asarray(part)).ravel()[: tr.size] for part in result
+    )
     record = {
         "variant": name,
         "pairs": int(tr.size),

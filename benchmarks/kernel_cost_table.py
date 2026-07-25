@@ -88,7 +88,16 @@ def table(records: dict[str, dict]) -> str:
         "polygon_rect_16x48",
         "polygon_rect_complex_step_16x48",
     }
+    # a raw quadrature is not a coupling, so it has no reference to deviate from
+    unreferenced = {"zeta_bow_corners"}
     for variant, record in records.items():
+        if variant in unreferenced:
+            lines.append(
+                f"{variant:34s} {record['us_per_pair']:10.3f} "
+                f"{record['us_per_pair'] / point:9.1f} "
+                f"{'-':>10s} {'-':>10s} {'-':>10s}  cost only, not a coupling"
+            )
+            continue
         if variant in rectangle_family:
             reference, mask, label = oracle, outside, "rectangle oracle, outside"
         else:

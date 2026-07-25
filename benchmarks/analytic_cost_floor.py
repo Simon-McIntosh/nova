@@ -13,6 +13,12 @@ first and second kind, four complete integrals of the third kind (characteristic
 ``arsinh`` integrals ``g_p`` that the paper leaves numerical. Everything else is
 rational algebra in quantities already computed.
 
+The floor stands, but the finished evaluation is now here to be measured against
+it: ``measured_cost`` times :func:`nova.biot.polygonanalytic.polygon_analytic_flux`
+on the same shape of problem, so the gap between the floor and the assembled
+closed form is the coefficient algebra and the pole bookkeeping the floor
+deliberately ignores.
+
     python benchmarks/analytic_cost_floor.py [nodes]
 """
 
@@ -25,6 +31,7 @@ import numpy as np
 import scipy.special
 
 from nova.biot.elliptic import complete_pi, pole_moment, sn_cn_moments, sn_moments
+from nova.biot.polygonanalytic import polygon_analytic_flux
 
 PAIRS = 4096
 EDGES = 6  # a hexagonal plasma cell contributes all six
@@ -65,6 +72,21 @@ def residual_quadrature_cost(pairs: int, edges: int, nodes: int) -> float:
     return time.perf_counter() - start
 
 
+def measured_cost(pairs: int, edges: int, nodes: int, repeats: int = 3) -> float:
+    """Return the median seconds for the assembled closed form over one build."""
+    rng = np.random.default_rng(2)
+    angle = np.pi / 6 + np.linspace(0.0, 2.0 * np.pi, edges, endpoint=False)
+    vertices = np.column_stack([6.2 + 0.06 * np.cos(angle), 0.06 * np.sin(angle)])
+    target_r = 6.2 + rng.uniform(-1.5, 1.5, pairs)
+    target_z = rng.uniform(-1.5, 1.5, pairs)
+    elapsed = []
+    for _ in range(repeats):
+        start = time.perf_counter()
+        polygon_analytic_flux(target_r, target_z, vertices, nodes=nodes)
+        elapsed.append(time.perf_counter() - start)
+    return float(np.median(elapsed))
+
+
 if __name__ == "__main__":
     nodes = int(sys.argv[1]) if len(sys.argv) > 1 else 48
     special = special_function_cost(PAIRS, EDGES)
@@ -74,3 +96,6 @@ if __name__ == "__main__":
     print(f"  special functions      {1e6 * special / PAIRS:9.2f} us/pair")
     print(f"  residual g_p quadrature{1e6 * residual / PAIRS:9.2f} us/pair")
     print(f"  floor                  {1e6 * total / PAIRS:9.2f} us/pair")
+    measured = measured_cost(PAIRS, EDGES, nodes)
+    print(f"  assembled closed form  {1e6 * measured / PAIRS:9.2f} us/pair")
+    print(f"  over floor             {measured / total:9.2f} x")

@@ -304,13 +304,14 @@ def _edge_terms(r, z, edge, which, nodes):
     plane_offset = (ra - r) - b1 * height
     u = (zb - z) if which else height
     edge_offset = (rb - r) if which else (ra - r)
-    # u = 0 -- a target exactly level with this end of the edge -- puts one G^2
-    # root at each end of the integration range, where the factorisation the
-    # reduction runs on does not exist.  The flux is continuous through u = 0, so
-    # a floor keeps the evaluation finite; it does NOT make it accurate, because
-    # small u is the confluent limit either way.  The floor is a fraction of the
-    # edge's own height so it carries no absolute length scale.
-    u = np.where(u == 0.0, 1e-9 * abs(zb - za), u)
+    # u = 0 -- a target exactly level with this end of the edge -- drives BOTH of
+    # G^2's roots onto the ends of the integration range, and the split below
+    # carries that exactly: each shift is zero, and each numerator's leading
+    # coefficient in the basis that vanishes there is zero with it, because both
+    # carry either sin^2 phi or u (r1 -/+ r).  The pole families return zero for a
+    # divergent leading moment on the same reasoning, so no floor is needed and the
+    # configuration a grid whose rows line up with the section's corners produces is
+    # evaluated rather than approached.
     rp = edge_offset + r
 
     a2 = u * u + (r + rp) ** 2

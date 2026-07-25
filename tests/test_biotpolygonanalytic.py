@@ -562,27 +562,32 @@ def test_a_horizontal_edge_contributes_nothing_to_the_closed_form():
     assert worst_relative(divided[keep], plain[keep]) <= 1e-12
 
 
-def test_a_target_level_with_an_edge_end_stays_finite():
-    """``u = 0`` puts one G^2 root at each end of the integration range.
+def test_a_target_level_with_an_edge_end_is_evaluated_rather_than_approached():
+    """``u = 0`` drives BOTH of G^2's roots onto the ends of the range.
 
-    The factorisation the reduction runs on does not exist there, so the
-    evaluation is floored off zero. That keeps it finite -- which a grid whose
-    rows line up with the section's corners needs -- and this test says so
-    explicitly, because the ACCURACY at that target is whatever the confluent
-    limit allows and is not claimed anywhere.
+    A grid whose rows line up with the section's corners produces this on every
+    row, so it is not exotic. It used to be floored off zero, which kept the
+    evaluation finite at about 1e-08; taking each root in the basis that vanishes
+    at its own end carries it exactly instead, because each shift goes to zero
+    together with the numerator's leading coefficient there, and the whole
+    configuration comes out at round-off.
 
     A target coinciding with a VERTEX is excluded, not overlooked: there ``u = 0``
     and ``r = r'`` together drive the modulus to 1, where the complete integral of
     the first kind itself diverges, and no amount of care in the reduction
     recovers it. The shipped quadrature is finite there and this is not.
     """
-    from nova.biot.polygonanalytic import polygon_analytic_flux
+    from nova.biot.polygonanalytic import polygon_analytic_greens
 
     vertices = scaled_hexagon(3.0, 1.0)
     level = np.unique(vertices[:, 1])
     target_r = np.repeat(np.array([1.8, 2.6, 4.6, 6.0]), level.size)
     target_z = np.tile(level, 4)
-    assert np.all(np.isfinite(polygon_analytic_flux(target_r, target_z, vertices)))
+    reference = polygon_greens(target_r, target_z, vertices, n_panels=128, n_nodes=192)
+    computed = polygon_analytic_greens(target_r, target_z, vertices)
+    for name, got, want in zip(COMPONENTS, computed, reference):
+        assert np.all(np.isfinite(got)), name
+        assert worst_relative(got, want) <= 1e-11, name
 
 
 # --------------------------------------------------------------------------

@@ -8,6 +8,9 @@ spine evaluates:
 * rectangular finite section -- :func:`cylinder_greens` (uniform current spread
   over a rectangular cross-section, smooth everywhere including inside the
   conductor);
+* second-moment corrected filament -- :func:`quadrupole_filament` (centroid
+  filament plus the section's quadrupole term, the only far-field form that
+  converges to a finite section for a full ring);
 * near/far blend -- :func:`hybrid_greens` (finite-area form near the section,
   cheap point-filament form beyond a standoff band).
 
@@ -261,6 +264,120 @@ def cylinder_greens(
     return psi, br, bz
 
 
+# --- second-moment corrected filament ---------------------------------
+
+
+def section_centroid(vertices: np.ndarray) -> np.ndarray:
+    """Return the polygon's ``(r, z)`` AREA centroid [m].
+
+    The area centroid, not the mean of the vertices: the two coincide only for a
+    section with a symmetry that pairs its corners, and a filament placed at the
+    vertex mean of a trapezoidal or wall-clipped section carries a first-moment
+    (dipole) error that no second-moment correction can absorb.
+    """
+    v = np.asarray(vertices, dtype=np.float64)
+    r, z = v[:, 0], v[:, 1]
+    r_next, z_next = np.roll(r, -1), np.roll(z, -1)
+    cross = r * z_next - r_next * z
+    area = 0.5 * cross.sum()
+    return np.array(
+        [
+            float(np.sum((r + r_next) * cross) / (6.0 * area)),
+            float(np.sum((z + z_next) * cross) / (6.0 * area)),
+        ]
+    )
+
+
+def second_moments(vertices: np.ndarray) -> tuple[float, float, float]:
+    """Return the area-normalised second central moments ``(Irr, Izz, Irz)`` [m^2].
+
+    Closed polygon (shoelace) formulae about the section's area centroid, not a
+    sampled approximation: they feed a correction term that is itself only parts
+    in ten thousand of the coupling, so a percent-level moment would swamp the
+    thing it corrects.
+    """
+    v = np.asarray(vertices, dtype=np.float64)
+    v = v - section_centroid(v)
+    r, z = v[:, 0], v[:, 1]
+    r_next, z_next = np.roll(r, -1), np.roll(z, -1)
+    cross = r * z_next - r_next * z
+    area = 0.5 * cross.sum()
+    irr = float(np.sum((r**2 + r * r_next + r_next**2) * cross) / 12.0 / area)
+    izz = float(np.sum((z**2 + z * z_next + z_next**2) * cross) / 12.0 / area)
+    irz = float(
+        np.sum((r * z_next + 2.0 * r * z + 2.0 * r_next * z_next + r_next * z) * cross)
+        / 24.0
+        / area
+    )
+    return irr, izz, irz
+
+
+# Source-position step for the curvature difference, in section radii.  The
+# truncation error of the second difference falls as step^2 and the round-off
+# amplification rises as step^-2; balanced against the smallest scale the ring
+# Green's function varies over, the optimum sits a few parts in a thousand of the
+# section size, and the resulting correction bottoms out near 1e-10 relative.  A
+# step tied to the section rather than fixed keeps that true for a millimetre
+# section as well as a metre one.
+_MOMENT_STEP = 2.0e-3
+
+
+def quadrupole_filament(
+    target_r: np.ndarray,
+    target_z: np.ndarray,
+    vertices: np.ndarray,
+    *,
+    step: float | None = None,
+    cross_moment: bool = True,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """(psi, B_R, B_Z) per ampere: centroid filament plus the section quadrupole.
+
+    ``vertices`` -- ``(n, 2)`` polygon ``(r, z)`` corners, either orientation, no
+    repeated closing vertex.  Spreading unit current over a finite section shifts
+    the coupling by the section's second moment contracted with the curvature of
+    the ring Green's function in the SOURCE position,
+
+        f_section = f(centroid) + (1/2) sum_ij m_ij d2f/dx_i dx_j,
+
+    with ``m_ij`` the area-normalised second central moments.  For a full
+    toroidal ring that curvature is set by the MAJOR radius rather than by the
+    distance to the target, so the bare centroid filament does not converge to
+    the section at any standoff -- its relative error flattens onto a floor of
+    order ``(a / R0)^2``.  Carrying the quadrupole term removes that floor at
+    point-filament cost: five Green's-function evaluations for a section
+    symmetric about one of its own axes, nine when the cross moment survives.
+    ``cross_moment=False`` forces the five-evaluation diagonal-only form even on
+    an asymmetric section, which is how the cross term's contribution is
+    isolated.
+    """
+    target_r = np.asarray(target_r, dtype=np.float64)
+    target_z = np.asarray(target_z, dtype=np.float64)
+    v = np.asarray(vertices, dtype=np.float64)
+    centre = section_centroid(v)
+    irr, izz, irz = second_moments(v)
+    if step is None:
+        radius = float(np.max(np.hypot(*(v - centre).T)))
+        step = _MOMENT_STEP * radius
+
+    def at(dr: float, dz: float) -> np.ndarray:
+        psi = greens_psi(target_r, target_z, centre[0] + dr, centre[1] + dz)
+        bz, br = greens_bz_br(target_r, target_z, centre[0] + dr, centre[1] + dz)
+        return np.array([psi, br, bz])
+
+    value = at(0.0, 0.0)
+    curvature = irr * (at(step, 0.0) - 2.0 * value + at(-step, 0.0)) + izz * (
+        at(0.0, step) - 2.0 * value + at(0.0, -step)
+    )
+    if cross_moment and abs(irz) > 1e-12 * max(abs(irr), abs(izz)):
+        curvature += (
+            0.5
+            * irz
+            * (at(step, step) - at(step, -step) - at(-step, step) + at(-step, -step))
+        )
+    corrected = value + 0.5 * curvature / step**2
+    return corrected[0], corrected[1], corrected[2]
+
+
 def hybrid_greens(
     target_r: np.ndarray,
     target_z: np.ndarray,
@@ -303,4 +420,7 @@ __all__ = [
     "corner_fields",
     "cylinder_greens",
     "hybrid_greens",
+    "section_centroid",
+    "second_moments",
+    "quadrupole_filament",
 ]

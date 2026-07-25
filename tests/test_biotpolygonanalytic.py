@@ -318,10 +318,10 @@ def test_a_section_with_no_sloped_edge_reproduces_the_rectangle_kernel(candidate
 # reproduces its own integral to 1e-14, but assembling a section differences that
 # integral over each edge's two limits and then over the edges, and the edge
 # antiderivative is of order the squared major radius while the flux is not: three
-# of the four sections miss the 1e-10 far band on the FLUX by 3x to 20x, purely on
-# round-off through that cancellation. Both field components pass everywhere except
-# B_Z on the hexagon, which misses by 4x. SECTION_ACCURACY below records the
-# distance from the gate rather than describing it.
+# of the four sections miss the 1e-10 far band on the FLUX by 2x to 12x, purely on
+# round-off through that cancellation. BOTH FIELD COMPONENTS now pass the far band on
+# every section, worst 3.4e-11. SECTION_ACCURACY below records the distance from the
+# gate rather than describing it.
 
 
 def alpha_quadrature(target_r, target_z, edge, which, nodes=600):
@@ -437,9 +437,13 @@ def worst_deviation(vertices, standoff=CONTOUR_STANDOFF):
 #   large and the numerator's value at that end is small. Taking each root in the
 #   basis that vanishes at ITS end makes that value a leading coefficient instead
 #   of an alternating sum, which is what removed the old fourth-power trend
-#   (5.5e-02 at radius 0.03, 6.8e-01 at 0.01). What is left is the ordinary
-#   round-off of a contraction whose terms exceed their sum, and it grows as the
-#   section thins because the moments do.
+#   (5.5e-02 at radius 0.03, 6.8e-01 at 0.01). Giving every complete integral the
+#   modulus COMPLEMENT rather than the float parameter took what remained down
+#   another order and a half at the slender end -- 4.0e-09 to 2.5e-10 at radius 0.03
+#   and 2.0e-07 to 7.1e-09 at 0.01 -- because a slender section is exactly where the
+#   complement is small and a float parameter cannot carry it. What is left is the
+#   ordinary round-off of a contraction whose terms exceed their sum, and it grows as
+#   the section thins because the moments do.
 #
 #   Fat end. The targets run to thirty section radii, so at radius 1.0 they reach
 #   ten major radii, and the edge antiderivative's arsinh weight is of order the
@@ -451,7 +455,7 @@ def worst_deviation(vertices, standoff=CONTOUR_STANDOFF):
 # Both are amplifications of round-off rather than of a formulation error, so the
 # way past them is a reduction that forms the difference between an edge's two
 # limits before the large antiderivative is assembled, not a better pole split.
-ASPECT_ACCURACY = {1.0: 6e-09, 0.3: 3e-10, 0.1: 1e-10, 0.03: 4e-09, 0.01: 2e-07}
+ASPECT_ACCURACY = {1.0: 3e-09, 0.3: 2e-10, 0.1: 8e-11, 0.03: 5e-10, 0.01: 2e-08}
 
 
 @pytest.mark.parametrize("radius", sorted(ASPECT_ACCURACY))
@@ -473,14 +477,17 @@ def test_the_closed_form_tracks_the_quadrature_over_a_whole_section(radius):
 
 # The same envelope over the four gate sections, worst component, so the distance
 # from the 1e-10 gate is recorded rather than described. The closed form does not
-# join CANDIDATES on these numbers: three of the four sections miss the far band,
-# by 3x on the trapezium, 12x on the hexagon and 20x on the thin plate, and every
-# one of those misses is the flux rather than the field.
+# join CANDIDATES on these numbers, but the margin is now small: three of the four
+# sections still miss the far band, by 2x on the hexagon, 2.4x on the trapezium and
+# 12x on the thin plate, and every one of those misses is the flux rather than the
+# field. Giving every complete integral the modulus complement moved all eight
+# entries -- most of an order at the far band, two orders at the near one, where the
+# targets sit close to the contour and so close to an edge's end.
 SECTION_ACCURACY = {
-    "hexagon": (4e-09, 6e-08),
-    "rectangle": (3e-11, 2e-10),
-    "thin_plate": (6e-09, 8e-10),
-    "trapezium": (9e-10, 4e-11),
+    "hexagon": (3e-10, 4e-10),
+    "rectangle": (4e-12, 7e-11),
+    "thin_plate": (2e-09, 3e-10),
+    "trapezium": (4e-10, 2e-11),
 }
 
 
@@ -572,10 +579,9 @@ def test_a_target_level_with_an_edge_end_is_evaluated_rather_than_approached():
     together with the numerator's leading coefficient there, and the whole
     configuration comes out at round-off.
 
-    A target coinciding with a VERTEX is excluded, not overlooked: there ``u = 0``
-    and ``r = r'`` together drive the modulus to 1, where the complete integral of
-    the first kind itself diverges, and no amount of care in the reduction
-    recovers it. The shipped quadrature is finite there and this is not.
+    A target coinciding with a VERTEX adds ``r' = r`` on top, which drives the
+    modulus to one as well; that is the harder degeneracy and it has its own
+    tests below.
     """
     from nova.biot.polygonanalytic import polygon_analytic_greens
 
@@ -588,6 +594,162 @@ def test_a_target_level_with_an_edge_end_is_evaluated_rather_than_approached():
     for name, got, want in zip(COMPONENTS, computed, reference):
         assert np.all(np.isfinite(got)), name
         assert worst_relative(got, want) <= 1e-11, name
+
+
+# --------------------------------------------------------------------------
+# A target ON A VERTEX. Two edges meet there, and for each of them the vertex is
+# one of its two limits, so at that limit u = 0 (the target is level with the edge
+# end) AND r' = r AND r1 = r together. Then the elliptic modulus k^2 = 4 r r'/a^2
+# reaches ONE, where K diverges, and both of the ring denominator's pole shifts and
+# one of the plane denominator's vanish at the same time.
+#
+# The flux and the field of a finite section are BOUNDED at its own vertex -- the
+# section's own corner carries no more singularity than its faces do -- so every
+# divergence here has to cancel against a vanishing coefficient. These sections are
+# destined for evaluation ACROSS themselves inside the plasma bundle, where a
+# target lands on a vertex by accident of grid alignment rather than by contrivance,
+# so a formulation that blows up there cannot be used at all.
+#
+# The band is the near-contour one: a vertex is ON the contour, where the boundary
+# quadrature oracle is converged to about 1e-11 and the gate is 1e-03.
+
+
+def on_the_vertices(vertices):
+    """Return targets landing exactly on each of the section's corners."""
+    corners = np.asarray(vertices, float)
+    return corners[:, 0].copy(), corners[:, 1].copy()
+
+
+def about_the_vertices(vertices, offset, directions=8):
+    """Return targets a fixed distance off each corner, in every direction."""
+    corners = np.asarray(vertices, float)
+    bearing = np.linspace(0.0, 2.0 * np.pi, directions, endpoint=False)
+    return (
+        (corners[:, 0][:, None] + offset * np.cos(bearing)).ravel(),
+        (corners[:, 1][:, None] + offset * np.sin(bearing)).ravel(),
+    )
+
+
+# Worst deviation from the boundary quadrature with a target on EVERY corner of the
+# section, per component, against a 384 x 384 rule. The flux column is the closed
+# form's own: the quadrature's psi is converged to 1e-12 there. The field column is
+# NOT -- the quadrature forms its field by differentiating its antiderivative and at
+# a corner that still moves 1.6e-06 between 384 x 384 and 768 x 512 -- so what those
+# entries bound is the pair, and the closed form's own field error is somewhere under
+# them.
+#
+#     section        psi          Br          Bz
+#     hexagon      1.9e-07     2.3e-06     2.2e-06
+#     rectangle    4.3e-13     2.5e-06     2.0e-06
+#     thin_plate   2.2e-07     3.6e-06     1.9e-06
+#     trapezium    2.4e-08     3.0e-07     2.1e-07
+#
+# The flux entries are the arsinh residual quadrature's, not the reduction's: raising
+# its node count from the default 64 to 256 takes the hexagon from 1.9e-07 to 8.9e-11
+# and the thin plate to 3.8e-10, and at the corner itself the reduction reproduces
+# its own edge integral to 1e-10 against a 40-digit quadrature of it, per edge and per
+# limit. What limits the section is one panel whose boundary layer collapses onto the
+# range end there; ``_LAYER_FLOOR`` records that trade-off.
+#
+# The rectangle is exact because a vertical edge's whole integrand vanishes at its own
+# endpoint -- every term carries the edge slope or ``u``. Approaching such an endpoint
+# rather than landing on it is the WORST-conditioned direction the closed form has,
+# for the same reason: the arctangent's boundary term is of order ``r^2`` and the
+# limit it must produce is of order ``u r``, so the cancellation is one part in
+# ``r/u`` and a vertical edge a picometre from its own end keeps a digit or two of
+# its own contribution. It does not reach the section, because that contribution is
+# proportional to ``u`` and so vanishing: the neighbourhood entries below hold at
+# 1e-12 of a section radius.
+
+
+@pytest.mark.parametrize("section", sorted(SECTIONS))
+def test_a_target_on_a_vertex_is_evaluated_rather_than_diverging(section):
+    """Every corner of every gate section, all three components.
+
+    The trapezium and the thin plate both join edges of very different slope at
+    every corner, and the thin plate joins a steep one to an exactly vertical one,
+    whose ``B^2`` is linear rather than quadratic in the range variable -- so if
+    the cancellation were per-edge rather than structural these would show it.
+    """
+    from nova.biot.polygonanalytic import polygon_analytic_greens
+
+    vertices = SECTIONS[section]
+    target_r, target_z = on_the_vertices(vertices)
+    reference = polygon_greens(target_r, target_z, vertices, n_panels=128, n_nodes=192)
+    computed = polygon_analytic_greens(target_r, target_z, vertices)
+    for name, got, want in zip(COMPONENTS, computed, reference):
+        assert np.all(np.isfinite(got)), name
+        assert worst_relative(got, want) <= NEAR_CONTOUR_GATE, name
+
+
+@pytest.mark.parametrize("offset", [1e-12, 1e-9, 1e-6])
+@pytest.mark.parametrize("section", sorted(SECTIONS))
+def test_the_neighbourhood_of_a_vertex_is_evaluated_too(section, offset):
+    """A hair off the corner, in every direction, at three decades of standoff.
+
+    Patching the exact point would leave the configuration a real target grid
+    actually produces -- a corner missed by a rounding error -- still broken, so
+    the neighbourhood is gated at the same band as the corner itself. It holds the
+    band by three to four orders at every one of these standoffs, and by the same
+    margin as the corner itself, which is what says the corner is a limit rather
+    than a special case: worst 2.2e-06 anywhere in the table above's neighbourhood.
+    """
+    from nova.biot.polygonanalytic import polygon_analytic_greens
+
+    vertices = SECTIONS[section]
+    target_r, target_z = about_the_vertices(vertices, offset)
+    reference = polygon_greens(target_r, target_z, vertices, n_panels=128, n_nodes=192)
+    computed = polygon_analytic_greens(target_r, target_z, vertices)
+    for name, got, want in zip(COMPONENTS, computed, reference):
+        assert np.all(np.isfinite(got)), name
+        assert worst_relative(got, want) <= NEAR_CONTOUR_GATE, name
+
+
+# How fast the evaluation closes on its own on-vertex value as the standoff shrinks,
+# and the level it bottoms out at. A section's field is Lipschitz at its corner up to
+# a logarithm -- the field's GRADIENT is what carries the corner's log singularity --
+# so the modulus is ``s log(1/s)``, and over the ten decades swept below a linear
+# bound with this constant covers that. The floor is where the closed form's own
+# round-off at a corner sits, from the table above.
+VERTEX_MODULUS = 1e3
+VERTEX_FLOOR = 3e-9
+
+
+@pytest.mark.parametrize("section", sorted(SECTIONS))
+def test_the_evaluation_is_continuous_through_a_vertex(section):
+    """Sweep a target along a line THROUGH each corner and watch it close up.
+
+    A value that is right AT the corner while its neighbourhood is not is a patch,
+    not a limit, and no comparison against the boundary quadrature can tell the two
+    apart at a corner -- the quadrature's own field is unconverged there. So this
+    asks the closed form alone: approached from either side along five bearings
+    through every corner, over ten decades of standoff, its value must CONVERGE on
+    the value it returns AT the corner, at the rate a bounded field allows. A
+    discontinuity shows up as a deviation that stops falling; the measured one falls
+    by very nearly a decade per decade all the way down, from 1e-01 at a thousandth
+    of a section radius to 5e-10 at 1e-12 of one.
+    """
+    from nova.biot.polygonanalytic import polygon_analytic_greens
+
+    vertices = np.asarray(SECTIONS[section], float)
+    radius = section_radius(vertices)
+    standoff = np.logspace(-3, -12, 10)
+    for corner in vertices:
+        for bearing in np.linspace(0.0, 2.0 * np.pi, 5, endpoint=False):
+            # the corner itself first, so each component's own value there is the
+            # one the rest of the sweep is held to
+            walk = np.concatenate([[0.0], standoff, -standoff]) * radius
+            target_r = corner[0] + walk * np.cos(bearing)
+            target_z = corner[1] + walk * np.sin(bearing)
+            for name, got in zip(
+                COMPONENTS, polygon_analytic_greens(target_r, target_z, vertices)
+            ):
+                assert np.all(np.isfinite(got)), name
+                deviation = np.abs(got[1:] - got[0]) / np.max(np.abs(got))
+                bound = VERTEX_MODULUS * np.tile(standoff, 2) + VERTEX_FLOOR
+                assert np.all(deviation <= bound), (
+                    f"{section}/{name}: {np.max(deviation / bound):.3e} of the bound"
+                )
 
 
 # --------------------------------------------------------------------------
@@ -783,7 +945,12 @@ def worst_field_deviation(vertices, standoff=CONTOUR_STANDOFF):
 # major radius, while the field's is of order the major radius itself. The field is
 # the better-conditioned of the two over the whole table, which is the reverse of
 # what differentiating the reduced flux would have given.
-FIELD_ASPECT_ACCURACY = {1.0: 6e-12, 0.3: 3e-12, 0.1: 5e-11, 0.03: 2e-09, 0.01: 3e-08}
+#
+# The slender end moved by nearly two orders when every complete integral was given
+# the modulus complement -- 2.0e-09 to 2.4e-11 at radius 0.03 and 3.0e-08 to 3.6e-10
+# at 0.01 -- so the field tracks the flux there more closely than it did, both being
+# limited by the same contraction round-off rather than by the modulus.
+FIELD_ASPECT_ACCURACY = {1.0: 2e-12, 0.3: 2e-12, 0.1: 4e-12, 0.03: 5e-11, 0.01: 8e-10}
 
 
 @pytest.mark.parametrize("radius", sorted(FIELD_ASPECT_ACCURACY))

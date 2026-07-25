@@ -51,6 +51,7 @@ import pytest
 
 from nova.biot.greens import cylinder_greens
 from nova.biot.polygon import polygon_greens
+from nova.biot.polygonanalytic import polygon_analytic_flux, polygon_analytic_greens
 
 COMPONENTS = ("psi", "Br", "Bz")
 ORACLE_RULE = dict(n_panels=64, n_nodes=96)
@@ -170,9 +171,12 @@ def shipped(target_r, target_z, vertices):
     return polygon_greens(target_r, target_z, vertices)
 
 
-# Every entry is held to the full gate below. A closed-form Urankar Part V
-# evaluation joins by adding one line here.
-CANDIDATES = {"boundary_quadrature": shipped}
+# Every entry is held to the full gate below: every band, all directions, targets
+# inside the conductor, four section shapes, and the two structural reductions.
+CANDIDATES = {
+    "boundary_quadrature": shipped,
+    "closed_form": polygon_analytic_greens,
+}
 
 
 def worst_relative(got, want):
@@ -314,14 +318,16 @@ def test_a_section_with_no_sloped_edge_reproduces_the_rectangle_kernel(candidate
 # answer depends on the section's aspect ratio and on how far the targets reach,
 # not on either alone.
 #
-# It does not join CANDIDATES above. Per edge and per limit the reduction now
-# reproduces its own integral to 1e-14, but assembling a section differences that
-# integral over each edge's two limits and then over the edges, and the edge
-# antiderivative is of order the squared major radius while the flux is not: three
-# of the four sections miss the 1e-10 far band on the FLUX by 2x to 12x, purely on
-# round-off through that cancellation. BOTH FIELD COMPONENTS now pass the far band on
-# every section, worst 3.4e-11. SECTION_ACCURACY below records the distance from the
-# gate rather than describing it.
+# It is a CANDIDATE, held to the whole gate above. Getting there took the two
+# post-reduction cancellations out rather than the pole treatment, which was
+# already right: assembling a section differences each edge's antiderivative over
+# its two limits and then over the edges, and the antiderivative is of order the
+# squared major radius while the flux is not, so a per-limit value accurate to a
+# few hundred ulp arrives at the section as 1e-9. Carrying every numerator in the
+# harmonic basis rather than in powers of a range variable put each per-limit value
+# back at a few ulp, and removing the residual quadratures' logarithm in closed
+# form took the near-contour band and the corner with it. The tables below record
+# where that leaves the envelope, in both directions.
 
 
 def alpha_quadrature(target_r, target_z, edge, which, nodes=600):
@@ -412,7 +418,6 @@ def scaled_hexagon(r0, radius):
 
 def worst_deviation(vertices, standoff=CONTOUR_STANDOFF):
     """Return the closed form's worst deviation from the oracle, beyond standoff."""
-    from nova.biot.polygonanalytic import polygon_analytic_flux
 
     target_r, target_z = gate_targets(vertices)
     reference = oracle(target_r, target_z, vertices)[0]
@@ -428,34 +433,31 @@ def worst_deviation(vertices, standoff=CONTOUR_STANDOFF):
 # better on every one of these target sets, checked by raising its rule to
 # 128 x 192, so what they record is the closed form.
 #
-# The envelope is not monotone in the aspect ratio, and the two ends of it fail for
-# DIFFERENT reasons. Both are round-off amplified by a cancellation, and neither is
-# the pole confluence any more -- that one is cured.
+# The envelope is nearly flat in the aspect ratio now, and what shape is left comes
+# from the section sum's own cancellation rather than from the reduction. Three
+# effects took it there, in the order they were found, and each is worth the entry
+# it earned:
 #
-#   Slender end. Each denominator carries a root a distance of order the squared
-#   aspect ratio past one end of the integration range, so the moments there are
-#   large and the numerator's value at that end is small. Taking each root in the
-#   basis that vanishes at ITS end makes that value a leading coefficient instead
-#   of an alternating sum, which is what removed the old fourth-power trend
-#   (5.5e-02 at radius 0.03, 6.8e-01 at 0.01). Giving every complete integral the
-#   modulus COMPLEMENT rather than the float parameter took what remained down
-#   another order and a half at the slender end -- 4.0e-09 to 2.5e-10 at radius 0.03
-#   and 2.0e-07 to 7.1e-09 at 0.01 -- because a slender section is exactly where the
-#   complement is small and a float parameter cannot carry it. What is left is the
-#   ordinary round-off of a contraction whose terms exceed their sum, and it grows as
-#   the section thins because the moments do.
+#   The pole confluence. Each denominator carries a root a distance of order the
+#   squared aspect ratio past one end of the integration range, so the moments
+#   there are large and the numerator's value at that end is small. Taking each
+#   root in the range variable that vanishes at ITS end makes that value a leading
+#   coefficient instead of an alternating sum, which removed a fourth-power trend
+#   (5.5e-02 at radius 0.03, 6.8e-01 at 0.01).
 #
-#   Fat end. The targets run to thirty section radii, so at radius 1.0 they reach
-#   ten major radii, and the edge antiderivative's arsinh weight is of order the
-#   squared major radius while the flux the two limits differ by is not. The
-#   difference over an edge's two limits and then over the edges cancels four
-#   decades at radius 1.0 -- which is why the fat entry is WORSE than the middle of
-#   the table rather than better.
+#   The modulus complement. Giving every complete integral ``k'^2`` from the
+#   geometry rather than a float parameter took the slender end down another order
+#   and a half -- 4.0e-09 to 2.5e-10 at radius 0.03 -- because a slender section is
+#   exactly where the complement is small.
 #
-# Both are amplifications of round-off rather than of a formulation error, so the
-# way past them is a reduction that forms the difference between an edge's two
-# limits before the large antiderivative is assembled, not a better pole split.
-ASPECT_ACCURACY = {1.0: 3e-09, 0.3: 2e-10, 0.1: 8e-11, 0.03: 5e-10, 0.01: 2e-08}
+#   The numerator basis. The reduced numerators reach degree six and the monomial
+#   basis on the unit range is conditioned at four decades by then, so the
+#   contraction was forming each per-limit value out of terms that exceeded it by
+#   as much. In the harmonic basis the coefficients are bounded by the numerator's
+#   own size and nothing cancels: two more orders here, and it is what carries the
+#   FAT end, where the targets reach ten major radii and the section sum differences
+#   an antiderivative of order the squared major radius down to a flux that is not.
+ASPECT_ACCURACY = {1.0: 6e-12, 0.3: 3e-12, 0.1: 3e-12, 0.03: 9e-12, 0.01: 8e-11}
 
 
 @pytest.mark.parametrize("radius", sorted(ASPECT_ACCURACY))
@@ -475,26 +477,29 @@ def test_the_closed_form_tracks_the_quadrature_over_a_whole_section(radius):
     )
 
 
-# The same envelope over the four gate sections, worst component, so the distance
-# from the 1e-10 gate is recorded rather than described. The closed form does not
-# join CANDIDATES on these numbers, but the margin is now small: three of the four
-# sections still miss the far band, by 2x on the hexagon, 2.4x on the trapezium and
-# 12x on the thin plate, and every one of those misses is the flux rather than the
-# field. Giving every complete integral the modulus complement moved all eight
-# entries -- most of an order at the far band, two orders at the near one, where the
-# targets sit close to the contour and so close to an edge's end.
+# The same envelope over the four gate sections, worst component, recorded in both
+# directions so an improvement forces the table to be updated rather than passing
+# unnoticed inside a loose bound. Every entry is now inside the 1e-10 gate the
+# CANDIDATES sweep applies, which is why the closed form is registered there; the
+# margin is 1.7x on the thin plate's far band and one to two orders everywhere else.
+#
+# The two changes that got there moved different entries. The harmonic numerator
+# basis carries the FAR band, where the section sum's cancellation is worst: 48x on
+# the hexagon, 33x on the thin plate, 62x on the trapezium. Removing the residual
+# quadratures' logarithm in closed form carries the NEAR band, where the targets sit
+# on the contour and so at an edge's own end -- and it is the near band, not the far,
+# that the rectangle's remaining 3.9e-11 sits in, on its B_R rather than its flux.
 SECTION_ACCURACY = {
-    "hexagon": (3e-10, 4e-10),
-    "rectangle": (4e-12, 7e-11),
-    "thin_plate": (2e-09, 3e-10),
-    "trapezium": (4e-10, 2e-11),
+    "hexagon": (9e-12, 9e-12),
+    "rectangle": (3e-12, 6e-11),
+    "thin_plate": (9e-11, 9e-12),
+    "trapezium": (1e-11, 6e-12),
 }
 
 
 @pytest.mark.parametrize("section", sorted(SECTION_ACCURACY))
 def test_the_closed_form_holds_its_recorded_envelope_over_the_gate_sections(section):
     """Per section, per band, worst component, bounded both ways."""
-    from nova.biot.polygonanalytic import polygon_analytic_greens
 
     vertices = SECTIONS[section]
     target_r, target_z = gate_targets(vertices)
@@ -527,7 +532,6 @@ def test_the_closed_form_reproduces_the_rectangle_kernel_for_vertical_edges():
     tolerance is the rectangle kernel's own 785-point zeta quadrature, not the
     closed form's.
     """
-    from nova.biot.polygonanalytic import polygon_analytic_flux
 
     width, height = 1.0, 0.8
     vertices = rectangle(r0=3.0, width=width, height=height)
@@ -547,7 +551,6 @@ def test_a_horizontal_edge_contributes_nothing_to_the_closed_form():
     exactly nothing, so the two evaluations agree to round-off rather than to the
     conditioning tolerance -- both sides are the same closed form.
     """
-    from nova.biot.polygonanalytic import polygon_analytic_flux
 
     vertices = rectangle(r0=3.0, width=1.0, height=0.8)
     r_low, r_high = vertices[0, 0], vertices[1, 0]
@@ -583,7 +586,6 @@ def test_a_target_level_with_an_edge_end_is_evaluated_rather_than_approached():
     modulus to one as well; that is the harder degeneracy and it has its own
     tests below.
     """
-    from nova.biot.polygonanalytic import polygon_analytic_greens
 
     vertices = scaled_hexagon(3.0, 1.0)
     level = np.unique(vertices[:, 1])
@@ -631,7 +633,7 @@ def about_the_vertices(vertices, offset, directions=8):
 
 
 # Worst deviation from the boundary quadrature with a target on EVERY corner of the
-# section, per component, against a 384 x 384 rule. The flux column is the closed
+# section, per component, against a 128 x 192 rule. The flux column is the closed
 # form's own: the quadrature's psi is converged to 1e-12 there. The field column is
 # NOT -- the quadrature forms its field by differentiating its antiderivative and at
 # a corner that still moves 1.6e-06 between 384 x 384 and 768 x 512 -- so what those
@@ -639,17 +641,16 @@ def about_the_vertices(vertices, offset, directions=8):
 # them.
 #
 #     section        psi          Br          Bz
-#     hexagon      1.9e-07     2.3e-06     2.2e-06
-#     rectangle    4.3e-13     2.5e-06     2.0e-06
-#     thin_plate   2.2e-07     3.6e-06     1.9e-06
-#     trapezium    2.4e-08     3.0e-07     2.1e-07
+#     hexagon      3.2e-12     2.7e-05     2.6e-05
+#     rectangle    3.5e-13     2.7e-05     2.4e-05
+#     thin_plate   3.3e-12     4.7e-05     2.3e-05
+#     trapezium    2.1e-13     3.9e-06     2.4e-06
 #
-# The flux entries are the arsinh residual quadrature's, not the reduction's: raising
-# its node count from the default 64 to 256 takes the hexagon from 1.9e-07 to 8.9e-11
-# and the thin plate to 3.8e-10, and at the corner itself the reduction reproduces
-# its own edge integral to 1e-10 against a 40-digit quadrature of it, per edge and per
-# limit. What limits the section is one panel whose boundary layer collapses onto the
-# range end there; ``_LAYER_FLOOR`` records that trade-off.
+# The flux column used to be the residual quadratures', at 1.9e-07 to 2.4e-08, and it
+# is now the reduction's: a corner is where both residual integrands turn genuinely
+# log-singular at the range end, and no amount of panel grading resolves a logarithm
+# -- it is removed in closed form instead, which took these entries down by five
+# orders on three of the four sections at no node cost.
 #
 # The rectangle is exact because a vertical edge's whole integrand vanishes at its own
 # endpoint -- every term carries the edge slope or ``u``. Approaching such an endpoint
@@ -671,7 +672,6 @@ def test_a_target_on_a_vertex_is_evaluated_rather_than_diverging(section):
     whose ``B^2`` is linear rather than quadratic in the range variable -- so if
     the cancellation were per-edge rather than structural these would show it.
     """
-    from nova.biot.polygonanalytic import polygon_analytic_greens
 
     vertices = SECTIONS[section]
     target_r, target_z = on_the_vertices(vertices)
@@ -694,7 +694,6 @@ def test_the_neighbourhood_of_a_vertex_is_evaluated_too(section, offset):
     margin as the corner itself, which is what says the corner is a limit rather
     than a special case: worst 2.2e-06 anywhere in the table above's neighbourhood.
     """
-    from nova.biot.polygonanalytic import polygon_analytic_greens
 
     vertices = SECTIONS[section]
     target_r, target_z = about_the_vertices(vertices, offset)
@@ -709,10 +708,17 @@ def test_the_neighbourhood_of_a_vertex_is_evaluated_too(section, offset):
 # and the level it bottoms out at. A section's field is Lipschitz at its corner up to
 # a logarithm -- the field's GRADIENT is what carries the corner's log singularity --
 # so the modulus is ``s log(1/s)``, and over the ten decades swept below a linear
-# bound with this constant covers that. The floor is where the closed form's own
-# round-off at a corner sits, from the table above.
+# bound with this constant covers that.
+#
+# The floor is NOT the on-vertex value's accuracy, which is now 3e-12: it is the
+# accuracy of the neighbourhood a picometre out, where the offsets that set the
+# residual quadratures' panel grading are 1e-13 of a section radius and the panel
+# reaches only ``_LAYER_FLOOR``. What is left unresolved there is the width of that
+# layer times its own logarithm, and the measured floor tracks it. Approaching a
+# corner is therefore now less accurate than landing on it, which is the reverse of
+# the old behaviour and five orders inside the band either way.
 VERTEX_MODULUS = 1e3
-VERTEX_FLOOR = 3e-9
+VERTEX_FLOOR = 1e-7
 
 
 @pytest.mark.parametrize("section", sorted(SECTIONS))
@@ -729,7 +735,6 @@ def test_the_evaluation_is_continuous_through_a_vertex(section):
     by very nearly a decade per decade all the way down, from 1e-01 at a thousandth
     of a section radius to 5e-10 at 1e-12 of one.
     """
-    from nova.biot.polygonanalytic import polygon_analytic_greens
 
     vertices = np.asarray(SECTIONS[section], float)
     radius = section_radius(vertices)
@@ -920,7 +925,6 @@ def worst_field_deviation(vertices, standoff=CONTOUR_STANDOFF):
     there -- which is itself worth knowing, because the closed form IS finite on
     the axis and a separate test pins it.
     """
-    from nova.biot.polygonanalytic import polygon_analytic_greens
 
     target_r, target_z = gate_targets(vertices)
     reference = oracle(target_r, target_z, vertices)
@@ -940,17 +944,12 @@ def worst_field_deviation(vertices, standoff=CONTOUR_STANDOFF):
 # -- and the point of measuring rather than assuming is that the field's weights
 # are one order LOWER in the arctangent term and one HIGHER in the radial D term.
 #
-# At the fat end it does NOT track, and by three decades: the flux's edge sum
-# cancels four decades there because its arsinh weight is of order the squared
-# major radius, while the field's is of order the major radius itself. The field is
-# the better-conditioned of the two over the whole table, which is the reverse of
-# what differentiating the reduced flux would have given.
-#
-# The slender end moved by nearly two orders when every complete integral was given
-# the modulus complement -- 2.0e-09 to 2.4e-11 at radius 0.03 and 3.0e-08 to 3.6e-10
-# at 0.01 -- so the field tracks the flux there more closely than it did, both being
-# limited by the same contraction round-off rather than by the modulus.
-FIELD_ASPECT_ACCURACY = {1.0: 2e-12, 0.3: 2e-12, 0.1: 4e-12, 0.03: 5e-11, 0.01: 8e-10}
+# It stays the better-conditioned of the two over the whole table, by one to two
+# orders, which is the reverse of what differentiating the reduced flux would have
+# given: the flux's arsinh weight is of order the squared major radius where the
+# field's is of order the major radius itself, so the section sum differences a
+# smaller quantity down to the same answer.
+FIELD_ASPECT_ACCURACY = {1.0: 3e-13, 0.3: 3e-13, 0.1: 2e-12, 0.03: 4e-12, 0.01: 9e-12}
 
 
 @pytest.mark.parametrize("radius", sorted(FIELD_ASPECT_ACCURACY))
@@ -971,7 +970,6 @@ def test_the_closed_form_field_reproduces_the_rectangle_kernel():
     The tolerance is the rectangle kernel's own 785-point zeta quadrature, which
     the gate above already records as limiting B_R agreement to about 1e-03.
     """
-    from nova.biot.polygonanalytic import polygon_analytic_greens
 
     width, height = 1.0, 0.8
     vertices = rectangle(r0=3.0, width=width, height=height)
@@ -985,7 +983,6 @@ def test_the_closed_form_field_reproduces_the_rectangle_kernel():
 
 def test_a_horizontal_edge_contributes_nothing_to_the_closed_form_field():
     """The field's own version of paper eq 7a."""
-    from nova.biot.polygonanalytic import polygon_analytic_greens
 
     vertices = rectangle(r0=3.0, width=1.0, height=0.8)
     r_low, r_high = vertices[0, 0], vertices[1, 0]
@@ -1017,7 +1014,6 @@ def test_the_field_is_clean_on_the_axis():
     the parity it inherits from the reduction pins B_R to zero rather than merely
     small.
     """
-    from nova.biot.polygonanalytic import polygon_analytic_greens
 
     vertices = scaled_hexagon(3.0, 1.0)
     target_z = np.array([-0.8, -0.2, 0.0, 0.3, 0.9])
@@ -1055,7 +1051,6 @@ def test_the_closed_form_field_is_the_gradient_of_its_own_flux(section):
     ample for what this test exists to catch -- the term it found was wrong by 170
     per cent on the trapezium and by a factor of six on a steep edge.
     """
-    from nova.biot.polygonanalytic import polygon_analytic_flux, polygon_analytic_greens
 
     vertices = SECTIONS[section]
     radius = section_radius(vertices)

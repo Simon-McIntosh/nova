@@ -579,3 +579,178 @@ def test_the_third_kind_integral_keeps_its_digits_when_handed_both_complements()
     # and the difference is real rather than round-off: the rounded parameter puts
     # the complement out by a part in 1e4, which Pi carries as half of that
     assert abs(loose - exact) > 1e-6 * abs(exact)
+
+
+# --------------------------------------------------------------------------
+# The HARMONIC families. A numerator written in powers of a range variable reaches
+# coefficients four decades above its own size by degree six -- that is what the
+# monomial basis costs on a unit interval -- so contracting one against the power
+# families above forms the answer out of terms that exceed it by as much. Cosines
+# are bounded by one and their moments decay, so the same contraction adds nothing
+# larger than the result. These three are what makes that possible: the plain
+# family, the same weighted by the radical, and one per pole factor.
+#
+# What is wanted from them is ABSOLUTE accuracy of order ``eps K``, not relative:
+# the high harmonics are small and the coefficients multiplying them are no larger
+# than the low ones, so an error tiny beside ``P_0`` is tiny beside the contraction
+# however large it is beside ``P_n`` itself. The tolerances below are written that
+# way, against ``K`` rather than against each moment.
+
+# Adaptive quadrature stops being a usable reference past this: at a complement of
+# 1e-9 the integrand is 3e4 over a width of 3e-5 radians and ``quad`` reports its own
+# error at 6e-09, an order above what is being measured. The confluence is pinned
+# below instead, against values that are elementary there.
+HARMONIC_PARAMETERS = [0.0, 1e-3, 0.3, 0.7, 0.95, 0.985, 0.995]
+
+
+def harmonic_quadrature(order, parameter, weight):
+    """Return ``int_0^(pi/2) cos(2 n a) weight(Delta) da`` by adaptive quadrature."""
+    value, _ = scipy.integrate.quad(
+        lambda angle: (
+            np.cos(2 * order * angle)
+            * weight(np.sqrt(1.0 - parameter * np.sin(angle) ** 2))
+        ),
+        0.0,
+        np.pi / 2.0,
+        limit=400,
+        epsabs=1e-15,
+        epsrel=1e-15,
+    )
+    return value
+
+
+@pytest.mark.parametrize("parameter", HARMONIC_PARAMETERS)
+def test_harmonic_moments_reproduce_their_defining_integral(parameter):
+    """``P_n = int cos(2 n a)/Delta da``, over and under the recursion's switch.
+
+    The family is the MINIMAL solution of its own three-term relation, so its
+    downward direction is the stable one everywhere except at the confluence,
+    where the two branches become degenerate; there it is run upward instead, on
+    the difference from the divergence every order shares. Both sides are swept.
+    """
+    from nova.biot.elliptic import harmonic_moments
+
+    complement = np.float64(1.0 - parameter)
+    moments = harmonic_moments(np.float64(parameter), 9, complement=complement)
+    scale = float(scipy.special.ellipk(parameter))
+    for order, moment in enumerate(moments):
+        expected = harmonic_quadrature(order, parameter, lambda delta: 1.0 / delta)
+        assert abs(float(moment) - expected) < 1e-13 * scale
+
+
+@pytest.mark.parametrize("parameter", HARMONIC_PARAMETERS)
+def test_harmonic_root_moments_reproduce_their_defining_integral(parameter):
+    """``D_n = int cos(2 n a) Delta da``, folded off the plain family.
+
+    ``Delta^2`` is itself two harmonics, so no new special function is needed --
+    which is the only reason the radical-weighted term costs nothing.
+    """
+    from nova.biot.elliptic import harmonic_moments, harmonic_root_moments
+
+    complement = np.float64(1.0 - parameter)
+    moments = harmonic_moments(np.float64(parameter), 10, complement=complement)
+    root = harmonic_root_moments(moments, np.float64(parameter))
+    scale = float(scipy.special.ellipk(parameter))
+    for order, moment in enumerate(root):
+        expected = harmonic_quadrature(order, parameter, lambda delta: delta)
+        assert abs(float(moment) - expected) < 1e-13 * scale
+
+
+@pytest.mark.parametrize("shift", [0.3, 1.0, 7.0, 1.0e3, 1.0e7])
+@pytest.mark.parametrize("parameter", [0.05, 0.5, 0.95, 0.995])
+@pytest.mark.parametrize("mirrored", [False, True])
+def test_harmonic_pole_moments_reproduce_their_defining_integral(
+    shift, parameter, mirrored
+):
+    """One pole factor, a root past either end, over seven decades of distance.
+
+    The far shifts are the point: a nearly vertical polygon edge puts the root at
+    the reciprocal of its squared slope, and the family's own decay is what has to
+    separate its orders there. Near roots are excluded because a caller takes the
+    weight on those out exactly instead -- the moments are then dominated by their
+    seed and this contraction is not the route used.
+    """
+    from nova.biot.elliptic import (
+        cn_pole_moment,
+        harmonic_moments,
+        harmonic_pole_moments,
+        sn_pole_moment,
+    )
+    from nova.biot.elliptic import POLE_HEADROOM
+
+    complement = np.float64(1.0 - parameter)
+    count = 9
+    moments = harmonic_moments(
+        np.float64(parameter), count + POLE_HEADROOM + 1, complement=complement
+    )
+    seed = (sn_pole_moment if mirrored else cn_pole_moment)(
+        np.float64(shift), np.float64(parameter), parameter_complement=complement
+    )
+    family = harmonic_pole_moments(
+        np.float64(shift), seed, moments, count, mirrored=mirrored
+    )
+    scale = float(scipy.special.ellipk(parameter)) / (1.0 + shift)
+    for order, moment in enumerate(family):
+        expected, _ = scipy.integrate.quad(
+            lambda angle, order=order: (
+                np.cos(2 * order * angle)
+                / (
+                    ((np.sin(angle) if mirrored else np.cos(angle)) ** 2 + shift)
+                    * np.sqrt(1.0 - parameter * np.sin(angle) ** 2)
+                )
+            ),
+            0.0,
+            np.pi / 2.0,
+            limit=400,
+            epsabs=1e-16,
+            epsrel=1e-15,
+        )
+        assert abs(float(moment) - expected) < 1e-12 * scale
+
+
+def test_the_harmonic_family_carries_the_confluence_as_a_finite_part():
+    """At ``k^2 = 1`` every harmonic moment diverges with the SAME logarithm.
+
+    ``cos 2 n a`` equals ``(-1)^n`` exactly where ``Delta`` vanishes, so the whole
+    family shares one divergence with weights ``(-1)^n`` -- which is why a
+    contraction against it puts the numerator's value at that end on the divergence,
+    and why a reduction whose own weight there is zero can take the finite parts and
+    be done. With ``K`` returned as zero those finite parts are elementary:
+    ``int (cos 2 n a - (-1)^n)/cos a da`` collapses on a polynomial.
+
+        P_0 = 0,  P_1 = 2,  P_2 = -8/3,  P_3 = 46/15
+
+    and the recursion reproduces them, which is the check: the first two are the
+    seeds, the rest are the relation.
+    """
+    from nova.biot.elliptic import harmonic_moments
+
+    moments = harmonic_moments(np.float64(1.0), 4, complement=np.float64(0.0))
+    np.testing.assert_allclose(
+        [float(value) for value in moments], [0.0, 2.0, -8.0 / 3.0, 46.0 / 15.0]
+    )
+
+
+@pytest.mark.parametrize("complement", [1e-4, 1e-9, 1e-14])
+def test_the_harmonic_family_satisfies_its_own_relation_near_the_confluence(complement):
+    """Where no quadrature reference survives, the recursion is pinned on itself.
+
+    ``(2n + 1) k^2 P(n+1) + 4n (1 + k'^2) P(n) + (2n - 1) k^2 P(n-1) = 0`` is what
+    the family is built from, so satisfying it proves nothing about the seeds -- but
+    ``P_0`` IS ``K``, taken from the complement, and the residual then says the
+    upward direction has not lost the seeds on the way. Both together are what the
+    quadrature would have said.
+    """
+    from nova.biot.elliptic import harmonic_moments
+
+    parameter = np.float64(1.0) - np.float64(complement)
+    moments = harmonic_moments(parameter, 10, complement=np.float64(complement))
+    expected = scipy.special.elliprf(0.0, complement, 1.0)
+    np.testing.assert_allclose(float(moments[0]), expected, rtol=1e-15)
+    for order in range(1, len(moments) - 1):
+        residual = (
+            (2 * order + 1) * parameter * moments[order + 1]
+            + 4.0 * order * (1.0 + complement) * moments[order]
+            + (2 * order - 1) * parameter * moments[order - 1]
+        )
+        assert abs(float(residual)) < 1e-13 * order * expected

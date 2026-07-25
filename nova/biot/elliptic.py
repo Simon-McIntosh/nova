@@ -44,12 +44,17 @@ import numpy as np
 import scipy.special  # type: ignore[import-untyped]
 
 __all__ = [
+    "cn_pole_moment",
     "cn_pole_moments",
     "complete_pi",
+    "harmonic_moments",
+    "harmonic_pole_moments",
+    "harmonic_root_moments",
     "pole_moment",
     "pole_moments",
     "sn_moments",
     "sn_cn_moments",
+    "sn_pole_moment",
     "sn_pole_moments",
     "stable_cn_moments",
     "stable_sn_moments",
@@ -81,6 +86,21 @@ _COMPLEMENT_SWITCH = 1.0 / (1.0 + _SHIFT_SWITCH)
 # arbitrary seed.  The parasitic branch decays by roughly the switch value per
 # order, so this many take it below round-off.
 _HEADROOM = 60
+
+# Where the harmonic family leaves its downward direction for its upward one.
+# The branch ratio there is ``(c - sqrt(c^2 - 1))^2`` with ``c = (1 + k'^2)/k^2``,
+# which is 0.67 per order at this parameter: the headroom below takes that under
+# round-off, and the upward direction -- which grows by the reciprocal -- costs
+# under an order over the harmonics a numerator of degree eight reaches.
+_HARMONIC_SWITCH = 0.99
+_HARMONIC_HEADROOM = 96
+
+# Orders the harmonic pole family is carried past the last one wanted before the
+# system is closed.  A root a quarter of the range past its end -- the point below
+# which a caller takes the pole's weight out exactly instead -- makes the family
+# decay by 0.38 per order, so this many put the closure's own error under
+# round-off.
+POLE_HEADROOM = 32
 
 
 def _complete_kind(complement: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
@@ -148,6 +168,168 @@ def complete_pi(
     rf = scipy.special.elliprf(0.0, parameter_complement, 1.0)
     rj = scipy.special.elliprj(0.0, parameter_complement, 1.0, complement)
     return rf + rj * characteristic / 3.0
+
+
+def harmonic_moments(
+    parameter: np.ndarray,
+    count: int,
+    *,
+    complement: np.ndarray | None = None,
+) -> list[np.ndarray]:
+    """Return ``[P_0, P_1, ...]``, ``P_n = integral_0^(pi/2) cos(2 n a)/Delta da``.
+
+    The moments of the HARMONICS rather than of a power of ``sn`` or ``cn``, and
+    what a numerator built as a cosine series contracts against.  The two power
+    families are the natural basis for the paper's algebra and the wrong one for
+    floating point: a polynomial of degree eight that stays of order one over the
+    range reaches monomial coefficients of order ``10^4`` times its own size, so
+    contracting it against a family of same-signed moments forms the answer as a
+    sum of terms that exceed it by as much.  Cosines are bounded by one and their
+    moments fall off, so the same contraction adds terms no larger than the
+    result.
+
+    Only ABSOLUTE accuracy of order ``eps K`` is wanted here, not relative: the
+    high harmonics are small and multiply coefficients no larger than the low
+    ones, so an error that is tiny beside ``P_0`` is tiny beside the contraction
+    however large it is beside ``P_n`` itself.  That is what makes both directions
+    below usable.
+
+    The recursion comes from ``[sin 2na Delta]`` vanishing at both ends of the
+    quarter period, with ``Delta^2 = (1 + k'^2)/2 + (k^2/2) cos 2a`` folding the
+    root back onto the family:
+
+        (2n + 1) k^2 P(n+1) + 4n (1 + k'^2) P(n) + (2n - 1) k^2 P(n-1) = 0
+
+    Its two branches are reciprocal, so ``P_n`` -- which decays, being the Fourier
+    series of a function analytic on the range -- is always the MINIMAL solution
+    and the upward direction is always the unstable one.  Downward is therefore
+    the direction of choice, and it is run on the RATIOS ``P_n/P(n-1)``, which
+    stay bounded where the moments themselves would overflow: a far target makes
+    the growth per downward step ``4/k^2``, which over a useful headroom is past
+    any exponent range.  The ratio recursion also carries ``k^2 = 0`` exactly,
+    returning zero for every harmonic above the mean.
+
+    Downward fails only as ``k^2 -> 1``, where the two branches become degenerate
+    -- and there the upward direction costs nothing for the same reason, provided
+    it is run on ``R_n = P_n - (-1)^n K``.  That difference is what stays bounded
+    at the confluence: ``cos 2na`` equals ``(-1)^n`` where ``Delta`` vanishes, so
+    every ``P_n`` carries the SAME logarithmic divergence and their difference from
+    it does not.  ``R`` obeys the same recursion with ``-(-1)^n 8 n k'^2 K`` on the
+    right, and at the confluence itself that source vanishes with ``k'^2``.
+
+    ``complement`` supplies ``k'^2``; see :func:`_complete_kind` for why it must be
+    given rather than formed, and for the finite-part convention at ``k'^2 = 0``.
+    """
+    parameter = np.asarray(parameter, dtype=np.float64)
+    if complement is None:
+        complement = 1.0 - parameter
+    complement = np.asarray(complement, dtype=np.float64) + np.zeros_like(parameter)
+    complete_k, complete_e = _complete_kind(complement)
+    degenerate = parameter > _HARMONIC_SWITCH
+
+    held = np.where(degenerate, parameter, 1.0)
+    held_complement = np.where(degenerate, complement, 0.0)
+    upward = [
+        np.zeros_like(parameter),
+        2.0 * (complete_e - held_complement * complete_k) / held,
+    ]
+    for order in range(1, count - 1):
+        upward.append(
+            -(
+                4.0 * order * (1.0 + held_complement) * upward[order]
+                + (2 * order - 1) * held * upward[order - 1]
+                + (-1.0) ** order * 8.0 * order * held_complement * complete_k
+            )
+            / ((2 * order + 1) * held)
+        )
+
+    ratio = np.zeros_like(parameter)
+    ratios: list[np.ndarray] = [None] * (count + _HARMONIC_HEADROOM + 1)  # type: ignore[list-item]
+    for order in range(count + _HARMONIC_HEADROOM, 0, -1):
+        ratio = (
+            -(2 * order - 1)
+            * parameter
+            / ((2 * order + 1) * parameter * ratio + 4.0 * order * (1.0 + complement))
+        )
+        if order <= count:
+            ratios[order] = ratio
+    downward = [complete_k]
+    for order in range(1, count):
+        downward.append(downward[order - 1] * ratios[order])
+    return [
+        np.where(
+            degenerate,
+            upward[order] + (-1.0) ** order * complete_k,
+            downward[order],
+        )
+        for order in range(count)
+    ]
+
+
+def harmonic_pole_moments(
+    shift: np.ndarray,
+    seed: np.ndarray,
+    moments: list[np.ndarray],
+    count: int,
+    *,
+    mirrored: bool = False,
+) -> list[np.ndarray]:
+    """Return ``V_n = integral C_n/((cos^2 a + shift) Delta) da``, or its mirror.
+
+    ``mirrored`` puts the pole factor on ``sin^2 a`` instead, so the root sits past
+    the other end of the range.  ``seed`` is ``V_0``, which
+    :func:`cn_pole_moment` and :func:`sn_pole_moment` give in closed form.
+
+    Multiplying the definition back by the pole factor folds each harmonic onto
+    its two neighbours -- ``cos^2 a = (1 + cos 2a)/2`` and
+    ``cos 2m a cos 2n a`` splits -- so the family satisfies a three-term relation
+    driven by the plain moments,
+
+        V(n-1) + s(2 + 4 shift) V(n) + V(n+1) = 4 s P(n),   s = +/- 1
+
+    with a diagonal of at least two against off-diagonals of one.  The system is
+    therefore diagonally dominant and solved directly, closing it at a high order
+    where the wanted solution -- which decays like the reciprocal of
+    ``(1 + 2 shift) + sqrt((1 + 2 shift)^2 - 1)`` per order -- has died away.  That
+    decay is what sets the headroom, and it is only fast enough for a root a
+    reasonable distance past the range; for a root ON the range end the family is
+    dominated by its seed anyway and the caller takes it out exactly instead.
+    """
+    sign = -1.0 if mirrored else 1.0
+    diagonal = sign * (2.0 + 4.0 * shift)
+    top = count + POLE_HEADROOM
+    ratio = [1.0 / diagonal]
+    solution = [(4.0 * sign * moments[1] - seed) / diagonal]
+    for order in range(2, top + 1):
+        pivot = diagonal - ratio[-1]
+        ratio.append(1.0 / pivot)
+        solution.append((4.0 * sign * moments[order] - solution[-1]) / pivot)
+    values: list[np.ndarray] = [None] * (top + 1)  # type: ignore[list-item]
+    values[top] = solution[top - 1]
+    for order in range(top - 1, 0, -1):
+        values[order] = solution[order - 1] - ratio[order - 1] * values[order + 1]
+    values[0] = seed
+    return values[:count]
+
+
+def harmonic_root_moments(
+    moments: list[np.ndarray], parameter: np.ndarray
+) -> list[np.ndarray]:
+    """Return ``[D_0, ...]``, ``D_n = integral_0^(pi/2) cos(2 n a) Delta da``.
+
+    ``Delta^2`` is itself the first two harmonics, ``(1 + k'^2)/2 + (k^2/2) cos
+    2a``, so multiplying it back under the integral folds each root moment onto
+    three neighbouring reciprocal ones -- no new special function, and the
+    ``P(-1) = P(1)`` reflection covers the mean.  ``moments`` must carry one order
+    past the last root moment wanted.
+    """
+    parameter = np.asarray(parameter, dtype=np.float64)
+    mean = 1.0 - 0.5 * parameter
+    return [
+        mean * moments[order]
+        + 0.25 * parameter * (moments[order + 1] + moments[abs(order - 1)])
+        for order in range(len(moments) - 1)
+    ]
 
 
 def stable_sn_moments(
@@ -394,9 +576,35 @@ def cn_pole_moments(
         moments = stable_cn_moments(
             parameter, count + _HEADROOM, complement=parameter_complement
         )
+    return _shifted_family(
+        shift,
+        cn_pole_moment(shift, parameter, parameter_complement=parameter_complement),
+        moments,
+        count,
+    )
+
+
+def cn_pole_moment(
+    shift: np.ndarray,
+    parameter: np.ndarray,
+    *,
+    parameter_complement: np.ndarray | None = None,
+) -> np.ndarray:
+    """Return ``integral_0^(pi/2) da/((cos^2 a + shift) Delta)``, the family's seed.
+
+    ``cos^2 a + shift = (1 + shift)(1 - n sin^2 a)`` with ``n = 1/(1 + shift)``,
+    whose complement ``shift/(1 + shift)`` is exact, so this is one ``Pi``.  It is
+    also the ONLY special function a whole complement-basis pole family needs, and
+    the only place a reduction's pole weight is multiplied by something that grows
+    as the root approaches the range -- so it is separated out here for callers
+    that want the seed alone.  ``shift = 0`` puts the root ON the end, where the
+    integral diverges; zero is returned, on the finite-part convention of
+    :func:`_complete_kind`.
+    """
+    shift = np.asarray(shift, dtype=np.float64)
     positive = shift > 0.0
     held = np.where(positive, shift, 1.0)
-    leading = np.where(
+    return np.where(
         positive,
         complete_pi(
             1.0 / (1.0 + held),
@@ -407,7 +615,6 @@ def cn_pole_moments(
         / (1.0 + held),
         0.0,
     )
-    return _shifted_family(shift, leading, moments, count)
 
 
 def sn_pole_moments(
@@ -442,9 +649,33 @@ def sn_pole_moments(
         moments = stable_sn_moments(
             parameter, count + _HEADROOM, complement=parameter_complement
         )
+    return _shifted_family(
+        shift,
+        sn_pole_moment(shift, parameter, parameter_complement=parameter_complement),
+        moments,
+        count,
+    )
+
+
+def sn_pole_moment(
+    shift: np.ndarray,
+    parameter: np.ndarray,
+    *,
+    parameter_complement: np.ndarray | None = None,
+) -> np.ndarray:
+    """Return ``integral_0^(pi/2) da/((sin^2 a + shift) Delta)``, the family's seed.
+
+    The mirror of :func:`cn_pole_moment`: the same characteristic with the pole
+    factor on ``cos^2 a``, which is what :func:`_mirrored_pi` evaluates without the
+    difference an ordinary ``Pi`` at a hugely negative characteristic would form.
+    """
+    shift = np.asarray(shift, dtype=np.float64)
+    parameter = np.asarray(parameter, dtype=np.float64)
+    if parameter_complement is None:
+        parameter_complement = 1.0 - parameter
     positive = shift > 0.0
     held = np.where(positive, shift, 1.0)
-    leading = np.where(
+    return np.where(
         positive,
         _mirrored_pi(
             1.0 / (1.0 + held),
@@ -454,7 +685,6 @@ def sn_pole_moments(
         / (1.0 + held),
         0.0,
     )
-    return _shifted_family(shift, leading, moments, count)
 
 
 def pole_moments(

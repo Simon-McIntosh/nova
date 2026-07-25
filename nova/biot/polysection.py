@@ -50,26 +50,27 @@ class PolySection(Matrix):
     axisymmetric: ClassVar[bool] = True
     name: ClassVar[str] = "polysection"
 
-    standoff: ClassVar[float | None] = 3.0
+    standoff: ClassVar[float | None] = None
     """Standoff band, in section radii, within which the exact kernel is used.
 
-    ``None`` (or ``inf``) means *exact everywhere*: every target-source pair goes
-    through the polygon kernel, with no point-filament far field and no seam at
-    all. That is the physically unimpeachable setting and it is what to reach for
-    when a result must not depend on a blend; it costs about four orders of
-    magnitude more per pair than the point form, so it is not the default.
+    The default ``None`` (or ``inf``) means *exact everywhere*: every
+    target-source pair goes through the polygon kernel, with no point-filament
+    far field and no seam at all. That is the physically unimpeachable setting
+    and the only one shipped as a default — a finite band needs a principled,
+    error-bounded cutoff, and none of the geometry-derived candidates measured
+    so far qualifies (a few section radii keeps the seam small, ~5e-4 in flux,
+    but where the finite-section correction stops mattering has to come from
+    the section's second-moment error bound, not from a budget). The
+    operator-assembly review owns that choice.
 
-    The default of three radii is the geometry-derived standoff, in the spirit of
-    the switch :func:`nova.biot.greens.hybrid_greens` applies to rectangular
-    sections. Note the basis differs: ``hybrid_greens`` measures its standoff
-    against the section's full extent, this against the circumradius, so three
-    radii here is the narrower band of the two.
-
-    Two radii is the useful floor. It still covers a cell and its first ring of
-    neighbours — in a hexagonal tiling of circumradius ``a`` the nearest centres
-    sit at ``sqrt(3) a`` — and measured on a 234-cell mesh it delivers an
-    identical self-term correction for a quarter of the cost. Below two radii,
-    near-neighbour pairs fall back to the bare point kernel just where
+    A finite value is for scoped studies via :meth:`configured`. Measured
+    guidance for such sweeps: the exact kernel costs about four orders of
+    magnitude more per pair than the point form; two radii is the useful floor
+    (it still covers a cell and its first ring of neighbours — in a hexagonal
+    tiling of circumradius ``a`` the nearest centres sit at ``sqrt(3) a`` —
+    and on a 234-cell mesh delivers the identical self-term correction for a
+    quarter of the cost of three radii). Below two radii, near-neighbour pairs
+    fall back to the bare point kernel just where
     :class:`nova.biot.circle.OffsetFilaments` would be applying its
     coincident-filament offset, and the two paths stop agreeing.
     """
@@ -150,8 +151,10 @@ class PolySection(Matrix):
         near = cls.near_band(target_r, target_z, vertices)
         if near.any():
             psi, br, bz = psi.copy(), br.copy(), bz.copy()
-            rule = {} if cls.quadrature is None else dict(
-                zip(("n_panels", "n_nodes"), cls.quadrature)
+            rule = (
+                {}
+                if cls.quadrature is None
+                else dict(zip(("n_panels", "n_nodes"), cls.quadrature))
             )
             psi[near], br[near], bz[near] = polygon_greens(
                 target_r[near], target_z[near], vertices, **rule

@@ -127,31 +127,40 @@ def test_the_blend_is_continuous_across_the_standoff_band():
 
     Both kernels are evaluated at the SAME radius, on the band edge, so the
     comparison isolates the switch rather than the radial variation of the flux.
+    A finite band is a scoped-study setting (the shipped default is exact
+    everywhere), so one is configured explicitly here.
     """
     from nova.biot.polygon import polygon_greens
 
     vertices = hexagon(radius=0.03)
-    edge = np.array([1.0 + PolySection.standoff * PolySection.section_radius(vertices)])
+    standoff = 3.0
+    edge = np.array([1.0 + standoff * PolySection.section_radius(vertices)])
     height = np.zeros(1)
-    exact = polygon_greens(edge, height, vertices)[0]
-    point = greens_psi(edge, height, 1.0, 0.0)
+    with PolySection.configured(standoff=standoff):
+        exact = polygon_greens(edge, height, vertices)[0]
+        point = greens_psi(edge, height, 1.0, 0.0)
     assert abs(float(exact[0]) - float(point[0])) < 1e-3 * abs(float(point[0]))
 
 
-def test_an_unbounded_band_is_exact_everywhere():
-    """A None or infinite standoff routes every pair through the exact kernel."""
+def test_the_default_band_is_unbounded_and_exact_everywhere():
+    """The shipped default routes every pair through the exact kernel.
+
+    A finite standoff is a scoped-study setting: configuring one excludes far
+    targets from the near band and blends them to the point form, which agrees
+    closely far out but is not the exact path.
+    """
     vertices = hexagon(radius=0.03)
     far_r = np.array([1.9])
     far_z = np.array([0.8])
-    assert not PolySection.near_band(far_r, far_z, vertices).any()
-    for unbounded in (None, np.inf):
-        with PolySection.configured(standoff=unbounded):
-            assert PolySection.near_band(far_r, far_z, vertices).all()
-            exact = PolySection.section_greens(far_r, far_z, vertices)[0]
+    assert PolySection.standoff is None
+    assert PolySection.near_band(far_r, far_z, vertices).all()
+    exact = PolySection.section_greens(far_r, far_z, vertices)[0]
+    with PolySection.configured(standoff=3.0):
+        assert not PolySection.near_band(far_r, far_z, vertices).any()
         blended = PolySection.section_greens(far_r, far_z, vertices)[0]
-        # far out the two agree closely, but the exact path is not the point form
-        np.testing.assert_allclose(exact, blended, rtol=1e-3)
-        assert float(exact[0]) != float(blended[0])
+    # far out the two agree closely, but the exact path is not the point form
+    np.testing.assert_allclose(exact, blended, rtol=1e-3)
+    assert float(exact[0]) != float(blended[0])
 
 
 def test_the_configuration_is_restored_after_use():
@@ -181,11 +190,12 @@ def test_the_quadrature_override_reaches_the_kernel():
     assert np.max(np.abs(coarse - reference)) / scale > 1e-4
 
 
-def test_the_near_band_is_a_small_fraction_of_a_grid():
-    """The blend is what keeps the exact kernel affordable on a real grid."""
+def test_a_finite_band_is_a_small_fraction_of_a_grid():
+    """A configured blend is what keeps the exact kernel affordable on a grid."""
     vertices = hexagon(radius=0.03)
     radius, height = np.meshgrid(np.linspace(0.3, 1.7, 45), np.linspace(-1.1, 1.1, 45))
-    near = PolySection.near_band(radius.ravel(), height.ravel(), vertices)
+    with PolySection.configured(standoff=3.0):
+        near = PolySection.near_band(radius.ravel(), height.ravel(), vertices)
     assert near.mean() < 0.05
 
 

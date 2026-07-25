@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="biot-coupling-schemes-findings">
+  <meta name="plan-title" content="Polygon-section coupling: scheme comparison, assembly backends and the closed-form conditioning result">
+  <meta name="plan-summary" content="Measured comparison of every way nova can couple a polygon plasma/conductor section — point filament, moment-corrected filament, reduced and full boundary quadrature, and the Urankar Part V closed form — with the assembly cost of each on CPU and on an H200, and the derivation that explains why the closed form's accuracy depends on section aspect ratio rather than on target distance">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-modified" content="2026-07-25">
+  <title>Coupling schemes and assembly backends | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>Polygon-section coupling: schemes, backends, and the closed-form conditioning result</h1>
+  <p>Measured 2026-07-25 on <code>sun_debug</code> compute nodes and one H200
+  (<code>betelgeuse</code>), fresh process, median of 3 unless stated. Companion to the
+  <a href="/nova/biot-operator-assembly.html">biot-operator-assembly</a> plan; the drivers are
+  <code>benchmarks/tiled_backend.py</code>, <code>benchmarks/analytic_cost_floor.py</code> and the
+  acceptance sweeps in <code>tests/test_biotbandedcoupling.py</code>.</p>
+
+  <h2>1. What a section can be coupled with</h2>
+  <p>A finite section carrying uniform azimuthal current density can be coupled to a target four
+  ways, and they differ by four orders of magnitude in cost and by eight in accuracy. The
+  headline is that <strong>none of them is best everywhere</strong>, and the axis along which they
+  trade is not the one the cost table alone suggests.</p>
+
+  <table>
+    <thead><tr>
+      <th>scheme</th><th>µs/pair</th><th>worst δψ</th><th>worst δB</th><th>where it belongs</th>
+    </tr></thead>
+    <tbody>
+      <tr><td>point filament at the centroid</td><td>0.42</td><td>8.7e-03</td><td>9.6e-02</td>
+        <td>Nowhere on its own: the error never falls below an (a/R₀)² floor, so distance does
+        not fix it.</td></tr>
+      <tr><td>moment-corrected filament (2nd + 3rd moments)</td><td>2.5–5.0</td>
+        <td>1.9e-08</td><td>1.7e-07</td>
+        <td>The far band. Removes the floor for ~5–13 point evaluations.</td></tr>
+      <tr><td>boundary quadrature, 8×24</td><td>217–298</td><td>1.5e-04</td><td>2.9e-02</td>
+        <td>The mid band, where a reduced rule is already converged.</td></tr>
+      <tr><td>boundary quadrature, 16×48</td><td>858–1012</td><td>reference</td><td>reference</td>
+        <td>The near band and the reference lane. Machine-precise exactly where a tokamak
+        section is slender.</td></tr>
+      <tr><td>Urankar Part V closed form (ψ)</td><td>244</td><td colspan="2">
+        aspect-dependent — see §4</td>
+        <td>Fat sections today; the ELM-coil case needs §4's remaining work.</td></tr>
+    </tbody>
+  </table>
+
+  <p>Two per-component facts drive every band choice. First, flux-only bounds mislead: at 8×24
+  the flux error is 1.5e-04 while B<sub>Z</sub> is 2.9e-02, a factor of 170, so the bands are
+  gated per component. Second, the point filament's error is not a convergence error at all —
+  for a full ring the curvature that the section's second moment multiplies is set by the
+  <em>major</em> radius, so the error flattens onto an (a/R₀)² floor (~2e-5 per plasma cell,
+  verified to 3000 section radii) that no switch distance repairs.</p>
+
+  <h2>2. The three-band scheme, and what a wall-clipped cell changed</h2>
+  <p>Bands are assigned by distance to the section <strong>contour</strong>, not the centroid:
+  16×48 inside 2.2 contour radii, 8×24 out to the far seam, moment-corrected filament beyond.
+  Seams are geometric, so a stored operator is reproducible and the seam is smooth in state for
+  autograd and Newton outer loops.</p>
+
+  <p>The locked design put the far seam at 6.8 contour radii with a quadrupole-corrected far
+  field. That holds for a regular hexagon and <strong>fails for a wall-clipped cell</strong>: a
+  hexagon's third moments vanish by symmetry, making its quadrupole-corrected filament
+  fourth-order accurate, but a cell the first wall cuts keeps a non-zero third moment and so a
+  third-order residual — measured 3.7e-05 of local magnitude at 6.8 radii, 37× outside the gate,
+  decaying only as d<sup>−2.5</sup> and not reaching 1e-6 until ~29 radii. Two changes follow,
+  both measured: the corrected filament carries the section's <strong>third</strong> moments as
+  well as its second (a bit-exact no-op on a symmetric section, so it costs nothing there), and
+  the far seam is derived from the section's own skew — 6.8 radii when skew ≤ 1e-3, else 16.0.</p>
+
+  <table>
+    <thead><tr><th>section</th><th>band</th><th>δψ</th><th>δB<sub>R</sub></th><th>δB<sub>Z</sub></th></tr></thead>
+    <tbody>
+      <tr><td rowspan="2">hexagon (skew 1.9e-14, seam 6.8)</td>
+        <td>mid</td><td>2.5e-09</td><td>1.0e-07</td><td>1.2e-07</td></tr>
+      <tr><td>far</td><td>1.1e-08</td><td>1.5e-07</td><td>1.5e-07</td></tr>
+      <tr><td rowspan="2">wall-clipped (skew 4.2e-03, seam 16.0)</td>
+        <td>mid</td><td>2.5e-09</td><td>1.0e-07</td><td>1.2e-07</td></tr>
+      <tr><td>far</td><td>1.9e-08</td><td>1.7e-07</td><td>1.7e-07</td></tr>
+    </tbody>
+  </table>
+  <p>Errors are relative to local magnitude (|ψ|, |B<sub>pol</sub>|) — the honest denominator,
+  since a component's peak is set by near-contour targets. Both bands sit 30–60× inside the
+  1e-6 gate. The near band is <em>bit-identical</em> to the shipped 16×48 rule, so the scheme
+  introduces nothing there. Worst seam jump is 1.6e-07 of local magnitude.</p>
+
+  <p>Cost: the whole 2339-target column falls to <strong>13.1 µs/pair on a hexagonal source and
+  52.0 µs/pair on a clipped one, against 869 and 1008 exact-everywhere — 66× and 19×</strong>.
+  The banded scheme evaluates 1.20% (hexagon) / 4.28% (clipped) of the exact node count; the
+  clipped cell pays for its wider seam.</p>
+
+  <figure>
+    <img src="/nova/figures/biot-operator-assembly/scheme_contours.png"
+         alt="Flux contours of three coupling schemes overlaid, and their error contours against the exact reference"
+         style="max-width:100%">
+    <figcaption>Left: ψ per ampere at shared levels — the exact 16×48 rule, the three-band
+    scheme and a bare point filament are indistinguishable at plotting accuracy on a hexagonal
+    plasma cell. Centre and right: log₁₀ relative error contours against the exact reference,
+    with the band seams overlaid. The point filament degrades to 1e-4–1e-5 near the section and
+    never improves faster than its floor; the three-band scheme holds 1e-9 to 1e-11 everywhere
+    outside the near band, and its seams leave no visible ridge.</figcaption>
+  </figure>
+
+  <h2>3. Assembling the operator: one traced path, two devices</h2>
+  <p>The pair space is embarrassingly parallel, and the tiled build pads every tile to one fixed
+  shape precisely so a single trace can serve both devices. Measured on one operator throughout
+  (320 hex cells × their own centres = 102,400 pairs, 64 tiles of 40×40, exact-everywhere 16×48,
+  median of 3 fresh processes):</p>
+
+  <table>
+    <thead><tr><th>device</th><th>variant</th><th>seconds</th><th>µs/pair</th><th>compile s</th></tr></thead>
+    <tbody>
+      <tr><td rowspan="5">sun_debug, 16 cores</td>
+        <td>pooled numpy, 1 core</td><td>95.49</td><td>932.6</td><td>—</td></tr>
+      <tr><td>pooled numpy, 8 cores</td><td>16.44</td><td>160.6</td><td>—</td></tr>
+      <tr><td>pooled numpy, 16 cores</td><td>11.54</td><td>112.7</td><td>—</td></tr>
+      <tr><td>traced, scan</td><td>19.82</td><td>193.6</td><td>1.57</td></tr>
+      <tr><td><strong>traced, vmap</strong></td><td><strong>8.07</strong></td><td><strong>78.8</strong></td><td>1.25</td></tr>
+      <tr><td rowspan="3">H200 NVL</td>
+        <td>pooled numpy, 8 cores (same node)</td><td>9.36</td><td>91.4</td><td>—</td></tr>
+      <tr><td>traced, scan</td><td>1.11</td><td>10.8</td><td>2.12</td></tr>
+      <tr><td><strong>traced, vmap</strong></td><td><strong>0.76</strong></td><td><strong>7.4</strong></td><td>1.54</td></tr>
+    </tbody>
+  </table>
+
+  <p>Three results decide the backend. The traced path <strong>beats the process pool on the
+  CPU</strong> — 78.8 against 112.7 µs/pair, 1.43×, in one process rather than sixteen, which
+  also removes the per-worker memory multiplication that forced the tile budget to be divided by
+  the core count. <code>vmap</code> beats <code>scan</code> on <em>both</em> devices, so the
+  single path needs only one combinator. And the GPU buys a further 15–40× over the best CPU
+  build for a 1.5 s compile amortised over the whole build, using 1.3% of the card. A numba CPU
+  twin would duplicate a page of Urankar algebra to chase a rate the traced path already
+  exceeds; the numpy path is retained as the parity oracle it now is.</p>
+
+  <p>Parity numpy↔traced is 2.6e-17 (CPU) / 5.8e-17 (GPU) worst absolute deviation against
+  component peaks ~1e-5, identical tile-level and through the assembled zarr store, with one
+  compilation per build. Tile size is where the device headroom sits: 400 pairs/tile costs
+  15.68 µs/pair at 131 MB device high-water, 1,600 costs 7.18 at 864 MB, 6,400 costs
+  <strong>2.83 at 1.43 GB</strong> of a 112.6 GB card. One caveat on reading the CPU rows:
+  the traced backend threads across the whole allocation, so those are one process using up to
+  16 cores against a 16-process pool on the same allocation — a fair node-level comparison, not
+  a per-core one.</p>
+
+  <p><strong>Projected first build of a 2000-cell exact-everywhere operator</strong> (4×10⁶
+  pairs): 7.5 min at 16 numpy cores, 5.3 min traced on those same cores, ~30 s on one H200 at
+  40×40 tiles, ~11 s at 80×80. With the banded scheme instead of exact-everywhere, a hexagonal
+  build lands in seconds. The ≤20 min budget is met with a wide margin on CPU alone, which was
+  the question this plan opened with.</p>
+
+  <p>One limitation found and documented rather than papered over:
+  <code>TilePlan.peak_bytes</code> models one quadrature block and therefore does
+  <strong>not</strong> bound a batched tile, whose blocks are all live at once — measured 864 MB
+  for a 40×40 tile, ~3.7× even the naive block-count product, and growing sub-linearly with tile
+  size because XLA reuses buffers the model cannot see. The benchmark driver now reports the
+  device high-water mark per run so a batched budget model can be calibrated from measurement
+  instead of derived from a formula that would not hold.</p>
+
+  <figure>
+    <img src="/nova/figures/biot-operator-assembly/assembly_evidence.png"
+         alt="Closed-form accuracy against section aspect ratio, and assembly cost per pair on CPU and GPU"
+         style="max-width:100%">
+    <figcaption>Left: the closed form's deviation from the boundary quadrature against section
+    aspect ratio, before and after the arctangent term was reduced one denominator at a time
+    (§4). The trend is unchanged in slope but shifted by up to three orders; the ELM-coil aspect
+    and the 1e-10 acceptance gate are marked. Right: build cost per pair — the process pool
+    against one traced code path, on 16 CPU cores and on one H200 at three tile sizes.</figcaption>
+  </figure>
+
+  <h2>4. The closed form: its limit is the section's aspect ratio, not the target's distance</h2>
+  <p>Urankar Part V evaluates the toroidal integration analytically, leaving per edge only two
+  smooth <code>arsinh</code> integrals. For the full turn the reduction is the paper's case C:
+  every elliptic integral is <strong>complete</strong> (4×H(π/2)), and <code>cn K = 0</code>
+  annihilates the radial vector potential, reproducing axisymmetry as a structural check rather
+  than an assumption. The measured floor for the special functions plus the residual quadrature
+  is 12.5–16.1 µs/pair; the assembled evaluation costs 244 µs/pair, the gap being pole-moment
+  stacks rebuilt per deflated pole rather than shared.</p>
+
+  <p>The accuracy behaves in a way the cost table would not predict: it is governed by the
+  section's <strong>aspect ratio</strong>, and the worst target is a near one, not a far one.
+  A first implementation lost four orders per decade of aspect ratio, reaching O(1) error at the
+  1/100 aspect a tokamak coil pack presents — which would have made the closed form useless
+  exactly where it is wanted. That turned out to be an <strong>expansion choice, not a property
+  of the method</strong>.</p>
+
+  <p><strong>Mechanism, and the exact repair.</strong> The derivative of the arctangent term is
+  rational over the product of both edge denominators, G²B². Expanding it by partial fractions
+  over their <em>combined</em> pole set divides by the difference of two characteristics that
+  both approach unity as (section/R₀)², so the weights diverge as ε<sup>−2</sup>. No such
+  expansion is needed. Because the arctangent's numerator N and the weight
+  W = (r sin φ D)² satisfy the paper's identity G²B² = N² + W, the derivative's numerator obeys</p>
+  <pre>2 W N' − N W'  =  2 G²B² N' − N (G²B²)'</pre>
+  <p>— the N² parts cancel identically — so the quotient is
+  <code>2N' − N(G²)'/G² − N(B²)'/B²</code>: a polynomial plus one term over each denominator
+  <em>separately</em>. This is precisely why the paper's own eq 14c carries only the G-pole family
+  and eq 14d only the B-pole family. Applying it measured a 974× improvement at aspect 1/300 and
+  44× at 1/3 (figure above, left).</p>
+
+  <p><strong>What still limits it.</strong> A second and distinct mechanism remains, also not
+  fundamental. Each pole family's largest moment is multiplied by the numerator's value at the
+  <em>end</em> of the integration range — an O(ε²) quantity that the moment contraction forms as
+  an alternating sum of O(1) terms, losing two decades per family and hence the ε<sup>−4</sup>
+  trend that survives. The cure is to expand each numerator in the variable that vanishes where
+  its pole sits (cos²α at one end, sin²α at the other), so that value is carried as a coefficient
+  rather than reconstructed from a cancelling sum. That needs complete cn moments alongside the
+  existing sn moments, plus a shifted-pole recursion; both have stable three-term forms.</p>
+
+  <p>The practical consequence for nova is the reverse of the naive reading: a slender section at
+  large major radius is the <em>hard</em> case for the closed form and the <em>easy</em> case for
+  the boundary quadrature, whose 16×48 rule is machine-precise there. So the closed form is not a
+  drop-in speedup for a coil pack — it becomes one when the remaining expansion lands, and that
+  is worth doing because the same evaluation is the template for circular cross-section ELM
+  coils.</p>
+
+  <h2>5. Defects surfaced by this work</h2>
+  <ul>
+    <li><code>cylinder_greens</code> is discontinuous across horizontal section faces: targets
+    1 µm either side of a face plane inside the radial span return ψ = −1.22e-4 / +1.65e-4 where
+    the polygon kernel gives a smooth +2.16e-5. Root cause in the <code>corner_fields</code>
+    γ-sign branch terms.</li>
+    <li><code>polygon_greens</code> divides by 2πr without guarding the axis, so B<sub>R</sub>
+    and B<sub>Z</sub> come back non-finite for a target at r = 0 (ψ is fine). The closed form
+    stays finite there instead, B<sub>R</sub> vanishing by the parity of the reduction.</li>
+    <li><code>PolySection</code> placed its far field and measured its section radius about the
+    <em>vertex mean</em>. For a section whose corners pair up that is the area centroid, but for
+    a trapezoidal or wall-clipped one it is displaced, leaving a dipole error the far field
+    cannot absorb. Both now use the shoelace area centroid. <code>benchmarks/nearfar_error.py</code>
+    still carries the same assumption — harmless there because it only measures a hexagon.</li>
+    <li>The printed <code>sn_moments</code> recursion is unusable past order ~2 below k² ≈ 0.1,
+    and the printed eq 24a/23 forms are ill-conditioned as printed; stable re-derivations are in
+    <code>nova/biot/elliptic.py</code> and are what callers should use.</li>
+  </ul>
+</main>
+</body>
+</html>

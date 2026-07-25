@@ -183,14 +183,14 @@ def test_the_shoelace_second_moments_match_a_sampled_section():
         np.testing.assert_allclose(got, expected, rtol=3e-3, atol=1e-9)
 
 
-def test_the_quadrupole_filament_removes_the_bare_filament_floor():
+def test_the_moment_filament_removes_the_bare_filament_floor():
     """Far out the bare filament stalls on a floor; the corrected one does not.
 
     The floor is the section second moment weighted by a curvature the MAJOR
     radius sets, so it does not decay with target distance. Measured against the
     exact polygon kernel at ten section radii, relative to the local magnitude.
     """
-    from nova.biot.greens import quadrupole_filament
+    from nova.biot.greens import moment_filament
     from nova.biot.polygon import polygon_greens
 
     vertices = _hexagon()
@@ -199,7 +199,7 @@ def test_the_quadrupole_filament_removes_the_bare_filament_floor():
     target_z = 0.6 * np.sin(angle)
 
     exact = polygon_greens(target_r, target_z, vertices)
-    corrected = quadrupole_filament(target_r, target_z, vertices)
+    corrected = moment_filament(target_r, target_z, vertices)
     bare_psi = greens_psi(target_r, target_z, 6.2, 0.0)
     bare_bz, bare_br = greens_bz_br(target_r, target_z, 6.2, 0.0)
 
@@ -222,7 +222,7 @@ def test_the_quadrupole_correction_scales_as_the_section_area():
     difference scheme's round-off: the step scales with the section, which holds
     the correction's relative accuracy section-size independent.
     """
-    from nova.biot.greens import quadrupole_filament
+    from nova.biot.greens import moment_filament
 
     target_r = np.array([6.6, 5.9, 6.2])
     target_z = np.array([0.3, -0.4, 0.5])
@@ -235,13 +235,13 @@ def test_the_quadrupole_correction_scales_as_the_section_area():
     )
     correction = {}
     for radius in (0.06, 0.006):
-        got = np.array(quadrupole_filament(target_r, target_z, _hexagon(radius=radius)))
+        got = np.array(moment_filament(target_r, target_z, _hexagon(radius=radius)))
         correction[radius] = np.abs(got - point) / np.abs(point)
     np.testing.assert_allclose(correction[0.06] / correction[0.006], 100.0, rtol=0.03)
     assert np.max(correction[0.06]) > 1e-4  # real at the shipped plasma cell size
 
 
-def test_the_quadrupole_filament_carries_the_cross_moment():
+def test_the_moment_filament_carries_the_cross_moment():
     """An asymmetric section needs the off-diagonal moment, so it is applied.
 
     Dropping the cross term is the cheap five-evaluation path, valid only when the
@@ -249,7 +249,7 @@ def test_the_quadrupole_filament_carries_the_cross_moment():
     term measurably closes the gap to the exact kernel, which is checked here by
     zeroing it: an axis-aligned diagonal-only correction is the worse model.
     """
-    from nova.biot.greens import quadrupole_filament, second_moments
+    from nova.biot.greens import moment_filament, second_moments
     from nova.biot.polygon import polygon_greens
 
     vertices = _trapezium()
@@ -259,11 +259,111 @@ def test_the_quadrupole_filament_carries_the_cross_moment():
     target_z = 1.0 * np.sin(angle)
 
     exact = polygon_greens(target_r, target_z, vertices)
-    corrected = quadrupole_filament(target_r, target_z, vertices)
-    diagonal = quadrupole_filament(target_r, target_z, vertices, cross_moment=False)
+    corrected = moment_filament(target_r, target_z, vertices)
+    diagonal = moment_filament(target_r, target_z, vertices, cross_moment=False)
     for index in range(3):
         scale = np.max(np.abs(exact[index]))
         full = np.max(np.abs(corrected[index] - exact[index])) / scale
         without = np.max(np.abs(diagonal[index] - exact[index])) / scale
         assert full < 1e-5
         assert without > 5.0 * full
+
+
+def _wall_clipped(r0=6.2, z0=0.0, radius=0.06):
+    """Return a hexagon with one corner cut by a straight wall.
+
+    Simple (non-self-intersecting) and mildly asymmetric, which is what a plasma
+    cell clipped by the first wall looks like: its third moments do not vanish,
+    where a regular hexagon's do by symmetry.
+    """
+    v = list(_hexagon(r0, z0, radius))
+    return np.array(
+        v[:2]
+        + [[r0 - 0.35 * radius, z0 + 0.75 * radius]]
+        + [[r0 - 0.95 * radius, z0 + 0.30 * radius]]
+        + v[3:]
+    )
+
+
+def _sampled_third_moments(vertices, count=1400):
+    """Return area-normalised third central moments by dense grid sampling."""
+    v = np.asarray(vertices, dtype=np.float64)
+    grid_r, grid_z = np.meshgrid(
+        np.linspace(v[:, 0].min(), v[:, 0].max(), count),
+        np.linspace(v[:, 1].min(), v[:, 1].max(), count),
+    )
+    r, z = grid_r.ravel(), grid_z.ravel()
+    inside = np.zeros(r.shape, dtype=bool)
+    for (ra, za), (rb, zb) in zip(v, np.roll(v, -1, axis=0)):
+        if zb == za:
+            continue
+        straddles = (za > z) != (zb > z)
+        crossing = ra + (z - za) * (rb - ra) / (zb - za)
+        inside ^= straddles & (r < crossing)
+    r, z = r[inside], z[inside]
+    r, z = r - r.mean(), z - z.mean()
+    return (
+        float(np.mean(r**3)),
+        float(np.mean(r * r * z)),
+        float(np.mean(r * z * z)),
+        float(np.mean(z**3)),
+    )
+
+
+def test_the_third_moments_match_a_sampled_section():
+    """The triangulated moments reproduce a dense sampling of the same polygon."""
+    from nova.biot.greens import third_moments
+
+    vertices = _wall_clipped()
+    got = third_moments(vertices)
+    expected = _sampled_third_moments(vertices)
+    scale = max(abs(value) for value in expected)
+    np.testing.assert_allclose(got, expected, rtol=2e-2, atol=1e-3 * scale)
+
+
+def test_a_section_symmetric_about_its_centroid_has_no_third_moment():
+    """A regular hexagon's odd moments vanish, so it pays nothing for them."""
+    from nova.biot.greens import moment_filament, third_moments
+
+    vertices = _hexagon()
+    assert np.max(np.abs(third_moments(vertices))) < 1e-16
+    target_r = np.array([6.8, 5.7, 6.2])
+    target_z = np.array([0.4, -0.5, 0.6])
+    for quadrupole, full in zip(
+        moment_filament(target_r, target_z, vertices, order=2),
+        moment_filament(target_r, target_z, vertices, order=3),
+    ):
+        np.testing.assert_array_equal(quadrupole, full)
+
+
+def test_the_section_skew_dominates_an_asymmetric_cell_far_field():
+    """On a wall-clipped cell the third moment is the leading far-field residual.
+
+    Carrying it wins better than an order of magnitude at every distance. What it
+    leaves behind is the fourth moment, so the bound is reached a little further
+    out rather than never -- where the quadrupole form alone leaves a third-order
+    residual that no practical band width recovers.
+    """
+    from nova.biot.greens import moment_filament
+    from nova.biot.polygon import polygon_greens
+
+    vertices = _wall_clipped()
+    radius = float(np.max(np.hypot(*(vertices - vertices.mean(axis=0)).T)))
+    angle = np.linspace(0.0, 2.0 * np.pi, 24, endpoint=False)
+    worst = {}
+    for reach in (7.8, 16.0):
+        target_r = 6.2 + reach * radius * np.cos(angle)
+        target_z = reach * radius * np.sin(angle)
+        exact = polygon_greens(target_r, target_z, vertices, n_panels=64, n_nodes=96)
+        field = np.hypot(exact[1], exact[2])
+        local = (np.abs(exact[0]), field, field)
+        for order in (2, 3):
+            got = moment_filament(target_r, target_z, vertices, order=order)
+            worst[reach, order] = max(
+                float(np.max(np.abs(got[index] - exact[index]) / local[index]))
+                for index in range(3)
+            )
+    for reach in (7.8, 16.0):
+        assert worst[reach, 3] < 0.2 * worst[reach, 2]
+    assert worst[7.8, 3] > 1e-6
+    assert worst[16.0, 3] < 1e-6

@@ -215,3 +215,126 @@ def test_the_quarter_period_jacobi_values_the_reduction_relies_on():
         np.testing.assert_allclose(sn, 1.0, atol=1e-12)
         np.testing.assert_allclose(cn, 0.0, atol=1e-12)
         np.testing.assert_allclose(dn, np.sqrt(1.0 - parameter), atol=1e-12)
+
+
+# --------------------------------------------------------------------------
+# The moment families above are what the printed recursions give.  The three
+# tests below pin the routes the polygon closed form actually evaluates, which
+# differ in the direction they run and in what they are handed: an explicit
+# complement, so a characteristic that sits a few 1e-9 from unity keeps its
+# relative accuracy instead of inheriting the round-off of ``1 - n``.
+
+
+@pytest.mark.parametrize("parameter", PARAMETERS + [1e-6, 1 - 1e-6])
+def test_the_stable_moments_agree_with_their_defining_integral_at_every_order(
+    parameter,
+):
+    """The route used in anger has to hold where the printed recursion does not.
+
+    ``sn_moments`` divides by ``k^2`` once per order, so at the small parameter a
+    distant target produces it has lost most of its digits by the highest order
+    the vector potential needs.  Running the same recursion DOWNWARD cures that,
+    because the parasitic branch decays as ``k^(2m)`` -- but only while ``k^2``
+    stays clear of unity, where the two branches become degenerate.  Neither
+    direction covers the whole range, so the stable route picks per parameter and
+    this test spans both sides of the switch.
+    """
+    from nova.biot.elliptic import stable_sn_moments
+
+    moments = stable_sn_moments(np.float64(parameter), 9)
+    for order, moment in enumerate(moments):
+        expected = quadrature(
+            lambda u, order=order: jacobi(u, parameter)[0] ** (2 * order), parameter
+        )
+        np.testing.assert_allclose(moment, expected, rtol=2e-12, atol=1e-14)
+
+
+@pytest.mark.parametrize("parameter", [0.05, 0.5, 0.95])
+@pytest.mark.parametrize("characteristic", [-2.0e5, -0.3, 1e-3, 0.4, 0.95])
+def test_pole_moments_reproduce_their_defining_integral(characteristic, parameter):
+    """V_m, the moments the polygon edge denominators reduce to.
+
+    ``V_m = int_0^{pi/2} sin^{2m} a / ((1 - n sin^2 a) sqrt(1 - k^2 sin^2 a)) da``.
+    Both directions again: upward from ``Pi(n | k^2)`` divides by ``n`` per order
+    and downward multiplies by it, so the switch is on ``|n|``, and the
+    characteristics here straddle it.
+    """
+    from nova.biot.elliptic import pole_moments
+
+    moments = pole_moments(np.float64(characteristic), np.float64(parameter), 9)
+    for order, moment in enumerate(moments):
+        expected, _ = scipy.integrate.quad(
+            lambda angle, order=order: (
+                np.sin(angle) ** (2 * order)
+                / (
+                    (1.0 - characteristic * np.sin(angle) ** 2)
+                    * np.sqrt(1.0 - parameter * np.sin(angle) ** 2)
+                )
+            ),
+            0.0,
+            np.pi / 2.0,
+            limit=200,
+            epsabs=1e-14,
+            epsrel=1e-14,
+        )
+        np.testing.assert_allclose(moment, expected, rtol=1e-11, atol=1e-15)
+
+
+def test_complete_pi_keeps_its_accuracy_when_handed_the_complement():
+    """A characteristic within round-off of unity is only usable via ``1 - n``.
+
+    ``Pi(n | m)`` grows like ``(1 - n)^(-1/2)``, so forming the complement inside
+    the routine caps its relative accuracy at ``eps / (1 - n)`` -- eight digits
+    gone by ``1 - n = 1e-8``, which is what a target level with a polygon vertex
+    produces.  Passing the complement, which the caller knows in closed form,
+    costs nothing and keeps every digit.
+    """
+    parameter = np.float64(0.5)
+    for complement in (1e-4, 1e-8, 1e-12):
+        expected = split_scale_pi(1.0 - complement, parameter, complement)
+        got = complete_pi(
+            np.float64(1.0 - complement), parameter, complement=np.float64(complement)
+        )
+        np.testing.assert_allclose(got, expected, rtol=1e-11)
+
+
+def split_scale_pi(characteristic, parameter, complement, nodes=300):
+    """Return Pi(n | m) by quadrature that resolves the ``1 - n`` scale.
+
+    Adaptive integration of the Legendre form is useless here: the integrand
+    carries a peak of width ``sqrt(1 - n)`` at ``a = pi/2``, so by ``1 - n =
+    1e-12`` the reference, not the routine under test, is the inaccurate side.
+    The interval is therefore split, and across the peak ``cos a`` is stretched
+    by ``tan``, which absorbs it exactly and leaves a smooth integrand for a
+    fixed rule.
+    """
+    node, weight = np.polynomial.legendre.leggauss(nodes)
+    width = np.sqrt(complement / characteristic)
+    # geometric mean of the two scales: wide enough that the flank's own rise is
+    # resolved, narrow enough that the stretched peak integrand is near constant
+    cut = min(0.5, np.sqrt(width))
+
+    upper = np.arccos(cut)
+    angle = 0.5 * upper * (node + 1.0)
+    flank = (0.5 * upper * weight) @ (
+        1.0
+        / (
+            (complement + characteristic * np.cos(angle) ** 2)
+            * np.sqrt(1.0 - parameter * np.sin(angle) ** 2)
+        )
+    )
+
+    upper = np.arctan(cut / width)
+    cosine = width * np.tan(0.5 * upper * (node + 1.0))
+    peak = (
+        (width / complement)
+        * (0.5 * upper * weight)
+        @ (
+            1.0
+            / (
+                np.sqrt(1.0 - parameter + parameter * cosine**2)
+                * np.sqrt(1.0 - cosine**2)
+            )
+        )
+    )
+    return flank + peak

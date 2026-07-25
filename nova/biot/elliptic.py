@@ -36,26 +36,158 @@ import scipy.special  # type: ignore[import-untyped]
 __all__ = [
     "complete_pi",
     "pole_moment",
+    "pole_moments",
     "sn_moments",
     "sn_cn_moments",
+    "stable_sn_moments",
 ]
 
+# Below this the upward moment recursions divide by a small number once per
+# order while the downward ones multiply by it; above it the roles swap.  One
+# threshold serves both the parameter and a pole characteristic because the two
+# recursions have the same shape.
+_SWITCH = 0.5
 
-def complete_pi(characteristic: np.ndarray, parameter: np.ndarray) -> np.ndarray:
+# Orders carried past the last one wanted when a recursion runs downward from an
+# arbitrary seed.  The parasitic branch decays by roughly the switch value per
+# order, so this many take it below round-off.
+_HEADROOM = 60
+
+
+def complete_pi(
+    characteristic: np.ndarray,
+    parameter: np.ndarray,
+    *,
+    complement: np.ndarray | None = None,
+) -> np.ndarray:
     """Return the complete elliptic integral of the third kind, Pi(n | m).
 
     Carlson symmetric forms, as the rectangular-section kernel already uses:
     ``Pi(n | m) = R_F(0, 1 - m, 1) + (n/3) R_J(0, 1 - m, 1, 1 - n)``.  Both
     arguments are the PARAMETER convention (``m = k^2``), matching
     :func:`scipy.special.ellipk`.
+
+    ``complement`` supplies ``1 - n`` directly.  ``Pi`` grows like
+    ``(1 - n)^(-1/2)``, so forming the complement here caps the relative accuracy
+    at ``eps / (1 - n)`` -- eight digits gone by ``1 - n = 1e-8``.  A caller that
+    knows the complement in closed form keeps every digit by passing it, and the
+    polygon reduction does know it: its characteristics are ratios whose
+    complements are squares of small edge offsets.
     """
     characteristic = np.asarray(characteristic, dtype=np.float64)
     parameter = np.asarray(parameter, dtype=np.float64)
+    if complement is None:
+        complement = 1.0 - characteristic
     zero = np.zeros_like(characteristic)
     one = np.ones_like(characteristic)
     rf = scipy.special.elliprf(zero, 1.0 - parameter, one)
-    rj = scipy.special.elliprj(zero, 1.0 - parameter, one, 1.0 - characteristic)
+    rj = scipy.special.elliprj(zero, 1.0 - parameter, one, complement)
     return rf + rj * characteristic / 3.0
+
+
+def stable_sn_moments(parameter: np.ndarray, count: int) -> list[np.ndarray]:
+    """Return ``[El0, El2, ...]`` accurately at every order and every parameter.
+
+    The same quantity :func:`sn_moments` returns, from the same three-term
+    recursion, run in whichever direction is accurate:
+
+    * UPWARD, as printed, divides by ``k^2`` once per order.  Accurate while
+      ``k^2`` is not small, losing about a digit per order once it is -- and the
+      small-parameter limit is a distant target.
+    * DOWNWARD from an arbitrary seed converges on the wanted branch because the
+      parasitic one decays as ``k^(2m)``.  That fails as ``k^2 -> 1``, where the
+      recursion's two branches (``1`` and ``k^(-2m)``) become degenerate and no
+      practical headroom separates them -- and ``k^2 -> 1`` is the
+      target-on-the-source-ring limit, which is common rather than exotic.
+
+    Neither direction spans the range, so each is used where it holds and the
+    result is selected per element.  The downward branch is normalised by
+    ``El0 = K``, which the recursion cannot fix, being homogeneous.
+    """
+    parameter = np.asarray(parameter, dtype=np.float64)
+    complete_k = scipy.special.ellipk(parameter)
+    complete_e = scipy.special.ellipe(parameter)
+    small = parameter < _SWITCH
+
+    held = np.where(small, _SWITCH, parameter)
+    upward = [complete_k, (complete_k - complete_e) / held]
+    for order in range(1, count - 1):
+        upward.append(
+            (
+                2.0 * order * (1.0 + held) * upward[order]
+                - (2 * order - 1) * upward[order - 1]
+            )
+            / ((2 * order + 1) * held)
+        )
+
+    held = np.where(small, parameter, 0.5 * _SWITCH)
+    top = count + _HEADROOM
+    downward: list[np.ndarray] = [None] * (top + 2)  # type: ignore[list-item]
+    downward[top + 1] = np.zeros_like(parameter)
+    downward[top] = np.ones_like(parameter)
+    for order in range(top, 0, -1):
+        downward[order - 1] = (
+            2.0 * order * (1.0 + held) * downward[order]
+            - (2 * order + 1) * held * downward[order + 1]
+        ) / (2 * order - 1)
+    scale = complete_k / downward[0]
+    return [
+        np.where(small, downward[order] * scale, upward[order])
+        for order in range(count)
+    ]
+
+
+def pole_moments(
+    characteristic: np.ndarray,
+    parameter: np.ndarray,
+    count: int,
+    *,
+    complement: np.ndarray | None = None,
+    moments: list[np.ndarray] | None = None,
+) -> list[np.ndarray]:
+    """Return ``V_m = integral_0^(pi/2) x^m / ((1 - n x) Delta) da``, ``x = sin^2 a``.
+
+    ``Delta = sqrt(1 - k^2 x)``.  These are what a polygon edge's denominators
+    reduce to: the toroidal integration leaves rational factors in ``x``, each of
+    which splits into linear factors contributing one family here.
+
+    ``V_(m-1) - n V_m = El_(m-1)`` ties the family to the plain moments and is
+    accurate in one direction at a time -- upward from ``V_0 = Pi(n | k^2)``
+    divides by ``n``, downward multiplies by it -- so the routes split on ``|n|``
+    exactly as :func:`stable_sn_moments` splits on the parameter.  The downward
+    branch needs no ``Pi`` at all: seeded past the top order it converges from
+    above, which is why a characteristic of ``1e-3`` costs no special function.
+
+    ``moments`` accepts an already-computed :func:`stable_sn_moments` list (of at
+    least ``count + 60`` entries) so a caller with several pole families over one
+    parameter pays for the plain moments once.
+    """
+    characteristic = np.asarray(characteristic, dtype=np.float64)
+    parameter = np.asarray(parameter, dtype=np.float64)
+    if moments is None:
+        moments = stable_sn_moments(parameter, count + _HEADROOM)
+    if complement is None:
+        complement = 1.0 - characteristic
+    shape = np.broadcast_shapes(np.shape(characteristic), np.shape(parameter))
+    strong = np.broadcast_to(np.abs(characteristic) >= _SWITCH, shape)
+
+    held = np.where(strong, 0.0, characteristic)
+    downward: list[np.ndarray] = [None] * len(moments)  # type: ignore[list-item]
+    downward[-1] = moments[-1] + np.zeros(shape)
+    for order in range(len(moments) - 2, -1, -1):
+        downward[order] = moments[order] + held * downward[order + 1]
+
+    upward = [
+        complete_pi(
+            np.where(strong, characteristic, _SWITCH),
+            parameter,
+            complement=np.where(strong, complement, 1.0 - _SWITCH),
+        )
+    ]
+    held = np.where(strong, characteristic, 1.0)
+    for order in range(1, count):
+        upward.append((upward[order - 1] - moments[order - 1]) / held)
+    return [np.where(strong, upward[order], downward[order]) for order in range(count)]
 
 
 def sn_moments(parameter: np.ndarray, count: int) -> list[np.ndarray]:

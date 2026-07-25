@@ -19,8 +19,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-25">
-<meta name="plan-impl" content="0.75">
-<meta name="plan-version" content="4">
+<meta name="plan-impl" content="0.9">
+<meta name="plan-version" content="5">
 </head>
 <body>
   <main class="plan-doc">
@@ -313,7 +313,7 @@ Done-when
      queued (cutoff study, post-zeta re-cost).</pre>
     <p class="r-fu-outcome">§3.1-§3.3 landed + §3.4 evidenced (develop merge of c65b330e..5dc0055a, 5 commits): survey (267 B/pair, 36% removable broadcast, cap binds on target grids); polygon kernel 5.05x (complex-step eliminated via closed-form gradient + cache blocking, 4336-&gt;858 us/pair); tiled fixed-shape prototype (48 B/pair, 8.8x @16 cores, projected 2000-cell exact-everywhere build 7.1 min on 16 cores — inside budget); Part V elliptic foundation + equivalence gate landed (transcription NOT landed; cost floor 12.5-16 us/pair); near/far decision locked on corrected-filament evidence. GPU demo not run — queued. Record: archive/biot-operator-assembly-s3-landed.html</p>
     </article>
-<article class="r-fu" data-id="f-boa-02" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-25" data-recommends-skill="/reckon-ship biot-operator-assembly" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-boa-02" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-25" data-recommends-skill="/reckon-ship biot-operator-assembly" data-resolved-at="2026-07-25T14:43:32+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Transcribe the Part V full-turn closed form, demo jit/vmap on the tiled path, implement the three-band scheme</h4>
     <div class="r-fu-body"><p>The foundation is in: verified elliptic module (complete integrals only — the full turn is the paper's case C, 4×H(π/2)), converged equivalence gate with a candidates registry, cost floor 12.5–16 µs/pair. Next rung: transcribe A_φ (B is already closed-form via the gradient identities), lock kernel-backend with a jit/vmap demonstration, implement the evidence-locked three-band coupling, then re-open the plasma-coupling default flip (physics-spine-adoption f-psa-04 gate).</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -359,6 +359,7 @@ Done-when
   3. Three-band coupling implemented behind per-component gates; exact-everywhere
      retained as the reference lane.
   4. Followup written; this followup resolved.</pre>
+    <p class="r-fu-outcome">Landed on develop (merges d2ba1a0b, b04819fd, 482032b3; baselines ae1a8c39; lane 1338 passed / 87 skipped / 0 failed). (1) kernel-backend LOCKED jax-single-path: one trace, 78.8 us/pair jit on 16 CPU cores beating the 16-process numpy pool at 112.7, and 7.4 us/pair vmap on one H200 (2.83 at 6400 pairs/tile, 1.3% of the card), vmap beating scan on both devices, parity <=5.8e-17 through the zarr store. (2) Three-band coupling shipped opt-in via PolySection.configured(banded=True): mid/far bands 30-60x inside the 1e-6 per-component gate, seams <=1.6e-07, near band bit-identical to the shipped rule, whole-column 13.1 us/pair vs 869 exact (66x) at 1.2% of the node count; evidence forced a third-moment far field and a skew-derived far seam because a wall-clipped cell's non-zero third moment left the quadrupole-only form 37x outside gate. (3) Part V closed form transcribed for flux AND both field components at 134.4 us/pair (field only +0.4 over flux). NOT registered as a production candidate: the flux is 3-20x short of the 1e-10 gate at every section but the rectangle, and the gate was not widened. Two conditioning defects found and fixed - a joint pole expansion dividing by the difference of two near-unit characteristics (974x at aspect 1/300), then a monomial contraction rebuilding the numerator's range-end value as a cancelling sum, cured by taking each pole factor in the basis vanishing at its own end (4.1e7 at aspect 1/100; the eps^-4 trend is gone). A VERIFIED ERRATUM in the paper: eq 11b's vertical row prints -b1^2 D/a0^2 where it is -b1 D/a0^2; the forms agree only at slope 0 and 1, so a rectangle and a 45-degree edge both hide it, and the printed form makes assembled B_Z wrong by 286% on a trapezium. Residual gap is post-reduction round-off (edge/limit differencing 7.1e3, monomial contraction 1e5), not the reduction, which reproduces its own integral to 1e-14 per edge. Record: /nova/biot-coupling-schemes-findings.html</p>
     </article>
 <article class="r-fu" data-id="f-boa-03" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-25T12:40:00+00:00" data-recommends-skill="/reckon-ship biot-operator-assembly" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Extend the polygon-section closed form from the full turn to a finite arc, giving the thick-section primitives 3D geometry needs</h4>
@@ -411,6 +412,93 @@ Done-when
   4. Cost per pair measured on a sun_debug node, fresh process, median of 3, recorded
      beside the full-turn figure.
   5. Followup written; this followup resolved.</pre>
+    </article>
+<article class="r-fu" data-id="f-boa-04" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-25T15:10:00+00:00" data-recommends-skill="/reckon-ship biot-operator-assembly" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Close the last 3-20x to the closed-form acceptance gate by removing two post-reduction cancellations</h4>
+    <div class="r-fu-body"><p>The reduction itself is done: per edge and per limit it reproduces its own integral to 1e-14, node-independent from 48 to 384 nodes, and the aspect-ratio degradation is cured. What keeps the flux 3-20x outside the 1e-10 gate is round-off through two cancellations that happen after the reduction — the edge/limit differencing (eight per-edge values of ~174.71 summing to 2.34e-03 on the thin plate, 7.1e3, and another 10x across edges) and the monomial-basis contraction (coefficients reaching 1e7 returning 1e4, so terms exceed their sum by 1e5, putting each edge value at ~270 eps rather than a few). Neither is reachable by a better pole split.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    biot-operator-assembly (http://127.0.0.1:8765/nova/biot-operator-assembly.html)
+Section: closed-form acceptance gate
+Tier:    opus
+
+Context
+  The closed-form polygon-section evaluation is on develop (482032b3) with flux and both
+  field components, and its conditioning against section aspect ratio is cured. It is NOT
+  registered in the CANDIDATES registry because the flux misses the 1e-10 far-band gate by
+  12x (hexagon), 20x (thin_plate) and 3x (trapezium), and B_Z by 4x (hexagon); the
+  rectangle passes everywhere. The distance from the gate is pinned both ways in
+  SECTION_ACCURACY, so an improvement forces that table to be updated.
+
+State to read
+  nova/biot/polygonanalytic.py (the reduction, the two range bases, and the module
+    docstring&#x27;s account of the conditioning);
+  tests/test_biotpolygonanalytic.py (SECTION_ACCURACY, ASPECT_ACCURACY, CANDIDATES, and
+    the gradient-stencil test that cross-checks two rows of the paper against each other);
+  nova/biot/elliptic.py (the moment and shifted-pole families the numerators contract
+    against);
+  /nova/biot-coupling-schemes-findings.html section 4 (the localisation of both
+    cancellations, with the numbers).
+
+The two routes, in order of expected value
+  1. Build the numerators in the cos-2n-alpha HARMONIC basis rather than as monomial
+     products, with matching harmonic pole-moment families obtained from the existing ones
+     by exact recursion. The physical quantities are naturally trigonometric, so the low
+     harmonics dominate and the contraction stops cancelling. Worth ~30x on the measured
+     numbers, and it attacks the larger of the two effects.
+  2. Restructure the per-edge evaluation to carry BOTH limits and form their difference
+     before the large antiderivative is assembled. The arsinh-beta2 weight is of order the
+     squared major radius and is u-INDEPENDENT, so its mean coefficient factors straight
+     out of the difference; that is where the four decades at the fat end live.
+
+Done-when
+  1. The closed form registered in CANDIDATES and the full equivalence gate green on all
+     four sections (1e-10 beyond half a section radius, 1e-3 inside).
+  2. SECTION_ACCURACY and ASPECT_ACCURACY updated to the new measured envelope, both
+     directions asserted.
+  3. Cost re-measured on a compute node (fresh process, median of 3); the floor is now
+     93 us/pair of which two thirds is the two moment stacks, whose length is set by
+     downward-recursion headroom rather than by the nine orders the numerators reach — that
+     is the next cost win if it comes cheaply.
+  4. Followup written; this followup resolved.</pre>
+    </article>
+<article class="r-fu" data-id="f-boa-05" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-25T15:12:00+00:00" data-recommends-skill="/reckon-ship biot-operator-assembly" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Evaluate a target landing exactly on a section vertex rather than returning a non-finite value</h4>
+    <div class="r-fu-body"><p>A target coinciding exactly with a polygon vertex sends both the edge-parameter offset and the radial offset to zero together, so the elliptic modulus reaches unity and K diverges: the closed form returns a non-finite value where the boundary quadrature stays finite. Measured on a 181x181 field grid over a hexagonal cell, exactly 2 of 32,761 points were affected, both landing on a vertex to within 7e-18 m. Narrow, but a field grid whose rows and columns align with section corners hits it by construction, and the u = 0 edge-level case was already cured the same way, so the vertex case is the remaining one.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    biot-operator-assembly (http://127.0.0.1:8765/nova/biot-operator-assembly.html)
+Section: vertex-coincident targets in the closed form
+Tier:    opus
+
+Context
+  nova/biot/polygonanalytic.py evaluates the full-turn polygon-section coupling in closed
+  form. A target exactly level with an edge END (u = 0) used to be floored and is now
+  evaluated exactly, because both pole shifts vanish together with the numerator&#x27;s leading
+  coefficient there. A target exactly ON a vertex is the remaining degenerate case: u = 0
+  and r = r&#x27; together drive the elliptic modulus to unity, where K itself diverges, and the
+  evaluation returns a non-finite value. nova/biot/polygon.py&#x27;s quadrature is finite there,
+  so a caller switching to the closed form would see a regression on a corner-aligned grid.
+
+State to read
+  nova/biot/polygonanalytic.py (the u = 0 treatment that already works, as the model for
+    this one, and the module docstring&#x27;s conditioning account);
+  tests/test_biotpolygonanalytic.py (the degenerate-case tests, including the edge-level
+    one, and how the gate target sets are built);
+  nova/biot/elliptic.py (behaviour of the moment families as the parameter approaches one).
+
+Guidance
+  Establish first whether the limit is finite: the flux and field of a finite section are
+  bounded at a vertex of the section, so the divergence is in the reduction&#x27;s variables, not
+  in the physics. Expect the K divergence to cancel against a vanishing coefficient, the way
+  the u = 0 case did. Verify against the boundary quadrature, which is finite and converged
+  there.
+
+Done-when
+  1. A target exactly on a vertex returns a finite value agreeing with the boundary
+     quadrature, for every section shape in the gate set, and the near-contour band&#x27;s
+     tolerance is met at that target.
+  2. A test places targets exactly on every vertex of every gate section (not merely near
+     them), so the case cannot regress silently.
+  3. Followup written; this followup resolved.</pre>
     </article>
 </section>
 

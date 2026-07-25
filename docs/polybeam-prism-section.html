@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="polybeam-prism-section">
+  <meta name="plan-title" content="PolyBeam — polygon cross-section straight segment">
+  <meta name="plan-summary" content="Give nova a polygon cross-section straight segment to sit beside Beam&#x27;s rectangular one: a prismatic conductor whose cross-section integral reduces by Stokes to a contour sum with an elementary axial integral, so it needs no elliptic machinery at all and is the flat-space limit of the arc case">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="M">
+  <meta name="plan-tier" content="opus">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>PolyBeam — polygon cross-section straight segment | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-07-25">
+<meta name="plan-version" content="1">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — Objective</h2>
+    <p><strong>Give nova a polygon cross-section straight segment.</strong>
+    <code>Beam</code> (<code>nova/biot/beam.py</code>) computes the interaction of a 3D straight
+    line element with a finite <em>rectangular</em> cross-section — width × height, in Cartesian
+    coordinates, with closed-form A<sub>x</sub>/A<sub>y</sub>/A<sub>z</sub> and
+    B<sub>x</sub>/B<sub>y</sub>/B<sub>z</sub>. There is no polygon-section counterpart, so a
+    straight conductor of any other cross-section must be approximated by a bundle of rectangles
+    or by a filament. This plan supplies the missing element: a <strong>prism</strong> of arbitrary
+    polygonal cross-section.</p>
+
+    <p>It is the sibling of <a href="/nova/polybow-arc-section.html">polybow-arc-section</a>, and
+    the pair completes the polygon column of nova's element grid. The two are deliberately
+    separate plans because they are <em>not</em> the same problem, and conflating them would
+    mis-scope both.</p>
+
+    <h2 id="s2">§2 — Why this is the easy one</h2>
+    <p><strong>A straight conductor has no curvature, so there are no elliptic integrals.</strong>
+    That single fact separates this plan from its sibling. The elliptic machinery in the
+    axisymmetric and arc cases exists entirely to handle the toroidal integration around a curved
+    path; a prism has none. The reduction is:</p>
+    <ol>
+      <li>Stokes reduces the cross-section area integral to a contour sum over the polygon's
+      edges, exactly as in Urankar Part V's first step — this part is shared, and is already
+      implemented for the ring in <code>nova/biot/polygon.py</code>.</li>
+      <li>The remaining axial integral along the segment is <strong>elementary</strong>: the same
+      <code>arsinh</code> and <code>arctan</code> family that <code>Beam</code> already carries for
+      a rectangle, evaluated per edge instead of per face.</li>
+    </ol>
+    <p><strong>Hard constraint on the implementation:</strong> if the derivation reaches for an
+    elliptic integral, a Jacobi function, or a moment recursion, it has gone wrong. Those belong to
+    the curved cases. The expected cost class is <code>Beam</code>'s, not the ring kernel's, and
+    the expected accuracy is round-off throughout — a prism's field has no near-singular parameter
+    confluence of the kind that dominated the axisymmetric work, because there is no modulus to
+    approach unity.</p>
+
+    <figure>
+      <svg viewBox="0 0 820 230" role="img" style="max-width:100%;height:auto;font-family:system-ui">
+        <text x="410" y="20" text-anchor="middle" font-size="14" font-weight="600" fill="#111">The reduction, and why it stops early</text>
+        <!-- stage boxes -->
+        <rect x="20" y="46" width="170" height="74" fill="none" stroke="#111" stroke-width="1"/>
+        <text x="105" y="70" text-anchor="middle" font-size="12.5" fill="#111">cross-section</text>
+        <text x="105" y="88" text-anchor="middle" font-size="12.5" fill="#111">area integral</text>
+        <text x="105" y="108" text-anchor="middle" font-size="11.5" fill="#555">over the polygon</text>
+        <line x1="196" y1="83" x2="242" y2="83" stroke="#111" stroke-width="1"/>
+        <polygon points="242,83 234,79 234,87" fill="#111"/>
+        <rect x="248" y="46" width="170" height="74" fill="none" stroke="#111" stroke-width="1"/>
+        <text x="333" y="70" text-anchor="middle" font-size="12.5" fill="#111">contour sum</text>
+        <text x="333" y="88" text-anchor="middle" font-size="12.5" fill="#111">over its edges</text>
+        <text x="333" y="108" text-anchor="middle" font-size="11.5" fill="#555">Stokes — shared</text>
+        <line x1="424" y1="83" x2="470" y2="83" stroke="#111" stroke-width="1"/>
+        <polygon points="470,83 462,79 462,87" fill="#111"/>
+        <rect x="476" y="46" width="180" height="74" fill="none" stroke="#0a7d33" stroke-width="1.6"/>
+        <text x="566" y="70" text-anchor="middle" font-size="12.5" fill="#111">axial integral</text>
+        <text x="566" y="88" text-anchor="middle" font-size="12.5" font-weight="600" fill="#0a7d33">elementary</text>
+        <text x="566" y="108" text-anchor="middle" font-size="11.5" fill="#555">arsinh + arctan</text>
+        <!-- the not-taken branch -->
+        <line x1="566" y1="126" x2="566" y2="156" stroke="#999" stroke-width="1" stroke-dasharray="3 3"/>
+        <rect x="466" y="158" width="200" height="42" fill="none" stroke="#999" stroke-width="1" stroke-dasharray="3 3"/>
+        <text x="566" y="176" text-anchor="middle" font-size="12" fill="#555">toroidal integration:</text>
+        <text x="566" y="192" text-anchor="middle" font-size="12" fill="#555">elliptic integrals — NOT here</text>
+        <text x="700" y="83" font-size="12" fill="#111">done</text>
+        <text x="410" y="222" text-anchor="middle" font-size="11.5" fill="#555">A curved path needs the fourth stage; a straight one does not. Reaching for it is the error to avoid.</text>
+      </svg>
+      <figcaption>The prism reduction shares its first two stages with the axisymmetric and arc
+      cases and then terminates: with no curvature there is no toroidal integration, so the
+      elliptic machinery those cases require never enters.</figcaption>
+    </figure>
+
+    <h2 id="s3">§3 — Deliverables</h2>
+    <ul>
+      <li>A prismatic polygon-section evaluation of the vector potential and all three field
+      components, in the Cartesian frame <code>Beam</code> uses.</li>
+      <li>An acceptance gate against a converged numerical reference, with the same
+      contour-distance banding the axisymmetric gate uses (distance measured to the
+      cross-section boundary, not its centroid — a polygon's field is not isotropic and a
+      centroid distance mixes converged and unconverged targets).</li>
+      <li>Element class following the <code>Beam</code> pattern (<code>Matrix</code> dataclass,
+      <code>ClassVar</code> name, <code>axisymmetric = False</code>) so the frame and groupset
+      machinery can consume it.</li>
+      <li>Cost per pair measured on a compute node, fresh process, median of 3, beside
+      <code>Beam</code>'s own figure.</li>
+    </ul>
+
+    <h2 id="s4">§4 — The three free oracles</h2>
+    <ol>
+      <li><strong>A rectangular polygon reproduces <code>Beam</code></strong> to its own tolerance.
+      This is the primary check and it is exact rather than asymptotic: the same geometry through
+      two independent formulations.</li>
+      <li><strong>A converged direct quadrature</strong> over the cross-section, built the way the
+      axisymmetric oracle was — raise the rule until it stops moving, and assert that it has,
+      rather than assuming convergence.</li>
+      <li><strong>The large-radius limit of PolyBow</strong>, once the sibling plan lands: as the
+      arc's major radius grows at fixed section and fixed arc length, the two must converge.
+      Record the radius at which they agree to a stated tolerance rather than asserting a limit
+      that has not been measured — this doubles as an independent check on the arc evaluation and
+      is the reason to keep both plans aware of each other.</li>
+    </ol>
+    <p>Degenerate cases to pin, inherited from the axisymmetric work where the analogues bit:
+    an edge parallel to the segment axis; a target lying exactly on an edge or, worse, exactly on a
+    <strong>vertex</strong> of the cross-section (in the axisymmetric case that configuration
+    returned a non-finite value and had to be fixed, because a field grid aligned with section
+    corners hits it by construction); and a target inside the conductor, which is the whole reason
+    a finite-section element exists.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="prism-derivation-source" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Derive the prism reduction directly, or transcribe it from the Urankar
+        series&#x27; own straight-conductor part if that part covers a general polygon rather than only
+        a rectangle?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="derive-direct">derive directly from Stokes</button>
+      <button class="r-opt" data-value="transcribe-series">transcribe the series&#x27; straight case</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="beam-relationship" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Does the element class extend Beam , or supersede it once a
+        rectangle is just a four-sided polygon evaluated by the same code?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="extend-beam">extend Beam, keep both</button>
+      <button class="r-opt" data-value="supersede-beam">supersede Beam once parity is pinned</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-pbeam-01" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-25T15:32:00+00:00" data-recommends-skill="/reckon-ship polybeam-prism-section" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Derive and land the prismatic polygon-section evaluation against Beam as its oracle</h4>
+    <div class="r-fu-body"><p>The whole plan is one coherent piece of work and small enough to land in a single rung: Stokes to a contour sum over the cross-section edges, an elementary axial integral per edge, and Beam as an exact oracle for the rectangular case. No elliptic machinery is involved; if the derivation reaches for it, it has gone wrong. Degenerate cases inherited from the axisymmetric work carry real risk -- particularly a target landing exactly on a cross-section vertex, which returned a non-finite value there and had to be fixed.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    polybeam-prism-section (http://127.0.0.1:8765/nova/polybeam-prism-section.html)
+Section: prismatic polygon-section evaluation
+Tier:    opus
+
+Context
+  nova/biot/beam.py couples a straight 3D segment of finite RECTANGULAR cross-section in
+  closed form, Cartesian, with arsinh and arctan terms. There is no polygon-section
+  counterpart, so a straight conductor of any other cross-section must be approximated. This
+  plan supplies the prism. It is the sibling of polybow-arc-section but a MUCH smaller
+  problem, because a straight path has no curvature and therefore no toroidal integration.
+
+State to read
+  nova/biot/beam.py -- the element pattern, the Cartesian frame, and the transcendental family
+    to expect (this is also the oracle);
+  nova/biot/polygon.py -- the Stokes reduction of a cross-section integral to a contour sum
+    over polygon edges, already implemented for the ring; the first two stages are shared;
+  tests/test_biotpolygonanalytic.py -- the acceptance-gate pattern worth reproducing:
+    converged oracle asserted converged, distance measured to the section CONTOUR rather than
+    its centroid, targets inside the conductor, envelopes asserted in both directions;
+  nova/biot/line.py -- the filament the prism thickens.
+
+Scope locks / constraints
+  Work in a detached worktree off develop; the primary checkout stays on main. Never widen a
+  tolerance to pass a test. Timing on a sun_debug node only. Do not modify beam.py without
+  asking -- the relationship between the two elements is an open decision on the plan.
+
+Key guidance
+  - NO elliptic integrals, Jacobi functions or moment recursions. Those exist only to handle a
+    curved path. Reaching for them is the signal that the reduction has gone wrong.
+  - Expect Beam&#x27;s cost class and round-off accuracy throughout: a prism has no modulus that
+    approaches unity, so the parameter confluence that dominated the axisymmetric work has no
+    analogue here.
+  - A rectangular polygon MUST reproduce Beam to its own tolerance -- exact, not asymptotic,
+    the same geometry through two independent formulations. Build that test first.
+  - Pin the degenerate cases explicitly: an edge parallel to the segment axis; a target exactly
+    on an edge; a target exactly on a VERTEX of the cross-section (the axisymmetric analogue
+    returned a non-finite value and had to be fixed, because a field grid aligned with section
+    corners hits it by construction); and targets inside the conductor.
+
+Done-when
+  1. Vector potential and all three field components evaluated for an arbitrary simple polygon
+     cross-section, passing a converged-oracle gate with banded tolerances.
+  2. A rectangular cross-section reproduces Beam within Beam&#x27;s own tolerance.
+  3. Degenerate cases above pinned by test, all finite.
+  4. Element class following the Beam pattern so the frame and groupset machinery can use it.
+  5. Cost per pair measured on a compute node, fresh process, median of 3, beside Beam&#x27;s.
+  6. Followup written; this followup resolved.</pre>
+    </article>
+</section>
+
+  </main>
+</body>
+</html>

@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="polybow-arc-section">
+  <meta name="plan-title" content="PolyBow — polygon cross-section arc segment">
+  <meta name="plan-summary" content="Give nova a polygon cross-section arc element to sit beside Bow&#x27;s rectangular one: the general Urankar Part V case with sweep below a full turn, which reinstates the incomplete elliptic integrals, the alpha-case bookkeeping, an interior integration limit in every moment recursion, and a real azimuthal field component">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="XL">
+  <meta name="plan-tier" content="opus">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-depends-on" content="biot-operator-assembly">
+  <title>PolyBow — polygon cross-section arc segment | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-07-25">
+<meta name="plan-version" content="1">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — Objective</h2>
+    <p><strong>Give nova a polygon cross-section arc element.</strong> The element hierarchy
+    today pairs a filament with a thick rectangular section at each geometry:
+    <code>Arc</code> (<code>nova/biot/arc.py</code>) is the 3D circular arc filament and
+    <code>Bow</code> (<code>nova/biot/bow.py</code>) is its rectangular-section thickening through
+    the zeta quadrature; <code>Line</code>/<code>Beam</code> do the same for a straight segment.
+    The polygon section exists only for the <em>full turn</em> — the axisymmetric ring landed
+    under <a href="/nova/biot-operator-assembly.html">biot-operator-assembly</a>. There is no
+    polygon-section arc, so any 3D geometry built from conductors of non-rectangular
+    cross-section has to approximate them.</p>
+
+    <p>This plan closes that gap with the <strong>general</strong> Urankar Part V case: a polygon
+    cross-section swept through an arc of <strong>sweep below 2π</strong>. The full turn nova
+    already has is precisely the specialisation this plan undoes — which is what makes the work
+    substantial rather than a parameter change, and also what gives it the strongest possible
+    regression test.</p>
+
+    <h2 id="s2">§2 — Why this is not a parameter change</h2>
+    <p>Five things change when the sweep stops being a full turn, and each is a body of work:</p>
+    <ul>
+      <li><strong>The elliptic integrals stop being complete.</strong> The full turn is the
+      paper's case C, in which every integral collapses to its value at α = π/2 — every
+      <code>K</code>, <code>E</code> and <code>Π</code> complete, and <code>cn K = 0</code>
+      annihilating the radial vector potential as a structural check. A finite arc reinstates
+      incomplete <code>F(α,k)</code>, <code>E(α,k)</code> and <code>π(α,η²,k)</code>.</li>
+
+      <li><strong>Every moment recursion regains a boundary term.</strong> The complete case
+      drops the endpoint contribution of eqs 24a/24b because <code>sn = 1</code> and
+      <code>cn = 0</code> there. With an interior upper limit those terms return — for the sn
+      moments, the complement-basis cn moments, and both shifted-pole families that the landed
+      conditioning work introduced. Each recursion's stability argument must be re-derived, not
+      merely re-used: the parasitic-branch reasoning that justifies running a recursion downward
+      changes once the limit is interior.</li>
+
+      <li><strong>The amplitudes become per-target arrays.</strong>
+      <code>α_i = (π + φ − φ_i)/2</code> depends on the target's azimuth relative to each arc
+      end, so what was a constant is now a field. That is what makes the evaluation batchable on
+      the tiled path, and it is also what makes the α-case selection a branch that must be
+      tested rather than assumed.</li>
+
+      <li><strong>B<sub>φ</sub> becomes a real component.</strong> Its vanishing for the full turn
+      is a parity argument — eq 11b's azimuthal row is the radial bracket weighted by
+      <code>sin φ</code> instead of <code>cos φ</code>, the bracket is even about φ = π, and the
+      odd weight integrates to nothing. On an arc there is no such cancellation, so the row has
+      to be implemented and tested rather than asserted away.</li>
+
+      <li><strong>Conditioning gets harder, not easier.</strong> The landed work cured a loss that
+      grew as the fourth power of the section's aspect ratio by taking each pole factor in the
+      range variable that vanishes at its own end. An arc end can place a pole arbitrarily close
+      to an <em>interior</em> limit, so the same treatment needs a third case that the full turn
+      never presents.</li>
+    </ul>
+
+    <figure>
+      <svg viewBox="0 0 860 250" role="img" style="max-width:100%;height:auto;font-family:system-ui">
+        <text x="430" y="20" text-anchor="middle" font-size="14" font-weight="600" fill="#111">Where PolyBow sits: the missing cell in the element table</text>
+        <!-- table frame -->
+        <line x1="230" y1="42" x2="800" y2="42" stroke="#111" stroke-width="1"/>
+        <line x1="230" y1="78" x2="800" y2="78" stroke="#111" stroke-width="1"/>
+        <line x1="230" y1="150" x2="800" y2="150" stroke="#111" stroke-width="1"/>
+        <line x1="230" y1="186" x2="800" y2="186" stroke="#111" stroke-width="1"/>
+        <!-- column headers -->
+        <text x="300" y="66" text-anchor="middle" font-size="13" fill="#111">filament</text>
+        <text x="470" y="66" text-anchor="middle" font-size="13" fill="#111">rectangular section</text>
+        <text x="670" y="66" text-anchor="middle" font-size="13" fill="#111">polygon section</text>
+        <!-- row labels -->
+        <text x="224" y="102" text-anchor="end" font-size="13" fill="#111">straight segment</text>
+        <text x="224" y="138" text-anchor="end" font-size="13" fill="#111">arc, sweep &lt; 2π</text>
+        <text x="224" y="174" text-anchor="end" font-size="13" fill="#111">full turn (2π)</text>
+        <!-- existing cells -->
+        <text x="300" y="102" text-anchor="middle" font-size="13" fill="#111">Line</text>
+        <text x="470" y="102" text-anchor="middle" font-size="13" fill="#111">Beam</text>
+        <text x="300" y="138" text-anchor="middle" font-size="13" fill="#111">Arc</text>
+        <text x="470" y="138" text-anchor="middle" font-size="13" fill="#111">Bow</text>
+        <text x="300" y="174" text-anchor="middle" font-size="13" fill="#111">Circle</text>
+        <text x="470" y="174" text-anchor="middle" font-size="13" fill="#111">Cylinder</text>
+        <text x="670" y="174" text-anchor="middle" font-size="13" fill="#111">PolySection</text>
+        <!-- gaps -->
+        <rect x="600" y="84" width="140" height="26" fill="none" stroke="#999" stroke-width="1" stroke-dasharray="3 3"/>
+        <text x="670" y="102" text-anchor="middle" font-size="12" fill="#555">PolyBeam</text>
+        <rect x="600" y="120" width="140" height="26" fill="none" stroke="#0a7d33" stroke-width="1.6"/>
+        <text x="670" y="138" text-anchor="middle" font-size="12" font-weight="600" fill="#0a7d33">PolyBow</text>
+        <text x="430" y="214" text-anchor="middle" font-size="12" fill="#555">Solid = exists. Dashed = the sibling plan (polybeam-prism-section). Heavy = this plan.</text>
+        <text x="430" y="234" text-anchor="middle" font-size="12" fill="#555">Only the polygon column is incomplete, and only below a full turn.</text>
+      </svg>
+      <figcaption>nova's Biot elements form a grid over path geometry and cross-section shape.
+      Every cell is filled except the polygon column away from the full turn: this plan supplies
+      the arc row, its sibling plan the straight row.</figcaption>
+    </figure>
+
+    <h2 id="s3">§3 — Prerequisites and inherited corrections</h2>
+    <p>This plan starts from the landed full-turn reduction and inherits both its machinery and
+    its known limitations. Read before starting:</p>
+    <ul>
+      <li><code>nova/biot/polygonanalytic.py</code> — the full-turn reduction, its dual range
+      bases, and the module docstring's account of the conditioning.</li>
+      <li><code>nova/biot/elliptic.py</code> — complete sn and cn moment families and the
+      shifted-pole recursions, all of which need interior-limit boundary terms here.</li>
+      <li><code>tests/test_biotpolygonanalytic.py</code> — the acceptance-gate pattern
+      (converged oracle, contour-distance bands, a candidates registry, aspect and per-section
+      envelopes asserted in both directions) to be reproduced for the arc.</li>
+      <li><code>nova/biot/arc.py</code>, <code>nova/biot/bow.py</code>, <code>nova/biot/zeta.py</code>
+      — the element-class pattern to follow, and <code>Bow</code> itself as the zero-edge-slope
+      oracle.</li>
+      <li><a href="/nova/biot-coupling-schemes-findings.html">The coupling-schemes findings</a> —
+      the measured conditioning account and the verified paper erratum below.</li>
+    </ul>
+    <p><strong>Inherited erratum (verified, must be carried).</strong> Eq 11b's vertical row prints
+    its rational term as <code>−b₁²D/a₀²</code>; it is <code>−b₁D/a₀²</code>, linear in the edge
+    slope. The two forms agree only at slope 0 and slope 1, so a rectangular section and a 45°
+    edge both hide the error, and the printed form makes assembled B<sub>Z</sub> wrong by 286% on
+    a trapezium. Everything derived from that row inherits the correction — the eq 19a boundary
+    term, the field families, and here also the azimuthal row that the full turn never formed.</p>
+    <p><strong>Inherited gate shortfall.</strong> The full-turn flux is 3–20× outside its 1e-10
+    acceptance gate for reasons that are post-reduction round-off rather than the reduction
+    itself, tracked on the parent plan. An arc evaluation built on the same numerator basis will
+    inherit that ceiling, so the harmonic-basis work queued there is worth landing first if the
+    schedules allow it — a decision below.</p>
+
+    <h2 id="s4">§4 — Deliverables</h2>
+    <ul>
+      <li>A finite-arc polygon-section evaluation of the vector potential and all
+      <strong>three</strong> field components, with the α-case branch selection under test.</li>
+      <li>An acceptance gate built like the full turn's: a converged numerical oracle over the
+      arc, per-edge and per-limit pins, an aspect-ratio sweep, and per-section envelopes asserted
+      in both directions.</li>
+      <li>Element classes following the <code>Arc</code>/<code>Bow</code> pattern
+      (<code>Constants</code> + <code>Matrix</code> dataclass, <code>ClassVar</code> name,
+      <code>axisymmetric = False</code>) so the frame and groupset machinery can consume them
+      rather than only a bare function.</li>
+      <li>Cost per pair measured on a compute node, fresh process, median of 3, beside the
+      full-turn and <code>Bow</code> figures.</li>
+    </ul>
+
+    <h2 id="s5">§5 — The four free oracles</h2>
+    <p>This plan is unusually well supplied with independent checks, and all four are tests
+    rather than afterthoughts. Each isolates a different failure mode:</p>
+    <ol>
+      <li><strong>Sweep → 2π reproduces the landed full-turn evaluation</strong>, to the accuracy
+      the full turn itself achieves. Catches errors in the α-case bookkeeping and the
+      interior-limit boundary terms, which is where most of the new risk lives.</li>
+      <li><strong>Zero edge slope reproduces <code>Bow</code></strong> within Bow's own tolerance
+      — the arc analogue of the full turn's reduction to <code>cylinder_greens</code>. Catches
+      errors in the degenerate branch the printed packaging cannot express.</li>
+      <li><strong>A converged direct quadrature over the arc</strong>, built the way the full
+      turn's oracle was (raise the rule until it stops moving, and assert that it has).</li>
+      <li><strong>Horizontal edges contribute nothing</strong>, exactly, as in the full turn.</li>
+    </ol>
+    <p>B<sub>φ</sub> has no such free oracle — it is the one component with no rectangular
+    counterpart to check against, because <code>Bow</code> carries it too but through a different
+    formulation. It therefore needs the direct quadrature and an integral identity of its own;
+    treat it as the highest-risk row.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="gate-first" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Land the parent plan&#x27;s harmonic-numerator work before starting the arc,
+        or build the arc on the present basis and inherit its 3–20× gate shortfall?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="harmonic-first">harmonic basis first, then the arc</button>
+      <button class="r-opt" data-value="arc-first">arc first, accept the inherited ceiling</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="incomplete-third-kind" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Where does the incomplete third-kind integral come from — a Carlson
+        symmetric-form evaluation written for this purpose, or the existing complete routine
+        extended with an amplitude argument?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="carlson-incomplete">Carlson symmetric forms, purpose-written</button>
+      <button class="r-opt" data-value="extend-complete">extend the complete routine with an amplitude</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="arc-element-shape" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Does the element class extend Bow (inheriting its arc
+        geometry and overriding the section evaluation) or Arc directly (treating the
+        polygon section as a peer of the rectangular one)?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="extend-bow">extend Bow, override the section</button>
+      <button class="r-opt" data-value="extend-arc">extend Arc, peer of Bow</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-pbow-01" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-25T15:30:00+00:00" data-recommends-skill="/reckon-ship polybow-arc-section" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Reinstate the alpha-case bookkeeping and the interior integration limit, then build the arc gate</h4>
+    <div class="r-fu-body"><p>First rung, and it is deliberately the risky half rather than the coefficient algebra: get the branch selection and the interior-limit boundary terms right, verified by the sweep-to-2pi oracle against the landed full-turn evaluation, before any new field row is attempted. The moment recursions all need their endpoint contributions restored and their stability arguments re-derived, because the parasitic-branch reasoning that justifies a downward recursion changes once the upper limit is interior.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    polybow-arc-section (http://127.0.0.1:8765/nova/polybow-arc-section.html)
+Section: alpha-case bookkeeping and interior-limit moments
+Tier:    opus
+
+Context
+  nova has a full-turn polygon-section closed form (nova/biot/polygonanalytic.py, on develop)
+  and no polygon-section ARC element. The full turn is the paper&#x27;s case C, in which every
+  elliptic integral collapses to a complete one at alpha = pi/2. This rung undoes that
+  specialisation: incomplete integrals, the alpha-case branches, and an interior upper limit
+  in every moment recursion. Coefficient algebra and the new field rows come after.
+
+State to read
+  nova/biot/polygonanalytic.py -- the full-turn reduction and its two range bases;
+  nova/biot/elliptic.py + tests/test_biotelliptic.py -- complete sn and cn moments and both
+    shifted-pole families, each of which needs an endpoint contribution here;
+  tests/test_biotpolygonanalytic.py -- the gate pattern to reproduce: converged oracle,
+    contour-distance bands, candidates registry, envelopes asserted in BOTH directions;
+  nova/biot/arc.py, nova/biot/bow.py, nova/biot/zeta.py -- the element pattern and the
+    zero-slope oracle.
+
+Scope locks / constraints
+  Work in a detached worktree off develop; the primary checkout stays on main. Do not modify
+  arc.py, bow.py or beam.py without asking. Never widen a tolerance to pass a test. Timing on
+  a sun_debug node only -- login-node timing has 5x spread.
+
+Key guidance
+  - alpha_i = (pi + phi - phi_i)/2 is PER TARGET, so amplitudes are arrays, not constants:
+    plan the shapes for that from the start, which is also what makes this batchable.
+  - Case A holds for 0 &lt; alpha &lt;= pi/2; case B (pi/2 &lt; |alpha_i| &lt;= 3pi/2) folds through
+    eq 25/26 with theta_i = pi - |alpha_i|; case C (3pi/2 &lt; alpha_i &lt;= 2pi) with
+    theta_i = 2pi - alpha_i. Put the branch selection and its sign bookkeeping under test
+    BEFORE any coefficient work -- it is the cheapest place to be wrong.
+  - Sweep -&gt; 2pi must reproduce the landed full-turn evaluation to the accuracy the full turn
+    itself achieves. That is the strongest single test available; build it first and keep it
+    green throughout.
+  - The dual-basis conditioning treatment carries over and needs a THIRD case: an arc end can
+    put a pole arbitrarily close to an interior limit, not only past a range end.
+  - Carry the verified erratum: eq 11b&#x27;s vertical row is -b1 D/a0^2, NOT -b1^2 D/a0^2. The two
+    agree only at slope 0 and 1.
+
+Done-when
+  1. Incomplete F, E and third-kind evaluations in place, pinned against quadrature across
+     modulus and amplitude, both recursion directions where two exist.
+  2. Every moment family carries its interior-limit boundary term, pinned, with the stability
+     switch re-derived rather than inherited.
+  3. The alpha-case branch selection tested at and across every boundary.
+  4. Sweep -&gt; 2pi reproduces the full-turn flux to its own accuracy.
+  5. Followup written; this followup resolved.</pre>
+    </article>
+</section>
+
+  </main>
+</body>
+</html>

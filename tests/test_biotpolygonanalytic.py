@@ -301,3 +301,230 @@ def test_a_section_with_no_sloped_edge_reproduces_the_rectangle_kernel(candidate
     # reference's accuracy, not at the 1e-10 gate
     for name, got, want in zip(COMPONENTS, computed, reference):
         assert worst_relative(got[keep], want) < 2e-3, name
+
+
+# --------------------------------------------------------------------------
+# The closed form. Urankar performs the toroidal integration analytically, so per
+# edge only two smooth ``arsinh`` integrals remain numerical and everything else
+# reduces to complete elliptic integrals. It is held here to two different
+# standards, because two different things can go wrong. Whether the REDUCTION is
+# right is settled per edge, against a converged quadrature of the very integral
+# it replaces, at targets where nothing is near-degenerate. What ACCURACY it then
+# delivers over a whole section is a separate, measured question -- and the
+# answer depends on the section's aspect ratio, not on the target's distance,
+# which is why the closed form does not join CANDIDATES above.
+
+
+def alpha_quadrature(target_r, target_z, edge, which, nodes=600):
+    """Return the edge integral the closed form replaces, by direct quadrature.
+
+    ``W(u) = 4 integral_0^(pi/2) da (-cos 2a) g(u, a)`` with ``phi = pi - 2a``:
+    the same edge antiderivative ``g`` the shipped kernel integrates over ``phi``,
+    written in the closed form's own angle so the two are the same integral and
+    not merely the same flux. Deliberately naive -- literal transcription of
+    ``g``, a single high-order rule, no machinery shared with the reduction.
+    """
+    ra, za, rb, zb = edge
+    b1 = (rb - ra) / (zb - za)
+    a02 = 1.0 + b1 * b1
+    node, weight = np.polynomial.legendre.leggauss(nodes)
+    alpha = 0.25 * np.pi * (node + 1.0)
+    r = np.atleast_1d(target_r)[:, None]
+    z = np.atleast_1d(target_z)[:, None]
+    angle = alpha[None, :]
+    cos_phi = -np.cos(2.0 * angle)
+    sin_phi = np.sin(2.0 * angle)
+    sin_two_phi = np.sin(2.0 * (np.pi - 2.0 * angle))
+    r1 = ra - b1 * (za - z)
+    u = (zb - z) if which else (za - z)
+    offset = (r1 + b1 * u) - r * cos_phi
+    plane_offset = r1 - r * cos_phi
+    g_squared = u * u + (r * sin_phi) ** 2
+    b_squared = plane_offset**2 + a02 * (r * sin_phi) ** 2
+    distance = np.sqrt(g_squared + offset**2)
+    gamma = u + b1 * offset
+    integrand = (
+        gamma * distance / (2.0 * a02)
+        + u * r * cos_phi * np.arcsinh(offset / np.sqrt(g_squared))
+        + (b_squared + 2.0 * a02 * r * cos_phi * plane_offset)
+        / (2.0 * a02 * np.sqrt(a02))
+        * np.arcsinh(gamma / np.sqrt(b_squared))
+        - 0.5
+        * r
+        * r
+        * sin_two_phi
+        * np.arctan((u * offset - b1 * g_squared) / (r * sin_phi * distance))
+    )
+    return 4.0 * (integrand @ (0.25 * np.pi * weight * -np.cos(2.0 * alpha)))
+
+
+# Edges spanning the slopes a polygon presents, including the exactly vertical
+# one: ``b1 = 0`` collapses the reduction's quadratic in x to a linear factor,
+# sending one of its two roots to infinity, and is the case a formulation built
+# only for sloped edges gets wrong outright rather than by a few digits.
+REDUCTION_EDGES = {
+    "sloped": (2.0, 0.1, 2.25, 0.05),
+    "steep": (2.0, 0.1, 2.05, 0.6),
+    "vertical": (2.2, -0.3, 2.2, 0.3),
+    "reversed": (2.4, 0.5, 2.0, 0.1),
+}
+
+
+@pytest.mark.parametrize("limit", [0, 1])
+@pytest.mark.parametrize("edge", sorted(REDUCTION_EDGES))
+def test_the_closed_form_reproduces_the_edge_integral_it_replaces(edge, limit):
+    """Per edge, per limit: the reduction against a quadrature of the same integral.
+
+    This is the transcription check, and it is deliberately run where the
+    reduction's small quantities are not small: targets a good fraction of the
+    major radius away from the edge, so the elliptic modulus is clear of 1 and no
+    pole sits near an end of the integration range. Anything wrong in the four
+    integrations by parts, the arctangent boundary term, or the pole bookkeeping
+    shows up here at full size, uncontaminated by conditioning.
+    """
+    from nova.biot.polygonanalytic import _edge_flux
+
+    target_r = np.array([2.6, 3.0, 1.6, 4.0, 0.9])
+    target_z = np.array([0.4, -0.45, 0.35, 0.2, -0.7])
+    vertices = np.asarray(REDUCTION_EDGES[edge], dtype=float)
+    reference = alpha_quadrature(target_r, target_z, vertices, limit)
+    computed = _edge_flux(target_r, target_z, vertices, limit, 48)
+    # measured worst over these edges and targets is 1.2e-09, set by the
+    # arctangent term, whose four-pole reduction is the deepest of the four
+    assert worst_relative(computed, reference) <= 1e-08
+
+
+def scaled_hexagon(r0, radius):
+    """Return a regular hexagon of the given bounding radius, centred at r0."""
+    angle = np.pi / 6 + np.linspace(0.0, 2.0 * np.pi, 6, endpoint=False)
+    return np.column_stack([r0 + radius * np.cos(angle), radius * np.sin(angle)])
+
+
+def worst_deviation(vertices, standoff=CONTOUR_STANDOFF):
+    """Return the closed form's worst deviation from the oracle, beyond standoff."""
+    from nova.biot.polygonanalytic import polygon_analytic_flux
+
+    target_r, target_z = gate_targets(vertices)
+    reference = oracle(target_r, target_z, vertices)[0]
+    computed = polygon_analytic_flux(target_r, target_z, vertices)
+    keep = contour_distance(target_r, target_z, vertices) >= standoff
+    assert np.all(np.isfinite(computed)), "closed form returned a non-finite flux"
+    return worst_relative(computed[keep], reference[keep])
+
+
+# Measured worst deviation beyond half a section radius of the contour, for a
+# hexagon at r0 = 3 as its bounding radius shrinks. Two of the reduction's small
+# quantities -- the complement of the elliptic modulus, and the gap between the
+# G^2 pole and the end of the integration range -- both fall as (radius/r0)^2 and
+# become CONFLUENT, so the loss goes as the fourth power of the aspect ratio: a
+# factor of three off the radius costs two orders of magnitude. The worst target
+# is a near one every time, not a far one.
+#
+# A slender section at large major radius is therefore the hard case for the
+# closed form and the easy case for the boundary quadrature, which is the reverse
+# of what the cost comparison alone suggests. It is also the case a tokamak coil
+# pack presents, so this table -- not the cost -- is what decides where the closed
+# form can be used.
+ASPECT_ACCURACY = {1.0: 1e-07, 0.3: 1e-05, 0.1: 1e-02}
+
+
+@pytest.mark.parametrize("radius", sorted(ASPECT_ACCURACY))
+def test_the_closed_form_tracks_the_quadrature_over_a_whole_section(radius):
+    """The conditioning limit is measured, so it is asserted in both directions.
+
+    An upper bound alone would let a regression pass unnoticed inside a loose
+    tolerance. Bounding below as well pins the loss to the aspect ratio it is
+    understood to come from, so a reformulation that resolves the confluence FAILS
+    this test and has to update the table -- which is the point of recording it.
+    """
+    tolerance = ASPECT_ACCURACY[radius]
+    deviation = worst_deviation(scaled_hexagon(3.0, radius))
+    assert deviation <= tolerance, f"radius {radius}: {deviation:.3e}"
+    assert deviation > 1e-3 * tolerance, (
+        f"radius {radius}: {deviation:.3e} beats the recorded conditioning"
+    )
+
+
+def test_the_closed_form_is_unusable_at_a_thin_section_aspect_ratio():
+    """The end of the trend, stated as a fact rather than left to be discovered.
+
+    At a hundredth of the major radius the confluence has consumed every digit
+    and the closed form returns a number of the wrong order. The shipped
+    quadrature is at its most accurate here, so this is not a gap that needs
+    covering -- but it is a gap, and a caller choosing between the two needs it
+    written down rather than inferred from the table above.
+    """
+    assert worst_deviation(scaled_hexagon(3.0, 0.03)) > 1.0
+
+
+def test_the_closed_form_reproduces_the_rectangle_kernel_for_vertical_edges():
+    """The ``b1 = 0`` limit, against the rectangle implementation already trusted.
+
+    Both of the rectangle's contributing edges are exactly vertical, so this is
+    the collapsed-quadratic case end to end rather than one edge at a time. The
+    tolerance is the rectangle kernel's own 785-point zeta quadrature, not the
+    closed form's.
+    """
+    from nova.biot.polygonanalytic import polygon_analytic_flux
+
+    width, height = 1.0, 0.8
+    vertices = rectangle(r0=3.0, width=width, height=height)
+    target_r, target_z = gate_targets(vertices, directions=24)
+    keep = contour_distance(target_r, target_z, vertices) >= CONTOUR_STANDOFF
+    computed = polygon_analytic_flux(target_r, target_z, vertices)
+    reference = cylinder_greens(
+        target_r[keep], target_z[keep], 3.0, 0.0, width, height
+    )[0]
+    assert worst_relative(computed[keep], reference) < 2e-3
+
+
+def test_a_horizontal_edge_contributes_nothing_to_the_closed_form():
+    """Paper eq 7a. The reduction divides by the edge's dz to form its slope.
+
+    Splitting a horizontal edge in two adds an edge whose contribution must be
+    exactly nothing, so the two evaluations agree to round-off rather than to the
+    conditioning tolerance -- both sides are the same closed form.
+    """
+    from nova.biot.polygonanalytic import polygon_analytic_flux
+
+    vertices = rectangle(r0=3.0, width=1.0, height=0.8)
+    r_low, r_high = vertices[0, 0], vertices[1, 0]
+    z_low, z_high = vertices[0, 1], vertices[2, 1]
+    split = np.array(
+        [
+            [r_low, z_low],
+            [0.5 * (r_low + r_high), z_low],
+            [r_high, z_low],
+            [r_high, z_high],
+            [r_low, z_high],
+        ]
+    )
+    target_r, target_z = gate_targets(vertices)
+    keep = converged(target_r, target_z, vertices)
+    plain = polygon_analytic_flux(target_r, target_z, vertices)
+    divided = polygon_analytic_flux(target_r, target_z, split)
+    assert np.all(np.isfinite(divided))
+    assert worst_relative(divided[keep], plain[keep]) <= 1e-12
+
+
+def test_a_target_level_with_an_edge_end_stays_finite():
+    """``u = 0`` puts one G^2 root at each end of the integration range.
+
+    The factorisation the reduction runs on does not exist there, so the
+    evaluation is floored off zero. That keeps it finite -- which a grid whose
+    rows line up with the section's corners needs -- and this test says so
+    explicitly, because the ACCURACY at that target is whatever the confluent
+    limit allows and is not claimed anywhere.
+
+    A target coinciding with a VERTEX is excluded, not overlooked: there ``u = 0``
+    and ``r = r'`` together drive the modulus to 1, where the complete integral of
+    the first kind itself diverges, and no amount of care in the reduction
+    recovers it. The shipped quadrature is finite there and this is not.
+    """
+    from nova.biot.polygonanalytic import polygon_analytic_flux
+
+    vertices = scaled_hexagon(3.0, 1.0)
+    level = np.unique(vertices[:, 1])
+    target_r = np.repeat(np.array([1.8, 2.6, 4.6, 6.0]), level.size)
+    target_z = np.tile(level, 4)
+    assert np.all(np.isfinite(polygon_analytic_flux(target_r, target_z, vertices)))

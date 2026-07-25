@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="biot-operator-assembly">
+  <meta name="plan-title"     content="Biot Operator Assembly — parallel, batchable, shardable construction">
+  <meta name="plan-summary"   content="Re-architect the construction of biot interaction operators: the pair space is embarrassingly parallel but today's assembly is RAM-limited and naively CPU-batched; design a tiled, shardable build that stays viable on CPU (local + CI), accelerates on GPU, streams to the cached zarr store, and delivers a principled near/far criterion that unlocks the thick-section plasma coupling default">
+  <meta name="plan-status"    content="draft">
+  <meta name="plan-roi"       content="high">
+  <meta name="plan-effort"    content="L">
+  <meta name="plan-tier"      content="opus">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-depends-on" content="nova-3d-native">
+  <meta name="plan-blocks"    content="mast-catalog-gpu-solve">
+  <title>Biot Operator Assembly | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — Objective</h2>
+    <p><strong>Make the construction of every biot interaction operator a parallel, batchable,
+    shardable computation.</strong> The target-source pair space is embarrassingly parallel — each
+    coupling entry is an independent kernel evaluation — yet today's assembly is RAM-limited and
+    batched naively on the CPU: <code>nova/biot/solve.py</code> partitions sources into fixed
+    ≤500-element chunks purely "so the interaction matrices stay bounded", each chunk builds a
+    dense block in host memory, and nothing exploits the independence of the pairs beyond numpy's
+    internal vectorisation. That design sets a hard wall for exact thick-section coupling: the
+    Urankar Part V polygon kernel costs ~39.5&nbsp;µs per pair against ~0.07&nbsp;µs for a point
+    filament (~70,000×), so an all-pairs 2000-cell plasma matrix is ~44&nbsp;hours through the
+    current path — which is why the hexagonal plasma mesh shipped point-coupled
+    (physics-spine-adoption, 2026-07-25) despite a measured +7.2%&nbsp;median /
+    +18%&nbsp;max error on cell self-flux terms.</p>
+    <p>Two hard constraints frame the design:</p>
+    <ul>
+      <li><strong>CPU viability is non-negotiable.</strong> GPUs cannot be guaranteed for local
+      work or CI, so the assembly must remain correct and usefully fast on a multicore CPU; the
+      GPU is an accelerator for the same code path, not a requirement.</li>
+      <li><strong>Build once, cache forever.</strong> Interaction matrices are pure geometry:
+      computed once per machine/grid signature and cached (the zarr operator store tier from
+      nova-spine-refactor). Steady-state solve throughput is therefore unaffected by build cost —
+      but the <em>first</em> build at MAST-catalog scale must finish in under ~20 minutes.</li>
+    </ul>
+    <p>Done well, this unlocks: the thick hexagonal plasma-section coupling as the default
+    (gated also on the <a href="/nova/nova-3d-native.html">nova-3d-native</a> §2 zeta fast path),
+    exact polygon coupling for wall-clipped cells and — later — conductor turns, and a first-solve
+    budget compatible with the <code>mast-catalog-gpu-solve</code> goal.</p>
+
+    <h2 id="s2">§2 — Evidence base (measured 2026-07-25)</h2>
+    <p>All figures from the physics-spine fleet session (login node, fresh-process, first-run;
+    full record in
+    <a href="archive/physics-spine-adoption-s6-waves12-landed.html">the waves 1+2 archive</a>):</p>
+    <table>
+      <thead><tr><th>Quantity</th><th>Value</th><th>Note</th></tr></thead>
+      <tbody>
+        <tr><td>Polygon kernel cost per pair</td><td>~39.5&nbsp;µs</td>
+          <td>vs ~0.07&nbsp;µs point filament (~70,000×). Flop-bound on COMPLEX transcendentals:
+          two complex-step passes × ~6 complex arcsinh/arctan/sqrt over a
+          (targets × 768 quadrature) array.</td></tr>
+        <tr><td>All-pairs 2000-cell matrix</td><td>~44&nbsp;h</td><td>Infeasible through the
+          current assembly; the wall this plan removes.</td></tr>
+        <tr><td>560-cell plasma solve, polygon-coupled</td><td>6.3&nbsp;s (2× band) /
+          15.8&nbsp;s (3× band)</td><td>vs 963&nbsp;ms point-coupled tracked baseline
+          (~6.5× / ~16×). Widening 2×→3× costs 2.5× for an identical self-term correction.</td></tr>
+        <tr><td>Correctness stake</td><td>self +7.2% median, +18% max; mutual +0.02% median</td>
+          <td>The point-kernel error concentrates exactly on self/first-neighbour terms —
+          the near zone is where exactness is physically real.</td></tr>
+        <tr><td>Band-edge seam</td><td>~5×10⁻⁴ relative flux</td><td>Geometry-fixed (same pairs
+          always on the same side), so smooth-in-state for autograd/Anderson/NK outer loops.</td></tr>
+        <tr><td>Quadrature ladder (vs closed-form rectangle oracle, ψ)</td>
+          <td>16×48: 3.7e-08 · 8×24: 2.9e-06 · 4×16: 4.5e-04</td>
+          <td>But at 8×24 B<sub>Z</sub> degrades to ~1e-02 — flux tolerance alone is a false
+          economy; component-wise bounds required.</td></tr>
+        <tr><td>Zeta fast path headroom</td><td>10–30×</td><td>nova-3d-native §2: Gauss–Legendre
+          (16–48 nodes) replaces ~500 midpoint panels on a smooth integrand; fixed node count =
+          fixed shapes = vmap-friendly. <strong>Prerequisite — re-cost the polygon kernel after it
+          lands before fixing any cutoff.</strong></td></tr>
+      </tbody>
+    </table>
+    <p>Instrumentation already in place: <code>nova/biot/polysection.py</code> ships
+    exact-everywhere by default with <code>PolySection.configured(standoff=…, quadrature=…)</code>
+    as scoped study knobs — band sweeps and the exact reference run in-process with no source
+    edits.</p>
+
+    <figure>
+      <svg viewBox="0 0 880 360" role="img" style="max-width:100%;height:auto;font-family:system-ui">
+        <text x="440" y="24" text-anchor="middle" font-size="15" font-weight="600" fill="#111">Tiled pair-space assembly: shard → evaluate → accumulate → cache</text>
+        <!-- pair-space grid -->
+        <rect x="40" y="60" width="240" height="240" fill="none" stroke="#333" stroke-width="1"/>
+        <line x1="120" y1="60" x2="120" y2="300" stroke="#bbb" stroke-width="1"/>
+        <line x1="200" y1="60" x2="200" y2="300" stroke="#bbb" stroke-width="1"/>
+        <line x1="40" y1="140" x2="280" y2="140" stroke="#bbb" stroke-width="1"/>
+        <line x1="40" y1="220" x2="280" y2="220" stroke="#bbb" stroke-width="1"/>
+        <rect x="120" y="140" width="80" height="80" fill="none" stroke="#0a7d33" stroke-width="2"/>
+        <text x="160" y="185" text-anchor="middle" font-size="12" fill="#0a7d33">tile</text>
+        <text x="160" y="316" text-anchor="middle" font-size="12" fill="#111">pair space (targets × sources)</text>
+        <text x="160" y="332" text-anchor="middle" font-size="11" fill="#555">every entry independent — embarrassingly parallel</text>
+        <text x="30" y="180" text-anchor="middle" font-size="12" fill="#111" transform="rotate(-90 30 180)">targets</text>
+        <text x="160" y="52" text-anchor="middle" font-size="12" fill="#111">sources</text>
+        <!-- arrow -->
+        <line x1="290" y1="180" x2="360" y2="180" stroke="#333" stroke-width="1"/>
+        <polygon points="360,180 352,176 352,184" fill="#333"/>
+        <!-- evaluate box -->
+        <rect x="370" y="120" width="200" height="120" fill="none" stroke="#333" stroke-width="1"/>
+        <text x="470" y="145" text-anchor="middle" font-size="13" font-weight="600" fill="#111">evaluate tile</text>
+        <text x="470" y="168" text-anchor="middle" font-size="12" fill="#111">one kernel, fixed shapes</text>
+        <text x="470" y="188" text-anchor="middle" font-size="12" fill="#111">CPU: cores × tiles (baseline)</text>
+        <text x="470" y="208" text-anchor="middle" font-size="12" fill="#111">GPU: vmap over tile (same code)</text>
+        <text x="470" y="228" text-anchor="middle" font-size="11" fill="#555">near/far picks the kernel per pair</text>
+        <!-- arrow -->
+        <line x1="580" y1="180" x2="650" y2="180" stroke="#333" stroke-width="1"/>
+        <polygon points="650,180 642,176 642,184" fill="#333"/>
+        <!-- accumulate/cache box -->
+        <rect x="660" y="120" width="190" height="120" fill="none" stroke="#333" stroke-width="1"/>
+        <text x="755" y="145" text-anchor="middle" font-size="13" font-weight="600" fill="#111">stream to store</text>
+        <text x="755" y="168" text-anchor="middle" font-size="12" fill="#111">tile → zarr chunk</text>
+        <text x="755" y="188" text-anchor="middle" font-size="12" fill="#111">RAM holds one tile,</text>
+        <text x="755" y="208" text-anchor="middle" font-size="12" fill="#111">never the matrix</text>
+        <text x="755" y="228" text-anchor="middle" font-size="11" fill="#555">built once per geometry signature</text>
+        <!-- footnote -->
+        <text x="440" y="352" text-anchor="middle" font-size="11" fill="#555">Replaces the fixed ≤500-source host-RAM chunking in nova/biot/solve.py — tile size set by memory budget, not a constant.</text>
+      </svg>
+      <figcaption>The assembly shape under study: shard the independent pair space into tiles,
+      evaluate each tile through one fixed-shape kernel path (CPU cores as the baseline, GPU vmap
+      as the accelerator over identical code), and stream finished tiles to the cached zarr store
+      so RAM holds one tile rather than the whole operator.</figcaption>
+    </figure>
+
+    <h2 id="s3">§3 — Research questions</h2>
+    <ol>
+      <li><strong>Assembly survey.</strong> Inventory how every operator class is built today
+      (Solve/Matrix tier, segment generators, the ≤500-source chunking, intermediate array
+      shapes, peak RAM per build) and identify what is shared vs kernel-specific. Where exactly
+      does the RAM limit bind, and what is the actual arithmetic intensity per kernel?</li>
+      <li><strong>Tiling and sharding.</strong> Tile the (target, source) pair space with the
+      tile size derived from a memory budget; evaluate tiles in parallel (multiprocessing /
+      threads + nogil numba on CPU; device batches on GPU) and accumulate into the zarr store
+      chunk-aligned. What tile geometry balances kernel launch overhead, cache locality, and
+      store chunking?</li>
+      <li><strong>One kernel, two backends.</strong> Can the polygon/cylinder/zeta kernels run
+      as a single fixed-shape code path (JAX with vmap on GPU, jitted on CPU; or numba
+      parallel-CPU + a JAX GPU twin pinned by parity test)? The CPU baseline must not regress
+      for existing operators; the same source must serve both, or the pair must be pinned by
+      tolerance-gated equivalence.</li>
+      <li><strong>Principled near/far.</strong> Derive the cutoff from the section's
+      second-moment (finite-area) error bound as a function of distance-in-section-sizes, per
+      component (ψ, B<sub>R</sub>, B<sub>Z</sub> — the quadrature study shows flux-only bounds
+      mislead), with the error budget set relative to sensor noise and solver tolerance — not
+      the compute budget. Sweep with <code>PolySection.configured</code> against the
+      exact-everywhere reference; the shipped default stays exact-everywhere until this bound
+      exists.</li>
+      <li><strong>Re-cost after zeta.</strong> The nova-3d-native §2 fast path (10–30× on the
+      quadrature hot spot) lands first; every cost line in §2 is re-measured before any cutoff
+      or backend decision is locked.</li>
+      <li><strong>Budget check.</strong> Demonstrate a MAST-catalog-scale first build
+      (≈2000×2000-cell plasma operator plus sensor rows) under ~20&nbsp;min on one GPU node and
+      report the CPU-only figure alongside it; both go in BASELINE.md.</li>
+    </ol>
+
+    <h2 id="s4">§4 — Deliverables</h2>
+    <ul>
+      <li>A costed design note with figures: error-vs-distance per component (near/far bound),
+      cost-vs-band, build-time-vs-shard-count on CPU and GPU, RAM-vs-tile-size.</li>
+      <li>The decisions below locked with measured rationale.</li>
+      <li>An implementation plan (sections with done-when) for the chosen assembly, sequenced
+      after the zeta fast path; the thick-section plasma default flip is its final rung, closing
+      the loop left open by physics-spine-adoption.</li>
+    </ul>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="kernel-backend" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Kernel backend strategy: one JAX code path serving CPU and GPU, or
+        numba parallel-CPU with a JAX GPU twin pinned by parity tests?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="jax-single-path">single JAX path, jit CPU / vmap GPU</button>
+          <button class="r-opt" data-value="numba-cpu-jax-gpu">numba CPU + JAX GPU twin, parity-pinned</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+      <div class="r-dec" data-key="nearfar-criterion" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Near/far criterion form: per-component second-moment error bound
+        (distance where the finite-area correction falls below a stated tolerance), or
+        exact-everywhere retained once the accelerated build makes it affordable?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="error-bounded-cutoff">error-bounded cutoff, per component</button>
+          <button class="r-opt" data-value="exact-everywhere">exact everywhere, no blend</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+      <div class="r-dec" data-key="tile-scheme" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Tiling scheme: memory-budget-derived square tiles streamed to
+        zarr-aligned chunks, or target-major strips matching today's row blocks?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="budget-tiles-zarr">budget-derived tiles, zarr-aligned</button>
+          <button class="r-opt" data-value="target-strips">target-major strips</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-boa-01" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-25">
+        <h4 class="r-fu-title">Assembly survey + tiling prototype (§3.1–§3.3) — measure before designing</h4>
+        <div class="r-fu-body"><p>First rung: inventory the current assembly (where the RAM
+        limit binds, arithmetic intensity per kernel), prototype a tiled build for one operator
+        class on CPU (cores × tiles) with zarr streaming, and pin a CPU/GPU single-source kernel
+        on one representative (the polygon section). Runs before any cutoff work; §3.4–§3.6
+        follow once the nova-3d-native §2 zeta fast path lands.</p></div>
+        <pre class="r-fu-prompt">Project: nova
+Plan:    biot-operator-assembly (http://127.0.0.1:8765/nova/biot-operator-assembly.html)
+Section: §3.1-§3.3 (survey + tiling prototype)
+Tier:    opus
+
+Context
+  Queued from the physics-spine fleet session (2026-07-25): the hex plasma
+  mesh shipped point-coupled because the exact polygon kernel is ~70,000x the
+  point cost through today's RAM-limited, naively CPU-batched assembly. The
+  pair space is embarrassingly parallel; the build must stay CPU-viable
+  (no GPU guarantee locally/CI) and stream to the cached zarr store.
+
+State to read
+  nova/biot/solve.py (check_segments 500-source chunking), matrix.py,
+  groupset.py (assembly path); nova/biot/polysection.py (configured() study
+  knobs, exact-everywhere default); nova/biot/polygon.py + greens.py
+  (kernels); the zarr operator store tier (nova/database, FrameSet store);
+  benchmarks/BASELINE.md; docs/archive/physics-spine-adoption-s6-waves12-landed.html
+  (measured cost/accuracy evidence).
+
+Scope locks / constraints
+  Work in a worktree off develop; primary checkout stays on main. Survey +
+  prototype + measurements only — no default-coupling change, no cutoff
+  decision (gated on nova-3d-native §2 zeta fast path landing first). CPU
+  baseline must not regress for existing operators. Figures per the plan
+  mandate (RAM-vs-tile, build-time-vs-cores, kernel parity).
+
+Done-when
+  1. Survey note in the plan: per-operator build path, peak RAM, intensity.
+  2. Tiled CPU prototype builds one real operator with bounded RAM and
+     near-linear core scaling, streamed to zarr; measurements recorded.
+  3. One kernel demonstrated on CPU and GPU from shared source (or
+     parity-pinned twin), with the parity test committed.
+  4. Findings written into the plan; this followup resolved; next rung
+     queued (cutoff study, post-zeta re-cost).</pre>
+      </article>
+    </section>
+
+  </main>
+</body>
+</html>

@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 import xarray
 
-from nova.imas.pulsedesign import Constraint, Control
+from nova.equilibrium.inverse import Constraint, Control
 from nova.imas.test_utilities import mark
 
 

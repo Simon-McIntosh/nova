@@ -9,7 +9,8 @@ import jax.numpy as jnp
 import numpy as np
 import optimistix as optx
 
-from nova.jax.plasma import Plasma
+from nova.equilibrium.forward import ForwardProfile
+from nova.equilibrium.forward_operator import ForwardFluxOperator
 from nova.imas.operate import Operate
 
 logger = logging.getLogger()
@@ -72,7 +73,7 @@ operate.time = 300
 operate.plasma.separatrix = {"e": [6.2, 0.5, 3, 4.6]}
 
 
-plasma = Plasma(
+flux_operator = ForwardFluxOperator(
     operate.plasmagrid.target,
     operate.plasmawall.target,
     operate.p_prime,
@@ -90,8 +91,9 @@ levels = -operate.plot_2d(
 )[::-1]
 
 # solve Newton-Krylov
-with timer("plasma.solve_flux"):
-    operate.plasma.solve_flux(verbose=True, f_rtol=1e-1, f_tol=1e-1)
+forward = ForwardProfile(operate.plasma)
+with timer("ForwardProfile.solve"):
+    forward.solve(verbose=True, f_rtol=1e-1, f_tol=1e-1)
 
 print(f"Krylov solve {optx.two_norm(flux_residual(operate.plasma.psi))}")
 
@@ -108,12 +110,12 @@ solver = optx.Newton(rtol=1e-1, atol=1e-1)
 psi = jnp.array(operate.plasma.psi)
 
 with timer("optx.root_find"):
-    sol = optx.root_find(lambda psi, args: plasma.residual(psi), solver, psi)
+    sol = optx.root_find(lambda psi, args: flux_operator.residual(psi), solver, psi)
 
 print(f"Newton L2 {optx.two_norm(flux_residual(sol.value))}")
 
 # plot optx sol
-plasma_current = plasma.plasma_current(sol.value)
+plasma_current = flux_operator.plasma_current(sol.value)
 operate.plasma.ionize = np.array(plasma_current, bool)
 operate.plasma.nturn = np.array(plasma_current)[plasma_current != 0]
 operate.plasma.nturn /= np.sum(operate.plasma.nturn)
@@ -127,7 +129,7 @@ operate.grid.plot(
 
 operate.grid.legend(loc="upper center", bbox_to_anchor=(0.5, 1.14))
 
-# operate.plasmagrid["psi"] = sol.value[: plasma.grid.node_number]
+# operate.plasmagrid["psi"] = sol.value[: flux_operator.grid.node_number]
 # operate.plasma.plot()
 # operate.plasmagrid.plot(colors="C0", levels=[operate.plasma.psi_lcfs])
 
@@ -136,7 +138,7 @@ operate.grid.legend(loc="upper center", bbox_to_anchor=(0.5, 1.14))
 # print(sol)
 
 # def residual(psi):
-#    return plasma.residual(psi), jac(psi)
+#    return flux_operator.residual(psi), jac(psi)
 
 # import jaxopt
 

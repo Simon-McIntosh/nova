@@ -6,6 +6,15 @@ Cost is the median across repeats of the same variant. Accuracy is per component
 (psi, B_R, B_Z) against two references: the exact-everywhere polygon rule for
 the reduced rules, and the closed-form rectangle kernel where the section is a
 rectangle, which is an independent oracle rather than a self-comparison.
+
+The rectangle comparison is taken outside the section's bounding box. Inside it,
+and along the horizontal faces in particular, ``cylinder_greens`` is not usable
+as an oracle: its corner antiderivative carries ``sign(z_corner - z_target)``
+step terms with a dead-band, and on a face where that difference is zero the
+returned flux jumps -- one benchmark target on the lower face returns a NEGATIVE
+psi where every neighbouring target, and the polygon kernel, give a smooth
+positive value. That is a defect in the rectangle kernel, not in what is being
+measured against it.
 """
 
 from __future__ import annotations
@@ -51,22 +60,23 @@ def error(record: dict, reference: dict, mask=None) -> dict[str, float]:
     return out
 
 
-def rectangle_oracle(radii, reference_variant: dict) -> dict:
-    """Return the closed-form rectangle kernel on the benchmark target set."""
+def rectangle_oracle(radii) -> tuple[dict, np.ndarray]:
+    """Return the closed-form rectangle kernel and the targets it is valid on."""
     from nova.biot.greens import cylinder_greens
 
     from benchmarks.kernel_cost import R0, RECT, Z0, targets
 
     tr, tz = targets()
     psi, br, bz = cylinder_greens(tr, tz, R0, Z0, *RECT)
-    return {"psi": psi, "br": br, "bz": bz, "radii": np.asarray(radii)}
+    outside = np.hypot(tr - R0, tz - Z0) > 1.05 * np.hypot(*RECT) / 2.0
+    return {"psi": psi, "br": br, "bz": bz, "radii": np.asarray(radii)}, outside
 
 
 def table(records: dict[str, dict]) -> str:
     """Return the cost/accuracy comparison as fixed-width text."""
     point = records["point"]["us_per_pair"]
     exact = records["polygon_hex_16x48"]
-    oracle = rectangle_oracle(exact["radii"], exact)
+    oracle, outside = rectangle_oracle(exact["radii"])
     lines = [
         f"{'method':34s} {'us/pair':>10s} {'x point':>9s} "
         f"{'d psi':>10s} {'d Br':>10s} {'d Bz':>10s}  reference"
@@ -80,10 +90,10 @@ def table(records: dict[str, dict]) -> str:
     }
     for variant, record in records.items():
         if variant in rectangle_family:
-            reference, label = oracle, "rectangle oracle"
+            reference, mask, label = oracle, outside, "rectangle oracle, outside"
         else:
-            reference, label = exact, "polygon 16x48"
-        deviation = error(record, reference)
+            reference, mask, label = exact, None, "polygon 16x48"
+        deviation = error(record, reference, mask)
         lines.append(
             f"{variant:34s} {record['us_per_pair']:10.3f} "
             f"{record['us_per_pair'] / point:9.1f} "
@@ -104,10 +114,16 @@ def figure(records: dict[str, dict], path: pathlib.Path) -> None:
     radii = np.asarray(exact["radii"])
     fig, axes = plt.subplots(1, 2, figsize=(12.5, 5.0))
 
+    # the reference rule and the complex-step formulation of it are the same
+    # integral, so they sit at zero error and would only bend the curve back on
+    # itself; they are annotated separately below.
     rules = {
-        k: v
-        for k, v in records.items()
-        if k.startswith("polygon_hex_") and "x" in k.split("_")[-1]
+        key: value
+        for key, value in records.items()
+        if key.startswith("polygon_hex_")
+        and "x" in key.split("_")[-1]
+        and "complex_step" not in key
+        and key != "polygon_hex_16x48"
     }
     for component, marker in zip(COMPONENTS, "os^"):
         cost, worst = [], []
@@ -127,11 +143,18 @@ def figure(records: dict[str, dict], path: pathlib.Path) -> None:
         ("hybrid_rect", "C5"),
     ):
         record = records[variant]
-        oracle = rectangle_oracle(radii, exact)
-        worst = max(error(record, oracle).values())
+        oracle, outside = rectangle_oracle(radii)
+        worst = max(error(record, oracle, outside).values())
         axes[0].plot(
             record["us_per_pair"], worst, "*", ms=14, color=colour, label=variant
         )
+    for variant, label in (
+        ("polygon_hex_16x48", "exact 16x48\n(closed-form gradient)"),
+        ("polygon_hex_complex_step_16x48", "exact 16x48\n(complex step)"),
+    ):
+        cost = records[variant]["us_per_pair"]
+        axes[0].axvline(cost, color="0.6", ls="--", lw=0.8)
+        axes[0].text(cost, 3e-15, label, fontsize=6, rotation=90, va="bottom")
     axes[0].set_xscale("log")
     axes[0].set_yscale("log")
     axes[0].set_xlabel("cost [us per target-source pair]")

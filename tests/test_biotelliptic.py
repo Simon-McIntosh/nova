@@ -291,50 +291,291 @@ def test_complete_pi_keeps_its_accuracy_when_handed_the_complement():
     """
     parameter = np.float64(0.5)
     for complement in (1e-4, 1e-8, 1e-12):
-        expected = split_scale_pi(1.0 - complement, parameter, complement)
+        expected = third_kind_quadrature(1.0 - complement, complement, parameter)
         got = complete_pi(
             np.float64(1.0 - complement), parameter, complement=np.float64(complement)
         )
         np.testing.assert_allclose(got, expected, rtol=1e-11)
 
 
-def split_scale_pi(characteristic, parameter, complement, nodes=300):
-    """Return Pi(n | m) by quadrature that resolves the ``1 - n`` scale.
+# --------------------------------------------------------------------------
+# The complement basis.  Every moment above is a moment of ``sin^2 a``, which
+# vanishes at ``a = 0``.  A pole sitting just past the OTHER end of the range
+# needs the mirror family -- moments of ``cos^2 a`` -- so that a numerator's
+# value AT that end is a coefficient of its expansion instead of an alternating
+# sum of coefficients.  The polygon reduction has such a pole in both of its
+# denominators, and their distance from the range end falls as the square of the
+# section's aspect ratio, so the two families below are what its accuracy at a
+# slender section rests on.
 
-    Adaptive integration of the Legendre form is useless here: the integrand
-    carries a peak of width ``sqrt(1 - n)`` at ``a = pi/2``, so by ``1 - n =
-    1e-12`` the reference, not the routine under test, is the inaccurate side.
-    The interval is therefore split, and across the peak ``cos a`` is stretched
-    by ``tan``, which absorbs it exactly and leaves a smooth integrand for a
-    fixed rule.
+
+def graded_quadrature(integrand, floor, nodes=64):
+    """Return the integral over ``theta`` in ``[0, pi/2]`` on graded panels.
+
+    ``theta = pi/2 - a``, so the range end where the complement basis vanishes is
+    at the origin -- and that is where the integrands below carry their narrow
+    features: the pole's distance from the end, and the modulus complement, which
+    are independent scales. An adaptive rule can step over either without
+    noticing and report a small error estimate for a wrong answer. Panels graded
+    geometrically from ``floor`` resolve both by construction: each spans one
+    octave, on which the integrand is smooth, so a fixed high-order rule on every
+    panel is spectrally accurate and no feature can hide between nodes.
     """
     node, weight = np.polynomial.legendre.leggauss(nodes)
-    width = np.sqrt(complement / characteristic)
-    # geometric mean of the two scales: wide enough that the flank's own rise is
-    # resolved, narrow enough that the stretched peak integrand is near constant
-    cut = min(0.5, np.sqrt(width))
+    edges = [0.0]
+    while edges[-1] < 0.5 * np.pi:
+        edges.append(floor if edges[-1] == 0.0 else min(2.0 * edges[-1], 0.5 * np.pi))
+    total = 0.0
+    for lower, upper in zip(edges[:-1], edges[1:]):
+        half = 0.5 * (upper - lower)
+        total += half * weight @ integrand(0.5 * (lower + upper) + half * node)
+    return total
 
-    upper = np.arccos(cut)
-    angle = 0.5 * upper * (node + 1.0)
-    flank = (0.5 * upper * weight) @ (
-        1.0
-        / (
-            (complement + characteristic * np.cos(angle) ** 2)
-            * np.sqrt(1.0 - parameter * np.sin(angle) ** 2)
-        )
-    )
 
-    upper = np.arctan(cut / width)
-    cosine = width * np.tan(0.5 * upper * (node + 1.0))
-    peak = (
-        (width / complement)
-        * (0.5 * upper * weight)
-        @ (
+def third_kind_quadrature(
+    characteristic, complement, parameter, parameter_complement=None, nodes=64
+):
+    """Return ``Pi(n | m)`` by quadrature that resolves both narrow scales.
+
+    ``Pi = int_0^{pi/2} dtheta / ((1 - n + n sin^2 theta) sqrt(k'^2 + k^2 sin^2
+    theta))`` in ``theta = pi/2 - a``: the characteristic's complement sets one
+    scale at the origin and the parameter's the other, and a stretch fitted to
+    either steps over the other. Both complements are taken as arguments because
+    a float parameter cannot express its own complement below ``eps``, which is
+    exactly the accuracy the routine under test claims to keep.
+    """
+    if parameter_complement is None:
+        parameter_complement = 1.0 - parameter
+    scales = [np.sqrt(complement / abs(characteristic))] if characteristic else [1.0]
+    scales.append(np.sqrt(parameter_complement / max(parameter, 1e-300)))
+    return graded_quadrature(
+        lambda theta: (
             1.0
             / (
-                np.sqrt(1.0 - parameter + parameter * cosine**2)
-                * np.sqrt(1.0 - cosine**2)
+                (complement + characteristic * np.sin(theta) ** 2)
+                * np.sqrt(parameter_complement + parameter * np.sin(theta) ** 2)
             )
-        )
+        ),
+        floor=0.01 * min(1.0, *scales),
+        nodes=nodes,
     )
-    return flank + peak
+
+
+def complement_moment_quadrature(parameter, order, nodes=64):
+    """Return ``A_m`` by quadrature of its own definition.
+
+    ``A_m = int_0^{pi/2} cos^{2m} a / sqrt(1 - k^2 sin^2 a) da``, written in
+    ``theta = pi/2 - a`` so the modulus complement's scale sits at the origin
+    where the grading is.
+    """
+    complementary = 1.0 - parameter
+    return graded_quadrature(
+        lambda theta: (
+            np.sin(theta) ** (2 * order)
+            / np.sqrt(complementary + parameter * np.sin(theta) ** 2)
+        ),
+        floor=0.01 * min(1.0, np.sqrt(complementary / max(parameter, 1e-300))),
+        nodes=nodes,
+    )
+
+
+def complement_pole_quadrature(shift, parameter, order, nodes=64):
+    """Return ``T_m`` in the complement basis by quadrature of its definition.
+
+    ``T_m = int_0^{pi/2} cos^{2m} a / ((cos^2 a + shift) sqrt(1 - k^2 sin^2 a)) da``.
+    """
+    complementary = 1.0 - parameter
+    scale = min(
+        np.sqrt(shift) if shift > 0.0 else 1.0,
+        np.sqrt(complementary / max(parameter, 1e-300)),
+    )
+    return graded_quadrature(
+        lambda theta: (
+            np.sin(theta) ** (2 * order)
+            / (
+                (np.sin(theta) ** 2 + shift)
+                * np.sqrt(complementary + parameter * np.sin(theta) ** 2)
+            )
+        ),
+        floor=0.01 * min(1.0, scale),
+        nodes=nodes,
+    )
+
+
+def plain_pole_quadrature(shift, parameter, order, nodes=64):
+    """Return ``T_m`` in the plain basis by quadrature of its definition.
+
+    ``T_m = int_0^{pi/2} sin^{2m} a / ((sin^2 a + shift) sqrt(1 - k^2 sin^2 a)) da``.
+    Here the pole's scale sits at ``a = 0`` and the modulus complement's at
+    ``a = pi/2``, so the grading runs from each end in turn.
+    """
+    complementary = 1.0 - parameter
+
+    def integrand(angle):
+        return np.sin(angle) ** (2 * order) / (
+            (np.sin(angle) ** 2 + shift)
+            * np.sqrt(complementary + parameter * np.cos(angle) ** 2)
+        )
+
+    # a = theta near the pole end, a = pi/2 - theta near the modulus end
+    near = graded_quadrature(
+        lambda theta: 0.5 * integrand(0.5 * theta),
+        floor=0.01 * min(1.0, np.sqrt(shift) if shift > 0.0 else 1.0),
+        nodes=nodes,
+    )
+    far = graded_quadrature(
+        lambda theta: 0.5 * integrand(0.5 * (np.pi - theta)),
+        floor=0.01 * min(1.0, np.sqrt(complementary / max(parameter, 1e-300))),
+        nodes=nodes,
+    )
+    return near + far
+
+
+def test_the_graded_reference_agrees_with_the_routines_already_pinned():
+    """The new reference is checked against ones the suite already trusts.
+
+    ``A_0`` is ``K`` and the plain shifted moment at ``m = 0`` is a third-kind
+    integral, both of which this module pins independently above. Without this the
+    tolerances below would be measuring the reference rather than the recursions.
+    """
+    for parameter in (1e-6, 0.3, 0.7, 1.0 - 1e-8):
+        np.testing.assert_allclose(
+            complement_moment_quadrature(parameter, 0),
+            scipy.special.ellipk(parameter),
+            rtol=1e-12,
+        )
+    for shift in (1e-8, 1e-3, 0.5):
+        # sin^2 a + shift = (1 + shift)(1 - n sin^2 a) with n = 1/(1 + shift)
+        characteristic = -1.0 / shift
+        np.testing.assert_allclose(
+            plain_pole_quadrature(shift, 0.7, 0),
+            complete_pi(
+                np.float64(characteristic),
+                np.float64(0.7),
+                complement=np.float64(1.0 + 1.0 / shift),
+            )
+            / shift,
+            rtol=1e-11,
+        )
+
+
+# The recursion for the complement moments has branches 1 and -k'^2/k^2, so its
+# upward direction holds where k^2 dominates and its downward one where the
+# complement does. These straddle the switch from both sides.
+COMPLEMENT_PARAMETERS = [1e-12, 1e-6, 0.1, 0.3, 0.33, 0.34, 0.5, 0.9, 1.0 - 1e-12]
+
+
+@pytest.mark.parametrize("parameter", COMPLEMENT_PARAMETERS)
+def test_the_complement_moments_agree_with_their_defining_integral(parameter):
+    """A_m at every order the reduction needs, in both recursion directions."""
+    from nova.biot.elliptic import stable_cn_moments
+
+    moments = stable_cn_moments(
+        np.float64(parameter), 9, complement=np.float64(1.0 - parameter)
+    )
+    for order, moment in enumerate(moments):
+        expected = complement_moment_quadrature(parameter, order)
+        np.testing.assert_allclose(moment, expected, rtol=2e-12, atol=1e-14)
+
+
+def test_the_complement_moments_stay_bounded_by_the_quarter_period():
+    """``cn <= 1`` makes every moment a decreasing sequence bounded by ``A0 = K``.
+
+    A recursion that has drifted onto its parasitic branch breaks monotonicity
+    long before it breaks the tolerance above, so this is the cheap sentinel.
+    """
+    from nova.biot.elliptic import stable_cn_moments
+
+    for parameter in COMPLEMENT_PARAMETERS:
+        moments = stable_cn_moments(np.float64(parameter), 12)
+        assert moments[0] == pytest.approx(scipy.special.ellipk(parameter))
+        for lower, upper in zip(moments[1:], moments[:-1]):
+            assert 0.0 < lower <= upper * (1.0 + 1e-12), parameter
+
+
+SHIFTS = [1e-10, 1e-6, 1e-3, 0.1, 1.0, 1.9, 2.1, 30.0]
+
+
+@pytest.mark.parametrize("parameter", [1e-6, 0.3, 0.7, 1.0 - 1e-8])
+@pytest.mark.parametrize("shift", SHIFTS)
+def test_the_complement_pole_moments_agree_with_their_defining_integral(
+    shift, parameter
+):
+    """T_m for a pole beyond the ``a = pi/2`` end, both recursion directions."""
+    from nova.biot.elliptic import cn_pole_moments
+
+    moments = cn_pole_moments(np.float64(shift), np.float64(parameter), 9)
+    for order, moment in enumerate(moments):
+        expected = complement_pole_quadrature(shift, parameter, order)
+        np.testing.assert_allclose(moment, expected, rtol=2e-11, atol=1e-14)
+
+
+@pytest.mark.parametrize("parameter", [1e-6, 0.3, 0.7, 1.0 - 1e-8])
+@pytest.mark.parametrize("shift", SHIFTS)
+def test_the_plain_pole_moments_agree_with_their_defining_integral(shift, parameter):
+    """The same family for a pole beyond the ``a = 0`` end, in the plain basis."""
+    from nova.biot.elliptic import sn_pole_moments
+
+    moments = sn_pole_moments(np.float64(shift), np.float64(parameter), 9)
+    for order, moment in enumerate(moments):
+        expected = plain_pole_quadrature(shift, parameter, order)
+        np.testing.assert_allclose(moment, expected, rtol=2e-11, atol=1e-14)
+
+
+@pytest.mark.parametrize("parameter", [0.2, 0.8])
+def test_a_pole_sitting_exactly_on_the_range_end_returns_the_plain_moments(parameter):
+    """``shift = 0`` puts the pole ON the end, where the leading moment diverges.
+
+    A numerator can only reach that configuration with its own leading
+    coefficient exactly zero -- the pole factor and the numerator share the
+    geometric quantity that vanishes -- so the divergent moment is multiplied by
+    a hard zero and the useful convention is to return zero for it rather than an
+    infinity that would poison the product. Every higher moment is finite and
+    equals the plain moment one order down, which is what is asserted here.
+    """
+    from nova.biot.elliptic import cn_pole_moments, sn_pole_moments, stable_cn_moments
+
+    plain = stable_cn_moments(np.float64(parameter), 9)
+    complement = cn_pole_moments(np.float64(0.0), np.float64(parameter), 9)
+    assert complement[0] == 0.0
+    np.testing.assert_allclose(complement[1:], plain[:8], rtol=1e-13)
+
+    from nova.biot.elliptic import stable_sn_moments
+
+    plain = stable_sn_moments(np.float64(parameter), 9)
+    shifted = sn_pole_moments(np.float64(0.0), np.float64(parameter), 9)
+    assert shifted[0] == 0.0
+    np.testing.assert_allclose(shifted[1:], plain[:8], rtol=1e-13)
+
+
+def test_the_third_kind_integral_keeps_its_digits_when_handed_both_complements():
+    """``Pi`` is as sensitive to the parameter's complement as to the
+    characteristic's.
+
+    Forming ``1 - m`` from a float parameter caps the relative accuracy at
+    ``eps / (1 - m)``, because the float cannot carry its own complement any
+    finer -- and the polygon reduction drives ``1 - m`` to the square of the
+    section aspect ratio, so at the aspect this exists for several digits are
+    already gone before the routine starts. The caller knows the complement in
+    closed form, from the target's offset from the source ring.
+    """
+    # the parameter is what a slender section produces: a rounded 1 - 1e-13, whose
+    # complement is therefore known to only nine digits from the float alone
+    parameter_complement = np.float64(1e-13)
+    parameter = np.float64(1.0) - parameter_complement
+    complement = np.float64(1e-8)
+    characteristic = np.float64(1.0) - complement
+    loose = complete_pi(characteristic, parameter, complement=complement)
+    tight = complete_pi(
+        characteristic,
+        parameter,
+        complement=complement,
+        parameter_complement=parameter_complement,
+    )
+    exact = third_kind_quadrature(
+        characteristic, complement, parameter, parameter_complement
+    )
+    np.testing.assert_allclose(tight, exact, rtol=1e-10)
+    # and the difference is real rather than round-off: the rounded parameter puts
+    # the complement out by a part in 1e4, which Pi carries as half of that
+    assert abs(loose - exact) > 1e-6 * abs(exact)

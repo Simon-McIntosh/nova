@@ -71,3 +71,24 @@ The zeta block size matters more than the node count: sizing a block's
 temporaries to stay in cache is worth 4× over multi-megabyte blocks, and past a
 few megabytes allocator churn costs another order of magnitude (2.44 s at 2**22
 doubles, 8.4 s at 2**19, 0.53 s at 2**16 on the 200k-element kernel).
+
+## coupling kernel cost per pair — compute node, fresh process, median of 3
+
+Recorded 2026-07-25 (sun_debug node; login-node timings showed 5× spread and
+were discarded). Drivers: `benchmarks/kernel_cost.py` / `kernel_cost_table.py`;
+accuracy columns and the near/far + order-vs-distance evidence are archived in
+`docs/archive/biot-operator-assembly-s3-landed.html`.
+
+| method | µs/pair | × point |
+|---|---|---|
+| point filament | 0.42 | 1 |
+| hybrid rectangle (switch=3) | 33.9 | 81 |
+| cylinder rectangle | 61.0 | 145 |
+| bow corner zeta (pre fixed-node zeta) | 148.0 | 352 |
+| polygon hex 16×48, closed-form gradient + block 16 | 857.8 | 2039 |
+| polygon hex 16×48, complex-step unblocked (retired) | 4335.9 | 10307 |
+| faithful Part V full-turn floor (special functions + g_p only) | 12.5–16.1 | ~30–38 |
+
+Tiled assembly (`nova/biot/tiledassembly.py`): ~48 B/pair (vs 267 B/pair
+through the ≤500-source chunking), 16-core scaling 8.78×; measured 16-core
+rate 107 µs/pair ⇒ projected 2000-cell exact-everywhere polygon build 7.1 min.

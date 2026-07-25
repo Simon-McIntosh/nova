@@ -11,6 +11,11 @@ already validated against -- an accelerator path is a cost change, never a
 physics change. Compilation is counted directly: the traced kernel must be
 compiled ONCE for a whole build, no matter how many tiles it evaluates, which
 is only true if the padded shapes really are constant.
+
+The tolerance is stated against each component's own peak rather than pointwise:
+a device reassociates the quadrature sum, and the smallest entries of Br and Bz
+are differences of much larger terms, so a pointwise ratio there measures the
+reference's cancellation instead of the backends' agreement.
 """
 
 import numpy as np
@@ -72,7 +77,7 @@ def test_the_traced_tile_matches_the_numpy_tile(batched):
     want = tile_coupling(target_r, target_z, edge, weight, norm, block=8)
     for got, reference in zip(computed, want):
         np.testing.assert_allclose(
-            got, reference, rtol=1e-11, atol=1e-13 * np.max(np.abs(reference))
+            got, reference, rtol=1e-11, atol=1e-11 * np.max(np.abs(reference))
         )
 
 
@@ -121,19 +126,18 @@ def test_a_ragged_tail_tile_does_not_force_a_recompile():
     assert full[0].shape == (4, 4)
     assert tail[0].shape == (4, 2)
     assert evaluate.compile_count == 1
+    want = tile_coupling(
+        target_r[:4],
+        target_z[:4],
+        edge[:, :, 5:],
+        weight[:, 5:],
+        norm[5:],
+        n_panels=plan.n_panels,
+        n_nodes=plan.n_nodes,
+        block=plan.block,
+    )[0]
     np.testing.assert_allclose(
-        tail[0],
-        tile_coupling(
-            target_r[:4],
-            target_z[:4],
-            edge[:, :, 5:],
-            weight[:, 5:],
-            norm[5:],
-            n_panels=plan.n_panels,
-            n_nodes=plan.n_nodes,
-            block=plan.block,
-        )[0],
-        rtol=1e-11,
+        tail[0], want, rtol=1e-11, atol=1e-11 * np.max(np.abs(want))
     )
 
 
@@ -160,6 +164,6 @@ def test_a_traced_build_streams_the_same_store(tmp_path):
             np.asarray(other[name][:]),
             want,
             rtol=1e-11,
-            atol=1e-13 * np.max(np.abs(want)),
+            atol=1e-11 * np.max(np.abs(want)),
         )
         assert other[name].chunks == one[name].chunks

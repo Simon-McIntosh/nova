@@ -26,6 +26,7 @@ Quantities are per ampere of total conductor current, in raw SI: total poloidal
 flux :math:`\\Phi = 2 \\pi R A_\\phi` [Wb] and field components [T].
 """
 
+from contextlib import contextmanager
 from dataclasses import dataclass
 from functools import cached_property
 from typing import ClassVar
@@ -49,19 +50,62 @@ class PolySection(Matrix):
     axisymmetric: ClassVar[bool] = True
     name: ClassVar[str] = "polysection"
 
-    standoff: ClassVar[float] = 2.0
-    """Standoff band in section radii within which the exact kernel is used.
+    standoff: ClassVar[float | None] = 3.0
+    """Standoff band, in section radii, within which the exact kernel is used.
 
-    Two section radii covers a cell and its first ring of neighbours: in a
-    hexagonal tiling of circumradius ``a`` the nearest centres sit at
-    ``sqrt(3) a``. Measured on a 234-cell mesh, widening the band to three radii
-    costs four times as much and changes nothing that matters — the self-term
-    correction is identical and the flux step at the switch moves only from
-    0.056% to 0.047%. Narrowing below two radii starts leaving near-neighbour
-    pairs to the bare point kernel, which is where
-    :class:`nova.biot.circle.OffsetFilaments` would otherwise be applying its
-    coincident-filament offset, so the two paths stop agreeing.
+    ``None`` (or ``inf``) means *exact everywhere*: every target-source pair goes
+    through the polygon kernel, with no point-filament far field and no seam at
+    all. That is the physically unimpeachable setting and it is what to reach for
+    when a result must not depend on a blend; it costs about four orders of
+    magnitude more per pair than the point form, so it is not the default.
+
+    The default of three radii is the geometry-derived standoff, in the spirit of
+    the switch :func:`nova.biot.greens.hybrid_greens` applies to rectangular
+    sections. Note the basis differs: ``hybrid_greens`` measures its standoff
+    against the section's full extent, this against the circumradius, so three
+    radii here is the narrower band of the two.
+
+    Two radii is the useful floor. It still covers a cell and its first ring of
+    neighbours — in a hexagonal tiling of circumradius ``a`` the nearest centres
+    sit at ``sqrt(3) a`` — and measured on a 234-cell mesh it delivers an
+    identical self-term correction for a quarter of the cost. Below two radii,
+    near-neighbour pairs fall back to the bare point kernel just where
+    :class:`nova.biot.circle.OffsetFilaments` would be applying its
+    coincident-filament offset, and the two paths stop agreeing.
     """
+
+    quadrature: ClassVar[tuple[int, int] | None] = None
+    """Boundary quadrature as ``(n_panels, n_nodes)``; ``None`` uses the kernel's
+    own rule.
+
+    Lowering it is a false economy: at ``(8, 24)`` the flux still holds a few
+    parts in ten million but ``B_Z`` degrades to ~1e-02 relative against the
+    closed-form rectangle oracle, which :mod:`tests.test_biotpolygon` pins at
+    ``rtol=1e-10``. Raise it if a section is far more elongated than a plasma
+    cell; otherwise leave it alone.
+    """
+
+    @classmethod
+    @contextmanager
+    def configured(cls, *, standoff=..., quadrature=...):
+        """Apply a temporary configuration for the duration of a solve.
+
+        The element is built inside :class:`nova.biot.solve.Solve`, so there is
+        no per-call argument to thread a configuration through; this scopes a
+        change instead of leaving the class mutated::
+
+            with PolySection.configured(standoff=None):  # exact everywhere
+                coilset.plasmagrid.solve()
+        """
+        previous = (cls.standoff, cls.quadrature)
+        if standoff is not ...:
+            cls.standoff = standoff
+        if quadrature is not ...:
+            cls.quadrature = quadrature
+        try:
+            yield cls
+        finally:
+            cls.standoff, cls.quadrature = previous
 
     @staticmethod
     def section_radius(vertices: np.ndarray) -> float:
@@ -74,11 +118,18 @@ class PolySection(Matrix):
     def near_band(
         cls, target_r: np.ndarray, target_z: np.ndarray, vertices: np.ndarray
     ) -> np.ndarray:
-        """Return the mask of targets inside the section's standoff band."""
+        """Return the mask of targets inside the section's standoff band.
+
+        Every target is inside the band when the standoff is ``None`` or
+        infinite, which is how *exact everywhere* is expressed.
+        """
+        target_r = np.asarray(target_r, dtype=np.float64)
+        if cls.standoff is None or not np.isfinite(cls.standoff):
+            return np.ones(target_r.shape, dtype=bool)
         vertices = np.asarray(vertices, dtype=np.float64)
         centre = vertices.mean(axis=0)
         distance = np.hypot(
-            np.asarray(target_r, dtype=np.float64) - centre[0],
+            target_r - centre[0],
             np.asarray(target_z, dtype=np.float64) - centre[1],
         )
         return distance < cls.standoff * cls.section_radius(vertices)
@@ -99,8 +150,11 @@ class PolySection(Matrix):
         near = cls.near_band(target_r, target_z, vertices)
         if near.any():
             psi, br, bz = psi.copy(), br.copy(), bz.copy()
+            rule = {} if cls.quadrature is None else dict(
+                zip(("n_panels", "n_nodes"), cls.quadrature)
+            )
             psi[near], br[near], bz[near] = polygon_greens(
-                target_r[near], target_z[near], vertices
+                target_r[near], target_z[near], vertices, **rule
             )
         return psi, br, bz
 

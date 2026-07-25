@@ -138,6 +138,49 @@ def test_the_blend_is_continuous_across_the_standoff_band():
     assert abs(float(exact[0]) - float(point[0])) < 1e-3 * abs(float(point[0]))
 
 
+def test_an_unbounded_band_is_exact_everywhere():
+    """A None or infinite standoff routes every pair through the exact kernel."""
+    vertices = hexagon(radius=0.03)
+    far_r = np.array([1.9])
+    far_z = np.array([0.8])
+    assert not PolySection.near_band(far_r, far_z, vertices).any()
+    for unbounded in (None, np.inf):
+        with PolySection.configured(standoff=unbounded):
+            assert PolySection.near_band(far_r, far_z, vertices).all()
+            exact = PolySection.section_greens(far_r, far_z, vertices)[0]
+        blended = PolySection.section_greens(far_r, far_z, vertices)[0]
+        # far out the two agree closely, but the exact path is not the point form
+        np.testing.assert_allclose(exact, blended, rtol=1e-3)
+        assert float(exact[0]) != float(blended[0])
+
+
+def test_the_configuration_is_restored_after_use():
+    """A scoped configuration never leaks into the next solve."""
+    before = (PolySection.standoff, PolySection.quadrature)
+    with PolySection.configured(standoff=None, quadrature=(4, 12)):
+        assert PolySection.standoff is None
+        assert PolySection.quadrature == (4, 12)
+    assert (PolySection.standoff, PolySection.quadrature) == before
+
+
+def test_the_quadrature_override_reaches_the_kernel():
+    """The override changes the result, so it is genuinely being applied."""
+    from nova.biot.greens import cylinder_greens
+
+    width, height = 0.06, 0.04
+    vertices = rectangle(width=width, height=height)
+    target_r = np.linspace(0.955, 1.045, 11)
+    target_z = np.full(target_r.size, 0.005)
+    reference = cylinder_greens(target_r, target_z, 1.0, 0.0, width, height)[2]
+
+    default = PolySection.section_greens(target_r, target_z, vertices)[2]
+    with PolySection.configured(quadrature=(2, 6)):
+        coarse = PolySection.section_greens(target_r, target_z, vertices)[2]
+    scale = np.max(np.abs(reference))
+    assert np.max(np.abs(default - reference)) / scale < 1e-6
+    assert np.max(np.abs(coarse - reference)) / scale > 1e-4
+
+
 def test_the_near_band_is_a_small_fraction_of_a_grid():
     """The blend is what keeps the exact kernel affordable on a real grid."""
     vertices = hexagon(radius=0.03)

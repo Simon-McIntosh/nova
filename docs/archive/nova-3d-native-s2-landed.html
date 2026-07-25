@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="archive">
+  <meta name="plan-slug" content="nova-3d-native-s2-landed">
+  <meta name="plan-title" content="Zeta fixed-node fast path — landed">
+  <meta name="plan-status" content="historical">
+  <meta name="plan-modified" content="2026-07-25">
+  <title>nova-3d-native §2 landed — zeta fixed-node fast path | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>§2 landed — the zeta integral: fixed-node Gauss–Legendre + tanh–sinh rules</h1>
+  <p><a href="/nova/nova-3d-native.html">← back to the evergreen plan</a> ·
+     landed 2026-07-25 · develop <code>6200501c..ce25286f</code>
+     (merge <code>c4d4b8ce</code>)</p>
+
+  <h2>Quick status</h2>
+  <table>
+    <thead><tr><th>Item</th><th>Status</th><th>Commit</th></tr></thead>
+    <tbody>
+      <tr><td>Equivalence-scan suite (5,672 cases) + fixed-node rules</td>
+          <td>✓ shipped</td><td><code>641a1728</code></td></tr>
+      <tr><td>Cylinder corner kernel driven from the shared zeta rule
+          (785-point midpoint copy removed)</td>
+          <td>✓ shipped</td><td><code>7bfa15fd</code></td></tr>
+      <tr><td>Timings recorded in benchmarks/BASELINE.md</td>
+          <td>✓ shipped</td><td><code>88b7142a</code></td></tr>
+      <tr><td>greens 4-ulp fingerprint migration to tolerance</td>
+          <td>superseded — see below</td><td>—</td></tr>
+    </tbody>
+  </table>
+
+  <h2>The headline finding: the midpoint rule was an accuracy defect</h2>
+  <p>The zeta integrand carries a <strong>logarithmic endpoint singularity</strong> whenever the
+  target sits in the plane of a source corner (γ → 0): sin φ vanishes at both ends of the folded
+  interval [0, π/2], so arcsinh β₁ ~ −ln α there. The uniform midpoint rule (~500 panels per unit
+  α) was therefore only <strong>~3.4×10⁻³</strong> accurate in-plane and ~8.7×10⁻⁷ far-field —
+  a latent accuracy defect, not merely a hot spot. Plain Gauss–Legendre at <em>any</em> order
+  cannot reach 1e-12 in that plane either (convergence degrades to algebraic), which fixes the
+  design: two fixed-node rules, not one.</p>
+  <figure>
+    <img src="/nova/figures/nova-3d-native/zeta-quadrature-accuracy.png" alt="Worst relative
+    error vs distance from the source-corner plane for the midpoint, Gauss-Legendre 48 and
+    tanh-sinh 177 rules" style="max-width:100%">
+    <figcaption>Worst relative error over the (rs/r, α) scan vs distance from the source-corner
+    plane. Gauss–Legendre 48 meets the 1e-12 gate down to |γ|/r ≈ 0.075; the tanh–sinh rule is
+    ~1e-15 everywhere including the singular plane; the retired midpoint rule never beats
+    ~5e-7. The production switch at |γ|/r = 0.2 carries 2.7× reserve, pinned by its own test.</figcaption>
+  </figure>
+
+  <h2>What shipped</h2>
+  <ul>
+    <li><strong>Production rule</strong> (<code>nova/biot/zeta.py</code>): Gauss–Legendre 48 nodes
+    for |γ| ≥ 0.2 r; tanh–sinh (double-exponential, 177 nodes, half-width 3.4) below. Both node
+    sets are data-independent — a whole target × source array evaluates as one broadcast with
+    <strong>fixed shapes</strong> (the JAX/vmap prerequisite). Worst case over the scan:
+    <strong>5.5×10⁻¹⁴</strong>, 18× under the 1e-12 gate.</li>
+    <li><strong>JAX <code>Zeta</code></strong>: tanh–sinh unconditionally — branch-free under
+    vmap, agrees with the numpy path to the gate.</li>
+    <li><strong>Shared rule</strong>: <code>greens._zeta</code> (cylinder/rectangle corner kernel)
+    delegates to the same quadrature; its private 785-point midpoint copy is gone.</li>
+    <li><strong>Reference retained</strong>: <code>zeta_midpoint</code> kept as the independent
+    comparison rule for the equivalence suite; reference cross-validated three ways (tanh–sinh
+    1025, scipy adaptive, geometric-composite GL40) to 4e-15.</li>
+    <li><strong>Numerics subtleties</strong> (documented in-module): nodes stored as distance from
+    the nearer interval end so sin φ keeps relative precision at extreme abscissae; broadcast
+    blocked at 2¹⁶ doubles — block size dominates throughput (4× vs multi-MB blocks, order of
+    magnitude past allocator churn).</li>
+  </ul>
+
+  <h2>Measured results</h2>
+  <table>
+    <thead><tr><th>Measurement (fresh-process, first-run)</th><th>midpoint</th>
+      <th>fixed-node</th><th>speedup</th></tr></thead>
+    <tbody>
+      <tr><td>bow point-cloud solve, 10 segments × 20k targets</td>
+          <td>9.36–9.37 s</td><td>4.04–4.33 s</td><td><strong>2.3×</strong></td></tr>
+      <tr><td>— zeta share of that solve</td>
+          <td>5.63 s (60%)</td><td>0.42 s (10%)</td><td><strong>13.6×</strong></td></tr>
+      <tr><td>zeta kernel, 200k elements (half near-plane)</td>
+          <td>1.66–1.68 s</td><td>0.53–0.55 s</td><td><strong>3.1×</strong></td></tr>
+      <tr><td>rectangle kernel <code>cylinder_greens</code> per pair (indicative)</td>
+          <td>~80 µs (777× point)</td><td>~12.7 µs (119× point)</td>
+          <td><strong>6.3×</strong></td></tr>
+    </tbody>
+  </table>
+  <p>Accuracy: worst case 3.4e-3 (in-plane) / 8.7e-7 (far) → <strong>5.5e-14 everywhere</strong>.
+  Fast lane 1023 passed / 0 failed (+15 new tests); full lane 1516 passed / 0 failed / 104
+  skipped (404 s).</p>
+
+  <h2>Deviations from the brief</h2>
+  <ul>
+    <li><strong>Fingerprint migration superseded.</strong> The 4-ulp corner-antiderivative pin was
+    NOT loosened to a tolerance: with <code>greens._zeta</code> delegating to the shared rule, both
+    spellings of the Part III formula in <code>test_biotgreens.py</code> drive the same quadrature,
+    so the pin now cleanly isolates the algebra. Migrating as specified would have required a
+    ~1e-4 tolerance (the midpoint reference's own error) — strictly weaker.</li>
+    <li><strong>The archived “5.9 s 10×2000 bow grid solve” baseline is unreproducible</strong>:
+    <code>grid.solve</code> on a winding never reaches the Bow kernel with the default
+    <code>filament=True</code>, and <code>filament=False</code> trips a pre-existing
+    <code>ellippinc</code> assertion in <code>nova/biot/constants.py</code>
+    (<code>abs(phi - k*pi) &lt;= pi/2</code>) unrelated to zeta. Re-timing used a point-cloud
+    solve that genuinely exercises Bow (318k zeta elements). The assertion fix is queued as a
+    followup.</li>
+  </ul>
+
+  <h2>What's next</h2>
+  <p>§3 exact flux couplings (M = ∮ A·dl operators) now proceed on a fast, fixed-shape zeta.
+  In parallel, the <a href="/nova/biot-operator-assembly.html">biot-operator-assembly</a> survey +
+  faithful Urankar Part V polygon kernel work is in flight (the polygon kernel does <em>not</em>
+  use zeta — its cost is its own φ-quadrature; measured ~6.4 ms/pair, ~63,000× point, correcting
+  the earlier ~39.5 µs/pair record).</p>
+</main>
+</body>
+</html>

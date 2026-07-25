@@ -572,6 +572,204 @@ def test_a_horizontal_edge_contributes_nothing_to_the_closed_form():
     assert worst_relative(divided[keep], plain[keep]) <= 1e-12
 
 
+# --------------------------------------------------------------------------
+# THE CORNER. A limit of an edge is one of the polygon's corners, and most of the
+# reduction sees only that corner: ``u`` and the corner's own radius fix the ring
+# modulus and its complement, and with them the harmonic moment stack, the ``G^2``
+# split and the first of the two residual ``arsinh`` integrals. The edge's SLOPE
+# reaches only ``B^2``, the arctangent's numerator and the derivative blocks. Every
+# corner of a closed section is the end of two edges, so the corner part is formed
+# once and read from both -- which is only sound if the two edges are handed the
+# same corner to the last bit.
+#
+# One term goes further. The ``arsinh beta1`` contribution is a function of the
+# corner alone in ALL THREE components, and a section sums each edge as its lower
+# limit less its upper, so around a closed chain every corner carries it twice with
+# opposite signs and it cancels. It survives only where a horizontal edge is
+# dropped, which breaks the chain at that edge's two ends, so it is accumulated
+# against the signed number of live edges meeting at each corner. For a hexagonal
+# plasma cell that count is zero everywhere and the term -- with the residual
+# quadrature that feeds it -- is never formed at all.
+#
+# Measured on the gate target sets, ONE corner's term is 14 to 1900 times the
+# assembled answer, so this is a cancellation of one to three decades rather than a
+# small term being neglected; carried per limit instead it leaves 7e-15 of the
+# answer behind, three orders inside the recorded envelopes, which is why the tables
+# above did not move when it was dropped. Both halves are asserted, because both
+# fail silently: that the term really does cancel where it is dropped, and that it
+# really is kept where it does not.
+
+
+def corner_terms(target_r, target_z, vertices):
+    """Return the ``arsinh beta1`` contribution at each corner, per component."""
+    from nova.biot.polygonanalytic import _NODES, _Vertex
+
+    r = np.abs(np.asarray(target_r, float)).ravel()
+    z = np.broadcast_to(target_z, np.shape(target_r)).ravel()
+    return [
+        _Vertex(r, z, corner[0], corner[1], _NODES, residual=True).arsinh_terms()
+        for corner in np.asarray(vertices, float)
+    ]
+
+
+def live_edge_count(vertices):
+    """Return the signed number of live edges leaving each corner.
+
+    Edge ``i`` runs from corner ``i`` to corner ``i + 1`` and is summed as its lower
+    limit less its upper, so a corner carries ``+1`` for the edge that starts there
+    and ``-1`` for the one that ends there.
+    """
+    from nova.biot.polygon import pack_section
+
+    live = pack_section(vertices)[1] != 0.0
+    return live.astype(int) - np.roll(live, 1).astype(int)
+
+
+def component_scale(target_r, vertices):
+    """Return each component's factor on the raw edge sum, from the assembly."""
+    from nova.biot.polygon import pack_section
+
+    norm = pack_section(vertices)[2]
+    return (
+        0.5 * norm * np.abs(target_r),
+        norm / (4.0 * np.pi) * np.sign(target_r),
+        norm / (4.0 * np.pi) * np.ones_like(target_r),
+    )
+
+
+@pytest.mark.parametrize("section", sorted(SECTIONS))
+def test_the_two_edges_at_a_corner_are_handed_the_same_corner(section):
+    """Bit-identical endpoints, or the shared corner part is an approximation.
+
+    ``pack_section`` gives each edge its own copy of the two corners it spans, and
+    the reduction's corner part -- the modulus and its complement, the moment stack,
+    the ring split, the first residual -- is formed once from one of them and read
+    by both edges. If the two copies ever disagreed in the last bit nothing else in
+    this module would notice: every tolerance here is far above one ulp of a corner
+    coordinate, and the term that cancels exactly would stop cancelling.
+    """
+    from nova.biot.polygon import pack_section
+
+    edges, weights, _ = pack_section(SECTIONS[section])
+    for index in range(len(edges)):
+        if not (weights[index] and weights[index - 1]):
+            continue  # a dropped horizontal edge carries a placeholder, not a corner
+        np.testing.assert_array_equal(edges[index][:2], edges[index - 1][2:])
+
+
+# The three gate sections with no horizontal edge; the rectangle is the broken chain
+# and is asserted the other way below.
+UNBROKEN = ["hexagon", "thin_plate", "trapezium"]
+
+
+@pytest.mark.parametrize("section", UNBROKEN)
+def test_the_corner_term_cancels_around_an_unbroken_chain(section):
+    """Formed per limit it cancels to round-off; per corner it is not formed at all.
+
+    Two assertions, and the second is what licenses the first. Summed the way the
+    edge loop would have summed it -- each corner once with either sign -- the term
+    leaves only round-off of the assembled answer, so omitting it is an identity and
+    not an approximation. And one corner's term ALONE is orders larger than that
+    answer, so the identity is a cancellation of one to three decades rather than a
+    statement about a term that was negligible anyway.
+    """
+    vertices = np.asarray(SECTIONS[section], float)
+    assert not np.any(live_edge_count(vertices)), "section has a horizontal edge"
+    target_r, target_z = gate_targets(vertices)
+    terms = corner_terms(target_r, target_z, vertices)
+    assembled = polygon_analytic_greens(target_r, target_z, vertices)
+    per_limit = [np.zeros_like(np.abs(target_r)) for _ in COMPONENTS]
+    for index in range(len(vertices)):
+        upper = terms[(index + 1) % len(vertices)]
+        for slot, high, low in zip(per_limit, upper, terms[index]):
+            slot -= high - low
+    for name, factor, left, got, single in zip(
+        COMPONENTS, component_scale(target_r, vertices), per_limit, assembled, terms[0]
+    ):
+        answer = np.max(np.abs(got))
+        assert np.max(np.abs(factor * left)) <= 2e-14 * answer, name
+        assert np.max(np.abs(factor * single)) > 5.0 * answer, name
+
+
+def test_the_corner_term_survives_where_a_horizontal_edge_breaks_the_chain():
+    """A rectangle drops two edges, so the term is load-bearing at four corners.
+
+    The signed count is the whole bookkeeping, so it is asserted directly, and then
+    the magnitude of what it keeps: the surviving sum is 6 per cent of the answer in
+    ``B_Z`` and the size of the answer itself in the flux, so a formulation that
+    dropped the term wherever it dropped the quadrature would be wrong by that much
+    -- and the recorded envelope above, which the rectangle holds at 3e-12, is what
+    says the shipped assembly does not.
+    """
+    vertices = np.asarray(rectangle(), float)
+    count = live_edge_count(vertices)
+    assert list(count) == [-1, 1, -1, 1]
+    target_r, target_z = gate_targets(vertices)
+    terms = corner_terms(target_r, target_z, vertices)
+    assembled = polygon_analytic_greens(target_r, target_z, vertices)
+    kept = [np.zeros_like(np.abs(target_r)) for _ in COMPONENTS]
+    for index in range(len(vertices)):
+        for slot, term in zip(kept, terms[index]):
+            slot += count[index] * term
+    for name, factor, keep, got in zip(
+        COMPONENTS, component_scale(target_r, vertices), kept, assembled
+    ):
+        assert np.max(np.abs(factor * keep)) > 1e-2 * np.max(np.abs(got)), name
+
+
+# What the reorganisation is worth, counted rather than timed, so a regression shows
+# up here as well as in the benchmark. Per section: the moment stacks the build
+# forms, and the graded residual quadratures.
+#
+#   section       corners   live edges   moment stacks   residuals   was
+#   hexagon           6          6             6             12       12 / 24
+#   trapezium         4          4             4              8        8 / 16
+#   thin_plate        4          4             4              8        8 / 16
+#   rectangle         4          2             4              8        4 /  8
+#
+# The rectangle is the case that gains NOTHING, and that is the honest shape of the
+# win: each of its four corners belongs to exactly one live edge, so there is no
+# sharing to exploit, and its chain is broken at every corner, so the first residual
+# survives everywhere. A hexagonal plasma cell is the opposite -- every corner shared
+# and the chain closed -- and it halves both counts.
+BUILD_COUNTS = {
+    "hexagon": (6, 12),
+    "trapezium": (4, 8),
+    "thin_plate": (4, 8),
+    "rectangle": (4, 8),
+}
+
+
+@pytest.mark.parametrize("section", sorted(BUILD_COUNTS))
+def test_the_corner_work_is_done_once_per_corner(section, monkeypatch):
+    """Count the calls, so the sharing cannot quietly stop happening.
+
+    Every accuracy test in this module passes just as well with the corner part
+    formed twice -- it is the same arithmetic -- so nothing else here can tell
+    whether the reorganisation is in effect.
+    """
+    import nova.biot.polygonanalytic as reduction
+
+    counts = dict.fromkeys(("moments", "residuals"), 0)
+
+    def counted(key, function):
+        def wrapper(*args, **kwargs):
+            counts[key] += 1
+            return function(*args, **kwargs)
+
+        return wrapper
+
+    monkeypatch.setattr(
+        reduction, "harmonic_moments", counted("moments", reduction.harmonic_moments)
+    )
+    monkeypatch.setattr(
+        reduction, "_graded_residual", counted("residuals", reduction._graded_residual)
+    )
+    polygon_analytic_flux(np.array([6.5]), np.array([0.1]), SECTIONS[section])
+    moments, residuals = BUILD_COUNTS[section]
+    assert counts == {"moments": moments, "residuals": residuals}
+
+
 def test_a_target_level_with_an_edge_end_is_evaluated_rather_than_approached():
     """``u = 0`` drives BOTH of G^2's roots onto the ends of the range.
 

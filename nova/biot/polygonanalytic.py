@@ -73,6 +73,25 @@ The four terms of ``g`` then reduce as follows.
 So the whole evaluation is: two ``arsinh`` quadratures, one arctangent boundary
 term, and rational functions over ``G^2``, ``B^2`` and ``D``.
 
+Organisation, which is where the cost is.  A limit of an edge is one of the
+polygon's CORNERS, and most of the reduction sees only that corner: ``u`` and the
+corner's own radius fix the ring modulus and its complement, and with them the
+whole harmonic moment stack, the ``G^2`` split with both of its pole seeds, and
+the first residual ``arsinh`` integral.  The edge's SLOPE reaches only ``B^2``,
+the arctangent's numerator and the derivative blocks.  Every corner of a closed
+section is the end of two edges, so the corner part is formed once and read from
+both -- :class:`_Vertex` holds it and :class:`_Edge` holds the rest.
+
+That split says something stronger about one term.  The ``arsinh beta1``
+contribution is a function of the corner alone in all three components, and a
+section sums each edge's antiderivative as its lower limit less its upper, so
+around a closed chain of edges it CANCELS: every corner carries it twice, once
+with either sign.  It survives only where a horizontal edge is dropped (paper
+eq 7a -- its integrand vanishes identically), which breaks the chain at that
+edge's two ends.  So it is accumulated per corner against the signed number of
+live edges meeting there, and for a section with no horizontal edge it is never
+formed at all.
+
 Conditioning, which is the whole difficulty.  Two effects, and each needs its own
 representation of the same polynomial.
 
@@ -139,6 +158,8 @@ Sign and unit conventions, and the ``psi [Wb/A]`` normalisation, are those of
 
 from __future__ import annotations
 
+from functools import lru_cache
+
 import numpy as np
 from numpy.polynomial.legendre import leggauss
 
@@ -188,6 +209,9 @@ _LAYER_FLOOR = 1e-8
 # section deviation is 2.3e-10 at 64 and saturates at 6e-12 from 128 on, the gap
 # being the most slender section's near-contour targets.
 _NODES = 128
+
+# One end of the quarter range to the other, which is what both graded panels span.
+_QUARTER = 0.25 * np.pi
 
 # The two range variables as harmonic series, and their product.  ``t = cos 2a``
 # is the first harmonic, so ``x = (1 - t)/2``, ``y = (1 + t)/2`` and
@@ -330,69 +354,204 @@ def _deflate(series: list, root):
     return quotient, series[0] + root * quotient[0] - 0.5 * current
 
 
-class _Edge:
-    """One polygon edge at one of its two limits, reduced against one target set.
+# ``d/dx`` of ``G^2`` over the target radius squared, and the range variable
+# itself: both are the same fixed pair of end values for every target, so they are
+# built once out of scalars rather than once per column.
+_RING_SLOPE_OVER_RADIUS_SQUARED = _range([], -4.0, 4.0)
+_VARIABLE = _range([], -1.0, 1.0)
 
-    Holds the moment families and the two denominator splits, so the flux and both
-    field components share every elliptic evaluation and differ only in the
-    polynomial weights they contract.
+
+@lru_cache(maxsize=None)
+def _rule(nodes: int) -> tuple:
+    """Return the Gauss-Legendre rule both graded panels share.
+
+    Fixed for the life of the process, so it is built once rather than once per
+    corner and per edge limit.
+    """
+    return leggauss(nodes // 2)
+
+
+def _model_integral(offset, scale):
+    """Return ``integral_0^(pi/4) log sqrt(offset^2 + scale^2 b^2) db``.
+
+    Elementary, and finite in both degenerate directions: on the axis the model is
+    constant and this is the width times its log; at a target level with the edge
+    end the model collapses onto ``scale b`` and the arctangent term vanishes with
+    the offset.
+    """
+    held_scale = np.where(scale > 0.0, scale, 1.0)
+    held_offset = np.where(offset > 0.0, offset, 1.0)
+    return 0.5 * (
+        _QUARTER * np.log(offset**2 + (scale * _QUARTER) ** 2)
+        - 2.0 * _QUARTER
+        + np.where(
+            scale > 0.0,
+            2.0 * offset / held_scale * np.arctan(held_scale * _QUARTER / held_offset),
+            2.0 * _QUARTER,
+        )
+    )
+
+
+def _regularised(numerator, denominator, model, sign):
+    """Return ``arsinh(N/W) + sign log(model)``, bounded at the range end.
+
+    The branch follows the sign of the numerator's own value AT that end, which is
+    what the logarithm's coefficient is: positive there the ``N + sqrt(N^2 + W^2)``
+    form is the stable one, negative there its mirror ``-log(sqrt(N^2 + W^2) - N)``,
+    and exactly zero there means the numerator vanishes with the denominator and no
+    logarithm survives at all -- the configuration a target ON a section vertex
+    produces.
+
+    Whichever branch the END picks, the numerator's sign can turn over INSIDE the
+    half -- the azimuthal weight ``b1 X`` sweeps a whole ring span -- and there that
+    branch's own sum cancels.  Its value is recovered through ``W^2`` from the other
+    one instead, the two being reciprocal about it, and the other is a sum of
+    positives exactly where the first is a difference.
+
+    All three cases are then ONE logarithm: the no-logarithm branch is the positive
+    one with the model replaced by unity, since ``arsinh`` is itself
+    ``log(N + sqrt(N^2 + W^2)) - log W``.
+    """
+    # the plain root rather than the guarded one: both arguments are of order the
+    # ring span here, so nothing overflows and the guard costs several times the
+    # square root it protects
+    root = np.sqrt(numerator * numerator + denominator * denominator)
+    direct = numerator + root
+    mirror = root - numerator
+    positive = sign >= 0.0
+    pick = np.where(positive, direct, mirror)
+    other = np.where(positive, mirror, direct)
+    base = np.where(
+        positive == (numerator >= 0.0),
+        pick,
+        denominator * denominator / np.where(other > 0.0, other, 1.0),
+    )
+    return np.where(sign < 0.0, -1.0, 1.0) * np.log(
+        base * np.where(sign != 0.0, model, 1.0) / denominator
+    )
+
+
+def _graded_residual(halves, pieces, nodes: int):
+    """Return ``integral_0^(pi/2) arsinh(N/W) da``, log removed per half.
+
+    Both of the reduction's residual integrals are log-singular where their
+    denominator vanishes, which is at a range end whenever the target is level with
+    an edge end or sits on the edge's extended line -- a grid across a section hits
+    both by alignment.  The logarithm is removed ANALYTICALLY rather than resolved:
+    ``arsinh`` splits as
+
+        arsinh(N/W) = log(N + sqrt(N^2 + W^2)) - log W
+
+    with the first term bounded, so subtracting a model of ``log W`` that matches
+    its end behaviour leaves a bounded integrand, and the model's own integral is
+    elementary.  Near either end both denominators go as ``sqrt(w^2 + h^2 b^2)`` in
+    the offset ``b`` from that end -- ``w`` the target's offset from the edge end's
+    level, or from the edge's line, and ``h`` the local curvature of the
+    denominator -- so that is the model, and the SAME two quantities set the panel
+    grading.
+
+    The quarter range is halved and each half stretched by ``b = width sinh(s)``
+    from its own end.  That map is EXACT for the model's quadratic --
+    ``w^2 + h^2 width^2 sinh^2 s = w^2 cosh^2 s`` -- so it carries what is left of
+    the boundary layer after the logarithm has gone, and the layer's own width is
+    set by the pair the model is built from: the denominator's end value and the
+    numerator's, since it is their ratio the ``arsinh`` turns over on.  ``pieces``
+    forms the two from ``x`` and ``y`` and the small end offsets, both exact, rather
+    than by evaluating a polynomial near its far end.
+    """
+    node, weight = _rule(nodes)
+    total = 0.0
+    for half, (offset, end, scale) in enumerate(halves):
+        # The denominator turns over at its own end value over the ring span, and
+        # the arsinh saturates where the numerator overtakes it -- never nearer the
+        # end than that, so grading on the denominator's scale reaches both.  What
+        # is new here is what happens when that scale VANISHES: with the logarithm
+        # gone the model is then exact to the order that matters, nothing is left at
+        # the denominator's own scale, and the remaining feature is the numerator's.
+        # A target on a section vertex sends both to zero and needs no grading at
+        # all -- which is the whole gain, because a floor set low enough for that
+        # case is what used to thin the nodes everywhere else.
+        reach = np.where(offset > 0.0, offset, np.abs(end))
+        width = np.where(reach > 0.0, np.clip(reach / scale, _LAYER_FLOOR, 1.0), 1.0)
+        span = np.arcsinh(_QUARTER / width)[:, None]
+        stretch = 0.5 * span * (node + 1.0)[None, :]
+        held = width[:, None]
+        stretched = np.sinh(stretch)
+        panel = held * stretched
+        # the panel never reaches a quarter turn, so the complement is a subtraction
+        # rather than a second transcendental, and the map's own jacobian follows
+        # from the sinh it has already taken
+        near = np.sin(panel) ** 2
+        x, y = (1.0 - near, near) if half else (near, 1.0 - near)
+        numerator, denominator = pieces(x, y)
+        sign = np.sign(end)[:, None]
+        scaled = scale[:, None] * panel
+        model = np.sqrt(offset[:, None] ** 2 + scaled * scaled)
+        jacobian = 0.5 * span * held * np.sqrt(1.0 + stretched * stretched)
+        total = (
+            total
+            + (jacobian * _regularised(numerator, denominator, model, sign)) @ weight
+            - np.sign(end) * _model_integral(offset, scale)
+        )
+    return total
+
+
+class _Vertex:
+    """The reduction against one target set at one polygon CORNER.
+
+    Everything held here is a function of the target and that corner alone.  ``u``
+    and the corner's own radius fix the ring modulus and its complement, and with
+    them the harmonic moment stack, its radical-weighted fold, the ``G^2`` split
+    with both of its pole seeds, and the first of the two residual ``arsinh``
+    integrals; none of it sees the slope of the edge the corner belongs to.  Every
+    corner of a closed section is the end of two edges, so this is formed once and
+    read from both.
+
+    The moment machinery lives here too -- the contractions and the pole route --
+    because it is the moment stack that decides them, and :class:`_Edge` reaches
+    through to it with the numerators the slope contributes.
+
+    ``residual`` says whether the first residual integral is wanted.  The one term
+    that uses it, :meth:`arsinh_terms`, is itself a function of the corner alone
+    and so cancels around an unbroken chain of edges, and there it is not formed.
     """
 
-    def __init__(self, r, z, edge, which, nodes):
+    def __init__(self, r, z, corner_r, corner_z, nodes, *, residual: bool):
         r = np.asarray(r, dtype=np.float64)
         z = np.asarray(z, dtype=np.float64)
-        ra, za, rb, zb = edge
-        self.slope = b1 = (rb - ra) / (zb - za)
-        self.squared_slope = a02 = 1.0 + b1 * b1
-        self.axial_slope = np.sqrt(a02)
-        # r1 - r and r' - r are the end values a pole weight is formed from, so both
-        # come from the geometry rather than from r1 and r': r' collapses to the
-        # edge endpoint radius at each limit, exactly.
-        lower_level = za - z
-        upper_level = zb - z
-        lower_offset = ra - r
-        upper_offset = rb - r
-        self.level = u = upper_level if which else lower_level
-        self.offset = edge_offset = upper_offset if which else lower_offset
-        # r1 - r is the target's offset from the edge's EXTENDED LINE, taken as the
-        # cross product of its offsets to the two endpoints over the edge's height
-        # rather than as r1 less r.  That vanishes EXACTLY at either endpoint, where
-        # both of that endpoint's own offsets are exactly zero, and both endpoints
-        # matter: a target on one is the vertex degeneracy for this edge, and a target
-        # on the other still lies on the line, where the plane denominator's near root
-        # sits on the range end.  Either subtraction form is exact at only one of the
-        # two.
-        self.plane_offset = plane_offset = (
-            lower_offset * upper_level - upper_offset * lower_level
-        ) / (zb - za)
-        self.plane_radius_value = r1 = r + plane_offset
+        # r' - r is an end value a pole weight is formed from, so it comes from the
+        # geometry rather than from r' less r: r' collapses to this corner's radius
+        # at this limit, exactly.
+        self.level = u = corner_z - z
+        self.offset = offset = corner_r - r
         self.radius = r
-        # u = 0 -- a target exactly level with this end of the edge -- drives BOTH of
-        # G^2's roots onto the ends of the integration range, and the split below
-        # carries that exactly: each shift is zero, and the numerator's value at the
-        # end it sits on is zero with it, because every one carries either sin^2 phi
-        # or u (r1 -/+ r).  The pole seeds return zero for a divergent moment on the
+        rp = offset + r
+        # u = 0 -- a target exactly level with this corner -- drives BOTH of G^2's
+        # roots onto the ends of the integration range, and the split below carries
+        # that exactly: each shift is zero, and the numerator's value at the end it
+        # sits on is zero with it, because every one carries either sin^2 phi or
+        # u (r1 -/+ r).  The pole seeds return zero for a divergent moment on the
         # same reasoning, so no floor is needed and the configuration a grid whose
         # rows line up with the section's corners produces is evaluated rather than
         # approached.
         #
-        # A target ON the edge's endpoint -- a section VERTEX -- adds r' = r and
-        # r1 = r to that, so the modulus reaches one as well and the plane
-        # denominator's near root joins the ring's on the range end.  What diverges
-        # there is the complete integral of the first kind; the reduction's total
-        # weight on it is zero, because the section's flux and field are bounded at
-        # its own corner, and the elliptic module evaluates that finite part directly.
-        rp = edge_offset + r
-
-        a2 = u * u + (r + rp) ** 2
+        # A target ON the corner adds r' = r and r1 = r to that, so the modulus
+        # reaches one as well and the plane denominator's near root joins the ring's
+        # on the range end.  What diverges there is the complete integral of the
+        # first kind; the reduction's total weight on it is zero, because the
+        # section's flux and field are bounded at its own corner, and the elliptic
+        # module evaluates that finite part directly.
+        self.radius_sum = radius_sum = r + rp
+        a2 = u * u + radius_sum**2
         self.span = np.sqrt(a2)
         parameter = 4.0 * r * rp / a2
-        # 1 - k^2 = (u^2 + (r - r')^2)/a^2 -- the target's squared distance to the edge
-        # END over the squared ring span -- which the float parameter cannot express.
-        # EVERY complete integral is as sensitive to this complement as the third-kind
-        # ones are to their own, K by eps/k'^2, so all of them are given it.
+        # 1 - k^2 = (u^2 + (r - r')^2)/a^2 -- the target's squared distance to this
+        # corner over the squared ring span -- which the float parameter cannot
+        # express.  EVERY complete integral is as sensitive to this complement as
+        # the third-kind ones are to their own, K by eps/k'^2, so all of them are
+        # given it.
         self.parameter = parameter
-        self.parameter_complement = complement = (u * u + edge_offset**2) / a2
+        self.parameter_complement = complement = (u * u + offset**2) / a2
         one = np.ones_like(parameter)
         self.one = one
 
@@ -403,47 +562,15 @@ class _Edge:
         )
         self.root_moments = harmonic_root_moments(self.moments, parameter)
 
-        # the range functions the four terms are built from, each with its two end
-        # values formed from the geometry
+        # the corner's own range functions, each with its two end values formed
+        # from the geometry
         self.cosine = _range([], one, -one)
-        self.edge_radius = _range([], edge_offset, rp + r)
-        self.plane_radius = _range([], plane_offset, r1 + r)
+        self.edge_radius = _range([], offset, radius_sum)
         self.ring_squared = _range([4.0 * r * r], u * u, u * u)
-        self.plane_squared = _range(
-            [4.0 * b1 * b1 * r * r], plane_offset**2, (r1 + r) ** 2
-        )
-        self.gamma = _range([], u + b1 * edge_offset, u + b1 * (rp + r))
-        # N = u X - b1 G^2.  Its value at either end collapses onto u times the plane
-        # radius there, because r' - b1 u is r1 exactly -- which is what makes the
-        # near-end weight u (r1 - r), of order the squared aspect ratio, a product of
-        # exact quantities instead of an alternating sum.
-        self.arctan_numerator = _range(
-            [-4.0 * b1 * r * r], u * plane_offset, u * (r1 + r)
-        )
-        # each of the arctangent's three pieces carries an explicit factor of the
-        # target radius against the single factor the reduction divides by;
-        # cancelling them here rather than numerically is what keeps the term finite
-        # on the axis, where all three vanish together.  A range function's
-        # derivative in x follows from its end values and its bulk directly:
-        # d/dx (n x + f y + x y T) = (n - f) + (y - x) T for constant T.
-        self.arctan_slope_over_radius = _range(
-            [], -2.0 * u + 4.0 * b1 * r, -2.0 * u - 4.0 * b1 * r
-        )
-        self.ring_slope_over_radius_squared = _range([], -4.0 * one, 4.0 * one)
-        self.edge_slope = _range(
-            [],
-            -4.0 * r1 * r - 4.0 * b1 * b1 * r * r,
-            -4.0 * r1 * r + 4.0 * b1 * b1 * r * r,
-        )
-        self.edge_slope_over_radius = _range(
-            [], -4.0 * r1 - 4.0 * b1 * b1 * r, -4.0 * r1 + 4.0 * b1 * b1 * r
-        )
+        self.ring = self.split(self.ring_squared)
+        self.ring_residual = self._first_residual(nodes) if residual else None
 
-        self.ring = self._split(self.ring_squared)
-        self.plane = self._split(self.plane_squared)
-        self._residual_quadrature(nodes)
-
-    def _split(self, denominator: tuple) -> tuple:
+    def split(self, denominator: tuple) -> tuple:
         """Return one denominator's two pole shifts, weights and seeds.
 
         A denominator ``L x y + n x + f y`` factors as ``L (y + p)(x + q)`` with
@@ -460,6 +587,9 @@ class _Edge:
         is linear -- leaves one factor, on whichever side its single root falls, and
         a vanishing end difference too -- a target on the axis -- leaves a constant
         denominator with no factor at all.
+
+        The ring denominator is the corner's own; the plane denominator is the
+        edge's, and :class:`_Edge` splits it against this corner's modulus.
         """
         bulk, near, far = denominator
         leading = bulk[0] if bulk else 0.0 * near
@@ -604,253 +734,212 @@ class _Edge:
             + weight_x * self._pole(numerator, shift_x, seed_x, family_x, True)
         )
 
-    def _residual_quadrature(self, nodes: int):
-        """Evaluate the two ``arsinh`` integrals the toroidal reduction leaves.
+    def _first_residual(self, nodes: int):
+        """Evaluate the ``arsinh beta1`` integral, over the ring denominator.
 
-        Both are log-singular where their denominator vanishes, which is at a range
-        end whenever the target is level with an edge end or sits on the edge's
-        extended line -- a grid across a section hits both by alignment.  The
-        logarithm is removed ANALYTICALLY rather than resolved: ``arsinh`` splits as
-
-            arsinh(N/W) = log(N + sqrt(N^2 + W^2)) - log W
-
-        with the first term bounded, so subtracting a model of ``log W`` that
-        matches its end behaviour leaves a bounded integrand, and the model's own
-        integral is elementary.  Near either end both denominators go as
-        ``sqrt(w^2 + h^2 b^2)`` in the offset ``b`` from that end -- ``w`` the
-        target's offset from the edge end's level, or from the edge's line, and
-        ``h`` the ring span -- so that is the model, and the SAME two quantities set
-        the panel grading.  Arguments are formed from ``x y`` and the small end
-        offsets, both exact, rather than by evaluating a polynomial near its far
-        end.
+        Its boundary layers are set by ``u`` -- the target's offset from this
+        corner's own level -- at both ends, and its curvature by the ring span;
+        :func:`_graded_residual` carries the rest.
         """
-        r = self.radius
-        u = self.level
-        b1 = self.slope
-        node, weight = leggauss(nodes // 2)
-        radius = r[:, None]
-        level = u[:, None]
-        held_radius = np.where(r > 0.0, r, 1.0)
-        limit = 0.25 * np.pi
+        radius = self.radius[:, None]
+        level = self.level[:, None]
+        offset = self.offset[:, None]
+        span = 2.0 * np.where(self.radius > 0.0, self.radius, 1.0)
 
-        def model_integral(offset, scale):
-            """Return ``integral_0^(pi/4) log sqrt(offset^2 + scale^2 b^2) db``.
-
-            Elementary, and finite in both degenerate directions: on the axis the
-            model is constant and this is the width times its log; at a target level
-            with the edge end the model collapses onto ``scale b`` and the
-            arctangent term vanishes with the offset.
-            """
-            held_scale = np.where(scale > 0.0, scale, 1.0)
-            held_offset = np.where(offset > 0.0, offset, 1.0)
-            return 0.5 * (
-                limit * np.log(offset**2 + (scale * limit) ** 2)
-                - 2.0 * limit
-                + np.where(
-                    scale > 0.0,
-                    2.0
-                    * offset
-                    / held_scale
-                    * np.arctan(held_scale * limit / held_offset),
-                    2.0 * limit,
-                )
-            )
-
-        def regularised(numerator, denominator, model, sign):
-            """Return ``arsinh(N/W) + sign log(model)``, bounded at the range end.
-
-            The branch follows the sign of the numerator's own value AT that end,
-            which is what the logarithm's coefficient is: positive there the
-            ``N + sqrt(N^2 + W^2)`` form is the stable one, negative there its
-            mirror ``-log(sqrt(N^2 + W^2) - N)``, and exactly zero there means the
-            numerator vanishes with the denominator and no logarithm survives at
-            all -- the configuration a target ON a section vertex produces.
-
-            Whichever branch the END picks, the numerator's sign can turn over
-            INSIDE the half -- the azimuthal weight ``b1 X`` sweeps a whole ring
-            span -- and there that branch's own sum cancels.  Its value is
-            recovered through ``W^2`` from the other one instead, the two being
-            reciprocal about it, and the other is a sum of positives exactly where
-            the first is a difference.
-
-            All three cases are then ONE logarithm: the no-logarithm branch is the
-            positive one with the model replaced by unity, since ``arsinh`` is
-            itself ``log(N + sqrt(N^2 + W^2)) - log W``.
-            """
-            # the plain root rather than the guarded one: both arguments are of
-            # order the ring span here, so nothing overflows and the guard costs
-            # several times the square root it protects
-            root = np.sqrt(numerator * numerator + denominator * denominator)
-            direct = numerator + root
-            mirror = root - numerator
-            positive = sign >= 0.0
-            pick = np.where(positive, direct, mirror)
-            other = np.where(positive, mirror, direct)
-            base = np.where(
-                positive == (numerator >= 0.0),
-                pick,
-                denominator * denominator / np.where(other > 0.0, other, 1.0),
-            )
-            return np.where(sign < 0.0, -1.0, 1.0) * np.log(
-                base * np.where(sign != 0.0, model, 1.0) / denominator
-            )
-
-        def residual(halves, pieces):
-            """Return ``integral_0^(pi/2) arsinh(N/W) da``, log removed per half.
-
-            The quarter range is halved and each half stretched by
-            ``b = width sinh(s)`` from its own end.  That map is EXACT for the
-            model's quadratic -- ``w^2 + h^2 width^2 sinh^2 s = w^2 cosh^2 s`` --
-            so it carries what is left of the boundary layer after the logarithm
-            has gone, and the layer's own width is set by the pair the model is
-            built from: the denominator's end value and the numerator's, since it
-            is their ratio the ``arsinh`` turns over on.
-            """
-            total = 0.0
-            for half, (offset, end, scale) in enumerate(halves):
-                # The denominator turns over at its own end value over the ring
-                # span, and the arsinh saturates where the numerator overtakes it --
-                # never nearer the end than that, so grading on the denominator's
-                # scale reaches both.  What is new here is what happens when that
-                # scale VANISHES: with the logarithm gone the model is then exact to
-                # the order that matters, nothing is left at the denominator's own
-                # scale, and the remaining feature is the numerator's.  A target on a
-                # section vertex sends both to zero and needs no grading at all --
-                # which is the whole gain, because a floor set low enough for that
-                # case is what used to thin the nodes everywhere else.
-                reach = np.where(offset > 0.0, offset, np.abs(end))
-                width = np.where(
-                    reach > 0.0, np.clip(reach / scale, _LAYER_FLOOR, 1.0), 1.0
-                )
-                span = np.arcsinh(limit / width)[:, None]
-                stretch = 0.5 * span * (node + 1.0)[None, :]
-                held = width[:, None]
-                stretched = np.sinh(stretch)
-                panel = held * stretched
-                # the panel never reaches a quarter turn, so the complement is a
-                # subtraction rather than a second transcendental, and the map's
-                # own jacobian follows from the sinh it has already taken
-                near = np.sin(panel) ** 2
-                x, y = (1.0 - near, near) if half else (near, 1.0 - near)
-                numerator, denominator = pieces(x, y)
-                sign = np.sign(end)[:, None]
-                scaled = scale[:, None] * panel
-                model = np.sqrt(offset[:, None] ** 2 + scaled * scaled)
-                jacobian = 0.5 * span * held * np.sqrt(1.0 + stretched * stretched)
-                total = (
-                    total
-                    + (jacobian * regularised(numerator, denominator, model, sign))
-                    @ weight
-                    - np.sign(end) * model_integral(offset, scale)
-                )
-            return total
-
-        def ring_pieces(x, y):
+        def pieces(x, y):
             return (
-                self.offset[:, None] + 2.0 * radius * y,
+                offset + 2.0 * radius * y,
                 np.sqrt(level**2 + 4.0 * radius**2 * x * y),
             )
 
-        def plane_pieces(x, y):
+        level_offset = np.abs(self.level)
+        return _graded_residual(
+            (
+                (level_offset, self.radius_sum, span),
+                (level_offset, self.offset, span),
+            ),
+            pieces,
+            nodes,
+        )
+
+    def arsinh_terms(self):
+        """Return the ``arsinh beta1`` contribution to the three integrands.
+
+        A function of the target and this corner alone in all three components,
+        which is why the section accumulates it per corner: around an unbroken
+        chain of edges every corner carries it twice with opposite signs and it
+        cancels exactly.
+
+        By parts.  ``cos^2 2a`` splits into its mean and an oscillatory part whose
+        antiderivative ``sin 4a/8`` vanishes at BOTH ends, so no boundary term
+        survives; the mean leaves the paper's residual arsinh quadrature and the
+        rest is rational over ``G^2 D``.  Both the flux's ``u r cos phi`` weight and
+        the radial field's ``r cos^2 phi`` weight land on that same integral,
+        ``cos phi = -cos 2a`` making them the same shape; the vertical field's
+        weight is constant, so its term is the residual quadrature itself with no
+        reduction.
+        """
+        r = self.radius
+        u = self.level
+        core = _times(
+            _product(
+                self.cosine,
+                _sum(
+                    self.ring_squared,
+                    _times(_product(self.edge_radius, self.cosine), -r),
+                ),
+            ),
+            -1.0,
+        )
+        first = 0.5 * self.ring_residual + (0.5 * r / self.span) * self.across(
+            _sine_squared_times(_across_the_range(core)), self.ring
+        )
+        return 4.0 * u * r * first, 4.0 * r * first, 4.0 * u * self.ring_residual
+
+
+class _Edge:
+    """One polygon edge's slope-dependent reduction against one target set.
+
+    Holds what the edge's SLOPE reaches and nothing more: the plane denominator
+    ``B^2``, the arctangent's numerator and the derivative blocks.  Both are
+    independent of which of the edge's two limits is being evaluated, so they are
+    formed once for the pair.  Everything the slope does not reach belongs to the
+    corner and is held by :class:`_Vertex`, which :meth:`terms` takes.
+    """
+
+    def __init__(self, r, z, edge, nodes):
+        r = np.asarray(r, dtype=np.float64)
+        z = np.asarray(z, dtype=np.float64)
+        ra, za, rb, zb = edge
+        self.nodes = nodes
+        self.radius = r
+        self.slope = b1 = (rb - ra) / (zb - za)
+        self.squared_slope = a02 = 1.0 + b1 * b1
+        self.axial_slope = np.sqrt(a02)
+        # r1 - r is the target's offset from the edge's EXTENDED LINE, taken as the
+        # cross product of its offsets to the two endpoints over the edge's height
+        # rather than as r1 less r.  That vanishes EXACTLY at either endpoint, where
+        # both of that endpoint's own offsets are exactly zero, and both endpoints
+        # matter: a target on one is the vertex degeneracy for this edge, and a
+        # target on the other still lies on the line, where the plane denominator's
+        # near root sits on the range end.  Either subtraction form is exact at only
+        # one of the two.
+        self.plane_offset = plane_offset = (
+            (ra - r) * (zb - z) - (rb - r) * (za - z)
+        ) / (zb - za)
+        self.plane_radius_value = r1 = r + plane_offset
+        self.plane_radius = _range([], plane_offset, r1 + r)
+        self.plane_squared = _range(
+            [4.0 * b1 * b1 * r * r], plane_offset**2, (r1 + r) ** 2
+        )
+        self.edge_slope = _range(
+            [],
+            -4.0 * r1 * r - 4.0 * b1 * b1 * r * r,
+            -4.0 * r1 * r + 4.0 * b1 * b1 * r * r,
+        )
+        self.edge_slope_over_radius = _range(
+            [], -4.0 * r1 - 4.0 * b1 * b1 * r, -4.0 * r1 + 4.0 * b1 * b1 * r
+        )
+
+    def _second_residual(self, vertex: _Vertex):
+        """Evaluate the ``arsinh beta2`` integral, over the plane denominator.
+
+        Its boundary layers are set by the target's offset from the edge's extended
+        line at one end and by the sum radius at the other, and its curvature comes
+        from the denominator's OWN expansion rather than from the ring span alone:
+        ``W^2 = w^2 + h^2 b^2 + O(b^4)`` at each end, and taking ``h`` from that is
+        what leaves NOTHING at the end's own scale for the quadrature to resolve.
+        It matters where the offset is small -- the term it adds is of relative size
+        ``w`` over the ring span, exactly the size of the feature it removes.  A
+        non-positive curvature means the denominator does not turn over at that end
+        at all, and then its offset is of order the ring span and there is no layer
+        to model.
+        """
+        r = self.radius
+        u = vertex.level
+        b1 = self.slope
+        radius = r[:, None]
+        level = u[:, None]
+        offset = vertex.offset
+        plane_offset = self.plane_offset
+        r1 = self.plane_radius_value
+        held_radius = np.where(r > 0.0, r, 1.0)
+
+        def pieces(x, y):
             return (
-                level + b1 * self.offset[:, None] + 2.0 * b1 * radius * y,
+                level + b1 * offset[:, None] + 2.0 * b1 * radius * y,
                 np.sqrt(
-                    (self.plane_offset[:, None] + 2.0 * radius * y) ** 2
+                    (plane_offset[:, None] + 2.0 * radius * y) ** 2
                     + 4.0 * self.squared_slope * radius**2 * x * y
                 ),
             )
 
-        rp = self.offset + r
-        r1 = self.plane_radius_value
-
         def curvature(coefficient):
-            """Return the model's scale from the denominator's own expansion.
-
-            ``W^2 = w^2 + h^2 b^2 + O(b^4)`` at each end, and taking ``h`` from that
-            expansion rather than from the ring span alone is what leaves NOTHING at
-            the end's own scale for the quadrature to resolve.  It matters where the
-            offset is small: the term it adds is of relative size ``w`` over the ring
-            span, which is exactly the size of the feature it removes.  A
-            non-positive curvature means the denominator does not turn over at that
-            end at all, and then its offset is of order the ring span and there is no
-            layer to model.
-            """
             return np.where(
                 coefficient > 0.0,
                 2.0 * np.sqrt(np.abs(held_radius * coefficient)),
                 2.0 * self.axial_slope * held_radius,
             )
 
-        span = 2.0 * held_radius
-        self.ring_residual = residual(
-            (
-                (np.abs(u), rp + r, span),
-                (np.abs(u), self.offset, span),
-            ),
-            ring_pieces,
-        )
-        self.plane_residual = residual(
+        return _graded_residual(
             (
                 (
                     np.abs(r1 + r),
-                    u + b1 * (rp + r),
+                    u + b1 * vertex.radius_sum,
                     curvature(b1 * b1 * held_radius - r1),
                 ),
                 (
-                    np.abs(self.plane_offset),
-                    u + b1 * self.offset,
+                    np.abs(plane_offset),
+                    u + b1 * offset,
                     curvature(r1 + b1 * b1 * held_radius),
                 ),
             ),
-            plane_pieces,
+            pieces,
+            self.nodes,
         )
 
-    def terms(self):
-        """Return ``(W_psi, W_r, W_z)``, the three edge integrands' angle integrals.
+    def terms(self, vertex: _Vertex):
+        """Return ``(W_psi, W_r, W_z)``, this edge's integrands at one limit.
 
         Each is ``4 integral_0^(pi/2) da`` of one of the paper's edge integrands,
-        the quarter range being all the full turn needs.  The flux comes from
-        eq 10b and the two field components from eq 11b.
+        the quarter range being all the full turn needs, LESS the ``arsinh beta1``
+        contribution -- which is the corner's own, and is accumulated there.  The
+        flux comes from eq 10b and the two field components from eq 11b.
         """
-        one = self.one
+        one = vertex.one
         r = self.radius
-        u = self.level
+        u = vertex.level
         b1 = self.slope
-        a = self.span
+        a = vertex.span
         a0 = self.axial_slope
         a02 = self.squared_slope
         r1 = self.plane_radius_value
+        # the plane denominator is the edge's, its split this corner's modulus
+        plane = vertex.split(self.plane_squared)
+        plane_residual = self._second_residual(vertex)
+        gamma = _range([], u + b1 * vertex.offset, u + b1 * vertex.radius_sum)
+        # N = u X - b1 G^2.  Its value at either end collapses onto u times the
+        # plane radius there, because r' - b1 u is r1 exactly -- which is what makes
+        # the near-end weight u (r1 - r), of order the squared aspect ratio, a
+        # product of exact quantities instead of an alternating sum.
+        arctan_numerator = _range(
+            [-4.0 * b1 * r * r], u * self.plane_offset, u * (r1 + r)
+        )
+        # each of the arctangent's three pieces carries an explicit factor of the
+        # target radius against the single factor the reduction divides by;
+        # cancelling them here rather than numerically is what keeps the term finite
+        # on the axis, where all three vanish together.  A range function's
+        # derivative in x follows from its end values and its bulk directly:
+        # d/dx (n x + f y + x y T) = (n - f) + (y - x) T for constant T.
+        arctan_slope_over_radius = _range(
+            [], -2.0 * u + 4.0 * b1 * r, -2.0 * u - 4.0 * b1 * r
+        )
 
-        def first_arsinh():
-            """Return ``integral cos^2 2a arsinh beta1 da`` over the quarter range.
-
-            By parts.  ``cos^2 2a`` splits into its mean and an oscillatory part
-            whose antiderivative ``sin 4a/8`` vanishes at BOTH ends, so no boundary
-            term survives; the mean leaves the paper's residual arsinh quadrature
-            and the rest is rational over ``G^2 D``.  Both the flux's
-            ``u r cos phi`` weight and the field's ``r cos^2 phi`` weight land on
-            this same integral, ``cos phi = -cos 2a`` making them the same shape.
-            """
-            core = _times(
-                _product(
-                    self.cosine,
-                    _sum(
-                        self.ring_squared,
-                        _times(_product(self.edge_radius, self.cosine), -r),
-                    ),
-                ),
-                -1.0,
-            )
-            return 0.5 * self.ring_residual + (0.5 * r / a) * self.across(
-                _sine_squared_times(_across_the_range(core)), self.ring
-            )
-
-        against_first_arsinh = first_arsinh()
         # the three components differ only in the weights they put on the same
         # reductions, so every product that does not carry a weight is formed once
-        plane_derivative = _product(self.gamma, self.edge_slope)
-        over_ring = _product(self.arctan_numerator, self.ring_slope_over_radius_squared)
-        over_plane = _product(self.arctan_numerator, self.edge_slope_over_radius)
+        plane_derivative = _product(gamma, self.edge_slope)
+        over_ring = _product(arctan_numerator, _RING_SLOPE_OVER_RADIUS_SQUARED)
+        over_plane = _product(arctan_numerator, self.edge_slope_over_radius)
 
         def against_second_arsinh(build):
             """Return ``integral build arsinh beta2 da`` over the quarter range.
@@ -878,10 +967,10 @@ class _Edge:
                 ]
             )
             return (
-                mean * self.plane_residual
-                + (2.0 * b1 * r / (a0 * a)) * self.plain(core)
+                mean * plane_residual
+                + (2.0 * b1 * r / (a0 * a)) * vertex.plain(core)
                 + (0.5 / (a0 * a))
-                * self.across(_product(core, plane_derivative), self.plane)
+                * vertex.across(_product(core, plane_derivative), plane)
             )
 
         # sin phi -> 0 at both ends drives beta3 to infinity, so the arctangent lands
@@ -896,11 +985,10 @@ class _Edge:
         # its own numerator carrying one more power of sin phi than its denominator.
         at_zero = 0.5 * np.pi * np.sign(u * (r1 + r))
         at_half = np.where(
-            self.parameter_complement > 0.0,
+            vertex.parameter_complement > 0.0,
             0.5 * np.pi * np.sign(u * self.plane_offset),
             -np.arctan(b1) * one,
         )
-        variable = _range([], -one, one)
 
         def against_arctan(weighting):
             """Return ``integral sin 2a weighting(cos 2a) arctan beta3 da``.
@@ -935,28 +1023,27 @@ class _Edge:
             weight = _range([], 0.0, 0.0)
             for coefficient in reversed(primitive):
                 weight = _sum(
-                    _product(weight, variable), _range([], coefficient, coefficient)
+                    _product(weight, _VARIABLE), _range([], coefficient, coefficient)
                 )
 
             return boundary + (0.25 / a) * (
-                2.0 * self.plain(_product(weight, self.arctan_slope_over_radius))
-                - r * self.across(_product(weight, over_ring), self.ring)
-                - self.across(_product(weight, over_plane), self.plane)
+                2.0 * vertex.plain(_product(weight, arctan_slope_over_radius))
+                - r * vertex.across(_product(weight, over_ring), vertex.ring)
+                - vertex.across(_product(weight, over_plane), plane)
             )
 
         # the flux, eq 10b weighted by cos phi
         flux = (
-            (2.0 * a / a02) * self.against_root(_product(self.cosine, self.gamma))
-            + 4.0 * u * r * against_first_arsinh
+            (2.0 * a / a02) * vertex.against_root(_product(vertex.cosine, gamma))
             + 4.0
             * against_second_arsinh(
                 lambda: _times(
                     _product(
-                        self.cosine,
+                        vertex.cosine,
                         _sum(
                             self.plane_squared,
                             _times(
-                                _product(self.cosine, self.plane_radius),
+                                _product(vertex.cosine, self.plane_radius),
                                 2.0 * a02 * r,
                             ),
                         ),
@@ -968,17 +1055,14 @@ class _Edge:
         )
 
         # the radial field, eq 11b's first component
-        radial = (
-            (4.0 * a / a02) * self.against_root(self.cosine)
-            + 4.0 * r * against_first_arsinh
-            + 4.0
-            * against_second_arsinh(
+        radial = (4.0 * a / a02) * vertex.against_root(vertex.cosine) + 4.0 * (
+            against_second_arsinh(
                 lambda: _times(
                     _product(
-                        self.cosine,
+                        vertex.cosine,
                         _sum(
                             _range([], r1 * one, r1 * one),
-                            _times(self.cosine, b1 * b1 * r),
+                            _times(vertex.cosine, b1 * b1 * r),
                         ),
                     ),
                     -b1 / (a02 * a0),
@@ -986,8 +1070,7 @@ class _Edge:
             )
         )
 
-        # the vertical field, eq 11b's third component.  Its arsinh beta1 weight is
-        # constant, so that term is the residual quadrature itself with no reduction.
+        # the vertical field, eq 11b's third component.
         #
         # The D term is LINEAR in the edge slope.  Eq 11b prints it quadratic, which
         # agrees at slope zero and slope one and nowhere else, so a section of
@@ -997,19 +1080,18 @@ class _Edge:
         # r^2 sin^2 phi + Y^2/a0^2 = B^2/a0^2, and whose remainder collapses on
         # Gamma = a0^2 u + b1 Y and Gamma^2 + B^2 = a0^2 D^2 to exactly -b1 D/a0^2.
         vertical = (
-            4.0 * u * self.ring_residual
-            + 4.0
+            4.0
             * against_second_arsinh(
                 lambda: _times(
                     _sum(
                         _range([], b1 * b1 * r1 * one, b1 * b1 * r1 * one),
-                        _times(self.cosine, -(2.0 * a02 - 1.0) * r),
+                        _times(vertex.cosine, -(2.0 * a02 - 1.0) * r),
                     ),
                     1.0 / (a02 * a0),
                 )
             )
             - 4.0 * r * against_arctan([one])
-            - (4.0 * b1 / a02) * a * self.root_moments[0]
+            - (4.0 * b1 / a02) * a * vertex.root_moments[0]
         )
         return flux, radial, vertical
 
@@ -1020,8 +1102,20 @@ def _edge_terms(r, z, edge, which, nodes):
     ``r`` must be positive.  ``psi`` and ``B_Z`` are even in ``r`` and ``B_R`` is
     odd, all three following from ``g(-r, phi) = g(r, pi - phi)``; the reduction's
     modulus and characteristics are defined for a positive radius only.
+
+    The whole per-limit value, corner term included -- which is what the reduction
+    is checked against edge by edge.  A section instead accumulates the corner term
+    once per corner, where most of it cancels.
     """
-    return _Edge(r, z, edge, which, nodes).terms()
+    ra, za, rb, zb = edge
+    corner_r, corner_z = (rb, zb) if which else (ra, za)
+    vertex = _Vertex(r, z, corner_r, corner_z, nodes, residual=True)
+    return tuple(
+        term + corner
+        for term, corner in zip(
+            _Edge(r, z, edge, nodes).terms(vertex), vertex.arsinh_terms()
+        )
+    )
 
 
 def _edge_flux(r, z, edge, which, nodes):
@@ -1052,6 +1146,12 @@ def polygon_analytic_greens(
     Unlike the shipped kernel this does not form the field by dividing a flux
     gradient by ``2 pi r``, so it stays finite on the axis, where ``B_R`` is zero
     by the parity of the reduction rather than by cancellation.
+
+    Edge ``i`` runs from corner ``i`` to corner ``i + 1``, so each corner is a
+    limit of two edges and its part of the reduction -- the moment stack, the ring
+    split, the first residual -- is formed once for both.  A corner is released as
+    soon as the later of its two edges has been evaluated, so the build holds three
+    moment stacks rather than one per corner.
     """
     edges, weights, norm = pack_section(vertices)
     signed = np.asarray(target_r, dtype=np.float64)
@@ -1062,14 +1162,58 @@ def polygon_analytic_greens(
     flux = np.zeros_like(r)
     radial = np.zeros_like(r)
     vertical = np.zeros_like(r)
-    for index in range(len(edges)):
-        if weights[index] == 0.0:
+    sides = len(edges)
+    live = weights != 0.0
+    # The signed number of live edges leaving each corner: +1 for the edge that
+    # starts there, -1 for the one that ends there, since a section sums each edge
+    # as its lower limit less its upper.  Around an unbroken chain the two cancel
+    # and the corner's own term is not formed at all; a dropped horizontal edge
+    # leaves +/-1 at each of its two ends, which are the only corners where the
+    # arsinh beta1 contribution survives.
+    chain = live.astype(np.int64) - np.roll(live, 1).astype(np.int64)
+    # the later of the two live edges that read each corner, which is what releases
+    # its moment stack; corner 0 is read by the last edge and so held throughout
+    last_read: dict[int, int] = {}
+    for index in np.flatnonzero(live):
+        last_read[int(index)] = int(index)
+        last_read[int(index + 1) % sides] = int(index)
+    corners: dict[int, _Vertex] = {}
+
+    def corner_part(index: int, corner_r: float, corner_z: float) -> _Vertex:
+        if index not in corners:
+            corners[index] = _Vertex(
+                r, z, corner_r, corner_z, nodes, residual=bool(chain[index])
+            )
+        return corners[index]
+
+    for index in range(sides):
+        if not live[index]:
             continue
-        upper = _edge_terms(r, z, edges[index], 1, nodes)
-        lower = _edge_terms(r, z, edges[index], 0, nodes)
-        flux = flux - (upper[0] - lower[0])
-        radial = radial - (upper[1] - lower[1])
-        vertical = vertical - (upper[2] - lower[2])
+        ra, za, rb, zb = edges[index]
+        lower = corner_part(index, ra, za)
+        upper = corner_part((index + 1) % sides, rb, zb)
+        edge = _Edge(r, z, edges[index], nodes)
+        # the antiderivative is of order the squared major radius where the flux is
+        # not, so an edge's two limits are differenced against each other before
+        # anything else is added to them
+        high = edge.terms(upper)
+        low = edge.terms(lower)
+        flux = flux - (high[0] - low[0])
+        radial = radial - (high[1] - low[1])
+        vertical = vertical - (high[2] - low[2])
+        # this edge's own two corners, once each -- a one-sided section would name
+        # the same one twice -- and each released if this was its later edge
+        for corner in dict.fromkeys((index, (index + 1) % sides)):
+            if last_read[corner] != index:
+                continue
+            if chain[corner]:
+                one_flux, one_radial, one_vertical = corners[corner].arsinh_terms()
+                flux = flux + chain[corner] * one_flux
+                radial = radial + chain[corner] * one_radial
+                vertical = vertical + chain[corner] * one_vertical
+            # nothing here holds the corner part by name, so dropping it from the
+            # dictionary is what frees its moment stack
+            del corners[corner]
     # the packed norm folds in the [0, pi] doubling the quarter range already has,
     # so psi keeps the 2 pi R of the total flux and the field does not
     return (

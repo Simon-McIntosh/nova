@@ -87,7 +87,22 @@ accuracy columns and the near/far + order-vs-distance evidence are archived in
 | bow corner zeta (pre fixed-node zeta) | 148.0 | 352 |
 | polygon hex 16×48, closed-form gradient + block 16 | 857.8 | 2039 |
 | polygon hex 16×48, complex-step unblocked (retired) | 4335.9 | 10307 |
+| polygon hex CLOSED FORM, 128 residual nodes, by corner | 176.6 | 420 |
+| polygon hex closed form, by edge limit (superseded) | 333.9 | 795 |
 | faithful Part V full-turn floor (special functions + g_p only) | 12.5–16.1 | ~30–38 |
+
+The closed form (`nova/biot/polygonanalytic.py`, driver
+`benchmarks/analytic_cost_floor.py`) returns the flux and BOTH field components
+for the same cost — they share every reduction — and its cost depends on the
+section's shape, because the evaluation is organised by CORNER and a corner is
+shared only where both its edges are live. Same job, one idle core, fresh process
+per variant: hexagon 333.9 → 176.6 µs/pair (1.89×), thin plate 220.7 → 119.3
+(1.85×), rectangle 109.4 → 113.2 (0.97× — it drops two horizontal edges, so no
+corner is shared and there is nothing to win). Floor 100.1 µs/pair, of which
+73.3 is the one graded residual quadrature that survives per edge limit — the
+other is a function of the corner alone and cancels around a closed chain of
+edges. Peak allocation 12.1 kB/pair (was 10.6: up to three corner parts are live
+at once).
 
 Tiled assembly (`nova/biot/tiledassembly.py`): ~48 B/pair (vs 267 B/pair
 through the ≤500-source chunking), 16-core scaling 8.78×; measured 16-core

@@ -4,20 +4,23 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="nova">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="biot-operator-assembly">
-  <meta name="plan-title"     content="Biot Operator Assembly — parallel, batchable, shardable construction">
-  <meta name="plan-summary"   content="Re-architect the construction of biot interaction operators: the pair space is embarrassingly parallel but today's assembly is RAM-limited and naively CPU-batched; design a tiled, shardable build that stays viable on CPU (local + CI), accelerates on GPU, streams to the cached zarr store, and delivers a principled near/far criterion that unlocks the thick-section plasma coupling default">
-  <meta name="plan-status"    content="draft">
-  <meta name="plan-roi"       content="high">
-  <meta name="plan-effort"    content="L">
-  <meta name="plan-tier"      content="opus">
-  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="biot-operator-assembly">
+  <meta name="plan-title" content="Biot Operator Assembly — parallel, batchable, shardable construction">
+  <meta name="plan-summary" content="Re-architect the construction of biot interaction operators: the pair space is embarrassingly parallel but today&#x27;s assembly is RAM-limited and naively CPU-batched; design a tiled, shardable build that stays viable on CPU (local + CI), accelerates on GPU, streams to the cached zarr store, and delivers a principled near/far criterion that unlocks the thick-section plasma coupling default">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="L">
+  <meta name="plan-tier" content="opus">
+  <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-depends-on" content="nova-3d-native">
-  <meta name="plan-blocks"    content="mast-catalog-gpu-solve">
+  <meta name="plan-blocks" content="mast-catalog-gpu-solve">
   <title>Biot Operator Assembly | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-07-25">
+<meta name="plan-impl" content="0.5">
+<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
@@ -29,10 +32,10 @@
     batched naively on the CPU: <code>nova/biot/solve.py</code> partitions sources into fixed
     ≤500-element chunks purely "so the interaction matrices stay bounded", each chunk builds a
     dense block in host memory, and nothing exploits the independence of the pairs beyond numpy's
-    internal vectorisation. That design sets a hard wall for exact thick-section coupling: the
-    Urankar Part V polygon kernel costs ~39.5&nbsp;µs per pair against ~0.07&nbsp;µs for a point
-    filament (~70,000×), so an all-pairs 2000-cell plasma matrix is ~44&nbsp;hours through the
-    current path — which is why the hexagonal plasma mesh shipped point-coupled
+    internal vectorisation. That design set a hard wall for exact thick-section coupling: the
+    brute-force polygon kernel cost ~4.3&nbsp;ms per pair against ~0.4&nbsp;µs for a point
+    filament (~10,000× clean; ~44&nbsp;h per all-pairs 2000-cell matrix on a contended login
+    node) — which is why the hexagonal plasma mesh shipped point-coupled
     (physics-spine-adoption, 2026-07-25) despite a measured +7.2%&nbsp;median /
     +18%&nbsp;max error on cell self-flux terms.</p>
     <p>Two hard constraints frame the design:</p>
@@ -141,6 +144,27 @@
       so RAM holds one tile rather than the whole operator.</figcaption>
     </figure>
 
+    <section id="s3-landed" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ §3.1–§3.3 landed, §3.4–§3.6 evidenced 2026-07-25</span>
+        <h2>Survey + kernel numerics + tiled prototype — landed</h2>
+      </header>
+      <p class="landed-summary">
+        Survey: 267 B/pair transient, 36% a removable materialised broadcast; ≤500 cap binds on
+        target grids (~13 GB per 100k-target chunk). Kernel: complex-step eliminated (closed-form
+        gradient) + cache-blocked quadrature — polygon 4336 → 858 µs/pair (5.05×), oracle tests
+        unchanged. Tiled fixed-shape assembly: 48 B/pair, 8.8× @16 cores, zarr streaming —
+        <strong>projected 2000-cell exact-everywhere build 7.1 min on 16 CPU cores</strong>
+        (inside the ≤20 min budget, no GPU, no cutoff). Part V groundwork: full turn needs only
+        COMPLETE elliptic integrals; verified elliptic module + equivalence gate landed; measured
+        cost floor 12.5–16 µs/pair (transcription itself not landed). Near/far: bare filament
+        NEVER converges (an (a/R₀)² floor); a quadrupole-corrected filament reaches 1e-6 at ~6
+        section radii — decisions locked below. Full record:
+        <a href="archive/biot-operator-assembly-s3-landed.html">§3 landed</a>
+        (develop merge of <code>c65b330e..5dc0055a</code>).
+      </p>
+    </section>
+
     <h2 id="s3">§3 — Research questions</h2>
     <ol>
       <li><strong>Assembly survey.</strong> Inventory how every operator class is built today
@@ -183,47 +207,47 @@
     </ul>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="kernel-backend" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Kernel backend strategy: one JAX code path serving CPU and GPU, or
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="kernel-backend" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Kernel backend strategy: one JAX code path serving CPU and GPU, or
         numba parallel-CPU with a JAX GPU twin pinned by parity tests?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="jax-single-path">single JAX path, jit CPU / vmap GPU</button>
-          <button class="r-opt" data-value="numba-cpu-jax-gpu">numba CPU + JAX GPU twin, parity-pinned</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-      <div class="r-dec" data-key="nearfar-criterion" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Near/far criterion form: per-component second-moment error bound
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="jax-single-path">single JAX path, jit CPU / vmap GPU</button>
+      <button class="r-opt" data-value="numba-cpu-jax-gpu">numba CPU + JAX GPU twin, parity-pinned</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="nearfar-criterion" data-choice="error-bounded-cutoff" data-by="reckon-ship" data-when="2026-07-25T09:33:54+00:00">
+    <p class="r-dec-q">Near/far criterion form: per-component second-moment error bound
         (distance where the finite-area correction falls below a stated tolerance), or
         exact-everywhere retained once the accelerated build makes it affordable?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="error-bounded-cutoff">error-bounded cutoff, per component</button>
-          <button class="r-opt" data-value="exact-everywhere">exact everywhere, no blend</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-      <div class="r-dec" data-key="tile-scheme" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Tiling scheme: memory-budget-derived square tiles streamed to
-        zarr-aligned chunks, or target-major strips matching today's row blocks?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="budget-tiles-zarr">budget-derived tiles, zarr-aligned</button>
-          <button class="r-opt" data-value="target-strips">target-major strips</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-    </section>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="error-bounded-cutoff">error-bounded cutoff, per component</button>
+      <button class="r-opt" data-value="exact-everywhere">exact everywhere, no blend</button>
+      </p>
+    <p class="r-dec-rat">Locked on measured evidence (2026-07-25, archive/biot-operator-assembly-s3-landed.html): a BARE centroid filament never converges to the section for a full ring — the error flattens onto an (a/R0)^2 floor (~2e-5 per plasma cell, verified to 3000 section radii), so hybrid_greens&#x27; far field carries a ~1e-4 floor no switch value fixes. The cutoff is therefore per-component AND requires a quadrupole-corrected far field: second-moment corrected filament reaches 1e-6 beyond ~6 section radii (B-limited; psi at 3.6) and 1e-8 beyond ~16. Adopted scheme (to implement): three fixed-shape bands — 16x48 inside 2.2 contour radii, 8x24 to 6.8, corrected filament beyond (~1% of exact-everywhere nodes). Distances measured to the section CONTOUR. Shipped default stays exact-everywhere until the banded scheme lands with its per-component gates.</p>
+    </div>
+<div class="r-dec" data-key="tile-scheme" data-choice="budget-tiles-zarr" data-by="reckon-ship" data-when="2026-07-25T09:33:54+00:00">
+    <p class="r-dec-q">Tiling scheme: memory-budget-derived square tiles streamed to
+        zarr-aligned chunks, or target-major strips matching today&#x27;s row blocks?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="budget-tiles-zarr">budget-derived tiles, zarr-aligned</button>
+      <button class="r-opt" data-value="target-strips">target-major strips</button>
+      </p>
+    <p class="r-dec-rat">Prototype measured (nova/biot/tiledassembly.py): budget-derived tiles with padded fixed shapes hold RAM at ~48 B/pair + ~1.5 MB fixed block (vs 267 B/pair today, and plan-bounded rather than problem-bounded), stream tile-&gt;zarr chunk-aligned, and scale 8.8x at 16 cores. Budgets &gt;=4 MB/worker cost nothing; 1 MB forces the quadrature block down and costs 1.6x. Target-major strips would reproduce today&#x27;s target-axis RAM fragility (13 GB/chunk at 100k targets).</p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-boa-01" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-25">
-        <h4 class="r-fu-title">Assembly survey + tiling prototype (§3.1–§3.3) — measure before designing</h4>
-        <div class="r-fu-body"><p>First rung: inventory the current assembly (where the RAM
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-boa-01" data-status="resolved" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-25" data-recommends-skill="" data-resolved-at="2026-07-25T09:33:54+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Assembly survey + tiling prototype (§3.1–§3.3) — measure before designing</h4>
+    <div class="r-fu-body"><p>First rung: inventory the current assembly (where the RAM
         limit binds, arithmetic intensity per kernel), prototype a tiled build for one operator
         class on CPU (cores × tiles) with zarr streaming, and pin a CPU/GPU single-source kernel
         on one representative (the polygon section). Runs before any cutoff work; §3.4–§3.6
         follow once the nova-3d-native §2 zeta fast path lands.</p></div>
-        <pre class="r-fu-prompt">Project: nova
+    <pre class="r-fu-prompt">Project: nova
 Plan:    biot-operator-assembly (http://127.0.0.1:8765/nova/biot-operator-assembly.html)
 Section: §3.1-§3.3 (survey + tiling prototype)
 Tier:    opus
@@ -231,7 +255,7 @@ Tier:    opus
 Context
   Queued from the physics-spine fleet session (2026-07-25): the hex plasma
   mesh shipped point-coupled because the exact polygon kernel is ~70,000x the
-  point cost through today's RAM-limited, naively CPU-batched assembly. The
+  point cost through today&#x27;s RAM-limited, naively CPU-batched assembly. The
   pair space is embarrassingly parallel; the build must stay CPU-viable
   (no GPU guarantee locally/CI) and stream to the cached zarr store.
 
@@ -258,8 +282,56 @@ Done-when
      parity-pinned twin), with the parity test committed.
   4. Findings written into the plan; this followup resolved; next rung
      queued (cutoff study, post-zeta re-cost).</pre>
-      </article>
-    </section>
+    <p class="r-fu-outcome">§3.1-§3.3 landed + §3.4 evidenced (develop merge of c65b330e..5dc0055a, 5 commits): survey (267 B/pair, 36% removable broadcast, cap binds on target grids); polygon kernel 5.05x (complex-step eliminated via closed-form gradient + cache blocking, 4336->858 us/pair); tiled fixed-shape prototype (48 B/pair, 8.8x @16 cores, projected 2000-cell exact-everywhere build 7.1 min on 16 cores — inside budget); Part V elliptic foundation + equivalence gate landed (transcription NOT landed; cost floor 12.5-16 us/pair); near/far decision locked on corrected-filament evidence. GPU demo not run — queued. Record: archive/biot-operator-assembly-s3-landed.html</p>
+    </article>
+<article class="r-fu" data-id="f-boa-02" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-25" data-recommends-skill="/reckon-ship biot-operator-assembly" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Transcribe the Part V full-turn closed form, demo jit/vmap on the tiled path, implement the three-band scheme</h4>
+    <div class="r-fu-body"><p>The foundation is in: verified elliptic module (complete integrals only — the full turn is the paper's case C, 4×H(π/2)), converged equivalence gate with a candidates registry, cost floor 12.5–16 µs/pair. Next rung: transcribe A_φ (B is already closed-form via the gradient identities), lock kernel-backend with a jit/vmap demonstration, implement the evidence-locked three-band coupling, then re-open the plasma-coupling default flip (physics-spine-adoption f-psa-04 gate).</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    biot-operator-assembly (http://127.0.0.1:8765/nova/biot-operator-assembly.html)
+Section: Part V transcription + backend demo + three-band implementation
+Tier:    opus
+
+Context
+  Survey/prototype/numerics rung landed (see archive/biot-operator-assembly-s3-landed.html).
+  The faithful Urankar Part V full-turn evaluation is prepared but not transcribed;
+  the near/far decision is locked (error-bounded, per component, quadrupole-corrected
+  far field, three fixed-shape bands); the tiled assembly is fixed-shape and test-pinned.
+
+State to read
+  nova/biot/elliptic.py + tests/test_biotelliptic.py (verified moment/pole routes —
+  the printed eq 24a/23 forms are ill-conditioned as printed; use these);
+  tests/test_biotpolygonanalytic.py (equivalence gate + candidates registry — a
+  closed form joins with one line); benchmarks/analytic_cost_floor.py;
+  nova/biot/polygon.py (closed-form gradient identities); nova/biot/tiledassembly.py;
+  paper page IMAGES (OCR text is unusable) — render from
+  /home/ITER/mcintos/Code/imas-ambix/references/Vector_potential_...Polygon_cross_section.pdf
+  pages 4-7 at 200 dpi (uv run --no-project --with pymupdf).
+
+Key guidance (measured, from the landed rung)
+  - Start from alpha = pi/2: every elliptic integral is COMPLETE (case C, 4x H(pi/2));
+    never touch ellipkinc/ellipeinc. cn K = 0 kills the radial A component — use as a
+    structural check.
+  - A_phi FIRST: B is already closed-form; closing B alone saves nothing while psi
+    still runs the quadrature.
+  - The four complete Pi per edge dominate the floor — check the quarter-period
+    cn-factor cancellations early (difference between a 30x and 60x win).
+  - Gate: 1e-10 beyond 0.5 contour radii vs the converged oracle; b1=0 must reduce
+    to cylinder_greens; horizontal/degenerate edges must vanish cleanly.
+  - Three-band scheme constants (evidence-locked): 16x48 inside 2.2 contour radii,
+    8x24 to 6.8, quadrupole-corrected filament beyond; per-component bounds; fixed
+    shapes per band. Default flip stays gated on f-psa-04 criteria.
+
+Done-when
+  1. Part V A_phi transcription passes the equivalence gate; measured us/pair recorded
+     (target 30-50).
+  2. kernel-backend decision locked with a jit (CPU) and vmap (GPU if available)
+     demonstration of the tiled path; parity pinned.
+  3. Three-band coupling implemented behind per-component gates; exact-everywhere
+     retained as the reference lane.
+  4. Followup written; this followup resolved.</pre>
+    </article>
+</section>
 
   </main>
 </body>

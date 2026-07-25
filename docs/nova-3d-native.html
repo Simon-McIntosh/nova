@@ -19,7 +19,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-25">
 <meta name="plan-impl" content="0.25">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
 </head>
 <body>
   <main class="plan-doc">
@@ -246,7 +246,7 @@ Done-when
   2. Chosen fast path lands; bow/arc solve re-timed and recorded.
   3. greens fingerprints migrated to physics-tolerance gates; kernel lane green.
   4. Followup written into plan + this followup resolved.</pre>
-    <p class="r-fu-outcome">§2 landed — develop c4d4b8ce (3 commits, merged+pushed). Worst-case zeta error 3.4e-3 -> 5.5e-14; bow solve 2.3x, rect kernel 6.3x (777x->119x point); fixed shapes for vmap. Decision zeta-fast-path locked (GL-48 + tanh-sinh near-plane). 4-ulp pin retained by design (both test paths now share the quadrature, so it isolates algebra). Full lane 1516/0. Record: archive/nova-3d-native-s2-landed.html</p>
+    <p class="r-fu-outcome">§2 landed — develop c4d4b8ce (3 commits, merged+pushed). Worst-case zeta error 3.4e-3 -&gt; 5.5e-14; bow solve 2.3x, rect kernel 6.3x (777x-&gt;119x point); fixed shapes for vmap. Decision zeta-fast-path locked (GL-48 + tanh-sinh near-plane). 4-ulp pin retained by design (both test paths now share the quadrature, so it isolates algebra). Full lane 1516/0. Record: archive/nova-3d-native-s2-landed.html</p>
     </article>
 <article class="r-fu" data-id="f-3d-02" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-25" data-recommends-skill="/reckon-ship nova-3d-native §3" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Land the §3 exact flux-coupling operators (M = ∮ A·dl)</h4>
@@ -284,7 +284,7 @@ Done-when
     </article>
 <article class="r-fu" data-id="f-3d-03" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-25" data-recommends-skill="/reckon-ship nova-3d-native" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Fix the ellippinc domain assertion that blocks non-filament grid solves</h4>
-    <div class="r-fu-body"><p>Pre-existing, surfaced by §2 re-timing: coilset.grid.solve with filament=False trips the assertion abs(phi - k*pi) <= pi/2 in nova/biot/constants.py ellippinc — unrelated to zeta, blocks any bow-kernel grid solve on windings. Also explains why the archived 5.9 s 10×2000 bow-grid baseline is unreproducible (the filament=True default never reaches Bow).</p></div>
+    <div class="r-fu-body"><p>Pre-existing, surfaced by §2 re-timing: coilset.grid.solve with filament=False trips the assertion abs(phi - k*pi) &lt;= pi/2 in nova/biot/constants.py ellippinc — unrelated to zeta, blocks any bow-kernel grid solve on windings. Also explains why the archived 5.9 s 10×2000 bow-grid baseline is unreproducible (the filament=True default never reaches Bow).</p></div>
     <pre class="r-fu-prompt">Project: nova
 Plan:    nova-3d-native (http://127.0.0.1:8765/nova/nova-3d-native.html)
 Section: standalone bugfix (surfaced by §2)
@@ -310,6 +310,45 @@ Done-when
   1. Reproduction test green; grid.solve(filament=False) completes.
   2. A bow grid-solve benchmark entry lands in BASELINE.md (the reproducible
      replacement for the retired 5.9 s figure).
+  3. Followup resolved.</pre>
+    </article>
+<article class="r-fu" data-id="f-3d-04" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-25" data-recommends-skill="/reckon-ship nova-3d-native" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Fix cylinder_greens discontinuity across horizontal section faces</h4>
+    <div class="r-fu-body"><p>Found by the operator-assembly gate and confirmed on merged develop: targets 1 µm either side of a horizontal face plane (inside the radial span) return ψ = −1.22e-4 / +1.65e-4 where the polygon kernel gives a smooth +2.16e-5 — sign flip, ~5× magnitude; 31/512 spiral targets affected, all at |dz| = half-height. Plasma-grid targets can land on cell faces, so this is production-reachable. Root cause in the corner_fields γ-sign branch terms (cphi/dz_coef dead-band).</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    nova-3d-native (http://127.0.0.1:8765/nova/nova-3d-native.html)
+Section: standalone bugfix (found by the biot-operator-assembly equivalence gate)
+Tier:    opus
+
+Context
+  cylinder_greens (nova/biot/greens.py corner_fields) is discontinuous across
+  horizontal section faces: the cphi and dz_coef branch terms use
+  _sign(gamma) * (_sign(rs - r) + 1), and for targets near gamma = 0 within
+  the section&#x27;s radial span the branch-jump terms fail to cancel the Pi3
+  branch jumps. Reproduction (on develop, post-zeta):
+    a,z0,da,dz = 4.0, 0.0, 0.1, 0.08; target r = a-0.0435, z = z0-0.04 +/- 1e-6
+    -&gt; psi = -1.223e-4 / +1.654e-4 (cylinder) vs smooth +2.157e-5 (polygon).
+  The polygon kernel (Ampere-verified) is the oracle.
+
+State to read
+  nova/biot/greens.py corner_fields (cphi, dz_coef, _sign dead-band, pi3
+  characteristics np2); tests/test_biotgreens.py; the polygon oracle
+  (nova/biot/polygon.py) and the gate machinery in
+  tests/test_biotpolygonanalytic.py.
+
+Scope locks / constraints
+  Worktree off develop. TDD: failing continuity test first (scan across the
+  face plane at fixed r inside the radial span; assert continuity and
+  agreement with polygon_greens to its gate). The fix must be a correct
+  branch/limit treatment of the corner antiderivative, not a widened
+  dead-band. Also check the four corner planes and the rs = r line.
+  Full fast lane green; keep the 4-ulp algebra pin passing.
+
+Done-when
+  1. Continuity test green; on-face and near-face targets agree with the
+     polygon oracle.
+  2. The outside-section B_R gap vs polygon (was 6.4e-4 with midpoint zeta)
+     re-measured post-fix and recorded.
   3. Followup resolved.</pre>
     </article>
 </section>

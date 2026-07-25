@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="archive">
+  <meta name="plan-slug" content="biot-operator-assembly-s3-landed">
+  <meta name="plan-title" content="Assembly survey, kernel numerics and tiled prototype — landed">
+  <meta name="plan-status" content="historical">
+  <meta name="plan-modified" content="2026-07-25">
+  <title>biot-operator-assembly §3.1–3.3 landed + §3.4 evidence | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>§3.1–§3.3 landed, §3.4 evidenced — survey, kernel numerics, tiled fixed-shape assembly</h1>
+  <p><a href="/nova/biot-operator-assembly.html">← back to the evergreen plan</a> ·
+     landed 2026-07-25 · develop merge of <code>c65b330e..5dc0055a</code>
+     (5 commits, measured at base <code>6200501c</code>)</p>
+
+  <h2>Quick status</h2>
+  <table>
+    <thead><tr><th>Item</th><th>Status</th><th>Commit</th></tr></thead>
+    <tbody>
+      <tr><td>Assembly survey (§3.1): build paths, peak RAM, chunk binding, intensity</td>
+          <td>✓ done (report)</td><td>—</td></tr>
+      <tr><td>Polygon kernel numerics: closed-form gradient (complex-step removed) +
+          cache-blocked quadrature — <strong>5.05× (4336 → 858 µs/pair)</strong></td>
+          <td>✓ shipped</td><td><code>c65b330e</code></td></tr>
+      <tr><td>Tiled fixed-shape assembly prototype (§3.2): 48 B/pair, 8.8× at 16 cores,
+          zarr-chunk streaming</td>
+          <td>✓ shipped</td><td><code>c65b330e</code></td></tr>
+      <tr><td>Elliptic foundation for the faithful Urankar Part V evaluation +
+          equivalence gate (candidates registry)</td>
+          <td>✓ shipped</td><td><code>52b81c98</code></td></tr>
+      <tr><td>Cost sweep, near/far evidence, cost-floor benchmarks</td>
+          <td>✓ shipped</td><td><code>373c5dc2</code>, <code>0cbfb566</code>, <code>5dc0055a</code></td></tr>
+      <tr><td>Faithful Part V transcription (eqs 14–22)</td>
+          <td>not landed — foundation + gate ready; cost floor 12.5–16 µs/pair measured</td><td>—</td></tr>
+      <tr><td>JAX vmap/GPU demonstration</td>
+          <td>not run — fixed-shape property test-pinned, demo queued</td><td>—</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Operator cost comparison (compute node, fresh-process, median of 3, spread &lt;2%)</h2>
+  <table>
+    <thead><tr><th>method</th><th>µs/pair</th><th>× point</th><th>δψ</th><th>δBr</th><th>δBz</th></tr></thead>
+    <tbody>
+      <tr><td>point filament</td><td>0.42</td><td>1</td><td>8.7e-03</td><td>9.6e-02</td><td>9.4e-02</td></tr>
+      <tr><td>hybrid rectangle (switch=3)</td><td>33.9</td><td>81</td><td>2.7e-04</td><td>7.9e-04</td><td>8.4e-04</td></tr>
+      <tr><td>cylinder rectangle (oracle)</td><td>61.0</td><td>145</td><td>—</td><td>—</td><td>—</td></tr>
+      <tr><td>bow corner zeta (cost line, pre-zeta-merge)</td><td>148.0</td><td>352</td><td>—</td><td>—</td><td>—</td></tr>
+      <tr><td>polygon rect 16×48</td><td>419.7</td><td>998</td><td>3.0e-05</td><td>6.4e-04</td><td>4.0e-06</td></tr>
+      <tr><td><strong>polygon hex 16×48, improved (closed-form gradient, blocked)</strong></td>
+          <td><strong>857.8</strong></td><td>2039</td><td>0 (reference)</td><td>0</td><td>0</td></tr>
+      <tr><td>polygon hex 16×48, complex-step (pre-improvement)</td><td>4335.9</td><td>10307</td>
+          <td>3.2e-12</td><td>1.6e-13</td><td>2.1e-13</td></tr>
+      <tr><td>polygon hex 8×24</td><td>217.4</td><td>517</td><td>1.5e-04</td><td>2.9e-02</td><td>2.5e-02</td></tr>
+      <tr><td>polygon hex 4×16</td><td>83.2</td><td>198</td><td>2.7e-03</td><td>1.2e-01</td><td>1.3e-01</td></tr>
+      <tr><td><em>faithful Part V (full turn) — measured floor</em></td><td><em>12.5–16.1</em></td>
+          <td><em>~30–38</em></td><td colspan="3"><em>projected 30–50 µs/pair finished (with
+          coefficient algebra) — at or below the rectangle kernel</em></td></tr>
+    </tbody>
+  </table>
+  <p>Accuracy columns are worst-case over all distances (near-contour dominated); resolved
+  against distance the reduced rules are far more favourable — see the order-vs-distance figure.
+  δψ vs δBz at 8×24 differ 170×: per-component gating is mandatory. Reference figures:</p>
+  <figure>
+    <img src="/nova/figures/biot-operator-assembly/kernel_cost.png"
+         alt="Cost versus accuracy per method, and reduced-rule error falling with distance"
+         style="max-width:100%">
+    <figcaption>Left: cost vs worst-case per-component accuracy for every coupling method.
+    Right: reduced-rule Bz error falls spectrally with contour distance — far pairs need far
+    fewer nodes.</figcaption>
+  </figure>
+
+  <h2>Survey findings (§3.1)</h2>
+  <ul>
+    <li>The 560-cell hex plasma grid ships point-coupled (segment <code>circle</code> only):
+    build 14.1 s, tracemalloc peak 143.7 MiB. Transient allocation is <strong>267 B per
+    pair</strong>, linear in pairs-per-chunk; the ≤500 cap chunks <em>sources only</em>.</li>
+    <li><strong>36% of peak (96 B/pair) is a materialised broadcast</strong> in
+    <code>Matrix.build_transform</code> (<code>np.tile</code> of target-constant coordinate
+    axes + origins) that <code>np.broadcast_to</code> removes outright.</li>
+    <li>The cap binds on large <em>target</em> grids, not plasma-plasma: 100k-target field grid
+    ⇒ ~13 GB per chunk. The zarr store writes whole datasets (no chunk streaming), so caching
+    never relieves build pressure.</li>
+    <li>Intensity: point is bandwidth-bound; rectangle and polygon compute-bound — polygon only
+    when blocked (unblocked loses 1.9×; production block 16, flat over 8–32; blocked results
+    are not bit-identical across block sizes, ~1e-11 spread — a stored operator is reproducible
+    only for a fixed block).</li>
+  </ul>
+
+  <h2>Kernel numerics (§3.3 track)</h2>
+  <ul>
+    <li><strong>Complex-step eliminated</strong>: two Urankar-variable identities
+    (B² + Γ² = a₀²D², (r sinφ D)² + numer(β₃)² = G²B²) collapse both transcendental derivatives
+    onto quantities the ψ evaluation already computes — ψ, Br, Bz in one real pass. 4336 → 1163
+    µs/pair (3.7×); cache-blocking 1597 → 858 (1.9×); 5.05× total. Equivalence to complex-step
+    3.2e-12; all 22 polygon oracle tests unchanged.</li>
+    <li><strong>Faithful Part V groundwork</strong> (<code>nova/biot/elliptic.py</code>, 91
+    tests): the full turn is the paper's case C — every elliptic integral is COMPLETE (4×H(π/2),
+    no incomplete F/E/Π anywhere), and cn K = 0 annihilates the radial A component, reproducing
+    axisymmetry as a structural check. Two printed forms are ill-conditioned as printed and were
+    re-derived by stable routes (eq 24a moments via w = 1 − dn u; eq 23 pole moment elementary
+    over the quarter period), pinned against the printed recursions where conditioned.</li>
+    <li><strong>Equivalence gate</strong> (<code>tests/test_biotpolygonanalytic.py</code>):
+    converged oracle (64×96, deviation ≤ 3.9e-11 vs 96×128 everywhere including the contour,
+    asserted); gate 1e-10 beyond 0.5 contour radii, 1e-3 inside; b₁ = 0 must reduce to the
+    test-pinned <code>cylinder_greens</code>; horizontal/degenerate edges tested. Distances
+    measured to the section CONTOUR, not the centroid.</li>
+    <li><strong>Cost floor</strong> (<code>benchmarks/analytic_cost_floor.py</code>): 12.5–16.1
+    µs/pair, dominated by four complete Π per edge (not the g_p residual quadrature); check the
+    quarter-period cn-factor cancellations early — it is the difference between a 30× and 60×
+    win.</li>
+  </ul>
+
+  <h2>Tiled fixed-shape assembly (§3.2)</h2>
+  <ul>
+    <li><code>nova/biot/tiledassembly.py</code>: memory-budget-derived tiles, padded section
+    edge counts (zero-weight edges) and padded tail tiles — every in-tile kernel call has one
+    identical shape (asserted by test — the vmap/shard precondition), streamed to
+    zarr-chunk-aligned storage.</li>
+    <li>RAM ~48 B/pair + ~1.5 MB fixed block (vs 267 B/pair today, 5.5× leaner, plan-bounded);
+    budget ≥4 MB/worker costs nothing.</li>
+    <li>Core scaling (320 cells, 64 tiles): 1.89× @2, 3.52× @4, 5.68× @8, 8.78× @16 (55%
+    efficiency at 16 with only 4 tiles/worker).</li>
+    <li><strong>Projected 2000-cell exact-everywhere build: 7.1 min on 16 cores</strong>
+    (measured 107 µs/pair rate) — inside the ≤20 min budget with no GPU, no cutoff. With
+    faithful Part V: ~20 s. With the three-band scheme: well under a minute serial.</li>
+  </ul>
+
+  <h2>Near/far evidence (§3.4 — decision input, default unchanged)</h2>
+  <ul>
+    <li><strong>Negative headline: a bare centroid filament NEVER converges to the section.</strong>
+    For a full ring the curvature the second moment multiplies is set by the MAJOR radius, so
+    the error flattens onto an (a/R₀)² floor (~2e-5 for a plasma cell), verified out to 3000
+    section radii. <code>hybrid_greens</code>' far field inherits a ~1e-4 floor no switch value
+    can fix.</li>
+    <li><strong>A second-moment (quadrupole) corrected filament removes the floor</strong> at
+    ~point cost (five Green's evaluations + shoelace second moments): 1e-6 beyond 3.6 (ψ) /
+    6.1 (B) section radii; 1e-8 beyond 8.4–15.6; bottoms near 3e-10.</li>
+    <li>Order-vs-distance (all components ≤1e-6 of peak): 8×24 beyond 2.2 radii; 4×16 beyond
+    6.8; suggested three-band scheme (16×48 / 8×24 / corrected filament) evaluates ~1% of the
+    exact-everywhere node count on a hex lattice. Shapes stay fixed within each band.</li>
+  </ul>
+  <figure>
+    <img src="/nova/figures/biot-operator-assembly/nearfar_correction.png"
+         alt="Bare vs quadrupole-corrected filament far-field error per component"
+         style="max-width:100%">
+    <figcaption>Bare filament error flattens onto the (a/R₀)² floor; the quadrupole-corrected
+    filament decays through 1e-6 at ~6 section radii and 1e-8 at ~16.</figcaption>
+  </figure>
+  <figure>
+    <img src="/nova/figures/biot-operator-assembly/quadrature_order.png"
+         alt="Reduced quadrature order error vs distance per component"
+         style="max-width:100%">
+    <figcaption>Per-component reduced-rule error vs contour distance — the basis of the
+    three-band adaptive-order proposal.</figcaption>
+  </figure>
+
+  <h2>Defect found (reported, not touched — concurrent scope)</h2>
+  <p><code>cylinder_greens</code> is discontinuous across horizontal section faces: targets 1 µm
+  either side of a face plane inside the radial span return ψ = −1.22e-4 / +1.65e-4 where the
+  polygon kernel gives a smooth +2.16e-5 (sign flip, ~5× magnitude; 31/512 spiral targets
+  affected, all at |dz| = half-height). Reproduced and confirmed by the orchestrator on merged
+  develop. Root cause in the <code>corner_fields</code> γ-sign branch terms. Queued as
+  nova-3d-native f-3d-04. Additionally the outside-section B_R gap vs polygon (6.4e-04) is
+  consistent with the retired midpoint zeta and serves as an acceptance number for the
+  fixed-node replacement.</p>
+
+  <h2>What's next</h2>
+  <p>Single follow-on rung queued: transcribe the Part V full-turn closed form (start from
+  α = π/2, complete integrals only, A_φ first — B is already closed-form; read the paper pages
+  as images), lock the kernel-backend decision with a jit/vmap demonstration of the tiled path,
+  and implement the evidence-locked three-band scheme behind the per-component bounds. The
+  coupling default stays point until that lands and the f-psa-04 gate re-opens.</p>
+</main>
+</body>
+</html>

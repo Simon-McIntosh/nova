@@ -48,7 +48,11 @@ def _reference_corner_fields(rs, zs, r4, z4):
     """The Urankar Part III corner antiderivative, spelled out independently.
 
     Uses the shared coefficient primitives in :mod:`nova.biot.constants` plus
-    the midpoint ``zeta`` integral -- the exact formula the kernel replaced.
+    the ``zeta`` integral -- the exact formula the kernel replaced.
+
+    Both spellings drive the same ``zeta``, so what this reference isolates is
+    the algebra of the antiderivative, not the quadrature inside it; the
+    quadrature has its own accuracy gate in ``test_biotzeta``.
     """
     c = Constants(rs, zs, r4, z4)
     zt = zeta(c.rs, c.r, c.gamma, (np.pi / 2) * np.ones_like(rs))
@@ -74,7 +78,12 @@ def _reference_corner_fields(rs, zs, r4, z4):
 
 
 def test_corner_fields_matches_reference_formula():
-    """The single corner antiderivative reproduces the Part III formula exactly."""
+    """The single corner antiderivative reproduces the Part III formula exactly.
+
+    Held at a few ulp rather than a physics tolerance: with the quadrature
+    shared between the two spellings, any drift here is the algebra diverging,
+    and that should never cost more than the last couple of bits.
+    """
     stacks = _corner_stacks(_A, _Z0, _DA, _DZ, _TR, _TZ)
     got = corner_fields(*stacks)
     ref = _reference_corner_fields(*stacks)

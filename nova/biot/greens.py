@@ -25,7 +25,7 @@ which is what a psi field read for topology (axis / X-points / LCFS) requires.
 
 Formulation (rectangular section): closed-form antiderivatives of the
 uniformly-distributed ring current -- complete elliptic integrals K, E, Pi
-(Carlson forms) plus a 1-D ``zeta`` quadrature (midpoint rule on an arcsinh
+(Carlson forms) plus a 1-D ``zeta`` quadrature (fixed-node rule on an arcsinh
 integrand, L. K. Urankar Part III) -- evaluated at the four cross-section
 corners and combined with alternating signs (the standard definite-double-
 integral corner rule), normalised per ampere of total conductor current:
@@ -41,6 +41,8 @@ from __future__ import annotations
 
 import numpy as np
 import scipy.special  # type: ignore[import-untyped]
+
+from nova.biot.zeta import zeta
 
 MU0 = 4.0e-7 * np.pi
 """Vacuum permeability [T.m/A]."""
@@ -135,26 +137,15 @@ def _ellipp(n: np.ndarray, m: np.ndarray) -> np.ndarray:
     return rf + rj * n / 3.0
 
 
-def _zeta(
-    rs: np.ndarray, r: np.ndarray, gamma: np.ndarray, *, points: int = 785
-) -> np.ndarray:
-    """The zeta integral: midpoint quadrature of the arcsinh integrand.
+def _zeta(rs: np.ndarray, r: np.ndarray, gamma: np.ndarray) -> np.ndarray:
+    """The zeta integral over the full arc half-angle range.
 
     zeta = integral arcsinh((rs - r cos phi)/sqrt(gamma^2 + r^2 sin^2 phi)) dalpha
     over alpha in [0, pi/2] with phi = pi - 2 alpha -- the one non-closed-form
-    piece of the cylinder antiderivative.  ``points`` matches the reference
-    resolution (500 per unit alpha -> 785 for pi/2).
+    piece of the cylinder antiderivative.  Delegates to the shared fixed-node
+    quadrature so the cylinder and bow kernels evaluate one and the same rule.
     """
-    alpha_max = np.pi / 2.0
-    dalpha = alpha_max / (points - 1)
-    alpha = np.linspace(0.0, alpha_max, points)[:-1] + dalpha / 2.0  # midpoints
-    phi = np.pi - 2.0 * alpha  # (Q,)
-    sin2 = np.sin(phi) ** 2
-    cosphi = np.cos(phi)
-    # broadcast: (..., 1) against (Q,)
-    g2 = gamma[..., None] ** 2 + r[..., None] ** 2 * sin2
-    integrand = np.arcsinh((rs[..., None] - r[..., None] * cosphi) / np.sqrt(g2))
-    return dalpha * integrand.sum(axis=-1)
+    return zeta(rs, r, gamma, np.pi / 2.0)
 
 
 def corner_fields(

@@ -14,13 +14,13 @@
   <meta name="plan-tier" content="opus">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-depends-on" content="nova-3d-native">
-  <meta name="plan-blocks" content="mast-catalog-gpu-solve">
+  <meta name="plan-blocks" content="mast-catalog-gpu-solve,polybow-arc-section,polybeam-prism-section">
   <title>Biot Operator Assembly | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-25">
 <meta name="plan-impl" content="0.9">
-<meta name="plan-version" content="6">
+<meta name="plan-version" content="7">
 </head>
 <body>
   <main class="plan-doc">
@@ -265,6 +265,16 @@
       </p>
     <p class="r-dec-rat">Prototype measured (nova/biot/tiledassembly.py): budget-derived tiles with padded fixed shapes hold RAM at ~48 B/pair + ~1.5 MB fixed block (vs 267 B/pair today, and plan-bounded rather than problem-bounded), stream tile-&gt;zarr chunk-aligned, and scale 8.8x at 16 cores. Budgets &gt;=4 MB/worker cost nothing; 1 MB forces the quadrature block down and costs 1.6x. Target-major strips would reproduce today&#x27;s target-axis RAM fragility (13 GB/chunk at 100k targets).</p>
     </div>
+<div class="r-dec" data-key="closed-form-device" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">The closed form needs elliptic integrals and JAX has NONE of them (no ellipk, ellipe, elliprf, elliprg, elliprj in jax.scipy.special, verified). The locked kernel-backend is a single traced JAX path. How does exact coupling reach a device?</p>
+    <p class="r-dec-ctx">The quadrature kernel is pure arithmetic and traces cleanly, which is why the backend benchmarks used it (78.8 us/pair jit on 16 CPU cores, 7.4 on one H200). The closed form calls scipy&#x27;s Carlson forms and therefore cannot enter a traced tile at all. Cost context, measured on 200k evaluations: ellipk 1.8 ms, elliprf 7.0, elliprg 8.4, elliprj 40.1 - the THIRD KIND dominates, and the reduction needs four complete Pi per edge, so the third-kind routine is the cost-critical choice rather than K and E.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="numpy-near-band-only">closed form stays on numpy, near band only</button>
+      <button class="r-opt" data-value="jax-native-primitives">implement complement-exact elliptic primitives in JAX</button>
+      <button class="r-opt" data-value="hybrid-device-dispatch">traced quadrature on device, closed form on host, one build</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
 </section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
@@ -503,7 +513,7 @@ Done-when
     </article>
 <article class="r-fu" data-id="f-boa-06" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-25T16:30:00+00:00" data-recommends-skill="/reckon-ship biot-operator-assembly" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Take the complete elliptic integrals through their complement in the point-filament kernels too</h4>
-    <div class="r-fu-body"><p>The vertex work established that <code>scipy.special.ellipk(m)</code> and <code>ellipe(m)</code> lose the modulus complement to rounding, returning K wrong by about eps/k'^2, and replaced them with Carlson forms that take the complement exactly. <code>nova/biot/greens.py</code> still calls them the parameter way for the POINT-filament Green's functions, and k^2 -> 1 there is the near field - the zone where the point kernel's error already concentrates and where the plasma bundle evaluates. It clips k^2 at 1 - 1e-12, which caps the induced error near 1e-5 relative and turns a target on the filament into a finite but wrong answer rather than a divergence: a floor of exactly the kind just removed from the closed form, sitting in the most-used kernel in the module. <code>nova/equilibrium/harmonic.py</code> shares the call pattern with the parameter approaching unity in the far field.</p></div>
+    <div class="r-fu-body"><p>The vertex work established that <code>scipy.special.ellipk(m)</code> and <code>ellipe(m)</code> lose the modulus complement to rounding, returning K wrong by about eps/k'^2, and replaced them with Carlson forms that take the complement exactly. <code>nova/biot/greens.py</code> still calls them the parameter way for the POINT-filament Green's functions, and k^2 -&gt; 1 there is the near field - the zone where the point kernel's error already concentrates and where the plasma bundle evaluates. It clips k^2 at 1 - 1e-12, which caps the induced error near 1e-5 relative and turns a target on the filament into a finite but wrong answer rather than a divergence: a floor of exactly the kind just removed from the closed form, sitting in the most-used kernel in the module. <code>nova/equilibrium/harmonic.py</code> shares the call pattern with the parameter approaching unity in the far field.</p></div>
     <pre class="r-fu-prompt">Project: nova
 Plan:    biot-operator-assembly (http://127.0.0.1:8765/nova/biot-operator-assembly.html)
 Section: complement-exact elliptic seeds in the point kernels
@@ -547,6 +557,118 @@ Done-when
      re-measured.
   3. Full fast lane clean.
   4. Followup written; this followup resolved.</pre>
+    </article>
+<article class="r-fu" data-id="f-boa-07" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-25T17:10:00+00:00" data-recommends-skill="/reckon-ship biot-operator-assembly" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Build complement-exact elliptic primitives, in numpy and in JAX, and adopt them everywhere</h4>
+    <div class="r-fu-body"><p>Two problems with one root. The vertex work established that passing the PARAMETER to <code>ellipk</code>/<code>ellipe</code> destroys the modulus complement and costs ~eps/k'^2; the closed form now uses Carlson forms that take the complement, but <code>nova/biot/greens.py</code> and <code>nova/equilibrium/harmonic.py</code> still use the parameter form. Separately, JAX has NO elliptic integrals whatsoever, so the closed form cannot enter the traced tile path that the locked kernel-backend selected. One coherent piece of work fixes both: a complement-native elliptic primitive set with a numpy and a JAX implementation, pinned against each other and against scipy's Carlson routines.</p><p>Algorithm choice is the substance, not a detail. Measured on 200k evaluations: <code>ellipk</code> 1.8 ms, <code>elliprf</code> 7.0, <code>elliprg</code> 8.4, <code>elliprj</code> 40.1. The four complete Pi per edge dominate, so the third kind decides the cost.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    biot-operator-assembly (http://127.0.0.1:8765/nova/biot-operator-assembly.html)
+Section: complement-exact elliptic primitives, host and device
+Tier:    opus
+
+Context
+  Every complete elliptic integral in nova should take the modulus COMPLEMENT, because a
+  float parameter cannot carry it: ellipk(1 - k&#x27;^2) disagrees with elliprf(0, k&#x27;^2, 1) by
+  2.3e-05 at k&#x27;^2 = 1e-14 and 2.6e-03 at 1e-16. The polygon closed form was fixed this way
+  and every one of its accuracy envelopes improved, by up to 84x. Two gaps remain: the point
+  kernels still use the parameter form, and JAX has no elliptic integrals at all, which blocks
+  the closed form from the traced tile path.
+
+State to read
+  nova/biot/elliptic.py -- _complete_kind, complete_pi with its parameter_complement, the
+    moment families, and the docstrings explaining why the complement must be carried;
+  nova/biot/greens.py -- greens_psi, greens_bz_br, cylinder_greens, hybrid_greens, and the
+    np.clip(k2, 0, 1 - 1e-12) that floors the near field today;
+  nova/equilibrium/harmonic.py -- the Legendre ladder&#x27;s ellipk/ellipe seeds;
+  nova/biot/tiledassembly.py -- the traced tile evaluator the primitives must survive
+    (one compilation per build, fixed shapes, no data-dependent branching);
+  benchmarks/analytic_cost_floor.py -- where the primitive costs are reported.
+
+Algorithm guidance (measured, and the point of the exercise)
+  - Carlson R_F/R_G/R_J are the reference and are already trusted through scipy on the host
+    path, but R_J is 5.7x R_F and 22x ellipk, and the reduction needs FOUR complete Pi per
+    edge. Do not assume Carlson is the right DEVICE algorithm just because it is the right
+    host one.
+  - Bulirsch&#x27;s `cel(kc, p, a, b)` is the strongest candidate for the device: its natural
+    argument IS the complementary modulus, one routine covers K, E and the complete third
+    kind, and it is generally cheaper than R_J. Its iteration needs a fixed trip count to
+    trace and to differentiate.
+  - AGM is the cheapest route to K and E specifically (K = pi/(2 AGM(1, k&#x27;)), quadratic
+    convergence, complement-native) and is worth having where the third kind is not needed.
+  - Whatever is chosen must jit AND vmap with a FIXED trip count and no data-dependent
+    branching, and must be differentiable -- nova differentiates through solves, so a
+    while_loop with a convergence test is not acceptable. Bound the iteration count from the
+    argument range and assert the bound in a test rather than trusting it.
+  - Pin the JAX implementation against the numpy one and both against scipy&#x27;s Carlson
+    routines across k&#x27;^2 from 1e-16 to 1, characteristics spanning both signs and approaching
+    unity, in float64 (enable jax x64).
+
+Scope locks / constraints
+  Work in a detached worktree off develop; the primary checkout stays on main. Removing the
+  greens.py clip changes behaviour AT a filament, where the field is genuinely singular --
+  decide deliberately what a coincident target returns and test it. The banded scheme&#x27;s
+  moment-corrected filament builds on those kernels, so its recorded per-band errors are a
+  downstream check: they must not regress.
+
+Done-when
+  1. A measured statement of what the parameter route costs in the near field, so the greens.py
+     change is justified by evidence rather than by analogy (closing it as not worth the churn
+     is a legitimate outcome for that half).
+  2. Complement-native primitives in numpy, adopted by greens.py and harmonic.py where the
+     measurement justifies it, with the banded per-band errors re-measured.
+  3. A JAX implementation of the same primitives, jit and vmap clean with a fixed trip count,
+     differentiable, pinned against the host route; the closed form demonstrated evaluating
+     inside a traced tile on CPU and, if a device is free, on the H200.
+  4. Primitive costs re-measured on a compute node and recorded; the closed-form cost floor
+     re-stated (two thirds of it is the moment stacks today).
+  5. The closed-form-device decision locked with those measurements.
+  6. Followup written; this followup resolved.</pre>
+    </article>
+<article class="r-fu" data-id="f-boa-08" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-25T17:14:00+00:00" data-recommends-skill="/reckon-ship biot-operator-assembly" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Make the closed form the shipped route for exact polygon coupling and re-open the plasma default flip</h4>
+    <div class="r-fu-body"><p>The closed form is a verified library function with no callers: it is absent from the candidates registry, unreachable from <code>PolySection</code>, and has no element class. Meanwhile the shipped defaults are a point filament for plasma cells (<code>segment="circle"</code>) and exact-everywhere 16x48 quadrature for the opt-in <code>PolySection</code>. This rung wires the closed form in and flips what it is safe to flip. The cost case is already made - 134 us/pair against 858 for the 16x48 rule, so it is 6.4x faster AND more accurate near the contour, where a quadrature has nothing to converge to; the natural architecture is the closed form taking the NEAR band while the banded scheme keeps mid and far.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    biot-operator-assembly (http://127.0.0.1:8765/nova/biot-operator-assembly.html)
+Section: adopt the closed form as the shipped exact route
+Tier:    opus
+
+Context
+  nova/biot/polygonanalytic.py evaluates the full-turn polygon-section flux and both field
+  components in closed form, is finite at vertices and edge levels, and holds the 1e-10 far
+  band on both field components across all four gate sections. It is referenced by nothing
+  but its own tests and one benchmark. The shipped defaults remain a point filament for
+  plasma cells and 16x48 boundary quadrature for PolySection.
+
+Prerequisites (check before starting; STOP and report if unmet)
+  - f-boa-04: the flux gate. Registering in CANDIDATES while the flux is 2-12x outside
+    1e-10 means committing a failing test. If that rung has not landed, this one cannot
+    complete step 1 and should not start.
+  - closed-form-device decision: whether exact coupling reaches a device at all shapes the
+    dispatch this rung writes. f-boa-07 supplies the measurements.
+
+State to read
+  nova/biot/polysection.py -- section_greens, the standoff/quadrature/banded ClassVars and
+    the configured() scoping helper that any new route must join;
+  nova/biot/bandedcoupling.py -- band assignment and the three treatments, the near band
+    being what the closed form would replace;
+  tests/test_biotpolygonanalytic.py -- CANDIDATES and the full gate a new entry inherits;
+  nova/biot/solve.py -- the element registry PolySection is reached through;
+  nova/frame/metaframe.py and nova/frame/coil.py -- segment = &quot;circle&quot; is the shipped
+    plasma-cell coupling; the flip is gated on the physics-spine-adoption f-psa-04 criteria.
+
+Done-when
+  1. The closed form registered in CANDIDATES with the full equivalence gate green.
+  2. Reachable through PolySection as a scoped route alongside exact and banded, and used for
+     the NEAR band of the banded scheme, with the banded per-component envelopes re-measured
+     and improved or unchanged (the near band is currently bit-identical to the 16x48 rule,
+     so this is where the accuracy gain lands).
+  3. A measured cost statement for a real plasma-grid build through the new route, on a
+     compute node, against the 858 us/pair exact and 13.1 us/pair banded figures, and the
+     projected 2000-cell first build updated in benchmarks/BASELINE.md.
+  4. An explicit recommendation on the plasma-coupling default, checked against the
+     f-psa-04 criteria, with the numbers to support it. Do not flip the shipped default
+     without that check passing; say so plainly if it does not.
+  5. Followup written; this followup resolved.</pre>
     </article>
 </section>
 

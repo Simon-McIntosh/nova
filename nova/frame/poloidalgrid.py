@@ -2,7 +2,6 @@
 
 from dataclasses import dataclass, field
 
-import numpy as np
 
 from nova.frame.columnar import is_list_like
 from nova.frame.coilsetattrs import GridAttrs
@@ -59,29 +58,6 @@ class PoloidalGrid(GridAttrs):
         self.update_loc_indexer()
         return index
 
-    @staticmethod
-    def thick_filament_segment(data, polygrid) -> dict:
-        """Return a segment override coupling polygonal plasma cells exactly.
-
-        A point-filament ring is log-singular at its own location, so a plasma
-        cell evaluated at or next to itself picks up a spurious near-field
-        spike. Where the mesh is polygonal throughout — hexagonal cells plus the
-        polygons the first wall clips them into — the cells are handed to the
-        exact polygon-section element instead
-        (:class:`nova.biot.polysection.PolySection`).
-
-        Only plasma meshes are promoted. Other conductors meshed into polygonal
-        turns keep the coupling they were built with: promoting them is
-        defensible on the same grounds but moves their numbers and their cost,
-        which is a separate decision from the plasma mesh.
-        """
-        if not data.get("plasma", False):
-            return {}
-        section = set(np.asarray(polygrid.frame["section"]).tolist())
-        if not section or not section <= {"hexagon", "polygon"}:
-            return {}
-        return {"segment": "polysection"}
-
     def subframe_insert(self, index):
         """
         Insert subframe(s).
@@ -107,7 +83,6 @@ class PoloidalGrid(GridAttrs):
                 "delim": "_",
                 "link": True,
             }
-            data |= self.thick_filament_segment(data, polygrid)
             if turncurrent is not None:
                 current = (
                     turncurrent[i]

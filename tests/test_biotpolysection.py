@@ -149,12 +149,19 @@ def test_the_near_band_is_a_small_fraction_of_a_grid():
 # --- the coilset wiring -----------------------------------------------------
 
 
-def test_a_hexagonal_plasma_cell_is_coupled_as_a_thick_filament():
-    """Plasma cells carry the polygon segment, not the log-singular point loop."""
+def test_a_hexagonal_plasma_cell_keeps_point_coupling_for_now():
+    """Plasma cells stay on the point-filament ring pending the operator review.
+
+    The polygon-section element exists (and is pinned above) but is not yet
+    the plasma default: the near/far standoff needed to make it affordable
+    demands a principled cutoff and a parallel/batchable operator-assembly
+    design, which is under review. Until then the interaction matrix keeps
+    the point kernel everywhere rather than a blend with an ad-hoc band.
+    """
     coilset = CoilSet(dplasma=-40)
     coilset.firstwall.insert({"e": [1.0, 0, 0.3, 0.4]}, Ic=1e6)
     segment = set(np.asarray(coilset.subframe.segment).tolist())
-    assert segment == {"polysection"}
+    assert segment == {"circle"}
 
 
 def test_the_plasma_grid_defaults_to_hexagonal_cells():

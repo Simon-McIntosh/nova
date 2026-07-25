@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="archive">
+  <meta name="plan-slug" content="biot-operator-assembly-closed-form-gate-landed">
+  <meta name="plan-title" content="Closed-form acceptance gate — landed">
+  <meta name="plan-status" content="historical">
+  <meta name="plan-modified" content="2026-07-25">
+  <title>biot-operator-assembly closed-form gate landed | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>The closed form clears its acceptance gate — harmonic numerators and an
+  analytic logarithm removal</h1>
+  <p><a href="/nova/biot-operator-assembly.html">← back to the evergreen plan</a> ·
+     landed 2026-07-25 · develop merge <code>7e5b49b0</code>
+     (<code>f6cd47be</code>, <code>a6e9a338</code>) · fast lane 1423 passed / 89
+     skipped / 0 failed</p>
+
+  <h2>Quick status</h2>
+  <table>
+    <thead><tr><th>Item</th><th>Status</th><th>Where</th></tr></thead>
+    <tbody>
+      <tr><td>Harmonic <code>cos 2n a</code> numerator basis, with each numerator's two
+          END values carried exactly from the geometry</td>
+          <td>✓ shipped</td><td><code>nova/biot/polygonanalytic.py</code></td></tr>
+      <tr><td>Harmonic moment families: plain, radical-weighted, and one per pole
+          factor</td>
+          <td>✓ shipped</td><td><code>nova/biot/elliptic.py</code></td></tr>
+      <tr><td>Analytic removal of the residual quadratures' boundary logarithm</td>
+          <td>✓ shipped</td><td><code>nova/biot/polygonanalytic.py</code></td></tr>
+      <tr><td>Closed form registered in <code>CANDIDATES</code>, full gate green</td>
+          <td>✓ shipped</td><td><code>tests/test_biotpolygonanalytic.py</code></td></tr>
+      <tr><td>Both accuracy tables re-measured and asserted in both directions</td>
+          <td>✓ shipped</td><td>same</td></tr>
+      <tr><td>Cost re-measured on a compute node, benchmark primitives updated</td>
+          <td>✓ shipped</td><td><code>benchmarks/analytic_cost_floor.py</code></td></tr>
+      <tr><td>Difference-before-assembly (the second route the rung listed)</td>
+          <td>not needed — see below</td><td>—</td></tr>
+    </tbody>
+  </table>
+
+  <figure>
+    <img src="/nova/figures/biot-operator-assembly/closed_form_envelope.png"
+         alt="Accuracy against section aspect ratio, per-section far-band envelope, on-vertex accuracy, and cost breakdown, before and after"
+         style="max-width:100%">
+    <figcaption>(a) The aspect sweep is now nearly flat and an order to three
+    inside the gate; the field stays the better-conditioned component throughout.
+    (b) Every gate section holds the 1e-10 far band on every component, which is
+    what registers the closed form as a candidate. (c) A target ON a section
+    vertex: the logarithm the residual quadratures carry there is removed in closed
+    form rather than resolved, worth five orders on three of the four sections.
+    (d) The cost of it: the moment work got cheaper, and the residual quadrature
+    became the whole story.</figcaption>
+  </figure>
+
+  <h2>What was wrong, and it was not the reduction</h2>
+  <p>Per edge and per limit the reduction already reproduced its own integral to
+  1e-14. What kept the assembled flux 2–12× outside the 1e-10 gate was round-off,
+  amplified twice on the way to a section total. Both factors were measured before
+  anything was changed, on each section's own worst target:</p>
+  <table>
+    <thead><tr><th>section</th><th>within-edge cancellation</th>
+      <th>across-edge cancellation</th><th>per-limit error</th></tr></thead>
+    <tbody>
+      <tr><td>hexagon</td><td>1.8e+02</td><td>35</td><td>816 ulp</td></tr>
+      <tr><td>rectangle</td><td>1.9e+01</td><td>35</td><td>36 ulp</td></tr>
+      <tr><td>thin plate</td><td>1.2e+04</td><td>27</td><td>7958 ulp</td></tr>
+      <tr><td>trapezium</td><td>2.1e+04</td><td>6.7</td><td>952 ulp</td></tr>
+    </tbody>
+  </table>
+  <p>The cancellation is the Stokes reduction itself and cannot be removed: the
+  edge antiderivative is of order the squared major radius while the flux the two
+  limits differ by is not, and the shipped boundary quadrature carries exactly the
+  same structure. What distinguishes the two is the third column. The quadrature's
+  per-limit values are accurate to about one ulp, which is why it lands at 2.4e-12;
+  the closed form's were accurate to hundreds, and hundreds times the same
+  cancellation is 1e-9. <strong>So the lever was per-limit accuracy, and the
+  routes that address the cancellation itself were not needed.</strong></p>
+
+  <h2>Where the hundreds of ulp came from</h2>
+  <p>Instrumenting every contraction inside one edge limit found numerators of
+  degree six carrying monomial coefficients up to 1e+09 against contractions
+  returning 1e+06 — the monomial basis on a unit interval is conditioned at four
+  decades by degree six, and the answer was being formed out of terms that exceeded
+  it by as much. The two deepest were the same term in the flux and in the radial
+  field: the <code>arsinh β₂</code> weight against the plane denominator.</p>
+  <p>The cure is the harmonic basis, whose coefficients are bounded by the
+  numerator's own size and whose moments decay. It cannot be applied naively,
+  because it pulls against the pole treatment that the previous rung installed: a
+  root a squared-aspect-ratio past the range end makes that pole's own moment
+  large, so the weight on it — the numerator's value AT that end — has to be exact
+  in the RELATIVE sense, and in a harmonic series that value is an alternating sum.
+  Each range function is therefore carried as</p>
+  <pre>N = N(phi = 0) x  +  N(phi = pi) y  +  x y T</pre>
+  <p>with both end values formed from the geometry and only the bulk as a series.
+  Products multiply end values and sums add them, so exactness survives the
+  algebra; and because <code>x y/(y + p)</code> is bounded by one, whatever
+  rounding is left in the bulk reaches the answer unamplified however close the
+  root comes. Splitting a denominator also stops being a root-finding problem —
+  its two shifts follow from its own two end values and its <code>x y</code>
+  coefficient, with no subtraction anywhere.</p>
+
+  <h2>Three new moment families, and why the third needed two routes</h2>
+  <p>A harmonic numerator needs harmonic moments. All three come from
+  <code>Delta^2 = (1 + k'^2)/2 + (k^2/2) cos 2a</code> folding back under the
+  integral:</p>
+  <ul>
+    <li><code>P_n = int cos(2na)/Delta da</code> obeys a three-term relation and is
+    its MINIMAL solution, so it is run downward — on the RATIOS, which stay bounded
+    where the moments themselves would overflow at a far target, and which carry
+    <code>k^2 = 0</code> exactly. Downward fails only as <code>k^2 -> 1</code>,
+    where the branches become degenerate; there it is run upward on
+    <code>R_n = P_n - (-1)^n K</code>, the difference from the divergence every
+    order shares. Validated against a 40-digit reference from <code>k'^2 = 1</code>
+    to <code>1e-14</code>: worst 15 ulp of <code>K</code>.</li>
+    <li><code>D_n = int cos(2na) Delta da</code> is three neighbouring
+    <code>P</code>, no new special function.</li>
+    <li><code>V_n</code>, one per pole factor. A NEAR root is handled by taking its
+    weight out exactly, as above; a FAR root is the opposite case and the exact-weight
+    route is wrong for it — its terms grow with the shift while their sum falls, and
+    at a shift of a hundred it has thrown away four decades. That was the one real
+    bug this rung found, and it showed up as a 1.7e-07 disagreement on a b₁ = 0.1
+    edge. The far route contracts the family's own moments directly, and the family
+    is a diagonally-dominant tridiagonal solve closed thirty-two orders out.</li>
+  </ul>
+
+  <h2>The corner: a logarithm removed rather than resolved</h2>
+  <p>Both residual <code>arsinh</code> integrands turn genuinely log-singular at a
+  range end whenever the target is level with an edge end, on an edge's extended
+  line, or on a vertex — all of which a grid across a section produces by
+  alignment. No panel grading resolves a logarithm; the previous
+  <code>_LAYER_FLOOR</code> constant recorded that as a measured trade-off. It is
+  now removed instead:</p>
+  <pre>arsinh(N/W) = log(N + sqrt(N^2 + W^2)) - log W</pre>
+  <p>with the first term bounded, so subtracting a model of <code>log W</code> that
+  matches the denominator's own expansion at that end leaves a bounded integrand,
+  and the model's integral is elementary. Two details had to be right for it to
+  work: the branch follows the sign of the numerator's value AT the end (exactly
+  zero there means the numerator vanishes with the denominator and no logarithm
+  survives — the vertex case), and the numerator's sign can turn over INSIDE the
+  half, where that branch's own sum cancels and has to be recovered through
+  <code>W^2</code> from the other one. Missing the second cost three orders and
+  looked like the method failing.</p>
+  <p>The gain is where it was aimed: a target on a vertex went from 1.9e-07 to
+  3.2e-12 on the hexagon and 2.2e-07 to 3.3e-12 on the thin plate, with no change
+  in node count. The one thing that got worse is a target a PICOMETRE off a corner,
+  where the panel still reaches only the floor: 5e-10 to 5.5e-08, five orders
+  inside the band either way, and recorded as such.</p>
+
+  <h2>The envelope, both directions</h2>
+  <table>
+    <thead><tr><th>section</th><th>far band before</th><th>far band after</th>
+      <th>near band before</th><th>near band after</th></tr></thead>
+    <tbody>
+      <tr><td>hexagon</td><td>3e-10</td><td><strong>6.2e-12</strong></td><td>4e-10</td><td>6.2e-12</td></tr>
+      <tr><td>rectangle</td><td>4e-12</td><td><strong>1.6e-12</strong></td><td>7e-11</td><td>3.9e-11</td></tr>
+      <tr><td>thin plate</td><td>2e-09</td><td><strong>6.0e-11</strong></td><td>3e-10</td><td>5.6e-12</td></tr>
+      <tr><td>trapezium</td><td>4e-10</td><td><strong>6.5e-12</strong></td><td>2e-11</td><td>3.6e-12</td></tr>
+    </tbody>
+  </table>
+  <p>Every entry is inside the 1e-10 the CANDIDATES sweep applies, which is what
+  registers the closed form there; the margin is 1.7× on the thin plate's far band
+  and one to two orders everywhere else. The aspect sweep moved by 55× to 764×
+  across its five entries and the field's by 6.5× to 185×. All eight table entries
+  are asserted in both directions, so the next improvement has to update them.</p>
+
+  <h2>Cost, honestly</h2>
+  <p>One SLURM compute core, 4096 pairs against a hexagonal cell, median of three
+  in a fresh process:</p>
+  <table>
+    <thead><tr><th>component</th><th>previous, 64 nodes</th>
+      <th>harmonic, 64 nodes</th><th>harmonic, 128 nodes</th></tr></thead>
+    <tbody>
+      <tr><td>third-kind seeds</td><td>17.1</td><td>17.5</td><td>16.9</td></tr>
+      <tr><td>moment stacks and all</td><td>52.1</td><td>39.9</td><td>40.4</td></tr>
+      <tr><td>residual quadrature</td><td>40.8</td><td>71.1</td><td>144.2</td></tr>
+      <tr><td>floor</td><td>92.9</td><td>111.0</td><td>184.6</td></tr>
+      <tr><td><strong>assembled psi + field</strong></td><td><strong>148.9</strong></td>
+        <td><strong>167.0</strong></td><td><strong>330.2</strong></td></tr>
+    </tbody>
+  </table>
+  <p>The evaluation is <strong>2.2× more expensive than it was</strong> and still
+  2.6× cheaper than the 858 µs/pair boundary quadrature it replaces, while being
+  one to two orders more accurate and — unlike the quadrature — accurate ON the
+  contour, where the 16×48 rule is at 2.6e-04.</p>
+  <p>Where the 181 µs went, and it is not the harmonic algebra: the moment work got
+  CHEAPER by 12 µs, because one harmonic family replaces two power stacks each with
+  sixty orders of downward-recursion headroom, and the four pole families that used
+  to sit on top of them are now skipped entirely unless some root is far enough out
+  to need one. The whole increase is the residual quadrature. Half of it is the node
+  count, doubled because the most slender section's near-contour targets do not
+  converge at 64 — that limit is pre-existing and unrelated to this rung, measured
+  identically on the previous code. The other half is what the regularised integrand
+  costs per node.</p>
+  <p>The coefficient algebra started at 2.3× the floor and was brought back to 1.79×
+  by four changes: the range-function product collapses its two end-value terms onto
+  the single two-term series they span, products that carry no component weight are
+  formed once for all three rows, the arctangent's antiderivative is built from
+  scalars rather than once per column, and the pole family is skipped where no root
+  needs it.</p>
+
+  <h2>The next cost win, and it is structural</h2>
+  <p>Both the first residual quadrature and the entire moment stack depend only on
+  the target and the edge's ENDPOINT — <code>u</code>, the endpoint radius, and the
+  modulus they set — not on the edge's slope. Every vertex of a closed section is
+  the endpoint of two edges, so a vertex-organised assembly would form them once
+  instead of twice, taking roughly 40% off the current figure. The same observation
+  says the <code>arsinh β₁</code> term TELESCOPES to zero over a closed polygon with
+  no horizontal edge, since it too is a function of the vertex alone — it is being
+  computed and cancelled at present.</p>
+</main>
+</body>
+</html>

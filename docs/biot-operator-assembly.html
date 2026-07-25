@@ -19,8 +19,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-25">
-<meta name="plan-impl" content="0.9">
-<meta name="plan-version" content="7">
+<meta name="plan-impl" content="0.93">
+<meta name="plan-version" content="8">
 </head>
 <body>
   <main class="plan-doc">
@@ -192,6 +192,42 @@
         <code>ae1a8c39</code>; full record:
         <a href="/nova/biot-coupling-schemes-findings.html">coupling-schemes findings</a>.
       </p>
+    </section>
+
+    <section id="s5-landed" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ closed-form acceptance gate landed 2026-07-25</span>
+        <h2>The closed form clears its gate and becomes a candidate — landed</h2>
+      </header>
+      <p class="landed-summary">
+        <strong>All four gate sections now hold the 1e-10 far band on all three
+        components</strong> — hexagon 6.2e-12, rectangle 1.6e-12, trapezium 6.5e-12,
+        thin plate 6.0e-11, against 3e-10/4e-12/4e-10/2e-09 — so
+        <code>polygon_analytic_greens</code> is registered in <code>CANDIDATES</code>
+        and inherits the whole gate. The aspect sweep moved 55–764× and the field's
+        6.5–185×; a target ON a vertex went from 1.9e-07 to <strong>3.2e-12</strong>.
+        The lever was per-limit accuracy, not the section sum's cancellation:
+        measured, the cancellation is 1e4 and intrinsic (the shipped quadrature has
+        it too), while each per-limit value was accurate to hundreds of ulp rather
+        than one, because the reduced numerators reach degree six and the monomial
+        basis is conditioned at four decades by then. They are now carried as their
+        two exact end values plus a bulk in <code>cos 2n a</code>, contracted against
+        three new moment families; and the residual quadratures' boundary logarithm
+        is removed in closed form rather than resolved, which is what carries the
+        corner. <strong>Cost 330 µs/pair at the 128 residual nodes the gate needs</strong>
+        (was 149), still 2.6× under the 858 µs boundary quadrature, and the next win
+        is structural — the first residual and the whole moment stack are functions
+        of the VERTEX, not of the edge. Merged to develop <code>7e5b49b0</code>; lane
+        1423 passed / 89 skipped / 0 failed. Full record:
+        <a href="archive/biot-operator-assembly-closed-form-gate-landed.html">closed-form gate landed</a>.
+      </p>
+      <figure>
+        <img src="/nova/figures/biot-operator-assembly/closed_form_envelope.png"
+             alt="Accuracy against section aspect ratio, per-section far-band envelope, on-vertex accuracy and cost breakdown, before and after"
+             style="max-width:100%">
+        <figcaption>What the harmonic numerator basis and the analytic logarithm
+        removal bought, and what they cost.</figcaption>
+      </figure>
     </section>
 
     <h2 id="s3">§3 — Research questions</h2>
@@ -423,7 +459,7 @@ Done-when
      beside the full-turn figure.
   5. Followup written; this followup resolved.</pre>
     </article>
-<article class="r-fu" data-id="f-boa-04" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-25T15:10:00+00:00" data-recommends-skill="/reckon-ship biot-operator-assembly" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-boa-04" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-25T15:10:00+00:00" data-recommends-skill="/reckon-ship biot-operator-assembly" data-resolved-at="2026-07-25T19:58:53+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Close the last 3-20x to the closed-form acceptance gate by removing two post-reduction cancellations</h4>
     <div class="r-fu-body"><p>The reduction itself is done: per edge and per limit it reproduces its own integral to 1e-14, node-independent from 48 to 384 nodes, and the aspect-ratio degradation is cured. What keeps the flux 3-20x outside the 1e-10 gate is round-off through two cancellations that happen after the reduction — the edge/limit differencing (eight per-edge values of ~174.71 summing to 2.34e-03 on the thin plate, 7.1e3, and another 10x across edges) and the monomial-basis contraction (coefficients reaching 1e7 returning 1e4, so terms exceed their sum by 1e5, putting each edge value at ~270 eps rather than a few). Neither is reachable by a better pole split.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -470,6 +506,7 @@ Done-when
      downward-recursion headroom rather than by the nine orders the numerators reach — that
      is the next cost win if it comes cheaply.
   4. Followup written; this followup resolved.</pre>
+    <p class="r-fu-outcome">Landed on develop (merge 7e5b49b0; commits f6cd47be, a6e9a338; fast lane 1423 passed / 89 skipped / 0 failed). ALL FOUR GATE SECTIONS NOW HOLD THE 1e-10 FAR BAND ON ALL THREE COMPONENTS - hexagon 6.2e-12, rectangle 1.6e-12, trapezium 6.5e-12, thin plate 6.0e-11, against 3e-10/4e-12/4e-10/2e-09 - so the closed form is registered in CANDIDATES and inherits the whole gate; the aspect sweep moved 55-764x and the field's 6.5-185x, and all eight table entries are asserted in both directions. MEASURING FIRST CHANGED THE PLAN: of the two routes the rung listed, only the first was needed. The section sum's cancellation was measured at 1.8e2-2.1e4 within an edge and 7-35 across edges, and it is INTRINSIC - the shipped boundary quadrature carries the identical structure and lands at 2.4e-12 purely because its per-limit values are accurate to one ulp where the closed form's were accurate to 36-7958. So difference-before-assembly was not implemented and is not wanted; the lever was per-limit accuracy alone. Contraction tracing found degree-six numerators with monomial coefficients reaching 1e9 against contractions returning 1e6 - the monomial basis on a unit interval is conditioned at four decades by degree six. Every numerator is now carried as its two END values, exact from the geometry (a pole on an end multiplies one of them, and no harmonic series delivers a value that is itself of order the squared aspect ratio), plus a bulk in cos 2n a; products multiply end values and sums add them, so exactness survives the algebra, and the denominator split falls out of the same two end values with no root-finding and no subtraction. Three new moment families in elliptic.py: the plain harmonic one (minimal solution of its own three-term relation, run downward on RATIOS so a far target cannot overflow and k^2 = 0 is exact, and upward on the divergence-free difference at the confluence; validated to 15 ulp of K against a 40-digit reference from k'^2 = 1 to 1e-14), its radical-weighted fold, and one per pole factor. THE ONE REAL BUG THIS RUNG FOUND: the exact-end-value route is WRONG for a FAR root - its terms grow with the shift while their sum falls, throwing away four decades at a shift of a hundred - so a far root contracts the family's own moments directly instead, and the family is a diagonally-dominant tridiagonal solve closed 32 orders out. THE CORNER, folded in as asked: both residual arsinh integrands are genuinely log-singular at a range end whenever the target is level with an edge end, on an edge's line, or on a vertex, and no grading resolves a logarithm - it is removed in closed form against a model matching the denominator's own expansion, taking a target ON a vertex from 1.9e-07 to 3.2e-12 (hexagon) and 2.2e-07 to 3.3e-12 (thin plate) at no node cost, and retiring _LAYER_FLOOR from a trade-off to a guard. A picometre OFF a corner got worse, 5e-10 to 5.5e-08, five orders inside the band either way and recorded. COST, honestly: 330 us/pair at the 128 residual nodes the gate needs, against 149 before - 2.2x more expensive and still 2.6x under the 858 us/pair boundary quadrature it replaces, while being one to two orders more accurate and accurate ON the contour where the 16x48 rule is at 2.6e-04. The moment work got CHEAPER (52.1 to 40.4) because one harmonic family replaces two 60-headroom power stacks and the pole families are skipped where no root needs them; the whole increase is the residual quadrature, half of it the node count (a pre-existing limit, measured identically on the previous code) and half the regularised integrand. Coefficient algebra brought from 2.3x its floor to 1.79x. Record: archive/biot-operator-assembly-closed-form-gate-landed.html</p>
     </article>
 <article class="r-fu" data-id="f-boa-05" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-25T15:12:00+00:00" data-recommends-skill="/reckon-ship biot-operator-assembly" data-resolved-at="2026-07-25T16:15:48+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Evaluate a target landing exactly on a section vertex rather than returning a non-finite value</h4>
@@ -626,7 +663,7 @@ Done-when
     </article>
 <article class="r-fu" data-id="f-boa-08" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-25T17:14:00+00:00" data-recommends-skill="/reckon-ship biot-operator-assembly" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Make the closed form the shipped route for exact polygon coupling and re-open the plasma default flip</h4>
-    <div class="r-fu-body"><p>The closed form is a verified library function with no callers: it is absent from the candidates registry, unreachable from <code>PolySection</code>, and has no element class. Meanwhile the shipped defaults are a point filament for plasma cells (<code>segment="circle"</code>) and exact-everywhere 16x48 quadrature for the opt-in <code>PolySection</code>. This rung wires the closed form in and flips what it is safe to flip. The cost case is already made - 134 us/pair against 858 for the 16x48 rule, so it is 6.4x faster AND more accurate near the contour, where a quadrature has nothing to converge to; the natural architecture is the closed form taking the NEAR band while the banded scheme keeps mid and far.</p></div>
+    <div class="r-fu-body"><p>The closed form now clears its whole acceptance gate and is registered as a candidate, but it is still a library function with no PRODUCTION callers: it is unreachable from <code>PolySection</code> and has no element class. Meanwhile the shipped defaults are a point filament for plasma cells (<code>segment="circle"</code>) and exact-everywhere 16x48 quadrature for the opt-in <code>PolySection</code>. This rung wires it in and flips what it is safe to flip. The cost case is thinner than it was but still holds - 330 us/pair against 858 for the 16x48 rule, so 2.6x faster AND one to two orders more accurate, including ON the contour where a quadrature has nothing to converge to and the shipped rule sits at 2.6e-04; the natural architecture is the closed form taking the NEAR band while the banded scheme keeps mid and far.</p></div>
     <pre class="r-fu-prompt">Project: nova
 Plan:    biot-operator-assembly (http://127.0.0.1:8765/nova/biot-operator-assembly.html)
 Section: adopt the closed form as the shipped exact route
@@ -635,16 +672,17 @@ Tier:    opus
 Context
   nova/biot/polygonanalytic.py evaluates the full-turn polygon-section flux and both field
   components in closed form, is finite at vertices and edge levels, and holds the 1e-10 far
-  band on both field components across all four gate sections. It is referenced by nothing
-  but its own tests and one benchmark. The shipped defaults remain a point filament for
-  plasma cells and 16x48 boundary quadrature for PolySection.
+  band on ALL THREE components across all four gate sections -- so it is already registered
+  in CANDIDATES and step 1 below is done. It is still referenced by nothing but its own
+  tests and one benchmark. The shipped defaults remain a point filament for plasma cells
+  and 16x48 boundary quadrature for PolySection.
 
 Prerequisites (check before starting; STOP and report if unmet)
-  - f-boa-04: the flux gate. Registering in CANDIDATES while the flux is 2-12x outside
-    1e-10 means committing a failing test. If that rung has not landed, this one cannot
-    complete step 1 and should not start.
   - closed-form-device decision: whether exact coupling reaches a device at all shapes the
     dispatch this rung writes. f-boa-07 supplies the measurements.
+  - f-boa-09 is NOT a prerequisite, but read its outcome first if it has landed: it
+    reorganises the evaluation by vertex and is expected to take ~40% off the 330 us/pair
+    this rung's cost statement quotes.
 
 State to read
   nova/biot/polysection.py -- section_greens, the standoff/quadrature/banded ClassVars and
@@ -657,7 +695,7 @@ State to read
     plasma-cell coupling; the flip is gated on the physics-spine-adoption f-psa-04 criteria.
 
 Done-when
-  1. The closed form registered in CANDIDATES with the full equivalence gate green.
+  1. (done -- the closed form is in CANDIDATES with the full gate green.)
   2. Reachable through PolySection as a scoped route alongside exact and banded, and used for
      the NEAR band of the banded scheme, with the banded per-component envelopes re-measured
      and improved or unchanged (the near band is currently bit-identical to the 16x48 rule,
@@ -669,6 +707,63 @@ Done-when
      f-psa-04 criteria, with the numbers to support it. Do not flip the shipped default
      without that check passing; say so plainly if it does not.
   5. Followup written; this followup resolved.</pre>
+    </article>
+<article class="r-fu" data-id="f-boa-09" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-25T22:10:00+00:00" data-recommends-skill="/reckon-ship biot-operator-assembly" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Organise the closed form by VERTEX rather than by edge limit, and drop the term that telescopes</h4>
+    <div class="r-fu-body"><p>Measuring the closed form's cost turned up a structural saving larger than any micro-optimisation left in it. The reduction is evaluated per edge, at each of the edge's two limits, and at a limit it depends on the target and the edge's ENDPOINT alone through <code>u</code> and the endpoint radius: the elliptic modulus and its complement, the whole harmonic moment stack, the ring denominator's split and both of its pole seeds, and the first residual <code>arsinh</code> quadrature. None of them sees the edge's slope. Every vertex of a closed section is the endpoint of two edges, so all of that is computed twice.</p><p>The same observation says something stronger about one term: the <code>arsinh beta1</code> contribution is a function of the vertex alone in all three components, so over a closed polygon it TELESCOPES to zero exactly. It survives only where a horizontal edge is skipped, which breaks the chain at two of the rectangle's four corners. It is currently formed, summed and cancelled.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    biot-operator-assembly (http://127.0.0.1:8765/nova/biot-operator-assembly.html)
+Section: vertex-organised closed-form assembly
+Tier:    opus
+
+Context
+  nova/biot/polygonanalytic.py costs 330 us/pair measured on one compute core, of
+  which 144 is the two residual quadratures and 40 the moment stack. Roughly 40% of
+  the total is work that depends on the target and one polygon VERTEX, not on the
+  edge that vertex belongs to, and a closed section shares every vertex between two
+  edges.
+
+State to read
+  nova/biot/polygonanalytic.py -- the _Edge class: everything it derives from u, the
+    endpoint radius rp and the parameter is vertex-only (moments, root moments, the
+    ring split and its two seeds, ring_residual); everything derived from b1, r1 and
+    plane_offset is edge-only (plane split, plane_residual, gamma, the slope blocks);
+  polygon_analytic_greens -- the edge loop that calls each limit;
+  nova/biot/polygon.py::pack_section -- how horizontal edges are dropped, which is
+    what breaks the telescoping chain and therefore has to drive the bookkeeping;
+  benchmarks/analytic_cost_floor.py -- the cost model to update with it.
+
+What to do
+  1. Split _Edge into a vertex part and an edge part, so a section builds one vertex
+     part per corner and each edge takes the two it sits between. Expect close to a
+     factor of two on the moment stack, the ring seeds and the first residual.
+  2. Accumulate the arsinh beta1 term per VERTEX with the signed count of live edges
+     meeting there, which is zero at an interior corner of an unbroken chain and
+     plus or minus one where a horizontal edge was dropped. It is then formed only
+     where it survives -- never, for a section with no horizontal edge.
+  3. Re-measure on a compute node, fresh process, median of three, and update the
+     benchmark&#x27;s own table.
+
+Guidance
+  - The gate is the guard: every entry in SECTION_ACCURACY, ASPECT_ACCURACY and
+    FIELD_ASPECT_ACCURACY is asserted in BOTH directions, so a reorganisation that
+    changes the arithmetic at all will move them and has to be re-measured rather
+    than nudged. A pure regrouping should leave them where they are.
+  - The telescoping is exact only in real arithmetic; in float the two vertex values
+    are bit-identical only if both edges form them from the same inputs, which is
+    the point of the split. Assert it: a section with no horizontal edge must give
+    bit-identical results with the term formed and with it dropped.
+  - Do NOT chase the residual quadrature&#x27;s node count here. It is 128 because the
+    most slender section&#x27;s near-contour targets do not converge at 64, that limit
+    predates the harmonic reduction, and it is its own investigation.
+
+Done-when
+  1. The vertex-only work formed once per corner, with the edge loop reading it.
+  2. The arsinh beta1 term formed only where the chain is broken, with the
+     bit-identity test above.
+  3. Cost re-measured and recorded; the accuracy tables re-measured and unchanged or
+     improved.
+  4. Followup written; this followup resolved.</pre>
     </article>
 </section>
 

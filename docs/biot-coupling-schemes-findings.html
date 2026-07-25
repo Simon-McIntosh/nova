@@ -47,10 +47,11 @@
       <tr><td>boundary quadrature, 16×48</td><td>858–1012</td><td>reference</td><td>reference</td>
         <td>The near band and the reference lane. Machine-precise exactly where a tokamak
         section is slender.</td></tr>
-      <tr><td>Urankar Part V closed form (ψ, B<sub>R</sub>, B<sub>Z</sub>)</td><td>134.4</td>
-        <td>1.2e-09</td><td>4.1e-10</td>
-        <td>Within 3–20× of the 1e-10 gate at every section; both field components cost
-        0.4 µs/pair on top of the flux. See §4.</td></tr>
+      <tr><td>Urankar Part V closed form (ψ, B<sub>R</sub>, B<sub>Z</sub>)</td><td>330</td>
+        <td>6.0e-11</td><td>4.2e-12</td>
+        <td>Inside the 1e-10 gate at every section, and the only scheme here that is
+        accurate ON the contour; both field components are free, sharing every
+        reduction with the flux. See §4.</td></tr>
     </tbody>
   </table>
 
@@ -276,20 +277,58 @@
   hexagon's vertex levels. A field grid whose rows align with section corners hits that on every
   row, so it was not an exotic case.</p>
 
-  <p><strong>What still limits it — no longer the reduction.</strong> Per edge and per limit the
-  reduction now reproduces its own integral to 1e-14, node-independent from 48 through 384 nodes.
-  The residual 3–20× is round-off amplified by two cancellations that happen <em>after</em> the
-  reduction. First, the <strong>edge/limit differencing</strong>: the edge antiderivative's
-  arsinh-β₂ weight is of order the squared major radius and is u-independent, while the flux the
-  two limits differ by is not — localised on the thin plate's worst target, eight per-edge values
-  of ≈174.71 sum to 2.34e-03, a 7.1×10³ cancellation, and another 10× across edges. Second, the
-  <strong>monomial contraction</strong>: numerator coefficients reach 1e7 while the contraction
-  returns 1e4, so individual terms exceed their sum by up to 1e5 — which is what puts each edge
-  value at ~270 ε rather than a few ε. The shipped quadrature has the same differencing structure
-  but its per-edge values are accurate to ~1 ε, which is why it lands at 2.4e-12. Neither is
-  reachable by a better pole split; the two routes that address them are a <code>cos 2nα</code>
-  harmonic numerator basis (worth ~30× on these numbers) and forming the limit difference before
-  the large antiderivative is assembled.</p>
+  <p><strong>What limited it, and which of the two suspects it actually was.</strong> Per edge and
+  per limit the reduction reproduces its own integral to 1e-14, node-independent from 48 through
+  384 nodes, so the residual 3–20× was round-off amplified after the reduction. Two candidates
+  were measured before either was acted on, and only one turned out to be the lever.</p>
+  <p>The <strong>edge/limit differencing</strong> is real and is not fixable: the edge
+  antiderivative's arsinh-β₂ weight is of order the squared major radius while the flux the two
+  limits differ by is not, so the section sum cancels 1.8×10²–2.1×10⁴ within an edge and another
+  7–35× across edges. But the shipped boundary quadrature has the <em>identical</em> structure and
+  lands at 2.4e-12, because its per-limit values are accurate to about one ulp. That is the whole
+  distinction, and it makes per-limit accuracy the only lever — the closed form's per-limit values
+  were accurate to 36 ulp (rectangle), 816 (hexagon), 952 (trapezium) and 7958 (thin plate).</p>
+  <p>The <strong>monomial contraction</strong> is where those ulp came from. Tracing every
+  contraction inside one edge limit found degree-six numerators with coefficients reaching 1e9
+  against contractions returning 1e6: the monomial basis on a unit interval is conditioned at four
+  decades by degree six, and the deepest offender was the same term in the flux and the radial
+  field — the arsinh-β₂ weight against the plane denominator. Carrying every numerator in the
+  <code>cos 2nα</code> harmonic basis instead, with its two END values held apart and exact so the
+  pole treatment survives, took the per-limit values to a few ulp and every section inside the
+  gate. Forming the limit difference before assembly, the other route on the list, was therefore
+  never needed.</p>
+  <p><strong>Where it now sits.</strong> Far band, worst component, against the same oracle:
+  hexagon 6.2e-12, rectangle 1.6e-12, trapezium 6.5e-12, thin plate 6.0e-11 — against
+  3e-10, 4e-12, 4e-10 and 2e-09. The aspect sweep moved 55–764× on the flux and 6.5–185× on the
+  field, and the closed form is registered as a production candidate, inheriting the whole gate.
+  Its cost rose with it, from 134 to 330 µs/pair: the moment work got <em>cheaper</em> (52.1 to
+  40.4, one harmonic family replacing two sixty-order power stacks), the coefficient algebra sits
+  at 1.79× its own floor, and the whole increase is the residual quadrature — half from doubling
+  its nodes, which the most slender section's near-contour targets need and which the previous
+  code needed too, and half from what the regularised integrand costs per node.</p>
+  <p><strong>The corner, and a logarithm removed rather than resolved.</strong> Both residual
+  <code>arsinh</code> integrands turn genuinely log-singular at a range end whenever the target is
+  level with an edge end, on an edge's extended line, or on a vertex — configurations a grid
+  across a section produces by alignment, not by contrivance. No panel grading resolves a
+  logarithm, which is what the old <code>_LAYER_FLOOR</code> trade-off recorded. Splitting
+  <code>arsinh(N/W) = log(N + √(N² + W²)) − log W</code> leaves the first term bounded, so
+  subtracting a model of <code>log W</code> matching the denominator's own expansion at that end
+  gives a bounded integrand and an elementary correction. A target ON a vertex went from 1.9e-07
+  to 3.2e-12 on the hexagon and 2.2e-07 to 3.3e-12 on the thin plate at no node cost. Two details
+  had to be right: the branch follows the sign of the numerator's value AT the end — exactly zero
+  there means the numerator vanishes with the denominator and no logarithm survives, which is the
+  vertex case — and the numerator's sign can turn over INSIDE the half, where that branch's own
+  sum cancels and must be recovered through <code>W²</code> from the other. Missing the second
+  cost three orders and looked like the method failing.</p>
+  <figure>
+    <img src="/nova/figures/biot-operator-assembly/closed_form_envelope.png"
+         alt="Accuracy against section aspect ratio, per-section far-band envelope, on-vertex accuracy and cost breakdown, before and after"
+         style="max-width:100%">
+    <figcaption>The closed form before and after the two post-reduction cancellations were
+    removed: the aspect sweep flattens and drops inside the gate, every gate section clears the
+    far band on every component, a target on a vertex improves by five orders, and the cost of it
+    — with the residual quadrature, not the algebra, as what is left to win.</figcaption>
+  </figure>
 
   <h3>The modulus complement: a floating-point defect that outweighed the reduction</h3>
   <p>Chasing a target that landed exactly on a section vertex — which returned a non-finite value

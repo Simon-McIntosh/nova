@@ -57,10 +57,19 @@
     <table>
       <thead><tr><th>Quantity</th><th>Value</th><th>Note</th></tr></thead>
       <tbody>
-        <tr><td>Polygon kernel cost per pair</td><td>~39.5&nbsp;µs</td>
-          <td>vs ~0.07&nbsp;µs point filament (~70,000×). Flop-bound on COMPLEX transcendentals:
-          two complex-step passes × ~6 complex arcsinh/arctan/sqrt over a
-          (targets × 768 quadrature) array.</td></tr>
+        <tr><td>Polygon kernel cost per pair</td><td>~6.4&nbsp;ms</td>
+          <td>vs ~0.10&nbsp;µs point filament (~63,000×) — re-measured 2026-07-25 fresh-process
+          (the earlier ~39.5&nbsp;µs/pair record was a unit slip; the ratio was right). Identical
+          batched and scalar — genuinely flop-bound on COMPLEX transcendentals: two complex-step
+          passes × ~6 complex arcsinh/arctan/sqrt over a (targets × 768 quadrature) array.
+          Method finding (user + paper review 2026-07-25): this brute-force φ-quadrature is NOT
+          the Urankar Part V method — the paper evaluates the toroidal integration analytically
+          (Jacobi elliptic functions + incomplete F/E/Π), with only two smooth 1-D arcsinh
+          (zeta-class) integrals left numerical, and closed-form B. A faithful implementation is
+          in flight; expected within a small factor of the rectangle kernel.</td></tr>
+        <tr><td>Rectangle kernel cost per pair</td><td>~12.7&nbsp;µs</td>
+          <td>~119× point, post zeta fast path (was ~80&nbsp;µs / 777× with the midpoint zeta) —
+          the cost class a faithful Part V polygon kernel should approach.</td></tr>
         <tr><td>All-pairs 2000-cell matrix</td><td>~44&nbsp;h</td><td>Infeasible through the
           current assembly; the wall this plan removes.</td></tr>
         <tr><td>560-cell plasma solve, polygon-coupled</td><td>6.3&nbsp;s (2× band) /
@@ -75,10 +84,12 @@
           <td>16×48: 3.7e-08 · 8×24: 2.9e-06 · 4×16: 4.5e-04</td>
           <td>But at 8×24 B<sub>Z</sub> degrades to ~1e-02 — flux tolerance alone is a false
           economy; component-wise bounds required.</td></tr>
-        <tr><td>Zeta fast path headroom</td><td>10–30×</td><td>nova-3d-native §2: Gauss–Legendre
-          (16–48 nodes) replaces ~500 midpoint panels on a smooth integrand; fixed node count =
-          fixed shapes = vmap-friendly. <strong>Prerequisite — re-cost the polygon kernel after it
-          lands before fixing any cutoff.</strong></td></tr>
+        <tr><td>Zeta fast path</td><td>landed 2026-07-25</td><td>nova-3d-native §2 shipped
+          (develop <code>c4d4b8ce</code>): GL-48 + tanh–sinh near-plane, 5.5e-14 worst case,
+          fixed shapes. <strong>Correction:</strong> the polygon kernel does <em>not</em> route
+          through zeta (its φ-quadrature is its own), so the zeta landing changes the rectangle/
+          bow rows only — the polygon fast path is the faithful Part V evaluation (§3.3, in
+          flight).</td></tr>
       </tbody>
     </table>
     <p>Instrumentation already in place: <code>nova/biot/polysection.py</code> ships

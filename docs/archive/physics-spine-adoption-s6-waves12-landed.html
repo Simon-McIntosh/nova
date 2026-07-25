@@ -163,7 +163,14 @@
   (+18% max), mutuals +0.02% median — the point-kernel error is concentrated exactly on the
   self/neighbour terms. The proper fix is queued as f-psa-04 (biot operator-assembly review:
   parallel/batchable/shardable GPU build, cached matrix, first solve &lt;20&nbsp;min), with the
-  <a href="/nova/nova-3d-native.html">nova-3d-native</a> §2 zeta fast path as prerequisite.</p>
+  <a href="/nova/nova-3d-native.html">nova-3d-native</a> §2 zeta fast path as prerequisite.
+  The element's standoff band and quadrature are first-class config (merge
+  <code>1cdd38cf</code>): <code>standoff=None</code> gives exact-everywhere — the reference lane
+  the f-psa-04 band sweep needs. Corrected cost figures for that study (560-cell plasma solve,
+  tracked baseline 963&nbsp;ms point-coupled): polygon-coupled 6.3&nbsp;s at a 2× band, 15.8&nbsp;s
+  at 3× — ~6.5× and ~16× the baseline; band-edge flux seam ~5×10⁻⁴ relative and geometry-fixed
+  (smooth-in-state for Anderson/NK outer loops). Fast lane back inside its gate (1008 passed,
+  59.6&nbsp;s) with the point default.</p>
 
   <h2>What's next</h2>
   <ul>

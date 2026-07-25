@@ -311,8 +311,17 @@ def test_a_section_with_no_sloped_edge_reproduces_the_rectangle_kernel(candidate
 # right is settled per edge, against a converged quadrature of the very integral
 # it replaces, at targets where nothing is near-degenerate. What ACCURACY it then
 # delivers over a whole section is a separate, measured question -- and the
-# answer depends on the section's aspect ratio, not on the target's distance,
-# which is why the closed form does not join CANDIDATES above.
+# answer depends on the section's aspect ratio and on how far the targets reach,
+# not on either alone.
+#
+# It does not join CANDIDATES above. Per edge and per limit the reduction now
+# reproduces its own integral to 1e-14, but assembling a section differences that
+# integral over each edge's two limits and then over the edges, and the edge
+# antiderivative is of order the squared major radius while the flux is not: three
+# of the four sections miss the 1e-10 far band on the FLUX by 3x to 20x, purely on
+# round-off through that cancellation. Both field components pass everywhere except
+# B_Z on the hexagon, which misses by 4x. SECTION_ACCURACY below records the
+# distance from the gate rather than describing it.
 
 
 def alpha_quadrature(target_r, target_z, edge, which, nodes=600):
@@ -414,23 +423,35 @@ def worst_deviation(vertices, standoff=CONTOUR_STANDOFF):
 
 
 # Measured worst deviation beyond half a section radius of the contour, for a
-# hexagon at r0 = 3 as its bounding radius shrinks.
+# hexagon at r0 = 3 as its bounding radius shrinks. Both tables below are the
+# closed form's own envelope, not a gate: the oracle is converged to 1e-12 or
+# better on every one of these target sets, checked by raising its rule to
+# 128 x 192, so what they record is the closed form.
 #
-# The reduction's numerators are contracted against pole moments whose divergence
-# sits at the end of the integration range, so what multiplies the largest moment
-# is the numerator's value AT that end -- a quantity of order (radius/r0)^2 formed
-# as an alternating sum of terms of order one. Two pole families lose two decades
-# each, which is the fourth-power trend below. Expanding the numerators in the
-# variable that vanishes where the pole sits would make that value a coefficient
-# instead of a sum; until then this table is the usable range, and the worst
-# target is a near one every time rather than a far one.
+# The envelope is not monotone in the aspect ratio, and the two ends of it fail for
+# DIFFERENT reasons. Both are round-off amplified by a cancellation, and neither is
+# the pole confluence any more -- that one is cured.
 #
-# A slender section at large major radius is therefore the hard case for the
-# closed form and the easy case for the boundary quadrature, which is the reverse
-# of what the cost comparison alone suggests. It is also the case a tokamak coil
-# pack presents, so this table -- not the cost -- is what decides where the closed
-# form can be used.
-ASPECT_ACCURACY = {1.0: 1e-07, 0.3: 1e-07, 0.1: 1e-04, 0.03: 1e-02}
+#   Slender end. Each denominator carries a root a distance of order the squared
+#   aspect ratio past one end of the integration range, so the moments there are
+#   large and the numerator's value at that end is small. Taking each root in the
+#   basis that vanishes at ITS end makes that value a leading coefficient instead
+#   of an alternating sum, which is what removed the old fourth-power trend
+#   (5.5e-02 at radius 0.03, 6.8e-01 at 0.01). What is left is the ordinary
+#   round-off of a contraction whose terms exceed their sum, and it grows as the
+#   section thins because the moments do.
+#
+#   Fat end. The targets run to thirty section radii, so at radius 1.0 they reach
+#   ten major radii, and the edge antiderivative's arsinh weight is of order the
+#   squared major radius while the flux the two limits differ by is not. The
+#   difference over an edge's two limits and then over the edges cancels four
+#   decades at radius 1.0 -- which is why the fat entry is WORSE than the middle of
+#   the table rather than better.
+#
+# Both are amplifications of round-off rather than of a formulation error, so the
+# way past them is a reduction that forms the difference between an edge's two
+# limits before the large antiderivative is assembled, not a better pole split.
+ASPECT_ACCURACY = {1.0: 6e-09, 0.3: 3e-10, 0.1: 1e-10, 0.03: 4e-09, 0.01: 2e-07}
 
 
 @pytest.mark.parametrize("radius", sorted(ASPECT_ACCURACY))
@@ -438,9 +459,9 @@ def test_the_closed_form_tracks_the_quadrature_over_a_whole_section(radius):
     """The conditioning limit is measured, so it is asserted in both directions.
 
     An upper bound alone would let a regression pass unnoticed inside a loose
-    tolerance. Bounding below as well pins the loss to the aspect ratio it is
-    understood to come from, so a reformulation that resolves the confluence FAILS
-    this test and has to update the table -- which is the point of recording it.
+    tolerance. Bounding below as well pins the loss to the mechanism it is
+    understood to come from, so a reformulation that improves on it FAILS this test
+    and has to update the table -- which is the point of recording it.
     """
     tolerance = ASPECT_ACCURACY[radius]
     deviation = worst_deviation(scaled_hexagon(3.0, radius))
@@ -448,6 +469,47 @@ def test_the_closed_form_tracks_the_quadrature_over_a_whole_section(radius):
     assert deviation > 1e-3 * tolerance, (
         f"radius {radius}: {deviation:.3e} beats the recorded conditioning"
     )
+
+
+# The same envelope over the four gate sections, worst component, so the distance
+# from the 1e-10 gate is recorded rather than described. The closed form does not
+# join CANDIDATES on these numbers: three of the four sections miss the far band,
+# by 3x on the trapezium, 12x on the hexagon and 20x on the thin plate, and every
+# one of those misses is the flux rather than the field.
+SECTION_ACCURACY = {
+    "hexagon": (4e-09, 6e-08),
+    "rectangle": (3e-11, 2e-10),
+    "thin_plate": (6e-09, 8e-10),
+    "trapezium": (9e-10, 4e-11),
+}
+
+
+@pytest.mark.parametrize("section", sorted(SECTION_ACCURACY))
+def test_the_closed_form_holds_its_recorded_envelope_over_the_gate_sections(section):
+    """Per section, per band, worst component, bounded both ways."""
+    from nova.biot.polygonanalytic import polygon_analytic_greens
+
+    vertices = SECTIONS[section]
+    target_r, target_z = gate_targets(vertices)
+    distance = contour_distance(target_r, target_z, vertices)
+    reference = oracle(target_r, target_z, vertices)
+    computed = polygon_analytic_greens(target_r, target_z, vertices)
+    for band, mask, tolerance in (
+        ("far", distance >= CONTOUR_STANDOFF, SECTION_ACCURACY[section][0]),
+        ("near", distance < CONTOUR_STANDOFF, SECTION_ACCURACY[section][1]),
+    ):
+        worst = max(
+            worst_relative(got[mask], want[mask])
+            for got, want in zip(computed, reference)
+        )
+        assert worst <= tolerance, f"{section}/{band}: {worst:.3e}"
+        assert worst > 1e-2 * tolerance, (
+            f"{section}/{band}: {worst:.3e} beats the recorded envelope"
+        )
+        # the near-contour band is where the closed form should be strongest,
+        # having no quadrature there to converge, and it is: every section holds
+        # it three orders inside the band the boundary quadrature is given
+        assert worst <= 1e-2 * NEAR_CONTOUR_GATE or band == "far"
 
 
 def test_the_closed_form_reproduces_the_rectangle_kernel_for_vertical_edges():
@@ -537,9 +599,17 @@ def test_a_target_level_with_an_edge_end_stays_finite():
 # is even about phi = pi and sin phi is odd, so it integrates to nothing over the
 # full turn. Axisymmetry is reproduced by the algebra rather than assumed, the
 # same way cn K = 0 kills the radial vector potential.
+#
+# Eq 11b is TRANSCRIBED here as well as in the kernel, so a per-edge check against
+# it cannot see a mis-transcription -- both sides carry the same one. Maxwell can,
+# and did: the last test in this module holds the field to the gradient of the
+# flux, and it is what caught the z row's rational term being quadratic in the edge
+# slope where it should be linear. That error is invisible on a rectangle (slope
+# zero) and on a 45-degree edge (slope one), the only two slopes at which the two
+# forms agree.
 
 
-def alpha_field_quadrature(target_r, target_z, edge, which, component, nodes=600):
+def alpha_field_quadrature(target_r, target_z, edge, which, component, nodes=300):
     """Return eq 11b's edge field integral by direct quadrature in alpha.
 
     ``phi = pi - 2a`` maps one full turn onto ``a`` in ``[-pi/2, pi/2]``, and the
@@ -549,45 +619,87 @@ def alpha_field_quadrature(target_r, target_z, edge, which, component, nodes=600
     the implementation computes and the azimuthal one it omits. ``h_l`` is the
     bracket of eq 11b transcribed literally; no machinery is shared with the
     reduction under test.
+
+    The two halves are integrated SEPARATELY, at ``nodes`` each. One rule across
+    the whole range is not converged, and not by a little: ``a = 0`` is ``phi =
+    pi``, where ``sin phi`` changes sign and ``beta3`` runs to infinity, so
+    ``arctan beta3`` jumps by ``pi``. The product with ``sin phi`` is continuous
+    but has an ``|a|`` kink, and a single Gauss rule sees a discontinuous
+    derivative in its interior: at 600 nodes the z component is wrong in the fifth
+    decimal. The r component has no arctangent, but ``a = 0`` is also where its
+    bracket varies on the scale of the target's offset from the edge end, and a
+    rule that reaches the feature only through its interior nodes resolves it far
+    worse than one that clusters at it -- 1e-6 against 1e-14 here. Splitting keeps
+    the node sets mirror images, so an odd integrand still cancels exactly.
     """
     ra, za, rb, zb = edge
     b1 = (rb - ra) / (zb - za)
     a02 = 1.0 + b1 * b1
     a03 = a02 * np.sqrt(a02)
     node, weight = np.polynomial.legendre.leggauss(nodes)
-    alpha = 0.5 * np.pi * node
     r = np.atleast_1d(target_r)[:, None]
     z = np.atleast_1d(target_z)[:, None]
-    angle = alpha[None, :]
-    cos_phi = -np.cos(2.0 * angle)
-    sin_phi = np.sin(2.0 * angle)
     r1 = ra - b1 * (za - z)
     u = (zb - z) if which else (za - z)
-    offset = (r1 + b1 * u) - r * cos_phi
-    plane_offset = r1 - r * cos_phi
-    g_squared = u * u + (r * sin_phi) ** 2
-    b_squared = plane_offset**2 + a02 * (r * sin_phi) ** 2
-    distance = np.sqrt(g_squared + offset**2)
-    first = np.arcsinh(offset / np.sqrt(g_squared))
-    second = np.arcsinh((u + b1 * offset) / np.sqrt(b_squared))
-    third = np.arctan((u * offset - b1 * g_squared) / (r * sin_phi * distance))
-    bracket = (
-        distance / a02
-        + r * cos_phi * first
-        - b1 / a03 * (r1 + b1 * b1 * r * cos_phi) * second
-    )
-    if component == "r":
-        integrand = cos_phi * bracket
-    elif component == "phi":
-        integrand = sin_phi * bracket
-    else:
-        integrand = (
-            u * first
-            + (b1 * b1 * r1 - (2.0 * a02 - 1.0) * r * cos_phi) / a03 * second
-            - r * sin_phi * third
-            - b1 * b1 / a02 * distance
+    total = 0.0
+    for half in (-1.0, 1.0):
+        angle = 0.25 * np.pi * half * (node + 1.0)[None, :]
+        cos_phi = -np.cos(2.0 * angle)
+        sin_phi = np.sin(2.0 * angle)
+        offset = (r1 + b1 * u) - r * cos_phi
+        plane_offset = r1 - r * cos_phi
+        g_squared = u * u + (r * sin_phi) ** 2
+        b_squared = plane_offset**2 + a02 * (r * sin_phi) ** 2
+        distance = np.sqrt(g_squared + offset**2)
+        first = np.arcsinh(offset / np.sqrt(g_squared))
+        second = np.arcsinh((u + b1 * offset) / np.sqrt(b_squared))
+        third = np.arctan((u * offset - b1 * g_squared) / (r * sin_phi * distance))
+        bracket = (
+            distance / a02
+            + r * cos_phi * first
+            - b1 / a03 * (r1 + b1 * b1 * r * cos_phi) * second
         )
-    return 2.0 * (integrand @ (0.5 * np.pi * weight))
+        if component == "r":
+            integrand = cos_phi * bracket
+        elif component == "phi":
+            integrand = sin_phi * bracket
+        else:
+            integrand = (
+                u * first
+                + (b1 * b1 * r1 - (2.0 * a02 - 1.0) * r * cos_phi) / a03 * second
+                - r * sin_phi * third
+                - b1 / a02 * distance
+            )
+        total = total + integrand @ (0.25 * np.pi * weight)
+    return 2.0 * total
+
+
+FIELD_TARGET_R = np.array([2.6, 3.0, 1.6, 4.0, 0.9])
+FIELD_TARGET_Z = np.array([0.4, -0.45, 0.35, 0.2, -0.7])
+
+
+@pytest.mark.parametrize("component", ["r", "z"])
+@pytest.mark.parametrize("edge", sorted(REDUCTION_EDGES))
+def test_the_edge_field_reference_is_converged_so_it_can_be_used_as_one(
+    edge, component
+):
+    """Raising the rule past the reference must not move it.
+
+    The same guard the boundary-quadrature oracle carries at the top of this
+    module, and for the same reason: without it a candidate can pass by matching
+    the reference's error instead of the integral's value -- or, as happened here,
+    a correct reduction can be rejected because the reference is the wrong side.
+    Both are silent, because a Gauss rule reports no residual.
+    """
+    vertices = np.asarray(REDUCTION_EDGES[edge], dtype=float)
+    for limit in (0, 1):
+        coarse = alpha_field_quadrature(
+            FIELD_TARGET_R, FIELD_TARGET_Z, vertices, limit, component
+        )
+        fine = alpha_field_quadrature(
+            FIELD_TARGET_R, FIELD_TARGET_Z, vertices, limit, component, nodes=450
+        )
+        assert worst_relative(coarse, fine) < 1e-12, limit
 
 
 @pytest.mark.parametrize("component", ["r", "z"])
@@ -602,11 +714,11 @@ def test_the_closed_form_reproduces_the_edge_field_integral(edge, limit, compone
     """
     from nova.biot.polygonanalytic import _edge_field
 
-    target_r = np.array([2.6, 3.0, 1.6, 4.0, 0.9])
-    target_z = np.array([0.4, -0.45, 0.35, 0.2, -0.7])
     vertices = np.asarray(REDUCTION_EDGES[edge], dtype=float)
-    reference = alpha_field_quadrature(target_r, target_z, vertices, limit, component)
-    computed = _edge_field(target_r, target_z, vertices, limit, 48)[
+    reference = alpha_field_quadrature(
+        FIELD_TARGET_R, FIELD_TARGET_Z, vertices, limit, component
+    )
+    computed = _edge_field(FIELD_TARGET_R, FIELD_TARGET_Z, vertices, limit, 48)[
         0 if component == "r" else 1
     ]
     assert worst_relative(computed, reference) <= 1e-08
@@ -631,7 +743,16 @@ def test_the_azimuthal_field_integrand_cancels_over_the_full_turn(edge):
 
 
 def worst_field_deviation(vertices, standoff=CONTOUR_STANDOFF):
-    """Return the closed form's worst field deviation from the oracle, per component."""
+    """Return the closed form's worst field deviation from the oracle, per component.
+
+    Targets where the ORACLE returns a non-finite field are dropped: it forms its
+    field by dividing a flux gradient by ``2 pi r`` without guarding the axis, and
+    a target set of thirty section radii about ``r0 = 3`` lands exactly on ``r = 0``
+    at two of the radii below. That is a defect in ``polygon_greens``, not a
+    disagreement about the polygon, and there is no reference to compare against
+    there -- which is itself worth knowing, because the closed form IS finite on
+    the axis and a separate test pins it.
+    """
     from nova.biot.polygonanalytic import polygon_analytic_greens
 
     target_r, target_z = gate_targets(vertices)
@@ -641,17 +762,23 @@ def worst_field_deviation(vertices, standoff=CONTOUR_STANDOFF):
     out = {}
     for name, got, want in zip(COMPONENTS, computed, reference):
         assert np.all(np.isfinite(got)), f"{name} returned a non-finite value"
-        out[name] = worst_relative(got[keep], want[keep])
+        usable = keep & np.isfinite(want)
+        out[name] = worst_relative(got[usable], want[usable])
     return out
 
 
 # The field's envelope against section aspect ratio, measured the same way as the
 # flux's. The confluence is a property of the reduction's pole structure, not of
-# which weight sits on top of it, so the field is expected to track the flux --
-# and the point of measuring rather than assuming is that the field's weights are
-# one order LOWER in the arctangent term and one HIGHER in the radial D term, so
-# tracking is a prediction, not a tautology.
-FIELD_ASPECT_ACCURACY = {1.0: 1e-07, 0.3: 1e-05, 0.1: 1e-02}
+# which weight sits on top of it, so the field tracks the flux at the slender end
+# -- and the point of measuring rather than assuming is that the field's weights
+# are one order LOWER in the arctangent term and one HIGHER in the radial D term.
+#
+# At the fat end it does NOT track, and by three decades: the flux's edge sum
+# cancels four decades there because its arsinh weight is of order the squared
+# major radius, while the field's is of order the major radius itself. The field is
+# the better-conditioned of the two over the whole table, which is the reverse of
+# what differentiating the reduced flux would have given.
+FIELD_ASPECT_ACCURACY = {1.0: 6e-12, 0.3: 3e-12, 0.1: 5e-11, 0.03: 2e-09, 0.01: 3e-08}
 
 
 @pytest.mark.parametrize("radius", sorted(FIELD_ASPECT_ACCURACY))
@@ -679,9 +806,7 @@ def test_the_closed_form_field_reproduces_the_rectangle_kernel():
     target_r, target_z = gate_targets(vertices, directions=24)
     keep = contour_distance(target_r, target_z, vertices) >= CONTOUR_STANDOFF
     computed = polygon_analytic_greens(target_r, target_z, vertices)
-    reference = cylinder_greens(
-        target_r[keep], target_z[keep], 3.0, 0.0, width, height
-    )
+    reference = cylinder_greens(target_r[keep], target_z[keep], 3.0, 0.0, width, height)
     for name, got, want in zip(COMPONENTS, computed, reference):
         assert worst_relative(got[keep], want) < 2e-3, name
 
@@ -734,3 +859,55 @@ def test_the_field_is_clean_on_the_axis():
     _, right, above = polygon_analytic_greens(offset, target_z, vertices)
     np.testing.assert_allclose(left, -right, rtol=1e-11)
     np.testing.assert_allclose(below, above, rtol=1e-11)
+
+
+@pytest.mark.parametrize("section", sorted(SECTIONS))
+def test_the_closed_form_field_is_the_gradient_of_its_own_flux(section):
+    """``B_R = -(1/2 pi r) dpsi/dz`` and ``B_Z = (1/2 pi r) dpsi/dr``.
+
+    The independent check on eq 11b's TRANSCRIPTION, which the per-edge tests
+    above cannot make: they hold the reduction to a quadrature of eq 11b, and both
+    sides read eq 11b the same way, so a wrong weight satisfies both. This one
+    compares two different rows of the paper against each other through Maxwell,
+    and it is what found the z row's rational term.
+
+    Deliberately not against the shipped kernel, which forms its own field by
+    differentiating its own flux and so would confirm nothing about eq 11b. The
+    stencil is a five-point central difference on the closed form's flux, at
+    targets two section radii clear of the contour where the flux is analytic.
+
+    The tolerance is the STENCIL's, measured: the ``h^4`` truncation and the flux
+    envelope amplified by ``1/12h`` cross at 1e-7 on the hexagon, the most slender
+    of the four sections and so the one whose flux carries the most noise, and at
+    1e-8 or better on the other three. Three decades of resolution below that is
+    ample for what this test exists to catch -- the term it found was wrong by 170
+    per cent on the trapezium and by a factor of six on a steep edge.
+    """
+    from nova.biot.polygonanalytic import polygon_analytic_flux, polygon_analytic_greens
+
+    vertices = SECTIONS[section]
+    radius = section_radius(vertices)
+    centre = np.asarray(vertices, float).mean(axis=0)
+    bearing = np.linspace(0.0, 2.0 * np.pi, 12, endpoint=False)
+    scale = np.repeat(np.array([2.0, 4.0, 9.0]) * radius, bearing.size)
+    target_r = centre[0] + scale * np.cos(np.tile(bearing, 3))
+    target_z = centre[1] + scale * np.sin(np.tile(bearing, 3))
+
+    step = 0.02 * radius
+
+    def derivative(along_r):
+        total = 0.0
+        # five-point central difference: (-f(2h) + 8f(h) - 8f(-h) + f(-2h))/(12h)
+        for shift, coefficient in ((-2, 1.0), (-1, -8.0), (1, 8.0), (2, -1.0)):
+            walk = shift * step
+            total = total + coefficient * polygon_analytic_flux(
+                target_r + (walk if along_r else 0.0),
+                target_z + (0.0 if along_r else walk),
+                vertices,
+            )
+        return total / (12.0 * step)
+
+    two_pi_r = 2.0 * np.pi * target_r
+    _, radial, vertical = polygon_analytic_greens(target_r, target_z, vertices)
+    assert worst_relative(radial, -derivative(along_r=False) / two_pi_r) <= 1e-06
+    assert worst_relative(vertical, derivative(along_r=True) / two_pi_r) <= 1e-06

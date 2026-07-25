@@ -19,7 +19,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-25">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="5">
 <meta name="plan-impl" content="0.6">
 </head>
 <body>
@@ -514,6 +514,45 @@ Done-when
      green; spine_bench parity recorded.
   3. §3/§4 collapsed; impl -&gt; 1.0; umbrella §10 collapsed referencing this
      plan&#x27;s archive; followup resolved or wave-4 queued with reason.</pre>
+    </article>
+<article class="r-fu" data-id="f-psa-04" data-status="open" data-tier="opus" data-written-by="smc/reckon-ship 2026-07-25" data-written-at="2026-07-25T09:30:00+00:00" data-recommends-skill="/reckon-create biot-operator-assembly" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Biot operator construction review — parallel/batchable/shardable assembly + principled near/far for thick sections</h4>
+    <div class="r-fu-body"><p>Research + planning task (user, 2026-07-25). The hexagonal plasma mesh is now the default but its cells keep POINT-filament coupling: the Urankar-V polygon element (<code>nova/biot/polysection.py</code>, landed and pinned) showed the exact kernel at ~70,000× the point cost, and a near/far blend at 2–3 section radii was rolled back — the cutoff must sit much farther out and be chosen on principle, not budget. Review the construction methods for all biot interaction operators for parallel / batchable / shardable assembly (GPU build; the matrix is computed once and cached so steady-state throughput is unaffected, but the first solve must stay under ~20 minutes). <strong>Prerequisite: the 3D zeta fast path ([[nova-3d-native]] §2 — analytical treatment / Gauss–Legendre) lands first</strong>; the thick hex-section default is gated on both.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    physics-spine-adoption (f-psa-04) — outcome feeds a new dedicated plan
+Section: research + planning (no code landing expected)
+Tier:    opus
+
+Context
+  Hex plasma mesh is default (develop 32bc49de) with point-filament cell
+  coupling. nova/biot/polysection.py carries the exact Urankar-V polygon
+  element, pinned by tests but NOT the plasma default: measured ~39.5 us per
+  target-source pair (~70,000x point kernel), all-pairs ~44 h per matrix on a
+  2000-cell grid. A 2-3 section-radius near/far blend was implemented and
+  rolled back — user: the cutoff must be materially farther than 3 filament
+  diameters, and the near interaction must be solved properly.
+
+Research questions
+  1. Operator assembly as a parallel/batchable/shardable computation: shard
+     the (source, target) pair space across GPU; JAX vs numba-cuda vs batched
+     host; memory layout consistent with nova.biot Matrix tier and the zarr
+     operator cache.
+  2. Principled near/far criterion: error-bounded cutoff derived from the
+     section second-moment expansion (not a fixed radius multiple);
+     quantify psi/Br/Bz error vs distance-in-section-sizes; the blend seam
+     must be smooth enough for autograd/Anderson/NK outer loops.
+  3. Zeta fast path (nova-3d-native §2, PREREQUISITE): analytical /
+     Gauss-Legendre treatment — expected 10-30x on the quadrature hot spot;
+     re-cost the polygon kernel after it lands before fixing any band.
+  4. Budget: full MAST-scale interaction matrix (2000x2000 pairs) first-build
+     under ~20 min; computed once, cached (zarr store tier).
+
+Done-when
+  1. A costed design note (figures: error-vs-distance, cost-vs-band,
+     build-time-vs-shard-count) lands as a reckon plan
+     (/reckon-create biot-operator-assembly) with decisions to lock.
+  2. physics-spine-adoption f-psa-04 resolved pointing at it; the thick
+     hex-section default explicitly gated on nova-3d-native §2 + that plan.</pre>
     </article>
 </section>
 

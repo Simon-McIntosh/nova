@@ -150,10 +150,23 @@
   approach produced gradients too sharp across the limited↔diverted switch for autograd or
   accelerator schemes (Anderson mixing, Newton–Krylov).</p>
 
+  <h2>Session add-on — hexagonal plasma grid default (user request)</h2>
+  <p>Landed <code>dee7bc18</code> + <code>32bc49de</code>: the plasma mesh defaults to hexagonal
+  cells (<code>tplasma="hex"</code>), and the exact Urankar Part V polygon-section element landed
+  as <code>nova/biot/polysection.py</code> (pinned: rectangle section reproduces the closed-form
+  cylinder kernel to rtol 1e-6 off-edge; far field reproduces the point filament; finite and
+  smooth through the conductor). <strong>Plasma cells keep POINT-filament coupling for now</strong>
+  (user direction): the exact kernel measures ~39.5&nbsp;µs/pair (~70,000× the point kernel;
+  all-pairs ≈ 44&nbsp;h per 2000-cell matrix), and the 2–3 section-radius near/far blend that made
+  it affordable was rolled back — the cutoff must sit materially farther out and be chosen on
+  principle. Correctness stake measured before rollback: self-flux terms move +7.2% median
+  (+18% max), mutuals +0.02% median — the point-kernel error is concentrated exactly on the
+  self/neighbour terms. The proper fix is queued as f-psa-04 (biot operator-assembly review:
+  parallel/batchable/shardable GPU build, cached matrix, first solve &lt;20&nbsp;min), with the
+  <a href="/nova/nova-3d-native.html">nova-3d-native</a> §2 zeta fast path as prerequisite.</p>
+
   <h2>What's next</h2>
   <ul>
-    <li><strong>In flight (this session):</strong> hexagonal plasma grid as the default, coupled
-    through the Urankar Part V polygon thick-filament kernel (user request; worker A).</li>
     <li><strong>Wave 3:</strong> ReconstructProfile re-architecture (nova.biot Greens, JAX
     fill/boundary-push topology, named-DOF Picard/LSQ with composable soft-prior rows, leading
     batch axis) + flux_surface_geometry assembly + coupling-generator emission of

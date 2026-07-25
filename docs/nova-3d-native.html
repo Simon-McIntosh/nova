@@ -109,6 +109,15 @@
     tolerance-gated equivalence suite against the midpoint reference (and the greens corner
     fingerprints migrated from ulp-pinning to physics-tolerance gates); bow/arc solve cost
     re-measured and recorded.</p>
+    <p><strong>Downstream consumer (prerequisite link, 2026-07-25):</strong> this zeta fast path
+    is a <em>prerequisite</em> for making the thick hexagonal plasma-section coupling the default
+    in the physics spine. The exact Urankar Part V polygon element
+    (<code>nova/biot/polysection.py</code>, landed with physics-spine-adoption waves 1+2)
+    measured ~70,000× the point-filament cost per pair, dominated by quadrature over complex
+    transcendentals; plasma cells therefore keep point coupling until this section's fast path
+    plus the biot operator-assembly review (physics-spine-adoption f-psa-04: parallel /
+    batchable / shardable GPU build, principled near/far cutoff well beyond 3 section diameters,
+    cached matrix with first solve under ~20&nbsp;min) both land.</p>
 
     <h2 id="s3">§3 — Exact flux couplings: 3-D coils and 3-D loops</h2>
     <p>Expose the kernel tier as coupling operators: the exact mutual flux between any 3-D

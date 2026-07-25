@@ -44,7 +44,16 @@ The four terms of ``g`` then reduce as follows.
   explicit boundary term.  There ``sin phi -> 0`` drives ``beta3`` to infinity and
   the arctangent to ``+/- pi/2`` with sign ``sign(u (r1 +/- r))`` -- the same
   dead-band the rectangle kernel carries.  The interior part is rational over
-  ``G^2 B^2 D``, using ``(r sin phi D)^2 + numer(beta3)^2 = G^2 B^2``.
+  ``G^2 B^2 D``, and it separates onto the two denominators EXACTLY: with ``N``
+  the arctangent's numerator and ``W = (r sin phi D)^2``, so that
+  ``G^2 B^2 = N^2 + W``, the derivative's numerator ``2 W N' - N W'`` equals
+  ``2 G^2 B^2 N' - N (G^2 B^2)'``, whose quotient is
+  ``2 N' - N (G^2)'/G^2 - N (B^2)'/B^2`` -- a polynomial plus one term over each
+  denominator on its own.  Splitting it that way rather than by partial fractions
+  over the combined pole set is what the accuracy at a slender section rests on:
+  the two denominators each carry a root just past an end of the range, those
+  roots approach one another as the section thins, and a joint expansion divides
+  by their difference.
 
 So the whole evaluation is: two ``arsinh`` quadratures, one arctangent boundary
 term, and rational functions of ``x`` over the product of ``G^2``, ``B^2`` and
@@ -58,15 +67,19 @@ to each end of the range; a target on an edge's extended line sends ``r1 -> r``
 and a ``B^2`` root to ``x = 1``.  Contracting a numerator against moments that
 are individually dominated by such a near-singularity subtracts large numbers to
 get a small one, so those numerators are DEFLATED instead -- the residue
-evaluated at the pole, where the numerator's own vanishing is explicit.  What is
-NOT cured is confluence: as the section shrinks against its major radius both
-``1 - k^2`` and the distance from the ``G^2`` root to the end of the range fall
-as ``(section/r0)^2`` TOGETHER, and the reduction loses accuracy in step.
-``tests/test_biotpolygonanalytic.py`` measures that loss against the section
-aspect ratio.  A slender section at large major radius is therefore the hard case
-here and the easy case for the boundary quadrature -- which is the opposite of
-what the cost comparison alone would suggest, and the reason this module is not
-simply a faster replacement.
+evaluated at the pole, where the numerator's own vanishing is explicit.
+
+What remains is a loss that grows with the section's aspect ratio, measured
+against it in ``tests/test_biotpolygonanalytic.py``.  Each pole family's largest
+moment is multiplied by the numerator's value at the END of the integration
+range, an ``(section/r0)^2`` quantity that the moment contraction forms as an
+alternating sum of terms of order one; two families lose two decades each.
+Expanding the numerators in the variable that vanishes where the pole sits --
+``cos^2 a`` for the ``a = pi/2`` end, ``sin^2 a`` for the other -- would carry
+that value as a coefficient rather than a sum and is the remaining work.  Until
+then a slender section at large major radius is the hard case here and the easy
+case for the boundary quadrature, which is the opposite of what the cost
+comparison alone would suggest.
 
 Sign and unit conventions, and the ``psi [Wb/A]`` normalisation, are those of
 :func:`nova.biot.polygon.polygon_greens`.
@@ -82,7 +95,7 @@ from numpy.polynomial.legendre import leggauss
 from nova.biot.elliptic import pole_moments, stable_sn_moments
 from nova.biot.polygon import pack_section
 
-__all__ = ["polygon_analytic_flux"]
+__all__ = ["polygon_analytic_flux", "polygon_analytic_greens"]
 
 # Highest power of x = sin^2 a the reduced numerators reach, plus one.  The
 # arctangent term is the deepest: weight cos^3 2a against a numerator of degree
@@ -151,6 +164,15 @@ def _from_cosine(polynomial: list, degree: int) -> list:
         for term in range(order + 1):
             out[term] = out[term] + coefficient * comb(order, term) * (-2.0) ** term
     return out
+
+
+def _derivative(polynomial: list) -> list:
+    """Return d/dx of a polynomial in x, coefficients ascending."""
+    if len(polynomial) < 2:
+        return [0.0 * polynomial[0]]
+    return [
+        (order + 1.0) * coefficient for order, coefficient in enumerate(polynomial[1:])
+    ]
 
 
 def _pole_basis(poles, scale, parameter, moments, count):
@@ -246,13 +268,28 @@ def _reduce(numerator, poles, scale, parameter, moments, count):
     return total
 
 
-def _edge_flux(r, z, edge, which, nodes):
-    """Return ``W(u)`` for one edge at one of its two limits, closed form.
+def _edge_terms(r, z, edge, which, nodes):
+    """Return ``(W_psi, W_r, W_z)`` for one edge at one of its two limits.
 
-    ``r`` must be positive: the flux is even in ``r`` (the edge antiderivative
-    satisfies ``g(-r, phi) = g(r, pi - phi)``, which flips the sign of the vector
-    potential and leaves ``r A_phi`` alone), and the reduction's modulus and
-    characteristics are defined for a positive radius only.
+    Each is the full-turn angle integral of one of the paper's edge integrands,
+    ``4 integral_0^(pi/2) da`` of it, the quarter range being all the full turn
+    needs.  The flux comes from eq 10b and the two field components from eq 11b,
+    which gives the field its OWN integrand rather than a derivative of the
+    potential -- so all three are built from the same four transcendentals with
+    different polynomial weights, and share every reduction below.  Taking the
+    field this way avoids differentiating the reduced flux, which would need the
+    derivatives of ``K``, ``E`` and ``Pi`` with respect to both the modulus and
+    the characteristic.
+
+    Eq 11b's azimuthal component is its radial bracket weighted by ``sin phi``
+    instead of ``cos phi``.  The bracket is even about ``phi = pi`` and ``sin phi``
+    is odd, so it integrates to nothing over the full turn: the ring carries no
+    toroidal field, reproduced by the algebra rather than assumed, and it is not
+    formed here.
+
+    ``r`` must be positive.  ``psi`` and ``B_Z`` are even in ``r`` and ``B_R`` is
+    odd, all three following from ``g(-r, phi) = g(r, pi - phi)``; the reduction's
+    modulus and characteristics are defined for a positive radius only.
     """
     ra, za, rb, zb = edge
     b1 = (rb - ra) / (zb - za)
@@ -321,9 +358,6 @@ def _edge_flux(r, z, edge, which, nodes):
     def over(numerator, poles, scale):
         return _reduce(numerator, poles, scale, parameter, moments, _ORDERS)
 
-    # Gamma D / (2 a0^2): a polynomial against D, no poles at all
-    flux = (2.0 * a / a02) * contract(_multiply(cosine, gamma), delta)
-
     # the two arsinh integrals the toroidal reduction leaves numerical
     node, weight = leggauss(nodes)
     angle = 0.25 * np.pi * (node + 1.0)
@@ -342,74 +376,229 @@ def _edge_flux(r, z, edge, which, nodes):
         @ quadrature_weight
     )
 
-    # u r cos phi arsinh beta1
-    flux = flux + 2.0 * u * r * first
-    flux = flux + (2.0 * u * r * r / a) * over(
-        _multiply(
-            _multiply(sine_squared, _scale(cosine, -1.0)),
-            _add(g_squared, _scale(_multiply(edge_radius, cosine), -r)),
-        ),
-        ring_poles,
-        u * u,
-    )
-
-    # [B^2 + 2 a0^2 r cos phi Y] / (2 a0^3) arsinh beta2
-    weighting = _scale(
-        _multiply(
-            cosine,
-            _add(b_squared, _scale(_multiply(cosine, plane_radius), 2.0 * a02 * r)),
-        ),
-        0.5 / (a02 * a0),
-    )
-    mean, first_harmonic, second_harmonic, third_harmonic = _to_cosine(weighting, 3)
-    mean = mean + 0.5 * second_harmonic
-    # antiderivative of the oscillatory part, sin 2n a / 2n, which vanishes at
-    # both ends of the quarter range; sin 2n a factors as sin 2a times a
-    # polynomial in cos 2a, so what is left is sin^2 phi times a polynomial in x
-    oscillation = _from_cosine(
-        [
-            0.5 * first_harmonic + 0.375 * third_harmonic - third_harmonic / 24.0,
-            0.25 * second_harmonic,
-            third_harmonic / 6.0,
-        ],
-        2,
-    )
-    core = _multiply(sine_squared, oscillation)
-    edge_slope = [b_squared[1], 2.0 * b_squared[2]]
-    flux = flux + 4.0 * (
-        mean * second
-        # the part of d(arsinh beta2)/da carrying B^2 cancels the denominator
-        + (2.0 * b1 * r / (a0 * a)) * contract(core, moments)
-        + (0.5 / (a0 * a))
-        * over(_multiply(core, _multiply(gamma, edge_slope)), edge_poles, c0)
-    )
-
-    # -(r^2/2) sin 2phi arctan beta3
     cos2a = _scale(cosine, -1.0)
-    boundary = -0.5 * np.pi * (np.sign(u * (r1 - r)) + np.sign(u * (r1 + r)))
-    interior = _add(
-        _multiply(
-            _add(
-                _multiply(
-                    sine_squared, [arctan_numerator[1], 2.0 * arctan_numerator[2]]
-                ),
-                _scale(_multiply(cos2a, arctan_numerator), -2.0),
+    edge_slope = _derivative(b_squared)
+    # The arctangent's three pieces below each carry an explicit factor of the
+    # target radius -- N' and (B^2)' one, (G^2)' two -- against the single factor
+    # the reduction divides by.  Cancelling them here rather than numerically is
+    # what keeps the term finite on the axis, where all three vanish together.
+    ring_slope_over_radius_squared = [4.0 * one, -8.0 * one]
+    edge_slope_over_radius = [4.0 * (a02 * r - (r + r1)), -8.0 * b1 * b1 * r]
+    arctan_slope_over_radius = [-2.0 * (u + 2.0 * b1 * r), 8.0 * b1 * r]
+
+    def against_first_arsinh():
+        """Return ``integral cos^2 2a arsinh beta1 da`` over the quarter range.
+
+        By parts.  ``cos^2 2a`` splits into its mean and an oscillatory part whose
+        antiderivative ``sin 4a/8`` vanishes at BOTH ends, so no boundary term
+        survives; the mean leaves the paper's residual arsinh quadrature and the
+        rest is rational over ``G^2 D``.  Both the flux's ``u r cos phi`` weight
+        and the field's ``r cos^2 phi`` weight land on this same integral, ``cos
+        phi = -cos 2a`` making them the same shape.
+        """
+        return 0.5 * first + (0.5 * r / a) * over(
+            _multiply(
+                _multiply(sine_squared, _scale(cosine, -1.0)),
+                _add(g_squared, _scale(_multiply(edge_radius, cosine), -r)),
             ),
-            [one, -parameter],
-        ),
-        _scale(_multiply(arctan_numerator, sine_squared), 0.5 * parameter),
+            ring_poles,
+            u * u,
+        )
+
+    def against_second_arsinh(weighting):
+        """Return ``integral weighting(x) arsinh beta2 da`` over the quarter range.
+
+        By parts, with the weight expanded in ``cos 2n a`` so that the
+        antiderivative of its oscillatory part -- a sum of ``sin 2n a / 2n`` --
+        vanishes at both ends and only the mean's residual quadrature survives as
+        a boundary-free term.  ``sin 2n a`` factors as ``sin 2a`` times a
+        polynomial in ``cos 2a``, so what multiplies the derivative is ``sin^2 phi``
+        times a polynomial in ``x``, and the part of that derivative carrying
+        ``B^2`` cancels the denominator outright.  Weights up to degree three
+        appear: three in the flux, two and one in the field.
+        """
+        mean, harmonic, second_harmonic, third_harmonic = _to_cosine(weighting, 3)
+        mean = mean + 0.5 * second_harmonic
+        oscillation = _from_cosine(
+            [
+                0.5 * harmonic + 0.375 * third_harmonic - third_harmonic / 24.0,
+                0.25 * second_harmonic,
+                third_harmonic / 6.0,
+            ],
+            2,
+        )
+        core = _multiply(sine_squared, oscillation)
+        return (
+            mean * second
+            + (2.0 * b1 * r / (a0 * a)) * contract(core, moments)
+            + (0.5 / (a0 * a))
+            * over(_multiply(core, _multiply(gamma, edge_slope)), edge_poles, c0)
+        )
+
+    # sin phi -> 0 at both ends drives beta3 to infinity, so the arctangent lands
+    # on +/- pi/2 with these signs -- the same dead-band the rectangle kernel has
+    at_zero = 0.5 * np.pi * np.sign(u * (r1 + r))
+    at_half = 0.5 * np.pi * np.sign(u * (r1 - r))
+
+    def against_arctan(weighting):
+        """Return ``integral sin 2a weighting(cos 2a) arctan beta3 da``.
+
+        By parts again, but here the antiderivative of the weight does NOT vanish
+        at the ends -- ``sin 2a`` integrates to a cosine -- so unlike the two
+        arsinh terms this one leaves an explicit boundary contribution, evaluated
+        from the arctangent's endpoint limits above.  The weight is given as a
+        polynomial in ``cos 2a`` because that is what makes its antiderivative a
+        polynomial too: degree two for the flux, degree zero for the field.
+
+        The interior part is rational over ``G^2 B^2 D``, and it separates onto the
+        two denominators EXACTLY.  Writing ``N`` for the arctangent's numerator and
+        ``W = (r sin phi D)^2``, so that ``G^2 B^2 = N^2 + W``, the derivative's
+        numerator ``2 W N' - N W'`` equals ``2 G^2 B^2 N' - N (G^2 B^2)'`` -- the
+        ``N^2`` parts cancel identically -- so dividing through leaves
+
+            2 N' - N (G^2)'/G^2 - N (B^2)'/B^2
+
+        a polynomial plus one term over each denominator on its own.  Reducing it
+        this way rather than by partial fractions over the combined pole set is what
+        holds the term at a slender section: ``G^2`` and ``B^2`` each carry a root
+        just past the end of the integration range, those two roots approach one
+        another as the section thins against its major radius, and a joint expansion
+        divides by their difference.
+        """
+        primitive = [0.0 * one] + [
+            coefficient / (order + 1.0) for order, coefficient in enumerate(weighting)
+        ]
+        upper = sum(primitive)
+        lower = sum(
+            coefficient * (-1.0) ** order for order, coefficient in enumerate(primitive)
+        )
+        boundary = -0.5 * (lower * at_half - upper * at_zero)
+        weight = _from_cosine(primitive, len(primitive) - 1)
+        return boundary + (0.25 / a) * (
+            2.0 * contract(_multiply(weight, arctan_slope_over_radius), moments)
+            - r
+            * over(
+                _multiply(
+                    weight, _multiply(arctan_numerator, ring_slope_over_radius_squared)
+                ),
+                ring_poles,
+                u * u,
+            )
+            - over(
+                _multiply(weight, _multiply(arctan_numerator, edge_slope_over_radius)),
+                edge_poles,
+                c0,
+            )
+        )
+
+    # the flux, eq 10b weighted by cos phi
+    flux = (
+        (2.0 * a / a02) * contract(_multiply(cosine, gamma), delta)
+        + 4.0 * u * r * against_first_arsinh()
+        + 4.0
+        * against_second_arsinh(
+            _scale(
+                _multiply(
+                    cosine,
+                    _add(
+                        b_squared,
+                        _scale(_multiply(cosine, plane_radius), 2.0 * a02 * r),
+                    ),
+                ),
+                0.5 / (a02 * a0),
+            )
+        )
+        - 4.0 * r * r * against_arctan([0.0 * one, 0.0 * one, one])
     )
-    flux = flux + (2.0 * r * r / 3.0) * (
-        boundary
-        - r
-        * a
-        * over(
-            _multiply(_multiply(_multiply(cos2a, cos2a), cos2a), interior),
-            ring_poles + edge_poles,
-            u * u * c0,
+
+    # the radial field, eq 11b's first component
+    radial = (
+        (4.0 * a / a02) * contract(cosine, delta)
+        + 4.0 * r * against_first_arsinh()
+        + 4.0
+        * against_second_arsinh(
+            _scale(
+                _multiply(cosine, _add([r1 * one], _scale(cosine, b1 * b1 * r))),
+                -b1 / (a02 * a0),
+            )
         )
     )
-    return flux
+
+    # the vertical field, eq 11b's third component.  Its arsinh beta1 weight is
+    # constant, so that term is the residual quadrature itself with no reduction.
+    vertical = (
+        4.0 * u * first
+        + 4.0
+        * against_second_arsinh(
+            _scale(
+                _add(
+                    [b1 * b1 * r1 * one],
+                    _scale(cosine, -(2.0 * a02 - 1.0) * r),
+                ),
+                1.0 / (a02 * a0),
+            )
+        )
+        - 4.0 * r * against_arctan([one])
+        - (4.0 * b1 * b1 / a02) * a * delta[0]
+    )
+    return flux, radial, vertical
+
+
+def _edge_flux(r, z, edge, which, nodes):
+    """Return the flux integrand's full-turn angle integral for one edge limit."""
+    return _edge_terms(r, z, edge, which, nodes)[0]
+
+
+def _edge_field(r, z, edge, which, nodes):
+    """Return the two field integrands' full-turn angle integrals for one limit."""
+    return _edge_terms(r, z, edge, which, nodes)[1:]
+
+
+def polygon_analytic_greens(
+    target_r: np.ndarray,
+    target_z: np.ndarray,
+    vertices: np.ndarray,
+    *,
+    nodes: int = _NODES,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Return ``(psi, B_R, B_Z)`` per ampere at targets, all in closed form.
+
+    Signature, sign conventions and units match
+    :func:`nova.biot.polygon.polygon_greens`: psi in Wb/A, field in T/A, per
+    ampere of total conductor current at uniform azimuthal current density.
+    ``vertices`` is the ``(n, 2)`` array of section corners in either
+    orientation; horizontal edges contribute nothing and are skipped.  Accuracy
+    is governed by the section aspect ratio, as the module docstring describes.
+
+    Unlike the shipped kernel this does not form the field by dividing a flux
+    gradient by ``2 pi r``, so it stays finite on the axis, where ``B_R`` is zero
+    by the parity of the reduction rather than by cancellation.
+    """
+    edges, weights, norm = pack_section(vertices)
+    signed = np.asarray(target_r, dtype=np.float64)
+    height = np.asarray(target_z, dtype=np.float64)
+    shape = signed.shape
+    r = np.abs(signed).ravel()
+    z = np.broadcast_to(height, shape).ravel()
+    flux = np.zeros_like(r)
+    radial = np.zeros_like(r)
+    vertical = np.zeros_like(r)
+    for index in range(len(edges)):
+        if weights[index] == 0.0:
+            continue
+        upper = _edge_terms(r, z, edges[index], 1, nodes)
+        lower = _edge_terms(r, z, edges[index], 0, nodes)
+        flux = flux - (upper[0] - lower[0])
+        radial = radial - (upper[1] - lower[1])
+        vertical = vertical - (upper[2] - lower[2])
+    # the packed norm folds in the [0, pi] doubling the quarter range already has,
+    # so psi keeps the 2 pi R of the total flux and the field does not
+    return (
+        (0.5 * norm * r * flux).reshape(shape),
+        # B_R is ODD in r, which is what makes it exactly zero on the axis
+        (norm / (4.0 * np.pi) * np.sign(signed).ravel() * radial).reshape(shape),
+        (norm / (4.0 * np.pi) * vertical).reshape(shape),
+    )
 
 
 def polygon_analytic_flux(
@@ -419,26 +608,5 @@ def polygon_analytic_flux(
     *,
     nodes: int = _NODES,
 ) -> np.ndarray:
-    """Return psi [Wb/A] at targets from a polygon-section ring, closed form.
-
-    ``vertices`` is the ``(n, 2)`` array of section corners in either
-    orientation, as :func:`nova.biot.polygon.polygon_greens` takes it, and the
-    result matches that function's psi to the accuracy the module docstring
-    describes.  Horizontal edges contribute nothing and are skipped.
-    """
-    edges, weights, norm = pack_section(vertices)
-    radius = np.abs(np.asarray(target_r, dtype=np.float64))
-    height = np.asarray(target_z, dtype=np.float64)
-    shape = radius.shape
-    r = radius.ravel()
-    z = np.broadcast_to(height, shape).ravel()
-    total = np.zeros_like(r)
-    for index in range(len(edges)):
-        if weights[index] == 0.0:
-            continue
-        total = total - (
-            _edge_flux(r, z, edges[index], 1, nodes)
-            - _edge_flux(r, z, edges[index], 0, nodes)
-        )
-    # the packed norm folds in the [0, pi] doubling the quarter range already has
-    return (0.5 * norm * r * total).reshape(shape)
+    """Return psi [Wb/A] alone, for a caller that does not want the field."""
+    return polygon_analytic_greens(target_r, target_z, vertices, nodes=nodes)[0]

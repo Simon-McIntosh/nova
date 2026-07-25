@@ -254,10 +254,12 @@ def _product(left: tuple, right: tuple) -> tuple:
     return (
         _harmonic_add(
             _harmonic_multiply(_BOTH, _harmonic_multiply(bulk, other_bulk)),
-            _harmonic_scale(_harmonic_multiply(_PLAIN, other_bulk), near),
-            _harmonic_scale(_harmonic_multiply(_PLAIN, bulk), other_near),
-            _harmonic_scale(_harmonic_multiply(_COMPLEMENT, other_bulk), far),
-            _harmonic_scale(_harmonic_multiply(_COMPLEMENT, bulk), other_far),
+            # each factor's own end values ride on the OTHER factor's bulk, and the
+            # pair collapses onto the single two-term series they span
+            _harmonic_multiply([0.5 * (near + far), 0.5 * (far - near)], other_bulk),
+            _harmonic_multiply(
+                [0.5 * (other_near + other_far), 0.5 * (other_far - other_near)], bulk
+            ),
             [-(near - far) * (other_near - other_far)],
         ),
         near * other_near,
@@ -281,10 +283,10 @@ def _times(term: tuple, factor) -> tuple:
 
 def _across_the_range(term: tuple) -> list:
     """Return the range function as one harmonic series."""
+    bulk, near, far = term
     return _harmonic_add(
-        _harmonic_scale(_PLAIN, term[1]),
-        _harmonic_scale(_COMPLEMENT, term[2]),
-        _harmonic_multiply(_BOTH, term[0]),
+        [0.5 * (near + far), 0.5 * (far - near)],
+        _harmonic_multiply(_BOTH, bulk),
     )
 
 
@@ -503,10 +505,23 @@ class _Edge:
             shift_x,
             seed_y,
             seed_x,
-            harmonic_pole_moments(capped_y, seed_y, self.moments, _HARMONICS + 1),
-            harmonic_pole_moments(
-                capped_x, seed_x, self.moments, _HARMONICS + 1, mirrored=True
-            ),
+            self._family(capped_y, seed_y, False),
+            self._family(capped_x, seed_x, True),
+        )
+
+    def _family(self, shift, seed, mirrored: bool):
+        """Return the pole family, or nothing where no root is far enough out.
+
+        The family is the route for a FAR root only, and a far root is the
+        exception: both of the ring denominator's shifts are the edge's own height
+        over the ring span, squared, and the plane's near one is the target's
+        offset from the edge's line.  Skipping it when no column needs it takes a
+        tridiagonal solve of forty orders out of the common build.
+        """
+        if not np.any(shift > _POLE_SWITCH):
+            return None
+        return harmonic_pole_moments(
+            shift, seed, self.moments, _HARMONICS + 1, mirrored=mirrored
         )
 
     def plain(self, term: tuple):
@@ -554,6 +569,8 @@ class _Edge:
                 + (-2.0 if mirrored else 2.0) * _contract(quotient, self.moments)
             )
         )
+        if family is None:
+            return held
         return np.where(
             shift <= _POLE_SWITCH,
             held,
@@ -651,29 +668,31 @@ class _Edge:
 
             Whichever branch the END picks, the numerator's sign can turn over
             INSIDE the half -- the azimuthal weight ``b1 X`` sweeps a whole ring
-            span -- and there the branch's own sum cancels.  Both are therefore
-            formed through ``W^2`` from the other one, which is a sum of positives
-            wherever the direct difference is not.
+            span -- and there that branch's own sum cancels.  Its value is
+            recovered through ``W^2`` from the other one instead, the two being
+            reciprocal about it, and the other is a sum of positives exactly where
+            the first is a difference.
+
+            All three cases are then ONE logarithm: the no-logarithm branch is the
+            positive one with the model replaced by unity, since ``arsinh`` is
+            itself ``log(N + sqrt(N^2 + W^2)) - log W``.
             """
-            root = np.hypot(numerator, denominator)
-            ratio = model / denominator
-            squared = denominator * denominator
+            # the plain root rather than the guarded one: both arguments are of
+            # order the ring span here, so nothing overflows and the guard costs
+            # several times the square root it protects
+            root = np.sqrt(numerator * numerator + denominator * denominator)
             direct = numerator + root
             mirror = root - numerator
-            rising = np.where(
-                numerator >= 0.0, direct, squared / np.where(mirror > 0.0, mirror, 1.0)
+            positive = sign >= 0.0
+            pick = np.where(positive, direct, mirror)
+            other = np.where(positive, mirror, direct)
+            base = np.where(
+                positive == (numerator >= 0.0),
+                pick,
+                denominator * denominator / np.where(other > 0.0, other, 1.0),
             )
-            falling = np.where(
-                numerator <= 0.0, mirror, squared / np.where(direct > 0.0, direct, 1.0)
-            )
-            return np.where(
-                sign > 0.0,
-                np.log(np.where(sign > 0.0, rising, 1.0)) + np.log(ratio),
-                np.where(
-                    sign < 0.0,
-                    -np.log(np.where(sign < 0.0, falling, 1.0)) - np.log(ratio),
-                    np.arcsinh(numerator / denominator),
-                ),
+            return np.where(sign < 0.0, -1.0, 1.0) * np.log(
+                base * np.where(sign != 0.0, model, 1.0) / denominator
             )
 
         def residual(halves, pieces):
@@ -705,14 +724,19 @@ class _Edge:
                 )
                 span = np.arcsinh(limit / width)[:, None]
                 stretch = 0.5 * span * (node + 1.0)[None, :]
-                panel = width[:, None] * np.sinh(stretch)
+                held = width[:, None]
+                stretched = np.sinh(stretch)
+                panel = held * stretched
+                # the panel never reaches a quarter turn, so the complement is a
+                # subtraction rather than a second transcendental, and the map's
+                # own jacobian follows from the sinh it has already taken
                 near = np.sin(panel) ** 2
-                far = np.cos(panel) ** 2
-                x, y = (far, near) if half else (near, far)
+                x, y = (1.0 - near, near) if half else (near, 1.0 - near)
                 numerator, denominator = pieces(x, y)
                 sign = np.sign(end)[:, None]
-                model = np.hypot(offset[:, None], scale[:, None] * panel)
-                jacobian = 0.5 * span * width[:, None] * np.cosh(stretch)
+                scaled = scale[:, None] * panel
+                model = np.sqrt(offset[:, None] ** 2 + scaled * scaled)
+                jacobian = 0.5 * span * held * np.sqrt(1.0 + stretched * stretched)
                 total = (
                     total
                     + (jacobian * regularised(numerator, denominator, model, sign))
@@ -822,6 +846,11 @@ class _Edge:
             )
 
         against_first_arsinh = first_arsinh()
+        # the three components differ only in the weights they put on the same
+        # reductions, so every product that does not carry a weight is formed once
+        plane_derivative = _product(self.gamma, self.edge_slope)
+        over_ring = _product(self.arctan_numerator, self.ring_slope_over_radius_squared)
+        over_plane = _product(self.arctan_numerator, self.edge_slope_over_radius)
 
         def against_second_arsinh(build):
             """Return ``integral build arsinh beta2 da`` over the quarter range.
@@ -852,9 +881,7 @@ class _Edge:
                 mean * self.plane_residual
                 + (2.0 * b1 * r / (a0 * a)) * self.plain(core)
                 + (0.5 / (a0 * a))
-                * self.across(
-                    _product(core, _product(self.gamma, self.edge_slope)), self.plane
-                )
+                * self.across(_product(core, plane_derivative), self.plane)
             )
 
         # sin phi -> 0 at both ends drives beta3 to infinity, so the arctangent lands
@@ -893,7 +920,7 @@ class _Edge:
             aspect ratio, and it multiplies the pole moment that grows as the root
             approaches.
             """
-            primitive = [0.0 * one] + [
+            primitive = [0.0] + [
                 coefficient / (order + 1.0)
                 for order, coefficient in enumerate(weighting)
             ]
@@ -903,19 +930,18 @@ class _Edge:
                 for order, coefficient in enumerate(primitive)
             )
             boundary = -0.5 * (lower * at_half - upper * at_zero)
-            weight = _range([], 0.0 * one, 0.0 * one)
+            # the weight is the same fixed polynomial for every target, so it is
+            # built once out of scalars rather than once per column
+            weight = _range([], 0.0, 0.0)
             for coefficient in reversed(primitive):
                 weight = _sum(
                     _product(weight, variable), _range([], coefficient, coefficient)
                 )
 
-            def over(block):
-                return _product(weight, _product(self.arctan_numerator, block))
-
             return boundary + (0.25 / a) * (
                 2.0 * self.plain(_product(weight, self.arctan_slope_over_radius))
-                - r * self.across(over(self.ring_slope_over_radius_squared), self.ring)
-                - self.across(over(self.edge_slope_over_radius), self.plane)
+                - r * self.across(_product(weight, over_ring), self.ring)
+                - self.across(_product(weight, over_plane), self.plane)
             )
 
         # the flux, eq 10b weighted by cos phi

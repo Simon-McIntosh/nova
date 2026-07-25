@@ -6,40 +6,52 @@ and ignores the coefficient algebra between them. The result is a LOWER bound on
 the closed form's cost and therefore an UPPER bound on the speedup available.
 
 Per edge of a full-turn ring the finished reduction needs, once per edge limit: the
-complete integrals of the first and second kind; the plain and complement moment
-stacks built from them; one complete integral of the third kind for each of the four
-pole factors -- two denominators, each split between a root past either end of the
-range -- and the two residual ``arsinh`` integrals the paper leaves numerical.
-Everything else is rational algebra in quantities already computed.
+complete integrals of the first and second kind; the harmonic moment stack built
+from them and its radical-weighted fold; one complete integral of the third kind for
+each of the four pole factors -- two denominators, each split between a root past
+either end of the range -- and the two residual ``arsinh`` integrals the paper
+leaves numerical. Everything else is rational algebra in quantities already
+computed.
 
 The residual quadratures carry their grading, because that is not optional: each
 integrand has a boundary layer at each end of the range whose width falls with the
 target's offset from the edge's end level, and a plain rule at any practical order
-steps over it. The grading costs a ``sinh`` and a ``cosh`` per node per pair, which
-is why it appears in the floor rather than beside it.
+steps over it. The grading costs a ``sinh`` per node per pair, which is why it
+appears in the floor rather than beside it.
 
 ``measured_cost`` times the assembled evaluation on the same shape of problem, for
 the flux alone and for the flux with both field components, so the gap to the floor
 is the coefficient algebra and the pole bookkeeping the floor deliberately ignores.
 
 Measured, one SLURM compute core, 4096 pairs against a hexagonal cell, median of
-three in a fresh process:
+three in a fresh process, at the 128 residual nodes the acceptance gate needs:
 
-    third-kind integrals        17.2 us/pair
-    moment stacks and all       52.1 us/pair
-    graded g_p quadrature       41.3 us/pair
-    floor                       93.4 us/pair
-    assembled psi              134.0 us/pair       1.43 x floor
-    assembled psi + field      134.4 us/pair       1.44 x floor
+    third-kind integrals        16.9 us/pair
+    moment stacks and all       40.4 us/pair
+    graded g_p quadrature      144.2 us/pair
+    floor                      184.6 us/pair
+    assembled psi              330.3 us/pair       1.79 x floor
+    assembled psi + field      330.2 us/pair       1.79 x floor
 
-Two things to read from that. The field is FREE: eq 11b's rows share every
+Three things to read from that. The field is FREE: eq 11b's rows share every
 reduction the flux uses and differ only in polynomial weights, so both components
-cost 0.4 us/pair on top of the flux -- which is the case for transcribing them
-rather than differentiating the reduced flux. And the assembly now sits within half
-again of its own primitives, against fifteen times when every pole family was
-rebuilt per term; what is left to win is in the primitives, and two thirds of those
-are the two moment stacks, whose length is set by the headroom a downward recursion
-needs rather than by the nine orders the numerators reach.
+cost nothing measurable on top of the flux -- which is the case for transcribing
+them rather than differentiating the reduced flux.
+
+The MOMENT work got cheaper, 52.1 to 40.4, even though its stack is now carried
+forty orders past the harmonics the numerators reach: one harmonic family replaces
+two power stacks each with sixty orders of downward-recursion headroom, and the four
+pole families that used to be built on top of them are a tridiagonal solve run only
+where a root is far enough out to need one.
+
+The residual quadrature is now the whole story, at 144 of the 184 floor. Half of
+that is the node count, which doubled because the most slender section's
+near-contour targets do not converge at 64; the other half is what removing the
+boundary logarithm costs per node -- a model, its root and a logarithm in place of
+one ``arsinh``. It buys five orders at a corner and one to two everywhere else, and
+it is where the next cost win is: BOTH the first residual and the whole moment stack
+depend only on the target and the edge's ENDPOINT, not on the edge's slope, so a
+vertex-organised assembly would form them once per vertex instead of twice.
 
     python benchmarks/analytic_cost_floor.py [nodes]
 """
@@ -53,11 +65,13 @@ import numpy as np
 import scipy.special
 
 from nova.biot.elliptic import (
-    cn_pole_moments,
+    POLE_HEADROOM,
+    cn_pole_moment,
     complete_pi,
-    sn_pole_moments,
-    stable_cn_moments,
-    stable_sn_moments,
+    harmonic_moments,
+    harmonic_pole_moments,
+    harmonic_root_moments,
+    sn_pole_moment,
 )
 from nova.biot.polygonanalytic import polygon_analytic_flux, polygon_analytic_greens
 
@@ -68,30 +82,35 @@ ORDERS = 9
 
 
 def special_function_cost(pairs: int, edges: int) -> float:
-    """Return seconds for the unavoidable special-function calls of one build."""
+    """Return seconds for the unavoidable moment work of one build.
+
+    One harmonic stack per edge limit, its radical-weighted fold, and per
+    denominator a seed and a family for each of the two pole factors.  The stack
+    is carried past the harmonics the numerators reach because the pole families'
+    system is closed there, which is what sets its length.
+    """
     rng = np.random.default_rng(0)
     parameter = rng.uniform(0.05, 0.95, pairs)
     complement = 1.0 - parameter
     shift = rng.uniform(1e-4, 3.0, pairs)
     start = time.perf_counter()
     for _ in range(edges * LIMITS):
-        plain = stable_sn_moments(parameter, ORDERS + 60)
-        complete = stable_cn_moments(parameter, ORDERS + 60, complement=complement)
+        moments = harmonic_moments(
+            parameter, ORDERS + POLE_HEADROOM + 1, complement=complement
+        )
+        harmonic_root_moments(moments, parameter)
         for _ in range(2):
-            cn_pole_moments(
-                shift,
-                parameter,
-                ORDERS,
-                moments=complete,
-                parameter_complement=complement,
-            )
-            sn_pole_moments(
-                shift,
-                parameter,
-                ORDERS,
-                moments=plain,
-                parameter_complement=complement,
-            )
+            for seed, mirrored in (
+                (
+                    cn_pole_moment(shift, parameter, parameter_complement=complement),
+                    False,
+                ),
+                (
+                    sn_pole_moment(shift, parameter, parameter_complement=complement),
+                    True,
+                ),
+            ):
+                harmonic_pole_moments(shift, seed, moments, ORDERS, mirrored=mirrored)
     return time.perf_counter() - start
 
 
@@ -110,7 +129,11 @@ def third_kind_cost(pairs: int, edges: int) -> float:
 
 
 def residual_quadrature_cost(pairs: int, edges: int, nodes: int) -> float:
-    """Return seconds for the two graded arsinh integrals, per edge limit."""
+    """Return seconds for the two graded arsinh integrals, per edge limit.
+
+    The regularised integrand replaces one ``arsinh`` with the model, its root and
+    two logarithms, which is what removing the boundary logarithm costs per node.
+    """
     rng = np.random.default_rng(1)
     radius = rng.uniform(5.0, 7.0, pairs)[:, None]
     offset = rng.uniform(0.1, 2.0, pairs)[:, None]
@@ -125,10 +148,13 @@ def residual_quadrature_cost(pairs: int, edges: int, nodes: int) -> float:
                 angle = width * np.sinh(stretch)
                 jacobian = 0.5 * span * width * np.cosh(stretch)
                 near = np.sin(angle) ** 2
-                argument = (radius - offset * near) / np.sqrt(
-                    offset**2 + radius**2 * near * (1.0 - near)
+                numerator = radius - offset * near
+                denominator = np.sqrt(offset**2 + radius**2 * near * (1.0 - near))
+                model = np.hypot(offset, radius * angle)
+                regular = np.log(numerator + np.hypot(numerator, denominator)) + np.log(
+                    model / denominator
                 )
-                (jacobian * np.arcsinh(argument)) @ weight
+                (jacobian * regular) @ weight
     return time.perf_counter() - start
 
 
@@ -151,7 +177,7 @@ def measured_cost(pairs: int, edges: int, nodes: int, repeats: int = 3) -> float
 
 
 if __name__ == "__main__":
-    nodes = int(sys.argv[1]) if len(sys.argv) > 1 else 64
+    nodes = int(sys.argv[1]) if len(sys.argv) > 1 else 128
     third = third_kind_cost(PAIRS, EDGES)
     special = special_function_cost(PAIRS, EDGES)
     residual = residual_quadrature_cost(PAIRS, EDGES, nodes)

@@ -103,6 +103,27 @@ offsets ``r' - r``, ``r1 - r`` and their squares, exactly what a conversion from
 the plain basis would reconstruct as differences of terms of order the major
 radius.
 
+A target ON a section VERTEX drives every one of those small quantities to zero at
+once, and it is a working configuration rather than a contrived one: these sections
+are evaluated ACROSS themselves inside a plasma bundle, so a grid row lands on a
+corner by alignment.  There ``u = 0`` and ``r' = r1 = r`` together, so both of
+``G^2``'s roots and ``B^2``'s near root sit ON the range end and the modulus reaches
+one, where ``K`` diverges logarithmically.  Two things carry it:
+
+* ``k'^2 = (u^2 + (r' - r)^2)/a^2`` -- the target's squared distance to the edge's
+  OWN END over the squared ring span -- is formed from the geometry and handed to
+  every complete integral, because a float parameter cannot carry its own complement
+  and ``K`` is then wrong by ``eps/k'^2``.  That error, not the confluence, is what
+  used to make a target within a micron of a corner useless.
+* AT the corner the divergence itself cancels.  ``u = 0`` collapses the
+  arctangent's numerator onto ``N = -b1 G^2`` exactly, so its interior part becomes
+  ``-b1[(G^2)' - G^2 (B^2)'/B^2]``, and at ``phi = 0`` with ``r' = r`` the ratio
+  ``G^2/B^2`` goes to ``1/a0^2`` while ``(B^2)'`` goes to ``a0^2 (G^2)'`` -- the
+  bracket vanishes.  Every other term's weight on ``K`` carries a factor of
+  ``sin^2 phi``, ``u`` or ``r1 -/+ r`` and vanishes on its own.  So the reduction's
+  total weight on ``K`` is zero and :func:`nova.biot.elliptic._complete_kind`
+  evaluates the moments' finite parts instead.
+
 Sign and unit conventions, and the ``psi [Wb/A]`` normalisation, are those of
 :func:`nova.biot.polygon.polygon_greens`.
 """
@@ -133,6 +154,20 @@ _ORDERS = 9
 # downward from an arbitrary seed has converged; matches the elliptic module's own
 # headroom, which sets what the moment stacks handed to them carry.
 _HEADROOM = 60
+
+# Narrowest boundary layer the graded panels below chase before giving up on it.
+# A target ON a section vertex, or anywhere on an edge's extended line, collapses a
+# layer onto the range end exactly, so this is reached rather than approached, and it
+# sets a trade-off rather than a cutoff.  The stretch the map has to span is the log
+# of the range over this, and the layer's own residual -- the part of its log that
+# the map leaves unresolved -- falls with it; but the O(1) feature the arsinh
+# saturates on sits a FIXED stretch below the top of that span, so a longer span
+# thins the node density exactly where the integrand stops being a plain logarithm.
+# The two cross in a broad basin: over the four gate sections the worst deviation at
+# a vertex runs 3.6e-05 at 1e-13, 5.6e-06 at 1e-09, 2.3e-07 here, 7.9e-07 at 1e-07
+# and 2.4e-05 at 1e-05, with none of the recorded whole-section envelopes moving
+# anywhere across that range.
+_LAYER_FLOOR = 1e-8
 
 # Nodes for the two arsinh integrals the reduction leaves numerical, split evenly
 # between the two graded panels.  Their integrands are analytic on the open range
@@ -298,12 +333,22 @@ def _edge_terms(r, z, edge, which, nodes):
     a0 = np.sqrt(a02)
     # r1 - r and r' - r are the complement basis's leading coefficients, so both
     # are formed from the geometry rather than from r1 and r': r' collapses to the
-    # edge endpoint radius at each limit, exactly
-    height = za - z
-    r1 = ra - b1 * height
-    plane_offset = (ra - r) - b1 * height
-    u = (zb - z) if which else height
-    edge_offset = (rb - r) if which else (ra - r)
+    # edge endpoint radius at each limit, exactly.
+    lower_level = za - z
+    upper_level = zb - z
+    lower_offset = ra - r
+    upper_offset = rb - r
+    u = upper_level if which else lower_level
+    edge_offset = upper_offset if which else lower_offset
+    # r1 - r is the target's offset from the edge's EXTENDED LINE, taken as the cross
+    # product of its offsets to the two endpoints over the edge's height rather than
+    # as r1 less r.  That vanishes EXACTLY at either endpoint, where both of that
+    # endpoint's own offsets are exactly zero, and both endpoints matter: a target on
+    # one is the vertex degeneracy for this edge, and a target on the other still
+    # lies on the line, where the plane denominator's near root sits on the range
+    # end.  Either subtraction form is exact at only one of the two.
+    plane_offset = (lower_offset * upper_level - upper_offset * lower_level) / (zb - za)
+    r1 = r + plane_offset
     # u = 0 -- a target exactly level with this end of the edge -- drives BOTH of
     # G^2's roots onto the ends of the integration range, and the split below
     # carries that exactly: each shift is zero, and each numerator's leading
@@ -312,17 +357,30 @@ def _edge_terms(r, z, edge, which, nodes):
     # divergent leading moment on the same reasoning, so no floor is needed and the
     # configuration a grid whose rows line up with the section's corners produces is
     # evaluated rather than approached.
+    #
+    # A target ON the edge's endpoint -- a section VERTEX -- adds r' = r and r1 = r
+    # to that, so the modulus reaches one as well and the plane denominator's near
+    # root joins the ring's on the range end.  What diverges there is the complete
+    # integral of the first kind; the reduction's total weight on it is zero, because
+    # the section's flux and field are bounded at its own corner, and the elliptic
+    # module evaluates that finite part directly.  Grids across the section land on
+    # vertices by alignment rather than by contrivance, so this is a working
+    # configuration and not an edge case.
     rp = edge_offset + r
 
     a2 = u * u + (r + rp) ** 2
     a = np.sqrt(a2)
     parameter = 4.0 * r * rp / a2
-    # 1 - k^2 = (u^2 + (r - r')^2)/a^2, which the float parameter cannot express:
-    # the third-kind integrals are as sensitive to this complement as to their own
+    # 1 - k^2 = (u^2 + (r - r')^2)/a^2 -- the target's squared distance to the edge
+    # END over the squared ring span -- which the float parameter cannot express.
+    # EVERY complete integral is as sensitive to this complement as the third-kind
+    # ones are to their own, K by eps/k'^2, so all of them are given it.
     parameter_complement = (u * u + edge_offset**2) / a2
     one = np.ones_like(parameter)
 
-    plain_moments = stable_sn_moments(parameter, _ORDERS + _HEADROOM)
+    plain_moments = stable_sn_moments(
+        parameter, _ORDERS + _HEADROOM, complement=parameter_complement
+    )
     complement_moments = stable_cn_moments(
         parameter, _ORDERS + _HEADROOM, complement=parameter_complement
     )
@@ -436,11 +494,12 @@ def _edge_terms(r, z, edge, which, nodes):
         """Return the angle a boundary layer of this half-width turns over on.
 
         Clipped above at one, where the layer is as wide as the range and the map
-        below is already near the identity, and below off zero, where the layer has
-        collapsed onto the range end and the integrand is genuinely log-singular
-        -- integrable, and left to the vanishing weight the map gives it there.
+        below is already near the identity, and below at ``_LAYER_FLOOR``, where the
+        layer has collapsed onto the range end and the integrand is genuinely
+        log-singular -- integrable, and left to the vanishing weight the map gives
+        it there.
         """
-        return np.clip(scale, 1e-13, 1.0)[:, None]
+        return np.clip(scale, _LAYER_FLOOR, 1.0)[:, None]
 
     def residual(widths, argument):
         """Return ``integral_0^(pi/2) arsinh(argument) da`` over graded panels.
@@ -564,9 +623,21 @@ def _edge_terms(r, z, edge, which, nodes):
         )
 
     # sin phi -> 0 at both ends drives beta3 to infinity, so the arctangent lands
-    # on +/- pi/2 with these signs -- the same dead-band the rectangle kernel has
+    # on +/- pi/2 with these signs -- the same dead-band the rectangle kernel has.
+    #
+    # Not at the edge's own endpoint, though.  beta3's numerator collapses onto
+    # u (r1 -/+ r) there, so when that vanishes the endpoint limit is set by the next
+    # order in sin^2 phi instead: at phi = 0 the numerator goes as -b1 G^2 and the
+    # denominator as r sin phi D, and with the target ON the endpoint both go as
+    # sin^2 phi with the ratio -b1 exactly -- the arctangent lands on -arctan b1
+    # rather than on zero or on the dead-band. phi = pi keeps its zero, its own
+    # numerator carrying one more power of sin phi than its denominator.
     at_zero = 0.5 * np.pi * np.sign(u * (r1 + r))
-    at_half = 0.5 * np.pi * np.sign(u * (r1 - r))
+    at_half = np.where(
+        parameter_complement > 0.0,
+        0.5 * np.pi * np.sign(u * plane_offset),
+        -np.arctan(b1) * one,
+    )
 
     def against_arctan(weighting):
         """Return ``integral sin 2a weighting(cos 2a) arctan beta3 da``.

@@ -22,6 +22,16 @@ component that must vanish for an axisymmetric ring.  The algebra reproduces the
 symmetry rather than assuming it, which makes it a useful check on a
 transcription.
 
+Everything here is parametrised by the modulus COMPLEMENT ``k'^2``, never by the
+parameter alone.  A float parameter cannot carry its own complement -- ``1 - m``
+is then known only to ``eps`` -- and ``K``, which grows like ``-log k'``, is wrong
+by ``eps/k'^2`` if formed that way.  For a polygon section ``k'^2`` is the target's
+squared distance to an edge's END over the squared ring span, so that error is what
+a target approaching a section VERTEX sees, and it reaches order one a micron out.
+Carlson's forms take the complement as their argument and a caller that knows it in
+closed form keeps every digit.  ``k'^2 = 0`` -- the target ON the vertex -- is the
+confluence, where ``K`` diverges logarithmically; see :func:`_complete_kind`.
+
 The three moment families below are what the final expressions (eqs 21-24) are
 built from.  They are collected here, separately testable against direct
 quadrature, because a mis-transcribed recursion is invisible inside the full
@@ -73,6 +83,35 @@ _COMPLEMENT_SWITCH = 1.0 / (1.0 + _SHIFT_SWITCH)
 _HEADROOM = 60
 
 
+def _complete_kind(complement: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """Return ``(K, E)`` from the modulus complement ``k'^2``.
+
+    ``K = R_F(0, k'^2, 1)`` and ``E = 2 R_G(0, k'^2, 1)``: Carlson's forms take the
+    complement as their argument, so a caller that knows it exactly keeps every
+    digit, where ``scipy.special.ellipk`` of a float parameter cannot -- at
+    ``k'^2 = 1e-14`` the two disagree in the fifth decimal.
+
+    ``k'^2 = 0`` is the confluence itself: the target sits ON the end of the edge
+    whose integral this is, the modulus reaches one and ``K`` diverges
+    logarithmically.  It is returned as ZERO, which is not a floor but the whole
+    evaluation.  Every moment family below carries that one divergence with a
+    weight of one, so returning zero for it returns each family's FINITE PART; and
+    the reduction that consumes them puts a total weight of ZERO on the divergence,
+    because the flux and field of a section are bounded at its own corner.  The
+    answer is therefore linear in whatever value is assigned here with a slope of
+    zero, and zero is the assignment that evaluates the finite part directly --
+    with no cancellation left to round off, rather than a large number cancelling
+    against itself.  ``E`` stays finite, ``E(1) = 1``.
+    """
+    complement = np.asarray(complement, dtype=np.float64)
+    reachable = complement > 0.0
+    held = np.where(reachable, complement, 1.0)
+    return (
+        np.where(reachable, scipy.special.elliprf(0.0, held, 1.0), 0.0),
+        2.0 * scipy.special.elliprg(0.0, complement, 1.0),
+    )
+
+
 def complete_pi(
     characteristic: np.ndarray,
     parameter: np.ndarray,
@@ -111,8 +150,16 @@ def complete_pi(
     return rf + rj * characteristic / 3.0
 
 
-def stable_sn_moments(parameter: np.ndarray, count: int) -> list[np.ndarray]:
+def stable_sn_moments(
+    parameter: np.ndarray, count: int, *, complement: np.ndarray | None = None
+) -> list[np.ndarray]:
     """Return ``[El0, El2, ...]`` accurately at every order and every parameter.
+
+    ``complement`` supplies ``k'^2`` for the seeds, which is the only place the
+    modulus enters other than as a nearly-unit multiplier: see
+    :func:`_complete_kind`.  At the confluence the seeds become ``(0, -E)`` and the
+    recursion carries every order's finite part exactly, the divergent branch of the
+    ``k^2 = 1`` recursion being the constant one.
 
     The same quantity :func:`sn_moments` returns, from the same three-term
     recursion, run in whichever direction is accurate:
@@ -131,8 +178,9 @@ def stable_sn_moments(parameter: np.ndarray, count: int) -> list[np.ndarray]:
     ``El0 = K``, which the recursion cannot fix, being homogeneous.
     """
     parameter = np.asarray(parameter, dtype=np.float64)
-    complete_k = scipy.special.ellipk(parameter)
-    complete_e = scipy.special.ellipe(parameter)
+    if complement is None:
+        complement = 1.0 - parameter
+    complete_k, complete_e = _complete_kind(complement + np.zeros_like(parameter))
     small = parameter < _SWITCH
 
     held = np.where(small, _SWITCH, parameter)
@@ -196,15 +244,16 @@ def stable_cn_moments(
     the downward branch is normalised on ``A0 = K``, which the recursion cannot
     fix, being homogeneous.
 
-    ``complement`` supplies ``k'^2``, which unlike the plain recursion this one
-    carries explicitly.
+    ``complement`` supplies ``k'^2``, which this recursion carries explicitly as
+    well as needing for its seeds; at the confluence they become ``(0, E)``, and
+    ``k'^2`` multiplying the divergent ``A0`` in the recursion drops it out of every
+    higher order, so all of those are exact.
     """
     parameter = np.asarray(parameter, dtype=np.float64)
     if complement is None:
         complement = 1.0 - parameter
     complement = np.asarray(complement, dtype=np.float64) + np.zeros_like(parameter)
-    complete_k = scipy.special.ellipk(parameter)
-    complete_e = scipy.special.ellipe(parameter)
+    complete_k, complete_e = _complete_kind(complement)
     small = parameter < _COMPLEMENT_SWITCH
 
     held = np.where(small, _COMPLEMENT_SWITCH, parameter)
@@ -256,11 +305,24 @@ def _mirrored_pi(
     stays of order ``K``, so a shift of 1e-10 costs five digits.  Written this way
     the shift appears only as ``m'(1 - n)`` inside ``R_J``, where it makes the term
     large rather than cancelling.
+
+    At the confluence ``m' = 0`` the whole integral is elementary, because
+    ``sqrt(1 - m sin^2 a)`` collapses onto ``cos a`` and the substitution
+    ``w = sin a`` leaves a rational function whose partial fractions are exactly the
+    two terms above: ``sqrt(n/n') arctan sqrt(n/n')`` plus ``K``.  The finite part is
+    therefore the arctangent term alone, and it is wanted rather than skipped even
+    where the caller's weight on this pole family is zero, because ``R_J`` diverges
+    there and a vanishing weight against it is not zero but undefined.
     """
-    return scipy.special.elliprf(0.0, parameter_complement, 1.0) + (
-        characteristic * parameter_complement / 3.0
-    ) * scipy.special.elliprj(
-        0.0, parameter_complement, 1.0, parameter_complement * complement
+    reachable = np.asarray(parameter_complement, dtype=np.float64) > 0.0
+    held = np.where(reachable, parameter_complement, 1.0)
+    root = np.sqrt(characteristic / complement)
+    return np.where(
+        reachable,
+        scipy.special.elliprf(0.0, held, 1.0)
+        + (characteristic * held / 3.0)
+        * scipy.special.elliprj(0.0, held, 1.0, held * complement),
+        root * np.arctan(root),
     )
 
 
@@ -377,7 +439,9 @@ def sn_pole_moments(
     if parameter_complement is None:
         parameter_complement = 1.0 - parameter
     if moments is None:
-        moments = stable_sn_moments(parameter, count + _HEADROOM)
+        moments = stable_sn_moments(
+            parameter, count + _HEADROOM, complement=parameter_complement
+        )
     positive = shift > 0.0
     held = np.where(positive, shift, 1.0)
     leading = np.where(

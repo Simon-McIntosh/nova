@@ -66,7 +66,7 @@ class Bow(Arc, Matrix):
 
     @cached_property
     def zeta(self):
-        """Return zeta coefficient from the midpoint-quadrature integral."""
+        """Return zeta coefficient from the fixed-node quadrature integral."""
         return zeta(
             np.tile(self.rs, self.reps),
             np.tile(self.r, self.reps),

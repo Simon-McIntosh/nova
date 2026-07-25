@@ -18,8 +18,8 @@
   <title>Physics Spine Adoption | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-24">
-<meta name="plan-version" content="1">
+<meta name="plan-modified" content="2026-07-25">
+<meta name="plan-version" content="2">
 </head>
 <body>
   <main class="plan-doc">
@@ -290,15 +290,15 @@ nova/transport/current_diffusion.py  CurrentDiffusion      (ambix current_diffus
         OCTUPOLE), profile ladder as n_pressure / n_diamagnetic, circuit modes as n_modes. No bare
         k anywhere in public API or symbol names.</p>
     </div>
-<div class="r-dec" data-key="topology-labeller" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="topology-labeller" data-choice="jax-only" data-by="smc" data-when="2026-07-25T06:12:59+00:00">
     <p class="r-dec-q">ReconstructProfile topology reads: unify on nova&#x27;s JAX
         connectivity/topology stack (vmap-safe, GPU-batchable — required by the catalog goal), or
         keep a host scipy.ndimage labeller path for the eager/debug lane alongside it?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="jax-only">JAX stack only (recommended)</button>
+      <button class="r-opt chosen" data-value="jax-only">JAX stack only (recommended)</button>
       <button class="r-opt" data-value="jax-primary-scipy-debug">JAX primary + scipy debug lane</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">User selection 2026-07-24 (mid fleet session): one vmap-safe, GPU-batchable topology path on nova&#x27;s JAX connectivity/topology stack — required by the MAST catalog GPU-solve goal; no parallel scipy.ndimage labeller to keep in parity.</p>
     </div>
 <div class="r-dec" data-key="transport-scope" data-choice="nova-owns-transport-jax" data-by="smc" data-when="2026-07-24T13:30:00+00:00">
     <p class="r-dec-q">Where does the current-diffusion transport model live, and in what

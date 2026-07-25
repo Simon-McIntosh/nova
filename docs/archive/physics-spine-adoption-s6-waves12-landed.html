@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="physics-spine-adoption-s6-waves12-landed">
+  <meta name="plan-title" content="Physics Spine Adoption — §6 waves 1+2 landed">
+  <meta name="plan-summary" content="Per-stage record: domain packages stood up with clean-break solver renames, all five wave-2 donor ports landed with donor-test parity (ScreeningCircuit stretch included), coupling generator and tabular geometry provider unified beside nova.biot; full lane 1488/0/104">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>§6 waves 1+2 landed | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+  <h1>§6 waves 1+2 landed — domain packages + all five donor ports</h1>
+  <p>Landed 2026-07-24/25 on <code>develop</code> in one fleet session (orchestrator + two
+  workers in detached worktrees off <code>06f8b91f</code>). Merges
+  <code>d38203a2</code> (circuit + transport) and <code>41754076</code> (equilibrium);
+  orchestrator commits <code>32d19b06</code> (coupling generator) and
+  <code>46bddd5f</code> (tabular geometry provider). Final verification at the merged tip:
+  <strong>full lane 1488 passed / 0 failed / 104 skipped</strong> (360 s) — exactly baseline
+  1361 + 45 (equilibrium) + 69 (circuit/transport) + 13 (orchestrator). Ambix untouched
+  (read-only donor); donor deletion and re-pointing are wave 3.
+  Plan: <a href="/nova/physics-spine-adoption.html">physics-spine-adoption</a>.</p>
+
+  <p><strong>Session policy override (user):</strong> no backward-compatibility shims — the
+  wave-1 moves were a clean break; old public names deleted and every in-repo caller
+  re-pointed. All ports were TDD: donor tests adapted first, then the model brought to green.</p>
+
+  <figure>
+    <svg viewBox="0 0 880 340" role="img" style="max-width:100%;height:auto;font-family:system-ui">
+      <text x="440" y="22" text-anchor="middle" font-size="15" font-weight="600" fill="#111">Name matrix after waves 1+2 — ✓ landed this session</text>
+      <text x="250" y="66" text-anchor="middle" font-size="13" font-weight="600" fill="#111">profile</text>
+      <text x="390" y="66" text-anchor="middle" font-size="13" font-weight="600" fill="#111">moment</text>
+      <text x="530" y="66" text-anchor="middle" font-size="13" font-weight="600" fill="#111">harmonic</text>
+      <text x="670" y="66" text-anchor="middle" font-size="13" font-weight="600" fill="#111">circuit</text>
+      <text x="800" y="66" text-anchor="middle" font-size="13" font-weight="600" fill="#111">grid / filament</text>
+      <text x="30" y="120" font-size="13" font-weight="600" fill="#111">forward</text>
+      <text x="30" y="170" font-size="13" font-weight="600" fill="#111">inverse</text>
+      <text x="30" y="220" font-size="13" font-weight="600" fill="#111">reconstruct</text>
+      <text x="30" y="270" font-size="13" font-weight="600" fill="#111">evolve</text>
+      <line x1="160" y1="94" x2="860" y2="94" stroke="#bbb" stroke-width="1"/>
+      <line x1="160" y1="144" x2="860" y2="144" stroke="#e3e3e3" stroke-width="1"/>
+      <line x1="160" y1="194" x2="860" y2="194" stroke="#e3e3e3" stroke-width="1"/>
+      <line x1="160" y1="244" x2="860" y2="244" stroke="#e3e3e3" stroke-width="1"/>
+      <line x1="160" y1="294" x2="860" y2="294" stroke="#bbb" stroke-width="1"/>
+      <line x1="160" y1="94" x2="160" y2="294" stroke="#bbb" stroke-width="1"/>
+      <text x="250" y="122" text-anchor="middle" font-size="12.5" fill="#0a7d33">✓ ForwardProfile</text>
+      <text x="250" y="138" text-anchor="middle" font-size="10.5" fill="#555">equilibrium/forward.py (+ForwardFluxOperator)</text>
+      <text x="250" y="172" text-anchor="middle" font-size="12.5" fill="#0a7d33">✓ InverseDesign</text>
+      <text x="250" y="188" text-anchor="middle" font-size="10.5" fill="#555">equilibrium/inverse.py</text>
+      <text x="250" y="222" text-anchor="middle" font-size="12.5" fill="#888">ReconstructProfile</text>
+      <text x="250" y="238" text-anchor="middle" font-size="10.5" fill="#888">wave 3 (fill/boundary-push topology)</text>
+      <text x="390" y="222" text-anchor="middle" font-size="12.5" fill="#0a7d33">✓ ReconstructMoment</text>
+      <text x="390" y="238" text-anchor="middle" font-size="10.5" fill="#555">equilibrium/moment.py</text>
+      <text x="530" y="222" text-anchor="middle" font-size="12.5" fill="#0a7d33">✓ ReconstructHarmonic</text>
+      <text x="530" y="238" text-anchor="middle" font-size="10.5" fill="#555">equilibrium/harmonic.py</text>
+      <text x="670" y="272" text-anchor="middle" font-size="12.5" fill="#0a7d33">✓ PassiveCircuit · ✓ ScreeningCircuit</text>
+      <text x="670" y="288" text-anchor="middle" font-size="10.5" fill="#555">circuit/{passive,screening}.py</text>
+      <text x="250" y="272" text-anchor="middle" font-size="12.5" fill="#0a7d33">✓ CurrentDiffusion</text>
+      <text x="250" y="288" text-anchor="middle" font-size="10.5" fill="#555">transport/current_diffusion.py (JAX)</text>
+    </svg>
+    <figcaption>The §2 name matrix with this session's landings marked. Only
+    ReconstructProfile (wave-3 re-architecture) remains open.</figcaption>
+  </figure>
+
+  <h2>Wave 1 — packages, clean-break renames, unification (worker A step 1 + orchestrator)</h2>
+  <table>
+    <thead><tr><th>Item</th><th>Status</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>nova/equilibrium package + solver moves</td><td>✅ shipped <code>b338a8ad</code></td>
+        <td>ForwardProfile (Newton–Krylov fixed point over the plasma write-then-read cycle),
+        ForwardFluxOperator (jitted pytree twin, own module so the eager path needs no jax extra),
+        InverseDesign (solver core split out of PulseDesign, which remains the IMAS actor
+        subclassing it). Old names gone, callers re-pointed. Two latent forward-path bugs fixed:
+        stray debug print in the ionization path; mixed-dtype lstsq failures under numba in
+        geometry/select.py (flux samples promoted to float64). Deleted the unused duplicate jax
+        Plasma pytree in nova/jax/operate.py.</td></tr>
+      <tr><td>nova/circuit + nova/transport packages</td><td>✅ shipped <code>4a02c838</code>/<code>9e9c73e3</code></td>
+        <td>Scaffolded with physics-stating module docstrings; purely additive.</td></tr>
+      <tr><td>Coupling generator beside nova.biot</td><td>✅ shipped <code>32d19b06</code></td>
+        <td><code>nova/biot/coupling.py</code>: machine-agnostic verify-and-flag circuit
+        classification (coil / dedicated case by authoritative id / inferred passive) over a
+        machine description supplied as data, plus a coupling plan merging redundant same-channel
+        discretisations by averaging, exposed as a per-source weight matrix (one matmul against
+        any biot coupling matrix). 11 tests incl. golden parity fixtures generated from the
+        reference implementation (MAST 13-active/10-case description travels as fixture data).</td></tr>
+      <tr><td>Geometry reader seam registration</td><td>✅ shipped <code>46bddd5f</code></td>
+        <td><code>TabularGeometryReader</code> presents any flat per-element mapping (zarr row,
+        columnar record) through the MachineGeometryReader seam; missing attributes raise a named
+        KeyError, never fabricate. MAST facility tables stay in ambix.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Wave 2 — donor ports (all five, incl. stretch)</h2>
+  <table>
+    <thead><tr><th>Port</th><th>Status</th><th>Parity / result</th></tr></thead>
+    <tbody>
+      <tr><td>ReconstructMoment (boundary_disc + boundary_moment)</td><td>✅ <code>7b16339a</code></td>
+        <td>One MomentOrder ladder (CENTROID = self-sized uniform disc, QUADRUPOLE gated,
+        OCTUPOLE); Greens from nova.biot (finite-area near / point far); whitened ridge +
+        Rogowski anchor; push-out boundary via nova's connectivity read. Donor tests ported
+        (moment terms, disc sizing, ring-shift gate, anchor ablation, masked-row invariance);
+        seed radius now backtracks instead of assuming a per-machine initial fraction. Vessel-eddy
+        stage deliberately left to PassiveCircuit; per-slice static eddy amplitudes are
+        under-determined.</td></tr>
+      <tr><td>ReconstructHarmonic (boundary_harmonic + prior rows)</td><td>✅ <code>d78d8919</code></td>
+        <td>Order-1 half-integer Legendre ring functions via closed-form elliptic-integral seeds +
+        degree recurrence (mpmath dependency dropped); circulation gauge tie, graded Sobolev
+        ridge, near-pole masking, annulus soft-prior rows in gradient and absolute form. Strong
+        oracle kept: every column solves the homogeneous GS operator to the FD floor. Two donor
+        docstring claims corrected against code behaviour (cosine-family circulation tie;
+        ring-function growth direction). Shared measurement tier extracted
+        (equilibrium/measurement.py).</td></tr>
+      <tr><td>PassiveCircuit (temporal_operator + passive_resistance)</td><td>✅ <code>4a02c838</code></td>
+        <td>Two-section flux linkage on nova.biot finite-area kernels (no kernel duplication);
+        exact-ZOH propagation (numpy reference + jitted JAX scan); history-relevance reduction,
+        held-back measured-circuit contract, vacuum-interval resistance identifiability ladder
+        with structured conductor-topology discovery. 41 donor-derived tests. Circuit membership
+        and channel wiring are INPUTS (ConductorSet + channel→circuits map) — classification
+        stays solely with the coupling generator. Torch TemporalOperator (ML tier) stays in
+        ambix.</td></tr>
+      <tr><td>CurrentDiffusion (torch → JAX)</td><td>✅ <code>9e9c73e3</code></td>
+        <td>Implicit θ-scheme ψ-diffusion as a jitted fp64 Thomas solve on lax.scan.
+        <strong>Torch-vs-JAX parity to fp64 round-off</strong> (rtol 1e-9 ψ, 1e-8 voltage) on four
+        frozen cases (reference npz dumped from the torch donor under ambix's env);
+        <strong>TORAX cross-check 0.4% RMS</strong> of reference flux swing (gate &lt;1%); Bessel
+        eigenmode decay to 3%; ring loop voltage to 5%; flux-budget identity exact.
+        flux_surface_geometry assembly (needs the profile ladder + EquilibriumGrid) rides with
+        wave-3 ReconstructProfile; the 1D state side is fully ported and pinned.</td></tr>
+      <tr><td>ScreeningCircuit (plasma_screening) — stretch</td><td>✅ <code>1f97c94b</code></td>
+        <td>(√ψ_N, θ) patch tiling, patch linkage from the grid's cached cell Greens matrix,
+        zero-net-current screening eigenbasis, closed-form loop voltage. Nested-circle identity
+        vs CurrentDiffusion: 5% RMS enclosed-current with a genuine skin formed; thin-shell decay
+        time to 8% analytic; geometric rescale maps τ by s² to 1e-6; flux ledger closes to 5e-4.
+        Grid-coupled pieces are seams (Greens matrix as array; optional grid_flux callable);
+        gs_solve fit-column plumbing stays in ambix for wave 3.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Decisions locked mid-session</h2>
+  <p><strong>topology-labeller → jax-only</strong>: one vmap-safe GPU-batchable topology path.
+  Formulation note (user): implement the ambix <em>fill / boundary-push</em> read — the only
+  truly parallelizable formulation; the older stationary-points-then-surface-identification
+  approach produced gradients too sharp across the limited↔diverted switch for autograd or
+  accelerator schemes (Anderson mixing, Newton–Krylov).</p>
+
+  <h2>What's next</h2>
+  <ul>
+    <li><strong>In flight (this session):</strong> hexagonal plasma grid as the default, coupled
+    through the Urankar Part V polygon thick-filament kernel (user request; worker A).</li>
+    <li><strong>Wave 3:</strong> ReconstructProfile re-architecture (nova.biot Greens, JAX
+    fill/boundary-push topology, named-DOF Picard/LSQ with composable soft-prior rows, leading
+    batch axis) + flux_surface_geometry assembly + coupling-generator emission of
+    ConductorSet/channel maps + ambix dependency flip, consumer re-point, donor deletion,
+    spine_bench parity.</li>
+  </ul>
+
+</main>
+</body>
+</html>

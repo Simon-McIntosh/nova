@@ -19,7 +19,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-25">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="4">
+<meta name="plan-impl" content="0.6">
 </head>
 <body>
   <main class="plan-doc">
@@ -128,14 +129,16 @@ nova/transport/current_diffusion.py  CurrentDiffusion      (ambix current_diffus
       <thead><tr><th>Donor (ambix)</th><th>Target (nova)</th><th>Port notes</th></tr></thead>
       <tbody>
         <tr><td><code>boundary_disc.py</code> + <code>boundary_moment.py</code></td>
-          <td><code>equilibrium/moment.py</code> — <code>ReconstructMoment</code></td>
+          <td><code>equilibrium/moment.py</code> — <code>ReconstructMoment</code>
+          <strong>✓ landed <code>7b16339a</code></strong></td>
           <td>Merge into one order ladder (<code>MomentOrder</code> enum). The staged-disc read
           becomes the self-sized CENTROID seed with the gated-quadrupole stage as the QUADRUPOLE
           rung; the monomial basis (<code>moment_terms</code>) carries the general ladder. Greens
           columns come from nova.biot kernels (cell → sensor / grid), not PatchBasis. Whitened LSQ
           + Rogowski anchor preserved; keep the push-out boundary consistency test.</td></tr>
         <tr><td><code>boundary_harmonic.py</code> + <code>boundary_prior.py</code></td>
-          <td><code>equilibrium/harmonic.py</code> — <code>ReconstructHarmonic</code></td>
+          <td><code>equilibrium/harmonic.py</code> — <code>ReconstructHarmonic</code>
+          <strong>✓ landed <code>d78d8919</code></strong></td>
           <td>Toroidal-harmonic (ring-function) vacuum-annulus read; port the order-1
           half-integer Legendre basis intact with its pole-placement rules. The annulus soft-prior
           row builder moves with it (it is the harmonic read's coupling into ReconstructProfile).</td></tr>
@@ -151,19 +154,22 @@ nova/transport/current_diffusion.py  CurrentDiffusion      (ambix current_diffus
           composable dataclass rows. Target: jit/vmap-safe per-slice solve with a leading batch
           axis — this class is what the GPU catalog plan batches.</td></tr>
         <tr><td><code>temporal_operator.py</code> + <code>passive_resistance.py</code></td>
-          <td><code>circuit/passive.py</code> — <code>PassiveCircuit</code></td>
+          <td><code>circuit/passive.py</code> — <code>PassiveCircuit</code>
+          <strong>✓ landed <code>4a02c838</code></strong></td>
           <td>Vessel L/R eigenmode system (exact two-section flux linkage L, calibrated R via the
           vacuum-interval identifiability ladder, case-current holdback contract). L matrices from
           nova.biot inductance kernels; eigenbasis + exact-ZOH propagation as JAX-friendly
           fixed-shape ops. Machine-agnostic region rules preserved verbatim.</td></tr>
         <tr><td><code>plasma_screening.py</code></td>
-          <td><code>circuit/screening.py</code> — <code>ScreeningCircuit</code></td>
+          <td><code>circuit/screening.py</code> — <code>ScreeningCircuit</code>
+          <strong>✓ landed <code>1f97c94b</code></strong></td>
           <td>Plasma-as-circuit screening modes in the zero-net-current subspace;
           (√ψ_N, θ) patch binning rules preserved; patch mutuals from the grid's cached cell
           Greens matrices (nova.biot). <code>n_modes</code> replaces the k-column count. Keep the
           nested-circle analytic pin against CurrentDiffusion.</td></tr>
         <tr><td><code>current_diffusion.py</code></td>
-          <td><code>transport/current_diffusion.py</code> — <code>CurrentDiffusion</code></td>
+          <td><code>transport/current_diffusion.py</code> — <code>CurrentDiffusion</code>
+          <strong>✓ landed <code>9e9c73e3</code></strong></td>
           <td><strong>torch → JAX translation.</strong> The implicit θ-scheme tridiagonal
           ψ-diffusion step maps directly to a jitted Thomas-algorithm /
           <code>lax.scan</code> solve in fp64; <code>flux_surface_geometry</code> metrics ride on
@@ -171,7 +177,8 @@ nova/transport/current_diffusion.py  CurrentDiffusion      (ambix current_diffus
           (NNLS) and the flux-budget ledger port as numpy/JAX dataclasses. Keep the TORAX-form
           verification test and the nested-circle pin shared with ScreeningCircuit.</td></tr>
         <tr><td><code>gs/imas_geometry.py</code></td>
-          <td>registers against <code>nova.imas.machine.MachineGeometryReader</code></td>
+          <td>registers against <code>nova.imas.machine.MachineGeometryReader</code>
+          <strong>✓ landed <code>46bddd5f</code></strong> (TabularGeometryReader)</td>
           <td>Ambix's geometry reader becomes a provider plugin behind nova's reader seam; the
           FAIR-MAST per-campaign tables (<code>gs/geometry.py</code>) stay in ambix as a facility
           plugin until the MAST machine-description plan supersedes them with DDv4 IDSs.</td></tr>
@@ -182,7 +189,9 @@ nova/transport/current_diffusion.py  CurrentDiffusion      (ambix current_diffus
           they do not get a matrix name.</td></tr>
         <tr><td><code>gs/</code> remainder (<code>operator.py</code>, <code>circuits.py</code>,
           <code>cylinder.py</code>, <code>filaments3d.py</code>, <code>elliptic.py</code>…)</td>
-          <td>deleted / unified</td>
+          <td>deleted / unified
+          <strong>✓ nova side landed <code>32d19b06</code></strong> (nova/biot/coupling.py;
+          ambix deletion = wave 3)</td>
           <td>Kernels are duplicates of nova.biot (polygon already ported back in §4 of the
           umbrella; <code>elliptic.py</code> is dead). The sensor-operator builder + circuit
           classification unify into <strong>one coupling-generator</strong> (EM-consolidation
@@ -228,7 +237,17 @@ nova/transport/current_diffusion.py  CurrentDiffusion      (ambix current_diffus
       through every port; sign conventions documented at module level and pinned by test.</li>
     </ul>
 
-    <h2 id="s6">§6 — Sequencing</h2>
+    <h2 id="s6">§6 — Sequencing <span class="badge badge-shipped">✓ waves 1+2 landed 2026-07-25</span></h2>
+    <p class="landed-summary"><strong>Waves 1+2 landed</strong> in one fleet session (orchestrator
+    + 2 workers): domain packages stood up with <strong>clean-break renames (no shims — user
+    override)</strong>; all five wave-2 ports landed TDD with donor-test parity, including the
+    ScreeningCircuit stretch. Full lane at the merged tip <strong>1488 passed / 0 failed /
+    104 skipped</strong> (= baseline 1361 + 127 new). Merges <code>d38203a2</code> +
+    <code>41754076</code>; orchestrator <code>32d19b06</code> (coupling generator),
+    <code>46bddd5f</code> (tabular reader seam). CurrentDiffusion torch→JAX parity to fp64
+    round-off; TORAX cross-check 0.4% RMS. Ambix untouched (wave 3 deletes donors).
+    Full record: <a href="archive/physics-spine-adoption-s6-waves12-landed.html">§6 waves 1+2
+    landed</a>.</p>
     <p>Three waves, disjoint write scopes, worktrees off nova <code>develop</code> + the ambix
     checkout per its own branch discipline:</p>
     <ol>
@@ -357,9 +376,9 @@ Done-when
   4. Followup for wave 2 written; this followup resolved.</pre>
     <p class="r-fu-outcome">Superseded by the 8-hour fleet-session brief (f-psa-02) — wave 1 is folded into it as worker A/B step 1 plus orchestrator scope.</p>
     </article>
-<article class="r-fu" data-id="f-psa-02" data-status="open" data-tier="opus" data-written-by="smc/session 2026-07-24" data-written-at="2026-07-24" data-recommends-skill="/reckon-ship physics-spine-adoption §6" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-psa-02" data-status="resolved" data-tier="opus" data-written-by="smc/session 2026-07-24" data-written-at="2026-07-24" data-recommends-skill="/reckon-ship physics-spine-adoption §6" data-resolved-at="2026-07-25T06:28:12+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">8-hour fleet session — land wave 1 + the wave-2 model ports (orchestrator + 2 opus workers)</h4>
-    <div class="r-fu-body"><p>One full working session sized for ~8 hours: a Fable orchestrator with <strong>two opus workers</strong> in detached worktrees off nova <code>develop</code>, disjoint write scopes (worker A: <code>nova/equilibrium/**</code>; worker B: <code>nova/circuit/**</code> + <code>nova/transport/**</code>). Target: wave 1 fully landed and the four independent wave-2 donor ports (ReconstructMoment, ReconstructHarmonic, PassiveCircuit, CurrentDiffusion→JAX) landed with donor tests green, ScreeningCircuit as stretch. Ambix stays read-only — donor deletion + re-pointing is wave 3. Resolve the open topology-labeller decision during the session (it gates the wave-3 ReconstructProfile re-architecture).</p></div>
+    <div class="r-fu-body"><p>One full working session sized for ~8 hours: a Fable orchestrator with <strong>two opus workers</strong> in detached worktrees off nova <code>develop</code>, disjoint write scopes (worker A: the <code>nova/equilibrium</code> tree; worker B: the <code>nova/circuit</code> + <code>nova/transport</code> trees). Target: wave 1 fully landed and the four independent wave-2 donor ports (ReconstructMoment, ReconstructHarmonic, PassiveCircuit, CurrentDiffusion→JAX) landed with donor tests green, ScreeningCircuit as stretch. Ambix stays read-only — donor deletion + re-pointing is wave 3. Resolve the open topology-labeller decision during the session (it gates the wave-3 ReconstructProfile re-architecture).</p></div>
     <pre class="r-fu-prompt">Project: nova
 Plan:    physics-spine-adoption (http://127.0.0.1:8765/nova/physics-spine-adoption.html)
 Section: §6 waves 1+2 (8-hour fleet session)
@@ -452,6 +471,49 @@ Done-when
      impl advanced; topology-labeller decision locked or escalated; this
      followup resolved; wave-3 followup queued (ReconstructProfile
      re-architecture + ambix rewiring + donor deletion).</pre>
+    <p class="r-fu-outcome">Waves 1+2 fully landed (all five ports incl. ScreeningCircuit stretch) — merges d38203a2 + 41754076, orchestrator 32d19b06/46bddd5f; full lane 1488/0/104; torch→JAX parity fp64 round-off, TORAX 0.4% RMS; topology-labeller locked jax-only (fill/boundary-push formulation); clean break, no shims. Record: docs/archive/physics-spine-adoption-s6-waves12-landed.html. Hex-grid default (user add-on) in flight same session.</p>
+    </article>
+<article class="r-fu" data-id="f-psa-03" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-25T07:00:00+00:00" data-recommends-skill="/reckon-ship physics-spine-adoption §6" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Wave 3 — ReconstructProfile re-architecture + ambix rewiring + donor deletion</h4>
+    <div class="r-fu-body"><p>Re-architect gs_solve as ReconstructProfile on nova.biot Greens with the locked JAX-only <strong>fill/boundary-push</strong> topology read (the only truly parallelizable formulation — the stationary-points-first approach was too sharp across the limited↔diverted switch for autograd/Anderson/NK), port the flux_surface_geometry assembly (profile ladder + EquilibriumGrid side deferred from the CurrentDiffusion port), wire the coupling generator to emit ConductorSet + channel→circuits maps for nova/circuit, then flip imas-ambix to consume the spine: dependency pin, consumer re-point, donor deletions, spine_bench parity.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    physics-spine-adoption (http://127.0.0.1:8765/nova/physics-spine-adoption.html)
+Section: §6 wave 3 (ReconstructProfile + ambix rewiring)
+Tier:    opus
+
+Context
+  Waves 1+2 landed (docs/archive/physics-spine-adoption-s6-waves12-landed.html):
+  domain packages, all five donor ports, coupling generator, tabular reader
+  seam; full lane 1488/0/104 at the merge tip. Ambix was read-only; this wave
+  re-architects ReconstructProfile and rewires ambix.
+
+State to read
+  Plan §2 §3 §4 §5; locked decisions (topology-labeller = jax-only with the
+  fill/boundary-push formulation note; dof-naming; solver-nomenclature).
+  Donors: ~/Code/imas-ambix/imas_ambix/latent/{gs_solve,moment_priors,
+  gs_observation}.py + tests/latent/test_gs_solve*.py.
+  nova side: nova/biot/{coupling,greens,cylinder}.py, nova/equilibrium/*,
+  nova/jax connectivity/topology + flux_surface_connectivity.
+
+Work
+  1. ReconstructProfile (equilibrium/profile.py): Greens from nova.biot;
+     topology via the JAX fill/boundary-push read (vmap-safe, leading batch
+     axis); Picard/LSQ with n_pressure/n_diamagnetic DOFs and composable
+     soft-prior rows (Ip, betap+li/2, pressure-gradient, annulus anchor,
+     passive trajectory). TDD from donor tests.
+  2. flux_surface_geometry assembly onto nova/transport (deferred piece).
+  3. Coupling generator emission: ConductorSet + {channel: [circuits]}
+     (+ measured_circuits holdback) feeding nova/circuit builds.
+  4. Ambix rewiring (§4): nova dependency pin, tokenizer seam re-point,
+     statespace/eval/spine_bench re-point, donor module deletion per port,
+     spine_bench parity vs pre-split baselines.
+
+Done-when
+  1. ReconstructProfile lands with donor tests green, jit/vmap batch solve.
+  2. imas-ambix imports the spine; zero kernels/solvers in-tree; ambix suite
+     green; spine_bench parity recorded.
+  3. §3/§4 collapsed; impl -&gt; 1.0; umbrella §10 collapsed referencing this
+     plan&#x27;s archive; followup resolved or wave-4 queued with reason.</pre>
     </article>
 </section>
 

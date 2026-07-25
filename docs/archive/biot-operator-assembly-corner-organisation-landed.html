@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="archive">
+  <meta name="plan-slug" content="biot-operator-assembly-corner-organisation-landed">
+  <meta name="plan-title" content="Corner-organised closed form — landed">
+  <meta name="plan-status" content="historical">
+  <meta name="plan-modified" content="2026-07-25">
+  <title>biot-operator-assembly corner organisation landed | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>The closed form organised by corner, and the term that telescopes away</h1>
+  <p><a href="/nova/biot-operator-assembly.html">← back to the evergreen plan</a> ·
+     landed 2026-07-25 · develop <code>56254283</code> · full fast lane 1435 passed /
+     87 skipped / 0 failed · <strong>1.89× on a hexagonal plasma cell, with every
+     accuracy table unchanged</strong></p>
+
+  <h2>Quick status</h2>
+  <table>
+    <thead><tr><th>Item</th><th>Status</th><th>Where</th></tr></thead>
+    <tbody>
+      <tr><td>Corner part split out of the edge, formed once per corner and read by
+          both of its edges</td>
+          <td>✓ shipped</td><td><code>nova/biot/polygonanalytic.py</code>
+          (<code>_Vertex</code>)</td></tr>
+      <tr><td>Edge part reduced to what the SLOPE reaches, and formed once for the
+          pair of limits rather than twice</td>
+          <td>✓ shipped</td><td>same (<code>_Edge</code>)</td></tr>
+      <tr><td>The <code>arsinh β₁</code> term accumulated per corner against the signed
+          count of live edges, so a closed chain never forms it</td>
+          <td>✓ shipped</td><td>same
+          (<code>polygon_analytic_greens</code>)</td></tr>
+      <tr><td>Corner part released as soon as its later edge is done — three live at a
+          time, not one per corner</td>
+          <td>✓ shipped</td><td>same</td></tr>
+      <tr><td>Twelve tests: shared-corner identity, the cancellation and its magnitude,
+          the survival where the chain breaks, and per-section call counts</td>
+          <td>✓ shipped</td><td><code>tests/test_biotpolygonanalytic.py</code></td></tr>
+      <tr><td>Cost re-measured, floor model re-counted, baseline updated</td>
+          <td>✓ shipped</td><td><code>benchmarks/analytic_cost_floor.py</code>,
+          <code>benchmarks/BASELINE.md</code></td></tr>
+      <tr><td>Accuracy tables re-measured</td>
+          <td>unchanged — see below</td><td>—</td></tr>
+      <tr><td>The residual quadrature's node count</td>
+          <td>deliberately untouched — its own rung</td><td>f-boa-10</td></tr>
+    </tbody>
+  </table>
+
+  <figure>
+    <img src="/nova/figures/biot-operator-assembly/corner_organisation.png"
+         alt="The signed count of live edges at each corner for a hexagon and a rectangle; assembled cost per section for both arrangements; and the cost breakdown before and after"
+         style="max-width:100%">
+    <figcaption>(a) Each corner carries the <code>arsinh β₁</code> term once with
+    either sign, so around a closed chain the signed count is zero everywhere and the
+    term is never formed; a dropped horizontal edge leaves ±1 at its two ends, which
+    for a rectangle is all four corners. (b) What the sharing is worth, by section:
+    the rectangle shares no corner and gains nothing, which is the honest shape of the
+    saving rather than a defect. (c) One of the two residual quadratures is gone
+    outright and the moment stacks are halved; the coefficient algebra falls with
+    them.</figcaption>
+  </figure>
+
+  <h2>What depends on the corner, and what depends on the slope</h2>
+  <p>An edge limit is one of the polygon's corners. Writing <code>u</code> for the
+  target's offset from that corner's level and <code>r'</code> for the corner's own
+  radius, the ring modulus <code>k² = 4rr'/a²</code> and its complement
+  <code>k'² = (u² + (r' − r)²)/a²</code> are functions of the corner alone — and
+  everything built on them is too. The slope <code>b₁</code> does not appear until
+  the plane denominator.</p>
+  <table>
+    <thead><tr><th>quantity</th><th>depends on</th><th>formed per</th></tr></thead>
+    <tbody>
+      <tr><td>modulus, complement, ring span</td><td>target, corner</td>
+          <td>corner</td></tr>
+      <tr><td>harmonic moment stack <code>P_n</code> and its radical fold
+          <code>D_n</code></td><td>modulus</td><td>corner</td></tr>
+      <tr><td><code>G²</code> split, both pole seeds, both pole families</td>
+          <td>modulus, <code>u</code></td><td>corner</td></tr>
+      <tr><td>first residual <code>arsinh β₁</code> integral</td>
+          <td>target, corner</td><td>corner</td></tr>
+      <tr><td>slope, <code>a₀²</code>, offset from the extended line, <code>r₁</code>,
+          <code>B²</code>, both derivative blocks</td>
+          <td>target, edge</td><td>edge (not per limit)</td></tr>
+      <tr><td><code>B²</code> split, <code>Γ</code>, arctangent numerator, second
+          residual</td><td>both</td><td>edge limit</td></tr>
+    </tbody>
+  </table>
+  <p>The rung named the first four rows. The fifth was found while splitting: the
+  target's offset from the edge's extended line is a cross product of its offsets to
+  the two endpoints, so it — and <code>r₁</code>, <code>B²</code> and both slope
+  blocks with it — is the <em>same at both limits</em> and was being formed twice per
+  edge as well. Only the last row is genuinely per (edge, limit).</p>
+  <p>The moment machinery moved onto the corner with the stack it operates on: the
+  contractions, the partial-fraction split between a denominator's two factors, and
+  the two pole routes (exact weight for a near root, the family's own moments for a
+  far one). <code>_Edge</code> reaches through it with the numerators its slope
+  contributes, which is what keeps the arithmetic identical.</p>
+
+  <h2>The term that telescopes, measured before it was dropped</h2>
+  <p>The <code>arsinh β₁</code> contribution is a function of the corner alone in all
+  three components — the flux weights it by <code>4ur</code>, the radial field by
+  <code>4r</code>, and the vertical field's weight is constant so its term is the
+  residual quadrature itself. A section sums each edge as its lower limit less its
+  upper, so around a closed chain every corner carries it twice with opposite signs.
+  It survives only where a horizontal edge is dropped (paper eq 7a — its integrand
+  vanishes identically), which breaks the chain at that edge's two ends.</p>
+  <p>Both directions of that were measured on the gate target sets before the term was
+  removed, because a cancellation that is asserted rather than measured is a guess:</p>
+  <table>
+    <thead><tr><th>section</th><th>live edges</th><th>one corner's term,
+      relative to the answer</th><th>summed per limit</th>
+      <th>summed per corner</th></tr></thead>
+    <tbody>
+      <tr><td>hexagon</td><td>6 of 6</td><td>421× (ψ), 95× (B<sub>R</sub>),
+          40× (B<sub>Z</sub>)</td><td>4.8e−15</td><td><strong>0.0 exactly</strong></td></tr>
+      <tr><td>thin plate</td><td>4 of 4</td><td>1860× (ψ), 154×, 200×</td>
+          <td>7.1e−15</td><td><strong>0.0 exactly</strong></td></tr>
+      <tr><td>trapezium</td><td>4 of 4</td><td>210× (ψ), 14×, 14×</td>
+          <td>1.4e−15</td><td><strong>0.0 exactly</strong></td></tr>
+      <tr><td>rectangle</td><td>2 of 4</td><td>510× (ψ), 98×, 45×</td>
+          <td>1.05 (ψ)</td><td>1.05 — <strong>kept</strong></td></tr>
+    </tbody>
+  </table>
+  <p>So this is a cancellation of one to three decades, not a term that was negligible
+  anyway; and carried per limit it was leaving up to 7e−15 of the answer behind as
+  round-off — three orders inside the recorded envelopes, which is exactly why the
+  accuracy tables did not move when it went. The rectangle is the counter-case and is
+  asserted the other way: its chain breaks at all four corners
+  (+1, −1, +1, −1) and the surviving sum is 6% of B<sub>Z</sub> and 105% of the flux,
+  so a formulation that dropped the term wherever it dropped the quadrature would be
+  wrong by that much.</p>
+
+  <h2>A pure regrouping, and how that is known</h2>
+  <p>Every entry of <code>SECTION_ACCURACY</code> (4 sections × 2 bands),
+  <code>ASPECT_ACCURACY</code> (5 radii) and <code>FIELD_ASPECT_ACCURACY</code> (5) is
+  asserted in BOTH directions — an improvement fails the test as loudly as a
+  regression — and all eighteen hold unchanged, with the whole 95-test acceptance gate
+  passing untouched. That is the rung's own prediction and it is what makes the saving
+  free: the arithmetic per limit is bit-for-bit what it was, only formed once instead
+  of twice, and the one arrangement that did change (the corner term, from a sum of
+  rounded per-edge differences to nothing at all) changed it by less than the
+  envelope's third significant figure.</p>
+  <p>That also means <strong>no accuracy test in the module can see whether the sharing
+  is in effect</strong> — it is the same arithmetic either way. So the structure is
+  pinned directly, by counting:</p>
+  <table>
+    <thead><tr><th>section</th><th>corners</th><th>live edges</th>
+      <th>moment stacks</th><th>residual quadratures</th></tr></thead>
+    <tbody>
+      <tr><td>hexagon</td><td>6</td><td>6</td><td>6 <em>(was 12)</em></td>
+          <td>12 <em>(was 24)</em></td></tr>
+      <tr><td>trapezium</td><td>4</td><td>4</td><td>4 <em>(was 8)</em></td>
+          <td>8 <em>(was 16)</em></td></tr>
+      <tr><td>thin plate</td><td>4</td><td>4</td><td>4 <em>(was 8)</em></td>
+          <td>8 <em>(was 16)</em></td></tr>
+      <tr><td>rectangle</td><td>4</td><td>2</td><td>4 <em>(unchanged)</em></td>
+          <td>8 <em>(unchanged)</em></td></tr>
+    </tbody>
+  </table>
+  <p>And one more identity the sharing rests on: <code>pack_section</code> hands each
+  edge its own copy of the two corners it spans, so a test asserts those copies are
+  bit-identical. If they ever disagreed in the last bit the sharing would be an
+  approximation and the term that cancels exactly would stop cancelling — and no
+  tolerance in the module is anywhere near one ulp of a corner coordinate, so nothing
+  else would notice.</p>
+
+  <h2>Cost</h2>
+  <p>One idle <code>sun_debug</code> core, 4096 pairs, fresh process per variant,
+  median of three, at the 128 residual nodes the gate needs. Both arrangements timed
+  in the same job, the superseded one loaded from its own file so nothing else
+  differs.</p>
+  <table>
+    <thead><tr><th>section</th><th>by edge limit</th><th>by corner</th><th></th></tr></thead>
+    <tbody>
+      <tr><td>hexagon (the plasma cell)</td><td>333.9 µs/pair</td>
+          <td><strong>176.6</strong></td><td>1.89×</td></tr>
+      <tr><td>thin plate</td><td>220.7</td><td><strong>119.3</strong></td><td>1.85×</td></tr>
+      <tr><td>rectangle</td><td>109.4</td><td>113.2</td><td>0.97×</td></tr>
+    </tbody>
+  </table>
+  <p>And the floor the evaluation is built on, hexagonal cell:</p>
+  <table>
+    <thead><tr><th>piece</th><th>by edge limit</th><th>by corner</th></tr></thead>
+    <tbody>
+      <tr><td>third-kind integrals</td><td>17.1</td><td>12.7</td></tr>
+      <tr><td>moment stacks and pole families</td><td>40.1</td><td>26.8</td></tr>
+      <tr><td>graded residual quadrature</td><td>144.8</td><td>73.3</td></tr>
+      <tr><td>floor</td><td>184.9</td><td><strong>100.1</strong></td></tr>
+      <tr><td>coefficient algebra (assembled less floor)</td><td>150.0</td><td>89.7</td></tr>
+    </tbody>
+  </table>
+  <p>Peak allocation moves the other way, 10.6 → 12.1 kB/pair, because up to three
+  corner parts are live at once where one edge limit used to be. Three, not one per
+  corner: a corner is released as soon as the later of its two edges has been
+  evaluated, and only the first corner is held across the whole loop because the last
+  edge closes on it. Verified by instrumenting the constructor — it is three for a
+  four-, six- and nine-corner section alike. The residual quadrature's
+  (pairs × nodes) blocks dominate that figure either way.</p>
+  <p>The <strong>rectangle</strong> row is the honest shape of the saving. Two of its
+  four edges are horizontal and dropped, so each of its corners belongs to exactly ONE
+  live edge and there is nothing to share; and its chain is broken at every corner, so
+  the first residual survives everywhere. What is left for it is one more object and
+  the release bookkeeping, a few per cent either way across runs. A hexagonal plasma
+  cell is the opposite case — every corner shared and the chain closed — and it halves
+  both counts.</p>
+
+  <h2>What this changes downstream</h2>
+  <p>The adoption rung's cost case gets substantially stronger. The closed form is now
+  <strong>4.9× faster</strong> than the 858 µs/pair 16×48 boundary quadrature it would
+  replace, where the figure that rung was written against was 2.6×, while remaining one
+  to two orders more accurate — and accurate ON the contour, where a quadrature has
+  nothing to converge to and the shipped rule sits at 2.6e−04. Against the banded
+  scheme's 13.1 µs/pair whole-column figure it is 13.5×, so the architecture that rung
+  proposes — closed form for the near band, banded for mid and far — is unchanged in
+  shape and cheaper in the band that matters.</p>
+  <p>The remaining cost is now two sizing constants rather than anything structural,
+  and both change VALUES where this rung changed none: the residual quadrature's 128
+  nodes (73 of the 100 floor, and the measurement that set it predates the analytic
+  logarithm removal) and the moment stack's length (carried forty orders past the
+  harmonics the numerators reach, for pole families that are skipped in the common
+  case). Queued as f-boa-10.</p>
+</main>
+</body>
+</html>

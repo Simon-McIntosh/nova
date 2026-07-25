@@ -19,8 +19,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-25">
-<meta name="plan-impl" content="0.93">
-<meta name="plan-version" content="8">
+<meta name="plan-impl" content="0.95">
+<meta name="plan-version" content="9">
 </head>
 <body>
   <main class="plan-doc">
@@ -227,6 +227,41 @@
              style="max-width:100%">
         <figcaption>What the harmonic numerator basis and the analytic logarithm
         removal bought, and what they cost.</figcaption>
+      </figure>
+    </section>
+
+    <section id="s6-landed" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ corner organisation landed 2026-07-25</span>
+        <h2>The closed form organised by corner, and the term that telescopes — landed</h2>
+      </header>
+      <p class="landed-summary">
+        <strong>1.89× off the closed form with every accuracy table unchanged</strong> —
+        hexagon 333.9 → <strong>176.6 µs/pair</strong>, thin plate 220.7 → 119.3,
+        rectangle 109.4 → 113.2 (it shares no corner, so there is nothing to win), floor
+        184.9 → 100.1. An edge limit is one of the section's CORNERS and the modulus, its
+        complement, the whole moment stack, the <code>G²</code> split and the first
+        residual see only that corner, so they are formed once and read by both its edges
+        (<code>_Vertex</code> / <code>_Edge</code>, three corner parts live at a time).
+        The <code>arsinh β₁</code> term is a function of the corner alone in all three
+        components, so around a closed chain it CANCELS: it is accumulated against the
+        signed count of live edges at each corner, and for a section with no horizontal
+        edge it is never formed at all — measured, one corner's term is 14–1900× the
+        answer and carrying it per limit was leaving 7e-15 of that answer behind, so the
+        section total is now exactly free of it. Because the arithmetic per limit is
+        unchanged, all eighteen two-directional accuracy entries hold and the 95-test gate
+        passes untouched; the structure is pinned by call counts instead. The adoption
+        rung's cost case is now <strong>4.9× under the 858 µs quadrature, not 2.6×</strong>.
+        Merged to develop <code>56254283</code>; fast lane 1435 passed / 87 skipped /
+        0 failed. Full record:
+        <a href="archive/biot-operator-assembly-corner-organisation-landed.html">corner organisation landed</a>.
+      </p>
+      <figure>
+        <img src="/nova/figures/biot-operator-assembly/corner_organisation.png"
+             alt="Signed live-edge count at each corner for a hexagon and a rectangle, assembled cost per section for both arrangements, and the cost breakdown before and after"
+             style="max-width:100%">
+        <figcaption>Why the term telescopes, which sections the sharing helps, and where
+        the time went.</figcaption>
       </figure>
     </section>
 
@@ -663,7 +698,7 @@ Done-when
     </article>
 <article class="r-fu" data-id="f-boa-08" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-25T17:14:00+00:00" data-recommends-skill="/reckon-ship biot-operator-assembly" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Make the closed form the shipped route for exact polygon coupling and re-open the plasma default flip</h4>
-    <div class="r-fu-body"><p>The closed form now clears its whole acceptance gate and is registered as a candidate, but it is still a library function with no PRODUCTION callers: it is unreachable from <code>PolySection</code> and has no element class. Meanwhile the shipped defaults are a point filament for plasma cells (<code>segment="circle"</code>) and exact-everywhere 16x48 quadrature for the opt-in <code>PolySection</code>. This rung wires it in and flips what it is safe to flip. The cost case is thinner than it was but still holds - 330 us/pair against 858 for the 16x48 rule, so 2.6x faster AND one to two orders more accurate, including ON the contour where a quadrature has nothing to converge to and the shipped rule sits at 2.6e-04; the natural architecture is the closed form taking the NEAR band while the banded scheme keeps mid and far.</p></div>
+    <div class="r-fu-body"><p>The closed form now clears its whole acceptance gate and is registered as a candidate, but it is still a library function with no PRODUCTION callers: it is unreachable from <code>PolySection</code> and has no element class. Meanwhile the shipped defaults are a point filament for plasma cells (<code>segment="circle"</code>) and exact-everywhere 16x48 quadrature for the opt-in <code>PolySection</code>. This rung wires it in and flips what it is safe to flip. The cost case is now a strong one - 176.6 us/pair on a hexagonal cell against 858 for the 16x48 rule, so <strong>4.9x faster</strong> AND one to two orders more accurate, including ON the contour where a quadrature has nothing to converge to and the shipped rule sits at 2.6e-04; the natural architecture is the closed form taking the NEAR band while the banded scheme keeps mid and far.</p></div>
     <pre class="r-fu-prompt">Project: nova
 Plan:    biot-operator-assembly (http://127.0.0.1:8765/nova/biot-operator-assembly.html)
 Section: adopt the closed form as the shipped exact route
@@ -680,9 +715,11 @@ Context
 Prerequisites (check before starting; STOP and report if unmet)
   - closed-form-device decision: whether exact coupling reaches a device at all shapes the
     dispatch this rung writes. f-boa-07 supplies the measurements.
-  - f-boa-09 is NOT a prerequisite, but read its outcome first if it has landed: it
-    reorganises the evaluation by vertex and is expected to take ~40% off the 330 us/pair
-    this rung's cost statement quotes.
+  - the corner organisation has LANDED (56254283) and the cost statement above already
+    carries its figure: 176.6 us/pair on a hexagonal cell, 119.3 on a thin plate, 113.2 on
+    a rectangle, because a corner is shared only where both its edges are live. Read
+    archive/biot-operator-assembly-corner-organisation-landed.html for the shape dependence
+    before quoting a single number at a wall-clipped cell.
 
 State to read
   nova/biot/polysection.py -- section_greens, the standoff/quadrature/banded ClassVars and
@@ -708,7 +745,7 @@ Done-when
      without that check passing; say so plainly if it does not.
   5. Followup written; this followup resolved.</pre>
     </article>
-<article class="r-fu" data-id="f-boa-09" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-25T22:10:00+00:00" data-recommends-skill="/reckon-ship biot-operator-assembly" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-boa-09" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-25T22:10:00+00:00" data-recommends-skill="/reckon-ship biot-operator-assembly" data-resolved-at="2026-07-25T21:36:24+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Organise the closed form by VERTEX rather than by edge limit, and drop the term that telescopes</h4>
     <div class="r-fu-body"><p>Measuring the closed form's cost turned up a structural saving larger than any micro-optimisation left in it. The reduction is evaluated per edge, at each of the edge's two limits, and at a limit it depends on the target and the edge's ENDPOINT alone through <code>u</code> and the endpoint radius: the elliptic modulus and its complement, the whole harmonic moment stack, the ring denominator's split and both of its pole seeds, and the first residual <code>arsinh</code> quadrature. None of them sees the edge's slope. Every vertex of a closed section is the endpoint of two edges, so all of that is computed twice.</p><p>The same observation says something stronger about one term: the <code>arsinh beta1</code> contribution is a function of the vertex alone in all three components, so over a closed polygon it TELESCOPES to zero exactly. It survives only where a horizontal edge is skipped, which breaks the chain at two of the rectangle's four corners. It is currently formed, summed and cancelled.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -763,6 +800,75 @@ Done-when
      bit-identity test above.
   3. Cost re-measured and recorded; the accuracy tables re-measured and unchanged or
      improved.
+  4. Followup written; this followup resolved.</pre>
+    <p class="r-fu-outcome">Landed on develop (56254283; full fast lane 1435 passed / 87 skipped / 0 failed, the +12 being this rung's own tests). A PURE REGROUPING, WHICH IS THE HEADLINE: every entry of SECTION_ACCURACY, ASPECT_ACCURACY and FIELD_ASPECT_ACCURACY holds UNCHANGED in both directions and the whole 95-test acceptance gate passes untouched, so no table needed re-measuring - the rung predicted exactly that and it is what makes the saving free. THE SPLIT. A limit of an edge is one of the section's CORNERS, and _Vertex now holds everything that sees only the corner: the ring modulus and its complement, the harmonic moment stack and its radical-weighted fold, the G^2 split with both pole seeds, the first residual arsinh integral, and the moment machinery itself (the contractions and the two pole routes, which the edge reaches through with the numerators its slope contributes). _Edge holds what the slope reaches - B^2, the arctangent's numerator, both derivative blocks - and a second thing the rung did not list: the target's offset from the edge's EXTENDED LINE, r1, B^2 and the two slope blocks are all limit-INDEPENDENT and were being formed twice per edge as well, so they are now formed once for the pair. Only the B^2 split (which needs the corner's modulus), gamma, the arctangent numerator and the second residual are genuinely per (edge, limit). A corner is released as soon as the later of its two edges has been evaluated, so three corner parts are live at a time rather than one per corner - verified by instrumenting the constructor, and it holds at 3 for a 4-, 6- and 9-corner section. THE TELESCOPING, MEASURED RATHER THAN ASSUMED. Over the gate target sets ONE corner's arsinh beta1 term is 14x to 1900x the assembled answer, so this is a cancellation of one to three decades, not a negligible term; summed the way the edge loop used to sum it, it left 7.1e-15 of the answer behind (worst, thin plate psi) - three orders inside the recorded envelopes, which is why the tables did not move when it went. It is now accumulated against the signed number of live edges meeting at each corner and the section total is EXACTLY free of it (0.0, not round-off) for the hexagon, thin plate and trapezium, none of which has a horizontal edge. The rectangle is the counter-case and is asserted the other way: its chain breaks at all four corners (+1/-1/+1/-1) and the surviving sum is 6% of B_Z and 105% of the flux, so the bookkeeping is load-bearing there. COST, one idle sun_debug core, 4096 pairs, fresh process, median of three, 128 residual nodes: hexagon 333.9 -> 176.6 us/pair (1.89x), thin plate 220.7 -> 119.3 (1.85x), rectangle 109.4 -> 113.2 (0.97x). The floor went 184.9 -> 100.1, of which the graded residual quadrature is 145 -> 73, the moment stacks 40.1 -> 26.8 and the third-kind integrals 17.1 -> 12.7. Peak allocation 10.6 -> 12.1 kB/pair (the three live corner parts; the residual quadrature's pairs x nodes blocks dominate either way). THE RECTANGLE RESULT IS THE HONEST SHAPE OF THE WIN, not a defect: two of its edges are horizontal and dropped, so each of its corners belongs to exactly ONE live edge and there is nothing to share, and its chain is broken everywhere so the first residual survives at every corner - it does the same work through one more object, a few per cent either way across runs. A hexagonal plasma cell is the opposite case and halves both counts. CONSEQUENCE FOR THE ADOPTION RUNG (f-boa-08, cost statement updated in place): the closed form is now 4.9x faster than the 858 us/pair 16x48 quadrature it would replace, not 2.6x, while staying one to two orders more accurate and accurate ON the contour where that rule sits at 2.6e-04; it is 13.5x the banded scheme's 13.1 us/pair whole-column figure. Twelve tests added, because no accuracy test can see whether the sharing is in effect - it is the same arithmetic: bit-identical corner coordinates from pack_section for both of a corner's edges, the cancellation and the magnitude it cancels, the survival where the chain breaks, and a per-section call count (hexagon 6 moment stacks / 12 residuals, was 12/24; rectangle 4/8, unchanged). Record: archive/biot-operator-assembly-corner-organisation-landed.html</p>
+    </article>
+<article class="r-fu" data-id="f-boa-10" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-25T23:40:00+00:00" data-recommends-skill="/reckon-ship biot-operator-assembly" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Take the last two costs out of the closed form: the moment stack&#x27;s length and the residual node count</h4>
+    <div class="r-fu-body"><p>With the corner organisation in, the closed form is 176.6 us/pair on a hexagonal cell against a 100.1 floor, and the floor is now two things. The graded residual quadrature is 73 of it, at 128 nodes because the most slender section's near-contour targets do not converge at 64 -- a limit that predates the harmonic reduction and was deliberately left alone. The moment stacks are 27, and their LENGTH is set by the pole families' downward-recursion headroom (forty orders past the harmonics the numerators actually reach) even though those families are skipped outright wherever no root is far enough out to need one, which is the common case. Both are worth attacking and both change the arithmetic, so both force the accuracy tables to be re-measured -- which is the opposite of the rung that just landed.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    biot-operator-assembly (http://127.0.0.1:8765/nova/biot-operator-assembly.html)
+Section: the closed form&#x27;s remaining cost floor
+Tier:    opus
+
+Context
+  nova/biot/polygonanalytic.py is organised by corner and costs 176.6 us/pair on a
+  hexagonal cell (one idle sun_debug core, 4096 pairs, fresh process, median of three,
+  128 residual nodes), against a floor of 100.1 of which 73.3 is the one graded residual
+  quadrature that survives per edge limit and 26.8 the moment stacks. Everything
+  structural has been taken: the corner work is formed once, the term that telescopes is
+  not formed at all. What is left is two sizing decisions, each of which changes VALUES
+  and so moves the recorded envelopes.
+
+State to read
+  nova/biot/polygonanalytic.py -- _NODES and the comment recording what it was measured
+    from; _HARMONICS + POLE_HEADROOM + 2 as the stack length; _Vertex.split and
+    _Vertex._family, which is where a pole family is skipped;
+  nova/biot/elliptic.py -- harmonic_moments (minimal solution, run downward on ratios, so
+    its starting order sets its accuracy), harmonic_root_moments, harmonic_pole_moments
+    and POLE_HEADROOM&#x27;s own justification;
+  tests/test_biotpolygonanalytic.py -- SECTION_ACCURACY, ASPECT_ACCURACY and
+    FIELD_ASPECT_ACCURACY, all asserted in BOTH directions, and the node-independence
+    evidence in the _NODES comment;
+  benchmarks/analytic_cost_floor.py -- the floor model and its measured table.
+
+The two routes
+  1. The STACK LENGTH. The stack is carried POLE_HEADROOM orders past the harmonics the
+     numerators reach purely so the pole families&#x27; downward recursion is closed, and the
+     families are built only where a root is far enough past the range to need one -- for
+     the ring denominator, essentially never. The shifts themselves need no moments: they
+     come from a denominator&#x27;s two end values and its xy coefficient. So the split could
+     be formed FIRST and the stack length chosen from it, dropping two thirds of the stack
+     in the common case. The catch is that harmonic_moments is a minimal solution run
+     downward, so its starting order is part of its accuracy: expect every envelope to
+     move and re-measure rather than assume. Establish the accuracy-vs-headroom curve
+     before choosing a rule.
+  2. The NODE COUNT. 128 was set because the whole-section deviation saturates at 6e-12
+     from 128 on and sits at 2.3e-10 at 64, the gap being the most slender section&#x27;s
+     near-contour targets. That was measured BEFORE the boundary logarithm was removed in
+     closed form, so the measurement is stale by one change: re-run the node sweep per
+     section and per band and find out whether 64 now suffices away from the slender
+     near-contour corner, and whether a per-target node count (or a second graded panel
+     only where the layer is narrow) is cheaper than paying 128 everywhere.
+
+Guidance
+  - Measure before implementing, as the last two rungs both did and both were right to:
+     instrument the accuracy against the knob first, decide from the curve, and record
+     the curve even if the answer is to leave the constant alone. Closing either half as
+     not worth the churn is a legitimate outcome.
+  - Whatever moves, every entry of the three accuracy tables is asserted in both
+     directions and must be re-measured, not nudged.
+  - A per-target node count breaks the fixed shapes the tiled assembly needs (one
+     compilation per build, no data-dependent branching), so if that is the answer it has
+     to be a fixed set of shapes selected per band, not a ragged one.
+
+Done-when
+  1. An accuracy-vs-headroom curve for the moment stack and an accuracy-vs-nodes curve
+     per section and per band, both recorded in the plan.
+  2. Whichever change the curves justify, implemented, with the three accuracy tables
+     re-measured in both directions and the reason for each movement stated.
+  3. Cost re-measured on a compute node, fresh process, median of three, and both the
+     benchmark table and benchmarks/BASELINE.md updated.
   4. Followup written; this followup resolved.</pre>
     </article>
 </section>

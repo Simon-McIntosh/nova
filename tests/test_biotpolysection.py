@@ -239,3 +239,89 @@ def test_the_section_orientation_does_not_change_the_field(orientation):
     np.testing.assert_allclose(psi, point_psi, rtol=5e-3)
     np.testing.assert_allclose(br, point_br, rtol=1e-2, atol=1e-9)
     np.testing.assert_allclose(bz, point_bz, rtol=1e-2, atol=1e-9)
+
+
+# --- the banded scheme, opt-in ----------------------------------------------
+
+
+def plasma_cell(r0=6.2, z0=0.0, radius=0.06):
+    """Return a hexagonal plasma cell at a tokamak major radius."""
+    angle = np.pi / 6 + np.linspace(0.0, 2.0 * np.pi, 6, endpoint=False)
+    return np.column_stack([r0 + radius * np.cos(angle), z0 + radius * np.sin(angle)])
+
+
+def test_the_shipped_default_is_exact_everywhere_and_not_banded():
+    """Neither reduction is on by default: every pair goes through the exact rule."""
+    from nova.biot.polygon import polygon_greens
+
+    assert PolySection.banded is False
+    assert PolySection.standoff is None
+    vertices = plasma_cell()
+    target_r = np.array([6.2, 7.4, 8.9])
+    target_z = np.array([0.5, -0.9, 1.4])
+    for got, expected in zip(
+        PolySection.section_greens(target_r, target_z, vertices),
+        polygon_greens(target_r, target_z, vertices),
+    ):
+        np.testing.assert_array_equal(got, expected)
+
+
+def test_the_banded_scheme_is_reached_through_the_scoped_configuration():
+    """Turning it on routes every pair through the band dispatch, and only then."""
+    from nova.biot.bandedcoupling import banded_greens
+
+    vertices = plasma_cell()
+    angle = np.linspace(0.0, 2.0 * np.pi, 12, endpoint=False)
+    target_r = 6.2 + np.geomspace(0.1, 2.0, 12) * np.cos(angle)
+    target_z = np.geomspace(0.1, 2.0, 12) * np.sin(angle)
+
+    exact = PolySection.section_greens(target_r, target_z, vertices)
+    with PolySection.configured(banded=True):
+        banded = PolySection.section_greens(target_r, target_z, vertices)
+    for got, expected in zip(banded, banded_greens(target_r, target_z, vertices)):
+        np.testing.assert_array_equal(got, expected)
+    # it is a different path, not a no-op rename of the exact one
+    assert any(not np.array_equal(one, other) for one, other in zip(banded, exact))
+
+
+def test_the_banded_scheme_holds_every_component_against_the_exact_lane():
+    """Through the element's own entry point, the two lanes agree to the bound."""
+    vertices = plasma_cell()
+    angle = np.linspace(0.0, 2.0 * np.pi, 16, endpoint=False)
+    reach = np.geomspace(0.07, 2.4, 16)[:, None]
+    target_r = (6.2 + reach * np.cos(angle)).ravel()
+    target_z = (reach * np.sin(angle)).ravel()
+
+    exact = PolySection.section_greens(target_r, target_z, vertices)
+    with PolySection.configured(banded=True):
+        banded = PolySection.section_greens(target_r, target_z, vertices)
+    for got, expected in zip(banded, exact):
+        scale = np.max(np.abs(expected))
+        assert np.max(np.abs(got - expected)) / scale <= 1e-6
+
+
+def test_the_banded_configuration_is_restored_after_use():
+    """The opt-in never leaks into the next solve."""
+    before = (PolySection.standoff, PolySection.quadrature, PolySection.banded)
+    with PolySection.configured(banded=True):
+        assert PolySection.banded is True
+    assert (PolySection.standoff, PolySection.quadrature, PolySection.banded) == before
+
+
+def test_the_point_far_field_sits_at_the_section_area_centroid():
+    """A standoff blend places its filament at the area centroid, not the vertex mean.
+
+    The two coincide only for a section whose corners pair up. On one where they do
+    not, the vertex mean carries a first-moment error, which is a dipole the far
+    field has no way to absorb.
+    """
+    from nova.biot.greens import section_centroid
+
+    vertices = np.array([[6.15, -0.03], [6.24, -0.03], [6.26, 0.02], [6.18, 0.04]])
+    centre = section_centroid(vertices)
+    assert not np.allclose(centre, vertices.mean(axis=0), atol=1e-6)
+    far_r = np.array([7.6])
+    far_z = np.array([1.1])
+    with PolySection.configured(standoff=3.0):
+        psi = PolySection.section_greens(far_r, far_z, vertices)[0]
+    np.testing.assert_array_equal(psi, greens_psi(far_r, far_z, centre[0], centre[1]))

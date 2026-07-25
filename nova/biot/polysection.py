@@ -22,6 +22,17 @@ rectangular sections, generalised to a polygon. On a plasma grid the band holds
 a few percent of the target-source pairs, which is what makes the exact
 treatment affordable where it is physically real.
 
+Three bands
+-----------
+The two-way near/far split above is a study knob, not the shipped default,
+because a bare point filament does not converge to a finite section for a full
+ring at any standoff. The measured alternative is the three-band scheme in
+:mod:`nova.biot.bandedcoupling` — converged rule, reduced rule, moment-corrected
+filament, binned by distance to the section contour — which holds every component
+to one part in a million of its peak. It is available here through ``banded`` and
+is off by default: exact everywhere remains the shipped lane and the reference
+the banded one is measured against.
+
 Quantities are per ampere of total conductor current, in raw SI: total poloidal
 flux :math:`\\Phi = 2 \\pi R A_\\phi` [Wb] and field components [T].
 """
@@ -33,7 +44,8 @@ from typing import ClassVar
 
 import numpy as np
 
-from nova.biot.greens import greens_bz_br, greens_psi
+from nova.biot.bandedcoupling import banded_greens
+from nova.biot.greens import greens_bz_br, greens_psi, section_centroid
 from nova.biot.matrix import Matrix
 from nova.biot.polygon import polygon_greens
 
@@ -86,33 +98,49 @@ class PolySection(Matrix):
     cell; otherwise leave it alone.
     """
 
+    banded: ClassVar[bool] = False
+    """Route pairs through :mod:`nova.biot.bandedcoupling` instead of the exact rule.
+
+    The three-band scheme evaluates the converged rule only where the finite
+    section is physically resolved, a reduced rule out to the section's own far
+    seam, and a moment-corrected filament beyond it — about one percent of the
+    exact-everywhere quadrature node count on a plasma grid, with every component
+    held to one part in a million of its peak against the exact lane.
+
+    The default is ``False``: exact everywhere stays the shipped lane and the
+    reference the banded one is measured against. Flipping the plasma-coupling
+    default is a separate decision from having the scheme available.
+    """
+
     @classmethod
     @contextmanager
-    def configured(cls, *, standoff=..., quadrature=...):
+    def configured(cls, *, standoff=..., quadrature=..., banded=...):
         """Apply a temporary configuration for the duration of a solve.
 
         The element is built inside :class:`nova.biot.solve.Solve`, so there is
         no per-call argument to thread a configuration through; this scopes a
         change instead of leaving the class mutated::
 
-            with PolySection.configured(standoff=None):  # exact everywhere
+            with PolySection.configured(banded=True):  # three-band scheme
                 coilset.plasmagrid.solve()
         """
-        previous = (cls.standoff, cls.quadrature)
+        previous = (cls.standoff, cls.quadrature, cls.banded)
         if standoff is not ...:
             cls.standoff = standoff
         if quadrature is not ...:
             cls.quadrature = quadrature
+        if banded is not ...:
+            cls.banded = banded
         try:
             yield cls
         finally:
-            cls.standoff, cls.quadrature = previous
+            cls.standoff, cls.quadrature, cls.banded = previous
 
     @staticmethod
     def section_radius(vertices: np.ndarray) -> float:
-        """Return the section's bounding radius about its centroid [m]."""
+        """Return the section's bounding radius about its area centroid [m]."""
         vertices = np.asarray(vertices, dtype=np.float64)
-        centre = vertices.mean(axis=0)
+        centre = section_centroid(vertices)
         return float(np.max(np.hypot(*(vertices - centre).T)))
 
     @classmethod
@@ -128,7 +156,7 @@ class PolySection(Matrix):
         if cls.standoff is None or not np.isfinite(cls.standoff):
             return np.ones(target_r.shape, dtype=bool)
         vertices = np.asarray(vertices, dtype=np.float64)
-        centre = vertices.mean(axis=0)
+        centre = section_centroid(vertices)
         distance = np.hypot(
             target_r - centre[0],
             np.asarray(target_z, dtype=np.float64) - centre[1],
@@ -141,11 +169,15 @@ class PolySection(Matrix):
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Return ``(psi, Br, Bz)`` per ampere: exact near the section, point far.
 
-        The returned arrays are shaped like ``target_r``.
+        The returned arrays are shaped like ``target_r``. With ``banded`` set, the
+        three-band scheme handles every pair instead and neither ``standoff`` nor
+        ``quadrature`` applies — the bands carry their own measured rules.
         """
         target_r = np.asarray(target_r, dtype=np.float64)
         target_z = np.asarray(target_z, dtype=np.float64)
-        centre = np.asarray(vertices, dtype=np.float64).mean(axis=0)
+        if cls.banded:
+            return banded_greens(target_r, target_z, vertices)
+        centre = section_centroid(vertices)
         psi = greens_psi(target_r, target_z, centre[0], centre[1])
         bz, br = greens_bz_br(target_r, target_z, centre[0], centre[1])
         near = cls.near_band(target_r, target_z, vertices)

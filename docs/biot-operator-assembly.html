@@ -20,7 +20,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-25">
 <meta name="plan-impl" content="0.75">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="4">
 </head>
 <body>
   <main class="plan-doc">
@@ -359,6 +359,58 @@ Done-when
   3. Three-band coupling implemented behind per-component gates; exact-everywhere
      retained as the reference lane.
   4. Followup written; this followup resolved.</pre>
+    </article>
+<article class="r-fu" data-id="f-boa-03" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-25T12:40:00+00:00" data-recommends-skill="/reckon-ship biot-operator-assembly" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Extend the polygon-section closed form from the full turn to a finite arc, giving the thick-section primitives 3D geometry needs</h4>
+    <div class="r-fu-body"><p>The full-turn (axisymmetric) polygon-section evaluation is the special case in which every elliptic integral is complete. Urankar Part V's actual subject is the <em>finite arc</em> segment, and nova's element hierarchy already has the pattern: <code>Arc</code> is the 3D filament arc and <code>Bow</code> its rectangular-section thickening, with no polygon-section counterpart. Building complex 3D geometry needs that counterpart. The work reinstates the paper's alpha-case bookkeeping (eq 25/26) and the incomplete F/E/Pi, restores every moment recursion's boundary term at an interior amplitude, implements the azimuthal field row (its full-turn zero was a parity argument that no longer holds), and reduces to <code>Bow</code> at zero edge slope as its oracle.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    biot-operator-assembly (http://127.0.0.1:8765/nova/biot-operator-assembly.html)
+Section: finite-arc polygon-section primitives
+Tier:    opus
+
+Context
+  The full-turn polygon-section closed form is in (flux and both axisymmetric field
+  components). It is the collapse of the paper&#x27;s case B onto case A in which every
+  elliptic integral becomes COMPLETE. Part V&#x27;s general subject is the finite arc, and
+  nova has no polygon-section arc element: Arc (nova/biot/arc.py) is the 3D filament,
+  Bow (nova/biot/bow.py) its rectangular-section thickening through zeta. The user wants
+  the full set of thick-section polygon primitives available for complex 3D geometry.
+
+State to read
+  nova/biot/polygonanalytic.py + tests/test_biotpolygonanalytic.py (the full-turn
+    reduction, its dual-basis conditioning treatment, and the acceptance gate/CANDIDATES
+    registry pattern to reproduce for the arc);
+  nova/biot/elliptic.py + tests/test_biotelliptic.py (complete sn/cn moments, shifted-pole
+    recursions — every one needs its interior-amplitude boundary term reinstated);
+  nova/biot/arc.py, nova/biot/bow.py (the element-class pattern: Constants + Matrix
+    dataclass, ClassVar name, axisymmetric = False; Bow is the b1 = 0 oracle);
+  nova/biot/zeta.py (how Bow handles its own quadrature);
+  the worktree&#x27;s URANKAR_PARTV_METHOD.md sections 3 and 7 (case bookkeeping and the
+    field rows, transcribed from the page images) and CONDITIONING_DESIGN.md.
+
+Key guidance
+  - alpha_i = (pi + phi - phi_i)/2 is PER TARGET, so the amplitudes are arrays: plan the
+    shapes for batching from the start, which is also what makes this tileable.
+  - Case A holds for 0 &lt; alpha &lt;= pi/2; case B (pi/2 &lt; |alpha_i| &lt;= 3pi/2) folds through
+    eq 25/26 with theta_i = pi - |alpha_i|; case C (3pi/2 &lt; alpha_i &lt;= 2pi) with
+    theta_i = 2pi - alpha_i. Get the branch selection and its sign bookkeeping under test
+    before any coefficient work.
+  - The dual-basis conditioning cure matters MORE here: an arc end can put a pole
+    arbitrarily close to an interior limit, not only past a range end.
+  - B_phi must be implemented and tested; its full-turn vanishing was parity, not algebra.
+  - Recover the full turn as the 2pi limit to the accuracy the full-turn route achieves —
+    that is the strongest single regression test available.
+
+Done-when
+  1. Finite-arc polygon-section evaluation (A_phi/psi and all three field components)
+     passing an acceptance gate built like the full turn&#x27;s: converged numerical oracle over
+     the arc, per-edge and per-limit pins, an aspect sweep, and the 2pi limit recovered.
+  2. Zero edge slope reduces to Bow within Bow&#x27;s own tolerance; horizontal edges vanish.
+  3. Element classes following the Arc/Bow pattern so the frame/groupset machinery can use
+     them, named by what they are (no version or plan labels).
+  4. Cost per pair measured on a sun_debug node, fresh process, median of 3, recorded
+     beside the full-turn figure.
+  5. Followup written; this followup resolved.</pre>
     </article>
 </section>
 

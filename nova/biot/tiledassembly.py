@@ -344,10 +344,20 @@ def tile_evaluator(plan: TilePlan, *, batched: bool = False) -> TileEvaluator:
     """Return a compiled evaluator for the tiles of one plan.
 
     ``batched`` chooses how the quadrature blocks are combined: ``False`` walks
-    them with ``scan``, holding one block's temporaries live, which is what keeps
-    a CPU run inside cache; ``True`` maps them with ``vmap``, presenting the
-    whole tile as one batched kernel, which is what gives a GPU enough work to
-    saturate. Both come from the same trace and must agree with numpy.
+    them with ``scan``, holding one block's temporaries live; ``True`` maps them
+    with ``vmap``, presenting the whole tile as one batched kernel. Both come
+    from the same trace and must agree with numpy, and measured on both a CPU
+    and a GPU the batched form is the faster of the two -- the sequential scan
+    denies the compiler the parallelism it would otherwise find across blocks.
+
+    A batched tile does NOT respect :attr:`TilePlan.peak_bytes`: that is a model
+    of one block's working set, and mapping the blocks makes the whole tile's
+    quadrature live at once. Measured at the 16x48 rule on an H200, the device
+    high-water mark ran 0.2-0.6 MB per pair in the tile, growing sub-linearly in
+    the tile (131 MB at 400 pairs, 864 MB at 1600, 1.4 GB at 6400) because the
+    compiler reuses buffers the model knows nothing about. Size a batched tile
+    from a measurement -- ``benchmarks/tiled_backend.py`` reports the device
+    high-water mark per run -- not from the plan's budget.
 
     The pair list of a full tile is a constant of the plan, so it is closed over
     rather than passed: the compiled kernel is a function of geometry alone.

@@ -290,6 +290,55 @@
   harmonic numerator basis (worth ~30× on these numbers) and forming the limit difference before
   the large antiderivative is assembled.</p>
 
+  <h3>The modulus complement: a floating-point defect that outweighed the reduction</h3>
+  <p>Chasing a target that landed exactly on a section vertex — which returned a non-finite value
+  where the boundary quadrature stayed finite — turned up a defect larger than the one it was
+  meant to explain. <code>scipy.special.ellipk(m)</code> and <code>ellipe(m)</code> take the
+  parameter, and <strong>a float parameter cannot carry its own complement</strong>: passing
+  <code>1 − k²</code> has already lost k′² to rounding, so <code>K ≈ −log k′</code> comes back
+  wrong by about ε/k′². Measured directly:</p>
+  <table>
+    <thead><tr><th>k′²</th><th><code>ellipk(1 − k′²)</code></th>
+      <th><code>elliprf(0, k′², 1)</code></th><th>relative disagreement</th></tr></thead>
+    <tbody>
+      <tr><td>1e-06</td><td>8.294051464</td><td>8.294051464</td><td>1.7e-12</td></tr>
+      <tr><td>1e-10</td><td>12.899219785</td><td>12.899219826</td><td>3.2e-09</td></tr>
+      <tr><td>1e-14</td><td>17.504789811</td><td>17.504390012</td><td><strong>2.3e-05</strong></td></tr>
+      <tr><td>1e-16</td><td>19.754694646</td><td>19.806975105</td><td><strong>2.6e-03</strong></td></tr>
+    </tbody>
+  </table>
+  <p>In this reduction <code>k′² = (u² + (r′ − r)²)/a²</code> is <em>exactly</em> the target's
+  squared distance to an edge's own endpoint over the squared ring span, so the induced error
+  grows as ε × (span / distance to the nearest corner)², which is the δ<sup>−2</sup> law the
+  measurements showed. The cure is Carlson's symmetric forms — <code>K = R_F(0, k′², 1)</code>
+  and <code>E = 2R_G(0, k′², 1)</code> — which take the complement as their argument, and the
+  geometry supplies it exactly. The module already threaded an exact complement through the
+  third-kind integrals for the same reason; K and E were the remaining leak.</p>
+  <p>Because a slender section is precisely where k′² is small, fixing this improved
+  <strong>every</strong> recorded envelope, most at the slender end: 16× on the flux and 84× on
+  the field at aspect 1/100, 28× and 83× at 1/300. <strong>Both field components now hold the
+  1e-10 far band on all four gate sections</strong> (worst 3.4e-11, independently reproduced);
+  only the flux still misses, and only through the edge-sum cancellation above — 2× on the
+  hexagon, 2.4× on the trapezium, 12× on the thin plate.</p>
+  <p>At the vertex itself K genuinely diverges, and the reduction's total weight on it is
+  <em>zero</em>: the ΓD term's coefficient is 1 − k² = k′², both <code>arsinh</code> numerators
+  carry sin²φ which vanishes there, and the arctangent's three separated pieces carry log weights
+  in the ratio 8 : −4 : −4. So the moments' finite parts are what the reduction wants, and every
+  corner of every gate section now evaluates finitely — ψ agreeing with the quadrature from
+  4.3e-13 (rectangle, exact because a vertical edge's integrand vanishes at its own endpoint) to
+  2.2e-07. Three further bugs had to be fixed for that cancellation to hold in floating point
+  rather than only in algebra: an edge-plane offset formed so that it vanished exactly at only one
+  of the two endpoints, leaving a ~1e-37 shift that broke the cancellation outright; the
+  arctangent's endpoint value at a corner, which is −arctan b₁ rather than zero and worth ~70% of
+  the per-limit value; and a mirrored Π returning 0 × ∞ where its own weight was zero.</p>
+  <p>The neighbourhood is smooth rather than a patched point: the deviation is flat across six
+  decades of standoff (2.2e-07 on the corner, 2.2e-07 at 1e-12 off, 2.3e-07 at 1e-09) and closes
+  on its on-vertex value a decade per decade over ten decades from both sides — Lipschitz through
+  the corner, which a patched point could not produce. Per edge and per limit against a 40-digit
+  reference the reduction is right at a corner to 1e-13; what remains at section level is the
+  residual <code>arsinh</code> quadrature, which raising its node count from 64 to 256 takes from
+  1.9e-07 to 8.9e-11.</p>
+
   <h3>An erratum in the printed paper</h3>
   <p>Eq 11b's vertical row prints its rational term as <code>−b₁²D/a₀²</code>. It is
   <strong><code>−b₁D/a₀²</code></strong>, linear in the edge slope. Applying eq 4b's own
@@ -338,6 +387,21 @@
     <li>The printed <code>sn_moments</code> recursion is unusable past order ~2 below k² ≈ 0.1,
     and the printed eq 24a/23 forms are ill-conditioned as printed; stable re-derivations are in
     <code>nova/biot/elliptic.py</code> and are what callers should use.</li>
+    <li><strong>The same complement defect is present in the point-filament kernels.</strong>
+    <code>nova/biot/greens.py</code> calls <code>ellipk(k2)</code> / <code>ellipe(k2)</code> with
+    the parameter, and k² → 1 is the near field — the zone that matters most, since it is where
+    the point kernel's error already concentrates. It clips k² at 1 − 1e-12, which caps the
+    induced error at roughly 1e-5 relative and turns a target on the filament into a finite but
+    wrong answer rather than a divergence; at millimetre standoffs from a 6 m ring the error is
+    ~1e-9 relative, so this is not urgent, but it is a floor of exactly the kind the closed form
+    just removed, in the most-used kernel in the module. <code>nova/equilibrium/harmonic.py</code>
+    has the same call pattern with the parameter approaching unity in the far field.</li>
+    <li>The boundary quadrature's <strong>field</strong> is not converged for a target on a
+    vertex at any rule tried up to 768×512 — still moving 1.6e-06 at 384×384, because it forms
+    the field by differentiating its antiderivative. Its ψ at a corner <em>is</em> converged
+    (1e-12). So the closed form's own field accuracy at a corner is bounded only by the
+    2–4e-06 the reference imposes, and any future gate that wants to hold a field on the
+    contour needs a different reference.</li>
   </ul>
 </main>
 </body>

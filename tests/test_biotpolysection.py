@@ -173,7 +173,13 @@ def test_the_configuration_is_restored_after_use():
 
 
 def test_the_quadrature_override_reaches_the_kernel():
-    """The override changes the result, so it is genuinely being applied."""
+    """The override changes the result, so it is genuinely being applied.
+
+    It is a knob on the boundary-quadrature route alone, which is no longer the
+    default, so the route is configured explicitly here. The closed form has no
+    ``(n_panels, n_nodes)`` to override -- its residual node count is fixed by its
+    own acceptance gate -- and it ignores this setting, which is asserted too.
+    """
     from nova.biot.greens import cylinder_greens
 
     width, height = 0.06, 0.04
@@ -182,12 +188,21 @@ def test_the_quadrature_override_reaches_the_kernel():
     target_z = np.full(target_r.size, 0.005)
     reference = cylinder_greens(target_r, target_z, 1.0, 0.0, width, height)[2]
 
-    default = PolySection.section_greens(target_r, target_z, vertices)[2]
-    with PolySection.configured(quadrature=(2, 6)):
-        coarse = PolySection.section_greens(target_r, target_z, vertices)[2]
+    with PolySection.configured(closed_form=False):
+        default = PolySection.section_greens(target_r, target_z, vertices)[2]
+        with PolySection.configured(quadrature=(2, 6)):
+            coarse = PolySection.section_greens(target_r, target_z, vertices)[2]
     scale = np.max(np.abs(reference))
     assert np.max(np.abs(default - reference)) / scale < 1e-6
     assert np.max(np.abs(coarse - reference)) / scale > 1e-4
+
+    # the closed form is unmoved by a quadrature it does not run
+    closed = PolySection.section_greens(target_r, target_z, vertices)[2]
+    with PolySection.configured(quadrature=(2, 6)):
+        np.testing.assert_array_equal(
+            PolySection.section_greens(target_r, target_z, vertices)[2], closed
+        )
+    assert np.max(np.abs(closed - reference)) / scale < 1e-6
 
 
 def test_a_finite_band_is_a_small_fraction_of_a_grid():
@@ -202,19 +217,77 @@ def test_a_finite_band_is_a_small_fraction_of_a_grid():
 # --- the coilset wiring -----------------------------------------------------
 
 
-def test_a_hexagonal_plasma_cell_keeps_point_coupling_for_now():
-    """Plasma cells stay on the point-filament ring pending the operator review.
+def test_a_hexagonal_plasma_cell_is_coupled_as_the_finite_section_it_is():
+    """Plasma cells couple through their own polygon, not through a point ring.
 
-    The polygon-section element exists (and is pinned above) but is not yet
-    the plasma default: the near/far standoff needed to make it affordable
-    demands a principled cutoff and a parallel/batchable operator-assembly
-    design, which is under review. Until then the interaction matrix keeps
-    the point kernel everywhere rather than a blend with an ad-hoc band.
+    A point filament is log-singular at its own location, and an all-to-all
+    plasma matrix puts a target inside its own source cell on every diagonal
+    entry -- the one configuration the point model cannot represent and the
+    finite section handles as an ordinary interior point. The default is the
+    section because the exact treatment stopped being expensive: the closed form
+    costs a few hundred microseconds a pair against the boundary quadrature's
+    858, the build is paid once per geometry and cached, and the banded scheme
+    keeps the far field at filament cost.
     """
     coilset = CoilSet(dplasma=-40)
     coilset.firstwall.insert({"e": [1.0, 0, 0.3, 0.4]}, Ic=1e6)
     segment = set(np.asarray(coilset.subframe.segment).tolist())
-    assert segment == {"circle"}
+    assert segment == {"polysection"}
+
+
+def test_a_rectangular_plasma_mesh_still_couples_through_the_cylinder_kernel():
+    """The section rule that was already there is not displaced by the new one.
+
+    A rectangular plasma cell has a closed-form finite-area kernel of its own and
+    keeps it; only the hexagonal mesh -- which had no section kernel and so fell
+    back to a point -- changes.
+    """
+    coilset = CoilSet(dplasma=-40)
+    coilset.firstwall.insert({"e": [1.0, 0, 0.3, 0.4]}, Ic=1e6, turn="rectangle")
+    segment = set(np.asarray(coilset.subframe.segment).tolist())
+    assert segment == {"cylinder"}
+
+
+def test_every_real_plasma_cell_evaluates_in_closed_form_including_the_clipped_ones():
+    """A real grid's cells are not the tidy sections the acceptance gate uses.
+
+    Measured on a 179-cell grid: the wall-clipped cells carry three to twelve
+    vertices, and clipping leaves edges as short as 1.6e-10 m beside edges of
+    0.12 m -- coincident corners, in effect, a ratio of nine orders. The closed
+    form has to stay finite through all of them, because the shipped default now
+    routes every one of these cells through it and a single non-finite entry
+    poisons the whole operator.
+
+    The disagreement with the boundary quadrature is measured the other way
+    round, and it is the quadrature that is wrong: on this grid the worst
+    off-diagonal pair is a neighbouring cell centre sitting 0.001 contour radii
+    outside its neighbour's boundary, where the shipped ``(16, 48)`` rule is
+    2.9e-03 out on B_Z. Refining it to 1024 panels closes that to 2.1e-12 OF THE
+    CLOSED FORM's value, so the closed form is what the quadrature converges to.
+    """
+    from nova.biot.polygonanalytic import polygon_analytic_greens
+
+    coilset = CoilSet(dplasma=-60)
+    coilset.firstwall.insert({"e": [6.2, 0, 2.0, 3.0]}, Ic=1e6)
+    subframe = coilset.subframe
+    sections = []
+    for poly in np.asarray(subframe["poly"]):
+        points = np.asarray(poly.points, dtype=float)[:, [0, 2]]
+        if len(points) > 1 and np.allclose(points[0], points[-1]):
+            points = points[:-1]
+        sections.append(points)
+    assert len(sections) > 40
+    assert max(len(points) for points in sections) > 6  # clipped cells are present
+    edge = np.concatenate(
+        [np.hypot(*(np.roll(points, -1, axis=0) - points).T) for points in sections]
+    )
+    assert edge.min() < 1e-9 * edge.max()  # clipping leaves near-coincident corners
+
+    target_r = np.asarray(subframe.x, dtype=float)
+    target_z = np.asarray(subframe.z, dtype=float)
+    for points in sections:
+        for component in polygon_analytic_greens(target_r, target_z, points):
+            assert np.all(np.isfinite(component))
 
 
 def test_the_plasma_grid_defaults_to_hexagonal_cells():
@@ -250,19 +323,26 @@ def plasma_cell(r0=6.2, z0=0.0, radius=0.06):
     return np.column_stack([r0 + radius * np.cos(angle), z0 + radius * np.sin(angle)])
 
 
-def test_the_shipped_default_is_exact_everywhere_and_not_banded():
-    """Neither reduction is on by default: every pair goes through the exact rule."""
-    from nova.biot.polygon import polygon_greens
+def test_the_shipped_default_is_the_closed_form_everywhere_and_not_banded():
+    """Neither binning reduction is on by default, and the exact kernel is closed.
+
+    No pair is approximated: there is no standoff band handing a far pair to a
+    point filament, and no three-band split handing it to a reduced rule. Every
+    pair goes through the closed-form reduction, which the measured cost makes
+    affordable -- 171 µs/pair against the 858 the boundary quadrature spent for
+    one to two orders less accuracy.
+    """
+    from nova.biot.polygonanalytic import polygon_analytic_greens
 
     assert PolySection.banded is False
     assert PolySection.standoff is None
-    assert PolySection.closed_form is False
+    assert PolySection.closed_form is True
     vertices = plasma_cell()
     target_r = np.array([6.2, 7.4, 8.9])
     target_z = np.array([0.5, -0.9, 1.4])
     for got, expected in zip(
         PolySection.section_greens(target_r, target_z, vertices),
-        polygon_greens(target_r, target_z, vertices),
+        polygon_analytic_greens(target_r, target_z, vertices),
     ):
         np.testing.assert_array_equal(got, expected)
 
@@ -279,7 +359,12 @@ def test_the_banded_scheme_is_reached_through_the_scoped_configuration():
     exact = PolySection.section_greens(target_r, target_z, vertices)
     with PolySection.configured(banded=True):
         banded = PolySection.section_greens(target_r, target_z, vertices)
-    for got, expected in zip(banded, banded_greens(target_r, target_z, vertices)):
+    for got, expected in zip(
+        banded,
+        banded_greens(
+            target_r, target_z, vertices, closed_form=PolySection.closed_form
+        ),
+    ):
         np.testing.assert_array_equal(got, expected)
     # it is a different path, not a no-op rename of the exact one
     assert any(not np.array_equal(one, other) for one, other in zip(banded, exact))

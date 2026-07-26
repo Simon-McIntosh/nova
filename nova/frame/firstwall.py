@@ -31,6 +31,7 @@ class PlasmaGrid(PoloidalGrid):
     def set_conditional_attributes(self):
         """Set conditional attrs for plasma grid."""
         self.ifthen("turn", "rectangle", "segment", "cylinder")
+        self.ifthen("turn", "hexagon", "segment", "polysection")
 
     def insert(self, *required, iloc=None, **additional):
         """

@@ -189,11 +189,44 @@ per variant. `tile_evaluator(kernel="closed")` traces
 
 The closed form on one H200 costs what the 16×48 quadrature costs, for one to
 two orders more accuracy — so on a device the exact kernel is free relative to
-the rule it replaces. Projected 2000-cell exact-everywhere closed-form build:
-≈22 s of kernel on one H200 plus a ONE-OFF 101 s compile. That compile is the
-outstanding cost: 101–136 s against the quadrature kernel's 1.3 s, because the
-reduction unrolls its moment recursions (138 downward ratio steps per corner,
-plus a 40-order tridiagonal solve per pole family).
+the rule it replaces. But **the compile is not a footnote to that, it is half the
+build**, and it is where the traced closed form has to be judged.
+
+    device / tile            compile s   note
+    H200, 32×32                  101.3   167,730 HLO ops (six-edge sections)
+    L4, 3×3                      136.1   the same graph, a smaller tile
+    16 CPU cores, 32×32         >3600    killed by the queue limit, never finished
+    16 CPU cores, 4×4 (16 pairs) >600    XLA:CPU's own slow-compile alarm fires
+
+So the traced closed form is a DEVICE-ONLY path: XLA:CPU lowers the whole tile to
+one LLVM function and the optimiser does not get through it at any tile size worth
+building. `polygon_analytic_greens` remains the host route, and the premise of one
+traced code path serving both devices — which holds for the quadrature kernel at a
+1.3 s compile — does not hold for this kernel.
+
+The graph is EXACTLY LINEAR in the corner count — 27,947 HLO operations per edge,
+measured at 83,889 / 111,836 / 167,730 / 195,677 for three, four, six and seven
+edges — against the quadrature kernel's 3,272 for the same block, and compile
+time tracks the count at roughly half a millisecond per operation on a device.
+The recursions everyone reaches for first are only 31% of it (`harmonic_moments`
+3,580 ops per corner, the pole families 454 each, the descent 402, each seed
+290); the other 69% is the harmonic-series coefficient algebra, which is not a
+recursion. Rolling every recursion into a `scan` is therefore worth about 1.45×.
+
+What that means for choosing a route, at 5.5 µs/pair on the H200 against the host
+closed form's 171.4 on one core and a projected 19.5 on a 16-core pool:
+
+    total pairs in the build     host 1 core   host 16 cores   H200 + compile
+    20,000                            3.4 s          0.4 s          101 s
+    400,000                          68.6 s          7.8 s          103 s
+    4,000,000                        11.4 min        78 s           123 s
+    25,000,000                       71 min          8.1 min        4.0 min
+
+The compile equals the device kernel at 18.4M pairs and the device only beats the
+16-core pool above 7.2M. So the device is the right route for ONE all-to-all
+machine matrix and the wrong one for a per-block build — and if the compile is
+amortised across builds (a warm evaluator, or the persistent compilation cache,
+neither of which is wired up) the device is a flat 3.5× the pool at any size.
 
 ## three-band polygon-section coupling (opt-in: PolySection.configured(banded=True))
 

@@ -256,6 +256,7 @@ def test_the_shipped_default_is_exact_everywhere_and_not_banded():
 
     assert PolySection.banded is False
     assert PolySection.standoff is None
+    assert PolySection.closed_form is False
     vertices = plasma_cell()
     target_r = np.array([6.2, 7.4, 8.9])
     target_z = np.array([0.5, -0.9, 1.4])
@@ -302,10 +303,103 @@ def test_the_banded_scheme_holds_every_component_against_the_exact_lane():
 
 def test_the_banded_configuration_is_restored_after_use():
     """The opt-in never leaks into the next solve."""
-    before = (PolySection.standoff, PolySection.quadrature, PolySection.banded)
-    with PolySection.configured(banded=True):
+    scoped = ("standoff", "quadrature", "banded", "closed_form")
+    before = tuple(getattr(PolySection, name) for name in scoped)
+    with PolySection.configured(banded=True, closed_form=True):
         assert PolySection.banded is True
-    assert (PolySection.standoff, PolySection.quadrature, PolySection.banded) == before
+        assert PolySection.closed_form is True
+    assert tuple(getattr(PolySection, name) for name in scoped) == before
+
+
+# --- the closed form as the exact kernel, opt-in ------------------------------
+
+
+def test_the_closed_form_is_reached_through_the_scoped_configuration():
+    """Turning it on takes every exact evaluation through the reduction instead.
+
+    Bit-identity to the closed form, and a difference from the quadrature: the
+    same physics through a different evaluation. Which of the two is nearer the
+    truth, and by how much where, is measured in
+    :mod:`tests.test_biotbandedcoupling` -- here the contract is only that the
+    configuration selects it.
+    """
+    from nova.biot.polygon import polygon_greens
+    from nova.biot.polygonanalytic import polygon_analytic_greens
+
+    vertices = plasma_cell()
+    angle = np.linspace(0.0, 2.0 * np.pi, 12, endpoint=False)
+    target_r = 6.2 + np.geomspace(0.02, 2.0, 12) * np.cos(angle)
+    target_z = np.geomspace(0.02, 2.0, 12) * np.sin(angle)
+
+    with PolySection.configured(closed_form=True):
+        closed = PolySection.section_greens(target_r, target_z, vertices)
+    for got, expected in zip(
+        closed, polygon_analytic_greens(target_r, target_z, vertices)
+    ):
+        np.testing.assert_array_equal(got, expected)
+    # a different evaluation of the same physics, not a rename of the quadrature
+    quadrature = polygon_greens(target_r, target_z, vertices)
+    assert any(not np.array_equal(one, other) for one, other in zip(closed, quadrature))
+    for name, one, other in zip(("psi", "br", "bz"), closed, quadrature):
+        scale = float(np.max(np.abs(other)))
+        assert np.max(np.abs(one - other)) / scale <= 1e-3, name
+
+
+def test_the_closed_form_serves_the_near_band_of_the_banded_scheme():
+    """The two knobs compose: one bins the pairs, the other evaluates the exact ones.
+
+    Where it lands is the near band, which is bit-identical to whichever exact
+    kernel is configured -- so this is the only place in the banded scheme where
+    the accuracy gain can appear, and it appears there in full.
+    """
+    from nova.biot.bandedcoupling import band, banded_greens
+    from nova.biot.polygonanalytic import polygon_analytic_greens
+
+    vertices = plasma_cell()
+    angle = np.linspace(0.0, 2.0 * np.pi, 12, endpoint=False)
+    reach = np.geomspace(0.07, 1.5, 10)[:, None]
+    target_r = (6.2 + reach * np.cos(angle)).ravel()
+    target_z = (reach * np.sin(angle)).ravel()
+
+    with PolySection.configured(banded=True, closed_form=True):
+        scheme = PolySection.section_greens(target_r, target_z, vertices)
+    for got, expected in zip(
+        scheme, banded_greens(target_r, target_z, vertices, closed_form=True)
+    ):
+        np.testing.assert_array_equal(got, expected)
+
+    near = band(target_r, target_z, vertices) == 0
+    assert near.any()
+    reference = polygon_analytic_greens(target_r[near], target_z[near], vertices)
+    for got, expected in zip(scheme, reference):
+        np.testing.assert_array_equal(got[near], expected)
+
+
+def test_the_closed_form_also_serves_a_standoff_band():
+    """It replaces the exact kernel wherever the exact kernel is used, not only far.
+
+    The standoff arrangement keeps a point filament outside its band, so the two
+    routes must differ inside the band and agree bit for bit outside it -- which is
+    what says the choice is about the exact treatment alone.
+    """
+    from nova.biot.polygonanalytic import polygon_analytic_greens
+
+    vertices = plasma_cell()
+    # the band is 3 section radii = 0.18 m about the centroid: 0.04 and 0.11 m out
+    # are inside it, the third target is far outside
+    target_r = np.array([6.24, 6.31, 8.9])
+    target_z = np.array([0.01, 0.0, 1.4])
+    with PolySection.configured(standoff=3.0):
+        inside = PolySection.near_band(target_r, target_z, vertices)
+        quadrature = PolySection.section_greens(target_r, target_z, vertices)
+        with PolySection.configured(closed_form=True):
+            closed = PolySection.section_greens(target_r, target_z, vertices)
+    assert inside.tolist() == [True, True, False]
+    reference = polygon_analytic_greens(target_r[inside], target_z[inside], vertices)
+    for got, expected in zip(closed, reference):
+        np.testing.assert_array_equal(got[inside], expected)
+    for got, expected in zip(closed, quadrature):
+        np.testing.assert_array_equal(got[~inside], expected[~inside])
 
 
 def test_the_point_far_field_sits_at_the_section_area_centroid():

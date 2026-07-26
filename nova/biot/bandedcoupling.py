@@ -20,11 +20,19 @@ distance cannot tell the two apart.
 ======  =====================================  ===============================
 band    contour distance / section radius      treatment
 ======  =====================================  ===============================
-near    below ``NEAR_LIMIT``                   ``NEAR_RULE`` -- exact, nothing
+near    below ``NEAR_LIMIT``                   the exact kernel -- nothing
                                                approximated
 mid     ``NEAR_LIMIT`` to the far seam         ``MID_RULE`` -- reduced rule
 far     beyond the far seam                    moment-corrected filament
 ======  =====================================  ===============================
+
+Which exact kernel serves the near band is the caller's choice: the ``NEAR_RULE``
+boundary quadrature, or the closed form of :mod:`nova.biot.polygonanalytic`
+through ``closed_form=True``. The closed form is the better one on both counts --
+one to two orders more accurate and cheaper, since it replaces 768 quadrature
+nodes with a per-corner reduction -- and it is the only one that stays accurate ON
+the contour, where a boundary quadrature is integrating through its own
+singularity and has nothing to converge to.
 
 The limits are measured, not budgeted: each is the distance beyond which EVERY
 component -- flux, radial field and vertical field separately -- holds to one
@@ -63,6 +71,7 @@ import numpy as np
 
 from nova.biot.greens import moment_filament, section_centroid, third_moments
 from nova.biot.polygon import polygon_greens
+from nova.biot.polygonanalytic import polygon_analytic_greens
 
 NEAR_LIMIT = 2.2
 """Near/mid seam, in section radii of contour distance."""
@@ -182,18 +191,44 @@ def band(
     return (offset >= near_limit).astype(np.int_) + (offset >= far_limit)
 
 
-def quadrature_nodes(assignment: np.ndarray) -> int:
+def quadrature_nodes(assignment: np.ndarray, *, closed_form: bool = False) -> int:
     """Return the phi-quadrature nodes a band assignment spends in total.
 
     The far band spends none: it is a handful of point Green's-function
     evaluations, some three orders of magnitude below one node of the converged
     rule, and counting them as nodes would misstate the saving in the direction
-    of flattering the scheme.
+    of flattering the scheme. With ``closed_form`` the near band spends none
+    either -- its angular integral is done in closed form, and what it does spend
+    is a per-corner reduction that no node count describes. Compare cost per pair
+    for that route, not nodes.
     """
     assignment = np.asarray(assignment)
-    near = int(np.count_nonzero(assignment == 0))
+    near = 0 if closed_form else int(np.count_nonzero(assignment == 0))
     mid = int(np.count_nonzero(assignment == 1))
     return near * NEAR_RULE[0] * NEAR_RULE[1] + mid * MID_RULE[0] * MID_RULE[1]
+
+
+def near_greens(
+    target_r: np.ndarray,
+    target_z: np.ndarray,
+    vertices: np.ndarray,
+    *,
+    closed_form: bool = False,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Return the near band's ``(psi, B_R, B_Z)`` through the chosen exact kernel.
+
+    Both routes are exact in the sense the band needs -- neither drops a term of
+    the finite-section physics. They differ in how the angular integral is done,
+    and therefore in what limits their accuracy: the quadrature by how well 768
+    nodes resolve an integrand that is singular as the target reaches the
+    boundary, the closed form by round-off in a reduction that has no integrand
+    left there at all.
+    """
+    if closed_form:
+        return polygon_analytic_greens(target_r, target_z, vertices)
+    return polygon_greens(
+        target_r, target_z, vertices, n_panels=NEAR_RULE[0], n_nodes=NEAR_RULE[1]
+    )
 
 
 def banded_greens(
@@ -203,12 +238,14 @@ def banded_greens(
     *,
     near_limit: float = NEAR_LIMIT,
     far_limit: float | None = None,
+    closed_form: bool = False,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Return ``(psi, B_R, B_Z)`` per ampere, each pair through its band's treatment.
 
     ``vertices`` -- ``(n, 2)`` of the section's ``(r, z)`` corners, either
     orientation, no repeated closing vertex. Returned arrays are shaped like
-    ``target_r``.
+    ``target_r``. ``closed_form`` selects the near band's exact kernel; see
+    :func:`near_greens`.
     """
     target_r = np.asarray(target_r, dtype=np.float64)
     target_z = np.asarray(target_z, dtype=np.float64)
@@ -218,16 +255,20 @@ def banded_greens(
     psi = np.empty(target_r.shape)
     br = np.empty(target_r.shape)
     bz = np.empty(target_r.shape)
-    for index, rule in enumerate((NEAR_RULE, MID_RULE)):
-        inside = assignment == index
-        if inside.any():
-            psi[inside], br[inside], bz[inside] = polygon_greens(
-                target_r[inside],
-                target_z[inside],
-                vertices,
-                n_panels=rule[0],
-                n_nodes=rule[1],
-            )
+    near = assignment == 0
+    if near.any():
+        psi[near], br[near], bz[near] = near_greens(
+            target_r[near], target_z[near], vertices, closed_form=closed_form
+        )
+    inside = assignment == 1
+    if inside.any():
+        psi[inside], br[inside], bz[inside] = polygon_greens(
+            target_r[inside],
+            target_z[inside],
+            vertices,
+            n_panels=MID_RULE[0],
+            n_nodes=MID_RULE[1],
+        )
     far = assignment == 2
     if far.any():
         psi[far], br[far], bz[far] = moment_filament(
@@ -250,5 +291,6 @@ __all__ = [
     "contour_distance",
     "band",
     "quadrature_nodes",
+    "near_greens",
     "banded_greens",
 ]

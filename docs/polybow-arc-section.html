@@ -18,8 +18,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-26">
-<meta name="plan-version" content="3">
-<meta name="plan-impl" content="0.5">
+<meta name="plan-version" content="4">
+<meta name="plan-impl" content="0.6">
 </head>
 <body>
   <main class="plan-doc">
@@ -198,6 +198,52 @@
         <figcaption>What a near root costs the printed arrangement, where the
         reflected route holds across both orientations and both double ranges, and the
         one corner it does not — which depends on the reflected pole alone.</figcaption>
+      </figure>
+    </section>
+
+    <section id="s-sine-family-landed" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ the fourth family landed 2026-07-26</span>
+        <h2>The stack was not closed after all — landed</h2>
+      </header>
+      <p class="landed-summary">
+        <strong>The assembly rung opened on the premise that no primitive was
+        missing, and the first thing it found was a missing primitive.</strong>
+        Two of an arc's five rows carry <code>sin φ</code> where the other three
+        carry <code>cos φ</code> — the potential's radial component and the
+        field's toroidal one — so they contract against moments that have no
+        counterpart anywhere in <code>elliptic.py</code> to be the partial-range
+        version OF: on a full turn that odd weight integrates to nothing, which
+        is the parity argument the ring's vanishing toroidal field IS. The family
+        landed, and it costs almost nothing because the weight is the radical's
+        own differential: <strong>both pole seeds are ELEMENTARY</strong> — one
+        inverse hyperbolic tangent each, where the cosine family's are incomplete
+        integrals of the third kind — the radical fold and the pole recursion
+        hold on it verbatim, and the tridiagonal solve is now shared, the two
+        callers differing in their right-hand side and their two seeds and
+        nothing else. Measured against both-ends-graded quadrature:
+        <strong>2.1e-14 over eight orders</strong> relative to its own zeroth
+        moment across the whole amplitude and complement range, seeds at 5e-14
+        RELATIVE over twelve decades of shift including the crossing where the
+        reflected pole changes sign. The seeds' gap <code>1 − z</code> is
+        supplied in closed form rather than subtracted, which is worth everything
+        by a shift of 1e-14. Also landed: the range-function algebra as
+        <code>nova/biot/rangefunction.py</code>, so the arc reduction shares the
+        full turn's conditioning treatment rather than copying it — full-turn
+        gate unmoved at 112 passed. 91 new tests, 520 across both families.
+        <strong>Not landed: the five-row assembly itself</strong>, which the next
+        rung carries with the reduction's shape at an interior limit now worked
+        out term by term. Full record:
+        <a href="archive/polybow-arc-section-sine-family-landed.html">the fourth family landed</a>.
+      </p>
+      <figure>
+        <img src="/nova/figures/polybow-arc-section/sine_moment_family.png"
+             alt="Relative error of the sine pole seed with its gap supplied against subtracted as the root approaches the range end, a map of the family's error over amplitude and modulus complement, and the two weights' seeds plotted together"
+             style="max-width:100%">
+        <figcaption>What the seed costs if its gap is subtracted rather than
+        supplied, where the family holds across amplitude and complement, and the
+        same integral under the two weights — elementary under one, a third kind
+        under the other.</figcaption>
       </figure>
     </section>
 
@@ -435,9 +481,9 @@ Done-when
   4. incomplete-third-kind locked with the measured rationale, including the cost per element
      beside the complete descent&#x27;s 0.1175 us.
   5. Followup written; this followup resolved.</pre>
-    <p class="r-fu-outcome">Landed in full -- all five done-when met, 575 new tests, fast lane 2537 passed / 0 failed / 104 skipped. The seed is nova.biot.incompleteelliptic.incomplete_pole, built on a new nova/biot/symmetricelliptic.py (Carlson R_F and R_J off ONE fixed-trip duplication) and on the exact pole reflection p -> k'^2/p, which turns the ill-conditioned orientation into three POSITIVE terms and so covers both orientations in one evaluation with no selection on a result. The context's third route was right and better than proposed: the elementary split is an exact identity, not an approximation. Measured -- worst 1.8e-15 against an extended-precision reference over 6 amplitudes x 9 poles (1e-12..1e12) x 7 complements (1..1e-100); a quarter turn reproduces complete_pole to 4e-15 at every pole to 1e18 and every complement to 1e-300; the two partial-range pole seeds (nova/biot/incompletemoments.py) meet their complete counterparts at 6.8e-16; tests/test_biotincompletemoments.py's pole families now take their seed from the routine rather than from quadrature and hold at 5e-13. Cost on a sun_debug node, fresh process, median of 3: 0.721 us/element against the incomplete first-and-second kinds' 0.727 and the complete descent's 0.130 -- free beside what the arc already pays at every corner. One measured corner, asserted in both directions: the reflected pole k'^2/p below the smallest normal double, which needs a millionth-thickness section AND a target within 1e-150 ring spans at once. Two side findings recorded: scipy's elliprj returns nan where this returns 3.5e+202 (confirmed against a longdouble run of the same algorithm), and at a unit pole the symmetric route is 2.5e-16 where the shipped amplitude descent is 5.3e-06 in the arc-end-edge corner its own contract documents -- that corner is the descent's, not the integral's. Full record: archive/polybow-arc-section-third-kind-landed.html</p>
+    <p class="r-fu-outcome">Landed in full -- all five done-when met, 575 new tests, fast lane 2537 passed / 0 failed / 104 skipped. The seed is nova.biot.incompleteelliptic.incomplete_pole, built on a new nova/biot/symmetricelliptic.py (Carlson R_F and R_J off ONE fixed-trip duplication) and on the exact pole reflection p -&gt; k'^2/p, which turns the ill-conditioned orientation into three POSITIVE terms and so covers both orientations in one evaluation with no selection on a result. The context's third route was right and better than proposed: the elementary split is an exact identity, not an approximation. Measured -- worst 1.8e-15 against an extended-precision reference over 6 amplitudes x 9 poles (1e-12..1e12) x 7 complements (1..1e-100); a quarter turn reproduces complete_pole to 4e-15 at every pole to 1e18 and every complement to 1e-300; the two partial-range pole seeds (nova/biot/incompletemoments.py) meet their complete counterparts at 6.8e-16; tests/test_biotincompletemoments.py's pole families now take their seed from the routine rather than from quadrature and hold at 5e-13. Cost on a sun_debug node, fresh process, median of 3: 0.721 us/element against the incomplete first-and-second kinds' 0.727 and the complete descent's 0.130 -- free beside what the arc already pays at every corner. One measured corner, asserted in both directions: the reflected pole k'^2/p below the smallest normal double, which needs a millionth-thickness section AND a target within 1e-150 ring spans at once. Two side findings recorded: scipy's elliprj returns nan where this returns 3.5e+202 (confirmed against a longdouble run of the same algorithm), and at a unit pole the symmetric route is 2.5e-16 where the shipped amplitude descent is 5.3e-06 in the arc-end-edge corner its own contract documents -- that corner is the descent's, not the integral's. Full record: archive/polybow-arc-section-third-kind-landed.html</p>
     </article>
-<article class="r-fu" data-id="f-pbow-03" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-26T13:20:00+00:00" data-recommends-skill="/reckon-ship polybow-arc-section" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-pbow-03" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-26T13:20:00+00:00" data-recommends-skill="/reckon-ship polybow-arc-section" data-resolved-at="2026-07-26T11:57:57+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Assemble the arc reduction on the closed moment stack, and close the sweep-to-2pi oracle</h4>
     <div class="r-fu-body"><p>Every primitive is now in and pinned — the interior-amplitude first, second and third kinds, the partial-range harmonic moments, the root and pole families verified unchanged at an interior limit, the two pole seeds, and the amplitude fold — so what is left is the assembly itself. Three things the full turn never formed: the by-parts boundary terms an interior limit reinstates, the arctangent's endpoint value where the full turn had a dead-band, and the azimuthal field row whose vanishing was a parity argument that an arc breaks. The sweep-to-2pi check against the landed full-turn flux is the acceptance signal, and it is the one done-when carried over unmet from the first rung.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -497,6 +543,115 @@ Done-when
      per-section envelopes asserted in both directions.
   5. Cost per pair measured on a compute node, fresh process, median of 3, beside the
      full-turn and Bow figures.
+  6. Followup written; this followup resolved.</pre>
+    <p class="r-fu-outcome">Partly landed and re-scoped by its own first finding -- develop 053ba72a (a1c20f8c + e1801718 + e9b8b175), 91 new tests, 1741 passed / 0 failed across every affected suite. The rung opened on the premise that NO PRIMITIVE IS MISSING; that premise was wrong, and finding out is what it produced. Two of an arc's five rows -- the potential's radial component and the field's toroidal one -- carry sin phi where the other three carry cos phi, so they contract against moments that have no counterpart anywhere in elliptic.py to be the partial-range version OF: over a full turn that odd weight integrates to nothing, which IS the parity argument the ring's vanishing toroidal field rests on. DONE: the fourth family (nova/biot/incompletemoments.sine_moments), 2.1e-14 over eight orders relative to its own zeroth moment across the whole amplitude and complement range against both-ends-graded quadrature; both of its pole seeds, which are ELEMENTARY where the cosine family's are incomplete third kinds -- one inverse hyperbolic tangent each, 5e-14 RELATIVE over twelve decades of shift and both signs of the reflected pole, including the crossing where q^2 = k'^2 - shift k^2 changes sign and the two branches meet; the radical fold and the pole recursion shown correct on the new family AS THEY STAND rather than assumed; the tridiagonal solve now shared, the two families differing in their right-hand side and their two seeds and nothing else; and the range-function algebra extracted to nova/biot/rangefunction.py so the arc reduction uses the same object as the full turn rather than a copy, full-turn gate unmoved at 112 passed. The seeds' accuracy is one quantity: the gap 1 - z, which reaches zero as the root reaches the range end. Supplied in closed form as a ratio of positives it holds to the floor; subtracted from one it tracks eps over the shift and has nothing left by 1e-14, which the figure measures. NOT DONE, and carried to f-pbow-04 with the derivation rather than the intent: the five-row assembly, the sweep-to-2pi oracle, the Bow and horizontal-edge reductions, the direct quadrature and the cost -- done-when 1 to 5 all open. What the next rung does NOT have to re-derive is recorded in the archive: the five rows and their fold parities, which channel each term lands in, why the by-parts constant is not free for a pure sine weight, and the one piece still missing (a harmonic series to range function conversion, a double Chebyshev deflation at t = +/-1). Full record: archive/polybow-arc-section-sine-family-landed.html</p>
+    </article>
+<article class="r-fu" data-id="f-pbow-04" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-26T14:30:00+00:00" data-recommends-skill="/reckon-ship polybow-arc-section" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Assemble the five arc rows on the now-genuinely-closed stack, and close the sweep-to-2pi oracle</h4>
+    <div class="r-fu-body"><p>The stack really is closed now: the cosine family and its third-kind seeds, the sine family and its elementary ones, the radical fold and the pole recursion verified on both, and the amplitude fold. What is left is the assembly, and this rung starts from a derivation rather than from the paper — the previous rung worked the reduction's shape out term by term at an interior limit before it ran out of road, and the prompt below carries it. One piece of algebra is genuinely missing and is named: converting a harmonic series back into a range function with exact end values.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    polybow-arc-section (http://127.0.0.1:8765/nova/polybow-arc-section.html)
+Section: the five arc rows, the sweep-to-2pi oracle, and the arc gate
+Tier:    opus
+
+Context
+  Every moment family the arc contracts against is now in and pinned: the cosine family
+  with its two third-kind pole seeds, the sine family with its two ELEMENTARY ones, the
+  radical fold and the pole recursion verified on both, and the amplitude fold. The
+  range-function algebra lives in nova/biot/rangefunction.py so this reduction shares the
+  full turn&#x27;s conditioning treatment rather than copying it. This rung is the assembly.
+
+  It starts from a derivation, not from the paper. The previous rung worked the shape out
+  term by term against the shipped full-turn expressions before it ran out of session, and
+  what follows is that work -- verified by hand, not guessed. Build from it.
+
+State to read
+  nova/biot/polygonanalytic.py -- the full-turn reduction this extends, term by term;
+  nova/biot/rangefunction.py -- the shared algebra, and where the missing helper belongs;
+  nova/biot/incompletemoments.py -- both families, both sets of seeds;
+  nova/biot/arcamplitude.py -- arc_limits and fold;
+  docs/archive/polybow-arc-section-sine-family-landed.html -- the derivation&#x27;s own record;
+  URANKAR_PARTV_METHOD.md in the develop worktree -- the audited equation chain (eq 10b,
+    11b with the verified erratum, 12, 13, 17);
+  nova/biot/bow.py + nova/biot/arc.py -- Bow ALREADY implements this arc for a rectangular
+    section, five rows and all (_Ar_hat .. _Bz_hat), through Urankar Part IV. It is the
+    zero-edge-slope oracle AND a worked example of the same fold bookkeeping.
+
+The derivation to build from
+  Per edge, per limit u = z&#x27; - z, per row l, define X_l(alpha) = int_0^alpha da w_l g_l.
+  The arc&#x27;s value at that limit is 2 * sum_i fold(limit_i, X_l, quarter), and a full sweep
+  collapses onto -2 X_l(pi/2). The five weights, with cos phi = -cos 2a and sin phi = sin 2a:
+
+    A_phi (psi):  w = cos phi,  integrand g (eq 9)            fold ODD  -&gt; supply quarter
+    A_r:          w = -sin phi, integrand g                   fold EVEN -&gt; quarter = None
+    B_r:          w = cos phi,  integrand eq 11b bracket      fold ODD
+    B_phi:        w = +sin phi, integrand eq 11b bracket      fold EVEN
+    B_z:          w = 1,        integrand eq 11b&#x27;s z row      fold ODD
+
+  Check against the shipped full turn BEFORE going further: _Edge.terms returns exactly
+  4 X_l(pi/2) for l = psi, B_r, B_z. Reproducing those three at a quarter-turn amplitude,
+  to the last bits, is the cheapest possible first test and localises everything after it.
+
+  WHICH CHANNEL EACH TERM LANDS IN. Every transcendental&#x27;s derivative carries exactly one
+  explicit factor of sin 2a, and the by-parts weight supplies the other -- so every term of
+  a cos-phi row contracts against the COSINE family and every term of a sin-phi row against
+  the SINE family. No term mixes them.
+
+  THE BY-PARTS CONSTANT IS NOT FREE. For the cos-phi rows the oscillatory antiderivative is
+  a sum of sin 2na/(2n), which vanishes at a = 0 on its own; only the UPPER boundary is new,
+  and it is that sum evaluated at the amplitude times the transcendental there. For the
+  sin-phi rows the weight is a pure sine series and its antiderivative must be taken as the
+  one VANISHING AT THE LOWER LIMIT -- sin^2 2a/2 for the sin 4a weight on arsinh beta1, and
+  sum v_n (1 - cos 2na)/(2n) for the arsinh beta2 weight. This is not cosmetic: arsinh beta1
+  DIVERGES at a = 0 for a target level with the corner, and only that zero makes the product
+  finite. Taking -cos 4a/4 instead puts a divergence into a term that has none.
+
+  A pure sine weight has no mean, so the sin-phi rows need NO arsinh quadrature at all --
+  the two residual integrals stay on the cos-phi rows only.
+
+  THE ARCTANGENT. The cos-phi rows keep the full turn&#x27;s antiderivative -(1/2)P(t), so the
+  a = 0 dead band survives as it is (+/- pi/2 with sign u(r1 + r)) and the upper boundary
+  becomes the arctangent ITSELF: arctan2(N(alpha), r sin 2alpha D(alpha)), whose denominator
+  is non-negative over the range so the two-argument form is the principal value and
+  collapses onto the dead band of its own accord at either end. Carry the full turn&#x27;s
+  -arctan(b1) limit for a target ON the edge endpoint. The sin-phi rows&#x27; arctangent weight
+  is sin^2 2a times a polynomial in cos 2a, whose antiderivative has NO mean and vanishes at
+  both ends -- so only the upper boundary survives there.
+
+  THE RESIDUAL QUADRATURES. Both boundary layers still sit at a = 0 and a = pi/2 -- a target
+  level with an edge end, or on the edge&#x27;s extended line -- but the upper one may now be
+  OUTSIDE the range. Split [0, alpha] at its midpoint, grade the lower panel from a = 0 and
+  the upper one from a = pi/2 in the offset b = pi/2 - a, anchoring the sinh map at b = 0
+  whether or not the panel reaches it. _model_integral needs its limits generalised from a
+  fixed quarter range to the panel&#x27;s own.
+
+  THE ONE PIECE STILL MISSING. A sin-phi row&#x27;s arsinh beta2 antiderivative comes out as a
+  harmonic series and the reduction needs it as a RANGE FUNCTION with exact end values. The
+  far end value is exactly zero by the constant chosen above; the near one is a closed-form
+  alternating sum; the bulk is a double Chebyshev deflation at t = +1 and t = -1, since
+  c(t) = (t^2 - 1) q(t) + linear and (t^2 - 1) = -4xy. rangefunction.deflate already performs
+  each step. Build that as the inverse of across_the_range, in rangefunction.py, with its own
+  round-trip test -- it is the last thing between the derivation and a working reduction.
+
+Scope locks / constraints
+  Detached worktree off develop; the primary checkout stays on main. Do not modify arc.py,
+  bow.py or beam.py without asking -- the element class is a later rung and its shape is an
+  open decision (arc-element-shape). Never widen a tolerance to pass a test. Timing on a
+  sun_debug node only.
+
+Done-when
+  1. A finite-arc evaluation of both potential rows and all three field components.
+  2. A quarter-turn amplitude reproduces the full-turn module&#x27;s own per-limit values for the
+     three rows it forms, and sweep -&gt; 2pi reproduces the landed full-turn flux and field to
+     the full turn&#x27;s own accuracy on every gate section.
+  3. Zero edge slope reproduces Bow within Bow&#x27;s own tolerance, all five rows; horizontal
+     edges contribute exactly nothing.
+  4. A converged direct quadrature over the arc -- built from the Biot-Savart volume
+     integral, not from the same reduction -- with per-section envelopes asserted in both
+     directions. B_phi is the highest-risk row and the only one with no closed-form
+     counterpart to check against.
+  5. Cost per pair measured on a compute node, fresh process, median of 3, beside the
+     full-turn 171.4 us hexagon figure and Bow&#x27;s.
   6. Followup written; this followup resolved.</pre>
     </article>
 </section>

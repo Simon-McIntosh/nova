@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="archive">
+  <meta name="plan-slug" content="polybow-arc-section-sine-family-landed">
+  <meta name="plan-title" content="The fourth moment family, and the two rows that need it — landed">
+  <meta name="plan-status" content="historical">
+  <meta name="plan-modified" content="2026-07-26">
+  <title>polybow-arc-section sine family landed | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>The stack was not closed: an arc needs a family the full turn has no counterpart for</h1>
+  <p><a href="/nova/polybow-arc-section.html">← back to the evergreen plan</a> ·
+     landed 2026-07-26 · 91 new tests, 520 across both moment families, 0 failed ·
+     <strong>the assembly rung opened on the premise that no primitive was missing;
+     the first thing it found was a missing primitive</strong></p>
+
+  <h2>Quick status</h2>
+  <table>
+    <thead><tr><th>Item</th><th>Status</th><th>Where</th></tr></thead>
+    <tbody>
+      <tr><td>The range-function algebra — two exact end values plus a harmonic
+          bulk — given a module of its own, so the arc reduction can use the same
+          object as the full turn rather than a copy of it</td>
+          <td>✓ shipped</td>
+          <td><code>nova/biot/rangefunction.py</code></td></tr>
+      <tr><td>The sine-weighted moment family
+          <code>∫ sin 2a cos 2na/Δ da</code>, differenced out of the moments of
+          the odd harmonics</td>
+          <td>✓ shipped</td>
+          <td><code>nova/biot/incompletemoments.py</code></td></tr>
+      <tr><td>Both of its pole seeds, ELEMENTARY where the cosine family's are
+          incomplete integrals of the third kind</td>
+          <td>✓ shipped</td>
+          <td><code>sine_cn_pole_moment</code>, <code>sine_sn_pole_moment</code></td></tr>
+      <tr><td>The tridiagonal solve shared between the two families, differing in
+          their right-hand side and their two seeds and nothing else</td>
+          <td>✓ shipped</td>
+          <td><code>incompletemoments._solve</code></td></tr>
+      <tr><td>The radical fold and the pole recursion shown correct on the new
+          family AS THEY STAND, against graded quadrature</td>
+          <td>✓ pinned</td>
+          <td><code>tests/test_biotsinemoments.py</code></td></tr>
+      <tr><td>The five-row arc reduction, the sweep-to-2π oracle, the direct
+          quadrature and the cost</td>
+          <td>⨯ not landed — carried forward</td>
+          <td>the next rung</td></tr>
+    </tbody>
+  </table>
+
+  <figure>
+    <img src="/nova/figures/polybow-arc-section/sine_moment_family.png"
+         alt="Relative error of the sine pole seed with its gap supplied against subtracted as the root approaches the range end, a map of the family's error over amplitude and modulus complement, and the two weights' seeds plotted together"
+         style="max-width:100%">
+    <figcaption>Left: what the seed costs if the inverse hyperbolic tangent's gap
+    is taken as one less a ratio — it tracks <code>ε</code> over the shift and has
+    nothing left by 1e-14, where the supplied form stays on the floor. Middle: the
+    family over eight orders, 2.1e-14 relative to its own zeroth moment across the
+    whole amplitude and complement range, the quarter turn included. Right: the
+    same integral under the two weights — elementary under one, an incomplete
+    third kind under the other.</figcaption>
+  </figure>
+
+  <h2>What the rung was scoped on, and why that was wrong</h2>
+  <p>The followup that opened this rung began <em>“No primitive is missing”</em>, and
+  listed the closed stack: the interior-amplitude first, second and third kinds, the
+  partial-range harmonic moments, the root and pole families verified unchanged at an
+  interior limit, both pole seeds, and the amplitude fold. That inventory is
+  correct for the three rows the full turn already forms. It is not correct for the
+  five rows an arc has.</p>
+
+  <p>Two of an arc's rows carry <code>sin φ</code> where the other three carry
+  <code>cos φ</code>: the vector potential's radial component and the field's
+  toroidal one. Over a full turn that odd weight integrates to nothing — it is
+  exactly the parity argument that leaves an axisymmetric ring with no toroidal
+  field, and the reason <code>polygonanalytic.py</code> never forms the component at
+  all. So the moments those two rows contract against have no counterpart anywhere in
+  <code>elliptic.py</code> to be the partial-range version OF. They are a fourth
+  family, and they had to be derived and built before either new row could be
+  written.</p>
+
+  <h2>The weight is the radical's own differential, and that is what makes it cheap</h2>
+  <p><code>d(Δ²) = −k² sin 2a da</code>, so a weight of <code>sin 2a</code> turns every
+  integral in the family into an elementary one in <code>Δ</code>. Three consequences,
+  and together they are why the two extra rows cost almost nothing:</p>
+  <ul>
+    <li><strong>Both pole seeds are elementary.</strong> Where the cosine family needs
+    an incomplete integral of the third kind — the rung before this one, and the
+    hardest primitive in the plan — this family needs one inverse hyperbolic tangent:
+    <code>∓2 ∫₁^Δ dD/(D² − q²)</code> with <code>q² = k'² − shift·k²</code> for the
+    root past the far end and <code>1 + shift·k²</code> for the root past the near
+    one.</li>
+    <li><strong>The radical fold and the pole recursion carry over verbatim.</strong>
+    Both are identities of the INTEGRAND — <code>Δ²</code> folded back under the
+    integral, and the pole factor multiplied back — so neither knows what weight the
+    integrand carries. <code>nova.biot.elliptic.harmonic_root_moments</code> and
+    <code>harmonic_pole_moments</code> are correct on the new family exactly as they
+    stand, which the tests check rather than assume.</li>
+    <li><strong>The family itself is the same tridiagonal system.</strong> Taking
+    <code>d/da[cos 2na Δ]</code> where the plain family takes
+    <code>d/da[sin 2na Δ]</code> gives the same three-term relation with
+    <code>4[1 − cos 2nα Δ(α)]</code> in place of <code>4 sin 2nα Δ(α)</code>, and
+    <code>T₀ = 0</code>. The solve is now shared: the two callers differ in their
+    right-hand side and their two seeds and in nothing else.</li>
+  </ul>
+
+  <p>The first moment is where the relation at order zero lands, and it is worth
+  writing down because the printed form of it is unusable:
+  <code>2(1 − Δ)/k²</code> is a difference of two nearly-equal numbers over a small
+  one, and a distant target — where <code>k²</code> is what is small — loses every
+  digit. <code>2 sin²α/(1 + Δ)</code> is the same number with neither.</p>
+
+  <h2>The gap has to be supplied, not subtracted</h2>
+  <p>The seeds' whole accuracy sits in one quantity. Written as
+  <code>artanh(z)/z</code>, the argument <code>z</code> reaches ONE as the root
+  reaches the range end — which is the configuration a slender section produces at
+  every corner — and <code>artanh</code> there is a logarithm of <code>1 − z</code>.
+  Forming that gap by subtracting a ratio from one caps the relative accuracy at
+  <code>ε</code> over the gap: five digits gone at 1e-11, everything gone by 1e-14.
+  Both callers have it in closed form as a ratio of positives —</p>
+  <pre>  far root:   1 − z = (1 + q)(1 + Δ)(cos²α + s) / ((Δ + q)·pivot)
+  near root:  1 − z = s (1 + Δ − k² sin²α/(1 + p)) / pivot</pre>
+  <p>— and <code>log1p</code> of <code>2z/(1 − z)</code> then holds at both ends: full
+  relative accuracy as <code>z</code> vanishes with the pole, and no cancellation as it
+  approaches one. The left panel of the figure is that claim measured.</p>
+
+  <p>One further property came out of the same algebra rather than being designed in.
+  The far-root seed's <code>q² = k'² − shift·k²</code> CHANGES SIGN as the shift passes
+  <code>k'²/k²</code> — the pole crossing the radical's own root — and the two branches
+  either side of it are the same series, <code>artanh(iz) = i·arctan z</code>. So one
+  even function covers both and nothing selects on a value; the test sweeps densely
+  through the crossing, including the point where <code>q²</code> is exactly zero and
+  both arguments vanish together.</p>
+
+  <h2>Measured</h2>
+  <table>
+    <thead><tr><th>Quantity</th><th>Worst deviation</th><th>Swept over</th></tr></thead>
+    <tbody>
+      <tr><td>The family, eight to ten orders, relative to its own zeroth moment</td>
+          <td>2.1e-14</td>
+          <td>amplitudes from a quarter turn down, twelve complements to 1e-16</td></tr>
+      <tr><td>The zeroth moment against its closed form at a quarter turn</td>
+          <td>6.1e-16 relative</td>
+          <td>the same twelve complements</td></tr>
+      <tr><td>Both pole seeds, RELATIVE — the accuracy a near root's weight needs</td>
+          <td>5e-14 gate, held</td>
+          <td>twelve decades of shift, both orientations, both signs of the
+              reflected pole</td></tr>
+      <tr><td>The radical fold and the pole recursion, unchanged routines on the new
+              family</td>
+          <td>5e-13 gate, held</td>
+          <td>three amplitudes × three complements; shifts 0.25 to 1e3</td></tr>
+      <tr><td>The closure headroom, starved to a tenth</td>
+          <td>8.6e-6 against 7e-18 shipped</td>
+          <td>just below the direction switch, where the solve contracts slowest</td></tr>
+    </tbody>
+  </table>
+
+  <p>The references are fixed Gauss rules with panels graded geometrically into BOTH
+  ends, which is what lets these sweeps reach two configurations the cosine family's
+  own tests have to leave out: a quarter-turn amplitude, where the radical's layer of
+  width <code>k'</code> sits ON the range end, and a pole root within 1e-4 of the range
+  start, where the integrand is a spike of that width. Uniform panels are not a
+  reference at either, and the convergence test refines the rule to show it.</p>
+
+  <h2>The range-function algebra moved, and the full-turn gate did not</h2>
+  <p>The two-exact-end-values-plus-harmonic-bulk representation is the entire
+  conditioning treatment of the polygon reduction, and the arc reduction needs the same
+  object. It moved verbatim into <code>nova/biot/rangefunction.py</code>, with the
+  account of why neither half can be dropped moved with it, and the full-turn module
+  now imports it. The gate is unmoved: 112 passed, and the closed form against the
+  boundary quadrature at 6.3e-14 / 1.4e-13 / 2.5e-13 on a trapezium.</p>
+
+  <h2>What the next rung inherits, and what it should not re-derive</h2>
+  <p>The assembly was started and not landed. What came out of starting it is worth
+  more than the code was: the reduction's shape at an interior limit is now known term
+  by term, and the next rung should build from it rather than work it out again. Four
+  things, all verified by hand against the shipped full-turn expressions:</p>
+  <ul>
+    <li><strong>The rows and their parities.</strong> Write
+    <code>X_l(α) = ∫₀^α w_l g_l da</code>; the arc's value at one edge limit is
+    <code>2 Σᵢ fold(limitᵢ, X_l)</code>, and a full sweep collapses that onto
+    <code>−2 X_l(π/2)</code> — minus the full-turn module's own per-limit value
+    divided by four. The five weights are <code>cos φ·g</code>,
+    <code>−sin φ·g</code>, <code>cos φ·bracket</code>, <code>sin φ·bracket</code> and
+    the vertical integrand as printed. The <code>cos φ</code> rows have ODD
+    antiderivatives and take the quarter-turn value through the fold; the
+    <code>sin φ</code> rows are half-turn periodic and do not.</li>
+    <li><strong>Which channel each term lands in.</strong> Every term of an odd row
+    lands in the sine family and every term of an even row in the cosine one, because
+    the derivative of each transcendental carries exactly one factor of
+    <code>sin 2a</code> and the by-parts weight supplies the other.</li>
+    <li><strong>The by-parts constant is not free.</strong> For a weight that is a
+    pure sine series the antiderivative must be the one vanishing at the LOWER limit —
+    <code>sin²2a/2</code> for the <code>sin 4a</code> weight on
+    <code>arsinh β1</code> — because <code>arsinh β1</code> diverges at
+    <code>a = 0</code> for a target level with the corner and only that zero makes the
+    product finite. Taking <code>−cos 4a/4</code> instead puts a divergence into a
+    term that has none.</li>
+    <li><strong>The one piece still missing is a basis conversion.</strong> An odd
+    row's <code>arsinh β2</code> term needs its antiderivative as a range function with
+    exact end values, and what is available is a harmonic series. The far end value is
+    exactly zero by the choice above; the near one is a closed-form sum; the bulk is a
+    double Chebyshev deflation at <code>t = ±1</code>, which
+    <code>rangefunction.deflate</code> already performs. That conversion is the next
+    thing to build, and it belongs in <code>rangefunction.py</code> beside its
+    inverse.</li>
+  </ul>
+</main>
+</body>
+</html>

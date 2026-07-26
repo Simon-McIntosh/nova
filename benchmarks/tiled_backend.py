@@ -15,6 +15,20 @@ rule -- and the only thing that changes is how the tiles are evaluated:
     jax-vmap    the same kernel, blocks mapped with vmap
     parity      both backends into two stores, compared over every pair
 
+The CLOSED-form reduction is measured through the same harness, because the
+question it answers is the same one -- can the accurate kernel reach a device --
+and only a shared harness makes the two comparable:
+
+    closed-host    the shipped host route, section by section, WITH its two
+                   value-dependent shortcuts (a pole family it can prove no
+                   column needs, and a corner term a closed chain cancels)
+    closed-numpy   the same reduction over tiles through the packed driver, which
+                   has no shortcuts because a traced value cannot be inspected --
+                   so this isolates what the shortcuts are worth
+    closed-scan    the packed driver traced, blocks walked with scan
+    closed-vmap    the packed driver traced, blocks mapped with vmap
+    closed-parity  the traced closed kernel against the numpy packed driver
+
 Timings are one variant per FRESH process, because a compiled kernel and a warm
 allocator both make a second measurement in the same interpreter look faster
 than a build does. The parent process spawns those children and reports the
@@ -138,7 +152,82 @@ def measure_numpy(workers: int, cells: int, tile: int) -> dict:
     }
 
 
-def measure_traced(batched: bool, cells: int, tile: int) -> dict:
+def measure_host_closed(cells: int, tile: int) -> dict:
+    """Return the per-pair rate of the shipped host closed form over the mesh.
+
+    Section by section, all targets at once, through the driver that keeps its
+    value-dependent shortcuts -- the rate a near-band host evaluation would run at.
+    """
+    from nova.biot.polygonanalytic import polygon_analytic_greens
+
+    sections, target_r, target_z = hex_mesh(cells)
+    start = time.perf_counter()
+    for section in sections:
+        polygon_analytic_greens(target_r, target_z, section)
+    seconds = time.perf_counter() - start
+    pairs = target_r.size * len(sections)
+    return {
+        "seconds": seconds,
+        "pairs": pairs,
+        "us_per_pair": 1e6 * seconds / pairs,
+        "tiles": 1,
+    }
+
+
+def measure_packed_closed(cells: int, tile: int) -> dict:
+    """Return the per-pair rate of the packed closed driver on numpy, over tiles.
+
+    The same arithmetic as the traced kernel and the same absence of shortcuts, so
+    the gap to :func:`measure_host_closed` is what the shortcuts buy and the gap to
+    the traced variants is what the compiler and the device buy.
+    """
+    from nova.biot.polygonanalytic import packed_analytic_greens
+
+    sections, target_r, target_z = hex_mesh(cells)
+    plan = build_plan(tile)
+    edge, weight, norm = pad_batch(sections)
+    bounds = list(plan.tiles(target_r.size, len(sections)))
+    start = time.perf_counter()
+    for rows, columns in bounds:
+        pair_r, pair_z, pair_edge, pair_weight, pair_norm = _pair_geometry(
+            target_r[rows],
+            target_z[rows],
+            edge[:, :, columns],
+            weight[:, columns],
+            norm[columns],
+        )
+        packed_analytic_greens(np, pair_r, pair_z, pair_edge, pair_weight, pair_norm)
+    seconds = time.perf_counter() - start
+    pairs = target_r.size * len(sections)
+    return {
+        "seconds": seconds,
+        "pairs": pairs,
+        "us_per_pair": 1e6 * seconds / pairs,
+        "tiles": len(bounds),
+    }
+
+
+def _pair_geometry(target_r, target_z, edge, weight, norm):
+    """Return one tile's geometry flattened onto its pair list.
+
+    The closed form is a function of a PAIR -- one target against one section --
+    where the quadrature kernel broadcasts a target row against a source column, so
+    a tile is presented to it as a flat pair vector with each pair's own section
+    beside it.
+    """
+    rows, columns = np.divmod(np.arange(target_r.size * norm.size), norm.size)
+    return (
+        target_r[rows],
+        target_z[rows],
+        edge[:, :, columns],
+        weight[:, columns],
+        norm[columns],
+    )
+
+
+def measure_traced(
+    batched: bool, cells: int, tile: int, kernel: str = "quadrature"
+) -> dict:
     """Return compile time and steady-state build time of the traced backend.
 
     The first tile carries the compile, so it is timed alone and then the whole
@@ -154,7 +243,7 @@ def measure_traced(batched: bool, cells: int, tile: int) -> dict:
     directory = pathlib.Path(tempfile.mkdtemp(prefix="tiled-backend-"))
     try:
         store = new_store(directory / "coupling.zarr", shape, plan)
-        evaluate = tile_evaluator(plan, batched=batched)
+        evaluate = tile_evaluator(plan, batched=batched, kernel=kernel)
 
         def write(rows, columns):
             tile_result = evaluate(
@@ -185,6 +274,38 @@ def measure_traced(batched: bool, cells: int, tile: int) -> dict:
         "us_per_pair": 1e6 * seconds / pairs,
         "tiles": len(bounds),
         "compile_count": evaluate.compile_count,
+        **device_report(),
+    }
+
+
+def measure_closed_parity(cells: int, tile: int) -> dict:
+    """Return the traced closed kernel's deviation from the same driver on numpy."""
+    from nova.biot.polygonanalytic import packed_analytic_greens
+
+    sections, target_r, target_z = hex_mesh(cells)
+    plan = build_plan(tile)
+    edge, weight, norm = pad_batch(sections)
+    evaluate = tile_evaluator(plan, batched=True, kernel="closed")
+    worst_abs = worst_rel = 0.0
+    for rows, columns in plan.tiles(target_r.size, len(sections)):
+        arguments = (
+            target_r[rows],
+            target_z[rows],
+            edge[:, :, columns],
+            weight[:, columns],
+            norm[columns],
+        )
+        want = packed_analytic_greens(np, *_pair_geometry(*arguments))
+        for got, reference in zip(evaluate(*arguments), want):
+            absolute, relative = deviation(
+                np.asarray(got).ravel(), np.asarray(reference).ravel()
+            )
+            worst_abs = max(worst_abs, absolute)
+            worst_rel = max(worst_rel, relative)
+    return {
+        "pairs": target_r.size * len(sections),
+        "worst_abs": worst_abs,
+        "worst_rel": worst_rel,
         **device_report(),
     }
 
@@ -241,6 +362,14 @@ def measure(variant: str, cells: int, tile: int) -> dict:
         return measure_numpy(int(variant.split("-")[1]), cells, tile)
     if variant.startswith("jax-"):
         return measure_traced(variant.endswith("vmap"), cells, tile)
+    if variant == "closed-host":
+        return measure_host_closed(cells, tile)
+    if variant == "closed-numpy":
+        return measure_packed_closed(cells, tile)
+    if variant in ("closed-scan", "closed-vmap"):
+        return measure_traced(variant.endswith("vmap"), cells, tile, kernel="closed")
+    if variant == "closed-parity":
+        return measure_closed_parity(cells, tile)
     if variant == "parity":
         return measure_parity(cells, tile)
     raise SystemExit(f"unknown variant {variant}")
@@ -282,6 +411,8 @@ def table(rows: list[dict]) -> str:
     )
     lines = [header]
     for row in rows:
+        if "seconds" not in row:  # a parity check reports deviations, not a rate
+            continue
         traced = "compile_seconds" in row
         lines.append(
             f"| {row['variant']} | {row['seconds']:.2f} "
@@ -298,18 +429,31 @@ def sweep(device: str, cells: int, tile: int, repeat: int, variants) -> dict:
     rows = []
     for variant in variants:
         records = [run_child(variant, device, cells, tile) for _ in range(repeat)]
+        # a parity variant reports deviations rather than a rate, so only the keys it
+        # actually carries are aggregated -- and the deviations are a worst case over
+        # every pair, so the worst run is the summary rather than the median
         median = {
             key: statistics.median([record[key] for record in records])
-            for key in ("seconds", "us_per_pair")
+            for key in ("seconds", "us_per_pair", "compile_seconds", "cold_seconds")
+            if key in records[0]
         }
-        for key in ("compile_seconds", "cold_seconds"):
-            if key in records[0]:
-                median[key] = statistics.median([record[key] for record in records])
+        median.update(
+            {
+                key: max(record[key] for record in records)
+                for key in (
+                    "worst_abs",
+                    "worst_rel",
+                    "store_worst_abs",
+                    "store_worst_rel",
+                )
+                if key in records[0]
+            }
+        )
         rows.append(
             {
                 "variant": variant,
                 **median,
-                "tiles": records[0]["tiles"],
+                "tiles": records[0].get("tiles", 1),
                 "pairs": records[0]["pairs"],
                 "runs": records,
             }

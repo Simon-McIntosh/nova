@@ -167,3 +167,100 @@ def test_a_traced_build_streams_the_same_store(tmp_path):
             atol=1e-11 * np.max(np.abs(want)),
         )
         assert other[name].chunks == one[name].chunks
+
+
+# The closed-form kernel is the reason the elliptic primitives were made
+# complement-native and trip-bounded: scipy's routines cannot enter a trace at all,
+# so before this the accurate kernel was host-only. What has to be pinned is that
+# the traced reduction computes the SAME thing as the host one and still compiles
+# once -- its cost is a separate question, measured in benchmarks/tiled_backend.py.
+
+
+def triangle(r0, z0, radius=0.05):
+    """Return a three-cornered section, the cheapest shape that closes a chain."""
+    angle = np.pi / 2 + np.linspace(0.0, 2.0 * np.pi, 3, endpoint=False)
+    return np.column_stack([r0 + radius * np.cos(angle), z0 + radius * np.sin(angle)])
+
+
+def pair_geometry(target_r, target_z, edge, weight, norm):
+    """Return a tile's geometry flattened onto its pair list, target-major."""
+    rows, columns = np.divmod(np.arange(target_r.size * norm.size), norm.size)
+    return (
+        target_r[rows],
+        target_z[rows],
+        edge[:, :, columns],
+        weight[:, columns],
+        norm[columns],
+    )
+
+
+def test_the_traced_closed_form_matches_the_same_reduction_on_numpy():
+    """One implementation, two namespaces, over a batch of unlike sections.
+
+    Three-cornered sections keep the trace small -- the reduction unrolls its moment
+    recursions, so the compile grows with the corner count -- and the sections still
+    differ from each other, which is what the padded batch exists for.
+    """
+    from nova.biot.polygonanalytic import packed_analytic_greens
+
+    sections = [triangle(6.2, 0.0), triangle(6.3, 0.08, 0.03), triangle(6.1, -0.05)]
+    target_r = np.array([6.22, 6.28, 6.13])
+    target_z = np.array([0.01, 0.06, -0.02])
+    edge, weight, norm = polygon.pad_batch(sections)
+    plan = TilePlan(
+        target_tile=target_r.size,
+        source_tile=len(sections),
+        block=target_r.size * len(sections),
+        n_panels=16,
+        n_nodes=48,
+    )
+    evaluate = tile_evaluator(plan, batched=True, kernel="closed")
+    got = evaluate(target_r, target_z, edge, weight, norm)
+    want = packed_analytic_greens(
+        np, *pair_geometry(target_r, target_z, edge, weight, norm)
+    )
+    assert evaluate.compile_count == 1
+    for component, reference in zip(got, want):
+        reference = np.asarray(reference).reshape(target_r.size, len(sections))
+        assert component.dtype == np.float64
+        np.testing.assert_allclose(
+            component,
+            reference,
+            rtol=1e-9,
+            atol=1e-9 * np.max(np.abs(reference)),
+        )
+
+
+def test_the_traced_closed_form_agrees_with_the_kernel_it_replaces():
+    """And with the quadrature, away from the contour where both are converged.
+
+    Not a tolerance the closed form should be judged by -- it is one to two orders
+    more accurate than the rule it is compared with, and the acceptance gate in
+    ``tests/test_biotpolygonanalytic.py`` is where that is measured. This is a check
+    that the traced path is wired to the right geometry: a transposed section or a
+    mis-taken pair column would be invisible against a self-comparison.
+    """
+    sections = [triangle(6.2, 0.0), triangle(6.35, 0.1, 0.04)]
+    target_r = np.array([6.5, 5.9])
+    target_z = np.array([0.3, -0.25])
+    edge, weight, norm = polygon.pad_batch(sections)
+    plan = TilePlan(
+        target_tile=target_r.size,
+        source_tile=len(sections),
+        block=target_r.size * len(sections),
+        n_panels=16,
+        n_nodes=48,
+    )
+    closed = tile_evaluator(plan, batched=True, kernel="closed")(
+        target_r, target_z, edge, weight, norm
+    )
+    quadrature = tile_coupling(target_r, target_z, edge, weight, norm, block=plan.block)
+    for got, reference in zip(closed, quadrature):
+        np.testing.assert_allclose(got, reference, rtol=2e-08, atol=0.0)
+
+
+def test_an_unknown_kernel_is_refused_rather_than_silently_ignored():
+    """A misspelled kernel must not fall back to the one it is not asking for."""
+    plan = TilePlan(target_tile=2, source_tile=2, block=4, n_panels=4, n_nodes=8)
+    with pytest.raises(ValueError, match="kernel"):
+        tile_evaluator(plan, kernel="analytic")

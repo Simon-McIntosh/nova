@@ -173,7 +173,11 @@ from nova.biot.elliptic import (
 )
 from nova.biot.polygon import pack_section
 
-__all__ = ["polygon_analytic_flux", "polygon_analytic_greens"]
+__all__ = [
+    "packed_analytic_greens",
+    "polygon_analytic_flux",
+    "polygon_analytic_greens",
+]
 
 # Harmonics the reduced numerators reach, plus one.  The arctangent term is the
 # deepest: an antiderivative weight of degree three against a numerator of degree
@@ -371,7 +375,7 @@ def _rule(nodes: int) -> tuple:
     return leggauss(nodes // 2)
 
 
-def _model_integral(offset, scale):
+def _model_integral(offset, scale, xp):
     """Return ``integral_0^(pi/4) log sqrt(offset^2 + scale^2 b^2) db``.
 
     Elementary, and finite in both degenerate directions: on the axis the model is
@@ -379,20 +383,20 @@ def _model_integral(offset, scale):
     end the model collapses onto ``scale b`` and the arctangent term vanishes with
     the offset.
     """
-    held_scale = np.where(scale > 0.0, scale, 1.0)
-    held_offset = np.where(offset > 0.0, offset, 1.0)
+    held_scale = xp.where(scale > 0.0, scale, 1.0)
+    held_offset = xp.where(offset > 0.0, offset, 1.0)
     return 0.5 * (
-        _QUARTER * np.log(offset**2 + (scale * _QUARTER) ** 2)
+        _QUARTER * xp.log(offset**2 + (scale * _QUARTER) ** 2)
         - 2.0 * _QUARTER
-        + np.where(
+        + xp.where(
             scale > 0.0,
-            2.0 * offset / held_scale * np.arctan(held_scale * _QUARTER / held_offset),
+            2.0 * offset / held_scale * xp.arctan(held_scale * _QUARTER / held_offset),
             2.0 * _QUARTER,
         )
     )
 
 
-def _regularised(numerator, denominator, model, sign):
+def _regularised(numerator, denominator, model, sign, xp):
     """Return ``arsinh(N/W) + sign log(model)``, bounded at the range end.
 
     The branch follows the sign of the numerator's own value AT that end, which is
@@ -415,23 +419,23 @@ def _regularised(numerator, denominator, model, sign):
     # the plain root rather than the guarded one: both arguments are of order the
     # ring span here, so nothing overflows and the guard costs several times the
     # square root it protects
-    root = np.sqrt(numerator * numerator + denominator * denominator)
+    root = xp.sqrt(numerator * numerator + denominator * denominator)
     direct = numerator + root
     mirror = root - numerator
     positive = sign >= 0.0
-    pick = np.where(positive, direct, mirror)
-    other = np.where(positive, mirror, direct)
-    base = np.where(
+    pick = xp.where(positive, direct, mirror)
+    other = xp.where(positive, mirror, direct)
+    base = xp.where(
         positive == (numerator >= 0.0),
         pick,
-        denominator * denominator / np.where(other > 0.0, other, 1.0),
+        denominator * denominator / xp.where(other > 0.0, other, 1.0),
     )
-    return np.where(sign < 0.0, -1.0, 1.0) * np.log(
-        base * np.where(sign != 0.0, model, 1.0) / denominator
+    return xp.where(sign < 0.0, -1.0, 1.0) * xp.log(
+        base * xp.where(sign != 0.0, model, 1.0) / denominator
     )
 
 
-def _graded_residual(halves, pieces, nodes: int):
+def _graded_residual(halves, pieces, nodes: int, xp):
     """Return ``integral_0^(pi/2) arsinh(N/W) da``, log removed per half.
 
     Both of the reduction's residual integrals are log-singular where their
@@ -471,27 +475,28 @@ def _graded_residual(halves, pieces, nodes: int):
         # A target on a section vertex sends both to zero and needs no grading at
         # all -- which is the whole gain, because a floor set low enough for that
         # case is what used to thin the nodes everywhere else.
-        reach = np.where(offset > 0.0, offset, np.abs(end))
-        width = np.where(reach > 0.0, np.clip(reach / scale, _LAYER_FLOOR, 1.0), 1.0)
-        span = np.arcsinh(_QUARTER / width)[:, None]
+        reach = xp.where(offset > 0.0, offset, xp.abs(end))
+        width = xp.where(reach > 0.0, xp.clip(reach / scale, _LAYER_FLOOR, 1.0), 1.0)
+        span = xp.arcsinh(_QUARTER / width)[:, None]
         stretch = 0.5 * span * (node + 1.0)[None, :]
         held = width[:, None]
-        stretched = np.sinh(stretch)
+        stretched = xp.sinh(stretch)
         panel = held * stretched
         # the panel never reaches a quarter turn, so the complement is a subtraction
         # rather than a second transcendental, and the map's own jacobian follows
         # from the sinh it has already taken
-        near = np.sin(panel) ** 2
+        near = xp.sin(panel) ** 2
         x, y = (1.0 - near, near) if half else (near, 1.0 - near)
         numerator, denominator = pieces(x, y)
-        sign = np.sign(end)[:, None]
+        sign = xp.sign(end)[:, None]
         scaled = scale[:, None] * panel
-        model = np.sqrt(offset[:, None] ** 2 + scaled * scaled)
-        jacobian = 0.5 * span * held * np.sqrt(1.0 + stretched * stretched)
+        model = xp.sqrt(offset[:, None] ** 2 + scaled * scaled)
+        jacobian = 0.5 * span * held * xp.sqrt(1.0 + stretched * stretched)
+        bounded = _regularised(numerator, denominator, model, sign, xp)
         total = (
             total
-            + (jacobian * _regularised(numerator, denominator, model, sign)) @ weight
-            - np.sign(end) * _model_integral(offset, scale)
+            + (jacobian * bounded) @ weight
+            - xp.sign(end) * _model_integral(offset, scale, xp)
         )
     return total
 
@@ -516,9 +521,10 @@ class _Vertex:
     and so cancels around an unbroken chain of edges, and there it is not formed.
     """
 
-    def __init__(self, r, z, corner_r, corner_z, nodes, *, residual: bool):
-        r = np.asarray(r, dtype=np.float64)
-        z = np.asarray(z, dtype=np.float64)
+    def __init__(self, r, z, corner_r, corner_z, nodes, *, residual: bool, xp=np):
+        self.xp = xp
+        r = xp.asarray(r)
+        z = xp.asarray(z)
         # r' - r is an end value a pole weight is formed from, so it comes from the
         # geometry rather than from r' less r: r' collapses to this corner's radius
         # at this limit, exactly.
@@ -543,7 +549,7 @@ class _Vertex:
         # module evaluates that finite part directly.
         self.radius_sum = radius_sum = r + rp
         a2 = u * u + radius_sum**2
-        self.span = np.sqrt(a2)
+        self.span = xp.sqrt(a2)
         parameter = 4.0 * r * rp / a2
         # 1 - k^2 = (u^2 + (r - r')^2)/a^2 -- the target's squared distance to this
         # corner over the squared ring span -- which the float parameter cannot
@@ -552,15 +558,15 @@ class _Vertex:
         # given it.
         self.parameter = parameter
         self.parameter_complement = complement = (u * u + offset**2) / a2
-        one = np.ones_like(parameter)
+        one = xp.ones_like(parameter)
         self.one = one
 
         # one order past the harmonics for the root moments, and the pole family's
         # headroom past that, since its system is closed there
         self.moments = harmonic_moments(
-            parameter, _HARMONICS + POLE_HEADROOM + 2, complement=complement
+            parameter, _HARMONICS + POLE_HEADROOM + 2, complement=complement, xp=xp
         )
-        self.root_moments = harmonic_root_moments(self.moments, parameter)
+        self.root_moments = harmonic_root_moments(self.moments, parameter, xp=xp)
 
         # the corner's own range functions, each with its two end values formed
         # from the geometry
@@ -591,46 +597,53 @@ class _Vertex:
         The ring denominator is the corner's own; the plane denominator is the
         edge's, and :class:`_Edge` splits it against this corner's modulus.
         """
+        xp = self.xp
         bulk, near, far = denominator
         leading = bulk[0] if bulk else 0.0 * near
         curved = leading != 0.0
-        held_leading = np.where(curved, leading, 1.0)
+        held_leading = xp.where(curved, leading, 1.0)
         offset = near / held_leading
         pivot = 1.0 + far / held_leading - offset
-        shift_y = np.where(
+        shift_y = xp.where(
             curved,
-            2.0 * offset / (pivot + np.sqrt(pivot * pivot + 4.0 * offset)),
+            2.0 * offset / (pivot + xp.sqrt(pivot * pivot + 4.0 * offset)),
             0.0,
         )
-        shift_x = np.where(curved, far / (held_leading * (1.0 + shift_y)), 0.0)
+        shift_x = xp.where(curved, far / (held_leading * (1.0 + shift_y)), 0.0)
 
         rising = (~curved) & (far > near)
         falling = (~curved) & (far < near)
-        gap = np.where(curved, 1.0, np.where(rising, far - near, near - far))
-        held_gap = np.where(gap != 0.0, gap, 1.0)
-        shift_y = np.where(rising, near / held_gap, shift_y)
-        shift_x = np.where(falling, far / held_gap, shift_x)
+        gap = xp.where(curved, 1.0, xp.where(rising, far - near, near - far))
+        held_gap = xp.where(gap != 0.0, gap, 1.0)
+        shift_y = xp.where(rising, near / held_gap, shift_y)
+        shift_x = xp.where(falling, far / held_gap, shift_x)
         live_y = curved | rising
         live_x = curved | falling
 
-        divisor = np.where(curved, held_leading * (1.0 + shift_y + shift_x), held_gap)
-        shift_y = np.where(live_y, shift_y, 1.0)
-        shift_x = np.where(live_x, shift_x, 1.0)
+        divisor = xp.where(curved, held_leading * (1.0 + shift_y + shift_x), held_gap)
+        shift_y = xp.where(live_y, shift_y, 1.0)
+        shift_x = xp.where(live_x, shift_x, 1.0)
         # a root so far past the range that the factor is constant across it to
         # round-off is held here, where the family's own decay still separates its
         # orders; past that the factor IS constant and the family is P/shift
-        capped_y = np.minimum(shift_y, _POLE_CEILING)
-        capped_x = np.minimum(shift_x, _POLE_CEILING)
+        capped_y = xp.minimum(shift_y, _POLE_CEILING)
+        capped_x = xp.minimum(shift_x, _POLE_CEILING)
         seed_y = cn_pole_moment(
-            capped_y, self.parameter, parameter_complement=self.parameter_complement
+            capped_y,
+            self.parameter,
+            parameter_complement=self.parameter_complement,
+            xp=xp,
         )
         seed_x = sn_pole_moment(
-            capped_x, self.parameter, parameter_complement=self.parameter_complement
+            capped_x,
+            self.parameter,
+            parameter_complement=self.parameter_complement,
+            xp=xp,
         )
         return (
-            np.where(live_y, 1.0 / divisor, 0.0),
-            np.where(live_x, 1.0 / divisor, 0.0),
-            np.where(live_y | live_x, 0.0, 1.0 / np.where(near != 0.0, near, 1.0)),
+            xp.where(live_y, 1.0 / divisor, 0.0),
+            xp.where(live_x, 1.0 / divisor, 0.0),
+            xp.where(live_y | live_x, 0.0, 1.0 / xp.where(near != 0.0, near, 1.0)),
             shift_y,
             shift_x,
             seed_y,
@@ -647,8 +660,13 @@ class _Vertex:
         over the ring span, squared, and the plane's near one is the target's
         offset from the edge's line.  Skipping it when no column needs it takes a
         tridiagonal solve of forty orders out of the common build.
+
+        The skip needs the shift's VALUE, and a traced evaluation does not have one
+        -- so it is available on the host only, and a trace forms the family for
+        every corner and lets :meth:`_pole`'s own selection discard it.  That is the
+        one place the two paths differ in cost rather than in arithmetic.
         """
-        if not np.any(shift > _POLE_SWITCH):
+        if self.xp is np and not np.any(shift > _POLE_SWITCH):
             return None
         return harmonic_pole_moments(
             shift, seed, self.moments, _HARMONICS + 1, mirrored=mirrored
@@ -701,7 +719,7 @@ class _Vertex:
         )
         if family is None:
             return held
-        return np.where(
+        return self.xp.where(
             shift <= _POLE_SWITCH,
             held,
             _contract(_across_the_range(numerator), family),
@@ -741,18 +759,19 @@ class _Vertex:
         corner's own level -- at both ends, and its curvature by the ring span;
         :func:`_graded_residual` carries the rest.
         """
+        xp = self.xp
         radius = self.radius[:, None]
         level = self.level[:, None]
         offset = self.offset[:, None]
-        span = 2.0 * np.where(self.radius > 0.0, self.radius, 1.0)
+        span = 2.0 * xp.where(self.radius > 0.0, self.radius, 1.0)
 
         def pieces(x, y):
             return (
                 offset + 2.0 * radius * y,
-                np.sqrt(level**2 + 4.0 * radius**2 * x * y),
+                xp.sqrt(level**2 + 4.0 * radius**2 * x * y),
             )
 
-        level_offset = np.abs(self.level)
+        level_offset = xp.abs(self.level)
         return _graded_residual(
             (
                 (level_offset, self.radius_sum, span),
@@ -760,6 +779,7 @@ class _Vertex:
             ),
             pieces,
             nodes,
+            xp,
         )
 
     def arsinh_terms(self):
@@ -807,15 +827,16 @@ class _Edge:
     corner and is held by :class:`_Vertex`, which :meth:`terms` takes.
     """
 
-    def __init__(self, r, z, edge, nodes):
-        r = np.asarray(r, dtype=np.float64)
-        z = np.asarray(z, dtype=np.float64)
+    def __init__(self, r, z, edge, nodes, *, xp=np):
+        self.xp = xp
+        r = xp.asarray(r)
+        z = xp.asarray(z)
         ra, za, rb, zb = edge
         self.nodes = nodes
         self.radius = r
         self.slope = b1 = (rb - ra) / (zb - za)
         self.squared_slope = a02 = 1.0 + b1 * b1
-        self.axial_slope = np.sqrt(a02)
+        self.axial_slope = xp.sqrt(a02)
         # r1 - r is the target's offset from the edge's EXTENDED LINE, taken as the
         # cross product of its offsets to the two endpoints over the edge's height
         # rather than as r1 less r.  That vanishes EXACTLY at either endpoint, where
@@ -855,6 +876,7 @@ class _Edge:
         at all, and then its offset is of order the ring span and there is no layer
         to model.
         """
+        xp = self.xp
         r = self.radius
         u = vertex.level
         b1 = self.slope
@@ -863,39 +885,45 @@ class _Edge:
         offset = vertex.offset
         plane_offset = self.plane_offset
         r1 = self.plane_radius_value
-        held_radius = np.where(r > 0.0, r, 1.0)
+        held_radius = xp.where(r > 0.0, r, 1.0)
+        # the slope belongs to the edge, so it is per PAIR when each pair carries its
+        # own section and a scalar when they all share one; a trailing axis for the
+        # quadrature's nodes covers both, being a length of one in the second case
+        slope = xp.asarray(b1)[..., None]
+        squared_slope = xp.asarray(self.squared_slope)[..., None]
 
         def pieces(x, y):
             return (
-                level + b1 * offset[:, None] + 2.0 * b1 * radius * y,
-                np.sqrt(
+                level + slope * offset[:, None] + 2.0 * slope * radius * y,
+                xp.sqrt(
                     (plane_offset[:, None] + 2.0 * radius * y) ** 2
-                    + 4.0 * self.squared_slope * radius**2 * x * y
+                    + 4.0 * squared_slope * radius**2 * x * y
                 ),
             )
 
         def curvature(coefficient):
-            return np.where(
+            return xp.where(
                 coefficient > 0.0,
-                2.0 * np.sqrt(np.abs(held_radius * coefficient)),
+                2.0 * xp.sqrt(xp.abs(held_radius * coefficient)),
                 2.0 * self.axial_slope * held_radius,
             )
 
         return _graded_residual(
             (
                 (
-                    np.abs(r1 + r),
+                    xp.abs(r1 + r),
                     u + b1 * vertex.radius_sum,
                     curvature(b1 * b1 * held_radius - r1),
                 ),
                 (
-                    np.abs(plane_offset),
+                    xp.abs(plane_offset),
                     u + b1 * offset,
                     curvature(r1 + b1 * b1 * held_radius),
                 ),
             ),
             pieces,
             self.nodes,
+            xp,
         )
 
     def terms(self, vertex: _Vertex):
@@ -906,6 +934,7 @@ class _Edge:
         contribution -- which is the corner's own, and is accumulated there.  The
         flux comes from eq 10b and the two field components from eq 11b.
         """
+        xp = self.xp
         one = vertex.one
         r = self.radius
         u = vertex.level
@@ -983,11 +1012,11 @@ class _Edge:
         # go as sin^2 phi with the ratio -b1 exactly -- the arctangent lands on
         # -arctan b1 rather than on zero or on the dead-band.  phi = pi keeps its zero,
         # its own numerator carrying one more power of sin phi than its denominator.
-        at_zero = 0.5 * np.pi * np.sign(u * (r1 + r))
-        at_half = np.where(
+        at_zero = 0.5 * np.pi * xp.sign(u * (r1 + r))
+        at_half = xp.where(
             vertex.parameter_complement > 0.0,
-            0.5 * np.pi * np.sign(u * self.plane_offset),
-            -np.arctan(b1) * one,
+            0.5 * np.pi * xp.sign(u * self.plane_offset),
+            -xp.arctan(b1) * one,
         )
 
         def against_arctan(weighting):
@@ -1233,3 +1262,83 @@ def polygon_analytic_flux(
 ) -> np.ndarray:
     """Return psi [Wb/A] alone, for a caller that does not want the field."""
     return polygon_analytic_greens(target_r, target_z, vertices, nodes=nodes)[0]
+
+
+def packed_analytic_greens(
+    xp,
+    target_r,
+    target_z,
+    edge,
+    weight,
+    norm,
+    *,
+    nodes: int = _NODES,
+):
+    """Return ``(psi, B_R, B_Z)`` per pair from the PACKED section form, unbranched.
+
+    The same reduction as :func:`polygon_analytic_greens`, driven over the packed
+    arrays :func:`nova.biot.polygon.pack_section` and
+    :func:`~nova.biot.polygon.pad_batch` produce -- ``edge`` ``(E, 4, ...)``,
+    ``weight`` ``(E, ...)`` and ``norm`` ``(...)``, in which a dropped horizontal
+    edge and a batch pad both carry zero weight and a harmless unit slope.  Every
+    trailing axis broadcasts, so ONE call evaluates a whole tile of pairs, each pair
+    against its own section.
+
+    Written this way because nothing in it inspects a value.  Three things the host
+    driver does with Python control flow are arithmetic here instead:
+
+    * a dead edge is not skipped but multiplied by its own zero weight, so the loop
+      over edges runs to a STATIC bound;
+    * a corner's geometry comes from the edge that STARTS there where that edge is
+      live, and from the edge that ENDS there where it is not.  Those are the same
+      point wherever both edges are live, and the second is the only one available
+      once a dropped edge's own corners have been replaced by the packed
+      placeholder -- a ``where``, not a dictionary;
+    * the ``arsinh beta1`` term is still accumulated ONCE per corner against the
+      signed number of live edges meeting there, so it still cancels EXACTLY around
+      an unbroken chain rather than to round-off.
+
+    What that costs, and it is the whole difference between the two paths: every
+    corner's pole families and first residual are formed whether the geometry needs
+    them or not, because deciding needs a value.  The arithmetic is otherwise
+    identical and the two agree to round-off.
+    """
+    signed = xp.asarray(target_r)
+    radius = xp.abs(signed)
+    height = xp.asarray(target_z) + xp.zeros_like(signed)
+    sides = edge.shape[0]
+
+    def corner(index: int):
+        """Return the ``(r, z)`` of the corner that edge ``index`` starts from."""
+        live = weight[index] != 0.0
+        return (
+            xp.where(live, edge[index][0], edge[index - 1][2]),
+            xp.where(live, edge[index][1], edge[index - 1][3]),
+        )
+
+    corners = [
+        _Vertex(radius, height, *corner(index), nodes, residual=True, xp=xp)
+        for index in range(sides)
+    ]
+    flux = radial = vertical = xp.zeros_like(radius)
+    for index in range(sides):
+        part = _Edge(radius, height, edge[index], nodes, xp=xp)
+        high = part.terms(corners[(index + 1) % sides])
+        low = part.terms(corners[index])
+        # the antiderivative is of order the squared major radius where the flux is
+        # not, so an edge's two limits are differenced before anything else is added
+        flux = flux - weight[index] * (high[0] - low[0])
+        radial = radial - weight[index] * (high[1] - low[1])
+        vertical = vertical - weight[index] * (high[2] - low[2])
+    for index in range(sides):
+        chain = weight[index] - weight[index - 1]
+        one_flux, one_radial, one_vertical = corners[index].arsinh_terms()
+        flux = flux + chain * one_flux
+        radial = radial + chain * one_radial
+        vertical = vertical + chain * one_vertical
+    return (
+        0.5 * norm * radius * flux,
+        # B_R is ODD in r, which is what makes it exactly zero on the axis
+        norm / (4.0 * np.pi) * xp.sign(signed) * radial,
+        norm / (4.0 * np.pi) * vertical,
+    )

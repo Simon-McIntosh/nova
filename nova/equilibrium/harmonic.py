@@ -66,7 +66,7 @@ from dataclasses import dataclass, field
 
 import numpy as np
 from scipy.constants import mu_0
-from scipy.special import ellipe, ellipk
+from nova.biot.completeelliptic import complete_kind
 
 from nova.equilibrium.measurement import (
     Magnetics,
@@ -136,8 +136,13 @@ def ring_legendre_p1(order: int, x: np.ndarray) -> np.ndarray:
                      - \\sqrt{\\frac{2}{x+1}}\\,K(m)\\right],
         \\quad m = \\frac{x-1}{x+1}
 
-    (:func:`scipy.special.ellipk` and :func:`~scipy.special.ellipe` take the
-    parameter :math:`m = k^2`, not the modulus), climbed in degree by the stable
+    taken through the modulus COMPLEMENT :math:`k'^2 = 2/(x + 1)`, which the pole
+    geometry gives exactly where :math:`1 - m` would be a subtraction: the focal ring
+    is :math:`x \\to \\infty`, where the parameter reaches one and a float cannot carry
+    what is left of it, so :math:`K` -- which grows like :math:`-\\log k'` -- would
+    come back wrong by :math:`\\eps (x + 1)/2`.  It is worth about 1e-13 a millimetre
+    from the focal ring and 1e-10 a micrometre from it, so this is hygiene rather than
+    a repair; it costs nothing and removes the trap.  Climbed in degree by the stable
     forward recurrence :math:`(\\nu+1)P_{\\nu+1} = (2\\nu+1) x P_\\nu - \\nu
     P_{\\nu-1}` — :math:`P` is the dominant, forward-stable solution — then raised
     to order 1 by :math:`P^1_\\nu = (x^2-1)^{-1/2}\\nu(x P_\\nu - P_{\\nu-1})` with
@@ -153,9 +158,7 @@ def ring_legendre_p1(order: int, x: np.ndarray) -> np.ndarray:
     # x = 1 is the axis / spatial infinity, where P^1 vanishes; clamp just off it
     # so the (x^2 - 1)^{-1/2} order raise stays finite (the far field is masked).
     x = np.maximum(x, 1.0 + 1e-12)
-    parameter = (x - 1.0) / (x + 1.0)
-    complete_k = ellipk(parameter)
-    complete_e = ellipe(parameter)
+    complete_k, complete_e = complete_kind(2.0 / (x + 1.0))
     low = np.sqrt(2.0 / (x + 1.0))
     high = np.sqrt(2.0 * (x + 1.0))
     degree = [
@@ -433,12 +436,8 @@ class ReconstructHarmonic:
         Flux-loop rows read the flux column; field-probe rows read the
         orientation-projected field.
         """
-        psi, _labels = harmonic_columns(
-            self.magnetics.r, self.magnetics.z, self.config
-        )
-        br, bz = harmonic_field_columns(
-            self.magnetics.r, self.magnetics.z, self.config
-        )
+        psi, _labels = harmonic_columns(self.magnetics.r, self.magnetics.z, self.config)
+        br, bz = harmonic_field_columns(self.magnetics.r, self.magnetics.z, self.config)
         return self.magnetics.project(psi, br, bz)
 
     def gauge_anchor(

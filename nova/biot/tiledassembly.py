@@ -48,6 +48,7 @@ import numpy as np
 import zarr
 
 from nova.biot.polygon import _BLOCK, _phi_rule, pad_batch
+from nova.biot.polygonanalytic import packed_analytic_greens
 
 COMPONENTS = ("Psi", "Br", "Bz")
 
@@ -340,8 +341,20 @@ class TileEvaluator:
         return tuple(tile[:, :n_target, :n_source])
 
 
-def tile_evaluator(plan: TilePlan, *, batched: bool = False) -> TileEvaluator:
+def tile_evaluator(
+    plan: TilePlan, *, batched: bool = False, kernel: str = "quadrature"
+) -> TileEvaluator:
     """Return a compiled evaluator for the tiles of one plan.
+
+    ``kernel`` chooses what a tile is evaluated WITH. ``"quadrature"`` traces the
+    fixed-node phi rule the operator is validated against. ``"closed"`` traces the
+    closed-form reduction of :func:`nova.biot.polygonanalytic.packed_analytic_greens`
+    instead -- the same tile shape, the same store, one to two orders more accurate
+    and, on the host, several times cheaper. It reaches a device at all because its
+    elliptic integrals come through a fixed-trip descent rather than a library call,
+    and because the packed driver replaces the host driver's three value-dependent
+    shortcuts with arithmetic; it pays for that with the pole families and residual
+    quadratures a host evaluation would skip.
 
     ``batched`` chooses how the quadrature blocks are combined: ``False`` walks
     them with ``scan``, holding one block's temporaries live; ``True`` maps them
@@ -394,14 +407,38 @@ def tile_evaluator(plan: TilePlan, *, batched: bool = False) -> TileEvaluator:
         two_pi_r = two_pi * r[:, 0]
         return jnp.stack([psi, -dpsi_dz / two_pi_r, dpsi_dr / two_pi_r])
 
+    def one_closed_block(target_r, target_z, edge, weight, norm, rows, columns):
+        """Return the same (3, block) from the closed-form reduction instead.
+
+        The closed form yields all three components directly, so unlike the
+        quadrature there is no flux gradient to divide by ``2 pi r`` -- which is also
+        why it stays finite on the axis.
+        """
+        return jnp.stack(
+            packed_analytic_greens(
+                jnp,
+                jnp.take(target_r, rows),
+                jnp.take(target_z, rows),
+                jnp.take(edge, columns, axis=2),
+                jnp.take(weight, columns, axis=1),
+                jnp.take(norm, columns),
+            )
+        )
+
+    if kernel not in ("quadrature", "closed"):
+        raise ValueError(f"unknown kernel {kernel!r}")
+    evaluate_block = one_block if kernel == "quadrature" else one_closed_block
+
     def over_blocks(target_r, target_z, edge, weight, norm):
         """Evaluate every block of the tile, mapped or walked."""
         geometry = (target_r, target_z, edge, weight, norm)
         if batched:
-            return jax.vmap(one_block, in_axes=(None,) * 5 + (0, 0))(*geometry, *index)
+            return jax.vmap(evaluate_block, in_axes=(None,) * 5 + (0, 0))(
+                *geometry, *index
+            )
 
         def step(carry, block):
-            return carry, one_block(*geometry, *block)
+            return carry, evaluate_block(*geometry, *block)
 
         return jax.lax.scan(step, None, index)[1]
 
@@ -453,6 +490,7 @@ def assemble(
     workers: int = 1,
     backend: str = "numpy",
     batched: bool = False,
+    kernel: str = "quadrature",
 ) -> TilePlan:
     """Build the coupling operator tile by tile, streaming it into a zarr store.
 
@@ -465,7 +503,11 @@ def assemble(
     ``backend`` selects the tile evaluator: ``"numpy"`` spreads the tiles over
     ``workers`` processes, ``"jax"`` hands each tile to one compiled kernel in
     this process -- the device is the parallelism there, so a pool would only
-    contend for it and ``workers`` must stay at one.
+    contend for it and ``workers`` must stay at one.  ``kernel`` selects what a
+    tile is evaluated with; see :func:`tile_evaluator`.  Only the traced backend
+    carries the closed form, the host route to it being
+    :func:`nova.biot.polygonanalytic.polygon_analytic_greens` with its own
+    value-dependent shortcuts.
     """
     target_r = np.ascontiguousarray(target_r, dtype=np.float64)
     target_z = np.ascontiguousarray(target_z, dtype=np.float64)
@@ -484,7 +526,7 @@ def assemble(
     if backend == "jax":
         if workers > 1:
             raise ValueError("the jax backend evaluates tiles in one process")
-        evaluate = tile_evaluator(plan, batched=batched)
+        evaluate = tile_evaluator(plan, batched=batched, kernel=kernel)
         for rows, columns in bounds:
             tile = evaluate(
                 target_r[rows],
@@ -498,6 +540,8 @@ def assemble(
         return plan
     if backend != "numpy":
         raise ValueError(f"unknown backend {backend!r}")
+    if kernel != "quadrature":
+        raise ValueError(f"the numpy backend has no {kernel!r} kernel")
     if workers <= 1:
         _open_worker(str(path), target_r, target_z, edge, weight, norm, plan)
         for tile in bounds:

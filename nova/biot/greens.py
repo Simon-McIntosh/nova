@@ -51,11 +51,36 @@ MU0 = 4.0e-7 * np.pi
 """Vacuum permeability [T.m/A]."""
 
 _EPS = 2.0 * np.finfo(float).eps
-# Numerical floor so on-axis / coincident points don't divide by zero.
+# Numerical floor so an ON-AXIS point does not divide by zero.  It bounds the ring
+# SPAN, ``(a + R)^2 + dz^2``, and the target radius -- both of order the machine, so
+# the floor is reached only at the axis, where every quantity it guards is masked to
+# its own limit anyway.  It is NOT applied to the target's distance to the filament:
+# an absolute floor on a squared length there would engage 32 micrometres out at any
+# ring radius and answer, silently, for a target that far away.
 _R_FLOOR = 1.0e-9
 
 
 # --- point circular filament ------------------------------------------
+
+
+def _filament_gap(r: np.ndarray, dz: np.ndarray, ar: float) -> np.ndarray:
+    """Return ``d^2 = (a - R)^2 + dz^2``, the squared distance to the filament.
+
+    Both kernels below want it twice over: as the modulus COMPLEMENT
+    ``k'^2 = d^2/((a + R)^2 + dz^2)``, and as the pole the field components carry.
+
+    The complement is the point.  ``k^2 = 4 a R/((a + R)^2 + dz^2)``, and the two
+    radicals differ by exactly ``4 a R``, so ``k'^2`` follows from the geometry with
+    no subtraction from one and keeps every digit however close the target sits --
+    where a float PARAMETER cannot carry its own complement at all.  Once ``k'^2`` is
+    below the spacing of the numbers next to one, ``1 - k'^2`` has rounded it away,
+    and ``K``, which grows like ``-log k'``, comes back wrong by about
+    ``eps/2 k'^2``.  Measured against an extended-precision reference
+    (``benchmarks/near_field_elliptic.py``): the parameter route loses 1e-6 of the
+    flux at 2.2e-06 ring radii and 1e-9 at 8.5e-05, and a couple of micrometres from
+    a metre-scale ring it is wrong in the second decimal.
+    """
+    return (ar - r) ** 2 + dz**2
 
 
 def greens_psi(rs: np.ndarray, zs: np.ndarray, ar: float, az: float) -> np.ndarray:
@@ -79,13 +104,14 @@ def greens_psi(rs: np.ndarray, zs: np.ndarray, ar: float, az: float) -> np.ndarr
     z = np.asarray(zs, dtype=np.float64)
     dz = z - az
     denom = (ar + r) ** 2 + dz**2
-    k2 = 4.0 * ar * r / np.maximum(denom, _R_FLOOR)
-    k2 = np.clip(k2, 0.0, 1.0 - 1.0e-12)
+    span = np.maximum(denom, _R_FLOOR)
+    k2 = 4.0 * ar * r / span
+    complement = _filament_gap(r, dz, ar) / span
     k = np.sqrt(k2)
-    big_k = scipy.special.ellipk(k2)
+    big_k = scipy.special.ellipkm1(complement)
     big_e = scipy.special.ellipe(k2)
     pref = 2.0 * MU0 * np.sqrt(ar * np.maximum(r, _R_FLOOR)) / np.maximum(k, _R_FLOOR)
-    psi = pref * ((1.0 - 0.5 * k2) * big_k - big_e)
+    psi = pref * (0.5 * (1.0 + complement) * big_k - big_e)
     # at R->0 the loop encloses no flux at the axis target -> Phi->0
     return np.where(r < _R_FLOOR, 0.0, psi)
 
@@ -98,24 +124,39 @@ def greens_bz_br(
     Standard axisymmetric forms (Jackson section 5.5).  On-axis (``R->0``)
     ``B_R->0`` and ``B_Z`` reduces to the textbook
     ``mu0 a^2 / (2 (a^2 + dz^2)^{3/2})``.
+
+    A target ON the filament returns the divergence, not a number.  The field there
+    is genuinely singular, and a filament model asked for it has been asked a
+    question it cannot answer -- the finite-section kernels (:func:`cylinder_greens`,
+    :func:`~nova.biot.polygon.polygon_greens`, :func:`moment_filament`) exist for
+    exactly that target and are smooth through the conductor.  What is NOT acceptable
+    is answering for a phantom standoff: a floor on the squared distance, or a cap on
+    the parameter, returns the kernel's value some micrometres away with nothing to
+    say so, and that is the one failure a caller cannot detect.  One ULP off the
+    filament these return the true finite values.
     """
     r = np.asarray(rs, dtype=np.float64)
     z = np.asarray(zs, dtype=np.float64)
     dz = z - az
     denom = (ar + r) ** 2 + dz**2
-    sq = np.sqrt(np.maximum(denom, _R_FLOOR))
-    k2 = 4.0 * ar * r / np.maximum(denom, _R_FLOOR)
-    k2 = np.clip(k2, 0.0, 1.0 - 1.0e-12)
-    big_k = scipy.special.ellipk(k2)
+    span = np.maximum(denom, _R_FLOOR)
+    sq = np.sqrt(span)
+    k2 = 4.0 * ar * r / span
+    gap = _filament_gap(r, dz, ar)
+    big_k = scipy.special.ellipkm1(gap / span)
     big_e = scipy.special.ellipe(k2)
-    d2 = (ar - r) ** 2 + dz**2
     pre = MU0 / (2.0 * np.pi)
-    bz = pre / sq * (big_k + (ar**2 - r**2 - dz**2) / np.maximum(d2, _R_FLOOR) * big_e)
+    # Both brackets are printed with the pole's numerator as a difference of terms of
+    # order a^2 whose value is of order a d -- so it arrives with relative error
+    # eps a/2d, which beats the modulus as the near-field limit.  Splitting the pole
+    # off removes it: a^2 - R^2 - dz^2 is -d^2 + 2 a (a - R) and a^2 + R^2 + dz^2 is
+    # d^2 + 2 a R, both exact, and what is left over d^2 is the divergence itself.
+    bz = pre / sq * (big_k - big_e + 2.0 * ar * (ar - r) / gap * big_e)
     br_full = (
         pre
         * dz
         / (np.maximum(r, _R_FLOOR) * sq)
-        * (-big_k + (ar**2 + r**2 + dz**2) / np.maximum(d2, _R_FLOOR) * big_e)
+        * (big_e - big_k + 2.0 * ar * r / gap * big_e)
     )
     br = np.where(r < _R_FLOOR, 0.0, br_full)
     return bz, br

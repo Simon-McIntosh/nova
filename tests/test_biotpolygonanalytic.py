@@ -1276,3 +1276,81 @@ def test_the_closed_form_field_is_the_gradient_of_its_own_flux(section):
     _, radial, vertical = polygon_analytic_greens(target_r, target_z, vertices)
     assert worst_relative(radial, -derivative(along_r=False) / two_pi_r) <= 1e-06
     assert worst_relative(vertical, derivative(along_r=True) / two_pi_r) <= 1e-06
+
+
+# The packed driver is the same reduction with its Python control flow replaced by
+# arithmetic, so that a whole tile of pairs -- each against its own section -- goes
+# through one call with no branch on a value. Nothing about the ANSWER may change.
+
+
+def pair_geometry(target_r, target_z, sections):
+    """Return the packed geometry of every (target, section) pair, flattened.
+
+    ``pad_batch`` gives a batch of sections one fixed edge count; the pair list then
+    repeats each target across the sections and each section across the targets, so
+    a single packed call covers the whole outer product.
+    """
+    from nova.biot.polygon import pad_batch
+
+    edge, weight, norm = pad_batch(sections)
+    pairs = np.arange(np.size(target_r) * len(sections))
+    rows, columns = np.divmod(pairs, len(sections))
+    return (
+        np.asarray(target_r, float).ravel()[rows],
+        np.asarray(target_z, float).ravel()[rows],
+        edge[:, :, columns],
+        weight[:, columns],
+        norm[columns],
+    )
+
+
+@pytest.mark.parametrize("section", sorted(SECTIONS))
+def test_the_packed_driver_reproduces_the_host_driver(section):
+    """Same reduction, no shortcuts: the two must agree to round-off.
+
+    The host driver skips a dead edge with ``continue``, forms a corner's term only
+    where the chain is broken, and forms a pole family only where some column's root
+    is far enough out to need one. None of those decisions can be made from a traced
+    value, so the packed driver makes all three with arithmetic instead -- a zero
+    weight, a signed live-edge count, and a selection inside the pole route. The
+    difference is cost, not arithmetic, and this pins that.
+    """
+    from nova.biot.polygonanalytic import packed_analytic_greens
+
+    vertices = SECTIONS[section]
+    target_r, target_z = gate_targets(vertices)
+    host = polygon_analytic_greens(target_r, target_z, vertices)
+    packed = packed_analytic_greens(np, *pair_geometry(target_r, target_z, [vertices]))
+    for name, got, want in zip(COMPONENTS, packed, host):
+        assert worst_relative(np.asarray(got), want) < 1e-11, name
+
+
+def test_the_packed_driver_takes_a_batch_of_unlike_sections_in_one_call():
+    """One call, one shape, a different section per pair -- which is the point.
+
+    A hexagonal plasma cell, a cell clipped by the first wall and a rectangle have
+    six, five and four live edges; padded to a common count they go through the same
+    call, and each pair's answer must equal what the host driver gives for that
+    section alone. The rectangle is the case that exercises the placeholder: its two
+    horizontal edges carry no corner of their own, so the driver has to take those
+    corners from the edges that END there.
+    """
+    from nova.biot.polygonanalytic import packed_analytic_greens
+
+    clipped = np.delete(hexagon(), 2, axis=0)
+    sections = [hexagon(), clipped, rectangle(), thin_plate()]
+    target_r = np.array([R0 + 0.04, R0 - 0.02, R0, 3.02])
+    target_z = np.array([0.01, -0.03, 0.05, 0.008])
+    packed = [
+        np.asarray(component)
+        for component in packed_analytic_greens(
+            np, *pair_geometry(target_r, target_z, sections)
+        )
+    ]
+    count = len(sections)
+    for index, vertices in enumerate(sections):
+        host = polygon_analytic_greens(target_r, target_z, vertices)
+        for component, name in enumerate(COMPONENTS):
+            got = packed[component][index::count][index]
+            want = host[component][index]
+            assert abs(got - want) <= 1e-11 * max(abs(want), 1e-30), (name, index)

@@ -915,21 +915,33 @@ Done-when
   4. Followup written; this followup resolved.</pre>
     </article>
 <article class="r-fu" data-id="f-boa-11" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-26T05:00:00+00:00" data-recommends-skill="/reckon-ship biot-operator-assembly" data-resolved-at="" data-resolved-by="">
-    <h4 class="r-fu-title">Collapse the traced closed form&#x27;s two-minute compile by rolling up the moment recursions</h4>
-    <div class="r-fu-body"><p>The closed form now evaluates inside a traced tile and on one H200 it costs what the 16x48 quadrature costs. What it does not yet have is a usable compile: <strong>101 s on the device and 136 s on the host, against 1.3 s for the quadrature kernel</strong>. The cause is structural rather than accidental -- every recursion in the reduction is a Python loop over a STATIC trip count, so a trace unrolls all of it: 138 downward ratio steps per corner for the plain harmonics, a 40-order tridiagonal solve per pole family, a 60-order headroom sweep in each shifted family, times one corner per edge. The HLO graph is enormous and its size grows with the section's corner count, so a seven-corner wall-clipped cell is worse than a hexagon and the compile is paid again for every distinct tile shape a build uses.</p><p>The fix is the same fixed-trip discipline the elliptic descent already uses, one level up: a <code>lax.scan</code> or <code>fori_loop</code> carries a recursion whose length is known at trace time without unrolling it, and the moment families are exactly that. What makes it delicate is that they RETAIN every order -- <code>harmonic_moments</code> returns a list of 42 arrays built by a recursion that runs 138 steps -- so the scan has to stack what it keeps and the numpy path must keep its list form, or fork. The accuracy tables are the gate: this changes no arithmetic if it is done right, so every one of the eighteen two-directional entries must hold UNCHANGED, exactly as they did through the complement adoption.</p></div>
+    <h4 class="r-fu-title">Stop paying the traced closed form&#x27;s two-minute compile per build, then shrink the graph that causes it</h4>
+    <div class="r-fu-body"><p>The closed form now evaluates inside a traced tile and on one H200 it costs what the 16x48 quadrature costs. What it does not yet have is a usable compile: <strong>101 s on the device and 136 s on the host, against 1.3 s for the quadrature kernel</strong>. The graph was then attributed by lowering it and counting instructions, which is cheap where compiling it is not, and the answer redirects this rung -- so the measurement comes first and the plan for it second.</p><p><strong>The graph is exactly linear in the corner count: 27,947 HLO operations per edge</strong>, measured at 83,889 / 111,836 / 167,730 / 195,677 for three, four, six and seven edges -- an intercept of forty-eight. Against the quadrature kernel's 3,272 for the same block, and compile time tracks the count at roughly half a millisecond per operation on both kernels, so operation count IS the lever and it scales.</p><p><strong>But the recursions are only a third of it.</strong> Per corner: <code>harmonic_moments</code> 3,580 operations, the pole families about 454 each, <code>harmonic_root_moments</code> 293, the descent 402 and each pole seed 290 -- some 8,700 of the 27,947, or 31%. Rolling every one of them into a <code>scan</code> therefore buys <strong>at most 1.45x, taking 136 s to about 95 s</strong>, which is worth having and is not the order of magnitude this rung was written expecting. The other 69% is the harmonic-series ALGEBRA -- <code>_product</code>, <code>_harmonic_multiply</code>, <code>_contract</code> and <code>_deflate</code> over nine-term coefficient lists -- and none of it is a recursion, so no scan reaches it.</p><p>Two levers do reach it, and both are cheaper than the scan work. The moment stack's LENGTH is <code>_HARMONICS + POLE_HEADROOM + 2 = 42</code> where the numerators reach nine, the extra thirty-two orders being carried in the PLAIN moments only so the pole families can close their system there -- which the host driver skips wherever no root is far enough out and a trace cannot. Shortening it shrinks the ratio loop AND every downstream contraction, and a product of two series is quadratic in the length, so the algebra shrinks fastest of all. That is f-boa-10's subject rather than this one's, and this measurement says its prize is a compile prize as much as a runtime one.</p><p><strong>Before any of that, the reuse.</strong> <code>assemble</code> builds a fresh <code>tile_evaluator</code> per call, so a caller scanning geometry -- winding packs at many positions, which is a real use -- pays the compile once per POSITION rather than once per process, though moving a section changes only argument VALUES and cannot force a retrace. Letting a caller pass a warm evaluator in, and enabling JAX's persistent compilation cache so it survives a process boundary, turns 101 s per position into 101 s once and needs none of the work above.</p></div>
     <pre class="r-fu-prompt">Project: nova
 Plan:    biot-operator-assembly (http://127.0.0.1:8765/nova/biot-operator-assembly.html)
-Section: collapse the traced closed form&#x27;s compile
+Section: the traced closed form&#x27;s compile, paid once and made smaller
 Tier:    opus
 
 Context
   The closed form traces and runs on a device at the 16x48 quadrature&#x27;s own rate (5.5
   vs 5.3 us/pair on one H200), which is what unlocked the closed-form-device decision.
   Its compile does not: 101 s on the device, 136 s on the host, against 1.3 s for the
-  quadrature kernel. Every recursion in the reduction is a Python loop over a static
-  trip count, so the trace unrolls all of it -- and the graph grows with the section&#x27;s
-  corner count, so the worst case is a seven-corner wall-clipped cell rather than a
-  hexagon.
+  quadrature kernel. The graph has since been attributed by lowering and counting
+  instructions -- 27,947 HLO ops per edge, exactly linear in the corner count, against
+  the quadrature&#x27;s 3,272 for the same block -- and the attribution redirects the work:
+  the recursions everyone would reach for first are only 31% of it, so rolling them all
+  up is worth 1.45x and not an order of magnitude. Read the followup body for the
+  breakdown before choosing what to do.
+
+  ORDER OF WORK, cheapest first. (1) assemble() builds a fresh tile_evaluator per call,
+  so a geometry scan pays the compile per POSITION; a warm evaluator passed in, plus
+  JAX&#x27;s persistent compilation cache, makes it once per process and then once ever.
+  Moving a section changes only argument values, so nothing about a scan forces a
+  retrace once that is done. (2) Roll the recursions -- the honest 1.45x. (3) The real
+  graph is the harmonic-series algebra, which shrinks quadratically with the moment
+  stack&#x27;s length, and that length is f-boa-10&#x27;s subject: 42 orders carried where the
+  numerators reach nine, the extra thirty-two serving pole families a trace cannot
+  skip. Coordinate with that rung rather than duplicating it.
 
 State to read
   nova/biot/elliptic.py -- harmonic_moments (a 138-step downward ratio recursion for 42
@@ -964,12 +976,16 @@ Scope locks / constraints
   the same tolerance. If an entry moves, the arithmetic moved and the change is wrong.
 
 Done-when
-  1. Compile time for the traced closed form measured before and after, per corner
-     count, on a compute node and on one H200, and recorded in benchmarks/BASELINE.md.
-  2. Steady-state us/pair not regressed on either device -- an unrolled graph is
+  1. A geometry scan -- the same sections at several positions -- demonstrated paying
+     the compile ONCE rather than once per position, and the persistent cache shown to
+     carry it across a process boundary.
+  2. Compile time for the traced closed form measured before and after, per corner
+     count, on a compute node and on one H200, and recorded in benchmarks/BASELINE.md,
+     alongside the HLO operation count that predicts it.
+  3. Steady-state us/pair not regressed on either device -- an unrolled graph is
      sometimes faster, so this is a real risk and has to be measured, not assumed.
-  3. Every accuracy entry unchanged in both directions; the fast lane green.
-  4. Followup written; this followup resolved.</pre>
+  4. Every accuracy entry unchanged in both directions; the fast lane green.
+  5. Followup written; this followup resolved.</pre>
     </article>
 </section>
 

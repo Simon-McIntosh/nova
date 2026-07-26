@@ -20,7 +20,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-26">
 <meta name="plan-impl" content="0.97">
-<meta name="plan-version" content="10">
+<meta name="plan-version" content="12">
 </head>
 <body>
   <main class="plan-doc">
@@ -273,8 +273,17 @@
       <p class="landed-summary">
         <strong>On one H200 the closed form costs 5.5 µs/pair against the 16×48
         quadrature's 5.3</strong> — the same rate for one to two orders more accuracy,
-        so exact coupling on a device is free relative to the rule it replaces
-        (projected 2000-cell exact build ≈22 s of kernel, one 101 s compile).
+        so exact coupling on a device is free relative to the rule it replaces. The
+        COMPILE is the other half of that build and decides where the route applies:
+        101 s on an H200, and on XLA:CPU it never finished — an hour at a 32×32
+        tile, still compiling after ten minutes at a sixteen-pair one — so the traced
+        closed form is <strong>device-only</strong> and
+        <code>polygon_analytic_greens</code> stays the host route. Total build time,
+        not µs/pair, picks between them — the compile equals the device kernel at
+        18.4 M pairs and the device only beats a 16-core host pool above 7.2 M — which
+        makes the device right for ONE all-to-all machine matrix, a single build over
+        tens of millions of pairs amortising a single compile, and wrong for a
+        per-block one.
         Bulirsch's <code>cel</code> from the modulus COMPLEMENT, fixed 14-trip descent,
         covers all three kinds in one routine that jits, vmaps and differentiates;
         <code>elliptic.py</code> now holds no library call and its two-case third kind
@@ -377,7 +386,7 @@
       </p>
     <p class="r-dec-rat">Prototype measured (nova/biot/tiledassembly.py): budget-derived tiles with padded fixed shapes hold RAM at ~48 B/pair + ~1.5 MB fixed block (vs 267 B/pair today, and plan-bounded rather than problem-bounded), stream tile-&gt;zarr chunk-aligned, and scale 8.8x at 16 cores. Budgets &gt;=4 MB/worker cost nothing; 1 MB forces the quadrature block down and costs 1.6x. Target-major strips would reproduce today&#x27;s target-axis RAM fragility (13 GB/chunk at 100k targets).</p>
     </div>
-<div class="r-dec" data-key="closed-form-device" data-choice="jax-native-primitives" data-by="reckon-ship" data-when="2026-07-26T04:49:13+00:00">
+<div class="r-dec" data-key="closed-form-device" data-choice="jax-native-primitives" data-by="reckon-ship" data-when="2026-07-26T05:59:36+00:00">
     <p class="r-dec-q">The closed form needs elliptic integrals and JAX has NONE of them (no ellipk, ellipe, elliprf, elliprg, elliprj in jax.scipy.special, verified). The locked kernel-backend is a single traced JAX path. How does exact coupling reach a device?</p>
     <p class="r-dec-ctx">The quadrature kernel is pure arithmetic and traces cleanly, which is why the backend benchmarks used it (78.8 us/pair jit on 16 CPU cores, 7.4 on one H200). The closed form calls scipy&#x27;s Carlson forms and therefore cannot enter a traced tile at all. Cost context, measured on 200k evaluations: ellipk 1.8 ms, elliprf 7.0, elliprg 8.4, elliprj 40.1 - the THIRD KIND dominates, and the reduction needs four complete Pi per edge, so the third-kind routine is the cost-critical choice rather than K and E.</p>
     <p class="r-dec-opts">
@@ -385,7 +394,7 @@
       <button class="r-opt chosen" data-value="jax-native-primitives">implement complement-exact elliptic primitives in JAX</button>
       <button class="r-opt" data-value="hybrid-device-dispatch">traced quadrature on device, closed form on host, one build</button>
       </p>
-    <p class="r-dec-rat">Locked on measured evidence (2026-07-26, develop 5d194134 + ea901d6b + a5912084; benchmarks/tiled_backend.py --variants closed-*, benchmarks/analytic_cost_floor.py, benchmarks/near_field_elliptic.py; 64-cell operator = 4096 pairs, 4 tiles of 32x32, one fresh process per variant, sun_debug node and one H200). This is no longer a choice between routes but a demonstrated one: the primitives were built and the whole closed form now traces. ONE routine covers all three kinds -- Bulirsch cel from the modulus COMPLEMENT with a fixed 14-trip descent, no convergence test and no branch on a value, so one implementation serves numpy and a compiled kernel and it differentiates. On ONE H200 the traced closed form costs 5.5 us/pair against the 16x48 quadrature&#x27;s 5.3 on the same card: the same rate for one to two orders more accuracy, so on a device the EXACT kernel is free relative to the rule it replaces -- projected 2000-cell exact-everywhere closed-form build ~22 s of kernel plus a one-off 101 s compile. Accuracy: both kinds hold &lt;=4 ulp over the complement&#x27;s whole double range including denormals, where the parameter route is wrong by 2.6e-03 at k&#x27;^2 = 1e-16 and INFINITE below; the third kind holds 1e-13 against Carlson&#x27;s positive arrangement and round-off against two exact identities across eighteen decades of pole -- the ordinary R_F + (n/3) R_J arrangement is out by 3.5e-08 at p = 1e15, which is why the module previously needed a reflected second form as a special case. Cost was not a compromise either: the descent&#x27;s THIRD kind is 3.3x CHEAPER than Carlson&#x27;s (0.1175 vs 0.3928 us/element), which took the closed form&#x27;s third-kind integrals from 12.70 to 5.06 us/pair and its floor from 100.1 to 92.9 -- with every one of the eighteen two-directional accuracy entries UNCHANGED. Parity 2.5e-12 against the same driver on numpy and 2.3e-12 through the zarr store against the host driver, ONE compilation per build. numpy-near-band-only is subsumed rather than rejected: polygon_analytic_greens remains the host route and keeps the three value-dependent shortcuts a trace cannot take (worth 1.35x -- 171.4 vs 230.8 us/pair at one array width), but it is no longer the ONLY route. hybrid-device-dispatch is rejected: it would need a host round-trip per near-band pair and two code paths to maintain, for a kernel that now runs on the device at the quadrature&#x27;s own rate. Known gap (followup): the traced compile is 101-136 s against the quadrature kernel&#x27;s 1.3 s, because the reduction unrolls its moment recursions -- 138 downward ratio steps per corner plus a 40-order tridiagonal solve per pole family -- which a fixed-trip scan would collapse.</p>
+    <p class="r-dec-rat">Locked 2026-07-26 (develop 5d194134 + ea901d6b + a5912084; benchmarks/tiled_backend.py --variants closed-*, analytic_cost_floor.py, near_field_elliptic.py; 64-cell operator = 4096 pairs, 4 tiles of 32x32, one fresh process per variant, sun_debug node and one H200). The primitives were built and the whole closed form now traces, so this is a demonstrated route rather than a chosen one. ONE routine covers all three kinds -- Bulirsch cel from the modulus COMPLEMENT, fixed 14-trip descent, no convergence test and no branch on a value -- and it jits, vmaps and differentiates. THE HEADLINE: on one H200 the traced closed form costs 5.5 us/pair against the 16x48 quadrature&#x27;s 5.3 on the same card, so exact coupling on a device is free relative to the rule it replaces. Accuracy: both kinds &lt;=4 ulp over the complement&#x27;s whole double range including denormals, where the parameter route is wrong by 2.6e-03 at k&#x27;^2 = 1e-16 and INFINITE below; the third kind 1e-13 against Carlson&#x27;s positive arrangement and round-off against two exact identities across eighteen decades of pole, where the ordinary R_F + (n/3) R_J arrangement is out by 3.5e-08 at p = 1e15. Cost was not a compromise: the descent&#x27;s third kind is 3.3x CHEAPER than Carlson&#x27;s (0.1175 vs 0.3928 us/element), taking the closed form&#x27;s third-kind integrals from 12.70 to 5.06 us/pair and its floor from 100.1 to 92.9, with all eighteen accuracy entries UNCHANGED. Parity 2.5e-12 vs the same driver on numpy, 2.3e-12 through the zarr store, one compilation per build. || WHERE THE ROUTE APPLIES, which the per-pair rate alone does not settle. The compile is not a footnote to that rate, it is half the build: 101 s on one H200, 136 s on an L4, and on XLA:CPU it does not finish inside the debug hour even at the smallest tile -- so THE TRACED CLOSED FORM IS DEVICE-ONLY and polygon_analytic_greens remains the host route. The premise of one code path serving both devices holds for the quadrature kernel (1.3 s compile) and NOT for this one. The graph is exactly linear in the corner count at 27,947 HLO ops per edge (83,889/111,836/167,730/195,677 for three/four/six/seven), against the quadrature&#x27;s 3,272, and compile tracks the count at ~0.5 ms/op. Total build time therefore decides the route, not us/pair: against the host closed form at 171.4 us/pair on one core and a projected 19.5 on a 16-core pool, the compile equals the device kernel at 18.4M pairs and the device only beats the pool above 7.2M -- 20k pairs 0.4 s pool vs 101 s device, 4M pairs 78 s vs 123 s, 25M pairs 8.1 min vs 4.0 min. THE ARCHITECTURE THAT MAKES THAT WORK is the one the spine is heading for anyway: ONE all-to-all machine matrix, every element interacting with every other, tens of millions of pairs in a single build and therefore a SINGLE compile amortised over all of it -- not a compile per block. Two consequences to hold onto. (1) A batch pays one compile per padded EDGE COUNT, not per section shape: pad_batch already puts hexagons, wall-clipped cells, rectangles and thin plates through one call, and pinning edge_count across the whole matrix keeps it at one. Padding a rectangle from four edges to seven costs 1.75x its arithmetic, which at 5.5 us/pair over a million pairs is 4 s against ~56 s for a second compile, so pinning wins by an order. (2) assemble builds a FRESH evaluator per call and JAX&#x27;s persistent compilation cache is not wired up, so a repeated build pays the compile again; with it amortised the device is a flat 3.5x the pool at every size. Both are the first item of f-boa-11. || numpy-near-band-only is not subsumed after all -- it is the HOST route, and the CPU compile finding makes that permanent rather than transitional. hybrid-device-dispatch stays rejected: a host round-trip per near-band pair and two code paths to maintain, for a kernel that runs on the device at the quadrature&#x27;s own rate.</p>
     </div>
 </section>
 
@@ -737,7 +746,7 @@ Done-when
      re-stated (two thirds of it is the moment stacks today).
   5. The closed-form-device decision locked with those measurements.
   6. Followup written; this followup resolved.</pre>
-    <p class="r-fu-outcome">Landed on develop (5d194134, ea901d6b, a5912084; fast lane 1477 passed / 87 skipped / 0 failed). ALL FIVE DONE-WHENS MET AND THE DECISION IS LOCKED. (1) The parameter route's cost is measured, not argued: benchmarks/near_field_elliptic.py against an extended-precision reference over eleven decades -- the flux loses 1e-6 at 2.2e-06 ring radii and 1e-9 at 8.5e-05, the clip engaged at k'^2 = 4.9e-13 (1.4 um from a unit ring) and did NOT bound the error (2.6e-02 at engagement climbing to 3.7e-01), and it was a bad trade at the engagement point itself (unclipped 3.5e-06). (2) Adopted where the measurement justified it: the point kernels take k'^2 = ((a-R)^2 + dz^2)/span from the geometry and K from ellipkm1, which costs 1.01x ellipk and removes the whole near-field flux error -- psi 5.3e-10 -> 3.1e-16 a millimetre from a coil. Carlson was REJECTED for that path (4x the special-function cost, 64% of the whole kernel, same accuracy) and the second kind never needs the complement at all. Two defects in the same brackets turned out to be the FIELD's real limit and went with it: an absolute floor on a squared length (engaging 32 um out at any ring radius, leaving B_Z 90% wrong inside it) and the pole's numerator as a cancelling difference -- B_Z 9.0e-01 -> 9.9e-16 ten micrometres from an ITER-scale filament. A coincident target now returns the divergence rather than answering, undetectably, for one 1.4 um away. The banded scheme's per-band errors were re-measured and reproduce every recorded cutoff BIT FOR BIT (the corrected filament is truncation-limited, not round-off-limited). (3) One namespace-agnostic implementation, jit/vmap/grad clean with a measured trip bound (12 converges the whole double range, 10 does not; the constant is 14), and the closed form demonstrated inside a traced tile on CPU AND on one H200 -- 5.5 us/pair against the quadrature's 5.3. (4) Primitive costs, the shortcut cost and the closed form's floor re-measured on a compute node and recorded in benchmarks/BASELINE.md. (5) closed-form-device locked jax-native-primitives. Full record: docs/archive/biot-operator-assembly-complement-primitives-landed.html.</p>
+    <p class="r-fu-outcome">Landed on develop (5d194134, ea901d6b, a5912084; fast lane 1477 passed / 87 skipped / 0 failed). ALL FIVE DONE-WHENS MET AND THE DECISION IS LOCKED. (1) The parameter route's cost is measured, not argued: benchmarks/near_field_elliptic.py against an extended-precision reference over eleven decades -- the flux loses 1e-6 at 2.2e-06 ring radii and 1e-9 at 8.5e-05, the clip engaged at k'^2 = 4.9e-13 (1.4 um from a unit ring) and did NOT bound the error (2.6e-02 at engagement climbing to 3.7e-01), and it was a bad trade at the engagement point itself (unclipped 3.5e-06). (2) Adopted where the measurement justified it: the point kernels take k'^2 = ((a-R)^2 + dz^2)/span from the geometry and K from ellipkm1, which costs 1.01x ellipk and removes the whole near-field flux error -- psi 5.3e-10 -&gt; 3.1e-16 a millimetre from a coil. Carlson was REJECTED for that path (4x the special-function cost, 64% of the whole kernel, same accuracy) and the second kind never needs the complement at all. Two defects in the same brackets turned out to be the FIELD's real limit and went with it: an absolute floor on a squared length (engaging 32 um out at any ring radius, leaving B_Z 90% wrong inside it) and the pole's numerator as a cancelling difference -- B_Z 9.0e-01 -&gt; 9.9e-16 ten micrometres from an ITER-scale filament. A coincident target now returns the divergence rather than answering, undetectably, for one 1.4 um away. The banded scheme's per-band errors were re-measured and reproduce every recorded cutoff BIT FOR BIT (the corrected filament is truncation-limited, not round-off-limited). (3) One namespace-agnostic implementation, jit/vmap/grad clean with a measured trip bound (12 converges the whole double range, 10 does not; the constant is 14), and the closed form demonstrated inside a traced tile on CPU AND on one H200 -- 5.5 us/pair against the quadrature's 5.3. (4) Primitive costs, the shortcut cost and the closed form's floor re-measured on a compute node and recorded in benchmarks/BASELINE.md. (5) closed-form-device locked jax-native-primitives. Full record: docs/archive/biot-operator-assembly-complement-primitives-landed.html.</p>
     </article>
 <article class="r-fu" data-id="f-boa-08" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-25T17:14:00+00:00" data-recommends-skill="/reckon-ship biot-operator-assembly" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Make the closed form the shipped route for exact polygon coupling and re-open the plasma default flip</h4>
@@ -986,6 +995,60 @@ Done-when
      sometimes faster, so this is a real risk and has to be measured, not assumed.
   4. Every accuracy entry unchanged in both directions; the fast lane green.
   5. Followup written; this followup resolved.</pre>
+    </article>
+<article class="r-fu" data-id="f-boa-12" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-26T06:10:00+00:00" data-recommends-skill="/reckon-ship biot-operator-assembly" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Carry the complement into the element tier, which is what the shipped operator build actually calls</h4>
+    <div class="r-fu-body"><p>The complement adoption went into <code>nova/biot/greens.py</code>, which is the module the followup named and which serves <code>polysection.py</code>'s banded far field and <code>circuit/passive.py</code>. It did NOT go into the tier that <code>solve.py</code> dispatches to. <code>solve.py</code> maps <code>segment="circle"</code> to <code>Circle(Constants, Matrix)</code> and <code>"arc"</code> to <code>Arc(Constants, Matrix)</code>, and <code>nova/biot/constants.py</code> forms <code>k2 = (1 - eps) * 4 r rs / a2</code> and then <code>ck2 = 1 - k2</code> -- the complement BY SUBTRACTION, behind a phantom standoff of order eps, with <code>ellipk</code>/<code>ellipe</code> taking the parameter. That is the same pattern this rung measured and removed from the point kernels, still standing in the code path a reconstruction's coil, plasma and passive rows are built from.</p><p>So the near-field improvement does not currently reach the shipped operator. It matters most exactly where an ALL-TO-ALL matrix puts its diagonal: every element against itself, which for a filament model is a coincident target and for a section is a target inside its own contour. That is the configuration the point kernel is worst at -- a measured +7.2% median and +18% max on cell self-flux terms -- and the one the closed form is best at, at 6.8e-12 on the contour against the shipped quadrature's 2.6e-04.</p><p>The measurement harness already exists and does not need rebuilding: <code>benchmarks/near_field_elliptic.py</code> established the mechanism, the reference stack and the crossing distances for the functional kernels, so this rung is a transcription of a known repair into a second implementation plus its own before-and-after. The incomplete integrals the ARC rows need (<code>ellipkinc</code>, <code>ellipeinc</code>, <code>ellippinc</code>) are a separate question from the complete ones and should be scoped rather than assumed to follow.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    biot-operator-assembly (http://127.0.0.1:8765/nova/biot-operator-assembly.html)
+Section: the complement in the element tier
+Tier:    opus
+
+Context
+  The complement adoption landed in nova/biot/greens.py, which serves the banded
+  scheme&#x27;s far field and the passive circuit. The tier that solve.py actually
+  dispatches to did not get it: Circle and Arc inherit nova/biot/constants.py, which
+  forms k2 with a (1 - eps) factor and then ck2 = 1 - k2, and whose ellipk/ellipe take
+  the parameter. Every coil, plasma and passive row of a shipped operator is built
+  through that. The repair is already measured and understood -- this rung carries it
+  across and proves it with the same kind of evidence.
+
+State to read
+  nova/biot/constants.py -- k2, ck2, the nudge transform, and the ellipk/ellipe/
+    ellipkinc/ellipeinc/ellippinc class methods;
+  nova/biot/circle.py and nova/biot/arc.py -- what they take from Constants;
+  nova/biot/solve.py -- the segment-to-class map, which is what makes this the
+    production path;
+  nova/biot/greens.py -- the repair to transcribe: _filament_gap, ellipkm1 for K, the
+    pole split in the field brackets, _held_parameter, and the coincident contract;
+  benchmarks/near_field_elliptic.py -- the harness, the reference stack and the
+    before-image; extend it rather than write a second one.
+
+Guidance
+  - The complement is available from the geometry here too: the two radicals differ by
+    exactly 4 r rs, so ck2 = ((r - rs)^2 + gamma^2)/a2 with no subtraction from one.
+  - The (1 - eps) factor and the nudge transform are phantom standoffs of the same kind
+    as the cap that was removed from greens.py. Decide deliberately what a coincident
+    target returns and test it -- but note that an ALL-TO-ALL matrix puts a coincident
+    target on its own diagonal, so a divergence there is a different decision from the
+    one greens.py could make, and the answer may be that the diagonal must come from a
+    finite-section kernel rather than a filament at all.
+  - The INCOMPLETE integrals the arc rows use are a separate question. Scope them, do
+    not assume the complete-integral repair transfers.
+  - The full validation suite is the gate for anything in this tier, not the fast lane.
+
+Scope locks / constraints
+  Work in a detached worktree off develop; the primary checkout stays on main. This
+  changes the shipped operator, so the acceptance evidence is a before-and-after on the
+  validation suite and on the tracked biotoperate baselines, not only unit tests.
+
+Done-when
+  1. What the parameter route costs THIS tier, measured against the same
+     extended-precision reference, with the crossing distances per component.
+  2. The complement carried in where the measurement justifies it, and the coincident
+     contract decided and tested -- including what an all-to-all diagonal should be.
+  3. Validation suite green and the tracked baselines unmoved or improved, both recorded.
+  4. Followup written; this followup resolved.</pre>
     </article>
 </section>
 

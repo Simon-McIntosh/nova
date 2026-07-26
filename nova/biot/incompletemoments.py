@@ -66,6 +66,27 @@ seed is exactly zero, every harmonic after it is exactly zero, and the system
 collapses onto the homogeneous one the complete family solves.  Taken instead as
 ``sin(n pi)`` from a floating-point right angle the seed is 1e-16 and the arc
 would miss the ring it closes onto by that much at every order.
+
+A FOURTH family, which the full turn has no counterpart for at all.  The arc's
+azimuthal rows -- the potential's radial component and the field's toroidal one
+-- carry ``sin phi`` where the other three carry ``cos phi``, and on a full turn
+that odd weight integrates to nothing: it is the parity argument that makes an
+axisymmetric ring carry no toroidal field, and an arc breaks it.  So
+:func:`sine_moments` exists here with nothing above it in
+:mod:`nova.biot.elliptic` to be the partial-range counterpart OF.
+
+It costs almost nothing, and that is a property of the weight rather than luck.
+``sin 2a`` is what the radical's own differential carries -- ``d(Delta^2)`` is
+proportional to ``sin 2a da`` -- so every integral this family is built from
+collapses onto an elementary one in ``Delta``.  Concretely: the two POLE seeds,
+which for the cosine family are incomplete integrals of the third kind, are here
+a single inverse hyperbolic tangent each (:func:`sine_cn_pole_moment`); the
+radical fold and the pole recursion are the same identities of the integrand and
+hold verbatim on the new family; and the family itself is the same tridiagonal
+system with a different boundary term, differenced out of the moments of the ODD
+harmonics ``sin 2na``.  Only that system is shared code -- :func:`_solve` -- and
+the two callers differ in exactly two lines, their right-hand side and their two
+seeds.
 """
 
 from __future__ import annotations
@@ -78,8 +99,12 @@ __all__ = [
     "HEADROOM",
     "SWITCH",
     "cn_pole_moment",
+    "harmonic_cosines",
     "harmonic_moments",
     "harmonic_source",
+    "sine_cn_pole_moment",
+    "sine_moments",
+    "sine_sn_pole_moment",
     "sn_pole_moment",
 ]
 
@@ -128,6 +153,25 @@ def harmonic_source(sine, cosine, count, *, xp=np):
     for order in range(1, count - 1):
         source.append(2.0 * doubled_cosine * source[order] - source[order - 1])
     return source[:count]
+
+
+def harmonic_cosines(sine, cosine, count, *, xp=np):
+    """Return ``[1, cos 2a, cos 4a, ...]`` from the amplitude's own pair.
+
+    The companion of :func:`harmonic_source`, and it is what the sine-weighted
+    family's boundary term is built from.  Same Chebyshev recursion, same reason
+    for taking the pair rather than the angle: at a quarter turn the doubled
+    cosine is exactly ``-1``, so every harmonic is exactly ``(-1)^n`` and the arc
+    meets the ring it closes onto rather than missing it by the order times
+    round-off.
+    """
+    sine = xp.asarray(sine)
+    cosine = xp.asarray(cosine) + xp.zeros_like(sine)
+    doubled_cosine = (cosine - sine) * (cosine + sine)
+    values = [xp.ones_like(doubled_cosine), doubled_cosine]
+    for order in range(1, count - 1):
+        values.append(2.0 * doubled_cosine * values[order] - values[order - 1])
+    return values[:count]
 
 
 def harmonic_moments(
@@ -185,51 +229,326 @@ def harmonic_moments(
     edge = xp.sqrt(complement + parameter * cosine * cosine)
     source = harmonic_source(sine, cosine, top + 2, xp=xp)
     degenerate = parameter > switch
+    held = xp.where(degenerate, parameter, 1.0)
+    return _solve(
+        parameter,
+        complement,
+        first,
+        # P_1 = F - 2(F - E)/k^2, the second sine moment being (F - E)/k^2
+        first - 2.0 * (first - second) / held,
+        [4.0 * term * edge for term in source],
+        # the ASYMPTOTIC moment rather than zero: integrating the definition by
+        # parts twice gives ``P_n = sin 2na/(2n Delta) + O(1/n^2)``, and using it
+        # costs nothing -- it is one term of a series already formed
+        source[top + 1] / (2.0 * (top + 1) * edge),
+        count,
+        headroom,
+        degenerate,
+        xp,
+    )
 
-    # UPWARD, as printed, from the two seeds the elliptic integrals give directly:
-    # P_1 = F - 2(F - E)/k^2, the second sine moment being (F - E)/k^2. It divides
-    # by k^2 once per order and grows by the recursion's dominant branch, so it is
-    # the route only where that branch is nearly one -- which is where the other
-    # route stops contracting, so between them they span the range.
+
+def _solve(
+    parameter,
+    complement,
+    zeroth,
+    first,
+    source,
+    closure,
+    count,
+    headroom,
+    degenerate,
+    xp,
+):
+    """Return a moment family from the three-term system both of them satisfy.
+
+    ``(2n + 1) k^2 M(n+1) + 4n (1 + k'^2) M(n) + (2n - 1) k^2 M(n-1) = source(n)``
+    is the relation the boundary term at a partial range leaves, and it is the
+    SAME operator for the plain harmonic moments and for the sine-weighted ones:
+    only the right-hand side and the two seeds differ, because only the boundary
+    term does.  ``zeroth`` is ``M_0``, ``first`` is ``M_1`` in whatever closed
+    form the family has, and ``closure`` is the asymptotic moment the downward
+    sweep is closed on ``headroom`` orders past the last one wanted.
+
+    Two directions, and ``degenerate`` selects between them per element.  The
+    tridiagonal solve stops contracting as the modulus reaches one -- a target on
+    the source ring -- because the relation then has the exact solution
+    ``(-1)^n`` in its kernel and nothing damps a closure at all; the upward
+    recursion, which divides by ``k^2`` once per order, covers exactly that end
+    for the same reason and by the same number.
+    """
+    top = count + headroom
+    # each direction's arithmetic is held at a benign value where the other one is
+    # selected, so neither divides by a small number it is not being used for
     held = xp.where(degenerate, parameter, 1.0)
     held_complement = xp.where(degenerate, complement, 0.0)
-    upward = [first, first - 2.0 * (first - second) / held]
+    upward = [zeroth, first]
     for order in range(1, count - 1):
         upward.append(
             (
-                4.0 * source[order] * edge
+                source[order]
                 - 4.0 * order * (1.0 + held_complement) * upward[order]
                 - held * (2 * order - 1) * upward[order - 1]
             )
             / (held * (2 * order + 1))
         )
 
-    # DOWNWARD, as the tridiagonal solve the module docstring derives, closed
-    # ``headroom`` orders past the last moment wanted -- on the ASYMPTOTIC moment
-    # rather than on zero.  Integrating the definition by parts twice gives
-    # ``P_n = sin 2na/(2n Delta) + O(1/n^2)`` at the amplitude, and using it costs
-    # nothing: it is one term of a series this routine has already formed.
     held = xp.where(degenerate, 1.0, parameter)
     held_complement = xp.where(degenerate, 0.0, complement)
     diagonal = 4.0 * (1.0 + held_complement)
-    closure = source[top + 1] / (2.0 * (top + 1) * edge)
     pivot = diagonal
     carried = [held * 3.0 / pivot]
-    solution = [(4.0 * source[1] * edge - held * first) / pivot]
+    solution = [(source[1] - held * zeroth) / pivot]
     for order in range(2, top + 1):
         pivot = order * diagonal - held * (2 * order - 1) * carried[-1]
         carried.append(held * (2 * order + 1) / pivot)
-        solution.append(
-            (4.0 * source[order] * edge - held * (2 * order - 1) * solution[-1]) / pivot
-        )
+        solution.append((source[order] - held * (2 * order - 1) * solution[-1]) / pivot)
     downward: list = [None] * (top + 1)
     downward[top] = solution[top - 1] - carried[top - 1] * closure
     for order in range(top - 1, 0, -1):
         downward[order] = solution[order - 1] - carried[order - 1] * downward[order + 1]
-    downward[0] = first
+    downward[0] = zeroth
     return [
         xp.where(degenerate, upward[order], downward[order]) for order in range(count)
     ]
+
+
+def _odd_harmonic_moments(
+    parameter, complement, sine, cosine, count, *, xp=np, headroom, switch
+):
+    """Return ``[T_0, ...]``, ``T_n = integral_0^phi sin(2 n a)/Delta da``.
+
+    The family the sine-weighted moments are differenced out of.  It satisfies
+    the SAME three-term relation as the plain harmonic moments -- take
+    ``d/da [cos 2na Delta]`` where the plain family takes ``d/da [sin 2na
+    Delta]`` -- with the boundary term ``4 [1 - cos 2n(phi) Delta(phi)]`` in
+    place of ``4 sin 2n(phi) Delta(phi)``, and with ``T_0 = 0`` exactly.
+
+    Its first moment is elementary and is the seed the upward direction needs:
+    the relation at ``n = 0`` reads ``2 k^2 T_1 = 4 (1 - Delta)``, and
+
+        T_1 = 2 (1 - Delta)/k^2 = 2 sin^2(phi)/(1 + Delta)
+
+    with the second form free of both the cancellation and the division.
+
+    Unlike the plain family this one stays FINITE where the target sits on the
+    source ring at a quarter-turn amplitude: every ``sin 2na`` vanishes at the
+    point the radical does, so the ratio is bounded and there is no divergence to
+    take a finite part of.  Only the asymptotic closure, which carries ``1/Delta``,
+    has to be held there -- and it is the direction that is not selected.
+    """
+    top = count + headroom
+    edge = xp.sqrt(complement + parameter * cosine * cosine)
+    held_edge = xp.where(edge > 0.0, edge, 1.0)
+    cosines = harmonic_cosines(sine, cosine, top + 2, xp=xp)
+    return _solve(
+        parameter,
+        complement,
+        xp.zeros_like(edge),
+        2.0 * sine * sine / (1.0 + edge),
+        [4.0 * (1.0 - term * edge) for term in cosines],
+        (1.0 - cosines[top + 1] / held_edge) / (2.0 * (top + 1)),
+        count,
+        headroom,
+        parameter > switch,
+        xp,
+    )
+
+
+def sine_moments(
+    amplitude,
+    parameter,
+    count: int,
+    *,
+    complement=None,
+    sine=None,
+    cosine=None,
+    xp=np,
+    headroom: int = HEADROOM,
+    switch: float = SWITCH,
+):
+    """Return ``[S_0, ...]``, ``S_n = integral sin(2a) cos(2 n a)/Delta da``.
+
+    What the arc's AZIMUTHAL rows contract against, and the one moment family
+    the full turn never forms.  Their integrands carry ``sin phi`` where the
+    other three carry ``cos phi``, and on a full turn that odd weight integrates
+    to nothing -- which is the parity argument that makes an axisymmetric ring
+    carry no toroidal field.  An arc breaks it, so the family has to exist.
+
+    Everything above the seed is shared with the plain family rather than new.
+    ``S_n = (T_(n+1) - T_(n-1))/2`` with ``T_(-1) = -T_1``, so ``S_0 = T_1``; the
+    radical fold of :func:`nova.biot.elliptic.harmonic_root_moments` and the pole
+    recursion of :func:`nova.biot.elliptic.harmonic_pole_moments` both hold
+    VERBATIM on this family, because each is an identity of the integrand and
+    neither knows what weight the integrand carries.  Only the two pole SEEDS are
+    the family's own, and both are elementary -- see
+    :func:`sine_cn_pole_moment`.
+
+    Differencing costs nothing that matters.  ``T_n`` and ``S_n`` both fall as
+    ``1/n``, and the parts of the two ``T`` that cancel are the ``1/2n`` terms
+    their boundary values share, so what is left is of the same order as ``S_n``
+    itself; only ABSOLUTE accuracy of order ``eps T_1`` is wanted here, for the
+    reason :func:`harmonic_moments` gives.
+    """
+    amplitude = xp.asarray(amplitude)
+    parameter = xp.asarray(parameter) + xp.zeros_like(amplitude)
+    if complement is None:
+        complement = 1.0 - parameter
+    complement = xp.asarray(complement) + xp.zeros_like(amplitude)
+    if sine is None:
+        sine = xp.sin(amplitude)
+    if cosine is None:
+        cosine = xp.cos(amplitude)
+    sine = xp.asarray(sine) + xp.zeros_like(amplitude)
+    cosine = xp.asarray(cosine) + xp.zeros_like(amplitude)
+    odd = _odd_harmonic_moments(
+        parameter,
+        complement,
+        sine,
+        cosine,
+        count + 1,
+        xp=xp,
+        headroom=headroom,
+        switch=switch,
+    )
+    return [
+        odd[1] if order == 0 else 0.5 * (odd[order + 1] - odd[order - 1])
+        for order in range(count)
+    ]
+
+
+def _reciprocal_arctangent(magnitude, gap, hyperbolic, xp):
+    """Return ``artanh(z)/z``, or ``arctan(z)/z`` where the pole reflects it.
+
+    ``magnitude`` is ``|z|`` and ``hyperbolic`` says which of the two the pole's
+    own sign selects: the two are the SAME series, ``artanh(i z) = i arctan z``,
+    so a pole crossing the radical's root changes the branch and nothing else.
+
+    ``gap`` is ``1 - z``, and it has to be supplied rather than formed because
+    that is where the whole accuracy of the hyperbolic branch sits.  ``z``
+    reaches one as the root reaches the range end -- which is the configuration a
+    slender section produces -- and ``artanh`` there is a logarithm of the gap:
+    subtracting a ratio from one first caps it at ``eps`` over the gap, which is
+    five digits gone at a gap of 1e-11.  Each caller has the gap in closed form
+    as a ratio of positives, and ``log1p`` of ``2 z/(1 - z)`` then holds at both
+    ends of the range -- full RELATIVE accuracy as ``z`` vanishes with the pole,
+    and no cancellation as it approaches one.
+    """
+    held = xp.where(magnitude > 0.0, magnitude, 1.0)
+    value = (
+        xp.where(
+            hyperbolic,
+            0.5 * xp.log1p(2.0 * magnitude / xp.where(gap > 0.0, gap, 1.0)),
+            xp.arctan(magnitude),
+        )
+        / held
+    )
+    # the pole sitting exactly ON the radical's own root, where both branches
+    # meet: the ratio is one there and neither expression forms it
+    return xp.where(magnitude > 0.0, value, 1.0)
+
+
+def sine_cn_pole_moment(shift, parameter, sine, cosine, *, complement=None, xp=np):
+    """Return ``integral_0^phi sin(2a) da/((cos^2 a + shift) Delta)``, a seed.
+
+    The sine-weighted family's counterpart of :func:`cn_pole_moment`, and where
+    that one needs an incomplete integral of the third kind this one is
+    ELEMENTARY -- which is the whole reason the azimuthal rows cost nothing
+    beyond the rows already being formed.  The weight ``sin 2a`` is what the
+    radical's own differential carries: with ``Delta`` as the variable,
+    ``dt = (4/k^2) Delta dDelta`` and the integral collapses onto
+
+        -2 integral_1^Delta dD/(D^2 - q^2),    q^2 = k'^2 - shift k^2
+
+    a single inverse hyperbolic tangent.  Both of the quantities it is built from
+    are formed without a cancellation, which is what a near root needs:
+    ``1 - Delta = k^2 sin^2(phi)/(1 + Delta)`` and
+
+        Delta - q^2 = k^2 [Delta sin^2(phi)/(1 + Delta) + cos^2(phi) + shift]
+
+    so the ``k^2`` divides out of the ratio and the seed is a ratio of positives
+    however close the root comes to the range end.
+
+    ``q^2`` changes sign as the shift passes ``k'^2/k^2`` and the evaluation does
+    not notice: :func:`_reciprocal_arctangent` is the same even function either
+    side.  A shift of exactly zero puts the root ON the far end of the range;
+    zero is returned there, as :func:`cn_pole_moment` returns it, so the arc and
+    the ring agree in the limit the arc closes and the callers that reach it
+    carry a weight on such a pole that is itself exactly zero.
+    """
+    shift = xp.asarray(shift)
+    parameter = xp.asarray(parameter) + xp.zeros_like(shift)
+    if complement is None:
+        complement = 1.0 - parameter
+    complement = xp.asarray(complement) + xp.zeros_like(shift)
+    sine = xp.asarray(sine) + xp.zeros_like(shift)
+    cosine = xp.asarray(cosine) + xp.zeros_like(shift)
+    near, far = sine * sine, cosine * cosine
+    edge = xp.sqrt(complement + parameter * far)
+    pivot = edge * near + (1.0 + edge) * (far + shift)
+    held = xp.where(pivot > 0.0, pivot, 1.0)
+    # the reflected pole, and the two quantities its transcendental needs: both
+    # come out as ratios of positives once k^2 is divided out of the numerator
+    # and the pivot alike
+    partner = complement - shift * parameter
+    root = xp.sqrt(xp.abs(partner))
+    return xp.where(
+        (shift > 0.0) & (pivot > 0.0),
+        2.0
+        * near
+        / held
+        * _reciprocal_arctangent(
+            root * near / held,
+            (1.0 + root) * (1.0 + edge) * (far + shift) / ((edge + root) * held),
+            partner > 0.0,
+            xp,
+        ),
+        0.0,
+    )
+
+
+def sine_sn_pole_moment(shift, parameter, sine, cosine, *, complement=None, xp=np):
+    """Return ``integral_0^phi sin(2a) da/((sin^2 a + shift) Delta)``, the mirror.
+
+    The orientation whose root sits just past the ``a = 0`` end, which is where
+    the range STARTS, so it is reached at every corner rather than occasionally.
+    The same collapse onto one inverse hyperbolic tangent, now with
+
+        2 integral_1^Delta dD/(D^2 - p^2),   p^2 = 1 + shift k^2 > 1
+
+    whose pole is always outside the radical's range, so the argument stays below
+    one for any positive shift and reaches it only at a shift of zero -- where
+    the integral genuinely diverges at the range's own start.  Zero is returned
+    there, as :func:`sn_pole_moment` returns it.
+    """
+    shift = xp.asarray(shift)
+    parameter = xp.asarray(parameter) + xp.zeros_like(shift)
+    if complement is None:
+        complement = 1.0 - parameter
+    complement = xp.asarray(complement) + xp.zeros_like(shift)
+    sine = xp.asarray(sine) + xp.zeros_like(shift)
+    cosine = xp.asarray(cosine) + xp.zeros_like(shift)
+    near = sine * sine
+    edge = xp.sqrt(complement + parameter * cosine * cosine)
+    pivot = near + (1.0 + edge) * shift
+    held = xp.where(pivot > 0.0, pivot, 1.0)
+    # this pole never crosses the radical's root -- it is one PAST the range on
+    # the other side -- so the branch is the hyperbolic one throughout, and the
+    # gap carries the ``1 - p`` its own root supplies without a subtraction
+    root = xp.sqrt(1.0 + shift * parameter)
+    return xp.where(
+        (shift > 0.0) & (pivot > 0.0),
+        2.0
+        * near
+        / held
+        * _reciprocal_arctangent(
+            root * near / held,
+            shift * (1.0 + edge - parameter * near / (1.0 + root)) / held,
+            True,
+            xp,
+        ),
+        0.0,
+    )
 
 
 def cn_pole_moment(shift, parameter, sine, cosine, *, complement=None, xp=np):

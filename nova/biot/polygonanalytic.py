@@ -92,23 +92,12 @@ edge's two ends.  So it is accumulated per corner against the signed number of
 live edges meeting there, and for a section with no horizontal edge it is never
 formed at all.
 
-Conditioning, which is the whole difficulty.  Two effects, and each needs its own
-representation of the same polynomial.
-
-The FIRST is ordinary basis conditioning.  The reduced numerators reach degree
-six and are bounded, over the range, by roughly the squared major radius; written
-in powers of a range variable their coefficients reach ten thousand times that,
-because the monomial basis on a unit interval is that badly conditioned by degree
-six.  Contracting such a numerator against a family of same-signed moments then
-forms the answer out of terms that exceed it by as much, and the loss is real:
-measured over the four acceptance sections it put each edge value at some
-hundreds of ulp rather than a few, and the section sum differences those values
-against each other by up to five decades.  Every numerator here is therefore
-carried in the HARMONIC basis ``cos 2n a``, whose coefficients are bounded by the
-function's own size, and contracted against :func:`nova.biot.elliptic.harmonic_moments`.
-
-The SECOND is the pole structure, and it pulls the other way.  Each denominator
-is a quadratic with one root just past each end of the range,
+Conditioning, which is the whole difficulty.  Every polynomial below is carried
+as a :mod:`nova.biot.rangefunction` object -- two exact end values plus a
+harmonic bulk -- and that module sets out why neither half of the representation
+can be dropped.  What is specific to this reduction is the pole structure it
+answers to.  Each denominator is a quadratic with one root just past each end of
+the range,
 
     G^2 = 4 r^2 (y + d)(x + d),   d = u^2/(2 r (r + c)),   c^2 = u^2 + r^2
     B^2 = 4 b1^2 r^2 (y + p)(x + q)
@@ -116,20 +105,13 @@ is a quadratic with one root just past each end of the range,
 and BOTH ``d`` and ``p`` fall as the square of the section's aspect ratio -- ``d``
 because the edge's height does, ``p`` because the target's offset from the edge's
 extended line does.  A root that close makes the pole's own moment large, so the
-weight it carries -- the numerator's value AT that end -- must be exact in the
-RELATIVE sense, and that value is itself of order the squared aspect ratio.  No
-harmonic series delivers it: it is an alternating sum of coefficients of order
-one.  So each range function is carried as
-
-    N = N(phi = 0) x  +  N(phi = pi) y  +  x y T
-
-with both end values formed directly from the geometry, exactly, and only the
-BULK ``T`` as a harmonic series.  Products multiply end values and sums add them,
-so exactness survives the algebra; and because ``x y/(y + p)`` is bounded by one,
-the rounding left in ``T`` reaches the answer unamplified however close the root
-comes.  Splitting a denominator is then immediate rather than a root-finding
-problem, its two shifts following from its own two end values and its ``x y``
-coefficient.
+weight it carries -- the numerator's value AT that end -- has to be exact in the
+relative sense, which is what the end values supply.  Splitting a denominator is
+then immediate rather than a root-finding problem, its two shifts following from
+its own two end values and its ``x y`` coefficient.  The loss the harmonic bulk
+avoids is measured: written in powers of a range variable instead, each edge
+value came out at some hundreds of ulp rather than a few, and the section sum
+differences those values against each other by up to five decades.
 
 A target ON a section VERTEX drives every one of those small quantities to zero at
 once, and it is a working configuration rather than a contrived one: these sections
@@ -172,6 +154,17 @@ from nova.biot.elliptic import (
     sn_pole_moment,
 )
 from nova.biot.polygon import pack_section
+from nova.biot.rangefunction import (
+    across_the_range,
+    contract,
+    deflate,
+    harmonic_multiply,
+    product,
+    range_function,
+    scaled,
+    sine_squared_times,
+    total,
+)
 
 __all__ = [
     "packed_analytic_greens",
@@ -217,152 +210,11 @@ _NODES = 128
 # One end of the quarter range to the other, which is what both graded panels span.
 _QUARTER = 0.25 * np.pi
 
-# The two range variables as harmonic series, and their product.  ``t = cos 2a``
-# is the first harmonic, so ``x = (1 - t)/2``, ``y = (1 + t)/2`` and
-# ``x y = (1 - cos 4a)/8``.
-_PLAIN = [0.5, -0.5]
-_COMPLEMENT = [0.5, 0.5]
-_BOTH = [0.125, 0.0, -0.125]
-
-
-def _harmonic_multiply(left: list, right: list) -> list:
-    """Return the product of two harmonic series.
-
-    ``cos 2m a cos 2n a = (cos 2(m + n) a + cos 2|m - n| a)/2`` -- a POSITIVE
-    combination, which is why a product of bounded factors keeps bounded
-    coefficients here where a monomial product does not.
-    """
-    if not left or not right:
-        return []
-    out: list = [0.0] * (len(left) + len(right) - 1)
-    for index, one in enumerate(left):
-        for other_index, other in enumerate(right):
-            term = 0.5 * one * other
-            out[index + other_index] = out[index + other_index] + term
-            out[abs(index - other_index)] = out[abs(index - other_index)] + term
-    return out
-
-
-def _harmonic_add(*series: list) -> list:
-    """Return the sum of harmonic series."""
-    length = max((len(term) for term in series), default=0)
-    out: list = [0.0] * length
-    for term in series:
-        for index, coefficient in enumerate(term):
-            out[index] = out[index] + coefficient
-    return out
-
-
-def _harmonic_scale(series: list, factor) -> list:
-    """Return the harmonic series multiplied through by a scalar."""
-    return [coefficient * factor for coefficient in series]
-
-
-def _range(bulk: list, near, far) -> tuple:
-    """Return the range function ``near x + far y + x y bulk``.
-
-    ``near`` is its value at ``phi = 0`` (``a = pi/2``, the source point closest
-    to the target in angle) and ``far`` its value at ``phi = pi``.  Both are held
-    apart from the series so a pole sitting on either end multiplies an exact
-    quantity; see the module docstring.
-    """
-    return (bulk, near, far)
-
-
-def _product(left: tuple, right: tuple) -> tuple:
-    """Return the product of two range functions, end values exact.
-
-    ``x^2 = x - x y`` and ``y^2 = y - x y`` fold the squares back, leaving the
-    cross term ``-(near1 - far1)(near2 - far2)`` in the bulk -- so the product's
-    end values are the products of the factors' own, formed without touching the
-    series.
-    """
-    bulk, near, far = left
-    other_bulk, other_near, other_far = right
-    return (
-        _harmonic_add(
-            _harmonic_multiply(_BOTH, _harmonic_multiply(bulk, other_bulk)),
-            # each factor's own end values ride on the OTHER factor's bulk, and the
-            # pair collapses onto the single two-term series they span
-            _harmonic_multiply([0.5 * (near + far), 0.5 * (far - near)], other_bulk),
-            _harmonic_multiply(
-                [0.5 * (other_near + other_far), 0.5 * (other_far - other_near)], bulk
-            ),
-            [-(near - far) * (other_near - other_far)],
-        ),
-        near * other_near,
-        far * other_far,
-    )
-
-
-def _sum(*terms: tuple) -> tuple:
-    """Return the sum of range functions."""
-    return (
-        _harmonic_add(*[term[0] for term in terms]),
-        sum(term[1] for term in terms),
-        sum(term[2] for term in terms),
-    )
-
-
-def _times(term: tuple, factor) -> tuple:
-    """Return the range function multiplied through by a scalar."""
-    return (_harmonic_scale(term[0], factor), term[1] * factor, term[2] * factor)
-
-
-def _across_the_range(term: tuple) -> list:
-    """Return the range function as one harmonic series."""
-    bulk, near, far = term
-    return _harmonic_add(
-        [0.5 * (near + far), 0.5 * (far - near)],
-        _harmonic_multiply(_BOTH, bulk),
-    )
-
-
-def _sine_squared_times(series: list) -> tuple:
-    """Return ``sin^2 phi`` times a harmonic series, as a range function.
-
-    ``sin^2 phi = 4 x y`` vanishes at both ends, so the product's end values are
-    exactly zero whatever the series is -- and a numerator carrying this factor
-    puts no weight at all on either pole.  Which is why only the arctangent term,
-    the one term without it, needs its end values from the geometry.
-    """
-    return (_harmonic_scale(series, 4.0), 0.0 * series[0], 0.0 * series[0])
-
-
-def _contract(numerator: list, moments: list):
-    """Return the harmonic series contracted against a moment family."""
-    total = 0.0
-    for order, coefficient in enumerate(numerator):
-        total = total + coefficient * moments[order]
-    return total
-
-
-def _deflate(series: list, root):
-    """Return ``(quotient, value)`` with ``series = (t - root) quotient + value``.
-
-    Clenshaw's recursion, which is the harmonic basis's synthetic division.  Run
-    downward it follows the branch that grows away from the range, so it is the
-    stable direction for a root outside it -- and both denominators' roots are
-    outside it by construction.
-    """
-    degree = len(series) - 1
-    if degree < 1:
-        return [], (series[0] if series else 0.0)
-    quotient: list = [0.0] * degree
-    upper = 0.0
-    current = 0.0
-    for order in range(degree, 1, -1):
-        current, upper = 2.0 * series[order] + 2.0 * root * current - upper, current
-        quotient[order - 1] = current
-    quotient[0] = series[1] + root * current - 0.5 * upper
-    return quotient, series[0] + root * quotient[0] - 0.5 * current
-
-
 # ``d/dx`` of ``G^2`` over the target radius squared, and the range variable
 # itself: both are the same fixed pair of end values for every target, so they are
 # built once out of scalars rather than once per column.
-_RING_SLOPE_OVER_RADIUS_SQUARED = _range([], -4.0, 4.0)
-_VARIABLE = _range([], -1.0, 1.0)
+_RING_SLOPE_OVER_RADIUS_SQUARED = range_function([], -4.0, 4.0)
+_VARIABLE = range_function([], -1.0, 1.0)
 
 
 @lru_cache(maxsize=None)
@@ -570,9 +422,9 @@ class _Vertex:
 
         # the corner's own range functions, each with its two end values formed
         # from the geometry
-        self.cosine = _range([], one, -one)
-        self.edge_radius = _range([], offset, radius_sum)
-        self.ring_squared = _range([4.0 * r * r], u * u, u * u)
+        self.cosine = range_function([], one, -one)
+        self.edge_radius = range_function([], offset, radius_sum)
+        self.ring_squared = range_function([4.0 * r * r], u * u, u * u)
         self.ring = self.split(self.ring_squared)
         self.ring_residual = self._first_residual(nodes) if residual else None
 
@@ -674,11 +526,11 @@ class _Vertex:
 
     def plain(self, term: tuple):
         """Return ``integral term/Delta da`` over the quarter range."""
-        return _contract(_across_the_range(term), self.moments)
+        return contract(across_the_range(term), self.moments)
 
     def against_root(self, term: tuple):
         """Return ``integral term Delta da`` over the quarter range."""
-        return _contract(_across_the_range(term), self.root_moments)
+        return contract(across_the_range(term), self.root_moments)
 
     def _pole(self, numerator: tuple, shift, seed, family, mirrored: bool):
         """Return ``integral numerator/((v + shift) Delta) da`` past one end.
@@ -702,19 +554,19 @@ class _Vertex:
         bulk, near, far = numerator
         end, other = (far, near) if mirrored else (near, far)
         root = (1.0 if mirrored else -1.0) * (1.0 + 2.0 * shift)
-        quotient, value = _deflate(bulk, root) if bulk else ([], 0.0)
+        quotient, value = deflate(bulk, root) if bulk else ([], 0.0)
         held = (
             (end * (1.0 + shift) - other * shift) * seed
             + (other - end) * self.moments[0]
-            + _contract(
-                _harmonic_multiply([0.5 + shift, 0.5 if mirrored else -0.5], bulk),
+            + contract(
+                harmonic_multiply([0.5 + shift, 0.5 if mirrored else -0.5], bulk),
                 self.moments,
             )
             - shift
             * (1.0 + shift)
             * (
                 value * seed
-                + (-2.0 if mirrored else 2.0) * _contract(quotient, self.moments)
+                + (-2.0 if mirrored else 2.0) * contract(quotient, self.moments)
             )
         )
         if family is None:
@@ -722,7 +574,7 @@ class _Vertex:
         return self.xp.where(
             shift <= _POLE_SWITCH,
             held,
-            _contract(_across_the_range(numerator), family),
+            contract(across_the_range(numerator), family),
         )
 
     def across(self, numerator: tuple, split: tuple):
@@ -801,18 +653,18 @@ class _Vertex:
         """
         r = self.radius
         u = self.level
-        core = _times(
-            _product(
+        core = scaled(
+            product(
                 self.cosine,
-                _sum(
+                total(
                     self.ring_squared,
-                    _times(_product(self.edge_radius, self.cosine), -r),
+                    scaled(product(self.edge_radius, self.cosine), -r),
                 ),
             ),
             -1.0,
         )
         first = 0.5 * self.ring_residual + (0.5 * r / self.span) * self.across(
-            _sine_squared_times(_across_the_range(core)), self.ring
+            sine_squared_times(across_the_range(core)), self.ring
         )
         return 4.0 * u * r * first, 4.0 * r * first, 4.0 * u * self.ring_residual
 
@@ -849,16 +701,16 @@ class _Edge:
             (ra - r) * (zb - z) - (rb - r) * (za - z)
         ) / (zb - za)
         self.plane_radius_value = r1 = r + plane_offset
-        self.plane_radius = _range([], plane_offset, r1 + r)
-        self.plane_squared = _range(
+        self.plane_radius = range_function([], plane_offset, r1 + r)
+        self.plane_squared = range_function(
             [4.0 * b1 * b1 * r * r], plane_offset**2, (r1 + r) ** 2
         )
-        self.edge_slope = _range(
+        self.edge_slope = range_function(
             [],
             -4.0 * r1 * r - 4.0 * b1 * b1 * r * r,
             -4.0 * r1 * r + 4.0 * b1 * b1 * r * r,
         )
-        self.edge_slope_over_radius = _range(
+        self.edge_slope_over_radius = range_function(
             [], -4.0 * r1 - 4.0 * b1 * b1 * r, -4.0 * r1 + 4.0 * b1 * b1 * r
         )
 
@@ -946,12 +798,12 @@ class _Edge:
         # the plane denominator is the edge's, its split this corner's modulus
         plane = vertex.split(self.plane_squared)
         plane_residual = self._second_residual(vertex)
-        gamma = _range([], u + b1 * vertex.offset, u + b1 * vertex.radius_sum)
+        gamma = range_function([], u + b1 * vertex.offset, u + b1 * vertex.radius_sum)
         # N = u X - b1 G^2.  Its value at either end collapses onto u times the
         # plane radius there, because r' - b1 u is r1 exactly -- which is what makes
         # the near-end weight u (r1 - r), of order the squared aspect ratio, a
         # product of exact quantities instead of an alternating sum.
-        arctan_numerator = _range(
+        arctan_numerator = range_function(
             [-4.0 * b1 * r * r], u * self.plane_offset, u * (r1 + r)
         )
         # each of the arctangent's three pieces carries an explicit factor of the
@@ -960,15 +812,15 @@ class _Edge:
         # on the axis, where all three vanish together.  A range function's
         # derivative in x follows from its end values and its bulk directly:
         # d/dx (n x + f y + x y T) = (n - f) + (y - x) T for constant T.
-        arctan_slope_over_radius = _range(
+        arctan_slope_over_radius = range_function(
             [], -2.0 * u + 4.0 * b1 * r, -2.0 * u - 4.0 * b1 * r
         )
 
         # the three components differ only in the weights they put on the same
         # reductions, so every product that does not carry a weight is formed once
-        plane_derivative = _product(gamma, self.edge_slope)
-        over_ring = _product(arctan_numerator, _RING_SLOPE_OVER_RADIUS_SQUARED)
-        over_plane = _product(arctan_numerator, self.edge_slope_over_radius)
+        plane_derivative = product(gamma, self.edge_slope)
+        over_ring = product(arctan_numerator, _RING_SLOPE_OVER_RADIUS_SQUARED)
+        over_plane = product(arctan_numerator, self.edge_slope_over_radius)
 
         def against_second_arsinh(build):
             """Return ``integral build arsinh beta2 da`` over the quarter range.
@@ -982,13 +834,13 @@ class _Edge:
             carrying ``B^2`` cancels the denominator outright.  Weights up to degree
             three appear: three in the flux, two and one in the field.
             """
-            weight = _across_the_range(build()) + [0.0 * one] * 4
+            weight = across_the_range(build()) + [0.0 * one] * 4
             # the antiderivative of the oscillatory part is
             # sum_n w_n sin 2n a/(2n) = sin 2a times a polynomial in cos 2a,
             # because sin 2n a factors that way; the mean is the harmonic
             # coefficient of order zero and leaves the residual quadrature
             mean = weight[0]
-            core = _sine_squared_times(
+            core = sine_squared_times(
                 [
                     0.5 * weight[1] + weight[3] / 6.0,
                     0.5 * weight[2],
@@ -999,7 +851,7 @@ class _Edge:
                 mean * plane_residual
                 + (2.0 * b1 * r / (a0 * a)) * vertex.plain(core)
                 + (0.5 / (a0 * a))
-                * vertex.across(_product(core, plane_derivative), plane)
+                * vertex.across(product(core, plane_derivative), plane)
             )
 
         # sin phi -> 0 at both ends drives beta3 to infinity, so the arctangent lands
@@ -1049,30 +901,31 @@ class _Edge:
             boundary = -0.5 * (lower * at_half - upper * at_zero)
             # the weight is the same fixed polynomial for every target, so it is
             # built once out of scalars rather than once per column
-            weight = _range([], 0.0, 0.0)
+            weight = range_function([], 0.0, 0.0)
             for coefficient in reversed(primitive):
-                weight = _sum(
-                    _product(weight, _VARIABLE), _range([], coefficient, coefficient)
+                weight = total(
+                    product(weight, _VARIABLE),
+                    range_function([], coefficient, coefficient),
                 )
 
             return boundary + (0.25 / a) * (
-                2.0 * vertex.plain(_product(weight, arctan_slope_over_radius))
-                - r * vertex.across(_product(weight, over_ring), vertex.ring)
-                - vertex.across(_product(weight, over_plane), plane)
+                2.0 * vertex.plain(product(weight, arctan_slope_over_radius))
+                - r * vertex.across(product(weight, over_ring), vertex.ring)
+                - vertex.across(product(weight, over_plane), plane)
             )
 
         # the flux, eq 10b weighted by cos phi
         flux = (
-            (2.0 * a / a02) * vertex.against_root(_product(vertex.cosine, gamma))
+            (2.0 * a / a02) * vertex.against_root(product(vertex.cosine, gamma))
             + 4.0
             * against_second_arsinh(
-                lambda: _times(
-                    _product(
+                lambda: scaled(
+                    product(
                         vertex.cosine,
-                        _sum(
+                        total(
                             self.plane_squared,
-                            _times(
-                                _product(vertex.cosine, self.plane_radius),
+                            scaled(
+                                product(vertex.cosine, self.plane_radius),
                                 2.0 * a02 * r,
                             ),
                         ),
@@ -1086,12 +939,12 @@ class _Edge:
         # the radial field, eq 11b's first component
         radial = (4.0 * a / a02) * vertex.against_root(vertex.cosine) + 4.0 * (
             against_second_arsinh(
-                lambda: _times(
-                    _product(
+                lambda: scaled(
+                    product(
                         vertex.cosine,
-                        _sum(
-                            _range([], r1 * one, r1 * one),
-                            _times(vertex.cosine, b1 * b1 * r),
+                        total(
+                            range_function([], r1 * one, r1 * one),
+                            scaled(vertex.cosine, b1 * b1 * r),
                         ),
                     ),
                     -b1 / (a02 * a0),
@@ -1111,10 +964,10 @@ class _Edge:
         vertical = (
             4.0
             * against_second_arsinh(
-                lambda: _times(
-                    _sum(
-                        _range([], b1 * b1 * r1 * one, b1 * b1 * r1 * one),
-                        _times(vertex.cosine, -(2.0 * a02 - 1.0) * r),
+                lambda: scaled(
+                    total(
+                        range_function([], b1 * b1 * r1 * one, b1 * b1 * r1 * one),
+                        scaled(vertex.cosine, -(2.0 * a02 - 1.0) * r),
                     ),
                     1.0 / (a02 * a0),
                 )

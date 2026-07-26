@@ -146,17 +146,13 @@ from nova.biot.elliptic import (
     POLE_HEADROOM,
     cn_pole_moment,
     harmonic_moments,
-    harmonic_pole_moments,
-    harmonic_root_moments,
     sn_pole_moment,
 )
 from nova.biot.gradedresidual import QUARTER, graded_residual
+from nova.biot.momentchannel import Channel
 from nova.biot.polygon import pack_section
 from nova.biot.rangefunction import (
     across_the_range,
-    contract,
-    deflate,
-    harmonic_multiply,
     product,
     range_function,
     scaled,
@@ -176,18 +172,6 @@ __all__ = [
 # the root moments, which fold each harmonic onto its neighbours, reach the same
 # order as the plain ones.
 _HARMONICS = 8
-
-# Where a denominator's root is far enough past the range for the pole family's own
-# moments to be contracted directly, and near enough below it for the weight on the
-# pole to have to be taken out exactly.  The two routes overlap comfortably: at this
-# shift the direct family decays by 0.38 per order and the deflation the other route
-# runs grows by three, so each holds a couple of orders inside round-off.
-_POLE_SWITCH = 0.25
-
-# Beyond this the factor varies across the range by less than round-off, so its
-# root's exact distance stops mattering and holding it here keeps the pole family's
-# recursion inside the exponent range.
-_POLE_CEILING = 1e12
 
 # Nodes for the two arsinh integrals the reduction leaves numerical, split evenly
 # between the two graded panels.  What they resolve is the O(1) variation between the
@@ -270,10 +254,22 @@ class _Vertex:
 
         # one order past the harmonics for the root moments, and the pole family's
         # headroom past that, since its system is closed there
-        self.moments = harmonic_moments(
-            parameter, _HARMONICS + POLE_HEADROOM + 2, complement=complement, xp=xp
+        self.channel = Channel(
+            harmonic_moments(
+                parameter, _HARMONICS + POLE_HEADROOM + 2, complement=complement, xp=xp
+            ),
+            parameter,
+            harmonics=_HARMONICS,
+            cn_seed=lambda shift: cn_pole_moment(
+                shift, parameter, parameter_complement=complement, xp=xp
+            ),
+            sn_seed=lambda shift: sn_pole_moment(
+                shift, parameter, parameter_complement=complement, xp=xp
+            ),
+            xp=xp,
         )
-        self.root_moments = harmonic_root_moments(self.moments, parameter, xp=xp)
+        self.moments = self.channel.moments
+        self.root_moments = self.channel.root_moments
 
         # the corner's own range functions, each with its two end values formed
         # from the geometry
@@ -283,181 +279,28 @@ class _Vertex:
         self.ring = self.split(self.ring_squared)
         self.ring_residual = self._first_residual(nodes) if residual else None
 
+    # The moment machinery is :class:`nova.biot.momentchannel.Channel`, which both
+    # reductions share; these read through to this corner's own family so that
+    # :class:`_Edge` asks the corner for a contraction rather than reaching past it.
     def split(self, denominator: tuple) -> tuple:
-        """Return one denominator's two pole shifts, weights and seeds.
-
-        A denominator ``L x y + n x + f y`` factors as ``L (y + p)(x + q)`` with
-        ``n = L p (1 + q)`` and ``f = L q (1 + p)``, so the shifts follow from the
-        two end values and the ``x y`` coefficient without a root-finding step and
-        without a subtraction: ``p`` comes from the positive root of
-        ``p^2 + p(1 + f/L - n/L) - n/L``, taken by its pivot, and ``q`` from ``f``
-        over ``L (1 + p)``.  Both denominators are strictly positive over the range,
-        so both shifts are non-negative and each root lies past its own end.
-
-        Partial fractions between the two FACTORS rather than between the two roots
-        divides by ``1 + p + q``, of order one however close either root comes to
-        the range.  A vanishing ``x y`` coefficient -- a vertical edge, whose ``B^2``
-        is linear -- leaves one factor, on whichever side its single root falls, and
-        a vanishing end difference too -- a target on the axis -- leaves a constant
-        denominator with no factor at all.
+        """Return one denominator's two pole shifts, weights, seeds and families.
 
         The ring denominator is the corner's own; the plane denominator is the
         edge's, and :class:`_Edge` splits it against this corner's modulus.
         """
-        xp = self.xp
-        bulk, near, far = denominator
-        leading = bulk[0] if bulk else 0.0 * near
-        curved = leading != 0.0
-        held_leading = xp.where(curved, leading, 1.0)
-        offset = near / held_leading
-        pivot = 1.0 + far / held_leading - offset
-        shift_y = xp.where(
-            curved,
-            2.0 * offset / (pivot + xp.sqrt(pivot * pivot + 4.0 * offset)),
-            0.0,
-        )
-        shift_x = xp.where(curved, far / (held_leading * (1.0 + shift_y)), 0.0)
-
-        rising = (~curved) & (far > near)
-        falling = (~curved) & (far < near)
-        gap = xp.where(curved, 1.0, xp.where(rising, far - near, near - far))
-        held_gap = xp.where(gap != 0.0, gap, 1.0)
-        shift_y = xp.where(rising, near / held_gap, shift_y)
-        shift_x = xp.where(falling, far / held_gap, shift_x)
-        live_y = curved | rising
-        live_x = curved | falling
-
-        divisor = xp.where(curved, held_leading * (1.0 + shift_y + shift_x), held_gap)
-        shift_y = xp.where(live_y, shift_y, 1.0)
-        shift_x = xp.where(live_x, shift_x, 1.0)
-        # a root so far past the range that the factor is constant across it to
-        # round-off is held here, where the family's own decay still separates its
-        # orders; past that the factor IS constant and the family is P/shift
-        capped_y = xp.minimum(shift_y, _POLE_CEILING)
-        capped_x = xp.minimum(shift_x, _POLE_CEILING)
-        seed_y = cn_pole_moment(
-            capped_y,
-            self.parameter,
-            parameter_complement=self.parameter_complement,
-            xp=xp,
-        )
-        seed_x = sn_pole_moment(
-            capped_x,
-            self.parameter,
-            parameter_complement=self.parameter_complement,
-            xp=xp,
-        )
-        return (
-            xp.where(live_y, 1.0 / divisor, 0.0),
-            xp.where(live_x, 1.0 / divisor, 0.0),
-            xp.where(live_y | live_x, 0.0, 1.0 / xp.where(near != 0.0, near, 1.0)),
-            shift_y,
-            shift_x,
-            seed_y,
-            seed_x,
-            self._family(capped_y, seed_y, False),
-            self._family(capped_x, seed_x, True),
-        )
-
-    def _family(self, shift, seed, mirrored: bool):
-        """Return the pole family, or nothing where no root is far enough out.
-
-        The family is the route for a FAR root only, and a far root is the
-        exception: both of the ring denominator's shifts are the edge's own height
-        over the ring span, squared, and the plane's near one is the target's
-        offset from the edge's line.  Skipping it when no column needs it takes a
-        tridiagonal solve of forty orders out of the common build.
-
-        The skip needs the shift's VALUE, and a traced evaluation does not have one
-        -- so it is available on the host only, and a trace forms the family for
-        every corner and lets :meth:`_pole`'s own selection discard it.  That is the
-        one place the two paths differ in cost rather than in arithmetic.
-        """
-        if self.xp is np and not np.any(shift > _POLE_SWITCH):
-            return None
-        return harmonic_pole_moments(
-            shift, seed, self.moments, _HARMONICS + 1, mirrored=mirrored
-        )
+        return self.channel.split(denominator)
 
     def plain(self, term: tuple):
         """Return ``integral term/Delta da`` over the quarter range."""
-        return contract(across_the_range(term), self.moments)
+        return self.channel.plain(term)
 
     def against_root(self, term: tuple):
         """Return ``integral term Delta da`` over the quarter range."""
-        return contract(across_the_range(term), self.root_moments)
-
-    def _pole(self, numerator: tuple, shift, seed, family, mirrored: bool):
-        """Return ``integral numerator/((v + shift) Delta) da`` past one end.
-
-        Two routes, and which one holds depends on how far past the end the root
-        sits.  A NEAR root is the hard case and the reason for the end values: the
-        pole's own moment grows without bound as the root reaches the range, so the
-        weight on it -- the numerator's value AT that end -- must be exact in the
-        relative sense, which no series of harmonics delivers.  Taking it out
-        analytically leaves the rest of the numerator reaching the pole only through
-        ``x y/(v + shift)``, bounded by one, and a deflation of the bulk whose own
-        rounding the shift then multiplies away.
-
-        A FAR root is the easy case and the first route is the wrong one for it:
-        the terms it separates grow with the shift while their sum falls, so at a
-        shift of a hundred it has thrown away four decades.  There the pole is no
-        pole at all -- the factor varies by a fraction of itself across the range --
-        and the family's own moments, which need no exactness anywhere, are
-        contracted directly.
-        """
-        bulk, near, far = numerator
-        end, other = (far, near) if mirrored else (near, far)
-        root = (1.0 if mirrored else -1.0) * (1.0 + 2.0 * shift)
-        quotient, value = deflate(bulk, root) if bulk else ([], 0.0)
-        held = (
-            (end * (1.0 + shift) - other * shift) * seed
-            + (other - end) * self.moments[0]
-            + contract(
-                harmonic_multiply([0.5 + shift, 0.5 if mirrored else -0.5], bulk),
-                self.moments,
-            )
-            - shift
-            * (1.0 + shift)
-            * (
-                value * seed
-                + (-2.0 if mirrored else 2.0) * contract(quotient, self.moments)
-            )
-        )
-        if family is None:
-            return held
-        return self.xp.where(
-            shift <= _POLE_SWITCH,
-            held,
-            contract(across_the_range(numerator), family),
-        )
+        return self.channel.against_root(term)
 
     def across(self, numerator: tuple, split: tuple):
-        """Return ``integral numerator/(denominator Delta) da``.
-
-        Split between the denominator's two factors, each taken with the range
-        variable that vanishes where its own root sits.  The two factors sum to
-        ``1 + p + q``, so partial fractions between them divides by a quantity of
-        order one however close either root comes to the range -- where a partial
-        fraction between the two ROOTS would divide by their difference, which
-        falls as the square of the section's aspect ratio.
-        """
-        (
-            weight_y,
-            weight_x,
-            weight_plain,
-            shift_y,
-            shift_x,
-            seed_y,
-            seed_x,
-            family_y,
-            family_x,
-        ) = split
-        return (
-            weight_plain * self.plain(numerator)
-            + weight_y * self._pole(numerator, shift_y, seed_y, family_y, False)
-            + weight_x * self._pole(numerator, shift_x, seed_x, family_x, True)
-        )
+        """Return ``integral numerator/(denominator Delta) da``."""
+        return self.channel.across(numerator, split)
 
     def _first_residual(self, nodes: int):
         """Evaluate the ``arsinh beta1`` integral, over the ring denominator.

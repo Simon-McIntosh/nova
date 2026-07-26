@@ -763,7 +763,7 @@ def test_the_corner_work_is_done_once_per_corner(section, monkeypatch):
         reduction, "harmonic_moments", counted("moments", reduction.harmonic_moments)
     )
     monkeypatch.setattr(
-        reduction, "_graded_residual", counted("residuals", reduction._graded_residual)
+        reduction, "graded_residual", counted("residuals", reduction.graded_residual)
     )
     polygon_analytic_flux(np.array([6.5]), np.array([0.1]), SECTIONS[section])
     moments, residuals = BUILD_COUNTS[section]

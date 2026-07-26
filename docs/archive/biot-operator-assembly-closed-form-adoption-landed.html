@@ -17,7 +17,7 @@
 <main class="plan-doc">
   <h1>The closed form becomes the shipped exact route, and a plasma cell becomes a section</h1>
   <p><a href="/nova/biot-operator-assembly.html">← back to the evergreen plan</a> ·
-     landed 2026-07-26 · develop <code>ccc784fa</code>
+     landed 2026-07-26 · develop <code>a32d8a9c</code>
      (<code>9dff4ceb</code> · <code>c9a015ac</code> · <code>9259266b</code> ·
      <code>146fd27d</code> · <code>4b6e641c</code>) ·
      full lane 2014 passed / 0 failed / 110 skipped ·
@@ -132,17 +132,36 @@
   parts live and amortises them, so it improves 38×. An exact-everywhere column
   hands the kernel all 2,339 pairs at once and the closed form wins five-fold; the
   three-band scheme hands its near band about thirteen, an order below the
-  crossing, and there the quadrature is 2.3× cheaper — which makes a banded build
-  1.9× dearer with the closed form on. Both docstrings now say so. It is
-  deliberately not switched automatically on batch width: which kernel ran would
-  then depend on how a caller happened to group its pairs, and a stored operator's
-  values have to be reproducible from its geometry alone.</p>
+  crossing, and there it loses. <strong>Three figures at three scopes, all
+  measured, none of them the others</strong> — the near-band kernel call alone is
+  <strong>4.1× dearer</strong> in closed form (984.2 µs/pair against 4023.4), which
+  dilutes to <strong>2.3×</strong> over a whole banded column (13.6 against 31.5)
+  and <strong>1.9×</strong> over a real 560-cell build (19.2 s against 36.4). Both
+  docstrings now carry all three with their scopes; an earlier draft of this record
+  quoted the column figure as if it were the band's. It is deliberately not
+  switched automatically on batch width: which kernel ran would then depend on how
+  a caller happened to group its pairs, and a stored operator's values have to be
+  reproducible from its geometry alone.</p>
   <p>The band populations are what turn a per-band cost into a column rate, and a
   real grid is not the idealised section: its wall cuts the boundary ring into
-  three- to twelve-corner cells and puts <strong>12.1 % of pairs on the mid
-  rule where an idealised hexagon puts 2.6 %</strong> (near 2.1 % / 0.56 %). That is
-  the whole of why the banded rows in the build table sit above their column
-  figures.</p>
+  three- to twelve-corner cells, <strong>120 of a 560-cell grid's carrying enough
+  skew for the wide 16-radius far seam</strong>, so it puts <strong>12.1 % of pairs
+  on the mid rule where an idealised hexagon puts 2.6 %</strong> (near 2.1 % /
+  0.56 %). At the mid rule's 268 µs/pair against the far filament's 0.7 that
+  fraction is most of a banded column's cost, so <strong>a banded rate projected
+  from an idealised hexagon is optimistic by about 4.5×</strong> — 13.6 projected
+  against 61.1 measured on a real build. That is the whole of why the banded rows
+  in the build table sit above their column figures, and it is a trap worth
+  naming.</p>
+  <p>Four recorded per-band figures moved, all by the same mechanism and none by a
+  kernel change, so they are corrected in <code>BASELINE.md</code> rather than
+  explained away: the far-band filament was recorded at 2.5/5.0 µs/pair and
+  measures 0.7/1.8 (3.6× / 2.8× cheaper — 2266/1978 pairs in one call here against
+  a throwaway driver's few); the near band was recorded at 871/1012 and measures
+  984.2/1109.3 (13 % / 10 % higher, on thirteen pairs); and the point filament was
+  recorded at 0.42 µs/pair on a 512-target spiral and measures 0.2 on a
+  2,339-target cloud. The two figures the whole cost case rests on — 858 µs/pair
+  quadrature and 171.4 closed form — both reproduce, at 849.7 and 162.9.</p>
 
   <figure>
     <img src="/nova/figures/biot-operator-assembly/adoption_cost.png"
@@ -273,11 +292,17 @@
   B<sub>Z</sub></strong>. Refining it to 1024 panels closes that to
   <strong>2.1e-12 of the closed form's value</strong>. Once again the closed form is
   what the quadrature converges to.</p>
-  <p>A consequence for cost that a synthetic hexagon hides: because the closed form
-  is organised by corner, its rate tracks the corner count, so a grid gets
-  <em>cheaper</em> per pair as it refines and the clipped fraction falls — mean
-  corners 9.45 at 47 cells against 7.26 at 548. The 2000-cell projections above are
-  conservative for that reason.</p>
+  <p>A consequence for cost that a synthetic hexagon hides, and one that runs the
+  other way: because the closed form is organised by corner, its rate tracks the
+  corner count, so a grid gets <em>cheaper</em> per pair as it refines and the
+  clipped fraction falls. Measured on the mesh alone — mean corners 7.82 at 65
+  cells, 6.09 at 560, 5.99 at 2120, the six-corner fraction climbing 30.8 % →
+  75.0 % → 87.4 %. So a 2000-cell grid is essentially the idealised hexagon case,
+  and the 6.6 % real-grid penalty measured at 560 cells (173.7 µs/pair against the
+  idealised 162.9) shrinks towards nothing by 2000. The 2000-cell projection is
+  bracketed at <strong>10.9–11.6 min on one core</strong> and conservative for that
+  reason. (Corner counts here drop the repeated closing vertex; a count that keeps
+  it reads one higher.)</p>
 
   <h2>The default flip, against the criteria it was gated on</h2>
   <p>The flip was gated on the physics-spine-adoption criteria and on this plan's

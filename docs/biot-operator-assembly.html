@@ -387,8 +387,9 @@
         docstrings — <strong>the two exact kernels cross at 64 pairs per call</strong>
         (the closed form improves 38× with batch width, the quadrature 1.3×), so the
         kernel and binning flags are independent in meaning and NOT in cost: the
-        closed form wins 5.2× on a whole column and loses 2.3× on a thirteen-pair
-        near band. Merged to develop <code>ccc784fa</code>. Full record:
+        closed form wins 5.2× on a whole column and loses on a thirteen-pair near
+        band — 4.1× on that call, 2.3× over a banded column, 1.9× over a real build.
+        Merged to develop <code>a32d8a9c</code>. Full record:
         <a href="archive/biot-operator-assembly-closed-form-adoption-landed.html">closed-form adoption landed</a>.
       </p>
       <figure>

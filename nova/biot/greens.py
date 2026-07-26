@@ -85,6 +85,20 @@ def _filament_gap(r: np.ndarray, dz: np.ndarray, ar: float) -> np.ndarray:
     return (ar - r) ** 2 + dz**2
 
 
+def _held_parameter(k2: np.ndarray) -> np.ndarray:
+    """Return the parameter bounded at one, for the SECOND kind alone.
+
+    ``4 a R`` and ``(a + R)^2 + dz^2`` are formed independently, so their ratio can
+    land an ulp ABOVE one for a target within about ``1e-8`` ring radii of the
+    filament -- and whether it does depends on the radius, which is why a unit ring
+    trips it one ULP off the filament and a 6.2 m one does not.  ``E`` is bounded and
+    smooth through ``m = 1``, where it is exactly one, so holding it there costs
+    nothing anywhere; the FIRST kind, which is the sensitive one, never sees the
+    parameter at all.
+    """
+    return np.minimum(k2, 1.0)
+
+
 def greens_psi(rs: np.ndarray, zs: np.ndarray, ar: float, az: float) -> np.ndarray:
     """Total poloidal flux ``Phi`` [Wb per A] at targets from a loop at ``(ar, az)``.
 
@@ -111,7 +125,7 @@ def greens_psi(rs: np.ndarray, zs: np.ndarray, ar: float, az: float) -> np.ndarr
     complement = _filament_gap(r, dz, ar) / span
     k = np.sqrt(k2)
     big_k = scipy.special.ellipkm1(complement)
-    big_e = scipy.special.ellipe(k2)
+    big_e = scipy.special.ellipe(_held_parameter(k2))
     pref = 2.0 * MU0 * np.sqrt(ar * np.maximum(r, _R_FLOOR)) / np.maximum(k, _R_FLOOR)
     psi = pref * (0.5 * (1.0 + complement) * big_k - big_e)
     # at R->0 the loop encloses no flux at the axis target -> Phi->0
@@ -146,7 +160,7 @@ def greens_bz_br(
     k2 = 4.0 * ar * r / span
     gap = _filament_gap(r, dz, ar)
     big_k = scipy.special.ellipkm1(gap / span)
-    big_e = scipy.special.ellipe(k2)
+    big_e = scipy.special.ellipe(_held_parameter(k2))
     pre = MU0 / (2.0 * np.pi)
     # Both brackets are printed with the pole's numerator as a difference of terms of
     # order a^2 whose value is of order a d -- so it arrives with relative error

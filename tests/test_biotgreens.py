@@ -367,3 +367,53 @@ def test_the_section_skew_dominates_an_asymmetric_cell_far_field():
         assert worst[reach, 3] < 0.2 * worst[reach, 2]
     assert worst[7.8, 3] > 1e-6
     assert worst[16.0, 3] < 1e-6
+
+
+# A filament model cannot answer for a point ON the filament, and the one thing it
+# must not do is answer for a point NEAR it instead. Both halves are pinned here.
+
+
+def test_a_target_on_the_filament_returns_the_divergence():
+    """No phantom standoff: the flux diverges and the field has no limit at all.
+
+    ``psi`` grows without bound from every direction, so ``inf`` is its limit.
+    ``B_Z`` does not have one -- approached radially in the plane its sign follows
+    which side the target is on -- so ``nan`` is the honest answer rather than either
+    infinity. What both replace is a finite number: capping the modulus and flooring
+    the squared distance used to return the kernel's value for a target 1.4 um away,
+    with nothing in the result to say so.
+    """
+    for radius in (0.9, 1.0, 6.2):
+        target = np.array([radius])
+        level = np.array([0.0])
+        with np.errstate(divide="ignore", invalid="ignore"):
+            psi = np.asarray(greens_psi(target, level, radius, 0.0))
+            bz, br = (
+                np.asarray(part) for part in greens_bz_br(target, level, radius, 0.0)
+            )
+        assert psi[0] == np.inf
+        assert np.isnan(bz[0])
+        assert np.isnan(br[0]) or br[0] == 0.0
+
+
+def test_one_ulp_off_the_filament_is_finite_at_every_ring_radius():
+    """Adjacent is not coincident, and only the complement tells the two apart.
+
+    The two radicals are formed independently, so their ratio -- the parameter --
+    can land an ulp ABOVE one this close, and whether it does depends on the ring
+    radius: a unit ring trips it one ULP off the filament where a 6.2 m ring does
+    not. The second kind is held at one for that reason; the first kind never sees
+    the parameter, taking the complement from the geometry instead, which is what
+    makes these values right rather than merely finite.
+    """
+    for radius in (0.9, 1.0, 6.2, 12.0):
+        target = np.array([np.nextafter(radius, np.inf)])
+        level = np.array([0.0])
+        psi = np.asarray(greens_psi(target, level, radius, 0.0))
+        bz, br = (np.asarray(part) for part in greens_bz_br(target, level, radius, 0.0))
+        assert np.isfinite(psi).all() and psi[0] > 0.0
+        assert np.isfinite(bz).all() and bz[0] < 0.0
+        assert np.isfinite(br).all()
+        # the flux of a loop against itself one ulp away is 2 mu0 a log(8a/d)-ish:
+        # bounded by the ring's own scale rather than by a floor
+        assert 1e-5 < psi[0] / radius < 1e-3

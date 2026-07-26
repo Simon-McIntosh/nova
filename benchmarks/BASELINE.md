@@ -225,9 +225,72 @@ closed form's 171.4 on one core and a projected 19.5 on a 16-core pool:
 
 The compile equals the device kernel at 18.4M pairs and the device only beats the
 16-core pool above 7.2M. So the device is the right route for ONE all-to-all
-machine matrix and the wrong one for a per-block build — and if the compile is
-amortised across builds (a warm evaluator, or the persistent compilation cache,
-neither of which is wired up) the device is a flat 3.5× the pool at any size.
+machine matrix and the wrong one for a per-block build — unless the compile is
+amortised, which is what the next section measures.
+
+### what the compile is paid PER
+
+Recorded 2026-07-26. Driver: `benchmarks/tiled_backend.py --variants
+*-positions,*-cache`, one fresh process per measurement, cache off except where
+it is the subject. Two things changed and no arithmetic did: `tile_evaluator`
+memoises on `(plan, batched, kernel)`, so one tile shape has one executable per
+process; and `compilation_cache` points JAX's persistent cache at
+`NOVA_COMPILATION_CACHE` (default `~/.cache/nova/kernels`, 2 GiB LRU, `off` to
+refuse it).
+
+A **geometry scan** — the same 64 hex cells at four positions 13 mm apart in R,
+each position a whole build through `assemble` into its own store — on one H200
+at 4 tiles of 32×32, median of three processes:
+
+| kernel | first position | each later position | compilations |
+|---|---|---|---|
+| closed | 101.65 s | 0.027 s | 1 |
+| quadrature | 2.20 s | 0.050 s | 1 |
+| quadrature, 16 CPU cores (320 cells, 40×40) | 9.44 s | 8.20 s | 1 |
+
+The first position pays the compile and no later one pays anything: moving a
+section changes argument VALUES, and geometry is an argument to the tile kernel
+rather than a constant of it, so a scan cannot force a retrace. **A closed-form
+pack swept through eight positions costs 102 s instead of 813 s.** The 8.20 s
+per CPU position is the 8.14 s a standalone build of the same operator takes, so
+reuse costs nothing per build; the 27 ms on the device is 6.7 µs/pair against
+the kernel's own 5.5, the difference being one zarr store created per position.
+
+Across a **process boundary**, the same build twice with one on-disk cache:
+
+| kernel / device | cold compile | warm compile | cache written |
+|---|---|---|---|
+| closed, H200 | 101.89 s | 8.45 s | 2.8 MB |
+| quadrature, H200 | 1.36 s | 0.23 s | 0.17 MB |
+| quadrature, 16 CPU cores | 1.33 s | 0.57 s | 0.17 MB |
+
+Three executables are stored per build and all three are hits in the second
+process, which reports 91.2 s of compile saved on JAX's own counter. The
+remaining 8.45 s is the part a cache cannot skip — tracing the reduction and
+lowering it to HLO, which is what the cache key is computed FROM. So the
+persistent cache removes 92 % of a cold closed-form compile and the warm
+evaluator removes the rest.
+
+Steady state is unchanged, measured the same way as the table above:
+closed-vmap 5.5 µs/pair on the H200 (spread 5.1–5.8 over three processes,
+against 5.5 recorded on 26 July), jax-vmap 5.6 (spread 5.5–7.0, against 5.3),
+and on 16 CPU cores jax-vmap 79.5 µs/pair against 78.8. Compile itself is also
+unchanged where it is still paid cold: 101.3 s on the H200 against 101.3.
+
+What that does to the route choice, against the same host figures:
+
+    total pairs in the build     host 16 cores   H200 cold   warm cache   warm evaluator
+    20,000                              0.4 s       101 s        8.5 s          0.1 s
+    400,000                             7.8 s       104 s       10.6 s          2.2 s
+    4,000,000                            78 s       124 s         30 s           22 s
+    25,000,000                        8.1 min      4.0 min      2.4 min        2.3 min
+
+**The build size at which the device beats a 16-core host pool falls from 7.2 M
+pairs to 0.60 M with the cache warm, and to nothing at all with the evaluator
+warm** — at which point the device is a flat 3.5× the pool at any size. A
+per-block build is still the wrong shape for it (0.4 s against 8.5 s at 20,000
+pairs, in a fresh process), but a session that builds repeatedly now pays the
+compile once rather than once a build.
 
 ## three-band polygon-section coupling (opt-in: PolySection.configured(banded=True))
 

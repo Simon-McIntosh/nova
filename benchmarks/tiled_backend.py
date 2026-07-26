@@ -29,12 +29,24 @@ and only a shared harness makes the two comparable:
     closed-vmap    the packed driver traced, blocks mapped with vmap
     closed-parity  the traced closed kernel against the numpy packed driver
 
+Once per build is not once, and for the closed form the compile is half the
+build -- so what a compile is paid PER is measured too, on either kernel:
+
+    jax-positions    the same sections built at several POSITIONS in one
+    closed-positions process, which is what a geometry scan is; the first
+                     position carries the compile and the rest report what a
+                     build costs once the evaluator is warm
+    jax-cache        two fresh processes sharing one on-disk compilation cache:
+    closed-cache     the first compiles, the second must not
+
 Timings are one variant per FRESH process, because a compiled kernel and a warm
 allocator both make a second measurement in the same interpreter look faster
 than a build does. The parent process spawns those children and reports the
-median. Traced variants report the compile separately from the steady state: the
-compile is paid once per build, so a build long enough to matter amortises it,
-and quoting only the cold total would hide the per-pair rate that scales.
+median. Every child runs with the persistent compilation cache OFF unless the
+variant is about the cache, so a compile figure is always a compile and never a
+disk read. Traced variants report the compile separately from the steady state:
+the compile is paid once per build, so a build long enough to matter amortises
+it, and quoting only the cold total would hide the per-pair rate that scales.
 
 Run on a compute node -- login-node timings of this kernel spread 5x.
 """
@@ -60,12 +72,25 @@ from nova.biot.tiledassembly import (
     COMPONENTS,
     TilePlan,
     assemble,
+    compilation_cache,
     tile_coupling,
     tile_evaluator,
 )
 
 CPU_VARIANTS = ("numpy-1", "numpy-8", "numpy-16", "jax-scan", "jax-vmap")
 GPU_VARIANTS = ("numpy-8", "jax-vmap", "jax-scan")
+
+# Positions a geometry scan is measured over.  Four is enough to separate the
+# first build from the rest and to show the rest do not drift.
+_POSITIONS = 4
+
+# How far the pack moves between positions, in metres: far enough that the
+# operator really changes, near enough that it stays the same problem.
+_STEP = 0.013
+
+# Persistent-cache traffic seen by this process, filled by the monitoring
+# listeners that JAX calls on a cache hit.
+_CACHE_EVENTS = {"hits": 0, "saved_seconds": 0.0}
 
 
 def build_plan(tile: int) -> TilePlan:
@@ -123,6 +148,54 @@ def device_report() -> dict:
         if key in stats:
             record[key] = int(stats[key])
     return record
+
+
+def watch_cache() -> None:
+    """Start counting persistent-cache hits, before anything is compiled.
+
+    A warm process and a cold one differ only in how long the compile takes,
+    which a slow filesystem or a busy node could equally explain -- so the hit is
+    counted rather than inferred from the clock.
+    """
+    import jax.monitoring as monitoring
+
+    def hit(event, **kwargs):
+        if event == "/jax/compilation_cache/cache_hits":
+            _CACHE_EVENTS["hits"] += 1
+
+    def saved(event, duration_secs, **kwargs):
+        if event == "/jax/compilation_cache/compile_time_saved_sec":
+            _CACHE_EVENTS["saved_seconds"] += duration_secs
+
+    monitoring.register_event_listener(hit)
+    monitoring.register_event_duration_secs_listener(saved)
+
+
+def store_every_compile() -> None:
+    """Lower the cache's worth-keeping threshold, when a directory was named.
+
+    JAX stores only compiles above a second, which is the right default and the
+    wrong one for a probe whose subject IS the store: the quadrature kernel
+    compiles in about that time, so whether its executable was kept would be a
+    coin toss. Only a run that explicitly named a cache directory is affected --
+    an ordinary timing has the cache off and reaches none of this.
+    """
+    if not os.environ.get("NOVA_COMPILATION_CACHE"):
+        return
+    directory = compilation_cache()
+    if directory is not None:
+        compilation_cache(directory, min_compile_seconds=0.0)
+
+
+def cache_report() -> dict:
+    """Return where the on-disk cache is and what this process took from it."""
+    import jax
+
+    return {
+        "cache_dir": jax.config.jax_compilation_cache_dir,
+        "cache_hits": _CACHE_EVENTS["hits"],
+        "compile_seconds_saved": _CACHE_EVENTS["saved_seconds"],
+    }
 
 
 def measure_numpy(workers: int, cells: int, tile: int) -> dict:
@@ -235,6 +308,7 @@ def measure_traced(
     store, so the steady-state figure is comparable with the numpy build rather
     than being a bare kernel rate.
     """
+    watch_cache()
     sections, target_r, target_z = hex_mesh(cells)
     plan = build_plan(tile)
     edge, weight, norm = pad_batch(sections)
@@ -274,6 +348,61 @@ def measure_traced(
         "us_per_pair": 1e6 * seconds / pairs,
         "tiles": len(bounds),
         "compile_count": evaluate.compile_count,
+        **cache_report(),
+        **device_report(),
+    }
+
+
+def measure_positions(cells: int, tile: int, kernel: str) -> dict:
+    """Return what a geometry scan pays at its first position and at the rest.
+
+    The same sections translated in R and built again -- a winding pack swept
+    through positions, which is a real use and the one that turns a per-build
+    compile into the whole cost. Each position goes through ``assemble``, so this
+    is the caller's own loop rather than a bare kernel rate; the first build
+    carries the compile and every later one finds the evaluator warm, so the gap
+    between them IS the compile and a fresh evaluator per position would pay the
+    first figure at every one of them.
+    """
+    watch_cache()
+    sections, target_r, target_z = hex_mesh(cells)
+    plan = build_plan(tile)
+    directory = pathlib.Path(tempfile.mkdtemp(prefix="tiled-positions-"))
+    seconds = []
+    try:
+        for index in range(_POSITIONS):
+            shift = _STEP * index
+            start = time.perf_counter()
+            assemble(
+                directory / f"position-{index}.zarr",
+                target_r + shift,
+                target_z,
+                [section + np.array([shift, 0.0]) for section in sections],
+                plan=plan,
+                backend="jax",
+                batched=True,
+                kernel=kernel,
+            )
+            seconds.append(time.perf_counter() - start)
+    finally:
+        shutil.rmtree(directory, ignore_errors=True)
+    evaluate = tile_evaluator(plan, batched=True, kernel=kernel)
+    later = statistics.median(seconds[1:])
+    pairs = target_r.size * len(sections)
+    return {
+        # named as the traced variants name them, so the table reads the same:
+        # the steady state is what a position costs warm, and the compile is
+        # what the first one paid over it
+        "seconds": later,
+        "compile_seconds": seconds[0] - later,
+        "cold_seconds": seconds[0],
+        "position_seconds": seconds,
+        "positions": _POSITIONS,
+        "pairs": pairs,
+        "us_per_pair": 1e6 * later / pairs,
+        "tiles": plan.tile_count(target_r.size, len(sections)),
+        "compile_count": evaluate.compile_count,
+        **cache_report(),
         **device_report(),
     }
 
@@ -357,10 +486,19 @@ def measure_parity(cells: int, tile: int) -> dict:
 
 
 def measure(variant: str, cells: int, tile: int) -> dict:
-    """Return one measurement record for one variant."""
+    """Return one measurement record for one variant.
+
+    Matched most specific first: a kernel prefix alone would swallow the variants
+    that share it, and a variant quietly measured as another one is worse than an
+    unknown variant, which at least says so.
+    """
+    if variant.endswith("-positions"):
+        return measure_positions(
+            cells, tile, "closed" if variant.startswith("closed") else "quadrature"
+        )
     if variant.startswith("numpy-"):
         return measure_numpy(int(variant.split("-")[1]), cells, tile)
-    if variant.startswith("jax-"):
+    if variant in ("jax-scan", "jax-vmap"):
         return measure_traced(variant.endswith("vmap"), cells, tile)
     if variant == "closed-host":
         return measure_host_closed(cells, tile)
@@ -375,9 +513,21 @@ def measure(variant: str, cells: int, tile: int) -> dict:
     raise SystemExit(f"unknown variant {variant}")
 
 
-def run_child(variant: str, device: str, cells: int, tile: int) -> dict:
-    """Return the record from a fresh process, so nothing is warm on entry."""
-    environment = dict(os.environ, TMPDIR=os.environ.get("TMPDIR", "/tmp"))
+def run_child(
+    variant: str, device: str, cells: int, tile: int, cache: str = "off"
+) -> dict:
+    """Return the record from a fresh process, so nothing is warm on entry.
+
+    ``cache`` is where the child may keep compiled executables. It defaults to
+    OFF, because a compile figure read out of a shared cache would be a disk read
+    wearing a compile's name; only the cache probe passes a directory.
+    """
+    environment = dict(
+        os.environ,
+        TMPDIR=os.environ.get("TMPDIR", "/tmp"),
+        NOVA_COMPILATION_CACHE=cache,
+    )
+    environment.pop("JAX_COMPILATION_CACHE_DIR", None)
     if device == "cpu":
         environment["JAX_PLATFORMS"] = "cpu"
     else:
@@ -403,6 +553,59 @@ def run_child(variant: str, device: str, cells: int, tile: int) -> dict:
     return json.loads(completed.stdout.strip().splitlines()[-1])
 
 
+def cache_probe(variant: str, device: str, cells: int, tile: int) -> dict:
+    """Return the compile of two fresh processes that share one on-disk cache.
+
+    The first process finds the cache empty and compiles; the second must find
+    its executable there. Both are the same build in the same shape, so the only
+    difference between them is where the executable came from -- and the hit is
+    counted from JAX's own event rather than read off the clock.
+    """
+    measured = variant.replace("-cache", "-vmap")
+    directory = pathlib.Path(tempfile.mkdtemp(prefix="tiled-cache-"))
+    try:
+        runs = [
+            run_child(measured, device, cells, tile, cache=str(directory))
+            for _ in range(2)
+        ]
+        stored = sum(
+            path.stat().st_size for path in directory.rglob("*") if path.is_file()
+        )
+    finally:
+        shutil.rmtree(directory, ignore_errors=True)
+    cold, warm = runs
+    return {
+        "variant": variant,
+        "measured": measured,
+        "cold_compile_seconds": cold["compile_seconds"],
+        "warm_compile_seconds": warm["compile_seconds"],
+        "cold_hits": cold["cache_hits"],
+        "warm_hits": warm["cache_hits"],
+        "compile_seconds_saved": warm["compile_seconds_saved"],
+        "cache_bytes": stored,
+        "pairs": cold["pairs"],
+        "runs": runs,
+    }
+
+
+def cache_table(rows: list[dict]) -> str:
+    """Return the table the cross-process claim is read from."""
+    header = (
+        "| variant | cold compile s | warm compile s | saved s | hits | cache MB |\n"
+        "|---|---|---|---|---|---|"
+    )
+    lines = [header]
+    for row in rows:
+        lines.append(
+            f"| {row['variant']} | {row['cold_compile_seconds']:.2f} "
+            f"| {row['warm_compile_seconds']:.2f} "
+            f"| {row['compile_seconds_saved']:.2f} "
+            f"| {row['cold_hits']} then {row['warm_hits']} "
+            f"| {row['cache_bytes'] / (1 << 20):.1f} |"
+        )
+    return "\n".join(lines)
+
+
 def table(rows: list[dict]) -> str:
     """Return the markdown table the decision is read from."""
     header = (
@@ -424,10 +627,15 @@ def table(rows: list[dict]) -> str:
     return "\n".join(lines)
 
 
-def sweep(device: str, cells: int, tile: int, repeat: int, variants) -> dict:
+def sweep(
+    device: str, cells: int, tile: int, repeat: int, variants, parity: bool = True
+) -> dict:
     """Return the median record of every variant, plus the parity check."""
     rows = []
     for variant in variants:
+        if variant.endswith("-cache"):  # a probe over two processes, not a timing
+            rows.append(cache_probe(variant, device, cells, tile))
+            continue
         records = [run_child(variant, device, cells, tile) for _ in range(repeat)]
         # a parity variant reports deviations rather than a rate, so only the keys it
         # actually carries are aggregated -- and the deviations are a worst case over
@@ -458,14 +666,16 @@ def sweep(device: str, cells: int, tile: int, repeat: int, variants) -> dict:
                 "runs": records,
             }
         )
-    return {
+    summary = {
         "device": device,
         "cells": cells,
         "tile": tile,
         "repeat": repeat,
         "rows": rows,
-        "parity": run_child("parity", device, min(cells, 120), tile),
     }
+    if parity:
+        summary["parity"] = run_child("parity", device, min(cells, 120), tile)
+    return summary
 
 
 if __name__ == "__main__":
@@ -475,10 +685,17 @@ if __name__ == "__main__":
     parser.add_argument("--tile", type=int, default=40)
     parser.add_argument("--repeat", type=int, default=3)
     parser.add_argument("--variants")
+    parser.add_argument(
+        "--parity",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="cross-check the backends; skip it when only a compile is in question",
+    )
     parser.add_argument("--measure", help="run one variant in this process")
     parser.add_argument("--json", type=pathlib.Path)
     arguments = parser.parse_args()
     if arguments.measure:
+        store_every_compile()
         print(json.dumps(measure(arguments.measure, arguments.cells, arguments.tile)))
         raise SystemExit(0)
     names = (
@@ -487,10 +704,20 @@ if __name__ == "__main__":
         else (CPU_VARIANTS if arguments.device == "cpu" else GPU_VARIANTS)
     )
     summary = sweep(
-        arguments.device, arguments.cells, arguments.tile, arguments.repeat, names
+        arguments.device,
+        arguments.cells,
+        arguments.tile,
+        arguments.repeat,
+        names,
+        parity=arguments.parity,
     )
     if arguments.json:
         arguments.json.write_text(json.dumps(summary, indent=2))
     print(table(summary["rows"]))
-    print()
-    print(json.dumps(summary["parity"], indent=2))
+    probes = [row for row in summary["rows"] if "cold_compile_seconds" in row]
+    if probes:
+        print()
+        print(cache_table(probes))
+    if "parity" in summary:
+        print()
+        print(json.dumps(summary["parity"], indent=2))

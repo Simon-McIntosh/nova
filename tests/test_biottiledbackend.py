@@ -10,13 +10,23 @@ Parity is pinned in float64 against the numpy kernel that the operator is
 already validated against -- an accelerator path is a cost change, never a
 physics change. Compilation is counted directly: the traced kernel must be
 compiled ONCE for a whole build, no matter how many tiles it evaluates, which
-is only true if the padded shapes really are constant.
+is only true if the padded shapes really are constant. Once per build is not
+once, though, and the closed-form kernel costs a hundred seconds to compile
+against under two to run a tile with -- so the reuse is pinned as well: a
+caller building the operator at several geometries must compile at the first
+one only, and a second process must find the executable on disk.
 
 The tolerance is stated against each component's own peak rather than pointwise:
 a device reassociates the quadrature sum, and the smallest entries of Br and Bz
 are differences of much larger terms, so a pointwise ratio there measures the
 reference's cancellation instead of the backends' agreement.
 """
+
+import json
+import os
+import subprocess
+import sys
+import textwrap
 
 import numpy as np
 import pytest
@@ -26,6 +36,8 @@ from nova.biot.tiledassembly import (
     COMPONENTS,
     TilePlan,
     assemble,
+    compilation_cache,
+    forget_evaluators,
     tile_coupling,
     tile_evaluator,
 )
@@ -247,3 +259,199 @@ def test_an_unknown_kernel_is_refused_rather_than_silently_ignored():
     plan = TilePlan(target_tile=2, source_tile=2, block=4, n_panels=4, n_nodes=8)
     with pytest.raises(ValueError, match="kernel"):
         tile_evaluator(plan, kernel="analytic")
+
+
+# What a compile is paid PER.  Compiling once per build is only a bounded cost
+# if a process performs one build; a caller sweeping a winding pack through
+# positions performs one per position, and the closed-form executable costs
+# more to produce than every tile of a small operator costs to evaluate.  The
+# geometry is an argument to the kernel rather than a constant of it, so the
+# same executable serves every position -- these checks pin that it is actually
+# reused, in the process and across a process boundary.
+
+
+def moved(sections, shift):
+    """Return the same sections translated in R -- a geometry scan's next step."""
+    return [section + np.array([shift, 0.0]) for section in sections]
+
+
+def test_the_same_tile_shape_hands_back_the_same_compiled_kernel():
+    """Memoised on the plan: two builds of one shape cannot compile twice."""
+    plan = TilePlan(target_tile=4, source_tile=4, block=8, n_panels=4, n_nodes=8)
+    other = TilePlan(target_tile=4, source_tile=4, block=8, n_panels=4, n_nodes=16)
+    evaluate = tile_evaluator(plan)
+    assert tile_evaluator(plan) is evaluate
+    assert tile_evaluator(plan, batched=True) is not evaluate
+    assert tile_evaluator(plan, kernel="closed") is not evaluate
+    assert tile_evaluator(other) is not evaluate
+
+
+def test_a_scan_over_positions_compiles_at_the_first_position_only(tmp_path):
+    """Moving a section changes argument VALUES, which cannot force a retrace."""
+    sections, target_r, target_z = mesh(8)
+    plan = TilePlan(target_tile=5, source_tile=4, block=8, n_panels=4, n_nodes=8)
+    evaluate = tile_evaluator(plan, batched=True)
+    stores = []
+    for index, shift in enumerate((0.0, 0.05, 0.11)):
+        path = tmp_path / f"position-{index}.zarr"
+        assemble(
+            path,
+            target_r + shift,
+            target_z,
+            moved(sections, shift),
+            plan=plan,
+            backend="jax",
+            batched=True,
+        )
+        stores.append(np.asarray(zarr.open_group(str(path), mode="r")["Psi"][:]))
+    assert evaluate.compile_count == 1
+    # the positions really are different operators, so the single compilation is
+    # reuse rather than three builds of the same thing
+    assert not np.allclose(stores[0], stores[1])
+    assert not np.allclose(stores[1], stores[2])
+
+
+def test_a_caller_can_hand_in_the_kernel_it_already_holds(tmp_path):
+    """An evaluator passed in builds the same store the default path builds."""
+    sections, target_r, target_z = mesh(7)
+    plan = TilePlan(target_tile=4, source_tile=4, block=8, n_panels=4, n_nodes=8)
+    evaluate = tile_evaluator(plan, batched=True)
+    reference, supplied = tmp_path / "default.zarr", tmp_path / "supplied.zarr"
+    for path, given in ((reference, None), (supplied, evaluate)):
+        assemble(
+            path,
+            target_r,
+            target_z,
+            sections,
+            plan=plan,
+            backend="jax",
+            batched=True,
+            evaluator=given,
+        )
+    paths = (reference, supplied)
+    one, other = (zarr.open_group(str(path), mode="r") for path in paths)
+    for name in COMPONENTS:
+        np.testing.assert_array_equal(
+            np.asarray(other[name][:]), np.asarray(one[name][:])
+        )
+    assert evaluate.compile_count == 1
+
+
+def test_a_kernel_built_for_another_build_is_refused(tmp_path):
+    """Silently ignoring the mismatch would build something else than was asked."""
+    sections, target_r, target_z = mesh(6)
+    plan = TilePlan(target_tile=4, source_tile=4, block=8, n_panels=4, n_nodes=8)
+    other = TilePlan(target_tile=3, source_tile=3, block=8, n_panels=4, n_nodes=8)
+    evaluate = tile_evaluator(plan, batched=True)
+    build = dict(plan=plan, backend="jax", batched=True)
+    for wrong in (dict(build, plan=other), dict(build, batched=False)):
+        with pytest.raises(ValueError, match="evaluator built for"):
+            assemble(
+                tmp_path / "refused.zarr",
+                target_r,
+                target_z,
+                sections,
+                evaluator=evaluate,
+                **wrong,
+            )
+    with pytest.raises(ValueError, match="no compiled evaluator"):
+        assemble(
+            tmp_path / "refused.zarr",
+            target_r,
+            target_z,
+            sections,
+            plan=plan,
+            evaluator=evaluate,
+        )
+
+
+def test_forgetting_the_warm_kernels_compiles_the_next_one_again():
+    """The escape hatch: a measurement of the compile needs a cold evaluator."""
+    plan = TilePlan(target_tile=4, source_tile=4, block=8, n_panels=8, n_nodes=8)
+    evaluate = tile_evaluator(plan)
+    forget_evaluators()
+    assert tile_evaluator(plan) is not evaluate
+
+
+# The persistent cache is JAX's, so what is checked is the wiring: the directory
+# this package chooses, the switch that turns it off, and -- the property that
+# matters -- that a SECOND process finds the executable the first one compiled.
+# A tile kernel is not needed to check that and would cost a compile to check it
+# with, so the child compiles the cheapest graph that reaches XLA at all.
+
+_CHILD_PROGRAM = """
+import json
+import jax
+import jax.monitoring
+import jax.numpy as jnp
+
+from nova.biot.tiledassembly import compilation_cache
+
+events = []
+jax.monitoring.register_event_listener(lambda event, **kwargs: events.append(event))
+directory = compilation_cache(min_compile_seconds=0.0)
+jax.jit(lambda x: jnp.sin(x) @ jnp.cos(x).T)(jnp.arange(64.0).reshape(8, 8))
+print(json.dumps({
+    "directory": str(directory),
+    "hits": events.count("/jax/compilation_cache/cache_hits"),
+}))
+"""
+
+
+def run_child(cache_directory):
+    """Return one fresh process's cache report, sharing an on-disk cache."""
+    completed = subprocess.run(
+        [sys.executable, "-c", textwrap.dedent(_CHILD_PROGRAM)],
+        capture_output=True,
+        text=True,
+        env=dict(
+            os.environ,
+            NOVA_COMPILATION_CACHE=str(cache_directory),
+            JAX_PLATFORMS="cpu",
+        ),
+    )
+    assert completed.returncode == 0, completed.stderr
+    return json.loads(completed.stdout.strip().splitlines()[-1])
+
+
+def test_a_compiled_kernel_outlives_the_process_that_produced_it(tmp_path):
+    """Cold process compiles and stores; the next one finds it and does not."""
+    cache = tmp_path / "kernels"
+    cold = run_child(cache)
+    assert cold["hits"] == 0
+    assert list(cache.iterdir()), "nothing was written to the cache"
+    assert run_child(cache)["hits"] >= 1
+
+
+@pytest.fixture
+def unconfigured_cache():
+    """Run with no cache directory on JAX, and put back whatever there was."""
+    previous = jax.config.jax_compilation_cache_dir
+    jax.config.update("jax_compilation_cache_dir", None)
+    yield
+    jax.config.update("jax_compilation_cache_dir", previous)
+
+
+def test_the_persistent_cache_can_be_switched_off(monkeypatch, unconfigured_cache):
+    """A measurement of the compile itself must be able to refuse the cache."""
+    monkeypatch.setenv("NOVA_COMPILATION_CACHE", "off")
+    assert compilation_cache() is None
+    assert jax.config.jax_compilation_cache_dir is None
+
+
+def test_the_cache_directory_comes_from_the_environment(
+    monkeypatch, tmp_path, unconfigured_cache
+):
+    """Named in the environment, so a build on a scratch filesystem can say so."""
+    monkeypatch.setenv("NOVA_COMPILATION_CACHE", str(tmp_path / "named"))
+    assert compilation_cache(tmp_path / "explicit") == tmp_path / "explicit"
+    assert jax.config.jax_compilation_cache_dir == str(tmp_path / "explicit")
+
+
+def test_a_directory_already_chosen_wins_over_the_default(
+    monkeypatch, tmp_path, unconfigured_cache
+):
+    """JAX_COMPILATION_CACHE_DIR is the caller's own choice; do not overrule it."""
+    jax.config.update("jax_compilation_cache_dir", str(tmp_path / "theirs"))
+    monkeypatch.setenv("NOVA_COMPILATION_CACHE", str(tmp_path / "ours"))
+    assert compilation_cache() == tmp_path / "theirs"

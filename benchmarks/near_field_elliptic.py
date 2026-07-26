@@ -1182,8 +1182,9 @@ def baseline(destination: pathlib.Path) -> dict:
 
     ``moment_filament`` -- the far field of the banded coupling scheme -- is built
     out of these same two point kernels by central differences on the SOURCE
-    position, so anything done to them lands here.  Captured before any change,
-    so the orchestrator has a before to compare against.
+    position, so anything done to them lands here.  Captured unmodified, which is
+    what makes it a before-image: the cutoff distances it reports must be
+    reproducible after any change to the kernels, and they are.
     """
     target = destination / "nearfar_error_baseline.json"
     command = [sys.executable, "benchmarks/nearfar_error.py", str(target)]

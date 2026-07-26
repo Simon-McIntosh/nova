@@ -486,10 +486,19 @@ def measure_parity(cells: int, tile: int) -> dict:
 
 
 def measure(variant: str, cells: int, tile: int) -> dict:
-    """Return one measurement record for one variant."""
+    """Return one measurement record for one variant.
+
+    Matched most specific first: a kernel prefix alone would swallow the variants
+    that share it, and a variant quietly measured as another one is worse than an
+    unknown variant, which at least says so.
+    """
+    if variant.endswith("-positions"):
+        return measure_positions(
+            cells, tile, "closed" if variant.startswith("closed") else "quadrature"
+        )
     if variant.startswith("numpy-"):
         return measure_numpy(int(variant.split("-")[1]), cells, tile)
-    if variant.startswith("jax-"):
+    if variant in ("jax-scan", "jax-vmap"):
         return measure_traced(variant.endswith("vmap"), cells, tile)
     if variant == "closed-host":
         return measure_host_closed(cells, tile)
@@ -497,10 +506,6 @@ def measure(variant: str, cells: int, tile: int) -> dict:
         return measure_packed_closed(cells, tile)
     if variant in ("closed-scan", "closed-vmap"):
         return measure_traced(variant.endswith("vmap"), cells, tile, kernel="closed")
-    if variant.endswith("-positions"):
-        return measure_positions(
-            cells, tile, "closed" if variant.startswith("closed") else "quadrature"
-        )
     if variant == "closed-parity":
         return measure_closed_parity(cells, tile)
     if variant == "parity":

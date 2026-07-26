@@ -44,11 +44,20 @@ It is also the DEARER one here, which the exact-everywhere lane does not predict
 The closed form amortises up to three live corner parts across a call, so its rate
 improves 38-fold between 8 and 4096 pairs in one call while the quadrature's
 improves 1.3-fold; the two cross at 64 pairs. A near band holds about thirteen
-pairs of a whole column, an order below that crossing, so the quadrature is 2.3x
-cheaper there and a banded build costs about 1.9x with the closed form on. Which
-one to prefer depends on whether that band's accuracy or the build's cost is the
-binding constraint -- so this module takes it as an argument and states the numbers
-rather than choosing.
+pairs of a whole column, an order below that crossing, so on the near-band call
+itself the quadrature is 4.1x cheaper -- 984.2 us/pair against 4023.4 -- which
+dilutes to 2.3x over a whole banded column (13.6 against 31.5) and 1.9x over a
+real 560-cell build (19.2 s against 36.4). Which one to prefer depends on whether
+that band's accuracy or the build's cost is the binding constraint, so this module
+takes it as an argument and states the numbers rather than choosing.
+
+Note for anyone reading a banded rate off an idealised section: do not. A real
+grid's wall cuts the boundary ring into three- to twelve-corner cells, 120 of a
+560-cell grid's carrying enough skew for the wide 16-radius far seam, so its mid
+band holds 12.1% of pairs where an idealised hexagon holds 2.6 -- and at the mid
+rule's 268 us/pair against the far filament's 0.7 that fraction is most of a
+banded column's cost. A rate projected from the hexagon alone is optimistic by
+about 4.5x (13.6 projected against 61.1 measured on a real build).
 
 The limits are measured, not budgeted: each is the distance beyond which EVERY
 component -- flux, radial field and vertical field separately -- holds to one

@@ -129,15 +129,18 @@ class PolySection(Matrix):
 
     The angular integral the boundary quadrature does numerically is done
     analytically instead, leaving two smooth ``arsinh`` residuals per corner —
-    the same physics through a different evaluation, and on the measured evidence
-    a strictly better one on both counts, which is why it is the default.
+    the same physics through a different evaluation. It is the default because on
+    the lane it serves, exact everywhere, it is measurably better on both counts.
+    It is NOT better on both counts everywhere: see the crossing below.
 
-    Cheaper: a hexagonal plasma cell costs 171 µs/pair against the ``(16, 48)``
-    rule's 858 (5.0×), because a corner is evaluated once for both its edges
-    rather than 768 quadrature nodes being spent per pair. Shape-dependent, as
-    that implies, where the quadrature is not: the cost tracks the corner count,
-    so a wall-clipped cell costs more than a regular one and a grid gets cheaper
-    per pair as it refines and the clipped fraction falls.
+    Cheaper on a whole column: a hexagonal plasma cell costs 162.9 µs/pair
+    against the ``(16, 48)`` rule's 849.7 (5.2×), and a real 560-cell plasma-grid
+    build 54.5 s against 274.5 (5.0×), because a corner is evaluated once for both
+    its edges rather than 768 quadrature nodes being spent per pair. Shape-dependent
+    as that implies, where the quadrature is not: the cost tracks the corner count
+    (wall-clipped 196.3 against the regular hexagon's 162.9), so a grid gets cheaper
+    per pair as it refines and the clipped fraction falls — mean corners 6.09 at 560
+    cells and 5.99 at 2120, the six-corner fraction climbing 75 % to 87 %.
 
     More accurate, and most where it matters: it holds 1e-10 of local magnitude
     on all three components across the whole acceptance gate, and it is finite and
@@ -163,12 +166,16 @@ class PolySection(Matrix):
     reuses it — falls only 1.3× (1084 → 851). **The two cross at 64 pairs per
     call.** An exact-everywhere column hands the kernel every pair at once and the
     closed form wins five-fold; the three-band scheme hands its near band about
-    thirteen, an order below the crossing, and there the quadrature is 2.3×
-    cheaper. So a banded build pays about 1.9× for the closed form's near-contour
-    accuracy, and a caller minimising a banded build should turn this off. It is
-    not switched automatically on batch width: which kernel ran would then depend
-    on how a caller happened to group its pairs, and a stored operator's values
-    have to be reproducible from its geometry alone.
+    thirteen, an order below the crossing, and there it LOSES — three figures at
+    three scopes, all measured, none of them the others: the near-band kernel call
+    alone 4023.4 µs/pair against 984.2 (**4.1× dearer**), the whole banded column
+    31.5 against 13.6 (2.3×), and a real 560-cell banded build 36.4 s against 19.2
+    (1.9×). A caller minimising a banded build should turn this off; one that needs
+    the near band right should not.
+
+    It is not switched automatically on batch width: which kernel ran would then
+    depend on how a caller happened to group its pairs, and a stored operator's
+    values have to be reproducible from its geometry alone.
     """
 
     @classmethod

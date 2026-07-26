@@ -18,9 +18,9 @@
   <title>Biot Operator Assembly | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-25">
-<meta name="plan-impl" content="0.95">
-<meta name="plan-version" content="9">
+<meta name="plan-modified" content="2026-07-26">
+<meta name="plan-impl" content="0.97">
+<meta name="plan-version" content="10">
 </head>
 <body>
   <main class="plan-doc">
@@ -265,6 +265,47 @@
       </figure>
     </section>
 
+    <section id="s7-landed" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ complement-native primitives landed 2026-07-26</span>
+        <h2>One complement-native descent, and the closed form on a device — landed</h2>
+      </header>
+      <p class="landed-summary">
+        <strong>On one H200 the closed form costs 5.5 µs/pair against the 16×48
+        quadrature's 5.3</strong> — the same rate for one to two orders more accuracy,
+        so exact coupling on a device is free relative to the rule it replaces
+        (projected 2000-cell exact build ≈22 s of kernel, one 101 s compile).
+        Bulirsch's <code>cel</code> from the modulus COMPLEMENT, fixed 14-trip descent,
+        covers all three kinds in one routine that jits, vmaps and differentiates;
+        <code>elliptic.py</code> now holds no library call and its two-case third kind
+        is gone. Both kinds hold ≤4 ulp over the complement's whole double range where
+        the parameter route is wrong by 2.6e-03 at 1e-16 and infinite below, and
+        <strong>the descent's third kind is 3.3× cheaper than Carlson's</strong> —
+        closed-form floor 100.1 → 92.9 µs/pair with every one of the eighteen accuracy
+        entries UNCHANGED. The reduction traces because a packed driver replaces the
+        host driver's three value-dependent shortcuts with arithmetic (worth 1.35× on
+        the host, 171.4 → 230.8 µs/pair); parity 2.5e-12 against numpy, 2.3e-12
+        through the zarr store, one compilation per build. Point kernels adopted it
+        too, on the evidence: <strong>B_Z ten micrometres from a coil goes from 90 %
+        wrong to 9.9e-16</strong> for no measurable cost — and two of the three
+        defects there were not the modulus but an absolute floor on a squared length
+        and a cancelling pole numerator. A coincident target now returns the
+        divergence instead of answering, undetectably, for one 1.4 µm away; the banded
+        scheme's cutoffs reproduce bit for bit. <code>closed-form-device</code> locked
+        <em>jax-native-primitives</em>. Merged to develop <code>5d194134</code> +
+        <code>ea901d6b</code> + <code>a5912084</code>; fast lane 1477 passed /
+        87 skipped / 0 failed. Full record:
+        <a href="archive/biot-operator-assembly-complement-primitives-landed.html">complement primitives landed</a>.
+      </p>
+      <figure>
+        <img src="/nova/figures/biot-operator-assembly/near_field_elliptic.png"
+             alt="Relative error against distance to the filament for psi, Bz and Br under five evaluation routes, the downstream corrected-filament agreement, the far-field bracket's own cancellation, cost per element per route, and the flux error collapsing onto eps over k prime squared"
+             style="max-width:100%">
+        <figcaption>What the parameter form cost the point kernels, which of the three
+        near-field limits the complement actually fixes, and what each route costs.</figcaption>
+      </figure>
+    </section>
+
     <h2 id="s3">§3 — Research questions</h2>
     <ol>
       <li><strong>Assembly survey.</strong> Inventory how every operator class is built today
@@ -336,15 +377,15 @@
       </p>
     <p class="r-dec-rat">Prototype measured (nova/biot/tiledassembly.py): budget-derived tiles with padded fixed shapes hold RAM at ~48 B/pair + ~1.5 MB fixed block (vs 267 B/pair today, and plan-bounded rather than problem-bounded), stream tile-&gt;zarr chunk-aligned, and scale 8.8x at 16 cores. Budgets &gt;=4 MB/worker cost nothing; 1 MB forces the quadrature block down and costs 1.6x. Target-major strips would reproduce today&#x27;s target-axis RAM fragility (13 GB/chunk at 100k targets).</p>
     </div>
-<div class="r-dec" data-key="closed-form-device" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="closed-form-device" data-choice="jax-native-primitives" data-by="reckon-ship" data-when="2026-07-26T04:49:13+00:00">
     <p class="r-dec-q">The closed form needs elliptic integrals and JAX has NONE of them (no ellipk, ellipe, elliprf, elliprg, elliprj in jax.scipy.special, verified). The locked kernel-backend is a single traced JAX path. How does exact coupling reach a device?</p>
     <p class="r-dec-ctx">The quadrature kernel is pure arithmetic and traces cleanly, which is why the backend benchmarks used it (78.8 us/pair jit on 16 CPU cores, 7.4 on one H200). The closed form calls scipy&#x27;s Carlson forms and therefore cannot enter a traced tile at all. Cost context, measured on 200k evaluations: ellipk 1.8 ms, elliprf 7.0, elliprg 8.4, elliprj 40.1 - the THIRD KIND dominates, and the reduction needs four complete Pi per edge, so the third-kind routine is the cost-critical choice rather than K and E.</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="numpy-near-band-only">closed form stays on numpy, near band only</button>
-      <button class="r-opt" data-value="jax-native-primitives">implement complement-exact elliptic primitives in JAX</button>
+      <button class="r-opt chosen" data-value="jax-native-primitives">implement complement-exact elliptic primitives in JAX</button>
       <button class="r-opt" data-value="hybrid-device-dispatch">traced quadrature on device, closed form on host, one build</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Locked on measured evidence (2026-07-26, develop 5d194134 + ea901d6b + a5912084; benchmarks/tiled_backend.py --variants closed-*, benchmarks/analytic_cost_floor.py, benchmarks/near_field_elliptic.py; 64-cell operator = 4096 pairs, 4 tiles of 32x32, one fresh process per variant, sun_debug node and one H200). This is no longer a choice between routes but a demonstrated one: the primitives were built and the whole closed form now traces. ONE routine covers all three kinds -- Bulirsch cel from the modulus COMPLEMENT with a fixed 14-trip descent, no convergence test and no branch on a value, so one implementation serves numpy and a compiled kernel and it differentiates. On ONE H200 the traced closed form costs 5.5 us/pair against the 16x48 quadrature&#x27;s 5.3 on the same card: the same rate for one to two orders more accuracy, so on a device the EXACT kernel is free relative to the rule it replaces -- projected 2000-cell exact-everywhere closed-form build ~22 s of kernel plus a one-off 101 s compile. Accuracy: both kinds hold &lt;=4 ulp over the complement&#x27;s whole double range including denormals, where the parameter route is wrong by 2.6e-03 at k&#x27;^2 = 1e-16 and INFINITE below; the third kind holds 1e-13 against Carlson&#x27;s positive arrangement and round-off against two exact identities across eighteen decades of pole -- the ordinary R_F + (n/3) R_J arrangement is out by 3.5e-08 at p = 1e15, which is why the module previously needed a reflected second form as a special case. Cost was not a compromise either: the descent&#x27;s THIRD kind is 3.3x CHEAPER than Carlson&#x27;s (0.1175 vs 0.3928 us/element), which took the closed form&#x27;s third-kind integrals from 12.70 to 5.06 us/pair and its floor from 100.1 to 92.9 -- with every one of the eighteen two-directional accuracy entries UNCHANGED. Parity 2.5e-12 against the same driver on numpy and 2.3e-12 through the zarr store against the host driver, ONE compilation per build. numpy-near-band-only is subsumed rather than rejected: polygon_analytic_greens remains the host route and keeps the three value-dependent shortcuts a trace cannot take (worth 1.35x -- 171.4 vs 230.8 us/pair at one array width), but it is no longer the ONLY route. hybrid-device-dispatch is rejected: it would need a host round-trip per near-band pair and two code paths to maintain, for a kernel that now runs on the device at the quadrature&#x27;s own rate. Known gap (followup): the traced compile is 101-136 s against the quadrature kernel&#x27;s 1.3 s, because the reduction unrolls its moment recursions -- 138 downward ratio steps per corner plus a 40-order tridiagonal solve per pole family -- which a fixed-trip scan would collapse.</p>
     </div>
 </section>
 
@@ -583,7 +624,7 @@ Done-when
   3. Followup written; this followup resolved.</pre>
     <p class="r-fu-outcome">Fixed and independently verified (worktree commit 7ac3a78c, merged to develop; lane 1358 passed / 89 skipped / 0 failed). Every corner of all four gate sections now evaluates finitely in all three components, where three of four returned nan and the thin plate returned 290x the answer; psi agrees with the boundary quadrature from 4.3e-13 (rectangle, exact because a vertical edge's integrand vanishes at its own endpoint) to 2.2e-07 against a 1e-3 near-contour band. It is a genuine limit: the reduction's total weight on the divergent K is ZERO (the Gamma-D term's coefficient is k'^2, both arsinh numerators carry sin^2 phi which vanishes there, and the arctangent's three separated pieces carry log weights 8 : -4 : -4), and the neighbourhood is Lipschitz through the corner - flat across six decades of standoff and closing on the on-vertex value a decade per decade over ten. ROOT CAUSE WAS LARGER THAN THE BUG: scipy.special.ellipk/ellipe take the parameter, and a float parameter cannot carry its own complement, so K ~ -log k' returns wrong by ~eps/k'^2; verified independently (2.3e-05 relative at k'^2 = 1e-14, 2.6e-03 at 1e-16). Since k'^2 is exactly the squared distance to an edge's own endpoint over the squared ring span, the error grew as eps x (span/distance)^2. Carlson complement forms (K = R_F(0, k'^2, 1), E = 2 R_G(0, k'^2, 1)) fix it, and because a slender section is where k'^2 is small EVERY recorded envelope improved - 16x flux and 84x field at aspect 1/100, 28x and 83x at 1/300. BOTH FIELD COMPONENTS NOW HOLD THE 1e-10 FAR BAND ON ALL FOUR SECTIONS (worst 3.4e-11, independently reproduced); only the flux misses, now 2x hexagon / 2.4x trapezium / 12x thin plate. Three further bugs fixed for the cancellation to hold in float: an edge-plane offset that vanished exactly at only one endpoint (leaving a ~1e-37 shift), the arctangent's corner endpoint value (-arctan b1, not zero, worth ~70% of the per-limit value), and a mirrored Pi returning 0 x inf where its weight was zero.</p>
     </article>
-<article class="r-fu" data-id="f-boa-06" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-25T16:30:00+00:00" data-recommends-skill="/reckon-ship biot-operator-assembly" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-boa-06" data-status="resolved" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-25T16:30:00+00:00" data-recommends-skill="/reckon-ship biot-operator-assembly" data-resolved-at="2026-07-26T04:49:13+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Take the complete elliptic integrals through their complement in the point-filament kernels too</h4>
     <div class="r-fu-body"><p>The vertex work established that <code>scipy.special.ellipk(m)</code> and <code>ellipe(m)</code> lose the modulus complement to rounding, returning K wrong by about eps/k'^2, and replaced them with Carlson forms that take the complement exactly. <code>nova/biot/greens.py</code> still calls them the parameter way for the POINT-filament Green's functions, and k^2 -&gt; 1 there is the near field - the zone where the point kernel's error already concentrates and where the plasma bundle evaluates. It clips k^2 at 1 - 1e-12, which caps the induced error near 1e-5 relative and turns a target on the filament into a finite but wrong answer rather than a divergence: a floor of exactly the kind just removed from the closed form, sitting in the most-used kernel in the module. <code>nova/equilibrium/harmonic.py</code> shares the call pattern with the parameter approaching unity in the far field.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -629,8 +670,9 @@ Done-when
      re-measured.
   3. Full fast lane clean.
   4. Followup written; this followup resolved.</pre>
+    <p class="r-fu-outcome">Subsumed and landed with f-boa-07, and the measurement changed what the work was. The point kernels do take the complement now -- k'^2 formed from the geometry, K from ellipkm1 -- but the SECOND kind was measured not to need it (dE/dm diverges only logarithmically, so E from the parameter is good to K eps, and where m rounds to one E(1) = 1 is itself right to 1e-24), and the Carlson pair this followup assumed was rejected on cost: 4x the special-function cost and 64% of the whole kernel for the same accuracy, where ellipkm1 costs 1.01x. The clip is gone and a coincident target returns the divergence. The bigger finding is that the modulus was only ONE of three near-field limits in those brackets, and not the one that mattered for the field: an absolute floor on a squared length left B_Z 90% wrong inside 32 micrometres of any filament, and the pole's numerator was a cancelling difference. Both are repaired. nova/equilibrium/harmonic.py adopted the complement too, where it is worth 1e-13 a millimetre from the focal ring -- hygiene, as the measurement shows, rather than a repair.</p>
     </article>
-<article class="r-fu" data-id="f-boa-07" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-25T17:10:00+00:00" data-recommends-skill="/reckon-ship biot-operator-assembly" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-boa-07" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-25T17:10:00+00:00" data-recommends-skill="/reckon-ship biot-operator-assembly" data-resolved-at="2026-07-26T04:49:13+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Build complement-exact elliptic primitives, in numpy and in JAX, and adopt them everywhere</h4>
     <div class="r-fu-body"><p>Two problems with one root. The vertex work established that passing the PARAMETER to <code>ellipk</code>/<code>ellipe</code> destroys the modulus complement and costs ~eps/k'^2; the closed form now uses Carlson forms that take the complement, but <code>nova/biot/greens.py</code> and <code>nova/equilibrium/harmonic.py</code> still use the parameter form. Separately, JAX has NO elliptic integrals whatsoever, so the closed form cannot enter the traced tile path that the locked kernel-backend selected. One coherent piece of work fixes both: a complement-native elliptic primitive set with a numpy and a JAX implementation, pinned against each other and against scipy's Carlson routines.</p><p>Algorithm choice is the substance, not a detail. Measured on 200k evaluations: <code>ellipk</code> 1.8 ms, <code>elliprf</code> 7.0, <code>elliprg</code> 8.4, <code>elliprj</code> 40.1. The four complete Pi per edge dominate, so the third kind decides the cost.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -695,6 +737,7 @@ Done-when
      re-stated (two thirds of it is the moment stacks today).
   5. The closed-form-device decision locked with those measurements.
   6. Followup written; this followup resolved.</pre>
+    <p class="r-fu-outcome">Landed on develop (5d194134, ea901d6b, a5912084; fast lane 1477 passed / 87 skipped / 0 failed). ALL FIVE DONE-WHENS MET AND THE DECISION IS LOCKED. (1) The parameter route's cost is measured, not argued: benchmarks/near_field_elliptic.py against an extended-precision reference over eleven decades -- the flux loses 1e-6 at 2.2e-06 ring radii and 1e-9 at 8.5e-05, the clip engaged at k'^2 = 4.9e-13 (1.4 um from a unit ring) and did NOT bound the error (2.6e-02 at engagement climbing to 3.7e-01), and it was a bad trade at the engagement point itself (unclipped 3.5e-06). (2) Adopted where the measurement justified it: the point kernels take k'^2 = ((a-R)^2 + dz^2)/span from the geometry and K from ellipkm1, which costs 1.01x ellipk and removes the whole near-field flux error -- psi 5.3e-10 -> 3.1e-16 a millimetre from a coil. Carlson was REJECTED for that path (4x the special-function cost, 64% of the whole kernel, same accuracy) and the second kind never needs the complement at all. Two defects in the same brackets turned out to be the FIELD's real limit and went with it: an absolute floor on a squared length (engaging 32 um out at any ring radius, leaving B_Z 90% wrong inside it) and the pole's numerator as a cancelling difference -- B_Z 9.0e-01 -> 9.9e-16 ten micrometres from an ITER-scale filament. A coincident target now returns the divergence rather than answering, undetectably, for one 1.4 um away. The banded scheme's per-band errors were re-measured and reproduce every recorded cutoff BIT FOR BIT (the corrected filament is truncation-limited, not round-off-limited). (3) One namespace-agnostic implementation, jit/vmap/grad clean with a measured trip bound (12 converges the whole double range, 10 does not; the constant is 14), and the closed form demonstrated inside a traced tile on CPU AND on one H200 -- 5.5 us/pair against the quadrature's 5.3. (4) Primitive costs, the shortcut cost and the closed form's floor re-measured on a compute node and recorded in benchmarks/BASELINE.md. (5) closed-form-device locked jax-native-primitives. Full record: docs/archive/biot-operator-assembly-complement-primitives-landed.html.</p>
     </article>
 <article class="r-fu" data-id="f-boa-08" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-25T17:14:00+00:00" data-recommends-skill="/reckon-ship biot-operator-assembly" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Make the closed form the shipped route for exact polygon coupling and re-open the plasma default flip</h4>
@@ -801,7 +844,7 @@ Done-when
   3. Cost re-measured and recorded; the accuracy tables re-measured and unchanged or
      improved.
   4. Followup written; this followup resolved.</pre>
-    <p class="r-fu-outcome">Landed on develop (56254283; full fast lane 1435 passed / 87 skipped / 0 failed, the +12 being this rung's own tests). A PURE REGROUPING, WHICH IS THE HEADLINE: every entry of SECTION_ACCURACY, ASPECT_ACCURACY and FIELD_ASPECT_ACCURACY holds UNCHANGED in both directions and the whole 95-test acceptance gate passes untouched, so no table needed re-measuring - the rung predicted exactly that and it is what makes the saving free. THE SPLIT. A limit of an edge is one of the section's CORNERS, and _Vertex now holds everything that sees only the corner: the ring modulus and its complement, the harmonic moment stack and its radical-weighted fold, the G^2 split with both pole seeds, the first residual arsinh integral, and the moment machinery itself (the contractions and the two pole routes, which the edge reaches through with the numerators its slope contributes). _Edge holds what the slope reaches - B^2, the arctangent's numerator, both derivative blocks - and a second thing the rung did not list: the target's offset from the edge's EXTENDED LINE, r1, B^2 and the two slope blocks are all limit-INDEPENDENT and were being formed twice per edge as well, so they are now formed once for the pair. Only the B^2 split (which needs the corner's modulus), gamma, the arctangent numerator and the second residual are genuinely per (edge, limit). A corner is released as soon as the later of its two edges has been evaluated, so three corner parts are live at a time rather than one per corner - verified by instrumenting the constructor, and it holds at 3 for a 4-, 6- and 9-corner section. THE TELESCOPING, MEASURED RATHER THAN ASSUMED. Over the gate target sets ONE corner's arsinh beta1 term is 14x to 1900x the assembled answer, so this is a cancellation of one to three decades, not a negligible term; summed the way the edge loop used to sum it, it left 7.1e-15 of the answer behind (worst, thin plate psi) - three orders inside the recorded envelopes, which is why the tables did not move when it went. It is now accumulated against the signed number of live edges meeting at each corner and the section total is EXACTLY free of it (0.0, not round-off) for the hexagon, thin plate and trapezium, none of which has a horizontal edge. The rectangle is the counter-case and is asserted the other way: its chain breaks at all four corners (+1/-1/+1/-1) and the surviving sum is 6% of B_Z and 105% of the flux, so the bookkeeping is load-bearing there. COST, one idle sun_debug core, 4096 pairs, fresh process, median of three, 128 residual nodes: hexagon 333.9 -> 176.6 us/pair (1.89x), thin plate 220.7 -> 119.3 (1.85x), rectangle 109.4 -> 113.2 (0.97x). The floor went 184.9 -> 100.1, of which the graded residual quadrature is 145 -> 73, the moment stacks 40.1 -> 26.8 and the third-kind integrals 17.1 -> 12.7. Peak allocation 10.6 -> 12.1 kB/pair (the three live corner parts; the residual quadrature's pairs x nodes blocks dominate either way). THE RECTANGLE RESULT IS THE HONEST SHAPE OF THE WIN, not a defect: two of its edges are horizontal and dropped, so each of its corners belongs to exactly ONE live edge and there is nothing to share, and its chain is broken everywhere so the first residual survives at every corner - it does the same work through one more object, a few per cent either way across runs. A hexagonal plasma cell is the opposite case and halves both counts. CONSEQUENCE FOR THE ADOPTION RUNG (f-boa-08, cost statement updated in place): the closed form is now 4.9x faster than the 858 us/pair 16x48 quadrature it would replace, not 2.6x, while staying one to two orders more accurate and accurate ON the contour where that rule sits at 2.6e-04; it is 13.5x the banded scheme's 13.1 us/pair whole-column figure. Twelve tests added, because no accuracy test can see whether the sharing is in effect - it is the same arithmetic: bit-identical corner coordinates from pack_section for both of a corner's edges, the cancellation and the magnitude it cancels, the survival where the chain breaks, and a per-section call count (hexagon 6 moment stacks / 12 residuals, was 12/24; rectangle 4/8, unchanged). Record: archive/biot-operator-assembly-corner-organisation-landed.html</p>
+    <p class="r-fu-outcome">Landed on develop (56254283; full fast lane 1435 passed / 87 skipped / 0 failed, the +12 being this rung's own tests). A PURE REGROUPING, WHICH IS THE HEADLINE: every entry of SECTION_ACCURACY, ASPECT_ACCURACY and FIELD_ASPECT_ACCURACY holds UNCHANGED in both directions and the whole 95-test acceptance gate passes untouched, so no table needed re-measuring - the rung predicted exactly that and it is what makes the saving free. THE SPLIT. A limit of an edge is one of the section's CORNERS, and _Vertex now holds everything that sees only the corner: the ring modulus and its complement, the harmonic moment stack and its radical-weighted fold, the G^2 split with both pole seeds, the first residual arsinh integral, and the moment machinery itself (the contractions and the two pole routes, which the edge reaches through with the numerators its slope contributes). _Edge holds what the slope reaches - B^2, the arctangent's numerator, both derivative blocks - and a second thing the rung did not list: the target's offset from the edge's EXTENDED LINE, r1, B^2 and the two slope blocks are all limit-INDEPENDENT and were being formed twice per edge as well, so they are now formed once for the pair. Only the B^2 split (which needs the corner's modulus), gamma, the arctangent numerator and the second residual are genuinely per (edge, limit). A corner is released as soon as the later of its two edges has been evaluated, so three corner parts are live at a time rather than one per corner - verified by instrumenting the constructor, and it holds at 3 for a 4-, 6- and 9-corner section. THE TELESCOPING, MEASURED RATHER THAN ASSUMED. Over the gate target sets ONE corner's arsinh beta1 term is 14x to 1900x the assembled answer, so this is a cancellation of one to three decades, not a negligible term; summed the way the edge loop used to sum it, it left 7.1e-15 of the answer behind (worst, thin plate psi) - three orders inside the recorded envelopes, which is why the tables did not move when it went. It is now accumulated against the signed number of live edges meeting at each corner and the section total is EXACTLY free of it (0.0, not round-off) for the hexagon, thin plate and trapezium, none of which has a horizontal edge. The rectangle is the counter-case and is asserted the other way: its chain breaks at all four corners (+1/-1/+1/-1) and the surviving sum is 6% of B_Z and 105% of the flux, so the bookkeeping is load-bearing there. COST, one idle sun_debug core, 4096 pairs, fresh process, median of three, 128 residual nodes: hexagon 333.9 -&gt; 176.6 us/pair (1.89x), thin plate 220.7 -&gt; 119.3 (1.85x), rectangle 109.4 -&gt; 113.2 (0.97x). The floor went 184.9 -&gt; 100.1, of which the graded residual quadrature is 145 -&gt; 73, the moment stacks 40.1 -&gt; 26.8 and the third-kind integrals 17.1 -&gt; 12.7. Peak allocation 10.6 -&gt; 12.1 kB/pair (the three live corner parts; the residual quadrature's pairs x nodes blocks dominate either way). THE RECTANGLE RESULT IS THE HONEST SHAPE OF THE WIN, not a defect: two of its edges are horizontal and dropped, so each of its corners belongs to exactly ONE live edge and there is nothing to share, and its chain is broken everywhere so the first residual survives at every corner - it does the same work through one more object, a few per cent either way across runs. A hexagonal plasma cell is the opposite case and halves both counts. CONSEQUENCE FOR THE ADOPTION RUNG (f-boa-08, cost statement updated in place): the closed form is now 4.9x faster than the 858 us/pair 16x48 quadrature it would replace, not 2.6x, while staying one to two orders more accurate and accurate ON the contour where that rule sits at 2.6e-04; it is 13.5x the banded scheme's 13.1 us/pair whole-column figure. Twelve tests added, because no accuracy test can see whether the sharing is in effect - it is the same arithmetic: bit-identical corner coordinates from pack_section for both of a corner's edges, the cancellation and the magnitude it cancels, the survival where the chain breaks, and a per-section call count (hexagon 6 moment stacks / 12 residuals, was 12/24; rectangle 4/8, unchanged). Record: archive/biot-operator-assembly-corner-organisation-landed.html</p>
     </article>
 <article class="r-fu" data-id="f-boa-10" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-25T23:40:00+00:00" data-recommends-skill="/reckon-ship biot-operator-assembly" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Take the last two costs out of the closed form: the moment stack&#x27;s length and the residual node count</h4>
@@ -869,6 +912,63 @@ Done-when
      re-measured in both directions and the reason for each movement stated.
   3. Cost re-measured on a compute node, fresh process, median of three, and both the
      benchmark table and benchmarks/BASELINE.md updated.
+  4. Followup written; this followup resolved.</pre>
+    </article>
+<article class="r-fu" data-id="f-boa-11" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-26T05:00:00+00:00" data-recommends-skill="/reckon-ship biot-operator-assembly" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Collapse the traced closed form&#x27;s two-minute compile by rolling up the moment recursions</h4>
+    <div class="r-fu-body"><p>The closed form now evaluates inside a traced tile and on one H200 it costs what the 16x48 quadrature costs. What it does not yet have is a usable compile: <strong>101 s on the device and 136 s on the host, against 1.3 s for the quadrature kernel</strong>. The cause is structural rather than accidental -- every recursion in the reduction is a Python loop over a STATIC trip count, so a trace unrolls all of it: 138 downward ratio steps per corner for the plain harmonics, a 40-order tridiagonal solve per pole family, a 60-order headroom sweep in each shifted family, times one corner per edge. The HLO graph is enormous and its size grows with the section's corner count, so a seven-corner wall-clipped cell is worse than a hexagon and the compile is paid again for every distinct tile shape a build uses.</p><p>The fix is the same fixed-trip discipline the elliptic descent already uses, one level up: a <code>lax.scan</code> or <code>fori_loop</code> carries a recursion whose length is known at trace time without unrolling it, and the moment families are exactly that. What makes it delicate is that they RETAIN every order -- <code>harmonic_moments</code> returns a list of 42 arrays built by a recursion that runs 138 steps -- so the scan has to stack what it keeps and the numpy path must keep its list form, or fork. The accuracy tables are the gate: this changes no arithmetic if it is done right, so every one of the eighteen two-directional entries must hold UNCHANGED, exactly as they did through the complement adoption.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    biot-operator-assembly (http://127.0.0.1:8765/nova/biot-operator-assembly.html)
+Section: collapse the traced closed form&#x27;s compile
+Tier:    opus
+
+Context
+  The closed form traces and runs on a device at the 16x48 quadrature&#x27;s own rate (5.5
+  vs 5.3 us/pair on one H200), which is what unlocked the closed-form-device decision.
+  Its compile does not: 101 s on the device, 136 s on the host, against 1.3 s for the
+  quadrature kernel. Every recursion in the reduction is a Python loop over a static
+  trip count, so the trace unrolls all of it -- and the graph grows with the section&#x27;s
+  corner count, so the worst case is a seven-corner wall-clipped cell rather than a
+  hexagon.
+
+State to read
+  nova/biot/elliptic.py -- harmonic_moments (a 138-step downward ratio recursion for 42
+    retained orders, plus an upward branch selected per element), harmonic_pole_moments
+    (a 41-order tridiagonal solve, forward then back), _shifted_family and the two
+    stable_* families (60-order headroom sweeps);
+  nova/biot/completeelliptic.py -- the descent, which is the ONE recursion already
+    written as a bounded fixed-trip loop, and the model for the rest;
+  nova/biot/polygonanalytic.py -- packed_analytic_greens, the driver that traces, and
+    the corner/edge split whose static loops multiply the graph;
+  benchmarks/tiled_backend.py --variants closed-vmap -- reports compile_seconds
+    separately from the steady state, which is how the win is measured.
+
+Guidance
+  - A recursion that RETAINS every order is a scan with a stacked output, not a
+    fori_loop over a carry; the retained orders are what the contractions consume.
+  - The numpy path must not regress. Either the scan form serves both namespaces (a
+    numpy scan is a Python loop again, which is what it already is) or the two forms
+    are selected on the namespace -- but not two transcriptions of the same recursion.
+  - The per-element direction SELECTION inside harmonic_moments and the stable_*
+    families is a where over two fully-evaluated branches. Under a trace that means
+    both branches are in the graph; consider whether the branch that cannot be reached
+    for a given argument range can be dropped, and measure before assuming it helps.
+  - Measure the compile per corner count (three, six, seven) so the growth law is
+    recorded rather than inferred.
+
+Scope locks / constraints
+  Work in a detached worktree off develop; the primary checkout stays on main. This
+  changes no arithmetic if it is done right, so the gate is that every entry of
+  SECTION_ACCURACY, ASPECT_ACCURACY and FIELD_ASPECT_ACCURACY holds UNCHANGED in both
+  directions, and that tests/test_biottiledbackend.py&#x27;s traced-closed parity holds at
+  the same tolerance. If an entry moves, the arithmetic moved and the change is wrong.
+
+Done-when
+  1. Compile time for the traced closed form measured before and after, per corner
+     count, on a compute node and on one H200, and recorded in benchmarks/BASELINE.md.
+  2. Steady-state us/pair not regressed on either device -- an unrolled graph is
+     sometimes faster, so this is a real risk and has to be measured, not assumed.
+  3. Every accuracy entry unchanged in both directions; the fast lane green.
   4. Followup written; this followup resolved.</pre>
     </article>
 </section>

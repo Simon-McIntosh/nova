@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="archive">
+  <meta name="plan-slug" content="biot-operator-assembly-complement-primitives-landed">
+  <meta name="plan-title" content="Complement-native elliptic primitives, host and device — landed">
+  <meta name="plan-status" content="historical">
+  <meta name="plan-modified" content="2026-07-26">
+  <title>biot-operator-assembly complement primitives landed | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>One complement-native descent, and the closed form on a device</h1>
+  <p><a href="/nova/biot-operator-assembly.html">← back to the evergreen plan</a> ·
+     landed 2026-07-26 · develop <code>5d194134</code> ·
+     <code>ea901d6b</code> · <code>a5912084</code> · fast lane 1477 passed /
+     87 skipped / 0 failed · <strong>the closed form now evaluates inside a traced
+     tile, its third-kind integrals cost 2.5× less than before, and a point-filament
+     field ten micrometres from a coil goes from 90 % wrong to
+     round-off</strong></p>
+
+  <h2>Quick status</h2>
+  <table>
+    <thead><tr><th>Item</th><th>Status</th><th>Where</th></tr></thead>
+    <tbody>
+      <tr><td>One routine for all three kinds, both arguments the COMPLEMENT, fixed
+          trip count, one implementation for numpy and for a trace</td>
+          <td>✓ shipped</td>
+          <td><code>nova/biot/completeelliptic.py</code></td></tr>
+      <tr><td>Every moment family taken through it; the elliptic module now holds no
+          library call, and the two-case third kind it needed to dodge a cancellation
+          is gone</td>
+          <td>✓ shipped</td><td><code>nova/biot/elliptic.py</code></td></tr>
+      <tr><td>The whole polygon reduction driven with no branch on a value, so a
+          padded batch of unlike sections is one call</td>
+          <td>✓ shipped</td>
+          <td><code>nova/biot/polygonanalytic.py</code>
+          (<code>packed_analytic_greens</code>)</td></tr>
+      <tr><td>The closed form as a second tile kernel, over the same tiles and the
+          same zarr store, jit and vmap</td>
+          <td>✓ shipped</td>
+          <td><code>nova/biot/tiledassembly.py</code>
+          (<code>tile_evaluator(kernel="closed")</code>)</td></tr>
+      <tr><td>Point-filament kernels on the complement, with the field's pole split
+          off and both phantom standoffs removed</td>
+          <td>✓ shipped</td><td><code>nova/biot/greens.py</code></td></tr>
+      <tr><td>Ring-function ladder's seeds on the complement</td>
+          <td>✓ shipped (hygiene — worth 1e-13)</td>
+          <td><code>nova/equilibrium/harmonic.py</code></td></tr>
+      <tr><td>What the parameter form costs, measured against extended precision
+          over eleven decades, with cost and the downstream check</td>
+          <td>✓ shipped</td>
+          <td><code>benchmarks/near_field_elliptic.py</code></td></tr>
+      <tr><td>Primitive costs, the shortcut cost and the closed form's floor
+          re-measured on a compute node</td>
+          <td>✓ shipped</td>
+          <td><code>benchmarks/analytic_cost_floor.py</code>,
+          <code>benchmarks/tiled_backend.py</code></td></tr>
+      <tr><td>51 new tests: the primitives against four references and two exact
+          identities, the trip bound in both directions, jit / vmap / grad, the packed
+          driver against the host driver, the traced kernel against numpy</td>
+          <td>✓ shipped</td>
+          <td><code>tests/test_biotcompleteelliptic.py</code>,
+          <code>tests/test_biotpolygonanalytic.py</code>,
+          <code>tests/test_biottiledbackend.py</code></td></tr>
+      <tr><td>The traced closed form's COMPILE cost, 136 s against the quadrature
+          kernel's 1.25 s</td>
+          <td>measured, not addressed — its own rung</td>
+          <td>the moment recursions unroll</td></tr>
+      <tr><td>The rectangle kernel's own <code>ellipk(k²)</code> calls
+          (<code>corner_fields</code>)</td>
+          <td>deliberately untouched — not measured here</td><td>—</td></tr>
+    </tbody>
+  </table>
+
+  <h2>The primitive: one integral, both arguments complements</h2>
+  <p>Bulirsch's <code>cel</code> is the complete elliptic integral in the general
+  form that covers all three kinds at once, and its natural arguments are exactly
+  the two quantities a caller can supply exactly and cannot recover once lost:</p>
+  <pre><code>cel(k', p, a, b) = ∫₀^(π/2) dα (a cos²α + b sin²α)
+                   / ((cos²α + p sin²α) √(cos²α + k'² sin²α))
+
+K = cel(k', 1, 1, 1)     E = cel(k', 1, 1, k'²)     Π(n | m) = cel(k', 1 − n, 1, 1)</code></pre>
+  <p>A float parameter cannot carry its own complement: once <code>k'²</code> is
+  below the spacing of the numbers next to one, <code>1 − k'²</code> has rounded it
+  away, and <code>K</code>, which grows like <code>−log k'</code>, comes back wrong
+  by about <code>eps/k'²</code>. For a ring the complement is the target's squared
+  distance to the source point over the squared ring span, so a micron from a
+  metre-scale ring is already 1e-12 — the loss is a working configuration, not a
+  corner case.</p>
+
+  <h3>Accuracy, against four references chosen so none assumes the convention</h3>
+  <p>Extended-precision (80-bit) arithmetic-geometric mean for <code>K</code>, whose
+  <code>π/(2 AGM)</code> form has no cancellation anywhere in it; the hypergeometric
+  series in longdouble for <code>E</code> beyond <code>k'² = 0.1</code>; the
+  small-complement expansion <code>1 + (k'²/2)(log 4/k' − ½)</code> below 1e-6, whose
+  error is <code>O(k'⁴ log k')</code>; and scipy's Carlson forms between, validated
+  against the two where they overlap.</p>
+  <table>
+    <thead><tr><th><code>k'²</code></th><th>descent, K</th><th>descent, E</th>
+      <th>parameter route, K</th></tr></thead>
+    <tbody>
+      <tr><td>1e-2 … 1</td><td>≤ 1 ulp</td><td>≤ 1 ulp</td><td>≤ 1 ulp</td></tr>
+      <tr><td>1e-8</td><td>≤ 1 ulp</td><td>≤ 2 ulp</td><td>2.4e-10</td></tr>
+      <tr><td>1e-12</td><td>≤ 1 ulp</td><td>≤ 1 ulp</td><td>7.3e-07</td></tr>
+      <tr><td>1e-16</td><td>≤ 1 ulp</td><td>≤ 3 ulp</td><td>2.6e-03</td></tr>
+      <tr><td>1e-20 … 1e-300</td><td>≤ 1 ulp</td><td>≤ 4 ulp</td>
+        <td><strong>infinite</strong> — the parameter rounds to one</td></tr>
+    </tbody>
+  </table>
+  <p>The third kind holds 1e-13 against Carlson in the arrangement that keeps both
+  of its terms positive, and round-off against two exact identities that need no
+  reference at all — <code>Π(n | 0) = (π/2)/√(1 − n)</code> and
+  <code>Π(m | m) = E/(1 − m)</code>. Those two are what pin it across
+  <strong>eighteen decades of pole</strong>, where every numerical reference is
+  itself losing digits: the ordinary <code>R_F + (n/3) R_J</code> arrangement is a
+  difference of near-equal terms once the pole is far past the range and is out by
+  3.5e-08 at <code>p = 1e15</code>, which is why the elliptic module previously
+  carried a second, reflected form as a special case. The pole argument removes the
+  case.</p>
+
+  <h3>The trip count is a measured claim, asserted in both directions</h3>
+  <p>A traced evaluation cannot iterate to a convergence test, so the descent runs a
+  constant number of times. Each trip takes a geometric mean, so the correct digits
+  double once the running pair is of one size and the exponent gap halves before
+  that — which is why ONE constant covers three hundred decades. Measured over a
+  dense sweep of the whole double range including denormals, and eighteen decades of
+  pole: <strong>twelve trips reach the algorithm's own round-off floor and ten leave
+  the smallest complements wrong in the sixth decimal.</strong> The constant is
+  fourteen; the test fails if either bound moves.</p>
+
+  <h3>Derivatives</h3>
+  <p>nova differentiates through solves, so a value alone is not enough. Against the
+  closed-form derivatives, which need only the values: the first kind and the third
+  kind are exact to a ulp in every argument. The second kind is not — <code>E</code>
+  approaches one as the complement vanishes and its whole dependence on the
+  complement is a variation of relative size <code>k'² log k'</code> on that one, so
+  the descent recovers the value to a few ulp but forms the derivative as a
+  difference of larger terms and loses about a digit per decade: exact at
+  <code>k'² = 1e-3</code>, 1e-10 at 1e-8, worthless by 1e-20. A caller that needs it
+  there has it exactly from the two values, <code>dE/dk'² = (K − E)/(2 k²)</code>.
+  Bounded by test rather than left unstated.</p>
+
+  <h2>Cost: the third kind is where the choice pays</h2>
+  <p>One SLURM compute core, 4096 elements, fresh process, median of three:</p>
+  <table>
+    <thead><tr><th>route</th><th>µs/element</th><th>vs Cephes</th></tr></thead>
+    <tbody>
+      <tr><td><code>ellipk(m) + ellipe(m)</code></td><td>0.0308</td><td>1.00×</td></tr>
+      <tr><td><code>ellipkm1(k'²) + ellipe(m)</code></td><td>0.0312</td>
+        <td>1.01× — <strong>a complement-native first kind is free on the host</strong></td></tr>
+      <tr><td>Carlson <code>R_F + 2 R_G</code> (K and E)</td><td>0.1495</td><td>4.9×</td></tr>
+      <tr><td><strong>descent, K and E from one sweep</strong></td><td>0.1687</td><td>5.5×</td></tr>
+      <tr><td>Carlson <code>R_F + (n/3) R_J</code> (third kind)</td><td>0.3928</td><td>12.8×</td></tr>
+      <tr><td><strong>descent, third kind</strong></td><td>0.1175</td>
+        <td>3.8× — <strong>and 3.3× cheaper than Carlson's</strong></td></tr>
+    </tbody>
+  </table>
+  <p>That splits the adoption cleanly, and the split is the point rather than an
+  inconsistency. The polygon reduction needs several complete <code>Π</code> per
+  corner and no Cephes route offers one at all, so the descent is both the only
+  traceable option and the cheapest: its third-kind integrals fell from 12.7 to
+  <strong>5.06 µs/pair</strong> of the closed form's cost floor. The point kernels
+  need only <code>K</code> and <code>E</code>, on the hottest path in the module,
+  where Cephes is five times cheaper and <code>ellipkm1</code> already takes the
+  complement — so they take that, and the reduction takes the descent.</p>
+  <p>The closed form's floor, re-measured on the same harness at the 128 residual
+  nodes the acceptance gate needs:</p>
+  <table>
+    <thead><tr><th>component</th><th>before (Carlson)</th><th>after (descent)</th></tr></thead>
+    <tbody>
+      <tr><td>third-kind integrals</td><td>12.70</td><td><strong>5.06</strong></td></tr>
+      <tr><td>moment stacks and all</td><td>26.80</td><td>19.76</td></tr>
+      <tr><td>graded residual quadrature</td><td>73.30</td><td>73.17</td></tr>
+      <tr><td>floor</td><td>100.10</td><td><strong>92.92</strong></td></tr>
+      <tr><td>assembled psi (and psi + field)</td><td>189.8 / 189.6</td>
+        <td>171.5 / 171.6</td></tr>
+    </tbody>
+  </table>
+  <p>All µs/pair, hexagonal cell, 4096 pairs. The residual quadrature is untouched
+  and is now <strong>79 % of the floor</strong>, which is where the next cost rung
+  points. And every one of the eighteen two-directional accuracy entries holds
+  UNCHANGED — worst per section and band, against the recorded bound: hexagon
+  7.65e-12 far / 7.28e-12 near (9e-12 / 9e-12), rectangle 1.59e-12 / 3.92e-11
+  (3e-12 / 6e-11), thin plate 3.33e-11 / 6.78e-12 (9e-11 / 9e-12), trapezium
+  8.04e-12 / 3.59e-12 (1e-11 / 6e-12). The descent reproduces the Carlson route's
+  accuracy through the whole assembled reduction while costing less.</p>
+
+  <h2>The closed form inside a traced tile</h2>
+  <p>Three things the host driver does with Python control flow cannot be done from a
+  traced value, and the packed driver does each with arithmetic instead:</p>
+  <ul>
+    <li>a dead edge — a dropped horizontal one, or a batch pad — is multiplied by its
+    own zero weight rather than skipped, so the loop over edges runs to a static
+    bound;</li>
+    <li>a corner's geometry comes from the edge that STARTS there where that edge is
+    live and from the edge that ENDS there where it is not. Those are the same point
+    wherever both are live, and the second is the only one available once a dropped
+    edge's corners have been replaced by the packed placeholder — a
+    <code>where</code>, not a dictionary;</li>
+    <li>the <code>arsinh β₁</code> term is still accumulated ONCE per corner against
+    the signed number of live edges meeting there, so it still cancels EXACTLY around
+    an unbroken chain rather than to round-off — which is what the corner
+    organisation bought and what a per-limit accumulation would give back.</li>
+  </ul>
+  <p>What that costs is the shortcuts, and it is measurable: at one array width, one
+  section, 4096 targets, the host driver runs <strong>171.4 µs/pair</strong> and the
+  packed driver <strong>230.8 µs/pair</strong> — <strong>1.35×</strong> for always
+  forming every corner's pole families and first residual. The arithmetic is
+  otherwise identical: the packed driver agrees with the host driver to 5.5e-13 and
+  the traced kernel agrees with the packed driver on numpy to 2.5e-12, ONE
+  compilation for a whole build, and through the zarr store the traced closed form
+  agrees with the host driver to 2.3e-12.</p>
+  <p><strong>The compile is the finding.</strong> 136 s for a six-corner padded
+  section against 1.25 s for the quadrature kernel, because the reduction unrolls its
+  moment recursions — one hundred and thirty-eight downward ratio steps per corner for
+  the plain harmonics alone, plus a forty-order tridiagonal solve per pole family.
+  It is paid once per build and a MAST-catalogue build is four million pairs, so it
+  amortises; but it grows with the corner count and it is two minutes of a developer's
+  iteration. Replacing the unrolled recursions with a fixed-trip <code>scan</code> is
+  the obvious reduction and it is not done here.</p>
+
+  <h2>The point-filament kernels, and two defects that were not the modulus</h2>
+  <figure>
+    <img src="/nova/figures/biot-operator-assembly/near_field_elliptic.png"
+         alt="Relative error against distance to the filament for psi, Bz and Br under five evaluation routes; the downstream corrected-filament error against standoff; the far-field bracket's cancellation against k squared; cost per element per route; and the flux error collapsing onto eps over k prime squared"
+         style="max-width:100%">
+    <figcaption>Top left to right: <code>psi</code>, <code>B_Z</code> and
+    <code>B_R</code> approaching the filament along three directions, five routes,
+    with the modulus cap and the distance floor marked — and the banded scheme's
+    corrected filament downstream, where every route agrees. Bottom: the far-field
+    bracket's own cancellation in two directions, the cost per element, and the flux
+    error following <code>eps/2 k'² K</code> until the complement removes it.</figcaption>
+  </figure>
+  <p>The flux's near-field error is entirely the modulus and the complement removes
+  all of it. The field components' is NOT, and that only came out because it was
+  measured: two things in the printed brackets cost more than the modulus does.</p>
+  <ul>
+    <li><code>np.maximum(d², _R_FLOOR)</code> was an absolute floor on a SQUARED
+    LENGTH. It engages 32 micrometres from the filament at ANY ring radius — the
+    radius does not appear — and inside it the field stops diverging and is simply
+    wrong.</li>
+    <li><code>a² − R² − dz²</code> is a difference of terms of order <code>a²</code>
+    whose value is of order <code>a d</code>, so it arrives with relative error
+    <code>eps a/2d</code>. Written <code>−d² + 2a(a − R)</code> — the same quantity
+    exactly — nothing cancels, and the pole is then isolated in the one term that
+    genuinely diverges.</li>
+  </ul>
+  <table>
+    <thead><tr><th>configuration</th><th><code>k'²</code></th>
+      <th>psi, before → after</th><th><code>B_Z</code>, before → after</th></tr></thead>
+    <tbody>
+      <tr><td>plasma cell, own edge (60 mm)</td><td>2.3e-05</td>
+        <td>8.4e-13 → 8.4e-17</td><td>1.5e-14 → 5.6e-16</td></tr>
+      <tr><td>probe 10 mm from a coil</td><td>6.5e-07</td>
+        <td>3.0e-12 → 2.5e-16</td><td>3.2e-14 → 2.3e-16</td></tr>
+      <tr><td>probe 1 mm from a coil</td><td>6.5e-09</td>
+        <td>5.3e-10 → 3.1e-16</td><td>6.4e-13 → 3.1e-16</td></tr>
+      <tr><td>probe 10 µm from a coil</td><td>6.5e-13</td>
+        <td><strong>1.6e-02 → 1.0e-16</strong></td>
+        <td><strong>9.0e-01 → 9.9e-16</strong></td></tr>
+      <tr><td>winding pack, 1 µm (a = 1 m)</td><td>2.5e-13</td>
+        <td>5.0e-02 → 6.1e-17</td><td>1.0e+00 → 1.6e-15</td></tr>
+      <tr><td>probe at 3 ring radii</td><td>6.9e-01</td>
+        <td>5.5e-15 → 5.5e-15</td><td>8.8e-16 → 8.8e-16</td></tr>
+    </tbody>
+  </table>
+  <p>The cap engaged at <code>k'² = 4.9e-13</code> — 1.4 µm from a unit ring, 8.7 µm
+  from an ITER-scale one — and did not bound the error: inside it <code>K</code> was
+  frozen while the true <code>K</code> kept growing, so the flux error climbed from
+  2.6e-02 at engagement to 3.7e-01. At the engagement point the cap was a bad trade
+  in its own right: unclipped, the same target was wrong by 3.5e-06 rather than
+  2.6e-02.</p>
+  <h3>What a coincident target returns, deliberately</h3>
+  <p>The divergence. <code>psi</code> is <code>inf</code>; the field is
+  <code>nan</code>, because its sign depends on which way the filament is approached
+  and the limit does not exist. Before, both were finite, silent and wrong — the
+  kernel's value at a phantom standoff of 1.4 µm, which is the one failure a caller
+  cannot detect. A filament model asked for a point ON the filament has been asked a
+  question it cannot answer, and the finite-section kernels exist for exactly that
+  target and are smooth through the conductor. One ULP off the filament these now
+  return the true finite values, which is the other half of the same contract:
+  adjacent is not coincident, and only the complement can tell the two apart.</p>
+  <h3>Two things measured and deliberately NOT fixed</h3>
+  <p><strong>The far-field bracket.</strong> <code>(1 − m/2)K − E</code> has a series
+  starting at <code>m²</code> formed out of terms of order one, so it loses
+  <code>log₁₀(16/m²)</code> digits wherever <code>K</code> and <code>E</code> came
+  from, and no route fixes it. The crossings are at 11 ring radii for 1e-12, 68 for
+  1e-9 and 420 for 1e-6 — a probe three ring radii out measures 5.5e-15 and a psi
+  grid whose inner edge is at <code>R = 0.1 m</code> on a 6.2 m ring measures 4.5e-13.
+  Nothing in the machine is far enough out to pay for replacing the bracket with its
+  series.</p>
+  <p><strong>The banded scheme downstream.</strong> <code>moment_filament</code> takes
+  SECOND differences of these kernels in the source position on a step of 2e-3 section
+  radii and divides by <code>step²</code>, which multiplies any absolute kernel error
+  by <code>2.5e5/cell²</code> — so it had to be measured rather than argued. Every
+  route agrees to 1.00× inside four section radii and 1.3× at thirty: the corrected
+  filament is limited by the TRUNCATION of the moment expansion, not by the kernel's
+  round-off. Re-running <code>benchmarks/nearfar_error.py</code> after the change
+  reproduces every recorded cutoff distance <strong>bit for bit</strong>.</p>
+
+  <h2>What is next</h2>
+  <div class="card">
+    <p><strong>The closed form is now reachable from a device, so the adoption rung
+    is unblocked</strong> — the decision it listed as a prerequisite is locked below
+    the evergreen's decisions. Two cost rungs follow from what was measured here: the
+    residual quadrature is 79 % of the closed form's floor at 128 nodes, and the
+    traced kernel's 136 s compile is the unrolled moment recursions, which a
+    fixed-trip <code>scan</code> would collapse.</p>
+  </div>
+</main>
+</body>
+</html>

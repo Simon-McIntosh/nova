@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="archive">
+  <meta name="plan-slug" content="polybow-arc-section-third-kind-landed">
+  <meta name="plan-title" content="The incomplete third kind, and the pole seeds it closes — landed">
+  <meta name="plan-status" content="historical">
+  <meta name="plan-modified" content="2026-07-26">
+  <title>polybow-arc-section third kind landed | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>The one primitive Bartky's rearrangement cannot carry</h1>
+  <p><a href="/nova/polybow-arc-section.html">← back to the evergreen plan</a> ·
+     landed 2026-07-26 · 575 new tests, fast lane 2537 passed / 0 failed ·
+     <strong>the pole families now take their seed from a routine rather than from
+     quadrature, and with that the whole moment stack the arc contracts against is
+     closed</strong></p>
+
+  <h2>Quick status</h2>
+  <table>
+    <thead><tr><th>Item</th><th>Status</th><th>Where</th></tr></thead>
+    <tbody>
+      <tr><td>Carlson's symmetric forms <code>R_F</code> and <code>R_J</code> off ONE
+          fixed-trip duplication, with the degenerate <code>R_C</code> taken from its
+          two roots rather than their squares</td>
+          <td>✓ shipped</td>
+          <td><code>nova/biot/symmetricelliptic.py</code></td></tr>
+      <tr><td>The incomplete third kind in the pole convention, spanning both
+          orientations through the reflection <code>p → k'²/p</code></td>
+          <td>✓ shipped</td>
+          <td><code>nova/biot/incompleteelliptic.py</code></td></tr>
+      <tr><td>The two pole-family seeds at an interior amplitude, mirroring the
+          complete pair</td>
+          <td>✓ shipped</td>
+          <td><code>nova/biot/incompletemoments.py</code></td></tr>
+      <tr><td>The moment tests take their seed from the routine, not from quadrature
+          — the acceptance signal this rung was scoped by</td>
+          <td>✓ done</td>
+          <td><code>tests/test_biotincompletemoments.py</code></td></tr>
+      <tr><td>Cost per element, compute node, fresh process, median of 3</td>
+          <td>✓ measured</td>
+          <td><code>benchmarks/incomplete_third_kind.py</code></td></tr>
+      <tr><td>The arc reduction itself, its field rows and its element class</td>
+          <td>⨯ unblocked, not started</td>
+          <td>§4 of the evergreen</td></tr>
+    </tbody>
+  </table>
+
+  <figure>
+    <img src="/nova/figures/polybow-arc-section/incomplete_third_kind.png"
+         alt="Relative error of the printed symmetric form against the reflected route as the pole grows, a map of the reflected route's error over pole and modulus complement, and the denormal boundary of the reflected pole"
+         style="max-width:100%">
+    <figcaption>Left: the printed arrangement tracks <code>ε√p</code> exactly as
+    predicted while the reflected route stays on the round-off floor. Middle: both
+    orientations and both double ranges, at one amplitude — worst 6.2e-16. Right: the
+    one corner, and that it depends on the reflected pole alone, three pole decades
+    collapsing onto one curve.</figcaption>
+  </figure>
+
+  <h2>Neither printed option was right, and the third route is exact</h2>
+  <p>The decision this rung locks offered two routes and the partial-range rung had
+  already measured both out. Carlson's symmetric forms taken as printed are
+  <code>F + (n/3) sin³φ R_J</code> with <code>n = 1 − p</code>, and for a root just past
+  the NEAR end of the range — which is where the range starts, so it is reached at
+  every corner rather than occasionally — <code>n</code> is hugely negative and the two
+  terms are of opposite sign and nearly equal. Their sum falls as <code>1/√p</code>
+  while each stays of order <code>F</code>, so the arrangement throws away half the
+  decades of the pole: <strong>measured against the extended-precision integral,
+  6.3e-11 at <code>p = 1e12</code></strong>, which is a section a millionth as thick as
+  it is wide. Extending the complete descent was the other option and it does not
+  carry over at all: Bartky's rearrangement is what makes <code>cel</code> one
+  fixed-trip descent over eighteen decades of pole and there is no amplitude anywhere
+  in it.</p>
+
+  <p>The third route the analysis pointed at — take the elementary growth out exactly
+  and leave a well-conditioned remainder — turns out to be an <em>exact identity</em>
+  rather than an approximation, and that is what shipped. Reflecting the pole onto its
+  partner <code>k'²/p</code> gives</p>
+  <pre>Pi(phi, p) = [k'^2 (p - 1)/(p (p - k'^2))] Pi(phi, k'^2/p)
+           + [k^2/(p - k'^2)] F(phi, k)
+           + [mu/(p - k'^2)] arctan(mu sin phi cos phi/Delta),
+    mu^2 = (p - 1)(p - k'^2)/p</pre>
+  <p>and for <code>p &gt; 1</code> every one of those three terms is <strong>positive</strong>,
+  so no cancellation is left anywhere. The arctangent is precisely the
+  <code>arctan(√p tan φ)/√p</code> the analysis identified as carrying the whole growth
+  — it reduces to it exactly at <code>k = 0</code> — the first kind's term carries the
+  predicted <code>k²/(p − 1)</code> factor that is small where the direct route is
+  worst, and the partner pole is BELOW one, which is the orientation in which the
+  symmetric forms are themselves a sum of positives. So one evaluation covers both
+  orientations: the pole handed to the duplication is the smaller of <code>p</code> and
+  <code>k'²/p</code>, and the three coefficients collapse to <code>(1, 0)</code> where
+  no reflection is wanted, the arctangent's weight vanishing with <code>mu</code>. Nothing
+  selects on the result.</p>
+
+  <h2>What the sweep says</h2>
+  <table>
+    <thead><tr><th>Check</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>Against the extended-precision integral, over 6 amplitudes × 9 poles
+          (1e-12 … 1e12) × 7 complements (1 … 1e-100)</td>
+          <td><strong>worst 1.8e-15</strong></td></tr>
+      <tr><td>A quarter-turn amplitude against the shipped <code>complete_pole</code>,
+          every pole to 1e18 and every complement to 1e-300</td>
+          <td><strong>≤ 4e-15</strong>, two algorithms sharing no arithmetic</td></tr>
+      <tr><td>The pole-family seeds at a quarter turn against their complete
+          counterparts, both orientations</td>
+          <td>6.8e-16</td></tr>
+      <tr><td>The seeds against partial-range quadrature, wherever the panelled rule
+          itself has converged</td>
+          <td>≤ 1.7e-15</td></tr>
+      <tr><td>Trip count: fourteen, matching both descents; ten short</td>
+          <td>4e-15 at the count against 2.3e-09 four trips short</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Two arrangements that had to be measured, not reasoned</h2>
+  <p><strong>The degenerate form's logarithm.</strong> <code>R_C</code>'s two arguments
+  COINCIDE whenever the pole argument equals one of the other three, which the arc
+  reaches at a vanishing amplitude exactly and approaches wherever an edge end is level
+  with the target. Written the direct way, <code>log((σ + root)/τ)</code>, the ratio is
+  then one to within its own rounding and the assembled third kind is
+  <strong>4.3e-09</strong> out — six decades outside the tolerance the rest of the sweep
+  holds, and it looks for all the world like an error in the algorithm. <code>log1p</code>
+  of <code>root + |τ − σ|</code> is the same value with no cancellation, and the
+  accompanying test runs both so the claim is a measurement.</p>
+
+  <p><strong>The third kind carries its weight into the accumulation.</strong>
+  <code>R_J</code> alone passes 1e308 at a near pole on the source ring — it is
+  <code>inf</code> at a reflected pole of 1e-318 — while the integral it belongs to is
+  1.6e-09. The weight it is destined for is small by the same amount, so folding it in
+  term by term, and dividing it by the root <em>before</em> it multiplies the
+  transcendental, is what keeps the whole evaluation inside the exponent range. It
+  costs one multiply per trip.</p>
+
+  <h2>The one corner, and it is not this routine's</h2>
+  <p>The reflection needs <code>k'²/p</code>, and below the smallest normal double that
+  partner carries fewer bits than a double does: 2.3e-13 at a partner of 1e-312, 3.8e-07
+  at 1e-317. Geometrically it takes a section a millionth as thick as it is wide AND a
+  target within 1e-150 ring spans of the source, at once — for a metre-scale ring, a
+  separation a hundred and thirty decades below the Planck length. The boundary is
+  asserted in both directions, so a regression and an unexplained improvement both
+  fail.</p>
+
+  <p>Two findings came out of the checking and neither was sought. First,
+  <strong><code>scipy.special.elliprj</code> returns <code>nan</code></strong> where this
+  routine returns 3.5e+202 — at <code>x = 0</code>, a complement of 1e-300 and a pole
+  1e-200 past the range — and the same algorithm run in <code>np.longdouble</code> puts
+  the value where the fixed-trip evaluation does, to 1.3e-16. Second, at a unit pole the
+  symmetric route and the shipped amplitude-carrying descent compute the same integral,
+  and in the arc-end-edge corner the descent's own contract documents as degraded
+  <strong>the descent is 5.3e-06 out where the symmetric route is 2.5e-16</strong>. That
+  corner is the descent's and not the integral's, which is worth knowing but is not this
+  rung's to act on.</p>
+
+  <h2>Cost</h2>
+  <p>Per element, <code>sun_debug</code> node, one core, fresh process per variant,
+  median of 3 — the same methodology the rest of the elliptic stack is quoted at,
+  because a second measurement in one process is some 40 % faster and would invent a
+  difference that is not there.</p>
+  <table>
+    <thead><tr><th>Primitive</th><th>µs/element</th><th></th></tr></thead>
+    <tbody>
+      <tr><td><code>complete_kind</code> — K and E off one Bartky descent</td>
+          <td>0.167</td><td></td></tr>
+      <tr><td><code>complete_pole</code> — the complete third kind</td>
+          <td>0.130</td><td>the 0.1175 of record, on this node</td></tr>
+      <tr><td><code>incomplete_kind</code> — F and E at an interior amplitude</td>
+          <td>0.727</td><td>the amplitude costs the descent 5.6×</td></tr>
+      <tr><td><strong><code>incomplete_pole</code> — the incomplete third kind</strong></td>
+          <td><strong>0.721</strong></td><td>free beside the first two</td></tr>
+    </tbody>
+  </table>
+  <p>So the answer to the cost question the decision posed is the good one: <strong>the
+  incomplete third kind costs the same as the incomplete first and second kinds</strong>,
+  0.721 against 0.727, and the arc pays for those at every corner already. It is 5.5×
+  the complete descent, and that factor is the amplitude rather than the kind — the
+  first two kinds pay exactly the same for it.</p>
+
+  <h2>What is next</h2>
+  <div class="card">
+    <p><strong>The reduction itself.</strong> Every primitive the arc contracts against
+    is now in and pinned: the interior-amplitude first, second and third kinds, the
+    partial-range harmonic moments, the root and pole families verified unchanged, the
+    two pole seeds, and the amplitude fold. What remains is the assembly — the
+    by-parts boundary terms the interior limit reinstates, the arctangent's endpoint
+    value where the full turn had a dead-band, and the azimuthal field row that has no
+    rectangular oracle — and then the sweep-to-2π check against the landed full-turn
+    flux, which is the strongest single test the plan has and the one thing carried
+    over from the first rung's done-when.</p>
+  </div>
+</main>
+</body>
+</html>

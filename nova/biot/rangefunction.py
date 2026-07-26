@@ -52,6 +52,7 @@ from __future__ import annotations
 
 __all__ = [
     "across_the_range",
+    "as_range_function",
     "contract",
     "deflate",
     "harmonic_add",
@@ -59,6 +60,7 @@ __all__ = [
     "harmonic_scale",
     "product",
     "range_function",
+    "rising_integral",
     "scaled",
     "sine_squared_times",
     "total",
@@ -161,6 +163,82 @@ def across_the_range(term: tuple) -> list:
         [0.5 * (near + far), 0.5 * (far - near)],
         harmonic_multiply(_BOTH_ENDS, bulk),
     )
+
+
+def _split_at_both_ends(series: list) -> tuple:
+    """Return ``(bulk, half, far)`` of a harmonic series, by double deflation.
+
+    ``series = (t^2 - 1) q + (t - 1) half + far`` with ``t^2 - 1 = -4 x y`` and
+    ``t - 1 = -2 x``, so the two remainders ARE the range function's two ends:
+    ``far`` is the value at ``t = 1`` and ``far - 2 half`` the value at
+    ``t = -1``.  :func:`deflate` performs each step; running it twice is what
+    turns a series back into the representation the reductions carry.
+    """
+    quotient, far = deflate(series, 1.0)
+    bulk, half = deflate(quotient, -1.0)
+    return harmonic_scale(bulk, -4.0), half, far
+
+
+def as_range_function(series: list) -> tuple:
+    """Return the harmonic series as a range function -- the inverse of
+    :func:`across_the_range`.
+
+    Both end values come out of the series here rather than from the geometry, so
+    this is the route for a series whose ends are not separately known.  Where
+    one of them is known EXACTLY -- and for the antiderivative
+    :func:`rising_integral` builds, one of them is exactly zero -- take the route
+    that imposes it instead: a value recovered from a series is only as good as
+    the cancellation in it.
+    """
+    bulk, half, far = _split_at_both_ends(series)
+    return (bulk, far - 2.0 * half, far)
+
+
+def _chebyshev_integral(series: list) -> list:
+    """Return the ``t``-antiderivative of a harmonic series, constant discarded.
+
+    ``2 integral T_n dt = T_(n+1)/(n+1) - T_(n-1)/(n-1)`` for ``n >= 2``, with
+    ``integral T_0 dt = T_1`` and ``integral T_1 dt = (T_2 + T_0)/4``.  The
+    ``T_0`` term is left out: every caller fixes the constant by an end value
+    instead, which is the whole point of doing this in the range representation.
+    """
+    if not series:
+        return []
+    out: list = [0.0 * series[0]] * (len(series) + 1)
+    for order, coefficient in enumerate(series):
+        if order == 0:
+            out[1] = out[1] + coefficient
+        elif order == 1:
+            out[2] = out[2] + 0.25 * coefficient
+        else:
+            out[order + 1] = out[order + 1] + 0.5 * coefficient / (order + 1)
+            out[order - 1] = out[order - 1] - 0.5 * coefficient / (order - 1)
+    return out
+
+
+def rising_integral(series: list) -> tuple:
+    """Return ``integral_0^a sin 2s C(s) ds`` as a range function, ``C`` the series.
+
+    The antiderivative an odd row's weight leaves.  A row weighted by ``sin phi``
+    carries ``sin 2a`` against an even coefficient, and ``dx = sin 2a da`` -- so
+    the antiderivative is just ``C`` integrated in the range variable ``x``, and
+    the one that vanishes at the LOWER limit is the one whose constant is fixed at
+    ``x = 0``.  That end is ``phi = pi``, the range function's FAR value, and it
+    comes out exactly zero here because the constant is imposed rather than
+    summed: the deflation's own remainder is what is discarded.
+
+    Exactness there is not cosmetic.  The transcendental this multiplies diverges
+    logarithmically at whichever end its denominator vanishes on, and the pole
+    family's seed diverges with it; the two cancel, and they cancel to round-off
+    only if the weight the divergence carries is the exact zero rather than a
+    residue of the series it was summed from.
+    """
+    if not series:
+        return ([], 0.0, 0.0)
+    bulk, half, _ = _split_at_both_ends(
+        harmonic_scale(_chebyshev_integral(series), -0.5)
+    )
+    return (bulk, -2.0 * half, 0.0 * half)
 
 
 def sine_squared_times(series: list) -> tuple:

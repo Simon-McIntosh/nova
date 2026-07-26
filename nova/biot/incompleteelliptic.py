@@ -64,13 +64,24 @@ amplitude short of a quarter turn.  Only the corner where the amplitude reaches 
 quarter turn AS WELL is the full turn's own divergence, and there the complete
 module's finite-part convention is returned so the two agree in the limit the arc
 closes.
+
+The THIRD kind, :func:`incomplete_pole`, does not come off that descent at all,
+and that is worth stating because it looks as though it should.  What makes the
+complete third kind ONE fixed-trip evaluation over eighteen decades of pole is
+Bartky's REARRANGEMENT of the mean, and there is no amplitude anywhere in it; the
+incomplete counterpart is a different algorithm rather than the same one with an
+argument added.  It is built on Carlson's symmetric forms
+(:mod:`nova.biot.symmetricelliptic`) instead, and on the reflection that makes
+them hold at a near pole -- see :func:`incomplete_pole`.
 """
 
 from __future__ import annotations
 
 import numpy as np
 
-__all__ = ["TRIPS", "incomplete_kind"]
+from nova.biot.symmetricelliptic import symmetric_kinds
+
+__all__ = ["TRIPS", "incomplete_kind", "incomplete_pole"]
 
 # Trips of the arithmetic-geometric mean.  Each takes the geometric mean of the
 # running pair, so the correct digits DOUBLE per trip once the two are of the same
@@ -214,3 +225,106 @@ def incomplete_kind(
         xp.where(reachable, first, elementary),
         xp.where(reachable, second, sine),
     )
+
+
+def incomplete_pole(pole, complement, sine, cosine, *, xp=np, trips: int = TRIPS):
+    """Return ``integral_0^phi da/((cos^2 a + p sin^2 a) sqrt(1 - k^2 sin^2 a))``.
+
+    The interior-amplitude counterpart of
+    :func:`nova.biot.completeelliptic.complete_pole`, in the same arrangement and
+    with the same two arguments: ``pole`` is the denominator's value at the FAR
+    end of the range, which is ``1 - n`` for the usual characteristic, and
+    ``complement`` is ``k'^2``.  Both are quantities a caller forms from its own
+    geometry, neither by subtraction; see the complete routine for why that is the
+    whole accuracy question near a range end.
+
+    The amplitude is taken as its ``sine`` and ``cosine`` and NOT as an angle,
+    because the angle never enters -- ``cos^2 phi``, ``sin phi`` and the two
+    denominators at the amplitude are all the evaluation asks for.  The arc's own
+    amplitude is ``(pi + psi)/2`` for an azimuthal separation ``psi`` from one of
+    its ends, so the pair is ``(cos(psi/2), -sin(psi/2))``, exact and exactly
+    ``(1, 0)`` where the separation vanishes; the cosine of the assembled angle is
+    6e-17 there instead, which at a quarter turn is the difference between the
+    ring's value and no value at all.
+
+    **The reflection is the substance of this routine.**  Written out directly the
+    integral is ``F + (n/3) sin^3 phi R_J`` with ``n = 1 - p``, and for a root just
+    past the NEAR end of the range -- which is where the range STARTS, so it is
+    reached at every corner rather than occasionally -- ``n`` is hugely negative
+    and those two terms are of opposite sign and nearly equal.  Their sum falls as
+    ``1/sqrt(p)`` while each stays of order ``F``, so the arrangement throws away
+    half the decades of the pole: measured against the extended-precision integral,
+    6.3e-11 at ``p = 1e12``, which is a section a millionth as thick as it is wide.
+    The weight this seed carries is the numerator's value at that same end and is
+    small by the same amount, so the loss reaches the answer undiminished.
+
+    Reflecting the pole onto its partner ``k'^2/p`` removes it.  The two are
+    related exactly, by an identity whose elementary part carries the whole growth,
+
+        Pi(phi, p) = [k'^2 (p - 1)/(p (p - k'^2))] Pi(phi, k'^2/p)
+                   + [k^2/(p - k'^2)] F(phi, k)
+                   + [mu/(p - k'^2)] arctan(mu sin phi cos phi/Delta),
+        mu^2 = (p - 1)(p - k'^2)/p
+
+    and for ``p > 1`` every one of those three terms is POSITIVE, so there is no
+    cancellation left anywhere: the arctangent is the ``arctan(sqrt(p) tan phi)/
+    sqrt(p)`` the range would have if the modulus were one, the first kind's term
+    carries the factor ``k^2/(p - 1)`` that is small exactly where the direct route
+    is worst, and the partner pole is BELOW one -- the orientation in which the
+    symmetric forms are a sum of positives.  Measured over the same sweep the
+    reflected route holds 1.8e-15 at every pole from 1e-12 to 1e12 and every
+    complement down to 1e-300.
+
+    So one evaluation covers both orientations: the pole handed to
+    :func:`nova.biot.symmetricelliptic.symmetric_kinds` is the smaller of ``p`` and
+    ``k'^2/p``, and the three coefficients above collapse to ``(1, 0)`` where no
+    reflection is wanted.  The arctangent's weight vanishes with ``mu`` there, so
+    the same expression serves both and nothing selects on the result.
+
+    A pole of zero puts the root ON the far end of the range.  At an interior
+    amplitude that is short of the range and the integral is finite, but zero is
+    returned, as the complete routine returns it, so the arc and the ring agree in
+    the limit the arc closes; the callers that reach it carry a weight on such a
+    pole that is itself exactly zero.
+    """
+    pole = xp.asarray(pole)
+    complement = xp.asarray(complement) + xp.zeros_like(pole)
+    sine = xp.asarray(sine) + xp.zeros_like(pole)
+    cosine = xp.asarray(cosine) + xp.zeros_like(pole)
+
+    live = pole > 0.0
+    held = xp.where(live, pole, 1.0)
+    # the reflection, taken on the ARGUMENTS so that one evaluation serves both
+    # orientations; below one the partner would be the worse of the two
+    reflected = pole > 1.0
+    partner = xp.where(reflected, complement / held, held)
+
+    squared_cosine, squared_sine = cosine * cosine, sine * sine
+    radical = squared_cosine + complement * squared_sine
+    weight = squared_cosine + partner * squared_sine
+
+    gap = xp.where(reflected, pole - complement, 1.0)
+    growth = xp.sqrt(
+        xp.where(reflected, (pole - 1.0) * (pole - complement) / held, 0.0)
+    )
+    partner_weight = xp.where(reflected, complement * (pole - 1.0) / (held * gap), 1.0)
+    first_weight = partner_weight + xp.where(reflected, (1.0 - complement) / gap, 0.0)
+
+    # the third kind's own weight rides INTO the accumulation: at a near pole and a
+    # target on the source ring the symmetric form passes 1e308 while the answer it
+    # belongs to is 1e-06, and this factor is small by the same amount
+    first, third = symmetric_kinds(
+        squared_cosine,
+        radical,
+        1.0,
+        weight,
+        partner_weight * (1.0 - partner) * sine * squared_sine / 3.0,
+        xp=xp,
+        trips=trips,
+    )
+    value = (
+        first_weight * sine * first
+        + third
+        + growth * xp.arctan2(growth * sine * cosine, xp.sqrt(radical)) / gap
+    )
+    return xp.where(live & (weight > 0.0), value, 0.0)

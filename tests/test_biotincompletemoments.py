@@ -12,10 +12,20 @@ arc can reuse:
   STAND against partial-range quadrature -- if either needed a counterpart, these
   tests are where it would show.
 
+What the pole family DOES need is its SEED, and that is the one special function a
+partial range adds: an incomplete integral of the third kind, at a pole argument
+each orientation's shift supplies exactly.  The family's tests take it from
+:func:`nova.biot.incompletemoments.cn_pole_moment` and its mirror rather than from
+quadrature, so a defect in either reaches these tests as well as the seed's own.
+
 Every reference is a panelled Gauss rule over the actual range rather than an
 adaptive one: the integrands oscillate up to the tenth harmonic and carry a layer
 of width ``k'`` at the far end, and a fixed panelled rule is the reference that
-can be shown to have converged by refining it.
+can be shown to have converged by refining it.  The rule is why the shifts swept
+here stop at 1e-4: a root closer than that to the range start is a spike the
+uniform panels do not resolve -- measured, the rule moves by 4e-06 between 1500
+panels and 3000 at a shift of 1e-10 -- and the seed is held to the extended
+reference of ``tests/test_biotincompleteelliptic.py`` over the rest.
 
 The two constants the family is tuned by -- where it changes direction and how
 far past the last wanted order it closes -- are asserted in both directions, so
@@ -26,9 +36,17 @@ import numpy as np
 import pytest
 from numpy.polynomial.legendre import leggauss
 
+from nova.biot.elliptic import cn_pole_moment as complete_cn_pole_moment
 from nova.biot.elliptic import harmonic_moments as complete_harmonic_moments
 from nova.biot.elliptic import harmonic_pole_moments, harmonic_root_moments
-from nova.biot.incompletemoments import HEADROOM, SWITCH, harmonic_moments
+from nova.biot.elliptic import sn_pole_moment as complete_sn_pole_moment
+from nova.biot.incompletemoments import (
+    HEADROOM,
+    SWITCH,
+    cn_pole_moment,
+    harmonic_moments,
+    sn_pole_moment,
+)
 
 # Held as the amplitude's distance BELOW a quarter turn, which is the arc's own
 # half-separation from one of its ends, and the quantity the accuracy depends on.
@@ -87,6 +105,18 @@ def reference_pole(amplitude, complement, shift, order, mirrored):
         return np.cos(2 * order * angle) / ((base + shift) * radical(angle, complement))
 
     return panelled(amplitude, integrand)
+
+
+def pole_seed(co_amplitude, complement, shift, mirrored):
+    """Return the family's seed from the routine, in whichever orientation."""
+    seed = sn_pole_moment if mirrored else cn_pole_moment
+    return seed(
+        np.asarray(shift),
+        1.0 - complement,
+        np.cos(co_amplitude),
+        np.sin(co_amplitude),
+        complement=np.asarray(complement),
+    )
 
 
 def family(co_amplitude, complement, count=ORDERS, **kwargs):
@@ -168,15 +198,14 @@ def test_the_pole_family_needs_no_counterpart_either(mirrored, shift, co_amplitu
     past the range for that decay to bite -- and the shipped headroom is what
     makes it hold.
 
-    The seed is supplied by quadrature.  That is the one piece of the arc's
-    machinery still missing: it is an incomplete integral of the THIRD kind, and
-    the complete routine's counterpart for it does not exist yet.  Pinning the
-    recursion separately is what isolates that gap to the seed alone.
+    The seed comes from the routine, not from quadrature: it is the incomplete
+    integral of the THIRD kind, and with it in place the whole moment stack the
+    arc contracts against is closed.
     """
     complement = 1e-3
     amplitude = 0.5 * np.pi - co_amplitude
     plain = family(co_amplitude, complement, count=ORDERS + 40)
-    seed = reference_pole(amplitude, complement, shift, 0, mirrored)
+    seed = float(pole_seed(co_amplitude, complement, shift, mirrored))
     got = harmonic_pole_moments(
         np.asarray(shift), np.asarray(seed), plain, ORDERS, mirrored=mirrored
     )
@@ -308,3 +337,67 @@ def test_the_traced_path_is_the_same_code_and_agrees_to_a_few_ulp():
     scale = np.abs(host[0])
     for one, other in zip(host, device):
         assert np.max(np.abs(np.asarray(other) - one) / scale) < 1e-14
+
+
+@pytest.mark.parametrize("mirrored", [False, True])
+@pytest.mark.parametrize("shift", [1e-4, 1e-2, 0.25, 1.0, 4.0, 1e4])
+@pytest.mark.parametrize("co_amplitude", [1.0, 0.4, 5e-2])
+def test_the_pole_seed_reproduces_its_defining_integral(mirrored, shift, co_amplitude):
+    """The one special function the partial range adds, in both orientations.
+
+    A root past the FAR end of the range is outside a partial one altogether, so
+    that orientation is bounded whatever the shift; a root past the NEAR end is
+    inside the layer the integral is concentrated in, because the range starts
+    there, and it is the one every corner reaches.
+    """
+    complement = 1e-3
+    amplitude = 0.5 * np.pi - co_amplitude
+    got = float(pole_seed(co_amplitude, complement, shift, mirrored))
+    expected = reference_pole(amplitude, complement, shift, 0, mirrored)
+    assert got == pytest.approx(expected, rel=5e-14)
+
+
+@pytest.mark.parametrize("mirrored", [False, True])
+@pytest.mark.parametrize("shift", [1e-12, 1e-4, 0.25, 4.0, 1e8])
+@pytest.mark.parametrize("complement", [0.9, 1e-3, 1e-9, 1e-16])
+def test_the_quarter_turn_reproduces_the_complete_seed(mirrored, shift, complement):
+    """The limit in which the arc closes onto the ring, for the seed itself.
+
+    Reached at every shift including the ones no panelled rule resolves, which is
+    what makes it the check that spans the whole range: the complete routine is a
+    Bartky descent and this is a Carlson duplication behind a reflection, so the
+    two share no arithmetic at all.
+    """
+    seed = sn_pole_moment if mirrored else cn_pole_moment
+    complete_seed = complete_sn_pole_moment if mirrored else complete_cn_pole_moment
+    got = seed(
+        np.asarray(shift),
+        1.0 - complement,
+        1.0,
+        0.0,
+        complement=np.asarray(complement),
+    )
+    expected = complete_seed(
+        np.asarray(shift),
+        1.0 - complement,
+        parameter_complement=np.asarray(complement),
+    )
+    assert float(got) == pytest.approx(float(expected), rel=4e-15)
+
+
+def test_the_seed_carries_the_family_where_quadrature_cannot():
+    """A root a squared aspect ratio past the range start, which is the working case.
+
+    The shift a slender section produces is far below anything a uniform panelled
+    rule resolves, so this is checked against the seed's own growth instead: the
+    near orientation's own moment is ``(pi/2)/sqrt(shift(1 + shift))`` as the shift
+    vanishes, which is the elementary integral the modulus radical multiplies by
+    one over the layer it is concentrated in.
+    """
+    complement = 1e-6
+    for shift in (1e-8, 1e-10, 1e-12):
+        got = float(pole_seed(0.4, complement, shift, True))
+        # the radical is one to within k'^2 over the layer of width sqrt(shift)
+        elementary = 0.5 * np.pi / np.sqrt(shift * (1.0 + shift))
+        assert got == pytest.approx(elementary, rel=2e-4)
+        assert got > elementary

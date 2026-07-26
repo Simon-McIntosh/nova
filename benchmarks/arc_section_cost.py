@@ -19,6 +19,13 @@ rather than incidental:
 Against that, the arc returns FIVE rows where the ring returns three, so the
 per-row comparison is not the per-call one.
 
+The variants come in two families and they are not interchangeable.  ``arc-`` and
+``ring-`` call a reduction directly, which is the sharpest comparison between two
+evaluations.  ``bow-`` and ``polybow-`` go through the FRAME -- a coilset, a
+source assembly, the local-to-global transform and the matrix storage -- which is
+the comparison a caller actually pays, and the only one in which the two element
+classes are measured on the same terms.
+
 One variant per process: repeats inside a single interpreter warm the allocator
 and understate the first-build cost operator assembly actually pays.  Run as
 ``python benchmarks/arc_section_cost.py <variant>``; ``list`` prints the variants.
@@ -136,12 +143,30 @@ def _ring(name: str) -> tuple:
     return _timed(once, len(radius)), len(radius)
 
 
-def _bow() -> tuple:
-    """Return ``Bow``'s per-pair cost over the same cloud, same sweep.
+# Frame sections, as a winding's own descriptor writes them: a width and a height
+# about the arc, which is what the element classes build their corners from.  The
+# rectangle is the same section the bare variants use, so ``arc-rectangle`` against
+# ``polybow-rectangle`` measures what the FRAME costs on top of the reduction.  The
+# hexagon is the same size but not the same orientation -- the generator puts a
+# corner on the r axis where ``hexagon()`` puts one on z, which leaves four live
+# edges rather than six -- so read that pair as bow against polybow, not as framed
+# against bare.
+FRAME_SECTIONS = {
+    "rectangle": {"rect": (0, 0, *RECT)},
+    "hexagon": {"hex": (0, 0, np.sqrt(3.0) * CELL_RADIUS, 2.0 * CELL_RADIUS)},
+}
 
-    The rectangular-section arc through Urankar Part IV and the fixed-node zeta
-    quadrature -- the evaluation the closed form has to be read against, since it
-    is what a non-rectangular section is approximated by today.
+
+def _frame(section: str, segment: str | None) -> tuple:
+    """Return an element class's per-pair cost through the frame, same cloud.
+
+    ``segment`` ``None`` leaves the frame's own routing alone, which sends a swept
+    winding to ``Bow`` whatever its section is -- the rectangular-section arc
+    through Urankar Part IV and the fixed-node zeta quadrature, and what a
+    non-rectangular section is approximated by today.  Naming a segment overrides
+    that.  Going through the frame rather than calling either reduction directly
+    is what makes the two comparable: the local-to-global transform, the source
+    assembly and the matrix storage are the same for both and are not free.
     """
     from nova.frame.coilset import CoilSet
 
@@ -154,13 +179,15 @@ def _bow() -> tuple:
     coilset = CoilSet(field_attrs=["Bx", "By", "Bz", "Ax", "Ay"])
     coilset.winding.insert(
         path,
-        {"rect": (0, 0, *RECT)},
+        FRAME_SECTIONS[section],
         nturn=1,
         Ic=1,
         minimum_arc_nodes=3,
         filament=False,
         ifttt=False,
     )
+    if segment is not None:
+        coilset.subframe.loc[:, "segment"] = segment
     cloud = np.stack(
         [radius * np.cos(azimuth), radius * np.sin(azimuth), height], axis=-1
     )
@@ -189,7 +216,13 @@ def _timed(call, pairs: int) -> float:
 VARIANTS = {
     **{f"arc-{name}": (lambda name=name: _arc(name)) for name in SECTIONS},
     **{f"ring-{name}": (lambda name=name: _ring(name)) for name in SECTIONS},
-    "bow-rectangle": _bow,
+    **{
+        f"{element}-{section}": (
+            lambda section=section, segment=segment: _frame(section, segment)
+        )
+        for element, segment in (("bow", None), ("polybow", "polybow"))
+        for section in FRAME_SECTIONS
+    },
 }
 
 

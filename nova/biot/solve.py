@@ -15,6 +15,7 @@ from nova.biot.bow import Bow
 from nova.biot.circle import Circle
 from nova.biot.cylinder import Cylinder
 from nova.biot.line import Line
+from nova.biot.polybow import PolyBow
 from nova.biot.polysection import PolySection
 from nova.biot.groupset import GroupSet
 
@@ -35,6 +36,7 @@ class Solve(GroupSet):
         "circle": Circle,
         "cylinder": Cylinder,
         "line": Line,
+        "polybow": PolyBow,
         "polysection": PolySection,
     }
 

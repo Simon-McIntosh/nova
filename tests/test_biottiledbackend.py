@@ -194,18 +194,30 @@ def pair_geometry(target_r, target_z, edge, weight, norm):
     )
 
 
-def test_the_traced_closed_form_matches_the_same_reduction_on_numpy():
+def test_the_traced_closed_form_matches_numpy_and_the_kernel_it_replaces():
     """One implementation, two namespaces, over a batch of unlike sections.
 
-    Three-cornered sections keep the trace small -- the reduction unrolls its moment
-    recursions, so the compile grows with the corner count -- and the sections still
-    differ from each other, which is what the padded batch exists for.
+    Both references off ONE compilation, because that compilation is expensive: the
+    reduction unrolls its moment recursions, so the trace is large and grows with the
+    corner count. Three-cornered sections keep it as small as a closed chain can be
+    and the sections still differ from each other, which is what the padded batch
+    exists for.
+
+    Against the same driver on numpy, to a few parts in 1e9 -- a compiler is free to
+    reassociate and to contract a multiply-add, which moves the last bits of a
+    reduction whose section sum differences an antiderivative of order the squared
+    major radius. And against the quadrature the closed form replaces, at targets far
+    enough from the contour for the rule to be converged: NOT a tolerance the closed
+    form should be judged by -- it is one to two orders more accurate, and the
+    acceptance gate in ``tests/test_biotpolygonanalytic.py`` is where that is measured
+    -- but the only check that would catch a transposed section or a mis-taken pair
+    column, which a self-comparison cannot see.
     """
     from nova.biot.polygonanalytic import packed_analytic_greens
 
     sections = [triangle(6.2, 0.0), triangle(6.3, 0.08, 0.03), triangle(6.1, -0.05)]
-    target_r = np.array([6.22, 6.28, 6.13])
-    target_z = np.array([0.01, 0.06, -0.02])
+    target_r = np.array([6.6, 5.8, 6.2])
+    target_z = np.array([0.35, -0.3, 0.4])
     edge, weight, norm = polygon.pad_batch(sections)
     plan = TilePlan(
         target_tile=target_r.size,
@@ -216,47 +228,18 @@ def test_the_traced_closed_form_matches_the_same_reduction_on_numpy():
     )
     evaluate = tile_evaluator(plan, batched=True, kernel="closed")
     got = evaluate(target_r, target_z, edge, weight, norm)
-    want = packed_analytic_greens(
+    assert evaluate.compile_count == 1
+    host = packed_analytic_greens(
         np, *pair_geometry(target_r, target_z, edge, weight, norm)
     )
-    assert evaluate.compile_count == 1
-    for component, reference in zip(got, want):
+    quadrature = tile_coupling(target_r, target_z, edge, weight, norm, block=plan.block)
+    for component, reference, rule in zip(got, host, quadrature):
         reference = np.asarray(reference).reshape(target_r.size, len(sections))
         assert component.dtype == np.float64
         np.testing.assert_allclose(
-            component,
-            reference,
-            rtol=1e-9,
-            atol=1e-9 * np.max(np.abs(reference)),
+            component, reference, rtol=1e-9, atol=1e-9 * np.max(np.abs(reference))
         )
-
-
-def test_the_traced_closed_form_agrees_with_the_kernel_it_replaces():
-    """And with the quadrature, away from the contour where both are converged.
-
-    Not a tolerance the closed form should be judged by -- it is one to two orders
-    more accurate than the rule it is compared with, and the acceptance gate in
-    ``tests/test_biotpolygonanalytic.py`` is where that is measured. This is a check
-    that the traced path is wired to the right geometry: a transposed section or a
-    mis-taken pair column would be invisible against a self-comparison.
-    """
-    sections = [triangle(6.2, 0.0), triangle(6.35, 0.1, 0.04)]
-    target_r = np.array([6.5, 5.9])
-    target_z = np.array([0.3, -0.25])
-    edge, weight, norm = polygon.pad_batch(sections)
-    plan = TilePlan(
-        target_tile=target_r.size,
-        source_tile=len(sections),
-        block=target_r.size * len(sections),
-        n_panels=16,
-        n_nodes=48,
-    )
-    closed = tile_evaluator(plan, batched=True, kernel="closed")(
-        target_r, target_z, edge, weight, norm
-    )
-    quadrature = tile_coupling(target_r, target_z, edge, weight, norm, block=plan.block)
-    for got, reference in zip(closed, quadrature):
-        np.testing.assert_allclose(got, reference, rtol=2e-08, atol=0.0)
+        np.testing.assert_allclose(component, rule, rtol=2e-08, atol=0.0)
 
 
 def test_an_unknown_kernel_is_refused_rather_than_silently_ignored():

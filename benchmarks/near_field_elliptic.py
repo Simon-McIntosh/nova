@@ -17,8 +17,10 @@ the only sensitive one -- does Cephes' ``ellipkm1``.
 Measured against an extended-precision reference built in this module (80-bit
 ``longdouble``, a complement-seeded AGM, and power series for the two brackets that
 cancel), with the routes differing from the shipped code in NOTHING but how they
-obtain ``k2``, ``K`` and ``E``: :func:`assemble` reproduces ``greens_psi`` and
-``greens_bz_br`` bit for bit, which :func:`validate` pins at a zero gap.
+obtain ``k2``, ``K`` and ``E``: one of the routes IS the shipped kernel, which
+:func:`_pin_shipped` reports the gap for.  It was the parameter route when this was
+written and is the split-pole route now, the recommendation below having landed --
+so that gap is the small one and the parameter gap is what the adoption removed.
 
 Three limits turned up.  They bind in different places and only the first is about
 the elliptic integrals at all.
@@ -1046,20 +1048,33 @@ def _agm_iterations(kc2: float) -> int:
 
 
 def _pin_shipped() -> dict:
-    """Return the largest gap between :func:`assemble` on the parameter route and
-    the shipped kernels, which must be exactly zero for the routes to be a
-    controlled comparison."""
+    """Return every route's largest gap from the shipped kernels.
+
+    The routes below are a controlled comparison only if ONE of them is the shipped
+    kernel -- otherwise a difference between two of them could be anything.  Which
+    one that is has changed: it was ``route_parameter`` when this was written and is
+    ``route_split_pole`` now, so both gaps are reported.  The split-pole gap says
+    which route ships (round-off, not zero: the shipped kernel forms the same
+    quantities in a different order); the parameter gap is the near-field error the
+    adoption removed, and it is only small out here where nothing is close.
+    """
     rng = np.random.default_rng(4)
     target_r = 6.2 + rng.uniform(-2.0, 2.0, 4096)
     target_z = rng.uniform(-2.0, 2.0, 4096)
-    psi, bz, br = route_parameter(target_r, target_z, 6.2, 0.0)
     shipped_psi = greens_psi(target_r, target_z, 6.2, 0.0)
     shipped_bz, shipped_br = greens_bz_br(target_r, target_z, 6.2, 0.0)
-    return {
-        "psi_max_abs_gap": float(np.max(np.abs(psi - shipped_psi))),
-        "bz_max_abs_gap": float(np.max(np.abs(bz - shipped_bz))),
-        "br_max_abs_gap": float(np.max(np.abs(br - shipped_br))),
-    }
+    gaps = {}
+    for name, route in (
+        ("parameter", route_parameter),
+        ("split_pole", route_split_pole),
+    ):
+        psi, bz, br = route(target_r, target_z, 6.2, 0.0)
+        gaps[name] = {
+            "psi_max_abs_gap": float(np.max(np.abs(psi - shipped_psi))),
+            "bz_max_abs_gap": float(np.max(np.abs(bz - shipped_bz))),
+            "br_max_abs_gap": float(np.max(np.abs(br - shipped_br))),
+        }
+    return gaps
 
 
 # --- part three: cost, one variant per fresh process ------------------

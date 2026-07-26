@@ -52,11 +52,12 @@ MU0 = 4.0e-7 * np.pi
 
 _EPS = 2.0 * np.finfo(float).eps
 # Numerical floor so an ON-AXIS point does not divide by zero.  It bounds the ring
-# SPAN, ``(a + R)^2 + dz^2``, and the target radius -- both of order the machine, so
-# the floor is reached only at the axis, where every quantity it guards is masked to
-# its own limit anyway.  It is NOT applied to the target's distance to the filament:
-# an absolute floor on a squared length there would engage 32 micrometres out at any
-# ring radius and answer, silently, for a target that far away.
+# SPAN ``(a + R)^2 + dz^2``, the target radius, and the modulus -- all three of order
+# the machine, and all three reached only at the axis, where what they guard is
+# masked to its own limit anyway.  It is NOT applied to the target's distance to the
+# FILAMENT: an absolute floor on a squared length there engages 32 micrometres out at
+# any ring radius -- the radius does not appear -- and answers, silently, for a target
+# that far away.
 _R_FLOOR = 1.0e-9
 
 
@@ -66,8 +67,9 @@ _R_FLOOR = 1.0e-9
 def _filament_gap(r: np.ndarray, dz: np.ndarray, ar: float) -> np.ndarray:
     """Return ``d^2 = (a - R)^2 + dz^2``, the squared distance to the filament.
 
-    Both kernels below want it twice over: as the modulus COMPLEMENT
-    ``k'^2 = d^2/((a + R)^2 + dz^2)``, and as the pole the field components carry.
+    Both kernels below want it: the flux as the modulus COMPLEMENT
+    ``k'^2 = d^2/((a + R)^2 + dz^2)``, and the field components as that AND as the
+    pole they carry over it.
 
     The complement is the point.  ``k^2 = 4 a R/((a + R)^2 + dz^2)``, and the two
     radicals differ by exactly ``4 a R``, so ``k'^2`` follows from the geometry with

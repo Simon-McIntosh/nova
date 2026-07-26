@@ -87,7 +87,8 @@ accuracy columns and the near/far + order-vs-distance evidence are archived in
 | bow corner zeta (pre fixed-node zeta) | 148.0 | 352 |
 | polygon hex 16×48, closed-form gradient + block 16 | 857.8 | 2039 |
 | polygon hex 16×48, complex-step unblocked (retired) | 4335.9 | 10307 |
-| polygon hex CLOSED FORM, 128 residual nodes, by corner | 176.6 | 420 |
+| polygon hex CLOSED FORM, 128 residual nodes, by corner | 171.4 | 408 |
+| polygon hex closed form, PACKED driver (no shortcuts, traceable) | 230.8 | 550 |
 | polygon hex closed form, by edge limit (superseded) | 333.9 | 795 |
 | faithful Part V full-turn floor (special functions + g_p only) | 12.5–16.1 | ~30–38 |
 
@@ -103,6 +104,33 @@ corner is shared and there is nothing to win). Floor 100.1 µs/pair, of which
 other is a function of the corner alone and cancels around a closed chain of
 edges. Peak allocation 12.1 kB/pair (was 10.6: up to three corner parts are live
 at once).
+
+Re-measured 2026-07-26 after the complete elliptic integrals moved onto one
+complement-native descent (`nova/biot/completeelliptic.py`): the closed form's
+third-kind integrals fell 12.70 → 5.06 µs/pair and its floor 100.1 → 92.9, with
+every one of the eighteen recorded accuracy entries UNCHANGED. Assembled hexagon
+176.6 → 171.4. The graded residual quadrature is untouched at 73.2 and is now 79%
+of the floor. Complete-integral routes, 4096 elements, one core, fresh process,
+median of 3:
+
+| route | µs/element | × Cephes |
+|---|---|---|
+| `ellipk(m) + ellipe(m)` | 0.0308 | 1.00 |
+| `ellipkm1(k'²) + ellipe(m)` | 0.0312 | 1.01 |
+| Carlson `R_F + 2 R_G` (K and E) | 0.1495 | 4.9 |
+| descent, K and E from one sweep | 0.1687 | 5.5 |
+| Carlson `R_F + (n/3) R_J` (third kind) | 0.3928 | 12.8 |
+| descent, third kind | 0.1175 | 3.8 |
+
+So a complement-native FIRST kind is free on the host (`ellipkm1`, which the
+point kernels take), and the descent's THIRD kind — which no Cephes route offers
+and which the polygon reduction needs several of per corner — is 3.3× cheaper
+than Carlson's as well as being the only traceable one.
+
+The PACKED driver (`packed_analytic_greens`) is the same reduction with the host
+driver's three value-dependent shortcuts replaced by arithmetic so that it
+traces: 230.8 vs 171.4 µs/pair at one array width, i.e. the shortcuts are worth
+1.35× on the host.
 
 Tiled assembly (`nova/biot/tiledassembly.py`): ~48 B/pair (vs 267 B/pair
 through the ≤500-source chunking), 16-core scaling 8.78×; measured 16-core
@@ -143,6 +171,29 @@ measured high-water marks.
 Projected 2000-cell exact-everywhere build (4e6 pairs): 7.5 min at 16 numpy
 cores; 5.3 min jax vmap on the same 16 cores in one process; ~30 s on one
 H200 at 40×40 tiles; ~11 s at 80×80.
+
+### the CLOSED FORM as a tile kernel
+
+Recorded 2026-07-26, same driver with `--variants closed-*`. 64 hex cells ×
+their own centres = 4,096 pairs, 4 tiles of 32×32, block 16, one fresh process
+per variant. `tile_evaluator(kernel="closed")` traces
+`packed_analytic_greens`; parity against the same driver on numpy 2.5e-12
+(CPU) / 3.2e-11 (GPU, through the store), one compilation per build.
+
+| variant | µs/pair | compile s | where |
+|---|---|---|---|
+| closed-host (host driver, per section) | 840.5 | — | 64 targets/call — Python overhead per call, not comparable with the 171.4 above |
+| closed-numpy (packed driver over tiles) | 272.4 | — | 1,024 pairs/call |
+| **closed-vmap, one H200** | **5.5** | 101.3 | against the 16×48 quadrature's 5.3 on the same card |
+| closed-scan, one H200 | 65.0 | 91.3 | scan loses on the device here too |
+
+The closed form on one H200 costs what the 16×48 quadrature costs, for one to
+two orders more accuracy — so on a device the exact kernel is free relative to
+the rule it replaces. Projected 2000-cell exact-everywhere closed-form build:
+≈22 s of kernel on one H200 plus a ONE-OFF 101 s compile. That compile is the
+outstanding cost: 101–136 s against the quadrature kernel's 1.3 s, because the
+reduction unrolls its moment recursions (138 downward ratio steps per corner,
+plus a 40-order tridiagonal solve per pole family).
 
 ## three-band polygon-section coupling (opt-in: PolySection.configured(banded=True))
 

@@ -92,6 +92,52 @@ accuracy columns and the near/far + order-vs-distance evidence are archived in
 | polygon hex closed form, by edge limit (superseded) | 333.9 | 795 |
 | faithful Part V full-turn floor (special functions + g_p only) | 12.5–16.1 | ~30–38 |
 
+Re-measured 2026-07-26 through the element's own dispatch, over a whole
+2,339-target column instead of the 512-target spiral above (sun_debug node
+98dci4-clu-3141, one core, fresh process per variant, median of 3, module import
+resolved before the timer starts; driver `benchmarks/polygon_route_cost.py`).
+`PolySection.closed_form` selects which exact kernel serves the lane, and it
+composes with either binning, so there are four arrangements and not two.
+
+| arrangement | hexagon µs/pair | wall-clipped µs/pair | on record |
+|---|---|---|---|
+| point filament | 0.2 | 0.2 | 0.42 (512-target spiral) |
+| exact-everywhere quadrature | 849.7 | 1003.6 | 869 / 1008 |
+| exact-everywhere CLOSED FORM | **162.9** | **196.3** | 171.4 (hexagon) |
+| three-band, quadrature near | 13.6 | 52.9 | 13.1 / 52.0 |
+| three-band, CLOSED FORM near | 31.5 | 72.6 | — |
+
+Every recorded figure reproduces. **The closed form is 5.2× cheaper than the
+boundary quadrature it replaces on the exact-everywhere lane (849.7 → 162.9),
+and 2.3× DEARER on the three-band scheme's near band (13.6 → 31.5).** Those are
+not in tension: what separates them is the number of pairs in one kernel call.
+
+Cost against DISTANCE is flat for both — 256 pairs a ring, contour distance 0.2
+to 29 section radii, the closed form a constant 0.34–0.35× the quadrature at
+every one — so a per-pair rate may be quoted for a whole column with no distance
+weighting, and the near band's disagreement is not about distance.
+
+Cost against BATCH WIDTH is not flat. The quadrature builds one angular rule and
+reuses it across the batch (1084 µs/pair at 8 pairs falling to 851 at 4096, a
+factor of 1.3); the closed form holds up to three corner parts live at once and
+falls by a factor of 38 over the same range (6532 → 170).
+
+| pairs in one call | quadrature | closed form | quadrature / closed |
+|---|---|---|---|
+| 8 | 1084.5 | 6532.2 | 0.17× |
+| 16 | 980.2 | 3291.0 | 0.30× |
+| 64 | 883.7 | 873.3 | **1.01× — they cross here** |
+| 256 | 859.9 | 301.5 | 2.85× |
+| 1024 | 849.1 | 182.9 | 4.64× |
+| 4096 | 851.4 | 170.3 | 5.00× |
+
+**The two kernels cross at 64 pairs in one call.** An exact-everywhere column
+hands the kernel all 2,339 pairs at once and the closed form wins five-fold; the
+three-band scheme hands its near band 13, an order below the crossing, and there
+the quadrature wins. Choosing the exact kernel is therefore not separable from
+choosing the binning, which is the one thing the two flags were expected to be
+orthogonal about.
+
 The closed form (`nova/biot/polygonanalytic.py`, driver
 `benchmarks/analytic_cost_floor.py`) returns the flux and BOTH field components
 for the same cost — they share every reduction — and its cost depends on the
@@ -136,6 +182,59 @@ Tiled assembly (`nova/biot/tiledassembly.py`): ~48 B/pair (vs 267 B/pair
 through the ≤500-source chunking), 16-core scaling 8.78×; measured 16-core
 rate 107 µs/pair ⇒ projected 2000-cell exact-everywhere polygon build 7.1 min.
 
+### a real plasma-grid build through each arrangement
+
+Recorded 2026-07-26, same node and protocol. `CoilSet(dplasma=-500,
+tplasma="hex")` on the tracked baseline's first wall (`ellip [4.2, -0.4, 1.25,
+4.2]`, `turn="hex"`) meshes to **560 cells**, and the plasma subframe's `segment`
+column is relabelled from `circle` to `polysection` to route the solve through
+the polygon element — the frame tier needs no change, `Solve.generator` already
+maps the label. 560 cells against their own centres is 313,600 pairs. The mesh,
+the imports and the grid instance are all resolved before the timer, so the
+figure is the operator build alone: kernel, per-column dispatch, composition and
+tessellation.
+
+| arrangement | build s | µs/pair | × point build |
+|---|---|---|---|
+| point filament (shipped default) | 1.16 (1.13–1.19) | 3.7 | 1 |
+| exact-everywhere quadrature | 274.53 (273.17–275.14) | 875.4 | 237 |
+| exact-everywhere CLOSED FORM | **54.46** (54.25–54.61) | 173.7 | **47** |
+| three-band, quadrature near | 19.18 (19.13–19.26) | 61.1 | 17 |
+| three-band, closed form near | 36.37 (35.91–36.72) | 116.0 | 31 |
+
+The point build reproduces the tracked 963 ms at 1.16 s — the tracked figure
+repeats the solve inside one warm process, and a fresh one costs 1.20× that. The
+per-pair rates match the column figures above to within a few percent (875 vs
+850, 174 vs 163, 61 vs 14 and 116 vs 32), and the two banded rows are the
+exception because the build's cells are not the idealised section: see the band
+populations below. **The closed form takes the exact-everywhere build from 4.6 min
+to 54 s, a 5.0× saving on a real grid, and makes the three-band build 1.9×
+dearer.**
+
+### projected 2000-cell first build
+
+2000 cells against their own centres is 4e6 pairs. One core is the measured
+column rate; the host pool divides it by the measured 8.78× tiled scaling and is
+therefore a **projection, not a measurement**; the device columns take the traced
+kernels' recorded steady-state rates and compile costs and apply only to the two
+arrangements that have a traced tile kernel — the banded arrangements bin pairs
+into three shapes per section and no traced kernel does that.
+
+| arrangement | µs/pair | 1 core | 16 cores | H200 cold | H200 warm cache |
+|---|---|---|---|---|---|
+| point filament | 0.2 | 0.8 s | 0.1 s | — | — |
+| exact-everywhere quadrature | 849.7 | 56.6 min | 6.5 min | 0.4 min | 0.4 min |
+| exact-everywhere CLOSED FORM | 162.9 | **10.9 min** | **1.2 min** | 2.1 min | 0.5 min |
+| three-band, quadrature near | 13.6 | 0.9 min | 0.1 min | — | — |
+| three-band, closed form near | 31.5 | 2.1 min | 0.2 min | — | — |
+
+Against the ~20 min first-build budget: the exact-everywhere quadrature is the
+one arrangement that **misses it on a single core** (56.6 min) and needs the pool
+to make it (6.5 min, consistent with the 7.1 min projected from the measured
+16-core tiled rate). Every other arrangement is inside the budget everywhere, and
+**the closed form is the only exact lane that fits on one core** — 10.9 min, with
+no parallel assembly and no device at all.
+
 ## tiled backend — one JAX trace on CPU and GPU vs the process pool
 
 Recorded 2026-07-25. Driver: `benchmarks/tiled_backend.py`. Same operator
@@ -170,7 +269,10 @@ measured high-water marks.
 
 Projected 2000-cell exact-everywhere build (4e6 pairs): 7.5 min at 16 numpy
 cores; 5.3 min jax vmap on the same 16 cores in one process; ~30 s on one
-H200 at 40×40 tiles; ~11 s at 80×80.
+H200 at 40×40 tiles; ~11 s at 80×80. All four are the QUADRATURE kernel; the
+same build through the host closed form is 10.9 min on one core and 1.2 min
+projected on sixteen, so the exact lane no longer needs a device or a pool to
+make the first-build budget — see the projection table above.
 
 ### the CLOSED FORM as a tile kernel
 
@@ -307,3 +409,47 @@ far filament 2.5/5.0 µs; whole 2339-target column 13.1/52.0 µs/pair vs
 count 1.20% / 4.28% of exact. Worst per-component error beyond the near band
 ≤ 1.7e-7 of local |B| (≤ 6.8e-9 on ψ contour maps); the near band is
 bit-identical to the production 16×48 rule. Seam jumps ≤ 1.6e-7 of local.
+
+### band populations, and the closed form on the near band
+
+Recorded 2026-07-26, same node and protocol as the per-pair section above;
+driver `benchmarks/polygon_route_cost.py`. The populations are what turn a
+per-band cost into a column rate, so a banded per-pair figure cannot be read
+without them. The target cloud is the 2,339-centre hexagonal tiling a 2000-cell
+plasma grid lays out; the third row is a real 560-cell grid, aggregated over
+every one of its source columns.
+
+| section | corners | skew | far seam | near | mid | far |
+|---|---|---|---|---|---|---|
+| hexagon | 6 | 1.9e-14 | 6.8 a | 0.56% | 2.57% | 96.88% |
+| wall-clipped | 7 | 4.2e-03 | 16.0 a | 0.56% | 14.88% | 84.57% |
+| real 560-cell grid | 3–12 (median 6) | 4.2e-13 | 6.8 a | 2.10% | 12.08% | 85.82% |
+
+A real grid is not one repeated section: 420 of its 560 cells are regular
+hexagons and the wall cuts the boundary ring into polygons of **three to twelve**
+corners, down to slivers of 2.0 mm circumradius against an interior cell's 60.7
+mm. 120 of the 560 carry enough skew to take the wide far seam, which is why its
+mid band holds 12.1% of pairs where an idealised hexagon holds 2.6% — and the mid
+rule is 268 µs/pair against the far filament's 0.7, so that fraction is most of
+the column's cost. **A banded rate projected from the idealised hexagon is
+optimistic for a real grid by about a factor of four** (13.6 µs/pair projected,
+61.1 measured on the build).
+
+Each band's treatment, on exactly the pairs the scheme routes to it
+(hexagon / wall-clipped, of 2,339):
+
+| band | pairs | µs/pair | seconds of the column |
+|---|---|---|---|
+| near, 16×48 quadrature | 13 / 13 | 984.2 / 1109.3 | 0.0128 / 0.0144 |
+| near, CLOSED FORM | 13 / 13 | 4023.4 / 4664.3 | 0.0523 / 0.0606 |
+| mid, 8×24 quadrature | 60 / 348 | 268.4 / 293.0 | 0.0161 / 0.1020 |
+| far, moment filament | 2266 / 1978 | 0.7 / 1.8 | 0.0017 / 0.0036 |
+
+**The closed form costs 4.1× MORE than the quadrature on the near band** — not
+because of where the pairs are (cost is flat in distance for both) but because
+there are only thirteen of them, an order below the 64-pair width at which the
+two kernels cross. It is the right exact kernel for a lane that hands it a whole
+column and the wrong one for a band that hands it thirteen pairs; served closed,
+the whole column goes 13.6 → 31.5 µs/pair (hexagon) and 52.9 → 72.6
+(wall-clipped). Serving the near band closed would need the near pairs of many
+source columns batched into one call, which the per-column dispatch does not do.

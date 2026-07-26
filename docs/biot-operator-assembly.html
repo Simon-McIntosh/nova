@@ -275,9 +275,9 @@
         quadrature's 5.3</strong> — the same rate for one to two orders more accuracy,
         so exact coupling on a device is free relative to the rule it replaces. The
         COMPILE is the other half of that build and decides where the route applies:
-        101 s on an H200, and on XLA:CPU it never finished — an hour at a 32×32
-        tile, still compiling after ten minutes at a sixteen-pair one — so the traced
-        closed form is <strong>device-only</strong> and
+        101 s on an H200, and on XLA:CPU it never finished at all — an hour at a
+        32×32 tile, fifty-five minutes on a SIXTEEN-pair one — so the traced closed
+        form is <strong>device-only</strong> and
         <code>polygon_analytic_greens</code> stays the host route. Total build time,
         not µs/pair, picks between them — the compile equals the device kernel at
         18.4 M pairs and the device only beats a 16-core host pool above 7.2 M — which

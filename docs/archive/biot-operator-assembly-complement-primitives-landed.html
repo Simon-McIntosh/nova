@@ -219,9 +219,9 @@ K = cel(k', 1, 1, 1)     E = cel(k', 1, 1, k'²)     Π(n | m) = cel(k', 1 − n
   agrees with the host driver to 2.3e-12.</p>
   <p><strong>The compile is the finding, and it is not a footnote to the per-pair
   rate but half the build.</strong> 101 s on one H200 and 136 s on an L4, against
-  1.3 s for the quadrature kernel; on XLA:CPU it never finished — an hour at a
-  32×32 tile, and still compiling after ten minutes at a SIXTEEN-pair one with XLA's
-  own slow-compile alarm firing, so the traced closed form is a DEVICE-ONLY path and
+  1.3 s for the quadrature kernel; on XLA:CPU it never finished at all — an
+  hour at a 32×32 tile, and fifty-five minutes on a SIXTEEN-pair one, XLA raising its
+  own slow-compile alarm and carrying on. The traced closed form is a DEVICE-ONLY path,
   leaves <code>polygon_analytic_greens</code> as the host route — so the premise of one
   code path serving both devices, which holds for the quadrature kernel, does not hold
   for this one.</p>

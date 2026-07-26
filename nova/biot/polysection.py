@@ -124,28 +124,35 @@ class PolySection(Matrix):
     default is a separate decision from having the scheme available.
     """
 
-    closed_form: ClassVar[bool] = False
+    closed_form: ClassVar[bool] = True
     """Take the exact kernel from :mod:`nova.biot.polygonanalytic` in closed form.
 
     The angular integral the boundary quadrature does numerically is done
-    analytically instead, leaving two smooth ``arsinh`` residuals per corner. It
-    is the same physics through a different evaluation, and on the measured
-    evidence a strictly better one: a hexagonal plasma cell costs 171 µs/pair
-    against 858 for the ``(16, 48)`` rule this replaces (5.0×) while holding
-    1e-10 of local magnitude on all three components against the converged
-    oracle, where that rule holds 1e-12 half a radius out and only 2.6e-04 ON the
-    contour — because a boundary quadrature there is integrating through its own
-    singularity, and a closed form has no integrand left to resolve.
+    analytically instead, leaving two smooth ``arsinh`` residuals per corner —
+    the same physics through a different evaluation, and on the measured evidence
+    a strictly better one on both counts, which is why it is the default.
+
+    Cheaper: a hexagonal plasma cell costs 171 µs/pair against the ``(16, 48)``
+    rule's 858 (5.0×), because a corner is evaluated once for both its edges
+    rather than 768 quadrature nodes being spent per pair. Shape-dependent, as
+    that implies — thin plate 119, rectangle 113, and a cell with twice the
+    corners costs about twice as much.
+
+    More accurate, and most where it matters: it holds 1e-10 of local magnitude
+    on all three components across the whole acceptance gate, and it is finite and
+    accurate ON the contour and ON a vertex, where a boundary quadrature is
+    integrating through its own singularity. Measured on a real 179-cell plasma
+    grid, the worst off-diagonal pair is a neighbour's centre 0.001 contour radii
+    outside the source cell, where the quadrature is 2.9e-03 out on B_Z; refining
+    it to 1024 panels brings it to 2.1e-12 OF THE CLOSED FORM's value, so the
+    closed form is the value and the quadrature was the error.
 
     Orthogonal to ``standoff`` and ``banded``, which choose how pairs are binned,
     not what the exact treatment is: with neither set this is closed-form
     everywhere, and with ``banded`` it serves the near band. ``quadrature`` has no
     meaning for it — the closed form's own residual node count is fixed by its
-    acceptance gate.
-
-    The default is ``False`` while the plasma-coupling default is a point
-    filament: the two decisions are separate, and the shipped exact lane stays
-    the quadrature the recorded envelopes were measured against.
+    acceptance gate. Set it ``False`` to get the boundary quadrature back, which
+    is what the closed form's own equivalence gate is measured against.
     """
 
     @classmethod

@@ -31,14 +31,24 @@ The fixed trip count is the other thing under test, as it is for the complete
 routine: a traced evaluation cannot iterate to a convergence test, so the descent
 runs a constant number of times, and that constant is a claim about the argument
 range asserted here in both directions.
+
+The THIRD kind is held to the same two agreements, with its own reference: the
+pole factor gives the integrand a SECOND layer, at the other end of the range and
+of a width the pole sets, so :func:`_pole_integral` grades from both ends where
+the first two kinds need only one.  Its own arrangement question is the reflection
+of a near pole onto its far partner, and that too is run in both forms so the
+cost of the printed one is a measurement -- it reaches the eleventh decimal at a
+section a millionth as thick as it is wide, which is exactly the configuration
+whose weight needs every digit.
 """
 
 import numpy as np
 import pytest
 from numpy.polynomial.legendre import leggauss
+from scipy.special import elliprf, elliprj
 
-from nova.biot.completeelliptic import complete_kind
-from nova.biot.incompleteelliptic import TRIPS, incomplete_kind
+from nova.biot.completeelliptic import complete_kind, complete_pole
+from nova.biot.incompleteelliptic import TRIPS, incomplete_kind, incomplete_pole
 
 LONG_PI = np.longdouble("3.14159265358979323846264338327950288")
 
@@ -339,3 +349,261 @@ def test_the_first_kind_differentiates_in_the_amplitude_exactly():
             np.cos(amplitude) ** 2 + complement * np.sin(amplitude) ** 2
         )
         assert got == pytest.approx(expected, rel=1e-12)
+
+
+# The pole argument, which is the denominator's value at the FAR end of the range.
+# Below one the root sits past that end -- outside a partial range altogether --
+# and above it past the NEAR end, which is where the range starts, so that side is
+# reached at every corner. Both are swept over the eighteen decades either side of
+# one that the polygon reduction's own shifts reach.
+POLES = [1e-12, 1e-8, 1e-3, 0.3, 1.0, 3.0, 1e3, 1e8, 1e12]
+
+# Where the reflected pole k'^2/p stops being a normal double, past which the
+# partner the reflection needs has fewer bits than a double carries. Reaching it
+# takes a section a millionth as thick as it is wide AND a target within 1e-150
+# ring spans of the source, at once.
+SMALLEST_PARTNER = 2.3e-308
+
+
+def _pole_integral(co_amplitude, pole, complement, nodes=60):
+    """Return the third kind's defining integral in longdouble, resolved everywhere.
+
+    Two layers rather than one, so the range is halved and each half graded from
+    its OWN end.  The pole factor turns over within ``1/sqrt(1 + p)`` of ``a = 0``
+    and the whole denominator within ``k' sqrt(p)/sqrt(p + k'^2)`` of a quarter
+    turn -- the second being ``k'`` where the modulus layer is the narrower of the
+    two and ``sqrt(p)`` where the pole's is.
+
+    Neither end angle is ever formed by subtracting from a quarter turn.  That is
+    not tidiness: below the ulp of ``pi/2`` the subtraction loses the co-amplitude
+    outright, and a reference built that way agrees with itself under refinement
+    while being wrong in the third decimal -- measured, on the way to this one.
+    """
+    pole = np.longdouble(pole)
+    complement = np.longdouble(complement)
+    co_amplitude = np.longdouble(co_amplitude)
+    node, weight = (np.longdouble(term) for term in leggauss(nodes))
+
+    def integrand(cosine, sine):
+        return 1.0 / (
+            (cosine**2 + pole * sine**2) * np.sqrt(cosine**2 + complement * sine**2)
+        )
+
+    def graded(lower, top, layer, flipped):
+        """Return the piece over ``[lower, top]``, mapped by sinh from ``lower``."""
+        low, high = np.arcsinh(lower / layer), np.arcsinh(top / layer)
+        panels = max(int(np.ceil(float(high - low))), 1)
+        edge = low + (high - low) * np.arange(panels + 1, dtype=np.longdouble) / panels
+        half = 0.5 * (edge[1] - edge[0])
+        stretch = edge[:-1, None] + half * (node[None, :] + 1.0)
+        angle = layer * np.sinh(stretch)
+        pair = (np.sin(angle), np.cos(angle))
+        if not flipped:
+            pair = pair[::-1]
+        return half * (layer * np.cosh(stretch) * integrand(*pair) @ weight).sum()
+
+    half_amplitude = 0.5 * (LONG_PI / 2 - co_amplitude)
+    return float(
+        graded(np.longdouble(0.0), half_amplitude, 1.0 / np.sqrt(1.0 + pole), False)
+        + graded(
+            co_amplitude,
+            LONG_PI / 4 + 0.5 * co_amplitude,
+            np.sqrt(complement * pole / (pole + complement)),
+            True,
+        )
+    )
+
+
+@pytest.mark.parametrize("pole", POLES)
+@pytest.mark.parametrize("complement", COMPLEMENTS)
+def test_the_third_kind_reproduces_its_defining_integral(pole, complement):
+    """Every pole the reduction reaches, over the whole double range of complement.
+
+    Both orientations in one sweep: below a pole of one the root sits past the far
+    end of the range and the symmetric forms are taken as printed, above it the
+    reflection carries them, and the tolerance is the same on both sides because
+    that is the claim.
+    """
+    for co_amplitude in CO_AMPLITUDES:
+        amplitude, sine, cosine = pair(co_amplitude)
+        got = incomplete_pole(np.asarray(pole), np.asarray(complement), sine, cosine)
+        expected = _pole_integral(co_amplitude, pole, complement)
+        assert float(got) == pytest.approx(expected, rel=1e-13)
+
+
+def test_the_reference_has_converged_under_refinement():
+    """Halving the rule must not move it, or nothing above means anything."""
+    for co_amplitude in (0.7, 1e-4, 0.0):
+        for pole in (1e-8, 1.0, 1e8):
+            for complement in (0.5, 1e-16, 1e-300):
+                coarse = _pole_integral(co_amplitude, pole, complement, nodes=30)
+                fine = _pole_integral(co_amplitude, pole, complement, nodes=60)
+                assert abs(coarse - fine) < 1e-15 * abs(fine)
+
+
+@pytest.mark.parametrize("pole", POLES + [1e18])
+@pytest.mark.parametrize("complement", COMPLEMENTS)
+def test_the_quarter_turn_reproduces_the_complete_pole_to_a_few_ulp(pole, complement):
+    """The limit in which the arc closes onto the ring, at every pole.
+
+    Two entirely different algorithms have to meet here: the complete routine is
+    one Bartky descent and this is a Carlson duplication with a reflection in
+    front of it, so agreement to a few ulp is the strongest single statement
+    available about either.
+    """
+    if complement / pole < SMALLEST_PARTNER:
+        pytest.skip("the denormal partner, whose boundary its own test measures")
+    amplitude, sine, cosine = pair(0.0)
+    got = incomplete_pole(np.asarray(pole), np.asarray(complement), sine, cosine)
+    expected = complete_pole(np.asarray(pole), np.asarray(complement))
+    assert float(got) == pytest.approx(float(expected), rel=4e-15)
+
+
+@pytest.mark.parametrize("co_amplitude", CO_AMPLITUDES)
+@pytest.mark.parametrize("pole", POLES)
+def test_a_vanishing_parameter_leaves_the_elementary_integral(co_amplitude, pole):
+    """``k = 0`` is a target on the axis or at infinity: the radical is one.
+
+    What is left is ``arctan(sqrt(p) tan phi)/sqrt(p)``, which is the term the
+    reflection puts in front -- so this is where a sign or a factor in it shows,
+    with no elliptic integral left to hide behind.
+    """
+    amplitude, sine, cosine = pair(co_amplitude)
+    got = incomplete_pole(np.asarray(pole), np.asarray(1.0), sine, cosine)
+    root = np.sqrt(pole)
+    expected = np.arctan2(root * sine, cosine) / root
+    assert float(got) == pytest.approx(expected, rel=4e-15)
+
+
+@pytest.mark.parametrize("co_amplitude", CO_AMPLITUDES)
+@pytest.mark.parametrize("complement", COMPLEMENTS)
+def test_a_unit_pole_is_the_first_kind(co_amplitude, complement):
+    """The denominator is then one, and two unrelated algorithms must meet.
+
+    Worth having beyond the reference checks because it crosses the two routes
+    this module carries -- the amplitude-carrying descent and the symmetric forms
+    -- at the one argument where they compute the same thing.
+
+    The arc-end-edge corner is excluded here for the reason the descent's own test
+    excludes it, and the exclusion is one-sided: measured against the longdouble
+    reference there, the descent is 5.3e-06 out and the symmetric route 2.5e-16.
+    The corner is the descent's and not the integral's.
+    """
+    if co_amplitude and co_amplitude < FRAGILE_CO_AMPLITUDE:
+        if complement < FRAGILE_COMPLEMENT:
+            pytest.skip("the arc end edge, whose boundary its own test measures")
+    amplitude, sine, cosine = pair(co_amplitude)
+    got = incomplete_pole(np.asarray(1.0), np.asarray(complement), sine, cosine)
+    first, _ = incomplete_kind(amplitude, complement, sine=sine, cosine=cosine)
+    assert float(got) == pytest.approx(float(first), rel=2e-13, abs=1e-300)
+
+
+@pytest.mark.parametrize("pole", POLES)
+def test_a_vanishing_amplitude_returns_nothing_at_every_pole(pole):
+    """The target diametrically opposite the arc's end: the range is empty."""
+    got = incomplete_pole(np.asarray(pole), np.asarray(1e-3), 0.0, 1.0)
+    assert float(got) == 0.0
+
+
+def test_a_root_on_the_range_end_keeps_the_complete_routine_s_convention():
+    """Zero, so the arc and the ring agree in the limit the arc closes.
+
+    At an interior amplitude the far end of the range is OUTSIDE it, so the
+    integral is finite there and the convention is a choice rather than a
+    necessity; it is the callers' choice, and their weight on such a pole is
+    itself exactly zero.
+    """
+    for co_amplitude in (0.7, 1e-4, 0.0):
+        _, sine, cosine = pair(co_amplitude)
+        got = incomplete_pole(np.asarray(0.0), np.asarray(1e-3), sine, cosine)
+        assert float(got) == 0.0
+        assert float(complete_pole(np.asarray(0.0), np.asarray(1e-3))) == 0.0
+
+
+def test_the_symmetric_forms_taken_as_printed_are_what_the_reflection_repairs():
+    """The cancellation at a near pole, measured in both arrangements.
+
+    ``F + (n/3) sin^3 phi R_J`` with ``n = 1 - p`` is the direct transcription.
+    For a root just past the NEAR end of the range ``n`` is hugely negative, the
+    two terms are of opposite sign and nearly equal, and their sum falls as
+    ``1/sqrt(p)`` while each stays of order ``F``.  Run here so the loss is
+    measured: half the decades of the pole, which at a shift of 1e-12 is six.
+    """
+    complement, co_amplitude = 1e-3, 0.7
+    _, sine, cosine = pair(co_amplitude)
+    squared_cosine = cosine * cosine
+    radical = squared_cosine + complement * sine * sine
+    worst = 0.0
+    for pole in (1e8, 1e10, 1e12):
+        expected = _pole_integral(co_amplitude, pole, complement)
+        got = incomplete_pole(np.asarray(pole), np.asarray(complement), sine, cosine)
+        assert float(got) == pytest.approx(expected, rel=4e-15)
+        printed = sine * elliprf(squared_cosine, radical, 1.0) + (
+            (1.0 - pole) / 3.0
+        ) * sine**3 * elliprj(
+            squared_cosine, radical, 1.0, squared_cosine + pole * sine * sine
+        )
+        worst = max(worst, abs(printed - expected) / abs(expected))
+    # the printed form loses half the decades of the pole; the bound is two-sided
+    # so an unexplained improvement fails as surely as a regression
+    assert 1e-12 < worst < 1e-9
+
+
+def test_the_denormal_partner_corner_degrades_by_a_measured_amount():
+    """Where the reflected pole leaves the exponent range -- and by how much.
+
+    The reflection needs ``k'^2/p``, and below the smallest normal double that
+    partner carries fewer bits than a double does.  Geometrically it takes a
+    section a millionth as thick as it is wide AND a target within 1e-150 ring
+    spans of the source at once -- for a metre-scale ring, a separation a hundred
+    and thirty decades below the Planck length.  The bound below is what the
+    corner costs, asserted in both directions.
+    """
+    kept = max(
+        abs(
+            float(incomplete_pole(np.asarray(pole), np.asarray(complement), 1.0, 0.0))
+            / float(complete_pole(np.asarray(pole), np.asarray(complement)))
+            - 1.0
+        )
+        for pole, complement in ((1e6, 1e-300), (1e12, 1e-296), (1e18, 1e-290))
+    )
+    lost = max(
+        abs(
+            float(incomplete_pole(np.asarray(pole), np.asarray(complement), 1.0, 0.0))
+            / float(complete_pole(np.asarray(pole), np.asarray(complement)))
+            - 1.0
+        )
+        for pole, complement in ((1e6, 1e-310), (1e12, 1e-305), (1e18, 1e-300))
+    )
+    assert kept < 4e-15
+    assert 1e-7 < lost < 1e-4
+
+
+def test_the_third_kind_s_trip_count_is_bounded_in_both_directions():
+    """The duplication's constant, seen through the integral that consumes it."""
+    _, sine, cosine = pair(0.0)
+    poles = np.array([1.0, 1e-12, 1e-3, 1e3, 1e12])
+    complements = np.array([1e-300, 1e-300, 1e-40, 1e-16, 1e-3])
+    settled = incomplete_pole(poles, complements, sine, cosine, trips=TRIPS + 6)
+    at_count = incomplete_pole(poles, complements, sine, cosine)
+    short = incomplete_pole(poles, complements, sine, cosine, trips=TRIPS - 4)
+    assert np.max(np.abs(at_count - settled) / settled) < 4e-15
+    assert np.max(np.abs(short - settled) / settled) > 1e-9
+
+
+def test_the_third_kind_traces_and_agrees_to_a_few_ulp():
+    """One implementation, numpy on the host and a compiled kernel on a device."""
+    jax, jnp = traced_namespace()
+    _, sine, cosine = pair(0.4)
+    poles = np.array([1e-12, 1e-3, 1.0, 1e3, 1e12])
+    complements = np.array([1e-300, 1e-40, 1e-12, 1e-3, 0.4])
+
+    @jax.jit
+    def traced(pole, complement):
+        return incomplete_pole(
+            pole, complement, jnp.asarray(sine), jnp.asarray(cosine), xp=jnp
+        )
+
+    host = incomplete_pole(poles, complements, sine, cosine)
+    device = traced(jnp.asarray(poles), jnp.asarray(complements))
+    assert np.max(np.abs(np.asarray(device) - host) / np.abs(host)) < 1e-14

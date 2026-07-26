@@ -52,7 +52,11 @@ two constants below.
 The pole family's own closure needs the same re-argument and survives it: ITS
 wanted solution no longer decays either, but its closure error still does, by
 ``(1 + 2 shift) - sqrt((1 + 2 shift)^2 - 1)`` per order, and the caller only takes
-that route for a root far enough past the range for the decay to bite.
+that route for a root far enough past the range for the decay to bite.  What the
+family does need is its SEED, and that is the one special function a partial range
+adds: :func:`cn_pole_moment` and :func:`sn_pole_moment` here are the interior-
+amplitude counterparts of :mod:`nova.biot.elliptic`'s, and each is one incomplete
+integral of the third kind at a pole argument the shift supplies exactly.
 
 The source term is built from the amplitude's own sine and cosine rather than
 from the amplitude, and that is what makes the quarter turn EXACT rather than
@@ -68,9 +72,16 @@ from __future__ import annotations
 
 import numpy as np
 
-from nova.biot.incompleteelliptic import incomplete_kind
+from nova.biot.incompleteelliptic import incomplete_kind, incomplete_pole
 
-__all__ = ["HEADROOM", "SWITCH", "harmonic_moments", "harmonic_source"]
+__all__ = [
+    "HEADROOM",
+    "SWITCH",
+    "cn_pole_moment",
+    "harmonic_moments",
+    "harmonic_source",
+    "sn_pole_moment",
+]
 
 # Orders carried past the last one wanted before the tridiagonal system is closed.
 # The closure's error decays on the way back down by the system's own contraction
@@ -219,3 +230,52 @@ def harmonic_moments(
     return [
         xp.where(degenerate, upward[order], downward[order]) for order in range(count)
     ]
+
+
+def cn_pole_moment(shift, parameter, sine, cosine, *, complement=None, xp=np):
+    """Return ``integral_0^phi da/((cos^2 a + shift) Delta)``, a family's seed.
+
+    The interior-amplitude counterpart of
+    :func:`nova.biot.elliptic.cn_pole_moment`, and the same reduction to one
+    special function: ``cos^2 a + shift = (1 + shift)(cos^2 a + p sin^2 a)`` with
+    ``p = shift/(1 + shift)``, whose complement ``1/(1 + shift)`` is exact, so no
+    characteristic is formed and none is lost.
+
+    The root sits past the FAR end of the range, and at a partial amplitude that
+    end is OUTSIDE it: a vanishing shift makes the complete integral diverge and
+    leaves this one finite, right up to the quarter turn where the two meet.  The
+    convention at a shift of exactly zero is the complete routine's -- see
+    :func:`nova.biot.incompleteelliptic.incomplete_pole`.
+    """
+    shift = xp.asarray(shift)
+    if complement is None:
+        complement = 1.0 - xp.asarray(parameter)
+    return incomplete_pole(shift / (1.0 + shift), complement, sine, cosine, xp=xp) / (
+        1.0 + shift
+    )
+
+
+def sn_pole_moment(shift, parameter, sine, cosine, *, complement=None, xp=np):
+    """Return ``integral_0^phi da/((sin^2 a + shift) Delta)``, the mirror seed.
+
+    ``sin^2 a + shift = shift (cos^2 a + p sin^2 a)`` with ``p = (1 + shift)/
+    shift``, so a root just past the ``a = 0`` end is a LARGE pole argument, as it
+    is for :func:`nova.biot.elliptic.sn_pole_moment`.
+
+    This is the orientation the arc reaches at every corner rather than
+    occasionally, because the range always STARTS at ``a = 0`` -- the root is
+    inside the layer the integral is concentrated in, whatever the amplitude -- and
+    it is the one the symmetric forms cannot take as printed.  What carries it is
+    the reflection onto ``k'^2/p``; see
+    :func:`nova.biot.incompleteelliptic.incomplete_pole`.
+    """
+    shift = xp.asarray(shift)
+    if complement is None:
+        complement = 1.0 - xp.asarray(parameter)
+    live = shift > 0.0
+    held = xp.where(live, shift, 1.0)
+    return xp.where(
+        live,
+        incomplete_pole((1.0 + held) / held, complement, sine, cosine, xp=xp) / held,
+        0.0,
+    )

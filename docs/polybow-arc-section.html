@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="polybow-arc-section">
   <meta name="plan-title" content="PolyBow — polygon cross-section arc segment">
   <meta name="plan-summary" content="Give nova a polygon cross-section arc element to sit beside Bow&#x27;s rectangular one: the general Urankar Part V case with sweep below a full turn, which reinstates the incomplete elliptic integrals, the alpha-case bookkeeping, an interior integration limit in every moment recursion, and a real azimuthal field component">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="XL">
   <meta name="plan-tier" content="opus">
@@ -17,8 +17,9 @@
   <title>PolyBow — polygon cross-section arc segment | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-25">
-<meta name="plan-version" content="1">
+<meta name="plan-modified" content="2026-07-26">
+<meta name="plan-version" content="2">
+<meta name="plan-impl" content="0.25">
 </head>
 <body>
   <main class="plan-doc">
@@ -49,19 +50,22 @@
       annihilating the radial vector potential as a structural check. A finite arc reinstates
       incomplete <code>F(α,k)</code>, <code>E(α,k)</code> and <code>π(α,η²,k)</code>.</li>
 
-      <li><strong>Every moment recursion regains a boundary term.</strong> The complete case
-      drops the endpoint contribution of eqs 24a/24b because <code>sn = 1</code> and
-      <code>cn = 0</code> there. With an interior upper limit those terms return — for the sn
-      moments, the complement-basis cn moments, and both shifted-pole families that the landed
-      conditioning work introduced. Each recursion's stability argument must be re-derived, not
-      merely re-used: the parasitic-branch reasoning that justifies running a recursion downward
-      changes once the limit is interior.</li>
+      <li><strong>Every moment recursion regains a boundary term</strong> — expected of all of
+      them, and <em>measured to be true of only one</em>. The shipped reduction contracts against
+      three families, and the root and pole families fold their own factor back under the
+      integral, which is an identity of the INTEGRAND rather than of the limit: both are correct
+      at an interior amplitude exactly as they stand, now pinned against partial-range
+      quadrature. The plain harmonic moments are the one that moves, and there the change is
+      structural: the source term costs them the minimality the complete family's downward
+      recursion exploits, so they are solved as a system paired with an upward recursion instead.
+      <strong>Landed below.</strong></li>
 
       <li><strong>The amplitudes become per-target arrays.</strong>
       <code>α_i = (π + φ − φ_i)/2</code> depends on the target's azimuth relative to each arc
       end, so what was a constant is now a field. That is what makes the evaluation batchable on
-      the tiled path, and it is also what makes the α-case selection a branch that must be
-      tested rather than assumed.</li>
+      the tiled path — and the α-case selection, which looked like a per-target branch that a
+      trace could not take, turns out not to be one at all: the paper's three cases are one
+      formula in the half-turn count. <strong>Landed below.</strong></li>
 
       <li><strong>B<sub>φ</sub> becomes a real component.</strong> Its vanishing for the full turn
       is a parity argument — eq 11b's azimuthal row is the radial bracket weighted by
@@ -113,6 +117,49 @@
       the arc row, its sibling plan the straight row.</figcaption>
     </figure>
 
+    <section id="s-primitives-landed" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ partial-range primitives landed 2026-07-26</span>
+        <h2>The interior limit, the amplitude fold, and the family that changes — landed</h2>
+      </header>
+      <p class="landed-summary">
+        <strong>A quarter-turn amplitude now reproduces the shipped complete routine
+        to 2.3e-16 over the whole double range of modulus complement</strong> — the arc
+        closing onto the ring, to the last bit — and that is the test a naive descent
+        fails by 89 %: written through <code>tan</code>, the amplitude step returns
+        nothing at a quarter turn, because 1.6e16 is not infinity, and the first kind
+        saturates on 38.025 where the value is 346.8. Landed: the incomplete first and
+        second kinds at an interior amplitude from the COMPLEMENT, one
+        arithmetic-geometric mean, fixed at fourteen trips so it traces and
+        differentiates (<code>nova/biot/incompleteelliptic.py</code>); the harmonic
+        moments over a partial range, as a tridiagonal solve PAIRED with an upward
+        recursion because the solve stops contracting exactly as the modulus reaches
+        one — a target on the source ring — <strong>worst 8.7e-15 over ten orders
+        against 1.3e-7 with either direction alone</strong>
+        (<code>nova/biot/incompletemoments.py</code>); and the amplitude fold, which
+        turns the paper's THREE printed cases into one formula in the half-turn count
+        and so needs no branch on a per-target value at all
+        (<code>nova/biot/arcamplitude.py</code>). Two findings changed the scope: of
+        the three moment families only ONE knows where the range ends — the root and
+        pole families fold their own factor back, which is an identity of the
+        integrand and not of the limit, so the shipped routines are correct at an
+        interior limit as they stand, now pinned rather than assumed — and the
+        incomplete THIRD kind, which the pole seeds need, is a rung of its own for
+        reasons the record sets out. 460 tests added, fast lane green. Merged to
+        develop <code>7fece719</code> + <code>2959d45c</code> + <code>0e33f622</code>.
+        Full record:
+        <a href="archive/polybow-arc-section-partial-range-primitives-landed.html">partial-range primitives landed</a>.
+      </p>
+      <figure>
+        <img src="/nova/figures/polybow-arc-section/partial_range_primitives.png"
+             alt="The amplitude fold against the paper's three printed cases, a relative-error map of the incomplete first kind over half-separation and modulus complement, and the partial-range moment family's two recursion directions either side of the switch"
+             style="max-width:100%">
+        <figcaption>Why three printed cases are one formula, where the first kind
+        holds and the one corner where it does not, and why the moment family needs
+        two directions.</figcaption>
+      </figure>
+    </section>
+
     <h2 id="s3">§3 — Prerequisites and inherited corrections</h2>
     <p>This plan starts from the landed full-turn reduction and inherits both its machinery and
     its known limitations. Read before starting:</p>
@@ -136,11 +183,23 @@
     edge both hide the error, and the printed form makes assembled B<sub>Z</sub> wrong by 286% on
     a trapezium. Everything derived from that row inherits the correction — the eq 19a boundary
     term, the field families, and here also the azimuthal row that the full turn never formed.</p>
-    <p><strong>Inherited gate shortfall.</strong> The full-turn flux is 3–20× outside its 1e-10
-    acceptance gate for reasons that are post-reduction round-off rather than the reduction
-    itself, tracked on the parent plan. An arc evaluation built on the same numerator basis will
-    inherit that ceiling, so the harmonic-basis work queued there is worth landing first if the
-    schedules allow it — a decision below.</p>
+    <p><strong>Inherited gate shortfall — resolved before this plan started.</strong> The
+    full-turn flux was 3–20× outside its 1e-10 acceptance gate for reasons that were
+    post-reduction round-off rather than the reduction itself. The parent plan's
+    harmonic-numerator rung closed it (all four gate sections now hold 1e-10 on all three
+    components) and its corner-organisation rung followed, so the arc is built on the
+    repaired basis and inherits no ceiling. <code>gate-first</code> is locked
+    <em>harmonic-first</em> on that record rather than on a schedule judgement.</p>
+    <p><strong>What the full turn had to change about the paper, and therefore what the arc
+    inherits.</strong> The shipped reduction is not a transcription of eqs 21–22: those are
+    packaged in powers of a range variable, and a reduced numerator of degree six written that
+    way reaches coefficients ten thousand times its own size, so contracting it against a
+    same-signed moment family forms the answer out of terms that exceed it by as much. The
+    shipped route carries every numerator in the HARMONIC basis instead, holds each range
+    function as its two exact end values plus a bulk, and splits each denominator between its
+    two factors rather than its two roots. The arc extends THAT machinery; the paper is the
+    guide to the case bookkeeping, the field rows and the interior-limit recursions, not the
+    packaging.</p>
 
     <h2 id="s4">§4 — Deliverables</h2>
     <ul>
@@ -178,19 +237,20 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="gate-first" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="gate-first" data-choice="harmonic-first" data-by="reckon-ship" data-when="2026-07-26T09:57:34+00:00">
     <p class="r-dec-q">Land the parent plan&#x27;s harmonic-numerator work before starting the arc,
         or build the arc on the present basis and inherit its 3–20× gate shortfall?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="harmonic-first">harmonic basis first, then the arc</button>
+      <button class="r-opt chosen" data-value="harmonic-first">harmonic basis first, then the arc</button>
       <button class="r-opt" data-value="arc-first">arc first, accept the inherited ceiling</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Settled by the record rather than by a schedule judgement: the parent plan&#x27;s harmonic-numerator rung landed 2026-07-25 (develop 7e5b49b0) and its corner-organisation rung followed (56254283), both before any arc work started. All four gate sections now hold the 1e-10 far band on all three components -- hexagon 6.2e-12, rectangle 1.6e-12, trapezium 6.5e-12, thin plate 6.0e-11 -- so the 3-20x shortfall this decision was hedging against no longer exists and the arc inherits no ceiling. The arc-first option is therefore not a live alternative, and the arc is built on the repaired basis: harmonic numerators, range functions held as two exact end values plus a bulk, and denominators split between their two FACTORS rather than their two roots. Note the consequence for how the paper is used: the shipped route is a re-derivation and not a transcription of eqs 21-22, whose power-basis packaging is what the harmonic rung replaced, so the paper guides the case bookkeeping, the field rows and the interior-limit recursions -- not the packaging.</p>
     </div>
 <div class="r-dec" data-key="incomplete-third-kind" data-choice="" data-by="" data-when="">
     <p class="r-dec-q">Where does the incomplete third-kind integral come from — a Carlson
         symmetric-form evaluation written for this purpose, or the existing complete routine
         extended with an amplitude argument?</p>
+    <p class="r-dec-ctx">Sharpened by the partial-range rung (2026-07-26, develop 7fece719 + 2959d45c + 0e33f622). The FIRST and SECOND kinds are done and took the extend-complete route -- one arithmetic-geometric mean with the amplitude carried alongside the modulus, fixed at fourteen trips, complement-native, reproducing the shipped complete routine at a quarter turn to 2.3e-16 across the whole double range. The third kind did not follow, and the evidence says NEITHER printed option is right as posed. (1) carlson-incomplete reproduces the cancellation the complete case rejected Carlson for. The seed is wanted in two orientations: a root just past the FAR end of the range, where R_F + (n/3) R_J is a sum of positives and holds; and a root just past the NEAR end, where the characteristic is hugely negative, the two terms are of opposite sign and nearly equal, and the arrangement loses about sqrt(p) -- five digits at a shift of 1e-10, which is what a slender section produces. The seed multiplies a numerator end value that is small by the same amount, so it needs full RELATIVE accuracy and the loss reaches the answer undiminished. (2) extend-complete does not carry over from the first two kinds: Bartky&#x27;s rearrangement, which is what makes cel one fixed-trip descent over eighteen decades of pole, has no amplitude in it at all, so the incomplete counterpart (Bulirsch el3) is a different algorithm rather than the same one with an argument added -- and its published form is branch-heavy where this codebase needs a fixed trip count. A THIRD route came out of the analysis and should be costed first: the ill-conditioning is entirely in an ELEMENTARY factor. With the pole written as cos^2 a + p sin^2 a the whole growth is arctan(sqrt(p) tan alpha)/sqrt(p), exact, and the remainder carries a factor k^2/(p - 1) that is small exactly where the direct evaluation is worst -- so the remainder needs only eps sqrt(p) relative accuracy, which the Carlson arrangement already delivers. Paired with Carlson taken directly in the far-end orientation, where it is a sum of positives, the two orientations are each covered by the means that suits them. Add elementary-split-plus-carlson as a third option when this is locked.</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="carlson-incomplete">Carlson symmetric forms, purpose-written</button>
       <button class="r-opt" data-value="extend-complete">extend the complete routine with an amplitude</button>
@@ -211,7 +271,7 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-pbow-01" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-25T15:30:00+00:00" data-recommends-skill="/reckon-ship polybow-arc-section" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-pbow-01" data-status="resolved" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-25T15:30:00+00:00" data-recommends-skill="/reckon-ship polybow-arc-section" data-resolved-at="2026-07-26T09:57:34+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Reinstate the alpha-case bookkeeping and the interior integration limit, then build the arc gate</h4>
     <div class="r-fu-body"><p>First rung, and it is deliberately the risky half rather than the coefficient algebra: get the branch selection and the interior-limit boundary terms right, verified by the sweep-to-2pi oracle against the landed full-turn evaluation, before any new field row is attempted. The moment recursions all need their endpoint contributions restored and their stability arguments re-derived, because the parasitic-branch reasoning that justifies a downward recursion changes once the upper limit is interior.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -262,6 +322,66 @@ Done-when
      switch re-derived rather than inherited.
   3. The alpha-case branch selection tested at and across every boundary.
   4. Sweep -&gt; 2pi reproduces the full-turn flux to its own accuracy.
+  5. Followup written; this followup resolved.</pre>
+    <p class="r-fu-outcome">Partly landed and partly re-scoped by evidence -- develop 7fece719 + 2959d45c + 0e33f622, 460 tests. DONE: incomplete first and second kinds at an interior amplitude (nova/biot/incompleteelliptic.py), reproducing the shipped complete routine at a quarter turn to 2.3e-16 over the whole double range of complement -- the test a tan-based amplitude step fails by 89 %, saturating on 38.025 where the value is 346.8; the partial-range harmonic moments (nova/biot/incompletemoments.py) as a tridiagonal solve paired with an upward recursion, worst 8.7e-15 over ten orders against 1.3e-7 with either direction alone, both constants set by sweep and asserted from both sides; and the amplitude fold (nova/biot/arcamplitude.py), which collapses the paper's three printed cases into one formula in the half-turn count and so carries NO branch on a per-target value. Two findings changed the scope. First, of the three moment families only the plain one knows where the range ends -- the root and pole families fold their own factor back, which is an identity of the integrand and not of the limit, so the shipped routines are correct at an interior limit as they stand, now pinned against partial-range quadrature. Second, the incomplete THIRD kind is a rung of its own and neither of the decision's two printed options is right as posed; the analysis and a third route are recorded in incomplete-third-kind's context. NOT DONE, and carried to the next followup: the third-kind seed, and with it done-when 4 (sweep to 2pi against the assembled full-turn flux) -- the fold's own sweep-to-2pi collapse onto -2 X(pi/2) is landed and tested, but the assembled reduction cannot be exercised until the pole families have their seed. Full record: archive/polybow-arc-section-partial-range-primitives-landed.html</p>
+    </article>
+<article class="r-fu" data-id="f-pbow-02" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-26T10:15:00+00:00" data-recommends-skill="/reckon-ship polybow-arc-section" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Seed the pole families at an interior amplitude — the incomplete third kind, and the elementary split that conditions it</h4>
+    <div class="r-fu-body"><p>The one primitive the arc still lacks, and the only thing between the landed machinery and an assembled arc evaluation. The pole families' recursions are already verified at a partial limit; they are handed a seed by quadrature in the tests, and this rung replaces it. The decision <code>incomplete-third-kind</code> carries the measured reason neither of its two printed options works and the third route to cost first: the seed's whole ill-conditioning sits in an elementary arctangent that can be taken out exactly, leaving a remainder that needs only <code>eps sqrt(p)</code> relative accuracy — which is what the Carlson arrangement already delivers.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    polybow-arc-section (http://127.0.0.1:8765/nova/polybow-arc-section.html)
+Section: the incomplete third kind, and the pole seeds it closes
+Tier:    opus
+
+Context
+  The partial-range rung landed the incomplete first and second kinds, the harmonic moments
+  over a partial range, and the amplitude fold (develop 7fece719 + 2959d45c + 0e33f622).
+  What is missing is the pole families&#x27; SEED at an interior amplitude, which is an incomplete
+  integral of the third kind. Everything else the arc contracts against is in and pinned; the
+  seed is what closes the moment stack and unblocks the reduction itself.
+
+State to read
+  nova/biot/completeelliptic.py -- the complete counterpart: one Bartky descent, both
+    arguments the COMPLEMENT, fixed trip count, and the docstring&#x27;s account of why Carlson&#x27;s
+    third kind was rejected for it;
+  nova/biot/incompleteelliptic.py -- the amplitude-carrying descent this must sit beside, and
+    the (sine, cosine) argument convention that keeps a quarter turn exact;
+  nova/biot/elliptic.py cn_pole_moment / sn_pole_moment -- the two orientations the reduction
+    asks for, and how each writes its pole factor;
+  tests/test_biotincompletemoments.py -- the pole-family tests, which currently supply the
+    seed by quadrature; replacing that supply is the acceptance signal;
+  the plan&#x27;s incomplete-third-kind decision context, which carries the measured analysis and
+    should be locked by this rung rather than re-derived.
+
+Key guidance
+  - Both orientations are needed and they are NOT symmetric at a partial limit. A root past
+    the far end (cn_pole, small p) is Carlson&#x27;s good case, a sum of positives. A root past the
+    NEAR end (sn_pole, large p) is where it loses sqrt(p) -- and the range always starts at
+    a = 0, so that orientation is reached at every corner rather than occasionally.
+  - The elementary split is the route to cost first: with the pole as cos^2 a + p sin^2 a, the
+    growth is arctan(sqrt(p) tan alpha)/sqrt(p) exactly, and what is left carries k^2/(p - 1).
+    Verify the error budget by measurement before building on it -- the claim is that the
+    remainder needs only eps sqrt(p) relative accuracy, and that is checkable directly.
+  - Whatever the route, it must be FIXED-TRIP and free of any branch on a value, like every
+    other primitive here, or the arc cannot be tiled. Carlson&#x27;s duplication is fixed-trip if
+    the convergence test is replaced by a constant; scipy&#x27;s elliprj is neither traceable nor
+    cheap (0.2 us/element against the descent&#x27;s 0.1175).
+  - Take the amplitude as its (sine, cosine) pair, as the first two kinds do. A quarter turn
+    must return the shipped complete_pole value to the last bit -- that is the sweep-to-2pi
+    check at the primitive level and it is the cheapest place to catch a sign.
+  - Do not widen a tolerance to pass a test. Timing on a sun_debug node only.
+
+Done-when
+  1. An incomplete third kind spanning both pole orientations and the double range of modulus
+     complement, pinned against a longdouble reference built the way
+     tests/test_biotincompleteelliptic.py builds its own -- on a graded map, never adaptive
+     quadrature -- with the accuracy boundary measured and asserted in both directions.
+  2. A quarter-turn amplitude reproduces nova.biot.completeelliptic.complete_pole to a few ulp
+     at every pole and every complement.
+  3. tests/test_biotincompletemoments.py&#x27;s pole-family tests take their seed from the routine
+     rather than from quadrature, and still pass.
+  4. incomplete-third-kind locked with the measured rationale, including the cost per element
+     beside the complete descent&#x27;s 0.1175 us.
   5. Followup written; this followup resolved.</pre>
     </article>
 </section>

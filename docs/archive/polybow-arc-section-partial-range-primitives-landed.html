@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="archive">
+  <meta name="plan-slug" content="polybow-arc-section-partial-range-primitives-landed">
+  <meta name="plan-title" content="Partial-range primitives and the amplitude fold — landed">
+  <meta name="plan-status" content="historical">
+  <meta name="plan-modified" content="2026-07-26">
+  <title>polybow-arc-section partial range primitives landed | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>What a finite arc needs that the full turn never formed</h1>
+  <p><a href="/nova/polybow-arc-section.html">← back to the evergreen plan</a> ·
+     landed 2026-07-26 · develop <code>7fece719</code> · <code>2959d45c</code> ·
+     <code>0e33f622</code> · 460 new tests, 6 skipped ·
+     <strong>the interior-amplitude integrals, the moment family that changes with
+     the range, and the amplitude fold are in and pinned; the incomplete THIRD
+     kind is not, and this rung is what establishes why it is a rung of its
+     own</strong></p>
+
+  <h2>Quick status</h2>
+  <table>
+    <thead><tr><th>Item</th><th>Status</th><th>Where</th></tr></thead>
+    <tbody>
+      <tr><td>Incomplete first and second kinds at an interior amplitude, from the
+          modulus COMPLEMENT, one arithmetic-geometric mean for both, fixed at
+          fourteen trips so the routine traces and differentiates</td>
+          <td>✓ shipped</td>
+          <td><code>nova/biot/incompleteelliptic.py</code></td></tr>
+      <tr><td>Harmonic moments over a partial range — the one family of three whose
+          recursion knows where the range ends — as a tridiagonal solve paired with
+          an upward recursion, both constants set by measurement</td>
+          <td>✓ shipped</td>
+          <td><code>nova/biot/incompletemoments.py</code></td></tr>
+      <tr><td>The root and pole families need NO counterpart, and that is checked
+          rather than assumed: both fold their own factor back under the integral,
+          which is an identity of the integrand and not of the limit</td>
+          <td>✓ verified in place</td>
+          <td><code>nova/biot/elliptic.py</code> (unchanged)</td></tr>
+      <tr><td>The amplitude fold: the paper's three printed cases as one formula in
+          the half-turn count, with no branch on a per-target value</td>
+          <td>✓ shipped</td>
+          <td><code>nova/biot/arcamplitude.py</code></td></tr>
+      <tr><td>Incomplete integral of the THIRD kind — the pole families' seed</td>
+          <td>⨯ not started, and now scoped</td>
+          <td>next rung; see below</td></tr>
+      <tr><td>The arc reduction itself, its field rows and its element class</td>
+          <td>⨯ blocked on the seed</td>
+          <td>§4 of the evergreen</td></tr>
+    </tbody>
+  </table>
+
+  <figure>
+    <img src="/nova/figures/polybow-arc-section/partial_range_primitives.png"
+         alt="The amplitude fold against the paper's three cases, a relative-error map of the incomplete first kind over half-separation and modulus complement, and the partial-range moment family's two recursion directions against the switch between them"
+         style="max-width:100%">
+    <figcaption>Left: the fold, and why three printed cases are one formula. Middle:
+    where the first kind holds and the one corner where it does not. Right: why the
+    moment family needs two directions and neither alone will do.</figcaption>
+  </figure>
+
+  <h2>The step that decides everything, and the value it collapses on</h2>
+  <p>The incomplete integrals descend by the arithmetic-geometric mean, and each trip
+  has to carry the amplitude along with the modulus. Written the way the identity
+  usually is — <code>phi &lt;- phi + arctan((b/a) tan phi)</code> — it <strong>collapses at
+  exactly the configuration this module has to reproduce</strong>. A quarter-turn
+  amplitude has a tangent of 1.6e16 rather than infinity, so a small ratio returns a
+  step of nothing where the true step is a quarter turn: the amplitude never doubles,
+  and the first kind saturates on <code>log(2/cos(pi/2))</code> — <strong>38.025, a
+  number that depends on nothing but the floating-point representation of a right
+  angle</strong>. Against the true 346.8 at a complement of 1e-300 that is an 89 %
+  error, and it is not a corner case: a quarter-turn amplitude is what the FULL TURN
+  is, so the arc would have failed the one test that matters most.</p>
+  <p>Taking the step from the amplitude's sine and cosine separately removes the
+  saturation and takes the continuous branch with it, and the whole turns the
+  arctangent cannot see are restored arithmetically rather than by a case. With that,
+  <strong>a quarter-turn amplitude reproduces the shipped complete routine to 2.3e-16
+  over the whole double range of complement</strong>, 1e-300 included — the arc closing
+  onto the ring, to the last bit. The arrangement being repaired is run inside the
+  test rather than described, so the 89 % is measured on every run.</p>
+  <p>The same argument runs one level up. The amplitude's own pair comes from the
+  caller, because the arc has it exactly: with <code>psi</code> the target's azimuthal
+  separation from an arc end, <code>sin alpha = cos(psi/2)</code> and
+  <code>cos alpha = -sin(psi/2)</code>, so a target ON the end gives a cosine of
+  exactly zero where <code>cos(pi/2)</code> gives 6e-17.</p>
+
+  <h2>Three cases, one formula, and no branch</h2>
+  <p>Urankar folds an amplitude back into the quarter the antiderivative covers in
+  three printed cases (eqs 25 and 26, p. 1178), each with its own
+  <code>theta</code> and its own multiple of the quarter-turn value. <strong>They are
+  one formula in the half-turn count</strong>, and it follows from what the integrands
+  are rather than from the cases: every one is a function of twice the angle, so all
+  are half-turn periodic, and each is even or odd about zero. The rows with an odd
+  integrand integrate to an even function whose half turn vanishes; the rows with an
+  even one integrate to an odd function whose half turn is twice the quarter-turn
+  value. Writing <code>alpha = n pi + delta</code>,</p>
+  <pre>    X_even(alpha) = X(|delta|)
+    X_odd(alpha)  = 2 n X(pi/2) + sign(delta) X(|delta|)</pre>
+  <p>and cases A, B and C are <code>n = 0, 1, 2</code>. That matters beyond tidiness:
+  the case selection is a branch on a PER-TARGET value, which a traced tile cannot
+  take, and the one-formula version has none — so the arc's amplitude bookkeeping is
+  batchable from the start rather than after a rewrite. It is checked against the
+  printed cases transcribed literally, against direct integration of two model
+  integrands over four turns of amplitude, and against the full turn, where the two
+  ends' folds cancel to <code>-2 X(pi/2)</code> — the ring the shipped reduction
+  evaluates, recovered from the arc's own bookkeeping rather than assumed.</p>
+
+  <h2>Of three moment families, only one knows where the range ends</h2>
+  <p>This is the finding that decides how much of the shipped full-turn reduction an
+  arc can reuse, and it came out better than the plan assumed. The root moments fold
+  <code>Delta^2</code> back under the integral and the pole moments fold their own pole
+  factor back; both are identities of the INTEGRAND and not of the limit, so
+  <strong>the shipped routines are correct at an interior amplitude exactly as they
+  stand</strong>. That is now pinned against partial-range quadrature rather than
+  argued.</p>
+  <p>The plain harmonic moments are the one family that moves, and the change is
+  structural rather than a boundary term to bolt on. Their recursion comes from
+  <code>[sin 2na Delta]</code> vanishing at both ends of the quarter range; at an
+  interior limit it gains a source, and with it <strong>the moments stop being the
+  minimal solution the complete family exploits</strong> — a cut range puts a jump into
+  the periodic extension, they decay only as <code>1/n</code>, and no branch of the
+  homogeneous relation describes them. So the family is not recursed downward at all
+  here. It is solved, as a tridiagonal system.</p>
+  <p>And the solve alone is not enough, for a reason worth stating because it is the
+  common configuration rather than an exotic one. The system's contraction ratio is
+  <code>[(1 + k'^2) - sqrt((1 + k'^2)^2 - k^4)]/k^2</code> — 0.17 for a distant target,
+  and <strong>reaching ONE as the modulus does</strong>, which is a target on the source
+  ring. There the relation has <code>(-1)^n</code> exactly in its kernel and nothing
+  damps the closure. The upward recursion covers precisely that end and by the same
+  number, what grows going up being the reciprocal of that ratio. Both constants are
+  set by a sweep of amplitude against parameter and asserted from both sides:
+  <strong>worst 8.7e-15 over ten orders with the pair, against 1.3e-7 with either
+  direction alone</strong>, and 1.2e-13 at forty orders less headroom.</p>
+  <p>One more piece of exactness earns its keep here. The source term
+  <code>4 sin(2 n alpha) Delta(alpha)</code> is generated by the Chebyshev recursion
+  from <code>2 sin alpha cos alpha</code>, so at a quarter turn its seed is exactly
+  zero, every harmonic after it is exactly zero, and <strong>the system the arc solves
+  IS the homogeneous one the complete family satisfies</strong>. Taken as
+  <code>sin(n pi)</code> of a floating-point right angle the seed is 1e-16 instead, and
+  the arc would differ from the ring at every order for no physical reason.</p>
+
+  <h2>What is not here, and why it is a rung rather than an omission</h2>
+  <p>The pole families need a seed, and at an interior amplitude that seed is an
+  incomplete integral of the THIRD kind. It is not implemented, and the analysis that
+  says why is the useful output of this rung — the plan's open decision offered two
+  routes and <strong>the evidence says neither is right as posed</strong>.</p>
+  <ul>
+    <li><strong>Carlson's symmetric forms, purpose-written</strong> reproduce the
+    cancellation the complete case rejected them for. The reduction needs the seed in
+    two orientations: a root just past the far end of the range, where Carlson's
+    <code>R_F + (n/3) R_J</code> is a sum of positives and is fine, and a root just past
+    the NEAR end, where the characteristic is hugely negative, the two terms are of
+    opposite sign and nearly equal, and the arrangement loses about
+    <code>sqrt(p)</code> — five digits at a shift of 1e-10, which is the shift a
+    slender section actually produces. The seed multiplies a numerator end value that
+    is small by exactly the same amount, so it needs full RELATIVE accuracy and the
+    loss reaches the answer undiminished.</li>
+    <li><strong>Extending the complete routine with an amplitude</strong> is what the
+    first and second kinds did here, and for them it worked. It does not carry over to
+    the third: Bartky's rearrangement, which is what makes <code>cel</code> a single
+    fixed-trip descent over eighteen decades of pole, has no amplitude in it, and the
+    incomplete counterpart is a different algorithm rather than the same one with an
+    argument added.</li>
+  </ul>
+  <p>A third route came out of the analysis and is the one to try first. The seed's
+  ill-conditioning is entirely in an ELEMENTARY factor: with the pole written as
+  <code>cos^2 a + p sin^2 a</code>, the whole growth is
+  <code>arctan(sqrt(p) tan alpha)/sqrt(p)</code>, which is exact, and the remainder
+  carries a factor of <code>k^2/(p - 1)</code> that makes it small exactly where the
+  direct evaluation is worst. Splitting there means the remainder needs only
+  <code>eps sqrt(p)</code> relative accuracy — which the Carlson arrangement already
+  delivers. Complementing it, a root past the FAR end is the orientation where Carlson
+  is a sum of positives, so the two orientations are covered by different means and
+  each by the one that suits it. Sizing and pinning that is the next rung.</p>
+
+  <h2>What is next</h2>
+  <div class="card">
+    <p><strong>The seed, then the reduction.</strong> With an incomplete third kind the
+    pole families close and the whole moment stack the arc contracts against is
+    available; the reduction itself — the by-parts boundary terms the interior limit
+    reinstates, the arctangent's endpoint value where the full turn had a dead-band,
+    and the azimuthal field row that has no rectangular oracle — follows on top of it.
+    The amplitude fold and the partial-range moments are both traceable and batched
+    over per-target amplitudes already, so nothing landed here has to be revisited to
+    make the arc tileable.</p>
+  </div>
+</main>
+</body>
+</html>

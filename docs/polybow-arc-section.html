@@ -18,8 +18,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-26">
-<meta name="plan-version" content="4">
-<meta name="plan-impl" content="0.6">
+<meta name="plan-version" content="5">
+<meta name="plan-impl" content="0.85">
 </head>
 <body>
   <main class="plan-doc">
@@ -74,7 +74,8 @@
       is a parity argument — eq 11b's azimuthal row is the radial bracket weighted by
       <code>sin φ</code> instead of <code>cos φ</code>, the bracket is even about φ = π, and the
       odd weight integrates to nothing. On an arc there is no such cancellation, so the row has
-      to be implemented and tested rather than asserted away.</li>
+      to be implemented and tested rather than asserted away. It is also the row with no free
+      oracle, and the direct volume integral is what holds it. <strong>Landed below.</strong></li>
 
       <li><strong>Conditioning gets harder, not easier.</strong> The landed work cured a loss that
       grew as the fourth power of the section's aspect ratio by taking each pole factor in the
@@ -247,6 +248,55 @@
       </figure>
     </section>
 
+    <section id="s-five-rows-landed" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ the arc evaluates 2026-07-26</span>
+        <h2>Five rows, four oracles, and the ring recovered from the fold — landed</h2>
+      </header>
+      <p class="landed-summary">
+        <strong>A quarter-turn amplitude reproduces the full turn's own per-limit
+        values to 5.7e-15 and a full sweep reproduces the landed ring to 4.7e-12,
+        with the two rows a full turn's parity annihilates vanishing to 1e-13 of
+        the three it keeps</strong> — the arc closing onto the axisymmetric
+        conductor by the amplitude fold's own arithmetic, and the same statement as
+        <code>cn K = 0</code> reached from the other side. Landed:
+        <code>nova/biot/polygonarc.polygon_arc_greens</code>, both potential rows
+        and all three field components; the harmonic-series-to-range-function
+        conversion the previous rung named as missing
+        (<code>rangefunction.rising_integral</code>, far end exactly zero by
+        imposition rather than by summation); and two extractions so the arc shares
+        the full turn's treatment rather than copying it — the pole route and the
+        contractions as <code>nova/biot/momentchannel.py</code>, one object per
+        moment family, and the residual quadratures as
+        <code>nova/biot/gradedresidual.py</code>, each panel now carrying its own
+        limits because an interior amplitude can stop short of the layer it is
+        graded from. <strong>The by-parts constants turned out to want OPPOSITE
+        choices</strong>: <code>arsinh β1</code> vanishing at the lower limit as the
+        previous rung derived, but <code>arsinh β2</code> vanishing at the
+        AMPLITUDE, because the transcendental it would otherwise multiply runs to a
+        logarithm exactly where a full sweep puts the target — the other choice's
+        term reaches twenty times the row it belongs to and grows without bound.
+        Held to a direct Biot–Savart volume integral at 4.8e-12 absolute over four
+        sections and four sweeps, to <code>Bow</code> at zero edge slope on all
+        five rows within Bow's own 2.2e-07, and a horizontal edge contributes
+        nothing to 1e-13. <strong>939 µs/pair on a hexagon</strong> — 4.7× the
+        ring's three rows and 2.65× <code>Bow</code> on the section shape they
+        share, a ratio flat across section shapes and four times BELOW what the
+        partial-range solves alone would predict, so the moment stack is not where
+        the cost is. 50 new tests, 0 failed; full-turn gate unmoved at 112.
+        Full record:
+        <a href="archive/polybow-arc-section-five-rows-landed.html">the five rows landed</a>.
+      </p>
+      <figure>
+        <img src="/nova/figures/polybow-arc-section/arc_five_rows.png"
+             alt="Every row against the arc's sweep with the landed full-turn values marked, each row's worst deviation from a direct volume integral measured absolutely and against its own scale, and the size of the term the other by-parts constant would form as the target reaches the edge's extended line"
+             style="max-width:100%">
+        <figcaption>The sweep closing onto the ring, the gate against an integral
+        that shares nothing with the reduction, and what the other by-parts
+        constant would have had to cancel.</figcaption>
+      </figure>
+    </section>
+
     <h2 id="s3">§3 — Prerequisites and inherited corrections</h2>
     <p>This plan starts from the landed full-turn reduction and inherits both its machinery and
     its known limitations. Read before starting:</p>
@@ -290,37 +340,51 @@
 
     <h2 id="s4">§4 — Deliverables</h2>
     <ul>
-      <li>A finite-arc polygon-section evaluation of the vector potential and all
-      <strong>three</strong> field components, with the α-case branch selection under test.</li>
-      <li>An acceptance gate built like the full turn's: a converged numerical oracle over the
+      <li><s>A finite-arc polygon-section evaluation of the vector potential and all
+      <strong>three</strong> field components, with the α-case branch selection under test.</s>
+      <strong>Landed</strong> — and the α-case selection turned out not to be a branch at all,
+      the paper's three printed cases being one formula in the half-turn count.</li>
+      <li><s>An acceptance gate built like the full turn's: a converged numerical oracle over the
       arc, per-edge and per-limit pins, an aspect-ratio sweep, and per-section envelopes asserted
-      in both directions.</li>
-      <li>Element classes following the <code>Arc</code>/<code>Bow</code> pattern
-      (<code>Constants</code> + <code>Matrix</code> dataclass, <code>ClassVar</code> name,
+      in both directions.</s> <strong>Landed</strong>, with four oracles rather than one —
+      <code>tests/test_biotpolygonarc.py</code>.</li>
+      <li><strong>Still open:</strong> element classes following the <code>Arc</code>/<code>Bow</code>
+      pattern (<code>Constants</code> + <code>Matrix</code> dataclass, <code>ClassVar</code> name,
       <code>axisymmetric = False</code>) so the frame and groupset machinery can consume them
-      rather than only a bare function.</li>
-      <li>Cost per pair measured on a compute node, fresh process, median of 3, beside the
-      full-turn and <code>Bow</code> figures.</li>
+      rather than only a bare function. Its shape is the plan's one open decision,
+      <code>arc-element-shape</code>.</li>
+      <li><s>Cost per pair measured on a compute node, fresh process, median of 3, beside the
+      full-turn and <code>Bow</code> figures.</s> <strong>Landed</strong> — 939 µs/pair on a
+      hexagon, 4.7× the ring and 2.65× <code>Bow</code>.</li>
     </ul>
 
-    <h2 id="s5">§5 — The four free oracles</h2>
-    <p>This plan is unusually well supplied with independent checks, and all four are tests
-    rather than afterthoughts. Each isolates a different failure mode:</p>
+    <h2 id="s5">§5 — The four free oracles — all four closed</h2>
+    <p>This plan was unusually well supplied with independent checks, and all four are now tests.
+    Each isolates a different failure mode, and the list turned out to be worth having: the one
+    defect the assembly rung carried was localised by WHICH of them failed, not by inspection.</p>
     <ol>
-      <li><strong>Sweep → 2π reproduces the landed full-turn evaluation</strong>, to the accuracy
-      the full turn itself achieves. Catches errors in the α-case bookkeeping and the
-      interior-limit boundary terms, which is where most of the new risk lives.</li>
-      <li><strong>Zero edge slope reproduces <code>Bow</code></strong> within Bow's own tolerance
-      — the arc analogue of the full turn's reduction to <code>cylinder_greens</code>. Catches
-      errors in the degenerate branch the printed packaging cannot express.</li>
-      <li><strong>A converged direct quadrature over the arc</strong>, built the way the full
-      turn's oracle was (raise the rule until it stops moving, and assert that it has).</li>
-      <li><strong>Horizontal edges contribute nothing</strong>, exactly, as in the full turn.</li>
+      <li><strong>Sweep → 2π reproduces the landed full-turn evaluation.</strong> 2.1e-13 to
+      4.7e-12 on the three rows a full turn keeps, and the two it annihilates vanish to 1e-13 of
+      them. A quarter-turn amplitude against the ring's own per-limit values, 5.7e-15, is the
+      sharper half of the same check and localises everything after it.</li>
+      <li><strong>Zero edge slope reproduces <code>Bow</code></strong>, all five rows. Bounded
+      from above only: nova's point solver decides its own output precision from process state,
+      so the floor is its storage rather than either reduction's accuracy.</li>
+      <li><strong>A converged direct quadrature over the arc</strong> — the Biot–Savart volume
+      integral itself, a signed triangle fan over the section crossed with a rule graded into
+      every nearest approach in the sweep. 4.8e-12 absolute over four sections and four sweeps.
+      Its azimuth has to be graded and the grading has to WRAP: a single rule misses the peak by
+      parts in a thousand, and the peak recurs at every whole turn inside the sweep.</li>
+      <li><strong>Horizontal edges contribute nothing</strong>, to 1e-13 — and splitting one moves
+      the corner term from a cancelling chain to a broken one, so the two sections reach the same
+      answer by different bookkeeping.</li>
     </ol>
-    <p>B<sub>φ</sub> has no such free oracle — it is the one component with no rectangular
-    counterpart to check against, because <code>Bow</code> carries it too but through a different
-    formulation. It therefore needs the direct quadrature and an integral identity of its own;
-    treat it as the highest-risk row.</p>
+    <p>B<sub>φ</sub> had no such free oracle, and that held: it is the one row with no rectangular
+    counterpart in the same formulation and none at all in the ring, so the volume integral is
+    what carries it. It is also four orders below the rows beside it at a plasma-cell aspect,
+    which is why the gate records each row against its OWN size as well as absolutely — the
+    absolute measure says nothing about a small component, and the relative one is the only
+    statement anything makes about this row. It holds 3.1e-11 of itself.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -546,7 +610,7 @@ Done-when
   6. Followup written; this followup resolved.</pre>
     <p class="r-fu-outcome">Partly landed and re-scoped by its own first finding -- develop 053ba72a (a1c20f8c + e1801718 + e9b8b175), 91 new tests, 1741 passed / 0 failed across every affected suite. The rung opened on the premise that NO PRIMITIVE IS MISSING; that premise was wrong, and finding out is what it produced. Two of an arc's five rows -- the potential's radial component and the field's toroidal one -- carry sin phi where the other three carry cos phi, so they contract against moments that have no counterpart anywhere in elliptic.py to be the partial-range version OF: over a full turn that odd weight integrates to nothing, which IS the parity argument the ring's vanishing toroidal field rests on. DONE: the fourth family (nova/biot/incompletemoments.sine_moments), 2.1e-14 over eight orders relative to its own zeroth moment across the whole amplitude and complement range against both-ends-graded quadrature; both of its pole seeds, which are ELEMENTARY where the cosine family's are incomplete third kinds -- one inverse hyperbolic tangent each, 5e-14 RELATIVE over twelve decades of shift and both signs of the reflected pole, including the crossing where q^2 = k'^2 - shift k^2 changes sign and the two branches meet; the radical fold and the pole recursion shown correct on the new family AS THEY STAND rather than assumed; the tridiagonal solve now shared, the two families differing in their right-hand side and their two seeds and nothing else; and the range-function algebra extracted to nova/biot/rangefunction.py so the arc reduction uses the same object as the full turn rather than a copy, full-turn gate unmoved at 112 passed. The seeds' accuracy is one quantity: the gap 1 - z, which reaches zero as the root reaches the range end. Supplied in closed form as a ratio of positives it holds to the floor; subtracted from one it tracks eps over the shift and has nothing left by 1e-14, which the figure measures. NOT DONE, and carried to f-pbow-04 with the derivation rather than the intent: the five-row assembly, the sweep-to-2pi oracle, the Bow and horizontal-edge reductions, the direct quadrature and the cost -- done-when 1 to 5 all open. What the next rung does NOT have to re-derive is recorded in the archive: the five rows and their fold parities, which channel each term lands in, why the by-parts constant is not free for a pure sine weight, and the one piece still missing (a harmonic series to range function conversion, a double Chebyshev deflation at t = +/-1). Full record: archive/polybow-arc-section-sine-family-landed.html</p>
     </article>
-<article class="r-fu" data-id="f-pbow-04" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-26T14:30:00+00:00" data-recommends-skill="/reckon-ship polybow-arc-section" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-pbow-04" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-26T14:30:00+00:00" data-recommends-skill="/reckon-ship polybow-arc-section" data-resolved-at="2026-07-26T13:23:12+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Assemble the five arc rows on the now-genuinely-closed stack, and close the sweep-to-2pi oracle</h4>
     <div class="r-fu-body"><p>The stack really is closed now: the cosine family and its third-kind seeds, the sine family and its elementary ones, the radical fold and the pole recursion verified on both, and the amplitude fold. What is left is the assembly, and this rung starts from a derivation rather than from the paper — the previous rung worked the reduction's shape out term by term at an interior limit before it ran out of road, and the prompt below carries it. One piece of algebra is genuinely missing and is named: converting a harmonic series back into a range function with exact end values.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -653,6 +717,74 @@ Done-when
   5. Cost per pair measured on a compute node, fresh process, median of 3, beside the
      full-turn 171.4 us hexagon figure and Bow&#x27;s.
   6. Followup written; this followup resolved.</pre>
+    <p class="r-fu-outcome">Landed in full -- all six done-when met. develop 9b43a786 (8b761be2 + e7b40010 + 56344f38), 50 new tests, 1751 passed / 0 failed across every affected suite, full-turn gate unmoved at 112.
+
+The arc evaluates: nova/biot/polygonarc.polygon_arc_greens returns both potential rows and all three field components per ampere in the target's own cylindrical basis. The derivation the prompt carried was right and was built from rather than re-worked. Held to FOUR independent references plus Bow: the same edge integral at an interior amplitude by panelled quadrature graded into both ends, 8.0e-15 over four edge slopes (the exactly vertical one included) x four amplitudes x both limits x five rows; the full turn's own per-limit values at a quarter-turn amplitude, 5.7e-15, two reductions sharing no moment family; the landed ring at a full sweep, 2.1e-13 to 4.7e-12 on the three rows it keeps with the two its parity annihilates vanishing to 1e-13 of them; and a direct Biot-Savart volume integral, 4.8e-12 absolute over four sections x four sweeps. Bow at zero edge slope reproduces all five rows, and a horizontal edge split in two agrees to 1e-13 -- which also moves the corner term from a cancelling chain to a broken one, so the two sections reach the same answer by different bookkeeping.
+
+ONE THING THE DERIVATION HAD WRONG, and it is the rung's own finding: the two residual terms want OPPOSITE by-parts constants. arsinh beta1 takes the antiderivative vanishing at the LOWER limit, as derived -- it diverges at a = 0 for a target level with the corner. But arsinh beta2 must take the one vanishing at the AMPLITUDE. Its antiderivative in the range variable does not vanish at the far end, and the transcendental it would multiply there runs to a logarithm wherever the target sits on the edge's extended line -- which at a quarter-turn amplitude is exactly what a full sweep IS, so the configuration is the closure test rather than a corner. Subtracting the value at the amplitude puts an exact zero on the weight the near pole's own divergence carries. Measured: the term the other choice forms reaches twenty times the row it belongs to by an offset of 1e-14 section radii and grows without bound.
+
+Two extractions rather than copies, both with the full-turn gate re-run: nova/biot/momentchannel.py (the factorisation, the exact removal of a numerator's end value at a near root, and the switch to the pole family at a far one -- one object per moment family, so the arc's TWO families factorise each denominator once and seed it twice) and nova/biot/gradedresidual.py (the two log-singular arsinh quadratures, each panel now carrying its own limits because an interior amplitude can stop short of the layer it is graded from). Plus rangefunction.rising_integral, the harmonic-series-to-range-function conversion the previous rung named as missing, with the far end imposed rather than summed.
+
+The rung's one real defect is worth recording for how it presented: the second residual was left reading a module constant for its limits while the first read the corner's, so it integrated the whole quarter range at every amplitude. The two sin-phi rows were then correct to 1e-14 and the three cos-phi rows wrong by factors of two to four -- and only a cos-phi row carries a residual quadrature at all, because only an even weight has a mean. The failure pattern named the term before anything was inspected.
+
+COST, sun_debug node, one core, fresh process per variant, median of 3, 512 pairs: 939.0 us/pair on a hexagon (five rows) against the ring's 201.5 (three rows) re-measured in the same session, so 4.66x -- and 479.6 against Bow's 181.3 on the rectangle they share, 2.65x. The ratio is flat across section shapes, so the extra cost is per corner; and it is four times BELOW what the moment stacks alone would predict, since a corner is evaluated at both amplitudes and at a quarter turn and each partial-range family carries a hundred and thirty orders of headroom. The solve is not where the time goes -- the residual quadratures and the range-function algebra are, and both are shared with the ring.
+
+NOT DONE: the element class, which is the plan's last deliverable and whose shape is its one open decision (arc-element-shape). One side finding recorded: nova's point solver decides its own output precision from process state, float32 in one and float64 in another. Full record: archive/polybow-arc-section-five-rows-landed.html</p>
+    </article>
+<article class="r-fu" data-id="f-pbow-05" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-26T16:30:00+00:00" data-recommends-skill="/reckon-ship polybow-arc-section" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Give the arc an element class, and lock arc-element-shape on the measurement rather than on taste</h4>
+    <div class="r-fu-body"><p>The evaluation is a function and the plan's last deliverable is the class that lets the frame and groupset machinery consume it. Its shape is the plan's one open decision, and this rung has evidence the decision did not have when it was written: <code>Bow</code> already carries the same five rows and the frame plumbing for them, and the arc agrees with it at zero edge slope on all five — so extending it inherits a tested consumer. Against that, the closed form costs 2.65× <code>Bow</code> on the section shape they share, which makes routing between them worth more than picking one.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    polybow-arc-section (http://127.0.0.1:8765/nova/polybow-arc-section.html)
+Section: the element class, and the packed driver the tiled path needs
+Tier:    opus
+
+Context
+  The finite-arc evaluation is landed and gated: nova/biot/polygonarc.polygon_arc_greens
+  returns both potential rows and all three field components per ampere, held to four
+  independent references plus Bow at zero edge slope on all five rows. What is left is the
+  class, which is the plan&#x27;s last deliverable, and the open decision that decides its shape.
+
+State to read
+  nova/biot/polygonarc.py -- the reduction and its module docstring&#x27;s account of the five
+    rows, the fold parities and the by-parts constants;
+  nova/biot/bow.py + nova/biot/arc.py -- Bow IS this arc for a rectangular section, five rows
+    and all, through Urankar Part IV: the Constants + Matrix dataclass pattern, the ClassVar
+    name, axisymmetric = False, and the _intergrate that folds the four section corners;
+  nova/biot/polysection.py -- the FULL TURN&#x27;s element class and, more to the point, its
+    closed_form flag: the same choice between an exact reduction and a quadrature, already
+    made once and already exposed to callers;
+  nova/biot/solve.py -- the segment -&gt; class registry the new name has to join;
+  tests/test_biotpolygonarc.py -- the gate the class must not move, and the Bow comparison
+    that is the class&#x27;s own acceptance signal once it is one;
+  docs/archive/polybow-arc-section-five-rows-landed.html -- the cost table and what it says
+    about routing.
+
+Key guidance
+  - Lock arc-element-shape on the two measurements rather than on taste. Bow carries the five
+    rows and their frame plumbing already, and the arc reproduces it -- so extend-bow inherits
+    a tested consumer and a worked example of the same fold bookkeeping. But the closed form
+    costs 2.65x Bow on a rectangle, so whichever base is chosen the class should be able to
+    route between the two evaluations the way PolySection.closed_form does, not commit to one.
+  - The reduction takes a target AZIMUTH where every other element class takes a position.
+    Bow&#x27;s own geometry already resolves that -- it carries the arc&#x27;s local frame -- so the
+    class&#x27;s job is the frame transform and not a new convention.
+  - The packed, unbranched driver the tiled path needs is named and not written: nothing in
+    the reduction inspects a value, so packed_analytic_greens&#x27;s counterpart is a driver rather
+    than a reformulation. Whether it belongs in this rung or the next is a scope call; if it
+    lands, the tiled backend&#x27;s memoisation key and the persistent compilation cache both
+    already handle a second kernel.
+  - Do not widen a tolerance to pass a test. Timing on a sun_debug node only.
+
+Done-when
+  1. An element class the frame and groupset machinery consume, registered in solve.py, with
+     the arc&#x27;s five rows reaching the same frame attributes Bow&#x27;s do.
+  2. arc-element-shape locked with the measured rationale, including what the cost table says
+     about routing between the closed form and the quadrature.
+  3. A frame-level test that a rectangular-section polygon arc and a Bow of the same section
+     agree through the CLASS, not only through the bare functions.
+  4. tests/test_biotpolygonarc.py and tests/test_biotpolygonanalytic.py both unmoved.
+  5. Followup written; this followup resolved.</pre>
     </article>
 </section>
 

@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="archive">
+  <meta name="plan-slug" content="polybow-arc-section-five-rows-landed">
+  <meta name="plan-title" content="The five arc rows, the four oracles and the cost — landed">
+  <meta name="plan-status" content="historical">
+  <meta name="plan-modified" content="2026-07-26">
+  <title>polybow-arc-section five rows landed | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>The arc evaluates, and it closes onto the ring by the fold's own arithmetic</h1>
+  <p><a href="/nova/polybow-arc-section.html">← back to the evergreen plan</a> ·
+     landed 2026-07-26 · 50 new tests, 0 failed ·
+     <strong>five rows against four independent oracles plus <code>Bow</code>, and
+     the two rows a full turn annihilates vanish to 1e-13 of the three it keeps</strong></p>
+
+  <h2>Quick status</h2>
+  <table>
+    <thead><tr><th>Item</th><th>Status</th><th>Where</th></tr></thead>
+    <tbody>
+      <tr><td>The finite-arc evaluation of both potential rows and all three field
+          components, per ampere in the target's own cylindrical basis</td>
+          <td>✓ shipped</td>
+          <td><code>nova/biot/polygonarc.polygon_arc_greens</code></td></tr>
+      <tr><td>Harmonic series back to a range function with exact end values — the
+          one piece of algebra the previous rung named as missing</td>
+          <td>✓ shipped</td>
+          <td><code>rangefunction.rising_integral</code>,
+              <code>as_range_function</code></td></tr>
+      <tr><td>The pole route and the contractions given a module, so the arc's TWO
+          moment families share the full turn's conditioning treatment rather than
+          copying it</td>
+          <td>✓ shipped</td>
+          <td><code>nova/biot/momentchannel.py</code></td></tr>
+      <tr><td>The two residual <code>arsinh</code> quadratures given a module and
+          their own panel limits, so a panel need not reach the end it is graded
+          from</td>
+          <td>✓ shipped</td>
+          <td><code>nova/biot/gradedresidual.py</code></td></tr>
+      <tr><td>A quarter-turn amplitude reproduces the full turn's own per-limit
+          values; a full sweep reproduces the landed ring on every gate section</td>
+          <td>✓ pinned</td>
+          <td>5.7e-15 / 4.7e-12</td></tr>
+      <tr><td>Zero edge slope reproduces <code>Bow</code>, all five rows; a
+          horizontal edge contributes exactly nothing</td>
+          <td>✓ pinned</td>
+          <td>2.2e-07 (float32 storage) / 1e-13</td></tr>
+      <tr><td>A converged direct Biot–Savart volume integral over the arc, with
+          per-section envelopes asserted in both directions</td>
+          <td>✓ pinned</td>
+          <td><code>tests/test_biotpolygonarc.py</code></td></tr>
+      <tr><td>Cost per pair on a compute node, fresh process, median of 3</td>
+          <td>✓ measured</td>
+          <td>939 µs/pair on a hexagon</td></tr>
+      <tr><td>The element class, so the frame and groupset machinery can consume
+          the arc rather than only a bare function</td>
+          <td>⨯ not landed — carried forward</td>
+          <td>the next rung (<code>arc-element-shape</code> is open)</td></tr>
+    </tbody>
+  </table>
+
+  <figure>
+    <img src="/nova/figures/polybow-arc-section/arc_five_rows.png"
+         alt="Every row against the arc's sweep with the landed full-turn values marked, each row's worst deviation from a direct volume integral measured absolutely and against its own scale, and the size of the term the other by-parts constant would form as the target reaches the edge's extended line"
+         style="max-width:100%">
+    <figcaption>Left: every row against the sweep, scaled by its own reach, with
+    the landed full turn's values as open rings — two of the five go to zero at a
+    whole turn and three land on the ring, and the kink at 0.7 radians is the sweep
+    passing the target's own azimuth. Middle: each row's worst deviation from the
+    volume integral over four sections and four sweeps, measured absolutely and
+    against the row's own size; the gap is exactly where a row has become small.
+    Right: the term the other by-parts constant would form, against the target's
+    offset from the edge's extended line — twenty times the row it belongs to at
+    1e-14 radii, and growing without bound.</figcaption>
+  </figure>
+
+  <h2>The reduction, and where the interior limit changes it</h2>
+  <p>Per edge, per limit <code>u = z' − z</code> and per row <code>l</code> the
+  reduction forms <code>X_l(α) = ∫₀^α da w_l g_l</code>, and
+  <code>arcamplitude.fold</code> turns the arc's two amplitudes into its value.  The
+  five weights are <code>−sin φ</code> and <code>cos φ</code> on eq 9's
+  antiderivative, <code>cos φ</code> and <code>sin φ</code> on eq 11b's bracket,
+  and one on eq 11b's <code>z</code> row.  Three of the five have an ODD fold and
+  supply a quarter-turn value; those three are <em>exactly</em> the three the full
+  turn forms, so the quarter comes from
+  <code>nova/biot/polygonanalytic.py</code>'s own evaluation and a full sweep
+  reproduces the ring by the fold's arithmetic rather than by a second
+  derivation.</p>
+
+  <p><strong>Which family each term lands in was the structural question, and it
+  has a one-line answer.</strong>  Every transcendental's derivative carries exactly
+  one explicit factor of <code>sin 2a</code> and the by-parts weight supplies the
+  other, so every term of a <code>cos φ</code> row contracts against the plain
+  harmonic moments and every term of a <code>sin φ</code> row against the
+  <code>sin 2a</code>-weighted ones.  No term mixes them.  That is what let the
+  contraction machinery become one object over a family
+  (<code>momentchannel.Channel</code>) rather than two copies: a denominator is
+  factorised ONCE, because the shifts belong to the denominator, and seeded twice,
+  because the seeds belong to the family.</p>
+
+  <h2>The by-parts constants are not free, and the two residuals want opposite ones</h2>
+  <p>For a <code>cos φ</code> row the weight is an even series and splits into its
+  mean and an oscillatory part whose antiderivative <code>Σ w_n sin 2na/(2n)</code>
+  vanishes at <code>a = 0</code> on its own <em>and</em> at a quarter turn, so only
+  the interior upper end is new.  For a <code>sin φ</code> row the weight is a pure
+  sine series and the constant is a choice — and the two residual terms want
+  different ones.</p>
+  <ul>
+    <li><strong><code>arsinh β1</code> takes the antiderivative vanishing at the
+    LOWER limit</strong>, <code>sin²2a/2</code> for a <code>sin 4a</code> weight.
+    It diverges at <code>a = 0</code> for a target level with the corner and only
+    that zero makes the product finite; <code>−cos 4a/4</code> puts a divergence
+    into a term that has none.  It happens to vanish at a quarter turn as well, so
+    this row needs nothing at the other end.  This is the previous rung's finding
+    and it held.</li>
+    <li><strong><code>arsinh β2</code> takes the one vanishing at the UPPER limit</strong>,
+    <code>W − W(α)</code>, and that is this rung's own.  Its antiderivative in the
+    range variable does not vanish at the far end, and the transcendental it would
+    multiply there runs to a logarithm wherever the target sits on the edge's
+    extended line — which at a quarter-turn amplitude is what a full sweep IS, so
+    the configuration is the reduction's own closure test rather than a corner.
+    Subtracting the value at the amplitude puts an <em>exact</em> zero on the weight
+    the near pole's divergence carries, and the pole's own seed then multiplies a
+    weight that vanishes as fast as it grows.  The figure's right panel measures
+    what the other choice would cost: the term reaches twenty times the row it
+    belongs to by an offset of 1e-14 section radii and grows without bound, so the
+    cancellation never quite fails and never stops growing either.</li>
+  </ul>
+  <p>A pure sine weight has no mean, so the <code>sin φ</code> rows need
+  <em>no</em> <code>arsinh</code> quadrature at all: both residual integrals stay on
+  the <code>cos φ</code> rows, and the two extra rows cost nothing in quadrature.</p>
+
+  <h2>The arctangent, and the dead band that only half survives</h2>
+  <p>The <code>cos φ</code> rows keep the full turn's antiderivative
+  <code>−½ P(t)</code>, so the <code>a = 0</code> dead band survives as it is —
+  <code>±π/2</code> with the sign of <code>u (r₁ + r)</code> — and the upper
+  boundary becomes the arctangent itself, taken as <code>arctan2</code> of its
+  numerator against <code>r sin 2a D</code>.  That denominator is non-negative over
+  the range, so the two-argument form <em>is</em> the principal value and runs onto
+  either dead band of its own accord; where it vanishes the amplitude has reached a
+  range end and the band is taken directly, the full turn's
+  <code>−arctan b₁</code> vertex limit included.  The <code>sin φ</code> row's
+  arctangent weight is <code>sin²2a cos 2a</code>, whose antiderivative
+  <code>−(r²/6) sin³2a</code> vanishes at both ends — so that row forms no dead band
+  at all.</p>
+
+  <h2>What the residual quadratures needed</h2>
+  <p>Both boundary layers still sit at <code>a = 0</code> and <code>a = π/2</code>,
+  because that is where the denominators vanish, but an interior amplitude can stop
+  short of the upper one.  So each panel carries its own bounds in the offset from
+  the end it is graded from, the <code>sinh</code> map stays anchored at the layer
+  whether or not the panel reaches it, and the model is integrated between the
+  panel's own limits.  The full turn is both panels running zero to a quarter turn,
+  and its gate did not move.</p>
+  <p>This was also the rung's one real defect and it is worth recording how it
+  presented.  The second residual was left reading a module constant for its limits
+  while the first read the corner's, so it integrated over the whole quarter range
+  at every amplitude.  What that produced was diagnostic: the two <code>sin φ</code>
+  rows were correct to 1e-14 and the three <code>cos φ</code> rows wrong by factors
+  of two to four — and only the <code>cos φ</code> rows carry a residual quadrature
+  at all, because only an even weight has a mean.  The failure pattern named the
+  term before anything was inspected.</p>
+
+  <h2>Measured</h2>
+  <table>
+    <thead><tr><th>Quantity</th><th>Worst</th><th>Swept over</th></tr></thead>
+    <tbody>
+      <tr><td>The edge integral at an interior amplitude, against a panelled
+          quadrature of the same integral graded into both ends</td>
+          <td>8.0e-15</td>
+          <td>four edge slopes including the exactly vertical one × four amplitudes
+              × both limits × five rows</td></tr>
+      <tr><td>A quarter-turn amplitude against the full turn's own per-limit values
+          — two reductions sharing no moment family</td>
+          <td>5.7e-15</td>
+          <td>the same four edges, both limits, the three rows the ring forms</td></tr>
+      <tr><td>A full sweep against the landed ring, the three rows it keeps</td>
+          <td>2.1e-13 to 4.7e-12</td>
+          <td>four gate sections × eighteen targets × six azimuths</td></tr>
+      <tr><td>A full sweep, the two rows its parity annihilates, against the scale
+          of the three it keeps</td>
+          <td>7.4e-15 to 1.0e-13</td>
+          <td>the same</td></tr>
+      <tr><td>The direct Biot–Savart volume integral, absolute agreement normalised
+          by the largest row</td>
+          <td>1.7e-13 to 4.8e-12</td>
+          <td>four sections × four sweeps × twelve targets</td></tr>
+      <tr><td>The same, each row against its OWN size — the only statement anything
+          makes about the azimuthal field row</td>
+          <td>3.1e-11 (B<sub>φ</sub>)</td>
+          <td>the same</td></tr>
+      <tr><td><code>Bow</code> at zero edge slope, all five rows</td>
+          <td>2.2e-07 or 2.0e-10</td>
+          <td>neither reduction's accuracy — nova's point solver returns float32 in
+              one process and float64 in another, and the two figures are the same
+              comparison under each</td></tr>
+      <tr><td>A horizontal edge split in two, which moves the corner term from a
+          cancelling chain to a broken one</td>
+          <td>1e-13</td>
+          <td>a rectangle, six directions, three standoffs</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Why two measures rather than one</h3>
+  <p>The gate records an absolute agreement normalised by the largest row AND each
+  row's deviation against its own size, and they disagree by three decades on
+  exactly the rows that have become small.  Both are needed.  The absolute one is
+  the tight statement — a few parts in 1e12, which is the assembly's own
+  differencing floor: each per-limit antiderivative is of order the squared major
+  radius where the answer is of order the section's scale, so an edge's two limits
+  are differenced against each other first and what survives is round-off on the
+  LARGER quantity (7e-19 absolute on a rectangle, against rows reaching 1e-6).  The
+  per-row one is the only measure that says anything about a small component, and
+  two of the five are: the azimuthal field row is four orders below the rows beside
+  it at a plasma-cell aspect and holds 3e-11 of itself, and the radial field row
+  falls just as far over a sweep symmetric about the target azimuths, where the
+  absolute floor shows through it.  That second case is what sets the looser table
+  entries — it records how small a row can get before the floor is visible, not an
+  accuracy the reduction lacks.</p>
+
+  <h2>Cost</h2>
+  <p><code>sun_debug</code> node, one core, fresh process per variant, median of 3,
+  512 pairs against one source section.  The ring figures were re-measured in the
+  same session so the comparison is not across nodes; the ring's own hexagon rate
+  of record is 171.4 µs and reads 201.5 here, which is why the RATIO is what the
+  table leads with.</p>
+  <table>
+    <thead><tr><th>Section</th><th>arc, 5 rows [µs/pair]</th>
+      <th>ring, 3 rows [µs/pair]</th><th>ratio</th></tr></thead>
+    <tbody>
+      <tr><td>hexagon (plasma cell)</td><td>939.0</td><td>201.5</td><td>4.66×</td></tr>
+      <tr><td>rectangle</td><td>479.6</td><td>101.4</td><td>4.73×</td></tr>
+      <tr><td>trapezium</td><td>592.0</td><td>128.7</td><td>4.60×</td></tr>
+      <tr><td>thin plate</td><td>590.4</td><td>137.5</td><td>4.29×</td></tr>
+      <tr><td><code>Bow</code>, rectangle, 5 rows</td><td colspan="3">181.3 — so the
+        closed form costs <strong>2.65×</strong> the zeta quadrature on the section
+        shape they share</td></tr>
+    </tbody>
+  </table>
+  <p>The ratio is remarkably flat across section shapes, which says the extra cost
+  is per corner rather than per edge.  It is also far BELOW what the moment stacks
+  alone would predict: a corner is evaluated at both amplitudes and at a quarter
+  turn, each partial-range family is a tridiagonal solve carried a hundred and
+  thirty orders past the last moment wanted against the ring's downward recursion
+  over forty, and there are two families rather than one — which multiplies out to
+  something like seventeen, not four and two thirds.  So the solve is not where the
+  time goes; the residual quadratures and the range-function algebra are, and both
+  are shared with the ring.  That is the useful part of the measurement: the arc is
+  not dear because the partial-range primitives are dear.</p>
+
+  <h2>What the next rung inherits</h2>
+  <p>The evaluation is a function.  What is left is the element class, and its shape
+  is the plan's one open decision (<code>arc-element-shape</code>): extend
+  <code>Bow</code> and override the section evaluation, or extend <code>Arc</code>
+  and treat the polygon section as a peer of the rectangular one.  Two things the
+  measurements above bear on it.  First, <code>Bow</code> already carries the five
+  rows and the frame plumbing for them, and the agreement at zero edge slope is on
+  all five — so extending it inherits a tested consumer.  Second, the closed form
+  costs 2.65× <code>Bow</code> on the same section, so a class that can route
+  between them is worth more than one that cannot: the same choice the full turn's
+  <code>PolySection.closed_form</code> flag already exposes.</p>
+  <p>One side finding, not this rung's to fix.  <code>Bow</code>'s agreement is
+  bounded from ABOVE only, because the point solver's output precision is not fixed:
+  the same four targets come back float32 in one process and float64 in another, and
+  the arc-to-Bow deviation moves from 2.2e-07 to 2.0e-10 with it.  Both are inside
+  what the comparison is for, but a lower bound on that agreement would be a claim
+  about nova's storage rather than about either reduction, so there is none — and
+  something in the frame stack is deciding a dtype from process state.</p>
+
+  <p>Two smaller things are named rather than left implied.  The packed, unbranched
+  driver the tiled path needs — <code>packed_analytic_greens</code>'s counterpart —
+  is not written; nothing in the reduction inspects a value, so it is a driver
+  rather than a reformulation.  And one corner is open and bounded rather than
+  covered: the odd rows' <code>arsinh β2</code> boundary runs to a logarithm at
+  <code>r₁ = −r</code>, which needs the edge's extended line to cross the axis at
+  the target's own height, and both the boundary and the far-pole seed return zero
+  there rather than an infinity.</p>
+</main>
+</body>
+</html>

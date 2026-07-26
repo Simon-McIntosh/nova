@@ -28,11 +28,27 @@ far     beyond the far seam                    moment-corrected filament
 
 Which exact kernel serves the near band is the caller's choice: the ``NEAR_RULE``
 boundary quadrature, or the closed form of :mod:`nova.biot.polygonanalytic`
-through ``closed_form=True``. The closed form is the better one on both counts --
-one to two orders more accurate and cheaper, since it replaces 768 quadrature
-nodes with a per-corner reduction -- and it is the only one that stays accurate ON
-the contour, where a boundary quadrature is integrating through its own
-singularity and has nothing to converge to.
+through ``closed_form=True``. Here, unlike on the exact-everywhere lane, that is a
+genuine trade rather than a free win.
+
+The closed form is the more accurate one, and by a margin that lands exactly in
+this band: measured on a real plasma grid, inside a quarter of a contour radius
+the shipped ``(16, 48)`` rule is 4.4e-03 out on B_R and 4.3e-02 on B_Z of local
+magnitude, where the closed form is at 1.6e-13 and 2.6e-07 against a 64x96
+oracle. Refining the rule through (24,64), (32,80), (48,96), (64,96) to (96,128)
+takes B_Z from 4.35e-02 to 1.35e-10, converging ONTO the closed form -- so the
+quadrature is the error, and it is the error where a plasma matrix's diagonal
+lives.
+
+It is also the DEARER one here, which the exact-everywhere lane does not predict.
+The closed form amortises up to three live corner parts across a call, so its rate
+improves 38-fold between 8 and 4096 pairs in one call while the quadrature's
+improves 1.3-fold; the two cross at 64 pairs. A near band holds about thirteen
+pairs of a whole column, an order below that crossing, so the quadrature is 2.3x
+cheaper there and a banded build costs about 1.9x with the closed form on. Which
+one to prefer depends on whether that band's accuracy or the build's cost is the
+binding constraint -- so this module takes it as an argument and states the numbers
+rather than choosing.
 
 The limits are measured, not budgeted: each is the distance beyond which EVERY
 component -- flux, radial field and vertical field separately -- holds to one

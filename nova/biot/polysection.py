@@ -135,8 +135,9 @@ class PolySection(Matrix):
     Cheaper: a hexagonal plasma cell costs 171 µs/pair against the ``(16, 48)``
     rule's 858 (5.0×), because a corner is evaluated once for both its edges
     rather than 768 quadrature nodes being spent per pair. Shape-dependent, as
-    that implies — thin plate 119, rectangle 113, and a cell with twice the
-    corners costs about twice as much.
+    that implies, where the quadrature is not: the cost tracks the corner count,
+    so a wall-clipped cell costs more than a regular one and a grid gets cheaper
+    per pair as it refines and the clipped fraction falls.
 
     More accurate, and most where it matters: it holds 1e-10 of local magnitude
     on all three components across the whole acceptance gate, and it is finite and
@@ -147,12 +148,27 @@ class PolySection(Matrix):
     it to 1024 panels brings it to 2.1e-12 OF THE CLOSED FORM's value, so the
     closed form is the value and the quadrature was the error.
 
-    Orthogonal to ``standoff`` and ``banded``, which choose how pairs are binned,
-    not what the exact treatment is: with neither set this is closed-form
-    everywhere, and with ``banded`` it serves the near band. ``quadrature`` has no
-    meaning for it — the closed form's own residual node count is fixed by its
-    acceptance gate. Set it ``False`` to get the boundary quadrature back, which
-    is what the closed form's own equivalence gate is measured against.
+    Independent of ``standoff`` and ``banded`` in MEANING — they choose how pairs
+    are binned, this chooses what the exact treatment is, so with neither set it is
+    closed-form everywhere and with ``banded`` it serves the near band.
+    ``quadrature`` has no meaning for it: the closed form's own residual node count
+    is fixed by its acceptance gate. Set it ``False`` to get the boundary
+    quadrature back, which is what the closed form's equivalence gate is measured
+    against.
+
+    Independent in meaning, NOT in cost, which is the one thing measuring it
+    disproved. The closed form holds three corner parts live and amortises them
+    across a call, so its rate falls 38× between 8 and 4096 pairs in one call
+    (6532 → 170 µs/pair) where the quadrature — which builds one angular rule and
+    reuses it — falls only 1.3× (1084 → 851). **The two cross at 64 pairs per
+    call.** An exact-everywhere column hands the kernel every pair at once and the
+    closed form wins five-fold; the three-band scheme hands its near band about
+    thirteen, an order below the crossing, and there the quadrature is 2.3×
+    cheaper. So a banded build pays about 1.9× for the closed form's near-contour
+    accuracy, and a caller minimising a banded build should turn this off. It is
+    not switched automatically on batch width: which kernel ran would then depend
+    on how a caller happened to group its pairs, and a stored operator's values
+    have to be reproducible from its geometry alone.
     """
 
     @classmethod

@@ -34,14 +34,27 @@ CPU working set in cache, ``vmap`` over the same blocks fills a device. Because
 the shapes are padded, the trace is compiled once for a whole build; the two
 backends are pinned against each other in float64 by
 ``tests/test_biottiledbackend.py``.
+
+*The compile.* Once per build is not once, and for the closed-form kernel the
+difference decides the route: its executable costs a hundred seconds to produce
+against a second and a half to run a tile with, so a caller that builds the same
+operator at several geometries -- a winding pack swept through positions -- would
+spend all of its time in the compiler. Two things make that cost a constant.
+:func:`tile_evaluator` MEMOISES on the plan, so the same tile shape hands back the
+same compiled kernel however many builds ask for it, and geometry is an argument
+rather than a constant so moving a section cannot force a retrace.
+:func:`compilation_cache` points JAX's persistent cache at a directory, so the
+executable outlives the process that produced it. Neither changes any arithmetic.
 """
 
 from __future__ import annotations
 
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
+import functools
 import math
 import os
+import pathlib
 from typing import Iterator
 
 import numpy as np
@@ -63,6 +76,19 @@ KERNELS = ("quadrature", "closed")
 # quadrature working set against a byte budget; an over-estimate costs a
 # smaller tile, never a failure.
 _LIVE_TEMPORARIES = 24
+
+# Values of NOVA_COMPILATION_CACHE that mean "compile in every process".
+_CACHE_OFF = frozenset({"", "0", "off", "false", "no", "none"})
+
+# Ceiling on the on-disk executable cache.  JAX evicts least-recently-used
+# entries to stay under it, so an unattended cache cannot grow without bound in
+# a home directory; -1 (JAX's own default) would let it.
+_CACHE_LIMIT = 2 << 30
+
+# How many compiled tile kernels are kept warm.  Each holds an executable and,
+# on a device, its buffers -- so this is a memory ceiling as much as a hit rate,
+# and a build uses one plan.
+_WARM_EVALUATORS = 8
 
 
 @dataclass(frozen=True)
@@ -323,11 +349,17 @@ class TileEvaluator:
     been compiled, so a build can assert the shapes really are constant -- a
     retrace per tile would turn the compile into a per-tile cost instead of a
     per-build one.
+
+    It carries the tile shape and the two choices that produced it, so a caller
+    handing a warm evaluator to :func:`assemble` can be told it built the wrong
+    thing rather than silently getting a build it did not ask for.
     """
 
-    def __init__(self, kernel, plan: TilePlan):
+    def __init__(self, kernel, plan: TilePlan, *, batched: bool, name: str):
         self._kernel = kernel
         self.plan = plan
+        self.batched = batched
+        self.kernel = name
 
     @property
     def compile_count(self) -> int:
@@ -347,10 +379,72 @@ class TileEvaluator:
         return tuple(tile[:, :n_target, :n_source])
 
 
+def compilation_cache(
+    directory=None, *, min_compile_seconds: float | None = None
+) -> pathlib.Path | None:
+    """Point JAX's persistent compilation cache at ``directory`` and return it.
+
+    An executable is a pure function of the graph, the JAX and XLA versions and
+    the device, so keeping one on disk between processes is a cache in the strict
+    sense -- it cannot change an answer, only the time taken to reach it. That
+    matters here because the closed-form tile kernel takes a hundred seconds to
+    compile and under two to run, so a fresh process spends more on the compiler
+    than on the operator.
+
+    The directory comes from ``NOVA_COMPILATION_CACHE`` when it is set, falls back
+    to the user cache home, and is switched off entirely by setting that variable
+    to ``off`` (or empty) -- which is what a measurement of the compile itself has
+    to do. An explicit ``directory`` overrides all of it. A directory already
+    configured on JAX -- through ``JAX_COMPILATION_CACHE_DIR``, or by an earlier
+    call -- is left alone, so a caller's own choice wins over this default.
+
+    Entries are evicted least-recently-used above :data:`_CACHE_LIMIT`, so the
+    cache is bounded without anybody having to tend it. ``min_compile_seconds``
+    sets the compile time below which an executable is not worth storing; JAX's
+    own default of one second already excludes everything cheap.
+    """
+    import jax
+
+    configured = jax.config.jax_compilation_cache_dir
+    if directory is None:
+        if configured is not None:
+            return pathlib.Path(configured)
+        directory = os.environ.get("NOVA_COMPILATION_CACHE")
+        if directory is not None and directory.strip().lower() in _CACHE_OFF:
+            return None
+        if directory is None:
+            directory = (
+                pathlib.Path(
+                    os.environ.get("XDG_CACHE_HOME", pathlib.Path.home() / ".cache")
+                )
+                / "nova"
+                / "kernels"
+            )
+    directory = pathlib.Path(directory).expanduser()
+    directory.mkdir(parents=True, exist_ok=True)
+    jax.config.update("jax_compilation_cache_dir", str(directory))
+    jax.config.update("jax_compilation_cache_max_size", _CACHE_LIMIT)
+    if min_compile_seconds is not None:
+        jax.config.update(
+            "jax_persistent_cache_min_compile_time_secs", min_compile_seconds
+        )
+    return directory
+
+
 def tile_evaluator(
     plan: TilePlan, *, batched: bool = False, kernel: str = "quadrature"
 ) -> TileEvaluator:
     """Return a compiled evaluator for the tiles of one plan.
+
+    The evaluator is MEMOISED on ``(plan, batched, kernel)``: asking twice for the
+    same tile shape returns the same object, and therefore the same executable.
+    That is what turns the compile into a per-PROCESS cost rather than a per-build
+    one, which is the difference between a usable and an unusable closed-form
+    kernel for a caller that builds the operator at more than one geometry --
+    section coordinates are arguments to the kernel, not constants of it, so
+    moving a section cannot force a retrace. :func:`forget_evaluators` releases
+    them; :func:`compilation_cache`, which this enables unless the environment
+    says otherwise, carries the executable across a process boundary as well.
 
     ``kernel`` chooses what a tile is evaluated WITH. ``"quadrature"`` traces the
     fixed-node phi rule the operator is validated against. ``"closed"`` traces the
@@ -386,10 +480,27 @@ def tile_evaluator(
     """
     if kernel not in KERNELS:
         raise ValueError(f"unknown kernel {kernel!r}, not one of {KERNELS}")
+    return _warm_evaluator(plan, batched, kernel)
+
+
+def forget_evaluators() -> None:
+    """Drop every warm tile kernel, releasing its executable and its buffers.
+
+    The next :func:`tile_evaluator` for a forgotten plan compiles again -- which
+    is the point when a measurement of the compile is what is wanted, and the
+    escape hatch when a long-lived process would rather have the device memory.
+    """
+    _warm_evaluator.cache_clear()
+
+
+@functools.lru_cache(maxsize=_WARM_EVALUATORS)
+def _warm_evaluator(plan: TilePlan, batched: bool, kernel: str) -> TileEvaluator:
+    """Trace and compile one tile kernel; see :func:`tile_evaluator`."""
     import jax
     import jax.numpy as jnp
 
     jax.config.update("jax_enable_x64", True)
+    compilation_cache()
 
     phi, wts = _phi_rule(plan.n_panels, plan.n_nodes)
     cosp, sinp = np.cos(phi), np.sin(phi)
@@ -448,7 +559,7 @@ def tile_evaluator(
 
         return jax.lax.scan(step, None, index)[1]
 
-    return TileEvaluator(jax.jit(over_blocks), plan)
+    return TileEvaluator(jax.jit(over_blocks), plan, batched=batched, name=kernel)
 
 
 _CONTEXT: dict = {}
@@ -497,6 +608,7 @@ def assemble(
     backend: str = "numpy",
     batched: bool = False,
     kernel: str = "quadrature",
+    evaluator: TileEvaluator | None = None,
 ) -> TilePlan:
     """Build the coupling operator tile by tile, streaming it into a zarr store.
 
@@ -514,9 +626,23 @@ def assemble(
     carries the closed form, the host route to it being
     :func:`nova.biot.polygonanalytic.polygon_analytic_greens` with its own
     value-dependent shortcuts.
+
+    ``evaluator`` supplies an already-compiled kernel instead of asking for one.
+    It is rarely needed -- :func:`tile_evaluator` memoises, so successive builds
+    of the same tile shape share an executable whether or not it is passed -- and
+    exists for a caller holding an evaluator it built itself. It must have been
+    built for this plan, kernel and mapping; anything else is refused rather than
+    quietly building something other than what was asked for.
     """
     if kernel not in KERNELS:
         raise ValueError(f"unknown kernel {kernel!r}, not one of {KERNELS}")
+    if evaluator is not None:
+        if backend != "jax":
+            raise ValueError(f"the {backend!r} backend takes no compiled evaluator")
+        asked = (plan, kernel, batched)
+        built = (evaluator.plan, evaluator.kernel, evaluator.batched)
+        if asked != built:
+            raise ValueError(f"evaluator built for {built}, not the requested {asked}")
     target_r = np.ascontiguousarray(target_r, dtype=np.float64)
     target_z = np.ascontiguousarray(target_z, dtype=np.float64)
     edge, weight, norm = pad_batch(sections)
@@ -534,7 +660,9 @@ def assemble(
     if backend == "jax":
         if workers > 1:
             raise ValueError("the jax backend evaluates tiles in one process")
-        evaluate = tile_evaluator(plan, batched=batched, kernel=kernel)
+        evaluate = evaluator
+        if evaluate is None:
+            evaluate = tile_evaluator(plan, batched=batched, kernel=kernel)
         for rows, columns in bounds:
             tile = evaluate(
                 target_r[rows],
@@ -583,6 +711,8 @@ __all__ = [
     "TilePlan",
     "assemble",
     "budget_from_environment",
+    "compilation_cache",
+    "forget_evaluators",
     "plan_tiles",
     "tile_coupling",
     "tile_evaluator",

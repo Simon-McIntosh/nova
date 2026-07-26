@@ -277,6 +277,11 @@ class _Vertex:
         self.edge_radius = range_function([], offset, radius_sum)
         self.ring_squared = range_function([4.0 * r * r], u * u, u * u)
         self.ring = self.split(self.ring_squared)
+        # Both residual quadratures run to the same limit -- the corner's amplitude
+        # -- so the panels belong to the corner rather than to either integral, and
+        # :class:`_Edge` reads them for its own.  Over a full turn every amplitude is
+        # the same right angle and both panels reach their own end of the range.
+        self.panels = (_PANEL, _PANEL)
         self.ring_residual = self._first_residual(nodes) if residual else None
 
     # The moment machinery is :class:`nova.biot.momentchannel.Channel`, which both
@@ -324,8 +329,8 @@ class _Vertex:
         level_offset = xp.abs(self.level)
         return graded_residual(
             (
-                (level_offset, self.radius_sum, span, *_PANEL),
-                (level_offset, self.offset, span, *_PANEL),
+                (level_offset, self.radius_sum, span, *self.panels[0]),
+                (level_offset, self.offset, span, *self.panels[1]),
             ),
             pieces,
             nodes,
@@ -464,13 +469,13 @@ class _Edge:
                     xp.abs(r1 + r),
                     u + b1 * vertex.radius_sum,
                     curvature(b1 * b1 * held_radius - r1),
-                    *_PANEL,
+                    *vertex.panels[0],
                 ),
                 (
                     xp.abs(plane_offset),
                     u + b1 * offset,
                     curvature(r1 + b1 * b1 * held_radius),
-                    *_PANEL,
+                    *vertex.panels[1],
                 ),
             ),
             pieces,

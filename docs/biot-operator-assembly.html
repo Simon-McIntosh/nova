@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="biot-operator-assembly">
   <meta name="plan-title" content="Biot Operator Assembly — parallel, batchable, shardable construction">
   <meta name="plan-summary" content="Re-architect the construction of biot interaction operators: the pair space is embarrassingly parallel but today&#x27;s assembly is RAM-limited and naively CPU-batched; design a tiled, shardable build that stays viable on CPU (local + CI), accelerates on GPU, streams to the cached zarr store, and delivers a principled near/far criterion that unlocks the thick-section plasma coupling default">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="L">
   <meta name="plan-tier" content="opus">
@@ -19,8 +19,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-26">
-<meta name="plan-impl" content="0.98">
-<meta name="plan-version" content="13">
+<meta name="plan-impl" content="1.0">
+<meta name="plan-version" content="14">
 </head>
 <body>
   <main class="plan-doc">
@@ -356,6 +356,50 @@
       </figure>
     </section>
 
+    <section id="s9-landed" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ the closed form shipped and the plasma default flipped 2026-07-26</span>
+        <h2>The exact route adopted, and a plasma cell coupled as a section — landed</h2>
+      </header>
+      <p class="landed-summary">
+        <strong>A 2000-cell exact operator builds in 10.9 min on ONE core through
+        the closed form and 56.6 min through the quadrature it replaces</strong> —
+        so the closed form is what brings the exact lane inside its twenty-minute
+        first-build budget, with no pool and no device, and it is now the default
+        exact kernel (162.9 µs/pair against 849.7; a real 560-cell build 54.5 s
+        against 274.5). On that budget every criterion the plasma-coupling flip was
+        gated on is met, so <strong>a hexagonal plasma cell now couples as its own
+        polygon</strong> — one conditional rule in <code>PlasmaGrid</code>, closing
+        the loop physics-spine-adoption left open. What it was costing, measured
+        against the closed form on a real 333-cell grid: the recorded self-flux
+        figure reproduces exactly at <strong>7.21 % median</strong> (always LOW, no
+        sign flips), and the self-FIELD the flux hid is <strong>2152 % median and
+        the wrong sign</strong> — B<sub>Z</sub> 9.8e-08 exact against −2.0e-06 —
+        because <code>OffsetFilaments</code> keeps the diagonal finite with an
+        ad-hoc 0.77-radius standoff rather than divergent. Integrated over a 15 MA
+        parabolic profile that is <strong>2.70 % of the B<sub>Z</sub> swing median,
+        5.93 % worst</strong> (ψ 0.090 %, energy 0.077 %), and refinement dilutes it
+        without ever fixing the term — 180→1274 cells takes the integrated
+        B<sub>Z</sub> 3.41 %→1.36 % while each cell's own self-field error GROWS
+        16×→38×. Full lane <strong>2014 passed / 0 failed</strong> against a 2019/0
+        baseline whose six-test difference is one optional dependency: not a single
+        golden value moved. One finding redirected the design and is now in both
+        docstrings — <strong>the two exact kernels cross at 64 pairs per call</strong>
+        (the closed form improves 38× with batch width, the quadrature 1.3×), so the
+        kernel and binning flags are independent in meaning and NOT in cost: the
+        closed form wins 5.2× on a whole column and loses 2.3× on a thirteen-pair
+        near band. Merged to develop <code>ccc784fa</code>. Full record:
+        <a href="archive/biot-operator-assembly-closed-form-adoption-landed.html">closed-form adoption landed</a>.
+      </p>
+      <figure>
+        <img src="/nova/figures/biot-operator-assembly/adoption_accuracy.png"
+             alt="Point-filament error against contour distance with the diagonal called out, the diagonal distribution per component, the reference check against a 64x96 oracle, the quadrature refinement ladder, and the integrated psi and B_Z difference over a 15 MA parabolic profile"
+             style="max-width:100%">
+        <figcaption>What the point-filament default was costing, where that error
+        lives, and which of the two exact kernels the quadrature converges onto.</figcaption>
+      </figure>
+    </section>
+
     <h2 id="s3">§3 — Research questions</h2>
     <ol>
       <li><strong>Assembly survey.</strong> Inventory how every operator class is built today
@@ -387,15 +431,35 @@
       report the CPU-only figure alongside it; both go in BASELINE.md.</li>
     </ol>
 
+    <p><strong>All six are answered</strong> — 1 and 2 in the survey and tiled-prototype
+    rung, 3 in the backend rung (<code>kernel-backend</code> locked
+    <em>jax-single-path</em>, with the closed form's device-only qualification in
+    <code>closed-form-device</code>), 4 in the near/far rung
+    (<code>nearfar-criterion</code> locked error-bounded and per-component, and the
+    shipped default needs no cutoff at all), 5 by re-measuring every §2 cost line
+    after the zeta fast path landed, and 6 by the adoption rung: a 2000-cell exact
+    first build is 10.9 min on one CPU core, inside the ~20 min budget without a
+    GPU, and 0.5 min on one H200 with a warm cache.</p>
+
     <h2 id="s4">§4 — Deliverables</h2>
     <ul>
-      <li>A costed design note with figures: error-vs-distance per component (near/far bound),
+      <li>✓ A costed design note with figures: error-vs-distance per component (near/far bound),
       cost-vs-band, build-time-vs-shard-count on CPU and GPU, RAM-vs-tile-size.</li>
-      <li>The decisions below locked with measured rationale.</li>
-      <li>An implementation plan (sections with done-when) for the chosen assembly, sequenced
+      <li>✓ The decisions below locked with measured rationale — all four.</li>
+      <li>✓ An implementation plan (sections with done-when) for the chosen assembly, sequenced
       after the zeta fast path; the thick-section plasma default flip is its final rung, closing
-      the loop left open by physics-spine-adoption.</li>
+      the loop left open by physics-spine-adoption — <strong>landed 2026-07-26</strong>.</li>
     </ul>
+    <p>The four followups still open are follow-on work rather than this plan's
+    subject: <strong>f-boa-03</strong> extends the closed form from the full turn to
+    a finite ARC, which is a new capability and what
+    <code>polybow-arc-section</code> and <code>polybeam-prism-section</code> are
+    blocked on; <strong>f-boa-10</strong> and <strong>f-boa-13</strong> are cost
+    optimisations of an already-shipped route (its residual node count and
+    moment-stack length, and the graph behind its cold compile — they share the
+    moment-stack lever); <strong>f-boa-12</strong> carries the modulus complement
+    into the element tier <code>Circle</code> and <code>Arc</code> inherit, which is
+    a different tier's repair gated on the full validation suite.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -789,7 +853,7 @@ Done-when
   6. Followup written; this followup resolved.</pre>
     <p class="r-fu-outcome">Landed on develop (5d194134, ea901d6b, a5912084; fast lane 1477 passed / 87 skipped / 0 failed). ALL FIVE DONE-WHENS MET AND THE DECISION IS LOCKED. (1) The parameter route's cost is measured, not argued: benchmarks/near_field_elliptic.py against an extended-precision reference over eleven decades -- the flux loses 1e-6 at 2.2e-06 ring radii and 1e-9 at 8.5e-05, the clip engaged at k'^2 = 4.9e-13 (1.4 um from a unit ring) and did NOT bound the error (2.6e-02 at engagement climbing to 3.7e-01), and it was a bad trade at the engagement point itself (unclipped 3.5e-06). (2) Adopted where the measurement justified it: the point kernels take k'^2 = ((a-R)^2 + dz^2)/span from the geometry and K from ellipkm1, which costs 1.01x ellipk and removes the whole near-field flux error -- psi 5.3e-10 -&gt; 3.1e-16 a millimetre from a coil. Carlson was REJECTED for that path (4x the special-function cost, 64% of the whole kernel, same accuracy) and the second kind never needs the complement at all. Two defects in the same brackets turned out to be the FIELD's real limit and went with it: an absolute floor on a squared length (engaging 32 um out at any ring radius, leaving B_Z 90% wrong inside it) and the pole's numerator as a cancelling difference -- B_Z 9.0e-01 -&gt; 9.9e-16 ten micrometres from an ITER-scale filament. A coincident target now returns the divergence rather than answering, undetectably, for one 1.4 um away. The banded scheme's per-band errors were re-measured and reproduce every recorded cutoff BIT FOR BIT (the corrected filament is truncation-limited, not round-off-limited). (3) One namespace-agnostic implementation, jit/vmap/grad clean with a measured trip bound (12 converges the whole double range, 10 does not; the constant is 14), and the closed form demonstrated inside a traced tile on CPU AND on one H200 -- 5.5 us/pair against the quadrature's 5.3. (4) Primitive costs, the shortcut cost and the closed form's floor re-measured on a compute node and recorded in benchmarks/BASELINE.md. (5) closed-form-device locked jax-native-primitives. Full record: docs/archive/biot-operator-assembly-complement-primitives-landed.html.</p>
     </article>
-<article class="r-fu" data-id="f-boa-08" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-25T17:14:00+00:00" data-recommends-skill="/reckon-ship biot-operator-assembly" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-boa-08" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-25T17:14:00+00:00" data-recommends-skill="/reckon-ship biot-operator-assembly" data-resolved-at="2026-07-26T08:46:15+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Make the closed form the shipped route for exact polygon coupling and re-open the plasma default flip</h4>
     <div class="r-fu-body"><p>The closed form now clears its whole acceptance gate and is registered as a candidate, but it is still a library function with no PRODUCTION callers: it is unreachable from <code>PolySection</code> and has no element class. Meanwhile the shipped defaults are a point filament for plasma cells (<code>segment="circle"</code>) and exact-everywhere 16x48 quadrature for the opt-in <code>PolySection</code>. This rung wires it in and flips what it is safe to flip. The cost case is now a strong one - 176.6 us/pair on a hexagonal cell against 858 for the 16x48 rule, so <strong>4.9x faster</strong> AND one to two orders more accurate, including ON the contour where a quadrature has nothing to converge to and the shipped rule sits at 2.6e-04; the natural architecture is the closed form taking the NEAR band while the banded scheme keeps mid and far.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -837,6 +901,7 @@ Done-when
      f-psa-04 criteria, with the numbers to support it. Do not flip the shipped default
      without that check passing; say so plainly if it does not.
   5. Followup written; this followup resolved.</pre>
+    <p class="r-fu-outcome">Landed on develop (ccc784fa; 9dff4ceb + c9a015ac + 9259266b + worker commits 146fd27d + 4b6e641c; full lane 2014 passed / 0 failed / 110 skipped against a 2019/0/104 develop baseline whose six-test difference is the imas_standard_names optional dependency). ALL FIVE DONE-WHENS MET AND THE DEFAULT WAS FLIPPED. (2) The closed form is reachable as PolySection.closed_form, orthogonally in MEANING to how pairs are binned: exact-everywhere becomes closed-form everywhere, and banded_greens(closed_form=) puts it on the near band through the shared near_greens. The near band's own accuracy was measured for the first time -- it used to be DEFINED as bit-identical to the (16,48) rule, so it carried no envelope -- and on a real grid's pair population, relative to the band's peak: inside a quarter contour radius the shipped rule is 5.8e-05 out on the flux, 4.4e-03 on B_R and 4.3e-02 on B_Z where the closed form is at 1.1e-12 / 1.6e-13 / 2.6e-07 against a 64x96 oracle; beyond half a radius the two agree to 9.5e-12 (flux) and 2.6e-11 (field), which is what lets either serve the band without moving a seam. Both seam-jump bounds hold at 1e-6 for BOTH kernels and every mid/far per-component envelope is UNCHANGED. The gain is extremely local -- 0.031% of a real grid's pairs, 34 of 110,889 -- but 12 of those 34 ARE the diagonal. (3) COST, two independently written drivers agreeing within 3%, sun_debug node, one core, fresh process per variant, median of three: exact-everywhere quadrature 849.7 us/pair, exact-everywhere CLOSED FORM 162.9 (5.2x), three-band quadrature-near 13.6, three-band closed-near 31.5; a real 560-cell build 274.5 s / 54.5 s / 19.2 s / 36.4 s against the point filament's 1.16 s. THE BUDGET LINE: a 2000-cell first build is 56.6 min on one core through the quadrature and 10.9 min through the closed form, so the exact-everywhere quadrature is the ONE arrangement that misses the ~20 min budget on a single core and the closed form is the only exact lane that makes it there -- with no pool and no device. BASELINE.md updated with all of it plus the band populations (a real grid puts 12.1% of pairs on the mid rule where an idealised hexagon puts 2.6, because its wall cuts the boundary ring into three- to twelve-corner cells). (4) THE DEFAULT WAS FLIPPED, on the criteria passing rather than in spite of them: zeta fast path landed, no cutoff at all in the shipped arrangement (so 'materially farther than three filament diameters' is moot and the near interaction is a closed form accurate ON the contour and ON a vertex), nearfar-criterion locked error-bounded per-component, 2000-cell build 10.9 min inside 20, and no seam to be smooth. Mechanism was one conditional rule -- ifthen('turn','hexagon','segment','polysection') in PlasmaGrid; Solve.generator already mapped the label so no tier below the frame changed. WHAT IT WAS COSTING, on a real 333-cell grid against the closed form: the recorded self-flux figure REPRODUCES EXACTLY at 7.206% median (15.3% max against a recorded 18%, which is grid-dependent where the median is not), always LOW on all 333 cells with no sign flips, and worse on clipped cells (9.22% median). The self-FIELD is what the flux figure hid: B_Z on the diagonal is 9.8e-08 exact against the point model's -2.0e-06, the wrong SIGN and twenty times the magnitude, a median 2152% of local and 2.35x the whole column's peak -- and it is not a mishandled divergence but a finite plausible wrong number, because OffsetFilaments pulls the rings apart by a measured median 0.769 section radii. INTEGRATED over a 15 MA parabolic profile: B_Z at a cell differs by a median 2.70% and a worst 5.93% of its own 3.55 T swing, psi by 0.090%/0.215% of 110.6 Wb, magnetic energy by 0.077%. Refinement dilutes without fixing -- 180 to 1274 cells takes the integrated B_Z 3.41% to 1.36% while each cell's own self-field error GROWS 16x to 38x, because a smaller cell sits relatively closer to its own boundary. THE FINDING THAT REDIRECTED THE DESIGN: the two exact kernels CROSS AT 64 PAIRS PER CALL. Cost against distance is flat for both (the closed form a constant 0.34-0.35x from 0.2 to 29 section radii), but against batch width the closed form improves 38x from 8 to 4096 pairs (6532 -> 170 us/pair) where the quadrature improves 1.3x (1084 -> 851), because the closed form amortises three live corner parts and the quadrature only reuses one angular rule. So the kernel and binning flags are independent in meaning and NOT in cost: the closed form wins 5.2x on a whole column and LOSES 2.3x on a thirteen-pair near band, making a banded build 1.9x dearer. Both docstrings now state it; it is deliberately NOT switched on batch width, because which kernel ran would then depend on how a caller grouped its pairs and a stored operator must be reproducible from its geometry alone. Also pinned: a real 179-cell grid's cells carry three to twelve corners with edges as short as 1.6e-10 m beside edges of 0.12 m, all evaluate finite, and its worst off-diagonal pair is a neighbour's centre 0.001 contour radii out where the shipped rule is 2.9e-03 off on B_Z and refining to 1024 panels closes to 2.1e-12 OF THE CLOSED FORM -- the quadrature is the error, twice over. Steady-state solve throughput is untouched by any of this: an interaction matrix is pure geometry, built once per signature and cached. Record: archive/biot-operator-assembly-closed-form-adoption-landed.html</p>
     </article>
 <article class="r-fu" data-id="f-boa-09" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-25T22:10:00+00:00" data-recommends-skill="/reckon-ship biot-operator-assembly" data-resolved-at="2026-07-25T21:36:24+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Organise the closed form by VERTEX rather than by edge limit, and drop the term that telescopes</h4>
@@ -1160,6 +1225,75 @@ Done-when
   3. Steady-state us/pair not regressed -- an unrolled graph is sometimes faster, so
      this is a real risk and has to be measured.
   4. Every accuracy entry unchanged in both directions; the fast lane green.
+  5. Followup written; this followup resolved.</pre>
+    </article>
+<article class="r-fu" data-id="f-boa-14" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-26T09:20:00Z" data-recommends-skill="/reckon-ship biot-operator-assembly" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Evaluate the banded near band across a whole tile so its accuracy stops costing 2.3x</h4>
+    <div class="r-fu-body">The adoption rung measured the two exact kernels crossing at 64 pairs in one call: the closed form improves 38x with batch width where the quadrature improves 1.3x, because it amortises three live corner parts. A near band evaluated PER SOURCE COLUMN hands the kernel about thirteen pairs, an order below the crossing, so the closed form is 2.3x dearer there and a banded build pays 1.9x for near-contour accuracy it should get free. Evaluated across a whole TILE instead -- every source column's near-band pairs in one call -- the batch sits above the crossing. This is a change to how the banded scheme is CALLED, not to either kernel, and it belongs with whoever next touches the tiled assembly's binning. Low priority: the shipped default is exact-everywhere and pays none of this.</div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    biot-operator-assembly (http://127.0.0.1:8765/nova/biot-operator-assembly.html)
+Section: tile-wide near-band batching
+Tier:    opus
+
+Context
+  The adoption rung landed the closed form as the default exact kernel and
+  measured why it is the WRONG choice for the three-band scheme&#x27;s near band as
+  that band is currently called. Cost against batch width: the closed form runs
+  at 6532 us/pair at 8 pairs in one call and 170 at 4096, a factor of 38, because
+  it holds up to three corner parts live and amortises them; the quadrature runs
+  at 1084 and 851, a factor of 1.3, because it builds one angular rule and reuses
+  it. They cross at 64 pairs per call. A near band called per source column holds
+  about thirteen, so the quadrature is 2.3x cheaper there and a banded build is
+  1.9x dearer with the closed form on -- while the closed form is the only one
+  that is right in that band (inside a quarter contour radius the shipped rule is
+  4.3e-02 out on B_Z of local magnitude and refining it converges onto the closed
+  form).
+
+  So the near band&#x27;s cost is a BATCHING artefact, not a kernel property. Gather
+  every source column&#x27;s near-band pairs into one call and the batch sits above the
+  crossing, and the accuracy is free.
+
+State to read
+  docs/archive/biot-operator-assembly-closed-form-adoption-landed.html -- the
+    crossing table, the band populations and why auto-switching was refused;
+  nova/biot/bandedcoupling.py -- band(), near_greens() and banded_greens(), which
+    is called once per source column from PolySection._coupling;
+  nova/biot/polysection.py -- _coupling&#x27;s per-column loop, which is what would
+    have to gather across columns, and the closed_form docstring&#x27;s account of the
+    crossing;
+  nova/biot/tiledassembly.py -- the tile plan and its fixed-shape requirement,
+    which is the constraint any gathering has to respect;
+  benchmarks/polygon_route_cost.py --variants covering batch width and the band
+    populations, which is how a win is measured.
+
+Guidance
+  - The band assignment must stay a pure function of geometry: a stored operator&#x27;s
+    seams have to be reproducible, so gathering may change WHEN pairs are
+    evaluated and never WHICH treatment they get. Assert bit-identity of the
+    result against the per-column path.
+  - The tiled assembly needs fixed shapes per kernel call. A gathered near band is
+    ragged across columns, so it has to be padded to a plan shape or bucketed into
+    a fixed set of widths -- decide which, and measure, because padding a
+    thirteen-pair band to 4096 would spend more than it saves.
+  - Measure the whole build, not the band: the near band is 2.1% of a real grid&#x27;s
+    pairs, so a 2.3x saving on it is bounded, and the honest figure is the change
+    in the banded build&#x27;s total.
+  - Closing this as not worth the churn is a legitimate outcome -- say so with the
+    measured build times if the padding eats the win.
+
+Scope locks / constraints
+  Work in a detached worktree off develop; the primary checkout stays on main.
+  This changes no arithmetic, so the gate is that every per-component envelope and
+  both seam-jump bounds in tests/test_biotbandedcoupling.py hold unchanged for
+  both kernels, and that the gathered path is BIT-IDENTICAL to the per-column one.
+
+Done-when
+  1. The near band evaluated above the crossing, with the batch width it actually
+     achieves on a real grid measured and recorded.
+  2. Bit-identity against the per-column path asserted in a test.
+  3. The banded build&#x27;s total cost re-measured on a compute node, fresh process,
+     median of three, through both kernels, and BASELINE.md updated.
+  4. Every accuracy envelope and seam bound unchanged; fast lane green.
   5. Followup written; this followup resolved.</pre>
     </article>
 </section>

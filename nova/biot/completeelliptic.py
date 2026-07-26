@@ -169,8 +169,8 @@ def complete_kind(complement, *, xp=np, trips: int = TRIPS):
     """
     complement = xp.asarray(complement)
     radicals, arithmetic = _descent(complement, xp, trips)
-    held = xp.where(complement > 0.0, complement, 1.0)
     reachable = complement > 0.0
+    held = xp.where(reachable, complement, 1.0)
     return (
         xp.where(reachable, _accumulate(radicals, arithmetic, 1.0, 1.0, 1.0, xp), 0.0),
         xp.where(reachable, _accumulate(radicals, arithmetic, 1.0, 1.0, held, xp), 1.0),

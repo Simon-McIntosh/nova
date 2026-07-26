@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="archive">
+  <meta name="plan-slug" content="biot-operator-assembly-compile-reuse-landed">
+  <meta name="plan-title" content="The traced tile compile paid once, not once a build — landed">
+  <meta name="plan-status" content="historical">
+  <meta name="plan-modified" content="2026-07-26">
+  <title>biot-operator-assembly compile reuse landed | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>What the traced tile compile is paid per</h1>
+  <p><a href="/nova/biot-operator-assembly.html">← back to the evergreen plan</a> ·
+     landed 2026-07-26 · develop <code>529a1641</code>
+     (<code>0fba3af7</code> · <code>945343b1</code> · <code>8c53cdad</code>) ·
+     fast lane 1479 passed / 89 skipped / 0 failed · slow lane over the four
+     affected suites 160 passed ·
+     <strong>a closed-form pack swept through eight positions costs 102 s
+     instead of 813, and a second process starts in 8.4 s instead of 101.9</strong></p>
+
+  <h2>Quick status</h2>
+  <table>
+    <thead><tr><th>Item</th><th>Status</th><th>Where</th></tr></thead>
+    <tbody>
+      <tr><td>One executable per tile shape per process — <code>tile_evaluator</code>
+          memoised on <code>(plan, batched, kernel)</code>, with an explicit release</td>
+          <td>✓ shipped</td>
+          <td><code>nova/biot/tiledassembly.py</code>
+          (<code>tile_evaluator</code>, <code>forget_evaluators</code>)</td></tr>
+      <tr><td>A caller's own compiled kernel accepted by the build, and one built for
+          another plan, kernel or mapping refused rather than ignored</td>
+          <td>✓ shipped</td>
+          <td><code>assemble(..., evaluator=)</code></td></tr>
+      <tr><td>The executable kept between processes — JAX's persistent cache pointed
+          at a bounded directory, named by <code>NOVA_COMPILATION_CACHE</code>,
+          refusable with <code>off</code></td>
+          <td>✓ shipped</td>
+          <td><code>compilation_cache</code></td></tr>
+      <tr><td>Both measured through the shipped build loop, per device, per kernel,
+          with cache hits counted from JAX's own event rather than the clock</td>
+          <td>✓ shipped</td>
+          <td><code>benchmarks/tiled_backend.py --variants *-positions,*-cache</code></td></tr>
+      <tr><td>Ten new tests: reuse identity, a scan over positions, a caller's
+          evaluator and the three ways it can mismatch, the cache directory's
+          precedence, and a compile crossing a real process boundary</td>
+          <td>✓ shipped</td>
+          <td><code>tests/test_biottiledbackend.py</code></td></tr>
+      <tr><td>A variant dispatched by prefix, so <code>jax-positions</code> was
+          silently measured as <code>jax-scan</code> — found because the number came
+          out at the scan's rate to within 0.2 %</td>
+          <td>✓ fixed in passing</td>
+          <td>most-specific-first matching in <code>measure</code></td></tr>
+      <tr><td>Rolling the moment recursions into a <code>scan</code> (the honest
+          1.45×) and shortening the moment stack</td>
+          <td>NOT this rung — the graph is unchanged, only what it is paid for</td>
+          <td>next rung; stack length is the residual-cost rung's subject</td></tr>
+    </tbody>
+  </table>
+
+  <figure>
+    <img src="/nova/figures/biot-operator-assembly/compile_reuse.png"
+         alt="Cumulative build time against position for a fresh and a warm evaluator, cold and warm compile per kernel and device, and total build time against pair count for five routes"
+         style="max-width:100%">
+    <figcaption>What a geometry scan pays once instead of every position, what the
+    on-disk cache leaves of a cold compile, and where the device now overtakes a
+    sixteen-core host pool.</figcaption>
+  </figure>
+
+  <h2>Why the compile was paid per build, and why it need not be</h2>
+  <p><code>assemble</code> asked <code>tile_evaluator</code> for a kernel on every
+  call, and <code>tile_evaluator</code> built a fresh closure every time, so
+  <code>jax.jit</code> — which caches per function object — never saw the same
+  function twice. A caller sweeping a winding pack through positions therefore paid
+  a hundred seconds per POSITION for a build that takes thirty milliseconds.</p>
+  <p>Nothing about a scan requires that. The pair list and the quadrature nodes are
+  constants of the PLAN and are closed over; the geometry — target coordinates,
+  section edges, weights, norms — is an argument. Moving a section changes argument
+  values at fixed shapes, which is precisely the case a compiled kernel is for. So
+  the fix is a memo on <code>(plan, batched, kernel)</code>, bounded at eight
+  entries because each holds an executable and its device buffers, with
+  <code>forget_evaluators</code> to release them — which is also what a measurement
+  of the compile needs, and what the benchmark uses.</p>
+  <p><code>assemble</code> additionally takes an <code>evaluator</code> a caller
+  already holds. It is rarely needed now that the memo exists, and it is checked:
+  an evaluator built for another plan, another kernel or the other mapping is
+  refused, because building something other than what was asked for is worse than
+  refusing.</p>
+
+  <h2>A geometry scan, measured through the build loop</h2>
+  <p>The same 64 hexagonal cells at four positions 13 mm apart in R — a fifth of a
+  cell — each position a whole build through <code>assemble</code> into its own zarr
+  store. One H200, four tiles of 32×32, median of three fresh processes:</p>
+  <table>
+    <thead><tr><th>kernel / device</th><th>first position</th>
+      <th>each later position</th><th>compilations</th></tr></thead>
+    <tbody>
+      <tr><td><strong>closed, one H200</strong></td><td>101.65 s</td>
+        <td><strong>0.027 s</strong></td><td>1</td></tr>
+      <tr><td>quadrature, one H200</td><td>2.20 s</td><td>0.050 s</td><td>1</td></tr>
+      <tr><td>quadrature, 16 CPU cores (320 cells, 40×40)</td><td>9.44 s</td>
+        <td>8.20 s</td><td>1</td></tr>
+    </tbody>
+  </table>
+  <p>The CPU row is the control that says reuse costs nothing per build: 8.20 s a
+  position against the 8.14 s a standalone build of the same operator takes. The
+  device rows are the prize — 27 ms is 6.7 µs/pair against the kernel's own 5.5, the
+  difference being one zarr store created per position rather than any arithmetic.
+  <strong>Eight positions: 102 s warm against 813 s cold.</strong></p>
+
+  <h2>Across a process boundary</h2>
+  <p>The same build twice, in two fresh processes sharing one on-disk cache. A hit is
+  counted from JAX's <code>/jax/compilation_cache/cache_hits</code> event, not
+  inferred from the clock — a slow filesystem would otherwise be indistinguishable
+  from a compile:</p>
+  <table>
+    <thead><tr><th>kernel / device</th><th>cold compile</th><th>warm compile</th>
+      <th>hits</th><th>cache written</th></tr></thead>
+    <tbody>
+      <tr><td><strong>closed, H200</strong></td><td>101.89 s</td>
+        <td><strong>8.45 s</strong></td><td>0 then 3</td><td>2.8 MB</td></tr>
+      <tr><td>quadrature, H200</td><td>1.36 s</td><td>0.23 s</td><td>0 then 3</td>
+        <td>0.17 MB</td></tr>
+      <tr><td>quadrature, 16 CPU cores</td><td>1.33 s</td><td>0.57 s</td>
+        <td>0 then 3</td><td>0.17 MB</td></tr>
+    </tbody>
+  </table>
+  <p>Three executables per build, all three hits, and JAX's own counter reports
+  <strong>91.2 s of compile saved</strong>. What the cache cannot skip is the 8.45 s
+  that remains: tracing the reduction and lowering it to HLO is how the cache KEY is
+  computed, so it happens before any lookup can. That splits the two mechanisms
+  cleanly — <strong>the persistent cache removes 92 % of a cold closed-form compile
+  and the warm evaluator removes the rest.</strong></p>
+  <p>The cache is on by default at <code>~/.cache/nova/kernels</code> (or
+  <code>XDG_CACHE_HOME</code>), bounded at 2 GiB with JAX evicting
+  least-recently-used entries, and refused outright by
+  <code>NOVA_COMPILATION_CACHE=off</code> — which every timing child of the benchmark
+  now sets, so a compile figure is always a compile and never a disk read. A
+  directory the caller already chose, through <code>JAX_COMPILATION_CACHE_DIR</code>
+  or an earlier call, wins over the default. A whole test run leaves 5.7 MB in it;
+  the tiled-backend suite goes from 95 s to 26 s on a second run because of it.</p>
+
+  <h2>Nothing moved that should not have</h2>
+  <p>An executable is a pure function of the graph, the JAX and XLA versions and the
+  device, so this cannot change an answer — but it was measured rather than argued,
+  the same way and on the same hardware:</p>
+  <table>
+    <thead><tr><th>measurement</th><th>recorded 26 July</th><th>after</th></tr></thead>
+    <tbody>
+      <tr><td>closed-vmap steady state, one H200</td><td>5.5 µs/pair</td>
+        <td>5.5 (spread 5.1–5.8 over three processes)</td></tr>
+      <tr><td>quadrature vmap steady state, one H200</td><td>5.3 µs/pair</td>
+        <td>5.6 (spread 5.5–7.0)</td></tr>
+      <tr><td>quadrature vmap steady state, 16 CPU cores</td><td>78.8 µs/pair</td>
+        <td>79.5</td></tr>
+      <tr><td>closed compile, cold process, one H200</td><td>101.3 s</td>
+        <td>101.3</td></tr>
+      <tr><td>every entry of the section, aspect and field-aspect accuracy tables</td>
+        <td colspan="2">unchanged in both directions — 160 passed over
+        <code>test_biotpolygonanalytic</code>, <code>test_biotpolysection</code>,
+        <code>test_biottiledassembly</code>, <code>test_biottiledbackend</code></td></tr>
+    </tbody>
+  </table>
+  <p>At 4,096 pairs a whole build is twenty-odd milliseconds, so the per-pair figures
+  on the device carry a spread of that order; the closed form's median lands on its
+  recorded value and the quadrature's is inside its own scatter.</p>
+
+  <h2>The route choice, re-costed</h2>
+  <p>Against the host closed form's 171.4 µs/pair on one core and a projected 19.5 on
+  a 16-core pool:</p>
+  <pre><code>total pairs in the build     host 16 cores   H200 cold   warm cache   warm evaluator
+20,000                              0.4 s       101 s        8.5 s          0.1 s
+400,000                             7.8 s       104 s       10.6 s          2.2 s
+4,000,000                            78 s       124 s         30 s           22 s
+25,000,000                        8.1 min      4.0 min      2.4 min        2.3 min</code></pre>
+  <p><strong>The build size at which the device beats a sixteen-core host pool falls
+  from 7.2 M pairs to 0.60 M with the cache warm, and to nothing at all with the
+  evaluator warm</strong>, where the device is a flat 3.5× the pool at any size. A
+  single per-block build in a fresh process is still the wrong shape for the device —
+  0.4 s against 8.5 s at twenty thousand pairs — but that is now the cost of a cold
+  START, not a cost the build repeats.</p>
+
+  <h2>A measurement that lied, and how it was caught</h2>
+  <p>The new <code>jax-positions</code> variant was dispatched by a
+  <code>startswith("jax-")</code> test that already existed for
+  <code>jax-scan</code>/<code>jax-vmap</code>, so it silently ran the SCAN kernel and
+  reported 193.2 µs/pair for a mapped build. It was caught because that figure sat
+  0.2 % from the recorded scan rate — a per-build overhead invented out of nowhere is
+  less believable than a dispatch that matched too early. Variants are now matched
+  most specific first, and an unknown one still raises.</p>
+
+  <h2>What is next</h2>
+  <div class="card">
+    <p><strong>The compile is now paid once; making it smaller is the separate
+    question, and the attribution says how much is there.</strong> The graph is
+    27,947 HLO operations per edge and exactly linear in the corner count; the
+    recursions are 31 % of it, so rolling every one into a <code>scan</code> is worth
+    about 1.45× and no more. The other 69 % is the harmonic-series coefficient
+    algebra, which shrinks quadratically with the moment stack's length — 42 orders
+    carried where the numerators reach nine — and that length is the residual-cost
+    rung's subject rather than this one's. With reuse landed, both are now
+    optimisations of a start-up cost rather than of a per-build one, which is a
+    lower priority than it looked when the compile was paid every time.</p>
+  </div>
+</main>
+</body>
+</html>

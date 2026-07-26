@@ -19,8 +19,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-26">
-<meta name="plan-impl" content="0.97">
-<meta name="plan-version" content="12">
+<meta name="plan-impl" content="0.98">
+<meta name="plan-version" content="13">
 </head>
 <body>
   <main class="plan-doc">
@@ -312,6 +312,45 @@
              style="max-width:100%">
         <figcaption>What the parameter form cost the point kernels, which of the three
         near-field limits the complement actually fixes, and what each route costs.</figcaption>
+      </figure>
+    </section>
+
+    <section id="s8-landed" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ the compile paid once landed 2026-07-26</span>
+        <h2>What the traced tile compile is paid per — landed</h2>
+      </header>
+      <p class="landed-summary">
+        The closed form's hundred-second compile was paid per BUILD, because
+        <code>assemble</code> asked for a fresh evaluator every call — so a caller
+        sweeping a winding pack through positions paid it at every position, for a
+        build that takes thirty milliseconds. Geometry is an argument to the tile
+        kernel, not a constant of it, so nothing about a scan requires a retrace:
+        <code>tile_evaluator</code> now memoises on <code>(plan, batched, kernel)</code>
+        and <code>compilation_cache</code> keeps the executable on disk between
+        processes. <strong>On one H200 a scan over positions costs 101.65 s at the
+        first and 0.027 s at each of the rest — eight positions for 102 s against
+        813 — and a second process starts in 8.45 s against 101.89</strong>, three
+        cache hits and 91.2 s saved on JAX's own counter. The 8.45 s the cache cannot
+        remove is the trace and the lowering, which is what the cache KEY is computed
+        from: the cache takes 92 % of a cold compile and the warm evaluator takes the
+        rest. <strong>The build size at which the device beats a sixteen-core host
+        pool falls from 7.2 M pairs to 0.60 M with the cache warm and to nothing with
+        the evaluator warm.</strong> No arithmetic moved — closed-vmap holds 5.5
+        µs/pair on the H200 and 79.5 on sixteen cores, and every section, aspect and
+        field-aspect accuracy entry is unchanged (160 passed over the four affected
+        suites; fast lane 1479 passed / 89 skipped / 0 failed). A dispatch bug found
+        in passing: a new benchmark variant matched an older prefix and was measured
+        as the scan it is not. Merged to develop <code>529a1641</code>. Full record:
+        <a href="archive/biot-operator-assembly-compile-reuse-landed.html">compile reuse landed</a>.
+      </p>
+      <figure>
+        <img src="/nova/figures/biot-operator-assembly/compile_reuse.png"
+             alt="Cumulative build time against position for a fresh and a warm evaluator, cold and warm compile per kernel and device, and total build time against pair count for five routes"
+             style="max-width:100%">
+        <figcaption>What a geometry scan pays once instead of every position, what
+        the on-disk cache leaves of a cold compile, and where the device now
+        overtakes a sixteen-core host pool.</figcaption>
       </figure>
     </section>
 
@@ -923,7 +962,7 @@ Done-when
      benchmark table and benchmarks/BASELINE.md updated.
   4. Followup written; this followup resolved.</pre>
     </article>
-<article class="r-fu" data-id="f-boa-11" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-26T05:00:00+00:00" data-recommends-skill="/reckon-ship biot-operator-assembly" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-boa-11" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-26T05:00:00+00:00" data-recommends-skill="/reckon-ship biot-operator-assembly" data-resolved-at="2026-07-26T06:56:50+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Stop paying the traced closed form&#x27;s two-minute compile per build, then shrink the graph that causes it</h4>
     <div class="r-fu-body"><p>The closed form now evaluates inside a traced tile and on one H200 it costs what the 16x48 quadrature costs. What it does not yet have is a usable compile: <strong>101 s on the device and 136 s on the host, against 1.3 s for the quadrature kernel</strong>. The graph was then attributed by lowering it and counting instructions, which is cheap where compiling it is not, and the answer redirects this rung -- so the measurement comes first and the plan for it second.</p><p><strong>The graph is exactly linear in the corner count: 27,947 HLO operations per edge</strong>, measured at 83,889 / 111,836 / 167,730 / 195,677 for three, four, six and seven edges -- an intercept of forty-eight. Against the quadrature kernel's 3,272 for the same block, and compile time tracks the count at roughly half a millisecond per operation on both kernels, so operation count IS the lever and it scales.</p><p><strong>But the recursions are only a third of it.</strong> Per corner: <code>harmonic_moments</code> 3,580 operations, the pole families about 454 each, <code>harmonic_root_moments</code> 293, the descent 402 and each pole seed 290 -- some 8,700 of the 27,947, or 31%. Rolling every one of them into a <code>scan</code> therefore buys <strong>at most 1.45x, taking 136 s to about 95 s</strong>, which is worth having and is not the order of magnitude this rung was written expecting. The other 69% is the harmonic-series ALGEBRA -- <code>_product</code>, <code>_harmonic_multiply</code>, <code>_contract</code> and <code>_deflate</code> over nine-term coefficient lists -- and none of it is a recursion, so no scan reaches it.</p><p>Two levers do reach it, and both are cheaper than the scan work. The moment stack's LENGTH is <code>_HARMONICS + POLE_HEADROOM + 2 = 42</code> where the numerators reach nine, the extra thirty-two orders being carried in the PLAIN moments only so the pole families can close their system there -- which the host driver skips wherever no root is far enough out and a trace cannot. Shortening it shrinks the ratio loop AND every downstream contraction, and a product of two series is quadratic in the length, so the algebra shrinks fastest of all. That is f-boa-10's subject rather than this one's, and this measurement says its prize is a compile prize as much as a runtime one.</p><p><strong>Before any of that, the reuse.</strong> <code>assemble</code> builds a fresh <code>tile_evaluator</code> per call, so a caller scanning geometry -- winding packs at many positions, which is a real use -- pays the compile once per POSITION rather than once per process, though moving a section changes only argument VALUES and cannot force a retrace. Letting a caller pass a warm evaluator in, and enabling JAX's persistent compilation cache so it survives a process boundary, turns 101 s per position into 101 s once and needs none of the work above.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -995,6 +1034,7 @@ Done-when
      sometimes faster, so this is a real risk and has to be measured, not assumed.
   4. Every accuracy entry unchanged in both directions; the fast lane green.
   5. Followup written; this followup resolved.</pre>
+    <p class="r-fu-outcome">First item landed (develop 529a1641): tile_evaluator memoises on (plan, batched, kernel) and compilation_cache keeps the executable on disk. On one H200 a geometry scan pays 101.65 s at the first position and 0.027 s at each later one (eight positions 102 s against 813), and a second process starts in 8.45 s against 101.89 with three cache hits and 91.2 s saved on JAX's own counter -- the residual being the trace and lowering the cache key is computed from. The device now beats a 16-core host pool above 0.60 M pairs with a warm cache instead of 7.2 M, and at any size with a warm evaluator. Steady state unchanged (closed-vmap 5.5 us/pair H200, 79.5 on 16 cores), every accuracy entry unchanged, fast lane 1479 passed / 89 skipped / 0 failed. Items two and three -- rolling the recursions, shortening the moment stack -- are NOT done and carry on as f-boa-13, now optimisations of a start-up cost rather than a per-build one.</p>
     </article>
 <article class="r-fu" data-id="f-boa-12" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-26T06:10:00+00:00" data-recommends-skill="/reckon-ship biot-operator-assembly" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Carry the complement into the element tier, which is what the shipped operator build actually calls</h4>
@@ -1049,6 +1089,76 @@ Done-when
      contract decided and tested -- including what an all-to-all diagonal should be.
   3. Validation suite green and the tracked baselines unmoved or improved, both recorded.
   4. Followup written; this followup resolved.</pre>
+    </article>
+<article class="r-fu" data-id="f-boa-13" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-26T09:10:00Z" data-recommends-skill="/reckon-ship biot-operator-assembly" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Shrink the graph behind the compile now that it is paid once, starting with the 69% that is not a recursion</h4>
+    <div class="r-fu-body"><p>The compile is no longer paid per build: <code>tile_evaluator</code> memoises and the persistent cache carries the executable across a process, so <strong>101.9 s became 8.45 s in a second process and 0.027 s at the second position of a scan</strong>. What remains is a START-UP cost, which lowers this rung's priority and changes what a win is worth -- 1.45x on a cold start, not on every build.</p><p><strong>The attribution has not changed.</strong> The graph is 27,947 HLO operations per edge, exactly linear in the corner count (83,889 / 111,836 / 167,730 / 195,677 at three, four, six and seven edges) against the quadrature kernel's 3,272, and compile time tracks the count at roughly half a millisecond per operation. The recursions are only 31% of it -- <code>harmonic_moments</code> 3,580 operations per corner, the pole families about 454 each, <code>harmonic_root_moments</code> 293, the descent 402, each pole seed 290 -- so rolling every one into a <code>scan</code> is worth <strong>at most 1.45x</strong>. The other 69% is the harmonic-series ALGEBRA over nine-term coefficient lists (<code>_product</code>, <code>_harmonic_multiply</code>, <code>_contract</code>, <code>_deflate</code>), which no scan reaches.</p><p>The lever that does reach it is the moment stack's LENGTH: <code>_HARMONICS + POLE_HEADROOM + 2 = 42</code> orders carried where the numerators reach nine, the extra thirty-two serving pole families a trace cannot skip. A product of two series is quadratic in the length, so the algebra shrinks fastest of all -- and that is f-boa-10's subject, so coordinate rather than duplicate. Note also that 8.45 s of the warm-start cost is TRACE AND LOWERING, not compilation, and a smaller graph shortens that too.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    biot-operator-assembly (http://127.0.0.1:8765/nova/biot-operator-assembly.html)
+Section: the graph behind the compile, now that the compile is paid once
+Tier:    opus
+
+Context
+  The traced closed form runs on one H200 at the 16x48 quadrature&#x27;s own rate (5.5
+  vs 5.6 us/pair) and its compile is no longer paid per build: tile_evaluator
+  memoises on (plan, batched, kernel) and compilation_cache keeps the executable on
+  disk, so a cold process pays 101.9 s, a second process 8.45 s and the second
+  position of a geometry scan 0.027 s. Read the compile-reuse landed record before
+  starting -- it changes what this rung is worth: a win here is a win on a cold
+  START, not on every build.
+
+  ORDER OF WORK. (1) Roll the recursions into scans -- harmonic_moments (a 138-step
+  downward ratio recursion retaining 42 orders, plus an upward branch selected per
+  element), harmonic_pole_moments (a 41-order tridiagonal solve, forward then back),
+  _shifted_family and the two stable_* families (60-order headroom sweeps). This is
+  31% of the graph and worth about 1.45x -- measure it, do not assume it. (2) The
+  real graph is the harmonic-series algebra, 69%, which is not a recursion and
+  shrinks QUADRATICALLY with the moment stack&#x27;s length; that length is f-boa-10&#x27;s
+  subject, so coordinate with that rung rather than duplicating it.
+
+State to read
+  docs/archive/biot-operator-assembly-compile-reuse-landed.html -- what reuse
+    changed and what it left;
+  nova/biot/elliptic.py -- the four recursion families and their retained orders;
+  nova/biot/completeelliptic.py -- the descent, the ONE recursion already written as
+    a bounded fixed-trip loop, and the model for the rest;
+  nova/biot/polygonanalytic.py -- packed_analytic_greens and the corner/edge split
+    whose static loops multiply the graph;
+  benchmarks/tiled_backend.py --variants closed-vmap,closed-cache -- reports the
+    cold compile and the warm-start cost separately, which is how a win is measured
+    now that there are two of them.
+
+Guidance
+  - A recursion that RETAINS every order is a scan with a stacked output, not a
+    fori_loop over a carry; the retained orders are what the contractions consume.
+  - The numpy path must not regress. Either the scan form serves both namespaces or
+    the two forms are selected on the namespace -- but not two transcriptions of the
+    same recursion.
+  - The per-element direction SELECTION inside harmonic_moments and the stable_*
+    families is a where over two fully-evaluated branches, so a trace holds both;
+    consider dropping the unreachable branch for a given argument range, and measure
+    before assuming it helps.
+  - Measure the compile per corner count (three, six, seven) so the growth law is
+    recorded rather than inferred, and measure the WARM-start cost too: 8.45 s of it
+    is trace and lowering, which a smaller graph also shortens.
+
+Scope locks / constraints
+  Work in a detached worktree off develop; the primary checkout stays on main. This
+  changes no arithmetic if it is done right, so the gate is that every entry of
+  SECTION_ACCURACY, ASPECT_ACCURACY and FIELD_ASPECT_ACCURACY holds UNCHANGED in
+  both directions, and that tests/test_biottiledbackend.py&#x27;s traced-closed parity
+  holds at the same tolerance. If an entry moves, the arithmetic moved.
+
+Done-when
+  1. Compile time for the traced closed form measured before and after, per corner
+     count, on one H200, alongside the HLO operation count that predicts it, and
+     recorded in benchmarks/BASELINE.md.
+  2. The warm-start cost measured as well as the cold one -- a smaller graph should
+     move both.
+  3. Steady-state us/pair not regressed -- an unrolled graph is sometimes faster, so
+     this is a real risk and has to be measured.
+  4. Every accuracy entry unchanged in both directions; the fast lane green.
+  5. Followup written; this followup resolved.</pre>
     </article>
 </section>
 

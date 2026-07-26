@@ -52,6 +52,12 @@ from nova.biot.polygonanalytic import packed_analytic_greens
 
 COMPONENTS = ("Psi", "Br", "Bz")
 
+# What a tile can be evaluated WITH: the fixed-node phi rule the operator is
+# validated against, or the closed-form reduction.  Only the traced backend carries
+# the second -- the host route to it keeps its own value-dependent shortcuts and is
+# nova.biot.polygonanalytic.polygon_analytic_greens.
+KERNELS = ("quadrature", "closed")
+
 # Live (block x nodes) float64 temporaries inside one edge-limit of the
 # gradient kernel, counted from the expression tree.  Used to size the
 # quadrature working set against a byte budget; an over-estimate costs a
@@ -378,6 +384,8 @@ def tile_evaluator(
     machine precision, and a float32 build would be an accuracy regression
     disguised as a speedup.
     """
+    if kernel not in KERNELS:
+        raise ValueError(f"unknown kernel {kernel!r}, not one of {KERNELS}")
     import jax
     import jax.numpy as jnp
 
@@ -425,8 +433,6 @@ def tile_evaluator(
             )
         )
 
-    if kernel not in ("quadrature", "closed"):
-        raise ValueError(f"unknown kernel {kernel!r}")
     evaluate_block = one_block if kernel == "quadrature" else one_closed_block
 
     def over_blocks(target_r, target_z, edge, weight, norm):
@@ -509,6 +515,8 @@ def assemble(
     :func:`nova.biot.polygonanalytic.polygon_analytic_greens` with its own
     value-dependent shortcuts.
     """
+    if kernel not in KERNELS:
+        raise ValueError(f"unknown kernel {kernel!r}, not one of {KERNELS}")
     target_r = np.ascontiguousarray(target_r, dtype=np.float64)
     target_z = np.ascontiguousarray(target_z, dtype=np.float64)
     edge, weight, norm = pad_batch(sections)
@@ -570,6 +578,7 @@ def budget_from_environment(default: int = 512 << 20) -> int:
 
 
 __all__ = [
+    "KERNELS",
     "TileEvaluator",
     "TilePlan",
     "assemble",

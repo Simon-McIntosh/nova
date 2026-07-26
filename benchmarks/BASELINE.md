@@ -196,7 +196,8 @@ build**, and it is where the traced closed form has to be judged.
     H200, 32×32                  101.3   167,730 HLO ops (six-edge sections)
     L4, 3×3                      136.1   the same graph, a smaller tile
     16 CPU cores, 32×32         >3600    killed by the queue limit, never finished
-    16 CPU cores, 4×4 (16 pairs) >600    XLA:CPU's own slow-compile alarm fires
+    16 CPU cores, 4×4 (16 pairs)>3300    never finished either -- XLA:CPU raises its
+                                         own slow_operation_alarm and keeps going
 
 So the traced closed form is a DEVICE-ONLY path: XLA:CPU lowers the whole tile to
 one LLVM function and the optimiser does not get through it at any tile size worth

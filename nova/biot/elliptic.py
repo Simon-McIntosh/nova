@@ -28,9 +28,15 @@ is then known only to ``eps`` -- and ``K``, which grows like ``-log k'``, is wro
 by ``eps/k'^2`` if formed that way.  For a polygon section ``k'^2`` is the target's
 squared distance to an edge's END over the squared ring span, so that error is what
 a target approaching a section VERTEX sees, and it reaches order one a micron out.
-Carlson's forms take the complement as their argument and a caller that knows it in
-closed form keeps every digit.  ``k'^2 = 0`` -- the target ON the vertex -- is the
-confluence, where ``K`` diverges logarithmically; see :func:`_complete_kind`.
+``k'^2 = 0`` -- the target ON the vertex -- is the confluence, where ``K`` diverges
+logarithmically and every family here returns its finite part.
+
+Every special function this module needs is one routine,
+:mod:`nova.biot.completeelliptic`, whose arguments ARE those complements and whose
+descent is a fixed number of arithmetic steps -- so the moment families below hold
+no library call, no convergence test and no branch on a value, and the whole stack
+evaluates inside a traced tile as readily as on the host.  ``xp`` is the array
+namespace: numpy by default, ``jax.numpy`` inside a trace.
 
 The three moment families below are what the final expressions (eqs 21-24) are
 built from.  They are collected here, separately testable against direct
@@ -41,7 +47,8 @@ assembly but obvious against a reference integral.
 from __future__ import annotations
 
 import numpy as np
-import scipy.special  # type: ignore[import-untyped]
+
+from nova.biot.completeelliptic import complete_kind, complete_pole
 
 __all__ = [
     "cn_pole_moment",
@@ -103,13 +110,13 @@ _HARMONIC_HEADROOM = 96
 POLE_HEADROOM = 32
 
 
-def _complete_kind(complement: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+def _complete_kind(complement: np.ndarray, xp=np) -> tuple[np.ndarray, np.ndarray]:
     """Return ``(K, E)`` from the modulus complement ``k'^2``.
 
-    ``K = R_F(0, k'^2, 1)`` and ``E = 2 R_G(0, k'^2, 1)``: Carlson's forms take the
-    complement as their argument, so a caller that knows it exactly keeps every
-    digit, where ``scipy.special.ellipk`` of a float parameter cannot -- at
-    ``k'^2 = 1e-14`` the two disagree in the fifth decimal.
+    :func:`nova.biot.completeelliptic.complete_kind`, which takes the complement as
+    its argument and gets both kinds off one descent.  Kept as a name of its own
+    because what the families below need from it is the CONVENTION at the
+    confluence as much as the values.
 
     ``k'^2 = 0`` is the confluence itself: the target sits ON the end of the edge
     whose integral this is, the modulus reaches one and ``K`` diverges
@@ -123,13 +130,7 @@ def _complete_kind(complement: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     with no cancellation left to round off, rather than a large number cancelling
     against itself.  ``E`` stays finite, ``E(1) = 1``.
     """
-    complement = np.asarray(complement, dtype=np.float64)
-    reachable = complement > 0.0
-    held = np.where(reachable, complement, 1.0)
-    return (
-        np.where(reachable, scipy.special.elliprf(0.0, held, 1.0), 0.0),
-        2.0 * scipy.special.elliprg(0.0, complement, 1.0),
-    )
+    return complete_kind(complement, xp=xp)
 
 
 def complete_pi(
@@ -138,36 +139,32 @@ def complete_pi(
     *,
     complement: np.ndarray | None = None,
     parameter_complement: np.ndarray | None = None,
+    xp=np,
 ) -> np.ndarray:
     """Return the complete elliptic integral of the third kind, Pi(n | m).
 
-    Carlson symmetric forms, as the rectangular-section kernel already uses:
-    ``Pi(n | m) = R_F(0, 1 - m, 1) + (n/3) R_J(0, 1 - m, 1, 1 - n)``.  Both
-    arguments are the PARAMETER convention (``m = k^2``), matching
-    :func:`scipy.special.ellipk`.
+    The PARAMETER-convention entry point, for the power-basis reference families
+    below: both arguments are ``m = k^2`` and ``n`` as the Legendre integral prints
+    them, and each optional complement replaces one of them with the quantity the
+    evaluation actually wants.
 
-    ``complement`` supplies ``1 - n`` directly.  ``Pi`` grows like
-    ``(1 - n)^(-1/2)``, so forming the complement here caps the relative accuracy
-    at ``eps / (1 - n)`` -- eight digits gone by ``1 - n = 1e-8``.  A caller that
-    knows the complement in closed form keeps every digit by passing it, and the
-    polygon reduction does know it: its characteristics are ratios whose
-    complements are squares of small edge offsets.
-
-    ``parameter_complement`` supplies ``1 - m`` for the same reason.  A float
-    parameter cannot carry its own complement to better than ``eps``, so forming
-    it here costs ``eps / (1 - m)`` however the parameter was computed -- and
-    ``1 - m`` is the target's squared offset from the source ring divided by its
-    squared span, which falls as the square of a section's aspect ratio.
+    Those complements are the whole substance.  ``Pi`` grows like
+    ``(1 - n)^(-1/2)``, so forming ``1 - n`` here caps the relative accuracy at
+    ``eps/(1 - n)`` -- eight digits gone by ``1 - n = 1e-8`` -- and ``K``, which the
+    integral contains, is wrong by ``eps/(1 - m)`` for the same reason.  A caller
+    that knows either in closed form keeps every digit by passing it, and the
+    polygon reduction knows both: its characteristics are ratios whose complements
+    are squares of small edge offsets, and ``1 - m`` is the target's squared offset
+    from the source ring over its squared span.  Which is why the harmonic path
+    below does not come through here at all -- it calls
+    :func:`nova.biot.completeelliptic.complete_pole`, whose ARGUMENTS are the two
+    complements, so there is nothing left to form.
     """
-    characteristic = np.asarray(characteristic, dtype=np.float64)
-    parameter = np.asarray(parameter, dtype=np.float64)
     if complement is None:
-        complement = 1.0 - characteristic
+        complement = 1.0 - xp.asarray(characteristic)
     if parameter_complement is None:
-        parameter_complement = 1.0 - parameter
-    rf = scipy.special.elliprf(0.0, parameter_complement, 1.0)
-    rj = scipy.special.elliprj(0.0, parameter_complement, 1.0, complement)
-    return rf + rj * characteristic / 3.0
+        parameter_complement = 1.0 - xp.asarray(parameter)
+    return complete_pole(complement, parameter_complement, xp=xp)
 
 
 def harmonic_moments(
@@ -175,6 +172,7 @@ def harmonic_moments(
     count: int,
     *,
     complement: np.ndarray | None = None,
+    xp=np,
 ) -> list[np.ndarray]:
     """Return ``[P_0, P_1, ...]``, ``P_n = integral_0^(pi/2) cos(2 n a)/Delta da``.
 
@@ -220,17 +218,17 @@ def harmonic_moments(
     ``complement`` supplies ``k'^2``; see :func:`_complete_kind` for why it must be
     given rather than formed, and for the finite-part convention at ``k'^2 = 0``.
     """
-    parameter = np.asarray(parameter, dtype=np.float64)
+    parameter = xp.asarray(parameter)
     if complement is None:
         complement = 1.0 - parameter
-    complement = np.asarray(complement, dtype=np.float64) + np.zeros_like(parameter)
-    complete_k, complete_e = _complete_kind(complement)
+    complement = xp.asarray(complement) + xp.zeros_like(parameter)
+    complete_k, complete_e = _complete_kind(complement, xp)
     degenerate = parameter > _HARMONIC_SWITCH
 
-    held = np.where(degenerate, parameter, 1.0)
-    held_complement = np.where(degenerate, complement, 0.0)
+    held = xp.where(degenerate, parameter, 1.0)
+    held_complement = xp.where(degenerate, complement, 0.0)
     upward = [
-        np.zeros_like(parameter),
+        xp.zeros_like(parameter),
         2.0 * (complete_e - held_complement * complete_k) / held,
     ]
     for order in range(1, count - 1):
@@ -243,7 +241,7 @@ def harmonic_moments(
             / ((2 * order + 1) * held)
         )
 
-    ratio = np.zeros_like(parameter)
+    ratio = xp.zeros_like(parameter)
     ratios: list[np.ndarray] = [None] * (count + _HARMONIC_HEADROOM + 1)  # type: ignore[list-item]
     for order in range(count + _HARMONIC_HEADROOM, 0, -1):
         ratio = (
@@ -257,7 +255,7 @@ def harmonic_moments(
     for order in range(1, count):
         downward.append(downward[order - 1] * ratios[order])
     return [
-        np.where(
+        xp.where(
             degenerate,
             upward[order] + (-1.0) ** order * complete_k,
             downward[order],
@@ -313,7 +311,7 @@ def harmonic_pole_moments(
 
 
 def harmonic_root_moments(
-    moments: list[np.ndarray], parameter: np.ndarray
+    moments: list[np.ndarray], parameter: np.ndarray, *, xp=np
 ) -> list[np.ndarray]:
     """Return ``[D_0, ...]``, ``D_n = integral_0^(pi/2) cos(2 n a) Delta da``.
 
@@ -323,7 +321,7 @@ def harmonic_root_moments(
     ``P(-1) = P(1)`` reflection covers the mean.  ``moments`` must carry one order
     past the last root moment wanted.
     """
-    parameter = np.asarray(parameter, dtype=np.float64)
+    parameter = xp.asarray(parameter)
     mean = 1.0 - 0.5 * parameter
     return [
         mean * moments[order]
@@ -468,46 +466,6 @@ def stable_cn_moments(
     ]
 
 
-def _mirrored_pi(
-    characteristic: np.ndarray,
-    *,
-    complement: np.ndarray,
-    parameter_complement: np.ndarray,
-) -> np.ndarray:
-    """Return ``integral_0^(pi/2) da/((1 - n cos^2 a) sqrt(1 - m sin^2 a))``.
-
-    The third-kind integral with its pole factor reflected onto the other end of
-    the range.  Reflecting the angle turns it into an ordinary ``Pi`` of NEGATIVE
-    parameter, ``Pi(n | -m/m')/sqrt(m')``, and Carlson's homogeneity collapses
-    that to ``K + (n m'/3) R_J(0, m', 1, m'(1 - n))`` -- two positive terms.
-
-    That is the point.  The same integral IS an ordinary ``Pi`` at a
-    characteristic of ``-1/shift``, but there ``R_F`` and ``(n/3) R_J`` are of
-    opposite sign and nearly equal: their sum falls as ``sqrt(shift)`` while each
-    stays of order ``K``, so a shift of 1e-10 costs five digits.  Written this way
-    the shift appears only as ``m'(1 - n)`` inside ``R_J``, where it makes the term
-    large rather than cancelling.
-
-    At the confluence ``m' = 0`` the whole integral is elementary, because
-    ``sqrt(1 - m sin^2 a)`` collapses onto ``cos a`` and the substitution
-    ``w = sin a`` leaves a rational function whose partial fractions are exactly the
-    two terms above: ``sqrt(n/n') arctan sqrt(n/n')`` plus ``K``.  The finite part is
-    therefore the arctangent term alone, and it is wanted rather than skipped even
-    where the caller's weight on this pole family is zero, because ``R_J`` diverges
-    there and a vanishing weight against it is not zero but undefined.
-    """
-    reachable = np.asarray(parameter_complement, dtype=np.float64) > 0.0
-    held = np.where(reachable, parameter_complement, 1.0)
-    root = np.sqrt(characteristic / complement)
-    return np.where(
-        reachable,
-        scipy.special.elliprf(0.0, held, 1.0)
-        + (characteristic * held / 3.0)
-        * scipy.special.elliprj(0.0, held, 1.0, held * complement),
-        root * np.arctan(root),
-    )
-
-
 def _shifted_family(
     shift: np.ndarray,
     leading: np.ndarray,
@@ -589,31 +547,25 @@ def cn_pole_moment(
     parameter: np.ndarray,
     *,
     parameter_complement: np.ndarray | None = None,
+    xp=np,
 ) -> np.ndarray:
     """Return ``integral_0^(pi/2) da/((cos^2 a + shift) Delta)``, the family's seed.
 
-    ``cos^2 a + shift = (1 + shift)(1 - n sin^2 a)`` with ``n = 1/(1 + shift)``,
-    whose complement ``shift/(1 + shift)`` is exact, so this is one ``Pi``.  It is
-    also the ONLY special function a whole complement-basis pole family needs, and
-    the only place a reduction's pole weight is multiplied by something that grows
-    as the root approaches the range -- so it is separated out here for callers
-    that want the seed alone.  ``shift = 0`` puts the root ON the end, where the
-    integral diverges; zero is returned, on the finite-part convention of
-    :func:`_complete_kind`.
+    ``cos^2 a + shift = (1 + shift)(cos^2 a + p sin^2 a)`` with
+    ``p = shift/(1 + shift)``, so this is one complete integral of the third kind
+    whose pole argument IS the shift, up to a factor of order one -- no
+    characteristic to form and no complement to lose.  It is also the ONLY special
+    function a whole complement-basis pole family needs, and the only place a
+    reduction's pole weight is multiplied by something that grows as the root
+    approaches the range, so it is separated out here for callers that want the seed
+    alone.  ``shift = 0`` puts the root ON the end, where the integral diverges;
+    zero is returned, on the finite-part convention of :func:`_complete_kind`.
     """
-    shift = np.asarray(shift, dtype=np.float64)
-    positive = shift > 0.0
-    held = np.where(positive, shift, 1.0)
-    return np.where(
-        positive,
-        complete_pi(
-            1.0 / (1.0 + held),
-            parameter,
-            complement=held / (1.0 + held),
-            parameter_complement=parameter_complement,
-        )
-        / (1.0 + held),
-        0.0,
+    shift = xp.asarray(shift)
+    if parameter_complement is None:
+        parameter_complement = 1.0 - xp.asarray(parameter)
+    return complete_pole(shift / (1.0 + shift), parameter_complement, xp=xp) / (
+        1.0 + shift
     )
 
 
@@ -662,27 +614,29 @@ def sn_pole_moment(
     parameter: np.ndarray,
     *,
     parameter_complement: np.ndarray | None = None,
+    xp=np,
 ) -> np.ndarray:
     """Return ``integral_0^(pi/2) da/((sin^2 a + shift) Delta)``, the family's seed.
 
-    The mirror of :func:`cn_pole_moment`: the same characteristic with the pole
-    factor on ``cos^2 a``, which is what :func:`_mirrored_pi` evaluates without the
-    difference an ordinary ``Pi`` at a hugely negative characteristic would form.
+    The mirror of :func:`cn_pole_moment`, and the same one special function:
+    ``sin^2 a + shift = shift (cos^2 a + p sin^2 a)`` with ``p = (1 + shift)/shift``,
+    so a root just past the ``a = 0`` end is a LARGE pole argument rather than a
+    reflected one.  Written as an ordinary ``Pi`` this configuration is a hugely
+    negative characteristic, where the two Carlson terms are of opposite sign and
+    nearly equal -- their sum falls as ``sqrt(shift)`` while each stays of order
+    ``K``, so a shift of 1e-10 used to cost five digits and needed the pole factor
+    reflected onto the other end of the range as a separate case.  The pole argument
+    removes the case: it is a sum of positives at any shift.  ``shift = 0`` returns
+    zero on the same reasoning as the complement family.
     """
-    shift = np.asarray(shift, dtype=np.float64)
-    parameter = np.asarray(parameter, dtype=np.float64)
+    shift = xp.asarray(shift)
     if parameter_complement is None:
-        parameter_complement = 1.0 - parameter
-    positive = shift > 0.0
-    held = np.where(positive, shift, 1.0)
-    return np.where(
-        positive,
-        _mirrored_pi(
-            1.0 / (1.0 + held),
-            complement=held / (1.0 + held),
-            parameter_complement=parameter_complement,
-        )
-        / (1.0 + held),
+        parameter_complement = 1.0 - xp.asarray(parameter)
+    live = shift > 0.0
+    held = xp.where(live, shift, 1.0)
+    return xp.where(
+        live,
+        complete_pole((1.0 + held) / held, parameter_complement, xp=xp) / held,
         0.0,
     )
 
@@ -758,11 +712,13 @@ def sn_moments(parameter: np.ndarray, count: int) -> list[np.ndarray]:
     seeds are the same story: ``El2 = (K - E)/k^2`` is a cancelling difference.
     A far-field evaluation must either carry the small-``k`` series or reach the
     far field by another route; this returns the recursion as printed and the
-    accompanying test pins the parameter range over which it holds.
+    accompanying test pins the parameter range over which it holds.  Only the
+    RECURSION is as printed: the seeds come through the complement like everything
+    else here, since taking them from the parameter would put a second and larger
+    error beside the one this function is documenting.
     """
     parameter = np.asarray(parameter, dtype=np.float64)
-    complete_k = scipy.special.ellipk(parameter)
-    complete_e = scipy.special.ellipe(parameter)
+    complete_k, complete_e = _complete_kind(1.0 - parameter)
     moments = [complete_k, (complete_k - complete_e) / parameter]
     for order in range(1, count - 1):
         moments.append(

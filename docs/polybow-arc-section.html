@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="polybow-arc-section">
   <meta name="plan-title" content="PolyBow — polygon cross-section arc segment">
   <meta name="plan-summary" content="Give nova a polygon cross-section arc element to sit beside Bow&#x27;s rectangular one: the general Urankar Part V case with sweep below a full turn, which reinstates the incomplete elliptic integrals, the alpha-case bookkeeping, an interior integration limit in every moment recursion, and a real azimuthal field component">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="XL">
   <meta name="plan-tier" content="opus">
@@ -18,8 +18,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-26">
-<meta name="plan-version" content="5">
-<meta name="plan-impl" content="0.85">
+<meta name="plan-version" content="6">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
   <main class="plan-doc">
@@ -114,7 +114,7 @@
         <rect x="600" y="120" width="140" height="26" fill="none" stroke="#0a7d33" stroke-width="1.6"/>
         <text x="670" y="138" text-anchor="middle" font-size="12" font-weight="600" fill="#0a7d33">PolyBow</text>
         <text x="430" y="214" text-anchor="middle" font-size="12" fill="#555">Solid = exists. Dashed = the sibling plan (polybeam-prism-section). Heavy = this plan.</text>
-        <text x="430" y="234" text-anchor="middle" font-size="12" fill="#555">Only the polygon column is incomplete, and only below a full turn.</text>
+        <text x="430" y="234" text-anchor="middle" font-size="12" fill="#555">Only the polygon column was incomplete; the arc row landed 2026-07-26 as PolyBow.</text>
       </svg>
       <figcaption>nova's Biot elements form a grid over path geometry and cross-section shape.
       Every cell is filled except the polygon column away from the full turn: this plan supplies
@@ -297,6 +297,54 @@
       </figure>
     </section>
 
+    <section id="s-element-class-landed" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ the element class 2026-07-26</span>
+        <h2>The arc becomes an element, and the routing turns out to be a
+        correctness question — landed</h2>
+      </header>
+      <p class="landed-summary">
+        <strong>The class costs the reduction plus 16 %, and the element it sits
+        beside returns four thirds of the answer on the very sections this one
+        exists for.</strong> Landed:
+        <code>nova/biot/polybow.PolyBow</code>, registered as the
+        <code>polybow</code> segment, five rows reaching the same frame
+        attributes <code>Bow</code>'s do. <code>arc-element-shape</code> is
+        locked <em>extend-arc</em> on what each base contains rather than on
+        taste: the rows and their plumbing are <code>Arc</code>'s and
+        <code>Bow</code> inherits them unchanged, so all extending
+        <code>Bow</code> would add is a <code>__post_init__</code> that stacks a
+        rectangle's four corners onto every geometry array — a base whose whole
+        body a polygon has to disable. Measured through the frame, so the two
+        elements are compared on the same terms: <strong>550.1 µs/pair against
+        <code>Bow</code>'s 182.1</strong> on the rectangle they share (3.02×,
+        where the 2.65× of record compared a bare kernel call with a framed one)
+        and 926.6 against 186.5 on a hexagon — where <strong><code>Bow</code> is
+        1.3330 … 1.3335 out on every row and every target</strong>, integrating
+        the box its width and height bound while dividing by the section's own
+        area. So the routing the cost table looked like it argued for is not a
+        cost question: the cheap evaluation is the wrong one, and it only exists
+        for a rectangle at all. The class itself is the reduction plus two
+        rotations — <strong>3.5e-12 against the bare function</strong>, four
+        orders below <code>Bow</code>'s own 4.9e-09 — and it builds its corners
+        from the frame's section DESCRIPTOR, not its <code>poly</code> column,
+        which for a swept element is the 3-D volume's poloidal projection with
+        its axes transposed against <code>width</code> and <code>height</code>.
+        Hollow sections are refused rather than silently rebuilt as a nearly
+        solid square. 15 new tests; both gate suites unmoved at 186 passed / 0
+        failed. Full record:
+        <a href="archive/polybow-arc-section-element-class-landed.html">the element class landed</a>.
+      </p>
+      <figure>
+        <img src="/nova/figures/polybow-arc-section/arc_element_class.png"
+             alt="The hexagonal section drawn inside the rectangle Bow integrates with the four-thirds ratio annotated, each row's deviation between the class and the bare reduction beside the same rows against Bow, and the per-pair cost of the two elements measured through the frame on a rectangle and on a hexagon"
+             style="max-width:100%">
+        <figcaption>What a hexagonal winding declares and what it is evaluated
+        as today, what the class adds to the reduction, and the cost of the two
+        elements over the same coilset and the same cloud.</figcaption>
+      </figure>
+    </section>
+
     <h2 id="s3">§3 — Prerequisites and inherited corrections</h2>
     <p>This plan starts from the landed full-turn reduction and inherits both its machinery and
     its known limitations. Read before starting:</p>
@@ -348,11 +396,15 @@
       arc, per-edge and per-limit pins, an aspect-ratio sweep, and per-section envelopes asserted
       in both directions.</s> <strong>Landed</strong>, with four oracles rather than one —
       <code>tests/test_biotpolygonarc.py</code>.</li>
-      <li><strong>Still open:</strong> element classes following the <code>Arc</code>/<code>Bow</code>
+      <li><s>Element classes following the <code>Arc</code>/<code>Bow</code>
       pattern (<code>Constants</code> + <code>Matrix</code> dataclass, <code>ClassVar</code> name,
       <code>axisymmetric = False</code>) so the frame and groupset machinery can consume them
-      rather than only a bare function. Its shape is the plan's one open decision,
-      <code>arc-element-shape</code>.</li>
+      rather than only a bare function.</s> <strong>Landed</strong> as
+      <code>nova/biot/polybow.PolyBow</code>, a peer of <code>Bow</code> rather than a
+      subclass — <code>arc-element-shape</code> locked <em>extend-arc</em>. Reached by
+      naming the segment; <em>routing</em> a winding to it automatically is follow-on work
+      rather than part of this deliverable, and a decision rather than a patch, because the
+      section shapes divide three ways.</li>
       <li><s>Cost per pair measured on a compute node, fresh process, median of 3, beside the
       full-turn and <code>Bow</code> figures.</s> <strong>Landed</strong> — 939 µs/pair on a
       hexagon, 4.7× the ring and 2.65× <code>Bow</code>.</li>
@@ -419,15 +471,19 @@ Two arrangements inside it had to be measured rather than reasoned. R_C&#x27;s t
 
 One corner is not covered and is asserted in both directions: the reflection needs k&#x27;^2/p, and below the smallest normal double that partner has fewer bits than a double carries -- 2.3e-13 at 1e-312, 3.8e-07 at 1e-317. It takes a section a millionth as thick as it is wide AND a target within 1e-150 ring spans of the source at once. Full record: archive/polybow-arc-section-third-kind-landed.html</p>
     </div>
-<div class="r-dec" data-key="arc-element-shape" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="arc-element-shape" data-choice="extend-arc" data-by="reckon-ship" data-when="2026-07-26T14:04:11+00:00">
     <p class="r-dec-q">Does the element class extend Bow (inheriting its arc
         geometry and overriding the section evaluation) or Arc directly (treating the
         polygon section as a peer of the rectangular one)?</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="extend-bow">extend Bow, override the section</button>
-      <button class="r-opt" data-value="extend-arc">extend Arc, peer of Bow</button>
+      <button class="r-opt chosen" data-value="extend-arc">extend Arc, peer of Bow</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Locked on what each base CONTAINS rather than on taste, and the reading is checkable in the source. The five rows the frame consumes -- _Ar_hat through _Bz_hat, rotated into the source&#x27;s local cartesian frame by _Ax_hat/_Ay_hat/_Bx_hat/_By_hat and thence to global by Matrix._vector -- are Arc&#x27;s, and Bow inherits them unchanged. What Bow ADDS is a __post_init__ that stacks a rectangle&#x27;s four corners onto every geometry array, a _stack helper that tiles the rest to match, a zeta quadrature over that stack, and the five row expressions that consume it. A polygon section needs none of those, so extend-bow would inherit a base whose entire body has to be disabled -- and disabling __post_init__ conditionally would make which base ran depend on a flag, where the frame plumbing has to be identical either way. extend-arc inherits the plumbing and nothing else, which is exactly what the two elements share. Asserted rather than described: PolyBow is an Arc and is not a Bow.
+
+WHAT THE COST TABLE SAYS ABOUT ROUTING, which the decision asked for -- and the answer is that the routing it looked like it argued for is not a cost question at all. Measured on the same terms (sun_debug node, one core, fresh process per variant, median of 3, 512 pairs, everything through the frame): Bow 182.1 us/pair against PolyBow&#x27;s 550.1 on the rectangle they share, so 3.02x -- where the 2.65x of record compared a BARE kernel call with a FRAMED one. On a hexagon, 186.5 against 926.6, so 4.97x. Three reasons that ratio does not become an in-class flag. (1) The two evaluations are already routed between at the SEGMENT level: a rectangular winding reaches Bow and a polygon one would reach PolyBow, which is the frame&#x27;s segment column and not a class flag; a second route inside the class would duplicate a decision the registry owns. (2) Bow&#x27;s alternative only exists for a rectangle -- its zeta quadrature integrates four corners and nothing else -- so on the sections this element is FOR there is no cheaper evaluation to route to, only a wrong one. (3) And on those sections it IS the wrong one: a hexagonal winding routed to Bow comes back at 1.3330 .. 1.3335 of its value on every row and every target, because Bow integrates the rectangle the frame&#x27;s width and height bound while dividing by the frame&#x27;s area, which is the hexagon&#x27;s, and a regular hexagon fills three quarters of that box. A disc measures 4/pi, 1.27305 .. 1.27324. So the cheap element is 186.5 us/pair and a third out, the dear one is 926.6 and right; there is no trade to route. The routing that IS worth having is PolySection&#x27;s OTHER knob, standoff -- exact near, point filament far, where the gap is four orders rather than three-fold -- and it is deliberately not built, for the same reason standoff defaults to None on the ring: a principled cutoff has to come from the section&#x27;s second-moment error bound and no geometry-derived candidate measured so far qualifies. Exact everywhere is the shipped lane for the ring and is the shipped lane here.
+
+What shipped: nova/biot/polybow.PolyBow, registered as Solve.generator[&#x27;polybow&#x27;]. The class is the reduction plus a source assembly, two rotations and the matrix storage -- 3.5e-12 against the bare function overall and 3.0e-11 by row, four orders below Bow&#x27;s own 4.9e-09 / 1.1e-08, and costing 77.9 us/pair, which is 16 % of a rectangle and 8 % of a hexagon and falls further with corner count. Its corners come from the frame&#x27;s section DESCRIPTOR through PolyGen, not from the poly column: for a swept element poly is the 3-D volume&#x27;s poloidal projection, with its axes transposed against width and height and stored at single precision. Five section names are admitted (disc, ellipse, hexagon, rectangle, square) and the rest refused -- skin and box because their fourth descriptor is a hollowness FACTOR rather than a height and their section has an interior boundary a corner list cannot carry, polygon/shell/outline because a swept element keeps no corner list of its own. Full record: archive/polybow-arc-section-element-class-landed.html</p>
     </div>
 </section>
 
@@ -731,7 +787,7 @@ COST, sun_debug node, one core, fresh process per variant, median of 3, 512 pair
 
 NOT DONE: the element class, which is the plan's last deliverable and whose shape is its one open decision (arc-element-shape). One side finding recorded: nova's point solver decides its own output precision from process state, float32 in one and float64 in another. Full record: archive/polybow-arc-section-five-rows-landed.html</p>
     </article>
-<article class="r-fu" data-id="f-pbow-05" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-26T16:30:00+00:00" data-recommends-skill="/reckon-ship polybow-arc-section" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-pbow-05" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-26T16:30:00+00:00" data-recommends-skill="/reckon-ship polybow-arc-section" data-resolved-at="2026-07-26T14:04:11+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Give the arc an element class, and lock arc-element-shape on the measurement rather than on taste</h4>
     <div class="r-fu-body"><p>The evaluation is a function and the plan's last deliverable is the class that lets the frame and groupset machinery consume it. Its shape is the plan's one open decision, and this rung has evidence the decision did not have when it was written: <code>Bow</code> already carries the same five rows and the frame plumbing for them, and the arc agrees with it at zero edge slope on all five — so extending it inherits a tested consumer. Against that, the closed form costs 2.65× <code>Bow</code> on the section shape they share, which makes routing between them worth more than picking one.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -785,6 +841,96 @@ Done-when
      agree through the CLASS, not only through the bare functions.
   4. tests/test_biotpolygonarc.py and tests/test_biotpolygonanalytic.py both unmoved.
   5. Followup written; this followup resolved.</pre>
+    <p class="r-fu-outcome">Landed in full -- all five done-when met. develop 1452fef5 + 428a7aaf, 15 new tests, and both gate suites unmoved at 186 passed / 0 failed (test_biotpolygonarc 50, test_biotpolygonanalytic 112, test_biotpolybow 15, test_biotarc 9), plus 62 passed across the savart/frame/matrix/operate/polysection suites the registry touches.
+
+The class is nova/biot/polybow.PolyBow, registered as Solve.generator['polybow'], five rows reaching the same frame attributes Bow's do. arc-element-shape is locked EXTEND-ARC on what each base contains: the rows and their plumbing are Arc's and Bow inherits them unchanged, so extending Bow would add only a __post_init__ that stacks a rectangle's four corners onto every geometry array -- a base whose whole body a polygon section has to disable.
+
+THE RUNG'S OWN FINDING, and it reframes the question the decision was asked: routing between the two elements is a CORRECTNESS question rather than a cost one. A swept winding of non-rectangular section is sent to Bow today by one line in nova/geometry/polyline.py, and Bow integrates the rectangle the frame's width and height bound while dividing by the frame's area, which is the section's -- so a hexagon comes back at 1.3330 .. 1.3335 of its value on every row and every target, and a disc at 4/pi (1.27305 .. 1.27324), an ellipse at 1.2749 .. 1.2755. Measured, not inferred. The cheap evaluation is not a cheaper route to the same answer; it is the wrong answer, and it only exists for a rectangle at all.
+
+COST, through the frame so the two elements are compared on the same terms (sun_debug node, one core, fresh process per variant, median of 3, 512 pairs): Bow 182.1 us/pair against PolyBow's 550.1 on the rectangle they share (3.02x) and 186.5 against 926.6 on a hexagon (4.97x). The 2.65x of record was a bare kernel call against a framed one; measured like for like it is 3.02x. The frame itself costs 77.9 us/pair -- the rectangle's bare reduction reads 472.2 -- which is 16 % of a rectangle and 8 % of a hexagon and falls with corner count, so the class is not where the arc's cost goes.
+
+Two things had to be worked out rather than assumed. The section cannot come from the frame's poly column, which is what the axisymmetric PolySection reads: for a SWEPT element poly is the 3-D volume's projection onto the poloidal plane, its axes transposed against width and height (a 0.06 x 0.04 winding projects to 0.04 x 0.06) and stored at single precision. It is built from the section descriptor through PolyGen instead, in Bow's own convention. And a generated section arrives as a shapely ring whose first corner repeats at the end -- twice over for a generator that sweeps an angle and closes to within round-off -- so zero-length edges are dropped against the SECTION's own extent rather than an absolute tolerance, which is what keeps a thin plate's corners at a major radius of six metres.
+
+One test exists only to keep the Bow comparison honest: CoilSet.point's accessors come back single precision, at which every comparison in the module reads as exact and a class that returned Bow's own numbers would pass. The tests read the frame's float64 matrices, and an assertion records that the two differ at all.
+
+NOT DONE, and carried to f-pbow-06: automatic routing. Nothing sends a winding to the new element; reaching it means naming the segment, as the tests and the benchmark do. Full record: archive/polybow-arc-section-element-class-landed.html</p>
+    </article>
+<article class="r-fu" data-id="f-pbow-06" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-26T17:40:00+00:00" data-recommends-skill="/reckon-ship polybow-arc-section" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Route a non-rectangular swept winding to the element that can evaluate it, and decide what a curved section costs</h4>
+    <div class="r-fu-body"><p>The element exists and nothing reaches it. One line in <code>nova/geometry/polyline.py</code> sends every swept winding to <code>Bow</code> whatever its cross-section is, and <code>Bow</code> integrates the box that section's width and height bound while dividing by the section's own area — so a hexagonal winding is <strong>a third too large</strong> and a disc <strong>27 % too large</strong>, both measured. This rung closes that, and it is a decision rather than a patch: the shapes divide three ways and only the hexagon is straightforward. A disc is sixty-four corners, so right costs roughly ten times wrong; a hollow section cannot route at all until it has a representation.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    polybow-arc-section (http://127.0.0.1:8765/nova/polybow-arc-section.html)
+Section: routing a swept winding to the element that can evaluate its section
+Tier:    opus
+
+Context
+  nova/biot/polybow.PolyBow is landed, registered and gated: five rows through the
+  frame, 3.5e-12 against the bare reduction, agreeing with Bow at zero edge slope
+  on all five. Nothing routes to it. nova/geometry/polyline.py carries
+  `thicken = {&quot;arc&quot;: &quot;bow&quot;, &quot;line&quot;: &quot;beam&quot;}`, so a swept winding of ANY section
+  becomes a `bow`, and Bow thickens its arc into the RECTANGLE the frame&#x27;s width
+  and height bound while normalising by the frame&#x27;s area, which is the section&#x27;s.
+  Measured through the frame, one winding, five rows, five targets:
+    hexagon   bow / polybow = 1.3330 .. 1.3335   (4/3 exactly; a hexagon fills 3/4
+                                                  of its box)
+    disc      1.27305 .. 1.27324                 (4/pi)
+    ellipse   1.2749 .. 1.2755                   (4/pi, plus a 64-gon&#x27;s own deficit)
+  This is a live correctness defect on the shipped path, not a modelling choice,
+  and it is why the routing question is not the cost question the plan&#x27;s cost
+  table looked like it was asking.
+
+State to read
+  nova/biot/polybow.py -- the class, its solid_sections set and the module
+    docstring&#x27;s account of why the section comes from the frame&#x27;s DESCRIPTOR and
+    not from its poly column;
+  nova/geometry/polyline.py -- the thicken map, and how a segment name is chosen;
+  nova/geometry/polygen.py -- the generators, and which of them take a height
+    where skin and box take a hollowness factor;
+  nova/biot/bow.py -- what it actually integrates, which is the defect;
+  nova/biot/solve.py -- the registry;
+  tests/test_biotpolybow.py -- the class&#x27;s own gate, including the assertion that
+    records the 4/3;
+  docs/archive/polybow-arc-section-element-class-landed.html -- the cost table,
+    the three shape classes and the two smaller findings named there.
+
+Key guidance
+  - The three shape classes need three answers and they are not the same answer.
+    HEXAGON: six corners, 4.97x the cost, a third of the error removed -- and the
+    section a plasma cell already uses, so this is the case that makes the change
+    worth making. DISC and ELLIPSE: correct but sixty-four corners, so roughly ten
+    times a hexagon, against a Bow approximation that is 27 % out; right and dear
+    against wrong and cheap is a caller&#x27;s trade, so decide whether it is a default,
+    a flag, or a coarser corner count. SKIN and BOX: hollow, cannot route, and Bow
+    is further from a thin ring than it is from a hexagon -- say what happens to
+    them rather than leaving them silently wrong.
+  - Whatever routes, the change moves numbers a caller already has. Find every
+    test and golden fixture that inserts a non-rectangular swept winding before
+    changing the map, and record which ones move and by how much -- a 4/3 shift is
+    a FIX, but it has to be visible as one.
+  - A cheaper option exists and should be costed rather than dismissed: keep Bow
+    for a curved section but correct its normalisation, which removes the whole
+    error for a shape whose only defect is the area ratio. Measure whether it does
+    -- the box&#x27;s SECOND moment differs from the section&#x27;s too, so the ratio may be
+    constant only for the rows this rung happened to measure.
+  - The poly column&#x27;s transposition is named and not fixed: for a swept element
+    nova/geometry/polyline.PolyLine.poly returns the 3-D volume&#x27;s poloidal
+    projection with its axes swapped against the frame&#x27;s own width and height, at
+    single precision. Something reads it. Find out what, and either fix it or
+    write down why it is harmless.
+  - Do not widen a tolerance to pass a test. Timing on a sun_debug node only.
+
+Done-when
+  1. A decision, locked, on what each of the three shape classes routes to, with
+     the cost and the error measured for each rather than argued.
+  2. The routing implemented to match it, and every moved golden value recorded
+     with its before and after.
+  3. A test that a hexagonal swept winding reaches the element that can evaluate
+     it WITHOUT the caller naming a segment.
+  4. tests/test_biotpolybow.py, tests/test_biotpolygonarc.py and
+     tests/test_biotpolygonanalytic.py all unmoved.
+  5. The poly column&#x27;s transposition either fixed or written down with its
+     consumers named.
+  6. Followup written; this followup resolved.</pre>
     </article>
 </section>
 

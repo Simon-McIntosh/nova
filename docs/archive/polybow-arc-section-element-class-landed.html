@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="archive">
+  <meta name="plan-slug" content="polybow-arc-section-element-class-landed">
+  <meta name="plan-title" content="The element class, and the third a hexagonal winding was out by — landed">
+  <meta name="plan-status" content="historical">
+  <meta name="plan-modified" content="2026-07-26">
+  <title>polybow-arc-section element class landed | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>The arc becomes an element, and the routing it needs turns out to be a correctness question</h1>
+  <p><a href="/nova/polybow-arc-section.html">← back to the evergreen plan</a> ·
+     landed 2026-07-26 · 15 new tests, 0 failed ·
+     <strong>the class costs the reduction plus 16 %, and the element it sits
+     beside returns four thirds of the answer on the section this one exists
+     for</strong></p>
+
+  <h2>Quick status</h2>
+  <table>
+    <thead><tr><th>Item</th><th>Status</th><th>Where</th></tr></thead>
+    <tbody>
+      <tr><td>An element class the frame and groupset machinery consume, with
+          the arc's five rows reaching the same frame attributes <code>Bow</code>'s
+          do</td>
+          <td>✓ shipped</td>
+          <td><code>nova/biot/polybow.PolyBow</code></td></tr>
+      <tr><td>Registered in the segment → class registry</td>
+          <td>✓ shipped</td>
+          <td><code>nova/biot/solve.Solve.generator["polybow"]</code></td></tr>
+      <tr><td><code>arc-element-shape</code> locked on the two measurements</td>
+          <td>✓ locked</td>
+          <td><em>extend-arc</em> — peer of <code>Bow</code></td></tr>
+      <tr><td>A rectangular-section polygon arc and a <code>Bow</code> of the same
+          section agree through the CLASS, over four sweeps</td>
+          <td>✓ pinned</td>
+          <td>4.9e-09 overall / 1.1e-08 by row</td></tr>
+      <tr><td>The class against the bare reduction — the frame transform alone</td>
+          <td>✓ pinned</td>
+          <td>3.5e-12 overall / 3.0e-11 by row</td></tr>
+      <tr><td>A hollow section is refused rather than silently rebuilt as a
+          nearly-solid square</td>
+          <td>✓ pinned</td>
+          <td><code>NotImplementedError</code></td></tr>
+      <tr><td>Cost through the frame, so the two elements are compared on the
+          same terms</td>
+          <td>✓ measured</td>
+          <td>550.1 µs/pair rectangle, 926.6 hexagon</td></tr>
+      <tr><td><code>tests/test_biotpolygonarc.py</code> and
+          <code>tests/test_biotpolygonanalytic.py</code> unmoved</td>
+          <td>✓ 186 passed</td>
+          <td>50 + 112 + 15 + 9, 0 failed</td></tr>
+      <tr><td>Automatic routing — a non-rectangular swept winding reaching this
+          element without the caller naming it</td>
+          <td>⨯ not landed — carried forward</td>
+          <td>the next rung, and it is a decision rather than a patch</td></tr>
+    </tbody>
+  </table>
+
+  <figure>
+    <img src="/nova/figures/polybow-arc-section/arc_element_class.png"
+         alt="The hexagonal section drawn inside the rectangle Bow integrates with the four-thirds ratio annotated, each row's deviation between the class and the bare reduction beside the same rows against Bow, and the per-pair cost of the two elements measured through the frame on a rectangle and on a hexagon"
+         style="max-width:100%">
+    <figcaption>Left: the section a hexagonal winding declares, and the box the
+    element it is routed to integrates instead — the ratio is the reciprocal of
+    the area fraction a regular hexagon fills, and it is the same on every row
+    and every target because the error is a normalisation. Middle: what the class
+    adds to the reduction is two rotation matrices, four orders below what
+    <code>Bow</code>'s own quadrature differs by. Right: the cost of the two
+    elements over the same coilset and the same cloud, with the bare reduction
+    marked on the rectangle where the frame's section is the bare variant's.</figcaption>
+  </figure>
+
+  <h2>The decision, and what decided it</h2>
+  <p><code>arc-element-shape</code> asked whether the class extends
+  <code>Bow</code>, inheriting its arc geometry and overriding the section
+  evaluation, or extends <code>Arc</code> directly and treats the polygon section
+  as a peer of the rectangular one. It is locked <strong>extend-arc</strong>, and
+  the argument is a reading of what each base actually contains rather than a
+  preference.</p>
+  <p>The five rows the frame consumes — <code>_Ar_hat</code> through
+  <code>_Bz_hat</code>, rotated into the source's local cartesian frame by
+  <code>_Ax_hat</code>/<code>_Ay_hat</code>/<code>_Bx_hat</code>/<code>_By_hat</code>
+  and thence to global by <code>Matrix._vector</code> — are <strong>Arc's</strong>.
+  <code>Bow</code> inherits them unchanged. What <code>Bow</code> adds is a
+  <code>__post_init__</code> that stacks the four corners of a rectangle onto every
+  geometry array, a <code>_stack</code> helper that tiles the rest to match, a
+  <code>zeta</code> quadrature over that stack, and the five row expressions that
+  consume it. A polygon section needs none of those, so extending <code>Bow</code>
+  would inherit a base whose entire body has to be disabled — and disabling
+  <code>__post_init__</code> conditionally would make which base ran depend on a
+  flag, where the frame plumbing has to be the same either way. Extending
+  <code>Arc</code> inherits the plumbing and nothing else, which is exactly what
+  the two elements share. The test asserts the relationship rather than describing
+  it: <code>PolyBow</code> is an <code>Arc</code> and is not a <code>Bow</code>.</p>
+
+  <h3>What the cost table says about routing, which is what the decision asked for</h3>
+  <p>The record carried 2.65× — the closed form against <code>Bow</code> on the
+  rectangle they share — and that comparison was between a BARE kernel call and a
+  FRAMED one. Measured on the same terms it is <strong>3.02×</strong>: the frame
+  costs the reduction another 16 %, and it costs <code>Bow</code> the same 16 %
+  it was already paying. That does not change the conclusion so much as sharpen
+  the question it was asked about.</p>
+  <p>The routing the cost table appeared to argue for — an in-class flag between
+  the closed form and the quadrature, the way <code>PolySection.closed_form</code>
+  chooses between two exact ring kernels — <strong>is not the routing that is
+  live here, and it is not a cost question at all.</strong> Three measured reasons:</p>
+  <ul>
+    <li><strong>The two evaluations are already routed between, at the segment
+    level.</strong> A rectangular-section winding reaches <code>Bow</code> and a
+    polygon one would reach <code>PolyBow</code>; the choice is the frame's
+    <code>segment</code> column, not a class flag. A second route inside the class
+    would duplicate a decision the registry already owns.</li>
+    <li><strong><code>Bow</code>'s alternative only exists for a rectangle.</strong>
+    Its zeta quadrature integrates a rectangle's four corners and nothing else, so
+    on the sections this element is for there is no cheaper evaluation to route to
+    — only a wrong one.</li>
+    <li><strong>And on those sections it IS the wrong one.</strong> A hexagonal
+    winding routed to <code>Bow</code> today comes back at <strong>four
+    thirds</strong> of its value, on every row and every target
+    (1.3330 … 1.3335 measured): <code>Bow</code> integrates over the rectangle the
+    frame's <code>width</code> and <code>height</code> bound while dividing by the
+    frame's <code>area</code>, which is the hexagon's — and a regular hexagon
+    fills three quarters of that box. So the cheaper element is 186.5 µs/pair and
+    33 % out; the dearer one is 926.6 and right. There is no trade to route.</li>
+  </ul>
+  <p>The routing that IS worth having is the other one <code>PolySection</code>
+  carries — <code>standoff</code>, exact near and a point filament far, where the
+  gap is four orders rather than three-fold. It is deliberately not built here for
+  the same reason <code>PolySection.standoff</code> defaults to <em>None</em>: a
+  principled cutoff has to come from the section's own second-moment error bound
+  and none of the geometry-derived candidates measured so far qualifies. Exact
+  everywhere is the shipped lane for the ring and it is the shipped lane here.</p>
+
+  <h2>The section, and the column it does not come from</h2>
+  <p>The class builds its corners from the frame's own section descriptor — the
+  name, the <code>width</code> and the <code>height</code>, about the arc's own
+  <code>(r, z)</code> — through <code>nova.geometry.polygen.PolyGen</code>, in the
+  same convention <code>Bow</code> builds its rectangle from.</p>
+  <p><strong>Not from the frame's <code>poly</code> column</strong>, which is what
+  the axisymmetric <code>PolySection</code> reads, and finding out why cost an
+  hour worth recording. For a ring, <code>poly</code> IS the cross-section. For a
+  SWEPT element it is the projection of the 3-D volume onto the poloidal plane,
+  and it disagrees with the frame's own dimensions in two ways at once: its axes
+  come back transposed — a 0.06 × 0.04 winding projects to a 0.04 × 0.06
+  rectangle — and it is stored at single precision. The transposition is a real
+  inconsistency between two descriptions of the same conductor and it is left
+  alone here, because <code>Bow</code>'s convention is the one the landed gate
+  measures against and the one the physics agrees with; it is named in the next
+  rung.</p>
+  <p>A generated section arrives as a shapely ring, so its first corner repeats at
+  the end — and a generator that sweeps an angle closes on a corner that is its
+  own first to within round-off rather than exactly, which leaves the ring one
+  corner longer still. Both are edges of zero length. They are dropped against the
+  SECTION's own extent rather than an absolute tolerance, so a thin plate keeps
+  corners a coordinate-absolute test would merge at a major radius of six metres.</p>
+
+  <h3>What is refused</h3>
+  <p>Five section names are admitted — <code>disc</code>, <code>ellipse</code>,
+  <code>hexagon</code>, <code>rectangle</code>, <code>square</code> — and they are
+  exactly the generators whose third and fourth arguments are the section's own two
+  dimensions. <code>skin</code> and <code>box</code> are refused for two reasons
+  that are each sufficient: their fourth argument is a HOLLOWNESS factor, so
+  building one from <code>(width, height)</code> would silently return a nearly
+  solid square rather than the ring the frame means, and the section they describe
+  has an interior boundary that a single corner list cannot carry.
+  <code>polygon</code>, <code>shell</code> and <code>outline</code> are refused
+  because a swept element keeps no corner list of its own to read — the winding
+  path consumes its cross-section into a vtk sweep and does not store it. A
+  <code>disc</code> is admitted and costs what its corner count implies: the
+  generator resolves a quadrant in sixteen segments, so sixty-four corners against
+  a hexagon's six.</p>
+
+  <h2>Measured</h2>
+  <table>
+    <thead><tr><th>Quantity</th><th>Worst</th><th>Swept over</th></tr></thead>
+    <tbody>
+      <tr><td>The class against the bare reduction, absolute agreement normalised
+          by the largest row — the local-to-global round trip and nothing else</td>
+          <td>3.5e-12</td>
+          <td>four sweeps × five rows, rectangle and hexagon</td></tr>
+      <tr><td>The same, each row against its OWN size</td>
+          <td>3.0e-11</td>
+          <td>the same</td></tr>
+      <tr><td><code>Bow</code> at zero edge slope, through the class rather than
+          through the bare function, normalised by the largest row</td>
+          <td>4.9e-09</td>
+          <td>four sweeps including one that crosses the branch cut</td></tr>
+      <tr><td>The same, each row against its own size — <code>Bow</code>'s
+          fixed-node zeta quadrature, not either reduction's accuracy</td>
+          <td>1.1e-08</td>
+          <td>the same</td></tr>
+      <tr><td>A hexagonal winding through <code>Bow</code> against the same
+          winding through this class</td>
+          <td>1.3330 … 1.3335</td>
+          <td>five rows × five targets; <code>4/3</code> is 1.33333</td></tr>
+      <tr><td>Two windings of different section and different sweep in one
+          segment, against the sum of two bare calls</td>
+          <td>&lt; 1e-11</td>
+          <td>one generator, two sources</td></tr>
+    </tbody>
+  </table>
+  <p>The <code>Bow</code> comparison is bounded from above only, as the bare-function
+  one already was, and for a sharper reason than last time. The landed record noted
+  that <code>CoilSet.point</code>'s accessors come back single precision in some
+  processes; they came back single precision in every process here, and at that
+  precision every comparison in this module reads as EXACT — a class that simply
+  returned <code>Bow</code>'s own numbers would pass. The frame's stored matrices
+  are float64 and are what the tests read, and one assertion exists solely to
+  record that the two elements differ at all.</p>
+
+  <h2>Cost</h2>
+  <p><code>sun_debug</code> node, one core, fresh process per variant, median of 3,
+  512 pairs against one source. <code>bow-rectangle</code> reads 182.1 against the
+  181.3 of record, so the node is the same one the previous rung measured on.</p>
+  <table>
+    <thead><tr><th>Evaluation</th><th>rectangle [µs/pair]</th>
+      <th>hexagon [µs/pair]</th><th>note</th></tr></thead>
+    <tbody>
+      <tr><td><code>Bow</code>, through the frame</td><td>182.1</td><td>186.5</td>
+          <td>the hexagon figure is <strong>4/3 out</strong></td></tr>
+      <tr><td><code>PolyBow</code>, through the frame</td><td>550.1</td><td>926.6</td>
+          <td>3.02× and 4.97×</td></tr>
+      <tr><td>the arc reduction alone</td><td>472.2</td><td>928.7</td>
+          <td>rectangle: the frame is +77.9, or 16 %</td></tr>
+      <tr><td>the ring reduction alone</td><td>101.9</td><td>203.4</td>
+          <td>three rows against the arc's five</td></tr>
+    </tbody>
+  </table>
+  <p>Only the rectangle column supports a framed-against-bare reading: the frame's
+  rectangle is the bare variant's rectangle. The two hexagons are the same size and
+  the same corner count but not the same ORIENTATION — the generator puts a corner
+  on the <code>r</code> axis where the benchmark's own hexagon puts one on
+  <code>z</code>, which leaves four live edges rather than six — so 926.6 against
+  928.7 is a coincidence of two differences and not a measurement of either.</p>
+  <p>The useful figure is the 16 %. The element class is the reduction plus a
+  source assembly, two rotations and the matrix storage, and none of that scales
+  with the section — so the same 78 µs is 16 % of a rectangle and 8 % of a
+  hexagon, and it falls further on anything with more corners. Whatever the arc
+  costs, the class is not where it goes.</p>
+
+  <h2>What the next rung inherits</h2>
+  <p>The element exists and nothing routes to it. Every swept winding is sent to
+  <code>Bow</code> by one line in <code>nova/geometry/polyline.py</code> —
+  <code>thicken = {"arc": "bow", "line": "beam"}</code> — whatever its
+  cross-section is, so reaching this class means setting the frame's
+  <code>segment</code> column by hand, which is the route the tests and the
+  benchmark take and the same one <code>benchmarks/polygon_route_cost.py</code>
+  takes to reach <code>PolySection</code>.</p>
+  <p>Making that automatic is the next rung and it is a DECISION rather than a
+  patch, because the shapes divide three ways and only one of them is
+  straightforward:</p>
+  <ul>
+    <li><strong>hexagon</strong> — six corners, 4.97× the cost and 33 % of the
+    error removed. The case that makes the change worth making, and the section a
+    plasma cell already uses.</li>
+    <li><strong>disc and ellipse</strong> — correct but sixty-four corners, so
+    roughly ten times a hexagon's cost, against a <code>Bow</code> approximation
+    measured at <code>4/π</code> — 1.27305 … 1.27324 on a disc and 1.2749 …
+    1.2755 on an ellipse, the second a hair above because a sixty-four-gon
+    slightly under-fills its own curve. Right and dear against wrong and cheap,
+    which is a caller's trade and not this element's to make silently.</li>
+    <li><strong>skin and box</strong> — cannot route at all: hollow, and
+    <code>Bow</code>'s rectangle is further from a thin ring than it is from a
+    hexagon. They stay where they are until a section with an interior boundary
+    has a representation.</li>
+  </ul>
+  <p>Two smaller things are named rather than left implied. The
+  <code>poly</code> column's transposition against <code>width</code> and
+  <code>height</code> for a swept element is a genuine disagreement between two
+  descriptions of one conductor, and something reads it. And the packed, unbranched
+  driver the tiled path needs is still not written — nothing in the reduction
+  inspects a value, so <code>packed_analytic_greens</code>'s counterpart is a
+  driver rather than a reformulation, and the tiled backend's memoisation key and
+  the persistent compilation cache both already handle a second kernel.</p>
+</main>
+</body>
+</html>

@@ -99,6 +99,27 @@ def test_sweep():
     assert np.isclose(coil.volume(), volume, rtol=1e-2)
 
 
+@pytest.mark.parametrize("align", ["vector", "axes"])
+def test_sweep_keeps_the_sections_width_radial_and_its_height_vertical(align):
+    """A swept conductor must have the dimensions its cross-section declares.
+
+    Volume alone cannot see this -- it is the same for a section and for its
+    transpose -- so a sweep that rotated every section a quarter turn passed
+    every test there was.  The two alignments have to agree for a path in a
+    plane of constant height, because there is only one sensible answer there.
+    """
+    radius, width, height = 5.0, 0.6, 0.9
+    angle = np.linspace(0.3, 1.9, 40)
+    path = np.stack(
+        [radius * np.cos(angle), radius * np.sin(angle), np.zeros_like(angle)], axis=-1
+    )
+    solid = Sweep(Polygon({"r": [0, 0, width, height]}).points, path, align=align)
+    vertices = np.asarray(solid.triangulate().vertices)
+    span = np.hypot(vertices[:, 0], vertices[:, 1])
+    assert np.isclose(np.ptp(span), width, atol=1e-6)
+    assert np.isclose(np.ptp(vertices[:, 2]), height, atol=1e-6)
+
+
 @pytest.mark.parametrize(
     "sequence,angles",
     [

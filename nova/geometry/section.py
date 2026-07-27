@@ -95,10 +95,17 @@ class Section:
                     ]
                     self.to_axes(axes)
                 case "vector":
-                    sign = np.sign(np.array([0, 0, 1]) @ self.triad[0])
+                    # A cross-section is authored in its own x-z plane -- width
+                    # along x, height along z, the y axis its normal -- so the
+                    # axis pinned to world vertical is the section's THIRD, and
+                    # its normal follows the tangent.  Pinning the first instead
+                    # lands the width along z and the height along the path's
+                    # own normal, which swaps the two dimensions of every swept
+                    # conductor and is invisible only for a square one.
+                    sign = np.sign(np.array([0, 0, 1]) @ self.triad[2])
                     if np.isclose(sign, 0):
                         sign = 1
-                    self.to_vector(np.array([0, 0, sign * 1]), 0)
+                    self.to_vector(np.array([0, 0, sign * 1]), 2)
                     self.to_vector(frenet.tangent[i], 1)
                 case "twist":
                     # delta = untwist(frenet.parametric_length[i]) - angle

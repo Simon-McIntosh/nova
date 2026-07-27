@@ -16,8 +16,8 @@
   <title>Nova Spine Refactor | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-24">
-<meta name="plan-version" content="18">
+<meta name="plan-modified" content="2026-07-27">
+<meta name="plan-version" content="20">
 <meta name="plan-impl" content="0.9">
 </head>
 <body>
@@ -461,10 +461,26 @@
     <p>End state under the locked in-place route: the assembly project (GP fitting + SSAT/in-pit, per §2a's
     hardened extraction) lives in its own repository and, where it needs frame/geometry/graphics services,
     depends on nova 2.0 — the dependency finally pointing the right way (assembly → spine, matching the
-    one-way leave→keep import direction that already exists). <code>develop</code> merges to <code>main</code>
-    once the 2.0 gate (§9 suite + §10 ambix adoption green) and the §2a extraction sign-off are both recorded;
-    nova returns to single-trunk operation and the 1.x line survives as <code>legacy/v1</code> + tag for
-    archaeology and as the oracle for cross-check tests during the transition.</p>
+    one-way leave→keep import direction that already exists). <strong>The seal is gated on the §2a extraction
+    sign-off alone — that sign-off is recorded, so §11 is unblocked and ready to ship</strong> (decision
+    <code>seal-gating</code>, 2026-07-27): §10 ambix adoption is independent work in the imas-ambix checkout and
+    does not gate returning nova main to the 2.0 spine, because the seal is a forward deletion of an
+    already-extracted tree, fully recoverable from <code>legacy/v1</code> + <code>v1-assembly-baseline</code>.
+    Forward deletion only — never a history rewrite, never a force-push, and the protected
+    <code>legacy/v1</code> branch and <code>v1-assembly-baseline</code> tag are never touched.
+    On merge, nova returns to single-trunk operation and the 1.x line survives as <code>legacy/v1</code> + tag
+    for archaeology and as the oracle for cross-check tests during the transition.</p>
+
+    <p><strong>Co-installation hazard (noted 2026-07-27).</strong> norma's distribution is named
+    <code>norma</code>, but its wheel still ships the top-level <code>nova</code> import package
+    (<code>[tool.hatch.build.targets.wheel] packages = ["nova"]</code>), overlapping nova 2.0
+    (<code>nova-stella</code>) on nine entries: <code>__init__.py</code>, <code>database</code>,
+    <code>dataset</code>, <code>definitions.py</code>, <code>frame</code>, <code>geometry</code>,
+    <code>graphics</code>, <code>structural</code>, <code>utilities</code>. Installing both distributions into
+    one environment lets the later install silently overwrite the earlier one's files, so until norma's import
+    namespace is renamed the two cannot safely share an environment. This does <em>not</em> gate the seal — the
+    seal removes assembly source from nova main and changes nothing about what norma ships. The rename is owned
+    by the norma plan <a href="/norma/norma-standalone-package.html"><code>norma-standalone-package</code></a>.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -522,6 +538,14 @@
       <button class="r-opt" data-value="dvc">DVC with a remote</button>
       </p>
     <p class="r-dec-rat">User confirmation 2026-07-23: OCI artifacts on GHCR pushed with ORAS — immutable content digests (what goldens manifests and run records reference), campaign tags, private packages under existing GitHub auth, CI-pullable, no repo bloat. Swappable later because manifests reference digests, not locations.</p>
+    </div>
+<div class="r-dec" data-key="seal-gating" data-choice="extraction-only" data-by="smc" data-when="2026-07-27T20:22:06+00:00">
+    <p class="r-dec-q">What gates the §11 forward-deletion seal — the §2a extraction sign-off only, or that plus §10 ambix adoption?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="extraction-only">extraction sign-off only</button>
+      <button class="r-opt" data-value="extraction-plus-ambix">extraction sign-off + ambix adoption</button>
+      </p>
+    <p class="r-dec-rat">User direction 2026-07-27: ambix adoption is NOT a prerequisite for the nova repo ship. §10 is independent work carried out in the imas-ambix checkout and does not gate returning nova main to the 2.0 spine. The seal is a forward deletion of an already-extracted tree — legacy/v1 and the v1-assembly-baseline tag remain the permanent frozen copy, so any file is recoverable with a single checkout and ambix&#x27;s migration state has no bearing on its safety. The sole precondition is the §2a extraction sign-off, which is recorded (norma CI green — run 30126947615, gate 228 passed / 13 skipped, self-contained green; nova 2e9119ee). f-int-09 (§10 ambix adoption) continues on its own track and stays open.</p>
     </div>
 </section>
 
@@ -1037,11 +1061,11 @@ Done-when
   4. This followup resolved. NOTE: the §11 develop→main forward-deletion seal
      remains additionally gated on §10 ambix adoption (f-int-09) — steps 6–7
      clear the extraction half only.</pre>
-    <p class="r-fu-outcome">norma CI stood up and green; §2a extraction sign-off recorded. norma .github/workflows/ci.yml (commit 23782909) runs two jobs on push/PR to main — gate: the metrology replay lanes at 228 passed / 13 visible skips / 0 failed; self-contained: uv build the wheel, install into a bare venv, import nova.assembly/nova.structural/nova.dataset and run the pure-function lanes (test_transform + TestErrorVector/TestTransform/TestMaskFrame) from a staging dir where the source tree is not importable, 11 passed — proving zero dependency back into nova. Verified green on GitHub: https://github.com/Simon-McIntosh/norma/actions/runs/30126796442 (first authored version) and https://github.com/Simon-McIntosh/norma/actions/runs/30126947615 (current, after bumping the actions off the deprecated Node 20 runtime). Prerequisite hardening: norma 04cc4168 defers the hard `import ansys.dpf.core` in nova/assembly/ansyspost.py behind a placeholder that raises on first attribute access, plus postponed annotations so the dataclass field types no longer need the real module — collection goes from 234 tests + 2 collection errors to 241 tests clean without the ansys extra. Sign-off prose committed in nova docs/nova-spine-refactor.html §2a. TWO QUALIFICATIONS recorded in the sign-off rather than papered over: (1) the gate-(6) dual-run window is one-sided — nova has no test CI at all (no .github tree; only GitHub-native Dependabot/dependency-graph runs), so the nova-side half remains the locally-recorded 2026-07-23 green at e31fb6df; (2) the corpus lanes still skip in CI — the private GHCR package norma-corpus is repo-linked to nova and GitHub exposes no API to grant norma's GITHUB_TOKEN read access to a user-owned private package, so the workflow authenticates with a read:packages PAT as repo secret CORPUS_READ_TOKEN and skips the pull when absent (5 of the 13 skips). Secret creation needs an interactive GitHub session; tracked as f-int-11.</p>
+    <p class="r-fu-outcome">norma CI stood up and green; §2a extraction sign-off recorded. norma .github/workflows/ci.yml (commit 23782909) runs two jobs on push/PR to main — gate: the metrology replay lanes at 228 passed / 13 visible skips / 0 failed; self-contained: uv build the wheel, install into a bare venv, import nova.assembly/nova.structural/nova.dataset and run the pure-function lanes (test_transform + TestErrorVector/TestTransform/TestMaskFrame) from a staging dir where the source tree is not importable, 11 passed — proving zero dependency back into nova. Verified green on GitHub: https://github.com/Simon-McIntosh/norma/actions/runs/30126796442 (first authored version) and https://github.com/Simon-McIntosh/norma/actions/runs/30126947615 (current, after bumping the actions off the deprecated Node 20 runtime). Prerequisite hardening: norma 04cc4168 defers the hard `import ansys.dpf.core` in nova/assembly/ansyspost.py behind a placeholder that raises on first attribute access, plus postponed annotations so the dataclass field types no longer need the real module — collection goes from 234 tests + 2 collection errors to 241 tests clean without the ansys extra. Sign-off prose committed in nova docs/nova-spine-refactor.html §2a. TWO QUALIFICATIONS recorded in the sign-off rather than papered over: (1) the gate-(6) dual-run window is one-sided — nova has no test CI at all (no .github tree; only GitHub-native Dependabot/dependency-graph runs), so the nova-side half remains the locally-recorded 2026-07-23 green at e31fb6df; (2) the corpus lanes still skip in CI — the private GHCR package norma-corpus is repo-linked to nova and GitHub exposes no API to grant norma's GITHUB_TOKEN read access to a user-owned private package, so the workflow authenticates with a read:packages PAT as repo secret CORPUS_READ_TOKEN and skips the pull when absent (5 of the 13 skips). Secret creation needs an interactive GitHub session; tracked as f-int-12 (since re-homed to the norma plan norma-standalone-package §3).</p>
     </article>
 <article class="r-fu" data-id="f-int-11" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-24T16:45:00+00:00" data-recommends-skill="/reckon-ship nova-spine-refactor §11" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">§11 convergence: forward-delete the assembly tree from nova main (develop→main) and return to single trunk</h4>
-    <div class="r-fu-body"><p>The seal, by forward deletion (never a history rewrite — <code>legacy/v1</code> + <code>v1-assembly-baseline</code> stay the permanent frozen copy in nova history; norma carries an independent full copy). <code>develop</code> already has the assembly tree removed (<code>59ee0303</code>); merging <code>develop→main</code> drops it from main's working tree while all history and the protected baseline remain. GATED on both preconditions: (a) §10 ambix adoption green (f-int-09), and (b) the §2a extraction sign-off recorded once norma CI + self-containment are green over a dual-run window (f-int-10). Fully recoverable: <code>git checkout v1-assembly-baseline -- nova/assembly</code> restores any file; no SHA churn.</p></div>
+    <div class="r-fu-body"><p>The seal, by forward deletion (never a history rewrite — <code>legacy/v1</code> + <code>v1-assembly-baseline</code> stay the permanent frozen copy in nova history; norma carries an independent full copy). <code>develop</code> already has the assembly tree removed (<code>59ee0303</code>); merging <code>develop→main</code> drops it from main's working tree while all history and the protected baseline remain. The <strong>sole precondition is the §2a extraction sign-off, and it IS recorded</strong> (f-int-10 resolved: norma CI run 30126947615, gate 228 passed / 13 skipped, self-contained green) — so this is UNBLOCKED and ready to ship. Per decision <code>seal-gating</code> (2026-07-27) §10 ambix adoption no longer gates the seal: it is independent work in the imas-ambix checkout, f-int-09 stays open on its own track. Fully recoverable: <code>git checkout v1-assembly-baseline -- nova/assembly</code> restores any file; no SHA churn.</p></div>
     <pre class="r-fu-prompt">Project: nova
 Plan:    nova-spine-refactor §11 (convergence / seal)
 Tier:    opus
@@ -1053,22 +1077,24 @@ Context
   filter-branch/rewrite nova history; legacy/v1 + v1-assembly-baseline are the
   permanent frozen copy and are branch-protected.
 
-  HARD PRECONDITIONS (both must be recorded before this runs):
-    - f-int-09 §10 ambix adoption green (imas-ambix imports the spine; full
-      ambix suite green; spine_bench matches baselines).
-    - f-int-10 §2a extraction sign-off: norma CI (replay gate from GHCR) +
-      self-containment install check green over a dual-run window with nova CI.
-  If either is not yet recorded, STOP — this is the (rare) prerequisite-unmet
-  hard stop; report and wait.
+  HARD PRECONDITION (one, and it is already recorded):
+    - f-int-10 §2a extraction sign-off: norma CI (gate 228 passed / 13 skipped,
+      run 30126947615) + the self-containment install check, both green;
+      sign-off prose recorded in §2a (nova 2e9119ee).
+  §10 ambix adoption is NOT a precondition (decision seal-gating, 2026-07-27):
+  it is independent work in the imas-ambix checkout and has no bearing on the
+  safety of a forward deletion of an already-extracted tree. f-int-09 stays
+  open on its own track. Confirm the §2a sign-off line is present; if it has
+  somehow been removed, STOP and report.
 
 State to read
   docs/nova-spine-refactor.html §2, §2a, §11 (branch model + hardened sequence)
   docs/archive/nova-spine-refactor-s2-landed.html (the develop deletion 59ee0303)
 
 Work
-  1. Confirm both preconditions are recorded (§2a sign-off line present; f-int-09
-     resolved). Confirm norma main + v1-assembly-baseline are live and the gate
-     is green.
+  1. Confirm the single precondition is recorded (§2a sign-off line present).
+     Confirm norma main + v1-assembly-baseline are live and the gate is green.
+     Do NOT wait on f-int-09 / ambix.
   2. Merge develop→main: git checkout main; git pull --no-rebase origin main;
      git merge --no-ff develop -m &#x27;Merge develop: 2.0 spine to main, assembly
      extracted to norma&#x27;. develop&#x27;s assembly deletion stands; main&#x27;s assembly
@@ -1091,9 +1117,14 @@ Done-when
   1. develop merged to main; assembly tree gone from main&#x27;s working tree; full
      history + legacy/v1 + v1-assembly-baseline intact and recoverable.
   2. nova main lanes green; no dangling imports.
-  3. Single-trunk restored; §11 recorded; plan set shipped.</pre>
+  3. Post-merge verification: nova has NO CI (.github/workflows does not exist),
+     so the check is a LOCALLY-run fast lane plus full lane on main, with the
+     command, counts and wall time recorded in this plan as the §11 outcome.
+     A locally-recorded green is the only available signal — do not claim a
+     CI-verified merge.
+  4. Single-trunk restored; §11 recorded; plan set shipped.</pre>
     </article>
-<article class="r-fu" data-id="f-int-12" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-24T21:35:00+00:00" data-recommends-skill="/reckon-ship nova-spine-refactor §2a" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-int-12" data-status="resolved" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-24T21:35:00+00:00" data-recommends-skill="/reckon-ship nova-spine-refactor §2a" data-resolved-at="2026-07-27T20:22:12+00:00" data-resolved-by="smc">
     <h4 class="r-fu-title">Add the CORPUS_READ_TOKEN secret so norma CI replays against the real measured corpus</h4>
     <div class="r-fu-body"><p>norma CI is green but corpus-blind: 5 of its 13 skips exist only because the measured sector-module corpus cannot be pulled in Actions. The private GHCR package <code>ghcr.io/simon-mcintosh/norma-corpus</code> is repo-linked to <em>nova</em>, and GitHub offers no API to grant a second repository's <code>GITHUB_TOKEN</code> read access to a user-owned private package — only the package's own settings page can. The workflow already handles this: it authenticates with <code>secrets.CORPUS_READ_TOKEN</code> and skips the pull steps when that secret is absent. Supplying the secret (or, alternatively, granting norma Actions access from the package settings page and switching the login to <code>GITHUB_TOKEN</code>) promotes the pit-gap ILIS reference lane, the off-repo canonical snapshot lane and three transcode lanes from skip to executed, with no workflow change. Both routes need an interactive GitHub session, so an agent cannot complete them unaided.</p></div>
     <pre class="r-fu-prompt">Project: norma (~/Code/norma, github.com/Simon-McIntosh/norma; private) and the GHCR package ghcr.io/simon-mcintosh/norma-corpus
@@ -1154,6 +1185,7 @@ Done-when
      skipped corpus lanes updated or removed accordingly.
   4. This followup resolved.
 </pre>
+    <p class="r-fu-outcome">Re-homed to the norma plan norma-standalone-package §3. The user granted admin access to the norma-corpus GHCR package on 2026-07-27, so the corpus-authentication work (secret vs package Actions-access route) now travels with the package re-home in norma rather than sitting as a loose nova followup. Nothing is dropped — the five corpus-dependent CI lanes stay skipped until that section lands.</p>
     </article>
 </section>
 

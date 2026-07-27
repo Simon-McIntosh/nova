@@ -72,6 +72,25 @@ temporaries to stay in cache is worth 4× over multi-megabyte blocks, and past a
 few megabytes allocator churn costs another order of magnitude (2.44 s at 2**22
 doubles, 8.4 s at 2**19, 0.53 s at 2**16 on the 200k-element kernel).
 
+## bow grid solve — the genuine finite-section winding build
+
+Recorded 2026-07-27 on sun_debug node 98dci4-clu-3141, one core, fresh process
+per run, first run, `TMPDIR=/tmp`, `JAX_PLATFORMS=cpu`; driver
+`benchmarks/bow_grid_solve.py`. The winding, the imports and the coilset are all
+resolved before the timer, so the figure is `grid.solve` alone.
+
+| measurement | wall clock |
+|---|---|
+| 10 bow segments × 2,052 grid targets (57 × 36), `grid.solve(2000, 0.5)` | 4.68 s (4.65–5.24) |
+
+`winding.insert(..., filament=False)` is what labels the segments `bow`; the
+default `filament=True` labels them `arc` and the finite-cross-section kernel is
+never reached, which is why an earlier "10×2000 bow grid solve 5.9 s" entry could
+not be reproduced. Reaching Bow through a grid additionally needed the incomplete
+third kind's amplitude fold corrected — an amplitude one representable step below
+a quarter turn, which is where a target on the arc's own end plane lands, used to
+abort — see `tests/test_biotoperate.py`.
+
 ## coupling kernel cost per pair — compute node, fresh process, median of 3
 
 Recorded 2026-07-25 (sun_debug node; login-node timings showed 5× spread and

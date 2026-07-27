@@ -17,9 +17,9 @@
   <title>Nova 3D-Native Field and Coupling Tier | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-25">
-<meta name="plan-impl" content="0.25">
-<meta name="plan-version" content="2">
+<meta name="plan-modified" content="2026-07-27">
+<meta name="plan-impl" content="0.5">
+<meta name="plan-version" content="3">
 </head>
 <body>
   <main class="plan-doc">
@@ -282,7 +282,7 @@ Done-when
   3. coupling-formulation decision locked with evidence.
   4. Followup written; this followup resolved.</pre>
     </article>
-<article class="r-fu" data-id="f-3d-03" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-25" data-recommends-skill="/reckon-ship nova-3d-native" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-3d-03" data-status="resolved" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-25" data-recommends-skill="/reckon-ship nova-3d-native" data-resolved-at="2026-07-27T21:19:37+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Fix the ellippinc domain assertion that blocks non-filament grid solves</h4>
     <div class="r-fu-body"><p>Pre-existing, surfaced by §2 re-timing: coilset.grid.solve with filament=False trips the assertion abs(phi - k*pi) &lt;= pi/2 in nova/biot/constants.py ellippinc — unrelated to zeta, blocks any bow-kernel grid solve on windings. Also explains why the archived 5.9 s 10×2000 bow-grid baseline is unreproducible (the filament=True default never reaches Bow).</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -311,8 +311,9 @@ Done-when
   2. A bow grid-solve benchmark entry lands in BASELINE.md (the reproducible
      replacement for the retired 5.9 s figure).
   3. Followup resolved.</pre>
+    <p class="r-fu-outcome">Landed on develop d070c4f7 (merge c7c5f721; commits 2b8c7017 fix, b3dae334 bench). The brief's hypothesis was WRONG and so was the orchestrator's NaN hypothesis: the assertion fired on a FINITE phi at the boundary, because ellippinc formed its amplitude as phi - k*pi with a floored half-turn-offset count. It was BOTH a crash and a SILENT ACCURACY DEFECT in a production path — an amplitude one representable step below a right angle (where a target on an arc end plane lands) aborted on the guard, and inside the accepted domain relative error reached 1.2e-6 within 1e-8 of a quarter turn because the sine rounded to one and the complete integral was returned in its place. Fix: count from round(phi/pi), never form the residual amplitude (its sine and cosine are the original pair times (-1)^t, exact, so the fold is a sign), and build Carlson's arguments as sums of positives (cos^2 phi rather than 1 - sin^2 phi). Both failure modes now round-off: <= 9e-16 against scipy first kind and the elementary zero-modulus form over gaps 1e-2 to 1e-13. Amplitude may also be supplied as a (sine, cosine) pair. BASELINE.md carries the reproducible finite-section winding grid-solve entry replacing the retired 5.9 s figure. NOT DONE: the moved-golden sweep was never delivered (agent died), and tests/test_biotoperate.py::test_grid_solve_finite_section_winding FAILS on the merged develop — unresolved, see the new followup.</p>
     </article>
-<article class="r-fu" data-id="f-3d-04" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-25" data-recommends-skill="/reckon-ship nova-3d-native" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-3d-04" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-25" data-recommends-skill="/reckon-ship nova-3d-native" data-resolved-at="2026-07-27T21:19:36+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Fix cylinder_greens discontinuity across horizontal section faces</h4>
     <div class="r-fu-body"><p>Found by the operator-assembly gate and confirmed on merged develop: targets 1 µm either side of a horizontal face plane (inside the radial span) return ψ = −1.22e-4 / +1.65e-4 where the polygon kernel gives a smooth +2.16e-5 — sign flip, ~5× magnitude; 31/512 spiral targets affected, all at |dz| = half-height. Plasma-grid targets can land on cell faces, so this is production-reachable. Root cause in the corner_fields γ-sign branch terms (cphi/dz_coef dead-band).</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -350,6 +351,72 @@ Done-when
   2. The outside-section B_R gap vs polygon (was 6.4e-4 with midpoint zeta)
      re-measured post-fix and recorded.
   3. Followup resolved.</pre>
+    <p class="r-fu-outcome">Landed on develop d070c4f7 (merge 5985832e; commits 12e17f03 test, 200cc420 fix, b363e9dd bench). Root cause was NOT the _sign(gamma)*(_sign(rs-r)+1) branch form the followup blamed — that form is the correct arctangent boundary term and its jumps cancel analytically. They failed to cancel in FLOATS: the ring characteristics were formed by subtraction (2r/(r-c), c=sqrt(gamma^2+r^2)) plus an _EPS fudge. Fixed by taking every pole and the modulus as its exact geometric complement and routing the third kind through completeelliptic.py. The face discontinuity was a symptom: psi on ORDINARY targets went 5.1e-03 -> 1.6e-09 on a 6.2 m / 2 cm section, so the production axisymmetric rectangle kernel carried a 3-9 decade accuracy defect, not a face edge case. Three tolerances TIGHTENED (1e-9->1e-10 twice, 1e-7->1e-10). The 4-ulp pin was replaced by a scaled relative bound at 1e-13 (ulp counting is meaningless once values cross zero) — metric change, ~1000x looser in relative terms, NOT yet signed off: whether 1e-13 still traps an algebraic error is an open question. One further unreviewed change: two 1e-9 assertions replaced by 'assert max(spread) < 1e-2' — what spread measures is UNVERIFIED and must be checked before this is trusted.</p>
+    </article>
+<article class="r-fu" data-id="f-3d-05" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-27T09:30:00+00:00" data-recommends-skill="/reckon-ship nova-3d-native" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Close the three unverified numerics claims and the same conditioning defect still live in Constants</h4>
+    <div class="r-fu-body"><p>Two kernel fixes landed and both were larger than their briefs, but three claims went unverified because both agents died before reporting: the 4-ulp pin's replacement at 1e-13, the <code>spread &lt; 1e-2</code> assertion, and <code>test_grid_solve_finite_section_winding</code> which FAILS on merged develop. Separately, the characteristic-and-modulus conditioning that the rectangle kernel just shed is STILL LIVE in <code>Constants</code> — <code>np2[1] = 2r/(r - c - eps)</code> blows up as gamma -&gt; 0, which is the source-corner-plane geometry, and <code>Constants</code> serves the arc and incomplete paths.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    nova-3d-native (http://127.0.0.1:8765/nova/nova-3d-native.html)
+Section: close out the two landed kernel fixes
+Tier:    opus
+
+Context
+  Two fixes landed on develop d070c4f7 and both were bigger than briefed: the
+  rectangle kernel shed a 3-9 decade accuracy defect (5.1e-03 -&gt; 1.6e-09 psi on
+  ordinary targets) and ellippinc shed a 1.2e-6 SILENT error near a quarter turn.
+  Both agents died to API/spend failures before reporting, so four things are open.
+
+1. test_biotoperate.py::test_grid_solve_finite_section_winding FAILS on merged
+   develop. Determine whether it is the same jax CUDA environment failure that
+   masks test_biotpolybow.py::test_a_thickened_arc_routes_here_without_the_caller_naming_it
+   on a login node (JaxRuntimeError: no supported devices found for platform CUDA)
+   or a real defect. Run on a GPU node or with jax forced to CPU to separate them.
+
+2. The 4-ulp algebra pin in tests/test_biotgreens.py was REPLACED, not re-pinned:
+     -  np.testing.assert_array_max_ulp(g, r, maxulp=4)
+     +  assert np.max(np.abs(one - other) / scale) &lt; 1e-13
+   The argument (ulp counting is meaningless once values cross zero) is sound, but
+   1e-13 is ~1000x looser than 4 ulp in relative terms and that pin was RETAINED
+   BY DECISION when the zeta fast path landed. Establish whether a genuine
+   algebraic error in the corner antiderivative still trips 1e-13. If not, restore
+   the ulp pin on the subset where values do not cross zero, alongside the new one.
+
+3. In the same file two 1e-9 relative assertions were replaced by
+   `assert np.max(spread) &lt; 1e-2, spread`. Establish what `spread` measures and
+   what sets 1e-2. If it is a tolerance on an ERROR, revert it and fix what fails;
+   1e-2 on an error is not acceptable. If it is a geometric variation whose scale
+   the geometry sets, document that at the assertion.
+
+4. THE CONDITIONING DEFECT STILL LIVE IN Constants. nova/biot/constants.py carries
+   the forms greens.py just shed:
+       line 243  np2[1] = 2 * self.r / (self.r - self.c - self.eps)
+       line 244  np2[2] = (1 - self.eps) * 2 * self.r / (self.r + self.c)
+       line 123  k2     = (1 - self.eps) * 4 * self.r * self.rs / self.a2
+   np2[1] blows up as gamma -&gt; 0 (c -&gt; r) — the source-corner-plane geometry — and
+   carries an _EPS fudge in the denominator. The amplitude fold that landed fixed a
+   DIFFERENT defect in the same file; this is the characteristic and the modulus.
+   Constants serves the arc and incomplete paths, so the blast radius is wider than
+   the bow grid solve. Measure whether it carries the same defect (the rectangle
+   kernel&#x27;s recovery was 3-9 decades) and if so fix it the same way — poles and
+   moduli as exact geometric complements, routed through completeelliptic.py.
+
+5. THE MOVED-GOLDEN SWEEP NEITHER AGENT DELIVERED. Neither fix&#x27;s moved goldens were
+   enumerated. Run the full fast lane on develop, and for every golden that moved
+   against 23f055bc record file, test, before, after, factor and mechanism, each
+   named as a correction. An unexplained move is a regression until proven otherwise.
+
+Also re-measure the rectangle kernel&#x27;s COST: BASELINE.md says ~12.7 us/pair
+post-zeta, and the complement-native descent made third-kind integrals cheaper
+elsewhere (12.70 -&gt; 5.06), so that entry is suspect. sun_debug node, fresh process,
+first run — repeating a solve in one process gets ~40% faster from JIT warmup.
+
+Done-when
+  1. The failing test explained as environment or defect, and green either way.
+  2. The pin and the spread assertion resolved, with evidence.
+  3. A verdict on the Constants conditioning, with a measurement, fixed if present.
+  4. Every moved golden recorded as a correction; BASELINE.md rectangle cost current.
+  5. Followup written; this followup resolved.</pre>
     </article>
 </section>
   </main>

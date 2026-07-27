@@ -1,19 +1,20 @@
+"""Assemble a fluid-response spectrum across a trial's shots."""
+
 from dataclasses import dataclass, InitVar
 from typing import Union
 
 import pandas
 
+from nova.thermalhydralic.plotimport import clock, pyplot
 from nova.thermalhydralic.sultan.trial import Trial
 from nova.thermalhydralic.sultan.sample import Sample
 from nova.thermalhydralic.sultan.fluidprofile import FluidProfile
-from nova.thermalhydralic.sultan.sultanio import SultanIO
 from nova.thermalhydralic.sultan.database import DataBase
-import matplotlib.pyplot as plt
-from nova.utilities.time import clock
+from nova.utilities.pandasdata import PandasHDF
 
 
 @dataclass
-class SultanSpectrum(SultanIO):
+class SultanSpectrum(PandasHDF):
     """Manage fluid response data."""
 
     experiment: str
@@ -70,9 +71,11 @@ class SultanSpectrum(SultanIO):
             tick.tock()
         return coefficents.astype("float")
 
-    def plot(self):
+    def plot(self, axes=None):
         """Plot spectrum."""
-        plt.plot(self.data.frequency, self.data.steadystate, "o")
+        if axes is None:
+            axes = pyplot().gca()
+        axes.plot(self.data.frequency, self.data.steadystate, "o")
 
 
 if __name__ == "__main__":

@@ -1,21 +1,34 @@
+"""Post-process CS module cold-test instrumentation logs.
+
+Reads the per-channel CSV exports of a coil cold test, groups the channels by
+sensor type and unit, conditions them onto a common timebase and fits the
+current-squared dependence that qualifies the coil.
+"""
+
 import datetime
 import os
 from glob import glob
 import string
 
-# import matplotlib.dates as mdates
-import matplotlib.gridspec
 import numpy as np
 import pandas
 from scipy.interpolate import interp1d
 import scipy.signal
-import seaborn as sns
 
 from nova.definitions import root_dir
+from nova.thermalhydralic.plotimport import clock, gridspec, pyplot, seaborn
 from nova.utilities.IO import pythonIO
-import matplotlib.pyplot as plt
-from nova.utilities.time import clock
-from nova.plot.addtext import linelabel
+
+
+def _linelabel(*args, **kwargs):
+    """Return a line-end label collector.
+
+    The collector draws through pylab, so it is reached from plot methods only
+    and never at module scope.
+    """
+    from nova.graphics.addtext import linelabel
+
+    return linelabel(*args, **kwargs)
 
 
 class cold_test(pythonIO):
@@ -60,12 +73,12 @@ class cold_test(pythonIO):
 
     def split_channels(self, data):
         index = {
-            **{self._ID[l]: [] for l in self._ID},
-            **{self._units[u]: [] for u in self._units},
+            **{self._ID[prefix]: [] for prefix in self._ID},
+            **{self._units[unit]: [] for unit in self._units},
             **{"other": []},
         }
         for channel in data.columns:
-            if np.array([l in channel[0] for l in self._ID]).any():
+            if np.array([prefix in channel[0] for prefix in self._ID]).any():
                 for label in self._ID:
                     if label in channel[0]:
                         index[self._ID[label]].append(channel)
@@ -169,7 +182,7 @@ class cold_test(pythonIO):
         columns = {}
         for c in data.columns:
             if c[:2] == "EX":
-                columns[c] = f'{c.split(" on ")[-1]}_(mm)'
+                columns[c] = f"{c.split(' on ')[-1]}_(mm)"
             elif c[:2] == "SG":
                 columns[c] = f"{c}_(ppm)"
             else:
@@ -207,7 +220,10 @@ class cold_test(pythonIO):
         _columns = [c.replace("value", "") for c in _columns]
         labels = [c.split("(")[0] for c in _columns]
         units = [c.split("(")[1][:-1] for c in _columns]
-        data.rename(columns={c: l for c, l in zip(columns, labels)}, inplace=True)
+        data.rename(
+            columns=dict(zip(columns, labels)),
+            inplace=True,
+        )
         data.columns = pandas.MultiIndex.from_arrays(
             [data.columns, units], names=("ID", "unit")
         )
@@ -294,8 +310,10 @@ class cold_test(pythonIO):
         data.loc[dt > gap, :] = None
 
     def plot_temperature(self):
+        """Plot every temperature channel, coloured by its final value."""
+        plt = pyplot()
         ax = plt.subplots(1, 1)[1]
-        text = linelabel(Ndiv=50, value="")
+        text = _linelabel(Ndiv=50, value="")
         for col in self.temperature:
             T = self.temperature.loc[:, col]
             if T[-1] > 250:
@@ -310,13 +328,11 @@ class cold_test(pythonIO):
                 color = "C3"
             ax.plot(self.temperature.loc[:, col], T, color=color, label=col[0][2:])
             text.add(col[0])
-        plt.despine()
         ax.set_ylim([0, 300])
         ax.set_xlabel("$t$ hr")
         ax.set_ylabel("$T$ K")
-        plt.legend(ncol=7, loc="upper center", bbox_to_anchor=(0.5, 1.4))
-        plt.despine()
-        # text.plot(fs=6)
+        ax.legend(ncol=7, loc="upper center", bbox_to_anchor=(0.5, 1.4))
+        seaborn().despine(ax=ax)
 
     def offset(self, dataframe, offset_dt):
         index = [[], []]
@@ -334,11 +350,11 @@ class cold_test(pythonIO):
             if pandas.api.types.is_list_like(label):
                 group = self._ID[label[0][:2]]
                 self.load_coldtest(group)
-                groups = [self.channels[l] for l in label]
+                groups = [self.channels[name] for name in label]
                 if not np.array([g == groups[0] for g in groups]).all():
                     raise IndexError("list labels must belong to same group")
                 group = groups[0]
-                channels = [(l, self._units_r.get(group, "mm")) for l in label]
+                channels = [(name, self._units_r.get(group, "mm")) for name in label]
             elif label in self.groups:
                 group = label
                 channels = slice(None)
@@ -373,6 +389,7 @@ class cold_test(pythonIO):
         ncol=2,
         **kwargs,
     ):
+        plt = pyplot()
         if ax is None:
             fig, ax = plt.subplots(1, 1)
         else:
@@ -401,25 +418,26 @@ class cold_test(pythonIO):
                 loc="upper center",
                 bbox_to_anchor=(0.5, 1 + shift),
             )
-        sns.despine()
+        seaborn().despine(ax=ax)
         fig.autofmt_xdate()
         if labels:
             if xlabel:
                 ax.set_xlabel("timestamp")
             if group in self._labels and ylabel:
                 ax.set_ylabel(self._labels[group])
-        # plt.set_aspect(0.7)
         return offset
 
     def plot_col(self, label, index=["cooldown", "test"], offset_dt=5 * 60):
-        ax = plt.subplots(1, 2, sharey=True, gridspec_kw={"wspace": 0.1})[1]
+        """Plot the cooldown and test phases side by side on a shared scale."""
+        ax = pyplot().subplots(1, 2, sharey=True, gridspec_kw={"wspace": 0.1})[1]
         offset = self.plot(label, index=index[0], ax=ax[0], offset_dt=offset_dt)
         self.plot(label, index=index[1], ax=ax[1], labels=False, offset=offset)
 
     def plot_row(self, label, index="test", ncol=2, color=None, offset_dt=5 * 60):
-        # plt.set_aspect(0.8)
+        """Plot a channel group above the drive current on a shared timebase."""
+        plt = pyplot()
         fig = plt.figure()
-        gs = matplotlib.gridspec.GridSpec(2, 1, height_ratios=[6, 1])
+        gs = gridspec().GridSpec(2, 1, height_ratios=[6, 1])
         ax = []
         ax.append(fig.add_subplot(gs[0]))
         ax.append(fig.add_subplot(gs[1], sharex=ax[0]))
@@ -472,17 +490,17 @@ class cold_test(pythonIO):
         # extract current
         if not hasattr(self, "current"):
             self.load_coldtest("current")
-        I = self.current.loc[index, ("PSIOut", "kA")]
-        # I = self.current.loc[index, ('IBus', 'kA')]
+        current = self.current.loc[index, ("PSIOut", "kA")]
+        # current = self.current.loc[index, ('IBus', 'kA')]
         # extract dataframe
         dataframe, group = self.get_dataframe(label, index)
         # interpolate
-        if I.shape[0] == dataframe.shape[0]:
-            interpolate = not np.equal(I.index, dataframe.index).all()
-        if I.shape[0] != dataframe.shape[0] or interpolate:
-            t = self.t(I.index)  # current time index
+        if current.shape[0] == dataframe.shape[0]:
+            interpolate = not np.equal(current.index, dataframe.index).all()
+        if current.shape[0] != dataframe.shape[0] or interpolate:
+            t = self.t(current.index)  # current time index
             t_data = self.t(dataframe.index)  # data time index
-            _dataframe = pandas.DataFrame(index=I.index)
+            _dataframe = pandas.DataFrame(index=current.index)
             for col in dataframe:  # load extension results
                 _dataframe[col] = interp1d(
                     t_data, dataframe.loc[:, col], bounds_error=False, fill_value=None
@@ -491,7 +509,7 @@ class cold_test(pythonIO):
             dataframe.columns = pandas.MultiIndex.from_tuples(dataframe.columns)
         # zero offset
         dataframe -= self.offset(dataframe, 5)
-        return I, dataframe
+        return current, dataframe
 
     def get_color(self, i, col):
         """Return line color."""
@@ -501,12 +519,13 @@ class cold_test(pythonIO):
                 index += 1
         except ValueError:
             index = i + 1
-        return f"C{index-1}"
+        return f"C{index - 1}"
 
     def plot_loop(self, label, index="CSM2", ncol=2):
-        I, dataframe = self.get_current(label, index)
+        """Plot each channel against drive current over the ramp loop."""
+        current, dataframe = self.get_current(label, index)
         group = self.channels[dataframe.columns.droplevel(1)[0]]
-        ax = plt.subplots(1, 1)[1]
+        ax = pyplot().subplots(1, 1)[1]
         max_value = dataframe.abs().max().max()
         for i, col in enumerate(dataframe):
             if (
@@ -515,12 +534,12 @@ class cold_test(pythonIO):
             ):
                 value = scipy.signal.savgol_filter(dataframe[col], 51, 1)
                 color = self.get_color(i, col)
-                ax.plot(I, value, "-", label=col[0], color=color, lw=1.5)
-        sns.despine()
-        plt.xlabel("$I$ kA")
-        plt.ylabel(self._labels[group])
+                ax.plot(current, value, "-", label=col[0], color=color, lw=1.5)
+        seaborn().despine(ax=ax)
+        ax.set_xlabel("$I$ kA")
+        ax.set_ylabel(self._labels[group])
         shift = np.floor(dataframe.shape[1] / ncol) * 0.12
-        plt.legend(ncol=ncol, loc="upper center", bbox_to_anchor=(0.5, 1 + shift))
+        ax.legend(ncol=ncol, loc="upper center", bbox_to_anchor=(0.5, 1 + shift))
 
     def fit(
         self,
@@ -538,12 +557,14 @@ class cold_test(pythonIO):
         Ndiv=20,
         xlabel=True,
     ):
-        I, dataframe = self.get_current(label, index)
-        dI = np.gradient(I, self.t(I.index))
+        current, dataframe = self.get_current(label, index)
+        current_rate = np.gradient(current, self.t(current.index))
         # trim  current
         if trim:
-            current_index = (I >= Imin) & (I <= Itrim) & (dI < -0.01)
-            I = I[current_index]
+            current_index = (
+                (current >= Imin) & (current <= Itrim) & (current_rate < -0.01)
+            )
+            current = current[current_index]
             dataframe = dataframe[current_index]
         max_value = dataframe.abs().max().max()
         coef = np.zeros(dataframe.shape[1])
@@ -551,25 +572,25 @@ class cold_test(pythonIO):
             if not np.isnan(dataframe.loc[:, col]).all():
                 index = dataframe.loc[:, col].notna()
                 coef[i] = np.linalg.lstsq(
-                    I[index].to_numpy().reshape(-1, 1) ** 2,
+                    current[index].to_numpy().reshape(-1, 1) ** 2,
                     dataframe.loc[index, col],
                     rcond=None,
                 )[0][0]
         if plot:
             if ax is None:
-                ax = plt.subplots(1, 1)[1]
+                ax = pyplot().subplots(1, 1)[1]
             if Imax is None:
-                Imax = I.max()
+                Imax = current.max()
                 xtick = None
             else:
                 xtick = Imax
-            _I = np.linspace(0, Imax, 100)  # plot fit
+            current_fit = np.linspace(0, Imax, 100)  # plot fit
             group = self.channels[dataframe.columns.droplevel(1)[0]]
             if group == "strain":
                 value = "1.0f"
             else:
                 value = "1.2f"
-            text = linelabel(
+            text = _linelabel(
                 value=value, postfix=self._units_r.get(group, "mm"), Ndiv=Ndiv, ax=ax
             )
             for i, col in enumerate(dataframe):
@@ -581,9 +602,22 @@ class cold_test(pythonIO):
                     c = color
                 if not np.isnan(dataframe.loc[:, col]).all():
                     ax.plot(
-                        I, dataframe[col], ".", color=c, alpha=0.75, ms=4, zorder=-20
+                        current,
+                        dataframe[col],
+                        ".",
+                        color=c,
+                        alpha=0.75,
+                        ms=4,
+                        zorder=-20,
                     )
-                    ax.plot(_I, coef[i] * _I**2, "--", color=c, alpha=1, label=col[0])
+                    ax.plot(
+                        current_fit,
+                        coef[i] * current_fit**2,
+                        "--",
+                        color=c,
+                        alpha=1,
+                        label=col[0],
+                    )
                     text.add("")
             if xtick is not None:
                 xticks = ax.get_xticks()
@@ -591,7 +625,7 @@ class cold_test(pythonIO):
                 xticks = [x for x in xticks if abs(x - xtick) / dx > 0.1]
                 xticks = np.sort(np.append(xticks, xtick))
                 ax.set_xticks(xticks)
-            sns.despine()
+            seaborn().despine(ax=ax)
             if xlabel:
                 ax.set_xlabel("$I$ kA")
             ax.set_ylabel(self._labels[group])
@@ -658,7 +692,7 @@ class cold_test(pythonIO):
 
 
 if __name__ == "__main__":
-    sns.set_context("talk")
+    seaborn().set_context("talk")
 
     ct = cold_test(project_dir="CSM2", read_txt=True)
     ct.load_coldtest("strain", read_txt=True)
@@ -668,226 +702,3 @@ if __name__ == "__main__":
     ct.plot_row("displace", index="fit", ncol=2)
     ct.plot_loop("displace", index="fit")
     ct.fit("displace", index="test")
-
-    """
-    #ct.plot_row('extend', index='CSM4_a', ncol=2)
-    #ct.plot_loop('extend', index='CSM4_a', ncol=2)
-    #ct.fit('extend', index='CSM4_a', Imin=12.5, Itrim=25, Imax=40, ncol=6)
-
-    columns = [name for name in ct.strain.columns.droplevel(1)
-               if 'ST1' in name]
-    ct.plot_row(columns, index='CSM4', ncol=6)
-
-    ct.fit(columns, index='CSM4_a', Imin=30, Itrim=50, Imax=40,
-           ncol=6, trim=True)
-
-    #displace = ['DS001', 'DS002', 'DS003', 'DS004', 'DS005']
-    #ct.plot_row(displace, index='CSM4_a', ncol=5)
-
-    #ct.fit(displace, index='CSM4_a', Imin=5, Itrim=32.5, Imax=40, ncol=5)
-
-    ct.plot_row(['DS007', 'DS008'], index='CSM2_08', ncol=2)
-    ct.plot_loop(['DS007', 'DS008'], index='CSM2_08', ncol=2)
-    ct.fit(['DS007', 'DS008'], index='CSM2_08', Imin=5, Itrim=32.5, Imax=40, ncol=4)
-
-
-    ct.plot_row([f'DS{i:003}' for i in range(1, 7)],
-                index='CSM2_08', ncol=3)
-    ct.plot_loop([f'DS{i:003}' for i in range(1, 7)],
-                 index='CSM2_08', ncol=3)
-    ct.fit([f'DS{i:003}' for i in [1, 2, 4]], index='CSM2_08',
-           Imin=12.5, Itrim=25, Imax=40, ncol=3)
-
-    ct.plot_row('displace', index='CSM2_08', ncol=4)
-    ct.plot_loop('displace', index='CSM2_08', ncol=4)
-    ct.fit('displace', index='CSM2_08', Imin=12.5, Itrim=25, Imax=40, ncol=4)
-
-    ct.plot_row('extend', index='CSM2_08', ncol=2)
-    ct.plot_loop('extend', index='CSM2_08', ncol=2)
-    ct.fit('extend', index='CSM2_08', Imin=12.5, Itrim=25, Imax=40, ncol=2)
-
-    ct.plot_row(['STvID', 'STvOD'], index=None)
-
-    ct.plot_row(['SThID0', 'SThID1', 'SThID2'], index=None, ncol=3)
-    ct.plot_loop(['SThID0', 'SThID1', 'SThID2'], index='CSM4_a', ncol=3)
-    ct.fit(['SThID0', 'SThID1', 'SThID2'], index='CSM2_08', Imin=0, Itrim=40,
-           Imax=40, ncol=3, trim=False)
-
-    ct.plot_row(['SThOD0', 'SThOD1', 'SThOD2'], index=None, ncol=3)
-    ct.plot_loop(['SThOD0', 'SThOD1', 'SThOD2'], index='CSM4_a', ncol=3)
-    ct.fit(['SThOD0', 'SThOD1', 'SThOD2'], index='CSM4_a', Imin=0, Itrim=40,
-           Imax=40, ncol=3, trim=False)
-
-    ct.plot_row(['STvID', 'STvOD'], index='CSM4_a', ncol=2)
-    ct.plot_loop(['STvID', 'STvOD'], index='CSM4_a', ncol=2)
-    ct.fit(['STvID', 'STvOD'],
-           index='CSM2_08', Imin=0, Itrim=40, Imax=40, ncol=2, trim=False)
-
-
-
-    """
-    # self.mean_strain('STvID', data, range(119, 124))
-    # self.mean_strain('STvOD', data, range(124, 129))
-    # three gauge hoop strain, ID
-    # self.mean_strain('SThID0', data, [101, 107, 113])
-    # self.mean_strain('SThID1', data, [102, 108, 114])
-    # self.mean_strain('SThID2', data, [103, 109, 115])
-    # three gauge hoop strain, OD
-    # self.mean_strain('SThOD0', data, [104, 110, 116])
-    # self.mean_strain('SThOD1', data, [105, 111, 117])
-    # self.mean_strain('SThOD2', data, [106, 112, 118])
-    """
-
-    ct.plot_row([f'ST{i}' for i in range(101, 107)], index='CSM4_a', ncol=2)
-
-
-    ct.plot_row([f'ST{i}' for i in range(101, 119)], index='CSM2_08', ncol=3)
-
-    # SThID
-    plt.set_aspect(0.8)
-    ax = plt.subplots(3, 1, sharex=True)[1]
-    ct.fit([f'ST{i}' for i in [101, 107, 113]], loc='upper left', Ndiv=6,
-           index='CSM2_08', trim=False, Imax=40, ncol=1, ax=ax[0],
-           xlabel=False)
-    ct.fit([f'ST{i}' for i in [102, 108, 114]], loc='upper left', Ndiv=6,
-           index='CSM2_08', trim=False, Imax=40, ncol=1, ax=ax[1],
-           xlabel=False)
-    ct.fit([f'ST{i}' for i in [103, 109, 115]], loc='upper left', Ndiv=6,
-           index='CSM2_08', trim=False, Imax=40, ncol=1, ax=ax[2])
-
-    # SThOD
-    ax = plt.subplots(3, 1, sharex=True)[1]
-    ct.fit([f'ST{i}' for i in [104, 110, 116]], loc='upper left', Ndiv=6,
-           index='CSM2_08', trim=False, Imax=40, ncol=1, ax=ax[0],
-           xlabel=False)
-    ct.fit([f'ST{i}' for i in [105, 111, 117]], loc='upper left', Ndiv=6,
-           index='CSM2_08', trim=False, Imax=40, ncol=1, ax=ax[1],
-           xlabel=False)
-    ct.fit([f'ST{i}' for i in [106, 112, 118]], loc='upper left', Ndiv=6,
-           index='CSM2_08', trim=False, Imax=40, ncol=1, ax=ax[2])
-
-
-    plt.set_aspect(0.8)
-    ax = plt.subplots(2, 1)[1]
-    ct.fit([f'ST{i}' for i in range(119, 124)], loc='upper left', Ndiv=6,
-           index='CSM2_08', trim=False, Imax=40, ncol=1, ax=ax[0],
-           xlabel=False)
-    ct.fit([f'ST{i}' for i in range(124, 129)], loc='upper left', Ndiv=6,
-           index='CSM2_08', trim=False, Imax=40, ncol=1, ax=ax[1])
-
-    plt.set_aspect(0.8)
-    ct.fit(['SThID0', 'SThID1', 'SThID2'],
-           index='CSM2_08', trim=False, Imax=40, ncol=3)
-
-    ct.fit(['SThOD0', 'SThOD1', 'SThOD2'],
-           index='CSM2_08', trim=False, Imax=40, ncol=3)
-    """
-
-    """
-    #ct.plot_loop('displace', index='CSM2_09', ncol=4)
-    #ct.fit('extend', index='CSM2_08', Imin=12.5, Itrim=25, Imax=40, ncol=4)
-    ct.fit('displace', index='CSM2_09', Imin=12.5, Itrim=25, Imax=40, ncol=4)
-    #index = slice('2021-03-09 09:10', '2021-03-11 16:27:30')
-
-    #ct.load_coldtest('strain')
-    #ct.strain.drop(columns=['ST108', 'ST109','ST110'], inplace=True)
-    #ct.plot('extend')
-
-    ct.fit(['STvID', 'STvOD'],
-           index='CSM4_a', Imin=0, Itrim=40, Imax=40, ncol=3)
-
-    ct.fit(['ST103', 'ST109', 'ST115'],
-           index='CSM2_08', Imin=0, Itrim=40, Imax=40, ncol=3)
-    [103, 109, 115]
-
-
-    ct.fit(['SThID2'],
-           index='CSM2_08', Imin=0, Itrim=40, Imax=40, ncol=3)
-
-    ct.fit(['SThOD0', 'SThOD1', 'SThOD2'],
-           index='CSM2_08', Imin=0, Itrim=40, Imax=40, ncol=3)
-
-    ct.fit(['SThOD2'],
-           index='CSM2_08', Imin=0, Itrim=40, Imax=40, ncol=3)
-
-    ct.plot_loop(['SThID0', 'SThID1', 'SThID2'], index='CSM2_08')
-    ct.plot_loop(['SThOD0', 'SThOD1', 'SThOD2'], index='CSM2_08')
-
-    """
-    # ct.plot_row(['ST119-123', 'ST124-128'], index='CSM2_08', ncol=2)
-    # ct.fit(['ST119-123', 'ST124-128'], index='CSM2_08',
-    #       Imin=0, Itrim=15, Imax=48.5, ncol=4)
-
-    # ct.fit(['DS001', 'DS004', 'DS007', 'DS008'],
-    #       index='CSM2_08', Imin=12.5, Itrim=30, Imax=48.5, ncol=4)
-
-    # ct.plot('current', index=ct.CSM2_index('opp'))
-
-    """
-
-    #ct.plot('temperature')
-
-    #ct.plot('current')
-
-    #ct.plot('strain', index='cooldown', ncol=3)
-    #ct.plot_col('strain')
-
-    #ct.plot_row('voltage', index='high_strain_trim')
-    #ct.plot_row('strain', index='strain', ncol=3)
-    #ct.fit('strain', index='high_strain_trim')
-
-    # ct.plot_row('temperature', index='high_strain_trim', ncol=0)
-
-    plt.set_aspect(0.85)
-    #ct.plot_row('strain', index='low_strain')
-    #ct.plot_row(['SG-340-ID', 'SG-220-OD'], index='low_strain')
-    #ct.plot_row(['SG-340-ID', 'SG-220-OD'], index='low_strain_trim')
-    #ct.fit(['SG-340-ID', 'SG-220-OD'], index='low_strain_trim')
-
-    #ct.plot_row('strain', index='medium_strain')
-    #ct.plot_row(['SG-340-ID', 'SG-220-OD'], index='medium_strain')
-
-    ct.plot_row(['SG-340-ID', 'SG-220-OD'], index='medium_strain_trim')
-    ct.fit(['SG-340-ID', 'SG-220-OD'], index='medium_strain_trim')
-
-    ct.plot_row(['SG-340-ID', 'SG-220-OD'], index='high_strain_trim')
-    ct.fit(['SG-340-ID', 'SG-220-OD'], index='high_strain_trim')
-
-    #ct.plot('extend', offset_dt=0)
-    #ct.plot_col('extend', offset_dt=0)
-    #ct.plot_col('displace', offset_dt=0)
-
-    #ct.plot_row('extend', index='test')
-    #ct.plot_row('displace', index='test')
-
-    #ct.plot_row(['EX-270-OD'], index='drop', color='C1')
-    #ct.plot_row(['DS002'], index='drop', color='C1')
-
-    #ct.plot_row(['EX-270-OD'], index='drop_trim', color='C1')
-    #ct.plot_row(['DS002'], index='drop_trim', color='C1')
-
-    #plt.set_aspect(0.9)
-    #ct.fit(['EX-270-OD'], index='drop_trim', Imin=0, color='C1')
-    #ct.fit(['DS002'], index='drop_trim', Imin=0, color='C1')
-
-    #plt.set_aspect(0.85)
-    #ct.extract_shrinkage(sensors=['displace'])
-    #ct.extract_shrinkage(sensors=['extend'])
-
-    #ct.plot_row('displace', index='test')
-    #ct.plot_row('extend', index='strain')
-
-    #ct.plot('displace', offset_dt=0)
-    #ct.plot_col('displace', offset_dt=0)
-    #ct.plot_row('displace', index='test')
-
-
-    ct.extract_shrinkage(sensors=['displace'])  # , 'extend'
-    ct.plot('shrink', offset_dt=0)
-    ct.plot_col('shrink', offset_dt=0)
-    ct.plot_row('shrink', index='test', ncol=4)
-    """
-    # ct.plot_row('voltage')
-
-    # myFmt = mdates.DateFormatter('%d %B')
-    # ax.xaxis.set_major_formatter(myFmt)

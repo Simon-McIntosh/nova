@@ -80,11 +80,11 @@ class Phase:
                 name = self.index[name]
             except IndexError as index_error:
                 raise IndexError(
-                    f"name index {name} " "out of range\n\n" f"{self.index}"
+                    f"name index {name} out of range\n\n{self.index}"
                 ) from index_error
         elif isinstance(name, str):
             if name not in self.index:
-                raise IndexError(f"name {name} not found in " f"\n{self.index}")
+                raise IndexError(f"name {name} not found in \n{self.index}")
         self._name = name
         self.reload.name = False
         self.reload.sourcedata = True

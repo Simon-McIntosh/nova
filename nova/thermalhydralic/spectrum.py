@@ -18,7 +18,3 @@ class Spectrum:
         self.data = {}
         for column in data:
             print(data[column])
-
-
-if __name__ == "__main__":
-    spectrum = Spectrum("test", data)

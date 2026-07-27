@@ -11,9 +11,8 @@ import pandas
 import nlopt
 
 from nova.definitions import root_dir
-from nova.thermalhydralic.sultan.sultanio import SultanIO
-import matplotlib.pyplot as plt
-from nova.utilities.png_tools import data_mine
+from nova.thermalhydralic.plotimport import pyplot, seaborn
+from nova.utilities.pandasdata import PandasHDF
 
 
 class TwenteFile:
@@ -41,7 +40,7 @@ class TwenteFile:
 
 
 @dataclass
-class TwenteSource(TwenteFile, SultanIO):
+class TwenteSource(TwenteFile, PandasHDF):
     """Methods for digitizing Twente data."""
 
     experiment: str
@@ -66,6 +65,10 @@ class TwenteSource(TwenteFile, SultanIO):
 
     def _mine_data(self):
         """Extract data from image."""
+        # digitising a published figure is an interactive graphics operation, so
+        # the image reader is reached here rather than at module scope
+        from nova.graphics.png_tools import data_mine
+
         metadata = {
             "experiment": self.experiment,
             "phase": self.phase,
@@ -113,14 +116,15 @@ class TwenteSource(TwenteFile, SultanIO):
         data.attrs = metadata
         return data
 
-    def plot(self):
+    def plot(self, axes=None):
         """Plot data."""
-        axes = plt.subplots(1, 1)[1]
+        if axes is None:
+            axes = pyplot().subplots(1, 1)[1]
         axes.plot(self.data["frequency"], self.data["Q"], "-o")
 
 
 @dataclass
-class TwentePost(TwenteFile, SultanIO):
+class TwentePost(TwenteFile, PandasHDF):
     """Manage Twente data postprocess chain."""
 
     source: TwenteSource
@@ -225,9 +229,10 @@ class TwentePost(TwenteFile, SultanIO):
             self.plot_polynomial()
         return coefficients
 
-    def plot_polynomial(self):
+    def plot_polynomial(self, axes=None):
         """Plot polynomial fit."""
-        axes = plt.subplots(1, 1)[1]
+        if axes is None:
+            axes = pyplot().subplots(1, 1)[1]
         polynomial = self.data.attrs["polynomial"]
         frequency, matrix = self.frequency_matrix(polynomial["order"], slice(None))
         polynomial_fit = matrix @ polynomial["coefficients"]
@@ -393,11 +398,13 @@ class TwentePost(TwenteFile, SultanIO):
         """Return esperiment index."""
         return self.source.index
 
-    def plot(self):
+    def plot(self, axes=None):
+        """Plot the measured spectrum against the fitted transfer function."""
         self.fit_polynomial(2, index=slice(3), plot=False)
         self.Qhys = 0  # 1.05*poly[0]
 
-        axes = plt.subplots(1, 1)[1]
+        if axes is None:
+            axes = pyplot().subplots(1, 1)[1]
         vector, system = self.fit_transfer_function(
             [], [-1.5, -0.4], self.Prms[0], self.Qhys
         )
@@ -410,10 +417,9 @@ class TwentePost(TwenteFile, SultanIO):
         axes.plot(frequency, Prms_model, "-")
 
         axes.plot(self.data.frequency, self.Prms, ".-")
-        plt.despine()
+        seaborn().despine(ax=axes)
         axes.set_xscale("log")
         axes.set_yscale("log")
-        print(self.Qhys)
 
         return system
 
@@ -502,7 +508,8 @@ if __name__ == "__main__":
         frequency_matrix = np.concatenate(
             [(2*np.pi*self.data['frequency'].values).reshape(-1, 1)**2,
              np.ones((len(self.data['frequency']), 1))], axis=1)
-        poly_tf = np.linalg.lstsq(frequency_matrix, self.data['Qdot']**-2, rcond=None)[0]
+        poly_tf = np.linalg.lstsq(
+            frequency_matrix, self.data['Qdot']**-2, rcond=None)[0]
 
         poly_tf = np.sqrt(poly_tf)
         gain = 1/poly_tf[0]

@@ -9,6 +9,15 @@ import scipy.optimize
 class LumpedCapacitance:
     """Fit an RC lumped thermal model to a cooling / heat-output curve."""
 
+    #: Integrator tolerances for the model response. solve_ivp defaults to
+    #: rtol=1e-3, which leaves several tenths of a percent of integration error
+    #: after a few time constants -- the same order as the fit residual the
+    #: optimiser is minimising, so the fitted time constant would be chasing
+    #: integrator noise. A single first-order ODE is cheap enough to solve far
+    #: tighter than any measurement it is fitted against.
+    rtol = 1e-8
+    atol = 1e-10
+
     def __init__(self, t, Te, Qdot):
         self.t = t
         self.Te = Te
@@ -32,10 +41,13 @@ class LumpedCapacitance:
             args=(hA, C),
             t_eval=self.t,
             method="RK45",
+            rtol=self.rtol,
+            atol=self.atol,
         )
-        dT = sol.y
-        Qdot = -hA * dT
-        return Qdot
+        # solve_ivp returns one row per state variable; this model carries a
+        # single temperature difference, so the heat output is one row and must
+        # come back on the input timebase rather than as a (1, n) frame
+        return -hA * sol.y[0]
 
     def Qdot_err(self, x):
         """Return normalized rms error between modeled and measured heat output."""

@@ -7,10 +7,10 @@ from types import SimpleNamespace
 import numpy as np
 import pandas
 
+from nova.thermalhydralic.plotimport import pyplot, seaborn
 from nova.thermalhydralic.sultan.campaign import Campaign
 from nova.thermalhydralic.sultan.trial import Trial
 from nova.thermalhydralic.sultan.sample import Sample
-import matplotlib.pyplot as plt
 
 
 @dataclass
@@ -233,7 +233,7 @@ class Profile:
         """Return intergral power."""
         self._assert_lowpass()
         pulse = self.timeseries(slice(self.heatindex.start, self.coldindex))
-        return np.trapz(pulse[1], pulse[0])
+        return np.trapezoid(pulse[1], pulse[0])
 
     @property
     def minimum_ratio(self):
@@ -303,7 +303,7 @@ class Profile:
         """
         axes = kwargs.pop("axes", None)
         if axes is None:
-            axes = plt.subplots(1, 1)[1]
+            axes = pyplot().subplots(1, 1)[1]
         axes.plot(*self.timeseries(index), *args, **kwargs)
 
     def plot_single(self, axes=None, lowpass_filter=True, **kwargs):
@@ -313,7 +313,7 @@ class Profile:
         Parameters
         ----------
         axes : axes, optional
-            Plot axes. The default is None, plt.gca().
+            Plot axes. The default is None, the current axes.
         lowpass_filter : bool, optional
             Serve lowpass filtered data. The default is False.
 
@@ -323,7 +323,7 @@ class Profile:
 
         """
         if axes is None:
-            axes = plt.gca()
+            axes = pyplot().gca()
         if lowpass_filter:
             color = "C0"
             label = "lowpass"
@@ -344,22 +344,22 @@ class Profile:
     def plot(self, axes=None, heat=True, lowpass=True):
         """Plot shot profile."""
         if axes is None:
-            axes = plt.gca()
+            axes = pyplot().gca()
         self.plot_single(lowpass_filter=False, axes=axes)
         if lowpass:
             self.plot_single(lowpass_filter=True, axes=axes)
         if heat:
-            self.plot_heat()
+            self.plot_heat(axes)
         axes.legend(loc="upper right")
         axes.set_xlabel("$t$ s")
         axes.set_ylabel(r"$\dot{Q}$ W")
-        plt.despine()
-        plt.title(self.sample.label)
+        axes.set_title(self.sample.label)
+        seaborn().despine(ax=axes)
 
     def plot_heat(self, axes=None, **kwargs):
         """Shade heated zone."""
         if axes is None:
-            axes = plt.gca()
+            axes = pyplot().gca()
         timeseries = self.timeseries(self.heatindex.index)
         time = timeseries[0]
         upper = timeseries[1]

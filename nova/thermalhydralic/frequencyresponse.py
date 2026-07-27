@@ -3,18 +3,19 @@
 import pandas
 import numpy as np
 
-import matplotlib.pyplot as plt
+from nova.thermalhydralic.plotimport import pyplot
 
 
 class FrequencyResponse:
     """Fit magnitude response and extract system transfer function."""
 
-    def __init__(self, *args):
+    def __init__(self):
         self._data = {}
-        # self._input_frequency = None
-        # self._rms_power = None
-        # self.rms_power = rms_power
-        # self.magnitude = 20*np.log10(self.rms_power)
+
+    @property
+    def data(self):
+        """Return the appended datasets keyed by label, read-only."""
+        return self._data
 
     def append_data(self, input_frequency, rms_power, label=None, prefix="dataset"):
         """
@@ -41,28 +42,31 @@ class FrequencyResponse:
         None.
 
         """
-        data = pandas.DataFrame(
-            [input_frequency, rms_power], columns=["frequency", "rms_power"]
-        )
+        # the two inputs are columns of one frame, one row per sample: passing
+        # them as a row list instead builds a two-row frame and only parses at
+        # all when the sweep happens to hold exactly two frequencies
+        data = pandas.DataFrame({"frequency": input_frequency, "rms_power": rms_power})
         data.sort_values(["frequency"], inplace=True)
+        data.reset_index(drop=True, inplace=True)
         data["magnitude"] = 20 * np.log10(data["rms_power"])
         if label is None:
-            offset = sum([1 for label in self._data if prefix in label])
+            offset = sum(1 for name in self._data if prefix in name)
             label = f"{prefix}{offset}"
         if label in self._data:
             raise IndexError(
-                f"label {label} already present in dataset " f"{self._data.keys()}"
+                f"label {label} already present in dataset {list(self._data)}"
             )
-        self.data[label] = data
+        self._data[label] = data
 
     def plot_data(self, ax=None):
+        """Plot the magnitude response of every appended dataset."""
         if ax is None:
-            ax = plt.gca()
-        for i, label in enumerate(self.data):
-            ax.plot(self.data[label]["frequency"], self.data[label]["magnitude"], "o")
+            ax = pyplot().gca()
+        for label in self._data:
+            ax.plot(self._data[label]["frequency"], self._data[label]["magnitude"], "o")
         ax.set_xscale("log")
         ax.set_xlabel(r"$\omega$ rads$^{-1}$")
-        ax.set_ylabel(r"$20$log$_{10}|H|$ dB$\dot{psi}")
+        ax.set_ylabel(r"$20\log_{10}|H|$ dB")
 
 
 if __name__ == "__main__":

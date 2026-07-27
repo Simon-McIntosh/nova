@@ -27,11 +27,12 @@ spreads unit current uniformly over the cross-section and is smooth everywhere,
 which is what a psi field read for topology (axis / X-points / LCFS) requires.
 
 Formulation (rectangular section): closed-form antiderivatives of the
-uniformly-distributed ring current -- complete elliptic integrals K, E, Pi
-(Carlson forms) plus a 1-D ``zeta`` quadrature (fixed-node rule on an arcsinh
-integrand, L. K. Urankar Part III) -- evaluated at the four cross-section
-corners and combined with alternating signs (the standard definite-double-
-integral corner rule), normalised per ampere of total conductor current:
+uniformly-distributed ring current -- complete elliptic integrals K, E, Pi from
+the modulus COMPLEMENT (:mod:`nova.biot.completeelliptic`) plus a 1-D ``zeta``
+quadrature (fixed-node rule on an arcsinh integrand, L. K. Urankar Part III) --
+evaluated at the four cross-section corners and combined with alternating signs
+(the standard definite-double-integral corner rule), normalised per ampere of
+total conductor current:
 
     psi = 2 pi mu0 R * Aphi_corner / (2 pi A)     [Wb/A]
     B   = mu0 * {Br,Bz}_corner / (2 pi A)          [T/A]
@@ -45,12 +46,12 @@ from __future__ import annotations
 import numpy as np
 import scipy.special  # type: ignore[import-untyped]
 
+from nova.biot.completeelliptic import complete_kind, complete_pole
 from nova.biot.zeta import zeta
 
 MU0 = 4.0e-7 * np.pi
 """Vacuum permeability [T.m/A]."""
 
-_EPS = 2.0 * np.finfo(float).eps
 # Numerical floor so an ON-AXIS point does not divide by zero.  It bounds the ring
 # SPAN ``(a + R)^2 + dz^2``, the target radius, and the modulus -- all three of order
 # the machine, and all three reached only at the axis, where what they guard is
@@ -181,22 +182,6 @@ def greens_bz_br(
 # --- rectangular finite section ---------------------------------------
 
 
-def _sign(x: np.ndarray) -> np.ndarray:
-    """Sign with a dead-band: 0 within numerical noise of zero."""
-    return np.where(np.abs(x) > 1e4 * _EPS, np.sign(x), 0.0)
-
-
-def _ellipp(n: np.ndarray, m: np.ndarray) -> np.ndarray:
-    """Complete elliptic integral of the 3rd kind via Carlson symmetric forms."""
-    x = np.zeros_like(n)
-    y = 1.0 - m
-    z = np.ones_like(n)
-    p = 1.0 - n
-    rf = scipy.special.elliprf(x, y, z)
-    rj = scipy.special.elliprj(x, y, z, p)
-    return rf + rj * n / 3.0
-
-
 def _zeta(rs: np.ndarray, r: np.ndarray, gamma: np.ndarray) -> np.ndarray:
     """The zeta integral over the full arc half-angle range.
 
@@ -218,43 +203,119 @@ def corner_fields(
     axisymmetric corner antiderivative: :func:`cylinder_greens` combines it
     over one ring's four corners, and the dataclass cylinder kernel drives it
     with per-source corner stacks.
+
+    Branch structure, which is what the arrangement below answers to.  The
+    antiderivative carries an arctangent boundary term whose limit at the ends of
+    the angle range is a SIGNED right angle -- ``cphi``, the reduction's
+    ``-(r^2/3)(pi/2) sign(gamma)(sign(rs - r) + 1)`` -- so it changes sign across
+    each of the section's own corner planes, the two levels ``gamma = 0`` and the
+    two radii ``rs = r``.  It is not a discontinuity: the ring denominator
+    ``gamma^2 + r^2 sin^2 phi`` has a root just past EACH end of the range at a
+    distance that falls as ``gamma^2``, and the two third-kind integrals over those
+    roots diverge as ``1/|gamma|`` against numerators that vanish as ``gamma``, with
+    one-sided limits of ``+/- pi r^2/6`` and ``+/- sign(rs - r) pi r^2/6``.  Those
+    two and ``cphi``'s ``-(1 + sign(rs - r)) pi r^2/6`` sum to ZERO from either
+    side, and the same three cancel in ``Bz_hat`` with ``3/r`` the weight.  So the
+    antiderivative is continuous across its own corner planes and vanishes on the
+    levels, for any target radius, inside the radial span or out.
+
+    That cancellation is exact in the mathematics and survives in floats ONLY if
+    each pole and the modulus complement come from the GEOMETRY.  The three
+    characteristics' complements are exact squares --
+
+        1 - n1 = ((r + c)/gamma)^2      1 - n2 = (gamma/(r + c))^2
+        1 - n3 = ((rs - r)/b)^2         k'^2   = (gamma^2 + (rs - r)^2)/a^2
+
+    -- and each is the quantity the whole cancellation is set by, so a subtraction
+    anywhere in that list caps the answer at ``eps`` over it.  Written as
+    ``2r/(r - c)`` and ``2r/(r + c)`` instead, the pair costs the branch cancellation
+    a relative ``eps (r + c) r/gamma^2``: three parts in a hundred thousand a
+    micrometre off a metre-scale face, and unbounded below that, which is what used
+    to leave a jump of the full ``pi r^2/3`` either side of a face.  The first two
+    poles are reciprocal, ``(1 - n1)(1 - n2) = 1`` exactly, the ring denominator's
+    two roots sitting symmetrically about the range.
     """
     gamma = zs - z
     a2 = gamma**2 + (rs + r) ** 2
     a = np.sqrt(a2)
     b = rs + r
-    c2 = gamma**2 + r**2
-    c = np.sqrt(c2)
-    k2 = (1.0 - _EPS) * 4.0 * r * rs / a2
+    c = np.sqrt(gamma**2 + r**2)
+    radius_sum = r + c
+    # rs - c, which the near pole's numerator carries and which cancels to nothing
+    # when the target sits on this corner's own radius: it is (rs - r) less
+    # gamma^2/(r + c), both exact, where rs less c keeps no digits at all -- at a
+    # tenth of a micrometre off a metre-scale corner the subtraction is down to two
+    # bits of the radius' own spacing and the numerator is a third wrong.
+    radius_gap = (rs - r) - gamma**2 / radius_sum
+    k2 = 4.0 * r * rs / a2
+    # the target's squared distance to this corner over the squared ring span,
+    # formed from the geometry: the two radicals differ by exactly 4 r rs, so the
+    # complement needs no subtraction from one and keeps every digit at a corner
+    complement = (gamma**2 + (rs - r) ** 2) / a2
     v = 1.0 + k2 * (gamma**2 - b * r) / (2.0 * r * rs)
-    ellip_k = scipy.special.ellipk(k2)
-    ellip_e = scipy.special.ellipe(k2)
+    # complement-native first and second kinds off one descent.  At a target ON a
+    # corner the complement is zero, where the first kind diverges logarithmically
+    # and this returns its FINITE PART -- the convention this reduction needs,
+    # because the section's flux and field are bounded at its own corner and the
+    # total weight on the divergence is zero.
+    ellip_k, ellip_e = complete_kind(complement)
     u_coef = k2 * (4.0 * gamma**2 + 3.0 * rs**2 - 5.0 * r**2) / (4.0 * r)
 
-    np2 = {
-        1: 2.0 * r / (r - c - _EPS),
-        2: (1.0 - _EPS) * 2.0 * r / (r + c),
-        3: (1.0 - _EPS) * 4.0 * r * rs / b**2,
+    # A target level with this corner puts both of the ring denominator's roots ON
+    # the ends of the range.  The pole moments below are ODD in gamma and bounded,
+    # so their value AT that confluence is zero -- the mean of the two one-sided
+    # limits, and the assignment that makes cphi's own zero there consistent.  The
+    # held gamma keeps the reciprocal pole finite rather than masking a nan.
+    level = gamma == 0.0
+    held = np.where(level, 1.0, gamma)
+    pole = {
+        1: (radius_sum / held) ** 2,
+        2: (gamma / radius_sum) ** 2,
+        3: ((rs - r) / b) ** 2,
     }
-    pi3 = {p: _ellipp(np2[p], k2) for p in (1, 2, 3)}
+    pi3 = {p: complete_pole(pole[p], complement) for p in (1, 2, 3)}
+    np2_2 = 2.0 * r / radius_sum
+    np2_3 = 4.0 * r * rs / b**2
 
-    qr = {p: (rs - (-1.0) ** p * c) * np2[p] * gamma**2 * c / r for p in (1, 2)}
-    qr[3] = np.zeros_like(r)
-    qz = {p: (rs - (-1.0) ** p * c) * -2.0 * gamma * c * np2[p] for p in (1, 2)}
-    qz[3] = gamma * b * (rs - r) * np2[3]
-    pphi = {
-        p: (rs - (-1.0) ** p * c) * np2[p] * c * (3.0 * r**2 - c2) / (2.0 * r)
-        for p in (1, 2)
+    # The far pole's characteristic diverges as 1/gamma^2 while its integral vanishes
+    # as |gamma|, so neither is formed: what the numerators want is the bounded
+    # product, one power of gamma taken off each of them and carried here instead.
+    # Every use of either pole carries at least one, which is why the two P/Q
+    # families below hold the reduction's own coefficients with a gamma removed.
+    far = np.where(level, 0.0, -2.0 * r * radius_sum / held * pi3[1])
+    near = gamma * pi3[2]
+    third = gamma * pi3[3]
+
+    # 3 r^2 - c^2 is 2 r^2 - gamma^2, which is the same two terms without the
+    # target radius appearing in both of them
+    moment = c * (2.0 * r**2 - gamma**2) / (2.0 * r)
+    qr = {
+        1: (rs + c) * gamma * c / r * far,
+        2: radius_gap * np2_2 * gamma * c / r * near,
+        3: np.zeros_like(r),
     }
-    pphi[3] = -rs / b * (rs - r) * (3.0 * r**2 - rs**2)
+    qz = {
+        1: (rs + c) * -2.0 * c * far,
+        2: radius_gap * -2.0 * c * np2_2 * near,
+        3: b * (rs - r) * np2_3 * third,
+    }
+    pphi = {
+        1: (rs + c) * moment * far,
+        2: radius_gap * np2_2 * moment * near,
+        3: -rs / b * (rs - r) * (3.0 * r**2 - rs**2) * third,
+    }
 
     def p_sum(coef: dict[int, np.ndarray]) -> np.ndarray:
         out = np.zeros_like(coef[1])
         for p in (1, 2, 3):
-            out += (-1.0) ** p * coef[p] * pi3[p]
+            out += (-1.0) ** p * coef[p]
         return out
 
-    cphi = -1.0 / 3.0 * r**2 * np.pi / 2.0 * _sign(gamma) * (_sign(rs - r) + 1.0)
+    # exact signs, no dead-band: cphi's jump is cancelled by the two pole moments'
+    # own, and a band that zeroes one of the three without the others reintroduces
+    # the jump at the band's edge instead of at the plane.  np.sign is already zero
+    # on the plane, which is the value the cancellation asks for.
+    cphi = -1.0 / 3.0 * r**2 * np.pi / 2.0 * np.sign(gamma) * (np.sign(rs - r) + 1.0)
     dz_coef = 3.0 / r * cphi
     zeta = _zeta(rs, r, gamma)
 
@@ -262,7 +323,7 @@ def corner_fields(
         cphi
         + gamma * r * zeta
         + gamma * a / (6.0 * r) * (u_coef * ellip_k - 2.0 * rs * ellip_e)
-        + gamma / (6.0 * a * r) * p_sum(pphi)
+        + 1.0 / (6.0 * a * r) * p_sum(pphi)
     )
     br_hat = (
         r * zeta

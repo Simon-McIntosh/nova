@@ -16,19 +16,30 @@ class FTPData:
     parent: str = "Daten"
     server: str = "ftptrans.psi.ch"
     username: str = field(default_factory=lambda: os.environ.get("SULTAN_FTP_USER", ""))
-    password: str = field(repr=False, default_factory=lambda: os.environ.get("SULTAN_FTP_PASSWORD", ""))
-    ftp_args: tuple[str] = field(init=False)
-
+    password: str = field(
+        repr=False,
+        default_factory=lambda: os.environ.get("SULTAN_FTP_PASSWORD", ""),
+    )
     def __post_init__(self):
-        """Assemble ftp arguments."""
+        """Set the experiment."""
+        self.experiment = self._experiment
+
+    @property
+    def ftp_args(self):
+        """Return the host arguments, read-only.
+
+        The credential check belongs to the connection, not to construction:
+        every DataBase builds an FTPData whether or not it ever reaches the
+        server, so raising here rather than in __post_init__ is what lets a
+        cached campaign be read with no credentials in the environment.
+        """
         if not self.username or not self.password:
             raise ConnectionError(
                 "SULTAN FTP credentials are read from the environment: "
                 "set SULTAN_FTP_USER and SULTAN_FTP_PASSWORD "
                 "(or work from the local cache)."
             )
-        self.ftp_args = (self.server, self.username, self.password)
-        self.experiment = self._experiment
+        return (self.server, self.username, self.password)
 
     @property
     def experiment(self):
@@ -127,7 +138,7 @@ class FTPData:
                 host.download(remotefile, localfile)
             except ftputil.error.PermanentError as file_not_found:
                 raise FileNotFoundError(
-                    f'file {file} not found in {host.listdir("./")}'
+                    f"file {file} not found in {host.listdir('./')}"
                 ) from file_not_found
 
     @staticmethod
@@ -161,7 +172,7 @@ class FTPData:
             except ftputil.error.PermanentError as file_not_found:
                 raise FileNotFoundError(
                     f"folder {folder} not found on {host.getcwd()} "
-                    f'in {host.listdir("./")}'
+                    f"in {host.listdir('./')}"
                 ) from file_not_found
 
     def listdir(self, *relative_path, select=""):

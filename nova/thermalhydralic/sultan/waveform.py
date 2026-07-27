@@ -11,8 +11,8 @@ import scipy.interpolate
 from nova.thermalhydralic.sultan.profile import Profile
 from nova.thermalhydralic.sultan.campaign import Campaign
 from nova.thermalhydralic.sultan.trial import Trial
+from nova.thermalhydralic.plotimport import pyplot, seaborn
 from nova.thermalhydralic.sultan.sample import Sample
-import matplotlib.pyplot as plt
 
 
 @dataclass
@@ -20,20 +20,23 @@ class WaveForm:
     """Manage response waveform."""
 
     profile: Union[Profile, Sample, Trial, Campaign, str]
-    threshold: InitVar[float] = 0.95
-    pulse: InitVar[bool] = True
+    # the init-only names carry an underscore because the class also exposes
+    # threshold and pulse as properties: sharing a name makes the dataclass read
+    # the property object as the field default instead of the literal below
+    _threshold: InitVar[float] = 0.95
+    _pulse: InitVar[bool] = True
     _data: pandas.DataFrame = field(init=False, repr=False)
     reload: SimpleNamespace = field(
         init=False, repr=False, default_factory=SimpleNamespace
     )
 
-    def __post_init__(self, threshold, pulse):
+    def __post_init__(self, _threshold, _pulse):
         """Init time and heat data fields."""
         self.reload.__init__(threshold=True, data=True)
         if not isinstance(self.profile, Profile):
             self.profile = Profile(self.profile)
-        self.threshold = threshold
-        self.pulse = pulse
+        self.threshold = _threshold
+        self.pulse = _pulse
 
     @property
     def threshold(self):
@@ -61,7 +64,7 @@ class WaveForm:
     def threshold(self, threshold):
         if threshold is not None:
             if threshold < -1 or threshold > 1:
-                raise ValueError(f"cooldown threshold {threshold} " "out of range.")
+                raise ValueError(f"cooldown threshold {threshold} out of range.")
         self._threshold = threshold
         self.reload.threshold = False
         self.reload.data = True
@@ -273,10 +276,12 @@ class WaveForm:
 
     def plot(self, input_variable="fieldratesq"):
         """Plot target waveform."""
-        axes = plt.subplots(2, 1, sharex=True, gridspec_kw={"height_ratios": [4, 1]})[1]
+        axes = pyplot().subplots(
+            2, 1, sharex=True, gridspec_kw={"height_ratios": [4, 1]}
+        )[1]
         if input_variable not in self.data:
             raise IndexError(
-                f"Input variable {input_variable} not in " f"{self.data.columns}"
+                f"Input variable {input_variable} not in {self.data.columns}"
             )
         axes[1].plot(self.data.time, self.data[input_variable], "C3")
         axes[0].plot(self.data.time, self.data.output, "C0")
@@ -291,7 +296,8 @@ class WaveForm:
         input_label = variable_label[input_variable]
         if self.profile.normalize:
             input_label = input_label.split()[0]
-        plt.despine()
+        for _axes in axes:
+            seaborn().despine(ax=_axes)
         axes[1].set_ylabel(input_label)
         axes[0].set_ylabel(r"$\dot{Q}$ W")
         axes[1].set_xlabel("$t$ s")
@@ -300,7 +306,7 @@ class WaveForm:
     def plot_heat(self, axes=None, **kwargs):
         """Shade heated zone."""
         if axes is None:
-            axes = plt.gca()
+            axes = pyplot().gca()
         _threshold = self.threshold
         self.threshold = 1
         time = self.data.time[self.heatindex]
@@ -313,6 +319,6 @@ class WaveForm:
 
 if __name__ == "__main__":
     sample = Sample("CSJA12", 0)
-    waveform = WaveForm(sample, 1, pulse=True)
+    waveform = WaveForm(sample, 1, _pulse=True)
     waveform.profile.normalize = True
     waveform.plot("fieldratesq")

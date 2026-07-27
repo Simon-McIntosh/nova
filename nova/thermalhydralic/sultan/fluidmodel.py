@@ -6,8 +6,8 @@ from typing import Union
 import scipy
 import numpy as np
 
+from nova.thermalhydralic.plotimport import pyplot
 from nova.thermalhydralic.sultan.model import Model
-import matplotlib.pyplot as plt
 
 
 @dataclass
@@ -60,13 +60,10 @@ class FluidModel:
         if self.reload or self.model.reload:
             self.reload = False
             self.model.reload = False
-            self._output = scipy.signal.lsim2(
-                self.model.lti,
-                self.signal,
-                T=self.time,
-                rtol=5e-3,
-                hmax=15 * (self.time[1] - self.time[0]),
-            )[1]
+            # lsim propagates the state with a matrix exponential over each
+            # sample interval and interpolates the input linearly within it,
+            # so a sampled excitation needs no integrator tolerance at all.
+            self._output = scipy.signal.lsim(self.model.lti, self.signal, self.time)[1]
             if self.model.time_delay > 0:
                 self._output = self._timeshift(self._output)
         return self._output
@@ -99,5 +96,5 @@ class FluidModel:
     def plot(self, axes=None, **kwargs):
         """Plot model output."""
         if axes is None:
-            axes = plt.gca()
+            axes = pyplot().gca()
         axes.plot(self.time, self.output, **kwargs)

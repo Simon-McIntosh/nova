@@ -156,8 +156,11 @@ class SampleData:
                     np.squeeze(data[attribute]), windowlength, polyorder=3
                 )
         for end in ["in", "out"]:  # Calculate enthapy
-            temperature = data[f"T{end}"].values
-            pressure = data[f"P{end}"].values
+            # naming only the outer level of the column index selects a frame
+            # holding the single unit sub-column, so the values arrive as a
+            # column vector; PropsSI takes vectors one-dimensional
+            temperature = np.squeeze(data[f"T{end}"].values)
+            pressure = np.squeeze(data[f"P{end}"].values)
             data[f"h{end}"] = CoolProp.PropsSI(
                 "H", "T", temperature, "P", pressure, "Helium"
             )

@@ -14,12 +14,12 @@ from nova.thermalhydralic.sultan.waveform import WaveForm
 from nova.thermalhydralic.sultan.model import Model
 from nova.thermalhydralic.sultan.fluidmodel import FluidModel
 from nova.thermalhydralic.sultan.fitfluid import FitFluid
-from nova.thermalhydralic.sultan.sultanio import SultanIO
-import matplotlib.pyplot as plt
+from nova.thermalhydralic.plotimport import pyplot, seaborn
+from nova.utilities.pandasdata import PandasHDF
 
 
 @dataclass
-class FluidProfile(SultanIO):
+class FluidProfile(PandasHDF):
     """Manage fluid model and non-linear fits to experimental data."""
 
     profile: Union[Sample, Trial, Campaign, str]
@@ -180,7 +180,7 @@ class FluidProfile(SultanIO):
         """Return intergral power."""
         self.fluid.timeseries = self.waveform.timeseries(1, pulse=True)
         coldindex = np.argmax(self.fluid.time >= self.profile.cold[0])
-        return np.trapz(self.fluid.output[:coldindex], self.fluid.time[:coldindex])
+        return np.trapezoid(self.fluid.output[:coldindex], self.fluid.time[:coldindex])
 
     @property
     def steadystate(self):
@@ -208,7 +208,7 @@ class FluidProfile(SultanIO):
             Plot correction. The default is True.
         TF : bool, optional
             Plot transfer function label. The default is True.
-        axes : plt.axes, optional
+        axes : matplotlib axes, optional
             Target axes. The default is None.
 
         Returns
@@ -219,7 +219,7 @@ class FluidProfile(SultanIO):
         if threshold < self.waveform.threshold:
             threshold = self.waveform.threshold
         if axes is None:
-            axes = plt.subplots(1, 1)[1]
+            axes = pyplot().subplots(1, 1)[1]
         self._reload()
         self.fluid.timeseries = self.waveform.timeseries(pulse=True)
         self.fluid.plot(axes=axes, color="C3", label="fit")
@@ -235,10 +235,10 @@ class FluidProfile(SultanIO):
         axes.legend(
             ncol=4, loc="upper center", frameon=False, bbox_to_anchor=(0.5, 1.13)
         )
-        plt.despine()
+        seaborn().despine(ax=axes)
         axes.set_xlabel("$t$ s")
         axes.set_ylabel(r"$\dot{Q}$ W")
-        plt.title(self.profile.sample.label, color="k", y=1.1)
+        axes.set_title(self.profile.sample.label, color="k", y=1.1)
 
     def plot_data(self, threshold, axes):
         """Plot sultan data."""

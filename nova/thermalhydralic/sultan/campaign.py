@@ -125,7 +125,7 @@ class Campaign:
 
     def read_metadata(self):
         """Extract data from *.xls campaign metadata."""
-        metadata_xls = self.database.locate("*.xls")
+        metadata_xls = self.database.sourcefile("*.xls", "*.xls", "*.xlsx")
         extension = metadata_xls.split(".")[-1]
         engine = "openpyxl" if extension == "xlsx" else None
         with pandas.ExcelFile(metadata_xls, engine=engine) as xls:
@@ -400,7 +400,7 @@ class Campaign:
         drop_columns = columns[columns.isna()]
         if len(drop_columns) > 0:
             testplan.drop(columns=drop_columns, inplace=True, level=0)
-        testplan.fillna(method="pad", inplace=True)
+        testplan.ffill(inplace=True)
         # rename columns
         columns = {
             "I pulse": "Ipulse",
@@ -449,7 +449,7 @@ class Campaign:
                 Campaign._format_frequency_label
             )
         elif frequency_hz in testplan:
-            if testplan[frequency_hz].dtype == object:
+            if pandas.api.types.is_object_dtype(testplan[frequency_hz]):
                 testplan[frequency_hz] = testplan[frequency_hz].apply(
                     Campaign._format_frequency_label
                 )
@@ -490,11 +490,15 @@ class Campaign:
                 pass
             testplan.reset_index(inplace=True)
             testplan.drop(columns=["index"], level=0, inplace=True)
-            testplan.fillna(method="ffill", inplace=True)
+            testplan.ffill(inplace=True)
             testplan.dropna(axis=1, inplace=True)
             # convert object dtypes to str
             dtypes = testplan.dtypes
-            astype = {c: str for c in dtypes.index if dtypes[c] == object}
+            astype = {
+                column: str
+                for column in dtypes.index
+                if pandas.api.types.is_object_dtype(dtypes[column])
+            }
             testplan = testplan.astype(astype)
             # save to dict
             metadata[testname] = testplan

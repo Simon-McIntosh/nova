@@ -49,6 +49,36 @@ class DataBase:
         self.ftp = FTPData(self.experiment, *self.ftp_args)
         self.local = LocalData(self.experiment, *self.local_args)
 
+    def sourcefile(self, pattern, *local_patterns):
+        """
+        Return the full local path of a source file matching pattern.
+
+        The local cache is authoritative when it holds a match, so a campaign
+        downloaded once stays readable with no server reachable; only a miss
+        reaches the FTP host. The remote match is a substring test while the
+        local one is a glob, so one remote pattern can need several local
+        patterns to cover the same set of extensions.
+
+        Parameters
+        ----------
+        pattern : str
+            Remote filename pattern, of type '*.ext'.
+        *local_patterns : str, optional
+            Local glob patterns, tried in order. Defaults to pattern alone.
+
+        Returns
+        -------
+        filepath : str
+            Full local path of the matched file.
+
+        """
+        for local_pattern in local_patterns or (pattern,):
+            try:
+                return self.source_filepath(self.local.locate(local_pattern))
+            except FileNotFoundError:
+                continue
+        return self.locate(pattern)
+
     def datafile(self, filename):
         """Return full local path of datafile."""
         try:  # local search
@@ -112,7 +142,7 @@ class DataBase:
             if makedir:
                 self.local.removedir()  # remove if generated bare
             raise FileNotFoundError(
-                f"File {filename} not found on " "ftp server"
+                f"File {filename} not found on ftp server"
             ) from file_not_found
         return self.source_filepath(filename)
 

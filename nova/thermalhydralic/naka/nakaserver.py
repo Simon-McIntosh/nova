@@ -1,4 +1,14 @@
-"""Manage access to Naka server."""
+"""Scrape the Naka conductor-test data server.
+
+The server this scrapes is no longer reachable: it was an intranet host at
+QST Naka and no replacement endpoint has been published. The module is kept
+because it documents the download layout the local Naka cache was built
+from -- run indices keyed by the PDF/CSV pair, one directory per year -- and
+because that layout is what nakadata and sampledata still parse. Treat every
+network method here as unrunnable and work from the cache instead.
+
+Credentials come from NAKA_USERID and NAKA_PASSWORD in the environment.
+"""
 
 import os
 from dataclasses import dataclass, field

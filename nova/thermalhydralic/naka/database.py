@@ -14,7 +14,7 @@ import pandas
 from nova.thermalhydralic.naka.nakaserver import NakaServer
 from nova.thermalhydralic.naka.localdata import LocalData
 from nova.thermalhydralic.naka.pipeline import PipeLine
-from nova.utilities.time import clock
+from nova.thermalhydralic.plotimport import clock
 
 
 @dataclass
@@ -74,7 +74,7 @@ class DataBase:
             if makedir:
                 self.local.removedir()  # remove if generated bare
             raise FileNotFoundError(
-                f"Year {self.year} not found on " "naka server"
+                f"Year {self.year} not found on naka server"
             ) from http_error
         return index
 
@@ -101,9 +101,7 @@ class DataBase:
             mrun, srun = shot
             shot = f"MRun{mrun:03}_SRun{srun:03}"
         if shot not in self.index:
-            raise IndexError(
-                f"shot {shot} not found in " f"run index \n\n{self.run_index}"
-            )
+            raise IndexError(f"shot {shot} not found in run index \n\n{self.run_index}")
         return shot
 
     def locate(self, shot: Union[int, list[int, int], str], files=[]):
@@ -163,8 +161,7 @@ class DataBase:
         if self.pipeline.count > 0:
             tick = clock(
                 self.pipeline.count,
-                header=f"Downloading {self.pipeline.count} files "
-                f"from the Naka server.",
+                header=f"Downloading {self.pipeline.count} files from the Naka server.",
             )
             with NakaServer(self.year) as server:
                 _url = server.browser.geturl()

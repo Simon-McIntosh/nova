@@ -66,25 +66,28 @@ def arc_winding(cross_section, **kwargs):
 
 
 @pytest.mark.parametrize(
-    "cross_section,section",
+    "cross_section,section,element",
     [
-        ({"rect": (0, 0, 0.06, 0.04)}, "rectangle"),
-        ({"hex": (0, 0, 0.06, 0.04)}, "hexagon"),
-        ({"disc": (0, 0, 0.06, 0.06)}, "disc"),
+        ({"rect": (0, 0, 0.06, 0.04)}, "rectangle", "bow"),
+        ({"hex": (0, 0, 0.06, 0.04)}, "hexagon", "polybow"),
+        ({"disc": (0, 0, 0.06, 0.06)}, "disc", "polybow"),
     ],
 )
 def test_a_thickened_arc_routes_to_the_element_that_can_evaluate_its_section(
-    cross_section, section
+    cross_section, section, element
 ):
     """Every section, with no segment named at the call site.
 
     ``Bow`` integrates the box its width and height bound while normalising by the
-    section's own area, so it is right for a rectangle and 4/3 out on a hexagon and
-    4/pi out on a disc -- and cannot express a section that is not a rectangle at
-    all.  A filament winding carries no section and stays an ``arc``.
+    section's own area, so it is EXACT for a rectangle -- which fills its own box --
+    and 4/3 out on a hexagon and 4/pi out on a disc, and cannot express a section
+    that is not a rectangle at all.  So the rectangle keeps the cheap exact element
+    and everything else takes the corner-by-corner one, which is the dispatch this
+    asserts: the element is a function of the PROFILE, not of the segment kind alone.
+    A filament winding carries no section and stays an ``arc``.
     """
     coilset = arc_winding(cross_section)
-    assert np.asarray(coilset.subframe["segment"]).tolist() == ["polybow"]
+    assert np.asarray(coilset.subframe["segment"]).tolist() == [element]
     assert np.asarray(coilset.subframe["section"]).tolist() == [section]
 
 

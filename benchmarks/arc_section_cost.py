@@ -160,11 +160,12 @@ FRAME_SECTIONS = {
 def _frame(section: str, segment: str | None) -> tuple:
     """Return an element class's per-pair cost through the frame, same cloud.
 
-    ``segment`` ``None`` leaves the frame's own routing alone, which sends a swept
-    winding to ``Bow`` whatever its section is -- the rectangular-section arc
-    through Urankar Part IV and the fixed-node zeta quadrature, and what a
-    non-rectangular section is approximated by today.  Naming a segment overrides
-    that.  Going through the frame rather than calling either reduction directly
+    Both elements are named EXPLICITLY rather than left to the frame's routing,
+    which now sends a swept winding to the element that can evaluate its section --
+    so ``None`` would measure ``PolyBow`` under either label.  ``Bow`` is the
+    rectangular-section arc through Urankar Part IV and the fixed-node zeta
+    quadrature, and remains reachable by name as the independent oracle for the
+    closed form.  Going through the frame rather than calling either reduction directly
     is what makes the two comparable: the local-to-global transform, the source
     assembly and the matrix storage are the same for both and are not free.
     """
@@ -220,7 +221,7 @@ VARIANTS = {
         f"{element}-{section}": (
             lambda section=section, segment=segment: _frame(section, segment)
         )
-        for element, segment in (("bow", None), ("polybow", "polybow"))
+        for element, segment in (("bow", "bow"), ("polybow", "polybow"))
         for section in FRAME_SECTIONS
     },
 }

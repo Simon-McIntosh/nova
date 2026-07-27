@@ -57,6 +57,28 @@ def collapse_collinear(points: np.ndarray, tolerance: float = 1e-9) -> np.ndarra
     return points
 
 
+def is_axis_aligned_rectangle(points: np.ndarray, tolerance: float = 1e-9) -> bool:
+    """Return whether a planar ring is a rectangle with edges along the axes.
+
+    The rectangular-section elements build their body from a width and a height, so
+    they are exact for this shape and for no other: four corners whose edges each
+    run along one axis.  Anything else -- more corners, a rotated rectangle, a
+    curved boundary sampled as a polygon, or a ring carrying an interior boundary --
+    has to be carried corner by corner instead.
+
+    Measured on the COLLAPSED corner set so a projection's mid-edge split cannot
+    hide a rectangle, and against the ring's own extent so the test is scale-free.
+    Four distinct non-collinear corners whose every edge has a vanishing component
+    alternate between the two axes, which is a rectangle.
+    """
+    corners = collapse_collinear(np.asarray(points, dtype=np.float64), tolerance)
+    if len(corners) != 4:
+        return False
+    scale = max(float(np.max(np.ptp(corners, axis=0))), np.finfo(float).tiny)
+    edge = np.roll(corners, -1, axis=0) - corners
+    return bool(np.all(np.min(np.abs(edge), axis=1) <= tolerance * scale))
+
+
 def poloidal_footprint(loops: np.ndarray, tolerance: float = 1e-10):
     """Return the poloidal footprint of a swept section as a shapely polygon.
 

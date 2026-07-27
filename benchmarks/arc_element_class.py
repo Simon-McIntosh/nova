@@ -138,7 +138,7 @@ def corners(coilset):
 
 def section(axes):
     """Draw the hexagon against the box Bow integrates, and the ratio it costs."""
-    hexagonal = solved({"hex": (0, 0, WIDTH, THICKNESS)}, SWEEPS["0.3 → 1.9"])
+    hexagonal = solved({"hex": (0, 0, WIDTH, THICKNESS)}, SWEEPS["0.3 → 1.9"], "bow")
     cell = corners(hexagonal)
     width = float(np.asarray(hexagonal.subframe["width"])[0])
     height = float(np.asarray(hexagonal.subframe["height"])[0])

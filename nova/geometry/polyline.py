@@ -550,27 +550,66 @@ class PolyLine(Plot):
         """Return quadseg resolved polyline path."""
         return self._stackattr("path")
 
-    thicken: ClassVar[dict[str, str]] = {"arc": "polybow", "line": "beam"}
-    """The biot element a thickened segment is routed to, by segment kind.
+    thicken: ClassVar[dict[str, dict[str, str]]] = {
+        "arc": {"rectangle": "bow", "polygon": "polybow"},
+        "line": {"rectangle": "beam", "polygon": "beam"},
+    }
+    """The biot element a thickened segment dispatches to, by segment kind and profile.
 
-    An arc goes to :class:`nova.biot.polybow.PolyBow` rather than to
-    :class:`nova.biot.bow.Bow` because it is the element that can evaluate the
-    section the frame actually carries.  ``Bow`` thickens the arc into the
-    RECTANGLE its width and height bound while normalising by the section's own
-    area, so every section that does not fill its bounding box comes back too large
-    by the ratio -- 4/3 for a hexagon, 4/pi for a disc -- and no section that is not
-    a rectangle can be expressed at all.  ``Bow`` stays reachable by naming the
-    segment, which is how it serves as an independent oracle for the closed form.
+    A profile and a segment kind are chosen independently -- the profile is the
+    cross-section current flows through, the segment kind is the path it follows --
+    so the element is a function of BOTH and the table has two axes.  The filament
+    profile is not in it: a filament carries no section, so it keeps the segment's
+    own kind and reaches :class:`nova.biot.arc.Arc` or its straight peer directly,
+    which is what lets a far-field segment stay cheap while a near one is thickened.
 
-    A line still goes to :class:`nova.biot.beam.Beam`, which builds its prism from
-    width and height in exactly the way ``Bow`` built its rectangle and has the same
-    question open.
+    For an arc the two thick profiles are genuinely different elements rather than
+    one superseding the other.  :class:`nova.biot.bow.Bow` builds its body from the
+    width and height its section bounds, so it is EXACT for a rectangle -- which
+    fills its own bounding box -- and wrong for anything that does not, by the
+    reciprocal of the area fraction: 4/3 for a hexagon, 4/pi for a disc.
+    :class:`nova.biot.polybow.PolyBow` carries the corners themselves, so it is
+    exact for any polygon including the ones no width and height can express, and
+    pays per corner for it -- 550 us/pair against Bow's 182 on the rectangle they
+    share.  Dispatching on the profile keeps the cheap route where it is exact
+    instead of paying the general one everywhere.
+
+    A polygon-profile LINE still routes to :class:`nova.biot.beam.Beam`, which builds
+    its prism from width and height exactly as Bow builds its rectangle and carries
+    the same error for a section that does not fill its box.  The prismatic
+    polygon-section element that would complete this column does not exist yet.
     """
+
+    profiles: ClassVar[tuple[str, ...]] = ("rectangle", "polygon")
+    """The thick profile kinds :attr:`thicken` dispatches on, coarsest first."""
+
+    @property
+    def profile(self) -> str:
+        """Return the thick profile kind this polyline's cross-section presents.
+
+        A rectangle is recognised GEOMETRICALLY rather than by the name it was
+        authored under, so a square, a rectangle spelled any of its aliases, and a
+        free-form four-corner box all reach the exact cheap element, while a hollow
+        section -- whose ring carries an interior boundary and cannot collapse to
+        four corners -- correctly does not.
+        """
+        from nova.geometry.section import is_axis_aligned_rectangle
+
+        section = np.asarray(self.cross_section, dtype=np.float64)
+        if section.ndim != 2 or len(section) < 3:
+            return "polygon"
+        spread = np.ptp(section, axis=0)
+        plane = np.argsort(spread)[-2:]
+        plane.sort()
+        if is_axis_aligned_rectangle(section[:, plane]):
+            return "rectangle"
+        return "polygon"
 
     def _to_list(self, attr: str):
         """Return segment attribute list."""
         if attr == "segment" and not self.filament:
-            return [self.thicken[segment[attr]] for segment in self.segments]
+            profile = self.profile
+            return [self.thicken[segment[attr]][profile] for segment in self.segments]
         return [segment[attr] for segment in self.segments]
 
     @cached_property

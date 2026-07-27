@@ -177,15 +177,15 @@ def test_a_thickened_arc_routes_here_without_the_caller_naming_it():
     section that is not a rectangle at all.  A filament winding is unaffected: it
     carries no section, so it stays an ``arc``.
     """
-    for section in (
-        {"rect": (0, 0, WIDTH, THICKNESS)},
-        {"hex": (0, 0, WIDTH, THICKNESS)},
-        {"disc": (0, 0, WIDTH, WIDTH)},
-        {"box": (0, 0, WIDTH, 0.2)},
-        {"sk": (0, 0, WIDTH, 0.2)},
+    for section, element in (
+        ({"rect": (0, 0, WIDTH, THICKNESS)}, "bow"),
+        ({"hex": (0, 0, WIDTH, THICKNESS)}, "polybow"),
+        ({"disc": (0, 0, WIDTH, WIDTH)}, "polybow"),
+        ({"box": (0, 0, WIDTH, 0.2)}, "bow"),
+        ({"sk": (0, 0, WIDTH, 0.2)}, "polybow"),
     ):
         coilset = winding(section, SWEEPS["short"])
-        assert set(np.asarray(coilset.subframe["segment"]).tolist()) == {"polybow"}
+        assert set(np.asarray(coilset.subframe["segment"]).tolist()) == {element}
     filament = CoilSet()
     start, end = SWEEPS["short"]
     angle = np.array([start, 0.5 * (start + end), end])
@@ -356,7 +356,7 @@ def test_the_bow_agreement_is_not_a_tie_at_single_precision():
     """
     section = {"rect": (0, 0, WIDTH, THICKNESS)}
     bow = cylindrical_rows(winding(section, SWEEPS["short"], segment="bow"))
-    poly = cylindrical_rows(winding(section, SWEEPS["short"]))
+    poly = cylindrical_rows(winding(section, SWEEPS["short"], segment="polybow"))
     assert worst_overall(poly, bow) >= 1e-13
 
 

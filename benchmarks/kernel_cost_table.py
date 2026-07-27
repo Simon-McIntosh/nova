@@ -7,14 +7,20 @@ Cost is the median across repeats of the same variant. Accuracy is per component
 the reduced rules, and the closed-form rectangle kernel where the section is a
 rectangle, which is an independent oracle rather than a self-comparison.
 
-The rectangle comparison is taken outside the section's bounding box. Inside it,
-and along the horizontal faces in particular, ``cylinder_greens`` is not usable
-as an oracle: its corner antiderivative carries ``sign(z_corner - z_target)``
-step terms with a dead-band, and on a face where that difference is zero the
-returned flux jumps -- one benchmark target on the lower face returns a NEGATIVE
-psi where every neighbouring target, and the polygon kernel, give a smooth
-positive value. That is a defect in the rectangle kernel, not in what is being
-measured against it.
+The rectangle comparison is taken outside the section's bounding box, and that
+restriction is now CONSERVATIVE rather than necessary. It was necessary once: the
+rectangle kernel's corner antiderivative used to reach the two poles of its ring
+denominator by subtraction, which cost the antiderivative's own branch cancellation
+a relative ``eps r^2/gamma^2`` and left the flux stepping by hundreds of times its
+true value either side of a face -- one benchmark target on the lower face returned
+a NEGATIVE psi where every neighbour, and the polygon kernel, gave a smooth positive
+one. That is fixed: every pole and the modulus now come from the geometry as exact
+complements, and the rectangle kernel agrees with the analytic polygon reduction to
+1e-12 relative ON the faces, at the corner radii and at the corners themselves
+(``tests/test_biotgreens.py``). So the mask below could be dropped and the
+comparison taken over the whole target cloud. It is retained because changing it
+moves every recorded accuracy number in the table, which wants a re-measure of its
+own rather than riding along with a kernel fix.
 """
 
 from __future__ import annotations

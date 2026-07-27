@@ -207,26 +207,83 @@ class Constants:
         return rf + rj * n / 3
 
     @classmethod
-    def _ellippinc(cls, n, phi, m):
-        """Return first branch incomplete elliptic intergral of the 3rd kind."""
-        x = 1.0 - np.sin(phi) ** 2
-        y = 1.0 - m * np.sin(phi) ** 2
-        z = np.ones_like(phi)
-        rf = cls.elliprf(x, y, z)
-        rj = cls.elliprj(x, y, z, 1.0 - n * np.sin(phi) ** 2)
-        return np.sin(phi) * rf + np.sin(phi) ** 3 * rj * n / 3.0
+    def _ellippinc(cls, n, sine, cosine, m):
+        """Return the 3rd kind over a quarter turn, from the amplitude's own pair.
+
+        Carlson's form for the amplitude ``phi`` is
+
+            Pi(n, phi, m) = sin phi R_F(cos^2 phi, 1 - m sin^2 phi, 1)
+                          + (n/3) sin^3 phi R_J(..., 1 - n sin^2 phi)
+
+        and every one of those three arguments is taken here as a SUM OF
+        POSITIVES rather than as a subtraction from one.  ``cos^2 phi`` written
+        as ``1 - sin^2 phi`` is the whole difficulty: within about 1e-8 of a
+        quarter turn the sine rounds to one, the difference collapses to exactly
+        zero, and the evaluation silently returns the COMPLETE integral in place
+        of the one it was asked for.  The other two follow the same identity,
+        ``1 - m sin^2 = cos^2 + (1 - m) sin^2``, which additionally keeps the
+        radical's relative accuracy where the target approaches the source ring
+        and both the modulus complement and the cosine are small at once.
+
+        Odd in the amplitude through ``sine``, so the fold's parity needs no
+        separate sign.
+        """
+        squared_sine, squared_cosine = sine * sine, cosine * cosine
+        radical = squared_cosine + (1.0 - m) * squared_sine
+        unit = np.ones_like(radical)
+        rf = cls.elliprf(squared_cosine, radical, unit)
+        rj = cls.elliprj(
+            squared_cosine, radical, unit, squared_cosine + (1.0 - n) * squared_sine
+        )
+        return sine * rf + n * sine * squared_sine * rj / 3.0
 
     @classmethod
-    def ellippinc(cls, n, phi, m):
+    def ellippinc(cls, n, phi, m, *, sine=None, cosine=None):
         """
         Return incomplete elliptic intergral of the 3rd kind.
 
-        Adapted from https://github.com/scipy/scipy/issues/4452.
+        The integrand is half-turn periodic and even about zero, so its integral
+        is ODD and gains two complete integrals per half turn of amplitude,
+
+            Pi(n, t pi + d, m) = 2 t Pi(n, m) + Pi(n, d, m)
+
+        with ``t = round(phi/pi)`` and ``|d| <= pi/2`` by construction of the
+        rounding.  The residual amplitude ``d`` is never FORMED: what the
+        evaluation asks for is its sine and cosine, and
+
+            sin d = (-1)^t sin phi,   cos d = (-1)^t cos phi
+
+        are exact, so the fold is a sign rather than a subtraction.  Taking it
+        as ``phi - t pi`` instead loses the residual to cancellation, and the
+        floor-and-offset count it used to be taken with — ``(phi + pi/2)//pi`` —
+        rounds up one step short of a quarter turn, putting the residual an ulp
+        OUTSIDE the closed quarter it was then checked against: an amplitude one
+        representable step below a right angle, which is where a target on an
+        arc's own end plane lands.
+
+        ``sine`` and ``cosine`` supply the amplitude's pair where the caller
+        formed it from its geometry, as
+        :func:`nova.biot.incompleteelliptic.incomplete_pole` and
+        :mod:`nova.biot.arcamplitude` do; near a quarter turn a pair carried
+        exactly is the difference between a relative accuracy and an absolute
+        one.  Adapted from https://github.com/scipy/scipy/issues/4452.
         """
-        k = (phi + np.pi / 2) // np.pi
-        assert np.all(abs(phi - k * np.pi) <= np.pi / 2)
+        phi = np.asarray(phi, dtype=float)
+        sine = np.sin(phi) if sine is None else np.asarray(sine)
+        cosine = np.cos(phi) if cosine is None else np.asarray(cosine)
+        turns = np.round(phi / np.pi)
+        parity = 1.0 - 2.0 * abs(np.remainder(turns, 2.0))
+        sine, cosine = parity * sine, parity * cosine
         assert np.all(m < 1)
-        return 2 * k * cls.ellipp(n, m) + cls._ellippinc(n, phi - k * np.pi, m)
+        # the fold leaves the residual amplitude inside the closed quarter, so
+        # its cosine is non-negative -- to within the resolution with which a
+        # float amplitude locates a half turn at all, which is what the old
+        # bound on the subtracted angle could not honour
+        assert np.all(cosine >= -4 * cls.eps * np.maximum(1.0, abs(phi)))
+        folded = cls._ellippinc(n, sine, cosine, m)
+        if not np.any(turns):  # a quarter-turn range never leaves the branch
+            return folded
+        return 2 * turns * cls.ellipp(n, m) + folded
 
     # @unit_nudge()
     def _np2_2(self):

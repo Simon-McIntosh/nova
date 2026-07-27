@@ -6,6 +6,8 @@ These run on plain numpy arrays with no frame machinery.  They pin:
   Part III rectangular-section formula it was extracted from -- the dataclass
   cylinder kernel and the functional ``cylinder_greens`` both drive this one
   routine, so the guard protects against the two paths silently diverging;
+* continuity of the finite-area rectangle kernel across the section's OWN corner
+  planes, where the antiderivative's branch terms change sign;
 * far-field agreement of the finite-area rectangle kernel with the point
   circular-loop kernel;
 * psi<->B consistency of the point-loop kernel (Jackson forms).
@@ -126,6 +128,161 @@ def test_point_loop_psi_b_consistency():
 def test_units_constant():
     """The kernel carries the SI vacuum permeability."""
     assert MU0 == 4.0e-7 * np.pi
+
+
+# --- continuity across the section's own corner planes -----------------------
+#
+# The corner antiderivative carries branch terms that are ODD in the target's
+# offset from a corner plane: an arctangent boundary term whose limit is a signed
+# right angle, and two third-kind integrals whose poles collapse onto the ends of
+# the integration range there.  Those jumps cancel each other exactly, so the
+# antiderivative is continuous -- but only if every characteristic and the modulus
+# complement are formed from the geometry.  A mis-set branch, or a characteristic
+# reached by subtraction, leaves an offset-INDEPENDENT jump; a ladder of standoffs
+# over nine decades is what separates that from the smooth variation across the
+# plane, since only the jump fails to fall with the standoff.
+
+_FACE_A, _FACE_Z0, _FACE_DA, _FACE_DZ = 4.0, 0.0, 0.1, 0.08
+_LADDER = 10.0 ** -np.arange(2.0, 11.0)
+_STRADDLE = np.concatenate([-_LADDER, [0.0], _LADDER[::-1]])
+# a target radius strictly inside the section's radial span, off its mid-plane and
+# off both corner radii, so the two lower corners straddle it in radius
+_INSIDE_SPAN = _FACE_A - 0.0435
+
+
+def _rectangle(a, z0, da, dz):
+    """Return the four ``(r, z)`` corners of an axis-aligned rectangular section."""
+    return np.array(
+        [
+            [a - da / 2, z0 - dz / 2],
+            [a + da / 2, z0 - dz / 2],
+            [a + da / 2, z0 + dz / 2],
+            [a - da / 2, z0 + dz / 2],
+        ]
+    )
+
+
+def _worst_against_the_polygon(target_r, target_z):
+    """Return the worst relative ``(psi, B_R, B_Z)`` deviation from the oracle.
+
+    The oracle is the fully analytic polygon reduction, not the quadrature one: a
+    target ON a face sits on the quadrature integrand's own boundary layer, where
+    the shipped 16x48 rule is six decades off in ``B_R``, so the quadrature form
+    cannot referee the singular configuration.  Away from the plane the two agree,
+    which :func:`test_the_two_polygon_oracles_agree_off_the_face` pins.
+    """
+    from nova.biot.polygonanalytic import polygon_analytic_greens
+
+    got = cylinder_greens(target_r, target_z, _FACE_A, _FACE_Z0, _FACE_DA, _FACE_DZ)
+    exact = polygon_analytic_greens(
+        target_r, target_z, _rectangle(_FACE_A, _FACE_Z0, _FACE_DA, _FACE_DZ)
+    )
+    # the field is scaled by its own magnitude rather than per component: B_R
+    # passes through zero on the section's mid-plane, where a per-component
+    # relative measure has no meaning
+    field = np.hypot(exact[1], exact[2])
+    local = (np.abs(exact[0]), field, field)
+    return [
+        float(np.max(np.abs(one - other) / scale))
+        for one, other, scale in zip(got, exact, local, strict=True)
+    ]
+
+
+def test_the_two_polygon_oracles_agree_off_the_face():
+    """Off the plane the quadrature and analytic polygon kernels are one oracle.
+
+    Which is what licenses the analytic one as the referee ON the plane, where the
+    quadrature rule's panels straddle the integrand's boundary layer.
+    """
+    from nova.biot.polygon import polygon_greens
+    from nova.biot.polygonanalytic import polygon_analytic_greens
+
+    vertices = _rectangle(_FACE_A, _FACE_Z0, _FACE_DA, _FACE_DZ)
+    target_r = np.full(6, _INSIDE_SPAN)
+    target_z = (
+        _FACE_Z0 - _FACE_DZ / 2 + np.array([-0.03, -0.01, -3e-3, 3e-3, 0.01, 0.03])
+    )
+    quadrature = polygon_greens(target_r, target_z, vertices, n_panels=64, n_nodes=96)
+    analytic = polygon_analytic_greens(target_r, target_z, vertices)
+    for one, other in zip(quadrature, analytic, strict=True):
+        np.testing.assert_allclose(one, other, rtol=2e-9)
+
+
+def test_the_rectangle_kernel_is_continuous_across_a_horizontal_face():
+    """Approaching a section face from either side reaches the same field.
+
+    The configuration a plasma bundle produces by alignment: a grid row level with
+    the cell's own lower or upper face, at a radius inside the cell's radial span,
+    so the two corners on that face straddle the target in radius and the
+    arctangent boundary term is live at one of them and dead at the other.
+    """
+    for level in (_FACE_Z0 - _FACE_DZ / 2, _FACE_Z0 + _FACE_DZ / 2):
+        worst = _worst_against_the_polygon(
+            np.full(_STRADDLE.shape, _INSIDE_SPAN), level + _STRADDLE
+        )
+        assert max(worst) < 1e-9, worst
+
+
+def test_the_rectangle_kernel_is_continuous_across_a_source_radius_plane():
+    """Crossing a corner's own radius leaves the field unchanged.
+
+    The other pair of planes the branch terms change sign across: ``rs = r`` flips
+    the arctangent's limit at the far end of the angle range, and it also drives
+    the third pole and the modulus complement to their own confluence.
+    """
+    for radius in (_FACE_A - _FACE_DA / 2, _FACE_A + _FACE_DA / 2):
+        worst = _worst_against_the_polygon(
+            radius + _STRADDLE, np.full(_STRADDLE.shape, _FACE_Z0 + 0.017)
+        )
+        assert max(worst) < 1e-9, worst
+
+
+def test_a_target_on_the_source_radius_line_survives_the_corner():
+    """Both confluences at once -- the corner itself -- stays on the oracle.
+
+    Sliding along ``rs = r`` through a corner drives the modulus complement, the
+    near pole and the third pole to zero together, where the first kind diverges
+    logarithmically and the reduction's total weight on it is zero.  Two decades
+    looser than the plane tests because the antiderivative is a cancellation of
+    terms of order the squared major radius here, and it is reached rather than
+    approached: the last row is the vertex exactly.
+    """
+    for radius in (_FACE_A - _FACE_DA / 2, _FACE_A + _FACE_DA / 2):
+        for level in (_FACE_Z0 - _FACE_DZ / 2, _FACE_Z0 + _FACE_DZ / 2):
+            worst = _worst_against_the_polygon(
+                np.full(_STRADDLE.shape, radius), level + _STRADDLE
+            )
+            assert max(worst) < 1e-7, worst
+
+
+def test_the_corner_planes_carry_no_jump_of_their_own():
+    """The two one-sided limits meet each other, and meet the value ON the plane.
+
+    Oracle-free, and the sharpest statement of the defect this guards: the branch
+    terms are odd in the offset, so a mis-set branch survives as a jump that does
+    NOT fall with the standoff.  Differencing the kernel against itself over a
+    ladder of standoffs is what exposes that without reference to any other kernel
+    -- and the value on the plane must be the meeting point rather than either
+    side, since a discontinuous antiderivative evaluated at its own jump lands on
+    the mean of the two limits and passes a two-sided comparison on its own.
+    """
+    for level in (_FACE_Z0 - _FACE_DZ / 2, _FACE_Z0 + _FACE_DZ / 2):
+        for radius in (_INSIDE_SPAN, _FACE_A + 0.021):
+            got = cylinder_greens(
+                np.full(_STRADDLE.shape, radius),
+                level + _STRADDLE,
+                _FACE_A,
+                _FACE_Z0,
+                _FACE_DA,
+                _FACE_DZ,
+            )
+            middle = len(_LADDER)
+            for component in got:
+                scale = np.max(np.abs(component))
+                closest = np.abs(component[middle - 1] - component[middle + 1])
+                on_plane = np.abs(component[middle] - component[middle + 1])
+                assert closest < 1e-9 * scale
+                assert on_plane < 1e-9 * scale
 
 
 # --- quadrupole-corrected filament ------------------------------------------

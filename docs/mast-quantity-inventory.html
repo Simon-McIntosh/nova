@@ -535,10 +535,13 @@
     </tbody>
   </table>
   <p>The script needs <code>zarr</code> and <code>scipy</code>, which are not nova dependencies —
-  <code>uv pip install "numpy&lt;2" "zarr&lt;3.1" scipy</code> in the working environment (the
-  numpy bound matters: an unpinned <code>zarr</code> pulls numpy 2.x and nova requires
-  &lt;&nbsp;2). Compute nodes here have no network, so install on the login node first and run
-  with <code>--offline</code>.</p>
+  <code>uv pip install "numpy&lt;2" "zarr&lt;3.1" scipy</code> in the working environment. The numpy
+  bound matters: an unpinned <code>zarr</code> pulls numpy 2.x and nova requires &lt;&nbsp;2.
+  Install into the environment <em>before</em> submitting, because <code>UV_OFFLINE=1</code> is set
+  in the shell environment here and <code>uv run --with &lt;pkg&gt;</code> therefore cannot resolve
+  a new package inside the job. This is an environment setting and not a firewall — pypi.org and
+  ghcr.io both answer from the compute nodes (verified 2026-07-27), which is what makes a
+  registry-backed MD viable from inside a job.</p>
   <p>The script deliberately reimplements the campaign digest rather than importing ambix, so nova
   carries no dependency on it — and the reimplementation reproduces all three of ambix's published
   keys (<code>9425ae4a8bf3bc15</code>, <code>edd753d282903679</code>,

@@ -233,11 +233,18 @@ class cold_test(pythonIO):
         #            inplace=True, level=0)
 
     def t(self, index, to=None):
+        """Return seconds elapsed from to, as a float array.
+
+        Every consumer differentiates or interpolates against this, so it has to
+        be a plain float array: casting the difference to a millisecond
+        resolution leaves a timedelta index, and scaling that yields timedelta
+        objects rather than the seconds the callers expect.
+        """
         if to is None:
             to = self.to
         elif isinstance(to, int):
             to = index[to]
-        return (index - to).astype("timedelta64[ms]") * 1e-3
+        return np.asarray((index - to) / np.timedelta64(1, "s"), dtype=float)
 
     def condition_signal(self, data):
         t = self.t(data.index)
@@ -282,8 +289,10 @@ class cold_test(pythonIO):
                 value = data.loc[:, col].copy()
                 isna = value.isna()
                 value.loc[isna] = 0
+                # unique returns positions into t, and the channel is indexed by
+                # timestamp, so the samples it picks out must be read positionally
                 _t, _i = np.unique(t, return_index=True)
-                _v = value[_i]
+                _v = value.to_numpy()[_i]
                 gradient = interp1d(_t, np.gradient(_v, _t))(t)
                 gradient_maximum = (abs(gradient) > gradient_max) | isna
             else:
@@ -300,7 +309,9 @@ class cold_test(pythonIO):
                 data.loc[index, col] = interp(t[index])
                 # calculate high frequency content
                 dt = np.median(np.diff(t))
-                __, psd = scipy.signal.welch(data.loc[:, col], 1 / dt)
+                # welch slices its input with an ellipsis, which a labelled
+                # series does not accept
+                __, psd = scipy.signal.welch(data.loc[:, col].to_numpy(), 1 / dt)
                 if psd[-1] > 1 and col in Tcol:
                     data.drop(columns=col, inplace=True)
             elif col in Tcol:
@@ -316,13 +327,16 @@ class cold_test(pythonIO):
         text = _linelabel(Ndiv=50, value="")
         for col in self.temperature:
             T = self.temperature.loc[:, col]
-            if T[-1] > 250:
+            # the channel is indexed by timestamp, so the last sample is
+            # positional; -1 is not a label in it
+            final = T.iloc[-1]
+            if final > 250:
                 color = "C0"
-            elif T[-1] > 50:
+            elif final > 50:
                 color = "C1"
-            elif T[-1] > 10:
+            elif final > 10:
                 color = "C2"
-            elif T[-1] > 6:
+            elif final > 6:
                 color = "C4"
             else:
                 color = "C3"
@@ -557,6 +571,13 @@ class cold_test(pythonIO):
         Ndiv=20,
         xlabel=True,
     ):
+        """Return the current-squared coefficient of each selected channel.
+
+        A cold-test channel that responds to Lorentz loading grows with the
+        square of the drive current, so one coefficient per channel is the
+        qualification result. The fit uses the down-ramp between Imin and Itrim,
+        where the coil is in equilibrium with the load rather than chasing it.
+        """
         current, dataframe = self.get_current(label, index)
         current_rate = np.gradient(current, self.t(current.index))
         # trim  current
@@ -640,6 +661,7 @@ class cold_test(pythonIO):
             else:
                 ax.legend(ncol=ncol, loc=loc)
             text.plot()
+        return coef
 
     def get_index(self, index):
         if index == "cooldown":

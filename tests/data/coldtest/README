@@ -1,0 +1,61 @@
+Synthetic CS module cold-test export
+===================================
+
+Provenance
+----------
+Synthesised. No CS module measurement is included, and none was available to
+copy: the shipped `data/CSM` directory is empty and no cold-test CSV has ever
+been committed to this repository's history. The file was written to match the
+export format `nova/thermalhydralic/cold_test.py` reads, at the smallest size
+that still drives every parsing and conditioning branch. Nothing in it is
+proprietary, and nothing in it should be cited as a measurement.
+
+Layout
+------
+The tests redirect the package root, so `data/CSM` below this directory is what
+`cold_test` resolves its project directory from, and `test/` is the folder the
+reader globs for the test-phase exports.
+
+    CSM_SYNTH/test/coldtest_20200211.csv
+
+The timestamps lie inside the reader's hard-coded `test` window
+(2020-02-11 09:00 to 2020-02-14 18:00), because the phase selectors are date
+slices rather than parameters.
+
+Export structure
+----------------
+Seven preamble lines, then a header row, then one row per sample at 10 s
+intervals. The reader takes the header from row seven, so the preamble's content
+is never parsed -- only its length matters. Each channel name carries its unit in
+parentheses, which is how the reader splits a name into a (channel, unit) pair:
+
+    timestamp,PSIOut_(kA),IBus_(kA),mean_TT001_value_(K),TT002_(K),DS001_(mm),DS002_(mm)
+
+`mean_TT001_value_(K)` is written in the instrument's own spelling so the
+name-normalising branch runs -- the reader strips `mean`, `value` and underscores
+before splitting on the parenthesis. Channels are grouped by prefix first and
+unit second, so `DS...` becomes displacement, `TT...` temperature, and anything
+in kA current.
+
+Signal content
+--------------
+The current holds at zero, ramps to 44 kA and back down, and holds at zero
+again, at 0.08 kA/s. Both bounds are deliberate: the conditioning discards and
+re-interpolates any current sample above 45 kA or any channel whose gradient
+exceeds 0.1 per second, so a steeper ramp or a higher peak would be silently
+rewritten rather than read.
+
+The two displacement channels follow
+
+    DS001 = -0.5 - k I**2          k = 18 / 44**2 mm/kA**2
+    DS002 = -0.5 + 0.5 * DS001
+
+The standoff term keeps the channel strictly negative, which the conditioning
+requires of a displacement, and the zero-current hold at the start means the
+reader's own offset subtraction removes exactly that standoff. What is left is
+the pure square law, so the fitted coefficient is -k with nothing left over --
+which is what makes the fit test an equality against a known number rather than
+a tolerance against measured data.
+
+Temperatures are constant, in range and smooth, so they survive conditioning and
+exercise the grouping without also exercising the rejection branches.

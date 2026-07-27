@@ -9,15 +9,28 @@ no longer tell a module-scope import from a deferred one.
 
 import importlib
 import pkgutil
+import shutil
 import subprocess
 import sys
+from pathlib import Path
 
 import numpy as np
+import pandas
 import pytest
 
 import nova.thermalhydralic as thermalhydralic
+import nova.thermalhydralic.cold_test as cold_test_module
 from nova.thermalhydralic.frequencyresponse import FrequencyResponse
 from nova.thermalhydralic.lumpedparameter import LumpedCapacitance
+
+COLDTEST_FIXTURE = Path(__file__).parent / "data" / "coldtest"
+
+#: Seconds between samples in the committed cold-test export.
+COLDTEST_TIMESTEP = 10.0
+
+#: Displacement law the export was generated from, mm per kA squared. The peak
+#: current sits below the 45 kA validity ceiling the conditioning enforces.
+COLDTEST_COEFFICENT = 18.0 / 44.0**2
 
 # Distributions the cluster reaches only behind an extra. A missing one is an
 # environment gate; a missing nova module is a stale import and must fail.
@@ -233,3 +246,69 @@ def test_lumped_capacitance_recovers_time_constant():
     heat_transfer, capacitance, error = lumped.fit_hA()
     assert np.isclose(capacitance / heat_transfer, time_constant, rtol=1e-2)
     assert error < 1e-3
+
+
+@pytest.fixture
+def coldtest(tmp_path, monkeypatch):
+    """Point the cold-test data root at a copy of the committed fixture.
+
+    cold_test resolves its project directory from the package root at
+    construction and pickles conditioned groups back beside the source, so the
+    root is redirected rather than the instance patched.
+    """
+    shutil.copytree(COLDTEST_FIXTURE, tmp_path / "data" / "CSM")
+    monkeypatch.setattr(cold_test_module, "root_dir", str(tmp_path))
+    return cold_test_module.cold_test(project_dir="CSM_SYNTH", read_txt=True)
+
+
+def test_coldtest_splits_channels_by_sensor_and_unit(coldtest):
+    """Each group holds the channels its prefix or unit selects, and no others."""
+    for group, channels in (
+        ("current", [("IBus", "kA"), ("PSIOut", "kA")]),
+        ("displace", [("DS001", "mm"), ("DS002", "mm")]),
+        ("temperature", [("TT001", "K"), ("TT002", "K")]),
+    ):
+        coldtest.load_coldtest(group, read_txt=True)
+        assert list(getattr(coldtest, group).columns) == channels
+    assert coldtest.channels["PSIOut"] == "current"
+    assert coldtest.channels["DS001"] == "displace"
+
+
+def test_coldtest_indexes_on_the_timestamp(coldtest):
+    """The export's timestamp column becomes a datetime index."""
+    coldtest.load_coldtest("current", read_txt=True)
+    index = coldtest.current.index
+    assert index.name == "timestamp"
+    assert isinstance(index, pandas.DatetimeIndex)
+    assert np.allclose(np.diff(coldtest.t(index)), COLDTEST_TIMESTEP)
+
+
+def test_coldtest_caches_the_conditioned_group(coldtest):
+    """A conditioned group is pickled and served from the pickle after."""
+    coldtest.load_coldtest("displace", read_txt=True)
+    conditioned = coldtest.displace.copy()
+    del coldtest.displace
+    coldtest.load_coldtest("displace")
+    assert coldtest.displace.equals(conditioned)
+
+
+def test_coldtest_zeroes_the_channel_on_the_first_samples(coldtest):
+    """The returned frame is offset so the unloaded coil reads zero."""
+    coldtest.load_coldtest("displace", read_txt=True)
+    current, frame = coldtest.get_current("displace", "test")
+    assert np.isclose(current.iloc[0], 0)
+    assert np.allclose(frame.iloc[0].to_numpy(), 0)
+
+
+def test_coldtest_recovers_the_current_squared_law(coldtest):
+    """The fit returns the coefficient the fixture was generated from.
+
+    The fixture's displacement is exactly -k I**2 above a standoff, and the
+    offset removes the standoff, so the fitted coefficient is -k with nothing
+    left over. The second channel carries half the coefficient of the first.
+    """
+    coldtest.load_coldtest("displace", read_txt=True)
+    coefficent = coldtest.fit("displace", index="test", plot=False)
+    assert np.allclose(
+        coefficent, [-COLDTEST_COEFFICENT, -0.5 * COLDTEST_COEFFICENT], rtol=1e-9
+    )

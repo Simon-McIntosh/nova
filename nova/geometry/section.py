@@ -3,11 +3,104 @@
 from dataclasses import dataclass, field
 
 import numpy as np
+import shapely.geometry
+import shapely.ops
 import vedo
 
 from nova.geometry.frenet import Frenet
 from nova.geometry.rotate import to_vector, to_axes, by_angle
 from nova.geometry.vtkgen import VtkFrame
+
+
+def distinct_corners(points: np.ndarray, tolerance: float = 1e-9) -> np.ndarray:
+    """Return a closed ring's corners with every zero-length edge dropped.
+
+    A generated section comes back as a shapely ring, so its first corner is
+    repeated at the end -- and a generator that sweeps an angle closes on a corner
+    that is its own first to within round-off rather than exactly, which leaves the
+    ring one corner longer still.  Both are edges of zero length, and the tolerance
+    is taken against the SECTION's own extent so a thin plate keeps corners a
+    coordinate-absolute one would merge.
+    """
+    points = np.asarray(points, dtype=np.float64)
+    scale = max(float(np.max(np.ptp(points, axis=0))), np.finfo(float).tiny)
+    gap = np.linalg.norm(points - np.roll(points, -1, axis=0), axis=1)
+    return points[gap > tolerance * scale]
+
+
+def collapse_collinear(points: np.ndarray, tolerance: float = 1e-9) -> np.ndarray:
+    """Return a planar ring's minimal corner set as an ``(n, 2)`` array.
+
+    Beyond the zero-length edges :func:`distinct_corners` drops, a corner sitting
+    part way along a straight edge carries no geometry either.  A projection puts
+    them there: the poloidal footprint of a swept hexagon comes back with a corner
+    mid-edge, agreeing with the straight line to round-off, and a closed-form
+    section reduction pays per corner -- so the run is collapsed before the section
+    is handed over rather than paid for.
+
+    Redundancy is measured as twice the area of the triangle a corner spans with
+    its two neighbours, against the square of the section's own extent, so it is
+    scale-free in the same way the zero-length test is.  A run of any length
+    collapses in one pass because every interior point of it fails the test at
+    once, and the loop repeats only for the runs a removal creates.
+    """
+    points = distinct_corners(points, tolerance)
+    scale = max(float(np.max(np.ptp(points, axis=0))), np.finfo(float).tiny)
+    while len(points) > 3:
+        edge = np.roll(points, -1, axis=0) - points
+        previous = np.roll(edge, 1, axis=0)
+        turn = np.abs(previous[:, 0] * edge[:, 1] - previous[:, 1] * edge[:, 0])
+        corner = turn > tolerance * scale**2
+        if corner.all() or corner.sum() < 3:
+            break
+        points = points[corner]
+    return points
+
+
+def poloidal_footprint(loops: np.ndarray, tolerance: float = 1e-10):
+    """Return the poloidal footprint of a swept section as a shapely polygon.
+
+    ``loops`` is the ``(loop, corner, 3)`` stack a sweep places the cross-section
+    at along its path, in the double precision the cross-section was authored in.
+    Each loop projects to ``(r, z)`` by ``r = hypot(x, y)``, and the footprint is
+    the union of those projections -- the section as it is actually carried, at
+    every station along the path, rather than an alpha shape fitted to a mesh's
+    vertices.
+
+    The loops themselves are unioned rather than the solid bands between them,
+    which is what keeps a CONCAVE section concave: a band's projection would have
+    to be convexified to be cheap, and a hull across the two loops fills in the
+    notch of an L or a wedge.  What that gives up is the sliver a band sweeps out
+    between two stations, which is bounded by how far the loops move -- nothing at
+    all for a sweep at constant radius about the vertical, the case every arc
+    element in an axisymmetric frame reads, where every loop projects onto very
+    nearly the same ring and the union collapses back onto it.
+
+    The result is collapsed before it is returned: a union of near-identical rings
+    leaves corners part way along the section's own edges, one per station that
+    moved, so a swept hexagon's union has sixteen corners over a sixteen-station arc
+    and leaves with six -- its area agreeing with the section's to 2e-14.
+    """
+    loops = np.asarray(loops, dtype=np.float64)
+    poloidal = np.stack(
+        [np.linalg.norm(loops[..., :2], axis=-1), loops[..., 2]], axis=-1
+    )
+    scale = max(float(np.max(np.ptp(poloidal.reshape(-1, 2), axis=0))), 1.0)
+    if np.max(np.abs(poloidal - poloidal[0])) <= tolerance * scale:
+        return shapely.geometry.Polygon(collapse_collinear(poloidal[0]))
+    station = [shapely.geometry.Polygon(ring).buffer(0) for ring in poloidal]
+    footprint = shapely.ops.unary_union(station)
+    if not footprint.is_valid:
+        footprint = footprint.buffer(0)
+    if not isinstance(footprint, shapely.geometry.Polygon):
+        return footprint
+    return shapely.geometry.Polygon(
+        collapse_collinear(np.asarray(footprint.exterior.coords, dtype=np.float64)),
+        [
+            collapse_collinear(np.asarray(ring.coords, dtype=np.float64))
+            for ring in footprint.interiors
+        ],
+    )
 
 
 @dataclass

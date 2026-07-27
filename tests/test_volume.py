@@ -1,15 +1,35 @@
 import numpy as np
 import pytest
+import shapely.geometry
 from scipy.spatial.transform import Rotation
 
+from nova.geometry.polygen import PolyGen
 from nova.geometry.polygeom import Polygon
 from nova.geometry.rotate import to_axes
 from nova.utilities.importmanager import skip_import
 
 with skip_import("vtk"):
-    from nova.geometry.section import Section
+    from nova.geometry.section import (
+        Section,
+        collapse_collinear,
+        poloidal_footprint,
+    )
     from nova.geometry.vtkgen import VtkFrame
     from nova.geometry.volume import Cell, Sweep
+
+
+def swept(loop: np.ndarray, radius=3.0, elevation=0.2, stations=21) -> Sweep:
+    """Return a cross-section swept at constant radius about the vertical."""
+    angle = np.linspace(0.3, 1.9, stations)
+    path = np.stack(
+        [
+            radius * np.cos(angle),
+            radius * np.sin(angle),
+            np.full_like(angle, elevation),
+        ],
+        axis=-1,
+    )
+    return Sweep(np.c_[loop[:, 0], np.zeros(len(loop)), loop[:, 1]], path)
 
 
 @pytest.fixture
@@ -139,6 +159,103 @@ def test_to_axes(sequence, angles):
     Rmat = to_axes(target, section.triad)
     assert np.allclose(Rmat.as_matrix() @ section.triad, target)
     assert np.allclose(Rmat.apply(section.triad.T).T, target)
+
+
+# ---------------------------------------------------------------------------
+# The section a sweep carries, and the poloidal footprint it reduces to.
+
+
+def test_a_sweep_keeps_its_corner_loops_at_double_precision():
+    """The mesh cannot be the geometry of record; the loops it was built from can.
+
+    VTK's points default to ``VTK_FLOAT``, so a corner authored at 2.97 reads back
+    from the mesh at 2.96999979.  That is 8e-09 relative -- four orders above a
+    closed-form section reduction's own round-off -- and it is why the sweep keeps
+    the transformed loops beside the mesh instead of measuring the mesh.  Forcing
+    VTK to double precision would double every mesh in the frame and fix nothing
+    else.
+    """
+    solid = swept(
+        np.array([[2.97, 0.18], [3.03, 0.18], [3.03, 0.22], [2.97, 0.22]])
+        - np.array([3.0, 0.2])
+    )
+    loops = solid.section_loops
+    assert loops.dtype == np.float64
+    radial = np.hypot(loops[..., 0], loops[..., 1])
+    assert abs(float(np.max(radial)) - 3.03) <= 1e-15
+    assert abs(float(np.min(radial)) - 2.97) <= 1e-15
+    assert abs(float(np.max(np.abs(loops[..., 2] - 0.2))) - 0.02) <= 1e-15
+    mesh = np.hypot(*np.asarray(solid.clone().triangulate().vertices)[:, :2].T)
+    assert abs(float(np.max(mesh)) - 3.03) > 1e-9  # measured 2.1e-08
+
+
+def test_collapse_collinear_keeps_the_corners_and_drops_the_rest():
+    """Zero-length edges, the closing repeat, and points part way along an edge."""
+    square = np.array([[1.0, 0.0], [1.0, 1.0], [0.0, 1.0], [0.0, 0.0]])
+    split = np.array(
+        [
+            [1.0, 0.0],
+            [1.0, 0.5],  # part way along an edge
+            [1.0, 1.0],
+            [1.0, 1.0],  # a zero-length edge
+            [0.5, 1.0],
+            [0.0, 1.0],
+            [0.0, 0.0],
+            [1.0, 0.0],  # the closing repeat
+        ]
+    )
+    collapsed = collapse_collinear(split)
+    assert len(collapsed) == 4
+    assert np.allclose(np.sort(collapsed, axis=0), np.sort(square, axis=0))
+
+
+def test_collapse_collinear_leaves_a_finely_resolved_curve_alone():
+    """A generated disc turns 2 pi / 64 per corner, nowhere near collinear."""
+    disc = np.asarray(PolyGen("disc")(0.0, 0.0, 0.06).exterior.coords, dtype=float)
+    assert len(collapse_collinear(disc)) == 64
+
+
+def test_the_footprint_of_a_constant_radius_sweep_is_the_section():
+    """The case every arc element in an axisymmetric frame reads.
+
+    Every station projects onto the same ring, so the union of the projections is
+    the cross-section itself -- exactly, not to a hull's tolerance.  Measured on a
+    hexagon, whose footprint arrives with more corners than the section has and has
+    to come back with six.
+    """
+    section = PolyGen("hexagon")(3.0, 0.2, 0.06, 0.04)
+    exact = collapse_collinear(np.asarray(section.exterior.coords, dtype=float))
+    loop = np.asarray(PolyGen("hexagon")(0.0, 0.0, 0.06, 0.04).exterior.coords, float)
+    footprint = poloidal_footprint(swept(loop).section_loops)
+    corners = collapse_collinear(np.asarray(footprint.exterior.coords, dtype=float))
+    assert len(corners) == 6
+    assert np.isclose(footprint.area, section.area, rtol=1e-12)
+    order = [
+        int(np.argmin(np.linalg.norm(exact - corner, axis=1))) for corner in corners
+    ]
+    assert sorted(order) == list(range(6))
+    assert np.max(np.abs(corners - exact[order])) <= 1e-15  # measured 4.4e-16
+
+
+def test_the_footprint_of_a_concave_section_stays_concave():
+    """A notch has to survive the projection, or an L becomes a rectangle.
+
+    The stations themselves are unioned rather than the solid bands between them
+    for exactly this reason: a band's projection is only cheap if it is convexified,
+    and a hull across two stations fills the notch in.  What survives is measured as
+    the footprint being strictly smaller than its own convex hull, and as the
+    reflex corner still being there.
+    """
+    loop = np.array(
+        [[-0.03, -0.02], [0.03, -0.02], [0.02, 0.0], [0.03, 0.02], [-0.01, 0.015]]
+    )
+    exact = shapely.geometry.Polygon(loop + np.array([3.0, 0.2]))
+    footprint = poloidal_footprint(swept(loop).section_loops)
+    hull = shapely.geometry.Polygon(footprint.exterior).convex_hull
+    assert footprint.area < 0.99 * hull.area
+    assert np.isclose(footprint.area, exact.area, rtol=1e-03)
+    corners = collapse_collinear(np.asarray(footprint.exterior.coords, dtype=float))
+    assert np.min(np.linalg.norm(corners - np.array([3.02, 0.2]), axis=1)) <= 1e-04
 
 
 # def test_to_axes_to_axes():

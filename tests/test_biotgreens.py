@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from nova.biot.constants import Constants
+from nova.biot.completeelliptic import complete_kind, complete_pole
 from nova.biot.greens import (
     MU0,
     corner_fields,
@@ -49,32 +49,77 @@ def _corner_stacks(a, z0, da, dz, tr, tz):
 def _reference_corner_fields(rs, zs, r4, z4):
     """The Urankar Part III corner antiderivative, spelled out independently.
 
-    Uses the shared coefficient primitives in :mod:`nova.biot.constants` plus
-    the ``zeta`` integral -- the exact formula the kernel replaced.
+    Written out term by term against the paper, in the paper's own grouping: the
+    ``P`` and ``Q`` coefficient families each carrying their own factor of gamma,
+    and one ``Pi`` per characteristic.  The kernel instead folds a factor of gamma
+    out of the two ring poles and carries the bounded product, which is what makes
+    it finite and continuous on a corner plane; off those planes the two groupings
+    are the same algebra and this pins that they are.
 
-    Both spellings drive the same ``zeta``, so what this reference isolates is
-    the algebra of the antiderivative, not the quadrature inside it; the
-    quadrature has its own accuracy gate in ``test_biotzeta``.
+    What this reference does NOT do is form a pole or the modulus by subtraction.
+    The paper's printed ``2r/(r - c)`` and ``1 - 4 r rs/a^2`` cost the branch
+    cancellation a relative ``eps r^2/gamma^2``, which is already 3e-09 in the flux
+    at a tenth of the section height off a corner level -- so a reference spelled
+    that way disagrees with an accurate kernel by four decades more than the pin
+    allows, and would be measuring its own conditioning rather than the algebra.
+    Both spellings therefore take the same exact complements, the same ``zeta`` and
+    the same complete-elliptic descent, leaving only the grouping between them;
+    the quadrature and the special functions have their own accuracy gates in
+    ``test_biotzeta`` and ``test_biotcompleteelliptic``.
     """
-    c = Constants(rs, zs, r4, z4)
-    zt = zeta(c.rs, c.r, c.gamma, (np.pi / 2) * np.ones_like(rs))
-    cphi = -1 / 3 * c.r**2 * np.pi / 2 * c.sign(c.gamma) * (c.sign(c.rs - c.r) + 1)
+    gamma = zs - z4
+    b = rs + r4
+    a = np.sqrt(gamma**2 + b**2)
+    c2 = gamma**2 + r4**2
+    c = np.sqrt(c2)
+    k2 = 4 * r4 * rs / (gamma**2 + b**2)
+    complement = (gamma**2 + (rs - r4) ** 2) / (gamma**2 + b**2)
+    big_k, big_e = complete_kind(complement)
+    v = 1 + k2 * (gamma**2 - b * r4) / (2 * r4 * rs)
+    u_coef = k2 * (4 * gamma**2 + 3 * rs**2 - 5 * r4**2) / (4 * r4)
+    zt = zeta(rs, r4, gamma, (np.pi / 2) * np.ones_like(rs))
+
+    # r - c is -gamma^2/(r + c) exactly, which is what the first characteristic and
+    # its own pole are built from rather than from r less c
+    np2 = {
+        1: -2 * r4 * (r4 + c) / gamma**2,
+        2: 2 * r4 / (r4 + c),
+        3: 4 * r4 * rs / b**2,
+    }
+    pole = {
+        1: ((r4 + c) / gamma) ** 2,
+        2: (gamma / (r4 + c)) ** 2,
+        3: ((rs - r4) / b) ** 2,
+    }
+    pi3 = {p: complete_pole(pole[p], complement) for p in (1, 2, 3)}
+    # rs -/+ c: the minus sign cancels to nothing on a corner's own radius, where it
+    # is (rs - r) less gamma^2/(r + c) instead
+    edge = {1: rs + c, 2: (rs - r4) - gamma**2 / (r4 + c)}
+    qr = {p: edge[p] * np2[p] * gamma**2 * c / r4 for p in (1, 2)}
+    qr[3] = np.zeros_like(r4)
+    qz = {p: edge[p] * -2 * gamma * c * np2[p] for p in (1, 2)}
+    qz[3] = gamma * b * (rs - r4) * np2[3]
+    pphi = {p: edge[p] * np2[p] * c * (3 * r4**2 - c2) / (2 * r4) for p in (1, 2)}
+    pphi[3] = -rs / b * (rs - r4) * (3 * r4**2 - rs**2)
+
+    def p_sum(coef):
+        return sum((-1) ** p * coef[p] * pi3[p] for p in (1, 2, 3))
+
+    cphi = -1 / 3 * r4**2 * np.pi / 2 * np.sign(gamma) * (np.sign(rs - r4) + 1)
     aphi = (
         cphi
-        + c.gamma * c.r * zt
-        + c.gamma * c.a / (6 * c.r) * (c.U * c.K - 2 * c.rs * c.E)
-        + c.gamma / (6 * c.a * c.r) * c.p_sum(c.Pphi, c.Pi)
+        + gamma * r4 * zt
+        + gamma * a / (6 * r4) * (u_coef * big_k - 2 * rs * big_e)
+        + gamma / (6 * a * r4) * p_sum(pphi)
     )
     br = (
-        c.r * zt
-        - c.a / (2 * c.r) * c.rs * (c.E - c.v * c.K)
-        - 1 / (4 * c.a * c.r) * c.p_sum(c.Qr, c.Pi)
+        r4 * zt - a / (2 * r4) * rs * (big_e - v * big_k) - 1 / (4 * a * r4) * p_sum(qr)
     )
     bz = (
-        3 / c.r * cphi
-        + 2 * c.gamma * zt
-        - c.a / (2 * c.r) * 3 / 2 * c.gamma * c.k2 * c.K
-        - 1 / (4 * c.a * c.r) * c.p_sum(c.Qz, c.Pi)
+        3 / r4 * cphi
+        + 2 * gamma * zt
+        - a / (2 * r4) * 3 / 2 * gamma * k2 * big_k
+        - 1 / (4 * a * r4) * p_sum(qz)
     )
     return aphi, br, bz
 
@@ -84,13 +129,22 @@ def test_corner_fields_matches_reference_formula():
 
     Held at a few ulp rather than a physics tolerance: with the quadrature
     shared between the two spellings, any drift here is the algebra diverging,
-    and that should never cost more than the last couple of bits.
+    and that should never cost more than the last couple of bits.  The targets
+    are all well off the section's corner planes, which is where the paper's own
+    arrangement of the characteristics is still faithful to its algebra.
     """
     stacks = _corner_stacks(_A, _Z0, _DA, _DZ, _TR, _TZ)
     got = corner_fields(*stacks)
     ref = _reference_corner_fields(*stacks)
-    for g, r in zip(got, ref, strict=True):
-        np.testing.assert_array_max_ulp(g, r, maxulp=4)
+    for one, other in zip(got, ref, strict=True):
+        # against the corner STACK's own scale, which is what the corner rule
+        # differences the four values against.  An ulp count on the values
+        # themselves cannot express this: the antiderivative is a cancellation of
+        # terms of order the squared major radius, so a corner whose value lands
+        # near zero is thousands of ulp away from a second grouping of the same
+        # algebra while being a couple of ulp of everything that built it.
+        scale = np.abs(other).max(axis=-1, keepdims=True)
+        assert np.max(np.abs(one - other) / scale) < 1e-13
 
 
 def test_cylinder_far_field_matches_point_loop():
@@ -220,7 +274,7 @@ def test_the_rectangle_kernel_is_continuous_across_a_horizontal_face():
         worst = _worst_against_the_polygon(
             np.full(_STRADDLE.shape, _INSIDE_SPAN), level + _STRADDLE
         )
-        assert max(worst) < 1e-9, worst
+        assert max(worst) < 1e-10, worst
 
 
 def test_the_rectangle_kernel_is_continuous_across_a_source_radius_plane():
@@ -234,7 +288,7 @@ def test_the_rectangle_kernel_is_continuous_across_a_source_radius_plane():
         worst = _worst_against_the_polygon(
             radius + _STRADDLE, np.full(_STRADDLE.shape, _FACE_Z0 + 0.017)
         )
-        assert max(worst) < 1e-9, worst
+        assert max(worst) < 1e-10, worst
 
 
 def test_a_target_on_the_source_radius_line_survives_the_corner():
@@ -242,47 +296,69 @@ def test_a_target_on_the_source_radius_line_survives_the_corner():
 
     Sliding along ``rs = r`` through a corner drives the modulus complement, the
     near pole and the third pole to zero together, where the first kind diverges
-    logarithmically and the reduction's total weight on it is zero.  Two decades
-    looser than the plane tests because the antiderivative is a cancellation of
-    terms of order the squared major radius here, and it is reached rather than
-    approached: the last row is the vertex exactly.
+    logarithmically and the reduction's total weight on it is zero.  It is reached
+    rather than approached: the middle row is the vertex exactly.  This is also the
+    line the near pole's own numerator ``rs - c`` vanishes on, which is why it is
+    formed as ``(rs - r)`` less ``gamma^2/(r + c)``; taken as a subtraction it costs
+    the flux 2e-07 a tenth of a micrometre out.
     """
     for radius in (_FACE_A - _FACE_DA / 2, _FACE_A + _FACE_DA / 2):
         for level in (_FACE_Z0 - _FACE_DZ / 2, _FACE_Z0 + _FACE_DZ / 2):
             worst = _worst_against_the_polygon(
                 np.full(_STRADDLE.shape, radius), level + _STRADDLE
             )
-            assert max(worst) < 1e-7, worst
+            assert max(worst) < 1e-10, worst
 
 
 def test_the_corner_planes_carry_no_jump_of_their_own():
-    """The two one-sided limits meet each other, and meet the value ON the plane.
+    """The difference quotient across a corner plane converges instead of blowing up.
 
-    Oracle-free, and the sharpest statement of the defect this guards: the branch
-    terms are odd in the offset, so a mis-set branch survives as a jump that does
-    NOT fall with the standoff.  Differencing the kernel against itself over a
-    ladder of standoffs is what exposes that without reference to any other kernel
-    -- and the value on the plane must be the meeting point rather than either
-    side, since a discontinuous antiderivative evaluated at its own jump lands on
-    the mean of the two limits and passes a two-sided comparison on its own.
+    Oracle-free, and the sharpest statement of the defect this guards.  A branch
+    term left uncancelled is a jump ``J`` that does not depend on the standoff, so
+    the quotient ``|f(+d) - f(-d)|/2d`` grows as ``J/2d`` -- five decades of it by
+    the time ``d`` is a micrometre -- where a continuous field's quotient settles on
+    its own derivative.  Comparing the rungs against each other rather than against
+    a bound is what makes this independent of both the field's magnitude and the
+    section's geometry.
     """
-    for level in (_FACE_Z0 - _FACE_DZ / 2, _FACE_Z0 + _FACE_DZ / 2):
-        for radius in (_INSIDE_SPAN, _FACE_A + 0.021):
-            got = cylinder_greens(
-                np.full(_STRADDLE.shape, radius),
-                level + _STRADDLE,
-                _FACE_A,
-                _FACE_Z0,
-                _FACE_DA,
-                _FACE_DZ,
+    planes = (
+        (_INSIDE_SPAN, 0.0, 1.0),
+        (_FACE_A + 0.021, 0.0, 1.0),
+        (0.0, _FACE_Z0 + 0.017, 0.0),
+        (0.0, _FACE_Z0 - _FACE_DZ / 2 - 0.05, 0.0),
+    )
+    for radius, level, across_the_level in planes:
+        for corner in (-1.0, 1.0):
+            centre = (
+                radius + (1.0 - across_the_level) * (_FACE_A + corner * _FACE_DA / 2),
+                level + across_the_level * (_FACE_Z0 + corner * _FACE_DZ / 2),
             )
-            middle = len(_LADDER)
-            for component in got:
-                scale = np.max(np.abs(component))
-                closest = np.abs(component[middle - 1] - component[middle + 1])
-                on_plane = np.abs(component[middle] - component[middle + 1])
-                assert closest < 1e-9 * scale
-                assert on_plane < 1e-9 * scale
+            quotients = []
+            for standoff in _LADDER:
+                step = np.array([-standoff, standoff])
+                got = cylinder_greens(
+                    centre[0] + (1.0 - across_the_level) * step,
+                    centre[1] + across_the_level * step,
+                    _FACE_A,
+                    _FACE_Z0,
+                    _FACE_DA,
+                    _FACE_DZ,
+                )
+                quotients.append(
+                    [
+                        abs(part[1] - part[0]) / (2.0 * standoff) / np.abs(part).max()
+                        for part in got
+                    ]
+                )
+            # Every rung below ten micrometres is on the limit already, so they
+            # agree with each other to a part in a thousand.  What sets that floor
+            # is the quotient itself and not the kernel: at the last rung it
+            # differences two field values a tenth of a nanometre apart, which keeps
+            # six digits of the difference.  A jump puts six DECADES between the
+            # first of these rungs and the last -- eight decades of margin.
+            settled = np.array(quotients[3:])
+            spread = np.ptp(settled, axis=0) / settled.mean(axis=0)
+            assert np.max(spread) < 1e-2, spread
 
 
 # --- quadrupole-corrected filament ------------------------------------------

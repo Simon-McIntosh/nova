@@ -144,16 +144,44 @@
   <code>(r, z)</code> — through <code>nova.geometry.polygen.PolyGen</code>, in the
   same convention <code>Bow</code> builds its rectangle from.</p>
   <p><strong>Not from the frame's <code>poly</code> column</strong>, which is what
-  the axisymmetric <code>PolySection</code> reads, and finding out why cost an
-  hour worth recording. For a ring, <code>poly</code> IS the cross-section. For a
-  SWEPT element it is the projection of the 3-D volume onto the poloidal plane,
-  and it disagrees with the frame's own dimensions in two ways at once: its axes
-  come back transposed — a 0.06 × 0.04 winding projects to a 0.04 × 0.06
-  rectangle — and it is stored at single precision. The transposition is a real
-  inconsistency between two descriptions of the same conductor and it is left
-  alone here, because <code>Bow</code>'s convention is the one the landed gate
-  measures against and the one the physics agrees with; it is named in the next
-  rung.</p>
+  the axisymmetric <code>PolySection</code> reads. For a ring, <code>poly</code>
+  IS the cross-section. For a SWEPT element it is the projection of the 3-D volume
+  onto the poloidal plane, and it disagrees with the frame's own dimensions in two
+  ways at once: its axes come back transposed — a 0.06 × 0.04 winding projects to
+  a 0.04 × 0.06 rectangle — and it is stored at single precision. This rung
+  followed <code>Bow</code>'s convention on the grounds that it is what the landed
+  gate measures against.</p>
+
+  <p class="note"><strong>Resolved 2026-07-27, and the transposition was a real
+  defect in a third place — the sweep.</strong> Chasing it against the swept SOLID
+  rather than against either description of it showed the vtk volume itself was
+  turned: for a <code>{"rect": (0, 0, 0.06, 0.04)}</code> winding the solid the
+  frame plots, meshes and volume-integrates spanned <strong>0.04 in radius and
+  0.06 in z</strong>. A cross-section is authored in its own <code>x-z</code>
+  plane — width along <code>x</code>, height along <code>z</code>,
+  <code>y</code> its normal — so the axis a vector-aligned sweep pins to world
+  vertical is the section's THIRD; <code>Section.sweep</code> pinned its FIRST,
+  which lands the width along <code>z</code> and the height along the path's own
+  normal. <strong>Every swept conductor came out with its two section dimensions
+  exchanged</strong>, invisible only for a square one. Fixed on develop
+  (<code>23f055bc</code>): the frame's <code>width</code> and <code>height</code>
+  are authoritative, <code>Bow</code> and <code>PolyBow</code> were reading them
+  correctly all along, and <code>poly</code> now agrees with both.</p>
+
+  <p class="note">Volume could not see it — a section and its transpose sweep the
+  same volume — which is why the existing sweep test passed throughout and why
+  <em>nothing in the suite moved when the rotation was corrected</em>. A test that
+  pins the extents instead now guards it, and requires the two alignments to agree
+  for a path at constant height; it fails on the old code for the vector alignment
+  and passes for <code>axes</code>, which was already right. What the defect was
+  worth, had it reached the kernels: <strong>5.9e-04 overall and 1.2e-03 on
+  B<sub>r</sub></strong> for the 3:2 rectangle above, growing with aspect ratio.
+  Two reasons to read <code>poly</code> survive the fix and are carried by
+  <code>f-pbow-06</code> — it is the section of record, and it can express a
+  polygon no <code>(width, height)</code> descriptor can — but it needs double
+  precision first: its corners round-trip through a VTK mesh, whose points are
+  <code>float32</code>, and that alone costs 7.9e-09 relative, four orders above
+  the closed form's measured 3.5e-12.</p>
   <p>A generated section arrives as a shapely ring, so its first corner repeats at
   the end — and a generator that sweeps an angle closes on a corner that is its
   own first to within round-off rather than exactly, which leaves the ring one

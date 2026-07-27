@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="polybow-arc-section">
   <meta name="plan-title" content="PolyBow — polygon cross-section arc segment">
   <meta name="plan-summary" content="Give nova a polygon cross-section arc element to sit beside Bow&#x27;s rectangular one: the general Urankar Part V case with sweep below a full turn, which reinstates the incomplete elliptic integrals, the alpha-case bookkeeping, an interior integration limit in every moment recursion, and a real azimuthal field component">
-  <meta name="plan-status" content="shipped">
+  <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="XL">
   <meta name="plan-tier" content="opus">
@@ -17,9 +17,9 @@
   <title>PolyBow — polygon cross-section arc segment | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-26">
-<meta name="plan-version" content="6">
-<meta name="plan-impl" content="1.0">
+<meta name="plan-modified" content="2026-07-27">
+<meta name="plan-version" content="7">
+<meta name="plan-impl" content="0.65">
 </head>
 <body>
   <main class="plan-doc">
@@ -326,13 +326,20 @@
         cost question: the cheap evaluation is the wrong one, and it only exists
         for a rectangle at all. The class itself is the reduction plus two
         rotations — <strong>3.5e-12 against the bare function</strong>, four
-        orders below <code>Bow</code>'s own 4.9e-09 — and it builds its corners
-        from the frame's section DESCRIPTOR, not its <code>poly</code> column,
-        which for a swept element is the 3-D volume's poloidal projection with
-        its axes transposed against <code>width</code> and <code>height</code>.
-        Hollow sections are refused rather than silently rebuilt as a nearly
-        solid square. 15 new tests; both gate suites unmoved at 186 passed / 0
-        failed. Full record:
+        orders below <code>Bow</code>'s own 4.9e-09. It builds its corners from
+        the frame's section DESCRIPTOR rather than its <code>poly</code> column,
+        because the two disagreed; chasing that against the swept SOLID found
+        the disagreement was <strong>a third defect, in the sweep itself</strong>
+        — a vector-aligned <code>Section.sweep</code> pinned the section's first
+        axis to world vertical where it must pin its third, so <strong>every
+        swept conductor came out with its width and height exchanged</strong>,
+        invisible only for a square one and worth 5.9e-04 had it reached a
+        kernel. Fixed on develop <code>23f055bc</code>, with a test that pins the
+        extents, since volume cannot see a transpose and nothing in the suite
+        moved when the rotation was corrected. Hollow sections are refused, which
+        <code>f-pbow-06</code> replaces with a coupled <code>±j</code> pair.
+        15 new tests; both gate suites unmoved at 186 passed / 0 failed.
+        Full record:
         <a href="archive/polybow-arc-section-element-class-landed.html">the element class landed</a>.
       </p>
       <figure>
@@ -855,82 +862,268 @@ One test exists only to keep the Bow comparison honest: CoilSet.point's accessor
 
 NOT DONE, and carried to f-pbow-06: automatic routing. Nothing sends a winding to the new element; reaching it means naming the segment, as the tests and the benchmark do. Full record: archive/polybow-arc-section-element-class-landed.html</p>
     </article>
-<article class="r-fu" data-id="f-pbow-06" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-26T17:40:00+00:00" data-recommends-skill="/reckon-ship polybow-arc-section" data-resolved-at="" data-resolved-by="">
-    <h4 class="r-fu-title">Route a non-rectangular swept winding to the element that can evaluate it, and decide what a curved section costs</h4>
-    <div class="r-fu-body"><p>The element exists and nothing reaches it. One line in <code>nova/geometry/polyline.py</code> sends every swept winding to <code>Bow</code> whatever its cross-section is, and <code>Bow</code> integrates the box that section's width and height bound while dividing by the section's own area — so a hexagonal winding is <strong>a third too large</strong> and a disc <strong>27 % too large</strong>, both measured. This rung closes that, and it is a decision rather than a patch: the shapes divide three ways and only the hexagon is straightforward. A disc is sixty-four corners, so right costs roughly ten times wrong; a hollow section cannot route at all until it has a representation.</p></div>
+<article class="r-fu" data-id="f-pbow-06" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-27T08:00:00+00:00" data-recommends-skill="/reckon-ship polybow-arc-section" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Take the cross-section from the frame's poly column, route every section to the element that can evaluate it, and build a hollow one as a coupled pair</h4>
+    <div class="r-fu-body"><p><strong>Authorised 2026-07-27: flip the routing.</strong> One line in <code>nova/geometry/polyline.py</code> sends every swept winding to <code>Bow</code> whatever its cross-section is, and <code>Bow</code> integrates the box that section's width and height bound while dividing by the section's own area — so a hexagonal winding is <strong>a third too large</strong> and a disc <strong>27 % too large</strong>, both measured. The section itself comes from the frame's <code>poly</code> column, which is the point of having one: it is the section of record and it can express a polygon no <code>(width, height)</code> pair can. Two things have to be true of it first, and neither is today — it must arrive at <strong>double precision</strong> (its corners round-trip through a VTK mesh, and <code>float32</code> alone costs 7.9e-09, four orders above the closed form's 3.5e-12) and without the collinear splits the projection adds. Hollow sections stop being refused and become a <strong>coupled pair</strong>: the outer solid at <code>+j</code> and the core at <code>−j</code>, with <code>j = I / A_annulus</code>, so every section the frame can express is reachable.</p></div>
     <pre class="r-fu-prompt">Project: nova
 Plan:    polybow-arc-section (http://127.0.0.1:8765/nova/polybow-arc-section.html)
-Section: routing a swept winding to the element that can evaluate its section
+Section: the poly cross-section, the routing flip, and hollow sections as coupled pairs
 Tier:    opus
 
 Context
-  nova/biot/polybow.PolyBow is landed, registered and gated: five rows through the
-  frame, 3.5e-12 against the bare reduction, agreeing with Bow at zero edge slope
-  on all five. Nothing routes to it. nova/geometry/polyline.py carries
-  `thicken = {&quot;arc&quot;: &quot;bow&quot;, &quot;line&quot;: &quot;beam&quot;}`, so a swept winding of ANY section
-  becomes a `bow`, and Bow thickens its arc into the RECTANGLE the frame&#x27;s width
-  and height bound while normalising by the frame&#x27;s area, which is the section&#x27;s.
-  Measured through the frame, one winding, five rows, five targets:
-    hexagon   bow / polybow = 1.3330 .. 1.3335   (4/3 exactly; a hexagon fills 3/4
-                                                  of its box)
-    disc      1.27305 .. 1.27324                 (4/pi)
-    ellipse   1.2749 .. 1.2755                   (4/pi, plus a 64-gon&#x27;s own deficit)
-  This is a live correctness defect on the shipped path, not a modelling choice,
-  and it is why the routing question is not the cost question the plan&#x27;s cost
-  table looked like it was asking.
+  nova/biot/polybow.PolyBow is landed, registered and gated, and nothing routes to
+  it: nova/geometry/polyline.py carries `thicken = {&quot;arc&quot;: &quot;bow&quot;, &quot;line&quot;: &quot;beam&quot;}`,
+  so a swept winding of ANY section becomes a `bow`. THE ROUTING FLIP IS
+  AUTHORISED -- this rung takes advantage of the proper poly sections rather than
+  deciding whether to.
+
+  Two defects sit under it and the second is the deeper one.
+
+  1. WHAT BOW INTEGRATES. Bow thickens its arc into the rectangle the frame&#x27;s
+     width and height bound while normalising by the frame&#x27;s area, which is the
+     section&#x27;s. Measured through the frame, one winding, five rows, five targets:
+       hexagon   bow / polybow = 1.3330 .. 1.3335   (4/3; a hexagon fills 3/4 of
+                                                     its bounding box)
+       disc      1.27305 .. 1.27324                 (4/pi)
+       ellipse   1.2749 .. 1.2755                   (4/pi, plus a 64-gon&#x27;s deficit)
+
+  2. WHERE THE SECTION COMES FROM. PolyBow builds its corners from the frame&#x27;s
+     section DESCRIPTOR (name + width + height, through PolyGen) because the
+     descriptor and the poly column disagreed. That disagreement is now fixed and
+     it was in neither of them: Section.sweep pinned the section&#x27;s FIRST axis to
+     world vertical where it must pin its THIRD, so every swept solid came out
+     with its width and height exchanged (develop 23f055bc). The frame&#x27;s width and
+     height are authoritative and poly now agrees with them.
+     THE POLY COLUMN IS STILL WHAT SHOULD BE READ -- that is the point of having
+     one -- for two reasons the fix does not touch: it is the single section of
+     record, so a class cannot drift from what is plotted and meshed; and it can
+     carry a polygon that no (width, height) pair can express, which is the whole
+     capability this element exists for. A descriptor-built section can only ever
+     reproduce the five named shapes.
 
 State to read
-  nova/biot/polybow.py -- the class, its solid_sections set and the module
-    docstring&#x27;s account of why the section comes from the frame&#x27;s DESCRIPTOR and
-    not from its poly column;
-  nova/geometry/polyline.py -- the thicken map, and how a segment name is chosen;
-  nova/geometry/polygen.py -- the generators, and which of them take a height
-    where skin and box take a hollowness factor;
-  nova/biot/bow.py -- what it actually integrates, which is the defect;
-  nova/biot/solve.py -- the registry;
-  tests/test_biotpolybow.py -- the class&#x27;s own gate, including the assertion that
-    records the 4/3;
-  docs/archive/polybow-arc-section-element-class-landed.html -- the cost table,
-    the three shape classes and the two smaller findings named there.
+  nova/geometry/polyline.py -- the thicken map, and PolyLine.poly, which builds
+    the section as TriShell(vtk, ahull=...) from the swept solid;
+  nova/geometry/volume.py Sweep + nova/geometry/section.py -- how a cross-section
+    is oriented onto the path frame, which is where the quarter turn comes from;
+  nova/biot/bow.py __post_init__ and nova/biot/beam.py __post_init__ -- BOTH build
+    their section from width/height, so the straight element has the same question;
+  nova/biot/polybow.py -- _section_vertices, solid_sections, and the module
+    docstring&#x27;s account of why it reads the descriptor today (this rung replaces
+    that account);
+  nova/biot/polysection.py _section_vertices -- the axisymmetric element already
+    reads poly, and is the pattern;
+  nova/frame/winding.py + nova/biot/biotframe.py -- how the section reaches the
+    biot Source frame, and what would have to be carried for poly to arrive intact;
+  tests/test_biotpolybow.py -- the class gate, including the assertion recording
+    the 4/3.
 
 Key guidance
-  - The three shape classes need three answers and they are not the same answer.
-    HEXAGON: six corners, 4.97x the cost, a third of the error removed -- and the
-    section a plasma cell already uses, so this is the case that makes the change
-    worth making. DISC and ELLIPSE: correct but sixty-four corners, so roughly ten
-    times a hexagon, against a Bow approximation that is 27 % out; right and dear
-    against wrong and cheap is a caller&#x27;s trade, so decide whether it is a default,
-    a flag, or a coarser corner count. SKIN and BOX: hollow, cannot route, and Bow
-    is further from a thin ring than it is from a hexagon -- say what happens to
-    them rather than leaving them silently wrong.
-  - Whatever routes, the change moves numbers a caller already has. Find every
-    test and golden fixture that inserts a non-rectangular swept winding before
-    changing the map, and record which ones move and by how much -- a 4/3 shift is
-    a FIX, but it has to be visible as one.
-  - A cheaper option exists and should be costed rather than dismissed: keep Bow
-    for a curved section but correct its normalisation, which removes the whole
-    error for a shape whose only defect is the area ratio. Measure whether it does
-    -- the box&#x27;s SECOND moment differs from the section&#x27;s too, so the ratio may be
-    constant only for the rows this rung happened to measure.
-  - The poly column&#x27;s transposition is named and not fixed: for a swept element
-    nova/geometry/polyline.PolyLine.poly returns the 3-D volume&#x27;s poloidal
-    projection with its axes swapped against the frame&#x27;s own width and height, at
-    single precision. Something reads it. Find out what, and either fix it or
-    write down why it is harmless.
+  - POLY MUST ARRIVE AT DOUBLE PRECISION, and the reason is mechanical rather
+    than a storage choice. PolyGeom&#x27;s own points are float64; winding.insert hands
+    them to Sweep, which builds a vedo mesh, and VTK&#x27;s vtkPoints default to
+    VTK_FLOAT -- so PolyLine.poly, built as TriShell(vtk, ahull=...).poly FROM
+    that mesh, inherits single precision and is promoted back into a float64
+    array. A corner reads 2.96999979 where the section is at 2.97. Measured cost
+    of that alone: 7.9e-09 relative on the rows, four orders above the closed
+    form&#x27;s own 3.5e-12, landing it at Bow&#x27;s accuracy instead of its own. Build the
+    swept section from the float64 cross-section transformed by the sweep&#x27;s own
+    frame, with no mesh round trip -- do NOT force VTK to double, which doubles
+    every mesh and fixes nothing else.
+  - POLY CARRIES COLLINEAR SPLITS. A swept hexagon&#x27;s poly comes back with nine
+    points where the section has six, from the projection. Numerically harmless --
+    a split edge agrees to 1e-13, which the landed gate already measures -- but it
+    is paid per corner and a corner is what the arc&#x27;s cost tracks. Collapse
+    collinear runs before handing the section to the reduction.
+  - HOLLOW SECTIONS ARE A COUPLED PAIR, not a refusal. A `skin` or `box` section
+    is an annulus between an outer boundary and an inner one, and superposition
+    gives it exactly: place the OUTER solid section carrying current density +j
+    and the inner CORE carrying -j, so the material between them carries j and the
+    core cancels. The density is set by the annulus, not by either boundary:
+        j = I / A_annulus,   I_outer = +j * A_outer,   I_core = -j * A_core
+    and I_outer + I_core = j * (A_outer - A_core) = I, which is the check to
+    assert. Both members are solid sections the landed reduction already handles,
+    so this needs a frame-level construction and a linked pair rather than any new
+    kernel -- see how the frame&#x27;s existing link machinery sums coupled columns
+    (Matrix.compute&#x27;s source_link) rather than inventing a second mechanism.
+    Delete PolyBow.solid_sections once every section is reachable.
+  - DISC AND ELLIPSE need a decision, not a default chosen silently: correct but
+    sixty-four corners, so roughly ten times a hexagon&#x27;s cost, against a Bow
+    approximation that is 27 % out. Decide whether that is the default, a flag, or
+    a coarser corner count chosen against a measured error budget -- and if a
+    coarser count, measure what the polygon&#x27;s own deficit against the true curve
+    costs, because a 64-gon already under-fills its ellipse by 1.7e-03.
+  - THE STRAIGHT ELEMENT HAS THE SAME PROBLEM. Beam builds xs/ys from width and
+    height exactly as Bow builds rs/zs, so it cannot express a polygon at all and
+    it reads the descriptor rather than the section of record. Do not fix it here
+    -- polybeam-prism-section is its home and is still a draft -- but record what
+    this rung establishes so that plan starts from it rather than rediscovering it.
+  - EVERY MOVED GOLDEN IS A FIX AND MUST BE VISIBLE AS ONE. Find every test and
+    fixture that inserts a non-rectangular or non-square swept winding BEFORE
+    changing anything, and record which move and by how much. A 4/3 shift is a
+    correction; an unexplained one is a regression.
   - Do not widen a tolerance to pass a test. Timing on a sun_debug node only.
 
 Done-when
-  1. A decision, locked, on what each of the three shape classes routes to, with
-     the cost and the error measured for each rather than argued.
-  2. The routing implemented to match it, and every moved golden value recorded
-     with its before and after.
-  3. A test that a hexagonal swept winding reaches the element that can evaluate
-     it WITHOUT the caller naming a segment.
-  4. tests/test_biotpolybow.py, tests/test_biotpolygonarc.py and
+  1. Both element classes take their cross-section from the frame&#x27;s poly column,
+     at double precision and with collinear runs collapsed, pinned against the
+     swept solid&#x27;s own bounds and against the section&#x27;s exact corners -- and a
+     free-form polygon section, which no descriptor can express, reaching the
+     kernel through it.
+  2. The routing flipped: a swept winding reaches the element that can evaluate
+     its section without the caller naming a segment, with a test that asserts it.
+  3. Hollow sections reachable as a coupled +j / -j pair, with I_outer + I_core = I
+     asserted and the pair checked against a converged direct integral over the
+     annulus.
+  4. A locked decision on disc and ellipse, with the cost and the error measured
+     for each rather than argued.
+  5. Every moved golden value recorded with its before and after, and named as a
+     correction.
+  6. tests/test_biotpolybow.py, tests/test_biotpolygonarc.py and
      tests/test_biotpolygonanalytic.py all unmoved.
-  5. The poly column&#x27;s transposition either fixed or written down with its
-     consumers named.
+  7. Followup written; this followup resolved.</pre>
+    </article>
+<article class="r-fu" data-id="f-pbow-07" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-27T08:10:00+00:00" data-recommends-skill="/reckon-ship polybow-arc-section" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Trace the arc kernel, then re-quote its cost as GPU wall clock rather than as CPU microseconds per pair</h4>
+    <div class="r-fu-body"><p>Every cost figure this plan carries is single-core CPU microseconds per pair, and that is the wrong currency for the machine the work is FOR. The ring already traces — <code>tile_evaluator(kernel="closed")</code> over <code>packed_analytic_greens</code>, 5.5 µs/pair on one H200 against the quadrature's 5.3, so on a device the exact kernel is free relative to the rule it replaces. The arc has no packed driver, so it cannot be traced and cannot be measured there at all. Write the driver — nothing in the reduction inspects a value, so it is a driver and not a reformulation — then re-quote the cost as wall clock for a real build on the cluster, which is the number <a href="/nova/mast-catalog-gpu-solve.html">mast-catalog-gpu-solve</a>'s slices-per-second requirement is denominated in.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    polybow-arc-section (http://127.0.0.1:8765/nova/polybow-arc-section.html)
+Section: the packed arc driver, and wall clock on the GPU cluster
+Tier:    opus
+
+Context
+  nova/biot/polygonarc.polygon_arc_greens is landed, gated and now has an element
+  class (PolyBow). Its whole cost record is single-core CPU microseconds per pair
+  on a sun_debug node: 550.1 through the frame on a rectangle, 926.6 on a hexagon,
+  against Bow&#x27;s 182.1 / 186.5. That currency does not answer the question the work
+  exists to answer, which is what a build COSTS IN WALL CLOCK on the GPU cluster.
+
+  The ring already has both halves. packed_analytic_greens replaces the host
+  driver&#x27;s three value-dependent shortcuts with arithmetic at 1.35x (171.4 -&gt;
+  230.8 us/pair on a CPU) and traces; tile_evaluator memoises on
+  (plan, batched, kernel) and compilation_cache wires JAX&#x27;s persistent cache to
+  NOVA_COMPILATION_CACHE. On one H200 the traced closed form is 5.5 us/pair
+  against the 16x48 quadrature&#x27;s 5.3 -- on a device the exact kernel is FREE
+  relative to the rule it replaces, which is the single most important number the
+  ring measured and the arc has no counterpart for.
+
+State to read
+  nova/biot/tiledassembly.py -- tile_evaluator, the memoisation key, the kernel
+    registry and how a second kernel joins it;
+  nova/biot/polygonanalytic.packed_analytic_greens -- the ring&#x27;s driver, and
+    specifically which three value-dependent shortcuts it had to replace and how;
+  nova/biot/polygonarc.py -- the arc reduction; note that NOTHING in it inspects a
+    value (the amplitude fold has no branch, the pole reflection selects on no
+    result), so its packed counterpart is a driver rather than a reformulation;
+  nova/biot/polybow.py -- the element class the host path goes through;
+  benchmarks/tiled_backend.py + benchmarks/arc_section_cost.py -- the two harnesses;
+  benchmarks/BASELINE.md -- where a wall-clock entry belongs;
+  docs/mast-catalog-gpu-solve.html -- the slices/s requirement this feeds.
+
+Key guidance
+  - The driver first, and hold it to the host path: the packed kernel must return
+    what polygon_arc_greens returns, to the reduction&#x27;s own accuracy, before any
+    timing is taken. The ring&#x27;s 1.35x for removing its shortcuts is the honest
+    expectation to measure against, not a target.
+  - COMPILE is the arc&#x27;s risk, not throughput. The ring pays 101 s on device
+    because the moment recursions unroll -- 138 ratio steps per corner -- and the
+    arc carries TWO partial-range families each solved rather than recursed, at
+    both amplitudes and at a quarter turn. Measure the trace+lowering time before
+    assuming the persistent cache absorbs it, and report cold and warm separately.
+  - Report WALL CLOCK for a real build, not only microseconds per pair: a stated
+    conductor set and target grid, end to end, on one H200 and on eight. The
+    per-pair figure is an input to that, not a substitute for it.
+  - betelgeuse needs --reservation=gpu_0003_grpA (ReqResv=YES; a submission
+    without it is denied). CPU comparison figures on a sun_debug node only.
+  - Fresh process per variant, median of 3. Repeating a solve inside one process
+    gets ~40 % faster on allocator and JIT warmup and would flatter the device.
+
+Done-when
+  1. A packed, unbranched arc driver joining the tiled kernel registry, agreeing
+     with polygon_arc_greens to the reduction&#x27;s own accuracy, with the host-path
+     cost of removing its shortcuts measured beside the ring&#x27;s 1.35x.
+  2. Trace + lowering time measured cold and warm, on device, and the persistent
+     cache shown to absorb it or shown not to.
+  3. Wall clock for a stated real build on one H200 and on eight, beside the
+     equivalent CPU-pool figure, landed in benchmarks/BASELINE.md.
+  4. The plan&#x27;s cost tables re-quoted in that currency, and the figure updated.
+  5. What the number means for mast-catalog-gpu-solve&#x27;s slices/s requirement
+     written into that plan or its followup.
   6. Followup written; this followup resolved.</pre>
+    </article>
+<article class="r-fu" data-id="f-pbow-08" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-27T08:20:00+00:00" data-recommends-skill="/reckon-ship polybow-arc-section" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Band the polygon arc, and test the equivalent filament at the rms radius against the area centroid</h4>
+    <div class="r-fu-body"><p>Two studies that belong together because they answer the same question — how little of the exact kernel a complex polygon geometry actually needs. <code>nova/biot/bandedcoupling.py</code> bands a RING by contour distance into a converged rule, a reduced rule and a moment-corrected filament; nothing bands the finite arc, and the arc is where the cost is. And the far band's filament sits at the section's AREA CENTROID with a second-moment correction bolted on — the proposal to test is placing the equivalent thin geometry at the <strong>rms radius</strong> instead, which absorbs the leading radial second moment into the POSITION rather than into a correction term, and should let the mid band widen if it works.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    polybow-arc-section (http://127.0.0.1:8765/nova/polybow-arc-section.html)
+Section: banded coupling for the finite arc, and where the equivalent filament belongs
+Tier:    opus
+
+Context
+  The exact polygon arc costs 550-930 us/pair through the frame against a
+  filament arc&#x27;s fraction of a microsecond, and a real geometry does not need the
+  exact kernel everywhere. nova/biot/bandedcoupling.py already answers that
+  question for a RING -- three bands by distance to the section CONTOUR (not to
+  its centroid, because what matters is how far the target is from the nearest
+  thing the integral integrates over), holding every component to one part in a
+  million of its peak. Nothing bands the finite arc.
+
+  The far band is a MOMENT-corrected filament: nova/biot/greens.moment_filament
+  puts a point at the section&#x27;s AREA centroid and corrects it with the section&#x27;s
+  second moments (and third, via third_moments). The proposal to test here is
+  different and simpler: place the equivalent thin geometry at the RMS RADIUS --
+  sqrt(mean of r^2 over the section) -- rather than at the area centroid, so the
+  leading radial second moment is carried by WHERE the filament is instead of by a
+  correction added to it. For a ring the flux is not linear in radius, so the two
+  placements are genuinely different equivalents and the rms one is the natural
+  candidate.
+
+State to read
+  nova/biot/bandedcoupling.py -- the three bands, the seams, section_skew,
+    mid_limit, contour_distance, and the module docstring&#x27;s account of why a real
+    clipped grid is not the idealised hexagon (its near band holds 12.1 % of pairs
+    where an idealised hexagon holds 2.6);
+  nova/biot/greens.py -- section_centroid, second/third_moments, moment_filament;
+  nova/biot/polygonarc.py + nova/biot/polybow.py -- what the near band would call;
+  nova/biot/arc.py -- the filament the far band would call for an arc;
+  benchmarks/plasma_coupling_accuracy.py + benchmarks/polygon_route_cost.py -- the
+    harnesses that measured the ring&#x27;s bands and its route costs;
+  the coupling-schemes findings doc for the measured conditioning account.
+
+Key guidance
+  - Do the PLACEMENT study first and separately: it is cheap, it is a property of
+    the section rather than of the sweep, and it changes what the far band is
+    before any band is drawn. Measure centroid+moment against rms+moment against
+    rms alone, over the gate sections and over a real clipped plasma grid, as a
+    function of contour distance -- and report where each crosses the other. If
+    rms alone matches centroid+moment, the far band gets cheaper as well as
+    simpler; if it does not, say by how much and keep the correction.
+  - An arc&#x27;s bands are not a ring&#x27;s. A target can be far from the section in the
+    poloidal plane and level with the sweep, or close in the plane and off the
+    end of the arc entirely; distance to the section contour does not capture the
+    second. Work out what the arc&#x27;s band coordinate IS before binning anything.
+  - Bin by GEOMETRY, never by a value the solve produces: a stored operator&#x27;s band
+    assignment has to be reproducible from its geometry alone, which is the rule
+    the ring&#x27;s scheme already follows and the reason its seams sit at fixed places.
+  - The batch-width crossing is measured and must be respected: the closed form
+    amortises corner parts across a call and beats the quadrature five-fold when
+    handed a whole column, but LOSES 4.1x on a near band of about thirteen pairs.
+    Whatever bands the arc has to be measured at the width it will actually be
+    called with.
+  - Do not widen a tolerance to pass a test. Timing on a sun_debug node only;
+    device figures need --reservation=gpu_0003_grpA.
+
+Done-when
+  1. The rms-radius placement measured against the centroid, with and without the
+     moment correction, over the gate sections and a real clipped plasma grid, as
+     a function of contour distance -- and a decision locked on which the far band
+     uses, with the crossing recorded.
+  2. A band coordinate for the finite arc, derived rather than borrowed, with the
+     off-the-end case shown to be handled.
+  3. A banded arc scheme measured against exact-everywhere on accuracy AND on
+     wall clock at the batch width it is called with.
+  4. Whether it beats exact-everywhere stated plainly, including if it does not.
+  5. Followup written; this followup resolved.</pre>
     </article>
 </section>
 

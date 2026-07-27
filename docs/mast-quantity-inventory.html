@@ -1,0 +1,549 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="mast-quantity-inventory">
+  <meta name="plan-title" content="MAST machine-description quantity ledger, the identified source COCOS, and the machine-description count">
+  <meta name="plan-summary" content="The full source-to-DDv4 ledger for MAST's machine description: 40 quantities across pf_active, pf_passive, wall, magnetics and tf with their validated DDv4 paths, standard names, units and transforms; the source convention identified as COCOS 3 from 11154 shots with all four Sauter digits measured rather than assumed; and the finding that the corpus needs five machine descriptions rather than three, because the passive structure changes independently of the coil set and neither follows a shot range.">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-informs" content="mast-machine-description,mast-catalog-gpu-solve">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-modified" content="2026-07-27">
+  <title>MAST quantity inventory and source COCOS | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>MAST machine description: the quantity ledger, the identified source COCOS, and how many machine descriptions the corpus actually needs</h1>
+
+  <p>Measured 2026-07-27 over the whole FAIR-MAST level-1 mirror at
+  <code>/work/projects/imas_gpu/mast/level1/shots</code> — 17,111 shots on disk, 14,633 of them
+  carrying readable static setup geometry, 11,154 carrying a converged reconstruction with
+  appreciable plasma current. The driver is
+  <code>nova/scripts/identify_source_cocos.py</code>; the verdict is pinned by
+  <code>tests/test_mastcocos.py</code> (19 tests); the artifact is
+  <code>docs/figures/mast-machine-description/source_cocos_audit.json</code>. Companion to the
+  <a href="/nova/mast-machine-description.html">mast-machine-description</a> plan, whose stage 1
+  this is.</p>
+
+  <h2>1. The three results that change the plan</h2>
+
+  <p><strong>The COCOS-3 hypothesis is confirmed, and one of its stated consequences is not.</strong>
+  All four Sauter &amp; Medvedev digits were measured, not assumed:
+  σ<sub>Bp</sub>&nbsp;=&nbsp;−1 (unanimous over 11,154 shots),
+  e<sub>Bp</sub>&nbsp;=&nbsp;0 (measured, not read off a units string),
+  σ<sub>ρθφ</sub>&nbsp;=&nbsp;−1 (99.99% of shots), σ<sub>RφZ</sub>&nbsp;=&nbsp;+1 (declared —
+  see §2.4). That is COCOS 3. But the plan's §3 offers <em>"the MAST convention has
+  ψ<sub>axis</sub>&nbsp;&gt;&nbsp;ψ<sub>boundary</sub>"</em> as a landmark, and it is not one:
+  <strong>379 shots (3.40%) have the axis as a flux <em>minimum</em></strong> while being the same
+  COCOS, because their plasma current and toroidal field are both reversed. The convention-invariant
+  statement is σ<sub>Bp</sub>&nbsp;=&nbsp;−1; the extremum is a consequence of the sign of
+  I<sub>p</sub> in a given campaign. Any guard hardcoding the flux maximum misfires on those shots.</p>
+
+  <p><strong>ψ does not change sign on the way to DDv4, and q does.</strong> The prior ambix work
+  identified the MAST-vs-IMAS mismatch as "axis = flux max vs axis = flux min", correctly — against
+  <strong>DDv3</strong>, which is COCOS 11 (σ<sub>Bp</sub>&nbsp;=&nbsp;+1). This plan targets
+  <strong>DDv4, which is COCOS 17, and COCOS 17 has σ<sub>Bp</sub>&nbsp;=&nbsp;−1 — the same as
+  COCOS 3.</strong> The celebrated mismatch evaporates at the DDv4 target: the ψ map is a pure
+  ×2π with no sign flip. What survives, and what nobody had flagged, is the
+  σ<sub>ρθφ</sub> digit: <strong>q changes sign</strong>, so a forward MAST shot authored in DDv4
+  carries q&nbsp;&lt;&nbsp;0. That is the live hazard for stage 6, not ψ.</p>
+
+  <p><strong>The corpus needs five machine descriptions, not three.</strong> The efm fingerprint
+  the ambix tables use — probe and loop positions, probe angles, coil filament centroids and turns,
+  limiter contour — resolves the whole corpus to exactly 3 states, and this audit reproduces
+  ambix's three published digests byte-for-byte. But that fingerprint covers only the active
+  conductors and the sensors. The <strong>passive structure lives in a different group entirely</strong>
+  (<code>amm</code> array descriptions) and is invisible to it; it carries 3 substantive states of
+  its own, and the two vary independently. The cross product is <strong>5</strong> machine
+  descriptions. None of the five occupies a shot range: one description's span is 87.6% foreign
+  shots.</p>
+
+  <h2>2. The source convention, digit by digit</h2>
+
+  <figure>
+    <img src="/nova/figures/mast-machine-description/cocos_evidence.png"
+         alt="Four panels: psi_axis minus psi_boundary against plasma current showing two occupied quadrants; q_95 against the sign product of Ip and B0; a histogram of flux-loop flux divided by psi at the loop peaking at 2 pi; and the verdict table with the resulting transform"
+         style="max-width:100%">
+    <figcaption>The empirical COCOS evidence. <strong>a</strong> — σ<sub>Bp</sub>: the 11,154
+    reconstructed shots occupy only the two quadrants in which
+    sign(ψ<sub>bnd</sub>&nbsp;−&nbsp;ψ<sub>axis</sub>)&nbsp;=&nbsp;−σ<sub>Ip</sub>. The red
+    reversed-current cohort sits in the lower-left quadrant — axis is a flux <em>minimum</em> there
+    — and yields the identical digit, which is the whole point. <strong>b</strong> —
+    σ<sub>ρθφ</sub>: q<sub>95</sub> is stored positive while σ<sub>Ip</sub>σ<sub>B0</sub>&nbsp;=&nbsp;−1
+    throughout; the +1 column is empty. COCOS 17 requires q&nbsp;&lt;&nbsp;0 in that configuration,
+    so the transform must flip it. <strong>c</strong> — e<sub>Bp</sub>, measured: each flux loop's
+    fitted flux [Wb] divided by the reconstructed ψ interpolated to that loop's own (R, Z)
+    [Wb/rad], over 2,662 loop-slices in 60 shots. Median 6.3007 against 2π&nbsp;=&nbsp;6.2832; the
+    e<sub>Bp</sub>&nbsp;=&nbsp;1 hypothesis sits at 1 and is nowhere near the data.
+    <strong>d</strong> — the verdict and the four transform factors it forces.</figcaption>
+  </figure>
+
+  <h3>2.1 σ<sub>Bp</sub> = −1, from two independent reads</h3>
+  <p>Sauter Eq. 23 gives sign(ψ<sub>edge</sub>&nbsp;−&nbsp;ψ<sub>axis</sub>)&nbsp;=&nbsp;σ<sub>Ip</sub>σ<sub>Bp</sub>.
+  Evaluated on the peak-current slice of every shot with |I<sub>p</sub>|&nbsp;&gt;&nbsp;100&nbsp;kA,
+  σ<sub>Bp</sub>&nbsp;=&nbsp;−1 with <strong>unanimity 1.000 across all 11,154 shots</strong> —
+  including the reversed cohort, where both factors flip together. The independent check
+  sign(dp/dψ)&nbsp;=&nbsp;−σ<sub>Ip</sub>σ<sub>Bp</sub> agrees on 97.2%; the 2.8% dissent is
+  concentrated in slices where the mid-radius median of <code>pprime</code> is small and noisy, not
+  in any coherent cohort. Two different arrays, one digit, no disagreement.</p>
+
+  <h3>2.2 e<sub>Bp</sub> = 0, measured rather than read</h3>
+  <p>This is the digit a units string would answer, and therefore the one worth measuring.
+  <code>efm/psi_axis</code> declares <code>units = 'Wb / rad'</code> and <code>efm/pprime</code>
+  declares <code>'Pa-rad/Wb'</code>, both consistent with ψ&nbsp;=&nbsp;Φ<sub>pol</sub>/2π. Rather
+  than trust that, the audit uses the fact that a poloidal flux loop physically links the
+  <em>total</em> flux Φ&nbsp;=&nbsp;2πR·A<sub>φ</sub> [Wb] while the flux function
+  ψ&nbsp;=&nbsp;R·A<sub>φ</sub> [Wb/rad] does not. Interpolating the reconstructed <code>psirz</code>
+  map onto each loop's own (R, Z) and dividing the loop's fitted flux <code>silop_c</code> by it
+  must return 2π for e<sub>Bp</sub>&nbsp;=&nbsp;0 and 1 for e<sub>Bp</sub>&nbsp;=&nbsp;1.</p>
+  <p>Result: <strong>median 6.3007 over 2,662 loop-slices in 60 shots, every one of the 60 per-shot
+  medians within 2% of 2π</strong>, and a per-shot interquartile spread of 0.2–0.6% — the bilinear
+  interpolation error on a 3 cm grid. Verified on all three coil/sensor fingerprints separately, so
+  this is a property of the reconstruction code and not of a campaign.</p>
+  <p>Two things had to be got right for that number to mean anything, and both bit first.
+  <code>psirz</code> is stored <strong>two different ways</strong> across this corpus: dense on its
+  native (<code>gridz</code>, <code>gridr</code>) grid in some campaigns, and scattered onto a
+  longer shared radial coordinate with NaN in the unused columns in others. <code>gridr</code> is
+  the live radial grid under both layouts; a shot's own <code>profile_r</code> is a different array
+  of a different length and radial span, and pairing the finite columns with it silently produced a
+  wrong grid — a plausible-looking ratio of 0.49 on one campaign and −1.48 on another. Second, a
+  shot whose <code>silop_c</code> is largely unpopulated at the sampled slice yields a ratio
+  scattered over orders of magnitude; such a shot is now <em>rejected</em> rather than allowed to
+  report a meaningless number. The quality gate is what surfaced the grid bug rather than averaging
+  over it.</p>
+
+  <h3>2.3 σ<sub>ρθφ</sub> = −1, and the q sign flip it forces</h3>
+  <p>From sign(q)&nbsp;=&nbsp;σ<sub>Ip</sub>σ<sub>B0</sub>σ<sub>ρθφ</sub>. MAST's forward
+  configuration is I<sub>p</sub>&nbsp;&gt;&nbsp;0 with B<sub>φ</sub>&nbsp;&lt;&nbsp;0 (the reference
+  vacuum field <code>bvac_val</code> is −0.28 to −0.41&nbsp;T throughout), and q is stored positive,
+  giving σ<sub>ρθφ</sub>&nbsp;=&nbsp;−1 on 99.99% of shots. The single dissenter is shot 15963,
+  whose <code>bvac_val</code> is exactly 0.0 on its peak slice — an unfilled field, not a
+  convention dissent; σ<sub>Bp</sub> is −1 there as everywhere.</p>
+  <p>COCOS 17 has σ<sub>ρθφ</sub>&nbsp;=&nbsp;+1, so the same physics expressed in DDv4 requires
+  q&nbsp;&lt;&nbsp;0 for a forward MAST shot. This is not a knob and not a defect: anything
+  downstream that assumes positive q on DDv4 MAST data is wrong, and
+  <code>test_target_q_is_negative_for_the_forward_cohort</code> exists to say so.</p>
+
+  <h3>2.4 σ<sub>RφZ</sub> = +1, declared and not determined</h3>
+  <p>Recorded honestly as a <strong>declaration</strong>, because no combination of scalar
+  equilibrium quantities can determine it. Sauter Eq. 23 cannot distinguish (R, φ, Z) from
+  (R, Z, φ): every toroidal quantity's sign is expressed in the very frame under test, so the
+  question is circular at the level of scalars. What is available is a consistency check —
+  <code>irod</code> and <code>bvac_val</code> share a sign only if both refer to the same
+  φ̂ sense, and they do on <strong>11,153 of 11,153 shots</strong>. That is a genuine constraint on
+  internal coherence and it is not a determination. Resolving it needs a signed vector quantity
+  whose frame is fixed externally — a probe's measured B<sub>R</sub> against a known coil
+  polarity, which is exactly what stage 3's vacuum forward model produces. <strong>Until then this
+  digit is an assumption, and it is the only one.</strong></p>
+
+  <h3>2.5 A limitation in the identification tooling worth recording</h3>
+  <p><code>imas_codex.cocos.calculator.determine_cocos</code> returns COCOS 3 on the raw efm
+  quantities for 3,999 of 4,000 shots tested, which corroborates the verdict. But its
+  e<sub>Bp</sub> digit comes from a magnitude heuristic — <code>e_bp = 1 if max|ψ| &gt; 0.5 Wb</code>
+  — and that heuristic is unreliable at MAST scale. Applying the 3→17 transform and re-asking gives
+  <strong>COCOS 7 for 3,923 of 4,000 shots and 17 for only 76</strong>, because after ×2π the
+  median max|ψ| is 0.332&nbsp;Wb and only 2.5% of slices clear the 0.5&nbsp;Wb threshold. COCOS 7 is
+  COCOS 17 with the wrong e<sub>Bp</sub> and every other digit right, which is the heuristic failing
+  in exactly the predicted way: a small, low-field machine has small ψ in Weber, and magnitude does
+  not carry the convention. <code>validate_cocos_consistency(declared=17)</code> is unaffected and
+  behaves correctly — 1 of 4,000 inconsistent on the transformed quantities against 3,999 of 4,000
+  on the untransformed — because Eq. 23 places no constraint on e<sub>Bp</sub> at all. The lesson
+  for the maps: <strong>e<sub>Bp</sub> must be measured or declared per source, never inferred from
+  magnitude</strong>, and the calculator's other three digits can be trusted.</p>
+
+  <h3>2.6 The transform, and the DD's own taxonomy for it</h3>
+  <p>Composing the digits — σ<sup>eff</sup>&nbsp;=&nbsp;σ<sub>in</sub>σ<sub>out</sub> per digit,
+  e<sup>eff</sup><sub>Bp</sub>&nbsp;=&nbsp;e<sub>out</sub>&nbsp;−&nbsp;e<sub>in</sub> — gives
+  σ<sup>eff</sup><sub>Bp</sub>&nbsp;=&nbsp;+1, σ<sup>eff</sup><sub>RφZ</sub>&nbsp;=&nbsp;+1,
+  σ<sup>eff</sup><sub>ρθφ</sub>&nbsp;=&nbsp;−1, e<sup>eff</sup><sub>Bp</sub>&nbsp;=&nbsp;+1. The DD
+  publishes its own transformation-type tags per field, and the four factors land on them exactly:</p>
+
+  <table>
+    <thead><tr>
+      <th>DD transformation type</th><th>factor, COCOS 3 → 17</th><th>MAST source quantities affected</th>
+    </tr></thead>
+    <tbody>
+      <tr><td><code>psi_like</code></td><td><strong>× 2π</strong>, no sign flip</td>
+        <td><code>psi_axis</code>, <code>psi_boundary</code>, <code>psirz</code>,
+        <code>silop_c</code>/<code>silop_x</code>, amb <code>fl_*</code></td></tr>
+      <tr><td><code>ip_like</code></td><td>× 1 (unchanged)</td>
+        <td><code>plasma_current_c</code>/<code>_x</code>, <code>fcoil_c</code>/<code>_x</code>,
+        amc <code>*_current</code>, <code>plasma_current_rz</code></td></tr>
+      <tr><td><code>b0_like</code></td><td>× 1 (unchanged)</td>
+        <td><code>bvac_val</code>, <code>bphi_rmag</code>, <code>fpsi_c</code> (F&nbsp;=&nbsp;R·B<sub>φ</sub>),
+        <code>diamag_flux*</code></td></tr>
+      <tr><td><code>q_like</code></td><td><strong>× (−1) — SIGN FLIP</strong></td>
+        <td><code>q_axis</code>, <code>q_90</code>, <code>q_95</code>, <code>q_100</code>,
+        <code>qpsi_c</code>, <code>qr</code>, <code>qstar</code></td></tr>
+      <tr><td><code>dodpsi_like</code></td><td><strong>÷ 2π</strong>, no sign flip</td>
+        <td><code>pprime</code>, <code>ffprime</code>, <code>pprimew</code></td></tr>
+      <tr><td><code>one_like</code></td><td>× 1 (unchanged)</td>
+        <td>every geometry coordinate; amb <code>ccbv*</code>/<code>obr*</code>/<code>obv*</code>
+        probe fields</td></tr>
+      <tr><td><code>pol_angle_like</code></td><td>× 1 (unchanged, but see §5)</td>
+        <td><code>magpr_ang</code></td></tr>
+    </tbody>
+  </table>
+
+  <p>Because σ<sup>eff</sup><sub>RφZ</sub>&nbsp;=&nbsp;+1 rests on the §2.4 declaration, every
+  <code>ip_like</code> and <code>b0_like</code> factor above is <em>conditional on that
+  declaration</em> — those are precisely the rows a wrong σ<sub>RφZ</sub> would flip. The ψ and q
+  rows are not: they carry σ<sup>eff</sup><sub>RφZ</sub> too, so a σ<sub>RφZ</sub> error would move
+  ψ and q as well, and the loop-flux round trip in §2.2 would catch it. Stage 3 closes this.</p>
+
+  <h2>3. How many machine descriptions, and why not a shot range</h2>
+
+  <figure>
+    <img src="/nova/figures/mast-machine-description/campaign_fingerprints.png"
+         alt="Three stacked shot-number timelines: three active-conductor fingerprints, three substantive passive digests plus eight single-shot dropouts, and the five combined machine descriptions the cross product produces"
+         style="max-width:100%">
+    <figcaption>Machine-description inventory over 14,633 fingerprinted shots.
+    <strong>a</strong> — the active-conductor and sensor fingerprint resolves the corpus to 3
+    states; these three digests reproduce the ambix per-campaign table keys exactly.
+    <strong>b</strong> — the passive-structure digest, over the (R, Z) positions parsed from the
+    <code>amm</code> element descriptions, is entirely independent of (a) and carries 3 substantive
+    states plus 8 single-shot acquisition dropouts (61–75 elements against the 74/76/78 norms — a
+    handful of missing descriptions for one shot, not a machine change). <strong>c</strong> — the
+    cross product: 5 machine descriptions, covering 99.9% of the shots for which a passive state can
+    be resolved.</figcaption>
+  </figure>
+
+  <table>
+    <thead><tr>
+      <th>#</th><th>coil/sensor fingerprint</th><th>passive digest</th><th>shots</th>
+      <th>span</th><th>foreign shots inside its own span</th>
+    </tr></thead>
+    <tbody>
+      <tr><td>1</td><td><code>fc1004…9425ae4a</code></td><td><code>pv76…0a8463ea</code></td>
+        <td>562</td><td>11695–12407</td><td>4 (0.7%)</td></tr>
+      <tr><td>2</td><td><code>fc938…1cb6f2ee</code></td><td><code>pv74…b1666642</code></td>
+        <td>933</td><td>11876–14538</td><td>1238 (57.0%)</td></tr>
+      <tr><td>3</td><td><code>fc1004…edd753d2</code></td><td><code>pv76…0a8463ea</code></td>
+        <td>724</td><td>12403–13360</td><td>97 (11.8%)</td></tr>
+      <tr><td>4</td><td><code>fc938…1cb6f2ee</code></td><td><code>pv76…0a8463ea</code></td>
+        <td>93</td><td>12429–13300</td><td>657 (87.6%)</td></tr>
+      <tr><td>5</td><td><code>fc938…1cb6f2ee</code></td><td><code>pv78…3dba5e86</code></td>
+        <td>7805</td><td>14540–30473</td><td>5 (0.1%)</td></tr>
+    </tbody>
+  </table>
+
+  <p>Description #4 is the load-bearing one: it is the 938-filament coil set carrying the
+  <em>other</em> campaign's passive state, 93 shots scattered through #3's span. It is not a
+  boundary effect — it is a genuine point in the cross product, and it exists only because the two
+  fingerprints move independently.</p>
+
+  <figure>
+    <img src="/nova/figures/mast-machine-description/fingerprint_interleaving.png"
+         alt="Left: the 1004-filament and 938-filament descriptions alternating in eleven runs across shots 12403 to 13360. Right: a log-scale histogram of the twenty-one contiguous runs the three descriptions form"
+         style="max-width:100%">
+    <figcaption>Why shot ranges cannot key the registry. <strong>a</strong> — over shots
+    12403–13360 the 1004-filament and 938-filament coil sets alternate in 11 runs, some as short as
+    4 shots. <strong>b</strong> — across the whole corpus the 3 coil/sensor fingerprints form
+    <strong>21 contiguous runs</strong>, spanning four orders of magnitude in length; a range table
+    would have to carry every one of them, and would still be wrong for any shot not sampled
+    here.</figcaption>
+  </figure>
+
+  <p>Two coverage facts bound what any registry can promise. <strong>4,508 of the 14,633
+  fingerprinted shots (30.8%) carry no parseable <code>amm</code> passive description at all</strong>,
+  so their passive state is unresolvable from the source and must be either inherited from a
+  neighbour by explicit rule or excluded — it cannot be assumed. And 2,478 of the 17,111 shots on
+  disk have no readable static setup geometry at all, so they cannot be keyed to any machine
+  description by any means.</p>
+
+  <h2>4. The quantity ledger</h2>
+
+  <figure>
+    <img src="/nova/figures/mast-machine-description/coverage_matrix.png"
+         alt="Coverage matrix of forty machine-description quantities across pf_active, pf_passive, wall, magnetics and tf, each coloured as mapped, standard-name gap, DD gap or source gap"
+         style="max-width:100%">
+    <figcaption>Coverage of the 40 machine-description quantities across the five IDSs. Every
+    state was verified against the standard-name catalogue and the DDv4 path index rather than
+    assumed: 21 fully mapped, 10 standard-name gaps (§4.2), 2 DD gaps where the source carries a
+    quantity DDv4 has no path for, and 7 source gaps where the DDv4 path and name both exist but
+    MAST publishes nothing to fill them.</figcaption>
+  </figure>
+
+  <h3>4.1 Source → DDv4 → standard name</h3>
+  <p>Every DDv4 path below was validated with <code>check_dd_paths</code> against DD 4.1.1; every
+  standard name was validated with <code>check_standard_names</code>. Source COCOS is 3 throughout;
+  the transform column gives the factor from §2.6. "GAP" marks a quantity with no standard name —
+  the proposed names are in §4.2, and they are proposals, not catalogue entries.</p>
+
+  <table>
+    <thead><tr>
+      <th>source</th><th>DDv4 path</th><th>standard name</th><th>units src → DD</th><th>transform</th>
+    </tr></thead>
+    <tbody>
+      <tr><td colspan="5"><strong>pf_active</strong> — 11 quantities</td></tr>
+      <tr><td><code>efm/fcoil_r</code></td><td><code>coil/element/geometry/rectangle/r</code></td>
+        <td><code>radial_centroid_of_coil_conductor_element</code></td><td>m → m</td><td>× 1</td></tr>
+      <tr><td><code>efm/fcoil_z</code></td><td><code>coil/element/geometry/rectangle/z</code></td>
+        <td><code>vertical_centroid_of_coil_conductor_element</code></td><td>m → m</td><td>× 1</td></tr>
+      <tr><td><code>efm/fcoil_width</code></td><td><code>coil/element/geometry/rectangle/width</code></td>
+        <td>GAP</td><td>m → m</td><td>× 1</td></tr>
+      <tr><td><code>efm/fcoil_height</code></td><td><code>coil/element/geometry/rectangle/height</code></td>
+        <td>GAP</td><td>m → m</td><td>× 1</td></tr>
+      <tr><td><code>efm/fcoil_turns</code></td><td><code>coil/element/turns_with_sign</code></td>
+        <td><code>effective_turn_count_of_coil_conductor_element</code></td>
+        <td><em>'deg'</em> (mislabelled) → 1</td><td>× 1</td></tr>
+      <tr><td><code>efm/fcoil_ang1</code>, <code>ang2</code></td>
+        <td><code>coil/element/geometry/outline/r</code></td>
+        <td><code>radial_outline_of_coil_conductor_element</code></td><td>deg → m</td>
+        <td>shear → vertices</td></tr>
+      <tr><td><code>efm/fcoil_ang1</code>, <code>ang2</code></td>
+        <td><code>coil/element/geometry/outline/z</code></td><td>GAP</td><td>deg → m</td>
+        <td>shear → vertices</td></tr>
+      <tr><td><code>efm/fcoil_circ</code></td><td><code>circuit/connections</code></td>
+        <td>GAP</td><td>1 → 1</td><td>index → matrix</td></tr>
+      <tr><td><code>efm/fcoil_xmult</code></td><td><strong>no DDv4 path</strong></td>
+        <td>—</td><td><em>'deg'</em> (mislabelled) → —</td><td>see §5</td></tr>
+      <tr><td><code>amc/p*_coil_current</code></td><td><code>coil/current/data</code></td>
+        <td><code>current_of_poloidal_field_coil</code></td><td>kA·turn → A</td>
+        <td>× 10³ ÷ turns</td></tr>
+      <tr><td>— (no source)</td><td><code>coil/resistance</code></td>
+        <td><code>resistance_of_poloidal_field_coil</code></td><td>— → ohm</td><td>source gap</td></tr>
+
+      <tr><td colspan="5"><strong>pf_passive</strong> — 8 quantities; note the whole
+        <code>loop/element</code> subtree is DDv4 lifecycle <strong>alpha</strong></td></tr>
+      <tr><td><code>amm/*</code> description R</td><td><code>loop/element/geometry/rectangle/r</code></td>
+        <td>GAP</td><td>m → m</td><td>× 1</td></tr>
+      <tr><td><code>amm/*</code> description Z</td><td><code>loop/element/geometry/rectangle/z</code></td>
+        <td>GAP</td><td>m → m</td><td>× 1 (see §5)</td></tr>
+      <tr><td>catalog <code>shapeAngle1/2</code></td>
+        <td><code>loop/element/geometry/outline/r</code>, <code>/z</code></td><td>GAP</td>
+        <td>deg → m</td><td>shear → vertices</td></tr>
+      <tr><td>width × height</td><td><code>loop/element/area</code></td>
+        <td><code>area_of_passive_loop</code></td><td>m² → m²</td><td>× 1</td></tr>
+      <tr><td>1 per element</td><td><code>loop/element/turns_with_sign</code></td>
+        <td><code>effective_turn_count_of_passive_loop</code></td><td>1 → 1</td><td>× 1</td></tr>
+      <tr><td>— (calibrated, unpublished)</td><td><code>loop/resistance</code></td>
+        <td><code>resistance_of_passive_loop</code></td><td>— → ohm</td><td>source gap</td></tr>
+      <tr><td>— (no source)</td><td><code>loop/resistivity</code></td><td>GAP</td>
+        <td>— → m.ohm</td><td>source gap</td></tr>
+      <tr><td><code>amm/*</code> values</td><td><code>loop/current</code></td>
+        <td><code>current_of_passive_loop</code></td><td>kA → A</td>
+        <td>× 10³; <strong>wall-model output</strong></td></tr>
+
+      <tr><td colspan="5"><strong>wall</strong> — 3 quantities</td></tr>
+      <tr><td><code>efm/limiterr</code></td><td><code>description_2d/limiter/unit/outline/r</code></td>
+        <td><code>radial_outline_of_limiter</code></td><td>m → m</td><td>× 1</td></tr>
+      <tr><td><code>efm/limiterz</code></td><td><code>description_2d/limiter/unit/outline/z</code></td>
+        <td>GAP</td><td>m → m</td><td>× 1</td></tr>
+      <tr><td>— (no source)</td><td><code>description_2d/vessel/unit/annular/*</code></td>
+        <td><code>vertical_outline_of_vacuum_vessel</code></td><td>— → m</td><td>source gap</td></tr>
+
+      <tr><td colspan="5"><strong>magnetics</strong> — 14 quantities</td></tr>
+      <tr><td><code>efm/silop_r</code></td><td><code>flux_loop/position/r</code></td>
+        <td><code>radial_coordinate_of_flux_loop</code></td><td>m → m</td><td>× 1</td></tr>
+      <tr><td><code>efm/silop_z</code></td><td><code>flux_loop/position/z</code></td>
+        <td><code>vertical_coordinate_of_flux_loop</code></td><td>m → m</td><td>× 1</td></tr>
+      <tr><td><code>amb/fl_*</code>, <code>efm/silop_x</code></td>
+        <td><code>flux_loop/flux/data</code></td>
+        <td><code>poloidal_magnetic_flux_of_flux_loop</code></td><td>Wb → Wb</td>
+        <td>× 1 (already total flux)</td></tr>
+      <tr><td>— (no source)</td><td><code>flux_loop</code> effective area</td>
+        <td><code>area_of_flux_loop</code></td><td>— → m²</td><td>source gap</td></tr>
+      <tr><td><code>efm/silop_dphi</code></td><td><strong>no DDv4 scalar</strong></td>
+        <td>GAP</td><td><em>'m'</em> (mislabelled; is an angle) → —</td><td>see §5</td></tr>
+      <tr><td><code>efm/magpr_r</code></td><td><code>b_field_pol_probe/position/r</code></td>
+        <td><code>radial_coordinate_of_poloidal_magnetic_field_probe</code></td><td>m → m</td><td>× 1</td></tr>
+      <tr><td><code>efm/magpr_z</code></td><td><code>b_field_pol_probe/position/z</code></td>
+        <td><code>vertical_coordinate_of_poloidal_magnetic_field_probe</code></td><td>m → m</td><td>× 1</td></tr>
+      <tr><td><code>efm/magpr_ang</code></td><td><code>b_field_pol_probe/poloidal_angle</code></td>
+        <td><strong>GAP</strong> — the sign-critical one</td><td>deg → rad</td>
+        <td>× π/180; sense per §5</td></tr>
+      <tr><td><code>efm/magpr_len</code></td><td><code>b_field_pol_probe/length</code></td>
+        <td><code>length_of_poloidal_magnetic_field_probe</code></td><td>m → m</td><td>× 1</td></tr>
+      <tr><td>— (no source)</td><td><code>b_field_pol_probe/area</code></td>
+        <td><code>area_of_poloidal_magnetic_field_probe</code></td><td>— → m²</td><td>source gap</td></tr>
+      <tr><td>— (no source)</td><td><code>b_field_pol_probe/turns</code></td>
+        <td><code>turn_count_of_poloidal_magnetic_field_probe</code></td><td>— → 1</td><td>source gap</td></tr>
+      <tr><td><code>amb/ccbv*</code>, <code>obr*</code>, <code>obv*</code></td>
+        <td><code>b_field_pol_probe/field/data</code></td>
+        <td><code>poloidal_magnetic_field_of_poloidal_magnetic_field_probe</code></td>
+        <td>T → T</td><td>× 1</td></tr>
+      <tr><td><code>amc/plasma_current</code></td><td><code>ip/data</code></td>
+        <td><code>plasma_current</code></td><td>kA → A</td><td>× 10³</td></tr>
+      <tr><td><code>efm/diamag_fluxx</code></td><td><code>diamagnetic_flux/data</code></td>
+        <td><code>diamagnetic_magnetic_flux</code></td><td>Wb → Wb</td><td>× 1</td></tr>
+
+      <tr><td colspan="5"><strong>tf</strong> — 4 quantities</td></tr>
+      <tr><td><code>efm/bvac_r</code></td><td><code>r0</code></td>
+        <td><code>reference_major_radius</code></td><td>m → m</td><td>× 1</td></tr>
+      <tr><td><code>efm/bvac_val</code></td><td><code>b_field_phi_vacuum_r/data</code></td>
+        <td><code>toroidal_vacuum_magnetic_field</code></td><td>T → m.T</td>
+        <td>× <code>bvac_r</code></td></tr>
+      <tr><td><code>efm/irod</code>, <code>amc/tf_current</code></td><td><code>coil/current</code></td>
+        <td><code>current_of_toroidal_field_coil</code></td><td>A·T / kA → A</td>
+        <td>÷ turns; × 10³</td></tr>
+      <tr><td>— (no source)</td><td><code>coil/turns</code></td><td>—</td><td>— → 1</td>
+        <td>source gap</td></tr>
+    </tbody>
+  </table>
+
+  <p>Two source quantities sit outside the MD proper but are needed by stage 6 and map cleanly:
+  <code>efm/fwtmp</code> → <code>equilibrium/…/constraints/b_field_pol_probe/weight</code>
+  (<code>equilibrium_weight_of_poloidal_magnetic_field_probe</code>) and <code>efm/fwtsi</code> →
+  the flux-loop equivalent (<code>equilibrium_weight_of_flux_loop</code>). Both names exist.</p>
+
+  <h3>4.2 Standard-name gaps, with proposed names</h3>
+  <p>Ten of the 40 ledger quantities have a validated DDv4 path and no standard name. The
+  striking feature is that <strong>seven of the ten are the missing half of an R/Z pair whose other
+  half is already accepted</strong> — which makes them the easiest possible contribution to argue,
+  since the precedent, the grammar and the documentation pattern all exist. <em>These are proposals
+  authored here, not catalogue entries.</em></p>
+
+  <table>
+    <thead><tr>
+      <th>quantity</th><th>proposed name</th><th>unit</th><th>precedent already in the catalogue</th>
+    </tr></thead>
+    <tbody>
+      <tr><td>coil element outline Z</td><td><code>vertical_outline_of_coil_conductor_element</code></td>
+        <td>m</td><td><code>radial_outline_of_coil_conductor_element</code> ✓</td></tr>
+      <tr><td>limiter outline Z</td><td><code>vertical_outline_of_limiter</code></td>
+        <td>m</td><td><code>radial_outline_of_limiter</code> ✓</td></tr>
+      <tr><td>passive element outline R</td><td><code>radial_outline_of_passive_loop</code></td>
+        <td>m</td><td><code>radial_outline_of_coil_conductor_element</code> ✓</td></tr>
+      <tr><td>passive element outline Z</td><td><code>vertical_outline_of_passive_loop</code></td>
+        <td>m</td><td>as above</td></tr>
+      <tr><td>passive element R centroid</td><td><code>radial_centroid_of_passive_loop</code></td>
+        <td>m</td><td><code>radial_centroid_of_coil_conductor_element</code> ✓</td></tr>
+      <tr><td>passive element Z centroid</td><td><code>vertical_centroid_of_passive_loop</code></td>
+        <td>m</td><td><code>vertical_centroid_of_coil_conductor_element</code> ✓</td></tr>
+      <tr><td><strong>probe sensitive-axis poloidal angle</strong></td>
+        <td><code>poloidal_angle_of_poloidal_magnetic_field_probe</code></td><td>rad</td>
+        <td><code>poloidal_angle_of_toroidal_magnetic_field_probe</code> ✓ and
+        <code>toroidal_angle_of_poloidal_magnetic_field_probe</code> ✓ — only this cell of the
+        2×2 is empty</td></tr>
+      <tr><td>coil element radial extent</td><td><code>radial_extent_of_coil_conductor_element</code></td>
+        <td>m</td><td>no direct precedent; <code>inner_radius_of_poloidal_field_coil</code> is the
+        nearest dimension name</td></tr>
+      <tr><td>coil element vertical extent</td><td><code>vertical_extent_of_coil_conductor_element</code></td>
+        <td>m</td><td>as above</td></tr>
+      <tr><td>passive loop resistivity</td><td><code>resistivity_of_passive_loop</code></td>
+        <td>m.ohm</td><td><code>resistance_of_passive_loop</code> ✓</td></tr>
+    </tbody>
+  </table>
+
+  <p>The probe-angle gap deserves its own sentence, because of the ten it is the one that can
+  corrupt physics rather than merely block a map. <code>magpr_ang</code> sets the
+  B<sub>R</sub>cos θ + B<sub>Z</sub>sin θ projection every magnetics forward model applies; it is
+  tagged <code>pol_angle_like</code> by the DD, i.e. COCOS-dependent; and it is the one MD quantity
+  with no standard name to carry its convention. The catalogue has three of the four
+  (probe family × angle) cells filled and this one empty.</p>
+
+  <h3>4.3 The two DD gaps</h3>
+  <p><code>efm/fcoil_xmult</code> — the weight with which each filament shares its circuit's
+  current — has <strong>no DDv4 path</strong>. DDv4 expresses a coil as elements with
+  <code>turns_with_sign</code> and circuits as a <code>connections</code> matrix; there is no
+  per-element current-share fraction, because in the DD model the turn count <em>is</em> the
+  share. That is representable: fold <code>xmult</code> into <code>turns_with_sign</code> so
+  Σ&nbsp;turns reproduces the circuit's amp-turns. It is a genuine modelling decision for stage 2
+  rather than a copy, and it must be recorded, because the folded product is no longer the physical
+  turn count.</p>
+  <p><code>efm/silop_dphi</code> — each flux loop's toroidal angular extent — has no DDv4 scalar
+  either. DDv4 represents a toroidally-partial loop by giving
+  <code>flux_loop/position</code> multiple (R, φ, Z) points, which carries the extent implicitly
+  and is strictly more expressive. The map is therefore a construction, not an assignment.</p>
+
+  <h2>5. Source defects found, and what each one costs</h2>
+  <p>These are reproducible defects in the FAIR-MAST source metadata, not transcription slips on
+  our side. Each was checked on at least three shots spanning all three coil fingerprints.</p>
+  <ul>
+    <li><strong>The <code>amm</code> end-crown Z signs are transposed.</strong>
+    <code>endcrown_l</code> ("Lower centre column end crown") carries <code>Z=2.46</code> and
+    <code>endcrown_u</code> ("Upper") carries <code>Z=-2.46</code> — on every shot checked, in
+    every campaign. Anything parsing R/Z out of these descriptions places both crowns on the wrong
+    side of the midplane. Cost: two mis-placed passive elements at the largest |Z| in the machine,
+    where they couple most strongly to the divertor-region sensors. Resolution is to trust the
+    <em>name</em> over the parsed sign here, and to flag rather than silently correct.</li>
+    <li><strong>Three efm unit strings are wrong.</strong> <code>fcoil_turns</code> and
+    <code>fcoil_xmult</code> both declare <code>units = 'deg'</code> (they are a turn count and a
+    dimensionless weight); <code>silop_dphi</code> declares <code>'m'</code> for what its own
+    description calls a "toroidal angular extent". Cost: any unit-aware ingest that trusts the
+    metadata converts a turn count as an angle. This is the concrete reason the plan's rule that
+    source metadata is untrusted for conventions should extend to <em>units</em>, not just to
+    dd-path tags.</li>
+    <li><strong>The <code>obv*</code> probe descriptions say "Br".</strong> Every
+    <code>obv01…obv18</code> channel is described as "Outer discrete <strong>Br</strong> magnetic
+    coil array" while <code>magpr_ang = 90</code> says vertical — the copy-paste defect ambix
+    already documented, confirmed here. Orientation must come from <code>magpr_ang</code>; the
+    channel description is a position lookup key and nothing more.</li>
+    <li><strong>Flux-loop descriptions carry placeholder and mis-signed positions.</strong>
+    <code>fl_cc01</code> through <code>fl_cc09</code> all claim the identical
+    <code>r=0.180, z=1.215</code>; <code>fl_p4u_4</code> and <code>fl_p6u_1</code> — both
+    upper-named — claim <code>z=+1.083</code> and <code>z=-1.089</code> respectively. Cost: this is
+    why 8 of the amb flux-loop channels cannot be matched to a <code>silop</code> index at all and
+    are honestly left unmatched rather than force-fitted.</li>
+    <li><strong><code>psirz</code> has two incompatible on-disk layouts</strong> (§2.2). Not a
+    metadata defect but an ingest one: the array's <code>attrs['shape']</code> says
+    <code>[86, 65, 65]</code> where the stored array is <code>(86, 65, 129)</code>, and the extra
+    columns are NaN-scattered rather than trailing-padded. Cost: it silently produced wrong
+    answers in this audit until the quality gate caught it, and it will do the same to any 2-D map
+    read in stage 6.</li>
+  </ul>
+
+  <h2>6. What this invalidates in the plan's §3</h2>
+  <ol>
+    <li><strong>"the MAST convention has ψ<sub>axis</sub> &gt; ψ<sub>boundary</sub>" is not a
+    landmark.</strong> True for 96.6% of shots, false for 379 of them (two blocks, 13469–13696 and
+    22376–22626), and the COCOS is identical either way. Replace with σ<sub>Bp</sub>&nbsp;=&nbsp;−1,
+    i.e. sign(ψ<sub>bnd</sub>&nbsp;−&nbsp;ψ<sub>axis</sub>)&nbsp;=&nbsp;−σ<sub>Ip</sub>.</li>
+    <li><strong>"sign flips on ψ/Ip/B<sub>φ</sub>/q" overstates the ψ case and understates the q
+    case.</strong> Against the DDv4 (COCOS 17) target: ψ scales by 2π and does <em>not</em> flip;
+    I<sub>p</sub> and B<sub>φ</sub> do not change at all; q flips. The DDv3-era "axis max vs axis
+    min" mismatch does not exist at this target.</li>
+    <li><strong>"ambix carries total flux Φ = 2πRA<sub>φ</sub> [Wb]" describes ambix, not the
+    source.</strong> The efm reconstruction is Wb/rad (e<sub>Bp</sub>&nbsp;=&nbsp;0) and the
+    measured flux loops are Wb. Both are true and they differ by the 2π; the ledger has to name
+    which one each row means, and §4.1 does.</li>
+    <li><strong>"per-campaign versioning" needs a fingerprint the plan does not yet describe.</strong>
+    §2 assigns <code>pf_passive</code> to "efm passive-element boxes", but the passive geometry is
+    not in the efm arrays the fingerprint hashes — it is in <code>amm</code> descriptions, it moves
+    independently, and 30.8% of shots do not carry it. The MD count is 5, not 3, and the fingerprint
+    must be extended before stage 5 can fan out.</li>
+    <li><strong>The <code>pf_passive/loop/element</code> subtree is DDv4 lifecycle
+    <code>alpha</code>.</strong> Not an invalidation but a risk the plan does not record: the MD's
+    passive description depends on a subtree the DD may still change. Worth pinning the DD version
+    for that reason alone.</li>
+  </ol>
+
+  <h2>7. Reproducing this</h2>
+  <p>Scan, verdict and all four figures come out of one command. The full-corpus pass over 17,111
+  shots takes <strong>1 m 58 s on 16 cores</strong> — cheap enough that it should be re-run rather
+  than trusted whenever the mirror changes.</p>
+  <table>
+    <thead><tr><th>artifact</th><th>path</th></tr></thead>
+    <tbody>
+      <tr><td>driver + figures</td><td><code>nova/scripts/identify_source_cocos.py</code></td></tr>
+      <tr><td>pinned verdict</td><td><code>tests/test_mastcocos.py</code> — 19 tests, 8 of them
+        corpus-backed and skipped where the mirror is absent</td></tr>
+      <tr><td>measured artifact</td>
+        <td><code>docs/figures/mast-machine-description/source_cocos_audit.json</code> (1.9 MB;
+        read it with <code>load_report</code>, which expands the columnar tables)</td></tr>
+      <tr><td>full-corpus run</td>
+        <td><code>srun --partition=sun_debug --cpus-per-task=16 --mem=32G --time=01:00:00 \<br>
+        &nbsp;&nbsp;uv run python nova/scripts/identify_source_cocos.py --stride 1 --workers 16</code></td></tr>
+      <tr><td>redraw figures only</td>
+        <td><code>uv run python nova/scripts/identify_source_cocos.py --figures-only</code></td></tr>
+    </tbody>
+  </table>
+  <p>The script needs <code>zarr</code> and <code>scipy</code>, which are not nova dependencies —
+  <code>uv pip install "numpy&lt;2" "zarr&lt;3.1" scipy</code> in the working environment (the
+  numpy bound matters: an unpinned <code>zarr</code> pulls numpy 2.x and nova requires
+  &lt;&nbsp;2). Compute nodes here have no network, so install on the login node first and run
+  with <code>--offline</code>.</p>
+  <p>The script deliberately reimplements the campaign digest rather than importing ambix, so nova
+  carries no dependency on it — and the reimplementation reproduces all three of ambix's published
+  keys (<code>9425ae4a8bf3bc15</code>, <code>edd753d282903679</code>,
+  <code>1cb6f2ee742c4ee4</code>) exactly, which is the cross-check that the two codebases agree
+  about what a campaign is.</p>
+</main>
+</body>
+</html>

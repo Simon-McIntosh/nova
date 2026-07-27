@@ -77,9 +77,9 @@ def poloidal_footprint(loops: np.ndarray, tolerance: float = 1e-10):
     nearly the same ring and the union collapses back onto it.
 
     The result is collapsed before it is returned: a union of near-identical rings
-    leaves corners part way along the section's own edges, so a swept hexagon comes
-    back with nine and leaves with six, its area agreeing with the section's to
-    2e-14.
+    leaves corners part way along the section's own edges, one per station that
+    moved, so a swept hexagon's union has sixteen corners over a sixteen-station arc
+    and leaves with six -- its area agreeing with the section's to 2e-14.
     """
     loops = np.asarray(loops, dtype=np.float64)
     poloidal = np.stack(

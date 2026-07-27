@@ -272,15 +272,17 @@ def test_the_section_reaches_the_kernel_at_double_precision():
 def test_a_swept_hexagon_reaches_the_kernel_with_six_corners():
     """A projection splits an edge; the reduction should not pay for it.
 
-    The poloidal footprint of a swept hexagon comes back with NINE corners, three
-    of them part way along an edge and agreeing with the straight line to
-    round-off.  A closed-form section reduction costs one evaluation per corner, so
-    the run is collapsed before the section is handed over.
+    The union of a sweep's projected stations puts a corner part way along the
+    section's own edges -- one per station that moved, sixteen over the sixteen-
+    station arc here -- each agreeing with the straight line to round-off.  A
+    closed-form section reduction costs one evaluation per corner and a corner is
+    what an arc's cost tracks, so the run is collapsed where the footprint is
+    formed and again where the section is read.
     """
     coilset = winding({"hex": (0, 0, WIDTH, THICKNESS)}, SWEEPS["short"])
     stored = np.asarray(np.asarray(coilset.subframe["poly"])[0].points)
     assert len(section_corners(np.asarray(coilset.subframe["poly"])[0])) == 6
-    assert len(stored) >= 6  # the column keeps whatever the projection produced
+    assert len(stored) == 7  # six corners and the ring's closing repeat
 
 
 def test_a_free_form_polygon_section_reaches_the_kernel():

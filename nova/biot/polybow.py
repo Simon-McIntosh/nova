@@ -70,9 +70,11 @@ def section_corners(poly) -> np.ndarray:
     The stored polygon carries its corners as ``(x, y, z)`` with the toroidal
     coordinate at zero, closes on a repeat of its first, and -- being a projection
     -- can carry a corner part way along a straight edge.  The reduction pays per
-    corner, and a corner is what an arc's cost tracks, so the run is collapsed here
-    rather than evaluated: a swept hexagon reaches the kernel with six corners
-    instead of the nine the projection can hand over.
+    corner, and a corner is what an arc's cost tracks, so a collinear run is
+    collapsed rather than evaluated: a swept hexagon reaches the kernel with six
+    corners where the projection's own union of stations has sixteen.  Collapsed
+    again here rather than trusted to the column, so a polygon reaching the frame by
+    another route cannot smuggle a redundant corner into the reduction's cost.
     """
     return collapse_collinear(np.asarray(poly.points, dtype=np.float64)[:, [0, 2]])
 

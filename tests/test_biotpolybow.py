@@ -3,21 +3,25 @@
 :mod:`tests.test_biotpolygonarc` holds the reduction's own acceptance gate --
 four independent references plus ``Bow`` -- and none of it goes through a frame.
 This module holds what the CLASS adds on top and nothing else: the section it
-builds from the frame's own descriptor, the local-to-global transform, and the
-segment registry that lets :class:`nova.biot.solve.Solve` reach it.
+takes from the frame's ``poly`` column, the local-to-global transform, the
+routing that reaches it, and the coupled pair a hollow section arrives as.
 
 So every check here is a comparison against the bare reduction or against
 ``Bow`` THROUGH the same frame machinery, and the reduction's accuracy is
-somebody else's test.  Two of them are worth naming:
+somebody else's test.  Three of them are worth naming:
 
 * ``Bow`` at zero edge slope, through the class rather than through the bare
   function.  It is the only end-to-end check of the whole path, and it holds to
   ``Bow``'s own fixed-node zeta quadrature rather than to round-off.
-* A HEXAGONAL section, which is what the element exists for.  A swept winding of
-  non-rectangular section is routed to ``Bow`` today and evaluated as a rectangle
-  of its own width and height while being normalised by its true area, so a
-  hexagon comes back a third too large.  That factor is asserted, not just the
-  agreement, because it is the size of the gap this element closes.
+* A HEXAGONAL section, which is what the element exists for.  ``Bow`` evaluates a
+  rectangle of the section's width and height while normalising by its true area,
+  so a hexagon comes back a third too large.  That factor is asserted, not just
+  the agreement, because it is the size of the gap this element closes -- and it
+  is now measured against a ``Bow`` the caller has to NAME, because a swept
+  winding routes here.
+* A HOLLOW section, which arrives as a linked pair of solid ones at ``+j`` and
+  ``-j`` and is checked against a partition of the annulus into solid cells --
+  a direct integral over the same boundaries, decomposed the other way.
 
 The frame's stored matrices are read rather than
 :attr:`nova.frame.coilset.CoilSet.point`'s accessors: the accessors cast to
@@ -26,9 +30,10 @@ single precision, which is enough to hide every comparison below.
 
 import numpy as np
 import pytest
+import shapely.geometry
 from scipy.constants import mu_0
 
-from nova.biot.polybow import PolyBow
+from nova.biot.polybow import PolyBow, section_corners
 from nova.biot.polygonarc import polygon_arc_greens
 from nova.biot.solve import Solve
 from nova.frame.coilset import CoilSet
@@ -65,11 +70,10 @@ def target_points():
 def winding(section, sweep, segment=None, radius=RADIUS, elevation=ELEVATION):
     """Return a solved coilset carrying one swept winding.
 
-    ``segment`` overrides the element the frame routes to, which is how a
-    polygon-section arc is reached today: nothing assigns ``polybow`` on its own
-    yet, because a swept winding's section is not always one a corner list can
-    carry.  Setting the column directly is the same route
-    :mod:`benchmarks.polygon_route_cost` takes to reach ``PolySection``.
+    A thickened arc routes to ``polybow`` on its own, so ``segment`` is what a
+    caller uses to reach ``Bow`` instead -- which is the direction the override now
+    runs in, and is how ``Bow`` serves as the independent Urankar Part IV oracle
+    below rather than as the default.
     """
     start, end = sweep
     angle = np.array([start, 0.5 * (start + end), end])
@@ -163,6 +167,46 @@ def test_the_segment_registry_reaches_the_element():
     assert PolyBow.axisymmetric is False
 
 
+def test_a_thickened_arc_routes_here_without_the_caller_naming_it():
+    """The routing, asserted where it can be read.
+
+    A swept winding reaches the element that can evaluate its section, for every
+    section, with no segment named at the call site.  ``Bow`` would evaluate the box
+    its width and height bound and normalise by the section's own area, so it is
+    right for a rectangle and wrong for everything else -- and cannot express a
+    section that is not a rectangle at all.  A filament winding is unaffected: it
+    carries no section, so it stays an ``arc``.
+    """
+    for section in (
+        {"rect": (0, 0, WIDTH, THICKNESS)},
+        {"hex": (0, 0, WIDTH, THICKNESS)},
+        {"disc": (0, 0, WIDTH, WIDTH)},
+        {"box": (0, 0, WIDTH, 0.2)},
+        {"sk": (0, 0, WIDTH, 0.2)},
+    ):
+        coilset = winding(section, SWEEPS["short"])
+        assert set(np.asarray(coilset.subframe["segment"]).tolist()) == {"polybow"}
+    filament = CoilSet()
+    start, end = SWEEPS["short"]
+    angle = np.array([start, 0.5 * (start + end), end])
+    filament.winding.insert(
+        np.stack(
+            [
+                RADIUS * np.cos(angle),
+                RADIUS * np.sin(angle),
+                ELEVATION * np.ones_like(angle),
+            ],
+            axis=-1,
+        ),
+        {"hex": (0, 0, WIDTH, THICKNESS)},
+        nturn=1,
+        Ic=1,
+        minimum_arc_nodes=3,
+        ifttt=False,
+    )
+    assert np.asarray(filament.subframe["segment"]).tolist() == ["arc"]
+
+
 def test_the_element_is_a_peer_of_bow_rather_than_a_subclass():
     """The decision, asserted where it can be read.
 
@@ -204,17 +248,80 @@ def test_the_class_adds_nothing_to_the_reduction_but_the_transform(sweep):
     assert np.max(worst_by_row(got, want)) <= 1e-10  # measured 3.0e-11
 
 
-def test_a_section_the_frame_cannot_describe_is_refused():
-    """A hollow section has an interior boundary a corner list cannot carry.
+def test_the_section_reaches_the_kernel_at_double_precision():
+    """The corners the reduction integrates are the section's own, exactly.
 
-    ``skin`` and ``box`` also store a hollowness FACTOR where the solid sections
-    store a height, so building one from ``(width, height)`` would silently return
-    a nearly-solid square rather than the ring the frame means.
+    The frame's ``poly`` column is built from the sweep's own float64 corner loops
+    rather than from the vtk mesh they build: VTK's points default to single
+    precision, which lands a corner authored at 2.97 on 2.96999979.  That is 8e-09
+    relative on a corner and 7.9e-09 on the rows -- four orders above the closed
+    form's own 3.5e-12 -- so the column has to be exact for reading it to be worth
+    anything.  Measured against the descriptor's corners, which for a named section
+    is the same polygon.
     """
-    coilset = winding({"sk": (0, 0, WIDTH, WIDTH, 0.2)}, SWEEPS["short"])
-    coilset.subframe.loc[:, "segment"] = "polybow"
-    with pytest.raises(NotImplementedError, match="width and height"):
-        coilset.point.solve(target_points())
+    coilset = winding({"hex": (0, 0, WIDTH, THICKNESS)}, SWEEPS["short"])
+    corners = section_corners(np.asarray(coilset.subframe["poly"])[0])
+    want = frame_section(coilset)
+    order = [
+        int(np.argmin(np.linalg.norm(want - corner, axis=1))) for corner in corners
+    ]
+    assert sorted(order) == list(range(len(want)))
+    assert np.max(np.abs(corners - want[order])) <= 1e-15  # measured 4.4e-16
+
+
+def test_a_swept_hexagon_reaches_the_kernel_with_six_corners():
+    """A projection splits an edge; the reduction should not pay for it.
+
+    The poloidal footprint of a swept hexagon comes back with NINE corners, three
+    of them part way along an edge and agreeing with the straight line to
+    round-off.  A closed-form section reduction costs one evaluation per corner, so
+    the run is collapsed before the section is handed over.
+    """
+    coilset = winding({"hex": (0, 0, WIDTH, THICKNESS)}, SWEEPS["short"])
+    stored = np.asarray(np.asarray(coilset.subframe["poly"])[0].points)
+    assert len(section_corners(np.asarray(coilset.subframe["poly"])[0])) == 6
+    assert len(stored) >= 6  # the column keeps whatever the projection produced
+
+
+def test_a_free_form_polygon_section_reaches_the_kernel():
+    """The capability no descriptor can express, which is why the column is read.
+
+    An irregular pentagon has no ``(width, height)`` pair that reproduces it, so a
+    class rebuilding its section from the frame's descriptor could only ever return
+    a rectangle of its bounding box.  Read from ``poly`` it arrives as itself.
+    """
+    loop = np.array(
+        [[-0.03, -0.02], [0.03, -0.02], [0.02, 0.0], [0.03, 0.02], [-0.01, 0.015]]
+    )
+    coilset = winding(shapely.geometry.Polygon(loop), SWEEPS["short"])
+    assert np.asarray(coilset.subframe["segment"]).tolist() == ["polybow"]
+    corners = section_corners(np.asarray(coilset.subframe["poly"])[0])
+    assert np.min(np.linalg.norm(corners - np.array([3.02, 0.2]), axis=1)) <= 1e-04
+    start, end = SWEEPS["short"]
+    want = np.stack(
+        polygon_arc_greens(TARGET_R, TARGET_Z, TARGET_PHI, corners, start, end)
+    )
+    got = cylindrical_rows(coilset)
+    assert worst_overall(got, want) <= 1e-11  # measured 1.6e-12
+    assert np.max(worst_by_row(got, want)) <= 1e-10  # measured 1.9e-11
+    # The section the frame carries is the swept solid's own footprint, which for a
+    # section NOT symmetric about the poloidal plane is a few parts in 1e5 wider
+    # than the loop as authored: a discretised path takes a CHORD direction for its
+    # end tangents, so the two end stations are tilted by O(h^2) and their
+    # projections reach beyond the rest.  Bounded here so the departure is a
+    # measured quantity rather than a surprise, and it is the path's, not the
+    # section's -- every named section is symmetric and lands on round-off.
+    ideal = np.stack(
+        polygon_arc_greens(
+            TARGET_R,
+            TARGET_Z,
+            TARGET_PHI,
+            loop + np.array([RADIUS, ELEVATION]),
+            start,
+            end,
+        )
+    )
+    assert worst_overall(got, ideal) <= 1e-04  # measured 4.7e-05
 
 
 # ---------------------------------------------------------------------------
@@ -231,8 +338,8 @@ def test_a_rectangular_section_reproduces_bow_through_the_class(sweep):
     as the value the quadrature is measured against.
     """
     section = {"rect": (0, 0, WIDTH, THICKNESS)}
-    bow = cylindrical_rows(winding(section, SWEEPS[sweep]))
-    poly = cylindrical_rows(winding(section, SWEEPS[sweep], segment="polybow"))
+    bow = cylindrical_rows(winding(section, SWEEPS[sweep], segment="bow"))
+    poly = cylindrical_rows(winding(section, SWEEPS[sweep]))
     assert worst_overall(poly, bow) <= 2e-08  # measured 4.9e-09
     assert np.max(worst_by_row(poly, bow)) <= 5e-08  # measured 1.1e-08
 
@@ -246,8 +353,8 @@ def test_the_bow_agreement_is_not_a_tie_at_single_precision():
     makes it evidence, and this is the assertion that the two differ at all.
     """
     section = {"rect": (0, 0, WIDTH, THICKNESS)}
-    bow = cylindrical_rows(winding(section, SWEEPS["short"]))
-    poly = cylindrical_rows(winding(section, SWEEPS["short"], segment="polybow"))
+    bow = cylindrical_rows(winding(section, SWEEPS["short"], segment="bow"))
+    poly = cylindrical_rows(winding(section, SWEEPS["short"]))
     assert worst_overall(poly, bow) >= 1e-13
 
 
@@ -279,10 +386,149 @@ def test_routing_a_hexagon_to_bow_overstates_it_by_a_third():
     and not a shape.
     """
     section = {"hex": (0, 0, WIDTH, THICKNESS)}
-    bow = cylindrical_rows(winding(section, SWEEPS["short"]))
-    poly = cylindrical_rows(winding(section, SWEEPS["short"], segment="polybow"))
+    bow = cylindrical_rows(winding(section, SWEEPS["short"], segment="bow"))
+    poly = cylindrical_rows(winding(section, SWEEPS["short"]))
     ratio = bow / poly
     assert np.allclose(ratio, 4.0 / 3.0, rtol=2e-03)
+
+
+@pytest.mark.parametrize(
+    "section,ratio",
+    [
+        ({"disc": (0, 0, WIDTH, WIDTH)}, 4.0 / np.pi),
+        ({"ellipse": (0, 0, WIDTH, THICKNESS)}, 4.0 / np.pi),
+    ],
+)
+def test_routing_a_round_section_to_bow_overstates_it_by_four_over_pi(section, ratio):
+    """The same normalisation gap on the sections whose corner count is the cost.
+
+    A disc fills ``pi/4`` of its bounding box and an ellipse the same fraction of
+    its own, so ``Bow`` returns ``4/pi`` -- 27 % -- too much on every row.  What the
+    correct answer costs is sixty-four corners against a hexagon's six, which is the
+    trade the round sections force and the reason this ratio is recorded rather than
+    described.
+    """
+    bow = cylindrical_rows(winding(section, SWEEPS["short"], segment="bow"))
+    poly = cylindrical_rows(winding(section, SWEEPS["short"]))
+    assert np.allclose(bow / poly, ratio, rtol=3e-03)
+
+
+# ---------------------------------------------------------------------------
+# A hollow section, as a coupled pair of solid ones.
+
+HOLLOW = 0.2  # hollowness factor, 1 - r/R
+
+
+def annulus_cells(coilset):
+    """Return a partition of the annulus into solid quadrilateral cells.
+
+    Built between corresponding corners of the two members' own boundaries, so the
+    cells tile exactly the region the pair means -- the same integral decomposed
+    the other way round, a sum of positive cells instead of a signed superposition.
+    """
+    outer, core = (
+        section_corners(poly) for poly in np.asarray(coilset.subframe["poly"])[:2]
+    )
+    assert len(outer) == len(core)
+    return [
+        np.array(
+            [
+                outer[i],
+                outer[(i + 1) % len(outer)],
+                core[(i + 1) % len(core)],
+                core[i],
+            ]
+        )
+        for i in range(len(outer))
+    ]
+
+
+def cell_integral(cells, sweep):
+    """Return the five rows of a partition, at the partition's own density."""
+    start, end = sweep
+    total = np.zeros((5, len(TARGET_R)))
+    area = 0.0
+    for cell in cells:
+        rolled = np.roll(cell, -1, axis=0)
+        cell_area = 0.5 * abs(
+            float(np.sum(cell[:, 0] * rolled[:, 1] - rolled[:, 0] * cell[:, 1]))
+        )
+        total += cell_area * np.stack(
+            polygon_arc_greens(TARGET_R, TARGET_Z, TARGET_PHI, cell, start, end)
+        )
+        area += cell_area
+    return total / area, area
+
+
+@pytest.mark.parametrize("section", ["box", "sk"])
+def test_a_hollow_section_is_a_coupled_pair_rather_than_a_refusal(section):
+    """The construction, read off the frame's own columns.
+
+    An annulus is the outer boundary at ``+j`` and the interior one at ``-j``, both
+    of them solid sections the reduction already evaluates.  The density is the
+    annulus's, which is why both members carry it as their ``area`` and the core
+    carries the ``-1`` the frame's link machinery already understands -- the
+    reference row of a linked group has factor one by definition, so the density
+    cannot live in that column.  The member currents then sum to the conductor's::
+
+        I_outer + I_core = j (A_outer - A_core) = I
+    """
+    coilset = winding({section: (0, 0, WIDTH, HOLLOW)}, SWEEPS["short"])
+    assert len(coilset.subframe) == 2
+    outer, core = (
+        section_corners(poly) for poly in np.asarray(coilset.subframe["poly"])
+    )
+    area = np.asarray(coilset.subframe["area"], dtype=float)
+    factor = np.asarray(coilset.subframe["factor"], dtype=float)
+    outer_area = shapely.geometry.Polygon(outer).area
+    core_area = shapely.geometry.Polygon(core).area
+    assert factor.tolist() == [1.0, -1.0]
+    assert np.allclose(area, outer_area - core_area, rtol=1e-14)
+    current = 1.0  # the winding's own Ic
+    density = current / area[0]
+    assert np.isclose(
+        factor[0] * density * outer_area + factor[1] * density * core_area,
+        current,
+        rtol=1e-14,
+    )
+
+
+@pytest.mark.parametrize("section", ["box", "sk"])
+def test_the_hollow_pair_reproduces_a_direct_integral_over_the_annulus(section):
+    """The pair against the annulus integrated directly, cell by cell.
+
+    A partition into solid quadrilaterals covers exactly the material the pair
+    means, evaluated by the same reduction with no cancellation between members --
+    so the agreement is a statement about the SUPERPOSITION rather than about the
+    kernel.  Exact rather than converged, because the cells tile the boundaries the
+    pair itself carries; refining them radially changes nothing.
+    """
+    coilset = winding({section: (0, 0, WIDTH, HOLLOW)}, SWEEPS["short"])
+    want, area = cell_integral(annulus_cells(coilset), SWEEPS["short"])
+    assert np.isclose(area, float(np.asarray(coilset.subframe["area"])[0]), rtol=1e-12)
+    got = cylindrical_rows(coilset)
+    assert worst_overall(got, want) <= 1e-09  # measured 6.1e-12 box, 7.8e-11 skin
+    assert np.max(worst_by_row(got, want)) <= 1e-08  # measured 4.0e-10
+
+
+def test_a_swept_skin_is_a_circular_annulus_and_not_a_square_one():
+    """The section of record decides, where a relabelling used to.
+
+    A ``skin`` is a disc with a disc removed; a ``box`` is a square with a square
+    removed.  Both boundaries are read off the section itself, so the two are
+    different conductors -- where relabelling ``skin`` to ``box`` made a swept skin
+    into a square annulus and its area into the square's, a factor of ``4/pi``.
+    """
+    skin = winding({"sk": (0, 0, WIDTH, HOLLOW)}, SWEEPS["short"])
+    box = winding({"box": (0, 0, WIDTH, HOLLOW)}, SWEEPS["short"])
+    assert np.asarray(skin.subframe["section"]).tolist() == ["skin", "skin"]
+    skin_area = float(np.asarray(skin.subframe["area"])[0])
+    box_area = float(np.asarray(box.subframe["area"])[0])
+    assert np.isclose(box_area, WIDTH**2 * HOLLOW * (2 - HOLLOW), rtol=1e-12)
+    # the 64-gon under-fills its circle, which is the whole of the discrepancy
+    exact = np.pi / 4 * WIDTH**2 * HOLLOW * (2 - HOLLOW)
+    assert np.isclose(skin_area, exact, rtol=2e-03)
+    assert np.isclose(box_area / skin_area, 4 / np.pi, rtol=2e-03)
 
 
 # ---------------------------------------------------------------------------

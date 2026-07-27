@@ -550,11 +550,27 @@ class PolyLine(Plot):
         """Return quadseg resolved polyline path."""
         return self._stackattr("path")
 
+    thicken: ClassVar[dict[str, str]] = {"arc": "polybow", "line": "beam"}
+    """The biot element a thickened segment is routed to, by segment kind.
+
+    An arc goes to :class:`nova.biot.polybow.PolyBow` rather than to
+    :class:`nova.biot.bow.Bow` because it is the element that can evaluate the
+    section the frame actually carries.  ``Bow`` thickens the arc into the
+    RECTANGLE its width and height bound while normalising by the section's own
+    area, so every section that does not fill its bounding box comes back too large
+    by the ratio -- 4/3 for a hexagon, 4/pi for a disc -- and no section that is not
+    a rectangle can be expressed at all.  ``Bow`` stays reachable by naming the
+    segment, which is how it serves as an independent oracle for the closed form.
+
+    A line still goes to :class:`nova.biot.beam.Beam`, which builds its prism from
+    width and height in exactly the way ``Bow`` built its rectangle and has the same
+    question open.
+    """
+
     def _to_list(self, attr: str):
         """Return segment attribute list."""
         if attr == "segment" and not self.filament:
-            thicken = {"arc": "bow", "line": "beam"}
-            return [thicken[segment[attr]] for segment in self.segments]
+            return [self.thicken[segment[attr]] for segment in self.segments]
         return [segment[attr] for segment in self.segments]
 
     @cached_property
@@ -569,12 +585,47 @@ class PolyLine(Plot):
 
     @cached_property
     def poly(self) -> list[Polygon]:
-        """Return list of polygon objects for 3D coil projected to 2d poloidal plane."""
-        from nova.geometry.volume import TriShell
+        """Return each segment's poloidal footprint as a Polygon.
+
+        Read from the sweep's own float64 corner loops rather than from the vtk
+        mesh those loops build.  VTK's points default to single precision, so a
+        corner authored at 2.97 comes back from the mesh at 2.96999979 -- 8e-09
+        relative, four orders above the closed-form arc reduction's own 3.5e-12,
+        which would peg the element reading this column at the accuracy of the one
+        it replaces.  Forcing the mesh to double precision would double every mesh
+        in the frame and fix nothing else, where the loops are already exact.
+        """
+        from nova.geometry.section import poloidal_footprint
 
         return [
-            TriShell(vtk, ahull=segment.name == "arc", alpha=None).poly
-            for vtk, segment in zip(self.vtk, self.segments)
+            Polygon(poloidal_footprint(vtk.section_loops), name="sweep")
+            for vtk in self.vtk
+        ]
+
+    def section_footprint(self, cross_section: np.ndarray) -> list[Polygon]:
+        """Return the footprint of another cross-section swept along the same path.
+
+        No mesh is built: the sweep's own frame is applied to the float64 corner
+        loop and the result projected, which is all a footprint needs.  This is how
+        the interior boundary of a hollow section reaches the frame as a section in
+        its own right, so the hole can be carried as a coupled negative-density
+        member rather than refused.
+        """
+        from nova.geometry.section import Section, poloidal_footprint
+
+        return [
+            Polygon(
+                poloidal_footprint(
+                    np.asarray(
+                        Section(np.array(cross_section, dtype=float))
+                        .sweep(segment.path, segment.binormal, self.align)
+                        .point_array,
+                        dtype=float,
+                    )
+                ),
+                name="sweep",
+            )
+            for segment in self.segments
         ]
 
     @cached_property

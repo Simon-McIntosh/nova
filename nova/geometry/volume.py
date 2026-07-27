@@ -159,7 +159,7 @@ class TriShell:
             hull = alphashape(keypoints, alpha)
             try:
                 return Polygon(hull, name="ahull")
-            except (NotImplementedError, IndexError):
+            except NotImplementedError, IndexError:
                 pass
         return Polygon(shapely.geometry.MultiPoint(poloidal).convex_hull, name="qhull")
 
@@ -354,7 +354,17 @@ class Sweep(Cell):
         if np.isclose(path[0], path[-1]).all():
             link = np.mean([section.point_array[0], section.point_array[-1]], axis=0)
             section.point_array[0] = section.point_array[-1] = link
+        loops = np.asarray(section.point_array, dtype=np.float64)
         super().__init__(section.point_array)
+        self.section_loops = loops
+        """The ``(loop, corner, 3)`` corner stack, at the precision it was built at.
+
+        The mesh above cannot serve as the geometry of record: VTK's points default
+        to ``VTK_FLOAT``, so a corner authored at 2.97 reads back 2.96999979 and
+        anything measuring the section through the mesh inherits ~1e-08 relative.
+        Keeping the transformed loops costs one array per sweep and is what
+        :func:`nova.geometry.section.poloidal_footprint` reduces to a section.
+        """
 
     def __str__(self):
         """Return volume name."""

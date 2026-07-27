@@ -20,14 +20,31 @@ else, which is what the two elements genuinely share.
 
 What the section is, and where it comes from
 --------------------------------------------
-The corners are built from the frame's own section descriptor -- its name, its
-``width`` and its ``height`` about the arc's own ``(r, z)`` -- through
-:class:`nova.geometry.polygen.PolyGen`, in the same convention ``Bow`` builds
-its rectangle from.  Not from the frame's ``poly`` column, which for a swept
-element is the projection of the 3-D volume onto the poloidal plane: its axes
-come back transposed against ``width`` and ``height``, and it is stored at
-single precision.  ``poly`` IS the section for an axisymmetric ring, which is
-why ``PolySection`` reads it and this element does not.
+The corners are the frame's ``poly`` column -- the single section of record, the
+same column :class:`nova.biot.polysection.PolySection` reads for a ring -- taken
+as its ``(r, z)`` corners with collinear runs collapsed.  Not rebuilt from the
+section DESCRIPTOR, its name and its ``width`` and ``height``, for two reasons no
+descriptor can answer.  A class that rebuilds its own section can drift from the
+one that is plotted, meshed and integrated for volume, and there is then no way to
+tell which of the two is the conductor.  And a descriptor reaches only the five
+named shapes: a free-form polygon, which is the whole capability this element
+exists for, is expressible in no ``(width, height)`` pair at all.
+
+For that to be worth reading, the column has to be exact.  It is built from the
+sweep's own float64 corner loops rather than from the vtk mesh those loops build
+(:func:`nova.geometry.section.poloidal_footprint`), because VTK's points default
+to single precision and a mesh round trip lands a corner authored at 2.97 on
+2.96999979 -- 7.9e-09 relative on the rows, four orders above this reduction's own
+3.5e-12, which would peg the element at the accuracy of the one it replaces.
+
+Hollow sections
+---------------
+A ``skin`` or ``box`` section is an annulus, which a single corner list cannot
+carry, and it is reached by superposition rather than refused: the frame inserts
+the outer boundary at current density ``+j`` and the interior boundary as a core at
+``-j``, linked, so the material between them carries ``j`` and the core cancels.
+Both members are solid sections this element already evaluates, and the frame's own
+link machinery sums the pair -- see :meth:`nova.frame.winding.Winding.insert`.
 
 Quantities are per ampere of total conductor current at uniform current density
 along the sweep, in nova's own frame convention -- the vector potential without
@@ -44,22 +61,33 @@ import numpy as np
 from nova.biot.arc import Arc, arctan2
 from nova.biot.matrix import Matrix
 from nova.biot.polygonarc import polygon_arc_greens
-from nova.geometry.polygen import PolyGen
+from nova.geometry.section import collapse_collinear
 
 
-def _distinct(points: np.ndarray) -> np.ndarray:
-    """Return a closed ring's corners with every repeat of its neighbour dropped.
+def section_corners(poly) -> np.ndarray:
+    """Return a frame polygon's ``(n, 2)`` r-z corners, ready for the reduction.
 
-    A generated section comes back as a shapely ring, so its first corner is
-    repeated at the end -- and a generator that sweeps an angle closes on a corner
-    that is its own first to within round-off rather than exactly, which leaves the
-    ring one corner longer still.  Both are edges of zero length, and the tolerance
-    is taken against the SECTION's own extent so a thin plate keeps corners a
-    coordinate-absolute one would merge.
+    The stored polygon carries its corners as ``(x, y, z)`` with the toroidal
+    coordinate at zero, closes on a repeat of its first, and -- being a projection
+    -- can carry a corner part way along a straight edge.  The reduction pays per
+    corner, and a corner is what an arc's cost tracks, so the run is collapsed here
+    rather than evaluated: a swept hexagon reaches the kernel with six corners
+    instead of the nine the projection can hand over.
     """
-    scale = max(float(np.max(np.ptp(points, axis=0))), np.finfo(float).tiny)
-    gap = np.linalg.norm(points - np.roll(points, -1, axis=0), axis=1)
-    return points[gap > 1e-9 * scale]
+    return collapse_collinear(np.asarray(poly.points, dtype=np.float64)[:, [0, 2]])
+
+
+def section_area(vertices: np.ndarray) -> float:
+    """Return the area a closed corner list encloses, by the shoelace sum.
+
+    The area the REDUCTION normalised by, measured on the same corners it was
+    handed rather than read from a column, so the two cannot disagree about which
+    polygon the per-ampere convention refers to.
+    """
+    rolled = np.roll(vertices, -1, axis=0)
+    return 0.5 * abs(
+        float(np.sum(vertices[:, 0] * rolled[:, 1] - rolled[:, 0] * vertices[:, 1]))
+    )
 
 
 @dataclass
@@ -85,22 +113,6 @@ class PolyBow(Arc, Matrix):
     rule moves the answer before it saves anything worth having.
     """
 
-    solid_sections: ClassVar[frozenset[str]] = frozenset(
-        {"disc", "ellipse", "hexagon", "rectangle", "square"}
-    )
-    """Section names this element can build from ``(width, height)``.
-
-    Every :class:`~nova.geometry.polygen.PolyGen` generator whose third and fourth
-    arguments are the section's own two dimensions, which is what the frame stores.
-    ``skin`` and ``box`` are excluded because theirs is a HOLLOWNESS factor rather
-    than a height, and because the section they describe has an interior boundary
-    that a single corner list cannot carry; ``polygon``, ``shell`` and ``outline``
-    because a swept element keeps no corner list of its own to read.  A ``disc``
-    or an ``ellipse`` is admitted and costs what its corner count implies -- the
-    generator resolves a quadrant in sixteen segments, so sixty-four corners
-    against a hexagon's six.
-    """
-
     @cached_property
     def _sweep(self) -> np.ndarray:
         """Return each source arc's end azimuth in its own local frame [rad].
@@ -114,24 +126,23 @@ class PolyBow(Arc, Matrix):
 
     @cached_property
     def _section_vertices(self) -> list[np.ndarray]:
-        """Return each source's cross-section corners as an ``(n, 2)`` r-z array."""
-        section = [PolyGen(str(name)).shape for name in self.source["section"]]
-        if unsupported := set(section) - self.solid_sections:
-            raise NotImplementedError(
-                f"cross-section {sorted(unsupported)} cannot be built from its "
-                f"width and height alone; {self.name} takes "
-                f"{sorted(self.solid_sections)}"
-            )
-        width = np.asarray(self.source["width"], dtype=float)
-        height = np.asarray(self.source["height"], dtype=float)
-        radius = np.asarray(self.rs)[0]
-        elevation = np.asarray(self.zs)[0]
+        """Return each source's cross-section corners as an ``(n, 2)`` r-z array.
+
+        The reduction works in the arc's OWN frame -- origin on the arc's plane,
+        vertical axis along the arc's -- where the ``poly`` column is in the global
+        poloidal one.  For an arc whose axis is the vertical, which is the arc for
+        which a poloidal projection IS the section, the two frames differ by one
+        translation along that axis, and the source carries both images of its own
+        start point to measure it with: :attr:`nova.biot.arc.Arc.zs` is that point's
+        local elevation and ``z1`` its global one.  The radius needs no such
+        correction -- it is measured from the same axis in both.
+        """
+        elevation = np.asarray(self.zs)[0] - np.asarray(self.source["z1"], dtype=float)
         vertices = []
-        for column, name in enumerate(section):
-            shape = PolyGen(name)(
-                radius[column], elevation[column], width[column], height[column]
-            )
-            vertices.append(_distinct(np.asarray(shape.exterior.coords, float)))
+        for column, poly in enumerate(np.asarray(self.source["poly"])):
+            corners = section_corners(poly)
+            corners[:, 1] += elevation[column]
+            vertices.append(corners)
         return vertices
 
     @cached_property
@@ -142,21 +153,35 @@ class PolyBow(Arc, Matrix):
         source and the reduction is organised by the section's corners.  Divided
         by ``mu0`` on the way out: the reduction carries Urankar eq 3a's factor
         and nova's frame convention does not, restoring it on the field alone.
+
+        Scaled from the kernel's own per-ampere convention -- uniform density over
+        the section it integrated -- to the density the FRAME's ``area`` implies,
+        which is the same convention ``Bow`` works in.  The ratio is one for a solid
+        section, whose area column is its own polygon's; it is what makes a hollow
+        section's linked pair sum, because both members then carry the annulus as
+        their density denominator and the ``-1`` factor is all the core needs.
         """
         radius = np.asarray(self.r)
         elevation = np.asarray(self.z)
         azimuth = np.asarray(self._phi)
+        area = np.asarray(self.source["area"], dtype=float)
         rows = np.empty((5,) + radius.shape)
         kernel = {} if self.nodes is None else {"nodes": self.nodes}
         for column, vertices in enumerate(self._section_vertices):
-            rows[:, :, column] = polygon_arc_greens(
-                radius[:, column],
-                elevation[:, column],
-                azimuth[:, column],
-                vertices,
-                0.0,
-                self._sweep[column],
-                **kernel,
+            rows[:, :, column] = (
+                section_area(vertices)
+                / area[column]
+                * np.stack(
+                    polygon_arc_greens(
+                        radius[:, column],
+                        elevation[:, column],
+                        azimuth[:, column],
+                        vertices,
+                        0.0,
+                        self._sweep[column],
+                        **kernel,
+                    )
+                )
             )
         return rows / self.mu_0
 

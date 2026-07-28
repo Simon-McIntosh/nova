@@ -13,7 +13,7 @@ from nova.biot.biotframe import Target
 from nova.biot.circle import Circle
 from nova.biot.greens import greens_bz_br, greens_psi, section_centroid
 from nova.biot.polygonanalytic import polygon_analytic_greens
-from nova.biot.sectionaverage import averaged_greens
+from nova.biot.sectionaverage import ORDER, averaged_greens
 from nova.frame.coilset import CoilSet
 
 
@@ -51,10 +51,11 @@ def test_the_element_uses_the_geometry_it_was_handed(coilset):
     """No offset, blend or floor anywhere between the frame and the kernel.
 
     The source ring sits at the frame's own root-mean-square radius and the target at
-    its own coordinates, bit for bit, on every pair -- including the coincident ones,
-    which is where a coincident-filament offset used to move both of them apart by a
-    fraction of the turn's own width. Any geometric nudge reintroduced for any reason
-    fails here, because it would have to change one of these four arrays.
+    its own coordinates, bit for bit, on every pair -- the coincident ones included,
+    which are the pairs a self-coupling model expressed in the geometry would have to
+    move apart by some fraction of the turn's own width. Any offset, blend or floor
+    introduced for any reason fails here, because it would have to change one of these
+    four arrays.
     """
     frame = coilset.subframe
     biot = Circle(frame, frame, reduce=[False, False])
@@ -139,7 +140,7 @@ def test_the_diagonal_is_not_the_single_integral_at_the_target_point(coilset):
 
 
 def test_a_vanishing_section_reproduces_the_point_filament(monkeypatch):
-    """The finite-section branch and the filament branch meet in the limit that joins them.
+    """The finite-section branch and the filament branch meet in the limit joining them.
 
     A section driven to nothing is a filament at its own centroid, so the two
     treatments have to agree there -- and they fold the permeability and the
@@ -252,10 +253,91 @@ def test_the_band_seams_are_the_size_the_contract_states():
     filament, single, double = at(Circle.section_band)
     assert abs(filament - single) / self_flux < 1e-03  # measured 3.0e-04
     filament, single, double = at(Circle.average_band)
-    assert abs(single - double) / self_flux < 3e-03  # measured 1.5e-03
+    seam = abs(single - double) / self_flux
+    assert seam < 3e-03  # measured 8.6e-04
+    # two-sided: the term the band carries is still growing inside it, so the band
+    # cannot be narrowed to a cheaper width without giving up more than it hands over
+    _, single, double = at(0.5 * Circle.average_band)
+    assert abs(single - double) / self_flux > 3.0 * seam  # measured 5.6x
     # and the floor both of them are heading for, twenty radii out
     filament, single, double = at(20.0)
     assert abs(filament - double) / self_flux < 1e-04  # measured 6.6e-05
+
+
+def test_the_average_band_reaches_the_pairs_whose_sections_can_meet():
+    """Two slender sections just inside two radii, at the shipped width and narrower.
+
+    Two sections of equal bounding radius stop being able to TOUCH at exactly two
+    radii of separation, and the configuration that makes the width load-bearing is a
+    pair of SLENDER sections side by side: their bounding radius is set by the long
+    direction while the gap between them is set by the short one, so they nearly
+    overlap at a separation a narrower band has already handed to the point target.
+    Two undiscretised ITER CS sections are exactly that pair, at 1.94 radii.
+
+    The band is pinned from both sides here. At the shipped width the reduced mutual
+    lands on the double integral over both sections; narrowed to 1.5 radii it misses
+    it by four orders more, which is what stops the value being lowered for cost.
+    """
+    coilset = CoilSet(dcoil=-1)
+    coilset.coil.insert(1.722, 5.313, 0.719, 2.075, nturn=554, name="CS3U", part="CS")
+    coilset.coil.insert(1.722, 3.188, 0.719, 2.075, nturn=554, name="CS2U", part="CS")
+    frame = coilset.subframe
+    upper, lower = sections(frame)
+    centre = np.array([section_centroid(upper), section_centroid(lower)])
+    radius = float(np.max(np.hypot(*(upper - centre[0]).T)))
+    separation = float(np.hypot(*(centre[0] - centre[1]))) / radius
+    assert 1.5 < separation < Circle.average_band  # measured 1.94 radii
+
+    want = 554.0**2 * averaged_greens([lower], upper)[0][0]
+
+    def mutual():
+        """Return the reduced turn-weighted mutual flux between the two sections."""
+        biot = Circle(frame, frame, turns=[True, True], reduce=[True, True])
+        return float(np.asarray(biot.compute("Psi")[0])[0, 1])
+
+    assert abs(mutual() - want) < 1e-04  # measured 8.8e-06 H
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(Circle, "average_band", 1.5)
+        assert abs(mutual() - want) > 1e-02  # measured 3.4e-02 H
+
+
+def test_a_tiling_of_sub_sections_sums_to_the_whole_section_integral(coilset):
+    """The discretisation is free once both bands cover the coil, and this is why.
+
+    A pair sum over a tiling IS the area integral split up: summing the double
+    integral over every ordered pair of sub-sections of one section reconstructs the
+    double integral over the whole of it, exactly, for a uniform current density.
+    That identity is what makes the reduced inductance of a discretised coil
+    independent of ``dcoil`` -- and it holds only where every pair takes the double
+    integral, so the bands are opened here and what is left is the quadrature.
+
+    It is also the check that ties the element to the readable statement of the
+    quantity on something other than the diagonal: 64 sub-elements interacting
+    through the shipped bands, reduced, against one call over the undivided section.
+    """
+    frame = coilset.subframe
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(Circle, "section_band", 1.0e9)
+        patch.setattr(Circle, "average_band", 1.0e9)
+        biot = Circle(frame, frame, turns=[True, True], reduce=[True, True])
+        got = np.diag(np.asarray(biot.compute("Psi")[0]))
+    whole = [
+        (3.9431, 7.5641, 0.9590, 0.9841, 248.64),
+        (1.722, 5.313, 0.719, 2.075, 554.0),
+    ]
+    for index, (major, height, width, depth, nturn) in enumerate(whole):
+        vertices = np.array(
+            [
+                [major - width / 2, height - depth / 2],
+                [major + width / 2, height - depth / 2],
+                [major + width / 2, height + depth / 2],
+                [major - width / 2, height + depth / 2],
+            ]
+        )
+        want = nturn**2 * averaged_greens([vertices], vertices, 2 * ORDER)[0][0]
+        # measured 4.5e-07 and 3.7e-06 relative; the sum over compact sub-sections is
+        # the more accurate of the two, since the undivided section carries aspect 2.9
+        assert got[index] == pytest.approx(want, rel=1e-05, abs=0)
 
 
 def test_the_flux_and_the_vector_potential_stay_one_quantity(cells):

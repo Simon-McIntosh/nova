@@ -37,6 +37,22 @@ tabulated ``GMD = 0.447049 w`` -- while carrying no shape assumption, so it is
 equally right for a slender rectangle, a hexagon and a wall-clipped cell, and it
 is defined for the field components, where a mean distance means nothing.
 
+What decides that the element evaluates that quantity correctly is neither of the
+two candidates above but a third thing: a brute-force four-dimensional quadrature
+over source section x target section, assembled from the elliptic integrals directly
+and sharing no code with the closed form or with the target-side rule. Against its
+Richardson limit the shipped rule lands within 3e-06 of the self term on a coil
+filament, 2e-07 on a plasma cell and 2e-04 on a section ten times taller than it is
+wide (:mod:`tests.test_biotsectionaverage`). That same reference settles what this
+diagonal owes a machine inductance table. On the ITER PF1 / CS3U / CS2U trio the
+exact double integral sits 4.1e-03 H below the tabulated PF1 self term and 4.7e-04 H
+below the two CS ones, while the element reproduces the exact value to a few parts
+in a hundred thousand -- so the residual against the table belongs to the table's own
+self-inductance model and not to this element. A geometric-mean-distance self term
+agrees with two of those three tabulated entries to one part in ten thousand, which
+is agreement with a METHOD carried on both sides of a comparison and is not evidence
+about either -- so closer agreement with the table is not a reason to choose a rule.
+
 A target that declares no section of its own -- a grid point, a field probe -- is a
 point, and takes the single integral. That is a property of what the target IS and
 not of where it sits, so no entry of the operator jumps as a probe crosses a
@@ -45,8 +61,8 @@ conductor boundary.
 The bands
 ---------
 Both treatments are banded on the source section's own bounding radius about its
-area centroid, and outside a band the point filament at the section's
-root-mean-square radius stands as before. Neither band closes to zero error: for a
+area centroid, and outside a band the pair is the point filament at the section's
+root-mean-square radius. Neither band closes to zero error: for a
 FULL RING the finite-section correction is set by the major radius rather than by
 the distance to the target, so a bare filament does not converge to a section at
 any standoff and both seams flatten onto a floor of order ``(a/R0)^2`` -- 1.7e-05
@@ -58,20 +74,67 @@ seam is the floor:
   Measured deviation from the double integral at the seam: 3.4e-04 of the self flux
   for a coil filament, 5.4e-05 for a plasma cell, against floors of 1.7e-05 and
   7.8e-06.
-* ``average_band`` (1.5 radii) -- the target-section average, which costs a
-  quadrature over the target section instead of one evaluation and so is the band
-  COST sets. It is placed inside a hexagonal tiling's first-neighbour separation of
-  ``sqrt(3)`` circumradii, which leaves the diagonal averaged and a plasma cell's
-  own neighbours on the single integral. What that leaves on the table, measured
-  against the double integral as a fraction of the self flux: 1.5e-03 at 1.5 radii
-  and 8.6e-04 at 2 for a coil filament, 8.8e-04 and 9.1e-05 for a plasma cell, and
-  about 3e-04 at the neighbour separation itself. Widening it to 2 radii multiplies
-  a hexagonally-tiled plasma-grid build by about seven, which is why it is not the
-  default; a caller who needs the wider band can raise it.
+* ``average_band`` (2 radii) -- the target-section average, which costs a quadrature
+  over the target section instead of a single evaluation. Two radii is where two
+  sections of equal bounding radius stop being able to TOUCH, so the band is every
+  pair whose sections can overlap or meet -- which is the configuration in which the
+  kernel's curvature over the target section is set by the source section rather than
+  by the major radius, and the only one in which the midpoint rule fails at leading
+  order. Measured deviation of the point target from the double integral, as a
+  fraction of the self flux: 8.6e-04 at the seam for a coil filament and 9.1e-05 for
+  a plasma cell, against 1.5e-03 and 8.8e-04 one half radius inside it. Two adjacent
+  slender sections are what need the band that wide, and their price is paid on the
+  MUTUAL term rather than on the self term: two undiscretised ITER CS sections sit
+  1.94 radii apart, and their reduced mutual inductance misses the exact double
+  integral over both sections by 3.4e-02 H at a 1.5 band against 8.8e-06 at 2.
+
+The cost of the wider band is a build a half longer at worst, not the sevenfold its
+pair count suggests. Measured at 1.5 radii against 2, as averaged pairs per source
+column and as assembly seconds, on both populations this element is built over:
+
+* an ITER PF and CS stack -- 4.0 to 6.3 pairs a column and 4.48 s to 5.25 s at
+  ``dcoil = 0.25`` (142 elements), 4.6 to 7.8 and 32.8 s to 34.5 s at 0.1 (866),
+  so the finer the discretisation the less the widening costs;
+* a hexagonal tiling, where the shell structure is sharpest -- 1.6 to 6.4 pairs a
+  column, the diagonal alone to the diagonal plus the first neighbour shell at
+  ``sqrt(3)`` circumradii, and 12.6 s to 18.5 s at 206 cells, 20.7 s to 32.5 s at
+  380.
+
+The pairs the wider band converts were already inside ``section_band`` and already
+paying a kernel evaluation, and the closed form holds its corner parts live across
+one call, so the extra nodes cost far less than their count.
 
 A principled error-BOUNDED cutoff remains open, exactly as
 :attr:`nova.biot.polysection.PolySection.standoff` records; these bands are placed
 on measurement, and the measurements are in :mod:`tests.test_biotcircle`.
+
+Which mechanism serves which path
+---------------------------------
+The target-side average runs only where the target frame declares a section, so the
+two lanes that build an inductance operator reach the same quantity by different
+routes and neither is a fallback for the other:
+
+* a target frame WITH sections -- an all-to-all coil matrix, where source and
+  target are one frame -- takes the double integral inside ``average_band``. Its
+  own discretisation is then free: summing the double integral over a tiling of
+  sub-sections reproduces the whole section's double integral identically, because
+  the pair sum IS the area integral split up, so the reduced value does not depend on
+  ``dcoil`` at all once both bands cover the coil.
+* a target frame WITHOUT sections -- a grid point, a field probe, and the target
+  :class:`nova.frame.polygrid.PolyTarget` builds for
+  :class:`nova.biot.inductance.Inductance` -- is a point at any distance, and the
+  target-side average is carried by that target's own SUBDIVISION instead. That is a
+  convergent substitute rather than an equivalent one, and it has to be resolved:
+  measured on the ITER PF1/CS3U pair against the same exact double integral, the
+  reduced matrix deviates by 5.7e-03, 2.2e-03, 1.2e-03 and 3.1e-04 H at 60, 134, 265
+  and 816 targets. A coarse subdivision therefore leaves the near pairs on the single
+  integral with the whole target-side average missing.
+
+Neither lane covers a tiled plasma grid, whose cells default to
+``segment="polysection"``: exact on the source side for every pair and with no band,
+but evaluated at the target cell's centre, so the plasma self term still carries the
+whole point-target gap -- measured at +5.7% of the cell's own flux in
+:mod:`benchmarks.plasma_coupling_accuracy`.
 
 The corner-level convention is NOT restated here. It is contracted in
 :mod:`nova.biot.constants` -- ``gamma`` held at one where a target is level with a
@@ -144,13 +207,15 @@ class Circle(Constants, Matrix):
     See the module docstring for the seam this leaves and what sets the value.
     """
 
-    average_band: ClassVar[float] = 1.5
+    average_band: ClassVar[float] = 2.0
     """Source-section radii within which the target's own section is averaged over.
 
-    Applies only where the target frame declares a section; a bare point target is
-    a point at any distance. Never wider than ``section_band``: averaging a
-    filament source over a target section would mix a treatment the band edge has
-    already left behind.
+    Two radii is the separation at which two sections of equal bounding radius stop
+    being able to touch, so the band is every pair whose sections can overlap or meet.
+    Applies only where the target frame declares a section; a bare point target is a
+    point at any distance. Never wider than ``section_band``: averaging a filament
+    source over a target section would mix a treatment the band edge has already left
+    behind. See the module docstring for what the seam costs.
     """
 
     def __post_init__(self):

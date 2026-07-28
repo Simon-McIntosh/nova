@@ -27,8 +27,17 @@ pinning the inner fan's degenerate vertex at the TARGET POINT, so the radial
 Jacobian of the polar decomposition cancels the kernel's logarithm exactly and what
 is left is ``t log t``, resolved to round-off by a mesh graded geometrically towards
 the origin. It converges algebraically in the rule order rather than spectrally,
-because the outer integrand's second derivatives are only bounded, so it is used
-with a Richardson limit taken over the last three rungs of its own ladder.
+because the outer integrand's second derivatives are only bounded, so it is read at
+a Richardson limit over three rungs of its own ladder.
+
+Those limits are RECORDED here, not re-derived. A ladder to the orders the limit
+needs is minutes of four-dimensional quadrature per section, and it returns the same
+numbers every time -- they are constants of fixed geometry. Re-deriving them on every
+run would make this file a benchmark that happens to assert. The ladder itself lives
+in :mod:`benchmarks.section_average_oracle`, which prints every rung and is what to
+run when the rule changes, when a section changes, or when a constant is doubted.
+Each recorded constant is guarded by the fingerprint of the polygon it belongs to, so
+a changed section fails rather than quietly comparing against the wrong number.
 """
 
 import numpy as np
@@ -143,6 +152,12 @@ def brute_force(target, source, order):
     The inner fan is pinned at the target point itself, which is what makes the
     coincident case ordinary; the outer fan is pinned at the target's own centroid,
     where the integrand is smooth.
+
+    Minutes per section at the orders its limit needs, so nothing here calls it: the
+    limits it produces are recorded below as constants and re-derived on demand by
+    :mod:`benchmarks.section_average_oracle`, which is what imports this. It stays
+    beside the primitives it is built from because a second copy of a reference
+    implementation would drift from this one, and not drifting is its whole value.
     """
     radial, angular = graded_interval(order), unit_interval(2 * order)
     node, weight = signed_fan(target, section_centroid(target), radial, angular)
@@ -155,16 +170,19 @@ def brute_force(target, source, order):
     return float(weight @ value / weight.sum())
 
 
-def brute_force_limit(target, source, orders=(10, 12, 14)):
-    """Return the oracle's Richardson limit over three rungs of its own ladder.
+def section_fingerprint(vertices):
+    """Return ``(area, centroid r, centroid z)`` -- what a recorded limit belongs to.
 
-    The ladder converges algebraically, so the last three values fix a geometric
-    tail and the limit is the sum of it. Reported deviations are against this limit
-    rather than against any single rung.
+    A self-flux limit is a constant of ONE polygon. Recording the number without
+    recording what it is a number for is how a stored reference rots: change a
+    section definition and every comparison quietly moves to the wrong constant while
+    still passing. This triple is asserted beside each recorded limit so that change
+    fails instead.
     """
-    value = [brute_force(target, source, order) for order in orders]
-    ratio = (value[1] - value[0]) / (value[2] - value[1])
-    return value[2] + (value[2] - value[1]) / (ratio - 1.0)
+    corner = np.asarray(vertices, dtype=float)
+    rolled = np.roll(corner, -1, axis=0)
+    cross = corner[:, 0] * rolled[:, 1] - rolled[:, 0] * corner[:, 1]
+    return (0.5 * float(cross.sum()), *section_centroid(corner))
 
 
 SECTIONS = {
@@ -175,6 +193,60 @@ SECTIONS = {
         [[6.10, 0.42], [6.24, 0.42], [6.27, 0.50], [6.18, 0.57], [6.10, 0.53]]
     ),
 }
+
+BRUTE_FORCE_SELF_FLUX = {
+    "coil filament": 1.819748608e-05,
+    "plasma cell": 3.767926648e-05,
+    "slender": 5.903458509e-06,
+    "wall-clipped": 3.630384886e-05,
+}
+"""Richardson limit of the oracle ladder on each section's own self term [Wb/A].
+
+Orders 10, 12 and 14 of the four-dimensional quadrature described above, extrapolated
+over the last three rungs. The ladders and their steps::
+
+    coil filament  1.819753105e-05  1.819750928e-05  1.819749805e-05  ratio 1.94
+    plasma cell    3.767928771e-05  3.767927711e-05  3.767927180e-05  ratio 2.00
+    slender        5.903321680e-06  5.903422636e-06  5.903449104e-06  ratio 3.81
+    wall-clipped   3.630388938e-05  3.630386955e-05  3.630385943e-05  ratio 1.96
+
+The RATIO is the extrapolation's conditioning -- the first step over the second. A
+ladder inside its asymptotic regime roughly halves its step, so the tail it implies
+is about the size of the last step; a ratio near one divides by almost nothing and
+extrapolates a rung that has not begun to converge. Everything recorded here sits
+between 1.86 and 3.81. Re-derive with ``python -m benchmarks.section_average_oracle``.
+"""
+
+SECTION_FINGERPRINT = {
+    "coil filament": (0.0589908000, 3.9431000000, 7.5641000000),
+    "plasma cell": (0.0146141787, 6.2000000000, 0.5000000000),
+    "slender": (0.0250000000, 1.7220000000, 5.3130000000),
+    "wall-clipped": (0.0195500000, 6.1763086104, 0.4845950554),
+}
+"""``(area, centroid r, centroid z)`` each recorded limit above was taken on."""
+
+ASPECT_MAJOR = 1.722
+"""Major radius the aspect sweep holds fixed [m]."""
+
+ASPECT_AREA = 0.719 * 2.075
+"""Section area the aspect sweep holds fixed, so only the SHAPE varies [m^2]."""
+
+ASPECT_SELF_FLUX = {
+    0.5: 2.701725429e-06,
+    1.0: 2.807142095e-06,
+    2.0: 2.713280798e-06,
+    2.89: 2.589510367e-06,
+    10.0: 1.954746276e-06,
+}
+"""Oracle limit against height over width, at fixed area and major radius [Wb/A].
+
+2.89 is the ITER CS section itself, which is the aspect the coil element meets. Step
+ratios 1.92, 1.94, 1.92, 1.86, 3.81 -- all well conditioned. Aspect 5 is swept by the
+benchmark and deliberately NOT recorded: its ladder gives 2.3369024e-06, 2.3368939e-06
+and 2.3368858e-06, a step ratio of 1.03, so the extrapolation divides by 0.03 and
+amplifies the last step thirtyfold. That is a rung outside its asymptotic regime, not
+a limit, and nothing here asserts against it.
+"""
 
 
 @pytest.mark.parametrize("name", list(SECTIONS))
@@ -303,7 +375,6 @@ def test_the_coincident_integrand_is_bounded_on_the_closed_section():
     assert np.argmax(value) == 0  # the centroid links the most flux
 
 
-@pytest.mark.slow
 @pytest.mark.parametrize("name", list(SECTIONS))
 def test_the_shipped_order_holds_the_self_term_against_the_brute_force(name):
     """The rule's ORDER, measured against a reference built from neither evaluation.
@@ -314,9 +385,16 @@ def test_the_shipped_order_holds_the_self_term_against_the_brute_force(name):
     thousand of it on every section the element meets, and doubling the order closes
     that to a couple of parts in a million -- which is the residual of the ORACLE's
     own Richardson limit, not of the rule.
+
+    The limit is read from :data:`BRUTE_FORCE_SELF_FLUX` and the section it was taken
+    on is checked first, so this asserts the same figures the ladder produced without
+    paying for the ladder.
     """
     vertices = SECTIONS[name]
-    limit = brute_force_limit(vertices, vertices)
+    assert section_fingerprint(vertices) == pytest.approx(
+        SECTION_FINGERPRINT[name], rel=1e-09, abs=1e-12
+    ), "the section moved; re-derive its limit with benchmarks.section_average_oracle"
+    limit = BRUTE_FORCE_SELF_FLUX[name]
     shipped = averaged_greens([vertices], vertices, ORDER)[0][0]
     doubled = averaged_greens([vertices], vertices, 2 * ORDER)[0][0]
     # measured at the shipped order: 2.7e-06 coil filament, 2.0e-07 plasma cell,
@@ -326,7 +404,6 @@ def test_the_shipped_order_holds_the_self_term_against_the_brute_force(name):
     assert abs(doubled / limit - 1.0) < 1e-04
 
 
-@pytest.mark.slow
 def test_the_rule_loses_order_to_the_section_aspect_ratio():
     """The diagnostic that separates a quadrature error from a reference's model.
 
@@ -336,24 +413,27 @@ def test_the_rule_loses_order_to_the_section_aspect_ratio():
     deviation belongs to the rule: an error that grows with aspect is the rule's order,
     and one that does not is a property of whatever it is being compared against.
 
-    Measured against the oracle at fixed area: 8e-06 flat from aspect 0.5 to 2,
-    3e-05 at 2.9, 2.6e-04 at 5 and 6e-04 at 10 -- so a disagreement at the
-    part-in-a-thousand level with anything else cannot be blamed on this rule for any
-    section the element meets.
+    Measured against the oracle at fixed area: 8e-06 flat from aspect 0.5 to 2, 2.9e-05
+    at the ITER CS section's own 2.89, and 6.0e-04 at aspect 10 -- so a disagreement at
+    the part-in-a-thousand level with anything else cannot be blamed on this rule for
+    any section the element meets. The monotone chain is asserted from aspect 2 up,
+    which is the direction the claim needs; below 2 the rule is at its floor and the
+    three values there are within a few parts in a million of each other.
     """
-    major, area = 1.722, 0.719 * 2.075
     error = {}
-    for aspect in (0.5, 1.0, 2.0, 5.0, 10.0):
-        width = np.sqrt(area / aspect)
-        vertices = rectangle(major, 0.0, width, aspect * width)
-        limit = brute_force_limit(vertices, vertices)
+    for aspect, limit in ASPECT_SELF_FLUX.items():
+        width = np.sqrt(ASPECT_AREA / aspect)
+        vertices = rectangle(ASPECT_MAJOR, 0.0, width, aspect * width)
+        assert section_fingerprint(vertices) == pytest.approx(
+            (ASPECT_AREA, ASPECT_MAJOR, 0.0), rel=1e-09, abs=1e-12
+        ), aspect
         error[aspect] = abs(
             averaged_greens([vertices], vertices, ORDER)[0][0] / limit - 1.0
         )
-    assert error[1.0] < 3e-05
-    assert error[10.0] > 10.0 * error[1.0]
-    assert error[10.0] > error[5.0] > error[2.0]
-    assert error[10.0] < 1e-03
+    assert error[1.0] < 3e-05  # measured 7.8e-06
+    assert error[10.0] > 10.0 * error[1.0]  # measured 77x
+    assert error[10.0] > error[2.89] > error[2.0]  # 6.0e-04, 2.9e-05, 9.6e-06
+    assert error[10.0] < 1e-03  # measured 6.0e-04
 
 
 @pytest.mark.parametrize("aspect", [0.2, 0.05, 0.01, 0.005])

@@ -49,9 +49,12 @@
           itself fails (below)</td></tr>
       <tr><td>PolyBow large-radius limit measured, not asserted</td>
           <td>✓ done</td>
-          <td>closes as 1/R to ~1e-5 relative at R ≈ 10³–10⁴ m (fixed 0.5 m arc
-          length), then the arc kernel's own conditioning floors the comparison —
-          doubling as an independent check on the arc evaluation</td></tr>
+          <td>closes first order in 1/R — 7.9e-3 at R=10, 8.0e-4 at 10², 8.0e-5 at
+          10³ on the field rows, worst row ~1e-4 at R ≈ 10³ (fixed 0.5 m arc length) —
+          then the comparison stops measuring the limit and starts measuring the ARC
+          kernel's own conditioning (A_phi bottoms at 1.2e-5 near 10³ and degrades
+          past 10⁵), an independent measurement of where the arc evaluation loses
+          precision</td></tr>
       <tr><td>Cost per pair, sun_debug node, fresh process, median of 3</td>
           <td>✓ measured</td>
           <td>reduction 1.39 µs/pair rectangle / 1.80 hexagon vs Beam's rows at
@@ -122,8 +125,10 @@
          alt="Beam parity residual per row and the PolyBow large-radius convergence closing as one over radius until the arc kernel's conditioning floors it"
          style="max-width:100%">
     <figcaption>Left: rectangle parity with Beam at 1e-14. Right: the swept element
-    straightens onto the prism as 1/R; past R ≈ 10⁴ m the finite-arc kernel's own
-    conditioning, not the prism, sets the floor.</figcaption>
+    straightens onto the prism first order in 1/R (a decade per decade, asserted);
+    past R ≈ 10³–10⁴ m the finite-arc kernel's own conditioning, not the prism, sets
+    the floor — its rows are differences of quantities of order the squared major
+    radius.</figcaption>
   </figure>
   <figure>
     <img src="/nova/figures/polybeam-prism-section/cost.svg"

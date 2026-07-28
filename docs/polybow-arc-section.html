@@ -17,8 +17,8 @@
   <title>PolyBow — polygon cross-section arc segment | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-28">
-<meta name="plan-version" content="9">
+<meta name="plan-modified" content="2026-07-29">
+<meta name="plan-version" content="10">
 <meta name="plan-impl" content="0.8">
 </head>
 <body>
@@ -1192,7 +1192,7 @@ Done-when
     </article>
 <article class="r-fu" data-id="f-pbow-10" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28T09:10:00+00:00" data-recommends-skill="/reckon-ship polybow-arc-section" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">The incomplete third kind disagrees with its own traced form by five decades at a tiny pole over a tiny complement</h4>
-    <div class="r-fu-body"><p><code>tests/test_biotincompleteelliptic.py::test_the_third_kind_traces_and_agrees_to_a_few_ulp</code> FAILS on develop and has been failing for some time: host numpy against the jit-compiled kernel gives <strong>1.2005e-09 relative against a 1e-14 gate</strong>, at the pair <code>pole = 1e-12, complement = 1e-300</code> (the first entry of the test's two arrays, which pair elementwise). Confirmed PRE-EXISTING &mdash; it fails at 23f055bc too, and neither the test nor <code>nova/biot/incompleteelliptic.py</code> appears in the range that landed the rectangle-kernel and amplitude-fold fixes, so neither caused it. It was unowned until now.</p><p><strong>Why it matters more than it did when it started failing.</strong> The element tier's conditioning repair routes <code>Constants</code> &mdash; and therefore <code>Circle</code> and <code>Arc</code>, which <code>solve.py</code> dispatches every coil, plasma and passive row through &mdash; onto <code>incomplete_pole</code> for the incomplete third kind, handing it poles and complements formed as exact geometric complements. Those are SMALL by construction near a source corner plane (the pre-repair measurements had the far characteristic's complement down in the 1e-13 range and below). So the shipped operator's JAX path is about to depend on precisely the corner where host and device disagree. This is a parity failure, not a host accuracy failure, so the numpy path is unaffected &mdash; but the device path is what the tiled assembly and the batch tier use.</p></div>
+    <div class="r-fu-body"><p><code>tests/test_biotincompleteelliptic.py::test_the_third_kind_traces_and_agrees_to_a_few_ulp</code> FAILS on develop and has been failing for some time: host numpy against the jit-compiled kernel gives <strong>1.2005e-09 relative against a 1e-14 gate</strong>, at the pair <code>pole = 1e-12, complement = 1e-300</code> (the first entry of the test's two arrays, which pair elementwise). Confirmed PRE-EXISTING — it fails at 23f055bc too, and neither the test nor <code>nova/biot/incompleteelliptic.py</code> appears in the range that landed the rectangle-kernel and amplitude-fold fixes, so neither caused it. It was unowned until now.</p><p><strong>Why it matters more than it did when it started failing.</strong> The element tier's conditioning repair routes <code>Constants</code> — and therefore <code>Circle</code> and <code>Arc</code>, which <code>solve.py</code> dispatches every coil, plasma and passive row through — onto <code>incomplete_pole</code> for the incomplete third kind, handing it poles and complements formed as exact geometric complements. Those are SMALL by construction near a source corner plane (the pre-repair measurements had the far characteristic's complement down in the 1e-13 range and below). So the shipped operator's JAX path is about to depend on precisely the corner where host and device disagree. This is a parity failure, not a host accuracy failure, so the numpy path is unaffected — but the device path is what the tiled assembly and the batch tier use.</p></div>
     <pre class="r-fu-prompt">Project: nova
 Plan:    polybow-arc-section (http://127.0.0.1:8765/nova/polybow-arc-section.html)
 Section: host/device parity of the incomplete third kind
@@ -1278,6 +1278,41 @@ Done-when
   4. A verdict on whether production geometry reaches the failing corner through the
      element tier&#x27;s new complement-native callers.
   5. Followup written; this followup resolved.</pre>
+    </article>
+<article class="r-fu" data-id="f-pbow-11" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-29T01:35:00+00:00" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Two accuracy pins fail on the develop tip — recalibrate on evidence, never by widening</h4>
+    <div class="r-fu-body"><p>Found while validating an unrelated merge: the fast lane on develop carries two failing measured-accuracy pins. (1) <code>test_biotpolybow.py::test_a_free_form_polygon_section_reaches_the_kernel</code> — the framed element vs bare-kernel gate reads a DETERMINISTIC 1.1330082227975509e-11 (bit-identical on a login node and a sun_debug node) against its 1e-11 gate, where 1.6e-12 was measured at authoring; every row is elevated 3–11e-12 (worst A_phi), suggesting the poly-column corners or the frame route moved slightly rather than one term breaking. (2) <code>test_biotincompleteelliptic.py::test_the_gaps_taken_by_subtraction_are_what_the_carried_ones_repair</code> — HOST-SENSITIVE: fails on login node 98dci4-srv-1006 (the strayed variant evaluates at 1.39e-15, below its 1e-11 lower bound — the naive route no longer strays there) and PASSES on a sun_debug node; the carried-gap repair appears to have healed the naive route on some libm paths.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    polybow-arc-section
+Section: post-landing test-pin recalibration
+Tier:    opus
+
+Context
+  Two measured-accuracy pins fail on develop tip (present at ffae8b5a, before the
+  prism element merge — confirmed by running both at that commit).
+
+  1) tests/test_biotpolybow.py:307 — worst_overall(framed PolyBow, bare
+     polygon_arc_greens on section_corners(poly)) = 1.1330082227975509e-11 vs gate
+     1e-11 (authored measurement 1.6e-12). Deterministic: bit-identical on two
+     different hosts. All five rows elevated (A_r 7.1e-12, A_phi 1.13e-11, B_r
+     3.2e-12, B_phi 8.4e-12, B_z 5.4e-12) — a broad drift, not a broken term.
+     Establish WHAT moved since the authored 1.6e-12 (the poly column&#x27;s corners,
+     the frame route, or the reference kernel — the ring-diagonal merge 88c1cec6
+     touched shared reduction machinery) and recalibrate or fix on that evidence.
+     Do NOT widen the tolerance to pass.
+
+  2) tests/test_biotincompleteelliptic.py:730 — asserts the SUBTRACTED route
+     strays (1e-11 &lt; err &lt; 1e-7, authored 1.2e-09). On login node 98dci4-srv-1006
+     the strayed variant evaluates at 1.39e-15 (test fails: premise gone); on a
+     sun_debug node it strays as authored (test passes). The Carlson-gap fix
+     (66bf65fb) appears to repair the naive route on some hosts&#x27; libm paths. The
+     pin needs either a host-independent construction of the strayed case or a
+     restatement of what it guards.
+
+Done-when
+  1. Both tests green on BOTH a login node and a sun_debug node, with the cause
+     (not just the recalibration) stated in the commit message.
+  2. No tolerance widened without the mechanism that justifies it.</pre>
     </article>
 </section>
 

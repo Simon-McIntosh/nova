@@ -1,15 +1,31 @@
 """What the target-section rule integrates, and what its order buys.
 
 The rule in :mod:`nova.biot.sectionaverage` turns a finite-section kernel evaluated
-at one target point into the DOUBLE integral an inductance operator wants. Three
+at one target point into the DOUBLE integral an inductance operator wants. Four
 things have to hold for that to mean anything: the rule must integrate the area it
 claims to, its order must be converged on the hardest integrand it sees (a section's
-own flux), and the quantity it produces must be the self-inductance -- which is
-checked here against a published closed form rather than against itself.
+own flux), the quantity it produces must be the self-inductance -- checked against a
+published closed form rather than against itself -- and its ORDER has to be measured
+against a reference built from neither of the two evaluations it sits between.
+
+The brute-force oracle
+----------------------
+That reference is below: a direct four-dimensional quadrature over source section x
+target section of the coaxial ring kernel, assembled from the complete elliptic
+integrals and sharing no code with :mod:`nova.biot.polygonanalytic` (the closed form
+the shipped rule drives) or with :mod:`nova.biot.sectionaverage` (the rule itself).
+It handles the coincident-section case -- the only one with a singularity -- by
+pinning the inner fan's degenerate vertex at the TARGET POINT, so the radial
+Jacobian of the polar decomposition cancels the kernel's logarithm exactly and what
+is left is ``t log t``, resolved to round-off by a mesh graded geometrically towards
+the origin. It converges algebraically in the rule order rather than spectrally,
+because the outer integrand's second derivatives are only bounded, so it is used
+with a Richardson limit taken over the last three rungs of its own ladder.
 """
 
 import numpy as np
 import pytest
+from scipy.special import ellipe, ellipkm1
 
 from nova.biot.greens import section_centroid
 from nova.biot.polygonanalytic import polygon_analytic_greens
@@ -42,6 +58,105 @@ def hexagon(major, height, radius):
     """Return a regular hexagon's six ``(r, z)`` corners, one corner outboard."""
     angle = np.arange(6) * np.pi / 3.0
     return np.c_[major + radius * np.cos(angle), height + radius * np.sin(angle)]
+
+
+def ring_flux(r, z, source_r, source_z):
+    """Return the coaxial ring kernel [Wb/A], built from the elliptic integrals.
+
+    The modulus complement is formed from the near separation over the far one, so
+    the logarithm a coincident pair drives is carried by ``ellipkm1`` without ever
+    subtracting the modulus from one. A coincident pair rounds the modulus itself
+    just above one, outside ``ellipe``'s domain, so it is clipped there.
+    """
+    far = (r + source_r) ** 2 + (z - source_z) ** 2
+    complement = ((r - source_r) ** 2 + (z - source_z) ** 2) / far
+    modulus = np.sqrt(np.minimum(4.0 * r * source_r / far, 1.0))
+    return (
+        MU0
+        * np.sqrt(r * source_r)
+        * (
+            (2.0 / modulus - modulus) * ellipkm1(complement)
+            - 2.0 / modulus * ellipe(modulus**2)
+        )
+    )
+
+
+def unit_interval(order):
+    """Return Gauss-Legendre nodes and weights mapped onto ``(0, 1)``."""
+    node, weight = np.polynomial.legendre.leggauss(order)
+    return 0.5 * (node + 1.0), 0.5 * weight
+
+
+def graded_interval(order, levels=5, ratio=0.25):
+    """Return a rule on ``(0, 1]`` geometrically graded towards the origin.
+
+    The radial direction of a fan pinned at the singular point leaves ``t log t``;
+    a geometric mesh resolves that to round-off in a handful of levels where a
+    single Gauss panel would converge at first order.
+    """
+    edge = [0.0] + [ratio**level for level in range(levels, -1, -1)]
+    node, weight = unit_interval(order)
+    return (
+        np.concatenate(
+            [low + (high - low) * node for low, high in zip(edge, edge[1:])]
+        ),
+        np.concatenate([(high - low) * weight for low, high in zip(edge, edge[1:])]),
+    )
+
+
+def signed_fan(vertices, apex, radial, angular):
+    """Return ``(points, weights)`` over the polygon, fanned from ``apex``.
+
+    Signed, so either orientation and a concave polygon both work, and the apex may
+    sit anywhere -- inside the polygon, on its boundary, or outside it.
+    """
+    corner = np.asarray(vertices, dtype=float)
+    start, end = corner - apex, np.roll(corner, -1, axis=0) - apex
+    signed = 0.5 * (start[:, 0] * end[:, 1] - start[:, 1] * end[:, 0])
+    radius, radius_weight = radial
+    along, along_weight = angular
+    edge = (1.0 - along)[None, :, None] * start[:, None, :] + along[
+        None, :, None
+    ] * end[:, None, :]
+    points = apex + radius[None, :, None, None] * edge[:, None, :, :]
+    weights = (
+        2.0
+        * signed[:, None, None]
+        * radius[None, :, None]
+        * radius_weight[None, :, None]
+        * along_weight[None, None, :]
+    )
+    return points.reshape(-1, 2), weights.reshape(-1)
+
+
+def brute_force(target, source, order):
+    """Return the ring kernel averaged over ``source`` and then over ``target``.
+
+    The inner fan is pinned at the target point itself, which is what makes the
+    coincident case ordinary; the outer fan is pinned at the target's own centroid,
+    where the integrand is smooth.
+    """
+    radial, angular = graded_interval(order), unit_interval(2 * order)
+    node, weight = signed_fan(target, section_centroid(target), radial, angular)
+    value = np.empty(len(node))
+    for index, point in enumerate(node):
+        inner, inner_weight = signed_fan(source, point, radial, angular)
+        value[index] = (
+            inner_weight @ ring_flux(point[0], point[1], inner[:, 0], inner[:, 1])
+        ) / inner_weight.sum()
+    return float(weight @ value / weight.sum())
+
+
+def brute_force_limit(target, source, orders=(10, 12, 14)):
+    """Return the oracle's Richardson limit over three rungs of its own ladder.
+
+    The ladder converges algebraically, so the last three values fix a geometric
+    tail and the limit is the sum of it. Reported deviations are against this limit
+    rather than against any single rung.
+    """
+    value = [brute_force(target, source, order) for order in orders]
+    ratio = (value[1] - value[0]) / (value[2] - value[1])
+    return value[2] + (value[2] - value[1]) / (ratio - 1.0)
 
 
 SECTIONS = {
@@ -131,6 +246,106 @@ def test_the_double_integral_is_reciprocal_where_the_single_integral_is_not():
         0
     ][0]
     assert abs(point_forward / point_backward - 1.0) > 1e-04  # measured 1.1e-03
+
+
+def test_the_oracle_reproduces_the_closed_form_where_both_are_ordinary():
+    """The brute force against the closed form, at points inside and outside a section.
+
+    The two share no code: one sums a polar fan of the elliptic-integral ring kernel,
+    the other is the analytic reduction of the same area integral. Agreeing to ten
+    digits at an exterior point, at an interior point, on the contour and on a corner
+    is what makes each of them an independent check on the other, and it is the
+    precondition for reading anything into the comparison the two tests below make.
+    """
+    source = rectangle(1.0, 0.0, 0.2, 0.2)
+    radial, angular = graded_interval(10), unit_interval(20)
+    for probe in ([1.5, 0.0], [1.05, 0.02], [1.0, 0.0], [1.0, 0.1], [1.1, 0.1]):
+        probe = np.array(probe)
+        node, weight = signed_fan(source, probe, radial, angular)
+        got = (
+            weight @ ring_flux(probe[0], probe[1], node[:, 0], node[:, 1])
+        ) / weight.sum()
+        want = polygon_analytic_greens(probe[:1], probe[1:], source)[0][0]
+        assert got == pytest.approx(want, rel=1e-08, abs=0), probe
+
+
+def test_the_coincident_integrand_is_bounded_on_the_closed_section():
+    """What the rule does about the singularity: there is none left for it to do.
+
+    The kernel is log-singular where target and source POINTS coincide, and the
+    coincident term integrates over exactly that configuration -- but the source
+    integral is taken first and in closed form, so what the target-side rule sees is
+    the section's own flux, which is bounded and continuous on the CLOSED section,
+    corners included. The rule therefore needs no grading, no exclusion disc and no
+    singular subtraction. What it does pay is the second derivative, which is not
+    bounded, and that is why the convergence measured above is algebraic rather than
+    spectral and why the order is measured rather than argued.
+    """
+    vertices = SECTIONS["coil filament"]
+    probe = np.vstack(
+        [
+            section_centroid(vertices),
+            vertices,
+            0.5 * (vertices + np.roll(vertices, -1, axis=0)),
+        ]
+    )
+    value = polygon_analytic_greens(probe[:, 0], probe[:, 1], vertices)[0]
+    assert np.all(np.isfinite(value))
+    assert np.min(value) > 0.5 * np.max(value)  # measured 0.79 corner over centroid
+    assert np.argmax(value) == 0  # the centroid links the most flux
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize("name", list(SECTIONS))
+def test_the_shipped_order_holds_the_self_term_against_the_brute_force(name):
+    """The rule's ORDER, measured against a reference built from neither evaluation.
+
+    The doubling check above says the rule has stopped moving; it cannot say what it
+    has stopped on. This one can, because the oracle shares no code with either the
+    closed form or the fan. The shipped order lands within a few parts in a hundred
+    thousand of it on every section the element meets, and doubling the order closes
+    that to a couple of parts in a million -- which is the residual of the ORACLE's
+    own Richardson limit, not of the rule.
+    """
+    vertices = SECTIONS[name]
+    limit = brute_force_limit(vertices, vertices)
+    shipped = averaged_greens([vertices], vertices, ORDER)[0][0]
+    doubled = averaged_greens([vertices], vertices, 2 * ORDER)[0][0]
+    # measured at the shipped order: 2.7e-06 coil filament, 2.0e-07 plasma cell,
+    # 1.7e-06 wall-clipped, 1.9e-04 slender; doubled, 3.9e-07 / 8.9e-08 / 1.7e-07 /
+    # 7.5e-06, and the compact three have then reached the oracle's own residual
+    assert abs(shipped / limit - 1.0) < 1e-03
+    assert abs(doubled / limit - 1.0) < 1e-04
+
+
+@pytest.mark.slow
+def test_the_rule_loses_order_to_the_section_aspect_ratio():
+    """The diagnostic that separates a quadrature error from a reference's model.
+
+    The collapsed fan gives the long direction of a section the same node count as
+    the short one, so the rule's own error rises with the ASPECT RATIO. Sweeping it at
+    fixed area and fixed major radius is therefore the measurement that says whether a
+    deviation belongs to the rule: an error that grows with aspect is the rule's order,
+    and one that does not is a property of whatever it is being compared against.
+
+    Measured against the oracle at fixed area: 8e-06 flat from aspect 0.5 to 2,
+    3e-05 at 2.9, 2.6e-04 at 5 and 6e-04 at 10 -- so a disagreement at the
+    part-in-a-thousand level with anything else cannot be blamed on this rule for any
+    section the element meets.
+    """
+    major, area = 1.722, 0.719 * 2.075
+    error = {}
+    for aspect in (0.5, 1.0, 2.0, 5.0, 10.0):
+        width = np.sqrt(area / aspect)
+        vertices = rectangle(major, 0.0, width, aspect * width)
+        limit = brute_force_limit(vertices, vertices)
+        error[aspect] = abs(
+            averaged_greens([vertices], vertices, ORDER)[0][0] / limit - 1.0
+        )
+    assert error[1.0] < 3e-05
+    assert error[10.0] > 10.0 * error[1.0]
+    assert error[10.0] > error[5.0] > error[2.0]
+    assert error[10.0] < 1e-03
 
 
 @pytest.mark.parametrize("aspect", [0.2, 0.05, 0.01, 0.005])

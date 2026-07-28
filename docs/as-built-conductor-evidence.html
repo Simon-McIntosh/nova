@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="as-built-conductor-evidence">
+  <meta name="plan-title" content="As-built conductor evidence: the prism, the section, and the wound ladder">
+  <meta name="plan-summary" content="One night's evidence across three landings: the polygon-section prism element in closed form, the CS cross-section decoded to exactly half its documented radius, and the wound-filament ladder that attributes 82% of the field coil's inductance gap to as-built geometry while exposing a solenoid outline-revision conflict">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-modified" content="2026-07-29">
+  <title>As-built conductor evidence | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>As-built conductor evidence: the prism, the section, and the wound ladder</h1>
+  <p>2026-07-29 · consolidating three landings:
+     <a href="/nova/polybeam-prism-section.html">polybeam-prism-section</a> (shipped whole),
+     and <a href="/nova/coil-conductor-fidelity.html">coil-conductor-fidelity</a>'s
+     CS-section reconciliation and wound-filament comparison (impl 0.5).
+     Develop: <code>513f22b7</code> (prism) · <code>9eac0631</code> (routing) ·
+     <code>b92d2c88</code> (wound ladder).</p>
+
+  <h2>Conclusions, in the order they matter</h2>
+  <ol>
+    <li><strong>The ITER field coil's "unexplained" self-inductance gap is mostly
+    its as-built geometry, and is not a turn count.</strong> PF1's centreline
+    measures 248.926 ± 0.03 turns (method validated on the six CS modules'
+    undisputed 554, reproduced to +0.03), ruling out the 249.36 the gap would
+    require. The attribution ladder — everything converged, nothing tuned — closes
+    82 % of the +4.14e-03 H gap: measured turn count +1.62e-03, as-built outline
+    and turn positions +2.71e-03, the true 3-D path −9.25e-04, leaving
+    <strong>+7.30e-04 H</strong>, which is the granularity scale the earlier
+    winding study measured (+6.7e-04) and exactly what the finite-section stage
+    now tests. The PF1–CS2U mutual agrees to 1.5e-06.
+    <a href="archive/coil-conductor-fidelity-wound-filament-landed.html">Record.</a></li>
+
+    <li><strong>The solenoid reference and the solenoid centreline file disagree
+    about where the coil is.</strong> The machine table's CS values match the
+    SHIPPED outline revision (granularity-scale gap of +5.0e-04), while the
+    111004/1 centreline packs sit 202 mm higher and 19 mm inside — on the OLDER
+    itergeom revision (1.687, 5.464, 0.740 × 2.093; confirmed independently by
+    the 14-layer histogram) — worth −2.14e-02 H, forty times the winding effect.
+    Until this provenance conflict is resolved upstream, no solenoid winding
+    effect is readable from the centreline file.</li>
+
+    <li><strong>The CS entry's cross-section stores exactly half its radius.</strong>
+    The nine-point section convention is a circle of radius
+    <code>hypot(delta_r, delta_z)</code> in a possibly tilted plane — exact to
+    10⁻¹⁴ mm on all 21 conductors across three files. PF stores 17.500 mm
+    (Ø35 cable space, correct); CS stores exactly 8.150 mm where the documented
+    cable space is Ø32.6 mm (radius 16.30): a diameter→radius halving applied to
+    an already-radius value. For modelling, the CS section is Ø32.6 mm.
+    <a href="archive/coil-conductor-fidelity-cs-section-landed.html">Record.</a></li>
+
+    <li><strong>nova's element grid is complete on the polygon column.</strong>
+    The prism (<code>PolyBeam</code>) couples a straight segment through an
+    arbitrary polygon section in closed form — arsinh and arctan only, one
+    expression covering inside, boundary and outside with no inside test, finite
+    where the box element is non-finite, round-off everywhere (7e-15 envelope),
+    Beam parity 1.0e-14, cost 1.39/1.80 µs/pair. Polygon-profile straight
+    segments now route to it, closing the 4/3-hexagon / 4/π-disc overstatement.
+    <a href="archive/polybeam-prism-section-landed.html">Record.</a></li>
+  </ol>
+
+  <h2>Upstream actions (data defects found, not nova's)</h2>
+  <ul>
+    <li>111004/1 (CS centrelines): the section radius is stored at half its value,
+    and the pack geometry sits on a superseded outline revision — two independent
+    provenance questions for the machine-description contacts named in the IDS
+    (provider Vincent Bontemps; contacts Guillaume Davin / Nelson Gatos; refs
+    DET-07879-A / DET-078779-A).</li>
+    <li>111005/1 (PF centrelines) is absent from <code>md_summary.yaml</code> —
+    the catalogue is incomplete and pulse directories must be probed directly.</li>
+  </ul>
+
+  <h2>What the decisions can now see</h2>
+  <ul>
+    <li><em>reference-status</em> (open): the evidence points per-coil — the PF
+    table values are consistent with the centreline geometry; the CS table values
+    are consistent with the shipped outline and not the centreline file. Lock
+    belongs to the field-coil-gap followup once the residual +7.30e-04 is
+    attributed by the finite-section stage.</li>
+    <li><em>conductor-model</em> (open): stage 1 shows the PATH and OUTLINE matter
+    more than granularity for the field coil; the finite-section sweep along the
+    true path is the experiment that separates "uniform + stated" from
+    "discrete-turn" on evidence.</li>
+  </ul>
+
+  <h2>Session verification trail</h2>
+  <ul>
+    <li>Fast lane at every merge: 3199 passed; the only failures are two
+    PRE-EXISTING accuracy pins (present at the base commit, one host-sensitive,
+    one deterministic) — tracked on the arc plan with the diagnostic evidence;
+    no tolerance touched.</li>
+    <li>Both workers' commits audited against their exclusive scopes
+    (<code>git show --stat</code>), trailer-checked, lint-clean; worktrees
+    merged <code>--no-ff</code> and removed.</li>
+    <li>Every quantitative claim above is carried by a committed JSON artifact
+    beside its figure (<code>docs/figures/polybeam-prism-section/</code>,
+    <code>docs/figures/wound-coil/</code>,
+    <code>docs/figures/coil-conductor-fidelity/</code>).</li>
+  </ul>
+</main>
+</body>
+</html>

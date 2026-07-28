@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-28">
-<meta name="plan-version" content="8">
+<meta name="plan-version" content="9">
 <meta name="plan-impl" content="0.8">
 </head>
 <body>
@@ -982,7 +982,7 @@ Done-when
   6. tests/test_biotpolybow.py, tests/test_biotpolygonarc.py and
      tests/test_biotpolygonanalytic.py all unmoved.
   7. Followup written; this followup resolved.</pre>
-    <p class="r-fu-outcome">Landed on develop d070c4f7 (merge 6b39f83a; commits c8b0ce80 feat, bd197e77 bench, f8a0fc9f docs) plus the orchestrator's dispatch commit d070c4f7. POLY AT DOUBLE PRECISION: corner deviation 4.4e-16 against 2.1e-08 through the VTK mesh round trip, built from the float64 cross-section transformed by the sweep's own frame with no mesh round trip. COLLINEAR COLLAPSE: a swept hexagon 9 corners -> 6 (nova/geometry/section.py collapse_collinear + distinct_corners). FREE-FORM POLYGON reaches the kernel — the capability no (width, height) descriptor can express. HOLLOW SECTIONS as a coupled +j/-j pair against a direct annulus partition: box 6.6e-12, skin 7.8e-11, with I_outer + I_core = I asserted; a swept skin is now a TRUE CIRCULAR annulus, area 1.0162e-03 against the square annulus's 1.296e-03 (the 4/pi), where winding.py had relabelled skin -> box and taken a circular annulus's area from the square formula. The [box] arm stayed numerically unchanged, which is the control that makes the skin move credible. 58 passed in the worker's own scope. THE ROUTING FLIP WAS SUPERSEDED BEFORE MERGE: the worker landed an unconditional arc -> polybow map, which bought correctness on the hexagon at 550 us/pair against Bow's 182 on the rectangle Bow was already exact for. Owner authorised dispatch-on-profile 2026-07-27; thicken is now two-axis {kind: {profile: element}}, a rectangle recognised GEOMETRICALLY (so a square and a free-form four-corner box also reach the cheap exact element), and a hollow section decomposes first so each solid member dispatches on its own profile — a square annulus becomes two exact Bows, a circular one two PolyBows. Verified: rect->bow, hex->polybow, disc->polybow, box->bow, sk->polybow. Filament is OUTSIDE the table: no section, keeps its segment kind, reaches Arc directly, which is what preserves a cheap far-field profile beside a thickened near one. nova/biot/arc.py is byte-identical and nova/biot/solve.py stays a flat registry, so PolyBow(Arc, Matrix) added a key rather than shadowing one. DONE-WHEN 6 AMENDED by the orchestrator: no NUMERIC golden moves; routing fixtures may be re-pinned to name their oracle explicitly — line 747 of tests/test_biotpolygonarc.py hard-coded the routing and test_biotpolybow/test_winding asserted the unconditional flip, all three re-pinned to the dispatch their own docstrings already described. Three benchmark call sites (arc_section_cost.py VARIANTS + docstring, arc_element_class.py twice, one assigning to a variable named bow) reached Bow through the old default and would have reported PolyBow's numbers under Bow's labels. NOT DELIVERED (agent died to the spend limit before reporting): the disc/ellipse locked decision, the moved-golden record, and the straight-element record for polybeam-prism-section.</p>
+    <p class="r-fu-outcome">Landed on develop d070c4f7 (merge 6b39f83a; commits c8b0ce80 feat, bd197e77 bench, f8a0fc9f docs) plus the orchestrator's dispatch commit d070c4f7. POLY AT DOUBLE PRECISION: corner deviation 4.4e-16 against 2.1e-08 through the VTK mesh round trip, built from the float64 cross-section transformed by the sweep's own frame with no mesh round trip. COLLINEAR COLLAPSE: a swept hexagon 9 corners -&gt; 6 (nova/geometry/section.py collapse_collinear + distinct_corners). FREE-FORM POLYGON reaches the kernel — the capability no (width, height) descriptor can express. HOLLOW SECTIONS as a coupled +j/-j pair against a direct annulus partition: box 6.6e-12, skin 7.8e-11, with I_outer + I_core = I asserted; a swept skin is now a TRUE CIRCULAR annulus, area 1.0162e-03 against the square annulus's 1.296e-03 (the 4/pi), where winding.py had relabelled skin -&gt; box and taken a circular annulus's area from the square formula. The [box] arm stayed numerically unchanged, which is the control that makes the skin move credible. 58 passed in the worker's own scope. THE ROUTING FLIP WAS SUPERSEDED BEFORE MERGE: the worker landed an unconditional arc -&gt; polybow map, which bought correctness on the hexagon at 550 us/pair against Bow's 182 on the rectangle Bow was already exact for. Owner authorised dispatch-on-profile 2026-07-27; thicken is now two-axis {kind: {profile: element}}, a rectangle recognised GEOMETRICALLY (so a square and a free-form four-corner box also reach the cheap exact element), and a hollow section decomposes first so each solid member dispatches on its own profile — a square annulus becomes two exact Bows, a circular one two PolyBows. Verified: rect-&gt;bow, hex-&gt;polybow, disc-&gt;polybow, box-&gt;bow, sk-&gt;polybow. Filament is OUTSIDE the table: no section, keeps its segment kind, reaches Arc directly, which is what preserves a cheap far-field profile beside a thickened near one. nova/biot/arc.py is byte-identical and nova/biot/solve.py stays a flat registry, so PolyBow(Arc, Matrix) added a key rather than shadowing one. DONE-WHEN 6 AMENDED by the orchestrator: no NUMERIC golden moves; routing fixtures may be re-pinned to name their oracle explicitly — line 747 of tests/test_biotpolygonarc.py hard-coded the routing and test_biotpolybow/test_winding asserted the unconditional flip, all three re-pinned to the dispatch their own docstrings already described. Three benchmark call sites (arc_section_cost.py VARIANTS + docstring, arc_element_class.py twice, one assigning to a variable named bow) reached Bow through the old default and would have reported PolyBow's numbers under Bow's labels. NOT DELIVERED (agent died to the spend limit before reporting): the disc/ellipse locked decision, the moved-golden record, and the straight-element record for polybeam-prism-section.</p>
     </article>
 <article class="r-fu" data-id="f-pbow-07" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-27T08:10:00+00:00" data-recommends-skill="/reckon-ship polybow-arc-section" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Trace the arc kernel, then re-quote its cost as GPU wall clock rather than as CPU microseconds per pair</h4>
@@ -1188,6 +1188,95 @@ Done-when
   3. Every moved golden recorded as a correction; the two CUDA-suspect failures
      explained as environment or defect and green either way.
   4. The straight-element record written into polybeam-prism-section.
+  5. Followup written; this followup resolved.</pre>
+    </article>
+<article class="r-fu" data-id="f-pbow-10" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28T09:10:00+00:00" data-recommends-skill="/reckon-ship polybow-arc-section" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">The incomplete third kind disagrees with its own traced form by five decades at a tiny pole over a tiny complement</h4>
+    <div class="r-fu-body"><p><code>tests/test_biotincompleteelliptic.py::test_the_third_kind_traces_and_agrees_to_a_few_ulp</code> FAILS on develop and has been failing for some time: host numpy against the jit-compiled kernel gives <strong>1.2005e-09 relative against a 1e-14 gate</strong>, at the pair <code>pole = 1e-12, complement = 1e-300</code> (the first entry of the test's two arrays, which pair elementwise). Confirmed PRE-EXISTING &mdash; it fails at 23f055bc too, and neither the test nor <code>nova/biot/incompleteelliptic.py</code> appears in the range that landed the rectangle-kernel and amplitude-fold fixes, so neither caused it. It was unowned until now.</p><p><strong>Why it matters more than it did when it started failing.</strong> The element tier's conditioning repair routes <code>Constants</code> &mdash; and therefore <code>Circle</code> and <code>Arc</code>, which <code>solve.py</code> dispatches every coil, plasma and passive row through &mdash; onto <code>incomplete_pole</code> for the incomplete third kind, handing it poles and complements formed as exact geometric complements. Those are SMALL by construction near a source corner plane (the pre-repair measurements had the far characteristic's complement down in the 1e-13 range and below). So the shipped operator's JAX path is about to depend on precisely the corner where host and device disagree. This is a parity failure, not a host accuracy failure, so the numpy path is unaffected &mdash; but the device path is what the tiled assembly and the batch tier use.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    polybow-arc-section (http://127.0.0.1:8765/nova/polybow-arc-section.html)
+Section: host/device parity of the incomplete third kind
+Tier:    opus
+
+Context
+  One implementation of the incomplete third kind is meant to serve numpy on the
+  host and a compiled kernel on a device. It does not, at the extreme corner of
+  its argument domain. The failure is five decades past the gate and predates the
+  two kernel fixes that landed on develop, so it is a standing defect rather than
+  a regression.
+
+Reproduction (verbatim from the test, tests/test_biotincompleteelliptic.py:594)
+    _, sine, cosine = pair(0.4)
+    poles       = np.array([1e-12, 1e-3, 1.0, 1e3, 1e12])
+    complements = np.array([1e-300, 1e-40, 1e-12, 1e-3, 0.4])
+    host   = incomplete_pole(poles, complements, sine, cosine)
+    device = jax.jit(...)(poles, complements)     # xp=jnp
+    assert max(|device - host|/|host|) &lt; 1e-14    # measured 1.2005e-09
+  The arrays pair ELEMENTWISE, so the offending pair is pole=1e-12 with
+  complement=1e-300. Isolate which element fails before assuming it is that one.
+
+What to establish
+  1. WHICH element, and whether the gap is one element or a trend across the five.
+     Print the per-element relative gap on both paths.
+  2. WHETHER THE HOST OR THE DEVICE IS WRONG. The test asserts parity, not
+     correctness, so it cannot say. Adjudicate both against an independent
+     extended-precision reference (mpmath at sufficient precision, or the
+     elementary closed form where the modulus or the pole degenerates). A parity
+     test that fires when the DEVICE is the accurate one is a different bug from
+     one that fires when the host is.
+  3. THE MECHANISM. Candidates, to be confirmed rather than guessed:
+     * float64 not actually enabled on the traced path, so the device runs the
+       whole descent in single precision (check jax_enable_x64 in effect at trace
+       time, not just at import);
+     * XLA reassociating or contracting an expression the host evaluates in a
+       fixed order -- the reflection branch forms `complement/pole` and
+       `(pole - 1)(pole - complement)/pole`, and at 1e-300/1e-12 those span 288
+       decades, so any reordering changes the answer;
+     * underflow: complement=1e-300 squared underflows to zero, and a squared
+       complement appearing anywhere in the descent would vanish on one path and
+       not the other if the two group the arithmetic differently;
+     * a `where`-masked branch evaluated on both sides on the device (XLA computes
+       both arms) hitting a non-finite intermediate that the host&#x27;s lazy path never
+       forms.
+  4. WHETHER THE GEOMETRY REACHES IT. The element tier now hands this routine poles
+     and complements from exact geometric complements, which are small near a source
+     corner plane. Establish the smallest (pole, complement) pair a real machine
+     geometry produces through Circle and Arc, and say whether the failing corner is
+     inside or outside what production can reach. If inside, this is a live defect on
+     the device path of the shipped operator and should be said so plainly.
+
+State to read
+  nova/biot/incompleteelliptic.py -- incomplete_pole, its reflection onto k&#x27;^2/pole,
+    the TRIPS descent count, and the module docstring&#x27;s account of which arguments
+    are complements;
+  tests/test_biotincompleteelliptic.py -- the parity test and the accuracy tests
+    around it, which pass, so the host path is accurate over the sampled domain;
+  nova/biot/completeelliptic.py -- the complete-kind counterpart and whether it has
+    an equivalent parity test at the same extreme (if it does not, add one; if it
+    does and passes, the difference between the two is evidence);
+  nova/biot/constants.py -- the callers the element-tier repair created, for the
+    regime question in item 4.
+
+Scope locks / constraints
+  Detached worktree off develop; primary checkout stays on main. The fix must be a
+  correct treatment of the descent at an extreme argument -- NOT a widened parity
+  gate. If the honest outcome is that 1e-14 parity is unattainable across XLA and
+  numpy at 1e-300 complement, then the gate moves to a MEASURED and justified value
+  with the mechanism documented at the assertion, and the domain over which parity
+  IS held is stated. Do not simply relax the number.
+  A device is available: partition betelgeuse needs --reservation=gpu_0003_grpA.
+  Note the login node&#x27;s L4 is usually near-full, so a device run there may fail on
+  memory rather than on numerics -- use JAX_PLATFORMS=cpu for the compiled-vs-host
+  comparison if the trace is what matters rather than the hardware.
+
+Done-when
+  1. The failing element identified, and host vs device adjudicated against an
+     independent reference so it is known WHICH is wrong.
+  2. The mechanism established, not guessed.
+  3. Fixed, or the gate moved to a measured value with the mechanism documented and
+     the parity-holding domain stated.
+  4. A verdict on whether production geometry reaches the failing corner through the
+     element tier&#x27;s new complement-native callers.
   5. Followup written; this followup resolved.</pre>
     </article>
 </section>

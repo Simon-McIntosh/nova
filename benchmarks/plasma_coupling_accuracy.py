@@ -1,23 +1,24 @@
-"""What the point-filament plasma-coupling default costs, on a real plasma grid.
+"""What the banded plasma-coupling default costs against exact everywhere.
 
-A hexagonal plasma cell is coupled today as a POINT FILAMENT at the section's
-root-mean-square radius (``segment="circle"``, :mod:`nova.biot.circle`), because
-the exact finite-section kernel used to be unaffordable. It no longer is: the
-closed form of :mod:`nova.biot.polygonanalytic` evaluates the same physics for a
-fifth of the boundary quadrature's cost. So the question is no longer whether the
-finite section is affordable but what the point filament is costing, and that is
-what this measures.
+``segment="circle"`` (:mod:`nova.biot.circle`) evaluates each source cell's own
+finite section inside a band of the section's radii and the point filament outside
+it, and averages the target cell's own section over the pairs closest in. Exact
+everywhere -- the closed form of :mod:`nova.biot.polygonanalytic` on every pair,
+which is what :mod:`nova.biot.polysection` ships -- is the reference. So what this
+measures is the SEAM: what the shipped element gives up by banding the finite
+section rather than paying for it on all of a plasma grid's pairs.
 
-Why the diagonal is the point
------------------------------
+Why the diagonal is reported apart
+----------------------------------
 An all-to-all plasma-plasma interaction matrix puts a target inside its own source
-cell on every diagonal entry. For a point filament that is a coincident target --
-log-singular -- so :class:`nova.biot.circle.OffsetFilaments` pulls the source and
-target rings apart by a blended fraction of the cell's own width to keep the
-answer finite. For a finite section the same target is an ordinary interior point
-where the flux and both field components are bounded and smooth. The diagonal is
-therefore where the point model is worst and where the closed form has nothing to
-approximate, and it is reported separately rather than averaged into the bulk.
+cell on every diagonal entry. For a point filament that is a coincident target,
+log-singular, and no answer at all; for a finite section it is an ordinary interior
+point where the flux and both field components are bounded and smooth. The
+diagonal is also the one place the shipped element evaluates a DOUBLE integral --
+the source section's flux averaged over the target cell's own section -- where the
+exact-everywhere reference evaluates a single integral at the cell centre, so the
+two differ there by design and by the size of the target-side average. It is
+reported separately rather than averaged into the bulk.
 
 The reference
 -------------
@@ -54,7 +55,6 @@ import numpy as np
 
 from nova.biot.bandedcoupling import NEAR_LIMIT, NEAR_RULE, contour_distance
 from nova.biot.biotframe import Target
-from nova.biot.circle import OffsetFilaments
 from nova.biot.greens import greens_psi, second_moments, section_centroid
 from nova.biot.polygon import polygon_greens
 from nova.biot.polygonanalytic import polygon_analytic_greens
@@ -178,8 +178,8 @@ def lattice_pitch(grid: dict) -> float:
 # --- the two couplings ------------------------------------------------------
 
 
-def point_coupling(coilset) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Return the shipped point-filament plasma-plasma matrices, per ampere.
+def element_coupling(coilset) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Return the shipped plasma-plasma matrices, per ampere.
 
     Assembled through :class:`nova.biot.solve.Solve` exactly as
     :meth:`nova.biot.plasmagrid.PlasmaGrid.solve` does -- targets are the plasma
@@ -382,17 +382,17 @@ def resolution_sweep(cell_counts=SWEEP_CELLS) -> dict:
     """Return the self term AND the integrated effect at several grid resolutions.
 
     Both are needed, because they move in opposite directions. The self term is a
-    ratio of two coupling values at one cell, and the point model's coincident
-    offset shrinks with the cell while the true finite-section value shrinks faster,
-    so the per-pair error grows as the grid is refined. The integrated effect
-    weights that same term by the cell's own current, which falls as the cell area,
+    ratio of two coupling values at one cell, and the target-side average the shipped
+    diagonal carries scales with the cell while the reference's single integral at the
+    cell centre does not, so the per-pair figure moves with resolution. The integrated
+    effect weights that same term by the cell's own current, which falls as the area,
     so it can fall while the per-pair figure rises. Quoting only one of the two
     would let the reader draw the opposite conclusion from the other.
     """
     sweep = {}
     for cells in cell_counts:
         coilset, grid = plasma_grid(cells)
-        point = point_coupling(coilset)
+        point = element_coupling(coilset)
         exact = exact_coupling(grid)
         regular = grid["section"] == "hexagon"
         radius = section_radii(grid["vertices"])
@@ -430,44 +430,6 @@ def resolution_sweep(cell_counts=SWEEP_CELLS) -> dict:
         )
         sweep[str(cells)] = entry
     return sweep
-
-
-def diagonal_offset(grid: dict) -> dict:
-    """Return the coincident-filament offset the point kernel applies, per cell.
-
-    :class:`nova.biot.circle.OffsetFilaments` is run on the diagonal pairs alone,
-    with the same inputs the assembled element feeds it, so the reported separation
-    is the one the shipped matrix was built with rather than an algebraic
-    reconstruction of it.
-    """
-    filament_r = grid["filament_r"]
-    centre_z = grid["centre_z"]
-    factor = {"hexagon": np.exp(-0.25), "polygon": 2 * 0.447049}
-    turnturn = np.array([factor[name] for name in grid["section"]])
-    data = dict(
-        rs=filament_r.copy(),
-        zs=centre_z.copy(),
-        r=grid["centre_r"].copy(),
-        z=centre_z.copy(),
-        dx=grid["width"],
-        dz=grid["height"],
-        turnturn=turnturn,
-    )
-    OffsetFilaments(data)
-    separation = np.hypot(data["r"] - data["rs"], data["z"] - data["zs"])
-    radius = section_radii(grid["vertices"])
-    reproduced = greens_psi(data["r"], data["z"], data["rs"], data["zs"])
-    return dict(
-        turnturn=turnturn,
-        separation=separation,
-        separation_over_radius=separation / radius,
-        reproduced_psi=reproduced,
-        summary=dict(
-            median_separation=float(np.median(separation)),
-            median_separation_over_radius=float(np.median(separation / radius)),
-            median_turnturn=float(np.median(turnturn)),
-        ),
-    )
 
 
 # --- the reference check ----------------------------------------------------
@@ -739,8 +701,8 @@ def figure(
     axis.set_yscale("log")
     axis.set_ylim(1e-13, 3e2)
     axis.set_xlabel("target distance to source cell contour  [source section radii]")
-    axis.set_ylabel("point-filament error  [fraction of column peak]")
-    axis.set_title("(a) what the point filament costs, per pair")
+    axis.set_ylabel("shipped-element error  [fraction of column peak]")
+    axis.set_title("(a) what the band costs, per pair")
     axis.axhline(0.072, ls="--", lw=1, color="0.3")
     axis.text(
         0.97,
@@ -779,7 +741,7 @@ def figure(
             )
     axis.set_xscale("log")
     axis.set_xlim(1e-15, 1e4)
-    axis.set_xlabel("point-filament error on the self term")
+    axis.set_xlabel("shipped-element error on the self term")
     axis.set_ylabel("cumulative fraction of cells")
     axis.set_title("(b) the diagonal, cell by cell")
     for value, label, shift in ((0.072, "7.2%", 0.02), (0.18, "18%", 0.10)):
@@ -881,7 +843,7 @@ def figure(
             linewidths=0.4,
         )
         bar = fig.colorbar(scatter, ax=axis)
-        bar.set_label(f"point - finite section  [% of the {name} swing]")
+        bar.set_label(f"shipped - exact everywhere  [% of the {name} swing]")
         axis.set_aspect("equal")
         axis.set_xlabel("R  [m]")
         axis.set_ylabel("Z  [m]")
@@ -901,7 +863,7 @@ def figure(
         )
 
     fig.suptitle(
-        "Point-filament plasma coupling against the closed-form finite section, "
+        "Banded plasma coupling against the closed-form finite section everywhere, "
         f"{grid['centre_r'].size}-cell hexagonal grid "
         f"({near['population']['regular_cells']} regular, "
         f"{near['population']['clipped_cells']} wall-clipped) at R0 = 6.2 m",
@@ -926,7 +888,6 @@ def _percent(value):
 def report(
     tables,
     detail,
-    offset,
     near,
     reference,
     refinement,
@@ -953,7 +914,7 @@ def report(
         f"{label:>26s}" for label in tables["psi"] if label != "scale"
     )
     for scale in ("local", "column_peak"):
-        print(f"\npoint-filament relative error, {scale.upper()} normalisation")
+        print(f"\nshipped-element relative error, {scale.upper()} normalisation")
         print(header)
         for name in COMPONENTS:
             row = f"{name:10s}"
@@ -965,14 +926,6 @@ def report(
                 pair += _percent(stats.get("maximum"))
                 row += f"{pair:>26s}"
             print(row)
-
-    print("\nthe coincident-filament offset the point kernel applies on the diagonal")
-    summary = offset["summary"]
-    print(
-        f"  median separation {summary['median_separation'] * 1e3:.2f} mm"
-        f" = {summary['median_separation_over_radius']:.3f} section radii"
-    )
-    print(f"  median section factor {summary['median_turnturn']:.6f}")
 
     print("\nthe self term, signed, split by whether the wall clipped the cell")
     for name in COMPONENTS:
@@ -1109,12 +1062,11 @@ def jsonable(value):
 def main(output=None, figure_path=None, cells=CELLS):
     """Measure, report and record the whole comparison."""
     coilset, grid = plasma_grid(cells)
-    point = point_coupling(coilset)
+    point = element_coupling(coilset)
     exact = exact_coupling(grid)
-    # the shipped point path is per ampere of source cell and sits at the section's
-    # rms radius, not its centroid -- checked against the bare ring formula on pairs
-    # the coincident-filament offset never reaches, so the comparison below is
-    # against the matrix a solve builds and not against a rescaling of it
+    # beyond the element's own section band the shipped path is the bare ring at the
+    # section's rms radius -- checked against the ring formula there, so the
+    # comparison below is against the matrix a solve builds and not a rescaling of it
     geometry = pair_geometry(grid)
     far = geometry["scaled"] > 20.0
     bare = greens_psi(
@@ -1124,11 +1076,10 @@ def main(output=None, figure_path=None, cells=CELLS):
         np.repeat(grid["centre_z"][None, :], grid["centre_r"].size, axis=0)[far],
     )
     residual = np.max(np.abs(point[0][far] / bare - 1.0))
-    assert residual < 1e-9, f"point path is not the bare ring far out: {residual:.3e}"
+    assert residual < 1e-9, f"far field is not the bare ring: {residual:.3e}"
 
     tables = error_tables(point, exact, geometry)
     detail = diagonal_detail(point, exact, grid, geometry)
-    offset = diagonal_offset(grid)
     near = near_band_gain(grid, exact, geometry)
     reference = reference_check(grid, exact, geometry)
     refinement = refinement_check(grid, exact, geometry)
@@ -1138,7 +1089,6 @@ def main(output=None, figure_path=None, cells=CELLS):
     report(
         tables,
         detail,
-        offset,
         near,
         reference,
         refinement,
@@ -1175,7 +1125,6 @@ def main(output=None, figure_path=None, cells=CELLS):
         moment=moment,
         error=tables,
         diagonal=detail,
-        diagonal_offset=offset["summary"],
         resolution=sweep,
         near_band=near,
         reference=reference,

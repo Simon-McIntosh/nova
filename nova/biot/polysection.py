@@ -94,9 +94,10 @@ class PolySection(Matrix):
     tiling of circumradius ``a`` the nearest centres sit at ``sqrt(3) a`` —
     and on a 234-cell mesh delivers the identical self-term correction for a
     quarter of the cost of three radii). Below two radii, near-neighbour pairs
-    fall back to the bare point kernel just where
-    :class:`nova.biot.circle.OffsetFilaments` would be applying its
-    coincident-filament offset, and the two paths stop agreeing.
+    fall back to the bare point kernel, and :class:`nova.biot.circle.Circle` --
+    which carries its own finite-section band and averages the target's section
+    over the coincident term -- is then the better-founded lane for those pairs
+    than a narrow band here.
     """
 
     quadrature: ClassVar[tuple[int, int] | None] = None

@@ -546,6 +546,19 @@ def swept_shell(section, *, nturn=1, **shell):
     ``filament=False`` is what thickens the segments so the section is evaluated at
     all; the three arcs close on themselves, so the result is one complete ring and
     may be compared against an axisymmetric coil.
+
+    Four points per insert against ``minimum_arc_nodes=4`` is what makes each of the
+    three a single 120-degree ARC, and the pairing is load-bearing rather than
+    incidental.  :meth:`nova.geometry.polyline.PolyLine.append` fits an arc only to a
+    run of at least ``minimum_arc_nodes`` points and emits chords otherwise, so
+    raising the node count and ``minimum_arc_nodes`` together does not refine the
+    path -- it drops every segment to ``beam`` and inscribes the circle in a polygon.
+    Measured against the quadrature reference at a standoff of six section widths,
+    the three arcs land at 8.8e-10 while the eighteen chords ``minimum_arc_nodes=8``
+    produces land at 2.2e-02 and the thirty-six of ``minimum_arc_nodes=16`` at
+    7.4e-03: a chord path does converge, at the second order its own count supplies,
+    but from seven decades away.  Refinement here means MORE INSERTS of four points
+    each, never a larger ``minimum_arc_nodes``.
     """
     shell = {**SHELL, **shell}
     segments = 3
@@ -579,54 +592,266 @@ def swept_shell(section, *, nturn=1, **shell):
     return coilset
 
 
-@pytest.mark.parametrize("section", ["box"])
-def test_box_section(section):
-    radius = 3.945
-    height = 2
-    outer_width = 0.05
-    inner_width = 0.04
+#: Panels per section half-width, and Gauss-Legendre order inside each panel, of
+#: the annulus quadrature reference.
+ANNULUS_PANELS = 32
+ANNULUS_ORDER = 12
 
-    attrs = ["Ay", "Br", "Bz"]
-    factor = 0.3
-    Ic = 5.3e5
-    ngrid = 30
+#: What panel doubling is allowed to move the reference by, which is the floor every
+#: assertion measured against it stands on. Measured 1.1e-12 for a target beside the
+#: section and 1.2e-15 for one metres away, so this carries a decade of reserve and
+#: sits two decades under the tightest element assertion below.
+ANNULUS_FLOOR = 1e-11
 
-    segment_number = 3
 
-    theta = np.linspace(0, 2 * np.pi, 1 + 3 * segment_number)
-    points = np.stack(
-        [radius * np.cos(theta), radius * np.sin(theta), height * np.ones_like(theta)],
-        axis=-1,
+def filament_ring_rows(source_radius, source_height, radius, height):
+    """Return a filament ring's ``(A_phi / mu_0, Br, Bz)`` per ampere, target by source.
+
+    Legendre-form complete integrals taken straight from scipy, so the reference
+    below shares no code, no argument reduction and no series with either element
+    it measures.  The potential row carries no vacuum permeability and the two
+    field rows do, which is the convention the operator store uses; the
+    axisymmetric arm of the gate is what pins that, since one reference cannot
+    reproduce all three rows of an element under two different conventions.
+
+    Result is ``(3, source, target)``.
+    """
+    source_radius = np.asarray(source_radius, dtype=float)[:, np.newaxis]
+    source_height = np.asarray(source_height, dtype=float)[:, np.newaxis]
+    radius = np.asarray(radius, dtype=float)[np.newaxis, :]
+    height = np.asarray(height, dtype=float)[np.newaxis, :]
+    gap = height - source_height
+    span = (source_radius + radius) ** 2 + gap**2
+    modulus = 4 * source_radius * radius / span
+    ellipk = scipy.special.ellipk(modulus)
+    ellipe = scipy.special.ellipe(modulus)
+    near = (source_radius - radius) ** 2 + gap**2
+    return np.stack(
+        [
+            np.sqrt(source_radius / radius)
+            / (np.pi * np.sqrt(modulus))
+            * ((1 - modulus / 2) * ellipk - ellipe),
+            Matrix.mu_0
+            / (2 * np.pi)
+            * gap
+            / (radius * np.sqrt(span))
+            * (-ellipk + (source_radius**2 + radius**2 + gap**2) / near * ellipe),
+            Matrix.mu_0
+            / (2 * np.pi)
+            / np.sqrt(span)
+            * (ellipk + (source_radius**2 - radius**2 - gap**2) / near * ellipe),
+        ]
     )
 
-    coilset = CoilSet(field_attrs=attrs)
-    for i in range(segment_number):
-        coilset.winding.insert(
-            points[3 * i : 1 + 3 * (i + 1)],
-            {section: (0, 0, outer_width, 1 - inner_width / outer_width)},
-            nturn=1,
-            minimum_arc_nodes=4,
-            Ic=Ic,
-            filament=False,
-            ifttt=False,
+
+def _gauss_panels(lower, upper, panels, order=ANNULUS_ORDER):
+    """Return nodes and weights of ``panels`` Gauss-Legendre panels on an interval."""
+    node, weight = np.polynomial.legendre.leggauss(order)
+    edge = np.linspace(lower, upper, panels + 1)
+    centre, half = 0.5 * (edge[1:] + edge[:-1]), 0.5 * np.diff(edge)
+    return (
+        (centre[:, np.newaxis] + half[:, np.newaxis] * node).ravel(),
+        (half[:, np.newaxis] * weight).ravel(),
+    )
+
+
+def square_annulus_rows(targets, panels=ANNULUS_PANELS, **shell):
+    """Return ``(A_phi / mu_0, Br, Bz)`` of a square-annulus-section ring by quadrature.
+
+    The section is the region between two concentric squares, tiled by the four
+    strips that make it up and integrated at the uniform current density the total
+    current and the annulus area set.  Every target must lie OUTSIDE that region:
+    that is what leaves the filament-ring integrand analytic at every node, so a
+    panelled Gauss-Legendre rule converges spectrally and its own panel doubling
+    reports the floor rather than an endpoint singularity's algebraic rate.
+    """
+    shell = {**SHELL, **shell}
+    radius, height = shell["radius"], shell["height"]
+    outer, inner = shell["outer_width"] / 2, shell["inner_width"] / 2
+    density = shell["current"] / (4 * (outer**2 - inner**2))
+    target_radius, target_height = targets[:, 0], targets[:, 2]
+    rows = np.zeros((3, len(target_radius)))
+    for lower_radius, upper_radius, lower_height, upper_height in (
+        (radius - outer, radius - inner, height - outer, height + outer),
+        (radius + inner, radius + outer, height - outer, height + outer),
+        (radius - inner, radius + inner, height - outer, height - inner),
+        (radius - inner, radius + inner, height + inner, height + outer),
+    ):
+        node_radius, weight_radius = _gauss_panels(
+            lower_radius,
+            upper_radius,
+            max(1, round(panels * (upper_radius - lower_radius) / outer)),
+        )
+        node_height, weight_height = _gauss_panels(
+            lower_height,
+            upper_height,
+            max(1, round(panels * (upper_height - lower_height) / outer)),
+        )
+        source_radius = np.repeat(node_radius, len(node_height))
+        source_height = np.tile(node_height, len(node_radius))
+        weight = np.outer(weight_radius, weight_height).ravel() * density
+        for start in range(0, len(source_radius), 4096):
+            block = slice(start, start + 4096)
+            rows += (
+                filament_ring_rows(
+                    source_radius[block],
+                    source_height[block],
+                    target_radius,
+                    target_height,
+                )
+                * weight[block][np.newaxis, :, np.newaxis]
+            ).sum(axis=1)
+    return rows
+
+
+def axisymmetric_shell(**shell):
+    """Return the square annulus as two solid axisymmetric coils at opposite density."""
+    shell = {**SHELL, **shell}
+    outer, inner = shell["outer_width"], shell["inner_width"]
+    coilset = CoilSet(field_attrs=["Ay", "Br", "Bz"])
+    coilset.coil.insert({"rect": (shell["radius"], shell["height"], outer, outer)})
+    coilset.coil.insert({"rect": (shell["radius"], shell["height"], inner, inner)})
+    density = shell["current"] / (outer**2 - inner**2)
+    coilset.saloc["Ic"] = density * outer**2, -density * inner**2
+    return coilset
+
+
+def element_rows(instance, coilset):
+    """Return ``(A_phi / mu_0, Br, Bz)`` from an element's own float64 operators.
+
+    Contracted here rather than read off ``instance.ay`` because the reduced field
+    arrays are stored single precision, which floors any comparison at 1e-06
+    relative -- three decades above where the axisymmetric element actually sits.
+    """
+    current = np.asarray(coilset.sloc["Ic"], dtype=float)
+    return np.stack(
+        [
+            np.asarray(instance.data[attr], dtype=float) @ current
+            for attr in ("Ay", "Br", "Bz")
+        ]
+    )
+
+
+def row_deviation(rows, reference):
+    """Return each row's largest departure from ``reference`` over its own scale.
+
+    Normalised by the row's peak over the target set rather than point by point:
+    ``Br`` passes through zero on the section's midplane, where a pointwise
+    relative measure divides by nothing and reports a full-scale failure for a
+    reference and an element that agree to round-off.
+    """
+    return np.max(np.abs(rows - reference), axis=-1) / np.max(
+        np.abs(reference), axis=-1
+    )
+
+
+#: The axisymmetric element against the independent quadrature, all three rows, at
+#: every target -- inside the cavity as much as outside the section. Measured 7.4e-12
+#: beside the section and 1.5e-11 metres away, so this stands two decades clear of
+#: the element and two above the reference's own floor: scaling any axisymmetric row
+#: by a relative 1e-09 fails this arm.
+AXISYMMETRIC_TOL = 1e-09
+
+#: The swept arc against the same reference at six section widths of standoff and
+#: beyond, where none of the near-face conditioning loss below is left. Measured
+#: 8.8e-10, one decade of reserve: scaling the swept rows by a relative 1e-08 fails
+#: this arm, 1e-09 passes it. A comparison of the two ELEMENTS against each other at
+#: 1e-04 relative admits a 1e-04 scaling of the swept rows, four decades looser.
+SWEPT_FAR_TOL = 1e-08
+
+
+@pytest.mark.parametrize("section", ["box"])
+def test_box_section(section):
+    """A swept hollow square against a quadrature reference, in three standoff bands.
+
+    The path is three 120-degree arcs, so the swept body is a TRUE RING of square
+    annular section and the comparison carries no discretisation term at all: the
+    axisymmetric arm below reproduces the reference to 7.4e-12, and the swept arc to
+    8.8e-10 away from its own section, against the 2.2e-02 a chord path of the same
+    node count returns (:func:`swept_shell`).  What the comparison does carry is the
+    accuracy the thickened-arc antiderivative reaches NEAR its own section, and that
+    is what the bands separate.
+
+    The reference is an independent panelled Gauss-Legendre integral of the
+    filament-ring Green's functions over the annulus, sharing no code with either
+    element; every target sits outside the conducting material, which is asserted
+    below, so the integrand is analytic and panel doubling puts the reference at
+    1.1e-12.  An element-against-element comparison cannot say which of the two
+    moved, and the answer matters here: the axisymmetric element reproduces the
+    reference at every target, including the ones inside the cavity, so the whole of
+    the departure belongs to the swept arc.
+
+    That departure grows as a target approaches the section's own face: 8.8e-10 at
+    six section widths of clearance, 2.5e-06 at 0.0075 m (a sixth of a width), and
+    1.3e-04 at 0.0005 m, which is where the cavity targets sit against the core's
+    face.  One tolerance over all three bands would be vacuous in the far one and
+    unreachable in the near one, so the two near bands are pinned TWO-SIDED at the
+    size measured in each: the gate fails if the arc gets worse, and equally if it
+    gets better, which is what keeps a recorded accuracy limit a statement about the
+    code rather than a ceiling nobody revisits.
+
+    ``skin`` is not covered here.  Its section is the annulus between two inscribed
+    64-gons, which no pair of ``rect`` coils and no square reference expresses;
+    :func:`test_skin_section_area_is_the_inscribed_annulus` and
+    :func:`test_a_hollow_square_carries_four_thirds_the_inscribed_moment` are where
+    that section is held.
+    """
+    swept, axisymmetric = swept_shell(section), axisymmetric_shell()
+    swept.grid.solve(30, 0.3)
+    axisymmetric.grid.solve(30, 0.3)
+
+    radius = np.asarray(swept.grid.data["x2d"], dtype=float).ravel()
+    height = np.asarray(swept.grid.data["z2d"], dtype=float).ravel()
+    assert np.allclose(radius, np.asarray(axisymmetric.grid.data["x2d"]).ravel())
+    assert np.allclose(height, np.asarray(axisymmetric.grid.data["z2d"]).ravel())
+    targets = np.stack([radius, np.zeros_like(radius), height], axis=-1)
+
+    outer, inner = SHELL["outer_width"] / 2, SHELL["inner_width"] / 2
+    offset = np.abs(np.stack([radius - SHELL["radius"], height - SHELL["height"]]))
+    cavity = np.all(offset < inner, axis=0)
+    outside = np.any(offset > outer, axis=0)
+    # the reference integrates the material itself, so no target may sit in it
+    assert np.all(cavity | outside)
+    # the 6 x 5 grid the request resolves to straddles the 5 mm wall without landing
+    # in it; a count that moves means the bands below no longer hold what they name
+    assert cavity.sum() == 12 and outside.sum() == 18
+
+    reference = square_annulus_rows(targets)
+    assert np.all(
+        row_deviation(square_annulus_rows(targets, 2 * ANNULUS_PANELS), reference)
+        < ANNULUS_FLOOR
+    )
+
+    swept_rows = element_rows(swept.grid, swept)
+    axisymmetric_rows = element_rows(axisymmetric.grid, axisymmetric)
+    for band in (cavity, outside):
+        assert np.all(
+            row_deviation(axisymmetric_rows[:, band], reference[:, band])
+            < AXISYMMETRIC_TOL
         )
 
-    coilset.grid.solve(ngrid, factor)
+    # the swept arc, pinned two-sided in each band at the size measured there
+    near_face = row_deviation(swept_rows[:, cavity], reference[:, cavity]).max()
+    clear_face = row_deviation(swept_rows[:, outside], reference[:, outside]).max()
+    assert 6e-05 < near_face < 3e-04  # measured 1.3e-04 at 0.0005 m of clearance
+    assert 1e-06 < clear_face < 6e-06  # measured 2.5e-06 at 0.0075 m
+    assert clear_face < near_face / 10  # the growth toward the face, not a constant
 
-    multicoil = CoilSet(field_attrs=attrs)
-    multicoil.coil.insert({"rect": (radius, height, outer_width, outer_width)})
-    multicoil.coil.insert({"rect": (radius, height, inner_width, inner_width)})
-
-    Ashell = outer_width**2 - inner_width**2
-    Jc = Ic / Ashell
-    multicoil.grid.solve(ngrid, factor)
-    multicoil.saloc["Ic"] = Jc * outer_width**2, -Jc * inner_width**2
-    for attr in attrs:
-        assert np.allclose(
-            getattr(coilset.grid, attr.lower()),
-            getattr(multicoil.grid, attr.lower()),
-            atol=1e-4,
-            rtol=1e-4,
+    standoff = np.array([0.3, 0.5, 1.0, 2.0, 3.0])
+    far = np.stack(
+        [
+            SHELL["radius"] + standoff,
+            np.zeros_like(standoff),
+            SHELL["height"] + standoff / 2,
+        ],
+        axis=-1,
+    )
+    reference = square_annulus_rows(far)
+    for coilset in (swept, axisymmetric):
+        coilset.point.solve(far)
+        assert np.all(
+            row_deviation(element_rows(coilset.point, coilset), reference)
+            < SWEPT_FAR_TOL
         )
 
 

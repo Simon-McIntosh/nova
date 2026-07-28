@@ -32,8 +32,19 @@ is one -- and the same fourteen trips that carry the two descents carry this:
 measured, twelve reach the round-off floor across the whole double range of
 complement and ten leave it wrong in the ninth decimal.
 
-Two arrangements in here are not cosmetic, and each was measured on the way in.
+Three arrangements in here are not cosmetic, and each was measured on the way in.
 
+* **The degenerate form's two roots are never subtracted from one another.**
+  Their difference factorises exactly into the three gaps ``pole - x``,
+  ``pole - y``, ``pole - z`` -- see :func:`_elementary` -- and those gaps QUARTER
+  under the duplication step, so a caller that can form them without a
+  subtraction gets them carried through the whole descent at full precision.
+  Subtracting the two roots instead keeps only the digits by which they differ,
+  and they COINCIDE wherever the pole argument equals two of the other three,
+  which the incomplete third kind reaches to within a rounding error.  Measured
+  at a pole of 1e-12 against the extended-precision integral: the subtracted form
+  holds 1.3e-15 under numpy and 1.2e-09 once a compiled kernel contracts its
+  multiply-adds, where the carried gaps hold the numpy figure on both.
 * **The degenerate form takes its two arguments as their own square roots.**
   ``R_C`` is wanted at ``(sigma^2, tau^2)`` where the caller has ``sigma`` and
   ``tau`` themselves, and squaring them first underflows: at a pole a squared
@@ -73,7 +84,7 @@ __all__ = ["TRIPS", "symmetric_kinds"]
 TRIPS = 14
 
 
-def _elementary(first, second, weight, xp):
+def _elementary(first, second, weight, xp, *, gaps=None):
     """Return ``weight R_C(first^2, second^2)`` from the two roots themselves.
 
     The one closed form of the family, and the whole of ``R_J``'s per-trip cost:
@@ -100,25 +111,65 @@ def _elementary(first, second, weight, xp):
     the exponent range at a near pole on the source ring -- ``1/tau`` with ``tau``
     at 1e-309 -- and dividing the small weight by the small root is the same
     quotient with both ends inside it.
+
+    ``gaps`` supplies ``(pole - x, pole - y, pole - z)`` where the descent carries
+    them, and it is what keeps ``t - s`` from being a cancelling subtraction.  The
+    two roots are, in the descent's own quantities,
+
+        s = pole (sqrt x + sqrt y + sqrt z) + sqrt(x y z)
+        t = sqrt(pole) (pole + sqrt(x y) + sqrt(y z) + sqrt(z x))
+
+    so ``t - s`` factorises EXACTLY, as
+    ``(sqrt(pole) - sqrt x)(sqrt(pole) - sqrt y)(sqrt(pole) - sqrt z)``, and
+    multiplying that by its own conjugate -- which is ``t + s``, a sum of
+    positives -- gives ``t^2 - s^2 = (pole - x)(pole - y)(pole - z)``.  Hence
+
+        root = sqrt|(pole - x)(pole - y)(pole - z)|,
+        t - s = sign(gaps) root^2/(t + s)
+
+    with nothing subtracted anywhere.  The two coincide wherever the pole argument
+    equals one of the other three, and the arc reaches that configuration to
+    within a rounding error, so the direct subtraction keeps only the digits by
+    which they differ and fused arithmetic on a device keeps fewer still.
+
+    ``root`` is formed as the product of the three gaps' OWN square roots rather
+    than as the root of their product, for the reason the module docstring gives
+    for the arguments arriving as roots: the product itself leaves the exponent
+    range where each factor is near the small end of it.  ``t - s`` is likewise
+    scaled down by ``t + s`` between its two factors of ``root``, and since
+    ``|t - s| <= root`` always, neither multiply can leave the range that ``root``
+    is already in.
+
+    The branch is taken on the sign of the gap product and on ``root`` being
+    non-zero, so a ``root`` beneath the exponent range takes the confluent value
+    the limit has rather than the vanishing one a saturated quotient would give.
     """
-    difference = second - first
-    root = xp.sqrt(xp.abs(difference)) * xp.sqrt(second + first)
-    held = xp.where(difference != 0.0, root, 1.0)
+    if gaps is None:
+        difference = second - first
+        root = xp.sqrt(xp.abs(difference)) * xp.sqrt(second + first)
+        sign = difference
+    else:
+        first_root, second_root, third_root = (xp.sqrt(xp.abs(gap)) for gap in gaps)
+        root = first_root * second_root * third_root
+        sign = xp.sign(gaps[0]) * xp.sign(gaps[1]) * xp.sign(gaps[2])
+        difference = sign * root * (root / (second + first))
+    live = root != 0.0
+    held = xp.where(live, root, 1.0)
     scaled = weight / held
     held_first = xp.where(first > 0.0, first, 1.0)
     held_second = xp.where(second > 0.0, second, 1.0)
     return xp.where(
-        difference > 0.0,
+        live & (sign > 0.0),
         scaled * xp.arctan2(root, first),
         xp.where(
-            difference < 0.0,
+            live & (sign < 0.0),
             scaled * xp.log1p((root - difference) / held_second),
             weight / held_first,
         ),
     )
 
 
-def symmetric_kinds(x, y, z, pole, scale=1.0, *, xp=np, trips: int = TRIPS):
+def symmetric_kinds(x, y, z, pole, scale=1.0, *, gaps=None, xp=np, trips: int = TRIPS):
     """Return ``(R_F(x, y, z), scale R_J(x, y, z, pole))`` off ONE duplication.
 
     The two share their whole iteration -- ``R_J`` differs only in carrying the
@@ -131,11 +182,33 @@ def symmetric_kinds(x, y, z, pole, scale=1.0, *, xp=np, trips: int = TRIPS):
     at the configurations the arc reaches, and its weight is small by the same
     factor, so the product is the quantity that exists.
 
+    ``gaps`` supplies ``(pole - x, pole - y, pole - z)`` where the caller can form
+    them WITHOUT a subtraction, and what it buys is the degenerate form's whole
+    accuracy at a pole argument that nearly equals one of the other three -- see
+    :func:`_elementary`, where the two roots then differ in their last digits and
+    the term hangs on the difference.  Supplying them costs three multiplies a
+    trip and is worth six decades at the configurations the arc reaches; omitting
+    them falls back to the subtraction, so a caller with no exact gaps keeps a
+    usable routine.
+
+    The gaps need no recomputation at any trip, because the step replaces every
+    one of the four by ``(term + step)/4`` with the SAME ``step``: the difference
+    of two of them is therefore exactly quartered, and quartering carries the full
+    precision where re-subtracting the quartered terms carries only what is left
+    of it.  A caller's gap may be finer than the assembled ``pole`` can represent
+    -- the reflected pole argument can be denormal, and ``pole`` then rounds onto
+    ``x`` while the gap still has digits -- and that inconsistency is beneath a
+    quantity the descent cannot resolve either way, so it costs nothing.
+
     All four arguments must be non-negative and ``pole`` positive; the caller
     holds them so, since a value inspected here would be a branch.
     """
     x, y, z, pole = (xp.asarray(term) for term in (x, y, z, pole))
     shape = xp.zeros_like(x + y + z + pole)
+    if gaps is not None:
+        gaps = tuple(xp.asarray(gap) for gap in gaps)
+        shape = xp.zeros_like(shape + gaps[0] + gaps[1] + gaps[2])
+        gaps = tuple(gap + shape for gap in gaps)
     x, y, z, pole = (term + shape for term in (x, y, z, pole))
     total = shape
     factor = scale
@@ -147,9 +220,12 @@ def symmetric_kinds(x, y, z, pole, scale=1.0, *, xp=np, trips: int = TRIPS):
             xp.sqrt(pole) * (pole + step),
             factor,
             xp,
+            gaps=gaps,
         )
         factor = 0.25 * factor
         x, y, z, pole = (0.25 * (term + step) for term in (x, y, z, pole))
+        if gaps is not None:
+            gaps = tuple(0.25 * gap for gap in gaps)
 
     # the first kind's closing series, in the deviations of the three from their
     # own mean -- which sum to zero, so the third is not formed independently

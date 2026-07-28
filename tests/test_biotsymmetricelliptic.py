@@ -12,10 +12,14 @@ is asserted here is what that one caller depends on:
 * **the fixed trip count**, in both directions.  A traced evaluation cannot
   iterate to a convergence test, so the count is a claim about the argument range
   and starving it must fail as surely as padding it must not help.
-* **the two arrangements that were measured on the way in** -- the degenerate
-  form's logarithm and the third kind's carried scale.  Each replaced an obvious
-  transcription that fails by far more than the tolerances above, and each is run
-  here in both forms so the claim is a measurement rather than a comment.
+* **the three arrangements that were measured on the way in** -- the degenerate
+  form's logarithm, the third kind's carried scale, and the gaps between the pole
+  argument and the other three.  Each stands against an obvious transcription that
+  fails by far more than the tolerances above, and each is run here in both forms
+  so the claim is a measurement rather than a comment.  The gaps carry two exact
+  statements with them -- the factorisation of the two roots' difference and the
+  quartering under the step -- and both are asserted as identities here, since
+  everything the argument buys follows from them.
 """
 
 import numpy as np
@@ -189,6 +193,92 @@ def test_the_degenerate_form_taken_as_a_ratio_is_what_this_repairs():
         accumulated(squared, pole, True) - accumulated(squared, pole, False)
     )
     assert abs(strayed - float(settled)) / float(settled) > 1e-9
+
+
+def test_the_two_roots_differ_by_the_product_of_the_gaps_exactly():
+    """The factorisation the carried gaps rest on, checked as an IDENTITY.
+
+    The degenerate form's two arguments are, in the roots ``a, b, c`` of the three
+    and ``q`` of the pole,
+
+        s = q^2 (a + b + c) + a b c,   t = q (q^2 + a b + b c + c a)
+
+    and ``t - s`` is ``(q - a)(q - b)(q - c)`` term for term -- a polynomial
+    identity, not an approximation.  Its conjugate ``t + s`` is the same product
+    with the signs flipped, so it is a SUM OF POSITIVES and cannot cancel, and
+    multiplying the two gives ``t^2 - s^2 = (q^2 - a^2)(q^2 - b^2)(q^2 - c^2)``:
+    the three gaps between the pole argument and the other three.
+
+    Run over integers, where Python's arithmetic is exact, so what is asserted is
+    the algebra rather than its round-off on some particular sample.
+    """
+    rng = np.random.default_rng(20260728)
+    roots = rng.integers(1, 10**6, size=(4000, 4))
+    for a, b, c, q in (tuple(int(term) for term in row) for row in roots):
+        x, y, z, pole = a * a, b * b, c * c, q * q
+        below = pole * (a + b + c) + a * b * c
+        above = q * (pole + a * b + b * c + c * a)
+        assert above - below == (q - a) * (q - b) * (q - c)
+        assert above + below == (q + a) * (q + b) * (q + c)
+        assert above**2 - below**2 == (pole - x) * (pole - y) * (pole - z)
+
+
+def test_the_gaps_quarter_exactly_where_the_subtraction_loses_them():
+    """Why the gaps are carried rather than re-formed at each trip.
+
+    The step replaces all four of ``x, y, z, pole`` by ``(term + step)/4`` with the
+    SAME ``step``, so every gap between two of them is exactly quartered -- and a
+    quarter is exact in binary, so carrying costs nothing at all.  Re-subtracting
+    the quartered terms instead keeps only the digits by which they still differ,
+    and at the configuration the arc reaches -- a pole argument a part in 1e12 from
+    the amplitude's squared cosine -- that is already the fourth digit at the FIRST
+    trip and nothing at all by the eighth.  Both are asserted, so the carried form
+    losing its exactness fails as surely as the subtraction regaining accuracy.
+    """
+    co_amplitude, pole, complement = 0.4, 1e-12, 1e-300
+    sine, cosine = np.cos(co_amplitude), np.sin(co_amplitude)
+    squared_sine, squared_cosine = sine * sine, cosine * cosine
+    x, y, z = squared_cosine, squared_cosine + complement * squared_sine, 1.0
+    argument = squared_cosine + pole * squared_sine
+    start = pole * squared_sine
+    gap = start
+    strayed = []
+    for trip in range(1, 9):
+        root_x, root_y, root_z = np.sqrt(x), np.sqrt(y), np.sqrt(z)
+        step = root_x * root_y + root_y * root_z + root_z * root_x
+        x, y, z, argument = (0.25 * (term + step) for term in (x, y, z, argument))
+        gap = 0.25 * gap
+        # the quartering is exact to the last bit, at every trip
+        assert gap == start * 0.25**trip
+        strayed.append(abs(gap - (argument - x)) / abs(gap))
+    assert strayed[0] > 1e-4  # measured 1.7e-04 at the first trip
+    assert strayed[-1] > 0.9  # measured 1.0 -- the subtraction returns zero
+
+
+@pytest.mark.parametrize("squared_cosine", SQUARED_COSINES)
+@pytest.mark.parametrize("complement", COMPLEMENTS)
+def test_the_carried_gaps_reproduce_the_reference_implementation(
+    squared_cosine, complement
+):
+    """Supplying the gaps must be the same function everywhere, not a near one.
+
+    The argument exists for the configurations where the two roots nearly meet, but
+    it changes the arithmetic at every argument, so it is held to the independent
+    implementation over the same grid as the subtraction is.
+    """
+    radical = squared_cosine + complement * (1.0 - squared_cosine)
+    for pole in POLES:
+        weight = squared_cosine + pole * (1.0 - squared_cosine)
+        if weight == 0.0:
+            continue
+        gaps = (weight - squared_cosine, weight - radical, weight - 1.0)
+        first, third = symmetric_kinds(squared_cosine, radical, 1.0, weight, gaps=gaps)
+        assert float(first) == pytest.approx(
+            float(elliprf(squared_cosine, radical, 1.0)), rel=2e-15
+        )
+        expected = float(elliprj(squared_cosine, radical, 1.0, weight))
+        if np.isfinite(expected):
+            assert float(third) == pytest.approx(expected, rel=2e-13)
 
 
 def test_the_trip_count_is_bounded_by_the_argument_range_in_both_directions():

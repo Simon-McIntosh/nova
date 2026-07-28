@@ -407,12 +407,23 @@ def cable_sensitivity(modules, conductor: Conductor, policy: str, diameters) -> 
     return result
 
 
-def placement_spread(modules, conductor: Conductor, rung: str) -> dict:
-    """Return the ladder rung under each way of placing turns on sites."""
+def placement_spread(modules, conductor: Conductor, rungs) -> dict:
+    """Return each rung under each way of placing turns on lattice sites.
+
+    Two rungs, not one, because the placement moves two things at once.  Where
+    the spare sites go changes the current DISTRIBUTION inside the outline, and
+    that shows up on the pitch rung, whose conductors fill their cells and
+    carry no concentration effect at all.  Anything left after subtracting the
+    pitch rung at the same placement is CONCENTRATION.  Quoting a rung's offset
+    from the continuum without that subtraction confuses the two.
+    """
     return {
-        policy: active_inductance(
-            winding_coilset(modules, rung, conductor, policy), modules
-        ).tolist()
+        policy: {
+            rung: active_inductance(
+                winding_coilset(modules, rung, conductor, policy), modules
+            ).tolist()
+            for rung in rungs
+        }
         for policy in ("smear", "corner", "edge")
     }
 
@@ -476,7 +487,7 @@ def stage_ladder(args) -> None:
         },
         "continuum_limit": continuum_limit(MODULES, args.deltas),
         "ladder": measure_ladder(MODULES, conductor, args.policy, RUNGS),
-        "placement": placement_spread(MODULES, conductor, "cable"),
+        "placement": placement_spread(MODULES, conductor, ("pitch", "cable")),
         "machine_description": MACHINE_DESCRIPTION.tolist(),
         "policy": args.policy,
     }
@@ -508,6 +519,33 @@ def report_ladder(payload: dict) -> None:
     print("\ngap the winding has to close (machine - continuum):")
     for name, value in zip(names, gap):
         print(f"  {name:<6}{value:+.4e}")
+    report_placement(payload)
+
+
+def report_placement(payload: dict) -> None:
+    """Print the placement spread, split into distribution and concentration."""
+    names = [module["name"] for module in payload["modules"]]
+    finest = payload["continuum_limit"][
+        min(payload["continuum_limit"], key=lambda key: float(key))
+    ]
+    continuum = np.array(finest["matrix"])
+    print(
+        "\nturn placement: distribution is the pitch rung against the continuum,"
+        "\nconcentration is the cable rung against the pitch rung at the same"
+        " placement\n"
+    )
+    print(f"{'placement':<11}" + "".join(f"{name:>30}" for name in names))
+    print(f"{'':<11}" + "".join(f"{'distribution  concentration':>30}" for _ in names))
+    for policy, rungs in payload["placement"].items():
+        pitch = np.array(rungs["pitch"])
+        cable = np.array(rungs["cable"])
+        row = f"{policy:<11}"
+        for i in range(len(names)):
+            row += (
+                f"{pitch[i, i] - continuum[i, i]:>+15.2e}"
+                f"{cable[i, i] - pitch[i, i]:>+15.2e}"
+            )
+        print(row)
 
 
 def stage_sensitivity(args) -> None:

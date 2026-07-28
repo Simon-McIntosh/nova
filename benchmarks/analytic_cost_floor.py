@@ -31,15 +31,31 @@ appears in the floor rather than beside it.
 the flux alone and for the flux with both field components, so the gap to the floor
 is the coefficient algebra and the pole bookkeeping the floor deliberately ignores.
 
-Measured, one SLURM compute core, 4096 pairs against a hexagonal cell, median of
-three in a fresh process, at the 128 residual nodes the acceptance gate needs:
+Every figure below is per pair of THIS reduction's own primitives -- the special
+functions and quadratures one polygon corner needs -- and none of them is the cost
+of a whole kernel call. In particular the third-kind row is what the closed form
+spends on its own third-kind integrals; the axisymmetric rectangle kernel's per-pair
+cost is a different measurement entirely and is recorded as ``cylinder rectangle``
+in ``BASELINE.md``.
 
-    third-kind integrals        12.7 us/pair
-    moment stacks and all       26.8 us/pair
-    graded g_p quadrature       73.3 us/pair
-    floor                      100.1 us/pair
-    assembled psi              189.8 us/pair       1.90 x floor
-    assembled psi + field      189.6 us/pair       1.89 x floor
+Re-measured 2026-07-28 on sun_debug node 98dci4-clu-3141, one core
+(``OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1``), 4096 pairs against a hexagonal cell,
+this module run as a script in a fresh process three times, median below, at the 128
+residual nodes the acceptance gate needs:
+
+    third-kind integrals         5.17 us/pair       5.06-5.20
+    moment stacks and all       19.09 us/pair      19.04-19.98
+    graded g_p quadrature       73.08 us/pair      72.29-74.05
+    floor                       93.05 us/pair      91.38-93.09
+    assembled psi              173.77 us/pair       1.87 x floor
+    assembled psi + field      173.68 us/pair       1.87 x floor
+
+The third kind fell from 12.7 and the floor from 100.1 when the complete integrals
+moved onto one complement-native descent (``nova/biot/completeelliptic.py``), which
+also took the moment stacks from 26.8 -- they are built from the same first and
+second kinds. The graded quadrature is untouched, 73.3 against 73.08, and is now 79%
+of the floor rather than 73%, so the residual rule is what a further reduction has
+to attack.
 
 Three things to read from that. The field is FREE: eq 11b's rows share every
 reduction the flux uses and differ only in polynomial weights, so both components
@@ -56,8 +72,9 @@ fresh process per variant, median of three:
     rectangle      109.4         113.2      0.97 x
 
 Through this module's own harness, where the floor model has already run in the
-process, the same pair is 334.9 to 189.8 -- 1.77x, and that is the figure the table
-above belongs to.
+process, the same pair is 334.9 to 173.8 -- 1.93x, and that is the figure the table
+above belongs to. The edge-limit column predates the complement-native descent and
+was not re-measured with it, so read the ratio and not the difference.
 
 The rectangle gains nothing, and that is the honest shape of the win rather than a
 defect: two of its four edges are horizontal and dropped, so each of its corners

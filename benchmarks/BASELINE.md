@@ -111,6 +111,48 @@ accuracy columns and the near/far + order-vs-distance evidence are archived in
 | polygon hex closed form, by edge limit (superseded) | 333.9 | 795 |
 | faithful Part V full-turn floor (special functions + g_p only) | 12.5–16.1 | ~30–38 |
 
+Re-measured 2026-07-28 on sun_debug node 98dci4-clu-3141, one core
+(`OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1`), fresh process per variant, first
+run, three processes per variant, `benchmarks/kernel_cost.py` unchanged — the same
+512-target spiral and the same 0.1 × 0.08 m section at R = 6.2 m as the table
+above, so the figures replace those rows directly. What this prices is the corner
+antiderivative moving onto the complement-native complete integrals
+(`nova/biot/completeelliptic.py`) in place of Carlson `elliprf`/`elliprj` for the
+three ring poles per corner.
+
+| method | µs/pair (median of 3) | spread | row it replaces |
+|---|---|---|---|
+| point filament | 0.38 | 0.38–0.39 | 0.42 |
+| hybrid rectangle (switch=3) | 20.6 | 20.2–21.1 | 33.9 |
+| cylinder rectangle | 30.6 | 30.4–32.6 | 61.0 |
+| polygon rectangle 16×48, block 64 | 783.2 | 778.1–810.2 | not previously recorded |
+
+**The rectangle kernel is 2.0× cheaper than the 61.0 on record, but only 1.12× of
+that belongs to the complement-native descent.** Measured either side of that
+change on the same node in the same session, `cylinder rectangle` goes 34.3 → 30.6
+µs/pair and `hybrid rectangle` 21.6 → 20.6, while the point kernel and the 16×48
+quadrature are unchanged (0.39 → 0.38, 811 → 783) — as they must be, since neither
+reaches the corner antiderivative. The remaining 61.0 → 34.3 is older than this
+measurement pair and is recorded as unattributed: nothing was measured between the
+two, so assigning it would be a guess.
+
+The 12.70 → 5.06 µs/pair third-kind figure quoted further down is the closed
+form's own special-function cost inside `polygon_analytic_greens`, not a
+rectangle-kernel figure — the axisymmetric rectangle kernel's per-pair cost is the
+`cylinder rectangle` row. The two are easy to read as one number and are not
+comparable: one is a special-function call per polygon corner, the other a whole
+kernel call per source-target pair.
+
+`benchmarks/analytic_cost_floor.py` carried the superseded 12.7 in its module
+docstring, and its whole table has been re-measured on the same node and date as the
+rows above — this module run as a script in three fresh processes, medians: third
+kind 5.17 (5.06–5.20), moment stacks 19.09, graded residual 73.08, floor 93.05,
+assembled psi 173.77, psi + field 173.68. That reproduces the 5.06 and 92.9 recorded
+on 26 July, and additionally moves the two rows never re-measured with the descent:
+moment stacks 26.8 → 19.09, which falls because it is built from the same first and
+second kinds, and assembled psi 189.8 → 173.77. The graded residual is untouched at
+73.08 against 73.3 and is now 79% of the floor.
+
 Re-measured 2026-07-26 through the element's own dispatch, over a whole
 2,339-target column instead of the 512-target spiral above (sun_debug node
 98dci4-clu-3141, one core, fresh process per variant, median of 3, module import

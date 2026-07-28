@@ -514,7 +514,72 @@ def test_ellippinc():
     assert np.allclose(p_scipy, p_mpmath)
 
 
-@pytest.mark.parametrize("section", ["box", "skin"])
+#: Edges a generated curved profile carries. ``PolyGen.disc`` buffers a circle
+#: with ``quadrant_segments`` edges per quadrant, so a ``disc`` and the two discs a
+#: ``skin`` differences are regular polygons INSCRIBED in their circles -- not the
+#: circles themselves. Stated here rather than folded into an area constant so that
+#: raising the facet count moves the reference instead of silently breaking it.
+DISC_EDGES = 4 * 16
+
+
+def inscribed_area(diameter, edges=DISC_EDGES):
+    """Return the area of the regular polygon a generated disc actually is.
+
+    ``(n/2) R^2 sin(2 pi / n)``, which approaches ``pi R^2`` from below: at 64
+    edges it under-fills its circle by 1.6e-03, and that shortfall is the whole
+    difference between a hollow circular section and the square one a bounding-box
+    reference would stand in for.
+    """
+    return edges / 2 * (diameter / 2) ** 2 * np.sin(2 * np.pi / edges)
+
+
+#: Section geometry both hollow-section tests are built on: a ring at this major
+#: radius and height, whose section has these outer and inner widths.
+SHELL = dict(
+    radius=3.945, height=2.0, outer_width=0.05, inner_width=0.04, current=5.3e5
+)
+
+
+def swept_shell(section, *, nturn=1, **shell):
+    """Return a full ring swept from three arcs, carrying ``section``.
+
+    ``filament=False`` is what thickens the segments so the section is evaluated at
+    all; the three arcs close on themselves, so the result is one complete ring and
+    may be compared against an axisymmetric coil.
+    """
+    shell = {**SHELL, **shell}
+    segments = 3
+    theta = np.linspace(0, 2 * np.pi, 1 + 3 * segments)
+    points = np.stack(
+        [
+            shell["radius"] * np.cos(theta),
+            shell["radius"] * np.sin(theta),
+            shell["height"] * np.ones_like(theta),
+        ],
+        axis=-1,
+    )
+    coilset = CoilSet(field_attrs=["Ay", "Br", "Bz"])
+    for i in range(segments):
+        coilset.winding.insert(
+            points[3 * i : 1 + 3 * (i + 1)],
+            {
+                section: (
+                    0,
+                    0,
+                    shell["outer_width"],
+                    1 - shell["inner_width"] / shell["outer_width"],
+                )
+            },
+            nturn=nturn,
+            minimum_arc_nodes=4,
+            Ic=shell["current"],
+            filament=False,
+            ifttt=False,
+        )
+    return coilset
+
+
+@pytest.mark.parametrize("section", ["box"])
 def test_box_section(section):
     radius = 3.945
     height = 2
@@ -563,6 +628,78 @@ def test_box_section(section):
             atol=1e-4,
             rtol=1e-4,
         )
+
+
+def test_skin_section_area_is_the_inscribed_annulus():
+    """A hollow CIRCULAR section encloses its two inscribed polygons, not their box.
+
+    The area a square annulus of the same widths would have is 4/pi larger, and a
+    ``skin`` returning that figure means the section was taken as its bounding box.
+    Stated against the geometry's own closed form so the check does not depend on
+    any element, and so a change of facet count lands here rather than as a field
+    disagreement thousands of grid points wide.
+    """
+    shell = inscribed_area(SHELL["outer_width"]) - inscribed_area(SHELL["inner_width"])
+    square = SHELL["outer_width"] ** 2 - SHELL["inner_width"] ** 2
+    assert np.isclose(square / shell, 4 / np.pi, rtol=2e-3)  # the 64-gon under-fill
+
+    area = np.asarray(swept_shell("skin").subframe["area"], dtype=float)
+    assert np.allclose(area, shell, rtol=1e-6)  # every swept member carries the shell
+    assert np.asarray(swept_shell("box").subframe["area"], dtype=float)[0] > shell
+
+
+def test_a_hollow_square_carries_four_thirds_the_inscribed_moment():
+    """The two hollow profiles differ in the far field by a pure number, 4/3.
+
+    Away from the section only the total current and the section's mean square
+    radius survive, and for a square of side ``s`` against the circle INSCRIBED in
+    it the ratio of those is ``(s^2/6) / (s^2/8) = 4/3`` -- for a shell, ``(a^2 +
+    b^2)/6`` against ``((a/2)^2 + (b/2)^2)/2``, which is 4/3 for ANY pair of widths,
+    so the constant is geometry and carries no fitted figure.
+
+    The excess over a near-filament ring of the same current isolates that moment,
+    and the ratio of the two excesses cancels the arc sweep the two share.  This is
+    the statement a bounding-box evaluation cannot make: taking a circular section
+    as its enclosing square returns the SQUARE's moment for both profiles and the
+    ratio collapses to 1, which is what the ratio has to be resolved against.
+
+    Section size and standoff are both pinned by that resolution, from opposite
+    sides.  The operator store is single precision, so an excess of 3e-05 -- what a
+    2 cm section gives -- carries barely two digits and the ratio scatters by several
+    percent; a WIDER section lifts the excess clear of that floor.  But the next
+    multipole enters as the section's own moment over the squared standoff, so a wide
+    section must be read from further out: at a fifth of a metre it costs 66% at 0.3 m
+    of standoff and 0.3% beyond 1.5 m.  The window below is where neither term
+    dominates, and the 64-gon's moment differs from its circle's by about the same
+    1.6e-03 as its area does.
+    """
+    widths = dict(outer_width=0.2, inner_width=0.16)
+    offset = np.array([1.5, 2.0, 3.0])
+    targets = np.stack(
+        [
+            SHELL["radius"] + offset,
+            np.zeros_like(offset),
+            np.full_like(offset, SHELL["height"]),
+        ],
+        axis=-1,
+    )
+
+    def flux(coilset):
+        coilset.point.solve(targets)
+        return np.asarray(coilset.point.ay, dtype=float)
+
+    # two thousand times narrower than the shells, so a millionth of their moment:
+    # the filament limit rather than a fourth section to be accounted for
+    filament = CoilSet(field_attrs=["Ay", "Br", "Bz"])
+    filament.coil.insert({"rect": (SHELL["radius"], SHELL["height"], 1e-4, 1e-4)})
+    filament.saloc["Ic"] = (SHELL["current"],)
+
+    reference = flux(filament)
+    circular = flux(swept_shell("skin", **widths)) / reference - 1.0
+    square = flux(swept_shell("box", **widths)) / reference - 1.0
+
+    assert np.all(circular > 0.0)  # a finite section always adds flux outside itself
+    assert np.allclose(square / circular, 4 / 3, rtol=1.5e-2)  # measured within 0.4%
 
 
 if __name__ == "__main__":

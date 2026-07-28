@@ -1098,6 +1098,23 @@ def stage_figures(args) -> None:
                 "o-",
                 label=f"{run} one tile",
             )
+            # The two host ROUTES, from the first run only -- they are the same
+            # code in every run.  Plotted together because the contrast is the
+            # point: the fixed-node rule is flat in the tile, the closed form
+            # amortises its per-call corner work over the targets in one call
+            # and falls by more than an order of magnitude across the sweep.
+            if path is device[0]:
+                for field, style, name in (
+                    ("host_quadrature_us_per_pair", ":", "host quadrature, one tile"),
+                    ("host_closed_us_per_pair", "-.", "host closed form, one tile"),
+                ):
+                    axis.plot(
+                        [int(tile) for tile in tiles],
+                        [payload["tiles"][tile][field] for tile in tiles],
+                        style,
+                        color="0.45" if "quadrature" in field else "0.65",
+                        label=name,
+                    )
             build = payload.get("build", {})
             device_builds = build.get("device", {})
             if device_builds:

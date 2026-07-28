@@ -18,8 +18,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-28">
-<meta name="plan-impl" content="0.0">
-<meta name="plan-version" content="2">
+<meta name="plan-impl" content="0.25">
+<meta name="plan-version" content="3">
 </head>
 <body>
   <main class="plan-doc">
@@ -130,37 +130,43 @@
         <tr><td>PF3</td><td>754</td><td>275</td><td>479</td><td>17.50 mm</td></tr>
         <tr><td>PF4</td><td>402</td><td>118</td><td>284</td><td>17.45 mm</td></tr>
         <tr><td>PF5</td><td>518</td><td>116</td><td>402</td><td>17.49 mm</td></tr>
-        <tr><td>PF6</td><td>896</td><td>161</td><td>735</td><td>16.46 mm (spread 2.3, tilted |dz| ≤ 8.8 mm)</td></tr>
-        <tr><td>CS3U (…each module)</td><td>~1558</td><td colspan="2">mixed</td><td>~8.0 mm — unreconciled, see below</td></tr>
+        <tr><td>PF6</td><td>896</td><td>161</td><td>735</td><td>17.50 mm exactly, tilt-corrected (polar read 16.46, spread 2.3)</td></tr>
+        <tr><td>CS3U (…each module)</td><td>~1558</td><td colspan="2">mixed</td><td>8.150 mm exactly, tilt-corrected — half the cable-space radius, see below</td></tr>
       </tbody>
     </table>
 
-    <p><strong>The PF entry decodes the cross-section convention.</strong> The nine
-    <code>(delta_r, delta_phi, delta_z)</code> points are a POLAR outline in the element's local
-    frame — radius <code>delta_r</code> at angle <code>delta_phi</code> (45° steps, closed), offset
-    <code>delta_z</code> along the tangent. PF1's constant 17.50 mm is a circle: a
-    <strong>35 mm cable space</strong>, the ITER PF NbTi conductor, stored exactly. PF6's spread
-    and tilt are a different supplier's conductor and a section plane not normal to the path — to
-    be handled, not averaged away.</p>
+    <p><strong>The cross-section convention is fully decoded</strong>
+    <span class="badge badge-shipped">✓ landed 2026-07-28</span>: the nine
+    <code>(delta_r, delta_phi, delta_z)</code> points are a circle of radius
+    <code>hypot(delta_r, delta_z)</code> sampled at 45° steps in a plane that may be
+    <em>tilted</em> relative to the element's local section plane — <code>delta_z</code> is the
+    out-of-plane component, not a free offset. The invariant is exact to 10⁻¹⁴ mm on every
+    conductor in all three files: PF1–PF6 read <strong>17.500 mm</strong> (the 35 mm NbTi cable
+    space — PF6's "spread" was pure tilt), the nine correction coils read 10.4652 mm, and all six
+    CS modules read <strong>exactly 8.150 mm</strong>.</p>
 
-    <p>Three things must still be resolved before the geometry is evaluated:</p>
-    <ul>
-      <li><strong>The CS section does not reconcile yet.</strong> The same convention read on
-      111004/1 gives a ~8.0 mm octagon where the CS cable space is ~32.7 mm diameter (16.3 mm
-      radius) inside a 49 mm jacket — off by a factor of two from the cable space and four from
-      the jacket. Whether it is a sub-cable, a different stored quantity, or a convention
-      difference between the two files has to be settled against the conductor documentation
-      (provenance DET-07879-A) before any CS number computed from it means anything.</li>
-      <li><strong>The DD versions are unparseable git-describe stamps</strong>
-      (<code>3.39.0-115-g143626e</code>, <code>3.39.0-132-g502f209</code>).
-      <code>ignore_unknown_dd_version=True</code> alone silently converts to 4.1.1, which the
-      project's DD-matching rule forbids; the correct combination is
-      <code>dd_version='3.39.0'</code> <em>plus</em> the ignore flag. nova's own reader
-      independently branches on <code>&lt;= 3.39</code> for this cross-section, corroborating it.</li>
-      <li><strong>Feeders are in the path.</strong> CS3U: 1496 of 1558 elements in the module, 57
-      running to r = 18.3 m. PF1: 1020 of 1082 within the nominal pack, the rest running to the
-      same feeder radius. They must be separated deliberately, not clipped by a magic radius.</li>
-    </ul>
+    <p class="landed-summary"><strong>The CS section reconciled:</strong> 4 × 8.150 = 32.600 —
+    the stored CS value is exactly HALF the documented cable-space radius (Ø32.6 mm in a 49 mm
+    jacket, DET-07879-A), with no CS conductor feature at Ø16.3 mm; the parsimonious mechanism is
+    a diameter→radius halving applied to an already-radius value in the CS extraction, which the
+    PF file (same halving, genuine diameters) got right. For modelling, the CS conductor section
+    is the Ø32.6 mm cable space. Feeders separate on a stated criterion (both endpoints inside
+    the jacket-inflated module outline + path contiguity): CS3U 1378 pack / 117 axial + 63 radial
+    feeder — reconciling the earlier "1496 in the module" as pack + axial run — and the z-span
+    puzzle was the feeder run (pack proper spans 1.888 m of the 2.075 m module). PolyLine
+    reduction is lossless 1:1 (CS3U 1378→1378: 1046 arcs, 332 lines). <em>New finding:</em> the
+    as-built CS packs sit on the OLDER itergeom outline revision (1.687, 5.464, 0.740 × 2.093),
+    and PF1's pack matches its outline's size but sits +9 mm outward / +48 mm higher — feeding §4
+    directly. Full record: <a href="archive/coil-conductor-fidelity-cs-section-landed.html">CS
+    section landed</a>.</p>
+
+    <p>Still standing from the original list: <strong>the DD versions are unparseable
+    git-describe stamps</strong> (<code>3.39.0-115-g143626e</code>,
+    <code>3.39.0-132-g502f209</code>). <code>ignore_unknown_dd_version=True</code> alone silently
+    converts to 4.1.1, which the project's DD-matching rule forbids; the correct combination is
+    <code>dd_version='3.39.0'</code> <em>plus</em> the ignore flag. nova's own reader
+    independently branches on <code>&lt;= 3.39</code> for this cross-section, corroborating
+    it.</p>
 
     <h2 id="s4">§4 — The field coil anomaly</h2>
 
@@ -277,7 +283,7 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-ccf-01" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ccf-01" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28" data-recommends-skill="" data-resolved-at="2026-07-28T21:56:05+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Load the as-built CS centrelines and decode the conductor section</h4>
     <div class="r-fu-body"><p>The data exists and is unused. Before any inductance number comes
         off it, three things must be settled: the DD-version handling, the feeder separation, and
@@ -318,6 +324,7 @@ Done-when
      model uses (r 1.346-2.160, and note z spans 4.493-9.713, taller than one
      2.075 m module -- reconcile that before trusting anything).
   4. A figure of the reduced path and its section.</pre>
+    <p class="r-fu-outcome">CS section reconciled without scaling: the nine points are a circle of radius hypot(delta_r, delta_z) in a possibly tilted plane, exact to 1e-14 mm on all 21 conductors across three files; CS stores exactly 8.150 mm = half the documented Ø32.6 mm cable-space radius (a diameter→radius halving applied to an already-radius value upstream — PF's 17.500 = Ø35/2 proves the decoder). Feeders separated by endpoint-in-inflated-outline + contiguity (CS3U 1378 pack / 117 axial + 63 radial of 1558); z-span puzzle was the feeder run; PolyLine reduction lossless 1:1. New: as-built CS packs sit on the OLDER itergeom revision (1.687, 5.464, 0.740x2.093) and PF1's pack sits +9 mm outward / +48 mm higher than its model outline — feeds the §4 gap hunt. Archive: docs/archive/coil-conductor-fidelity-cs-section-landed.html; figure docs/figures/coil-conductor-fidelity/cs-section-and-path.png.</p>
     </article>
 <article class="r-fu" data-id="f-ccf-02" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Settle the reconstruction mesh, whose discretisation error exceeds

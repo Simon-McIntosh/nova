@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="archive">
+  <meta name="plan-slug" content="coil-conductor-fidelity-cs-section-landed">
+  <meta name="plan-title" content="The CS section stores half its radius, and the tilt invariant proves it — landed">
+  <meta name="plan-status" content="historical">
+  <meta name="plan-modified" content="2026-07-28">
+  <title>coil-conductor-fidelity CS section landed | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>The CS section stores half its radius, and the tilt invariant proves it</h1>
+  <p><a href="/nova/coil-conductor-fidelity.html">← back to the evergreen plan</a> ·
+     landed 2026-07-28 ·
+     <strong>the ~8&nbsp;mm CS reading is exactly half the documented cable-space radius,
+     the feeders separate on a stated criterion, and the as-built packs sit on a
+     different outline than the shipped model</strong></p>
+
+  <h2>Quick status</h2>
+  <table>
+    <thead><tr><th>Item</th><th>Status</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>The CS cross-section reconciled without scaling anything to fit</td>
+          <td>✓ done</td>
+          <td>stored radius is <strong>exactly 8.150&nbsp;mm</strong> on all six modules;
+              the documented cable space is Ø32.6&nbsp;mm (radius 16.30) — the stored
+              value is the radius halved, to machine precision</td></tr>
+      <tr><td>The section convention completed: tilted planes</td>
+          <td>✓ done</td>
+          <td><code>hypot(delta_r, delta_z)</code> is the section radius, exact to
+              7·10⁻¹⁵&nbsp;mm on every one of 12 CS/PF and 9 CC conductors</td></tr>
+      <tr><td>Feeders separated by a stated criterion</td>
+          <td>✓ done</td>
+          <td>endpoint-in-inflated-outline + path contiguity; CS3U 1378 pack /
+              117 axial + 63 radial feeder — reconciles the earlier ad-hoc
+              1496 = 1378 pack + 117 axial run</td></tr>
+      <tr><td>Path reduced through <code>PolyLine</code></td>
+          <td>✓ done</td>
+          <td>lossless 1:1 — CS3U 1378 elements → 1378 segments (1046 arcs, 332
+              lines); PF1 1013 → 1013 (878 arcs, 135 lines)</td></tr>
+      <tr><td>Swept geometry checked against the model outline; the z-span puzzle</td>
+          <td>✓ done, findings</td>
+          <td>the tall z-span was the feeder run; the pack proper fits its module —
+              but on the OLDER geometry revision (CS), and offset from the model
+              outline (PF1) — see below</td></tr>
+    </tbody>
+  </table>
+
+  <h2>The decode</h2>
+  <p>The nine <code>(delta_r, delta_phi, delta_z)</code> points are a circle of radius
+  <code>hypot(delta_r, delta_z)</code> sampled at 45° steps, drawn in a plane that may be
+  TILTED relative to the element's local section plane; <code>delta_z</code> is the
+  out-of-plane component, not a free offset. The polar reading alone loses the tilt —
+  PF6 reads a 2.345&nbsp;mm spread and CS1L a 4.959&nbsp;mm spread on <code>delta_r</code>
+  — while the hypot invariant collapses every conductor in all three files to a constant
+  with spread below 10⁻¹⁴&nbsp;mm:</p>
+  <table>
+    <thead><tr><th>file</th><th>coils</th><th>stored radius</th><th>documented conductor</th><th>reading</th></tr></thead>
+    <tbody>
+      <tr><td>111005/1 (PF, PF.xls, 29/11/2023)</td><td>PF1–PF6</td>
+          <td><strong>17.500&nbsp;mm</strong> exactly, all six</td>
+          <td>Ø35&nbsp;mm NbTi cable space</td>
+          <td>radius = Ø/2 — <strong>correct</strong></td></tr>
+      <tr><td>111004/1 (CS, CS.xls, 19/10/2023)</td><td>CS3L–CS3U</td>
+          <td><strong>8.150&nbsp;mm</strong> exactly, all six</td>
+          <td>Ø32.6&nbsp;mm cable space in a 49&nbsp;mm jacket</td>
+          <td>stored = radius/2 = Ø/4 — <strong>halved once too often</strong></td></tr>
+      <tr><td>111003/2 (CC, CC.xls, 05/10/2023)</td><td>9 correction coils</td>
+          <td><strong>10.4652&nbsp;mm</strong> exactly, all nine</td>
+          <td>CC cable space</td>
+          <td>third witness of the constant-radius convention</td></tr>
+    </tbody>
+  </table>
+  <p>4 × 8.150 = 32.600: the CS entry's stored diameter (16.30&nbsp;mm) equals the
+  documented cable-space <em>radius</em>. No feature of the ITER CS conductor exists at
+  Ø16.3&nbsp;mm (the central spiral is ~Ø9&nbsp;mm, the cable space Ø32.6, the jacket
+  49&nbsp;mm square), and the factor is exact and uniform across all six modules, so the
+  parsimonious mechanism is a diameter→radius conversion applied to a value that was
+  already a radius during the CS extraction. The PF file (different date and contact)
+  applied the same halving to a genuine diameter and lands exactly. Nothing here is
+  scaled to fit: the identification is by exact factor against DET-07879-A's documented
+  conductor, with the PF entry proving the decoder. <em>Residual uncertainty:</em> the
+  source spreadsheet (CS.xls, provider Vincent Bontemps, contact Guillaume Davin) was
+  not opened; the claim should be reported upstream for confirmation and correction.
+  <strong>For modelling, the CS conductor section is the Ø32.6&nbsp;mm cable space.</strong></p>
+
+  <h2>Feeder criterion</h2>
+  <p>An element belongs to the winding pack iff BOTH its endpoints lie inside the
+  module's gross r-z outline inflated by one jacket width (49&nbsp;mm); elements between
+  the first and last pack element in path order stay pack (in-pack joggles and
+  crossovers — PF1 keeps 105 such). Everything else is feeder, split at r = 2.5&nbsp;m
+  (CS) into the axial run alongside the stack and the radial run to the terminal near
+  r ≈ 18.3–18.7&nbsp;m.</p>
+  <table>
+    <thead><tr><th>coil</th><th>elements</th><th>pack (lines/arcs)</th><th>axial feeder</th><th>radial feeder</th><th>pack z-span [m]</th></tr></thead>
+    <tbody>
+      <tr><td>CS3L</td><td>1561</td><td>1417 (333/1084)</td><td>106</td><td>38</td><td>−6.383 … −4.442</td></tr>
+      <tr><td>CS2L</td><td>1558</td><td>1448 (338/1110)</td><td>73</td><td>37</td><td>−4.245 … −2.241</td></tr>
+      <tr><td>CS1L</td><td>1542</td><td>1477 (341/1136)</td><td>26</td><td>39</td><td>−2.091 … −0.039</td></tr>
+      <tr><td>CS1U</td><td>1560</td><td>1483 (347/1136)</td><td>9</td><td>68</td><td>0.091 … 2.139</td></tr>
+      <tr><td>CS2U</td><td>1552</td><td>1404 (322/1082)</td><td>84</td><td>64</td><td>2.294 … 4.234</td></tr>
+      <tr><td>CS3U</td><td>1558</td><td>1378 (332/1046)</td><td>117</td><td>63</td><td>4.493 … 6.381</td></tr>
+      <tr><td>PF1</td><td>1082</td><td>1013 (135/878)</td><td>19</td><td>50</td><td>7.152 … 8.079</td></tr>
+    </tbody>
+  </table>
+  <p>The z-span that read "taller than one module" is the feeder run: CS3U's conductor
+  reaches z = 10.118&nbsp;m and r = 18.36&nbsp;m through its feeder, while the pack
+  proper spans 1.888&nbsp;m of the 2.075&nbsp;m module height.</p>
+
+  <h2>The packs sit on a different outline than the shipped model</h2>
+  <p>The CS3U pack's radial histogram resolves <strong>14 discrete layers</strong> at
+  r = 1.3458 … 2.0330&nbsp;m (layer pitch 52.9&nbsp;mm), centred at r = 1.689,
+  z = 5.436. That is the OLDER CS geometry revision nova carries
+  (<code>itergeom</code>: 1.687, 5.464, 0.740 × 2.093) — not the current outline the
+  shipped model and every converged comparison use (1.722, 5.313, 0.719 × 2.075).
+  PF1's pack resolves 16 layers × 16 double-pancake rows whose centreline spans match
+  the model outline's dimensions almost exactly (0.898 vs 0.959 − pitch, 0.921 vs
+  0.984 − pitch) but sit <strong>+9&nbsp;mm outward and +48&nbsp;mm higher</strong> than
+  the model outline's centre. A machine-table value computed on the as-built outline
+  would therefore differ from one computed on the shipped outline — exactly the
+  "machine value computed on a different outline" candidate the field-coil-gap hunt
+  (§4) lists, now with geometry behind it. The radial offset alone is first-order worth
+  roughly ΔL ≈ L·ΔR/R ~ +1.7·10⁻³&nbsp;H on PF1's 0.7035&nbsp;H — the same scale as the
+  +4.1·10⁻³ gap — so the wound-filament solve now in flight arbitrates with no outline
+  argument at all.</p>
+
+  <figure>
+    <img src="/nova/figures/coil-conductor-fidelity/cs-section-and-path.png"
+         alt="CS3U as-built conductor path in r-z with the winding pack and feeder separated and the module outline drawn; plan view showing the feeder exit to large radius; the stored nine-point section outline at Ø16.3 mm against the documented Ø32.6 mm cable space and 49 mm square jacket"
+         style="max-width:100%">
+    <figcaption>Left: CS3U's as-built path, pack (blue) against the module outline
+    (red) and the feeder (grey) exiting to r = 18.3&nbsp;m. Middle: plan view — the
+    winding is a full annulus in phi; the feeder is the radial spur. Right: the stored
+    section (blue, Ø16.3&nbsp;mm) against the documented cable space (red, Ø32.6) and
+    jacket (grey, 49&nbsp;mm square): the stored circle is exactly half the cable
+    space.</figcaption>
+  </figure>
+
+  <h2>What's next</h2>
+  <p>The wound-filament comparison (same plan, §3/§4 stage 1) is in flight: per-coil
+  turn counts off the unwrapped phi and the wound-vs-continuum-vs-machine ladder on
+  converged meshes. The outline findings above feed the field-coil gap hunt directly.
+  The upstream data defect should be reported to the machine-description contacts named
+  in the IDS provenance.</p>
+</main>
+</body>
+</html>

@@ -43,15 +43,37 @@ over source section x target section, assembled from the elliptic integrals dire
 and sharing no code with the closed form or with the target-side rule. Against its
 Richardson limit the shipped rule lands within 3e-06 of the self term on a coil
 filament, 2e-07 on a plasma cell and 2e-04 on a section ten times taller than it is
-wide (:mod:`tests.test_biotsectionaverage`). That same reference settles what this
-diagonal owes a machine inductance table. On the ITER PF1 / CS3U / CS2U trio the
-exact double integral sits 4.1e-03 H below the tabulated PF1 self term and 4.7e-04 H
-below the two CS ones, while the element reproduces the exact value to a few parts
-in a hundred thousand -- so the residual against the table belongs to the table's own
-self-inductance model and not to this element. A geometric-mean-distance self term
-agrees with two of those three tabulated entries to one part in ten thousand, which
-is agreement with a METHOD carried on both sides of a comparison and is not evidence
-about either -- so closer agreement with the table is not a reason to choose a rule.
+wide (:mod:`tests.test_biotsectionaverage`). What that settles is the RULE, and only
+the rule.
+
+What the current is assumed to do
+---------------------------------
+Every quantity above is the uniform-current limit: the element spreads an element's
+current at CONSTANT DENSITY over the whole of its section polygon. There is no
+jacket, no insulation, no cooling channel, no void and no turn structure inside a
+section -- an ``nturn`` count scales the result and never subdivides the area.
+
+That is a modelling choice and not a numerical detail, because it is not neutral in
+sign. Concentrating the same current into discrete sub-conductors inside the same
+outline lowers each conductor's own geometric mean distance and so RAISES the self
+inductance; smearing it over the gross outline is therefore the LOWEST self
+inductance that outline can carry. A real wound coil -- cable-in-conduit turns in
+steel jackets, insulated from each other -- sits above this element's value by an
+amount set by the winding pack, and none of the convergence figures quoted here
+bear on that gap. A comparison against a machine inductance table is therefore a
+comparison between two models, reported as a difference with neither side the
+reference. Against the tabulated ITER PF1 / CS3U / CS2U self terms this element
+reads LOW -- by 4.1e-03 H on PF1 and 4.7e-04 H on the two CS coils -- which is the
+direction winding granularity predicts on both.
+
+A first-order estimate of that effect, ``N mu_0 R ln(GMD_cell / GMD_conductor)`` for
+one conductor per turn cell, closes the CS gap and overshoots it: 6.0e-04 to 8.2e-04
+H for a 36 mm to 30 mm round conductor in the 51.9 mm turn cell, against 4.7e-04
+observed. On PF1 the same estimate gives about 1.0e-03 against 4.1e-03 observed, and
+reproducing that gap by granularity alone would need a 2.5 mm conductor in a 61.6 mm
+cell, which is not a conductor. So granularity plausibly carries the CS difference
+and does NOT carry PF1's, and what PF1's difference is remains open. Do not treat
+either side of it as correct, and do not tune a quadrature rule towards the table.
 
 A target that declares no section of its own -- a grid point, a field probe -- is a
 point, and takes the single integral. That is a property of what the target IS and
@@ -85,8 +107,10 @@ seam is the floor:
   a plasma cell, against 1.5e-03 and 8.8e-04 one half radius inside it. Two adjacent
   slender sections are what need the band that wide, and their price is paid on the
   MUTUAL term rather than on the self term: two undiscretised ITER CS sections sit
-  1.94 radii apart, and their reduced mutual inductance misses the exact double
-  integral over both sections by 3.4e-02 H at a 1.5 band against 8.8e-06 at 2.
+  1.94 radii apart, and their reduced mutual inductance misses the uniform-current
+  double integral over both sections by 3.4e-02 H at a 1.5 band against 8.8e-06 at
+  2 -- and by the same 8.8e-06 at 4, so two radii buys all of it and nothing above
+  it is worth paying for.
 
 The cost of the wider band is a build a half longer at worst, not the sevenfold its
 pair count suggests. Measured at 1.5 radii against 2, as averaged pairs per source
@@ -124,11 +148,17 @@ routes and neither is a fallback for the other:
   :class:`nova.frame.polygrid.PolyTarget` builds for
   :class:`nova.biot.inductance.Inductance` -- is a point at any distance, and the
   target-side average is carried by that target's own SUBDIVISION instead. That is a
-  convergent substitute rather than an equivalent one, and it has to be resolved:
-  measured on the ITER PF1/CS3U pair against the same exact double integral, the
-  reduced matrix deviates by 5.7e-03, 2.2e-03, 1.2e-03 and 3.1e-04 H at 60, 134, 265
-  and 816 targets. A coarse subdivision therefore leaves the near pairs on the single
-  integral with the whole target-side average missing.
+  convergent substitute rather than an equivalent one, and it has to be RESOLVED --
+  a coarse target frame leaves the near pairs on the single integral with the whole
+  target-side average missing, and returns a quietly wrong inductance rather than
+  refusing. Measured on the ITER PF1/CS3U pair against the uniform-current double
+  integral over each undivided section, the reduced matrix deviates by
+
+    targets     2      60      134     265     816
+    deviation   1.3e-01 5.7e-03 2.2e-03 1.2e-03 3.1e-04   [H]
+
+  so the lane is usable only from something like a hundred targets a coil upwards.
+  The two-target case is off by more than a sixth of the inductance it reports.
 
 Neither lane covers a tiled plasma grid, whose cells default to
 ``segment="polysection"``: exact on the source side for every pair and with no band,

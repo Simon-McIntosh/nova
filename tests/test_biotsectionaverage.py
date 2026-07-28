@@ -8,6 +8,14 @@ own flux), the quantity it produces must be the self-inductance -- checked again
 published closed form rather than against itself -- and its ORDER has to be measured
 against a reference built from neither of the two evaluations it sits between.
 
+Everything here is the UNIFORM-CURRENT limit -- constant current density over the
+whole of a section polygon, no jacket, no insulation, no void, no turn structure
+inside it. The oracle below shares that assumption by construction, so what these
+tests decide is whether the shipped rule evaluates the uniform-current double
+integral correctly, and nothing more. None of them bears on a real winding pack,
+which concentrates the same current into discrete sub-conductors and therefore sits
+ABOVE this limit.
+
 The brute-force oracle
 ----------------------
 That reference is below: a direct four-dimensional quadrature over source section x
@@ -368,7 +376,9 @@ def test_the_self_term_converges_onto_the_published_ring_inductance(aspect):
       at 0.005, shrinking only as the logarithm it sits beside grows.
 
     That is the whole case for the diagonal being the double integral, and this test
-    fails if it is reverted to a point evaluation.
+    fails if it is reverted to a point evaluation. Grover's constant is the geometric
+    mean distance of a UNIFORMLY FILLED square, so both sides of this comparison make
+    the same current assumption and it is silent about a subdivided conductor.
     """
     major = 1.0
     width = aspect * major

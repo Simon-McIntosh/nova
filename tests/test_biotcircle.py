@@ -275,8 +275,10 @@ def test_the_average_band_reaches_the_pairs_whose_sections_can_meet():
     Two undiscretised ITER CS sections are exactly that pair, at 1.94 radii.
 
     The band is pinned from both sides here. At the shipped width the reduced mutual
-    lands on the double integral over both sections; narrowed to 1.5 radii it misses
-    it by four orders more, which is what stops the value being lowered for cost.
+    lands on the uniform-current double integral over both sections; narrowed to 1.5
+    radii it misses it by four orders more, which is what stops the value being
+    lowered for cost. Widening further buys nothing -- the deviation at four radii is
+    the same 8.8e-06 H as at two.
     """
     coilset = CoilSet(dcoil=-1)
     coilset.coil.insert(1.722, 5.313, 0.719, 2.075, nturn=554, name="CS3U", part="CS")
@@ -306,10 +308,13 @@ def test_a_tiling_of_sub_sections_sums_to_the_whole_section_integral(coilset):
 
     A pair sum over a tiling IS the area integral split up: summing the double
     integral over every ordered pair of sub-sections of one section reconstructs the
-    double integral over the whole of it, exactly, for a uniform current density.
-    That identity is what makes the reduced inductance of a discretised coil
-    independent of ``dcoil`` -- and it holds only where every pair takes the double
-    integral, so the bands are opened here and what is left is the quadrature.
+    double integral over the whole of it, exactly -- and only because the current is
+    taken UNIFORM over the section, which is what lets the sub-sections tile it with
+    no gaps and no weighting. That identity is what makes the reduced inductance of a
+    discretised coil independent of ``dcoil``, and it holds only where every pair
+    takes the double integral, so the bands are opened here and what is left is the
+    quadrature. A subdivided real conductor tiles nothing, and this identity would
+    not hold for one.
 
     It is also the check that ties the element to the readable statement of the
     quantity on something other than the diagonal: 64 sub-elements interacting

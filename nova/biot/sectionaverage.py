@@ -18,6 +18,20 @@ This module supplies the target-side rule that closes that gap: nodes and weight
 over an arbitrary simple polygon, so a caller can average a kernel over a section
 instead of sampling it at one point.
 
+What the current is assumed to do
+---------------------------------
+An UNWEIGHTED area mean: the current sits at constant density over the whole of the
+polygon, with no jacket, no insulation, no cooling channel, no void and no turn
+structure anywhere inside it. Every figure quoted here and in
+:mod:`nova.biot.circle` is that uniform-current limit, and it is the LOWEST self
+inductance a given outline can carry -- concentrating the same current into discrete
+sub-conductors inside the outline shrinks each one's own geometric mean distance and
+raises the result. A real winding pack therefore sits above what this rule returns,
+by an amount this module neither models nor bounds, and no convergence figure below
+bears on that gap. The weights are where the assumption lives: a caller with a known
+current distribution would scale them by it, and what came back would stop being an
+area mean.
+
 The rule
 --------
 A signed fan triangulation from the section's own area centroid, with a collapsed

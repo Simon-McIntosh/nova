@@ -1,120 +1,137 @@
 {
  "device": "gpu",
  "kernel": "quadrature",
+ "mapping": "vmap",
  "targets": 1376,
  "sections": 1376,
  "pairs": 1893376,
+ "workers": 13,
+ "visible_cores": 13,
  "compilation_cache": "/tmp/cswinding-kernel-cache",
  "tiles": {
   "8": {
    "tile_pairs": 64,
-   "host_us_per_pair": 492.66893620369956,
-   "cold_seconds": 1.8132303897291422,
-   "warm_us_per_pair": 10.273906809743494,
-   "worst_absolute": 1.624609192833748e-18,
-   "worst_relative": 6.843411524797131e-14
+   "host_quadrature_us_per_pair": 486.01657908875495,
+   "host_closed_us_per_pair": 1668.1588385836221,
+   "cold_seconds": 1.8644432248547673,
+   "warm_us_per_pair": 15.090331241178015,
+   "host_closed_sections": 8,
+   "same_route_absolute": 1.624609192833748e-18,
+   "same_route_relative": 6.843411524797131e-14,
+   "cross_route_absolute": 1.624609192833748e-18,
+   "cross_route_relative": 6.843411524797131e-14
   },
   "16": {
    "tile_pairs": 256,
-   "host_us_per_pair": 448.03854325436987,
-   "cold_seconds": 0.15884824795648456,
-   "warm_us_per_pair": 5.399453584686853,
-   "worst_absolute": 2.4360667563033678e-18,
-   "worst_relative": 1.0261549293699973e-13
+   "host_quadrature_us_per_pair": 444.41732825362124,
+   "host_closed_us_per_pair": 866.2054806336528,
+   "cold_seconds": 0.16242460487410426,
+   "warm_us_per_pair": 5.536472599487752,
+   "host_closed_sections": 16,
+   "same_route_absolute": 2.4360667563033678e-18,
+   "same_route_relative": 1.0261549293699973e-13,
+   "cross_route_absolute": 2.4360667563033678e-18,
+   "cross_route_relative": 1.0261549293699973e-13
   },
   "32": {
    "tile_pairs": 1024,
-   "host_us_per_pair": 451.75827654020395,
-   "cold_seconds": 0.9594188639894128,
-   "warm_us_per_pair": 2.782165059519078,
-   "worst_absolute": 4.8721335126067356e-18,
-   "worst_relative": 2.0113662329092662e-13
+   "host_quadrature_us_per_pair": 454.3726963674999,
+   "host_closed_us_per_pair": 446.546524472069,
+   "cold_seconds": 1.0290606711059809,
+   "warm_us_per_pair": 2.6361784269586983,
+   "host_closed_sections": 32,
+   "same_route_absolute": 4.8721335126067356e-18,
+   "same_route_relative": 2.0113662329092662e-13,
+   "cross_route_absolute": 4.8721335126067356e-18,
+   "cross_route_relative": 2.0113662329092662e-13
   },
   "64": {
    "tile_pairs": 4096,
-   "host_us_per_pair": 463.23261790348624,
-   "cold_seconds": 0.23086275020614266,
-   "warm_us_per_pair": 1.6749727365095168,
-   "worst_absolute": 6.299384028730232e-18,
-   "worst_relative": 2.500420864301811e-13
+   "host_quadrature_us_per_pair": 473.7346880574478,
+   "host_closed_us_per_pair": 241.4152040728368,
+   "cold_seconds": 0.22538402117788792,
+   "warm_us_per_pair": 1.6990899969944924,
+   "host_closed_sections": 32,
+   "same_route_absolute": 4.8721335126067356e-18,
+   "same_route_relative": 2.0113662329092662e-13,
+   "cross_route_absolute": 6.299384028730232e-18,
+   "cross_route_relative": 2.500420864301811e-13
   },
   "128": {
    "tile_pairs": 16384,
-   "host_us_per_pair": 486.65829302763086,
-   "cold_seconds": 0.21182356588542461,
-   "warm_us_per_pair": 2.2498048698101534,
-   "worst_absolute": 8.538092108323347e-18,
-   "worst_relative": 3.14496259858125e-13
+   "host_quadrature_us_per_pair": 494.5690505451239,
+   "host_closed_us_per_pair": 141.145473889992,
+   "cold_seconds": 0.22586390608921647,
+   "warm_us_per_pair": 2.261353699850588,
+   "host_closed_sections": 32,
+   "same_route_absolute": 4.8721335126067356e-18,
+   "same_route_relative": 2.0113662329092662e-13,
+   "cross_route_absolute": 8.538092108323347e-18,
+   "cross_route_relative": 3.14496259858125e-13
   },
   "256": {
    "tile_pairs": 65536,
-   "host_us_per_pair": 484.38195035771514,
-   "cold_seconds": 0.26360662607476115,
-   "warm_us_per_pair": 1.0192179094777505,
-   "worst_absolute": 1.2597921024513209e-17,
-   "worst_relative": 4.049064557733995e-13
+   "host_quadrature_us_per_pair": 487.4462835715576,
+   "host_closed_us_per_pair": 96.56589111273206,
+   "cold_seconds": 0.2664124183356762,
+   "warm_us_per_pair": 1.0188380651735922,
+   "host_closed_sections": 32,
+   "same_route_absolute": 4.8721335126067356e-18,
+   "same_route_relative": 2.0113662329092662e-13,
+   "cross_route_absolute": 1.2597921024513209e-17,
+   "cross_route_relative": 4.049064557733995e-13
   }
  },
  "build": {
-  "32": {
-   "tile": 32,
-   "workers": 8,
-   "tiles": 1849,
-   "numpy": {
-    "seconds": 110.56103120185435,
-    "us_per_pair": 58.393594934051315
+  "workers": 13,
+  "host": {
+   "64": {
+    "tile": 64,
+    "seconds": 68.83411837881431,
+    "us_per_pair": 36.35522916674464,
+    "tiles": 484
    },
-   "jax": {
-    "seconds": 12.126349986996502,
-    "us_per_pair": 6.404617987656177
-   },
-   "worst_absolute": 5.638391280428498e-17,
-   "worst_relative": 1.8122204649319589e-12
+   "256": {
+    "tile": 256,
+    "seconds": 70.53266812628135,
+    "us_per_pair": 37.25233029587433,
+    "tiles": 36
+   }
   },
-  "64": {
-   "tile": 64,
-   "workers": 8,
-   "tiles": 484,
-   "numpy": {
-    "seconds": 106.51564955199137,
-    "us_per_pair": 56.25699784511443
+  "device": {
+   "32": {
+    "tile": 32,
+    "seconds": 13.690904940944165,
+    "us_per_pair": 7.230948813624005,
+    "tiles": 1849,
+    "cross_route_absolute": 5.638391280428498e-17,
+    "cross_route_relative": 1.8122204649319589e-12
    },
-   "jax": {
-    "seconds": 6.146311599761248,
-    "us_per_pair": 3.2462181836894772
+   "64": {
+    "tile": 64,
+    "seconds": 6.619982201140374,
+    "us_per_pair": 3.496390680530636,
+    "tiles": 484,
+    "cross_route_absolute": 5.638391280428498e-17,
+    "cross_route_relative": 1.8122204649319589e-12
    },
-   "worst_absolute": 5.638391280428498e-17,
-   "worst_relative": 1.8122204649319589e-12
+   "128": {
+    "tile": 128,
+    "seconds": 5.544740682002157,
+    "us_per_pair": 2.9284942251312773,
+    "tiles": 121,
+    "cross_route_absolute": 5.638391280428498e-17,
+    "cross_route_relative": 1.8122204649319589e-12
+   },
+   "256": {
+    "tile": 256,
+    "seconds": 2.793500837869942,
+    "us_per_pair": 1.475407334766017,
+    "tiles": 36,
+    "cross_route_absolute": 5.638391280428498e-17,
+    "cross_route_relative": 1.8122204649319589e-12
+   }
   },
-  "128": {
-   "tile": 128,
-   "workers": 8,
-   "tiles": 121,
-   "numpy": {
-    "seconds": 109.341798836831,
-    "us_per_pair": 57.74964868934168
-   },
-   "jax": {
-    "seconds": 5.470344583969563,
-    "us_per_pair": 2.889201396853854
-   },
-   "worst_absolute": 5.638391280428498e-17,
-   "worst_relative": 1.8122204649319589e-12
-  },
-  "256": {
-   "tile": 256,
-   "workers": 8,
-   "tiles": 36,
-   "numpy": {
-    "seconds": 114.38308891374618,
-    "us_per_pair": 60.41224189687953
-   },
-   "jax": {
-    "seconds": 2.7698668357916176,
-    "us_per_pair": 1.462924868484452
-   },
-   "worst_absolute": 5.638391280428498e-17,
-   "worst_relative": 1.8122204649319589e-12
-  }
+  "host_spread": 0.024675986087588638
  }
 }

@@ -42,6 +42,14 @@ Stages, each writing its own JSON beside the figures:
 
 Run the ladder and the device stage on a compute node; the coupling matrix of a
 three-module winding is a few million pairs and a login node will not hold it.
+
+A device run LOOKS idle for most of its wall clock and is not.  JAX takes a
+large fraction of the card on first use and holds it for the life of the
+process, so ``nvidia-smi`` reports a big resident footprint at zero utilisation
+throughout every host phase -- that is the allocator, not the workload.
+``XLA_PYTHON_CLIENT_PREALLOCATE=false`` shows true usage, at a cost in speed.
+The host phases themselves are the other half of the illusion, which is why the
+host reference is assembled once rather than at every tile width.
 """
 
 from __future__ import annotations
@@ -50,6 +58,7 @@ import argparse
 from dataclasses import dataclass, replace
 import json
 import math
+import os
 import pathlib
 import time
 
@@ -629,8 +638,6 @@ def report_sensitivity(payload: dict) -> None:
 
 def stage_device(args) -> None:
     """Time the tiled polygon operator over the winding, host against device."""
-    import os
-
     os.environ.setdefault("JAX_PLATFORMS", "cuda" if args.device == "gpu" else "cpu")
     from nova.biot.polygon import pad_batch
     from nova.biot.tiledassembly import (
@@ -646,6 +653,7 @@ def stage_device(args) -> None:
     edge, weight, norm = pad_batch(sections)
     pairs = len(target_r) * len(sections)
     print(f"{len(target_r)} targets x {len(sections)} sections = {pairs} pairs")
+    print(f"{args.workers} host workers, {len(os.sched_getaffinity(0))} visible cores")
 
     cache = None if args.no_cache else compilation_cache()
     payload = {
@@ -655,6 +663,8 @@ def stage_device(args) -> None:
         "targets": len(target_r),
         "sections": len(sections),
         "pairs": pairs,
+        "workers": args.workers,
+        "visible_cores": len(os.sched_getaffinity(0)),
         "compilation_cache": str(cache),
         "tiles": {},
     }
@@ -671,9 +681,17 @@ def stage_device(args) -> None:
         )
         tile_pairs = (rows.stop - rows.start) * (columns.stop - columns.start)
 
+        # tile_coupling is the fixed-node QUADRATURE host route whatever kernel
+        # the device is running, so this column is the same code in every run
+        # and is not a host measurement of the closed form.  The closed form's
+        # own host route is polygon_analytic_greens, timed separately below.
         host_start = time.perf_counter()
         host = tile_coupling(*block)
         host_seconds = time.perf_counter() - host_start
+
+        closed_host = host_closed_tile(
+            sections[columns], target_r[rows], target_z[rows], cap=args.closed_cap
+        )
 
         forget_evaluators()
         cold_start = time.perf_counter()
@@ -690,43 +708,108 @@ def stage_device(args) -> None:
             evaluate(*block)
         warm_seconds = (time.perf_counter() - warm_start) / args.repeats
 
-        worst = max(
-            float(np.max(np.abs(np.asarray(got) - want)))
-            for got, want in zip(first, host)
+        # Against the host route of the SAME kernel where one exists -- that is
+        # the comparison that says a traced kernel reproduces its own host
+        # arithmetic.  The cross-route figure is kept as well because two
+        # independent reductions agreeing is a stronger check than either.
+        taken = closed_host["sections"]
+        same_route = (
+            closed_host["result"]
+            if args.kernel == "closed"
+            else tuple(component[:, :taken] for component in host)
         )
-        scale = max(float(np.max(np.abs(component))) for component in host)
-        payload["tiles"][str(tile)] = {
-            "tile_pairs": tile_pairs,
-            "host_us_per_pair": 1e6 * host_seconds / tile_pairs,
-            "cold_seconds": cold_seconds,
-            "warm_us_per_pair": 1e6 * warm_seconds / tile_pairs,
-            "worst_absolute": worst,
-            "worst_relative": worst / scale,
-        }
+        against = tuple(component[:, :taken] for component in first)
+        payload["tiles"][str(tile)] = (
+            {
+                "tile_pairs": tile_pairs,
+                "host_quadrature_us_per_pair": 1e6 * host_seconds / tile_pairs,
+                "host_closed_us_per_pair": closed_host["us_per_pair"],
+                "cold_seconds": cold_seconds,
+                "warm_us_per_pair": 1e6 * warm_seconds / tile_pairs,
+                "host_closed_sections": taken,
+            }
+            | deviation(against, same_route, "same_route")
+            | deviation(first, host, "cross_route")
+        )
         entry = payload["tiles"][str(tile)]
         print(
             f"tile {tile:>4} pairs {tile_pairs:>7}"
-            f" host {entry['host_us_per_pair']:>8.2f} us/pair"
+            f" host quad {entry['host_quadrature_us_per_pair']:>8.2f}"
+            f" closed {entry['host_closed_us_per_pair']:>8.2f}"
             f" cold {cold_seconds:>7.1f} s"
             f" warm {entry['warm_us_per_pair']:>8.3f} us/pair"
-            f" agreement {worst:.2e} ({entry['worst_relative']:.1e} relative)"
+            f" same-route {entry['same_route_relative']:.1e}"
+            f" cross-route {entry['cross_route_relative']:.1e}"
         )
-    payload["build"] = {
-        str(tile): full_build(sections, target_r, target_z, args, tile, print_row=True)
-        for tile in args.build_tile
-    }
+    payload["build"] = full_build(sections, target_r, target_z, args, print_row=True)
     name = f"device-{args.device}-{args.kernel}{args.label}.json"
     print(f"wrote {_write(name, payload)}")
 
 
-def full_build(sections, target_r, target_z, args, tile, *, print_row=False) -> dict:
-    """Assemble the whole winding operator on the host and on the device.
+def deviation(got, want, label: str) -> dict:
+    """Return the worst absolute and relative deviation of a component triple."""
+    worst = max(
+        float(np.max(np.abs(np.asarray(one) - np.asarray(other))))
+        for one, other in zip(got, want)
+    )
+    scale = max(float(np.max(np.abs(np.asarray(one)))) for one in want)
+    return {f"{label}_absolute": worst, f"{label}_relative": worst / scale}
+
+
+def host_closed_tile(sections, target_r, target_z, *, cap: int = 32) -> dict:
+    """Return the shipped host closed form over one tile, timed.
+
+    Section by section with all targets at once, through the driver that keeps
+    its value-dependent shortcuts.  This is the closed form's OWN host route --
+    the thing a closed-form device kernel has to be compared against if the
+    comparison is to be like for like, and the only column that could show the
+    host closed form to be tile-sensitive.
+
+    ``cap`` bounds the SECTIONS evaluated, not the targets.  A whole
+    256-section tile through this route is tens of seconds and the sweep would
+    spend longer measuring the host than the device, but the amortisation this
+    column exists to detect is over TARGETS within one call -- so capping
+    sections keeps the cost bounded while leaving the per-pair rate free to
+    move with the tile if the route really does amortise.
+    """
+    from nova.biot.polygonanalytic import polygon_analytic_greens
+
+    taken = list(sections[:cap])
+    start = time.perf_counter()
+    columns = [
+        polygon_analytic_greens(target_r, target_z, section) for section in taken
+    ]
+    seconds = time.perf_counter() - start
+    result = tuple(
+        np.stack([column[i] for column in columns], axis=1) for i in range(3)
+    )
+    return {
+        "seconds": seconds,
+        "sections": len(taken),
+        "us_per_pair": 1e6 * seconds / (len(target_r) * len(taken)),
+        "result": result,
+    }
+
+
+def full_build(sections, target_r, target_z, args, *, print_row=False) -> dict:
+    """Assemble the whole winding operator: the host ONCE, the device per tile.
 
     A tile is a microbenchmark; the operator is the workload.  Two central
     solenoid modules and a poloidal field coil wound turn by turn is a couple of
-    million pairs, which is the regime the tiled path exists for, so the two
-    backends are timed over the SAME complete build and compared over every
-    pair of one tile of the result rather than over a tile evaluated on its own.
+    million pairs, which is the regime the tiled path exists for, so the
+    backends are timed over the same complete build and compared over every
+    pair of it rather than over a tile evaluated on its own.
+
+    The host reference is HOISTED OUT of the tile sweep.  Its cost does not
+    depend on the tile -- it is the same pair list through the same kernel,
+    redistributed over the same pool -- so paying it at every tile width buys
+    one number repeated and leaves the device idle for the whole of it, which
+    from outside is indistinguishable from a stall.  It is taken at two widths
+    instead, which is what evidences the independence rather than assuming it,
+    and every device build is compared against the first host store.
+
+    A device figure is only as honest as the host it is quoted against, so the
+    worker count is carried into the result and printed with every ratio.
     """
     import shutil
     import tempfile
@@ -735,46 +818,64 @@ def full_build(sections, target_r, target_z, args, tile, *, print_row=False) -> 
 
     import zarr
 
-    plan = TilePlan(tile, tile, 16, 16, 48)
+    pairs = len(target_r) * len(sections)
     root = pathlib.Path(tempfile.mkdtemp(prefix="cs-winding-"))
-    result = {
-        "tile": tile,
-        "workers": args.workers,
-        "tiles": plan.tile_count(len(target_r), len(sections)),
-    }
-    try:
-        stores = {}
-        for backend, kwargs in (
-            ("numpy", {"workers": args.workers}),
-            ("jax", {"batched": args.batched, "kernel": args.kernel}),
-        ):
-            path = root / backend
-            start = time.perf_counter()
-            assemble(
-                path, target_r, target_z, sections, plan=plan, backend=backend, **kwargs
+    result = {"workers": args.workers, "host": {}, "device": {}}
+
+    def build(path, tile, backend, **kwargs):
+        """Assemble the whole operator once and return its rate."""
+        plan = TilePlan(tile, tile, 16, 16, 48)
+        start = time.perf_counter()
+        assemble(
+            path, target_r, target_z, sections, plan=plan, backend=backend, **kwargs
+        )
+        seconds = time.perf_counter() - start
+        entry = {
+            "tile": tile,
+            "seconds": seconds,
+            "us_per_pair": 1e6 * seconds / pairs,
+            "tiles": plan.tile_count(len(target_r), len(sections)),
+        }
+        if print_row:
+            print(
+                f"build {backend:<6} tile {tile:>4} {seconds:>8.2f} s"
+                f" {entry['us_per_pair']:>8.3f} us/pair"
+                + (f" ({args.workers} workers)" if backend == "numpy" else "")
             )
-            seconds = time.perf_counter() - start
-            stores[backend] = zarr.open_group(str(path), mode="r")
-            pairs = len(target_r) * len(sections)
-            result[backend] = {
-                "seconds": seconds,
-                "us_per_pair": 1e6 * seconds / pairs,
-            }
+        return entry
+
+    try:
+        reference = root / "host"
+        for index, tile in enumerate(args.host_tile):
+            entry = build(
+                reference if index == 0 else root / f"host-{tile}",
+                tile,
+                "numpy",
+                workers=args.workers,
+            )
+            result["host"][str(tile)] = entry
+        host_store = zarr.open_group(str(reference), mode="r")
+        want = {name: np.asarray(host_store[name][:]) for name in COMPONENTS}
+        scale = max(float(np.max(np.abs(block))) for block in want.values())
+
+        for tile in args.build_tile:
+            path = root / f"device-{tile}"
+            entry = build(path, tile, "jax", batched=args.batched, kernel=args.kernel)
+            store = zarr.open_group(str(path), mode="r")
+            worst = max(
+                float(np.max(np.abs(np.asarray(store[name][:]) - want[name])))
+                for name in COMPONENTS
+            )
+            entry["cross_route_absolute"] = worst
+            entry["cross_route_relative"] = worst / scale
+            result["device"][str(tile)] = entry
             if print_row:
                 print(
-                    f"build tile {tile:>4} {backend:<6} {seconds:>8.2f} s"
-                    f" {result[backend]['us_per_pair']:>8.3f} us/pair"
+                    f"   against the host store over every pair"
+                    f" {worst:.3e} ({worst / scale:.2e} relative)"
                 )
-        worst, scale = 0.0, 0.0
-        for name in COMPONENTS:
-            got = np.asarray(stores["jax"][name][:])
-            want = np.asarray(stores["numpy"][name][:])
-            worst = max(worst, float(np.max(np.abs(got - want))))
-            scale = max(scale, float(np.max(np.abs(want))))
-        result["worst_absolute"] = worst
-        result["worst_relative"] = worst / scale
-        if print_row:
-            print(f"build agreement over every pair {worst:.3e} ({worst / scale:.2e})")
+        rates = [entry["us_per_pair"] for entry in result["host"].values()]
+        result["host_spread"] = (max(rates) - min(rates)) / min(rates) if rates else 0.0
     finally:
         shutil.rmtree(root, ignore_errors=True)
     return result
@@ -998,23 +1099,29 @@ def stage_figures(args) -> None:
                 label=f"{run} one tile",
             )
             build = payload.get("build", {})
-            if not build:
-                continue
-            widths = sorted((width for width in build if width.isdigit()), key=int)
-            if not widths:
-                continue
-            axis.plot(
-                [int(width) for width in widths],
-                [build[width]["jax"]["us_per_pair"] for width in widths],
-                "^-",
-                label=f"{run} whole operator",
-            )
-            axis.plot(
-                [int(width) for width in widths],
-                [build[width]["numpy"]["us_per_pair"] for width in widths],
-                "s--",
-                label=f"host pool x{build[widths[0]]['workers']} beside {run}",
-            )
+            device_builds = build.get("device", {})
+            if device_builds:
+                widths = sorted(device_builds, key=int)
+                axis.plot(
+                    [int(width) for width in widths],
+                    [device_builds[width]["us_per_pair"] for width in widths],
+                    "^-",
+                    label=f"{run} whole operator",
+                )
+            # One host reference per run, at the two widths that evidence it does
+            # not depend on the tile.  Plotted as isolated markers rather than a
+            # line, because a line through two tile-independent points would
+            # suggest a trend the measurement says is not there.
+            host_builds = build.get("host", {})
+            if host_builds and path is device[0]:
+                widths = sorted(host_builds, key=int)
+                axis.plot(
+                    [int(width) for width in widths],
+                    [host_builds[width]["us_per_pair"] for width in widths],
+                    "s",
+                    color="0.35",
+                    label=f"host pool x{build['workers']}, whole operator",
+                )
         axis.set_xscale("log", base=2)
         axis.set_yscale("log")
         axis.set_xlabel("tile width [sections]")
@@ -1061,7 +1168,14 @@ def parse_args(argv=None):
     device.add_argument("--tiles", type=int, nargs="+", default=[16, 32, 64, 128])
     device.add_argument("--repeats", type=int, default=3)
     device.add_argument("--build-tile", type=int, nargs="+", default=[128])
-    device.add_argument("--workers", type=int, default=8)
+    # Two widths, because the point of measuring the host at more than one is
+    # to EVIDENCE that its cost does not depend on the tile, not to pay for it
+    # at every rung of the device sweep.
+    device.add_argument("--host-tile", type=int, nargs="+", default=[64, 256])
+    device.add_argument("--closed-cap", type=int, default=32)
+    # Default to what the allocation actually holds: an under-provisioned host
+    # inflates every device ratio quoted against it.
+    device.add_argument("--workers", type=int, default=len(os.sched_getaffinity(0)))
     # Distinguishes runs of one kernel that differ in something the filename
     # would otherwise collapse -- a cold compile against a cache-served one.
     device.add_argument("--label", default="")

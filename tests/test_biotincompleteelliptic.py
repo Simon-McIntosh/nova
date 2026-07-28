@@ -40,6 +40,15 @@ of a near pole onto its far partner, and that too is run in both forms so the
 cost of the printed one is a measurement -- it reaches the eleventh decimal at a
 section a millionth as thick as it is wide, which is exactly the configuration
 whose weight needs every digit.
+
+The third kind is also the one place where the COMPILED path has to be held to the
+reference in its own right rather than to the host.  A compiled kernel contracts
+multiply-adds and reassociates sums, so the pole argument it forms can differ from
+the host's in its last bit; where the symmetric forms' degenerate term rests on a
+difference of two nearly-equal roots that bit is most of what the difference has,
+and a host-against-device check cannot see the loss because it cannot tell which
+of the two is right.  The sweep therefore holds both against
+:func:`_pole_integral` absolutely, across the whole small-pole side.
 """
 
 import numpy as np
@@ -47,6 +56,7 @@ import pytest
 from numpy.polynomial.legendre import leggauss
 from scipy.special import elliprf, elliprj
 
+from nova.biot import incompleteelliptic
 from nova.biot.completeelliptic import complete_kind, complete_pole
 from nova.biot.incompleteelliptic import TRIPS, incomplete_kind, incomplete_pole
 
@@ -607,3 +617,171 @@ def test_the_third_kind_traces_and_agrees_to_a_few_ulp():
     host = incomplete_pole(poles, complements, sine, cosine)
     device = traced(jnp.asarray(poles), jnp.asarray(complements))
     assert np.max(np.abs(np.asarray(device) - host) / np.abs(host)) < 1e-14
+
+
+# The poles the compiled path is held over. Below one the pole argument handed to
+# the symmetric forms is within ``p`` of the amplitude's squared cosine, so it is
+# the whole small-pole side -- not one corner of it -- that the degenerate form's
+# two roots nearly coincide on.
+FUSED_POLES = [1e-14, 1e-12, 1e-10, 1e-8, 1e-6, 1e-3, 0.3, 1.0, 3.0, 1e3, 1e12]
+FUSED_COMPLEMENTS = [1e-300, 1e-40, 1e-12, 1e-3, 0.4]
+
+
+def test_the_compiled_third_kind_holds_the_extended_reference_over_the_sweep():
+    """The compiled path against the defining integral DIRECTLY, not against numpy.
+
+    Host-against-device says only that the two agree, which two paths that had
+    drifted together would also say; this is the absolute statement.  It matters
+    here because the arithmetic the two paths do is not the same: a compiled kernel
+    contracts ``a b + c`` into one fused multiply-add and reassociates sums, so an
+    argument the host rounds and the device does not enters the descent differing
+    in its last bit -- and where the degenerate form's two roots are a part in
+    1e12 apart, that last bit is most of what their difference has.
+
+    Both the host and the compiled path are held to the same bound, over the whole
+    small-pole side rather than one point of it, so the claim is that the region
+    holds and not that a sample does.
+    """
+    jax, jnp = traced_namespace()
+
+    @jax.jit
+    def traced(pole, complement, sine, cosine):
+        return incomplete_pole(pole, complement, sine, cosine, xp=jnp)
+
+    worst_host = worst_device = 0.0
+    for co_amplitude in (1.2, 0.4, 1e-4):
+        _, sine, cosine = pair(co_amplitude)
+        poles = np.array([pole for pole in FUSED_POLES for _ in FUSED_COMPLEMENTS])
+        complements = np.array(
+            [term for _ in FUSED_POLES for term in FUSED_COMPLEMENTS]
+        )
+        host = np.asarray(incomplete_pole(poles, complements, sine, cosine))
+        device = np.asarray(
+            traced(
+                jnp.asarray(poles),
+                jnp.asarray(complements),
+                jnp.asarray(sine),
+                jnp.asarray(cosine),
+            )
+        )
+        for index, (pole, complement) in enumerate(zip(poles, complements)):
+            if complement / pole < SMALLEST_PARTNER:
+                continue  # the denormal partner, whose boundary its own test measures
+            expected = _pole_integral(co_amplitude, pole, complement)
+            worst_host = max(worst_host, abs(host[index] - expected) / abs(expected))
+            worst_device = max(
+                worst_device, abs(device[index] - expected) / abs(expected)
+            )
+    assert worst_host < 4e-15  # measured 2.2e-15
+    assert worst_device < 4e-15  # measured 2.2e-15
+
+
+def test_the_gaps_taken_by_subtraction_are_what_the_carried_ones_repair(monkeypatch):
+    """The cancellation the carried gaps remove, measured in BOTH arrangements.
+
+    The pole argument the symmetric forms receive is ``cos^2 phi + p sin^2 phi``,
+    so a small ``p`` puts it within ``p`` of ``cos^2 phi`` -- which is one of the
+    other three -- and the degenerate form's two roots then agree to all but their
+    last few digits.  Subtracting them keeps only those; the carried gaps are
+    products of quantities the caller holds and keep everything.
+
+    The two are run side by side against the same longdouble reference, and the
+    comparison is made on the COMPILED path because that is where the loss is at
+    its worst: the fusion the compiler applies to ``cos^2 phi + p sin^2 phi``
+    changes the argument in its last bit, and the subtraction multiplies that up by
+    the reciprocal of the relative gap.  The bound on the subtracted form is
+    two-sided, so an unexplained improvement fails as surely as a regression.
+    """
+    jax, jnp = traced_namespace()
+    co_amplitude = 0.4
+    _, sine, cosine = pair(co_amplitude)
+    poles = np.array([1e-14, 1e-12, 1e-10, 1e-8])
+    complements = np.array([1e-300, 1e-300, 1e-300, 1e-300])
+
+    @jax.jit
+    def traced(pole, complement):
+        return incomplete_pole(
+            pole, complement, jnp.asarray(sine), jnp.asarray(cosine), xp=jnp
+        )
+
+    def strayed():
+        traced.clear_cache()
+        device = np.asarray(traced(jnp.asarray(poles), jnp.asarray(complements)))
+        return max(
+            abs(device[index] - _pole_integral(co_amplitude, pole, complement))
+            / abs(_pole_integral(co_amplitude, pole, complement))
+            for index, (pole, complement) in enumerate(zip(poles, complements))
+        )
+
+    carried = strayed()
+
+    # the arrangement being held against, run here so its cost is a measurement:
+    # the module's own entry point supplies the gaps, so withholding them is what
+    # leaves the routine to subtract the two roots
+    subtracted_kinds = incompleteelliptic.symmetric_kinds
+
+    def without_gaps(*arguments, gaps=None, **keywords):
+        return subtracted_kinds(*arguments, **keywords)
+
+    monkeypatch.setattr(incompleteelliptic, "symmetric_kinds", without_gaps)
+    subtracted = strayed()
+
+    assert carried < 4e-15  # measured 1.2e-15
+    assert 1e-11 < subtracted < 1e-7  # measured 1.2e-09
+
+
+def test_the_third_kind_differentiates_where_a_gap_vanishes_exactly():
+    """The pole argument landing ON one of the descent's other three.
+
+    The gaps are supplied as products, so ``partner - k'^2`` is exactly zero when
+    the two coincide rather than a rounding error from it, and the square root of a
+    gap has an infinite derivative there.  The gap is therefore held at one and the
+    product zeroed, which leaves the value at the elementary limit the confluence
+    has and the derivative finite -- the root's own contribution is dropped, so it
+    is finite rather than exact, and the nearby non-degenerate poles below pin that
+    everywhere else it is the derivative itself.
+
+    The confluence is reached only on the DIRECT side of the reflection, and that is
+    geometry rather than a choice of sweep: the reflection runs above a pole of one,
+    ``k'^2`` is a modulus complement and so never exceeds one, and the two can
+    therefore not coincide above one at all.  Driven there ANYWAY -- with a
+    ``complement`` above one, which no ring produces -- the reflected arrangement
+    divides its three coefficients by ``pole - complement`` and returns nan for the
+    value as well as for the slope; a hundredth of a part per trillion off it the
+    value is an ordinary 0.6465.  So the sweep here stops below one because that is
+    where the argument lives, not to avoid a corner.
+    """
+    jax, jnp = traced_namespace()
+    _, sine, cosine = pair(0.4)
+
+    def value(pole, complement):
+        return incomplete_pole(
+            pole, complement, jnp.asarray(sine), jnp.asarray(cosine), xp=jnp
+        )
+
+    slope = jax.jit(jax.grad(value, argnums=(0, 1)))
+    # the confluence: the partner pole and the complement coincide exactly
+    for pole in (1e-8, 1e-3, 0.3):
+        for taken in slope(jnp.asarray(pole), jnp.asarray(pole)):
+            assert np.isfinite(float(taken))
+
+    # and away from it the slope is the derivative itself, against a central
+    # difference -- taken where the difference is well conditioned, since a step
+    # small enough to sit inside a tiny complement is all round-off
+    for pole, complement in ((0.3, 0.1), (3.0, 0.1), (0.3, 1e-3)):
+        taken = slope(jnp.asarray(pole), jnp.asarray(complement))
+        for index, argument in enumerate((pole, complement)):
+            step = 1e-5 * argument
+            moved = [
+                [pole, complement][other] + (step if other == index else 0.0)
+                for other in (0, 1)
+            ]
+            backed = [
+                [pole, complement][other] - (step if other == index else 0.0)
+                for other in (0, 1)
+            ]
+            difference = (
+                float(value(*(jnp.asarray(term) for term in moved)))
+                - float(value(*(jnp.asarray(term) for term in backed)))
+            ) / (2.0 * step)
+            assert float(taken[index]) == pytest.approx(difference, rel=1e-7)

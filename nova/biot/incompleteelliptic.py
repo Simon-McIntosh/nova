@@ -281,6 +281,23 @@ def incomplete_pole(pole, complement, sine, cosine, *, xp=np, trips: int = TRIPS
     reflection is wanted.  The arctangent's weight vanishes with ``mu`` there, so
     the same expression serves both and nothing selects on the result.
 
+    The symmetric form's own accuracy needs one thing from here beyond the
+    arguments.  Its degenerate term turns on the three gaps between the pole
+    argument and the other three, and with ``x = cos^2 phi``,
+    ``y = cos^2 phi + k'^2 sin^2 phi``, ``z = 1`` and the pole argument
+    ``cos^2 phi + partner sin^2 phi`` every one of them is a PRODUCT,
+
+        pole - x = partner sin^2 phi
+        pole - y = (partner - k'^2) sin^2 phi
+        pole - z = (partner - 1) sin^2 phi
+
+    the last because ``cos^2 phi - 1`` is ``-sin^2 phi``.  A small partner pole
+    puts the pole argument within a rounding error of both ``x`` and ``y``, so
+    taking the gaps by subtraction there leaves a handful of digits; taken as
+    products they are exact, and better than exact arithmetic on the assembled
+    pole would be -- a denormal partner rounds the pole argument onto ``x``
+    outright, where the product still carries digits.
+
     A pole of zero puts the root ON the far end of the range.  At an interior
     amplitude that is short of the range and the integral is finite, but zero is
     returned, as the complete routine returns it, so the arc and the ring agree in
@@ -310,6 +327,16 @@ def incomplete_pole(pole, complement, sine, cosine, *, xp=np, trips: int = TRIPS
     partner_weight = xp.where(reflected, complement * (pole - 1.0) / (held * gap), 1.0)
     first_weight = partner_weight + xp.where(reflected, (1.0 - complement) / gap, 0.0)
 
+    # the three gaps between the pole argument and the other three, as PRODUCTS of
+    # quantities already held: the symmetric form's degenerate term hangs on their
+    # difference, and the pole argument is within a rounding error of both
+    # squared_cosine and radical wherever the partner pole is small
+    gaps = (
+        partner * squared_sine,
+        (partner - complement) * squared_sine,
+        (partner - 1.0) * squared_sine,
+    )
+
     # the third kind's own weight rides INTO the accumulation: at a near pole and a
     # target on the source ring the symmetric form passes 1e308 while the answer it
     # belongs to is 1e-06, and this factor is small by the same amount
@@ -319,6 +346,7 @@ def incomplete_pole(pole, complement, sine, cosine, *, xp=np, trips: int = TRIPS
         1.0,
         weight,
         partner_weight * (1.0 - partner) * sine * squared_sine / 3.0,
+        gaps=gaps,
         xp=xp,
         trips=trips,
     )

@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="polybeam-prism-section">
   <meta name="plan-title" content="PolyBeam — polygon cross-section straight segment">
   <meta name="plan-summary" content="Give nova a polygon cross-section straight segment to sit beside Beam&#x27;s rectangular one: a prismatic conductor whose cross-section integral reduces by Stokes to a contour sum with an elementary axial integral, so it needs no elliptic machinery at all and is the flat-space limit of the arc case">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="M">
   <meta name="plan-tier" content="opus">
@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-28">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
 <meta name="plan-blocks" content="coil-conductor-fidelity">
 </head>
 <body>
@@ -130,24 +130,24 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="prism-derivation-source" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="prism-derivation-source" data-choice="derive-direct" data-by="reckon-ship" data-when="2026-07-28T21:09:58+00:00">
     <p class="r-dec-q">Derive the prism reduction directly, or transcribe it from the Urankar
         series&#x27; own straight-conductor part if that part covers a general polygon rather than only
         a rectangle?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="derive-direct">derive directly from Stokes</button>
+      <button class="r-opt chosen" data-value="derive-direct">derive directly from Stokes</button>
       <button class="r-opt" data-value="transcribe-series">transcribe the series&#x27; straight case</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Derived directly from Stokes, the way the ring and finite-arc closed forms were: the cross-section area integral reduces to a contour sum over polygon edges and the remaining axial integral is elementary (arsinh + arctan). No published straight-conductor series covering a general polygon was needed; Beam&#x27;s rectangle expressions pin the transcendental family and serve as the exact oracle.</p>
     </div>
-<div class="r-dec" data-key="beam-relationship" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="beam-relationship" data-choice="extend-beam" data-by="reckon-ship" data-when="2026-07-28T21:09:58+00:00">
     <p class="r-dec-q">Does the element class extend Beam , or supersede it once a
         rectangle is just a four-sided polygon evaluated by the same code?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="extend-beam">extend Beam, keep both</button>
+      <button class="r-opt chosen" data-value="extend-beam">extend Beam, keep both</button>
       <button class="r-opt" data-value="supersede-beam">supersede Beam once parity is pinned</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">PolyBeam is a peer of Beam, both kept — the same relationship PolyBow has to Bow, and for the same reasons argued in nova/biot/polybow.py&#x27;s docstring: the polygon element reads the frame&#x27;s poly column rather than the width/height descriptor, so subclassing the rectangle class would inherit a body that must be disabled. Supersession is deferred until rectangle parity is pinned in production use.</p>
     </div>
 </section>
 

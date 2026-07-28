@@ -20,7 +20,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-28">
 <meta name="plan-impl" content="1.0">
-<meta name="plan-version" content="16">
+<meta name="plan-version" content="17">
 </head>
 <body>
   <main class="plan-doc">
@@ -1306,7 +1306,7 @@ Done-when
   4. Every accuracy envelope and seam bound unchanged; fast lane green.
   5. Followup written; this followup resolved.</pre>
     </article>
-<article class="r-fu" data-id="f-boa-15" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28T08:20:00+00:00" data-recommends-skill="/reckon-ship biot-operator-assembly" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-boa-15" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28T08:20:00+00:00" data-recommends-skill="/reckon-ship biot-operator-assembly" data-resolved-at="2026-07-28T06:19:24+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Put the closed form&#x27;s numerators in the basis that vanishes where each pole sits, so a slender section stops losing four decades</h4>
     <div class="r-fu-body"><p>The closed form's accuracy DEGRADES as the section thins, and it is a cancellation in the numerator contraction rather than anything elliptic. Measured deviation of <code>polygon_analytic_greens</code> from <code>polygon_greens</code> (32x64), regular hexagon at r0 = 3, targets 1.05-12 section radii, six directions: aspect 1/3 (radius 1.0) 1.59e-10; 1/10 (0.3) 3.50e-06; 1/30 (0.1) 4.70e-04; 1/100 (0.03) 5.46e-02; 1/300 (0.01) 6.83e-01. The residual scales as <code>eps^-4</code> on a ~1.6e-10 baseline, and aspect 1/100 is the ELM-coil case. An EXACT POLE SPLIT already landed and bought 10^3 at the thin end and 44x at the fat end (the column above is post-split; pre-split it was 6.97e-09 / 6.79e-06 / 1.28e-03 / 1.07e+00 / 6.65e+02) - but it did not touch the mechanism that sets the <code>eps^-4</code> scaling. That mechanism, and its cure, are derived in the prompt: the fix is a COMPLEMENT BASIS for the moments, so the small numerator value at the pole is a coefficient rather than an alternating sum of O(1) terms.</p><p>Distinct from <a href="#f-boa-10">f-boa-10</a>, which is about the closed form's COST (stack length and residual node count); this is about its ACCURACY at slender aspect. Both move the accuracy tables, so they are cheaper done together than apart.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -1412,6 +1412,7 @@ Acceptance
   5. The envelope test asserts the NEW table in BOTH directions, so a regression and an
      unexplained improvement both fail.
   6. Followup written; this followup resolved.</pre>
+    <p class="r-fu-outcome">RETRACTED — already implemented; this followup should never have been written. It was raised from an untracked working note found in the develop worktree whose own status line claimed the cure was "SPECIFIED here and not yet implemented". That line was stale: the note was a snapshot taken BEFORE three commits landed it. (a) 611d920a added the complement-basis moment families and the shifted-pole recursions — stable_cn_moments is the note's A_m = integral cn^(2m) u du with the same three-term recursion, the same K and (E - k'^2 K)/k^2 seeds and the same two-direction split, and cn_pole_moments/_shifted_family are its T_m in both bases; (b) 17b9e234 applied it per family — "take each denominator root in the basis that vanishes at its own end", and nova/biot/polygonanalytic.py:102 carries the note's identity verbatim, G^2 = 4 r^2 (y + d)(x + d) with d = u^2/(2 r (r + c)) and c^2 = u^2 + r^2; (c) f6cd47be carried the numerator in the harmonic basis. The acceptance the note asked for (1e-10 or better at circumradius 0.03, aspect 1/100, the ELM-coil case) is MET AND EXCEEDED: ASPECT_ACCURACY in tests/test_biotpolygonanalytic.py is {1.0: 6e-12, 0.3: 3e-12, 0.1: 3e-12, 0.03: 9e-12, 0.01: 8e-11}, asserted in BOTH directions exactly as the note's item 5 asked, so an unexplained improvement fails too. The eps^-4 trend is gone — the envelope is flat across a 100x aspect range where the note measured nine decades of spread. The recovery is ~10 decades at both slender entries, and the test file records the note's own pre-fix figures as history ("removed a fourth-power trend (5.5e-02 at radius 0.03, 6.8e-01 at 0.01)") against the note's 5.46e-02 and 6.83e-01. Two further effects the note did not anticipate are recorded alongside: the modulus complement from the geometry (4.0e-09 -> 2.5e-10 at radius 0.03) and the harmonic numerator basis carrying the FAT end. Also confirmed implemented: the b1 = 0 rectangle branch (test_the_closed_form_reproduces_the_rectangle_kernel_for_vertical_edges) and the A_m/T_m pins (tests/test_biotincompletemoments.py, test_biotsinemoments.py). The working note has been deleted; nothing in it was unrecorded. Cost work on the same module remains genuinely open under f-boa-10.</p>
     </article>
 </section>
 

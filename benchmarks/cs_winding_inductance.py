@@ -388,6 +388,39 @@ def continuum_limit(modules, deltas) -> dict:
     return result
 
 
+def turn_count_equivalent(modules, delta: float, step: float = 0.005) -> dict:
+    """Return how many turns each coil's gap to the machine description is worth.
+
+    A pack's inductance goes as the square of its turn count, so a discrepancy
+    can always be restated as a turn count -- and that is the honest scale to
+    judge a competing explanation on.  The derivative is MEASURED by rebuilding
+    the continuum at a perturbed turn count rather than assumed to be exactly
+    quadratic, because the reduction is over elements whose own turn shares move
+    with it.
+    """
+    base = np.diag(reduced_inductance(continuum_coilset(modules, delta)))
+    perturbed = np.diag(
+        reduced_inductance(
+            continuum_coilset(
+                [
+                    replace(module, nturn=module.nturn * (1 + step))
+                    for module in modules
+                ],
+                delta,
+            )
+        )
+    )
+    counts = np.array([module.nturn for module in modules])
+    slope = (perturbed - base) / (step * counts)
+    gap = np.diag(MACHINE_DESCRIPTION) - base
+    return {
+        "self": base.tolist(),
+        "henry_per_turn": slope.tolist(),
+        "turns_equivalent": (gap / slope).tolist(),
+        "exponent": (counts * slope / base).tolist(),
+    }
+
+
 def cable_sensitivity(modules, conductor: Conductor, policy: str, diameters) -> dict:
     """Return the ladder's cable rungs against cable-space diameter.
 
@@ -488,6 +521,7 @@ def stage_ladder(args) -> None:
         "continuum_limit": continuum_limit(MODULES, args.deltas),
         "ladder": measure_ladder(MODULES, conductor, args.policy, RUNGS),
         "placement": placement_spread(MODULES, conductor, ("pitch", "cable")),
+        "turn_count": turn_count_equivalent(MODULES, min(args.deltas)),
         "machine_description": MACHINE_DESCRIPTION.tolist(),
         "policy": args.policy,
     }
@@ -519,6 +553,17 @@ def report_ladder(payload: dict) -> None:
     print("\ngap the winding has to close (machine - continuum):")
     for name, value in zip(names, gap):
         print(f"  {name:<6}{value:+.4e}")
+    counts = payload["turn_count"]
+    print(
+        "\nthe same gap restated as a turn count, from a measured dL/dN"
+        " (exponent is the local power of N):"
+    )
+    for index, name in enumerate(names):
+        print(
+            f"  {name:<6}dL/dN {counts['henry_per_turn'][index]:.3e} H/turn"
+            f"   exponent {counts['exponent'][index]:.3f}"
+            f"   gap = {counts['turns_equivalent'][index]:+.3f} turns"
+        )
     report_placement(payload)
 
 
@@ -631,10 +676,12 @@ def stage_device(args) -> None:
         first = tuple(np.asarray(component) for component in first)
         cold_seconds = time.perf_counter() - cold_start
 
+        # The evaluator converts its result on the way out, so the call has
+        # already blocked on the device by the time it returns -- there is no
+        # asynchronous dispatch left to wait for.
         warm_start = time.perf_counter()
         for _ in range(args.repeats):
-            warm = evaluate(*block)
-            warm[0].block_until_ready()
+            evaluate(*block)
         warm_seconds = (time.perf_counter() - warm_start) / args.repeats
 
         worst = max(
@@ -658,7 +705,73 @@ def stage_device(args) -> None:
             f" warm {entry['warm_us_per_pair']:>8.3f} us/pair"
             f" agreement {worst:.2e} ({entry['worst_relative']:.1e} relative)"
         )
-    print(f"wrote {_write(f'device-{args.device}-{args.kernel}.json', payload)}")
+    payload["build"] = {
+        str(tile): full_build(sections, target_r, target_z, args, tile, print_row=True)
+        for tile in args.build_tile
+    }
+    name = f"device-{args.device}-{args.kernel}{args.label}.json"
+    print(f"wrote {_write(name, payload)}")
+
+
+def full_build(sections, target_r, target_z, args, tile, *, print_row=False) -> dict:
+    """Assemble the whole winding operator on the host and on the device.
+
+    A tile is a microbenchmark; the operator is the workload.  Two central
+    solenoid modules and a poloidal field coil wound turn by turn is a couple of
+    million pairs, which is the regime the tiled path exists for, so the two
+    backends are timed over the SAME complete build and compared over every
+    pair of one tile of the result rather than over a tile evaluated on its own.
+    """
+    import shutil
+    import tempfile
+
+    from nova.biot.tiledassembly import COMPONENTS, TilePlan, assemble
+
+    import zarr
+
+    plan = TilePlan(tile, tile, 16, 16, 48)
+    root = pathlib.Path(tempfile.mkdtemp(prefix="cs-winding-"))
+    result = {
+        "tile": tile,
+        "workers": args.workers,
+        "tiles": plan.tile_count(len(target_r), len(sections)),
+    }
+    try:
+        stores = {}
+        for backend, kwargs in (
+            ("numpy", {"workers": args.workers}),
+            ("jax", {"batched": args.batched, "kernel": args.kernel}),
+        ):
+            path = root / backend
+            start = time.perf_counter()
+            assemble(
+                path, target_r, target_z, sections, plan=plan, backend=backend, **kwargs
+            )
+            seconds = time.perf_counter() - start
+            stores[backend] = zarr.open_group(str(path), mode="r")
+            pairs = len(target_r) * len(sections)
+            result[backend] = {
+                "seconds": seconds,
+                "us_per_pair": 1e6 * seconds / pairs,
+            }
+            if print_row:
+                print(
+                    f"build tile {tile:>4} {backend:<6} {seconds:>8.2f} s"
+                    f" {result[backend]['us_per_pair']:>8.3f} us/pair"
+                )
+        worst, scale = 0.0, 0.0
+        for name in COMPONENTS:
+            got = np.asarray(stores["jax"][name][:])
+            want = np.asarray(stores["numpy"][name][:])
+            worst = max(worst, float(np.max(np.abs(got - want))))
+            scale = max(scale, float(np.max(np.abs(want))))
+        result["worst_absolute"] = worst
+        result["worst_relative"] = worst / scale
+        if print_row:
+            print(f"build agreement over every pair {worst:.3e} ({worst / scale:.2e})")
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+    return result
 
 
 def stage_figures(args) -> None:
@@ -682,8 +795,9 @@ def stage_figures(args) -> None:
     lattice = derive_lattice(module)
     radius, height = lattice.centres()
     turns = site_turns(lattice, ladder["policy"])
-    figure, axes = plt.subplots(1, len(RUNGS), figsize=(3.0 * len(RUNGS), 8.4))
-    for axis, rung in zip(axes, RUNGS):
+
+    def draw_rung(axis, rung):
+        """Fill one axis with the current-carrying regions of one rung."""
         axis.add_patch(
             Rectangle(
                 (
@@ -710,89 +824,138 @@ def stage_figures(args) -> None:
                     alpha=0.55,
                 )
             )
-        else:
-            for region in rung_sections(rung, lattice, conductor):
-                face = "C0" if region["current"] else "0.75"
-                for site_r, site_z, count in zip(radius, height, turns):
-                    if count == 0.0:
-                        continue
-                    if region["section"] == "square":
-                        axis.add_patch(
-                            Rectangle(
-                                (
-                                    site_r - region["dl"] / 2,
-                                    site_z - region["dl"] / 2,
-                                ),
-                                region["dl"],
-                                region["dl"],
-                                facecolor=face,
-                                edgecolor="none",
-                            )
+            return
+        for region in rung_sections(rung, lattice, conductor):
+            face = "C0" if region["current"] else "0.75"
+            for site_r, site_z, count in zip(radius, height, turns):
+                if count == 0.0:
+                    continue
+                if region["section"] == "square":
+                    axis.add_patch(
+                        Rectangle(
+                            (site_r - region["dl"] / 2, site_z - region["dl"] / 2),
+                            region["dl"],
+                            region["dl"],
+                            facecolor=face,
+                            edgecolor="none",
                         )
-                    elif region["section"] == "disc":
-                        axis.add_patch(
-                            CirclePatch(
-                                (site_r, site_z), region["dl"] / 2, facecolor=face
-                            )
+                    )
+                elif region["section"] == "disc":
+                    axis.add_patch(
+                        CirclePatch((site_r, site_z), region["dl"] / 2, facecolor=face)
+                    )
+                else:
+                    axis.add_patch(
+                        Wedge(
+                            (site_r, site_z),
+                            region["dl"] / 2,
+                            0,
+                            360,
+                            width=region["dl"] * region["dt"] / 2,
+                            facecolor=face,
                         )
-                    else:
-                        axis.add_patch(
-                            Wedge(
-                                (site_r, site_z),
-                                region["dl"] / 2,
-                                0,
-                                360,
-                                width=region["dl"] * region["dt"] / 2,
-                                facecolor=face,
-                            )
-                        )
+                    )
+
+    # Two rows because the two things worth seeing are at different scales: the
+    # pack fills the outline, and what changes between rungs is the conductor.
+    figure, axes = plt.subplots(
+        2,
+        len(RUNGS),
+        figsize=(2.6 * len(RUNGS), 9.6),
+        gridspec_kw={"height_ratios": [3, 1]},
+    )
+    for column, rung in enumerate(RUNGS):
         matrix = np.array(ladder["ladder"][rung]["matrix"])
-        axis.set_title(f"{rung}\n{matrix[1, 1]:.6f} H", fontsize=9)
-        axis.set_xlim(
-            module.radius - 0.62 * module.width, module.radius + 0.62 * module.width
+        offset = matrix[1, 1] - continuum[1, 1]
+        windows = (
+            (0.62 * module.width, 0.56 * module.thickness),
+            (1.6 * lattice.pitch_radial, 1.6 * lattice.pitch_vertical),
         )
-        axis.set_ylim(
-            module.height - 0.56 * module.thickness,
-            module.height + 0.56 * module.thickness,
+        for row, (half_r, half_z) in enumerate(windows):
+            axis = axes[row, column]
+            draw_rung(axis, rung)
+            axis.set_xlim(module.radius - half_r, module.radius + half_r)
+            axis.set_ylim(module.height - half_z, module.height + half_z)
+            axis.set_aspect("equal")
+            axis.set_xticks([])
+            axis.set_yticks([])
+        axes[0, column].set_title(
+            f"{rung}\n{matrix[1, 1]:.6f} H\n{offset:+.2e} on the continuum", fontsize=9
         )
-        axis.set_aspect("equal")
-        axis.set_xticks([])
-        axis.set_yticks([])
+    axes[1, 0].set_xlabel("detail, a few turns", fontsize=8)
     figure.suptitle(
         f"{module.name} winding ladder, {lattice.n_radial}x{lattice.n_vertical} lattice"
-        f" at {1e3 * lattice.pitch:.1f} mm pitch, {module.nturn:g} turns"
+        f" at {1e3 * lattice.pitch_radial:.2f} x {1e3 * lattice.pitch_vertical:.2f} mm"
+        f" pitch, {module.nturn:g} turns"
+        f"\njacket {1e3 * conductor.jacket:.0f} mm, cable space"
+        f" {1e3 * conductor.cable:.0f} mm, channel {1e3 * conductor.channel:.0f} mm"
     )
     figure.tight_layout()
     figure.savefig(FIGURES / "lattice.png", dpi=130)
     plt.close(figure)
 
-    figure, axes = plt.subplots(1, len(names), figsize=(4.6 * len(names), 4.4))
+    # Everything is plotted as an OFFSET from the converged continuum, because
+    # the quantity under study is four decimal places into the value itself.
     sensitivity_path = FIGURES / "sensitivity.json"
     sensitivity = (
         json.loads(sensitivity_path.read_text()) if sensitivity_path.exists() else None
     )
-    for index, (axis, name) in enumerate(zip(axes, names)):
-        values = [
-            np.array(ladder["ladder"][rung]["matrix"])[index, index] for rung in RUNGS
+    rungs = [rung for rung in RUNGS if rung != "continuum"]
+    figure, axes = plt.subplots(
+        2, len(names), figsize=(4.6 * len(names), 7.6), squeeze=False
+    )
+    for index, name in enumerate(names):
+        axis = axes[0, index]
+        offsets = [
+            np.array(ladder["ladder"][rung]["matrix"])[index, index]
+            - continuum[index, index]
+            for rung in rungs
         ]
-        axis.plot(range(len(RUNGS)), values, "o-", color="C0", label="ladder")
-        axis.axhline(continuum[index, index], color="C7", ls=":", label="continuum")
-        axis.axhline(machine[index, index], color="C3", ls="--", label="machine")
-        if sensitivity is not None:
-            band = [
-                np.array(entry["cable"])[index, index]
-                for entry in sensitivity["sweep"].values()
-            ]
-            axis.axhspan(
-                min(band), max(band), color="C0", alpha=0.15, label="cable sweep"
-            )
-        axis.set_xticks(range(len(RUNGS)))
-        axis.set_xticklabels(RUNGS, rotation=35, ha="right")
-        axis.set_title(name)
-        axis.set_ylabel("reduced self-inductance [H]")
+        gap = machine[index, index] - continuum[index, index]
+        axis.axhline(0.0, color="C7", ls=":", label="converged continuum")
+        axis.axhline(gap, color="C3", ls="--", label="machine description")
+        axis.plot(range(len(rungs)), offsets, "o-", color="C0", label="winding ladder")
+        turns_equivalent = ladder["turn_count"]["turns_equivalent"][index]
+        axis.annotate(
+            f"gap {gap:+.2e} H\n= {turns_equivalent:+.3f} turns",
+            (0.02, gap),
+            xycoords=("axes fraction", "data"),
+            fontsize=8,
+            color="C3",
+            va="bottom",
+        )
+        axis.set_xticks(range(len(rungs)))
+        axis.set_xticklabels(rungs, rotation=30, ha="right")
+        axis.set_title(f"{name}: what the winding buys")
+        axis.set_ylabel("offset from the continuum [H]")
         axis.grid(alpha=0.3)
         axis.legend(fontsize=8)
-    figure.suptitle("self-inductance ladder against the machine description")
+
+        axis = axes[1, index]
+        if sensitivity is None:
+            continue
+        diameters = 1e3 * np.array(sensitivity["diameters"])
+        for rung, style in (("cable", "o-"), ("annulus", "s-")):
+            axis.plot(
+                diameters,
+                [
+                    np.array(entry[rung])[index, index] - continuum[index, index]
+                    for entry in sensitivity["sweep"].values()
+                ],
+                style,
+                label=rung,
+            )
+        axis.axhline(0.0, color="C7", ls=":")
+        axis.axhline(gap, color="C3", ls="--", label="machine description")
+        axis.axvspan(32.0, 35.0, color="0.5", alpha=0.15, label="plausible cable space")
+        axis.set_xlabel("cable-space diameter [mm]")
+        axis.set_ylabel("offset from the continuum [H]")
+        axis.set_title(f"{name}: conductor sensitivity")
+        axis.grid(alpha=0.3)
+        axis.legend(fontsize=8)
+    figure.suptitle(
+        "does the discrete winding close the gap to the machine description?"
+    )
     figure.tight_layout()
     figure.savefig(FIGURES / "ladder.png", dpi=130)
     plt.close(figure)
@@ -809,17 +972,35 @@ def stage_figures(args) -> None:
                 "o-",
                 label=f"{payload['device']} {payload['kernel']} warm",
             )
+            build = payload.get("build", {})
+            if not build:
+                continue
+            widths = sorted((width for width in build if width.isdigit()), key=int)
+            if not widths:
+                continue
             axis.plot(
-                [int(tile) for tile in tiles],
-                [payload["tiles"][tile]["host_us_per_pair"] for tile in tiles],
+                [int(width) for width in widths],
+                [build[width]["jax"]["us_per_pair"] for width in widths],
+                "^-",
+                label=f"{payload['kernel']} device, whole operator",
+            )
+            axis.plot(
+                [int(width) for width in widths],
+                [build[width]["numpy"]["us_per_pair"] for width in widths],
                 "s--",
-                label=f"{payload['device']} {payload['kernel']} host",
+                label=(
+                    f"{payload['kernel']} host pool"
+                    f" x{build[widths[0]]['workers']}, whole operator"
+                ),
             )
         axis.set_xscale("log", base=2)
         axis.set_yscale("log")
         axis.set_xlabel("tile width [sections]")
         axis.set_ylabel("us per pair")
-        axis.set_title("tiled polygon operator over the winding")
+        axis.set_title(
+            "tiled polygon operator over the winding\n"
+            "one tile (circles) against the whole 1.89M-pair build (triangles)"
+        )
         axis.grid(alpha=0.3, which="both")
         axis.legend(fontsize=8)
         figure.tight_layout()
@@ -856,6 +1037,11 @@ def parse_args(argv=None):
     )
     device.add_argument("--tiles", type=int, nargs="+", default=[16, 32, 64, 128])
     device.add_argument("--repeats", type=int, default=3)
+    device.add_argument("--build-tile", type=int, nargs="+", default=[128])
+    device.add_argument("--workers", type=int, default=8)
+    # Distinguishes runs of one kernel that differ in something the filename
+    # would otherwise collapse -- a cold compile against a cache-served one.
+    device.add_argument("--label", default="")
     device.add_argument("--batched", action="store_true", default=True)
     device.add_argument("--scan", dest="batched", action="store_false")
     device.add_argument("--no-cache", action="store_true")

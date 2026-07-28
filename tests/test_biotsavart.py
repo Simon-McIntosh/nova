@@ -812,6 +812,8 @@ def test_box_section(section):
     outside = np.any(offset > outer, axis=0)
     # the reference integrates the material itself, so no target may sit in it
     assert np.all(cavity | outside)
+    # the 6 x 5 grid the request resolves to straddles the 5 mm wall without landing
+    # in it; a count that moves means the bands below no longer hold what they name
     assert cavity.sum() == 12 and outside.sum() == 18
 
     reference = square_annulus_rows(targets)

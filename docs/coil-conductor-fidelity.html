@@ -13,13 +13,13 @@
   <meta name="plan-effort" content="M">
   <meta name="plan-tier" content="opus">
   <meta name="plan-owner" content="Simon McIntosh">
-  <meta name="plan-depends-on" content="nova-3d-native">
+  <meta name="plan-depends-on" content="nova-3d-native,polybeam-prism-section">
   <title>Coil Conductor Fidelity | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-28">
 <meta name="plan-impl" content="0.0">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
 </head>
 <body>
   <main class="plan-doc">
@@ -103,37 +103,63 @@
 
     <h2 id="s3">§3 — The as-built conductor geometry exists, and has not yet been used</h2>
 
-    <p>Located 2026-07-28 in the shared machine-description database, catalogued in
-    <code>/work/imas/shared/imasdb/ITER_MACHINE_DESCRIPTION/3/md_summary.yaml</code>:</p>
+    <p>Located 2026-07-28 in the shared machine-description database. The CS is catalogued in
+    <code>/work/imas/shared/imasdb/ITER_MACHINE_DESCRIPTION/3/md_summary.yaml</code>; the PF entry
+    is on disk but <strong>absent from that catalogue</strong>, which is why a catalogue search
+    alone missed it:</p>
 
-    <pre><code>111004/1  coils_non_axisymmetric  PBS-11
-          Central Solenoid Modules - conductor centerlines
+    <pre><code>111004/1  coils_non_axisymmetric   Central Solenoid Modules - conductor centerlines
           provenance DET-07879-A   status active   backend hdf5
-          /work/imas/shared/imasdb/ITER_MACHINE_DESCRIPTION/3/111004/1</code></pre>
+111005/1  coils_non_axisymmetric   Poloidal Field Coils - conductor centerlines
+          UNCATALOGUED in md_summary.yaml — comment field carries the description
+          stamped 3.39.0-132-g502f209
+          /work/imas/shared/imasdb/ITER_MACHINE_DESCRIPTION/3/11100{4,5}/1</code></pre>
 
-    <p>Six coils — CS3L, CS2L, CS1L, CS1U, CS2U, CS3U — one conductor each with
-    <code>turns = 1.00</code>, so the winding is resolved <strong>geometrically</strong> rather
-    than smeared into a turn count. Roughly 1560 elements per module as cylindrical
-    <code>(r, phi, z)</code> start / intermediate / end triples spanning a full turn in phi.
-    <code>111003/2</code> carries the ex-vessel correction coils with feeders, same provider.</p>
+    <p>Twelve coils in all — the six CS modules and <strong>all six PF coils</strong> — each one
+    conductor with <code>turns = 1.00</code>, so the winding is resolved
+    <strong>geometrically</strong> rather than smeared into a turn count. Paths are arc/line
+    element triples in cylindrical <code>(r, phi, z)</code>; phi is stored wrapped, so the true
+    turn count is read by unwrapping it along the path. <code>111003/2</code> carries the ex-vessel
+    correction coils with feeders, same provider.</p>
 
-    <p>Three things must be resolved before it can be evaluated, and each is a real question rather
-    than a chore:</p>
+    <table>
+      <thead><tr><th>coil</th><th>elements</th><th>lines</th><th>arcs</th><th>section radius</th></tr></thead>
+      <tbody>
+        <tr><td>PF1</td><td>1082</td><td>189</td><td>893</td><td>17.50 mm (spread 0)</td></tr>
+        <tr><td>PF2</td><td>320</td><td>108</td><td>212</td><td>17.50 mm</td></tr>
+        <tr><td>PF3</td><td>754</td><td>275</td><td>479</td><td>17.50 mm</td></tr>
+        <tr><td>PF4</td><td>402</td><td>118</td><td>284</td><td>17.45 mm</td></tr>
+        <tr><td>PF5</td><td>518</td><td>116</td><td>402</td><td>17.49 mm</td></tr>
+        <tr><td>PF6</td><td>896</td><td>161</td><td>735</td><td>16.46 mm (spread 2.3, tilted |dz| ≤ 8.8 mm)</td></tr>
+        <tr><td>CS3U (…each module)</td><td>~1558</td><td colspan="2">mixed</td><td>~8.0 mm — unreconciled, see below</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>The PF entry decodes the cross-section convention.</strong> The nine
+    <code>(delta_r, delta_phi, delta_z)</code> points are a POLAR outline in the element's local
+    frame — radius <code>delta_r</code> at angle <code>delta_phi</code> (45° steps, closed), offset
+    <code>delta_z</code> along the tangent. PF1's constant 17.50 mm is a circle: a
+    <strong>35 mm cable space</strong>, the ITER PF NbTi conductor, stored exactly. PF6's spread
+    and tilt are a different supplier's conductor and a section plane not normal to the path — to
+    be handled, not averaged away.</p>
+
+    <p>Three things must still be resolved before the geometry is evaluated:</p>
     <ul>
-      <li><strong>The DD version is unparseable.</strong> Stamped <code>3.39.0-115-g143626e</code>.
+      <li><strong>The CS section does not reconcile yet.</strong> The same convention read on
+      111004/1 gives a ~8.0 mm octagon where the CS cable space is ~32.7 mm diameter (16.3 mm
+      radius) inside a 49 mm jacket — off by a factor of two from the cable space and four from
+      the jacket. Whether it is a sub-cable, a different stored quantity, or a convention
+      difference between the two files has to be settled against the conductor documentation
+      (provenance DET-07879-A) before any CS number computed from it means anything.</li>
+      <li><strong>The DD versions are unparseable git-describe stamps</strong>
+      (<code>3.39.0-115-g143626e</code>, <code>3.39.0-132-g502f209</code>).
       <code>ignore_unknown_dd_version=True</code> alone silently converts to 4.1.1, which the
       project's DD-matching rule forbids; the correct combination is
       <code>dd_version='3.39.0'</code> <em>plus</em> the ignore flag. nova's own reader
       independently branches on <code>&lt;= 3.39</code> for this cross-section, corroborating it.</li>
-      <li><strong>Feeders are in the path.</strong> For CS3U, 1496 of 1558 elements lie in the
-      module (r 1.346–2.160 m, z 4.493–9.713 m); 57 run out to r = 18.3 m at z ≈ 9.98. They must be
-      separated deliberately, not clipped by a magic radius.</li>
-      <li><strong>The cross-section convention is undecoded.</strong> Nine points as
-      <code>(delta_r, delta_phi, delta_z)</code> in the element triad, with
-      <code>delta_phi</code> stepping in 45° increments and <code>delta_r</code> ≈ 8.1 mm roughly
-      constant — a polar octagon of ~8 mm radius, <em>not</em> a 49 mm square jacket. Whether that
-      is the cable space, an equivalent section, or a convention misread has to be settled before
-      any number computed from it means anything.</li>
+      <li><strong>Feeders are in the path.</strong> CS3U: 1496 of 1558 elements in the module, 57
+      running to r = 18.3 m. PF1: 1020 of 1082 within the nominal pack, the rest running to the
+      same feeder radius. They must be separated deliberately, not clipped by a magic radius.</li>
     </ul>
 
     <h2 id="s4">§4 — The field coil anomaly</h2>
@@ -179,6 +205,13 @@
     carries a fractional 248.64 turns.</strong> That a coil sits within a single turn of its
     description — and that 248.64 + 0.723 is 249.36 — is worth weighing against the turn count
     itself before anything more elaborate is attempted.</p>
+
+    <p><strong>And the turn count is now directly countable</strong>, not merely arguable: the
+    as-built PF1 centreline (§3, 111005/1) winds the conductor geometrically, so unwrapping phi
+    along the path and dividing by 2π reads the true winding turns off the data. Three candidate
+    values are already in play — 248.6 (the active <code>pf_active</code> description 111001/104),
+    248.64 (the DDD test), and 249.36 (what the inductance gap implies) — and the centreline
+    arbitrates between them with no model in the loop.</p>
 
     <p>The honest framing: <strong>the two coils' discrepancies have different causes and only one
     is in hand.</strong> Closing PF1 by tuning a conductor parameter would be reproducing the model
@@ -269,13 +302,17 @@ Open it as
   4.1.1, which is banned. Pin 3.39.0 and ignore only the git suffix.
 
 Done-when
-  1. The cross-section convention decoded and stated: delta_r ~8.1 mm roughly
-     constant with delta_phi in 45-degree steps reads as a polar octagon of ~8 mm
-     radius, which is NOT a 49 mm jacket. Establish what it is against the
-     conductor&#x27;s own documentation or against the swept area it implies.
+  1. The CS cross-section RECONCILED. The convention itself is decoded -- the PF
+     entry (111005/1) proves the nine (delta_r, delta_phi, delta_z) points are a
+     POLAR outline, radius at angle in 45-degree steps, delta_z along the tangent:
+     PF1 reads a constant 17.50 mm, the 35 mm PF NbTi cable space, exactly. But
+     the SAME reading on the CS gives ~8.0 mm where the CS cable space is
+     ~32.7 mm diameter inside a 49 mm jacket -- off by two from the cable space
+     and four from the jacket. Establish what the CS entry stores against the
+     conductor documentation (provenance DET-07879-A). Do NOT scale it to fit.
   2. Feeders separated from the winding pack by a stated criterion, not a radius
-     cut. For CS3U, 1496 of 1558 elements are in the module and 57 run to
-     r = 18.3 m at z ~ 9.98.
+     cut. CS3U: 1496 of 1558 elements in the module, 57 to r = 18.3 m. PF1: 1020
+     of 1082 in the nominal pack, the rest to the same feeder radius.
   3. The path reduced through PolyLine with the arc/line segmentation reported,
      and the swept geometry checked against the module outline the axisymmetric
      model uses (r 1.346-2.160, and note z spans 4.493-9.713, taller than one
@@ -345,10 +382,14 @@ is 249.36. A coil within one turn of its reference is a turn-count question
 before it is a physics question, and it is the cheapest thing to eliminate.
 
 Candidates, in the order their cost suggests
-  * THE TURN COUNT ITSELF -- what does the machine description entry use, and
-    what does 248.64 represent (a grading, a partial outer layer, a
-    turns_with_sign convention)? nova/frame/itergeom.py carries two CS geometry
-    revisions, so a PF revision may differ too;
+  * THE TURN COUNT ITSELF, and it is now COUNTABLE: unwrap phi along the as-built
+    PF1 centreline (111005/1, see f-ccf-04) and divide by 2 pi. Three candidates
+    are in play -- 248.6 (pf_active 111001/104, the active machine description),
+    248.64 (the DDD test), 249.36 (what the gap implies) -- and the centreline
+    arbitrates with no model in the loop. Also establish what 248.64 represents
+    (a grading, a partial outer layer, a turns_with_sign convention);
+    nova/frame/itergeom.py carries two CS geometry revisions, so a PF revision
+    may differ too;
   * a machine value computed on a different outline;
   * insulation or ground wrap shrinking the current-carrying outline;
   * a different conductor or grading within the pack;
@@ -363,6 +404,60 @@ Done-when
   1. The gap attributed, or the candidates eliminated one by one with the
      measurement that eliminates each.
   2. Whichever way it resolves, the decision reference-status locked with it.</pre>
+    </article>
+<article class="r-fu" data-id="f-ccf-04" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28T22:00:00+00:00" data-recommends-skill="/reckon-ship coil-conductor-fidelity §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Solve the true wound coil against the approximation, with our own elements</h4>
+    <div class="r-fu-body"><p>The as-built centrelines for all six PF coils (111005/1, uncatalogued) and the six CS modules (111004/1) are arc/line element paths with the conductor cross-section stored — PF1–PF5 a 35 mm circular cable space, exactly. Build the wound coil from nova's own high-order elements and compare it DIRECTLY against the axisymmetric approximation and the machine table: filament first (settles the turn count with no new element), finite section after the prism element lands. The cooling-channel hole is modelled as coupled counter-flowing sections, the way the box-section gate already models a hollow square.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    coil-conductor-fidelity
+Section: §3/§4 — the direct comparison
+Tier:    opus
+
+Context
+  /work/imas/shared/imasdb/ITER_MACHINE_DESCRIPTION/3/111005/1 (PF, UNCATALOGUED
+  in md_summary.yaml — do not expect to find it there) and .../111004/1 (CS)
+  carry conductor centrelines: one conductor per coil, turns=1.00, arc/line
+  element triples in wrapped cylindrical (r, phi, z), cross-section as a polar
+  outline (radius delta_r at angle delta_phi, delta_z along the tangent).
+  PF1: 1082 elements (893 arcs, 189 lines), section a constant 17.50 mm radius.
+  Open with dd_version=&#x27;3.39.0&#x27; PLUS ignore_unknown_dd_version=True (stamps are
+  git-describe suffixes; the ignore flag alone silently converts to 4.1.1,
+  which is banned).
+
+Stage 1 — FILAMENT, no new element needed
+  Reduce each path through nova.geometry.polyline.PolyLine (arc/line RDP — the
+  data is already arcs and lines, so the reduction should be near-lossless;
+  report the segment count in and out). Exclude feeders by a stated criterion.
+  Solve the wound filament with the existing arc + line kernels on the H200
+  tiled path and compare against the axisymmetric approximation:
+    * TURN COUNT: unwrap phi, divide by 2 pi — arbitrates 248.6 (pf_active
+      111001/104) vs 248.64 (DDD test) vs 249.36 (gap-implied) with no model
+      in the loop. Report per PF coil and per CS module.
+    * self and mutual inductance of the wound filament coil vs the
+      uniform-current continuum vs the machine table, converged mesh both
+      sides (the dcoil=0.25 overshoot is +5.7e-04 H — never compare at it).
+
+Stage 2 — FINITE SECTION (prerequisite: polybeam-prism-section)
+  The 893 arcs take PolyBow (landed); the 189 straight segments need the PRISM
+  element — the thick 3-D line with polygonal section — which is a DRAFT plan
+  (docs/polybeam-prism-section.html) and is marked as this plan&#x27;s dependency.
+  With it, sweep the true 35 mm circular cable space along the true path.
+  THE COOLING-CHANNEL HOLE: model hollow conductors as COUPLED COUNTER-FLOWING
+  sections — outer section at +J, channel at -J, linked as one circuit — the
+  same superposition the rebuilt box-section gate uses for a hollow square.
+  That covers the CS annulus (once f-ccf-01 reconciles its stored section) and
+  any jacket study without new kernel work.
+
+Deliverables
+  1. The turn-count table, per coil, against the three candidate values.
+  2. Wound vs approximation vs machine table, self and mutual, with the
+     residual at each rung attributed (turn count / winding path / section /
+     granularity), on converged meshes.
+  3. Device throughput for the full wound system (12 coils, ~7800 elements)
+     on one H200, host agreement stated over every pair.
+  4. Figures: the wound path per coil, the section, the comparison ladder.
+  5. Do NOT edit tests/test_biotsavart.py; draft any gate wording for the
+     orchestrator. Do NOT tune anything toward the table.</pre>
     </article>
 </section>
 

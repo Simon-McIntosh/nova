@@ -1,0 +1,105 @@
+{
+ "device": "gpu",
+ "kernel": "closed",
+ "targets": 1376,
+ "sections": 1376,
+ "pairs": 1893376,
+ "compilation_cache": "/tmp/cswinding-kernel-cache",
+ "tiles": {
+  "8": {
+   "tile_pairs": 64,
+   "host_us_per_pair": 481.1513426830061,
+   "cold_seconds": 7.776768477167934,
+   "warm_us_per_pair": 20.474161525877815,
+   "worst_absolute": 2.91311571219699e-17,
+   "worst_relative": 1.2271043230491288e-12
+  },
+  "16": {
+   "tile_pairs": 256,
+   "host_us_per_pair": 453.988181106979,
+   "cold_seconds": 5.633566382806748,
+   "warm_us_per_pair": 7.647320065492144,
+   "worst_absolute": 2.91311571219699e-17,
+   "worst_relative": 1.2271043230491288e-12
+  },
+  "32": {
+   "tile_pairs": 1024,
+   "host_us_per_pair": 452.96503412828315,
+   "cold_seconds": 5.660598987713456,
+   "warm_us_per_pair": 2.295665278021867,
+   "worst_absolute": 3.1387652893455353e-17,
+   "worst_relative": 1.2957786357212408e-12
+  },
+  "64": {
+   "tile_pairs": 4096,
+   "host_us_per_pair": 450.58398063702043,
+   "cold_seconds": 5.742297885939479,
+   "warm_us_per_pair": 0.6166294876190174,
+   "worst_absolute": 3.857049228617182e-17,
+   "worst_relative": 1.5309824455673962e-12
+  },
+  "128": {
+   "tile_pairs": 16384,
+   "host_us_per_pair": 448.67697226891323,
+   "cold_seconds": 5.736705310177058,
+   "warm_us_per_pair": 0.2204314360672773,
+   "worst_absolute": 5.216875922139236e-17,
+   "worst_relative": 1.921609587764079e-12
+  },
+  "256": {
+   "tile_pairs": 65536,
+   "host_us_per_pair": 459.8851064798737,
+   "cold_seconds": 57.489842352923006,
+   "warm_us_per_pair": 0.1243296168240704,
+   "worst_absolute": 7.427123694704607e-17,
+   "worst_relative": 2.3871322307560516e-12
+  }
+ },
+ "build": {
+  "64": {
+   "tile": 64,
+   "workers": 8,
+   "tiles": 484,
+   "numpy": {
+    "seconds": 109.54229659074917,
+    "us_per_pair": 57.85554300400405
+   },
+   "jax": {
+    "seconds": 9.032170719932765,
+    "us_per_pair": 4.770405202100779
+   },
+   "worst_absolute": 1.429356451788607e-16,
+   "worst_relative": 4.5940568590993395e-12
+  },
+  "128": {
+   "tile": 128,
+   "workers": 8,
+   "tiles": 121,
+   "numpy": {
+    "seconds": 109.39085002196953,
+    "us_per_pair": 57.77555542162229
+   },
+   "jax": {
+    "seconds": 7.042283143848181,
+    "us_per_pair": 3.7194319268059703
+   },
+   "worst_absolute": 1.429356451788607e-16,
+   "worst_relative": 4.5940568590993395e-12
+  },
+  "256": {
+   "tile": 256,
+   "workers": 8,
+   "tiles": 36,
+   "numpy": {
+    "seconds": 114.70880154706538,
+    "us_per_pair": 60.58426934061981
+   },
+   "jax": {
+    "seconds": 0.6790627217851579,
+    "us_per_pair": 0.35865180597258967
+   },
+   "worst_absolute": 1.3871953868390243e-16,
+   "worst_relative": 4.4585480926358084e-12
+  }
+ }
+}

@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="archive">
+  <meta name="plan-slug" content="polybeam-prism-section-landed">
+  <meta name="plan-title" content="The prism: a straight polygon-section conductor in closed form — landed">
+  <meta name="plan-status" content="historical">
+  <meta name="plan-modified" content="2026-07-29">
+  <title>polybeam-prism-section landed | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>The prism: a straight polygon-section conductor in closed form</h1>
+  <p><a href="/nova/polybeam-prism-section.html">← back to the evergreen plan</a> ·
+     landed 2026-07-29 · 25 new tests · develop merge <code>513f22b7</code>
+     (<code>fa2624fb</code> element + tests, <code>90271c96</code> benchmark + figures) ·
+     <strong>arsinh and arctan are the whole transcendental family, one expression covers
+     inside, boundary and outside with no inside test, and the element is finite where
+     Beam is not</strong></p>
+
+  <h2>Quick status</h2>
+  <table>
+    <thead><tr><th>Item</th><th>Status</th><th>Where / result</th></tr></thead>
+    <tbody>
+      <tr><td>Closed-form A and all three field components for an arbitrary
+          simple-polygon section, from Stokes, no elliptic machinery</td>
+          <td>✓ shipped</td>
+          <td><code>nova/biot/polybeam.py</code> —
+          <code>polygon_beam_greens</code> + <code>PolyBeam(Matrix)</code>,
+          registered as <code>Solve.generator["polybeam"]</code></td></tr>
+      <tr><td>Rectangle reproduces <code>Beam</code> to round-off</td>
+          <td>✓ done</td>
+          <td>worst row 1.0e-14 (A_z), 2.5e-15 / 1.3e-15 (B) — two independent
+          formulations of the same integral</td></tr>
+      <tr><td>Converged-quadrature gate with banded tolerances by contour distance</td>
+          <td>✓ done</td>
+          <td>flat at ~7e-15 near/inside and 1.6e-14 far, against bands of 1e-12 /
+          1e-11 — three orders of headroom, 64 of 96 gate targets inside the
+          conductor</td></tr>
+      <tr><td>Degenerate cases pinned finite</td>
+          <td>✓ done</td>
+          <td>axis-parallel edges, target on an edge, on a corner, on the axis, in an
+          end-face plane, inside the conductor — and the case <code>Beam</code>
+          itself fails (below)</td></tr>
+      <tr><td>PolyBow large-radius limit measured, not asserted</td>
+          <td>✓ done</td>
+          <td>closes as 1/R to ~1e-5 relative at R ≈ 10³–10⁴ m (fixed 0.5 m arc
+          length), then the arc kernel's own conditioning floors the comparison —
+          doubling as an independent check on the arc evaluation</td></tr>
+      <tr><td>Cost per pair, sun_debug node, fresh process, median of 3</td>
+          <td>✓ measured</td>
+          <td>reduction 1.39 µs/pair rectangle / 1.80 hexagon vs Beam's rows at
+          0.71 — twice the box it generalises; through the frame both read
+          ~56 µs/pair, indistinguishable (the operator assembly is 30× the
+          reduction it wraps)</td></tr>
+      <tr><td>Hollow sections</td>
+          <td>✓ covered</td>
+          <td>a <code>skin</code>/<code>box</code> section arrives as a linked
+          ±j pair of solid sections and sums — the same superposition the arc
+          element uses; pinned by test on a square-in-square annulus</td></tr>
+    </tbody>
+  </table>
+
+  <h2>The reduction, and the two choices that matter</h2>
+  <p>Current along the local z axis leaves one potential component, whose axial
+  integral is elementary; the divergence theorem takes the remaining section
+  integral to the polygon's boundary twice — once through <code>arsinh</code> itself
+  for the field, once through a radial field for the potential. Two derivation
+  choices carry the quality of the result:</p>
+  <ul>
+    <li><strong>The interior delta is cancelled by the constant of integration.</strong>
+    The potential's radial field has a free constant; the naive choice carries a
+    <code>1/ρ</code> singularity whose flux is an interior-point indicator —
+    discontinuous where the answer is smooth. Choosing <code>w·ρ/(2(r+|w|))</code>
+    instead leaves the field vanishing at the origin, so ONE expression covers a
+    target outside the section, on its boundary and inside the conductor, with no
+    inside test anywhere.</li>
+    <li><strong>The edge arctangents are combined before they are evaluated.</strong>
+    Each edge's pair carries a <code>1/|d|</code> pole on the edge's extended line;
+    the difference identity (valid unconditionally here — the arguments share a
+    sign) turns the pole into a factor of <code>d</code>, so the row is regular
+    where a field grid aligned with the section lands by construction.</li>
+  </ul>
+  <p><strong>The prism is finite where <code>Beam</code> is not:</strong> Beam's
+  theta ratios divide by corner offsets, and a target aligned axially with a section
+  corner zeroes two of them at once — Beam returns a non-finite value there, the
+  contour sum a finite one. Pinned by
+  <code>test_the_prism_is_finite_where_beam_is_not</code>. (Beam itself is untouched
+  — the peer relationship is a locked decision.)</p>
+  <p>A subtlety the frame forced: the <code>poly</code> column is a POLOIDAL
+  projection of the section, and for a straight segment that projection is not the
+  identity it is for an arc — a chord's section plane is tilted by half the chord's
+  own turn, and reading the column raw would come back narrow by that cosine. The
+  element inverts the frame's own projection map to recover the authored section;
+  the swept-hexagon test pins it end-to-end through <code>winding.insert</code>.</p>
+
+  <h2>Why the element matters at all — the routing overstatement</h2>
+  <p>Every non-rectangular straight winding previously routed to <code>Beam</code>'s
+  bounding box while dividing by the section's true area: measured through the frame,
+  a hexagon overstates by 4/3 and a disc by 4/π. Both are pinned by test now, and
+  the cost argument against fixing the routing is gone — through a coilset the two
+  elements are indistinguishable (56.3 vs 55.8 µs/pair; the assembly dominates), so
+  the cheap route is worth keeping only where it is also exact. The routing flip
+  itself stays with the arc plan's queued work, which owns the same defect for
+  curved segments.</p>
+
+  <figure>
+    <img src="/nova/figures/polybeam-prism-section/accuracy-envelope.svg"
+         alt="Accuracy envelope of the closed form against the converged section quadrature versus distance to the section contour, flat at round-off inside and outside the conductor, with the tolerance bands drawn well above"
+         style="max-width:100%">
+    <figcaption>The envelope a reduction with no near-singular parameter should have:
+    flat at 7e-15–1.6e-14 over four decades of contour distance, inside the conductor
+    as much as outside, with the 1e-12/1e-11 bands as headroom rather than fit.</figcaption>
+  </figure>
+  <figure>
+    <img src="/nova/figures/polybeam-prism-section/convergence.svg"
+         alt="Beam parity residual per row and the PolyBow large-radius convergence closing as one over radius until the arc kernel's conditioning floors it"
+         style="max-width:100%">
+    <figcaption>Left: rectangle parity with Beam at 1e-14. Right: the swept element
+    straightens onto the prism as 1/R; past R ≈ 10⁴ m the finite-arc kernel's own
+    conditioning, not the prism, sets the floor.</figcaption>
+  </figure>
+  <figure>
+    <img src="/nova/figures/polybeam-prism-section/cost.svg"
+         alt="Cost per pair for the bare reduction, the named element and the framed element, Beam beside PolyBeam on a rectangle and a hexagon"
+         style="max-width:100%">
+    <figcaption>Bare reduction 1.39/1.80 µs/pair against Beam's 0.71; through the
+    element 21.7 vs 21.3; through the frame 56 for both — the assembly is thirty
+    times the kernel it wraps.</figcaption>
+  </figure>
+
+  <h2>What's next</h2>
+  <p>The finite-section stage of the wound-coil comparison
+  (<a href="/nova/coil-conductor-fidelity.html">coil-conductor-fidelity</a> §3/§4
+  stage 2) is unblocked: the 189 straight segments of PF1's as-built path can now
+  carry the true 35 mm cable-space section beside PolyBow's 893 arcs.</p>
+</main>
+</body>
+</html>

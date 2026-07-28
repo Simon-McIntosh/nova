@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="polybeam-prism-section">
   <meta name="plan-title" content="PolyBeam — polygon cross-section straight segment">
   <meta name="plan-summary" content="Give nova a polygon cross-section straight segment to sit beside Beam&#x27;s rectangular one: a prismatic conductor whose cross-section integral reduces by Stokes to a contour sum with an elementary axial integral, so it needs no elliptic machinery at all and is the flat-space limit of the arc case">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="M">
   <meta name="plan-tier" content="opus">
@@ -17,12 +17,36 @@
   <title>PolyBeam — polygon cross-section straight segment | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-28">
-<meta name="plan-version" content="3">
+<meta name="plan-modified" content="2026-07-29">
+<meta name="plan-version" content="4">
 <meta name="plan-blocks" content="coil-conductor-fidelity">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
   <main class="plan-doc">
+
+    <section id="landed" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-07-29</span>
+        <h2>The whole plan landed in one rung</h2>
+      </header>
+      <p class="landed-summary">
+      Built <code>nova/biot/polybeam.py</code> — <code>polygon_beam_greens</code> +
+      <code>PolyBeam</code>, registered beside <code>beam</code> — with 25 tests
+      (<code>tests/test_biotpolybeam.py</code>) and a node-measured benchmark
+      (<code>benchmarks/polybeam_section_cost.py</code>); develop merge
+      <code>513f22b7</code>. Rectangle reproduces Beam to 1.0e-14; the converged-quadrature
+      envelope is flat at 7e-15–1.6e-14 over four decades of contour distance including
+      inside the conductor, against 1e-12/1e-11 bands; every degenerate case is finite —
+      including a target aligned axially with a section corner, where <code>Beam</code>
+      itself returns a non-finite value; PolyBow straightens onto the prism as 1/R to
+      ~1e-5 at R ≈ 10³–10⁴ m before the arc kernel's conditioning floors the comparison.
+      Cost: 1.39/1.80 µs/pair (rectangle/hexagon) against Beam's 0.71 bare — and an
+      indistinguishable ~56 µs/pair through the frame, where assembly dominates 30×.
+      Hollow sections arrive as linked ±j pairs and sum. Full record:
+      <a href="archive/polybeam-prism-section-landed.html">prism landed</a>.
+      </p>
+    </section>
 
     <h2 id="s1">§1 — Objective</h2>
     <p><strong>Give nova a polygon cross-section straight segment.</strong>
@@ -153,7 +177,7 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-pbeam-01" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-25T15:32:00+00:00" data-recommends-skill="/reckon-ship polybeam-prism-section" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-pbeam-01" data-status="resolved" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-25T15:32:00+00:00" data-recommends-skill="/reckon-ship polybeam-prism-section" data-resolved-at="2026-07-28T23:12:42+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Derive and land the prismatic polygon-section evaluation against Beam as its oracle</h4>
     <div class="r-fu-body"><p>The whole plan is one coherent piece of work and small enough to land in a single rung: Stokes to a contour sum over the cross-section edges, an elementary axial integral per edge, and Beam as an exact oracle for the rectangular case. No elliptic machinery is involved; if the derivation reaches for it, it has gone wrong. Degenerate cases inherited from the axisymmetric work carry real risk -- particularly a target landing exactly on a cross-section vertex, which returned a non-finite value there and had to be fixed.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -204,6 +228,33 @@ Done-when
   4. Element class following the Beam pattern so the frame and groupset machinery can use it.
   5. Cost per pair measured on a compute node, fresh process, median of 3, beside Beam&#x27;s.
   6. Followup written; this followup resolved.</pre>
+    <p class="r-fu-outcome">Landed whole: nova/biot/polybeam.py (polygon_beam_greens + PolyBeam, registered in Solve.generator), 25 tests, node-measured benchmark; develop merge 513f22b7. Rectangle==Beam to 1.0e-14; converged-quadrature envelope flat at 7e-15..1.6e-14 incl. inside the conductor (bands 1e-12/1e-11); all degenerate cases finite, including the axially-corner-aligned target where Beam itself returns non-finite; PolyBow straightens onto the prism as 1/R to ~1e-5 at R~1e3-1e4 m; cost 1.39/1.80 us/pair (rect/hex) vs Beam 0.71 bare, indistinguishable through the frame (~56, assembly dominates 30x). Hollow sections as linked +/-j pairs. No elliptic machinery anywhere. Archive: docs/archive/polybeam-prism-section-landed.html.</p>
+    </article>
+<article class="r-fu" data-id="f-pbeam-02" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-29T00:30:00+00:00" data-recommends-skill="/reckon-edit polybeam-prism-section" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Revisit Beam supersession and the straight-segment routing once the prism has production mileage</h4>
+    <div class="r-fu-body"><p>The beam-relationship decision is locked extend-beam for now. Two facts gathered at landing bear on revisiting it: through the frame the two elements are indistinguishable in cost (~56 us/pair; assembly dominates 30x), and Beam returns a non-finite value where a target aligns axially with a section corner while the prism is finite there. The polyline thicken routing (line -> beam regardless of section, overstating a hexagon by 4/3 and a disc by 4/pi — both pinned by test) is owned by the arc plan's queued routing flip and should carry the straight case with it.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    polybeam-prism-section
+Section: post-landing decision review
+Tier:    sonnet
+
+Context
+  PolyBeam landed (develop 513f22b7) as a peer of Beam. Framed cost is
+  indistinguishable (56.3 vs 55.8 us/pair, spread 1.7); bare reduction is 2x; Beam
+  is non-finite for a target axially aligned with a section corner
+  (tests/test_biotpolybeam.py::test_the_prism_is_finite_where_beam_is_not) while the
+  prism is finite; the geometry/polyline thicken map still routes every straight
+  thick segment to beam whatever its section (hexagon overstated 4/3, disc 4/pi,
+  pinned by test).
+
+Done-when
+  1. The routing flip for straight segments decided together with the arc plan&#x27;s
+     queued flip (one mechanism, two segment kinds), with the full lane green at the
+     flip.
+  2. The beam-relationship decision revisited on production evidence: keep the peer,
+     or supersede Beam where a rectangle is just a four-sided polygon through the
+     same code and the corner-aligned non-finite case disappears with it.
+  3. Plan status moved to done.</pre>
     </article>
 </section>
 

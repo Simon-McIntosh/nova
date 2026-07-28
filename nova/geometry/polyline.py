@@ -552,7 +552,7 @@ class PolyLine(Plot):
 
     thicken: ClassVar[dict[str, dict[str, str]]] = {
         "arc": {"rectangle": "bow", "polygon": "polybow"},
-        "line": {"rectangle": "beam", "polygon": "beam"},
+        "line": {"rectangle": "beam", "polygon": "polybeam"},
     }
     """The biot element a thickened segment dispatches to, by segment kind and profile.
 
@@ -574,10 +574,14 @@ class PolyLine(Plot):
     share.  Dispatching on the profile keeps the cheap route where it is exact
     instead of paying the general one everywhere.
 
-    A polygon-profile LINE still routes to :class:`nova.biot.beam.Beam`, which builds
-    its prism from width and height exactly as Bow builds its rectangle and carries
-    the same error for a section that does not fill its box.  The prismatic
-    polygon-section element that would complete this column does not exist yet.
+    The line column dispatches the same way: :class:`nova.biot.beam.Beam` builds its
+    prism from width and height exactly as Bow builds its rectangle, so it is exact
+    for a rectangle and overstates any section that does not fill its box by the
+    same reciprocal area fraction, while :class:`nova.biot.polybeam.PolyBeam`
+    carries the corners themselves and is exact for any polygon.  Through the frame
+    the two straight elements cost the same -- operator assembly dominates the
+    reduction thirty-fold -- so the rectangle keeps its dedicated route on exactness
+    grounds alone.
     """
 
     profiles: ClassVar[tuple[str, ...]] = ("rectangle", "polygon")

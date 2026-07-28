@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-29">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="5">
 <meta name="plan-blocks" content="coil-conductor-fidelity">
 <meta name="plan-impl" content="1.0">
 </head>
@@ -44,7 +44,10 @@
       floors the comparison.
       Cost: 1.39/1.80 µs/pair (rectangle/hexagon) against Beam's 0.71 bare — and an
       indistinguishable ~56 µs/pair through the frame, where assembly dominates 30×.
-      Hollow sections arrive as linked ±j pairs and sum. Full record:
+      Hollow sections arrive as linked ±j pairs and sum. The routing followed
+      same-session: the thicken table's line column dispatches polygon profiles to the
+      prism (develop <code>9eac0631</code>), closing the 4/3-hexagon / 4/π-disc
+      overstatement, fast lane unchanged. Full record:
       <a href="archive/polybeam-prism-section-landed.html">prism landed</a>.
       </p>
     </section>
@@ -231,9 +234,9 @@ Done-when
   6. Followup written; this followup resolved.</pre>
     <p class="r-fu-outcome">Landed whole: nova/biot/polybeam.py (polygon_beam_greens + PolyBeam, registered in Solve.generator), 25 tests, node-measured benchmark; develop merge 513f22b7. Rectangle==Beam to 1.0e-14; converged-quadrature envelope flat at 7e-15..1.6e-14 incl. inside the conductor (bands 1e-12/1e-11); all degenerate cases finite, including the axially-corner-aligned target where Beam itself returns non-finite; PolyBow straightens onto the prism as 1/R to ~1e-5 at R~1e3-1e4 m; cost 1.39/1.80 us/pair (rect/hex) vs Beam 0.71 bare, indistinguishable through the frame (~56, assembly dominates 30x). Hollow sections as linked +/-j pairs. No elliptic machinery anywhere. Archive: docs/archive/polybeam-prism-section-landed.html.</p>
     </article>
-<article class="r-fu" data-id="f-pbeam-02" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-29T00:30:00+00:00" data-recommends-skill="/reckon-edit polybeam-prism-section" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-pbeam-02" data-status="resolved" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-29T00:30:00+00:00" data-recommends-skill="/reckon-edit polybeam-prism-section" data-resolved-at="2026-07-28T23:27:30+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Revisit Beam supersession and the straight-segment routing once the prism has production mileage</h4>
-    <div class="r-fu-body"><p>The beam-relationship decision is locked extend-beam for now. Two facts gathered at landing bear on revisiting it: through the frame the two elements are indistinguishable in cost (~56 us/pair; assembly dominates 30x), and Beam returns a non-finite value where a target aligns axially with a section corner while the prism is finite there. The polyline thicken routing (line -> beam regardless of section, overstating a hexagon by 4/3 and a disc by 4/pi — both pinned by test) is owned by the arc plan's queued routing flip and should carry the straight case with it.</p></div>
+    <div class="r-fu-body"><p>The beam-relationship decision is locked extend-beam for now. Two facts gathered at landing bear on revisiting it: through the frame the two elements are indistinguishable in cost (~56 us/pair; assembly dominates 30x), and Beam returns a non-finite value where a target aligns axially with a section corner while the prism is finite there. The polyline thicken routing (line -&gt; beam regardless of section, overstating a hexagon by 4/3 and a disc by 4/pi — both pinned by test) is owned by the arc plan's queued routing flip and should carry the straight case with it.</p></div>
     <pre class="r-fu-prompt">Project: nova
 Plan:    polybeam-prism-section
 Section: post-landing decision review
@@ -255,6 +258,34 @@ Done-when
   2. The beam-relationship decision revisited on production evidence: keep the peer,
      or supersede Beam where a rectangle is just a four-sided polygon through the
      same code and the corner-aligned non-finite case disappears with it.
+  3. Plan status moved to done.</pre>
+    <p class="r-fu-outcome">The routing half landed same-session: develop 9eac0631 flips the thicken table's line column (polygon profile → polybeam), symmetric with the arc column's landed flip; fast lane unchanged (3199 passed, same two pre-existing pins). The supersession half is requeued as its own followup.</p>
+    </article>
+<article class="r-fu" data-id="f-pbeam-03" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-29T01:50:00+00:00" data-recommends-skill="/reckon-edit polybeam-prism-section" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Revisit Beam supersession once the prism has production mileage</h4>
+    <div class="r-fu-body"><p>The beam-relationship decision is locked extend-beam. Facts gathered at landing that bear on revisiting it: through the frame the two elements are indistinguishable in cost (~56 µs/pair, assembly dominates 30×); Beam returns a non-finite value where a target aligns axially with a section corner while the prism is finite there; and a purely radial thickened straight segment crashes in the frame before reaching either element (the poloidal footprint degenerates to a MultiPolygon that Polygon rejects, nova/geometry/polygon.py:142) — a pre-existing frame limit worth fixing whichever element survives.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    polybeam-prism-section
+Section: post-landing decision review
+Tier:    sonnet
+
+Context
+  PolyBeam landed (develop 513f22b7) and the polygon-profile routing flip followed
+  (9eac0631). Beam keeps the rectangle route on exactness grounds; bare-kernel cost
+  is 2x but framed cost is indistinguishable. Beam is non-finite for a target
+  axially aligned with a section corner (pinned:
+  tests/test_biotpolybeam.py::test_the_prism_is_finite_where_beam_is_not); the
+  prism is finite there. Separately, a purely radial thickened straight segment
+  crashes in the frame before any element is reached: the poloidal footprint
+  degenerates to two disjoint slivers and Polygon rejects the MultiPolygon
+  (IndexError, nova/geometry/polygon.py:142).
+
+Done-when
+  1. The beam-relationship decision revisited on production evidence: keep the
+     peer, or supersede Beam where a rectangle is a four-sided polygon through the
+     same code and the corner-aligned non-finite case disappears with it.
+  2. The radial-segment frame crash either fixed or explicitly gated with a clear
+     error naming the limitation.
   3. Plan status moved to done.</pre>
     </article>
 </section>

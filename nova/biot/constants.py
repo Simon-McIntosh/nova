@@ -28,13 +28,20 @@ numerator ``rs - c`` goes the same way: it is ``(rs - r)`` less
 ``gamma^2/(r + c)``, both exact, where the printed difference keeps no digits on
 a corner's own radius.
 
-The three kinds are therefore routed through the complement-native descents,
+So every argument here is a complement, and each kind is taken by whichever route
+accepts one.  The first kind has a Cephes entry point on the complement,
+``ellipkm1``, and the second is bounded and takes the parameter without loss, so
+those two stay where they are.  The THIRD is the one that needs a routine of its
+own -- there is no complement-native library form, and the printed
+``R_F + (n/3) R_J`` puts two nearly-equal terms of opposite sign against each
+other once the pole is past the range -- so it goes through
 :mod:`nova.biot.completeelliptic` over the whole quarter range and
-:mod:`nova.biot.incompleteelliptic` at an interior amplitude, rather than through
-a parameter form that has to re-derive what the caller already knows exactly.
-The third kind's entry points here take the pole and the complement alongside the
-characteristic and the modulus, so a caller that formed them from its geometry
-loses nothing on the way in.
+:mod:`nova.biot.incompleteelliptic` at an interior amplitude.  Its entry points
+here take the pole and the complement alongside the characteristic and the
+modulus, so a caller that formed them from its geometry loses nothing on the way
+in.  Measured on a compute node over two million elements: the descent costs the
+third kind 544 ns an element against Carlson's 664, and would cost the first and
+second pair 1245 against Cephes' 290, which is why the split runs where it does.
 
 One confluence is not reached by the complements alone.  A target LEVEL with a
 source corner puts both roots of the ring denominator on the ends of the range:
@@ -54,7 +61,7 @@ from typing import ClassVar
 import numpy as np
 import scipy.special
 
-from nova.biot.completeelliptic import complete_kind, complete_pole
+from nova.biot.completeelliptic import complete_pole
 from nova.biot.incompleteelliptic import incomplete_pole
 
 
@@ -138,28 +145,53 @@ class Constants:
 
     @cached_property
     def v(self):
-        """Return v coefficient."""
-        return 1 + self.k2 * (self.gamma**2 - self.b * self.r) / (2 * self.r * self.rs)
+        """Return v coefficient, which VANISHES at a source corner.
 
-    @cached_property
-    def _complete_kinds(self):
-        """Return ``(K, E)`` off ONE descent, from the modulus complement.
+        ``1 + k^2 (gamma^2 - b r)/(2 r rs)`` collapses onto
 
-        The two share the descent and differ only in the weight on ``sin^2``, so
-        the second kind costs a handful of multiplies rather than a second
-        iteration -- which is worth having because both rows use both.
+            v = (3 gamma^2 + (rs - r)(rs + r))/a^2
+
+        exactly, and that is the arrangement to take it in: the printed form is one
+        plus a term that reaches minus one, so it comes back at order the squared
+        distance to the corner from two quantities of order one, where every term
+        of the collapsed numerator is a product of exact differences.  It weights
+        the first kind against the second in the radial row, so the loss is damped
+        by the small factor it carries -- but it is 3.2e-10 at a corner six
+        micrometres from a metre-scale target and free to avoid.
         """
-        return complete_kind(self.ck2)
+        return (3 * self.gamma**2 + (self.rs - self.r) * self.b) / self.a2
 
     @cached_property
     def K(self):
-        """Return complete elliptic intergral of the 1st kind."""
-        return self._complete_kinds[0]
+        """Return complete elliptic intergral of the 1st kind, from the complement.
+
+        ``ellipkm1`` takes ``k'^2`` directly, so the sensitive kind -- it grows like
+        ``-log k'`` and is therefore only as good as its argument -- never sees the
+        parameter at all.  The complement-native descent
+        (:func:`nova.biot.completeelliptic.complete_kind`) agrees with it to a
+        couple of ulp and costs four times as much for this pair, so it is what the
+        THIRD kind is taken through and not this one.
+
+        A vanishing complement is a target ON the source ring, where this is the
+        divergence rather than a number -- the same convention the axisymmetric
+        filament kernel returns, and the right one for a filament, which has been
+        asked a question it cannot answer.  The finite-section reduction takes its
+        first kind through the descent's finite part instead.
+        """
+        return scipy.special.ellipkm1(self.ck2)
 
     @cached_property
     def E(self):
-        """Return complete elliptic intergral of the 2nd kind."""
-        return self._complete_kinds[1]
+        """Return complete elliptic intergral of the 2nd kind.
+
+        Held at the parameter's own limit, because ``4 r rs`` and ``a^2`` are formed
+        independently and their ratio can land an ulp ABOVE one for a target within
+        about ``1e-08`` ring radii of the source.  ``E`` is bounded and smooth
+        through ``m = 1``, where it is exactly one, so holding it there costs
+        nothing anywhere -- and this is the only place the parameter is the argument
+        of anything.
+        """
+        return scipy.special.ellipe(np.minimum(self.k2, 1.0))
 
     @cached_property
     def U(self):

@@ -217,6 +217,43 @@ def test_each_characteristic_holds_at_a_corner(p, geometry):
     assert con.np2[p] == pytest.approx(1.0 - pole[p], rel=8e-16, abs=0)
 
 
+def extended_radial_weight(con):
+    """Return ``v`` in longdouble from the collapsed numerator.
+
+    ``1 + k^2 (gamma^2 - b r)/(2 r rs)`` is ``(3 gamma^2 + (rs - r)(rs + r))/a^2``
+    identically, and every term of the second is a product of exact differences.
+    """
+    gamma = np.longdouble(con.gamma)
+    gap = np.longdouble(con.rs) - np.longdouble(con.r)
+    span = np.longdouble(con.rs) + np.longdouble(con.r)
+    return (3 * gamma**2 + gap * span) / (gamma**2 + span**2)
+
+
+@pytest.mark.parametrize("geometry", [corner_plane, corner_radius])
+def test_the_radial_row_weight_holds_at_a_corner(geometry):
+    """``v`` vanishes at a corner, and the collapsed numerator holds onto it."""
+    con = constants(**geometry(RATIOS))
+    ratio = con.v / extended_radial_weight(con)
+    assert np.max(abs(ratio - 1.0)) < 1e-15  # measured 2.5e-16
+
+
+def test_the_radial_row_weight_cancels_where_it_is_taken_from_one():
+    """What the printed ``v`` costs, measured, on the sweep that drives it to zero.
+
+    ``v`` is one plus a term that reaches minus one, so it comes back at order the
+    squared distance to the corner out of two quantities of order one -- and it
+    vanishes only when BOTH the standoff and the radial gap do, which is why this
+    runs along the radius at a corner already within a micrometre of the plane.
+    Both spellings go against the same extended-precision value, so the gap between
+    the two curves is the arrangement and nothing else.
+    """
+    con = constants(**corner_radius(RATIOS, ratio=1e-6))
+    want = extended_radial_weight(con)
+    printed = 1 + con.k2 * (con.gamma**2 - con.b * con.r) / (2 * con.r * con.rs)
+    assert np.max(abs(printed / want - 1.0)) > 1e-06  # measured 6.5e-05
+    assert np.max(abs(con.v / want - 1.0)) < 1e-15  # measured 1.9e-16
+
+
 @pytest.mark.parametrize("geometry", [corner_plane, corner_radius])
 def test_the_complete_third_kind_holds_at_a_corner(geometry):
     """The integral the poles are handed to, over all three characteristics."""

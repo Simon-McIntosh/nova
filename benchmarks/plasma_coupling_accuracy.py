@@ -1,24 +1,26 @@
-"""What the banded plasma-coupling default costs against exact everywhere.
+"""What the plasma-coupling default's point TARGET costs, on a real plasma grid.
 
-``segment="circle"`` (:mod:`nova.biot.circle`) evaluates each source cell's own
-finite section inside a band of the section's radii and the point filament outside
-it, and averages the target cell's own section over the pairs closest in. Exact
-everywhere -- the closed form of :mod:`nova.biot.polygonanalytic` on every pair,
-which is what :mod:`nova.biot.polysection` ships -- is the reference. So what this
-measures is the SEAM: what the shipped element gives up by banding the finite
-section rather than paying for it on all of a plasma grid's pairs.
+A hexagonally tiled plasma grid is coupled by ``segment="polysection"``
+(:mod:`nova.biot.polysection`), which is the closed form of
+:mod:`nova.biot.polygonanalytic` on every pair -- each source cell's current spread
+uniformly over its true section, exact, with no filament and no seam anywhere. So
+the source side of this operator is settled and the recomputation below confirms it
+to round-off. What is NOT settled is the TARGET side: every entry is evaluated at
+one point, the target cell's centre, where the quantity an inductance operator wants
+is the average over the area that cell's own current occupies.
 
 Why the diagonal is reported apart
 ----------------------------------
-An all-to-all plasma-plasma interaction matrix puts a target inside its own source
-cell on every diagonal entry. For a point filament that is a coincident target,
-log-singular, and no answer at all; for a finite section it is an ordinary interior
-point where the flux and both field components are bounded and smooth. The
-diagonal is also the one place the shipped element evaluates a DOUBLE integral --
-the source section's flux averaged over the target cell's own section -- where the
-exact-everywhere reference evaluates a single integral at the cell centre, so the
-two differ there by design and by the size of the target-side average. It is
-reported separately rather than averaged into the bulk.
+An all-to-all plasma-plasma matrix puts a target inside its own source cell on every
+diagonal entry. Off the diagonal a point target is an excellent midpoint rule -- the
+kernel varies over the target cell only through its own curvature, which for a full
+ring is set by the major radius. On the diagonal it is not: the curvature there is
+set by the cell size, and the point value and the area mean part company by the whole
+gap between a section's arithmetic mean logarithmic distance and its geometric mean
+distance. :mod:`nova.biot.circle` closed that gap for the coil element by averaging
+the target element's own section over its coincident term; this measures what the
+plasma lane still carries by not doing so, cell by cell, against the same
+:mod:`nova.biot.sectionaverage` rule.
 
 The reference
 -------------
@@ -55,9 +57,10 @@ import numpy as np
 
 from nova.biot.bandedcoupling import NEAR_LIMIT, NEAR_RULE, contour_distance
 from nova.biot.biotframe import Target
-from nova.biot.greens import greens_psi, second_moments, section_centroid
+from nova.biot.greens import second_moments, section_centroid
 from nova.biot.polygon import polygon_greens
 from nova.biot.polygonanalytic import polygon_analytic_greens
+from nova.biot.sectionaverage import averaged_greens
 from nova.biot.solve import Solve
 from nova.frame.coilset import CoilSet
 
@@ -126,8 +129,8 @@ SEED = 20260726
 def plasma_grid(cells: int = CELLS):
     """Return a real hexagonally-tiled plasma grid inside an elliptical wall.
 
-    Returns the coilset (the point-filament matrices come from it, through the
-    shipped solve path) alongside the per-cell geometry the closed form needs:
+    Returns the coilset (the shipped matrices come from it, through the shipped
+    solve path) alongside the per-cell geometry the closed form needs:
     centres, section polygons, areas and section labels. The tiling produces both
     regular hexagons and cells clipped by the wall, and the two behave differently
     -- a clipped cell has no symmetry to cancel its odd moments, and its centroid
@@ -430,6 +433,36 @@ def resolution_sweep(cell_counts=SWEEP_CELLS) -> dict:
         )
         sweep[str(cells)] = entry
     return sweep
+
+
+def diagonal_double_integral(grid: dict, exact) -> dict:
+    """Return the self term BOTH ways: point target and target-section average.
+
+    The shipped plasma lane evaluates the source section's flux at the target cell's
+    centre; the quantity an inductance operator wants is that flux averaged over the
+    target cell's own area, which is the same closed form driven over the rule in
+    :mod:`nova.biot.sectionaverage`. The two are separated here because the gap
+    between them is the one part of the plasma coupling the source kernel being exact
+    does not settle, and it is the gap :class:`nova.biot.circle.Circle` closed for the
+    coil element.
+    """
+    single = np.diag(np.asarray(exact[0]))
+    double = np.array(
+        [averaged_greens([vertices], vertices)[0][0] for vertices in grid["vertices"]]
+    )
+    ratio = single / double
+    regular = grid["section"] == "hexagon"
+    return dict(
+        single_median=float(np.median(single)),
+        double_median=float(np.median(double)),
+        ratio_median=float(np.median(ratio)),
+        ratio_minimum=float(np.min(ratio)),
+        ratio_maximum=float(np.max(ratio)),
+        ratio_median_regular=float(np.median(ratio[regular])),
+        ratio_median_clipped=(
+            float(np.median(ratio[~regular])) if (~regular).any() else float("nan")
+        ),
+    )
 
 
 # --- the reference check ----------------------------------------------------
@@ -888,6 +921,7 @@ def _percent(value):
 def report(
     tables,
     detail,
+    double,
     near,
     reference,
     refinement,
@@ -926,6 +960,17 @@ def report(
                 pair += _percent(stats.get("maximum"))
                 row += f"{pair:>26s}"
             print(row)
+
+    print("\nthe self term: point target against the target-section average")
+    print(
+        f"  single {double['single_median']:.4e}  double {double['double_median']:.4e}"
+        f"  ratio median {double['ratio_median']:.5f}"
+        f"  range {double['ratio_minimum']:.5f} to {double['ratio_maximum']:.5f}"
+    )
+    print(
+        f"  regular cells {double['ratio_median_regular']:.5f}"
+        f"  wall-clipped {double['ratio_median_clipped']:.5f}"
+    )
 
     print("\nthe self term, signed, split by whether the wall clipped the cell")
     for name in COMPONENTS:
@@ -1064,22 +1109,16 @@ def main(output=None, figure_path=None, cells=CELLS):
     coilset, grid = plasma_grid(cells)
     point = element_coupling(coilset)
     exact = exact_coupling(grid)
-    # beyond the element's own section band the shipped path is the bare ring at the
-    # section's rms radius -- checked against the ring formula there, so the
-    # comparison below is against the matrix a solve builds and not a rescaling of it
+    # the shipped path is the closed form on every pair, so the recomputation here
+    # has to reproduce it to round-off; that is what makes the diagonal comparison
+    # below a statement about the TARGET side and not about the source kernel
     geometry = pair_geometry(grid)
-    far = geometry["scaled"] > 20.0
-    bare = greens_psi(
-        np.repeat(grid["centre_r"][:, None], grid["filament_r"].size, axis=1)[far],
-        np.repeat(grid["centre_z"][:, None], grid["filament_r"].size, axis=1)[far],
-        np.repeat(grid["filament_r"][None, :], grid["centre_r"].size, axis=0)[far],
-        np.repeat(grid["centre_z"][None, :], grid["centre_r"].size, axis=0)[far],
-    )
-    residual = np.max(np.abs(point[0][far] / bare - 1.0))
-    assert residual < 1e-9, f"far field is not the bare ring: {residual:.3e}"
+    residual = float(np.max(np.abs(point[0] / exact[0] - 1.0)))
+    assert residual < 1e-12, f"shipped path is not the closed form: {residual:.3e}"
 
     tables = error_tables(point, exact, geometry)
     detail = diagonal_detail(point, exact, grid, geometry)
+    double = diagonal_double_integral(grid, exact)
     near = near_band_gain(grid, exact, geometry)
     reference = reference_check(grid, exact, geometry)
     refinement = refinement_check(grid, exact, geometry)
@@ -1089,6 +1128,7 @@ def main(output=None, figure_path=None, cells=CELLS):
     report(
         tables,
         detail,
+        double,
         near,
         reference,
         refinement,
@@ -1125,6 +1165,7 @@ def main(output=None, figure_path=None, cells=CELLS):
         moment=moment,
         error=tables,
         diagonal=detail,
+        diagonal_double_integral=double,
         resolution=sweep,
         near_band=near,
         reference=reference,
@@ -1136,7 +1177,7 @@ def main(output=None, figure_path=None, cells=CELLS):
             for key, value in integrated.items()
             if key != "current"
         },
-        far_field_residual=float(residual),
+        shipped_against_closed_form=residual,
     )
     if output is not None:
         pathlib.Path(output).write_text(json.dumps(jsonable(record), indent=2))

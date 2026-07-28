@@ -139,8 +139,19 @@ two, so assigning it would be a guess.
 The 12.70 → 5.06 µs/pair third-kind figure quoted further down is the closed
 form's own special-function cost inside `polygon_analytic_greens`, not a
 rectangle-kernel figure — the axisymmetric rectangle kernel's per-pair cost is the
-`cylinder rectangle` row. `benchmarks/analytic_cost_floor.py` still carries the
-superseded 12.7 in its module docstring.
+`cylinder rectangle` row. The two are easy to read as one number and are not
+comparable: one is a special-function call per polygon corner, the other a whole
+kernel call per source-target pair.
+
+`benchmarks/analytic_cost_floor.py` carried the superseded 12.7 in its module
+docstring, and its whole table has been re-measured on the same node and date as the
+rows above — this module run as a script in three fresh processes, medians: third
+kind 5.17 (5.06–5.20), moment stacks 19.09, graded residual 73.08, floor 93.05,
+assembled psi 173.77, psi + field 173.68. That reproduces the 5.06 and 92.9 recorded
+on 26 July, and additionally moves the two rows never re-measured with the descent:
+moment stacks 26.8 → 19.09, which falls because it is built from the same first and
+second kinds, and assembled psi 189.8 → 173.77. The graded residual is untouched at
+73.08 against 73.3 and is now 79% of the floor.
 
 Re-measured 2026-07-26 through the element's own dispatch, over a whole
 2,339-target column instead of the 512-target spiral above (sun_debug node

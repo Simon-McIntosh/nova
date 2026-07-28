@@ -1,0 +1,129 @@
+{
+ "device": "gpu",
+ "kernel": "closed",
+ "mapping": "vmap",
+ "targets": 1376,
+ "sections": 1376,
+ "pairs": 1893376,
+ "workers": 13,
+ "visible_cores": 13,
+ "compilation_cache": "/tmp/cswinding-kernel-cache",
+ "tiles": {
+  "8": {
+   "tile_pairs": 64,
+   "host_quadrature_us_per_pair": 481.22361476998776,
+   "host_closed_us_per_pair": 1666.133182880003,
+   "cold_seconds": 7.358763306867331,
+   "warm_us_per_pair": 29.99396383529529,
+   "host_closed_sections": 8,
+   "same_route_absolute": 4.060675949137116e-18,
+   "same_route_relative": 1.7104960818510633e-13,
+   "cross_route_absolute": 2.91311571219699e-17,
+   "cross_route_relative": 1.2271043230491288e-12
+  },
+  "16": {
+   "tile_pairs": 256,
+   "host_quadrature_us_per_pair": 459.84355892869644,
+   "host_closed_us_per_pair": 867.3218981130049,
+   "cold_seconds": 5.655843479093164,
+   "warm_us_per_pair": 6.88886757416185,
+   "host_closed_sections": 16,
+   "same_route_absolute": 8.120504865326977e-18,
+   "same_route_relative": 3.420635364352554e-13,
+   "cross_route_absolute": 2.91311571219699e-17,
+   "cross_route_relative": 1.2271043230491288e-12
+  },
+  "32": {
+   "tile_pairs": 1024,
+   "host_quadrature_us_per_pair": 446.8725301194354,
+   "host_closed_us_per_pair": 446.78645144813345,
+   "cold_seconds": 5.556311204098165,
+   "warm_us_per_pair": 1.9083433168513388,
+   "host_closed_sections": 32,
+   "same_route_absolute": 1.486712229020748e-17,
+   "same_route_relative": 6.137604332402256e-13,
+   "cross_route_absolute": 3.1387652893455353e-17,
+   "cross_route_relative": 1.2957786357212408e-12
+  },
+  "64": {
+   "tile_pairs": 4096,
+   "host_quadrature_us_per_pair": 448.92288497067057,
+   "host_closed_us_per_pair": 239.14893495202705,
+   "cold_seconds": 5.681199845857918,
+   "warm_us_per_pair": 0.6762601666802462,
+   "host_closed_sections": 32,
+   "same_route_absolute": 1.486712229020748e-17,
+   "same_route_relative": 6.137604332402256e-13,
+   "cross_route_absolute": 3.857049228617182e-17,
+   "cross_route_relative": 1.5309824455673962e-12
+  },
+  "128": {
+   "tile_pairs": 16384,
+   "host_quadrature_us_per_pair": 454.86542558137444,
+   "host_closed_us_per_pair": 138.73894943117193,
+   "cold_seconds": 5.719296132214367,
+   "warm_us_per_pair": 0.2319375198567286,
+   "host_closed_sections": 32,
+   "same_route_absolute": 1.486712229020748e-17,
+   "same_route_relative": 6.137604332402256e-13,
+   "cross_route_absolute": 5.216875922139236e-17,
+   "cross_route_relative": 1.921609587764079e-12
+  },
+  "256": {
+   "tile_pairs": 65536,
+   "host_quadrature_us_per_pair": 448.674530808546,
+   "host_closed_us_per_pair": 92.30142177329981,
+   "cold_seconds": 5.7708023358136415,
+   "warm_us_per_pair": 0.11994227596308824,
+   "host_closed_sections": 32,
+   "same_route_absolute": 2.366610054628515e-17,
+   "same_route_relative": 9.770092584737865e-13,
+   "cross_route_absolute": 7.427123694704607e-17,
+   "cross_route_relative": 2.3871322307560516e-12
+  }
+ },
+ "build": {
+  "workers": 13,
+  "host": {
+   "64": {
+    "tile": 64,
+    "seconds": 69.60663511091843,
+    "us_per_pair": 36.76323937290767,
+    "tiles": 484
+   },
+   "256": {
+    "tile": 256,
+    "seconds": 69.82064703665674,
+    "us_per_pair": 36.87627129352899,
+    "tiles": 36
+   }
+  },
+  "device": {
+   "64": {
+    "tile": 64,
+    "seconds": 9.618425410240889,
+    "us_per_pair": 5.08003978620247,
+    "tiles": 484,
+    "cross_route_absolute": 1.429356451788607e-16,
+    "cross_route_relative": 4.5940568590993395e-12
+   },
+   "128": {
+    "tile": 128,
+    "seconds": 7.029393498785794,
+    "us_per_pair": 3.7126241690957285,
+    "tiles": 121,
+    "cross_route_absolute": 1.429356451788607e-16,
+    "cross_route_relative": 4.5940568590993395e-12
+   },
+   "256": {
+    "tile": 256,
+    "seconds": 0.6839256249368191,
+    "us_per_pair": 0.3612201828568753,
+    "tiles": 36,
+    "cross_route_absolute": 1.3871953868390243e-16,
+    "cross_route_relative": 4.4585480926358084e-12
+   }
+  },
+  "host_spread": 0.0030745908834305586
+ }
+}

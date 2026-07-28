@@ -1,0 +1,184 @@
+<!-- docs-project: nova -->
+<meta name="docs-project" content="nova">
+<meta name="plan-slug" content="nova-3d-native-element-callers-landed">
+<meta name="plan-title" content="Element-tier callers, the Carlson gaps, and the box-section gate — landed">
+<meta name="plan-type" content="research">
+<meta name="plan-status" content="reference">
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+
+<article>
+
+<header>
+  <h1>Element-tier callers, the Carlson gaps, and the box-section gate</h1>
+  <p class="lede">Three of four parallel workers landed and merged; the fourth is held
+  by a physics question its own oracle could not answer. Two production paths were
+  returning <strong>nan</strong> rather than merely losing digits, and the gate that
+  was believed to be discretisation-limited turned out to be masking a real
+  near-face kernel error.</p>
+</header>
+
+<section>
+  <h2>Quick status</h2>
+  <table>
+    <thead><tr><th>Work</th><th>State</th><th>Commit</th></tr></thead>
+    <tbody>
+      <tr><td>Arc rows on the geometry's own complements</td><td>✓ landed</td><td><code>ce004ff6</code></td></tr>
+      <tr><td>Carlson gaps carried instead of subtracted</td><td>✓ landed</td><td><code>5b0c459e</code></td></tr>
+      <tr><td>Box section against a quadrature reference</td><td>✓ landed</td><td><code>548664b6</code></td></tr>
+      <tr><td>Ring diagonal on the finite-width section</td><td>held — see below</td><td><code>d304ca54</code> (unmerged)</td></tr>
+      <tr><td>Vertical weight as a shared constant</td><td>✓ landed</td><td><code>959220b2</code></td></tr>
+    </tbody>
+  </table>
+  <p>Full lane on merged develop: <strong>1 failed, 3661 passed, 140 skipped</strong>
+  against a baseline of 2 failed, 3578 passed, 140 skipped. Both baseline failures are
+  fixed; 83 tests added; one new marginal failure carried forward.</p>
+</section>
+
+<section>
+  <h2>The arc rows were returning nan, not losing digits</h2>
+  <p>The brief called this transcription. It was not. Six arrangements landed, each
+  measured end to end on the rows it feeds:</p>
+  <ul>
+    <li>The Jacobian pair is the amplitude's own sine and cosine, so a scipy inversion
+    disappears — and the inversion it replaces <strong>returned nan for every target
+    within 1e-08 radii of the source ring</strong>, the complete first kind it inverts
+    being infinite there.</li>
+    <li><code>dn</code> as <code>cos²θ + k'² sin²θ</code>, a sum of positives, where the
+    printed radical returns no digits at all on the arc's own end plane. It divides the
+    toroidal field row, multiplies the radial potential row, and enters the composite
+    second kind.</li>
+    <li>The first and second kinds off one complement-native descent: on the closed arc
+    against the axisymmetric kernel the flux goes <strong>1.9e-05 (infinite forty
+    nanometres in) → 7.8e-16</strong>, and <strong>both field rows nan → 1.9e-15</strong>.</li>
+    <li>The third kind on its pole and complement: <strong>8.2e-04 → 3.3e-16</strong>,
+    where the characteristic-and-parameter route also fails the general entry point's own
+    assertion once the parameter rounds to one.</li>
+    <li>The pole gap as <code>(1 − n) − k'²</code> and the denominator as
+    <code>cos²θ + (1 − n) sin²θ</code>: <strong>4.0e-04 → 4.3e-10</strong>, and it removes
+    a negative denominator from under a logarithm.</li>
+    <li>The vertical row's second-kind weight, worth 7.1e-09 on the closed arc.</li>
+  </ul>
+  <p>A seventh cancellation was found unprompted: the far root's logarithm
+  <strong>returned exactly zero past a pole of 1e20</strong>; its difference times its
+  sum is <code>k²</code> times the denominator identically, so the ratio is now a
+  quotient of positives.</p>
+  <p>Stated limitation, measured rather than hidden: the amplitude is assembled as
+  <code>(π − ψ)/2</code>, so an end row is only as good as the assembled angle and the
+  first kind holds 2.5e-12 within 1e-08 radians of the end plane and 1e-08 radii of the
+  ring. An amplitude landing on a right angle is exempt and taken exactly, which covers
+  both integration limits. Cost: 2.4× and 2.2× per element on the host.</p>
+</section>
+
+<section>
+  <h2>A compiled kernel disagreed with its own host path</h2>
+  <p>Found while taking the baseline, not by the brief. <code>_elementary</code> opened on
+  <code>β − α</code>, and those two are <em>exactly equal</em> when Carlson's pole argument
+  equals two of the other three — which the incomplete third kind reaches whenever the pole
+  and the complement are both small. The subtraction kept four digits on the host and six
+  fewer once XLA contracted its multiply-adds: <strong>1.2e-09 against the
+  extended-precision integral where numpy held 1.3e-15</strong>. Eager <code>jax.numpy</code>
+  was bit-identical to numpy, so the cause was the fused arithmetic and nothing else.</p>
+  <p>Two exact statements remove it. The difference factorises as
+  <code>(√p − √x)(√p − √y)(√p − √z)</code> whose conjugate is their sum — a sum of
+  positives — so the difference is the product of the three gaps over that sum, and the
+  root is the product of the gaps' own square roots. And the duplication shifts all four
+  arguments by the same amount, so <strong>the gaps quarter exactly</strong> and are
+  carried rather than re-formed; the subtracted gap is already 2.6e-04 wrong by the second
+  trip.</p>
+  <p>Both paths now hold <strong>2.2e-15</strong>. The compiled lane got
+  <em>faster</em> — 891 → 592 ns/element — while numpy rose 1655 → 2119. The CUDA backend
+  never contracted this term and is unchanged at 1.7e-15.</p>
+  <p>A vanishing gap is held before its square root, since gaps formed as products reach
+  exactly zero where the subtraction never did and <code>sqrt</code> has an infinite
+  derivative there. The confluence is reachable only below a pole of one: above it the
+  reflection is in force, and a modulus complement never exceeds one, so the two cannot
+  meet. Driven there anyway — with a complement above one, which no ring produces — the
+  reflected arrangement divides by <code>pole − complement</code> and returns nan for the
+  value as well. Recorded at the test rather than guarded for.</p>
+</section>
+
+<section>
+  <h2>The box-section gate was masking a kernel error, not measuring discretisation</h2>
+  <p>The plan asserted this comparison was discretisation-dominated. <strong>That was
+  wrong.</strong> Three 120° arcs sweep a <em>true</em> ring, so the comparison carries no
+  discretisation term at all.</p>
+  <p>An independent panelled Gauss–Legendre integral of the filament-ring Green's functions
+  over the square annulus settles which side moved: the axisymmetric element reproduces
+  that reference to <strong>7.4e-12 at every target</strong>, including the twelve inside
+  the cavity, so the whole departure belongs to the thickened arc — whose error
+  <strong>grows toward its own section face</strong>: 8.8e-10 at six section widths,
+  2.5e-06 at 0.0075 m, 1.3e-04 at 0.0005 m. The bands now separate and pin that two-sided.</p>
+  <p>Why naive refinement made it worse (4% and 30% on <code>Ay</code>): raising
+  <code>minimum_arc_nodes</code> past the point count <strong>switches the path from arcs
+  to chords</strong> — eighteen chords sit at 2.2e-02 and thirty-six at 7.4e-03,
+  second-order in the chord count, against three arcs at 8.8e-10.</p>
+  <p>Sensitivity demonstrated rather than asserted: rows are contracted from the float64
+  operators because the reduced field arrays are <em>single precision</em> and floor any
+  comparison at 1e-06, and scaling an axisymmetric row by a relative 1e-09, or a swept row
+  by 1e-08, now fails the gate.</p>
+</section>
+
+<section>
+  <h2>The diagonal: the removed model was not a fudge, and the oracle could not arbitrate</h2>
+  <p><code>OffsetFilaments</code> was removed and the ring element's diagonal now comes from
+  the finite-width section. But the measurement that shaped the work overturned its own
+  brief: for a square section <code>0.5·dx·turnturn</code> <strong>is the section's
+  geometric mean distance</strong>, so the removed machinery was a leading-order
+  self-inductance model, not an arbitrary nudge. A single integral at the target point is a
+  different quantity, +7.1% on the psi self term, and would have been a regression. The
+  resolution shipped is the <strong>double integral</strong> — the source's exact
+  finite-section kernel area-averaged over the target element's own section.</p>
+  <p>A brute-force 4-D quadrature oracle was then built and refined. It establishes, and
+  these stand:</p>
+  <ul>
+    <li>the shipped fan rule reproduces the uniform-current double integral to
+    <strong>6.5e-07</strong> against the Richardson limit;</li>
+    <li>the tiling identity closes — with both bands opened, the sub-element sum reproduces
+    the continuum to <strong>1.4e-06</strong>;</li>
+    <li>no aspect-driven loss through aspect 2.89;</li>
+    <li>band 2.0 costs 1.46×/1.57× on a plasma grid, <em>not</em> the 7× a stale docstring
+    claimed, and takes the undiscretised pair from 3.397e-02 to 3.596e-03 of the continuum,
+    unchanged at band 4.0.</li>
+  </ul>
+  <p><strong>What it does not establish is that the machine reference is wrong.</strong>
+  Every one of those evaluations assumes a uniform current density over the gross section.
+  A real CS module is 554 turns of cable-in-conduit conductor — cable space inside a steel
+  jacket, insulation between — so the uniform-current integral is exact for a conductor
+  nobody built. And the sign supports the winding: concentrating current into discrete
+  sub-conductors <em>raises</em> self-inductance, and the reference sits above the continuum
+  on every self term.</p>
+  <table>
+    <thead><tr><th>Coil</th><th>uniform-j continuum</th><th>DDD</th><th>difference</th></tr></thead>
+    <tbody>
+      <tr><td>PF1</td><td>0.703468</td><td>0.7076</td><td>−4.132e-03</td></tr>
+      <tr><td>CS3U</td><td>0.794932</td><td>0.7954</td><td>−4.684e-04</td></tr>
+      <tr><td>CS2U</td><td>0.794930</td><td>0.7954</td><td>−4.698e-04</td></tr>
+    </tbody>
+  </table>
+  <p>The diagonal work is therefore <strong>held unmerged</strong> pending a discrete-winding
+  study, with the machine reference as oracle and the uniform-current model as the thing
+  under test.</p>
+</section>
+
+<section>
+  <h2>Carried forward</h2>
+  <ul>
+    <li><code>test_a_free_form_polygon_section_reaches_the_kernel</code> sits at 1.133e-11
+    against its own 1e-11 gate, from a written 1.6e-12 — a consistency check between the
+    element route and the direct function, marginal rather than broken, and moved by the
+    arc-row work.</li>
+    <li>Three exact-cancellation tests (<code>test_circle_circle_coil_pair</code>,
+    <code>test_cyliner_cylinder_coil_pair</code>, <code>test_multifilament_3d_vector</code>)
+    assert zero on <em>single-precision</em> reduced arrays whose floor is ~1e-06. They pass
+    in a full-tree run and fail as a subset, at base and unchanged by any worker. A
+    cancellation gate on float32 is the same species of unreliable gate this increment set
+    out to remove.</li>
+    <li>The inductance lane's target-side average is carried by <code>PolyTarget</code>'s own
+    subdivision, not by a section: 2 targets is 1.32e-01 from the reference, 60 still fails
+    at 5.19e-03, and it only holds from ~64 up. The shipped default passes because it sits
+    above that threshold, not because anything enforces it.</li>
+  </ul>
+</section>
+
+</article>

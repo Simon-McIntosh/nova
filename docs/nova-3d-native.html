@@ -18,8 +18,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-28">
-<meta name="plan-impl" content="0.6">
-<meta name="plan-version" content="4">
+<meta name="plan-impl" content="0.75">
+<meta name="plan-version" content="5">
 </head>
 <body>
   <main class="plan-doc">
@@ -163,6 +163,34 @@
         further failing tests turned out to be wrong tests with correct code. Full record:
         <a href="archive/nova-3d-native-kernel-closeout-landed.html">kernel close-out landed</a>
         (develop <code>d070c4f7..fb9fafbb</code>).
+      </p>
+    </section>
+
+    <section id="element-callers" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-07-28</span>
+        <h2>Element-tier callers, the Carlson gaps, and the box-section gate</h2>
+      </header>
+      <p class="landed-summary">
+        Three of four parallel workers merged; two production paths were returning
+        <strong>nan</strong>, not merely losing digits. The arc's field rows returned nan for any
+        target within 1e-08 radii of the source ring and its flux was infinite forty nanometres in
+        — <strong>nan → 1.9e-15</strong> on both field rows, 1.9e-05 → 7.8e-16 on the flux — with
+        the third kind 8.2e-04 → 3.3e-16 and a seventh cancellation found unprompted (the far
+        root's logarithm returned exactly zero past a pole of 1e20). A compiled kernel was found
+        disagreeing with its own host path at <strong>1.2e-09 where numpy held 1.3e-15</strong>,
+        because Carlson's <code>β − α</code> is exactly zero when the pole meets two of the other
+        three; the gaps are now carried and quarter exactly, both paths hold 2.2e-15, and the
+        compiled lane got <em>faster</em> (891 → 592 ns/element). And the box-section gate was
+        <strong>not</strong> discretisation-limited as this plan asserted — three 120° arcs sweep a
+        true ring, an independent quadrature reference puts the axisymmetric element at 7.4e-12,
+        so the whole departure is the thickened arc's own error growing toward its section face
+        (1.3e-04 at half a millimetre). Full lane <strong>3661 passed / 1 failed / 140 skipped</strong>
+        against a baseline of 3578 / 2 / 140. The ring diagonal is built but
+        <strong>held unmerged</strong>: its oracle assumes uniform current density, which a
+        554-turn cable-in-conduit winding is not. Full record:
+        <a href="archive/nova-3d-native-element-callers-landed.html">element callers landed</a>
+        (develop <code>ce004ff6</code>, <code>5b0c459e</code>, <code>548664b6</code>).
       </p>
     </section>
 
@@ -441,11 +469,11 @@ Done-when
   3. A verdict on the Constants conditioning, with a measurement, fixed if present.
   4. Every moved golden recorded as a correction; BASELINE.md rectangle cost current.
   5. Followup written; this followup resolved.</pre>
-    <p class="r-fu-outcome">Landed on develop d070c4f7..fb9fafbb (merges 8621a32e, 1621cfb2, fb9fafbb; pushed). All five items closed. (1) The failing test is the ENVIRONMENT: the login node's L4 has 73 MiB free of 23034, so bow -> zeta -> jax initialises CUDA and JAX walks its preallocation down from 16.47 GiB; whether it degrades or dies depends on what the other process holds at that instant, which is why it never reproduces. Ordering was ruled out MECHANICALLY (pytest_randomly and xdist both absent, so a full-file plus full-lane run exhaust the orderings that exist). (2) THE ULP PIN IS RESTORED AND BETTER THAN THE ORIGINAL: the 1e-13 scaled bound was measuring WHICH TARGETS WERE CHOSEN, because the corner value is a cancellation of terms reaching 206x the stack scale on the shipped targets and four decades on targets they do not visit, with the third-kind sum cancelling by a further 800x. The reference now returns the magnitude of the WIDEST TERM each value is assembled from and the pin is taken over that: 2.7 ulp shipped, &lt;=3.9 across several hundred random geometries where the cancellation factor spans three decades — geometry-independent, which the old 4-ulp pin never was. Injected single-term slips sit thirteen decades clear; the term pin catches a 1e-14 coefficient slip the scaled one does not. Scaled bound kept at 1e-13 as the cruder statement (3.7e-14 measured). (3) spread is a CONVERGENCE statement, not an error tolerance — but coverage HAD been lost: two of four crossing configurations had NO oracle, restored at 1e-10 (1.5e-12 / 2.2e-11 measured). And the ladder was measuring the SECTION: standoffs fixed in metres make the floor d/L-dependent, so a 6.2 m ring with a 2 cm section spread 2.9e-02 where the 4 m section spread 4.3e-03 — the bound passed on one aspect and FAILED on the other. Diagnosed as the quotient's floor not a kernel defect on three counts that fail differently (ladder flat to 1e4 with the whole excursion in the finest rung; rung ratios 1.00 where a jump gives a clean 10.0; oracle agrees to 1.6e-11). Standoffs are now fractions of the section extent, bound TIGHTENED 1e-2 -> 2e-3, section shape a test input. (4) THE CONDITIONING DEFECT WAS REAL AND LARGER THAN THE RECTANGLE KERNEL'S, because solve.py builds every coil, plasma and passive row through Constants: the far characteristic was 110% wrong a tenth of a micrometre off a metre-scale corner plane, and end to end through Bow the flux row lost FOUR DECADES by a millimetre off the plane and passed 100% wrong at six micrometres. FOUR defects fixed: the poles and modulus by subtraction (r - c = -gamma^2/(r + c) exactly, pole ((r + c)/gamma)^2); the third pole ((rs - r)/b)^2 carrying no gamma so wrong at ANY gamma for a small corner offset; the second kind's vertical weight 2r - b k^2 = 2r(gamma^2 - b(rs - r))/a^2 (Circle.Bz 7.1e-09 -> 1.1e-15); and v = 1 + k^2(gamma^2 - br)/(2r rs) = (3gamma^2 + (rs - r)(rs + r))/a^2 (6.5e-05 -> 1.9e-16). eps fudges and the dead unit_nudge/_np2_2/_np2_3/Constants.sign removed rather than retuned. VERIFIED against the independent oracle: the repaired ring rows reproduce the already-fixed axisymmetric kernel — flux and BOTH field components — to 1e-13 relative driven onto the filament. tests/test_biotconstants.py 35/35 (25 failed before the fix). TWO measured results overturned instructions: the complement-native descent is the WRONG route for the first and second kinds (1245 ns/element against Cephes' 290; ellipkm1 already takes k'^2) and right only for the third (544 vs Carlson's 664); and the two third-kind implementations do not compete but cover different DOMAINS — at n = 1.3 the pole goes negative, the root falls inside the range, and the integral is a principal value (-1.739) the descent silently returns 0 for, so Carlson is retained deliberately and the routine is selected on the pole's domain. (5) THE MOVED-GOLDEN SWEEP: zero committed goldens moved and no fixture was regenerated, so every move was MEASURED against an oracle verified bit-identical across the range (polygonanalytic imports neither greens nor constants). psi on ordinary targets 1.01e-04 -> 3.24e-11; on a face 1.60e+04 -> 2.18e-11; at a corner 8.10e+03 -> 1.34e-11. Three tolerances tightened, ZERO loosened anywhere. The one row that looked worse (far field 0.96x) was chased to the oracle: the older value was 4% wrong about the true quadrupole difference. COST: the '12.7 us/pair rectangle' premise was a CATEGORY ERROR — that is the closed form's third-kind cost per corner, not a kernel per-pair figure. The rectangle kernel is 30.6 us/pair against 61.0 recorded, of which only 1.12x belongs to the range (34.3 -> 30.6, with the point kernel and 16x48 quadrature flat as controls); the rest is left UNATTRIBUTED. Closed form's floor re-measured whole: third kind 5.17, moment stacks 26.8 -> 19.09, graded residual 73.08 (now 79% of the floor), assembled psi 189.8 -> 173.77. TWO FAILING TESTS FOUND AND FIXED, both wrong tests with correct code: test_box_section[skin] compared a circular annulus against two solid SQUARES and passed only while the element evaluated a curved section as its bounding box (it reported two different geometries agreeing to every digit, which is proof of a defect, not health) — rebuilt analytically from geometry with the facet count named and the 4/3 mean-square-radius ratio as the far-field statement; and the lean-core probe aborted on any absent extra, now standing them in so every module is inspected. FULL LANE at fb9fafbb: 3576 passed, 140 skipped, 1 FAILED — test_box_section[box], which is a MARGINAL GATE not a defect: it asserts a 3-segment polygonal winding against a true ring pair at 1e-4 while the geometric discrepancy alone was already 9.70e-05 (passing by 3%), and the repair moved it to 1.15e-04. That the discrepancy is discretisation-dominated and not kernel error is settled by the ring-limit test holding 1e-13. NOT loosened — left failing visibly and handed off (f-3d-06). Record: archive/nova-3d-native-kernel-closeout-landed.html</p>
+    <p class="r-fu-outcome">Landed on develop d070c4f7..fb9fafbb (merges 8621a32e, 1621cfb2, fb9fafbb; pushed). All five items closed. (1) The failing test is the ENVIRONMENT: the login node's L4 has 73 MiB free of 23034, so bow -&gt; zeta -&gt; jax initialises CUDA and JAX walks its preallocation down from 16.47 GiB; whether it degrades or dies depends on what the other process holds at that instant, which is why it never reproduces. Ordering was ruled out MECHANICALLY (pytest_randomly and xdist both absent, so a full-file plus full-lane run exhaust the orderings that exist). (2) THE ULP PIN IS RESTORED AND BETTER THAN THE ORIGINAL: the 1e-13 scaled bound was measuring WHICH TARGETS WERE CHOSEN, because the corner value is a cancellation of terms reaching 206x the stack scale on the shipped targets and four decades on targets they do not visit, with the third-kind sum cancelling by a further 800x. The reference now returns the magnitude of the WIDEST TERM each value is assembled from and the pin is taken over that: 2.7 ulp shipped, &lt;=3.9 across several hundred random geometries where the cancellation factor spans three decades — geometry-independent, which the old 4-ulp pin never was. Injected single-term slips sit thirteen decades clear; the term pin catches a 1e-14 coefficient slip the scaled one does not. Scaled bound kept at 1e-13 as the cruder statement (3.7e-14 measured). (3) spread is a CONVERGENCE statement, not an error tolerance — but coverage HAD been lost: two of four crossing configurations had NO oracle, restored at 1e-10 (1.5e-12 / 2.2e-11 measured). And the ladder was measuring the SECTION: standoffs fixed in metres make the floor d/L-dependent, so a 6.2 m ring with a 2 cm section spread 2.9e-02 where the 4 m section spread 4.3e-03 — the bound passed on one aspect and FAILED on the other. Diagnosed as the quotient's floor not a kernel defect on three counts that fail differently (ladder flat to 1e4 with the whole excursion in the finest rung; rung ratios 1.00 where a jump gives a clean 10.0; oracle agrees to 1.6e-11). Standoffs are now fractions of the section extent, bound TIGHTENED 1e-2 -&gt; 2e-3, section shape a test input. (4) THE CONDITIONING DEFECT WAS REAL AND LARGER THAN THE RECTANGLE KERNEL'S, because solve.py builds every coil, plasma and passive row through Constants: the far characteristic was 110% wrong a tenth of a micrometre off a metre-scale corner plane, and end to end through Bow the flux row lost FOUR DECADES by a millimetre off the plane and passed 100% wrong at six micrometres. FOUR defects fixed: the poles and modulus by subtraction (r - c = -gamma^2/(r + c) exactly, pole ((r + c)/gamma)^2); the third pole ((rs - r)/b)^2 carrying no gamma so wrong at ANY gamma for a small corner offset; the second kind's vertical weight 2r - b k^2 = 2r(gamma^2 - b(rs - r))/a^2 (Circle.Bz 7.1e-09 -&gt; 1.1e-15); and v = 1 + k^2(gamma^2 - br)/(2r rs) = (3gamma^2 + (rs - r)(rs + r))/a^2 (6.5e-05 -&gt; 1.9e-16). eps fudges and the dead unit_nudge/_np2_2/_np2_3/Constants.sign removed rather than retuned. VERIFIED against the independent oracle: the repaired ring rows reproduce the already-fixed axisymmetric kernel — flux and BOTH field components — to 1e-13 relative driven onto the filament. tests/test_biotconstants.py 35/35 (25 failed before the fix). TWO measured results overturned instructions: the complement-native descent is the WRONG route for the first and second kinds (1245 ns/element against Cephes' 290; ellipkm1 already takes k'^2) and right only for the third (544 vs Carlson's 664); and the two third-kind implementations do not compete but cover different DOMAINS — at n = 1.3 the pole goes negative, the root falls inside the range, and the integral is a principal value (-1.739) the descent silently returns 0 for, so Carlson is retained deliberately and the routine is selected on the pole's domain. (5) THE MOVED-GOLDEN SWEEP: zero committed goldens moved and no fixture was regenerated, so every move was MEASURED against an oracle verified bit-identical across the range (polygonanalytic imports neither greens nor constants). psi on ordinary targets 1.01e-04 -&gt; 3.24e-11; on a face 1.60e+04 -&gt; 2.18e-11; at a corner 8.10e+03 -&gt; 1.34e-11. Three tolerances tightened, ZERO loosened anywhere. The one row that looked worse (far field 0.96x) was chased to the oracle: the older value was 4% wrong about the true quadrupole difference. COST: the '12.7 us/pair rectangle' premise was a CATEGORY ERROR — that is the closed form's third-kind cost per corner, not a kernel per-pair figure. The rectangle kernel is 30.6 us/pair against 61.0 recorded, of which only 1.12x belongs to the range (34.3 -&gt; 30.6, with the point kernel and 16x48 quadrature flat as controls); the rest is left UNATTRIBUTED. Closed form's floor re-measured whole: third kind 5.17, moment stacks 26.8 -&gt; 19.09, graded residual 73.08 (now 79% of the floor), assembled psi 189.8 -&gt; 173.77. TWO FAILING TESTS FOUND AND FIXED, both wrong tests with correct code: test_box_section[skin] compared a circular annulus against two solid SQUARES and passed only while the element evaluated a curved section as its bounding box (it reported two different geometries agreeing to every digit, which is proof of a defect, not health) — rebuilt analytically from geometry with the facet count named and the 4/3 mean-square-radius ratio as the far-field statement; and the lean-core probe aborted on any absent extra, now standing them in so every module is inspected. FULL LANE at fb9fafbb: 3576 passed, 140 skipped, 1 FAILED — test_box_section[box], which is a MARGINAL GATE not a defect: it asserts a 3-segment polygonal winding against a true ring pair at 1e-4 while the geometric discrepancy alone was already 9.70e-05 (passing by 3%), and the repair moved it to 1.15e-04. That the discrepancy is discretisation-dominated and not kernel error is settled by the ring-limit test holding 1e-13. NOT loosened — left failing visibly and handed off (f-3d-06). Record: archive/nova-3d-native-kernel-closeout-landed.html</p>
     </article>
-<article class="r-fu" data-id="f-3d-06" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28T13:30:00+00:00" data-recommends-skill="/reckon-ship nova-3d-native" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-3d-06" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28T13:30:00+00:00" data-recommends-skill="/reckon-ship nova-3d-native" data-resolved-at="2026-07-28T18:08:15+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Carry the repaired constants into the arc and circle rows, decide the operator diagonal, and make the box-section comparison a real gate</h4>
-    <div class="r-fu-body"><p>Three things left by the kernel close-out, in dependency order. The <code>Constants</code> repair landed and is verified to 1e-13 against the axisymmetric kernel, but <strong>its callers still take the naive entry points</strong>, so the measured residual survives one level up: <code>Arc.Pi_inc</code> up to 1.0 at &gamma;/r = 1e-10 on an arc end plane, <code>Arc.ellipj</code>'s <code>dn</code> 2.6e-10 where the elementary form holds at 9.0e-18, and <code>Circle.Bz</code>/<code>Arc._Bz_hat</code>'s <code>2r &minus; b k&sup2;</code> at 7.1e-09 against 1.1e-15. All four items are already MEASURED &mdash; this is transcription plus its own before-and-after, not investigation.</p><p>Second, <strong>the operator diagonal is undefined</strong>. The removed eps fudges were functionally a disguised self-coupling model: they kept a filament kernel finite on its own diagonal by nudging the geometry, so the diagonal was set by floating-point epsilon rather than by the conductor's cross-section. The corner-level case now has a stated contract; the coincident case &mdash; every diagonal entry of an all-to-all matrix &mdash; does not.</p><p>Third, <code>test_box_section[box]</code> FAILS on develop and is deliberately left failing. It is a marginal gate, not a defect: it asserts a 3-segment polygonal winding against a true axisymmetric ring pair at 1e-4 while the geometric discrepancy alone was 9.70e-05, so it was passing by 3% and the repair moved it to 1.15e-04. It must be made geometry-limited rather than loosened.</p></div>
+    <div class="r-fu-body"><p>Three things left by the kernel close-out, in dependency order. The <code>Constants</code> repair landed and is verified to 1e-13 against the axisymmetric kernel, but <strong>its callers still take the naive entry points</strong>, so the measured residual survives one level up: <code>Arc.Pi_inc</code> up to 1.0 at γ/r = 1e-10 on an arc end plane, <code>Arc.ellipj</code>'s <code>dn</code> 2.6e-10 where the elementary form holds at 9.0e-18, and <code>Circle.Bz</code>/<code>Arc._Bz_hat</code>'s <code>2r − b k²</code> at 7.1e-09 against 1.1e-15. All four items are already MEASURED — this is transcription plus its own before-and-after, not investigation.</p><p>Second, <strong>the operator diagonal is undefined</strong>. The removed eps fudges were functionally a disguised self-coupling model: they kept a filament kernel finite on its own diagonal by nudging the geometry, so the diagonal was set by floating-point epsilon rather than by the conductor's cross-section. The corner-level case now has a stated contract; the coincident case — every diagonal entry of an all-to-all matrix — does not.</p><p>Third, <code>test_box_section[box]</code> FAILS on develop and is deliberately left failing. It is a marginal gate, not a defect: it asserts a 3-segment polygonal winding against a true axisymmetric ring pair at 1e-4 while the geometric discrepancy alone was 9.70e-05, so it was passing by 3% and the repair moved it to 1.15e-04. It must be made geometry-limited rather than loosened.</p></div>
     <pre class="r-fu-prompt">Project: nova
 Plan:    nova-3d-native (http://127.0.0.1:8765/nova/nova-3d-native.html)
 Section: the element-tier callers, the diagonal, and one marginal gate
@@ -597,6 +625,83 @@ Done-when
      (expect to have to MEASURE them — the last two kernel fixes moved zero
      committed golden literals).
   5. Followup written; this followup resolved.</pre>
+    <p class="r-fu-outcome">Parts 1 and 3 LANDED and merged (develop ce004ff6, 5b0c459e, 548664b6; full lane 3661 passed / 1 failed / 140 skipped against a baseline of 3578 / 2 / 140). Part 2 built but HELD UNMERGED on a physics question — see f-3d-07. PART 1 was not transcription: the Jacobian round trip RETURNED NAN for every target within 1e-08 radii of the source ring (the complete first kind it inverts is infinite there), and taking the first and second kinds off one complement-native descent moved the closed arc's flux from 1.9e-05 (infinite forty nanometres in) to 7.8e-16 and BOTH FIELD ROWS FROM NAN to 1.9e-15. Item 4 was landed in FULL, not as the 5x. Third kind 8.2e-04 -> 3.3e-16; pole gap 4.0e-04 -> 4.3e-10, removing a negative denominator from under a logarithm; vertical weight 7.1e-09. A seventh cancellation was found unprompted (the far root's logarithm returned exactly zero past a pole of 1e20). Stated limit: end rows hold 2.5e-12 within 1e-08 radians of the end plane, the amplitude being assembled. Cost 2.4x / 2.2x per element on the host. A FIFTH DEFECT WAS FOUND WHILE TAKING THE BASELINE, which had two failures not one: the compiled kernel disagreed with its own host path at 1.2e-09 where numpy held 1.3e-15, because Carlson's beta - alpha is EXACTLY zero when the pole argument equals two of the other three, which the incomplete third kind reaches. Fixed by carrying the three gaps (beta^2 - alpha^2 = (p-x)(p-y)(p-z) exactly; the gaps quarter exactly under the duplication, where the subtracted gap is 2.6e-04 wrong by the second trip). Both paths now 2.2e-15; the compiled lane got FASTER, 891 -> 592 ns/element; CUDA never contracted the term. PART 3 OVERTURNED THIS PLAN'S OWN PREMISE: the box-section comparison is NOT discretisation-dominated. Three 120-degree arcs sweep a TRUE ring, so it carries no discretisation term; an independent panelled Gauss-Legendre reference puts the axisymmetric element at 7.4e-12 at every target, so the whole departure is the thickened arc's own error GROWING TOWARD ITS SECTION FACE (8.8e-10 at six section widths, 2.5e-06 at 0.0075 m, 1.3e-04 at 0.0005 m). The gate was masking a real near-face kernel error. Naive refinement failed because raising minimum_arc_nodes past the point count switches arcs to CHORDS (18 chords 2.2e-02, 36 at 7.4e-03) against three arcs at 8.8e-10. Sensitivity demonstrated: a 1e-09 relative row scaling now fails. Record: archive/nova-3d-native-element-callers-landed.html</p>
+    </article>
+<article class="r-fu" data-id="f-3d-07" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28T20:30:00+00:00" data-recommends-skill="/reckon-ship nova-3d-native" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Settle the ring diagonal against a discrete CS winding, and merge it</h4>
+    <div class="r-fu-body"><p>The diagonal is built and unmerged (<code>d304ca54</code> in <code>../nova-w-diagonal</code>). <code>OffsetFilaments</code> is gone and the near band is the exact DOUBLE integral. But the measurement that shaped it overturned its brief: for a square section <code>0.5·dx·turnturn</code> IS the section's geometric mean distance, so the removed machinery was a leading-order self-inductance model, not a nudge, and a single integral at the target point is a different quantity (+7.1 % on the psi self term).</p><p>Its brute-force 4-D oracle then appeared to convict the machine reference — and that conclusion was RETRACTED, because the oracle assumes uniform current density over the gross section and a CS module is 554 turns of cable-in-conduit conductor. The sign supports the winding: discrete sub-conductors RAISE self-inductance, and DDD sits above the continuum on every self term (PF1 −4.13e-03, CS −4.68e-04).</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    nova-3d-native (http://127.0.0.1:8765/nova/nova-3d-native.html)
+Section: the ring diagonal, against a discrete winding
+Tier:    opus
+
+Context
+  Two threads converge here. The diagonal work sits unmerged at d304ca54 in the
+  detached worktree ../nova-w-diagonal; a discrete-winding study is being built
+  in ../nova-w-winding (benchmarks/cs_winding_inductance.py) on the H200.
+
+What the diagonal oracle DOES establish, and these stand:
+  * the shipped fan rule reproduces the uniform-current double integral to
+    6.5e-07 against a refined Richardson limit;
+  * the tiling identity closes to 1.4e-06 with both bands opened;
+  * no aspect-driven loss through aspect 2.89;
+  * band 2.0 costs 1.46x/1.57x on a plasma grid (NOT the 7x a stale docstring
+    claimed) and takes the undiscretised pair from 3.397e-02 to 3.596e-03 of the
+    continuum, unchanged at band 4.0.
+
+What it does NOT establish is that DDD is wrong. Every evaluation assumes uniform
+j over the gross section. Treat DDD as the ORACLE and the uniform-j model as the
+thing under test.
+
+Done-when
+  1. The discrete-winding ladder answers whether the winding accounts for the gap,
+     and whether ONE conductor model accounts for BOTH the PF1 and CS gaps.
+  2. The uniform-current assumption stated as a contract in circle.py and
+     sectionaverage.py wherever the continuum is used as a reference; no test
+     pinned against the continuum as truth for a real coil.
+  3. The inductance lane&#x27;s discretisation threshold documented with its measured
+     ladder (2 targets 1.32e-01 from DDD, 60 still failing at 5.19e-03, holding
+     only from ~64 up) and a proposal for making a too-coarse frame fail loudly.
+  4. The diagonal merged, with the band decided and its seam pinned two-sided.
+  5. Followup written; this followup resolved.</pre>
+    </article>
+<article class="r-fu" data-id="f-3d-08" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-28T20:30:00+00:00" data-recommends-skill="/reckon-ship nova-3d-native" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Two marginal gates the element work exposed rather than caused</h4>
+    <div class="r-fu-body"><p>Neither blocks anything; both are the species of unreliable gate this increment set out to remove, and both are now MEASURED rather than suspected.</p><p><code>test_a_free_form_polygon_section_reaches_the_kernel</code> sits at 1.133e-11 against its own 1e-11 bound, from a written 1.6e-12 — a consistency check between the element route and the direct function, moved by the arc-row work. Separately, three exact-cancellation tests assert zero on SINGLE-PRECISION reduced arrays whose floor is ~1e-06; they pass in a full-tree run and fail as a subset, at base, unchanged by any worker.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    nova-3d-native (http://127.0.0.1:8765/nova/nova-3d-native.html)
+Section: two marginal gates
+Tier:    sonnet (escalate to opus if the polybow move turns out to be a kernel change)
+
+Context
+  The element-caller work left one new marginal failure and surfaced three
+  pre-existing ones. Neither set was caused by the work; both need settling.
+
+1. tests/test_biotpolybow.py::test_a_free_form_polygon_section_reaches_the_kernel
+   fails at 1.133e-11 against 1e-11, where its docstring records 1.6e-12 when
+   written. Both sides of that comparison go through the arc reduction, so
+   establish whether the two routes now differ MORE (a real change worth
+   understanding) or whether the bound was always this close and the arc-row
+   work moved it within its own noise. Do not widen the bound without saying
+   which.
+
+2. tests/test_biotsavart.py::test_circle_circle_coil_pair,
+   ::test_cyliner_cylinder_coil_pair and ::test_multifilament_3d_vector assert
+   exact cancellation (two coil sets at +/-Ic -&gt; zero) via np.isclose/allclose
+   against zero, whose default atol is 1e-08, on reduced field arrays that are
+   SINGLE PRECISION and therefore floor any comparison at ~1e-06. Measured:
+   -9.14e-07 on the circle pair. They pass in a full-tree run and fail run as a
+   three-test subset, identically at base and in every worker tree, so the
+   pass/fail turns on run context rather than on the code.
+   Make them state their own floor: assert the cancellation against the single
+   precision the operator store actually carries, or contract the rows from the
+   float64 operators the way tests/test_biotsavart.py&#x27;s rebuilt box-section gate
+   now does. A gate whose verdict depends on what else ran is not a gate.
+
+Done-when
+  1. The polybow move attributed, with a measurement, and the bound justified.
+  2. The three cancellation tests deterministic, stating what sets their floor.
+  3. Full lane clean; followup resolved.</pre>
     </article>
 </section>
   </main>

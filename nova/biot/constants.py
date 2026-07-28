@@ -171,6 +171,25 @@ class Constants:
         return (3 * self.gamma**2 + (self.rs - self.r) * self.b) / self.a2
 
     @cached_property
+    def axial_weight(self):
+        """Return the second kind's weight in the vertical row, without subtracting.
+
+        ``2 r - b k^2`` reaches zero as the target reaches the ring -- two
+        quantities of order the ring span coming back at order the distance to it,
+        for a relative ``eps b/(2 r - b k^2)``.  Since ``a^2 - 2 rs b`` is
+        ``gamma^2 + b(r - rs)``,
+
+            2 r - b k^2 = 2 r (gamma^2 - b (rs - r))/a^2
+
+        exactly, and neither term of that numerator approaches the other on the
+        approach.  It divides by the modulus complement in the row it weights, so
+        the printed difference costs the vertical field four decades at a target a
+        hundredth of a micrometre off a metre-scale ring, where the flux and the
+        radial row beside it are already exact.
+        """
+        return 2 * self.r * (self.gamma**2 - self.b * (self.rs - self.r)) / self.a2
+
+    @cached_property
     def K(self):
         """Return complete elliptic intergral of the 1st kind, from the complement.
 

@@ -413,8 +413,24 @@ def geometric_axial_weight(con):
 
     exactly, and neither term of that numerator approaches the other as the target
     reaches the ring.
+
+    Written out here independently of the class so the two spellings can be held
+    against each other, which is what
+    :func:`test_the_class_supplies_the_geometric_vertical_weight` does.
     """
     return 2.0 * con.r * (con.gamma**2 - con.b * (con.rs - con.r)) / con.a2
+
+
+def test_the_class_supplies_the_geometric_vertical_weight():
+    """The weight the ring rows adopt is the one measured here, bit for bit.
+
+    Both vertical rows -- the complete filament's and the finite arc's -- take it
+    from :attr:`nova.biot.constants.Constants.axial_weight` rather than each
+    spelling it out, so the arrangement this file measures is the arrangement they
+    run.
+    """
+    con, _ = approaching_the_filament()
+    assert np.array_equal(con.axial_weight, geometric_axial_weight(con))
 
 
 def test_the_ring_reproduces_the_axisymmetric_kernel_near_the_filament():

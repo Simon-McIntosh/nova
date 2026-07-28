@@ -54,22 +54,64 @@ OPTIONAL_DISTRIBUTION = frozenset(
 DEFERRED_PLOTTING = ("matplotlib", "seaborn", "pylab")
 
 LEAN_CORE_PROBE = """
+import importlib.util
 import pkgutil
 import sys
+import types
+from unittest.mock import MagicMock
 
 BLOCKED = frozenset({blocked!r})
+OPTIONAL = frozenset({optional!r})
 
 
-class BlockRoots:
-    \"\"\"Raise on any import below a blocked root package.\"\"\"
+def missing(root):
+    \"\"\"Return whether an optional root is absent from this environment.\"\"\"
+    try:
+        return importlib.util.find_spec(root) is None
+    except (ImportError, ValueError):
+        return True
+
+
+# Stand in for the extras this environment does not carry, so every module in the
+# subtree still executes its body and is inspected. Skipping those modules instead
+# would make the guard weaker the leaner the environment is, which is backwards --
+# the lean environment is the one it exists for, and here ten of the twelve extras
+# are absent, covering most of the sultan, naka and twente packages.
+#
+# A blocked root is never stood in for. Each of them is also an extra, so ordering
+# these two tests is the whole correctness of the arrangement: excusing an absent
+# plotting stack would excuse exactly the property under test.
+STUBBED = frozenset(root for root in OPTIONAL - BLOCKED if missing(root))
+
+
+class StubLoader:
+    \"\"\"Execute a stand-in as an empty package answering any attribute.\"\"\"
+
+    def create_module(self, spec):
+        module = types.ModuleType(spec.name)
+        module.__path__ = []
+        module.__getattr__ = lambda attribute: MagicMock()
+        return module
+
+    def exec_module(self, module):
+        pass
+
+
+class Finder:
+    \"\"\"Refuse a blocked root outright; stand in for an absent extra.\"\"\"
 
     def find_spec(self, name, path=None, target=None):
-        if name.split(".")[0] in BLOCKED:
-            raise ModuleNotFoundError(f"{{name}} blocked by the lean-core probe")
+        root = name.split(".")[0]
+        if root in BLOCKED:
+            raise ModuleNotFoundError(
+                f"{{name}} blocked by the lean-core probe", name=name
+            )
+        if root in STUBBED:
+            return importlib.util.spec_from_loader(name, StubLoader(), is_package=True)
         return None
 
 
-sys.meta_path.insert(0, BlockRoots())
+sys.meta_path.insert(0, Finder())
 
 import nova.thermalhydralic as thermalhydralic
 
@@ -81,7 +123,7 @@ for module in pkgutil.walk_packages(
 leaked = sorted(name for name in sys.modules if name.split(".")[0] in BLOCKED)
 if leaked:
     raise AssertionError(f"plotting stack reached at import: {{leaked}}")
-print("LEAN_CORE_OK")
+print(f"LEAN_CORE_OK stood in for {{sorted(STUBBED)}}")
 """
 
 
@@ -111,12 +153,24 @@ def test_module_imports(name):
 def test_lean_core_defers_plotting():
     """No module in the subtree imports a plotting stack at module scope.
 
+    Every module is inspected whether or not its own extras are installed: an
+    absent extra is stood in for, so the guard does not quietly shrink to the
+    modules a given environment happens to be able to import. A blocked plotting
+    root is never stood in for, which is what keeps the assertion live.
+
     Marked slow because the probe pays the whole cluster's cold import cost --
     CoolProp, nlopt, ftputil, mechanize and the data dictionary -- in a fresh
     interpreter, which the in-process tests have already amortised.
     """
     probe = subprocess.run(
-        [sys.executable, "-c", LEAN_CORE_PROBE.format(blocked=DEFERRED_PLOTTING)],
+        [
+            sys.executable,
+            "-c",
+            LEAN_CORE_PROBE.format(
+                blocked=DEFERRED_PLOTTING,
+                optional=tuple(sorted(OPTIONAL_DISTRIBUTION)),
+            ),
+        ],
         capture_output=True,
         text=True,
         check=False,

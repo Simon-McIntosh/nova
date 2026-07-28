@@ -1,0 +1,69 @@
+{
+  "microseconds_per_pair": {
+    "beam-hexagon": 56.089,
+    "beam-rectangle": 55.841,
+    "element-beam-hexagon": 21.851,
+    "element-beam-rectangle": 21.271,
+    "element-polybeam-hexagon": 22.408,
+    "element-polybeam-rectangle": 21.674,
+    "polybeam-hexagon": 56.645,
+    "polybeam-rectangle": 56.328,
+    "prism-hexagon": 1.796,
+    "prism-rectangle": 1.391,
+    "reduction-beam-rectangle": 0.709
+  },
+  "spread": {
+    "beam-hexagon": 0.893,
+    "beam-rectangle": 1.734,
+    "element-beam-hexagon": 7.355,
+    "element-beam-rectangle": 0.282,
+    "element-polybeam-hexagon": 0.755,
+    "element-polybeam-rectangle": 0.601,
+    "polybeam-hexagon": 0.597,
+    "polybeam-rectangle": 0.122,
+    "prism-hexagon": 0.048,
+    "prism-rectangle": 0.062,
+    "reduction-beam-rectangle": 0.025
+  },
+  "processes": {
+    "beam-hexagon": 3,
+    "beam-rectangle": 3,
+    "element-beam-hexagon": 3,
+    "element-beam-rectangle": 3,
+    "element-polybeam-hexagon": 3,
+    "element-polybeam-rectangle": 3,
+    "polybeam-hexagon": 3,
+    "polybeam-rectangle": 3,
+    "prism-hexagon": 3,
+    "prism-rectangle": 3,
+    "reduction-beam-rectangle": 3
+  },
+  "pairs": {
+    "beam-hexagon": 512,
+    "beam-rectangle": 512,
+    "element-beam-hexagon": 512,
+    "element-beam-rectangle": 512,
+    "element-polybeam-hexagon": 512,
+    "element-polybeam-rectangle": 512,
+    "polybeam-hexagon": 512,
+    "polybeam-rectangle": 512,
+    "prism-hexagon": 512,
+    "prism-rectangle": 512,
+    "reduction-beam-rectangle": 512
+  },
+  "repeats_within_a_process": 3,
+  "note": "fresh process per measurement, median of three first-run timings within each, median across processes; measured on a sun_debug compute node",
+  "framed_ratio": {
+    "rectangle": 1.009,
+    "hexagon": 1.01
+  },
+  "element_ratio": {
+    "rectangle": 1.019,
+    "hexagon": 1.025
+  },
+  "corner_scaling": 1.291,
+  "reduction_ratio": {
+    "rectangle": 1.963,
+    "hexagon": 2.534
+  }
+}

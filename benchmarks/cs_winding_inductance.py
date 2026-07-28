@@ -431,7 +431,10 @@ def cable_sensitivity(modules, conductor: Conductor, policy: str, diameters) -> 
     for diameter in diameters:
         trial = replace(conductor, cable=float(diameter))
         entry = {}
-        for rung in ("cable", "annulus"):
+        # A channel wider than the cable space is not a conductor, so the
+        # annulus rung drops out at the small-diameter end of a sweep.
+        rungs = ("cable",) if trial.channel >= trial.cable else ("cable", "annulus")
+        for rung in rungs:
             coilset = winding_coilset(modules, rung, trial, policy)
             entry[rung] = active_inductance(coilset, modules).tolist()
         entry["cable_area"] = trial.cable_area
@@ -604,7 +607,7 @@ def stage_sensitivity(args) -> None:
         "machine_description": MACHINE_DESCRIPTION.tolist(),
         "policy": args.policy,
     }
-    print(f"wrote {_write('sensitivity.json', payload)}")
+    print(f"wrote {_write(f'sensitivity{args.label}.json', payload)}")
     report_sensitivity(payload)
 
 
@@ -615,6 +618,8 @@ def report_sensitivity(payload: dict) -> None:
     print(f"\n{'cable [mm]':<12}{'rung':<9}" + "".join(f"{name:>26}" for name in names))
     for key, entry in payload["sweep"].items():
         for rung in ("cable", "annulus"):
+            if rung not in entry:
+                continue
             matrix = np.array(entry[rung])
             row = f"{1e3 * float(key):<12.1f}{rung:<9}"
             for i in range(len(names)):
@@ -888,18 +893,17 @@ def stage_figures(args) -> None:
         f" at {1e3 * lattice.pitch_radial:.2f} x {1e3 * lattice.pitch_vertical:.2f} mm"
         f" pitch, {module.nturn:g} turns"
         f"\njacket {1e3 * conductor.jacket:.0f} mm, cable space"
-        f" {1e3 * conductor.cable:.0f} mm, channel {1e3 * conductor.channel:.0f} mm"
+        f" {1e3 * conductor.cable:.0f} mm, channel {1e3 * conductor.channel:.0f} mm",
+        fontsize=11,
     )
-    figure.tight_layout()
+    figure.tight_layout(rect=(0.0, 0.0, 1.0, 0.94))
     figure.savefig(FIGURES / "lattice.png", dpi=130)
     plt.close(figure)
 
     # Everything is plotted as an OFFSET from the converged continuum, because
     # the quantity under study is four decimal places into the value itself.
-    sensitivity_path = FIGURES / "sensitivity.json"
-    sensitivity = (
-        json.loads(sensitivity_path.read_text()) if sensitivity_path.exists() else None
-    )
+    sweep_paths = sorted(FIGURES.glob("sensitivity*.json"))
+    sweeps = [json.loads(path.read_text()) for path in sweep_paths]
     rungs = [rung for rung in RUNGS if rung != "continuum"]
     figure, axes = plt.subplots(
         2, len(names), figsize=(4.6 * len(names), 7.6), squeeze=False
@@ -920,9 +924,11 @@ def stage_figures(args) -> None:
             f"gap {gap:+.2e} H\n= {turns_equivalent:+.3f} turns",
             (0.02, gap),
             xycoords=("axes fraction", "data"),
+            textcoords="offset points",
+            xytext=(0, -4),
             fontsize=8,
             color="C3",
-            va="bottom",
+            va="top",
         )
         axis.set_xticks(range(len(rungs)))
         axis.set_xticklabels(rungs, rotation=30, ha="right")
@@ -932,22 +938,25 @@ def stage_figures(args) -> None:
         axis.legend(fontsize=8)
 
         axis = axes[1, index]
-        if sensitivity is None:
+        if not sweeps:
             continue
-        diameters = 1e3 * np.array(sensitivity["diameters"])
         for rung, style in (("cable", "o-"), ("annulus", "s-")):
+            points = sorted(
+                (1e3 * float(key), np.array(entry[rung])[index, index])
+                for source in sweeps
+                for key, entry in source["sweep"].items()
+                if rung in entry
+            )
             axis.plot(
-                diameters,
-                [
-                    np.array(entry[rung])[index, index] - continuum[index, index]
-                    for entry in sensitivity["sweep"].values()
-                ],
+                [point[0] for point in points],
+                [point[1] - continuum[index, index] for point in points],
                 style,
                 label=rung,
             )
         axis.axhline(0.0, color="C7", ls=":")
         axis.axhline(gap, color="C3", ls="--", label="machine description")
         axis.axvspan(32.0, 35.0, color="0.5", alpha=0.15, label="plausible cable space")
+        axis.set_xscale("log")
         axis.set_xlabel("cable-space diameter [mm]")
         axis.set_ylabel("offset from the continuum [H]")
         axis.set_title(f"{name}: conductor sensitivity")
@@ -1028,6 +1037,7 @@ def parse_args(argv=None):
     sensitivity.add_argument("--cable-min", type=float, default=0.026)
     sensitivity.add_argument("--cable-max", type=float, default=0.042)
     sensitivity.add_argument("--cable-steps", type=int, default=9)
+    sensitivity.add_argument("--label", default="")
     sensitivity.set_defaults(run=stage_sensitivity)
 
     device = stages.add_parser("device")

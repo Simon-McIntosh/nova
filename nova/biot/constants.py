@@ -34,14 +34,23 @@ accepts one.  The first kind has a Cephes entry point on the complement,
 those two stay where they are.  The THIRD is the one that needs a routine of its
 own -- there is no complement-native library form, and the printed
 ``R_F + (n/3) R_J`` puts two nearly-equal terms of opposite sign against each
-other once the pole is past the range -- so it goes through
-:mod:`nova.biot.completeelliptic` over the whole quarter range and
-:mod:`nova.biot.incompleteelliptic` at an interior amplitude.  Its entry points
-here take the pole and the complement alongside the characteristic and the
-modulus, so a caller that formed them from its geometry loses nothing on the way
-in.  Measured on a compute node over two million elements: the descent costs the
-third kind 544 ns an element against Carlson's 664, and would cost the first and
-second pair 1245 against Cephes' 290, which is why the split runs where it does.
+other once the pole is past the range -- so its entry points here take the pole
+and the complement alongside the characteristic and the modulus, and a caller
+that supplies them is routed through :mod:`nova.biot.completeelliptic` over the
+whole quarter range and :mod:`nova.biot.incompleteelliptic` at an interior
+amplitude.  :attr:`Constants.Pi` supplies them from :attr:`Constants.np2_pole`;
+the arc rows are the callers that still have to.
+
+A caller that cannot is routed through Carlson's forms as before, and that is a
+DOMAIN split rather than a fallback: the descent's pole must be above zero -- the
+ring denominator's root outside the range -- which every characteristic a source
+ring produces satisfies, while the general entry points also carry a
+characteristic above one, where the root falls inside the range and the integral
+is a principal value the descent has no branch for.
+
+Measured on a compute node over two million elements: the descent costs the third
+kind 544 ns an element against Carlson's 664, and would cost the first and second
+pair 1245 against Cephes' 290, which is why the split runs where it does.
 
 One confluence is not reached by the complements alone.  A target LEVEL with a
 source corner puts both roots of the ring denominator on the ends of the range:
@@ -230,26 +239,95 @@ class Constants:
         """Return complete elliptic intergral of the 2nd kind."""
         return cls._ellip("e", m)
 
+    @classmethod
+    def elliprf(cls, x, y, z):
+        """Return completely-symmetric elliptic integral of the first kind."""
+        return scipy.special.elliprf(x, y, z)
+
+    @classmethod
+    def elliprj(cls, x, y, z, p):
+        """Retrun symmetric elliptic integral of the third kind."""
+        return scipy.special.elliprj(x, y, z, p)
+
     @staticmethod
-    def _complements(n, m, pole, complement):
-        """Return the pole and the modulus complement, preferring what was supplied.
+    def _exact_arguments(pole, complement):
+        """Return the pole and the modulus complement a caller supplied, or ``None``.
 
         ``pole`` is the third kind's denominator at the far end of the range,
-        ``1 - n``, and ``complement`` is ``k'^2``.  A caller holding the geometry
-        forms both exactly; forming them here instead caps the integral at ``eps``
-        over whichever is small, which at a corner is both.
+        ``1 - n``, and ``complement`` is ``k'^2``.  Both or neither: the descent's
+        accuracy comes from having every argument exact, and one exact argument
+        beside one reached by subtraction is the subtraction's accuracy.
         """
-        pole = 1.0 - np.asarray(n) if pole is None else np.asarray(pole)
-        complement = (
-            1.0 - np.asarray(m) if complement is None else np.asarray(complement)
-        )
-        return pole, complement
+        if pole is None or complement is None:
+            return None
+        return np.asarray(pole), np.asarray(complement)
 
     @classmethod
     def ellipp(cls, n, m, *, pole=None, complement=None):
-        """Return complete elliptic intergral of the 3rd kind."""
-        pole, complement = cls._complements(n, m, pole, complement)
-        return complete_pole(pole, complement)
+        """Return complete elliptic intergral of the 3rd kind.
+
+        Two routes, and which one runs is decided by whether the caller can supply
+        the POLE and the modulus complement from its own geometry.
+
+        With them, Bulirsch's descent
+        (:func:`nova.biot.completeelliptic.complete_pole`): the arguments enter as
+        themselves, the iteration is a sum of positives, and one expression spans
+        eighteen decades of pole.  Its domain is a pole ABOVE zero -- the ring
+        denominator's root outside the range -- which is every characteristic a
+        source ring produces, all three of them.
+
+        Without them, Carlson's symmetric forms on ``1 - n`` and ``1 - m``.  That is
+        the general entry point rather than a fallback, because it carries a
+        characteristic above one, where the root falls INSIDE the range and the
+        integral is a principal value the descent has no branch for.  What it costs
+        where both routes apply is the subtraction: ``1 - n`` and ``1 - m`` each
+        carry an absolute ``eps``, and the two terms are of opposite sign and nearly
+        equal once the pole is far past the range.
+        """
+        exact = cls._exact_arguments(pole, complement)
+        if exact is not None:
+            return complete_pole(*exact)
+        n = np.asarray(n)
+        x, y, z, p = np.zeros_like(n), 1 - np.asarray(m), np.ones_like(n), 1 - n
+        return cls.elliprf(x, y, z) + cls.elliprj(x, y, z, p) * n / 3
+
+    @classmethod
+    def _ellippinc(cls, n, sine, cosine, m):
+        """Return the 3rd kind over a quarter turn, from the amplitude's own pair.
+
+        Carlson's form for the amplitude ``phi`` is
+
+            Pi(n, phi, m) = sin phi R_F(cos^2 phi, 1 - m sin^2 phi, 1)
+                          + (n/3) sin^3 phi R_J(..., 1 - n sin^2 phi)
+
+        and every one of those three arguments is taken here as a SUM OF
+        POSITIVES rather than as a subtraction from one.  ``cos^2 phi`` written
+        as ``1 - sin^2 phi`` is the whole difficulty: within about 1e-8 of a
+        quarter turn the sine rounds to one, the difference collapses to exactly
+        zero, and the evaluation silently returns the COMPLETE integral in place
+        of the one it was asked for.  The other two follow the same identity,
+        ``1 - m sin^2 = cos^2 + (1 - m) sin^2``, which additionally keeps the
+        radical's relative accuracy where the target approaches the source ring
+        and both the modulus complement and the cosine are small at once.
+
+        What it cannot do is take the characteristic's own complement from the
+        caller: ``1 - n`` is formed here, and at an amplitude near a quarter turn
+        the sine's square is one and nothing is left to dilute the loss.  A caller
+        holding the pole exactly is served by
+        :func:`nova.biot.incompleteelliptic.incomplete_pole` instead -- see
+        :meth:`ellippinc`.
+
+        Odd in the amplitude through ``sine``, so the fold's parity needs no
+        separate sign.
+        """
+        squared_sine, squared_cosine = sine * sine, cosine * cosine
+        radical = squared_cosine + (1.0 - m) * squared_sine
+        unit = np.ones_like(radical)
+        rf = cls.elliprf(squared_cosine, radical, unit)
+        rj = cls.elliprj(
+            squared_cosine, radical, unit, squared_cosine + (1.0 - n) * squared_sine
+        )
+        return sine * rf + n * sine * squared_sine * rj / 3.0
 
     @classmethod
     def ellippinc(
@@ -277,31 +355,39 @@ class Constants:
         right angle, which is where a target on an arc's own end plane lands.
 
         ``sine`` and ``cosine`` supply the amplitude's pair where the caller
-        formed it from its geometry, as
-        :func:`nova.biot.incompleteelliptic.incomplete_pole` and
-        :mod:`nova.biot.arcamplitude` do; near a quarter turn a pair carried
-        exactly is the difference between a relative accuracy and an absolute
-        one.  ``pole`` and ``complement`` do the same for the characteristic and
-        the modulus -- see :meth:`_complements`.
+        formed it from its geometry, as :mod:`nova.biot.arcamplitude` does; near a
+        quarter turn a pair carried exactly is the difference between a relative
+        accuracy and an absolute one.  ``pole`` and ``complement`` do the same for
+        the characteristic and the modulus, and supplying them routes the residual
+        through :func:`nova.biot.incompleteelliptic.incomplete_pole` -- which
+        additionally reflects a near pole onto its far partner, the arrangement in
+        which the whole expression is a sum of positives.  Without them the
+        residual goes through Carlson's forms on ``1 - n``; see :meth:`ellipp` for
+        why that is the general route and what the two differ in.
         """
         phi = np.asarray(phi, dtype=float)
         sine = np.sin(phi) if sine is None else np.asarray(sine)
         cosine = np.cos(phi) if cosine is None else np.asarray(cosine)
-        pole, complement = cls._complements(n, m, pole, complement)
+        exact = cls._exact_arguments(pole, complement)
         turns = np.round(phi / np.pi)
         parity = 1.0 - 2.0 * abs(np.remainder(turns, 2.0))
         sine, cosine = parity * sine, parity * cosine
-        # a vanishing complement is a target ON the source ring, which the descent
-        # carries as its own confluence; a negative one is not a modulus at all
-        assert np.all(complement >= 0)
+        if exact is None:
+            # the parameter route has to form the modulus complement itself, and a
+            # parameter at one leaves it nothing to form it from
+            assert np.all(np.asarray(m) < 1)
         # the fold leaves the residual amplitude inside the closed quarter, so
         # its cosine is non-negative -- to within the resolution with which a
         # float amplitude locates a half turn at all
         assert np.all(cosine >= -4 * cls.eps * np.maximum(1.0, abs(phi)))
-        folded = incomplete_pole(pole, complement, sine, cosine)
+        if exact is None:
+            folded = cls._ellippinc(n, sine, cosine, m)
+        else:
+            folded = incomplete_pole(*exact, sine, cosine)
         if not np.any(turns):  # a quarter-turn range never leaves the branch
             return folded
-        return 2 * turns * complete_pole(pole, complement) + folded
+        complete = cls.ellipp(n, m, pole=pole, complement=complement)
+        return 2 * turns * complete + folded
 
     @cached_property
     def _held_gamma(self):

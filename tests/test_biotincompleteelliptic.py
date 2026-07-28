@@ -728,3 +728,60 @@ def test_the_gaps_taken_by_subtraction_are_what_the_carried_ones_repair(monkeypa
 
     assert carried < 4e-15  # measured 1.2e-15
     assert 1e-11 < subtracted < 1e-7  # measured 1.2e-09
+
+
+def test_the_third_kind_differentiates_where_a_gap_vanishes_exactly():
+    """The pole argument landing ON one of the descent's other three.
+
+    The gaps are supplied as products, so ``partner - k'^2`` is exactly zero when
+    the two coincide rather than a rounding error from it, and the square root of a
+    gap has an infinite derivative there.  The gap is therefore held at one and the
+    product zeroed, which leaves the value at the elementary limit the confluence
+    has and the derivative finite -- the root's own contribution is dropped, so it
+    is finite rather than exact, and the nearby non-degenerate poles below pin that
+    everywhere else it is the derivative itself.
+
+    The confluence is reached only on the DIRECT side of the reflection, and that is
+    geometry rather than a choice of sweep: the reflection runs above a pole of one,
+    ``k'^2`` is a modulus complement and so never exceeds one, and the two can
+    therefore not coincide above one at all.  Driven there ANYWAY -- with a
+    ``complement`` above one, which no ring produces -- the reflected arrangement
+    divides its three coefficients by ``pole - complement`` and returns nan for the
+    value as well as for the slope; a hundredth of a part per trillion off it the
+    value is an ordinary 0.6465.  So the sweep here stops below one because that is
+    where the argument lives, not to avoid a corner.
+    """
+    jax, jnp = traced_namespace()
+    _, sine, cosine = pair(0.4)
+
+    def value(pole, complement):
+        return incomplete_pole(
+            pole, complement, jnp.asarray(sine), jnp.asarray(cosine), xp=jnp
+        )
+
+    slope = jax.jit(jax.grad(value, argnums=(0, 1)))
+    # the confluence: the partner pole and the complement coincide exactly
+    for pole in (1e-8, 1e-3, 0.3):
+        for taken in slope(jnp.asarray(pole), jnp.asarray(pole)):
+            assert np.isfinite(float(taken))
+
+    # and away from it the slope is the derivative itself, against a central
+    # difference -- taken where the difference is well conditioned, since a step
+    # small enough to sit inside a tiny complement is all round-off
+    for pole, complement in ((0.3, 0.1), (3.0, 0.1), (0.3, 1e-3)):
+        taken = slope(jnp.asarray(pole), jnp.asarray(complement))
+        for index, argument in enumerate((pole, complement)):
+            step = 1e-5 * argument
+            moved = [
+                [pole, complement][other] + (step if other == index else 0.0)
+                for other in (0, 1)
+            ]
+            backed = [
+                [pole, complement][other] - (step if other == index else 0.0)
+                for other in (0, 1)
+            ]
+            difference = (
+                float(value(*(jnp.asarray(term) for term in moved)))
+                - float(value(*(jnp.asarray(term) for term in backed)))
+            ) / (2.0 * step)
+            assert float(taken[index]) == pytest.approx(difference, rel=1e-7)

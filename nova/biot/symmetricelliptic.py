@@ -143,14 +143,24 @@ def _elementary(first, second, weight, xp, *, gaps=None):
     The branch is taken on the sign of the gap product and on ``root`` being
     non-zero, so a ``root`` beneath the exponent range takes the confluent value
     the limit has rather than the vanishing one a saturated quotient would give.
+
+    A gap that is EXACTLY zero -- the pole argument equal to one of the other
+    three, which a caller forming its gaps as products reaches exactly rather than
+    nearly -- is held at one before its square root is taken, and the product
+    zeroed instead.  ``sqrt`` has an infinite derivative at zero, so taking it of
+    the gap itself would put a ``nan`` in the gradient at the one configuration
+    whose value is the elementary limit; held, the value is that limit and the
+    derivative is finite.
     """
     if gaps is None:
         difference = second - first
         root = xp.sqrt(xp.abs(difference)) * xp.sqrt(second + first)
         sign = difference
     else:
-        first_root, second_root, third_root = (xp.sqrt(xp.abs(gap)) for gap in gaps)
-        root = first_root * second_root * third_root
+        vanishing = (gaps[0] == 0.0) | (gaps[1] == 0.0) | (gaps[2] == 0.0)
+        roots = (xp.sqrt(xp.abs(xp.where(gap != 0.0, gap, 1.0))) for gap in gaps)
+        first_root, second_root, third_root = roots
+        root = xp.where(vanishing, 0.0, first_root * second_root * third_root)
         sign = xp.sign(gaps[0]) * xp.sign(gaps[1]) * xp.sign(gaps[2])
         difference = sign * root * (root / (second + first))
     live = root != 0.0

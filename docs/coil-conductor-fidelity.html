@@ -17,9 +17,9 @@
   <title>Coil Conductor Fidelity | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-28">
-<meta name="plan-impl" content="0.25">
-<meta name="plan-version" content="3">
+<meta name="plan-modified" content="2026-07-29">
+<meta name="plan-impl" content="0.5">
+<meta name="plan-version" content="4">
 </head>
 <body>
   <main class="plan-doc">
@@ -212,16 +212,27 @@
     description — and that 248.64 + 0.723 is 249.36 — is worth weighing against the turn count
     itself before anything more elaborate is attempted.</p>
 
-    <p><strong>And the turn count is now directly countable</strong>, not merely arguable: the
-    as-built PF1 centreline (§3, 111005/1) winds the conductor geometrically, so unwrapping phi
-    along the path and dividing by 2π reads the true winding turns off the data. Three candidate
-    values are already in play — 248.6 (the active <code>pf_active</code> description 111001/104),
-    248.64 (the DDD test), and 249.36 (what the inductance gap implies) — and the centreline
-    arbitrates between them with no model in the loop.</p>
+    <p class="landed-summary"><strong>Counted and solved
+    <span class="badge badge-shipped">✓ landed 2026-07-29</span>:</strong> PF1's as-built
+    centreline measures <strong>248.926 ± 0.03 turns</strong> (the six CS modules validate the
+    method, reproducing their undisputed 554 to +0.03) — favouring the design's 248.64 and ruling
+    out the gap-implied 249.36: <em>the gap is not a turn count</em>. The wound-filament ladder
+    then attributes it: against the converged continuum's +4.14e-03, the measured turn count is
+    worth +1.62e-03, the as-built outline and turn positions +2.71e-03, and the true 3-D path
+    −9.25e-04, leaving <strong>+7.30e-04 — 82 % of the field coil's gap is as-built geometry</strong>,
+    with the remainder at the granularity scale the finite-section stage tests. The PF1–CS2U
+    mutual agrees to 1.5e-06. The solenoid modules invert the story: the machine table's CS
+    values match the SHIPPED outline revision, while the 111004/1 centreline packs sit 202 mm
+    higher / 19 mm inside (worth −2.14e-02, forty times the winding effect) on the older itergeom
+    revision — a geometry-revision conflict to reconcile upstream before any solenoid winding
+    effect is readable. Nothing was tuned toward the table. Full record:
+    <a href="archive/coil-conductor-fidelity-wound-filament-landed.html">wound filament landed</a>
+    (develop merge <code>b92d2c88</code>).</p>
 
-    <p>The honest framing: <strong>the two coils' discrepancies have different causes and only one
-    is in hand.</strong> Closing PF1 by tuning a conductor parameter would be reproducing the model
-    we removed.</p>
+    <p>The honest framing survives measurement: <strong>the two coils' discrepancies have
+    different causes</strong> — the field coil's is largely its as-built geometry, the solenoid's
+    is which outline revision the reference was computed on. Closing either by tuning a conductor
+    parameter would be reproducing the model we removed.</p>
 
     <h2 id="s5">§5 — Device throughput, measured in passing</h2>
 
@@ -412,7 +423,7 @@ Done-when
      measurement that eliminates each.
   2. Whichever way it resolves, the decision reference-status locked with it.</pre>
     </article>
-<article class="r-fu" data-id="f-ccf-04" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28T22:00:00+00:00" data-recommends-skill="/reckon-ship coil-conductor-fidelity §3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ccf-04" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28T22:00:00+00:00" data-recommends-skill="/reckon-ship coil-conductor-fidelity §3" data-resolved-at="2026-07-28T23:55:44+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Solve the true wound coil against the approximation, with our own elements</h4>
     <div class="r-fu-body"><p>The as-built centrelines for all six PF coils (111005/1, uncatalogued) and the six CS modules (111004/1) are arc/line element paths with the conductor cross-section stored — PF1–PF5 a 35 mm circular cable space, exactly. Build the wound coil from nova's own high-order elements and compare it DIRECTLY against the axisymmetric approximation and the machine table: filament first (settles the turn count with no new element), finite section after the prism element lands. The cooling-channel hole is modelled as coupled counter-flowing sections, the way the box-section gate already models a hollow square.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -465,6 +476,49 @@ Deliverables
   4. Figures: the wound path per coil, the section, the comparison ladder.
   5. Do NOT edit tests/test_biotsavart.py; draft any gate wording for the
      orchestrator. Do NOT tune anything toward the table.</pre>
+    <p class="r-fu-outcome">Stage 1 landed (develop merge b92d2c88: ddfe2b8b turn count, 9f79ea07 wound ladder). Turn counts measured for all 12 coils off the centrelines (path-intrinsic feeder box + arc-geometry unwrap; CS modules validate at 554+0.03): PF1 = 248.926 ± 0.03 — favours 248.64, rules out the gap-implied 249.36. Wound-filament ladder on converged meshes attributes PF1's +4.14e-03 gap: turn count +1.62e-03, as-built outline/turn positions +2.71e-03, true 3-D path -9.25e-04 → residual +7.30e-04 (82% closed by geometry; remainder at granularity scale). PF1-CS2U mutual agrees to 1.5e-06. CS inverts: machine table matches the SHIPPED outline revision while the centreline packs sit 202 mm higher / 19 mm inside (worth -2.14e-02, 40x the winding effect) — upstream geometry-revision conflict. No device route exists for arc/line filaments (tiled path is axisymmetric-only); host at 0.079 us/pair sufficed — 1.1e08 pairs in 548 s. Stage 2 (finite section, prism + polybow) requeued. Archive: docs/archive/coil-conductor-fidelity-wound-filament-landed.html.</p>
+    </article>
+<article class="r-fu" data-id="f-ccf-05" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-29T02:30:00+00:00" data-recommends-skill="/reckon-ship coil-conductor-fidelity §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Sweep the true finite section along the true path — stage 2 of the direct comparison</h4>
+    <div class="r-fu-body"><p>The prism element landed (develop 513f22b7, routing 9eac0631) and stage 1 leaves PF1 +7.30e-04 from the machine value with path and turn count as-built — the granularity scale. Sweep the 35 mm cable space along the true path (PolyBow for the 893 arcs, PolyBeam for the 189 lines), the cooling channel as coupled counter-flowing sections, and test whether the finite section closes the residual. The CS modules are blocked on the upstream geometry-revision conflict, not on elements.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    coil-conductor-fidelity
+Section: §3/§4 — the direct comparison, stage 2 (FINITE SECTION)
+Tier:    opus
+
+Context
+  Stage 1 (archive: coil-conductor-fidelity-wound-filament-landed.html) leaves PF1
+  at +7.30e-04 from the machine table with turn count and path as-built and the
+  per-turn self term declared as a ring carrying the 35 mm cable-space disc. The
+  prior ladder study measured granularity at +6.7e-04 on a solenoid module — the
+  same scale. The prism element exists (nova/biot/polybeam.py, develop 513f22b7)
+  and polygon-profile routing reaches it (9eac0631); PolyBow carries the arcs.
+  benchmarks/wound_coil_inductance.py holds the stage-1 machinery: path reduction,
+  feeder criterion (path-intrinsic box — an outline box clips the cross-over
+  layer), A·dl assembly, converged-mesh discipline (never dcoil=0.25).
+
+Do
+  1. Replace the declared ring diagonal with the true swept section: PolyBow on
+     the 893 arcs, PolyBeam on the 189 lines of PF1&#x27;s pack, the 35 mm circular
+     cable space as the section polygon (a modest corner count — measure the
+     corner-count convergence: 16/32/64).
+  2. Model the cooling channel as coupled counter-flowing sections (outer at +J,
+     10 mm channel at -J, one circuit), as the box-section gate models a hollow
+     square. Report the channel&#x27;s contribution separately.
+  3. Compare against stage 1&#x27;s ladder on the same converged meshes; attribute the
+     remaining PF1 residual. Do NOT tune anything toward the table.
+  4. CS modules: do not attempt until the upstream geometry-revision conflict is
+     resolved (machine table matches the shipped outline revision; the centreline
+     file sits on the older one — and its stored section is half the cable-space
+     radius, see the CS-section landing).
+  5. Figures + JSON beside the stage-1 artifacts in docs/figures/wound-coil/.
+
+Done-when
+  1. PF1 wound finite-section self and mutuals on converged meshes, residual
+     attributed against stage 1&#x27;s +7.30e-04.
+  2. The channel superposition validated against the hollow-square gate pattern.
+  3. Figures + JSON committed; the plan&#x27;s §3/§4 updated; decisions
+     conductor-model and reference-status informed or locked with the evidence.</pre>
     </article>
 </section>
 

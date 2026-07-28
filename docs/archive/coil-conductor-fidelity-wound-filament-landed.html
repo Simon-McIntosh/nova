@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="archive">
+  <meta name="plan-slug" content="coil-conductor-fidelity-wound-filament-landed">
+  <meta name="plan-title" content="The wound filament against the smeared coil — landed">
+  <meta name="plan-status" content="historical">
+  <meta name="plan-modified" content="2026-07-29">
+  <title>coil-conductor-fidelity wound filament landed | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>The wound filament against the smeared coil</h1>
+  <p><a href="/nova/coil-conductor-fidelity.html">← back to the evergreen plan</a> ·
+     landed 2026-07-29 · develop merge <code>b92d2c88</code>
+     (<code>ddfe2b8b</code> turn count, <code>9f79ea07</code> wound ladder) ·
+     <strong>the field coil's gap is 82 % as-built geometry and not a turn count;
+     the solenoid table matches the shipped outline revision, not the centreline
+     file</strong></p>
+
+  <h2>Quick status</h2>
+  <table>
+    <thead><tr><th>Item</th><th>Status</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>Turn count measured per coil, all 6 PF + 6 CS</td>
+          <td>✓ done</td>
+          <td>PF1 <strong>248.926 ± 0.03</strong>; every whole-path sweep an integer
+              (terminal-to-terminal); the six CS modules reproduce their undisputed
+              554 to +0.03, which is the method's error bar</td></tr>
+      <tr><td>PF1 candidate arbitration</td>
+          <td>✓ decided</td>
+          <td>favours the design's 248.64 (residual +0.29) over pf_active's 248.6
+              (+0.33) and rules out the gap-implied 249.36 (−0.43): <strong>the
+              inductance gap is not a turn count</strong></td></tr>
+      <tr><td>Wound filament vs converged continuum vs machine table</td>
+          <td>✓ done</td>
+          <td>full attribution ladder below; PF1 residual falls from +4.14e-03 to
+              <strong>+7.30e-04</strong>; PF1–CS2U mutual agrees to 1.5e-06</td></tr>
+      <tr><td>Per-turn self term declared and validated</td>
+          <td>✓ stated</td>
+          <td>axisymmetric ring at each turn's own radius carrying the declared
+              cable-space disc; the filament-ring GMD identity checked against the
+              full finite-section matrix (3.9e-05 on the stack); sensitivity
+              dL/dln(a) = −1.235e-03 H per e-fold of cable radius</td></tr>
+      <tr><td>Compute route</td>
+          <td>✓ recorded</td>
+          <td>no device route exists for arc/line filaments (the tiled path is
+              axisymmetric-only) — host assembly at 0.079 µs/pair at 8000 targets
+              made the GPU moot; 21 328 stations, 1.1e08 pairs, 548 s on sun_debug
+              nodes; quadrature converged (2e-05 vs doubled stations), matrix
+              reciprocal to 8.9e-07</td></tr>
+    </tbody>
+  </table>
+
+  <h2>The two method findings that make the count defensible</h2>
+  <ul>
+    <li><strong>Feeders cannot be separated with a box on the model outline.</strong>
+    The as-built packs carry an outer cross-over layer at a far coarser pitch than
+    the winding (PF1 ~140 mm/turn against 49 mm), reaching 171 mm beyond the
+    outline — an outline box silently deletes it: PF3 loses 0.90 turns, CS3U 41.5.
+    The working criterion is path-intrinsic: the poloidal extent of the elements
+    that sweep more than 0.3 turn toroidally (feeders sweep thousandths), inflated
+    one jacket width, plus path contiguity. Stable to ±0.03 turns over thresholds
+    0.1–0.4 and inflations 49–100 mm.</li>
+    <li><strong>The sweep is read off each arc's own circle, not its three stored
+    points.</strong> Some arcs run ~200° between stored points with the intermediate
+    point splitting them 85/15, within 2 % of np.unwrap's half-turn limit — where a
+    whole turn would be lost silently. Resampled on the arc geometry, the counts are
+    identical to 4 decimals at 3, 8, 24 and 64 samples per arc.</li>
+  </ul>
+
+  <h2>The attribution ladder</h2>
+  <p>Reduced self-inductance [H], converged both sides (the shipped dcoil=0.25
+  overshoot never enters). Each rung adds one as-built ingredient:</p>
+  <table>
+    <thead><tr><th>rung</th><th>PF1</th><th>machine − PF1</th><th>CS3U</th><th>machine − CS3U</th></tr></thead>
+    <tbody>
+      <tr><td>continuum, shipped outline</td><td>0.703463</td><td>+4.14e-03</td><td>0.794899</td><td>+5.01e-04</td></tr>
+      <tr><td>+ measured turn count</td><td>0.705083</td><td>+2.52e-03</td><td>0.794975</td><td>+4.25e-04</td></tr>
+      <tr><td>+ as-built outline (uniform)</td><td>0.713256</td><td>−5.66e-03</td><td>0.773564</td><td>+2.18e-02</td></tr>
+      <tr><td>ring stack at as-built turn positions</td><td>0.707795</td><td><strong>−1.95e-04</strong></td><td>0.763884</td><td>+3.15e-02</td></tr>
+      <tr><td>wound 3-D path</td><td>0.706870</td><td><strong>+7.30e-04</strong></td><td>0.763532</td><td>+3.19e-02</td></tr>
+    </tbody>
+  </table>
+  <p><strong>PF1 — largely explained.</strong> Against the machine's 0.7076 the
+  as-built geometry closes 82 % of the +4.14e-03 gap: +1.62e-03 from the measured
+  turn count, +2.71e-03 from the outline and turn positions the conductor actually
+  occupies, −9.25e-04 from the helix, joggles and cross-over layer of the true
+  path. The remaining +7.30e-04 sits at the granularity scale the prior ladder
+  study measured (+6.7e-04 on a solenoid module) — exactly what the finite-section
+  stage exists to test. Mutuals corroborate: PF1–CS2U agrees to 1.5e-06 of
+  0.060210; PF1–CS3U reads −2.67e-03 of 0.134800, which is the CS position
+  question below, not PF1's.</p>
+  <p><strong>The solenoid modules — a geometry-revision conflict, not a winding
+  effect.</strong> The centreline file's CS3U pack sits 202 mm above and 19 mm
+  inside the outline the shipped gate carries, worth −2.14e-02 on the self term —
+  forty times the +5.01e-04 the continuum was missing — and the as-built modules
+  sit 75 mm further apart (CS3U–CS2U mutual +2.35e-02 low). So the machine table's
+  solenoid values agree with the shipped outline revision and NOT with the
+  111004/1 centreline file, whose packs land on the older itergeom revision
+  (1.687, 5.464, 0.740 × 2.093 — same conclusion reached independently from the
+  layer histogram in the <a href="coil-conductor-fidelity-cs-section-landed.html">CS
+  section landing</a>). Which geometry the machine was actually built to has to be
+  reconciled upstream before a winding effect can be read off a solenoid module;
+  together with the CS section factor-of-two, the 111004/1 entry now carries two
+  independent provenance questions.</p>
+
+  <figure>
+    <img src="/nova/figures/wound-coil/turn-count.svg"
+         alt="Measured winding turns per coil against nominal values, with the PF1 candidates marked and the CS modules validating the method at 554"
+         style="max-width:100%">
+    <figcaption>The turn-count table as measured, feeders excluded by the
+    path-intrinsic criterion; PF1's three candidates marked — the as-built count
+    favours 248.64 and rules out 249.36.</figcaption>
+  </figure>
+  <figure>
+    <img src="/nova/figures/wound-coil/winding-path.svg"
+         alt="As-built winding paths per coil in r-z and plan view with feeders greyed"
+         style="max-width:100%">
+    <figcaption>The as-built paths, feeders greyed by the path-intrinsic criterion.</figcaption>
+  </figure>
+  <figure>
+    <img src="/nova/figures/wound-coil/ladder.svg"
+         alt="The attribution ladder: machine minus model at each rung for PF1, CS3U and CS2U"
+         style="max-width:100%">
+    <figcaption>Machine − model at each rung. PF1 converges onto the machine value
+    as as-built ingredients are added; the CS modules diverge because the machine
+    table carries the other outline revision.</figcaption>
+  </figure>
+
+  <h2>What's next</h2>
+  <p><strong>Stage 2 — finite section along the true path</strong> is unblocked:
+  the prism element landed (develop <code>513f22b7</code>) and the routing followed
+  (<code>9eac0631</code>), so PF1's 189 straight segments and 893 arcs can carry
+  the true 35 mm cable space via PolyBeam + PolyBow, with the cooling channel as
+  coupled counter-flowing sections. The PF1 residual of +7.30e-04 is the number it
+  must explain. The CS geometry-revision conflict and the section factor-of-two
+  go upstream to the machine-description contacts.</p>
+</main>
+</body>
+</html>

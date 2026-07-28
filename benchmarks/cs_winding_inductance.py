@@ -802,8 +802,13 @@ def stage_figures(args) -> None:
     radius, height = lattice.centres()
     turns = site_turns(lattice, ladder["policy"])
 
-    def draw_rung(axis, rung):
-        """Fill one axis with the current-carrying regions of one rung."""
+    def draw_rung(axis, rung, window=None):
+        """Fill one axis with the current-carrying regions of one rung.
+
+        ``window`` is a (half-width, half-height) view about the module centre;
+        sites outside it are skipped rather than drawn and clipped, which is
+        what keeps a close-up panel from carrying the whole pack's geometry.
+        """
         axis.add_patch(
             Rectangle(
                 (
@@ -835,6 +840,11 @@ def stage_figures(args) -> None:
             face = "C0" if region["current"] else "0.75"
             for site_r, site_z, count in zip(radius, height, turns):
                 if count == 0.0:
+                    continue
+                if window is not None and (
+                    abs(site_r - module.radius) > window[0] + region["dl"]
+                    or abs(site_z - module.height) > window[1] + region["dl"]
+                ):
                     continue
                 if region["section"] == "square":
                     axis.add_patch(
@@ -879,7 +889,8 @@ def stage_figures(args) -> None:
         )
         for row, (half_r, half_z) in enumerate(windows):
             axis = axes[row, column]
-            draw_rung(axis, rung)
+            axis.set_rasterization_zorder(2 if row == 0 else None)
+            draw_rung(axis, rung, None if row == 0 else (half_r, half_z))
             axis.set_xlim(module.radius - half_r, module.radius + half_r)
             axis.set_ylim(module.height - half_z, module.height + half_z)
             axis.set_aspect("equal")
@@ -898,7 +909,7 @@ def stage_figures(args) -> None:
         fontsize=11,
     )
     figure.tight_layout(rect=(0.0, 0.0, 1.0, 0.94))
-    figure.savefig(FIGURES / "lattice.png", dpi=130)
+    figure.savefig(FIGURES / "lattice.svg", dpi=200)
     plt.close(figure)
 
     # Everything is plotted as an OFFSET from the converged continuum, because
@@ -970,7 +981,7 @@ def stage_figures(args) -> None:
         "does the discrete winding close the gap to the machine description?"
     )
     figure.tight_layout()
-    figure.savefig(FIGURES / "ladder.png", dpi=130)
+    figure.savefig(FIGURES / "ladder.svg")
     plt.close(figure)
 
     device = sorted(FIGURES.glob("device-*.json"))
@@ -1015,7 +1026,7 @@ def stage_figures(args) -> None:
         axis.grid(alpha=0.3, which="both")
         axis.legend(fontsize=8)
         figure.tight_layout()
-        figure.savefig(FIGURES / "throughput.png", dpi=130)
+        figure.savefig(FIGURES / "throughput.svg")
         plt.close(figure)
     print(f"wrote figures to {FIGURES}")
 

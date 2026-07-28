@@ -552,10 +552,13 @@ def swept_shell(section, *, nturn=1, **shell):
     incidental.  :meth:`nova.geometry.polyline.PolyLine.append` fits an arc only to a
     run of at least ``minimum_arc_nodes`` points and emits chords otherwise, so
     raising the node count and ``minimum_arc_nodes`` together does not refine the
-    path -- it drops every segment to ``beam`` and inscribes the circle in a polygon,
-    which departs from the ring it is meant to approach instead of approaching it.
-    Refinement here means MORE INSERTS of four points each, never a larger
-    ``minimum_arc_nodes``.
+    path -- it drops every segment to ``beam`` and inscribes the circle in a polygon.
+    Measured against the quadrature reference at a standoff of six section widths,
+    the three arcs land at 8.8e-10 while the eighteen chords ``minimum_arc_nodes=8``
+    produces land at 2.2e-02 and the thirty-six of ``minimum_arc_nodes=16`` at
+    7.4e-03: a chord path does converge, at the second order its own count supplies,
+    but from seven decades away.  Refinement here means MORE INSERTS of four points
+    each, never a larger ``minimum_arc_nodes``.
     """
     shell = {**SHELL, **shell}
     segments = 3
@@ -763,10 +766,11 @@ def test_box_section(section):
 
     The path is three 120-degree arcs, so the swept body is a TRUE RING of square
     annular section and the comparison carries no discretisation term at all: the
-    axisymmetric arm below reproduces the reference to 7.4e-12, seven decades under
-    what a polygonal path of the same node count costs.  What the comparison does
-    carry is the accuracy the thickened-arc antiderivative reaches near its own
-    section, and that is what the bands separate.
+    axisymmetric arm below reproduces the reference to 7.4e-12, and the swept arc to
+    8.8e-10 away from its own section, against the 2.2e-02 a chord path of the same
+    node count returns (:func:`swept_shell`).  What the comparison does carry is the
+    accuracy the thickened-arc antiderivative reaches NEAR its own section, and that
+    is what the bands separate.
 
     The reference is an independent panelled Gauss-Legendre integral of the
     filament-ring Green's functions over the annulus, sharing no code with either

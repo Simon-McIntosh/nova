@@ -278,6 +278,42 @@ def test_the_first_and_second_kinds_hold_at_a_corner(geometry):
 # Through the third kind's own entry points, at an exact pole.
 
 
+def test_the_general_entry_points_keep_the_wider_domain():
+    """A characteristic ABOVE one, which the descent has no branch for.
+
+    The pole is then negative -- the ring denominator's root falls INSIDE the
+    range and the integral is a principal value -- and the descent, whose whole
+    arrangement is a sum of positives over a pole above zero, returns zero there.
+    Every characteristic a source ring produces is below one, so supplying the pole
+    is always available to the reduction; the entry points also serve callers whose
+    characteristic is not, and this is the case that separates the two routes.
+
+    The value is the principal value of the integral, so the sign is the assertion:
+    a positive result would be the descent's zero-pole convention leaking into a
+    domain it does not cover.
+    """
+    n, m = np.array([1.3]), np.array([0.8])
+    assert Constants.ellipp(n, m) < 0.0
+    assert Constants.ellippinc(n, np.array([5.5]), m) < 0.0
+
+
+def test_every_ring_characteristic_is_below_one():
+    """Which is why the reduction can always supply the pole to the descent.
+
+    ``c >= r`` makes the near characteristic ``2 r/(r + c)`` at most one, ``4 r rs``
+    is at most ``b^2`` by the arithmetic-geometric mean so the third is too, and the
+    far one is negative outright.  All three poles are therefore non-negative, which
+    is the descent's domain.
+    """
+    for geometry in (corner_plane, corner_radius):
+        con = constants(**geometry(RATIOS))
+        assert np.all(con.np2[1] < 0.0)
+        assert np.all(con.np2[2] <= 1.0)
+        assert np.all(con.np2[3] <= 1.0)
+        for p in (1, 2, 3):
+            assert np.all(con.np2_pole[p] >= 0.0)
+
+
 @pytest.mark.parametrize("geometry", [corner_plane, corner_radius])
 def test_the_complete_entry_point_takes_an_exact_pole(geometry):
     """``ellipp`` at a supplied pole is the complement-native routine."""

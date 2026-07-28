@@ -724,9 +724,10 @@ def test_a_target_on_the_filament_returns_the_divergence():
     ``psi`` grows without bound from every direction, so ``inf`` is its limit.
     ``B_Z`` does not have one -- approached radially in the plane its sign follows
     which side the target is on -- so ``nan`` is the honest answer rather than either
-    infinity. What both replace is a finite number: capping the modulus and flooring
-    the squared distance used to return the kernel's value for a target 1.4 um away,
-    with nothing in the result to say so.
+    infinity. What neither may be is a finite number: an absolute floor on the
+    squared distance to the filament answers for a target 1.4 um away instead, with
+    nothing in the result to say so, and it does that at every ring radius because
+    the ring radius does not appear in it.
     """
     for radius in (0.9, 1.0, 6.2):
         target = np.array([radius])

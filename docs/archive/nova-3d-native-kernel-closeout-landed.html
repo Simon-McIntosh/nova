@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="archive">
+  <meta name="plan-slug" content="nova-3d-native-kernel-closeout-landed">
+  <meta name="plan-title" content="The two kernel fixes closed out — and four more defects in the element tier">
+  <meta name="plan-status" content="historical">
+  <meta name="plan-modified" content="2026-07-28">
+  <title>nova-3d-native — kernel close-out landed | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>Kernel close-out landed — three unverified claims closed, and the conditioning defect was real</h1>
+  <p><a href="/nova/nova-3d-native.html">← back to the evergreen plan</a> ·
+     landed 2026-07-28 · develop <code>d070c4f7..fb9fafbb</code>
+     (merges <code>8621a32e</code>, <code>1621cfb2</code>, <code>fb9fafbb</code>)</p>
+
+  <h2>Quick status</h2>
+  <table>
+    <thead><tr><th>Item</th><th>Status</th><th>Commit</th></tr></thead>
+    <tbody>
+      <tr><td>The failing <code>grid_solve_finite_section_winding</code> — environment or defect?</td>
+          <td>✓ closed — environment, cause identified</td><td>—</td></tr>
+      <tr><td>The 4-ulp algebra pin's replacement at 1e-13</td>
+          <td>✓ closed — ulp pin restored on a better scale</td><td><code>13f838e8</code></td></tr>
+      <tr><td>The <code>spread &lt; 1e-2</code> assertion</td>
+          <td>✓ closed — convergence statement; lost oracle coverage restored</td><td><code>13f838e8</code>, <code>1ef70ff2</code></td></tr>
+      <tr><td>The conditioning defect still live in <code>Constants</code></td>
+          <td>✓ real, and larger than the rectangle kernel's — four defects fixed</td><td><code>3b065fb5</code>, <code>a977b871</code>, <code>4f7137c7</code></td></tr>
+      <tr><td>The moved-golden sweep neither prior agent delivered</td>
+          <td>✓ delivered — zero committed goldens moved; every move measured</td><td>—</td></tr>
+      <tr><td>BASELINE.md's suspect rectangle cost</td>
+          <td>✓ re-measured — and the premise was a category error</td><td><code>705db761</code>, <code>f91dcb02</code></td></tr>
+      <tr><td>Two failing tests found along the way, both wrong tests</td>
+          <td>✓ fixed</td><td><code>7fd62663</code>, <code>a78d760d</code></td></tr>
+      <tr><td>The arc/circle callers of the repaired constants</td>
+          <td>deferred — measured, scoped, not landed</td><td>—</td></tr>
+    </tbody>
+  </table>
+
+  <h2>The headline: the element tier carried a worse defect than the kernel that prompted the look</h2>
+  <p>The brief asked whether <code>nova/biot/constants.py</code> carried the same conditioning
+  defect the axisymmetric rectangle kernel had just shed. It did, and it mattered more, because
+  <code>solve.py</code> dispatches <code>segment="circle"</code> to <code>Circle(Constants, Matrix)</code>
+  and <code>"arc"</code> to <code>Arc(Constants, Matrix)</code> — so <strong>every coil, plasma and
+  passive row of a reconstruction operator is assembled through the code that was wrong.</strong></p>
+  <figure>
+    <img src="/nova/figures/nova-3d-native/conditioning-recovery.png" alt="Three panes: the ring
+    characteristics and modulus complement losing accuracy as the target approaches a source-corner
+    plane; the resulting error in the element's field rows reaching 100 percent; and the rectangle
+    kernel's recovery on ordinary, on-face and at-corner targets" style="max-width:100%">
+    <figcaption>Left: the ring characteristics and the modulus complement, formed by subtraction,
+    against the same quantities taken from the geometry (flat at ~3e-16 across the whole sweep).
+    Centre: what that costs the element's rows end to end against the polygon arc oracle — the flux
+    row loses four decades by a millimetre off the corner plane and passes 100 % wrong at six
+    micrometres. Right: the axisymmetric rectangle kernel, measured either side of its own repair;
+    on a section face the value was decades larger than the truth, not perturbed.</figcaption>
+  </figure>
+
+  <h3>Four distinct defects, all the same shape</h3>
+  <ol>
+    <li><strong>The poles and the modulus by subtraction.</strong> <code>np2[1] = 2r/(r − c − eps)</code>
+    with <code>c = √(γ² + r²)</code>: as γ → 0 the denominator is a catastrophic subtraction, and an
+    absolute epsilon was then subtracted from it to stop it reaching zero — so the fudge was
+    proportionally largest exactly where the true value is largest. Taken from the geometry,
+    <code>r − c = −γ²/(r + c)</code> exactly, so the characteristic is <code>−2r(r + c)/γ²</code> and
+    its pole <code>((r + c)/γ)²</code>. The far characteristic was <strong>110 % wrong</strong> a tenth
+    of a micrometre off a metre-scale corner plane; the modulus complement 1.9e-03.</li>
+    <li><strong>The third pole carries no γ at all.</strong> <code>1 − n₃ = ((rs − r)/b)²</code>, so it
+    was 1.9e-03 wrong for any 1e-6 r corner offset at <em>any</em> γ — a wider engagement than the
+    corner plane alone.</li>
+    <li><strong>The second kind's weight in the vertical row.</strong> <code>2r − b k²</code> cancels as
+    the target reaches the ring; exactly <code>2r(γ² − b(rs − r))/a²</code>. It capped
+    <code>Circle.Bz</code> at 7.1e-09 a hundredth of a micrometre off a 6.2 m filament while ψ and
+    B<sub>r</sub> sat at 1e-16. Fixed in <code>Constants</code>; the <code>circle.py</code> and
+    <code>arc.py</code> adoption is deferred.</li>
+    <li><strong>The radial row's weight.</strong> <code>v = 1 + k²(γ² − br)/(2r·rs)</code> is one plus a
+    term reaching minus one, and is identically <code>(3γ² + (rs − r)(rs + r))/a²</code>. Printed form
+    6.5e-05 wrong at a corner a micrometre from the plane; collapsed form 1.9e-16.</li>
+  </ol>
+
+  <h3>Two results that came out of measuring rather than assuming</h3>
+  <p><strong>The complement-native descent is the wrong route for the first and second kinds.</strong>
+  The instruction was to route every integral through it. Measured over two million elements on a
+  compute node, it costs the first and second kinds <strong>1245 ns/element against Cephes' 290</strong>,
+  because <code>ellipkm1</code> already takes k′² directly so the sensitive kind never sees the
+  parameter, and the second kind is bounded and takes the parameter without loss. For the third kind
+  it wins — 544 ns against Carlson's 664 — where the printed <code>R_F + (n/3)R_J</code> sets two
+  nearly-equal terms of opposite sign against each other. Accuracy is the same either way (the ring's
+  flux holds at 5.2e-16). Only the third kind was rerouted.</p>
+  <p><strong>The two third-kind implementations do not compete; they cover different domains.</strong>
+  An unconditional reroute broke <code>n = 1.3</code>, where the pole <code>1 − n</code> is negative,
+  the root falls <em>inside</em> the integration range, and the integral is a principal value (−1.739)
+  that the complement-native descent has no branch for and silently returns <strong>0</strong> for.
+  The routine is now selected on the pole's domain: a caller supplying <code>pole=</code> and
+  <code>complement=</code> gets the descent, a caller holding only the characteristic and the parameter
+  keeps Carlson's forms, which carry the wider domain. So the "duplicate" is retained deliberately —
+  deleting it would reintroduce a zero where a principal value belongs.</p>
+
+  <h2>The two test assertions — one was measuring the wrong thing, one had lost coverage</h2>
+  <p><strong>The pin.</strong> The scaled bound at 1e-13 was measuring <em>which targets were chosen</em>,
+  not the algebra: the corner value is a cancellation of terms reaching 206× the four-corner stack's
+  scale on the shipped targets and four decades of it on targets they do not visit, with the third-kind
+  sum cancelling by a further 800× inside that — so one rounding of one term's last bit arrives as a
+  couple of thousand ulp of the corner value. The reference now returns the <strong>magnitude of the
+  widest term each value is assembled from</strong>, and the pin is taken over that:
+  <strong>2.7 ulp on the shipped set and ≤3.9 across several hundred random target and section
+  geometries</strong>, over which the cancellation factor spans three decades and the bound does not
+  move. So the ulp pin is restored <em>and</em> is geometry-independent, which the original 4-ulp pin
+  never was. Injected single-term slips — a dropped factor of three, a flipped <code>(−1)^p</code>,
+  transposed characteristics, <code>rs + c</code> read as <code>rs − c</code> — sit thirteen decades
+  clear of either bound, and the term pin catches a 1e-14 relative coefficient slip that the scaled
+  one does not. The scaled bound is kept at 1e-13 as the cruder statement of the same thing, because
+  tightening it toward the term bound would only make it a statement about the target set.</p>
+  <p><strong>The spread.</strong> Not a tolerance on an error — an oracle-free convergence statement:
+  the symmetric difference quotient across a corner plane must settle on the derivative rather than
+  grow as J/2d. But <strong>two of the four crossing configurations had no oracle at all</strong> (a
+  radius outside the section's radial span crossing a face level, and a level below the section
+  crossing a corner radius), and they are now restored at 1e-10 with 1.5e-12 measured on the 4 m
+  section and 2.2e-11 on the 2 cm one. The two statements are complementary, not substitutes, and that
+  is now demonstrated in both directions: an injected jump of 1e-10 of the field fires the ladder and
+  not the oracle; a wrong value on the plane alone fires the oracle and not the ladder.</p>
+  <p><strong>And the ladder was measuring the section, not the kernel.</strong> Standoffs fixed in
+  metres make the quotient's floor a property of the geometry: the noise is the kernel's relative
+  round-off divided by the relative field difference a rung forms, which is of order d/L for a section
+  of extent L. A 6.2 m ring with a 2 cm section — a production winding-pack shape — therefore spread
+  2.9e-02 where the 4 m section spread 4.3e-03, so <strong>the bound passed on one aspect ratio and
+  failed on the other</strong>. Diagnosed as the quotient's floor and not a kernel defect on three
+  counts that fail differently: the ladder is flat to a part in 1e4 through the window with the whole
+  excursion in the single finest rung; consecutive-rung ratios are 1.00 where an uncancelled jump gives
+  a clean 10.0 at every rung; and the analytic polygon oracle agrees to 1.6e-11 at the same centre,
+  where a surviving branch term would be order the field. Standoffs are now fractions of the section's
+  extent, which holds d/L fixed and the floor with it — 2.4e-04 and 5.1e-04, a factor of two apart
+  rather than seven — and the bound <strong>tightened from 1e-2 to 2e-3</strong>. Section shape is a
+  test input for both corner-plane tests now.</p>
+  <p>The window is a fixed fraction rather than chosen from the measured plateau, deliberately:
+  selecting the window from the data can pick a span on which growth looks flat, which is the one
+  thing the test exists to see.</p>
+
+  <h2>The moved-golden sweep</h2>
+  <p><strong>The two landed fixes moved zero committed goldens.</strong> No numeric golden literal
+  changed in any test in the range, and no <code>tests/data</code> fixture was regenerated — so the
+  moves had to be <em>measured</em>, not read off a diff. The oracle's own validity was established
+  rather than assumed: <code>polygonanalytic.py</code> imports neither <code>greens.py</code> nor
+  <code>constants.py</code>, and the oracle column is bit-identical before and after (factor 1.000).
+  Every move below is therefore in the kernel, and every move is toward an oracle that did not move.</p>
+  <table>
+    <thead><tr><th>Configuration</th><th>Quantity</th><th>at 23f055bc</th><th>at d070c4f7</th><th>factor</th></tr></thead>
+    <tbody>
+      <tr><td>ordinary targets, no corner plane</td><td>ψ</td><td>1.01e-04</td><td>3.24e-11</td><td>3.1e+06</td></tr>
+      <tr><td></td><td>B<sub>Z</sub></td><td>4.14e-06</td><td>4.37e-12</td><td>9.5e+05</td></tr>
+      <tr><td>on a horizontal face</td><td>ψ</td><td>1.60e+04</td><td>2.18e-11</td><td>7.3e+14</td></tr>
+      <tr><td></td><td>B<sub>Z</sub></td><td>5.80e+02</td><td>3.22e-13</td><td>1.8e+15</td></tr>
+      <tr><td>the corner itself, both confluences</td><td>ψ</td><td>8.10e+03</td><td>1.34e-11</td><td>6.0e+14</td></tr>
+      <tr><td>difference quotient across a face</td><td>spread</td><td>5.40</td><td>1.01e-02</td><td>537</td></tr>
+      <tr><td>far field vs point loop, 40 widths</td><td>ψ difference</td><td>1.741e-06</td><td>1.813e-06</td><td>0.96</td></tr>
+    </tbody>
+  </table>
+  <p><strong>Three tolerances tightened, zero loosened anywhere in the range</strong> (1e-9 → 1e-10
+  twice, 1e-7 → 1e-10). The one row that looks worse — the far field at 0.96× — was chased rather than
+  waved through: the oracle puts that difference at 1.8129611e-06 against the kernel's 1.8129822e-06,
+  agreeing to 8.1e-11, so 1.81e-06 is the true geometric quadrupole difference and the older value was
+  4 % wrong about it. Also a correction. Nothing unexplained remains.</p>
+  <p>For the amplitude fold, the mechanism was confirmed by the error's <em>shape</em>: it peaks at gap
+  1e-8 and falls exactly proportionally below it (7.3e-09 at 1e-8 down to 7.3e-15 at 1e-14), which is
+  the signature of <code>1 − sin²φ</code> collapsing to exactly zero once the gap squared drops under
+  eps — Carlson was handed the <em>complete</em> integral's argument and silently returned the complete
+  integral in place of the incomplete one, leaving the omitted sliver as the residual.</p>
+
+  <h2>The failing test was the environment, with a concrete cause</h2>
+  <p><code>test_grid_solve_finite_section_winding</code> passes in every configuration tried: alone and
+  paired, bare and with <code>JAX_PLATFORMS=cpu</code>, on a login node and on a compute node, in a
+  whole-file run and in the full lane. Ordering was ruled out <em>mechanically</em> rather than
+  empirically — <code>pytest_randomly</code> and <code>xdist</code> are both absent, so collection order
+  is deterministic and a full-file plus full-lane run exhaust the orderings that exist.</p>
+  <p>The cause is the login node's GPU: an L4 with <strong>73 MiB free of 23034</strong>, 97 % held by
+  another process. The test asserts <code>segment[0] == "bow"</code>; <code>bow.py</code> imports
+  <code>zeta</code>, which imports <code>jax</code> — so the path initialises a CUDA backend, and JAX
+  walks its preallocation down from 16.47 GiB emitting <code>CUDA_ERROR_OUT_OF_MEMORY</code>. Whether
+  that degrades to CPU or fails outright depends on what the other process holds at that instant, which
+  is exactly why an intermittent report never reproduces. Compute nodes have no GPU and pass
+  deterministically.</p>
+
+  <h2>Cost — and a category error in the premise</h2>
+  <p>The brief called BASELINE.md's "~12.7 µs/pair rectangle" figure suspect. It was worse than
+  suspect: <strong>that figure is not the rectangle kernel at all.</strong> 12.70 → 5.06 is the closed
+  form's own third-kind special-function cost per polygon corner inside
+  <code>polygon_analytic_greens</code>; the axisymmetric rectangle kernel is a whole kernel call per
+  source–target pair, an unrelated measurement. Its recorded entries were 61.0 (cylinder) and 33.9
+  (hybrid).</p>
+  <table>
+    <thead><tr><th>method</th><th>µs/pair (median of 3)</th><th>spread</th><th>on record</th></tr></thead>
+    <tbody>
+      <tr><td>point filament</td><td>0.38</td><td>0.38–0.39</td><td>0.42</td></tr>
+      <tr><td>hybrid rectangle (switch = 3)</td><td>20.6</td><td>20.2–21.1</td><td>33.9</td></tr>
+      <tr><td>cylinder rectangle</td><td>30.6</td><td>30.4–32.6</td><td>61.0</td></tr>
+      <tr><td>polygon rectangle 16×48, block 64</td><td>783.2</td><td>778.1–810.2</td><td>—</td></tr>
+    </tbody>
+  </table>
+  <p>sun_debug node, one core, fresh process per variant, first run, three processes per variant, driver
+  unchanged. The rectangle kernel is 2.0× cheaper than the recorded 61.0, but <strong>only 1.12× of that
+  belongs to the range</strong> — measured either side, 34.3 → 30.6, with the point kernel and the 16×48
+  quadrature flat at 0.38 and 783 as an explicit control, since neither reaches the corner
+  antiderivative. The remaining 61.0 → 34.3 is older than the measurement pair and is recorded as
+  <em>unattributed</em> rather than assigned. The closed form's own floor was also re-measured whole
+  rather than patched a row at a time: third kind 5.17, moment stacks 26.8 → 19.09, graded residual
+  73.08, floor 93.05, assembled ψ 189.8 → 173.77 — so the graded residual quadrature is now 79 % of the
+  floor and is what a further reduction has to attack.</p>
+
+  <h2>Two failing tests found along the way — both wrong tests, correct code</h2>
+  <p><strong>The hollow circular section.</strong> <code>test_box_section[skin]</code> drove both
+  profiles against two solid rectangles, which is right for a square annulus and wrong for a circular
+  one — the square encloses the circle and carries 4/π more area. It passed only while the element
+  evaluated a curved section as its bounding box, and it reported the two profiles agreeing to every
+  digit, which two geometries that do not share a field cannot do. That bit-identity is the proof of a
+  defect at the older revision, not evidence of health. The circular annulus now gets two statements it
+  can make: its area as the two inscribed polygons' difference in closed form with the facet count named
+  rather than folded into a constant, and — away from the section — the two profiles' flux excess over a
+  filament of the same current as their mean square radius, whose ratio is exactly 4/3 for any pair of
+  widths, so a bounding-box evaluation collapses it to 1. Measured within 0.4 % of 4/3 against the 25 %
+  that separates 4/3 from 1. A disc-sectioned coil was ruled out as the referee: its far-field moment is
+  2.91× where the geometry says 0.96×.</p>
+  <p><strong>The lean-core probe.</strong> It imported the whole subtree with the plotting stack blocked
+  at the finder, so any module reaching for an absent extra aborted the run — and ten of twelve extras
+  are absent in a lean environment, which is the environment the guard exists for. An absent extra is now
+  stood in for by an empty package that answers any attribute, so every module executes its body and is
+  inspected. A blocked root is never stood in for, and every blocked root is also an extra, so the order
+  of those two tests carries the whole correctness — verified against controls, including
+  <code>regex</code>, which is both absent and an extra.</p>
+
+  <h2>What is deferred, and why</h2>
+  <p>The <code>arc.py</code> / <code>circle.py</code> adoption is measured and scoped but not landed. It
+  is a pure gain rather than a prerequisite: the third kind's routine is selected on the pole's domain,
+  so <code>Arc</code> keeps its present behaviour until it supplies the pole, and the landed commits are
+  strictly non-regressive. Four items, all measured:</p>
+  <ul>
+    <li><code>Arc.ellipj</code> is a numerical round trip with an exact answer —
+    <code>ellipj(ellipkinc(θ, m), m)</code> returns sin θ and cos θ to round-off (verified 0.0 to
+    1.1e-16 over a sweep) because that <em>is</em> the identity. Its <code>dn</code>, though, is 2.6e-10
+    wrong at a target on the arc's end plane where <code>√(cn² + k′² sin²θ)</code> holds at 9.0e-18, and
+    <code>dn</code> divides <code>_Bphi_hat</code> and enters <code>Winc</code> and <code>_Ar_hat</code>.</li>
+    <li><code>Arc.Ip</code>'s two subtractions are exact differences of complements:
+    <code>k² − np2[p]</code> is <code>np2_pole[p] − ck2</code>, and <code>1 − np2[p] sn²</code> is
+    <code>cn² + np2_pole[p] sn²</code>. No new machinery needed.</li>
+    <li><code>Arc.Pi_inc</code> needs <code>pole=</code> and <code>complement=</code>; residual today is
+    up to 1.0 at γ/r = 1e-10 on the end plane and 1.8e-04 on the third pole.</li>
+    <li><code>Arc.Kinc</code>/<code>Einc</code>: an exact parameter alone buys only 5.9e-05 → 1.1e-05, so
+    closing it needs <code>incomplete_kind(θ, ck2, parameter=k2)</code> rather than the cheap half.</li>
+  </ul>
+  <p>Also open: the <strong>coincident / all-to-all diagonal contract</strong>. The removed eps fudges
+  were functionally a disguised self-coupling model — they kept a filament kernel finite on its own
+  diagonal by nudging the geometry, so the operator's diagonal was set by floating-point epsilon rather
+  than by the conductor's cross-section. The corner-level case now has a stated contract (γ held at one
+  where the target is level with a source corner, the bounded product put at zero there, which is the
+  mean of its two one-sided limits), but the coincident case — a target on the filament or inside its own
+  section, which is <em>every</em> diagonal entry of an all-to-all matrix — is not yet decided. The
+  likely answer is that the diagonal must come from a finite-section kernel rather than a filament at
+  all: the point kernel is +7.2 % median and +18 % max on cell self-flux terms where the closed form is
+  6.8e-12 on the contour.</p>
+</main>
+</body>
+</html>

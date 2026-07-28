@@ -276,6 +276,9 @@ def extended_pole_coefficient(element, p):
             / (2 * np.sqrt(-gap))
             * np.log(span**2 / denominator)
         )
+    # one branch for the whole sweep, so the sign of the gap has to be uniform over
+    # it -- a mixed sweep would take the wrong closed form for half its elements
+    assert np.all(gap > 0)  # n < k^2
     return (
         -np.sqrt(characteristic)
         / (2 * np.sqrt(gap))

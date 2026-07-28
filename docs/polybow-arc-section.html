@@ -17,9 +17,9 @@
   <title>PolyBow — polygon cross-section arc segment | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-27">
-<meta name="plan-version" content="7">
-<meta name="plan-impl" content="0.65">
+<meta name="plan-modified" content="2026-07-28">
+<meta name="plan-version" content="8">
+<meta name="plan-impl" content="0.8">
 </head>
 <body>
   <main class="plan-doc">
@@ -862,8 +862,8 @@ One test exists only to keep the Bow comparison honest: CoilSet.point's accessor
 
 NOT DONE, and carried to f-pbow-06: automatic routing. Nothing sends a winding to the new element; reaching it means naming the segment, as the tests and the benchmark do. Full record: archive/polybow-arc-section-element-class-landed.html</p>
     </article>
-<article class="r-fu" data-id="f-pbow-06" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-27T08:00:00+00:00" data-recommends-skill="/reckon-ship polybow-arc-section" data-resolved-at="" data-resolved-by="">
-    <h4 class="r-fu-title">Take the cross-section from the frame's poly column, route every section to the element that can evaluate it, and build a hollow one as a coupled pair</h4>
+<article class="r-fu" data-id="f-pbow-06" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-27T08:00:00+00:00" data-recommends-skill="/reckon-ship polybow-arc-section" data-resolved-at="2026-07-28T05:38:31+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Take the cross-section from the frame&#x27;s poly column, route every section to the element that can evaluate it, and build a hollow one as a coupled pair</h4>
     <div class="r-fu-body"><p><strong>Authorised 2026-07-27: flip the routing.</strong> One line in <code>nova/geometry/polyline.py</code> sends every swept winding to <code>Bow</code> whatever its cross-section is, and <code>Bow</code> integrates the box that section's width and height bound while dividing by the section's own area — so a hexagonal winding is <strong>a third too large</strong> and a disc <strong>27 % too large</strong>, both measured. The section itself comes from the frame's <code>poly</code> column, which is the point of having one: it is the section of record and it can express a polygon no <code>(width, height)</code> pair can. Two things have to be true of it first, and neither is today — it must arrive at <strong>double precision</strong> (its corners round-trip through a VTK mesh, and <code>float32</code> alone costs 7.9e-09, four orders above the closed form's 3.5e-12) and without the collinear splits the projection adds. Hollow sections stop being refused and become a <strong>coupled pair</strong>: the outer solid at <code>+j</code> and the core at <code>−j</code>, with <code>j = I / A_annulus</code>, so every section the frame can express is reachable.</p></div>
     <pre class="r-fu-prompt">Project: nova
 Plan:    polybow-arc-section (http://127.0.0.1:8765/nova/polybow-arc-section.html)
@@ -982,6 +982,7 @@ Done-when
   6. tests/test_biotpolybow.py, tests/test_biotpolygonarc.py and
      tests/test_biotpolygonanalytic.py all unmoved.
   7. Followup written; this followup resolved.</pre>
+    <p class="r-fu-outcome">Landed on develop d070c4f7 (merge 6b39f83a; commits c8b0ce80 feat, bd197e77 bench, f8a0fc9f docs) plus the orchestrator's dispatch commit d070c4f7. POLY AT DOUBLE PRECISION: corner deviation 4.4e-16 against 2.1e-08 through the VTK mesh round trip, built from the float64 cross-section transformed by the sweep's own frame with no mesh round trip. COLLINEAR COLLAPSE: a swept hexagon 9 corners -> 6 (nova/geometry/section.py collapse_collinear + distinct_corners). FREE-FORM POLYGON reaches the kernel — the capability no (width, height) descriptor can express. HOLLOW SECTIONS as a coupled +j/-j pair against a direct annulus partition: box 6.6e-12, skin 7.8e-11, with I_outer + I_core = I asserted; a swept skin is now a TRUE CIRCULAR annulus, area 1.0162e-03 against the square annulus's 1.296e-03 (the 4/pi), where winding.py had relabelled skin -> box and taken a circular annulus's area from the square formula. The [box] arm stayed numerically unchanged, which is the control that makes the skin move credible. 58 passed in the worker's own scope. THE ROUTING FLIP WAS SUPERSEDED BEFORE MERGE: the worker landed an unconditional arc -> polybow map, which bought correctness on the hexagon at 550 us/pair against Bow's 182 on the rectangle Bow was already exact for. Owner authorised dispatch-on-profile 2026-07-27; thicken is now two-axis {kind: {profile: element}}, a rectangle recognised GEOMETRICALLY (so a square and a free-form four-corner box also reach the cheap exact element), and a hollow section decomposes first so each solid member dispatches on its own profile — a square annulus becomes two exact Bows, a circular one two PolyBows. Verified: rect->bow, hex->polybow, disc->polybow, box->bow, sk->polybow. Filament is OUTSIDE the table: no section, keeps its segment kind, reaches Arc directly, which is what preserves a cheap far-field profile beside a thickened near one. nova/biot/arc.py is byte-identical and nova/biot/solve.py stays a flat registry, so PolyBow(Arc, Matrix) added a key rather than shadowing one. DONE-WHEN 6 AMENDED by the orchestrator: no NUMERIC golden moves; routing fixtures may be re-pinned to name their oracle explicitly — line 747 of tests/test_biotpolygonarc.py hard-coded the routing and test_biotpolybow/test_winding asserted the unconditional flip, all three re-pinned to the dispatch their own docstrings already described. Three benchmark call sites (arc_section_cost.py VARIANTS + docstring, arc_element_class.py twice, one assigning to a variable named bow) reached Bow through the old default and would have reported PolyBow's numbers under Bow's labels. NOT DELIVERED (agent died to the spend limit before reporting): the disc/ellipse locked decision, the moved-golden record, and the straight-element record for polybeam-prism-section.</p>
     </article>
 <article class="r-fu" data-id="f-pbow-07" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-27T08:10:00+00:00" data-recommends-skill="/reckon-ship polybow-arc-section" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Trace the arc kernel, then re-quote its cost as GPU wall clock rather than as CPU microseconds per pair</h4>
@@ -1123,6 +1124,70 @@ Done-when
   3. A banded arc scheme measured against exact-everywhere on accuracy AND on
      wall clock at the batch width it is called with.
   4. Whether it beats exact-everywhere stated plainly, including if it does not.
+  5. Followup written; this followup resolved.</pre>
+    </article>
+<article class="r-fu" data-id="f-pbow-09" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28T08:00:00+00:00" data-recommends-skill="/reckon-ship polybow-arc-section" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Resolve the hollowness contradiction between the frame and biot layers, and decide disc and ellipse on measurement</h4>
+    <div class="r-fu-body"><p>The poly cross-section, the profile dispatch and the hollow coupled pair all landed, but three things the rung named did not. <code>nova/biot/crosssection.py:38-39</code> normalises <code>box → skin</code> while <code>nova/frame/winding.py</code> normalised <code>skin → box</code> — the two layers fold hollowness in OPPOSITE directions, and only the frame side was fixed. The disc/ellipse corner-count decision was never measured. And no moved-golden record exists for a change that moved a 4/pi and a 4/3.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    polybow-arc-section (http://127.0.0.1:8765/nova/polybow-arc-section.html)
+Section: close out the poly cross-section rung
+Tier:    opus
+
+Context
+  develop d070c4f7 carries the poly cross-section at double precision, the
+  collinear collapse, the hollow +j/-j coupled pair, and dispatch-on-profile
+  (rect-&gt;bow, hex/disc/sk-&gt;polybow, box-&gt;bow because its pair is two solid
+  rectangles). Three items the rung named were never delivered because the worker
+  died to the org spend limit before reporting.
+
+1. THE HOLLOWNESS CONTRADICTION, still live and only half fixed.
+   nova/biot/crosssection.py:38-39 maps  &quot;shell&quot;: &quot;skin&quot;  and  &quot;box&quot;: &quot;skin&quot;  — the
+   biot cross-section layer treats skin as the GENERIC hollow and folds box into
+   it. nova/frame/winding.py used to fold skin into box, and THAT side was fixed
+   (a swept skin is now a true circular annulus). The biot side was granted to the
+   worker and never landed. Two layers still normalise hollowness in opposite
+   directions. Pick one direction, make both layers agree, and state the mechanism.
+   Also check nova/geometry/polyshape.py:18 — skin/sk/ring/annulus/pipe all alias
+   onto skin, so five spellings reach whatever you decide — and
+   nova/geometry/polygeom.py:116/135/180, where skin&#x27;s FOURTH descriptor is a
+   hollowness factor 1-r/R rather than a height.
+   Scope: nova/biot/crosssection.py, nova/geometry/polygeom.py,
+   tests/test_polygeom.py (all were granted, none were touched).
+
+2. DISC AND ELLIPSE need a decision on MEASUREMENT, not a default chosen silently.
+   Correct but sixty-four corners is roughly ten times a hexagon&#x27;s cost against a
+   Bow approximation that is 27% out. Decide whether 64 corners is the default, a
+   flag, or a coarser count chosen against a measured error budget — and if
+   coarser, measure what the polygon&#x27;s own deficit against the true curve costs,
+   because a 64-gon already under-fills its ellipse by 1.7e-03. Timing on a
+   sun_debug node only, fresh process, first run (a repeat in one process gets ~40%
+   faster from JIT warmup). Lock the decision in the plan with the numbers.
+
+3. THE MOVED-GOLDEN RECORD. This rung moved a 4/pi (skin&#x27;s area) and re-pinned
+   three routing fixtures, and no before/after record was ever produced. Run the
+   full fast lane on develop and, for every golden that moved against 23f055bc,
+   record file, test, before, after, factor and mechanism, each named as a
+   correction. An unexplained move is a regression until proven otherwise.
+   NOTE two known failures on merged develop that are probably environmental, not
+   yours: test_biotpolybow.py::test_a_thickened_arc_routes_here_without_the_caller_naming_it
+   and test_biotoperate.py::test_grid_solve_finite_section_winding both hit
+   JaxRuntimeError: no supported devices found for platform CUDA on a login node.
+   Separate environment from defect on a GPU node or with jax forced to CPU.
+
+4. RECORD WHAT THIS ESTABLISHES FOR THE STRAIGHT ELEMENT. Beam builds xs/ys from
+   width and height exactly as Bow builds rs/zs, so it cannot express a polygon and
+   reads the descriptor rather than the section of record. The two-axis dispatch
+   table already has a line/polygon cell and it currently points at Beam because the
+   prismatic polygon element does not exist. Do not fix it here — write the record
+   polybeam-prism-section should start from, including that dispatch cell.
+
+Done-when
+  1. One hollowness direction, both layers agreeing, mechanism stated.
+  2. Disc/ellipse decision locked with measured cost and measured error per option.
+  3. Every moved golden recorded as a correction; the two CUDA-suspect failures
+     explained as environment or defect and green either way.
+  4. The straight-element record written into polybeam-prism-section.
   5. Followup written; this followup resolved.</pre>
     </article>
 </section>

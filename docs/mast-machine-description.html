@@ -4,20 +4,23 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="nova">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="mast-machine-description">
-  <meta name="plan-title"     content="MAST Machine Description — DDv4 IDS set + standard-name data maps">
-  <meta name="plan-summary"   content="Author a proper MAST machine-description IDS set (pf_active, pf_passive, wall, magnetics, tf) that nova's magnetic model builds from — DDv4-native (COCOS 17), Standard Name conventions — with per-campaign versioning and validated data maps/transformations from the FAIR-MAST/efm sources. Multi-session program.">
-  <meta name="plan-status"    content="active">
-  <meta name="plan-roi"       content="high">
-  <meta name="plan-effort"    content="XL">
-  <meta name="plan-tier"      content="opus">
-  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="mast-machine-description">
+  <meta name="plan-title" content="MAST Machine Description — DDv4 IDS set + standard-name data maps">
+  <meta name="plan-summary" content="Author a proper MAST machine-description IDS set (pf_active, pf_passive, wall, magnetics, tf) that nova&#x27;s magnetic model builds from — DDv4-native (COCOS 17), Standard Name conventions — with per-campaign versioning and validated data maps/transformations from the FAIR-MAST/efm sources. Multi-session program.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="XL">
+  <meta name="plan-tier" content="opus">
+  <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-depends-on" content="nova-spine-refactor">
-  <meta name="plan-blocks"    content="mast-catalog-gpu-solve">
+  <meta name="plan-blocks" content="mast-catalog-gpu-solve">
   <title>MAST Machine Description | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-07-28">
+<meta name="plan-impl" content="0.2">
+<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
@@ -211,52 +214,52 @@
     </ul>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="dd-version-pin" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Which DDv4 version to pin for the MD authoring (and therefore for every
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="dd-version-pin" data-choice="4.1.1" data-by="reckon-ship" data-when="2026-07-28T05:41:30+00:00">
+    <p class="r-dec-q">Which DDv4 version to pin for the MD authoring (and therefore for every
         consumer open)? Latest stable at stage-2 time is the default recommendation; the pin is
         recorded in the MD registry and in the maps.</p>
-        <p class="r-dec-rat"></p>
-      </div>
-      <div class="r-dec" data-key="md-registry" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Where do the authored MD IDS files live and how are they versioned?
+    <p class="r-dec-rat">Top of the DD chain (3.22.0 -&gt; 4.1.1) and present in the installed imas-python 2.3.0, so it is writable today without an AL upgrade — both verified. Pinning newest 4.x rather than 4.0.0 matters specifically because the pf_passive/loop/element subtree the MAST passive description depends on is DDv4 lifecycle ALPHA; the closer the pin sits to head, the less alpha churn between authoring and consumption. Changes if: a 4.2.x lands before stage 2, or a required pf_passive path changed shape between 4.1.0 and 4.1.1.</p>
+    </div>
+<div class="r-dec" data-key="md-registry" data-choice="ghcr-oras" data-by="reckon-ship" data-when="2026-07-28T05:41:30+00:00">
+    <p class="r-dec-q">Where do the authored MD IDS files live and how are they versioned?
         Candidates: GHCR OCI artifacts via ORAS (matches the norma corpus pattern — immutable
         digests, campaign tags, CI-pullable); in-repo under a size budget (MD is small — likely
         &lt;10 MB total); or a dedicated mast-md repository.</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="ghcr-oras">GHCR OCI artifacts (ORAS)</button>
-          <button class="r-opt" data-value="in-repo">in-repo data/ under size budget</button>
-          <button class="r-opt" data-value="dedicated-repo">dedicated mast-md repo</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-      <div class="r-dec" data-key="campaign-keying" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Campaign → MD-version keying: one MD per campaign fingerprint (the
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="ghcr-oras">GHCR OCI artifacts (ORAS)</button>
+      <button class="r-opt" data-value="in-repo">in-repo data/ under size budget</button>
+      <button class="r-opt" data-value="dedicated-repo">dedicated mast-md repo</button>
+      </p>
+    <p class="r-dec-rat">SDCC can pull it, MEASURED not assumed: ghcr.io answers from BOTH login and compute nodes (HTTP 401 unauthenticated, DNS 140.82.121.34, verified 2026-07-27), so a job can fetch the MD from inside a SLURM allocation. An earlier inference that compute nodes had no network was WRONG — the failed resolve was UV_OFFLINE=1 already set in the shell environment, and pypi.org returns 200 from a compute node. The norma corpus already proves the pattern on this machine (digest-verified ORAS pulls to ~/.local/share/norma/&lt;tag&gt;/, `gh auth token | oras login`, a programmatic resolver in nova.assembly.provenance.corpus to model on); the firewall constraint recorded for norma is SMB (ports 445/139, the //io-ws-ccstore1 share) and does not touch HTTPS. The deciding argument against in-repo is CHURN rather than size: five machine descriptions now, and the fingerprint still has to be extended to cover the passive structure, so the set will be regenerated more than once and immutable digests keep that out of git history. Changes if: CI runs anywhere without a GHCR token — the set is small enough (&lt;10 MB) that in-repo wins immediately.</p>
+    </div>
+<div class="r-dec" data-key="campaign-keying" data-choice="one MD per fingerprint, recomputed per shot, never a shot range; the fingerprint MUST be extended to cover the passive structure" data-by="reckon-ship" data-when="2026-07-28T05:41:30+00:00">
+    <p class="r-dec-q">Campaign → MD-version keying: one MD per campaign fingerprint (the
         ambix geometry-signature approach carried over), or one MD per named campaign with the
         fingerprint as a consistency check? Determines how many MD versions the registry carries
         and how consumers select one from a shot number.</p>
-        <p class="r-dec-rat"></p>
-      </div>
-      <div class="r-dec" data-key="map-home" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Where do the MAST facility maps (efm/FAIR-MAST path → standard name →
+    <p class="r-dec-rat">Forced by measurement rather than suggested. A consumer CANNOT correctly select a machine description from a shot number: the 3 coil/sensor fingerprints form 21 contiguous runs in shot order, the 1004- and 938-filament coil sets ALTERNATE in 11 runs across shots 12403-13360 with some runs only 4 shots long, and one description&#x27;s own span is 87.6% foreign shots (verified independently by the orchestrator from source_cocos_audit.json: fc938 spans 11876-30473, entirely containing both fc1004 ranges). A range table is not a lossy approximation here, it is wrong — it mis-assigns at minimum the 93 shots of MD #4. Separately the passive geometry lives in the amm array descriptions, INVISIBLE to the efm-only fingerprint, and moves independently: 3 substantive passive states, so the cross product is 5 substantive MDs and not 3, and MD #4 exists only because a 938-filament coil set carries the other campaign&#x27;s passive state. The selector must be fingerprint(shot) computed from the shot&#x27;s own static arrays, hashing the passive positions too. Changes if: nothing about the geometry — only a decision to accept mis-assigned passive geometry inside an MD, which the operator-parity gate would then have to absorb.</p>
+    </div>
+<div class="r-dec" data-key="map-home" data-choice="the imas-codex MAST map set" data-by="reckon-ship" data-when="2026-07-28T05:41:30+00:00">
+    <p class="r-dec-q">Where do the MAST facility maps (efm/FAIR-MAST path → standard name →
         COCOS transform) live? The io-contract-home decision puts facility maps with the mapping
-        layer (codex emits facility maps against ISN's schema); the pragmatic near-term options are
+        layer (codex emits facility maps against ISN&#x27;s schema); the pragmatic near-term options are
         the imas-codex MAST map set, an ambix-side plugin table, or a maps/ tree beside the MD
         registry.</p>
-        <p class="r-dec-rat"></p>
-      </div>
-    </section>
+    <p class="r-dec-rat">The io-contract-home decision already puts facility maps with the mapping layer, and the two hardest jobs both live there: standard-name resolution (10 of the 40 ledger rows need names contributed through the ISN/ISNC fork flow, which codex owns) and the COCOS transform machinery (imas_codex.cocos, which needs an e_Bp fix regardless — determine_cocos infers e_Bp from a |psi| &gt; 0.5 Wb magnitude heuristic and returns COCOS 7 for 3,923 of 4,000 TRANSFORMED shots because median max|psi| after x2pi is 0.332 Wb; small low-field machines break it, so e_Bp must be measured or declared per source, never inferred from magnitude). Splitting the map from either would put the source of truth for a sign convention in a third place. Changes if: md-registry ends up in-repo, when a maps/ tree beside it beats a cross-repo dependency on the ingest path.</p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-mmd-01" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-24">
-        <h4 class="r-fu-title">Stage 1 — quantity inventory + COCOS identification audit</h4>
-        <div class="r-fu-body"><p>The foundation session: enumerate every geometry/sensor quantity
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-mmd-01" data-status="resolved" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-24" data-recommends-skill="" data-resolved-at="2026-07-28T05:41:30+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Stage 1 — quantity inventory + COCOS identification audit</h4>
+    <div class="r-fu-body"><p>The foundation session: enumerate every geometry/sensor quantity
         in the ambix campaign tables and the FAIR-MAST L2 store, identify source COCOS and units
         per quantity, fingerprint the campaigns, and emit the map skeleton as a research doc. The
         registry/keying/map-home decisions should be locked at the end of this stage with the
         evidence in hand.</p></div>
-        <pre class="r-fu-prompt">Project: nova
+    <pre class="r-fu-prompt">Project: nova
 Plan:    mast-machine-description (http://127.0.0.1:8765/nova/mast-machine-description.html)
 Section: §4 stage 1
 Tier:    opus
@@ -284,13 +287,13 @@ Tools (MANDATORY — use the MCP servers, do not grep DD XML or guess names)
     a stub — never use it for names.
   imas-cx:  search/list/fetch/check_standard_names (the real catalog, with
     per-name COCOS metadata + cocos_type filters), search_signals +
-    get_facility_coverage (facility="mast-u"), search_code/search_docs
+    get_facility_coverage (facility=&quot;mast-u&quot;), search_code/search_docs
     (prior COCOS + mapping work in the codex graph).
 
 Scope locks / constraints
   Read-only toward both repos this stage. DDv4 is COCOS 17 (target); source
   COCOS must be IDENTIFIED per quantity with evidence, never assumed —
-  FAIR-MAST's dd-path metadata tags are early tagging work and are UNTRUSTED
+  FAIR-MAST&#x27;s dd-path metadata tags are early tagging work and are UNTRUSTED
   for sign conventions (candidate path hints only). Working hypothesis:
   MAST data is COCOS 3; confirm by loading sample equilibria and computing
   the implied COCOS from consistent (psi, Ip, B_phi, q) combinations with
@@ -305,8 +308,95 @@ Done-when
   3. Campaign fingerprint inventory: how many distinct MDs the catalog needs.
   4. Registry / campaign-keying / map-home decisions locked with rationale.
   5. Stage-2 followup written; this followup resolved.</pre>
-      </article>
-    </section>
+    <p class="r-fu-outcome">Landed on main eeed26f6 (commits aace2b52, 5b2d1519). docs/mast-quantity-inventory.html carries the full ledger: 40 quantities across 5 IDSs, 21 fully mapped, 10 standard-name gaps (each with a proposed name marked AS a proposal; 7 of the 10 are the missing half of an R/Z pair whose other half is already accepted; the most important single gap is poloidal_angle_of_poloidal_magnetic_field_probe, which sets the B_R cos-theta + B_Z sin-theta projection and so can corrupt physics rather than merely block a map), 2 DD gaps, 7 source gaps, 0 UNRESOLVED. Every DDv4 path validated with check_dd_paths against 4.1.1, every standard name with check_standard_names. reckon audit-doc: OK, no ERRORs. COCOS VERDICT — hypothesis CONFIRMED, source is COCOS 3, all four Sauter digits identified from DATA not metadata: sigma_Bp = -1 with UNANIMITY 1.000 over 11,154 shots (independent second read via sign(dp/dpsi) agrees 97.2%, the 2.8% being small noisy mid-radius pprime with no coherent cohort); e_Bp = 0 MEASURED by interpolating psirz onto each flux loop's own (R,Z) and dividing silop_c by it — median 6.3007 against 2pi = 6.2832 over 2,662 loop-slices in 60 shots, all 60 per-shot medians within 2%, per-shot IQR 0.2-0.6%, so the e_Bp=1 hypothesis sits at 1 and is nowhere near the data; sigma_rho_theta_phi = -1 at 99.99% (sole dissenter shot 15963 has bvac_val exactly 0.0, an unfilled field rather than a dissent); sigma_RphiZ = +1 DECLARED NOT DETERMINED, because Sauter Eq. 23 cannot distinguish (R,phi,Z) from (R,Z,phi) — the ONLY assumption in the verdict, with sign(irod)==sign(B_phi) passing 11,153/11,153 as a coherence check that is not a determination, and stage 3's vacuum forward model is what closes it. The evidence that matters is INVARIANCE: the forward cohort (10,775 shots, Ip>0 at +435..+1196 kA, B_phi<0 at -0.28..-0.41 T, psi_axis>psi_bnd) and the reversed cohort (379 shots, all those signs flipped) BOTH give COCOS 3. TRANSFORM 3->17: psi x2pi with NO sign flip, Ip and B_phi and F=R*B_phi x1, q x(-1), p' and ff' /2pi — mapping onto the DD's own psi_like/ip_like/b0_like/q_like/dodpsi_like tags. Pinned by tests/test_mastcocos.py, 19 tests passing (60.8 s), 11 pure-logic and 8 corpus-backed that auto-skip when the mirror is absent, including one that exists to stop the tempting shortcut: test_axis_flux_extremum_is_not_a_convention_invariant. NO IMAS pulse was opened and no dd_version was involved on the read side — MAST level-1 is FAIR-MAST zarr and no IMAS-native MAST pulse exists; 17,111 shots on disk, 14,633 with readable setup geometry, 11,154 with a converged reconstruction; the DDv4 side was queried through the MCP path index at 4.1.1. FINGERPRINTS: 3 coil/sensor, reproducing all three of ambix's published digests byte-for-byte while importing nothing from ambix (the cross-check that both codebases agree what a campaign is); 3 substantive passive states plus 8 single-shot dropouts; 5 substantive combined MDs from 13 raw digest combinations. All four decisions locked from this evidence. FIVE PLAN-§3 INVALIDATIONS recorded in the doc: psi_axis > psi_boundary is NOT a landmark (false for 379 shots that run Ip and B_phi both reversed and are the SAME COCOS — use sigma_Bp = -1 instead); the claimed sign flips on psi/Ip/B_phi/q are wrong in two directions (psi scales and does not flip, Ip and B_phi do not change, q flips, and the prior ambix axis-max-vs-min mismatch was correct against DDv3 COCOS 11 and does not exist at the DDv4 COCOS 17 target); 'ambix carries total flux Phi = 2piRA_phi [Wb]' describes ambix and not the source (efm is Wb/rad, the measured loops are Wb, and each ledger row must name which); §2 assigns pf_passive to efm passive-element boxes when it is not in efm at all; and the NEW risk that pf_passive/loop/element is DDv4 lifecycle alpha. Plus five reproducible SOURCE defects, worst being that the amm end-crown Z signs are TRANSPOSED (endcrown_l carries Z=+2.46 and endcrown_u Z=-2.46, every shot every campaign). ONE OPEN QUESTION the orchestrator raised and the worker never answered: the rule reducing 13 raw combinations to 5 was never stated — the 8 singletons (shots 13105/13106/13107, 25622, 26093, 26094, 26096, 26111) may be per-shot amm glitches or genuine reconfigurations, and whether they were inspected substantively or only observed to hash differently is unknown. A TOOLING LIMITATION worth carrying: imas_codex.cocos.determine_cocos gets e_Bp wrong on transformed low-field data (see map-home).</p>
+    </article>
+<article class="r-fu" data-id="f-mmd-02" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28T08:00:00+00:00" data-recommends-skill="/reckon-ship mast-machine-description" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Author pf_active, wall and tf for a pilot campaign and reproduce the ambix operators</h4>
+    <div class="r-fu-body"><p>With the ledger and the COCOS 3 → 17 transform pinned, author the coil, limiter and TF IDSs in DDv4 4.1.1 for machine description #5 (fc938…1cb6f2ee + pv78…3dba5e86, 7,805 shots, the largest) and compile them through nova's MachineGeometryReader seam. The gate is operator parity against the ambix geometry-table operators. Two modelling decisions fall out of the ledger and must be recorded rather than improvised: folding <code>fcoil_xmult</code> into <code>turns_with_sign</code>, and whether pf_active elements use rectangle or outline geometry_type.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    mast-machine-description (http://127.0.0.1:8765/nova/mast-machine-description.html)
+Section: §4 stage 2
+Tier:    opus
+
+Context
+  Stage 1 landed (main eeed26f6): docs/mast-quantity-inventory.html carries the full
+  40-quantity ledger (source path -&gt; DDv4 path -&gt; standard name -&gt; units -&gt;
+  transform), the identified source convention (COCOS 3, all four digits, pinned by
+  tests/test_mastcocos.py), and the machine-description count (5 substantive, 13
+  raw). Read it FIRST — it is the contract this stage implements, and it invalidates
+  five statements in the plan&#x27;s §3.
+
+State to read
+  docs/mast-quantity-inventory.html  (the transform table; the row-by-row map; the
+    two DD gaps you must decide; the five source defects)
+  nova/scripts/identify_source_cocos.py  (fingerprints; how to select a campaign&#x27;s
+    shots; --figures-only redraws the figures)
+  tests/test_mastcocos.py  (the pinned convention — extend, never weaken)
+  ~/Code/imas-ambix/imas_ambix/gs/geometry.py  (the operators you must match:
+    collapse_rectangular_circuits, mast_slanted_polygon_sections,
+    shaped_section_vertices)
+  ~/Code/imas-ambix/imas_ambix/gs/imas_geometry.py  (an IMAS-to-GeometryTable reader
+    already exists; its honestly-flagged gap list is your acceptance checklist read
+    backwards)
+
+  RESOLVE THIS BEFORE YOU START — where the code lives. Stage 1&#x27;s script and test
+  landed on MAIN&#x27;s lineage (nova/scripts/identify_source_cocos.py,
+  tests/test_mastcocos.py) because docs/ live on main, but all code work happens on
+  develop and the two branches have diverged (182/101 commits). A develop worktree
+  will NOT have those files. Either land them on develop first as their own commit,
+  or work on main and say so — do not silently duplicate them across branches.
+
+Target
+  Machine description #5: fingerprint fc938...1cb6f2ee + passive pv78...3dba5e86,
+  7,805 shots, 14540..30473. Select shots by RECOMPUTING the fingerprint, NEVER by
+  shot range — 21 contiguous runs for 3 fingerprints, and one description whose span
+  is 87.6% foreign shots. This is a locked decision (campaign-keying).
+
+Scope locks / constraints
+  DDv4 pinned at 4.1.1 (writable by the installed imas-python 2.3.0). Author with
+  imas-python only, never h5py for data; DBEntry opens in the CONSTRUCTOR, do not
+  call .open() after. Every authored IDS must pass validate(). Read-only toward
+  imas-ambix and imas-codex. Author pf_active + wall + tf ONLY — magnetics is stage
+  3, pf_passive stage 4 (and pf_passive/loop/element is DDv4 lifecycle ALPHA, a risk
+  to carry forward). Two modelling decisions to make and RECORD (both are DD gaps,
+  not copies): (a) fcoil_xmult has no DDv4 path — fold it into turns_with_sign so the
+  summed amp-turns are preserved, and note that the folded product is no longer a
+  physical turn count; (b) decide whether pf_active elements use rectangle or outline
+  geometry_type, because the operator path differs.
+  NOTE the source defects before trusting any parsed value: the amm end-crown Z signs
+  are TRANSPOSED (endcrown_l carries Z=+2.46 and endcrown_u Z=-2.46, every shot every
+  campaign, putting both crowns on the wrong side of the midplane), and three efm unit
+  strings are WRONG (fcoil_turns and fcoil_xmult both declare &#x27;deg&#x27;) — the concrete
+  reason the source-metadata-is-untrusted rule must extend to UNITS, not just dd-path
+  tags. Sensor orientation must never come from a channel description.
+  zarr + scipy are not nova deps: `uv pip install &quot;numpy&lt;2&quot; &quot;zarr&lt;3.1&quot; scipy` BEFORE
+  submitting — UV_OFFLINE=1 is set in this environment so `uv run --with` cannot
+  resolve inside a job. Respect nova&#x27;s numpy&lt;2 pin.
+
+Also settle the one open stage-1 question: the rule reducing 13 raw digest
+combinations to 5 substantive MDs was never stated. Inspect the 8 single-shot passive
+descriptions (shots 13105, 13106, 13107, 25622, 26093, 26094, 26096, 26111) and
+establish whether each differs SUBSTANTIVELY from its neighbours (a moved element is a
+machine change needing its own MD) or only hashes differently (a NaN, a unit change, a
+truncated element list — a data defect to exclude by an explicit, stated rule). Record
+the rule either way. Also decide the treatment of the 4,508 of 14,633 shots (30.8%)
+with NO parseable amm passive description, and the 2,478 of 17,111 with no readable
+static geometry at all — inherited by an explicit rule or excluded, never assumed.
+
+Done-when
+  1. pf_active, wall and tf authored in DDv4 4.1.1 for MD #5, every IDS passing
+     validate(), ids_properties/version_put carrying the pin.
+  2. nova Machine.build compiles them through the MachineGeometryReader seam.
+  3. Operator parity: MD-built coil-to-sensor and coil-to-grid operators against the
+     ambix geometry-table operators, element-wise, tolerance STATED and the residual
+     reported per operator — not &quot;matches&quot;.
+  4. A COCOS round-trip test per mapped quantity family, extending
+     tests/test_mastcocos.py rather than duplicating it.
+  5. The singleton rule and the missing-geometry treatment recorded.
+  6. The two modelling decisions recorded with rationale; stage-3 followup written;
+     this followup resolved.</pre>
+    </article>
+</section>
 
   </main>
 </body>

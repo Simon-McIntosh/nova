@@ -4,19 +4,21 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="nova">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="nova-heritage-recovery">
-  <meta name="plan-title"     content="Nova Heritage Recovery">
-  <meta name="plan-summary"   content="Recover, repair and test the non-assembly 1.x heritage on the 2.0 line: SULTAN thermo-hydraulic and cold-test pipelines, the low-order beam solver, G-EQDSK interchange, and the fenics/MAST example galleries">
-  <meta name="plan-status"    content="active">
-  <meta name="plan-roi"       content="mid">
-  <meta name="plan-effort"    content="L">
-  <meta name="plan-tier"      content="opus">
-  <meta name="plan-owner"     content="Simon McIntosh">
-  <meta name="plan-impl"      content="0.25">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="nova-heritage-recovery">
+  <meta name="plan-title" content="Nova Heritage Recovery">
+  <meta name="plan-summary" content="Recover, repair and test the non-assembly 1.x heritage on the 2.0 line: SULTAN thermo-hydraulic and cold-test pipelines, the low-order beam solver, G-EQDSK interchange, and the fenics/MAST example galleries">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="mid">
+  <meta name="plan-effort" content="L">
+  <meta name="plan-tier" content="opus">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-impl" content="0.7">
   <title>Nova Heritage Recovery | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-07-28">
+<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
@@ -175,73 +177,71 @@
     </ul>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="design-disposition" data-choice="salvage-concept" data-by="smc" data-when="2026-07-24T05:00:00+00:00">
-        <p class="r-dec-q">nova/design/ disposition — the directory is the DEMO/SOFE-era
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="design-disposition" data-choice="salvage-concept" data-by="smc" data-when="2026-07-24T05:00:00+00:00">
+    <p class="r-dec-q">nova/design/ disposition — the directory is the DEMO/SOFE-era
         design-optimisation suite, dead on import (removed 1.x modules + the unvendored amigo
         package); nothing ITER-facing works.</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="drop">drop to history</button>
-          <button class="r-opt chosen" data-value="salvage-concept">salvage inverse-design concept only</button>
-          <button class="r-opt" data-value="recover">recover as-is</button>
-        </p>
-        <p class="r-dec-rat">Owner 2026-07-24: record the free-boundary inverse-design intent as a
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="drop">drop to history</button>
+      <button class="r-opt chosen" data-value="salvage-concept">salvage inverse-design concept only</button>
+      <button class="r-opt" data-value="recover">recover as-is</button>
+      </p>
+    <p class="r-dec-rat">Owner 2026-07-24: record the free-boundary inverse-design intent as a
         future 2.0 reimplementation idea (§5 concept note); the code stays in history.</p>
-      </div>
-      <div class="r-dec" data-key="mast-disposition" data-choice="examples" data-by="smc" data-when="2026-07-24T05:00:00+00:00">
-        <p class="r-dec-q">projects/MAST/ — most recently active deleted directory (2025-02, ML
+    </div>
+<div class="r-dec" data-key="mast-disposition" data-choice="examples" data-by="smc" data-when="2026-07-24T05:00:00+00:00">
+    <p class="r-dec-q">projects/MAST/ — most recently active deleted directory (2025-02, ML
         equilibrium-reconstruction studies; sklearn + intake against an external catalog).</p>
-        <p class="r-dec-opts">
-          <button class="r-opt chosen" data-value="examples">keep as examples/mast behind an extra</button>
-          <button class="r-opt" data-value="ambix">relocate to imas-ambix later</button>
-          <button class="r-opt" data-value="history">history only</button>
-        </p>
-        <p class="r-dec-rat">Owner 2026-07-24: recover as an import-checked gallery; no CI data runs.</p>
-      </div>
-      <div class="r-dec" data-key="dina-readers" data-choice="drop" data-by="smc" data-when="2026-07-24T05:00:00+00:00">
-        <p class="r-dec-q">DINA scenario-reader family (read_scenario + waveform/read_plasma;
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="examples">keep as examples/mast behind an extra</button>
+      <button class="r-opt" data-value="ambix">relocate to imas-ambix later</button>
+      <button class="r-opt" data-value="history">history only</button>
+      </p>
+    <p class="r-dec-rat">Owner 2026-07-24: recover as an import-checked gallery; no CI data runs.</p>
+    </div>
+<div class="r-dec" data-key="dina-readers" data-choice="drop" data-by="smc" data-when="2026-07-24T05:00:00+00:00">
+    <p class="r-dec-q">DINA scenario-reader family (read_scenario + waveform/read_plasma;
         pandas + astropy; external data; stale nova.frame.IO imports). geqdsk.py is kept regardless.</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="defer">defer — recover on need</button>
-          <button class="r-opt" data-value="recover">recover + repair now</button>
-          <button class="r-opt chosen" data-value="drop">drop outright</button>
-        </p>
-        <p class="r-dec-rat">Owner 2026-07-24: history only; geqdsk.py is the interchange keeper.</p>
-      </div>
-      <div class="r-dec" data-key="sultan-satellites" data-choice="full-cluster" data-by="smc" data-when="2026-07-24T05:00:00+00:00">
-        <p class="r-dec-q">SULTAN-adjacent satellites: twente/ (PDF-mining hysteresis data, needs the
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="defer">defer — recover on need</button>
+      <button class="r-opt" data-value="recover">recover + repair now</button>
+      <button class="r-opt chosen" data-value="drop">drop outright</button>
+      </p>
+    <p class="r-dec-rat">Owner 2026-07-24: history only; geqdsk.py is the interchange keeper.</p>
+    </div>
+<div class="r-dec" data-key="sultan-satellites" data-choice="full-cluster" data-by="smc" data-when="2026-07-24T05:00:00+00:00">
+    <p class="r-dec-q">SULTAN-adjacent satellites: twente/ (PDF-mining hysteresis data, needs the
         SultanIO repair) and naka/ (QST reader; legacy mechanize scraper, server liveness doubtful).</p>
-        <p class="r-dec-opts">
-          <button class="r-opt chosen" data-value="full-cluster">full cluster incl. twente + naka</button>
-          <button class="r-opt" data-value="core-plus-naka-data">sultan core + naka data model only</button>
-          <button class="r-opt" data-value="core-only">sultan core only</button>
-        </p>
-        <p class="r-dec-rat">Owner 2026-07-24: recover both; credentials scrubbed to env vars, naka
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="full-cluster">full cluster incl. twente + naka</button>
+      <button class="r-opt" data-value="core-plus-naka-data">sultan core + naka data model only</button>
+      <button class="r-opt" data-value="core-only">sultan core only</button>
+      </p>
+    <p class="r-dec-rat">Owner 2026-07-24: recover both; credentials scrubbed to env vars, naka
         scraper gated behind its own extra with a dead-server caveat.</p>
-      </div>
-      <div class="r-dec" data-key="cold-test-home" data-choice="nova" data-by="reckon-ship" data-when="2026-07-24T05:00:00+00:00">
-        <p class="r-dec-q">Where does the CSM cold-test analysis live — nova or norma? It measures
+    </div>
+<div class="r-dec" data-key="cold-test-home" data-choice="nova" data-by="reckon-ship" data-when="2026-07-24T05:00:00+00:00">
+    <p class="r-dec-q">Where does the CSM cold-test analysis live — nova or norma? It measures
         strain/displacement/temperature during CS-coil cold tests.</p>
-        <p class="r-dec-opts">
-          <button class="r-opt chosen" data-value="nova">nova (thermo-mechanical qualification physics)</button>
-          <button class="r-opt" data-value="norma">norma (assembly metrology)</button>
-        </p>
-        <p class="r-dec-rat">Investigation verdict 2026-07-24: coil qualification physics, not
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="nova">nova (thermo-mechanical qualification physics)</button>
+      <button class="r-opt" data-value="norma">norma (assembly metrology)</button>
+      </p>
+    <p class="r-dec-rat">Investigation verdict 2026-07-24: coil qualification physics, not
         assembly fit-up metrology — recovered to nova/thermalhydralic/cold_test.py.</p>
-      </div>
-    </section>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-nhr-01" data-status="open" data-tier="opus"
-               data-written-by="reckon-create" data-written-at="2026-07-24"
-               data-recommends-skill="/reckon-ship nova-heritage-recovery §3">
-        <h4 class="r-fu-title">Execute the SULTAN repair and the hermetic test program (§3 + §4)</h4>
-        <div class="r-fu-body"><p>The recovered baseline is landed (<code>61f86176</code>); the two
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-nhr-01" data-status="resolved" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-24" data-recommends-skill="/reckon-ship nova-heritage-recovery §3" data-resolved-at="2026-07-28T05:39:08+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Execute the SULTAN repair and the hermetic test program (§3 + §4)</h4>
+    <div class="r-fu-body"><p>The recovered baseline is landed (<code>61f86176</code>); the two
         repair sections are ready to execute together — the §4 tests are the acceptance gate for the
         §3 repairs. Work in a worktree off develop; disjoint from the spine-refactor §3/§4 closure
         (nova/frame, nova/biot).</p></div>
-        <pre class="r-fu-prompt">Project: nova
+    <pre class="r-fu-prompt">Project: nova
 Plan:    nova-heritage-recovery (http://127.0.0.1:8765/nova/nova-heritage-recovery.html)
 Section: §3 + §4
 Tier:    opus
@@ -281,8 +281,70 @@ Done-when
   3. Lint debt in the cluster cleared or explicitly waived per file.
   4. §3 + §4 collapsed in the plan with counts; impl advanced; this followup
      resolved; §5 (galleries + salvage register) followup queued.</pre>
-      </article>
-    </section>
+    <p class="r-fu-outcome">Landed on develop d070c4f7 (merge 13055ab4; commits d1b5053d, 1431fc93, dd99168d, 169d334b). The five modules the abandoned SultanIO refactor orphaned import again (d1b5053d). A REAL DEFECT was found in the G-EQDSK interchange, not merely a missing test: the writer asked for keys the reader never returns (1431fc93), which means the round trip had never once been exercised end to end — tests/test_geqdsk.py plus a tests/data/geqdsk/analytic.geqdsk fixture now close it. The SULTAN lane runs OFFLINE against a committed cache (dd99168d) with SYNTHESISED fixtures under tests/data/sultan/SYNTH_1/ (two .dat files and a testplan .xlsx, named SYNTH so their provenance is unambiguous — no proprietary bulk data committed), replacing the FTP-gated collection skip. The cold-test analysis runs and its fit returns a result (169d334b) with tests/data/coldtest/. New suites: tests/test_geqdsk.py, tests/test_thermalhydralic.py. NOT DELIVERED — the worker died to the org spend limit before reporting, so five named done-when items have no evidence on record: the before/after damage inventory table, the FrequencyResponse bug verdict and its analytic oracle, the hermeticity proof (which skips remain and why each is a legitimate environment gate), the per-file lint disposition, and all test counts. The code is landed and merged; the ACCOUNT of it is missing and must be reconstructed.</p>
+    </article>
+<article class="r-fu" data-id="f-nhr-02" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-28T08:00:00+00:00" data-recommends-skill="/reckon-ship nova-heritage-recovery" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Reconstruct the repair&#x27;s evidence, then close the galleries and the salvage register</h4>
+    <div class="r-fu-body"><p>The SULTAN repair, the offline lane, the cold-test lane and the geqdsk round trip are all merged on develop, but the worker died before reporting any of it — so the damage inventory, the FrequencyResponse verdict, the hermeticity proof, the lint disposition and every test count are missing from the record. Reconstruct them from the merged code and the suites, then take §5 (example galleries + the salvage register the <code>salvage-concept</code> decision needs).</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    nova-heritage-recovery (http://127.0.0.1:8765/nova/nova-heritage-recovery.html)
+Section: reconstruct the §3/§4 evidence, then §5
+Tier:    sonnet (escalate to opus if the FrequencyResponse mechanism turns out unresolved)
+
+Context
+  develop d070c4f7 carries the whole §3/§4 repair: the orphaned thermalhydralic
+  modules import (d1b5053d), the geqdsk writer/reader key mismatch is fixed with a
+  round-trip test (1431fc93), the SULTAN lane runs offline against committed
+  SYNTH_1 fixtures (dd99168d), and the cold-test lane runs (169d334b). The CODE is
+  merged and the ACCOUNT is missing — the worker died to the org spend limit before
+  reporting. Reconstruct the evidence first; it is cheap and the plan is wrong
+  without it.
+
+PART A — reconstruct (do not re-do the repair, it is landed)
+  1. THE DAMAGE INVENTORY, before and after. Import every module under
+     nova/thermalhydralic/ at 23f055bc (use a worktree at that sha) and at
+     develop tip, and record importable yes/no with the error for each failure.
+     That table is the spine of the section and nothing else substitutes for it.
+  2. THE FrequencyResponse BUG. The brief said &quot;FrequencyResponse (bug fixed)&quot;,
+     meaning a real bug, not an import failure. Read the diff, identify what it
+     was, and CHECK IT against an analytic oracle — a first-order lag has a
+     closed-form magnitude and phase; a lumped-capacitance step response has a
+     closed-form exponential. If no such check exists in the landed tests, add one.
+     Report the mechanism in 3-6 sentences.
+  3. HERMETICITY PROOF. Show no network at collection OR run time: run the suites
+     with no credentials in the environment and report the counts. State exactly
+     which skips REMAIN and the legitimate environment gate behind each (live IMAS
+     DBs, bokeh extra, …). A permanent skip with no named resource has zero signal
+     value and should become a fixture-backed test or a visible failure.
+  4. THE geqdsk ROUND-TRIP TOLERANCE and what sets it — G-EQDSK&#x27;s fixed-width text
+     format has finite precision, so the tolerance is a property of the format
+     rather than a choice. State both.
+  5. LINT, per file in the cluster: cleared, or waived with the reason.
+  6. TEST COUNTS for every suite you ran, with wall clock and node type, plus a
+     whole-tree `uv run pytest --collect-only -q` to prove no import broke.
+
+PART B — §5, once A is recorded
+  Example galleries (fenics + MAST) as IMPORT-CHECKED only, no CI data runs, behind
+  their extras — the mast-disposition decision is locked to `examples`. Then the
+  SALVAGE REGISTER the `design-disposition` decision requires: nova/design/ stays
+  in history, and what must be written down is the free-boundary inverse-design
+  INTENT as a 2.0 reimplementation note — what it solved, what it optimised over,
+  and which parts nova/equilibrium&#x27;s InverseDesign already covers. Record it so the
+  code never has to be read again to recover the idea.
+
+Scope
+  nova/thermalhydralic/, nova/io/geqdsk.py, tests/test_sultan.py,
+  tests/test_geqdsk.py, tests/test_thermalhydralic.py, tests/data/ (new files only),
+  examples/ or the gallery dir. ASK before touching pyproject.toml.
+  Worktree off develop; the primary checkout stays on main.
+
+Done-when
+  1. All six Part-A items recorded in the plan with numbers.
+  2. Galleries import-checked behind their extras; no CI data runs.
+  3. Salvage register written for the inverse-design intent.
+  4. Followup written; this followup resolved.</pre>
+    </article>
+</section>
 
   </main>
 </body>

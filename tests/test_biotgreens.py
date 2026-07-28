@@ -256,27 +256,53 @@ _STRADDLE = np.concatenate([-_LADDER, [0.0], _LADDER[::-1]])
 # off both corner radii, so the two lower corners straddle it in radius
 _INSIDE_SPAN = _FACE_A - 0.0435
 
-# The four ways a target crosses a corner plane, as ``(radius, level, across)``:
-# ``across`` selects which coordinate the standoff is added to, and the other one
-# is offset onto the corner.  The first two cross a face LEVEL, at a radius inside
-# the section's radial span and at one outside it; the last two cross a corner
-# RADIUS, at a level inside the section's vertical span and at one below it.  The
-# pair that stays outside the span never enters the conductor, so the branch terms
-# there change sign without the field's own kink to hide behind.
-_CROSSINGS = (
-    (_INSIDE_SPAN, 0.0, 1.0),
-    (_FACE_A + 0.021, 0.0, 1.0),
-    (0.0, _FACE_Z0 + 0.017, 0.0),
-    (0.0, _FACE_Z0 - _FACE_DZ / 2 - 0.05, 0.0),
+# Sections the crossings below are exercised on, as ``(a, z0, da, dz)``: the one the
+# rest of this group is written around, and a production winding-pack shape -- small,
+# square, and at a large radius, where the corner cancellation is thirty times worse
+# and everything built on differencing the kernel inherits that.  Section shape is a
+# test INPUT here rather than a constant, because a bound that holds on one aspect
+# ratio and one radius is a statement about that geometry and not about the kernel.
+_SECTIONS = (
+    (4.0, 0.0, 0.1, 0.08),
+    (6.2, 0.0, 0.02, 0.02),
 )
 
+# The four ways a target crosses a corner plane, as fractions of the section's own
+# extents: ``(radial offset, vertical offset, across)``, where ``across`` selects
+# which coordinate the standoff is added to and the other is offset onto the corner.
+# The first two cross a face LEVEL, at a radius inside the section's radial span and
+# at one outside it; the last two cross a corner RADIUS, at a level inside the
+# section's vertical span and at one below it.  The pair that stays outside the span
+# never enters the conductor, so the branch terms there change sign without the
+# field's own kink to hide behind.  Fractions rather than metres so the same four
+# configurations follow the section: on the first section they are the radii and
+# levels the straddle tests above use.
+_CROSSINGS = (
+    (-0.435, 0.0, 1.0),
+    (0.21, 0.0, 1.0),
+    (0.0, 0.2125, 0.0),
+    (0.0, -1.125, 0.0),
+)
 
-def _crossing_centres(radius, level, across):
+# Standoffs as a fraction of the section's extent in the direction they are taken.
+# The quotient's floor is the kernel's own relative round-off divided by the RELATIVE
+# field difference a rung forms, and that difference is set by ``d/L`` for a section
+# of extent ``L`` -- so a ladder fixed in metres spends a different part of its budget
+# on every geometry, and a small section at a large radius loses its finest rungs
+# outright.  Fixed as a fraction, every section gets a ladder its own field supports.
+_LADDER_FRACTIONS = 10.0 ** -np.arange(1.0, 8.0)
+# rungs before this one still carry the symmetric quotient's own second-order
+# truncation, which falls as ``(d/L)^2`` and is a part in 1e6 by here
+_SETTLED_RUNG = 3
+
+
+def _crossing_centres(section, radial, vertical, across):
     """Yield the two corner-plane centres of a crossing, one per corner."""
+    a, z0, da, dz = section
     for corner in (-1.0, 1.0):
         yield (
-            radius + (1.0 - across) * (_FACE_A + corner * _FACE_DA / 2),
-            level + across * (_FACE_Z0 + corner * _FACE_DZ / 2),
+            a + radial * da + (1.0 - across) * corner * da / 2,
+            z0 + vertical * dz + across * corner * dz / 2,
         )
 
 
@@ -292,7 +318,7 @@ def _rectangle(a, z0, da, dz):
     )
 
 
-def _worst_against_the_polygon(target_r, target_z):
+def _worst_against_the_polygon(target_r, target_z, section=None):
     """Return the worst relative ``(psi, B_R, B_Z)`` deviation from the oracle.
 
     The oracle is the fully analytic polygon reduction, not the quadrature one: a
@@ -303,10 +329,9 @@ def _worst_against_the_polygon(target_r, target_z):
     """
     from nova.biot.polygonanalytic import polygon_analytic_greens
 
-    got = cylinder_greens(target_r, target_z, _FACE_A, _FACE_Z0, _FACE_DA, _FACE_DZ)
-    exact = polygon_analytic_greens(
-        target_r, target_z, _rectangle(_FACE_A, _FACE_Z0, _FACE_DA, _FACE_DZ)
-    )
+    a, z0, da, dz = section or (_FACE_A, _FACE_Z0, _FACE_DA, _FACE_DZ)
+    got = cylinder_greens(target_r, target_z, a, z0, da, dz)
+    exact = polygon_analytic_greens(target_r, target_z, _rectangle(a, z0, da, dz))
     # the field is scaled by its own magnitude rather than per component: B_R
     # passes through zero on the section's mid-plane, where a per-component
     # relative measure has no meaning
@@ -402,19 +427,28 @@ def test_every_corner_plane_crossing_holds_the_oracle():
     characteristic -- an assignment no difference quotient reaches, because every
     quotient stands off the plane on both sides.
     """
-    for radius, level, across_the_level in _CROSSINGS:
-        for centre in _crossing_centres(radius, level, across_the_level):
-            worst = _worst_against_the_polygon(
-                centre[0] + (1.0 - across_the_level) * _STRADDLE,
-                centre[1] + across_the_level * _STRADDLE,
-            )
-            # 1.5e-12 measured worst, over the whole ladder including the plane
-            # itself; sevenfold reserve.  What holds the floor down is the same
-            # thing the sibling straddle tests rest on -- every characteristic and
-            # the modulus complement formed from the geometry rather than by
-            # subtraction -- so a mis-masked branch on the plane is a full
-            # ``pi r^2/3`` here, nine decades clear of the bound.
-            assert max(worst) < 1e-11, worst
+    for section in _SECTIONS:
+        extents = (section[3], section[2])  # the extent the standoff is taken along
+        for radial, vertical, across_the_level in _CROSSINGS:
+            straddle = _LADDER_FRACTIONS * extents[int(across_the_level)]
+            straddle = np.concatenate([-straddle, [0.0], straddle[::-1]])
+            for centre in _crossing_centres(
+                section, radial, vertical, across_the_level
+            ):
+                worst = _worst_against_the_polygon(
+                    centre[0] + (1.0 - across_the_level) * straddle,
+                    centre[1] + across_the_level * straddle,
+                    section,
+                )
+                # over the whole ladder including the plane itself: 1.5e-12 measured
+                # on the 4 m section and 2.2e-11 on the 2 cm one, where the corner
+                # cancellation is thirty times worse -- so the reserve is 4.6-fold on
+                # the smaller section and the bound is set by it.  What holds the
+                # floor down at all is what the sibling straddle tests rest on --
+                # every characteristic and the modulus complement formed from the
+                # geometry rather than by subtraction -- so a mis-masked branch on
+                # the plane is a full ``pi r^2/3``, nine decades clear of the bound.
+                assert max(worst) < 1e-10, worst
 
 
 def test_the_corner_planes_carry_no_jump_of_their_own():
@@ -422,11 +456,14 @@ def test_the_corner_planes_carry_no_jump_of_their_own():
 
     Oracle-free, and the sharpest statement of the defect this guards.  A branch
     term left uncancelled is a jump ``J`` that does not depend on the standoff, so
-    the quotient ``|f(+d) - f(-d)|/2d`` grows as ``J/2d`` -- five decades of it by
-    the time ``d`` is a micrometre -- where a continuous field's quotient settles on
-    its own derivative.  Comparing the rungs against each other rather than against
-    a bound is what makes this independent of both the field's magnitude and the
-    section's geometry.
+    the quotient ``|f(+d) - f(-d)|/2d`` grows as ``J/2d`` -- a decade per rung, all
+    the way down -- where a continuous field's quotient settles on its own
+    derivative.  Comparing the rungs against each other rather than against a bound
+    is what frees this from the field's magnitude; it does NOT by itself free it from
+    the section's geometry, which is why the standoffs are fractions of the section
+    and not lengths.  Held in metres, the plateau a small section at a large radius
+    can support is two decades worse than a large one's, for no reason that has
+    anything to do with the kernel.
 
     A CONVERGENCE statement, not an error against a reference: nothing here is a
     tolerance on an accuracy.  It says the quotient has reached the derivative
@@ -434,43 +471,49 @@ def test_the_corner_planes_carry_no_jump_of_their_own():
     rungs rather than a bound on any one of them.  The oracle statement about the
     same crossings is :func:`test_every_corner_plane_crossing_holds_the_oracle` and
     the two are complementary: an oracle catches a wrong VALUE, this catches a
-    DISCONTINUITY, and a jump of a part in 1e11 is far below what any oracle
-    comparison at these standoffs resolves.
+    DISCONTINUITY, and a jump far below what an oracle comparison resolves still
+    puts decades between the first rung and the last.
     """
-    for radius, level, across_the_level in _CROSSINGS:
-        for centre in _crossing_centres(radius, level, across_the_level):
-            quotients = []
-            for standoff in _LADDER:
-                step = np.array([-standoff, standoff])
-                got = cylinder_greens(
-                    centre[0] + (1.0 - across_the_level) * step,
-                    centre[1] + across_the_level * step,
-                    _FACE_A,
-                    _FACE_Z0,
-                    _FACE_DA,
-                    _FACE_DZ,
-                )
-                quotients.append(
-                    [
-                        abs(part[1] - part[0]) / (2.0 * standoff) / np.abs(part).max()
-                        for part in got
-                    ]
-                )
-            # Every rung below ten micrometres is on the limit already, and they
-            # agree with each other to four parts in a thousand.  What sets that
-            # floor is the quotient itself and not the kernel's accuracy: the last
-            # rung differences two field values a tenth of a nanometre apart, so the
-            # kernel's own relative round-off arrives divided by ``2d``, and the
-            # earlier rungs carry the quotient's second-order truncation instead --
-            # which is why the ladder starts where it does.  The gate is 2.3 times
-            # the 4.3e-03 measured, and the last rung is kept even though it sets
-            # that floor, because it is the widest lever on the defect: the gate
-            # fires on a standoff-independent jump of 1e-11 of the field, ten decades
-            # below the ``pi r^2/3`` an uncancelled branch term leaves, and dropping
-            # the rung costs a decade of that reach to buy a decade of headroom.
-            settled = np.array(quotients[3:])
-            spread = np.ptp(settled, axis=0) / settled.mean(axis=0)
-            assert np.max(spread) < 1e-2, spread
+    for section in _SECTIONS:
+        extents = (section[3], section[2])  # the extent the standoff is taken along
+        for radial, vertical, across_the_level in _CROSSINGS:
+            extent = extents[int(across_the_level)]
+            for centre in _crossing_centres(
+                section, radial, vertical, across_the_level
+            ):
+                quotients = []
+                for standoff in _LADDER_FRACTIONS * extent:
+                    step = np.array([-standoff, standoff])
+                    got = cylinder_greens(
+                        centre[0] + (1.0 - across_the_level) * step,
+                        centre[1] + across_the_level * step,
+                        *section,
+                    )
+                    quotients.append(
+                        [
+                            abs(part[1] - part[0])
+                            / (2.0 * standoff)
+                            / np.abs(part).max()
+                            for part in got
+                        ]
+                    )
+                # Every rung from a ten-thousandth of the section's extent down is on
+                # the limit already, and they agree with each other to 2.4e-04 on the
+                # 4 m section and 5.1e-04 on the 2 cm one -- a factor of two apart,
+                # where the same two sections on a ladder fixed in METRES give 4.3e-03
+                # and 2.9e-02, the smaller one past any bound the larger supports.
+                # What sets the floor is the quotient and not the kernel's accuracy:
+                # the finest rung's relative field difference is of order ``d/L``, so
+                # the kernel's own relative round-off arrives divided by it, and
+                # holding ``d/L`` fixed holds the floor fixed across geometries.
+                # Fourfold reserve on the worst measured.  A jump does not fall with
+                # the standoff at all, so it grows as ``J/2d`` against a plateau and
+                # puts three decades across this window: the gate fires on one of
+                # 1e-10 of the field, ten decades below the ``pi r^2/3`` an
+                # uncancelled branch term leaves.
+                settled = np.array(quotients[_SETTLED_RUNG:])
+                spread = np.ptp(settled, axis=0) / settled.mean(axis=0)
+                assert np.max(spread) < 2e-3, (section, spread)
 
 
 # --- quadrupole-corrected filament ------------------------------------------

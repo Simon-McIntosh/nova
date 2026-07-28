@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="coil-conductor-fidelity">
+  <meta name="plan-title" content="Coil Conductor Fidelity: what the inductance operator should model">
+  <meta name="plan-summary" content="What conductor model the axisymmetric inductance operator should carry — the as-built CS conductor centrelines against the uniform-current element, the field coil&#x27;s unexplained self-inductance gap, and the mesh convergence the comparison rests on">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="M">
+  <meta name="plan-tier" content="opus">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-depends-on" content="nova-3d-native">
+  <title>Coil Conductor Fidelity | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-07-28">
+<meta name="plan-impl" content="0.0">
+<meta name="plan-version" content="1">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — Why this exists, and what is already settled</h2>
+
+    <p>The ring element spreads a source element's current at <strong>constant density over its
+    whole section polygon</strong> — no jacket, no insulation, no cooling channel, no turn
+    structure. An <code>nturn</code> count scales the result and never subdivides the area. That
+    assumption was nowhere stated until now, and in its absence a four-dimensional quadrature
+    oracle built alongside the element read as an arbiter of the real conductor. <strong>It is not
+    one</strong>: it shares the assumption by construction.</p>
+
+    <p>The assumption is not neutral in sign. Concentrating the same current into discrete
+    sub-conductors inside one outline shrinks each conductor's own geometric mean distance and
+    <strong>raises</strong> the self inductance, so smearing over the gross outline is the lowest
+    self inductance an outline can carry. A wound coil sits above it — and the machine description
+    sits above the element on all three self terms, which is the direction granularity predicts.</p>
+
+    <p>This plan owns that question. It is <em>not</em> a kernel-repair task: the kernels are
+    repaired and merged (see <code>nova-3d-native</code>). It is a modelling question with real
+    decisions in it, and it was split out because a research question wearing a bugfix's clothing
+    is what made the parent plan feel endless.</p>
+
+    <h3>Established, and not to be re-derived</h3>
+    <table>
+      <thead><tr><th>Finding</th><th>Evidence</th></tr></thead>
+      <tbody>
+        <tr><td>The removed offset model WAS the geometric mean distance</td>
+            <td><code>0.5·dx·turnturn</code> on a square section; the machinery was leading-order
+            self-inductance, not a nudge. Keyed on the section <em>family</em>, so wrong for any
+            non-square rectangle and for a hexagon.</td></tr>
+        <tr><td>The shipped fan rule is not the source of any discrepancy</td>
+            <td>6.5e-07 against a refined Richardson limit; tiling identity closes to 1.4e-06;
+            aspect sweep 7.8e-06 at aspect 1, 2.9e-05 at 2.89.</td></tr>
+        <tr><td>The lattice, placement and reduction are validated before conductor geometry enters</td>
+            <td>The <em>pitch</em> rung — solid squares filling their site cells — reproduces the
+            continuum to <strong>1.4e-07</strong> on a solenoid module. Everything above that line
+            is concentration, not discretisation.</td></tr>
+        <tr><td>Granularity explains the solenoid gap</td>
+            <td>The annulus rung crosses the +4.78e-04 H gap at a cable space near 30 mm, inside
+            the plausible range once the channel diameter varies. Reported as a band, not a point.</td></tr>
+        <tr><td>Granularity does NOT explain the field coil gap</td>
+            <td>Best rung across the whole sweep is +1.16e-03 of +4.10e-03 — 28 % — at a 26 mm
+            cable space, already outside any plausible conductor. <strong>One conductor model does
+            not account for both coils.</strong></td></tr>
+        <tr><td>Mutuals are unmoved by the winding</td>
+            <td>PF1–CS3U 0.134897 continuum against 0.134998 cable, machine 0.1348 — a mutual
+            between separated packs cannot see how current is arranged inside either.</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="s2">§2 — The mesh is not converged at the size of the effect</h2>
+
+    <p>This displaced the question and must be handled before any further comparison is trusted.
+    Converged reduced self-inductance [H], element size 0.25 → 0.08 m:</p>
+
+    <table>
+      <thead><tr><th>coil</th><th>0.25 m</th><th>0.12 m</th><th>0.08 m</th><th>machine</th></tr></thead>
+      <tbody>
+        <tr><td>PF1</td><td>0.704024</td><td>0.703605</td><td>0.703528</td><td>0.7076</td></tr>
+        <tr><td>CS3U</td><td>0.795495</td><td>0.794955</td><td>0.794924</td><td>0.7954</td></tr>
+        <tr><td>CS2U</td><td>0.795495</td><td>0.794955</td><td>0.794924</td><td>0.7954</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>The shipped <code>dcoil=0.25</code> mesh overshoots its own converged limit by
+    +5.7e-04 H on a solenoid module — larger than the +4.76e-04 the winding is being asked to
+    explain.</strong> So the apparently excellent agreement of the old geometric-mean-distance
+    model at the shipped mesh size was partly a discretisation artifact: at 0.25 m the element
+    reads 0.795495 against a machine value of 0.7954, and the agreement decays as the mesh
+    converges. Every conductor comparison must be taken against the converged limit, and the
+    reconstruction lane's own mesh choice is now a question this plan owns.</p>
+
+    <p>Separately, where the target frame declares no section — a grid point, a probe, and the
+    <code>PolyTarget</code> the inductance lane builds — the target-side average is carried by that
+    target's own subdivision instead. That is <em>convergent, not equivalent</em>: the reduced
+    matrix deviates from the exact double integral by 5.7e-03, 2.2e-03, 1.2e-03 and 3.1e-04 H at
+    60, 134, 265 and 816 targets, and the machine gate at atol 5e-3 first holds at 134. The shipped
+    default passes because it sits above that threshold, not because anything enforces it.</p>
+
+    <h2 id="s3">§3 — The as-built conductor geometry exists, and has not yet been used</h2>
+
+    <p>Located 2026-07-28 in the shared machine-description database, catalogued in
+    <code>/work/imas/shared/imasdb/ITER_MACHINE_DESCRIPTION/3/md_summary.yaml</code>:</p>
+
+    <pre><code>111004/1  coils_non_axisymmetric  PBS-11
+          Central Solenoid Modules - conductor centerlines
+          provenance DET-07879-A   status active   backend hdf5
+          /work/imas/shared/imasdb/ITER_MACHINE_DESCRIPTION/3/111004/1</code></pre>
+
+    <p>Six coils — CS3L, CS2L, CS1L, CS1U, CS2U, CS3U — one conductor each with
+    <code>turns = 1.00</code>, so the winding is resolved <strong>geometrically</strong> rather
+    than smeared into a turn count. Roughly 1560 elements per module as cylindrical
+    <code>(r, phi, z)</code> start / intermediate / end triples spanning a full turn in phi.
+    <code>111003/2</code> carries the ex-vessel correction coils with feeders, same provider.</p>
+
+    <p>Three things must be resolved before it can be evaluated, and each is a real question rather
+    than a chore:</p>
+    <ul>
+      <li><strong>The DD version is unparseable.</strong> Stamped <code>3.39.0-115-g143626e</code>.
+      <code>ignore_unknown_dd_version=True</code> alone silently converts to 4.1.1, which the
+      project's DD-matching rule forbids; the correct combination is
+      <code>dd_version='3.39.0'</code> <em>plus</em> the ignore flag. nova's own reader
+      independently branches on <code>&lt;= 3.39</code> for this cross-section, corroborating it.</li>
+      <li><strong>Feeders are in the path.</strong> For CS3U, 1496 of 1558 elements lie in the
+      module (r 1.346–2.160 m, z 4.493–9.713 m); 57 run out to r = 18.3 m at z ≈ 9.98. They must be
+      separated deliberately, not clipped by a magic radius.</li>
+      <li><strong>The cross-section convention is undecoded.</strong> Nine points as
+      <code>(delta_r, delta_phi, delta_z)</code> in the element triad, with
+      <code>delta_phi</code> stepping in 45° increments and <code>delta_r</code> ≈ 8.1 mm roughly
+      constant — a polar octagon of ~8 mm radius, <em>not</em> a 49 mm square jacket. Whether that
+      is the cable space, an equivalent section, or a convention misread has to be settled before
+      any number computed from it means anything.</li>
+    </ul>
+
+    <h2 id="s4">§4 — The field coil anomaly</h2>
+
+    <p>PF1's self term sits 4.07e-03 H below the machine description and granularity buys at most
+    28 % of it. Since the solenoid's gap <em>is</em> explained by the same mechanism at the same
+    conductor scale, whatever is happening to PF1 is specific to it. Candidates, none yet tested:
+    a different conductor or grading within the pack; a machine-description value computed on a
+    different outline or turn count than the one modelled (PF1 carries a fractional 248.64 turns);
+    an insulation or ground-wrap thickness that shrinks the current-carrying outline; or a
+    reference computed with a different method for that coil than for the solenoid.</p>
+
+    <p>The honest framing: <strong>the two coils' discrepancies now have different explanations,
+    and only one is in hand.</strong> Closing PF1 by tuning a conductor parameter would be
+    reproducing the model we removed.</p>
+
+    <h2 id="s5">§5 — Device throughput, measured in passing</h2>
+
+    <p>The winding operator is 1,893,376 pairs and was assembled on one H200 as a stress test of
+    the batched path. Host and device agree to <strong>6.8e-14 – 4.6e-12 relative on every
+    pair</strong>, which was the check that outranked the physics. Warm throughput: quadrature
+    1.02–1.65 µs/pair against ~450 µs/pair host; closed form <strong>0.242 µs/pair at tile
+    128</strong>. Compile 65 s cold, 6–7 s from the persistent cache in a fresh process. Two host
+    columns need a sentence each: the closed form's host rate drifts 454 → 1032 µs/pair across the
+    tile sweep where the quadrature's stays flat, and the host reference ran with 8 workers against
+    a 30-CPU allocation, so any quoted ratio must state the worker count.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="conductor-model" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">What conductor model should the shipped inductance operator carry: uniform current over the gross section (today, with the assumption now stated), uniform current plus an explicit documented granularity correction, or a discrete-turn source built from the as-built centrelines?</p>
+    <p class="r-dec-ctx">Granularity is measured and robust: concentration contributes +6.72e-04 to +6.81e-04 H on a solenoid module across every spare-site placement policy, a 1.3 % spread. But it explains the solenoid and not the field coil, so a correction fitted to close both would be reproducing the geometric-mean-distance model that was just removed.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="uniform-stated">uniform, assumption stated</button>
+      <button class="r-opt" data-value="uniform-plus-correction">uniform + granularity correction</button>
+      <button class="r-opt" data-value="discrete-turns">discrete turns from as-built geometry</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="reference-status" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">What standing does the machine-description inductance table have — oracle, cross-check, or a value with its own stated model? It reproduces the solenoid once granularity is modelled, and disagrees with the field coil by four times what granularity can buy.</p>
+    <p class="r-dec-ctx">The table cannot arbitrate its own construction. It is above the uniform-current continuum on all three self terms, which is the direction granularity predicts, and the solenoid gap is closed by a cable space near 30 mm. The field coil&#x27;s is not closed by any plausible conductor.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="oracle">oracle for both</button>
+      <button class="r-opt" data-value="cross-check">cross-check with a stated model</button>
+      <button class="r-opt" data-value="per-coil">per-coil, decided on evidence</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-ccf-01" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Load the as-built CS centrelines and decode the conductor section</h4>
+    <div class="r-fu-body"><p>The data exists and is unused. Before any inductance number comes
+        off it, three things must be settled: the DD-version handling, the feeder separation, and
+        what the nine-point <code>(delta_r, delta_phi, delta_z)</code> cross-section actually
+        describes.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    coil-conductor-fidelity
+Section: §3
+Tier:    opus
+
+Context
+  /work/imas/shared/imasdb/ITER_MACHINE_DESCRIPTION/3/111004/1 holds
+  coils_non_axisymmetric for the six CS modules, one conductor each, turns=1.00,
+  ~1560 elements as cylindrical (r, phi, z) start/intermediate/end triples.
+  nova/imas/coils_non_axisymmetric.py already reads this IDS shape and reduces
+  the path through nova.geometry.polyline.PolyLine (hybrid arc/line RDP).
+
+Open it as
+  imas.DBEntry(uri, &#x27;r&#x27;, dd_version=&#x27;3.39.0&#x27;)
+  entry.get(&#x27;coils_non_axisymmetric&#x27;, ignore_unknown_dd_version=True)
+  The stamp is &#x27;3.39.0-115-g143626e&#x27;; the ignore flag ALONE silently converts to
+  4.1.1, which is banned. Pin 3.39.0 and ignore only the git suffix.
+
+Done-when
+  1. The cross-section convention decoded and stated: delta_r ~8.1 mm roughly
+     constant with delta_phi in 45-degree steps reads as a polar octagon of ~8 mm
+     radius, which is NOT a 49 mm jacket. Establish what it is against the
+     conductor&#x27;s own documentation or against the swept area it implies.
+  2. Feeders separated from the winding pack by a stated criterion, not a radius
+     cut. For CS3U, 1496 of 1558 elements are in the module and 57 run to
+     r = 18.3 m at z ~ 9.98.
+  3. The path reduced through PolyLine with the arc/line segmentation reported,
+     and the swept geometry checked against the module outline the axisymmetric
+     model uses (r 1.346-2.160, and note z spans 4.493-9.713, taller than one
+     2.075 m module -- reconcile that before trusting anything).
+  4. A figure of the reduced path and its section.</pre>
+    </article>
+<article class="r-fu" data-id="f-ccf-02" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Settle the reconstruction mesh, whose discretisation error exceeds
+        the effect under study</h4>
+    <div class="r-fu-body"><p>The shipped <code>dcoil=0.25</code> mesh overshoots its converged
+        limit by +5.7e-04 H on a solenoid module, larger than the +4.76e-04 the winding explains.
+        Every comparison against the machine table rests on this, and the inductance lane's
+        no-section target path has its own convergence threshold at ~134 targets.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    coil-conductor-fidelity
+Section: §2
+Tier:    opus
+
+Context
+  Converged self-inductance [H] at element size 0.25 / 0.12 / 0.08 m:
+    PF1  0.704024 / 0.703605 / 0.703528   machine 0.7076
+    CS3U 0.795495 / 0.794955 / 0.794924   machine 0.7954
+  So the old geometric-mean-distance model&#x27;s excellent agreement at the shipped
+  mesh was partly a discretisation artifact.
+
+Done-when
+  1. A recommended default mesh for the inductance lane, with the convergence
+     ladder that justifies it and the cost it carries.
+  2. The no-section target path&#x27;s threshold enforced or surfaced: 2 targets is
+     1.32e-01 H from the machine value, 60 still fails at 5.19e-03, and it holds
+     only from ~134. Propose a mechanism that fails loudly rather than returning
+     a quietly wrong inductance; do not implement before agreeing it.
+  3. Whether tests/test_biotsavart.py::test_ITER_subinductance_matrix should
+     state what its reference carries and at what mesh it is valid. That file is
+     shared -- draft the wording, do not assume the edit.</pre>
+    </article>
+<article class="r-fu" data-id="f-ccf-03" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Find what the field coil&#x27;s 4.07e-03 H gap actually is</h4>
+    <div class="r-fu-body"><p>Granularity explains the solenoid and buys at most 28 % of PF1 at
+        a conductor already outside any plausible cable space. The two coils' discrepancies have
+        different causes and only one is in hand.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    coil-conductor-fidelity
+Section: §4
+Tier:    opus
+
+Context
+  PF1 (3.9431, 7.5641, 0.9590 x 0.9841, 248.64 turns) reads 0.703528 H converged
+  against a machine value of 0.7076. The discrete-winding ladder&#x27;s best rung is
+  +1.16e-03 at a 26 mm cable space, 28 per cent of the gap, and shrinking further
+  leaves the range any cable-in-conduit conductor occupies.
+
+Candidates, none tested
+  * a different conductor or grading within the pack;
+  * a machine value computed on a different outline or turn count -- note the
+    fractional 248.64 turns, and that nova/frame/itergeom.py carries two CS
+    geometry revisions, so a PF revision may differ too;
+  * insulation or ground wrap shrinking the current-carrying outline;
+  * a reference computed by a different method for this coil than for the CS.
+
+Constraint
+  Do NOT close the gap by tuning a conductor parameter. Reproducing the model
+  that was removed is the one outcome worse than leaving it open. If the cause
+  is the reference&#x27;s, say so and evidence it.
+
+Done-when
+  1. The gap attributed, or the candidates eliminated one by one with the
+     measurement that eliminates each.
+  2. Whichever way it resolves, the decision reference-status locked with it.</pre>
+    </article>
+</section>
+
+  </main>
+</body>
+</html>

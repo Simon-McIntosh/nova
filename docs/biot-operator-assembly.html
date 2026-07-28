@@ -18,9 +18,9 @@
   <title>Biot Operator Assembly | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-26">
+<meta name="plan-modified" content="2026-07-28">
 <meta name="plan-impl" content="1.0">
-<meta name="plan-version" content="15">
+<meta name="plan-version" content="16">
 </head>
 <body>
   <main class="plan-doc">
@@ -1305,6 +1305,113 @@ Done-when
      median of three, through both kernels, and BASELINE.md updated.
   4. Every accuracy envelope and seam bound unchanged; fast lane green.
   5. Followup written; this followup resolved.</pre>
+    </article>
+<article class="r-fu" data-id="f-boa-15" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28T08:20:00+00:00" data-recommends-skill="/reckon-ship biot-operator-assembly" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Put the closed form&#x27;s numerators in the basis that vanishes where each pole sits, so a slender section stops losing four decades</h4>
+    <div class="r-fu-body"><p>The closed form's accuracy DEGRADES as the section thins, and it is a cancellation in the numerator contraction rather than anything elliptic. Measured deviation of <code>polygon_analytic_greens</code> from <code>polygon_greens</code> (32x64), regular hexagon at r0 = 3, targets 1.05-12 section radii, six directions: aspect 1/3 (radius 1.0) 1.59e-10; 1/10 (0.3) 3.50e-06; 1/30 (0.1) 4.70e-04; 1/100 (0.03) 5.46e-02; 1/300 (0.01) 6.83e-01. The residual scales as <code>eps^-4</code> on a ~1.6e-10 baseline, and aspect 1/100 is the ELM-coil case. An EXACT POLE SPLIT already landed and bought 10^3 at the thin end and 44x at the fat end (the column above is post-split; pre-split it was 6.97e-09 / 6.79e-06 / 1.28e-03 / 1.07e+00 / 6.65e+02) - but it did not touch the mechanism that sets the <code>eps^-4</code> scaling. That mechanism, and its cure, are derived in the prompt: the fix is a COMPLEMENT BASIS for the moments, so the small numerator value at the pole is a coefficient rather than an alternating sum of O(1) terms.</p><p>Distinct from <a href="#f-boa-10">f-boa-10</a>, which is about the closed form's COST (stack length and residual node count); this is about its ACCURACY at slender aspect. Both move the accuracy tables, so they are cheaper done together than apart.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    biot-operator-assembly (http://127.0.0.1:8765/nova/biot-operator-assembly.html)
+Section: slender-section conditioning of the closed form
+Tier:    opus
+
+Context
+  nova/biot/polygonanalytic.py loses accuracy as the section thins, as eps^-4 on a
+  ~1.6e-10 baseline, where eps is the aspect ratio. The exact pole split that landed
+  removed one cause and left this one. The numbers are in the followup body; the
+  target is 1e-10 or better at circumradius 0.03 on a hexagon at r0 = 3 (aspect
+  1/100), which is the ELM-coil case and the reason the work exists.
+
+WHY eps^-4 SURVIVES - the mechanism
+  pole_moments returns V_m = integral x^m/((1 - n x) Delta) da, and the reduction
+  contracts a numerator against them as sum_m a_m V_m.  For a near pole n -&gt; 1^- the
+  divergence of V_m sits at x = 1, where x^m = 1 for EVERY m.  So V_m = V_0 + O(1)
+  with V_0 large (~1/eps), and
+      sum_m a_m V_m  =  V_0 * sum_m a_m + O(1)  =  V_0 * N(1) + O(1)
+  The answer is O(1), so N(1) must be O(eps^2) - and it is, but N(1) is computed as an
+  ALTERNATING SUM of a_m that are individually O(1).  That is the cancellation: two
+  decades of eps lost per pole family, two families, hence eps^-4.
+  The cure is to expand the numerator in the variable that VANISHES WHERE THE POLE IS,
+  so N(1) is a coefficient rather than a sum.
+
+THE COMPLEMENT BASIS (new primitives needed)
+  Let y = cos^2 a = 1 - x.  The range is a in [0, pi/2], so y: 1 -&gt; 0, and
+  Delta^2 = 1 - k^2 x = k&#x27;^2 + k^2 y.
+
+  Plain complement moments:
+      A_m = integral_0^(pi/2) y^m/Delta da = integral_0^K cn^(2m) u du
+  Three-term recursion, from [sn cn^(2m+1) dn]_0^K = 0:
+      (2m+3) k^2 A_(m+2) = (2m+1) k&#x27;^2 A_m - (2m+2)(k&#x27;^2 - k^2) A_(m+1)
+  Seeds A_0 = K, A_1 = (E - k&#x27;^2 K)/k^2.  Divide-by-k^2 UPWARD is accurate for k^2 NOT
+  small (the slender limit, k^2 -&gt; 1); for small k^2 run the same recursion DOWNWARD
+  from a seed past the top order and normalise on A_0 = K - exactly as
+  stable_sn_moments already splits its two directions.
+
+  Shifted-pole moments over either basis, for a pole a distance d &gt; 0 OUTSIDE the range end:
+      T_m = integral t^m/((t + d) Delta) da        (t = y, or t = x)
+      T_m = M_(m-1) - d T_(m-1)                   (M = that basis&#x27;s plain moments)
+  which is stable upward because d is small AND EXACT.  Only T_0 needs a special function:
+    * t = y:  y + d = (1 + d)(1 - n x) with n = 1/(1 + d), complement 1 - n = d/(1 + d)
+              - both exact, so T_0 = complete_pi(n, k^2, complement=d/(1+d))/(1 + d).
+    * t = x:  x + d = d (1 - n x) with n = -1/d, complement 1 + 1/d, so
+              T_0 = complete_pi(-1/d, k^2, complement=1 + 1/d)/d.
+
+APPLYING IT PER FAMILY
+  Each family&#x27;s denominator is a quadratic in y with one root just BELOW 0 and one just
+  ABOVE 1 - the phi = 0 and phi = pi ends - and both approach the range as the section
+  thins.  Split the quadratic between its two roots (their separation is ~1, so THIS
+  partial fraction is harmless), then take each factor in the basis that vanishes at ITS
+  end:
+      (y + d1)            -&gt; y basis, shift d1   (root below 0, near a = pi/2)
+      (y2 - y) = (x + d2) -&gt; x basis, shift d2   (root above 1, near a = 0)
+  G^2 = u^2 + 4 r^2 y (1 - y) is SYMMETRIC under y &lt;-&gt; x, so its two shifts are equal
+  and exact:
+      d1 = d2 = u^2/(2 r (r + c)),      c^2 = u^2 + r^2
+  B^2 = (r1 - r)^2 + 4 r [(r1 - r) + a0^2 r] y - 4 b1^2 r^2 y^2 is NOT symmetric; take
+  its roots by the pivot form already used in the module (never as a difference of
+  roots), and note the b1 = 0 case degenerates to LINEAR in y (one root only) - that
+  branch must be KEPT, it is what a rectangle&#x27;s vertical edges take.
+
+  Numerators must be built in BOTH bases, directly from the geometry, so their small
+  coefficients are exact rather than differences.  Every block is available in either:
+      cos phi   = 2x - 1                = 1 - 2y
+      sin^2 phi = 4x(1 - x)             = 4y(1 - y)
+      G^2       = u^2 + 4r^2 x(1-x)     (same in y)
+      X = r&#x27; - r cos phi = (r&#x27; - r) + 2 r y = (r&#x27; - r) + 2r - 2 r x
+      Y = r1 - r cos phi = (r1 - r) + 2 r y
+      Gamma = u + b1 X   = (u + b1 (r&#x27; - r)) + 2 b1 r y
+      N     = u X - b1 G^2
+      Delta^2 = k&#x27;^2 + k^2 y
+  with the small quantities formed WITHOUT cancellation:
+      r&#x27; - r  =  (rb - r) upper limit, (ra - r) lower   (r&#x27; = r1 + b1 u collapses to
+                 the edge endpoint radius)
+      r1 - r  =  (ra - r) - b1 (za - z)
+      k&#x27;^2    =  (u^2 + (r - r&#x27;)^2)/a^2
+
+State to read
+  nova/biot/polygonanalytic.py - the reduction and where the numerator is contracted
+    against the moments; _Vertex.split and _Vertex._family;
+  nova/biot/elliptic.py - harmonic_moments, harmonic_root_moments,
+    harmonic_pole_moments, stable_sn_moments (the two-direction split to copy),
+    POLE_HEADROOM;
+  nova/biot/completeelliptic.py - complete_pi and the complement-native API;
+  tests/test_biotpolygonanalytic.py - SECTION_ACCURACY, ASPECT_ACCURACY and
+    FIELD_ASPECT_ACCURACY, all asserted in BOTH directions.
+
+Scope locks / constraints
+  Detached worktree off develop; primary checkout stays on main.  Read f-boa-10 before
+  starting: it changes the SAME accuracy tables for cost reasons, so doing both in one
+  pass is cheaper than two separate re-measurements.
+
+Acceptance
+  1. A_m pinned against quadrature at k^2 spanning 1e-12 to 1 - 1e-12, every order,
+     BOTH recursion directions.
+  2. T_m pinned against quadrature at shifts 1e-10 to 1, both bases.
+  3. The aspect table replaced by one that does NOT degrade: 1e-10 or better at
+     circumradius 0.03 (aspect 1/100).
+  4. b1 = 0 (rectangle) and the horizontal-edge reductions unchanged.
+  5. The envelope test asserts the NEW table in BOTH directions, so a regression and an
+     unexplained improvement both fail.
+  6. Followup written; this followup resolved.</pre>
     </article>
 </section>
 

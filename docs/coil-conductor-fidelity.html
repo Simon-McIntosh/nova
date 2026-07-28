@@ -138,28 +138,85 @@
 
     <h2 id="s4">§4 — The field coil anomaly</h2>
 
-    <p>PF1's self term sits 4.07e-03 H below the machine description and granularity buys at most
-    28 % of it. Since the solenoid's gap <em>is</em> explained by the same mechanism at the same
-    conductor scale, whatever is happening to PF1 is specific to it. Candidates, none yet tested:
-    a different conductor or grading within the pack; a machine-description value computed on a
-    different outline or turn count than the one modelled (PF1 carries a fractional 248.64 turns);
-    an insulation or ground-wrap thickness that shrinks the current-carrying outline; or a
-    reference computed with a different method for that coil than for the solenoid.</p>
+    <p>Rather than extrapolate a logarithm, the conductor sweep was pushed to absurdity to find the
+    diameter at which each coil's gap actually closes. These are builds, not fits:</p>
 
-    <p>The honest framing: <strong>the two coils' discrepancies now have different explanations,
-    and only one is in hand.</strong> Closing PF1 by tuning a conductor parameter would be
-    reproducing the model we removed.</p>
+    <table>
+      <thead><tr><th>coil</th><th>gap [H]</th><th>diameter the gap requires</th><th>is that a conductor?</th></tr></thead>
+      <tbody>
+        <tr><td>CS3U / CS2U</td><td>+4.7795e-04</td>
+            <td>30.1 mm annulus over a 10 mm channel, or 40.5 mm solid disc</td>
+            <td>Yes — a 30 mm cable space inside a 49 mm jacket at a 51 mm pitch is an ITER
+            cable-in-conduit conductor.</td></tr>
+        <tr><td>PF1</td><td>+4.0988e-03</td>
+            <td>about 2.5 mm solid disc</td>
+            <td>No — 0.14 % of the site cell. A wire, not a conductor, and nothing that could be
+            wound into a poloidal field coil.</td></tr>
+      </tbody>
+    </table>
+
+    <p>The two required diameters differ by more than an order of magnitude, so <strong>no single
+    conductor model reaches both</strong>.</p>
+
+    <h3>The gap restated as a turn count — the strongest lead</h3>
+
+    <p>A pack's inductance goes as the square of its turn count, so a discrepancy can be restated
+    as turns, which is the scale any competing explanation has to be judged on. The derivative was
+    <em>measured</em>, by rebuilding the converged continuum at a perturbed turn count rather than
+    assuming quadratic scaling:</p>
+
+    <table>
+      <thead><tr><th>coil</th><th>dL/dN [H/turn]</th><th>local exponent</th><th>gap as turns</th></tr></thead>
+      <tbody>
+        <tr><td>PF1</td><td>5.673e-03</td><td>2.005</td><td><strong>+0.723</strong></td></tr>
+        <tr><td>CS3U</td><td>2.877e-03</td><td>2.005</td><td>+0.166</td></tr>
+        <tr><td>CS2U</td><td>2.877e-03</td><td>2.005</td><td>+0.166</td></tr>
+      </tbody>
+    </table>
+
+    <p>The exponent comes out at 2.005, so the restatement is sound. A solenoid module's
+    discrepancy is a sixth of a turn; <strong>the field coil's is three quarters of one, and PF1
+    carries a fractional 248.64 turns.</strong> That a coil sits within a single turn of its
+    description — and that 248.64 + 0.723 is 249.36 — is worth weighing against the turn count
+    itself before anything more elaborate is attempted.</p>
+
+    <p>The honest framing: <strong>the two coils' discrepancies have different causes and only one
+    is in hand.</strong> Closing PF1 by tuning a conductor parameter would be reproducing the model
+    we removed.</p>
 
     <h2 id="s5">§5 — Device throughput, measured in passing</h2>
 
-    <p>The winding operator is 1,893,376 pairs and was assembled on one H200 as a stress test of
-    the batched path. Host and device agree to <strong>6.8e-14 – 4.6e-12 relative on every
-    pair</strong>, which was the check that outranked the physics. Warm throughput: quadrature
-    1.02–1.65 µs/pair against ~450 µs/pair host; closed form <strong>0.242 µs/pair at tile
-    128</strong>. Compile 65 s cold, 6–7 s from the persistent cache in a fresh process. Two host
-    columns need a sentence each: the closed form's host rate drifts 454 → 1032 µs/pair across the
-    tile sweep where the quadrature's stays flat, and the host reference ran with 8 workers against
-    a 30-CPU allocation, so any quoted ratio must state the worker count.</p>
+    <p>Two solenoid modules and the field coil wound turn by turn is 1376 four-corner polygon
+    sections against 1376 target centres — <strong>1,893,376 pairs</strong>, the regime the tiled
+    path exists for. One H200 NVL, 8 CPU cores, fixed-node quadrature at the 16×48 rule, vmap over
+    the blocks, persistent compilation cache warm:</p>
+
+    <table>
+      <thead><tr><th>tile</th><th>one tile, host</th><th>one tile, device</th>
+                 <th>whole build, host pool ×8</th><th>whole build, device</th></tr></thead>
+      <tbody>
+        <tr><td>32</td><td>451.76</td><td>2.782</td><td>58.394</td><td>6.405</td></tr>
+        <tr><td>64</td><td>463.23</td><td>1.675</td><td>56.257</td><td>3.246</td></tr>
+        <tr><td>128</td><td>486.66</td><td>2.250</td><td>57.750</td><td>2.889</td></tr>
+        <tr><td>256</td><td>484.38</td><td>1.019</td><td>60.412</td><td><strong>1.463</strong></td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top:-0.5em"><small>µs/pair. Host per-tile figures are single-core and noisy
+    (448–493 for the same work); the honest host number is the eight-worker pool over the whole
+    build, stable at 56–60 across four independent builds.</small></p>
+
+    <p><strong>The device wins everywhere and the margin grows with the tile — 41× the eight-process
+    host pool over the whole build at a 256-section tile.</strong> The crossover for this problem is
+    below the smallest tile measured: there is no tile width at which the host is competitive. A
+    single tile beats the whole build at the same width (1.02 against 1.46 at 256) because a build
+    pays per-tile dispatch and a zarr write on top of the kernel, and that gap closes as the tile
+    grows and the tile count falls.</p>
+
+    <p><strong>Host and device agree.</strong> Over every pair of the complete operator, all three
+    components, the worst absolute deviation is 5.638e-17 — relative 1.81e-12. The traced kernel
+    and the numpy kernel are the same arithmetic in float64. Per tile the worst deviation runs
+    1.6e-18 at eight sections to 1.3e-17 at 256, growing with the tile only because a bigger tile
+    holds more pairs to be worst over. No disagreement to report.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -266,17 +323,35 @@ Section: §4
 Tier:    opus
 
 Context
-  PF1 (3.9431, 7.5641, 0.9590 x 0.9841, 248.64 turns) reads 0.703528 H converged
-  against a machine value of 0.7076. The discrete-winding ladder&#x27;s best rung is
-  +1.16e-03 at a 26 mm cable space, 28 per cent of the gap, and shrinking further
-  leaves the range any cable-in-conduit conductor occupies.
+  PF1 (3.9431, 7.5641, 0.9590 x 0.9841, 248.64 turns) reads 0.70350119 H converged
+  against a machine value of 0.7076, a gap of +4.0988e-03. The conductor sweep was
+  pushed past plausibility to find where that gap closes, by BUILDING rather than
+  extrapolating: it needs about a 2.5 mm solid disc, a current-carrying area 0.14
+  per cent of the site cell. That is a wire, not a conductor. The solenoid gap
+  closes at 30.1 mm as an annulus over a 10 mm channel, which IS an ITER
+  cable-in-conduit conductor. The two required diameters differ by more than an
+  order of magnitude, so no single conductor model reaches both.
 
-Candidates, none tested
-  * a different conductor or grading within the pack;
-  * a machine value computed on a different outline or turn count -- note the
-    fractional 248.64 turns, and that nova/frame/itergeom.py carries two CS
-    geometry revisions, so a PF revision may differ too;
+START HERE -- THE TURN COUNT. The gap restated as turns, with dL/dN MEASURED by
+rebuilding the converged continuum at a perturbed count rather than assumed:
+
+    coil    dL/dN [H/turn]   local exponent   gap as turns
+    PF1        5.673e-03         2.005          +0.723
+    CS3U       2.877e-03         2.005          +0.166
+
+The exponent is 2.005, so the restatement is sound. PF1 sits three quarters of a
+turn from its description and carries a FRACTIONAL 248.64 turns; 248.64 + 0.723
+is 249.36. A coil within one turn of its reference is a turn-count question
+before it is a physics question, and it is the cheapest thing to eliminate.
+
+Candidates, in the order their cost suggests
+  * THE TURN COUNT ITSELF -- what does the machine description entry use, and
+    what does 248.64 represent (a grading, a partial outer layer, a
+    turns_with_sign convention)? nova/frame/itergeom.py carries two CS geometry
+    revisions, so a PF revision may differ too;
+  * a machine value computed on a different outline;
   * insulation or ground wrap shrinking the current-carrying outline;
+  * a different conductor or grading within the pack;
   * a reference computed by a different method for this coil than for the CS.
 
 Constraint

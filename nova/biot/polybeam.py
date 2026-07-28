@@ -140,15 +140,25 @@ def _arcsinh(numerator: np.ndarray, denominator: np.ndarray) -> np.ndarray:
     return np.where(live, np.arcsinh(numerator / np.where(live, denominator, 1.0)), 0.0)
 
 
-def _counterclockwise(vertices: np.ndarray) -> np.ndarray:
-    """Return a closed corner list wound counterclockwise.
+def _oriented_loop(vertices: np.ndarray) -> np.ndarray:
+    """Return a corner list with no zero-length edge, wound counterclockwise.
 
-    The divergence theorem needs the OUTWARD normal, and the normal is taken as
-    the edge tangent turned a quarter turn -- which points outward for one winding
-    and inward for the other, flipping the sign of every row.  Fixing the winding
-    here is what lets the reduction take the normal from the tangent unconditionally.
+    Two things the reduction needs and neither of which it can recover from:
+
+    * every edge carries a unit tangent, so a corner repeated -- which a closed
+      ring's own first corner is -- would divide by a vanishing length and take
+      every row with it;
+    * the divergence theorem needs the OUTWARD normal, and the normal is the edge
+      tangent turned a quarter turn, which points outward for one winding and
+      inward for the other, flipping the sign of every row.
+
+    Fixing both here is what lets the reduction take the normal from the tangent
+    unconditionally and accept a loop however the caller closed it.
     """
     corners = np.asarray(vertices, dtype=np.float64)
+    edge = np.roll(corners, -1, axis=0) - corners
+    length = np.linalg.norm(edge, axis=1)
+    corners = corners[length > 0.0]
     rolled = np.roll(corners, -1, axis=0)
     signed = float(np.sum(corners[:, 0] * rolled[:, 1] - rolled[:, 0] * corners[:, 1]))
     return corners if signed > 0 else corners[::-1].copy()
@@ -178,16 +188,16 @@ def polygon_beam_greens(
     target cloud against one source.
 
     Edge ``i`` runs from corner ``i`` to corner ``i + 1`` and the loop closes on
-    its own first corner; a corner part way along a straight edge costs an
-    evaluation and contributes nothing, so collapse the collinear runs before
-    calling (:func:`nova.geometry.section.collapse_collinear`).
+    its own first corner, repeated or not.  A corner part way along a straight edge
+    costs an evaluation and contributes nothing, so collapse the collinear runs
+    before calling (:func:`nova.geometry.section.collapse_collinear`).
     """
     shape = np.broadcast_shapes(np.shape(x), np.shape(y), np.shape(z))
     target_x, target_y, target_z = (
         np.broadcast_to(np.asarray(value, dtype=np.float64), shape).ravel()
         for value in (x, y, z)
     )
-    corners = _counterclockwise(vertices)
+    corners = _oriented_loop(vertices)
     area = section_area(corners)
     rolled = np.roll(corners, -1, axis=0)
     edge = rolled - corners

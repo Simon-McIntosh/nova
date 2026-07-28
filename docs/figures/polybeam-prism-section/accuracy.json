@@ -1,0 +1,17 @@
+{
+  "section": "hexagon",
+  "section_extent": 0.12,
+  "reference": "signed-fan section quadrature of the filament kernel, 48 nodes",
+  "rows": [
+    "A_z",
+    "B_x",
+    "B_y"
+  ],
+  "worst_near_contour": 6.7735713797441936e-15,
+  "worst_far_from_contour": 1.6369464167715135e-14,
+  "worst_inside_the_conductor": 6.7735713797441936e-15,
+  "band_near": 1e-12,
+  "band_far": 1e-11,
+  "targets": 96,
+  "targets_inside_the_conductor": 64
+}

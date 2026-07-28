@@ -651,6 +651,7 @@ def stage_device(args) -> None:
     payload = {
         "device": args.device,
         "kernel": args.kernel,
+        "mapping": "vmap" if args.batched else "scan",
         "targets": len(target_r),
         "sections": len(sections),
         "pairs": pairs,
@@ -957,6 +958,9 @@ def stage_figures(args) -> None:
         axis.axhline(gap, color="C3", ls="--", label="machine description")
         axis.axvspan(32.0, 35.0, color="0.5", alpha=0.15, label="plausible cable space")
         axis.set_xscale("log")
+        axis.set_xticks([2, 5, 10, 20, 30, 40])
+        axis.xaxis.set_major_formatter(matplotlib.ticker.ScalarFormatter())
+        axis.xaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
         axis.set_xlabel("cable-space diameter [mm]")
         axis.set_ylabel("offset from the continuum [H]")
         axis.set_title(f"{name}: conductor sensitivity")
@@ -974,12 +978,13 @@ def stage_figures(args) -> None:
         figure, axis = plt.subplots(figsize=(6.4, 4.4))
         for path in device:
             payload = json.loads(path.read_text())
+            run = path.stem.removeprefix("device-")
             tiles = sorted(payload["tiles"], key=int)
             axis.plot(
                 [int(tile) for tile in tiles],
                 [payload["tiles"][tile]["warm_us_per_pair"] for tile in tiles],
                 "o-",
-                label=f"{payload['device']} {payload['kernel']} warm",
+                label=f"{run} one tile",
             )
             build = payload.get("build", {})
             if not build:
@@ -991,16 +996,13 @@ def stage_figures(args) -> None:
                 [int(width) for width in widths],
                 [build[width]["jax"]["us_per_pair"] for width in widths],
                 "^-",
-                label=f"{payload['kernel']} device, whole operator",
+                label=f"{run} whole operator",
             )
             axis.plot(
                 [int(width) for width in widths],
                 [build[width]["numpy"]["us_per_pair"] for width in widths],
                 "s--",
-                label=(
-                    f"{payload['kernel']} host pool"
-                    f" x{build[widths[0]]['workers']}, whole operator"
-                ),
+                label=f"host pool x{build[widths[0]]['workers']} beside {run}",
             )
         axis.set_xscale("log", base=2)
         axis.set_yscale("log")

@@ -1344,6 +1344,18 @@ def stage_ladder(args) -> None:
         "subset": section["subset"],
         "turn_count": section["turn_count"],
     }
+    payload["carried"] = {
+        key: entry
+        | {
+            "rung": cross[index, index] + entry["self"],
+            "gap": float(machine[index, index]) - cross[index, index] - entry["self"],
+            "feeder_gap": float(machine[index, index])
+            - cross[index, index]
+            - entry["self"]
+            - terminal,
+        }
+        for key, entry in _finer_by_subset(runs).items()
+    }
     if (FIGURES / "seam.json").exists():
         seam = _read("seam.json")
         payload["seam"] = {
@@ -1374,6 +1386,42 @@ def _merge_sections(names) -> dict:
         merged["runs"] |= payload["runs"]
         merged["files"].append(name)
     return merged
+
+
+def _finer_by_subset(resolved: dict) -> dict:
+    """Return each whole-pack run carried to a finer section by its subset's step.
+
+    A corner count's worth is a per-metre logarithmic correction to the section's
+    own geometric mean distance, so the step it costs scales with the length of
+    conductor and with nothing else.  That is what lets the expensive resolution be
+    measured on a spread of turns and carried to the pack: the prediction is the
+    subset's step times the length ratio.  It is not asserted -- the same scaling
+    across the resolutions the pack itself was run at is reported beside it, and
+    agreeing there is what licenses the step it was not run at.
+    """
+    subsets = sorted(
+        {key.split("-", 3)[3] for key in resolved if len(key.split("-")) > 3}
+    )
+    carried = {}
+    for key, run in resolved.items():
+        if run["rung"] is None:
+            continue
+        shape, corners, intervals = key.split("-")[:3]
+        for size in (2 * int(corners), 4 * int(corners)):
+            for suffix in subsets:
+                low = resolved.get(f"{shape}-{corners}-{intervals}-{suffix}")
+                high = resolved.get(f"{shape}-{size}-{intervals}-{suffix}")
+                if low is None or high is None:
+                    continue
+                ratio = run["length"] / low["length"]
+                carried[f"{shape}-{size}-{intervals}"] = {
+                    "from": key,
+                    "step": (high["self"] - low["self"]) * ratio,
+                    "self": run["self"] + (high["self"] - low["self"]) * ratio,
+                    "length_ratio": ratio,
+                    "measured_on": low["turns_covered"],
+                }
+    return carried
 
 
 def _section_pairs(resolved: dict) -> list[tuple[str, str, str]]:
@@ -1461,6 +1509,22 @@ def report_ladder(payload: dict) -> None:
         low = payload["resolved"][first]["self"]
         high = payload["resolved"][second]["self"]
         print(f"{name:<50}{high - low:>+14.3e}{(high - low) / low:>+12.2e}")
+    if payload["carried"]:
+        print(
+            "\nand the resolution the pack was not run at, carried to it by the"
+            "\nsubset's own step times the length ratio -- the same scaling that"
+            "\nreproduced the step the pack WAS run at [H]\n"
+        )
+        print(
+            f"{'section':<18}{'from':<18}{'on turns':>9}{'step':>13}"
+            f"{'self':>16}{'gap':>13}{'and feeders':>14}"
+        )
+        for key, entry in payload["carried"].items():
+            print(
+                f"{key:<18}{entry['from']:<18}{entry['measured_on']:>9}"
+                f"{entry['step']:>+13.3e}{entry['self']:>16.9f}"
+                f"{entry['gap']:>+13.3e}{entry['feeder_gap']:>+14.3e}"
+            )
     if "seam" in payload:
         seam = payload["seam"]
         print(

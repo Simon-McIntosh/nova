@@ -17,6 +17,20 @@
   "wound path": 0.0007301944697635232
  },
  "resolved": {
+  "annulus-16-4": {
+   "self": 0.0070809747849255675,
+   "ring_self": 0.007105855439974379,
+   "step": -2.4880655048811762e-05,
+   "rung": 0.7068449248751877,
+   "gap": 0.0007550751248123211,
+   "with_feeder": 0.7071783764679901,
+   "feeder_gap": 0.0004216235320099553,
+   "channel": -0.0007982466843708616,
+   "centreline": 0.007294159587662407,
+   "correction": 0.00021318480273683303,
+   "length": 6180.328473992828,
+   "turns_covered": 249
+  },
   "disc-16-4": {
    "self": 0.0071227577198230375,
    "ring_self": 0.007105855439974379,
@@ -44,62 +58,6 @@
    "correction": 0.0003090077361622627,
    "length": 6180.328473992828,
    "turns_covered": 249
-  },
-  "annulus-16-4": {
-   "self": 0.0070809747849255675,
-   "ring_self": 0.007105855439974379,
-   "step": -2.4880655048811762e-05,
-   "rung": 0.7068449248751877,
-   "gap": 0.0007550751248123211,
-   "with_feeder": 0.7071783764679901,
-   "feeder_gap": 0.0004216235320099553,
-   "channel": -0.0007982466843708616,
-   "centreline": 0.007294159587662407,
-   "correction": 0.00021318480273683303,
-   "length": 6180.328473992828,
-   "turns_covered": 249
-  },
-  "disc-16-4-of25": {
-   "self": 0.0007201024467006455,
-   "ring_self": null,
-   "step": null,
-   "rung": null,
-   "gap": null,
-   "with_feeder": null,
-   "feeder_gap": null,
-   "channel": 0.0,
-   "centreline": 0.0007513220448803114,
-   "correction": 3.121959817966614e-05,
-   "length": 624.3360264964592,
-   "turns_covered": 25
-  },
-  "disc-32-4-of25": {
-   "self": 0.000718898781566077,
-   "ring_self": null,
-   "step": null,
-   "rung": null,
-   "gap": null,
-   "with_feeder": null,
-   "feeder_gap": null,
-   "channel": 0.0,
-   "centreline": 0.000750114720845871,
-   "correction": 3.121593927979381e-05,
-   "length": 624.3360264964592,
-   "turns_covered": 25
-  },
-  "disc-64-4-of25": {
-   "self": 0.0007185979254172226,
-   "ring_self": null,
-   "step": null,
-   "rung": null,
-   "gap": null,
-   "with_feeder": null,
-   "feeder_gap": null,
-   "channel": 0.0,
-   "centreline": 0.0007498136184694516,
-   "correction": 3.1215693052229116e-05,
-   "length": 624.3360264964592,
-   "turns_covered": 25
   },
   "annulus-16-4-of25": {
    "self": 0.0007158816249705302,
@@ -143,6 +101,48 @@
    "length": 624.3360264964592,
    "turns_covered": 25
   },
+  "disc-16-4-of25": {
+   "self": 0.0007201024467006455,
+   "ring_self": null,
+   "step": null,
+   "rung": null,
+   "gap": null,
+   "with_feeder": null,
+   "feeder_gap": null,
+   "channel": 0.0,
+   "centreline": 0.0007513220448803114,
+   "correction": 3.121959817966614e-05,
+   "length": 624.3360264964592,
+   "turns_covered": 25
+  },
+  "disc-32-4-of25": {
+   "self": 0.000718898781566077,
+   "ring_self": null,
+   "step": null,
+   "rung": null,
+   "gap": null,
+   "with_feeder": null,
+   "feeder_gap": null,
+   "channel": 0.0,
+   "centreline": 0.000750114720845871,
+   "correction": 3.121593927979381e-05,
+   "length": 624.3360264964592,
+   "turns_covered": 25
+  },
+  "disc-64-4-of25": {
+   "self": 0.0007185979254172226,
+   "ring_self": null,
+   "step": null,
+   "rung": null,
+   "gap": null,
+   "with_feeder": null,
+   "feeder_gap": null,
+   "channel": 0.0,
+   "centreline": 0.0007498136184694516,
+   "correction": 3.1215693052229116e-05,
+   "length": 624.3360264964592,
+   "turns_covered": 25
+  },
   "disc-32-2-of25": {
    "self": 0.0007190728588557582,
    "ring_self": null,
@@ -176,26 +176,6 @@
  "subset": null,
  "turn_count": 249,
  "carried": {
-  "disc-32-4": {
-   "from": "disc-16-4",
-   "step": -1.191513157757556e-05,
-   "self": 0.007110842588245462,
-   "length_ratio": 9.89904188081941,
-   "measured_on": 25,
-   "rung": 0.7068747926785076,
-   "gap": 0.0007252073214923903,
-   "feeder_gap": 0.0003917557286900245
-  },
-  "disc-64-4": {
-   "from": "disc-32-4",
-   "step": -2.9781876176112173e-06,
-   "self": 0.00710786422615845,
-   "length_ratio": 9.89904188081941,
-   "measured_on": 25,
-   "rung": 0.7068718143164207,
-   "gap": 0.0007281856835794024,
-   "feeder_gap": 0.0003947340907770366
-  },
   "annulus-32-4": {
    "from": "annulus-16-4",
    "step": -1.1908452685422073e-05,
@@ -215,6 +195,26 @@
    "rung": 0.7068300386891101,
    "gap": 0.0007699613108899314,
    "feeder_gap": 0.0004365097180875656
+  },
+  "disc-32-4": {
+   "from": "disc-16-4",
+   "step": -1.191513157757556e-05,
+   "self": 0.007110842588245462,
+   "length_ratio": 9.89904188081941,
+   "measured_on": 25,
+   "rung": 0.7068747926785076,
+   "gap": 0.0007252073214923903,
+   "feeder_gap": 0.0003917557286900245
+  },
+  "disc-64-4": {
+   "from": "disc-32-4",
+   "step": -2.9781876176112173e-06,
+   "self": 0.00710786422615845,
+   "length_ratio": 9.89904188081941,
+   "measured_on": 25,
+   "rung": 0.7068718143164207,
+   "gap": 0.0007281856835794024,
+   "feeder_gap": 0.0003947340907770366
   }
  },
  "seam": {

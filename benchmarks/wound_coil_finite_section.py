@@ -697,12 +697,12 @@ def stage_gate(args) -> None:
     }
 
     # The channel superposition, against the annulus integrated cell by cell.
-    payload["channel"] = {}
+    payload["hollow_pair"] = {}
     for corners in CORNERS:
         section = Section(diameter, CHANNEL, corners)
         loops = section.boundaries(args.radius, args.height)
         pair = ring_flux(section, args.radius, args.height)
-        payload["channel"][section.label] = {
+        payload["hollow_pair"][section.label] = {
             "pair_centreline": pair["centreline"],
             "partition_centreline": partition_flux(loops, args.radius, args.height),
             "cells": len(annulus_partition(loops)),
@@ -806,7 +806,7 @@ def report_gate(payload: dict) -> None:
     print(
         f"{'section':<14}{'pair [H]':>18}{'cells [H]':>18}{'relative':>12}{'cells':>8}"
     )
-    for label, record in payload["channel"].items():
+    for label, record in payload["hollow_pair"].items():
         pair, cells = record["pair_centreline"], record["partition_centreline"]
         print(
             f"{label:<14}{pair:>18.10e}{cells:>18.10e}"
@@ -1343,6 +1343,22 @@ def stage_figures(args) -> None:
         " one circuit",
         fontsize=9,
     )
+    exact = np.pi / 4 * (diameter**2 - channel**2)
+    deficit = {
+        corners: 100 * (1 - Section(diameter, channel, corners).area() / exact)
+        for corners in CORNERS
+    }
+    axes[0].annotate(
+        "conducting area against the true annulus:\n"
+        + "\n".join(
+            f"  {corners:>3} corners   {value:+.2f} %"
+            for corners, value in deficit.items()
+        ),
+        (0.03, 0.04),
+        xycoords="axes fraction",
+        fontsize=7,
+        color="0.3",
+    )
     axes[0].legend(fontsize=7, loc="upper right")
     axes[0].grid(alpha=0.3)
 
@@ -1452,7 +1468,16 @@ def stage_figures(args) -> None:
         " SECTION, not of the ring",
         fontsize=9,
     )
-    axes[0].legend(fontsize=7)
+    axes[0].annotate(
+        "the three resolutions of each section coincide on this scale:\n"
+        "the correction is set by the section's SHAPE, not by how\n"
+        "finely its boundary is cut",
+        (0.03, 0.60),
+        xycoords="axes fraction",
+        fontsize=7,
+        color="0.3",
+    )
+    axes[0].legend(fontsize=7, ncol=2, loc="center right")
     axes[0].grid(alpha=0.3)
 
     for route, marker, colour in (
@@ -1485,7 +1510,24 @@ def stage_figures(args) -> None:
         " section, against an independent kernel",
         fontsize=9,
     )
-    axes[1].legend(fontsize=7)
+    floor = max(
+        abs(entry["relative"])
+        for record in gate["swept"].values()
+        for entry in record.values()
+    )
+    axes[1].annotate(
+        f"the floor is not the kernels but the section-mean correction's own radius\n"
+        f"banding at {CORRECTION_RADIUS:g} m: {floor:.0e} relative, which over this"
+        f" coil's whole self term is\n"
+        f"{floor * 7.1e-03:.0e} H.  Evaluated at the ring's exact radius both routes"
+        f" reach 1e-10.",
+        (0.03, 0.06),
+        xycoords="axes fraction",
+        fontsize=7,
+        color="0.3",
+    )
+    axes[1].set_ylim(1e-9, 1e-6)
+    axes[1].legend(fontsize=7, loc="upper left")
     axes[1].grid(alpha=0.3, which="both")
     figure.suptitle("what the swept self term rests on, measured rather than argued")
     figure.tight_layout(rect=(0.0, 0.0, 1.0, 0.93))

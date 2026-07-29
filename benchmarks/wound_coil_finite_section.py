@@ -1763,12 +1763,24 @@ def stage_figures(args) -> None:
     whole = {
         key: run for key, run in ladder["resolved"].items() if run["rung"] is not None
     }
-    figure, axes = plt.subplots(1, 2, figsize=(12.8, 5.2), width_ratios=[1.4, 1])
-    names = list(ladder["rungs"]) + [f"wound section\n{key}" for key in whole]
-    values = list(ladder["rungs"].values()) + [run["rung"] for run in whole.values()]
-    if ladder["terminal_step"]:
-        names += [f"+ feeders\n{key}" for key in whole]
-        values += [run["with_feeder"] for run in whole.values()]
+    # ONE section run carries the ladder, because a ladder is a sequence in which
+    # every step changes one thing -- the section variants are alternatives to each
+    # other, not steps after each other, and they belong in the panel beside it.
+    # The one chosen is the conductor as built: the cable space about its channel,
+    # at the finest resolution the sweep reached.
+    preferred = max(
+        whole,
+        key=lambda key: (key.startswith("annulus"), int(key.split("-")[1])),
+        default=None,
+    )
+    figure, axes = plt.subplots(1, 2, figsize=(12.8, 5.2), width_ratios=[1.25, 1])
+    names, values = list(ladder["rungs"]), list(ladder["rungs"].values())
+    if preferred is not None:
+        names += [f"wound section\n{preferred}"]
+        values += [whole[preferred]["rung"]]
+        if ladder["terminal_step"]:
+            names += ["+ the feeder run"]
+            values += [whole[preferred]["with_feeder"]]
     base = ladder["rungs"]["continuum"]
     axes[0].axhline(0.0, color="C7", ls=":", lw=1.0, label="continuum rung")
     axes[0].axhline(
@@ -1848,12 +1860,13 @@ def stage_figures(args) -> None:
     axes[1].set_xticklabels(keys, rotation=25, ha="right", fontsize=7)
     axes[1].set_ylabel("machine description less the rung [H]")
     axes[1].set_title(
-        "what is left: the section moves it by a per cent,\nthe feeder run by half of"
-        " it",
+        "every section the sweep reached, as alternatives:\nthe section moves the"
+        " residual by a per cent, the feeders by half",
         fontsize=9,
     )
+    axes[1].set_ylim(0.0, 1.35 * max(residual))
     axes[1].grid(alpha=0.3, axis="y")
-    axes[1].legend(fontsize=8)
+    axes[1].legend(fontsize=8, loc="upper center", ncol=2, framealpha=0.9)
     figure.tight_layout()
     figure.savefig(FIGURES / "section-ladder.svg")
     plt.close(figure)

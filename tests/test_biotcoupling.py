@@ -16,6 +16,8 @@ import pytest
 
 from nova.biot.coupling import (
     CaseChannel,
+    CircuitClass,
+    CircuitCoupling,
     CircuitTable,
     CoilChannel,
     classify_circuits,
@@ -62,6 +64,19 @@ def _arrays(fixture):
     height = np.array([f["z"] for f in filaments], dtype=float)
     weight = np.array([f["xmult"] for f in filaments], dtype=float)
     return circuit, radius, height, weight
+
+
+def _emit(plan, fixture, *, measured_channels=()):
+    circuit, radius, height, weight = _arrays(fixture)
+    return plan.emit(
+        r=radius,
+        z=height,
+        dr=np.full(radius.shape, 0.02),
+        dz=np.full(radius.shape, 0.03),
+        current_share=weight,
+        circuit=circuit,
+        measured_channels=measured_channels,
+    )
 
 
 def test_golden_classification_parity(golden, table):
@@ -203,3 +218,79 @@ def test_unmatched_circuit_is_inferred_passive(golden, table):
     assert classes[0].role == "inferred_passive"
     assert classes[0].coil_label == ""
     assert classes[0].channel == ""
+
+
+def test_emit_packages_conductors_and_merged_channel(golden, table):
+    fixture = golden["fixtures"]["redundant_merge"]
+    classes = classify_circuits(*_arrays(fixture), fixture["channels"], table)
+    emitted = _emit(couple_circuits(classes), fixture)
+
+    assert isinstance(emitted, CircuitCoupling)
+    assert emitted.conductors.n_filaments == 2
+    assert emitted.channel_circuits == {"p4u_coil_current": [8, 88]}
+    assert emitted.passive_circuits == ()
+    assert emitted.measured_circuits == {}
+
+
+def test_emit_holds_measured_circuit_out_of_drives(golden, table):
+    fixture = golden["fixtures"]["p4u_active_and_case"]
+    classes = classify_circuits(*_arrays(fixture), fixture["channels"], table)
+    emitted = _emit(
+        couple_circuits(classes),
+        fixture,
+        measured_channels=["p4u_case_current"],
+    )
+
+    assert emitted.channel_circuits == {"p4u_coil_current": [8]}
+    assert emitted.passive_circuits == (18,)
+    assert emitted.measured_circuits == {"p4u_case_current": 18}
+
+
+def test_emit_order_is_deterministic(golden, table):
+    fixture = golden["fixtures"]["all_13_active"]
+    classes = classify_circuits(*_arrays(fixture), fixture["channels"], table)
+    emitted = _emit(couple_circuits(list(reversed(classes))), fixture)
+
+    assert list(emitted.channel_circuits) == sorted(emitted.channel_circuits)
+    assert all(
+        members == sorted(members) for members in emitted.channel_circuits.values()
+    )
+
+
+def test_couple_rejects_ambiguous_channel_membership():
+    common = {
+        "centroid_radius": 1.0,
+        "centroid_height": 0.0,
+        "filament_count": 1,
+        "weight_sum": 1.0,
+        "coil_label": "coil",
+        "channel": "shared_current",
+        "flag": "",
+    }
+    classes = [
+        CircuitClass(circuit=1, role="known_pf", **common),
+        CircuitClass(circuit=2, role="known_case", **common),
+    ]
+
+    with pytest.raises(ValueError, match="ambiguously mixes circuit roles"):
+        couple_circuits(classes)
+
+
+def test_emit_rejects_unknown_conductor_membership(golden, table):
+    fixture = golden["fixtures"]["p4u_active_and_case"]
+    classes = classify_circuits(*_arrays(fixture), fixture["channels"], table)
+    plan = couple_circuits(classes[:-1])
+
+    with pytest.raises(ValueError, match="missing classifications"):
+        _emit(plan, fixture)
+
+
+def test_emit_rejects_ambiguous_or_unknown_holdback(golden, table):
+    fixture = golden["fixtures"]["redundant_merge"]
+    classes = classify_circuits(*_arrays(fixture), fixture["channels"], table)
+    plan = couple_circuits(classes)
+
+    with pytest.raises(ValueError, match="holdback requires one circuit"):
+        _emit(plan, fixture, measured_channels=["p4u_coil_current"])
+    with pytest.raises(ValueError, match="no classified circuit"):
+        _emit(plan, fixture, measured_channels=["missing_current"])

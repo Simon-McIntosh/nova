@@ -1,0 +1,655 @@
+{
+ "corners": 32,
+ "intervals": 4,
+ "circuit_boundary": "undetermined",
+ "coils": {
+  "PF1": {
+   "coil": "PF1",
+   "intervals": 4,
+   "feeder_elements": 68,
+   "feeder_length": 36.19495225252796,
+   "feeder_sweep": 0.07217010141834684,
+   "pack_length": 6180.328473992828,
+   "mean_radius": 9.778787654282,
+   "path_radius_max": 18.276378224363825,
+   "filament_block": [
+    [
+     0.7552456965788256,
+     0.00015719279128237465
+    ],
+    [
+     0.00015719279128237462,
+     -3.8941632331707015e-06
+    ]
+   ],
+   "mutual": 0.00015719279128237465,
+   "reciprocity": 1.724319168265624e-16,
+   "filament_feeder_self": -3.8941632331707015e-06,
+   "mutual_seconds": 1.4755266439169645,
+   "sections": {
+    "disc-32": {
+     "section": "disc-32",
+     "feeder_self": {
+      "centreline": 2.1120337041582422e-05,
+      "correction": 1.8097505774864423e-06,
+      "self": 1.931058646409598e-05,
+      "core": 0.0,
+      "length": 36.19495225252796,
+      "sources": 68,
+      "stations": 272
+     },
+     "self_seconds": 33.4639186123386,
+     "terminal_step": 0.00033369616902884525
+    },
+    "annulus-32": {
+     "section": "annulus-32",
+     "feeder_self": {
+      "centreline": 2.031432900578559e-05,
+      "correction": 1.2483187681690818e-06,
+      "self": 1.9066010237616507e-05,
+      "core": -2.6833713283718447e-06,
+      "length": 36.19495225252796,
+      "sources": 68,
+      "stations": 272
+     },
+     "self_seconds": 67.28005064558238,
+     "terminal_step": 0.0003334515928023658
+    }
+   }
+  },
+  "PF2": {
+   "coil": "PF2",
+   "intervals": 4,
+   "feeder_elements": 65,
+   "feeder_length": 29.197472834082603,
+   "feeder_sweep": 0.04118400565019775,
+   "pack_length": 5998.720482578471,
+   "mean_radius": 11.46443915099055,
+   "path_radius_max": 18.28841165875264,
+   "filament_block": [
+    [
+     0.47597120333038495,
+     0.00010412487750985881
+    ],
+    [
+     0.0001041248775098588,
+     -1.8207454771641631e-06
+    ]
+   ],
+   "mutual": 0.00010412487750985881,
+   "reciprocity": 1.301564763404943e-16,
+   "filament_feeder_self": -1.8207454771641631e-06,
+   "mutual_seconds": 0.17816947400569916,
+   "sections": {
+    "disc-32": {
+     "section": "disc-32",
+     "feeder_self": {
+      "centreline": 1.7451623636484728e-05,
+      "correction": 1.4598785413447604e-06,
+      "self": 1.5991745095139968e-05,
+      "core": 0.0,
+      "length": 29.197472834082603,
+      "sources": 65,
+      "stations": 260
+     },
+     "self_seconds": 35.15072271972895,
+     "terminal_step": 0.0002242415001148576
+    },
+    "annulus-32": {
+     "section": "annulus-32",
+     "feeder_self": {
+      "centreline": 1.6801493964381182e-05,
+      "correction": 1.0069870684685745e-06,
+      "self": 1.579450689591261e-05,
+      "core": -2.201385106456775e-06,
+      "length": 29.197472834082603,
+      "sources": 65,
+      "stations": 260
+     },
+     "self_seconds": 70.20368837192655,
+     "terminal_step": 0.00022404426191563023
+    }
+   }
+  },
+  "PF3": {
+   "coil": "PF3",
+   "intervals": 4,
+   "feeder_elements": 63,
+   "feeder_length": 38.298918510003254,
+   "feeder_sweep": 0.037999551802322486,
+   "pack_length": 14047.606231625026,
+   "mean_radius": 13.286067791837517,
+   "path_radius_max": 18.27637822436381,
+   "filament_block": [
+    [
+     2.074509622502625,
+     0.00019081319961719895
+    ],
+    [
+     0.00019081319961719882,
+     -5.2256036089256765e-06
+    ]
+   ],
+   "mutual": 0.00019081319961719887,
+   "reciprocity": 7.102510299736753e-16,
+   "filament_feeder_self": -5.2256036089256765e-06,
+   "mutual_seconds": 0.7395594427362084,
+   "sections": {
+    "disc-32": {
+     "section": "disc-32",
+     "feeder_self": {
+      "centreline": 2.2913043422918495e-05,
+      "correction": 1.9149546162860684e-06,
+      "self": 2.099808880663243e-05,
+      "core": 0.0,
+      "length": 38.298918510003254,
+      "sources": 63,
+      "stations": 252
+     },
+     "self_seconds": 30.795928581617773,
+     "terminal_step": 0.0004026244880410302
+    },
+    "annulus-32": {
+     "section": "annulus-32",
+     "feeder_self": {
+      "centreline": 2.206020269786237e-05,
+      "correction": 1.3208878259082613e-06,
+      "self": 2.0739314871954108e-05,
+      "core": -2.8895556959825508e-06,
+      "length": 38.298918510003254,
+      "sources": 63,
+      "stations": 252
+     },
+     "self_seconds": 61.94338535796851,
+     "terminal_step": 0.00040236571410635186
+    }
+   }
+  },
+  "PF4": {
+   "coil": "PF4",
+   "intervals": 4,
+   "feeder_elements": 64,
+   "feeder_length": 34.29452997361509,
+   "feeder_sweep": 0.03449817955064635,
+   "pack_length": 12808.929122067513,
+   "mean_radius": 13.297302358111285,
+   "path_radius_max": 18.550339518640968,
+   "filament_block": [
+    [
+     1.566117210138187,
+     0.00017314635909537258
+    ],
+    [
+     0.00017314635909537274,
+     -2.497600147185258e-06
+    ]
+   ],
+   "mutual": 0.00017314635909537266,
+   "reciprocity": 9.39265062935834e-16,
+   "filament_feeder_self": -2.497600147185258e-06,
+   "mutual_seconds": 0.2907407386228442,
+   "sections": {
+    "disc-32": {
+     "section": "disc-32",
+     "feeder_self": {
+      "centreline": 2.0796368585441003e-05,
+      "correction": 1.714734280791303e-06,
+      "self": 1.90816343046497e-05,
+      "core": 0.0,
+      "length": 34.29452997361509,
+      "sources": 64,
+      "stations": 256
+     },
+     "self_seconds": 27.192193758673966,
+     "terminal_step": 0.00036537435249539503
+    },
+    "annulus-32": {
+     "section": "annulus-32",
+     "feeder_self": {
+      "centreline": 2.0032709552833224e-05,
+      "correction": 1.1827808434215312e-06,
+      "self": 1.8849928709411693e-05,
+      "core": -2.6122251290757325e-06,
+      "length": 34.29452997361509,
+      "sources": 64,
+      "stations": 256
+     },
+     "self_seconds": 54.37514782324433,
+     "terminal_step": 0.000365142646900157
+    }
+   }
+  },
+  "PF5": {
+   "coil": "PF5",
+   "intervals": 4,
+   "feeder_elements": 64,
+   "feeder_length": 42.79879052578248,
+   "feeder_sweep": 0.03638946519693077,
+   "pack_length": 11464.918262190393,
+   "mean_radius": 9.456011640110582,
+   "path_radius_max": 18.638202907277762,
+   "filament_block": [
+    [
+     1.6027226578987885,
+     0.00013833572389583903
+    ],
+    [
+     0.00013833572389583882,
+     -1.4285648872287062e-05
+    ]
+   ],
+   "mutual": 0.00013833572389583893,
+   "reciprocity": 1.567494125092175e-15,
+   "filament_feeder_self": -1.4285648872287062e-05,
+   "mutual_seconds": 0.453024297952652,
+   "sections": {
+    "disc-32": {
+     "section": "disc-32",
+     "feeder_self": {
+      "centreline": 2.4648256411759137e-05,
+      "correction": 2.139942170316923e-06,
+      "self": 2.2508314241442213e-05,
+      "core": 0.0,
+      "length": 42.79879052578248,
+      "sources": 64,
+      "stations": 256
+     },
+     "self_seconds": 30.861273761838675,
+     "terminal_step": 0.00029917976203312004
+    },
+    "annulus-32": {
+     "section": "annulus-32",
+     "feeder_self": {
+      "centreline": 2.369517525585869e-05,
+      "correction": 1.476075934179277e-06,
+      "self": 2.2219099321679413e-05,
+      "core": -3.1440372813889244e-06,
+      "length": 42.79879052578248,
+      "sources": 64,
+      "stations": 256
+     },
+     "self_seconds": 62.12829171027988,
+     "terminal_step": 0.0002988905471133573
+    }
+   }
+  },
+  "PF6": {
+   "coil": "PF6",
+   "intervals": 4,
+   "feeder_elements": 59,
+   "feeder_length": 42.09617701855853,
+   "feeder_sweep": 0.061978252787093756,
+   "pack_length": 12574.718828406458,
+   "mean_radius": 7.508903743461919,
+   "path_radius_max": 18.64453394124607,
+   "filament_block": [
+    [
+     2.461791041259053,
+     0.0002305873664680879
+    ],
+    [
+     0.00023058736646808768,
+     -1.8732543836603866e-05
+    ]
+   ],
+   "mutual": 0.0002305873664680878,
+   "reciprocity": 9.403829785579796e-16,
+   "filament_feeder_self": -1.8732543836603866e-05,
+   "mutual_seconds": 1.5183023735880852,
+   "sections": {
+    "disc-32": {
+     "section": "disc-32",
+     "feeder_self": {
+      "centreline": 2.4402236647813797e-05,
+      "correction": 2.1048032686334724e-06,
+      "self": 2.2297433379180324e-05,
+      "core": 0.0,
+      "length": 42.09617701855853,
+      "sources": 59,
+      "stations": 236
+     },
+     "self_seconds": 36.72517996933311,
+     "terminal_step": 0.0004834721663153559
+    },
+    "annulus-32": {
+     "section": "annulus-32",
+     "feeder_self": {
+      "centreline": 2.346479434168243e-05,
+      "correction": 1.4518348549553463e-06,
+      "self": 2.2012959486727085e-05,
+      "core": -3.106530008175054e-06,
+      "length": 42.09617701855853,
+      "sources": 59,
+      "stations": 236
+     },
+     "self_seconds": 73.720792141743,
+     "terminal_step": 0.00048318769242290265
+    }
+   }
+  },
+  "CS3L": {
+   "coil": "CS3L",
+   "intervals": 4,
+   "feeder_elements": 67,
+   "feeder_length": 50.49101352942447,
+   "feeder_sweep": -0.026019328605966324,
+   "pack_length": 5888.434297024478,
+   "mean_radius": 5.810469626439432,
+   "path_radius_max": 18.62687694989651,
+   "filament_block": [
+    [
+     0.7900781721054122,
+     -2.836691428930673e-06
+    ],
+    [
+     -2.836691428930662e-06,
+     -2.2245884049099755e-05
+    ]
+   ],
+   "mutual": -2.8366914289306674e-06,
+   "reciprocity": 3.8817857317871205e-15,
+   "filament_feeder_self": -2.2245884049099755e-05,
+   "mutual_seconds": 3.6809769915416837,
+   "sections": {
+    "disc-32": {
+     "section": "disc-32",
+     "feeder_self": {
+      "centreline": 2.9856817410194155e-05,
+      "correction": 2.5245324841499225e-06,
+      "self": 2.7332284926044234e-05,
+      "core": 0.0,
+      "length": 50.49101352942447,
+      "sources": 67,
+      "stations": 268
+     },
+     "self_seconds": 26.444209001027048,
+     "terminal_step": 2.16589020681829e-05
+    },
+    "annulus-32": {
+     "section": "annulus-32",
+     "feeder_self": {
+      "centreline": 2.8617431011027637e-05,
+      "correction": 1.6710172043603049e-06,
+      "self": 2.6946413806667334e-05,
+      "core": -4.34055568434884e-06,
+      "length": 50.49101352942447,
+      "sources": 67,
+      "stations": 268
+     },
+     "self_seconds": 53.17173940874636,
+     "terminal_step": 2.1273030948806e-05
+    }
+   }
+  },
+  "CS2L": {
+   "coil": "CS2L",
+   "intervals": 4,
+   "feeder_elements": 66,
+   "feeder_length": 51.69080865925346,
+   "feeder_sweep": -0.024936542582982252,
+   "pack_length": 5888.4062721593855,
+   "mean_radius": 6.021414549783224,
+   "path_radius_max": 18.63820290727774,
+   "filament_block": [
+    [
+     0.7872826874833392,
+     1.6166959748441714e-06
+    ],
+    [
+     1.6166959748441786e-06,
+     -1.707489203339387e-05
+    ]
+   ],
+   "mutual": 1.616695974844175e-06,
+   "reciprocity": 4.453391462396335e-15,
+   "filament_feeder_self": -1.707489203339387e-05,
+   "mutual_seconds": 3.6677896855399013,
+   "sections": {
+    "disc-32": {
+     "section": "disc-32",
+     "feeder_self": {
+      "centreline": 3.131248672459321e-05,
+      "correction": 2.5845242748322825e-06,
+      "self": 2.8727962449760925e-05,
+      "core": 0.0,
+      "length": 51.69080865925346,
+      "sources": 66,
+      "stations": 264
+     },
+     "self_seconds": 28.47646254580468,
+     "terminal_step": 3.1961354399449275e-05
+    },
+    "annulus-32": {
+     "section": "annulus-32",
+     "feeder_self": {
+      "centreline": 3.0043644332581705e-05,
+      "correction": 1.710727510149054e-06,
+      "self": 2.8332916822432652e-05,
+      "core": -4.521209204636097e-06,
+      "length": 51.69080865925346,
+      "sources": 66,
+      "stations": 264
+     },
+     "self_seconds": 57.41582024842501,
+     "terminal_step": 3.1566308772121e-05
+    }
+   }
+  },
+  "CS1L": {
+   "coil": "CS1L",
+   "intervals": 4,
+   "feeder_elements": 67,
+   "feeder_length": 65.88125953427671,
+   "feeder_sweep": -0.0108386324712064,
+   "pack_length": 5888.142672860154,
+   "mean_radius": 5.795354772321309,
+   "path_radius_max": 18.63820290727774,
+   "filament_block": [
+    [
+     0.7877590778027439,
+     1.6290780551869875e-05
+    ],
+    [
+     1.629078055186987e-05,
+     -2.8318805555408002e-05
+    ]
+   ],
+   "mutual": 1.6290780551869872e-05,
+   "reciprocity": 4.1595696145183264e-16,
+   "filament_feeder_self": -2.8318805555408002e-05,
+   "mutual_seconds": 3.6224294435232878,
+   "sections": {
+    "disc-32": {
+     "section": "disc-32",
+     "feeder_self": {
+      "centreline": 4.000552491340105e-05,
+      "correction": 3.2940392391621923e-06,
+      "self": 3.671148567423886e-05,
+      "core": 0.0,
+      "length": 65.88125953427671,
+      "sources": 67,
+      "stations": 268
+     },
+     "self_seconds": 25.502653737552464,
+     "terminal_step": 6.92930467779786e-05
+    },
+    "annulus-32": {
+     "section": "annulus-32",
+     "feeder_self": {
+      "centreline": 3.838844514668134e-05,
+      "correction": 2.1803626117060756e-06,
+      "self": 3.620808253497527e-05,
+      "core": -5.7723754700456315e-06,
+      "length": 65.88125953427671,
+      "sources": 67,
+      "stations": 268
+     },
+     "self_seconds": 53.13252458255738,
+     "terminal_step": 6.8789643638715e-05
+    }
+   }
+  },
+  "CS1U": {
+   "coil": "CS1U",
+   "intervals": 4,
+   "feeder_elements": 76,
+   "feeder_length": 69.08733476523781,
+   "feeder_sweep": -0.025194986227182574,
+   "pack_length": 5888.3194914378455,
+   "mean_radius": 8.534053769631008,
+   "path_radius_max": 18.288411658752654,
+   "filament_block": [
+    [
+     0.7892242410676366,
+     8.068817118640318e-07
+    ],
+    [
+     8.068817118640037e-07,
+     -2.1937044508954516e-05
+    ]
+   ],
+   "mutual": 8.068817118640178e-07,
+   "reciprocity": 3.4904553024435625e-14,
+   "filament_feeder_self": -2.1937044508954516e-05,
+   "mutual_seconds": 3.6841664044186473,
+   "sections": {
+    "disc-32": {
+     "section": "disc-32",
+     "feeder_self": {
+      "centreline": 4.199976393794711e-05,
+      "correction": 3.4543691731231753e-06,
+      "self": 3.8545394764823936e-05,
+      "core": 0.0,
+      "length": 69.08733476523781,
+      "sources": 76,
+      "stations": 304
+     },
+     "self_seconds": 24.726687910966575,
+     "terminal_step": 4.015915818855197e-05
+    },
+    "annulus-32": {
+     "section": "annulus-32",
+     "feeder_self": {
+      "centreline": 4.030387862145217e-05,
+      "correction": 2.2864984615056684e-06,
+      "self": 3.80173801599465e-05,
+      "core": -6.058318730679817e-06,
+      "length": 69.08733476523781,
+      "sources": 76,
+      "stations": 304
+     },
+     "self_seconds": 51.52869144547731,
+     "terminal_step": 3.963114358367453e-05
+    }
+   }
+  },
+  "CS2U": {
+   "coil": "CS2U",
+   "intervals": 4,
+   "feeder_elements": 74,
+   "feeder_length": 57.286747101940584,
+   "feeder_sweep": -0.01144057315142086,
+   "pack_length": 5888.079927405657,
+   "mean_radius": 8.297298675243526,
+   "path_radius_max": 18.288411658752654,
+   "filament_block": [
+    [
+     0.7885741780481741,
+     1.4697064802687625e-05
+    ],
+    [
+     1.4697064802687598e-05,
+     -1.2115959373704838e-05
+    ]
+   ],
+   "mutual": 1.4697064802687611e-05,
+   "reciprocity": 1.8442494930811598e-15,
+   "filament_feeder_self": -1.2115959373704838e-05,
+   "mutual_seconds": 3.960092544555664,
+   "sections": {
+    "disc-32": {
+     "section": "disc-32",
+     "feeder_self": {
+      "centreline": 3.497865345040695e-05,
+      "correction": 2.8643383717388776e-06,
+      "self": 3.2114315078668076e-05,
+      "core": 0.0,
+      "length": 57.286747101940584,
+      "sources": 74,
+      "stations": 296
+     },
+     "self_seconds": 23.50179182831198,
+     "terminal_step": 6.15084446840433e-05
+    },
+    "annulus-32": {
+     "section": "annulus-32",
+     "feeder_self": {
+      "centreline": 3.357258393178735e-05,
+      "correction": 1.8959477458201524e-06,
+      "self": 3.16766361859672e-05,
+      "core": -5.039233905403707e-06,
+      "length": 57.286747101940584,
+      "sources": 74,
+      "stations": 296
+     },
+     "self_seconds": 44.734996744431555,
+     "terminal_step": 6.107076579134243e-05
+    }
+   }
+  },
+  "CS3U": {
+   "coil": "CS3U",
+   "intervals": 4,
+   "feeder_elements": 74,
+   "feeder_length": 43.18937606132816,
+   "feeder_sweep": -0.02499677110324084,
+   "pack_length": 5888.293191194227,
+   "mean_radius": 8.611089407671631,
+   "path_radius_max": 18.276378224363807,
+   "filament_block": [
+    [
+     0.7895713301834878,
+     -9.111926409043036e-07
+    ],
+    [
+     -9.111926409042784e-07,
+     -4.907855983764459e-06
+    ]
+   ],
+   "mutual": -9.11192640904291e-07,
+   "reciprocity": 2.7655216964665915e-14,
+   "filament_feeder_self": -4.907855983764459e-06,
+   "mutual_seconds": 3.6755905244499445,
+   "sections": {
+    "disc-32": {
+     "section": "disc-32",
+     "feeder_self": {
+      "centreline": 2.639268718494401e-05,
+      "correction": 2.1594706690175595e-06,
+      "self": 2.423321651592645e-05,
+      "core": 0.0,
+      "length": 43.18937606132816,
+      "sources": 74,
+      "stations": 296
+     },
+     "self_seconds": 19.362021557986736,
+     "terminal_step": 2.2410831234117867e-05
+    },
+    "annulus-32": {
+     "section": "annulus-32",
+     "feeder_self": {
+      "centreline": 2.533260771213328e-05,
+      "correction": 1.4293859284959933e-06,
+      "self": 2.3903221783637284e-05,
+      "core": -3.8014363203165135e-06,
+      "length": 43.18937606132816,
+      "sources": 74,
+      "stations": 296
+     },
+     "self_seconds": 39.162522884085774,
+     "terminal_step": 2.20808365018287e-05
+    }
+   }
+  }
+ }
+}

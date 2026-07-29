@@ -86,6 +86,7 @@ Stages, each writing its own JSON beside the figures::
     python benchmarks/wound_coil_finite_section.py self
     python benchmarks/wound_coil_finite_section.py seam
     python benchmarks/wound_coil_finite_section.py feeder
+    python benchmarks/wound_coil_finite_section.py feeder-fleet
     python benchmarks/wound_coil_finite_section.py ladder
     python benchmarks/wound_coil_finite_section.py figures
 
@@ -1121,8 +1122,67 @@ def filament_linkage(target: tuple, source: tuple, slab: int) -> float:
     return mu_0 / (4 * np.pi) * total
 
 
+def _feeder_geometry(path, table: dict, args) -> tuple[dict, list, float]:
+    """Return a feeder's section-independent coupling record and geometry."""
+    pack = cut_turns(path)
+    feeder = [path.segments[index] for index in np.flatnonzero(~path.pack)]
+
+    start = time.perf_counter()
+    runs = []
+    for segments in (pack.segments, feeder):
+        station, step = [], []
+        for segment in segments:
+            points, delta = _stations(segment, args.intervals)
+            station.append(points)
+            step.append(delta)
+        runs.append((np.vstack(station), np.vstack(step)))
+    block = np.array(
+        [
+            [filament_linkage(target, source, args.slab) for source in runs]
+            for target in runs
+        ]
+    )
+    mutual_seconds = time.perf_counter() - start
+    radius = float(
+        np.mean([np.hypot(*_stations(segment, 1)[0][0][:2]) for segment in feeder])
+    )
+    payload = {
+        "coil": path.name,
+        "intervals": args.intervals,
+        "feeder_elements": int(len(feeder)),
+        "feeder_length": float(sum(segment.length for segment in feeder)),
+        "feeder_sweep": float(path.swept(np.flatnonzero(~path.pack))),
+        "pack_length": float(sum(segment.length for segment in pack.segments)),
+        "mean_radius": radius,
+        "path_radius_max": table[path.name]["path_radius_max"],
+        "filament_block": block.tolist(),
+        "mutual": 0.5 * float(block[0, 1] + block[1, 0]),
+        "reciprocity": float(
+            abs(block[0, 1] - block[1, 0]) / max(abs(block[0, 1]), 1e-30)
+        ),
+        "filament_feeder_self": float(block[1, 1]),
+        "mutual_seconds": mutual_seconds,
+    }
+    return payload, feeder, radius
+
+
+def _feeder_section(
+    common: dict, feeder: list, radius: float, args, channel: float
+) -> dict:
+    """Return the feeder self and terminal step for one resolved section."""
+    section = Section(cable_diameter(common["coil"]), channel, args.corners)
+    start = time.perf_counter()
+    feeder_self = path_self(feeder, section, args.intervals, radius)
+    return {
+        "section": section.label,
+        "feeder_self": feeder_self,
+        "self_seconds": time.perf_counter() - start,
+        "terminal_step": 2 * common["mutual"] + feeder_self["self"],
+    }
+
+
 def stage_feeder(args) -> None:
-    """Measure the feeder run, which is conductor and is in neither ladder rung.
+    """Measure one feeder run, which is conductor and is in neither ladder rung.
 
     The as-built centreline runs past the winding pack and out to the coil's
     terminals.  That run is separated before anything is counted, because it does
@@ -1154,56 +1214,36 @@ def stage_feeder(args) -> None:
     path = {entry.name: entry for entry in read_paths(args.coil[:2])}[args.coil]
     path.resolution = args.resolution
     table = count_turns([path], args.revision, args.minimum_sweep, args.inflate)
-    pack = cut_turns(path)
-    feeder = [path.segments[index] for index in np.flatnonzero(~path.pack)]
-    diameter = cable_diameter(path.name)
-    section = Section(diameter, args.channel * CHANNEL, args.corners)
-
-    start = time.perf_counter()
-    runs = []
-    for segments in (pack.segments, feeder):
-        station, step = [], []
-        for segment in segments:
-            points, delta = _stations(segment, args.intervals)
-            station.append(points)
-            step.append(delta)
-        runs.append((np.vstack(station), np.vstack(step)))
-    block = np.array(
-        [
-            [filament_linkage(target, source, args.slab) for source in runs]
-            for target in runs
-        ]
-    )
-    mutual_seconds = time.perf_counter() - start
-
-    start = time.perf_counter()
-    radius = float(
-        np.mean([np.hypot(*_stations(segment, 1)[0][0][:2]) for segment in feeder])
-    )
-    feeder_self = path_self(feeder, section, args.intervals, radius)
-    payload = {
-        "coil": path.name,
-        "section": section.label,
-        "intervals": args.intervals,
-        "feeder_elements": int(len(feeder)),
-        "feeder_length": float(sum(segment.length for segment in feeder)),
-        "feeder_sweep": float(path.swept(np.flatnonzero(~path.pack))),
-        "pack_length": float(sum(segment.length for segment in pack.segments)),
-        "mean_radius": radius,
-        "path_radius_max": table[path.name]["path_radius_max"],
-        "filament_block": block.tolist(),
-        "mutual": 0.5 * float(block[0, 1] + block[1, 0]),
-        "reciprocity": float(
-            abs(block[0, 1] - block[1, 0]) / max(abs(block[0, 1]), 1e-30)
-        ),
-        "feeder_self": feeder_self,
-        "filament_feeder_self": float(block[1, 1]),
-        "mutual_seconds": mutual_seconds,
-        "self_seconds": time.perf_counter() - start,
-    }
-    payload["terminal_step"] = 2 * payload["mutual"] + feeder_self["self"]
+    common, feeder, radius = _feeder_geometry(path, table, args)
+    resolved = _feeder_section(common, feeder, radius, args, args.channel * CHANNEL)
+    payload = common | resolved
     print(f"wrote {_write('feeder.json', payload)}")
     report_feeder(payload)
+
+
+def stage_feeder_fleet(args) -> None:
+    """Measure solid and channel-resolved feeder steps for all twelve coils."""
+    paths = read_paths("PF") + read_paths("CS")
+    for path in paths:
+        path.resolution = args.resolution
+    table = count_turns(paths, args.revision, args.minimum_sweep, args.inflate)
+    records = {}
+    for path in paths:
+        common, feeder, radius = _feeder_geometry(path, table, args)
+        sections = {}
+        for channel in (0.0, CHANNEL):
+            resolved = _feeder_section(common, feeder, radius, args, channel)
+            sections[resolved["section"]] = resolved
+        records[path.name] = common | {"sections": sections}
+        report_feeder_fleet(records[path.name])
+    payload = {
+        "corners": args.corners,
+        "intervals": args.intervals,
+        "circuit_boundary": "undetermined",
+        "coils": records,
+    }
+    print(f"wrote {_write('feeders.json', payload)}")
+    feeder_fleet_figure(payload)
 
 
 def report_feeder(payload: dict) -> None:
@@ -1229,6 +1269,95 @@ def report_feeder(payload: dict) -> None:
         f"  {'what the terminals would see, 2 M + L':<44}"
         f"{payload['terminal_step']:>+14.3e} H"
     )
+
+
+def report_feeder_fleet(payload: dict) -> None:
+    """Print one fleet row with both resolved conductor sections."""
+    solid = next(
+        section
+        for name, section in payload["sections"].items()
+        if name.startswith("disc-")
+    )
+    hollow = next(
+        section
+        for name, section in payload["sections"].items()
+        if name.startswith("annulus-")
+    )
+    print(
+        f"{payload['coil']:<5}"
+        f" feeder {payload['feeder_length']:>7.2f} m"
+        f"  2M {2 * payload['mutual']:>+10.3e} H"
+        f"  solid {solid['terminal_step']:>+10.3e} H"
+        f"  channel {hollow['terminal_step']:>+10.3e} H"
+    )
+
+
+def feeder_fleet_figure(payload: dict) -> None:
+    """Render feeder decomposition and geometry for the twelve-coil fleet."""
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    names = list(payload["coils"])
+    offset = np.arange(len(names))
+    mutual = np.array([2 * payload["coils"][name]["mutual"] for name in names])
+    solid = np.array(
+        [
+            next(
+                section["feeder_self"]["self"]
+                for key, section in payload["coils"][name]["sections"].items()
+                if key.startswith("disc-")
+            )
+            for name in names
+        ]
+    )
+    hollow = np.array(
+        [
+            next(
+                section["feeder_self"]["self"]
+                for key, section in payload["coils"][name]["sections"].items()
+                if key.startswith("annulus-")
+            )
+            for name in names
+        ]
+    )
+    length = np.array([payload["coils"][name]["feeder_length"] for name in names])
+    sweep = np.array([payload["coils"][name]["feeder_sweep"] for name in names])
+
+    figure, axes = plt.subplots(2, 1, figsize=(10.5, 8.0), sharex=True)
+    axes[0].bar(offset, mutual, label="twice pack-feeder mutual")
+    axes[0].bar(offset, solid, bottom=mutual, label="solid feeder self")
+    axes[0].plot(
+        offset,
+        mutual + hollow,
+        "o",
+        color="C3",
+        label="total with cooling channel",
+    )
+    axes[0].axhline(0.0, color="0.5", lw=0.8)
+    axes[0].set_ylabel("terminal inductance step [H]")
+    axes[0].set_title("feeder contribution, resolved for every PF coil and CS module")
+    axes[0].legend(fontsize=8, ncol=3)
+    axes[0].grid(alpha=0.25, axis="y")
+
+    axes[1].bar(offset - 0.18, length, width=0.36, color="C2", label="feeder length")
+    axes[1].set_ylabel("feeder length [m]", color="C2")
+    axes[1].tick_params(axis="y", colors="C2")
+    twin = axes[1].twinx()
+    twin.bar(offset + 0.18, sweep, width=0.36, color="C4", label="toroidal sweep")
+    twin.set_ylabel("toroidal sweep [turns]", color="C4")
+    twin.tick_params(axis="y", colors="C4")
+    axes[1].set_xticks(offset)
+    axes[1].set_xticklabels(names)
+    axes[1].grid(alpha=0.25, axis="y")
+    handles, labels = axes[1].get_legend_handles_labels()
+    extra = twin.get_legend_handles_labels()
+    axes[1].legend(handles + extra[0], labels + extra[1], fontsize=8, loc="upper left")
+    figure.tight_layout()
+    figure.savefig(FIGURES / "feeder-fleet.svg")
+    plt.close(figure)
+    print(f"wrote {FIGURES / 'feeder-fleet.svg'}")
 
 
 def _cross_turn(
@@ -2038,6 +2167,12 @@ def parse_args(argv=None):
     feeder.add_argument("--intervals", type=int, default=4)
     feeder.add_argument("--slab", type=int, default=4000)
     feeder.set_defaults(run=stage_feeder)
+
+    fleet = stages.add_parser("feeder-fleet")
+    fleet.add_argument("--corners", type=int, default=32)
+    fleet.add_argument("--intervals", type=int, default=4)
+    fleet.add_argument("--slab", type=int, default=4000)
+    fleet.set_defaults(run=stage_feeder_fleet)
 
     ladder = stages.add_parser("ladder")
     ladder.add_argument("--wound", default="wound.json")

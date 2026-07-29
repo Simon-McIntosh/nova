@@ -7,19 +7,22 @@
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="nova-spine-refactor">
   <meta name="plan-title" content="Nova Spine Refactor (in-place)">
-  <meta name="plan-summary" content="In-place refactor of nova into the pandas-free physics spine (python≥3.14): 2.0 core on develop, live 1.x assembly line protected by µm-tolerance characterization goldens, hardened assembly extraction to its own nova-free repo">
-  <meta name="plan-status" content="active">
+  <meta name="plan-summary" content="Shipped pandas-free physics spine on the single main trunk; assembly extracted to norma, protected 1.x baseline retained, and the post-convergence local suite is green.">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="XL">
-  <meta name="plan-tier" content="opus">
   <meta name="plan-owner" content="Simon McIntosh">
   <title>Nova Spine Refactor | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-29">
-<meta name="plan-version" content="21">
-<meta name="plan-impl" content="0.9">
+<meta name="plan-version" content="22">
+<meta name="plan-impl" content="1.0">
 <meta name="plan-sprint" content="S1">
+<meta name="plan-commits" content="0d8bb8ce,25f21429">
+<meta name="plan-artifacts" content="docs/archive/nova-spine-refactor-s11-landed.html">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
 </head>
 <body>
   <main class="plan-doc">
@@ -459,18 +462,18 @@
     </ul>
 
     <h2 id="s11">§11 — Convergence: assembly extraction and return to single trunk</h2>
-    <p>End state under the locked in-place route: the assembly project (GP fitting + SSAT/in-pit, per §2a's
-    hardened extraction) lives in its own repository and, where it needs frame/geometry/graphics services,
-    depends on nova 2.0 — the dependency finally pointing the right way (assembly → spine, matching the
-    one-way leave→keep import direction that already exists). <strong>The seal is gated on the §2a extraction
-    sign-off alone — that sign-off is recorded, so §11 is unblocked and ready to ship</strong> (decision
-    <code>seal-gating</code>, 2026-07-27): §10 ambix adoption is independent work in the imas-ambix checkout and
-    does not gate returning nova main to the 2.0 spine, because the seal is a forward deletion of an
-    already-extracted tree, fully recoverable from <code>legacy/v1</code> + <code>v1-assembly-baseline</code>.
-    Forward deletion only — never a history rewrite, never a force-push, and the protected
-    <code>legacy/v1</code> branch and <code>v1-assembly-baseline</code> tag are never touched.
-    On merge, nova returns to single-trunk operation and the 1.x line survives as <code>legacy/v1</code> + tag
-    for archaeology and as the oracle for cross-check tests during the transition.</p>
+    <section class="card landed-summary">
+      <h3>Landed 2026-07-29</h3>
+      <p><strong>Shipped.</strong> <code>develop</code> merged into <code>main</code> by forward deletion at
+      <code>0d8bb8ce</code>; the assembly and recorded-corpus trees are absent from the working tree while
+      <code>legacy/v1</code> and <code>v1-assembly-baseline</code> remain the recoverable frozen line. The
+      repository is back on a single <code>main</code> trunk and the obsolete split worktrees were removed.</p>
+      <p>Local verification on <code>sun_debug</code> (Python 3.14.2): the complete lane
+      <code>uv run pytest -m "slow or not slow" -p no:randomly</code> passed
+      <strong>3,804 passed / 118 skipped</strong> in 660.52&nbsp;s. The post-merge hygiene and branch-policy
+      closeout landed at <code>25f21429</code>. Full evidence:
+      <a href="archive/nova-spine-refactor-s11-landed.html">convergence record</a>.</p>
+    </section>
 
     <p><strong>Co-installation hazard (noted 2026-07-27).</strong> norma's distribution is named
     <code>norma</code>, but its wheel still ships the top-level <code>nova</code> import package
@@ -552,7 +555,7 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-int-01" data-status="resolved" data-tier="opus" data-written-by="nova-scoping-review synthesis" data-written-at="2026-07-23" data-recommends-skill="" data-resolved-at="2026-07-23T08:07:33+00:00" data-resolved-by="smc">
+<article class="r-fu" data-id="f-int-01" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="nova-scoping-review synthesis" data-written-at="2026-07-23" data-recommends-skill="" data-resolved-at="2026-07-23T08:07:33+00:00" data-resolved-by="smc">
     <h4 class="r-fu-title">Bootstrap the imas-nova repository (§2)</h4>
     <div class="r-fu-body"><p>Blocked only on the three decisions above (repo mechanics, cache backend, frame path). Once locked, stand up the repository per §2 and begin §3/§4 in parallel — the frame core and the kernel lift are independent workstreams meeting at the provider protocol.</p></div>
     <pre class="r-fu-prompt">Project: imas-ambix
@@ -582,7 +585,7 @@ Done-when
   3. followup written into plan + this followup marked resolved</pre>
     <p class="r-fu-outcome">Superseded: repo-mechanics locked to refactor-in-place (2026-07-23); the new-repo bootstrap brief no longer applies. Replaced by the branch-restructure + goldens-baseline followup.</p>
     </article>
-<article class="r-fu" data-id="f-int-02" data-status="resolved" data-tier="opus" data-written-by="smc/session 2026-07-23" data-written-at="2026-07-23" data-recommends-skill="" data-resolved-at="2026-07-23T08:53:46+00:00" data-resolved-by="smc">
+<article class="r-fu" data-id="f-int-02" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="smc/session 2026-07-23" data-written-at="2026-07-23" data-recommends-skill="" data-resolved-at="2026-07-23T08:53:46+00:00" data-resolved-by="smc">
     <h4 class="r-fu-title">Nova branch restructure + assembly goldens baseline (§2 + §2a)</h4>
     <div class="r-fu-body"><p>Repo-mechanics locked to in-place refactor. Priority order: land the §2a golden characterization harness on nova main FIRST (it defines the protected baseline), then perform the §2 branch surgery (fast-forward main to the jax tip, cut legacy/v1 + tag at the goldens-green commit, branch develop). Blocked on the assembly-repo-name, cache-backend and frame-migration-path decisions only for later sections — not for this work.</p></div>
     <pre class="r-fu-prompt">Project: imas-ambix
@@ -618,7 +621,7 @@ Done-when
   4. followup written into plan + this followup marked resolved</pre>
     <p class="r-fu-outcome">Superseded by the §2a rework (2026-07-23): acceptance gate relaxed from byte-identity to 1 µm tolerance (3 dp mm, below measurement noise) with the hash manifest retained as fingerprint; scope extended to the vault spectral proxy + structural; plan renamed nova-spine-refactor. Replaced by the updated baseline followup.</p>
     </article>
-<article class="r-fu" data-id="f-int-03" data-status="resolved" data-tier="opus" data-written-by="smc/session 2026-07-23" data-written-at="2026-07-23" data-recommends-skill="" data-resolved-at="2026-07-23T10:45:50+00:00" data-resolved-by="reckon-ship">
+<article class="r-fu" data-id="f-int-03" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="smc/session 2026-07-23" data-written-at="2026-07-23" data-recommends-skill="" data-resolved-at="2026-07-23T10:45:50+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Assembly characterization baseline + nova branch restructure (§2a then §2)</h4>
     <div class="r-fu-body"><p>Execute §2a's protection baseline first — characterization harness with the 1 µm tolerance gate over the full protected scope (GP/fiducial fitting, winding pack, vault spectral proxy, gap asymmetry) — then the §2 branch surgery. The data-registry decision (GHCR/ORAS recommended) should be locked before the corpus push step but does not block harness authoring.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -658,7 +661,7 @@ Done-when
   4. followup written into plan + this followup marked resolved</pre>
     <p class="r-fu-outcome">§2a + §2 branch restructure landed (commit e31fb6df). Characterization harness green — 35 passed / 4 visible skips; 7 deterministic goldens (gap Fourier proxy, IDM/RE/as-built CCL fiducial deltas, nominal fiducial frame, uniform + base-assembly vault geometry) with a 1 µm tolerance gate + sha256 fingerprint manifest. main fast-forwarded to the goldens-green commit (now default); legacy/v1 + tag v1-assembly-baseline branch-protected (enforce-admins, no force-push/deletion); jax retired with 5 dependabot PRs retargeted to main; develop cut and pushed (== baseline). Full record: docs/archive/nova-spine-refactor-s2-landed.html. Sector/pit fits, ANSYS vault Fourier proxy and heavy winding-pack build are visible skips pending off-repo fixtures. Remaining develop 2.0 bootstrap tracked in the new followup.</p>
     </article>
-<article class="r-fu" data-id="f-int-04" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-23" data-recommends-skill="/reckon-ship nova-spine-refactor §2" data-resolved-at="2026-07-23T21:10:29+00:00" data-resolved-by="reckon-ship">
+<article class="r-fu" data-id="f-int-04" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-23" data-recommends-skill="/reckon-ship nova-spine-refactor §2" data-resolved-at="2026-07-23T21:10:29+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Finish the develop 2.0 bootstrap (leave-set deletion, lean pyproject, plan scaffolds)</h4>
     <div class="r-fu-body"><p>The protection baseline and branch restructure landed; develop is cut and pushed (== the goldens-green baseline e31fb6df). What remains is the develop 2.0 bootstrap: delete the leave-set, reset the dependency floors, and scaffold the repo-local plans. The bulk leave-set deletion is safety-classifier-gated — run it via an in-session <code>!</code> command or add a Bash permission rule for <code>git rm</code>.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -722,7 +725,7 @@ Done-when
   3. §2 collapsed in the umbrella plan; impl advanced; this followup resolved.</pre>
     <p class="r-fu-outcome">develop 2.0 bootstrap landed — commit 59ee0303 (416 files, −71,974 LOC): leave-set + dependent tests deleted with zero dangling references; pyproject reset to py&gt;=3.14/numpy&gt;=2 lean core, pandas out of core, hatch-vcs pinned to numeric tags; np.float_ fixed; honest import backlog recorded (57/186 modules clean; matplotlib 69 / fsspec 17 / jax 14 dominate). Plan scaffolds already satisfied by nova-spine-refactor (in nova) + norma-data-provenance.</p>
     </article>
-<article class="r-fu" data-id="f-int-05" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-23" data-recommends-skill="/reckon-ship nova-spine-refactor §3" data-resolved-at="2026-07-24T04:16:29+00:00" data-resolved-by="reckon-ship">
+<article class="r-fu" data-id="f-int-05" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-23" data-recommends-skill="/reckon-ship nova-spine-refactor §3" data-resolved-at="2026-07-24T04:16:29+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Land the §3 columnar frame core and §4 unified kernel set (fleet in flight)</h4>
     <div class="r-fu-body"><p>The develop 2.0 bootstrap is landed (59ee0303). §3 (pandas-free columnar frame store) and §4 (unified Biot kernels + polygon conductor kernel ported back from imas-ambix gs/polygon.py with its golden-value tests) are running as parallel opus workers in detached worktrees off develop, reviewed and merged by the orchestrating session. If the session ends before they land, re-dispatch from this followup.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -758,7 +761,7 @@ Done-when
      this followup resolved; §5/§6 followup queued.</pre>
     <p class="r-fu-outcome">§3 core + construction tier and §4 kernels + assembly rebind landed on develop (38 commits, tip a8edb892). Frame: 0/168-fail acceptance surface vs 53 RecursionError baseline (pandas 3.0 breaks the old tower outright); construction tier ported (test_framesetloc 0/20→20/20, test_coilset 5/49→46/49). Biot: polygon kernel ported from ambix (22 golden tests, 1e-10..1e-4 agreement), canonical Greens module, assembly rebound columnar (Solve==greens at 1e-9), plasma paths adapted — test_biotsavart_3d 39/39, biotoperate/biotmatrix/matrix green. Two frame-core items remain (id-stable cached views; link→ref re-derivation — 7 reduction tests) — run interrupted by the org monthly spend limit with both workers down; resume prompt in the next followup.</p>
     </article>
-<article class="r-fu" data-id="f-int-06" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-24" data-recommends-skill="/reckon-ship nova-spine-refactor §3" data-resolved-at="2026-07-24T06:01:29+00:00" data-resolved-by="reckon-ship">
+<article class="r-fu" data-id="f-int-06" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-24" data-recommends-skill="/reckon-ship nova-spine-refactor §3" data-resolved-at="2026-07-24T06:01:29+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Close the two frame-core gaps (id-stable cached views; link→ref re-derivation), confirm the validation lane, then §5–§9</h4>
     <div class="r-fu-body"><p>Spend-limit interruption point: develop tip <code>a8edb892</code> (38 commits since bootstrap). Across the whole §3+§4 surface exactly two precisely-characterised frame-core items remain, then the lane confirmation closes both sections; §5–§9 follow. Worktrees <code>../nova-develop</code> (orchestrator), <code>../nova-w-frame</code>, <code>../nova-w-biot</code> are all clean and merged — safe to reuse or remove.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -815,7 +818,7 @@ Done-when
      §5/§6 followup queued.</pre>
     <p class="r-fu-outcome">§3+§4 closed and collapsed (develop 59ee0303..8a9becc1, 43 commits). Item A: id-stable cached views landed (995d7792) — per-column view cache + in-place set; read 0.325→0.009 ms (target ≤0.03; 3× faster than the pandas reference), bulk insert 16.2→3.4 µs/coil (1.24× ref) after removing two O(n²)/list-round-trip hot spots. Item B: link→ref fixed frame-side (dad5ee53) — row labels carried through the per-segment source rebuild; regression pinned in test_biotframe. Lane: 520 passed / 0 failed incl. ITER sub-inductance goldens; test_subspace 11 fails → 39/39, test_force + test_uri fixed en route. Full suite 1300 passed / 17 failed / 4 errors — all residuals verified pre-existing, banked §6/§8/§9 items. Archive: docs/archive/nova-spine-refactor-s3s4-landed.html.</p>
     </article>
-<article class="r-fu" data-id="f-int-07" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-24" data-recommends-skill="/reckon-ship nova-spine-refactor §5" data-resolved-at="2026-07-24T09:44:18+00:00" data-resolved-by="reckon-ship">
+<article class="r-fu" data-id="f-int-07" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-24" data-recommends-skill="/reckon-ship nova-spine-refactor §5" data-resolved-at="2026-07-24T09:44:18+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Ship §5 batched JAX evaluation ∥ §6 machine description + zarr identity cache, then §7/§8, then §9</h4>
     <div class="r-fu-body"><p>§3/§4 are closed and collapsed (develop tip <code>8a9becc1</code>; lane 520/0). §5 (jitted pytree operator primary + merged vmap-safe topology stacks + ambix gs_solve port) and §6 (IMAS layer on the columnar store + content-hash zarr identity cache, decision locked) have disjoint write scopes (nova/jax vs nova/imas+nova/database) and run as parallel opus workers in detached worktrees off develop; §7 (nova.io + ISN/ISNC fork-RC pins) ∥ §8 (plotting mixins, matplotlib/seaborn-free core imports, vtkgeo rework) follow, then §9 closes the fast lane. Banked residuals to absorb: vtkgeo pandas idioms + test_vtk/ferritic/winding/animate (§8); pulsedesign imas_core fixtures + machinedata/itergeom/vde read_csv (§6); bokeh/jax_basis/extrapolate collection errors → importmanager skips (§5/§6/§9); nova/__init__ eager dataset import (§6).</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -885,7 +888,7 @@ Done-when
      advanced stepwise; this followup resolved; §10/§11 followup queued.</pre>
     <p class="r-fu-outcome">Wave 1+ landed (develop 8a9becc1..045e92ec): §8 CLOSED (matplotlib-free import graph pinned; vtkgeo/ferritic columnar; acceptance 17 fails → 43/0); §5 core landed (jit==numpy 2.8e-14; batched==per-slice pinned; stencil nulls ported; fieldnull → jax stack) with primary-path flip + ambix topology cascade + gs_solve banked; §6 cache tier landed (canonical typed keys + DD version, ZarrStore group eviction, 8 round-trip/stale-key tests, lazy package init) with Machine-key/geometry-seam/ingest-IO deferred to live-DB access. Also: arc/bow vectorisation (949528d6, bow 12.9→5.9 s — user directive), numba lstsq toolchain fix (44 fails recovered), seaborn → matplotlib extra. FULL SUITE GREEN: 1265 passed / 0 failed / 103 skipped (test_bokeh excluded — §9). Archive: docs/archive/nova-spine-refactor-s5s6s8-landed.html. nova-3d-native plan scaffolded (exact 3-D flux couplings; zeta fast path).</p>
     </article>
-<article class="r-fu" data-id="f-int-08" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-24" data-recommends-skill="/reckon-ship nova-spine-refactor §7" data-resolved-at="2026-07-24T12:55:17+00:00" data-resolved-by="reckon-ship">
+<article class="r-fu" data-id="f-int-08" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-24" data-recommends-skill="/reckon-ship nova-spine-refactor §7" data-resolved-at="2026-07-24T12:55:17+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Ship §7 (nova.io + ISN/ISNC fork-RC pins) and §9 (fast-lane transfer); absorb the §5/§6 remainders</h4>
     <div class="r-fu-body"><p>Wave 1+ is merged and the full suite is green (1265/0/103, tip <code>045e92ec</code>). Remaining spine work: §7 (nova.io ingest/egress transcoders + zarr signal store + fork-RC pins — ISN v0.8.0rc56 / ISNC v0.2.0rc63; ISN fastmcp→[mcp] extra hardening still open), §9 (importmanager sweep incl. test_bokeh, DB-bound fixtures, &lt;60 s default lane, asv benchmarks), and the banked §5/§6 remainders (jit primary-path flip at nova/biot/operate.py:13; ambix connectivity/gs_solve port cascade; Machine composite-key DD version + geometry seam + ingest-IO pandas removal, all needing live iter_md DBs). §10 (ambix adoption) follows in the imas-ambix checkout; §11 closes on norma extraction.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -942,7 +945,7 @@ Done-when
      resolved; §10 (ambix adoption) followup queued.</pre>
     <p class="r-fu-outcome">§7 + §9 landed and §5/§6 closed (develop 045e92ec..06f8b91f, 5 workers over 2 waves). §7: nova.io shipped — standard-name resolver over ISN/ISNC, zarr SignalStore keyed by URI+DD, ingest/egress with in-lane validate() round-trip, warm re-read 120-142x AL full-get; git-tag pins in an io extra (test.pypi wheels unpublished — ISN fastmcp weight + missing catalog.db flagged as fork work; beta_normal = genuine ISNC contribution). §5 closed: jit operator primary with numpy fallback + xxhash gating; connectivity/flux-surface/wall-mask ported vmap-safe (batched==per-slice 1e-10); gs_solve re-banked to §10 with closure evidence. §6 closed: Machine key carries DD version (live iter_md validated); MachineGeometryReader seam; compiled frames + solved operators persist as zarr groups with per-group eviction; frame/imas ingest IO pandas-free. §9: default lane 885/78 in 56.4 s, zero exclusions; full lane 1361/0/104; asv baselines in benchmarks/BASELINE.md; core viz leak fixed (f37fa3fa). Archives: s7-landed, s5s6-closed, s9-landed.</p>
     </article>
-<article class="r-fu" data-id="f-int-09" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-24" data-recommends-skill="/reckon-ship nova-spine-refactor §10" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-int-09" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-24" data-recommends-skill="/reckon-ship nova-spine-refactor §10" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Ship §10 ambix adoption (nova 2.0 dependency, gs/latent move incl. the gs_solve re-architecture)</h4>
     <div class="r-fu-body"><p>§3–§9 are landed on nova develop (tip <code>06f8b91f</code>; full lane 1361/0/104, fast lane 56 s). §10 executes in the <strong>imas-ambix checkout</strong>: add nova 2.0 as a dependency, move <code>gs/</code> + the latent physics tier onto the spine deleting donor copies, re-point the tokenizer seam, and unify the coupling generators. The re-banked gs_solve lands here — re-architected onto nova.biot's kernels (its ambix closure pulls FAIR-MAST paths + torch current_diffusion; evidence in the §5/§6 archive). Register ambix's imas_geometry reader against nova's MachineGeometryReader seam. Env followups parked in nova: ISN/ISNC fork wheel publish → pin flip; iter_md public-path is_valid layout; dd_version/user threading from Machine to geometry sources.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -983,7 +986,7 @@ Done-when
   3. §10 collapsed in this plan with archive HTML; impl advanced; this
      followup resolved; §11 (convergence) followup queued.</pre>
     </article>
-<article class="r-fu" data-id="f-int-10" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-24T16:20:00+00:00" data-recommends-skill="/reckon-ship nova-spine-refactor §2a" data-resolved-at="2026-07-24T21:18:11+00:00" data-resolved-by="reckon-ship">
+<article class="r-fu" data-id="f-int-10" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-24T16:20:00+00:00" data-recommends-skill="/reckon-ship nova-spine-refactor §2a" data-resolved-at="2026-07-24T21:18:11+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Stand up norma CI (replay gate) + self-containment install check — clears §2a extraction-gate steps 6–7</h4>
     <div class="r-fu-body"><p>§2a's hardened extraction sequence names two remaining gate steps that were never specified beyond a bullet: (6) a dual-run window with <em>both</em> CIs green, and (7) an install check. norma has <strong>no CI yet</strong> (filter-repo did not carry <code>.github</code>). This followup specifies and executes both, in the norma repo. Step 6: a GitHub Actions workflow running norma's replay gate (characterization + provenance + canonical + fiducial/assembly/transform lanes) against the GHCR corpus pulled by pinned digest, with ANSYS/heavy/Tier-2 as visible opt-in skips. Step 7 (reframed — norma is NOT shipped on PyPI): a self-containment job that builds the wheel, installs it into a clean venv, and imports <code>nova.assembly</code>/<code>nova.structural</code>/<code>nova.dataset</code> + runs a corpus-free pure-function subset, proving zero dangling dependency back into the parent — an install gate, never a publish. Prerequisite hardening: guard the hard <code>import ansys.dpf.core</code> in <code>ansyspost.py</code> so the fiducial/trial/transform lanes collect without proprietary ANSYS (mirrors the spine's matplotlib-optional pattern). Clearing these lets the §2a extraction sign-off be recorded; the §11 forward-deletion seal (develop→main) then waits only on §10 ambix adoption (f-int-09).</p></div>
     <pre class="r-fu-prompt">Project: norma (~/Code/norma, live at github.com/Simon-McIntosh/norma; private)
@@ -1064,7 +1067,7 @@ Done-when
      clear the extraction half only.</pre>
     <p class="r-fu-outcome">norma CI stood up and green; §2a extraction sign-off recorded. norma .github/workflows/ci.yml (commit 23782909) runs two jobs on push/PR to main — gate: the metrology replay lanes at 228 passed / 13 visible skips / 0 failed; self-contained: uv build the wheel, install into a bare venv, import nova.assembly/nova.structural/nova.dataset and run the pure-function lanes (test_transform + TestErrorVector/TestTransform/TestMaskFrame) from a staging dir where the source tree is not importable, 11 passed — proving zero dependency back into nova. Verified green on GitHub: https://github.com/Simon-McIntosh/norma/actions/runs/30126796442 (first authored version) and https://github.com/Simon-McIntosh/norma/actions/runs/30126947615 (current, after bumping the actions off the deprecated Node 20 runtime). Prerequisite hardening: norma 04cc4168 defers the hard `import ansys.dpf.core` in nova/assembly/ansyspost.py behind a placeholder that raises on first attribute access, plus postponed annotations so the dataclass field types no longer need the real module — collection goes from 234 tests + 2 collection errors to 241 tests clean without the ansys extra. Sign-off prose committed in nova docs/nova-spine-refactor.html §2a. TWO QUALIFICATIONS recorded in the sign-off rather than papered over: (1) the gate-(6) dual-run window is one-sided — nova has no test CI at all (no .github tree; only GitHub-native Dependabot/dependency-graph runs), so the nova-side half remains the locally-recorded 2026-07-23 green at e31fb6df; (2) the corpus lanes still skip in CI — the private GHCR package norma-corpus is repo-linked to nova and GitHub exposes no API to grant norma's GITHUB_TOKEN read access to a user-owned private package, so the workflow authenticates with a read:packages PAT as repo secret CORPUS_READ_TOKEN and skips the pull when absent (5 of the 13 skips). Secret creation needs an interactive GitHub session; tracked as f-int-12 (since re-homed to the norma plan norma-standalone-package §3).</p>
     </article>
-<article class="r-fu" data-id="f-int-11" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-24T16:45:00+00:00" data-recommends-skill="/reckon-ship nova-spine-refactor §11" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-int-11" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-24T16:45:00+00:00" data-recommends-skill="/reckon-ship nova-spine-refactor §11" data-resolved-at="2026-07-29T15:28:10+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">§11 convergence: forward-delete the assembly tree from nova main (develop→main) and return to single trunk</h4>
     <div class="r-fu-body"><p>The seal, by forward deletion (never a history rewrite — <code>legacy/v1</code> + <code>v1-assembly-baseline</code> stay the permanent frozen copy in nova history; norma carries an independent full copy). <code>develop</code> already has the assembly tree removed (<code>59ee0303</code>); merging <code>develop→main</code> drops it from main's working tree while all history and the protected baseline remain. The <strong>sole precondition is the §2a extraction sign-off, and it IS recorded</strong> (f-int-10 resolved: norma CI run 30126947615, gate 228 passed / 13 skipped, self-contained green) — so this is UNBLOCKED and ready to ship. Per decision <code>seal-gating</code> (2026-07-27) §10 ambix adoption no longer gates the seal: it is independent work in the imas-ambix checkout, f-int-09 stays open on its own track. Fully recoverable: <code>git checkout v1-assembly-baseline -- nova/assembly</code> restores any file; no SHA churn.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -1124,8 +1127,9 @@ Done-when
      A locally-recorded green is the only available signal — do not claim a
      CI-verified merge.
   4. Single-trunk restored; §11 recorded; plan set shipped.</pre>
+    <p class="r-fu-outcome">Forward-deletion convergence shipped on main. develop merged at 0d8bb8ce; assembly and recorded-corpus trees left the working tree while legacy/v1 and v1-assembly-baseline remained untouched. Full local lane on sun_debug with Python 3.14.2: 3,804 passed / 118 skipped in 660.52 s. Single-trunk guidance and merge hygiene landed at 25f21429. f-int-09 remains open as independent ambix adoption work.</p>
     </article>
-<article class="r-fu" data-id="f-int-12" data-status="resolved" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-24T21:35:00+00:00" data-recommends-skill="/reckon-ship nova-spine-refactor §2a" data-resolved-at="2026-07-27T20:22:12+00:00" data-resolved-by="smc">
+<article class="r-fu" data-id="f-int-12" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-ship" data-written-at="2026-07-24T21:35:00+00:00" data-recommends-skill="/reckon-ship nova-spine-refactor §2a" data-resolved-at="2026-07-27T20:22:12+00:00" data-resolved-by="smc">
     <h4 class="r-fu-title">Add the CORPUS_READ_TOKEN secret so norma CI replays against the real measured corpus</h4>
     <div class="r-fu-body"><p>norma CI is green but corpus-blind: 5 of its 13 skips exist only because the measured sector-module corpus cannot be pulled in Actions. The private GHCR package <code>ghcr.io/simon-mcintosh/norma-corpus</code> is repo-linked to <em>nova</em>, and GitHub offers no API to grant a second repository's <code>GITHUB_TOKEN</code> read access to a user-owned private package — only the package's own settings page can. The workflow already handles this: it authenticates with <code>secrets.CORPUS_READ_TOKEN</code> and skips the pull steps when that secret is absent. Supplying the secret (or, alternatively, granting norma Actions access from the package settings page and switching the login to <code>GITHUB_TOKEN</code>) promotes the pit-gap ILIS reference lane, the off-repo canonical snapshot lane and three transcode lanes from skip to executed, with no workflow change. Both routes need an interactive GitHub session, so an agent cannot complete them unaided.</p></div>
     <pre class="r-fu-prompt">Project: norma (~/Code/norma, github.com/Simon-McIntosh/norma; private) and the GHCR package ghcr.io/simon-mcintosh/norma-corpus

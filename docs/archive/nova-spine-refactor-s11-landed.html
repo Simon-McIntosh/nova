@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="archive">
+  <meta name="plan-slug" content="nova-spine-refactor-s11-landed">
+  <meta name="plan-title" content="Physics-spine convergence — landed">
+  <meta name="plan-status" content="historical">
+  <meta name="plan-modified" content="2026-07-29">
+  <title>Physics-spine convergence — landed | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Physics-spine convergence — landed</h1>
+    <p><strong>2026-07-29.</strong> Nova returned to a single <code>main</code> trunk after the
+    extracted assembly tree was removed by an ordinary merge. History was not rewritten, and
+    the protected 1.x reference remains available through <code>legacy/v1</code> and the
+    <code>v1-assembly-baseline</code> tag.</p>
+
+    <section class="card">
+      <h2>Result</h2>
+      <table>
+        <thead><tr><th>Check</th><th>Outcome</th></tr></thead>
+        <tbody>
+          <tr><td>Extraction sign-off</td><td>norma run 30126947615 green: 228 passed / 13 skipped</td></tr>
+          <tr><td>Forward-deletion merge</td><td><code>0d8bb8ce</code> on <code>main</code></td></tr>
+          <tr><td>Assembly and recorded corpus</td><td>absent from nova's working tree; retained in norma and frozen nova history</td></tr>
+          <tr><td>Complete local lane</td><td>3,804 passed / 118 skipped in 660.52 s</td></tr>
+          <tr><td>Single-trunk policy and hygiene</td><td><code>25f21429</code>; obsolete split instructions retired</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>Branch convergence</h2>
+      <svg viewBox="0 0 760 230" role="img"
+           aria-label="Develop merges into main while the frozen legacy branch remains unchanged"
+           style="max-width:100%;height:auto;font-family:sans-serif;font-size:14px">
+        <line x1="70" y1="70" x2="690" y2="70" stroke="#4c8bf5" stroke-width="4"/>
+        <line x1="250" y1="165" x2="500" y2="70" stroke="#e08a2b" stroke-width="4"/>
+        <circle cx="500" cy="70" r="9" fill="#2ec26b"/>
+        <text x="505" y="48" text-anchor="middle" fill="#2ec26b">0d8bb8ce — convergence merge</text>
+        <text x="705" y="75" fill="#4c8bf5" font-weight="bold">main</text>
+        <text x="190" y="190" fill="#e08a2b">develop (historical integration line)</text>
+        <line x1="160" y1="70" x2="160" y2="130" stroke="#b060d0" stroke-width="3"/>
+        <circle cx="160" cy="130" r="7" fill="#b060d0"/>
+        <text x="175" y="135" fill="#b060d0">legacy/v1 + v1-assembly-baseline (frozen)</text>
+      </svg>
+    </section>
+
+    <section class="card">
+      <h2>Verification environment</h2>
+      <p>The repository has no GitHub Actions workflow, so the post-merge signal is the mandated
+      local run. It executed on an SDCC <code>sun_debug</code> compute node with Python 3.14.2
+      after syncing every available extra except uncached <code>gmsh</code>. Command:</p>
+      <pre><code>uv run pytest -m "slow or not slow" -p no:randomly</code></pre>
+      <p>Outcome: <strong>3,804 passed, 118 skipped, 186 warnings</strong> in 660.52 seconds.
+      The earlier default selection reached 3,178 passed / 92 skipped before its long-tail
+      interruption; the remaining six test modules passed 99 tests, and the IMAS doctest files
+      produced nine named offline-data skips. The complete lane above is the authoritative result.</p>
+    </section>
+
+    <section class="card">
+      <h2>Preserved boundaries</h2>
+      <ul>
+        <li>No history rewrite, force-push, or protected-ref mutation was performed.</li>
+        <li>The norma extraction remains independently green and is the canonical assembly home.</li>
+        <li>The open ambix adoption work is independent and did not gate this repository seal.</li>
+        <li>One pre-existing equilibrium worktree remains because it contains two untracked
+        benchmark-result JSON files; those artifacts were preserved rather than discarded.</li>
+      </ul>
+    </section>
+  </main>
+</body>
+</html>

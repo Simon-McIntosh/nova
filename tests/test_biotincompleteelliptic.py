@@ -676,27 +676,126 @@ def test_the_compiled_third_kind_holds_the_extended_reference_over_the_sweep():
     assert worst_device < 4e-15  # measured 2.2e-15
 
 
-def test_the_gaps_taken_by_subtraction_are_what_the_carried_ones_repair(monkeypatch):
-    """The cancellation the carried gaps remove, measured in BOTH arrangements.
+# The small-pole side, and one reflected pole whose partner k'^2/p is DENORMAL.
+# At the first four the gap between the pole argument and the amplitude's squared
+# cosine is resolvable but small; at the last the pole argument rounds onto that
+# cosine outright, which is the end of the ladder rather than a separate corner.
+GAP_POLES = [1e-14, 1e-12, 1e-10, 1e-8]
+DENORMAL_PARTNER_POLE = 1e12
 
-    The pole argument the symmetric forms receive is ``cos^2 phi + p sin^2 phi``,
-    so a small ``p`` puts it within ``p`` of ``cos^2 phi`` -- which is one of the
-    other three -- and the degenerate form's two roots then agree to all but their
-    last few digits.  Subtracting them keeps only those; the carried gaps are
-    products of quantities the caller holds and keep everything.
+# What subtracting the two leaves, as a fraction of the gap itself. The pole
+# argument is ``cos^2 phi + partner sin^2 phi`` and the other three include
+# ``cos^2 phi``, so their difference is quantised by the ulp of ``cos^2 phi`` and
+# the subtraction keeps the gap only to ulp/gap -- 2.8e-17 over 8.5e-15 at the
+# first of these. Round-to-nearest on a double is the whole mechanism, so these
+# are floors on every machine rather than one host's measurement.
+SUBTRACTED_GAP_FLOORS = [5e-4, 2e-6, 1e-8, 2e-10]  # measured 1.1e-3 to 5.2e-10
 
-    The two are run side by side against the same longdouble reference, and the
-    comparison is made on the COMPILED path because that is where the loss is at
-    its worst: the fusion the compiler applies to ``cos^2 phi + p sin^2 phi``
-    changes the argument in its last bit, and the subtraction multiplies that up by
-    the reciprocal of the relative gap.  The bound on the subtracted form is
-    two-sided, so an unexplained improvement fails as surely as a regression.
+
+def _supplied_arguments(poles, complements, co_amplitude=0.4):
+    """Return what :func:`incomplete_pole` hands the symmetric forms, as it forms it.
+
+    The gaps are the point of the exercise, so they are taken from the entry point
+    rather than rebuilt here: a routine that stopped supplying them, or supplied
+    them by subtraction, is exactly what this has to see.
     """
+    _, sine, cosine = pair(co_amplitude)
+    seen = {}
+    original = incompleteelliptic.symmetric_kinds
+
+    def spy(x, y, z, pole, scale=1.0, *, gaps=None, **keywords):
+        seen.update(x=x, y=y, z=z, pole=pole, gaps=gaps)
+        return original(x, y, z, pole, scale, gaps=gaps, **keywords)
+
+    incompleteelliptic.symmetric_kinds = spy
+    try:
+        incomplete_pole(np.asarray(poles), np.asarray(complements), sine, cosine)
+    finally:
+        incompleteelliptic.symmetric_kinds = original
+    return seen
+
+
+def _exact_gaps(pole, complement, co_amplitude=0.4):
+    """Return the three gaps in longdouble, through the reflection the routine takes."""
+    pole, complement = np.longdouble(pole), np.longdouble(complement)
+    _, sine, _ = pair(co_amplitude)
+    squared_sine = np.longdouble(sine) * np.longdouble(sine)
+    partner = complement / pole if pole > 1.0 else pole
+    return (
+        partner * squared_sine,
+        (partner - complement) * squared_sine,
+        (partner - 1.0) * squared_sine,
+    )
+
+
+def test_the_gaps_are_carried_as_products_because_the_subtraction_has_no_digits():
+    """The cancellation the carried gaps remove, measured where it happens.
+
+    The pole argument the symmetric forms receive is
+    ``cos^2 phi + partner sin^2 phi`` and one of the other three is ``cos^2 phi``
+    itself, so the gap between them is ``partner sin^2 phi`` -- a PRODUCT of
+    quantities the caller already holds, and exact.  Formed instead by subtracting
+    the two, it keeps the gap only to the ulp of ``cos^2 phi``: three decades gone
+    at a pole of 1e-14, and at a reflected pole whose partner is denormal the pole
+    argument rounds onto ``cos^2 phi`` outright, so the subtraction returns zero
+    where the product still carries its mantissa.  Nothing in that but
+    round-to-nearest on a double, which is why it is asserted with a floor.
+
+    Both arrangements are measured HERE, on the arguments the entry point itself
+    formed, rather than through the assembled value, and that is deliberate.  The
+    degenerate form is SECOND order in its root: ``R_C`` departs from ``1/s`` by
+    ``root^2/3s^2``, and in the hyperbolic branch the ``root - difference`` under
+    the logarithm is what cancels the log's own first-order term.  So a root
+    overstated by eight decades -- which is what subtracting two roots that agree
+    past their last bit gives -- still leaves the value at round-off, PROVIDED root
+    and difference stay consistent with each other.  Carried, they are, because the
+    difference is formed from the root.  Subtracted, they are two separately
+    rounded derivations of a subtraction with no correct digits left, and a
+    compiler free to recompute either one breaks the cancellation and lets those
+    eight decades through: measured, the same kernel over the same poles strays
+    1.2e-09 on one backend and holds 1.6e-15 on another.  The assembled comparison
+    below therefore bounds the subtracted arrangement from ABOVE only, and the
+    claim carrying a floor is the one about the gaps.
+    """
+    complements = [1e-300] * (len(GAP_POLES) + 1)
+    poles = GAP_POLES + [DENORMAL_PARTNER_POLE]
+    seen = _supplied_arguments(poles, complements)
+
+    # the supply itself: a routine that stopped carrying the gaps leaves the
+    # degenerate form to subtract its two roots, and there is nothing to measure
+    assert seen["gaps"] is not None
+
+    argument = np.asarray(seen["pole"])
+    others = [np.broadcast_to(np.asarray(seen[name]), argument.shape) for name in "xyz"]
+    for index, (pole, complement) in enumerate(zip(poles, complements)):
+        exact = _exact_gaps(pole, complement)
+        for which, other in enumerate(others):
+            supplied = np.longdouble(seen["gaps"][which][index])
+            subtracted = np.longdouble(argument[index] - other[index])
+            carried_error = abs(supplied - exact[which]) / abs(exact[which])
+            subtracted_error = abs(subtracted - exact[which]) / abs(exact[which])
+            if pole == DENORMAL_PARTNER_POLE and which == 0:
+                # the product is denormal, so its own mantissa is what limits it
+                assert carried_error < 1e-11  # measured 4.4e-12
+            else:
+                assert carried_error < 1e-16  # measured 2.0e-18 to 5.6e-17
+            if which == 2:
+                continue  # the gap to z is of order one, and subtracts cleanly
+            if pole == DENORMAL_PARTNER_POLE:
+                # the pole argument rounds onto the other outright
+                assert subtracted == 0.0
+                assert supplied != 0.0
+            else:
+                assert subtracted_error > SUBTRACTED_GAP_FLOORS[index]
+
+    # and the accuracy the products buy at the entry point, on both paths. The
+    # subtracted arrangement is bounded from above alone: whether the loss above
+    # reaches the value depends on how the kernel was compiled, not on the input.
     jax, jnp = traced_namespace()
     co_amplitude = 0.4
     _, sine, cosine = pair(co_amplitude)
-    poles = np.array([1e-14, 1e-12, 1e-10, 1e-8])
-    complements = np.array([1e-300, 1e-300, 1e-300, 1e-300])
+    swept = np.array(GAP_POLES)
+    complements = np.full_like(swept, 1e-300)
 
     @jax.jit
     def traced(pole, complement):
@@ -704,30 +803,33 @@ def test_the_gaps_taken_by_subtraction_are_what_the_carried_ones_repair(monkeypa
             pole, complement, jnp.asarray(sine), jnp.asarray(cosine), xp=jnp
         )
 
-    def strayed():
-        traced.clear_cache()
-        device = np.asarray(traced(jnp.asarray(poles), jnp.asarray(complements)))
+    def strayed(got):
         return max(
-            abs(device[index] - _pole_integral(co_amplitude, pole, complement))
+            abs(got[index] - _pole_integral(co_amplitude, pole, complement))
             / abs(_pole_integral(co_amplitude, pole, complement))
-            for index, (pole, complement) in enumerate(zip(poles, complements))
+            for index, (pole, complement) in enumerate(zip(swept, complements))
         )
 
-    carried = strayed()
+    def compiled():
+        traced.clear_cache()
+        return np.asarray(traced(jnp.asarray(swept), jnp.asarray(complements)))
 
-    # the arrangement being held against, run here so its cost is a measurement:
-    # the module's own entry point supplies the gaps, so withholding them is what
-    # leaves the routine to subtract the two roots
-    subtracted_kinds = incompleteelliptic.symmetric_kinds
+    host = np.asarray(incomplete_pole(swept, complements, sine, cosine))
+    assert strayed(host) < 4e-15  # measured 1.3e-15
+    assert strayed(compiled()) < 4e-15  # measured 1.2e-15 and 1.4e-15
+
+    # the arrangement being held against, run so its cost is a measurement
+    carried_kinds = incompleteelliptic.symmetric_kinds
 
     def without_gaps(*arguments, gaps=None, **keywords):
-        return subtracted_kinds(*arguments, **keywords)
+        return carried_kinds(*arguments, **keywords)
 
-    monkeypatch.setattr(incompleteelliptic, "symmetric_kinds", without_gaps)
-    subtracted = strayed()
-
-    assert carried < 4e-15  # measured 1.2e-15
-    assert 1e-11 < subtracted < 1e-7  # measured 1.2e-09
+    incompleteelliptic.symmetric_kinds = without_gaps
+    try:
+        subtracted = strayed(compiled())
+    finally:
+        incompleteelliptic.symmetric_kinds = carried_kinds
+    assert subtracted < 1e-7  # measured 1.6e-15 on one backend, 1.2e-09 on another
 
 
 def test_the_third_kind_differentiates_where_a_gap_vanishes_exactly():

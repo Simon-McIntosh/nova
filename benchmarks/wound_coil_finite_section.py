@@ -1417,7 +1417,11 @@ def _finer_by_subset(resolved: dict) -> dict:
         {key.split("-", 3)[3] for key in resolved if len(key.split("-")) > 3}
     )
     carried = {}
-    for key, run in resolved.items():
+    # coarsest base first, so where a target is reachable from two whole-pack runs
+    # the FINEST of them wins: one extrapolation step is better than two
+    for key, run in sorted(
+        resolved.items(), key=lambda item: int(item[0].split("-")[1])
+    ):
         if run["rung"] is None:
             continue
         shape, corners, intervals = key.split("-")[:3]

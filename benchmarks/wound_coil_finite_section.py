@@ -23,12 +23,15 @@ discover.
     which pairs need it   Two non-overlapping circular sections have a geometric
                           mean distance exactly equal to the distance between
                           their centres, so a filament reproduces what a finite
-                          section would give for any pair of turns that do not
-                          overlap -- and the pack's turn-to-turn clearance is
-                          larger than the cable space everywhere.  The finite
-                          section is spent on the WITHIN-TURN block alone, which
-                          is five source elements against twenty stations rather
-                          than the whole matrix.
+                          section would give for any pair of turns -- real
+                          conductor cannot overlap.  The finite section is spent
+                          on the WITHIN-TURN block alone, five source elements
+                          against twenty stations rather than the whole matrix.
+                          Where that identity is most at risk is the turn
+                          BOUNDARY, at which the conductor does not stop and the
+                          two sections are separated along it rather than across
+                          it; the ``seam`` stage measures exactly those pairs both
+                          ways and finds +1.7e-08 H over the whole pack.
 
     where the target is   An inductance is the flux linked by the current, which
                           is the MEAN of the flux over the section the current
@@ -51,13 +54,15 @@ discover.
                           its ``(r, z)`` fixed as it sweeps.  A winding pack does
                           not: each element advances across the pack as it goes
                           round, so its footprint is a smear reaching 170 mm where
-                          the section is 35 mm -- 244 corners instead of 32 and 7.6
-                          times the area the current occupies, on an element three
-                          quarters of the pack's length looks like.  A self term is
-                          the logarithm of the section's geometric mean distance, so
-                          that is a first-order error on it.  Two joggles in a
-                          hundred move so far that the footprint is not even
-                          connected.  So the closed forms are driven directly, with
+                          the section is 35 mm.  Three quarters of this pack's
+                          length sits on elements that move further than their own
+                          section is wide, and the worst column reaches the kernel
+                          with 244 corners instead of 32, carrying 7.6 times the
+                          area the current occupies.  A self term is the logarithm
+                          of the section's geometric mean distance, so that is a
+                          first-order error on it.  Two joggles in a hundred move so
+                          far that the footprint is not even connected.  So the
+                          closed forms are driven directly, with
                           the section handed over as the section.  The two routes
                           are run against each other on the coaxial ring, which is
                           the one path where the frame's column IS the section.
@@ -84,11 +89,20 @@ Stages, each writing its own JSON beside the figures::
     python benchmarks/wound_coil_finite_section.py ladder
     python benchmarks/wound_coil_finite_section.py figures
 
-Every stage is minutes on a login node once the frame is out of the loop: the
-direct route pays for the section's corners and for nothing else.  It is host
-numpy throughout, for the reason the companion sets out -- the tiled operator
-reaches the axisymmetric polygon section only, so there is no device route to the
-swept arc and prism kernels a resolved winding is built from.
+Only ``self`` over the whole pack is heavy, and it is heavy per SECTION rather than
+per pair: the closed form amortises its corner parts across a call and a turn is
+only twenty stations, so the cost is one call per element per boundary, about 4.6 s
+a turn at sixteen corners and 8.7 s at thirty-two, doubling again for a hollow
+section.  A whole-pack run is therefore twenty to forty minutes and the sweep is a
+set of independent processes rather than a loop -- one section each, merged by
+``ladder``, which is what lands the whole sweep inside one hour of one allocation.
+The corner count the pack is too expensive to run at is carried to it from a
+twenty-five turn subset by the length ratio, and the scaling that licenses that is
+printed beside it.
+
+Everything is host numpy, for the reason the companion sets out -- the tiled
+operator reaches the axisymmetric polygon section only, so there is no device route
+to the swept arc and prism kernels a resolved winding is built from.
 """
 
 from __future__ import annotations

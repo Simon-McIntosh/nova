@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-29T11:18:02",
+  "updated": "2026-07-29T14:11:57",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -14,11 +14,29 @@
             "why_now": "All migration work depends on the final API/branch convergence.",
             "tier": "opus",
             "done_when": "Ambix adoption contract is frozen, assembly extracted, plan/code branches converge and the main suite passes."
+          },
+          {
+            "slug": "polybow-arc-section",
+            "why_now": "The pin refit exposed a real correctness item: XLA CPU codegen breaks a root/difference cancellation in the elliptic descent that GPU-less serving nodes compile through; the hollowness normalisation still folds in opposite directions across two layers. Stabilise before downstream ports consume the arc element.",
+            "tier": "opus",
+            "done_when": "Descent swept and codegen-pinned on both backends; traced-parity item re-triaged; hollowness one direction with both layers agreeing; disc/ellipse corner-count decision locked on measurement. GPU wall-clock re-quote and arc banding may roll to S2."
+          },
+          {
+            "slug": "coil-conductor-fidelity",
+            "why_now": "One rung from shipped: the feeder run is 46% of PF1's residual and costs seconds per coil to measure; the mesh-default recommendation unblocks the reconstruction lane's convergence discipline.",
+            "tier": "opus",
+            "done_when": "Feeder rung tabulated for all twelve coils with the circuit boundary established or explicitly undetermined; reconstruction mesh default recommended with its convergence ladder; plan shipped."
+          },
+          {
+            "slug": "nova-heritage-recovery",
+            "why_now": "The repair is merged but its evidence record is missing; reconstruction is cheap and the plan is at 0.7 with one followup between it and shipped.",
+            "tier": "sonnet",
+            "done_when": "Damage inventory, FrequencyResponse oracle check, hermeticity proof and test counts recorded; galleries import-checked; salvage register written; plan shipped."
           }
         ],
         "starts": "2026-07-29",
         "ends": "2026-08-05",
-        "description": "Finish assembly extraction, Ambix adoption contract and return to a single trunk before downstream ports consume unstable APIs."
+        "description": "Finish assembly extraction, Ambix adoption contract and return to a single trunk before downstream ports consume unstable APIs \u2014 plus the close-out lanes that must stabilise before anything consumes them: the arc element's codegen/hollowness correctness set, the conductor-fidelity feeder rung, and the heritage evidence record."
       },
       {
         "id": "S2",
@@ -87,8 +105,43 @@
         "when": "2026-07-29",
         "who": "codex",
         "what": "Dependency-ordered Ambix-to-Nova physics transition sprints S1-S4 defined"
+      },
+      {
+        "when": "2026-07-29",
+        "who": "reckon-sprint",
+        "what": "S1 rebalanced: polybow correctness close-out, conductor-fidelity feeder rung and heritage evidence added beside the convergence item; blockers B1-B4 recorded; cross-project dependencies qualified project:slug under the new schema."
       }
     ],
-    "_version": 2
+    "blockers": [
+      {
+        "id": "B1",
+        "summary": "develop/main diverged 6 days (269 code commits on develop vs 126 docs/data commits on main since e31fb6df) \u2014 reckon state serves from main while all code lands on develop. The \u00a711 forward-deletion merge (develop\u2192main, assembly tree drops from the working tree, no history rewrite) is UNBLOCKED: the sole precondition (norma extraction sign-off, CI 228/13 green) is recorded.",
+        "origin": "nova-spine-refactor#s11",
+        "owner": "Simon McIntosh",
+        "next": "/reckon-ship nova-spine-refactor \u00a711 \u2014 merge develop\u2192main, verify lanes green locally (no CI), retire the two-branch exception, set the plan shipped."
+      },
+      {
+        "id": "B2",
+        "summary": "CS geometry-revision conflict, upstream of nova: the 111004/1 conductor centreline packs sit on the OLDER itergeom outline revision (CS3U 202 mm higher / 19 mm inside, worth -2.14e-02 H \u2014 forty times the winding effect) while the machine inductance table matches the SHIPPED revision, and the stored CS section is half the documented cable-space radius. No solenoid winding comparison is readable until the ITER machine-description provenance (DET-07879-A chain) is reconciled.",
+        "origin": "external: ITER_MACHINE_DESCRIPTION 111004/1 vs itergeom revisions",
+        "owner": "Simon McIntosh",
+        "next": "Raise with the machine-description provider; until then CS stays off the conductor-fidelity ladder (recorded in coil-conductor-fidelity \u00a73/\u00a74)."
+      },
+      {
+        "id": "B3",
+        "summary": "The machine-description inductance table's circuit boundary is undetermined: terminal-to-terminal vs pack-only decides whether PF1's +3.335e-04 H feeder rung belongs on the comparison ladder (46% of the remaining residual) or in the hardware record. A documentation hunt, not a computation.",
+        "origin": "coil-conductor-fidelity#s4 (f-ccf-06 item 3)",
+        "owner": "Simon McIntosh",
+        "next": "Establish from DDD / DET-07879-A / pf_active 111001/104 metadata which circuit the table describes; if undetermined, tabulate both readings per coil."
+      },
+      {
+        "id": "B4",
+        "summary": "norma still ships a top-level nova/ package (nine of ten entries collide with nova-stella; pip lets the later install silently overwrite the earlier). Any environment installing both norma and nova 2.0 is exposed until the namespace rename lands. External to nova: the work is norma:norma-standalone-package (rename \u2192 registry re-home \u2192 wheel-boundary co-installation gate).",
+        "origin": "external: norma:norma-standalone-package",
+        "owner": "Simon McIntosh",
+        "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
+      }
+    ],
+    "_version": 3
   }
 }

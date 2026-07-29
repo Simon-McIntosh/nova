@@ -1,4 +1,4 @@
-"""Circuit-coupling generator: classify conductor circuits, merge drive channels.
+"""Circuit-coupling generator: classify conductors and emit circuit inputs.
 
 Magnetostatic reconstruction couples sensors (and grids) to *driven current
 sources*, but a facility's conductor model enumerates *circuits* — filament
@@ -26,15 +26,26 @@ in their own column, passive circuits listed for the eddy/structure block.
 :meth:`CouplingPlan.weight_matrix` expresses the plan as per-source column
 weights so any per-source coupling matrix from the biot Solve/Matrix tier
 collapses to merged columns with a single matmul.
+
+:meth:`CouplingPlan.emit` is the hand-off to :mod:`nova.circuit`: it packages
+the same filament table as a :class:`nova.circuit.ConductorSet`, emits the
+deterministic drive-channel wiring, and moves explicitly measured circuits
+into the passive state while retaining their channels as held-back targets.
 """
 
+from __future__ import annotations
+
 from dataclasses import dataclass
+from collections.abc import Iterable
 
 import numpy as np
+
+from nova.circuit.conductor import ConductorSet, PolygonSection
 
 __all__ = [
     "CaseChannel",
     "CircuitClass",
+    "CircuitCoupling",
     "CircuitTable",
     "CoilChannel",
     "CouplingColumn",
@@ -241,6 +252,80 @@ class CouplingPlan:
     passive: tuple[int, ...]
     classes: tuple[CircuitClass, ...]
 
+    def emit(
+        self,
+        *,
+        r: np.ndarray,
+        z: np.ndarray,
+        dr: np.ndarray,
+        dz: np.ndarray,
+        current_share: np.ndarray,
+        circuit: np.ndarray,
+        measured_channels: Iterable[str] = (),
+        polygon_sections: Iterable[PolygonSection] = (),
+    ) -> CircuitCoupling:
+        """Emit circuit-ready conductors, wiring, and measured holdbacks.
+
+        ``measured_channels`` names instrumented circuits whose currents are
+        supervision targets rather than drives. Each such channel must map to
+        exactly one circuit; its circuit is added to ``passive_circuits`` and
+        the channel is omitted from ``channel_circuits``. This matches the
+        input contract of :func:`nova.circuit.build_passive_circuit_system`.
+
+        The filament circuit membership must exactly match the classified
+        membership. A mismatch is rejected here so a missing or extraneous
+        circuit cannot silently disappear from the physical model.
+        """
+        conductors = ConductorSet(
+            r=r,
+            z=z,
+            dr=dr,
+            dz=dz,
+            current_share=current_share,
+            circuit=circuit,
+            polygon_sections=tuple(polygon_sections),
+        )
+        classified = {entry.circuit for entry in self.classes}
+        represented = {int(member) for member in conductors.circuits}
+        if classified != represented:
+            missing = sorted(represented - classified)
+            unknown = sorted(classified - represented)
+            raise ValueError(
+                "classified circuits do not match conductor membership: "
+                f"missing classifications {missing}; "
+                f"unknown classifications {unknown}"
+            )
+
+        requested = set(measured_channels)
+        available = {column.channel for column in self.columns}
+        unknown_channels = sorted(requested - available)
+        if unknown_channels:
+            raise ValueError(
+                f"measured channels have no classified circuit: {unknown_channels}"
+            )
+
+        held_back: dict[str, int] = {}
+        driven: dict[str, list[int]] = {}
+        for column in self.columns:
+            members = list(column.circuits)
+            if column.channel in requested:
+                if len(members) != 1:
+                    raise ValueError(
+                        f"measured channel {column.channel!r} maps to "
+                        f"{len(members)} circuits; holdback requires one circuit"
+                    )
+                held_back[column.channel] = members[0]
+            else:
+                driven[column.channel] = members
+
+        passive = tuple(sorted((*self.passive, *held_back.values())))
+        return CircuitCoupling(
+            conductors=conductors,
+            channel_circuits=driven,
+            passive_circuits=passive,
+            measured_circuits=held_back,
+        )
+
     def weight_matrix(
         self,
         circuit: np.ndarray,
@@ -280,11 +365,32 @@ def couple_circuits(classes: "list[CircuitClass]") -> CouplingPlan:
     """
     by_channel: dict[str, list[CircuitClass]] = {}
     passive: list[int] = []
+    seen: set[int] = set()
     for entry in classes:
+        if entry.circuit in seen:
+            raise ValueError(f"circuit {entry.circuit} is classified more than once")
+        seen.add(entry.circuit)
         if entry.role in _KNOWN_ROLES:
+            if not entry.channel:
+                raise ValueError(f"known circuit {entry.circuit} has no drive channel")
             by_channel.setdefault(entry.channel, []).append(entry)
-        else:
+        elif entry.role == "inferred_passive":
+            if entry.channel:
+                raise ValueError(
+                    f"passive circuit {entry.circuit} has drive channel "
+                    f"{entry.channel!r}"
+                )
             passive.append(entry.circuit)
+        else:
+            raise ValueError(f"circuit {entry.circuit} has unknown role {entry.role!r}")
+    for channel, members in by_channel.items():
+        roles = {entry.role for entry in members}
+        if len(roles) != 1:
+            circuits = sorted(entry.circuit for entry in members)
+            raise ValueError(
+                f"channel {channel!r} ambiguously mixes circuit roles "
+                f"{sorted(roles)} for circuits {circuits}"
+            )
     columns = tuple(
         CouplingColumn(
             channel=channel,
@@ -296,3 +402,18 @@ def couple_circuits(classes: "list[CircuitClass]") -> CouplingPlan:
     return CouplingPlan(
         columns=columns, passive=tuple(sorted(passive)), classes=tuple(classes)
     )
+
+
+@dataclass(frozen=True)
+class CircuitCoupling:
+    """Circuit-tier emission from one classified conductor model.
+
+    ``channel_circuits`` contains driven channels only. ``measured_circuits``
+    names single passive circuits held back as supervision targets. Both maps
+    are inserted in sorted channel order, and every circuit list is sorted.
+    """
+
+    conductors: ConductorSet
+    channel_circuits: dict[str, list[int]]
+    passive_circuits: tuple[int, ...]
+    measured_circuits: dict[str, int]

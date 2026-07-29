@@ -20,10 +20,15 @@ import pytest
 
 from nova.scripts.identify_source_cocos import (
     LEVEL1,
+    build_configuration_ranges,
+    canonical_closed_curve,
+    canonical_physical_geometry,
     cocos_from_digits,
     determine_digits,
     fingerprint_shot,
     flux_loop_two_pi_ratio,
+    physical_geometry_equivalent,
+    physical_geometry_shot,
 )
 
 # --- the measured verdict ---------------------------------------------------
@@ -240,6 +245,116 @@ def test_target_q_is_negative_for_the_forward_cohort():
     assert np.sign(FORWARD_COHORT["ip"]) * np.sign(FORWARD_COHORT["b0"]) == -1
 
 
+def _physical_arrays(*, subdivided: bool = False) -> dict[str, np.ndarray]:
+    if subdivided:
+        fcoil_r = np.array([-0.5, 0.5, -0.5, 0.5])
+        fcoil_z = np.array([-0.25, -0.25, 0.25, 0.25])
+        fcoil_width = np.full(4, 1.0)
+        fcoil_height = np.full(4, 0.5)
+        fcoil_weight = np.full(4, 0.25)
+        fcoil_component = np.ones(4)
+        fcoil_turns = np.full(4, 10.0)
+    else:
+        fcoil_r = np.array([0.0])
+        fcoil_z = np.array([0.0])
+        fcoil_width = np.array([2.0])
+        fcoil_height = np.array([1.0])
+        fcoil_weight = np.array([1.0])
+        fcoil_component = np.array([1.0])
+        fcoil_turns = np.array([10.0])
+    return {
+        "magpr_r": np.array([1.0, 1.2]),
+        "magpr_z": np.array([0.1, -0.1]),
+        "magpr_ang": np.array([0.0, 90.0]),
+        "magpr_len": np.array([0.02, 0.02]),
+        "silop_r": np.array([0.9, 1.3, np.nan]),
+        "silop_z": np.array([0.2, -0.2, np.nan]),
+        "fcoil_r": fcoil_r,
+        "fcoil_z": fcoil_z,
+        "fcoil_width": fcoil_width,
+        "fcoil_height": fcoil_height,
+        "fcoil_turns": fcoil_turns,
+        "fcoil_circ": fcoil_component,
+        "fcoil_xmult": fcoil_weight,
+        "limiterr": np.array([0.5, 1.5, 1.5, 0.5]),
+        "limiterz": np.array([-1.0, -1.0, 1.0, 1.0]),
+    }
+
+
+def test_conductor_subdivision_does_not_change_physical_geometry():
+    coarse = canonical_physical_geometry(_physical_arrays())
+    divided = canonical_physical_geometry(_physical_arrays(subdivided=True))
+    assert np.allclose(
+        np.asarray(coarse["active_and_case_circuits"], dtype=float),
+        np.asarray(divided["active_and_case_circuits"], dtype=float),
+    )
+    assert physical_geometry_equivalent(coarse, divided)
+
+
+def test_true_conductor_relocation_changes_physical_geometry():
+    base = canonical_physical_geometry(_physical_arrays())
+    moved_arrays = _physical_arrays(subdivided=True)
+    moved_arrays["fcoil_r"] += 0.05
+    moved = canonical_physical_geometry(moved_arrays)
+    assert not physical_geometry_equivalent(base, moved)
+
+
+@pytest.mark.parametrize(
+    ("field", "offset"),
+    [("magpr_r", 0.02), ("magpr_ang", 0.2)],
+)
+def test_diagnostic_pose_and_orientation_are_physical_identity(field, offset):
+    base = canonical_physical_geometry(_physical_arrays())
+    changed_arrays = _physical_arrays()
+    changed_arrays[field][0] += offset
+    changed = canonical_physical_geometry(changed_arrays)
+    assert not physical_geometry_equivalent(base, changed)
+
+
+def test_curve_subdivision_does_not_change_geometry():
+    base = canonical_closed_curve(
+        np.array([0.0, 2.0, 2.0, 0.0]),
+        np.array([0.0, 0.0, 1.0, 1.0]),
+    )
+    divided = canonical_closed_curve(
+        np.array([0.0, 1.0, 2.0, 2.0, 1.0, 0.0]),
+        np.array([0.0, 0.0, 0.0, 1.0, 1.0, 1.0]),
+    )
+    assert base == pytest.approx(divided)
+
+
+def test_shot_ranges_keep_unreadable_evidence_explicit():
+    ranges = build_configuration_ranges(
+        [(100, "geometry-a"), (101, None), (102, "geometry-a")]
+    )
+    assert len(ranges) == 1
+    assert ranges[0].shot_min == 100
+    assert ranges[0].shot_max == 102
+    assert ranges[0].unreadable_shots == (101,)
+
+
+def test_shot_ranges_do_not_hide_a_configuration_change_across_a_gap():
+    ranges = build_configuration_ranges(
+        [(100, "geometry-a"), (101, None), (102, "geometry-b")]
+    )
+    assert [(item.shot_min, item.shot_max) for item in ranges] == [
+        (100, 100),
+        (102, 102),
+    ]
+    assert ranges[0].unreadable_shots == (101,)
+    assert all(item.confidence == "provisional" for item in ranges)
+
+
+def test_corrupt_geometry_is_not_a_configuration(monkeypatch):
+    from nova.scripts import identify_source_cocos
+
+    def fail_open(shot):
+        raise ValueError(f"unreadable {shot}")
+
+    monkeypatch.setattr(identify_source_cocos, "_open_efm", fail_open)
+    assert physical_geometry_shot(12345) is None
+
+
 # --- corpus-backed re-derivation (skipped without the mirror) --------------
 
 _MIRROR = Path(LEVEL1)
@@ -247,13 +362,13 @@ _needs_mirror = pytest.mark.skipif(
     not _MIRROR.is_dir(), reason=f"MAST level-1 mirror not present at {_MIRROR}"
 )
 
-#: one representative shot per identified machine description, each chosen
+#: one representative shot per raw setup fingerprint, each chosen
 #: because its reconstructed flux map and fitted loop fluxes are both populated
 #: at its peak-current slice -- so the same three shots exercise the fingerprint
 #: check and the 2*pi measurement.
 REPRESENTATIVE_SHOTS = (11794, 12417, 18502)
 
-#: the three machine-description fingerprints the whole corpus resolves to.
+#: the three representation fingerprints the whole corpus resolves to.
 KNOWN_FINGERPRINTS = {
     "mp78-fl46-fc1004-lim37-9425ae4a8bf3bc15",
     "mp78-fl46-fc1004-lim37-edd753d282903679",
@@ -271,6 +386,20 @@ def test_shot_resolves_to_a_known_fingerprint(shot):
     assert row["n_probe"] == 78
     assert row["n_loop"] == 46
     assert row["n_limiter"] == 37
+
+
+@_needs_mirror
+def test_raw_setup_fingerprints_share_one_physical_geometry():
+    geometries = [physical_geometry_shot(shot) for shot in REPRESENTATIVE_SHOTS]
+    if any(geometry is None for geometry in geometries):
+        pytest.skip("one or more representative setup geometries are unreadable")
+    reference, *others = geometries
+    assert reference is not None
+    assert all(
+        physical_geometry_equivalent(reference, geometry)
+        for geometry in others
+        if geometry is not None
+    )
 
 
 @_needs_mirror
@@ -299,7 +428,7 @@ def test_flux_loop_ratio_measures_the_two_pi(shot):
     """The e_Bp digit, measured: loop flux [Wb] over psi at the loop [Wb/rad].
 
     Asserted once per machine description, because the flux map is stored on a
-    different grid layout in different campaigns and a wrong grid produces a
+    different grid layout in different setup representations and a wrong grid produces a
     plausible-looking but meaningless ratio.
     """
     result = flux_loop_two_pi_ratio(shot)

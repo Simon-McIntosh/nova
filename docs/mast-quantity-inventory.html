@@ -6,38 +6,38 @@
   <meta name="docs-project" content="nova">
   <meta name="reckon-type" content="research">
   <meta name="plan-slug" content="mast-quantity-inventory">
-  <meta name="plan-title" content="MAST machine-description quantity ledger, the identified source COCOS, and the machine-description count">
-  <meta name="plan-summary" content="The full source-to-DDv4 ledger for MAST's machine description: 40 quantities across pf_active, pf_passive, wall, magnetics and tf with their validated DDv4 paths, standard names, units and transforms; the source convention identified as COCOS 3 from 11154 shots with all four Sauter digits measured rather than assumed; and the finding that the corpus needs five machine descriptions rather than three, because the passive structure changes independently of the coil set and neither follows a shot range.">
+  <meta name="plan-title" content="MAST machine-description quantity ledger, source COCOS, and physical configuration evidence">
+  <meta name="plan-summary" content="The source-to-DDv4 ledger for 40 MAST machine quantities, the measured COCOS-3 convention, and the physical-configuration audit: three raw EFIT setup fingerprints collapse to one provisional geometry over shots 11695-30473 when mesh subdivision and wall-model discretisation are removed, with diagnostic positions and orientations retained and all unreadable evidence explicit.">
   <meta name="plan-status" content="reference">
   <meta name="plan-informs" content="mast-machine-description,mast-catalog-gpu-solve">
   <meta name="plan-owner" content="Simon McIntosh">
-  <meta name="plan-modified" content="2026-07-27">
+  <meta name="plan-modified" content="2026-07-30">
   <title>MAST quantity inventory and source COCOS | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 </head>
 <body>
 <main class="plan-doc">
-  <h1>MAST machine description: the quantity ledger, the identified source COCOS, and how many machine descriptions the corpus actually needs</h1>
+  <h1>MAST machine description: quantity ledger, source COCOS, and physical configuration evidence</h1>
 
   <p>Measured 2026-07-27 over the whole FAIR-MAST level-1 mirror at
   <code>/work/projects/imas_gpu/mast/level1/shots</code> — 17,111 shots on disk, 14,633 of them
   carrying readable static setup geometry, 11,154 carrying a converged reconstruction with
   appreciable plasma current. The driver is
   <code>nova/scripts/identify_source_cocos.py</code>; the verdict is pinned by
-  <code>tests/test_mastcocos.py</code> (19 tests); the artifact is
+  <code>tests/test_mastcocos.py</code>; the artifact is
   <code>docs/figures/mast-machine-description/source_cocos_audit.json</code>. Companion to the
-  <a href="/nova/mast-machine-description.html">mast-machine-description</a> plan, whose stage 1
-  this is.</p>
+  <a href="/nova/mast-machine-description.html">mast-machine-description</a> plan, which this
+  research informs.</p>
 
-  <h2>1. The three results that change the plan</h2>
+  <h2>1. Three results that govern authoring</h2>
 
   <p><strong>The COCOS-3 hypothesis is confirmed, and one of its stated consequences is not.</strong>
   All four Sauter &amp; Medvedev digits were measured, not assumed:
   σ<sub>Bp</sub>&nbsp;=&nbsp;−1 (unanimous over 11,154 shots),
   e<sub>Bp</sub>&nbsp;=&nbsp;0 (measured, not read off a units string),
   σ<sub>ρθφ</sub>&nbsp;=&nbsp;−1 (99.99% of shots), σ<sub>RφZ</sub>&nbsp;=&nbsp;+1 (declared —
-  see §2.4). That is COCOS 3. But the plan's §3 offers <em>"the MAST convention has
+  see §2.4). That is COCOS 3. But the earlier authoring premise offered <em>"the MAST convention has
   ψ<sub>axis</sub>&nbsp;&gt;&nbsp;ψ<sub>boundary</sub>"</em> as a landmark, and it is not one:
   <strong>379 shots (3.40%) have the axis as a flux <em>minimum</em></strong> while being the same
   COCOS, because their plasma current and toroidal field are both reversed. The convention-invariant
@@ -46,22 +46,27 @@
 
   <p><strong>ψ does not change sign on the way to DDv4, and q does.</strong> The prior ambix work
   identified the MAST-vs-IMAS mismatch as "axis = flux max vs axis = flux min", correctly — against
-  <strong>DDv3</strong>, which is COCOS 11 (σ<sub>Bp</sub>&nbsp;=&nbsp;+1). This plan targets
+  <strong>DDv3</strong>, which is COCOS 11 (σ<sub>Bp</sub>&nbsp;=&nbsp;+1). The target is
   <strong>DDv4, which is COCOS 17, and COCOS 17 has σ<sub>Bp</sub>&nbsp;=&nbsp;−1 — the same as
   COCOS 3.</strong> The celebrated mismatch evaporates at the DDv4 target: the ψ map is a pure
   ×2π with no sign flip. What survives, and what nobody had flagged, is the
   σ<sub>ρθφ</sub> digit: <strong>q changes sign</strong>, so a forward MAST shot authored in DDv4
-  carries q&nbsp;&lt;&nbsp;0. That is the live hazard for stage 6, not ψ.</p>
+  carries q&nbsp;&lt;&nbsp;0. That is the live hazard for equilibrium mapping, not ψ.</p>
 
-  <p><strong>The corpus needs five machine descriptions, not three.</strong> The efm fingerprint
-  the ambix tables use — probe and loop positions, probe angles, coil filament centroids and turns,
-  limiter contour — resolves the whole corpus to exactly 3 states, and this audit reproduces
-  ambix's three published digests byte-for-byte. But that fingerprint covers only the active
-  conductors and the sensors. The <strong>passive structure lives in a different group entirely</strong>
-  (<code>amm</code> array descriptions) and is invisible to it; it carries 3 substantive states of
-  its own, and the two vary independently. The cross product is <strong>5</strong> machine
-  descriptions. None of the five occupies a shot range: one description's span is 87.6% foreign
-  shots.</p>
+  <p><strong>The three raw setup fingerprints do not imply three machine descriptions.</strong>
+  They are EFIT representation keys. Once filament cells are grouped into the 23 physical active
+  and case circuits, element count is removed, diagnostic positions and sensitive-axis
+  orientations are compared explicitly, and the limiter is compared as a continuous closed
+  curve, all three support <strong>one physical-geometry equivalence class</strong>. The
+  938-versus-1004 filament difference is a discretisation of the same conductors. The 78 magnetic
+  probes retain the same orientations; their maximum 12.6&nbsp;mm setup-coordinate spread is
+  within the measured source uncertainty and was independently classified as rounding/measurement
+  noise in the <a href="/imas-ambix/mast-coil-circuits.html#s5">MAST circuit audit</a>, not as a
+  relocation. The <code>amm</code> lists are wall-model point discretisations and cannot establish
+  passive vessel identity. The available evidence therefore supports a <strong>single provisional
+  range, shots 11695–30473</strong>, with 2,478 unreadable on-disk shots listed as exceptions. It
+  does not establish that no hardware change ever occurred: installation and maintenance records
+  are still required before this range may be called authoritative.</p>
 
   <h2>2. The source convention, digit by digit</h2>
 
@@ -138,7 +143,7 @@
   φ̂ sense, and they do on <strong>11,153 of 11,153 shots</strong>. That is a genuine constraint on
   internal coherence and it is not a determination. Resolving it needs a signed vector quantity
   whose frame is fixed externally — a probe's measured B<sub>R</sub> against a known coil
-  polarity, which is exactly what stage 3's vacuum forward model produces. <strong>Until then this
+  polarity, which is exactly what vacuum forward-model validation produces. <strong>Until then this
   digit is an assumption, and it is the only one.</strong></p>
 
   <h3>2.5 A limitation in the identification tooling worth recording</h3>
@@ -194,67 +199,79 @@
   <code>ip_like</code> and <code>b0_like</code> factor above is <em>conditional on that
   declaration</em> — those are precisely the rows a wrong σ<sub>RφZ</sub> would flip. The ψ and q
   rows are not: they carry σ<sup>eff</sup><sub>RφZ</sub> too, so a σ<sub>RφZ</sub> error would move
-  ψ and q as well, and the loop-flux round trip in §2.2 would catch it. Stage 3 closes this.</p>
+  ψ and q as well, and the loop-flux round trip in §2.2 would catch it. Vacuum forward-model
+  validation closes this.</p>
 
-  <h2>3. How many machine descriptions, and why not a shot range</h2>
+  <h2>3. Physical configuration identity and shot range</h2>
 
   <figure>
     <img src="/nova/figures/mast-machine-description/campaign_fingerprints.png"
-         alt="Three stacked shot-number timelines: three active-conductor fingerprints, three substantive passive digests plus eight single-shot dropouts, and the five combined machine descriptions the cross product produces"
+         alt="Three shot-number timelines comparing raw EFIT setup fingerprints, their single canonical physical geometry, and one provisional operating range with unreadable shots marked as exceptions"
          style="max-width:100%">
-    <figcaption>Machine-description inventory over 14,633 fingerprinted shots.
-    <strong>a</strong> — the active-conductor and sensor fingerprint resolves the corpus to 3
-    states; these three digests reproduce the ambix per-campaign table keys exactly.
-    <strong>b</strong> — the passive-structure digest, over the (R, Z) positions parsed from the
-    <code>amm</code> element descriptions, is entirely independent of (a) and carries 3 substantive
-    states plus 8 single-shot acquisition dropouts (61–75 elements against the 74/76/78 norms — a
-    handful of missing descriptions for one shot, not a machine change). <strong>c</strong> — the
-    cross product: 5 machine descriptions, covering 99.9% of the shots for which a passive state can
-    be resolved.</figcaption>
+    <figcaption>Representation versus machine identity over the 17,111-shot mirror.
+    <strong>a</strong> — three raw EFIT setup fingerprints reproduce the Ambix cache keys exactly,
+    but they alternate because they include solver discretisation. <strong>b</strong> — after
+    reducing the source to 23 physical circuits, diagnostic poses and the continuous limiter, all
+    14,633 readable shots map to one canonical physical-geometry equivalence class.
+    <strong>c</strong> — one provisional range spans shots 11695–30473. Red ticks are the 2,478
+    on-disk shots whose static setup is unreadable; they are explicit evidence gaps, not inferred
+    boundaries.</figcaption>
   </figure>
 
   <table>
     <thead><tr>
-      <th>#</th><th>coil/sensor fingerprint</th><th>passive digest</th><th>shots</th>
-      <th>span</th><th>foreign shots inside its own span</th>
+      <th>raw EFIT representation</th><th>filament cells</th><th>readable shots</th>
+      <th>raw span</th><th>physical result</th>
     </tr></thead>
     <tbody>
-      <tr><td>1</td><td><code>fc1004…9425ae4a</code></td><td><code>pv76…0a8463ea</code></td>
-        <td>562</td><td>11695–12407</td><td>4 (0.7%)</td></tr>
-      <tr><td>2</td><td><code>fc938…1cb6f2ee</code></td><td><code>pv74…b1666642</code></td>
-        <td>933</td><td>11876–14538</td><td>1238 (57.0%)</td></tr>
-      <tr><td>3</td><td><code>fc1004…edd753d2</code></td><td><code>pv76…0a8463ea</code></td>
-        <td>724</td><td>12403–13360</td><td>97 (11.8%)</td></tr>
-      <tr><td>4</td><td><code>fc938…1cb6f2ee</code></td><td><code>pv76…0a8463ea</code></td>
-        <td>93</td><td>12429–13300</td><td>657 (87.6%)</td></tr>
-      <tr><td>5</td><td><code>fc938…1cb6f2ee</code></td><td><code>pv78…3dba5e86</code></td>
-        <td>7805</td><td>14540–30473</td><td>5 (0.1%)</td></tr>
+      <tr><td><code>…9425ae4a8bf3bc15</code></td><td>1004</td><td>562</td>
+        <td>11695–12407</td><td rowspan="3"><code>mast-physical-5e9ad0bc9e9c4f1e</code><br>
+        23 physical circuits, 78 probe poses, 46 loop positions, one limiter curve</td></tr>
+      <tr><td><code>…edd753d282903679</code></td><td>1004</td><td>744</td>
+        <td>12403–13360</td></tr>
+      <tr><td><code>…1cb6f2ee742c4ee4</code></td><td>938</td><td>13,327</td>
+        <td>11876–30473</td></tr>
     </tbody>
   </table>
 
-  <p>Description #4 is the load-bearing one: it is the 938-filament coil set carrying the
-  <em>other</em> campaign's passive state, 93 shots scattered through #3's span. It is not a
-  boundary effect — it is a genuine point in the cross product, and it exists only because the two
-  fingerprints move independently.</p>
+  <p>The physical identifier above is an evidence digest of the canonical representative, not a
+  promise that rounding a future setup array will reproduce the same bytes. Assignment is by
+  physical comparison: circuit topology, component centroids/bounds/moments and effective turns;
+  probe and loop positions plus probe sensitive-axis orientation; and closed-curve limiter
+  geometry. Filament count, element subdivision and source-array ordering are absent. The
+  comparison thresholds are the measured uncertainty envelope of the three setup variants:
+  25&nbsp;mm for conductor setup coordinates, 15&nbsp;mm for diagnostic positions and
+  0.1° for orientation. A relocation or rotation outside that envelope remains distinct, as pinned
+  by synthetic subdivision-versus-relocation tests.</p>
 
   <figure>
     <img src="/nova/figures/mast-machine-description/fingerprint_interleaving.png"
-         alt="Left: the 1004-filament and 938-filament descriptions alternating in eleven runs across shots 12403 to 13360. Right: a log-scale histogram of the twenty-one contiguous runs the three descriptions form"
+         alt="Left: the three raw EFIT setup fingerprints interleaving over shot number. Right: the raw 938 and 1004 filament counts reduced to the same 23 physical circuits."
          style="max-width:100%">
-    <figcaption>Why shot ranges cannot key the registry. <strong>a</strong> — over shots
-    12403–13360 the 1004-filament and 938-filament coil sets alternate in 11 runs, some as short as
-    4 shots. <strong>b</strong> — across the whole corpus the 3 coil/sensor fingerprints form
-    <strong>21 contiguous runs</strong>, spanning four orders of magnitude in length; a range table
-    would have to carry every one of them, and would still be wrong for any shot not sampled
-    here.</figcaption>
+    <figcaption>Why the raw digest must not key a registry. <strong>a</strong> — setup fingerprints
+    interleave in shot order, which is characteristic of reconstruction inputs rather than discrete
+    hardware operation. <strong>b</strong> — 938 and 1004 EFIT cells both reduce to the same 23
+    physical active and case circuits. Resolution changes are retained as provenance but removed
+    from machine identity.</figcaption>
   </figure>
 
-  <p>Two coverage facts bound what any registry can promise. <strong>4,508 of the 14,633
-  fingerprinted shots (30.8%) carry no parseable <code>amm</code> passive description at all</strong>,
-  so their passive state is unresolvable from the source and must be either inherited from a
-  neighbour by explicit rule or excluded — it cannot be assumed. And 2,478 of the 17,111 shots on
-  disk have no readable static setup geometry at all, so they cannot be keyed to any machine
-  description by any means.</p>
+  <table>
+    <thead><tr><th>provisional range</th><th>readable evidence</th><th>explicit exceptions</th>
+      <th>boundary verdict</th></tr></thead>
+    <tbody><tr><td>11695–30473</td><td>14,633 shots</td>
+      <td>2,478 on-disk shots with unreadable static setup</td>
+      <td>No physical boundary established</td></tr></tbody>
+  </table>
+
+  <p><strong>This is deliberately provisional.</strong> The source establishes equivalence of the
+  available setup representations; it does not provide an installation/maintenance ledger. In
+  particular, 4,508 readable shots (30.8%) have no parseable <code>amm</code> positions, and the
+  74/76/78-point <code>amm</code> lists describe EFIT wall-model elements rather than authoritative
+  continuous passive structures. They are not three passive machine configurations. Before IDS
+  authoring, an authoritative MAST engineering source must confirm whether conductor, passive
+  topology, vessel/limiter, TF hardware, or any diagnostic position/orientation changed inside the
+  range. If it identifies a change, that evidence creates a discrete boundary; the current raw
+  fingerprint alternation does not.</p>
 
   <h2>4. The quantity ledger</h2>
 
@@ -387,7 +404,7 @@
     </tbody>
   </table>
 
-  <p>Two source quantities sit outside the MD proper but are needed by stage 6 and map cleanly:
+  <p>Two source quantities sit outside the MD proper but are needed by equilibrium mapping and map cleanly:
   <code>efm/fwtmp</code> → <code>equilibrium/…/constraints/b_field_pol_probe/weight</code>
   (<code>equilibrium_weight_of_poloidal_magnetic_field_probe</code>) and <code>efm/fwtsi</code> →
   the flux-loop equivalent (<code>equilibrium_weight_of_flux_loop</code>). Both names exist.</p>
@@ -444,9 +461,9 @@
   <code>turns_with_sign</code> and circuits as a <code>connections</code> matrix; there is no
   per-element current-share fraction, because in the DD model the turn count <em>is</em> the
   share. That is representable: fold <code>xmult</code> into <code>turns_with_sign</code> so
-  Σ&nbsp;turns reproduces the circuit's amp-turns. It is a genuine modelling decision for stage 2
-  rather than a copy, and it must be recorded, because the folded product is no longer the physical
-  turn count.</p>
+  Σ&nbsp;turns reproduces the circuit's amp-turns. It is a genuine modelling decision for
+  <code>pf_active</code> authoring rather than a copy, and it must be recorded, because the folded
+  product is no longer the physical turn count.</p>
   <p><code>efm/silop_dphi</code> — each flux loop's toroidal angular extent — has no DDv4 scalar
   either. DDv4 represents a toroidally-partial loop by giving
   <code>flux_loop/position</code> multiple (R, φ, Z) points, which carries the extent implicitly
@@ -467,7 +484,7 @@
     <code>fcoil_xmult</code> both declare <code>units = 'deg'</code> (they are a turn count and a
     dimensionless weight); <code>silop_dphi</code> declares <code>'m'</code> for what its own
     description calls a "toroidal angular extent". Cost: any unit-aware ingest that trusts the
-    metadata converts a turn count as an angle. This is the concrete reason the plan's rule that
+    metadata converts a turn count as an angle. This is the concrete reason the authoring rule that
     source metadata is untrusted for conventions should extend to <em>units</em>, not just to
     dd-path tags.</li>
     <li><strong>The <code>obv*</code> probe descriptions say "Br".</strong> Every
@@ -486,10 +503,10 @@
     <code>[86, 65, 65]</code> where the stored array is <code>(86, 65, 129)</code>, and the extra
     columns are NaN-scattered rather than trailing-padded. Cost: it silently produced wrong
     answers in this audit until the quality gate caught it, and it will do the same to any 2-D map
-    read in stage 6.</li>
+    read by the equilibrium map.</li>
   </ul>
 
-  <h2>6. What this invalidates in the plan's §3</h2>
+  <h2>6. Consequences for machine-description authoring</h2>
   <ol>
     <li><strong>"the MAST convention has ψ<sub>axis</sub> &gt; ψ<sub>boundary</sub>" is not a
     landmark.</strong> True for 96.6% of shots, false for 379 of them (two blocks, 13469–13696 and
@@ -503,11 +520,12 @@
     source.</strong> The efm reconstruction is Wb/rad (e<sub>Bp</sub>&nbsp;=&nbsp;0) and the
     measured flux loops are Wb. Both are true and they differ by the 2π; the ledger has to name
     which one each row means, and §4.1 does.</li>
-    <li><strong>"per-campaign versioning" needs a fingerprint the plan does not yet describe.</strong>
-    §2 assigns <code>pf_passive</code> to "efm passive-element boxes", but the passive geometry is
-    not in the efm arrays the fingerprint hashes — it is in <code>amm</code> descriptions, it moves
-    independently, and 30.8% of shots do not carry it. The MD count is 5, not 3, and the fingerprint
-    must be extended before stage 5 can fan out.</li>
+    <li><strong>Raw setup fingerprints cannot version machine descriptions.</strong>
+    The three EFIT keys collapse to one provisional physical geometry when 938/1004 filament
+    subdivision and wall-model elements are removed. Diagnostic positions and sensitive-axis
+    orientations remain in the comparison. <code>amm</code> descriptions are not continuous
+    passive geometry, and 30.8% of readable shots do not carry them. Authoring must wait for an
+    engineering source that can confirm physical shot-range boundaries.</li>
     <li><strong>The <code>pf_passive/loop/element</code> subtree is DDv4 lifecycle
     <code>alpha</code>.</strong> Not an invalidation but a risk the plan does not record: the MD's
     passive description depends on a subtree the DD may still change. Worth pinning the DD version
@@ -515,15 +533,17 @@
   </ol>
 
   <h2>7. Reproducing this</h2>
-  <p>Scan, verdict and all four figures come out of one command. The full-corpus pass over 17,111
+  <p>The COCOS scan, physical-configuration audit and all four figures come out of one command. The full-corpus pass over 17,111
   shots takes <strong>1 m 58 s on 16 cores</strong> — cheap enough that it should be re-run rather
   than trusted whenever the mirror changes.</p>
   <table>
     <thead><tr><th>artifact</th><th>path</th></tr></thead>
     <tbody>
       <tr><td>driver + figures</td><td><code>nova/scripts/identify_source_cocos.py</code></td></tr>
-      <tr><td>pinned verdict</td><td><code>tests/test_mastcocos.py</code> — 19 tests, 8 of them
-        corpus-backed and skipped where the mirror is absent</td></tr>
+      <tr><td>pinned verdict</td><td><code>tests/test_mastcocos.py</code> — pure tests cover
+        mesh collapse, real conductor relocation, diagnostic position/orientation changes, curve
+        resampling and missing/corrupt range evidence; corpus-backed tests skip where the mirror is
+        absent</td></tr>
       <tr><td>measured artifact</td>
         <td><code>docs/figures/mast-machine-description/source_cocos_audit.json</code> (1.9 MB;
         read it with <code>load_report</code>, which expands the columnar tables)</td></tr>
@@ -532,6 +552,8 @@
         &nbsp;&nbsp;uv run python nova/scripts/identify_source_cocos.py --stride 1 --workers 16</code></td></tr>
       <tr><td>redraw figures only</td>
         <td><code>uv run python nova/scripts/identify_source_cocos.py --figures-only</code></td></tr>
+      <tr><td>refresh physical evidence without rescanning COCOS</td>
+        <td><code>uv run python nova/scripts/identify_source_cocos.py --physical-only</code></td></tr>
     </tbody>
   </table>
   <p>The script needs <code>zarr</code> and <code>scipy</code>, which are not nova dependencies —
@@ -542,11 +564,12 @@
   a new package inside the job. This is an environment setting and not a firewall — pypi.org and
   ghcr.io both answer from the compute nodes (verified 2026-07-27), which is what makes a
   registry-backed MD viable from inside a job.</p>
-  <p>The script deliberately reimplements the campaign digest rather than importing ambix, so nova
-  carries no dependency on it — and the reimplementation reproduces all three of ambix's published
-  keys (<code>9425ae4a8bf3bc15</code>, <code>edd753d282903679</code>,
-  <code>1cb6f2ee742c4ee4</code>) exactly, which is the cross-check that the two codebases agree
-  about what a campaign is.</p>
+  <p>The script deliberately reproduces the raw setup digest without importing Ambix, so Nova
+  carries no dependency on it. The three published keys
+  (<code>9425ae4a8bf3bc15</code>, <code>edd753d282903679</code>,
+  <code>1cb6f2ee742c4ee4</code>) remain byte-identical for cache provenance. The physical comparison
+  is a separate layer and maps all three to <code>mast-physical-5e9ad0bc9e9c4f1e</code>; neither
+  key type is silently repurposed.</p>
 </main>
 </body>
 </html>

@@ -18,8 +18,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-30">
-<meta name="plan-version" content="10">
-<meta name="plan-impl" content="0.82">
+<meta name="plan-version" content="11">
+<meta name="plan-impl" content="0.86">
 <meta name="plan-sprint" content="S2">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -568,6 +568,9 @@ Done-when
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s3" data-id="c-physics-nova-wave" data-who="reckon-ship" data-when="2026-07-30">
     <div class="r-comment-body">Nova-side reconstruction dependencies landed and are on main: ReconstructProfile with canonical Nova Green operators plus JIT/vmap named-control tests (70c11815), circuit coupling emission with measured-circuit holdback (21b48d4e), and flux-surface transport geometry with analytic/Ampere/current-diffusion pins (7048d13d). Ambix dependency and consumer rewiring remains open, so the followup stays active.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-physics-ambix-facade" data-who="reckon-ship" data-when="2026-07-30T01:20:00+02:00">
+    <div class="r-comment-body">Ambix dependency seam landed on imas-ambix main at 215b8a3: Python 3.14 floor, nova-stella pinned to Nova 7ba65a59, and direct equilibrium/circuit/transport facade types with seven focused tests passing. Consumer cutover is now running in disjoint worktrees. Nova test-extra repair landed at 9638b560 after a 48-error collection failure; post-repair collection found 3409 tests with 536 deselected, and the full lane is in progress on sun_debug.</div>
 </div>
 </section>
 </main>

@@ -1,0 +1,36 @@
+{
+ "coil": "PF1",
+ "section": "annulus-32",
+ "intervals": 4,
+ "feeder_elements": 68,
+ "feeder_length": 36.19495225252796,
+ "feeder_sweep": 0.07217010141834684,
+ "pack_length": 6180.328473992828,
+ "mean_radius": 9.778787654282,
+ "path_radius_max": 18.276378224363825,
+ "filament_block": [
+  [
+   0.7552456965788256,
+   0.00015719279128237465
+  ],
+  [
+   0.00015719279128237462,
+   -3.8941632331707015e-06
+  ]
+ ],
+ "mutual": 0.00015719279128237465,
+ "reciprocity": 1.724319168265624e-16,
+ "feeder_self": {
+  "centreline": 2.031432900578559e-05,
+  "correction": 1.2483187681690818e-06,
+  "self": 1.9066010237616507e-05,
+  "core": -2.6833713283718447e-06,
+  "length": 36.19495225252796,
+  "sources": 68,
+  "stations": 272
+ },
+ "filament_feeder_self": -3.8941632331707015e-06,
+ "mutual_seconds": 1.4082649648189545,
+ "self_seconds": 45.97182512097061,
+ "terminal_step": 0.0003334515928023658
+}

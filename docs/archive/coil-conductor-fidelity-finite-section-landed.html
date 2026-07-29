@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type" content="archive">
+  <meta name="plan-slug" content="coil-conductor-fidelity-finite-section-landed">
+  <meta name="plan-title" content="The finite section does not close the field coil — and the feeder run carries half of what remains — landed">
+  <meta name="plan-status" content="historical">
+  <title>Wound finite section — landed | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h1>Stage 2 of the direct comparison: the true 35 mm section swept along the true path</h1>
+    <p><em>Landed 2026-07-29 · develop merge <code>682a26ef</code> (14 commits,
+    <code>38f85c2e..e4421435</code>) · parent plan:
+    <a href="/nova/coil-conductor-fidelity.html">coil-conductor-fidelity</a> §3/§4 ·
+    stage 1: <a href="coil-conductor-fidelity-wound-filament-landed.html">wound filament landed</a></em></p>
+
+    <h2>Quick status</h2>
+    <table>
+      <thead><tr><th>item</th><th>status</th></tr></thead>
+      <tbody>
+        <tr><td>PF1 swept solid section (PolyBow 893 arcs + PolyBeam 189 lines), converged</td><td>✓ shipped</td></tr>
+        <tr><td>Cooling channel as coupled counter-flowing sections, validated</td><td>✓ shipped</td></tr>
+        <tr><td>Corner-count convergence 16/32/64, carry validated on whole-pack runs</td><td>✓ shipped</td></tr>
+        <tr><td>Feeder run measured (PF1 only) — the ladder's missing conductor</td><td>✓ shipped</td></tr>
+        <tr><td>Decisions <code>conductor-model</code> and <code>reference-status</code></td><td>✓ locked on this evidence</td></tr>
+        <tr><td>CS modules</td><td>deferred — upstream geometry-revision conflict</td></tr>
+        <tr><td>Frame section-of-record for winding packs (footprint ≠ cross-section)</td><td>blocker recorded, source untouched</td></tr>
+      </tbody>
+    </table>
+
+    <h2>The verdict, plainly</h2>
+    <p><strong>The finite section does not close the +7.302e-04 H residual.</strong> With a solid
+    35 mm cable space it closes +2.0e-06 H (0.3 %). With the cooling channel in — which is the
+    conductor as built — it <strong>opens</strong> the residual by 5 %, to +7.670e-04 H
+    (whole pack, 32 corners; +7.700e-04 carried to 64). To close +7.30e-04 by section alone the
+    cable space would have to be 19.4 mm instead of 35, at stage 1's measured
+    dL/dln(a) = −1.235e-03 H per e-fold. The granularity-scale remainder is <em>not</em> the
+    conductor's section.</p>
+    <p><strong>What does move it is conductor no rung of either study ever had in: the feeder
+    run.</strong> 36.19 m of conductor (68 elements, sweeping 0.0722 turns, out to r = 18.3 m) in
+    series with the pack is worth <strong>+3.335e-04 H — 46 % of the residual</strong>: twice its
+    mutual with the pack (+1.572e-04, block reciprocity 1.7e-16) plus its own self (+1.907e-05,
+    which needs the resolved section — the filament estimate of that term is negative). Stated
+    conditionally, because the data cannot say which the machine table means: if the table is
+    terminal-to-terminal the residual falls to +4.365e-04; if it is pack-only, this is a fact
+    about the hardware and not about the gap. Either way the section is not the explanation.</p>
+
+    <h2>The ladder (PF1 self, machine description 0.707600 H)</h2>
+    <table>
+      <thead><tr><th>rung</th><th>self [H]</th><th>machine − rung</th></tr></thead>
+      <tbody>
+        <tr><td>continuum, converged mesh, nominal 248.64 turns</td><td>0.703463</td><td>+4.137e-03</td></tr>
+        <tr><td>turn count, measured 248.926</td><td>0.705083</td><td>+2.517e-03</td></tr>
+        <tr><td>outline, as-built pack box</td><td>0.713256</td><td>−5.656e-03</td></tr>
+        <tr><td>ring stack, declared 35 mm disc</td><td>0.707795</td><td>−1.947e-04</td></tr>
+        <tr><td>wound path (stage 1's last rung)</td><td>0.706870</td><td>+7.302e-04</td></tr>
+        <tr><td>wound section, solid, 16 corners</td><td>0.706887</td><td>+7.133e-04</td></tr>
+        <tr><td>wound section, solid, 32 corners</td><td>0.706875</td><td>+7.252e-04</td></tr>
+        <tr><td>wound section, solid, 64 corners (carried)</td><td>0.706872</td><td>+7.282e-04</td></tr>
+        <tr><td>wound section + channel, 16 corners</td><td>0.706845</td><td>+7.551e-04</td></tr>
+        <tr><td><strong>wound section + channel, 32 corners — the conductor as built</strong></td><td><strong>0.706833</strong></td><td><strong>+7.670e-04</strong></td></tr>
+        <tr><td>wound section + channel, 64 corners (carried)</td><td>0.706830</td><td>+7.700e-04</td></tr>
+        <tr><td>+ the feeder run, converged solid</td><td>0.707205</td><td>+3.947e-04</td></tr>
+        <tr><td>+ the feeder run, with channel</td><td>0.707163</td><td>+4.365e-04</td></tr>
+      </tbody>
+    </table>
+    <p>Per-turn self against the ring that stood in for it (0.007105855 H): swept solid
+    0.007107864 → step +2.01e-06; with channel 0.007066088 → step −3.98e-05. Mutuals are
+    stage 1's, untouched — only the diagonal was replaced.
+    <code>ladder.json</code> is the artifact of record: every rung, every gap, the carried rows
+    with their basis and length ratio, the feeder decomposition and the seam.</p>
+
+    <figure>
+      <img src="/nova/figures/wound-coil/section-ladder.svg"
+           alt="The extended comparison ladder: stage 1's rungs joined by the swept solid section, the channel, and the feeder run, each with its residual against the machine value" style="max-width:100%">
+      <figcaption>The extended ladder. The section rungs sit within a few parts in 1e-5 of the
+      wound path; the feeder rung takes 46 % of the residual.</figcaption>
+    </figure>
+
+    <h2>The channel, and its validation</h2>
+    <p>The cooling channel is modelled as coupled counter-flowing sections — outer at +J, 10 mm
+    channel at −J, one circuit — worth <strong>−4.178e-05 H over the pack</strong> (−5.88e-03
+    relative), identical at 16, 32 and 64 corners. Superposition gates: per segment,
+    Σ factor × footprint / area = 1.000000000000 (I<sub>outer</sub> + I<sub>core</sub> = I), and
+    the linked pair against the annulus integrated cell by cell (16/32/64 solid quadrilateral
+    cells, no cancellation between members) agrees to 3.3e-16 / 0 / 1.1e-16.</p>
+
+    <h2>Corner-count convergence, and the validated carry</h2>
+    <p>On a 25-turn subset: 16→32 = −1.204e-06 (−1.67e-03 relative); 32→64 = −3.009e-07
+    (−4.18e-04). Quadratic, ratio 4.0, identical for the annulus. Length-scaled to the pack:
+    −1.192e-05 and −2.98e-06. The scaling is validated against two whole-pack runs rather than
+    asserted: it predicted disc-32 as 0.007110843 where the pack measured 0.007110842, and
+    annulus-32 as 0.007069066 where the pack measured 0.007069066 — nine decimals. (The direct
+    64-corner whole-pack hollow run would have cost 137 min, over the 1-hour debug wall.)
+    Quadrature: intervals 2→4 = −1.74e-07, 4→8 = −1.26e-07 on 25 turns, so intervals=4 carries
+    ≤1.3e-06 H over the pack. The turn-split seam — pairs handed to the filament across a turn
+    boundary, where the sections separate <em>along</em> the conductor rather than across it —
+    was measured both ways over 12 boundaries: +1.69e-08 H over the whole pack, five orders
+    below the residual.</p>
+
+    <figure>
+      <img src="/nova/figures/wound-coil/section-gate.svg"
+           alt="The gate battery: reference kernel identity, both routes against the coaxial ring reference, and the straight-limit comparison of the arc and beam routes" style="max-width:100%">
+      <figcaption>The gates. The reference kernel reproduces the shipped Circle disc-turn
+      element exactly; both swept routes hold ≤3.6e-08 on a coaxial ring; the straight-limit
+      residual is genuine curvature, (l/R)²/24.</figcaption>
+    </figure>
+
+    <h2>Two things the study had to discover</h2>
+    <ol>
+      <li><strong>A centreline A·dl sum is not an inductance.</strong> It owes the gap between
+      the section's geometric mean distance from itself and its mean log distance from its own
+      centroid — μ₀/8π per metre for a solid disc, <strong>3.09e-04 H over this coil's 6180 m of
+      cable, 42 % of the residual</strong>. Omit it and you appear to close half the gap for
+      free. It was computed from the section's own corners by an axisymmetric kernel sharing no
+      code with the swept elements, and lands on μ₀/8π to ten digits (5.0000006e-08 vs
+      4.9999999993e-08 H/m); annulus 3.4489e-08.</li>
+      <li><strong>The frame's section of record is a swept footprint, not a cross-section.</strong>
+      <code>Winding.insert</code> fills the <code>poly</code> column with the poloidal footprint
+      of the swept volume; for an axisymmetric coil that <em>is</em> the section, but a winding
+      pack's elements advance across the pack as they sweep: 77 % of PF1's pack length sits on
+      elements whose ends move further in (r, z) than their section is wide (worst footprint a
+      170 mm smear); the worst column reaches the kernel with 244 corners carrying 7.6× the
+      conducting area — first order on a self term; 41 straight joggles have a disconnected
+      footprint (MultiPolygon → AttributeError in <code>PolyGeom.points</code>); a footprint
+      straddling z = 0 silently loses corners to the shapely union (32→23; centroid off by 0.1
+      section radii); and <code>winding.insert</code> refuses a feeder run outright (IndexError
+      in <code>Polygon.translate</code> for a segment that travels without sweeping).
+      <strong>Change needed (not made — outside this study's scope): the thickened elements need
+      the section handed to them as a section, distinct from the swept footprint.</strong> The
+      study drove <code>polygon_arc_greens</code> / <code>polygon_beam_greens</code> directly,
+      with the framed route kept side by side on the coaxial ring where the two agree to
+      1e-10.</li>
+    </ol>
+
+    <figure>
+      <img src="/nova/figures/wound-coil/section-conductor.svg"
+           alt="The conductor as modelled: the 35 mm cable space with its 10 mm channel as the coupled pair, the swept footprint against the true cross-section, and the feeder run in the poloidal plane" style="max-width:100%">
+      <figcaption>The conductor: the coupled ±J pair, what the swept footprint smears against
+      the true section, and the feeder run the ladder never carried.</figcaption>
+    </figure>
+
+    <h2>Gates, all passed</h2>
+    <ul>
+      <li>Reference kernel (analytic polygon ring + section average) = the shipped
+      <code>Circle</code> disc-turn element exactly, 0.00e+00.</li>
+      <li>Both routes vs that reference on a coaxial ring: ≤3.6e-08, floored by the correction's
+      own 0.1 m radius banding (2e-10 H on the coil); at the exact radius both reach 3e-10.</li>
+      <li>Straight route vs arc route in the straight limit: 4.5e-07 at R = 100 m — genuine
+      curvature, (l/R)²/24.</li>
+      <li>test_biotpolybeam 25 passed, test_biotpolygonarc 50 passed, test_biotsectionaverage +
+      test_biotpolygonanalytic 136 passed. No tests, no source touched.</li>
+    </ul>
+
+    <h2>Outcomes</h2>
+    <table>
+      <thead><tr><th>item</th><th>result</th><th>where</th></tr></thead>
+      <tbody>
+        <tr><td>Section rung</td><td>solid +2.0e-06; as-built (channel) −4.0e-05 → residual +7.670e-04</td><td><code>benchmarks/wound_coil_finite_section.py</code>, <code>ladder.json</code></td></tr>
+        <tr><td>Feeder rung</td><td>+3.335e-04 (46 % of residual), PF1 only</td><td><code>feeder.json</code></td></tr>
+        <tr><td>conductor-model</td><td>locked: uniform + correction (turn count / position / path, derived once per coil)</td><td>plan decisions</td></tr>
+        <tr><td>reference-status</td><td>locked: cross-check, not oracle</td><td>plan decisions</td></tr>
+      </tbody>
+    </table>
+
+    <h2>What's next</h2>
+    <p>The cheapest open lead: <strong>the feeder rung for the other eleven coils</strong> (all
+    carry feeders; PF1's cost 1.4 s of mutual + 46 s of self to measure) and the circuit-boundary
+    question — whether the machine table is terminal-to-terminal or pack-only — which decides
+    whether the feeder belongs on the ladder or in the hardware record. Tracked in the parent
+    plan's followups. The footprint blocker is recorded for the element plans
+    (<a href="/nova/polybow-arc-section.html">polybow-arc-section</a> /
+    <a href="/nova/polybeam-prism-section.html">polybeam-prism-section</a>): the framed route
+    cannot yet carry a winding pack's true cross-section.</p>
+
+  </main>
+</body>
+</html>

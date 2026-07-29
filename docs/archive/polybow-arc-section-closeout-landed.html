@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="archive">
+  <meta name="plan-slug" content="polybow-arc-section-closeout-landed">
+  <meta name="plan-title" content="Polygon arc section closeout — landed">
+  <meta name="plan-status" content="historical">
+  <meta name="plan-modified" content="2026-07-29">
+  <title>Polygon arc section closeout — landed | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Polygon arc section closeout — landed</h1>
+    <p><strong>2026-07-29.</strong> The polygon-section arc is shipped with one
+    shape-preserving hollow-section vocabulary, a measured round-section resolution,
+    and host, CPU-compiled, and GPU-compiled elliptic parity.</p>
+
+    <section class="card">
+      <h2>Section identity and routing</h2>
+      <p><code>skin</code> is the circular annulus and <code>box</code> is the square
+      annulus from geometry through winding assembly and Biot self factors. Both retain
+      the same numerical self factor today, but neither is an alias of the other. The
+      distinction is regression-pinned by assigning deliberately different factors and
+      observing that each section receives its own.</p>
+      <figure>
+        <img src="/nova/figures/polybow-arc-section/cross-section-routing.png"
+             alt="Four panels comparing section routing, hollow-pair accuracy, and round-section cost versus error">
+        <figcaption>The section presented to the kernel, the error from rectangular
+        routing, direct-annulus agreement, and the measured round-section resolution
+        curve.</figcaption>
+      </figure>
+    </section>
+
+    <section class="card">
+      <h2>Round-section resolution</h2>
+      <table>
+        <thead>
+          <tr><th>Corners</th><th>Area deficit</th><th>Worst row error</th><th>Cost</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>16</td><td>2.5505e-2</td><td>1.3491e-5</td><td>2642.0 µs/pair</td></tr>
+          <tr><td>32</td><td>6.4131e-3</td><td>3.3954e-6</td><td>5375.6 µs/pair</td></tr>
+          <tr><td>64</td><td>1.6056e-3</td><td>8.4090e-7</td><td>10327.3 µs/pair</td></tr>
+          <tr><td>128</td><td>4.0155e-4</td><td>2.0032e-7</td><td>20106.3 µs/pair</td></tr>
+        </tbody>
+      </table>
+      <p>The errors are against the 512-corner reference on all five arc rows. Sixty-four
+      corners is retained because it is the first measured option below one part per
+      million; making the default coarser would knowingly cross that accuracy boundary.
+      The exact-kernel cost is exposed honestly rather than hidden behind an approximation
+      flag. Geometry-derived banding and device wall-clock remain separate optimization
+      studies.</p>
+    </section>
+
+    <section class="card">
+      <h2>Hollow-pair and moved-golden record</h2>
+      <table>
+        <thead><tr><th>Evidence</th><th>Measured result</th><th>Mechanism</th></tr></thead>
+        <tbody>
+          <tr><td>Square annulus against direct cells</td><td>2.0e-10 worst row</td><td>outer +j and inner −j boundaries</td></tr>
+          <tr><td>Circular annulus against direct cells</td><td>1.2e-10 worst row</td><td>outer +j and inner −j boundaries</td></tr>
+          <tr><td>Disc and ellipse routing</td><td>Bow overstates by 4/π</td><td>the curve fills π/4 of its bounding box</td></tr>
+          <tr><td>Hexagon routing</td><td>Bow overstates by 4/3</td><td>the regular hexagon fills 3/4 of its bounding box</td></tr>
+          <tr><td>Skin area</td><td>circular, distinct from box by 4/π</td><td>the fourth descriptor is hollowness, not height</td></tr>
+        </tbody>
+      </table>
+      <p>These are corrections against the earlier bounding-box route, not unexplained
+      golden movement. The straight counterpart is already shipped as
+      <code>PolyBeam</code>, with the line/polygon dispatch implemented and its own
+      accuracy, convergence, and cost record.</p>
+    </section>
+
+    <section class="card">
+      <h2>Elliptic code-generation sweep</h2>
+      <p>The complete, incomplete, and symmetric descents were inspected for
+      root/difference and sum/difference pairs whose consistency is value-critical.
+      The only exposed site is the degenerate Carlson form already defended by the
+      carried gaps landed in <code>0939d3e5</code>; the exact-zero derivative guard in
+      <code>66bf65fb</code> completes that treatment. Later differences of the converged
+      arithmetic and geometric means are squared corrections, while the reflection
+      differences are coefficients at the regular confluence rather than paired roots.
+      No additional source treatment was warranted.</p>
+      <table>
+        <thead><tr><th>Lane</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td>Host NumPy versus JAX LLVM CPU</td><td>four parity checks passed</td></tr>
+          <tr><td>Host NumPy versus JAX H200 GPU</td><td>four parity checks passed in 17.53 s</td></tr>
+          <tr><td>CUDA-suspect routing checks on H200</td><td>two passed in 18.47 s</td></tr>
+          <tr><td>Elliptic and frame focused lane</td><td>871 passed, 15 skipped</td></tr>
+        </tbody>
+      </table>
+      <p>The earlier traced-parity failure is superseded: its premise was removed when
+      the exact caller-supplied gaps replaced the subtracted root difference in
+      <code>0939d3e5</code>. The gate remains unchanged.</p>
+    </section>
+
+    <section class="card">
+      <h2>Commit</h2>
+      <p><code>71305f1f</code> — distinct hollow-section factors, regression pin, and
+      rendered closeout evidence.</p>
+    </section>
+  </main>
+</body>
+</html>

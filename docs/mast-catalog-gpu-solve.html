@@ -4,19 +4,22 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="nova">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="mast-catalog-gpu-solve">
-  <meta name="plan-title"     content="MAST Catalog GPU Solve — full-catalog equilibria in ~1 hour on 8×H200">
-  <meta name="plan-summary"   content="Nova's short-term capability goal: reconstruct equilibria for ALL timesteps of all 11,573 MAST L2 shots in ~1 hour on the 8×H200 node — batched jitted reconstruction (moment seed → profile solve → topology labels), multi-device sharding, streaming zarr IO, labeled outputs persisted.">
-  <meta name="plan-status"    content="active">
-  <meta name="plan-roi"       content="high">
-  <meta name="plan-effort"    content="XL">
-  <meta name="plan-tier"      content="opus">
-  <meta name="plan-owner"     content="Simon McIntosh">
-  <meta name="plan-depends-on" content="physics-spine-adoption,mast-machine-description">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="mast-catalog-gpu-solve">
+  <meta name="plan-title" content="MAST Catalog GPU Solve — full-catalog equilibria in ~1 hour on 8×H200">
+  <meta name="plan-summary" content="Nova&#x27;s short-term capability goal: reconstruct equilibria for ALL timesteps of all 11,573 MAST L2 shots in ~1 hour on the 8×H200 node — batched jitted reconstruction (moment seed → profile solve → topology labels), multi-device sharding, streaming zarr IO, labeled outputs persisted.">
+  <meta name="plan-status" content="blocked">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="XL">
+  <meta name="plan-tier" content="opus">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-depends-on" content="physics-spine-adoption,mast-machine-description,mast-nonaxisymmetric-physics">
   <title>MAST Catalog GPU Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-sprint" content="S4">
+<meta name="plan-modified" content="2026-07-29">
+<meta name="plan-version" content="2">
 </head>
 <body>
   <main class="plan-doc">
@@ -136,61 +139,61 @@
     </ul>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="catalog-scope" data-choice="all-l2-shots" data-by="smc" data-when="2026-07-24T13:30:00+00:00">
-        <p class="r-dec-q">What counts as the "full MAST catalog" for the 1-hour goal?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="all-l2-shots">all 11,573 L2 shots, all timesteps</button>
-          <button class="r-opt" data-value="training-grade">training-grade subset (~5k shots)</button>
-        </p>
-        <p class="r-dec-rat">User selection 2026-07-24: the hard target — every FAIR-MAST level-2
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="catalog-scope" data-choice="all-l2-shots" data-by="smc" data-when="2026-07-24T13:30:00+00:00">
+    <p class="r-dec-q">What counts as the &quot;full MAST catalog&quot; for the 1-hour goal?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="all-l2-shots">all 11,573 L2 shots, all timesteps</button>
+      <button class="r-opt" data-value="training-grade">training-grade subset (~5k shots)</button>
+      </p>
+    <p class="r-dec-rat">User selection 2026-07-24: the hard target — every FAIR-MAST level-2
         shot, every magnetics timestep. Sizes the batched-solver design; the training-grade subset
         falls out as a filter on the labeled store, not a smaller run.</p>
-      </div>
-      <div class="r-dec" data-key="sharding-strategy" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Multi-GPU strategy: single-process jax.sharding over 8 devices
+    </div>
+<div class="r-dec" data-key="sharding-strategy" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Multi-GPU strategy: single-process jax.sharding over 8 devices
         (one compiled program, best batch pooling, new machinery for nova) vs per-GPU process
         array over shot ranges (zero new JAX machinery, robust, slightly worse pooling)?
         Recommendation: measure L1 first; take sharding only if the single-program path is clean,
         else the process array is a perfectly good L3 vehicle.</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="jax-sharding">single-process jax.sharding</button>
-          <button class="r-opt" data-value="process-array">per-GPU process array</button>
-          <button class="r-opt" data-value="decide-at-l2">decide at L2 from L1 evidence</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-      <div class="r-dec" data-key="output-store" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Output format for the labeled catalog: standard-name-keyed zarr label
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="jax-sharding">single-process jax.sharding</button>
+      <button class="r-opt" data-value="process-array">per-GPU process array</button>
+      <button class="r-opt" data-value="decide-at-l2">decide at L2 from L1 evidence</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="output-store" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Output format for the labeled catalog: standard-name-keyed zarr label
         store (nova.io native, streams well, feeds ambix training directly) vs equilibrium IDSs
         per shot (IMAS-interoperable, heavier) vs both (zarr primary + IDS egress on demand via
         nova.io)?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="zarr-primary">zarr label store primary</button>
-          <button class="r-opt" data-value="ids-per-shot">equilibrium IDS per shot</button>
-          <button class="r-opt" data-value="zarr-plus-ids-egress">zarr primary + IDS egress on demand</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-      <div class="r-dec" data-key="convergence-policy" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Fixed-iteration-budget policy for the batched Picard/Newton loop: one
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="zarr-primary">zarr label store primary</button>
+      <button class="r-opt" data-value="ids-per-shot">equilibrium IDS per shot</button>
+      <button class="r-opt" data-value="zarr-plus-ids-egress">zarr primary + IDS egress on demand</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="convergence-policy" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Fixed-iteration-budget policy for the batched Picard/Newton loop: one
         global budget sized to the tail (simple, wastes bulk throughput), or a two-pass scheme
         (short budget for all → re-solve the non-converged residue with a long budget)? Two-pass
         is the likely winner if the iteration-count distribution from L1 is heavy-tailed.</p>
-        <p class="r-dec-rat"></p>
-      </div>
-    </section>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-mcg-01" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-24">
-        <h4 class="r-fu-title">L0 — catalog slice census + jitted-solve parity gate</h4>
-        <div class="r-fu-body"><p>First rung, runnable before the solver ports complete: pin the
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-mcg-01" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-24" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">L0 — catalog slice census + jitted-solve parity gate</h4>
+    <div class="r-fu-body"><p>First rung, runnable before the solver ports complete: pin the
         catalog's true slice count (turning the 1-hour goal into an exact slices/s requirement)
         and stand up the parity gate the whole ladder measures against. Blocked on
         physics-spine-adoption wave 3 (ReconstructProfile) for the full gate; the census +
         ReconstructMoment parity half can run as soon as wave 2 lands.</p></div>
-        <pre class="r-fu-prompt">Project: nova
+    <pre class="r-fu-prompt">Project: nova
 Plan:    mast-catalog-gpu-solve (http://127.0.0.1:8765/nova/mast-catalog-gpu-solve.html)
 Section: §3 L0
 Tier:    opus
@@ -219,9 +222,14 @@ Done-when
   2. Parity gate green: jitted ReconstructMoment (and ReconstructProfile when
      available) match eager on the heldout set to the registered tolerance.
   3. L1 followup written with the measured requirement; this one resolved.</pre>
-      </article>
-    </section>
+    </article>
+</section>
 
-  </main>
+  <section data-reckon="research" id="research" class="r-research-list">
+<h2><span class="sec">§</span> Research</h2>
+<div class="r-research" data-id="r-mcgs-transition" data-type="transition-audit" data-source="nova" data-added-by="codex" data-when="2026-07-29" data-url="/nova/physics-spine-transition-audit.html">
+    <span class="r-research-title"><a href="/nova/physics-spine-transition-audit.html">Physics Spine Transition Audit</a></span></div>
+</section>
+</main>
 </body>
 </html>

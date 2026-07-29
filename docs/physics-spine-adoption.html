@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="physics-spine-adoption">
   <meta name="plan-title" content="Physics Spine Adoption — solver nomenclature + ambix model ports">
   <meta name="plan-summary" content="Nova becomes the home of the full physics spine (equilibrium, circuits, transport): apply the locked problem×representation solver nomenclature, port the remaining ambix physics models as nova-style dataclasses on native nova types (torch current diffusion → JAX), and rewire imas-ambix to consume the spine as a dependency">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="blocked">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="XL">
   <meta name="plan-tier" content="opus">
@@ -18,9 +18,10 @@
   <title>Physics Spine Adoption | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-25">
-<meta name="plan-version" content="6">
+<meta name="plan-modified" content="2026-07-29">
+<meta name="plan-version" content="8">
 <meta name="plan-impl" content="0.6">
+<meta name="plan-sprint" content="S2">
 </head>
 <body>
   <main class="plan-doc">
@@ -553,10 +554,15 @@ Done-when
      (/reckon-create biot-operator-assembly) with decisions to lock.
   2. physics-spine-adoption f-psa-04 resolved pointing at it; the thick
      hex-section default explicitly gated on nova-3d-native §2 + that plan.</pre>
-    <p class="r-fu-outcome">Plan created same-session with full context: biot-operator-assembly (draft, depends_on nova-3d-native, blocks mast-catalog-gpu-solve). Carries the measured evidence base (70,000×/pair, 6.5×/16× solve cost at 2×/3× bands, seam 5e-4, quadrature component trap), the user constraints (old assembly RAM-limited + naive CPU batching; embarrassingly parallel pair space; CPU viability mandatory — no GPU guarantee locally/CI; build-once-cache-forever; first build <20 min), and f-boa-01 as the first rung (survey + tiled CPU prototype + CPU/GPU kernel parity).</p>
+    <p class="r-fu-outcome">Plan created same-session with full context: biot-operator-assembly (draft, depends_on nova-3d-native, blocks mast-catalog-gpu-solve). Carries the measured evidence base (70,000×/pair, 6.5×/16× solve cost at 2×/3× bands, seam 5e-4, quadrature component trap), the user constraints (old assembly RAM-limited + naive CPU batching; embarrassingly parallel pair space; CPU viability mandatory — no GPU guarantee locally/CI; build-once-cache-forever; first build &lt;20 min), and f-boa-01 as the first rung (survey + tiled CPU prototype + CPU/GPU kernel parity).</p>
     </article>
 </section>
 
-  </main>
+  <section data-reckon="research" id="research" class="r-research-list">
+<h2><span class="sec">§</span> Research</h2>
+<div class="r-research" data-id="r-psa-transition" data-type="transition-audit" data-source="nova" data-added-by="codex" data-when="2026-07-29" data-url="/nova/physics-spine-transition-audit.html">
+    <span class="r-research-title"><a href="/nova/physics-spine-transition-audit.html">Physics Spine Transition Audit</a></span></div>
+</section>
+</main>
 </body>
 </html>

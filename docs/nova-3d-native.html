@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="nova-3d-native">
   <meta name="plan-title" content="Nova 3D-Native Field and Coupling Tier">
   <meta name="plan-summary" content="Exact 3D flux couplings (3D coils and 3D loops) on the vectorised x/y/z field kernels: PF offsets and tilts, toroidally averaged metrics feeding axisymmetric reconstruction, and a fast-path treatment of the zeta integral">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="blocked">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="L">
   <meta name="plan-tier" content="opus">
@@ -17,9 +17,10 @@
   <title>Nova 3D-Native Field and Coupling Tier | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-28">
+<meta name="plan-modified" content="2026-07-29">
 <meta name="plan-impl" content="0.75">
-<meta name="plan-version" content="5">
+<meta name="plan-version" content="7">
+<meta name="plan-sprint" content="S2">
 </head>
 <body>
   <main class="plan-doc">
@@ -625,7 +626,7 @@ Done-when
      (expect to have to MEASURE them — the last two kernel fixes moved zero
      committed golden literals).
   5. Followup written; this followup resolved.</pre>
-    <p class="r-fu-outcome">Parts 1 and 3 LANDED and merged (develop ce004ff6, 5b0c459e, 548664b6; full lane 3661 passed / 1 failed / 140 skipped against a baseline of 3578 / 2 / 140). Part 2 built but HELD UNMERGED on a physics question — see f-3d-07. PART 1 was not transcription: the Jacobian round trip RETURNED NAN for every target within 1e-08 radii of the source ring (the complete first kind it inverts is infinite there), and taking the first and second kinds off one complement-native descent moved the closed arc's flux from 1.9e-05 (infinite forty nanometres in) to 7.8e-16 and BOTH FIELD ROWS FROM NAN to 1.9e-15. Item 4 was landed in FULL, not as the 5x. Third kind 8.2e-04 -> 3.3e-16; pole gap 4.0e-04 -> 4.3e-10, removing a negative denominator from under a logarithm; vertical weight 7.1e-09. A seventh cancellation was found unprompted (the far root's logarithm returned exactly zero past a pole of 1e20). Stated limit: end rows hold 2.5e-12 within 1e-08 radians of the end plane, the amplitude being assembled. Cost 2.4x / 2.2x per element on the host. A FIFTH DEFECT WAS FOUND WHILE TAKING THE BASELINE, which had two failures not one: the compiled kernel disagreed with its own host path at 1.2e-09 where numpy held 1.3e-15, because Carlson's beta - alpha is EXACTLY zero when the pole argument equals two of the other three, which the incomplete third kind reaches. Fixed by carrying the three gaps (beta^2 - alpha^2 = (p-x)(p-y)(p-z) exactly; the gaps quarter exactly under the duplication, where the subtracted gap is 2.6e-04 wrong by the second trip). Both paths now 2.2e-15; the compiled lane got FASTER, 891 -> 592 ns/element; CUDA never contracted the term. PART 3 OVERTURNED THIS PLAN'S OWN PREMISE: the box-section comparison is NOT discretisation-dominated. Three 120-degree arcs sweep a TRUE ring, so it carries no discretisation term; an independent panelled Gauss-Legendre reference puts the axisymmetric element at 7.4e-12 at every target, so the whole departure is the thickened arc's own error GROWING TOWARD ITS SECTION FACE (8.8e-10 at six section widths, 2.5e-06 at 0.0075 m, 1.3e-04 at 0.0005 m). The gate was masking a real near-face kernel error. Naive refinement failed because raising minimum_arc_nodes past the point count switches arcs to CHORDS (18 chords 2.2e-02, 36 at 7.4e-03) against three arcs at 8.8e-10. Sensitivity demonstrated: a 1e-09 relative row scaling now fails. Record: archive/nova-3d-native-element-callers-landed.html</p>
+    <p class="r-fu-outcome">Parts 1 and 3 LANDED and merged (develop ce004ff6, 5b0c459e, 548664b6; full lane 3661 passed / 1 failed / 140 skipped against a baseline of 3578 / 2 / 140). Part 2 built but HELD UNMERGED on a physics question — see f-3d-07. PART 1 was not transcription: the Jacobian round trip RETURNED NAN for every target within 1e-08 radii of the source ring (the complete first kind it inverts is infinite there), and taking the first and second kinds off one complement-native descent moved the closed arc's flux from 1.9e-05 (infinite forty nanometres in) to 7.8e-16 and BOTH FIELD ROWS FROM NAN to 1.9e-15. Item 4 was landed in FULL, not as the 5x. Third kind 8.2e-04 -&gt; 3.3e-16; pole gap 4.0e-04 -&gt; 4.3e-10, removing a negative denominator from under a logarithm; vertical weight 7.1e-09. A seventh cancellation was found unprompted (the far root's logarithm returned exactly zero past a pole of 1e20). Stated limit: end rows hold 2.5e-12 within 1e-08 radians of the end plane, the amplitude being assembled. Cost 2.4x / 2.2x per element on the host. A FIFTH DEFECT WAS FOUND WHILE TAKING THE BASELINE, which had two failures not one: the compiled kernel disagreed with its own host path at 1.2e-09 where numpy held 1.3e-15, because Carlson's beta - alpha is EXACTLY zero when the pole argument equals two of the other three, which the incomplete third kind reaches. Fixed by carrying the three gaps (beta^2 - alpha^2 = (p-x)(p-y)(p-z) exactly; the gaps quarter exactly under the duplication, where the subtracted gap is 2.6e-04 wrong by the second trip). Both paths now 2.2e-15; the compiled lane got FASTER, 891 -&gt; 592 ns/element; CUDA never contracted the term. PART 3 OVERTURNED THIS PLAN'S OWN PREMISE: the box-section comparison is NOT discretisation-dominated. Three 120-degree arcs sweep a TRUE ring, so it carries no discretisation term; an independent panelled Gauss-Legendre reference puts the axisymmetric element at 7.4e-12 at every target, so the whole departure is the thickened arc's own error GROWING TOWARD ITS SECTION FACE (8.8e-10 at six section widths, 2.5e-06 at 0.0075 m, 1.3e-04 at 0.0005 m). The gate was masking a real near-face kernel error. Naive refinement failed because raising minimum_arc_nodes past the point count switches arcs to CHORDS (18 chords 2.2e-02, 36 at 7.4e-03) against three arcs at 8.8e-10. Sensitivity demonstrated: a 1e-09 relative row scaling now fails. Record: archive/nova-3d-native-element-callers-landed.html</p>
     </article>
 <article class="r-fu" data-id="f-3d-07" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28T20:30:00+00:00" data-recommends-skill="/reckon-ship nova-3d-native" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Settle the ring diagonal against a discrete CS winding, and merge it</h4>
@@ -704,6 +705,11 @@ Done-when
   3. Full lane clean; followup resolved.</pre>
     </article>
 </section>
-  </main>
+  <section data-reckon="research" id="research" class="r-research-list">
+<h2><span class="sec">§</span> Research</h2>
+<div class="r-research" data-id="r-n3d-transition" data-type="transition-audit" data-source="nova" data-added-by="codex" data-when="2026-07-29" data-url="/nova/physics-spine-transition-audit.html">
+    <span class="r-research-title"><a href="/nova/physics-spine-transition-audit.html">Physics Spine Transition Audit</a></span></div>
+</section>
+</main>
 </body>
 </html>

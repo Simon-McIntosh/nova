@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="physics-spine-transition-audit">
+  <meta name="plan-title" content="Physics Spine Transition Audit">
+  <meta name="plan-summary" content="Current evidence for the Ambix-to-Nova transfer, ownership boundary, completed ports, remaining donor code and dependency-ordered launch path.">
+  <meta name="plan-informs" content="nova-spine-refactor,physics-spine-adoption,mast-machine-description,mast-catalog-gpu-solve,mast-nonaxisymmetric-physics">
+  <meta name="plan-read" content="1">
+  <title>Physics Spine Transition Audit | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — Current state</h2>
+    <p>Nova 2.0 has the domain package structure and most generic physics components: equilibrium forward/inverse/moment/harmonic models, passive and screening circuits, JAX current diffusion, coupling generation, machine abstractions, standard-name IO and IMAS-facing infrastructure. The main refactor is approximately 90% complete and physics adoption approximately 60% complete.</p>
+    <h2 id="s2">§2 — Remaining transition</h2>
+    <table>
+      <thead><tr><th>Capability</th><th>State</th><th>Remaining evidence</th></tr></thead>
+      <tbody>
+        <tr><td>Equilibrium reconstruction</td><td>Core models ported; profile reconstruction and <code>gs_solve</code> remain.</td><td>Frozen-shot topology, axis, LCFS, profile and ledger parity.</td></tr>
+        <tr><td>Transport</td><td>JAX diffusion ported; full multi-rate coupling remains.</td><td>CPU/device interval and rollout parity across ramp and flat-top.</td></tr>
+        <tr><td>Passive/circuits</td><td>Generic models ported.</td><td>MAST structures, 3D drive semantics, eddy trajectories and circuit validation.</td></tr>
+        <tr><td>IMAS/machine data</td><td>Infrastructure exists.</td><td>Production MAST DDv4 descriptions, COCOS/identity gates and round trips.</td></tr>
+        <tr><td>GPU physics</td><td>JAX substrate demonstrated in Ambix.</td><td>Move production kernels to Nova; H200 catalog throughput and precision gates.</td></tr>
+        <tr><td>Ambix cutover</td><td>Not started as a package dependency.</td><td>Pinned Nova dependency, thin adapters, donor deletion and end-to-end label evidence.</td></tr>
+      </tbody>
+    </table>
+    <h2 id="s3">§3 — Ownership and launch recommendation</h2>
+    <p>Nova owns all production physics and IMAS mechanics; Ambix consumes Nova for labeling and ML. Finish refactor convergence first. Then run Wave 3 reconstruction/transport and MAST machine-description work in parallel. Run MAST non-axisymmetric/passive completion after the 3D substrate. Only after those gates pass should the H200 catalog solve and Ambix consumer cutover run.</p>
+  </main>
+</body>
+</html>

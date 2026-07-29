@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="mast-nonaxisymmetric-physics">
+  <meta name="plan-title" content="MAST Non-axisymmetric Physics">
+  <meta name="plan-summary" content="Own MAST 3D coil fields, passive structures, circuit semantics and vacuum taring in Nova, replacing the Ambix-local implementation path.">
+  <meta name="plan-status" content="pending">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="L">
+  <meta name="plan-tier" content="opus">
+  <meta name="plan-sprint" content="S3">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-depends-on" content="nova-3d-native">
+  <meta name="plan-blocks" content="mast-catalog-gpu-solve">
+  <title>MAST Non-axisymmetric Physics | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-07-29">
+<meta name="plan-version" content="1">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — Outcome</h2>
+    <p>Nova provides the production MAST model for non-axisymmetric drive fields, passive structures and circuits. It represents correction/RMP/ELM coils and leads, era-keyed sensor geometry, circuit semantics, passive screening and vacuum taring. Plasma response remains outside this first scope; exposed plasma-on channels carry flags and uncertainty inflation.</p>
+    <figure>
+      <img src="/nova/figures/physics-spine-transition/transition-roadmap.svg" alt="Three dependency-ordered sprints move Nova from convergence through physics and machine completion to GPU catalog and Ambix cutover.">
+      <figcaption>The non-axisymmetric and passive work joins the critical path after the 3D substrate and before the production catalog.</figcaption>
+    </figure>
+    <h2 id="s2">§2 — Research-first build</h2>
+    <ol>
+      <li>Produce a geometry and circuit provenance research document covering engineering drawings, literature, IMAS availability, channel eras and uncertainty.</li>
+      <li>Land versioned MAST 3D geometry and drive semantics using Nova's native 3D kernels and machine-description identities.</li>
+      <li>Model open/shorted/era-dependent coil boundary conditions and passive screening with identifiable vacuum-shot gates.</li>
+      <li>Expose vacuum taring through Nova's standard-name IO and machine API, then rewire Ambix to consume it.</li>
+    </ol>
+    <h2 id="s3">§3 — Evidence gates</h2>
+    <p>Evidence must include source provenance, per-era channel ledgers, vacuum/off-on contrasts, coil and passive Green-function cross-checks, held-out ramp residuals, uncertainty calibration, CPU/JAX parity and commit/environment identities. Negative results and unresolved plasma-response contamination are recorded explicitly.</p>
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="physics-owner" data-choice="nova" data-by="Simon McIntosh" data-when="2026-07-29">
+    <p class="r-dec-q">Which repository owns the production 3D/passive physics?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="nova">Nova</button>
+      <button class="r-opt" data-value="ambix">Ambix</button>
+      </p>
+    <p class="r-dec-rat">The user-directed architecture places all physics-spine capabilities in Nova and keeps Ambix as a consumer.</p>
+    </div>
+</section>
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-mnap-01" data-status="open" data-tier="opus" data-written-by="codex" data-written-at="2026-07-29" data-recommends-skill="/reckon-ship mast-nonaxisymmetric-physics" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Research and implement MAST 3D/passive physics in Nova</h4>
+    <div class="r-fu-body"><p>Begin after <code>nova-3d-native</code> ships. Preserve the Ambix work as research/evidence input, not as the production owner.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    mast-nonaxisymmetric-physics (http://localhost:8765/nova/mast-nonaxisymmetric-physics.html)
+Section: full plan
+Tier:    opus
+
+Context
+  MAST-specific 3D field subtraction and passive semantics currently live in Ambix.
+  Nova must own the production model on its native 3D and machine-description substrate.
+
+State to read
+  physics-spine-transition-audit.html, nova/field/, nova/circuit/
+  Ambix nonaxisymmetric-field-subtraction plan and its research/evidence artifacts
+
+Scope locks / constraints
+  Research document before implementation; evidence document after each landing.
+  Vacuum taring first; plasma response remains out of scope.
+
+Done-when
+  1. MAST geometry, circuits and vacuum-taring API land with held-out evidence
+  2. tests still green
+  3. followup written + this followup marked resolved</pre>
+    </article>
+</section>
+  <section data-reckon="research" id="research" class="r-research-list">
+<h2><span class="sec">§</span> Research</h2>
+<div class="r-research" data-id="r-mnap-transition" data-type="transition-audit" data-source="nova" data-added-by="codex" data-when="2026-07-29" data-url="/nova/physics-spine-transition-audit.html">
+    <span class="r-research-title"><a href="/nova/physics-spine-transition-audit.html">Physics Spine Transition Audit</a></span></div>
+</section>
+</main>
+</body>
+</html>

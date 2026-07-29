@@ -1,8 +1,94 @@
 {
-  "updated": "2026-07-23T09:38:42",
+  "updated": "2026-07-29T11:18:02",
   "project": "nova",
   "doc": "index",
   "data": {
-    "_version": 1
+    "sprints": [
+      {
+        "id": "S1",
+        "status": "active",
+        "theme": "Converge Nova 2.0",
+        "items": [
+          {
+            "slug": "nova-spine-refactor",
+            "why_now": "All migration work depends on the final API/branch convergence.",
+            "tier": "opus",
+            "done_when": "Ambix adoption contract is frozen, assembly extracted, plan/code branches converge and the main suite passes."
+          }
+        ],
+        "starts": "2026-07-29",
+        "ends": "2026-08-05",
+        "description": "Finish assembly extraction, Ambix adoption contract and return to a single trunk before downstream ports consume unstable APIs."
+      },
+      {
+        "id": "S2",
+        "status": "planned",
+        "theme": "Complete the axisymmetric physics spine and MAST machine data",
+        "items": [
+          {
+            "slug": "physics-spine-adoption",
+            "why_now": "Profile reconstruction, gs_solve, geometry and full transport coupling are the remaining core physics ports.",
+            "tier": "opus",
+            "done_when": "Wave 3 lands in Nova with frozen CPU/JAX parity evidence and Ambix donor inventory."
+          },
+          {
+            "slug": "mast-machine-description",
+            "why_now": "Production reconstruction and IMAS egress require versioned MAST DDv4 descriptions and identity gates.",
+            "tier": "opus",
+            "done_when": "MAST IDS descriptions, COCOS gates and IMAS round trips pass with provenance."
+          },
+          {
+            "slug": "nova-3d-native",
+            "why_now": "MAST passive and non-axisymmetric work needs the exact native 3D coupling substrate.",
+            "tier": "opus",
+            "done_when": "Exact flux-coupling operators and remaining numerical gates ship with evidence."
+          }
+        ],
+        "starts": "2026-08-06",
+        "ends": "2026-08-20",
+        "description": "After convergence, run Wave 3 reconstruction/transport, MAST DDv4 descriptions and the native 3D substrate as parallel evidence-gated tracks."
+      },
+      {
+        "id": "S3",
+        "status": "planned",
+        "theme": "MAST 3D fields, passive structures and circuits",
+        "items": [
+          {
+            "slug": "mast-nonaxisymmetric-physics",
+            "why_now": "This closes the remaining Ambix-owned 3D/passive physics boundary before production labeling.",
+            "tier": "opus",
+            "done_when": "Versioned geometry, circuits, vacuum taring and held-out ramp evidence ship in Nova."
+          }
+        ],
+        "starts": "2026-08-21",
+        "ends": "2026-09-04",
+        "description": "Move MAST-specific non-axisymmetric geometry, drive semantics, passive screening and vacuum taring into Nova after the native 3D substrate ships."
+      },
+      {
+        "id": "S4",
+        "status": "planned",
+        "theme": "H200 production catalog",
+        "items": [
+          {
+            "slug": "mast-catalog-gpu-solve",
+            "why_now": "The validated production substrate is ready for campaign-scale GPU execution and label-store release.",
+            "tier": "opus",
+            "done_when": "H200 solve meets science, provenance and throughput gates; versioned label store and optional IMAS egress are published."
+          }
+        ],
+        "starts": "2026-09-05",
+        "ends": "2026-09-19",
+        "description": "Run the GPU catalog only after reconstruction, machine descriptions and MAST 3D/passive physics pass their evidence gates."
+      }
+    ],
+    "active_sprint_id": "S1",
+    "timeline": [
+      {
+        "when": "2026-07-29",
+        "who": "codex",
+        "what": "Dependency-ordered Ambix-to-Nova physics transition sprints S1-S4 defined"
+      }
+    ],
+    "_version": 2
   }
 }

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 265" role="img" aria-labelledby="title desc">
+  <title id="title">Physics spine transition roadmap</title>
+  <desc id="desc">Sprint one converges Nova, sprint two completes reconstruction and machine data, and sprint three completes 3D physics, GPU catalog and Ambix cutover.</desc>
+  <defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#334155"/></marker></defs>
+  <g font-family="system-ui" fill="#0f172a">
+    <rect x="25" y="50" width="245" height="155" rx="4" fill="#fff" stroke="#2563eb"/>
+    <text x="147" y="82" text-anchor="middle" font-size="16">S1 · converge</text><text x="147" y="113" text-anchor="middle" font-size="13">assembly extraction</text><text x="147" y="138" text-anchor="middle" font-size="13">single trunk</text><text x="147" y="171" text-anchor="middle" font-size="13" fill="#2563eb">API freeze</text>
+    <rect x="365" y="50" width="245" height="155" rx="4" fill="#fff" stroke="#0f766e"/>
+    <text x="487" y="82" text-anchor="middle" font-size="16">S2 · complete core</text><text x="487" y="113" text-anchor="middle" font-size="13">profile GS + transport</text><text x="487" y="138" text-anchor="middle" font-size="13">MAST DDv4 descriptions</text><text x="487" y="171" text-anchor="middle" font-size="13" fill="#0f766e">CPU parity</text>
+    <rect x="705" y="35" width="250" height="185" rx="4" fill="#fff" stroke="#c2410c"/>
+    <text x="830" y="70" text-anchor="middle" font-size="16">S3 · production cutover</text><text x="830" y="103" text-anchor="middle" font-size="13">3D/passive physics</text><text x="830" y="128" text-anchor="middle" font-size="13">H200 catalog solve</text><text x="830" y="153" text-anchor="middle" font-size="13">Ambix consumer adapter</text><text x="830" y="188" text-anchor="middle" font-size="13" fill="#c2410c">evidence + donor deletion</text>
+  </g>
+  <line x1="270" y1="128" x2="360" y2="128" stroke="#334155" marker-end="url(#a)"/><line x1="610" y1="128" x2="700" y2="128" stroke="#334155" marker-end="url(#a)"/>
+</svg>

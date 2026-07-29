@@ -1,0 +1,142 @@
+{
+ "coil": "PF1",
+ "machine": 0.7076,
+ "cross_turn": 0.6997639500902622,
+ "rungs": {
+  "continuum": 0.7034633581983654,
+  "turn count": 0.7050834217833207,
+  "outline": 0.7132559834769172,
+  "ring stack": 0.7077946708790142,
+  "wound path": 0.7068698055302365
+ },
+ "gap": {
+  "continuum": 0.004136641801634644,
+  "turn count": 0.002516578216679277,
+  "outline": -0.0056559834769172035,
+  "ring stack": -0.00019467087901414715,
+  "wound path": 0.0007301944697635232
+ },
+ "resolved": {
+  "disc-16-4": {
+   "self": 0.0071227577198230375,
+   "ring_self": 0.007105855439974379,
+   "step": 1.69022798486582e-05,
+   "rung": 0.7068867078100852,
+   "gap": 0.0007132921899147826,
+   "with_feeder": 0.7072201594028876,
+   "feeder_gap": 0.0003798405971124168,
+   "channel": 0.0,
+   "centreline": 0.007431801678397974,
+   "correction": 0.0003090439585749391,
+   "length": 6180.328473992828,
+   "turns_covered": 249
+  },
+  "disc-16-4-of25": {
+   "self": 0.0007201024467006455,
+   "ring_self": null,
+   "step": null,
+   "rung": null,
+   "gap": null,
+   "with_feeder": null,
+   "feeder_gap": null,
+   "channel": 0.0,
+   "centreline": 0.0007513220448803114,
+   "correction": 3.121959817966614e-05,
+   "length": 624.3360264964592,
+   "turns_covered": 25
+  },
+  "disc-32-4-of25": {
+   "self": 0.000718898781566077,
+   "ring_self": null,
+   "step": null,
+   "rung": null,
+   "gap": null,
+   "with_feeder": null,
+   "feeder_gap": null,
+   "channel": 0.0,
+   "centreline": 0.000750114720845871,
+   "correction": 3.121593927979381e-05,
+   "length": 624.3360264964592,
+   "turns_covered": 25
+  },
+  "disc-64-4-of25": {
+   "self": 0.0007185979254172226,
+   "ring_self": null,
+   "step": null,
+   "rung": null,
+   "gap": null,
+   "with_feeder": null,
+   "feeder_gap": null,
+   "channel": 0.0,
+   "centreline": 0.0007498136184694516,
+   "correction": 3.1215693052229116e-05,
+   "length": 624.3360264964592,
+   "turns_covered": 25
+  },
+  "annulus-16-4-of25": {
+   "self": 0.0007158816249705302,
+   "ring_self": null,
+   "step": null,
+   "rung": null,
+   "gap": null,
+   "with_feeder": null,
+   "feeder_gap": null,
+   "channel": -8.068868257023845e-05,
+   "centreline": 0.0007374175440771637,
+   "correction": 2.153591910663328e-05,
+   "length": 624.3360264964592,
+   "turns_covered": 25
+  },
+  "annulus-32-4-of25": {
+   "self": 0.0007146786345368301,
+   "ring_self": null,
+   "step": null,
+   "rung": null,
+   "gap": null,
+   "with_feeder": null,
+   "feeder_gap": null,
+   "channel": -8.058135988406476e-05,
+   "centreline": 0.0007362102250369269,
+   "correction": 2.15315905000968e-05,
+   "length": 624.3360264964592,
+   "turns_covered": 25
+  },
+  "disc-32-2-of25": {
+   "self": 0.0007190728588557582,
+   "ring_self": null,
+   "step": null,
+   "rung": null,
+   "gap": null,
+   "with_feeder": null,
+   "feeder_gap": null,
+   "channel": 0.0,
+   "centreline": 0.0007502887981355519,
+   "correction": 3.121593927979381e-05,
+   "length": 624.3360264964592,
+   "turns_covered": 25
+  },
+  "disc-32-8-of25": {
+   "self": 0.0007187728733155868,
+   "ring_self": null,
+   "step": null,
+   "rung": null,
+   "gap": null,
+   "with_feeder": null,
+   "feeder_gap": null,
+   "channel": 0.0,
+   "centreline": 0.0007499888125953806,
+   "correction": 3.121593927979381e-05,
+   "length": 624.3360264964592,
+   "turns_covered": 25
+  }
+ },
+ "terminal_step": 0.0003334515928023658,
+ "subset": null,
+ "turn_count": 249,
+ "seam": {
+  "mean_per_boundary": 6.829571723003637e-11,
+  "pack_estimate": 1.693733787304902e-08,
+  "boundaries": 12,
+  "section": "annulus-32"
+ }
+}

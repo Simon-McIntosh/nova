@@ -1,0 +1,2549 @@
+{
+ "coil": "PF1",
+ "turn_table": {
+  "elements": 1082,
+  "pack": 1014,
+  "pack_lines": 135,
+  "pack_arcs": 879,
+  "filled": 83,
+  "feeder_axial": 2,
+  "feeder_radial": 66,
+  "first_pack": 31,
+  "last_pack": 1044,
+  "winding_box": [
+   [
+    3.5034999511482066,
+    4.461644343211943
+   ],
+   [
+    7.1518999999999995,
+    8.078900000000747
+   ]
+  ],
+  "path_radius_max": 18.276378224363825,
+  "turns_full_path": 248.99831219693215,
+  "turns_pack": 248.92614209551377,
+  "step": 0.8387051421752196,
+  "step_margin": 0.7330318616524458,
+  "nominal": 248.64,
+  "outline": [
+   3.9431,
+   7.5641,
+   0.959,
+   0.9841
+  ],
+  "outline_excess": 0.07984999999999953
+ },
+ "turn_count": 249,
+ "measured_turns": 248.92614209551377,
+ "diameter": 0.035,
+ "channel": 0.01,
+ "subset": null,
+ "runs": {
+  "disc-16-4": {
+   "section": "disc-16",
+   "diameter": 0.035,
+   "channel": 0.0,
+   "corners": 16,
+   "intervals": 4,
+   "turns": {
+    "0": {
+     "centreline": 3.3524354165536585e-05,
+     "correction": 1.3722493416359207e-06,
+     "self": 3.2152104823900665e-05,
+     "core": 0.0,
+     "length": 27.442358798699786,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "1": {
+     "centreline": 3.236653899652618e-05,
+     "correction": 1.3307342069299094e-06,
+     "self": 3.103580478959627e-05,
+     "core": 0.0,
+     "length": 26.612205716412195,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "2": {
+     "centreline": 3.1315388144838686e-05,
+     "correction": 1.2935405504650225e-06,
+     "self": 3.0021847594373664e-05,
+     "core": 0.0,
+     "length": 25.868439536015423,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "3": {
+     "centreline": 3.0248595870281257e-05,
+     "correction": 1.2556466304029762e-06,
+     "self": 2.899294923987828e-05,
+     "core": 0.0,
+     "length": 25.110669840190724,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "4": {
+     "centreline": 2.9151515546337638e-05,
+     "correction": 1.2165196488163054e-06,
+     "self": 2.793499589752133e-05,
+     "core": 0.0,
+     "length": 24.328241581879993,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "5": {
+     "centreline": 2.8090073190307592e-05,
+     "correction": 1.178481444986718e-06,
+     "self": 2.6911591745320872e-05,
+     "core": 0.0,
+     "length": 23.56758729276347,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "6": {
+     "centreline": 2.7042533148471023e-05,
+     "correction": 1.1407577220865626e-06,
+     "self": 2.590177542638446e-05,
+     "core": 0.0,
+     "length": 22.813270541985723,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "7": {
+     "centreline": 2.6078817933819697e-05,
+     "correction": 1.1058842438156902e-06,
+     "self": 2.4972933690004006e-05,
+     "core": 0.0,
+     "length": 22.115908928350862,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "8": {
+     "centreline": 2.651762044945928e-05,
+     "correction": 1.121805133621132e-06,
+     "self": 2.5395815315838148e-05,
+     "core": 0.0,
+     "length": 22.434250071852997,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "9": {
+     "centreline": 2.7577802147561573e-05,
+     "correction": 1.1600435829224727e-06,
+     "self": 2.64177585646391e-05,
+     "core": 0.0,
+     "length": 23.198907128640197,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "10": {
+     "centreline": 2.8538114663070153e-05,
+     "correction": 1.194500713466183e-06,
+     "self": 2.734361394960397e-05,
+     "core": 0.0,
+     "length": 23.88794491049436,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "11": {
+     "centreline": 2.965145220119125e-05,
+     "correction": 1.2344707228081572e-06,
+     "self": 2.8416981478383094e-05,
+     "core": 0.0,
+     "length": 24.687189848842177,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "12": {
+     "centreline": 3.0717826742945057e-05,
+     "correction": 1.2724412927477534e-06,
+     "self": 2.9445385450197303e-05,
+     "core": 0.0,
+     "length": 25.44649306335342,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "13": {
+     "centreline": 3.1737879919684965e-05,
+     "correction": 1.308589725929971e-06,
+     "self": 3.0429290193754995e-05,
+     "core": 0.0,
+     "length": 26.169357339339864,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "14": {
+     "centreline": 3.2949537530574264e-05,
+     "correction": 1.3514113829763112e-06,
+     "self": 3.1598126147597954e-05,
+     "core": 0.0,
+     "length": 27.025673927601034,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "15": {
+     "centreline": 3.395078248038629e-05,
+     "correction": 1.3886587814981621e-06,
+     "self": 3.2562123698888126e-05,
+     "core": 0.0,
+     "length": 27.77051616975633,
+     "sources": 12,
+     "stations": 48,
+     "elements": 12
+    },
+    "16": {
+     "centreline": 3.290890433407009e-05,
+     "correction": 1.3498656460988488e-06,
+     "self": 3.1559038687971244e-05,
+     "core": 0.0,
+     "length": 26.994762110996263,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "17": {
+     "centreline": 3.189385751933339e-05,
+     "correction": 1.314021487071656e-06,
+     "self": 3.057983603226173e-05,
+     "core": 0.0,
+     "length": 26.277982445805286,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "18": {
+     "centreline": 3.076157851748899e-05,
+     "correction": 1.2738950101649085e-06,
+     "self": 2.9487683507324084e-05,
+     "core": 0.0,
+     "length": 25.475604550502688,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "19": {
+     "centreline": 2.972109741021467e-05,
+     "correction": 1.2368470836431476e-06,
+     "self": 2.848425032657152e-05,
+     "core": 0.0,
+     "length": 24.73475432969177,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "20": {
+     "centreline": 2.8620531853585716e-05,
+     "correction": 1.197539690034612e-06,
+     "self": 2.7422992163551105e-05,
+     "core": 0.0,
+     "length": 23.9487191771252,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "21": {
+     "centreline": 2.7563034683562415e-05,
+     "correction": 1.159524275233888e-06,
+     "self": 2.640351040832853e-05,
+     "core": 0.0,
+     "length": 23.18852185431428,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "22": {
+     "centreline": 2.6505171003523714e-05,
+     "correction": 1.1213627821836745e-06,
+     "self": 2.538380822134004e-05,
+     "core": 0.0,
+     "length": 22.425403773623344,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "23": {
+     "centreline": 2.6085227052109917e-05,
+     "correction": 1.1061080379873583e-06,
+     "self": 2.4979119014122558e-05,
+     "core": 0.0,
+     "length": 22.120384452391455,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "24": {
+     "centreline": 2.7057100135356382e-05,
+     "correction": 1.1412737322911714e-06,
+     "self": 2.591582640306521e-05,
+     "core": 0.0,
+     "length": 22.82358989391492,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "25": {
+     "centreline": 2.8106803564338542e-05,
+     "correction": 1.1790531192925497e-06,
+     "self": 2.692775044504599e-05,
+     "core": 0.0,
+     "length": 23.579065663457417,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "26": {
+     "centreline": 2.906493299508628e-05,
+     "correction": 1.2133705477376402e-06,
+     "self": 2.7851562447348642e-05,
+     "core": 0.0,
+     "length": 24.265265129438742,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "27": {
+     "centreline": 3.017594041738271e-05,
+     "correction": 1.2531615544000175e-06,
+     "self": 2.8922778862982693e-05,
+     "core": 0.0,
+     "length": 25.060972798421854,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "28": {
+     "centreline": 3.124900008834191e-05,
+     "correction": 1.291291404278901e-06,
+     "self": 2.995770868406301e-05,
+     "core": 0.0,
+     "length": 25.823460735696848,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "29": {
+     "centreline": 3.232205249294045e-05,
+     "correction": 1.3292667104790353e-06,
+     "self": 3.0992785782461415e-05,
+     "core": 0.0,
+     "length": 26.58282232394884,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "30": {
+     "centreline": 3.353245517989541e-05,
+     "correction": 1.3719903826399565e-06,
+     "self": 3.216046479725545e-05,
+     "core": 0.0,
+     "length": 27.437180114720295,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "31": {
+     "centreline": 3.387290750848131e-05,
+     "correction": 1.3863642899908781e-06,
+     "self": 3.248654321849043e-05,
+     "core": 0.0,
+     "length": 27.724630733857058,
+     "sources": 10,
+     "stations": 40,
+     "elements": 10
+    },
+    "32": {
+     "centreline": 3.2332454428172604e-05,
+     "correction": 1.329560577890971e-06,
+     "self": 3.100289385028163e-05,
+     "core": 0.0,
+     "length": 26.588735321455534,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "33": {
+     "centreline": 3.142747415419788e-05,
+     "correction": 1.2976786955795744e-06,
+     "self": 3.012979545861831e-05,
+     "core": 0.0,
+     "length": 25.951194851763784,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "34": {
+     "centreline": 3.0365164592588953e-05,
+     "correction": 1.2599251705136347e-06,
+     "self": 2.910523942207532e-05,
+     "core": 0.0,
+     "length": 25.19623293215895,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "35": {
+     "centreline": 2.9300613569086174e-05,
+     "correction": 1.2219821202441908e-06,
+     "self": 2.8078631448841983e-05,
+     "core": 0.0,
+     "length": 24.437481350149266,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "36": {
+     "centreline": 2.8206256945102443e-05,
+     "correction": 1.1827589969489798e-06,
+     "self": 2.7023497948153463e-05,
+     "core": 0.0,
+     "length": 23.65313092155694,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "37": {
+     "centreline": 2.7155924595898003e-05,
+     "correction": 1.1449704316420224e-06,
+     "self": 2.601095416425598e-05,
+     "core": 0.0,
+     "length": 22.89746962936093,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "38": {
+     "centreline": 2.61612695301825e-05,
+     "correction": 1.1088955822035655e-06,
+     "self": 2.5052373947978936e-05,
+     "core": 0.0,
+     "length": 22.176130860177025,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "39": {
+     "centreline": 2.6399748623055412e-05,
+     "correction": 1.1175624118870805e-06,
+     "self": 2.528218621116833e-05,
+     "core": 0.0,
+     "length": 22.349402643797685,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "40": {
+     "centreline": 2.7463768535174476e-05,
+     "correction": 1.1559688452281377e-06,
+     "self": 2.630779968994634e-05,
+     "core": 0.0,
+     "length": 23.11741927530774,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "41": {
+     "centreline": 2.847246921763787e-05,
+     "correction": 1.1921843072870856e-06,
+     "self": 2.7280284910350784e-05,
+     "core": 0.0,
+     "length": 23.841620799865716,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "42": {
+     "centreline": 2.9532153776040934e-05,
+     "correction": 1.2302704252267622e-06,
+     "self": 2.8301883350814173e-05,
+     "core": 0.0,
+     "length": 24.603232792073364,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "43": {
+     "centreline": 3.0600393385189026e-05,
+     "correction": 1.2683326475584428e-06,
+     "self": 2.9332060737630582e-05,
+     "core": 0.0,
+     "length": 25.36432769202709,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "44": {
+     "centreline": 3.166319370791408e-05,
+     "correction": 1.3060317784174722e-06,
+     "self": 3.0357161929496607e-05,
+     "core": 0.0,
+     "length": 26.11820315313205,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "45": {
+     "centreline": 3.274943153504262e-05,
+     "correction": 1.3444320023849477e-06,
+     "self": 3.140499953265767e-05,
+     "core": 0.0,
+     "length": 26.886099504553478,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "46": {
+     "centreline": 3.388575705746772e-05,
+     "correction": 1.3863533376459361e-06,
+     "self": 3.249940371982178e-05,
+     "core": 0.0,
+     "length": 27.724411707933367,
+     "sources": 11,
+     "stations": 44,
+     "elements": 11
+    },
+    "47": {
+     "centreline": 3.303701478952237e-05,
+     "correction": 1.3544980888005518e-06,
+     "self": 3.168251670072182e-05,
+     "core": 0.0,
+     "length": 27.087402211206747,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "48": {
+     "centreline": 3.196581944707623e-05,
+     "correction": 1.316689483492668e-06,
+     "self": 3.0649129963583566e-05,
+     "core": 0.0,
+     "length": 26.33133740522308,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "49": {
+     "centreline": 3.0898203636690695e-05,
+     "correction": 1.2788636322036317e-06,
+     "self": 2.9619340004487064e-05,
+     "core": 0.0,
+     "length": 25.57492807826998,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "50": {
+     "centreline": 2.9835509595934496e-05,
+     "correction": 1.2410462677897196e-06,
+     "self": 2.8594463328144776e-05,
+     "core": 0.0,
+     "length": 24.818730586436992,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "51": {
+     "centreline": 2.8771151096949273e-05,
+     "correction": 1.2030426240937286e-06,
+     "self": 2.7568108472855543e-05,
+     "core": 0.0,
+     "length": 24.058768324997875,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "52": {
+     "centreline": 2.7680832041505856e-05,
+     "correction": 1.163880176507892e-06,
+     "self": 2.6516951864997963e-05,
+     "core": 0.0,
+     "length": 23.27563250309057,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "53": {
+     "centreline": 2.663116086177463e-05,
+     "correction": 1.1260220720087618e-06,
+     "self": 2.550513878976587e-05,
+     "core": 0.0,
+     "length": 22.518581875559676,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "54": {
+     "centreline": 2.6037576874005855e-05,
+     "correction": 1.1044097385663425e-06,
+     "self": 2.493316713543951e-05,
+     "core": 0.0,
+     "length": 22.086421191283165,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "55": {
+     "centreline": 2.6937445397797454e-05,
+     "correction": 1.1369934253415093e-06,
+     "self": 2.5800451972455946e-05,
+     "core": 0.0,
+     "length": 22.737990823617352,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "56": {
+     "centreline": 2.799084420545206e-05,
+     "correction": 1.1749363188783929e-06,
+     "self": 2.6815907886573666e-05,
+     "core": 0.0,
+     "length": 23.496736626961592,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "57": {
+     "centreline": 2.9002285422464185e-05,
+     "correction": 1.2111652703629087e-06,
+     "self": 2.7791120152101276e-05,
+     "core": 0.0,
+     "length": 24.221207178669683,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "58": {
+     "centreline": 3.0060012007882664e-05,
+     "correction": 1.249091412490007e-06,
+     "self": 2.881092059539266e-05,
+     "core": 0.0,
+     "length": 24.97957729491766,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "59": {
+     "centreline": 3.113645973496674e-05,
+     "correction": 1.2873727197870992e-06,
+     "self": 2.984908701517964e-05,
+     "core": 0.0,
+     "length": 25.74509423006202,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "60": {
+     "centreline": 3.219414401927835e-05,
+     "correction": 1.3248063288954245e-06,
+     "self": 3.0869337690382925e-05,
+     "core": 0.0,
+     "length": 26.49365919608229,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "61": {
+     "centreline": 3.3336064423750555e-05,
+     "correction": 1.3651675664906294e-06,
+     "self": 3.1970896857259926e-05,
+     "core": 0.0,
+     "length": 27.30073685830438,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "62": {
+     "centreline": 3.398675663456914e-05,
+     "correction": 1.3899707489276311e-06,
+     "self": 3.2596785885641514e-05,
+     "core": 0.0,
+     "length": 27.796753005759307,
+     "sources": 11,
+     "stations": 44,
+     "elements": 11
+    },
+    "63": {
+     "centreline": 3.2445538988153776e-05,
+     "correction": 1.333520315783705e-06,
+     "self": 3.111201867237007e-05,
+     "core": 0.0,
+     "length": 26.6679227045075,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "64": {
+     "centreline": 3.155097410467021e-05,
+     "correction": 1.3020060548479318e-06,
+     "self": 3.024896804982228e-05,
+     "core": 0.0,
+     "length": 26.037696179438797,
+     "sources": 3,
+     "stations": 12,
+     "elements": 3
+    },
+    "65": {
+     "centreline": 3.0472721315669367e-05,
+     "correction": 1.2641172640115296e-06,
+     "self": 2.9208604051657837e-05,
+     "core": 0.0,
+     "length": 25.280067247655076,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "66": {
+     "centreline": 2.941187103861087e-05,
+     "correction": 1.2263209396515162e-06,
+     "self": 2.8185550098959354e-05,
+     "core": 0.0,
+     "length": 24.524250065166957,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "67": {
+     "centreline": 2.8323334350871113e-05,
+     "correction": 1.1872856068607777e-06,
+     "self": 2.7136048744010336e-05,
+     "core": 0.0,
+     "length": 23.74365527787193,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "68": {
+     "centreline": 2.727041719490202e-05,
+     "correction": 1.1492108836978037e-06,
+     "self": 2.6121206311204214e-05,
+     "core": 0.0,
+     "length": 22.982271489285615,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "69": {
+     "centreline": 2.622165302054472e-05,
+     "correction": 1.1114974963728382e-06,
+     "self": 2.5110155524171885e-05,
+     "core": 0.0,
+     "length": 22.228164965128624,
+     "sources": 7,
+     "stations": 28,
+     "elements": 7
+    },
+    "70": {
+     "centreline": 2.6288521162868893e-05,
+     "correction": 1.1136389611667526e-06,
+     "self": 2.517488220170214e-05,
+     "core": 0.0,
+     "length": 22.270990822012223,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "71": {
+     "centreline": 2.7344642223752038e-05,
+     "correction": 1.1518007085233645e-06,
+     "self": 2.6192841515228674e-05,
+     "core": 0.0,
+     "length": 23.034063599937415,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "72": {
+     "centreline": 2.839313303035277e-05,
+     "correction": 1.1894681205800198e-06,
+     "self": 2.720366490977275e-05,
+     "core": 0.0,
+     "length": 23.787301771259422,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "73": {
+     "centreline": 2.941352070726759e-05,
+     "correction": 1.2261541790851795e-06,
+     "self": 2.818736652818241e-05,
+     "core": 0.0,
+     "length": 24.520915148753467,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "74": {
+     "centreline": 3.0475988006303963e-05,
+     "correction": 1.2640323352351958e-06,
+     "self": 2.9211955671068765e-05,
+     "core": 0.0,
+     "length": 25.27836882517632,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "75": {
+     "centreline": 3.154100263886455e-05,
+     "correction": 1.3018068920890382e-06,
+     "self": 3.0239195746775515e-05,
+     "core": 0.0,
+     "length": 26.033713295191045,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "76": {
+     "centreline": 3.259547062103335e-05,
+     "correction": 1.3389873851681668e-06,
+     "self": 3.125648323586518e-05,
+     "core": 0.0,
+     "length": 26.777217448789486,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "77": {
+     "centreline": 3.3824781889728114e-05,
+     "correction": 1.3842232984201729e-06,
+     "self": 3.244055859130794e-05,
+     "core": 0.0,
+     "length": 27.68181500271723,
+     "sources": 10,
+     "stations": 40,
+     "elements": 10
+    },
+    "78": {
+     "centreline": 3.3145519351762085e-05,
+     "correction": 1.358515811422031e-06,
+     "self": 3.178700354034005e-05,
+     "core": 0.0,
+     "length": 27.16774907143558,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "79": {
+     "centreline": 3.2095617604943793e-05,
+     "correction": 1.3215327074132938e-06,
+     "self": 3.07740848975305e-05,
+     "core": 0.0,
+     "length": 26.428192863386812,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "80": {
+     "centreline": 3.102530183924319e-05,
+     "correction": 1.2836112354466749e-06,
+     "self": 2.9741690603796516e-05,
+     "core": 0.0,
+     "length": 25.669871439256617,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "81": {
+     "centreline": 2.9941247571206415e-05,
+     "correction": 1.2451896153164145e-06,
+     "self": 2.869605795589e-05,
+     "core": 0.0,
+     "length": 24.90154838277219,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "82": {
+     "centreline": 2.8882358648439796e-05,
+     "correction": 1.20740049343451e-06,
+     "self": 2.7674958155005285e-05,
+     "core": 0.0,
+     "length": 24.14591816221952,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "83": {
+     "centreline": 2.7795595727417633e-05,
+     "correction": 1.1683720447376214e-06,
+     "self": 2.662722368268001e-05,
+     "core": 0.0,
+     "length": 23.36546226072179,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "84": {
+     "centreline": 2.6745350993130254e-05,
+     "correction": 1.1302122664501207e-06,
+     "self": 2.5615138726680132e-05,
+     "core": 0.0,
+     "length": 22.60237884450712,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "85": {
+     "centreline": 2.599953067395891e-05,
+     "correction": 1.1031342652193275e-06,
+     "self": 2.4896396408739584e-05,
+     "core": 0.0,
+     "length": 22.060913772635267,
+     "sources": 7,
+     "stations": 28,
+     "elements": 7
+    },
+    "86": {
+     "centreline": 2.6820445630758864e-05,
+     "correction": 1.1328861123424082e-06,
+     "self": 2.5687559518416455e-05,
+     "core": 0.0,
+     "length": 22.65585134664084,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "87": {
+     "centreline": 2.7869978115072864e-05,
+     "correction": 1.170707230594214e-06,
+     "self": 2.669927088447865e-05,
+     "core": 0.0,
+     "length": 23.412162023224447,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "88": {
+     "centreline": 2.8921586865484208e-05,
+     "correction": 1.2084011700943291e-06,
+     "self": 2.771318569538988e-05,
+     "core": 0.0,
+     "length": 24.165929961838806,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "89": {
+     "centreline": 2.9942803292255277e-05,
+     "correction": 1.2450192001758785e-06,
+     "self": 2.8697784092079398e-05,
+     "core": 0.0,
+     "length": 24.898140387062124,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "90": {
+     "centreline": 3.100874468785815e-05,
+     "correction": 1.2829558920835947e-06,
+     "self": 2.9725788795774555e-05,
+     "core": 0.0,
+     "length": 25.656765773448868,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "91": {
+     "centreline": 3.207741203071831e-05,
+     "correction": 1.3208137659165212e-06,
+     "self": 3.075659826480179e-05,
+     "core": 0.0,
+     "length": 26.41381537244193,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "92": {
+     "centreline": 3.3153879127269584e-05,
+     "correction": 1.3588642989855833e-06,
+     "self": 3.1795014828284e-05,
+     "core": 0.0,
+     "length": 27.174718164177452,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "93": {
+     "centreline": 3.40294965525821e-05,
+     "correction": 1.3913743318784218e-06,
+     "self": 3.263812222070368e-05,
+     "core": 0.0,
+     "length": 27.82482197673321,
+     "sources": 10,
+     "stations": 40,
+     "elements": 10
+    },
+    "94": {
+     "centreline": 3.260930305872466e-05,
+     "correction": 1.3392774337207823e-06,
+     "self": 3.127002562500388e-05,
+     "core": 0.0,
+     "length": 26.783054340920913,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "95": {
+     "centreline": 3.164894913809289e-05,
+     "correction": 1.3054971037408578e-06,
+     "self": 3.034345203435203e-05,
+     "core": 0.0,
+     "length": 26.10751065540311,
+     "sources": 2,
+     "stations": 8,
+     "elements": 2
+    },
+    "96": {
+     "centreline": 3.0605389077795585e-05,
+     "correction": 1.2686983331420775e-06,
+     "self": 2.9336690744653507e-05,
+     "core": 0.0,
+     "length": 25.371640733281225,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "97": {
+     "centreline": 2.9535294486997946e-05,
+     "correction": 1.2304614698290223e-06,
+     "self": 2.8304833017168925e-05,
+     "core": 0.0,
+     "length": 24.607053346259413,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "98": {
+     "centreline": 2.8459217996417453e-05,
+     "correction": 1.1918460842610728e-06,
+     "self": 2.726737191215638e-05,
+     "core": 0.0,
+     "length": 23.834856925284665,
+     "sources": 6,
+     "stations": 24,
+     "elements": 6
+    },
+    "99": {
+     "centreline": 2.7387322046917377e-05,
+     "correction": 1.1532345877651581e-06,
+     "self": 2.6234087459152218e-05,
+     "core": 0.0,
+     "length": 23.062738756503734,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "100": {
+     "centreline": 2.6328472663926932e-05,
+     "correction": 1.1149859702675924e-06,
+     "self": 2.521348669365934e-05,
+     "core": 0.0,
+     "length": 22.297878066262058,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "101": {
+     "centreline": 2.618352624398564e-05,
+     "correction": 1.1097794438912635e-06,
+     "self": 2.5073746800094375e-05,
+     "core": 0.0,
+     "length": 22.193806674530748,
+     "sources": 6,
+     "stations": 24,
+     "elements": 6
+    },
+    "102": {
+     "centreline": 2.722536335421344e-05,
+     "correction": 1.1475636641990722e-06,
+     "self": 2.607779969001437e-05,
+     "core": 0.0,
+     "length": 22.949378144590224,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "103": {
+     "centreline": 2.8279411955941793e-05,
+     "correction": 1.1854544221779106e-06,
+     "self": 2.7093957533763884e-05,
+     "core": 0.0,
+     "length": 23.707034756567815,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "104": {
+     "centreline": 2.9299522183211102e-05,
+     "correction": 1.222003525860329e-06,
+     "self": 2.8077518657350774e-05,
+     "core": 0.0,
+     "length": 24.43790942461656,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "105": {
+     "centreline": 3.035235258404678e-05,
+     "correction": 1.2597852209926656e-06,
+     "self": 2.9092567363054116e-05,
+     "core": 0.0,
+     "length": 25.19343419393893,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "106": {
+     "centreline": 3.1418398172350244e-05,
+     "correction": 1.297649043765509e-06,
+     "self": 3.0120749128584736e-05,
+     "core": 0.0,
+     "length": 25.95060186984373,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "107": {
+     "centreline": 3.248831376532836e-05,
+     "correction": 1.3355108603311843e-06,
+     "self": 3.115280290499718e-05,
+     "core": 0.0,
+     "length": 26.70772988817298,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "108": {
+     "centreline": 3.3747094479711835e-05,
+     "correction": 1.3817982229327476e-06,
+     "self": 3.236529625677909e-05,
+     "core": 0.0,
+     "length": 27.63331813730025,
+     "sources": 12,
+     "stations": 48,
+     "elements": 12
+    },
+    "109": {
+     "centreline": 3.328223410285139e-05,
+     "correction": 1.36323439149318e-06,
+     "self": 3.191899971135821e-05,
+     "core": 0.0,
+     "length": 27.262077060634198,
+     "sources": 3,
+     "stations": 12,
+     "elements": 3
+    },
+    "110": {
+     "centreline": 3.220082601645557e-05,
+     "correction": 1.3251218709204431e-06,
+     "self": 3.0875704145535125e-05,
+     "core": 0.0,
+     "length": 26.499969448902306,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "111": {
+     "centreline": 3.112847978718422e-05,
+     "correction": 1.2871433820289066e-06,
+     "self": 2.9841336405155317e-05,
+     "core": 0.0,
+     "length": 25.740507895347584,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "112": {
+     "centreline": 3.0066810010086166e-05,
+     "correction": 1.2494236643917715e-06,
+     "self": 2.8817386345694395e-05,
+     "core": 0.0,
+     "length": 24.98622173421051,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "113": {
+     "centreline": 2.9005802229650247e-05,
+     "correction": 1.2115377172873922e-06,
+     "self": 2.7794264512362855e-05,
+     "core": 0.0,
+     "length": 24.228611761763467,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "114": {
+     "centreline": 2.793205601815972e-05,
+     "correction": 1.1729215209163655e-06,
+     "self": 2.6759134497243352e-05,
+     "core": 0.0,
+     "length": 23.456444079774446,
+     "sources": 6,
+     "stations": 24,
+     "elements": 6
+    },
+    "115": {
+     "centreline": 2.6868160433767848e-05,
+     "correction": 1.1345097570523301e-06,
+     "self": 2.5733650676715517e-05,
+     "core": 0.0,
+     "length": 22.68832155947776,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "116": {
+     "centreline": 2.5987117068100203e-05,
+     "correction": 1.1025441328727292e-06,
+     "self": 2.4884572935227474e-05,
+     "core": 0.0,
+     "length": 22.049112073401346,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "117": {
+     "centreline": 2.6699863067501428e-05,
+     "correction": 1.1286604806416072e-06,
+     "self": 2.557120258685982e-05,
+     "core": 0.0,
+     "length": 22.571345691027275,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "118": {
+     "centreline": 2.7752698603007194e-05,
+     "correction": 1.1665272025017384e-06,
+     "self": 2.6586171400505455e-05,
+     "core": 0.0,
+     "length": 23.328568540238102,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "119": {
+     "centreline": 2.8807036755030003e-05,
+     "correction": 1.2043802994556437e-06,
+     "self": 2.760265645557436e-05,
+     "core": 0.0,
+     "length": 24.08551951484089,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "120": {
+     "centreline": 2.9828997242434596e-05,
+     "correction": 1.2409067700294236e-06,
+     "self": 2.8588090472405173e-05,
+     "core": 0.0,
+     "length": 24.815940877930508,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "121": {
+     "centreline": 3.0884343795868304e-05,
+     "correction": 1.2787101348484473e-06,
+     "self": 2.9605633661019857e-05,
+     "core": 0.0,
+     "length": 25.57185841257601,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "122": {
+     "centreline": 3.1952809070359356e-05,
+     "correction": 1.3165901981258355e-06,
+     "self": 3.063621887223352e-05,
+     "core": 0.0,
+     "length": 26.329351882800186,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "123": {
+     "centreline": 3.3025123187818544e-05,
+     "correction": 1.3544308162253354e-06,
+     "self": 3.167069237159321e-05,
+     "core": 0.0,
+     "length": 27.086056886825908,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "124": {
+     "centreline": 3.4007194244106234e-05,
+     "correction": 1.3908347904974054e-06,
+     "self": 3.2616359453608826e-05,
+     "core": 0.0,
+     "length": 27.814032182404034,
+     "sources": 13,
+     "stations": 52,
+     "elements": 13
+    },
+    "125": {
+     "centreline": 3.2955249933204604e-05,
+     "correction": 1.3516880052507051e-06,
+     "self": 3.16035619279539e-05,
+     "core": 0.0,
+     "length": 27.031205850361978,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "126": {
+     "centreline": 3.2021212650830576e-05,
+     "correction": 1.3186390702547871e-06,
+     "self": 3.070257358057579e-05,
+     "core": 0.0,
+     "length": 26.370325509463076,
+     "sources": 2,
+     "stations": 8,
+     "elements": 2
+    },
+    "127": {
+     "centreline": 3.083828333604976e-05,
+     "correction": 1.2767227570646244e-06,
+     "self": 2.956156057898513e-05,
+     "core": 0.0,
+     "length": 25.532114500398258,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "128": {
+     "centreline": 2.9798347147673924e-05,
+     "correction": 1.2397049142275181e-06,
+     "self": 2.8558642233446407e-05,
+     "core": 0.0,
+     "length": 24.791864244830283,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "129": {
+     "centreline": 2.8572878729954595e-05,
+     "correction": 1.1958332075298737e-06,
+     "self": 2.7377045522424723e-05,
+     "core": 0.0,
+     "length": 23.914592483348997,
+     "sources": 6,
+     "stations": 24,
+     "elements": 6
+    },
+    "130": {
+     "centreline": 2.7623761173948066e-05,
+     "correction": 1.1617868008324534e-06,
+     "self": 2.6461974373115612e-05,
+     "core": 0.0,
+     "length": 23.23376853470629,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "131": {
+     "centreline": 2.6564986151136227e-05,
+     "correction": 1.1237001141108888e-06,
+     "self": 2.5441286037025336e-05,
+     "core": 0.0,
+     "length": 22.472146552190235,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "132": {
+     "centreline": 2.605004090446027e-05,
+     "correction": 1.1048633259904073e-06,
+     "self": 2.4945177578469862e-05,
+     "core": 0.0,
+     "length": 22.095492211344947,
+     "sources": 6,
+     "stations": 24,
+     "elements": 6
+    },
+    "133": {
+     "centreline": 2.6996847880369207e-05,
+     "correction": 1.1391388498397515e-06,
+     "self": 2.5857709030529455e-05,
+     "core": 0.0,
+     "length": 22.78089577052955,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "134": {
+     "centreline": 2.8042646768485157e-05,
+     "correction": 1.1767777262378032e-06,
+     "self": 2.6865869042247352e-05,
+     "core": 0.0,
+     "length": 23.533561655732782,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "135": {
+     "centreline": 2.903648114653168e-05,
+     "correction": 1.212339292020108e-06,
+     "self": 2.782414185451157e-05,
+     "core": 0.0,
+     "length": 24.24468557793286,
+     "sources": 3,
+     "stations": 12,
+     "elements": 3
+    },
+    "136": {
+     "centreline": 3.012996471829167e-05,
+     "correction": 1.2514133946360018e-06,
+     "self": 2.8878551323655668e-05,
+     "core": 0.0,
+     "length": 25.026012753454417,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "137": {
+     "centreline": 3.118960064362771e-05,
+     "correction": 1.2890703225856244e-06,
+     "self": 2.9900530321042087e-05,
+     "core": 0.0,
+     "length": 25.779043173783986,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "138": {
+     "centreline": 3.2254573695414796e-05,
+     "correction": 1.3267666890087851e-06,
+     "self": 3.092780700640601e-05,
+     "core": 0.0,
+     "length": 26.532862747282316,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "139": {
+     "centreline": 3.342165393071963e-05,
+     "correction": 1.3678824328702712e-06,
+     "self": 3.2053771497849356e-05,
+     "core": 0.0,
+     "length": 27.355063800504904,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "140": {
+     "centreline": 3.3802804983491987e-05,
+     "correction": 1.3840368960601487e-06,
+     "self": 3.241876808743184e-05,
+     "core": 0.0,
+     "length": 27.678087312501248,
+     "sources": 11,
+     "stations": 44,
+     "elements": 11
+    },
+    "141": {
+     "centreline": 3.244244635343457e-05,
+     "correction": 1.3334958011445796e-06,
+     "self": 3.110895055228999e-05,
+     "core": 0.0,
+     "length": 26.66739614564149,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "142": {
+     "centreline": 3.135969813978769e-05,
+     "correction": 1.295198336145747e-06,
+     "self": 3.0064499803641944e-05,
+     "core": 0.0,
+     "length": 25.90159221037888,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "143": {
+     "centreline": 3.0305794339748135e-05,
+     "correction": 1.2577726584725946e-06,
+     "self": 2.904802168127554e-05,
+     "core": 0.0,
+     "length": 25.153186570323655,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "144": {
+     "centreline": 2.9242491005190742e-05,
+     "correction": 1.2198508343587673e-06,
+     "self": 2.8022640170831974e-05,
+     "core": 0.0,
+     "length": 24.394859401583876,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "145": {
+     "centreline": 2.804533268943339e-05,
+     "correction": 1.1768960717864383e-06,
+     "self": 2.6868436617646952e-05,
+     "core": 0.0,
+     "length": 23.535928366287706,
+     "sources": 6,
+     "stations": 24,
+     "elements": 6
+    },
+    "146": {
+     "centreline": 2.709882785078325e-05,
+     "correction": 1.1428637914710619e-06,
+     "self": 2.5955964059312186e-05,
+     "core": 0.0,
+     "length": 22.8553884516159,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "147": {
+     "centreline": 2.6105580012078397e-05,
+     "correction": 1.1068702862374773e-06,
+     "self": 2.499870972584092e-05,
+     "core": 0.0,
+     "length": 22.13562819329354,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "148": {
+     "centreline": 2.6463040542242144e-05,
+     "correction": 1.1198599561150322e-06,
+     "self": 2.534318058612711e-05,
+     "core": 0.0,
+     "length": 22.395349734086558,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "149": {
+     "centreline": 2.7514357759195594e-05,
+     "correction": 1.1577742059653407e-06,
+     "self": 2.6356583553230253e-05,
+     "core": 0.0,
+     "length": 23.15352343267961,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "150": {
+     "centreline": 2.8578512461428263e-05,
+     "correction": 1.1960023734367678e-06,
+     "self": 2.7382510087991495e-05,
+     "core": 0.0,
+     "length": 23.91797550842304,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "151": {
+     "centreline": 2.9576621616634207e-05,
+     "correction": 1.2316297571269404e-06,
+     "self": 2.8344991859507265e-05,
+     "core": 0.0,
+     "length": 24.630417026121428,
+     "sources": 2,
+     "stations": 8,
+     "elements": 2
+    },
+    "152": {
+     "centreline": 3.0634397150609395e-05,
+     "correction": 1.2693712231524087e-06,
+     "self": 2.9365025927456987e-05,
+     "core": 0.0,
+     "length": 25.38513696245065,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "153": {
+     "centreline": 3.172561798237e-05,
+     "correction": 1.308062935418643e-06,
+     "self": 3.0417555046951357e-05,
+     "core": 0.0,
+     "length": 26.158860610914402,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "154": {
+     "centreline": 3.280883831504644e-05,
+     "correction": 1.3463087666969156e-06,
+     "self": 3.1462529548349525e-05,
+     "core": 0.0,
+     "length": 26.92363124431321,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "155": {
+     "centreline": 3.396672221225835e-05,
+     "correction": 1.389157701332607e-06,
+     "self": 3.257756451092574e-05,
+     "core": 0.0,
+     "length": 27.780493610949563,
+     "sources": 12,
+     "stations": 48,
+     "elements": 12
+    },
+    "156": {
+     "centreline": 3.3083618171795255e-05,
+     "correction": 1.3561308708456773e-06,
+     "self": 3.1727487300949575e-05,
+     "core": 0.0,
+     "length": 27.120054766677473,
+     "sources": 3,
+     "stations": 12,
+     "elements": 3
+    },
+    "157": {
+     "centreline": 3.217578350937271e-05,
+     "correction": 1.3245431900782954e-06,
+     "self": 3.085124031929441e-05,
+     "core": 0.0,
+     "length": 26.488396909821862,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "158": {
+     "centreline": 3.096528185199223e-05,
+     "correction": 1.2811716131572065e-06,
+     "self": 2.9684110238835024e-05,
+     "core": 0.0,
+     "length": 25.621083466074687,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "159": {
+     "centreline": 2.988280324634399e-05,
+     "correction": 1.2426592442352077e-06,
+     "self": 2.8640144002108784e-05,
+     "core": 0.0,
+     "length": 24.85094552106343,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "160": {
+     "centreline": 2.866544539780597e-05,
+     "correction": 1.1991559280500028e-06,
+     "self": 2.7466289469755966e-05,
+     "core": 0.0,
+     "length": 23.981041137454437,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "161": {
+     "centreline": 2.773487222039277e-05,
+     "correction": 1.1658839394188455e-06,
+     "self": 2.6568988280973923e-05,
+     "core": 0.0,
+     "length": 23.315704367944058,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "162": {
+     "centreline": 2.6688996569367772e-05,
+     "correction": 1.1281880007539846e-06,
+     "self": 2.5560808568613786e-05,
+     "core": 0.0,
+     "length": 22.561896873549827,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "163": {
+     "centreline": 2.6002656590501478e-05,
+     "correction": 1.1032602711358947e-06,
+     "self": 2.4899396319365584e-05,
+     "core": 0.0,
+     "length": 22.063433688612744,
+     "sources": 7,
+     "stations": 28,
+     "elements": 7
+    },
+    "164": {
+     "centreline": 2.6879128839271667e-05,
+     "correction": 1.1349896351144311e-06,
+     "self": 2.5744139204157237e-05,
+     "core": 0.0,
+     "length": 22.69791832822709,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "165": {
+     "centreline": 2.7926759249125346e-05,
+     "correction": 1.172686573238597e-06,
+     "self": 2.6754072675886747e-05,
+     "core": 0.0,
+     "length": 23.45174552410216,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "166": {
+     "centreline": 2.8844491674818498e-05,
+     "correction": 1.2054586290704696e-06,
+     "self": 2.7639033045748027e-05,
+     "core": 0.0,
+     "length": 24.107084239033956,
+     "sources": 3,
+     "stations": 12,
+     "elements": 3
+    },
+    "167": {
+     "centreline": 3.0013494307539093e-05,
+     "correction": 1.24726172773215e-06,
+     "self": 2.8766232579806944e-05,
+     "core": 0.0,
+     "length": 24.9430287933497,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "168": {
+     "centreline": 3.107113937489583e-05,
+     "correction": 1.2848699527951183e-06,
+     "self": 2.978626942210071e-05,
+     "core": 0.0,
+     "length": 25.69504347859426,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "169": {
+     "centreline": 3.2130194858502495e-05,
+     "correction": 1.3223726385925399e-06,
+     "self": 3.080782221990995e-05,
+     "core": 0.0,
+     "length": 26.444989922644268,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "170": {
+     "centreline": 3.333611921014298e-05,
+     "correction": 1.3649015816723565e-06,
+     "self": 3.197121762847062e-05,
+     "core": 0.0,
+     "length": 27.295452409394585,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "171": {
+     "centreline": 3.398275167929864e-05,
+     "correction": 1.389893193523852e-06,
+     "self": 3.259285848577479e-05,
+     "core": 0.0,
+     "length": 27.795202046212303,
+     "sources": 12,
+     "stations": 48,
+     "elements": 12
+    },
+    "172": {
+     "centreline": 3.2561714824805646e-05,
+     "correction": 1.3376619314217508e-06,
+     "self": 3.12240528933839e-05,
+     "core": 0.0,
+     "length": 26.750710878541526,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "173": {
+     "centreline": 3.147888458052387e-05,
+     "correction": 1.299379652045347e-06,
+     "self": 3.0179504928478518e-05,
+     "core": 0.0,
+     "length": 25.985210862682358,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "174": {
+     "centreline": 3.0425300107518393e-05,
+     "correction": 1.2619778898987937e-06,
+     "self": 2.91633222176196e-05,
+     "core": 0.0,
+     "length": 25.23728362071035,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "175": {
+     "centreline": 2.9353191091100546e-05,
+     "correction": 1.2237540986101716e-06,
+     "self": 2.8129436992490375e-05,
+     "core": 0.0,
+     "length": 24.47291778375508,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "176": {
+     "centreline": 2.8145091888526826e-05,
+     "correction": 1.1804622460972034e-06,
+     "self": 2.6964629642429623e-05,
+     "core": 0.0,
+     "length": 23.607199883423725,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "177": {
+     "centreline": 2.721080845319301e-05,
+     "correction": 1.1470087293381809e-06,
+     "self": 2.606379972385483e-05,
+     "core": 0.0,
+     "length": 22.938232131433978,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "178": {
+     "centreline": 2.6171515940489497e-05,
+     "correction": 1.1096040009748113e-06,
+     "self": 2.5061911939514686e-05,
+     "core": 0.0,
+     "length": 22.190298097946823,
+     "sources": 6,
+     "stations": 24,
+     "elements": 6
+    },
+    "179": {
+     "centreline": 2.6343018225209036e-05,
+     "correction": 1.1158407464855464e-06,
+     "self": 2.522717747872349e-05,
+     "core": 0.0,
+     "length": 22.31502299252422,
+     "sources": 6,
+     "stations": 24,
+     "elements": 6
+    },
+    "180": {
+     "centreline": 2.7402625420522798e-05,
+     "correction": 1.153882854481027e-06,
+     "self": 2.624874256604177e-05,
+     "core": 0.0,
+     "length": 23.075702992983665,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "181": {
+     "centreline": 2.8452581583119823e-05,
+     "correction": 1.191558254885911e-06,
+     "self": 2.7261023328233912e-05,
+     "core": 0.0,
+     "length": 23.829100836418437,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "182": {
+     "centreline": 2.9378192308081327e-05,
+     "correction": 1.2245489294357479e-06,
+     "self": 2.815364337864558e-05,
+     "core": 0.0,
+     "length": 24.488812994621718,
+     "sources": 3,
+     "stations": 12,
+     "elements": 3
+    },
+    "183": {
+     "centreline": 3.0533379697563376e-05,
+     "correction": 1.2657676766226318e-06,
+     "self": 2.9267612020940745e-05,
+     "core": 0.0,
+     "length": 25.313072525711824,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "184": {
+     "centreline": 3.1605179682093545e-05,
+     "correction": 1.3038002290764612e-06,
+     "self": 3.0301379453017083e-05,
+     "core": 0.0,
+     "length": 26.07361429897399,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "185": {
+     "centreline": 3.267110343652791e-05,
+     "correction": 1.3414684046343819e-06,
+     "self": 3.132963503189353e-05,
+     "core": 0.0,
+     "length": 26.82686967862528,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "186": {
+     "centreline": 3.4027630202291324e-05,
+     "correction": 1.3913676436684388e-06,
+     "self": 3.2636262558622885e-05,
+     "core": 0.0,
+     "length": 27.82468822534233,
+     "sources": 14,
+     "stations": 56,
+     "elements": 14
+    },
+    "187": {
+     "centreline": 3.3192077495301703e-05,
+     "correction": 1.359963569420923e-06,
+     "self": 3.183211392588078e-05,
+     "core": 0.0,
+     "length": 27.196701495617443,
+     "sources": 2,
+     "stations": 8,
+     "elements": 2
+    },
+    "188": {
+     "centreline": 3.232461433580209e-05,
+     "correction": 1.3294769743290114e-06,
+     "self": 3.099513736147308e-05,
+     "core": 0.0,
+     "length": 26.587063405923562,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "189": {
+     "centreline": 3.108361092434708e-05,
+     "correction": 1.2853453753941477e-06,
+     "self": 2.9798265548952932e-05,
+     "core": 0.0,
+     "length": 25.704551058973266,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "190": {
+     "centreline": 3.0001923622596478e-05,
+     "correction": 1.2468731380193073e-06,
+     "self": 2.875505048457717e-05,
+     "core": 0.0,
+     "length": 24.935215802997927,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "191": {
+     "centreline": 2.8806350756347783e-05,
+     "correction": 1.2041500611963205e-06,
+     "self": 2.760220069515146e-05,
+     "core": 0.0,
+     "length": 24.080915148520305,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "192": {
+     "centreline": 2.7857481316824224e-05,
+     "correction": 1.1701523453847123e-06,
+     "self": 2.6687328971439513e-05,
+     "core": 0.0,
+     "length": 23.4010652587306,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "193": {
+     "centreline": 2.680650370100229e-05,
+     "correction": 1.1322700950679551e-06,
+     "self": 2.5674233605934332e-05,
+     "core": 0.0,
+     "length": 22.643532018471024,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "194": {
+     "centreline": 2.598375027135348e-05,
+     "correction": 1.1023975552690307e-06,
+     "self": 2.488135271608445e-05,
+     "core": 0.0,
+     "length": 22.046180756717472,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "195": {
+     "centreline": 2.6759517722542536e-05,
+     "correction": 1.1307482838559128e-06,
+     "self": 2.5628769438686623e-05,
+     "core": 0.0,
+     "length": 22.613098307419175,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "196": {
+     "centreline": 2.781193279157268e-05,
+     "correction": 1.168636620031894e-06,
+     "self": 2.6643296171540786e-05,
+     "core": 0.0,
+     "length": 23.370753318549895,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "197": {
+     "centreline": 2.8689500628875075e-05,
+     "correction": 1.2001265680153283e-06,
+     "self": 2.7489374060859748e-05,
+     "core": 0.0,
+     "length": 24.00045225521956,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "198": {
+     "centreline": 2.9891090190695667e-05,
+     "correction": 1.2429218930933912e-06,
+     "self": 2.8648168297602275e-05,
+     "core": 0.0,
+     "length": 24.856239775498764,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "199": {
+     "centreline": 3.095400710791656e-05,
+     "correction": 1.2807328796144727e-06,
+     "self": 2.9673274228302086e-05,
+     "core": 0.0,
+     "length": 25.612309599558827,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "200": {
+     "centreline": 3.2011659337278096e-05,
+     "correction": 1.3182068454279626e-06,
+     "self": 3.0693452491850134e-05,
+     "core": 0.0,
+     "length": 26.361681817922502,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "201": {
+     "centreline": 3.316555342712093e-05,
+     "correction": 1.358904414398747e-06,
+     "self": 3.180664901272218e-05,
+     "core": 0.0,
+     "length": 27.175520396635527,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "202": {
+     "centreline": 3.413246270445208e-05,
+     "correction": 1.3949468503359446e-06,
+     "self": 3.273751585411614e-05,
+     "core": 0.0,
+     "length": 27.896265504051243,
+     "sources": 11,
+     "stations": 44,
+     "elements": 11
+    },
+    "203": {
+     "centreline": 3.268192522103018e-05,
+     "correction": 1.3418683496489652e-06,
+     "self": 3.1340056871381216e-05,
+     "core": 0.0,
+     "length": 26.83483129431118,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "204": {
+     "centreline": 3.160003802493729e-05,
+     "correction": 1.3036327822900224e-06,
+     "self": 3.0296405242647272e-05,
+     "core": 0.0,
+     "length": 26.070265670228693,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "205": {
+     "centreline": 3.054616473639954e-05,
+     "correction": 1.266241904220608e-06,
+     "self": 2.927992283217893e-05,
+     "core": 0.0,
+     "length": 25.32255622307823,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "206": {
+     "centreline": 2.9483991481140348e-05,
+     "correction": 1.2283953375812313e-06,
+     "self": 2.8255596143559118e-05,
+     "core": 0.0,
+     "length": 24.56573435522357,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "207": {
+     "centreline": 2.827273776635705e-05,
+     "correction": 1.18502080231366e-06,
+     "self": 2.708771696404339e-05,
+     "core": 0.0,
+     "length": 23.69836311048796,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "208": {
+     "centreline": 2.7331108727394475e-05,
+     "correction": 1.151202466269256e-06,
+     "self": 2.617990626112522e-05,
+     "core": 0.0,
+     "length": 23.022099767976442,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "209": {
+     "centreline": 2.6265404693117532e-05,
+     "correction": 1.1126754601332924e-06,
+     "self": 2.515272923298424e-05,
+     "core": 0.0,
+     "length": 22.251722348636697,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "210": {
+     "centreline": 2.6242664440900964e-05,
+     "correction": 1.1118454575002972e-06,
+     "self": 2.5130818983400667e-05,
+     "core": 0.0,
+     "length": 22.235123628884367,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "211": {
+     "centreline": 2.7285398280290117e-05,
+     "correction": 1.1496694173603449e-06,
+     "self": 2.613572886292977e-05,
+     "core": 0.0,
+     "length": 22.9914897302781,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "212": {
+     "centreline": 2.833698155164367e-05,
+     "correction": 1.1874971579979183e-06,
+     "self": 2.714948439364575e-05,
+     "core": 0.0,
+     "length": 23.74788593412253,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "213": {
+     "centreline": 2.9217142453496483e-05,
+     "correction": 1.2190158955067257e-06,
+     "self": 2.7998126557989757e-05,
+     "core": 0.0,
+     "length": 24.3781621011183,
+     "sources": 3,
+     "stations": 12,
+     "elements": 3
+    },
+    "214": {
+     "centreline": 3.0406004160201724e-05,
+     "correction": 1.2612484267394555e-06,
+     "self": 2.9144755733462268e-05,
+     "core": 0.0,
+     "length": 25.222695672070017,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "215": {
+     "centreline": 3.148819918909994e-05,
+     "correction": 1.2996812399020256e-06,
+     "self": 3.0188517949197915e-05,
+     "core": 0.0,
+     "length": 25.99124206690899,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "216": {
+     "centreline": 3.254923458962957e-05,
+     "correction": 1.3371771235176864e-06,
+     "self": 3.1212057466111885e-05,
+     "core": 0.0,
+     "length": 26.74105204857583,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "217": {
+     "centreline": 3.396355412113589e-05,
+     "correction": 1.38908999860246e-06,
+     "self": 3.257446412253343e-05,
+     "core": 0.0,
+     "length": 27.779139686006058,
+     "sources": 12,
+     "stations": 48,
+     "elements": 12
+    },
+    "218": {
+     "centreline": 3.33602585314164e-05,
+     "correction": 1.3659105819293208e-06,
+     "self": 3.199434794948708e-05,
+     "core": 0.0,
+     "length": 27.315595744108062,
+     "sources": 2,
+     "stations": 8,
+     "elements": 2
+    },
+    "219": {
+     "centreline": 3.2364024526366144e-05,
+     "correction": 1.330689167455543e-06,
+     "self": 3.10333353589106e-05,
+     "core": 0.0,
+     "length": 26.61130501080851,
+     "sources": 6,
+     "stations": 24,
+     "elements": 6
+    },
+    "220": {
+     "centreline": 3.117661039013133e-05,
+     "correction": 1.288614316756699e-06,
+     "self": 2.988799607337463e-05,
+     "core": 0.0,
+     "length": 25.76992389320992,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "221": {
+     "centreline": 3.0126472398232114e-05,
+     "correction": 1.2512875579830438e-06,
+     "self": 2.887518484024907e-05,
+     "core": 0.0,
+     "length": 25.02349624716219,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "222": {
+     "centreline": 2.897592929123007e-05,
+     "correction": 1.2102388342671831e-06,
+     "self": 2.7765690456962888e-05,
+     "core": 0.0,
+     "length": 24.202680061717558,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "223": {
+     "centreline": 2.7970440676825097e-05,
+     "correction": 1.1741760349117632e-06,
+     "self": 2.6796264641913332e-05,
+     "core": 0.0,
+     "length": 23.481532235167276,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "224": {
+     "centreline": 2.692558055698485e-05,
+     "correction": 1.1365353330608767e-06,
+     "self": 2.5789045223923974e-05,
+     "core": 0.0,
+     "length": 22.72882973451935,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "225": {
+     "centreline": 2.6013754112974963e-05,
+     "correction": 1.1035214120764266e-06,
+     "self": 2.4910232700898536e-05,
+     "core": 0.0,
+     "length": 22.06865608805515,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "226": {
+     "centreline": 2.6640774470234315e-05,
+     "correction": 1.126248776627653e-06,
+     "self": 2.551452569360666e-05,
+     "core": 0.0,
+     "length": 22.523115593547068,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "227": {
+     "centreline": 2.7694530878456073e-05,
+     "correction": 1.164244366570064e-06,
+     "self": 2.653028651188601e-05,
+     "core": 0.0,
+     "length": 23.282915687579393,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "228": {
+     "centreline": 2.860118446951644e-05,
+     "correction": 1.1967528563806234e-06,
+     "self": 2.7404431613135817e-05,
+     "core": 0.0,
+     "length": 23.932983867159862,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "229": {
+     "centreline": 2.976951043705587e-05,
+     "correction": 1.2386308278446276e-06,
+     "self": 2.8530879609211243e-05,
+     "core": 0.0,
+     "length": 24.77038445275538,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "230": {
+     "centreline": 3.08376647389537e-05,
+     "correction": 1.2766454674062396e-06,
+     "self": 2.956101927154746e-05,
+     "core": 0.0,
+     "length": 25.53056884892721,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "231": {
+     "centreline": 3.1910119022710495e-05,
+     "correction": 1.3146578871815462e-06,
+     "self": 3.0595461135528946e-05,
+     "core": 0.0,
+     "length": 26.29070926274149,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "232": {
+     "centreline": 3.3018777173420726e-05,
+     "correction": 1.3537807612248577e-06,
+     "self": 3.166499641219587e-05,
+     "core": 0.0,
+     "length": 27.073057015210775,
+     "sources": 3,
+     "stations": 12,
+     "elements": 3
+    },
+    "233": {
+     "centreline": 3.408928377935874e-05,
+     "correction": 1.3935085435997083e-06,
+     "self": 3.2695775235759035e-05,
+     "core": 0.0,
+     "length": 27.867502123868945,
+     "sources": 13,
+     "stations": 52,
+     "elements": 13
+    },
+    "234": {
+     "centreline": 3.2799753704753634e-05,
+     "correction": 1.3460011969650337e-06,
+     "self": 3.14537525077886e-05,
+     "core": 0.0,
+     "length": 26.917480430883227,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "235": {
+     "centreline": 3.172519615758383e-05,
+     "correction": 1.3080467629996526e-06,
+     "self": 3.0417149394584174e-05,
+     "core": 0.0,
+     "length": 26.158537192183807,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "236": {
+     "centreline": 3.0664132189237166e-05,
+     "correction": 1.2704144952508178e-06,
+     "self": 2.9393717693986348e-05,
+     "core": 0.0,
+     "length": 25.40600052436554,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "237": {
+     "centreline": 2.9593918022602682e-05,
+     "correction": 1.2322974472007648e-06,
+     "self": 2.8361620575401917e-05,
+     "core": 0.0,
+     "length": 24.6437696467993,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "238": {
+     "centreline": 2.8454035513925695e-05,
+     "correction": 1.191514883247108e-06,
+     "self": 2.7262520630678588e-05,
+     "core": 0.0,
+     "length": 23.828233478779612,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "239": {
+     "centreline": 2.7445466831741804e-05,
+     "correction": 1.1552885158200811e-06,
+     "self": 2.629017831592172e-05,
+     "core": 0.0,
+     "length": 23.103813839282115,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "240": {
+     "centreline": 2.6378472382933182e-05,
+     "correction": 1.1167700082707618e-06,
+     "self": 2.526170237466242e-05,
+     "core": 0.0,
+     "length": 22.333555880083072,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "241": {
+     "centreline": 2.6152646256488353e-05,
+     "correction": 1.1085408977816904e-06,
+     "self": 2.5044105358706662e-05,
+     "core": 0.0,
+     "length": 22.16903774132995,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "242": {
+     "centreline": 2.717330455852638e-05,
+     "correction": 1.145462665300564e-06,
+     "self": 2.6027841893225815e-05,
+     "core": 0.0,
+     "length": 22.907361636306227,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "243": {
+     "centreline": 2.8224947687501014e-05,
+     "correction": 1.1832976962849697e-06,
+     "self": 2.7041649991216044e-05,
+     "core": 0.0,
+     "length": 23.663903975031396,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "244": {
+     "centreline": 2.9130415418267098e-05,
+     "correction": 1.2157049155519262e-06,
+     "self": 2.7914710502715172e-05,
+     "core": 0.0,
+     "length": 24.31194835743442,
+     "sources": 4,
+     "stations": 16,
+     "elements": 4
+    },
+    "245": {
+     "centreline": 3.0292391961358065e-05,
+     "correction": 1.2572578349902041e-06,
+     "self": 2.9035134126367862e-05,
+     "core": 0.0,
+     "length": 25.142891028425744,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "246": {
+     "centreline": 3.137194699646906e-05,
+     "correction": 1.2956027344308246e-06,
+     "self": 3.0076344262038234e-05,
+     "core": 0.0,
+     "length": 25.909679434689117,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "247": {
+     "centreline": 3.242776514411848e-05,
+     "correction": 1.332949786850929e-06,
+     "self": 3.1094815357267554e-05,
+     "core": 0.0,
+     "length": 26.656476891559503,
+     "sources": 5,
+     "stations": 20,
+     "elements": 5
+    },
+    "248": {
+     "centreline": 3.0895714355820084e-05,
+     "correction": 1.2766444627026434e-06,
+     "self": 2.961906989311744e-05,
+     "core": 0.0,
+     "length": 25.530444315676235,
+     "sources": 6,
+     "stations": 24,
+     "elements": 6
+    }
+   },
+   "total": 0.0071227577198230375,
+   "core": 0.0,
+   "centreline": 0.007431801678397974,
+   "correction": 0.0003090439585749391,
+   "length": 6180.328473992828,
+   "seconds": 1120.3656071713194
+  }
+ }
+}

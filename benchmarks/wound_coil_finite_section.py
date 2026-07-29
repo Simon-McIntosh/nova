@@ -1692,9 +1692,11 @@ def stage_figures(args) -> None:
     axes[0].legend(fontsize=7, ncol=2, loc="center right")
     axes[0].grid(alpha=0.3)
 
+    # the framed route as a ring around the direct one: the two agree to the floor,
+    # and a filled marker over a filled marker would hide that rather than show it
     for route, marker, colour in (
         ("relative", "o", "C0"),
-        ("framed_relative", "s", "C1"),
+        ("framed_relative", "o", "C1"),
     ):
         for order, (label, record) in enumerate(gate["swept"].items()):
             corners = int(label.split("-")[-1])
@@ -1703,8 +1705,9 @@ def stage_figures(args) -> None:
                 [max(abs(entry[route]), 1e-13) for entry in record.values()],
                 marker,
                 color=colour,
-                ms=5,
-                alpha=0.8,
+                ms=5 if route == "relative" else 11,
+                fillstyle="full" if route == "relative" else "none",
+                mew=1.2,
                 label=(
                     ("driven directly" if route == "relative" else "through the frame")
                     if order == 0

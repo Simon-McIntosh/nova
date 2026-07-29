@@ -34,6 +34,19 @@ def test_turnturn_skin():
     ).all()
 
 
+def test_round_and_square_annuli_keep_distinct_section_factors():
+    frame = FrameLink(
+        {"section": ["skin", "box"]},
+        required=["section"],
+        additional=["turnturn"],
+    )
+    section = CrossSection(frame)
+    section.section_factor["skin"] = 0.75
+    section.section_factor["box"] = 1.25
+    section.initialize()
+    assert frame["turnturn"].to_list() == [0.75, 1.25]
+
+
 def test_framelink_section():
     framelink = FrameLink(required=["x"])
     framelink.insert(range(4), delta=-2, section=["o", "sq", "hex", "skin"])

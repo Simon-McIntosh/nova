@@ -1,4 +1,4 @@
-"""Cross-ection methods for BiotFrame."""
+"""Cross-section methods for BiotFrame."""
 
 from dataclasses import dataclass, field
 
@@ -26,6 +26,7 @@ class CrossSection(metamethod.CrossSection):
             "disc": np.exp(-0.25),  # disc-disc
             "square": 2 * 0.447049,  # square-square
             "skin": 1,
+            "box": 1,
         },
     )  # skin-skin
     section_key: dict[str, str] = field(
@@ -36,7 +37,6 @@ class CrossSection(metamethod.CrossSection):
             "polygon": "square",
             "polyloop": "square",
             "shell": "skin",
-            "box": "skin",
             "hexagon": "disc",
         },
     )

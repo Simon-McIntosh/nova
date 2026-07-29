@@ -8,20 +8,21 @@
   <meta name="plan-slug" content="physics-spine-adoption">
   <meta name="plan-title" content="Physics Spine Adoption — solver nomenclature + ambix model ports">
   <meta name="plan-summary" content="Nova becomes the home of the full physics spine (equilibrium, circuits, transport): apply the locked problem×representation solver nomenclature, port the remaining ambix physics models as nova-style dataclasses on native nova types (torch current diffusion → JAX), and rewire imas-ambix to consume the spine as a dependency">
-  <meta name="plan-status" content="blocked">
+  <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="XL">
-  <meta name="plan-tier" content="opus">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-depends-on" content="nova-spine-refactor">
   <meta name="plan-blocks" content="mast-catalog-gpu-solve">
   <title>Physics Spine Adoption | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-29">
-<meta name="plan-version" content="8">
+<meta name="plan-modified" content="2026-07-30">
+<meta name="plan-version" content="9">
 <meta name="plan-impl" content="0.6">
 <meta name="plan-sprint" content="S2">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
 </head>
 <body>
   <main class="plan-doc">
@@ -335,7 +336,7 @@ nova/transport/current_diffusion.py  CurrentDiffusion      (ambix current_diffus
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-psa-01" data-status="resolved" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-24" data-recommends-skill="" data-resolved-at="2026-07-24T21:25:13+00:00" data-resolved-by="smc">
+<article class="r-fu" data-id="f-psa-01" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-07-24" data-recommends-skill="" data-resolved-at="2026-07-24T21:25:13+00:00" data-resolved-by="smc">
     <h4 class="r-fu-title">Wave 1 — package scaffolding, forward/inverse renames, coupling-generator unification</h4>
     <div class="r-fu-body"><p>First shippable increment: stand up
         <code>nova/equilibrium</code> / <code>nova/circuit</code> / <code>nova/transport</code>,
@@ -377,7 +378,7 @@ Done-when
   4. Followup for wave 2 written; this followup resolved.</pre>
     <p class="r-fu-outcome">Superseded by the 8-hour fleet-session brief (f-psa-02) — wave 1 is folded into it as worker A/B step 1 plus orchestrator scope.</p>
     </article>
-<article class="r-fu" data-id="f-psa-02" data-status="resolved" data-tier="opus" data-written-by="smc/session 2026-07-24" data-written-at="2026-07-24" data-recommends-skill="/reckon-ship physics-spine-adoption §6" data-resolved-at="2026-07-25T06:28:12+00:00" data-resolved-by="reckon-ship">
+<article class="r-fu" data-id="f-psa-02" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="smc/session 2026-07-24" data-written-at="2026-07-24" data-recommends-skill="/reckon-ship physics-spine-adoption §6" data-resolved-at="2026-07-25T06:28:12+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">8-hour fleet session — land wave 1 + the wave-2 model ports (orchestrator + 2 opus workers)</h4>
     <div class="r-fu-body"><p>One full working session sized for ~8 hours: a Fable orchestrator with <strong>two opus workers</strong> in detached worktrees off nova <code>develop</code>, disjoint write scopes (worker A: the <code>nova/equilibrium</code> tree; worker B: the <code>nova/circuit</code> + <code>nova/transport</code> trees). Target: wave 1 fully landed and the four independent wave-2 donor ports (ReconstructMoment, ReconstructHarmonic, PassiveCircuit, CurrentDiffusion→JAX) landed with donor tests green, ScreeningCircuit as stretch. Ambix stays read-only — donor deletion + re-pointing is wave 3. Resolve the open topology-labeller decision during the session (it gates the wave-3 ReconstructProfile re-architecture).</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -474,7 +475,7 @@ Done-when
      re-architecture + ambix rewiring + donor deletion).</pre>
     <p class="r-fu-outcome">Waves 1+2 fully landed (all five ports incl. ScreeningCircuit stretch) — merges d38203a2 + 41754076, orchestrator 32d19b06/46bddd5f; full lane 1488/0/104; torch→JAX parity fp64 round-off, TORAX 0.4% RMS; topology-labeller locked jax-only (fill/boundary-push formulation); clean break, no shims. Record: docs/archive/physics-spine-adoption-s6-waves12-landed.html. Hex-grid default (user add-on) in flight same session.</p>
     </article>
-<article class="r-fu" data-id="f-psa-03" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-25T07:00:00+00:00" data-recommends-skill="/reckon-ship physics-spine-adoption §6" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-psa-03" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-25T07:00:00+00:00" data-recommends-skill="/reckon-ship physics-spine-adoption §6" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Wave 3 — ReconstructProfile re-architecture + ambix rewiring + donor deletion</h4>
     <div class="r-fu-body"><p>Re-architect gs_solve as ReconstructProfile on nova.biot Greens with the locked JAX-only <strong>fill/boundary-push</strong> topology read (the only truly parallelizable formulation — the stationary-points-first approach was too sharp across the limited↔diverted switch for autograd/Anderson/NK), port the flux_surface_geometry assembly (profile ladder + EquilibriumGrid side deferred from the CurrentDiffusion port), wire the coupling generator to emit ConductorSet + channel→circuits maps for nova/circuit, then flip imas-ambix to consume the spine: dependency pin, consumer re-point, donor deletions, spine_bench parity.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -516,7 +517,7 @@ Done-when
   3. §3/§4 collapsed; impl -&gt; 1.0; umbrella §10 collapsed referencing this
      plan&#x27;s archive; followup resolved or wave-4 queued with reason.</pre>
     </article>
-<article class="r-fu" data-id="f-psa-04" data-status="resolved" data-tier="opus" data-written-by="smc/reckon-ship 2026-07-25" data-written-at="2026-07-25T09:30:00+00:00" data-recommends-skill="/reckon-create biot-operator-assembly" data-resolved-at="2026-07-25T07:45:07+00:00" data-resolved-by="reckon-create">
+<article class="r-fu" data-id="f-psa-04" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="smc/reckon-ship 2026-07-25" data-written-at="2026-07-25T09:30:00+00:00" data-recommends-skill="/reckon-create biot-operator-assembly" data-resolved-at="2026-07-25T07:45:07+00:00" data-resolved-by="reckon-create">
     <h4 class="r-fu-title">Biot operator construction review — parallel/batchable/shardable assembly + principled near/far for thick sections</h4>
     <div class="r-fu-body"><p>Research + planning task (user, 2026-07-25). The hexagonal plasma mesh is now the default but its cells keep POINT-filament coupling: the Urankar-V polygon element (<code>nova/biot/polysection.py</code>, landed and pinned) showed the exact kernel at ~70,000× the point cost, and a near/far blend at 2–3 section radii was rolled back — the cutoff must sit much farther out and be chosen on principle, not budget. Review the construction methods for all biot interaction operators for parallel / batchable / shardable assembly (GPU build; the matrix is computed once and cached so steady-state throughput is unaffected, but the first solve must stay under ~20 minutes). <strong>Prerequisite: the 3D zeta fast path ([[nova-3d-native]] §2 — analytical treatment / Gauss–Legendre) lands first</strong>; the thick hex-section default is gated on both.</p></div>
     <pre class="r-fu-prompt">Project: nova

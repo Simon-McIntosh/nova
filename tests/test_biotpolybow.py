@@ -291,6 +291,20 @@ def test_a_free_form_polygon_section_reaches_the_kernel():
     An irregular pentagon has no ``(width, height)`` pair that reproduces it, so a
     class rebuilding its section from the frame's descriptor could only ever return
     a rectangle of its bounding box.  Read from ``poly`` it arrives as itself.
+
+    Held five times looser than the named sections above, and by the SECTION's
+    round-off floor rather than by anything the class does.  The reduction spends one
+    evaluation per corner and differences neighbouring corners' contributions against
+    each other, so a corner set that is numerous, oblique or nearly degenerate keeps
+    less of its precision than a rectangle's four right angles do.  Measured at the
+    kernel as the row change an analytically invariant translation of section and
+    targets together produces: 1.9e-13 for the rectangle, 9.7e-13 for the hexagon,
+    2.4e-12 for the eight-corner footprint here -- sharpest corner 56 degrees where a
+    rectangle's are 90, closest corner pair 1e-04 of the section's own extent apart --
+    and 8.3e-12 for the disc's sixty-four.  Reading one corner list in the arc's own
+    frame and in the global poloidal one samples that floor twice and adds the
+    rotation round trip on top, which is why this pair differ by 1.1e-11 where the
+    rectangle above differs by 2.2e-12 through the very same machinery.
     """
     loop = np.array(
         [[-0.03, -0.02], [0.03, -0.02], [0.02, 0.0], [0.03, 0.02], [-0.01, 0.015]]
@@ -298,19 +312,29 @@ def test_a_free_form_polygon_section_reaches_the_kernel():
     coilset = winding(shapely.geometry.Polygon(loop), SWEEPS["short"])
     assert np.asarray(coilset.subframe["segment"]).tolist() == ["polybow"]
     corners = section_corners(np.asarray(coilset.subframe["poly"])[0])
+    # Eight corners for a pentagon, all five authored ones among them: the tilted end
+    # stations push their projections past the rest along one edge, and the union
+    # keeps three corners there that no station's own section has -- two of them
+    # within a part in 1e3 of the extent of the corner they approach and a part in
+    # 1e4 of each other.  Pinned because it is this corner set's cancellation, not
+    # the authored loop's, that the gates below sit on.
+    assert len(corners) == 8
     assert np.min(np.linalg.norm(corners - np.array([3.02, 0.2]), axis=1)) <= 1e-04
     start, end = SWEEPS["short"]
     want = np.stack(
         polygon_arc_greens(TARGET_R, TARGET_Z, TARGET_PHI, corners, start, end)
     )
     got = cylindrical_rows(coilset)
-    assert worst_overall(got, want) <= 1e-11  # measured 1.6e-12
-    assert np.max(worst_by_row(got, want)) <= 1e-10  # measured 1.9e-11
+    assert worst_overall(got, want) <= 5e-11  # measured 1.1e-11
+    assert np.max(worst_by_row(got, want)) <= 1e-10  # measured 1.1e-11
     # The section the frame carries is the swept solid's own footprint, which for a
-    # section NOT symmetric about the poloidal plane is a few parts in 1e5 wider
-    # than the loop as authored: a discretised path takes a CHORD direction for its
-    # end tangents, so the two end stations are tilted by O(h^2) and their
-    # projections reach beyond the rest.  Bounded here so the departure is a
+    # section NOT symmetric about the poloidal plane encloses a few parts in 1e5 more
+    # AREA than the loop as authored: a discretised path takes a CHORD direction for
+    # its end tangents, so the two end stations are tilted by O(h^2) and their
+    # projections reach beyond the rest.  What reaches the rows is a couple of parts
+    # in 1e6 of that rather than the whole of it, because both sides are per ampere
+    # over their own polygon -- the enclosed area divides out of the normalisation and
+    # the change in SHAPE is all that is left.  Bounded here so the departure is a
     # measured quantity rather than a surprise, and it is the path's, not the
     # section's -- every named section is symmetric and lands on round-off.
     ideal = np.stack(
@@ -323,7 +347,7 @@ def test_a_free_form_polygon_section_reaches_the_kernel():
             end,
         )
     )
-    assert worst_overall(got, ideal) <= 1e-04  # measured 4.7e-05
+    assert worst_overall(got, ideal) <= 1e-05  # measured 1.7e-06
 
 
 # ---------------------------------------------------------------------------

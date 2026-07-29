@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="archive">
+  <meta name="plan-slug" content="polybow-arc-section-operator-dispatch-landed">
+  <meta name="plan-title" content="PolyBow operator dispatch and finite-arc banding — landed">
+  <meta name="plan-status" content="historical">
+  <meta name="plan-modified" content="2026-07-29">
+  <title>PolyBow operator dispatch and finite-arc banding — landed | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>PolyBow operator dispatch and finite-arc banding — landed</h1>
+    <p><strong>2026-07-29.</strong> The production route is geometry-aware:
+    use packed JAX for large polygon-ring builds, use an end-aware host band for
+    finite polygon arcs, and keep cheap geometry kernels on the host until a
+    fixed-shape packed driver demonstrates an end-to-end crossover.</p>
+
+    <section class="card">
+      <h2>Dispatch evidence</h2>
+      <figure>
+        <img src="/nova/figures/polybow-arc-section/operator_dispatch_and_banding.png"
+             alt="Three panels comparing FrameSpace overhead, finite-arc filament placement errors, and GPU ring versus finite-arc routes">
+        <figcaption>Matched operator overhead, the finite-arc placement study,
+        and measured device routes. Dashed GPU bars include compilation; solid
+        bars are warm execution.</figcaption>
+      </figure>
+      <table>
+        <thead>
+          <tr><th>Geometry</th><th>Accepted route</th><th>Reason</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Polygon ring</td>
+            <td>Packed JAX, one large-tile H200 by default</td>
+            <td>The kernel has a viable fixed graph; four-device sharding adds
+            only 1.53× at the measured tile width.</td>
+          </tr>
+          <tr>
+            <td>Finite polygon arc</td>
+            <td>Exact host near, centroid-moment filament far</td>
+            <td>Host banding is 1.883× faster at 5.805e-8 worst relative error;
+            full JAX compilation takes 695.94 s.</td>
+          </tr>
+          <tr>
+            <td>Straight prism, filament arc, rectangular bow, cylinder</td>
+            <td>Host</td>
+            <td>The kernels are cheap enough that FrameSpace, transfer, and
+            dispatch overhead dominate unless a packed route proves otherwise.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>The apparent geometry-assembly bottleneck</h2>
+      <p>The earlier “geometry assembly is about ten times slower than the solve”
+      finding conflated the bare numerical kernel with the complete FrameSpace
+      operator path. A current matched straight-prism run measures framed/bare
+      ratios of <strong>33.7× at 512 pairs</strong> and
+      <strong>25.9× at 4096 pairs</strong>. A warm 512-pair profile attributes
+      23 ms to Source, Target, and FrameSpace metadata, 12 ms to xarray
+      construction, 5 ms to operator wrapping, 4 ms to Matrix construction, and
+      about 1 ms to the bare polygon kernel. The section and path geometry are
+      constructed outside that timing.</p>
+      <p>This is an orchestration tax exposed by a cheap kernel, not evidence that
+      geometric meshing is intrinsically expensive. The same matched measurement
+      on the computationally expensive finite-arc kernel is only
+      <strong>1.10× at 512 pairs</strong> and
+      <strong>1.02× at 4096 pairs</strong>. Caching inside the interactive frame
+      model would optimize the wrong boundary; dense repeated construction should
+      bypass per-object xarray assembly through packed operator builders.</p>
+    </section>
+
+    <section class="card">
+      <h2>Finite-arc band and filament placement</h2>
+      <p>The band coordinate is derived from the finite sweep. Inside the sweep it
+      is distance to the section contour. Outside either end it combines the
+      poloidal contour gap with the angular chord to the nearest end. The
+      assignment therefore depends only on source and target geometry and handles
+      a target that is poloidally close but azimuthally beyond the conductor.</p>
+      <table>
+        <thead>
+          <tr><th>Far approximation</th><th>Worst relative error</th><th>Verdict</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Area centroid + section moments</td><td>4.5425e-8</td><td>retain</td></tr>
+          <tr><td>RMS radius + section moments</td><td>4.5393e-8</td><td>no material gain</td></tr>
+          <tr><td>RMS radius only</td><td>1.804e-4</td><td>reject</td></tr>
+        </tbody>
+      </table>
+      <p>The study covers hexagonal, trapezium, and thin-plate sections on radial,
+      vertical, and off-end routes. RMS plus moments is statistically
+      indistinguishable from centroid plus moments while requiring a displaced
+      filament and first-moment bookkeeping, so the area centroid remains the
+      simpler correct equivalent.</p>
+      <p>At 4096 targets the derived seams route 2225 pairs exact and 1871 to the
+      moment filament. Wall clock falls from 2.5936 s to 1.3775 s, a
+      <strong>1.8828× speedup</strong>, with 5.805e-8 worst relative error.
+      Exact thin-plate references eventually become cancellation-limited at
+      extreme standoff, so acceptance evidence is bounded to 80 section radii
+      beyond every seam.</p>
+    </section>
+
+    <section class="card">
+      <h2>GPU compilation and sharding</h2>
+      <p>The packed finite-arc driver agrees with the NumPy reduction to about
+      2e-12 relative error and joins the geometry registry, but the graph is not a
+      viable production executable. A one-pair H200 graph takes 695.94 s to
+      compile and 18.82 ms/pair warm. Removing the static closed-chain residual
+      takes 720.74 s and 18.10 ms/pair, so that specialization does not address
+      the graph-size problem. The host measures 404 microseconds/pair at a
+      4096-target width.</p>
+      <table>
+        <thead>
+          <tr><th>Ring arrangement</th><th>Cold wall</th><th>Warm wall</th><th>Warm µs/pair</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1 H200, 40×40 tiles</td><td>2.302 s</td><td>0.7941 s</td><td>7.755</td></tr>
+          <tr><td>4 H200, 40×40 tiles</td><td>4.936 s</td><td>0.5183 s</td><td>5.062</td></tr>
+          <tr><td>1 H200, 80×80 tiles, recorded baseline</td><td>—</td><td>—</td><td>2.830</td></tr>
+          <tr><td>4 H200, 80×80 tiles</td><td>3.425 s</td><td>0.1894 s</td><td>1.850</td></tr>
+        </tbody>
+      </table>
+      <p>Multi-device execution shards pair blocks and replicates the small
+      geometry arrays. Four cards improve steady execution by only 1.53× at the
+      measured width, while increasing cold cost. A two-term fit projects
+      1.686 µs/pair on eight cards, 1.68× over the one-card baseline. That point
+      is explicitly a projection: three H200s were occupied by existing DeepSeek
+      and embedding services, which were left untouched.</p>
+    </section>
+
+    <section class="card">
+      <h2>Artifacts and verification</h2>
+      <ul>
+        <li><code>895680eb</code> — geometry-aware operator routes.</li>
+        <li><code>docs/figures/polybow-arc-section/operator_dispatch_evidence.json</code>
+        — machine-readable measurement record.</li>
+        <li><code>benchmarks/BASELINE.md</code> — durable wall-clock and dispatch table.</li>
+        <li>Finite-arc focused lane: 58 passed.</li>
+        <li>Virtual four-device dispatch parity: 1 passed.</li>
+        <li>Ruff and HTML document checks: clean.</li>
+      </ul>
+    </section>
+  </main>
+</body>
+</html>

@@ -18,8 +18,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-30">
-<meta name="plan-impl" content="0.3">
-<meta name="plan-version" content="7">
+<meta name="plan-impl" content="0.35">
+<meta name="plan-version" content="8">
 <meta name="plan-sprint" content="S2">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -479,6 +479,37 @@ Done-when
   3. Missing/corrupt/unknown intervals are explicit and cannot bridge different configurations.
   4. A tracked canonical manifest is ready for per-IDS authors and semantic digest tests.</pre>
     </article>
+<article class="r-fu" data-id="f-mmd-standard-name-graph" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-07-30T01:50:00+02:00" data-recommends-skill="/reckon-ship mast-machine-description" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Repair live Standard Name graph and refresh physical MAST mappings</h4>
+    <div class="r-fu-body"><p>Restore the live Standard Name graph to the intended published catalog state, then refresh the complete MAST physical mapping ledger without introducing names for reconstruction meshes or discretizations.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan: mast-machine-description
+Section: Standard Name graph repair and physical MAST map refresh
+Capability: orchestrator
+Requirements: deep reasoning, extended context, autonomous tools, strict verification, elevated risk
+
+Context
+  A read-only audit at imas-codex 2fea0e8d and catalog eaa79623 found 2,223 published active entries but only two skipped nodes in the live Standard Name API. The old MAST count of 21 mapped and 10 gaps is stale. Several accepted successors exist, older names disappeared, and the current probe poloidal-angle attachment is semantically wrong.
+
+Locked identity rule
+  Machine descriptions capture continuous physical geometry, topology, turns/polarity and diagnostic positions plus orientations over discrete shot ranges. EFIT fcoil cells, amm elements, mesh counts, subdivisions and reconstruction weights are never machine identity.
+
+Work
+  1. Diagnose why the live graph exposes only two skipped nodes; do not blindly rebuild from catalog because catalog reconciliation updates existing nodes and does not recreate missing graph state.
+  2. Restore and verify the intended graph/catalog relationship.
+  3. Author one imas-codex focus manifest for the complete 40-row MAST ledger and diagnostic supplement; generate/review through the standard pipeline, never by hand-editing catalog YAML.
+  4. Detach semantically wrong attachments, especially probe poloidal orientation mapped as a flux-surface angle.
+  5. Re-query all names, DD 4.1.1 attachments and COCOS fields from the live read-only API.
+
+Constraints
+  Do not create Standard Names for fcoil or amm discretizations. Do not manufacture missing probe phi/toroidal orientation or partial-loop vertices. Dynamic currents and measured signals do not define configuration identity. Preserve any pre-existing dirty ISN worktree state.
+
+Done-when
+  1. Live graph inventory agrees with the intended published catalog and MAST names are queryable.
+  2. Every nameable physical MAST DD path has an accepted, semantically correct attachment or an explicit reviewed gap.
+  3. Diagnostic R, phi, Z and both orientation angles are covered correctly; ordered 3D loop paths remain a structural geometry requirement.
+  4. Catalog validation and live API re-query pass at recorded SHAs.</pre>
+    </article>
 </section>
 
   <section data-reckon="research" id="research" class="r-research-list">
@@ -489,6 +520,9 @@ Done-when
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="_top" data-id="c-mmd-cocos-repair" data-who="reckon-ship" data-when="2026-07-30T01:12:00+02:00">
     <div class="r-comment-body"><p>COCOS mapping blocker repaired in imas-codex main at 2fea0e8d (worker ebfb3b8f): flux-like quantities now scale by 2π for MAST 3→17, flux derivatives by 1/(2π), poloidal probe angles reverse, and toroidal angles remain unchanged. Focused transform suite: 55 passed. This removes a conversion defect only; authoritative physical shot-range history and complete diagnostic poses remain blocking.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-mmd-standard-name-audit" data-who="reckon-ship" data-when="2026-07-30T01:50:00+02:00">
+    <div class="r-comment-body"><p>Current 40-row mapping audit completed against catalog eaa79623 and imas-codex 2fea0e8d. The prior 21-mapped/10-gap count is stale: accepted successors, disappeared names, and wrong DD attachments all exist. EFIT fcoil cells and amm elements are explicitly non-authoritative discretizations. Diagnostic R, phi, Z, poloidal and toroidal orientation, plus ordered three-dimensional partial-loop paths remain identity-bearing. A separate service defect blocks graph-backed mapping claims: the live Standard Name API exposes only two skipped nodes while the published catalog contains 2,223 active entries.</p></div>
 </div>
 </section>
 </main>

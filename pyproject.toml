@@ -71,7 +71,17 @@ jax = [
 ]
 matplotlib = ["matplotlib>=3.10", "seaborn>=0.13"]
 numba = ["numba>=0.61"]
-test = ["pytest", "pytest-cov>=4.1.0", "pytest-asyncio>=0.21.1"]
+test = [
+  "jax>=0.5",
+  "matplotlib>=3.10",
+  "meshio>=5.3.4",
+  "pyvista>=0.44",
+  "pytest",
+  "pytest-cov>=4.1.0",
+  "pytest-asyncio>=0.21.1",
+  "trimesh>=4",
+  "vedo>=2024.5.0",
+]
 thermofluids = [
   "coolprop>=6.6.0",
   "ftputil>=5.0.4",

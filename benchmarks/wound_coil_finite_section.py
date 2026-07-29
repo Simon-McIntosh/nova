@@ -1897,6 +1897,28 @@ def stage_figures(args) -> None:
     )
     axes[0].grid(alpha=0.3)
     axes[0].legend(fontsize=8)
+    supporting = []
+    if ladder["terminal_step"]:
+        feeder = _read("feeder.json")
+        supporting += [
+            f"the feeder step is twice a mutual plus a self:"
+            f" 2 x {feeder['mutual']:+.3e} {feeder['feeder_self']['self']:+.3e}"
+            f" over {feeder['feeder_length']:.1f} m"
+        ]
+    if "seam" in ladder:
+        supporting += [
+            f"the turn split's own seam, measured both ways:"
+            f" {ladder['seam']['pack_estimate']:+.1e} H over the pack"
+        ]
+    if supporting:
+        axes[0].annotate(
+            "\n".join(supporting),
+            (0.02, 0.10),
+            xycoords="axes fraction",
+            fontsize=7,
+            color="0.3",
+            bbox={"facecolor": "white", "edgecolor": "0.85", "pad": 3.0},
+        )
 
     keys = list(whole)
     residual = [whole[key]["gap"] for key in keys]

@@ -1391,17 +1391,23 @@ def _section_pairs(resolved: dict) -> list[tuple[str, str, str]]:
         shape, corners, intervals, *rest = key.split("-")
         suffix = "-".join(rest)
         tail = f"-{suffix}" if suffix else ""
+        # the turn coverage belongs in the name: the same comparison on the whole
+        # pack and on a subset of it are two measurements, not one repeated
+        over = f" on {resolved[key]['turns_covered']} turns"
         finer = f"{shape}-{2 * int(corners)}-{intervals}{tail}"
         if finer in resolved:
-            name = f"{shape}, {corners} to {2 * int(corners)} corners"
+            name = f"{shape}, {corners} to {2 * int(corners)} corners{over}"
             pairs.append((name, key, finer))
         hollow = f"annulus-{corners}-{intervals}{tail}"
         if shape == "disc" and hollow in resolved:
-            name = f"the cooling channel at {corners} corners"
+            name = f"the cooling channel at {corners} corners{over}"
             pairs.append((name, key, hollow))
         mesh = f"{shape}-{corners}-{2 * int(intervals)}{tail}"
         if mesh in resolved:
-            name = f"{shape}-{corners}, {intervals} to {2 * int(intervals)} intervals"
+            name = (
+                f"{shape}-{corners}, {intervals} to {2 * int(intervals)}"
+                f" intervals{over}"
+            )
             pairs.append((name, key, mesh))
     return pairs
 
@@ -1436,7 +1442,7 @@ def report_ladder(payload: dict) -> None:
     print(
         f"\nwhat the section is worth against the ring that stood in for it [H]\n"
         f"\n{'run':<22}{'turns':>7}{'ring self':>16}{'swept self':>16}"
-        f"{'step':>13}{'channel':>13}"
+        f"{'step':>13}{'core member':>13}"
     )
     for key, run in payload["resolved"].items():
         ring = "" if run["ring_self"] is None else f"{run['ring_self']:.9f}"
@@ -1446,14 +1452,15 @@ def report_ladder(payload: dict) -> None:
             f"{step:>13}{run['channel']:>+13.2e}"
         )
     print(
-        "\nwhat resolving the section finer is worth, and what the channel takes"
-        "\noff, both on the same turns [H]\n"
+        "\nthe core member above is the superposition's own negative half, not what"
+        "\nthe channel is worth; what it is worth is the annulus against the solid"
+        "\ncable space at the same resolution on the same turns [H]\n"
     )
-    print(f"{'comparison':<44}{'difference':>14}{'relative':>12}")
+    print(f"{'comparison':<50}{'difference':>14}{'relative':>12}")
     for name, first, second in _section_pairs(payload["resolved"]):
         low = payload["resolved"][first]["self"]
         high = payload["resolved"][second]["self"]
-        print(f"{name:<44}{high - low:>+14.3e}{(high - low) / low:>+12.2e}")
+        print(f"{name:<50}{high - low:>+14.3e}{(high - low) / low:>+12.2e}")
     if "seam" in payload:
         seam = payload["seam"]
         print(

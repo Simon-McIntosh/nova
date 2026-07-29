@@ -19,7 +19,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-29">
 <meta name="plan-impl" content="0.75">
-<meta name="plan-version" content="5">
+<meta name="plan-version" content="6">
 </head>
 <body>
   <main class="plan-doc">
@@ -385,7 +385,7 @@ Done-when
      state what its reference carries and at what mesh it is valid. That file is
      shared -- draft the wording, do not assume the edit.</pre>
     </article>
-<article class="r-fu" data-id="f-ccf-03" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ccf-03" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28" data-recommends-skill="" data-resolved-at="2026-07-29T10:24:15+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Find what the field coil&#x27;s 4.07e-03 H gap actually is</h4>
     <div class="r-fu-body"><p>Granularity explains the solenoid and buys at most 28 % of PF1 at
         a conductor already outside any plausible cable space. The two coils' discrepancies have
@@ -440,6 +440,7 @@ Done-when
   1. The gap attributed, or the candidates eliminated one by one with the
      measurement that eliminates each.
   2. Whichever way it resolves, the decision reference-status locked with it.</pre>
+    <p class="r-fu-outcome">Answered by the wound-ladder stages rather than executed as written — both done-when are met. The gap is attributed: PF1's +4.14e-03 decomposes as turn count +1.62e-03 (as-built 248.926 vs nominal 248.64; the gap-implied 249.36 is RULED OUT by the centreline count), as-built outline and turn positions +2.71e-03, true 3-D path -9.25e-04, finite section +2.0e-06 (solid) to -4.2e-05 (with channel — the section is ruled out as the remainder), leaving +7.30e-04 of which the feeder run carries +3.335e-04 (46%), conditional on the table's circuit boundary. Candidates eliminated with measurements: turn count (counted off the centreline, CS modules validate the method at 554+0.03), insulation/conductor tuning (constraint honoured — nothing tuned; closing by section would need an unphysical 19.4 mm cable space), different outline (the machine value behaves like a discrete-turn AXISYMMETRIC computation on the as-built positions — it sits within -1.95e-04 of the coaxial ring stack, 21% of the helix term). reference-status locked cross-check with this evidence, per done-when 2. Records: archive/coil-conductor-fidelity-wound-filament-landed.html + archive/coil-conductor-fidelity-finite-section-landed.html; remaining open thread is the feeder/circuit-boundary followup.</p>
     </article>
 <article class="r-fu" data-id="f-ccf-04" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28T22:00:00+00:00" data-recommends-skill="/reckon-ship coil-conductor-fidelity §3" data-resolved-at="2026-07-28T23:55:44+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Solve the true wound coil against the approximation, with our own elements</h4>

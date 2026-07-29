@@ -67,11 +67,20 @@ superposition: the cable space at current density ``+j`` and the central channel
 as a core at ``-j``, one circuit, so the annulus between them carries ``j`` and the
 channel cancels.  Its contribution is reported on its own.
 
+One more thing the ladder was missing turns out to matter more than the section
+does, and it is not a model choice at all.  The as-built centreline runs past the
+winding pack and out to the coil's terminals, and that run is separated before
+anything is counted because it does not WIND -- but it is thirty-six metres of
+conductor carrying the coil's own current in series with the pack, so the
+inductance a terminal sees includes it and no rung either study built has ever had
+it in.  The ``feeder`` stage measures it.
+
 Stages, each writing its own JSON beside the figures::
 
     python benchmarks/wound_coil_finite_section.py gate
     python benchmarks/wound_coil_finite_section.py self
     python benchmarks/wound_coil_finite_section.py seam
+    python benchmarks/wound_coil_finite_section.py feeder
     python benchmarks/wound_coil_finite_section.py ladder
     python benchmarks/wound_coil_finite_section.py figures
 
@@ -1071,6 +1080,143 @@ def stage_seam(args) -> None:
     report_seam(payload)
 
 
+# ---------------------------------------------------------------------------
+# The conductor the coupling leaves out: the run to the terminals.
+
+
+def filament_linkage(target: tuple, source: tuple, slab: int) -> float:
+    """Return the flux one filament run links from another, ``mu0 A.dl`` [H].
+
+    Both runs as their own quadrature stations and exact steps, summed in slabs so
+    the pair matrix stays bounded.  A pair at zero separation -- which the diagonal
+    of a run against itself has -- is dropped rather than accumulated, so the same
+    call returns a finite number for a self block whose true value a filament cannot
+    supply.  That block is reported only as the divergent estimate it is.
+    """
+    station, step = target
+    source_station, source_step = source
+    total = 0.0
+    for first in range(0, len(station), slab):
+        rows = slice(first, min(first + slab, len(station)))
+        separation = station[rows, np.newaxis, :] - source_station[np.newaxis, :, :]
+        distance = np.linalg.norm(separation, axis=-1)
+        kernel = np.divide(
+            1.0, distance, out=np.zeros_like(distance), where=distance > 0
+        )
+        total += float(np.einsum("ts,tc,sc->", kernel, step[rows], source_step))
+    return mu_0 / (4 * np.pi) * total
+
+
+def stage_feeder(args) -> None:
+    """Measure the feeder run, which is conductor and is in neither ladder rung.
+
+    The as-built centreline runs past the winding pack and out to the coil's
+    terminals.  That run is separated before anything is counted, because it does
+    not WIND -- it sweeps seven hundredths of a turn over its whole length -- and
+    counting it as winding would put the turn count wrong.  But it is thirty-six
+    metres of conductor carrying the coil's own current in series with the pack, so
+    the coil's terminal inductance includes it and neither the companion's ladder
+    nor this study's has ever had it in.
+
+    Three terms, and they are reported separately because they answer different
+    questions.  ``mutual`` is the pack against the feeder, taken BOTH ways so
+    reciprocity is a check rather than an assumption; a radial or axial run carries
+    no toroidal ``dl``, so what couples is only the fraction of a turn the run
+    sweeps, and how far out it sweeps it decides how much.  ``self`` is the feeder
+    against itself, from its own swept section, which is the only term that needs
+    one -- its two legs run side by side and a filament cannot supply that.  The
+    total the coil's terminals would see is the pack plus twice the mutual plus the
+    feeder's own self.
+
+    The mutual is taken by direct Biot-Savart over both runs' own quadrature
+    stations rather than through the frame, because the frame cannot carry a feeder
+    at all: it builds every segment's swept volume whatever the profile, and a run
+    that travels radially or axially without sweeping has a degenerate poloidal
+    footprint that the section reader raises on.  A filament sum needs no volume,
+    and it is what the term wants anyway -- the pack and the feeder are separate
+    conductor with no shared section, and where they meet the feeder's ``dl`` is
+    across the pack's own potential rather than along it.
+    """
+    path = {entry.name: entry for entry in read_paths(args.coil[:2])}[args.coil]
+    path.resolution = args.resolution
+    table = count_turns([path], args.revision, args.minimum_sweep, args.inflate)
+    pack = cut_turns(path)
+    feeder = [path.segments[index] for index in np.flatnonzero(~path.pack)]
+    diameter = cable_diameter(path.name)
+    section = Section(diameter, args.channel * CHANNEL, args.corners)
+
+    start = time.perf_counter()
+    runs = []
+    for segments in (pack.segments, feeder):
+        station, step = [], []
+        for segment in segments:
+            points, delta = _stations(segment, args.intervals)
+            station.append(points)
+            step.append(delta)
+        runs.append((np.vstack(station), np.vstack(step)))
+    block = np.array(
+        [
+            [filament_linkage(target, source, args.slab) for source in runs]
+            for target in runs
+        ]
+    )
+    mutual_seconds = time.perf_counter() - start
+
+    start = time.perf_counter()
+    radius = float(
+        np.mean([np.hypot(*_stations(segment, 1)[0][0][:2]) for segment in feeder])
+    )
+    feeder_self = path_self(feeder, section, args.intervals, radius)
+    payload = {
+        "coil": path.name,
+        "section": section.label,
+        "intervals": args.intervals,
+        "feeder_elements": int(len(feeder)),
+        "feeder_length": float(sum(segment.length for segment in feeder)),
+        "feeder_sweep": float(path.swept(np.flatnonzero(~path.pack))),
+        "pack_length": float(sum(segment.length for segment in pack.segments)),
+        "mean_radius": radius,
+        "path_radius_max": table[path.name]["path_radius_max"],
+        "filament_block": block.tolist(),
+        "mutual": 0.5 * float(block[0, 1] + block[1, 0]),
+        "reciprocity": float(
+            abs(block[0, 1] - block[1, 0]) / max(abs(block[0, 1]), 1e-30)
+        ),
+        "feeder_self": feeder_self,
+        "filament_feeder_self": float(block[1, 1]),
+        "mutual_seconds": mutual_seconds,
+        "self_seconds": time.perf_counter() - start,
+    }
+    payload["terminal_step"] = 2 * payload["mutual"] + feeder_self["self"]
+    print(f"wrote {_write('feeder.json', payload)}")
+    report_feeder(payload)
+
+
+def report_feeder(payload: dict) -> None:
+    """Print what the feeder run adds to the coil's terminal inductance."""
+    print(
+        f"\n{payload['coil']}: the feeder run, {payload['feeder_elements']} elements,"
+        f" {payload['feeder_length']:.2f} m of conductor sweeping"
+        f" {payload['feeder_sweep']:.4f} turns out to"
+        f" r = {payload['path_radius_max']:.1f} m"
+        f"\nagainst a winding pack of {payload['pack_length']:.1f} m\n"
+    )
+    print(f"  {'pack against feeder, filament':<44}{payload['mutual']:>+14.3e} H")
+    print(f"  {'reciprocity of that block':<44}{payload['reciprocity']:>14.1e}")
+    print(
+        f"  {'feeder against itself, section resolved':<44}"
+        f"{payload['feeder_self']['self']:>+14.3e} H"
+    )
+    print(
+        f"  {'the same term as a filament, which diverges':<44}"
+        f"{payload['filament_feeder_self']:>+14.3e} H"
+    )
+    print(
+        f"  {'what the terminals would see, 2 M + L':<44}"
+        f"{payload['terminal_step']:>+14.3e} H"
+    )
+
+
 def _cross_turn(
     station_turn: np.ndarray, element_turn: np.ndarray, pairwise: np.ndarray
 ) -> np.ndarray:
@@ -1157,6 +1303,11 @@ def stage_ladder(args) -> None:
         name: np.array(matrix)[index, index]
         for name, matrix in wound["attribution"]["rungs"].items()
     }
+    # the feeder run, which is conductor in series with the pack and is in no rung
+    # either study has built: its own self plus twice its mutual with the pack
+    terminal = 0.0
+    if (FIGURES / "feeder.json").exists():
+        terminal = _read("feeder.json")["terminal_step"]
     runs = {}
     for key, run in section["runs"].items():
         # a subset run measures a section against another section on the same
@@ -1170,6 +1321,10 @@ def stage_ladder(args) -> None:
             "step": run["total"] - float(ring[index]) if whole else None,
             "rung": resolved,
             "gap": float(machine[index, index]) - resolved if whole else None,
+            "with_feeder": resolved + terminal if whole else None,
+            "feeder_gap": (
+                float(machine[index, index]) - resolved - terminal if whole else None
+            ),
             "channel": run["core"],
             "centreline": run["centreline"],
             "correction": run["correction"],
@@ -1185,6 +1340,7 @@ def stage_ladder(args) -> None:
             name: float(machine[index, index] - value) for name, value in rungs.items()
         },
         "resolved": runs,
+        "terminal_step": terminal,
         "subset": section["subset"],
         "turn_count": section["turn_count"],
     }
@@ -1264,6 +1420,19 @@ def report_ladder(payload: dict) -> None:
         if run["rung"] is None:
             continue
         print(f"{'wound section ' + key:<26}{run['rung']:>14.6f}{run['gap']:>+18.2e}")
+    if payload["terminal_step"]:
+        print(
+            f"\nand the conductor no rung has ever had in -- the feeder run out to"
+            f" the coil's\nterminals, in series with the pack, worth"
+            f" {payload['terminal_step']:+.3e} H:\n"
+        )
+        for key, run in payload["resolved"].items():
+            if run["with_feeder"] is None:
+                continue
+            print(
+                f"{'+ feeders, ' + key:<26}{run['with_feeder']:>14.6f}"
+                f"{run['feeder_gap']:>+18.2e}"
+            )
     print(
         f"\nwhat the section is worth against the ring that stood in for it [H]\n"
         f"\n{'run':<22}{'turns':>7}{'ring self':>16}{'swept self':>16}"
@@ -1581,13 +1750,15 @@ def stage_figures(args) -> None:
         print(f"wrote figures to {FIGURES} (no ladder stage yet)")
         return
     ladder = _read("ladder.json")
-    figure, axes = plt.subplots(1, 2, figsize=(12.4, 5.0), width_ratios=[1.4, 1])
-    names = list(ladder["rungs"]) + [
-        f"wound section\n{key}" for key in ladder["resolved"]
-    ]
-    values = list(ladder["rungs"].values()) + [
-        run["rung"] for run in ladder["resolved"].values()
-    ]
+    whole = {
+        key: run for key, run in ladder["resolved"].items() if run["rung"] is not None
+    }
+    figure, axes = plt.subplots(1, 2, figsize=(12.8, 5.2), width_ratios=[1.4, 1])
+    names = list(ladder["rungs"]) + [f"wound section\n{key}" for key in whole]
+    values = list(ladder["rungs"].values()) + [run["rung"] for run in whole.values()]
+    if ladder["terminal_step"]:
+        names += [f"+ feeders\n{key}" for key in whole]
+        values += [run["with_feeder"] for run in whole.values()]
     base = ladder["rungs"]["continuum"]
     axes[0].axhline(0.0, color="C7", ls=":", lw=1.0, label="continuum rung")
     axes[0].axhline(
@@ -1617,14 +1788,16 @@ def stage_figures(args) -> None:
     axes[0].set_ylabel("offset from the continuum rung [H]")
     axes[0].set_title(
         f"{ladder['coil']}: does resolving the conductor section close what the"
-        f"\nas-built winding path leaves?",
+        f"\nas-built winding path leaves?  (and what does?)",
         fontsize=9,
     )
     axes[0].grid(alpha=0.3)
     axes[0].legend(fontsize=8)
 
-    keys = list(ladder["resolved"])
-    residual = [ladder["resolved"][key]["gap"] for key in keys]
+    keys = list(whole)
+    residual = [whole[key]["gap"] for key in keys]
+    position = np.arange(len(keys))
+    width = 0.38 if ladder["terminal_step"] else 0.55
     axes[1].axhline(
         ladder["gap"]["wound path"],
         color="C7",
@@ -1633,21 +1806,40 @@ def stage_figures(args) -> None:
         label=f"declared ring  {ladder['gap']['wound path']:+.2e}",
     )
     axes[1].axhline(0.0, color="C3", ls="--", lw=1.0, label="machine description")
-    axes[1].bar(range(len(keys)), residual, 0.55, color="C0")
-    for position, key in enumerate(keys):
-        axes[1].annotate(
-            f"{residual[position]:+.2e}",
-            (position, residual[position]),
-            textcoords="offset points",
-            xytext=(0, 4 if residual[position] >= 0 else -11),
-            ha="center",
-            fontsize=7,
+    bars = [
+        (
+            position - 0.5 * width * bool(ladder["terminal_step"]),
+            residual,
+            "C0",
+            "section resolved",
         )
-    axes[1].set_xticks(range(len(keys)))
+    ]
+    if ladder["terminal_step"]:
+        bars.append(
+            (
+                position + 0.5 * width,
+                [whole[key]["feeder_gap"] for key in keys],
+                "C2",
+                "and the feeders in",
+            )
+        )
+    for centre, values_, colour, label in bars:
+        axes[1].bar(centre, values_, width, color=colour, label=label)
+        for at, value in zip(centre, values_):
+            axes[1].annotate(
+                f"{value:+.2e}",
+                (at, value),
+                textcoords="offset points",
+                xytext=(0, 4 if value >= 0 else -11),
+                ha="center",
+                fontsize=7,
+            )
+    axes[1].set_xticks(position)
     axes[1].set_xticklabels(keys, rotation=25, ha="right", fontsize=7)
-    axes[1].set_ylabel("machine description less the resolved rung [H]")
+    axes[1].set_ylabel("machine description less the rung [H]")
     axes[1].set_title(
-        "what is left once the section is resolved,\nby section and quadrature",
+        "what is left: the section moves it by a per cent,\nthe feeder run by half of"
+        " it",
         fontsize=9,
     )
     axes[1].grid(alpha=0.3, axis="y")
@@ -1711,6 +1903,14 @@ def parse_args(argv=None):
     seam.add_argument("--intervals", type=int, default=4)
     seam.add_argument("--boundary-scan", type=int, default=12)
     seam.set_defaults(run=stage_seam)
+
+    feeder = stages.add_parser("feeder")
+    feeder.add_argument("--coil", default="PF1")
+    feeder.add_argument("--corners", type=int, default=32)
+    feeder.add_argument("--channel", type=int, default=1)
+    feeder.add_argument("--intervals", type=int, default=4)
+    feeder.add_argument("--slab", type=int, default=4000)
+    feeder.set_defaults(run=stage_feeder)
 
     ladder = stages.add_parser("ladder")
     ladder.add_argument("--wound", default="wound.json")

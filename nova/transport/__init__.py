@@ -11,6 +11,9 @@ next.
   flux-surface-averaged resistive current diffusion, its predicted current
   profiles, their projection back onto a profile-coefficient ladder, and the
   inductive/resistive flux-consumption ledger.
+* :func:`~nova.transport.current_diffusion.flux_surface_geometry` -- the
+  fixed-shape assembly of diffusion metrics from an equilibrium grid and its
+  fitted profile ladder.
 
 Conventions: total poloidal flux ``Phi = 2 pi R A_phi`` [Wb], explicit ``mu0``,
 raw SI throughout.
@@ -20,10 +23,13 @@ from nova.transport.current_diffusion import (
     CurrentDiffusion,
     EtaProfile,
     FluxSurfaceGeometry,
+    assemble_flux_surface_geometry_jax,
     basis_projection_images,
     diffuse_psi,
     ejima_coefficient,
     flux_budget,
+    flux_surface_geometry,
+    flux_surface_geometry_jax,
     poloidal_field_energy_li,
     predicted_current,
     project_coefficients,
@@ -33,10 +39,13 @@ __all__ = [
     "CurrentDiffusion",
     "EtaProfile",
     "FluxSurfaceGeometry",
+    "assemble_flux_surface_geometry_jax",
     "basis_projection_images",
     "diffuse_psi",
     "ejima_coefficient",
     "flux_budget",
+    "flux_surface_geometry",
+    "flux_surface_geometry_jax",
     "poloidal_field_energy_li",
     "predicted_current",
     "project_coefficients",

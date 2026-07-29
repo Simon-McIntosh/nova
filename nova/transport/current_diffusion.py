@@ -24,6 +24,8 @@ What the module provides:
 * :class:`FluxSurfaceGeometry` -- the 1D metrics of one equilibrium on a uniform
   ``rho`` face grid, plus the Ampere identity that reads an enclosed-current
   profile back out of a flux profile;
+* :func:`flux_surface_geometry` -- the profile-ladder and equilibrium-grid
+  assembly of those metrics from Nova's fixed-shape connectivity bins;
 * :func:`diffuse_psi` -- the implicit theta-scheme flux-diffusion step, a jitted
   fp64 Thomas solve per sub-step;
 * :func:`predicted_current` -- the evolved state's flux-surface-averaged toroidal
@@ -46,6 +48,7 @@ All inputs are raw measurements or the spine's own fits.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from functools import partial
 
 import numpy as np
 
@@ -190,6 +193,557 @@ class FluxSurfaceGeometry:
         i_face[1:-1] = 0.5 * (i_mid[:-1] + i_mid[1:])
         i_face[-1] = 1.5 * i_mid[-1] - 0.5 * i_mid[-2]
         return i_face
+
+
+def _profile_shapes_jax(psi_n, n_terms: int, *, nonnegative: bool):
+    """Profile-ladder shapes on a normalised-flux sample, as JAX arrays."""
+    normalised = jnp.clip(psi_n, 0.0, 1.0)
+    if n_terms == 0:
+        return jnp.empty((*normalised.shape, 0), dtype=normalised.dtype)
+    if nonnegative:
+        exponents = jnp.asarray(NONNEGATIVE_EXPONENTS[:n_terms])
+        return (1.0 - normalised)[..., jnp.newaxis] ** exponents
+
+    coordinate = 2.0 * normalised - 1.0
+    terms = [jnp.ones_like(normalised)]
+    if n_terms > 1:
+        terms.append(coordinate)
+    for degree in range(2, n_terms):
+        terms.append(
+            ((2 * degree - 1) * coordinate * terms[-1] - (degree - 1) * terms[-2])
+            / degree
+        )
+    return jnp.stack(terms, axis=-1) * (1.0 - normalised)[..., jnp.newaxis]
+
+
+def _cumulative_trapezoid_from_axis(coordinate, values):
+    """Cumulative trapezoid with the finite axis value extended to zero."""
+    increments = 0.5 * (values[1:] + values[:-1]) * (coordinate[1:] - coordinate[:-1])
+    return jnp.concatenate(
+        [
+            values[:1] * coordinate[:1],
+            values[:1] * coordinate[:1] + jnp.cumsum(increments),
+        ]
+    )
+
+
+def _integrate_diamagnetic_drive(
+    psi_n, diamagnetic_drive, *, boundary_f, poloidal_flux_span
+):
+    """Integrate ``F F'`` inward from the boundary and return ``F(psi_n)``."""
+    increments = (
+        0.5 * (diamagnetic_drive[1:] + diamagnetic_drive[:-1]) * jnp.diff(psi_n)
+    )
+    integral_from_boundary = jnp.concatenate(
+        [-jnp.cumsum(increments[::-1])[::-1], jnp.zeros(1, psi_n.dtype)]
+    )
+    f_squared = (
+        boundary_f**2 + 2.0 * poloidal_flux_span / _TWO_PI * integral_from_boundary
+    )
+    return (
+        jnp.sign(boundary_f) * jnp.sqrt(jnp.clip(f_squared, min=0.0)),
+        jnp.all(f_squared > 0.0),
+    )
+
+
+def _connectivity_core(psi_n, inside_limiter):
+    """Return the axis-connected confined cells using Nova's flood-fill kernel."""
+    from nova.jax.flux_surface_connectivity import flood_fill_core
+
+    confined = (psi_n < 1.0) & inside_limiter
+    seed_position = jnp.argmin(jnp.where(confined, psi_n, jnp.inf).reshape(-1))
+    seed = (
+        jnp.zeros(psi_n.size, dtype=bool)
+        .at[seed_position]
+        .set(True)
+        .reshape(psi_n.shape)
+    )
+    return flood_fill_core(confined, seed, psi_n.shape[0] + psi_n.shape[1])
+
+
+def _surface_interpolation(rho, rho_samples, values, axis_value, edge_value):
+    """Interpolate surface samples onto ``rho`` with explicit axis and edge limits."""
+    interpolated = jnp.interp(rho, rho_samples, values, right=edge_value)
+    inner = rho < rho_samples[0]
+    inner_value = axis_value + (values[0] - axis_value) * (
+        rho / jnp.maximum(rho_samples[0], 1e-12)
+    )
+    return jnp.where(inner, inner_value, interpolated)
+
+
+@partial(
+    jax.jit,
+    static_argnames=(
+        "n_pressure",
+        "n_diamagnetic",
+        "n_radial_cells",
+        "nonnegative",
+    ),
+)
+def assemble_flux_surface_geometry_jax(
+    surface_bins,
+    psi2d,
+    radius,
+    height,
+    inside_limiter,
+    *,
+    axis_psi,
+    boundary_psi,
+    profile_coefficients,
+    coefficient_scale,
+    ip_amperes,
+    major_radius,
+    boundary_toroidal_field,
+    n_pressure: int,
+    n_diamagnetic: int,
+    n_radial_cells: int = 24,
+    nonnegative: bool = True,
+    bandwidth_factor=1.25,
+):
+    """Assemble fixed-shape transport metrics from connectivity surface bins.
+
+    The input grid is ``psi2d[height, radius]`` in total poloidal flux [Wb].
+    ``surface_bins`` is the output of
+    :func:`nova.jax.flux_surface_connectivity.flux_surface_bins_jax`: its
+    ``n_surface_bins`` arrays live on increasing normalised-poloidal-flux
+    mid-levels and may be nonuniform. ``profile_coefficients`` and
+    ``coefficient_scale`` are the pressure-gradient columns followed by the
+    diamagnetic columns; their product has toroidal-current-density units
+    [A m-2].
+
+    The returned dictionary is a JAX PyTree. Face arrays have
+    ``n_radial_cells + 1`` entries, cell arrays have ``n_radial_cells`` entries,
+    and all shapes are independent of the number of confined grid cells. The
+    scalar ``valid`` is false for empty or ill-posed surfaces; callers can
+    discard that slice without fabricating geometry.
+    """
+    psi2d = jnp.asarray(psi2d, dtype=jnp.float64)
+    radius = jnp.asarray(radius, dtype=jnp.float64)
+    height = jnp.asarray(height, dtype=jnp.float64)
+    inside_limiter = jnp.asarray(inside_limiter, dtype=bool)
+    profile_coefficients = jnp.asarray(profile_coefficients, dtype=jnp.float64)
+    coefficient_scale = jnp.asarray(coefficient_scale, dtype=jnp.float64)
+
+    poloidal_flux_span = boundary_psi - axis_psi
+    safe_span = jnp.where(
+        jnp.abs(poloidal_flux_span) > 1e-12, poloidal_flux_span, 1e-12
+    )
+    psi_n_grid = (psi2d - axis_psi) / safe_span
+    core = _connectivity_core(psi_n_grid, inside_limiter)
+    mesh_radius = jnp.broadcast_to(radius[jnp.newaxis, :], psi2d.shape)
+
+    scaled_coefficients = profile_coefficients * coefficient_scale
+    pressure_shapes = _profile_shapes_jax(
+        psi_n_grid, n_pressure, nonnegative=nonnegative
+    )
+    diamagnetic_shapes = _profile_shapes_jax(
+        psi_n_grid, n_diamagnetic, nonnegative=nonnegative
+    )
+    pressure_drive = pressure_shapes @ scaled_coefficients[:n_pressure]
+    diamagnetic_drive = diamagnetic_shapes @ scaled_coefficients[n_pressure:]
+    current_density = (
+        mesh_radius / major_radius * pressure_drive
+        + major_radius / mesh_radius * diamagnetic_drive
+    )
+
+    psi_n_profile = jnp.linspace(0.0, 1.0, 101)
+    diamagnetic_profile = (
+        _profile_shapes_jax(psi_n_profile, n_diamagnetic, nonnegative=nonnegative)
+        @ scaled_coefficients[n_pressure:]
+    )
+    f_profile, f_well_posed = _integrate_diamagnetic_drive(
+        psi_n_profile,
+        MU0 * major_radius * diamagnetic_profile,
+        boundary_f=major_radius * boundary_toroidal_field,
+        poloidal_flux_span=safe_span,
+    )
+
+    psi_n_surface = jnp.asarray(surface_bins["pn_s"], dtype=jnp.float64)
+    volume_derivative = jnp.asarray(surface_bins["dv_dpn"], dtype=jnp.float64)
+    inverse_radius_squared = jnp.asarray(surface_bins["inv_r2"], dtype=jnp.float64)
+    inverse_radius = jnp.asarray(surface_bins["inv_r"], dtype=jnp.float64)
+    gradient_squared_over_radius_squared = jnp.asarray(
+        surface_bins["grad2_r2"], dtype=jnp.float64
+    )
+    cumulative_volume = jnp.asarray(surface_bins["v_cum"], dtype=jnp.float64)
+    volume = jnp.asarray(surface_bins["v_total"], dtype=jnp.float64)
+
+    f_surface = jnp.interp(psi_n_surface, psi_n_profile, f_profile)
+    volume_derivative_per_flux = volume_derivative / jnp.abs(safe_span)
+    safety_factor = (
+        jnp.abs(f_surface)
+        * inverse_radius_squared
+        * volume_derivative_per_flux
+        / _TWO_PI
+    )
+    toroidal_flux_surface = _cumulative_trapezoid_from_axis(
+        psi_n_surface, safety_factor * jnp.abs(safe_span)
+    )
+    boundary_toroidal_flux = toroidal_flux_surface[-1] + (
+        1.0 - psi_n_surface[-1]
+    ) * safety_factor[-1] * jnp.abs(safe_span)
+    safe_boundary_toroidal_flux = jnp.maximum(boundary_toroidal_flux, 1e-30)
+    rho_surface = jnp.sqrt(
+        jnp.clip(toroidal_flux_surface / safe_boundary_toroidal_flux, 0.0, 1.0)
+    )
+    rho_surface = jax.lax.associative_scan(jnp.maximum, rho_surface)
+
+    magnetic_field_squared = (
+        gradient_squared_over_radius_squared / (4.0 * jnp.pi**2)
+        + f_surface**2 * inverse_radius_squared
+    )
+    rho_face = jnp.linspace(0.0, 1.0, n_radial_cells + 1)
+    rho_cell = 0.5 * (rho_face[:-1] + rho_face[1:])
+    psi_n_face = _surface_interpolation(rho_face, rho_surface, psi_n_surface, 0.0, 1.0)
+    psi_n_cell = _surface_interpolation(rho_cell, rho_surface, psi_n_surface, 0.0, 1.0)
+    f_face = _surface_interpolation(
+        rho_face,
+        rho_surface,
+        f_surface,
+        f_profile[0],
+        major_radius * boundary_toroidal_field,
+    )
+    f_cell = 0.5 * (f_face[:-1] + f_face[1:])
+    g3_face = _surface_interpolation(
+        rho_face,
+        rho_surface,
+        inverse_radius_squared,
+        inverse_radius_squared[0],
+        inverse_radius_squared[-1],
+    )
+    g3_cell = 0.5 * (g3_face[:-1] + g3_face[1:])
+    inverse_radius_cell = jnp.interp(psi_n_cell, psi_n_surface, inverse_radius)
+    magnetic_field_squared_cell = jnp.interp(
+        psi_n_cell, psi_n_surface, magnetic_field_squared
+    )
+    safety_factor_face = _surface_interpolation(
+        rho_face,
+        rho_surface,
+        safety_factor,
+        safety_factor[0],
+        safety_factor[-1],
+    )
+
+    volume_face = _surface_interpolation(
+        rho_face, rho_surface, cumulative_volume, 0.0, volume
+    )
+    volume_face = jax.lax.associative_scan(jnp.maximum, jnp.nan_to_num(volume_face))
+    radial_spacing = 1.0 / n_radial_cells
+    volume_derivative_face = jnp.gradient(volume_face, radial_spacing)
+    volume_derivative_face = volume_derivative_face.at[0].set(0.0)
+    volume_derivative_cell = jnp.diff(volume_face) / radial_spacing
+
+    volume_derivative_per_flux_face = jnp.interp(
+        psi_n_face, psi_n_surface, volume_derivative_per_flux
+    )
+    gradient_squared_face = jnp.interp(
+        psi_n_face, psi_n_surface, gradient_squared_over_radius_squared
+    )
+    g2_face = (
+        (volume_derivative_per_flux_face**2 * gradient_squared_face).at[0].set(0.0)
+    )
+
+    # The fitted profile ladder supplies the initial enclosed-current shape.
+    # Smooth cumulative weights preserve fixed shapes and accelerator batching;
+    # the edge is normalised to the measured total current.
+    dr = radius[1] - radius[0]
+    dz = height[1] - height[0]
+    surface_spacing = jnp.mean(jnp.diff(psi_n_surface))
+    bandwidth = jnp.maximum(bandwidth_factor * surface_spacing, 1e-6)
+    normal_cdf = 0.5 * (
+        1.0
+        + jax.scipy.special.erf(
+            (psi_n_face[:, jnp.newaxis, jnp.newaxis] - psi_n_grid[jnp.newaxis, :, :])
+            / (jnp.sqrt(2.0) * bandwidth)
+        )
+    )
+    enclosed_current = jnp.sum(
+        normal_cdf
+        * core[jnp.newaxis, :, :]
+        * current_density[jnp.newaxis, :, :]
+        * dr
+        * dz,
+        axis=(1, 2),
+    )
+    enclosed_current = enclosed_current - enclosed_current[0]
+    current_edge = enclosed_current[-1]
+    enclosed_current = (
+        enclosed_current
+        * jnp.abs(ip_amperes)
+        / jnp.maximum(jnp.abs(current_edge), 1e-30)
+        * jnp.sign(current_edge)
+    )
+    enclosed_current = enclosed_current.at[0].set(0.0)
+
+    diffusion_face = jnp.zeros_like(rho_face)
+    diffusion_face = diffusion_face.at[1:].set(g2_face[1:] * g3_face[1:] / rho_face[1:])
+    flux_sign = jnp.where(safe_span >= 0.0, 1.0, -1.0)
+    safe_denominator = jnp.where(
+        jnp.abs(diffusion_face[1:] * f_face[1:]) > 1e-30,
+        diffusion_face[1:] * f_face[1:],
+        1e-30,
+    )
+    poloidal_flux_gradient = (
+        jnp.zeros_like(rho_face)
+        .at[1:]
+        .set(
+            flux_sign
+            * enclosed_current[1:]
+            * (_16PI3 * MU0 * safe_boundary_toroidal_flux)
+            / safe_denominator
+        )
+    )
+    diffusion_mid = 0.5 * (diffusion_face[:-1] + diffusion_face[1:])
+    f_mid = 0.5 * (f_face[:-1] + f_face[1:])
+    current_mid = (
+        flux_sign
+        * diffusion_mid
+        * 0.5
+        * (poloidal_flux_gradient[:-1] + poloidal_flux_gradient[1:])
+        * f_mid
+        / (safe_boundary_toroidal_flux * _16PI3 * MU0)
+    )
+    readback_edge_current = 1.5 * current_mid[-1] - 0.5 * current_mid[-2]
+    poloidal_flux_gradient = (
+        poloidal_flux_gradient
+        * jnp.abs(ip_amperes)
+        / jnp.maximum(jnp.abs(readback_edge_current), 1e-30)
+        * jnp.sign(readback_edge_current)
+    )
+    psi_face = axis_psi + jnp.concatenate(
+        [
+            jnp.zeros(1),
+            jnp.cumsum(
+                0.5
+                * (poloidal_flux_gradient[1:] + poloidal_flux_gradient[:-1])
+                * radial_spacing
+            ),
+        ]
+    )
+
+    finite_arrays = (
+        jnp.all(jnp.isfinite(psi_n_surface))
+        & jnp.all(jnp.isfinite(volume_derivative))
+        & jnp.all(jnp.isfinite(inverse_radius_squared))
+        & jnp.all(jnp.isfinite(psi_face))
+    )
+    valid = (
+        (jnp.abs(poloidal_flux_span) > 1e-12)
+        & (jnp.sum(core) >= 200)
+        & jnp.all(jnp.diff(psi_n_surface) > 0.0)
+        & jnp.all(volume_derivative > 0.0)
+        & (boundary_toroidal_flux > 0.0)
+        & (jnp.abs(current_edge) > 1e-6 * jnp.maximum(jnp.abs(ip_amperes), 1.0))
+        & jnp.all(diffusion_face[1:] > 0.0)
+        & f_well_posed
+        & finite_arrays
+    )
+    return {
+        "rho_face": rho_face,
+        "rho_cell": rho_cell,
+        "psi_face": psi_face,
+        "psi_n_face": psi_n_face,
+        "psi_n_cell": psi_n_cell,
+        "vpr_face": volume_derivative_face,
+        "vpr_cell": volume_derivative_cell,
+        "g2_face": g2_face,
+        "g3_face": g3_face,
+        "g3_cell": g3_cell,
+        "f_face": f_face,
+        "f_cell": f_cell,
+        "b2_cell": magnetic_field_squared_cell,
+        "inv_r_cell": inverse_radius_cell,
+        "phi_b": safe_boundary_toroidal_flux,
+        "r0": major_radius,
+        "ip_amperes": jnp.abs(ip_amperes),
+        "axis_psi": axis_psi,
+        "boundary_psi": boundary_psi,
+        "volume": volume,
+        "q_face": safety_factor_face,
+        "flux_sign": flux_sign,
+        "valid": valid,
+    }
+
+
+@partial(
+    jax.jit,
+    static_argnames=(
+        "n_pressure",
+        "n_diamagnetic",
+        "n_radial_cells",
+        "n_surface_bins",
+        "nonnegative",
+    ),
+)
+def flux_surface_geometry_jax(
+    psi2d,
+    radius,
+    height,
+    inside_limiter,
+    *,
+    axis_psi,
+    boundary_psi,
+    profile_coefficients,
+    coefficient_scale,
+    ip_amperes,
+    major_radius,
+    boundary_toroidal_field,
+    n_pressure: int,
+    n_diamagnetic: int,
+    n_radial_cells: int = 24,
+    n_surface_bins: int = 28,
+    psi_n_min=0.04,
+    psi_n_max=0.985,
+    nonnegative: bool = True,
+    bandwidth_factor=1.25,
+):
+    """Build fixed-shape flux-surface geometry directly from an equilibrium grid.
+
+    This device entry point composes Nova's connectivity bins with
+    :func:`assemble_flux_surface_geometry_jax`; it is safe under ``jit`` and
+    ``vmap`` when slices share a machine grid and the static shape parameters.
+    """
+    from nova.jax.flux_surface_connectivity import flux_surface_bins_jax
+
+    surface_bins = flux_surface_bins_jax(
+        psi2d,
+        radius,
+        height,
+        inside_limiter,
+        axis_psi,
+        boundary_psi,
+        psi_n_min,
+        psi_n_max,
+        n_surface_bins,
+        bandwidth_factor,
+    )
+    return assemble_flux_surface_geometry_jax(
+        surface_bins,
+        psi2d,
+        radius,
+        height,
+        inside_limiter,
+        axis_psi=axis_psi,
+        boundary_psi=boundary_psi,
+        profile_coefficients=profile_coefficients,
+        coefficient_scale=coefficient_scale,
+        ip_amperes=ip_amperes,
+        major_radius=major_radius,
+        boundary_toroidal_field=boundary_toroidal_field,
+        n_pressure=n_pressure,
+        n_diamagnetic=n_diamagnetic,
+        n_radial_cells=n_radial_cells,
+        nonnegative=nonnegative,
+        bandwidth_factor=bandwidth_factor,
+    )
+
+
+def flux_surface_geometry(
+    psi2d,
+    grid,
+    *,
+    axis_psi: float,
+    boundary_psi: float,
+    profile_coefficients: np.ndarray,
+    coefficient_scale: np.ndarray,
+    ip_amperes: float,
+    n_pressure: int,
+    n_diamagnetic: int,
+    boundary_toroidal_field: float,
+    n_radial_cells: int = 24,
+    n_surface_bins: int = 28,
+    psi_n_min: float = 0.04,
+    psi_n_max: float = 0.985,
+    nonnegative: bool = True,
+    bandwidth_factor: float = 1.25,
+) -> FluxSurfaceGeometry | None:
+    """Return transport geometry for one equilibrium, or ``None`` if invalid.
+
+    ``grid`` supplies increasing ``rg``/``zg`` coordinates, an
+    ``inside_limiter`` mask, and the machine major radius ``r0``. Inputs and
+    outputs use raw SI: total poloidal flux [Wb], plasma current [A], toroidal
+    field [T], distances [m], and profile-column scales [A m-2].
+    """
+    expected_coefficients = n_pressure + n_diamagnetic
+    coefficients = np.asarray(profile_coefficients, dtype=np.float64)
+    scales = np.asarray(coefficient_scale, dtype=np.float64)
+    if coefficients.shape != (expected_coefficients,):
+        raise ValueError(
+            "profile_coefficients must have shape "
+            f"({expected_coefficients},), got {coefficients.shape}"
+        )
+    if scales.shape != (expected_coefficients,):
+        raise ValueError(
+            f"coefficient_scale must have shape ({expected_coefficients},), "
+            f"got {scales.shape}"
+        )
+    if nonnegative and max(n_pressure, n_diamagnetic) > len(NONNEGATIVE_EXPONENTS):
+        raise ValueError(
+            "the nonnegative ladder supports at most "
+            f"{len(NONNEGATIVE_EXPONENTS)} terms per profile family"
+        )
+    if n_radial_cells < 2:
+        raise ValueError("n_radial_cells must be at least 2")
+    if n_surface_bins < 2:
+        raise ValueError("n_surface_bins must be at least 2")
+
+    assembled = flux_surface_geometry_jax(
+        jnp.asarray(np.asarray(psi2d, dtype=np.float64)),
+        jnp.asarray(np.asarray(grid.rg, dtype=np.float64)),
+        jnp.asarray(np.asarray(grid.zg, dtype=np.float64)),
+        jnp.asarray(np.asarray(grid.inside_limiter, dtype=bool)),
+        axis_psi=jnp.asarray(float(axis_psi)),
+        boundary_psi=jnp.asarray(float(boundary_psi)),
+        profile_coefficients=jnp.asarray(coefficients),
+        coefficient_scale=jnp.asarray(scales),
+        ip_amperes=jnp.asarray(float(ip_amperes)),
+        major_radius=jnp.asarray(float(grid.r0)),
+        boundary_toroidal_field=jnp.asarray(float(boundary_toroidal_field)),
+        n_pressure=int(n_pressure),
+        n_diamagnetic=int(n_diamagnetic),
+        n_radial_cells=int(n_radial_cells),
+        n_surface_bins=int(n_surface_bins),
+        psi_n_min=jnp.asarray(float(psi_n_min)),
+        psi_n_max=jnp.asarray(float(psi_n_max)),
+        nonnegative=bool(nonnegative),
+        bandwidth_factor=jnp.asarray(float(bandwidth_factor)),
+    )
+    if not bool(assembled["valid"]):
+        return None
+
+    array_fields = {
+        field: np.asarray(assembled[field])
+        for field in (
+            "rho_face",
+            "rho_cell",
+            "psi_face",
+            "psi_n_face",
+            "psi_n_cell",
+            "vpr_face",
+            "vpr_cell",
+            "g2_face",
+            "g3_face",
+            "g3_cell",
+            "f_face",
+            "f_cell",
+            "b2_cell",
+            "inv_r_cell",
+            "q_face",
+        )
+    }
+    scalar_fields = {
+        field: float(assembled[field])
+        for field in (
+            "phi_b",
+            "r0",
+            "ip_amperes",
+            "axis_psi",
+            "boundary_psi",
+            "volume",
+            "flux_sign",
+        )
+    }
+    return FluxSurfaceGeometry(**array_fields, **scalar_fields)
 
 
 def poloidal_field_energy_li(geometry: FluxSurfaceGeometry) -> float:
@@ -676,10 +1230,13 @@ __all__ = [
     "CurrentDiffusion",
     "EtaProfile",
     "FluxSurfaceGeometry",
+    "assemble_flux_surface_geometry_jax",
     "basis_projection_images",
     "diffuse_psi",
     "ejima_coefficient",
     "flux_budget",
+    "flux_surface_geometry",
+    "flux_surface_geometry_jax",
     "poloidal_field_energy_li",
     "predicted_current",
     "profile_shapes",

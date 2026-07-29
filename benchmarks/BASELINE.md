@@ -514,3 +514,98 @@ column and the wrong one for a band that hands it thirteen pairs; served closed,
 the whole column goes 13.6 → 31.5 µs/pair (hexagon) and 52.9 → 72.6
 (wall-clipped). Serving the near band closed would need the near pairs of many
 source columns batched into one call, which the per-column dispatch does not do.
+
+## FrameSpace operator overhead by geometry and batch width
+
+Recorded 2026-07-29 on one `sun_debug` node. Driver:
+`benchmarks/frame_operator_overhead.py`; one source, geometry and clouds built
+outside the timer, one warm call followed by the median of three. This reproduces
+the protocol behind the earlier “frame assembly” number and makes its meaning
+explicit: it times `Source`/`Target`, local/global transforms, xarray allocation,
+solve composition and operator wrapping. It does **not** time path or section
+construction.
+
+| pairs | straight direct µs/pair | straight frame µs/pair | ratio | arc direct µs/pair | arc frame µs/pair | ratio |
+|---:|---:|---:|---:|---:|---:|---:|
+| 1 | 286.10 | 23517.30 | 82.20 | 133034.87 | 153616.83 | 1.15 |
+| 8 | 39.27 | 2884.07 | 73.45 | 16515.51 | 19305.62 | 1.17 |
+| 64 | 6.09 | 372.99 | 61.25 | 2260.10 | 2621.04 | 1.16 |
+| 512 | 1.66 | 55.77 | 33.70 | 527.09 | 580.56 | 1.10 |
+| 4096 | 1.95 | 50.47 | 25.86 | 404.40 | 413.69 | 1.02 |
+
+The remembered “about 10× geometry assembly” was therefore two conflated
+facts. The archived 512-pair prism result was about **31×**, and the current
+matched run is **33.7×**; a warm profile of that solve attributes 23 ms to
+FrameSpace metadata, 12 ms to xarray initialization, 5 ms to operator wrapping,
+4 ms to matrix transforms and about 1 ms to the polygon kernel. But this is a
+cheap straight kernel. On the finite arc, where arithmetic is actually
+expensive, the same frame adds 10% at 512 pairs and 2% at 4096. The fix for
+dense operator construction is a packed array boundary that bypasses xarray,
+not a special geometry cache inside the interactive frame API.
+
+## Finite-arc geometry bands and equivalent-filament placement
+
+Recorded 2026-07-29 on the same node. Drivers:
+`benchmarks/arc_operator_dispatch.py placement` and `wall --targets 4096`.
+The band coordinate is distance to the finite swept section: poloidal contour
+distance inside the angular span, and the hypotenuse of poloidal gap plus the
+nearest-end chord outside it. The far seam is 32 bounding radii for the hexagon
+and skewed trapezium; the elongated acceptance plate widens its own seam to
+52.256 from section aspect.
+
+The far model carries first, second and third area moments about its filament.
+Across all three sections, poloidal and both off-end rays:
+
+| placement | worst relative error beyond its seam |
+|---|---:|
+| area centroid + moments | 4.543e-08 |
+| RMS radius + moments | 4.539e-08 |
+| bare RMS radius | 1.804e-04 |
+
+RMS plus moments is numerically indistinguishable from the centroid while adding
+a non-zero first moment; bare RMS misses by four orders more. The centroid stays.
+On the 4096-target three-dimensional column, 2225 pairs (54.32%) remain exact and
+1871 take the filament: exact-everywhere 2.594 s, banded 1.378 s,
+**1.883× faster**, worst row-scaled deviation 5.805e-08.
+
+The exact thin-plate arc ceases to be a credible far-field reference at extreme
+standoff because its large cancelling terms exhaust the row; the acceptance
+sweep stops at 80 section radii, beyond every selected seam, rather than
+mistaking reference cancellation for filament error.
+
+## GPU geometry dispatch and pair-block sharding
+
+Recorded 2026-07-29 on `98dci4-gpu-0003` (H200 NVL). Drivers:
+`benchmarks/arc_operator_dispatch.py gpu` and
+`benchmarks/gpu_pair_sharding.py`.
+
+The finite-arc packed driver is traceable and agrees with its shortcut host
+driver in NumPy and eager JAX, but XLA is the wrong implementation route for this
+reduction: a **one-pair** graph took 695.94 s to compile and 18.82 ms/pair warm.
+Removing broken-edge residual quadrature for a closed edge chain was immaterial
+(720.74 s and 18.10 ms/pair), so that specialization was rejected. At a
+4096-wide host call the exact arc is 404.4 µs/pair: even warm, the one-pair GPU
+shape loses about 45×. The production optimization is the geometry band above,
+not GPU compilation of the full five-row reduction.
+
+The axisymmetric polygon ring is the opposite case: its fixed quadrature has
+enough uniform work to shard. Geometry is replicated and pair blocks are divided
+evenly with `pmap`.
+
+| ring build, 320×320 | cold wall | warm wall | warm µs/pair |
+|---|---:|---:|---:|
+| 1 H200, 40×40 tiles | 2.302 s | 0.794 s | 7.755 |
+| 4 H200, 40×40 tiles | 4.936 s | 0.518 s | 5.062 |
+| 1 H200, 80×80 tiles (prior baseline) | — | — | 2.830 |
+| 4 H200, 80×80 tiles | 3.425 s | 0.189 s | 1.850 |
+
+Four devices give only **1.53×** steady-state speedup because one H200 already
+fills a mapped tile; they also double cold dispatch at the smaller tile. A
+two-term replicated-geometry fit projects 1.686 µs/pair on eight H200s, only
+1.68× over one. The actual eight-device run was unavailable: two H200s serve the
+long-running DeepSeek process and one serves embeddings, and those unrelated
+services were deliberately left untouched. The operational rule is therefore:
+use one large-tile H200 by default; shard only an already-large ring build whose
+remaining wall justifies the extra devices. Straight prisms, filament arcs,
+rectangular bows and cylinders remain host routes until they acquire a
+fixed-shape packed driver and a measured crossover.

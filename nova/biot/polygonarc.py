@@ -114,7 +114,7 @@ from nova.biot.rangefunction import (
     total,
 )
 
-__all__ = ["polygon_arc_greens"]
+__all__ = ["packed_arc_greens", "polygon_arc_greens"]
 
 # Harmonics the reduced numerators reach, plus one -- the full turn's count, and
 # for the same reason: the arctangent term is the deepest, an antiderivative
@@ -635,6 +635,108 @@ def _folded(limits, rows, quarter):
         )
         for index in range(len(_ROWS))
     )
+
+
+def packed_arc_greens(
+    xp,
+    target_r,
+    target_z,
+    target_phi,
+    edge,
+    weight,
+    norm,
+    start,
+    end,
+    *,
+    nodes: int = _NODES,
+):
+    """Return the finite-arc rows for one fixed-shape list of target/source pairs.
+
+    ``edge`` is ``(E, 4, N)`` and ``weight`` ``(E, N)`` after selecting ``N``
+    pairs from :func:`nova.biot.polygon.pad_batch`; all other inputs are length
+    ``N``.  The arithmetic is deliberately independent of which edges are live:
+    every padded edge and every possible broken-chain residual is evaluated, then
+    multiplied by its numeric weight.  That makes the same driver executable by
+    NumPy and traceable by JAX without changing the finite-arc reduction.
+
+    The host driver below skips zero-weight edges, shares adjacent corners, and
+    omits residual quadratures on a closed edge chain.  Those are valuable scalar
+    shortcuts but depend on geometry values.  This packed form exchanges them for
+    one static graph that can be mapped over a GPU tile.
+    """
+    radius = xp.abs(xp.asarray(target_r))
+    z = xp.asarray(target_z) + xp.zeros_like(radius)
+    phi = xp.asarray(target_phi) + xp.zeros_like(radius)
+    limits = arc_limits(phi, start, end, xp=xp)
+    rows = [xp.zeros_like(radius) for _ in _ROWS]
+    live = xp.asarray(weight != 0.0, dtype=radius.dtype)
+    chain = live - xp.roll(live, 1, axis=0)
+    sides = edge.shape[0]
+
+    def quarter_rows(values):
+        return (None, values[0], values[1], None, values[2])
+
+    def corner_parts(corner_r, corner_z):
+        arc = tuple(
+            _Vertex(
+                radius,
+                z,
+                (corner_r, corner_z),
+                (limit.amplitude, limit.sine, limit.cosine),
+                nodes,
+                residual=True,
+                xp=xp,
+            )
+            for limit in limits
+        )
+        ring = _RingVertex(
+            radius,
+            z,
+            corner_r,
+            corner_z,
+            nodes,
+            residual=True,
+            xp=xp,
+        )
+        return arc, ring
+
+    def residual(parts):
+        arc, ring = parts
+        return _folded(
+            limits,
+            [vertex.arsinh_terms() for vertex in arc],
+            quarter_rows(ring.arsinh_terms()),
+        )
+
+    for index in range(sides):
+        ra, za, rb, zb = edge[index]
+        lower = corner_parts(ra, za)
+        upper = corner_parts(rb, zb)
+        part = _Edge(radius, z, edge[index], nodes, xp=xp)
+        high = _folded(
+            limits,
+            [part.terms(vertex) for vertex in upper[0]],
+            quarter_rows(_RingEdge.terms(part, upper[1])),
+        )
+        low = _folded(
+            limits,
+            [part.terms(vertex) for vertex in lower[0]],
+            quarter_rows(_RingEdge.terms(part, lower[1])),
+        )
+        edge_weight = weight[index]
+        lower_residual = residual(lower)
+        upper_residual = residual(upper)
+        lower_chain = live[index] * chain[index]
+        upper_chain = live[index] * chain[(index + 1) % sides]
+        for row_index in range(len(rows)):
+            rows[row_index] = (
+                rows[row_index]
+                + edge_weight * (low[row_index] - high[row_index])
+                + lower_chain * lower_residual[row_index]
+                + upper_chain * upper_residual[row_index]
+            )
+    factor = norm / (4.0 * np.pi)
+    return tuple(factor * row for row in rows)
 
 
 def polygon_arc_greens(

@@ -35,6 +35,9 @@ the shapes are padded, the trace is compiled once for a whole build; the two
 backends are pinned against each other in float64 by
 ``tests/test_biottiledbackend.py``.
 
+Finite arcs use the same pair-block registry through
+:func:`nova.biot.polygonarc.packed_arc_greens`.
+
 *The compile.* Once per build is not once, and for the closed-form kernel the
 difference decides the route: its executable costs a hundred seconds to produce
 against a second and a half to run a tile with, so a caller that builds the same
@@ -62,8 +65,10 @@ import zarr
 
 from nova.biot.polygon import _BLOCK, _phi_rule, pad_batch
 from nova.biot.polygonanalytic import packed_analytic_greens
+from nova.biot.polygonarc import packed_arc_greens
 
 COMPONENTS = ("Psi", "Br", "Bz")
+ARC_COMPONENTS = ("Ar", "Aphi", "Br", "Bphi", "Bz")
 
 # What a tile can be evaluated WITH: the fixed-node phi rule the operator is
 # validated against, or the closed-form reduction.  Only the traced backend carries
@@ -232,6 +237,24 @@ def _pair_blocks(n_target: int, n_source: int, block: int) -> tuple:
     return rows.reshape(-1, block), columns.reshape(-1, block)
 
 
+def _device_blocks(plan: TilePlan, devices: int) -> tuple[np.ndarray, np.ndarray]:
+    """Return pair blocks split evenly across ``devices``, padding with pair zero."""
+    rows, columns = _pair_blocks(plan.target_tile, plan.source_tile, plan.block)
+    remainder = len(rows) % devices
+    if remainder:
+        padding = devices - remainder
+        rows = np.concatenate([rows, np.zeros((padding, plan.block), dtype=rows.dtype)])
+        columns = np.concatenate(
+            [columns, np.zeros((padding, plan.block), dtype=columns.dtype)]
+        )
+    if devices == 1:
+        return rows, columns
+    return (
+        rows.reshape(devices, -1, plan.block),
+        columns.reshape(devices, -1, plan.block),
+    )
+
+
 def _traced_psi_gradient(jnp, r, z, edge, weight, cosp, sinp, sin2p, w_cos, norm):
     """Return ``(psi, dpsi_dr, dpsi_dz)`` per ampere, traced instead of executed.
 
@@ -314,10 +337,10 @@ def _traced_psi_gradient(jnp, r, z, edge, weight, cosp, sinp, sin2p, w_cos, norm
 
 
 def _fill_tile(plan: TilePlan, target_r, target_z, edge, weight, norm):
-    """Return the tile's geometry grown to the plan's full tile shape.
+    """Return the tile's geometry grown to the configured full tile shape.
 
     A tile at the edge of the matrix holds fewer targets or sources than the
-    plan's tile. Growing it back -- by repeating the tile's first target and
+    configured tile. Growing it back -- by repeating the tile's first target and
     first section, whose duplicated results are discarded -- is what makes EVERY
     tile of a build one shape, and therefore one compilation. The repeated
     geometry is real geometry, so the pad cannot produce a non-finite value that
@@ -326,7 +349,7 @@ def _fill_tile(plan: TilePlan, target_r, target_z, edge, weight, norm):
     n_target, n_source = target_r.size, norm.size
     if n_target > plan.target_tile or n_source > plan.source_tile:
         raise ValueError(
-            f"tile ({n_target}, {n_source}) exceeds the plan's "
+            f"tile ({n_target}, {n_source}) exceeds the configured shape "
             f"({plan.target_tile}, {plan.source_tile})"
         )
     rows = np.zeros(plan.target_tile, dtype=np.intp)
@@ -339,6 +362,40 @@ def _fill_tile(plan: TilePlan, target_r, target_z, edge, weight, norm):
         np.ascontiguousarray(edge[:, :, columns]),
         np.ascontiguousarray(weight[:, columns]),
         np.ascontiguousarray(norm[columns]),
+    )
+
+
+def _fill_arc_tile(
+    plan: TilePlan,
+    target_r,
+    target_z,
+    target_phi,
+    edge,
+    weight,
+    norm,
+    start,
+    end,
+):
+    """Return one finite-arc tile grown to the fixed target/source shape."""
+    n_target, n_source = np.size(target_r), np.size(norm)
+    if n_target > plan.target_tile or n_source > plan.source_tile:
+        raise ValueError(
+            f"tile ({n_target}, {n_source}) exceeds the configured shape "
+            f"({plan.target_tile}, {plan.source_tile})"
+        )
+    rows = np.zeros(plan.target_tile, dtype=np.intp)
+    rows[:n_target] = np.arange(n_target)
+    columns = np.zeros(plan.source_tile, dtype=np.intp)
+    columns[:n_source] = np.arange(n_source)
+    return (
+        np.ascontiguousarray(target_r, dtype=np.float64)[rows],
+        np.ascontiguousarray(target_z, dtype=np.float64)[rows],
+        np.ascontiguousarray(target_phi, dtype=np.float64)[rows],
+        np.ascontiguousarray(edge[:, :, columns]),
+        np.ascontiguousarray(weight[:, columns]),
+        np.ascontiguousarray(norm[columns]),
+        np.ascontiguousarray(start, dtype=np.float64)[columns],
+        np.ascontiguousarray(end, dtype=np.float64)[columns],
     )
 
 
@@ -355,27 +412,47 @@ class TileEvaluator:
     thing rather than silently getting a build it did not ask for.
     """
 
-    def __init__(self, kernel, plan: TilePlan, *, batched: bool, name: str):
+    def __init__(
+        self,
+        kernel,
+        plan: TilePlan,
+        *,
+        batched: bool,
+        name: str,
+        geometry: str = "ring",
+        components: tuple[str, ...] = COMPONENTS,
+        devices: int = 1,
+    ):
         self._kernel = kernel
         self.plan = plan
         self.batched = batched
         self.kernel = name
+        self.geometry = geometry
+        self.components = components
+        self.devices = devices
 
     @property
     def compile_count(self) -> int:
         """Return the number of distinct shapes the kernel has been compiled for."""
         return self._kernel._cache_size()
 
-    def __call__(self, target_r, target_z, edge, weight, norm):
-        """Return the ``(psi, Br, Bz)`` sub-matrices of one tile, shape (T, S)."""
+    def __call__(self, *geometry):
+        """Return the component sub-matrices of one tile, each shape ``(T, S)``."""
         plan = self.plan
-        n_target, n_source = np.size(target_r), np.size(norm)
-        filled = _fill_tile(plan, target_r, target_z, edge, weight, norm)
-        flat = np.asarray(self._kernel(*filled))
-        flat = flat.transpose(1, 0, 2).reshape(3, -1)[
+        n_target = np.size(geometry[0])
+        if self.geometry == "ring":
+            n_source = np.size(geometry[4])
+            filled = _fill_tile(plan, *geometry)
+        else:
+            n_source = np.size(geometry[5])
+            filled = _fill_arc_tile(plan, *geometry)
+        result = np.asarray(self._kernel(*filled))
+        if self.devices > 1:
+            result = result.reshape(-1, len(self.components), plan.block)
+        flat = result.transpose(1, 0, 2).reshape(len(self.components), -1)[
             :, : plan.target_tile * plan.source_tile
         ]
-        tile = flat.reshape(3, plan.target_tile, plan.source_tile)
+        tile = flat.reshape(len(self.components), plan.target_tile, plan.source_tile)
         return tuple(tile[:, :n_target, :n_source])
 
 
@@ -432,11 +509,17 @@ def compilation_cache(
 
 
 def tile_evaluator(
-    plan: TilePlan, *, batched: bool = False, kernel: str = "quadrature"
+    plan: TilePlan,
+    *,
+    batched: bool = False,
+    kernel: str = "quadrature",
+    geometry: str = "ring",
+    devices: int = 1,
 ) -> TileEvaluator:
     """Return a compiled evaluator for the tiles of one plan.
 
-    The evaluator is MEMOISED on ``(plan, batched, kernel)``: asking twice for the
+    The evaluator is MEMOISED on its plan, mapping, kernel, geometry family and
+    device count: asking twice for the
     same tile shape returns the same object, and therefore the same executable.
     That is what turns the compile into a per-PROCESS cost rather than a per-build
     one, which is the difference between a usable and an unusable closed-form
@@ -470,17 +553,32 @@ def tile_evaluator(
     the tile (131 MB at 400 pairs, 864 MB at 1600, 1.4 GB at 6400) because the
     compiler reuses buffers the model knows nothing about. Size a batched tile
     from a measurement -- ``benchmarks/tiled_backend.py`` reports the device
-    high-water mark per run -- not from the plan's budget.
+    high-water mark per run -- not from the configured byte budget.
 
     The pair list of a full tile is a constant of the plan, so it is closed over
     rather than passed: the compiled kernel is a function of geometry alone.
     float64 is switched on for the process -- the operator is validated at
     machine precision, and a float32 build would be an accuracy regression
     disguised as a speedup.
+
+    ``geometry="arc"`` selects the five-row finite-arc driver.  Its only kernel is
+    ``"closed"``. ``devices`` divides pair blocks evenly across local devices
+    with replicated geometry; multiple devices require ``batched`` evaluation
+    because the shard unit is the mapped block axis.
     """
+    if geometry not in {"ring", "arc"}:
+        raise ValueError(f"unknown geometry {geometry!r}")
     if kernel not in KERNELS:
         raise ValueError(f"unknown kernel {kernel!r}, not one of {KERNELS}")
-    return _warm_evaluator(plan, batched, kernel)
+    if geometry == "arc" and kernel != "closed":
+        raise ValueError("finite arcs have only the closed packed kernel")
+    if devices < 1:
+        raise ValueError("devices must be positive")
+    if devices > 1 and not batched:
+        raise ValueError("multiple devices require batched block evaluation")
+    if geometry == "arc":
+        return _warm_arc_evaluator(plan, batched, kernel, devices)
+    return _warm_evaluator(plan, batched, kernel, devices)
 
 
 def forget_evaluators() -> None:
@@ -491,10 +589,13 @@ def forget_evaluators() -> None:
     escape hatch when a long-lived process would rather have the device memory.
     """
     _warm_evaluator.cache_clear()
+    _warm_arc_evaluator.cache_clear()
 
 
 @functools.lru_cache(maxsize=_WARM_EVALUATORS)
-def _warm_evaluator(plan: TilePlan, batched: bool, kernel: str) -> TileEvaluator:
+def _warm_evaluator(
+    plan: TilePlan, batched: bool, kernel: str, devices: int
+) -> TileEvaluator:
     """Trace and compile one tile kernel; see :func:`tile_evaluator`."""
     import jax
     import jax.numpy as jnp
@@ -506,7 +607,7 @@ def _warm_evaluator(plan: TilePlan, batched: bool, kernel: str) -> TileEvaluator
     cosp, sinp = np.cos(phi), np.sin(phi)
     sin2p, w_cos = np.sin(2.0 * phi), wts * cosp
     nodes = tuple(jnp.asarray(array) for array in (cosp, sinp, sin2p, w_cos))
-    rows, columns = _pair_blocks(plan.target_tile, plan.source_tile, plan.block)
+    rows, columns = _device_blocks(plan, devices)
     index = (jnp.asarray(rows), jnp.asarray(columns))
     two_pi = 2.0 * np.pi
 
@@ -546,20 +647,160 @@ def _warm_evaluator(plan: TilePlan, batched: bool, kernel: str) -> TileEvaluator
 
     evaluate_block = one_block if kernel == "quadrature" else one_closed_block
 
-    def over_blocks(target_r, target_z, edge, weight, norm):
+    def over_blocks(target_r, target_z, edge, weight, norm, rows, columns):
         """Evaluate every block of the tile, mapped or walked."""
         geometry = (target_r, target_z, edge, weight, norm)
         if batched:
             return jax.vmap(evaluate_block, in_axes=(None,) * 5 + (0, 0))(
-                *geometry, *index
+                *geometry, rows, columns
             )
 
         def step(carry, block):
             return carry, evaluate_block(*geometry, *block)
 
-        return jax.lax.scan(step, None, index)[1]
+        return jax.lax.scan(step, None, (rows, columns))[1]
 
-    return TileEvaluator(jax.jit(over_blocks), plan, batched=batched, name=kernel)
+    if devices == 1:
+        compiled = jax.jit(lambda *geometry: over_blocks(*geometry, *index))
+    else:
+        available = jax.local_devices()
+        if devices > len(available):
+            raise ValueError(
+                f"asked for {devices} devices, only {len(available)} are visible"
+            )
+        compiled = jax.pmap(
+            over_blocks,
+            in_axes=(None,) * 5 + (0, 0),
+            devices=available[:devices],
+        )
+        mapped_kernel = compiled
+        seen = [False]
+
+        def mapped(*geometry):
+            result = mapped_kernel(*geometry, *index)
+            seen[0] = True
+            return result
+
+        mapped._cache_size = lambda: int(seen[0])
+        compiled = mapped
+    return TileEvaluator(
+        compiled,
+        plan,
+        batched=batched,
+        name=kernel,
+        devices=devices,
+    )
+
+
+@functools.lru_cache(maxsize=_WARM_EVALUATORS)
+def _warm_arc_evaluator(
+    plan: TilePlan,
+    batched: bool,
+    kernel: str,
+    devices: int,
+) -> TileEvaluator:
+    """Trace and compile the finite-arc packed kernel for one tile shape."""
+    import jax
+    import jax.numpy as jnp
+
+    jax.config.update("jax_enable_x64", True)
+    compilation_cache()
+
+    rows, columns = _device_blocks(plan, devices)
+    index = (jnp.asarray(rows), jnp.asarray(columns))
+
+    def one_block(
+        target_r,
+        target_z,
+        target_phi,
+        edge,
+        weight,
+        norm,
+        start,
+        end,
+        rows,
+        columns,
+    ):
+        """Return the five finite-arc components of one padded pair block."""
+        return jnp.stack(
+            packed_arc_greens(
+                jnp,
+                jnp.take(target_r, rows),
+                jnp.take(target_z, rows),
+                jnp.take(target_phi, rows),
+                jnp.take(edge, columns, axis=2),
+                jnp.take(weight, columns, axis=1),
+                jnp.take(norm, columns),
+                jnp.take(start, columns),
+                jnp.take(end, columns),
+            )
+        )
+
+    def over_blocks(
+        target_r,
+        target_z,
+        target_phi,
+        edge,
+        weight,
+        norm,
+        start,
+        end,
+        rows,
+        columns,
+    ):
+        """Evaluate every finite-arc block of the tile, mapped or walked."""
+        geometry = (
+            target_r,
+            target_z,
+            target_phi,
+            edge,
+            weight,
+            norm,
+            start,
+            end,
+        )
+        if batched:
+            return jax.vmap(one_block, in_axes=(None,) * 8 + (0, 0))(
+                *geometry, rows, columns
+            )
+
+        def step(carry, block):
+            return carry, one_block(*geometry, *block)
+
+        return jax.lax.scan(step, None, (rows, columns))[1]
+
+    if devices == 1:
+        compiled = jax.jit(lambda *geometry: over_blocks(*geometry, *index))
+    else:
+        available = jax.local_devices()
+        if devices > len(available):
+            raise ValueError(
+                f"asked for {devices} devices, only {len(available)} are visible"
+            )
+        compiled = jax.pmap(
+            over_blocks,
+            in_axes=(None,) * 8 + (0, 0),
+            devices=available[:devices],
+        )
+        mapped_kernel = compiled
+        seen = [False]
+
+        def mapped(*geometry):
+            result = mapped_kernel(*geometry, *index)
+            seen[0] = True
+            return result
+
+        mapped._cache_size = lambda: int(seen[0])
+        compiled = mapped
+    return TileEvaluator(
+        compiled,
+        plan,
+        batched=batched,
+        name=kernel,
+        geometry="arc",
+        components=ARC_COMPONENTS,
+        devices=devices,
+    )
 
 
 _CONTEXT: dict = {}
@@ -609,6 +850,7 @@ def assemble(
     batched: bool = False,
     kernel: str = "quadrature",
     evaluator: TileEvaluator | None = None,
+    devices: int = 1,
 ) -> TilePlan:
     """Build the coupling operator tile by tile, streaming it into a zarr store.
 
@@ -639,8 +881,14 @@ def assemble(
     if evaluator is not None:
         if backend != "jax":
             raise ValueError(f"the {backend!r} backend takes no compiled evaluator")
-        asked = (plan, kernel, batched)
-        built = (evaluator.plan, evaluator.kernel, evaluator.batched)
+        asked = (plan, kernel, batched, "ring", devices)
+        built = (
+            evaluator.plan,
+            evaluator.kernel,
+            evaluator.batched,
+            evaluator.geometry,
+            evaluator.devices,
+        )
         if asked != built:
             raise ValueError(f"evaluator built for {built}, not the requested {asked}")
     target_r = np.ascontiguousarray(target_r, dtype=np.float64)
@@ -662,7 +910,9 @@ def assemble(
             raise ValueError("the jax backend evaluates tiles in one process")
         evaluate = evaluator
         if evaluate is None:
-            evaluate = tile_evaluator(plan, batched=batched, kernel=kernel)
+            evaluate = tile_evaluator(
+                plan, batched=batched, kernel=kernel, devices=devices
+            )
         for rows, columns in bounds:
             tile = evaluate(
                 target_r[rows],
@@ -692,6 +942,84 @@ def assemble(
     return plan
 
 
+def assemble_arcs(
+    path,
+    target_r: np.ndarray,
+    target_z: np.ndarray,
+    target_phi: np.ndarray,
+    sections: list[np.ndarray],
+    start: np.ndarray,
+    end: np.ndarray,
+    *,
+    plan: TilePlan,
+    batched: bool = True,
+    evaluator: TileEvaluator | None = None,
+    devices: int = 1,
+) -> TilePlan:
+    """Build a finite-arc operator with the packed closed kernel.
+
+    Targets are cylindrical ``(r, z, phi)`` arrays and each section has one
+    ``start``/``end`` azimuth.  The result is streamed into five zarr arrays,
+    chunked to ``plan``.  Blocks are mapped within each accelerator; with
+    ``devices > 1`` they are divided evenly across visible devices by ``pmap``.
+    Geometry is replicated because it is small relative to the pair-space
+    temporaries and output that are sharded.
+    """
+    target_r = np.ascontiguousarray(target_r, dtype=np.float64)
+    target_z = np.ascontiguousarray(target_z, dtype=np.float64)
+    target_phi = np.ascontiguousarray(target_phi, dtype=np.float64)
+    start = np.ascontiguousarray(start, dtype=np.float64)
+    end = np.ascontiguousarray(end, dtype=np.float64)
+    if not (target_r.shape == target_z.shape == target_phi.shape):
+        raise ValueError("target r, z and phi arrays must have the same shape")
+    if not (len(sections) == start.size == end.size):
+        raise ValueError("each finite-arc section needs one start and end")
+    edge, weight, norm = pad_batch(sections)
+    shape = (target_r.size, len(sections))
+
+    if evaluator is None:
+        evaluator = tile_evaluator(
+            plan,
+            batched=batched,
+            kernel="closed",
+            geometry="arc",
+            devices=devices,
+        )
+    asked = (plan, "closed", batched, "arc", devices)
+    built = (
+        evaluator.plan,
+        evaluator.kernel,
+        evaluator.batched,
+        evaluator.geometry,
+        evaluator.devices,
+    )
+    if asked != built:
+        raise ValueError(f"evaluator built for {built}, not the requested {asked}")
+
+    store = zarr.open_group(str(path), mode="w")
+    for name in ARC_COMPONENTS:
+        store.create_array(
+            name,
+            shape=shape,
+            chunks=(plan.target_tile, plan.source_tile),
+            dtype="float64",
+        )
+    for rows, columns in plan.tiles(*shape):
+        tile = evaluator(
+            target_r[rows],
+            target_z[rows],
+            target_phi[rows],
+            edge[:, :, columns],
+            weight[:, columns],
+            norm[columns],
+            start[columns],
+            end[columns],
+        )
+        for name, component in zip(ARC_COMPONENTS, tile):
+            store[name][rows, columns] = component
+    return plan
+
+
 def budget_from_environment(default: int = 512 << 20) -> int:
     """Return a per-worker byte budget, divided across the visible cores.
 
@@ -706,10 +1034,12 @@ def budget_from_environment(default: int = 512 << 20) -> int:
 
 
 __all__ = [
+    "ARC_COMPONENTS",
     "KERNELS",
     "TileEvaluator",
     "TilePlan",
     "assemble",
+    "assemble_arcs",
     "budget_from_environment",
     "compilation_cache",
     "forget_evaluators",

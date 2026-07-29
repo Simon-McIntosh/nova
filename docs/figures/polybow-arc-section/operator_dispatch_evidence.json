@@ -1,0 +1,84 @@
+{
+  "recorded": "2026-07-29",
+  "hosts": {
+    "cpu": "sun_debug, 8 CPUs",
+    "gpu": "98dci4-gpu-0003, NVIDIA H200 NVL"
+  },
+  "frame_overhead": {
+    "profile_512_pairs": {
+      "solve_seconds": 0.060,
+      "source_target_metadata_seconds": 0.023,
+      "xarray_initialization_seconds": 0.012,
+      "matrix_compute_seconds": 0.004,
+      "operator_wrapping_seconds": 0.005,
+      "bare_kernel_seconds": 0.001
+    },
+    "straight": [
+      {"pairs": 1, "frame_us_per_pair": 23517.30, "direct_us_per_pair": 286.10, "ratio": 82.20},
+      {"pairs": 8, "frame_us_per_pair": 2884.07, "direct_us_per_pair": 39.27, "ratio": 73.45},
+      {"pairs": 64, "frame_us_per_pair": 372.99, "direct_us_per_pair": 6.09, "ratio": 61.25},
+      {"pairs": 512, "frame_us_per_pair": 55.77, "direct_us_per_pair": 1.66, "ratio": 33.70},
+      {"pairs": 4096, "frame_us_per_pair": 50.47, "direct_us_per_pair": 1.95, "ratio": 25.86}
+    ],
+    "finite_arc": [
+      {"pairs": 1, "frame_us_per_pair": 153616.83, "direct_us_per_pair": 133034.87, "ratio": 1.15},
+      {"pairs": 8, "frame_us_per_pair": 19305.62, "direct_us_per_pair": 16515.51, "ratio": 1.17},
+      {"pairs": 64, "frame_us_per_pair": 2621.04, "direct_us_per_pair": 2260.10, "ratio": 1.16},
+      {"pairs": 512, "frame_us_per_pair": 580.56, "direct_us_per_pair": 527.09, "ratio": 1.10},
+      {"pairs": 4096, "frame_us_per_pair": 413.69, "direct_us_per_pair": 404.40, "ratio": 1.02}
+    ]
+  },
+  "arc_banding": {
+    "far_limits_in_section_radii": {
+      "hexagon": 32.0,
+      "trapezium": 32.0,
+      "thin_plate": 52.25578117937449
+    },
+    "placement_worst_beyond_seam": {
+      "centroid_moment": 4.542547978218175e-08,
+      "rms_moment": 4.539278217784742e-08,
+      "rms_bare": 1.8041552221834497e-04
+    },
+    "wall_4096_targets": {
+      "exact_pairs": 2225,
+      "filament_pairs": 1871,
+      "exact_fraction": 0.543212890625,
+      "exact_seconds": 2.593642552383244,
+      "banded_seconds": 1.377526025287807,
+      "speedup": 1.8828265345051127,
+      "worst_relative": 5.805290347200127e-08
+    }
+  },
+  "gpu_dispatch": {
+    "finite_arc_one_pair": {
+      "cold_seconds": 695.9425225662999,
+      "warm_us_per_pair": 18823.73308762908,
+      "closed_chain_cold_seconds": 720.7384628369473,
+      "closed_chain_warm_us_per_pair": 18099.709879606962,
+      "verdict": "reject accelerator route; static topology specialization is immaterial"
+    },
+    "ring_quadrature_320_by_320": {
+      "one_h200_tile_40": {
+        "cold_seconds": 2.3023054632358253,
+        "warm_seconds": 0.7941002189181745,
+        "warm_us_per_pair": 7.754884950372798
+      },
+      "four_h200_tile_40": {
+        "cold_seconds": 4.936229169368744,
+        "warm_seconds": 0.5183432716876268,
+        "warm_us_per_pair": 5.061946012574481
+      },
+      "one_h200_tile_80_previous_baseline_us_per_pair": 2.83,
+      "four_h200_tile_80": {
+        "cold_seconds": 3.4253579499199986,
+        "warm_seconds": 0.18941995594650507,
+        "warm_us_per_pair": 1.8498042572900886
+      },
+      "projected_eight_h200_tile_80_us_per_pair": 1.686
+    },
+    "eight_h200_actual": {
+      "status": "unavailable",
+      "reason": "three H200s occupied by the long-running deepseek and embedding services; those jobs were left untouched"
+    }
+  }
+}

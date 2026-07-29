@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type" content="archive">
+  <meta name="plan-slug" content="polybow-arc-section-pin-recalibration-landed">
+  <meta name="plan-title" content="Two failing accuracy pins recalibrated on their mechanisms — landed">
+  <meta name="plan-status" content="historical">
+  <title>Pin recalibration — landed | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h1>The two failing accuracy pins, recalibrated on evidence — neither needed a source change</h1>
+    <p><em>Landed 2026-07-29 · develop merges <code>0745dfa1</code> (pin 1,
+    <code>2d35adaf</code>) and <code>9e76d634</code> (pin 2, <code>205b733b</code>) · parent
+    plan: <a href="/nova/polybow-arc-section.html">polybow-arc-section</a>, post-landing
+    test-pin recalibration · both pins green on the login node (98dci4-srv-1006) and a
+    sun_debug node; no tolerance widened without its mechanism, one gate tightened 10×.</em></p>
+
+    <h2>Quick status</h2>
+    <table>
+      <thead><tr><th>item</th><th>status</th></tr></thead>
+      <tbody>
+        <tr><td>Pin 1 — framed-vs-bare free-form section gate (test_biotpolybow.py)</td><td>✓ cause found, recalibrated, green both hosts</td></tr>
+        <tr><td>Pin 2 — subtracted-route stray pin (test_biotincompleteelliptic.py)</td><td>✓ mechanism found, pin refooted on arithmetic, green both hosts</td></tr>
+        <tr><td>Production code (nova/biot, nova/geometry)</td><td>untouched — both were test-pin questions</td></tr>
+        <tr><td>Fast lane on the merged tip (login node)</td><td>see below</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Pin 1 — the gate never had the headroom its annotation claimed</h2>
+    <p><strong>The <code>1.6e-12</code> annotation never described the committed test.</strong>
+    Run at the very commit that wrote it, the comparison measures 9.46e-12 against the 1e-11
+    gate — 6 % of headroom from birth, not 6×; the annotations were measured on an earlier
+    in-session draft and never refreshed. What later crossed the gate is the Carlson-gap
+    commit (<code>0939d3e5</code>): across that step the corner set, the area column and the
+    vs-ideal value are bit-identical, so the mover is the <em>kernel</em> — both sides of the
+    framed-vs-bare comparison at once, from different arguments (A<sub>φ</sub> +20 %,
+    B<sub>r</sub> −8 %, three rows unmoved to five figures). The ring-diagonal and prism
+    merges are innocent; the poly column and the frame route did not move; the two sides
+    integrate the same 8 corners bit-for-bit.</p>
+    <p><strong>The gate is a property of the corner set's round-off floor.</strong> The
+    reduction differences neighbouring corners' contributions, so cancellation grows with
+    corner count and obliqueness — kernel residue measured by an analytically invariant
+    translation: rectangle 1.9e-13, hexagon 9.7e-13, this 8-corner footprint (with a
+    6.3e-6-gap sliver pair worth ~4× of it) 2.4e-12, a 64-gon disc 8.3e-12. The framed
+    comparison samples that floor twice plus the rotation round trip. Recalibrated:
+    worst_overall 1e-11 → <strong>5e-11</strong> (measured 1.13e-11, ~4.4× headroom, the
+    module's convention), worst_by_row left at 1e-10, and the vs-ideal gate
+    <strong>tightened 1e-04 → 1e-05</strong> (measured 1.7e-06 — the old 4.7e-05 annotation
+    was the footprint's excess <em>area</em>, which divides out of a per-ampere comparison).
+    A <code>len(corners) == 8</code> assert keeps the floor's basis a checked fact.
+    A warning recorded for future gates: a 1e-11 framed-vs-bare gate is a 4–6-corner number —
+    a disc comparison would land near 3–6e-11 and should never inherit it.</p>
+
+    <h2>Pin 2 — the host sensitivity was the XLA backend, and no input can rebuild the stray</h2>
+    <p><strong>Not libm, not an ulp.</strong> The login node compiles JAX through the GPU
+    backend; a sun_debug node fails <code>cuInit</code> and falls back to LLVM CPU. Same
+    kernel, same arguments: the subtracted route holds 1.16e-15 on the GPU backend (the
+    authored lower bound had no premise there — hence the failure) and strays 1.201e-09 on
+    the CPU backend. Every transcendental measured correctly rounded on both;
+    host numpy bit-identical across nodes. The mechanism: the degenerate Carlson form is
+    second order in its root, and the <code>root − difference</code> under the logarithm
+    cancels the log's first-order term — so even a root overstated by eight decades leaves
+    the value at round-off <em>provided root and difference stay mutually consistent</em>.
+    Carried, they are; subtracted, they are two separately-rounded derivations with no
+    correct digits, and a compiler free to recompute one side lets the eight decades
+    through. Observing the loss destroys it — returning the intermediate drops the stray
+    1.2e-09 → 1.3e-15 (HLO shows sqrt rewritten into a multiply). A host-independent
+    constructed stray in the assembled value therefore does not exist.</p>
+    <p><strong>The pin moved onto the gap arithmetic, provable from round-to-nearest
+    alone:</strong> the gaps are products the caller holds exactly; subtracting them
+    quantises by ulp(cos²φ) — supplied 4.6e-17 vs subtracted 1.1e-03 at pole 1e-14, and
+    exactly zero at a denormal partner where the product is non-zero. The gaps are spied off
+    <code>incomplete_pole</code> as it forms them, so the pin sees the wiring. The assembled
+    comparison stays, bounded from above only, with the backend span recorded at the
+    assertion. <strong>Revert-guard demonstrated both ways:</strong> withdrawing the gap
+    supply and re-forming the gaps by subtraction each trip the new assertions (source
+    restored byte-identically; the landed commit touches only the test file).</p>
+
+    <h2>Results</h2>
+    <table>
+      <thead><tr><th>check</th><th>login node</th><th>sun_debug node</th></tr></thead>
+      <tbody>
+        <tr><td>tests/test_biotpolybow.py</td><td>25 passed</td><td>25 passed</td></tr>
+        <tr><td>tests/test_biotincompleteelliptic.py</td><td>731 passed / 15 skipped</td><td>731 passed / 15 skipped</td></tr>
+        <tr><td>test_biotpolygonarc + test_biotpolygonanalytic</td><td>162 passed (unmoved)</td><td>—</td></tr>
+      </tbody>
+    </table>
+
+    <h2>What's next</h2>
+    <p>The refit exposed the real item: on a GPU-less serving node the shipped kernel
+    compiles through exactly the backend that breaks root/difference consistency, and only
+    the one site the carried gaps cover is defended — queued as the codegen-consistency
+    followup in the parent plan, together with the re-triage of the traced-parity item
+    (that test now passes on both hosts, and its recorded 1.2e-09 equals the CPU-backend
+    stray, so its premise predates the carried-gap supply).</p>
+
+  </main>
+</body>
+</html>

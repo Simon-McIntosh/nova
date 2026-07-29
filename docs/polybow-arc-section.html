@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-29">
-<meta name="plan-version" content="10">
+<meta name="plan-version" content="11">
 <meta name="plan-impl" content="0.8">
 </head>
 <body>
@@ -1279,7 +1279,7 @@ Done-when
      element tier&#x27;s new complement-native callers.
   5. Followup written; this followup resolved.</pre>
     </article>
-<article class="r-fu" data-id="f-pbow-11" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-29T01:35:00+00:00" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-pbow-11" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-29T01:35:00+00:00" data-recommends-skill="" data-resolved-at="2026-07-29T10:02:28+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Two accuracy pins fail on the develop tip — recalibrate on evidence, never by widening</h4>
     <div class="r-fu-body"><p>Found while validating an unrelated merge: the fast lane on develop carries two failing measured-accuracy pins. (1) <code>test_biotpolybow.py::test_a_free_form_polygon_section_reaches_the_kernel</code> — the framed element vs bare-kernel gate reads a DETERMINISTIC 1.1330082227975509e-11 (bit-identical on a login node and a sun_debug node) against its 1e-11 gate, where 1.6e-12 was measured at authoring; every row is elevated 3–11e-12 (worst A_phi), suggesting the poly-column corners or the frame route moved slightly rather than one term breaking. (2) <code>test_biotincompleteelliptic.py::test_the_gaps_taken_by_subtraction_are_what_the_carried_ones_repair</code> — HOST-SENSITIVE: fails on login node 98dci4-srv-1006 (the strayed variant evaluates at 1.39e-15, below its 1e-11 lower bound — the naive route no longer strays there) and PASSES on a sun_debug node; the carried-gap repair appears to have healed the naive route on some libm paths.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -1313,6 +1313,50 @@ Done-when
   1. Both tests green on BOTH a login node and a sun_debug node, with the cause
      (not just the recalibration) stated in the commit message.
   2. No tolerance widened without the mechanism that justifies it.</pre>
+    <p class="r-fu-outcome">Both pins recalibrated on their mechanisms, both green on the login node AND a sun_debug node — develop merges 0745dfa1 (2d35adaf) + 9e76d634 (205b733b), test files only, no source change needed. PIN 1: no defect — the authored annotations were stale from birth (the committed test measured 9.46e-12 against its '# measured 1.6e-12' comment, 6% headroom not 6x), and the Carlson-gap commit 0939d3e5 legitimately moved the KERNEL on both sides of the framed-vs-bare comparison to 1.133e-11; the corner set, area and vs-ideal were bit-identical across the step. The gate is a property of the CORNER SET's round-off floor (kernel residue: rect 1.9e-13, hex 9.7e-13, this 8-corner footprint-with-sliver 2.4e-12, 64-gon disc 8.3e-12): recalibrated to 5e-11 with the mechanism at the assertion, worst_by_row LEFT at 1e-10, vs-ideal TIGHTENED 1e-04→1e-05 (the 4.7e-05 annotation was the footprint's excess area, which divides out), and a len(corners)==8 assert keeps the floor's basis checked. PIN 2: the host sensitivity is the XLA BACKEND (login node compiles GPU, sun_debug falls back to LLVM CPU), not libm — all transcendentals measured correctly rounded; the subtracted route has NO recoverable stray input (the degenerate form is second order in its root and root/difference consistency protects the value even with the root wrong by 8 decades — until codegen recomputes one side: materialising the intermediate drops the CPU stray 1.2e-09→1.3e-15). The pin moved onto the GAP ARITHMETIC, provable from round-to-nearest alone (subtracted gap 1.1e-03 at pole 1e-14 vs 4.6e-17 supplied; exactly zero at a denormal partner), spied off incomplete_pole as it forms them; the assembled comparison stays, bounded from above only. Revert-guard demonstrated both ways (supply withdrawn and gaps re-subtracted both trip it). Whole file 731 passed/15 skipped on both hosts. NOTE for the traced-parity item: that test PASSES on both hosts now, and its 1.2e-09 figure equals the CPU-backend subtracted-route stray — re-triage before executing it. Fast lane on the merged tip: see the archive record. Archive: docs/archive/polybow-arc-section-pin-recalibration-landed.html.</p>
+    </article>
+<article class="r-fu" data-id="f-pbow-12" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-29T10:20:00+00:00" data-recommends-skill="/reckon-ship polybow-arc-section" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Pin the descent&#x27;s root/difference consistency against codegen, and re-triage the traced-parity item on the backend evidence</h4>
+    <div class="r-fu-body"><p>The pin refit found the real exposure: on a GPU-less node JAX compiles through the LLVM CPU backend, and XLA's freedom to recompute one side of a root/difference pair breaks a cancellation the arithmetic depends on — the subtracted arrangement of the degenerate Carlson form goes 1.2e-09 wrong there, and <em>materialising the intermediate changes the answer by six decades</em>. The carried gaps defend the one site that was found, but nothing pins that the compiler cannot break the same consistency elsewhere in the descent. Separately, the traced-parity test (the earlier standing item) now PASSES on both hosts and its recorded 1.2e-09 equals the CPU-backend stray — its premise needs re-triage before its investigation is executed as written.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    polybow-arc-section
+Section: codegen consistency of the elliptic descent
+Tier:    opus
+
+Context
+  The carried-gap pin refit (develop 9e76d634; archive polybow-arc-section-pin-
+  recalibration-landed.html) established: (1) the subtracted arrangement of the
+  degenerate R_C form loses its root/difference consistency ONLY under XLA CPU
+  codegen (1.2e-09; host numpy and the GPU backend hold round-off), and observing
+  the intermediate destroys the loss — a codegen decision, HLO shows sqrt rewritten
+  into a multiply; (2) the shipped kernel on a GPU-less serving node compiles
+  through exactly that backend, so this is a real exposure, defended today only at
+  the one site the carried gaps cover; (3) the traced-parity test
+  (test_the_third_kind_traces_and_agrees_to_a_few_ulp) passes on BOTH backends on
+  the develop tip and its recorded failure figure (1.2e-09 at pole=1e-12,
+  complement=1e-300 vs 1e-14 gate) equals the CPU-backend subtracted-route stray.
+
+Do
+  1. Sweep the descent (symmetricelliptic.py, incompleteelliptic.py,
+     completeelliptic.py) for OTHER value-critical cancellations where a
+     root/difference (or sum/difference) pair must stay mutually consistent, and
+     measure each on the LLVM CPU backend (JAX_PLATFORMS=cpu) against host numpy
+     across the argument extremes the element tier reaches.
+  2. Where a site is exposed, apply the carried-gap treatment (form the difference
+     once, thread it through) rather than a tolerance; pin each treated site the
+     way the refit pinned the gaps — on arithmetic, not on a backend.
+  3. Re-triage the traced-parity item: reproduce its recorded failure if possible
+     (which jax version/backend produced it?), and either restate that test&#x27;s
+     premise on the backend evidence or confirm it as fixed by the carried-gap
+     supply and record which commit healed it.
+  4. Never widen a parity gate; state any measured bound with its mechanism.
+
+Done-when
+  1. The descent swept, every exposed consistency site treated and pinned, measured
+     on both backends and on host numpy.
+  2. The traced-parity item re-triaged with its premise restated or its healing
+     attributed.
+  3. Tests green on a login node and a sun_debug node.</pre>
     </article>
 </section>
 

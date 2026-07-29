@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="archive">
+  <meta name="plan-slug" content="nova-3d-native-coupling-landed">
+  <meta name="plan-title" content="Three-dimensional coupling closeout — landed">
+  <meta name="plan-status" content="historical">
+  <meta name="plan-modified" content="2026-07-29">
+  <title>Three-dimensional coupling closeout — landed | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Three-dimensional coupling closeout — landed</h1>
+    <p><strong>2026-07-29.</strong> The existing Cartesian Biot kernels now assemble into
+    arbitrary closed-loop flux couplings, batched rigid perturbations, and toroidal averages
+    suitable for an axisymmetric consumer.</p>
+
+    <section class="card">
+      <h2>Assembly path</h2>
+      <svg viewBox="0 0 820 230" role="img"
+           aria-label="Three dimensional source kernels feed loop integration and toroidal averaging"
+           style="max-width:100%;height:auto;font-family:sans-serif;font-size:14px">
+        <defs>
+          <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4"
+                  orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#667"/></marker>
+        </defs>
+        <rect x="30" y="75" width="190" height="75" rx="8" fill="#e8f0fe" stroke="#4c8bf5"/>
+        <text x="125" y="103" text-anchor="middle">arc / bow / line / beam</text>
+        <text x="125" y="127" text-anchor="middle">Cartesian A and B</text>
+        <line x1="220" y1="112" x2="320" y2="112" stroke="#667" stroke-width="2"
+              marker-end="url(#arrow)"/>
+        <rect x="330" y="25" width="205" height="75" rx="8" fill="#e9f8ee" stroke="#2e9d55"/>
+        <text x="432" y="53" text-anchor="middle">closed-loop quadrature</text>
+        <text x="432" y="77" text-anchor="middle">M = ∮ A·dl</text>
+        <rect x="330" y="130" width="205" height="75" rx="8" fill="#fff4e5" stroke="#d9822b"/>
+        <text x="432" y="158" text-anchor="middle">toroidal sampling</text>
+        <text x="432" y="182" text-anchor="middle">n = 0 mean + residual</text>
+        <line x1="535" y1="62" x2="635" y2="92" stroke="#667" stroke-width="2"
+              marker-end="url(#arrow)"/>
+        <line x1="535" y1="168" x2="635" y2="136" stroke="#667" stroke-width="2"
+              marker-end="url(#arrow)"/>
+        <rect x="645" y="75" width="145" height="75" rx="8" fill="#f3eafd" stroke="#8e5bb7"/>
+        <text x="717" y="103" text-anchor="middle">coupling and</text>
+        <text x="717" y="127" text-anchor="middle">operator consumers</text>
+      </svg>
+    </section>
+
+    <section class="card">
+      <h2>Evidence</h2>
+      <table>
+        <thead><tr><th>Contract</th><th>Measured result</th></tr></thead>
+        <tbody>
+          <tr><td>Coaxial circular mutual inductance</td><td>Maxwell oracle within 2e-13 relative</td></tr>
+          <tr><td>Reciprocity</td><td>source and observer exchange within 3e-13 relative</td></tr>
+          <tr><td>Rigid-motion invariance</td><td>common rotation and translation within 2e-12 relative</td></tr>
+          <tr><td>Small vertical displacement</td><td>Maxwell first-order expansion within 2e-9 relative</td></tr>
+          <tr><td>Axisymmetric toroidal mean</td><td>native operator within 2e-14 relative</td></tr>
+          <tr><td>Tilted-source toroidal mean</td><td>64-angle rule within 2e-11 of 512-angle reference</td></tr>
+          <tr><td>Focused test lane</td><td>8 passed; adjacent 3-D and ring lanes 11 passed / 39 deselected</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>Earlier stale entries reconciled</h2>
+      <p>The finite-section ring diagonal was already merged at <code>88c1cec6</code>.
+      Its continuum contract and two-sided band seam are test-pinned. The discrete-winding
+      evidence subsequently showed that conductor detail explains the central-solenoid
+      residual but not the field-coil residual; the remaining field-coil attribution belongs
+      to feeder geometry. The free-form polygon gate and carried-gap cancellation gates were
+      already stabilized by <code>0745dfa1</code> and <code>9e76d634</code>.</p>
+    </section>
+
+    <section class="card">
+      <h2>Commit</h2>
+      <p><code>2d19524a</code> — loop coupling, rigid transforms, toroidal averaging, and
+      their analytic and property-test suite.</p>
+    </section>
+  </main>
+</body>
+</html>

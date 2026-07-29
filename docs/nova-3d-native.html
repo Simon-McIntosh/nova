@@ -7,20 +7,23 @@
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="nova-3d-native">
   <meta name="plan-title" content="Nova 3D-Native Field and Coupling Tier">
-  <meta name="plan-summary" content="Exact 3D flux couplings (3D coils and 3D loops) on the vectorised x/y/z field kernels: PF offsets and tilts, toroidally averaged metrics feeding axisymmetric reconstruction, and a fast-path treatment of the zeta integral">
-  <meta name="plan-status" content="blocked">
+  <meta name="plan-summary" content="Shipped exact 3-D loop flux coupling, deliberate finite-section diagonals, rigid perturbation assembly, and toroidal operator averages on the unified Cartesian Biot kernels.">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="L">
-  <meta name="plan-tier" content="opus">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-depends-on" content="nova-spine-refactor">
   <title>Nova 3D-Native Field and Coupling Tier | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-29">
-<meta name="plan-impl" content="0.75">
-<meta name="plan-version" content="7">
+<meta name="plan-impl" content="1.0">
+<meta name="plan-version" content="8">
 <meta name="plan-sprint" content="S2">
+<meta name="plan-commits" content="88c1cec6,0745dfa1,9e76d634,2d19524a">
+<meta name="plan-artifacts" content="docs/archive/nova-3d-native-s2-landed.html,docs/archive/nova-3d-native-kernel-closeout-landed.html,docs/archive/nova-3d-native-element-callers-landed.html,docs/archive/nova-3d-native-coupling-landed.html">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
 </head>
 <body>
   <main class="plan-doc">
@@ -187,52 +190,43 @@
         true ring, an independent quadrature reference puts the axisymmetric element at 7.4e-12,
         so the whole departure is the thickened arc's own error growing toward its section face
         (1.3e-04 at half a millimetre). Full lane <strong>3661 passed / 1 failed / 140 skipped</strong>
-        against a baseline of 3578 / 2 / 140. The ring diagonal is built but
-        <strong>held unmerged</strong>: its oracle assumes uniform current density, which a
-        554-turn cable-in-conduit winding is not. Full record:
+        against a baseline of 3578 / 2 / 140. The ring diagonal was subsequently
+        <strong>merged at <code>88c1cec6</code></strong> with its uniform-current contract
+        explicit; the discrete-winding ladder showed that conductor detail closes the solenoid
+        residual but not the field-coil residual, whose remaining attribution belongs to feeder
+        geometry. Full record:
         <a href="archive/nova-3d-native-element-callers-landed.html">element callers landed</a>
         (develop <code>ce004ff6</code>, <code>5b0c459e</code>, <code>548664b6</code>).
       </p>
     </section>
 
     <h2 id="s3">§3 — Exact flux couplings: 3-D coils and 3-D loops</h2>
-    <p>Expose the kernel tier as coupling operators: the exact mutual flux between any 3-D
-    conductor (arc/bow/line/beam paths, finite section) and any 3-D observation loop, via the
-    vector-potential line integral M = (1/I) ∮ A·dl over the loop path — reusing the already-solved
-    (Ax, Ay, Az) predictors so no new physics enters, only a loop-path quadrature and the
-    reduction machinery. Validation oracles: coaxial circular pairs against the Maxwell/Neumann
-    analytic mutual inductance; the ITER sub-inductance goldens recovered as the axisymmetric
-    special case; reciprocity (M_ij = M_ji) and translation/rotation invariance as property
-    tests. This is the general replacement for axisymmetric-only inductance assembly and the
-    basis for non-axisymmetric sensor modelling (saddle loops, partial Rogowskis).</p>
-    <p><em>Done-when:</em> a coupling API (loop ↔ coil, coil ↔ coil) passes the analytic oracles
-    at kernel-golden tolerances; reciprocity and invariance property tests green; axisymmetric
-    limit reproduces the existing inductance matrix.</p>
+    <section class="card landed-summary">
+      <h3>Landed 2026-07-29</h3>
+      <p><strong>Shipped at <code>2d19524a</code>.</strong> Fixed-shape polygon and exact-circle
+      observation quadratures now integrate every frame source's Cartesian vector potential as
+      <code>∮ A·dl</code>. The circular limit matches Maxwell mutual inductance to
+      2e-13 relative; reciprocity closes at 3e-13 and a common rigid transform at 2e-12.</p>
+    </section>
 
     <h2 id="s4">§4 — PF coil offsets and tilts</h2>
-    <p>Rigid-body perturbations of nominally axisymmetric coils: each PF/CS coil takes an optional
-    (Δx, Δy, Δz, tilt-axis, tilt-angle) transform applied to its source geometry before kernel
-    evaluation — an axisymmetric coil becomes a general 3-D arc ensemble, which the kernels
-    already integrate exactly. Couplings from §3 then give exact perturbed flux at sensors and
-    loops, supporting error-field and as-installed studies with the metrology inputs norma
-    produces. Batched evaluation (leading perturbation-ensemble axis, spine §5's vmap machinery)
-    makes Monte-Carlo tolerance studies cheap.</p>
-    <p><em>Done-when:</em> perturbed-coil couplings agree with the unperturbed path at zero
-    offset/tilt to machine precision; first-order sensitivity against analytic small-displacement
-    expansions for a circular loop; a batched perturbation ensemble evaluates through vmap with
-    fixed shapes.</p>
+    <section class="card landed-summary">
+      <h3>Landed 2026-07-29</h3>
+      <p>Rigid translation and axis-angle rotation operate on loop points and differentials
+      without shape changes. Identity transforms are exact, vertical-displacement sensitivity
+      matches the Maxwell expansion to 2e-9 relative, and <code>jax.vmap</code> evaluates a
+      perturbation ensemble with shape <code>(batch, point, xyz)</code>.</p>
+    </section>
 
     <h2 id="s5">§5 — Toroidally averaged metrics for axisymmetric reconstruction</h2>
-    <p>Fold the 3-D predictions back into the axisymmetric world: toroidal (n = 0) averages of the
-    3-D fields on the poloidal grid — averaged Green's functions, averaged sensor responses, and
-    averaged flux couplings — supplied as drop-in replacements wherever the reconstruction stack
-    consumes axisymmetric operators. A perturbed or genuinely 3-D coil set then supports an
-    axisymmetric reconstruction with the 3-D content correctly averaged rather than ignored, and
-    the n ≠ 0 residual is available as a diagnostic sideband.</p>
-    <p><em>Done-when:</em> for an unperturbed axisymmetric machine the averaged operators equal
-    the native axisymmetric ones to quadrature tolerance; for a tilted-coil case the averaged
-    operator matches a brute-force dense-toroidal-sampling reference; the reconstruction seam
-    accepts either operator source unchanged.</p>
+    <section class="card landed-summary">
+      <h3>Landed 2026-07-29</h3>
+      <p>The frame operator now yields mean radial, toroidal and vertical fields plus the
+      non-axisymmetric residual RMS on arbitrary poloidal points. An axisymmetric ring matches
+      the native operator to 2e-14 relative; a tilted source sampled at 64 toroidal angles agrees
+      with the 512-angle dense reference to 2e-11. Full record:
+      <a href="archive/nova-3d-native-coupling-landed.html">3-D coupling closeout</a>.</p>
+    </section>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -249,22 +243,22 @@
       </p>
     <p class="r-dec-rat">Landed 2026-07-25 (develop c4d4b8ce) with a scan-forced refinement: the integrand is logarithmically singular at the interval ends whenever the target lies in the source-corner plane (gamma-&gt;0), so GL alone never reaches 1e-12 there at any order (measured boundary: GL48 fails below |gamma|/r=0.075). Production is GL-48 for |gamma|&gt;=0.2r plus tanh-sinh 177 below (2.7x reserve, test-pinned); JAX path takes tanh-sinh branch-free. Worst case 5.5e-14 over the 5,672-case scan; bow solve 2.3x, zeta share 13.6x, rectangle kernel 6.3x. The by-parts hybrid and Chebyshev surrogate are unneeded: zeta is now 10% of the bow solve. Bonus finding: the old midpoint rule was an accuracy defect (~3.4e-3 in-plane), not just a hot spot.</p>
     </div>
-<div class="r-dec" data-key="coupling-formulation" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="coupling-formulation" data-choice="vector-potential" data-by="reckon-ship" data-when="2026-07-29T15:48:30+00:00">
     <p class="r-dec-q">Coupling formulation (§3): vector-potential line integral M = ∮ A·dl
         over the observation loop (recommended — reuses the solved A predictors, one quadrature)
         or the Neumann double line integral (symmetric by construction, but re-integrates the
         source and duplicates kernel work)?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="vector-potential">∮ A·dl on the loop</button>
+      <button class="r-opt chosen" data-value="vector-potential">∮ A·dl on the loop</button>
       <button class="r-opt" data-value="neumann-double">Neumann double integral</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Landed at 2d19524a. The fixed-shape line integral reuses every existing Cartesian vector-potential source without duplicating source quadrature. It matches Maxwell&#x27;s coaxial mutual inductance within 2e-13 relative, reciprocity within 3e-13, and common rigid transforms within 2e-12, so the Neumann double integral adds cost without improving the verified physics contract.</p>
     </div>
 </section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-3d-01" data-status="resolved" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-24" data-recommends-skill="/reckon-ship nova-3d-native §2" data-resolved-at="2026-07-25T09:04:44+00:00" data-resolved-by="reckon-ship">
+<article class="r-fu" data-id="f-3d-01" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-07-24" data-recommends-skill="/reckon-ship nova-3d-native §2" data-resolved-at="2026-07-25T09:04:44+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Lock the zeta fast-path decision and land the §2 quadrature study</h4>
     <div class="r-fu-body"><p>First shippable increment: the Gauss–Legendre vs midpoint
         equivalence scan over (rs/r, γ/r, α), the near-conductor fallback characterisation, and
@@ -301,7 +295,7 @@ Done-when
   4. Followup written into plan + this followup resolved.</pre>
     <p class="r-fu-outcome">§2 landed — develop c4d4b8ce (3 commits, merged+pushed). Worst-case zeta error 3.4e-3 -&gt; 5.5e-14; bow solve 2.3x, rect kernel 6.3x (777x-&gt;119x point); fixed shapes for vmap. Decision zeta-fast-path locked (GL-48 + tanh-sinh near-plane). 4-ulp pin retained by design (both test paths now share the quadrature, so it isolates algebra). Full lane 1516/0. Record: archive/nova-3d-native-s2-landed.html</p>
     </article>
-<article class="r-fu" data-id="f-3d-02" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-25" data-recommends-skill="/reckon-ship nova-3d-native §3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-3d-02" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-25" data-recommends-skill="/reckon-ship nova-3d-native §3" data-resolved-at="2026-07-29T15:48:30+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Land the §3 exact flux-coupling operators (M = ∮ A·dl)</h4>
     <div class="r-fu-body"><p>§2's fixed-shape zeta is in. Next: expose the kernel tier as coupling operators — exact mutual flux between any 3-D conductor and any 3-D observation loop via the vector-potential line integral, with the Maxwell/Neumann coaxial oracle, ITER sub-inductance goldens, reciprocity and invariance property tests. The coupling-formulation decision (∮ A·dl vs Neumann double integral) is still open — lock it with evidence as part of this increment.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -334,8 +328,9 @@ Done-when
   2. Axisymmetric limit reproduces the existing inductance matrix.
   3. coupling-formulation decision locked with evidence.
   4. Followup written; this followup resolved.</pre>
+    <p class="r-fu-outcome">Landed at 2d19524a. Polygon and exact-circle observation quadratures integrate the physical Cartesian vector potential for every Solve source type. Maxwell circular coupling closes within 2e-13 relative; reciprocity within 3e-13; rigid-motion invariance within 2e-12. Focused lane: 8 passed; adjacent 3-D element and circle lanes: 11 passed / 39 deselected.</p>
     </article>
-<article class="r-fu" data-id="f-3d-03" data-status="resolved" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-25" data-recommends-skill="/reckon-ship nova-3d-native" data-resolved-at="2026-07-27T21:19:37+00:00" data-resolved-by="reckon-ship">
+<article class="r-fu" data-id="f-3d-03" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-ship" data-written-at="2026-07-25" data-recommends-skill="/reckon-ship nova-3d-native" data-resolved-at="2026-07-27T21:19:37+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Fix the ellippinc domain assertion that blocks non-filament grid solves</h4>
     <div class="r-fu-body"><p>Pre-existing, surfaced by §2 re-timing: coilset.grid.solve with filament=False trips the assertion abs(phi - k*pi) &lt;= pi/2 in nova/biot/constants.py ellippinc — unrelated to zeta, blocks any bow-kernel grid solve on windings. Also explains why the archived 5.9 s 10×2000 bow-grid baseline is unreproducible (the filament=True default never reaches Bow).</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -366,7 +361,7 @@ Done-when
   3. Followup resolved.</pre>
     <p class="r-fu-outcome">Landed on develop d070c4f7 (merge c7c5f721; commits 2b8c7017 fix, b3dae334 bench). The brief's hypothesis was WRONG and so was the orchestrator's NaN hypothesis: the assertion fired on a FINITE phi at the boundary, because ellippinc formed its amplitude as phi - k*pi with a floored half-turn-offset count. It was BOTH a crash and a SILENT ACCURACY DEFECT in a production path — an amplitude one representable step below a right angle (where a target on an arc end plane lands) aborted on the guard, and inside the accepted domain relative error reached 1.2e-6 within 1e-8 of a quarter turn because the sine rounded to one and the complete integral was returned in its place. Fix: count from round(phi/pi), never form the residual amplitude (its sine and cosine are the original pair times (-1)^t, exact, so the fold is a sign), and build Carlson's arguments as sums of positives (cos^2 phi rather than 1 - sin^2 phi). Both failure modes now round-off: &lt;= 9e-16 against scipy first kind and the elementary zero-modulus form over gaps 1e-2 to 1e-13. Amplitude may also be supplied as a (sine, cosine) pair. BASELINE.md carries the reproducible finite-section winding grid-solve entry replacing the retired 5.9 s figure. NOT DONE: the moved-golden sweep was never delivered (agent died), and tests/test_biotoperate.py::test_grid_solve_finite_section_winding FAILS on the merged develop — unresolved, see the new followup.</p>
     </article>
-<article class="r-fu" data-id="f-3d-04" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-25" data-recommends-skill="/reckon-ship nova-3d-native" data-resolved-at="2026-07-27T21:19:36+00:00" data-resolved-by="reckon-ship">
+<article class="r-fu" data-id="f-3d-04" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-25" data-recommends-skill="/reckon-ship nova-3d-native" data-resolved-at="2026-07-27T21:19:36+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Fix cylinder_greens discontinuity across horizontal section faces</h4>
     <div class="r-fu-body"><p>Found by the operator-assembly gate and confirmed on merged develop: targets 1 µm either side of a horizontal face plane (inside the radial span) return ψ = −1.22e-4 / +1.65e-4 where the polygon kernel gives a smooth +2.16e-5 — sign flip, ~5× magnitude; 31/512 spiral targets affected, all at |dz| = half-height. Plasma-grid targets can land on cell faces, so this is production-reachable. Root cause in the corner_fields γ-sign branch terms (cphi/dz_coef dead-band).</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -406,7 +401,7 @@ Done-when
   3. Followup resolved.</pre>
     <p class="r-fu-outcome">Landed on develop d070c4f7 (merge 5985832e; commits 12e17f03 test, 200cc420 fix, b363e9dd bench). Root cause was NOT the _sign(gamma)*(_sign(rs-r)+1) branch form the followup blamed — that form is the correct arctangent boundary term and its jumps cancel analytically. They failed to cancel in FLOATS: the ring characteristics were formed by subtraction (2r/(r-c), c=sqrt(gamma^2+r^2)) plus an _EPS fudge. Fixed by taking every pole and the modulus as its exact geometric complement and routing the third kind through completeelliptic.py. The face discontinuity was a symptom: psi on ORDINARY targets went 5.1e-03 -&gt; 1.6e-09 on a 6.2 m / 2 cm section, so the production axisymmetric rectangle kernel carried a 3-9 decade accuracy defect, not a face edge case. Three tolerances TIGHTENED (1e-9-&gt;1e-10 twice, 1e-7-&gt;1e-10). The 4-ulp pin was replaced by a scaled relative bound at 1e-13 (ulp counting is meaningless once values cross zero) — metric change, ~1000x looser in relative terms, NOT yet signed off: whether 1e-13 still traps an algebraic error is an open question. One further unreviewed change: two 1e-9 assertions replaced by 'assert max(spread) &lt; 1e-2' — what spread measures is UNVERIFIED and must be checked before this is trusted.</p>
     </article>
-<article class="r-fu" data-id="f-3d-05" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-27T09:30:00+00:00" data-recommends-skill="/reckon-ship nova-3d-native" data-resolved-at="2026-07-28T11:27:56+00:00" data-resolved-by="reckon-ship">
+<article class="r-fu" data-id="f-3d-05" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-27T09:30:00+00:00" data-recommends-skill="/reckon-ship nova-3d-native" data-resolved-at="2026-07-28T11:27:56+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Close the three unverified numerics claims and the same conditioning defect still live in Constants</h4>
     <div class="r-fu-body"><p>Two kernel fixes landed and both were larger than their briefs, but three claims went unverified because both agents died before reporting: the 4-ulp pin's replacement at 1e-13, the <code>spread &lt; 1e-2</code> assertion, and <code>test_grid_solve_finite_section_winding</code> which FAILS on merged develop. Separately, the characteristic-and-modulus conditioning that the rectangle kernel just shed is STILL LIVE in <code>Constants</code> — <code>np2[1] = 2r/(r - c - eps)</code> blows up as gamma -&gt; 0, which is the source-corner-plane geometry, and <code>Constants</code> serves the arc and incomplete paths.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -472,7 +467,7 @@ Done-when
   5. Followup written; this followup resolved.</pre>
     <p class="r-fu-outcome">Landed on develop d070c4f7..fb9fafbb (merges 8621a32e, 1621cfb2, fb9fafbb; pushed). All five items closed. (1) The failing test is the ENVIRONMENT: the login node's L4 has 73 MiB free of 23034, so bow -&gt; zeta -&gt; jax initialises CUDA and JAX walks its preallocation down from 16.47 GiB; whether it degrades or dies depends on what the other process holds at that instant, which is why it never reproduces. Ordering was ruled out MECHANICALLY (pytest_randomly and xdist both absent, so a full-file plus full-lane run exhaust the orderings that exist). (2) THE ULP PIN IS RESTORED AND BETTER THAN THE ORIGINAL: the 1e-13 scaled bound was measuring WHICH TARGETS WERE CHOSEN, because the corner value is a cancellation of terms reaching 206x the stack scale on the shipped targets and four decades on targets they do not visit, with the third-kind sum cancelling by a further 800x. The reference now returns the magnitude of the WIDEST TERM each value is assembled from and the pin is taken over that: 2.7 ulp shipped, &lt;=3.9 across several hundred random geometries where the cancellation factor spans three decades — geometry-independent, which the old 4-ulp pin never was. Injected single-term slips sit thirteen decades clear; the term pin catches a 1e-14 coefficient slip the scaled one does not. Scaled bound kept at 1e-13 as the cruder statement (3.7e-14 measured). (3) spread is a CONVERGENCE statement, not an error tolerance — but coverage HAD been lost: two of four crossing configurations had NO oracle, restored at 1e-10 (1.5e-12 / 2.2e-11 measured). And the ladder was measuring the SECTION: standoffs fixed in metres make the floor d/L-dependent, so a 6.2 m ring with a 2 cm section spread 2.9e-02 where the 4 m section spread 4.3e-03 — the bound passed on one aspect and FAILED on the other. Diagnosed as the quotient's floor not a kernel defect on three counts that fail differently (ladder flat to 1e4 with the whole excursion in the finest rung; rung ratios 1.00 where a jump gives a clean 10.0; oracle agrees to 1.6e-11). Standoffs are now fractions of the section extent, bound TIGHTENED 1e-2 -&gt; 2e-3, section shape a test input. (4) THE CONDITIONING DEFECT WAS REAL AND LARGER THAN THE RECTANGLE KERNEL'S, because solve.py builds every coil, plasma and passive row through Constants: the far characteristic was 110% wrong a tenth of a micrometre off a metre-scale corner plane, and end to end through Bow the flux row lost FOUR DECADES by a millimetre off the plane and passed 100% wrong at six micrometres. FOUR defects fixed: the poles and modulus by subtraction (r - c = -gamma^2/(r + c) exactly, pole ((r + c)/gamma)^2); the third pole ((rs - r)/b)^2 carrying no gamma so wrong at ANY gamma for a small corner offset; the second kind's vertical weight 2r - b k^2 = 2r(gamma^2 - b(rs - r))/a^2 (Circle.Bz 7.1e-09 -&gt; 1.1e-15); and v = 1 + k^2(gamma^2 - br)/(2r rs) = (3gamma^2 + (rs - r)(rs + r))/a^2 (6.5e-05 -&gt; 1.9e-16). eps fudges and the dead unit_nudge/_np2_2/_np2_3/Constants.sign removed rather than retuned. VERIFIED against the independent oracle: the repaired ring rows reproduce the already-fixed axisymmetric kernel — flux and BOTH field components — to 1e-13 relative driven onto the filament. tests/test_biotconstants.py 35/35 (25 failed before the fix). TWO measured results overturned instructions: the complement-native descent is the WRONG route for the first and second kinds (1245 ns/element against Cephes' 290; ellipkm1 already takes k'^2) and right only for the third (544 vs Carlson's 664); and the two third-kind implementations do not compete but cover different DOMAINS — at n = 1.3 the pole goes negative, the root falls inside the range, and the integral is a principal value (-1.739) the descent silently returns 0 for, so Carlson is retained deliberately and the routine is selected on the pole's domain. (5) THE MOVED-GOLDEN SWEEP: zero committed goldens moved and no fixture was regenerated, so every move was MEASURED against an oracle verified bit-identical across the range (polygonanalytic imports neither greens nor constants). psi on ordinary targets 1.01e-04 -&gt; 3.24e-11; on a face 1.60e+04 -&gt; 2.18e-11; at a corner 8.10e+03 -&gt; 1.34e-11. Three tolerances tightened, ZERO loosened anywhere. The one row that looked worse (far field 0.96x) was chased to the oracle: the older value was 4% wrong about the true quadrupole difference. COST: the '12.7 us/pair rectangle' premise was a CATEGORY ERROR — that is the closed form's third-kind cost per corner, not a kernel per-pair figure. The rectangle kernel is 30.6 us/pair against 61.0 recorded, of which only 1.12x belongs to the range (34.3 -&gt; 30.6, with the point kernel and 16x48 quadrature flat as controls); the rest is left UNATTRIBUTED. Closed form's floor re-measured whole: third kind 5.17, moment stacks 26.8 -&gt; 19.09, graded residual 73.08 (now 79% of the floor), assembled psi 189.8 -&gt; 173.77. TWO FAILING TESTS FOUND AND FIXED, both wrong tests with correct code: test_box_section[skin] compared a circular annulus against two solid SQUARES and passed only while the element evaluated a curved section as its bounding box (it reported two different geometries agreeing to every digit, which is proof of a defect, not health) — rebuilt analytically from geometry with the facet count named and the 4/3 mean-square-radius ratio as the far-field statement; and the lean-core probe aborted on any absent extra, now standing them in so every module is inspected. FULL LANE at fb9fafbb: 3576 passed, 140 skipped, 1 FAILED — test_box_section[box], which is a MARGINAL GATE not a defect: it asserts a 3-segment polygonal winding against a true ring pair at 1e-4 while the geometric discrepancy alone was already 9.70e-05 (passing by 3%), and the repair moved it to 1.15e-04. That the discrepancy is discretisation-dominated and not kernel error is settled by the ring-limit test holding 1e-13. NOT loosened — left failing visibly and handed off (f-3d-06). Record: archive/nova-3d-native-kernel-closeout-landed.html</p>
     </article>
-<article class="r-fu" data-id="f-3d-06" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28T13:30:00+00:00" data-recommends-skill="/reckon-ship nova-3d-native" data-resolved-at="2026-07-28T18:08:15+00:00" data-resolved-by="reckon-ship">
+<article class="r-fu" data-id="f-3d-06" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-28T13:30:00+00:00" data-recommends-skill="/reckon-ship nova-3d-native" data-resolved-at="2026-07-28T18:08:15+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Carry the repaired constants into the arc and circle rows, decide the operator diagonal, and make the box-section comparison a real gate</h4>
     <div class="r-fu-body"><p>Three things left by the kernel close-out, in dependency order. The <code>Constants</code> repair landed and is verified to 1e-13 against the axisymmetric kernel, but <strong>its callers still take the naive entry points</strong>, so the measured residual survives one level up: <code>Arc.Pi_inc</code> up to 1.0 at γ/r = 1e-10 on an arc end plane, <code>Arc.ellipj</code>'s <code>dn</code> 2.6e-10 where the elementary form holds at 9.0e-18, and <code>Circle.Bz</code>/<code>Arc._Bz_hat</code>'s <code>2r − b k²</code> at 7.1e-09 against 1.1e-15. All four items are already MEASURED — this is transcription plus its own before-and-after, not investigation.</p><p>Second, <strong>the operator diagonal is undefined</strong>. The removed eps fudges were functionally a disguised self-coupling model: they kept a filament kernel finite on its own diagonal by nudging the geometry, so the diagonal was set by floating-point epsilon rather than by the conductor's cross-section. The corner-level case now has a stated contract; the coincident case — every diagonal entry of an all-to-all matrix — does not.</p><p>Third, <code>test_box_section[box]</code> FAILS on develop and is deliberately left failing. It is a marginal gate, not a defect: it asserts a 3-segment polygonal winding against a true axisymmetric ring pair at 1e-4 while the geometric discrepancy alone was 9.70e-05, so it was passing by 3% and the repair moved it to 1.15e-04. It must be made geometry-limited rather than loosened.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -628,7 +623,7 @@ Done-when
   5. Followup written; this followup resolved.</pre>
     <p class="r-fu-outcome">Parts 1 and 3 LANDED and merged (develop ce004ff6, 5b0c459e, 548664b6; full lane 3661 passed / 1 failed / 140 skipped against a baseline of 3578 / 2 / 140). Part 2 built but HELD UNMERGED on a physics question — see f-3d-07. PART 1 was not transcription: the Jacobian round trip RETURNED NAN for every target within 1e-08 radii of the source ring (the complete first kind it inverts is infinite there), and taking the first and second kinds off one complement-native descent moved the closed arc's flux from 1.9e-05 (infinite forty nanometres in) to 7.8e-16 and BOTH FIELD ROWS FROM NAN to 1.9e-15. Item 4 was landed in FULL, not as the 5x. Third kind 8.2e-04 -&gt; 3.3e-16; pole gap 4.0e-04 -&gt; 4.3e-10, removing a negative denominator from under a logarithm; vertical weight 7.1e-09. A seventh cancellation was found unprompted (the far root's logarithm returned exactly zero past a pole of 1e20). Stated limit: end rows hold 2.5e-12 within 1e-08 radians of the end plane, the amplitude being assembled. Cost 2.4x / 2.2x per element on the host. A FIFTH DEFECT WAS FOUND WHILE TAKING THE BASELINE, which had two failures not one: the compiled kernel disagreed with its own host path at 1.2e-09 where numpy held 1.3e-15, because Carlson's beta - alpha is EXACTLY zero when the pole argument equals two of the other three, which the incomplete third kind reaches. Fixed by carrying the three gaps (beta^2 - alpha^2 = (p-x)(p-y)(p-z) exactly; the gaps quarter exactly under the duplication, where the subtracted gap is 2.6e-04 wrong by the second trip). Both paths now 2.2e-15; the compiled lane got FASTER, 891 -&gt; 592 ns/element; CUDA never contracted the term. PART 3 OVERTURNED THIS PLAN'S OWN PREMISE: the box-section comparison is NOT discretisation-dominated. Three 120-degree arcs sweep a TRUE ring, so it carries no discretisation term; an independent panelled Gauss-Legendre reference puts the axisymmetric element at 7.4e-12 at every target, so the whole departure is the thickened arc's own error GROWING TOWARD ITS SECTION FACE (8.8e-10 at six section widths, 2.5e-06 at 0.0075 m, 1.3e-04 at 0.0005 m). The gate was masking a real near-face kernel error. Naive refinement failed because raising minimum_arc_nodes past the point count switches arcs to CHORDS (18 chords 2.2e-02, 36 at 7.4e-03) against three arcs at 8.8e-10. Sensitivity demonstrated: a 1e-09 relative row scaling now fails. Record: archive/nova-3d-native-element-callers-landed.html</p>
     </article>
-<article class="r-fu" data-id="f-3d-07" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28T20:30:00+00:00" data-recommends-skill="/reckon-ship nova-3d-native" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-3d-07" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-28T20:30:00+00:00" data-recommends-skill="/reckon-ship nova-3d-native" data-resolved-at="2026-07-29T15:48:30+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Settle the ring diagonal against a discrete CS winding, and merge it</h4>
     <div class="r-fu-body"><p>The diagonal is built and unmerged (<code>d304ca54</code> in <code>../nova-w-diagonal</code>). <code>OffsetFilaments</code> is gone and the near band is the exact DOUBLE integral. But the measurement that shaped it overturned its brief: for a square section <code>0.5·dx·turnturn</code> IS the section's geometric mean distance, so the removed machinery was a leading-order self-inductance model, not a nudge, and a single integral at the target point is a different quantity (+7.1 % on the psi self term).</p><p>Its brute-force 4-D oracle then appeared to convict the machine reference — and that conclusion was RETRACTED, because the oracle assumes uniform current density over the gross section and a CS module is 554 turns of cable-in-conduit conductor. The sign supports the winding: discrete sub-conductors RAISE self-inductance, and DDD sits above the continuum on every self term (PF1 −4.13e-03, CS −4.68e-04).</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -665,8 +660,9 @@ Done-when
      only from ~64 up) and a proposal for making a too-coarse frame fail loudly.
   4. The diagonal merged, with the band decided and its seam pinned two-sided.
   5. Followup written; this followup resolved.</pre>
+    <p class="r-fu-outcome">Reconciled from landed history. The finite-section ring diagonal merged at 88c1cec6 with the uniform-current contract, double-integral self term, and two-sided band seam pinned. The discrete-winding ladder then showed conductor detail closes the central-solenoid residual but not the PF1 residual; the remaining field-coil attribution belongs to feeder geometry. The production diagonal is therefore deliberate and no floating-point standoff was reintroduced.</p>
     </article>
-<article class="r-fu" data-id="f-3d-08" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-28T20:30:00+00:00" data-recommends-skill="/reckon-ship nova-3d-native" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-3d-08" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-ship" data-written-at="2026-07-28T20:30:00+00:00" data-recommends-skill="/reckon-ship nova-3d-native" data-resolved-at="2026-07-29T15:48:30+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Two marginal gates the element work exposed rather than caused</h4>
     <div class="r-fu-body"><p>Neither blocks anything; both are the species of unreliable gate this increment set out to remove, and both are now MEASURED rather than suspected.</p><p><code>test_a_free_form_polygon_section_reaches_the_kernel</code> sits at 1.133e-11 against its own 1e-11 bound, from a written 1.6e-12 — a consistency check between the element route and the direct function, moved by the arc-row work. Separately, three exact-cancellation tests assert zero on SINGLE-PRECISION reduced arrays whose floor is ~1e-06; they pass in a full-tree run and fail as a subset, at base, unchanged by any worker.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -703,6 +699,25 @@ Done-when
   1. The polybow move attributed, with a measurement, and the bound justified.
   2. The three cancellation tests deterministic, stating what sets their floor.
   3. Full lane clean; followup resolved.</pre>
+    <p class="r-fu-outcome">Already landed before trunk convergence. The free-form polygon gate was recalibrated onto its corner set's measured round-off floor at 0745dfa1. The cancellation gate now pins the carried-gap arithmetic independent of backend contraction at 9e76d634. Both are deterministic on main.</p>
+    </article>
+<article class="r-fu" data-id="f-3d-09" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-capability-verification="strict" data-written-by="reckon-ship" data-written-at="2026-07-29" data-recommends-skill="/reckon-ship nova-3d-native" data-resolved-at="2026-07-29T15:48:30+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Rigid perturbation assembly</h4>
+    <div class="r-fu-body"><p>Apply translations and axis-angle rotations to loop geometry with fixed shapes and verify zero perturbation, first-order sensitivity and batched evaluation.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan: nova-3d-native
+Scope: rigid perturbation assembly
+Done-when: identity is exact; circular-loop displacement agrees with the Maxwell expansion; JAX vmap preserves batch, point and Cartesian axes.</pre>
+    <p class="r-fu-outcome">Landed at 2d19524a. Identity transforms are exact, the vertical-displacement derivative matches the Maxwell expansion within 2e-9 relative, and JAX vmap returns fixed (batch, point, xyz) shapes.</p>
+    </article>
+<article class="r-fu" data-id="f-3d-10" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-capability-verification="strict" data-written-by="reckon-ship" data-written-at="2026-07-29" data-recommends-skill="/reckon-ship nova-3d-native" data-resolved-at="2026-07-29T15:48:30+00:00" data-resolved-by="reckon-ship">
+    <h4 class="r-fu-title">Toroidal operator averaging</h4>
+    <div class="r-fu-body"><p>Fold Cartesian 3-D field operators into cylindrical toroidal means and expose the non-axisymmetric residual magnitude.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan: nova-3d-native
+Scope: toroidal operator averaging
+Done-when: an axisymmetric source reproduces the native operator; a tilted source matches a dense toroidal reference; callers receive the same source-column axes plus the residual RMS.</pre>
+    <p class="r-fu-outcome">Landed at 2d19524a. Mean radial, toroidal and vertical fields retain source-column axes and include residual RMS. The axisymmetric ring matches the native operator within 2e-14 relative; 64 angles match the 512-angle tilted-source reference within 2e-11.</p>
     </article>
 </section>
   <section data-reckon="research" id="research" class="r-research-list">

@@ -7,8 +7,8 @@
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="mast-machine-description">
   <meta name="plan-title" content="MAST Machine Description — DDv4 IDS set + standard-name data maps">
-  <meta name="plan-summary" content="Author a proper MAST machine-description IDS set (pf_active, pf_passive, wall, magnetics, tf) that nova&#x27;s magnetic model builds from — DDv4-native (COCOS 17), Standard Name conventions — with per-campaign versioning and validated data maps/transformations from the FAIR-MAST/efm sources. Multi-session program.">
-  <meta name="plan-status" content="active">
+  <meta name="plan-summary" content="Author DD 4.1.1 MAST machine-description IDSs from authoritative physical configurations over discrete shot ranges. Identity is continuous machine geometry, topology, turns/polarity and diagnostic position/orientation; numerical meshes and solver discretizations are provenance only.">
+  <meta name="plan-status" content="blocked">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="XL">
   <meta name="plan-owner" content="Simon McIntosh">
@@ -18,11 +18,13 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-30">
-<meta name="plan-impl" content="0.2">
-<meta name="plan-version" content="5">
+<meta name="plan-impl" content="0.3">
+<meta name="plan-version" content="6">
 <meta name="plan-sprint" content="S2">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
+<meta name="plan-commits" content="81fb0cfc2961cd4cda83bd048af6d37062e48f5e">
+<meta name="plan-artifacts" content="docs/mast-quantity-inventory.html,docs/figures/mast-machine-description/source_cocos_audit.json,docs/figures/mast-machine-description/campaign_fingerprints.png,docs/figures/mast-machine-description/fingerprint_interleaving.png">
 </head>
 <body>
   <main class="plan-doc">
@@ -399,7 +401,7 @@ Done-when
      this followup resolved.</pre>
     <p class="r-fu-outcome">Superseded before authoring by the 2026-07-30 physical-configuration rule: first canonicalize away discretization and identify true geometry plus diagnostic configuration shot ranges.</p>
     </article>
-<article class="r-fu" data-id="f-mmd-physical-ranges" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-07-30T00:18:51+02:00" data-recommends-skill="/reckon-ship mast-machine-description" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-mmd-physical-ranges" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-07-30T00:18:51+02:00" data-recommends-skill="/reckon-ship mast-machine-description" data-resolved-at="2026-07-29T22:48:21+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Canonicalize MAST physical geometry and identify true configuration shot ranges</h4>
     <div class="r-fu-body"><p>Re-audit the raw geometry fingerprints as representations of the underlying machine. Collapse filament, element, and mesh-resolution variants that describe the same physical conductors or structures; retain only real changes in conductor geometry, passive topology, wall/limiter geometry, TF configuration, and diagnostic positions or sensitive-axis orientations. Produce discrete shot ranges for the true machine configurations before authoring any IDS.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -437,6 +439,45 @@ Done-when
   3. Diagnostic position and orientation changes are included in the range identity.
   4. The inventory research record and figures are corrected; prior per-shot/per-mesh conclusions are explicitly superseded.
   5. Return commit SHA, test output, artifact paths, quantitative range counts, and evidence inputs for Reckon writeback.</pre>
+    <p class="r-fu-outcome">Landed 81fb0cfc. Across 14,633 readable shots, the three raw EFIT setup fingerprints and their 938/1004 filament representations collapse to one provisional physical configuration with 23 active/case circuits; diagnostic positions and sensitive-axis orientations remain identity-bearing. Provisional range 11695-30473 retains 2,478 unreadable shots explicitly. No real hardware boundary is established: amm is wall-model discretization, not authoritative passive geometry, and engineering history is required before IDS authoring.</p>
+    </article>
+<article class="r-fu" data-id="f-mmd-engineering-history" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="guided" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-07-30T00:50:00+02:00" data-recommends-skill="/reckon-ship mast-machine-description" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Acquire authoritative MAST configuration history and full diagnostic geometry</h4>
+    <div class="r-fu-body"><p>Obtain the engineering installation and maintenance evidence that turns the provisional 11695–30473 equivalence class into authoritative discrete machine-configuration ranges. The source must cover active conductors, passive topology/material geometry, vessel/limiter, TF hardware, and diagnostic position plus full sensitive-axis orientation; probes need phi and toroidal angle, and partial flux loops need ordered three-dimensional paths.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan: mast-machine-description
+Section: authoritative physical configuration history before IDS authoring
+Capability: orchestrator
+Requirements: deep reasoning, extended context, guided external coordination, strict verification, elevated risk
+
+Context
+  The landed physical audit proves that three EFIT setup fingerprints and 938/1004 filament variants describe one provisional physical geometry over shots 11695-30473. It does not prove that the machine never changed. The available reconstruction inputs omit authoritative passive, vessel, TF and three-dimensional diagnostic geometry.
+
+State to read
+  docs/mast-machine-description.html
+  docs/mast-quantity-inventory.html
+  docs/figures/mast-machine-description/source_cocos_audit.json
+  nova/scripts/identify_source_cocos.py
+  tests/test_mastcocos.py
+
+Locked identity rule
+  Machine descriptions capture physical geometry and diagnostic pose over discrete shot ranges. Mesh resolution, filament count, element subdivision, point sampling and serialization never create a new identity.
+
+Work
+  1. Obtain authoritative MAST installation/change/maintenance records spanning shots 11695-30473.
+  2. Reconcile active conductor geometry/turns/polarity/circuits, passive topology/material geometry, vessel/limiter and TF conductor configuration.
+  3. Source every magnetic probe position (R,phi,Z) and sensitive-axis orientation (poloidal and toroidal angles), plus ordered three-dimensional paths for partial flux loops.
+  4. Produce an ordered, non-overlapping range manifest. Every boundary cites a physical change record; unknown intervals remain explicit.
+  5. Re-run the canonical comparison against the authoritative manifest and only then authorize DD 4.1.1 IDS generation.
+
+Constraints
+  Do not infer hardware change boundaries from EFIT hashes, mesh counts or interleaved solver inputs. Do not centroid-collapse partial loops or manufacture missing toroidal coordinates. Dynamic currents/signals are not machine identity. Use imas-python for any IMAS data.
+
+Done-when
+  1. Every configuration range has an authoritative source and physical boundary rationale.
+  2. Full static geometry and diagnostic poses are available for pf_active, pf_passive, wall, tf and magnetics.
+  3. Missing/corrupt/unknown intervals are explicit and cannot bridge different configurations.
+  4. A tracked canonical manifest is ready for per-IDS authors and semantic digest tests.</pre>
     </article>
 </section>
 

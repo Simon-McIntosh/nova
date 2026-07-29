@@ -2,9 +2,8 @@
 
 Determines all four Sauter & Medvedev COCOS digits for the FAIR-MAST ``efm``
 equilibrium reconstruction empirically -- never from a units string or a
-catalogue metadata tag alone -- and, in the same pass, fingerprints the static
-machine geometry so the number of distinct machine descriptions the corpus
-needs is a measured count rather than an assumption.
+catalogue metadata tag alone -- and, in the same pass, separates raw static
+setup fingerprints from canonical physical-configuration evidence.
 
 The four digits and how each one is pinned
 ------------------------------------------
@@ -41,23 +40,28 @@ The four digits and how each one is pinned
     sign only if both refer to the same ``phi`` sense).  The script reports
     that check's pass rate and never upgrades it to a determination.
 
-Geometry fingerprint
---------------------
-A campaign fingerprint is a hash of the rounded static-setup arrays -- probe
-and loop positions, probe angles, coil filament centroids and turns, limiter
-contour -- plus their counts.  Two shots share a machine description iff they
-share a fingerprint.  ``silop`` arrays are NaN-padded in this corpus, so only
-finite entries are hashed.  The digest scheme deliberately reproduces the one
-the ambix per-campaign tables already use, so the keys are comparable across
-the two codebases without either importing the other.
+Physical configuration versus setup representation
+---------------------------------------------------
+The historical campaign fingerprint remains in the artifact because it is the
+key used by existing Ambix operator caches.  It hashes every EFIT filament and
+therefore changes when the same physical conductor is represented by a
+different mesh.  It is a representation fingerprint, not a machine-description
+identity.
 
-That fingerprint covers the ACTIVE conductors and the sensors, and nothing
-else.  The passive (vessel) structure geometry lives in a different group
-entirely, embedded in the ``amm`` array descriptions as ``R= Z=`` text, and is
-therefore invisible to it -- so a passive-only change would be silently folded
-into a single machine description.  A second, independent digest over the
-parsed passive positions is reported alongside, which is what turns "how many
-machine descriptions does the corpus need" from an assumption into a count.
+The physical comparison in this module instead:
+
+* groups filament cells by the physical circuit they discretise and compares
+  geometry moments, bounds, turns and topology without retaining cell count;
+* compares diagnostic positions and sensitive-axis orientations explicitly;
+* compares the limiter as a closed curve using sampling-independent geometric
+  moments; and
+* treats ``amm`` positions as wall-model discretisation evidence, never as
+  authoritative vessel geometry.
+
+Configuration ranges are built only after equivalent setup representations
+have been grouped.  Missing or corrupt source entries are retained as explicit
+exceptions.  A boundary remains provisional unless an actual installation or
+maintenance record establishes a physical change.
 
 Reads only static-setup geometry plus reconstructed scalars used as a
 convention referee; writes a JSON summary and the figures.  Nothing here
@@ -72,6 +76,7 @@ import json
 import re
 import warnings
 from concurrent.futures import ProcessPoolExecutor
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -79,7 +84,7 @@ import numpy as np
 
 LEVEL1 = Path("/work/projects/imas_gpu/mast/level1/shots")
 
-#: static-setup arrays hashed into the campaign fingerprint (no time axis;
+#: static-setup arrays hashed into the representation fingerprint (no time axis;
 #: each is indexed by a geometry dimension).
 FINGERPRINT_ARRAYS: tuple[str, ...] = (
     "magpr_r",
@@ -90,6 +95,24 @@ FINGERPRINT_ARRAYS: tuple[str, ...] = (
     "fcoil_r",
     "fcoil_z",
     "fcoil_turns",
+    "limiterr",
+    "limiterz",
+)
+
+PHYSICAL_GEOMETRY_ARRAYS: tuple[str, ...] = (
+    "magpr_r",
+    "magpr_z",
+    "magpr_ang",
+    "magpr_len",
+    "silop_r",
+    "silop_z",
+    "fcoil_r",
+    "fcoil_z",
+    "fcoil_turns",
+    "fcoil_width",
+    "fcoil_height",
+    "fcoil_circ",
+    "fcoil_xmult",
     "limiterr",
     "limiterz",
 )
@@ -120,12 +143,407 @@ def _finite(a: np.ndarray) -> np.ndarray:
 
 
 def geometry_digest(arrays: list[np.ndarray], decimals: int = 4) -> str:
-    """16-hex digest of rounded float arrays -- the campaign fingerprint."""
+    """16-hex digest of rounded arrays for representation compatibility."""
     h = hashlib.sha256()
     for a in arrays:
         r = np.round(np.asarray(a, dtype=np.float64), decimals)
         h.update(np.ascontiguousarray(r).tobytes())
     return h.hexdigest()[:16]
+
+
+# The MAST control-system machine description contains 23 physical circuits:
+# 13 active PF circuits and 10 separately supplied coil cases.  Higher circuit
+# numbers in EFIT's fcoil table are wall-model elements, not additional coils.
+MAST_PHYSICAL_CIRCUITS = tuple(range(1, 24))
+
+# Setup coordinates differ slightly between otherwise equivalent historical
+# inputs.  These thresholds bound the measured variation across the three raw
+# setup fingerprints and are deliberately smaller than the changes tests use
+# to represent a relocated component.
+CONDUCTOR_POSITION_UNCERTAINTY_M = 0.025
+DIAGNOSTIC_POSITION_UNCERTAINTY_M = 0.015
+DIAGNOSTIC_ANGLE_UNCERTAINTY_DEG = 0.1
+CURVE_MOMENT_UNCERTAINTY = 5.0e-3
+
+
+def _normalise_angle_deg(value: float) -> float:
+    """Normalise a signed sensitive-axis angle without folding its polarity."""
+    angle = float(value) % 360.0
+    return 0.0 if np.isclose(angle, 360.0) else angle
+
+
+def canonical_diagnostic_layout(
+    probe_r: np.ndarray,
+    probe_z: np.ndarray,
+    probe_angle_deg: np.ndarray,
+    probe_length: np.ndarray,
+    flux_loop_r: np.ndarray,
+    flux_loop_z: np.ndarray,
+) -> dict[str, tuple[tuple[float, ...], ...]]:
+    """Canonical diagnostic poses independent of source-array ordering.
+
+    Probe orientation is kept modulo 360 degrees, not 180 degrees: reversing a
+    sensitive axis reverses the measured signal and is a physical configuration
+    change.  Non-finite padding is omitted.
+    """
+
+    probes = []
+    for r, z, angle, length in zip(
+        probe_r, probe_z, probe_angle_deg, probe_length, strict=True
+    ):
+        values = np.asarray([r, z, angle, length], dtype=np.float64)
+        if np.all(np.isfinite(values)):
+            probes.append(
+                (
+                    float(r),
+                    float(z),
+                    _normalise_angle_deg(float(angle)),
+                    float(length),
+                )
+            )
+
+    loops = []
+    for r, z in zip(flux_loop_r, flux_loop_z, strict=True):
+        values = np.asarray([r, z], dtype=np.float64)
+        if np.all(np.isfinite(values)):
+            loops.append((float(r), float(z)))
+
+    return {
+        "magnetic_probes": tuple(
+            sorted(probes, key=lambda pose: (pose[2], pose[0], pose[1], pose[3]))
+        ),
+        "flux_loops": tuple(sorted(loops)),
+    }
+
+
+def canonical_conductor_components(
+    component: np.ndarray,
+    r: np.ndarray,
+    z: np.ndarray,
+    width: np.ndarray,
+    height: np.ndarray,
+    turns: np.ndarray,
+    weight: np.ndarray,
+    *,
+    include: tuple[int, ...] | None = None,
+) -> tuple[tuple[float | int, ...], ...]:
+    """Reduce a conductor mesh to physical component geometry.
+
+    Each component retains its weighted centroid, occupied bounds, second
+    moments and effective turns.  Element count and subdivision are absent, so
+    splitting a filled conductor cell into smaller cells with proportional
+    weights leaves the result unchanged.
+    """
+
+    arrays = [
+        np.asarray(a, dtype=np.float64)
+        for a in (component, r, z, width, height, turns, weight)
+    ]
+    if len({a.shape for a in arrays}) != 1:
+        raise ValueError("conductor arrays must have identical shapes")
+
+    component_id, rr, zz, dr, dz, nturn, share = arrays
+    allowed = None if include is None else set(include)
+    out: list[tuple[float | int, ...]] = []
+    for value in sorted({int(x) for x in component_id[np.isfinite(component_id)]}):
+        if allowed is not None and value not in allowed:
+            continue
+        mask = component_id == value
+        finite = np.isfinite(
+            np.column_stack(
+                [rr[mask], zz[mask], dr[mask], dz[mask], nturn[mask], share[mask]]
+            )
+        ).all(axis=1)
+        if not finite.any():
+            continue
+        cr = rr[mask][finite]
+        cz = zz[mask][finite]
+        cw = np.abs(dr[mask][finite])
+        ch = np.abs(dz[mask][finite])
+        ct = nturn[mask][finite]
+        signed_share = share[mask][finite]
+        mass = np.abs(signed_share)
+        total_mass = float(mass.sum())
+        if total_mass == 0.0:
+            mass = np.ones_like(mass)
+            total_mass = float(mass.sum())
+        centre_r = float(np.dot(mass, cr) / total_mass)
+        centre_z = float(np.dot(mass, cz) / total_mass)
+        moment_r = float(np.dot(mass, (cr - centre_r) ** 2 + cw**2 / 12.0) / total_mass)
+        moment_z = float(np.dot(mass, (cz - centre_z) ** 2 + ch**2 / 12.0) / total_mass)
+        out.append(
+            (
+                value,
+                centre_r,
+                centre_z,
+                float(np.min(cr - cw / 2.0)),
+                float(np.max(cr + cw / 2.0)),
+                float(np.min(cz - ch / 2.0)),
+                float(np.max(cz + ch / 2.0)),
+                moment_r,
+                moment_z,
+                float(np.dot(signed_share, ct)),
+            )
+        )
+    return tuple(out)
+
+
+def canonical_closed_curve(r: np.ndarray, z: np.ndarray) -> tuple[float, ...] | None:
+    """Sampling-independent area, centroid, moments, bounds and perimeter."""
+
+    points = np.column_stack(
+        [np.asarray(r, dtype=np.float64), np.asarray(z, dtype=np.float64)]
+    )
+    points = points[np.isfinite(points).all(axis=1)]
+    if len(points) < 3:
+        return None
+    keep = np.r_[True, np.any(np.diff(points, axis=0) != 0.0, axis=1)]
+    points = points[keep]
+    if np.array_equal(points[0], points[-1]):
+        points = points[:-1]
+    if len(points) < 3:
+        return None
+
+    x = points[:, 0]
+    y = points[:, 1]
+    x_next = np.roll(x, -1)
+    y_next = np.roll(y, -1)
+    cross = x * y_next - x_next * y
+    signed_area = 0.5 * float(cross.sum())
+    if np.isclose(signed_area, 0.0):
+        return None
+    centroid_r = float(np.sum((x + x_next) * cross) / (6.0 * signed_area))
+    centroid_z = float(np.sum((y + y_next) * cross) / (6.0 * signed_area))
+    second_r = float(
+        np.sum((y**2 + y * y_next + y_next**2) * cross) / (12.0 * signed_area)
+    )
+    second_z = float(
+        np.sum((x**2 + x * x_next + x_next**2) * cross) / (12.0 * signed_area)
+    )
+    perimeter = float(np.hypot(x_next - x, y_next - y).sum())
+    return (
+        abs(signed_area),
+        centroid_r,
+        centroid_z,
+        second_r,
+        second_z,
+        float(x.min()),
+        float(x.max()),
+        float(y.min()),
+        float(y.max()),
+        perimeter,
+    )
+
+
+def canonical_physical_geometry(arrays: dict[str, np.ndarray]) -> dict[str, Any]:
+    """Canonical physical MAST geometry from one EFIT setup representation."""
+
+    required = {
+        "magpr_r",
+        "magpr_z",
+        "magpr_ang",
+        "magpr_len",
+        "silop_r",
+        "silop_z",
+        "fcoil_r",
+        "fcoil_z",
+        "fcoil_width",
+        "fcoil_height",
+        "fcoil_turns",
+        "fcoil_circ",
+        "fcoil_xmult",
+        "limiterr",
+        "limiterz",
+    }
+    missing = sorted(required - arrays.keys())
+    if missing:
+        raise ValueError(f"physical geometry arrays missing: {', '.join(missing)}")
+
+    return {
+        "active_and_case_circuits": canonical_conductor_components(
+            arrays["fcoil_circ"],
+            arrays["fcoil_r"],
+            arrays["fcoil_z"],
+            arrays["fcoil_width"],
+            arrays["fcoil_height"],
+            arrays["fcoil_turns"],
+            arrays["fcoil_xmult"],
+            include=MAST_PHYSICAL_CIRCUITS,
+        ),
+        "diagnostics": canonical_diagnostic_layout(
+            arrays["magpr_r"],
+            arrays["magpr_z"],
+            arrays["magpr_ang"],
+            arrays["magpr_len"],
+            arrays["silop_r"],
+            arrays["silop_z"],
+        ),
+        "limiter": canonical_closed_curve(arrays["limiterr"], arrays["limiterz"]),
+        "physical_circuit_ids": MAST_PHYSICAL_CIRCUITS,
+    }
+
+
+def physical_geometry_equivalent(
+    left: dict[str, Any],
+    right: dict[str, Any],
+    *,
+    conductor_position_uncertainty_m: float = CONDUCTOR_POSITION_UNCERTAINTY_M,
+    diagnostic_position_uncertainty_m: float = DIAGNOSTIC_POSITION_UNCERTAINTY_M,
+    diagnostic_angle_uncertainty_deg: float = DIAGNOSTIC_ANGLE_UNCERTAINTY_DEG,
+) -> bool:
+    """Whether two setup representations support the same physical geometry."""
+
+    if left["physical_circuit_ids"] != right["physical_circuit_ids"]:
+        return False
+    l_conductor = np.asarray(left["active_and_case_circuits"], dtype=np.float64)
+    r_conductor = np.asarray(right["active_and_case_circuits"], dtype=np.float64)
+    if l_conductor.shape != r_conductor.shape:
+        return False
+    if not np.array_equal(l_conductor[:, 0], r_conductor[:, 0]):
+        return False
+    # Component positions, bounds and effective turns carry source-scale
+    # uncertainty.  Second moments have squared-distance units.
+    conductor_atol = np.asarray(
+        [
+            0.0,
+            conductor_position_uncertainty_m,
+            conductor_position_uncertainty_m,
+            conductor_position_uncertainty_m,
+            conductor_position_uncertainty_m,
+            conductor_position_uncertainty_m,
+            conductor_position_uncertainty_m,
+            conductor_position_uncertainty_m,
+            conductor_position_uncertainty_m,
+            1.0e-4,
+        ]
+    )
+    if not np.all(np.abs(l_conductor - r_conductor) <= conductor_atol):
+        return False
+
+    l_diag = left["diagnostics"]
+    r_diag = right["diagnostics"]
+    for key, atol in (
+        (
+            "magnetic_probes",
+            np.asarray(
+                [
+                    diagnostic_position_uncertainty_m,
+                    diagnostic_position_uncertainty_m,
+                    diagnostic_angle_uncertainty_deg,
+                    diagnostic_position_uncertainty_m,
+                ]
+            ),
+        ),
+        (
+            "flux_loops",
+            np.asarray(
+                [
+                    diagnostic_position_uncertainty_m,
+                    diagnostic_position_uncertainty_m,
+                ]
+            ),
+        ),
+    ):
+        l_values = np.asarray(l_diag[key], dtype=np.float64)
+        r_values = np.asarray(r_diag[key], dtype=np.float64)
+        if l_values.shape != r_values.shape:
+            return False
+        if not np.all(np.abs(l_values - r_values) <= atol):
+            return False
+
+    l_curve = left["limiter"]
+    r_curve = right["limiter"]
+    if (l_curve is None) != (r_curve is None):
+        return False
+    return l_curve is None or bool(
+        np.allclose(
+            np.asarray(l_curve),
+            np.asarray(r_curve),
+            rtol=0.0,
+            atol=CURVE_MOMENT_UNCERTAINTY,
+        )
+    )
+
+
+def physical_geometry_digest(geometry: dict[str, Any]) -> str:
+    """Evidence digest for one canonical geometry representative."""
+
+    payload = json.dumps(geometry, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(payload.encode()).hexdigest()[:16]
+
+
+@dataclass(frozen=True)
+class ShotConfigurationRange:
+    """A contiguous physical-configuration range with explicit source gaps."""
+
+    configuration: str
+    shot_min: int
+    shot_max: int
+    evidence_shots: tuple[int, ...]
+    unreadable_shots: tuple[int, ...]
+    confidence: str
+
+
+def build_configuration_ranges(
+    evidence: list[tuple[int, str | None]],
+    *,
+    confidence: str = "provisional",
+) -> tuple[ShotConfigurationRange, ...]:
+    """Build discrete ranges while preserving missing/corrupt-shot exceptions.
+
+    Invalid evidence does not invent a boundary.  It is attached to a range
+    when bracketed by the same configuration.  When configurations differ
+    across a gap, each neighbouring range remains provisional and the invalid
+    shots are retained on the earlier range as unresolved boundary evidence.
+    """
+
+    if not evidence:
+        return ()
+    records = sorted(evidence)
+    ranges: list[ShotConfigurationRange] = []
+    current: str | None = None
+    shots: list[int] = []
+    unreadable: list[int] = []
+    pending: list[int] = []
+
+    def close() -> None:
+        if current is None or not shots:
+            return
+        ranges.append(
+            ShotConfigurationRange(
+                configuration=current,
+                shot_min=shots[0],
+                shot_max=shots[-1],
+                evidence_shots=tuple(shots),
+                unreadable_shots=tuple(unreadable),
+                confidence=confidence,
+            )
+        )
+
+    for shot, configuration in records:
+        if configuration is None:
+            pending.append(int(shot))
+            continue
+        if current is None:
+            current = configuration
+            shots = [int(shot)]
+            unreadable = pending
+            pending = []
+            continue
+        if configuration == current:
+            unreadable.extend(pending)
+            pending = []
+            shots.append(int(shot))
+            continue
+        unreadable.extend(pending)
+        pending = []
+        close()
+        current = configuration
+        shots = [int(shot)]
+        unreadable = []
+    unreadable.extend(pending)
+    close()
+    return tuple(ranges)
 
 
 #: ``amm`` arrays that are not passive structures (time base, bookkeeping).
@@ -175,7 +593,7 @@ def _get(efm: Any, keys: set[str], name: str) -> np.ndarray | None:
 
 
 def fingerprint_shot(shot: int) -> dict[str, Any] | None:
-    """Campaign fingerprint + the convention-determining signs for one shot."""
+    """Representation fingerprint + convention-determining signs for one shot."""
     try:
         efm, keys = _open_efm(shot)
     except Exception:  # noqa: BLE001 -- a missing/corrupt shot is skipped
@@ -221,6 +639,25 @@ def fingerprint_shot(shot: int) -> dict[str, Any] | None:
     }
     row.update(_convention_signs(efm, keys))
     return row
+
+
+def physical_geometry_shot(shot: int) -> dict[str, Any] | None:
+    """Canonical physical-geometry evidence for one readable MAST shot."""
+
+    try:
+        efm, keys = _open_efm(shot)
+    except Exception:  # noqa: BLE001 -- an unreadable shot is explicit evidence
+        return None
+    if not set(PHYSICAL_GEOMETRY_ARRAYS) <= keys:
+        return None
+    try:
+        arrays = {
+            name: np.asarray(efm[name][:], dtype=np.float64)
+            for name in PHYSICAL_GEOMETRY_ARRAYS
+        }
+        return canonical_physical_geometry(arrays)
+    except Exception:  # noqa: BLE001 -- corrupt geometry is not a configuration
+        return None
 
 
 def _convention_signs(efm: Any, keys: set[str]) -> dict[str, Any]:
@@ -510,6 +947,125 @@ def load_report(path: Path) -> dict[str, Any]:
     return report
 
 
+def audit_physical_configurations(
+    report: dict[str, Any],
+    available_shots: list[int],
+) -> dict[str, Any]:
+    """Group raw setup fingerprints by physical equivalence and build ranges."""
+
+    representatives: list[dict[str, Any]] = []
+    raw_to_physical: dict[str, str] = {}
+    for raw_key, raw_group in sorted(
+        report["campaigns"].items(), key=lambda item: item[1]["shot_min"]
+    ):
+        representative_shot = int(raw_group["shots"][0])
+        geometry = physical_geometry_shot(representative_shot)
+        if geometry is None:
+            continue
+        match = next(
+            (
+                group
+                for group in representatives
+                if physical_geometry_equivalent(geometry, group["geometry"])
+            ),
+            None,
+        )
+        if match is None:
+            match = {
+                "configuration": f"mast-physical-{physical_geometry_digest(geometry)}",
+                "geometry": geometry,
+                "representative_shot": representative_shot,
+                "raw_fingerprints": [],
+            }
+            representatives.append(match)
+        match["raw_fingerprints"].append(raw_key)
+        raw_to_physical[raw_key] = match["configuration"]
+
+    configuration_by_shot = {
+        int(shot): raw_to_physical[raw_key]
+        for raw_key, raw_group in report["campaigns"].items()
+        if raw_key in raw_to_physical
+        for shot in raw_group["shots"]
+    }
+    evidence = [
+        (int(shot), configuration_by_shot.get(int(shot)))
+        for shot in sorted(available_shots)
+    ]
+    ranges = build_configuration_ranges(evidence)
+    range_rows = []
+    for item in ranges:
+        range_rows.append(
+            {
+                "configuration": item.configuration,
+                "shot_min": item.shot_min,
+                "shot_max": item.shot_max,
+                "n_evidence_shots": len(item.evidence_shots),
+                "n_unreadable_shots": len(item.unreadable_shots),
+                "unreadable_shots": list(item.unreadable_shots),
+                "confidence": item.confidence,
+            }
+        )
+
+    n_readable = len(configuration_by_shot)
+    n_unreadable = len(available_shots) - n_readable
+    n_with_passive = sum(
+        int(group["n_shots"]) for group in report["passive_groups"].values()
+    )
+    passive_missing_fraction = (
+        0.0 if n_readable == 0 else 1.0 - n_with_passive / n_readable
+    )
+
+    return {
+        "identity_rule": (
+            "underlying conductor, wall, limiter, TF and diagnostic geometry; "
+            "never source mesh or element count"
+        ),
+        "n_raw_setup_fingerprints": len(report["campaigns"]),
+        "n_canonical_physical_configurations": len(representatives),
+        "raw_to_physical": raw_to_physical,
+        "configurations": [
+            {
+                "configuration": group["configuration"],
+                "representative_shot": group["representative_shot"],
+                "raw_fingerprints": group["raw_fingerprints"],
+                "n_physical_circuits": len(
+                    group["geometry"]["active_and_case_circuits"]
+                ),
+                "n_magnetic_probes": len(
+                    group["geometry"]["diagnostics"]["magnetic_probes"]
+                ),
+                "n_flux_loops": len(group["geometry"]["diagnostics"]["flux_loops"]),
+            }
+            for group in representatives
+        ],
+        "operational_ranges": range_rows,
+        "excluded_representation_details": {
+            "efm_fcoil": (
+                "filament count, subdivision and wall-model circuits above the "
+                "23 physical active and case circuits"
+            ),
+            "amm": (
+                "parsed wall-model element positions are discretisation evidence, "
+                "not authoritative vessel geometry"
+            ),
+        },
+        "boundary_status": (
+            "No physical change boundary is established by the available source. "
+            "The single range is provisional until installation and maintenance "
+            "records confirm conductor, passive, wall, TF and diagnostic epochs."
+        ),
+        "source_limitations": [
+            f"{n_unreadable:,} on-disk shots have no readable static setup geometry",
+            f"{passive_missing_fraction:.1%} of readable setup shots have no "
+            "parseable amm positions",
+            "FAIR-MAST setup arrays do not distinguish calibration revisions from "
+            "physical diagnostic relocation",
+            "amm element lists do not provide authoritative continuous passive "
+            "structure geometry",
+        ],
+    }
+
+
 def scan(shots: list[int], workers: int) -> list[dict[str, Any]]:
     with ProcessPoolExecutor(max_workers=workers) as pool:
         results = pool.map(fingerprint_shot, shots, chunksize=16)
@@ -573,86 +1129,109 @@ SINGLETON_MAX = 1
 def campaign_timeline(d: dict) -> None:
     import matplotlib.pyplot as plt
 
-    active = d["campaigns"]
-    passive = d["passive_groups"]
-    combined = d["combined_machine_descriptions"]
+    raw = d["campaigns"]
+    physical = d["physical_configuration_audit"]
+    raw_to_physical = physical["raw_to_physical"]
+    lo = min(v["shot_min"] for v in raw.values())
+    hi = max(v["shot_max"] for v in raw.values())
 
     fig, axes = plt.subplots(
-        3, 1, figsize=(12.4, 6.6), sharex=True, height_ratios=[1.0, 1.1, 1.35]
+        3, 1, figsize=(12.4, 6.5), sharex=True, height_ratios=[1.45, 0.75, 0.8]
     )
-    lo = min(v["shot_min"] for v in active.values())
-    hi = max(v["shot_max"] for v in active.values())
 
-    def band(ax, groups, title, label_of):
-        keys = sorted(groups, key=lambda k: groups[k]["shot_min"])
-        solid = [k for k in keys if groups[k]["n_shots"] > SINGLETON_MAX]
-        drops = [k for k in keys if groups[k]["n_shots"] <= SINGLETON_MAX]
-        rows = list(reversed(solid))
-        colour = {k: MD_COLOURS[i % len(MD_COLOURS)] for i, k in enumerate(solid)}
-        labels = []
-        for i, k in enumerate(rows):
-            shots = np.asarray(groups[k]["shots"])
-            ax.scatter(
-                shots,
-                np.full(shots.size, i),
-                s=3,
-                marker="|",
-                color=colour[k],
-                linewidths=0.8,
-            )
-            labels.append((i, f"{label_of(k)}  n={shots.size}", colour[k]))
-        if drops:
-            i = len(rows)
-            shots = np.asarray([s for k in drops for s in groups[k]["shots"]])
-            ax.scatter(
-                shots,
-                np.full(shots.size, i),
-                s=30,
-                marker="x",
-                color=RED,
-                linewidths=1.0,
-            )
-            labels.append((i, f"{len(drops)} single-shot acquisition dropouts", RED))
-        for i, text, col in labels:
-            ax.text(hi + 400, i, text, va="center", fontsize=8, color=col)
-        n = len(rows) + (1 if drops else 0)
-        ax.set_yticks(range(n))
-        ax.set_yticklabels(
-            [f"#{len(rows) - i}" for i in range(len(rows))]
-            + (["drop"] if drops else []),
-            fontsize=7.5,
+    raw_keys = sorted(raw, key=lambda key: raw[key]["shot_min"])
+    for i, key in enumerate(raw_keys):
+        shots = np.asarray(raw[key]["shots"])
+        axes[0].scatter(
+            shots,
+            np.full(shots.size, i),
+            s=3,
+            marker="|",
+            color=MD_COLOURS[i],
+            linewidths=0.8,
         )
-        ax.set_ylim(-0.7, n - 0.2)
-        ax.set_xlim(lo - 400, hi + 6400)
-        ax.set_title(title, loc="left", color=INK)
+    axes[0].set_yticks(range(len(raw_keys)))
+    axes[0].set_yticklabels(
+        [
+            f"{key.split('-lim37-')[0].replace('mp78-fl46-', '')}…{key[-6:]}"
+            for key in raw_keys
+        ],
+        fontsize=7.5,
+    )
+    axes[0].set_title(
+        "a  Raw EFIT setup fingerprints — representation states, not machine IDs",
+        loc="left",
+        color=INK,
+    )
+
+    physical_shots: dict[str, list[int]] = {}
+    for key, group in raw.items():
+        physical_shots.setdefault(raw_to_physical[key], []).extend(group["shots"])
+    for i, (key, shots) in enumerate(sorted(physical_shots.items())):
+        values = np.asarray(sorted(shots))
+        axes[1].scatter(
+            values,
+            np.full(values.size, i),
+            s=3,
+            marker="|",
+            color=GREEN,
+            linewidths=0.8,
+        )
+        axes[1].text(
+            hi + 300,
+            i,
+            f"{key[-8:]}  n={values.size:,}",
+            va="center",
+            fontsize=8,
+            color=GREEN,
+        )
+    axes[1].set_yticks(range(len(physical_shots)))
+    axes[1].set_yticklabels(["physical geometry"] * len(physical_shots), fontsize=7.5)
+    axes[1].set_title(
+        "b  Canonical physical comparison — mesh counts and "
+        "wall-model elements removed",
+        loc="left",
+        color=INK,
+    )
+
+    for item in physical["operational_ranges"]:
+        axes[2].hlines(
+            0.15,
+            item["shot_min"],
+            item["shot_max"],
+            color=GREEN,
+            linewidth=8,
+            zorder=1,
+        )
+        unreadable = np.asarray(item["unreadable_shots"])
+        if unreadable.size:
+            axes[2].scatter(
+                unreadable,
+                np.full(unreadable.size, -0.15),
+                marker="|",
+                s=10,
+                color=RED,
+                linewidths=0.7,
+                alpha=0.8,
+                zorder=3,
+            )
+    axes[2].set_yticks([-0.15, 0.15])
+    axes[2].set_yticklabels(["unreadable", "provisional range"], fontsize=7.5)
+    axes[2].set_title(
+        "c  Operational range — red ticks are unreadable source shots, not boundaries",
+        loc="left",
+        color=INK,
+    )
+    axes[2].set_xlabel("MAST shot number")
+
+    for ax in axes:
+        ax.set_xlim(lo - 400, hi + 3800)
         for spine in ("top", "right"):
             ax.spines[spine].set_visible(False)
-
-    band(
-        axes[0],
-        active,
-        "a  Active-conductor + sensor fingerprint"
-        " (efm magpr / silop / fcoil / limiter)",
-        lambda k: k.split("-lim37-")[0].replace("mp78-fl46-", "") + "…" + k[-6:],
-    )
-    band(
-        axes[1],
-        passive,
-        "b  Passive-structure digest (amm element positions) — invisible to (a)",
-        lambda k: k.split("-")[0] + "…" + k[-6:],
-    )
-    band(
-        axes[2],
-        combined,
-        "c  Machine descriptions the catalog needs = (a) x (b)",
-        lambda k: k.split("+")[0][-6:] + " + " + k.split("+")[1].split("-")[0],
-    )
-
-    n_solid = sum(1 for v in combined.values() if v["n_shots"] > SINGLETON_MAX)
-    axes[2].set_xlabel("MAST shot number")
     fig.suptitle(
-        "Three coil/sensor fingerprints x three passive states = "
-        f"{n_solid} machine descriptions — and not one of them is a shot range",
+        f"{len(raw)} setup fingerprints collapse to "
+        f"{physical['n_canonical_physical_configurations']} provisional physical "
+        "configuration; no hardware boundary is established",
         fontsize=11.5,
         color=INK,
     )
@@ -667,65 +1246,60 @@ def campaign_timeline(d: dict) -> None:
 def interleaving(d: dict) -> None:
     import matplotlib.pyplot as plt
 
-    active = d["campaigns"]
-    keys = sorted(active, key=lambda k: active[k]["shot_min"])
-    label = {k: f"MD{i + 1}" for i, k in enumerate(keys)}
-    colour = {k: MD_COLOURS[i % len(MD_COLOURS)] for i, k in enumerate(keys)}
-    owner = {s: k for k in keys for s in active[k]["shots"]}
-
-    fig, axes = plt.subplots(1, 2, figsize=(11.0, 3.4), width_ratios=[1.35, 1])
+    raw = d["campaigns"]
+    physical = d["physical_configuration_audit"]
+    keys = sorted(raw, key=lambda key: raw[key]["shot_min"])
+    colours = {key: MD_COLOURS[i] for i, key in enumerate(keys)}
+    fig, axes = plt.subplots(1, 2, figsize=(11.4, 3.8), width_ratios=[1.5, 1])
 
     ax = axes[0]
-    lo, hi = 12380, 13400
-    for k in keys:
-        shots = np.asarray([s for s in active[k]["shots"] if lo <= s <= hi])
-        if shots.size:
-            ax.scatter(
-                shots,
-                np.full(shots.size, list(keys).index(k)),
-                s=14,
-                marker="|",
-                color=colour[k],
-                linewidths=1.1,
-            )
+    for i, key in enumerate(keys):
+        shots = np.asarray(raw[key]["shots"])
+        ax.scatter(
+            shots,
+            np.full(shots.size, i),
+            s=4,
+            marker="|",
+            color=colours[key],
+            linewidths=0.8,
+        )
     ax.set_yticks(range(len(keys)))
-    ax.set_yticklabels([label[k] for k in keys])
-    ax.set_xlim(lo, hi)
+    ax.set_yticklabels(
+        [f"{key.split('-')[2]}  …{key[-6:]}" for key in keys], fontsize=7.5
+    )
     ax.set_xlabel("MAST shot number")
     ax.set_title(
-        "a  The two 1004-filament and 938-filament descriptions interleave\n"
-        "   over shots 12403–13360 — 11 alternating runs, not one boundary",
+        "a  Raw representations interleave\n"
+        "   alternation is evidence against hardware boundaries",
         loc="left",
         color=INK,
     )
-    for spine in ("top", "right"):
-        ax.spines[spine].set_visible(False)
 
-    # run-length histogram over the whole corpus
     ax = axes[1]
-    shots = sorted(owner)
-    runs = []
-    start = shots[0]
-    cur = owner[start]
-    for a, b in zip(shots, shots[1:]):
-        if owner[b] != cur:
-            runs.append(a - start + 1)
-            start = b
-            cur = owner[b]
-    runs.append(shots[-1] - start + 1)
-    ax.bar(range(len(runs)), runs, color=[MUTED] * len(runs), width=0.75)
+    raw_counts = [int(key.split("-fc")[1].split("-")[0]) for key in keys]
+    physical_counts = [physical["configurations"][0]["n_physical_circuits"]] * len(keys)
+    x = np.arange(len(keys))
+    ax.bar(x - 0.18, raw_counts, width=0.36, color=AMBER, label="EFIT filaments")
+    ax.bar(
+        x + 0.18,
+        physical_counts,
+        width=0.36,
+        color=GREEN,
+        label="physical circuits",
+    )
+    ax.set_xticks(x)
+    ax.set_xticklabels([f"setup {i + 1}" for i in x], fontsize=7.5)
+    ax.set_ylabel("count")
     ax.set_yscale("log")
-    ax.set_xlabel("contiguous run, in shot order")
-    ax.set_ylabel("run length [shots]")
     ax.set_title(
-        f"b  {len(runs)} contiguous runs for {len(keys)} descriptions\n"
-        "   a range table would need every one of them",
+        "b  Resolution removed from identity\n   938/1004 cells → the same 23 circuits",
         loc="left",
         color=INK,
     )
-    for spine in ("top", "right"):
-        ax.spines[spine].set_visible(False)
-
+    ax.legend(frameon=False, fontsize=7.5)
+    for ax in axes:
+        for spine in ("top", "right"):
+            ax.spines[spine].set_visible(False)
     fig.tight_layout()
     fig.savefig(figure_dir() / "fingerprint_interleaving.png", dpi=140)
     plt.close(fig)
@@ -1053,6 +1627,11 @@ def main() -> int:
         action="store_true",
         help="redraw the figures from an existing artifact without rescanning",
     )
+    parser.add_argument(
+        "--physical-only",
+        action="store_true",
+        help="refresh physical configuration evidence in an existing artifact",
+    )
     args = parser.parse_args()
 
     global _FIGURE_DIR  # noqa: PLW0603 -- figures land beside the artifact
@@ -1063,6 +1642,15 @@ def main() -> int:
         return 0
 
     all_shots = sorted(int(p.name.removesuffix(".zarr")) for p in LEVEL1.glob("*.zarr"))
+    if args.physical_only:
+        report = json.loads(args.out.read_text())
+        report["physical_configuration_audit"] = audit_physical_configurations(
+            report, all_shots
+        )
+        args.out.write_text(json.dumps(report, separators=(",", ":")))
+        draw_figures(load_report(args.out))
+        return 0
+
     shots = all_shots[:: args.stride]
     print(
         f"scanning {len(shots)} of {len(all_shots)} shots with {args.workers} workers"
@@ -1155,6 +1743,9 @@ def main() -> int:
         "sign_rows": as_columns([_compact(r) for r in rows]),
         "ratio_rows": as_columns([_compact(r) for r in ratio_rows]),
     }
+    report["physical_configuration_audit"] = audit_physical_configurations(
+        report, all_shots
+    )
     args.out.parent.mkdir(parents=True, exist_ok=True)
     # compact separators: indented, the columnar tables put each of ~260k values
     # on its own line and treble the file.  Read it back with load_report.
@@ -1171,9 +1762,22 @@ def main() -> int:
     print(f"passive-structure digests: {len(passive_groups)}")
     for key, v in sorted(passive_groups.items(), key=lambda kv: min(kv[1])):
         print(f"  {key}  n={len(v):5d}  shots {min(v)}..{max(v)}")
-    print(f"combined machine descriptions: {len(combined)}")
+    print(f"combined raw setup/passive digest pairs: {len(combined)}")
     for key, v in sorted(combined.items(), key=lambda kv: min(kv[1])):
         print(f"  {key}  n={len(v):5d}  shots {min(v)}..{max(v)}")
+    physical = report["physical_configuration_audit"]
+    print(
+        "canonical physical configurations: "
+        f"{physical['n_canonical_physical_configurations']}"
+    )
+    for item in physical["operational_ranges"]:
+        print(
+            f"  {item['configuration']}  shots "
+            f"{item['shot_min']}..{item['shot_max']} "
+            f"evidence={item['n_evidence_shots']} "
+            f"unreadable={item['n_unreadable_shots']} "
+            f"confidence={item['confidence']}"
+        )
 
     if not args.no_figures:
         draw_figures(load_report(args.out))

@@ -11,7 +11,6 @@ import scipy
 from nova.thermalhydralic.naka.database import DataBase
 from nova.thermalhydralic.naka.nakadata import NakaData
 from nova.utilities.pandasdata import PandasHDF
-import matplotlib.pyplot as plt
 
 
 @dataclass
@@ -98,12 +97,7 @@ class SampleData(PandasHDF):
 
         data = pandas.DataFrame(data)
         data.attrs["position"] = position
-        print(data)
-
-        print(nakadata.columns.to_list())
-
-        plt.plot(data.time, data.mdot_in)
-        plt.plot(data.time, data.mdot_out)
+        return data
 
 
 if __name__ == "__main__":

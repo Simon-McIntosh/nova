@@ -1,9 +1,15 @@
-import jax.numpy as jnp
-import matplotlib.pylab
 import numpy as np
 import pytest
 
-from nova.jax.basis import Bernstein, BSpline, Interp, Linear, Polynomial
+from nova.utilities.importmanager import skip_import
+
+with skip_import("jax"):
+    import jax.numpy as jnp
+
+    from nova.jax.basis import Bernstein, BSpline, Interp, Linear, Polynomial
+
+with skip_import("matplotlib"):
+    import matplotlib.pylab
 
 
 def test_basis_order():

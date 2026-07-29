@@ -53,9 +53,10 @@ class CrossSection(metamethod.CrossSection):
         ]
         undefined = [section is None for section in biot_section]
         if any(undefined):
+            unknown = np.unique(np.asarray(self.frame.section)[undefined])
             raise KeyError(
                 "Biotsection "
-                f"{self.frame.section[undefined].unique()} "
+                f"{unknown} "
                 "undefined. List in section_factor or section_key."
             )
         self.frame["turnturn"] = [

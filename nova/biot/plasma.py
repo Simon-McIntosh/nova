@@ -1,4 +1,10 @@
-"""Forward free-boundary equilibrium solver."""
+"""Plasma separatrix, filament ionization and flux-map state.
+
+Writing a poloidal flux map here re-normalizes the flux, re-ionizes the
+filaments inside the resulting separatrix and redistributes the plasma current
+across them. That write-then-read cycle is the map whose fixed point
+:class:`nova.equilibrium.forward.ForwardProfile` solves.
+"""
 
 from contextlib import contextmanager
 from dataclasses import dataclass, field, InitVar
@@ -7,7 +13,6 @@ from functools import cached_property
 import numpy as np
 from scipy.constants import mu_0
 from scipy.interpolate import interp1d
-from scipy.optimize import newton_krylov
 import scipy.spatial
 
 from nova.database.netcdf import netCDF
@@ -237,21 +242,11 @@ class Plasma(Plot, netCDF, Flux, PlasmaLoc):
         with self.profile():
             self.separatrix = self.psi_lcfs
 
-    def solve_flux(self, **kwargs):
-        """Solve for equilibrium poloidal flux across plasma grid and boundary."""
-
-        def flux_residual(psi):
-            """Return flux residual."""
-            self.psi = psi
-            return self.psi - psi
-
-        self.psi = newton_krylov(flux_residual, self.psi, **kwargs)
-
     @property
     def separatrix(self):
         """Return plasma separatrix, the convex hull of active filaments."""
-        index = self.loc["plasma", "nturn"] > 0
-        points = self.loc["plasma", ["x", "z"]].values[index]
+        index = np.asarray(self.aloc["plasma", "nturn"]) > 0
+        points = np.c_[self.aloc["plasma", "x"], self.aloc["plasma", "z"]][index]
         hull = scipy.spatial.ConvexHull(points)
         vertices = np.append(hull.vertices, hull.vertices[0])
         convexhull = points[vertices]

@@ -1,4 +1,21 @@
-"""Biot-Savart calculation for rectangular cross-section arc segments."""
+"""Biot-Savart calculation for rectangular cross-section arc segments.
+
+Urankar Part IV integrates a RECTANGLE, so this element's section is the box that
+bounds the frame's own -- taken from the ``poly`` column, the single section of
+record, rather than rebuilt from the ``width`` and ``height`` descriptor.  The two
+agree for every section a descriptor can express, which is the point: reading the
+column removes the possibility of the two drifting, lets a free-form polygon reach
+the element as its bounding box instead of failing for want of a descriptor, and
+gives the core of a hollow section its own section rather than a width scaling.
+
+What it cannot do is evaluate the section itself.  The rectangle is integrated
+while the normalisation is the frame's true area, so any section that does not
+fill its bounding box comes back too large by the ratio -- 4/3 for a hexagon,
+4/pi for a disc.  :class:`nova.biot.polybow.PolyBow` is the peer that evaluates
+the section as it stands, and is what a swept winding routes to; this element
+stays reachable by naming the segment, and serves as the independent Part IV
+oracle the closed form is measured against.
+"""
 
 from dataclasses import dataclass
 from functools import cached_property
@@ -8,6 +25,7 @@ import numpy as np
 
 from nova.biot.arc import Arc
 from nova.biot.matrix import Matrix
+from nova.geometry.section import collapse_collinear
 
 from nova.biot.zeta import zeta
 
@@ -27,16 +45,40 @@ class Bow(Arc, Matrix):
     def __post_init__(self):
         """Load intergration constants."""
         super().__post_init__()
+        width, height = self._section_extent
         self.rs = np.stack(
-            [self.rs + delta / 2 * self.source("width") for delta in [-1, 1, 1, -1]],
+            [self.rs + delta / 2 * width for delta in [-1, 1, 1, -1]],
             axis=-1,
         )
         self.zs = np.stack(
-            [self.zs + delta / 2 * self.source("height") for delta in [-1, -1, 1, 1]],
+            [self.zs + delta / 2 * height for delta in [-1, -1, 1, 1]],
             axis=-1,
         )
         for attr in ["r", "z", "alpha", "_phi"]:
             setattr(self, attr, self._stack(attr))
+
+    @property
+    def _section_extent(self) -> tuple[np.ndarray, np.ndarray]:
+        """Return the bounding width and height of each source's own section.
+
+        Measured on the ``poly`` column so the rectangle bounds the section of
+        record.  The ``width`` and ``height`` descriptor is the fallback for a
+        source that carries no polygon -- a filament frame relabelled to this
+        segment -- and is not the primary because a section it cannot express
+        would silently come back as something else.
+        """
+        poly = np.asarray(self.source["poly"], dtype=object)
+        extent = np.empty((2, len(poly)))
+        extent[0] = np.asarray(self.source["width"], dtype=float)
+        extent[1] = np.asarray(self.source["height"], dtype=float)
+        for column, section in enumerate(poly):
+            if not hasattr(section, "points"):  # no polygon stored for this source
+                continue
+            corners = collapse_collinear(
+                np.asarray(section.points, dtype=np.float64)[:, [0, 2]]
+            )
+            extent[:, column] = np.ptp(corners, axis=0)
+        return extent[0][np.newaxis, :], extent[1][np.newaxis, :]
 
     def _stack(self, attr):
         """Return cross section attribute stacked along last axis."""
@@ -66,7 +108,7 @@ class Bow(Arc, Matrix):
 
     @cached_property
     def zeta(self):
-        """Return zeta coefficient calculated using numba's trapezoid method."""
+        """Return zeta coefficient from the fixed-node quadrature integral."""
         return zeta(
             np.tile(self.rs, self.reps),
             np.tile(self.r, self.reps),

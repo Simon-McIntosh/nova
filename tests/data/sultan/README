@@ -1,0 +1,89 @@
+Synthetic SULTAN campaign cache
+==============================
+
+Provenance
+----------
+Every file here is synthesised. No SULTAN measurement is included, and none was
+available to copy from: the shipped data directory is empty, and no `.dat` or
+campaign workbook has ever been committed to this repository's history. The
+content was written to match the file format the readers in
+`nova/thermalhydralic/sultan/` implement, at the smallest size that still drives
+every parsing branch. It is therefore safe to redistribute -- there is nothing
+proprietary in it -- and it carries no measurement anyone should cite.
+
+The numbers are a plausible helium-cooled conductor test, not a validated one:
+5.5 bar inlet at 4.5 K, 8 g/s mass flow, a 230 A pulse coil driving a sinusoidal
+field between t = 1.5 s and t = 5.5 s, and an outlet temperature that rises
+through a single exponential during the pulse and relaxes through another
+afterwards. That shape is chosen so the heat index finds one driven window, the
+profile finds one maximum, and the cooldown threshold has something monotone to
+bisect.
+
+Layout
+------
+The tests point `XDG_DATA_HOME` at a copy of this directory, so `Sultan/` below
+it is what `appdirs.user_data_dir(appname="Sultan")` resolves to and `ftp/` is
+the source sub-directory `LocalData` downloads into.
+
+    SYNTH_1/ftp/SYNTH_1_testplan.xlsx   campaign metadata workbook
+    SYNTH_1/ftp/SYNTH1A110611.dat       ac shot, 1 Hz, 150 samples
+    SYNTH_1/ftp/SYNTH1A110612.dat       ac shot, 2 Hz, 120 samples
+
+The two ac shots differ in length so that advancing the shot index is visible in
+the profile, which is what pins the reload propagation. The workbook also
+declares a two-shot dc phase; it ships no timeseries because no test reads one,
+and it exists to give the mode split and the phase index two entries.
+
+Workbook structure
+------------------
+The reader takes column A as the campaign's spine. Row 0 holds the strand
+template `SYNTH1-AXXYYZZ`, from which the strand prefix `SYNTH1` is derived --
+the reader strips the `XXYYZZ` placeholder, drops the test-mode letter and
+removes hyphens, so the template must stand alone on its row. Each phase is then
+a section heading, a two-row column header, and one row per shot:
+
+    SYNTH1-AXXYYZZ
+    (blank)
+    AC Loss Initial
+    File            B Sultan  I Sample  P. Freq  I pulse  Notes
+                    T         kA        Hz       A
+    SYNTH1A110611   10.8      45.0      1.0      230 A    1 Hz sweep
+    SYNTH1A110612   10.8      45.0      2.0      230 A    2 Hz sweep
+    DC Test
+    File            B Sultan  I Sample  P. Freq  I pulse  Notes
+                    T         kA        Hz       A
+    SYNTH1D110621   10.8      45.0      0.0      230 A    dc hold
+    SYNTH1D110622   10.8      60.0      0.0      230 A    dc hold
+
+A shot's test mode is the character of its filename at the strand's length, so
+`SYNTH1A110611` is an ac shot and `SYNTH1D110621` a dc one. The header names are
+the pre-rename spellings (`B Sultan`, `I Sample`, `P. Freq`, `I pulse`) so the
+column-renaming branch is exercised rather than bypassed.
+
+Timeseries structure
+--------------------
+Each `.dat` is comma-separated with a single header row, which is what
+`SultanData._read_data` reads. The columns are the ones the sample conditioning
+selects by name:
+
+    Time                        s
+    dm/dt left, dm/dt right     g/s, scaled to kg/s on read
+    PS EEI (I)                  pulse-coil current, A
+    T11..T14, T21..T24          left and right inlet rakes, K
+    T31..T34, T41..T44          left and right outlet rakes, K
+    P in left,  P out left      bar, scaled to Pa on read
+    P in right, P out right     bar
+
+Side names are written lower case and `T11` carries a ` (320K)` suffix so the
+reader's column-normalising branches -- capitalising the side, collapsing double
+spaces, stripping the calibration suffix -- all run. Four probes per rake are
+required because the conditioning averages them.
+
+Unverified assumption
+---------------------
+The comma delimiter is what `SultanData._read_data` asks for
+(`pandas.read_csv` with its default separator, ISO-8859-1 encoding) and has been
+so throughout this repository's history. It has not been checked against a file
+produced by the SULTAN facility, because none is available here. If a real
+export turns out to be tab- or whitespace-separated, the reader is what is wrong
+and this fixture will need to follow it.

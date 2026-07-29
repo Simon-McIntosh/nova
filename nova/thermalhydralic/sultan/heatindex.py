@@ -49,7 +49,7 @@ class HeatIndex:
     @threshold.setter
     def threshold(self, threshold):
         if threshold < 0 or threshold > 1:
-            raise ValueError(f"heat threshold {threshold} " "must lie between 0 and 1")
+            raise ValueError(f"heat threshold {threshold} must lie between 0 and 1")
         self._threshold = threshold
         self.reload.threshold = False
         self.reload.index = True

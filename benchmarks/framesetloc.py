@@ -1,11 +1,18 @@
 """Benchmark frameset loc indexer methods."""
 
 import os
+import tempfile
 import timeit
 
 import numpy as np
 
 from nova.frame.coilset import CoilSet
+
+# Fixed absolute cache directory: asv re-imports this module in a separate
+# process for setup_cache and for each benchmark, so the path must resolve
+# identically in every process (a randomised mkdtemp would differ per process).
+_CACHE_DIR = os.path.join(tempfile.gettempdir(), "nova_asv_framesetloc")
+os.makedirs(_CACHE_DIR, exist_ok=True)
 
 
 class SubFrameLoc:
@@ -15,12 +22,17 @@ class SubFrameLoc:
     params = (["Ic", "nturn", "x"], ["loc", "sloc", "aloc", "saloc"])
     param_names = ["attr", "indexer"]
     timer = timeit.default_timer
-    filename = "./frameset"
+    filename = "frameset"
+    dirname = _CACHE_DIR
 
     def setup_cache(self):
         """Build reference coilset."""
         coilset = CoilSet(
-            dcoil=-100, dplasma=-500, array=["Ic", "nturn", "fix", "free", "plasma"]
+            dcoil=-100,
+            dplasma=-500,
+            array=["Ic", "nturn", "fix", "free", "plasma"],
+            filename=self.filename,
+            dirname=self.dirname,
         )
         coilset.coil.insert(5.5, [-2, -1, 1], 0.5, 0.75, label="PF", free=True)
         coilset.coil.insert(4.5, [-3.5, 2.5], 0.5, 0.75, label="PF")
@@ -28,11 +40,11 @@ class SubFrameLoc:
         coilset.linkframe(["CS2", "CS3"])
         coilset.firstwall.insert({"ellip": [4.2, -0.4, 1.25, 3.2]}, turn="hex")
         coilset.saloc["Ic"] = range(len(coilset.sloc))
-        coilset.store(self.filename)
+        coilset.store()
 
     def setup(self, attr, indexer):
         """Load coilset and set indexer."""
-        self.coilset = CoilSet().load(self.filename)
+        self.coilset = CoilSet(filename=self.filename, dirname=self.dirname).load()
         if "a" in indexer and attr not in self.coilset.array:
             raise NotImplementedError
         if "s" in indexer and attr not in self.coilset.subspace:
@@ -44,7 +56,7 @@ class SubFrameLoc:
 
     def remove(self):
         """Remove coilset."""
-        os.remove(self.filename + ".nc")
+        os.remove(os.path.join(self.dirname, self.filename + ".nc"))
 
 
 class GetSubFrameLoc(SubFrameLoc):

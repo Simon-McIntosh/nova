@@ -2,8 +2,8 @@
 
 from dataclasses import dataclass, field
 
-import pandas
 
+from nova.frame.columnar import is_list_like
 from nova.frame.coilsetattrs import GridAttrs
 from nova.frame.polygrid import PolyGrid
 from nova.geometry.polygeom import PolyGeom
@@ -66,27 +66,33 @@ class PoloidalGrid(GridAttrs):
         - Link turns.
 
         """
-        frame = self.frame.loc[index, :]
-        griddata = frame.loc[
-            :,
-            self.required_columns
-            + [attr for attr in self.additional_columns if attr in self.frame],
+        length = len(index)
+        subattrs = dict(self.subattrs)
+        turncurrent = subattrs.pop("It", None)
+        griddata_columns = self.required_columns + [
+            attr for attr in self.additional_columns if attr in self.frame
         ]
+        griddata = self.row_records(self.frame, index, griddata_columns)
+        framedata = self.row_records(self.frame, index)
         subframe = []
-        subattrs = pandas.DataFrame(self.subattrs, index=index)
-        try:
-            turncurrent = subattrs.pop("It")
-        except KeyError:
-            turncurrent = None
         for i, name in enumerate(index):
-            polygrid = PolyGrid(**griddata.iloc[i].to_dict(), **self.gridattrs)
-            data = frame.iloc[i].to_dict()
-            data |= {"label": name, "frame": name, "delim": "_", "link": True}
+            polygrid = PolyGrid(**griddata[i], **self.gridattrs)
+            data = framedata[i] | {
+                "label": name,
+                "frame": name,
+                "delim": "_",
+                "link": True,
+            }
             if turncurrent is not None:
-                data["It"] = (
-                    turncurrent.iloc[i] * polygrid.frame["nturn"] / polygrid.nturn
+                current = (
+                    turncurrent[i]
+                    if is_list_like(turncurrent) and len(turncurrent) == length
+                    else turncurrent
                 )
+                data["It"] = current * polygrid.frame["nturn"] / polygrid.nturn
             subframe.append(
-                self.subframe.assemble(polygrid.frame, **data, **subattrs.iloc[i])
+                self.subframe.assemble(
+                    polygrid.frame, **data, **self.broadcast_row(subattrs, i, length)
+                )
             )
         self.subframe.concatenate(*subframe)

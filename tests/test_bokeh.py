@@ -1,7 +1,12 @@
-from bokeh.model import Model
 import pytest
 
-from nova.graphics.bokeh import IdsInput
+from nova.utilities.importmanager import skip_import
+
+with skip_import("bokeh"):
+    from bokeh.model import Model
+
+    from nova.graphics.bokeh import IdsInput
+
 from nova.imas.test_utilities import ids_attrs, mark
 
 

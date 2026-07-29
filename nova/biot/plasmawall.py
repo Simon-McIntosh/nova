@@ -64,7 +64,7 @@ class PlasmaWall(Limiter, Point):
     @property
     def boundary(self):
         """Return first wall boundary."""
-        return self.Loc["plasma", "poly"][0].boundary
+        return self.aloc["plasma", "poly"][0].boundary
 
     def solve(self, number=None, boundary=None):
         """Solve Biot wall-pannel nodes with a delta subpannel spacing."""

@@ -1,0 +1,59 @@
+{
+ "device": "gpu",
+ "kernel": "quadrature",
+ "mapping": "scan",
+ "targets": 1376,
+ "sections": 1376,
+ "pairs": 1893376,
+ "workers": 13,
+ "visible_cores": 13,
+ "compilation_cache": "/tmp/cswinding-kernel-cache",
+ "tiles": {
+  "64": {
+   "tile_pairs": 4096,
+   "host_quadrature_us_per_pair": 448.17443870215357,
+   "host_closed_us_per_pair": 237.59581836202415,
+   "cold_seconds": 1.8385527110658586,
+   "warm_us_per_pair": 4.60059269850414,
+   "host_closed_sections": 32,
+   "same_route_absolute": 4.060675949137116e-18,
+   "same_route_relative": 1.6763716482209705e-13,
+   "cross_route_absolute": 5.879255686892099e-18,
+   "cross_route_relative": 2.333658897286388e-13
+  },
+  "128": {
+   "tile_pairs": 16384,
+   "host_quadrature_us_per_pair": 443.26313951614793,
+   "host_closed_us_per_pair": 138.6305451660519,
+   "cold_seconds": 0.21825960418209434,
+   "warm_us_per_pair": 4.232488663546974,
+   "host_closed_sections": 32,
+   "same_route_absolute": 4.060675949137116e-18,
+   "same_route_relative": 1.6763716482209705e-13,
+   "cross_route_absolute": 7.684282897491013e-18,
+   "cross_route_relative": 2.830466338723125e-13
+  }
+ },
+ "build": {
+  "workers": 13,
+  "host": {
+   "128": {
+    "tile": 128,
+    "seconds": 71.27015574229881,
+    "us_per_pair": 37.641839625250775,
+    "tiles": 121
+   }
+  },
+  "device": {
+   "128": {
+    "tile": 128,
+    "seconds": 9.27412263629958,
+    "us_per_pair": 4.898193827480426,
+    "tiles": 121,
+    "cross_route_absolute": 5.542824788154531e-17,
+    "cross_route_relative": 1.7815046907958506e-12
+   }
+  },
+  "host_spread": 0.0
+ }
+}

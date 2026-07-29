@@ -266,11 +266,81 @@ class ThickLine(GeomData):
 
 
 @dataclass
+class MachineGeometryReader(ABC):
+    """Provider seam presenting a poloidal geometry element to CrossSection.
+
+    Decouples the geometry-type dispatch and attribute extraction from the
+    backing store so that an IMAS IDS geometry node and a (FAIR-MAST) zarr
+    source are interchangeable providers of the same :class:`GeomData`
+    sections. A concrete reader reports the element's geometry type and builds
+    the requested section from whatever it wraps.
+    """
+
+    source: object = field(repr=False)
+
+    @property
+    @abstractmethod
+    def geometry_type(self) -> int:
+        """Return the poloidal geometry-type index of the element."""
+
+    @abstractmethod
+    def section(self, geometry: type[GeomData]) -> GeomData:
+        """Return the ``geometry`` section built from the backing source."""
+
+
+@dataclass
+class ImasGeometryReader(MachineGeometryReader):
+    """Present an IMAS geometry IDS node through the reader seam."""
+
+    @property
+    def geometry_type(self) -> int:
+        """Return the geometry-type index read from the IDS node."""
+        return self.source.geometry_type.value
+
+    def section(self, geometry: type[GeomData]) -> GeomData:
+        """Build the section by extracting attributes from the IDS node."""
+        return geometry(self.source)
+
+
+@dataclass
+class TabularGeometryReader(MachineGeometryReader):
+    """Present a flat mapping record through the reader seam.
+
+    The provider skeleton for facility geometry tables that are not IMAS
+    IDSs — a FAIR-MAST zarr row, a columnar record, or any per-element
+    mapping carrying ``geometry_type`` plus the section's attributes as flat
+    scalar fields. A facility plugin normalises its native store into such
+    records and drives :class:`CrossSection` through this reader; the
+    facility tables themselves stay with the plugin.
+
+    A record missing a required attribute raises ``KeyError`` naming the
+    attribute — verify-and-flag, never a fabricated geometry value.
+    """
+
+    @property
+    def geometry_type(self) -> int:
+        """Return the geometry-type index read from the record."""
+        return int(self.source["geometry_type"])
+
+    def section(self, geometry: type[GeomData]) -> GeomData:
+        """Build the section from the record's flat attribute fields."""
+        try:
+            data = {attr: self.source[attr] for attr in geometry.attrs}
+        except KeyError as error:
+            raise KeyError(
+                f"tabular geometry record missing attribute {error.args[0]!r} "
+                f"required by section {geometry.name!r}"
+            ) from None
+        return geometry(None, data)
+
+
+@dataclass
 class CrossSection:
     """Manage poloidal cross-sections."""
 
     ids: ImasIds = field(repr=False)
     data: GeomData = field(init=False)
+    reader: ClassVar[type[MachineGeometryReader]] = ImasGeometryReader
     transform: ClassVar[dict[int, object]] = {
         1: Outline,
         2: Rectangle,
@@ -281,16 +351,18 @@ class CrossSection:
     }
 
     def __post_init__(self):
-        """Build geometry instance."""
+        """Build geometry instance through the reader seam."""
+        reader = self.reader(self.ids)
+        geometry_type = reader.geometry_type
         try:
-            self.data = self.transform[self.ids.geometry_type.value](self.ids)
-        except KeyError as error:
-            if self.ids.geometry_type.value == -999999999:
+            self.data = reader.section(self.transform[geometry_type])
+        except KeyError:
+            if geometry_type == -999999999:
                 default_geometry_type = 1  # remove once WEST pf_passive is fixed
                 warn(f"geometry type unset, fixing value to {default_geometry_type}")
-                self.data = self.transform[default_geometry_type](self.ids)
+                self.data = reader.section(self.transform[default_geometry_type])
             else:
-                raise KeyError from error
+                raise
         if self.data.name == "outline" and len(self.data.data["r"]) == 1:  # WEST data
             for attr in "rz":
                 self.data.data[attr] = self.data.data[attr][0]
@@ -1228,9 +1300,17 @@ class Machine(CoilSet, Geometry, CoilData):  # Diagnostics,
         """
         Return group attrs.
 
-        Extends :func:`~nova.imas.database.CoilData.group_attrs`.
+        Extends :func:`~nova.imas.database.CoilData.group_attrs`. The data
+        dictionary version is folded into the composite identity so a machine
+        description assembled under a differing DD version cannot reuse a stale
+        cache entry, mirroring the per-source fold in
+        :func:`~nova.imas.database.Database.group_attrs`.
         """
-        return self.coilset_attrs | self.dataset_attrs
+        return (
+            self.coilset_attrs
+            | self.dataset_attrs
+            | {"dd_version": str(self.dd_version)}
+        )
 
     def solve_biot(self):
         """Solve biot instances."""

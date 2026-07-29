@@ -1,13 +1,12 @@
 """Build ITER coilset."""
 
 from dataclasses import dataclass, field
-import io
 
 import numpy as np
-import pandas
 from scipy.spatial.transform import Rotation
 
 from nova.frame.coilset import CoilSet
+from nova.frame.dataframe import DataFrame
 from nova.frame.framedata import FrameData
 from nova.frame.machinedata import MachineData
 from nova.frame.turn import Turn
@@ -154,27 +153,43 @@ class ITERgeom(CoilSet):
 
     def insert_poloidal_field_coils(self):
         """Insert poloidal field coils."""
-        data = pandas.read_csv(
-            self._poloidal_field_coils(),
-            delimiter="\t",
-            skiprows=1,
-            index_col=0,
-            skipinitialspace=True,
-        )
-        part = ["cs" if "CS" in name else "pf" for name in data.index]
-        columns = {col: col.split(",")[0].lower() for col in data}
-        columns["R, ohm"] = "R"
-        columns["N,"] = "nturn"
-        data.rename(columns=columns, inplace=True)
-        data.rename(columns={"dx": "dl", "dz": "dt"}, inplace=True)
+        names, columns = self._parse_coil_table(self._poloidal_field_coils())
+        part = ["cs" if "CS" in name else "pf" for name in names]
+        data = DataFrame(columns, index=names)
         self.coil.insert(data, part=part, turn="hex")
         self.linkframe(["CS1U", "CS1L"])
+
+    @staticmethod
+    def _parse_coil_table(table):
+        """Return coil names and named columns from a tab-delimited table.
+
+        The header row labels seven geometry columns; each following row is a
+        coil name followed by its values. Header labels collapse to their short
+        form (``X, m`` -> ``x``) with resistance and turn count named
+        explicitly and the section extents renamed to ``dl`` / ``dt``.
+        """
+        lines = [line.strip() for line in table.splitlines() if line.strip()]
+        header = [field.strip() for field in lines[0].split("\t")]
+        rename = {label: label.split(",")[0].lower() for label in header}
+        rename["R, ohm"] = "R"
+        rename["N,"] = "nturn"
+        rename = {
+            label: {"dx": "dl", "dz": "dt"}.get(name, name)
+            for label, name in rename.items()
+        }
+        names, rows = [], []
+        for line in lines[1:]:
+            name, *values = [field.strip() for field in line.split("\t")]
+            names.append(name)
+            rows.append([float(value) for value in values])
+        table = np.array(rows, dtype=float)
+        columns = {rename[label]: table[:, i] for i, label in enumerate(header)}
+        return names, columns
 
     def _poloidal_field_coils(self):
         """Return poloidal field coil geometrical data."""
         if self.metadata["source"] == "PCR":  # update, post 2012
-            return io.StringIO(
-                """
+            return """
                 X, m	Z, m	DX, m	DZ, m	N,	R, ohm	m, Kg
                 CS3U	1.6870	5.4640	0.7400	2.093	554	0.102	9.0e3
                 CS2U	1.6870	3.2780	0.7400	2.093 	554	0.113	10.0e3
@@ -189,10 +204,8 @@ class ITERgeom(CoilSet):
                 PF5	8.3908	-6.7369	0.8125	0.9538	216.80	0.0791	28.0e3
                 PF6	4.3340	-7.4765	1.5590	1.1075	459.36	0.120	24.0e3
                 """
-            )
         if self.metadata["source"] == "baseline":  # old
-            return io.StringIO(
-                """
+            return """
                 X, m	Z, m	DX, m	DZ, m	N,	R, ohm	m, Kg
                 CS3U	1.722	5.313	0.719	2.075	554	0.102	9.0e3
                 CS2U	1.722	3.188	0.719	2.075	554	0.113	10.0e3
@@ -207,44 +220,9 @@ class ITERgeom(CoilSet):
                 PF5	8.3908	-6.7369	0.8125	0.9538	216.80	0.0791	28.0e3
                 PF6	4.3340	-7.4765	1.5590	1.1075	459.36	0.120	24.0e3
                 """
-            )
         raise IndexError(f"source {self.metadata['source']} not found")
 
 
 if __name__ == "__main__":
     coilset = ITERgeom(dcoil=0.25, dplasma=-150)
-    """
-    index = coilset.subframe.frame == "VS3U"
-    index |= coilset.subframe.frame == "VS3Uj"
-    coilset.plot(index)
-
-    coilset.ferritic.insert("Fi", multiframe=False, label="Fi", offset=1)
-    coilset.plasma.insert({"ellip": [6.5, 0.5, 4.5, 6.5]})
-    coilset.shell.insert(
-        {"ellip": [6.5, 0.5, 1.2 * 4.5, 1.2 * 6.5]}, -80, 0.25, part="vv"
-    )
-    """
-    from nova.assembly.centerline import CenterLine
-
-    poly = dict(r=[0, 0, 0.6, 0.8])
-    mesh = CenterLine().mesh
-    for __ in range(18):
-        mesh.rotate_z(20)
-        coilset.winding.insert(
-            poly, mesh.points, nturn=134, label="TF", offset=1, part="tf", delta=0
-        )
-    coilset.link(coilset.frame.iloc[-18:].index)
-
-    coilset.subframe.vtkplot()
-
-    """
-
-    #print(coilset.frame.vtk[-1].volume())
-
-    #print(coilset.frame.vtk[-1].isClosed())
-
-
-    #coilset.plot()
-
-    #coilset.frame.vtkplot()
-    """
+    coilset.plot()

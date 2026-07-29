@@ -4,7 +4,6 @@ from dataclasses import dataclass, field
 import gc
 
 import xarray
-import xxhash
 
 from nova.database.filepath import FilePath
 
@@ -29,12 +28,6 @@ class netCDF(FilePath):
         if len(subgroup) == 0:
             return None
         return "/".join(subgroup)
-
-    def hash_attrs(self, attrs: dict) -> str:
-        """Return xxh32 hex hash of attrs dict."""
-        xxh32 = xxhash.xxh32()
-        xxh32.update(str(attrs))
-        return xxh32.hexdigest()
 
     def get_mode(self, mode=None) -> str:
         """Return file access mode."""

@@ -1,6 +1,7 @@
 """Manage file data access for frame and biot instances."""
 
 from __future__ import annotations
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from functools import wraps
 import os
@@ -9,6 +10,8 @@ import sys
 
 import appdirs
 import fsspec
+import numpy as np
+import xxhash
 
 import nova
 from nova.definitions import root_dir
@@ -22,6 +25,43 @@ def stardot(func):
         return func(path).replace(".", "*")
 
     return wrapper
+
+
+def canonical_key(value) -> str:
+    """Return a deterministic, type-tagged serialisation for cache-key hashing.
+
+    Unlike ``str(dict)`` the result is independent of mapping insertion order
+    and never conflates values that merely share a printed form: ``1`` (int),
+    ``1.0`` (float), ``"1"`` (str) and ``True`` (bool) each serialise to a
+    distinct key. Nested mappings and sequences are handled recursively so a
+    composite identity descriptor -- identity attributes, per-source content
+    hashes and discretisation parameters -- hashes unambiguously.
+    """
+    if value is None:
+        return "none"
+    if isinstance(value, bool):  # bool before int: bool subclasses int
+        return f"bool:{int(value)}"
+    if isinstance(value, (int, np.integer)):
+        return f"int:{int(value)}"
+    if isinstance(value, (float, np.floating)):
+        return f"float:{float(value)!r}"
+    if isinstance(value, str):
+        return f"str:{value}"
+    if isinstance(value, bytes):
+        return f"bytes:{value.hex()}"
+    if isinstance(value, Mapping):
+        items = sorted(
+            (canonical_key(key), canonical_key(item)) for key, item in value.items()
+        )
+        return "{" + ",".join(f"{key}={item}" for key, item in items) + "}"
+    if isinstance(value, np.ndarray):
+        body = ",".join(canonical_key(item) for item in value.ravel().tolist())
+        return f"array:{value.dtype.str}:{value.shape}:[{body}]"
+    if isinstance(value, (list, tuple)):
+        prefix = "list" if isinstance(value, list) else "tuple"
+        return f"{prefix}:[" + ",".join(canonical_key(item) for item in value) + "]"
+    # Version and any other opaque object: type-tagged repr keeps it stable.
+    return f"{type(value).__name__}:{value!r}"
 
 
 @dataclass
@@ -41,6 +81,17 @@ class FilePath:
         self.path = self.dirname
         if hasattr(super(), "__post_init__"):
             super().__post_init__()
+
+    def hash_attrs(self, attrs: Mapping) -> str:
+        """Return a stable hex digest labelling data by its identity mapping.
+
+        The mapping is serialised through :func:`canonical_key` so the digest
+        is insertion-order independent and type-aware, guarding against stale
+        cache reuse when only a value's type (not its printed form) differs.
+        """
+        xxh = xxhash.xxh64()
+        xxh.update(canonical_key(attrs).encode("utf-8"))
+        return xxh.hexdigest()
 
     @property
     def host(self):
@@ -169,21 +220,29 @@ class FilePath:
             return filepath.with_suffix(extension)
         return filepath
 
+    def _remove(self):
+        """Remove the cached datafile, whether a single file or a store dir."""
+        if os.path.isdir(self.filepath):  # grouped zarr store is a directory
+            import shutil
+
+            shutil.rmtree(self.filepath)
+        elif os.path.isfile(self.filepath):
+            os.remove(self.filepath)
+
     def _clear(self):
         """Clear datafile at self.filepath."""
-        if os.path.isfile(self.filepath):
-            os.remove(self.filepath)
+        self._remove()
 
     @property
     def clear(self):
         """Clear cached datafile at self.filepath."""
-        if os.path.isfile(self.filepath):
+        if os.path.isfile(self.filepath) or os.path.isdir(self.filepath):
             remove = input(
                 "Confirm removal of the following cached datafile:"
                 f"\n{self.filepath}\nProceed (Y/n)?"
             )
             if remove == "" or remove.lower() == "y":
-                os.remove(self.filepath)
+                self._remove()
             return
         sys.stdout.write(f"Cached datafile clear:\n{self.filepath}")
 

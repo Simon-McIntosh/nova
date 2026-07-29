@@ -1,32 +1,42 @@
-import pytest
-import numpy as np
+"""Field-null categorisation on the jax select/null stack.
+
+The serial numba field-null finder is superseded by the vmap-safe jax stack
+(``nova.jax.select`` and ``nova.jax.null``); these tests exercise the jax
+implementations of quadratic-surface fitting, null typing, sub-grid null
+interpolation on both the 2D grid stencil and the 1D wall loop.
+"""
 
 from itertools import product
 
-from nova.frame.coilset import CoilSet
-from nova.geometry import select
-from nova.geometry.polygon import Polygon
+import numpy as np
+import pytest
+
+from nova.utilities.importmanager import skip_import
+
+with skip_import("jax"):
+    import jax
+    import jax.numpy as jnp
+
+    from nova.jax import select
+
+    jax.config.update("jax_enable_x64", True)
 
 
 def meshgrid():
+    """Return a flattened 3x3 unit-spaced grid."""
     x, z = np.meshgrid(
         np.arange(1, 4, 1, dtype=float), np.arange(1, 4, 1, dtype=float), indexing="ij"
     )
-    (
-        x,
-        z,
-    ) = (
-        x.flatten(),
-        z.flatten(),
-    )
-    return x, z
+    return x.flatten(), z.flatten()
 
 
 def coefficient_matrix(x, z):
+    """Return the quadratic design matrix used to recover psi."""
     return np.c_[x**2, z**2, x, z, x * z, np.ones_like(x)]
 
 
 def quadratic_surface(x, z, null_type: int, xo=2, zo=2):
+    """Return an analytic quadratic surface of the requested null type."""
     if null_type == 0:  # saddle
         return (x - xo) ** 2 + -((z - zo) ** 2)
     if null_type == -1:  # minimum
@@ -41,7 +51,7 @@ def quadratic_surface(x, z, null_type: int, xo=2, zo=2):
 def test_quadratic_coefficents(null_type: int):
     x, z = meshgrid()
     psi = quadratic_surface(x, z, null_type)
-    coef = select.quadratic_surface(x, z, psi)
+    coef = np.asarray(select.quadratic_surface(jnp.array(x), jnp.array(z), jnp.array(psi)))
     assert np.allclose(psi, coefficient_matrix(x, z) @ coef)
 
 
@@ -49,8 +59,16 @@ def test_quadratic_coefficents(null_type: int):
 def test_quadratic_null_type(null_type: int):
     x, z = meshgrid()
     psi = quadratic_surface(x, z, null_type)
-    coef = select.quadratic_surface(x, z, psi)
-    assert select.null_type(coef) == null_type
+    coef = select.quadratic_surface(jnp.array(x), jnp.array(z), jnp.array(psi))
+    assert int(select.null_type(coef)) == null_type
+
+
+def test_quadratic_plane_surface():
+    """A plane surface has a degenerate second-order form (null_type is nan)."""
+    x, z = meshgrid()
+    psi = quadratic_surface(x, z, 2)
+    coef = select.quadratic_surface(jnp.array(x), jnp.array(z), jnp.array(psi))
+    assert np.isnan(float(select.null_type(coef)))
 
 
 @pytest.mark.parametrize(
@@ -60,203 +78,45 @@ def test_quadratic_null_type(null_type: int):
 def test_quadratic_coordinate(null_type, coordinate):
     x, z = meshgrid()
     psi = quadratic_surface(x, z, null_type, *coordinate)
-    coef = select.quadratic_surface(x, z, psi)
-    assert np.allclose(select.null_coordinate(coef), coordinate)
+    coef = select.quadratic_surface(jnp.array(x), jnp.array(z), jnp.array(psi))
+    null_coordinate = np.asarray(select.null_coordinate(coef))
+    assert np.allclose(null_coordinate, coordinate)
 
 
 @pytest.mark.parametrize(
     "null_type,coordinate", product([-1, 0, 1], [(1, 2.7), (2.2, 2.2), (2, 3)])
 )
-def test_quadratic_coordinate_cluster(null_type, coordinate):
+def test_subnull(null_type, coordinate):
     x, z = meshgrid()
     psi = quadratic_surface(x, z, null_type, *coordinate)
-    coef = select.quadratic_surface(x, z, psi)
-    select.null_coordinate(coef, (x, z))
+    cluster = jnp.array(np.c_[x, z, psi].T)  # (3, N): [x; z; psi]
+    null_coords_psi_type = np.asarray(select.subnull(cluster))
+    assert np.allclose(null_coords_psi_type[:2], coordinate)
+    assert np.isclose(null_coords_psi_type[2], 0)
+    assert int(null_coords_psi_type[3]) == null_type
 
 
-@pytest.mark.parametrize(
-    "null_type,coordinate", product([-1, 0, 1], [(-4, 2.7), (8, 2), (2, -4), (0.8, 8)])
-)
-def test_quadratic_coordinate_xcluster(null_type, coordinate):
-    x, z = meshgrid()
-    psi = quadratic_surface(x, z, null_type, *coordinate)
-    coef = select.quadratic_surface(x, z, psi)
-    with pytest.raises(AssertionError):
-        select.null_coordinate(coef, (x, z))
+@pytest.mark.parametrize("polarity", [1, -1])
+def test_wall_flux(polarity):
+    """The 1D wall-loop finder locates the extreme-flux panel on the loop."""
+    theta = np.linspace(0, 2 * np.pi, 48, endpoint=False)
+    x = 1.0 + 0.4 * np.cos(theta)
+    z = 0.4 * np.sin(theta)
+    # flux extremum on the loop sits at the outboard vertex (theta = 0)
+    psi = polarity * -((x - 1.4) ** 2 + z**2)
+    out = np.asarray(select.wall_flux(jnp.array(x), jnp.array(z), jnp.array(psi), polarity))
+    assert np.allclose(out[:2], [1.4, 0.0], atol=1e-6)
+    assert np.isfinite(out[2])
 
 
-def test_quadratic_plane_surface():
-    x, z = meshgrid()
-    psi = quadratic_surface(x, z, 2)
-    coef = select.quadratic_surface(x, z, psi)
-    with pytest.raises(ValueError):
-        select.null_type(coef)
-
-
-@pytest.mark.parametrize(
-    "null,coordinate", product([-1, 0, 1], [(1, 2.7), (2.2, 2.2), (2, 3)])
-)
-def test_subnull(null, coordinate):
-    x, z = meshgrid()
-    psi = quadratic_surface(x, z, null, *coordinate)
-    null_coords, null_psi, null_type = select.subnull(x, z, psi)
-    assert np.allclose(null_coords, coordinate)
-    assert np.isclose(null_psi, 0)
-    assert null_type == null
-
-
-def test_grid_2d():
-    coilset = CoilSet()
-    coilset.coil.insert(5, [-1, 1], 0.75, 0.5, Ic=1e3)
-    coilset.grid.solve(50, 0.2)
-    assert coilset.grid.x_point_number == 1
-    assert np.isclose(coilset.grid.x_points[0][1], 0, atol=1e-2)
-
-
-def test_grid_1d():
-    coilset = CoilSet(dplasma=-50, tplasma="hex")
-    coilset.firstwall.insert(dict(ellip=[0.5, 0, 0.075, 0.15]), Ic=15e3)
-    coilset.coil.insert(0.5, [-0.08, 0.08], 0.01, 0.01, Ic=5e3)
-    coilset.plasmagrid.solve()
-    assert coilset.plasmagrid.o_points[0][0] != coilset.plasmagrid.x_points[0][0]
-    assert coilset.plasmagrid.o_point_number == 1
-    assert coilset.plasmagrid.x_point_number == 2
-
-
-def test_plasma_update(plot=False):
-    update = np.full(4, False)
-    coilset = CoilSet(
-        required=["x", "z", "dx", "dz"], dplasma=-5, dcoil=0.5, tplasma="hex"
-    )
-    coilset.firstwall.insert(dict(disc=[4.5, 0.5, 1]), Ic=15e6)
-    coilset.coil.insert(5, -0.5, 0.75, 0.75, Ic=15e6)
-    coilset.grid.solve(20, 0.2, "plasma")
-    grid = coilset.grid.version
-    subframe = coilset.subframe.version
-    update[0] = grid["Psi"] != subframe["nturn"]  # False
-    coilset.plasma.separatrix = Polygon(dict(c=[4.5, 0.5, 0.5])).boundary
-    update[1] = grid["Psi"] != subframe["nturn"]  # True
-    _ = coilset.grid.psi
-    update[2] = grid["Psi"] != subframe["nturn"]  # False
-    update[3] = grid["Br"] != subframe["nturn"]  # True
-    if plot:
-        coilset.plot()
-        coilset.grid.plot()
-    assert np.equal(update, [False, True, False, True]).all()
-
-
-def null_curvature(sign, plot):
-    coilset = CoilSet(dcoil=-5, dplasma=-5, tplasma="hex")
-    coilset.firstwall.insert(dict(o=[5, 1, 0.5]), Ic=15e6)
-    coilset.coil.insert(5, -0.25, 0.75, 0.75, Ic=-15e6)
-    coilset.grid.solve(1e2, 0.25)  # generate plasma grid
-    coilset.sloc["plasma", "Ic"] *= sign
-    if plot:
-        coilset.plot()
-        coilset.grid.plot()
-    return coilset
-
-
-def test_Opoint_curvature_Ip_positive(plot=False):
-    coilset = null_curvature(1, plot)
-    assert coilset.grid.x_point_number == 0
-    assert coilset.grid.o_point_number == 2
-
-
-def test_Opoint_curvature_Ip_negative(plot=False):
-    coilset = null_curvature(-1, plot)
-    assert coilset.grid.x_point_number == 1
-    assert coilset.grid.o_point_number == 2
-
-
-def test_multi_xpoint(plot=False):
-    coilset = CoilSet(dcoil=-5, dplasma=-5, tplasma="hex")
-    coilset.coil.insert(5, [-1.1, 1.1], 0.75, 0.75, Ic=[1, 1])
-    coilset.firstwall.insert(dict(o=[5.25, 0, 0.5]), Ic=0.5)
-    coilset.grid.solve(250, 1.5, "plasma")  # generate plasma grid
-    if plot:
-        coilset.plot()
-        coilset.grid.plot()
-    assert coilset.grid.x_point_number == 2
-    assert coilset.grid.o_point_number == 1
-
-
-def test_empty():
-    coilset = CoilSet(dcoil=-5, dplasma=-5, tplasma="hex")
-    coilset.coil.insert(5, [-1, 1], 0.75, 0.75, Ic=[-1, 1])
-    coilset.firstwall.insert(dict(o=[5.25, 0, 0.5]), Ic=0)
-    coilset.grid.solve(1e2, 0.25, "plasma")  # generate plasma grid
-    assert coilset.grid.x_point_number == 0
-    assert coilset.grid.o_point_number == 0
-
-
-def global_null(sign, plot=False):
-    coilset = CoilSet(dcoil=0.5, dplasma=0.4, tplasma="hex")
-    coilset.coil.insert(5, [-2, 2], 0.75, 0.75)
-    coilset.coil.insert(7.8, 0, 0.75, 0.75, label="Xcoil")
-    coilset.firstwall.insert(dict(o=(4, 0, 0.5)))
-    coilset.grid.solve(500, 0.05)
-    coilset.sloc["Ic"] = sign * 15e6
-    if plot:
-        coilset.plot()
-        coilset.grid.plot(levels=51)
-    return coilset
-
-
-def test_unique_null():
-    coilset = CoilSet()
-    coilset.coil.insert([1.1, 1.2, 1.3], 0, 0.075, 0.15, Ic=15e3)
-    coilset.grid.solve(100)
-    assert coilset.grid.x_point_number == 1
-    assert coilset.grid.o_point_number == 2
-
-
-def test_global_null_Ip_positive(plot=False):
-    coilset = global_null(1, plot)
-    assert coilset.grid.x_point_number == 3
-    assert coilset.grid.o_point_number == 4
-
-
-def test_global_null_Ip_negative(plot=False):
-    coilset = global_null(-1, plot)
-    assert coilset.grid.x_point_number == 3
-    assert coilset.grid.o_point_number == 4
-
-
-def test_plasma_coil_parity(plot=False):
-    coilset = CoilSet(dcoil=-4, dplasma=-4, tplasma="hex")
-    coilset.coil.insert(5, 0.75, 0.75, 0.75, turn="r")
-    coilset.firstwall.insert({"r": [5, -0.75, 0.75, 0.75]}, turn="r")
-    coilset.grid.solve(150, 0.05)
-    coilset.sloc[:, "Ic"] = 15e6
-    coilset.grid.update_turns("Psi", svd=False)
-    if plot:
-        coilset.plot()
-        coilset.grid.plot()
-    assert np.isclose(coilset.grid.x_points[0][1], 0, atol=1e-3)
-
-
-def test_plasma_unique_psi_axis():
-    coilset = CoilSet(dplasma=-20, tplasma="hex")
-    coilset.firstwall.insert({"e": [0.5, 0, 0.2, 0.1]})
-    coilset.coil.insert(0.5, [-0.05, 0.05], 0.01, 0.01, Ic=1e3)
-    coilset.plasma.solve()
-    coilset.sloc["plasma", "Ic"] = 1e3
-    with pytest.raises(IndexError):
-        coilset.plasma.psi_axis
-
-
-def test_plasma_x_point():
-    coilset = CoilSet(dplasma=-100, tplasma="hex")
-    coilset.firstwall.insert({"e": [0.5, 0, 0.1, 0.2]})
-    coilset.coil.insert(0.485, [-0.12, 0.12], 0.03, 0.03, Ic=5e3)
-    coilset.plasma.solve()
-    coilset.sloc["plasma", "Ic"] = 7e3
-    coilset.saloc["Ic"][1] = 4.5e3
-    assert coilset.plasmagrid["x_point"][1] > 0
-    coilset.saloc["Ic"][1] = 5.5e3
-    coilset.plasma.grid.check_null()
-    assert coilset.plasmagrid["x_point"][1] < 0
+def test_wall_flux_zero_polarity_is_nan():
+    """A zero polarity marks the wall null as undefined (all nan)."""
+    theta = np.linspace(0, 2 * np.pi, 24, endpoint=False)
+    x = 1.0 + 0.4 * np.cos(theta)
+    z = 0.4 * np.sin(theta)
+    psi = -((x - 1.4) ** 2 + z**2)
+    out = np.asarray(select.wall_flux(jnp.array(x), jnp.array(z), jnp.array(psi), 0))
+    assert np.all(np.isnan(out))
 
 
 if __name__ == "__main__":

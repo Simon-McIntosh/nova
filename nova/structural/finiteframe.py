@@ -1127,7 +1127,7 @@ class finiteframe(secondmoment):
         self.mpc[name]["Cc"] = -np.identity(self.mpc[name]["neq"])
         if rotate:  # populate Cr with rotational constraint
             axis = self.check_axis(axis)
-            mask = ~np.in1d(["x", "y", "z"], axis)
+            mask = ~np.isin(["x", "y", "z"], axis)
             theta = np.arcsin(
                 np.cross(self.X[nodes[0], mask], self.X[nodes[1], mask])
                 / (
@@ -1270,12 +1270,12 @@ class finiteframe(secondmoment):
         self.Cr = np.zeros((self.cp_nd["n"], self.nd["nr"]))
         for i, name in enumerate(self.couple):
             couple = self.couple[name]
-            self.Cr[i, np.in1d(self.nd["dr"], couple["dr"])] = couple["Cr"]
-            self.Cc[i, np.in1d(self.cp_nd["dc"], couple["dc"])] = couple["Cc"]
+            self.Cr[i, np.isin(self.nd["dr"], couple["dr"])] = couple["Cr"]
+            self.Cc[i, np.isin(self.cp_nd["dc"], couple["dc"])] = couple["Cc"]
 
         # build transformation matrix
         self.Tc = np.zeros((self.nd["nc"], self.nd["nr"]))  # initalise
-        index = np.in1d(self.nd["dc"], self.cp_nd["dc"])
+        index = np.isin(self.nd["dc"], self.cp_nd["dc"])
         self.Tc[index, :] = np.dot(-np.linalg.inv(self.Cc), self.Cr)
         self.T = np.append(np.identity(self.nd["nr"]), self.Tc, axis=0)
 

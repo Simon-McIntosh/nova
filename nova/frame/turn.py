@@ -3,17 +3,17 @@
 from dataclasses import dataclass, field
 
 import numpy as np
-import pandas
 import shapely
 
 from nova.frame.coilsetattrs import CoilSetAttrs
+from nova.frame.dataframe import DataFrame
 
 
 @dataclass
 class TurnGeom:
     """Derive frame geometory from subframe turns."""
 
-    frame: pandas.DataFrame
+    frame: DataFrame
     data: dict = field(init=False, default_factory=dict)
 
     def __post_init__(self):
@@ -111,7 +111,7 @@ class Turn(CoilSetAttrs):
         with self.insert_required(required):
             subindex = self.subframe.insert(*args, **subattrs)
         poly = shapely.geometry.MultiPolygon(
-            [polygon.poly for polygon in self.subframe.poly[subindex]]
+            [polygon.poly for polygon in self.subframe.loc[subindex, "poly"]]
         )
         attrs = {
             attr: self.attrs[attr]
@@ -119,7 +119,22 @@ class Turn(CoilSetAttrs):
             if not isinstance(self.attrs[attr], (dict, list, np.ndarray))
         }
         index = self.frame.insert(poly, iloc=iloc, **attrs)
-        geom = TurnGeom(self.subframe.loc[subindex, :])
-        self.frame.loc[index, geom.columns] = geom.data.values()
+        turn_columns = [
+            "area",
+            "x",
+            "y",
+            "z",
+            "segment",
+            "rms",
+            "nturn",
+            "section",
+            "dl",
+            "dt",
+        ]
+        records = self.row_records(self.subframe, subindex, turn_columns)
+        subset = {name: [row[name] for row in records] for name in records[0]}
+        geom = TurnGeom(DataFrame(subset, index=range(len(records))))
+        for col, value in geom.data.items():
+            self.frame.loc[index[0], col] = value
         self.update_loc_indexer()
         return index

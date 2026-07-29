@@ -57,7 +57,7 @@ def test_section_keyerror():
 
 
 def test_target_shape():
-    biotframe = BiotFrame(range(3), range(3))
+    biotframe = BiotFrame({"x": range(3), "z": range(3)})
     biotframe.biotshape.set_target(12)
     assert biotframe.biotshape.source == 3
     assert biotframe.biotshape.target == 12
@@ -65,7 +65,7 @@ def test_target_shape():
 
 
 def test_source_shape():
-    biotframe = BiotFrame(range(2), range(2))
+    biotframe = BiotFrame({"x": range(2), "z": range(2)})
     biotframe.biotshape.set_source(6)
     assert biotframe.biotshape.source == 6
     assert biotframe.biotshape.target == 2
@@ -73,7 +73,7 @@ def test_source_shape():
 
 
 def test_region_not_set_errot():
-    biotframe = BiotFrame(range(2), range(2))
+    biotframe = BiotFrame({"x": range(2), "z": range(2)})
     with pytest.raises(IndexError):
         biotframe("x")
 
@@ -90,8 +90,28 @@ def test_biotreduce_indices_link():
         label="Coil",
         link=["", "Coil3", "", "", "", "Coil4", "", ""],
     )
-    assert source.biotreduce.indices == [0, 1, 2, 3, 4, 6, 7]
+    assert list(source.biotreduce.indices) == [0, 1, 2, 3, 4, 6, 7]
     assert source.biotreduce.link == {3: [1, 1.0]}
+
+
+def test_labeled_rebuild_ref_consistent():
+    """A labeled column-dict rebuild reproduces the donor frame's ref indices.
+
+    The link column stores row labels: rebuilding without the donor index
+    re-derives ref against fresh auto-labels, which can split one coil's
+    filaments across reduction indices.
+    """
+    from nova.frame.coilset import CoilSet
+
+    coilset = CoilSet(dcoil=-2)
+    coilset.coil.insert(1, [-0.5, 0.5], 0.01, 0.01, segment="circle")
+    donor = coilset.subframe
+    assert list(np.asarray(donor.ref)) == [0, 0, 2, 2]
+    rebuilt = Source(
+        {col: np.asarray(donor[col]) for col in donor.columns},
+        index=list(donor.index),
+    )
+    assert list(np.asarray(rebuilt.ref)) == [0, 0, 2, 2]
 
 
 def test_stack():

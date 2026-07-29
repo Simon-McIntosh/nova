@@ -1,12 +1,26 @@
-"""Manage mulit-point constraints."""
+"""Manage multi-point constraints across the frame index.
+
+Resolves the ``link`` column (bool / numeric / label) into canonical link
+labels plus the ``ref`` / ``subref`` reduction indices that map every row to
+its independent degree of freedom. Operates on the columnar frame store; no
+DataFrame library dependency.
+"""
 
 from dataclasses import dataclass, field
 
 import numpy as np
-import pandas
 
 import nova.frame.metamethod as metamethod
-from nova.frame.dataframe import DataFrame
+from nova.frame.columnar import Index, is_list_like
+
+
+def _isna(value) -> bool:
+    """Return True for a missing link value (None or float nan)."""
+    if value is None:
+        return True
+    if isinstance(value, float):
+        return np.isnan(value)
+    return False
 
 
 @dataclass
@@ -15,80 +29,71 @@ class MultiPoint(metamethod.MultiPoint):
 
     name = "multipoint"
 
-    frame: DataFrame = field(repr=False)
+    frame: object = field(repr=False)
     additional: list[str] = field(default_factory=lambda: ["factor", "ref", "subref"])
     indexer: list[int] = field(init=False, repr=False)
-    index: pandas.Index = field(default_factory=lambda: pandas.Index([]))
+    index: Index = field(default_factory=lambda: Index([]))
 
     def initialize(self):
-        """
-        Init multipoint.frame constraints if key_attributes in columns.
-
-            - link is none or NaN:
-
-                - link = ''
-                - factor = 0
-
-            - link is bool:
-
-                - link = '' if False else 'index[0]'
-                - factor = 0 if False else 1
-
-            - link is int or float:
-
-                - link = 'index[0]'
-                - factor = value
-
-        """
-        self.frame.link = self.frame.link.astype(object)
-        isna = pandas.isna(self.frame.link)
-        self.frame.loc[isna, "link"] = self.frame.metaframe.default["link"]
-        self.frame.loc[isna, "factor"] = self.frame.metaframe.default["factor"]
+        """Normalise the link column and build the reduction indices."""
+        link = np.asarray(self.frame.link, dtype=object)
+        self.frame.link = link
+        isna = np.array([_isna(value) for value in link], dtype=bool)
+        if isna.any():
+            self.frame.loc[isna, "link"] = self.frame.metaframe.default["link"]
+            self.frame.loc[isna, "factor"] = self.frame.metaframe.default["factor"]
+        link = np.asarray(self.frame.link, dtype=object)
         isnumeric = np.array(
             [
-                isinstance(link, (int, float)) & (not isinstance(link, bool))
-                for link in self.frame.link
+                isinstance(value, (int, float, np.integer, np.floating))
+                and not isinstance(value, (bool, np.bool_))
+                for value in link
             ],
             dtype=bool,
         )
-        istrue = np.array([link is True for link in self.frame.link], dtype=bool)
-        isstr = np.array(
-            [isinstance(link, str) for link in self.frame.link], dtype=bool
+        istrue = np.array(
+            [isinstance(value, (bool, np.bool_)) and bool(value) for value in link],
+            dtype=bool,
         )
-        self.frame.loc[~istrue & ~isnumeric & ~isstr, "link"] = ""
+        isstr = np.array([isinstance(value, str) for value in link], dtype=bool)
+        reset = ~istrue & ~isnumeric & ~isstr
+        if reset.any():
+            self.frame.loc[reset, "link"] = ""
         index = self.frame.index[istrue | isnumeric]
-        if not index.empty:
+        if len(index) > 0:
             with self.frame.setlock(True, "multipoint"):
-                factor = self.frame.factor
-                factor = factor[istrue | isnumeric][1:]
-                self.link(index, factor.values)
-        self.frame.loc[:, "link"] = [str(link) for link in self.frame.link]
+                factor = np.asarray(self.frame.factor)[istrue | isnumeric][1:]
+                self.link(index, factor)
+        self.frame.loc[:, "link"] = np.array(
+            [str(value) for value in self.frame.link], dtype=object
+        )
         self.sort_link()
         self.build()
 
     def sort_link(self):
-        """Update frame.links to ensure monotonic increasing."""
-        for index, link in enumerate(self.frame.link):
+        """Ensure links point to a monotonically earlier row."""
+        for position, link in enumerate(self.frame.link):
             if link and link in self.frame.index:
-                name = self.frame.index[index]
+                name = self.frame.index[position]
                 link_index = self.frame.index.get_loc(link)
-                if link_index > index:  # reverse
-                    self.frame.loc[link, "link"] = name
-                    self.frame.loc[self.frame.link == link, "link"] = name
-                    self.frame.loc[name, "link"] = ""
+                if link_index > position:  # reverse
+                    self.frame.at[link, "link"] = name
+                    self.frame.loc[np.asarray(self.frame.link) == link, "link"] = name
+                    self.frame.at[name, "link"] = ""
 
     def build(self):
-        """Update multi-point parameters."""
+        """Compute the ref / subref reduction indices from the links."""
         range_index = np.arange(len(self.frame), dtype=int)
-        self.indexer = list(range_index[self.frame.link == ""])
+        link = np.asarray(self.frame.link)
+        self.indexer = list(range_index[link == ""])
         self.index = self.frame.index[self.indexer]
-        ref = self.frame.index.get_indexer(self.frame.link)
-        if any(ref == -1):
+        ref = self.frame.index.get_indexer(link)
+        if np.any(ref == -1):
             split = [name.split("_")[0] for name in self.frame.index]
             ref[ref == -1] = [
-                split.index(link) if link in split else 0
-                for i, link in enumerate(self.frame.link)
-                if ref[i] == -1
+                split.index(value) if value in split else 0
+                for position, value in enumerate(link)
+                if ref[position] == -1
             ]
         ref[self.indexer] = range_index[self.indexer]
         self.frame.ref = ref
@@ -97,48 +102,27 @@ class MultiPoint(metamethod.MultiPoint):
         self.frame.subref = subref[ref]
 
     def expand_index(self, index, factor):
-        """Return subindex extracted from frame column."""
+        """Expand link targets across a subframe's frame membership column."""
         if "frame" not in self.frame:
             raise IndexError("frame column required for index expansion")
         factor = [1] + list(factor)
         subindex, subfactor = [], []
+        frame_col = np.asarray(self.frame["frame"])
         for name, fact in zip(index, factor):
-            names = self.frame.index[self.frame.frame == name]
+            names = self.frame.index[frame_col == name]
             if len(names) == 0:
                 raise IndexError(
-                    f"name {name} not listed in frame {np.unique(self.frame.frame)}"
+                    f"name {name} not listed in frame {np.unique(frame_col)}"
                 )
-            subindex.extend(names)
+            subindex.extend(list(names))
             subfactor.extend(fact * np.ones(len(names)))
         return subindex, subfactor[1:]
 
     def link(self, index, factor=1, expand=False):
-        """
-        Define multi-point constraint linking a set of coils.
-
-        Parameters
-        ----------
-        index : list[str]
-            List of coil names (present in self.frame.index).
-        factor : float, optional
-            Inter-coil coupling factor. The default is 1.
-
-        Raises
-        ------
-        IndexError
-
-            - index must be list-like
-            - len(index) must be greater than l
-            - len(factor) must equal 1 or len(name)-1.
-
-        Returns
-        -------
-        None.
-
-        """
-        if not pandas.api.types.is_list_like(index):
+        """Define a multi-point constraint linking a set of rows."""
+        if not is_list_like(index):
             raise IndexError(f"index: {index} is not list like")
-        if not pandas.api.types.is_list_like(factor):
+        if not is_list_like(factor):
             factor = factor * np.ones(len(index) - 1)
         if expand:
             index, factor = self.expand_index(index, factor)
@@ -160,25 +144,26 @@ class MultiPoint(metamethod.MultiPoint):
             self.frame.at[index[i], "link"] = str(name)
             self.frame.at[index[i], "factor"] = factor[i - 1]
         if self.frame.lock("multipoint") is False:
-            self.frame.__init__(self.frame, attrs=self.frame.attrs)
+            # snapshot the store before reinitialising: __init__ clears _store
+            # before reading its data, so a bare self-reinit would empty the frame
+            columns = {
+                name: np.asarray(self.frame._store.get(name))
+                for name in self.frame._store.column_names()
+            }
+            self.frame.__init__(
+                columns,
+                index=list(self.frame.index),
+                attrs={"metaframe": self.frame.metaframe},
+            )
 
     def drop(self, index):
-        """
-        Remove multi-point constraints referancing dropped coils.
-
-        Parameters
-        ----------
-        index : Union[str, list[str], pandas.Index]
-            Dropped coil index.
-
-        Returns
-        -------
-        None.
-
-        """
-        if self.generate:
-            if not pandas.api.types.is_list_like(index):
-                index = [index]
-            reset = [link in index for link in self.frame.link]
+        """Reset links referencing dropped rows, then rebuild."""
+        if not self.generate:
+            return
+        if not is_list_like(index):
+            index = [index]
+        link = np.asarray(self.frame.link)
+        reset = np.array([value in index for value in link], dtype=bool)
+        if reset.any():
             self.frame.loc[reset, "link"] = ""
-            self.initialize()
+        self.initialize()

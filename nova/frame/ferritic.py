@@ -429,12 +429,13 @@ class FerriticBase(CoilSetAttrs):
             }
             # insert subframes
             index = self.subframe.insert(vtk, iloc=iloc, **self.attrs)
-            subframe = self.subframe.loc[index, :]
-            # insert frame
-            self.attrs |= subframe.iloc[0].to_dict()
+            # insert frame from the first inserted subframe row
+            self.attrs |= self.row_records(self.subframe, index)[0]
             self.attrs |= {"delim": "", "name": name, "segment": "vtk"}
             self.attrs.pop("poly", None)
-            vtk = vedo.merge(*subframe.vtk)
+            vtk_column = self.subframe["vtk"]
+            positions = [self.subframe.index.get_loc(label) for label in index]
+            vtk = vedo.merge(*[vtk_column[position] for position in positions])
             self.frame.insert(vtk, iloc=iloc, **self.attrs)
 
 
@@ -478,16 +479,17 @@ class Ferritic(FerriticBase):
     ):
         """Insert vtk objects from frame."""
         if not multiframe:
-            self.attrs = additional | frame.iloc[0].to_dict()
+            self.attrs = additional | self.row_records(frame, [frame.index[0]])[0]
             self._update_label(additional)
             return super().insert(frame, iloc=iloc, **self.attrs)
         for part in frame.part.unique():
             index = part == frame.part
-            _frame = frame.iloc[np.argmax(index)]
-            self.attrs = additional | _frame.to_dict()
-            self.attrs["name"] = _frame.get("frame", _frame["part"])
+            labels = [frame.index[position] for position in np.flatnonzero(index)]
+            record = self.row_records(frame, [labels[0]])[0]
+            self.attrs = additional | record
+            self.attrs["name"] = record.get("frame", record["part"])
             self._update_label(additional)
-            super().insert(frame.loc[index, :], iloc=iloc, **self.attrs)
+            super().insert(type(frame)(frame, index=labels), iloc=iloc, **self.attrs)
 
     def load_frame(self, file: str):
         """Load frame from file."""

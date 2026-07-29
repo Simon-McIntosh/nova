@@ -3,23 +3,85 @@
 from __future__ import annotations
 from contextlib import contextmanager
 from dataclasses import dataclass, field
-from functools import cached_property
+from functools import cache, cached_property
 from importlib import import_module
 import statistics
 from string import digits
 from typing import ClassVar, Optional, TYPE_CHECKING
 
 import numpy as np
-from matplotlib.patches import FancyArrowPatch
-from mpl_toolkits.mplot3d import proj3d
-from mpl_toolkits.mplot3d.art3d import Patch3DCollection
 import xarray
 
 from nova.frame.dataframe import DataFrame
 from nova.frame.error import ColumnError
+from nova.utilities.importmanager import check_import
 
 if TYPE_CHECKING:
     import matplotlib
+
+
+def _matplotlib(name: str = "matplotlib"):
+    """Import matplotlib (or a submodule), raising a clear guard when absent.
+
+    Matplotlib is an optional extra: the core import graph never pulls it in,
+    so plot methods reach it only through this helper. A missing install then
+    fails with an actionable message rather than a bare ImportError.
+    """
+    with check_import("matplotlib"):
+        return import_module(name)
+
+
+@cache
+def _fancy_arrow_patch_3d():
+    """Return a 3D-aware FancyArrowPatch subclass, built on first use.
+
+    https://stackoverflow.com/a/22867877/5025009
+    """
+    fancy_arrow_patch = _matplotlib("matplotlib.patches").FancyArrowPatch
+    proj3d = _matplotlib("mpl_toolkits.mplot3d.proj3d")
+
+    class FancyArrowPatch3D(fancy_arrow_patch):
+        """Draw 3D arrows."""
+
+        def __init__(self, posA, posB, *args, **kwargs):
+            super().__init__((0, 0), (0, 0), *args, **kwargs)
+            self._points = np.c_[posA, posB].T
+
+        def draw(self, renderer):
+            """Extend FancyArrowPatch for the 3d renderer."""
+            _points2d = proj3d.proj_transform(*self._points, renderer.M)
+            self.set_positions(_points2d[0][:2], _points2d[1][:2])
+            super().draw(renderer)
+
+    return FancyArrowPatch3D
+
+
+def polygon_patch(geometry, **kwargs):
+    """Return a matplotlib PathPatch for a GeoJSON-like polygon mapping.
+
+    Replaces the unmaintained ``descartes.PolygonPatch``: every ring of a
+    Polygon / MultiPolygon becomes a subpath of a single compound path, so
+    interior rings render as holes under the even-odd fill rule.
+    """
+    path = _matplotlib("matplotlib.path").Path
+    path_patch = _matplotlib("matplotlib.patches").PathPatch
+
+    def ring_codes(length):
+        codes = np.full(length, path.LINETO, dtype=path.code_type)
+        codes[0] = path.MOVETO
+        return codes
+
+    match geometry["type"]:
+        case "Polygon":
+            polygons = [geometry["coordinates"]]
+        case "MultiPolygon":
+            polygons = geometry["coordinates"]
+        case unsupported:
+            raise ValueError(f"unsupported geometry {unsupported}")
+    rings = [np.asarray(ring)[:, :2] for polygon in polygons for ring in polygon]
+    vertices = np.concatenate(rings)
+    codes = np.concatenate([ring_codes(len(ring)) for ring in rings])
+    return path_patch(path(vertices, codes), **kwargs)
 
 
 @dataclass
@@ -170,12 +232,12 @@ class Axes:
     @cached_property
     def gridspec(self):
         """Provide access to gridspec layout editor."""
-        return import_module("matplotlib.gridspec").GridSpec
+        return _matplotlib("matplotlib.gridspec").GridSpec
 
     @cached_property
     def plt(self):
         """Provied access to pyplot module."""
-        return import_module("matplotlib.pyplot")
+        return _matplotlib("matplotlib.pyplot")
 
     def generate(self, style="2d", nrows=1, ncols=1, **kwargs):
         """Generate new axis instance."""
@@ -194,28 +256,35 @@ class Axes:
             kwargs["subplot_kw"] = {"projection": "3d"}
         aspect = kwargs.pop("aspect", None)
         if aspect is not None:
-            kwargs["figsize"] = import_module("matplotlib.figure").figaspect(aspect)
+            kwargs["figsize"] = _matplotlib("matplotlib.figure").figaspect(aspect)
         self.fig, self.axes = self.plt.subplots(nrows, ncols, **kwargs)
         self.set_style(style)
         return self.axes
 
     def gcf(self):
         """Link fig instance to current figure and return."""
-        self._fig = import_module("matplotlib.pyplot").gcf()
+        self._fig = _matplotlib("matplotlib.pyplot").gcf()
         return self._fig
 
     def gca(self):
         """Link axes instance to current axes and return."""
-        self._axes = import_module("matplotlib.pyplot").gca()
+        self._axes = _matplotlib("matplotlib.pyplot").gca()
         return self._axes
 
     def despine(self, axes=None):
-        """Remove spines from axes instance."""
-        sns = import_module("seaborn")
+        """Remove top and right spines, deferring to seaborn when installed."""
         if axes is None:
             axes = self.axes
+        try:
+            sns = import_module("seaborn")
+        except ModuleNotFoundError:
+            sns = None
         for _axes in np.atleast_1d(axes).flatten():
-            sns.despine(ax=_axes)
+            if sns is None:  # seaborn is optional: fall back to bare spine removal
+                for side in ("top", "right"):
+                    _axes.spines[side].set_visible(False)
+            else:
+                sns.despine(ax=_axes)
 
     @staticmethod
     def _set_style(style, axes):
@@ -292,12 +361,12 @@ class MatPlotLib:
         """Get item from matplotlib collections libary."""
         if "Collection" in key:
             return getattr(self.collections, key)
-        return import_module(f"matplotlib.{key}")
+        return _matplotlib(f"matplotlib.{key}")
 
     @cached_property
     def collections(self):
         """Return matplotlib collections."""
-        return import_module("matplotlib.collections")
+        return _matplotlib("matplotlib.collections")
 
 
 @dataclass
@@ -322,20 +391,6 @@ class MoviePy:
     def mplfig_to_npimage(self, fig):
         """Return mplfig as npimage."""
         return self.bindings.mplfig_to_npimage(fig)
-
-
-class FancyArrowPatch3D(FancyArrowPatch):
-    """Draw 3D arrows https://stackoverflow.com/a/22867877/5025009."""
-
-    def __init__(self, posA, posB, *args, **kwargs):
-        super().__init__((0, 0), (0, 0), *args, **kwargs)
-        self._points = np.c_[posA, posB].T
-
-    def draw(self, renderer):
-        """Extend FancyArrowpatch for 3d renderer."""
-        _points2d = proj3d.proj_transform(*self._points, renderer.M)
-        self.set_positions(_points2d[0][:2], _points2d[1][:2])
-        super().draw(renderer)
 
 
 @dataclass
@@ -373,10 +428,10 @@ class Plot:
         """Return moviepy instance."""
         return MoviePy()
 
-    @cached_property
+    @property
     def patch(self):
-        """Provice acces to descartes PolygonPatch class."""
-        return import_module("descartes").PolygonPatch
+        """Return the polygon-patch factory (native descartes replacement)."""
+        return polygon_patch
 
     def arrow(
         self,
@@ -398,8 +453,8 @@ class Plot:
                 patch = self.mpl["patches"].FancyArrowPatch
                 collection = self.mpl.collections.PatchCollection
             case "3d":
-                patch = FancyArrowPatch3D
-                collection = Patch3DCollection
+                patch = _fancy_arrow_patch_3d()
+                collection = _matplotlib("mpl_toolkits.mplot3d.art3d").Patch3DCollection
             case _:
                 raise NotImplementedError(f"arrow not implemented for {style} style")
         arrows = [
@@ -611,7 +666,7 @@ class Animate(MoviePy, Plot):
             data = np.r_[
                 [[time[0], np.nan]],
                 data,
-                [[time[-1] + 2.0 * np.finfo(np.float_).eps, np.nan]],
+                [[time[-1] + 2.0 * np.finfo(np.float64).eps, np.nan]],
             ]
         if attr in self._segments:
             data = np.r_[self._segments[attr], data]

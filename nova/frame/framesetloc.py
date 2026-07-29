@@ -7,57 +7,129 @@ import numpy as np
 import xxhash
 
 from nova.frame.arraylocindexer import ArrayLocIndexer
+from nova.frame.columnar import Vector, is_list_like
 from nova.frame.framedata import FrameData
 from nova.frame.framespace import FrameSpace
-from nova.frame.error import SpaceKeyError
+from nova.frame.error import SpaceKeyError, SubSpaceKeyError
+from nova.frame.indexer import LabelAccessor
+
+
+@dataclass
+class RowSelection:
+    """A labelled row selection exposing its index (Loc[rows, :])."""
+
+    frame: FrameSpace
+    rows: object
+
+    @property
+    def index(self):
+        """Return the labels of the selected rows."""
+        return Vector(np.asarray(self.frame.index)[self.rows])
+
+    def __len__(self) -> int:
+        """Return the number of selected rows."""
+        return len(self.index)
+
+
+@dataclass
+class ColumnSelection:
+    """A multi-column selection (Loc[rows, [cols]]) with squeeze support."""
+
+    columns: dict
+
+    def squeeze(self):
+        """Return the single column when there is one, else self."""
+        if len(self.columns) == 1:
+            return next(iter(self.columns.values()))
+        return self
+
+    def to_list(self):
+        """Return the selected columns as lists."""
+        return [column.tolist() for column in self.columns.values()]
 
 
 @dataclass
 class LocIndexer:
-    """Access frame attributes using a pandas style loc indexer."""
+    """Access frame / subframe attributes with a columnar loc indexer.
+
+    ``Loc``/``loc`` target the full frame / subframe; ``sLoc``/``sloc`` (name
+    starting with 's') target the subspace projection. Reads of a subspace
+    column on a full-frame accessor inflate; direct writes are rejected in
+    favour of the subspace accessor.
+    """
 
     name: str
     frame: FrameSpace
     subspace: bool = field(init=False)
 
     def __post_init__(self):
-        """Set subspace flag."""
+        """Set the subspace-target flag from the accessor name."""
         self.subspace = self.name[0] == "s"
 
     def __call__(self):
-        """Return frame attribute."""
+        """Return the underlying frame."""
         return self.frame
 
     def __len__(self):
-        """Return frame length."""
+        """Return the frame length."""
         return len(self.frame)
 
-    def __setitem__(self, key, value):
-        """Set frame attribute."""
-        index = self.frame.get_index(key)
-        col = self.frame.get_col(key)
-        if self.frame.hascol("subspace", col) and not self.subspace:
-            raise SpaceKeyError(self.name, col)
-        if self.frame.hascol("array", col):
-            if isinstance(index, slice) and index == slice(None):
-                return setattr(self.frame, col, value)
-            getattr(self.frame, col)[index] = value
-            return None
-        self.frame.loc[index, col] = value
+    @staticmethod
+    def _split(key):
+        """Return (rows, column) from a loc key."""
+        if isinstance(key, tuple):
+            return key[0], key[1]
+        return slice(None), key
 
-    def __getitem__(self, key) -> np.ndarray:
-        """Return frame attribute."""
-        index = self.frame.get_index(key)
-        col = self.frame.get_col(key)
-        if self.frame.hascol("array", col):
-            if isinstance(index, slice) and index == slice(None):
-                return getattr(self.frame, col)
-            self.frame.get_index(key)
-            return getattr(self.frame, col)[index]
-        self.frame.update_frame()
-        if isinstance(index, int):
-            index = self.frame.index[index]
-        return self.frame.loc[index, col]
+    def _check(self, col, setting):
+        """Enforce subspace membership / protection for a column access."""
+        if not isinstance(col, str):
+            return
+        if self.subspace:
+            if not self.frame.hascol("subspace", col):
+                raise SubSpaceKeyError(col, self.frame.metaframe.subspace)
+            return
+        if setting and self.frame.hascol("subspace", col):
+            raise SpaceKeyError(self.name, col)
+        if setting:
+            if col not in self.frame:
+                self.frame.check_column(col)  # raises ColumnError for schema cols
+                raise KeyError(col)
+        elif col not in self.frame and not self.frame.hascol("subspace", col):
+            raise KeyError(col)
+
+    def __getitem__(self, key):
+        """Return the selected column values (or a RowSelection for [rows, :])."""
+        rows, col = self._split(key)
+        if isinstance(col, slice):
+            return RowSelection(self.frame, LabelAccessor(self.frame)._rows(rows))
+        if is_list_like(col):
+            return ColumnSelection({name: self.frame.loc[rows, name] for name in col})
+        self._check(col, setting=False)
+        return self.frame.loc[rows, col]
+
+    def __setitem__(self, key, value):
+        """Assign to the selected column values, in place on the store."""
+        rows, col = self._split(key)
+        self._check(col, setting=True)
+        index = LabelAccessor(self.frame)._rows(rows)
+        whole = isinstance(index, slice) and index == slice(None, None, None)
+        energized = getattr(self.frame, "_energized", None)
+        if energized is not None and energized(col):
+            # It is derived from Ic * nturn, so it has no backing store array to
+            # write through; route the assignment onto Ic via the frame setter
+            if whole:
+                self.frame[col] = value
+            else:
+                derived = np.asarray(self.frame[col]).copy()
+                derived[index] = value
+                self.frame[col] = derived
+            return
+        column = self.frame[col]
+        if whole:
+            column[:] = value  # length-checked in place (ValueError on mismatch)
+        else:
+            column[index] = value
 
 
 @dataclass

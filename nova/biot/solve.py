@@ -2,7 +2,6 @@
 
 from dataclasses import dataclass, field
 from functools import cached_property
-from itertools import zip_longest
 from typing import ClassVar
 
 import numpy as np
@@ -11,11 +10,14 @@ import xarray
 
 from nova.biot.arc import Arc
 from nova.biot.beam import Beam
+from nova.biot.biotframe import Source
 from nova.biot.bow import Bow
 from nova.biot.circle import Circle
 from nova.biot.cylinder import Cylinder
 from nova.biot.line import Line
-from nova.biot.polygon import Polygon
+from nova.biot.polybeam import PolyBeam
+from nova.biot.polybow import PolyBow
+from nova.biot.polysection import PolySection
 from nova.biot.groupset import GroupSet
 
 
@@ -35,7 +37,9 @@ class Solve(GroupSet):
         "circle": Circle,
         "cylinder": Cylinder,
         "line": Line,
-        "polygon": Polygon,
+        "polybeam": PolyBeam,
+        "polybow": PolyBow,
+        "polysection": PolySection,
     }
 
     def __post_init__(self):
@@ -47,24 +51,23 @@ class Solve(GroupSet):
         # self.decompose()
 
     def check_segments(self):
-        """Check for segment in self.generator."""
-        self.source_segment = self.source.segment.copy()
-        for segment in self.source.segment.unique():
+        """Split each kernel segment into chunks of at most 500 sources.
+
+        ``source_segment`` is a per-source label array; each kernel segment is
+        partitioned into sub-batches named ``<segment>_<i>`` so the interaction
+        matrices stay bounded.
+        """
+        segment_column = np.asarray(self.source["segment"])
+        self.source_segment = segment_column.astype(object).copy()
+        for segment in np.unique(segment_column):
             if segment not in self.generator:
                 raise NotImplementedError(
                     f"segment <{segment}> not implemented "
                     f"in Biot.generator: {self.generator.keys()}"
                 )
-            index = self.source.index[self.source_segment == segment]
-            for i, chunk in enumerate(self.group_segments(index, 500, index[-1])):
-                self.source_segment.loc[list(chunk)] = f"{segment}_{i}"
-
-    @staticmethod
-    def group_segments(iterable, length, fillvalue):
-        """Return grouped iterable."""
-        length = min([length, len(iterable)])
-        args = length * [iter(iterable)]
-        return zip_longest(*args, fillvalue=fillvalue)
+            positions = np.flatnonzero(segment_column == segment)
+            for i in range(0, len(positions), 500):
+                self.source_segment[positions[i : i + 500]] = f"{segment}_{i // 500}"
 
     def initialize(self):
         """Initialize dataset."""
@@ -74,8 +77,12 @@ class Solve(GroupSet):
             coords=dict(
                 source=self.get_index("source"),
                 target=self.get_index("target"),
-                source_plasma=self.source.index[self.source.plasma].to_list(),
-                target_plasma=self.target.index[self.target.plasma].to_list(),
+                source_plasma=np.asarray(self.source.index)[
+                    np.asarray(self.source.plasma)
+                ].tolist(),
+                target_plasma=np.asarray(self.target.index)[
+                    np.asarray(self.target.plasma)
+                ].tolist(),
             )
         )
         self.data.attrs["attributes"] = self.attrs
@@ -136,11 +143,10 @@ class Solve(GroupSet):
     def get_plasma_index(self, frame: str) -> int:
         """Return frame plasma index."""
         biotframe = getattr(self, frame)
+        plasma = np.asarray(biotframe.aloc["plasma"])
+        names = np.unique(np.asarray(biotframe["frame"])[plasma])
         try:
-            return next(
-                biotframe.subspace.index.get_loc(name)
-                for name in biotframe.frame[biotframe.aloc["plasma"]].unique()
-            )
+            return next(biotframe.subspace.index.get_loc(name) for name in names)
         except StopIteration:
             return -1
 
@@ -148,42 +154,58 @@ class Solve(GroupSet):
         """Return matrix coordinate, reduce if flag True."""
         biotframe = getattr(self, frame)
         if biotframe.reduce:
-            return biotframe.biotreduce.index.to_list()
+            return list(biotframe.biotreduce.index)
         return biotframe.index.to_list()
 
     def compose(self):
         """Calculate full ensemble biot interaction."""
-        for segment in tqdm(self.source_segment.unique(), ncols=65, desc=self.name):
+        for segment in tqdm(np.unique(self.source_segment), ncols=65, desc=self.name):
             self.compute(segment)
 
     @cached_property
     def _frame_link(self):
-        """Return frame link."""
-        link = self.source.biotreduce.frame.link.copy()
-        link.loc[link == ""] = link.index[link == ""]
-        return link
+        """Return {label: linked label} map, empty links resolving to self."""
+        frame = self.source.biotreduce.frame
+        labels = np.asarray(frame.index)
+        link = np.asarray(frame["link"]).astype(object)
+        return {
+            label: (label if target == "" else target)
+            for label, target in zip(labels, link)
+        }
 
     def source_index(self, segment):
         """Return source segment index."""
+        segment_mask = self.source_segment == segment
         if not self.source.reduce:
-            return self.source.index[self.source_segment == segment]
+            return np.asarray(self.source.index)[segment_mask]
         frame = [
-            self._frame_link.loc[frame]
-            for frame in np.unique(self.source.frame[self.source_segment == segment])
+            self._frame_link[label]
+            for label in np.unique(np.asarray(self.source["frame"])[segment_mask])
         ]
         return np.isin(self.get_index("source"), frame)
 
     def plasma_index(self, segment):
         """Return plasma segment index."""
-        plasma = self.source_segment[self.source.index[self.source.plasma]]
+        plasma = self.source_segment[np.asarray(self.source.plasma)]
         return np.array(plasma == segment)
 
     def compute(self, segment: str):
         """Compute segment and update dataset."""
         source_index = self.source_index(segment)
         plasma_index = self.plasma_index(segment)
+        segment_mask = self.source_segment == segment
+        # slice by column but keep the row labels: link stores row labels, so
+        # a label-less rebuild re-derives ref against fresh auto-labels and can
+        # split one coil's filaments across reduction indices
+        source = Source(
+            {
+                col: np.asarray(self.source[col])[segment_mask]
+                for col in self.source.columns
+            },
+            index=list(np.asarray(self.source.index)[segment_mask]),
+        )
         generator = self.generator[segment.split("_")[0]](
-            self.source.loc[self.source_segment == segment, :].to_dict(),
+            source,
             self.target,
             turns=self.turns,
             reduce=self.reduce,

@@ -4,7 +4,7 @@ dynamic = ["version"]
 description = "Equilibrium generation and inference"
 license = { text = "ITER GIP" }
 readme = "README.md"
-requires-python = ">=3.11,<3.13"
+requires-python = ">=3.14"
 authors = [{ name = "Simon McIntosh", email = "simon.mcintosh@iter.org" }]
 keywords = [
   "equilibrium",
@@ -21,80 +21,75 @@ classifiers = [
   "License :: Other/Proprietary License",
   "Natural Language :: English",
   "Operating System :: OS Independent",
-  "Programming Language :: Python :: 3.11",
-  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.14",
   "Topic :: Scientific/Engineering :: Physics",
 ]
-urls.Homepage = "https://git.iter.org/projects/EQ/repos/nova/"
-urls.Repository = "https://git.iter.org/projects/EQ/repos/nova/"
+urls.Homepage = "https://github.com/Simon-McIntosh/nova"
+urls.Repository = "https://github.com/Simon-McIntosh/nova"
 dependencies = [
-  "alphashape>=1.3.1",
   "appdirs>=1.4.4",
-  "bokeh>=3.1.1",
-  "contourpy>=1.0.7",
-  "descartes>=1.1.0",
-  "fsspec>=2023.5.0",
+  "contourpy>=1.3",
+  "fsspec>=2024.10",
   "gitpython>=3.1.31",
-  "matplotlib>=3.7.1",
-  "meshio>=5.3.4",
-  "moviepy>=1.0.3",
-  "netcdf4>=1.6.3",
-  "networkx>=3.1",
-  "numpy (>=1.26,<2.0.0)",
-  "overrides>=7.4.0",
+  "h5py>=3.10",
+  "imas-python>=2.0",
+  "netcdf4>=1.7",
+  "numpy>=2",
   "packaging>=23.2",
-  "pandas<2.2.0",
-  "pillow>=12.3.0",
   "pyquaternion>=0.9.9",
-  "pyvista>=0.39.1",
-  "seaborn>=0.12.2",
-  "scipy>=1.10.1",
-  "scikit-learn>=1.2.2",
+  "scipy>=1.14",
   "shapely>=2.0.1",
   "tqdm>=4.66.1",
-  "trimesh>=3.21.7",
-  "vedo>=2023.5.0",
-  "xarray>=2023.5.0",
+  "xarray>=2024.10",
   "xxhash>=3.2.0",
-  "optax (>=0.2.3,<0.3.0)",
-  "optimistix (>=0.0.7,<0.0.8)",
-  "altair (>=5.5.0,<6.0.0)",
-  "openpyxl>=3.1.5",
-  "pyyaml>=6.0",
-  "rich>=14.1.0",
+  "zarr>=3",
 ]
 
 [project.optional-dependencies]
-ansys = [
-  "ansys-dpf-core>=0.8.1",
-  "ansys-dpf-post>=0.4.0",
-  "fortranformat>=1.2.2",
-  "openpyxl>=3.1.2",
+bokeh = ["bokeh>=3.6"]
+# Standard-name semantics for the zarr signal store live in the managed
+# imas-standard-names (name API, pint units) + imas-standard-names-catalog
+# (data-only SQLite catalog). Both are isolated behind this extra: ISN
+# currently hard-depends on fastmcp, which drags an MCP server stack
+# (starlette/uvicorn/httpx/authlib) that the store consumers -- name lookup
+# and units only -- never touch. nova.io imports gate on this extra so the
+# core import graph stays free of the server stack. Pinned to the fork RCs
+# converging on the first upstream release; flip to PyPI ranges on release.
+io = [
+  "imas-standard-names @ git+https://github.com/Simon-McIntosh/IMAS-Standard-Names.git@v0.8.0rc56",
+  "imas-standard-names-catalog @ git+https://github.com/Simon-McIntosh/imas-standard-names-catalog.git@v0.2.0rc64",
 ]
-bamboo = ["coverage2clover>=4.0.0", "tox>=4.6.4"]
-imas = [
-  "imas-python",
-  #"imas-core @ git+ssh://git@git.iter.org/imas/al-core.git",
-  "h5py>=3.10.0",
+# dolfinx itself is conda/spack-provisioned (no PyPI wheels); this extra
+# carries only the pip-installable meshing stack the fenics examples use
+fenics = ["gmsh>=4.12", "pygmsh>=7.1"]
+interchange = ["openpyxl>=3.1.5", "pandas>=2.2"]
+mast = ["intake>=2", "scikit-learn>=1.5"]
+naka = ["beautifulsoup4>=4.12", "mechanize>=0.4"]
+jax = [
+  "jax[cuda12]>=0.5; sys_platform == 'linux'",
+  "jax>=0.5; sys_platform != 'linux'",
 ]
-jit = [
-  "jax[cpu]==0.4.27",     # cuda12_local
-  "numba>=0.59.0",
-  "tbb>=2021.11.0",
-  "tbb-devel>=2021.11.0",
-]
-# naka = ["nakamap @ git+https://github.com/Simon-McIntosh/nakamap.git"]
-optimize = ["jaxopt>=0.8.3", "pylops>=2.1.0"]
+matplotlib = ["matplotlib>=3.10", "seaborn>=0.13"]
+numba = ["numba>=0.61"]
 test = ["pytest", "pytest-cov>=4.1.0", "pytest-asyncio>=0.21.1"]
 thermofluids = [
   "coolprop>=6.6.0",
   "ftputil>=5.0.4",
-  "matplotlib>=3.7.1",
+  "nlopt>=2.7",
   "openpyxl>=3.1.2",
+  "pymupdf>=1.24",
+  "regex>=2024",
   "tables>=3.8.0",
   "xlrd>=2.0.1",
 ]
-uda = ["nest-asyncio>=1.5.8", "async-property>=0.2.2"]
+viz = [
+  "alphashape>=1.3.1",
+  "meshio>=5.3.4",
+  "pyvista>=0.44",
+  "scikit-learn>=1.5",
+  "trimesh>=4",
+  "vedo>=2024.5.0",
+]
 
 [dependency-groups]
 dev = [
@@ -104,6 +99,8 @@ dev = [
   "mypy>=1.15.0,<1.17.0",
   "pre-commit>=4.2.0",
   "tqdm-stubs>=0.2.1",
+  # Benchmark harness (asv suite under benchmarks/)
+  "asv>=0.6",
   # Interactive development
   "ipython>=9.2.0",
   "ipykernel>=6.29.5",
@@ -120,16 +117,26 @@ configure = "nova.scripts.configure:configure"
 requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
 
+# The io extra pins the standard-name forks by git tag until they release to
+# PyPI; hatchling rejects direct (git-URL) references in dependencies without
+# this opt-in. Drops out when the pins flip to PyPI ranges on upstream release.
+[tool.hatch.metadata]
+allow-direct-references = true
+
 [tool.hatch.version]
 source = "vcs"
 
 [tool.hatch.version.raw-options]
 version_scheme = "post-release"
-# only numeric tags carry versions; milestone tags (e.g. v1-assembly-baseline) are ignored
-tag_regex = "^(?P<version>[vV]?\\d+(?:\\.\\d+){0,2})$"
+# only numeric release tags carry versions; skip marker tags like v1-assembly-baseline
 git_describe_command = [
-  "git", "describe", "--dirty", "--tags", "--long",
-  "--match", "[0-9]*",
+  "git",
+  "describe",
+  "--dirty",
+  "--tags",
+  "--long",
+  "--match",
+  "[0-9]*.[0-9]*",
 ]
 
 [tool.hatch.build.hooks.vcs]
@@ -137,32 +144,17 @@ version-file = "nova/_version.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["nova"]
-exclude = [
-  "nova/ansys",
-  "nova/assembly",
-  "nova/design",
-  "nova/development",
-  "nova/dina",
-  "nova/projects",
-  "nova/structural",
-  "nova/thermalhydralic",
-]
 
 [tool.black]
 line-length = 88
-target-version = ['py311']
+target-version = ['py314']
 
 [tool.ruff]
-target-version = "py311"
+target-version = "py314"
 line-length = 88
 
 exclude = [
-  "design",
-  "development",
-  "dina",
-  "projects",
-  "structural",
-  "thermalhydralic",
+  "examples",
   "tests",
   ".git",
   ".mypy_cache",
@@ -229,8 +221,14 @@ lint.mccabe.max-complexity = 10
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
-addopts = "-rfEs --doctest-modules --ignore=tests/test_sultan.py"
+# Default invocation is the fast lane: everything except tests marked `slow`.
+# Run the whole suite with `pytest -m "slow or not slow"` (the command-line -m
+# overrides the one prepended here).
+addopts = "-rfEs --doctest-modules -m 'not slow'"
 norecursedirs = ".git __pycache__"
+markers = [
+  "slow: heavy tests excluded from the default fast lane (numerical sweeps, jax jit/vmap/grad, signal-store round-trips, structural solves, live-data integration); run them with `pytest -m \"slow or not slow\"`",
+]
 testpaths = [
   "tests",
   "nova/imas/database.py",
@@ -243,8 +241,6 @@ testpaths = [
 filterwarnings = [
   "once::Warning",
   "ignore:open:DeprecationWarning:imas",
-  "ignore:datetime.datetime.utcfromtimestamp:DeprecationWarning:dateutil",             # pandas <2.2 
-  "ignore:the matrix subclass is not the recommended:PendingDeprecationWarning:numpy", # alphashape
 ]
 
 [tool.mypy]
@@ -266,15 +262,7 @@ strict = false
 [tool.coverage.run]
 branch = true
 omit = [
-  "nova/ansys/*",
-  "nova/assembly/*",
-  "nova/design/*",
-  "nova/development/*",
-  "nova/dina/*",
-  "nova/obsolete/*",
-  "nova/projects/*",
   "nova/scripts/*",
-  "nova/thermalhydralic/*",
   "nova/utilities/*",
 ]
 
@@ -287,5 +275,3 @@ exclude_lines = [
   "raise NotImplementedError",
   "if __name__ == .__main__.:",
 ]
-
-

@@ -20,15 +20,11 @@ Public API in the main Nova namespace
 
 """
 
-__all__ = [
-    "geometry",
-]
+__all__: list[str] = []
 
 import importlib
 import importlib.metadata
 import os
-
-from .dataset import geometry
 
 try:
     __version__ = importlib.metadata.version("nova-stella")
@@ -36,7 +32,11 @@ except importlib.metadata.PackageNotFoundError:
     __version__ = "0.0.0"
 __all__.extend("__version__")
 
+# Imported on demand so that ``import nova`` does not eagerly pull in the
+# heavy xarray/pandas stack the dataset accessors depend on. Accessing
+# ``nova.dataset`` (or ``nova.imas``) triggers the import via __getattr__.
 submodules = [
+    "dataset",
     "imas",
 ]
 __all__.extend(submodules)

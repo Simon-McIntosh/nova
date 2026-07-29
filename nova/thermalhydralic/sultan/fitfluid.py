@@ -10,9 +10,29 @@ import numpy as np
 import nlopt
 import pandas
 
+from nova.thermalhydralic.plotimport import pyplot, seaborn
 from nova.thermalhydralic.sultan.model import Model
 from nova.thermalhydralic.sultan.fluidmodel import FluidModel
-import matplotlib.pyplot as plt
+
+#: Waveform amplitudes carried through to the fit coefficients. Every one is
+#: reported, so every one must be extracted -- keeping the two lists as a single
+#: name avoids a coefficient asking for an amplitude that was never read.
+AMPLITUDE = (
+    "field_amplitude",
+    "fieldsq_amplitude",
+    "fieldrate_amplitude",
+    "fieldratesq_amplitude",
+)
+
+#: Coefficient names reported by FitFluid.coefficents, in order.
+COEFFICENT = (
+    *AMPLITUDE,
+    "massflow",
+    "frequency",
+    "steadystate",
+    "steadystate_error",
+    "L2norm",
+)
 
 
 @dataclass
@@ -37,7 +57,7 @@ class FitFluid:
             setattr(self.data, vector, waveform_data[vector].to_numpy())
         for attribute in [
             "filename",
-            "fieldratesq_amplitude",
+            *AMPLITUDE,
             "frequency",
             "massflow",
             "samplenumber",
@@ -118,14 +138,7 @@ class FitFluid:
     def coefficents(self):
         """Return fitting coefficients."""
         coefficents = {}
-        for attr in [
-            "field_amplitude",
-            "fieldsq_amplitude",
-            "fieldrate_amplitude",
-            "fieldratesq_amplitude",
-            "massflow",
-            "frequency",
-        ]:
+        for attr in [*AMPLITUDE, "massflow", "frequency"]:
             coefficents[attr] = getattr(self.data, attr)
         coefficents["steadystate"] = self.steadystate
         coefficents["steadystate_error"] = self.steadystate_error
@@ -145,13 +158,14 @@ class FitFluid:
 
     def plot(self, axes=None):
         """Plot model fit."""
+        plt = pyplot()
         if axes is None:
             axes = plt.gca()
         axes.plot(self.data.time, self.data.output, label="data")
         axes.plot(
             self.data.time, self.fluid.output, label=f"model {self.fluid.model.label}"
         )
-        plt.xlabel("$t$ s")
-        plt.ylabel(r"heat output W")
-        plt.legend(loc="center right")
-        plt.despine()
+        axes.set_xlabel("$t$ s")
+        axes.set_ylabel("heat output W")
+        axes.legend(loc="center right")
+        seaborn().despine(ax=axes)

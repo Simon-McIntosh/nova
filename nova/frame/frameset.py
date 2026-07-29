@@ -5,10 +5,10 @@ from functools import cached_property
 from importlib import import_module
 from typing import ClassVar
 
-import netCDF4
-import pandas
+import numpy as np
 
-from nova.database.netcdf import netCDF
+from nova.database.zarrstore import ZarrStore
+from nova.frame.dataframe import DataFrame
 from nova.frame.framedata import FrameData
 from nova.frame.framesetloc import FrameSetLoc
 from nova.frame.framespace import FrameSpace
@@ -37,7 +37,7 @@ def frame_factory(frame_method):
 
 
 @dataclass
-class FrameSet(netCDF, FrameSetLoc):
+class FrameSet(ZarrStore, FrameSetLoc):
     """Manage FrameSet instances."""
 
     base: list[str] = field(
@@ -170,10 +170,12 @@ class FrameSet(netCDF, FrameSetLoc):
         columns = [
             col for col in ["link", "part", "segment", "nturn"] if col in self.frame
         ]
-        superframe = pandas.DataFrame(self.Loc[:, columns])
-        superframe["Ic"] = self.sloc["Ic"][self.frame.subref]
-        superframe["It"] = superframe["Ic"] * superframe["nturn"]
-        return superframe
+        data = {col: np.asarray(self.Loc[:, col]) for col in columns}
+        current = np.asarray(self.sloc["Ic"])[np.asarray(self.frame.subref)]
+        data["Ic"] = current
+        if "nturn" in data:
+            data["It"] = current * np.asarray(data["nturn"], dtype=float)
+        return DataFrame(data, index=list(self.frame.index))
 
     @staticmethod
     def import_method(name: str, package: str | None):
@@ -192,36 +194,28 @@ class FrameSet(netCDF, FrameSetLoc):
         for attr in delattrs:
             delattr(self, attr)
 
-    def subset(self, dataset):
-        """Return group from dataset."""
-        if self.group is not None:
-            return dataset[self.group]
-        return dataset
-
     def load(self):
-        """Load frameset from file."""
+        """Load frameset from the grouped zarr store."""
         self.frame.load(self.filepath, self.subgroup("frame"))
         self.subframe.load(self.filepath, self.subgroup("subframe"))
         self.clear_frameset()
-        with netCDF4.Dataset(self.filepath) as dataset:
-            dataset = self.subset(dataset)
-            for attr in dataset.groups:
-                if attr in dir(self.__class__) and isinstance(
-                    data := getattr(self, attr), netCDF
-                ):
-                    data.filepath = self.filepath
-                    data.group = self.subgroup(data.name)
-                    data.load()
+        for attr in self.group_names():
+            if attr in dir(self.__class__) and isinstance(
+                data := getattr(self, attr), ZarrStore
+            ):
+                data.filepath = self.filepath
+                data.group = self.subgroup(data.name)
+                data.load()
         super().load()
         return self
 
     def store(self, vtk=True):
-        """Store frame, subframe and methods as groups within netCDF file."""
+        """Store frame, subframe and methods as groups within the zarr store."""
         self.frame.store(self.filepath, self.subgroup("frame"), self.get_mode(), vtk)
         self.subframe.store(self.filepath, self.subgroup("subframe"), "a", vtk)
         for attr in self.__dict__:
             data = getattr(self, attr)
-            if isinstance(data, netCDF) and isinstance(data, FrameData):
+            if isinstance(data, ZarrStore) and isinstance(data, FrameData):
                 data.filepath = self.filepath
                 data.group = self.subgroup(data.name)
                 data.store()

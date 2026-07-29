@@ -4,7 +4,6 @@ from dataclasses import dataclass, field
 from typing import ClassVar
 
 import numpy as np
-import pandas
 
 from nova.graphics.plot import Plot
 from nova.imas.database import Database
@@ -52,7 +51,7 @@ class Magnetics(Plot, Database):
     user: str = "public"
     name: str = "magnetics"
 
-    data: dict[str, pandas.DataFrame] = field(
+    data: dict[str, dict[str, np.ndarray]] = field(
         init=False, repr=False, default_factory=dict
     )
 
@@ -129,10 +128,9 @@ class Magnetics(Plot, Database):
         self.data[key] = item
 
     def build_frame(self):
-        """Extract magnetics data."""
-        self.data["frame"] = pandas.DataFrame()
+        """Extract magnetics data into a columnar table keyed by identifier."""
+        identifier, name, diagnostic_name, diagnostic_type = [], [], [], []
         for diagnostic in self.diagnostic:
-            name, identifier, diagnostic_name, diagnostic_type = [], [], [], []
             for ids in self.get_ids(diagnostic):
                 name.append(ids.name)
                 identifier.append(ids.identifier)
@@ -143,89 +141,72 @@ class Magnetics(Plot, Database):
                     )
                 except AttributeError:
                     diagnostic_type.append(diagnostic)
-
-            frame = pandas.DataFrame(
-                dict(
-                    name=name,
-                    diagnostic_name=diagnostic_name,
-                    diagnostic_type=diagnostic_type,
-                ),
-                index=identifier,
-            )
-            self["frame"] = pandas.concat([self["frame"], frame])
+        self.data["frame"] = {
+            "identifier": np.array(identifier, dtype=object),
+            "name": np.array(name, dtype=object),
+            "diagnostic_name": np.array(diagnostic_name, dtype=object),
+            "diagnostic_type": np.array(diagnostic_type, dtype=object),
+        }
 
     def build_summary(self):
-        """Extract overview from dataframe."""
+        """Extract a per-sensor overview from the diagnostic table."""
+        frame = self["frame"]
         index, identifier, name, diagnostic_type, number = [], [], [], [], []
-        for data_name in self["frame"].name.unique():
-            frame = self["frame"].loc[self["frame"].name == data_name, :]
+        for data_name in self._unique(frame["name"]):
+            select = frame["name"] == data_name
+            row_identifier = frame["identifier"][select]
             index.append(data_name.split(" ")[0].split(".")[1])
-            identifier.append("-".join(frame.index[0].split("-")[:-1]))
+            identifier.append("-".join(row_identifier[0].split("-")[:-1]))
             name.append(" ".join(data_name.split(" ")[1:]))
-            type_array = frame.diagnostic_type.unique()
+            type_array = self._unique(frame["diagnostic_type"][select])
             if len(type_array) != 1:
                 raise ValueError(
-                    f"diagnostic type not unique for {data_name} "
-                    f"{frame.diagnostic_type.unique()}"
+                    f"diagnostic type not unique for {data_name} {type_array}"
                 )
             diagnostic_type.append(type_array[0])
-            number.append(len(frame))
-        self.data["summary"] = pandas.DataFrame(
-            dict(
-                name=name,
-                identifier=identifier,
-                diagnostic=diagnostic_type,
-                number=number,
-            ),
-            index=index,
-        )
+            number.append(int(select.sum()))
+        self.data["summary"] = {
+            "index": np.array(index, dtype=object),
+            "name": np.array(name, dtype=object),
+            "identifier": np.array(identifier, dtype=object),
+            "diagnostic": np.array(diagnostic_type, dtype=object),
+            "number": np.array(number, dtype=int),
+        }
 
     def build_flux_loops(self):
-        """Build Partial FLux Loop diagnostic."""
-        self.data["flux_loop"] = pandas.DataFrame(
-            columns=["name", "identifier", "type"]
-        )
-        data = []
+        """Build Partial Flux Loop diagnostic table."""
+        columns = ["name", "identifier", "group", "type", "r", "z", "phi", "indices"]
+        columns += ["area", "gm9"]
+        rows = {column: [] for column in columns}
         for ids in self.get_ids("flux_loop"):
             group = ids.identifier.split(".", 3)[1]
-            data.append(
-                [
-                    ids.name,
-                    ids.identifier,
-                    group,
-                    ids.type.index,
-                    *[
-                        np.array([getattr(position, attr) for position in ids.position])
-                        for attr in ["r", "z", "phi"]
-                    ],
-                    ids.indices_differential,
-                    ids.area,
-                    ids.gm9,
-                ]
-            )
-        self.data["flux_loop"] = pandas.DataFrame(
-            data,
-            columns=[
-                "name",
-                "identifier",
-                "group",
-                "type",
-                "r",
-                "z",
-                "phi",
-                "indices",
-                "area",
-                "gm9",
-            ],
-        )
-        self["flux_loop"].loc[self["flux_loop"].type < 3, "gm9"] = 0
+            rows["name"].append(ids.name)
+            rows["identifier"].append(ids.identifier)
+            rows["group"].append(group)
+            rows["type"].append(ids.type.index)
+            for attr in ["r", "z", "phi"]:
+                rows[attr].append(
+                    np.array([getattr(position, attr) for position in ids.position])
+                )
+            rows["indices"].append(ids.indices_differential)
+            rows["area"].append(ids.area)
+            rows["gm9"].append(ids.gm9)
+        flux_loop = {column: np.array(rows[column], dtype=object) for column in columns}
+        flux_loop["type"] = np.array(rows["type"], dtype=int)
+        flux_loop["gm9"] = np.where(flux_loop["type"] < 3, 0, flux_loop["gm9"])
+        self.data["flux_loop"] = flux_loop
+
+    @staticmethod
+    def _unique(values: np.ndarray) -> list:
+        """Return unique values preserving first-seen order."""
+        return list(dict.fromkeys(values.tolist()))
 
     def plot(self, axes=None):
         """Plot diagnostics."""
         self.set_axes("2d", axes=axes)
         data = self["flux_loop"]
-        for index in data.loc[data.group == "AD"].index:
-            self.axes.plot(data.loc[index, "phi"], data.loc[index, "z"], "o-")
+        for i in np.flatnonzero(data["group"] == "AD"):
+            self.axes.plot(data["phi"][i], data["z"][i], "o-")
 
     def signal_types(self):
         """Add signal type information."""
@@ -237,5 +218,5 @@ if __name__ == "__main__":
     args = []
     magnetics = Magnetics(*args)
     magnetics.plot()
-    # print(magnetics['flux_loop'].loc[0, 'r'])
+    # print(magnetics['flux_loop']['r'][0])
     # print(magnetics['summary'])

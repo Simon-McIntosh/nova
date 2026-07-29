@@ -1,5 +1,16 @@
-"""Manage access to Naka server."""
+"""Scrape the Naka conductor-test data server.
 
+The server this scrapes is no longer reachable: it was an intranet host at
+QST Naka and no replacement endpoint has been published. The module is kept
+because it documents the download layout the local Naka cache was built
+from -- run indices keyed by the PDF/CSV pair, one directory per year -- and
+because that layout is what nakadata and sampledata still parse. Treat every
+network method here as unrunnable and work from the cache instead.
+
+Credentials come from NAKA_USERID and NAKA_PASSWORD in the environment.
+"""
+
+import os
 from dataclasses import dataclass, field
 
 import mechanize
@@ -28,10 +39,17 @@ class NakaServer:
 
     def __enter__(self):
         """Login to Naka website and navigate to year."""
+        userid = os.environ.get("NAKA_USERID", "")
+        password = os.environ.get("NAKA_PASSWORD", "")
+        if not userid or not password:
+            raise ConnectionError(
+                "Naka server credentials are read from the environment: "
+                "set NAKA_USERID and NAKA_PASSWORD."
+            )
         self.browser.open(f"{self.url}/index-e.php")
         self.browser.select_form(nr=1)
-        self.browser.form["userid"] = "FG"
-        self.browser.form["password"] = "edmly70a"
+        self.browser.form["userid"] = userid
+        self.browser.form["password"] = password
         self.browser.submit()
         self.browser.open(f"{self.url}/data/{self.year}")
         return self

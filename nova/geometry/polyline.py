@@ -3,19 +3,19 @@
 import abc
 from dataclasses import dataclass, field
 from functools import cached_property
-from typing import ClassVar
+from typing import TYPE_CHECKING, ClassVar, override
 
 import numpy as np
-from overrides import override
 import pandas
 import scipy
-from vedo import Mesh
 
 from nova.geometry.frenet import Frenet
 from nova.geometry.polygeom import Polygon
 from nova.geometry.rdp import rdp
-from nova.geometry.volume import Cell, Sweep, TriShell
 from nova.graphics.plot import Plot
+
+if TYPE_CHECKING:
+    from nova.geometry.volume import Cell
 
 
 @dataclass
@@ -550,16 +550,77 @@ class PolyLine(Plot):
         """Return quadseg resolved polyline path."""
         return self._stackattr("path")
 
+    thicken: ClassVar[dict[str, dict[str, str]]] = {
+        "arc": {"rectangle": "bow", "polygon": "polybow"},
+        "line": {"rectangle": "beam", "polygon": "polybeam"},
+    }
+    """The biot element a thickened segment dispatches to, by segment kind and profile.
+
+    A profile and a segment kind are chosen independently -- the profile is the
+    cross-section current flows through, the segment kind is the path it follows --
+    so the element is a function of BOTH and the table has two axes.  The filament
+    profile is not in it: a filament carries no section, so it keeps the segment's
+    own kind and reaches :class:`nova.biot.arc.Arc` or its straight peer directly,
+    which is what lets a far-field segment stay cheap while a near one is thickened.
+
+    For an arc the two thick profiles are genuinely different elements rather than
+    one superseding the other.  :class:`nova.biot.bow.Bow` builds its body from the
+    width and height its section bounds, so it is EXACT for a rectangle -- which
+    fills its own bounding box -- and wrong for anything that does not, by the
+    reciprocal of the area fraction: 4/3 for a hexagon, 4/pi for a disc.
+    :class:`nova.biot.polybow.PolyBow` carries the corners themselves, so it is
+    exact for any polygon including the ones no width and height can express, and
+    pays per corner for it -- 550 us/pair against Bow's 182 on the rectangle they
+    share.  Dispatching on the profile keeps the cheap route where it is exact
+    instead of paying the general one everywhere.
+
+    The line column dispatches the same way: :class:`nova.biot.beam.Beam` builds its
+    prism from width and height exactly as Bow builds its rectangle, so it is exact
+    for a rectangle and overstates any section that does not fill its box by the
+    same reciprocal area fraction, while :class:`nova.biot.polybeam.PolyBeam`
+    carries the corners themselves and is exact for any polygon.  Through the frame
+    the two straight elements cost the same -- operator assembly dominates the
+    reduction thirty-fold -- so the rectangle keeps its dedicated route on exactness
+    grounds alone.
+    """
+
+    profiles: ClassVar[tuple[str, ...]] = ("rectangle", "polygon")
+    """The thick profile kinds :attr:`thicken` dispatches on, coarsest first."""
+
+    @property
+    def profile(self) -> str:
+        """Return the thick profile kind this polyline's cross-section presents.
+
+        A rectangle is recognised GEOMETRICALLY rather than by the name it was
+        authored under, so a square, a rectangle spelled any of its aliases, and a
+        free-form four-corner box all reach the exact cheap element, while a hollow
+        section -- whose ring carries an interior boundary and cannot collapse to
+        four corners -- correctly does not.
+        """
+        from nova.geometry.section import is_axis_aligned_rectangle
+
+        section = np.asarray(self.cross_section, dtype=np.float64)
+        if section.ndim != 2 or len(section) < 3:
+            return "polygon"
+        spread = np.ptp(section, axis=0)
+        plane = np.argsort(spread)[-2:]
+        plane.sort()
+        if is_axis_aligned_rectangle(section[:, plane]):
+            return "rectangle"
+        return "polygon"
+
     def _to_list(self, attr: str):
         """Return segment attribute list."""
         if attr == "segment" and not self.filament:
-            thicken = {"arc": "bow", "line": "beam"}
-            return [thicken[segment[attr]] for segment in self.segments]
+            profile = self.profile
+            return [self.thicken[segment[attr]][profile] for segment in self.segments]
         return [segment[attr] for segment in self.segments]
 
     @cached_property
-    def vtk(self) -> list[Cell]:
+    def vtk(self) -> list["Cell"]:
         """Return list of vtk mesh segments swept along segment paths."""
+        from nova.geometry.volume import Sweep
+
         return [
             Sweep(self.cross_section, segment.path, segment.binormal, align=self.align)
             for segment in self.segments
@@ -567,10 +628,47 @@ class PolyLine(Plot):
 
     @cached_property
     def poly(self) -> list[Polygon]:
-        """Return list of polygon objects for 3D coil projected to 2d poloidal plane."""
+        """Return each segment's poloidal footprint as a Polygon.
+
+        Read from the sweep's own float64 corner loops rather than from the vtk
+        mesh those loops build.  VTK's points default to single precision, so a
+        corner authored at 2.97 comes back from the mesh at 2.96999979 -- 8e-09
+        relative, four orders above the closed-form arc reduction's own 3.5e-12,
+        which would peg the element reading this column at the accuracy of the one
+        it replaces.  Forcing the mesh to double precision would double every mesh
+        in the frame and fix nothing else, where the loops are already exact.
+        """
+        from nova.geometry.section import poloidal_footprint
+
         return [
-            TriShell(vtk, ahull=segment.name == "arc", alpha=None).poly
-            for vtk, segment in zip(self.vtk, self.segments)
+            Polygon(poloidal_footprint(vtk.section_loops), name="sweep")
+            for vtk in self.vtk
+        ]
+
+    def section_footprint(self, cross_section: np.ndarray) -> list[Polygon]:
+        """Return the footprint of another cross-section swept along the same path.
+
+        No mesh is built: the sweep's own frame is applied to the float64 corner
+        loop and the result projected, which is all a footprint needs.  This is how
+        the interior boundary of a hollow section reaches the frame as a section in
+        its own right, so the hole can be carried as a coupled negative-density
+        member rather than refused.
+        """
+        from nova.geometry.section import Section, poloidal_footprint
+
+        return [
+            Polygon(
+                poloidal_footprint(
+                    np.asarray(
+                        Section(np.array(cross_section, dtype=float))
+                        .sweep(segment.path, segment.binormal, self.align)
+                        .point_array,
+                        dtype=float,
+                    )
+                ),
+                name="sweep",
+            )
+            for segment in self.segments
         ]
 
     @cached_property
@@ -645,18 +743,6 @@ class PolyLine(Plot):
 
     def vtkplot(self):
         """Plot vtk centerline."""
+        from vedo import Mesh
+
         Mesh(*[segment.mesh for segment in self.segments]).show()
-
-
-if __name__ == "__main__":
-    from nova.assembly.fiducialdata import FiducialData
-
-    fiducial = FiducialData(fiducial="RE")
-
-    points = fiducial.data.centerline_target.data
-    points += 500 * fiducial.data.centerline_delta[3].data
-    polyline = PolyLine(points)
-    polyline.plot()
-
-    # poly = PolyLine()
-    # for segment in polyline.segments:

@@ -6,7 +6,6 @@ from typing import Union
 import shapely.geometry
 import shapely.strtree
 import numpy as np
-import pandas
 
 from nova.biot.biotframe import Target
 from nova.frame.dataframe import DataFrame
@@ -225,7 +224,7 @@ class PolyGrid(PolyCell, Plot):
 
     trim: bool = True
     vector: PolyVector = field(init=False, repr=False)
-    frame: pandas.DataFrame = field(init=False, repr=False)
+    frame: DataFrame = field(init=False, repr=False)
     columns: list[str] = field(
         init=False,
         default_factory=lambda: [
@@ -296,9 +295,12 @@ class PolyGrid(PolyCell, Plot):
         for i, poly in enumerate(polys):
             geom = PolyGeom(poly, segment="circle").geometry
             data[i] = {name: geom[name] for name in self.columns}
-        frame = pandas.DataFrame(data, columns=self.columns)
-        frame["nturn"] = self.nturn * frame["area"] / frame["area"].sum()
-        return frame
+        columns = {name: [row[name] for row in data] for name in self.columns}
+        area = np.asarray(columns["area"], dtype=float)
+        columns["nturn"] = self.nturn * area / area.sum()
+        # a positional index marks this as an anonymous geometry table so the
+        # consuming insert derives row labels from its own label / delim tags
+        return DataFrame(columns, index=range(len(data)))
 
     @property
     def polyarea(self):
@@ -318,9 +320,9 @@ class PolyGrid(PolyCell, Plot):
     @property
     def polyplot(self):
         """Return polyplot instance."""
-        frame = self.frame.copy()
+        frame = DataFrame(self.frame, additional=["part"])
         frame["part"] = "cs"
-        return PolyPlot(DataFrame(frame))
+        return PolyPlot(frame)
 
     def plot(self):
         """Plot polygon exterior and polycells."""

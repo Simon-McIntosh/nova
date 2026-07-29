@@ -116,8 +116,13 @@ class Winding(CoilSetAttrs):
             )
         if not isinstance(cross_section, PolyGeom):
             cross_section = PolyGeom(cross_section, name="sweep")
-        if cross_section.section == "skin":
-            cross_section.section = "box"
+        if "section" not in cross_section.metadata:
+            # A boundary loop or a shapely polygon carries no section NAME, only
+            # corners, and the frame's biot cross-section registry is keyed by one.
+            # ``polygon`` is the key that says exactly that, and naming it here is
+            # what lets a section no (width, height) pair can express reach an
+            # element at all.
+            cross_section.section = "polygon"
 
         polyline_kwargs = {
             attr: additional.pop(attr)
@@ -143,7 +148,7 @@ class Winding(CoilSetAttrs):
         )
         self.attrs = additional | dict(
             section=cross_section.section,
-            area=cross_section.area,
+            area=cross_section.poly.area,
             width=cross_section.width,
             height=cross_section.height,
         )
@@ -163,13 +168,81 @@ class Winding(CoilSetAttrs):
                 )
             )
             subattrs.pop("name", None)
+            core = self.interior_boundaries(cross_section, polyline)
+            core_poly = [polyline.section_footprint(boundary) for boundary in core]
+            subattrs["area"] = self.conducting_area(
+                polyline.volume_geometry["poly"], core_poly
+            )
             subindex = self.subframe.insert(**subattrs)
-            if cross_section.section in ["box"] and polyline.filament is False:
-                subattrs["width"] *= 1 - cross_section.thickness
-                subattrs["height"] *= 1 - cross_section.thickness
-                self.subframe.insert(**subattrs | {"link": subindex[0]}, factor=-1)
+            for boundary, poly in zip(core, core_poly):
+                self.subframe.insert(
+                    **subattrs
+                    | dict(
+                        link=subindex[0],
+                        poly=poly,
+                        width=float(np.ptp(boundary[:, 0])),
+                        height=float(np.ptp(boundary[:, 2])),
+                    ),
+                    factor=-1,
+                )
         self.update_loc_indexer()
         return index
+
+    @staticmethod
+    def conducting_area(outer: list, core: list) -> list[float]:
+        """Return each segment's conducting area: its footprint less its holes.
+
+        Measured on the SWEPT footprints rather than on the cross-section, because
+        that is the polygon every thickened element integrates and the column is
+        what sets its current density -- a solid section whose column disagreed with
+        its own polygon would spread more or less than the frame's one ampere over
+        it, which is a first-order error where the polygon's own departure from the
+        curve it approximates is second order.  The two agree to round-off for a
+        section symmetric about the poloidal plane and to a few parts in 1e5 for one
+        that is not, the difference being the tilt the path's own end tangents give
+        the two end stations.
+        """
+        return [
+            poly.poly.area - sum(hole[segment].poly.area for hole in core)
+            for segment, poly in enumerate(outer)
+        ]
+
+    @staticmethod
+    def interior_boundaries(cross_section: PolyGeom, polyline: PolyLine) -> list:
+        """Return each interior boundary of a hollow section as ``(n, 3)`` points.
+
+        A ``skin`` or a ``box`` -- or any polygon with a hole -- is an annulus
+        between an outer boundary and an inner one, and superposition gives it
+        exactly.  The outer boundary is inserted as a solid section carrying current
+        density ``+j`` and each interior boundary as a CORE carrying ``-j``, so the
+        material between them carries ``j`` and the core cancels.  The density is set
+        by the annulus rather than by either boundary::
+
+            j = I / A_annulus,  I_outer = +j A_outer,  I_core = -j A_core
+
+        and ``I_outer + I_core = j (A_outer - A_core) = I``.  Both members carry the
+        ANNULUS as their ``area``, which is what sets ``j``, and the ``-1`` factor
+        the frame's own link machinery already understands is what makes the core
+        subtract: the reference row of a linked group has factor one by definition,
+        so the density cannot live in that column and lives in the area instead.
+        Both members are solid sections every thickened element already evaluates,
+        so nothing here needs a second kernel.
+
+        Reading the boundaries off the section rather than scaling its width and
+        height is what makes a ``skin`` a circular annulus instead of a square one,
+        and what admits a hollow section no descriptor names at all.
+
+        Empty for a filament, which carries no section, and for a solid one.
+        """
+        if polyline.filament is not False:
+            return []
+        return [
+            np.c_[coords[:, 0], np.zeros(len(coords)), coords[:, 1]]
+            for coords in (
+                np.asarray(ring.coords, dtype=float)
+                for ring in cross_section.poly.interiors
+            )
+        ]
 
     @staticmethod
     def vtk_data(vtk: vedo.Mesh):

@@ -1,42 +1,58 @@
 {
-  "updated": "2026-07-29T14:11:57",
+  "updated": "2026-07-29T19:05:17",
   "project": "nova",
   "doc": "index",
   "data": {
     "sprints": [
       {
         "id": "S1",
-        "status": "active",
+        "status": "done",
         "theme": "Converge Nova 2.0",
         "items": [
           {
             "slug": "nova-spine-refactor",
             "why_now": "All migration work depends on the final API/branch convergence.",
-            "tier": "opus",
-            "done_when": "Ambix adoption contract is frozen, assembly extracted, plan/code branches converge and the main suite passes."
+            "done_when": "Ambix adoption contract is frozen, assembly extracted, plan/code branches converge and the main suite passes.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {}
+            }
           },
           {
             "slug": "polybow-arc-section",
             "why_now": "The pin refit exposed a real correctness item: XLA CPU codegen breaks a root/difference cancellation in the elliptic descent that GPU-less serving nodes compile through; the hollowness normalisation still folds in opposite directions across two layers. Stabilise before downstream ports consume the arc element.",
-            "tier": "opus",
-            "done_when": "Descent swept and codegen-pinned on both backends; traced-parity item re-triaged; hollowness one direction with both layers agreeing; disc/ellipse corner-count decision locked on measurement. GPU wall-clock re-quote and arc banding may roll to S2."
+            "done_when": "Descent swept and codegen-pinned on both backends; traced-parity item re-triaged; hollowness one direction with both layers agreeing; disc/ellipse corner-count decision locked on measurement. GPU wall-clock re-quote and arc banding may roll to S2.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {}
+            }
           },
           {
             "slug": "coil-conductor-fidelity",
             "why_now": "One rung from shipped: the feeder run is 46% of PF1's residual and costs seconds per coil to measure; the mesh-default recommendation unblocks the reconstruction lane's convergence discipline.",
-            "tier": "opus",
-            "done_when": "Feeder rung tabulated for all twelve coils with the circuit boundary established or explicitly undetermined; reconstruction mesh default recommended with its convergence ladder; plan shipped."
+            "done_when": "Feeder rung tabulated for all twelve coils with the circuit boundary established or explicitly undetermined; reconstruction mesh default recommended with its convergence ladder; plan shipped.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {}
+            }
           },
           {
             "slug": "nova-heritage-recovery",
             "why_now": "The repair is merged but its evidence record is missing; reconstruction is cheap and the plan is at 0.7 with one followup between it and shipped.",
-            "tier": "sonnet",
-            "done_when": "Damage inventory, FrequencyResponse oracle check, hermeticity proof and test counts recorded; galleries import-checked; salvage register written; plan shipped."
+            "done_when": "Damage inventory, FrequencyResponse oracle check, hermeticity proof and test counts recorded; galleries import-checked; salvage register written; plan shipped.",
+            "capability": {
+              "version": "1.0",
+              "class": "general",
+              "requirements": {}
+            }
           }
         ],
         "starts": "2026-07-29",
-        "ends": "2026-08-05",
-        "description": "Finish assembly extraction, Ambix adoption contract and return to a single trunk before downstream ports consume unstable APIs \u2014 plus the close-out lanes that must stabilise before anything consumes them: the arc element's codegen/hollowness correctness set, the conductor-fidelity feeder rung, and the heritage evidence record."
+        "ends": "2026-07-29",
+        "description": "Closed 2026-07-29. All four items shipped: trunk convergence (nova-spine-refactor), CPU/GPU arc correctness with measured 64-corner default and two performance refinements deferred to S2 (polybow-arc-section), 0.06 m conductor reference mesh plus all twelve feeder decompositions with circuit boundary explicitly undetermined (coil-conductor-fidelity), and a fully evidenced offline heritage recovery with import-checked galleries and inverse-design salvage register (nova-heritage-recovery). Final sun_debug gate: 3,841 passed, 118 resource-gated skips in 647.00 s. Closeout records live under docs/archive/ and plan artifacts."
       },
       {
         "id": "S2",
@@ -46,20 +62,32 @@
           {
             "slug": "physics-spine-adoption",
             "why_now": "Profile reconstruction, gs_solve, geometry and full transport coupling are the remaining core physics ports.",
-            "tier": "opus",
-            "done_when": "Wave 3 lands in Nova with frozen CPU/JAX parity evidence and Ambix donor inventory."
+            "done_when": "Wave 3 lands in Nova with frozen CPU/JAX parity evidence and Ambix donor inventory.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {}
+            }
           },
           {
             "slug": "mast-machine-description",
             "why_now": "Production reconstruction and IMAS egress require versioned MAST DDv4 descriptions and identity gates.",
-            "tier": "opus",
-            "done_when": "MAST IDS descriptions, COCOS gates and IMAS round trips pass with provenance."
+            "done_when": "MAST IDS descriptions, COCOS gates and IMAS round trips pass with provenance.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {}
+            }
           },
           {
             "slug": "nova-3d-native",
             "why_now": "MAST passive and non-axisymmetric work needs the exact native 3D coupling substrate.",
-            "tier": "opus",
-            "done_when": "Exact flux-coupling operators and remaining numerical gates ship with evidence."
+            "done_when": "Exact flux-coupling operators and remaining numerical gates ship with evidence.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {}
+            }
           }
         ],
         "starts": "2026-08-06",
@@ -74,8 +102,12 @@
           {
             "slug": "mast-nonaxisymmetric-physics",
             "why_now": "This closes the remaining Ambix-owned 3D/passive physics boundary before production labeling.",
-            "tier": "opus",
-            "done_when": "Versioned geometry, circuits, vacuum taring and held-out ramp evidence ship in Nova."
+            "done_when": "Versioned geometry, circuits, vacuum taring and held-out ramp evidence ship in Nova.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {}
+            }
           }
         ],
         "starts": "2026-08-21",
@@ -90,8 +122,12 @@
           {
             "slug": "mast-catalog-gpu-solve",
             "why_now": "The validated production substrate is ready for campaign-scale GPU execution and label-store release.",
-            "tier": "opus",
-            "done_when": "H200 solve meets science, provenance and throughput gates; versioned label store and optional IMAS egress are published."
+            "done_when": "H200 solve meets science, provenance and throughput gates; versioned label store and optional IMAS egress are published.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {}
+            }
           }
         ],
         "starts": "2026-09-05",
@@ -99,7 +135,7 @@
         "description": "Run the GPU catalog only after reconstruction, machine descriptions and MAST 3D/passive physics pass their evidence gates."
       }
     ],
-    "active_sprint_id": "S1",
+    "active_sprint_id": null,
     "timeline": [
       {
         "when": "2026-07-29",
@@ -110,6 +146,11 @@
         "when": "2026-07-29",
         "who": "reckon-sprint",
         "what": "S1 rebalanced: polybow correctness close-out, conductor-fidelity feeder rung and heritage evidence added beside the convergence item; blockers B1-B4 recorded; cross-project dependencies qualified project:slug under the new schema."
+      },
+      {
+        "when": "2026-07-29",
+        "who": "reckon-ship",
+        "what": "S1 closed: all four plans shipped; final full suite 3,841 passed and 118 resource-gated skips on sun_debug."
       }
     ],
     "blockers": [
@@ -142,6 +183,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 3
+    "_version": 4
   }
 }

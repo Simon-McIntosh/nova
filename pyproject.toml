@@ -75,10 +75,12 @@ test = [
   "jax>=0.5",
   "matplotlib>=3.10",
   "meshio>=5.3.4",
+  "networkx",
   "pyvista>=0.44",
   "pytest",
   "pytest-cov>=4.1.0",
   "pytest-asyncio>=0.21.1",
+  "scikit-learn>=1.5",
   "trimesh>=4",
   "vedo>=2024.5.0",
 ]

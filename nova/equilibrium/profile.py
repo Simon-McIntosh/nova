@@ -436,16 +436,47 @@ class ReconstructProfile:
         gram = matrix.T @ matrix + self.ridge * jnp.eye(self.degrees.number)
         vector = matrix.T @ rhs
         current_row = jnp.sum(basis, axis=0)
+        kkt, constrained_rhs, coefficient_scale = self._scaled_kkt(
+            gram, vector, current_row, plasma_current
+        )
+        solution = jnp.linalg.solve(kkt, constrained_rhs)
+        return solution[:-1] / coefficient_scale
+
+    def _scaled_kkt(
+        self,
+        gram: jax.Array,
+        vector: jax.Array,
+        current_row: jax.Array,
+        plasma_current: jax.Array,
+    ) -> tuple[jax.Array, jax.Array, jax.Array]:
+        """Equilibrate the constrained normal equations by congruence.
+
+        Profile families have different physical units, so their unscaled KKT
+        matrix can be poorly conditioned even when the constrained fit is
+        identifiable.  Congruence scaling preserves the exact minimizer and
+        measured-current equality while making scalar and batched
+        factorizations comparably stable.
+        """
+        coefficient_scale = jnp.sqrt(jnp.diag(gram))
+        coefficient_scale = jnp.maximum(
+            coefficient_scale, jnp.sqrt(jnp.finfo(gram.dtype).tiny)
+        )
+        scaled_gram = gram / (coefficient_scale[:, None] * coefficient_scale[None, :])
+        scaled_vector = vector / coefficient_scale
+        scaled_current = current_row / coefficient_scale
+        equality_scale = jnp.linalg.norm(scaled_current)
+        equality_scale = jnp.maximum(
+            equality_scale, jnp.sqrt(jnp.finfo(gram.dtype).tiny)
+        )
+        scaled_current = scaled_current / equality_scale
         kkt = jnp.block(
             [
-                [gram, current_row[:, None]],
-                [current_row[None, :], jnp.zeros((1, 1))],
+                [scaled_gram, scaled_current[:, None]],
+                [scaled_current[None, :], jnp.zeros((1, 1))],
             ]
         )
-        solution = jnp.linalg.solve(
-            kkt, jnp.concatenate([vector, plasma_current[None]])
-        )
-        return solution[:-1]
+        rhs = jnp.concatenate([scaled_vector, plasma_current[None] / equality_scale])
+        return kkt, rhs, coefficient_scale
 
     def _result(
         self,

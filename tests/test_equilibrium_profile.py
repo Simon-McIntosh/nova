@@ -227,12 +227,79 @@ def test_batched_least_squares_matches_slice_solves():
         )
         for index in range(2)
     ]
-    np.testing.assert_allclose(
-        batched.coefficients,
-        np.stack([result.coefficients for result in per_slice]),
-        rtol=1.0e-10,
-        atol=1.0e-10,
+    batched_coefficients = np.asarray(batched.coefficients)
+    per_slice_coefficients = np.stack(
+        [np.asarray(result.coefficients) for result in per_slice]
     )
+    current_row = np.asarray(jnp.sum(basis, axis=0))
+    for candidates in (batched_coefficients, per_slice_coefficients):
+        np.testing.assert_allclose(
+            candidates @ current_row,
+            np.asarray(plasma_current),
+            rtol=8.0 * np.finfo(np.float64).eps,
+            atol=0.0,
+        )
+
+    response = np.asarray(solver.plasma_to_sensor @ basis)
+    gram = response.T @ response + solver.ridge * np.eye(solver.degrees.number)
+    raw_kkt = np.block(
+        [
+            [gram, current_row[:, None]],
+            [current_row[None, :], np.zeros((1, 1))],
+        ]
+    )
+    raw_condition = np.linalg.cond(raw_kkt)
+    scaled_conditions = []
+    machine_epsilon = np.finfo(np.float64).eps
+
+    for index in range(coefficients.shape[0]):
+        vector = response.T @ np.asarray(measured[index])
+        scaled_kkt, scaled_rhs, coefficient_scale = solver._scaled_kkt(
+            jnp.asarray(gram),
+            jnp.asarray(vector),
+            jnp.asarray(current_row),
+            plasma_current[index],
+        )
+        scaled_kkt = np.asarray(scaled_kkt)
+        scaled_rhs = np.asarray(scaled_rhs)
+        coefficient_scale = np.asarray(coefficient_scale)
+        scaled_conditions.append(np.linalg.cond(scaled_kkt))
+        coefficient_error_map = (
+            np.diag(1.0 / coefficient_scale) @ np.linalg.inv(scaled_kkt)[:-1]
+        )
+        residual_to_coefficient = np.max(np.linalg.norm(coefficient_error_map, axis=1))
+
+        residual_norms = []
+        for candidate in (
+            batched_coefficients[index],
+            per_slice_coefficients[index],
+        ):
+            scaled_coefficients = coefficient_scale * candidate
+            constraint_column = scaled_kkt[:-1, -1]
+            stationarity_without_multiplier = (
+                scaled_kkt[:-1, :-1] @ scaled_coefficients - scaled_rhs[:-1]
+            )
+            multiplier = -np.dot(
+                constraint_column, stationarity_without_multiplier
+            ) / np.dot(constraint_column, constraint_column)
+            state = np.concatenate([scaled_coefficients, [multiplier]])
+            residual = scaled_kkt @ state - scaled_rhs
+            residual_norm = np.linalg.norm(residual)
+            residual_norms.append(residual_norm)
+            backward_error = residual_norm / (
+                np.linalg.norm(scaled_kkt, ord=2) * np.linalg.norm(state)
+                + np.linalg.norm(scaled_rhs)
+            )
+            assert backward_error <= 128.0 * machine_epsilon
+
+        forward_error_bound = residual_to_coefficient * sum(residual_norms)
+        coefficient_difference = np.max(
+            np.abs(batched_coefficients[index] - per_slice_coefficients[index])
+        )
+        assert coefficient_difference <= forward_error_bound
+
+    assert max(scaled_conditions) < 1.0e4
+    assert raw_condition / max(scaled_conditions) > 1.0e8
 
 
 def test_shape_validation_rejects_incompatible_operator():

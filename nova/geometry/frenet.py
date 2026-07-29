@@ -189,5 +189,3 @@ class Frenet(Plot):
                 self.torsion, self.parametric_length, initial=0
             ),
         )
-
-

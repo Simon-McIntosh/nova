@@ -123,60 +123,37 @@ uv run pytest -v
 
 ### Working in Worktrees
 
-Cursor remote agents often work in auto-created worktrees. Follow this workflow for clean commits:
+Use worktrees only when the user has already authorised a non-primary branch or
+when an orchestrated worker needs an isolated checkout. Do not create a topic
+branch or move commits between branches with cherry-pick.
 
-**Step 1: Commit in the worktree**
+Commit and push from the worktree on its assigned branch:
 
 ```bash
-cd /path/to/worktree
-
 # Lint and format
 uv run ruff check --fix .
 uv run ruff format .
 
-# Stage and commit
+# Stage, commit, and publish
 git add <file1> <file2> ...
 uv run git commit -m 'type: description'
+git pull --no-rebase origin <assigned-branch>
+git push origin <assigned-branch>
 ```
 
-**Step 2: Cherry-pick to main workspace**
+Remove a worktree only after its worktree is clean and every required commit is
+reachable from its published branch.
 
-The `main` branch is checked out in the primary workspace, so cherry-pick:
+### Branch policy
 
-```bash
-cd /home/ITER/mcintos/Code/nova
-git cherry-pick <commit-hash-from-worktree>
-git push
-```
-
-**Step 3: Clean up worktree**
-
-```bash
-cd /path/to/worktree
-git checkout -- .  # Discard any remaining changes
-```
-
-### Reckon plans & branch policy (transitional refactor split)
-
-The spine refactor runs a temporary two-branch split — an explicit exception to
-trunk-based work, for its duration:
-
-- **`main`** — live 1.x line and the **default branch**. The assembly tree and
-  the **norma** (assembly-metrology) data-provenance work live here, and **all
-  reckon plans live here**.
-- **`develop`** — the 2.0 physics-spine core; the leave set
-  (`assembly`, `structural`, `thermalhydralic`, `dina`, `design`, `projects`,
-  `development`, `ansys`) is deleted here.
+- **`main`** — the primary branch for all code and all Reckon plans.
 - **`legacy/v1`** + tag **`v1-assembly-baseline`** — the frozen goldens-green
   baseline, branch-protected (no force-push, no deletion).
+- **`develop`** — historical integration branch retained for traceability; do
+  not start new work there.
 
-The reckon server serves the primary checkout's **working tree** (see
-`~/Code/reckon/AGENTS.md`), so **keep the primary checkout on `main`** — that is
-where plans render coherently and where norma/assembly work happens, so it needs
-no branch switching. Do **`develop` (2.0-core) code work in a git worktree**
-(`git worktree add ../nova-develop develop`), never by switching the primary
-checkout off `main`. Commit and push plan edits in the same session so live plan
-state never depends on an un-pushed file on the wrong branch.
+Keep the primary checkout on `main`. The Reckon server serves this checkout's
+working tree, so commit and push plan edits in the same session.
 
 ## Rules
 

@@ -51,16 +51,16 @@ discover.
                           its ``(r, z)`` fixed as it sweeps.  A winding pack does
                           not: each element advances across the pack as it goes
                           round, so its footprint is a smear reaching 170 mm where
-                          the section is 35 mm -- 364 corners instead of 32, the
-                          current spread over several times the area it occupies,
-                          and the self term misplaced by about the size of the
-                          residual under study.  Two joggles in a hundred step
-                          further than their own section is wide, and there the
-                          footprint is not even connected.  So the closed forms are
-                          driven directly, with the section handed over as the
-                          section.  The two routes are run against each other on
-                          the coaxial ring, which is the one path where the frame's
-                          column IS the section.
+                          the section is 35 mm -- 244 corners instead of 32 and 7.6
+                          times the area the current occupies, on an element three
+                          quarters of the pack's length looks like.  A self term is
+                          the logarithm of the section's geometric mean distance, so
+                          that is a first-order error on it.  Two joggles in a
+                          hundred move so far that the footprint is not even
+                          connected.  So the closed forms are driven directly, with
+                          the section handed over as the section.  The two routes
+                          are run against each other on the coaxial ring, which is
+                          the one path where the frame's column IS the section.
 
 The cooling channel is carried the way the frame carries any hollow section, by
 superposition: the cable space at current density ``+j`` and the central channel
@@ -400,10 +400,12 @@ def centreline_linkage(coilset, segments, intervals: int) -> np.ndarray:
 def _arc_frame(segment) -> tuple:
     """Return a circular arc's own frame, and the sweep it covers in it.
 
-    Built from the arc's own start point and start tangent rather than from its
-    stored axes, so the frame is right-handed about the direction the current
-    actually flows and the sweep runs from zero to a positive angle -- which is
-    the convention the closed form takes its limits in.
+    Built from the arc's own three points rather than from its stored axes, so the
+    frame is right-handed about the direction the current actually flows and the
+    sweep runs from zero to a positive angle -- which is the convention the closed
+    form takes its limits in.  The section a swept conductor presents is a disc in
+    THIS frame's own ``(r, z)`` plane whatever the arc's orientation, because the
+    plane current crosses is the plane perpendicular to an azimuthal path.
     """
     centre = np.asarray(segment.center, dtype=float)
     run = np.asarray(segment.sample(3), dtype=float)
@@ -463,12 +465,14 @@ def segment_potential(segment, section: Section, station: np.ndarray) -> np.ndar
     sweeps, the footprint IS the section.  A winding pack's path does not hold them
     fixed: every element advances across the pack as it goes round, so its
     footprint is a smear reaching 170 mm where the section is 35 mm.  Measured on
-    this coil's own pack, that column reaches the kernel with up to 364 corners
-    instead of 32 and spreads the current over several times the area it occupies,
-    which moves the self term by about the size of the residual under study.  Two
-    of the pack's straight joggles in a hundred step further than their own section
-    is wide, and there the footprint is not even connected -- the column comes back
-    as a pair of disjoint discs, which the frame's own section reader raises on.
+    this coil's own pack, three quarters of its length sits on elements whose ends
+    move further than their own section is wide, the worst column reaches the kernel
+    with 244 corners instead of 32, and it carries 7.6 times the area the current
+    occupies.  A self term is the logarithm of the section's own geometric mean
+    distance, so a section several times too large is a first-order error on it,
+    not a rounding.  Two of the pack's joggles in a hundred move so far that the
+    footprint is not even connected -- the column comes back as a pair of disjoint
+    discs, which the frame's own section reader raises on.
 
     So the section is handed over AS the section: for an arc, the conductor's own
     disc at the arc's radius in the arc's own frame, which is exactly what the
@@ -1216,6 +1220,36 @@ def _merge_sections(names) -> dict:
     return merged
 
 
+def _section_pairs(resolved: dict) -> list[tuple[str, str, str]]:
+    """Return the run pairs that isolate one input each, and what they isolate.
+
+    A comparison is only attributable if the two runs share everything but the one
+    thing under test, so the pairs are built by name rather than chosen: the same
+    shape at two resolutions, the same resolution with and without the channel, and
+    the same section at two quadratures.  Only pairs both of whose runs exist are
+    returned, so a sweep that lost a run to a wall clock reports fewer rows rather
+    than a wrong one.
+    """
+    pairs = []
+    for key in resolved:
+        shape, corners, intervals, *rest = key.split("-")
+        suffix = "-".join(rest)
+        tail = f"-{suffix}" if suffix else ""
+        finer = f"{shape}-{2 * int(corners)}-{intervals}{tail}"
+        if finer in resolved:
+            name = f"{shape}, {corners} to {2 * int(corners)} corners"
+            pairs.append((name, key, finer))
+        hollow = f"annulus-{corners}-{intervals}{tail}"
+        if shape == "disc" and hollow in resolved:
+            name = f"the cooling channel at {corners} corners"
+            pairs.append((name, key, hollow))
+        mesh = f"{shape}-{corners}-{2 * int(intervals)}{tail}"
+        if mesh in resolved:
+            name = f"{shape}-{corners}, {intervals} to {2 * int(intervals)} intervals"
+            pairs.append((name, key, mesh))
+    return pairs
+
+
 def report_ladder(payload: dict) -> None:
     """Print the ladder with the resolved section on the end of it."""
     machine = payload["machine"]
@@ -1232,16 +1266,25 @@ def report_ladder(payload: dict) -> None:
         print(f"{'wound section ' + key:<26}{run['rung']:>14.6f}{run['gap']:>+18.2e}")
     print(
         f"\nwhat the section is worth against the ring that stood in for it [H]\n"
-        f"\n{'run':<22}{'turns':>7}{'ring self':>14}{'swept self':>14}"
-        f"{'step':>14}{'channel':>14}"
+        f"\n{'run':<22}{'turns':>7}{'ring self':>16}{'swept self':>16}"
+        f"{'step':>13}{'channel':>13}"
     )
     for key, run in payload["resolved"].items():
-        ring = "" if run["ring_self"] is None else f"{run['ring_self']:>14.6f}"
-        step = "" if run["step"] is None else f"{run['step']:>+14.2e}"
+        ring = "" if run["ring_self"] is None else f"{run['ring_self']:.9f}"
+        step = "" if run["step"] is None else f"{run['step']:+.2e}"
         print(
-            f"{key:<22}{run['turns_covered']:>7}{ring:>14}{run['self']:>14.6f}"
-            f"{step:>14}{run['channel']:>+14.2e}"
+            f"{key:<22}{run['turns_covered']:>7}{ring:>16}{run['self']:>16.9f}"
+            f"{step:>13}{run['channel']:>+13.2e}"
         )
+    print(
+        "\nwhat resolving the section finer is worth, and what the channel takes"
+        "\noff, both on the same turns [H]\n"
+    )
+    print(f"{'comparison':<44}{'difference':>14}{'relative':>12}")
+    for name, first, second in _section_pairs(payload["resolved"]):
+        low = payload["resolved"][first]["self"]
+        high = payload["resolved"][second]["self"]
+        print(f"{name:<44}{high - low:>+14.3e}{(high - low) / low:>+12.2e}")
     if "seam" in payload:
         seam = payload["seam"]
         print(

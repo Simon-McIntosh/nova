@@ -7,20 +7,23 @@
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="coil-conductor-fidelity">
   <meta name="plan-title" content="Coil Conductor Fidelity: what the inductance operator should model">
-  <meta name="plan-summary" content="What conductor model the axisymmetric inductance operator should carry — the as-built CS conductor centrelines against the uniform-current element, the field coil&#x27;s unexplained self-inductance gap, and the mesh convergence the comparison rests on">
-  <meta name="plan-status" content="active">
+  <meta name="plan-summary" content="Shipped conductor-fidelity decision and evidence: uniform gross-section continuum plus geometry-derived winding correction, a 0.06 m reference mesh, true swept-section and feeder measurements, and an explicitly undetermined machine-table circuit boundary.">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="M">
-  <meta name="plan-tier" content="opus">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-depends-on" content="nova-3d-native,polybeam-prism-section">
   <title>Coil Conductor Fidelity | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-29">
-<meta name="plan-impl" content="0.75">
-<meta name="plan-version" content="7">
+<meta name="plan-impl" content="1.0">
+<meta name="plan-version" content="8">
 <meta name="plan-sprint" content="S1">
+<meta name="plan-commits" content="9ea1a269">
+<meta name="plan-artifacts" content="docs/archive/coil-conductor-fidelity-closeout-landed.html,docs/figures/wound-coil/feeders.json,docs/figures/wound-coil/feeder-fleet.svg,docs/figures/wound-coil/wound.json">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
 </head>
 <body>
   <main class="plan-doc">
@@ -313,7 +316,7 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-ccf-01" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28" data-recommends-skill="" data-resolved-at="2026-07-28T21:56:05+00:00" data-resolved-by="reckon-ship">
+<article class="r-fu" data-id="f-ccf-01" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-28" data-recommends-skill="" data-resolved-at="2026-07-28T21:56:05+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Load the as-built CS centrelines and decode the conductor section</h4>
     <div class="r-fu-body"><p>The data exists and is unused. Before any inductance number comes
         off it, three things must be settled: the DD-version handling, the feeder separation, and
@@ -356,7 +359,7 @@ Done-when
   4. A figure of the reduced path and its section.</pre>
     <p class="r-fu-outcome">CS section reconciled without scaling: the nine points are a circle of radius hypot(delta_r, delta_z) in a possibly tilted plane, exact to 1e-14 mm on all 21 conductors across three files; CS stores exactly 8.150 mm = half the documented Ø32.6 mm cable-space radius (a diameter→radius halving applied to an already-radius value upstream — PF's 17.500 = Ø35/2 proves the decoder). Feeders separated by endpoint-in-inflated-outline + contiguity (CS3U 1378 pack / 117 axial + 63 radial of 1558); z-span puzzle was the feeder run; PolyLine reduction lossless 1:1. New: as-built CS packs sit on the OLDER itergeom revision (1.687, 5.464, 0.740x2.093) and PF1's pack sits +9 mm outward / +48 mm higher than its model outline — feeds the §4 gap hunt. Archive: docs/archive/coil-conductor-fidelity-cs-section-landed.html; figure docs/figures/coil-conductor-fidelity/cs-section-and-path.png.</p>
     </article>
-<article class="r-fu" data-id="f-ccf-02" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ccf-02" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-28" data-recommends-skill="" data-resolved-at="2026-07-29T16:43:00+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Settle the reconstruction mesh, whose discretisation error exceeds
         the effect under study</h4>
     <div class="r-fu-body"><p>The shipped <code>dcoil=0.25</code> mesh overshoots its converged
@@ -385,8 +388,9 @@ Done-when
   3. Whether tests/test_biotsavart.py::test_ITER_subinductance_matrix should
      state what its reference carries and at what mesh it is valid. That file is
      shared -- draft the wording, do not assume the edit.</pre>
+    <p class="r-fu-outcome">Recommended dcoil=0.06 m for reference inductance: 1,096 elements, 45.34 s for PF1/CS3U/CS2U; final refinement changed PF1 by 3.33e-06 H and each CS module by 2.95e-05 H. The no-section route must fail loudly below 134 targets; proposed reference-test wording is recorded without editing the shared test, as required. Full record: docs/archive/coil-conductor-fidelity-closeout-landed.html.</p>
     </article>
-<article class="r-fu" data-id="f-ccf-03" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28" data-recommends-skill="" data-resolved-at="2026-07-29T10:24:15+00:00" data-resolved-by="reckon-ship">
+<article class="r-fu" data-id="f-ccf-03" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-28" data-recommends-skill="" data-resolved-at="2026-07-29T10:24:15+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Find what the field coil&#x27;s 4.07e-03 H gap actually is</h4>
     <div class="r-fu-body"><p>Granularity explains the solenoid and buys at most 28 % of PF1 at
         a conductor already outside any plausible cable space. The two coils' discrepancies have
@@ -443,7 +447,7 @@ Done-when
   2. Whichever way it resolves, the decision reference-status locked with it.</pre>
     <p class="r-fu-outcome">Answered by the wound-ladder stages rather than executed as written — both done-when are met. The gap is attributed: PF1's +4.14e-03 decomposes as turn count +1.62e-03 (as-built 248.926 vs nominal 248.64; the gap-implied 249.36 is RULED OUT by the centreline count), as-built outline and turn positions +2.71e-03, true 3-D path -9.25e-04, finite section +2.0e-06 (solid) to -4.2e-05 (with channel — the section is ruled out as the remainder), leaving +7.30e-04 of which the feeder run carries +3.335e-04 (46%), conditional on the table's circuit boundary. Candidates eliminated with measurements: turn count (counted off the centreline, CS modules validate the method at 554+0.03), insulation/conductor tuning (constraint honoured — nothing tuned; closing by section would need an unphysical 19.4 mm cable space), different outline (the machine value behaves like a discrete-turn AXISYMMETRIC computation on the as-built positions — it sits within -1.95e-04 of the coaxial ring stack, 21% of the helix term). reference-status locked cross-check with this evidence, per done-when 2. Records: archive/coil-conductor-fidelity-wound-filament-landed.html + archive/coil-conductor-fidelity-finite-section-landed.html; remaining open thread is the feeder/circuit-boundary followup.</p>
     </article>
-<article class="r-fu" data-id="f-ccf-04" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28T22:00:00+00:00" data-recommends-skill="/reckon-ship coil-conductor-fidelity §3" data-resolved-at="2026-07-28T23:55:44+00:00" data-resolved-by="reckon-ship">
+<article class="r-fu" data-id="f-ccf-04" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-28T22:00:00+00:00" data-recommends-skill="/reckon-ship coil-conductor-fidelity §3" data-resolved-at="2026-07-28T23:55:44+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Solve the true wound coil against the approximation, with our own elements</h4>
     <div class="r-fu-body"><p>The as-built centrelines for all six PF coils (111005/1, uncatalogued) and the six CS modules (111004/1) are arc/line element paths with the conductor cross-section stored — PF1–PF5 a 35 mm circular cable space, exactly. Build the wound coil from nova's own high-order elements and compare it DIRECTLY against the axisymmetric approximation and the machine table: filament first (settles the turn count with no new element), finite section after the prism element lands. The cooling-channel hole is modelled as coupled counter-flowing sections, the way the box-section gate already models a hollow square.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -498,7 +502,7 @@ Deliverables
      orchestrator. Do NOT tune anything toward the table.</pre>
     <p class="r-fu-outcome">Stage 1 landed (develop merge b92d2c88: ddfe2b8b turn count, 9f79ea07 wound ladder). Turn counts measured for all 12 coils off the centrelines (path-intrinsic feeder box + arc-geometry unwrap; CS modules validate at 554+0.03): PF1 = 248.926 ± 0.03 — favours 248.64, rules out the gap-implied 249.36. Wound-filament ladder on converged meshes attributes PF1's +4.14e-03 gap: turn count +1.62e-03, as-built outline/turn positions +2.71e-03, true 3-D path -9.25e-04 → residual +7.30e-04 (82% closed by geometry; remainder at granularity scale). PF1-CS2U mutual agrees to 1.5e-06. CS inverts: machine table matches the SHIPPED outline revision while the centreline packs sit 202 mm higher / 19 mm inside (worth -2.14e-02, 40x the winding effect) — upstream geometry-revision conflict. No device route exists for arc/line filaments (tiled path is axisymmetric-only); host at 0.079 us/pair sufficed — 1.1e08 pairs in 548 s. Stage 2 (finite section, prism + polybow) requeued. Archive: docs/archive/coil-conductor-fidelity-wound-filament-landed.html.</p>
     </article>
-<article class="r-fu" data-id="f-ccf-05" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-29T02:30:00+00:00" data-recommends-skill="/reckon-ship coil-conductor-fidelity §3" data-resolved-at="2026-07-29T09:13:25+00:00" data-resolved-by="reckon-ship">
+<article class="r-fu" data-id="f-ccf-05" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-29T02:30:00+00:00" data-recommends-skill="/reckon-ship coil-conductor-fidelity §3" data-resolved-at="2026-07-29T09:13:25+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Sweep the true finite section along the true path — stage 2 of the direct comparison</h4>
     <div class="r-fu-body"><p>The prism element landed (develop 513f22b7, routing 9eac0631) and stage 1 leaves PF1 +7.30e-04 from the machine value with path and turn count as-built — the granularity scale. Sweep the 35 mm cable space along the true path (PolyBow for the 893 arcs, PolyBeam for the 189 lines), the cooling channel as coupled counter-flowing sections, and test whether the finite section closes the residual. The CS modules are blocked on the upstream geometry-revision conflict, not on elements.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -541,7 +545,7 @@ Done-when
      conductor-model and reference-status informed or locked with the evidence.</pre>
     <p class="r-fu-outcome">Stage 2 landed (develop merge 682a26ef, 14 commits, benchmarks/wound_coil_finite_section.py). The finite section does NOT close the +7.302e-04 residual: solid 35 mm closes +2.0e-06 (0.3%); with the cooling channel (the conductor as built) it OPENS to +7.670e-04 — closing by section alone would need a 19.4 mm cable space. Channel worth -4.178e-05, coupled +-J pair validated against a cell-by-cell annulus partition to 1e-16; corner convergence quadratic (16/32/64), carry validated on whole-pack runs to nine decimals. NEW CONDUCTOR FOUND: the feeder run (36.19 m, 68 elements, to r=18.3 m) is worth +3.335e-04 — 46% of the residual — conditional on the table's circuit boundary (terminal-to-terminal vs pack-only). Also: a centreline A.dl sum owes mu0/8pi per metre internal-inductance (3.09e-04 over 6180 m; verified to ten digits) — omit it and half the gap closes for free; and the frame's poly column is a swept FOOTPRINT, not a cross-section (77% of PF1's pack smeared, worst 244 corners / 7.6x area; MultiPolygon joggles crash; z=0 unions lose corners) — winding packs cannot reach the framed PolyBow/PolyBeam route until the section is handed as a section. Decisions conductor-model and reference-status locked on this evidence. Archive: docs/archive/coil-conductor-fidelity-finite-section-landed.html.</p>
     </article>
-<article class="r-fu" data-id="f-ccf-06" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-29T09:45:00+00:00" data-recommends-skill="/reckon-ship coil-conductor-fidelity §4" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ccf-06" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-29T09:45:00+00:00" data-recommends-skill="/reckon-ship coil-conductor-fidelity §4" data-resolved-at="2026-07-29T16:43:00+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Measure the feeder rung across the fleet, and settle what circuit the machine table describes</h4>
     <div class="r-fu-body"><p>Stage 2 found the ladder's missing conductor: PF1's feeder run is worth +3.335e-04 H, 46 % of the remaining residual, and every one of the twelve coils carries feeders that no rung has measured. The measurement is cheap (PF1: 1.4 s of mutual + 46 s of self on the resolved section). The companion question decides what the number means: whether the machine-description inductance table is terminal-to-terminal or pack-only — a provenance question about the table, not a computation.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -580,6 +584,7 @@ Done-when
      both readings tabulated.
   3. Figures + JSON beside the stage-2 artifacts; the plan&#x27;s §4 updated.
   4. Do NOT tune anything toward the table; do NOT edit tests.</pre>
+    <p class="r-fu-outcome">Landed commit 9ea1a269. Measured solid and cooling-channel feeder decompositions for all six PF coils and six CS modules; PF terminal steps span 2.240e-04 to 4.832e-04 H and CS steps 2.127e-05 to 6.879e-05 H, reciprocity at worst 9.4e-16. Public/source metadata do not define whether the table is terminal-to-terminal or pack-only, so the circuit boundary is explicitly undetermined and both readings are recorded. Artifacts: feeders.json, feeder-fleet.svg, closeout archive. Runtime had no repo-permitted advertised worker, so execution used the inline-no-advertised-worker fallback.</p>
     </article>
 </section>
 

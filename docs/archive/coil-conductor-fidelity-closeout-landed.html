@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="archive">
+  <meta name="plan-slug" content="coil-conductor-fidelity-closeout-landed">
+  <meta name="plan-title" content="Coil conductor fidelity closeout — mesh and feeder fleet">
+  <meta name="plan-status" content="historical">
+  <title>Coil conductor fidelity closeout | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Coil conductor fidelity closeout: the reference mesh and all twelve feeders</h1>
+    <p><em>Landed 2026-07-29 · implementation <code>9ea1a269</code> · parent:
+    <a href="/nova/coil-conductor-fidelity.html">coil-conductor-fidelity</a></em></p>
+
+    <h2>Verdict</h2>
+    <p><strong>Use <code>dcoil=0.06 m</code> for reference inductance comparisons.</strong>
+    It resolves the three-coil comparison with 1,096 elements in 45.3 s on a
+    <code>sun_debug</code> CPU node. The final 0.08→0.06 m refinement changes PF1 by
+    3.33e-06 H and each CS module by 2.95e-05 H; the shipped 0.25 m mesh is too coarse
+    for effects at the few-1e-04 H scale.</p>
+    <p>The no-section target route must reject fewer than 134 targets for an inductance
+    reference run. Its error is 1.32e-01 H at two targets and 5.19e-03 H at 60; the
+    existing 5e-03 H gate first holds at about 134 targets (2.2e-03 H), then falls to
+    1.2e-03 H at 265 and 3.1e-04 H at 816. This is a recommendation, not an API change:
+    the followup explicitly required agreement before enforcing it.</p>
+
+    <h2>Continuum mesh ladder</h2>
+    <table>
+      <thead><tr><th><code>dcoil</code> [m]</th><th>elements</th><th>PF1 [H]</th><th>CS3U [H]</th><th>CS2U [H]</th><th>wall [s]</th></tr></thead>
+      <tbody>
+        <tr><td>0.25</td><td>64</td><td>0.703425066</td><td>0.794285216</td><td>0.794285216</td><td>6.19</td></tr>
+        <tr><td>0.12</td><td>268</td><td>0.703451566</td><td>0.794776486</td><td>0.794776486</td><td>10.64</td></tr>
+        <tr><td>0.08</td><td>612</td><td>0.703460027</td><td>0.794869085</td><td>0.794869085</td><td>24.87</td></tr>
+        <tr><td><strong>0.06</strong></td><td><strong>1,096</strong></td><td><strong>0.703463358</strong></td><td><strong>0.794898564</strong></td><td><strong>0.794898564</strong></td><td><strong>45.34</strong></td></tr>
+      </tbody>
+    </table>
+    <p>Proposed reference-test wording: “This matrix is a cross-check for the stated
+    ITER machine-description geometry, uniform-current gross sections, and
+    <code>dcoil=0.06 m</code>; it is not an oracle for another geometry, mesh, turn
+    placement, or circuit boundary.” The shared test file was not edited.</p>
+
+    <h2>The feeder rung across the fleet</h2>
+    <p>Every feeder was solved twice: a solid cable space and the same section with its
+    10 mm cooling channel. The terminal step is
+    <code>2 × M(pack, feeder) + L(feeder)</code>. Block reciprocity was at worst
+    9.4e-16. The cooling channel changes the terminal step by only 0.02–0.53 µH;
+    the dominant variation is pack–feeder mutual coupling.</p>
+    <table>
+      <thead><tr><th>coil</th><th>length [m]</th><th>2M [H]</th><th>solid [H]</th><th>with channel [H]</th></tr></thead>
+      <tbody>
+        <tr><td>PF1</td><td>36.19</td><td>+3.144e-04</td><td>+3.337e-04</td><td>+3.335e-04</td></tr>
+        <tr><td>PF2</td><td>29.20</td><td>+2.082e-04</td><td>+2.242e-04</td><td>+2.240e-04</td></tr>
+        <tr><td>PF3</td><td>38.30</td><td>+3.816e-04</td><td>+4.026e-04</td><td>+4.024e-04</td></tr>
+        <tr><td>PF4</td><td>34.29</td><td>+3.463e-04</td><td>+3.654e-04</td><td>+3.651e-04</td></tr>
+        <tr><td>PF5</td><td>42.80</td><td>+2.767e-04</td><td>+2.992e-04</td><td>+2.989e-04</td></tr>
+        <tr><td>PF6</td><td>42.10</td><td>+4.612e-04</td><td>+4.835e-04</td><td>+4.832e-04</td></tr>
+        <tr><td>CS3L</td><td>50.49</td><td>−5.673e-06</td><td>+2.166e-05</td><td>+2.127e-05</td></tr>
+        <tr><td>CS2L</td><td>51.69</td><td>+3.233e-06</td><td>+3.196e-05</td><td>+3.157e-05</td></tr>
+        <tr><td>CS1L</td><td>65.88</td><td>+3.258e-05</td><td>+6.929e-05</td><td>+6.879e-05</td></tr>
+        <tr><td>CS1U</td><td>69.09</td><td>+1.614e-06</td><td>+4.016e-05</td><td>+3.963e-05</td></tr>
+        <tr><td>CS2U</td><td>57.29</td><td>+2.939e-05</td><td>+6.151e-05</td><td>+6.107e-05</td></tr>
+        <tr><td>CS3U</td><td>43.19</td><td>−1.822e-06</td><td>+2.241e-05</td><td>+2.208e-05</td></tr>
+      </tbody>
+    </table>
+
+    <figure>
+      <img src="/nova/figures/wound-coil/feeder-fleet.svg"
+           alt="Two-panel comparison of feeder inductance contributions, lengths and toroidal sweep for six PF coils and six CS modules"
+           style="max-width:100%">
+      <figcaption>The all-coil feeder decomposition. PF feeders are mutual-dominated;
+      CS feeder self is often the larger positive term.</figcaption>
+    </figure>
+
+    <h2>Circuit boundary: explicitly undetermined</h2>
+    <p>The public ITER feeder record describes the feeders as the systems connecting
+    coils to terminal boxes, but neither those pages, the IDS metadata, nor the available
+    machine-description records define whether the reference inductance table is
+    pack-only or terminal-to-terminal. The circuit boundary is therefore
+    <strong>undetermined</strong>, not inferred.</p>
+    <table>
+      <thead><tr><th>comparison</th><th>pack-only reading</th><th>terminal reading</th></tr></thead>
+      <tbody>
+        <tr><td>PF1 against 0.707600 H</td><td>residual +7.670e-04 H</td><td>residual +4.335e-04 H</td></tr>
+        <tr><td>PF2–PF6</td><td>no table value available</td><td>add the tabulated feeder step</td></tr>
+        <tr><td>CS3U / CS2U</td><td>reference exists, but pack residual is invalidated by the outline-revision conflict</td><td>same conflict; feeder step remains measured</td></tr>
+        <tr><td>other CS modules</td><td>no table value available</td><td>add the tabulated feeder step</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Artifacts</h2>
+    <ul>
+      <li><code>benchmarks/wound_coil_finite_section.py feeder-fleet</code></li>
+      <li><code>docs/figures/wound-coil/feeders.json</code> — full decomposition,
+      geometry, timings and section variants</li>
+      <li><code>docs/figures/wound-coil/feeder-fleet.svg</code> — fleet comparison</li>
+      <li><code>docs/figures/wound-coil/wound.json</code> — mesh ladder</li>
+    </ul>
+  </main>
+</body>
+</html>

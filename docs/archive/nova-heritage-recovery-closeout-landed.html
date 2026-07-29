@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="archive">
+  <meta name="plan-slug" content="nova-heritage-recovery-closeout-landed">
+  <meta name="plan-title" content="Nova heritage recovery — evidence, galleries and salvage register">
+  <meta name="plan-status" content="historical">
+  <title>Nova heritage recovery closeout | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Nova heritage recovery: reconstructed evidence and salvage register</h1>
+    <p><em>Landed 2026-07-29 · gallery gate <code>a2efc586</code> · parent:
+    <a href="/nova/nova-heritage-recovery.html">nova-heritage-recovery</a></em></p>
+
+    <h2>Outcome</h2>
+    <p>The recovered thermal-hydraulic cluster is import-complete, offline-testable and
+    lint-clean. The G-EQDSK interchange has a format-derived round-trip tolerance.
+    The fenics and MAST galleries are statically import-checked without executing their
+    meshing, network or training workloads. The deleted design suite remains in history;
+    its reusable inverse-design intent is recorded below.</p>
+
+    <figure>
+      <img src="/nova/figures/nova-heritage-recovery/recovery-map.svg"
+           alt="Recovery map showing six broken module imports repaired, offline analytic and fixture gates, static gallery checks, and the design intent retained as a written salvage register"
+           style="max-width:100%">
+      <figcaption>The closure path: recover importability, prove behaviour offline,
+      gate the examples without data runs, and retain only the design intent.</figcaption>
+    </figure>
+
+    <h2>Damage inventory: historical baseline → current tip</h2>
+    <p>Each module was imported in its own interpreter from detached baseline
+    <code>23f055bc</code> and from current tip. Baseline: 31/37 importable; current:
+    38/38 importable. Isolated interpreters preserve the exact failure rather than allowing
+    one optional import to contaminate later results.</p>
+    <table>
+      <thead><tr><th>module</th><th>baseline</th><th>current</th></tr></thead>
+      <tbody>
+        <tr><td><code>nova.thermalhydralic</code></td><td>pass</td><td>pass</td></tr>
+        <tr><td><code>nova.thermalhydralic.attributes</code></td><td>pass</td><td>pass</td></tr>
+        <tr><td><code>nova.thermalhydralic.cold_test</code></td><td>fail — <code>nova.plot</code> missing</td><td>pass</td></tr>
+        <tr><td><code>nova.thermalhydralic.frequencyresponse</code></td><td>pass</td><td>pass</td></tr>
+        <tr><td><code>nova.thermalhydralic.lumpedparameter</code></td><td>pass</td><td>pass</td></tr>
+        <tr><td><code>nova.thermalhydralic.naka</code></td><td>pass</td><td>pass</td></tr>
+        <tr><td><code>nova.thermalhydralic.naka.database</code></td><td>pass</td><td>pass</td></tr>
+        <tr><td><code>nova.thermalhydralic.naka.localdata</code></td><td>pass</td><td>pass</td></tr>
+        <tr><td><code>nova.thermalhydralic.naka.nakadata</code></td><td>pass</td><td>pass</td></tr>
+        <tr><td><code>nova.thermalhydralic.naka.nakaserver</code></td><td>pass</td><td>pass</td></tr>
+        <tr><td><code>nova.thermalhydralic.naka.pipeline</code></td><td>pass</td><td>pass</td></tr>
+        <tr><td><code>nova.thermalhydralic.naka.sampledata</code></td><td>pass</td><td>pass</td></tr>
+        <tr><td><code>nova.thermalhydralic.plotimport</code></td><td>not present</td><td>pass</td></tr>
+        <tr><td><code>nova.thermalhydralic.spectrum</code></td><td>pass</td><td>pass</td></tr>
+        <tr><td><code>nova.thermalhydralic.sultan</code></td><td>pass</td><td>pass</td></tr>
+        <tr><td><code>nova.thermalhydralic.sultan.campaign</code></td><td>pass</td><td>pass</td></tr>
+        <tr><td><code>nova.thermalhydralic.sultan.clear</code></td><td>pass</td><td>pass</td></tr>
+        <tr><td><code>nova.thermalhydralic.sultan.database</code></td><td>pass</td><td>pass</td></tr>
+        <tr><td><code>nova.thermalhydralic.sultan.ensemble</code></td><td>fail — <code>sultanio</code> missing</td><td>pass</td></tr>
+        <tr><td><code>nova.thermalhydralic.sultan.field</code></td><td>fail — <code>fluid</code> missing</td><td>pass</td></tr>
+        <tr><td><code>nova.thermalhydralic.sultan.fitfluid</code></td><td>pass</td><td>pass</td></tr>
+        <tr><td><code>nova.thermalhydralic.sultan.fluidmodel</code></td><td>pass</td><td>pass</td></tr>
+        <tr><td><code>nova.thermalhydralic.sultan.fluidprofile</code></td><td>fail — <code>sultanio</code> missing</td><td>pass</td></tr>
+        <tr><td><code>nova.thermalhydralic.sultan.heatindex</code></td><td>pass</td><td>pass</td></tr>
+        <tr><td><code>nova.thermalhydralic.sultan.localdata</code></td><td>pass</td><td>pass</td></tr>
+        <tr><td><code>nova.thermalhydralic.sultan.model</code></td><td>pass</td><td>pass</td></tr>
+        <tr><td><code>nova.thermalhydralic.sultan.phase</code></td><td>pass</td><td>pass</td></tr>
+        <tr><td><code>nova.thermalhydralic.sultan.profile</code></td><td>pass</td><td>pass</td></tr>
+        <tr><td><code>nova.thermalhydralic.sultan.remotedata</code></td><td>pass</td><td>pass</td></tr>
+        <tr><td><code>nova.thermalhydralic.sultan.sample</code></td><td>pass</td><td>pass</td></tr>
+        <tr><td><code>nova.thermalhydralic.sultan.sampledata</code></td><td>pass</td><td>pass</td></tr>
+        <tr><td><code>nova.thermalhydralic.sultan.sourcedata</code></td><td>pass</td><td>pass</td></tr>
+        <tr><td><code>nova.thermalhydralic.sultan.sultandata</code></td><td>pass</td><td>pass</td></tr>
+        <tr><td><code>nova.thermalhydralic.sultan.sultanspectrum</code></td><td>fail — <code>sultanio</code> missing</td><td>pass</td></tr>
+        <tr><td><code>nova.thermalhydralic.sultan.trial</code></td><td>pass</td><td>pass</td></tr>
+        <tr><td><code>nova.thermalhydralic.sultan.waveform</code></td><td>pass</td><td>pass</td></tr>
+        <tr><td><code>nova.thermalhydralic.twente</code></td><td>pass</td><td>pass</td></tr>
+        <tr><td><code>nova.thermalhydralic.twente.twentedata</code></td><td>fail — <code>sultanio</code> missing</td><td>pass</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Behavioural defects and analytic oracles</h2>
+    <p><strong>FrequencyResponse:</strong> <code>append_data</code> built a frame from
+    <code>[frequency, rms_power]</code> while naming two columns. That treats each input vector
+    as a row, so ordinary sweeps either fail on shape or become a two-row transposition; it only
+    appeared to work when each vector happened to contain exactly two samples. The repair builds
+    named columns, sorts by frequency and resets the row index. A closed-form first-order lag
+    now pins one row per sample, <code>20 log10 |H|</code>, the −3.0103 dB corner and the
+    −20 dB/decade high-frequency slope.</p>
+    <p><strong>LumpedCapacitance:</strong> the single-state solver returned
+    <code>(1, n)</code> instead of the input timebase shape <code>(n,)</code>, and loose
+    integration tolerances could leak into the fitted time constant. The output is flattened at
+    the state row and solved at <code>rtol=1e-8</code>, <code>atol=1e-10</code>. The analytic
+    exponential response and recovery of <code>C/hA</code> are both gated.</p>
+
+    <h2>G-EQDSK interchange</h2>
+    <p>The repair aligned writer keys with what the reader actually returns and added a
+    non-square analytic fixture so an R/Z transpose cannot hide. Round-trip comparisons use
+    <code>rtol=atol=1e-9</code>. This is set by the format: scalar headers use
+    <code>{:16.9f}</code> (absolute quantisation ≤5e-10) and arrays use
+    <code>{:16.9e}</code> (relative quantisation ≤5e-10), so 1e-9 sits just outside the
+    text representation's own resolution.</p>
+
+    <h2>Hermeticity, collection and lint</h2>
+    <table>
+      <thead><tr><th>gate</th><th>result</th><th>environment</th></tr></thead>
+      <tbody>
+        <tr><td>SULTAN + G-EQDSK + thermal-hydraulic suites</td><td>100 passed, 1 slow test deselected, 11.84 s</td><td><code>sun_debug</code> CPU; FTP, AWS, MAST, NAKA and IMAS credentials unset</td></tr>
+        <tr><td>lean-core plotting deferral</td><td>1 passed, 8.50 s</td><td>fresh subprocess; plotting roots blocked and absent extras stubbed</td></tr>
+        <tr><td>whole-tree collection</td><td>3,929 known; 3,391 selected, 538 deselected, 13.72 s</td><td><code>sun_debug</code> CPU</td></tr>
+        <tr><td>collection skips</td><td>2</td><td><code>tests/test_matrix.py</code>; named gate is unavailable requisite live IDS data</td></tr>
+        <tr><td>cluster lint</td><td>all checks passed</td><td>every file under <code>nova/thermalhydralic</code>, G-EQDSK and their three test modules</td></tr>
+      </tbody>
+    </table>
+    <p>No network call is made by collection or the focused run. SULTAN uses committed
+    synthetic fixtures; cold-test uses committed CSV fixtures. The only collection skips are
+    the two live-IDS matrix benchmarks and state their unavailable resource explicitly.</p>
+
+    <h2>Example galleries</h2>
+    <p><code>tests/test_example_galleries.py</code> checks all 11 fenics scripts and all
+    15 MAST scripts. It parses and compiles each import graph and verifies every referenced
+    <code>nova.*</code> module exists, while also pinning the corresponding
+    <code>fenics</code> and <code>mast</code> optional dependency groups. Result:
+    <strong>28 passed in 4.53 s</strong>. The scripts are not executed in CI: several open
+    network catalogues, build meshes, launch plotters or load local training data at module
+    scope, so execution would be a data run rather than an import check.</p>
+
+    <h2>Salvage register: deleted design suite</h2>
+    <p><strong>Disposition: retain the intent, not the implementation.</strong>
+    <code>nova/design</code> remains available on <code>legacy/v1</code> and is not restored.
+    It depended on removed 1.x frame classes, an unvendored <code>amigo</code> geometry
+    package, spreadsheet configuration and interactive plotting.</p>
+    <table>
+      <thead><tr><th>intent in history</th><th>design variables / objective</th><th>current coverage</th><th>future keeper</th></tr></thead>
+      <tbody>
+        <tr><td>Free-boundary current solve from boundary-flux and field collocation</td><td>free PF/CS currents; least-squares residual with Tikhonov term and current bounds</td><td><code>nova.equilibrium.InverseDesign</code> already assembles flux/field constraints, solves regularised free currents and iterates the separatrix</td><td>keep and extend the current class</td></tr>
+        <tr><td>Electromagnetic operating limits</td><td>PF vertical force, CS stack sum/separation, tie-plate axial loads</td><td>not carried by the current inverse solve</td><td>reintroduce as explicit constraint objects backed by the current force operator, only when required</td></tr>
+        <tr><td>Plasma-facing geometry synthesis</td><td>divertor targets, first-wall/blanket/vessel offsets, minimum length or toroidal volume</td><td>outside <code>InverseDesign</code>; historical code mixes configuration, geometry and rendering</td><td>reimplement as pure geometry objectives and inequalities over current Nova geometry types</td></tr>
+        <tr><td>Parametric loop and module layout</td><td>normalised bounded shape parameters; segment-length and clearance constraints</td><td>generic optimisation primitives exist, but no canonical 2.0 design problem</td><td>define a data-class problem specification before adding a solver</td></tr>
+      </tbody>
+    </table>
+    <p>The reusable idea is a coupled optimisation: solve coil currents against a target
+    separatrix, then vary conductor and plasma-facing geometry under current, force,
+    clearance and build constraints while minimising length, volume or field error. A future
+    implementation should compose the present <code>InverseDesign</code> current solve with
+    explicit geometry/force constraint objects; it should not revive the historical inheritance
+    tree or its spreadsheet-driven global state.</p>
+  </main>
+</body>
+</html>

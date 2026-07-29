@@ -7,19 +7,22 @@
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="nova-heritage-recovery">
   <meta name="plan-title" content="Nova Heritage Recovery">
-  <meta name="plan-summary" content="Recover, repair and test the non-assembly 1.x heritage on the 2.0 line: SULTAN thermo-hydraulic and cold-test pipelines, the low-order beam solver, G-EQDSK interchange, and the fenics/MAST example galleries">
-  <meta name="plan-status" content="active">
+  <meta name="plan-summary" content="Shipped the recovered thermal-hydraulic, SULTAN, cold-test and G-EQDSK heritage with offline analytic/fixture gates; import-checked fenics and MAST galleries without data runs; retained the deleted design suite only as a written inverse-design salvage register.">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="mid">
   <meta name="plan-effort" content="L">
-  <meta name="plan-tier" content="opus">
   <meta name="plan-owner" content="Simon McIntosh">
-  <meta name="plan-impl" content="0.7">
+  <meta name="plan-impl" content="1.0">
   <title>Nova Heritage Recovery | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-29">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
 <meta name="plan-sprint" content="S1">
+<meta name="plan-commits" content="d070c4f7,a2efc586">
+<meta name="plan-artifacts" content="docs/archive/nova-heritage-recovery-closeout-landed.html,docs/figures/nova-heritage-recovery/recovery-map.svg,tests/test_example_galleries.py">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
 </head>
 <body>
   <main class="plan-doc">
@@ -236,7 +239,7 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-nhr-01" data-status="resolved" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-24" data-recommends-skill="/reckon-ship nova-heritage-recovery §3" data-resolved-at="2026-07-28T05:39:08+00:00" data-resolved-by="reckon-ship">
+<article class="r-fu" data-id="f-nhr-01" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-07-24" data-recommends-skill="/reckon-ship nova-heritage-recovery §3" data-resolved-at="2026-07-28T05:39:08+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Execute the SULTAN repair and the hermetic test program (§3 + §4)</h4>
     <div class="r-fu-body"><p>The recovered baseline is landed (<code>61f86176</code>); the two
         repair sections are ready to execute together — the §4 tests are the acceptance gate for the
@@ -284,7 +287,7 @@ Done-when
      resolved; §5 (galleries + salvage register) followup queued.</pre>
     <p class="r-fu-outcome">Landed on develop d070c4f7 (merge 13055ab4; commits d1b5053d, 1431fc93, dd99168d, 169d334b). The five modules the abandoned SultanIO refactor orphaned import again (d1b5053d). A REAL DEFECT was found in the G-EQDSK interchange, not merely a missing test: the writer asked for keys the reader never returns (1431fc93), which means the round trip had never once been exercised end to end — tests/test_geqdsk.py plus a tests/data/geqdsk/analytic.geqdsk fixture now close it. The SULTAN lane runs OFFLINE against a committed cache (dd99168d) with SYNTHESISED fixtures under tests/data/sultan/SYNTH_1/ (two .dat files and a testplan .xlsx, named SYNTH so their provenance is unambiguous — no proprietary bulk data committed), replacing the FTP-gated collection skip. The cold-test analysis runs and its fit returns a result (169d334b) with tests/data/coldtest/. New suites: tests/test_geqdsk.py, tests/test_thermalhydralic.py. NOT DELIVERED — the worker died to the org spend limit before reporting, so five named done-when items have no evidence on record: the before/after damage inventory table, the FrequencyResponse bug verdict and its analytic oracle, the hermeticity proof (which skips remain and why each is a legitimate environment gate), the per-file lint disposition, and all test counts. The code is landed and merged; the ACCOUNT of it is missing and must be reconstructed.</p>
     </article>
-<article class="r-fu" data-id="f-nhr-02" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-28T08:00:00+00:00" data-recommends-skill="/reckon-ship nova-heritage-recovery" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-nhr-02" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-ship" data-written-at="2026-07-28T08:00:00+00:00" data-recommends-skill="/reckon-ship nova-heritage-recovery" data-resolved-at="2026-07-29T16:43:14+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Reconstruct the repair&#x27;s evidence, then close the galleries and the salvage register</h4>
     <div class="r-fu-body"><p>The SULTAN repair, the offline lane, the cold-test lane and the geqdsk round trip are all merged on develop, but the worker died before reporting any of it — so the damage inventory, the FrequencyResponse verdict, the hermeticity proof, the lint disposition and every test count are missing from the record. Reconstruct them from the merged code and the suites, then take §5 (example galleries + the salvage register the <code>salvage-concept</code> decision needs).</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -344,6 +347,7 @@ Done-when
   2. Galleries import-checked behind their extras; no CI data runs.
   3. Salvage register written for the inverse-design intent.
   4. Followup written; this followup resolved.</pre>
+    <p class="r-fu-outcome">Reconstructed and landed the missing account. Baseline 23f055bc imported 31/37 thermal-hydraulic modules; current tip imports 38/38. FrequencyResponse's row/column construction defect is pinned by a first-order lag oracle; LumpedCapacitance by an analytic exponential; G-EQDSK uses format-derived rtol=atol=1e-9. With credentials removed, focused suites passed 100 tests in 11.84 s plus the lean-core slow probe 1/1 in 8.50 s; whole-tree collection found 3,929 tests and only two named live-IDS skips; cluster lint is clean. Commit a2efc586 adds static, no-data-run checks for all 11 fenics and 15 MAST scripts (28 passed). The closeout archive contains the full module table and salvage register: current InverseDesign already covers regularised free-current/separatrix solving; future geometry and electromagnetic-force constraints should be composed as explicit 2.0 objects, not recovered from the historical inheritance tree. Runtime had no repo-permitted advertised worker, so execution used the inline-no-advertised-worker fallback.</p>
     </article>
 </section>
 

@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="420" viewBox="0 0 1120 420" role="img" aria-labelledby="title desc">
+  <title id="title">Nova heritage recovery map</title>
+  <desc id="desc">Four connected panels show repaired imports, offline behavioural gates, static example checks, and a written salvage register.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#667085"/>
+    </marker>
+    <style>
+      .box { fill: #f8fafc; stroke: #475467; stroke-width: 2; rx: 14; }
+      .good { fill: #ecfdf3; stroke: #039855; stroke-width: 2; rx: 14; }
+      .note { fill: #fffaeb; stroke: #dc6803; stroke-width: 2; rx: 14; }
+      .title { font: 700 19px sans-serif; fill: #101828; }
+      .body { font: 15px sans-serif; fill: #344054; }
+      .metric { font: 700 27px sans-serif; fill: #027a48; }
+      .flow { fill: none; stroke: #667085; stroke-width: 3; marker-end: url(#arrow); }
+    </style>
+  </defs>
+  <rect width="1120" height="420" fill="white"/>
+  <text x="560" y="38" text-anchor="middle" class="title">Heritage closure: recover behaviour, not historical coupling</text>
+
+  <rect x="35" y="85" width="235" height="245" class="good"/>
+  <text x="152" y="120" text-anchor="middle" class="title">Module imports</text>
+  <text x="152" y="172" text-anchor="middle" class="metric">31/37 → 38/38</text>
+  <text x="55" y="213" class="body">Six stale imports repaired</text>
+  <text x="55" y="241" class="body">One plotting facade added</text>
+  <text x="55" y="269" class="body">Lean-core import graph gated</text>
+
+  <path d="M270 207 H315" class="flow"/>
+  <rect x="325" y="85" width="235" height="245" class="good"/>
+  <text x="442" y="120" text-anchor="middle" class="title">Offline evidence</text>
+  <text x="442" y="172" text-anchor="middle" class="metric">101 passed</text>
+  <text x="345" y="213" class="body">First-order lag oracle</text>
+  <text x="345" y="241" class="body">Thermal exponential oracle</text>
+  <text x="345" y="269" class="body">G-EQDSK round trip</text>
+  <text x="345" y="297" class="body">No credentials or network</text>
+
+  <path d="M560 207 H605" class="flow"/>
+  <rect x="615" y="85" width="220" height="245" class="good"/>
+  <text x="725" y="120" text-anchor="middle" class="title">Example galleries</text>
+  <text x="725" y="172" text-anchor="middle" class="metric">28 passed</text>
+  <text x="635" y="213" class="body">11 fenics scripts</text>
+  <text x="635" y="241" class="body">15 MAST scripts</text>
+  <text x="635" y="269" class="body">Static import checks</text>
+  <text x="635" y="297" class="body">No data workloads in CI</text>
+
+  <path d="M835 207 H880" class="flow"/>
+  <rect x="890" y="85" width="195" height="245" class="note"/>
+  <text x="987" y="120" text-anchor="middle" class="title">Design salvage</text>
+  <text x="987" y="167" text-anchor="middle" class="body">Code stays in history</text>
+  <text x="987" y="205" text-anchor="middle" class="body">Inverse-current intent</text>
+  <text x="987" y="233" text-anchor="middle" class="body">already covered</text>
+  <text x="987" y="271" text-anchor="middle" class="body">Geometry + force</text>
+  <text x="987" y="299" text-anchor="middle" class="body">constraints recorded</text>
+
+  <text x="560" y="380" text-anchor="middle" class="body">The current implementation is tested; remote data and interactive workloads remain explicit environment gates.</text>
+</svg>

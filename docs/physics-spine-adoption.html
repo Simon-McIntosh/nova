@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-30">
-<meta name="plan-version" content="12">
+<meta name="plan-version" content="13">
 <meta name="plan-impl" content="0.9">
 <meta name="plan-sprint" content="S2">
 <meta name="plan-capability-version" content="1.0">
@@ -605,6 +605,9 @@ Done when
 </div>
 <div class="r-comment" data-section="s4" data-id="c-physics-s2-closeout" data-who="reckon-ship" data-when="2026-07-30">
     <div class="r-comment-body">S2 closeout: Nova main 145828fd passed its default lane (3292 passed, 125 skipped, 536 deselected). Ambix main 3e4360e carries the Nova facade and circuit/passive consumers plus stale-test repairs; focused consumer coverage passed, and a 24 GiB default run crossed all changed and repaired areas without a failure marker before the unrelated final real-shot world-model smoke test exceeded the one-hour debug wall. Machine/tokenizer/state cutover is blocked because current operators still derive identity from raw fcoil and amm discretization. Resume only from authoritative physical MAST shot ranges with complete diagnostic position and orientation.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-physics-validation-cancelled" data-who="reckon-ship" data-when="2026-07-30">
+    <div class="r-comment-body">Final Ambix validation is infrastructure-incomplete, not an assertion failure. The 24 GiB default run reached 98% with no failure marker, passed every changed and repaired area, and peaked at 12,543,776 KiB before the one-hour debug wall expired during the final real-shot world-model smoke test. The required split chunk ran that incomplete test alone and remained CPU-active with no failure output, but job 1237764 was externally cancelled after 33:21 by UID 39486 with 26:39 remaining. It was not rerun. The final real-shot smoke result therefore remains unverified.</div>
 </div>
 </section>
 </main>

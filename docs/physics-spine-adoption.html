@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="physics-spine-adoption">
   <meta name="plan-title" content="Physics Spine Adoption — solver nomenclature + ambix model ports">
   <meta name="plan-summary" content="Nova becomes the home of the full physics spine (equilibrium, circuits, transport): apply the locked problem×representation solver nomenclature, port the remaining ambix physics models as nova-style dataclasses on native nova types (torch current diffusion → JAX), and rewire imas-ambix to consume the spine as a dependency">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="blocked">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="XL">
   <meta name="plan-owner" content="Simon McIntosh">
@@ -18,8 +18,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-30">
-<meta name="plan-version" content="11">
-<meta name="plan-impl" content="0.86">
+<meta name="plan-version" content="12">
+<meta name="plan-impl" content="0.9">
 <meta name="plan-sprint" content="S2">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -476,7 +476,7 @@ Done-when
      re-architecture + ambix rewiring + donor deletion).</pre>
     <p class="r-fu-outcome">Waves 1+2 fully landed (all five ports incl. ScreeningCircuit stretch) — merges d38203a2 + 41754076, orchestrator 32d19b06/46bddd5f; full lane 1488/0/104; torch→JAX parity fp64 round-off, TORAX 0.4% RMS; topology-labeller locked jax-only (fill/boundary-push formulation); clean break, no shims. Record: docs/archive/physics-spine-adoption-s6-waves12-landed.html. Hex-grid default (user add-on) in flight same session.</p>
     </article>
-<article class="r-fu" data-id="f-psa-03" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-25T07:00:00+00:00" data-recommends-skill="/reckon-ship physics-spine-adoption §6" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-psa-03" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-25T07:00:00+00:00" data-recommends-skill="/reckon-ship physics-spine-adoption §6" data-resolved-at="2026-07-30T03:22:48+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Wave 3 — ReconstructProfile re-architecture + ambix rewiring + donor deletion</h4>
     <div class="r-fu-body"><p>Re-architect gs_solve as ReconstructProfile on nova.biot Greens with the locked JAX-only <strong>fill/boundary-push</strong> topology read (the only truly parallelizable formulation — the stationary-points-first approach was too sharp across the limited↔diverted switch for autograd/Anderson/NK), port the flux_surface_geometry assembly (profile ladder + EquilibriumGrid side deferred from the CurrentDiffusion port), wire the coupling generator to emit ConductorSet + channel→circuits maps for nova/circuit, then flip imas-ambix to consume the spine: dependency pin, consumer re-point, donor deletions, spine_bench parity.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -517,6 +517,7 @@ Done-when
      green; spine_bench parity recorded.
   3. §3/§4 collapsed; impl -&gt; 1.0; umbrella §10 collapsed referencing this
      plan&#x27;s archive; followup resolved or wave-4 queued with reason.</pre>
+    <p class="r-fu-outcome">Nova ReconstructProfile, coupling emission, flux-surface geometry, conditioning repair, and full default lane landed. Ambix dependency facade plus circuit, transport, passive-calibration, and equilibrium-label consumers landed with focused coverage; the default Ambix lane crossed every changed/repaired area without failure before an unrelated real-shot world-model smoke test exceeded the debug wall. Machine/tokenizer/state cutover, donor deletion, and spine benchmark parity remain unsafe until authoritative MAST physical configuration epochs and complete diagnostic poses replace raw fcoil and amm discretization identity; those items move to f-psa-machine-cutover.</p>
     </article>
 <article class="r-fu" data-id="f-psa-04" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="smc/reckon-ship 2026-07-25" data-written-at="2026-07-25T09:30:00+00:00" data-recommends-skill="/reckon-create biot-operator-assembly" data-resolved-at="2026-07-25T07:45:07+00:00" data-resolved-by="reckon-create">
     <h4 class="r-fu-title">Biot operator construction review — parallel/batchable/shardable assembly + principled near/far for thick sections</h4>
@@ -558,6 +559,36 @@ Done-when
      hex-section default explicitly gated on nova-3d-native §2 + that plan.</pre>
     <p class="r-fu-outcome">Plan created same-session with full context: biot-operator-assembly (draft, depends_on nova-3d-native, blocks mast-catalog-gpu-solve). Carries the measured evidence base (70,000×/pair, 6.5×/16× solve cost at 2×/3× bands, seam 5e-4, quadrature component trap), the user constraints (old assembly RAM-limited + naive CPU batching; embarrassingly parallel pair space; CPU viability mandatory — no GPU guarantee locally/CI; build-once-cache-forever; first build &lt;20 min), and f-boa-01 as the first rung (survey + tiled CPU prototype + CPU/GPU kernel parity).</p>
     </article>
+<article class="r-fu" data-id="f-psa-machine-cutover" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-07-30" data-recommends-skill="/reckon-ship physics-spine-adoption §4" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">MAST physical configuration cutover and donor retirement</h4>
+    <div class="r-fu-body"><p>Resume Ambix machine, tokenizer, state-estimation, and equilibrium consumer cutover only after an authoritative MAST manifest defines discrete shot ranges by real physical configuration changes. Identity must include active and passive hardware geometry plus diagnostic positions, poloidal and toroidal orientations, and ordered three-dimensional loop paths. Mesh resolution, filament count, wall-element count, source ordering, and reconstruction weights are discretization and must never create a configuration epoch. After the physical manifest and live Standard Name graph are available, rewire consumers, record benchmark parity, and delete only superseded axisymmetric donors; non-axisymmetric donors remain until their native replacement lands.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan: physics-spine-adoption
+Task: complete the MAST-dependent Ambix cutover and retire superseded donors.
+
+Prerequisites
+- Authoritative engineering or maintenance evidence defines discrete MAST shot ranges for real hardware or diagnostic-pose changes.
+- The physical machine manifest includes active coils, passive conductors, vessel and limiter geometry, probe R/phi/Z plus poloidal and toroidal orientation, and absolute ordered 3D paths for partial flux loops.
+- The live Standard Name graph is repaired and exposes the published catalog mappings.
+
+Binding identity rule
+- Configuration identity is the physical machine and diagnostic pose.
+- Mesh density, fcoil or amm element count, subdivision, source ordering, and reconstruction weights are never identity-bearing.
+- A diagnostic relocation or rotation is identity-bearing and creates a range boundary when operational records show the change.
+
+Work
+1. Author and validate the physical shot-range manifest against engineering evidence.
+2. Rewire Ambix machine, tokenizer, state-estimation, and equilibrium consumers to Nova physics types without hashing discretization.
+3. Run focused consumer coverage and spine benchmark parity.
+4. Delete only axisymmetric donors proven superseded after parity; retain non-axisymmetric donors until their native replacement lands.
+5. Record exact ranges, diagnostic-pose completeness, benchmark metrics, and donor disposition in the plan.
+
+Done when
+- Every supported shot selects one authoritative physical configuration range.
+- Subdivision or mesh-resolution changes leave the selected configuration identity unchanged.
+- Diagnostic position and orientation changes select the correct new range.
+- Consumer tests and benchmark parity pass, and donor deletion is evidence-backed.</pre>
+    </article>
 </section>
 
   <section data-reckon="research" id="research" class="r-research-list">
@@ -571,6 +602,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s4" data-id="c-physics-ambix-facade" data-who="reckon-ship" data-when="2026-07-30T01:20:00+02:00">
     <div class="r-comment-body">Ambix dependency seam landed on imas-ambix main at 215b8a3: Python 3.14 floor, nova-stella pinned to Nova 7ba65a59, and direct equilibrium/circuit/transport facade types with seven focused tests passing. Consumer cutover is now running in disjoint worktrees. Nova test-extra repair landed at 9638b560 after a 48-error collection failure; post-repair collection found 3409 tests with 536 deselected, and the full lane is in progress on sun_debug.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-physics-s2-closeout" data-who="reckon-ship" data-when="2026-07-30">
+    <div class="r-comment-body">S2 closeout: Nova main 145828fd passed its default lane (3292 passed, 125 skipped, 536 deselected). Ambix main 3e4360e carries the Nova facade and circuit/passive consumers plus stale-test repairs; focused consumer coverage passed, and a 24 GiB default run crossed all changed and repaired areas without a failure marker before the unrelated final real-shot world-model smoke test exceeded the one-hour debug wall. Machine/tokenizer/state cutover is blocked because current operators still derive identity from raw fcoil and amm discretization. Resume only from authoritative physical MAST shot ranges with complete diagnostic position and orientation.</div>
 </div>
 </section>
 </main>

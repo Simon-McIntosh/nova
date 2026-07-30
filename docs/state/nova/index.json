@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-29T19:05:17",
+  "updated": "2026-07-30T11:09:16+02:00",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -67,6 +67,22 @@
               "version": "1.0",
               "class": "orchestrator",
               "requirements": {}
+            }
+          },
+          {
+            "slug": "mast-catalog-geometry-recovery",
+            "why_now": "The Ambix L1/L2 catalogs contain the physical MAST geometry and diagnostic poses needed to replace raw EFIT/AMM setup hashes with real configuration identity.",
+            "done_when": "A subdivision-invariant catalog registry publishes observed physical shot ranges and validated DDv4 machine/diagnostic geometry, unblocking mast-machine-description and physics-spine-adoption.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "context": "extended",
+                "tool_autonomy": "autonomous",
+                "verification": "strict",
+                "risk": "elevated"
+              }
             }
           },
           {
@@ -151,6 +167,11 @@
         "when": "2026-07-29",
         "who": "reckon-ship",
         "what": "S1 closed: all four plans shipped; final full suite 3,841 passed and 118 resource-gated skips on sun_debug."
+      },
+      {
+        "when": "2026-07-30",
+        "who": "reckon-sprint",
+        "what": "S2 catalog geometry recovery added ahead of MAST DDv4 authoring; physical geometry and diagnostic pose are identity, while EFIT/AMM subdivisions are evidence only."
       }
     ],
     "blockers": [
@@ -183,6 +204,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 4
+    "_version": 5
   }
 }

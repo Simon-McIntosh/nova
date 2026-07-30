@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="mast-catalog-geometry-evidence">
+  <meta name="plan-title" content="MAST Catalog Geometry Evidence">
+  <meta name="plan-summary" content="Full L1/L2 Zarr census and subdivision-invariant prototype proving that three EFIT setup representations collapse to one observed physical MAST configuration, with diagnostic pose coverage and source gaps made explicit.">
+  <meta name="plan-informs" content="mast-catalog-geometry-recovery,mast-machine-description,physics-spine-adoption">
+  <meta name="plan-read" content="1">
+  <meta name="plan-recorded-at" content="2026-07-30">
+  <meta name="plan-verdict" content="The Ambix L1/L2 catalogs are the authoritative source for the axisymmetric machine geometry and magnetic/SXR diagnostic poses used by the training and reconstruction paths. Three EFIT setup signatures are solver representations of one physical configuration over the complete L2 observations; source omissions are not shot-range boundaries.">
+  <title>MAST Catalog Geometry Evidence | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+  <h2 id="s1">§1 — Verdict</h2>
+  <p><strong>The existing Ambix L1/L2 Zarr catalogs contain the physical geometry required by
+  the MAST axisymmetric training and reconstruction paths.</strong> The correct source boundary
+  is not the old EFIT setup hash. L2 carries named physical active coils, passive structures,
+  wall/limiter geometry, magnetic diagnostic placement, ordered three-dimensional saddle paths,
+  and soft-X-ray lines of sight. L1 contributes magnetic-probe sensitive-axis angles and
+  flux-loop toroidal span. The three familiar EFIT setup digests describe solver inputs and
+  discretizations; after canonicalizing named physical components they collapse to one observed
+  machine configuration.</p>
+  <p>The evidence does <em>not</em> authorize inventing geometry that the stores do not publish.
+  Detailed TF winding geometry and installed poses for interferometry, visible spectroscopy, gas
+  valves, Thomson scattering and charge exchange are not present as full three-dimensional
+  geometry arrays in the inspected L2 groups. They remain explicit source-coverage items outside
+  the magnetic/SXR geometry proved here.</p>
+
+  <figure>
+    <img src="/nova/figures/mast-catalog-geometry/recovery-pipeline.svg"
+         alt="Pipeline separating catalog source representations from canonical physical identity and discrete shot ranges">
+    <figcaption>Only the canonical physical snapshot can create configuration identity. Raw
+    filament or element counts remain provenance, and absent source arrays remain missing
+    evidence.</figcaption>
+  </figure>
+
+  <h2 id="s2">§2 — What the two catalog levels actually carry</h2>
+  <table>
+    <thead>
+      <tr><th>Physical object</th><th>Catalog source</th><th>Recovered geometry</th><th>Identity treatment</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Active coils</td>
+        <td>L2 <code>pf_active</code></td>
+        <td>13 named components; R/Z cell centroids and width/height, including 656 solenoid cells</td>
+        <td>Convex outer outline per named pack; cell count and tiling ignored</td>
+      </tr>
+      <tr>
+        <td>Passive structures</td>
+        <td>L2 <code>pf_passive</code></td>
+        <td>16 named families; section R/Z, width/height and two shear angles</td>
+        <td>Polygon union per family; subdivision ignored, disconnected topology retained</td>
+      </tr>
+      <tr>
+        <td>Wall and limiter</td>
+        <td>L2 <code>wall</code></td>
+        <td>37-point ordered limiter contour</td>
+        <td>Closed-cycle canonicalization ignores start index and direction</td>
+      </tr>
+      <tr>
+        <td>Poloidal magnetic probes</td>
+        <td>L2 <code>magnetics</code> + L1 <code>efm.magpr_ang</code></td>
+        <td>78 probes with R/Z, toroidal extent, length and sensitive-axis angle</td>
+        <td>Pose is identity; L1 per-shot R/Z drift is EFIT setup provenance, not placement authority</td>
+      </tr>
+      <tr>
+        <td>Flux loops</td>
+        <td>L2 <code>magnetics</code> + later L1 <code>efm.silop_dphi</code></td>
+        <td>44 named R/Z locations; catalog-wide L1 reference gives <code>2π</code> span</td>
+        <td>Position and span are identity; missing early span fields are completed from the same catalog</td>
+      </tr>
+      <tr>
+        <td>Toroidal saddle probes</td>
+        <td>L2 <code>magnetics</code></td>
+        <td>36 named ordered paths, each with 28 R/Z/φ points</td>
+        <td>Full path is identity; cyclic start and traversal direction are neutral</td>
+      </tr>
+      <tr>
+        <td>Soft-X-ray cameras</td>
+        <td>L2 <code>soft_x_rays</code></td>
+        <td>96 lines of sight with origin, endpoint and φ</td>
+        <td>Ordered origin-to-endpoint pose is identity</td>
+      </tr>
+      <tr>
+        <td>Other diagnostics</td>
+        <td>L2 diagnostic groups</td>
+        <td>TS/CX radial sampling coordinates; signals or channel names only for several other groups</td>
+        <td>Insufficient for full installed pose; keep as an explicit gap, never manufacture orientation</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="s3">§3 — Representation hashes are not machine configurations</h2>
+  <p>The prototype reproduces the Ambix EFIT setup digest algorithm byte-for-byte: finite arrays,
+  rounded to four decimal places, from <code>magpr</code>, <code>silop</code>,
+  <code>fcoil</code> and limiter setup fields. Across the 11,016 L2 shots with a readable matching
+  L1 setup it finds the same three digests Ambix has used as campaign keys:</p>
+  <table>
+    <thead><tr><th>EFIT setup digest</th><th>Observed matching shots</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><code>9425ae4a8bf3bc15</code></td><td>392</td><td>Setup representation</td></tr>
+      <tr><td><code>edd753d282903679</code></td><td>582</td><td>Setup representation</td></tr>
+      <tr><td><code>1cb6f2ee742c4ee4</code></td><td>10,042</td><td>Setup representation</td></tr>
+    </tbody>
+  </table>
+  <p>Those digests include 1004-versus-938 <code>fcoil</code> cells and small EFIT sensor-table
+  shifts. They are valuable provenance for reproducing an historical operator, but they do not
+  describe three physical machines. L2’s named component geometry is invariant across those
+  cohorts, and the canonical physical digest is <code>67f789d3d8b40135</code>.</p>
+
+  <h2 id="s4">§4 — Full-corpus census and shot-range adjudication</h2>
+  <p>SLURM job <code>1238120</code> scanned all 11,573 L2 stores on
+  <code>sun_debug</code> with 16 CPUs. It completed successfully in 54:07, peaked at
+  325,384 KiB RSS, and read only static geometry plus the matching rounded L1 setup evidence.
+  The immutable result is
+  <a href="/nova/figures/mast-catalog-geometry/catalog-geometry-scan.json">catalog-geometry-scan.json</a>.</p>
+  <table>
+    <thead><tr><th>Coverage result</th><th>Count</th><th>Interpretation</th></tr></thead>
+    <tbody>
+      <tr><td>L2 stores inspected</td><td>11,573</td><td>Shots 11766–30471</td></tr>
+      <tr><td>Complete physical snapshots</td><td>11,556</td><td>All map to one physical digest</td></tr>
+      <tr><td>Stores missing both passive and wall arrays</td><td>16</td><td>Incomplete source evidence</td></tr>
+      <tr><td>Store missing only <code>pf_passive.vertw</code></td><td>1</td><td>Shot 26963; incomplete source evidence</td></tr>
+      <tr><td>Physical configurations admitted</td><td><strong>1</strong></td><td>Observed range 11766–30471</td></tr>
+    </tbody>
+  </table>
+  <p><strong>Shot 26963 is not a configuration.</strong> Its first-pass digest lacked the
+  <code>vertw</code> passive family. The family is present with identical surrounding geometry
+  on shots 26961 and 26964, and all three shots share setup digest
+  <code>1cb6f2ee742c4ee4</code>. Treating a one-store omission as physical removal and
+  reinstallation across two unobserved gaps would violate both the catalog evidence and machine
+  operation. The corrected prototype marks this shot incomplete and leaves the physical range
+  unbroken.</p>
+  <p>L1 extends from shots 11695–30473, wider than L2’s 11766–30471. The same three setup
+  representations exist at those edges, but an EFIT setup is not by itself physical authority.
+  The registry may extend the physical configuration over the L1-only edge shots as an explicit
+  inherited-range assertion; it must not claim those edge shots are independently verified by
+  named L2 geometry.</p>
+
+  <h2 id="s5">§5 — Prototype gates</h2>
+  <p><code>nova/scripts/mast_catalog_geometry.py</code> is an executable recovery prototype.
+  It opens Zarr directly, hashes static arrays only, caches physical canonicalization by source
+  snapshot, and emits coverage, representation and range evidence. Six focused tests pass:</p>
+  <ul>
+    <li>active coil identity is invariant to cell subdivision;</li>
+    <li>passive identity is invariant to element subdivision;</li>
+    <li>closed paths are invariant to start index and traversal direction;</li>
+    <li>missing shots do not split ranges while real digest changes do;</li>
+    <li>real early/late EFIT setup variants share the same L2 physical source;</li>
+    <li>shot 26963 is rejected as incomplete evidence because <code>vertw</code> is absent.</li>
+  </ul>
+  <p>The development run also caught a boundary regression: a prefix selector initially included
+  dynamic <code>fcoil_c</code>/<code>fcoil_x</code> arrays. That job was stopped, the selector was
+  replaced by an explicit ten-field static setup list, and the successful census was run once
+  with the corrected boundary.</p>
+
+  <h2 id="s6">§6 — Consequence for S2</h2>
+  <p>The external engineering-chronology blocker in the existing machine-description plan is too
+  broad. Catalog recovery can now supply the axisymmetric physical machine and magnetic/SXR
+  diagnostic pose registry directly. S2 should first land the canonical registry, then author
+  DD 4.1.1 IDSs from that registry and validate round trips. External engineering evidence is
+  retained only for fields the catalogs genuinely do not publish, and it cannot be used to turn
+  mesh counts or source dropouts into machine configurations.</p>
+
+</main>
+</body>
+</html>

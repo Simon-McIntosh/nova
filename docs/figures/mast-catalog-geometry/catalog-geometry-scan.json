@@ -1,0 +1,71 @@
+{
+  "schema": "mast-catalog-physical-geometry",
+  "catalogs": {
+    "level1": {
+      "root": "/work/projects/imas_gpu/mast/level1/shots",
+      "stores": 17111,
+      "first_shot": 11695,
+      "last_shot": 30473
+    },
+    "level2": {
+      "root": "/work/projects/imas_gpu/mast/level2/shots",
+      "stores": 11573,
+      "first_shot": 11766,
+      "last_shot": 30471
+    }
+  },
+  "execution": {
+    "slurm_job": 1238120,
+    "partition": "sun_debug",
+    "allocated_cpus": 16,
+    "elapsed": "00:54:07",
+    "exit_code": 0,
+    "peak_rss_kib": 325384
+  },
+  "coverage": {
+    "complete_geometry_shots": 11556,
+    "incomplete_geometry_shots": 17,
+    "missing_evidence_counts": {
+      "level2-pf_passive": 16,
+      "level2-wall": 16,
+      "level2-pf_passive-vertw": 1
+    },
+    "note": "The 16 missing-group shots lack both pf_passive and wall. Shot 26963 is otherwise complete but omits vertw. Missing evidence is not a configuration."
+  },
+  "representation_signatures": {
+    "coverage_shots": 11016,
+    "signatures": {
+      "9425ae4a8bf3bc15": 392,
+      "edd753d282903679": 582,
+      "1cb6f2ee742c4ee4": 10042
+    },
+    "meaning": "Rounded EFIT setup representations reproduced byte-for-byte from the Ambix signature algorithm. These are provenance, not machine identity."
+  },
+  "physical_configurations": {
+    "count": 1,
+    "configurations": {
+      "67f789d3d8b40135": {
+        "observed_shots": 11556,
+        "first_observed_shot": 11766,
+        "last_observed_shot": 30471,
+        "representative_shot": 11766,
+        "active_components": 13,
+        "passive_components": 16,
+        "poloidal_probes": 78,
+        "flux_loops": 44,
+        "saddle_paths": 36,
+        "soft_x_ray_chords": 96
+      }
+    }
+  },
+  "adjudications": [
+    {
+      "shot": 26963,
+      "raw_physical_digest": "937964b6b99a15e4",
+      "classification": "incomplete-source",
+      "missing": "pf_passive.vertw",
+      "evidence": "The vertw family exists with identical surrounding physical geometry on shots 26961 and 26964. All three shots share EFIT setup signature 1cb6f2ee742c4ee4. A single omitted family cannot establish hardware removal and reinstatement across two unobserved shot gaps."
+    }
+  ],
+  "identity_rule": "Only canonical conductor, passive, wall, topology, turns or polarity, and diagnostic pose changes split a machine configuration. Solver cells, element counts, weights, mesh resolution, padding, and source omissions do not."
+}

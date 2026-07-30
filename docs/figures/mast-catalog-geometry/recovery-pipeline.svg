@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 430" role="img" aria-labelledby="title desc">
+  <title id="title">MAST catalog geometry recovery pipeline</title>
+  <desc id="desc">Level-one solver representations and level-two named physical geometry are separated. Only canonical physical components and diagnostic poses form configuration identity and shot ranges.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+      <path d="M0,0 L9,4.5 L0,9 z" fill="#465362"/>
+    </marker>
+    <style>
+      .box { fill: #fff; stroke: #465362; stroke-width: 1.6; rx: 8; }
+      .physical { fill: #edf8f1; stroke: #237a48; stroke-width: 2; rx: 8; }
+      .evidence { fill: #fff7e8; stroke: #a46811; stroke-width: 1.7; rx: 8; }
+      .title { font: 700 18px system-ui, sans-serif; fill: #18212b; }
+      .head { font: 700 15px system-ui, sans-serif; fill: #18212b; }
+      .body { font: 13px system-ui, sans-serif; fill: #33404d; }
+      .small { font: 12px system-ui, sans-serif; fill: #526170; }
+      .arrow { fill: none; stroke: #465362; stroke-width: 1.8; marker-end: url(#arrow); }
+      .dash { fill: none; stroke: #a46811; stroke-width: 1.6; stroke-dasharray: 6 5; marker-end: url(#arrow); }
+    </style>
+  </defs>
+
+  <text x="560" y="29" text-anchor="middle" class="title">Recover the machine, not a solver’s subdivision</text>
+
+  <rect x="25" y="70" width="220" height="135" class="box"/>
+  <text x="135" y="95" text-anchor="middle" class="head">L1 Zarr</text>
+  <text x="45" y="122" class="body">EFIT setup cells and circuits</text>
+  <text x="45" y="145" class="body">probe sensitive-axis angles</text>
+  <text x="45" y="168" class="body">flux-loop toroidal spans</text>
+  <text x="45" y="191" class="small">17,111 stores · shots 11695–30473</text>
+
+  <rect x="25" y="245" width="220" height="135" class="box"/>
+  <text x="135" y="270" text-anchor="middle" class="head">L2 Zarr</text>
+  <text x="45" y="297" class="body">named active/passive geometry</text>
+  <text x="45" y="320" class="body">wall and magnetic diagnostics</text>
+  <text x="45" y="343" class="body">ordered saddle and X-ray paths</text>
+  <text x="45" y="366" class="small">11,573 stores · shots 11766–30471</text>
+
+  <path d="M245 137 H315" class="arrow"/>
+  <path d="M245 312 H315" class="arrow"/>
+
+  <rect x="315" y="92" width="250" height="250" class="physical"/>
+  <text x="440" y="120" text-anchor="middle" class="head">Canonical physical snapshot</text>
+  <text x="338" y="153" class="body">• coil-pack outer outlines</text>
+  <text x="338" y="179" class="body">• passive polygon unions + topology</text>
+  <text x="338" y="205" class="body">• canonical wall/limiter cycle</text>
+  <text x="338" y="231" class="body">• probe R, Z, φ, axis, length</text>
+  <text x="338" y="257" class="body">• loop span and ordered 3-D paths</text>
+  <text x="338" y="283" class="body">• line-of-sight origin → endpoint</text>
+  <text x="338" y="315" class="small">quantized in physical units; names retain mapping</text>
+
+  <path d="M565 175 H645" class="arrow"/>
+  <path d="M440 342 V392 H135 V380" class="dash"/>
+
+  <rect x="645" y="105" width="205" height="140" class="physical"/>
+  <text x="748" y="133" text-anchor="middle" class="head">Physical identity</text>
+  <text x="667" y="163" class="body">geometry + topology</text>
+  <text x="667" y="188" class="body">turns / polarity</text>
+  <text x="667" y="213" class="body">diagnostic pose</text>
+  <text x="748" y="235" text-anchor="middle" class="small">one digest per real machine state</text>
+
+  <rect x="645" y="285" width="205" height="105" class="evidence"/>
+  <text x="748" y="313" text-anchor="middle" class="head">Representation evidence</text>
+  <text x="667" y="342" class="body">filament / element counts</text>
+  <text x="667" y="367" class="body">mesh resolution and weights</text>
+
+  <path d="M748 245 V283" class="dash"/>
+  <path d="M850 175 H915" class="arrow"/>
+
+  <rect x="915" y="105" width="180" height="140" class="physical"/>
+  <text x="1005" y="133" text-anchor="middle" class="head">Discrete shot ranges</text>
+  <text x="937" y="164" class="body">split only when the</text>
+  <text x="937" y="188" class="body">physical digest changes</text>
+  <text x="937" y="218" class="small">catalog holes stay “missing”,</text>
+  <text x="937" y="236" class="small">never new configurations</text>
+
+  <path d="M1005 245 V300" class="arrow"/>
+  <rect x="915" y="300" width="180" height="90" class="box"/>
+  <text x="1005" y="330" text-anchor="middle" class="head">DDv4 authoring</text>
+  <text x="1005" y="355" text-anchor="middle" class="body">machine IDS registry</text>
+  <text x="1005" y="377" text-anchor="middle" class="body">validated round trips</text>
+</svg>

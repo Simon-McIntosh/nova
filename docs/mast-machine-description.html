@@ -8,18 +8,18 @@
   <meta name="plan-slug" content="mast-machine-description">
   <meta name="plan-title" content="MAST Machine Description — DDv4 IDS set + standard-name data maps">
   <meta name="plan-summary" content="Author DD 4.1.1 MAST machine-description IDSs from authoritative physical configurations over discrete shot ranges. Identity is continuous machine geometry, topology, turns/polarity and diagnostic position/orientation; numerical meshes and solver discretizations are provenance only.">
-  <meta name="plan-status" content="blocked">
+  <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="XL">
   <meta name="plan-owner" content="Simon McIntosh">
-  <meta name="plan-depends-on" content="nova-spine-refactor">
+  <meta name="plan-depends-on" content="nova-spine-refactor,mast-catalog-geometry-recovery">
   <meta name="plan-blocks" content="mast-catalog-gpu-solve">
   <title>MAST Machine Description | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-30">
 <meta name="plan-impl" content="0.35">
-<meta name="plan-version" content="8">
+<meta name="plan-version" content="9">
 <meta name="plan-sprint" content="S2">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -441,7 +441,7 @@ Done-when
   5. Return commit SHA, test output, artifact paths, quantitative range counts, and evidence inputs for Reckon writeback.</pre>
     <p class="r-fu-outcome">Landed 81fb0cfc. Across 14,633 readable shots, the three raw EFIT setup fingerprints and their 938/1004 filament representations collapse to one provisional physical configuration with 23 active/case circuits; diagnostic positions and sensitive-axis orientations remain identity-bearing. Provisional range 11695-30473 retains 2,478 unreadable shots explicitly. No real hardware boundary is established: amm is wall-model discretization, not authoritative passive geometry, and engineering history is required before IDS authoring.</p>
     </article>
-<article class="r-fu" data-id="f-mmd-engineering-history" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="guided" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-07-30T00:50:00+02:00" data-recommends-skill="/reckon-ship mast-machine-description" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-mmd-engineering-history" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="guided" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-07-30T00:50:00+02:00" data-recommends-skill="/reckon-ship mast-machine-description" data-resolved-at="2026-07-30T09:55:34+00:00" data-resolved-by="reckon-edit">
     <h4 class="r-fu-title">Acquire authoritative MAST configuration history and full diagnostic geometry</h4>
     <div class="r-fu-body"><p>Obtain the engineering installation and maintenance evidence that turns the provisional 11695–30473 equivalence class into authoritative discrete machine-configuration ranges. The source must cover active conductors, passive topology/material geometry, vessel/limiter, TF hardware, and diagnostic position plus full sensitive-axis orientation; probes need phi and toroidal angle, and partial flux loops need ordered three-dimensional paths.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -478,6 +478,7 @@ Done-when
   2. Full static geometry and diagnostic poses are available for pf_active, pf_passive, wall, tf and magnetics.
   3. Missing/corrupt/unknown intervals are explicit and cannot bridge different configurations.
   4. A tracked canonical manifest is ready for per-IDS authors and semantic digest tests.</pre>
+    <p class="r-fu-outcome">Superseded as the broad S2 blocker by <code>mast-catalog-geometry-recovery</code>. The complete L1/L2 census proves that L2 publishes named active/passive/wall geometry, magnetic diagnostic placement, 36 ordered three-dimensional saddle paths and 96 SXR chords, while L1 supplies sensitive-axis angles and loop span. Three EFIT setup digests collapse to one complete physical configuration over observed shots 11766–30471. Sixteen missing passive/wall stores and the shot-26963 <code>vertw</code> omission are incomplete evidence, not configurations. Detailed TF winding geometry and full poses for other diagnostics remain explicit scoped source gaps during IDS authoring.</p>
     </article>
 <article class="r-fu" data-id="f-mmd-standard-name-graph" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-07-30T01:50:00+02:00" data-recommends-skill="/reckon-ship mast-machine-description" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Repair live Standard Name graph and refresh physical MAST mappings</h4>
@@ -516,6 +517,8 @@ Done-when
 <h2><span class="sec">§</span> Research</h2>
 <div class="r-research" data-id="r-mmd-transition" data-type="transition-audit" data-source="nova" data-added-by="codex" data-when="2026-07-29" data-url="/nova/physics-spine-transition-audit.html">
     <span class="r-research-title"><a href="/nova/physics-spine-transition-audit.html">Physics Spine Transition Audit</a></span></div>
+<div class="r-research" data-id="r-mmd-catalog-geometry" data-type="evidence" data-source="Nova L1/L2 full-corpus census and subdivision-invariance prototype" data-added-by="reckon-edit" data-when="2026-07-30" data-url="/nova/mast-catalog-geometry-evidence.html">
+    <span class="r-research-title"><a href="/nova/mast-catalog-geometry-evidence.html">MAST Catalog Geometry Evidence</a></span></div>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="_top" data-id="c-mmd-cocos-repair" data-who="reckon-ship" data-when="2026-07-30T01:12:00+02:00">

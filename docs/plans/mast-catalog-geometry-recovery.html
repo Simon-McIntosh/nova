@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="plan-slug" content="mast-catalog-geometry-recovery">
+<meta name="reckon-type" content="plan">
+<title>mast-catalog-geometry-recovery</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-title" content="MAST Catalog Geometry Recovery">
+<meta name="plan-summary" content="Recover physical MAST machine and diagnostic geometry from the Ambix L1/L2 Zarr catalogs, canonicalize away solver subdivisions, and publish evidence-backed discrete shot ranges for DDv4 authoring.">
+<meta name="plan-status" content="active">
+<meta name="plan-roi" content="high">
+<meta name="plan-effort" content="L">
+<meta name="plan-sprint" content="S2">
+<meta name="plan-owner" content="Simon McIntosh">
+<meta name="plan-modified" content="2026-07-30">
+<meta name="plan-blocks" content="mast-machine-description,physics-spine-adoption">
+<meta name="plan-artifacts" content="nova/scripts/mast_catalog_geometry.py,tests/test_mast_catalog_geometry.py,docs/research/mast-catalog-geometry-evidence.html,docs/figures/mast-catalog-geometry/catalog-geometry-scan.json,docs/figures/mast-catalog-geometry/recovery-pipeline.svg">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
+<meta name="plan-capability-reasoning" content="deep">
+<meta name="plan-capability-context" content="extended">
+<meta name="plan-capability-tool-autonomy" content="autonomous">
+<meta name="plan-capability-verification" content="strict">
+<meta name="plan-capability-risk" content="elevated">
+<meta name="plan-impl" content="0.25">
+<meta name="plan-version" content="2">
+</head>
+<body>
+<main class="plan-doc">
+
+<h2 id="s1">§1 — Objective and S2 role</h2>
+<p>Build the canonical MAST geometry registry directly from the L1/L2 Zarr catalogs used by
+Ambix training. The registry must identify the physical machine and installed diagnostic pose
+over discrete operational shot ranges. EFIT filament counts, AMM channel counts, cell tilings,
+mesh resolution, padding and numerical weights are retained as provenance only and can never
+create a configuration.</p>
+<p>This plan is the geometry authority immediately upstream of
+<a href="/nova/mast-machine-description.html"><code>mast-machine-description</code></a> and
+<a href="/nova/physics-spine-adoption.html"><code>physics-spine-adoption</code></a>. It is attached
+to S2 before machine-description authoring because both consumers need the same answer to “which
+physical MAST configuration applies to this shot?”</p>
+
+<h2 id="s2">§2 — Locked identity contract</h2>
+<table>
+  <thead><tr><th>Contributes to identity</th><th>Never contributes to identity</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>Active-conductor geometry, turns and polarity</td>
+      <td>Number of filaments or cells used to approximate a conductor</td>
+    </tr>
+    <tr>
+      <td>Passive geometry, material grouping and electrical topology</td>
+      <td>Number of passive elements used by a solver discretization</td>
+    </tr>
+    <tr>
+      <td>Wall/limiter geometry and TF physical configuration</td>
+      <td>Mesh resolution, quadrature order, padding or source weights</td>
+    </tr>
+    <tr>
+      <td>Diagnostic position, full path and sensitive-axis orientation</td>
+      <td>Channel availability, absent arrays or a one-shot catalog dropout</td>
+    </tr>
+  </tbody>
+</table>
+<p>A range boundary is admitted only when a canonical physical digest changes and the source
+evidence supports a real hardware reconfiguration. Missing catalog evidence is represented
+separately and does not split the range.</p>
+
+<h2 id="s3">§3 — Research already landed</h2>
+<p>The linked
+<a href="/nova/mast-catalog-geometry-evidence.html">catalog geometry evidence</a> and
+<a href="/nova/figures/mast-catalog-geometry/catalog-geometry-scan.json">full-corpus report</a>
+establish the starting point:</p>
+<ul>
+  <li>11,573 L2 stores were scanned; 11,556 carry a complete recoverable physical snapshot.</li>
+  <li>Three Ambix-compatible EFIT setup digests cover 11,016 matching L1 shots, but all complete
+  observations collapse to one physical digest, <code>67f789d3d8b40135</code>.</li>
+  <li>The directly observed physical range is 11766–30471. Sixteen stores omit both passive and
+  wall arrays; shot 26963 omits only <code>vertw</code>. All 17 are missing evidence, not machine
+  configurations.</li>
+  <li>One snapshot contains 13 active components, 16 passive families, 78 poloidal probes,
+  44 flux loops, 36 ordered saddle paths and 96 soft-X-ray chords.</li>
+  <li>Six prototype tests pin subdivision invariance, path invariance, range-hole handling,
+  real setup-to-physical collapse and the 26963 dropout adjudication.</li>
+</ul>
+
+<figure>
+  <img src="/nova/figures/mast-catalog-geometry/recovery-pipeline.svg"
+       alt="MAST catalog geometry recovery pipeline">
+  <figcaption>The registry is built from canonical physical objects. Historical solver
+  representations are retained beside it as provenance and cannot split shot ranges.</figcaption>
+</figure>
+
+<h2 id="s4">§4 — Deliverables</h2>
+<ol>
+  <li><strong>Catalog geometry reader.</strong> A maintained Nova module that reads only static
+  L1/L2 arrays, joins L1 orientation/span to L2 named placement, validates required families,
+  and emits typed physical objects plus source-completeness records.</li>
+  <li><strong>Canonical registry.</strong> Stable geometry payloads and digests independent of
+  component subdivision, with source paths, units, tolerances and representation provenance.</li>
+  <li><strong>Shot-range map.</strong> Ordered, non-overlapping physical configuration ranges;
+  observed, inherited and missing-evidence status are separate fields.</li>
+  <li><strong>DD 4.1.1 authorer.</strong> <code>pf_active</code>, <code>pf_passive</code>,
+  <code>wall</code> and <code>magnetics</code> generated with imas-python. TF and diagnostics not
+  fully represented in the catalogs remain explicit authoring gaps rather than guessed geometry.</li>
+  <li><strong>Consumer seam.</strong> Nova and the migrated Ambix physics select geometry by shot
+  through the registry, not by EFIT setup digest or mesh count.</li>
+</ol>
+
+<h2 id="s5">§5 — Implementation sequence</h2>
+<ol>
+  <li><strong>Harden the prototype.</strong> Move reusable code out of the script, add typed
+  records, explicit units/tolerances, component-family validation, bounded parallel reads and
+  incremental checkpoints. Preserve the script as the reproducible census entry point.</li>
+  <li><strong>Publish the physical registry.</strong> Materialize canonical outlines, polygon
+  unions, wall cycles and diagnostic poses; attach the three EFIT setup digests as representation
+  aliases to the single observed physical configuration. Record the 17 incomplete stores without
+  creating range breaks.</li>
+  <li><strong>Adjudicate range extent.</strong> Keep 11766–30471 as directly observed L2 geometry.
+  Decide whether L1-only edge shots 11695–11765 and 30472–30473 inherit the same configuration;
+  any extension must be labelled inherited because L1 setup geometry is not physical authority.</li>
+  <li><strong>Author and round-trip IDSs.</strong> Write the catalog-backed geometry with
+  imas-python at DD 4.1.1, reopen with the matching DD version, validate every IDS, and prove
+  canonical geometry and diagnostic orientations survive the round trip.</li>
+  <li><strong>Cut over consumers.</strong> Make machine-description authoring and physics-spine
+  geometry selection consume the registry. Re-run operator parity on representatives of all
+  three setup aliases, record outcomes in the dependent plans, and clear the catalog-geometry
+  blockers.</li>
+</ol>
+
+<h2 id="s6">§6 — Acceptance gates</h2>
+<ul>
+  <li>Subdividing or merging equivalent active/passive source elements leaves the physical digest
+  unchanged.</li>
+  <li>Changing any conductor outline, passive topology, wall contour, turns/polarity, diagnostic
+  position, sensitive axis or ordered path changes the digest.</li>
+  <li>Every shot lookup returns one configuration plus an evidence state; missing source data
+  cannot silently fall through to a different configuration.</li>
+  <li>All complete L2 stores map to the published registry, and the 17 incomplete stores are
+  reproduced as explicit gaps.</li>
+  <li>DD 4.1.1 validate/reopen/round-trip tests preserve geometry to the declared physical
+  tolerance and preserve diagnostic orientation/path ordering.</li>
+  <li>Representative Nova operators agree across all three historical setup aliases after they
+  resolve to the same physical machine.</li>
+</ul>
+
+<h2 id="s7">§7 — Boundaries and residual gaps</h2>
+<p>The catalog proof is complete for the axisymmetric components and magnetic/SXR diagnostics
+listed in §3. It does not yet supply detailed TF winding geometry or full installed poses for
+every non-magnetic diagnostic. Those gaps are fields to source or scope explicitly during IDS
+authoring; they are not permission to infer geometry from a signal grid, and they do not revive
+the old EFIT/AMM digest as machine identity.</p>
+
+<section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-mast-geometry-authoring" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-create" data-written-at="2026-07-30" data-recommends-skill="/reckon-ship mast-catalog-geometry-recovery" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Author the canonical catalog geometry registry and DDv4 IDS set</h4>
+    <div class="r-fu-body"><p>Turn the recovered catalog geometry into a versioned registry whose identity is physical machine and diagnostic pose. Prove shot boundaries from canonical geometry; never admit EFIT filament counts, AMM element counts, meshes, or numerical resolution as configuration changes.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan: mast-catalog-geometry-recovery (/nova/mast-catalog-geometry-recovery.html)
+Section: §5 implementation sequence
+Skill: /reckon-ship mast-catalog-geometry-recovery
+
+Context
+  The L1/L2 catalog census and prototype establish the physical-identity boundary. Read the evidence document and JSON artifact first. The user requirement is binding: capture the machine geometry and diagnostic position/orientation over real discrete shot ranges; ignore solver discretization variants.
+
+State to read
+  docs/mast-catalog-geometry-recovery.html
+  docs/mast-catalog-geometry-evidence.html
+  docs/figures/mast-catalog-geometry/catalog-geometry-scan.json
+  nova/scripts/mast_catalog_geometry.py
+  tests/test_mast_catalog_geometry.py
+  docs/mast-machine-description.html
+
+Scope
+  Convert the prototype into the canonical registry builder; preserve named active and passive topology, wall/limiter contour, magnetic-probe sensitive axes, flux-loop spans, ordered 3-D saddle paths, and available line-of-sight chords. Separate per-shot source completeness from configuration identity. Author DD 4.1.1 IDSs with imas-python and validate round trips. Do not use raw HDF5.
+
+§05 Done when
+  1. The registry contains physical configuration records and explicit observed shot ranges, with catalog holes represented as missing evidence rather than new configurations.
+  2. Synthetic subdivision tests and real catalog representation-to-physical collapse tests pass.
+  3. Diagnostic positions and orientations round-trip through the target IDS paths.
+  4. mast-machine-description and physics-spine-adoption consume the registry and can clear their catalog-geometry blocker.
+  5. Results, hashes, validation counts, and any residual source gaps are recorded in both plans.</pre>
+    </article>
+</section>
+<section data-reckon="research" id="research" class="r-research-list">
+<h2><span class="sec">§</span> Research</h2>
+<div class="r-research" data-id="r-mast-catalog-geometry" data-type="evidence" data-source="L1/L2 Zarr full-corpus census and subdivision-invariance prototype" data-added-by="reckon-create" data-when="2026-07-30" data-url="/nova/mast-catalog-geometry-evidence.html">
+    <span class="r-research-title"><a href="/nova/mast-catalog-geometry-evidence.html">MAST catalog geometry evidence</a></span></div>
+</section>
+</main>
+</body>
+</html>

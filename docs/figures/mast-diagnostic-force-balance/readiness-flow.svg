@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" role="img"
+     aria-labelledby="title description">
+  <title id="title">MAST machine-description readiness flow</title>
+  <desc id="description">Catalog degree metadata and existing radian loop spans pass through one canonical radian boundary, then DD 4.1.1 authoring and a verified local artifact. Consumer cutover remains blocked by missing physical, electrical and sign semantics, external Standard Name publication work and absent Ambix write authority.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f7fafc"/>
+      <stop offset="1" stop-color="#edf4f7"/>
+    </linearGradient>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3"
+            orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#45616f"/>
+    </marker>
+    <style>
+      .heading { font: 700 28px system-ui, sans-serif; fill: #163642; }
+      .subheading { font: 600 17px system-ui, sans-serif; fill: #274c5a; }
+      .body { font: 15px system-ui, sans-serif; fill: #29444e; }
+      .small { font: 13px system-ui, sans-serif; fill: #49636c; }
+      .box { stroke-width: 2; rx: 16; }
+      .source { fill: #edf6ff; stroke: #5486a5; }
+      .landed { fill: #ebf8f0; stroke: #398460; }
+      .blocked { fill: #fff1ed; stroke: #b55f4d; }
+      .external { fill: #fff8e7; stroke: #ad7c25; }
+      .flow { fill: none; stroke: #45616f; stroke-width: 3; marker-end: url(#arrow); }
+      .bar { fill: #163642; }
+      .bartext { font: 700 15px system-ui, sans-serif; fill: white; letter-spacing: .04em; }
+    </style>
+  </defs>
+
+  <rect width="1200" height="760" fill="url(#background)"/>
+  <text x="60" y="56" class="heading">What is ready, and what still blocks consumer cutover</text>
+  <text x="60" y="86" class="body">Physical identity, source completeness and publication authority remain separate.</text>
+
+  <rect x="55" y="125" width="245" height="150" class="box source"/>
+  <rect x="75" y="145" width="110" height="27" rx="8" class="bar"/>
+  <text x="92" y="164" class="bartext">SOURCE</text>
+  <text x="75" y="200" class="subheading">Catalog metadata</text>
+  <text x="75" y="229" class="body">Probe and path φ in degrees</text>
+  <text x="75" y="253" class="body">Loop span already in radians</text>
+
+  <path d="M300 200 H350" class="flow"/>
+
+  <rect x="355" y="125" width="245" height="150" class="box landed"/>
+  <rect x="375" y="145" width="120" height="27" rx="8" class="bar"/>
+  <text x="390" y="164" class="bartext">LANDED</text>
+  <text x="375" y="200" class="subheading">One radian boundary</text>
+  <text x="375" y="229" class="body">Convert degree-sourced φ once</text>
+  <text x="375" y="253" class="body">Preserve radian loop span</text>
+
+  <path d="M600 200 H650" class="flow"/>
+
+  <rect x="655" y="125" width="215" height="150" class="box landed"/>
+  <rect x="675" y="145" width="120" height="27" rx="8" class="bar"/>
+  <text x="690" y="164" class="bartext">LANDED</text>
+  <text x="675" y="200" class="subheading">DD 4.1.1 authoring</text>
+  <text x="675" y="229" class="body">Position and known pose</text>
+  <text x="675" y="253" class="body">Unknown semantics stay unset</text>
+
+  <path d="M870 200 H920" class="flow"/>
+
+  <rect x="925" y="125" width="220" height="150" class="box landed"/>
+  <rect x="945" y="145" width="120" height="27" rx="8" class="bar"/>
+  <text x="960" y="164" class="bartext">VERIFIED</text>
+  <text x="945" y="200" class="subheading">Local artifact</text>
+  <text x="945" y="229" class="body">Pinned, content-addressed</text>
+  <text x="945" y="253" class="body">No GHCR publication</text>
+
+  <path d="M1035 275 V338 H600 V378" class="flow"/>
+
+  <rect x="315" y="385" width="570" height="105" class="box blocked"/>
+  <rect x="335" y="405" width="130" height="27" rx="8" class="bar"/>
+  <text x="351" y="424" class="bartext">BLOCKED</text>
+  <text x="335" y="461" class="subheading">Ambix consumer cutover and donor retirement</text>
+  <text x="335" y="483" class="small">The verified artifact is necessary, but it does not manufacture missing semantics.</text>
+
+  <path d="M425 490 V535" class="flow"/>
+  <path d="M775 490 V535" class="flow"/>
+
+  <rect x="55" y="545" width="540" height="155" class="box blocked"/>
+  <text x="80" y="580" class="subheading">Missing physical, electrical and sign semantics</text>
+  <text x="80" y="610" class="body">• active turns, polarity and circuit topology</text>
+  <text x="80" y="635" class="body">• passive material, resistance and electrical topology</text>
+  <text x="80" y="660" class="body">• TF winding, probe-bank assignment/orientation, saddle sign</text>
+  <text x="80" y="685" class="small">Auxiliary non-magnetics poses are outside this authoring scope.</text>
+
+  <rect x="615" y="545" width="530" height="155" class="box external"/>
+  <text x="640" y="580" class="subheading">External publication and repository authority</text>
+  <text x="640" y="610" class="body">• repair Standard Name attachments and missing records</text>
+  <text x="640" y="635" class="body">• refresh graph provenance and COCOS metadata</text>
+  <text x="640" y="660" class="body">• obtain explicit Ambix write, commit and push authority</text>
+  <text x="640" y="685" class="small">No Ambix mutation was authorized or performed.</text>
+</svg>

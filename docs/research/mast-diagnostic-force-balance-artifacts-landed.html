@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="mast-diagnostic-force-balance-artifacts-landed">
+  <meta name="plan-title" content="MAST diagnostics, force balance and verified artifacts — landed">
+  <meta name="plan-summary" content="Verified landing record for generic force-balance diagnostics, corrected MAST diagnostic-angle authoring, and the local machine-artifact layout, with Ambix and Standard Name blockers kept explicit.">
+  <meta name="plan-informs" content="mast-catalog-geometry-recovery,mast-machine-description,physics-spine-adoption">
+  <meta name="plan-recorded-at" content="2026-07-31">
+  <meta name="plan-verdict" content="Generic force-balance diagnostics, corrected MAST diagnostic geometry and the verified local artifact layout landed, and the integrated Nova default suite passed. Consumer cutover remains blocked by unsourced physical semantics, external Standard Name publication work and absent Ambix mutation authority.">
+  <title>MAST diagnostics, force balance and verified artifacts — landed</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+  <header>
+    <span class="badge badge-shipped">✓ landed 2026-07-31</span>
+    <h1>MAST diagnostics, force balance and verified artifacts</h1>
+    <p>Nova now carries generic force-balance diagnostics, corrected catalog-backed diagnostic
+    geometry, and a verified local machine-artifact contract. The integrated default lane passed
+    at the merged tip; no external publication or Ambix cutover is represented as complete.</p>
+  </header>
+
+  <section class="quick-status">
+    <div class="status-card">
+      <strong>Nova implementation</strong>
+      <span class="badge badge-shipped">landed</span>
+      <p>Force balance, diagnostic repair and artifact layout are on <code>main</code>.</p>
+    </div>
+    <div class="status-card">
+      <strong>Independent review</strong>
+      <span class="badge badge-shipped">green</span>
+      <p>54 + 21 + 14 focused tests; 51 artifact cases approved.</p>
+    </div>
+    <div class="status-card">
+      <strong>Integrated lane</strong>
+      <span class="badge badge-shipped">green</span>
+      <p>3,414 passed; 125 skipped; 536 deselected.</p>
+    </div>
+    <div class="status-card">
+      <strong>Consumer cutover</strong>
+      <span class="badge badge-blocked">blocked</span>
+      <p>Physical semantics, publication repair and Ambix authority remain open.</p>
+    </div>
+  </section>
+
+  <h2>Outcomes</h2>
+  <table>
+    <thead>
+      <tr><th>Item</th><th>Verdict</th><th>Evidence</th><th>Commit / artifact</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Generic force-balance diagnostics</td>
+        <td><span class="badge badge-shipped">landed</span></td>
+        <td>Shafranov vertical-field estimates, vacuum decay index, the open stability interval,
+        strict finite/monotone guards, and a direct symmetric-loop far-field
+        <code>n → 3</code> pin; 54 focused tests passed on <code>sun_debug</code>.</td>
+        <td><code>32993e2b</code>, hardened by <code>f9d900ce</code></td>
+      </tr>
+      <tr>
+        <td>MAST diagnostic-angle repair</td>
+        <td><span class="badge badge-shipped">landed</span></td>
+        <td>All degree-sourced diagnostic φ values cross one canonical radian boundary; the
+        already-radian loop span remains unchanged. Independent focused tests: 21 passed;
+        final catalog tests: 14 passed.</td>
+        <td><code>e286bb59</code></td>
+      </tr>
+      <tr>
+        <td>Verified local machine artifact</td>
+        <td><span class="badge badge-shipped">approved</span></td>
+        <td>Canonical manifest, exact DD/registry/physical pins, content-addressed cache,
+        incomplete-artifact rejection, portable namespace and descriptor-relative no-clobber
+        publication; independent 51-case <code>sun_debug</code> review approved.</td>
+        <td><code>f4e478e3</code></td>
+      </tr>
+      <tr>
+        <td>Integrated default suite</td>
+        <td><span class="badge badge-shipped">passing</span></td>
+        <td>A single default <code>uv run pytest</code> completed on <code>sun_debug</code>:
+        3,414 passed, 125 skipped, 536 deselected and 143 warnings in 391.50 seconds.</td>
+        <td><code>f4e478e3</code>; job <code>1238999</code></td>
+      </tr>
+      <tr>
+        <td>Ambix consumer and donor cutover</td>
+        <td><span class="badge badge-blocked">blocked</span></td>
+        <td>Requires unsourced physical/electrical/sign semantics, Standard Name publication
+        repair and explicit cross-repository authority.</td>
+        <td>No Ambix changes authorized or made</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <figure>
+    <img src="/nova/figures/mast-diagnostic-force-balance/readiness-flow.svg"
+         alt="Flow from catalog angle metadata through canonical radian conversion and DD authoring to a verified local artifact, with consumer cutover blocked by missing semantics and external authority">
+    <figcaption>Nova’s landed path stops at a verified local artifact. Missing semantics remain
+    unset, and external Standard Name and Ambix work stays outside the completed boundary.</figcaption>
+  </figure>
+
+  <h2>Integrated verification</h2>
+  <p>At Nova commit <code>f4e478e315e1786c55df733e95e110e1fd6eea87</code>, SLURM job
+  <code>1238999</code> ran one default <code>uv run pytest</code> invocation on
+  <code>sun_debug</code>, node <code>98dci4-clu-3141</code>, with 8 CPUs and 24 GiB. It exited
+  zero with 3,414 passed, 125 skipped, 536 deselected and 143 warnings in 391.50 seconds; the
+  allocation lasted 00:07:53. The captured log is
+  <code>/home/ITER/mcintos/.cache/codex/nova-s2-integrated-tests.log</code>.</p>
+
+  <h2>Diagnostic geometry after the repair</h2>
+  <p>Source units are resolved once: degree-sourced diagnostic φ values are normalized to radians
+  at the catalog boundary, while the flux-loop span already expressed in radians is preserved.
+  The physical digest is <code>76cf833561e602a7</code>; the complete registry digest is
+  <code>73ecabaa030a476d80cc24c1fe35d038876a12454ebd7b0c7055aac1d3cf3ab2</code>.</p>
+  <table>
+    <thead><tr><th>Geometry family</th><th>Published coverage</th><th>Boundary retained</th></tr></thead>
+    <tbody>
+      <tr><td>Primary poloidal probes</td><td>78 probes</td>
+        <td>R/Z and sourced poloidal orientation; discrete 150°/330° bank choice remains
+        unresolved, with no invented midpoint.</td></tr>
+      <tr><td>Additional poloidal probes</td><td>61 points</td>
+        <td>Position only; no unsupported sensitive-axis semantics.</td></tr>
+      <tr><td>Additional toroidal probes</td><td>36 points</td>
+        <td>Position only.</td></tr>
+      <tr><td>Flux loops</td><td>44 full loops</td>
+        <td>The sourced full-loop span remains <code>2π</code>.</td></tr>
+      <tr><td>Saddle sensors</td><td>36 paths, 972 vertices</td>
+        <td>Position/path geometry only; traversal sign remains unset.</td></tr>
+      <tr><td>Soft-X-ray diagnostics</td><td>96 chords</td>
+        <td>Sourced origin and endpoint geometry.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Verified artifact boundary</h2>
+  <p>Merge <code>f4e478e3</code> landed a canonical manifest with exact DD, registry and physical
+  digest pins; a content-addressed local cache; default rejection of incomplete artifacts; a
+  deterministic OCI/GHCR naming convention; a portable namespace; and descriptor-relative,
+  no-clobber publication. Publication semantics were verified without creating an outward-facing
+  effect. <strong>No GHCR artifact was published.</strong></p>
+
+  <h2>Read-only Ambix alias baseline</h2>
+  <p>The clean read-only source was Ambix commit
+  <code>3e4360eb7873e2e25da85610eec03272bb51596c</code>. The local evidence artifact is
+  <code>/home/ITER/mcintos/.cache/codex/nova-s2-alias-baseline/artifacts/physics-spine-v0-mast-heldout-6-3e4360eb78-98dci4-clu-3141.yaml</code>,
+  SHA-256 <code>8d75faf57643158dc98c2ca76829ffb7fa479f0fee0d92dfcba5b37b7f0ff149</code>.</p>
+  <table>
+    <thead>
+      <tr><th>Shot / representation</th><th>Scored</th><th>Greens solve / throughput</th><th>Reproduction</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>11794 / <code>mp78-fl46-fc1004-lim37-9425ae4a8bf3bc15</code></td>
+        <td>5/6; converged 0.8333, confined 0.8</td>
+        <td>2635.621 ms/slice; 0.379417 slices/core/s; 6815.895 ms end-to-end</td>
+        <td>axis 0.016471 cm; LCFS 0.007694 cm; profile RMS 0.025367</td>
+      </tr>
+      <tr>
+        <td>12417 / <code>mp78-fl46-fc1004-lim37-edd753d282903679</code></td>
+        <td>5/5; converged/confined 1.0</td>
+        <td>1835.003 ms/slice; 0.544958 slices/core/s; 3185.261 ms end-to-end</td>
+        <td>axis 0.010536 cm; LCFS 0.005834 cm; profile RMS 0.002270</td>
+      </tr>
+      <tr>
+        <td>18502 / <code>mp78-fl46-fc938-lim37-1cb6f2ee742c4ee4</code></td>
+        <td>6/6; converged/confined 1.0</td>
+        <td>3352.898 ms/slice; 0.298249 slices/core/s; 4519.459 ms end-to-end</td>
+        <td>axis 0.010624 cm; LCFS 0.008112 cm; profile RMS 0.023629</td>
+      </tr>
+    </tbody>
+  </table>
+  <p><strong>Metadata caveat.</strong> This was an ad-hoc three-representation baseline. Its
+  filename and embedded <code>shotset_version: v0-mast-heldout-6</code> are incorrect metadata,
+  because the frozen six-shot set was not run. Shot 11794 also scored only five of six attempted
+  slices, so this artifact is baseline evidence, not a parity verdict. Frozen six-shot parity was
+  not rerun.</p>
+
+  <h2>Consumer tail and retained blockers</h2>
+  <p>The read-only Ambix inventory found 103 production/script files in the explicit legacy
+  axisymmetric donor set, or 155 including tests. Direct imports from
+  <code>imas_ambix.gs</code> remain in 71 production/script files, or 112 including tests.
+  Ambix tracked files were clean, but its canonical checkout had 2,040 untracked entries.
+  No Ambix changes were authorized or made.</p>
+  <h3>Machine-description authoring blockers</h3>
+  <ol>
+    <li>active turns, polarity and circuit topology;</li>
+    <li>passive material, resistance and electrical topology;</li>
+    <li>detailed toroidal-field winding geometry;</li>
+    <li>independent toroidal probe orientation;</li>
+    <li>poloidal channel-to-bank assignment;</li>
+    <li>saddle traversal sign.</li>
+  </ol>
+  <p>Auxiliary non-magnetics installed poses are outside machine-description authoring scope and
+  are not a completion blocker for this tranche.</p>
+
+  <h3>External Standard Name publication blockers</h3>
+  <p>The external graph still has three wrong attachments, four missing or review-only records,
+  stale graph/provenance state and inadequate COCOS metadata. These are external publication
+  blockers; they are not evidence that the Nova-local artifact failed.</p>
+
+  <section class="card">
+    <h2>What’s next</h2>
+    <p>Source the six machine-description semantics and repair the external Standard Name
+    publication state. Only after explicit Ambix authority is granted should consumers move to
+    the verified artifact and donor retirement proceed behind parity and zero-import gates.</p>
+  </section>
+
+</main>
+</body>
+</html>

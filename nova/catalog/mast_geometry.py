@@ -918,10 +918,6 @@ def registry_payload(
                         "assignment is not sourced"
                     ),
                     "saddle traversal sign is not sourced",
-                    (
-                        "installed poses beyond magnetics and soft-X-ray chords "
-                        "are not sourced"
-                    ),
                 ],
             }
         },
@@ -972,6 +968,12 @@ def registry_payload(
             "representative_shot": 11766,
             "complete_geometry_shots": 11556,
             "incomplete_geometry_shots": 17,
+            "out_of_scope_source_gaps": [
+                (
+                    "installed poses beyond magnetics and soft-X-ray chords "
+                    "are not sourced"
+                )
+            ],
             "source_census_physical_digest": "67f789d3d8b40135",
             "source_census_angle_unit": (
                 "degree for diagnostic positions and orientations; "

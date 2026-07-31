@@ -7,8 +7,7 @@
         "detailed toroidal-field winding geometry is not sourced",
         "independent toroidal probe orientation is not sourced",
         "poloidal probe channel-to-bank toroidal position assignment is not sourced",
-        "saddle traversal sign is not sourced",
-        "installed poses beyond magnetics and soft-X-ray chords are not sourced"
+        "saddle traversal sign is not sourced"
       ],
       "geometry": {
         "active_components": {
@@ -7692,6 +7691,9 @@
     },
     "complete_geometry_shots": 11556,
     "incomplete_geometry_shots": 17,
+    "out_of_scope_source_gaps": [
+      "installed poses beyond magnetics and soft-X-ray chords are not sourced"
+    ],
     "representation_counts": {
       "1cb6f2ee742c4ee4": 10042,
       "9425ae4a8bf3bc15": 392,
@@ -7721,7 +7723,7 @@
       "physical_digest": "76cf833561e602a7"
     }
   ],
-  "registry_digest": "48369472e0ab0dd61b2f60320842213dfdb54a5da4595358db596b4ba33029ba",
+  "registry_digest": "73ecabaa030a476d80cc24c1fe35d038876a12454ebd7b0c7055aac1d3cf3ab2",
   "representation_aliases": {
     "1cb6f2ee742c4ee4": "76cf833561e602a7",
     "9425ae4a8bf3bc15": "76cf833561e602a7",

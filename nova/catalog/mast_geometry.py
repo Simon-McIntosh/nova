@@ -973,10 +973,14 @@ def registry_payload(
             "complete_geometry_shots": 11556,
             "incomplete_geometry_shots": 17,
             "source_census_physical_digest": "67f789d3d8b40135",
-            "source_census_angle_unit": "degree",
+            "source_census_angle_unit": (
+                "degree for diagnostic positions and orientations; "
+                "radian for flux-loop span"
+            ),
             "canonicalization_note": (
-                "The registry converts every catalog angle to radians at ingestion; "
-                "all length coordinates retain their source values."
+                "The registry normalizes degree-sourced diagnostic angles to radians "
+                "at ingestion; flux-loop spans are already radians, and all length "
+                "coordinates retain their source values."
             ),
             "representation_counts": {
                 "9425ae4a8bf3bc15": 392,

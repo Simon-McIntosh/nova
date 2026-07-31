@@ -7675,7 +7675,7 @@
     }
   ],
   "provenance": {
-    "canonicalization_note": "The registry converts every catalog angle to radians at ingestion; all length coordinates retain their source values.",
+    "canonicalization_note": "The registry normalizes degree-sourced diagnostic angles to radians at ingestion; flux-loop spans are already radians, and all length coordinates retain their source values.",
     "catalogs": {
       "level1": {
         "first_shot": 11695,
@@ -7698,7 +7698,7 @@
       "edd753d282903679": 582
     },
     "representative_shot": 11766,
-    "source_census_angle_unit": "degree",
+    "source_census_angle_unit": "degree for diagnostic positions and orientations; radian for flux-loop span",
     "source_census_physical_digest": "67f789d3d8b40135"
   },
   "ranges": [
@@ -7721,7 +7721,7 @@
       "physical_digest": "76cf833561e602a7"
     }
   ],
-  "registry_digest": "8192c6ac1e3b343f4aa85353715dc445cfe6e635688eebb65d314173b40b77a7",
+  "registry_digest": "48369472e0ab0dd61b2f60320842213dfdb54a5da4595358db596b4ba33029ba",
   "representation_aliases": {
     "1cb6f2ee742c4ee4": "76cf833561e602a7",
     "9425ae4a8bf3bc15": "76cf833561e602a7",

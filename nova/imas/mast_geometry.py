@@ -209,18 +209,47 @@ def _author_magnetics(factory: imas.IDSFactory, geometry: Mapping[str, Any]) -> 
         )
 
     probes = magnetics["poloidal_probes"]
-    ids.b_field_pol_probe.resize(len(probes))
-    for index, (probe, row) in enumerate(
-        zip(ids.b_field_pol_probe, probes, strict=True)
-    ):
-        r, z, poloidal_angle, length, phi_start, phi_end = row["pose"]
-        extent = (phi_end - phi_start) % (2 * np.pi)
+    poloidal_points = [
+        (family, index, point)
+        for family, points in sorted(magnetics["additional_points"].items())
+        if family.startswith("poloidal_")
+        for index, point in enumerate(points)
+    ]
+    ids.b_field_pol_probe.resize(len(probes) + len(poloidal_points))
+    for index, row in enumerate(probes):
+        probe = ids.b_field_pol_probe[index]
+        r, z, poloidal_angle, length = row["pose"]
         probe.name = f"{row['family']}_{index}"
         probe.position.r = float(r)
         probe.position.z = float(z)
-        probe.position.phi = float((phi_start + extent / 2) % (2 * np.pi))
         probe.poloidal_angle = float(poloidal_angle)
         probe.length = float(length)
+    for index, (family, family_index, point) in enumerate(
+        poloidal_points,
+        start=len(probes),
+    ):
+        probe = ids.b_field_pol_probe[index]
+        probe.name = f"{family}_{family_index}"
+        probe.position.r = float(point[0])
+        probe.position.z = float(point[1])
+        probe.position.phi = float(point[2])
+
+    toroidal_points = [
+        (family, index, point)
+        for family, points in sorted(magnetics["additional_points"].items())
+        if family.startswith("toroidal_")
+        for index, point in enumerate(points)
+    ]
+    ids.b_field_phi_probe.resize(len(toroidal_points))
+    for probe, (family, family_index, point) in zip(
+        ids.b_field_phi_probe,
+        toroidal_points,
+        strict=True,
+    ):
+        probe.name = f"{family}_{family_index}"
+        probe.position.r = float(point[0])
+        probe.position.z = float(point[1])
+        probe.position.phi = float(point[2])
     return ids
 
 

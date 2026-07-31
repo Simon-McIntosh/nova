@@ -196,6 +196,74 @@ def test_registry_contains_all_census_source_gaps() -> None:
     assert registry.incomplete_evidence[26963].missing == ("level2-pf_passive-vertw",)
 
 
+def test_registry_angles_are_canonical_radians() -> None:
+    geometry = next(
+        iter(MachineGeometryRegistry.default().configurations.values())
+    ).geometry
+    magnetics = geometry["magnetics"]
+
+    candidate_phi = [
+        phi
+        for probe in magnetics["poloidal_probes"]
+        for phi in probe["position_phi_candidates"]
+    ]
+    saddle_phi = [
+        point[2]
+        for paths in magnetics["saddle_paths"].values()
+        for path in paths
+        for point in path
+    ]
+    additional_phi = [
+        point[2]
+        for points in magnetics["additional_points"].values()
+        for point in points
+    ]
+    xray_phi = [
+        chord[4]
+        for chords in geometry["soft_x_ray_chords"].values()
+        for chord in chords
+    ]
+
+    for values in (candidate_phi, saddle_phi, additional_phi, xray_phi):
+        assert values
+        assert np.all(np.asarray(values) >= 0.0)
+        assert np.all(np.asarray(values) <= 2 * np.pi)
+
+
+def test_registry_pins_catalog_degree_conversions() -> None:
+    geometry = next(
+        iter(MachineGeometryRegistry.default().configurations.values())
+    ).geometry
+    magnetics = geometry["magnetics"]
+
+    first_probe = magnetics["poloidal_probes"][0]
+    assert np.allclose(
+        first_probe["position_phi_candidates"],
+        np.deg2rad([150.0, 330.0]),
+        atol=5e-6,
+    )
+    assert np.isclose(
+        magnetics["saddle_paths"]["l"][0][0][2],
+        np.deg2rad(4.96822),
+        atol=5e-6,
+    )
+    assert np.isclose(
+        magnetics["additional_points"]["poloidal_cc"][0][2],
+        np.deg2rad(270.0),
+        atol=5e-6,
+    )
+    assert np.isclose(
+        magnetics["additional_points"]["toroidal_cc"][0][2],
+        np.deg2rad(10.0),
+        atol=5e-6,
+    )
+    assert np.isclose(
+        geometry["soft_x_ray_chords"]["horizontal_cam_lower"][0][4],
+        np.deg2rad(105.0),
+        atol=5e-6,
+    )
+
+
 def test_physical_identity_changes_with_supported_geometry_and_pose() -> None:
     geometry = deepcopy(
         next(iter(MachineGeometryRegistry.default().configurations.values())).geometry
@@ -218,6 +286,10 @@ def test_physical_identity_changes_with_supported_geometry_and_pose() -> None:
     probe = deepcopy(geometry)
     probe["magnetics"]["poloidal_probes"][0]["pose"][2] += 1e-3
     mutations.append(probe)
+
+    probe_bank = deepcopy(geometry)
+    probe_bank["magnetics"]["poloidal_probes"][0]["position_phi_candidates"][0] += 1e-3
+    mutations.append(probe_bank)
 
     saddle = deepcopy(geometry)
     saddle["magnetics"]["saddle_paths"]["l"][0][0][2] += 1e-3

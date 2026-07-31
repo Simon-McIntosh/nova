@@ -36,6 +36,7 @@ DEFAULT_REGISTRY_PATH = Path(__file__).with_name("mast_geometry.json")
 GEOMETRY_PRECISION_M = 1e-5
 ANGLE_PRECISION_DEG = 1e-4
 ANGLE_PRECISION_RAD = float(np.deg2rad(ANGLE_PRECISION_DEG))
+SOURCE_ANGLE_UNIT = "degree"
 
 _ACTIVE_SUFFIXES = ("_r", "_z", "_width", "_height")
 _ACTIVE_COMPONENTS = (
@@ -715,6 +716,14 @@ def _nearest_values(
     return result
 
 
+def _source_angles_to_radians(values: Any) -> np.ndarray:
+    """Convert catalog angles to the registry's canonical SI unit."""
+
+    if SOURCE_ANGLE_UNIT != "degree":
+        raise ValueError(f"unsupported source angle unit {SOURCE_ANGLE_UNIT!r}")
+    return np.deg2rad(np.asarray(values, dtype=float))
+
+
 def _magnetics_payload(level1: zarr.Group, level2: zarr.Group) -> dict[str, Any]:
     efm = level1["efm"]
     probes: list[dict[str, Any]] = []
@@ -734,16 +743,21 @@ def _magnetics_payload(level1: zarr.Group, level2: zarr.Group) -> dict[str, Any]
         phi_2 = _array(level2, f"{stem}_phi_2").astype(float)
         for values in zip(r, z, angles, lengths, phi_1, phi_2, strict=True):
             rr, zz, angle_deg, length, start_deg, end_deg = values
+            angle_rad, first_phi_rad, second_phi_rad = _source_angles_to_radians(
+                [angle_deg, start_deg, end_deg]
+            )
             probes.append(
                 {
                     "family": family,
                     "pose": [
                         round(float(rr), 5),
                         round(float(zz), 5),
-                        round(float(np.deg2rad(angle_deg)), 5),
+                        round(float(angle_rad), 5),
                         round(float(length), 5),
-                        round(float(np.deg2rad(start_deg)), 5),
-                        round(float(np.deg2rad(end_deg)), 5),
+                    ],
+                    "position_phi_candidates": [
+                        round(float(first_phi_rad), 5),
+                        round(float(second_phi_rad), 5),
                     ],
                 }
             )
@@ -769,7 +783,7 @@ def _magnetics_payload(level1: zarr.Group, level2: zarr.Group) -> dict[str, Any]
         stem = f"b_field_tor_probe_saddle_{family}"
         r = _array(level2, f"{stem}_r")
         z = _array(level2, f"{stem}_z")
-        phi = _array(level2, f"{stem}_phi")
+        phi = _source_angles_to_radians(_array(level2, f"{stem}_phi"))
         paths[family] = [
             canonical_cycle(np.column_stack([rr, zz, pp]))
             for rr, zz, pp in zip(r, z, phi, strict=True)
@@ -782,7 +796,7 @@ def _magnetics_payload(level1: zarr.Group, level2: zarr.Group) -> dict[str, Any]
             columns = [
                 _array(level2, f"{stem}_r"),
                 _array(level2, f"{stem}_z"),
-                _array(level2, f"{stem}_phi"),
+                _source_angles_to_radians(_array(level2, f"{stem}_phi")),
             ]
             points[f"poloidal_{family}"] = sorted(
                 np.round(np.column_stack(columns), 5).tolist()
@@ -795,7 +809,7 @@ def _magnetics_payload(level1: zarr.Group, level2: zarr.Group) -> dict[str, Any]
                     [
                         _array(level2, f"{stem}_r"),
                         _array(level2, f"{stem}_z"),
-                        _array(level2, f"{stem}_phi"),
+                        _source_angles_to_radians(_array(level2, f"{stem}_phi")),
                     ]
                 ),
                 5,
@@ -828,9 +842,11 @@ def _xray_payload(level2: zarr.Group) -> dict[str, list[list[float]]]:
             f"{stem}_phi",
         )
         if all(key in group for key in keys):
+            columns = [_array(group, key) for key in keys[:-1]]
+            columns.append(_source_angles_to_radians(_array(group, keys[-1])))
             payload[stem] = sorted(
                 np.round(
-                    np.column_stack([_array(group, key) for key in keys]),
+                    np.column_stack(columns),
                     5,
                 ).tolist()
             )
@@ -897,6 +913,10 @@ def registry_payload(
                     ),
                     "detailed toroidal-field winding geometry is not sourced",
                     "independent toroidal probe orientation is not sourced",
+                    (
+                        "poloidal probe channel-to-bank toroidal position "
+                        "assignment is not sourced"
+                    ),
                     "saddle traversal sign is not sourced",
                     (
                         "installed poses beyond magnetics and soft-X-ray chords "
@@ -953,10 +973,10 @@ def registry_payload(
             "complete_geometry_shots": 11556,
             "incomplete_geometry_shots": 17,
             "source_census_physical_digest": "67f789d3d8b40135",
-            "source_census_angle_unit": "degree for probe orientation and extent",
+            "source_census_angle_unit": "degree",
             "canonicalization_note": (
-                "The registry converts probe orientation and extent to radians; "
-                "all other geometry is unchanged from the source census payload."
+                "The registry converts every catalog angle to radians at ingestion; "
+                "all length coordinates retain their source values."
             ),
             "representation_counts": {
                 "9425ae4a8bf3bc15": 392,

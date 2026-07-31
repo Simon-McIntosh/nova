@@ -18,7 +18,7 @@
 <meta name="plan-owner" content="Simon McIntosh">
 <meta name="plan-modified" content="2026-07-31">
 <meta name="plan-blocks" content="mast-machine-description,physics-spine-adoption">
-<meta name="plan-artifacts" content="nova/catalog/mast_geometry.json,nova/catalog/mast_geometry.py,nova/imas/mast_geometry.py,nova/scripts/mast_catalog_geometry.py,tests/test_mast_catalog_geometry.py,tests/test_machine.py,docs/research/mast-catalog-geometry-evidence.html,docs/figures/mast-catalog-geometry/catalog-geometry-scan.json,docs/figures/mast-catalog-geometry/recovery-pipeline.svg,docs/research/mast-catalog-geometry-registry-ids-landed.html">
+<meta name="plan-artifacts" content="nova/catalog/mast_geometry.json,nova/catalog/mast_geometry.py,nova/imas/mast_geometry.py,nova/imas/mast_artifact.py,nova/scripts/mast_catalog_geometry.py,tests/test_mast_catalog_geometry.py,tests/test_machine.py,tests/test_mast_artifact.py,docs/research/mast-catalog-geometry-evidence.html,docs/figures/mast-catalog-geometry/catalog-geometry-scan.json,docs/figures/mast-catalog-geometry/recovery-pipeline.svg,docs/research/mast-catalog-geometry-registry-ids-landed.html,docs/research/mast-diagnostic-force-balance-artifacts-landed.html,docs/figures/mast-diagnostic-force-balance/readiness-flow.svg">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-capability-reasoning" content="deep">
@@ -26,9 +26,9 @@
 <meta name="plan-capability-tool-autonomy" content="autonomous">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="elevated">
-<meta name="plan-impl" content="0.8">
-<meta name="plan-version" content="3">
-<meta name="plan-commits" content="0f2b026fe8449465aabcf840673ed193472fd364,8c790cbc54a341e9dfe028918054254b9f903741">
+<meta name="plan-impl" content="0.9">
+<meta name="plan-version" content="4">
+<meta name="plan-commits" content="0f2b026fe8449465aabcf840673ed193472fd364,8c790cbc54a341e9dfe028918054254b9f903741,e286bb59cd456fa0ab8f9bb40a0b77a60319eec2,943c3069700397e48840691298c9c4bf2fac7412,f4e478e315e1786c55df733e95e110e1fd6eea87">
 </head>
 <body>
 <main class="plan-doc">
@@ -199,9 +199,9 @@ Landed baseline
 - Integrated default lane: 3307 passed, 125 skipped, 536 deselected.
 
 Prerequisites and authority
-- Obtain or explicitly adjudicate active turns/polarity/circuit wiring, passive material/resistance/electrical topology, independent toroidal probe orientation, saddle traversal sign, detailed TF geometry, and other missing installed poses.
+- Obtain or explicitly adjudicate active turns/polarity/circuit wiring, passive material/resistance/electrical topology, independent toroidal probe orientation, saddle traversal sign, detailed TF geometry, and poloidal channel-to-bank assignment. Auxiliary non-magnetics poses are outside this machine-description scope.
 - Repair and reconcile the live Standard Name graph: 229 current catalog IDs are absent; three audited attachments are wrong; MAST sources must move from DD 4.1.0 provenance to 4.1.1 with authoritative COCOS metadata.
-- Obtain explicit write/commit/push authority for imas-codex, the Standard Name catalog if publication is needed, and imas-ambix. Use isolated clean worktrees; do not touch the 1053 pre-existing untracked Ambix entries.
+- Obtain explicit write/commit/push authority for imas-codex, the Standard Name catalog if publication is needed, and imas-ambix. Use isolated clean worktrees; do not touch the 2,040 pre-existing untracked Ambix entries.
 
 Work
 1. Reconcile Standard Name catalog/graph parity and detach semantically wrong outline/probe-angle attachments.
@@ -223,10 +223,15 @@ Done when
     <span class="r-research-title"><a href="/nova/mast-catalog-geometry-evidence.html">MAST catalog geometry evidence</a></span></div>
 <div class="r-research" data-id="r-mast-registry-ids-landed" data-type="evidence" data-source="Nova implementation, independent verification, and downstream readiness audits" data-added-by="reckon-ship" data-when="2026-07-31" data-url="/nova/mast-catalog-geometry-registry-ids-landed.html">
     <span class="r-research-title"><a href="/nova/mast-catalog-geometry-registry-ids-landed.html">MAST physical registry and DD authoring — landed</a></span></div>
+<div class="r-research" data-id="r-mast-readiness-evidence" data-type="evidence" data-source="Nova implementation, independent reviews, integrated default lane, and read-only Ambix alias baseline" data-added-by="reckon-ship" data-when="2026-07-31" data-url="/nova/mast-diagnostic-force-balance-artifacts-landed.html">
+    <span class="r-research-title"><a href="/nova/mast-diagnostic-force-balance-artifacts-landed.html">MAST diagnostic, force-balance and artifact readiness evidence</a></span></div>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s5" data-id="c-mast-registry-ids-landed" data-who="reckon-ship" data-when="2026-07-31T10:05:00+02:00">
     <div class="r-comment-body">The Nova-local registry tranche landed at 0f2b026f and merged at 8c790cbc. Independent focused verification passed 19 tests; the integrated default lane passed 3,307 with 125 resource-gated skips and 536 deselected on sun_debug job 1238939. Registry file SHA-256 is d694dc45984ed22f687464c20c96c57993669ed8dcdc7cb32644b3fd9ef30bb8. The remaining consumer step is blocked by missing electrical/pose semantics and separate imas-codex / Ambix authority; no unsupported field was inferred.</div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-mast-diagnostic-artifact-readiness" data-who="reckon-ship" data-when="2026-07-31T11:40:00+02:00">
+    <div class="r-comment-body">The Nova-local geometry tranche advanced to corrected SI-angle semantics, additional DD 4.1.1 position authoring and a verified local artifact boundary at main f4e478e3. The physical digest remains 76cf833561e602a7; the registry digest is 73ecabaa030a476d80cc24c1fe35d038876a12454ebd7b0c7055aac1d3cf3ab2. Primary 150/330 degree probe-bank candidates remain discrete and unresolved, 61 additional poloidal and 36 toroidal probes are authored position-only, and auxiliary non-magnetics poses are explicitly outside machine-description scope. The artifact layer pins DD/registry/physical identity, rejects incomplete artifacts by default, publishes locally without clobber, and defines a deterministic OCI convention; no GHCR artifact was published. Independent focused gates passed and the integrated default lane passed 3,414 with 125 skipped and 536 deselected on job 1238999. The plan remains blocked on six physical/electrical/sign authoring semantics, Standard Name publication repair, explicit external repository authority, frozen benchmark parity and zero legacy imports.</div>
 </div>
 </section>
 </main>

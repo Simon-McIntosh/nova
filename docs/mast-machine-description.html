@@ -18,13 +18,13 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-31">
-<meta name="plan-impl" content="0.35">
-<meta name="plan-version" content="10">
+<meta name="plan-impl" content="0.45">
+<meta name="plan-version" content="11">
 <meta name="plan-sprint" content="S2">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-commits" content="81fb0cfc2961cd4cda83bd048af6d37062e48f5e">
-<meta name="plan-artifacts" content="docs/mast-quantity-inventory.html,docs/figures/mast-machine-description/source_cocos_audit.json,docs/figures/mast-machine-description/campaign_fingerprints.png,docs/figures/mast-machine-description/fingerprint_interleaving.png">
+<meta name="plan-commits" content="81fb0cfc2961cd4cda83bd048af6d37062e48f5e,e286bb59cd456fa0ab8f9bb40a0b77a60319eec2,943c3069700397e48840691298c9c4bf2fac7412,f4e478e315e1786c55df733e95e110e1fd6eea87">
+<meta name="plan-artifacts" content="docs/mast-quantity-inventory.html,docs/figures/mast-machine-description/source_cocos_audit.json,docs/figures/mast-machine-description/campaign_fingerprints.png,docs/figures/mast-machine-description/fingerprint_interleaving.png,docs/research/mast-diagnostic-force-balance-artifacts-landed.html,docs/figures/mast-diagnostic-force-balance/readiness-flow.svg">
 </head>
 <body>
   <main class="plan-doc">
@@ -33,8 +33,9 @@
     <p>Nova's magnetic model must build the MAST machine from a <strong>proper machine-description
     IDS set</strong> — not from ambix's ad-hoc per-campaign geometry tables. This plan defines and
     authors that set: DDv4-native (DDv4 is COCOS&nbsp;17), keyed to the IMAS Standard Name
-    conventions, versioned per campaign, and validated end-to-end by building nova operators from
-    it and reproducing the sensor forward model the ambix vacuum campaigns already pinned. It also
+    conventions, versioned by discrete physical-configuration shot range, and validated end-to-end
+    by building nova operators from it and reproducing the sensor forward model the Ambix vacuum
+    baselines already pinned. It also
     delivers the <strong>data maps and transformations</strong> that carry the FAIR-MAST / efm
     source quantities onto DDv4 semantics — the ingest side of the same contract.</p>
     <p><strong>This is a multi-session program</strong> — the stages in §4 are deliberately sized
@@ -50,7 +51,7 @@
         <rect x="20" y="52" width="190" height="80" fill="none" stroke="#888" stroke-width="1"/>
         <text x="115" y="72" text-anchor="middle" font-size="13" font-weight="600" fill="#111">Sources</text>
         <text x="115" y="92" text-anchor="middle" font-size="11.5" fill="#333">FAIR-MAST L2 zarr (efm)</text>
-        <text x="115" y="108" text-anchor="middle" font-size="11.5" fill="#333">ambix gs/geometry.py tables</text>
+        <text x="115" y="108" text-anchor="middle" font-size="11.5" fill="#333">catalog geometry + source provenance</text>
         <text x="115" y="124" text-anchor="middle" font-size="11.5" fill="#333">UKAEA drawings / silop refs</text>
         <!-- maps -->
         <rect x="260" y="52" width="190" height="80" fill="none" stroke="#888" stroke-width="1"/>
@@ -63,8 +64,8 @@
         <text x="595" y="60" text-anchor="middle" font-size="13" font-weight="600" fill="#1a6b3c">DDv4 MD IDS set</text>
         <text x="595" y="80" text-anchor="middle" font-size="11.5" fill="#333">pf_active · pf_passive · wall</text>
         <text x="595" y="96" text-anchor="middle" font-size="11.5" fill="#333">magnetics · tf</text>
-        <text x="595" y="112" text-anchor="middle" font-size="11.5" fill="#333">per-campaign versions</text>
-        <text x="595" y="128" text-anchor="middle" font-size="11.5" fill="#333">(coil drift ≲ 13 mm)</text>
+        <text x="595" y="112" text-anchor="middle" font-size="11.5" fill="#333">physical shot-range identity</text>
+        <text x="595" y="128" text-anchor="middle" font-size="11.5" fill="#333">representation aliases are provenance</text>
         <!-- consumers -->
         <rect x="740" y="52" width="140" height="80" fill="none" stroke="#888" stroke-width="1"/>
         <text x="810" y="72" text-anchor="middle" font-size="13" font-weight="600" fill="#111">Consumers</text>
@@ -91,19 +92,22 @@
       <thead><tr><th>IDS</th><th>Content for MAST</th><th>Primary source</th></tr></thead>
       <tbody>
         <tr><td><code>pf_active</code></td><td>PF coil geometry (winding-pack outlines, turns),
-          circuit topology, supplies; the solenoid (P1) with its response conventions. Per-campaign
-          coil positions (efm coil geometry drifts up to ~13&nbsp;mm between campaigns).</td>
-          <td>efm via FAIR-MAST; ambix <code>gs/geometry.py</code> campaign tables</td></tr>
+          circuit topology, supplies; the solenoid (P1) with its response conventions. Catalog
+          outlines are authorable, while physical turns, polarity and circuit wiring remain
+          explicit gaps.</td>
+          <td>FAIR-MAST catalog geometry plus engineering evidence</td></tr>
         <tr><td><code>pf_passive</code></td><td>Vessel and case conducting elements — the passive
           loops the PassiveCircuit model builds L/R from; two-section element geometry; nominal
-          resistances with the calibration multipliers referenced, not baked in.</td>
-          <td>efm passive-element boxes; ambix passive tables + calibrated R provenance</td></tr>
+          resistances with calibration multipliers referenced, not baked in. Catalog outlines are
+          physical geometry; material, resistance and galvanic topology still need authoritative
+          evidence.</td>
+          <td>FAIR-MAST L2 outlines plus engineering evidence; calibrated resistance is provenance</td></tr>
         <tr><td><code>wall</code></td><td>Limiter contour + vessel 2D outline (the in-polygon masks
           the topology reads use).</td><td>efm limiter arrays; ambix ivc_geometry</td></tr>
         <tr><td><code>magnetics</code></td><td>Flux loops and pickup coils: positions, orientation
-          angles, effective areas, names — the sensor set the reconstruction fits. Includes the
-          per-campaign validity masks (dead/renamed channels).</td>
-          <td>efm/silop sensor tables (silop positions are campaign-stable)</td></tr>
+          angles, effective areas, names — the sensor set the reconstruction fits. Position-only
+          records are valid where independent orientation evidence is absent.</td>
+          <td>FAIR-MAST diagnostic metadata and configuration drawings</td></tr>
         <tr><td><code>tf</code></td><td>TF conductor description sufficient for the rod-current
           F = R·B_φ convention used by profile solves.</td><td>efm scalars + drawings</td></tr>
       </tbody>
@@ -118,11 +122,11 @@
       <li><strong>DDv4-native authoring.</strong> The MD is written once, in a pinned DDv4 version
       (decision below), with <code>ids_properties/version_put</code> carrying it; consumers open
       with the matching <code>dd_version</code> — never auto-converted.</li>
-      <li><strong>COCOS 17 is the target convention</strong> (DDv4's). The source side must be
-      <em>identified, not assumed</em>: stage 1 includes a COCOS identification audit of the
-      efm/FAIR-MAST quantities (known landmarks: the MAST convention has ψ_axis &gt; ψ_boundary;
-      ambix carries total flux Φ = 2πRA_φ [Wb]; the working hypothesis is
-      <strong>COCOS&nbsp;3</strong> — to be confirmed against real data, never assumed). Every map
+      <li><strong>COCOS 17 is the target convention</strong> (DDv4's). The source side was
+      <em>identified, not assumed</em>: the catalog audit measured MAST source COCOS&nbsp;3 across
+      both forward- and reversed-field cohorts. The 3→17 transform scales ψ by 2π without a sign
+      flip, preserves I<sub>p</sub> and B<sub>φ</sub>, flips q, and scales flux derivatives by
+      1/(2π). Every map
       records the source COCOS id and the exact transform applied (sign flips on ψ/Ip/B_φ/q,
       2π factors), and a round-trip test pins each one.</li>
       <li><strong>FAIR-MAST's IMAS dd-path metadata is untrusted for signs.</strong> The catalog
@@ -521,6 +525,8 @@ Done-when
     <span class="r-research-title"><a href="/nova/mast-catalog-geometry-evidence.html">MAST Catalog Geometry Evidence</a></span></div>
 <div class="r-research" data-id="r-mmd-registry-ids-landed" data-type="evidence" data-source="Nova implementation, independent verification, and downstream readiness audits" data-added-by="reckon-ship" data-when="2026-07-31" data-url="/nova/mast-catalog-geometry-registry-ids-landed.html">
     <span class="r-research-title"><a href="/nova/mast-catalog-geometry-registry-ids-landed.html">MAST physical registry and DD authoring — landed</a></span></div>
+<div class="r-research" data-id="r-mmd-readiness-evidence" data-type="evidence" data-source="Nova implementation, independent reviews, integrated default lane, and read-only Ambix alias baseline" data-added-by="reckon-ship" data-when="2026-07-31" data-url="/nova/mast-diagnostic-force-balance-artifacts-landed.html">
+    <span class="r-research-title"><a href="/nova/mast-diagnostic-force-balance-artifacts-landed.html">MAST diagnostic, force-balance and artifact readiness evidence</a></span></div>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="_top" data-id="c-mmd-cocos-repair" data-who="reckon-ship" data-when="2026-07-30T01:12:00+02:00">
@@ -534,6 +540,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s4" data-id="c-mmd-registry-ids-landed" data-who="reckon-ship" data-when="2026-07-31T10:06:00+02:00">
     <div class="r-comment-body">Nova main 8c790cbc now carries the immutable physical registry and DD 4.1.1 authoring/reopen seam. The registry has one configuration, three representation aliases, and 17 explicit source gaps; 19 focused tests and the 3,307-test integrated default lane passed. Catalog-backed outlines, limiter, sourced poloidal orientation, loop spans and direction-neutral saddle paths round-trip. Turns/polarity/circuit wiring, passive material/resistance/topology, independent toroidal probe orientation, saddle traversal sign, detailed TF geometry and other missing poses remain unset and continue to block a complete machine description.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-mmd-diagnostic-artifact-readiness" data-who="reckon-ship" data-when="2026-07-31T11:40:00+02:00">
+    <div class="r-comment-body">Nova main f4e478e3 corrects all degree-sourced diagnostic phi at one catalog boundary while preserving the already-radian loop span. The physical digest remains 76cf833561e602a7 and the registry digest is 73ecabaa030a476d80cc24c1fe35d038876a12454ebd7b0c7055aac1d3cf3ab2. DD 4.1.1 authoring now carries 78 primary probes with unresolved discrete 150/330 degree bank candidates and no default midpoint, plus 61 position-only poloidal probes, 36 position-only toroidal probes, 44 full loops, 36 direction-neutral saddle paths with 972 vertices, and 96 SXR chords. Unsupported orientation, turns and sign fields remain unset. A verified local content-addressed artifact layout also landed, but no GHCR artifact was published. Independent focused gates passed and the integrated default lane passed 3,414 with 125 skipped and 536 deselected. Completion remains blocked by exactly six authoring gaps: active turns/polarity/circuit topology; passive material/resistance/electrical topology; detailed TF winding geometry; independent toroidal probe orientation; poloidal channel-to-bank assignment; and saddle traversal sign. Auxiliary non-magnetics poses are out of machine-description scope. The Standard Name graph still requires three wrong attachments, four missing/review-only mappings, stale provenance and inadequate COCOS metadata to be repaired under separate authority.</div>
 </div>
 </section>
 </main>

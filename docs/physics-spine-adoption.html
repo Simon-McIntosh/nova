@@ -18,12 +18,12 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-31">
-<meta name="plan-version" content="15">
-<meta name="plan-impl" content="0.9">
+<meta name="plan-version" content="16">
+<meta name="plan-impl" content="0.92">
 <meta name="plan-sprint" content="S2">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-commits" content="21b48d4e35571b4bc5f79260f2f6ae9c1c1c16d9,70c11815e1e72f464c93d5ec9f1ab8dc37397c2b,7048d13debe2fced507d2ac92e6e64c5550bc07b">
+<meta name="plan-commits" content="21b48d4e35571b4bc5f79260f2f6ae9c1c1c16d9,70c11815e1e72f464c93d5ec9f1ab8dc37397c2b,7048d13debe2fced507d2ac92e6e64c5550bc07b,f9d900ce50fe38663d36a5c07836e78d3b5fa993,e286bb59cd456fa0ab8f9bb40a0b77a60319eec2,f4e478e315e1786c55df733e95e110e1fd6eea87">
 </head>
 <body>
   <main class="plan-doc">
@@ -186,10 +186,13 @@ nova/transport/current_diffusion.py  CurrentDiffusion      (ambix current_diffus
           FAIR-MAST per-campaign tables (<code>gs/geometry.py</code>) stay in ambix as a facility
           plugin until the MAST machine-description plan supersedes them with DDv4 IDSs.</td></tr>
         <tr><td><code>gs/force_balance.py</code></td>
-          <td><code>equilibrium/diagnostics.py</code> (or fold into profile.py)</td>
-          <td>Analytic Shafranov vertical-field + decay-index identities — small, stateless,
-          moves onto nova.biot field evaluation. These are diagnostics of a solve, not a solver:
-          they do not get a matrix name.</td></tr>
+          <td><code>equilibrium/diagnostics.py</code>
+          <strong>✓ landed <code>f9d900ce</code></strong></td>
+          <td>Analytic Shafranov vertical-field and decay-index identities, with strict
+          finite/monotone guards and a direct symmetric-loop far-field pin. These are diagnostics
+          of a solve, not a solver, so they do not get a matrix name. The generic Nova API is
+          complete; Ambix facility adapters and donor deletion remain part of the blocked consumer
+          cutover.</td></tr>
         <tr><td><code>gs/</code> remainder (<code>operator.py</code>, <code>circuits.py</code>,
           <code>cylinder.py</code>, <code>filaments3d.py</code>, <code>elliptic.py</code>…)</td>
           <td>deleted / unified
@@ -599,6 +602,8 @@ Done when
     <span class="r-research-title"><a href="/nova/mast-catalog-geometry-evidence.html">MAST Catalog Geometry Evidence</a></span></div>
 <div class="r-research" data-id="r-psa-registry-ids-landed" data-type="evidence" data-source="Nova implementation, independent verification, and downstream readiness audits" data-added-by="reckon-ship" data-when="2026-07-31" data-url="/nova/mast-catalog-geometry-registry-ids-landed.html">
     <span class="r-research-title"><a href="/nova/mast-catalog-geometry-registry-ids-landed.html">MAST physical registry and DD authoring — landed</a></span></div>
+<div class="r-research" data-id="r-psa-readiness-evidence" data-type="evidence" data-source="Nova implementation, independent reviews, integrated default lane, and read-only Ambix alias baseline" data-added-by="reckon-ship" data-when="2026-07-31" data-url="/nova/mast-diagnostic-force-balance-artifacts-landed.html">
+    <span class="r-research-title"><a href="/nova/mast-diagnostic-force-balance-artifacts-landed.html">MAST diagnostic, force-balance and artifact readiness evidence</a></span></div>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s3" data-id="c-physics-nova-wave" data-who="reckon-ship" data-when="2026-07-30">
@@ -615,6 +620,9 @@ Done when
 </div>
 <div class="r-comment" data-section="s4" data-id="c-physics-registry-readiness-audit" data-who="reckon-ship" data-when="2026-07-31T10:07:00+02:00">
     <div class="r-comment-body">Nova main 8c790cbc now supplies physical digest plus observed/inherited/missing evidence state without hashing fcoil/AMM subdivisions; the integrated default lane passed 3,307 tests. Read-only Ambix audit at 3e4360e bounded the remaining cutover: machine/tokenizer/state/equilibrium consumers still key identity through gs geometry/operator and SetupSignature paths; 72 tracked scripts import at least one legacy axisymmetric module. The catalogs do not prove turns/polarity/circuit wiring, passive material/resistance/topology, independent toroidal probe orientation, saddle traversal sign, detailed TF geometry, or several installed poses. Ambix work requires explicit cross-repository authority and a clean isolated worktree because its canonical checkout has 1,053 pre-existing untracked entries. Preserve non-axisymmetric donors and delete axisymmetric donors only after zero tracked imports plus parity on representation shots 11794, 12417 and 18502 and the frozen six-shot benchmark.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-physics-readiness-evidence" data-who="reckon-ship" data-when="2026-07-31T11:40:00+02:00">
+    <div class="r-comment-body">Nova main f4e478e3 now includes generic Shafranov vertical-field and decay-index diagnostics, corrected MAST diagnostic-angle/position authoring, and a verified local content-addressed machine-artifact layout. Independent focused gates passed 54 force-balance, 21 diagnostic, 14 final-catalog, and 51 artifact cases; the integrated default lane passed 3,414 with 125 skipped and 536 deselected on sun_debug job 1238999. The read-only Ambix alias baseline at 3e4360e covered representation shots 11794, 12417 and 18502, but shot 11794 scored 5/6 and the artifact carries an incorrect frozen-shotset label, so frozen six-shot parity remains open. Current migration inventory is 103 production/script files in the explicit legacy axisymmetric donor set (155 including tests), with 71 production/script files importing imas_ambix.gs directly (112 including tests); the Ambix checkout has 2,040 untracked entries. No Ambix mutation was authorized. Consumer cutover and donor retirement remain blocked on the six physical/electrical/sign semantics, Standard Name publication repair, Ambix authority, zero imports and benchmark parity.</div>
 </div>
 </section>
 </main>

@@ -134,17 +134,18 @@
   <ul>
     <li>The catalogs do not establish active turns/polarity/circuit wiring, passive
     material/resistance/electrical topology, an independent toroidal sensitive-axis angle for
-    poloidal probes, saddle traversal sign, detailed TF winding geometry, or complete installed
-    poses for several diagnostics. These remain explicit authoring gaps and their IDS fields are
-    not guessed.</li>
+    poloidal probes, saddle traversal sign, detailed TF winding geometry, or poloidal
+    channel-to-bank assignment. These remain explicit authoring gaps and their IDS fields are not
+    guessed. Auxiliary non-magnetics poses are outside the machine-description authoring scope.</li>
     <li>The live Standard Name graph is operational but not reconciled: 4,117 graph nodes versus
     2,223 active catalog names, with 229 current catalog IDs absent. Three audited attachments
     are semantically wrong and most MAST source attachments still cite DD 4.1.0 rather than
     4.1.1.</li>
-    <li>The Ambix migration still has 72 tracked scripts importing at least one legacy
-    axisymmetric module. Machine, tokenizer, state-estimation, label, and benchmark consumers
-    require an isolated Ambix worktree and explicit cross-repository authority. Non-axisymmetric
-    donors remain out of scope.</li>
+    <li>The current Ambix inventory has 103 production/script files in the explicit legacy
+    axisymmetric donor set (155 including tests), with 71 production/script files importing
+    <code>imas_ambix.gs</code> directly (112 including tests). Machine, tokenizer,
+    state-estimation, label, and benchmark consumers require an isolated Ambix worktree and
+    explicit cross-repository authority. Non-axisymmetric donors remain out of scope.</li>
   </ul>
 
   <section class="card">

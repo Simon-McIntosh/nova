@@ -17,9 +17,9 @@
   <title>MAST Machine Description | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-30">
+<meta name="plan-modified" content="2026-07-31">
 <meta name="plan-impl" content="0.35">
-<meta name="plan-version" content="9">
+<meta name="plan-version" content="10">
 <meta name="plan-sprint" content="S2">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -519,6 +519,8 @@ Done-when
     <span class="r-research-title"><a href="/nova/physics-spine-transition-audit.html">Physics Spine Transition Audit</a></span></div>
 <div class="r-research" data-id="r-mmd-catalog-geometry" data-type="evidence" data-source="Nova L1/L2 full-corpus census and subdivision-invariance prototype" data-added-by="reckon-edit" data-when="2026-07-30" data-url="/nova/mast-catalog-geometry-evidence.html">
     <span class="r-research-title"><a href="/nova/mast-catalog-geometry-evidence.html">MAST Catalog Geometry Evidence</a></span></div>
+<div class="r-research" data-id="r-mmd-registry-ids-landed" data-type="evidence" data-source="Nova implementation, independent verification, and downstream readiness audits" data-added-by="reckon-ship" data-when="2026-07-31" data-url="/nova/plans/archive/mast-catalog-geometry-recovery-registry-ids-landed.html">
+    <span class="r-research-title"><a href="/nova/plans/archive/mast-catalog-geometry-recovery-registry-ids-landed.html">MAST physical registry and DD authoring — landed</a></span></div>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="_top" data-id="c-mmd-cocos-repair" data-who="reckon-ship" data-when="2026-07-30T01:12:00+02:00">
@@ -526,6 +528,12 @@ Done-when
 </div>
 <div class="r-comment" data-section="_top" data-id="c-mmd-standard-name-audit" data-who="reckon-ship" data-when="2026-07-30T01:50:00+02:00">
     <div class="r-comment-body"><p>Current 40-row mapping audit completed against catalog eaa79623 and imas-codex 2fea0e8d. The prior 21-mapped/10-gap count is stale: accepted successors, disappeared names, and wrong DD attachments all exist. EFIT fcoil cells and amm elements are explicitly non-authoritative discretizations. Diagnostic R, phi, Z, poloidal and toroidal orientation, plus ordered three-dimensional partial-loop paths remain identity-bearing. A separate service defect blocks graph-backed mapping claims: the live Standard Name API exposes only two skipped nodes while the published catalog contains 2,223 active entries.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-mmd-standard-name-live-audit" data-who="reckon-ship" data-when="2026-07-31T10:06:00+02:00">
+    <div class="r-comment-body">Read-only live audit supersedes the earlier two-node symptom: the graph is operational with 4,117 Standard Name nodes and 9,458 sources, but catalog parity is still false. Against catalog eaa79623 (2,223 active names), only 1,994 current IDs are present and 229 are absent; graph lifecycle is 2,104 draft plus 2,013 null with zero active. Three MAST attachments are semantically wrong (active/passive outline R mapped to an iron-core segment, probe poloidal angle mapped to a flux-surface angle), four mappings remain missing/review-only, and most source attachments cite DD 4.1.0 rather than target 4.1.1. Repair requires separate imas-codex/catalog authority; no live mutation was performed.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-mmd-registry-ids-landed" data-who="reckon-ship" data-when="2026-07-31T10:06:00+02:00">
+    <div class="r-comment-body">Nova main 8c790cbc now carries the immutable physical registry and DD 4.1.1 authoring/reopen seam. The registry has one configuration, three representation aliases, and 17 explicit source gaps; 19 focused tests and the 3,307-test integrated default lane passed. Catalog-backed outlines, limiter, sourced poloidal orientation, loop spans and direction-neutral saddle paths round-trip. Turns/polarity/circuit wiring, passive material/resistance/topology, independent toroidal probe orientation, saddle traversal sign, detailed TF geometry and other missing poses remain unset and continue to block a complete machine description.</div>
 </div>
 </section>
 </main>

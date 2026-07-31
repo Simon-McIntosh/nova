@@ -11,14 +11,14 @@
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-title" content="MAST Catalog Geometry Recovery">
 <meta name="plan-summary" content="Recover physical MAST machine and diagnostic geometry from the Ambix L1/L2 Zarr catalogs, canonicalize away solver subdivisions, and publish evidence-backed discrete shot ranges for DDv4 authoring.">
-<meta name="plan-status" content="active">
+<meta name="plan-status" content="blocked">
 <meta name="plan-roi" content="high">
 <meta name="plan-effort" content="L">
 <meta name="plan-sprint" content="S2">
 <meta name="plan-owner" content="Simon McIntosh">
-<meta name="plan-modified" content="2026-07-30">
+<meta name="plan-modified" content="2026-07-31">
 <meta name="plan-blocks" content="mast-machine-description,physics-spine-adoption">
-<meta name="plan-artifacts" content="nova/scripts/mast_catalog_geometry.py,tests/test_mast_catalog_geometry.py,docs/research/mast-catalog-geometry-evidence.html,docs/figures/mast-catalog-geometry/catalog-geometry-scan.json,docs/figures/mast-catalog-geometry/recovery-pipeline.svg">
+<meta name="plan-artifacts" content="nova/catalog/mast_geometry.json,nova/catalog/mast_geometry.py,nova/imas/mast_geometry.py,nova/scripts/mast_catalog_geometry.py,tests/test_mast_catalog_geometry.py,tests/test_machine.py,docs/research/mast-catalog-geometry-evidence.html,docs/figures/mast-catalog-geometry/catalog-geometry-scan.json,docs/figures/mast-catalog-geometry/recovery-pipeline.svg,docs/plans/archive/mast-catalog-geometry-recovery-registry-ids-landed.html">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-capability-reasoning" content="deep">
@@ -26,8 +26,9 @@
 <meta name="plan-capability-tool-autonomy" content="autonomous">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="elevated">
-<meta name="plan-impl" content="0.25">
-<meta name="plan-version" content="2">
+<meta name="plan-impl" content="0.8">
+<meta name="plan-version" content="3">
+<meta name="plan-commits" content="0f2b026fe8449465aabcf840673ed193472fd364,8c790cbc54a341e9dfe028918054254b9f903741">
 </head>
 <body>
 <main class="plan-doc">
@@ -111,26 +112,24 @@ establish the starting point:</p>
   through the registry, not by EFIT setup digest or mesh count.</li>
 </ol>
 
-<h2 id="s5">§5 — Implementation sequence</h2>
-<ol>
-  <li><strong>Harden the prototype.</strong> Move reusable code out of the script, add typed
-  records, explicit units/tolerances, component-family validation, bounded parallel reads and
-  incremental checkpoints. Preserve the script as the reproducible census entry point.</li>
-  <li><strong>Publish the physical registry.</strong> Materialize canonical outlines, polygon
-  unions, wall cycles and diagnostic poses; attach the three EFIT setup digests as representation
-  aliases to the single observed physical configuration. Record the 17 incomplete stores without
-  creating range breaks.</li>
-  <li><strong>Adjudicate range extent.</strong> Keep 11766–30471 as directly observed L2 geometry.
-  Decide whether L1-only edge shots 11695–11765 and 30472–30473 inherit the same configuration;
-  any extension must be labelled inherited because L1 setup geometry is not physical authority.</li>
-  <li><strong>Author and round-trip IDSs.</strong> Write the catalog-backed geometry with
-  imas-python at DD 4.1.1, reopen with the matching DD version, validate every IDS, and prove
-  canonical geometry and diagnostic orientations survive the round trip.</li>
-  <li><strong>Cut over consumers.</strong> Make machine-description authoring and physics-spine
-  geometry selection consume the registry. Re-run operator parity on representatives of all
-  three setup aliases, record outcomes in the dependent plans, and clear the catalog-geometry
-  blockers.</li>
-</ol>
+<section id="s5" class="section-landed">
+  <header>
+    <span class="badge badge-shipped">✓ registry + DD authoring landed 2026-07-31</span>
+    <h2>§5 — Physical registry and DD authoring</h2>
+  </header>
+  <p class="landed-summary">
+    Built the immutable physical registry, evidence-aware shot lookup, resumable census command,
+    DD 4.1.1 authorer, and machine-reader seam at <code>0f2b026f</code> /
+    <code>8c790cbc</code>. One configuration, three representation aliases, and 17 explicit
+    evidence gaps are pinned; 19 focused tests and the 3,307-test integrated lane passed.
+    Full record:
+    <a href="archive/mast-catalog-geometry-recovery-registry-ids-landed.html">registry and DD
+    authoring landed</a>.
+  </p>
+  <p><span class="badge badge-blocked">consumer cutover blocked</span>
+  Operator parity and dependent-consumer migration still require missing electrical/pose
+  semantics, live Standard Name reconciliation, and explicit imas-codex / Ambix authority.</p>
+</section>
 
 <h2 id="s6">§6 — Acceptance gates</h2>
 <ul>
@@ -157,7 +156,7 @@ the old EFIT/AMM digest as machine identity.</p>
 
 <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-mast-geometry-authoring" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-create" data-written-at="2026-07-30" data-recommends-skill="/reckon-ship mast-catalog-geometry-recovery" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-mast-geometry-authoring" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-create" data-written-at="2026-07-30" data-recommends-skill="/reckon-ship mast-catalog-geometry-recovery" data-resolved-at="2026-07-31T08:10:13+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Author the canonical catalog geometry registry and DDv4 IDS set</h4>
     <div class="r-fu-body"><p>Turn the recovered catalog geometry into a versioned registry whose identity is physical machine and diagnostic pose. Prove shot boundaries from canonical geometry; never admit EFIT filament counts, AMM element counts, meshes, or numerical resolution as configuration changes.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -185,12 +184,50 @@ Scope
   3. Diagnostic positions and orientations round-trip through the target IDS paths.
   4. mast-machine-description and physics-spine-adoption consume the registry and can clear their catalog-geometry blocker.
   5. Results, hashes, validation counts, and any residual source gaps are recorded in both plans.</pre>
+    <p class="r-fu-outcome">Nova-local registry and DD 4.1.1 authoring landed at 0f2b026f / 8c790cbc: one physical configuration, three representation aliases, 17 explicit evidence gaps; 19 focused tests and the integrated 3,307-test default lane passed. Consumer cutover remains blocked by missing electrical/pose semantics, live Standard Name reconciliation, and external repository authority.</p>
+    </article>
+<article class="r-fu" data-id="f-mast-geometry-consumer-cutover" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-07-31T10:05:00+02:00" data-recommends-skill="/reckon-ship mast-catalog-geometry-recovery" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Complete physical semantics and consumer cutover</h4>
+    <div class="r-fu-body"><p>Supply or explicitly adjudicate the physical/electrical semantics the catalogs do not prove, reconcile the live Standard Name graph, then move machine-description and Ambix consumers from EFIT/AMM representation identity onto the Nova registry. Preserve all unresolved fields as gaps and delete donors only after zero tracked imports plus benchmark parity.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan: mast-catalog-geometry-recovery
+Task: complete physical semantics and registry consumer cutover.
+
+Landed baseline
+- Nova main 8c790cbc carries the immutable MAST physical registry, evidence-aware shot lookup, DD 4.1.1 authorer, and MachineGeometryReader seam.
+- One physical configuration covers observed shots 11766-30471; three EFIT setup digests are representation aliases; 17 source gaps do not split identity.
+- Integrated default lane: 3307 passed, 125 skipped, 536 deselected.
+
+Prerequisites and authority
+- Obtain or explicitly adjudicate active turns/polarity/circuit wiring, passive material/resistance/electrical topology, independent toroidal probe orientation, saddle traversal sign, detailed TF geometry, and other missing installed poses.
+- Repair and reconcile the live Standard Name graph: 229 current catalog IDs are absent; three audited attachments are wrong; MAST sources must move from DD 4.1.0 provenance to 4.1.1 with authoritative COCOS metadata.
+- Obtain explicit write/commit/push authority for imas-codex, the Standard Name catalog if publication is needed, and imas-ambix. Use isolated clean worktrees; do not touch the 1053 pre-existing untracked Ambix entries.
+
+Work
+1. Reconcile Standard Name catalog/graph parity and detach semantically wrong outline/probe-angle attachments.
+2. Complete the physical/electrical registry fields only from authoritative evidence; leave unknowns unset.
+3. Cut machine-description and Ambix machine/tokenizer/state/equilibrium consumers over to physical digest plus evidence state; representation aliases remain numerical provenance only.
+4. Prove operator and benchmark parity on representatives 11794, 12417, and 18502 plus the frozen six-shot benchmark.
+5. Delete only superseded axisymmetric donors after tracked imports reach zero. Preserve non-axisymmetric donors.
+
+Done when
+- Every supported consumer selects physical identity without hashing discretization.
+- All nameable DD 4.1.1 paths have correct accepted attachments or reviewed gaps.
+- Focused consumer coverage, full suites, and benchmark parity pass at recorded SHAs.
+- Donor disposition is evidence-backed and no external or missing geometry is invented.</pre>
     </article>
 </section>
 <section data-reckon="research" id="research" class="r-research-list">
 <h2><span class="sec">§</span> Research</h2>
 <div class="r-research" data-id="r-mast-catalog-geometry" data-type="evidence" data-source="L1/L2 Zarr full-corpus census and subdivision-invariance prototype" data-added-by="reckon-create" data-when="2026-07-30" data-url="/nova/mast-catalog-geometry-evidence.html">
     <span class="r-research-title"><a href="/nova/mast-catalog-geometry-evidence.html">MAST catalog geometry evidence</a></span></div>
+<div class="r-research" data-id="r-mast-registry-ids-landed" data-type="evidence" data-source="Nova implementation, independent verification, and downstream readiness audits" data-added-by="reckon-ship" data-when="2026-07-31" data-url="/nova/plans/archive/mast-catalog-geometry-recovery-registry-ids-landed.html">
+    <span class="r-research-title"><a href="/nova/plans/archive/mast-catalog-geometry-recovery-registry-ids-landed.html">MAST physical registry and DD authoring — landed</a></span></div>
+</section>
+<section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s5" data-id="c-mast-registry-ids-landed" data-who="reckon-ship" data-when="2026-07-31T10:05:00+02:00">
+    <div class="r-comment-body">The Nova-local registry tranche landed at 0f2b026f and merged at 8c790cbc. Independent focused verification passed 19 tests; the integrated default lane passed 3,307 with 125 resource-gated skips and 536 deselected on sun_debug job 1238939. Registry file SHA-256 is d694dc45984ed22f687464c20c96c57993669ed8dcdc7cb32644b3fd9ef30bb8. The remaining consumer step is blocked by missing electrical/pose semantics and separate imas-codex / Ambix authority; no unsupported field was inferred.</div>
+</div>
 </section>
 </main>
 </body>

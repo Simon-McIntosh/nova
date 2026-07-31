@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="mast-catalog-geometry-recovery-registry-ids-landed">
+  <meta name="plan-title" content="MAST physical registry and DD authoring — landed">
+  <meta name="plan-summary" content="Verified landing record for the physical MAST geometry registry, evidence-aware shot lookup, and DD 4.1.1 authoring seam.">
+  <meta name="plan-evidence-for" content="mast-catalog-geometry-recovery,mast-machine-description,physics-spine-adoption">
+  <meta name="plan-recorded-at" content="2026-07-31">
+  <meta name="plan-verdict" content="The Nova-local registry and catalog-backed DD authoring tranche landed and passed the full default lane. Consumer cutover remains blocked by missing physical/electrical semantics and external repository authority.">
+  <title>MAST physical registry and DD authoring — landed</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+  <header>
+    <span class="badge badge-shipped">✓ landed 2026-07-31</span>
+    <h1>MAST physical registry and DD authoring</h1>
+    <p>The maintained Nova registry, evidence-aware shot lookup, resumable census command,
+    DD&nbsp;4.1.1 authorer, and machine-reader seam landed on <code>main</code>. The next
+    consumer tranche is explicitly blocked rather than being represented as complete.</p>
+  </header>
+
+  <section class="quick-status">
+    <div class="status-card">
+      <strong>Implementation</strong>
+      <span class="badge badge-shipped">shipped</span>
+      <p><code>0f2b026f</code>, integrated by <code>8c790cbc</code>.</p>
+    </div>
+    <div class="status-card">
+      <strong>Integrated lane</strong>
+      <span class="badge badge-shipped">green</span>
+      <p>3,307 passed; 125 skipped; 536 deselected.</p>
+    </div>
+    <div class="status-card">
+      <strong>Consumer cutover</strong>
+      <span class="badge badge-blocked">blocked</span>
+      <p>External semantics and repository authority are still required.</p>
+    </div>
+  </section>
+
+  <h2>Outcomes</h2>
+  <table>
+    <thead>
+      <tr><th>Item</th><th>Verdict</th><th>Evidence</th><th>Commit / follow-on</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Typed physical registry</td>
+        <td><span class="badge badge-shipped">landed</span></td>
+        <td>One physical configuration, three representation aliases, 17 explicit
+        incomplete-evidence shots.</td>
+        <td><code>0f2b026f</code></td>
+      </tr>
+      <tr>
+        <td>Shot-range identity</td>
+        <td><span class="badge badge-shipped">passing</span></td>
+        <td>Observed range 11766–30471; inherited edges remain distinct from observed
+        evidence; missing stores never split identity.</td>
+        <td>Registry digest
+        <code>b1ddbe39894c0b9a07a6adad974eaf31d6d03eacafe691531dba5721dbee0252</code></td>
+      </tr>
+      <tr>
+        <td>DD 4.1.1 authoring</td>
+        <td><span class="badge badge-shipped">passing</span></td>
+        <td>IDS validation, write, reopen, diagnostic orientation, flux-loop span, and
+        ordered saddle-path round trip all passed.</td>
+        <td>Physical digest <code>4a4b8f665f92515a</code></td>
+      </tr>
+      <tr>
+        <td>Package delivery</td>
+        <td><span class="badge badge-shipped">passing</span></td>
+        <td>The wheel includes the registry JSON plus the catalog and IMAS reader modules.</td>
+        <td>Wheel SHA-256
+        <code>aa51df4d4895831dd0764d632b09698d2c5b11475df226a5cfb50280de0201e8</code></td>
+      </tr>
+      <tr>
+        <td>Consumer and donor cutover</td>
+        <td><span class="badge badge-blocked">blocked</span></td>
+        <td>Requires authoritative electrical/pose semantics, live Standard Name repair,
+        and explicit Ambix / imas-codex write authority.</td>
+        <td>Complete physical-semantics and consumer cutover</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Authored implementation sequence</h2>
+  <ol>
+    <li><strong>Harden the prototype.</strong> Move reusable code out of the script, add typed
+    records, explicit units and tolerances, component-family validation, bounded parallel reads,
+    and incremental checkpoints. Preserve the script as the reproducible census entry point.</li>
+    <li><strong>Publish the physical registry.</strong> Materialize canonical outlines, polygon
+    unions, wall cycles, and diagnostic poses; attach the three EFIT setup digests as
+    representation aliases to the single observed physical configuration. Record the 17
+    incomplete stores without creating range breaks.</li>
+    <li><strong>Adjudicate range extent.</strong> Keep 11766–30471 as directly observed L2
+    geometry. Label any L1-only edge coverage as inherited because an EFIT setup is not physical
+    authority.</li>
+    <li><strong>Author and round-trip IDSs.</strong> Write catalog-backed geometry with
+    imas-python at DD 4.1.1, reopen with the matching DD version, validate every IDS, and prove
+    canonical geometry plus diagnostic orientations survive the round trip.</li>
+    <li><strong>Cut over consumers.</strong> Make machine-description authoring and physics-spine
+    geometry selection consume the registry, then re-run operator parity on representatives of
+    all three setup aliases. This final item remains blocked and is carried by the next
+    follow-up.</li>
+  </ol>
+
+  <figure>
+    <img src="/nova/figures/mast-catalog-geometry/recovery-pipeline.svg"
+         alt="Pipeline from catalog representations to canonical MAST geometry and evidence-aware shot ranges">
+    <figcaption>The shipped registry keeps physical identity, representation provenance, and
+    missing evidence as separate layers. Only the physical layer can split a configuration.</figcaption>
+  </figure>
+
+  <h2>Verification</h2>
+  <ul>
+    <li>Independent pre-merge verification: 19 focused tests passed in 6.76 seconds; Ruff,
+    JSON validation, Reckon document audit, commit scope, and wheel contents passed.</li>
+    <li>Integrated default lane: 3,307 passed, 125 resource-gated skips, 536 deselected,
+    zero failures in 460.55 seconds on <code>sun_debug</code> job <code>1238939</code>,
+    node <code>98dci4-clu-3141</code>, peak RSS 1,852,944 KiB.</li>
+    <li>Registry file SHA-256:
+    <code>d694dc45984ed22f687464c20c96c57993669ed8dcdc7cb32644b3fd9ef30bb8</code>.</li>
+    <li>Subdivision and merge invariance, physical-change sensitivity, representation collapse,
+    evidence-state lookup, and all 17 source gaps have direct regression coverage.</li>
+  </ul>
+
+  <h2>Negative findings and retained blockers</h2>
+  <ul>
+    <li>The catalogs do not establish active turns/polarity/circuit wiring, passive
+    material/resistance/electrical topology, an independent toroidal sensitive-axis angle for
+    poloidal probes, saddle traversal sign, detailed TF winding geometry, or complete installed
+    poses for several diagnostics. These remain explicit authoring gaps and their IDS fields are
+    not guessed.</li>
+    <li>The live Standard Name graph is operational but not reconciled: 4,117 graph nodes versus
+    2,223 active catalog names, with 229 current catalog IDs absent. Three audited attachments
+    are semantically wrong and most MAST source attachments still cite DD 4.1.0 rather than
+    4.1.1.</li>
+    <li>The Ambix migration still has 72 tracked scripts importing at least one legacy
+    axisymmetric module. Machine, tokenizer, state-estimation, label, and benchmark consumers
+    require an isolated Ambix worktree and explicit cross-repository authority. Non-axisymmetric
+    donors remain out of scope.</li>
+  </ul>
+
+  <section class="card">
+    <h2>What’s next</h2>
+    <p>Complete the physical/electrical semantics, reconcile the live Standard Name graph, then
+    cut Ambix consumers over to the registry and prove parity across representatives of all
+    three historical setup aliases. Do not delete donors until tracked imports reach zero and
+    the frozen benchmark is green.</p>
+  </section>
+
+</main>
+</body>
+</html>

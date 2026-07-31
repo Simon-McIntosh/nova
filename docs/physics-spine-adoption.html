@@ -17,8 +17,8 @@
   <title>Physics Spine Adoption | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-30">
-<meta name="plan-version" content="14">
+<meta name="plan-modified" content="2026-07-31">
+<meta name="plan-version" content="15">
 <meta name="plan-impl" content="0.9">
 <meta name="plan-sprint" content="S2">
 <meta name="plan-capability-version" content="1.0">
@@ -597,6 +597,8 @@ Done when
     <span class="r-research-title"><a href="/nova/physics-spine-transition-audit.html">Physics Spine Transition Audit</a></span></div>
 <div class="r-research" data-id="r-psa-catalog-geometry" data-type="evidence" data-source="Nova L1/L2 full-corpus census and subdivision-invariance prototype" data-added-by="reckon-edit" data-when="2026-07-30" data-url="/nova/mast-catalog-geometry-evidence.html">
     <span class="r-research-title"><a href="/nova/mast-catalog-geometry-evidence.html">MAST Catalog Geometry Evidence</a></span></div>
+<div class="r-research" data-id="r-psa-registry-ids-landed" data-type="evidence" data-source="Nova implementation, independent verification, and downstream readiness audits" data-added-by="reckon-ship" data-when="2026-07-31" data-url="/nova/plans/archive/mast-catalog-geometry-recovery-registry-ids-landed.html">
+    <span class="r-research-title"><a href="/nova/plans/archive/mast-catalog-geometry-recovery-registry-ids-landed.html">MAST physical registry and DD authoring — landed</a></span></div>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s3" data-id="c-physics-nova-wave" data-who="reckon-ship" data-when="2026-07-30">
@@ -610,6 +612,9 @@ Done when
 </div>
 <div class="r-comment" data-section="s4" data-id="c-physics-validation-cancelled" data-who="reckon-ship" data-when="2026-07-30">
     <div class="r-comment-body">Final Ambix validation is infrastructure-incomplete, not an assertion failure. The 24 GiB default run reached 98% with no failure marker, passed every changed and repaired area, and peaked at 12,543,776 KiB before the one-hour debug wall expired during the final real-shot world-model smoke test. The required split chunk ran that incomplete test alone and remained CPU-active with no failure output, but job 1237764 was externally cancelled after 33:21 by UID 39486 with 26:39 remaining. It was not rerun. The final real-shot smoke result therefore remains unverified.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-physics-registry-readiness-audit" data-who="reckon-ship" data-when="2026-07-31T10:07:00+02:00">
+    <div class="r-comment-body">Nova main 8c790cbc now supplies physical digest plus observed/inherited/missing evidence state without hashing fcoil/AMM subdivisions; the integrated default lane passed 3,307 tests. Read-only Ambix audit at 3e4360e bounded the remaining cutover: machine/tokenizer/state/equilibrium consumers still key identity through gs geometry/operator and SetupSignature paths; 72 tracked scripts import at least one legacy axisymmetric module. The catalogs do not prove turns/polarity/circuit wiring, passive material/resistance/topology, independent toroidal probe orientation, saddle traversal sign, detailed TF geometry, or several installed poses. Ambix work requires explicit cross-repository authority and a clean isolated worktree because its canonical checkout has 1,053 pre-existing untracked entries. Preserve non-axisymmetric donors and delete axisymmetric donors only after zero tracked imports plus parity on representation shots 11794, 12417 and 18502 and the frozen six-shot benchmark.</div>
 </div>
 </section>
 </main>

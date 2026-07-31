@@ -43,13 +43,12 @@ def shafranov_vertical_field(
     current = float(plasma_current)
     radius = float(major_radius)
     minor = float(minor_radius)
+    profile_term = float(poloidal_beta_plus_half_internal_inductance)
+    if not all(np.isfinite(value) for value in (current, radius, minor, profile_term)):
+        return float("nan")
     if radius <= 0.0 or minor <= 0.0 or minor >= 8.0 * radius:
         return float("nan")
-    force_factor = (
-        np.log(8.0 * radius / minor)
-        + float(poloidal_beta_plus_half_internal_inductance)
-        - 1.5
-    )
+    force_factor = np.log(8.0 * radius / minor) + profile_term - 1.5
     return float(-MU0 * current / (4.0 * np.pi * radius) * force_factor)
 
 
@@ -68,14 +67,22 @@ def shafranov_vertical_field_elongated(
     :func:`shafranov_vertical_field` exactly. Non-positive or non-finite
     elongation returns NaN.
     """
+    current = float(plasma_current)
+    radius = float(major_radius)
+    minor = float(minor_radius)
     shape = float(elongation)
-    if shape <= 0.0 or not np.isfinite(shape):
+    profile_term = float(poloidal_beta_plus_half_internal_inductance)
+    if not all(
+        np.isfinite(value) for value in (current, radius, minor, shape, profile_term)
+    ):
+        return float("nan")
+    if shape <= 0.0:
         return float("nan")
     return shafranov_vertical_field(
-        plasma_current,
-        major_radius,
-        float(minor_radius) * float(np.sqrt(shape)),
-        poloidal_beta_plus_half_internal_inductance,
+        current,
+        radius,
+        minor * float(np.sqrt(shape)),
+        profile_term,
     )
 
 
@@ -88,20 +95,40 @@ def decay_index(radius: np.ndarray, vertical_field: np.ndarray) -> np.ndarray:
 
        n(R) = -\frac{R}{B_z}\frac{\partial B_z}{\partial R}.
 
-    ``radius`` must be monotonic and have the same shape as ``vertical_field``.
-    The derivative uses :func:`numpy.gradient`, including its behavior for
-    undersized or inconsistent arrays. A field null has no meaningful decay
-    index, so values within an amplitude-scaled zero tolerance return NaN.
+    Both inputs must be equal-shaped one-dimensional arrays with at least two
+    samples. ``radius`` must be finite and strictly monotonic, increasing or
+    decreasing. A field null has no meaningful decay index, so values within
+    an amplitude-scaled zero tolerance return NaN. Non-finite field samples
+    propagate through the local finite-difference stencil; a field with no
+    finite samples returns all NaN.
     """
     radial_coordinate = np.asarray(radius, dtype=np.float64)
     field = np.asarray(vertical_field, dtype=np.float64)
-    field_gradient = np.gradient(field, radial_coordinate)
-    zero_tolerance = 1e-12 + 1e-6 * float(np.nanmax(np.abs(field), initial=0.0))
-    index = np.where(
-        np.abs(field) > zero_tolerance,
-        -(radial_coordinate / field) * field_gradient,
-        np.nan,
-    )
+    if radial_coordinate.ndim != 1 or field.ndim != 1:
+        raise ValueError("radius and vertical_field must be one-dimensional")
+    if radial_coordinate.shape != field.shape:
+        raise ValueError("radius and vertical_field must have equal shapes")
+    if radial_coordinate.size < 2:
+        raise ValueError("radius and vertical_field must contain at least two samples")
+    if not np.isfinite(radial_coordinate).all():
+        raise ValueError("radius must contain only finite values")
+    spacing = np.diff(radial_coordinate)
+    if not (np.all(spacing > 0.0) or np.all(spacing < 0.0)):
+        raise ValueError("radius must be strictly monotonic")
+
+    finite_field = np.abs(field[np.isfinite(field)])
+    if finite_field.size == 0:
+        return np.full(field.shape, np.nan, dtype=np.float64)
+    zero_tolerance = 1e-12 + 1e-6 * float(np.max(finite_field))
+    with np.errstate(divide="ignore", invalid="ignore"):
+        field_gradient = np.gradient(field, radial_coordinate)
+        index = np.where(
+            np.isfinite(field)
+            & np.isfinite(field_gradient)
+            & (np.abs(field) > zero_tolerance),
+            -(radial_coordinate / field) * field_gradient,
+            np.nan,
+        )
     return np.asarray(index, dtype=np.float64)
 
 

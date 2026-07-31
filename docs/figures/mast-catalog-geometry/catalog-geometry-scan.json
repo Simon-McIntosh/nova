@@ -67,5 +67,80 @@
       "evidence": "The vertw family exists with identical surrounding physical geometry on shots 26961 and 26964. All three shots share EFIT setup signature 1cb6f2ee742c4ee4. A single omitted family cannot establish hardware removal and reinstatement across two unobserved shot gaps."
     }
   ],
+  "canonical_registry": {
+    "path": "nova/catalog/mast_geometry.json",
+    "file_sha256": "d694dc45984ed22f687464c20c96c57993669ed8dcdc7cb32644b3fd9ef30bb8",
+    "registry_digest": "b1ddbe39894c0b9a07a6adad974eaf31d6d03eacafe691531dba5721dbee0252",
+    "physical_digest": "4a4b8f665f92515a",
+    "source_census_physical_digest": "67f789d3d8b40135",
+    "digest_note": "The maintained registry converts the source census probe orientation and toroidal extent from degrees to SI radians before hashing. No physical geometry changed.",
+    "dd_version": "4.1.1",
+    "units": {
+      "length": "m",
+      "angle": "rad"
+    },
+    "shot_ranges": [
+      {
+        "first_shot": 11695,
+        "last_shot": 11765,
+        "evidence": "inherited"
+      },
+      {
+        "first_shot": 11766,
+        "last_shot": 30471,
+        "evidence": "observed"
+      },
+      {
+        "first_shot": 30472,
+        "last_shot": 30473,
+        "evidence": "inherited"
+      }
+    ],
+    "incomplete_evidence_shots": [
+      26767,
+      26829,
+      26838,
+      26846,
+      26876,
+      26884,
+      26885,
+      26941,
+      26947,
+      26950,
+      26953,
+      26957,
+      26959,
+      26963,
+      26972,
+      26982,
+      26990
+    ],
+    "validation": {
+      "focused_tests": 19,
+      "focused_test_result": "pass",
+      "ids_validated_and_reopened": [
+        "pf_active",
+        "pf_passive",
+        "wall",
+        "magnetics"
+      ],
+      "authored_counts": {
+        "active_components": 13,
+        "passive_families": 16,
+        "limiter_contours": 1,
+        "poloidal_probes": 78,
+        "poloidal_flux_loops": 44,
+        "saddle_paths": 36
+      }
+    },
+    "unsupported_authoring_semantics": [
+      "active turns, polarity, and circuit topology",
+      "passive material, resistance, and electrical topology",
+      "detailed toroidal-field winding geometry",
+      "independent toroidal probe orientation",
+      "saddle traversal sign",
+      "installed poses beyond magnetics and soft-X-ray chords"
+    ]
+  },
   "identity_rule": "Only canonical conductor, passive, wall, topology, turns or polarity, and diagnostic pose changes split a machine configuration. Solver cells, element counts, weights, mesh resolution, padding, and source omissions do not."
 }

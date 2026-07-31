@@ -10,7 +10,7 @@
   <meta name="plan-summary" content="Full L1/L2 Zarr census and subdivision-invariant prototype proving that three EFIT setup representations collapse to one observed physical MAST configuration, with diagnostic pose coverage and source gaps made explicit.">
   <meta name="plan-informs" content="mast-catalog-geometry-recovery,mast-machine-description,physics-spine-adoption">
   <meta name="plan-read" content="1">
-  <meta name="plan-recorded-at" content="2026-07-30">
+  <meta name="plan-recorded-at" content="2026-07-31">
   <meta name="plan-verdict" content="The Ambix L1/L2 catalogs are the authoritative source for the axisymmetric machine geometry and magnetic/SXR diagnostic poses used by the training and reconstruction paths. Three EFIT setup signatures are solver representations of one physical configuration over the complete L2 observations; source omissions are not shot-range boundaries.">
   <title>MAST Catalog Geometry Evidence | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
@@ -163,7 +163,53 @@
   replaced by an explicit ten-field static setup list, and the successful census was run once
   with the corrected boundary.</p>
 
-  <h2 id="s6">§6 — Consequence for S2</h2>
+  <h2 id="s6">§6 — Maintained registry and DD 4.1.1 round trip</h2>
+  <p>The recovery logic now lives in the typed
+  <code>nova.catalog.mast_geometry</code> module. The executable script remains a census entry
+  point, while the immutable packaged payload at
+  <code>nova/catalog/mast_geometry.json</code> is the consumer authority. It records one
+  configuration, the three setup-representation aliases, explicit SI units and tolerances, the
+  observed and inherited ranges, all 17 incomplete observations, provenance and unsupported
+  authoring semantics.</p>
+  <table>
+    <thead><tr><th>Maintained artifact</th><th>Value</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td>Canonical SI physical digest</td><td><code>4a4b8f665f92515a</code></td>
+        <td>Probe orientation and toroidal extent are converted from source degrees to radians
+        before hashing</td></tr>
+      <tr><td>Source-census digest</td><td><code>67f789d3d8b40135</code></td>
+        <td>The previously published mixed-source-unit snapshot; retained as provenance</td></tr>
+      <tr><td>Registry semantic digest</td>
+        <td><code>b1ddbe39894c0b9a07a6adad974eaf31d6d03eacafe691531dba5721dbee0252</code></td>
+        <td>Digest of the complete registry payload excluding its self-digest field</td></tr>
+      <tr><td>Registry file SHA-256</td>
+        <td><code>d694dc45984ed22f687464c20c96c57993669ed8dcdc7cb32644b3fd9ef30bb8</code></td>
+        <td>Immutable on-disk bytes used by the packaged reader</td></tr>
+    </tbody>
+  </table>
+  <p>Shot selection is deliberately two-dimensional. The physical digest remains the same while
+  evidence is <code>inherited</code> for 11695–11765, <code>observed</code> for 11766–30471 and
+  <code>inherited</code> for 30472–30473. Within the observed interval, shots 26767, 26829,
+  26838, 26846, 26876, 26884, 26885, 26941, 26947, 26950, 26953, 26957, 26959, 26972, 26982 and
+  26990 are <code>missing</code> both passive and wall evidence; shot 26963 is
+  <code>missing</code> <code>vertw</code>. The selection still names the same underlying
+  configuration and cannot fall through to a different one.</p>
+  <p>The DD authorer wrote <code>pf_active</code>, <code>pf_passive</code>, <code>wall</code> and
+  <code>magnetics</code> with imas-python 2.3.0 at DD 4.1.1, validated every IDS, reopened with
+  <code>dd_version='4.1.1'</code>, and pinned 13 active components, 16 passive families, the
+  limiter cycle, 78 poloidal probes, 44 full flux loops and all 36 saddle paths. Probe R/Z,
+  poloidal angle and length survived; flux-loop span and canonical saddle point order survived.
+  The focused command
+  <code>uv run python -m pytest tests/test_mast_catalog_geometry.py tests/test_machine.py
+  --tb=short -q</code> passed all 19 tests in 4.42 seconds.</p>
+  <p><strong>Negative findings remain data, not defaults.</strong> The catalogs do not
+  authoritatively supply active turns, polarity or circuit topology; passive material,
+  resistance or electrical topology; detailed TF winding geometry; independent toroidal probe
+  orientation; saddle traversal sign; or complete installed poses beyond the magnetic and
+  soft-X-ray geometry recorded here. These fields remain explicit authoring gaps and are left
+  unset rather than inferred.</p>
+
+  <h2 id="s7">§7 — Consequence for S2</h2>
   <p>The external engineering-chronology blocker in the existing machine-description plan is too
   broad. Catalog recovery can now supply the axisymmetric physical machine and magnetic/SXR
   diagnostic pose registry directly. S2 should first land the canonical registry, then author

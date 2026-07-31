@@ -10,7 +10,14 @@ TabularGeometryReader`, and assert both yield the same section.
 
 import numpy as np
 
-from nova.imas.machine import CrossSection, TabularGeometryReader
+from nova.catalog.mast_geometry import EvidenceState, MachineGeometryRegistry
+from nova.imas.machine import CrossSection, Outline, TabularGeometryReader
+from nova.imas.mast_geometry import (
+    DD_VERSION,
+    RegistryGeometryReader,
+    author_catalog_ids,
+    write_and_reopen,
+)
 from nova.imas.test_utilities import mark
 
 
@@ -104,3 +111,86 @@ def test_tabular_reader_reports_missing_attribute():
         assert "height" in str(error)
     else:
         raise AssertionError("missing attribute must raise KeyError")
+
+
+@mark["imas"]
+def test_registry_reader_selects_geometry_and_exposes_evidence():
+    readers = RegistryGeometryReader.for_component(11766, "p2_inner_lower")
+
+    assert len(readers) == 1
+    assert readers[0].evidence == EvidenceState.OBSERVED
+    assert (
+        readers[0].physical_digest in MachineGeometryRegistry.default().configurations
+    )
+    assert readers[0].section(Outline).area > 0
+
+
+@mark["imas"]
+def test_registry_reader_preserves_missing_evidence_state():
+    readers = RegistryGeometryReader.for_component(
+        26963,
+        "botcol",
+        passive=True,
+    )
+
+    assert readers
+    assert all(reader.evidence == EvidenceState.MISSING for reader in readers)
+
+
+@mark["imas"]
+def test_catalog_ids_validate_reopen_and_preserve_diagnostic_geometry(tmp_path):
+    selection = MachineGeometryRegistry.default().select(11766)
+    bundle = author_catalog_ids(selection)
+    reopened = write_and_reopen(bundle, tmp_path / "mast_geometry")
+
+    assert set(reopened) == {"pf_active", "pf_passive", "wall", "magnetics"}
+    assert all(
+        str(ids.ids_properties.version_put.data_dictionary) == DD_VERSION
+        for ids in reopened.values()
+    )
+
+    geometry = selection.configuration.geometry
+    pf_active = reopened["pf_active"]
+    pf_passive = reopened["pf_passive"]
+    wall = reopened["wall"]
+    magnetics = reopened["magnetics"]
+
+    assert len(pf_active.coil) == len(geometry["active_components"]) == 13
+    assert len(pf_passive.loop) == len(geometry["passive_components"]) == 16
+    limiter = np.column_stack(
+        [
+            wall.description_2d[0].limiter.unit[0].outline.r,
+            wall.description_2d[0].limiter.unit[0].outline.z,
+        ]
+    )
+    assert np.allclose(limiter[:-1], geometry["limiter"])
+
+    source_probe = geometry["magnetics"]["poloidal_probes"][0]["pose"]
+    probe = magnetics.b_field_pol_probe[0]
+    assert np.isclose(probe.position.r, source_probe[0])
+    assert np.isclose(probe.position.z, source_probe[1])
+    assert np.isclose(probe.poloidal_angle, source_probe[2])
+    assert np.isclose(probe.length, source_probe[3])
+
+    flux_loop = magnetics.flux_loop[0]
+    source_loop = geometry["magnetics"]["flux_loops"][0]
+    assert flux_loop.type.index == 1
+    assert np.allclose(
+        [[point.r, point.z, point.phi] for point in flux_loop.position],
+        [[source_loop[0], source_loop[1], 0.0], source_loop],
+    )
+
+    first_saddle = magnetics.flux_loop[len(geometry["magnetics"]["flux_loops"])]
+    source_saddle = geometry["magnetics"]["saddle_paths"]["l"][0]
+    assert first_saddle.type.index == 2
+    assert np.allclose(
+        [
+            [
+                first_saddle.position[index].r,
+                first_saddle.position[index].z,
+                first_saddle.position[index].phi,
+            ]
+            for index in range(len(first_saddle.position) - 1)
+        ],
+        source_saddle,
+    )

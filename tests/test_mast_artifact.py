@@ -8,6 +8,7 @@ from pathlib import Path
 
 import pytest
 
+import nova.imas.mast_artifact as mast_artifact_module
 from nova.imas.mast_artifact import (
     MANIFEST_FILENAME,
     OCI_ARTIFACT_TYPE,
@@ -228,6 +229,41 @@ def test_symlinked_digest_destination_is_rejected_without_outside_writes(
     assert list(outside.iterdir()) == []
 
 
+def test_object_root_path_swap_cannot_redirect_materialization(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    source = tmp_path / "source"
+    _write_bundle(source)
+    manifest = _manifest(source)
+    cache = tmp_path / "cache"
+    visible_root = cache / "sha256"
+    pinned_root = cache / "pinned-object-root"
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    create_private_directory = mast_artifact_module._create_private_directory
+
+    def swap_visible_root(descriptor: int, digest_hex: str):
+        visible_root.rename(pinned_root)
+        visible_root.symlink_to(outside, target_is_directory=True)
+        return create_private_directory(descriptor, digest_hex)
+
+    monkeypatch.setattr(
+        mast_artifact_module,
+        "_create_private_directory",
+        swap_visible_root,
+    )
+
+    with pytest.raises(MachineArtifactError, match="object root changed"):
+        materialize_machine_artifact(source, cache, manifest)
+
+    digest_hex = manifest.digest.removeprefix("sha256:")
+    assert (pinned_root / digest_hex / MANIFEST_FILENAME).is_file()
+    assert list(outside.iterdir()) == []
+    with pytest.raises(MachineArtifactError, match="object root.*symlink"):
+        resolve_machine_artifact(cache, manifest.digest, allow_incomplete=True)
+
+
 def test_resolver_rejects_symlinked_manifest(tmp_path: Path) -> None:
     _, stored = _materialized(tmp_path)
     manifest_path = stored.directory / MANIFEST_FILENAME
@@ -293,6 +329,14 @@ def test_resolver_rejects_file_set_and_content_changes(
         "ids/./escape.h5",
         "ids/trailing.",
         "ids/trailing ",
+        "MANIFEST.JSON",
+        "ids/less<than.h5",
+        "ids/greater>than.h5",
+        'ids/quote"name.h5',
+        "ids/pipe|name.h5",
+        "ids/question?.h5",
+        "ids/star*.h5",
+        "ids/non_ascii_\u00e9.h5",
         "CON",
         "ids/aux.txt",
         "ids/COM1.h5",

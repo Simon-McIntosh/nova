@@ -6,13 +6,13 @@ import hashlib
 import json
 import os
 import re
+import secrets
 import shutil
-import tempfile
 from ctypes import CDLL, c_char_p, c_int, get_errno
 from dataclasses import dataclass
 from errno import EEXIST, ENOTEMPTY
 from pathlib import Path, PurePosixPath
-from stat import S_ISREG
+from stat import S_ISDIR, S_ISLNK, S_ISREG
 from typing import Any, Iterable, Mapping
 
 MANIFEST_FILENAME = "manifest.json"
@@ -27,13 +27,13 @@ _OCI_REPOSITORY_PATTERN = re.compile(
     r"[a-z0-9]+(?:[.-][a-z0-9]+)*(?:/[a-z0-9]+(?:[._-][a-z0-9]+)*)+"
 )
 _OCI_TAG_PATTERN = re.compile(r"[A-Za-z0-9_][A-Za-z0-9._-]{0,127}")
+_PORTABLE_COMPONENT_PATTERN = re.compile(r"[A-Za-z0-9_][A-Za-z0-9._-]*")
 _EVIDENCE_STATES = frozenset({"observed", "inherited", "missing"})
 _WINDOWS_DEVICE_NAMES = frozenset(
     {"CON", "PRN", "AUX", "NUL"}
     | {f"COM{index}" for index in range(1, 10)}
     | {f"LPT{index}" for index in range(1, 10)}
 )
-_AT_CURRENT_DIRECTORY = -100
 _RENAME_NO_REPLACE = 1
 
 
@@ -146,6 +146,7 @@ def _safe_relative_name(value: str) -> str:
     if any(
         not component
         or component in {".", ".."}
+        or _PORTABLE_COMPONENT_PATTERN.fullmatch(component) is None
         or component.endswith((".", " "))
         or component.split(".", 1)[0].upper() in _WINDOWS_DEVICE_NAMES
         for component in components
@@ -157,8 +158,10 @@ def _safe_relative_name(value: str) -> str:
     normalized = path.as_posix()
     if normalized != value:
         raise MachineArtifactError(f"non-canonical artifact file name {value!r}")
-    if normalized == MANIFEST_FILENAME:
-        raise MachineArtifactError(f"{MANIFEST_FILENAME!r} is reserved")
+    if normalized.casefold() == MANIFEST_FILENAME.casefold():
+        raise MachineArtifactError(
+            f"unsafe artifact file name {value!r}: {MANIFEST_FILENAME!r} is reserved"
+        )
     return normalized
 
 
@@ -790,9 +793,21 @@ def _digest_hex(digest: str) -> str:
     return value
 
 
-def _publish_directory_no_replace(source: Path, destination: Path) -> bool:
-    """Atomically publish a directory and report a concurrent winner."""
-
+def _linux_rename_no_replace() -> Any:
+    required_flags = ("O_DIRECTORY", "O_NOFOLLOW")
+    if any(not hasattr(os, name) for name in required_flags):
+        raise MachineArtifactError(
+            "descriptor-relative artifact publication requires Linux open flags"
+        )
+    required_dir_fd = (os.mkdir, os.open, os.stat)
+    if any(function not in os.supports_dir_fd for function in required_dir_fd):
+        raise MachineArtifactError(
+            "descriptor-relative artifact publication is unavailable"
+        )
+    if not Path("/proc/self/fd").is_dir():
+        raise MachineArtifactError(
+            "descriptor-relative artifact paths require the Linux proc filesystem"
+        )
     library = CDLL(None, use_errno=True)
     try:
         rename_no_replace = library.renameat2
@@ -802,11 +817,156 @@ def _publish_directory_no_replace(source: Path, destination: Path) -> bool:
         ) from error
     rename_no_replace.argtypes = (c_int, c_char_p, c_int, c_char_p, c_int)
     rename_no_replace.restype = c_int
+    return rename_no_replace
+
+
+def _open_pinned_object_root(object_root: Path) -> int:
+    flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
+    try:
+        descriptor = os.open(object_root, flags)
+    except OSError as error:
+        raise MachineArtifactError(
+            f"cannot pin cache object root {object_root}"
+        ) from error
+    opened = os.fstat(descriptor)
+    visible = _entry_metadata(object_root)
+    if (
+        visible is None
+        or S_ISLNK(visible.st_mode)
+        or not S_ISDIR(visible.st_mode)
+        or (visible.st_dev, visible.st_ino) != (opened.st_dev, opened.st_ino)
+    ):
+        os.close(descriptor)
+        raise MachineArtifactError(
+            f"cache object root changed while being pinned: {object_root}"
+        )
+    return descriptor
+
+
+def _pinned_root_path(descriptor: int, cache_root: Path) -> Path:
+    proc_path = Path("/proc/self/fd") / str(descriptor)
+    resolved = _require_contained(proc_path, cache_root, "pinned cache object root")
+    opened = os.fstat(descriptor)
+    current = resolved.stat()
+    if (current.st_dev, current.st_ino) != (opened.st_dev, opened.st_ino):
+        raise MachineArtifactError("pinned cache object root identity changed")
+    return resolved
+
+
+def _visible_root_matches_descriptor(object_root: Path, descriptor: int) -> bool:
+    visible = _entry_metadata(object_root)
+    if visible is None or S_ISLNK(visible.st_mode) or not S_ISDIR(visible.st_mode):
+        return False
+    opened = os.fstat(descriptor)
+    return (visible.st_dev, visible.st_ino) == (opened.st_dev, opened.st_ino)
+
+
+def _destination_exists_at(descriptor: int, digest_hex: str) -> bool:
+    try:
+        metadata = os.stat(digest_hex, dir_fd=descriptor, follow_symlinks=False)
+    except FileNotFoundError:
+        return False
+    except OSError as error:
+        raise MachineArtifactError(
+            f"cannot inspect cache object {digest_hex}"
+        ) from error
+    if S_ISLNK(metadata.st_mode):
+        raise MachineArtifactError(
+            f"cache digest destination must not be a symlink: {digest_hex}"
+        )
+    if not S_ISDIR(metadata.st_mode):
+        raise MachineArtifactError(
+            f"cache digest destination is not a directory: {digest_hex}"
+        )
+    return True
+
+
+def _create_private_directory(descriptor: int, digest_hex: str) -> tuple[str, int]:
+    for _ in range(32):
+        name = f".{digest_hex}.{secrets.token_hex(12)}"
+        try:
+            os.mkdir(name, mode=0o700, dir_fd=descriptor)
+        except FileExistsError:
+            continue
+        except OSError as error:
+            raise MachineArtifactError(
+                "cannot create private cache directory"
+            ) from error
+        flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
+        try:
+            temporary_descriptor = os.open(name, flags, dir_fd=descriptor)
+        except OSError as error:
+            raise MachineArtifactError("cannot pin private cache directory") from error
+        return name, temporary_descriptor
+    raise MachineArtifactError("cannot allocate a unique private cache directory")
+
+
+def _copy_file_at(source: Path, directory_descriptor: int, name: str) -> None:
+    parts = PurePosixPath(name).parts
+    current = os.dup(directory_descriptor)
+    try:
+        for component in parts[:-1]:
+            try:
+                os.mkdir(component, mode=0o700, dir_fd=current)
+            except FileExistsError:
+                pass
+            flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
+            child = os.open(component, flags, dir_fd=current)
+            os.close(current)
+            current = child
+        source_flags = os.O_RDONLY | os.O_NOFOLLOW
+        source_descriptor = os.open(source, source_flags)
+        source_metadata = os.fstat(source_descriptor)
+        if not S_ISREG(source_metadata.st_mode):
+            os.close(source_descriptor)
+            raise MachineArtifactError(
+                f"artifact source is not a regular file: {source}"
+            )
+        target_flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW
+        try:
+            target_descriptor = os.open(
+                parts[-1],
+                target_flags,
+                0o600,
+                dir_fd=current,
+            )
+        except OSError:
+            os.close(source_descriptor)
+            raise
+        with (
+            os.fdopen(source_descriptor, "rb") as source_stream,
+            os.fdopen(target_descriptor, "wb") as target_stream,
+        ):
+            shutil.copyfileobj(source_stream, target_stream)
+    except OSError as error:
+        raise MachineArtifactError(f"cannot copy artifact file {name!r}") from error
+    finally:
+        os.close(current)
+
+
+def _write_bytes_at(directory_descriptor: int, name: str, data: bytes) -> None:
+    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW
+    try:
+        descriptor = os.open(name, flags, 0o600, dir_fd=directory_descriptor)
+    except OSError as error:
+        raise MachineArtifactError(f"cannot write artifact file {name!r}") from error
+    with os.fdopen(descriptor, "wb") as stream:
+        stream.write(data)
+
+
+def _publish_directory_no_replace(
+    rename_no_replace: Any,
+    object_descriptor: int,
+    source_name: str,
+    destination_name: str,
+) -> bool:
+    """Atomically publish within a pinned directory and report a winner."""
+
     result = rename_no_replace(
-        _AT_CURRENT_DIRECTORY,
-        os.fsencode(source),
-        _AT_CURRENT_DIRECTORY,
-        os.fsencode(destination),
+        object_descriptor,
+        os.fsencode(source_name),
+        object_descriptor,
+        os.fsencode(destination_name),
         _RENAME_NO_REPLACE,
     )
     if result == 0:
@@ -814,9 +974,9 @@ def _publish_directory_no_replace(source: Path, destination: Path) -> bool:
     error_number = get_errno()
     if error_number in {EEXIST, ENOTEMPTY}:
         return False
-    error = OSError(error_number, os.strerror(error_number), str(destination))
+    error = OSError(error_number, os.strerror(error_number), destination_name)
     raise MachineArtifactError(
-        f"cannot publish cache object at {destination}"
+        f"cannot publish cache object {destination_name}"
     ) from error
 
 
@@ -831,36 +991,63 @@ def materialize_machine_artifact(
     source = Path(source_directory)
     _verify_directory_files(source, manifest, allow_manifest=False)
     digest_hex = _digest_hex(manifest.digest)
+    rename_no_replace = _linux_rename_no_replace()
     object_root = _verified_object_root(cache_directory, create=True)
-    destination = object_root / digest_hex
-    if _verified_destination(object_root, digest_hex) is not None:
-        resolved = resolve_machine_artifact(
-            cache_directory,
-            manifest.digest,
-            allow_incomplete=not manifest.complete,
-        )
-        if resolved.manifest.canonical_bytes() != manifest.canonical_bytes():
-            raise MachineArtifactError(
-                f"cache object {manifest.digest} has a different manifest"
-            )
-        return resolved
-
-    temporary = Path(tempfile.mkdtemp(prefix=f".{digest_hex}.", dir=object_root))
+    object_descriptor = _open_pinned_object_root(object_root)
+    temporary_name: str | None = None
+    temporary_descriptor: int | None = None
+    temporary_path: Path | None = None
     try:
-        _require_contained(temporary, object_root.parent, "temporary cache object")
+        if _destination_exists_at(object_descriptor, digest_hex):
+            if not _visible_root_matches_descriptor(object_root, object_descriptor):
+                raise MachineArtifactError(
+                    "cache object root changed during materialization"
+                )
+            resolved = resolve_machine_artifact(
+                cache_directory,
+                manifest.digest,
+                allow_incomplete=not manifest.complete,
+            )
+            if resolved.manifest.canonical_bytes() != manifest.canonical_bytes():
+                raise MachineArtifactError(
+                    f"cache object {manifest.digest} has a different manifest"
+                )
+            return resolved
+
+        temporary_name, temporary_descriptor = _create_private_directory(
+            object_descriptor,
+            digest_hex,
+        )
+        temporary_path = Path("/proc/self/fd") / str(object_descriptor) / temporary_name
         for artifact_file in manifest.files:
-            target = temporary / artifact_file.name
-            target.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(source / artifact_file.name, target)
-        (temporary / MANIFEST_FILENAME).write_bytes(manifest.canonical_bytes())
+            _copy_file_at(
+                source / artifact_file.name,
+                temporary_descriptor,
+                artifact_file.name,
+            )
+        _write_bytes_at(
+            temporary_descriptor,
+            MANIFEST_FILENAME,
+            manifest.canonical_bytes(),
+        )
         _verify_directory_files(
-            temporary,
+            temporary_path,
             manifest,
             allow_manifest=True,
-            containment_root=object_root.parent,
         )
-        if not _publish_directory_no_replace(temporary, destination):
-            _verified_destination(object_root, digest_hex)
+        os.close(temporary_descriptor)
+        temporary_descriptor = None
+        _publish_directory_no_replace(
+            rename_no_replace,
+            object_descriptor,
+            temporary_name,
+            digest_hex,
+        )
+        _pinned_root_path(object_descriptor, object_root.parent)
+        if not _visible_root_matches_descriptor(object_root, object_descriptor):
+            raise MachineArtifactError(
+                "cache object root changed during materialization"
+            )
         resolved = resolve_machine_artifact(
             cache_directory,
             manifest.digest,
@@ -872,7 +1059,11 @@ def materialize_machine_artifact(
             )
         return resolved
     finally:
-        shutil.rmtree(temporary, ignore_errors=True)
+        if temporary_descriptor is not None:
+            os.close(temporary_descriptor)
+        if temporary_path is not None:
+            shutil.rmtree(temporary_path, ignore_errors=True)
+        os.close(object_descriptor)
 
 
 def resolve_machine_artifact(

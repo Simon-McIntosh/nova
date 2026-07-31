@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import replace
 from pathlib import Path
 
@@ -122,6 +123,7 @@ def test_materialize_and_resolve_round_trip(tmp_path: Path) -> None:
             expected_dd_version="4.1.1",
             expected_registry_digest=REGISTRY_DIGEST,
             expected_physical_digest=PHYSICAL_DIGEST,
+            allow_incomplete=True,
         ).manifest
     )
 
@@ -133,6 +135,129 @@ def test_repeated_materialization_is_idempotent(tmp_path: Path) -> None:
 
     assert repeated == stored
     assert len(list((tmp_path / "cache" / "sha256").glob("[0-9a-f]*"))) == 1
+
+
+def test_stale_temporary_directory_does_not_block_materialization(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "source"
+    _write_bundle(source)
+    manifest = _manifest(source)
+    object_root = tmp_path / "cache" / "sha256"
+    stale = object_root / f".{manifest.digest.removeprefix('sha256:')}.abandoned"
+    stale.mkdir(parents=True)
+    (stale / "partial").write_bytes(b"incomplete")
+
+    stored = materialize_machine_artifact(source, tmp_path / "cache", manifest)
+
+    assert stored.digest == manifest.digest
+    assert stale.is_dir()
+
+
+def test_concurrent_materializers_share_verified_winner(tmp_path: Path) -> None:
+    source = tmp_path / "source"
+    _write_bundle(source)
+    manifest = _manifest(source)
+    cache = tmp_path / "cache"
+
+    def materialize():
+        return materialize_machine_artifact(source, cache, manifest)
+
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        results = tuple(executor.map(lambda _: materialize(), range(8)))
+
+    assert {result.digest for result in results} == {manifest.digest}
+    assert {result.directory for result in results} == {results[0].directory}
+    assert not tuple((cache / "sha256").glob(f".{manifest.digest[7:]}.*"))
+
+
+def test_existing_empty_destination_is_not_overwritten(tmp_path: Path) -> None:
+    source = tmp_path / "source"
+    _write_bundle(source)
+    manifest = _manifest(source)
+    destination = (
+        tmp_path / "cache" / "sha256" / manifest.digest.removeprefix("sha256:")
+    )
+    destination.mkdir(parents=True)
+
+    with pytest.raises(MachineArtifactError, match="manifest is missing"):
+        materialize_machine_artifact(source, tmp_path / "cache", manifest)
+
+    assert list(destination.iterdir()) == []
+
+
+def test_symlinked_object_root_is_rejected_without_outside_writes(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "source"
+    _write_bundle(source)
+    manifest = _manifest(source)
+    cache = tmp_path / "cache"
+    outside = tmp_path / "outside"
+    cache.mkdir()
+    outside.mkdir()
+    (cache / "sha256").symlink_to(outside, target_is_directory=True)
+
+    with pytest.raises(MachineArtifactError, match="object root.*symlink"):
+        materialize_machine_artifact(source, cache, manifest)
+    with pytest.raises(MachineArtifactError, match="object root.*symlink"):
+        resolve_machine_artifact(cache, manifest.digest, allow_incomplete=True)
+
+    assert list(outside.iterdir()) == []
+
+
+def test_symlinked_digest_destination_is_rejected_without_outside_writes(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "source"
+    _write_bundle(source)
+    manifest = _manifest(source)
+    cache = tmp_path / "cache"
+    object_root = cache / "sha256"
+    outside = tmp_path / "outside"
+    object_root.mkdir(parents=True)
+    outside.mkdir()
+    digest_hex = manifest.digest.removeprefix("sha256:")
+    (object_root / digest_hex).symlink_to(outside, target_is_directory=True)
+
+    with pytest.raises(MachineArtifactError, match="destination.*symlink"):
+        materialize_machine_artifact(source, cache, manifest)
+    with pytest.raises(MachineArtifactError, match="destination.*symlink"):
+        resolve_machine_artifact(cache, manifest.digest, allow_incomplete=True)
+
+    assert list(outside.iterdir()) == []
+
+
+def test_resolver_rejects_symlinked_manifest(tmp_path: Path) -> None:
+    _, stored = _materialized(tmp_path)
+    manifest_path = stored.directory / MANIFEST_FILENAME
+    outside = tmp_path / "outside-manifest.json"
+    outside.write_bytes(manifest_path.read_bytes())
+    manifest_path.unlink()
+    manifest_path.symlink_to(outside)
+
+    with pytest.raises(MachineArtifactError, match="manifest.*symlink"):
+        resolve_machine_artifact(
+            tmp_path / "cache",
+            stored.digest,
+            allow_incomplete=True,
+        )
+
+
+def test_resolver_rejects_symlinked_payload(tmp_path: Path) -> None:
+    _, stored = _materialized(tmp_path)
+    payload = stored.directory / stored.manifest.files[0].name
+    outside = tmp_path / "outside-payload.h5"
+    outside.write_bytes(payload.read_bytes())
+    payload.unlink()
+    payload.symlink_to(outside)
+
+    with pytest.raises(MachineArtifactError, match="contains symlink"):
+        resolve_machine_artifact(
+            tmp_path / "cache",
+            stored.digest,
+            allow_incomplete=True,
+        )
 
 
 @pytest.mark.parametrize("change", ["tamper", "missing", "unexpected"])
@@ -153,8 +278,28 @@ def test_resolver_rejects_file_set_and_content_changes(
         resolve_machine_artifact(tmp_path / "cache", stored.digest)
 
 
-@pytest.mark.parametrize("name", ["/absolute.h5", "../escape.h5", "ids/../escape.h5"])
-def test_manifest_rejects_path_traversal(tmp_path: Path, name: str) -> None:
+@pytest.mark.parametrize(
+    "name",
+    [
+        "",
+        ".",
+        "/absolute.h5",
+        "../escape.h5",
+        "ids/../escape.h5",
+        "ids\\escape.h5",
+        "C:/escape.h5",
+        "\\\\server\\share\\escape.h5",
+        "ids//escape.h5",
+        "ids/./escape.h5",
+        "ids/trailing.",
+        "ids/trailing ",
+        "CON",
+        "ids/aux.txt",
+        "ids/COM1.h5",
+        "ids/lpt9",
+    ],
+)
+def test_manifest_rejects_nonportable_names(tmp_path: Path, name: str) -> None:
     source = tmp_path / "source"
     _write_bundle(source)
     manifest = _manifest(source)
@@ -162,6 +307,59 @@ def test_manifest_rejects_path_traversal(tmp_path: Path, name: str) -> None:
 
     with pytest.raises(MachineArtifactError, match="unsafe"):
         replace(manifest, files=(altered_file, *manifest.files[1:])).canonical_bytes()
+
+
+def test_manifest_rejects_casefold_colliding_names(tmp_path: Path) -> None:
+    source = tmp_path / "source"
+    _write_bundle(source)
+    manifest = _manifest(source)
+    first = manifest.files[0]
+    colliding = replace(first, name=first.name.upper())
+
+    with pytest.raises(MachineArtifactError, match="case-insensitive"):
+        replace(
+            manifest,
+            files=tuple(sorted((first, colliding, *manifest.files[1:]))),
+        ).canonical_bytes()
+
+
+def test_manifest_rejects_casefold_colliding_directories(tmp_path: Path) -> None:
+    source = tmp_path / "source"
+    _write_bundle(source)
+    manifest = _manifest(source)
+    first = manifest.files[0]
+    second = replace(first, name="IDS/other.h5")
+
+    with pytest.raises(MachineArtifactError, match="case-insensitive"):
+        replace(
+            manifest,
+            files=tuple(sorted((first, second, *manifest.files[1:]))),
+        ).canonical_bytes()
+
+
+def test_source_inventory_rejects_casefold_collisions(tmp_path: Path) -> None:
+    source = tmp_path / "source"
+    source.mkdir()
+    (source / "coil.h5").write_bytes(b"lower")
+    (source / "COIL.h5").write_bytes(b"upper")
+
+    with pytest.raises(MachineArtifactError, match="case-insensitive"):
+        create_machine_artifact_manifest(
+            source,
+            dd_version="4.1.1",
+            registry_digest=REGISTRY_DIGEST,
+            physical_digest=PHYSICAL_DIGEST,
+            shot_ranges=(
+                ArtifactShotRange(
+                    first_shot=11766,
+                    last_shot=30471,
+                    physical_digest=PHYSICAL_DIGEST,
+                    evidence="observed",
+                ),
+            ),
+            complete=False,
+            unresolved_gaps=("source gap",),
+        )
 
 
 def test_manifest_rejects_duplicate_files(tmp_path: Path) -> None:
@@ -227,15 +425,16 @@ def test_incomplete_artifact_can_be_stored_but_not_operator_ready(
 ) -> None:
     _, stored = _materialized(tmp_path)
 
-    resolved = resolve_machine_artifact(tmp_path / "cache", stored.digest)
+    with pytest.raises(IncompleteMachineArtifactError, match="operator-ready"):
+        resolve_machine_artifact(tmp_path / "cache", stored.digest)
+
+    resolved = resolve_machine_artifact(
+        tmp_path / "cache",
+        stored.digest,
+        allow_incomplete=True,
+    )
     assert not resolved.manifest.complete
     assert resolved.manifest.unresolved_gaps
-    with pytest.raises(IncompleteMachineArtifactError, match="operator-ready"):
-        resolve_machine_artifact(
-            tmp_path / "cache",
-            stored.digest,
-            require_complete=True,
-        )
 
 
 def test_complete_artifact_is_operator_ready(tmp_path: Path) -> None:
@@ -244,7 +443,6 @@ def test_complete_artifact_is_operator_ready(tmp_path: Path) -> None:
     resolved = resolve_machine_artifact(
         tmp_path / "cache",
         stored.digest,
-        require_complete=True,
     )
 
     assert resolved.manifest.complete
@@ -285,6 +483,8 @@ def test_oci_reference_and_media_types_are_explicit(tmp_path: Path) -> None:
     )
     with pytest.raises(MachineArtifactError, match="repository"):
         oci_artifact_reference("https://ghcr.io/example/mast-md", manifest)
+    with pytest.raises(MachineArtifactError, match="at most 128"):
+        oci_artifact_tag(f"{'1' * 120}.1.1", PHYSICAL_DIGEST)
 
 
 def test_malformed_hashes_and_unsafe_source_entries_are_rejected(

@@ -169,8 +169,48 @@ def test_catalog_ids_validate_reopen_and_preserve_diagnostic_geometry(tmp_path):
     probe = magnetics.b_field_pol_probe[0]
     assert np.isclose(probe.position.r, source_probe[0])
     assert np.isclose(probe.position.z, source_probe[1])
+    assert not probe.position.phi.has_value
     assert np.isclose(probe.poloidal_angle, source_probe[2])
+    assert not probe.toroidal_angle.has_value
     assert np.isclose(probe.length, source_probe[3])
+
+    source_poloidal_points = [
+        point
+        for family, points in sorted(geometry["magnetics"]["additional_points"].items())
+        if family.startswith("poloidal_")
+        for point in points
+    ]
+    assert len(source_poloidal_points) == 61
+    assert len(magnetics.b_field_pol_probe) == len(
+        geometry["magnetics"]["poloidal_probes"]
+    ) + len(source_poloidal_points)
+    additional_probe = magnetics.b_field_pol_probe[
+        len(geometry["magnetics"]["poloidal_probes"])
+    ]
+    assert np.allclose(
+        [
+            additional_probe.position.r,
+            additional_probe.position.z,
+            additional_probe.position.phi,
+        ],
+        source_poloidal_points[0],
+    )
+    assert not additional_probe.poloidal_angle.has_value
+    assert not additional_probe.toroidal_angle.has_value
+    assert not additional_probe.length.has_value
+    assert not additional_probe.turns.has_value
+
+    source_toroidal_points = geometry["magnetics"]["additional_points"]["toroidal_cc"]
+    assert len(source_toroidal_points) == len(magnetics.b_field_phi_probe) == 36
+    phi_probe = magnetics.b_field_phi_probe[0]
+    assert np.allclose(
+        [phi_probe.position.r, phi_probe.position.z, phi_probe.position.phi],
+        source_toroidal_points[0],
+    )
+    assert not phi_probe.poloidal_angle.has_value
+    assert not phi_probe.toroidal_angle.has_value
+    assert not phi_probe.length.has_value
+    assert not phi_probe.turns.has_value
 
     flux_loop = magnetics.flux_loop[0]
     source_loop = geometry["magnetics"]["flux_loops"][0]
@@ -194,3 +234,5 @@ def test_catalog_ids_validate_reopen_and_preserve_diagnostic_geometry(tmp_path):
         ],
         source_saddle,
     )
+    assert not first_saddle.flux.data.has_value
+    assert not first_saddle.voltage.data.has_value

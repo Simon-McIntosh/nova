@@ -42,7 +42,7 @@
   <text x="338" y="153" class="body">• coil-pack outer outlines</text>
   <text x="338" y="179" class="body">• passive polygon unions + topology</text>
   <text x="338" y="205" class="body">• canonical wall/limiter cycle</text>
-  <text x="338" y="231" class="body">• probe R, Z, φ, axis, length</text>
+  <text x="338" y="231" class="body">• probe R, Z, poloidal axis + φ extent</text>
   <text x="338" y="257" class="body">• loop span and ordered 3-D paths</text>
   <text x="338" y="283" class="body">• line-of-sight origin → endpoint</text>
   <text x="338" y="315" class="small">quantized in physical units; names retain mapping</text>
@@ -53,7 +53,7 @@
   <rect x="645" y="105" width="205" height="140" class="physical"/>
   <text x="748" y="133" text-anchor="middle" class="head">Physical identity</text>
   <text x="667" y="163" class="body">geometry + topology</text>
-  <text x="667" y="188" class="body">turns / polarity</text>
+  <text x="667" y="188" class="body">turns / polarity when sourced</text>
   <text x="667" y="213" class="body">diagnostic pose</text>
   <text x="748" y="235" text-anchor="middle" class="small">one digest per real machine state</text>
 
@@ -75,6 +75,6 @@
   <path d="M1005 245 V300" class="arrow"/>
   <rect x="915" y="300" width="180" height="90" class="box"/>
   <text x="1005" y="330" text-anchor="middle" class="head">DDv4 authoring</text>
-  <text x="1005" y="355" text-anchor="middle" class="body">machine IDS registry</text>
-  <text x="1005" y="377" text-anchor="middle" class="body">validated round trips</text>
+  <text x="1005" y="355" text-anchor="middle" class="body">4 IDSs validate + reopen</text>
+  <text x="1005" y="377" text-anchor="middle" class="body">unsupported fields stay gaps</text>
 </svg>

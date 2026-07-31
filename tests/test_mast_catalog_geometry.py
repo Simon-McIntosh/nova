@@ -1,15 +1,21 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from pathlib import Path
 
 import numpy as np
 import pytest
 
-from nova.scripts.mast_catalog_geometry import (
+import nova.catalog.mast_geometry as mast_geometry
+from nova.catalog.mast_geometry import (
+    EvidenceState,
+    MachineGeometryRegistry,
+    SourceFingerprint,
     active_component_geometry,
     canonical_cycle,
     observed_ranges,
     passive_component_geometry,
+    physical_digest,
     source_fingerprint,
 )
 
@@ -125,3 +131,178 @@ def test_partial_passive_store_is_missing_evidence() -> None:
     assert not row.complete
     assert row.source_digest is None
     assert row.missing == ("level2-pf_passive-vertw",)
+
+
+def test_registry_resolves_aliases_to_one_physical_configuration() -> None:
+    registry = MachineGeometryRegistry.default()
+
+    configurations = {
+        registry.resolve_representation(alias).physical_digest
+        for alias in registry.representation_aliases
+    }
+
+    assert len(registry.representation_aliases) == 3
+    assert len(configurations) == 1
+    assert configurations == set(registry.configurations)
+    assert registry.provenance["source_census_physical_digest"] == "67f789d3d8b40135"
+
+
+def test_registry_shot_lookup_separates_evidence_from_identity() -> None:
+    registry = MachineGeometryRegistry.default()
+    early = registry.select(11695)
+    observed = registry.select(11766)
+    missing = registry.select(26963)
+    late = registry.select(30473)
+
+    assert early.evidence is EvidenceState.INHERITED
+    assert observed.evidence is EvidenceState.OBSERVED
+    assert missing.evidence is EvidenceState.MISSING
+    assert missing.missing == ("level2-pf_passive-vertw",)
+    assert late.evidence is EvidenceState.INHERITED
+    assert {
+        selection.configuration.physical_digest
+        for selection in (early, observed, missing, late)
+    } == set(registry.configurations)
+
+
+def test_registry_contains_all_census_source_gaps() -> None:
+    registry = MachineGeometryRegistry.default()
+
+    missing_group_shots = {
+        gap.shot
+        for gap in registry.incomplete_evidence.values()
+        if set(gap.missing) == {"level2-pf_passive", "level2-wall"}
+    }
+
+    assert len(registry.incomplete_evidence) == 17
+    assert missing_group_shots == {
+        26767,
+        26829,
+        26838,
+        26846,
+        26876,
+        26884,
+        26885,
+        26941,
+        26947,
+        26950,
+        26953,
+        26957,
+        26959,
+        26972,
+        26982,
+        26990,
+    }
+    assert registry.incomplete_evidence[26963].missing == ("level2-pf_passive-vertw",)
+
+
+def test_physical_identity_changes_with_supported_geometry_and_pose() -> None:
+    geometry = deepcopy(
+        next(iter(MachineGeometryRegistry.default().configurations.values())).geometry
+    )
+    baseline = physical_digest(geometry)
+    mutations = []
+
+    active = deepcopy(geometry)
+    active["active_components"]["sol"] += "00"
+    mutations.append(active)
+
+    passive = deepcopy(geometry)
+    passive["passive_components"]["vertw"] += "00"
+    mutations.append(passive)
+
+    limiter = deepcopy(geometry)
+    limiter["limiter"][0][0] += 1e-4
+    mutations.append(limiter)
+
+    probe = deepcopy(geometry)
+    probe["magnetics"]["poloidal_probes"][0]["pose"][2] += 1e-3
+    mutations.append(probe)
+
+    saddle = deepcopy(geometry)
+    saddle["magnetics"]["saddle_paths"]["l"][0][0][2] += 1e-3
+    mutations.append(saddle)
+
+    for mutation in mutations:
+        assert physical_digest(mutation) != baseline
+
+
+def test_unsupported_semantics_are_explicit_authoring_gaps() -> None:
+    configuration = next(
+        iter(MachineGeometryRegistry.default().configurations.values())
+    )
+    gaps = " ".join(configuration.authoring_gaps)
+
+    assert "turns" in gaps
+    assert "polarity" in gaps
+    assert "circuit topology" in gaps
+    assert "material" in gaps
+    assert "resistance" in gaps
+    assert "independent toroidal probe orientation" in gaps
+    assert "saddle traversal sign" in gaps
+
+
+def test_catalog_scan_resumes_from_atomic_fingerprint_checkpoint(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    level1_root = tmp_path / "level1"
+    level2_root = tmp_path / "level2"
+    level1_root.mkdir()
+    level2_root.mkdir()
+    for shot in (10, 11):
+        (level2_root / f"{shot}.zarr").mkdir()
+
+    geometry = {
+        "active_components": {},
+        "passive_components": {},
+        "limiter": [],
+        "magnetics": {
+            "poloidal_probes": [],
+            "flux_loops": [],
+            "saddle_paths": {},
+        },
+        "soft_x_ray_chords": {},
+    }
+    digest = physical_digest(geometry)
+    calls: list[int] = []
+
+    def fingerprint(
+        shot: int,
+        _level1_root: Path,
+        _level2_root: Path,
+    ) -> SourceFingerprint:
+        calls.append(shot)
+        return SourceFingerprint(shot, "source", f"representation-{shot}", True, ())
+
+    monkeypatch.setattr(mast_geometry, "source_fingerprint", fingerprint)
+    monkeypatch.setattr(
+        mast_geometry,
+        "physical_snapshot",
+        lambda *_args: geometry,
+    )
+    checkpoint = tmp_path / "fingerprints.json"
+
+    report = mast_geometry.scan_catalog(
+        level1_root,
+        level2_root,
+        workers=1,
+        checkpoint_path=checkpoint,
+        checkpoint_every=1,
+    )
+
+    assert calls == [10, 11]
+    assert checkpoint.exists()
+    assert report["physical_configuration_counts"] == {digest: 2}
+
+    calls.clear()
+    resumed = mast_geometry.scan_catalog(
+        level1_root,
+        level2_root,
+        workers=1,
+        checkpoint_path=checkpoint,
+        checkpoint_every=1,
+    )
+
+    assert calls == []
+    assert resumed == report

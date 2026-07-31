@@ -14,6 +14,13 @@ explicitly.
 
 from typing import TYPE_CHECKING
 
+from nova.equilibrium.diagnostics import (
+    DECAY_INDEX_WINDOW,
+    decay_index,
+    shafranov_vertical_field,
+    shafranov_vertical_field_elongated,
+)
+
 if TYPE_CHECKING:
     from nova.equilibrium.profile import (
         ProfileDegrees,
@@ -22,17 +29,30 @@ if TYPE_CHECKING:
         ReconstructProfile,
     )
 
+_PROFILE_EXPORTS = frozenset(
+    {
+        "ProfileDegrees",
+        "ProfilePrior",
+        "ProfileResult",
+        "ReconstructProfile",
+    }
+)
+
 __all__ = [
+    "DECAY_INDEX_WINDOW",
     "ProfileDegrees",
     "ProfilePrior",
     "ProfileResult",
     "ReconstructProfile",
+    "decay_index",
+    "shafranov_vertical_field",
+    "shafranov_vertical_field_elongated",
 ]
 
 
 def __getattr__(name: str):
     """Load the JAX reconstruction API only when one of its names is requested."""
-    if name not in __all__:
+    if name not in _PROFILE_EXPORTS:
         raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
     from nova.equilibrium import profile
 

@@ -12,14 +12,14 @@
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="XL">
   <meta name="plan-owner" content="Simon McIntosh">
-  <meta name="plan-depends-on" content="nova-spine-refactor,mast-catalog-geometry-recovery">
-  <meta name="plan-blocks" content="mast-catalog-gpu-solve">
+  <meta name="plan-depends-on" content="nova-spine-refactor">
+  <meta name="plan-blocks" content="">
   <title>MAST Machine Description | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-31">
+<meta name="plan-modified" content="2026-08-02">
 <meta name="plan-impl" content="0.45">
-<meta name="plan-version" content="11">
+<meta name="plan-version" content="13">
 <meta name="plan-sprint" content="S2">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -256,6 +256,24 @@
         registry.</p>
     <p class="r-dec-rat">The io-contract-home decision already puts facility maps with the mapping layer, and the two hardest jobs both live there: standard-name resolution (10 of the 40 ledger rows need names contributed through the ISN/ISNC fork flow, which codex owns) and the COCOS transform machinery (imas_codex.cocos, which needs an e_Bp fix regardless — determine_cocos infers e_Bp from a |psi| &gt; 0.5 Wb magnitude heuristic and returns COCOS 7 for 3,923 of 4,000 TRANSFORMED shots because median max|psi| after x2pi is 0.332 Wb; small low-field machines break it, so e_Bp must be measured or declared per source, never inferred from magnitude). Splitting the map from either would put the source of truth for a sign convention in a third place. Changes if: md-registry ends up in-repo, when a maps/ tree beside it beats a cross-repo dependency on the ingest path.</p>
     </div>
+<div class="r-dec" data-key="provisional-parameter-policy" data-choice="generate-refine" data-by="Simon McIntosh" data-when="2026-08-02">
+    <p class="r-dec-q">Do missing physical parameters stop machine-description progress?</p>
+    <p class="r-dec-ctx">Several parameters are absent from catalog geometry but can be initialized from defensible material or engineering priors and refined experimentally.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="generate-refine">Generate a provenance-typed seed and refine with vacuum shots</button>
+      <button class="r-opt" data-value="wait-for-final-engineering-values">Block until final engineering values are supplied</button>
+      </p>
+    <p class="r-dec-rat">Passive resistance is seeded from nominal steel or Inconel properties and refined from MAST vacuum runs. The same loop applies to other identifiable parameters. Generated values remain explicitly provisional until held-out evidence promotes them.</p>
+    </div>
+<div class="r-dec" data-key="equilibrium-tf-readiness" data-choice="axisymmetric-summary-sufficient" data-by="Simon McIntosh" data-when="2026-08-02">
+    <p class="r-dec-q">Does axisymmetric equilibrium require full installed TF winding geometry?</p>
+    <p class="r-dec-ctx">Detailed TF paths matter for ripple and non-axisymmetric error fields, while the axisymmetric reconstruction consumes the R-Z machine, magnetic constraints and toroidal-field reference.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="axisymmetric-summary-sufficient">Proceed with the pinned axisymmetric TF summary</button>
+      <button class="r-opt" data-value="full-tf-required">Wait for the complete 3-D TF winding</button>
+      </p>
+    <p class="r-dec-rat">Full TF winding geometry is a 3-D fidelity requirement, not a prerequisite for advancing the axisymmetric equilibrium and catalog solve lanes.</p>
+    </div>
 </section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
@@ -484,7 +502,7 @@ Done-when
   4. A tracked canonical manifest is ready for per-IDS authors and semantic digest tests.</pre>
     <p class="r-fu-outcome">Superseded as the broad S2 blocker by <code>mast-catalog-geometry-recovery</code>. The complete L1/L2 census proves that L2 publishes named active/passive/wall geometry, magnetic diagnostic placement, 36 ordered three-dimensional saddle paths and 96 SXR chords, while L1 supplies sensitive-axis angles and loop span. Three EFIT setup digests collapse to one complete physical configuration over observed shots 11766–30471. Sixteen missing passive/wall stores and the shot-26963 <code>vertw</code> omission are incomplete evidence, not configurations. Detailed TF winding geometry and full poses for other diagnostics remain explicit scoped source gaps during IDS authoring.</p>
     </article>
-<article class="r-fu" data-id="f-mmd-standard-name-graph" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-07-30T01:50:00+02:00" data-recommends-skill="/reckon-ship mast-machine-description" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-mmd-standard-name-graph" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-07-30T01:50:00+02:00" data-recommends-skill="/reckon-ship mast-machine-description" data-resolved-at="2026-08-02T17:09:04+00:00" data-resolved-by="reckon-edit">
     <h4 class="r-fu-title">Repair live Standard Name graph and refresh physical MAST mappings</h4>
     <div class="r-fu-body"><p>Restore the live Standard Name graph to the intended published catalog state, then refresh the complete MAST physical mapping ledger without introducing names for reconstruction meshes or discretizations.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -514,6 +532,41 @@ Done-when
   2. Every nameable physical MAST DD path has an accepted, semantically correct attachment or an explicit reviewed gap.
   3. Diagnostic R, phi, Z and both orientation angles are covered correctly; ordered 3D loop paths remain a structural geometry requirement.
   4. Catalog validation and live API re-query pass at recorded SHAs.</pre>
+    <p class="r-fu-outcome">Re-homed, not completed, to imas-standard-names:mast-semantic-source-repair so Standard Name grammar, graph-source, facility-signal and ISNC publication work has one canonical plan in the Standard Names repository. Catalog and live graph mutation remain unauthorized.</p>
+    </article>
+<article class="r-fu" data-id="f-mmd-generate-refine-authoring" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-edit" data-written-at="2026-08-02" data-recommends-skill="/reckon-ship mast-machine-description" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Author the provisional DD set and promote semantics by held-out evidence</h4>
+    <div class="r-fu-body"><p>Advance DD 4.1.1 authoring from the landed physical registry using provenance-typed seeds. Nominal passive resistance and other identifiable parameters enter as generated values and are refined on vacuum shots; discrete circuit, bank and traversal choices require decisive evidence. Detailed TF winding geometry stays outside the axisymmetric completion gate. Standard Name publication follows the external source-repair plan and waits for authority.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan: mast-machine-description
+External semantic plan: imas-standard-names:mast-semantic-source-repair
+Capability: orchestrator
+Requirements: deep reasoning, extended context, autonomous local tools, strict verification, elevated risk
+
+Read first
+- docs/research/mast-source-resolution.html
+- docs/research/mast-catalog-geometry-registry-ids-landed.html
+- the current MAST registry, DD authorer and content-addressed artifact contract
+
+Locked decisions
+- Generate/refine: nominal passive material resistance is a seed, not a blocker; refine it and other identifiable parameters with held-out vacuum runs.
+- Axisymmetric TF readiness: the measured/reference toroidal field and axisymmetric representation are sufficient to progress equilibrium. Complete 3-D winding geometry is a later fidelity gate.
+- Standard Names are semantic identities; DD and facility signals are sources. Do not mutate the graph or ISNC without explicit authority.
+
+Work
+1. Extend the machine artifact evidence contract with measured, published, generated, fitted and unresolved states, each carrying source, assumptions, uncertainty and supported shot range.
+2. Populate the provisional DD 4.1.1 IDS set from existing catalog geometry, public authoritative MAST sources and nominal material/circuit priors. Never turn an EFIT subdivision into physical turns or topology.
+3. Build a provenance-pinned vacuum-shot cohort. Infer active circuit signs/turn relations, effective passive R/L groups, probe orientation, 150/330 bank assignment and saddle sign only where held-out response identifies them.
+4. Keep detailed TF winding geometry, independent toroidal-probe pose and unresolved signed saddle use on the 3-D fidelity track. Axisymmetric authoring and equilibrium consume only supported fields.
+5. Validate every IDS, reopen with exact DD 4.1.1, compare nominal and refined forward predictions, and publish a new content-addressed local artifact revision.
+6. Re-query the complete MAST Standard Name ledger through imas-cx. Until external publication is authorized, record proposed missing names and source deltas without graph/catalog mutation.
+
+Done when
+- A provisional artifact can author and reopen all supported DD 4.1.1 IDSs without fabricating unresolved fields.
+- Each fitted parameter improves held-out vacuum prediction and remains physically admissible, or stays visibly provisional/unset.
+- Axisymmetric equilibrium proceeds without full TF winding geometry.
+- The six physical gaps each have a promoted value, a bounded provisional value, a discrete unresolved choice, or an evidence-backed not-required-for-this-lane disposition.
+- The external Standard Name plan carries the exact remaining publication delta and authority gate.</pre>
     </article>
 </section>
 
@@ -527,6 +580,8 @@ Done-when
     <span class="r-research-title"><a href="/nova/mast-catalog-geometry-registry-ids-landed.html">MAST physical registry and DD authoring — landed</a></span></div>
 <div class="r-research" data-id="r-mmd-readiness-evidence" data-type="evidence" data-source="Nova implementation, independent reviews, integrated default lane, and read-only Ambix alias baseline" data-added-by="reckon-ship" data-when="2026-07-31" data-url="/nova/mast-diagnostic-force-balance-artifacts-landed.html">
     <span class="r-research-title"><a href="/nova/mast-diagnostic-force-balance-artifacts-landed.html">MAST diagnostic, force-balance and artifact readiness evidence</a></span></div>
+<div class="r-research" data-id="r-mast-source-resolution" data-type="resolution-plan" data-source="Nova catalog evidence plus UKAEA machine-description, vacuum-calibration and equilibrium literature" data-added-by="reckon-edit" data-when="2026-08-02" data-url="/nova/mast-source-resolution.html">
+    <span class="r-research-title"><a href="/nova/mast-source-resolution.html">MAST source-resolution programme</a></span></div>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="_top" data-id="c-mmd-cocos-repair" data-who="reckon-ship" data-when="2026-07-30T01:12:00+02:00">

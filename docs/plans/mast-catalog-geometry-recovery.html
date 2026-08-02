@@ -11,13 +11,13 @@
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-title" content="MAST Catalog Geometry Recovery">
 <meta name="plan-summary" content="Recover physical MAST machine and diagnostic geometry from the Ambix L1/L2 Zarr catalogs, canonicalize away solver subdivisions, and publish evidence-backed discrete shot ranges for DDv4 authoring.">
-<meta name="plan-status" content="blocked">
+<meta name="plan-status" content="active">
 <meta name="plan-roi" content="high">
 <meta name="plan-effort" content="L">
 <meta name="plan-sprint" content="S2">
 <meta name="plan-owner" content="Simon McIntosh">
-<meta name="plan-modified" content="2026-07-31">
-<meta name="plan-blocks" content="mast-machine-description,physics-spine-adoption">
+<meta name="plan-modified" content="2026-08-02">
+<meta name="plan-blocks" content="">
 <meta name="plan-artifacts" content="nova/catalog/mast_geometry.json,nova/catalog/mast_geometry.py,nova/imas/mast_geometry.py,nova/imas/mast_artifact.py,nova/scripts/mast_catalog_geometry.py,tests/test_mast_catalog_geometry.py,tests/test_machine.py,tests/test_mast_artifact.py,docs/research/mast-catalog-geometry-evidence.html,docs/figures/mast-catalog-geometry/catalog-geometry-scan.json,docs/figures/mast-catalog-geometry/recovery-pipeline.svg,docs/research/mast-catalog-geometry-registry-ids-landed.html,docs/research/mast-diagnostic-force-balance-artifacts-landed.html,docs/figures/mast-diagnostic-force-balance/readiness-flow.svg">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -27,7 +27,7 @@
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="elevated">
 <meta name="plan-impl" content="0.9">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="6">
 <meta name="plan-commits" content="0f2b026fe8449465aabcf840673ed193472fd364,8c790cbc54a341e9dfe028918054254b9f903741,e286bb59cd456fa0ab8f9bb40a0b77a60319eec2,943c3069700397e48840691298c9c4bf2fac7412,f4e478e315e1786c55df733e95e110e1fd6eea87">
 </head>
 <body>
@@ -186,7 +186,7 @@ Scope
   5. Results, hashes, validation counts, and any residual source gaps are recorded in both plans.</pre>
     <p class="r-fu-outcome">Nova-local registry and DD 4.1.1 authoring landed at 0f2b026f / 8c790cbc: one physical configuration, three representation aliases, 17 explicit evidence gaps; 19 focused tests and the integrated 3,307-test default lane passed. Consumer cutover remains blocked by missing electrical/pose semantics, live Standard Name reconciliation, and external repository authority.</p>
     </article>
-<article class="r-fu" data-id="f-mast-geometry-consumer-cutover" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-07-31T10:05:00+02:00" data-recommends-skill="/reckon-ship mast-catalog-geometry-recovery" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-mast-geometry-consumer-cutover" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-07-31T10:05:00+02:00" data-recommends-skill="/reckon-ship mast-catalog-geometry-recovery" data-resolved-at="2026-08-02T17:08:22+00:00" data-resolved-by="reckon-edit">
     <h4 class="r-fu-title">Complete physical semantics and consumer cutover</h4>
     <div class="r-fu-body"><p>Supply or explicitly adjudicate the physical/electrical semantics the catalogs do not prove, reconcile the live Standard Name graph, then move machine-description and Ambix consumers from EFIT/AMM representation identity onto the Nova registry. Preserve all unresolved fields as gaps and delete donors only after zero tracked imports plus benchmark parity.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -215,6 +215,42 @@ Done when
 - All nameable DD 4.1.1 paths have correct accepted attachments or reviewed gaps.
 - Focused consumer coverage, full suites, and benchmark parity pass at recorded SHAs.
 - Donor disposition is evidence-backed and no external or missing geometry is invented.</pre>
+    <p class="r-fu-outcome">Superseded by a decomposed source-resolution and seeded-cutover plan. The recovered catalog geometry is no longer held behind final passive resistance or detailed TF geometry; those move to an evidence-state generate/refine loop and a separate 3-D fidelity lane.</p>
+    </article>
+<article class="r-fu" data-id="f-mast-seeded-consumer-cutover" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-edit" data-written-at="2026-08-02" data-recommends-skill="/reckon-ship mast-catalog-geometry-recovery" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Land the provisional machine artifact and cut axisymmetric consumers over behind parity</h4>
+    <div class="r-fu-body"><p>Extend the landed physical registry with provenance-typed generated and fitted evidence, seed passive resistance from nominal material properties, and cut axisymmetric Ambix consumers to the pinned artifact. Detailed TF winding geometry and unresolved 3-D diagnostic pose stay on the later fidelity lane. Retire only donors with zero tracked imports and frozen six-shot parity.</p></div>
+    <pre class="r-fu-prompt">Project: nova, with authorized consumer changes in imas-ambix
+Plan: mast-catalog-geometry-recovery
+Capability: orchestrator
+Requirements: deep reasoning, extended context, autonomous tools, strict verification, elevated risk
+
+Read first
+- docs/research/mast-source-resolution.html
+- docs/research/mast-catalog-geometry-registry-ids-landed.html
+- docs/research/mast-diagnostic-force-balance-artifacts-landed.html
+- the current immutable MAST registry and artifact manifest
+
+Locked policy
+- Passive resistance is not a blocker. Seed component-family values from sourced nominal bulk material properties, mark them generated with uncertainty, and refine them using held-out MAST vacuum shots.
+- Apply the same generate/refine loop to other identifiable parameters.
+- Detailed TF winding geometry and unresolved toroidal diagnostic pose do not gate axisymmetric equilibrium.
+- Configuration identity is physical geometry/topology and diagnostic pose, never solver subdivision.
+
+Work
+1. Extend the evidence schema to distinguish measured, published, generated, fitted and unresolved fields without changing the physical digest for representation-only data.
+2. Build one content-addressed provisional artifact using catalog geometry, documented active circuit relations and nominal passive material parameters. Leave unresolved discrete signs/poses explicit.
+3. Select and provenance-pin vacuum shots and signals; fit only identifiable circuit/passive blocks and challenge on held-out shots. Record nominal-versus-refined residuals and parameter intervals.
+4. Rewire the authorized Ambix axisymmetric machine, tokenizer, state-estimation and equilibrium consumers to the artifact. Do not require detailed TF paths or 3-D-only diagnostics.
+5. Run focused tests, the frozen six-shot numerical parity gate, and an explicit tracked-import census.
+6. Delete only superseded axisymmetric donors after parity and zero imports. Preserve all non-axisymmetric/3-D donors.
+
+Done when
+- Every provisional value carries source kind, assumptions, uncertainty and supported shot range.
+- Held-out vacuum prediction improves or a visible negative result keeps the nominal value provisional.
+- Axisymmetric consumers select the physical digest independent of EFIT/AMM subdivision.
+- The frozen six-shot set runs completely and meets pre-registered numerical/throughput tolerances.
+- Tracked legacy axisymmetric imports are zero before donor deletion; 3-D donors remain.</pre>
     </article>
 </section>
 <section data-reckon="research" id="research" class="r-research-list">
@@ -225,6 +261,8 @@ Done when
     <span class="r-research-title"><a href="/nova/mast-catalog-geometry-registry-ids-landed.html">MAST physical registry and DD authoring — landed</a></span></div>
 <div class="r-research" data-id="r-mast-readiness-evidence" data-type="evidence" data-source="Nova implementation, independent reviews, integrated default lane, and read-only Ambix alias baseline" data-added-by="reckon-ship" data-when="2026-07-31" data-url="/nova/mast-diagnostic-force-balance-artifacts-landed.html">
     <span class="r-research-title"><a href="/nova/mast-diagnostic-force-balance-artifacts-landed.html">MAST diagnostic, force-balance and artifact readiness evidence</a></span></div>
+<div class="r-research" data-id="r-mast-source-resolution" data-type="resolution-plan" data-source="Nova catalog evidence plus UKAEA machine-description, vacuum-calibration and equilibrium literature" data-added-by="reckon-edit" data-when="2026-08-02" data-url="/nova/mast-source-resolution.html">
+    <span class="r-research-title"><a href="/nova/mast-source-resolution.html">MAST source-resolution programme</a></span></div>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s5" data-id="c-mast-registry-ids-landed" data-who="reckon-ship" data-when="2026-07-31T10:05:00+02:00">

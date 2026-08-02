@@ -12,13 +12,13 @@
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="XL">
   <meta name="plan-owner" content="Simon McIntosh">
-  <meta name="plan-depends-on" content="nova-spine-refactor,mast-catalog-geometry-recovery">
+  <meta name="plan-depends-on" content="nova-spine-refactor">
   <meta name="plan-blocks" content="mast-catalog-gpu-solve">
   <title>Physics Spine Adoption | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-31">
-<meta name="plan-version" content="16">
+<meta name="plan-modified" content="2026-08-02">
+<meta name="plan-version" content="18">
 <meta name="plan-impl" content="0.92">
 <meta name="plan-sprint" content="S2">
 <meta name="plan-capability-version" content="1.0">
@@ -562,7 +562,7 @@ Done-when
      hex-section default explicitly gated on nova-3d-native §2 + that plan.</pre>
     <p class="r-fu-outcome">Plan created same-session with full context: biot-operator-assembly (draft, depends_on nova-3d-native, blocks mast-catalog-gpu-solve). Carries the measured evidence base (70,000×/pair, 6.5×/16× solve cost at 2×/3× bands, seam 5e-4, quadrature component trap), the user constraints (old assembly RAM-limited + naive CPU batching; embarrassingly parallel pair space; CPU viability mandatory — no GPU guarantee locally/CI; build-once-cache-forever; first build &lt;20 min), and f-boa-01 as the first rung (survey + tiled CPU prototype + CPU/GPU kernel parity).</p>
     </article>
-<article class="r-fu" data-id="f-psa-machine-cutover" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-07-30" data-recommends-skill="/reckon-ship physics-spine-adoption §4" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-psa-machine-cutover" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-07-30" data-recommends-skill="/reckon-ship physics-spine-adoption §4" data-resolved-at="2026-08-02T17:09:31+00:00" data-resolved-by="reckon-edit">
     <h4 class="r-fu-title">MAST physical configuration cutover and donor retirement</h4>
     <div class="r-fu-body"><p>Resume Ambix machine, tokenizer, state-estimation, and equilibrium consumer cutover only after an authoritative MAST manifest defines discrete shot ranges by real physical configuration changes. Identity must include active and passive hardware geometry plus diagnostic positions, poloidal and toroidal orientations, and ordered three-dimensional loop paths. Mesh resolution, filament count, wall-element count, source ordering, and reconstruction weights are discretization and must never create a configuration epoch. After the physical manifest and live Standard Name graph are available, rewire consumers, record benchmark parity, and delete only superseded axisymmetric donors; non-axisymmetric donors remain until their native replacement lands.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -591,6 +591,41 @@ Done when
 - Subdivision or mesh-resolution changes leave the selected configuration identity unchanged.
 - Diagnostic position and orientation changes select the correct new range.
 - Consumer tests and benchmark parity pass, and donor deletion is evidence-backed.</pre>
+    <p class="r-fu-outcome">Superseded by a narrower cutover gate. The prior prompt incorrectly required complete diagnostic pose, detailed TF geometry and live Standard Name publication before any consumer cutover; the axisymmetric path now uses the versioned provisional artifact and retains unresolved 3-D semantics.</p>
+    </article>
+<article class="r-fu" data-id="f-psa-axisymmetric-cutover" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-edit" data-written-at="2026-08-02" data-recommends-skill="/reckon-ship physics-spine-adoption §4" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Cut the axisymmetric consumers over, prove six-shot parity, then retire only zero-import donors</h4>
+    <div class="r-fu-body"><p>Use the pinned provisional MAST artifact to rewire Ambix's axisymmetric consumers. Missing final passive resistance and detailed TF winding geometry are not cutover blockers: nominal passive values are refined separately and 3-D donors remain. The hard gates are a complete frozen six-shot parity run and zero tracked imports of each donor selected for deletion.</p></div>
+    <pre class="r-fu-prompt">Projects: nova and authorized imas-ambix
+Plan: physics-spine-adoption
+Capability: orchestrator
+Requirements: deep reasoning, extended context, autonomous tools, strict verification, elevated risk
+
+Read first
+- docs/research/mast-source-resolution.html
+- docs/research/mast-diagnostic-force-balance-artifacts-landed.html, especially the mislabeled three-shot baseline caveat
+- the frozen six-shot benchmark definition in Ambix
+- current tracked import census for axisymmetric and non-axisymmetric donor modules
+
+Scope
+- Axisymmetric consumer cutover only: machine selection, geometry reader, tokenizer/state interfaces and equilibrium reconstruction.
+- Use the content-addressed provisional DD 4.1.1 artifact. Nominal passive parameters are permitted when provenance-typed; detailed TF geometry and 3-D diagnostic gaps are not prerequisites.
+- Preserve every non-axisymmetric donor and any axisymmetric donor that still has a tracked import or lacks parity.
+
+Work
+1. Pin the exact Nova and machine-artifact revisions in Ambix and replace representation-hash selection with physical-digest selection.
+2. Rewire axisymmetric consumers to Nova types and operators while preserving a measured before/after benchmark seam.
+3. Enumerate the frozen six shots and all prescribed slices from the canonical benchmark manifest. Reject any artifact labeled six-shot that omits a shot or slice.
+4. Run old and new paths on the same inputs and record convergence, confinement/topology, magnetic-axis position, LCFS distance, profile residual, field/flux residual and throughput using pre-registered tolerances.
+5. Run an explicit repository-wide tracked-import census per donor module, including scripts, tests and dynamic import strings.
+6. Delete one donor only when its parity gate passes and its tracked-import count is zero. Re-run focused and integrated suites after deletion. Keep 3-D donors intact.
+
+Done when
+- The benchmark contains all six canonical shots and every required slice; partial scoring is a failure, not a qualified pass.
+- New and old axisymmetric paths satisfy the registered parity tolerances on every scored item and the aggregate throughput regression stays within budget.
+- Every retired donor has zero tracked imports immediately before deletion and zero after the final suite.
+- Non-axisymmetric donors and unresolved 3-D semantics remain available and explicitly owned by mast-nonaxisymmetric-physics.
+- Exact commits, artifact digests, test logs, parity metrics and donor disposition are recorded.</pre>
     </article>
 </section>
 
@@ -604,6 +639,8 @@ Done when
     <span class="r-research-title"><a href="/nova/mast-catalog-geometry-registry-ids-landed.html">MAST physical registry and DD authoring — landed</a></span></div>
 <div class="r-research" data-id="r-psa-readiness-evidence" data-type="evidence" data-source="Nova implementation, independent reviews, integrated default lane, and read-only Ambix alias baseline" data-added-by="reckon-ship" data-when="2026-07-31" data-url="/nova/mast-diagnostic-force-balance-artifacts-landed.html">
     <span class="r-research-title"><a href="/nova/mast-diagnostic-force-balance-artifacts-landed.html">MAST diagnostic, force-balance and artifact readiness evidence</a></span></div>
+<div class="r-research" data-id="r-mast-source-resolution" data-type="resolution-plan" data-source="Nova catalog evidence plus UKAEA machine-description, vacuum-calibration and equilibrium literature" data-added-by="reckon-edit" data-when="2026-08-02" data-url="/nova/mast-source-resolution.html">
+    <span class="r-research-title"><a href="/nova/mast-source-resolution.html">MAST source-resolution programme</a></span></div>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s3" data-id="c-physics-nova-wave" data-who="reckon-ship" data-when="2026-07-30">

@@ -8,19 +8,25 @@
   <meta name="plan-slug" content="mast-nonaxisymmetric-physics">
   <meta name="plan-title" content="MAST Non-axisymmetric Physics">
   <meta name="plan-summary" content="Own MAST 3D coil fields, passive structures, circuit semantics and vacuum taring in Nova, replacing the Ambix-local implementation path.">
-  <meta name="plan-status" content="pending">
+  <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="L">
-  <meta name="plan-tier" content="opus">
   <meta name="plan-sprint" content="S3">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-depends-on" content="nova-3d-native">
-  <meta name="plan-blocks" content="mast-catalog-gpu-solve">
+  <meta name="plan-blocks" content="">
   <title>MAST Non-axisymmetric Physics | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-29">
-<meta name="plan-version" content="1">
+<meta name="plan-modified" content="2026-08-02">
+<meta name="plan-version" content="2">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
+<meta name="plan-capability-reasoning" content="deep">
+<meta name="plan-capability-context" content="extended">
+<meta name="plan-capability-tool-autonomy" content="autonomous">
+<meta name="plan-capability-verification" content="strict">
+<meta name="plan-capability-risk" content="elevated">
 </head>
 <body>
   <main class="plan-doc">
@@ -52,7 +58,7 @@
 </section>
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-mnap-01" data-status="open" data-tier="opus" data-written-by="codex" data-written-at="2026-07-29" data-recommends-skill="/reckon-ship mast-nonaxisymmetric-physics" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-mnap-01" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="codex" data-written-at="2026-07-29" data-recommends-skill="/reckon-ship mast-nonaxisymmetric-physics" data-resolved-at="2026-08-02T17:10:00+00:00" data-resolved-by="reckon-edit">
     <h4 class="r-fu-title">Research and implement MAST 3D/passive physics in Nova</h4>
     <div class="r-fu-body"><p>Begin after <code>nova-3d-native</code> ships. Preserve the Ambix work as research/evidence input, not as the production owner.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -76,12 +82,46 @@ Done-when
   1. MAST geometry, circuits and vacuum-taring API land with held-out evidence
   2. tests still green
   3. followup written + this followup marked resolved</pre>
+    <p class="r-fu-outcome">Superseded by the evidence-backed generate/refine programme. The prerequisite nova-3d-native has shipped, passive resistance has a non-blocking nominal seed, and the work is decomposed into vacuum calibration, diagnostic adjudication and detailed TF fidelity.</p>
+    </article>
+<article class="r-fu" data-id="f-mnap-vacuum-refinement" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-edit" data-written-at="2026-08-02" data-recommends-skill="/reckon-ship mast-nonaxisymmetric-physics" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Build and validate the MAST passive and 3-D model through vacuum refinement</h4>
+    <div class="r-fu-body"><p>Start from catalog geometry, documented circuit topology and nominal component-family material properties. Refine passive R/L, diagnostic orientation/bank/sign and detailed TF parameters against provenance-pinned vacuum shots with held-out validation. Keep vacuum geometry, acquisition calibration and plasma response as separate model layers.</p></div>
+    <pre class="r-fu-prompt">Project: nova, consuming read-only MAST data and authorized Ambix evidence
+Plan: mast-nonaxisymmetric-physics
+Capability: orchestrator
+Requirements: deep reasoning, extended context, autonomous tools, strict verification, elevated risk
+
+Read first
+- docs/research/mast-source-resolution.html
+- existing Nova 3-D field/circuit APIs and the landed nova-3d-native evidence
+- Ambix non-axisymmetric field-subtraction research as evidence, not production ownership
+- UKAEA MAST vacuum-calibration, passive-current and intrinsic-error-field publications linked by the research record
+
+Work decomposition
+1. Evidence manifest: source installed active/passive/TF topology and diagnostic construction from MAST-specific public or catalog evidence. Reject MAST-U-only dimensions unless an unchanged component is explicitly documented.
+2. Nominal model: build component-family resistivity priors, positive resistance/inductance matrices, documented circuit signs and a bounded nominal TF path. Mark all inferred quantities generated with uncertainty.
+3. Vacuum cohort: select no-plasma, single-coil and mixed-excitation shots; pin acquisition/calibration chains and exclude plasma-contaminated windows.
+4. Passive refinement: fit identifiable grouped R/L parameters, not one free value per mesh element. Require passivity, positive dissipation, stable cross-shot values and improvement on held-out transients.
+5. Diagnostic adjudication: solve toroidal-probe orientation, 150/330 bank assignment and saddle traversal sign as constrained continuous/binary inference. Leave ambiguous items unresolved when evidence is not decisive.
+6. TF fidelity: validate the axisymmetric average against R*Bphi, then validate ripple/error-field structure separately. Do not absorb plasma response into a vacuum geometry correction.
+7. Productization: expose a versioned Nova API and artifact with uncertainty, write focused synthetic and corpus-backed tests, and compare against the retained Ambix 3-D path before any donor retirement.
+
+Done when
+- The nominal model runs before calibration and every seed carries evidence and an uncertainty interval.
+- Held-out vacuum residuals improve for each promoted parameter block; ablations show that passive, diagnostic and TF blocks are identifiable rather than compensating for each other.
+- The resistance/inductance system is passive and numerically stable across supported shot ranges.
+- Discrete orientations, banks and signs are promoted only with decisive held-out evidence; ambiguity remains explicit otherwise.
+- Nova matches or improves the retained Ambix 3-D vacuum-field and subtraction evidence at recorded tolerances.
+- Axisymmetric work was never held behind this plan; only 3-D donors are candidates for retirement after native parity.</pre>
     </article>
 </section>
   <section data-reckon="research" id="research" class="r-research-list">
 <h2><span class="sec">§</span> Research</h2>
 <div class="r-research" data-id="r-mnap-transition" data-type="transition-audit" data-source="nova" data-added-by="codex" data-when="2026-07-29" data-url="/nova/physics-spine-transition-audit.html">
     <span class="r-research-title"><a href="/nova/physics-spine-transition-audit.html">Physics Spine Transition Audit</a></span></div>
+<div class="r-research" data-id="r-mast-source-resolution" data-type="resolution-plan" data-source="Nova catalog evidence plus UKAEA machine-description, vacuum-calibration and equilibrium literature" data-added-by="reckon-edit" data-when="2026-08-02" data-url="/nova/mast-source-resolution.html">
+    <span class="r-research-title"><a href="/nova/mast-source-resolution.html">MAST source-resolution programme</a></span></div>
 </section>
 </main>
 </body>

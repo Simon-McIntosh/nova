@@ -11,15 +11,21 @@
   <meta name="plan-status" content="blocked">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="XL">
-  <meta name="plan-tier" content="opus">
   <meta name="plan-owner" content="Simon McIntosh">
-  <meta name="plan-depends-on" content="physics-spine-adoption,mast-machine-description,mast-nonaxisymmetric-physics">
+  <meta name="plan-depends-on" content="physics-spine-adoption">
   <title>MAST Catalog GPU Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-sprint" content="S4">
-<meta name="plan-modified" content="2026-07-29">
-<meta name="plan-version" content="2">
+<meta name="plan-modified" content="2026-08-02">
+<meta name="plan-version" content="3">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
+<meta name="plan-capability-reasoning" content="deep">
+<meta name="plan-capability-context" content="extended">
+<meta name="plan-capability-tool-autonomy" content="autonomous">
+<meta name="plan-capability-verification" content="strict">
+<meta name="plan-capability-risk" content="elevated">
 </head>
 <body>
   <main class="plan-doc">
@@ -182,11 +188,20 @@
         is the likely winner if the iteration-count distribution from L1 is heavy-tailed.</p>
     <p class="r-dec-rat"></p>
     </div>
+<div class="r-dec" data-key="machine-fidelity-gate" data-choice="pinned-axisymmetric-artifact" data-by="Simon McIntosh" data-when="2026-08-02">
+    <p class="r-dec-q">Which machine fidelity is required before the equilibrium throughput ladder starts?</p>
+    <p class="r-dec-ctx">The catalog solve is axisymmetric. Full TF winding paths, calibrated 3-D ripple and signed 3-D diagnostics belong to a separate fidelity programme.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="pinned-axisymmetric-artifact">Pinned provisional axisymmetric artifact</button>
+      <button class="r-opt" data-value="complete-three-dimensional-machine">Complete calibrated 3-D machine</button>
+      </p>
+    <p class="r-dec-rat">Proceed with catalog geometry, supported magnetic diagnostics, measured toroidal-field reference and provenance-typed nominal passive parameters. Detailed TF geometry and non-axisymmetric calibration do not gate census, parity or throughput work.</p>
+    </div>
 </section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-mcg-01" data-status="open" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-24" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-mcg-01" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-07-24" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">L0 — catalog slice census + jitted-solve parity gate</h4>
     <div class="r-fu-body"><p>First rung, runnable before the solver ports complete: pin the
         catalog's true slice count (turning the 1-hour goal into an exact slices/s requirement)
@@ -229,6 +244,8 @@ Done-when
 <h2><span class="sec">§</span> Research</h2>
 <div class="r-research" data-id="r-mcgs-transition" data-type="transition-audit" data-source="nova" data-added-by="codex" data-when="2026-07-29" data-url="/nova/physics-spine-transition-audit.html">
     <span class="r-research-title"><a href="/nova/physics-spine-transition-audit.html">Physics Spine Transition Audit</a></span></div>
+<div class="r-research" data-id="r-mast-source-resolution" data-type="resolution-plan" data-source="Nova catalog evidence plus UKAEA machine-description, vacuum-calibration and equilibrium literature" data-added-by="reckon-edit" data-when="2026-08-02" data-url="/nova/mast-source-resolution.html">
+    <span class="r-research-title"><a href="/nova/mast-source-resolution.html">MAST source-resolution programme</a></span></div>
 </section>
 </main>
 </body>

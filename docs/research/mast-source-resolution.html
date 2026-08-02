@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="mast-source-resolution">
+  <meta name="plan-title" content="MAST source-resolution programme">
+  <meta name="plan-summary" content="Evidence-backed resolution plan for the six remaining MAST authoring gaps, separating provisional parameters that can be generated and refined from semantics that require discrete adjudication, and removing detailed TF geometry from the axisymmetric-equilibrium critical path.">
+  <meta name="plan-informs" content="mast-machine-description,mast-catalog-geometry-recovery,physics-spine-adoption,mast-nonaxisymmetric-physics,mast-catalog-gpu-solve">
+  <meta name="plan-recorded-at" content="2026-08-02">
+  <meta name="plan-verdict" content="None of the six physical-source gaps should stop provisional axisymmetric equilibrium work. Passive resistance is seeded from nominal bulk material properties and refined from vacuum shots; the same generate-refine loop applies wherever a parameter is identifiable. Detailed TF geometry gates only three-dimensional fidelity. Standard Name publication remains a separate authorization-gated track.">
+  <title>MAST source-resolution programme | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <header>
+    <span class="badge badge-active">researched 2026-08-02</span>
+    <h1>MAST source-resolution programme</h1>
+    <p>The remaining gaps are now split by what they actually prevent. Parameters with a
+    physically defensible prior are generated, versioned and refined against vacuum data.
+    Discrete topology and sign choices are inferred only when the experiment identifies them.
+    Public sources are admissible evidence when their machine, revision, units and coordinate
+    conventions are recorded.</p>
+  </header>
+
+  <section class="quick-status">
+    <div class="status-card"><strong>Passive resistance</strong>
+      <span class="badge badge-shipped">not blocking</span>
+      <p>Seed from nominal steel or Inconel properties; calibrate the effective model on vacuum transients.</p></div>
+    <div class="status-card"><strong>Axisymmetric equilibrium</strong>
+      <span class="badge badge-shipped">can progress</span>
+      <p>Use the existing R-Z machine registry, measured currents and a pinned provisional passive model.</p></div>
+    <div class="status-card"><strong>Detailed TF geometry</strong>
+      <span class="badge badge-pending">later fidelity</span>
+      <p>Needed for ripple, intrinsic-error-field and full 3-D calculations, not the static equilibrium start.</p></div>
+    <div class="status-card"><strong>Standard Names</strong>
+      <span class="badge badge-blocked">publication authority</span>
+      <p>The graph/catalog source contract has its own plan in the Standard Names repository.</p></div>
+  </section>
+
+  <figure>
+    <img src="/nova/figures/mast-source-resolution/generate-refine-loop.svg"
+         alt="Evidence ladder leading to a provisional machine model, vacuum prediction, held-out refinement, and separate equilibrium and three-dimensional fidelity lanes">
+    <figcaption>The seed is a useful, explicitly provisional scientific object. Promotion requires
+    held-out predictive evidence; lack of a final engineering value is not permission to leave the
+    whole equilibrium lane idle.</figcaption>
+  </figure>
+
+  <h2>What the external evidence changes</h2>
+  <p>A UKAEA study of NSTX, MAST and their upgrades describes the same workflow now adopted here:
+  create an axisymmetric machine description from drawings, estimate conductor resistance from
+  bulk-material properties, then use dedicated vacuum shots to refine passive resistance and
+  location as well as magnetic-sensor position and orientation. It explicitly calls this an
+  iterative process. See
+  <a href="https://scientific-publications.ukaea.uk/wp-content/uploads/UKAEA-CCFE-PR1934.PDF">Battaglia et al., time-dependent vacuum-field calculations</a>,
+  pp. 6–8.</p>
+  <p>The original MAST diagnostic paper reports stainless-steel vessel and coil cases, an Inconel
+  centre tube, in-situ calibration from individual PF-coil pulses, and an eight-vacuum-shot matrix
+  solve that removed pickup and induced-current contributions. This is direct evidence that the
+  archive contains experiments capable of identifying circuit, passive and diagnostic response:
+  <a href="https://scientific-publications.ukaea.uk/wp-content/uploads/Published/RSIVOL72p421.pdf">Edlington, Martin and Pinfold, MAST magnetic diagnostics</a>.</p>
+  <p>For equilibrium specifically, UKAEA's MAST reconstruction work uses three-dimensional vessel
+  calculations on vacuum coil-test shots and maps them to effective resistances in the two-dimensional
+  EFIT vessel groupings. That demonstrates a legitimate reduced axisymmetric representation rather
+  than a requirement for complete three-dimensional conductor detail at the start:
+  <a href="https://scientific-publications.ukaea.uk/papers/kinetic-equilibrium-reconstructions-of-plasmas-in-the-mast-database-and-preparation-for-reconstruction-of-the-first-plasmas-in-mast-upgrade/">Berkery et al., MAST equilibrium reconstruction</a>.</p>
+
+  <h2>Source hierarchy and promotion contract</h2>
+  <ol>
+    <li><strong>Existing physical evidence:</strong> the FAIR-MAST L1/L2 geometry and signal stores,
+    the Nova registry and the recorded representation aliases.</li>
+    <li><strong>Authoritative public material:</strong> UKAEA papers, machine drawings, diagnostic
+    schematics, technical reports and public shot metadata. MAST and MAST-U evidence must never be
+    conflated. The source record stores URL, title, page/figure/table, publication revision, units,
+    coordinate frame and uncertainty.</li>
+    <li><strong>Generated seed:</strong> nominal material properties, documented circuit structure,
+    measured component geometry and bounded discrete candidates. Every seeded field is marked
+    provisional and carries the assumptions used to produce it.</li>
+    <li><strong>Experimental refinement:</strong> vacuum shots with known coil excitations fit only
+    identifiable parameter groups. Training shots and held-out shots are separated before fitting.</li>
+    <li><strong>Promotion:</strong> a value becomes authoritative for a supported shot range only when
+    it predicts held-out responses, respects physical constraints and is stable across excitation
+    families. Otherwise the seed remains provisional with uncertainty or the field stays unset.</li>
+  </ol>
+  <p>The public FAIR-MAST service exposes a JSON metadata API and Zarr diagnostic data for campaigns
+  M05–M09 under an open-data licence, while the UKAEA open-data portal exposes programme objectives
+  including commissioning and TF test shots. These are discovery and calibration inputs, not proof
+  by themselves: <a href="https://www.ukaea.org/service/fair-mast/">FAIR MAST</a> and
+  <a href="https://opendata.ukaea.uk/mast-data/">UKAEA MAST Data</a>.</p>
+
+  <h2>Resolution plan for each physical gap</h2>
+  <table>
+    <thead><tr><th>Gap</th><th>Why it is still absent</th><th>Generate</th><th>Refine and acceptance gate</th><th>What it blocks</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Active turns, polarity and circuit topology</strong></td>
+        <td>L1/L2 publish conductor geometry and measured circuit currents, but not a complete
+        physical winding-to-supply contract. Solver filament multiplicity is not a turn count.</td>
+        <td>Build a circuit manifest from public schematics and papers, then reconcile it with the
+        EFIT current channels. Public evidence already states that MAST upper/lower coil pairs are
+        normally series-connected, P6 is anti-series, and the solenoid uses two parallel circuits
+        of alternating layers.</td>
+        <td>Fit the signed coil-to-diagnostic vacuum response matrix. Require integer or explicitly
+        effective turns, one unambiguous channel-to-circuit map, correct COCOS polarity, prediction
+        on held-out single-coil and multi-coil shots, and no dependence on EFIT subdivision.</td>
+        <td>Quantitative PF forward response and final machine-description electrical semantics;
+        not the geometry registry.</td>
+      </tr>
+      <tr>
+        <td><strong>Passive material, resistance and electrical topology</strong></td>
+        <td>The outlines are present, but material grade, connection details and effective
+        electromagnetic grouping are not encoded in the catalog.</td>
+        <td>Assign component-family priors from documented stainless steel, Inconel or other
+        sourced material and compute nominal resistance from resistivity, path length and section.
+        Preserve a range for temperature and material uncertainty.</td>
+        <td>Fit grouped effective R/L parameters to vacuum-current decay and loop/probe response.
+        Hold out complete shots and at least one excitation family. Promote only positive,
+        physically plausible, cross-shot-stable parameters; compare both transient waveforms and
+        reconstructed passive current.</td>
+        <td>Dynamic eddy-current fidelity. <strong>It is not a blocker:</strong> static equilibrium
+        work starts with the versioned nominal model and later consumes calibrated parameters.</td>
+      </tr>
+      <tr>
+        <td><strong>Detailed TF winding geometry</strong></td>
+        <td>The catalog carries the central-field quantity but not a complete installed 3-D winding
+        path. MAST's dismantlable copper TF topology is documented publicly, but not yet reduced to
+        a revision-pinned conductor model.</td>
+        <td>Use UKAEA machine papers, figures, PROCESS's MAST topology description, public technical
+        drawings and photographs to construct a bounded nominal winding path. Keep digitized
+        dimensions and inferred symmetry visibly uncertain.</td>
+        <td>Validate axisymmetric average against measured <em>R B</em><sub>φ</sub>; validate the
+        detailed model separately against toroidal probe variation, ripple and known intrinsic
+        error-field measurements. Do not tune a vacuum-only model to plasma-response residuals.</td>
+        <td>3-D ripple, error fields and structural loads. It does <strong>not</strong> gate the
+        axisymmetric Grad–Shafranov reconstruction or the catalog GPU-solve census/parity ladder.</td>
+      </tr>
+      <tr>
+        <td><strong>Independent toroidal-probe orientation</strong></td>
+        <td>The 36 catalog entries carry position only. Reusing a poloidal-probe orientation or a
+        coordinate angle would silently change the measured field component.</td>
+        <td>Extract diagnostic construction/orientation from the MAST magnetic-diagnostics paper
+        and later schematics; initialize unresolved sensors with a normalized axis and a bounded
+        installation-angle prior, never a fabricated exact value.</td>
+        <td>Regress each sensor against known PF and TF vacuum excitations, jointly estimating gain
+        and orientation only when identifiable. Require a unit vector, stable orientation across
+        shots, correct sign, and held-out voltage/field residual below the pre-registered noise
+        envelope.</td>
+        <td>Toroidal-probe use in 3-D validation; it does not block poloidal magnetics-only equilibrium.</td>
+      </tr>
+      <tr>
+        <td><strong>Poloidal channel-to-bank assignment</strong></td>
+        <td>The 78 primary probes have sourced sensitive-axis angles but their toroidal position is
+        a discrete 150° or 330° candidate. A midpoint would be false precision.</td>
+        <td>Form a binary assignment problem using channel names, wiring documents, array order and
+        the two physical bank locations. Preserve both candidates when evidence is insufficient.</td>
+        <td>Score candidates on vacuum-shot response and toroidally varying calibration/error-field
+        shots, subject to one-to-one array-order constraints. Accept only assignments that are
+        stable across held-out shots and decisively outperform the alternative; otherwise retain
+        an explicit ambiguity.</td>
+        <td>Correct 3-D diagnostic pose and shot-range identity; axisymmetric solvers may use the
+        common R-Z pose without inventing φ.</td>
+      </tr>
+      <tr>
+        <td><strong>Saddle traversal sign</strong></td>
+        <td>All 36 ordered 3-D paths and 972 vertices are present, but geometry alone is invariant
+        under path reversal and therefore cannot determine Faraday-law signal sign.</td>
+        <td>Keep canonical geometry direction-neutral and add a binary traversal/polarity candidate
+        from wiring or acquisition metadata.</td>
+        <td>Compare predicted signed flux derivative with known coil-pulse voltage. Require one sign
+        to win on held-out shots, remain consistent with the acquisition polarity chain, and leave
+        the geometric digest unchanged.</td>
+        <td>Signed saddle measurements and 3-D validation; not static geometry or equilibrium.</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>For the TF source ladder, UKAEA's PROCESS documentation records the specific MAST topology in
+  which copper TF inboard legs pass through the solenoid and the coils can be dismantled. It is a
+  valuable topology source, not an installed-dimension authority:
+  <a href="https://ukaea.github.io/PROCESS/eng-models/tf-coil/">PROCESS TF-coil model</a>.
+  Likewise, measured MAST intrinsic error fields show that a vacuum approximation can differ
+  substantially from the empirical correction, so vacuum geometry and plasma response must be
+  validated as separate models:
+  <a href="https://scientific-publications.ukaea.uk/papers/measurement-correctionimplications-of-the-intrinsic-error-fields-on-mast/">Kirk et al., MAST intrinsic error fields</a>.</p>
+
+  <h2>Execution order and artifacts</h2>
+  <ol>
+    <li><strong>Freeze the evidence manifest.</strong> Record every candidate source, supported shot
+    range, revision, coordinate convention, uncertainty and licence. Reject MAST-U-only evidence
+    unless it explicitly documents unchanged original-MAST hardware.</li>
+    <li><strong>Generate one provisional registry revision.</strong> Add nominal passive parameters,
+    documented circuit relations and bounded diagnostic/TF candidates. The artifact must distinguish
+    <code>measured</code>, <code>published</code>, <code>generated</code>, <code>fitted</code> and
+    <code>unresolved</code> evidence states.</li>
+    <li><strong>Assemble the vacuum cohort.</strong> Use metadata to select no-plasma commissioning,
+    individual-coil and mixed-excitation shots. Pin signal provenance and exclude contaminated time
+    windows before any fitting.</li>
+    <li><strong>Fit by identifiable blocks.</strong> Circuit signs/turns first; passive R/L second;
+    diagnostic orientation/bank/sign third; detailed TF geometry on a separate 3-D lane. Never let
+    one block absorb another block's residual without an ablation proving identifiability.</li>
+    <li><strong>Challenge on held-out data.</strong> Report waveform residuals, flux/field residuals,
+    parameter intervals, cross-shot drift and the nominal-versus-refined improvement. Negative
+    results remain visible.</li>
+    <li><strong>Promote and cut over.</strong> Publish a content-addressed machine artifact. Run the
+    frozen six-shot parity gate and explicit zero-import census before retiring only the superseded
+    axisymmetric Ambix donors. Retain all 3-D donors until native Nova parity exists.</li>
+  </ol>
+
+  <h2>Blocker disposition</h2>
+  <table>
+    <thead><tr><th>Workstream</th><th>Disposition now</th><th>True remaining gate</th></tr></thead>
+    <tbody>
+      <tr><td>Nova physical registry refinement</td><td><span class="badge badge-active">ready</span></td><td>None; proceed with explicit provisional evidence states.</td></tr>
+      <tr><td>Axisymmetric Ambix/Nova cutover</td><td><span class="badge badge-active">ready after seeded artifact</span></td><td>Six-shot numerical parity and zero tracked legacy imports, not final TF detail.</td></tr>
+      <tr><td>3-D/passive production model</td><td><span class="badge badge-pending">planned</span></td><td>Held-out vacuum evidence and detailed TF/diagnostic adjudication.</td></tr>
+      <tr><td>Standard Name graph and ISNC release</td><td><span class="badge badge-blocked">authorization-gated</span></td><td>Approval to mutate/publish the catalog; planning and read-only validation may proceed.</td></tr>
+    </tbody>
+  </table>
+</main>
+</body>
+</html>

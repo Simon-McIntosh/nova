@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 420" role="img" aria-labelledby="title desc">
+  <title id="title">MAST evidence-backed generate and refine loop</title>
+  <desc id="desc">A source ladder feeds a provisional machine model. Static equilibrium can proceed from the versioned provisional model, while vacuum-shot residuals refine passive, circuit, diagnostic and three-dimensional parameters before promotion.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 z" fill="#30363d"/>
+    </marker>
+    <style>
+      .box{fill:#fff;stroke:#30363d;stroke-width:1.5;rx:10}
+      .seed{fill:#fff8c5;stroke:#9a6700}
+      .ready{fill:#dafbe1;stroke:#1a7f37}
+      .later{fill:#ddf4ff;stroke:#0969da}
+      .gate{fill:#ffebe9;stroke:#cf222e}
+      .line{stroke:#30363d;stroke-width:2;fill:none;marker-end:url(#arrow)}
+      .feedback{stroke:#8250df;stroke-width:2;fill:none;stroke-dasharray:7 5;marker-end:url(#arrow)}
+      .h{font:600 17px system-ui,sans-serif;fill:#1f2328}
+      .t{font:14px system-ui,sans-serif;fill:#1f2328}
+      .s{font:12px system-ui,sans-serif;fill:#57606a}
+      .lane{font:600 14px system-ui,sans-serif;fill:#1f2328}
+    </style>
+  </defs>
+
+  <rect class="box" x="25" y="115" width="205" height="150"/>
+  <text class="h" x="45" y="145">Evidence ladder</text>
+  <text class="t" x="45" y="172">1. L1/L2 catalog geometry</text>
+  <text class="t" x="45" y="195">2. drawings and machine papers</text>
+  <text class="t" x="45" y="218">3. public data and shot logs</text>
+  <text class="t" x="45" y="241">4. explicit engineering request</text>
+
+  <path class="line" d="M230 190 H285"/>
+  <rect class="box seed" x="285" y="115" width="205" height="150"/>
+  <text class="h" x="305" y="145">Generate seed</text>
+  <text class="t" x="305" y="172">measured geometry</text>
+  <text class="t" x="305" y="195">nominal bulk resistivity</text>
+  <text class="t" x="305" y="218">documented circuit signs</text>
+  <text class="t" x="305" y="241">bounded unknown parameters</text>
+
+  <path class="line" d="M490 190 H545"/>
+  <rect class="box" x="545" y="115" width="205" height="150"/>
+  <text class="h" x="565" y="145">Vacuum prediction</text>
+  <text class="t" x="565" y="172">known PF and TF excitations</text>
+  <text class="t" x="565" y="195">eddy-current transients</text>
+  <text class="t" x="565" y="218">probe and loop responses</text>
+  <text class="t" x="565" y="241">uncertainty-aware residuals</text>
+
+  <path class="line" d="M750 190 H805"/>
+  <rect class="box gate" x="805" y="115" width="285" height="150"/>
+  <text class="h" x="825" y="145">Refine and challenge</text>
+  <text class="t" x="825" y="172">fit only identifiable parameter groups</text>
+  <text class="t" x="825" y="195">hold out shots and excitation families</text>
+  <text class="t" x="825" y="218">reject non-physical or unstable solutions</text>
+  <text class="t" x="825" y="241">promote with provenance and uncertainty</text>
+
+  <path class="feedback" d="M940 265 C940 350 390 350 390 265"/>
+  <text class="s" x="610" y="376">repeat until held-out residuals stop improving and every promoted value remains physically admissible</text>
+
+  <path class="line" d="M390 115 V65 H565"/>
+  <rect class="box ready" x="565" y="20" width="250" height="70"/>
+  <text class="lane" x="585" y="48">Axisymmetric equilibrium lane</text>
+  <text class="s" x="585" y="70">starts from the pinned provisional artifact</text>
+
+  <path class="line" d="M947 115 V65 H870"/>
+  <rect class="box later" x="815" y="20" width="275" height="70"/>
+  <text class="lane" x="835" y="48">3-D and dynamic fidelity lane</text>
+  <text class="s" x="835" y="70">requires calibrated passive and TF detail</text>
+</svg>

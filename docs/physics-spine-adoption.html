@@ -17,13 +17,13 @@
   <title>Physics Spine Adoption | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-03">
-<meta name="plan-version" content="19">
-<meta name="plan-impl" content="0.92">
+<meta name="plan-modified" content="2026-08-04">
+<meta name="plan-version" content="20">
+<meta name="plan-impl" content="0.95">
 <meta name="plan-sprint" content="S2">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-commits" content="21b48d4e35571b4bc5f79260f2f6ae9c1c1c16d9,70c11815e1e72f464c93d5ec9f1ab8dc37397c2b,7048d13debe2fced507d2ac92e6e64c5550bc07b,f9d900ce50fe38663d36a5c07836e78d3b5fa993,e286bb59cd456fa0ab8f9bb40a0b77a60319eec2,f4e478e315e1786c55df733e95e110e1fd6eea87">
+<meta name="plan-commits" content="21b48d4e35571b4bc5f79260f2f6ae9c1c1c16d9,70c11815e1e72f464c93d5ec9f1ab8dc37397c2b,7048d13debe2fced507d2ac92e6e64c5550bc07b,f9d900ce50fe38663d36a5c07836e78d3b5fa993,e286bb59cd456fa0ab8f9bb40a0b77a60319eec2,f4e478e315e1786c55df733e95e110e1fd6eea87,cfa2d2c">
 </head>
 <body>
   <main class="plan-doc">
@@ -665,6 +665,9 @@ Done when
 </div>
 <div class="r-comment" data-section="_top" data-id="c-psa-cutover-census" data-who="reckon-ship" data-when="2026-08-03">
     <div class="r-comment-body">A verified read-only census at ambix 3e4360e re-scoped the §4 cutover. The frozen six-shot gate is spine_bench/shots.py {21978, 21983, 21985, 21986, 21989, 22086} with derived slices, but NO numeric parity tolerances exist anywhere in the harness — they must be registered from the committed baseline stamp (axis 0.0234 cm, LCFS 0.00828 cm, profile RMS 0.01623, converged/confined 1.0 on the hard-read arms; the connectivity arm is not parity-clean at converged 0.8333). The mislabeled three-shot baseline traces to runner.py stamping shotset_version unconditionally on --shots overrides; discriminator role: ad-hoc. True external donor coupling is 61 production/script files (102 with tests), zero dynamic imports; the 3-D preserve set (filaments3d, ivc_geometry, sensor_toroidal) is fully severable and cylinder/polygon/elliptic are axisymmetric retire candidates. SetupSignature.key is byte-stability-locked by on-disk caches and checkpoints, so physical-digest selection is a dual-read migration, not a key rewrite. The nova pin (7ba65a59, asserted in pyproject, uv.lock and the dependency-contract test) predates the machine artifact; cutover mechanics including the pin bump to ac42194c are in flight. The after-path parity run waits on fitted turns_with_sign from the vacuum node — the artifact's one forward-model-blocking gap.</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-psa-cutover-mechanics-landed" data-who="reckon-ship" data-when="2026-08-04">
+    <div class="r-comment-body">Cutover mechanics landed on imas-ambix main at cfa2d2c (six commits off 3e4360e; 1,836 insertions; focused suites 3 + 69 + 276 + 96 + 693 passed, latent/statespace chunk on sun_debug job 1240342). Registered: 13 numeric parity tolerances on the two hard-read arms in spine_bench/parity.py — reproduction metrics carry a 4x change budget (zero spread across four committed stamps; axis ceiling 0.094 cm ≈ 1/28 radial cell), solve-health fractions gate at exact 1.0, throughput budget 25% against the slowest committed stamp; the connectivity arm is measured but not gated. The stamping defect is fixed (a --shots override can no longer masquerade as the frozen set) and a genuine 2-arm before-path stamp is banked at results/…-ca82e50d2f-….yaml (job 1240346, 18:49 wall, all six frozen shots 6/6 slices, passes all 13 tolerances). Nova pin bumped to ac42194c in pyproject, uv.lock and the dependency-contract test; the artifact materializes node-locally and matches semantic identity 680076be…, physical 76cf833561e602a7, registry 73ecabaa…3ab2. Identity rule implemented: physical digest governs selection and provenance while discretization governs computation — compute caches stay signature-keyed because two representation aliases carry different filament counts (fc938 vs fc1004) under one physical digest, so a digest key would collapse distinct matrices; zero cache orphans, SetupSignature byte-identical. Two gaps for the after-path node: the registered historical reference is 94 engine commits stale (compare_paths(before, after) added; gate with it, not evaluate() alone), and no field/flux residual metric exists in the schema — registering one needs a SCHEMA_VERSION bump and a fresh reference stamp. After-path parity and donor retirement remain blocked on fitted pf_active turns_with_sign (machine-readable in the artifact as blocks_axisymmetric_forward_model).</div>
 </div>
 </section>
 </main>

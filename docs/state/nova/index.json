@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-30T11:09:16+02:00",
+  "updated": "2026-08-03T23:55:13",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -56,7 +56,7 @@
       },
       {
         "id": "S2",
-        "status": "planned",
+        "status": "active",
         "theme": "Complete the axisymmetric physics spine and MAST machine data",
         "items": [
           {
@@ -151,7 +151,7 @@
         "description": "Run the GPU catalog only after reconstruction, machine descriptions and MAST 3D/passive physics pass their evidence gates."
       }
     ],
-    "active_sprint_id": null,
+    "active_sprint_id": "S2",
     "timeline": [
       {
         "when": "2026-07-29",
@@ -204,6 +204,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 5
+    "_version": 6
   }
 }

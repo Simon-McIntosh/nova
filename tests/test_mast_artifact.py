@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import ctypes
+import errno
 import hashlib
 import json
 from concurrent.futures import ThreadPoolExecutor
@@ -660,6 +662,32 @@ def test_semantic_identity_changes_with_authored_semantics(tmp_path: Path) -> No
 
     assert plain.semantic_identity() != seeded.semantic_identity()
     assert plain.oci.tag == seeded.oci.tag
+
+
+def test_filesystem_without_atomic_publication_is_named(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    source = tmp_path / "source"
+    _write_bundle(source)
+    manifest = _manifest(source)
+    cache = tmp_path / "cache"
+
+    def reject_rename(*_args):
+        ctypes.set_errno(errno.EINVAL)
+        return -1
+
+    monkeypatch.setattr(
+        mast_artifact_module,
+        "_linux_rename_no_replace",
+        lambda: reject_rename,
+    )
+
+    with pytest.raises(MachineArtifactError, match="does not support atomic"):
+        materialize_machine_artifact(source, cache, manifest)
+
+    digest_hex = manifest.digest.removeprefix("sha256:")
+    assert not (cache / "sha256" / digest_hex).exists()
 
 
 def test_file_size_mismatch_is_reported_before_checksum(tmp_path: Path) -> None:

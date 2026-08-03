@@ -3,6 +3,11 @@
 The command writes no registry and contacts no remote: it authors the seeded DD
 4.1.1 set from the packaged registry, round-trips it through the dictionary pin,
 and publishes it into a content-addressed local cache.
+
+The cache location has to be chosen, not defaulted. Publication completes with an
+atomic no-clobber directory rename so a reader never sees a half-written object,
+and several parallel filesystems reject that operation, which would make any
+shared default fail on some machines and silently work on others.
 """
 
 from __future__ import annotations
@@ -14,8 +19,6 @@ from pathlib import Path
 from nova.catalog.mast_geometry import MachineGeometryRegistry
 from nova.imas.machine_evidence import FieldEvidence
 from nova.imas.mast_geometry import REPRESENTATIVE_SHOT, publish_provisional_artifact
-
-DEFAULT_CACHE = Path.home() / ".cache" / "nova" / "mast-machine-description"
 
 
 def _report(cache_directory: Path, shot: int) -> dict[str, object]:
@@ -54,7 +57,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Publish a provisional MAST machine-description artifact."
     )
-    parser.add_argument("--cache", type=Path, default=DEFAULT_CACHE)
+    parser.add_argument("--cache", type=Path, required=True)
     parser.add_argument("--shot", type=int, default=REPRESENTATIVE_SHOT)
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()

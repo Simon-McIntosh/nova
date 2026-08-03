@@ -10,7 +10,7 @@ import secrets
 import shutil
 from ctypes import CDLL, c_char_p, c_int, get_errno
 from dataclasses import dataclass
-from errno import EEXIST, ENOTEMPTY
+from errno import EEXIST, EINVAL, ENOSYS, ENOTEMPTY, EOPNOTSUPP, EPERM
 from pathlib import Path, PurePosixPath
 from stat import S_ISDIR, S_ISLNK, S_ISREG
 from typing import Any, Iterable, Mapping
@@ -47,6 +47,7 @@ _WINDOWS_DEVICE_NAMES = frozenset(
     | {f"LPT{index}" for index in range(1, 10)}
 )
 _RENAME_NO_REPLACE = 1
+_RENAME_UNSUPPORTED_ERRORS = frozenset({EINVAL, ENOSYS, EOPNOTSUPP, EPERM})
 
 
 class MachineArtifactError(MachineDescriptionError):
@@ -1024,6 +1025,13 @@ def _publish_directory_no_replace(
     if error_number in {EEXIST, ENOTEMPTY}:
         return False
     error = OSError(error_number, os.strerror(error_number), destination_name)
+    if error_number in _RENAME_UNSUPPORTED_ERRORS:
+        raise MachineArtifactError(
+            "the cache filesystem does not support atomic no-clobber directory "
+            "rename, so an artifact cannot be published there without risking a "
+            "half-visible object; several parallel filesystems reject the "
+            "operation outright"
+        ) from error
     raise MachineArtifactError(
         f"cannot publish cache object {destination_name}"
     ) from error

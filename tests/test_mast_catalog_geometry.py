@@ -147,6 +147,20 @@ def test_registry_resolves_aliases_to_one_physical_configuration() -> None:
     assert registry.provenance["source_census_physical_digest"] == "67f789d3d8b40135"
 
 
+def test_packaged_registry_identity_is_pinned_by_value() -> None:
+    registry = MachineGeometryRegistry.default()
+    configuration = next(iter(registry.configurations.values()))
+
+    assert configuration.physical_digest == "76cf833561e602a7"
+    assert physical_digest(dict(configuration.geometry)) == "76cf833561e602a7"
+    assert registry.registry_digest == (
+        "73ecabaa030a476d80cc24c1fe35d038876a12454ebd7b0c7055aac1d3cf3ab2"
+    )
+    assert {shot_range.physical_digest for shot_range in registry.ranges} == {
+        "76cf833561e602a7"
+    }
+
+
 def test_registry_shot_lookup_separates_evidence_from_identity() -> None:
     registry = MachineGeometryRegistry.default()
     early = registry.select(11695)

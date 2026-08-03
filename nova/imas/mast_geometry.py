@@ -1,7 +1,16 @@
-"""Author and consume catalog-backed MAST geometry with IMAS DD 4.1.1."""
+"""Author and consume catalog-backed MAST geometry with IMAS DD 4.1.1.
+
+Two authoring entry points sit side by side.  The catalog set writes only what
+the shot catalogs measure.  The provisional set adds the seeds that public
+sources license — documented circuit grouping, nominal passive material and the
+resistance those imply — and carries an evidence record for every field so a
+seed is never mistaken for a measurement.  Fields no source fixes stay unset in
+both.
+"""
 
 from __future__ import annotations
 
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping
@@ -16,8 +25,22 @@ from nova.catalog.mast_geometry import (
     MachineGeometryRegistry,
 )
 from nova.imas.machine import GeomData, MachineGeometryReader
+from nova.imas.machine_evidence import EvidenceLedger, FieldEvidence
+from nova.imas.mast_artifact import (
+    ArtifactShotRange,
+    VerifiedMachineArtifact,
+    create_machine_artifact_manifest,
+    materialize_machine_artifact,
+)
+from nova.imas.mast_seed_parameters import (
+    CIRCUIT_RELATIONS,
+    loop_sections,
+    passive_material,
+    seed_evidence,
+)
 
 DD_VERSION = "4.1.1"
+REPRESENTATIVE_SHOT = 11766
 
 
 def _outline_records(wkb_hex: str) -> tuple[dict[str, Any], ...]:
@@ -253,6 +276,40 @@ def _author_magnetics(factory: imas.IDSFactory, geometry: Mapping[str, Any]) -> 
     return ids
 
 
+def _author_circuits(ids: Any) -> None:
+    """Name each documented poloidal-field circuit and how it is connected."""
+
+    ids.circuit.resize(len(CIRCUIT_RELATIONS))
+    for circuit, relation in zip(ids.circuit, CIRCUIT_RELATIONS, strict=True):
+        circuit.name = relation.name
+        circuit.type = relation.connection
+
+
+def _author_passive_seeds(ids: Any, geometry: Mapping[str, Any]) -> None:
+    """Seed passive resistivity, single-loop resistance and section turns."""
+
+    sections = loop_sections(geometry)
+    for loop in ids.loop:
+        section = sections[str(loop.name)]
+        material = passive_material(section.family)
+        for element in loop.element:
+            element.turns_with_sign = 1.0
+        if material is None:
+            continue
+        loop.resistivity = material.resistivity
+        if section.is_single_loop:
+            loop.resistance = material.loop_resistance(
+                section.area,
+                section.major_radius,
+            )
+
+
+def _author_toroidal_field(factory: imas.IDSFactory) -> Any:
+    """Author the toroidal-field slot without inventing a winding or a constant."""
+
+    return _new_ids(factory, "tf")
+
+
 def author_catalog_ids(selection: GeometrySelection) -> CatalogIdsBundle:
     """Author the supported registry geometry without filling source gaps."""
 
@@ -272,8 +329,110 @@ def author_catalog_ids(selection: GeometrySelection) -> CatalogIdsBundle:
     return bundle
 
 
+@dataclass(frozen=True)
+class ProvisionalIdsBundle:
+    """Seeded machine-description IDSs and the provenance of every field."""
+
+    selection: GeometrySelection
+    ids: Mapping[str, Any]
+    evidence: EvidenceLedger
+    authoring_gaps: tuple[str, ...]
+
+    def validate(self) -> None:
+        """Validate every IDS against its pinned dictionary and the ledger."""
+
+        for ids in self.ids.values():
+            ids.validate()
+        self.evidence.validate()
+
+
+def author_provisional_ids(
+    selection: GeometrySelection,
+    *,
+    first_shot: int,
+    last_shot: int,
+) -> ProvisionalIdsBundle:
+    """Author the catalog geometry plus every seed public sources license."""
+
+    factory = imas.IDSFactory(version=DD_VERSION)
+    geometry = selection.configuration.geometry
+    pf_active = _author_pf_active(factory, geometry)
+    _author_circuits(pf_active)
+    pf_passive = _author_pf_passive(factory, geometry)
+    _author_passive_seeds(pf_passive, geometry)
+    bundle = ProvisionalIdsBundle(
+        selection=selection,
+        ids={
+            "pf_active": pf_active,
+            "pf_passive": pf_passive,
+            "wall": _author_wall(factory, geometry),
+            "magnetics": _author_magnetics(factory, geometry),
+            "tf": _author_toroidal_field(factory),
+        },
+        evidence=seed_evidence(
+            geometry,
+            first_shot=first_shot,
+            last_shot=last_shot,
+        ),
+        authoring_gaps=selection.configuration.authoring_gaps,
+    )
+    bundle.validate()
+    return bundle
+
+
+def artifact_shot_ranges(
+    registry: MachineGeometryRegistry,
+) -> tuple[ArtifactShotRange, ...]:
+    """Carry the registry's evidence-typed shot ranges into artifact identity."""
+
+    return tuple(
+        sorted(
+            ArtifactShotRange(
+                first_shot=shot_range.first_shot,
+                last_shot=shot_range.last_shot,
+                physical_digest=shot_range.physical_digest,
+                evidence=str(shot_range.evidence),
+            )
+            for shot_range in registry.ranges
+        )
+    )
+
+
+def publish_provisional_artifact(
+    cache_directory: Path | str,
+    *,
+    registry: MachineGeometryRegistry | None = None,
+    shot: int = REPRESENTATIVE_SHOT,
+) -> VerifiedMachineArtifact:
+    """Author, round-trip and publish one content-addressed local revision."""
+
+    registry = registry or MachineGeometryRegistry.default()
+    shot_ranges = artifact_shot_ranges(registry)
+    selection = registry.select(shot)
+    bundle = author_provisional_ids(
+        selection,
+        first_shot=min(row.first_shot for row in shot_ranges),
+        last_shot=max(row.last_shot for row in shot_ranges),
+    )
+    unresolved = bundle.evidence.paths_with_state(FieldEvidence.UNRESOLVED)
+    with tempfile.TemporaryDirectory() as work:
+        source = Path(work) / "machine_description"
+        write_and_reopen(bundle, source)
+        manifest = create_machine_artifact_manifest(
+            source,
+            dd_version=DD_VERSION,
+            registry_digest=registry.registry_digest,
+            physical_digest=selection.configuration.physical_digest,
+            shot_ranges=shot_ranges,
+            complete=not unresolved,
+            unresolved_gaps=bundle.authoring_gaps,
+            field_evidence=bundle.evidence.records,
+        )
+        return materialize_machine_artifact(source, cache_directory, manifest)
+
+
 def write_and_reopen(
-    bundle: CatalogIdsBundle,
+    bundle: CatalogIdsBundle | ProvisionalIdsBundle,
     path: Path | str,
 ) -> dict[str, Any]:
     """Write and reopen a bundle with the same pinned DD version."""

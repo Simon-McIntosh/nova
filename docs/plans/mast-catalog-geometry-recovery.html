@@ -16,7 +16,7 @@
 <meta name="plan-effort" content="L">
 <meta name="plan-sprint" content="S2">
 <meta name="plan-owner" content="Simon McIntosh">
-<meta name="plan-modified" content="2026-08-03">
+<meta name="plan-modified" content="2026-08-04">
 <meta name="plan-blocks" content="">
 <meta name="plan-artifacts" content="nova/catalog/mast_geometry.json,nova/catalog/mast_geometry.py,nova/imas/mast_geometry.py,nova/imas/mast_artifact.py,nova/scripts/mast_catalog_geometry.py,tests/test_mast_catalog_geometry.py,tests/test_machine.py,tests/test_mast_artifact.py,docs/research/mast-catalog-geometry-evidence.html,docs/figures/mast-catalog-geometry/catalog-geometry-scan.json,docs/figures/mast-catalog-geometry/recovery-pipeline.svg,docs/research/mast-catalog-geometry-registry-ids-landed.html,docs/research/mast-diagnostic-force-balance-artifacts-landed.html,docs/figures/mast-diagnostic-force-balance/readiness-flow.svg">
 <meta name="plan-capability-version" content="1.0">
@@ -26,8 +26,8 @@
 <meta name="plan-capability-tool-autonomy" content="autonomous">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="elevated">
-<meta name="plan-impl" content="0.92">
-<meta name="plan-version" content="7">
+<meta name="plan-impl" content="0.95">
+<meta name="plan-version" content="8">
 <meta name="plan-commits" content="0f2b026fe8449465aabcf840673ed193472fd364,8c790cbc54a341e9dfe028918054254b9f903741,e286bb59cd456fa0ab8f9bb40a0b77a60319eec2,943c3069700397e48840691298c9c4bf2fac7412,f4e478e315e1786c55df733e95e110e1fd6eea87">
 </head>
 <body>
@@ -252,6 +252,26 @@ Done when
 - The frozen six-shot set runs completely and meets pre-registered numerical/throughput tolerances.
 - Tracked legacy axisymmetric imports are zero before donor deletion; 3-D donors remain.</pre>
     </article>
+<article class="r-fu" data-id="f-mast-registry-probe-axis-defect" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-04" data-recommends-skill="/reckon-ship mast-catalog-geometry-recovery" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Correct the obr probe poloidal angle in the canonical registry</h4>
+    <div class="r-fu-body"><p>The vacuum-response fit identified the obr probe family as radial (held-out residual 6.78e-3 T against 9.15e-3 T for the registry's π/2 value), so 19 probes in the canonical registry carry a wrong sensitive axis and would report the wrong field component. Orientation is identity-bearing: the correction moves the pinned physical digest (76cf833561e602a7) and therefore every digest-pinned test and the artifact identity chain — it needs its own careful node, not a drive-by edit.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan: mast-catalog-geometry-recovery
+Capability: orchestrator
+Requirements: deep reasoning, extended context, autonomous tools, strict verification, elevated risk
+
+Context
+  The registry (nova/catalog/mast_geometry.json) carries poloidal angle pi/2 for all 78 primary probes from the L1 source; the vacuum-response fit (nova/imas/mast_vacuum_response.py, figures under docs/figures/mast-source-resolution/) identified the obr family as radial with a decisive held-out margin. The refined artifact already carries the correction in its evidence ledger; the canonical registry does not.
+
+Work
+1. Re-derive the per-family axis evidence from the vacuum fit and any independent source (diagnostic paper family naming: obr = outboard radial).
+2. Correct the registry payload; the physical digest WILL change — update every digest pin deliberately (registry tests, seed/authoring tests, artifact identity chain) and record old→new digest mapping as a representation-alias-style provenance note.
+3. Republish the artifact; verify the fitted evidence and the corrected registry now agree; re-run the focused suites and the integrated lane.
+4. Notify downstream consumers (ambix identity seam pins the physical digest as provenance) of the digest change with the mapping.
+
+Done when
+- Registry and artifact agree on every probe axis with evidence; the digest change is mapped, test-pinned and pushed; no consumer silently resolves the old digest.</pre>
+    </article>
 </section>
 <section data-reckon="research" id="research" class="r-research-list">
 <h2><span class="sec">§</span> Research</h2>
@@ -275,6 +295,9 @@ Done when
 </div>
 <div class="r-comment" data-section="_top" data-id="c-mast-provisional-artifact-landed" data-who="reckon-ship" data-when="2026-08-03">
     <div class="r-comment-body">Cutover items 1–2 landed on nova main ac42194c: the evidence schema now distinguishes measured, published, generated, fitted and unresolved states without perturbing the physical digest (76cf833561e602a7, test-pinned before/after seeding and publication), and one content-addressed provisional artifact publishes with documented circuit relations and nominal passive material parameters (steel and Inconel resistivity intervals; 12 single-section family resistances with bounds; unresolved discrete signs/poses kept explicit). Integrated default lane 3,466 passed. The vacuum-shot generate/refine node and the Ambix consumer-cutover mechanics node are in flight; the frozen six-shot gate was found to carry no pre-registered numeric tolerances, so tolerance registration from the committed baseline stamp is now an explicit cutover work item. Full record: docs/research/mast-provisional-artifact-landed.html.</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-mast-vacuum-refinement-landed" data-who="reckon-ship" data-when="2026-08-04">
+    <div class="r-comment-body">Cutover item 3 landed at nova ee107ed4: provenance-pinned vacuum cohort (400 admitted of 17,111 with refusal reasons; held-out split before fitting; the full all-circuit excitation family withheld), identifiable-block fits (turns for 11 of 13 coils, held-out variance 0.9889; coil_cases regrouped 32→10 by enclosure; one separable passive decay pattern 23–72 ms), and a refined content-addressed artifact (semantic identity c3847ffc…7306) with the physical and registry digests unchanged. Structural negative results recorded for the 150/330 bank assignment, toroidal-probe orientation and saddle sign. Remaining cutover items 4–6 (consumer rewiring flip-on, frozen six-shot after-path parity, zero-import donor retirement) are the sprint's final node, blocked only on the P6 effective-turns adjudication now folded into that node.</div>
 </div>
 </section>
 </main>

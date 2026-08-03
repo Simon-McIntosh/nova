@@ -9,6 +9,12 @@ from pathlib import Path
 import pytest
 
 import nova.imas.mast_artifact as mast_artifact_module
+from nova.imas.machine_evidence import (
+    EvidenceError,
+    EvidenceRecord,
+    FieldEvidence,
+    SourceReference,
+)
 from nova.imas.mast_artifact import (
     MANIFEST_FILENAME,
     OCI_ARTIFACT_TYPE,
@@ -29,6 +35,29 @@ from nova.imas.mast_artifact import (
 
 REGISTRY_DIGEST = "a" * 64
 PHYSICAL_DIGEST = "b" * 16
+SOURCE = SourceReference(
+    title="A machine description",
+    url="https://example.invalid/machine.pdf",
+    locator="p. 7",
+    machine="mast",
+    text_verified=True,
+)
+MEASURED_FIELD = EvidenceRecord(
+    path="wall/description_2d/limiter/unit/outline",
+    evidence=FieldEvidence.MEASURED,
+    first_shot=11766,
+    last_shot=30471,
+    statement="the limiter contour is the catalog wall cycle",
+    source=SOURCE,
+)
+UNRESOLVED_FIELD = EvidenceRecord(
+    path="tf/r0",
+    evidence=FieldEvidence.UNRESOLVED,
+    first_shot=11766,
+    last_shot=30471,
+    statement="the official reference radius is not sourced",
+    assumptions=("no document states the machine constant",),
+)
 
 
 def _write_bundle(path: Path) -> None:
@@ -42,6 +71,7 @@ def _manifest(
     source: Path,
     *,
     complete: bool = False,
+    field_evidence=(MEASURED_FIELD,),
 ) -> MachineArtifactManifest:
     gaps = () if complete else ("toroidal probe orientation is unresolved",)
     return create_machine_artifact_manifest(
@@ -59,6 +89,7 @@ def _manifest(
         ),
         complete=complete,
         unresolved_gaps=gaps,
+        field_evidence=field_evidence,
     )
 
 
@@ -556,6 +587,79 @@ def test_malformed_hashes_and_unsafe_source_entries_are_rejected(
             complete=False,
             unresolved_gaps=("source gap",),
         )
+
+
+def test_field_evidence_survives_the_manifest_round_trip(tmp_path: Path) -> None:
+    _, stored = _materialized(tmp_path)
+
+    restored = resolve_machine_artifact(
+        tmp_path / "cache",
+        stored.digest,
+        allow_incomplete=True,
+    ).manifest
+
+    assert restored.field_evidence == (MEASURED_FIELD,)
+    assert restored.evidence.state_counts()["measured"] == 1
+    assert restored == stored.manifest
+
+
+def test_complete_artifact_cannot_carry_an_unresolved_field(tmp_path: Path) -> None:
+    source = tmp_path / "source"
+    _write_bundle(source)
+
+    with pytest.raises(MachineArtifactError, match="unresolved fields: tf/r0"):
+        _manifest(source, complete=True, field_evidence=(UNRESOLVED_FIELD,))
+
+    incomplete = _manifest(source, field_evidence=(UNRESOLVED_FIELD, MEASURED_FIELD))
+    assert incomplete.evidence.paths_with_state(FieldEvidence.UNRESOLVED) == ("tf/r0",)
+
+
+def test_field_evidence_must_stay_inside_the_artifact_shot_extent(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "source"
+    _write_bundle(source)
+    outside = replace(MEASURED_FIELD, first_shot=11000)
+
+    with pytest.raises(MachineArtifactError, match="outside the artifact extent"):
+        _manifest(source, field_evidence=(outside,))
+
+
+def test_manifest_rejects_conflicting_evidence_for_one_field(tmp_path: Path) -> None:
+    source = tmp_path / "source"
+    _write_bundle(source)
+    conflicting = replace(
+        UNRESOLVED_FIELD,
+        path=MEASURED_FIELD.path,
+    )
+
+    with pytest.raises(EvidenceError, match="two evidence states"):
+        _manifest(source, field_evidence=(MEASURED_FIELD, conflicting))
+
+
+def test_semantic_identity_is_stable_across_container_rewrites(tmp_path: Path) -> None:
+    first = tmp_path / "first"
+    second = tmp_path / "second"
+    _write_bundle(first)
+    _write_bundle(second)
+    (second / "master.h5").write_bytes(b"master rewritten by the same authoring")
+
+    left = _manifest(first)
+    right = _manifest(second)
+
+    assert left.digest != right.digest
+    assert left.semantic_identity() == right.semantic_identity()
+    assert left.oci.tag == right.oci.tag
+
+
+def test_semantic_identity_changes_with_authored_semantics(tmp_path: Path) -> None:
+    source = tmp_path / "source"
+    _write_bundle(source)
+    plain = _manifest(source)
+    seeded = _manifest(source, field_evidence=(MEASURED_FIELD, UNRESOLVED_FIELD))
+
+    assert plain.semantic_identity() != seeded.semantic_identity()
+    assert plain.oci.tag == seeded.oci.tag
 
 
 def test_file_size_mismatch_is_reported_before_checksum(tmp_path: Path) -> None:

@@ -15,6 +15,18 @@ from pathlib import Path, PurePosixPath
 from stat import S_ISDIR, S_ISLNK, S_ISREG
 from typing import Any, Iterable, Mapping
 
+from nova.imas.machine_evidence import (
+    EvidenceLedger,
+    EvidenceRecord,
+    FieldEvidence,
+    MachineDescriptionError,
+    canonical_json,
+    require_bool,
+    require_exact_keys,
+    require_int,
+    require_string,
+)
+
 MANIFEST_FILENAME = "manifest.json"
 MANIFEST_SCHEMA = "nova-mast-machine-artifact"
 OCI_ARTIFACT_TYPE = "application/vnd.iter.nova.mast-machine-description.v1"
@@ -28,7 +40,7 @@ _OCI_REPOSITORY_PATTERN = re.compile(
 )
 _OCI_TAG_PATTERN = re.compile(r"[A-Za-z0-9_][A-Za-z0-9._-]{0,127}")
 _PORTABLE_COMPONENT_PATTERN = re.compile(r"[A-Za-z0-9_][A-Za-z0-9._-]*")
-_EVIDENCE_STATES = frozenset({"observed", "inherited", "missing"})
+_SHOT_RANGE_EVIDENCE_STATES = frozenset({"observed", "inherited", "missing"})
 _WINDOWS_DEVICE_NAMES = frozenset(
     {"CON", "PRN", "AUX", "NUL"}
     | {f"COM{index}" for index in range(1, 10)}
@@ -37,24 +49,12 @@ _WINDOWS_DEVICE_NAMES = frozenset(
 _RENAME_NO_REPLACE = 1
 
 
-class MachineArtifactError(ValueError):
+class MachineArtifactError(MachineDescriptionError):
     """Base exception for an invalid or altered machine artifact."""
 
 
 class IncompleteMachineArtifactError(MachineArtifactError):
     """Raised when operator-ready semantics are requested from incomplete data."""
-
-
-def _canonical_json(payload: Mapping[str, Any]) -> bytes:
-    return (
-        json.dumps(
-            payload,
-            ensure_ascii=True,
-            separators=(",", ":"),
-            sort_keys=True,
-        )
-        + "\n"
-    ).encode()
 
 
 def _sha256_bytes(data: bytes) -> str:
@@ -99,25 +99,15 @@ def _require_exact_keys(
     expected: set[str],
     context: str,
 ) -> None:
-    actual = set(row)
-    if actual != expected:
-        missing = sorted(expected - actual)
-        unexpected = sorted(actual - expected)
-        raise MachineArtifactError(
-            f"{context} fields differ: missing={missing}, unexpected={unexpected}"
-        )
+    require_exact_keys(row, expected, context, MachineArtifactError)
 
 
 def _require_string(value: Any, context: str) -> str:
-    if not isinstance(value, str):
-        raise MachineArtifactError(f"{context} must be a string")
-    return value
+    return require_string(value, context, MachineArtifactError)
 
 
 def _require_int(value: Any, context: str) -> int:
-    if isinstance(value, bool) or not isinstance(value, int):
-        raise MachineArtifactError(f"{context} must be an integer")
-    return value
+    return require_int(value, context, MachineArtifactError)
 
 
 def _validate_hex(value: str, lengths: tuple[int, ...], context: str) -> None:
@@ -267,7 +257,7 @@ class ArtifactShotRange:
         ):
             raise MachineArtifactError("last shot must not precede first shot")
         _validate_hex(self.physical_digest, (16, 64), "range physical digest")
-        if self.evidence not in _EVIDENCE_STATES:
+        if self.evidence not in _SHOT_RANGE_EVIDENCE_STATES:
             raise MachineArtifactError(f"unknown evidence state {self.evidence!r}")
 
     def as_dict(self) -> dict[str, Any]:
@@ -385,6 +375,18 @@ class MachineArtifactManifest:
     unresolved_gaps: tuple[str, ...]
     files: tuple[ArtifactFile, ...]
     oci: OciArtifactConvention
+    field_evidence: tuple[EvidenceRecord, ...] = ()
+
+    @property
+    def evidence(self) -> EvidenceLedger:
+        """Return the field-level provenance carried by this artifact."""
+
+        return EvidenceLedger(records=self.field_evidence)
+
+    def forward_model_blockers(self) -> tuple[str, ...]:
+        """Return unresolved fields that stop an axisymmetric forward model."""
+
+        return self.evidence.forward_model_blockers()
 
     def validate(self) -> None:
         """Reject ambiguous, incomplete, or non-canonical manifest state."""
@@ -446,7 +448,29 @@ class MachineArtifactManifest:
             raise MachineArtifactError(
                 "incomplete artifact must state at least one unresolved gap"
             )
+        self._validate_field_evidence()
         self.oci.validate(self.dd_version, self.physical_digest)
+
+    def _validate_field_evidence(self) -> None:
+        """Require field provenance consistent with the artifact's shot extent."""
+
+        ledger = self.evidence
+        ledger.validate()
+        first_shot = min(shot_range.first_shot for shot_range in self.shot_ranges)
+        last_shot = max(shot_range.last_shot for shot_range in self.shot_ranges)
+        for record in ledger.records:
+            if record.first_shot < first_shot or record.last_shot > last_shot:
+                raise MachineArtifactError(
+                    f"field {record.path!r} claims shots "
+                    f"{record.first_shot}-{record.last_shot} outside the artifact "
+                    f"extent {first_shot}-{last_shot}"
+                )
+        unresolved = ledger.paths_with_state(FieldEvidence.UNRESOLVED)
+        if self.complete and unresolved:
+            raise MachineArtifactError(
+                f"complete artifact cannot carry unresolved fields: "
+                f"{', '.join(unresolved)}"
+            )
 
     def as_dict(self) -> dict[str, Any]:
         """Return the complete canonical manifest payload."""
@@ -454,6 +478,7 @@ class MachineArtifactManifest:
         return {
             "complete": self.complete,
             "dd_version": self.dd_version,
+            "field_evidence": self.evidence.as_list(),
             "files": [artifact_file.as_dict() for artifact_file in self.files],
             "oci": self.oci.as_dict(),
             "physical_digest": self.physical_digest,
@@ -467,13 +492,33 @@ class MachineArtifactManifest:
         """Serialize to timestamp-free, byte-stable JSON."""
 
         self.validate()
-        return _canonical_json(self.as_dict())
+        return canonical_json(self.as_dict())
 
     @property
     def digest(self) -> str:
         """Return the content address of the canonical manifest."""
 
         return f"sha256:{_sha256_bytes(self.canonical_bytes())}"
+
+    def semantic_identity(self) -> str:
+        """Return the address of the authored semantics alone.
+
+        The stored files are dictionary containers, and their bytes carry
+        library metadata that changes between writes, so two authoring runs over
+        identical inputs publish different manifest digests.  This address covers
+        the dictionary pin, the physical and registry identity, the shot extent
+        and every field's provenance, and is therefore reproducible: it answers
+        whether two revisions describe the same machine in the same way, which a
+        file checksum cannot.
+        """
+
+        self.validate()
+        payload = {
+            key: value
+            for key, value in self.as_dict().items()
+            if key not in {"files", "oci"}
+        }
+        return f"sha256:{_sha256_bytes(canonical_json(payload))}"
 
     def require_complete(self) -> None:
         """Require operator-ready semantics without treating gaps as defaults."""
@@ -493,6 +538,7 @@ class MachineArtifactManifest:
         expected = {
             "complete",
             "dd_version",
+            "field_evidence",
             "files",
             "oci",
             "physical_digest",
@@ -525,7 +571,7 @@ class MachineArtifactManifest:
                 else _raise_row_error("shot range")
                 for item in shot_ranges
             ),
-            complete=row["complete"],
+            complete=require_bool(row["complete"], "complete", MachineArtifactError),
             unresolved_gaps=tuple(
                 _require_string(item, "unresolved gap") for item in gaps
             ),
@@ -536,6 +582,7 @@ class MachineArtifactManifest:
                 for item in files
             ),
             oci=OciArtifactConvention.from_dict(oci),
+            field_evidence=EvidenceLedger.from_list(row["field_evidence"]).records,
         )
         result.validate()
         if result.canonical_bytes() != data:
@@ -724,6 +771,7 @@ def create_machine_artifact_manifest(
     shot_ranges: Iterable[ArtifactShotRange],
     complete: bool,
     unresolved_gaps: Iterable[str],
+    field_evidence: Iterable[EvidenceRecord] = (),
 ) -> MachineArtifactManifest:
     """Hash an authored IDS directory into a canonical manifest."""
 
@@ -746,6 +794,7 @@ def create_machine_artifact_manifest(
         unresolved_gaps=tuple(sorted(unresolved_gaps)),
         files=files,
         oci=OciArtifactConvention.create(dd_version, physical_digest),
+        field_evidence=EvidenceLedger.create(field_evidence).records,
     )
     manifest.validate()
     return manifest

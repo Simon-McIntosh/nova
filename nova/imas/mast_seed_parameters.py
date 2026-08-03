@@ -86,8 +86,7 @@ def _toroidal_field_topology(locator: str) -> SourceReference:
 
 
 def _reduced_vessel_model(locator: str) -> SourceReference:
-    """Cite the MAST reconstruction study that maps three-dimensional eddy
-    currents onto two-dimensional vessel groupings."""
+    """Cite the reconstruction study behind the reduced vessel representation."""
 
     return SourceReference(
         title=(

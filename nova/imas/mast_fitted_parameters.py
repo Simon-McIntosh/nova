@@ -256,11 +256,17 @@ AXIAL_PROBE_FAMILIES = "ccbv,obv"
 AXIS_RESIDUAL_MARGIN = 1.35
 """How much worse the next-best sensitive-axis assignment predicts the cohort."""
 
-PASSIVE_DECAY_INTERVAL = (0.017, 0.047)
-"""Seconds of effective passive decay observed across the transient shots."""
+PASSIVE_DECAY_INTERVAL = (0.023, 0.072)
+"""Seconds of effective passive decay observed across the cohort's free decays."""
 
-PASSIVE_DOMINANT_SHARE = 0.86
+PASSIVE_DOMINANT_SHARE = 0.864
 """Smallest share of post-pulse signal power carried by one decay pattern."""
+
+PASSIVE_DECAY_SHOTS = 12
+"""Shots whose free decay the passive identification read."""
+
+PASSIVE_DECISIVE_ATTRIBUTIONS = 2
+"""Shots where one conductor group explained the dominant pattern outright."""
 
 CASE_GROUP_COUNT = 10
 """Coil-case groups the plates resolve into, one per poloidal-field coil set."""
@@ -515,10 +521,10 @@ def fitted_passive_records(
                 "the sixteen passive families"
             ),
             assumptions=(
-                "which family the dominant pattern most resembles changes with "
-                "which coil was pulsed, and the closest and second-closest families "
-                "score within a tenth of each other, so the pattern identifies a "
-                "neighbourhood rather than a conductor",
+                "one conductor group explains the dominant pattern outright on "
+                f"{PASSIVE_DECISIVE_ATTRIBUTIONS} of {PASSIVE_DECAY_SHOTS} shots, "
+                "and which group it is changes with which coil was pulsed, so the "
+                "pattern identifies a neighbourhood rather than a conductor",
                 "the per-family currents the store publishes are the "
                 "reconstruction's own wall-model output rather than an instrument "
                 "reading, so they cannot ground a fit",

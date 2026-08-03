@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 from pathlib import Path
 from typing import Any, Sequence
 
@@ -32,6 +33,13 @@ from nova.imas.mast_vacuum_cohort import (
     select_vacuum_cohort,
     store_shots,
     survey_store,
+)
+from nova.imas.mast_fitted_parameters import RADIAL_PROBE_FAMILY
+from nova.imas.mast_passive_response import (
+    case_grouping,
+    passive_coupling,
+    passive_groups,
+    survey_decays,
 )
 from nova.imas.mast_vacuum_response import (
     MINIMUM_STANDOFF,
@@ -382,6 +390,87 @@ def _reason_counts(cohort: VacuumCohort) -> dict[str, int]:
     return dict(sorted(counts.items()))
 
 
+def passive(arguments: argparse.Namespace) -> None:
+    """Decompose the free decays and report what the probes can separate."""
+
+    surveys = load_surveys(arguments.census)
+    cohort = select_vacuum_cohort(
+        surveys, held_out_families=[HELD_OUT_FAMILY], held_out_fraction=0.2
+    )
+    registry = MachineGeometryRegistry.default()
+    geometry = registry.select(REPRESENTATIVE_SHOT).configuration.geometry
+    probes = geometry["magnetics"]["poloidal_probes"]
+    channels = probe_channels(probes)
+    model = ResponseModel.build(
+        geometry,
+        probes,
+        channels,
+        radial_families=frozenset({RADIAL_PROBE_FAMILY}),
+    )
+    groups = passive_groups(geometry)
+    coupling = passive_coupling(groups, model.targets)
+
+    by_shot = {row.shot: row for row in surveys}
+    ranked = sorted(
+        (shot for shot in cohort.shots if by_shot[shot].excited_families),
+        key=lambda shot: -max(by_shot[shot].coil_peaks.values(), default=0.0),
+    )[: arguments.shots]
+    waveforms = [read_shot_waveforms(shot, store=arguments.store) for shot in ranked]
+    results = survey_decays(waveforms, model.targets, groups, coupling)
+
+    constants: list[float] = []
+    shares: list[float] = []
+    rows: list[dict[str, Any]] = []
+    decisive = 0
+    for spectrum, attributions in results:
+        dominant = spectrum.modes[0] if spectrum.modes else None
+        if dominant is None or not math.isfinite(dominant.time_constant):
+            continue
+        constants.append(dominant.time_constant)
+        shares.append(dominant.signal_fraction)
+        best = next(
+            (row for row in attributions if row.mode_index == dominant.index), None
+        )
+        decisive += 1 if best is not None and best.decisive else 0
+        rows.append(
+            {
+                "attribution": None if best is None else best.as_dict(),
+                "spectrum": spectrum.as_dict(),
+            }
+        )
+    if not constants:
+        raise SystemExit("no shot in the cohort admitted a readable free decay")
+
+    print(
+        f"free decay on {len(rows)} shots: dominant pattern carries "
+        f"{min(shares):.3f} to {max(shares):.3f} of the signal, decaying on "
+        f"{min(constants) * 1e3:.0f} to {max(constants) * 1e3:.0f} ms"
+    )
+    print(
+        f"one group explains the dominant pattern decisively on {decisive} of "
+        f"{len(rows)} shots, so a resistance per family is not supported"
+    )
+    grouping = case_grouping(geometry)
+    print(
+        f"coil cases group into {len(grouping)} sets covering "
+        f"{sum(len(v) for v in grouping.values())} plates"
+    )
+    payload = {
+        "case_grouping": {name: len(rows_) for name, rows_ in grouping.items()},
+        "decay_shots": list(ranked),
+        "decisive_attributions": decisive,
+        "dominant_share": [min(shares), max(shares)],
+        "group_names": [group.name for group in groups],
+        "results": rows,
+        "time_constant_interval": [min(constants), max(constants)],
+    }
+    arguments.passive_report.parent.mkdir(parents=True, exist_ok=True)
+    arguments.passive_report.write_text(
+        json.dumps(payload, indent=1, sort_keys=True) + "\n"
+    )
+    print(f"wrote {arguments.passive_report}")
+
+
 FIGURE_DIRECTORY = Path("docs/figures/mast-source-resolution")
 """Where the refinement's comparison figures are written."""
 
@@ -550,6 +639,15 @@ def main(argv: Sequence[str] | None = None) -> int:
     identify.add_argument("--held-out-fraction", type=float, default=0.2)
     identify.add_argument("--held-out-families", nargs="*", default=[HELD_OUT_FAMILY])
     identify.set_defaults(handler=fit)
+
+    decay = stages.add_parser("passive", help="decompose the free decays")
+    decay.add_argument("--shots", type=int, default=12)
+    decay.add_argument(
+        "--passive-report",
+        type=Path,
+        default=Path.home() / ".cache/nova-mast/mast_passive_decay.json",
+    )
+    decay.set_defaults(handler=passive)
 
     drawing = stages.add_parser("figures", help="draw the comparisons from a report")
     drawing.add_argument("--figures", type=Path, default=FIGURE_DIRECTORY)

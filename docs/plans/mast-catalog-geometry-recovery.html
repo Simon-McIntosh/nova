@@ -16,7 +16,7 @@
 <meta name="plan-effort" content="L">
 <meta name="plan-sprint" content="S2">
 <meta name="plan-owner" content="Simon McIntosh">
-<meta name="plan-modified" content="2026-08-02">
+<meta name="plan-modified" content="2026-08-03">
 <meta name="plan-blocks" content="">
 <meta name="plan-artifacts" content="nova/catalog/mast_geometry.json,nova/catalog/mast_geometry.py,nova/imas/mast_geometry.py,nova/imas/mast_artifact.py,nova/scripts/mast_catalog_geometry.py,tests/test_mast_catalog_geometry.py,tests/test_machine.py,tests/test_mast_artifact.py,docs/research/mast-catalog-geometry-evidence.html,docs/figures/mast-catalog-geometry/catalog-geometry-scan.json,docs/figures/mast-catalog-geometry/recovery-pipeline.svg,docs/research/mast-catalog-geometry-registry-ids-landed.html,docs/research/mast-diagnostic-force-balance-artifacts-landed.html,docs/figures/mast-diagnostic-force-balance/readiness-flow.svg">
 <meta name="plan-capability-version" content="1.0">
@@ -26,8 +26,8 @@
 <meta name="plan-capability-tool-autonomy" content="autonomous">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="elevated">
-<meta name="plan-impl" content="0.9">
-<meta name="plan-version" content="6">
+<meta name="plan-impl" content="0.92">
+<meta name="plan-version" content="7">
 <meta name="plan-commits" content="0f2b026fe8449465aabcf840673ed193472fd364,8c790cbc54a341e9dfe028918054254b9f903741,e286bb59cd456fa0ab8f9bb40a0b77a60319eec2,943c3069700397e48840691298c9c4bf2fac7412,f4e478e315e1786c55df733e95e110e1fd6eea87">
 </head>
 <body>
@@ -263,6 +263,8 @@ Done when
     <span class="r-research-title"><a href="/nova/mast-diagnostic-force-balance-artifacts-landed.html">MAST diagnostic, force-balance and artifact readiness evidence</a></span></div>
 <div class="r-research" data-id="r-mast-source-resolution" data-type="resolution-plan" data-source="Nova catalog evidence plus UKAEA machine-description, vacuum-calibration and equilibrium literature" data-added-by="reckon-edit" data-when="2026-08-02" data-url="/nova/mast-source-resolution.html">
     <span class="r-research-title"><a href="/nova/mast-source-resolution.html">MAST source-resolution programme</a></span></div>
+<div class="r-research" data-id="r-mast-provisional-artifact-landed" data-type="evidence" data-source="Nova implementation, integrated default lane, and read-only Ambix census" data-added-by="reckon-ship" data-when="2026-08-03" data-url="/nova/mast-provisional-artifact-landed.html">
+    <span class="r-research-title"><a href="/nova/mast-provisional-artifact-landed.html">MAST provisional machine artifact — landed</a></span></div>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s5" data-id="c-mast-registry-ids-landed" data-who="reckon-ship" data-when="2026-07-31T10:05:00+02:00">
@@ -270,6 +272,9 @@ Done when
 </div>
 <div class="r-comment" data-section="s5" data-id="c-mast-diagnostic-artifact-readiness" data-who="reckon-ship" data-when="2026-07-31T11:40:00+02:00">
     <div class="r-comment-body">The Nova-local geometry tranche advanced to corrected SI-angle semantics, additional DD 4.1.1 position authoring and a verified local artifact boundary at main f4e478e3. The physical digest remains 76cf833561e602a7; the registry digest is 73ecabaa030a476d80cc24c1fe35d038876a12454ebd7b0c7055aac1d3cf3ab2. Primary 150/330 degree probe-bank candidates remain discrete and unresolved, 61 additional poloidal and 36 toroidal probes are authored position-only, and auxiliary non-magnetics poses are explicitly outside machine-description scope. The artifact layer pins DD/registry/physical identity, rejects incomplete artifacts by default, publishes locally without clobber, and defines a deterministic OCI convention; no GHCR artifact was published. Independent focused gates passed and the integrated default lane passed 3,414 with 125 skipped and 536 deselected on job 1238999. The plan remains blocked on six physical/electrical/sign authoring semantics, Standard Name publication repair, explicit external repository authority, frozen benchmark parity and zero legacy imports.</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-mast-provisional-artifact-landed" data-who="reckon-ship" data-when="2026-08-03">
+    <div class="r-comment-body">Cutover items 1–2 landed on nova main ac42194c: the evidence schema now distinguishes measured, published, generated, fitted and unresolved states without perturbing the physical digest (76cf833561e602a7, test-pinned before/after seeding and publication), and one content-addressed provisional artifact publishes with documented circuit relations and nominal passive material parameters (steel and Inconel resistivity intervals; 12 single-section family resistances with bounds; unresolved discrete signs/poses kept explicit). Integrated default lane 3,466 passed. The vacuum-shot generate/refine node and the Ambix consumer-cutover mechanics node are in flight; the frozen six-shot gate was found to carry no pre-registered numeric tolerances, so tolerance registration from the committed baseline stamp is now an explicit cutover work item. Full record: docs/research/mast-provisional-artifact-landed.html.</div>
 </div>
 </section>
 </main>

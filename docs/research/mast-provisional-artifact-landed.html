@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="mast-provisional-artifact-landed">
+  <meta name="plan-title" content="MAST provisional machine artifact and cutover evidence base — landed">
+  <meta name="plan-summary" content="Verified landing record for the evidence-state contract, the seeded provisional DD 4.1.1 machine artifact, and the read-only Ambix benchmark/import census that scopes the axisymmetric consumer cutover.">
+  <meta name="plan-informs" content="mast-machine-description,mast-catalog-geometry-recovery,physics-spine-adoption">
+  <meta name="plan-recorded-at" content="2026-08-03">
+  <meta name="plan-verdict" content="The provisional artifact authors and reopens all five DD 4.1.1 IDSs with provenance-typed evidence and no fabricated fields; exactly one gap (pf_active turns_with_sign) blocks the artifact-built axisymmetric forward model and is the vacuum-fit target. The frozen six-shot gate has no pre-registered numeric tolerances yet, and the prior three-shot artifact mislabel traces to an unconditional shotset stamp.">
+  <title>MAST provisional machine artifact — landed</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+  <header>
+    <span class="badge badge-shipped">✓ landed 2026-08-03</span>
+    <h1>MAST provisional machine artifact and cutover evidence base</h1>
+    <p>The machine-description evidence contract now types every field as measured, published,
+    generated, fitted or unresolved, and the first seeded provisional DD&nbsp;4.1.1 artifact
+    publishes from it. A parallel read-only census of imas-ambix pinned the frozen six-shot
+    benchmark, the donor import graph and the identity seams the consumer cutover must migrate.</p>
+  </header>
+
+  <section class="quick-status">
+    <div class="status-card">
+      <strong>Evidence contract + seeds + authoring</strong>
+      <span class="badge badge-shipped">landed</span>
+      <p>Five commits, integrated fast-forward at <code>ac42194c</code>.</p>
+    </div>
+    <div class="status-card">
+      <strong>Integrated lane</strong>
+      <span class="badge badge-shipped">green</span>
+      <p>3,466 passed; 125 skipped; 536 deselected (sun_debug job 1240320).</p>
+    </div>
+    <div class="status-card">
+      <strong>Axisymmetric forward model</strong>
+      <span class="badge badge-pending">one gap</span>
+      <p>Only <code>pf_active</code> <code>turns_with_sign</code> blocks it; vacuum fitting in flight.</p>
+    </div>
+    <div class="status-card">
+      <strong>Ambix cutover scoping</strong>
+      <span class="badge badge-shipped">census complete</span>
+      <p>Benchmark manifest, tolerances gap, import census and seam inventory recorded.</p>
+    </div>
+  </section>
+
+  <figure>
+    <svg viewBox="0 0 880 260" role="img" style="max-width:100%;height:auto;font-family:system-ui">
+      <text x="440" y="22" text-anchor="middle" font-size="15" font-weight="600" fill="#111">Provisional artifact → refinement → cutover dependency</text>
+      <rect x="20" y="50" width="250" height="92" fill="none" stroke="#1a6b3c" stroke-width="1.5"/>
+      <text x="145" y="70" text-anchor="middle" font-size="13" font-weight="600" fill="#1a6b3c">Provisional artifact (landed)</text>
+      <text x="145" y="90" text-anchor="middle" font-size="11.5" fill="#333">5 IDSs, DD 4.1.1 exact, validate+reopen</text>
+      <text x="145" y="106" text-anchor="middle" font-size="11.5" fill="#333">60 evidence records; 0 fitted, 16 unresolved</text>
+      <text x="145" y="122" text-anchor="middle" font-size="11.5" fill="#333">physical digest 76cf8335… unchanged</text>
+      <rect x="330" y="50" width="250" height="92" fill="none" stroke="#8a5a00" stroke-width="1.5"/>
+      <text x="455" y="70" text-anchor="middle" font-size="13" font-weight="600" fill="#8a5a00">Vacuum generate/refine (in flight)</text>
+      <text x="455" y="90" text-anchor="middle" font-size="11.5" fill="#333">cohort → circuit turns/signs → passive R/L</text>
+      <text x="455" y="106" text-anchor="middle" font-size="11.5" fill="#333">→ discrete diagnostic choices</text>
+      <text x="455" y="122" text-anchor="middle" font-size="11.5" fill="#333">turns_with_sign is the unlock</text>
+      <rect x="640" y="50" width="220" height="92" fill="none" stroke="#888" stroke-width="1.5"/>
+      <text x="750" y="70" text-anchor="middle" font-size="13" font-weight="600" fill="#111">Ambix parity + retirement</text>
+      <text x="750" y="90" text-anchor="middle" font-size="11.5" fill="#333">frozen six-shot gate</text>
+      <text x="750" y="106" text-anchor="middle" font-size="11.5" fill="#333">zero-import donor deletion</text>
+      <text x="750" y="122" text-anchor="middle" font-size="11.5" fill="#333">3-D donors preserved</text>
+      <line x1="270" y1="96" x2="328" y2="96" stroke="#555" stroke-width="1.2" marker-end="url(#arr)"/>
+      <line x1="580" y1="96" x2="638" y2="96" stroke="#555" stroke-width="1.2" marker-end="url(#arr)"/>
+      <defs><marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#555"/></marker></defs>
+      <text x="440" y="180" text-anchor="middle" font-size="12" fill="#333">Cutover mechanics (tolerance registration, pin bump, digest-selection migration, stamping fix)</text>
+      <text x="440" y="198" text-anchor="middle" font-size="12" fill="#333">proceed in parallel with refinement; only the after-path parity run waits for fitted turns.</text>
+    </svg>
+    <figcaption>The one true serial edge is fitted coil turns: everything else in the cutover is
+    mechanics that can land beside the refinement.</figcaption>
+  </figure>
+
+  <h2>Outcomes — nova implementation</h2>
+  <table>
+    <thead><tr><th>Item</th><th>Verdict</th><th>Evidence</th><th>Commit</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Evidence-state contract (<code>nova/imas/machine_evidence.py</code>)</td>
+        <td><span class="badge badge-shipped">landed</span></td>
+        <td>measured | published | generated | fitted | unresolved, each carrying source,
+        assumptions, uncertainty and supported shot range; representation-only additions leave the
+        physical digest unchanged (test-pinned in three suites).</td>
+        <td><code>f9f86257</code></td>
+      </tr>
+      <tr>
+        <td>Circuit/material seed manifest (<code>nova/imas/mast_seed_parameters.py</code>)</td>
+        <td><span class="badge badge-shipped">landed</span></td>
+        <td>Published relations: P2–P5 upper/lower series, P6 anti-series, solenoid two parallel
+        circuits of alternating layers (turn current = ½ feed current). Nominal resistivity: steel
+        7.4e-7 [6.9e-7, 9.0e-7] Ω·m, Inconel 1.15e-6 [1.0e-6, 1.35e-6]; 12 single-section family
+        resistances 38.5–288.2 µΩ with intervals. MAST-U-only evidence rejected by test.</td>
+        <td><code>64376b22</code></td>
+      </tr>
+      <tr>
+        <td>Provisional DD 4.1.1 authoring + content-addressed publication</td>
+        <td><span class="badge badge-shipped">landed</span></td>
+        <td>pf_active, pf_passive, wall, magnetics, tf + master.h5; every IDS passes
+        <code>validate()</code> and reopens at exactly 4.1.1. Semantic identity
+        <code>680076be…d276e</code> is reproducible across authoring runs; artifact file digests are
+        not (HDF5 embeds write metadata) — revisions compare by semantic identity.</td>
+        <td><code>17d63744</code></td>
+      </tr>
+      <tr>
+        <td>GPFS publication limit named</td>
+        <td><span class="badge badge-shipped">landed</span></td>
+        <td>The atomic no-clobber rename (<code>RENAME_NOREPLACE</code>) returns EINVAL on GPFS
+        (/home and /work); artifact caches publish on node-local storage only. The publisher names
+        the cause; the guarantee was not weakened. A shared source of truth is the registry
+        (ghcr-oras decision), with per-node materialization.</td>
+        <td><code>b5409e5b</code></td>
+      </tr>
+      <tr>
+        <td>Tests</td>
+        <td><span class="badge badge-shipped">green</span></td>
+        <td>Focused 152/152 across seven suites; integrated default lane 3,466 passed / 0 failed
+        (+52 new) on sun_debug job 1240320. COCOS suite extended nowhere weakened.</td>
+        <td><code>ac42194c</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Per-gap disposition (the six physical gaps)</h2>
+  <table>
+    <thead><tr><th>Gap</th><th>Disposition</th><th>Detail</th></tr></thead>
+    <tbody>
+      <tr><td>Active turns / polarity / circuit topology</td>
+        <td><span class="badge badge-pending">partly promoted</span></td>
+        <td>Connection kinds published and authored for six circuits; turn magnitude, absolute
+        polarity, the DD connections node matrix and the P2 inner/outer pack link remain unset.
+        <strong>The only gap that blocks the artifact-built axisymmetric forward model</strong> —
+        it is the vacuum-fit target.</td></tr>
+      <tr><td>Passive material / resistance / topology</td>
+        <td><span class="badge badge-pending">bounded provisional</span></td>
+        <td>15/16 families carry generated resistivity with intervals; 12 single-section
+        resistances generated. Multi-section grouping (coil_cases, mid, ring) and the rodgr
+        material class stay unresolved rather than asserting an unsourced galvanic grouping.</td></tr>
+      <tr><td>Detailed TF winding geometry</td>
+        <td><span class="badge badge-shipped">not required for this lane</span></td>
+        <td>Topology published (copper inboard legs through the solenoid bore; dismantlable);
+        conductor elements unresolved and non-blocking, per the locked axisymmetric-TF decision.</td></tr>
+      <tr><td>Independent toroidal-probe orientation</td>
+        <td><span class="badge badge-pending">unresolved, non-blocking</span></td>
+        <td>36 probes position-only; angles unset.</td></tr>
+      <tr><td>Poloidal channel-to-bank assignment</td>
+        <td><span class="badge badge-pending">explicit discrete choice</span></td>
+        <td>Both catalog candidates retained (150°, 330°); no midpoint.</td></tr>
+      <tr><td>Saddle traversal sign</td>
+        <td><span class="badge badge-pending">explicit discrete choice</span></td>
+        <td>Direction-neutral geometry; both sign candidates carried; digest unchanged.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Standard-name delta (read-only)</h2>
+  <p>All eight machine-description names needed are absent from the live catalog
+  (coil current/turns, passive loop resistance/resistivity, vacuum R·B<sub>φ</sub>, probe toroidal
+  angle, toroidal-probe orientation, saddle traversal sign); they are recorded as proposals with
+  DD-path-validated attachments. The 4.1.0→4.1.1 provenance delta persists;
+  <code>get_facility_coverage("mast")</code> is empty (only mast-u configured). The 229 absent
+  catalog IDs and 3 wrong attachments from the last audit are carried forward, not re-measured.
+  No graph or catalog mutation was performed; publication remains with
+  <code>imas-standard-names:mast-semantic-source-repair</code>.</p>
+
+  <h2>Outcomes — imas-ambix read-only census (cutover scoping)</h2>
+  <table>
+    <thead><tr><th>Finding</th><th>Consequence</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Frozen six-shot gate is <code>spine_bench/shots.py</code>:
+        {21978, 21983, 21985, 21986, 21989, 22086}, one campaign signature, slices derived
+        (≤6 per shot, |Ip|&gt;200&nbsp;kA). <strong>No numeric parity tolerances exist anywhere in the
+        harness.</strong></td>
+        <td>Tolerances must be registered from the committed baseline stamp
+        (<code>…-0447fb2e0d-…</code>: axis 0.0234&nbsp;cm, LCFS 0.00828&nbsp;cm, profile RMS 0.01623,
+        converged/confined 1.0) before any parity claim; connectivity arm is not parity-clean
+        (converged 0.8333) — gate on the hard-read arms.</td>
+      </tr>
+      <tr>
+        <td>The mislabeled three-shot baseline traces to <code>runner.py</code> stamping
+        <code>shotset_version</code> unconditionally on <code>--shots</code> overrides; the
+        discriminator is <code>role: ad-hoc</code> rows.</td>
+        <td>Fix the stamp so overrides can never masquerade as the frozen set; reject any parity
+        artifact whose shot ids differ from the frozen six or whose rows carry ad-hoc roles.</td>
+      </tr>
+      <tr>
+        <td>True external donor coupling is 61 production/script files (102 with tests); zero
+        dynamic imports reach the donor set; the 3-D preserve set
+        (<code>filaments3d</code>, <code>ivc_geometry</code>, <code>sensor_toroidal</code>) is fully
+        severable; <code>cylinder</code>/<code>polygon</code>/<code>elliptic</code> are axisymmetric
+        retire candidates.</td>
+        <td>Leaf-first deletion order established; a purely static import census is sufficient
+        evidence for retirement gating.</td>
+      </tr>
+      <tr>
+        <td><code>SetupSignature.key</code> (four discretization counts + hash of raw efm arrays)
+        is byte-stability-locked because on-disk caches, benchmark stamps and trained checkpoints
+        resolve through it.</td>
+        <td>Physical-digest selection is a migration with a dual-read window, not a key rewrite;
+        replace with physical digest <code>76cf833561e602a7</code> + registry digest
+        <code>73ecabaa…3ab2</code> at the selection seams only.</td>
+      </tr>
+      <tr>
+        <td>The nova pin (<code>7ba65a59</code>) predates the machine artifact and is asserted in
+        three places (pyproject, uv.lock, dependency-contract test). A 3-arm before/after parity
+        pair (~61&nbsp;min) does not fit one 1&nbsp;h debug job.</td>
+        <td>Pin bump to <code>ac42194c</code> updates all three; parity pairs run 2-arm in one job
+        or 3-arm split across two.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>What's next</h2>
+  <p>Two nodes in flight: the vacuum-cohort generate/refine fit (turns/signs → passive R/L →
+  discrete diagnostic choices, held-out challenge, refined artifact revision) and the Ambix
+  cutover mechanics (tolerance registration, pin bump, digest-selection migration seam, stamping
+  fix, genuine before-stamp). The wave after lands the after-path parity run against the refined
+  artifact and the zero-import leaf-first donor retirement.</p>
+
+</main>
+</body>
+</html>

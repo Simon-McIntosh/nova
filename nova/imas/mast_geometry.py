@@ -32,6 +32,11 @@ from nova.imas.mast_artifact import (
     create_machine_artifact_manifest,
     materialize_machine_artifact,
 )
+from nova.imas.mast_fitted_parameters import (
+    RADIAL_PROBE_FAMILY,
+    authored_turns,
+    refined_evidence,
+)
 from nova.imas.mast_seed_parameters import (
     CIRCUIT_RELATIONS,
     loop_sections,
@@ -205,7 +210,21 @@ def _append_flux_loop(
         target.phi = float(phi)
 
 
-def _author_magnetics(factory: imas.IDSFactory, geometry: Mapping[str, Any]) -> Any:
+def _author_magnetics(
+    factory: imas.IDSFactory,
+    geometry: Mapping[str, Any],
+    *,
+    radial_families: frozenset[str] = frozenset(),
+) -> Any:
+    """Author the diagnostic set, optionally correcting a family's sensitive axis.
+
+    ``radial_families`` names the probe families the vacuum response placed along
+    the major radius.  The registry stores one poloidal angle for every probe and
+    cannot distinguish them, so an empty set reproduces the registry exactly and a
+    populated one carries a fitted orientation.  Nothing else about the probe
+    changes, so the geometric identity the artifact is keyed on is untouched.
+    """
+
     ids = _new_ids(factory, "magnetics")
     magnetics = geometry["magnetics"]
     loops = magnetics["flux_loops"]
@@ -245,7 +264,9 @@ def _author_magnetics(factory: imas.IDSFactory, geometry: Mapping[str, Any]) -> 
         probe.name = f"{row['family']}_{index}"
         probe.position.r = float(r)
         probe.position.z = float(z)
-        probe.poloidal_angle = float(poloidal_angle)
+        probe.poloidal_angle = (
+            0.0 if row["family"] in radial_families else float(poloidal_angle)
+        )
         probe.length = float(length)
     for index, (family, family_index, point) in enumerate(
         poloidal_points,
@@ -380,6 +401,131 @@ def author_provisional_ids(
     return bundle
 
 
+def _author_fitted_turns(ids: Any, turns: Mapping[str, float]) -> tuple[str, ...]:
+    """Write each measured coil's signed turn count, leaving the rest unset.
+
+    A coil the cohort could not see keeps an unset turn count rather than a
+    plausible one, because a forward model that reads a fabricated turn count
+    produces a field with no way to tell that it is wrong.  Which coils were left
+    unset is returned so the caller can carry it into the artifact's own gaps.
+    """
+
+    unset: list[str] = []
+    for coil in ids.coil:
+        name = str(coil.name)
+        value = turns.get(name)
+        if value is None:
+            unset.append(name)
+            continue
+        for element in coil.element:
+            element.turns_with_sign = float(value)
+    return tuple(sorted(unset))
+
+
+@dataclass(frozen=True)
+class RefinedIdsBundle:
+    """Machine-description IDSs carrying every value the vacuum cohort measured."""
+
+    selection: GeometrySelection
+    ids: Mapping[str, Any]
+    evidence: EvidenceLedger
+    authoring_gaps: tuple[str, ...]
+    unset_turns: tuple[str, ...]
+
+    def validate(self) -> None:
+        """Validate every IDS against its pinned dictionary and the ledger."""
+
+        for ids in self.ids.values():
+            ids.validate()
+        self.evidence.validate()
+
+
+def author_refined_ids(
+    selection: GeometrySelection,
+    *,
+    first_shot: int,
+    last_shot: int,
+) -> RefinedIdsBundle:
+    """Author the seeded description plus everything the vacuum cohort fixed."""
+
+    factory = imas.IDSFactory(version=DD_VERSION)
+    geometry = selection.configuration.geometry
+    pf_active = _author_pf_active(factory, geometry)
+    _author_circuits(pf_active)
+    unset = _author_fitted_turns(pf_active, authored_turns())
+    pf_passive = _author_pf_passive(factory, geometry)
+    _author_passive_seeds(pf_passive, geometry)
+    seed = seed_evidence(geometry, first_shot=first_shot, last_shot=last_shot)
+    gaps = tuple(
+        gap
+        for gap in selection.configuration.authoring_gaps
+        if not gap.startswith("active turns")
+    )
+    if unset:
+        gaps = (*gaps, f"turns are not sourced for {', '.join(unset)}")
+    bundle = RefinedIdsBundle(
+        selection=selection,
+        ids={
+            "pf_active": pf_active,
+            "pf_passive": pf_passive,
+            "wall": _author_wall(factory, geometry),
+            "magnetics": _author_magnetics(
+                factory,
+                geometry,
+                radial_families=frozenset({RADIAL_PROBE_FAMILY}),
+            ),
+            "tf": _author_toroidal_field(factory),
+        },
+        evidence=EvidenceLedger.create(
+            refined_evidence(seed.records, first_shot=first_shot, last_shot=last_shot)
+        ),
+        authoring_gaps=tuple(sorted(gaps)),
+        unset_turns=unset,
+    )
+    bundle.validate()
+    return bundle
+
+
+def publish_refined_artifact(
+    cache_directory: Path | str,
+    *,
+    registry: MachineGeometryRegistry | None = None,
+    shot: int = REPRESENTATIVE_SHOT,
+) -> VerifiedMachineArtifact:
+    """Author, round-trip and publish the refined content-addressed revision.
+
+    The revision differs from the seeded one in what the fields say, never in the
+    conductor geometry underneath, so the registry and physical digests it carries
+    are the same ones the seeded revision carried.  The manifest's semantic
+    identity is what moves, and that is the point: a consumer can tell the two
+    apart by identity without either of them claiming a different machine.
+    """
+
+    registry = registry or MachineGeometryRegistry.default()
+    shot_ranges = artifact_shot_ranges(registry)
+    selection = registry.select(shot)
+    bundle = author_refined_ids(
+        selection,
+        first_shot=min(row.first_shot for row in shot_ranges),
+        last_shot=max(row.last_shot for row in shot_ranges),
+    )
+    unresolved = bundle.evidence.paths_with_state(FieldEvidence.UNRESOLVED)
+    with tempfile.TemporaryDirectory() as work:
+        source = Path(work) / "machine_description"
+        write_and_reopen(bundle, source)
+        manifest = create_machine_artifact_manifest(
+            source,
+            dd_version=DD_VERSION,
+            registry_digest=registry.registry_digest,
+            physical_digest=selection.configuration.physical_digest,
+            shot_ranges=shot_ranges,
+            complete=not unresolved,
+            unresolved_gaps=bundle.authoring_gaps,
+            field_evidence=bundle.evidence.records,
+        )
+        return materialize_machine_artifact(source, cache_directory, manifest)
+
+
 def artifact_shot_ranges(
     registry: MachineGeometryRegistry,
 ) -> tuple[ArtifactShotRange, ...]:
@@ -432,7 +578,7 @@ def publish_provisional_artifact(
 
 
 def write_and_reopen(
-    bundle: CatalogIdsBundle | ProvisionalIdsBundle,
+    bundle: CatalogIdsBundle | ProvisionalIdsBundle | RefinedIdsBundle,
     path: Path | str,
 ) -> dict[str, Any]:
     """Write and reopen a bundle with the same pinned DD version."""

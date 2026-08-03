@@ -18,6 +18,8 @@ import json
 from pathlib import Path
 from typing import Any, Sequence
 
+import numpy as np
+
 
 from nova.catalog.mast_geometry import MachineGeometryRegistry
 from nova.imas.mast_vacuum_cohort import (
@@ -380,6 +382,139 @@ def _reason_counts(cohort: VacuumCohort) -> dict[str, int]:
     return dict(sorted(counts.items()))
 
 
+FIGURE_DIRECTORY = Path("docs/figures/mast-source-resolution")
+"""Where the refinement's comparison figures are written."""
+
+
+def figures(arguments: argparse.Namespace) -> None:
+    """Draw the comparisons the fit established, from the cached report."""
+
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    report = json.loads(arguments.report.read_text())
+    arguments.figures.mkdir(parents=True, exist_ok=True)
+    _draw_turn_counts(plt, report, arguments.figures / "fitted_turn_counts.svg")
+    _draw_held_out(plt, report, arguments.figures / "held_out_prediction.svg")
+    _draw_axis_scores(plt, report, arguments.figures / "probe_axis_assignment.svg")
+    print(f"wrote figures to {arguments.figures}")
+
+
+def _draw_turn_counts(plt: Any, report: dict[str, Any], path: Path) -> None:
+    """Show each coil's fitted turn count against the archive's own multiplier."""
+
+    rows = [row for row in report["turn_dispositions"]]
+    names = [row["family"] for row in rows]
+    positions = np.arange(len(rows))
+    figure, axes = plt.subplots(figsize=(9.0, 5.0), constrained_layout=True)
+    for index, row in enumerate(rows):
+        if not row["identified"]:
+            axes.text(
+                index,
+                0.5,
+                "not\nidentified",
+                ha="center",
+                va="center",
+                fontsize=8,
+                color="firebrick",
+            )
+            continue
+        value = row["multiplier"]
+        low, high = row["interval"]
+        counted = row["resolves_an_integer"]
+        axes.errorbar(
+            index,
+            value,
+            yerr=[[value - low], [high - value]],
+            fmt="o" if counted else "s",
+            color="tab:blue" if counted else "tab:orange",
+            capsize=4,
+            markersize=6,
+        )
+        if row["archive_multiplier"] is not None:
+            axes.plot(
+                index,
+                row["archive_multiplier"],
+                marker="_",
+                markersize=16,
+                color="black",
+                linestyle="none",
+            )
+    axes.set_xticks(positions)
+    axes.set_xticklabels(names, rotation=45, ha="right", fontsize=8)
+    axes.set_yscale("symlog", linthresh=10)
+    axes.set_ylabel("turns per ampere of the measured channel")
+    axes.set_title(
+        "Signed turn count from the vacuum response\n"
+        "circles counted to one integer, squares bounded only, "
+        "black bars the archive's own multiplier"
+    )
+    axes.grid(alpha=0.3)
+    figure.savefig(path)
+    plt.close(figure)
+
+
+def _draw_held_out(plt: Any, report: dict[str, Any], path: Path) -> None:
+    """Show how much better the fitted response predicts withheld shots."""
+
+    scores = report["held_out_scores"]
+    order = ["nominal_unit_turns", "fitted_multipliers", "refined_integers"]
+    labels = ["one turn per coil", "fitted multipliers", "authored values"]
+    figure, (left, right) = plt.subplots(
+        1, 2, figsize=(10.0, 4.2), constrained_layout=True
+    )
+    values = [scores[key]["variance_explained"] for key in order if key in scores]
+    left.bar(range(len(values)), values, color=["grey", "tab:blue", "tab:green"])
+    left.set_xticks(range(len(values)))
+    left.set_xticklabels(labels[: len(values)], rotation=15, ha="right", fontsize=9)
+    left.set_ylabel("held-out variance explained")
+    left.set_ylim(0.0, 1.0)
+    left.grid(alpha=0.3, axis="y")
+    left.set_title("Prediction on shots never fitted")
+
+    per_shot = scores.get("fitted_multipliers", {}).get(
+        "per_shot_variance_explained", {}
+    )
+    if per_shot:
+        shots = sorted(per_shot, key=int)
+        right.bar(range(len(shots)), [per_shot[s] for s in shots], color="tab:blue")
+        right.set_xticks(range(len(shots)))
+        right.set_xticklabels(shots, rotation=60, ha="right", fontsize=7)
+        right.set_ylabel("variance explained")
+        right.set_ylim(0.0, 1.0)
+        right.grid(alpha=0.3, axis="y")
+        right.set_title("Per held-out shot")
+    figure.savefig(path)
+    plt.close(figure)
+
+
+def _draw_axis_scores(plt: Any, report: dict[str, Any], path: Path) -> None:
+    """Show that one sensitive-axis assignment predicts the cohort best."""
+
+    rows = report["axis_scores"]
+    labels = ["+".join(row["radial_families"]) or "none radial" for row in rows]
+    values = [row["residual_rms"] for row in rows]
+    best = int(np.argmin(values))
+    figure, axes = plt.subplots(figsize=(6.5, 4.0), constrained_layout=True)
+    axes.bar(
+        range(len(values)),
+        values,
+        color=["tab:green" if i == best else "grey" for i in range(len(values))],
+    )
+    axes.set_xticks(range(len(values)))
+    axes.set_xticklabels(labels, rotation=20, ha="right", fontsize=9)
+    axes.set_ylabel("cohort residual [T]")
+    axes.set_title(
+        "Which probe families measure the radial component\n"
+        "lower is better; the winner is not a preference but a refit"
+    )
+    axes.grid(alpha=0.3, axis="y")
+    figure.savefig(path)
+    plt.close(figure)
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     """Run one refinement stage."""
 
@@ -415,6 +550,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     identify.add_argument("--held-out-fraction", type=float, default=0.2)
     identify.add_argument("--held-out-families", nargs="*", default=[HELD_OUT_FAMILY])
     identify.set_defaults(handler=fit)
+
+    drawing = stages.add_parser("figures", help="draw the comparisons from a report")
+    drawing.add_argument("--figures", type=Path, default=FIGURE_DIRECTORY)
+    drawing.set_defaults(handler=figures)
 
     arguments = parser.parse_args(argv)
     arguments.handler(arguments)

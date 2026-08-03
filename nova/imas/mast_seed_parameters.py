@@ -105,7 +105,7 @@ def _reduced_vessel_model(locator: str) -> SourceReference:
     )
 
 
-def _catalog(locator: str) -> SourceReference:
+def catalog_source(locator: str) -> SourceReference:
     """Cite the recovered catalog geometry that measures a placement."""
 
     return SourceReference(
@@ -426,7 +426,7 @@ def _active_records(first_shot: int, last_shot: int) -> list[EvidenceRecord]:
                 "each winding-pack outline is the subdivision-independent hull of "
                 "the named catalog conductor cells"
             ),
-            source=_catalog("level-2 pf_active named component arrays"),
+            source=catalog_source("level-2 pf_active named component arrays"),
         ),
         EvidenceRecord(
             path="pf_active/coil/element/turns_with_sign",
@@ -527,7 +527,7 @@ def _passive_records(
                 "each passive outline is the union of the named catalog sections and "
                 "is invariant under their subdivision"
             ),
-            source=_catalog("level-2 pf_passive named component arrays"),
+            source=catalog_source("level-2 pf_passive named component arrays"),
         ),
         EvidenceRecord(
             path="pf_passive/loop/element/turns_with_sign",
@@ -662,7 +662,7 @@ def _wall_records(first_shot: int, last_shot: int) -> list[EvidenceRecord]:
                 "the limiter contour is the catalog wall cycle, canonicalized "
                 "against start index and traversal direction"
             ),
-            source=_catalog("level-2 wall limiter arrays"),
+            source=catalog_source("level-2 wall limiter arrays"),
         )
     ]
 
@@ -702,7 +702,7 @@ def _magnetics_records(
                 f"{probes} primary probes and {extra_poloidal} additional poloidal "
                 "probes carry a catalog major radius and height"
             ),
-            source=_catalog("level-2 magnetics poloidal probe arrays"),
+            source=catalog_source("level-2 magnetics poloidal probe arrays"),
         ),
         EvidenceRecord(
             path="magnetics/b_field_pol_probe/poloidal_angle",
@@ -713,7 +713,7 @@ def _magnetics_records(
                 f"the sensitive-axis angle of the {probes} primary probes is joined "
                 "from the level-1 setup arrays and converted once to radians"
             ),
-            source=_catalog("level-1 magnetic probe orientation arrays"),
+            source=catalog_source("level-1 magnetic probe orientation arrays"),
         ),
         EvidenceRecord(
             path="magnetics/b_field_pol_probe/position/phi",
@@ -769,7 +769,7 @@ def _magnetics_records(
             statement=(
                 f"{toroidal} toroidal field probes carry a catalog position only"
             ),
-            source=_catalog("level-2 magnetics toroidal probe arrays"),
+            source=catalog_source("level-2 magnetics toroidal probe arrays"),
         ),
         EvidenceRecord(
             path="magnetics/b_field_phi_probe/toroidal_angle",
@@ -796,7 +796,7 @@ def _magnetics_records(
                 f"{loops} full flux loops carry a catalog position and a full "
                 "toroidal span"
             ),
-            source=_catalog("level-2 magnetics flux loop arrays"),
+            source=catalog_source("level-2 magnetics flux loop arrays"),
         ),
         EvidenceRecord(
             path="magnetics/flux_loop(saddle)/position",
@@ -807,7 +807,7 @@ def _magnetics_records(
                 f"{saddles} saddle paths carry {vertices} ordered catalog vertices, "
                 "canonicalized so the geometry is direction neutral"
             ),
-            source=_catalog("level-2 magnetics saddle path arrays"),
+            source=catalog_source("level-2 magnetics saddle path arrays"),
         ),
         EvidenceRecord(
             path="magnetics/flux_loop(saddle)/traversal_sign",

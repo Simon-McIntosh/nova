@@ -34,8 +34,8 @@ from nova.imas.mast_seed_parameters import (
 )
 from nova.imas.test_utilities import mark
 
-PHYSICAL_DIGEST = "76cf833561e602a7"
-REGISTRY_DIGEST = "73ecabaa030a476d80cc24c1fe35d038876a12454ebd7b0c7055aac1d3cf3ab2"
+PHYSICAL_DIGEST = "ca06c8f64481114f"
+REGISTRY_DIGEST = "7083e8029c879310d4b811ecc58f5eefdd40b2bfe01b4a1714b177b03a307366"
 FIRST_SHOT = 11695
 LAST_SHOT = 30473
 
@@ -93,7 +93,8 @@ def test_seeded_set_validates_and_reopens_at_the_pinned_dictionary(reopened) -> 
 @mark["imas"]
 def test_documented_circuit_grouping_reaches_the_dictionary(reopened) -> None:
     circuits = [
-        (str(circuit.name), str(circuit.type)) for circuit in reopened["pf_active"].circuit
+        (str(circuit.name), str(circuit.type))
+        for circuit in reopened["pf_active"].circuit
     ]
 
     assert circuits == [
@@ -230,7 +231,9 @@ def test_published_revision_verifies_but_is_not_operator_ready(tmp_path: Path) -
 
 
 @mark["imas"]
-def test_republishing_reproduces_the_semantics_not_the_container(tmp_path: Path) -> None:
+def test_republishing_reproduces_the_semantics_not_the_container(
+    tmp_path: Path,
+) -> None:
     first = publish_provisional_artifact(tmp_path / "first")
     second = publish_provisional_artifact(tmp_path / "second")
 

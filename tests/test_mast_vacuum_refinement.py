@@ -69,14 +69,14 @@ from nova.imas.mast_vacuum_response import (
 )
 
 REFINED_SEMANTIC_IDENTITY = (
-    "sha256:68f64209385139beb78f1135b29398eca569b5589216a403e6fa1589cf6cf351"
+    "sha256:85993ba9491bd16498d0c42d49c0f1dca3da493affcb55e78511b7e1f88fff16"
 )
 """Semantic address of the refined revision this worktree authors."""
 
-PHYSICAL_DIGEST = "76cf833561e602a7"
+PHYSICAL_DIGEST = "ca06c8f64481114f"
 """Conductor geometry the refinement must not disturb."""
 
-REGISTRY_DIGEST = "73ecabaa030a476d80cc24c1fe35d038876a12454ebd7b0c7055aac1d3cf3ab2"
+REGISTRY_DIGEST = "7083e8029c879310d4b811ecc58f5eefdd40b2bfe01b4a1714b177b03a307366"
 """Registry identity the refinement must not disturb."""
 
 DRIVEN_COLUMNS = 21
@@ -601,7 +601,7 @@ def test_fitted_evidence_is_a_valid_ledger():
     ledger = EvidenceLedger.create(fitted_evidence())
     ledger.validate()
     counts = ledger.state_counts()
-    assert counts["fitted"] == 13
+    assert counts["fitted"] == 12
     assert counts["unresolved"] == 6
 
 

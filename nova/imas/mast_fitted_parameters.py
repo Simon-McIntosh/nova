@@ -248,10 +248,10 @@ P6_ISOLATING_SHOTS = 3
 """Plasma-free shots that both isolate and sustain a P6 coil."""
 
 RADIAL_PROBE_FAMILY = "obr"
-"""Probe family whose sensitive axis the cohort placed along the major radius."""
+"""Probe family whose sensitive axis lies along the major radius."""
 
 AXIAL_PROBE_FAMILIES = "ccbv,obv"
-"""Probe families whose sensitive axes the cohort left along the machine axis."""
+"""Probe families whose sensitive axes lie along the machine axis."""
 
 AXIS_RESIDUAL_MARGIN = 1.35
 """How much worse the next-best sensitive-axis assignment predicts the cohort."""
@@ -398,24 +398,25 @@ def fitted_diagnostic_records(
     return [
         EvidenceRecord(
             path=f"magnetics/b_field_pol_probe({RADIAL_PROBE_FAMILY})/poloidal_angle",
-            evidence=FieldEvidence.FITTED,
+            evidence=FieldEvidence.MEASURED,
             first_shot=first_shot,
             last_shot=last_shot,
             statement=(
-                "refitting the whole cohort under each sensitive-axis assignment "
-                "puts this family's axis along the major radius, predicting the "
-                f"probes {AXIS_RESIDUAL_MARGIN:.2f} times better in residual than "
-                "the next assignment and leaving the other two families axial"
+                "the level-1 store puts this family's sensitive axis along the major "
+                "radius, and refitting the whole cohort under each assignment "
+                f"predicts the probes {AXIS_RESIDUAL_MARGIN:.2f} times better in "
+                "residual that way round than the other"
             ),
             assumptions=(
-                "the registry carries one poloidal angle for all seventy-eight "
-                "probes, so which families measure the radial component is not "
-                "recorded in it and has to be decided by prediction",
-                "an axis assigned the wrong way round predicts a field component "
-                "the probe never saw and no multiplier can rescue it, which is what "
-                "makes the comparison decisive rather than a preference",
+                "nineteen of the store's seventy-eight probe positions carry two "
+                "probes, one radial and one axial, so a placement match that "
+                "resolves a tie by array order takes the axial partner's angle and "
+                "reports a component the radial probe never saw",
+                "an axis assigned the wrong way round cannot be rescued by any "
+                "multiplier, which is what lets the cohort confirm the store rather "
+                "than merely prefer one reading of it",
             ),
-            source=_vacuum_fit("sensitive-axis assignment scored on the cohort"),
+            source=catalog_source("level-1 magnetics named probe arrays"),
             uncertainty=Uncertainty(lower=0.0, upper=0.0, unit="rad"),
         ),
         EvidenceRecord(
@@ -597,12 +598,11 @@ be filled at all, which stops being true once the supply columns are dropped: th
 coil-to-coil junctions the sources fix are authorable without any supply, and
 per-circuit records take over from the one that denied them.
 
-The probe sensitive axis is replaced for a different and stronger reason.  The
-seed records it as measured for all seventy-eight probes, because the registry
-carries one angle for all of them; the vacuum response shows that angle is wrong
-for the nineteen radial probes.  Leaving the blanket record standing beside the
-fitted one would let the ledger claim the same quantity was both measured and
-corrected, so it is narrowed to the families it is actually right for.
+The probe sensitive axis is replaced for a different reason.  The seed records one
+angle for all seventy-eight probes, which stops being true once the radial family
+carries its own: the store gives nineteen outboard probes an axis along the major
+radius and the rest an axial one.  A blanket record would now assert a uniformity
+the machine does not have, so it is narrowed to one record per axis.
 """
 
 

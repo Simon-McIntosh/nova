@@ -5,6 +5,7 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+import shapely
 
 import nova.catalog.mast_geometry as mast_geometry
 from nova.catalog.mast_geometry import (
@@ -151,14 +152,70 @@ def test_packaged_registry_identity_is_pinned_by_value() -> None:
     registry = MachineGeometryRegistry.default()
     configuration = next(iter(registry.configurations.values()))
 
-    assert configuration.physical_digest == "76cf833561e602a7"
-    assert physical_digest(dict(configuration.geometry)) == "76cf833561e602a7"
+    assert configuration.physical_digest == "ca06c8f64481114f"
+    assert physical_digest(dict(configuration.geometry)) == "ca06c8f64481114f"
     assert registry.registry_digest == (
-        "73ecabaa030a476d80cc24c1fe35d038876a12454ebd7b0c7055aac1d3cf3ab2"
+        "7083e8029c879310d4b811ecc58f5eefdd40b2bfe01b4a1714b177b03a307366"
     )
     assert {shot_range.physical_digest for shot_range in registry.ranges} == {
-        "76cf833561e602a7"
+        "ca06c8f64481114f"
     }
+
+
+def test_registry_records_the_identity_it_replaced() -> None:
+    registry = MachineGeometryRegistry.default()
+
+    superseded = registry.provenance["superseded_physical_digests"]
+
+    assert set(superseded) == {"76cf833561e602a7"}
+    assert "76cf833561e602a7" not in registry.configurations
+    statement = superseded["76cf833561e602a7"]
+    assert "radial and vertical extents" in statement
+    assert "poloidal angle" in statement
+
+
+def test_outboard_radial_probes_measure_the_radial_component() -> None:
+    """Pin the sensitive axis the level-1 store gives each probe family.
+
+    Nineteen outboard probes share a position with an axial partner, so a
+    placement match that breaks the tie by array order hands them the partner's
+    angle and they report the wrong field component.
+    """
+
+    geometry = next(
+        iter(MachineGeometryRegistry.default().configurations.values())
+    ).geometry
+    angles: dict[str, set[float]] = {}
+    for probe in geometry["magnetics"]["poloidal_probes"]:
+        angles.setdefault(probe["family"], set()).add(probe["pose"][2])
+
+    assert angles["obr"] == {0.0}
+    assert angles["ccbv"] == {round(float(np.pi / 2), 5)}
+    assert angles["obv"] == {round(float(np.pi / 2), 5)}
+
+
+def test_coil_case_plates_enclose_the_windings_they_surround() -> None:
+    """Pin plate extents against the exchange that turns a case into a pinwheel.
+
+    A case plate is thin across its own face: reading the two extents the wrong
+    way round swings each plate through the winding pack it should sit outside.
+    """
+
+    geometry = next(
+        iter(MachineGeometryRegistry.default().configurations.values())
+    ).geometry
+    plates = shapely.from_wkb(
+        bytes.fromhex(geometry["passive_components"]["coil_cases"])
+    )
+    packs = [
+        shapely.from_wkb(bytes.fromhex(outline))
+        for outline in geometry["active_components"].values()
+    ]
+
+    overlap = sum(plates.intersection(pack).area for pack in packs)
+
+    assert plates.area == pytest.approx(0.0192, abs=5e-4)
+    assert overlap / plates.area < 0.01
 
 
 def test_registry_shot_lookup_separates_evidence_from_identity() -> None:

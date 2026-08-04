@@ -80,6 +80,38 @@ _PASSIVE_COMPONENTS = (
     "uhorw",
     "vertw",
 )
+SUPERSEDED_PHYSICAL_DIGESTS = {
+    "76cf833561e602a7": (
+        "recovered before two source-reading corrections: every coil-case plate "
+        "exchanged its radial and vertical extents about its own centre, and the "
+        "outboard radial probe family carried the poloidal angle of the axial probe "
+        "it shares a position with"
+    ),
+}
+"""Canonical identities a corrected reading of the same sources has replaced.
+
+A consumer holding one of these has a description of this machine, not of another
+one, so it needs the mapping rather than a lookup failure.
+"""
+
+_RADIAL_PROBE_FAMILIES = ("obr",)
+"""Poloidal probe families the level-2 store names for the radial component.
+
+Outboard probes are installed as pairs reading the two poloidal components at one
+position, so position alone cannot say which member of a pair a named family is.
+The family name carries that, and the level-1 angles confirm it: the store gives
+exactly as many radial angles as this family has members, all at its positions.
+"""
+
+_TRANSPOSED_EXTENT_FAMILIES = ("coil_cases",)
+"""Passive families whose source width and height name the opposite axis.
+
+Every other family measures width across the major radius.  Read that way a case
+plate turns broadside and sweeps through the winding pack it should sit outside;
+read across, each group of plates closes into an enclosure whose interior holds
+its coil, and the plate faces meet edge to edge.
+"""
+
 _MAGNETICS_SUFFIXES = (
     "_r",
     "_z",
@@ -678,11 +710,14 @@ def _passive_payload(group: zarr.Group) -> dict[str, str]:
     for stem in stems:
         r = _array(group, f"{stem}_r")
         zeros = np.zeros_like(r, dtype=float)
+        across_r, across_z = f"{stem}_width", f"{stem}_height"
+        if stem in _TRANSPOSED_EXTENT_FAMILIES:
+            across_r, across_z = across_z, across_r
         payload[stem] = passive_component_geometry(
             r,
             _array(group, f"{stem}_z"),
-            _array(group, f"{stem}_width"),
-            _array(group, f"{stem}_height"),
+            _array(group, across_r),
+            _array(group, across_z),
             (
                 _array(group, f"{stem}_shapeAngle1")
                 if f"{stem}_shapeAngle1" in group
@@ -716,6 +751,49 @@ def _nearest_values(
     return result
 
 
+def _axis_offset_deg(angles_deg: np.ndarray, wanted_deg: float) -> np.ndarray:
+    """Return how far each angle's axis lies from ``wanted_deg``, ignoring sense.
+
+    A sensitive axis is the same line whichever way the probe is wired, so the
+    comparison is modulo half a turn.
+    """
+
+    shifted = (np.asarray(angles_deg, dtype=float) - wanted_deg + 90.0) % 180.0
+    return np.abs(shifted - 90.0)
+
+
+def _probe_axis_angles(
+    target_r: np.ndarray,
+    target_z: np.ndarray,
+    source_r: np.ndarray,
+    source_z: np.ndarray,
+    angles_deg: np.ndarray,
+    *,
+    radial: bool,
+    maximum_distance: float = 0.03,
+) -> np.ndarray:
+    """Take each named probe's angle from the source probe on its own axis.
+
+    Where two source probes share a position the placement match is a tie, and
+    resolving it by array order hands both named families the same angle -- so one
+    of them reports a component its probe never reads.  The requested axis breaks
+    the tie; a position carrying a single source probe is unaffected.
+    """
+
+    result = np.full(np.asarray(target_r).shape, np.nan, dtype=float)
+    source_r, source_z, angles_deg = _finite_rows(source_r, source_z, angles_deg)
+    wanted = 0.0 if radial else 90.0
+    for index, (r, z) in enumerate(zip(target_r, target_z, strict=True)):
+        distance = np.hypot(source_r - r, source_z - z)
+        within = np.flatnonzero(distance <= maximum_distance)
+        if within.size == 0:
+            continue
+        offset = _axis_offset_deg(angles_deg[within], wanted)
+        nearest = within[np.lexsort((distance[within], offset))[0]]
+        result[index] = float(angles_deg[nearest])
+    return result
+
+
 def _source_angles_to_radians(values: Any) -> np.ndarray:
     """Convert catalog angles to the registry's canonical SI unit."""
 
@@ -731,12 +809,13 @@ def _magnetics_payload(level1: zarr.Group, level2: zarr.Group) -> dict[str, Any]
         stem = f"b_field_pol_probe_{family}"
         r = _array(level2, f"{stem}_r").astype(float)
         z = _array(level2, f"{stem}_z").astype(float)
-        angles = _nearest_values(
+        angles = _probe_axis_angles(
             r,
             z,
             _array(efm, "magpr_r"),
             _array(efm, "magpr_z"),
             _array(efm, "magpr_ang"),
+            radial=family in _RADIAL_PROBE_FAMILIES,
         )
         lengths = _array(level2, f"{stem}_length").astype(float)
         phi_1 = _array(level2, f"{stem}_phi_1").astype(float)
@@ -989,6 +1068,7 @@ def registry_payload(
                 "edd753d282903679": 582,
                 "1cb6f2ee742c4ee4": 10042,
             },
+            "superseded_physical_digests": SUPERSEDED_PHYSICAL_DIGESTS,
         },
     }
     payload["registry_digest"] = stable_digest(payload)

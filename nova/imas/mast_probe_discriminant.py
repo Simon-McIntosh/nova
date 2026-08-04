@@ -195,8 +195,8 @@ class DiscriminantStatistics:
         if self.family_count < MINIMUM_FAMILIES:
             return False
         if self.gain_standard_error <= 0.0:
-            return self.gain_spread > 0.0
-        return self.gain_spread > SPREAD_SIGNIFICANCE * self.gain_standard_error
+            return bool(self.gain_spread > 0.0)
+        return bool(self.gain_spread > SPREAD_SIGNIFICANCE * self.gain_standard_error)
 
     @property
     def near_field_contrast(self) -> float:
@@ -208,13 +208,13 @@ class DiscriminantStatistics:
     def rigid_fit_reaches_floor(self) -> bool:
         """Return whether a gain-and-tilt fit explains the channel to its floor."""
 
-        return self.rigid_residual <= FLOOR_MULTIPLE * self.noise_floor
+        return bool(self.rigid_residual <= FLOOR_MULTIPLE * self.noise_floor)
 
     @property
     def tilt_admissible(self) -> bool:
         """Return whether the fitted angle is small enough to be a mounting error."""
 
-        return abs(self.tilt) <= MAXIMUM_TILT
+        return bool(abs(self.tilt) <= MAXIMUM_TILT)
 
     @property
     def tilt_identified(self) -> bool:
@@ -222,7 +222,7 @@ class DiscriminantStatistics:
 
         if not self.tilt_admissible or self.tilt_standard_error <= 0.0:
             return False
-        return (
+        return bool(
             abs(self.tilt) > SPREAD_SIGNIFICANCE * self.tilt_standard_error
             and self.tilt_variance_removed > 0.5
         )

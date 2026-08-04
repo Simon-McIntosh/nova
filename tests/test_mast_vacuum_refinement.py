@@ -70,9 +70,16 @@ from nova.imas.mast_vacuum_response import (
 )
 
 REFINED_SEMANTIC_IDENTITY = (
-    "sha256:c20bc7e157fa117318883826373f41ea03e8539011b16c0265cc88d4cb203f06"
+    "sha256:3aba565a2e407a621c38ec1abc0d458752bf5be85a225e8f8b077c7bd3d9ea78"
 )
-"""Semantic address of the refined revision this worktree authors."""
+"""Semantic address of the refined revision this worktree authors.
+
+It moves whenever the evidence ledger gains a record, which is the behaviour the
+identity split exists for: what the description asserts about a field has changed
+while the conductor geometry has not, so :data:`PHYSICAL_DIGEST` and
+:data:`REGISTRY_DIGEST` are pinned beside it and a change in either is a fault
+rather than an update.
+"""
 
 PHYSICAL_DIGEST = "ca06c8f64481114f"
 """Conductor geometry the refinement must not disturb."""
@@ -649,9 +656,9 @@ def test_fitted_evidence_is_a_valid_ledger():
     ledger.validate()
     counts = ledger.state_counts()
     assert counts["published"] == 10
-    assert counts["fitted"] == 2
-    assert counts["measured"] == 4
-    assert counts["unresolved"] == 6
+    assert counts["fitted"] == 4
+    assert counts["measured"] == 6
+    assert counts["unresolved"] == 10
 
 
 def test_refinement_narrows_the_forward_model_blockers(geometry):

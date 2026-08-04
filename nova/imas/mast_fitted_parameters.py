@@ -543,8 +543,266 @@ either number could be said to disagree with the other.
 ERROR_FIELD_SHOTS = 262
 """Plasma-free shots that deliberately drove a non-axisymmetric coil."""
 
-ERROR_FIELD_PEAK = 7843.0
-"""Strongest current any error-field coil channel carried on those shots [A]."""
+ERROR_FIELD_PEAK = 12054.4
+"""Strongest current any error-field coil channel carried in the archive [A].
+
+Larger than the strongest the later campaigns reach, because the store names
+these coils two ways and the earlier scheme is acquired on its own clock inside
+the same group: a reader that knows only the later names sees the earlier
+campaigns as carrying no such coil, and those campaigns hold the two strongest
+shots in the archive.  Both schemes are read in
+:mod:`nova.imas.mast_error_field_screen`.
+"""
+
+ERROR_FIELD_ISOLATED_SHOTS = 26
+"""Shots that drove a non-axisymmetric coil with every poloidal coil quiet.
+
+These make the coupling measurable directly rather than inferred: with nothing
+else driving, a probe's regression on the error-field waveform IS that channel's
+response per ampere.
+"""
+
+ERROR_FIELD_ARRAY_RESPONSE = 2.2e-9
+"""Median probe response per ampere of non-axisymmetric current [T/A].
+
+Measured across seventy-seven channels on the isolated shots.  At the strongest
+excitation the archive contains it puts twenty-seven microtesla on a typical
+channel, against a pooled sensor floor of :data:`SENSOR_FLOOR` -- fourteen times
+below.  So the non-axisymmetric drive present in this archive is not merely
+screened out of the calibration, it is invisible to these sensors.
+"""
+
+ERROR_FIELD_COUPLED_CHANNEL = "obr17"
+"""The one channel whose coupling to the excitation is real and reproducible."""
+
+ERROR_FIELD_COUPLED_RESPONSE = 1.1238e-7
+"""That channel's response per ampere [T/A], median over fourteen shots.
+
+Fifty times its own neighbours' and stable to twenty-eight percent across shots,
+tracking the current rather than its derivative.  A field cannot do that: the
+array is wound at seventy-five millimetre pitch and no coil produces a field that
+varies fiftyfold over that distance, so this is a conductor shared with the
+excitation.  It is screened like a field anyway -- the channel reports it either
+way -- but it carries no field pattern and therefore no information about where
+the array sits.
+"""
+
+ERROR_FIELD_MATCHED_PAIRS = 12
+"""Shot pairs alike in poloidal drive and unalike in the non-axisymmetric one.
+
+Curated on the coils' own peak currents rather than on an excitation label, and
+matched to between seven parts in a thousand and four percent.  They are the route
+that needs no model of the error-field coil: subtract the two readings and every
+axisymmetric term cancels to the accuracy the currents match.
+"""
+
+ERROR_FIELD_PAIR_SENSITIVITY = (1.03e-3, 2.42e-3)
+"""Spread of the median pair difference across the matched set [T].
+
+Two point seven to six point three times the sensor floor, and it is NOT the
+excitation: over the ten pairs measured, the error-field current spans four
+percent while the difference spans eighty-nine, and the correlation between them
+is -0.16.  What the difference measures is how unalike two different shots are in
+waveform once their peaks have been matched, which sets the route's sensitivity at
+about a millitesla -- a hundred and fifty times above the seven microtesla the
+excitation is worth at these currents.
+
+So the matched-pair route is curated and reported and cannot answer the question,
+while the isolated shots -- which drive the same coils with every poloidal coil
+quiet, so nothing has to cancel -- answer it at
+:data:`ERROR_FIELD_ARRAY_RESPONSE`.  Recording both is what makes the negative
+result usable: a later reader tempted by matched pairs can see the bound rather
+than rediscover it.
+"""
+
+ERROR_FIELD_COUPLED_THRESHOLD = 685.4
+"""Excitation at which the coupled channel reaches its own noise floor [A].
+
+Every other channel needs at least five kiloamperes and the median needs
+eighty-two, so the screen removes one channel from the shots that drove the
+error-field coils and removes no shot at all.
+"""
+
+ERROR_FIELD_SCREENED_SHOTS = (40, 50, 3)
+"""Shots losing a channel to the screen, in train, held-out and noise order.
+
+The three noise shots matter most: the quiescent class admitted them because
+error-field drive is not poloidal-coil drive, so the sensor floor was measured
+with a non-axisymmetric coil running on three of its sixty shots.  Only the one
+coupled channel is affected, and re-measuring under the screen moves the pooled
+floor by :data:`SCREENED_FLOOR_SHIFT` -- so the floor is not merely asserted to
+be free of that excitation, it is measured to be.
+"""
+
+SCREENED_FLOOR_SHIFT = 1.75e-9
+"""Change in the pooled sensor floor when the screen is applied [T].
+
+Five parts in a million of the floor itself.  The coupled channel's own floor
+moves by 0.67 microtesla, upward, because the three shots removed happened to be
+quiet ones -- and that is a fortieth of the channel's own shot-to-shot spread of
+25.9 microtesla.  Both statements are needed: the pooled number is what the ladder
+targets, and the per-channel number is what says the shift is not hiding inside
+one sensor.
+"""
+
+ACQUISITION_STEPPING_CHANNELS = 19
+"""Probe channels recorded at more than one scale across the archive.
+
+Of seventy-six with a measurable history.  A single calibration number cannot
+describe them: fitted across a step it returns an average of two discrete states
+weighted by shot count, which describes no shot and moves when the shot selection
+moves.  Sixteen of them were handed a single gain by an independent route that did
+not resolve the blocks, spanning up to a factor of 4.2 -- which is why the ledger
+below promotes five channels and not thirty.
+"""
+
+ACQUISITION_STEP_COUNT = (37, 29)
+"""Scale changes found, and how many landed on the declared ladder.
+
+The ladder is powers of two and their square roots, stated as a hypothesis before
+the steps were classified.  The rungs the run actually took are one half (14
+times), one over root two (4), root two (5) and two (14) -- so the hypothesis is
+confirmed by the histogram rather than imposed on it.
+"""
+
+ACQUISITION_CONCURRENCY = (12, 16)
+"""Boundaries where most channels held still, out of those carrying a step.
+
+The control that makes the conclusion per-channel.  A wrong drive weight, coil
+geometry or turn count moves every channel that reads a shot, because they all read
+the same currents through the same model; the archive shows five channels moving by
+a factor of two while fifty hold at unity on the same two shots.  That cannot come
+from anything upstream of the individual signal paths.
+"""
+
+PROMOTED_CHANNEL_SCALES = {
+    "obr17": 0.5011,
+    "obv04": 0.8571,
+    "obr05": 1.1043,
+    "obv05": 0.9449,
+    "ccbv35": 0.9474,
+}
+"""Steady channels whose calibration scale is off unity and corroborated.
+
+Each is steady across every shot it appears on, off unity by more than five
+percent, agreed to within three percent by an independent route that shares no
+estimator and no shot selection with this one, and confirmed on both halves of its
+own shots taken in shot order.  ``obr17`` is a factor of two, and it is the same
+channel whose coupling to the error-field circuit is fifty times its neighbours' --
+two independent symptoms of one faulty signal path.
+"""
+
+WITHHELD_CHANNEL_SCALES = ("obv11",)
+"""Steady channels off unity that the promotion gates refused.
+
+Its two routes disagree by 7.4 percent and its own two halves read 0.869 and 1.065,
+so whatever it is doing is not one scale.  Recorded because a refusal with a reason
+is worth more than a silence.
+"""
+
+PROBE_VERDICT_COUNTS = {"field_shape": 64, "inseparable": 12, "not_tested": 1}
+"""How the pre-registered discriminant classed all seventy-seven channels.
+
+No channel reached a probe-side verdict, so no gain and no orientation was
+promoted.  The twelve inseparable ones are the probes with no orthogonal partner,
+whose rigid residual is unmeasured rather than small.
+"""
+
+NEAR_FIELD_PROBE_GAIN = 0.826
+"""Measured field over described field for the coil a probe stands beside.
+
+Pooled over the two outboard axial probes that carry most of the cross-source
+excess, each about one winding-pack width from the nearer member of the P5 pair.
+The description over-predicts that coil's axial field at that distance by
+twenty-one percent while predicting every coil beyond about five pack widths to
+within :data:`DISTANT_PROBE_GAIN` of unity.
+"""
+
+DISTANT_PROBE_GAIN = 1.066
+"""Measured field over described field for coils beyond the near-field cut.
+
+The same two probes, same shots, same fit.  That this sits near one while
+:data:`NEAR_FIELD_PROBE_GAIN` does not is the whole discriminant: a wrong
+effective area or a rotated probe scales every coil's field alike, and only the
+arrangement of current inside a nearby pack can scale one coil and leave the
+others.
+"""
+
+PROBE_GAIN_SPREAD_SIGNIFICANCE = 12.4
+"""Standard errors separating the smallest per-coil gain from the largest.
+
+Measured on the quieter of the two probes; the other reads 13.5.  The criterion
+called three standard errors excitation-selective before any fit ran.
+"""
+
+RIGID_RESIDUAL_FLOOR_RATIO = (58.5, 101.0)
+"""Residual after the best scale and rotation, in units of the channel's floor.
+
+The two outboard axial probes.  Their co-located radial partners reach 12.8 and
+2.1 on the same shots, so the point at which the description stops describing
+these sensors is specific to the axial component beside the winding pack rather
+than general to the mount.
+"""
+
+PROBE_TILT_INTERVAL = ((0.194, 0.078), (-0.179, 0.060))
+"""Fitted poloidal rotation and its jackknife error, per probe [rad].
+
+Both inside the mounting tolerance and nearly equal and opposite at positions
+that mirror each other about the midplane, which is what a field error
+antisymmetric in height looks like and not what two independently mis-mounted
+probes look like.  Neither is promoted: the criterion requires the rotation to
+remove the residual, and the residual it leaves is
+:data:`RIGID_RESIDUAL_FLOOR_RATIO` times the floor.
+"""
+
+P5_LOWER_STEADY_CHANNEL_SPREAD = 0.0037
+"""Campaign-to-campaign spread of P5 lower's amplitude on steady channels only [1].
+
+The verdict on the largest unexplained term this description carried.  Measured on
+far-field probes whose acquisition scale does not step, P5 lower reads 0.9901 on one
+campaign and 0.9864 on the other -- four parts in a thousand.  The four and a half
+percent an earlier route reported is what the stepping channels put into a fit that
+pooled them, so the shift is neither a coil nor a supply: it is the unnormalised
+per-block channel scale, and it disappears when those channels are excluded.  A
+static winding layout cannot produce a between-campaign change at all, which closes
+the other candidate independently.
+"""
+
+CAMPAIGN_PROBE_SPREAD = 0.0183
+"""Median spread of a probe's gain across campaigns, all coils pooled."""
+
+CAMPAIGN_COIL_SPREAD = 0.0978
+"""Median spread of a coil's gain across campaigns, all far-field probes pooled.
+
+Five times the probe figure.  Whatever moves between campaigns moves in the coil
+dimension and not in the sensor dimension, which is what the question was: the
+sensors are stable to under two percent across the whole archive.  The P5 lower
+coil itself reads 0.9875 and 0.9818 on its two campaigns -- six parts in a
+thousand, not the four and a half percent an earlier route reported before the
+near-field probes were excluded and the cancelling-pair shots refused.
+"""
+
+LOOP_DISPOSITION_COUNTS = {
+    "agreed": 25,
+    "promoted": 3,
+    "dual_valued": 11,
+    "no_described_counterpart": 7,
+    "no_channel": 5,
+}
+"""How every flux-loop channel's position was dispositioned.
+
+All three promotions went to the position the description already carries, so the
+adjudication confirms the described loop set where it can decide and moves
+nothing.
+"""
+
+LOOP_DECIDED_MARGIN = (0.0715, 0.1249)
+"""Held-out residual advantage of the promoted loop positions, smallest to largest.
+
+Against a declared margin of five percent.  The loops that stayed dual-valued
+came in between two and sixteen parts in ten thousand, so the boundary the
+criterion drew is not a close call in either direction.
+"""
 
 VERTICAL_PAIR_ALONE_SHOTS = 207
 """Plasma-free shots that sustain a vertical-control coil with contrast to read it.
@@ -914,10 +1172,23 @@ def fitted_diagnostic_records(
                 f"shots of it, reaching {ERROR_FIELD_PEAK / 1e3:.1f} kiloamperes in "
                 "an error-field coil channel, so the experiment is present rather "
                 "than merely hoped for",
-                "predicting that excitation needs the error-field coil winding "
-                "geometry, which the registry does not carry, so the blocker is a "
-                "missing conductor model and not missing shots -- which is what makes "
-                "it worth authoring that geometry rather than searching further",
+                f"{ERROR_FIELD_ISOLATED_SHOTS} of those shots drove the "
+                "non-axisymmetric coil with every poloidal coil quiet, which makes "
+                "the coupling a direct measurement rather than an inference: the "
+                f"array's median response is {ERROR_FIELD_ARRAY_RESPONSE * 1e9:.1f} "
+                "nanotesla per ampere, so even the strongest excitation the archive "
+                "contains puts twenty-seven microtesla on a typical channel against "
+                f"a {SENSOR_FLOOR * 1e6:.0f} microtesla floor",
+                "so the blocker is not the missing error-field winding geometry but "
+                "the excitation itself: separating the candidates would need about "
+                "fifty kiloamperes through these coils, four times the largest shot "
+                "in the archive, and authoring their geometry would not change that",
+                "the single channel that does respond reproducibly, "
+                f"{ERROR_FIELD_COUPLED_CHANNEL}, responds fifty times more than the "
+                "channels seventy-five "
+                "millimetres either side of it, which no coil's field can do -- it is "
+                "a conductor shared with the excitation and carries no field pattern "
+                "to phase a toroidal position against",
             ),
             candidates=("150 degrees", "330 degrees"),
         ),
@@ -1045,6 +1316,263 @@ def fitted_passive_records(
     ]
 
 
+def sensor_adjudication_records(
+    first_shot: int = FIRST_SHOT,
+    last_shot: int = LAST_SHOT,
+) -> list[EvidenceRecord]:
+    """Record what the sensor adjudication decided, and what it decided against.
+
+    Two of the three outcomes here are negative, and they are the load-bearing
+    ones.  No probe earned a gain or an orientation correction, and the reason is
+    measured rather than assumed: the scale the data wants depends on which coil is
+    driving, which a rigid probe error cannot produce.  And the flux-loop positions
+    the fit could decide all came down on the side the description already carried,
+    so an adjudication that could have moved thirteen sensor poses moves none.
+    """
+
+    scales = ", ".join(
+        f"{channel} {value:.4f}"
+        for channel, value in sorted(PROMOTED_CHANNEL_SCALES.items())
+    )
+    stepping, total = ACQUISITION_STEP_COUNT
+    held, boundaries = ACQUISITION_CONCURRENCY
+    return [
+        EvidenceRecord(
+            path="magnetics/b_field_pol_probe(steady)/field/scale",
+            evidence=FieldEvidence.FITTED,
+            first_shot=first_shot,
+            last_shot=last_shot,
+            statement=(
+                f"five channels carry a calibration scale off unity: {scales}; each is "
+                "recorded at one scale on every shot it appears on, and the first is a "
+                "factor of two"
+            ),
+            assumptions=(
+                "the scale is measured only where the coil dominating the reading "
+                "stands clear of the probe, because a near-field probe's apparent "
+                "scale carries how the current sits inside the pack as well as the "
+                "channel's own calibration and the two are one parameter on a "
+                "single-coil shot",
+                "each value is agreed to within three percent by an independent solve "
+                "that shares no estimator and no shot selection with this one, which "
+                "is what stops a promotion rule formulated after seeing the data from "
+                "being a rule tuned to it",
+                "each is confirmed on both halves of its own shots split in shot "
+                "order, so a channel that drifted inside its block would fail rather "
+                "than average",
+                "the factor-of-two channel is the same one whose coupling to the "
+                "error-field circuit stands fifty times above its neighbours', so two "
+                "independent symptoms point at one signal path",
+            ),
+            uncertainty=Uncertainty(lower=0.50, upper=1.13, unit="1"),
+        ),
+        EvidenceRecord(
+            path="magnetics/b_field_pol_probe(stepping)/field/scale",
+            evidence=FieldEvidence.UNRESOLVED,
+            first_shot=first_shot,
+            last_shot=last_shot,
+            statement=(
+                f"{ACQUISITION_STEPPING_CHANNELS} channels were recorded at more than "
+                "one scale, so no single calibration number describes them and the "
+                "description carries none"
+            ),
+            assumptions=(
+                f"{stepping} scale changes were found and {total} land on a ladder of "
+                "powers of two and their square roots that was declared before they "
+                "were classified; the rungs actually taken are one half, one over root "
+                "two, root two and two",
+                f"at {held} of {boundaries} boundaries most channels hold still while "
+                "a handful move, which no error in the drive weights, the coil "
+                "geometry or the turn counts can produce -- those move every channel "
+                "reading that shot together",
+                "so what is unresolved is not a sensor property but a per-block "
+                "acquisition setting the level-1 store has not normalised, and it "
+                "belongs on the path that reads a channel rather than in a static "
+                "record here",
+                "a fit pooling shots across a step sees the two states averaged by "
+                "shot count, which is how a coil amplitude acquires an apparent "
+                "campaign dependence no geometry can explain",
+            ),
+            candidates=("per-block scale on read", "unnormalised as published"),
+        ),
+        EvidenceRecord(
+            path="magnetics/b_field_pol_probe/field/scale",
+            evidence=FieldEvidence.FITTED,
+            first_shot=first_shot,
+            last_shot=last_shot,
+            statement=(
+                "no probe carries a calibration-scale correction: fitted over the "
+                "calibration cohort, the scale each channel wants is one to within "
+                "its own scatter once the coil that dominates the reading is far "
+                "enough away, and the excess the outboard channels carry is not a "
+                "scale at all"
+            ),
+            assumptions=(
+                "each outboard axial probe shares its position with an outboard "
+                "radial one, so a scale and a poloidal rotation are both fittable "
+                "against measurements at that point rather than against the model "
+                "whose winding description is itself in question",
+                "the scale is estimated per shot and pooled across shots, because a "
+                "waveform's samples carry about one pulse of information between "
+                "them and a standard error taken from the sample count would make "
+                "every channel look excitation-selective",
+                "a shot driving a coil pair in opposition is refused: the two fields "
+                "cancel, each coil's own power becomes a large multiple of the "
+                "prediction, and the scale returned is a ratio of two nearly "
+                "cancelling numbers rather than an amplitude",
+            ),
+            uncertainty=Uncertainty(lower=0.95, upper=1.05, unit="1"),
+        ),
+        EvidenceRecord(
+            path="pf_active/coil(p4,p5)/element/current_distribution",
+            evidence=FieldEvidence.UNRESOLVED,
+            first_shot=first_shot,
+            last_shot=last_shot,
+            statement=(
+                "uniform current density over these coils' pack outlines "
+                "over-predicts the axial field one pack width away by "
+                f"{(1.0 / NEAR_FIELD_PROBE_GAIN - 1.0) * 100:.0f} percent, while the "
+                "same fit predicts every coil beyond about five pack widths to "
+                f"within {abs(DISTANT_PROBE_GAIN - 1.0) * 100:.0f} percent -- and no "
+                "admissible turn layout moves it by more than one percent, so the "
+                "near-field discrepancy is real and its cause is not the layout"
+            ),
+            assumptions=(
+                "the two channels carrying most of the cross-source excess are "
+                "placed identically by both descriptions, so no pose difference can "
+                "explain it and the cause is one both descriptions inherit",
+                "their per-coil scale spreads by "
+                f"{PROBE_GAIN_SPREAD_SIGNIFICANCE:.1f} standard errors across the "
+                "coils that drove them, against three declared beforehand as the "
+                "boundary, and the largest departure is on the nearest coil in each "
+                "case",
+                "the best joint scale and rotation leaves "
+                f"{RIGID_RESIDUAL_FLOOR_RATIO[0]:.0f} and "
+                f"{RIGID_RESIDUAL_FLOOR_RATIO[1]:.0f} times each channel's own "
+                "quiescent scatter, so no rigid probe transform explains them "
+                "however stable its coefficients",
+                "the two fitted rotations are nearly equal and opposite at positions "
+                "mirroring each other about the midplane, which is a field error "
+                "antisymmetric in height rather than two mis-mounted probes",
+                "neither channel's own calibration scale is at fault: both are steady "
+                "across the archive and within a few percent of unity by two "
+                "independent routes, so the excess is not noise, not a gain, not a "
+                "stepping acquisition scale and not a turn layout",
+                "what is left is the probes' pose or a conductor the description does "
+                "not carry, and those are separable only by an experiment that moves "
+                "one without the other",
+            ),
+            candidates=("pose", "unmodelled conductor"),
+        ),
+        EvidenceRecord(
+            path="magnetics/flux_loop/position",
+            evidence=FieldEvidence.MEASURED,
+            first_shot=first_shot,
+            last_shot=last_shot,
+            statement=(
+                f"{LOOP_DISPOSITION_COUNTS['agreed']} loops are placed identically by "
+                "both sources and every disagreement the measured flux could decide "
+                "was decided in favour of the position already described"
+            ),
+            assumptions=(
+                "each channel is joined to its loop through the reconstruction's own "
+                "family blocks rather than by proximity, because several described "
+                "loops share one position and a nearest-position join hands them all "
+                "the same loop",
+                "each candidate position is scored with one free scale per channel, "
+                "so a position is judged on how its predicted flux varies with the "
+                "coils and with time rather than on an amplitude the loop's own gain "
+                "could supply",
+                "a candidate promotes only when it wins on shots the fit never saw, "
+                "by at least a twentieth in residual, and with the same winner in and "
+                "out of sample: the promoted ones win by "
+                f"{LOOP_DECIDED_MARGIN[0] * 100:.1f} to "
+                f"{LOOP_DECIDED_MARGIN[1] * 100:.1f} percent",
+            ),
+            source=catalog_source("level-2 flux-loop positions as catalogued"),
+            uncertainty=Uncertainty(lower=-1.0e-3, upper=1.0e-3, unit="m"),
+        ),
+        EvidenceRecord(
+            path="magnetics/flux_loop(displaced)/position",
+            evidence=FieldEvidence.UNRESOLVED,
+            first_shot=first_shot,
+            last_shot=last_shot,
+            statement=(
+                f"{LOOP_DISPOSITION_COUNTS['dual_valued']} loops are placed "
+                "differently by the two sources by three to nine millimetres and the "
+                "measured flux does not choose between them"
+            ),
+            assumptions=(
+                "the two positions differ in predicted flux by up to a hundred and "
+                "fifty times the channel's own scatter, so the question is "
+                "answerable in principle; what stops it is that both candidates "
+                "leave a residual two orders above that scatter, and a few "
+                "millimetres of position moves that residual by parts in a thousand",
+                "so this stays open until the term dominating the loop residual is "
+                "found, which is a statement about the field description and not "
+                "about the loop survey",
+            ),
+            candidates=("catalogued position", "reconstruction position"),
+        ),
+        EvidenceRecord(
+            path="magnetics/flux_loop(undescribed)/position",
+            evidence=FieldEvidence.UNRESOLVED,
+            first_shot=first_shot,
+            last_shot=last_shot,
+            statement=(
+                "the reconstruction reads "
+                f"{LOOP_DISPOSITION_COUNTS['no_described_counterpart']} loops the "
+                "description carries no sensor for, and the description "
+                f"carries {LOOP_DISPOSITION_COUNTS['no_channel']} loops no published "
+                "channel reaches"
+            ),
+            assumptions=(
+                "the gap is one-sided by family: the four lower P4 loops and the two "
+                "upper P6 loops are missing while their opposite-side counterparts "
+                "are carried, and each missing loop sits about a quarter of a metre "
+                "from the nearest described one, so this is an absent fixture set "
+                "rather than a displaced one",
+                "the catalogued source the description is built from does not list "
+                "them, so closing the gap needs a document and not a fit",
+            ),
+            blocks_axisymmetric_forward_model=False,
+        ),
+        EvidenceRecord(
+            path="magnetics/b_field_pol_probe/non_axisymmetric_screen",
+            evidence=FieldEvidence.MEASURED,
+            first_shot=first_shot,
+            last_shot=last_shot,
+            statement=(
+                "the deliberately non-axisymmetric excitation the archive contains "
+                "cannot bias a calibration fit at seventy-six of seventy-seven "
+                f"channels, and re-measuring the sensor floor under the screen moves "
+                f"it by {SCREENED_FLOOR_SHIFT * 1e12:.1f} picotesla"
+            ),
+            assumptions=(
+                f"the coupling is measured on {ERROR_FIELD_ISOLATED_SHOTS} shots that "
+                "drove the non-axisymmetric coil with every poloidal coil quiet, and "
+                "the threshold each channel is screened at is where that coupling "
+                "reaches the channel's own quiescent scatter",
+                f"one channel, {ERROR_FIELD_COUPLED_CHANNEL}, is refused above "
+                f"{ERROR_FIELD_COUPLED_THRESHOLD:.0f} amperes; every other channel's "
+                "threshold exceeds five kiloamperes and the median exceeds eighty, so "
+                "the screen removes a channel and never a shot",
+                "the channel that has a coupling responds fifty times more than the "
+                "channels either side of it, which no coil's field does over "
+                "seventy-five millimetres, so it is read as a shared conductor and "
+                "not as evidence about the array's toroidal position",
+                f"{ERROR_FIELD_MATCHED_PAIRS} shot pairs alike in poloidal drive and "
+                "unalike in this one were curated as the model-free route and cannot "
+                "reach it: their difference is about a millitesla and independent of "
+                "the error-field current, so the route's sensitivity is set by how "
+                "unalike two shots are rather than by the excitation",
+            ),
+            source=catalog_source("level-1 error-field coil current channels"),
+            uncertainty=Uncertainty(lower=0.0, upper=SCREENED_FLOOR_SHIFT, unit="T"),
+        ),
+    ]
+
+
 def fitted_evidence(
     first_shot: int = FIRST_SHOT,
     last_shot: int = LAST_SHOT,
@@ -1056,6 +1584,7 @@ def fitted_evidence(
         *fitted_diagnostic_records(first_shot, last_shot),
         *fitted_passive_records(first_shot, last_shot),
         *sensor_floor_records(first_shot, last_shot),
+        *sensor_adjudication_records(first_shot, last_shot),
     ]
 
 
@@ -1067,6 +1596,7 @@ SUPERSEDED_SEED_PATHS = frozenset(
         "magnetics/b_field_pol_probe/position/phi",
         "magnetics/b_field_phi_probe/toroidal_angle",
         "magnetics/flux_loop(saddle)/traversal_sign",
+        "magnetics/flux_loop/position",
     }
 )
 """Seed records the refinement replaces with per-component or evidenced ones.
@@ -1087,6 +1617,11 @@ angle for all seventy-eight probes, which stops being true once the radial famil
 carries its own: the store gives nineteen outboard probes an axis along the major
 radius and the rest an axial one.  A blanket record would now assert a uniformity
 the machine does not have, so it is narrowed to one record per axis.
+
+The loop positions are replaced because the seed can only say the catalog gives
+them, and the refinement can say the loops' own measured flux was asked which of
+two candidate positions it prefers and answered.  That is the same claim with a
+test behind it, and the record has to carry the test or the next reader repeats it.
 """
 
 

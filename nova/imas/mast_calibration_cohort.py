@@ -185,6 +185,7 @@ class CalibrationExperiment:
     excited: tuple[str, ...]
     identifies: tuple[str, ...]
     identifies_sum: tuple[str, ...]
+    peaks: Mapping[str, float]
     peak_current: float
     hold_time: float
     toroidal_peak: float
@@ -212,6 +213,7 @@ class CalibrationExperiment:
             "identifies": list(self.identifies),
             "identifies_sum": list(self.identifies_sum),
             "peak_current": float(self.peak_current),
+            "peaks": {k: float(v) for k, v in sorted(self.peaks.items())},
             "probe_count": self.probe_count,
             "shot": self.shot,
             "sustained": list(self.sustained),
@@ -249,6 +251,7 @@ def classify_experiment(
         shot=survey.shot,
         sustained=sustained,
         excited=excited,
+        peaks={family: survey.coil_peaks.get(family, 0.0) for family in excited},
         peak_current=peak,
         hold_time=held,
         toroidal_peak=survey.toroidal_current_peak,
@@ -354,6 +357,14 @@ class Identifiability:
     alone: tuple[int, ...]
     in_sum: tuple[int, ...]
     strongest: float
+    """Largest current THIS coil carried on a shot that can measure it [A].
+
+    The coil's own channel, not the strongest excitation present.  Reading the
+    shot's peak instead overstates every coil that is ever driven beside a
+    stronger one -- on this store that is all twelve poloidal coils, by up to
+    seventy per cent -- and turns a statement about what an experiment can measure
+    into a statement about what else was happening at the time.
+    """
 
     @property
     def identifiable(self) -> bool:
@@ -407,7 +418,7 @@ def identifiability_map(
         in_sum = tuple(sorted(row.shot for row in rows if family in row.identifies_sum))
         reachable = {*alone, *in_sum}
         strongest = max(
-            (row.peak_current for row in rows if row.shot in reachable),
+            (row.peaks.get(family, 0.0) for row in rows if row.shot in reachable),
             default=0.0,
         )
         result.append(

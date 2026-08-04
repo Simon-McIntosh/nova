@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-03T23:55:13",
+  "updated": "2026-08-04T07:00:47",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -172,6 +172,11 @@
         "when": "2026-07-30",
         "who": "reckon-sprint",
         "what": "S2 catalog geometry recovery added ahead of MAST DDv4 authoring; physical geometry and diagnostic pose are identity, while EFIT/AMM subdivisions are evidence only."
+      },
+      {
+        "when": "2026-08-04",
+        "who": "reckon-ship",
+        "what": "S2 execution: provisional and refined MAST artifact with evidence states and fitted turns landed (nova ac42194c/ee107ed4/28872e4f); ambix cutover mechanics, magnetics-residual gate, artifact reader and drive-map consumption landed (imas-ambix cfa2d2c..27dff421). Frozen six-shot after-path parity passes 13/15 with every reproduction metric improved; the single sensor-misfit failure (2.2% vs a same-source 1% budget) is attributed to irreducible cross-source differences on a structurally non-neutral benchmark. Donor retirement and sprint closure gated on the budget adjudication; registry corrections and the solenoid stratum re-fit queued."
       }
     ],
     "blockers": [
@@ -204,6 +209,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 6
+    "_version": 7
   }
 }

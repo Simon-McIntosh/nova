@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="mast-vacuum-floor-recovery">
+  <meta name="plan-title"     content="MAST Vacuum Floor Recovery — calibrate the description to the measurement floor">
+  <meta name="plan-summary"   content="Drive the absolute whitened magnetics misfit on the frozen vacuum-dominated gate from ~0.74σ toward the sensor noise envelope by closing the turn counts, adjudicating sensor poses and winding lattices, and calibrating passive R/L on dedicated vacuum experiments — so the artifact path beats the incumbent absolutely instead of passing on a wider budget.">
+  <meta name="plan-status"    content="active">
+  <meta name="plan-roi"       content="high">
+  <meta name="plan-effort"    content="XL">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-context" content="extended">
+  <meta name="plan-capability-tool-autonomy" content="autonomous">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="elevated">
+  <meta name="plan-sprint"    content="S5">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-depends-on" content="mast-catalog-geometry-recovery">
+  <meta name="plan-blocks"    content="mast-catalog-gpu-solve">
+  <title>MAST Vacuum Floor Recovery | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — Objective: the floor is calibration error, and it is ours to remove</h2>
+    <p>Both machine descriptions misfit the measured magnetics at the same level: on the frozen
+    six-shot gate the efm path scores a whitened sensor residual of <strong>0.740</strong> and the
+    artifact path <strong>0.764</strong> — and the metric's own definition places that floor at
+    <em>static coil/sensor calibration error</em>, because the frozen solve never fits the magnetics
+    channels. The S2 cutover passed by scoring the source change against a measured cross-source
+    budget; this plan makes that budget moot. The objective is to complete and calibrate the
+    machine description until the artifact path <strong>beats the incumbent on absolute misfit</strong>
+    and approaches the quantified sensor-noise envelope on vacuum-dominated data. Every improvement
+    lands as evidence-typed description (measured / published / generated / fitted / unresolved),
+    never as a benchmark-side correction — the incumbent's <code>SOLENOID_RESPONSE_SCALE</code> is
+    the cautionary example of a machine parameter hidden in a scoring path.</p>
+
+    <figure>
+      <svg viewBox="0 0 880 300" role="img" style="max-width:100%;height:auto;font-family:system-ui">
+        <text x="440" y="20" text-anchor="middle" font-size="14" font-weight="600" fill="#111">The residual ladder: whitened sensor misfit on the frozen gate</text>
+        <!-- axis -->
+        <line x1="90" y1="40" x2="90" y2="250" stroke="#999" stroke-width="1"/>
+        <line x1="90" y1="250" x2="850" y2="250" stroke="#999" stroke-width="1"/>
+        <text x="40" y="45" font-size="12" fill="#333">misfit</text>
+        <!-- levels -->
+        <line x1="90" y1="60" x2="850" y2="60" stroke="#b04a4a" stroke-width="1" stroke-dasharray="5 4"/>
+        <text x="845" y="55" text-anchor="end" font-size="12.5" fill="#b04a4a">0.764 — artifact path today (S2 close)</text>
+        <line x1="90" y1="85" x2="850" y2="85" stroke="#555" stroke-width="1" stroke-dasharray="5 4"/>
+        <text x="845" y="80" text-anchor="end" font-size="12.5" fill="#333">0.740 — efm incumbent (its calibration already spent)</text>
+        <line x1="90" y1="215" x2="850" y2="215" stroke="#1a6b3c" stroke-width="1.2"/>
+        <text x="845" y="210" text-anchor="end" font-size="12.5" fill="#1a6b3c">sensor-noise envelope — to be quantified in stage A</text>
+        <!-- rungs -->
+        <text x="110" y="115" font-size="12.5" fill="#111">A  dedicated calibration cohort + noise envelope</text>
+        <text x="110" y="140" font-size="12.5" fill="#111">B  turns closed: solenoid reconciled, P4/P5 counted, P6 adjudicated</text>
+        <text x="110" y="165" font-size="12.5" fill="#111">C  sensor poses and gains adjudicated (obv06/obv14, flux loops)</text>
+        <text x="110" y="190" font-size="12.5" fill="#111">D  winding lattices authored · E  passive R/L calibrated</text>
+        <path d="M95 100 L95 200" stroke="#1a6b3c" stroke-width="1.2" marker-end="url(#down)"/>
+        <defs><marker id="down" markerWidth="8" markerHeight="8" refX="4" refY="7" orient="auto"><path d="M0,0 L8,0 L4,8 z" fill="#1a6b3c"/></marker></defs>
+        <text x="440" y="278" text-anchor="middle" font-size="12" fill="#555">Each stage re-stamps the frozen gate; the absolute residual must be monotone non-increasing (§4 gate 1).</text>
+      </svg>
+      <figcaption>Where the misfit stands and where the ladder takes it. The incumbent's 0.740 is
+      the primary target to beat; the noise envelope, quantified in stage A, is the stretch floor.</figcaption>
+    </figure>
+
+    <h2 id="s2">§2 — What is already in hand</h2>
+    <p>The S2 execution left a complete measurement substrate; this plan consumes it rather than
+    rebuilding it:</p>
+    <ul>
+      <li><strong>The gate:</strong> <code>imas_ambix/spine_bench</code> carries the frozen six-shot
+      manifest, 15 registered tolerances including the raw-magnetics residual metric (schema 1.4),
+      genuine banked before/after stamps, both budget classes, and honest stamp labelling. A 2-arm
+      stamp costs ~20 minutes on <code>sun_debug</code>.</li>
+      <li><strong>The attribution:</strong> per-channel and per-column residual decomposition,
+      re-solved swap experiments and the instrumented drivers
+      (<code>~/.cache/ambix-after-path/attribution/</code>; narrative in
+      <a href="/nova/mast-cutover-parity-evidence.html">the cutover parity evidence</a>). The excess
+      concentrates on <code>obv06</code>/<code>obv14</code> (61%), outboard at R = 1.845 m beside
+      P4/P5, and is 88% vacuum-term.</li>
+      <li><strong>The fitting machinery:</strong> <code>nova/imas/mast_vacuum_cohort.py</code>
+      (17,111-shot survey, per-shot refusal reasons, train/held-out discipline),
+      <code>mast_vacuum_response.py</code> (signed response fits with near-probe exclusion),
+      <code>mast_fitted_parameters.py</code>, and the evidence-typed artifact with its channel drive
+      map (semantic identity <code>68f64209…f351</code>).</li>
+      <li><strong>The literature leads:</strong> the MAST magnetic-diagnostics paper (Edlington,
+      Martin and Pinfold, RSI 72, 421) documents in-situ calibration from individual PF-coil pulses
+      and an <em>eight-vacuum-shot matrix solve</em> that removed pickup and induced-current
+      contributions — direct evidence that the archive contains experiments designed to identify
+      exactly what this plan fits. Battaglia et al. (PR1934) describe the same iterative
+      description-refinement workflow on NSTX/MAST.</li>
+      <li><strong>Known measured facts to honour:</strong> only <em>sustained</em> (~0.62 s)
+      single-coil experiments measure turn counts (in ~6 ms pulsed shots the coil case carries up to
+      half the feed current at probe-read time); probes closer than two winding-pack <em>widths</em>
+      to an excited coil bias turn fits and must be excluded on that scale.</li>
+    </ul>
+
+    <h2 id="s3">§3 — The calibration ladder</h2>
+    <p>Five stages, strictly evidence-first, each with its own held-out challenge and each followed
+    by a frozen-gate re-stamp (§4). Stages B–E are fits into the <em>description</em>; nothing in
+    this plan touches a benchmark tolerance.</p>
+
+    <h3 id="s3a">Stage A — dedicated calibration cohort and the noise envelope</h3>
+    <p>The S2 vacuum cohort was generic no-plasma selection (400 shots, 22 excitation families).
+    This stage mines the archive metadata for the <em>designed</em> calibration experiments: the
+    individual-PF-coil sustained pulses per coil, the eight-vacuum-shot matrix family, TF-only and
+    commissioning shots, and any toroidally-varying error-field-coil shots (the only class that can
+    separate the 150°/330° bank candidates). Deliverables: a provenance-pinned calibration cohort
+    keyed by experiment class; per-channel sensor noise measured from quiescent windows and
+    repeat-pulse scatter (the <strong>noise envelope</strong> the ladder targets); and the
+    train/held-out split declared before any stage-B fit. The cohort record states, per shot, which
+    parameters it can identify — the identifiability map that orders stages B–E.</p>
+
+    <h3 id="s3b">Stage B — close the turns and circuits</h3>
+    <p>Three items, in identifiability order:</p>
+    <ol>
+      <li><strong>Solenoid weight reconciliation.</strong> Two measurement routes disagree: the
+      six-shot cohort fit gives 344.66 ± 11.7 A·turn/A while the incumbent's plasma-free vacuum
+      stratum (85 shots, ~111k slices, no solve in the loop) gives [348.5, 361.1] at 95%. Reproduce
+      the stratum measurement nova-side from level-1 data, run the ablation that explains why the
+      cohort fit lands low (shot selection, near-probe exclusion radius, case-current
+      contamination), and promote one weight with a defensible interval covering both routes — or
+      record the visible disagreement with its cause.</li>
+      <li><strong>P4/P5 integer turn counts.</strong> Currently bounded at ~22 ± 5 with the archive
+      claiming 23. Fit on the stage-A sustained single-coil shots with the pack-width exclusion;
+      require the interval to shrink below 0.5 turn so the count is <em>counted</em>, not assumed.
+      If the archive's own exact-integer ampere-turn ratio channels (23, constant across 17,111
+      shots) are adopted instead, they enter as <em>published</em> evidence with the fit as
+      corroboration — the record must state which route promoted the value.</li>
+      <li><strong>P6 disposition.</strong> The store publishes P6 excitation as ampere-turns and no
+      shot isolates P6 above 0.6% of predicted signal power. Author the explicitly-effective
+      channel semantics as published evidence, search stage-A metadata for any dedicated P6
+      commissioning shot, and either pin the physical count or record the structural
+      non-identifiability with the evidence that closes the search.</li>
+      <li><strong>Circuit gaps.</strong> The P2 inner/outer pack interconnection and the supply
+      inventory stay unset unless stage-A documents surface; record the search.</li>
+    </ol>
+
+    <h3 id="s3c">Stage C — sensor pose and gain adjudication</h3>
+    <p>The attribution localised 61% of the cross-source excess on two outboard probes and the
+    sources disagree on flux-loop placement (26 loops agree ≤ 1 mm, 39 ≤ 10 mm, 7 efm loops have no
+    artifact counterpart within 50 mm). This stage adjudicates, sensor by sensor, with the
+    calibration cohort as referee:</p>
+    <ol>
+      <li><strong>obv06/obv14 targeted investigation.</strong> Fit per-probe gain (effective area)
+      and orientation jointly against the stage-A cohort where identifiable; establish whether the
+      excess these two probes carry is a probe-side calibration item (gain/tilt) or a genuine
+      near-conductor field-shape sensitivity (stage D's winding lattice question). Pre-register the
+      discriminant before fitting.</li>
+      <li><strong>Flux-loop position adjudication.</strong> For the 7 + 6 mm disagreement classes:
+      trace both sources' provenance (L1/L2 arrays vs efm table lineage), then let vacuum response
+      decide where documents do not — a loop's mutual with each coil is position-sensitive and the
+      calibration cohort excites the coils one at a time. Promote per loop with intervals; a loop
+      whose two candidate positions cannot be separated stays explicitly dual-valued.</li>
+      <li><strong>Per-channel gain ledger.</strong> Record fitted gain/area corrections as
+      evidence-typed sensor records in the artifact (the description owns calibration — never a
+      scoring-path constant).</li>
+    </ol>
+
+    <h3 id="s3d">Stage D — winding lattices as authored geometry</h3>
+    <p>The artifact states uniform current density over each winding-pack polygon; efm resolves
+    P4/P5 into a 6×4 filament lattice with a vacant top-outboard cross-over position, and the two
+    differ by 2–3 mm in current centroid — exactly what the nearest probes see. Author the real
+    turn lattices where evidence supports them (efm's lattice is itself evidence of the wound
+    layout; drawings and the diagnostics paper corroborate), as <em>generated</em> evidence with
+    stated assumptions. The identity question this raises is a locked-before-work decision
+    (<code>winding-lattice-identity</code>, §Decisions): whether interior turn placement enters the
+    physical digest or stays drive-level representation. Validation: the lattice must improve the
+    held-out cohort prediction at the near probes without degrading any other channel — the S2
+    attribution showed a blind lattice swap <em>hurts</em> (−27% of the gap), so this stage fits
+    lattice parameters against data rather than copying efm's.</p>
+
+    <h3 id="s3e">Stage E — passive R/L calibrated on decay</h3>
+    <p>The generic cohort separated exactly one passive decay pattern (23–72 ms), so per-family
+    resistance stayed nominal. This stage combines three things the S2 pass did not:
+    (i) <strong>exact inductance</strong> — L per enclosure group computed from nova.biot on the
+    corrected case geometry (the transposed-extents fix lands upstream in
+    <code>mast-catalog-geometry-recovery</code>), so R = L/τ converts every fitted time constant
+    directly; (ii) the <strong>dedicated decay experiments</strong> from stage A — per-coil pulses
+    excite different case groups preferentially, and the eight-shot matrix was designed to separate
+    induced contributions; (iii) <strong>mode-resolved fitting</strong> — fit the two or three
+    dominant spatial decay modes with the group L matrix in the loop rather than one lumped
+    pattern. Promotion per the standing contract: positive, physically plausible, cross-shot
+    stable, held-out improving; otherwise the nominal value stays with the negative result
+    visible. The 2 unchannelled case groups (P6 upper/lower) stay induced.</p>
+
+    <h3 id="s3f">Stage F — the floor ladder</h3>
+    <p>After each stage lands in the artifact: republish (new semantic identity, physical digest
+    moves only through the upstream registry-corrections node), bump the ambix pin, re-stamp the
+    frozen gate once, and append the absolute residual to the ladder. The ladder is the plan's
+    running figure. Closure: the artifact path's absolute whitened residual ≤ the incumbent's
+    0.740 on both hard-read arms (primary, locked in §Decisions), with the distance to the stage-A
+    noise envelope reported. On success, re-score the cutover comparison — the source-cutover
+    budget remains registered for future source pairs, but this pair should then pass the
+    <em>same-source</em> class, retiring the qualified status entirely. Donor migration
+    (<code>physics-spine-adoption</code>) consumes the result.</p>
+
+    <h2 id="s4">§4 — Acceptance gates</h2>
+    <ul>
+      <li><strong>Monotone ladder:</strong> the frozen-gate absolute residual never increases when
+      a stage lands; a stage that increases it is reverted or its parameters stay provisional with
+      the negative result recorded.</li>
+      <li><strong>Held-out discipline everywhere:</strong> every promoted parameter improves
+      held-out prediction on the stage-A cohort and is stable across excitation families; splits
+      are declared before fitting; ablations prove identifiability before one block absorbs
+      another's residual.</li>
+      <li><strong>Description owns calibration:</strong> no fitted constant lands in a scoring or
+      operator path; everything enters the artifact's evidence ledger with source, assumptions,
+      uncertainty and supported shot range.</li>
+      <li><strong>Deliberate digests:</strong> the physical digest moves only in the upstream
+      registry-corrections node with an old→new mapping; artifact revisions compare by semantic
+      identity; the ambix pin bumps with the dependency-contract test in the same commit.</li>
+      <li><strong>Closure:</strong> artifact ≤ incumbent absolute residual on both arms; noise
+      envelope quantified with the remaining gap decomposed per channel; all six S2 physical gaps
+      re-dispositioned against the new evidence; negative results as visible as promotions.</li>
+    </ul>
+
+    <h2 id="s5">§5 — Execution definition</h2>
+    <p>Coordinator-only orchestration per reckon-ship sprint mode; Opus-class background workers,
+    <strong>maximum two concurrent</strong>, each shut down after its manifest is audited and
+    integrated. One detached worktree per worker on shared storage (<code>git worktree add
+    --detach</code> beside the checkout — <em>never</em> under <code>/run/user</code>, which SLURM
+    compute nodes cannot see). Environment rules embedded in every dispatch: <code>uv sync</code>
+    before anything; <code>uv run python -m pytest</code>, never bare <code>pytest</code>;
+    <code>export JAX_PLATFORMS=cpu</code> on login nodes; heavy fits and every gate stamp on
+    <code>srun --partition=sun_debug --cpus-per-task=8 --mem=16G --time=01:00:00</code> with
+    <code>OMP_NUM_THREADS=1</code>, one stamp per job, file-redirect with exit sentinels, and no
+    tracked-file edits while a stamp runs. Artifact publication is node-local only (GPFS rejects
+    <code>RENAME_NOREPLACE</code>); revisions pin by semantic identity. Workers commit locally by
+    explicit path list and never push; the coordinator audits (<code>git show --stat</code>,
+    trailer sweep, scope check), merges, pushes, records plan state after every landing, and
+    removes each worktree only when clean and reachable. Stage order A → B → (C ∥ D where scopes
+    are disjoint: C is sensor records, D is winding geometry) → E → F re-stamps interleave after
+    each landing. Cross-repo authority: nova owns all fitting and authoring; imas-ambix changes are
+    limited to the pin bump and reader consumption of new evidence records, under the same
+    authorization as the S2 cutover.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="floor-target" data-choice="beat-incumbent-absolute" data-by="Simon McIntosh" data-when="2026-08-04">
+        <p class="r-dec-q">What is the closure criterion for the vacuum floor — relative budgets,
+        beating the incumbent absolutely, or a fixed numeric residual?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt chosen" data-value="beat-incumbent-absolute">artifact ≤ incumbent absolute residual; noise envelope as stretch</button>
+          <button class="r-opt" data-value="cross-source-budget-only">keep the cross-source budget as the only gate</button>
+          <button class="r-opt" data-value="fixed-numeric-target">pre-commit a fixed numeric residual now</button>
+        </p>
+        <p class="r-dec-rat">Owner directive 2026-08-04: vacuum shots must be recoverable to a very
+        high level of accuracy. The incumbent's 0.740 is a measured, meaningful bar — it is what a
+        description calibrated against this machine's own data achieves — so beating it absolutely
+        proves the artifact description is at least as good as the incumbent everywhere the gate
+        looks, and retires the qualified cross-source pass. A fixed numeric target ahead of the
+        stage-A noise-envelope measurement would be arbitrary; the envelope becomes the stretch
+        floor once measured. Changes if: stage A shows the envelope sits above 0.740 (then the
+        incumbent bar is already noise-limited and the target reduces to statistical equivalence).</p>
+      </div>
+      <div class="r-dec" data-key="winding-lattice-identity" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Does interior winding-turn placement (the lattice inside a pack outline)
+        enter the physical configuration digest, or is it drive-level representation carried as
+        evidence? The outline, turns and polarity are already identity; the question is the
+        interior layout that stage D authors.</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="identity-bearing">identity-bearing — a lattice change is a configuration change</button>
+          <button class="r-opt" data-value="drive-evidence">drive-level generated evidence — digest unchanged</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-vfr-01" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-create" data-written-at="2026-08-04" data-recommends-skill="/reckon-ship mast-vacuum-floor-recovery §3a">
+        <h4 class="r-fu-title">Stage A+B — dedicated calibration cohort, noise envelope, and turns closure</h4>
+        <div class="r-fu-body"><p>Mine the archive for the designed calibration experiments (sustained
+        single-coil pulses, the eight-vacuum-shot matrix, TF-only, error-field-coil shots), measure the
+        per-channel noise envelope, then close the turns: reconcile the solenoid weight across its two
+        measurement routes, count P4/P5 to the integer, and adjudicate P6. Requires the registry
+        corrections from mast-catalog-geometry-recovery to have landed first (probe axes feed every fit).</p></div>
+        <pre class="r-fu-prompt">Project: nova
+Plan:    mast-vacuum-floor-recovery (§3a + §3b)
+Capability: orchestrator
+Requirements: deep reasoning, extended context, autonomous tools, strict verification, elevated risk
+
+Context
+  First shippable stage of the vacuum-floor ladder. The S2 generic cohort (400 no-plasma
+  shots) identified 11 of 13 turn counts but left the solenoid weight disputed between two
+  measurement routes, P4/P5 bounded at +-5 turns, and P6 open. The archive documents
+  designed calibration experiments (RSI 72 p421: individual PF-coil pulses, an
+  eight-vacuum-shot matrix solve). Prerequisite: the mast-catalog-geometry-recovery
+  registry-corrections node has landed (corrected obr probe axes and case-plate
+  orientation, new physical digest) - verify before fitting.
+
+State to read
+  nova/imas/mast_vacuum_cohort.py, mast_vacuum_response.py, mast_fitted_parameters.py,
+  mast_channel_drive.py (the machinery this extends)
+  docs/research/mast-cutover-parity-evidence.html (the floor evidence)
+  docs/research/mast-source-resolution.html (source hierarchy, promotion contract)
+  ~/Code/imas-ambix/imas_ambix/gs/operator.py SOLENOID_RESPONSE_SCALE docstring
+  (the incumbent's vacuum-stratum measurement to reproduce nova-side)
+  Level-1 store: /work/projects/imas_gpu/mast/level1/shots/ + FAIR-MAST metadata API
+
+Scope locks / constraints
+  Held-out split declared BEFORE fitting; sustained-vs-pulsed discrimination applied
+  (only ~0.62 s experiments measure turns); near-probe exclusion at two pack WIDTHS.
+  Evidence-typed records only; no fabrication; negative results visible. Fits on
+  sun_debug (8 cpu / 16G / <=1h, OMP=1); uv sync first; JAX_PLATFORMS=cpu on login;
+  worktree on shared storage; commit locally by explicit path, never push.
+
+Done-when
+  1. Calibration cohort keyed by experiment class, provenance-pinned, with the
+     identifiability map and the measured per-channel noise envelope committed.
+  2. One solenoid weight with an interval reconciling both routes (or the recorded
+     disagreement with its measured cause); P4/P5 intervals below 0.5 turn or the
+     published integer promoted with the fit as corroboration; P6 dispositioned.
+  3. Refined artifact republished (new semantic identity), focused + integrated lanes
+     green, ladder re-stamp banked, plan followup for stage C/D written, this resolved.</pre>
+      </article>
+      <article class="r-fu" data-id="f-vfr-02" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-create" data-written-at="2026-08-04" data-recommends-skill="/reckon-ship mast-vacuum-floor-recovery §3c">
+        <h4 class="r-fu-title">Stage C+D — sensor pose/gain adjudication and winding lattices</h4>
+        <div class="r-fu-body"><p>Adjudicate the flux-loop placement disagreements and fit per-probe
+        gain/orientation where identifiable, with a pre-registered discriminant for whether obv06/obv14
+        carry a probe-side calibration item or a near-conductor field-shape effect; author fitted winding
+        lattices for P4/P5 under the winding-lattice-identity decision. Two workers with disjoint scopes
+        (sensor records vs winding geometry) may run in parallel.</p></div>
+        <pre class="r-fu-prompt">Project: nova
+Plan:    mast-vacuum-floor-recovery (§3c + §3d)
+Capability: orchestrator
+Requirements: deep reasoning, extended context, autonomous tools, strict verification, elevated risk
+
+Context
+  Stage A/B landed: calibration cohort, noise envelope, turns closed. The attribution
+  localised 61% of the cross-source excess on obv06/obv14 (outboard, beside P4/P5) and
+  the sources disagree on flux-loop placement (7 loops unmatched within 50 mm, others
+  displaced <=6 mm). A blind efm-lattice swap HURT the residual (-27% of the gap), so
+  lattice parameters must be FIT, not copied.
+
+State to read
+  The stage-A cohort record + noise envelope artifacts (paths in the stage-A landing)
+  ~/.cache/ambix-after-path/attribution/out/*.json (per-channel excess, column tables)
+  nova/imas/mast_geometry.py + machine_evidence.py (sensor + evidence records)
+  Both sources' flux-loop tables (artifact IDSs vs imas_ambix gs geometry, read-only)
+
+Scope locks / constraints
+  Pre-register the obv06/obv14 discriminant before fitting. Joint gain+orientation fits
+  only where identifiable (unit vector, cross-shot stability, sign). Loop positions
+  promote per loop with intervals; inseparable candidates stay dual-valued. Lattices are
+  generated evidence with stated assumptions; honour the winding-lattice-identity
+  decision (lock it first if still open - surface to the orchestrator, do not resolve
+  unilaterally). Held-out challenge on every promotion; monotone-ladder gate applies.
+
+Done-when
+  1. Every disagreeing sensor has a promoted pose/gain with interval, or an explicit
+     dual-valued record; the obv06/obv14 verdict is recorded with its discriminant.
+  2. Fitted lattices improve held-out prediction at the near probes without degrading
+     any other channel, or the negative result stands and uniform density stays.
+  3. Artifact republished, lanes green, ladder re-stamp banked, stage-E followup
+     written, this resolved.</pre>
+      </article>
+      <article class="r-fu" data-id="f-vfr-03" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-create" data-written-at="2026-08-04" data-recommends-skill="/reckon-ship mast-vacuum-floor-recovery §3e">
+        <h4 class="r-fu-title">Stage E — passive R/L calibrated on dedicated decay experiments</h4>
+        <div class="r-fu-body"><p>Compute exact group inductance from nova.biot on the corrected case
+        geometry, fit mode-resolved decay on the dedicated per-coil-pulse and matrix experiments, and
+        convert time constants to grouped resistance. Promote per the standing contract; the S2 negative
+        result (one separable mode from generic shots) is the baseline to beat.</p></div>
+        <pre class="r-fu-prompt">Project: nova
+Plan:    mast-vacuum-floor-recovery (§3e)
+Capability: orchestrator
+Requirements: deep reasoning, extended context, autonomous tools, strict verification, elevated risk
+
+Context
+  The S2 pass grouped 32 case plates into 10 enclosure groups but could separate only ONE
+  spatial decay pattern (23-72 ms) from generic no-plasma shots, so per-family resistance
+  stayed nominal. Three new levers: exact L per group from nova.biot on the CORRECTED case
+  geometry (registry-corrections node), the dedicated decay experiments from the stage-A
+  cohort (per-coil pulses excite different groups; the eight-shot matrix was designed to
+  separate induced contributions), and mode-resolved fitting with the L matrix in the loop.
+
+State to read
+  nova/imas/mast_passive_response.py (the S2 decay machinery + its negative result)
+  nova/imas/mast_seed_parameters.py (nominal resistivities + intervals to refine)
+  The stage-A cohort record (decay-experiment classes + identifiability map)
+  nova/biot inductance kernels (exact two-section flux linkage; see nova/circuit/passive.py)
+
+Scope locks / constraints
+  R = L/tau only with exact L on corrected geometry; fit two-three dominant modes, not one
+  lumped pattern; hold out complete shots AND one excitation family; promote only positive,
+  physically plausible, cross-shot-stable values inside the material intervals (or record
+  why outside); the two unchannelled P6 case groups stay induced. Monotone-ladder gate.
+
+Done-when
+  1. Group L matrix committed with its geometry provenance; mode-resolved fits with
+     per-group R intervals, promoted or visibly negative per group.
+  2. Held-out transient waveforms and reconstructed passive current both improve, or the
+     nominal values stand with the recorded reason.
+  3. Artifact republished, lanes green, ladder re-stamp banked, stage-F followup
+     written, this resolved.</pre>
+      </article>
+      <article class="r-fu" data-id="f-vfr-04" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-create" data-written-at="2026-08-04" data-recommends-skill="/reckon-ship mast-vacuum-floor-recovery §3f">
+        <h4 class="r-fu-title">Stage F — close the ladder and retire the qualified pass</h4>
+        <div class="r-fu-body"><p>Final ladder accounting: verify the monotone residual sequence, run the
+        closing frozen-gate pair, and if the artifact path now beats the incumbent absolutely, re-score the
+        cutover under the same-source budget and retire the qualified cross-source status. Decompose any
+        remaining gap to the noise envelope per channel and hand the result to the donor-migration and
+        GPU-catalog plans.</p></div>
+        <pre class="r-fu-prompt">Project: nova, with authorized imas-ambix pin/scoring changes
+Plan:    mast-vacuum-floor-recovery (§3f + §4 closure)
+Capability: orchestrator
+Requirements: deep reasoning, extended context, autonomous tools, strict verification, elevated risk
+
+Context
+  Stages A-E have landed with their per-stage re-stamps. This stage closes the ladder
+  against the locked floor-target decision and re-frames the cutover verdict.
+
+State to read
+  The ladder of banked stamps (imas_ambix/spine_bench/results/) + each stage's landing
+  imas_ambix/spine_bench/parity.py (both budget classes; the same-source class is the
+  closure re-score, NOT a tolerance to modify)
+  The stage-A noise envelope record
+
+Scope locks / constraints
+  No tolerance changes; the closure is scored against the untouched same-source budget.
+  One final before/after stamp pair at the final pin (two sun_debug jobs). If the ladder
+  is not monotone or the final residual exceeds the incumbent, the plan does NOT close -
+  record the failing stage and the per-channel decomposition instead.
+
+Done-when
+  1. Ladder table committed (stage -> residual, both arms) with the closing stamps.
+  2. artifact <= incumbent on both arms scored under the SAME-SOURCE budget, qualified
+     cross-source status retired in the plan records; or the honest failure recorded
+     with its decomposition.
+  3. Remaining gap to the noise envelope decomposed per channel; six-gap disposition
+     table refreshed; handoff comments written to physics-spine-adoption (donor
+     migration) and mast-catalog-gpu-solve; plan set shipped; this resolved.</pre>
+      </article>
+    </section>
+
+    <section data-reckon="research" id="research" class="r-research-list">
+      <h2><span class="sec">§</span> Research</h2>
+      <div class="r-research" data-id="r-vfr-parity-evidence" data-type="evidence" data-source="S2 frozen-gate stamps, re-solved swaps, per-channel attribution" data-added-by="reckon-create" data-when="2026-08-04" data-url="/nova/mast-cutover-parity-evidence.html">
+        <span class="r-research-title"><a href="/nova/mast-cutover-parity-evidence.html">MAST cutover parity evidence and residual attribution</a></span></div>
+      <div class="r-research" data-id="r-vfr-provisional-artifact" data-type="evidence" data-source="S2 artifact + census landing record" data-added-by="reckon-create" data-when="2026-08-04" data-url="/nova/mast-provisional-artifact-landed.html">
+        <span class="r-research-title"><a href="/nova/mast-provisional-artifact-landed.html">MAST provisional machine artifact — landed</a></span></div>
+      <div class="r-research" data-id="r-vfr-source-resolution" data-type="resolution-plan" data-source="Nova catalog evidence plus UKAEA machine-description and vacuum-calibration literature" data-added-by="reckon-create" data-when="2026-08-04" data-url="/nova/mast-source-resolution.html">
+        <span class="r-research-title"><a href="/nova/mast-source-resolution.html">MAST source-resolution programme</a></span></div>
+    </section>
+
+  </main>
+</body>
+</html>

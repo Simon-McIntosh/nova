@@ -1,214 +1,245 @@
 {
-  "updated": "2026-08-04T12:35:05",
-  "project": "nova",
-  "doc": "index",
-  "data": {
-    "sprints": [
-      {
-        "id": "S1",
-        "status": "done",
-        "theme": "Converge Nova 2.0",
-        "items": [
-          {
-            "slug": "nova-spine-refactor",
-            "why_now": "All migration work depends on the final API/branch convergence.",
-            "done_when": "Ambix adoption contract is frozen, assembly extracted, plan/code branches converge and the main suite passes.",
-            "capability": {
-              "version": "1.0",
-              "class": "orchestrator",
-              "requirements": {}
-            }
-          },
-          {
-            "slug": "polybow-arc-section",
-            "why_now": "The pin refit exposed a real correctness item: XLA CPU codegen breaks a root/difference cancellation in the elliptic descent that GPU-less serving nodes compile through; the hollowness normalisation still folds in opposite directions across two layers. Stabilise before downstream ports consume the arc element.",
-            "done_when": "Descent swept and codegen-pinned on both backends; traced-parity item re-triaged; hollowness one direction with both layers agreeing; disc/ellipse corner-count decision locked on measurement. GPU wall-clock re-quote and arc banding may roll to S2.",
-            "capability": {
-              "version": "1.0",
-              "class": "orchestrator",
-              "requirements": {}
-            }
-          },
-          {
-            "slug": "coil-conductor-fidelity",
-            "why_now": "One rung from shipped: the feeder run is 46% of PF1's residual and costs seconds per coil to measure; the mesh-default recommendation unblocks the reconstruction lane's convergence discipline.",
-            "done_when": "Feeder rung tabulated for all twelve coils with the circuit boundary established or explicitly undetermined; reconstruction mesh default recommended with its convergence ladder; plan shipped.",
-            "capability": {
-              "version": "1.0",
-              "class": "orchestrator",
-              "requirements": {}
-            }
-          },
-          {
-            "slug": "nova-heritage-recovery",
-            "why_now": "The repair is merged but its evidence record is missing; reconstruction is cheap and the plan is at 0.7 with one followup between it and shipped.",
-            "done_when": "Damage inventory, FrequencyResponse oracle check, hermeticity proof and test counts recorded; galleries import-checked; salvage register written; plan shipped.",
-            "capability": {
-              "version": "1.0",
-              "class": "general",
-              "requirements": {}
-            }
-          }
-        ],
-        "starts": "2026-07-29",
-        "ends": "2026-07-29",
-        "description": "Closed 2026-07-29. All four items shipped: trunk convergence (nova-spine-refactor), CPU/GPU arc correctness with measured 64-corner default and two performance refinements deferred to S2 (polybow-arc-section), 0.06 m conductor reference mesh plus all twelve feeder decompositions with circuit boundary explicitly undetermined (coil-conductor-fidelity), and a fully evidenced offline heritage recovery with import-checked galleries and inverse-design salvage register (nova-heritage-recovery). Final sun_debug gate: 3,841 passed, 118 resource-gated skips in 647.00 s. Closeout records live under docs/archive/ and plan artifacts."
-      },
-      {
-        "id": "S2",
-        "status": "active",
-        "theme": "Complete the axisymmetric physics spine and MAST machine data",
-        "items": [
-          {
-            "slug": "physics-spine-adoption",
-            "why_now": "Profile reconstruction, gs_solve, geometry and full transport coupling are the remaining core physics ports.",
-            "done_when": "Wave 3 lands in Nova with frozen CPU/JAX parity evidence and Ambix donor inventory.",
-            "capability": {
-              "version": "1.0",
-              "class": "orchestrator",
-              "requirements": {}
-            }
-          },
-          {
-            "slug": "mast-catalog-geometry-recovery",
-            "why_now": "The Ambix L1/L2 catalogs contain the physical MAST geometry and diagnostic poses needed to replace raw EFIT/AMM setup hashes with real configuration identity.",
-            "done_when": "A subdivision-invariant catalog registry publishes observed physical shot ranges and validated DDv4 machine/diagnostic geometry, unblocking mast-machine-description and physics-spine-adoption.",
-            "capability": {
-              "version": "1.0",
-              "class": "orchestrator",
-              "requirements": {
-                "reasoning": "deep",
-                "context": "extended",
-                "tool_autonomy": "autonomous",
-                "verification": "strict",
-                "risk": "elevated"
-              }
-            }
-          },
-          {
-            "slug": "mast-machine-description",
-            "why_now": "Production reconstruction and IMAS egress require versioned MAST DDv4 descriptions and identity gates.",
-            "done_when": "MAST IDS descriptions, COCOS gates and IMAS round trips pass with provenance.",
-            "capability": {
-              "version": "1.0",
-              "class": "orchestrator",
-              "requirements": {}
-            }
-          },
-          {
-            "slug": "nova-3d-native",
-            "why_now": "MAST passive and non-axisymmetric work needs the exact native 3D coupling substrate.",
-            "done_when": "Exact flux-coupling operators and remaining numerical gates ship with evidence.",
-            "capability": {
-              "version": "1.0",
-              "class": "orchestrator",
-              "requirements": {}
-            }
-          }
-        ],
-        "starts": "2026-08-06",
-        "ends": "2026-08-20",
-        "description": "Execution complete 2026-08-04; implementation 95.5%. All four item done_when gates met: nova-3d-native shipped (S1 carryover); the MAST registry gained five-state evidence provenance, a seeded then vacuum-refined content-addressed DD 4.1.1 artifact (fitted turns for 11 of 13 coils, held-out variance 0.9889; electrical drive map covering all 21 driven columns), and DD round trips with provenance (nova ac42194c/ee107ed4/28872e4f); the Ambix axisymmetric cutover landed identity seams, a hardened frozen six-shot gate (15 registered tolerances incl. a new raw-magnetics residual; stamp mislabelling fixed), the artifact reader, and PASSES 15/15 under the owner-adjudicated source-cutover budget with every reproduction metric improved (imas-ambix cfa2d2c..ae728ad); zero-import donors retired with census proof. Carryover followups keep the three plans active: solve-input ingest maps and the solenoid vacuum-stratum re-fit (mast-machine-description), the combined registry digest-change corrections (mast-catalog-geometry-recovery), and the deep-donor importer migration (physics-spine-adoption). Records: docs/research/mast-provisional-artifact-landed.html and docs/research/mast-cutover-parity-evidence.html."
-      },
-      {
-        "id": "S3",
-        "status": "planned",
-        "theme": "MAST 3D fields, passive structures and circuits",
-        "items": [
-          {
-            "slug": "mast-nonaxisymmetric-physics",
-            "why_now": "This closes the remaining Ambix-owned 3D/passive physics boundary before production labeling.",
-            "done_when": "Versioned geometry, circuits, vacuum taring and held-out ramp evidence ship in Nova.",
-            "capability": {
-              "version": "1.0",
-              "class": "orchestrator",
-              "requirements": {}
-            }
-          }
-        ],
-        "starts": "2026-08-21",
-        "ends": "2026-09-04",
-        "description": "Move MAST-specific non-axisymmetric geometry, drive semantics, passive screening and vacuum taring into Nova after the native 3D substrate ships."
-      },
-      {
-        "id": "S4",
-        "status": "planned",
-        "theme": "H200 production catalog",
-        "items": [
-          {
-            "slug": "mast-catalog-gpu-solve",
-            "why_now": "The validated production substrate is ready for campaign-scale GPU execution and label-store release.",
-            "done_when": "H200 solve meets science, provenance and throughput gates; versioned label store and optional IMAS egress are published.",
-            "capability": {
-              "version": "1.0",
-              "class": "orchestrator",
-              "requirements": {}
-            }
-          }
-        ],
-        "starts": "2026-09-05",
-        "ends": "2026-09-19",
-        "description": "Run the GPU catalog only after reconstruction, machine descriptions and MAST 3D/passive physics pass their evidence gates."
+ "updated": "2026-08-04T12:35:05",
+ "project": "nova",
+ "doc": "index",
+ "data": {
+  "sprints": [
+   {
+    "id": "S1",
+    "status": "done",
+    "theme": "Converge Nova 2.0",
+    "items": [
+     {
+      "slug": "nova-spine-refactor",
+      "why_now": "All migration work depends on the final API/branch convergence.",
+      "done_when": "Ambix adoption contract is frozen, assembly extracted, plan/code branches converge and the main suite passes.",
+      "capability": {
+       "version": "1.0",
+       "class": "orchestrator",
+       "requirements": {}
       }
-    ],
-    "active_sprint_id": "S2",
-    "timeline": [
-      {
-        "when": "2026-07-29",
-        "who": "codex",
-        "what": "Dependency-ordered Ambix-to-Nova physics transition sprints S1-S4 defined"
-      },
-      {
-        "when": "2026-07-29",
-        "who": "reckon-sprint",
-        "what": "S1 rebalanced: polybow correctness close-out, conductor-fidelity feeder rung and heritage evidence added beside the convergence item; blockers B1-B4 recorded; cross-project dependencies qualified project:slug under the new schema."
-      },
-      {
-        "when": "2026-07-29",
-        "who": "reckon-ship",
-        "what": "S1 closed: all four plans shipped; final full suite 3,841 passed and 118 resource-gated skips on sun_debug."
-      },
-      {
-        "when": "2026-07-30",
-        "who": "reckon-sprint",
-        "what": "S2 catalog geometry recovery added ahead of MAST DDv4 authoring; physical geometry and diagnostic pose are identity, while EFIT/AMM subdivisions are evidence only."
-      },
-      {
-        "when": "2026-08-04",
-        "who": "reckon-ship",
-        "what": "S2 execution: provisional and refined MAST artifact with evidence states and fitted turns landed (nova ac42194c/ee107ed4/28872e4f); ambix cutover mechanics, magnetics-residual gate, artifact reader and drive-map consumption landed (imas-ambix cfa2d2c..27dff421). Frozen six-shot after-path parity passes 13/15 with every reproduction metric improved; the single sensor-misfit failure (2.2% vs a same-source 1% budget) is attributed to irreducible cross-source differences on a structurally non-neutral benchmark. Donor retirement and sprint closure gated on the budget adjudication; registry corrections and the solenoid stratum re-fit queued."
+     },
+     {
+      "slug": "polybow-arc-section",
+      "why_now": "The pin refit exposed a real correctness item: XLA CPU codegen breaks a root/difference cancellation in the elliptic descent that GPU-less serving nodes compile through; the hollowness normalisation still folds in opposite directions across two layers. Stabilise before downstream ports consume the arc element.",
+      "done_when": "Descent swept and codegen-pinned on both backends; traced-parity item re-triaged; hollowness one direction with both layers agreeing; disc/ellipse corner-count decision locked on measurement. GPU wall-clock re-quote and arc banding may roll to S2.",
+      "capability": {
+       "version": "1.0",
+       "class": "orchestrator",
+       "requirements": {}
       }
-    ],
-    "blockers": [
-      {
-        "id": "B1",
-        "summary": "develop/main diverged 6 days (269 code commits on develop vs 126 docs/data commits on main since e31fb6df) \u2014 reckon state serves from main while all code lands on develop. The \u00a711 forward-deletion merge (develop\u2192main, assembly tree drops from the working tree, no history rewrite) is UNBLOCKED: the sole precondition (norma extraction sign-off, CI 228/13 green) is recorded.",
-        "origin": "nova-spine-refactor#s11",
-        "owner": "Simon McIntosh",
-        "next": "/reckon-ship nova-spine-refactor \u00a711 \u2014 merge develop\u2192main, verify lanes green locally (no CI), retire the two-branch exception, set the plan shipped."
-      },
-      {
-        "id": "B2",
-        "summary": "CS geometry-revision conflict, upstream of nova: the 111004/1 conductor centreline packs sit on the OLDER itergeom outline revision (CS3U 202 mm higher / 19 mm inside, worth -2.14e-02 H \u2014 forty times the winding effect) while the machine inductance table matches the SHIPPED revision, and the stored CS section is half the documented cable-space radius. No solenoid winding comparison is readable until the ITER machine-description provenance (DET-07879-A chain) is reconciled.",
-        "origin": "external: ITER_MACHINE_DESCRIPTION 111004/1 vs itergeom revisions",
-        "owner": "Simon McIntosh",
-        "next": "Raise with the machine-description provider; until then CS stays off the conductor-fidelity ladder (recorded in coil-conductor-fidelity \u00a73/\u00a74)."
-      },
-      {
-        "id": "B3",
-        "summary": "The machine-description inductance table's circuit boundary is undetermined: terminal-to-terminal vs pack-only decides whether PF1's +3.335e-04 H feeder rung belongs on the comparison ladder (46% of the remaining residual) or in the hardware record. A documentation hunt, not a computation.",
-        "origin": "coil-conductor-fidelity#s4 (f-ccf-06 item 3)",
-        "owner": "Simon McIntosh",
-        "next": "Establish from DDD / DET-07879-A / pf_active 111001/104 metadata which circuit the table describes; if undetermined, tabulate both readings per coil."
-      },
-      {
-        "id": "B4",
-        "summary": "norma still ships a top-level nova/ package (nine of ten entries collide with nova-stella; pip lets the later install silently overwrite the earlier). Any environment installing both norma and nova 2.0 is exposed until the namespace rename lands. External to nova: the work is norma:norma-standalone-package (rename \u2192 registry re-home \u2192 wheel-boundary co-installation gate).",
-        "origin": "external: norma:norma-standalone-package",
-        "owner": "Simon McIntosh",
-        "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
+     },
+     {
+      "slug": "coil-conductor-fidelity",
+      "why_now": "One rung from shipped: the feeder run is 46% of PF1's residual and costs seconds per coil to measure; the mesh-default recommendation unblocks the reconstruction lane's convergence discipline.",
+      "done_when": "Feeder rung tabulated for all twelve coils with the circuit boundary established or explicitly undetermined; reconstruction mesh default recommended with its convergence ladder; plan shipped.",
+      "capability": {
+       "version": "1.0",
+       "class": "orchestrator",
+       "requirements": {}
       }
+     },
+     {
+      "slug": "nova-heritage-recovery",
+      "why_now": "The repair is merged but its evidence record is missing; reconstruction is cheap and the plan is at 0.7 with one followup between it and shipped.",
+      "done_when": "Damage inventory, FrequencyResponse oracle check, hermeticity proof and test counts recorded; galleries import-checked; salvage register written; plan shipped.",
+      "capability": {
+       "version": "1.0",
+       "class": "general",
+       "requirements": {}
+      }
+     }
     ],
-    "_version": 8
-  }
+    "starts": "2026-07-29",
+    "ends": "2026-07-29",
+    "description": "Closed 2026-07-29. All four items shipped: trunk convergence (nova-spine-refactor), CPU/GPU arc correctness with measured 64-corner default and two performance refinements deferred to S2 (polybow-arc-section), 0.06 m conductor reference mesh plus all twelve feeder decompositions with circuit boundary explicitly undetermined (coil-conductor-fidelity), and a fully evidenced offline heritage recovery with import-checked galleries and inverse-design salvage register (nova-heritage-recovery). Final sun_debug gate: 3,841 passed, 118 resource-gated skips in 647.00 s. Closeout records live under docs/archive/ and plan artifacts."
+   },
+   {
+    "id": "S2",
+    "status": "done",
+    "theme": "Complete the axisymmetric physics spine and MAST machine data",
+    "items": [
+     {
+      "slug": "nova-3d-native",
+      "why_now": "MAST passive and non-axisymmetric work needs the exact native 3D coupling substrate.",
+      "done_when": "Exact flux-coupling operators and remaining numerical gates ship with evidence.",
+      "capability": {
+       "version": "1.0",
+       "class": "orchestrator",
+       "requirements": {}
+      }
+     }
+    ],
+    "starts": "2026-08-06",
+    "ends": "2026-08-04",
+    "description": "Closed 2026-08-04; implementation 95.5% at close. All four item done_when gates met: nova-3d-native shipped (S1 carryover); the MAST registry gained five-state evidence provenance, a seeded then vacuum-refined content-addressed DD 4.1.1 artifact (fitted turns for 11 of 13 coils, held-out variance 0.9889; electrical drive map covering all 21 driven columns), and DD round trips with provenance (nova ac42194c/ee107ed4/28872e4f); the Ambix axisymmetric cutover landed identity seams, a hardened frozen six-shot gate (15 registered tolerances incl. a new raw-magnetics residual; stamp mislabelling fixed), the artifact reader, and PASSES 15/15 under the owner-adjudicated source-cutover budget with every reproduction metric improved (imas-ambix cfa2d2c..ae728ad); zero-import donors retired with census proof. The three plans that executed here (physics-spine-adoption, mast-catalog-geometry-recovery, mast-machine-description) moved to S5 with their follow-on work: registry digest-change corrections, the vacuum-floor calibration ladder, solve-input ingest maps, and deep-donor importer migration. Records: docs/research/mast-provisional-artifact-landed.html and docs/research/mast-cutover-parity-evidence.html."
+   },
+   {
+    "id": "S5",
+    "status": "planned",
+    "theme": "Recover the vacuum floor",
+    "items": [
+     {
+      "slug": "mast-catalog-geometry-recovery",
+      "why_now": "Two proven registry defects (obr probe axes radial-not-π/2; transposed case-plate extents) corrupt sensor projection and case inductance in every downstream fit; the correction is one deliberate physical-digest change and the whole floor ladder consumes it.",
+      "done_when": "Both corrections landed as one digest change with the old→new mapping test-pinned, artifact republished, nova and ambix suites green at the new pin; plan shipped.",
+      "capability": {
+       "version": "1.0",
+       "class": "orchestrator",
+       "requirements": {
+        "reasoning": "deep",
+        "context": "extended",
+        "tool_autonomy": "autonomous",
+        "verification": "strict",
+        "risk": "elevated"
+       }
+      }
+     },
+     {
+      "slug": "mast-vacuum-floor-recovery",
+      "why_now": "Both machine descriptions misfit the measured magnetics at ~0.74σ — static coil/sensor calibration error that bounds every reconstruction the GPU catalog will produce; the archive contains the designed calibration experiments (sustained single-coil pulses, the eight-vacuum-shot matrix) to remove it.",
+      "done_when": "Artifact path ≤ incumbent absolute residual on both hard-read arms scored under the untouched same-source budget; per-channel noise envelope quantified with the remaining gap decomposed; all six S2 physical gaps re-dispositioned; plan shipped.",
+      "capability": {
+       "version": "1.0",
+       "class": "orchestrator",
+       "requirements": {
+        "reasoning": "deep",
+        "context": "extended",
+        "tool_autonomy": "autonomous",
+        "verification": "strict",
+        "risk": "elevated"
+       }
+      }
+     },
+     {
+      "slug": "mast-machine-description",
+      "why_now": "The solve-input ingest maps are the last open stage, and the floor-recovered calibration flows through the same nova.io path the catalog solve consumes.",
+      "done_when": "A MAST shot's solve inputs load through nova.io against the refined artifact with round-trip tests passing on a pilot set spanning both field polarities; plan shipped.",
+      "capability": {
+       "version": "1.0",
+       "class": "orchestrator",
+       "requirements": {}
+      }
+     },
+     {
+      "slug": "physics-spine-adoption",
+      "why_now": "With the cutover gate passed, the deep-donor importer migration (geometry 77, operator 71 external importers) is unblocked and each floor-ladder pin bump is a natural migration checkpoint.",
+      "done_when": "Importer tranches migrated leaf-first with per-tranche gates under the registered budget classes; every retirement carries zero-import proof; plan shipped or the surviving-donor ladder explicitly re-scoped.",
+      "capability": {
+       "version": "1.0",
+       "class": "orchestrator",
+       "requirements": {}
+      }
+     }
+    ],
+    "starts": "2026-08-05",
+    "ends": "2026-08-19",
+    "description": "Calibrate the MAST machine description to the measurement floor. The S2 cutover passed on a measured cross-source budget; this sprint makes that budget moot by completing turns/circuits, adjudicating sensor poses and winding lattices, and calibrating passive R/L on the archive's designed vacuum experiments, until the artifact path beats the incumbent on absolute whitened sensor misfit and approaches the quantified noise envelope. Order: registry corrections first (one digest change), then the mast-vacuum-floor-recovery ladder (cohort + noise envelope → turns → sensors ∥ lattices → passive R/L → closing stamps), with ingest maps and donor migration riding alongside."
+   },
+   {
+    "id": "S3",
+    "status": "planned",
+    "theme": "MAST 3D fields, passive structures and circuits",
+    "items": [
+     {
+      "slug": "mast-nonaxisymmetric-physics",
+      "why_now": "This closes the remaining Ambix-owned 3D/passive physics boundary before production labeling.",
+      "done_when": "Versioned geometry, circuits, vacuum taring and held-out ramp evidence ship in Nova.",
+      "capability": {
+       "version": "1.0",
+       "class": "orchestrator",
+       "requirements": {}
+      }
+     }
+    ],
+    "starts": "2026-08-21",
+    "ends": "2026-09-04",
+    "description": "Move MAST-specific non-axisymmetric geometry, drive semantics, passive screening and vacuum taring into Nova after the native 3D substrate ships."
+   },
+   {
+    "id": "S4",
+    "status": "planned",
+    "theme": "H200 production catalog",
+    "items": [
+     {
+      "slug": "mast-catalog-gpu-solve",
+      "why_now": "The validated production substrate is ready for campaign-scale GPU execution and label-store release.",
+      "done_when": "H200 solve meets science, provenance and throughput gates; versioned label store and optional IMAS egress are published.",
+      "capability": {
+       "version": "1.0",
+       "class": "orchestrator",
+       "requirements": {}
+      }
+     }
+    ],
+    "starts": "2026-09-05",
+    "ends": "2026-09-19",
+    "description": "Run the GPU catalog only after reconstruction, machine descriptions and MAST 3D/passive physics pass their evidence gates."
+   }
+  ],
+  "active_sprint_id": null,
+  "timeline": [
+   {
+    "when": "2026-07-29",
+    "who": "codex",
+    "what": "Dependency-ordered Ambix-to-Nova physics transition sprints S1-S4 defined"
+   },
+   {
+    "when": "2026-07-29",
+    "who": "reckon-sprint",
+    "what": "S1 rebalanced: polybow correctness close-out, conductor-fidelity feeder rung and heritage evidence added beside the convergence item; blockers B1-B4 recorded; cross-project dependencies qualified project:slug under the new schema."
+   },
+   {
+    "when": "2026-07-29",
+    "who": "reckon-ship",
+    "what": "S1 closed: all four plans shipped; final full suite 3,841 passed and 118 resource-gated skips on sun_debug."
+   },
+   {
+    "when": "2026-07-30",
+    "who": "reckon-sprint",
+    "what": "S2 catalog geometry recovery added ahead of MAST DDv4 authoring; physical geometry and diagnostic pose are identity, while EFIT/AMM subdivisions are evidence only."
+   },
+   {
+    "when": "2026-08-04",
+    "who": "reckon-ship",
+    "what": "S2 execution: provisional and refined MAST artifact with evidence states and fitted turns landed (nova ac42194c/ee107ed4/28872e4f); ambix cutover mechanics, magnetics-residual gate, artifact reader and drive-map consumption landed (imas-ambix cfa2d2c..27dff421). Frozen six-shot after-path parity passes 13/15 with every reproduction metric improved; the single sensor-misfit failure (2.2% vs a same-source 1% budget) is attributed to irreducible cross-source differences on a structurally non-neutral benchmark. Donor retirement and sprint closure gated on the budget adjudication; registry corrections and the solenoid stratum re-fit queued."
+   },
+   {
+    "when": "2026-08-04",
+    "who": "reckon-sprint",
+    "what": "S2 closed (all item gates met; qualified cross-source parity pass recorded). S5 'Recover the vacuum floor' created ahead of S3/S4: registry digest-change corrections, the mast-vacuum-floor-recovery calibration ladder (dedicated cohort + noise envelope, turns closure, sensor/lattice adjudication, passive R/L on exact biot inductance, monotone residual ladder targeting artifact ≤ incumbent under the same-source budget), plus ingest maps and deep-donor migration. The three S2 carryover plans moved to S5."
+   }
+  ],
+  "blockers": [
+   {
+    "id": "B1",
+    "summary": "develop/main diverged 6 days (269 code commits on develop vs 126 docs/data commits on main since e31fb6df) — reckon state serves from main while all code lands on develop. The §11 forward-deletion merge (develop→main, assembly tree drops from the working tree, no history rewrite) is UNBLOCKED: the sole precondition (norma extraction sign-off, CI 228/13 green) is recorded.",
+    "origin": "nova-spine-refactor#s11",
+    "owner": "Simon McIntosh",
+    "next": "/reckon-ship nova-spine-refactor §11 — merge develop→main, verify lanes green locally (no CI), retire the two-branch exception, set the plan shipped."
+   },
+   {
+    "id": "B2",
+    "summary": "CS geometry-revision conflict, upstream of nova: the 111004/1 conductor centreline packs sit on the OLDER itergeom outline revision (CS3U 202 mm higher / 19 mm inside, worth -2.14e-02 H — forty times the winding effect) while the machine inductance table matches the SHIPPED revision, and the stored CS section is half the documented cable-space radius. No solenoid winding comparison is readable until the ITER machine-description provenance (DET-07879-A chain) is reconciled.",
+    "origin": "external: ITER_MACHINE_DESCRIPTION 111004/1 vs itergeom revisions",
+    "owner": "Simon McIntosh",
+    "next": "Raise with the machine-description provider; until then CS stays off the conductor-fidelity ladder (recorded in coil-conductor-fidelity §3/§4)."
+   },
+   {
+    "id": "B3",
+    "summary": "The machine-description inductance table's circuit boundary is undetermined: terminal-to-terminal vs pack-only decides whether PF1's +3.335e-04 H feeder rung belongs on the comparison ladder (46% of the remaining residual) or in the hardware record. A documentation hunt, not a computation.",
+    "origin": "coil-conductor-fidelity#s4 (f-ccf-06 item 3)",
+    "owner": "Simon McIntosh",
+    "next": "Establish from DDD / DET-07879-A / pf_active 111001/104 metadata which circuit the table describes; if undetermined, tabulate both readings per coil."
+   },
+   {
+    "id": "B4",
+    "summary": "norma still ships a top-level nova/ package (nine of ten entries collide with nova-stella; pip lets the later install silently overwrite the earlier). Any environment installing both norma and nova 2.0 is exposed until the namespace rename lands. External to nova: the work is norma:norma-standalone-package (rename → registry re-home → wheel-boundary co-installation gate).",
+    "origin": "external: norma:norma-standalone-package",
+    "owner": "Simon McIntosh",
+    "next": "/reckon-ship norma-standalone-package §2 in ~/Code/norma (then §3 registry, §4 independence audit)."
+   }
+  ],
+  "_version": 9
+ }
 }

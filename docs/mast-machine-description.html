@@ -19,8 +19,8 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-04">
 <meta name="plan-impl" content="0.88">
-<meta name="plan-version" content="17">
-<meta name="plan-sprint" content="S2">
+<meta name="plan-version" content="18">
+<meta name="plan-sprint" content="S5">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-commits" content="81fb0cfc2961cd4cda83bd048af6d37062e48f5e,e286bb59cd456fa0ab8f9bb40a0b77a60319eec2,943c3069700397e48840691298c9c4bf2fac7412,f4e478e315e1786c55df733e95e110e1fd6eea87,ac42194c,ee107ed4,28872e4f">
@@ -595,7 +595,7 @@ Work
 Done when
 - A MAST shot&#x27;s solve inputs load through nova.io against the refined artifact with no ambix geometry table on the path; round-trip tests pass on the pilot set; unresolved names remain visible proposals.</pre>
     </article>
-<article class="r-fu" data-id="f-mmd-solenoid-vacuum-stratum" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-04" data-recommends-skill="/reckon-ship mast-machine-description" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-mmd-solenoid-vacuum-stratum" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-04" data-recommends-skill="/reckon-ship mast-machine-description" data-resolved-at="2026-08-04T14:29:45+00:00" data-resolved-by="reckon-sprint">
     <h4 class="r-fu-title">Re-fit the solenoid drive weight on the plasma-free vacuum stratum</h4>
     <div class="r-fu-body"><p>The plasma-free coil-only stratum (85 shots, ~111k slices, no solve in the loop) puts the effective solenoid weight at [348.5, 361.1] at 95%, while the artifact states the six-vacuum-shot cohort fit 344.657 ± 11.68 — 1.1% below the stratum interval. The stratum is the stronger evidence line; efm's effective 355.06 sits inside it. Re-fit the sol_current drive weight on the full stratum, challenge held-out, and republish the drive map with the promoted value or the visible negative result.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -614,6 +614,7 @@ Work
 
 Done when
 - One evidence-backed solenoid weight with a stated interval reconciling both measurement routes, published in the drive map, test-pinned, lanes green.</pre>
+    <p class="r-fu-outcome">Re-homed to mast-vacuum-floor-recovery §3b (stage B, followup f-vfr-01), which owns the whole vacuum-floor calibration ladder — the solenoid-weight reconciliation is its first fitting item and is specified there with the same evidence basis (six-shot cohort 344.657±11.68 vs plasma-free stratum [348.5, 361.1]).</p>
     </article>
 </section>
 

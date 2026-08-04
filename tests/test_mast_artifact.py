@@ -11,6 +11,7 @@ from pathlib import Path
 import pytest
 
 import nova.imas.mast_artifact as mast_artifact_module
+from nova.imas.machine_drive import SINGLE_ELEMENT, ChannelDrive
 from nova.imas.machine_evidence import (
     EvidenceError,
     EvidenceRecord,
@@ -69,11 +70,33 @@ def _write_bundle(path: Path) -> None:
     (path / "ids" / "pf_active.h5").write_bytes(b"active")
 
 
+DRIVEN_FIELD = EvidenceRecord(
+    path="pf_active/coil(p3_upper)/current(p3u_coil_current)",
+    evidence=FieldEvidence.MEASURED,
+    first_shot=11766,
+    last_shot=30471,
+    statement="the channel reports ampere turns, so one ampere drives one",
+    source=SOURCE,
+)
+DRIVE = ChannelDrive(
+    channel="p3u_coil_current",
+    container="pf_active",
+    conductor="p3_upper",
+    elements=(0,),
+    circuit="P3",
+    ampere_turns_per_ampere=1.0,
+    distribution=SINGLE_ELEMENT,
+    evidence=FieldEvidence.MEASURED,
+    path=DRIVEN_FIELD.path,
+)
+
+
 def _manifest(
     source: Path,
     *,
     complete: bool = False,
     field_evidence=(MEASURED_FIELD,),
+    channel_drive=(),
 ) -> MachineArtifactManifest:
     gaps = () if complete else ("toroidal probe orientation is unresolved",)
     return create_machine_artifact_manifest(
@@ -92,6 +115,7 @@ def _manifest(
         complete=complete,
         unresolved_gaps=gaps,
         field_evidence=field_evidence,
+        channel_drive=channel_drive,
     )
 
 
@@ -603,6 +627,49 @@ def test_field_evidence_survives_the_manifest_round_trip(tmp_path: Path) -> None
     assert restored.field_evidence == (MEASURED_FIELD,)
     assert restored.evidence.state_counts()["measured"] == 1
     assert restored == stored.manifest
+
+
+def test_channel_drives_survive_the_manifest_round_trip(tmp_path: Path) -> None:
+    """A weight a consumer scales its vacuum field by decodes back unchanged."""
+
+    source = tmp_path / "source"
+    _write_bundle(source)
+    manifest = _manifest(
+        source,
+        field_evidence=(DRIVEN_FIELD, MEASURED_FIELD),
+        channel_drive=(DRIVE,),
+    )
+    restored = MachineArtifactManifest.from_bytes(manifest.canonical_bytes())
+
+    assert restored.channel_drive == (DRIVE,)
+    assert restored.drive_map.for_channel("p3u_coil_current") == DRIVE
+    assert restored.driven_columns() == (("pf_active", "p3_upper", (0,)),)
+    assert restored == manifest
+
+
+def test_a_drive_weight_cannot_outrun_its_provenance(tmp_path: Path) -> None:
+    """A weight whose record the artifact does not carry is not publishable."""
+
+    source = tmp_path / "source"
+    _write_bundle(source)
+
+    with pytest.raises(MachineArtifactError, match="cite absent evidence records"):
+        _manifest(source, field_evidence=(MEASURED_FIELD,), channel_drive=(DRIVE,))
+
+
+def test_drive_semantics_move_the_semantic_identity(tmp_path: Path) -> None:
+    """Two descriptions of one set of conductors stay addressable apart."""
+
+    source = tmp_path / "source"
+    _write_bundle(source)
+    undriven = _manifest(source, field_evidence=(DRIVEN_FIELD, MEASURED_FIELD))
+    driven = _manifest(
+        source,
+        field_evidence=(DRIVEN_FIELD, MEASURED_FIELD),
+        channel_drive=(DRIVE,),
+    )
+
+    assert undriven.semantic_identity() != driven.semantic_identity()
 
 
 def test_complete_artifact_cannot_carry_an_unresolved_field(tmp_path: Path) -> None:

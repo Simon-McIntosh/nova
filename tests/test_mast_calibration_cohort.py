@@ -13,6 +13,7 @@ visible as a wrong number rather than as a plausible one.
 
 from __future__ import annotations
 
+import json
 import math
 
 import numpy as np
@@ -348,6 +349,26 @@ def test_a_noise_shot_never_also_fits_a_turn_count():
     assert set(cohort.noise_shots) == {90, 91, 92}
     assert not set(cohort.noise_shots) & set(cohort.shots)
     cohort.validate()
+
+
+def test_a_fit_cannot_run_against_a_split_nobody_wrote_down(tmp_path):
+    """The declared split is read from disk, and its absence is an error.
+
+    Deterministic selection is not the same guarantee.  A stage that derives its
+    own arms can be re-run with a different fraction once a result is visible and
+    leave no trace; a stage that reads them cannot.
+    """
+
+    from nova.scripts.mast_calibration_experiments import _declared_split
+
+    with pytest.raises(SystemExit):
+        _declared_split(tmp_path / "absent.json")
+
+    surveys = [survey(400 + index, p4_lower=1.5e4) for index in range(6)]
+    cohort = select_calibration_cohort(surveys)
+    record = tmp_path / "cohort.json"
+    record.write_text(json.dumps({"cohort": cohort.as_dict()}))
+    assert _declared_split(record) == (cohort.training, cohort.held_out)
 
 
 def test_the_cohort_record_states_its_classes_and_published_ratios():

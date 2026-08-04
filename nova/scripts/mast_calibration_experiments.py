@@ -285,17 +285,35 @@ def _read_many(shots: Sequence[int], store: Path) -> dict[int, Any]:
     return waveforms
 
 
+def _declared_split(path: Path) -> tuple[tuple[int, ...], tuple[int, ...]]:
+    """Read the train and held-out arms the classification stage declared.
+
+    Read rather than recomputed, and it matters even though the selection is
+    deterministic.  A stage that derives its own split can be re-run with a
+    different fraction after seeing a result, and nothing in the output would show
+    it; a stage that reads one cannot.  The absence of the record is an error rather
+    than a cue to choose a split, so a fit can never run against a split that was
+    never written down.
+    """
+
+    if not path.exists():
+        raise SystemExit(
+            f"no declared split at {path}: run the classify stage before fitting, "
+            "so the arms are on disk before any result is seen"
+        )
+    payload = json.loads(path.read_text())["cohort"]
+    return tuple(payload["training"]), tuple(payload["held_out"])
+
+
 def turns(arguments: argparse.Namespace) -> None:
-    """Fit the turn counts the admitted shots support, and bound the rest."""
+    """Fit the turn counts the declared split and the amplitude screen admit."""
 
     surveys = load_surveys(arguments.census)
     published = {
         family: float(integer)
         for family, integer in integer_ampere_turn_ratios(surveys).items()
     }
-    cohort = select_calibration_cohort(
-        surveys, held_out_fraction=arguments.held_out_fraction
-    )
+    declared = _declared_split(arguments.cohort)
     screened = json.loads(arguments.scale_report.read_text())["scales"]
     admitted = {row["shot"] for row in screened if row["admissible"]}
     refused = {row["shot"] for row in screened if not row["admissible"]}
@@ -319,8 +337,8 @@ def turns(arguments: argparse.Namespace) -> None:
 
         return shot not in refused
 
-    training = [shot for shot in cohort.training if usable(shot)]
-    held_out = [shot for shot in cohort.held_out if usable(shot)]
+    training = [shot for shot in declared[0] if usable(shot)]
+    held_out = [shot for shot in declared[1] if usable(shot)]
     unscreened = [shot for shot in (*training, *held_out) if shot not in admitted]
     print(
         f"fitting on {len(training)} training shots, challenging on "

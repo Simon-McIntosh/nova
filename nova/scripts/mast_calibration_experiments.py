@@ -17,7 +17,7 @@ import argparse
 import json
 import math
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any, Mapping, Sequence
 
 import numpy as np
 
@@ -298,16 +298,34 @@ def turns(arguments: argparse.Namespace) -> None:
     )
     screened = json.loads(arguments.scale_report.read_text())["scales"]
     admitted = {row["shot"] for row in screened if row["admissible"]}
+    refused = {row["shot"] for row in screened if not row["admissible"]}
     model, selection = _model(arguments.standoff)
-    experiments = {
-        row.shot: row for row in calibration_experiments(surveys) if row.measures_turns
+    classed = calibration_experiments(surveys)
+    experiments = {row.shot: row for row in classed if row.measures_turns}
+    sustained = {
+        row.shot: row for row in classed if row.identifies or row.identifies_sum
     }
 
-    training = [shot for shot in cohort.training if shot in admitted]
-    held_out = [shot for shot in cohort.held_out if shot in admitted]
+    def usable(shot: int) -> bool:
+        """Return whether a shot may be fitted, screened or unscreenable.
+
+        A shot that drove only the solenoid cannot be screened at all, because the
+        archive publishes no turn count for it and the amplitude test needs one.
+        Dropping those would discard the cleanest experiments the store holds for
+        the one coil whose weight rests entirely on a fit, so an unscreenable shot
+        is admitted and counted separately -- the price is that the solenoid's
+        interval must carry the shots' own disagreement, which it does.
+        """
+
+        return shot not in refused
+
+    training = [shot for shot in cohort.training if usable(shot)]
+    held_out = [shot for shot in cohort.held_out if usable(shot)]
+    unscreened = [shot for shot in (*training, *held_out) if shot not in admitted]
     print(
-        f"fitting on {len(training)} admitted training shots, "
-        f"challenging on {len(held_out)} admitted held-out shots"
+        f"fitting on {len(training)} training shots, challenging on "
+        f"{len(held_out)} held-out shots; {len(refused)} refused on amplitude, "
+        f"{len(unscreened)} admitted unscreenable"
     )
     train_waveforms = _read_many(training, arguments.store)
     test_waveforms = _read_many(held_out, arguments.store)
@@ -334,8 +352,8 @@ def turns(arguments: argparse.Namespace) -> None:
             f"n={len(row.shots):<3d}{note}"
         )
 
-    solenoid = _solenoid_interval(estimates)
-    vertical = _vertical_pair(cohort, experiments, model, arguments)
+    solenoid = _solenoid_interval(estimates, experiments)
+    vertical = _vertical_pair(sustained, model, arguments)
     scores: dict[str, Any] = {}
     fitted = {row.family: row.multiplier for row in dispositions if row.identified}
     promoted = dict(published)
@@ -367,24 +385,47 @@ def turns(arguments: argparse.Namespace) -> None:
             "physical_digest": selection.configuration.physical_digest,
             "promoted_weights": promoted,
             "published_ampere_turn_ratios": published,
+            "refused_on_amplitude": sorted(refused),
             "solenoid": solenoid,
             "training_shots": training,
+            "unscreenable_shots": sorted(unscreened),
             "turn_dispositions": [row.as_dict() for row in dispositions],
             "vertical_pair": vertical,
         },
     )
 
 
-def _solenoid_interval(estimates: Sequence[Any]) -> dict[str, Any]:
-    """Combine every shot that measured the solenoid into one weight.
+def _solenoid_interval(
+    estimates: Sequence[Any],
+    experiments: Mapping[int, Any],
+) -> dict[str, Any]:
+    """Combine the shots that held the solenoid ALONE into one weight.
 
     The solenoid is the one coil the archive publishes no turn count for, so its
-    weight rests entirely on the fit and the interval has to carry the shots'
-    own disagreement rather than the solve's optimism about a single shot.
+    weight rests entirely on the fit, and the interval has to carry the shots' own
+    disagreement rather than the solve's optimism about any single shot.
+
+    Only shots that held the solenoid and nothing else contribute.  A shot driving
+    the solenoid beside another coil still reports a solenoid multiplier and still
+    passes the leverage and correlation screens, because the solenoid's ampere turns
+    outweigh a few-kiloampere neighbour by a factor of forty -- but the number it
+    reports has absorbed that neighbour's misfit.  Measured on this store the two
+    populations do not overlap: shots that drove the solenoid by itself read 337 to
+    366, and shots that drove it alongside another coil read 428 to 477.  Pooling
+    them moves the centre seven percent and triples the interval, so a measurement
+    would appear to get worse as data was added; the restriction is what makes the
+    interval mean anything.
     """
 
+    alone = {
+        shot
+        for shot, row in experiments.items()
+        if tuple(row.identifies) == (SOLENOID_FAMILY,) and not row.identifies_sum
+    }
     rows = [
-        row for row in estimates if row.family == SOLENOID_FAMILY and row.identified
+        row
+        for row in estimates
+        if row.family == SOLENOID_FAMILY and row.identified and row.shot in alone
     ]
     if not rows:
         return {"identified": False, "shots": []}
@@ -412,8 +453,7 @@ def _solenoid_interval(estimates: Sequence[Any]) -> dict[str, Any]:
 
 
 def _vertical_pair(
-    cohort: Any,
-    experiments: Any,
+    experiments: Mapping[int, Any],
     model: ResponseModel,
     arguments: argparse.Namespace,
 ) -> dict[str, Any]:
@@ -427,13 +467,22 @@ def _vertical_pair(
     published product fixes only that product.
     """
 
-    shots = sorted(
-        shot
+    pair = set(VERTICAL_PAIR)
+    reachable = [
+        (row.peak_current, shot)
         for shot, row in experiments.items()
-        if set(row.identifies_sum) >= set(VERTICAL_PAIR) and not row.identifies
-    )[: arguments.pair_shots]
+        if pair & (set(row.identifies) | set(row.identifies_sum))
+        and not (set(row.identifies) | set(row.identifies_sum)) - pair
+    ]
+    shots = [shot for _, shot in sorted(reachable, reverse=True)][
+        : arguments.pair_shots
+    ]
     if not shots:
         return {"measured": False, "reason": "no shot holds the pair alone"}
+    print(
+        f"\n{len(reachable)} shots hold the vertical pair and nothing else; "
+        f"reading the {len(shots)} strongest"
+    )
     print(f"\ntesting the vertical pair's published semantics on {len(shots)} shots")
     unit = {family: 1.0 for family in VERTICAL_PAIR}
     rows = []
@@ -497,8 +546,17 @@ def noise(arguments: argparse.Namespace) -> None:
     experiments = [
         row for row in calibration_experiments(surveys) if row.measures_turns
     ]
+    refused: set[int] = set()
+    if arguments.scale_report.exists():
+        refused = {
+            row["shot"]
+            for row in json.loads(arguments.scale_report.read_text())["scales"]
+            if not row["admissible"]
+        }
+        print(f"\nexcluding {len(refused)} amplitude-refused shots from the repeats")
     repeats = []
-    for family, group, peak in repeat_groups(experiments)[: arguments.repeat_groups]:
+    grouped = repeat_groups(experiments, exclude=refused)
+    for family, group, peak in grouped[: arguments.repeat_groups]:
         readable = _read_many(group, arguments.store)
         try:
             measured = measure_repeat_scatter(

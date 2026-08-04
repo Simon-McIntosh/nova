@@ -555,6 +555,31 @@ def test_repeats_group_by_coil_and_current(model):
     assert peak == pytest.approx(1.405e4, rel=1.0e-3)
 
 
+def test_two_shots_a_campaign_apart_are_not_one_repetition():
+    """A repeat is a back-to-back re-firing, not two similar shots years apart.
+
+    Pooling distant shots reports the archive's whole variability as shot-to-shot
+    scatter: on this store it collects twenty-five solenoid shots spanning fifteen
+    thousand shot numbers and claims seventy-four percent disagreement, where the
+    genuine back-to-back pairs agree to a fraction of a percent.
+    """
+
+    surveys = [survey(300, p4_lower=1.4e4), survey(9300, p4_lower=1.4e4)]
+    assert repeat_groups(calibration_experiments(surveys)) == ()
+    close = [survey(300, p4_lower=1.4e4), survey(305, p4_lower=1.4e4)]
+    assert len(repeat_groups(calibration_experiments(close))) == 1
+
+
+def test_an_amplitude_refused_shot_never_enters_a_repeat():
+    """A shot recorded at half amplitude disagrees with its twin by that half."""
+
+    surveys = [survey(310 + index, p4_lower=1.4e4) for index in range(3)]
+    experiments = calibration_experiments(surveys)
+    assert repeat_groups(experiments)[0][1] == (310, 311, 312)
+    screened = repeat_groups(experiments, exclude={312})
+    assert screened[0][1] == (310, 311)
+
+
 def test_repeat_scatter_divides_out_the_supply_and_keeps_the_rest(model):
     """A shot delivering less current is not counted as sensor disagreement."""
 

@@ -241,51 +241,69 @@ class RepeatScatter:
         }
 
 
+CAMPAIGN_SHOT_SPAN = 20
+"""How far apart two shots may sit and still be one designed repetition.
+
+A repeat is a deliberate back-to-back re-firing of the same experiment, which is
+what makes the difference between the two readings a measure of reproducibility.
+Two shots a thousand apart at a similar current are not a repetition -- they are
+two different days, two different thermal states and possibly two different
+acquisition configurations -- and pooling them reports the archive's whole
+variability as though it were shot-to-shot scatter.  Measured on this store the
+distinction is stark: grouping on current alone collects twenty-five solenoid
+shots spanning fifteen thousand shot numbers and reports seventy-four percent
+disagreement, while the back-to-back pairs inside the same campaign agree to
+between two tenths of a percent and a few percent.
+"""
+
+
 def repeat_groups(
     experiments: Iterable[Any],
     *,
     current_tolerance: float = 0.02,
+    shot_span: int = CAMPAIGN_SHOT_SPAN,
+    exclude: Iterable[int] = (),
 ) -> tuple[tuple[str, tuple[int, ...], float], ...]:
-    """Group experiments that repeat one coil at one current, as designed.
+    """Group experiments that repeat one coil at one current, back to back.
 
     Two shots repeat an experiment when they hold the same single coil to within
-    ``current_tolerance`` of the same peak.  The campaigns deliberately fired each
-    coil twice at each of two levels, so the groups this finds are the archive's
-    own repetitions rather than coincidences of operation.
+    ``current_tolerance`` of the same peak AND sit within ``shot_span`` of each
+    other.  ``exclude`` drops shots a prior screen has already refused, because a
+    shot whose magnetics were recorded at the wrong amplitude disagrees with its
+    own repeat by that amplitude and would be reported as irreproducibility.
     """
 
-    singles: dict[str, list[tuple[float, int]]] = {}
+    refused = set(exclude)
+    singles: dict[str, list[tuple[int, float]]] = {}
     for row in experiments:
-        if len(row.identifies) != 1:
+        if len(row.identifies) != 1 or row.shot in refused:
             continue
-        singles.setdefault(row.identifies[0], []).append((row.peak_current, row.shot))
+        singles.setdefault(row.identifies[0], []).append((row.shot, row.peak_current))
     groups: list[tuple[str, tuple[int, ...], float]] = []
-    for family, members in sorted(singles.items()):
-        members.sort()
-        current: list[tuple[float, int]] = []
-        for peak, shot in members:
-            if (
-                current
-                and abs(peak - current[0][0]) > current_tolerance * current[0][0]
-            ):
-                if len(current) > 1:
-                    groups.append(
-                        (
-                            family,
-                            tuple(sorted(row[1] for row in current)),
-                            float(np.mean([row[0] for row in current])),
-                        )
-                    )
-                current = []
-            current.append((peak, shot))
+
+    def flush(family: str, current: list[tuple[int, float]]) -> None:
         if len(current) > 1:
             groups.append(
                 (
                     family,
-                    tuple(sorted(row[1] for row in current)),
-                    float(np.mean([row[0] for row in current])),
+                    tuple(sorted(row[0] for row in current)),
+                    float(np.mean([row[1] for row in current])),
                 )
             )
+
+    for family, members in sorted(singles.items()):
+        members.sort()
+        current: list[tuple[int, float]] = []
+        for shot, peak in members:
+            same = current and (
+                abs(peak - current[0][1]) <= current_tolerance * current[0][1]
+                and shot - current[0][0] <= shot_span
+            )
+            if not same:
+                flush(family, current)
+                current = []
+            current.append((shot, peak))
+        flush(family, current)
     return tuple(groups)
 
 

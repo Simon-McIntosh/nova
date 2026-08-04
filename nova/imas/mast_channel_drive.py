@@ -129,17 +129,16 @@ def _element_count(geometry: Mapping[str, Any], key: str, family: str) -> int:
     return 1 if parts is None else len(parts)
 
 
-def case_plate_channels(geometry: Mapping[str, Any]) -> dict[str, tuple[int, ...]]:
-    """Return the case plates each measured case-current channel drives.
+def enclosed_coil_sets(geometry: Mapping[str, Any]) -> tuple[str | None, ...]:
+    """Return the coil set each case plate encloses, in the family's own order.
 
     The registry publishes the cases as one family of plates with no statement
     about which coil each belongs to, and the store publishes one current per coil
     set.  Enclosure settles the join without a fit: a case surrounds its own coil,
     so a plate belongs to the set it is nearest to, and a plate further than
-    :data:`~nova.imas.mast_passive_response.CASE_PROXIMITY` from every coil is left
-    undriven rather than attached to the least distant one.  The indices returned
-    are positions in the case family's own outline sequence, which is the order the
-    artifact writes its elements in.
+    :data:`~nova.imas.mast_passive_response.CASE_PROXIMITY` from every coil takes
+    ``None`` rather than being attached to the least distant one.  The sequence
+    position is the element index the artifact writes that plate at.
     """
 
     plates = passive_sections(geometry).get(CASE_FAMILY)
@@ -150,17 +149,24 @@ def case_plate_channels(geometry: Mapping[str, Any]) -> dict[str, tuple[int, ...
         coils.setdefault(case_side(family), []).extend(
             shapely.Polygon(vertices) for vertices in parts
         )
-    assignment: dict[str, list[int]] = {}
-    for index, vertices in enumerate(plates):
+    enclosed: list[str | None] = []
+    for vertices in plates:
         plate = shapely.Polygon(vertices)
         distances = {
             family: min(plate.distance(polygon) for polygon in polygons)
             for family, polygons in coils.items()
         }
         nearest = min(distances, key=lambda key: distances[key])
-        if distances[nearest] > CASE_PROXIMITY:
-            continue
-        channel = CASE_CURRENT_CHANNELS.get(nearest)
+        enclosed.append(None if distances[nearest] > CASE_PROXIMITY else nearest)
+    return tuple(enclosed)
+
+
+def case_plate_channels(geometry: Mapping[str, Any]) -> dict[str, tuple[int, ...]]:
+    """Return the case plates each measured case-current channel drives."""
+
+    assignment: dict[str, list[int]] = {}
+    for index, coil_set in enumerate(enclosed_coil_sets(geometry)):
+        channel = CASE_CURRENT_CHANNELS.get(coil_set) if coil_set else None
         if channel is None:
             continue
         assignment.setdefault(channel, []).append(index)
@@ -170,27 +176,15 @@ def case_plate_channels(geometry: Mapping[str, Any]) -> dict[str, tuple[int, ...
 def undriven_case_sets(geometry: Mapping[str, Any]) -> tuple[str, ...]:
     """Return the coil sets whose case encloses plates but carries no channel."""
 
-    plates = passive_sections(geometry).get(CASE_FAMILY)
-    if not plates:
-        raise KeyError(f"registry carries no {CASE_FAMILY!r} family")
-    coils: dict[str, list[shapely.Polygon]] = {}
-    for family, parts in coil_sections(geometry).items():
-        coils.setdefault(case_side(family), []).extend(
-            shapely.Polygon(vertices) for vertices in parts
+    return tuple(
+        sorted(
+            {
+                coil_set
+                for coil_set in enclosed_coil_sets(geometry)
+                if coil_set is not None and coil_set not in CASE_CURRENT_CHANNELS
+            }
         )
-    undriven: set[str] = set()
-    for vertices in plates:
-        plate = shapely.Polygon(vertices)
-        distances = {
-            family: min(plate.distance(polygon) for polygon in polygons)
-            for family, polygons in coils.items()
-        }
-        nearest = min(distances, key=lambda key: distances[key])
-        if distances[nearest] > CASE_PROXIMITY:
-            continue
-        if nearest not in CASE_CURRENT_CHANNELS:
-            undriven.add(nearest)
-    return tuple(sorted(undriven))
+    )
 
 
 def _active_drive_path(family: str, channel: str) -> str:

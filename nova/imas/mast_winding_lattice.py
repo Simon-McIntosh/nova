@@ -1015,6 +1015,39 @@ def profile_fill(
     )
 
 
+def amplitude_reach(
+    targets: Sequence[ProbeTarget],
+    vertices: np.ndarray,
+    baseline: np.ndarray,
+    admissible: np.ndarray,
+    *,
+    shapes: Sequence[tuple[int, int]] = LATTICE_SHAPES,
+    fills: Sequence[float] = (0.80, 0.90, 1.00),
+) -> float:
+    """Largest amplitude shift any offered layout can produce on the far field.
+
+    A turn-count or response-scale measurement is a pooled amplitude over the
+    probes standing clear of the coil, so this is the bound on what rearranging
+    the turns inside the pack could do to such a measurement.  It answers, once and
+    with a number, whether a layout can be the cause of a reported amplitude
+    discrepancy -- and because a layout is static, it also settles anything that
+    changed between campaigns without needing the campaign data.
+    """
+
+    reference = np.asarray(baseline, dtype=float)[admissible]
+    worst = 0.0
+    for shape in shapes:
+        for fill in fills:
+            column = lattice_column(
+                targets, vertices, TurnLattice(shape[0], shape[1], fill)
+            )[admissible]
+            power = float(column @ column)
+            if power <= 0.0:
+                continue
+            worst = max(worst, abs(float(column @ reference) / power - 1.0))
+    return worst
+
+
 @dataclass(frozen=True)
 class DisplacementProfile:
     """Where a coil's near probes want its current centroid, layout aside.

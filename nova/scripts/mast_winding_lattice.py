@@ -1,6 +1,6 @@
 """Fit the turn layout inside the P4/P5 winding packs and challenge it out of sample.
 
-Three stages, each writing what the next reads.  ``reduce`` reads the archive once
+Three passes, each writing what the next reads.  ``reduce`` reads the archive once
 -- the sustained shots that drove one of these coils, screened for a quiescent
 error-field bank and for the magnetics-amplitude defect the turn closure refused --
 and reduces each to the sums a layout comparison needs.  ``fit`` scans grid shapes
@@ -38,6 +38,7 @@ from nova.imas.mast_winding_lattice import (
     ShotMoments,
     TurnLattice,
     admissible_shapes,
+    amplitude_reach,
     baseline_columns,
     channel_deltas,
     error_field_quiescent,
@@ -382,7 +383,12 @@ def fit_lattice(arguments: argparse.Namespace) -> None:
             except LatticeError as error:
                 print(f"  {family}: no held-out displacement scan ({error})")
 
+        column = model.families.index(family)
+        clear = model.standoff[:, column] >= NEAR_FIELD_STANDOFF
         report: dict[str, Any] = {
+            "amplitude_reach": amplitude_reach(
+                targets, outline, baseline[family], clear
+            ),
             "centroid": {"lattice": list(centroid), "outline": [polygon.x, polygon.y]},
             "displacement": {
                 "held_out": None if held_reach is None else held_reach.as_dict(),
@@ -469,7 +475,8 @@ def fit_lattice(arguments: argparse.Namespace) -> None:
             f"train near gain {report['training']['near']['lattice_gain']:+.4f} "
             f"held-out near gain {near.get('lattice_gain', float('nan')):+.4f} "
             f"| best rigid shift {reach.offset[0] * 1e3:+.1f}, "
-            f"{reach.offset[1] * 1e3:+.1f} mm for {reach.improvement:+.4f}"
+            f"{reach.offset[1] * 1e3:+.1f} mm for {reach.improvement:+.4f} "
+            f"| amplitude reach {report['amplitude_reach'] * 100:.4f}%"
         )
 
     _write(
@@ -538,8 +545,8 @@ def draw_figures(arguments: argparse.Namespace) -> None:
         "twenty-three turns left"
     )
     figure.tight_layout()
-    path = directory / "lattice_layout.png"
-    figure.savefig(path, dpi=140)
+    path = directory / "lattice_layout.svg"
+    figure.savefig(path)
     plt.close(figure)
     print(f"wrote {path}")
 
@@ -577,8 +584,8 @@ def draw_figures(arguments: argparse.Namespace) -> None:
     axes[1].set_title("Layout gain, in sample and out")
     axes[1].legend(fontsize=7)
     figure.tight_layout()
-    path = directory / "lattice_fill_profile.png"
-    figure.savefig(path, dpi=140)
+    path = directory / "lattice_fill_profile.svg"
+    figure.savefig(path)
     plt.close(figure)
     print(f"wrote {path}")
 
@@ -607,8 +614,8 @@ def draw_figures(arguments: argparse.Namespace) -> None:
         "(green removes misfit, red adds it)"
     )
     figure.tight_layout()
-    path = directory / "lattice_channel_deltas.png"
-    figure.savefig(path, dpi=140)
+    path = directory / "lattice_channel_deltas.svg"
+    figure.savefig(path)
     plt.close(figure)
     print(f"wrote {path}")
 
@@ -647,14 +654,14 @@ def draw_figures(arguments: argparse.Namespace) -> None:
     )
     axis.legend(fontsize=8)
     figure.tight_layout()
-    path = directory / "lattice_near_probe_sensitivity.png"
-    figure.savefig(path, dpi=140)
+    path = directory / "lattice_near_probe_sensitivity.svg"
+    figure.savefig(path)
     plt.close(figure)
     print(f"wrote {path}")
 
 
 def main(argv: Sequence[str] | None = None) -> None:
-    """Run one stage of the winding-layout measurement."""
+    """Run one pass of the winding-layout measurement."""
 
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="stage", required=True)

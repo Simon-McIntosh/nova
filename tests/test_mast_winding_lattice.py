@@ -35,6 +35,7 @@ from nova.imas.mast_winding_lattice import (
     LatticeError,
     TurnLattice,
     admissible_shapes,
+    amplitude_reach,
     baseline_columns,
     calibrate_array,
     channel_deltas,
@@ -311,6 +312,26 @@ def test_a_layout_is_invisible_beyond_two_pack_widths(model, outlines, baseline)
 
 
 # --- the estimator, on data whose answer is known ----------------------
+
+
+@pytest.mark.parametrize("family", WOUND_FAMILIES)
+def test_a_layout_cannot_move_a_pooled_amplitude_by_a_tenth_of_a_percent(
+    model, baseline, outlines, family
+):
+    """No offered layout shifts a far-field amplitude by more than a tenth of a percent.
+
+    This is the bound that keeps a layout out of every amplitude argument.  A
+    response-scale or turn-count measurement is a pooled amplitude over the probes
+    standing clear of the coil, and rearranging the turns inside the pack cannot
+    move it by even a tenth of a percent -- so a reported discrepancy of a few
+    percent, and a fortiori one that differs between campaigns, is not a winding
+    layout however the layout is drawn.
+    """
+
+    column = model.families.index(family)
+    clear = model.standoff[:, column] >= 2.0
+    reach = amplitude_reach(model.targets, outlines[family], baseline[family], clear)
+    assert reach < 1.0e-3
 
 
 def test_an_exact_model_leaves_no_residual(model, baseline, outlines):

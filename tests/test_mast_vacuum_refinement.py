@@ -576,7 +576,25 @@ def test_the_published_count_is_corroborated_by_an_independent_fit():
     assert covered
     for row in covered:
         assert abs(row.corroboration) <= WORST_PUBLISHED_OFFSET + 1.0e-6
-        assert row.interval.contains(float(row.published_turns))
+
+
+def test_a_published_interval_is_never_narrower_than_its_disagreement():
+    """An exact integer is not reported with an interval that asserts agreement.
+
+    The archive's integer is exact as a statement; what is uncertain is whether this
+    description reproduces the field it implies.  So the interval has to be at least
+    as wide as the distance the fit lands from it -- a zero-width interval on an
+    exact integer would claim the agreement rather than measure it.
+    """
+
+    for row in VACUUM_FITTED_TURNS:
+        if not row.published:
+            continue
+        published = float(row.published_turns)
+        half = 0.5 * (row.interval.upper - row.interval.lower)
+        assert half >= abs(row.fitted_turns - published) - 1.0e-9
+        assert row.interval.contains(published)
+        assert row.interval.contains(row.fitted_turns)
 
 
 def test_one_coil_disagrees_and_the_record_says_so():

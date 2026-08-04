@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="mast-sensor-adjudication-landed">
+  <meta name="plan-title" content="MAST sensor adjudication — five scales promoted, the stepping acquisition found, P5 lower closed">
+  <meta name="plan-summary" content="Per-stage record: five channel calibration scales promoted with intervals; 19 channels found to carry discrete unnormalised acquisition scales (ladder 1/2, 1/√2, √2, 2) — closing the P5-lower shift at 0.37% and identifying the largest open lever; obv06/obv14 verdict FIELD_SHAPE (pose or unmodelled conductor); flux loops adjudicated with the L2 gap confirmed at seven loops; EFC bank assignment measurably unobtainable.">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>MAST sensor adjudication landed | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+  <h1>Sensor adjudication — the acquisition was the calibration item</h1>
+  <p>Landed 2026-08-05, nova merge <code>fef981b4</code> (nine commits, 16 files, 11,671
+  insertions; the discriminant pre-registered and committed before the first fit). Full fast lane
+  3815/0 (job 1240944), slow subset 522/0 (job 1240945).
+  Plan: <a href="/nova/plans/mast-vacuum-floor-recovery.html">mast-vacuum-floor-recovery</a>.</p>
+
+  <h2>The headline — 19 channels carry discrete acquisition scales</h2>
+  <p>The level-1 store applies unnormalised per-block scales to 19 probe channels: 37 switch
+  points, 29 on a ladder whose measured rungs are exactly 1/2, 1/√2, √2, 2. Control: at 12 of 16
+  block boundaries most channels hold still — no drive-weight, geometry or turn-count error can
+  produce a per-channel discrete step while neighbours stand still. Consequences:</p>
+  <ul>
+    <li><strong>P5-lower closed:</strong> on far-field probes whose scale does not step, P5 lower
+    reads 0.9901 / 0.9864 across its two campaigns — <strong>0.37%, not 4.5%</strong>. The 4.5%
+    was the stepping channels pooled into the fit. Probes are stable to 1.8% across campaigns;
+    verdict: sensor-side, specifically the acquisition scale — not gain drift, not the supply
+    (the lattice bound had already excluded geometry at 130×).</li>
+    <li><strong>The frozen gate itself reads 19 channels at the wrong scale on some shots</strong>
+    — the largest open lever this ladder has found. The normalisation belongs on the read path;
+    measured and recorded here, implementation routed to its own node.</li>
+    <li>The stepping channels are refused any static record (16 had been given single gains by
+    the far-field solve, spanning up to 4.2× across their blocks).</li>
+  </ul>
+
+  <h2>Promotions and verdicts</h2>
+  <table>
+    <thead><tr><th>channel</th><th>scale</th><th>interval</th><th>route gap</th></tr></thead>
+    <tbody>
+      <tr><td>obr17</td><td>0.5011</td><td>[0.5011, 0.5037]</td><td>0.5%</td></tr>
+      <tr><td>obv04</td><td>0.8571</td><td>[0.8570, 0.8758]</td><td>2.2%</td></tr>
+      <tr><td>obr05</td><td>1.1043</td><td>[1.1029, 1.1279]</td><td>2.1%</td></tr>
+      <tr><td>obv05</td><td>0.9449</td><td>[0.9409, 0.9565]</td><td>0.2%</td></tr>
+      <tr><td>ccbv35</td><td>0.9474</td><td>[0.9330, 0.9700]</td><td>1.2%</td></tr>
+    </tbody>
+  </table>
+  <p>Each steady across its shots, off unity beyond its scatter, agreed within 3% by the lattice
+  node's independent solve, confirmed on both halves in shot order. Withheld: obv11 (routes differ
+  7.4%). <strong>obv06/obv14 verdict against the pre-registered discriminant: FIELD_SHAPE</strong>
+  — overall scales 1.00, adjacent-vs-distant coil spread 13.5σ/12.4σ against the 3σ criterion,
+  best joint scale+rotation still leaves 58.5×/101× the noise floor while co-located partners
+  reach 12.8×/2.1×. Zero probe-side verdicts over 77 channels. With noise, gain, turns and
+  lattice all excluded, the open candidates are <strong>pose or an unmodelled conductor</strong>.</p>
+
+  <h2>Flux loops and the EFC route</h2>
+  <p>25 agreed / 3 promoted (all three CONFIRM the described position — nothing moves) /
+  11 dual-valued / 7 undescribed / 5 unreached. The asymmetric L2 gap is confirmed independently
+  and is <strong>seven</strong> loops (four lower P4, two upper P6, plus fl_p5l_3), each ~0.24 m
+  from anything described — an absent fixture set, not a displaced one.
+  <code>efps_current</code> is NOT an error-field channel (r = 0.99993 with p2ol current); the
+  real EFC channels reach 12 kA. Coupling measured at 2.2 nT/A median: the screen removes one
+  channel and never a shot, and the 60-shot noise floor moves 1.75 pT under it — <strong>387 µT
+  stands, provably EFC-free</strong>. Twelve matched pairs curated; the route cannot reach the
+  ~7 µT signature (waveform mismatch is 150× larger), and <strong>the 150°/330° bank assignment
+  is measurably unobtainable</strong> (needs ~50 kA vs the 12 kA the archive holds) — the record
+  asserting the blocker was missing EFC winding geometry has been corrected: authoring it would
+  not help.</p>
+
+  <h2>Identity</h2>
+  <p><strong>No identity-bearing promotions.</strong> No pose changed; the registry and physical
+  digest <code>ca06c8f64481114f</code> are untouched. The evidence ledger moves the semantic
+  identity to <code>sha256:3aba565a…d9ea78</code> (31 records: 6 measured / 10 published /
+  1 generated / 4 fitted / 10 unresolved); republish routed to the re-stamp node. Records under
+  <code>~/.cache/nova-mast/</code>; figures <code>sensor_*/efc_*</code> under
+  <code>docs/figures/mast-vacuum-floor/</code>.</p>
+
+</main>
+</body>
+</html>

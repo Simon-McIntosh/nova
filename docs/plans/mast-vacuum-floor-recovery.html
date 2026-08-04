@@ -26,8 +26,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-05">
-<meta name="plan-version" content="3">
-<meta name="plan-impl" content="0.5">
+<meta name="plan-version" content="4">
+<meta name="plan-impl" content="0.67">
 </head>
 <body>
   <main class="plan-doc">
@@ -192,6 +192,21 @@
     attribution showed a blind lattice swap <em>hurts</em> (−27% of the gap), so this stage fits
     lattice parameters against data rather than copying efm's.</p>
 
+    <h3>Stage C <span class="badge badge-shipped">✓ landed 2026-08-05 — the acquisition was the calibration item</span></h3>
+    <p class="landed-summary">
+    Five channel scales promoted with intervals (obr17 0.5011, obv04 0.8571, obr05 1.1043,
+    obv05 0.9449, ccbv35 0.9474); <strong>19 channels found to carry discrete unnormalised
+    acquisition scales</strong> (37 switches, rungs exactly 1/2, 1/√2, √2, 2) — closing P5-lower
+    at 0.37% (the 4.5% was stepping channels pooled) and identifying the ladder's largest open
+    lever: the gate itself reads 19 channels mis-scaled on some shots; normalisation routed to a
+    read-path node. obv06/obv14 verdict <strong>FIELD_SHAPE</strong> (13.5σ/12.4σ against the
+    pre-registered 3σ) — with noise, gain, turns and lattice excluded, candidates are pose or an
+    unmodelled conductor. Flux loops: 3 promotions all confirming described positions; the L2 gap
+    confirmed at seven absent loops. EFC: floor EFC-free (moves 1.75 pT); bank assignment
+    measurably unobtainable (~50 kA needed vs 12 kA held). No identity-bearing promotion;
+    semantic → 3aba565a… (nova <code>fef981b4</code>; lanes 3815/0 + 522/0). Full record:
+    <a href="/nova/research/mast-sensor-adjudication-landed.html">sensor adjudication landed</a>.</p>
+
     <h3>Stage D <span class="badge badge-shipped">✓ landed 2026-08-05 — negative result, uniform density stands</span></h3>
     <p class="landed-summary">
     The P4/P5 layout is <strong>derivable</strong> from the pack chamfer (regular grid, vacated
@@ -353,7 +368,7 @@ Done-when
      green, ladder re-stamp banked, plan followup for stage C/D written, this resolved.</pre>
     <p class="r-fu-outcome">Stages A+B landed — nova cb3f6049 (7 commits, 13,983 insertions), ambix ab9892d (identity repin + banked stamp pair + cache gitignore). Cohort: 17,111 shots classed by design (sustained_single_coil 39, symmetric_pair 43, coil_group 287, pulsed 31, TF-only 577, quiescent 372), split 223/83/60 declared-before-fit and binding. Sensor floor measured: 387 µT RMS (obr 126 / ccbv 444 / obv 431); residual 4.26 mT = 11× the floor; obv14 among quietest at 48 µT. Turns: ten of thirteen counts PUBLISHED on exact archive integers (P4/P5=23); ±5-turn spread traced to eight half-amplitude shots, refused pre-fit; solenoid 344.657 [332.97,356.34] reconciles with the stratum [348.5,361.1] after excluding co-driven shots; P6 closed by evidence — structurally unreachable (ampere-turn excitation), unit-weight negative result recorded, blocks_axisymmetric_forward_model stays True. Re-stamp FLAT (0.7632105/0.7631399 both arms, parity PASS 15/15, monotone gate satisfied): both revisions operator-equivalent because drive weight supersedes turns — turns were NEVER a candidate cause of the 0.024 excess; only field shape can move the gate. N1's corrections measured at −0.0007. Full lane 4087/0 (job 1240889). Record: docs/research/mast-calibration-cohort-landed.html</p>
     </article>
-<article class="r-fu" data-id="f-vfr-02" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-create" data-written-at="2026-08-04" data-recommends-skill="/reckon-ship mast-vacuum-floor-recovery §3c" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-vfr-02" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-create" data-written-at="2026-08-04" data-recommends-skill="/reckon-ship mast-vacuum-floor-recovery §3c" data-resolved-at="2026-08-04T23:26:14+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Stage C+D — sensor pose/gain adjudication and winding lattices</h4>
     <div class="r-fu-body"><p>Adjudicate the flux-loop placement disagreements and fit per-probe
         gain/orientation where identifiable, with a pre-registered discriminant for whether obv06/obv14
@@ -393,6 +408,7 @@ Done-when
      any other channel, or the negative result stands and uniform density stays.
   3. Artifact republished, lanes green, ladder re-stamp banked, stage-E followup
      written, this resolved.</pre>
+    <p class="r-fu-outcome">Stages C+D landed (nova fef981b4 + 9f9ad143). Stage C: five channel scales promoted with intervals; 19 channels carry DISCRETE unnormalised acquisition scales (37 switches, rungs exactly 1/2, 1/√2, √2, 2) — P5-lower closed at 0.37% (4.5% was stepping channels pooled); obv06/obv14 verdict FIELD_SHAPE against the pre-registered 3σ discriminant (candidates: pose or unmodelled conductor); flux loops 25 agreed / 3 promoted (all confirming described positions) / 11 dual-valued; L2 gap confirmed at SEVEN absent loops; EFC floor-check passes (1.75 pT shift), bank assignment measurably unobtainable (~50 kA needed vs 12 kA held) and the position/phi blocker record corrected. Stage D: promoted negative — layout derivable from the chamfer (23 turns) yet refused four ways; uniform density stands. No identity-bearing promotion; physical digest unchanged; semantic → 3aba565a… (republish + re-stamp node dispatched). The read-path block-scale normalisation node is dispatched with the stage-D falsification check (does the displacement sign-flip survive normalised channels). Records: docs/research/mast-sensor-adjudication-landed.html, docs/research/mast-winding-lattice-landed.html</p>
     </article>
 <article class="r-fu" data-id="f-vfr-03" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-create" data-written-at="2026-08-04" data-recommends-skill="/reckon-ship mast-vacuum-floor-recovery §3e" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Stage E — passive R/L calibrated on dedicated decay experiments</h4>
@@ -470,6 +486,23 @@ Done-when
      table refreshed; handoff comments written to physics-spine-adoption (donor
      migration) and mast-catalog-gpu-solve; plan set shipped; this resolved.</pre>
     </article>
+<article class="r-fu" data-id="f-vfr-05" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-08-05 01:00" data-recommends-skill="/reckon-ship mast-vacuum-floor-recovery §3f" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Decide whether the frozen gate reads block-normalised measurements</h4>
+    <div class="r-fu-body"><p>The acquisition-scale finding means the frozen six-shot gate scores both arms against 19 mis-scaled channels on some shots. Normalising the gate's measurement path would lower both arms' residuals and sharpen the comparison, but changes stamp comparability across the banked ladder. This is a material scoring decision for stage F / the owner: re-baseline both arms on normalised measurements (one fresh before/after pair at the same commit), or keep the gate raw and confine normalisation to nova-side fits. The same-source budget itself stays untouched either way.</p></div>
+    <pre class="r-fu-prompt">Project: nova + authorized imas-ambix scoring-path change
+Plan: mast-vacuum-floor-recovery (gate measurement normalisation decision)
+
+Context
+  docs/research/mast-sensor-adjudication-landed.html: 19 channels carry discrete acquisition scales; the read-path normalisation is landing nova-side. The frozen gate reads the same level-1 channels; both arms are scored against mis-scaled measurements on some shots.
+
+Work
+  1. Surface the decision to the owner: re-baseline the gate on normalised measurements vs keep raw. Do not modify tolerances either way.
+  2. If re-baselined: apply the normalisation on the gate&#x27;s read path, bank a fresh before/after pair at one commit for BOTH arms, and record the measurement-change discontinuity in the ladder table.
+  3. Record the decision and its rationale in the plan.
+
+Done when
+  - The decision is locked with the owner&#x27;s authority; the ladder table carries the re-baseline point if taken; stamps banked.</pre>
+    </article>
 </section>
 
     <section data-reckon="research" id="research" class="r-research-list">
@@ -487,7 +520,7 @@ Done-when
     <div class="r-comment-body">Three findings from the solve-input maps node (docs/research/mast-solve-input-maps-landed.html) for stages C/D/E: (1) the flux-loop channel-to-sensor join the ledger recorded as unresolvable IS resolved — each channel matches exactly one fitted-loop column at family-block start + channel number − 1 (144 discriminating matches, zero violations, byte-identical across seven shots), and it exposes an ASYMMETRIC L2 registry gap: the two upper P6 loops and four lower P4 loops are missing while their opposite-side counterparts are carried — stage C's loop adjudication should use this join as its channel map. (2) The two-channel current redundancy measures the described turn count: P2/P3 agree to &lt;1e-6 while P4/P5 disagree by 1.82–5.09%, each equal to |23 − fitted|/23 — whichever channel a campaign holds moves the P4/P5 column by up to 5%; combine with the stage-A finding that P4/P5 turn values are operator-UNREAD (drive weight supersedes turns on every driven column), so this matters to authoring, not to the residual. (3) P6's two published channels fail the authored anti-series relation on 2 of the pilot shots — P6 semantics are unsettled beyond the missing turn count; rides with stage E's case modelling.</div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-vfr-lattice-negative" data-who="reckon-ship" data-when="2026-08-05">
-    <div class="r-comment-body">Stage D landed as a promoted negative (nova 9f9ad143): the P4/P5 layout is derivable from the pack chamfer (23 turns, nothing fitted) yet refused four ways; uniform density stands and no artifact republish occurred. Decisive for the ladder: the near-probe misfit is CAMPAIGN-DEPENDENT (rigid-displacement direction reverses across the 192xx/25xxx boundary on exactly the straddling coils) — no static description can carry it. Stage C now owns: the far-field gain ledger (30/77 channels off unity >5%; obr02 1.747, obr17 0.504; obv06 1.001 / obv14 0.987 — NOT mis-gained), campaign-resolved calibration, and the P5-lower verdict (layout amplitude reach ≤0.066% = 130× below the 4.5% shift → sensor- or supply-side). f-vfr-02 resolves when stage C reports. Record: docs/research/mast-winding-lattice-landed.html</div>
+    <div class="r-comment-body">Stage D landed as a promoted negative (nova 9f9ad143): the P4/P5 layout is derivable from the pack chamfer (23 turns, nothing fitted) yet refused four ways; uniform density stands and no artifact republish occurred. Decisive for the ladder: the near-probe misfit is CAMPAIGN-DEPENDENT (rigid-displacement direction reverses across the 192xx/25xxx boundary on exactly the straddling coils) — no static description can carry it. Stage C now owns: the far-field gain ledger (30/77 channels off unity &gt;5%; obr02 1.747, obr17 0.504; obv06 1.001 / obv14 0.987 — NOT mis-gained), campaign-resolved calibration, and the P5-lower verdict (layout amplitude reach ≤0.066% = 130× below the 4.5% shift → sensor- or supply-side). f-vfr-02 resolves when stage C reports. Record: docs/research/mast-winding-lattice-landed.html</div>
 </div>
 </section>
 </main>

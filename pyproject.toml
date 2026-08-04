@@ -124,6 +124,7 @@ benchmark = "nova.scripts.benchmark:benchmark"
 extrapolate = "nova.imas.scripts:extrapolate"
 filepath = "nova.database.scripts:filepath"
 configure = "nova.scripts.configure:configure"
+mast-machine-artifact = "nova.scripts.mast_machine_artifact:main"
 
 [build-system]
 requires = ["hatchling", "hatch-vcs"]

@@ -18,12 +18,12 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-04">
-<meta name="plan-version" content="22">
+<meta name="plan-version" content="23">
 <meta name="plan-impl" content="0.95">
 <meta name="plan-sprint" content="S2">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-commits" content="21b48d4e35571b4bc5f79260f2f6ae9c1c1c16d9,70c11815e1e72f464c93d5ec9f1ab8dc37397c2b,7048d13debe2fced507d2ac92e6e64c5550bc07b,f9d900ce50fe38663d36a5c07836e78d3b5fa993,e286bb59cd456fa0ab8f9bb40a0b77a60319eec2,f4e478e315e1786c55df733e95e110e1fd6eea87,cfa2d2c,8ae7510,30114ee">
+<meta name="plan-commits" content="21b48d4e35571b4bc5f79260f2f6ae9c1c1c16d9,70c11815e1e72f464c93d5ec9f1ab8dc37397c2b,7048d13debe2fced507d2ac92e6e64c5550bc07b,f9d900ce50fe38663d36a5c07836e78d3b5fa993,e286bb59cd456fa0ab8f9bb40a0b77a60319eec2,f4e478e315e1786c55df733e95e110e1fd6eea87,cfa2d2c,8ae7510,30114ee,27dff421">
 </head>
 <body>
   <main class="plan-doc">
@@ -674,6 +674,9 @@ Done when
 </div>
 <div class="r-comment" data-section="_top" data-id="c-psa-afterpath-parity-fail" data-who="reckon-ship" data-when="2026-08-04">
     <div class="r-comment-body">First after-path frozen six-shot run BANKED AND FAILED — a quantified negative result, landed at imas-ambix 30114ee. The three prior blockers all cleared: the refined artifact restores the 19-probe radial family exactly matching efm, sensor mapping reaches 96/4 identical to efm after replacing exact-float orientation matching with a 1° band, and classification now takes the source's own active-circuit statement (artifact 43→13 known_pf, efm behaviour pinned byte-identical). The genuine after-path stamp then failed 3 of 15 tolerances: magnetics_residual_whitened_rms 0.740→1.210 on BOTH arms against a 1% budget, greens confined_fraction 0.9167 — while reproduction, convergence and throughput all improved (throughput ~3.2×). Root cause measured by comparing driven Green's columns: the solenoid column enters at 1/328 of the campaign value — efm carries amp-turns-per-feed-ampere in its filament weights (sum 328), the artifact reader weights every element 1, and the published 689.313 turn count cannot become a column weight because pf_active/circuit/connections is unresolved (the fitted 344.66 amp-turns per feed-ampere IS the missing weight); additionally 8 of 21 driven columns (the measured *_case_current circuits) vanish because the artifact files cases in pf_passive without a channel mapping. The cutover is blocked on ELECTRICAL description, not geometry. No donor was deleted (census re-run: only imas_geometry/q1_detect/elliptic are at one external test importer; geometry.py 74, operator.py 69). A corrective nova node is authoring the circuit-connection and per-channel drive semantics from the published topology plus fitted multipliers; the parity re-run follows.</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-psa-afterpath-rerun" data-who="reckon-ship" data-when="2026-08-04">
+    <div class="r-comment-body">After-path re-run on the electrical drive map landed at imas-ambix 27dff421 and closed 94.9% of the residual gap: magnetics_residual_whitened_rms 1.210→0.764 on both arms, confinement restored to 1.0 (the three lost slices WERE the solenoid at 1/328), and every reproduction metric now BEATS the before-path (axis 0.0154 vs 0.0253 cm, LCFS 0.0075 vs 0.0083 cm, profile 0.0126 vs 0.0190). The reader drives all 21 columns channel-for-channel with efm; Green's columns agree ≤0.5% on the 12 PF windings. THE SOLENOID IS EXONERATED: efm's SOLENOID_RESPONSE_SCALE (1.0825) is an amp-turn statement in disguise, so its effective weight is 328×1.0825=355.06 — INSIDE the cohort-fitted interval [332.97, 356.34]; a three-weight diagnostic sweep (328 / 344.657 / 355.06) puts the held-out optimum at 339.80, and the stated fitted weight is the best of the three. The reader now refuses to double-apply a source-stated weight and a calibration fitted to correct another source's turn count (COIL_MODEL_VERSION source-stated-drives; efm tables byte-identical, 368 tests green). VERDICT: compare_paths 13/15 PASS; the single failing metric is the sensor misfit at 0.7639 vs bound 0.7475 — 2.2% over a 1% budget that was calibrated on cross-substrate spread within ONE geometry source (7.3e-4). Measured residual cause: the two sources cut the same case enclosures into different plate sets (≤3.5% on case columns) and the artifact's flux loops sit up to ~6 mm from efm's, where the gate's own basis prices 10 mm at 1.65%. Donor retirement correctly did not run. A per-channel attribution node is quantifying whether this is a fixable geometry item or an irreducible cross-source floor before the gate question is adjudicated.</div>
 </div>
 </section>
 </main>

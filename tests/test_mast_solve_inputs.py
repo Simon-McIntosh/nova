@@ -391,6 +391,7 @@ def test_the_measured_case_currents_share_one_dictionary_field():
         "p3l_case_current",
     ]
     assert "one current for the whole loop" in blocked[0].reason
+    assert "24 described plates" in blocked[0].reason
     assert "drive map carries the per-element weights" in blocked[0].unmet
 
 

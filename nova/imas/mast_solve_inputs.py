@@ -41,6 +41,14 @@ Every clock is left alone.  The excitation and the response are acquired on
 different clocks at different rates, and a map that resampled one onto the other
 would be making a modelling choice on a consumer's behalf; the dictionary's
 heterogeneous time lets each signal carry the clock it was measured on.
+
+Circuit currents are deliberately not served.  A series pair carries one current,
+and the store publishes a feed channel for each of its two coils; on the pilot
+shots those two agree to within a few per cent of peak, which is the coherence a
+series connection predicts and also the reason a circuit row would be a choice
+rather than a copy.  The coil rows already carry both measurements, so writing
+either of them into a circuit field as well would put one measurement in two
+places and hide which channel a residual came from.
 """
 
 from __future__ import annotations
@@ -521,25 +529,34 @@ def case_current_blocked(machine: DescribedMachine) -> tuple[BlockedSignal, ...]
         for drive in machine.drives.drives
         if drive.container == "pf_passive"
     }
-    return tuple(
-        BlockedSignal(
-            source_group=CURRENT_GROUP,
-            source_channel=channel,
-            target_path=f"pf_passive/loop({drive.conductor})/current",
-            reason=(
-                f"{channel} measures the current in the plates "
-                f"{list(drive.elements)} of the described {drive.conductor} family, "
-                "and the dictionary carries one current for the whole loop, so the "
-                f"{len(channels)} measured enclosure currents have one field between "
-                "them"
-            ),
-            unmet=(
-                "pf_passive/loop/current is per loop while the measured currents are "
-                "per enclosure; the drive map carries the per-element weights instead"
-            ),
+    blocked = []
+    for channel, drive in sorted(channels.items()):
+        if drive.conductor not in machine.passive_loops:
+            raise SolveInputError(
+                f"channel {channel!r} drives {drive.conductor!r}, which the "
+                "description carries no passive loop for"
+            )
+        plates = machine.passive_elements[drive.conductor]
+        blocked.append(
+            BlockedSignal(
+                source_group=CURRENT_GROUP,
+                source_channel=channel,
+                target_path=f"pf_passive/loop({drive.conductor})/current",
+                reason=(
+                    f"{channel} measures the current in the plates "
+                    f"{list(drive.elements)} of the described {drive.conductor} "
+                    f"family, and the dictionary carries one current for the whole "
+                    f"loop, so {len(channels)} measured enclosure currents and "
+                    f"{plates} described plates have one field between them"
+                ),
+                unmet=(
+                    "pf_passive/loop/current is per loop while the measured currents "
+                    "are per enclosure; the drive map carries the per-element weights "
+                    "instead"
+                ),
+            )
         )
-        for channel, drive in sorted(channels.items())
-    )
+    return tuple(blocked)
 
 
 def probe_field_signals(

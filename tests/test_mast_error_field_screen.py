@@ -46,6 +46,19 @@ FLOOR = 8.0e-5
 """Tesla of quiescent scatter the synthetic channels are given."""
 
 
+def unmeasured_drive(shot: int, *, samples: int = 800) -> ErrorFieldDrive:
+    """Build a shot from a campaign that recorded none of these channels."""
+
+    time = np.linspace(-0.4, 1.2, samples)
+    return ErrorFieldDrive(
+        shot=shot,
+        time=time,
+        waveforms={},
+        absent=tuple(sorted(ERROR_FIELD_CHANNELS + ERROR_FIELD_ALIASES)),
+        quiescent_mask=np.ones(time.shape, dtype=bool),
+    )
+
+
 def drive(
     shot: int,
     peaks: dict[str, float],
@@ -65,7 +78,8 @@ def drive(
 
     time = np.linspace(-0.4, 1.2, samples)
     shape = ((time >= 0.1) & (time <= 0.9)).astype(float)
-    waveforms = {channel: peak * shape for channel, peak in peaks.items()}
+    recorded = dict.fromkeys(ERROR_FIELD_CHANNELS, 0.0) | dict(peaks)
+    waveforms = {channel: peak * shape for channel, peak in recorded.items()}
     quiescent = np.ones(time.shape, dtype=bool)
     for values in waveforms.values():
         quiescent &= np.abs(values) < QUIESCENT_CURRENT
@@ -111,12 +125,13 @@ def test_both_naming_schemes_are_screened():
     """
 
     assert set(ERROR_FIELD_CHANNELS).isdisjoint(ERROR_FIELD_ALIASES)
-    early = drive(1, {"error_field_a": 1.2e4}, absent=ERROR_FIELD_CHANNELS)
+    early = drive(1, {"error_field_a": 1.2e4}, absent=())
     late = drive(2, {"error_field_05": 3.2e3}, absent=ERROR_FIELD_ALIASES)
     assert early.driven and late.driven
     assert early.peak > late.peak
     assert early.strongest_channel == "error_field_a"
-    assert set(early.absent) == set(ERROR_FIELD_CHANNELS)
+    assert set(late.absent) == set(ERROR_FIELD_ALIASES)
+    assert not early.unmeasured and not late.unmeasured
 
 
 def test_a_shot_nobody_screened_is_not_a_shot_that_passed():
@@ -338,11 +353,17 @@ def test_the_slope_is_measured_against_a_zero_taken_while_the_coil_was_off():
     assert slopes["obr16"] == pytest.approx(2.0e-9, rel=1e-9)
 
 
-def test_a_shot_that_drove_nothing_cannot_be_regressed_on():
-    """Asking for a coupling where there was no excitation is an error."""
+def test_a_shot_with_no_such_channel_cannot_be_regressed_on():
+    """Asking for a coupling where the channel was never recorded is an error."""
 
     with pytest.raises(ErrorFieldError, match="drove no error-field channel"):
-        probe_response_to_drive(drive(1, {}), {"obr17": np.zeros(800)})
+        probe_response_to_drive(unmeasured_drive(14061), {"obr17": np.zeros(800)})
+
+
+def test_a_shot_recorded_at_zero_yields_no_slope_rather_than_an_error():
+    """A channel present and quiet is a valid shot that simply constrains nothing."""
+
+    assert probe_response_to_drive(drive(1, {}), {"obr17": np.zeros(800)}) == {}
 
 
 # --- the matched-pair isolation set --------------------------------------
@@ -417,3 +438,43 @@ def test_a_pair_serializes_with_its_own_bound_on_the_cancellation():
     row = pair.as_dict()
     assert json.loads(json.dumps(row, sort_keys=True)) == row
     assert row["agreement"] == pytest.approx(0.1e3 / 9.1e3)
+
+
+def test_a_campaign_that_never_recorded_these_channels_is_refused_wholesale():
+    """An absent channel is not a quiet one, and cannot be vouched for.
+
+    The earliest campaigns predate the recording of the error-field coils, so a
+    screen that reads their absence as quiescence passes exactly the shots it knows
+    nothing about.
+    """
+
+    screen = ErrorFieldScreen(
+        couplings=(
+            coupling("obr17", 1.1236e-7, neighbour=2.1e-9),
+            coupling("obr16", 2.0e-9, neighbour=1.1e-7),
+        )
+    )
+    blind = unmeasured_drive(14061)
+    assert blind.unmeasured
+    assert not blind.driven
+    assert blind.peak == 0.0
+    assert set(screen.refused(blind)) == {"obr16", "obr17"}
+    assert not screen.passes(blind)
+    outcome = screen_shot_set("training", [14061], screen, {14061: blind})
+    assert outcome.unmeasured_shots == (14061,)
+    assert outcome.driven_shots == ()
+    assert not outcome.clean
+    assert blind.as_dict()["unmeasured"] is True
+
+
+def test_a_recorded_and_quiet_shot_is_distinguished_from_an_unrecorded_one():
+    """The two look identical in a peak and must not look identical in the screen."""
+
+    screen = ErrorFieldScreen(
+        couplings=(coupling("obr17", 1.1236e-7, neighbour=2.1e-9),)
+    )
+    quiet = drive(19995, {})
+    assert not quiet.unmeasured
+    assert screen.refused(quiet) == ()
+    assert screen_shot_set("noise", [19995], screen, {19995: quiet}).clean
+    assert screen.refused(unmeasured_drive(14061)) == ("obr17",)

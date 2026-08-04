@@ -185,6 +185,19 @@ class ErrorFieldDrive:
         return self.peak >= DRIVEN_CURRENT
 
     @property
+    def unmeasured(self) -> bool:
+        """Return whether this shot recorded no non-axisymmetric channel at all.
+
+        The earliest campaigns predate the recording of these channels, so their
+        shots carry none of them.  That is NOT the same as carrying them at zero:
+        a coil nobody measured may have been driven, and a screen that reads an
+        absent channel as quiescent passes exactly the shots it cannot vouch for.
+        Such a shot is reported unmeasured and refused.
+        """
+
+        return not self.waveforms
+
+    @property
     def strongest_channel(self) -> str | None:
         """Return the channel carrying the shot's largest excitation."""
 
@@ -203,6 +216,7 @@ class ErrorFieldDrive:
             "peaks": self.peaks,
             "shot": self.shot,
             "strongest_channel": self.strongest_channel,
+            "unmeasured": self.unmeasured,
         }
 
 
@@ -699,8 +713,15 @@ class ErrorFieldScreen:
         )
 
     def refused(self, drive: ErrorFieldDrive) -> tuple[str, ...]:
-        """Return the probe channels this shot's excitation disqualifies."""
+        """Return the probe channels this shot's excitation disqualifies.
 
+        A shot that recorded none of these channels loses every channel the screen
+        has a threshold for, because nothing about it can be vouched for.  A shot
+        that recorded them and found them quiet loses nothing.
+        """
+
+        if drive.unmeasured:
+            return tuple(sorted(self.thresholds))
         peak = drive.peak
         if peak <= 0.0:
             return ()
@@ -729,19 +750,30 @@ class ErrorFieldScreen:
 
 @dataclass(frozen=True)
 class ScreenOutcome:
-    """What the screen did to one named set of shots."""
+    """What the screen did to one named set of shots.
+
+    Three dispositions, deliberately kept apart.  ``driven_shots`` recorded the
+    excitation and found it running; ``unmeasured_shots`` did not record it at all
+    and are refused wholesale; ``unscreened_shots`` were never looked at, which is a
+    gap in this run rather than a fact about the archive.
+    """
 
     name: str
     shot_count: int
     driven_shots: tuple[int, ...]
     unscreened_shots: tuple[int, ...]
     refusals: Mapping[int, tuple[str, ...]] = field(default_factory=dict)
+    unmeasured_shots: tuple[int, ...] = ()
 
     @property
     def clean(self) -> bool:
         """Return whether no shot in the set lost a channel."""
 
-        return not self.refusals and not self.unscreened_shots
+        return (
+            not self.refusals
+            and not self.unscreened_shots
+            and not self.unmeasured_shots
+        )
 
     def as_dict(self) -> dict[str, Any]:
         """Return the canonical JSON representation."""
@@ -755,6 +787,7 @@ class ScreenOutcome:
                 for shot, channels in sorted(self.refusals.items())
             },
             "shot_count": self.shot_count,
+            "unmeasured_shots": list(self.unmeasured_shots),
             "unscreened_shots": list(self.unscreened_shots),
         }
 
@@ -774,13 +807,16 @@ def screen_shot_set(
 
     driven = []
     unscreened = []
+    unmeasured = []
     refusals: dict[int, tuple[str, ...]] = {}
     for shot in shots:
         drive = drives.get(shot)
         if drive is None:
             unscreened.append(shot)
             continue
-        if drive.driven:
+        if drive.unmeasured:
+            unmeasured.append(shot)
+        elif drive.driven:
             driven.append(shot)
         removed = screen.refused(drive)
         if removed:
@@ -791,6 +827,7 @@ def screen_shot_set(
         driven_shots=tuple(driven),
         unscreened_shots=tuple(unscreened),
         refusals=refusals,
+        unmeasured_shots=tuple(unmeasured),
     )
 
 

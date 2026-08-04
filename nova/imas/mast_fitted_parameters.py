@@ -120,7 +120,13 @@ HELD_OUT_FAMILY = "P1+P2+P3+P4+P5+P6"
 """Excitation family withheld in full, so no coil combination was seen twice."""
 
 HELD_OUT_VARIANCE_EXPLAINED = 0.9889
-"""Share of held-out probe signal power the fitted multipliers reproduce."""
+"""Share of held-out probe signal power the fitted multipliers reproduce.
+
+On the generic cohort's twelve-shot held-out arm.  The calibration cohort's arm is
+:data:`CALIBRATION_HELD_OUT_VARIANCE_EXPLAINED`, over eighty-two shots, and the two
+are not comparable: a share of explained variance depends on how much signal the
+withheld shots carry, so it can only be read against its own split.
+"""
 
 NOMINAL_VARIANCE_EXPLAINED = 0.1014
 """Share the same prediction reaches with one turn per coil, the unfitted case."""
@@ -130,6 +136,27 @@ HELD_OUT_RESIDUAL = 4.3818e-3
 
 NOMINAL_RESIDUAL = 3.9498e-2
 """Root-mean-square held-out probe residual [T] before fitting."""
+
+CALIBRATION_HELD_OUT_SHOTS = 82
+"""Shots withheld from every fit on the calibration cohort's declared split."""
+
+CALIBRATION_HELD_OUT_VARIANCE_EXPLAINED = 0.9826
+"""Share of that arm's probe signal the authored weights reproduce."""
+
+CALIBRATION_HELD_OUT_RESIDUAL = 4.2637e-3
+"""Root-mean-square held-out probe residual [T] with the authored weights.
+
+Eleven times the measured sensor floor, which is the useful reading of it: the
+description is nowhere near instrument-limited on vacuum data, so the misfit that
+remains is calibration and modelling error rather than noise.
+
+Promoting the published integers over the free fit costs almost nothing here --
+letting every weight float reaches 4.2367e-3 on the same shots, six parts in a
+thousand better -- so the more defensible values are not the worse ones.
+"""
+
+CALIBRATION_NOMINAL_RESIDUAL = 3.0778e-2
+"""The same arm's residual with one turn per coil, the unfitted case [T]."""
 
 FIRST_SHOT = 11695
 """First shot the registry's configuration covers."""

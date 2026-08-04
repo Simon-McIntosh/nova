@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-04T07:00:47",
+  "updated": "2026-08-04T12:35:05",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -108,7 +108,7 @@
         ],
         "starts": "2026-08-06",
         "ends": "2026-08-20",
-        "description": "After convergence, run Wave 3 reconstruction/transport, MAST DDv4 descriptions and the native 3D substrate as parallel evidence-gated tracks."
+        "description": "Execution complete 2026-08-04; implementation 95.5%. All four item done_when gates met: nova-3d-native shipped (S1 carryover); the MAST registry gained five-state evidence provenance, a seeded then vacuum-refined content-addressed DD 4.1.1 artifact (fitted turns for 11 of 13 coils, held-out variance 0.9889; electrical drive map covering all 21 driven columns), and DD round trips with provenance (nova ac42194c/ee107ed4/28872e4f); the Ambix axisymmetric cutover landed identity seams, a hardened frozen six-shot gate (15 registered tolerances incl. a new raw-magnetics residual; stamp mislabelling fixed), the artifact reader, and PASSES 15/15 under the owner-adjudicated source-cutover budget with every reproduction metric improved (imas-ambix cfa2d2c..ae728ad); zero-import donors retired with census proof. Carryover followups keep the three plans active: solve-input ingest maps and the solenoid vacuum-stratum re-fit (mast-machine-description), the combined registry digest-change corrections (mast-catalog-geometry-recovery), and the deep-donor importer migration (physics-spine-adoption). Records: docs/research/mast-provisional-artifact-landed.html and docs/research/mast-cutover-parity-evidence.html."
       },
       {
         "id": "S3",
@@ -209,6 +209,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 7
+    "_version": 8
   }
 }

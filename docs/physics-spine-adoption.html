@@ -18,12 +18,12 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-04">
-<meta name="plan-version" content="25">
-<meta name="plan-impl" content="0.95">
+<meta name="plan-version" content="26">
+<meta name="plan-impl" content="0.97">
 <meta name="plan-sprint" content="S2">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-commits" content="21b48d4e35571b4bc5f79260f2f6ae9c1c1c16d9,70c11815e1e72f464c93d5ec9f1ab8dc37397c2b,7048d13debe2fced507d2ac92e6e64c5550bc07b,f9d900ce50fe38663d36a5c07836e78d3b5fa993,e286bb59cd456fa0ab8f9bb40a0b77a60319eec2,f4e478e315e1786c55df733e95e110e1fd6eea87,cfa2d2c,8ae7510,30114ee,27dff421">
+<meta name="plan-commits" content="21b48d4e35571b4bc5f79260f2f6ae9c1c1c16d9,70c11815e1e72f464c93d5ec9f1ab8dc37397c2b,7048d13debe2fced507d2ac92e6e64c5550bc07b,f9d900ce50fe38663d36a5c07836e78d3b5fa993,e286bb59cd456fa0ab8f9bb40a0b77a60319eec2,f4e478e315e1786c55df733e95e110e1fd6eea87,cfa2d2c,8ae7510,30114ee,27dff421,ae728ad">
 </head>
 <body>
   <main class="plan-doc">
@@ -597,7 +597,7 @@ Done when
 - Consumer tests and benchmark parity pass, and donor deletion is evidence-backed.</pre>
     <p class="r-fu-outcome">Superseded by a narrower cutover gate. The prior prompt incorrectly required complete diagnostic pose, detailed TF geometry and live Standard Name publication before any consumer cutover; the axisymmetric path now uses the versioned provisional artifact and retains unresolved 3-D semantics.</p>
     </article>
-<article class="r-fu" data-id="f-psa-axisymmetric-cutover" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-edit" data-written-at="2026-08-02" data-recommends-skill="/reckon-ship physics-spine-adoption §4" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-psa-axisymmetric-cutover" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-edit" data-written-at="2026-08-02" data-recommends-skill="/reckon-ship physics-spine-adoption §4" data-resolved-at="2026-08-04T10:33:58+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Cut the axisymmetric consumers over, prove six-shot parity, then retire only zero-import donors</h4>
     <div class="r-fu-body"><p>Use the pinned provisional MAST artifact to rewire Ambix's axisymmetric consumers. Missing final passive resistance and detailed TF winding geometry are not cutover blockers: nominal passive values are refined separately and 3-D donors remain. The hard gates are a complete frozen six-shot parity run and zero tracked imports of each donor selected for deletion.</p></div>
     <pre class="r-fu-prompt">Projects: nova and authorized imas-ambix
@@ -630,6 +630,29 @@ Done when
 - Every retired donor has zero tracked imports immediately before deletion and zero after the final suite.
 - Non-axisymmetric donors and unresolved 3-D semantics remain available and explicitly owned by mast-nonaxisymmetric-physics.
 - Exact commits, artifact digests, test logs, parity metrics and donor disposition are recorded.</pre>
+    <p class="r-fu-outcome">Landed across imas-ambix cfa2d2c..ae728ad and nova ac42194c/ee107ed4/28872e4f. The frozen six-shot after-path parity PASSES 15/15 under the adjudicated source-cutover budget (parity.ComparisonKind.SOURCE_CUTOVER, 7.93% = 2.85% propagated column disagreement + 3.37% measured solve feedback + 1.71% stated-weight calibration asymmetry, pre-registered from the attribution artifacts; the same pair still fails the untouched 1% same-source budget — the regression test that the classes differ). After-path stamp …-e76b0dc65c-…: every reproduction metric beats the before-path (axis 0.0154 vs 0.0253 cm, LCFS 0.0075 vs 0.0083, profile 0.0126 vs 0.0190), confinement 1.0, throughput within budget, sensor misfit +3.22%/+3.27% vs the 7.93% bound. Benchmark integrity hardened on the way: 15 registered tolerances, stamp mislabelling fixed, magnetics-residual metric added (schema 1.4). Donors retired with zero-external-import proof: imas_geometry, elliptic, q1_detect (note: q1_detect's removal deleted 85 lines of live monitor test coverage — priced sound because it had zero product/script consumers, and ae728ad is a one-line revert if the monitor is wanted back). Survivors recorded: geometry 77, operator 71, cylinder 24, residual 8, geometry_export 7, circuits 5, force_balance 4, polygon 3; 3-D preserve set untouched; artifact_geometry is the seam target, never a retirement candidate. Full record: docs/research/mast-cutover-parity-evidence.html.</p>
+    </article>
+<article class="r-fu" data-id="f-psa-donor-migration" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-04" data-recommends-skill="/reckon-ship physics-spine-adoption §4" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Migrate the surviving axisymmetric donor importers onto the artifact path</h4>
+    <div class="r-fu-body"><p>The cutover gate is passed and the zero-import donors are retired, but gs/geometry.py (77 external importers), gs/operator.py (71) and the mid-tier donors (cylinder 24, residual 8, geometry_export 7, circuits 5, force_balance 4, polygon 3) remain load-bearing. Migrating their importers onto the artifact/identity path is a consumer-by-consumer ladder, gated per tranche by the registered budgets. Two residues ride along: scripts/plot_physics_spine_map.py still draws the deleted readers (marked DEAD in the figure), and gs/artifacts/imas_geometry_iter.json is orphaned but cited by two docs pages.</p></div>
+    <pre class="r-fu-prompt">Projects: nova and authorized imas-ambix
+Plan: physics-spine-adoption §4
+Capability: orchestrator
+Requirements: deep reasoning, extended context, autonomous tools, strict verification, elevated risk
+
+Read first
+- docs/research/mast-cutover-parity-evidence.html (the passed gate, the budget mechanism, the survivor census)
+- imas_ambix/spine_bench/parity.py (ComparisonKind and both budget classes)
+- imas_ambix/gs/artifact_geometry.py (the artifact path importers migrate onto)
+
+Work
+1. Migrate importer tranches leaf-first onto the artifact/identity path (start with the 1-importer donors: grounding, integrated_inventory), re-running the focused suites and — where a tranche touches the solve path — the frozen six-shot gate under the appropriate budget class per tranche.
+2. Retire each donor at zero external imports with the same census proof discipline; update :mod: anchors in the same commit.
+3. Clean the two residues: the spine-map figure boxes for deleted readers, and the orphaned gs/artifacts/imas_geometry_iter.json together with the two docs pages that cite it.
+4. geometry.py and operator.py go last, after machine selection/tokenizer/state consumers select physical identity in production, not only through the benchmark seam.
+
+Done when
+- Each migrated tranche is suite-green with its gate recorded; each retirement carries zero-import proof; no dead figure boxes or orphaned artifacts remain.</pre>
     </article>
 </section>
 

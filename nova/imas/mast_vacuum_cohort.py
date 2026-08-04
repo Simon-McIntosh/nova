@@ -136,6 +136,17 @@ CASE_CURRENT_CHANNELS = {
 }
 """Coil-case current channels, the only per-family passive current published."""
 
+ERROR_FIELD_CHANNELS = ("error_field_02", "error_field_05", "efps_current")
+"""Channels carrying the deliberately non-axisymmetric excitation.
+
+A poloidal-field coil produces the same field at every toroidal angle, so no
+poloidal vacuum shot can say where a probe sits toroidally.  These channels are
+the only excitation in the store that can, which is why what they carry is
+recorded per shot rather than left to be discovered later: a shot that drove them
+is the discriminating experiment, and a store in which none did closes the search
+by evidence instead of by silence.
+"""
+
 PROBE_FAMILIES = ("ccbv", "obr", "obv")
 """Poloidal field probe families, in the registry's block order."""
 
@@ -295,6 +306,17 @@ class ShotSurvey:
     field_channels: tuple[str, ...]
     current_identity: str = ""
     field_identity: str = ""
+    case_peaks: Mapping[str, float] = field(default_factory=dict)
+    error_field_peaks: Mapping[str, float] = field(default_factory=dict)
+    toroidal_hold_time: float = 0.0
+
+    @property
+    def error_field_driven(self) -> bool:
+        """Return whether a non-axisymmetric coil was deliberately driven."""
+
+        return any(
+            peak >= EXCITATION_CURRENT for peak in self.error_field_peaks.values()
+        )
 
     def sustained_coils(self, hold: float = SUSTAINED_HOLD) -> tuple[str, ...]:
         """Return the coils held near their peak for long enough to be read.
@@ -388,17 +410,22 @@ class ShotSurvey:
         return {
             "absent_channels": list(self.absent_channels),
             "absent_groups": list(self.absent_groups),
+            "case_peaks": {k: float(v) for k, v in sorted(self.case_peaks.items())},
             "coil_hold_times": {
                 k: float(v) for k, v in sorted(self.coil_hold_times.items())
             },
             "coil_peaks": {k: float(v) for k, v in sorted(self.coil_peaks.items())},
             "current_identity": self.current_identity,
+            "error_field_peaks": {
+                k: float(v) for k, v in sorted(self.error_field_peaks.items())
+            },
             "excitation_family": self.excitation_family,
             "field_channels": list(self.field_channels),
             "field_identity": self.field_identity,
             "plasma_current_peak": float(self.plasma_current_peak),
             "shot": self.shot,
             "toroidal_current_peak": float(self.toroidal_current_peak),
+            "toroidal_hold_time": float(self.toroidal_hold_time),
             "turn_multipliers": {
                 k: float(v) for k, v in sorted(self.turn_multipliers.items())
             },
@@ -447,8 +474,11 @@ def survey_shot(shot: int, store: Path | str = SHOT_STORE) -> ShotSurvey:
     coil_peaks: dict[str, float] = {}
     hold_times: dict[str, float] = {}
     multipliers: dict[str, float] = {}
+    case_peaks: dict[str, float] = {}
+    error_field_peaks: dict[str, float] = {}
     plasma_peak = 0.0
     toroidal_peak = 0.0
+    toroidal_hold = 0.0
     current_identity = ""
     field_identity = ""
     field_channels: tuple[str, ...] = ()
@@ -475,9 +505,21 @@ def survey_shot(shot: int, store: Path | str = SHOT_STORE) -> ShotSurvey:
         else:
             absent_channels.append("plasma_current")
         if "tf_current" in keys:
-            toroidal_peak = _peak(currents["tf_current"][...]) * KILO
+            values = np.asarray(currents["tf_current"][...], dtype=float)
+            toroidal_peak = _peak(values) * KILO
+            toroidal_hold = _hold_time(clock, values)
         else:
             absent_channels.append("tf_current")
+        for family, channel in sorted(CASE_CURRENT_CHANNELS.items()):
+            if channel in keys:
+                case_peaks[family] = _peak(currents[channel][...]) * KILO
+            else:
+                absent_channels.append(channel)
+        for channel in ERROR_FIELD_CHANNELS:
+            if channel in keys:
+                error_field_peaks[channel] = _peak(currents[channel][...]) * KILO
+            else:
+                absent_channels.append(channel)
         for drive in COIL_DRIVES:
             if drive.channel in keys:
                 values = np.asarray(currents[drive.channel][...], dtype=float)
@@ -513,6 +555,9 @@ def survey_shot(shot: int, store: Path | str = SHOT_STORE) -> ShotSurvey:
         field_channels=field_channels,
         current_identity=current_identity,
         field_identity=field_identity,
+        case_peaks=case_peaks,
+        error_field_peaks=error_field_peaks,
+        toroidal_hold_time=toroidal_hold,
     )
 
 

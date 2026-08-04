@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="physics-spine-adoption-donor-census-landed">
+  <meta name="plan-title" content="Physics Spine Adoption — §4 donor census and ladder re-scope">
+  <meta name="plan-summary" content="Per-stage record: the donor-migration ladder has no migratable rung — six of eight mid-tier donors are physics kernels, not machine-description sources, and production has no route to the artifact/identity path. Residues landed (imas-ambix ae728ad..8d7784d); gs 224/15 green, statespace 201 green.">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>§4 donor census — ladder re-scoped | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+  <h1>§4 donor census — the migration ladder re-scoped on measurement</h1>
+  <p>Landed 2026-08-04 on imas-ambix <code>main</code> (<code>ae728ad..8d7784d</code>, one
+  worker in a detached worktree). The planned consumer-by-consumer importer migration did
+  <strong>not start</strong>: an AST-level census of every "donor" showed the ladder's premise
+  wrong, and the honest outcome is a re-scope, which the plan's done-when explicitly admits.
+  Plan: <a href="/nova/physics-spine-adoption.html">physics-spine-adoption</a>.</p>
+
+  <h2>Finding — no tranche is migratable</h2>
+  <p>Six of the eight "mid-tier donors" are not machine-description donors at all; they are
+  physics kernels and ML modules that live under <code>imas_ambix/gs/</code>. Roles measured
+  from source, not inferred from importer counts:</p>
+
+  <table>
+    <thead><tr><th>module (importers)</th><th>what it actually is</th><th>migratable onto the artifact path?</th></tr></thead>
+    <tbody>
+      <tr><td><code>grounding</code> (1)</td><td>torch GroundingHead for the RKN latent</td><td>no — no machine description in it</td></tr>
+      <tr><td><code>integrated_inventory</code> (1)</td><td>corpus co-availability feasibility report</td><td>no — no geometry at all</td></tr>
+      <tr><td><code>polygon</code> (3)</td><td>Urankar Part V polygon Green's kernel</td><td>no — pure math</td></tr>
+      <tr><td><code>force_balance</code> (4)</td><td>analytic Shafranov / decay-index identities</td><td>no — pure physics</td></tr>
+      <tr><td><code>circuits</code> (5)</td><td>MAST <code>pfSystems.xml</code> circuit description</td><td>real donor, but the live case-circuit authority (see below)</td></tr>
+      <tr><td><code>geometry_export</code> (7)</td><td>GeometryTable → flat per-channel table</td><td>no — source-agnostic transform</td></tr>
+      <tr><td><code>residual</code> (8)</td><td>regularised inverse of the forward operator</td><td>no — physics</td></tr>
+      <tr><td><code>cylinder</code> (24)</td><td>Urankar Part III rectangle kernel</td><td>no — pure math</td></tr>
+      <tr><td><code>geometry</code> (77)</td><td>source-neutral substrate <em>plus</em> the efm reader (54 reader / 16 substrate / 7 both)</td><td>only the reader half, and not yet — <code>artifact_geometry.py</code> itself imports 11 substrate symbols from it</td></tr>
+      <tr><td><code>operator</code> (71)</td><td>the Green's forward operator</td><td>no — consumes GeometryTable, is not a source</td></tr>
+    </tbody>
+  </table>
+
+  <h2>The blocking precondition — three independent components</h2>
+  <ol>
+    <li><strong>No product consumer reaches the artifact reader.</strong>
+    <code>artifact_geometry</code> has 0 external importers; the only reference outside itself
+    is its own test file. It is not wired through a benchmark seam in-tree — the passing
+    after-path stamp builds the artifact table out-of-tree and pokes it into
+    <code>scripts.heldout_mse_gate_eval._TABLE_CACHE</code>, keyed by a signature computed via
+    <code>read_efm_geometry</code>, so even the seam addresses the artifact through the efm
+    reader.</li>
+    <li><strong>No consumer selects physical identity.</strong> <code>machine_identity</code> is
+    imported by exactly three modules, all inside <code>gs/</code>; nothing in
+    <code>statespace/</code>, <code>tokenizer/</code> or <code>latent/</code> resolves a
+    physical digest.</li>
+    <li><strong>There is no artifact to select.</strong> <code>MachineArtifactGeometryReader</code>
+    requires explicit <code>cache_directory</code> + <code>digest</code>; ambix packages no
+    default location, and its 15 tests skip unless both environment variables are set.</li>
+  </ol>
+  <p>Why <code>circuits.py</code> is blocked despite being a real donor: the artifact publishes an
+  evidence-typed drive map, but <code>GeometryTable.active_circuits</code> /
+  <code>circuit_drives</code> are empty for the efm reader by design, so
+  <code>operator._CASE_BY_CIRCUIT_ID</code>, built at import from
+  <code>circuits_mod.case_circuits()</code>, is the live case-circuit authority on every
+  production table. Retiring it would silently regress case-circuit classification.</p>
+
+  <figure>
+    <img src="/nova/figures/physics-spine-transition/em-stack-map.png" alt="EM stack map: the machine-description tier drawn as it stands, with the artifact reader in its own colour meaning no product caller" style="max-width:100%;height:auto">
+    <figcaption>The regenerated stack map carries the finding: both live readers drawn with their
+    callers, and the artifact reader in a colour of its own meaning "implemented, tested,
+    reachable only from its tests".</figcaption>
+  </figure>
+
+  <h2>What landed (imas-ambix <code>ae728ad..8d7784d</code>)</h2>
+  <table>
+    <thead><tr><th>item</th><th>commit</th><th>result</th></tr></thead>
+    <tbody>
+      <tr><td>Stack-map figure redrawn to the current tier (dead boxes removed, reader roles corrected, artifact reader distinguished); anchors re-verified</td><td><code>db0545d</code></td><td>✅ shipped</td></tr>
+      <tr><td>Orphaned <code>gs/artifacts/imas_geometry_iter.json</code> deleted with its three citation sites unrotted (measured numbers kept, dead paths replaced by the retiring commit)</td><td><code>9bc8ea8</code></td><td>✅ shipped</td></tr>
+      <tr><td>Plan-label scrub of four module docstrings + two tests; one false classifier caveat in <code>circuits.py</code> rewritten to the current mechanism</td><td><code>8d7784d</code></td><td>✅ shipped</td></tr>
+      <tr><td>Importer tranche migration (all tranches)</td><td>—</td><td>⛔ re-scoped: no migratable rung exists until production wiring lands</td></tr>
+    </tbody>
+  </table>
+  <p><strong>Tests</strong> at the final worktree state: <code>tests/gs/</code> 224 passed /
+  15 skipped; <code>tests/statespace/</code> 201 passed (JAX_PLATFORMS=cpu). No six-shot gate
+  run and no budget class applies — nothing on the solve path changed. Logs and the census
+  tooling: <code>~/.cache/ambix-after-path/donor-migration/</code>.</p>
+
+  <h2>What's next</h2>
+  <p>The next rung is not a consumer migration — it is a <strong>design step</strong>: wire a
+  default artifact resolution + physical-identity selection into one product consumer, so the
+  artifact path acquires its first production caller. Until then every importer count is
+  load-bearing and the ladder stays parked. Tracked as the plan's open followup
+  (<em>Wire artifact resolution into a production consumer</em>). Two doc-rot findings were
+  routed to their owners: the open §3 of <code>cocos-convention-hardening</code> (imas-ambix)
+  targets a file deleted in <code>ae728ad</code>, and
+  <code>physics-spine-em-consolidation-review</code> still lists landed retirements as
+  candidates.</p>
+
+</main>
+</body>
+</html>

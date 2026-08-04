@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-04">
-<meta name="plan-version" content="27">
+<meta name="plan-version" content="28">
 <meta name="plan-impl" content="0.97">
 <meta name="plan-sprint" content="S5">
 <meta name="plan-capability-version" content="1.0">
@@ -225,6 +225,17 @@ nova/transport/current_diffusion.py  CurrentDiffusion      (ambix current_diffus
     </ul>
     <p><em>Done-when:</em> imas-ambix imports the spine from the package; no physics kernels or
     solvers remain in-tree; full ambix suite green; spine_bench parity recorded.</p>
+
+    <h3>Donor census — ladder re-scoped <span class="badge badge-shipped">✓ landed 2026-08-04</span></h3>
+    <p class="landed-summary">
+    Residues shipped (imas-ambix <code>ae728ad..8d7784d</code>: stack map redrawn, orphaned gate
+    record deleted with citations unrotted, docstring scrub); gs 224/15 and statespace 201 green.
+    The importer-migration ladder itself has <strong>no migratable rung</strong>: an AST census
+    showed six of eight "mid-tier donors" are physics kernels, <code>circuits.py</code> is the
+    live case-circuit authority, and production has no route to the artifact path (0 product
+    importers of <code>artifact_geometry</code>, no identity selection outside <code>gs/</code>,
+    no default artifact resolution). Next rung is a design step, not a migration. Full record:
+    <a href="archive/physics-spine-adoption-donor-census-landed.html">§4 donor census landed</a>.</p>
 
     <h2 id="s5">§5 — Style contract for ported code</h2>
     <ul>
@@ -632,7 +643,7 @@ Done when
 - Exact commits, artifact digests, test logs, parity metrics and donor disposition are recorded.</pre>
     <p class="r-fu-outcome">Landed across imas-ambix cfa2d2c..ae728ad and nova ac42194c/ee107ed4/28872e4f. The frozen six-shot after-path parity PASSES 15/15 under the adjudicated source-cutover budget (parity.ComparisonKind.SOURCE_CUTOVER, 7.93% = 2.85% propagated column disagreement + 3.37% measured solve feedback + 1.71% stated-weight calibration asymmetry, pre-registered from the attribution artifacts; the same pair still fails the untouched 1% same-source budget — the regression test that the classes differ). After-path stamp …-e76b0dc65c-…: every reproduction metric beats the before-path (axis 0.0154 vs 0.0253 cm, LCFS 0.0075 vs 0.0083, profile 0.0126 vs 0.0190), confinement 1.0, throughput within budget, sensor misfit +3.22%/+3.27% vs the 7.93% bound. Benchmark integrity hardened on the way: 15 registered tolerances, stamp mislabelling fixed, magnetics-residual metric added (schema 1.4). Donors retired with zero-external-import proof: imas_geometry, elliptic, q1_detect (note: q1_detect's removal deleted 85 lines of live monitor test coverage — priced sound because it had zero product/script consumers, and ae728ad is a one-line revert if the monitor is wanted back). Survivors recorded: geometry 77, operator 71, cylinder 24, residual 8, geometry_export 7, circuits 5, force_balance 4, polygon 3; 3-D preserve set untouched; artifact_geometry is the seam target, never a retirement candidate. Full record: docs/research/mast-cutover-parity-evidence.html.</p>
     </article>
-<article class="r-fu" data-id="f-psa-donor-migration" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-04" data-recommends-skill="/reckon-ship physics-spine-adoption §4" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-psa-donor-migration" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-04" data-recommends-skill="/reckon-ship physics-spine-adoption §4" data-resolved-at="2026-08-04T15:53:26+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Migrate the surviving axisymmetric donor importers onto the artifact path</h4>
     <div class="r-fu-body"><p>The cutover gate is passed and the zero-import donors are retired, but gs/geometry.py (77 external importers), gs/operator.py (71) and the mid-tier donors (cylinder 24, residual 8, geometry_export 7, circuits 5, force_balance 4, polygon 3) remain load-bearing. Migrating their importers onto the artifact/identity path is a consumer-by-consumer ladder, gated per tranche by the registered budgets. Two residues ride along: scripts/plot_physics_spine_map.py still draws the deleted readers (marked DEAD in the figure), and gs/artifacts/imas_geometry_iter.json is orphaned but cited by two docs pages.</p></div>
     <pre class="r-fu-prompt">Projects: nova and authorized imas-ambix
@@ -653,6 +664,35 @@ Work
 
 Done when
 - Each migrated tranche is suite-green with its gate recorded; each retirement carries zero-import proof; no dead figure boxes or orphaned artifacts remain.</pre>
+    <p class="r-fu-outcome">Ladder re-scoped on measurement — no migratable rung exists. AST census: six of eight mid-tier donors are physics kernels, not machine-description sources; circuits.py is the live case-circuit authority (efm tables carry empty circuit_drives by design); geometry.py splits 54 reader / 16 substrate / 7 both and artifact_geometry itself imports its substrate. Production has no route to the artifact path: 0 product importers of artifact_geometry, no identity selection outside gs/, no default artifact resolution (the after-path stamp addresses its table via read_efm_geometry). Residues shipped: imas-ambix ae728ad..8d7784d (stack map redrawn, orphaned imas_geometry_iter.json deleted with three citation sites unrotted, docstring scrub + one false classifier caveat fixed); gs 224/15, statespace 201 green. Record: docs/archive/physics-spine-adoption-donor-census-landed.html</p>
+    </article>
+<article class="r-fu" data-id="f-psa-artifact-wiring" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-04 18:00" data-recommends-skill="/reckon-ship physics-spine-adoption §4" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Wire default artifact resolution and physical-identity selection into one product consumer</h4>
+    <div class="r-fu-body"><p>The donor census showed every importer count is load-bearing until production can reach the artifact path at all: artifact_geometry has zero product importers, machine_identity is only imported inside gs/, and MachineArtifactGeometryReader has no default cache/digest resolution. The next rung is a design step — give ambix a default artifact resolution (cache location + digest selection semantics) and route one product consumer (machine selection / tokenizer / statespace) through physical identity, so the migration ladder acquires its first real rung. Only then do the reader half of geometry.py and circuits.py become migratable.</p></div>
+    <pre class="r-fu-prompt">Projects: nova (read-only) and authorized imas-ambix
+Plan: physics-spine-adoption §4
+Capability: orchestrator
+Requirements: deep reasoning, extended context, autonomous tools, strict verification, elevated risk
+
+Context
+  The donor-census node (docs/archive/physics-spine-adoption-donor-census-landed.html) proved the importer-migration ladder has no first rung: no product consumer reaches the artifact reader, nothing outside gs/ selects physical identity, and there is no default artifact resolution (MachineArtifactGeometryReader needs explicit cache_directory + digest; its tests skip without AMBIX_MACHINE_ARTIFACT_CACHE/DIGEST). The after-path stamp pokes an out-of-tree table into scripts.heldout_mse_gate_eval._TABLE_CACHE keyed via read_efm_geometry.
+
+Read first
+  - docs/archive/physics-spine-adoption-donor-census-landed.html (the census, the three-component precondition)
+  - imas_ambix/gs/artifact_geometry.py and machine_identity (the path to wire)
+  - ~/.cache/ambix-after-path/donor-migration/donor_census.py + census output (the measured importer graph)
+
+Open decisions to surface (do not resolve unilaterally)
+  - default artifact cache location + digest selection semantics (packaged default vs environment vs config)
+  - which product consumer goes first (machine selection vs tokenizer vs statespace)
+
+Work
+  1. Design and land default artifact resolution in ambix (a resolvable cache location + pinned digest, environment-overridable), with tests that run without hand-set env vars.
+  2. Route ONE product consumer through physical-identity selection onto the artifact reader, gated by the frozen six-shot gate under the appropriate budget class.
+  3. Re-open the migration ladder from that first rung: the reader half of geometry.py (54 importers) and circuits.py (drive-map consumption replacing _CASE_BY_CIRCUIT_ID) become the next tranches.
+
+Done-when
+  - The artifact reader has &gt;= 1 production caller with identity selection, suite-green with the gate recorded; the ladder&#x27;s next tranche is enumerated from a re-run census; no env-var-only test skips remain on the wired path.</pre>
     </article>
 </section>
 

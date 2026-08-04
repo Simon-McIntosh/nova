@@ -24,6 +24,7 @@ from nova.catalog.mast_geometry import MachineGeometryRegistry
 from nova.imas.mast_fitted_parameters import RADIAL_PROBE_FAMILY
 from nova.imas.mast_probe_calibration import (
     MINIMUM_SHOTS,
+    PooledRigidFit,
     ShotGain,
     adjudicate_probes,
     aggregate_family_gains,
@@ -453,11 +454,63 @@ def test_a_probe_with_no_held_out_coverage_is_not_promoted(model):
         ],
         standoff_table_stub(),
     )
-    rows = adjudicate_probes(gains, (), FLOOR)
+    rows = adjudicate_probes(gains, (clean_rigid_fit(),), FLOOR)
     row = next(item for item in rows if item.channel == "obv06")
     assert row.verdict is ProbeVerdict.CALIBRATION_GAIN
     assert not row.improves_held_out
     assert not row.promoted
+
+
+def test_a_probe_with_no_orthogonal_partner_is_never_a_calibration_item(model):
+    """Without a rigid fit the residual is unmeasured, not zero.
+
+    A probe reporting no rigid residual at all would otherwise read as having
+    been explained to its noise floor by a fit nobody ran, and a probe-side
+    verdict would follow from an absence of evidence.
+    """
+
+    gains = aggregate_family_gains(
+        [
+            ShotGain(
+                shot=index,
+                channel="obv06",
+                family=family,
+                gain=1.08,
+                leverage=0.9,
+                sample_count=500,
+                residual=1.0e-6,
+                signal=1.0e-3,
+            )
+            for family in ("p3_upper", "p4_upper", "p5_upper")
+            for index in range(3)
+        ],
+        standoff_table_stub(),
+    )
+    row = next(
+        item for item in adjudicate_probes(gains, (), FLOOR) if item.channel == "obv06"
+    )
+    assert math.isinf(row.statistics.rigid_residual)
+    assert not row.statistics.rigid_fit_reaches_floor
+    assert row.verdict is ProbeVerdict.INSEPARABLE
+    assert row.as_dict()["statistics"]["rigid_residual"] is None
+
+
+def clean_rigid_fit() -> PooledRigidFit:
+    """Return a conditioned rigid fit that reaches the synthetic noise floor."""
+
+    return PooledRigidFit(
+        channel="obv06",
+        partner="obr06",
+        shot_count=9,
+        gain=1.08,
+        tilt=0.0,
+        gain_error=1.0e-4,
+        tilt_error=1.0e-4,
+        condition=25.0,
+        residual=FLOOR["obv06"],
+        signal=1.0e-3,
+        tilt_variance_removed=0.0,
+    )
 
 
 def standoff_table_stub() -> dict[tuple[str, str], float]:

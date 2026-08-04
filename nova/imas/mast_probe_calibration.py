@@ -96,6 +96,19 @@ a probe pushes it to infinity.  Four orders is where the smaller singular value
 stops carrying more signal than double precision noise on the larger one.
 """
 
+MINIMUM_COHERENCE = 0.5
+"""Share of the coils' summed power the prediction itself must retain.
+
+The leverage screen asks whether one coil dominates the prediction, and on a
+shot driving a pair in opposition it says yes for the wrong reason: the two
+fields cancel, the prediction goes small, and each coil's own power becomes a
+large multiple of it.  A coil can then carry several times the predicted power
+while contributing almost nothing to what the probe reads, and the scale the fit
+returns for it is a ratio of two nearly cancelling numbers.  Requiring the
+prediction to retain half the summed power of its parts refuses exactly that
+shot, and refuses nothing where one coil genuinely dominates.
+"""
+
 MINIMUM_SHAPE_AGREEMENT = 0.5
 """Share of a probe's variance one coil's modelled shape must explain.
 
@@ -487,7 +500,11 @@ def shot_gains(
         total = float(np.dot(prediction[keep], prediction[keep]))
         if total <= 0.0:
             continue
+        parts = float(np.sum(columns[keep, :] ** 2))
+        coherent = parts <= 0.0 or total >= MINIMUM_COHERENCE * parts
         for column, family in enumerate(model.families):
+            if not coherent:
+                break
             partial = columns[keep, column]
             power = float(np.dot(partial, partial))
             if power <= 0.0 or power / total < family_leverage:
@@ -788,7 +805,7 @@ def build_statistics(
     tilt = rigid.tilt if usable else 0.0
     tilt_error = rigid.tilt_error if usable else 0.0
     removed = rigid.tilt_variance_removed if usable else 0.0
-    rigid_residual = rigid.residual if rigid is not None else 0.0
+    rigid_residual = rigid.residual if rigid is not None else math.inf
     partner = rigid.partner if rigid is not None else ""
     return DiscriminantStatistics(
         channel=channel,

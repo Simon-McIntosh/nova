@@ -168,7 +168,7 @@ class DiscriminantStatistics:
             (self.gain_standard_error, "gain standard error"),
             (self.gain_spread, "gain spread"),
             (self.tilt_standard_error, "tilt standard error"),
-            (self.rigid_residual, "rigid residual"),
+            (min(self.rigid_residual, 0.0), "rigid residual"),
             (self.noise_floor, "noise floor"),
         ):
             if not math.isfinite(value) or value < 0.0:
@@ -206,7 +206,12 @@ class DiscriminantStatistics:
 
     @property
     def rigid_fit_reaches_floor(self) -> bool:
-        """Return whether a gain-and-tilt fit explains the channel to its floor."""
+        """Return whether a gain-and-tilt fit explains the channel to its floor.
+
+        A probe with no orthogonal partner has no rigid fit, so its residual is
+        not zero but unmeasured, and it must not read as having reached anything:
+        a probe-side verdict for such a channel would rest on a fit nobody ran.
+        """
 
         return bool(self.rigid_residual <= FLOOR_MULTIPLE * self.noise_floor)
 
@@ -244,7 +249,9 @@ class DiscriminantStatistics:
             "partner_channel": self.partner_channel,
             "partner_excess_share": self.partner_excess_share,
             "rigid_fit_reaches_floor": self.rigid_fit_reaches_floor,
-            "rigid_residual": self.rigid_residual,
+            "rigid_residual": (
+                None if math.isinf(self.rigid_residual) else self.rigid_residual
+            ),
             "tilt": self.tilt,
             "tilt_identified": self.tilt_identified,
             "tilt_standard_error": self.tilt_standard_error,

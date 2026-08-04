@@ -109,13 +109,18 @@
     <thead><tr><th>Finding</th><th>Evidence</th><th>Owner</th></tr></thead>
     <tbody>
       <tr>
-        <td>Registry case plates carry transposed R/Z extents</td>
-        <td>Every <code>coil_cases</code> plate in config <code>76cf833561e602a7</code> has its radial and
+        <td>Registry case plates carry transposed R/Z extents
+        <span class="badge badge-shipped">✓ resolved 2026-08-04</span></td>
+        <td>Every <code>coil_cases</code> plate in config <code>76cf833561e602a7</code> had its radial and
         vertical extents exchanged about its own centre — a pinwheel whose arms pass through the winding
         pack, physically impossible for a case; efm's plates close into an enclosure. Centres, thicknesses
-        and total area match efm exactly.</td>
-        <td>mast-catalog-geometry-recovery (registry correction; moves the physical digest — combine with
-        the obr probe-axis correction in one digest-change node)</td>
+        and total area match efm exactly. <strong>Resolved</strong> at the builder root together with the
+        obr probe-axis correction in one digest change (<code>76cf833561e602a7 →
+        ca06c8f64481114f</code>, nova <code>58c81059</code>): plate area inside the packs 33.7%→0.4%,
+        all eight 4-plate groups close, bounding-box overstatement 56.2×→14.2× — the residual is the
+        reader row below. Record:
+        <a href="/nova/research/mast-registry-corrections-landed.html">registry corrections landed</a>.</td>
+        <td>mast-catalog-geometry-recovery — done</td>
       </tr>
       <tr>
         <td>Reader collapses driven passive elements to bounding boxes</td>
@@ -166,7 +171,10 @@
   fixes), <code>27dff421</code> (drive-map consumption + re-run stamp). Attribution artifacts and
   instrumented drivers: <code>~/.cache/ambix-after-path/attribution/</code>. Refined artifact semantic
   identity <code>68f64209…f351</code>; physical digest <code>76cf833561e602a7</code>; registry digest
-  <code>73ecabaa…3ab2</code>.</p>
+  <code>73ecabaa…3ab2</code>. <em>Identity note 2026-08-04:</em> the registry corrections superseded
+  these identities — physical <code>ca06c8f64481114f</code>, semantic <code>85993ba9…fff16</code>,
+  mapping recorded in <code>provenance.superseded_physical_digests</code>
+  (<a href="/nova/research/mast-registry-corrections-landed.html">record</a>).</p>
 
 </main>
 </body>

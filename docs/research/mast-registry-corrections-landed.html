@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="mast-registry-corrections-landed">
+  <meta name="plan-title" content="MAST registry corrections — one digest change, both defects closed">
+  <meta name="plan-summary" content="Per-stage record: obr probe axes recovered as measured-in-source (the recovery lost them to an array-order tie-break) and coil_cases extents un-transposed (enclosures now close, 33.7%→0.4% of plate area inside the packs); physical digest 76cf833561e602a7 → ca06c8f64481114f, artifact republished, lane 3536 green, ambix cross-check green.">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>MAST registry corrections landed | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+  <h1>Registry corrections — one digest change, both defects closed</h1>
+  <p>Landed 2026-08-04 on nova <code>main</code> (worker commits <code>6bc4b4a..27205fa0</code>,
+  merge <code>58c81059</code>; ambix cross-check repin <code>3c7cefc</code>, merge
+  <code>3dcd2fe</code>). Both proven registry defects were corrected at their root in the
+  builder (<code>nova/catalog/mast_geometry.py</code>), not just in the generated JSON, and the
+  physical digest moved exactly once.
+  Plan: <a href="/nova/plans/mast-catalog-geometry-recovery.html">mast-catalog-geometry-recovery</a>.</p>
+
+  <h2>Correction 1 — the obr probe axis was always in the source</h2>
+  <p>The plan's premise ("the L1 source carries π/2 for all 78 probes; the correct axis has to be
+  decided by prediction") turned out to be false: <code>efm/magpr_ang</code> carries exactly 19
+  angles of 0° and 59 of 90°, and the 19 radial ones sit exactly on the 19 obr positions (19/19
+  matched within 3 cm; ccbv never has a radial neighbour). 19 of the 78 source positions carry
+  <em>two co-located probes</em> — one radial, one axial — and the recovery's
+  <code>_nearest_values</code> broke that positional tie with <code>np.argmin</code>, i.e. by
+  array order, which always returned the axial partner. The fix is a family-aware angle
+  selection; the axis evidence class upgrades from <strong>fitted → measured</strong>
+  (fitted count 13 → 12), with the vacuum refit's 1.35× held-out margin
+  (6.78e-3 vs 9.15e-3 T) retained as confirmation rather than basis.</p>
+
+  <figure>
+    <img src="/nova/figures/mast-source-resolution/probe_axis_assignment.svg" alt="Probe axis assignment: the obr family sits on co-located radial/axial position pairs" style="max-width:100%;height:auto">
+    <figcaption>The vacuum-fit evidence that first exposed the wrong axis; the source itself
+    turned out to carry the answer the tie-break was discarding.</figcaption>
+  </figure>
+
+  <h2>Correction 2 — coil_cases extents un-transposed</h2>
+  <p>Every <code>coil_cases</code> plate had its radial and vertical extents transposed about its
+  own centre; every other passive family is self-consistent under the builder's
+  width-across-radius convention. Quantitative proof independent of efm: as built,
+  <strong>33.7%</strong> of total plate area (0.006484 of 0.019217 m²) sat <em>inside</em> the
+  winding packs; corrected, <strong>0.4%</strong>. Total area is identical either way — which is
+  why area checks never caught it. All eight 4-plate groups now close into exactly one ring with
+  the winding pack inside the hole (zero closed as built); the two 8-plate chamfered octagons
+  (p3l/p3u) improve 26.9%→3.3% and 22.4%→2.6%, their residual being a box-representation
+  artifact, not a transposition. Side effect: <code>loop_sections</code> coil_cases part count
+  32 → 24 as plates that now close an enclosure meet along shared faces (still multi-part, so
+  the resistance disposition is unchanged). The registry half cuts case-plate bounding-box
+  overstatement from 56.2× to 14.2× (p4: 62.3× → 16.1×); the residual 14.2× is the ambix
+  reader's bounding-box collapse — the other half of that finding.</p>
+
+  <h2>One digest change, provably two independent corrections</h2>
+  <table>
+    <thead><tr><th>identity</th><th>old</th><th>new</th></tr></thead>
+    <tbody>
+      <tr><td>physical</td><td><code>76cf833561e602a7</code></td><td><code>ca06c8f64481114f</code></td></tr>
+      <tr><td>registry</td><td><code>73ecabaa…d3cf3ab2</code></td><td><code>7083e802…b03a307366</code></td></tr>
+      <tr><td>semantic (artifact)</td><td><code>sha256:68f64209…cf6cf351</code></td><td><code>sha256:85993ba9…f88fff16</code></td></tr>
+    </tbody>
+  </table>
+  <p>Negative controls (no files touched): case extents read the old way alone gives
+  <code>bfbef7809c65ce96</code>; the probe tie alone gives <code>086c193decd98324</code> — each
+  correction is independently identity-bearing, and the retired digest was the two defects
+  compounded. The old→new mapping is recorded as
+  <code>provenance.superseded_physical_digests</code> in the registry itself and mirrored in
+  <code>registry_payload()</code>, so the note is reproducible and test-pinned; a consumer
+  resolving the old digest gets a loud <code>KeyError</code> plus the mapping, never a silent
+  resolve. The registry is now provably reproducible from its source catalogs:
+  <code>registry_payload(physical_snapshot(11766), …)</code> equals the packaged payload and the
+  serialised bytes equal the file, both catalog-gated
+  (<code>tests/test_mast_registry_reproduction.py</code>).</p>
+
+  <h2>Verification</h2>
+  <table>
+    <thead><tr><th>check</th><th>result</th></tr></thead>
+    <tbody>
+      <tr><td>nova integrated lane at the new pin (sun_debug job 1240842)</td><td>3536 passed / 125 skipped / 536 deselected, exit 0</td></tr>
+      <tr><td>nova focused suites (catalog, provisional IDS, seed, vacuum refinement, artifact, machine)</td><td>154 passed</td></tr>
+      <tr><td>registry reproduction tests</td><td>4 passed, none skipped</td></tr>
+      <tr><td>ambix cross-check <code>tests/gs/test_artifact_geometry.py</code> at the new pins, artifact-backed tests executed</td><td>green, zero failures</td></tr>
+      <tr><td>refined artifact republished (evidence states 21 measured / 12 published / 37 generated / 23 fitted / 21 unresolved)</td><td><code>~/.cache/mast-artifact-geo</code>, per-file digest re-verified; OCI tag <code>dd-4.1.1-physical-ca06c8f64481114f</code></td></tr>
+    </tbody>
+  </table>
+
+  <h2>What's next</h2>
+  <p>One coupled carryover: imas-ambix resolves nova through its installed git pin, so
+  <code>MAST_PHYSICAL_DIGEST</code> in <code>tests/gs/test_machine_identity.py</code> and the one
+  stale docstring token in <code>imas_ambix/gs/machine_identity.py</code> move together with the
+  nova pin bump in <code>pyproject.toml</code>/<code>uv.lock</code> — dispatched as its own node.
+  The vacuum-floor ladder (calibration cohort, noise envelope, turns closure) is unblocked and
+  running against the corrected registry.</p>
+
+</main>
+</body>
+</html>

@@ -26,8 +26,8 @@
 <meta name="plan-capability-tool-autonomy" content="autonomous">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="elevated">
-<meta name="plan-impl" content="0.97">
-<meta name="plan-version" content="11">
+<meta name="plan-impl" content="0.99">
+<meta name="plan-version" content="12">
 <meta name="plan-commits" content="0f2b026fe8449465aabcf840673ed193472fd364,8c790cbc54a341e9dfe028918054254b9f903741,e286bb59cd456fa0ab8f9bb40a0b77a60319eec2,943c3069700397e48840691298c9c4bf2fac7412,f4e478e315e1786c55df733e95e110e1fd6eea87">
 </head>
 <body>
@@ -129,6 +129,27 @@ establish the starting point:</p>
   <p><span class="badge badge-blocked">consumer cutover blocked</span>
   Operator parity and dependent-consumer migration still require missing electrical/pose
   semantics, live Standard Name reconciliation, and explicit imas-codex / Ambix authority.</p>
+</section>
+
+<section id="s5b" class="section-landed">
+  <header>
+    <span class="badge badge-shipped">✓ registry corrections landed 2026-08-04</span>
+    <h2>§5b — Registry corrections: one digest change</h2>
+  </header>
+  <p class="landed-summary">
+    Both proven defects corrected at the builder root (nova <code>58c81059</code>): the obr probe
+    axis was <strong>measured in the L1 source all along</strong> (19 co-located radial/axial
+    pairs; an array-order tie-break discarded the radial partner — evidence upgraded
+    fitted→measured), and coil_cases extents un-transposed (plate area inside the packs
+    33.7%→0.4%; all eight 4-plate groups now close; loop_sections parts 32→24). Physical digest
+    <code>76cf833561e602a7 → ca06c8f64481114f</code>, mapping recorded in
+    <code>provenance.superseded_physical_digests</code> and test-pinned; registry provably
+    reproducible from its catalogs; artifact republished
+    (<code>dd-4.1.1-physical-ca06c8f64481114f</code>). Lane 3536 green (job 1240842); ambix
+    cross-check green at the new pin. Full record:
+    <a href="/nova/research/mast-registry-corrections-landed.html">registry corrections
+    landed</a>. Coupled ambix pin bump dispatched as its own node.
+  </p>
 </section>
 
 <h2 id="s6">§6 — Acceptance gates</h2>
@@ -253,7 +274,7 @@ Done when
 - Tracked legacy axisymmetric imports are zero before donor deletion; 3-D donors remain.</pre>
     <p class="r-fu-outcome">All six work items landed. Evidence schema with five provenance states and digest-stable representation handling (nova ac42194c); content-addressed provisional artifact with documented circuit relations and nominal passive material (semantic identity 680076be…), refined by the vacuum campaign to 68f64209… with fitted turns and the electrical drive map (ee107ed4, 28872e4f); provenance-pinned vacuum cohort (400 of 17,111 shots, held-out split before fitting) with per-block fits and visible negative results; axisymmetric Ambix consumers select the physical digest through the identity seam and the artifact reader (imas-ambix cfa2d2c..ae728ad) with representation aliases retained as provenance; the frozen six-shot gate runs complete and PASSES 15/15 under the adjudicated source-cutover budget with every reproduction metric improved; zero-import donors retired with census proof and all non-axisymmetric/3-D donors preserved. Carryover: the two registry corrections (obr probe axis; transposed case-plate extents) land together as one digest-change node, and the deep-donor importer migration continues under physics-spine-adoption. Records: docs/research/mast-provisional-artifact-landed.html and docs/research/mast-cutover-parity-evidence.html.</p>
     </article>
-<article class="r-fu" data-id="f-mast-registry-probe-axis-defect" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-04" data-recommends-skill="/reckon-ship mast-catalog-geometry-recovery" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-mast-registry-probe-axis-defect" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-04" data-recommends-skill="/reckon-ship mast-catalog-geometry-recovery" data-resolved-at="2026-08-04T16:09:16+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Correct the obr probe poloidal angle in the canonical registry</h4>
     <div class="r-fu-body"><p>The vacuum-response fit identified the obr probe family as radial (held-out residual 6.78e-3 T against 9.15e-3 T for the registry's π/2 value), so 19 probes in the canonical registry carry a wrong sensitive axis and would report the wrong field component. Orientation is identity-bearing: the correction moves the pinned physical digest (76cf833561e602a7) and therefore every digest-pinned test and the artifact identity chain — it needs its own careful node, not a drive-by edit.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -272,8 +293,9 @@ Work
 
 Done when
 - Registry and artifact agree on every probe axis with evidence; the digest change is mapped, test-pinned and pushed; no consumer silently resolves the old digest.</pre>
+    <p class="r-fu-outcome">Landed at the builder root — nova 58c81059 (worker 6bc4b4a..27205fa0). The premise was wrong in a useful way: efm/magpr_ang carries 19×0° + 59×90° and the 19 radial values sit exactly on the obr positions — 19 source positions carry co-located radial/axial probe PAIRS and _nearest_values broke the tie by array order, always taking the axial partner. Fix is family-aware angle selection; evidence class upgraded fitted→measured (13→12 fitted), vacuum refit 1.35× margin retained as confirmation. Physical digest 76cf833561e602a7→ca06c8f64481114f (one change with the case-plate correction), mapping in provenance.superseded_physical_digests, test-pinned, loud KeyError on old resolve. Lane 3536 green (sun_debug 1240842); ambix cross-check green. Record: docs/research/mast-registry-corrections-landed.html</p>
     </article>
-<article class="r-fu" data-id="f-mast-registry-case-orientation-defect" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-04" data-recommends-skill="/reckon-ship mast-catalog-geometry-recovery" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-mast-registry-case-orientation-defect" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-04" data-recommends-skill="/reckon-ship mast-catalog-geometry-recovery" data-resolved-at="2026-08-04T16:09:16+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Correct the transposed case-plate extents in the canonical registry</h4>
     <div class="r-fu-body"><p>Every coil_cases plate in config 76cf833561e602a7 carries its radial and vertical extents transposed about its own centre — the plates radiate through the winding pack as a pinwheel instead of closing into an enclosure; centres, thicknesses and total area match efm exactly, so efm's orientation is right. Land this in the SAME digest-change node as the obr probe-axis correction ([[f-mast-registry-probe-axis-defect]]): both move the pinned physical digest 76cf833561e602a7 and the digest must change once, with one old→new mapping.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -292,6 +314,23 @@ Work
 
 Done when
 - Both corrections are in the registry with evidence; one digest change, mapped and test-pinned; artifact republished; nova and ambix suites green at the new pin.</pre>
+    <p class="r-fu-outcome">Landed in the same digest change (nova 58c81059). Transposition confirmed CONFINED to coil_cases (every other passive family self-consistent): plate area inside the winding packs 33.7%→0.4% when corrected, total area identical either way (why area checks never caught it); all eight 4-plate groups close into one ring with the pack inside the hole (zero as built); p3l/p3u corner gaps are a box-representation artifact (26.9%→3.3%, 22.4%→2.6%). Side effects: loop_sections coil_cases parts 32→24 (resistance disposition unchanged); case-plate bounding-box overstatement 56.2×→14.2× — the residual is the ambix reader's bounding-box collapse. Negative controls prove each correction independently identity-bearing (bfbef7809c65ce96 / 086c193decd98324). Registry now provably reproducible from its catalogs (catalog-gated test). Record: docs/research/mast-registry-corrections-landed.html</p>
+    </article>
+<article class="r-fu" data-id="f-mcgr-ambix-pin-closeout" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-ship" data-written-at="2026-08-04 18:40" data-recommends-skill="/reckon-ship mast-catalog-geometry-recovery" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Ship the plan once the coupled ambix nova-pin bump lands</h4>
+    <div class="r-fu-body"><p>Both corrections are landed, mapped and test-pinned; the artifact is republished. The plan's done-when requires nova AND ambix suites green at the new pin — ambix's identity-seam pins (MAST_PHYSICAL_DIGEST in tests/gs/test_machine_identity.py, the pyproject nova revision, one stale docstring token in gs/machine_identity.py) move together in the dependency-bump node already dispatched. When it integrates green, set this plan shipped and impl 1.0.</p></div>
+    <pre class="r-fu-prompt">Project: nova (plan closure only — no product code)
+Plan: mast-catalog-geometry-recovery
+
+Context
+  The registry-corrections node landed (nova 58c81059; record docs/research/mast-registry-corrections-landed.html). The coupled imas-ambix dependency bump (pyproject nova pin → 58c81059, uv.lock, dependency-contract test, MAST_PHYSICAL_DIGEST → ca06c8f64481114f, stale docstring token) was dispatched as its own node.
+
+Work
+  1. Verify the ambix bump integrated on imas-ambix main with tests/gs/ green (the 11 previously pin-blocked identity tests now passing) and tests/statespace/ green.
+  2. Set this plan status=shipped, impl=1.0; resolve this followup with the ambix merge SHA and suite counts.
+
+Done when
+  - Plan shipped with the ambix evidence recorded; no consumer resolves the old digest silently.</pre>
     </article>
 </section>
 <section data-reckon="research" id="research" class="r-research-list">

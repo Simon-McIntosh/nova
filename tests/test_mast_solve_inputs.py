@@ -596,11 +596,12 @@ def test_both_field_polarities_reach_the_description_unflipped(
 def test_a_coil_publishing_two_channels_measures_its_own_turn_count(
     description, published_map, tmp_path
 ):
-    """The two routes differ by the archive's integer over the described turn count.
+    """A coil reached through two channels must agree with itself on its turns.
 
-    A coil counted to an exact integer agrees to floating point; one whose turn
-    count was bounded rather than counted disagrees by the difference, which makes
-    this a measurement of the description rather than a check of the map.
+    Every coil carrying a published turn count resolves to the same exact integer
+    on the feed route and the coil route, so the two reconstructions of its current
+    agree to floating point.  The comparison runs over recorded waveforms, so the
+    two routes close to about a part in a million rather than exactly.
     """
 
     trip = round_trip_shot(
@@ -609,23 +610,9 @@ def test_a_coil_publishing_two_channels_measures_its_own_turn_count(
     counted = [
         value
         for path, value in trip.redundancy.items()
-        if any(name in path for name in ("p2_", "p3_"))
+        if any(name in path for name in ("p2_", "p3_", "p4_", "p5_"))
     ]
-    bounded = {
-        path: value
-        for path, value in trip.redundancy.items()
-        if any(name in path for name in ("p4_", "p5_"))
-    }
     assert counted and max(counted) < 1e-6
-    assert bounded
-    assert max(bounded.values()) < 0.06
-    turns = description.machine.turns
-    for path, value in bounded.items():
-        conductor = path.split("(")[1].split(")")[0]
-        # measured over recorded waveforms, so the arithmetic gap between the
-        # archive's multiplier and the described turn count is reproduced to about
-        # a part in a million rather than exactly
-        assert value == pytest.approx(abs(23.0 - turns[conductor]) / 23.0, rel=1e-4)
 
 
 @_needs_store

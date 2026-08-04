@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="mast-winding-lattice-landed">
+  <meta name="plan-title" content="MAST winding-lattice hypothesis test — uniform density stands">
+  <meta name="plan-summary" content="Per-stage record: the P4/P5 turn layout is derivable from the pack chamfer (23 turns, nothing fitted) yet the data refuses it four independent ways; the near-probe misfit is campaign-dependent, which no static description can carry; the far-field gain ledger (30/77 channels off unity, two factor-of-two defects) shows obv06/obv14 are NOT mis-gained.">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>MAST winding lattices — uniform density stands | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+  <h1>Winding-lattice hypothesis test — uniform density stands</h1>
+  <p>Landed 2026-08-05, nova merge <code>9f9ad143</code> (two commits, 3 new files + 4 figures,
+  19,362 insertions). <strong>Negative result, promoted as evidence:</strong> no fitted lattice
+  enters the description; uniform current density stands; the physical digest is unmoved and no
+  artifact republish occurred (a refused hypothesis authors no evidence record).
+  Plan: <a href="/nova/plans/mast-vacuum-floor-recovery.html">mast-vacuum-floor-recovery</a>.</p>
+
+  <h2>The layout is derivable — and the data refuses it anyway</h2>
+  <p>Turns on a regular grid spanning the pack, with the position vacated where the chamfer cuts
+  it, return exactly 23 turns — the published count — on all four coils with nothing fitted; the
+  vacated corner agrees with efm's cross-over to ~1 mm. The instruments were proven sharp by
+  planted-recovery tests (fill to 0.01, 2 mm displacement to 1 mm, gains to 2%), so the null is
+  about the archive, not the code. Four independent refusals:</p>
+  <ol>
+    <li>Held-out near-probe prediction worsens on three of four coils (−0.37% to −0.45%) against
+    all-positive training gains — classic overfitting; fails promotion outright.</li>
+    <li>Collateral degradation on 29–46 untargeted channels per coil, largest ON the near probes.</li>
+    <li>The fitted fill fraction pins to its lower bound on three coils — no interior optimum.</li>
+    <li>The preferred grid shape disagrees across identically-wound coils (4×6 vs 8×3) — four
+    coils wound the same way cannot have two layer counts.</li>
+  </ol>
+
+  <figure>
+    <img src="/nova/figures/mast-vacuum-floor/lattice_layout.svg" alt="Derived winding layout per coil: vacated cross-over corner, 23 turns" style="max-width:100%;height:auto">
+    <figcaption>The chamfer-derived layout: right about the hardware, wrong as a residual lever.</figcaption>
+  </figure>
+
+  <h2>The decisive finding — the near-probe misfit is campaign-dependent</h2>
+  <p>A rigid-displacement scan (a strictly larger family than any interior layout) runs to the
+  ±5 mm boundary for 5–18% improvement, and its preferred direction <strong>reverses between
+  train and held-out exactly on the two coils whose shot split straddles the 192xx/25xxx campaign
+  boundary</strong> — and on neither coil whose split does not. A static geometry error cannot
+  flip sign between shot groups. There is a campaign-dependent term in the near-probe readings
+  that <em>no static description can carry</em>: independent, field-shape corroboration of the
+  P5-lower amplitude shift, extended to P4 lower. The next lever is campaign-resolved sensor
+  calibration, not geometry.</p>
+
+  <h2>Bounds and verdict inputs</h2>
+  <ul>
+    <li><strong>P5-lower verdict input:</strong> the largest amplitude shift any admissible layout
+    can produce is 0.034–0.066% per coil (test-pinned &lt;1e-3). The 4.5% campaign shift is 130×
+    the p5_lower bound — it is sensor-side or supply-side, and a static layout cannot produce a
+    between-campaign change at all.</li>
+    <li><strong>Gain ledger (far field, no layout in the model):</strong> solving per-probe gains
+    first — structurally required, since gain and layout are the same parameter on single-coil
+    data — cut the far-field whitened residual 99.9σ → 27.5σ. 30 of 77 channels sit off unity by
+    &gt;5%; two clean factor-of-two defects (obr02 = 1.747, obr17 = 0.504). Promotion belongs to
+    the sensor-adjudication node.</li>
+    <li><strong>obv06 = 1.001, obv14 = 0.987:</strong> the two probes carrying 61% of the
+    cross-source excess are NOT mis-gained. With the 48 µT noise floor and the refused layout,
+    their excess is neither noise, nor gain, nor winding layout — pose, or field shape from an
+    unmodelled source.</li>
+    <li><strong>Near-probe residuals under uniform density:</strong> 89–194σ whitened held-out —
+    a ~1% layout lever was never going to close it.</li>
+  </ul>
+
+  <figure>
+    <img src="/nova/figures/mast-vacuum-floor/lattice_near_probe_sensitivity.svg" alt="Layout-minus-uniform effect vs probe standoff with the two-pack-width exclusion marked" style="max-width:100%;height:auto">
+    <figcaption>Layout effects die with standoff — which is why gains had to be solved on the far
+    field first, and why gains and layout are one measurement, not two.</figcaption>
+  </figure>
+
+  <h2>Verification and screens</h2>
+  <p>Focused 119/0; full default lane 3761/0 (job 1240932); slow lane 522/0 (job 1240936 — the
+  default addopts exclude <code>slow</code>, so both were run). EFC quiescence screen applied per
+  channel with absent channels recorded <code>unmeasured</code>, never <code>quiescent</code> —
+  the whole 1408x campaign refused on that basis; all eight amplitude-refused shots stayed
+  refused; the binding stage-A split was read, never re-derived. Evidence records:
+  <code>~/.cache/nova-mast/mast_winding_lattice.json</code>, <code>mast_winding_reduced.json</code>,
+  <code>mast_winding_moments.npz</code>.</p>
+
+</main>
+</body>
+</html>

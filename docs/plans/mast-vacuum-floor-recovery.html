@@ -25,9 +25,9 @@
   <title>MAST Vacuum Floor Recovery | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-04">
-<meta name="plan-version" content="2">
-<meta name="plan-impl" content="0.33">
+<meta name="plan-modified" content="2026-08-05">
+<meta name="plan-version" content="3">
+<meta name="plan-impl" content="0.5">
 </head>
 <body>
   <main class="plan-doc">
@@ -191,6 +191,21 @@
     held-out cohort prediction at the near probes without degrading any other channel — the S2
     attribution showed a blind lattice swap <em>hurts</em> (−27% of the gap), so this stage fits
     lattice parameters against data rather than copying efm's.</p>
+
+    <h3>Stage D <span class="badge badge-shipped">✓ landed 2026-08-05 — negative result, uniform density stands</span></h3>
+    <p class="landed-summary">
+    The P4/P5 layout is <strong>derivable</strong> from the pack chamfer (regular grid, vacated
+    cross-over corner, 23 turns, nothing fitted) — and the data refuses it four independent ways
+    (held-out worsens on 3 of 4 coils; collateral damage on untargeted channels; fill pinned to
+    its bound; grid shape disagrees across identical coils). No lattice enters the description
+    (nova <code>9f9ad143</code>; lanes 3761/0 + 522/0). Decisive: the near-probe misfit is
+    <strong>campaign-dependent</strong> (displacement direction reverses across the 192xx/25xxx
+    boundary on exactly the straddling coils) — no static description can carry it; the next
+    lever is campaign-resolved sensor calibration. Layout amplitude reach ≤0.066% ⇒ the 4.5%
+    P5-lower shift is 130× out of a lattice's reach — sensor- or supply-side. Far-field gain
+    ledger handed to stage C (30/77 off unity &gt;5%; obr02 1.747, obr17 0.504;
+    <strong>obv06/obv14 NOT mis-gained</strong>). Full record:
+    <a href="/nova/research/mast-winding-lattice-landed.html">winding lattices landed</a>.</p>
 
     <h3 id="s3e">Stage E — passive R/L calibrated on decay</h3>
     <p>The generic cohort separated exactly one passive decay pattern (23–72 ms), so per-family
@@ -470,6 +485,9 @@ Done-when
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="_top" data-id="c-vfr-solve-input-findings" data-who="reckon-ship" data-when="2026-08-04">
     <div class="r-comment-body">Three findings from the solve-input maps node (docs/research/mast-solve-input-maps-landed.html) for stages C/D/E: (1) the flux-loop channel-to-sensor join the ledger recorded as unresolvable IS resolved — each channel matches exactly one fitted-loop column at family-block start + channel number − 1 (144 discriminating matches, zero violations, byte-identical across seven shots), and it exposes an ASYMMETRIC L2 registry gap: the two upper P6 loops and four lower P4 loops are missing while their opposite-side counterparts are carried — stage C's loop adjudication should use this join as its channel map. (2) The two-channel current redundancy measures the described turn count: P2/P3 agree to &lt;1e-6 while P4/P5 disagree by 1.82–5.09%, each equal to |23 − fitted|/23 — whichever channel a campaign holds moves the P4/P5 column by up to 5%; combine with the stage-A finding that P4/P5 turn values are operator-UNREAD (drive weight supersedes turns on every driven column), so this matters to authoring, not to the residual. (3) P6's two published channels fail the authored anti-series relation on 2 of the pilot shots — P6 semantics are unsettled beyond the missing turn count; rides with stage E's case modelling.</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-vfr-lattice-negative" data-who="reckon-ship" data-when="2026-08-05">
+    <div class="r-comment-body">Stage D landed as a promoted negative (nova 9f9ad143): the P4/P5 layout is derivable from the pack chamfer (23 turns, nothing fitted) yet refused four ways; uniform density stands and no artifact republish occurred. Decisive for the ladder: the near-probe misfit is CAMPAIGN-DEPENDENT (rigid-displacement direction reverses across the 192xx/25xxx boundary on exactly the straddling coils) — no static description can carry it. Stage C now owns: the far-field gain ledger (30/77 channels off unity >5%; obr02 1.747, obr17 0.504; obv06 1.001 / obv14 0.987 — NOT mis-gained), campaign-resolved calibration, and the P5-lower verdict (layout amplitude reach ≤0.066% = 130× below the 4.5% shift → sensor- or supply-side). f-vfr-02 resolves when stage C reports. Record: docs/research/mast-winding-lattice-landed.html</div>
 </div>
 </section>
 </main>

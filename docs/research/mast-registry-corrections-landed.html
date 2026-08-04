@@ -72,9 +72,12 @@
   correction is independently identity-bearing, and the retired digest was the two defects
   compounded. The old→new mapping is recorded as
   <code>provenance.superseded_physical_digests</code> in the registry itself and mirrored in
-  <code>registry_payload()</code>, so the note is reproducible and test-pinned; a consumer
-  resolving the old digest gets a loud <code>KeyError</code> plus the mapping, never a silent
-  resolve. The registry is now provably reproducible from its source catalogs:
+  <code>registry_payload()</code>, so the note is reproducible and test-pinned. The mapping is registry-level
+  (<code>registry.provenance['superseded_physical_digests']</code>, keyed old-digest → the prose
+  naming both corrections); a consumer resolving the old digest via
+  <code>registry.configurations[…]</code> gets a bare <code>KeyError</code> — loud, never a
+  silent resolve, though the explanation must be read from provenance rather than the
+  exception. The registry is now provably reproducible from its source catalogs:
   <code>registry_payload(physical_snapshot(11766), …)</code> equals the packaged payload and the
   serialised bytes equal the file, both catalog-gated
   (<code>tests/test_mast_registry_reproduction.py</code>).</p>

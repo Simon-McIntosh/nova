@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-title" content="MAST Catalog Geometry Recovery">
 <meta name="plan-summary" content="Recover physical MAST machine and diagnostic geometry from the Ambix L1/L2 Zarr catalogs, canonicalize away solver subdivisions, and publish evidence-backed discrete shot ranges for DDv4 authoring.">
-<meta name="plan-status" content="active">
+<meta name="plan-status" content="shipped">
 <meta name="plan-roi" content="high">
 <meta name="plan-effort" content="L">
 <meta name="plan-sprint" content="S5">
@@ -26,8 +26,8 @@
 <meta name="plan-capability-tool-autonomy" content="autonomous">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="elevated">
-<meta name="plan-impl" content="0.99">
-<meta name="plan-version" content="12">
+<meta name="plan-impl" content="1.0">
+<meta name="plan-version" content="13">
 <meta name="plan-commits" content="0f2b026fe8449465aabcf840673ed193472fd364,8c790cbc54a341e9dfe028918054254b9f903741,e286bb59cd456fa0ab8f9bb40a0b77a60319eec2,943c3069700397e48840691298c9c4bf2fac7412,f4e478e315e1786c55df733e95e110e1fd6eea87">
 </head>
 <body>
@@ -316,7 +316,7 @@ Done when
 - Both corrections are in the registry with evidence; one digest change, mapped and test-pinned; artifact republished; nova and ambix suites green at the new pin.</pre>
     <p class="r-fu-outcome">Landed in the same digest change (nova 58c81059). Transposition confirmed CONFINED to coil_cases (every other passive family self-consistent): plate area inside the winding packs 33.7%→0.4% when corrected, total area identical either way (why area checks never caught it); all eight 4-plate groups close into one ring with the pack inside the hole (zero as built); p3l/p3u corner gaps are a box-representation artifact (26.9%→3.3%, 22.4%→2.6%). Side effects: loop_sections coil_cases parts 32→24 (resistance disposition unchanged); case-plate bounding-box overstatement 56.2×→14.2× — the residual is the ambix reader's bounding-box collapse. Negative controls prove each correction independently identity-bearing (bfbef7809c65ce96 / 086c193decd98324). Registry now provably reproducible from its catalogs (catalog-gated test). Record: docs/research/mast-registry-corrections-landed.html</p>
     </article>
-<article class="r-fu" data-id="f-mcgr-ambix-pin-closeout" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-ship" data-written-at="2026-08-04 18:40" data-recommends-skill="/reckon-ship mast-catalog-geometry-recovery" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-mcgr-ambix-pin-closeout" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-ship" data-written-at="2026-08-04 18:40" data-recommends-skill="/reckon-ship mast-catalog-geometry-recovery" data-resolved-at="2026-08-04T16:27:27+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Ship the plan once the coupled ambix nova-pin bump lands</h4>
     <div class="r-fu-body"><p>Both corrections are landed, mapped and test-pinned; the artifact is republished. The plan's done-when requires nova AND ambix suites green at the new pin — ambix's identity-seam pins (MAST_PHYSICAL_DIGEST in tests/gs/test_machine_identity.py, the pyproject nova revision, one stale docstring token in gs/machine_identity.py) move together in the dependency-bump node already dispatched. When it integrates green, set this plan shipped and impl 1.0.</p></div>
     <pre class="r-fu-prompt">Project: nova (plan closure only — no product code)
@@ -331,6 +331,7 @@ Work
 
 Done when
   - Plan shipped with the ambix evidence recorded; no consumer resolves the old digest silently.</pre>
+    <p class="r-fu-outcome">Ambix pin bump integrated at merge b7c18f9 (worker b2861cd): nova pin 28872e4f→58c81059, MAST_PHYSICAL_DIGEST→ca06c8f64481114f, dependency-contract test updated, stale docstring literal replaced by the mechanism (read the digest from registry.configurations). tests/gs/ 239/0/0 with the 11 pin-blocked identity tests recovered (before-state reproduced: exactly 11 failures at old pins); artifact-backed tests 36 executed, 0 skips; statespace+physics 208/0/0. Repo-wide grep: zero stale digest/pin tokens remain. Mapping-location correction recorded: registry.provenance['superseded_physical_digests'] (registry-level, not per-configuration); old-digest resolve raises a bare KeyError. Plan done-when fully met — shipped. done — no followup: downstream work lives in mast-vacuum-floor-recovery and mast-machine-description.</p>
     </article>
 </section>
 <section data-reckon="research" id="research" class="r-research-list">

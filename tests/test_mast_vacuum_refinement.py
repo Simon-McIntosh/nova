@@ -70,7 +70,7 @@ from nova.imas.mast_vacuum_response import (
 )
 
 REFINED_SEMANTIC_IDENTITY = (
-    "sha256:f51924e98ef0e3c6f3c0b16b80615b0d48e7f6e0ed38dedc7f643bfc6e416895"
+    "sha256:3aba565a2e407a621c38ec1abc0d458752bf5be85a225e8f8b077c7bd3d9ea78"
 )
 """Semantic address of the refined revision this worktree authors.
 
@@ -656,9 +656,9 @@ def test_fitted_evidence_is_a_valid_ledger():
     ledger.validate()
     counts = ledger.state_counts()
     assert counts["published"] == 10
-    assert counts["fitted"] == 3
+    assert counts["fitted"] == 4
     assert counts["measured"] == 6
-    assert counts["unresolved"] == 9
+    assert counts["unresolved"] == 10
 
 
 def test_refinement_narrows_the_forward_model_blockers(geometry):

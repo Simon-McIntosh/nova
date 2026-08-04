@@ -645,6 +645,61 @@ targets, and the per-channel number is what says the shift is not hiding inside
 one sensor.
 """
 
+ACQUISITION_STEPPING_CHANNELS = 19
+"""Probe channels recorded at more than one scale across the archive.
+
+Of seventy-six with a measurable history.  A single calibration number cannot
+describe them: fitted across a step it returns an average of two discrete states
+weighted by shot count, which describes no shot and moves when the shot selection
+moves.  Sixteen of them were handed a single gain by an independent route that did
+not resolve the blocks, spanning up to a factor of 4.2 -- which is why the ledger
+below promotes five channels and not thirty.
+"""
+
+ACQUISITION_STEP_COUNT = (37, 29)
+"""Scale changes found, and how many landed on the declared ladder.
+
+The ladder is powers of two and their square roots, stated as a hypothesis before
+the steps were classified.  The rungs the run actually took are one half (14
+times), one over root two (4), root two (5) and two (14) -- so the hypothesis is
+confirmed by the histogram rather than imposed on it.
+"""
+
+ACQUISITION_CONCURRENCY = (12, 16)
+"""Boundaries where most channels held still, out of those carrying a step.
+
+The control that makes the conclusion per-channel.  A wrong drive weight, coil
+geometry or turn count moves every channel that reads a shot, because they all read
+the same currents through the same model; the archive shows five channels moving by
+a factor of two while fifty hold at unity on the same two shots.  That cannot come
+from anything upstream of the individual signal paths.
+"""
+
+PROMOTED_CHANNEL_SCALES = {
+    "obr17": 0.5011,
+    "obv04": 0.8571,
+    "obr05": 1.1043,
+    "obv05": 0.9449,
+    "ccbv35": 0.9474,
+}
+"""Steady channels whose calibration scale is off unity and corroborated.
+
+Each is steady across every shot it appears on, off unity by more than five
+percent, agreed to within three percent by an independent route that shares no
+estimator and no shot selection with this one, and confirmed on both halves of its
+own shots taken in shot order.  ``obr17`` is a factor of two, and it is the same
+channel whose coupling to the error-field circuit is fifty times its neighbours' --
+two independent symptoms of one faulty signal path.
+"""
+
+WITHHELD_CHANNEL_SCALES = ("obv11",)
+"""Steady channels off unity that the promotion gates refused.
+
+Its two routes disagree by 7.4 percent and its own two halves read 0.869 and 1.065,
+so whatever it is doing is not one scale.  Recorded because a refusal with a reason
+is worth more than a silence.
+"""
+
 PROBE_VERDICT_COUNTS = {"field_shape": 64, "inseparable": 12, "not_tested": 1}
 """How the pre-registered discriminant classed all seventy-seven channels.
 
@@ -698,6 +753,19 @@ antisymmetric in height looks like and not what two independently mis-mounted
 probes look like.  Neither is promoted: the criterion requires the rotation to
 remove the residual, and the residual it leaves is
 :data:`RIGID_RESIDUAL_FLOOR_RATIO` times the floor.
+"""
+
+P5_LOWER_STEADY_CHANNEL_SPREAD = 0.0037
+"""Campaign-to-campaign spread of P5 lower's amplitude on steady channels only [1].
+
+The verdict on the largest unexplained term this description carried.  Measured on
+far-field probes whose acquisition scale does not step, P5 lower reads 0.9901 on one
+campaign and 0.9864 on the other -- four parts in a thousand.  The four and a half
+percent an earlier route reported is what the stepping channels put into a fit that
+pooled them, so the shift is neither a coil nor a supply: it is the unnormalised
+per-block channel scale, and it disappears when those channels are excluded.  A
+static winding layout cannot produce a between-campaign change at all, which closes
+the other candidate independently.
 """
 
 CAMPAIGN_PROBE_SPREAD = 0.0183
@@ -1262,7 +1330,71 @@ def sensor_adjudication_records(
     so an adjudication that could have moved thirteen sensor poses moves none.
     """
 
+    scales = ", ".join(
+        f"{channel} {value:.4f}"
+        for channel, value in sorted(PROMOTED_CHANNEL_SCALES.items())
+    )
+    stepping, total = ACQUISITION_STEP_COUNT
+    held, boundaries = ACQUISITION_CONCURRENCY
     return [
+        EvidenceRecord(
+            path="magnetics/b_field_pol_probe(steady)/field/scale",
+            evidence=FieldEvidence.FITTED,
+            first_shot=first_shot,
+            last_shot=last_shot,
+            statement=(
+                f"five channels carry a calibration scale off unity: {scales}; each is "
+                "recorded at one scale on every shot it appears on, and the first is a "
+                "factor of two"
+            ),
+            assumptions=(
+                "the scale is measured only where the coil dominating the reading "
+                "stands clear of the probe, because a near-field probe's apparent "
+                "scale carries how the current sits inside the pack as well as the "
+                "channel's own calibration and the two are one parameter on a "
+                "single-coil shot",
+                "each value is agreed to within three percent by an independent solve "
+                "that shares no estimator and no shot selection with this one, which "
+                "is what stops a promotion rule formulated after seeing the data from "
+                "being a rule tuned to it",
+                "each is confirmed on both halves of its own shots split in shot "
+                "order, so a channel that drifted inside its block would fail rather "
+                "than average",
+                "the factor-of-two channel is the same one whose coupling to the "
+                "error-field circuit stands fifty times above its neighbours', so two "
+                "independent symptoms point at one signal path",
+            ),
+            uncertainty=Uncertainty(lower=0.50, upper=1.13, unit="1"),
+        ),
+        EvidenceRecord(
+            path="magnetics/b_field_pol_probe(stepping)/field/scale",
+            evidence=FieldEvidence.UNRESOLVED,
+            first_shot=first_shot,
+            last_shot=last_shot,
+            statement=(
+                f"{ACQUISITION_STEPPING_CHANNELS} channels were recorded at more than "
+                "one scale, so no single calibration number describes them and the "
+                "description carries none"
+            ),
+            assumptions=(
+                f"{stepping} scale changes were found and {total} land on a ladder of "
+                "powers of two and their square roots that was declared before they "
+                "were classified; the rungs actually taken are one half, one over root "
+                "two, root two and two",
+                f"at {held} of {boundaries} boundaries most channels hold still while "
+                "a handful move, which no error in the drive weights, the coil "
+                "geometry or the turn counts can produce -- those move every channel "
+                "reading that shot together",
+                "so what is unresolved is not a sensor property but a per-block "
+                "acquisition setting the level-1 store has not normalised, and it "
+                "belongs on the path that reads a channel rather than in a static "
+                "record here",
+                "a fit pooling shots across a step sees the two states averaged by "
+                "shot count, which is how a coil amplitude acquires an apparent "
+                "campaign dependence no geometry can explain",
+            ),
+            candidates=("per-block scale on read", "unnormalised as published"),
+        ),
         EvidenceRecord(
             path="magnetics/b_field_pol_probe/field/scale",
             evidence=FieldEvidence.FITTED,
@@ -1301,9 +1433,9 @@ def sensor_adjudication_records(
                 "over-predicts the axial field one pack width away by "
                 f"{(1.0 / NEAR_FIELD_PROBE_GAIN - 1.0) * 100:.0f} percent, while the "
                 "same fit predicts every coil beyond about five pack widths to "
-                f"within {abs(DISTANT_PROBE_GAIN - 1.0) * 100:.0f} percent, so what "
-                "is unresolved is how the turns sit inside the pack and not how much "
-                "current they carry"
+                f"within {abs(DISTANT_PROBE_GAIN - 1.0) * 100:.0f} percent -- and no "
+                "admissible turn layout moves it by more than one percent, so the "
+                "near-field discrepancy is real and its cause is not the layout"
             ),
             assumptions=(
                 "the two channels carrying most of the cross-source excess are "
@@ -1322,8 +1454,15 @@ def sensor_adjudication_records(
                 "the two fitted rotations are nearly equal and opposite at positions "
                 "mirroring each other about the midplane, which is a field error "
                 "antisymmetric in height rather than two mis-mounted probes",
+                "neither channel's own calibration scale is at fault: both are steady "
+                "across the archive and within a few percent of unity by two "
+                "independent routes, so the excess is not noise, not a gain, not a "
+                "stepping acquisition scale and not a turn layout",
+                "what is left is the probes' pose or a conductor the description does "
+                "not carry, and those are separable only by an experiment that moves "
+                "one without the other",
             ),
-            candidates=("filament lattice", "uniform pack density"),
+            candidates=("pose", "unmodelled conductor"),
         ),
         EvidenceRecord(
             path="magnetics/flux_loop/position",

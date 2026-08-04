@@ -26,7 +26,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-04">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
+<meta name="plan-impl" content="0.33">
 </head>
 <body>
   <main class="plan-doc">
@@ -142,6 +143,20 @@
       <li><strong>Circuit gaps.</strong> The P2 inner/outer pack interconnection and the supply
       inventory stay unset unless stage-A documents surface; record the search.</li>
     </ol>
+
+    <h3>Stages A+B <span class="badge badge-shipped">✓ landed 2026-08-04</span></h3>
+    <p class="landed-summary">
+    Landed at nova <code>cb3f6049</code> / ambix <code>ab9892d</code> (full lane 4087/0, job
+    1240889). 17,111 shots classed by experiment design (223 train / 83 held-out / 60 noise,
+    binding); <strong>sensor floor 387 µT</strong> measured (residual 4.26 mT = 11× — the floor is
+    not the limit; obv14 is among the quietest at 48 µT so its excess is model error). Ten turn
+    counts moved fitted→<strong>published</strong> on exact archive integers (P4/P5 = 23); the
+    ±5-turn spread traced to eight half-amplitude shots, now refused; solenoid reconciled at
+    344.657 [332.97, 356.34] overlapping the stratum route; P6 closed by evidence as structurally
+    unreachable (blocks stays True). Re-stamp <strong>FLAT by operator equivalence</strong> —
+    drive weight supersedes turns, so turns were never the 0.024 excess; only field shape
+    (stages C/D) can move the gate. N1's registry corrections measured at −0.0007. Full record:
+    <a href="/nova/research/mast-calibration-cohort-landed.html">calibration cohort landed</a>.</p>
 
     <h3 id="s3c">Stage C — sensor pose and gain adjudication</h3>
     <p>The attribution localised 61% of the cross-source excess on two outboard probes and the
@@ -261,22 +276,22 @@
         floor once measured. Changes if: stage A shows the envelope sits above 0.740 (then the
         incumbent bar is already noise-limited and the target reduces to statistical equivalence).</p>
     </div>
-<div class="r-dec" data-key="winding-lattice-identity" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="winding-lattice-identity" data-choice="drive-evidence" data-by="reckon-ship" data-when="2026-08-04T20:37:48+00:00">
     <p class="r-dec-q">Does interior winding-turn placement (the lattice inside a pack outline)
         enter the physical configuration digest, or is it drive-level representation carried as
         evidence? The outline, turns and polarity are already identity; the question is the
         interior layout that stage D authors.</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="identity-bearing">identity-bearing — a lattice change is a configuration change</button>
-      <button class="r-opt" data-value="drive-evidence">drive-level generated evidence — digest unchanged</button>
+      <button class="r-opt chosen" data-value="drive-evidence">drive-level generated evidence — digest unchanged</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Locked on the mechanism precedent this sprint exercised twice: fitted/derived values move the artifact&#x27;s SEMANTIC identity while the physical digest holds (the stage-A+B republish changed ten records fitted→published at unmoved ca06c8f64481114f). A stage-D lattice is a FITTED estimate with stated assumptions — S2 measured that copying efm&#x27;s lattice HURT the residual, so lattices will be refit as evidence improves; if they entered the physical digest every refit would move machine identity and churn every pin for a drive-level detail. Identity keeps what hardware states: outline, turns, polarity. Reopen path per §07 if as-built winding drawings ever surface (a MEASURED lattice would be a physical fact and the decision deserves re-examination).</p>
     </div>
 </section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-vfr-01" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-create" data-written-at="2026-08-04" data-recommends-skill="/reckon-ship mast-vacuum-floor-recovery §3a" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-vfr-01" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-create" data-written-at="2026-08-04" data-recommends-skill="/reckon-ship mast-vacuum-floor-recovery §3a" data-resolved-at="2026-08-04T20:37:48+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Stage A+B — dedicated calibration cohort, noise envelope, and turns closure</h4>
     <div class="r-fu-body"><p>Mine the archive for the designed calibration experiments (sustained
         single-coil pulses, the eight-vacuum-shot matrix, TF-only, error-field-coil shots), measure the
@@ -321,6 +336,7 @@ Done-when
      published integer promoted with the fit as corroboration; P6 dispositioned.
   3. Refined artifact republished (new semantic identity), focused + integrated lanes
      green, ladder re-stamp banked, plan followup for stage C/D written, this resolved.</pre>
+    <p class="r-fu-outcome">Stages A+B landed — nova cb3f6049 (7 commits, 13,983 insertions), ambix ab9892d (identity repin + banked stamp pair + cache gitignore). Cohort: 17,111 shots classed by design (sustained_single_coil 39, symmetric_pair 43, coil_group 287, pulsed 31, TF-only 577, quiescent 372), split 223/83/60 declared-before-fit and binding. Sensor floor measured: 387 µT RMS (obr 126 / ccbv 444 / obv 431); residual 4.26 mT = 11× the floor; obv14 among quietest at 48 µT. Turns: ten of thirteen counts PUBLISHED on exact archive integers (P4/P5=23); ±5-turn spread traced to eight half-amplitude shots, refused pre-fit; solenoid 344.657 [332.97,356.34] reconciles with the stratum [348.5,361.1] after excluding co-driven shots; P6 closed by evidence — structurally unreachable (ampere-turn excitation), unit-weight negative result recorded, blocks_axisymmetric_forward_model stays True. Re-stamp FLAT (0.7632105/0.7631399 both arms, parity PASS 15/15, monotone gate satisfied): both revisions operator-equivalent because drive weight supersedes turns — turns were NEVER a candidate cause of the 0.024 excess; only field shape can move the gate. N1's corrections measured at −0.0007. Full lane 4087/0 (job 1240889). Record: docs/research/mast-calibration-cohort-landed.html</p>
     </article>
 <article class="r-fu" data-id="f-vfr-02" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-create" data-written-at="2026-08-04" data-recommends-skill="/reckon-ship mast-vacuum-floor-recovery §3c" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Stage C+D — sensor pose/gain adjudication and winding lattices</h4>
@@ -453,7 +469,7 @@ Done-when
 
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="_top" data-id="c-vfr-solve-input-findings" data-who="reckon-ship" data-when="2026-08-04">
-    <div class="r-comment-body">Three findings from the solve-input maps node (docs/research/mast-solve-input-maps-landed.html) for stages C/D/E: (1) the flux-loop channel-to-sensor join the ledger recorded as unresolvable IS resolved — each channel matches exactly one fitted-loop column at family-block start + channel number − 1 (144 discriminating matches, zero violations, byte-identical across seven shots), and it exposes an ASYMMETRIC L2 registry gap: the two upper P6 loops and four lower P4 loops are missing while their opposite-side counterparts are carried — stage C's loop adjudication should use this join as its channel map. (2) The two-channel current redundancy measures the described turn count: P2/P3 agree to <1e-6 while P4/P5 disagree by 1.82–5.09%, each equal to |23 − fitted|/23 — whichever channel a campaign holds moves the P4/P5 column by up to 5%; combine with the stage-A finding that P4/P5 turn values are operator-UNREAD (drive weight supersedes turns on every driven column), so this matters to authoring, not to the residual. (3) P6's two published channels fail the authored anti-series relation on 2 of the pilot shots — P6 semantics are unsettled beyond the missing turn count; rides with stage E's case modelling.</div>
+    <div class="r-comment-body">Three findings from the solve-input maps node (docs/research/mast-solve-input-maps-landed.html) for stages C/D/E: (1) the flux-loop channel-to-sensor join the ledger recorded as unresolvable IS resolved — each channel matches exactly one fitted-loop column at family-block start + channel number − 1 (144 discriminating matches, zero violations, byte-identical across seven shots), and it exposes an ASYMMETRIC L2 registry gap: the two upper P6 loops and four lower P4 loops are missing while their opposite-side counterparts are carried — stage C's loop adjudication should use this join as its channel map. (2) The two-channel current redundancy measures the described turn count: P2/P3 agree to &lt;1e-6 while P4/P5 disagree by 1.82–5.09%, each equal to |23 − fitted|/23 — whichever channel a campaign holds moves the P4/P5 column by up to 5%; combine with the stage-A finding that P4/P5 turn values are operator-UNREAD (drive weight supersedes turns on every driven column), so this matters to authoring, not to the residual. (3) P6's two published channels fail the authored anti-series relation on 2 of the pilot shots — P6 semantics are unsettled beyond the missing turn count; rides with stage E's case modelling.</div>
 </div>
 </section>
 </main>

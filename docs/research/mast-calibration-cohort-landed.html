@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="mast-calibration-cohort-landed">
+  <meta name="plan-title" content="MAST calibration cohort, sensor floor, and turns closure — vacuum-floor stages A+B">
+  <meta name="plan-summary" content="Per-stage record: 17,111 shots classed into designed calibration experiments; 387 µT sensor floor measured (residual is 11×); ten turn counts moved fitted→published on exact archive integers; solenoid routes reconciled; P4/P5 ±5-turn spread traced to eight half-amplitude shots; P6 closed by evidence as structurally unreachable; ladder stamp measured FLAT — turns were never the excess.">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>MAST calibration cohort + turns closure landed | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+  <h1>Calibration cohort, sensor floor, and turns closure</h1>
+  <p>Landed 2026-08-04: nova merge <code>cb3f6049</code> (seven worker commits off
+  <code>58c81059</code>, 13,983 insertions) and imas-ambix <code>ab9892d</code> (identity repin +
+  banked stamp pair + cache gitignore). Full nova lane <strong>4087 passed / 0 failed</strong>
+  (sun_debug job 1240889); ambix focused 96 passed.
+  Plan: <a href="/nova/plans/mast-vacuum-floor-recovery.html">mast-vacuum-floor-recovery</a>.</p>
+
+  <h2>The cohort and the floor</h2>
+  <p>All 17,111 archive shots classed by experiment design: sustained_single_coil 39,
+  sustained_symmetric_pair 43, sustained_coil_group 287, pulsed_excitation 31,
+  toroidal_field_only 577, quiescent 372, plasma 13,813, unreadable 1,949. Split 223 train /
+  83 held-out / 60 noise, declared before fitting and binding on the fit (the classifier is the
+  only stage allowed to decide it).</p>
+  <p><strong>The sensor noise envelope exists for the first time: 387 µT RMS</strong> pooled over
+  77 channels × 60 quiescent shots (obr 126, ccbv 444, obv 431 µT). The held-out vacuum residual
+  is 4.26 mT — <strong>11× the floor</strong> — so the description has an order of magnitude of
+  headroom and the floor is not the limit. Decisive for stage C: obv14 is among the quietest
+  channels at 48 µT, so the excess it carries is model error, not noise.</p>
+
+  <figure>
+    <img src="/nova/figures/mast-vacuum-floor/sensor_noise_envelope.svg" alt="Per-channel sensor noise envelope by family" style="max-width:100%;height:auto">
+    <figcaption>The per-channel floor the ladder now targets.</figcaption>
+  </figure>
+
+  <h2>Turns closed</h2>
+  <ul>
+    <li><strong>Ten of thirteen counts are PUBLISHED, not fitted:</strong> the store publishes each
+    coil's current twice and the ratio is one exact integer on ≥15,100 shots (P2 inner 12,
+    P2 outer and P3 8, P4 and P5 23). The earlier pass recognised only four because a six-decimal
+    de-dup split families on the store's own float noise. Nine of ten vacuum-fit corroborations
+    round to the published integer (worst offset 3.6%).</li>
+    <li><strong>The P4/P5 ±5-turn spread had a measured cause:</strong> eight shots (19322, 24947,
+    24948, 24959, 24977–24980) recorded their magnetics at 0.42–0.57 of the field their own
+    currents imply — each with a matched twin agreeing on every current channel while every probe
+    reads a factor ~2.02 apart. A magnetics-side amplitude defect, now screened before any fit and
+    permanently refused.</li>
+    <li><strong>Solenoid RECONCILED:</strong> 344.657 A·turn/A, interval [332.97, 356.34],
+    overlapping the incumbent's independent vacuum-stratum [348.5, 361.1] — the two routes are
+    consistent, not in conflict. Geometry was exonerated first (0.18% amplitude, 0.99997 shape
+    agreement between the descriptions' solenoid columns); co-driven shots (reading 428–477 as
+    the solenoid absorbs a neighbour's misfit at 40:1 leverage) are excluded.</li>
+    <li><strong>P6 closed by evidence:</strong> 207 plasma-free shots reach it, 36 hold the pair
+    alone at up to 18.9 kA — no experiment is missing; the count is structurally unreachable
+    because the excitation is published as ampere-turns. Negative result recorded: the published
+    unit weight reproduces 0.04% of a pair-only shot's signal (best-fit amplitude 0.38), so
+    something unmodelled — the P6 cases above all — dominates its neighbourhood.
+    <code>blocks_axisymmetric_forward_model</code> stays True.</li>
+  </ul>
+
+  <figure>
+    <img src="/nova/figures/mast-vacuum-floor/turn_closure.svg" alt="Turn count closure: published integers with fit corroboration intervals" style="max-width:100%;height:auto">
+    <figcaption>Published integers with the fit as corroboration; the record states which route
+    promoted each value.</figcaption>
+  </figure>
+
+  <h2>The ladder stamp — flat, and why that is the finding</h2>
+  <table>
+    <thead><tr><th>arm</th><th>before (85993ba9…)</th><th>after (c20bc7e1…)</th><th>Δ</th></tr></thead>
+    <tbody>
+      <tr><td>greens-matvec</td><td>0.7632105</td><td>0.7632105</td><td>0</td></tr>
+      <tr><td>grid-delstar</td><td>0.7631399</td><td>0.7631399</td><td>0</td></tr>
+    </tbody>
+  </table>
+  <p>Parity PASS 15/15, no tolerance modified; monotone gate satisfied (flat). The flatness is
+  itself load-bearing: the drive weight supersedes <code>turns_with_sign</code> on every driven
+  column (both artifact revisions are operator-equivalent — drive weights, positions and xmult
+  identical; only the unread turns field differs), so <strong>the S2 residual was always computed
+  at 23 A·turn/A and turn counts were never a candidate cause of the 0.024 excess</strong>. No
+  later node should re-litigate turns hoping for residual movement — only field <em>shape</em>
+  (stage C poses/gains, stage D lattices) can move this gate. The ladder context also banks N1's
+  registry corrections at −0.0007 measured (0.7639 at the superseded digest → 0.7632 here);
+  incumbent bar unchanged at 0.7396/0.7401.</p>
+
+  <h2>Artifact and records</h2>
+  <p>Artifact republished at unchanged physical digest <code>ca06c8f64481114f</code>: semantic
+  <code>sha256:c20bc7e1…203f06</code>, durable at <code>~/.cache/mast-artifact-floor</code>;
+  ledger fitted 23→13, published 12→22, measured 21→23. Cohort/noise/turn-closure JSON records
+  under <code>~/.cache/nova-mast/</code>; stamp YAMLs banked in
+  <code>imas_ambix/spine_bench/results/…-180455e846-*.yaml</code>; figures under
+  <code>docs/figures/mast-vacuum-floor/</code>.</p>
+
+  <h2>Carryovers to stages C/D/E</h2>
+  <ul>
+    <li>Only field shape can move the gate; amplitude is closed.</li>
+    <li>P5 lower's 4.5% campaign response shift (0.990 early vs 1.035–1.037 later, each group
+    tight to 1e-3) while its identically-wound partner reads 23.02 — the largest unexplained term,
+    independently corroborated by the solve-input node's channel-redundancy route (up to 5%).</li>
+    <li>The eight amplitude-refused shots stay refused in every later fit.</li>
+    <li>P6's neighbourhood is unmodelled (its case the prime candidate) — the ampere-turn
+    semantics test waits behind stage E's case groups.</li>
+    <li>Stage-B item 4 (P2 interconnection / supply-inventory document search) was not reported by
+    this node and carries forward unresolved.</li>
+    <li>Environment: /tmp artifact caches are volatile and their absence surfaces as fixture
+    ERRORS, not skips — recreate the cache before judging.</li>
+  </ul>
+
+</main>
+</body>
+</html>

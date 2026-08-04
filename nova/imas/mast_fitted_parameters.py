@@ -587,6 +587,34 @@ way -- but it carries no field pattern and therefore no information about where
 the array sits.
 """
 
+ERROR_FIELD_MATCHED_PAIRS = 12
+"""Shot pairs alike in poloidal drive and unalike in the non-axisymmetric one.
+
+Curated on the coils' own peak currents rather than on an excitation label, and
+matched to between seven parts in a thousand and four percent.  They are the route
+that needs no model of the error-field coil: subtract the two readings and every
+axisymmetric term cancels to the accuracy the currents match.
+"""
+
+ERROR_FIELD_PAIR_SENSITIVITY = (1.03e-3, 2.42e-3)
+"""Spread of the median pair difference across the matched set [T].
+
+Two point seven to six point three times the sensor floor, and it is NOT the
+excitation: over the ten pairs measured, the error-field current spans four
+percent while the difference spans eighty-nine, and the correlation between them
+is -0.16.  What the difference measures is how unalike two different shots are in
+waveform once their peaks have been matched, which sets the route's sensitivity at
+about a millitesla -- a hundred and fifty times above the seven microtesla the
+excitation is worth at these currents.
+
+So the matched-pair route is curated and reported and cannot answer the question,
+while the isolated shots -- which drive the same coils with every poloidal coil
+quiet, so nothing has to cancel -- answer it at
+:data:`ERROR_FIELD_ARRAY_RESPONSE`.  Recording both is what makes the negative
+result usable: a later reader tempted by matched pairs can see the bound rather
+than rediscover it.
+"""
+
 ERROR_FIELD_COUPLED_THRESHOLD = 685.4
 """Excitation at which the coupled channel reaches its own noise floor [A].
 
@@ -1394,6 +1422,11 @@ def sensor_adjudication_records(
                 "channels either side of it, which no coil's field does over "
                 "seventy-five millimetres, so it is read as a shared conductor and "
                 "not as evidence about the array's toroidal position",
+                f"{ERROR_FIELD_MATCHED_PAIRS} shot pairs alike in poloidal drive and "
+                "unalike in this one were curated as the model-free route and cannot "
+                "reach it: their difference is about a millitesla and independent of "
+                "the error-field current, so the route's sensitivity is set by how "
+                "unalike two shots are rather than by the excitation",
             ),
             source=catalog_source("level-1 error-field coil current channels"),
             uncertainty=Uncertainty(lower=0.0, upper=SCREENED_FLOOR_SHIFT, unit="T"),

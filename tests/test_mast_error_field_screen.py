@@ -24,6 +24,7 @@ import pytest
 
 from nova.imas.mast_error_field_screen import (
     DRIVEN_CURRENT,
+    PAIR_CURRENT_TOLERANCE,
     ERROR_FIELD_ALIASES,
     ERROR_FIELD_CHANNELS,
     MINIMUM_COUPLING_SHOTS,
@@ -35,6 +36,7 @@ from nova.imas.mast_error_field_screen import (
     ErrorFieldError,
     ErrorFieldScreen,
     SupplyMonitor,
+    matched_pairs,
     measure_error_field_coupling,
     probe_response_to_drive,
     screen_shot_set,
@@ -341,3 +343,77 @@ def test_a_shot_that_drove_nothing_cannot_be_regressed_on():
 
     with pytest.raises(ErrorFieldError, match="drove no error-field channel"):
         probe_response_to_drive(drive(1, {}), {"obr17": np.zeros(800)})
+
+
+# --- the matched-pair isolation set --------------------------------------
+
+
+def test_a_pair_is_matched_on_currents_and_not_on_a_family_label():
+    """Two shots can share an excitation label and differ by a factor in drive.
+
+    Matching on the label would pair them anyway and the difference would carry
+    the mismatched poloidal coil rather than the error-field one.
+    """
+
+    peaks = {
+        1: {"p4_upper": 9.0e3, "p5_upper": 8.0e3},
+        2: {"p4_upper": 9.1e3, "p5_upper": 8.05e3},
+        3: {"p4_upper": 4.0e3, "p5_upper": 8.0e3},
+    }
+    families = {1: "P4+P5", 2: "P4+P5", 3: "P4+P5"}
+    field = {1: 3.2e3, 2: 12.0, 3: 15.0}
+    pairs = matched_pairs(peaks, families, field)
+    assert len(pairs) == 1
+    assert pairs[0].driven_shot == 1
+    assert pairs[0].quiet_shot == 2
+    assert pairs[0].usable
+    assert pairs[0].agreement <= PAIR_CURRENT_TOLERANCE
+
+
+def test_a_partner_driving_a_coil_the_other_did_not_is_refused():
+    """An extra coil on one side of the difference does not cancel."""
+
+    peaks = {
+        1: {"p4_upper": 9.0e3},
+        2: {"p4_upper": 9.0e3, "sol": 1.5e4},
+    }
+    pairs = matched_pairs(peaks, {1: "P4", 2: "P1+P4"}, {1: 3.2e3, 2: 12.0})
+    assert pairs == ()
+
+
+def test_a_driven_shot_with_no_close_partner_yields_no_pair():
+    """A pair too far apart in poloidal drive is refused, not merely flagged."""
+
+    peaks = {1: {"p4_upper": 9.0e3}, 2: {"p4_upper": 6.0e3}}
+    assert matched_pairs(peaks, {1: "P4", 2: "P4"}, {1: 3.2e3, 2: 12.0}) == ()
+
+
+def test_each_driven_shot_keeps_only_its_closest_partner():
+    """The set is one pair per experiment rather than every combination."""
+
+    peaks = {
+        1: {"p4_upper": 9.0e3},
+        2: {"p4_upper": 9.2e3},
+        3: {"p4_upper": 9.01e3},
+    }
+    families = {shot: "P4" for shot in peaks}
+    pairs = matched_pairs(peaks, families, {1: 3.2e3, 2: 12.0, 3: 15.0})
+    assert len(pairs) == 1
+    assert pairs[0].quiet_shot == 3
+
+
+def test_a_shot_whose_partner_also_drove_the_error_field_is_not_a_partner():
+    """The quiet side has to be quiet in the excitation being isolated."""
+
+    peaks = {1: {"p4_upper": 9.0e3}, 2: {"p4_upper": 9.0e3}}
+    assert matched_pairs(peaks, {1: "P4", 2: "P4"}, {1: 3.2e3, 2: 2.9e3}) == ()
+
+
+def test_a_pair_serializes_with_its_own_bound_on_the_cancellation():
+    """The agreement is what bounds the difference, so it travels with the pair."""
+
+    peaks = {1: {"p4_upper": 9.0e3}, 2: {"p4_upper": 9.1e3}}
+    pair = matched_pairs(peaks, {1: "P4", 2: "P4"}, {1: 3.2e3, 2: 12.0})[0]
+    row = pair.as_dict()
+    assert json.loads(json.dumps(row, sort_keys=True)) == row
+    assert row["agreement"] == pytest.approx(0.1e3 / 9.1e3)

@@ -557,6 +557,111 @@ def measure_error_field_coupling(
     return tuple(couplings)
 
 
+PAIR_CURRENT_TOLERANCE = 0.05
+"""Fractional agreement two shots' poloidal peaks need to be one pair.
+
+Five percent is what the archive's repeat pulses reproduce each other to, so a
+pair matched this closely differs in the non-axisymmetric drive and in nothing a
+probe can tell apart.
+"""
+
+
+@dataclass(frozen=True, order=True)
+class MatchedPair:
+    """Two shots alike in poloidal drive and unalike in the other kind.
+
+    A pair isolates the non-axisymmetric excitation without needing a model of
+    it: subtract the two shots' probe readings and every axisymmetric term
+    cancels to the accuracy the currents match, leaving whatever the error-field
+    coil put on the array.  ``agreement`` is the worst fractional match over the
+    coils either shot drove, which is what bounds that cancellation.
+    """
+
+    driven_shot: int
+    quiet_shot: int
+    family: str
+    driven_error_field: float
+    quiet_error_field: float
+    agreement: float
+
+    @property
+    def usable(self) -> bool:
+        """Return whether the pair's poloidal drives match closely enough."""
+
+        return self.agreement <= PAIR_CURRENT_TOLERANCE
+
+    def as_dict(self) -> dict[str, Any]:
+        """Return the canonical JSON representation."""
+
+        return {
+            "agreement": self.agreement,
+            "driven_error_field": self.driven_error_field,
+            "driven_shot": self.driven_shot,
+            "family": self.family,
+            "quiet_error_field": self.quiet_error_field,
+            "quiet_shot": self.quiet_shot,
+            "usable": self.usable,
+        }
+
+
+def matched_pairs(
+    peaks: Mapping[int, Mapping[str, float]],
+    families: Mapping[int, str],
+    error_field: Mapping[int, float],
+    *,
+    tolerance: float = PAIR_CURRENT_TOLERANCE,
+) -> tuple[MatchedPair, ...]:
+    """Pair each error-field shot with the closest shot that drove it quiet.
+
+    Matching is on the poloidal coils' own peak currents rather than on the
+    excitation family label, because two shots can share a label and differ by a
+    factor in what they drove.  Each driven shot keeps only its best partner, so
+    the set is one pair per experiment rather than every combination.
+    """
+
+    quiet = [
+        shot
+        for shot, value in sorted(error_field.items())
+        if value < QUIESCENT_CURRENT and shot in peaks
+    ]
+    pairs = []
+    for shot, value in sorted(error_field.items()):
+        if value < DRIVEN_CURRENT or shot not in peaks:
+            continue
+        driven = {
+            family: abs(float(current))
+            for family, current in peaks[shot].items()
+            if abs(float(current)) > 0.0
+        }
+        if not driven:
+            continue
+        best: tuple[float, int] | None = None
+        for other in quiet:
+            candidate = peaks[other]
+            worst = 0.0
+            for family, current in driven.items():
+                partner = abs(float(candidate.get(family, 0.0)))
+                worst = max(worst, abs(partner - current) / max(current, partner, 1.0))
+            for family, current in candidate.items():
+                if abs(float(current)) > 0.0 and family not in driven:
+                    worst = 1.0
+            if best is None or worst < best[0]:
+                best = (worst, other)
+        if best is None or best[0] > tolerance:
+            continue
+        pairs.append(
+            MatchedPair(
+                driven_shot=shot,
+                quiet_shot=best[1],
+                family=str(families.get(shot, "")),
+                driven_error_field=float(value),
+                quiet_error_field=float(error_field.get(best[1], 0.0)),
+                agreement=float(best[0]),
+            )
+        )
+    return tuple(pairs)
+
+
 @dataclass(frozen=True)
 class ErrorFieldScreen:
     """Per-channel thresholds, and the verdict they give a shot.

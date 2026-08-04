@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="mast-solve-input-maps-landed">
+  <meta name="plan-title" content="MAST solve-input maps — per-slice inputs through nova.io, round-tripped on a two-polarity pilot">
+  <meta name="plan-summary" content="Per-stage record: 139 solve-input rows served through nova.io against the refined artifact with COCOS 3→17 derived from digit algebra; 7-shot pilot across both polarities round-trips exactly; zero Standard-Name blockers; TF reference not yet servable and the flux-loop join resolved with an asymmetric L2 gap exposed.">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>MAST solve-input maps landed | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+  <h1>Solve-input maps — per-slice inputs through nova.io</h1>
+  <p>Landed 2026-08-04 on nova <code>main</code> (<code>be7127c3..acab5b5f</code>, one worker in a
+  detached worktree; 7 new files, 3,662 insertions, no existing module edited). The catalog
+  solve's per-slice inputs (coil currents, sensor signals, Rogowski Ip) now load through
+  <code>nova.io</code> against the refined artifact, with no ambix geometry table anywhere on the
+  path. Plan: <a href="/nova/mast-machine-description.html">mast-machine-description</a>.</p>
+
+  <h2>What was built</h2>
+  <table>
+    <thead><tr><th>module</th><th>mechanism</th></tr></thead>
+    <tbody>
+      <tr><td><code>nova/io/sourcemap.py</code></td><td>source path → DDv4 path → standard-name → transform map rows with provenance; refusal-with-reason for unservable channels</td></tr>
+      <tr><td><code>nova/io/cocos.py</code></td><td>COCOS factors derived from the four Sauter digits (no lookup table); self-inverse over all 16×16 convention pairs, pinned against the existing table tests</td></tr>
+      <tr><td><code>nova/imas/mast_solve_inputs.py</code></td><td>the per-slice MAST map: 21 coil-current rows, 78 probe rows, 39 flux-loop rows, Rogowski Ip; excitation-group union clocks; misaligned channels refused rather than index-aligned</td></tr>
+      <tr><td><code>nova/imas/mast_solve_input_ids.py</code></td><td>write + reopen of the solve-input bundle at DD 4.1.1</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Verification</h2>
+  <ul>
+    <li><strong>Pilot: 7 shots, both polarities</strong> (forward 11766/15000/24000/28000, reversed
+    13500/13600/22500). Dataset round-trip residual ≤ 1.5e-16 on all seven; read-back after
+    write+reopen at 4.1.1 exactly 0.0; description fingerprint and per-signal clocks preserved
+    bit-identical. Polarity tested as the convention-invariant relation
+    sign(Ip)·sign(tf) = −1 in both cohorts.</li>
+    <li><strong>Suites:</strong> focused 82 passed; neighbour regression 215 passed; integrated
+    lane <strong>3618 passed / 123 skipped</strong> (sun_debug job 1240881, clean re-run after an
+    overlapped earlier lane was discarded as signal).</li>
+    <li><strong>Standard Names:</strong> all four map names are accepted in the live catalogue —
+    zero recorded proposals, nothing waits on publication authority. (A packaging gate rides
+    along: the pinned imas-standard-names-catalog tag ships no built catalog.db, so the installed
+    resolver serves 3 of 4 names under <code>provisional/</code> from a 41-entry bundled fallback
+    — fixable by shipping the built catalogue with the io extra.)</li>
+    <li><strong>Independent corroboration of the registry corrections:</strong> the probe join was
+    checked against the reconstruction's own poses on 437 discriminating matches, zero
+    violations, worst gap 12.57 mm (inside the 15 mm tolerance), angles to 3.7e-6 rad — a route
+    that never reads a channel description corroborates the obr-radial correction.</li>
+  </ul>
+
+  <h2>Findings routed to owners</h2>
+  <table>
+    <thead><tr><th>finding</th><th>owner</th></tr></thead>
+    <tbody>
+      <tr><td><strong>TF reference not servable:</strong> the artifact's <code>tf</code> carries no
+      coil and <code>tf/r0</code> is unset, so neither <code>amc/tf_current</code> nor
+      <code>efm/bvac_val</code> can fill F = R·Bφ — a GS solve from this map has coil currents,
+      sensors and Ip but no toroidal-field reference, against the equilibrium-tf-readiness
+      decision's assumption.</td><td>this plan — open followup (author the axisymmetric TF summary)</td></tr>
+      <tr><td><strong>Flux-loop join resolved + L2 registry gap:</strong> the ledger's
+      "unresolvable" channel-to-sensor join IS resolved via the reconstruction's own fitted loop
+      input (144 discriminating matches, zero violations, byte-identical across shots); it shows
+      the L2 catalogue is missing the two upper P6 loops and four lower P4 loops while carrying
+      their opposite-side counterparts.</td><td>mast-vacuum-floor-recovery §3c (sensor adjudication)</td></tr>
+      <tr><td><strong>P4/P5 two-channel redundancy measures the turn count:</strong> P2/P3 agree
+      to &lt;1e-6 while P4/P5 disagree by 1.82–5.09%, each equal to |23 − fitted turns|/23 —
+      whichever channel a campaign holds moves the column by up to 5%.</td><td>mast-vacuum-floor-recovery (turns evidence)</td></tr>
+      <tr><td><strong>P6 rows refused by arithmetic</strong> (turns_with_sign unsourced), and the
+      pair's two published channels fail the authored anti-series relation on 2 pilot shots —
+      P6 semantics unsettled beyond the missing count.</td><td>mast-vacuum-floor-recovery stage E (case modelling) / P6 disposition</td></tr>
+      <tr><td><strong>Eight measured case currents share one pf_passive loop field</strong> across
+      24 described plates — usable only through the drive map's per-element weights; splitting the
+      family would invent an unsourced topology.</td><td>recorded in the map; no action</td></tr>
+    </tbody>
+  </table>
+
+  <p>Artifacts: map digest <code>59e468618d3ee220</code> against artifact
+  <code>sha256:f18efe7c…faf32c</code> at DD 4.1.1; validation report
+  <code>~/.cache/mast-solve-input-report/solve-input-validation.json</code>; lane log
+  <code>~/.cache/mast-solve-input-report/lane-final.log</code>.</p>
+
+</main>
+</body>
+</html>

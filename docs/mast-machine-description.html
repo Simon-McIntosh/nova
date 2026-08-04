@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="mast-machine-description">
   <meta name="plan-title" content="MAST Machine Description — DDv4 IDS set + standard-name data maps">
   <meta name="plan-summary" content="Author DD 4.1.1 MAST machine-description IDSs from authoritative physical configurations over discrete shot ranges. Identity is continuous machine geometry, topology, turns/polarity and diagnostic position/orientation; numerical meshes and solver discretizations are provenance only.">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="XL">
   <meta name="plan-owner" content="Simon McIntosh">
@@ -18,8 +18,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-04">
-<meta name="plan-impl" content="0.88">
-<meta name="plan-version" content="18">
+<meta name="plan-impl" content="1.0">
+<meta name="plan-version" content="19">
 <meta name="plan-sprint" content="S5">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -206,6 +206,17 @@
     <p><em>Done-when (plan):</em> all six stages landed; a MAST shot can be taken from FAIR-MAST
     source to a nova operator set + solve-ready input bundle using only the MD IDSs and the maps —
     no ambix geometry tables on the path.</p>
+
+    <h3>Stage 6 — solve-input maps <span class="badge badge-shipped">✓ landed 2026-08-04</span></h3>
+    <p class="landed-summary">
+    All six stages are now landed. Per-slice solve inputs load through <code>nova.io</code>
+    (nova <code>be7127c3..acab5b5f</code>): 139 rows served (21 coil currents, 78 probes,
+    39 flux loops, Rogowski Ip), COCOS 3→17 derived from digit algebra and pinned self-inverse
+    over all 256 convention pairs, zero Standard-Name blockers. 7-shot pilot across both
+    polarities round-trips exactly; integrated lane 3618 green (job 1240881); no ambix geometry
+    table on the path. One gap rides as an open followup: the artifact carries no axisymmetric
+    TF summary, so F = R·Bφ is not yet servable. Full record:
+    <a href="/nova/research/mast-solve-input-maps-landed.html">solve-input maps landed</a>.</p>
 
     <h2 id="s5">§5 — Validation gates</h2>
     <ul>
@@ -569,7 +580,7 @@ Done when
 - The external Standard Name plan carries the exact remaining publication delta and authority gate.</pre>
     <p class="r-fu-outcome">Landed across nova main ac42194c (evidence contract, seeds, provisional DD 4.1.1 artifact) and ee107ed4 (vacuum-response identification, refined artifact). The refined artifact (semantic identity c3847ffc…7306; physical digest 76cf833561e602a7 and registry digest unchanged) authors and reopens all five IDSs without fabricating unresolved fields; evidence states 8 measured / 8 published / 29 generated / 13 fitted / 18 unresolved. Vacuum cohort: 400 no-plasma shots admitted from 17,111 with per-shot refusal reasons, held-out split before fitting. Turns — the one forward-model-blocking gap — identified for 11 of 13 coils (P2/P3 counted to integers within 0.5 turn; solenoid and P4/P5 bounded; held-out variance explained 0.9889, residual 4.38e-3 T; independently corroborated by the store's exact-integer ampere-turn ratio channel, never a fit input); the blocker survives only on the P6 pair, whose excitation the store publishes as ampere-turns. Passive coil_cases grouped 32 plates → 10 enclosure groups; one separable decay pattern 23–72 ms recorded fitted; per-family resistance stays a visible negative result. Discrete gaps stay explicit with structural reasons: 150/330 bank assignment is not identifiable from toroidally-uniform poloidal-field vacuum shots (error-field coil geometry would be needed), no raw toroidal-probe channel exists, and published saddle signals have the sign-fixing pickup removed. All six gap dispositions test-pinned; each fitted parameter improved held-out prediction or stayed provisional. Standard Name delta recorded read-only (8 needed names absent). Integrated lane 3,503 passed on job 1240367. Record: docs/research/mast-provisional-artifact-landed.html and the fitted-turn/held-out/probe-axis figures under docs/figures/mast-source-resolution/.</p>
     </article>
-<article class="r-fu" data-id="f-mmd-ingest-maps" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-04" data-recommends-skill="/reckon-ship mast-machine-description" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-mmd-ingest-maps" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-04" data-recommends-skill="/reckon-ship mast-machine-description" data-resolved-at="2026-08-04T17:51:34+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Map the catalog solve inputs through nova.io onto the refined artifact</h4>
     <div class="r-fu-body"><p>Stage 6 remains: the per-slice solve inputs (coil currents, sensor signals, Rogowski Ip) mapped through nova.io with standard-name keys and COCOS 3→17 transforms, round-trip validated on a pilot shot set against the refined artifact. The P6 effective-turns adjudication and the registry probe-angle correction ride with the sprint's cutover node and the geometry-recovery plan respectively.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -594,6 +605,7 @@ Work
 
 Done when
 - A MAST shot&#x27;s solve inputs load through nova.io against the refined artifact with no ambix geometry table on the path; round-trip tests pass on the pilot set; unresolved names remain visible proposals.</pre>
+    <p class="r-fu-outcome">Stage 6 landed — nova be7127c3..acab5b5f (7 new files, 3,662 insertions; nova/io/sourcemap.py + cocos.py, nova/imas/mast_solve_inputs.py + mast_solve_input_ids.py + tests). 139 rows served (21 coil currents, 78 probes, 39 flux loops, Rogowski Ip); COCOS 3→17 derived from Sauter digit algebra, self-inverse over all 256 pairs, agreeing with tests/test_mastcocos.py for all sixteen conventions. 7-shot pilot spanning both polarities: dataset round-trip ≤1.5e-16, write+reopen at 4.1.1 exactly 0.0, clocks bit-identical. Zero Standard-Name blockers — all four names accepted, no proposals (one packaging gate: pinned catalog tag ships no built catalog.db, resolver falls back to provisional/ namespace for 3 of 4). Integrated lane 3618 green (job 1240881). No ambix geometry table on the path. Probe join independently corroborates the obr-radial correction (437 matches, zero violations, worst 12.57 mm). Findings routed: flux-loop join resolved + asymmetric L2 loop gap and P4/P5 channel-redundancy 5% disagreement → mast-vacuum-floor-recovery; TF reference not servable → open followup here. Record: docs/research/mast-solve-input-maps-landed.html</p>
     </article>
 <article class="r-fu" data-id="f-mmd-solenoid-vacuum-stratum" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-04" data-recommends-skill="/reckon-ship mast-machine-description" data-resolved-at="2026-08-04T14:29:45+00:00" data-resolved-by="reckon-sprint">
     <h4 class="r-fu-title">Re-fit the solenoid drive weight on the plasma-free vacuum stratum</h4>
@@ -615,6 +627,23 @@ Work
 Done when
 - One evidence-backed solenoid weight with a stated interval reconciling both measurement routes, published in the drive map, test-pinned, lanes green.</pre>
     <p class="r-fu-outcome">Re-homed to mast-vacuum-floor-recovery §3b (stage B, followup f-vfr-01), which owns the whole vacuum-floor calibration ladder — the solenoid-weight reconciliation is its first fitting item and is specified there with the same evidence basis (six-shot cohort 344.657±11.68 vs plasma-free stratum [348.5, 361.1]).</p>
+    </article>
+<article class="r-fu" data-id="f-mmd-tf-summary" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-ship" data-written-at="2026-08-04 19:30" data-recommends-skill="/reckon-ship mast-machine-description" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Author the axisymmetric TF summary so F = R·Bφ is servable</h4>
+    <div class="r-fu-body"><p>The solve-input map serves coil currents, sensors and Ip, but the artifact's tf IDS carries no coil and tf/r0 is unset, so neither amc/tf_current (no described conductor/turn count) nor efm/bvac_val (needs the per-shot reference radius) can fill the toroidal-field reference. A GS solve from this map has no F = R·Bφ, against the equilibrium-tf-readiness decision's assumption of a pinned axisymmetric TF summary. Trigger: before mast-catalog-gpu-solve's first GS solve from these maps.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan: mast-machine-description (TF summary authoring)
+
+Context
+  docs/research/mast-solve-input-maps-landed.html records the gap: the refined artifact has no axisymmetric TF summary, so the solve-input map cannot serve F = R·Bφ. The TF winding geometry is a known explicit authoring gap; what a GS solve needs first is the summary pair (reference radius r0, vacuum field b0 per shot or per slice) sourced from the archive&#x27;s TF current channel and a described effective turns/radius product.
+
+Work
+  1. Establish the archive route for the TF summary (amc/tf_current × described winding product, or efm/bvac_val with its per-shot radius) with evidence-typed provenance; author tf/r0 + the per-slice b0 map row.
+  2. Extend the solve-input map to serve the toroidal-field reference; round-trip on the existing 7-shot pilot.
+  3. Keep detailed TF winding geometry an explicit gap — this node is the summary only.
+
+Done when
+  - A GS solve input bundle from nova.io carries F = R·Bφ on the pilot set, both polarities, with provenance; lanes green.</pre>
     </article>
 </section>
 

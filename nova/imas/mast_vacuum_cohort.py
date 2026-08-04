@@ -20,6 +20,11 @@ measured catalog by up to a centimetre and, for the flux loops, repeat one
 position across a whole family.  The registry geometry is the authority; the
 store supplies the ordered channel name, and the two are joined by family and
 channel number.
+
+Probe amplitude is not taken as published either.  The acquisition applied a
+per-channel range setting that the store never normalised out, so
+:func:`read_shot_waveforms` divides it out where the channel is read and reports
+what it divided by -- see :mod:`~nova.imas.mast_block_scale`.
 """
 
 from __future__ import annotations
@@ -31,6 +36,12 @@ from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 
 import numpy as np
+
+from nova.imas.mast_block_scale import (
+    BlockScaleTable,
+    ScaleCorrection,
+    promoted_block_scales,
+)
 
 SHOT_STORE = Path("/work/projects/imas_gpu/mast/level1/shots")
 """Level-1 MAST shot store holding one Zarr group per shot."""
@@ -816,6 +827,13 @@ class ExcludedWindow:
 class ShotWaveforms:
     """One shot's excitation and response on a common time base.
 
+    ``scale_corrections`` records what the acquisition range setting of each probe
+    channel was divided out by, one row per channel including the channels nothing
+    was divided out of.  It is carried on the waveforms rather than applied
+    silently because a channel read at unity because its scale was measured to be
+    unity and one read at unity because nobody measured it are different
+    statements, and only the first is a calibration.
+
     ``sample_mask`` marks the samples a fit may read.  It is the conjunction of
     every window test, and the windows it removed are listed in ``excluded`` so
     the boundary is visible without re-deriving it.
@@ -837,12 +855,33 @@ class ShotWaveforms:
     baseline_mask: np.ndarray
     excluded: tuple[ExcludedWindow, ...] = ()
     provenance: tuple[SignalProvenance, ...] = field(default_factory=tuple)
+    scale_corrections: tuple[ScaleCorrection, ...] = field(default_factory=tuple)
 
     @property
     def sample_count(self) -> int:
         """Return how many time samples survived the window tests."""
 
         return int(np.count_nonzero(self.sample_mask))
+
+    @property
+    def scaled_channels(self) -> tuple[str, ...]:
+        """Return the channels an acquisition scale was divided out of."""
+
+        return tuple(
+            sorted(
+                row.channel
+                for row in self.scale_corrections
+                if row.applied and row.scale != 1.0
+            )
+        )
+
+    @property
+    def unscaled_channels(self) -> tuple[str, ...]:
+        """Return the channels read raw because no scale warranted a correction."""
+
+        return tuple(
+            sorted(row.channel for row in self.scale_corrections if not row.applied)
+        )
 
 
 def _resample(
@@ -874,6 +913,7 @@ def read_shot_waveforms(
     *,
     store: Path | str = SHOT_STORE,
     quiescent_ramp_fraction: float = 0.0,
+    block_scale: BlockScaleTable | None = None,
 ) -> ShotWaveforms:
     """Read one shot's coil excitations and probe responses, windows marked.
 
@@ -885,6 +925,15 @@ def read_shot_waveforms(
     ``quiescent_ramp_fraction`` and is the one that suppresses induced vessel
     current; it is left off by default so the passive fit can see the transient
     the turn fit wants excluded.
+
+    Probe channels are returned with their measured acquisition range setting
+    divided out, because a channel recorded at twice its usual setting is not a
+    measurement of twice the field.  ``block_scale`` names the table that supplies
+    the setting and defaults to the promoted one; passing
+    :func:`~nova.imas.mast_block_scale.BlockScaleTable` with no blocks, or an empty
+    table, reads the archive exactly as published.  What was divided out of each
+    channel -- including the channels nothing was divided out of, and why -- comes
+    back in ``scale_corrections``.
     """
 
     import zarr
@@ -938,6 +987,8 @@ def read_shot_waveforms(
         provenance.append(
             SignalProvenance(str(root), shot, FIELD_GROUP, channel, field_identity)
         )
+    table = promoted_block_scales() if block_scale is None else block_scale
+    probes, corrections = table.normalise(shot, probes)
 
     mask = np.ones(time.shape, dtype=bool)
     excluded: list[ExcludedWindow] = []
@@ -985,6 +1036,7 @@ def read_shot_waveforms(
         baseline_mask=quiet,
         excluded=tuple(excluded),
         provenance=tuple(provenance),
+        scale_corrections=corrections,
     )
 
 

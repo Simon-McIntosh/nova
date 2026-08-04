@@ -53,6 +53,7 @@ from typing import Any, Iterable, Mapping, Sequence
 
 import numpy as np
 
+from nova.imas.mast_block_scale import BlockScaleTable, promoted_block_scales
 from nova.imas.mast_vacuum_cohort import (
     CURRENT_GROUP,
     FIELD_GROUP,
@@ -835,8 +836,14 @@ def read_probe_signals(
     shot: int,
     *,
     store: Path | str = SHOT_STORE,
+    block_scale: BlockScaleTable | None = None,
 ) -> dict[str, np.ndarray]:
-    """Read one shot's poloidal field probe channels as they were recorded."""
+    """Read one shot's poloidal field probe channels, range setting divided out.
+
+    ``block_scale`` names the table and defaults to the promoted one, so a coupling
+    slope measured here is a slope in field rather than in whatever range the
+    acquisition happened to be on.  An empty table reads the archive as published.
+    """
 
     import zarr
 
@@ -848,4 +855,5 @@ def read_probe_signals(
         except CohortError:
             continue
         signals[channel] = np.asarray(fields[channel][...], dtype=float)
-    return signals
+    table = promoted_block_scales() if block_scale is None else block_scale
+    return table.normalise(shot, signals)[0]

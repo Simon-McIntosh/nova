@@ -27,7 +27,7 @@
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="elevated">
 <meta name="plan-impl" content="0.95">
-<meta name="plan-version" content="8">
+<meta name="plan-version" content="9">
 <meta name="plan-commits" content="0f2b026fe8449465aabcf840673ed193472fd364,8c790cbc54a341e9dfe028918054254b9f903741,e286bb59cd456fa0ab8f9bb40a0b77a60319eec2,943c3069700397e48840691298c9c4bf2fac7412,f4e478e315e1786c55df733e95e110e1fd6eea87">
 </head>
 <body>
@@ -272,6 +272,26 @@ Work
 Done when
 - Registry and artifact agree on every probe axis with evidence; the digest change is mapped, test-pinned and pushed; no consumer silently resolves the old digest.</pre>
     </article>
+<article class="r-fu" data-id="f-mast-registry-case-orientation-defect" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-04" data-recommends-skill="/reckon-ship mast-catalog-geometry-recovery" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Correct the transposed case-plate extents in the canonical registry</h4>
+    <div class="r-fu-body"><p>Every coil_cases plate in config 76cf833561e602a7 carries its radial and vertical extents transposed about its own centre — the plates radiate through the winding pack as a pinwheel instead of closing into an enclosure; centres, thicknesses and total area match efm exactly, so efm's orientation is right. Land this in the SAME digest-change node as the obr probe-axis correction ([[f-mast-registry-probe-axis-defect]]): both move the pinned physical digest 76cf833561e602a7 and the digest must change once, with one old→new mapping.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan: mast-catalog-geometry-recovery
+Capability: orchestrator
+Requirements: deep reasoning, extended context, autonomous tools, strict verification, elevated risk
+
+Context
+  Two registry defects are proven and must land together as ONE physical-digest change: (1) the obr probe family is radial while the registry carries pi/2 (vacuum-fit evidence, figures under docs/figures/mast-source-resolution/); (2) every coil_cases plate has transposed R/Z extents about its centre (attribution evidence, docs/research/mast-cutover-parity-evidence.html — the pinwheel geometry is physically impossible for a case and efm&#x27;s enclosure orientation is corroborated).
+
+Work
+1. Re-derive both corrections from source evidence; correct nova/catalog/mast_geometry.json.
+2. The physical digest changes ONCE: update every digest pin deliberately (registry, seed, authoring, artifact identity tests), record the old→new mapping as provenance, and republish the refined artifact (new semantic identity).
+3. Re-run focused suites and the integrated lane; re-run the ambix reader cross-check (tests/gs/test_artifact_geometry.py at the new pin) so the enclosure geometry and probe axes agree with efm where efm is right.
+4. Notify downstream consumers of the digest mapping (ambix identity seam carries the old digest as provenance).
+
+Done when
+- Both corrections are in the registry with evidence; one digest change, mapped and test-pinned; artifact republished; nova and ambix suites green at the new pin.</pre>
+    </article>
 </section>
 <section data-reckon="research" id="research" class="r-research-list">
 <h2><span class="sec">§</span> Research</h2>
@@ -285,6 +305,8 @@ Done when
     <span class="r-research-title"><a href="/nova/mast-source-resolution.html">MAST source-resolution programme</a></span></div>
 <div class="r-research" data-id="r-mast-provisional-artifact-landed" data-type="evidence" data-source="Nova implementation, integrated default lane, and read-only Ambix census" data-added-by="reckon-ship" data-when="2026-08-03" data-url="/nova/mast-provisional-artifact-landed.html">
     <span class="r-research-title"><a href="/nova/mast-provisional-artifact-landed.html">MAST provisional machine artifact — landed</a></span></div>
+<div class="r-research" data-id="r-mast-cutover-parity-evidence" data-type="evidence" data-source="Five instrumented frozen-set stamps, re-solved swap experiments, and per-channel attribution" data-added-by="reckon-ship" data-when="2026-08-04" data-url="/nova/mast-cutover-parity-evidence.html">
+    <span class="r-research-title"><a href="/nova/mast-cutover-parity-evidence.html">MAST cutover parity evidence and residual attribution</a></span></div>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s5" data-id="c-mast-registry-ids-landed" data-who="reckon-ship" data-when="2026-07-31T10:05:00+02:00">

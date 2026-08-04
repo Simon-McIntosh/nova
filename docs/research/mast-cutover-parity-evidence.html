@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="mast-cutover-parity-evidence">
+  <meta name="plan-title" content="MAST axisymmetric cutover — frozen six-shot parity evidence and residual attribution">
+  <meta name="plan-summary" content="Complete evidence chain for the artifact-path frozen six-shot parity: the electrical drive map closes the vacuum term, 13 of 15 tolerances pass with every reproduction metric improved, and the single failing sensor-misfit metric is attributed to an irreducible cross-source difference scored by a same-source budget on a structurally non-neutral benchmark.">
+  <meta name="plan-informs" content="physics-spine-adoption,mast-catalog-geometry-recovery,mast-machine-description">
+  <meta name="plan-recorded-at" content="2026-08-04">
+  <meta name="plan-verdict" content="The artifact path drives all 21 vacuum columns channel-for-channel with efm, restores full confinement, and beats the incumbent on every reproduction metric; the remaining 2.2% sensor-misfit excess is not localisable to any fixable geometry item, is 88% vacuum-term, and is structurally expected when a source-fidelity path is scored against an incumbent carrying a calibration fitted to the scored data. A cross-source budget measured from the pair's own column disagreement is ~3%; the registered 1% is a same-source tolerance. The gate choice is an explicit adjudication.">
+  <title>MAST cutover parity evidence | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+  <header>
+    <span class="badge badge-active">recorded 2026-08-04</span>
+    <h1>MAST axisymmetric cutover — parity evidence and residual attribution</h1>
+    <p>Four nodes ran the cutover ladder: the first after-path stamp failed on a measured vacuum-term
+    gap (solenoid at 1/328, eight missing case columns); the electrical drive map closed it; the
+    re-run passes 13 of 15 registered tolerances with every reproduction metric improved; and a
+    five-stamp instrumented attribution establishes what the last 2.2% is — and is not.</p>
+  </header>
+
+  <section class="quick-status">
+    <div class="status-card"><strong>Vacuum term</strong>
+      <span class="badge badge-shipped">closed</span>
+      <p>21/21 driven columns channel-for-channel with efm; residual 1.210 → 0.764.</p></div>
+    <div class="status-card"><strong>Parity gate</strong>
+      <span class="badge badge-blocked">13/15</span>
+      <p>Sensor misfit 0.7639 vs bound 0.7475 (2.2% over a 1% same-source budget), both arms.</p></div>
+    <div class="status-card"><strong>Solenoid</strong>
+      <span class="badge badge-shipped">exonerated</span>
+      <p>efm's response scale is an amp-turn statement; effective 355.06 sits inside the fitted interval.</p></div>
+    <div class="status-card"><strong>Donor retirement</strong>
+      <span class="badge badge-pending">gated</span>
+      <p>Correctly not performed; census banked (two donors at zero external importers).</p></div>
+  </section>
+
+  <h2>The re-run scorecard (compare_paths, before = efm path, after = artifact path)</h2>
+  <table>
+    <thead><tr><th>Metric</th><th>Arm</th><th>Before</th><th>After</th><th>Bound</th><th>Verdict</th></tr></thead>
+    <tbody>
+      <tr><td>axis_reproduce_cm</td><td>greens-matvec</td><td>0.025336</td><td>0.015360</td><td>≤ 0.101344</td><td>pass (improves)</td></tr>
+      <tr><td>lcfs_reproduce_cm</td><td>greens-matvec</td><td>0.008262</td><td>0.007486</td><td>≤ 0.033047</td><td>pass (improves)</td></tr>
+      <tr><td>profile_reproduce_rms</td><td>greens-matvec</td><td>0.018967</td><td>0.012567</td><td>≤ 0.075868</td><td>pass (improves)</td></tr>
+      <tr><td>fsa_d_roughness_nrho32 / 96</td><td>both arms</td><td>0.345 / 0.175</td><td>0.287–0.294 / 0.167</td><td>—</td><td>pass (improves)</td></tr>
+      <tr><td>converged / confined fraction</td><td>both arms</td><td>1.0</td><td>1.0</td><td>= 1.0</td><td>pass (confinement restored)</td></tr>
+      <tr><td>throughput_slices_per_core_s</td><td>both arms</td><td>0.252 / 0.419</td><td>0.235 / 0.424</td><td>≥ 0.189 / 0.315</td><td>pass</td></tr>
+      <tr><td><strong>magnetics_residual_whitened_rms</strong></td><td>greens-matvec</td><td>0.740103</td><td><strong>0.763921</strong></td><td>≤ 0.747504</td><td><strong>FAIL</strong></td></tr>
+      <tr><td><strong>magnetics_residual_whitened_rms</strong></td><td>grid-delstar</td><td>0.739561</td><td><strong>0.763753</strong></td><td>≤ 0.746957</td><td><strong>FAIL</strong></td></tr>
+    </tbody>
+  </table>
+  <p>Stamps: before <code>…-08ae0dee74-…</code>, failed first attempt <code>…-27aaed2bb9-…</code>
+  (residual 1.210, confinement 0.9167), re-run <code>…-e76b0dc65c-…</code> — all genuine
+  (six frozen shots, 6/6 slices, real roles, single signature, schema 1.4).</p>
+
+  <h2>What the drive map fixed</h2>
+  <p>The first after-path failure had a measured root cause: efm carries solenoid amp-turns-per-feed-ampere
+  in its filament weights (sum 328) where the artifact reader weighted every element 1 — the largest flux
+  source entered at 1/328 — and the eight measured <code>*_case_current</code> circuits had no route onto
+  artifact conductors. The artifact now publishes an evidence-typed drive map (31 channels → 21 columns);
+  the reader folds stated weights into element weighting and declares circuit→channel directly. Green's
+  columns agree with efm to ≤0.5% on the 12 PF windings; the case section-area split reproduces efm's
+  non-uniform weights exactly.</p>
+  <p><strong>The solenoid contradiction dissolved.</strong> <code>SOLENOID_RESPONSE_SCALE</code> = 1.0825
+  is, per its own documentation, degenerate with a turn count — efm's effective weight is
+  328 × 1.0825 = 355.06 A·turn/A, <em>inside</em> the cohort-fitted interval [332.97, 356.34]. The reader
+  refuses to apply a magnetics-fitted calibration on top of a source-stated weight (double-counting the
+  same 8%). A three-weight frozen-set sweep (328 / 344.657 / 355.06) has its optimum at 339.80 —
+  no admissible solenoid weight clears the residual gate, exonerating the solenoid.</p>
+
+  <h2>Attribution of the remaining 2.2% (five instrumented frozen-set stamps)</h2>
+  <figure>
+    <img src="/nova/figures/mast-cutover-parity/per_channel_excess.svg"
+         alt="Ranked per-channel contribution to the residual excess">
+    <figcaption>The excess is concentrated: two outboard vertical-field probes (obv06, obv14) at the
+    wall nearest P4/P5 carry 61% of it; the top ten channels carry 75%. 96% of the excess is on
+    b-probes, 4% on flux loops.</figcaption>
+  </figure>
+  <figure>
+    <img src="/nova/figures/mast-cutover-parity/vacuum_plasma_split.svg"
+         alt="Vacuum-term versus plasma-term split of the excess">
+    <figcaption>Vacuum-dominated: 88% of the excess moves with the vacuum columns; the artifact's
+    plasma term alone slightly <em>improves</em> the misfit. The plasma solve is not implicated.</figcaption>
+  </figure>
+  <figure>
+    <img src="/nova/figures/mast-cutover-parity/per_column_swap.svg"
+         alt="Re-solved swap experiments per source difference">
+    <figcaption>No re-solved swap fixes it: efm flux-loop positions recover 0.4%, efm case
+    discretisation 2.3%, and efm's winding filament lattices make it 27% <em>worse</em>. The
+    hold-fixed per-column decomposition (windings 77%) is contradicted by the re-solves because the
+    disc read feeds vacuum changes back into the solve.</figcaption>
+  </figure>
+  <figure>
+    <img src="/nova/figures/mast-cutover-parity/excess_vs_displacement.svg"
+         alt="Per-channel excess against sensor displacement between sources">
+    <figcaption>Sensor displacement is uncorrelated with the excess — probe positions are identical
+    to 5.7e-8 m and the seven loops that moved ≤6 mm sit at zero delta.</figcaption>
+  </figure>
+
+  <h2>Findings that stand regardless of the gate decision</h2>
+  <table>
+    <thead><tr><th>Finding</th><th>Evidence</th><th>Owner</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Registry case plates carry transposed R/Z extents</td>
+        <td>Every <code>coil_cases</code> plate in config <code>76cf833561e602a7</code> has its radial and
+        vertical extents exchanged about its own centre — a pinwheel whose arms pass through the winding
+        pack, physically impossible for a case; efm's plates close into an enclosure. Centres, thicknesses
+        and total area match efm exactly.</td>
+        <td>mast-catalog-geometry-recovery (registry correction; moves the physical digest — combine with
+        the obr probe-axis correction in one digest-change node)</td>
+      </tr>
+      <tr>
+        <td>Reader collapses driven passive elements to bounding boxes</td>
+        <td><code>read_artifact_pf_passive</code> reduces a driven element to its bounding box; combined
+        with the transposed extents the operator receives a filled 0.374 m box for a 0.00224 m² case
+        section — 62× overstatement. The source outline is correct; the reader loses it.</td>
+        <td>physics-spine-adoption §4 (ambix reader fix; worth 2.3% of the excess together with the row above)</td>
+      </tr>
+      <tr>
+        <td>The fitted solenoid weight is probably ~3% low</td>
+        <td>The plasma-free vacuum stratum (85 shots, ~111k slices, no solve in the loop) puts the
+        effective weight at [348.5, 361.1] 95%; the artifact's 344.657 sits 1.1% below it, while the
+        six-shot re-solved scan (36 slices, solve in loop) preferred 344.657. The stratum is the stronger
+        evidence line.</td>
+        <td>mast-machine-description (re-fit the solenoid drive weight on the vacuum stratum)</td>
+      </tr>
+      <tr>
+        <td>The benchmark structurally favours the incumbent</td>
+        <td>The efm path carries <code>SOLENOID_RESPONSE_SCALE</code>, fitted against MAST magnetics —
+        the scored quantity — while the artifact path is judged on source fidelity alone. The solenoid
+        column difference is pure amplitude (96% scale, 4% shape), confirming the mechanism.</td>
+        <td>gate adjudication input</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>The gate question</h2>
+  <p>The registered 1% residual budget was derived from cross-substrate spread within a <em>single</em>
+  geometry source (7.3e-4) and had never been exercised across two independent descriptions of one
+  machine. The measured column disagreement of this source pair (≤1.2% windings, ≤13% cases, 2.9%
+  solenoid amplitude) propagated through the metric accounts for 88% of the observed 3.2% difference —
+  a mechanism-derived cross-source budget for this pair is ~3%. The choice — re-derive the budget for
+  source cutovers, hold the 1% line and work the geometry ladder, or accept a qualified cutover — decides
+  donor retirement and is recorded as an explicit adjudication, not a coordinator default.</p>
+  <p>Donor census at the gate (external tracked importers): <code>imas_geometry</code> 0,
+  <code>elliptic</code> 0, <code>q1_detect</code> 1 (a mechanical test-import removal),
+  <code>geometry</code> 76, <code>operator</code> 72; <code>artifact_geometry</code> shows 0 external
+  importers because it is the after-path <em>target</em> reached through the benchmark seam — a future
+  census must never count it as a retirement candidate. Deleting <code>imas_geometry</code> or
+  <code>elliptic</code> must update the live <code>:mod:</code> docstring anchors in
+  <code>artifact_geometry.py</code>, <code>geometry.py</code> and <code>polygon.py</code>.</p>
+
+  <h2>Record</h2>
+  <p>Commits: nova <code>ac42194c</code> (evidence contract + seeded artifact), <code>ee107ed4</code>
+  (vacuum-response identification), <code>28872e4f</code> (electrical drive semantics); imas-ambix
+  <code>cfa2d2c</code> (tolerances, stamp labelling, identity seam), <code>8ae7510</code> (magnetics
+  residual metric + artifact reader), <code>30114ee</code> (first after-path stamp + mapping/classification
+  fixes), <code>27dff421</code> (drive-map consumption + re-run stamp). Attribution artifacts and
+  instrumented drivers: <code>~/.cache/ambix-after-path/attribution/</code>. Refined artifact semantic
+  identity <code>68f64209…f351</code>; physical digest <code>76cf833561e602a7</code>; registry digest
+  <code>73ecabaa…3ab2</code>.</p>
+
+</main>
+</body>
+</html>

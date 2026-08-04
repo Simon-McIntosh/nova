@@ -19,7 +19,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-04">
 <meta name="plan-impl" content="0.88">
-<meta name="plan-version" content="16">
+<meta name="plan-version" content="17">
 <meta name="plan-sprint" content="S2">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -595,6 +595,26 @@ Work
 Done when
 - A MAST shot&#x27;s solve inputs load through nova.io against the refined artifact with no ambix geometry table on the path; round-trip tests pass on the pilot set; unresolved names remain visible proposals.</pre>
     </article>
+<article class="r-fu" data-id="f-mmd-solenoid-vacuum-stratum" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-04" data-recommends-skill="/reckon-ship mast-machine-description" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Re-fit the solenoid drive weight on the plasma-free vacuum stratum</h4>
+    <div class="r-fu-body"><p>The plasma-free coil-only stratum (85 shots, ~111k slices, no solve in the loop) puts the effective solenoid weight at [348.5, 361.1] at 95%, while the artifact states the six-vacuum-shot cohort fit 344.657 ± 11.68 — 1.1% below the stratum interval. The stratum is the stronger evidence line; efm's effective 355.06 sits inside it. Re-fit the sol_current drive weight on the full stratum, challenge held-out, and republish the drive map with the promoted value or the visible negative result.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan: mast-machine-description
+Capability: orchestrator
+Requirements: deep reasoning, extended context, autonomous tools, strict verification, elevated risk
+
+Context
+  docs/research/mast-cutover-parity-evidence.html records the disagreement: the artifact&#x27;s fitted solenoid weight (344.657 ± 11.68 A·turn/A, six-shot vacuum cohort) sits 1.1% below the plasma-free vacuum-stratum interval [348.5, 361.1] measured over ~111k slices in imas-ambix&#x27;s calibration record; efm&#x27;s effective weight 328 × 1.0825 = 355.06 sits inside it.
+
+Work
+1. Reproduce the vacuum-stratum measurement nova-side from the level-1 store (plasma-free slices, solenoid-dominant excitation), with provenance-pinned shot/slice selection and the same held-out discipline as nova/imas/mast_vacuum_response.py.
+2. Reconcile with the cohort fit: identify why the six-shot cohort lands low (shot selection, near-probe exclusion radius, case-current contamination) with an ablation.
+3. Promote the stratum-fitted weight into the drive map if it wins held-out challenge across both cohorts; otherwise record the visible negative result and keep the current value with widened uncertainty.
+4. Republish the refined artifact (new semantic identity), physical digest unchanged; update the pinned tests; run focused suites + integrated lane.
+
+Done when
+- One evidence-backed solenoid weight with a stated interval reconciling both measurement routes, published in the drive map, test-pinned, lanes green.</pre>
+    </article>
 </section>
 
   <section data-reckon="research" id="research" class="r-research-list">
@@ -611,6 +631,8 @@ Done when
     <span class="r-research-title"><a href="/nova/mast-source-resolution.html">MAST source-resolution programme</a></span></div>
 <div class="r-research" data-id="r-mmd-provisional-artifact-landed" data-type="evidence" data-source="Nova implementation, integrated default lane, and read-only Ambix census" data-added-by="reckon-ship" data-when="2026-08-03" data-url="/nova/mast-provisional-artifact-landed.html">
     <span class="r-research-title"><a href="/nova/mast-provisional-artifact-landed.html">MAST provisional machine artifact — landed</a></span></div>
+<div class="r-research" data-id="r-mmd-cutover-parity-evidence" data-type="evidence" data-source="Five instrumented frozen-set stamps, re-solved swap experiments, and per-channel attribution" data-added-by="reckon-ship" data-when="2026-08-04" data-url="/nova/mast-cutover-parity-evidence.html">
+    <span class="r-research-title"><a href="/nova/mast-cutover-parity-evidence.html">MAST cutover parity evidence and residual attribution</a></span></div>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="_top" data-id="c-mmd-cocos-repair" data-who="reckon-ship" data-when="2026-07-30T01:12:00+02:00">

@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-04">
-<meta name="plan-version" content="23">
+<meta name="plan-version" content="24">
 <meta name="plan-impl" content="0.95">
 <meta name="plan-sprint" content="S2">
 <meta name="plan-capability-version" content="1.0">
@@ -643,6 +643,8 @@ Done when
     <span class="r-research-title"><a href="/nova/mast-source-resolution.html">MAST source-resolution programme</a></span></div>
 <div class="r-research" data-id="r-psa-provisional-artifact-landed" data-type="evidence" data-source="Nova implementation, integrated default lane, and read-only Ambix census" data-added-by="reckon-ship" data-when="2026-08-03" data-url="/nova/mast-provisional-artifact-landed.html">
     <span class="r-research-title"><a href="/nova/mast-provisional-artifact-landed.html">MAST provisional machine artifact — landed</a></span></div>
+<div class="r-research" data-id="r-psa-cutover-parity-evidence" data-type="evidence" data-source="Five instrumented frozen-set stamps, re-solved swap experiments, and per-channel attribution" data-added-by="reckon-ship" data-when="2026-08-04" data-url="/nova/mast-cutover-parity-evidence.html">
+    <span class="r-research-title"><a href="/nova/mast-cutover-parity-evidence.html">MAST cutover parity evidence and residual attribution</a></span></div>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s3" data-id="c-physics-nova-wave" data-who="reckon-ship" data-when="2026-07-30">
@@ -677,6 +679,9 @@ Done when
 </div>
 <div class="r-comment" data-section="_top" data-id="c-psa-afterpath-rerun" data-who="reckon-ship" data-when="2026-08-04">
     <div class="r-comment-body">After-path re-run on the electrical drive map landed at imas-ambix 27dff421 and closed 94.9% of the residual gap: magnetics_residual_whitened_rms 1.210→0.764 on both arms, confinement restored to 1.0 (the three lost slices WERE the solenoid at 1/328), and every reproduction metric now BEATS the before-path (axis 0.0154 vs 0.0253 cm, LCFS 0.0075 vs 0.0083 cm, profile 0.0126 vs 0.0190). The reader drives all 21 columns channel-for-channel with efm; Green's columns agree ≤0.5% on the 12 PF windings. THE SOLENOID IS EXONERATED: efm's SOLENOID_RESPONSE_SCALE (1.0825) is an amp-turn statement in disguise, so its effective weight is 328×1.0825=355.06 — INSIDE the cohort-fitted interval [332.97, 356.34]; a three-weight diagnostic sweep (328 / 344.657 / 355.06) puts the held-out optimum at 339.80, and the stated fitted weight is the best of the three. The reader now refuses to double-apply a source-stated weight and a calibration fitted to correct another source's turn count (COIL_MODEL_VERSION source-stated-drives; efm tables byte-identical, 368 tests green). VERDICT: compare_paths 13/15 PASS; the single failing metric is the sensor misfit at 0.7639 vs bound 0.7475 — 2.2% over a 1% budget that was calibrated on cross-substrate spread within ONE geometry source (7.3e-4). Measured residual cause: the two sources cut the same case enclosures into different plate sets (≤3.5% on case columns) and the artifact's flux loops sit up to ~6 mm from efm's, where the gate's own basis prices 10 mm at 1.65%. Donor retirement correctly did not run. A per-channel attribution node is quantifying whether this is a fixable geometry item or an irreducible cross-source floor before the gate question is adjudicated.</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-psa-residual-attribution" data-who="reckon-ship" data-when="2026-08-04">
+    <div class="r-comment-body">Residual attribution complete (read-only; five instrumented frozen-set stamps; full record docs/research/mast-cutover-parity-evidence.html with figures). The 2.2% excess is NOT a fixable geometry item: it concentrates on two outboard probes nearest P4/P5 (61%), is 88% vacuum-term, and every re-solved swap does nothing or hurts (efm loop positions recover 0.4%, efm case discretisation 2.3%, efm winding lattices −27%). Two real defects found and queued anyway: the registry's coil_cases plates carry transposed R/Z extents (pinwheel through the winding pack; efm is right), and the ambix reader collapses driven passive elements to bounding boxes (62× section overstatement) — together worth 2.3% of the excess. The vacuum stratum (111k plasma-free slices) puts the effective solenoid weight at [348.5, 361.1], 1.1% above the artifact's fitted 344.657 — the strongest evidence line, queued for an upstream re-fit. Load-bearing structural finding: the benchmark favours the incumbent — the efm path runs WITH a calibration fitted against MAST magnetics (SOLENOID_RESPONSE_SCALE) while the artifact path is judged on source fidelity alone. A mechanism-derived cross-source budget from this pair's measured column disagreement is ~3%; the registered 1% is a same-source tolerance. The gate choice (re-derive for source cutovers vs hold 1% and work the geometry ladder vs qualified cutover) decides donor retirement and is surfaced to the plan owner as an explicit adjudication.</div>
 </div>
 </section>
 </main>

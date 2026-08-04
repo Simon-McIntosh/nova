@@ -363,6 +363,10 @@ def fitted_turn_records(
                         "the store publishes this coil's excitation as ampere-turns "
                         "rather than as the current in one conductor, so even a "
                         "clean shot would fix the product and not the count",
+                        "that same published product is what lets the coil be driven "
+                        "at all: its channel drive carries one ampere-turn per "
+                        "ampere, so the forward-model column is fixed without the "
+                        "count this record leaves open",
                     ),
                     blocks_axisymmetric_forward_model=True,
                 )
@@ -573,6 +577,7 @@ def fitted_evidence(
 SUPERSEDED_SEED_PATHS = frozenset(
     {
         "pf_active/coil/element/turns_with_sign",
+        "pf_active/circuit/connections",
         "magnetics/b_field_pol_probe/poloidal_angle",
         "magnetics/b_field_pol_probe/position/phi",
         "magnetics/b_field_phi_probe/toroidal_angle",
@@ -586,6 +591,11 @@ right statement while nothing is known and the wrong one once eleven of thirteen
 coils have been measured separately.  Two diagnostic paths are replaced because
 the refinement establishes WHY each is unresolved, which the seed could only
 assert.
+
+The blanket circuit-connection record goes because it says the node matrix cannot
+be filled at all, which stops being true once the supply columns are dropped: the
+coil-to-coil junctions the sources fix are authorable without any supply, and
+per-circuit records take over from the one that denied them.
 
 The probe sensitive axis is replaced for a different and stronger reason.  The
 seed records it as measured for all seventy-eight probes, because the registry

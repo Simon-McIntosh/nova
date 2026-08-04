@@ -15,6 +15,7 @@ from pathlib import Path, PurePosixPath
 from stat import S_ISDIR, S_ISLNK, S_ISREG
 from typing import Any, Iterable, Mapping
 
+from nova.imas.machine_drive import ChannelDrive, DriveMap
 from nova.imas.machine_evidence import (
     EvidenceLedger,
     EvidenceRecord,
@@ -377,12 +378,24 @@ class MachineArtifactManifest:
     files: tuple[ArtifactFile, ...]
     oci: OciArtifactConvention
     field_evidence: tuple[EvidenceRecord, ...] = ()
+    channel_drive: tuple[ChannelDrive, ...] = ()
 
     @property
     def evidence(self) -> EvidenceLedger:
         """Return the field-level provenance carried by this artifact."""
 
         return EvidenceLedger(records=self.field_evidence)
+
+    @property
+    def drive_map(self) -> DriveMap:
+        """Return which measured channel drives which conductor, and how hard."""
+
+        return DriveMap(drives=self.channel_drive)
+
+    def driven_columns(self) -> tuple[tuple[str, str], ...]:
+        """Return the conductors a campaign's channels can drive."""
+
+        return self.drive_map.columns()
 
     def forward_model_blockers(self) -> tuple[str, ...]:
         """Return unresolved fields that stop an axisymmetric forward model."""
@@ -450,6 +463,7 @@ class MachineArtifactManifest:
                 "incomplete artifact must state at least one unresolved gap"
             )
         self._validate_field_evidence()
+        self._validate_channel_drive()
         self.oci.validate(self.dd_version, self.physical_digest)
 
     def _validate_field_evidence(self) -> None:
@@ -473,10 +487,31 @@ class MachineArtifactManifest:
                 f"{', '.join(unresolved)}"
             )
 
+    def _validate_channel_drive(self) -> None:
+        """Require every drive weight to point at provenance the artifact carries.
+
+        A weight is a claim about the machine, so it is inadmissible on its own
+        terms: the record it names has to be in the ledger, or the artifact would
+        be publishing a number a consumer scales its whole vacuum field by with
+        nothing behind it.
+        """
+
+        drive_map = self.drive_map
+        drive_map.validate()
+        paths = {record.path for record in self.field_evidence}
+        missing = sorted(
+            {drive.path for drive in drive_map.drives if drive.path not in paths}
+        )
+        if missing:
+            raise MachineArtifactError(
+                f"channel drives cite absent evidence records: {', '.join(missing)}"
+            )
+
     def as_dict(self) -> dict[str, Any]:
         """Return the complete canonical manifest payload."""
 
         return {
+            "channel_drive": self.drive_map.as_list(),
             "complete": self.complete,
             "dd_version": self.dd_version,
             "field_evidence": self.evidence.as_list(),
@@ -537,6 +572,7 @@ class MachineArtifactManifest:
 
         row = _decode_json(data)
         expected = {
+            "channel_drive",
             "complete",
             "dd_version",
             "field_evidence",
@@ -584,6 +620,7 @@ class MachineArtifactManifest:
             ),
             oci=OciArtifactConvention.from_dict(oci),
             field_evidence=EvidenceLedger.from_list(row["field_evidence"]).records,
+            channel_drive=DriveMap.from_list(row["channel_drive"]).drives,
         )
         result.validate()
         if result.canonical_bytes() != data:
@@ -773,6 +810,7 @@ def create_machine_artifact_manifest(
     complete: bool,
     unresolved_gaps: Iterable[str],
     field_evidence: Iterable[EvidenceRecord] = (),
+    channel_drive: Iterable[ChannelDrive] = (),
 ) -> MachineArtifactManifest:
     """Hash an authored IDS directory into a canonical manifest."""
 
@@ -796,6 +834,7 @@ def create_machine_artifact_manifest(
         files=files,
         oci=OciArtifactConvention.create(dd_version, physical_digest),
         field_evidence=EvidenceLedger.create(field_evidence).records,
+        channel_drive=DriveMap.create(channel_drive).drives,
     )
     manifest.validate()
     return manifest

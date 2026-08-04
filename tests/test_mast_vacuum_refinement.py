@@ -69,7 +69,7 @@ from nova.imas.mast_vacuum_response import (
 )
 
 REFINED_SEMANTIC_IDENTITY = (
-    "sha256:c3847ffcae362be35d883adb511ab2e68ed57455cf3e84064be57a14d30e7306"
+    "sha256:68f64209385139beb78f1135b29398eca569b5589216a403e6fa1589cf6cf351"
 )
 """Semantic address of the refined revision this worktree authors."""
 
@@ -78,6 +78,9 @@ PHYSICAL_DIGEST = "76cf833561e602a7"
 
 REGISTRY_DIGEST = "73ecabaa030a476d80cc24c1fe35d038876a12454ebd7b0c7055aac1d3cf3ab2"
 """Registry identity the refinement must not disturb."""
+
+DRIVEN_COLUMNS = 21
+"""Conductor sets the campaign's published current channels reach."""
 
 
 @pytest.fixture(scope="module")
@@ -672,6 +675,49 @@ def test_refined_artifact_keeps_the_machine_it_describes(tmp_path):
     assert manifest.dd_version == "4.1.1"
     assert manifest.semantic_identity() == REFINED_SEMANTIC_IDENTITY
     assert not manifest.complete
+
+
+def test_the_refined_artifact_carries_its_own_drive_semantics(tmp_path):
+    """The published artifact says what one ampere of every channel drives."""
+
+    manifest = publish_refined_artifact(tmp_path / "driven").manifest
+    drives = manifest.drive_map
+    drives.validate()
+
+    assert len(manifest.driven_columns()) == DRIVEN_COLUMNS
+    assert drives.for_channel("sol_current").ampere_turns_per_ampere == pytest.approx(
+        344.656565
+    )
+    assert drives.for_channel("p3u_coil_current").ampere_turns_per_ampere == 1.0
+    assert drives.for_channel("p2l_case_current").container == "pf_passive"
+    ledger_paths = {record.path for record in manifest.evidence.records}
+    assert {drive.path for drive in drives.drives} <= ledger_paths
+
+
+def test_the_refined_ids_carry_the_sourced_circuit_junctions():
+    """A two-coil circuit's node matrix is authored; an open one stays empty."""
+
+    registry = MachineGeometryRegistry.default()
+    selection = registry.select(REPRESENTATIVE_SHOT)
+    bundle = author_refined_ids(selection, first_shot=11695, last_shot=30473)
+    pf_active = bundle.ids["pf_active"]
+    coils = [str(coil.name) for coil in pf_active.coil]
+    written = {}
+    for circuit in pf_active.circuit:
+        if circuit.connections.has_value:
+            written[str(circuit.name)] = np.asarray(circuit.connections)
+    assert sorted(written) == ["P3", "P4", "P5", "P6"]
+    assert len(pf_active.supply) == 0
+    for matrix in written.values():
+        assert matrix.shape == (1, len(coils))
+    junction = written["P3"][0]
+    assert [coils[index] for index in np.flatnonzero(junction)] == [
+        "p3_lower",
+        "p3_upper",
+    ]
+    assert sorted(junction[np.flatnonzero(junction)].tolist()) == [-1, 1]
+    opposed = written["P6"][0]
+    assert sorted(opposed[np.flatnonzero(opposed)].tolist()) == [-1, -1]
 
 
 def test_refined_artifact_is_reproducible(tmp_path):

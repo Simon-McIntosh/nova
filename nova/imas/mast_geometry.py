@@ -25,12 +25,18 @@ from nova.catalog.mast_geometry import (
     MachineGeometryRegistry,
 )
 from nova.imas.machine import GeomData, MachineGeometryReader
+from nova.imas.machine_drive import DriveMap
 from nova.imas.machine_evidence import EvidenceLedger, FieldEvidence
 from nova.imas.mast_artifact import (
     ArtifactShotRange,
     VerifiedMachineArtifact,
     create_machine_artifact_manifest,
     materialize_machine_artifact,
+)
+from nova.imas.mast_channel_drive import (
+    channel_drives,
+    circuit_connections,
+    electrical_records,
 )
 from nova.imas.mast_fitted_parameters import (
     RADIAL_PROBE_FAMILY,
@@ -306,6 +312,23 @@ def _author_circuits(ids: Any) -> None:
         circuit.type = relation.connection
 
 
+def _author_circuit_connections(ids: Any, geometry: Mapping[str, Any]) -> None:
+    """Write the node matrix of every circuit whose whole relation is sourced.
+
+    A circuit the sources leave partly open keeps an unset matrix rather than a
+    partial one, because a node list is read as complete: a junction left out of
+    a written matrix says the terminals are apart, which is a stronger claim than
+    saying nothing.
+    """
+
+    matrices = circuit_connections(geometry)
+    for circuit in ids.circuit:
+        matrix = matrices.get(str(circuit.name))
+        if matrix is None:
+            continue
+        circuit.connections = matrix
+
+
 def _author_passive_seeds(ids: Any, geometry: Mapping[str, Any]) -> None:
     """Seed passive resistivity, single-loop resistance and section turns."""
 
@@ -429,15 +452,17 @@ class RefinedIdsBundle:
     selection: GeometrySelection
     ids: Mapping[str, Any]
     evidence: EvidenceLedger
+    drives: DriveMap
     authoring_gaps: tuple[str, ...]
     unset_turns: tuple[str, ...]
 
     def validate(self) -> None:
-        """Validate every IDS against its pinned dictionary and the ledger."""
+        """Validate every IDS against its pinned dictionary, the ledger and the map."""
 
         for ids in self.ids.values():
             ids.validate()
         self.evidence.validate()
+        self.drives.validate()
 
 
 def author_refined_ids(
@@ -452,6 +477,7 @@ def author_refined_ids(
     geometry = selection.configuration.geometry
     pf_active = _author_pf_active(factory, geometry)
     _author_circuits(pf_active)
+    _author_circuit_connections(pf_active, geometry)
     unset = _author_fitted_turns(pf_active, authored_turns())
     pf_passive = _author_pf_passive(factory, geometry)
     _author_passive_seeds(pf_passive, geometry)
@@ -477,8 +503,20 @@ def author_refined_ids(
             "tf": _author_toroidal_field(factory),
         },
         evidence=EvidenceLedger.create(
-            refined_evidence(seed.records, first_shot=first_shot, last_shot=last_shot)
+            (
+                *refined_evidence(
+                    seed.records,
+                    first_shot=first_shot,
+                    last_shot=last_shot,
+                ),
+                *electrical_records(
+                    geometry,
+                    first_shot=first_shot,
+                    last_shot=last_shot,
+                ),
+            )
         ),
+        drives=channel_drives(geometry),
         authoring_gaps=tuple(sorted(gaps)),
         unset_turns=unset,
     )
@@ -522,6 +560,7 @@ def publish_refined_artifact(
             complete=not unresolved,
             unresolved_gaps=bundle.authoring_gaps,
             field_evidence=bundle.evidence.records,
+            channel_drive=bundle.drives.drives,
         )
         return materialize_machine_artifact(source, cache_directory, manifest)
 

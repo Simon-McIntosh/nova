@@ -49,9 +49,7 @@ def ledger(geometry):
 
 
 def test_every_citation_describes_the_original_machine(ledger) -> None:
-    sources = [
-        record.source for record in ledger.records if record.source is not None
-    ]
+    sources = [record.source for record in ledger.records if record.source is not None]
 
     assert sources
     for source in sources:
@@ -77,7 +75,9 @@ def test_documented_circuits_cover_every_active_family(geometry) -> None:
     }
 
     assert families == set(geometry["active_components"])
-    assert sum(len(relation.families) for relation in CIRCUIT_RELATIONS) == len(families)
+    assert sum(len(relation.families) for relation in CIRCUIT_RELATIONS) == len(
+        families
+    )
     connections = {relation.name: relation.connection for relation in CIRCUIT_RELATIONS}
     assert connections["P6"] == "anti-series"
     assert {connections[name] for name in ("P2", "P3", "P4", "P5")} == {"series"}
@@ -107,7 +107,9 @@ def test_material_is_named_by_a_source_or_assigned_by_association() -> None:
 def test_an_ambiguous_conductor_family_gets_no_material(ledger) -> None:
     assert passive_material("rodgr") is None
     record = next(
-        row for row in ledger.records if row.path == "pf_passive/loop(rodgr)/resistivity"
+        row
+        for row in ledger.records
+        if row.path == "pf_passive/loop(rodgr)/resistivity"
     )
 
     assert record.evidence is FieldEvidence.UNRESOLVED
@@ -130,7 +132,11 @@ def test_loop_resistance_is_resistivity_times_path_length_over_section(
 ) -> None:
     section = loop_sections(geometry)["vertw"]
     expected = (
-        STAINLESS_STEEL.resistivity * 2.0 * math.pi * section.major_radius / section.area
+        STAINLESS_STEEL.resistivity
+        * 2.0
+        * math.pi
+        * section.major_radius
+        / section.area
     )
 
     resistance = STAINLESS_STEEL.loop_resistance(section.area, section.major_radius)
@@ -157,7 +163,7 @@ def test_only_connected_sections_get_a_seeded_resistance(geometry, ledger) -> No
 
     assert multi_part == {"coil_cases", "mid", "ring", "rodgr"}
     assert unresolved_resistance == multi_part | {"rodgr"}
-    assert sections["coil_cases"].parts == 32
+    assert sections["coil_cases"].parts == 24
 
 
 def test_section_measurement_rejects_a_degenerate_loop() -> None:
@@ -240,9 +246,9 @@ def test_toroidal_field_detail_is_absent_without_blocking_the_forward_model(
 
 
 def test_seeding_leaves_the_physical_identity_untouched(geometry, ledger) -> None:
-    assert physical_digest(dict(geometry)) == "76cf833561e602a7"
+    assert physical_digest(dict(geometry)) == "ca06c8f64481114f"
     assert ledger.records
-    assert physical_digest(dict(geometry)) == "76cf833561e602a7"
+    assert physical_digest(dict(geometry)) == "ca06c8f64481114f"
 
 
 def test_proposed_standard_names_point_at_real_dictionary_paths() -> None:

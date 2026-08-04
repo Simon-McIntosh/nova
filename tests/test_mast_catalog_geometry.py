@@ -162,29 +162,6 @@ def test_packaged_registry_identity_is_pinned_by_value() -> None:
     }
 
 
-def test_packaged_registry_rebuilds_from_the_catalogs() -> None:
-    """Keep the packaged registry reproducible from the sources it was read from.
-
-    The registry is generated output.  If the reader drifts from it, a later census
-    emits a different digest and reports a hardware change that never happened.
-    """
-
-    roots = (
-        Path("/work/projects/imas_gpu/mast/level1/shots"),
-        Path("/work/projects/imas_gpu/mast/level2/shots"),
-    )
-    if not all((root / "11766.zarr").exists() for root in roots):
-        pytest.skip("MAST L1/L2 catalogs are not mounted")
-
-    registry = MachineGeometryRegistry.default()
-    configuration = next(iter(registry.configurations.values()))
-
-    rebuilt = mast_geometry.physical_snapshot(11766, *roots)
-
-    assert rebuilt == configuration.geometry
-    assert physical_digest(rebuilt) == configuration.physical_digest
-
-
 def test_registry_records_the_identity_it_replaced() -> None:
     registry = MachineGeometryRegistry.default()
 

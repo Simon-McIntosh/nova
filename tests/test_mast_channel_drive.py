@@ -240,17 +240,19 @@ def test_the_records_stay_inside_the_machines_the_sources_describe(ledger):
             assert record.source.machine in {"mast", "mast-and-mast-u"}
 
 
-def test_the_archive_ratio_agrees_with_the_recorded_corroboration():
-    """The measured channel ratio matches the multiplier the cohort recorded."""
+def test_the_channel_ratio_and_the_turn_count_stay_one_number():
+    """The ratio a channel carries and the count a coil has are the same integer.
+
+    They are two readings of one measurement, so writing them down separately
+    would let them drift apart while both looked authoritative.
+    """
 
     recorded = {
-        row.family: row.archive_multiplier
-        for row in VACUUM_FITTED_TURNS
-        if row.archive_multiplier is not None
+        row.family: row.published_turns for row in VACUUM_FITTED_TURNS if row.published
     }
-    assert recorded
-    for family, multiplier in recorded.items():
-        assert MEASURED_AMPERE_TURN_RATIOS[family] == multiplier
+    assert len(recorded) == len(MEASURED_AMPERE_TURN_RATIOS)
+    for family, turns in recorded.items():
+        assert MEASURED_AMPERE_TURN_RATIOS[family] == float(turns)
 
 
 def test_a_drive_map_round_trips_through_canonical_json(drives):

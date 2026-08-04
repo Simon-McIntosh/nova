@@ -22,6 +22,7 @@ from nova.imas.machine_evidence import EvidenceLedger, FieldEvidence
 from nova.imas.mast_fitted_parameters import (
     AXIAL_PROBE_FAMILIES,
     RADIAL_PROBE_FAMILY,
+    WORST_PUBLISHED_OFFSET,
     VACUUM_FITTED_TURNS,
     authored_turns,
     fitted_evidence,
@@ -69,7 +70,7 @@ from nova.imas.mast_vacuum_response import (
 )
 
 REFINED_SEMANTIC_IDENTITY = (
-    "sha256:85993ba9491bd16498d0c42d49c0f1dca3da493affcb55e78511b7e1f88fff16"
+    "sha256:c20bc7e157fa117318883826373f41ea03e8539011b16c0265cc88d4cb203f06"
 )
 """Semantic address of the refined revision this worktree authors."""
 
@@ -546,29 +547,75 @@ def test_a_group_without_a_section_is_refused(geometry, model):
 # --- what was authored ------------------------------------------------
 
 
-def test_counted_coils_carry_an_integer_and_bounded_ones_do_not():
-    """The three dispositions are distinguishable in the pinned results."""
+def test_each_coil_states_which_route_established_its_count():
+    """A published count, a fitted one and an unreachable one stay distinguishable."""
 
-    counted = [row for row in VACUUM_FITTED_TURNS if row.counted]
-    bounded = [row for row in VACUUM_FITTED_TURNS if row.identified and not row.counted]
+    published = [row for row in VACUUM_FITTED_TURNS if row.published]
+    fitted = [
+        row for row in VACUUM_FITTED_TURNS if row.identified and not row.published
+    ]
     absent = [row for row in VACUUM_FITTED_TURNS if not row.identified]
     assert {row.family for row in absent} == {"p6_lower", "p6_upper"}
-    assert len(counted) == 6
-    assert len(bounded) == 5
-    for row in counted:
+    assert len(published) == 10
+    assert {row.family for row in fitted} == {"sol"}
+    for row in published:
+        assert row.turns == float(row.published_turns)
         assert row.turns == float(round(row.turns))
-        assert row.half_width < 0.5
-    for row in bounded:
-        assert row.half_width >= 0.5
 
 
-def test_the_archive_multiplier_matches_every_coil_it_covers():
-    """Where the archive states a multiplier, the fit lands on it."""
+def test_the_published_count_is_corroborated_by_an_independent_fit():
+    """Each published integer is reached again by measuring the field.
 
-    covered = [row for row in VACUUM_FITTED_TURNS if row.archive_multiplier is not None]
+    The two routes are independent: one divides two published current channels,
+    the other predicts the probes from the registry outlines and the measured
+    current.  Agreement is therefore a check on the description and not a
+    restatement of the archive.
+    """
+
+    covered = [row for row in VACUUM_FITTED_TURNS if row.published]
     assert covered
     for row in covered:
-        assert abs(row.multiplier - row.archive_multiplier) < 0.1
+        assert abs(row.corroboration) <= WORST_PUBLISHED_OFFSET + 1.0e-6
+
+
+def test_a_published_interval_is_never_narrower_than_its_disagreement():
+    """An exact integer is not reported with an interval that asserts agreement.
+
+    The archive's integer is exact as a statement; what is uncertain is whether this
+    description reproduces the field it implies.  So the interval has to be at least
+    as wide as the distance the fit lands from it -- a zero-width interval on an
+    exact integer would claim the agreement rather than measure it.
+    """
+
+    for row in VACUUM_FITTED_TURNS:
+        if not row.published:
+            continue
+        published = float(row.published_turns)
+        half = 0.5 * (row.interval.upper - row.interval.lower)
+        assert half >= abs(row.fitted_turns - published) - 1.0e-9
+        assert row.interval.contains(published)
+        assert row.interval.contains(row.fitted_turns)
+
+
+def test_one_coil_disagrees_and_the_record_says_so():
+    """P5 lower rounds to twenty-four, and that is kept visible.
+
+    Its experiments split by campaign rather than scatter, so the disagreement is
+    a systematic no term in this description carries.  Recording it as agreement
+    would hide the largest unexplained term this route has found.
+    """
+
+    row = fitted_turns("p5_lower")
+    assert row.published_turns == 23
+    assert not row.agrees_with_published
+    assert round(row.fitted_turns) == 24
+    assert row.turns == 23.0
+    others = [
+        item
+        for item in VACUUM_FITTED_TURNS
+        if item.published and item.family != "p5_lower"
+    ]
+    assert all(item.agrees_with_published for item in others)
 
 
 def test_the_solenoid_turn_count_doubles_its_fitted_multiplier():
@@ -601,7 +648,9 @@ def test_fitted_evidence_is_a_valid_ledger():
     ledger = EvidenceLedger.create(fitted_evidence())
     ledger.validate()
     counts = ledger.state_counts()
-    assert counts["fitted"] == 12
+    assert counts["published"] == 10
+    assert counts["fitted"] == 2
+    assert counts["measured"] == 4
     assert counts["unresolved"] == 6
 
 

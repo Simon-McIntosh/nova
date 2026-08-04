@@ -1005,6 +1005,130 @@ def aggregate_turns(
     return tuple(dispositions)
 
 
+ADMISSIBLE_SCALE = (0.75, 1.25)
+"""How far a shot's measured amplitude may sit from the published turns.
+
+A shot whose probes read half what the archive's own turn counts predict has not
+measured a different machine.  Matched pairs exist in the store -- two shots
+holding one coil at the same current to a tenth of a percent, every excitation
+channel agreeing, and every probe reading a factor of two apart with the field's
+shape across the array unchanged -- so the discrepancy is an amplitude the
+magnetics side applied and not a field the coils produced.  Such a shot cannot
+measure a turn count, because the count and the amplitude enter the prediction as
+one product.
+
+The interval is set to admit the cross-campaign disagreement that the clean shots
+genuinely show, which is several percent and is itself a real limit on this route,
+while refusing the factor of two.  It is deliberately far from both, because
+nothing occurs in between: the clean shots land inside a tenth and the anomalous
+ones near a half.
+"""
+
+
+@dataclass(frozen=True, order=True)
+class PublishedScale:
+    """How well one shot's field matches the turn count the archive publishes.
+
+    ``scale`` is the single number multiplying the prediction built from the
+    published turn counts that best reproduces what the probes read.  It is one
+    when the archive's counts, the measured currents and the registry geometry
+    agree, and it is the quantity a turn fit would otherwise absorb into the count
+    itself -- which is why it is measured separately before any count is promoted.
+    """
+
+    shot: int
+    families: tuple[str, ...]
+    scale: float
+    probe_spread: float
+    probe_count: int
+    residual_rms: float
+    signal_rms: float
+
+    @property
+    def admissible(self) -> bool:
+        """Return whether this shot's amplitude lets it measure a turn count."""
+
+        lower, upper = ADMISSIBLE_SCALE
+        return math.isfinite(self.scale) and lower <= self.scale <= upper
+
+    @property
+    def variance_explained(self) -> float:
+        """Return the share of signal power the scaled published turns reproduce."""
+
+        if self.signal_rms <= 0.0:
+            return 0.0
+        return float(1.0 - (self.residual_rms / self.signal_rms) ** 2)
+
+    def as_dict(self) -> dict[str, Any]:
+        """Return the canonical JSON representation."""
+
+        return {
+            "admissible": self.admissible,
+            "families": list(self.families),
+            "probe_count": self.probe_count,
+            "probe_spread": float(self.probe_spread),
+            "residual_rms": float(self.residual_rms),
+            "scale": float(self.scale),
+            "shot": self.shot,
+            "signal_rms": float(self.signal_rms),
+            "variance_explained": float(self.variance_explained),
+        }
+
+
+def published_turn_scale(
+    waveforms: ShotWaveforms,
+    model: ResponseModel,
+    published: Mapping[str, float],
+    *,
+    stride: int = 1,
+) -> PublishedScale:
+    """Measure one shot's amplitude against the archive's own turn counts.
+
+    Only the coils this shot drove and the archive publishes a count for enter the
+    prediction, so the scale answers for those coils and is not diluted by a coil
+    whose count is what the cohort is trying to find.  The scatter of the same
+    ratio taken probe by probe is reported alongside: an amplitude the acquisition
+    applied moves every probe together and leaves that scatter unchanged, while a
+    geometry error moves the probes differently and shows up there.
+    """
+
+    driven = tuple(
+        family
+        for family in excited_families(waveforms, model.families)
+        if family in published and math.isfinite(float(published[family]))
+    )
+    if not driven:
+        raise ResponseError(
+            f"shot {waveforms.shot} drove no coil the archive publishes a count for"
+        )
+    reduced = model.select(driven)
+    design, observed, used = reduced.design(waveforms, stride=stride)
+    weights = np.asarray([float(published[family]) for family in driven], dtype=float)
+    predicted = design @ weights
+    power = float(predicted @ predicted)
+    if power <= 0.0:
+        raise ResponseError(f"shot {waveforms.shot} predicts no signal from its drives")
+    scale = float(predicted @ observed) / power
+    error = observed - scale * predicted
+    rows = observed.size // max(len(used), 1)
+    per_probe = []
+    for index in range(len(used)):
+        block = slice(index * rows, (index + 1) * rows)
+        part, seen = predicted[block], observed[block]
+        local = float(part @ part)
+        if local > 0.0:
+            per_probe.append(float(part @ seen) / local)
+    return PublishedScale(
+        shot=waveforms.shot,
+        families=driven,
+        scale=scale,
+        probe_spread=float(np.std(per_probe)) if per_probe else float("nan"),
+        probe_count=len(used),
+        residual_rms=float(np.sqrt(np.mean(error**2))),
+        signal_rms=float(np.sqrt(np.mean(observed**2))),
+    )
+
+
 def probe_residuals(
     waveforms: ShotWaveforms,
     model: ResponseModel,

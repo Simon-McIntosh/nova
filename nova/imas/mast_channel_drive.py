@@ -47,7 +47,11 @@ from nova.imas.machine_evidence import (
     SourceReference,
     Uncertainty,
 )
-from nova.imas.mast_fitted_parameters import fitted_turns
+from nova.imas.mast_fitted_parameters import (
+    PUBLISHED_RATIO_SHOTS,
+    PUBLISHED_TURN_RATIOS,
+    fitted_turns,
+)
 from nova.imas.mast_passive_response import (
     CASE_FAMILY,
     CASE_PROXIMITY,
@@ -69,30 +73,25 @@ CASE_TURNS = 1.0
 """Turns a shorted axisymmetric coil case carries: it closes on itself once."""
 
 MEASURED_AMPERE_TURN_RATIOS = {
-    "p2_inner_lower": 12.0,
-    "p2_inner_upper": 12.0,
-    "p2_outer_lower": 8.0,
-    "p2_outer_upper": 8.0,
-    "p3_lower": 8.0,
-    "p3_upper": 8.0,
-    "p4_lower": 23.0,
-    "p4_upper": 23.0,
-    "p5_lower": 23.0,
-    "p5_upper": 23.0,
+    family: float(turns) for family, turns in PUBLISHED_TURN_RATIOS.items()
 }
 """Constant the archive multiplies each conductor-current channel by.
 
 Measured, not fitted: the store publishes both channels of the pair for these ten
-coils, their ratio is constant over the driven samples of every shot checked, and
-it is the same exact integer in each.  That is what makes the ampere-turn channel
-usable at unit weight -- the multiplication has already happened, and this is the
-number that happened.  It is read here as a statement about the channel and never
-as a turn count, which is why it does not replace the cohort's fitted counts even
-where the two agree.
+coils, and their ratio is the same exact integer on every shot that carries both.
+That is what makes the ampere-turn channel usable at unit weight -- the
+multiplication has already happened, and this is the number that happened.
+
+The same ratio does double duty, and the two readings must not be confused.  Read
+as a property of the CHANNEL it says one ampere already drives one ampere turn,
+which is what this table is for.  Read as a property of the COIL it states the turn
+count, which is what promotes ten of the thirteen counts in
+:mod:`nova.imas.mast_fitted_parameters` -- so the two live in one place rather than
+being written down twice and allowed to drift apart.
 """
 
-AMPERE_TURN_RATIO_SHOTS = 8
-"""Excitation shots the constant ratio was checked on, one channel pair at a time."""
+AMPERE_TURN_RATIO_SHOTS = PUBLISHED_RATIO_SHOTS
+"""Shots the constant ratio holds on, for the least-carried of the ten pairs."""
 
 _TWO_TERMINAL_CIRCUITS = frozenset({"P3", "P4", "P5", "P6"})
 """Circuits whose whole published relation is a junction between two coils.
@@ -508,9 +507,9 @@ def _active_drive_records(
                 last_shot=last_shot,
                 statement=(
                     f"{ampere_turn_channel} is {feed_channel} multiplied by "
-                    f"{ratio:g} in every one of {AMPERE_TURN_RATIO_SHOTS} excitation "
-                    "shots, so it already reports ampere turns and one ampere of it "
-                    "drives one ampere turn"
+                    f"{ratio:g} on every one of at least {AMPERE_TURN_RATIO_SHOTS} "
+                    "shots that carry both, so it already reports ampere turns and "
+                    "one ampere of it drives one ampere turn"
                 ),
                 source=_shot_store(
                     f"channel pair {ampere_turn_channel} and {feed_channel}"

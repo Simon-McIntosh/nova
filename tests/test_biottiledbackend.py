@@ -158,7 +158,7 @@ def test_a_tile_larger_than_the_plan_is_refused():
     sections, target_r, target_z = mesh(6)
     edge, weight, norm = polygon.pad_batch(sections)
     plan = TilePlan(target_tile=3, source_tile=3, block=8, n_panels=4, n_nodes=8)
-    with pytest.raises(ValueError, match="exceeds the plan"):
+    with pytest.raises(ValueError, match="exceeds the configured shape"):
         tile_evaluator(plan)(target_r, target_z, edge, weight, norm)
 
 

@@ -18,12 +18,12 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-04">
-<meta name="plan-impl" content="0.85">
-<meta name="plan-version" content="15">
+<meta name="plan-impl" content="0.88">
+<meta name="plan-version" content="16">
 <meta name="plan-sprint" content="S2">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-commits" content="81fb0cfc2961cd4cda83bd048af6d37062e48f5e,e286bb59cd456fa0ab8f9bb40a0b77a60319eec2,943c3069700397e48840691298c9c4bf2fac7412,f4e478e315e1786c55df733e95e110e1fd6eea87,ac42194c,ee107ed4">
+<meta name="plan-commits" content="81fb0cfc2961cd4cda83bd048af6d37062e48f5e,e286bb59cd456fa0ab8f9bb40a0b77a60319eec2,943c3069700397e48840691298c9c4bf2fac7412,f4e478e315e1786c55df733e95e110e1fd6eea87,ac42194c,ee107ed4,28872e4f">
 <meta name="plan-artifacts" content="docs/mast-quantity-inventory.html,docs/figures/mast-machine-description/source_cocos_audit.json,docs/figures/mast-machine-description/campaign_fingerprints.png,docs/figures/mast-machine-description/fingerprint_interleaving.png,docs/research/mast-diagnostic-force-balance-artifacts-landed.html,docs/figures/mast-diagnostic-force-balance/readiness-flow.svg">
 </head>
 <body>
@@ -627,6 +627,9 @@ Done when
 </div>
 <div class="r-comment" data-section="_top" data-id="c-mmd-vacuum-refinement-landed" data-who="reckon-ship" data-when="2026-08-04">
     <div class="r-comment-body">Vacuum-response identification landed at ee107ed4: 37 new focused tests, integrated lane 3,503 passed (job 1240367). Two measured method facts worth keeping: probes closer than two winding-pack widths to an excited coil bias turn counts (28 vs 23) and must be dropped with the pack width, not the diagonal, as the scale; and only the archive's sustained (~0.62 s) individual-coil experiments measure turn counts — in the ~6 ms pulsed kind the coil case carries up to half the feed current at probe-read time. A registry defect was found and carried in the artifact evidence (not yet in nova/catalog, which would move the pinned physical digest): the obr probe family is radial (fitted residual 6.78e-3 T vs 9.15e-3 T for the registry's pi/2 value), so 19 probes would otherwise report the wrong field component — correction queued with mast-catalog-geometry-recovery.</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-mmd-drive-semantics-landed" data-who="reckon-ship" data-when="2026-08-04">
+    <div class="r-comment-body">Electrical drive semantics landed at nova 28872e4f (new semantic identity 68f64209…f351; physical and registry digests unchanged; evidence now 20 measured / 12 published / 37 generated / 24 fitted / 21 unresolved; lane 3,529 passed, job 1240422). The drive map converts turn evidence into forward-operator column weights: 31 channels → 21 driven conductor columns — solenoid sol_current at 344.657±11.68 A·turn/A (fitted; the 689.313 turn count × the published two-parallel feed split), ten *_coil_current channels at 1.0 (measured amp-turns, ratio-channel corroborated), *_feed_current channels at the authored turn counts, P6 channels at 1.0 (published ampere-turn semantics), and eight *_case_current channels at 1.0 split across enclosure plates by section area — reproducing efm's own convention exactly on 20 of 21 columns including the non-uniform case weights. DD 4.1.1 pf_active/circuit/connections authored for the P3/P4/P5 series pairs and P6 anti-series; supply inventory, P2 pack interconnection and the intra-coil solenoid parallel relation stay explicitly unset with reasons. Artifact publication now goes through an explicit `mast-machine-artifact --revision {seeded,refined}` CLI; the script that silently published the superseded seeded revision is deleted. ONE REAL DISAGREEMENT recorded: efm carries 328 solenoid amp-turns per feed-ampere (656 × 0.5) which lies OUTSIDE the cohort-fitted interval [332.97, 356.34]; the frozen-set parity residual adjudicates which description fits the measured probes.</div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-mmd-registry-ids-landed" data-who="reckon-ship" data-when="2026-07-31T10:06:00+02:00">
     <div class="r-comment-body">Nova main 8c790cbc now carries the immutable physical registry and DD 4.1.1 authoring/reopen seam. The registry has one configuration, three representation aliases, and 17 explicit source gaps; 19 focused tests and the 3,307-test integrated default lane passed. Catalog-backed outlines, limiter, sourced poloidal orientation, loop spans and direction-neutral saddle paths round-trip. Turns/polarity/circuit wiring, passive material/resistance/topology, independent toroidal probe orientation, saddle traversal sign, detailed TF geometry and other missing poses remain unset and continue to block a complete machine description.</div>

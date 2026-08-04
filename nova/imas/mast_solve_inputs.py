@@ -777,11 +777,17 @@ def unmapped_current_blocked(machine: DescribedMachine) -> tuple[BlockedSignal, 
                 unmet="no non-axisymmetric conductor description exists",
             )
         )
-    pairs = {
-        "p2l": ("p2_inner_lower", "p2_outer_lower"),
-        "p2u": ("p2_inner_upper", "p2_outer_upper"),
-    }
-    for prefix, conductors in sorted(pairs.items()):
+    for prefix, side in (("p2l", "lower"), ("p2u", "upper")):
+        conductors = tuple(
+            name
+            for name in machine.coils
+            if name.startswith("p2_") and name.endswith(f"_{side}")
+        )
+        carried = (
+            f"{len(conductors)} separate conductors, {', '.join(conductors)},"
+            if conductors
+            else "separate conductors,"
+        )
         blocked.append(
             BlockedSignal(
                 source_group=CURRENT_GROUP,
@@ -789,9 +795,8 @@ def unmapped_current_blocked(machine: DescribedMachine) -> tuple[BlockedSignal, 
                 target_path="pf_active/coil/current/data",
                 reason=(
                     "this channel reports the ampere turns of a coil set the "
-                    f"description carries as two conductors, {conductors[0]} and "
-                    f"{conductors[1]}, and no source states how the set's excitation "
-                    "divides between them"
+                    f"description carries as {carried} and no source states how the "
+                    "set's excitation divides between them"
                 ),
                 unmet=(
                     "the interconnection of the two packs of this coil set is not "

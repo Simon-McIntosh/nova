@@ -465,6 +465,16 @@ def test_the_served_rows_cover_every_described_probe(description, published_map)
         )
 
 
+def test_a_set_level_channel_names_the_conductors_it_spans(description, published_map):
+    """The obstruction is read off the description, so it names the packs it spans."""
+
+    blocked = {row.source_channel: row for row in published_map.blocked}
+    reason = blocked["p2l_current"].reason
+    assert "p2_inner_lower" in reason
+    assert "p2_outer_lower" in reason
+    assert "interconnection" in blocked["p2l_current"].unmet
+
+
 @_needs_store
 def test_the_loop_join_is_a_property_of_the_configuration(description):
     """The join must not depend on which shot's measured positions it was taken from."""

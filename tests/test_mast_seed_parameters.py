@@ -18,8 +18,12 @@ import pytest
 from nova.catalog.mast_geometry import MachineGeometryRegistry, physical_digest
 from nova.imas.machine_evidence import FieldEvidence
 from nova.imas.mast_seed_parameters import (
+    CASE_CURRENT_IDENTIFYING_SHOTS,
     CIRCUIT_RELATIONS,
     INCONEL,
+    INSTRUMENTED_CASE_GROUPS,
+    MEASURED_DECAY_BAND,
+    NOMINAL_SLOWEST_MODE,
     MAST_MACHINE_SCOPES,
     PROPOSED_STANDARD_NAMES,
     STAINLESS_STEEL,
@@ -174,10 +178,10 @@ def test_section_measurement_rejects_a_degenerate_loop() -> None:
 def test_seeded_ledger_states_every_field_it_touches(ledger) -> None:
     assert ledger.state_counts() == {
         "measured": 8,
-        "published": 8,
-        "generated": 28,
+        "published": 9,
+        "generated": 29,
         "fitted": 0,
-        "unresolved": 16,
+        "unresolved": 15,
     }
     assert ledger.paths_with_state(FieldEvidence.UNRESOLVED) == (
         "magnetics/b_field_phi_probe/toroidal_angle",
@@ -185,7 +189,6 @@ def test_seeded_ledger_states_every_field_it_touches(ledger) -> None:
         "magnetics/b_field_pol_probe/position/phi",
         "magnetics/b_field_pol_probe/toroidal_angle",
         "magnetics/flux_loop(saddle)/traversal_sign",
-        "pf_active/circuit(P2)/connections",
         "pf_active/circuit/connections",
         "pf_active/coil/element/turns_with_sign",
         "pf_passive/loop(coil_cases)/resistance",
@@ -197,6 +200,80 @@ def test_seeded_ledger_states_every_field_it_touches(ledger) -> None:
         "tf/coils_n",
         "tf/r0",
     )
+
+
+def test_the_decay_calibration_records_its_negative_result(ledger) -> None:
+    """The nominal resistivity carries the reason a fit did not replace it.
+
+    A negative result that lives only in a report is invisible to every reader of
+    the description, and the next pass repeats the work.  So the record states that
+    the fit was run, what it could not identify, and the corroboration that makes
+    the seed a tested value: the predicted slowest mode sits inside the band the
+    probe decays measure.
+    """
+
+    record = next(
+        row for row in ledger.records if row.path == "pf_passive/loop/resistivity"
+    )
+    assumptions = " ".join(record.assumptions)
+
+    assert record.evidence is FieldEvidence.GENERATED
+    assert "could not identify a resistivity" in record.statement
+    assert MEASURED_DECAY_BAND[0] < NOMINAL_SLOWEST_MODE <= MEASURED_DECAY_BAND[1]
+    assert "71.9 ms" in assumptions
+    assert "ramps slower than" in assumptions
+    assert "does not generalise" in assumptions
+    assert "leave their profile open at a search bound" in assumptions
+
+
+def test_the_record_names_the_measurement_that_would_identify_a_resistance(
+    ledger,
+) -> None:
+    """A negative result should hand on the lever it found but did not spend.
+
+    The eight instrumented case-current channels are transducer readings of
+    induced current per case group, and the excited coil's own case dominates them
+    on every shot that carries them.  That is the identifiability the probe array
+    lacks, so the record names it rather than leaving the next pass to rediscover
+    it.
+    """
+
+    record = next(
+        row for row in ledger.records if row.path == "pf_passive/loop/resistivity"
+    )
+    assumptions = " ".join(record.assumptions)
+
+    assert "coil-case " in assumptions and "current channels" in assumptions
+    assert str(INSTRUMENTED_CASE_GROUPS) in assumptions
+    assert str(CASE_CURRENT_IDENTIFYING_SHOTS) in assumptions
+    assert "instrument readings" in assumptions
+
+
+def test_the_p2_packs_are_published_as_separately_fed(ledger) -> None:
+    """Two currents measured on one shot settle the pack interconnection.
+
+    A series connection cannot carry nine kiloamperes in one pack and thirty
+    amperes in the other, so this is excluded by measurement rather than argued
+    from plausibility -- which is why the record is published rather than fitted.
+    """
+
+    record = next(
+        row for row in ledger.records if row.path == "pf_active/circuit(P2)/connections"
+    )
+    assert record.evidence is FieldEvidence.PUBLISHED
+    assert "no common current" in record.statement
+    assert record.source is not None
+    assert "feed-current" in record.source.locator
+
+
+def test_the_supply_inventory_stays_unauthorable(ledger) -> None:
+    """Knowing the packs are separate says nothing about how many supplies exist."""
+
+    record = next(
+        row for row in ledger.records if row.path == "pf_active/circuit/connections"
+    )
+    assert record.evidence is FieldEvidence.UNRESOLVED
+    assert any("controllable outputs" in row for row in record.assumptions)
 
 
 def test_turns_are_the_only_axisymmetric_forward_model_blocker(ledger) -> None:

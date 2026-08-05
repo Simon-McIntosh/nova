@@ -70,15 +70,15 @@ from nova.imas.mast_vacuum_response import (
 )
 
 REFINED_SEMANTIC_IDENTITY = (
-    "sha256:3aba565a2e407a621c38ec1abc0d458752bf5be85a225e8f8b077c7bd3d9ea78"
+    "sha256:18c75c19493714108fc71f88a55cc775836218e489e073f43942fd007d937bdc"
 )
 """Semantic address of the refined revision this worktree authors.
 
-It moves whenever the evidence ledger gains a record, which is the behaviour the
-identity split exists for: what the description asserts about a field has changed
-while the conductor geometry has not, so :data:`PHYSICAL_DIGEST` and
-:data:`REGISTRY_DIGEST` are pinned beside it and a change in either is a fault
-rather than an update.
+It moves whenever the evidence ledger gains or restates a record, which is the
+behaviour the identity split exists for: what the description asserts about a
+field has changed while the conductor geometry has not, so
+:data:`PHYSICAL_DIGEST` and :data:`REGISTRY_DIGEST` are pinned beside it and a
+change in either is a fault rather than an update.
 """
 
 PHYSICAL_DIGEST = "ca06c8f64481114f"

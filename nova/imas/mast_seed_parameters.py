@@ -351,6 +351,58 @@ CIRCUIT_RELATIONS = (
 
 _PASSIVE_TURNS_PER_SECTION = 1.0
 
+DECAY_CALIBRATION_TRANSIENTS = 100
+"""Dedicated decay experiments the passive resistance was tested against.
+
+Of a hundred and thirteen candidates in the designed classes -- sustained
+single-coil pulses, sustained symmetric pairs and pulsed shots.  The thirteen
+refusals are the eight-shot amplitude refusal that carries through from the
+acquisition sweep, shots with no readable common window, and one shot whose
+measured residual drive accounted for most of its transient.
+"""
+
+NOMINAL_SLOWEST_MODE = 0.0719
+"""Slowest decay time the nominal resistivity predicts on the exact inductance [s].
+
+Computed from the geometric flux linkage of the fifty-seven passive circuits with
+the published bulk resistivities, nothing fitted.  It is quoted because it lands
+inside the band the probe decays measure, which is what makes the seed a
+corroborated value rather than an untested one.
+"""
+
+MEASURED_DECAY_BAND = (0.0229, 0.0719)
+"""Range of dominant decay times the probe array measures directly [s].
+
+Read off the free decays themselves by decomposition, independent of any circuit
+model, so it is the observation the predicted spectrum has to sit inside.
+"""
+
+INSTRUMENTED_CASE_GROUPS = 8
+"""Coil-case groups whose induced current the store measures directly.
+
+The lower and upper case of each of P2, P3, P4 and P5.  Unlike the per-family
+passive currents, which are a reconstruction's own wall-model output, these are
+transducer readings, so they can ground a fit rather than only corroborate one.
+The two P6 case groups carry no such channel, which is why they stay induced.
+"""
+
+CASE_CURRENT_IDENTIFYING_SHOTS = 37
+"""Decay shots on which a case channel identifies its own coil unambiguously.
+
+Every single-coil-set decay shot in the calibration cohort that carries the case
+channels.  On all of them the case of the coil that was driven reads the largest
+current of the eight, which is what establishes that these channels measure
+induced current per group rather than a common pickup.
+"""
+
+CASE_CURRENT_CONTRAST = 8.1
+"""How far the driven coil's own case current stands above the others.
+
+Median over :data:`CASE_CURRENT_IDENTIFYING_SHOTS` of the excited case's peak
+divided by the median peak of the other seven; the range runs from 2.5 to 54.
+A contrast this large per group is the identifiability the probe array lacks.
+"""
+
 
 @dataclass(frozen=True)
 class ProposedStandardName:
@@ -462,22 +514,42 @@ def _active_records(first_shot: int, last_shot: int) -> list[EvidenceRecord]:
                 "the coil grouping and connection kind each circuit needs are "
                 "recorded per circuit and become authorable once the supply "
                 "inventory is sourced",
+                "the store's channel set bounds the inventory from below without "
+                "fixing it: thirteen coil feeds are commanded independently, which "
+                "says at least that many controllable outputs exist and nothing about "
+                "how many supplies provide them or how their terminals are shared",
             ),
         ),
         EvidenceRecord(
             path="pf_active/circuit(P2)/connections",
-            evidence=FieldEvidence.UNRESOLVED,
+            evidence=FieldEvidence.PUBLISHED,
             first_shot=first_shot,
             last_shot=last_shot,
             statement=(
-                "the published relation covers the upper-to-lower pairing of the "
-                "coil set, not whether the inner and outer winding packs are "
-                "connected to each other"
+                "the inner and outer winding packs of a P2 coil carry no common "
+                "current: the store publishes one feed-current channel per pack and "
+                "drives either pack while the other sits at its pickup floor, and the "
+                "set channel is the sum of the two packs' ampere-turns rather than a "
+                "current they share"
             ),
             assumptions=(
-                "the catalog resolves four separate P2 outlines, so the pack "
-                "interconnection is a distinct electrical question from the "
-                "documented up-down pairing",
+                "two channels of one shot reading nine kiloamperes and thirty amperes "
+                "measure two different currents, so a series connection between the "
+                "packs is excluded rather than thought unlikely",
+                "producing that split across shared terminals would need an impedance "
+                "ratio of some hundreds between two similar packs, and each pack "
+                "carries its own feed measurement, so they are separately fed rather "
+                "than paralleled",
+                "the pack ampere-turn ratios these channels carry are exact integers, "
+                "twelve inner and eight outer, which is what makes the set channel's "
+                "agreement with their sum a statement about the coil rather than a "
+                "coincidence of scaling",
+                "this fixes how the packs relate to each other and not how many "
+                "supplies feed them, so the node matrix stays unauthorable",
+            ),
+            source=catalog_source(
+                "level-1 amc per-pack feed-current, per-pack ampere-turn and "
+                "set ampere-turn channels"
             ),
         ),
     ]
@@ -528,6 +600,67 @@ def _passive_records(
                 "is invariant under their subdivision"
             ),
             source=catalog_source("level-2 pf_passive named component arrays"),
+        ),
+        EvidenceRecord(
+            path="pf_passive/loop/resistivity",
+            evidence=FieldEvidence.GENERATED,
+            first_shot=first_shot,
+            last_shot=last_shot,
+            statement=(
+                "the nominal bulk resistivities stand: a mode-resolved fit of the "
+                f"{DECAY_CALIBRATION_TRANSIENTS} dedicated decay experiments against "
+                "the exact geometric inductance could not identify a resistivity for "
+                "any class of conductor, and the nominal values already reproduce the "
+                "measured decay band"
+            ),
+            assumptions=(
+                "the inductance is exact rather than fitted, so a decay time converts "
+                "straight to a resistance and resistivity is the only unknown a decay "
+                "can carry",
+                "at the nominal resistivity the slowest predicted mode is "
+                f"{NOMINAL_SLOWEST_MODE * 1e3:.1f} ms, inside the "
+                f"{MEASURED_DECAY_BAND[0] * 1e3:.1f} to "
+                f"{MEASURED_DECAY_BAND[1] * 1e3:.1f} ms band the probe decays "
+                "themselves show, which is a corroboration of the seed and not a fit "
+                "to it",
+                "the fitted alternative lowers the training misfit by seven per cent "
+                "while turning two thirds of the modes it uses into ramps slower than "
+                "their own window can resolve, where the nominal model uses none; a "
+                "ramp absorbs baseline error rather than describing a conductor",
+                "scored on the withheld coil with those ramps disallowed the fitted "
+                "model is worse by half, so the training gain does not generalise",
+                "three of the four conductor classes leave their profile open at a "
+                "search bound rather than closing inside it, and the fourth closes "
+                "only across a factor of sixteen, so the diagnostic set does not "
+                "constrain a resistivity per class",
+                "the fitted vessel and coil-case values both imply a resistivity below "
+                "the bulk interval of their own metal, which an ideal ring standing in "
+                "for a real shell cannot reach: cut-outs, joints and longer paths all "
+                "raise resistance, so a value there points at conductor the model does "
+                "not carry rather than at a resistivity",
+                "two classes asking independently for more conductance than their "
+                "measured sections provide is what a welded shell looks like to a "
+                "model that treats each section as its own ring, so the galvanic "
+                "grouping of the vessel sections is the next thing to settle rather "
+                "than the resistivity",
+                "no mode count settles it either: the misfit keeps falling from two "
+                "modes to four while the fitted values move by factors of several, so "
+                "the fit absorbs whatever basis it is given rather than converging",
+                f"a stronger measurement than the probe field exists and this fit did "
+                f"not use it: the store carries {INSTRUMENTED_CASE_GROUPS} coil-case "
+                "current channels, and on every one of the "
+                f"{CASE_CURRENT_IDENTIFYING_SHOTS} single-set decay shots that carry "
+                "them the driven coil's own case reads the largest current, by a "
+                f"median factor of {CASE_CURRENT_CONTRAST:.1f} over the others -- so "
+                "these are instrument readings of induced current per case group "
+                "rather than a reconstruction's output, and they constrain a case "
+                "group individually where the probe array constrains only a class",
+            ),
+            uncertainty=Uncertainty(lower=0.2, upper=20.0, unit="1"),
+            source=_reduced_vessel_model(
+                "abstract; effective vessel resistances are refined against vacuum "
+                "coil-test shots"
+            ),
         ),
         EvidenceRecord(
             path="pf_passive/loop/element/turns_with_sign",

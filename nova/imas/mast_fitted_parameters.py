@@ -654,6 +654,25 @@ weighted by shot count, which describes no shot and moves when the shot selectio
 moves.  Sixteen of them were handed a single gain by an independent route that did
 not resolve the blocks, spanning up to a factor of 4.2 -- which is why the ledger
 below promotes five channels and not thirty.
+
+What describes them instead is a record per block:
+:mod:`~nova.imas.mast_block_scale` carries, for each of these channels, the runs of
+shots it held one setting over and which rung of the declared ladder that setting
+was, and the read path divides that rung out.  So the quantity these channels lack
+is specifically a *static* per-channel scale, not a calibration record.  Five of
+them additionally hold one block whose step does not land on the ladder
+(:data:`ACQUISITION_OFF_LADDER_CHANNELS`); a read inside such a block is refused
+rather than rounded onto a rung, and comes back exactly as published with its
+warrant saying so.
+"""
+
+ACQUISITION_OFF_LADDER_CHANNELS = 5
+"""Stepping channels holding one block whose step is not a ladder rung.
+
+Five blocks of a hundred and thirteen, one channel each.  A step off the ladder is
+not evidence of a range setting, so no factor is divided out there and the block is
+read as published and flagged -- rounding it onto the nearest rung would assert a
+setting the ladder does not support and silently move the channel by the difference.
 """
 
 ACQUISITION_STEP_COUNT = (37, 29)
@@ -1373,8 +1392,11 @@ def sensor_adjudication_records(
             last_shot=last_shot,
             statement=(
                 f"{ACQUISITION_STEPPING_CHANNELS} channels were recorded at more than "
-                "one scale, so no single calibration number describes them and the "
-                "description carries none"
+                "one scale, so no single static calibration number describes them; "
+                "each is described per block of shots and the setting divided out "
+                f"where the channel is read, except in the "
+                f"{ACQUISITION_OFF_LADDER_CHANNELS} blocks whose step is not a ladder "
+                "rung, which are read as published"
             ),
             assumptions=(
                 f"{stepping} scale changes were found and {total} land on a ladder of "
@@ -1388,7 +1410,8 @@ def sensor_adjudication_records(
                 "so what is unresolved is not a sensor property but a per-block "
                 "acquisition setting the level-1 store has not normalised, and it "
                 "belongs on the path that reads a channel rather than in a static "
-                "record here",
+                "record here -- which is where it now lives, keyed by the shots each "
+                "block was measured on rather than by the block's span",
                 "a fit pooling shots across a step sees the two states averaged by "
                 "shot count, which is how a coil amplitude acquires an apparent "
                 "campaign dependence no geometry can explain",

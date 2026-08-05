@@ -26,8 +26,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-05">
-<meta name="plan-version" content="8">
-<meta name="plan-impl" content="0.72">
+<meta name="plan-version" content="9">
+<meta name="plan-impl" content="0.85">
 </head>
 <body>
   <main class="plan-doc">
@@ -249,6 +249,20 @@
     stable, held-out improving; otherwise the nominal value stays with the negative result
     visible. The 2 unchannelled case groups (P6 upper/lower) stay induced.</p>
 
+    <h3>Stage E <span class="badge badge-shipped">✓ landed 2026-08-05 — exact linkage landed, nominal resistance stands</span></h3>
+    <p class="landed-summary">
+    The exact 57-circuit passive L matrix landed on the corrected case geometry (reciprocity
+    3.0e-3, convergence banked; nova <code>2ee8980c</code>; lanes 3988/0 + 522/0 + focused
+    237/0). The dedicated decay experiments give τ ∈ [22.9, 71.9] ms but only 2 decisive
+    attributions; the four-class resistivity fit converges in-sample (+7.2%) and then
+    <strong>fails the promotion contract four ways</strong> (held-out coil flat; the stricter
+    resolvability screen degrades it 30–53%; pedestal check shows mode-flattening; selection
+    unstable) — <strong>nominal resistances stand</strong> as a visible negative, with the
+    identifying measurement named. Positive rider: the P2 pack interconnection published from
+    archive evidence (the stage-B search resolved). Full record:
+    <a href="/nova/research/mast-passive-calibration-landed.html">passive calibration
+    landed</a>.</p>
+
     <h3 id="s3f">Stage F — the floor ladder</h3>
     <p>After each stage lands in the artifact: republish (new semantic identity, physical digest
     moves only through the upstream registry-corrections node), bump the ambix pin, re-stamp the
@@ -423,7 +437,7 @@ Done-when
      written, this resolved.</pre>
     <p class="r-fu-outcome">Stages C+D landed (nova fef981b4 + 9f9ad143). Stage C: five channel scales promoted with intervals; 19 channels carry DISCRETE unnormalised acquisition scales (37 switches, rungs exactly 1/2, 1/√2, √2, 2) — P5-lower closed at 0.37% (4.5% was stepping channels pooled); obv06/obv14 verdict FIELD_SHAPE against the pre-registered 3σ discriminant (candidates: pose or unmodelled conductor); flux loops 25 agreed / 3 promoted (all confirming described positions) / 11 dual-valued; L2 gap confirmed at SEVEN absent loops; EFC floor-check passes (1.75 pT shift), bank assignment measurably unobtainable (~50 kA needed vs 12 kA held) and the position/phi blocker record corrected. Stage D: promoted negative — layout derivable from the chamfer (23 turns) yet refused four ways; uniform density stands. No identity-bearing promotion; physical digest unchanged; semantic → 3aba565a… (republish + re-stamp node dispatched). The read-path block-scale normalisation node is dispatched with the stage-D falsification check (does the displacement sign-flip survive normalised channels). Records: docs/research/mast-sensor-adjudication-landed.html, docs/research/mast-winding-lattice-landed.html</p>
     </article>
-<article class="r-fu" data-id="f-vfr-03" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-create" data-written-at="2026-08-04" data-recommends-skill="/reckon-ship mast-vacuum-floor-recovery §3e" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-vfr-03" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-create" data-written-at="2026-08-04" data-recommends-skill="/reckon-ship mast-vacuum-floor-recovery §3e" data-resolved-at="2026-08-05T08:09:21+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Stage E — passive R/L calibrated on dedicated decay experiments</h4>
     <div class="r-fu-body"><p>Compute exact group inductance from nova.biot on the corrected case
         geometry, fit mode-resolved decay on the dedicated per-coil-pulse and matrix experiments, and
@@ -461,6 +475,7 @@ Done-when
      nominal values stand with the recorded reason.
   3. Artifact republished, lanes green, ladder re-stamp banked, stage-F followup
      written, this resolved.</pre>
+    <p class="r-fu-outcome">Stage E landed (nova 2ee8980c, 14 commits; lanes 3988/0 + 522/0 + 237/0; manifest reconstructed by orchestrator audit after server-overload interruptions — all evidence committed/on disk). POSITIVE: exact 57-circuit passive L matrix on the corrected case geometry (reciprocity 3.0e-3, convergence banked, 7 unsourced-material sections explicit); P2 pack interconnection PUBLISHED from archive evidence (stage-B item 4 resolved); decay machinery gives τ ∈ [22.9, 71.9] ms with dominant shares to 0.998 but only 2 decisive attributions. VERDICT: the four-class resistivity fit converges in-sample (+7.2%, variance 0.70) and fails the promotion contract four ways (held-out coil +0.25% only; stricter resolvability screen degrades 30–53%; pedestal check shows the fit flattens 2/3 of modes where nominal flattens none; selection unstable; only coil_case identified at 0.406× nominal [0.25, 4.0]) — NOMINAL RESISTANCES STAND as a visible negative with the identifying measurement named. Screens held: eight mis-scaled shots refused; block-normalised reads; binding split consumed. Ledger rider done. Record: docs/research/mast-passive-calibration-landed.html</p>
     </article>
 <article class="r-fu" data-id="f-vfr-04" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-create" data-written-at="2026-08-04" data-recommends-skill="/reckon-ship mast-vacuum-floor-recovery §3f" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Stage F — close the ladder and retire the qualified pass</h4>

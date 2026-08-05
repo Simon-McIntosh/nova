@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="mast-passive-calibration-landed">
+  <meta name="plan-title" content="MAST passive calibration — exact linkage landed, nominal resistance stands">
+  <meta name="plan-summary" content="Per-stage record: the exact 57-circuit passive L matrix landed on the corrected case geometry (reciprocity 3e-3, convergence banked); the dedicated decay experiments yield two decisive attributions at τ ∈ [23, 72] ms; the resistance fit converges in-sample but fails the promotion contract on held-out, resolvability and pedestal screens — nominal resistances stand, with the identifying measurement named; the P2 pack interconnection published from archive evidence.">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>MAST passive calibration landed | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+  <h1>Passive calibration — exact linkage landed, nominal resistance stands</h1>
+  <p>Landed 2026-08-05, nova merge <code>2ee8980c</code> (fourteen worker commits, 15 files,
+  11,613 insertions; the node survived one spend-limit and three server-overload interruptions
+  on its incremental commits). Lanes at the final commit: focused 237/0, full fast 3988/0,
+  slow 522/0. Manifest reconstructed by orchestrator audit from the committed records and lane
+  logs (the worker's final report was lost to server overload; all evidence is on disk).
+  Plan: <a href="/nova/plans/mast-vacuum-floor-recovery.html">mast-vacuum-floor-recovery</a>.</p>
+
+  <h2>What landed positively</h2>
+  <ul>
+    <li><strong>The exact group L matrix</strong> (<code>nova/imas/mast_passive_inductance.py</code>):
+    57 toroidal circuits on the corrected case geometry (physical digest
+    <code>ca06c8f64481114f</code>, registry shot 11766), each passive section its own circuit
+    with exact two-section flux linkage — 18,358 quadrature points, reciprocity residual
+    3.0e-3, convergence banked (2 vs 4 cells across thickness: self-term shift median 0.27%,
+    eigenvalue shift ≤5.8%). Seven unsourced-material sections recorded explicitly.</li>
+    <li><strong>The P2 pack interconnection, published from archive evidence</strong>
+    (commit <code>979f9739</code>) — the stage-B carryover ("record the search") resolved
+    positively: the archive already measured it.</li>
+    <li><strong>Mode-resolved decay machinery</strong>
+    (<code>mast_passive_decay_modes.py</code>): 12 dedicated decay shots, dominant-mode shares
+    up to 0.998, time-constant interval [22.9, 71.9] ms — consistent with the earlier 23–72 ms
+    single-pattern finding — but only <strong>2 decisive attributions</strong>; the stepping
+    channels' ledger note updated in the same series (the granted rider).</li>
+  </ul>
+
+  <h2>The verdict — nominal resistance stands, and the fit that failed says why</h2>
+  <p>A four-class resistivity fit (centre_column, centre_rod, coil_case, vessel_shell) over the
+  57-circuit model converges in-sample (misfit 5.60 → 5.19, +7.2%, variance explained 0.70) —
+  and then fails the standing promotion contract four independent ways:</p>
+  <ol>
+    <li>held-out coil (P5, never fit) improves by only +0.25% — no transfer;</li>
+    <li>under the stricter resolvability screen (slowest resolvable time 0.087 s instead of
+    0.5 s) the fitted values <em>degrade</em> held-out prediction by 30–53%;</li>
+    <li>the pedestal check shows the fitted solution parks two-thirds of its modes in a
+    pedestal (nominal parks none) — the fit flattened modes rather than measuring them;</li>
+    <li>shot-to-shot selection is unstable, and three of four classes are unidentified
+    (centre_rod pinned at its bound, centre_column and vessel_shell flat/at-bound; only
+    coil_case shows real curvature, at 0.406× nominal with interval [0.25, 4.0]).</li>
+  </ol>
+  <p><strong>No per-group resistance is promoted; the nominal values stand</strong> as a visible
+  negative with its measured cause, and the record names the measurement that would identify a
+  passive resistance (commit <code>93ce6404</code>) so the next attempt starts from evidence.
+  Screens held throughout: the eight mis-scaled shots stayed refused; signals read
+  block-normalised; the binding stage-A split was consumed, never re-derived.</p>
+
+  <figure>
+    <img src="/nova/figures/mast-vacuum-floor/passive_mode_spectra.svg" alt="Mode spectra of the passive decay fits against the resolvability boundary" style="max-width:100%;height:auto">
+    <figcaption>The mode-flattening evidence: the fitted solution's pedestal against the
+    resolvability boundary — why the in-sample improvement did not earn promotion.</figcaption>
+  </figure>
+
+  <p>Records: <code>~/.cache/nova-mast/mast_passive_{linkage,decay,calibration,transients}.json</code>
+  (+ the half-decay screen variant); figures <code>passive_*</code> under
+  <code>docs/figures/mast-vacuum-floor/</code>; lane logs
+  <code>~/.cache/nova-mast/passive_*.log</code>.</p>
+
+</main>
+</body>
+</html>

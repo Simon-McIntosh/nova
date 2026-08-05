@@ -238,7 +238,7 @@ class TestPromotionContract:
         assert verdict["interval"] == [1.1, 1.9]
         assert verdict["profile_interval"] == [1.39, 1.41]
 
-    def test_a_resistivity_outside_the_material_interval_is_flagged_not_refused(self):
+    def test_a_resistivity_above_the_material_interval_is_flagged_not_refused(self):
         """A welded shell is expected to out-resist the bulk metal it is made of."""
 
         verdict = promotion_verdict(
@@ -251,7 +251,30 @@ class TestPromotionContract:
         )
         assert verdict["promoted"]
         assert not verdict["resistivity_inside_material_interval"]
+        assert not verdict["implies_unmodelled_conductor"]
         assert verdict["resistivity"] > verdict["nominal_resistivity"]
+
+    def test_a_resistivity_below_the_material_interval_is_refused(self):
+        """Replacing a shell with an ideal ring cannot make it conduct better.
+
+        Cut-outs, joints and longer current paths all raise resistance, so there is
+        no correction that takes an ideal ring of the measured section *below* the
+        solid metal's own resistivity.  A fit that lands there is reporting
+        conductor the model does not carry, and calling that a resistivity would
+        name the wrong quantity.
+        """
+
+        verdict = promotion_verdict(
+            "vessel_shell",
+            0.24,
+            (0.22, 0.27),
+            {"relative_spread": 0.1, "minimum": 0.23, "maximum": 0.26},
+            identified=True,
+            improvement=0.08,
+        )
+        assert not verdict["promoted"]
+        assert verdict["implies_unmodelled_conductor"]
+        assert any("conduct better" in reason for reason in verdict["refusals"])
 
 
 class TestDriveResponse:

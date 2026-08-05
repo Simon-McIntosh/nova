@@ -448,11 +448,19 @@ def promotion_verdict(
     Four tests, all of which have to pass.  The value has to be identified by the
     data rather than merely returned by the optimiser; it has to be stable when
     shots are dropped; it has to improve prediction on decays the fit never saw;
-    and its implied resistivity has to be physically admissible.  A value outside
-    the material interval is not automatically refused -- an axisymmetric ring
-    standing in for a welded shell is expected to be more resistive than the bulk
-    metal -- but it is then recorded as an effective ring resistance rather than as
-    a measurement of the metal's resistivity.
+    and its implied resistivity has to be physically admissible.
+
+    **Admissibility is one-sided, and the asymmetry is the physics.**  Above the
+    bulk-material interval is expected and allowed: an axisymmetric ring standing
+    in for a welded three-dimensional shell has cut-outs, joints and longer current
+    paths, all of which raise resistance, so a high value is recorded as an
+    effective ring resistance rather than as a measurement of the metal.  *Below*
+    the interval is not allowed, because nothing about replacing a real shell with
+    an ideal ring can make it conduct better than solid metal of the section the
+    registry measured.  A value there is evidence that conductor the model does not
+    carry is sharing the current -- sections welded in parallel, or a thicker wall
+    than the outline states -- and reporting it as a resistivity would name the
+    wrong quantity.
 
     **The promoted interval is the union of the two things that can widen it.**  A
     profile interval answers how far the multiplier can move before the misfit
@@ -470,6 +478,7 @@ def promotion_verdict(
     lower = min(interval[0], stability.get("minimum", interval[0]) or interval[0])
     upper = max(interval[1], stability.get("maximum", interval[1]) or interval[1])
     inside = material.resistivity_lower <= resistivity <= material.resistivity_upper
+    conductive = resistivity < material.resistivity_lower
     reasons = []
     if not identified:
         reasons.append("the profile does not close inside the search bounds")
@@ -477,9 +486,15 @@ def promotion_verdict(
         reasons.append(f"leave-one-out spread is {spread:.2f} of the median")
     if improvement <= 0.0:
         reasons.append("held-out prediction does not improve")
+    if conductive:
+        reasons.append(
+            f"{resistivity:.2e} ohm.m is below the bulk interval, so the ring would "
+            "conduct better than the solid metal of its measured section"
+        )
     return {
         "held_out_improvement": improvement,
         "identified": identified,
+        "implies_unmodelled_conductor": conductive,
         "interval": [lower, upper],
         "leave_one_out_range": [
             stability.get("minimum", float("nan")),
@@ -487,6 +502,7 @@ def promotion_verdict(
         ],
         "leave_one_out_spread": spread,
         "material": material.name,
+        "material_interval": [material.resistivity_lower, material.resistivity_upper],
         "multiplier": fitted,
         "nominal_resistivity": material.resistivity,
         "profile_interval": list(interval),
@@ -540,6 +556,7 @@ def fit(arguments: argparse.Namespace) -> None:
         turns,
         names=names,
         mode_count=arguments.modes,
+        slowest=arguments.slowest,
     )
     print(
         f"misfit {fitted.nominal_misfit:.4f} -> {fitted.misfit:.4f} "
@@ -591,6 +608,7 @@ def fit(arguments: argparse.Namespace) -> None:
             channels,
             turns,
             mode_count=arguments.modes,
+            slowest=arguments.slowest,
         )
         for label in ("held_out_shots", "held_out_coil")
         if split[label]
@@ -633,6 +651,7 @@ def fit(arguments: argparse.Namespace) -> None:
         "held_out_coil": HELD_OUT_COIL,
         "held_out_scores": scores,
         "mode_count": arguments.modes,
+        "slowest_resolvable_time": arguments.slowest,
         "mode_count_sensitivity": (
             mode_count_sensitivity(
                 fitted,
@@ -874,10 +893,8 @@ def _resistance_figure(plt, linkage, resistance, turns, report, out) -> None:
         lower, upper = row["resistivity_interval"]
         axes[1].plot([lower, upper], [position, position], color="#1f5f9c", lw=2.4)
         axes[1].plot(row["resistivity"], position, "o", color="#1f5f9c", ms=6)
-        material_lower = row["nominal_resistivity"] * 0.93
-        material_upper = row["nominal_resistivity"] * 1.22
         axes[1].plot(
-            [material_lower, material_upper],
+            row["material_interval"],
             [position + 0.2] * 2,
             color="#3d8b5f",
             lw=1.4,
@@ -1044,6 +1061,7 @@ def main(argv: Sequence[str] | None = None) -> None:
     )
     fit_parser.add_argument("--modes", type=int, default=RESOLVED_MODE_COUNT)
     fit_parser.add_argument("--profile-points", type=int, default=13)
+    fit_parser.add_argument("--slowest", type=float, default=SLOWEST_RESOLVABLE_TIME)
     fit_parser.add_argument("--sensitivity", action="store_true")
     fit_parser.set_defaults(handler=fit)
 

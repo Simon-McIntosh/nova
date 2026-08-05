@@ -700,6 +700,7 @@ def decay_misfit(
     *,
     mode_count: int = RESOLVED_MODE_COUNT,
     selections: Mapping[int, np.ndarray] | None = None,
+    slowest: float = SLOWEST_RESOLVABLE_TIME,
 ) -> MisfitReport:
     """Return the pooled whitened misfit of one candidate resistivity model.
 
@@ -724,7 +725,7 @@ def decay_misfit(
     for transient in transients:
         rows = channel_rows(transient, channels)
         selection = (
-            visible_modes(modes, transient, rows, count=mode_count)
+            visible_modes(modes, transient, rows, count=mode_count, slowest=slowest)
             if selections is None
             else np.asarray(selections[transient.shot], dtype=int)
         )
@@ -748,6 +749,7 @@ def mode_selections(
     values: np.ndarray,
     *,
     mode_count: int = RESOLVED_MODE_COUNT,
+    slowest: float = SLOWEST_RESOLVABLE_TIME,
 ) -> dict[int, np.ndarray]:
     """Rank and choose the modes each shot carries under one resistance model."""
 
@@ -759,7 +761,11 @@ def mode_selections(
     )
     return {
         transient.shot: visible_modes(
-            modes, transient, channel_rows(transient, channels), count=mode_count
+            modes,
+            transient,
+            channel_rows(transient, channels),
+            count=mode_count,
+            slowest=slowest,
         )
         for transient in transients
     }
@@ -826,6 +832,7 @@ def fit_resistivity(
     bounds: tuple[float, float] = MULTIPLIER_BOUNDS,
     start: Sequence[float] | None = None,
     maxiter: int = 200,
+    slowest: float = SLOWEST_RESOLVABLE_TIME,
 ) -> ResistivityFit:
     """Fit one resistivity multiplier per conductor class on the given transients.
 
@@ -855,6 +862,7 @@ def fit_resistivity(
         names,
         np.exp(seed),
         mode_count=mode_count,
+        slowest=slowest,
     )
 
     def misfit_of(logarithms: np.ndarray) -> float:
@@ -913,6 +921,7 @@ def fit_resistivity(
         names,
         np.exp(result.x),
         mode_count=mode_count,
+        slowest=slowest,
     )
     return ResistivityFit(
         names=names,
@@ -1160,6 +1169,7 @@ def held_out_score(
     turns: Sequence[PassiveTurn],
     *,
     mode_count: int = RESOLVED_MODE_COUNT,
+    slowest: float = SLOWEST_RESOLVABLE_TIME,
 ) -> dict[str, Any]:
     """Score a fitted model and the nominal one on transients it never saw.
 
@@ -1179,6 +1189,7 @@ def held_out_score(
         fit.names,
         np.asarray(fit.multipliers),
         mode_count=mode_count,
+        slowest=slowest,
     )
     nominal = decay_misfit(
         transients,
@@ -1190,6 +1201,7 @@ def held_out_score(
         fit.names,
         np.ones(len(fit.names)),
         mode_count=mode_count,
+        slowest=slowest,
     )
     return {
         "fitted_misfit": fitted.misfit,

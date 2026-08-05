@@ -259,6 +259,42 @@ class TestLinkage:
         thick = linkage_matrix([turn("thick", rectangle(1.0, 0.0, 0.08, 0.08))])
         assert thick.matrix[0, 0] < thin.matrix[0, 0]
 
+    def test_a_tall_thin_shell_reaches_the_long_solenoid_limit(self):
+        """The other limit the passive set actually contains, and it is not a ring.
+
+        The centre column and the vertical wall are metres tall at small major
+        radius, so a thin-ring formula does not describe them at all -- they are
+        single-turn solenoids, whose inductance is the uniform interior field
+        ``mu0 pi R^2 / length``.  Checking this limit matters because these are the
+        sections whose self terms the ring intuition would misread by a factor of
+        several, and their decay times are what the calibration turns on.
+
+        A finite solenoid falls a few per cent below the infinite-length value
+        because the field spreads at the ends, so agreement is expected slightly
+        under one rather than at it.
+        """
+
+        for radius, length in ((0.2, 4.0), (0.3, 6.0)):
+            shell = turn("shell", rectangle(radius, 0.0, 0.01, length))
+            measured = linkage_matrix([shell]).matrix[0, 0]
+            infinite = MU_0 * math.pi * radius**2 / length
+            assert 0.90 < measured / infinite < 0.99
+
+    def test_a_compact_section_reaches_the_thin_ring_limit(self):
+        """A coil case is compact enough that the classical ring formula applies.
+
+        Its section is a fifth of a metre across at a major radius of one and a
+        half, so an equal-area round section is a fair description and the standard
+        ``mu0 R (ln(8R/a) - 7/4)`` has to be reproduced.  Together with the
+        solenoid limit this brackets the two shapes the passive set is made of.
+        """
+
+        case = turn("case", rectangle(1.5, 1.1, 0.19, 0.19))
+        measured = linkage_matrix([case]).matrix[0, 0]
+        minor = math.sqrt(case.area / math.pi)
+        expected = MU_0 * 1.5 * (math.log(8.0 * 1.5 / minor) - 1.75)
+        assert measured == pytest.approx(expected, rel=0.05)
+
     def test_the_names_and_point_counts_travel_with_the_matrix(self):
         """A committed matrix is only reusable if its rows are labelled."""
 

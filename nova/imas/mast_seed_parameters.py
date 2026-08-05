@@ -607,11 +607,19 @@ def _passive_records(
                 "search bound rather than closing inside it, and the fourth closes "
                 "only across a factor of sixteen, so the diagnostic set does not "
                 "constrain a resistivity per class",
-                "the fitted vessel value implies a resistivity below the bulk interval "
-                "of the metal, which an ideal ring standing in for a real shell cannot "
-                "reach: cut-outs, joints and longer paths all raise resistance, so a "
-                "value there points at conductor the model does not carry rather than "
-                "at a resistivity",
+                "the fitted vessel and coil-case values both imply a resistivity below "
+                "the bulk interval of their own metal, which an ideal ring standing in "
+                "for a real shell cannot reach: cut-outs, joints and longer paths all "
+                "raise resistance, so a value there points at conductor the model does "
+                "not carry rather than at a resistivity",
+                "two classes asking independently for more conductance than their "
+                "measured sections provide is what a welded shell looks like to a "
+                "model that treats each section as its own ring, so the galvanic "
+                "grouping of the vessel sections is the next thing to settle rather "
+                "than the resistivity",
+                "no mode count settles it either: the misfit keeps falling from two "
+                "modes to four while the fitted values move by factors of several, so "
+                "the fit absorbs whatever basis it is given rather than converging",
             ),
             uncertainty=Uncertainty(lower=0.2, upper=20.0, unit="1"),
             source=_reduced_vessel_model(

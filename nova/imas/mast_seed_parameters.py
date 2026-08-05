@@ -576,12 +576,12 @@ def _passive_records(
             source=catalog_source("level-2 pf_passive named component arrays"),
         ),
         EvidenceRecord(
-            path="pf_passive/loop/resistance",
+            path="pf_passive/loop/resistivity",
             evidence=FieldEvidence.GENERATED,
             first_shot=first_shot,
             last_shot=last_shot,
             statement=(
-                "the nominal ring resistances stand: a mode-resolved fit of the "
+                "the nominal bulk resistivities stand: a mode-resolved fit of the "
                 f"{DECAY_CALIBRATION_TRANSIENTS} dedicated decay experiments against "
                 "the exact geometric inductance could not identify a resistivity for "
                 "any class of conductor, and the nominal values already reproduce the "

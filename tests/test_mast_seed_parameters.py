@@ -201,7 +201,7 @@ def test_seeded_ledger_states_every_field_it_touches(ledger) -> None:
 
 
 def test_the_decay_calibration_records_its_negative_result(ledger) -> None:
-    """The nominal resistance carries the reason a fit did not replace it.
+    """The nominal resistivity carries the reason a fit did not replace it.
 
     A negative result that lives only in a report is invisible to every reader of
     the description, and the next pass repeats the work.  So the record states that
@@ -211,7 +211,7 @@ def test_the_decay_calibration_records_its_negative_result(ledger) -> None:
     """
 
     record = next(
-        row for row in ledger.records if row.path == "pf_passive/loop/resistance"
+        row for row in ledger.records if row.path == "pf_passive/loop/resistivity"
     )
     assumptions = " ".join(record.assumptions)
 

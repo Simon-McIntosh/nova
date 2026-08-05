@@ -70,7 +70,7 @@ from nova.imas.mast_vacuum_response import (
 )
 
 REFINED_SEMANTIC_IDENTITY = (
-    "sha256:5c19a3d5a5467900e66ceb5a2f25ba214c1296957f97da908850ec160216a6f7"
+    "sha256:6242e097f23a8ff4cd8865d105365f546f5bcbe7ca2461f829b3c878335c88eb"
 )
 """Semantic address of the refined revision this worktree authors.
 

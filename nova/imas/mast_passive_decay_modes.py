@@ -1127,6 +1127,59 @@ def _profile_curvature(samples: Sequence[tuple[float, float]], fitted: float) ->
     return float(2.0 * coefficients[0])
 
 
+def pedestal_check(
+    transients: Sequence[DecayTransient],
+    linkage: Linkage,
+    resistance: np.ndarray,
+    coupling: np.ndarray,
+    channels: Sequence[str],
+    turns: Sequence[PassiveTurn],
+    names: Sequence[str],
+    values: np.ndarray,
+    *,
+    mode_count: int = RESOLVED_MODE_COUNT,
+) -> dict[str, Any]:
+    """Count how many selected modes are too slow to decay inside their own window.
+
+    A resistance model can always lower the misfit by slowing its modes down: a
+    mode much slower than the window is a straight ramp across it, and a ramp
+    absorbs baseline error, residual drift and anything else without shape.  The
+    boundary is a property of each shot's own window rather than a fixed constant
+    -- ``span / ln 2`` is where a mode has just half-decayed by the window's end --
+    and a model whose leading modes sit beyond it is not measuring resistance.
+
+    Reported for whichever model is passed, so the nominal and the fitted values
+    can be compared on the one number that says whether an improvement was earned.
+    """
+
+    modes = mode_set(
+        linkage,
+        resistance,
+        coupling,
+        multipliers=circuit_multipliers(turns, names, values),
+    )
+    selected = 0
+    pedestal = 0
+    worst = 0.0
+    for transient in transients:
+        span = float(transient.time[-1] - transient.time[0])
+        if span <= 0.0:
+            continue
+        boundary = span / math.log(2.0)
+        rows = channel_rows(transient, channels)
+        selection = visible_modes(modes, transient, rows, count=mode_count)
+        taus = modes.tau[selection]
+        selected += taus.size
+        pedestal += int((taus > boundary).sum())
+        worst = max(worst, float(taus.max() / boundary))
+    return {
+        "pedestal_fraction": (pedestal / selected) if selected else 0.0,
+        "pedestal_modes": pedestal,
+        "selected_modes": selected,
+        "slowest_over_boundary": worst,
+    }
+
+
 def mode_count_sensitivity(
     fit: ResistivityFit,
     transients: Sequence[DecayTransient],

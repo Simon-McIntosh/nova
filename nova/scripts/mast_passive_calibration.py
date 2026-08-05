@@ -46,6 +46,7 @@ from nova.imas.mast_passive_decay_modes import (
     leave_one_out,
     mode_count_sensitivity,
     mode_set,
+    pedestal_check,
     profile_class,
     read_transient,
     reconstruct,
@@ -631,6 +632,27 @@ def fit(arguments: argparse.Namespace) -> None:
         )
         for name in names
     }
+    for label, values in (
+        ("nominal", np.ones(len(names))),
+        ("fitted", np.asarray(fitted.multipliers)),
+    ):
+        check = pedestal_check(
+            training,
+            linkage,
+            resistance,
+            coupling,
+            channels,
+            turns,
+            names,
+            values,
+            mode_count=arguments.modes,
+        )
+        print(
+            f"  {label:16s} pedestal modes {check['pedestal_modes']}/"
+            f"{check['selected_modes']} "
+            f"({check['pedestal_fraction'] * 100:.1f}%), slowest is "
+            f"{check['slowest_over_boundary']:.2f} times its window boundary"
+        )
     for name, verdict in verdicts.items():
         state = "PROMOTED" if verdict["promoted"] else "refused"
         print(
@@ -665,6 +687,30 @@ def fit(arguments: argparse.Namespace) -> None:
             if arguments.sensitivity
             else {}
         ),
+        "pedestal_check": {
+            "fitted": pedestal_check(
+                training,
+                linkage,
+                resistance,
+                coupling,
+                channels,
+                turns,
+                names,
+                np.asarray(fitted.multipliers),
+                mode_count=arguments.modes,
+            ),
+            "nominal": pedestal_check(
+                training,
+                linkage,
+                resistance,
+                coupling,
+                channels,
+                turns,
+                names,
+                np.ones(len(names)),
+                mode_count=arguments.modes,
+            ),
+        },
         "nominal_time_constants": sorted(
             float(value)
             for value in mode_set(linkage, resistance, coupling).tau
@@ -967,6 +1013,14 @@ def _reconstruction_figure(
         envelope = np.exp(-transient.time[None, :] / modes.tau[selection][:, None])
         signature = modes.signature[np.ix_(channel_index, selection)]
         predicted = (signature * np.asarray(outcome.amplitudes)) @ envelope
+        # The measured residual drive was fitted alongside the modes, so leaving it
+        # out here would draw a prediction the reconstruction never made.
+        if transient.drive_patterns is not None and outcome.drive_amplitudes:
+            predicted = (
+                predicted
+                + (transient.drive_patterns * np.asarray(outcome.drive_amplitudes))
+                @ transient.drive_waveforms
+            )
         residuals[label] = (
             np.abs(transient.signal - predicted).max(axis=1) / transient.noise
         )

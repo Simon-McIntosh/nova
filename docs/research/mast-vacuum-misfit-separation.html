@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="mast-vacuum-misfit-separation">
+  <meta name="plan-title" content="MAST vacuum misfit separated into two independent faults — a probe gain of one half and a P4/P5-local conductor">
+  <meta name="plan-summary" content="The residual that neither machine description explains is not one defect but two, and they are independent. obr17 carries a probe gain of 0.50: a single rigid factor removes 98.7% of its residual variance across a 765-fold amplitude range, twelve different driving coils, and four independent measurement routes. obv06/obv13/obv14 carry a field localised near P4/P5 that no described coil column can produce: 34% of the residual is orthogonal to every column on single-coil shots and 55-89% on symmetric-pair shots, 5.7-6.2 mT survives a free inversion of all thirteen coil currents, it follows level and not rate (median rate increment 0.71 percentage points), it is up-down symmetric, and it is independent of the error-field circuits at R-squared below 0.0005. Removing obr17 takes 11.4% off the artifact pooled misfit and 12.8% off the incumbent, widening the cutover gap by about 30% because it is a shared defect the artifact handles slightly better.">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-recorded-at" content="2026-08-06">
+  <meta name="plan-verdict" content="Two independent faults, both localised and both named. obr17 is a probe gain of one half — scale-invariant, source-independent, and corroborated by an independently fitted per-channel scale of 0.5011 that is the only value below 0.7 in seventy-six channels. The outboard verticals beside P4/P5 carry a field the description cannot produce, which survives solving every coil current freely and stays linear in the P4/P5 drives; it is up-down symmetric, so the source current is symmetric and the earlier antisymmetry reading was backwards. Inductive coupling, rate, turns, wiring polarity, winding lattice, toroidal structure, and acquisition range are all excluded by measurement. The surviving candidates are P4-member geometry or current distribution, or a conductor local to P4/P5 that is absent from both descriptions.">
+  <title>MAST vacuum misfit separation | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+  <header>
+    <span class="badge badge-active">recorded 2026-08-06</span>
+    <h1>The vacuum misfit is two faults, not one</h1>
+    <p>The closure record left a single unexplained quantity: six channels carrying 56.6% of the
+    vacuum misfit, each 91&ndash;253&times; its own noise floor, on <em>both</em> machine
+    descriptions. This investigation separates that quantity. It is two faults with different
+    physics, different locations, and no measurable coupling between them &mdash; one is an
+    instrument error and one is a missing conductor. Neither is a modelling approximation, and
+    neither will move by tuning the solver.</p>
+    <p>Every number below comes from the banked arrays under
+    <code>~/.cache/nova-mast/misfit-hunt/</code>; nothing was re-derived for this document, and each
+    figure caption names the file it was drawn from. Read-only investigation across 406 shots for
+    the regression arms and 351 inverted shots for the current solve.</p>
+  </header>
+
+  <section class="quick-status">
+    <h2>The separation</h2>
+    <table>
+      <thead>
+        <tr><th></th><th>obr17 &mdash; a probe gain</th><th>obv06 / obv13 / obv14 &mdash; a missing conductor</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>what it is</strong></td>
+          <td>The channel reads the described field times a constant &minus;0.50.</td>
+          <td>A field near P4/P5 that no combination of described coil columns can produce.</td>
+        </tr>
+        <tr>
+          <td><strong>signature</strong></td>
+          <td>Scale-invariant: one factor holds over a 765&times; amplitude range and twelve
+          different driving coils.</td>
+          <td>Orthogonal to the described column space, and linear in the P4/P5 drives at
+          R&sup2; 0.85 median.</td>
+        </tr>
+        <tr>
+          <td><strong>survives a free current solve</strong></td>
+          <td>No &mdash; 7.2 mT falls to 3.1 mT once all thirteen currents are free, because a gain
+          error is partly absorbable by rescaling currents.</td>
+          <td>Yes &mdash; 6.2 / 5.8 / 5.9 mT falls only to 6.2 / 5.7 / 5.7 mT. No current vector
+          removes it.</td>
+        </tr>
+        <tr>
+          <td><strong>independent corroboration</strong></td>
+          <td>An independently fitted per-channel scale of 0.5011 &mdash; the only value below 0.7
+          among seventy-six channels.</td>
+          <td>Independent of the error-field circuits at R&sup2; 0.0004; up-down symmetric, so the
+          source current is symmetric.</td>
+        </tr>
+        <tr>
+          <td><strong>effect on the cutover gap</strong></td>
+          <td>Removing it <em>widens</em> the gap by about 30% &mdash; a shared defect the artifact
+          handles slightly better.</td>
+          <td>This is the gap: the artifact loses on exactly these outboard verticals.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <h2>The machine as the probe array sees it</h2>
+  <p>Thirteen active coil families, twenty-four case plates, and seventy-eight probes with their
+  sensitive axes. Thirty of the seventy-eight probes sit in a narrow outboard band spanning P5 upper
+  to P5 lower, and they include every one of the six channels carrying the misfit &mdash; the region
+  where both faults live, and where the array's geometric leverage on the P4/P5 currents is
+  concentrated.</p>
+  <figure>
+    <img src="/nova/figures/mast-misfit-hunt/conductor_probe_layout.svg"
+         alt="Full-machine poloidal layout of all thirteen active coils, twenty-four case plates and seventy-eight probes with sensitive-axis ticks, with the outboard window enlarged"
+         style="max-width:100%;height:auto">
+    <figcaption>Left: the full poloidal cross-section. Each probe carries a centred tick along its
+    sensitive axis, which is undirected &mdash; a pickup coil responds equally to
+    &plusmn;B along its own axis. Right: the outboard window R &isin; [1.4, 2.0] m,
+    Z &isin; [&minus;1, 1] m. The six channels carrying the misfit are named. obv06, obr10 and obv14
+    lie on the outboard wall at R &asymp; 1.84 m; obr17 and obr04 sit just outboard of P6 lower and
+    P6 upper, immediately beside the P5 windings. Evidence:
+    <code>figures/cross_sections.npz</code>.</figcaption>
+  </figure>
+
+  <h2>Fault one &mdash; obr17 is a probe gain of one half</h2>
+  <p>Regressing each channel's vacuum residual on the <em>described per-family field columns</em>
+  (not on the currents) returns a fractional error on each column's weight. For obr17 that error
+  is &minus;0.50, and it is the same &minus;0.50 whichever coil is supplying the field and however
+  large the field is. That is the definition of an instrument gain error, and it is the one thing a
+  geometry correction cannot be.</p>
+  <figure>
+    <img src="/nova/figures/mast-misfit-hunt/probe_gain_invariance.svg"
+         alt="Three panels showing obr17's fitted field error clustered at minus one half across a 765-fold amplitude range, across twelve driving families, and its uniquely low independently fitted calibration scale"
+         style="max-width:100%;height:auto">
+    <figcaption>Left: on the thirty-nine sustained single-coil shots the fitted error clusters at
+    &minus;0.499 (median) while the residual amplitude spans 0.076&ndash;57.8 mT, a factor of 765.
+    Thirty-five of the thirty-nine sit within &minus;0.457 to &minus;0.511. A field-shape error
+    would scatter with amplitude; a gain error does not. Middle: the same &minus;0.5 appears against
+    every one of twelve driving families (range &minus;0.475 to &minus;0.707, median &minus;0.540
+    pooled over all shot classes). Right: the per-channel scale fitted independently by the sensor
+    adjudication, on different data and by a different method, puts obr17 at 0.5011 &mdash; the only
+    one of seventy-six channels below 0.7. Evidence:
+    <code>attribution.json</code>, <code>attribution_verdicts.json</code>,
+    <code>inversion.json</code> (<code>calibration_scales</code>).</figcaption>
+  </figure>
+  <p>Four independent routes reach the same number:</p>
+  <ol>
+    <li><strong>The multivariate field-column fit.</strong> A single rigid factor accounts for
+    99.88% of obr17's residual variance on sustained single-coil shots (97.78% on symmetric pairs,
+    94.06% on pulsed, 98.37% at the gate shots), holding across the 765&times; amplitude range.</li>
+    <li><strong>The independently fitted channel scale.</strong> 0.5011, fitted by the sensor
+    adjudication before this investigation existed, and never read by the residual gate.</li>
+    <li><strong>The free current inversion.</strong> Solving all thirteen coil currents without
+    reading any drive map halves obr17's residual (7.2 &rarr; 3.1 mT) &mdash; the partial absorption
+    a gain error permits &mdash; and what remains is still linear in the driving coil at
+    R&sup2; 0.965.</li>
+    <li><strong>Source independence.</strong> obr17 carries the largest single share of the pooled
+    misfit on <em>both</em> descriptions (22.6% artifact, 25.0% incumbent) at 206&times; and
+    210&times; its own floor. A defect present in two independently authored descriptions is not in
+    either description.</li>
+  </ol>
+
+  <h2>Fault two &mdash; a field near P4/P5 that the description cannot produce</h2>
+  <p>The outboard verticals behave in the opposite way. Their residual is not a rescaling of the
+  described field; a substantial part of it lies outside the span of every described coil column,
+  and it does not go away when the currents are set free.</p>
+  <figure>
+    <img src="/nova/figures/mast-misfit-hunt/orthogonal_and_surviving.svg"
+         alt="Left: share of each channel's residual orthogonal to every described field column, by drive class. Right: residual under the described drive map, under a free thirteen-coil solve, and under a solve that also frees the cases"
+         style="max-width:100%;height:auto">
+    <figcaption>Left: the fraction of residual variance no linear combination of described coil
+    fields can reach. obr17 is essentially zero (0.1% on single-coil shots) &mdash; its residual
+    lies <em>inside</em> the column space, which is what a gain error looks like. obv06, obv13 and
+    obv14 sit at 34% on single-coil shots and 55&ndash;89% on symmetric pairs, where the two
+    P4/P5 members are driven together and the description's error cannot hide in a single column.
+    Right: the described drive map, then a free least-squares solve for all thirteen coil currents
+    reading no drive map at all. obr17 halves; the outboard verticals barely move. The hatched third
+    bar frees the eight case groups as well and does reduce them &mdash; but a coil and its own case
+    are not separable at this array (relative singular values 1.4&times;10<sup>&minus;4</sup> to
+    4.7&times;10<sup>&minus;3</sup>), so that reduction buys nothing physical and is shown only to
+    make the trap visible. Evidence: <code>attribution.json</code>,
+    <code>separation_verdicts.json</code>, <code>inversion.json</code>,
+    <code>inversion_cases.json</code>.</figcaption>
+  </figure>
+  <p>What survives the free inversion stays <strong>linear in the P4/P5 drives</strong> at a median
+  R&sup2; of 0.85 (0.02&ndash;0.97 across shots) &mdash; so it is a real magnetostatic field
+  proportional to those currents, not noise and not a numerical artefact. It is
+  <strong>level-following, not rate-following</strong>, which excludes every inductive mechanism.
+  And it is <strong>independent of the error-field circuits</strong>: the two error-field levels
+  explain obv06's residual at R&sup2; 0.00039 and 0.00047, and obv14's at 0.00039 and 0.00048.</p>
+  <figure>
+    <img src="/nova/figures/mast-misfit-hunt/level_versus_rate.svg"
+         alt="Left: median R-squared on supply levels against median R-squared on supply rates for all seventy-seven channels. Right: histogram of the R-squared the rates add on top of the levels"
+         style="max-width:100%;height:auto">
+    <figcaption>Left: every one of the seventy-seven scored channels sits far above the diagonal
+    &mdash; the residual tracks supply <em>levels</em>, not their time derivatives. Right: once the
+    levels are in the fit, adding all twenty-five supply rates buys a median of
+    0.71 percentage points of R&sup2;. For obv06 and obv14 it buys 1.37 points on top of a level fit
+    of 0.919 and 0.917; for obr17, 0.004 points on top of 0.9997. An inductive or eddy-current
+    mechanism would show the opposite ordering. Caveat: single-regressor R&sup2; ranks by correlation
+    and is therefore biased toward whichever supply is largest on a given shot &mdash; the
+    multivariate field-column fit above is the unbiased reading, and it agrees. Evidence:
+    <code>separation_verdicts.json</code>.</figcaption>
+  </figure>
+
+  <h2>The parity argument, corrected</h2>
+  <p>An earlier reading took an antisymmetric residual at mirrored radial probes as evidence for an
+  antisymmetric &mdash; that is, mis-wired anti-series &mdash; current. That inference is backwards.
+  A pair of up-down symmetric axisymmetric currents makes the poloidal flux function even in Z, so
+  B<sub>R</sub> = &minus;&part;<sub>Z</sub>A<sub>&phi;</sub> is <em>odd</em> and B<sub>Z</sub> is
+  <em>even</em>. Radial pairs must therefore read antisymmetric and vertical pairs must read
+  symmetric <em>for the same symmetric source</em>. Both hold in the data, so the source current is
+  up-down symmetric and the anti-series hypothesis is refuted rather than supported.</p>
+  <figure>
+    <img src="/nova/figures/mast-misfit-hunt/mirror_parity.svg"
+         alt="Symmetric against antisymmetric residual for every supported mirror pair, with the parity derivation for an up-down symmetric current"
+         style="max-width:100%;height:auto">
+    <figcaption>Every mirror pair supported on ten or more shots. The vertical (obv) pairs are
+    symmetric-dominant by 2.4&ndash;7.8&times; &mdash; obv06/obv14 by 3.9&times; &mdash; while the
+    radial (obr) pairs sit at or below equal parity, obr03/obr17 anti-dominant at 0.80. Both
+    readings are the same conclusion. The best single regressor of the antisymmetric part never
+    exceeds R&sup2; 0.47 and is usually below 0.2, so no described drive explains the antisymmetric
+    part either. Evidence: <code>antisymmetry_supported.json</code>,
+    <code>antisymmetry_verdicts.json</code>.</figcaption>
+  </figure>
+
+  <h2>The vacuum flux the description actually produces</h2>
+  <p>Eleven shots each drive one identifiable coil family in sustained fashion, giving a clean read
+  of that family's field at the probe array. These are the field patterns the residual is measured
+  against.</p>
+  <figure>
+    <img src="/nova/figures/mast-misfit-hunt/static_flux_gallery.svg"
+         alt="Eleven poloidal flux maps, one per identifiable coil family, each overlaid with the coil outlines, case plates and the six channels carrying the misfit"
+         style="max-width:100%;height:auto">
+    <figcaption>Poloidal flux of the described coil set driven by the recorded currents. Each panel
+    is normalised to its own peak, so the pattern is comparable between panels but the amplitude is
+    not &mdash; the drive is printed on each title, spanning 93 kA-turns (P4 upper) to
+    10.3 MA-turns (solenoid). The P4 and P5 panels are the ones that matter: their flux gradient is
+    steepest exactly where obv06, obr10 and obv14 sit on the outboard wall, which is why a small
+    geometric error in those windings has disproportionate leverage on those channels. Evidence:
+    <code>figures/flux_&lt;shot&gt;_&lt;family&gt;.npz</code> indexed by
+    <code>figures/flux_manifest.json</code>.</figcaption>
+  </figure>
+  <p>The two pulsed shots are the rate-rich cases, and they are the direct visual counterpart of the
+  level-versus-rate result.</p>
+  <figure>
+    <img src="/nova/figures/mast-misfit-hunt/pulsed_flux_sequence.svg"
+         alt="Two pulsed excitation shots rendered at six time steps each, showing an unchanging flux pattern at changing amplitude"
+         style="max-width:100%;height:auto">
+    <figcaption>Six samples through each pulsed excitation, spanning a factor of eleven in drive
+    (150 &rarr; 13 kA-turns for shot 14073). Because each panel is normalised to its own peak, the
+    visual identity between panels <em>is</em> the finding: the field shape is time-invariant and
+    only its amplitude moves. A residual driven by a fixed geometric defect must then follow the
+    amplitude &mdash; the level &mdash; which is what the regression measures. Evidence:
+    <code>figures/flux_14073_p5_lower_step*.npz</code>,
+    <code>figures/flux_14088_p5_upper_step*.npz</code>.</figcaption>
+  </figure>
+  <figure>
+    <img src="/nova/figures/mast-misfit-hunt/gate_and_unit_columns.svg"
+         alt="The gate shot's plasma-free flux sample beside the P4 upper, P5 upper and P5 lower unit flux columns"
+         style="max-width:100%;height:auto">
+    <figcaption>Left: a plasma-free sample from gate shot 21978 at t = &minus;0.0654 s, the solenoid
+    dominating at 5.0 MA-turns. Right: three unit columns from the Green's cache, in Wb per
+    ampere-turn. The gate's field is a superposition of exactly these columns &mdash; no new field
+    shape appears at the gate, so the faults found on the sustained shots are the faults the gate
+    scores. Caveat: the six gate shots contribute plasma-free windows only, where fields are about
+    ten times smaller than in the scored plasma slices; the gate metric itself is a median of medians
+    and is not reconstructible from per-channel mean-square shares, so only <em>relative</em> changes
+    on a mean-square pooling are quoted anywhere in this document. Evidence:
+    <code>figures/flux_21978_sol.npz</code>, <code>figures/coil_flux_greens.npz</code>.</figcaption>
+  </figure>
+
+  <h2>What the field pins, and what it cannot &mdash; the wiring read</h2>
+  <p>Inverting the probe array for all thirteen coil currents, reading no drive map at all, turns
+  the published ampere-turn weights into a testable claim. The array does not resolve thirteen
+  directions: the singular spectrum falls off a cliff after mode ten, so three coil combinations are
+  invisible and any statement about them is unsupported no matter what the fit returns.</p>
+  <figure>
+    <img src="/nova/figures/mast-misfit-hunt/inversion_identifiability.svg"
+         alt="Left: singular spectra for the thirteen-coil and twenty-one-column inversions showing a cliff after mode ten. Right: inverted weight divided by published weight for every conductor, coloured by verdict"
+         style="max-width:100%;height:auto">
+    <figcaption>Left: relative singular values. Mode 10 sits at 0.113 and mode 11 at 0.0097 &mdash;
+    a twelve-fold cliff, so the array resolves ten of thirteen coil directions. Adding the eight
+    case groups as unknowns (twenty-one columns) does not add resolution: the condition number
+    degrades from 371 to 7182 and the extra directions land below the cliff. Right: the inverted
+    weight as a fraction of the published one, with the relative spread across shots as an error bar
+    (clipped at 3). Only P4 and P5 land inside their own spread. Evidence:
+    <code>inversion.json</code>, <code>inversion_taxonomy.json</code>,
+    <code>inversion_cases.json</code>.</figcaption>
+  </figure>
+  <table>
+    <thead>
+      <tr><th>conductor</th><th>published</th><th>inverted</th><th>ratio</th><th>relative spread</th><th>shots</th><th>verdict</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>P5 lower</td><td>23</td><td>22.74</td><td>0.989</td><td>0.019</td><td>229</td><td><strong>confirmed</strong> &mdash; blind to ~1%</td></tr>
+      <tr><td>P5 upper</td><td>23</td><td>22.86</td><td>0.994</td><td>0.015</td><td>224</td><td><strong>confirmed</strong> &mdash; blind to ~1%</td></tr>
+      <tr><td>P4 upper</td><td>23</td><td>22.11</td><td>0.961</td><td>0.026</td><td>223</td><td><strong>confirmed</strong></td></tr>
+      <tr><td>P4 lower</td><td>23</td><td>27.98</td><td>1.217</td><td>0.016</td><td>229</td><td><strong>magnitude contradicted</strong></td></tr>
+      <tr><td>solenoid</td><td>344.66</td><td>305.05</td><td>0.885</td><td>0.040</td><td>218</td><td>corroborated in sign and order, but the value still moves 15% between truncation ranks &mdash; not converged</td></tr>
+      <tr><td>P3 lower / upper</td><td>8</td><td>7.13 / 6.88</td><td>0.891 / 0.860</td><td>0.219 / 0.161</td><td>19 / 10</td><td>unanswerable &mdash; below the rank cliff</td></tr>
+      <tr><td>P2 inner lower / upper</td><td>12</td><td>11.53 / 14.14</td><td>0.961 / 1.178</td><td>7.9 / 6.6</td><td>13 / 16</td><td>unanswerable</td></tr>
+      <tr><td>P2 outer lower / upper</td><td>8</td><td>100.9 / 10.11</td><td>12.6 / 1.263</td><td>0.888 / 10.8</td><td>7 / 10</td><td>unanswerable</td></tr>
+      <tr><td>P6 lower / upper</td><td>1</td><td>0.68 / 1.02</td><td>0.681 / 1.019</td><td>14.1 / 8.2</td><td>67 / 52</td><td>unanswerable</td></tr>
+    </tbody>
+  </table>
+  <p>The one substantive finding here is the <strong>P4 pair asymmetry</strong>. Both members are
+  published at 23 ampere-turns per ampere and both are rank-converged with spreads of 1.6% and 2.6%
+  &mdash; yet they invert 26.5% apart (11.2% apart on the arm that applies no calibration scales).
+  Two nominally identical series-connected windings that the field says are not identical is exactly
+  the kind of defect that would produce a P4/P5-local field the description cannot reproduce. The
+  solenoid's 0.885 ratio is consistent with its two-parallel-circuit split but is not a measurement:
+  only about 15% of its weight is pinned before the truncation rank starts moving the answer.</p>
+
+  <h2>The published circuit relations all have counterexamples</h2>
+  <p>Every up-down and inner-outer relation in the published circuit description &mdash; each
+  asserting that two members carry the same current &mdash; is contradicted by archive shots in
+  which one member is driven and its partner is at rest.</p>
+  <figure>
+    <img src="/nova/figures/mast-misfit-hunt/circuit_relation_counterexamples.svg"
+         alt="For each of eight published circuit relations, the median partner-to-driven current ratio and the worst counterexample shot"
+         style="max-width:100%;height:auto">
+    <figcaption>The median shot obeys each relation to within 0.3% (P6 to 17%), which is why the
+    relations were adopted. But every relation has shots where the partner sits at
+    2&times;10<sup>&minus;4</sup> to 2&times;10<sup>&minus;2</sup> of the driven member &mdash; 6 to
+    34 shots below half per relation, out of 233&ndash;356. The members are independently drivable,
+    so the relations are properties of typical operation, not of the wiring. This is inert for the
+    residual gate, which reads recorded per-channel currents rather than circuit relations, but it is
+    a real description defect for any consumer that trusts the topology. P6 is the outlier in the
+    other direction: 269 of 356 shots show an anti-correlated partner, consistent with its published
+    anti-series connection. Evidence: <code>pair_independence.json</code>,
+    <code>wiring_report.json</code>.</figcaption>
+  </figure>
+
+  <h2>What removing obr17 does to the arithmetic</h2>
+  <p>obr17 is a shared defect, so removing it improves both arms &mdash; and it improves the
+  incumbent slightly more, because the incumbent handles that channel slightly worse. The
+  consequence is counter-intuitive and worth stating plainly: <strong>correcting the largest single
+  piece of the absolute misfit makes the cutover comparison worse, not better.</strong></p>
+  <table>
+    <thead>
+      <tr><th>pooled mean-square metric</th><th>artifact</th><th>incumbent (efm)</th><th>gap</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>as scored</td><td>1.0324</td><td>0.9992</td><td>+0.0332</td></tr>
+      <tr><td>obr17 removed</td><td>0.9149 (&minus;11.4%)</td><td>0.8715 (&minus;12.8%)</td><td>+0.0434 (+31%)</td></tr>
+      <tr><td>obr17 rescaled by its fitted 0.5011</td><td>0.9103 (&minus;11.8%)</td><td>0.8673 (&minus;13.2%)</td><td>+0.0430 (+30%)</td></tr>
+    </tbody>
+  </table>
+  <p>A single rigid factor removes 88.3% of obr17's residual amplitude on the artifact arm and 88.5%
+  on the incumbent, leaving 11.7% and 11.5% respectively. obr17's own share is 22.6% and 25.0% of
+  the pooled misfit at 206&times; and 210&times; its floor. These are relative changes on a
+  mean-square pooling and are <em>not</em> the gate metric, which is a median of medians and cannot
+  be rebuilt from per-channel shares &mdash; the absolute numbers here are not comparable to a stamp.
+  Evidence: <code>obr17_arithmetic.json</code>, computed on the banked channel-gap decomposition with
+  no solve re-run.</p>
+  <p>This turns the obr17 finding into a decision rather than a fix. Scoring obr17 through its
+  fitted gain is defensible as instrument calibration and is the physically correct thing to do; it
+  also costs 0.010 on the very comparison the cutover is judged by. That trade belongs to the owner
+  of the gate, not to this investigation.</p>
+
+  <h2>Machine-description artifact inventory, and the publication hazard</h2>
+  <p>Four revisions of the MAST machine description sit on disk. They are four distinct semantic
+  identities and four distinct manifest digests &mdash; and they all compute the <em>same</em>
+  registry tag.</p>
+  <table>
+    <thead>
+      <tr><th>cache</th><th>semantic identity</th><th>manifest digest</th><th>computed tag</th><th>size</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>geometry refinement</td><td><code>85993ba9491b</code></td><td><code>f18efe7c58ca</code></td><td rowspan="4"><code>dd-4.1.1-physical-ca06c8f64481114f</code><br><em>shared by all four</em></td><td>369K</td></tr>
+      <tr><td>floor ladder</td><td><code>c20bc7e157fa</code></td><td><code>303b42341c8b</code></td><td>385K</td></tr>
+      <tr><td>conductor detail</td><td><code>3aba565a2e40</code></td><td><code>221522a89e74</code></td><td>393K</td></tr>
+      <tr><td>sensor records + P2 interconnection</td><td><code>18c75c194937</code></td><td><code>b41c076e1fb7</code></td><td>401K</td></tr>
+    </tbody>
+  </table>
+  <p>All four hold the same six IDS (<code>magnetics</code>, <code>pf_active</code>,
+  <code>pf_passive</code>, <code>tf</code>, <code>wall</code>, <code>master</code>) with byte-identical
+  payload <em>sizes</em> but differing SHA-256, because HDF5 write-time metadata differs even when
+  logical content matches. A second physical family exists at
+  <code>dd-4.1.1-physical-76cf833561e602a7</code>.</p>
+  <p><strong>The hazard.</strong> The tag is derived as
+  <code>dd-{dd_version}-physical-{physical_digest}</code>, and the physical digest is keyed on
+  logical payload rather than on semantic content. Pushing these four revisions to one registry
+  repository would therefore have each silently overwrite the last, and the tag a consumer pulled
+  would not identify what they received. The caches are also not an OCI layout &mdash; files live
+  under <code>sha256/&lt;manifest-digest&gt;/</code> with no <code>oci-layout</code> marker, no
+  <code>index.json</code>, and no blob store &mdash; and no push code exists; the reference helper
+  formats a tag string without contacting a registry. Nothing has been overwritten, because nothing
+  has been pushed.</p>
+  <p><strong>What a publishable tag needs.</strong> It must carry the semantic identity, which is
+  precisely the field that distinguishes these four and which the current tag omits. The in-repo
+  precedent is the benchmark push, which is commit-keyed
+  (<code>&lt;benchmark-name&gt;-&lt;commit-sha&gt;</code>) &mdash; the opposite convention, and one
+  that would have distinguished all four revisions correctly. A tag carrying either the semantic
+  identity or the authoring commit resolves this; the physical digest alone does not. Evidence:
+  <code>ids_inventory.json</code>.</p>
+
+  <h2>What is now excluded by measurement</h2>
+  <table>
+    <thead><tr><th>candidate</th><th>status</th><th>measurement that closed it</th></tr></thead>
+    <tbody>
+      <tr><td>Inductive coupling, eddy currents, any rate-driven mechanism</td><td><strong>excluded</strong></td><td>Every channel fits levels far better than rates; rates add a median 0.71 percentage points of R&sup2; on top of the levels.</td></tr>
+      <tr><td>Ampere-turn counts on P4 and P5</td><td><strong>excluded as published values</strong></td><td>P5 confirmed to ~1%, P4 upper to 4%, both rank-converged. P4 lower is contradicted in magnitude &mdash; a real finding, not an exclusion.</td></tr>
+      <tr><td>Wiring polarity and circuit topology as a residual source</td><td><strong>excluded for the gate</strong></td><td>The relations are falsified as topology but the gate reads recorded per-channel currents, so no residual flows from them.</td></tr>
+      <tr><td>An antisymmetric (anti-series mis-wired) source current</td><td><strong>refuted</strong></td><td>The parity of the residual, read correctly, requires a symmetric source.</td></tr>
+      <tr><td>Error-field / correction-coil circuits</td><td><strong>excluded</strong></td><td>The two error-field levels explain obv06's and obv14's residuals at R&sup2; between 0.00039 and 0.00048; those channels moved on only 80 of 406 shots and are locked to each other at a ratio of 0.325.</td></tr>
+      <tr><td>Winding filament lattice, acquisition range, sensor pose displacement, toroidal / 3D structure</td><td><strong>excluded previously and unchanged</strong></td><td>Recorded in the lattice, sensor-adjudication, and cutover-parity records; nothing in this investigation reopens them.</td></tr>
+      <tr><td>Coil cases as the missing conductor</td><td><strong>not testable at this array</strong></td><td>A coil and its own case are inseparable (relative singular values 1.4&times;10<sup>&minus;4</sup> to 4.7&times;10<sup>&minus;3</sup>); the case-solving arm reduces the residual without identifying anything.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Named next targets</h2>
+  <ol>
+    <li><strong>P4 member geometry or current distribution.</strong> The two P4 windings are
+    published identical and invert 26.5% apart with 1.6&ndash;2.6% spread and full rank convergence.
+    Either their geometry differs from the description or the current is distributed differently
+    within the pack. This is the single most specific lead, it is local to exactly the right region,
+    and it is testable against the as-built record rather than against the magnetics.</li>
+    <li><strong>A feeder, busbar, or structural conductor local to P4/P5, absent from both
+    descriptions.</strong> The surviving residual is up-down symmetric, level-following, linear in
+    the P4/P5 drives, orthogonal to every described column, and immune to a free current solve. A
+    conductor carrying current proportional to the P4/P5 drives and not present in either
+    description satisfies all five constraints at once; nothing else found so far satisfies more than
+    three.</li>
+    <li><strong>The obr17 gate-calibration decision.</strong> Whether to score obr17 through its
+    fitted 0.5011 gain. Physically correct, arithmetically costly to the cutover comparison, and
+    entirely the gate owner's call. Recommendation: apply it, and re-baseline the cutover budget
+    against the corrected pooling &mdash; carrying a known instrument error to protect a comparison
+    is the worse of the two positions.</li>
+  </ol>
+
+  <h2>Caveats that bound every number above</h2>
+  <ul>
+    <li>The gate metric is a median of medians and is not reconstructible from per-channel
+    mean-square shares. Only relative changes on a mean-square pooling are quoted; no absolute
+    number here is a stamp value.</li>
+    <li>Single-regressor R&sup2; ranks by correlation with the residual and is biased toward the
+    highest-amplitude supply on a shot. The multivariate field-column fit is the unbiased reading and
+    is the one every conclusion rests on.</li>
+    <li>Case-current channels are near-proxies for the coil currents that induce them, so a case
+    channel ranking first in a single-regressor table does not separate case from coil.</li>
+    <li>The six gate shots contribute plasma-free windows only, where fields are about ten times
+    smaller than in the scored slices.</li>
+    <li>The inversion runs on plasma-free sustained shots only. No plasma shot is inverted, because a
+    plasma column would absorb whatever the coil columns could not and the orthogonality measurement
+    would be meaningless.</li>
+    <li>Flux loops are excluded from the inversion: their absolute gain is not established &mdash;
+    the adjudication fits and divides out a per-channel scale precisely because a factor of 2&pi;
+    between store and kernel conventions cannot be ruled out &mdash; and an unknown row gain would
+    corrupt every inverted current.</li>
+  </ul>
+
+  <h2>Related records</h2>
+  <ul>
+    <li><a href="/nova/research/mast-vacuum-floor-closure-landed.html">Vacuum-floor ladder closure</a>
+    &mdash; the six-channel decomposition and the +0.023 cutover gap this investigation set out to
+    explain, including obr17's 22.6%/25.0% shares.</li>
+    <li><a href="/nova/research/mast-sensor-adjudication-landed.html">Sensor adjudication</a> &mdash;
+    the source of obr17's independently fitted 0.5011 scale, and the record that first assigned
+    obv06/obv14 the verdict of a field-shape defect rather than a calibration one. This document
+    confirms that verdict by measurement.</li>
+    <li><a href="/nova/research/mast-cutover-parity-evidence.html">Cutover parity evidence</a> &mdash;
+    established that obv06 and obv14 carry 61% of the residual excess, that it is 88% vacuum-term,
+    and that sensor displacement is uncorrelated with it.</li>
+    <li><a href="/nova/research/mast-winding-lattice-landed.html">Winding lattice</a> &mdash; the
+    lattice exclusion relied on above.</li>
+    <li><a href="/nova/research/mast-passive-calibration-landed.html">Passive calibration</a> &mdash;
+    the inductive half exact, the resistive half nominal; bounds what a passive-structure explanation
+    could contribute.</li>
+    <li><a href="/nova/research/mast-block-scale-normalisation-landed.html">Block-scale
+    normalisation</a> and <a href="/nova/research/mast-calibration-cohort-landed.html">calibration
+    cohort</a> &mdash; the acquisition-range and noise-floor exclusions.</li>
+    <li><a href="/nova/research/mast-registry-corrections-landed.html">Registry corrections</a> and
+    <a href="/nova/research/mast-catalog-geometry-registry-ids-landed.html">catalog geometry
+    registry</a> &mdash; the geometry provenance behind the coil outlines in every figure here.</li>
+    <li><a href="/nova/research/mast-solve-input-maps-landed.html">Solve input maps</a> &mdash; the
+    drive-weight route whose published ampere-turns the inversion tests above.</li>
+  </ul>
+
+  <p>Substrate: 17111-shot store at <code>/work/projects/imas_gpu/mast/level1/shots</code>; geometry
+  from the machine-geometry registry at shot 21978; forward model
+  <code>nova.imas.mast_vacuum_response</code> over the polygon Green's kernel. Scripts and results
+  are indexed by <code>~/.cache/nova-mast/misfit-hunt/MANIFEST.json</code>; the two long arms ran as
+  batch jobs (residual separation 29 min over 406 shots; three inversion arms over 351 shots each).</p>
+
+</main>
+</body>
+</html>

@@ -64,12 +64,19 @@ import xarray
 
 from nova.imas.machine_drive import DriveMap
 from nova.imas.machine_evidence import FieldEvidence
+from nova.imas.mast_block_scale import (
+    BlockScaleTable,
+    ScaleCorrection,
+    promoted_block_scales,
+)
 from nova.imas.mast_vacuum_cohort import (
     CURRENT_GROUP,
     FIELD_GROUP,
     KILO,
     SHOT_STORE,
+    CohortError,
     SignalProvenance,
+    parse_probe_channel,
     probe_channels,
 )
 from nova.io.cocos import IP_LIKE, ONE_LIKE, PSI_LIKE
@@ -859,6 +866,12 @@ class ShotSignals:
     configuration could serve: the store is missing individual channels on many
     shots, and the difference between the two is exactly the list of what a
     particular slice cannot constrain.
+
+    ``scale_corrections`` records the acquisition range setting divided out of each
+    probe channel on this shot.  It sits on the read rather than in the map because
+    the setting is a property of the shot and the map is a property of the
+    configuration: a channel's conversion to the description does not change between
+    shots, but which range the acquisition happened to be on does.
     """
 
     shot: int
@@ -870,6 +883,7 @@ class ShotSignals:
     misaligned_channels: tuple[str, ...]
     dropped_samples: Mapping[str, int]
     provenance: tuple[SignalProvenance, ...] = field(default_factory=tuple)
+    scale_corrections: tuple[ScaleCorrection, ...] = field(default_factory=tuple)
 
     @property
     def sample_counts(self) -> dict[str, int]:
@@ -877,8 +891,38 @@ class ShotSignals:
 
         return {name: int(clock.size) for name, clock in sorted(self.clocks.items())}
 
+    @property
+    def scaled_channels(self) -> tuple[str, ...]:
+        """Return the channels an acquisition setting was divided out of."""
+
+        return tuple(
+            sorted(
+                row.channel
+                for row in self.scale_corrections
+                if row.applied and row.scale != 1.0
+            )
+        )
+
+    @property
+    def unscaled_channels(self) -> tuple[str, ...]:
+        """Return the channels served as published because no setting warranted one."""
+
+        return tuple(
+            sorted(row.channel for row in self.scale_corrections if not row.applied)
+        )
+
 
 _CLOCK_GROUPS = {CURRENT_CLOCK: CURRENT_GROUP, FIELD_CLOCK: FIELD_GROUP}
+
+
+def _probe_channel(channel: str) -> bool:
+    """Return whether a source channel names a poloidal field probe."""
+
+    try:
+        parse_probe_channel(channel)
+    except CohortError:
+        return False
+    return True
 
 
 def read_solve_inputs(
@@ -887,6 +931,7 @@ def read_solve_inputs(
     *,
     store: Path | str = SHOT_STORE,
     resolver: StandardNameResolver | None = None,
+    block_scale: BlockScaleTable | None = None,
 ) -> ShotSignals:
     """Read one shot's mapped channels and convert them onto the description.
 
@@ -901,6 +946,12 @@ def read_solve_inputs(
     the clock, and index-aligning them would silently move every sample in time, so
     the channel is refused for that shot and reported as misaligned rather than
     served on a guess.
+
+    Probe channels are served with their measured acquisition range setting divided
+    out, so a solve input means the same thing on every shot.  ``block_scale`` names
+    the table and defaults to the promoted one; an empty table serves the archive
+    exactly as published.  What was divided out of each channel, and on what warrant,
+    comes back in ``scale_corrections`` and is summarised in the dataset attributes.
     """
 
     import zarr
@@ -954,6 +1005,14 @@ def read_solve_inputs(
                 SignalProvenance(str(root), shot, name, channel, identity)
             )
         available.extend(present)
+    table = promoted_block_scales() if block_scale is None else block_scale
+    probes = {
+        channel: values
+        for channel, values in samples.items()
+        if _probe_channel(channel)
+    }
+    normalised, corrections = table.normalise(shot, probes)
+    samples.update(normalised)
     selected = source_map.select(available)
     dataset = tensorize(
         selected,
@@ -968,6 +1027,16 @@ def read_solve_inputs(
             "dropped_samples": [
                 f"{base}:{count}" for base, count in sorted(dropped.items())
             ],
+            "acquisition_scaled_channels": sorted(
+                f"{row.channel}:{row.scale:.6g}"
+                for row in corrections
+                if row.applied and row.scale != 1.0
+            ),
+            "acquisition_unscaled_channels": sorted(
+                f"{row.channel}:{row.disposition}"
+                for row in corrections
+                if not row.applied
+            ),
         },
     )
     return ShotSignals(
@@ -980,6 +1049,7 @@ def read_solve_inputs(
         misaligned_channels=tuple(sorted(misaligned)),
         dropped_samples=dropped,
         provenance=tuple(provenance),
+        scale_corrections=corrections,
     )
 
 

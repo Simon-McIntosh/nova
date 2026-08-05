@@ -17,9 +17,9 @@
   <title>MAST Machine Description | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-04">
+<meta name="plan-modified" content="2026-08-05">
 <meta name="plan-impl" content="1.0">
-<meta name="plan-version" content="19">
+<meta name="plan-version" content="20">
 <meta name="plan-sprint" content="S5">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -644,6 +644,22 @@ Work
 
 Done when
   - A GS solve input bundle from nova.io carries F = R·Bφ on the pilot set, both polarities, with provenance; lanes green.</pre>
+    </article>
+<article class="r-fu" data-id="f-mmd-element-turns-defect" data-status="open" data-capability-version="1.0" data-capability-class="routine" data-written-by="reckon-ship" data-written-at="2026-08-05 08:00" data-recommends-skill="/reckon-ship mast-machine-description" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Fix the per-element turns write before any multi-element authoring</h4>
+    <div class="r-fu-body"><p>Latent defect found by the turn-fidelity investigation: nova/imas/mast_geometry.py _author_fitted_turns writes the coil's TOTAL turn count to EVERY element (for element in coil.element: element.turns_with_sign = float(value)). Dormant today — all 13 coils author exactly one element — but it breaks the moment anyone authors per-layer fidelity (e.g. a 4-element solenoid). Everything else already supports multi-element packs (author resizes coil.element to len(outlines); coil_sections splits MultiPolygons area-weighted; the ambix reader divides a stated drive weight over named elements). Trigger: before any multi-element pf_active authoring.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan: mast-machine-description (authoring defect, one function)
+
+Context
+  ~/.cache/nova-mast/fidelity/evidence.json and the turn-fidelity investigation record the defect: _author_fitted_turns assigns the coil-total turns_with_sign to every element, which double-counts the moment a coil authors more than one element outline.
+
+Work
+  1. Distribute the fitted/published turn value over elements consistently with how coil_sections splits areas (area-weighted, or per-element counts when the registry states them), preserving today&#x27;s single-element behaviour bit-for-bit.
+  2. Add a test that authors a synthetic two-element coil and asserts the summed ampere-turns equal the coil value (guards the defect class, not the incident).
+
+Done when
+  - Single-element authoring unchanged (digest-stable); multi-element authoring sums correctly; suites green.</pre>
     </article>
 </section>
 

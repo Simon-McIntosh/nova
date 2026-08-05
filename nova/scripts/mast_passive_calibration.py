@@ -34,8 +34,12 @@ from nova.imas.mast_error_field_screen import (
 )
 from nova.imas.mast_fitted_parameters import MIS_SCALED_SHOTS, RADIAL_PROBE_FAMILY
 from nova.imas.mast_passive_decay_modes import (
-    DecayTransient,
+    FASTEST_RESOLVABLE_TIME,
+    MAXIMUM_DRIVE_SHARE,
     RESOLVED_MODE_COUNT,
+    SLOWEST_RESOLVABLE_TIME,
+    DecayTransient,
+    channel_rows,
     class_names,
     fit_resistivity,
     held_out_score,
@@ -44,7 +48,9 @@ from nova.imas.mast_passive_decay_modes import (
     mode_set,
     profile_class,
     read_transient,
+    reconstruct,
     resistivity_class,
+    visible_modes,
 )
 from nova.imas.mast_passive_inductance import (
     Linkage,
@@ -219,6 +225,25 @@ def excitation_coil(families: Sequence[str]) -> str:
     return stems.pop() if len(stems) == 1 else ""
 
 
+def coil_field_response(model: ResponseModel) -> dict[str, dict[str, float]]:
+    """Return the field each probe reads per unit drive of each coil family.
+
+    The same geometry response the turn fits are built on, read here so the
+    residual drive still falling through a decay window can be carried as a
+    modelled column rather than screened against.  Its amplitude is fitted per
+    shot, so no turn count enters: geometry supplies the spatial pattern and the
+    archive supplies the waveform.
+    """
+
+    return {
+        family: {
+            target.channel: float(model.response[row, column])
+            for row, target in enumerate(model.targets)
+        }
+        for column, family in enumerate(model.families)
+    }
+
+
 def transients(arguments: argparse.Namespace) -> None:
     """Select, screen and cache the decay experiments' windowed waveforms."""
 
@@ -230,6 +255,7 @@ def transients(arguments: argparse.Namespace) -> None:
     _, _, model, _ = build_geometry()
     screen = load_screen(arguments.screen)
     refused_amplitude = set(MIS_SCALED_SHOTS)
+    drive_response = coil_field_response(model)
 
     rows: list[dict[str, Any]] = []
     kept: list[DecayTransient] = []
@@ -266,6 +292,7 @@ def transients(arguments: argparse.Namespace) -> None:
                 model.targets,
                 excitation_family="",
                 refused_channels=removed,
+                drive_response=drive_response,
             )
         except Exception as error:  # noqa: BLE001 - the store's failures are data
             record["refusal"] = f"{type(error).__name__}: {error}"
@@ -276,10 +303,11 @@ def transients(arguments: argparse.Namespace) -> None:
             transient,
             excitation_family=coil or "+".join(transient.driven_families),
         )
-        if transient.residual_drive > arguments.settle_fraction:
+        if transient.drive_share > arguments.maximum_drive_share:
             record["refusal"] = (
-                f"drive still swings {transient.residual_drive:.3f} of its peak "
-                "inside the window"
+                f"the measured residual drive alone explains "
+                f"{transient.drive_share:.3f} of the transient, so the window "
+                "watches the coil switching off rather than the structure"
             )
             rows.append(record)
             continue
@@ -309,6 +337,19 @@ def transients(arguments: argparse.Namespace) -> None:
                 ("signal", transient.signal),
                 ("noise", transient.noise),
                 ("channels", np.asarray(transient.channels)),
+                (
+                    "drive_patterns",
+                    transient.drive_patterns
+                    if transient.drive_patterns is not None
+                    else np.zeros((len(transient.channels), 0)),
+                ),
+                (
+                    "drive_waveforms",
+                    transient.drive_waveforms
+                    if transient.drive_waveforms is not None
+                    else np.zeros((0, transient.time.size)),
+                ),
+                ("drive_names", np.asarray(transient.drive_names, dtype="<U32")),
                 ("family", np.asarray([transient.excitation_family])),
                 ("driven", np.asarray(transient.driven_families)),
                 ("refused", np.asarray(transient.refused_channels)),
@@ -619,6 +660,340 @@ def fit(arguments: argparse.Namespace) -> None:
     print(f"wrote {arguments.report}")
 
 
+def figures(arguments: argparse.Namespace) -> None:
+    """Draw what the calibration established."""
+
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    plt.rcParams.update({"font.size": 9, "svg.fonttype": "none", "figure.dpi": 110})
+    linkage, resistance, coupling, channels = load_linkage(arguments.linkage)
+    _, _, _, turns = build_geometry()
+    report = json.loads(arguments.report.read_text())
+    rows = load_transients(arguments.transients)
+    out = arguments.figures
+    out.mkdir(parents=True, exist_ok=True)
+
+    _linkage_figure(plt, linkage, resistance, turns, out)
+    _spectrum_figure(plt, linkage, resistance, coupling, turns, report, out)
+    _resistance_figure(plt, linkage, resistance, turns, report, out)
+    _reconstruction_figure(
+        plt, linkage, resistance, coupling, channels, turns, report, rows, out
+    )
+    print(f"wrote four figures to {out}")
+
+
+def _fitted_multipliers(report: dict[str, Any], turns) -> np.ndarray:
+    """Return the fitted multiplier of every circuit from a fit record."""
+
+    values = report["fit"]["multipliers"]
+    return np.asarray([values[resistivity_class(turn.family)] for turn in turns])
+
+
+def _linkage_figure(plt, linkage, resistance, turns, out: Path) -> None:
+    """Show the linkage's block structure and what it implies per circuit."""
+
+    figure, axes = plt.subplots(1, 3, figsize=(12.4, 4.0))
+    scale = np.sqrt(np.outer(np.diag(linkage.matrix), np.diag(linkage.matrix)))
+    normalised = linkage.matrix / scale
+    image = axes[0].imshow(normalised, cmap="RdBu_r", vmin=-1.0, vmax=1.0)
+    axes[0].set_title("coupling coefficient  $L_{ij}/\\sqrt{L_{ii}L_{jj}}$")
+    axes[0].set_xlabel("circuit")
+    axes[0].set_ylabel("circuit")
+    cases = [index for index, turn in enumerate(turns) if turn.enclosed_coil]
+    if cases:
+        axes[0].axhline(min(cases) - 0.5, color="#333", lw=0.6)
+        axes[0].axhline(max(cases) + 0.5, color="#333", lw=0.6)
+        axes[0].text(
+            1.0,
+            float(np.mean(cases)),
+            "coil cases",
+            fontsize=7,
+            rotation=90,
+            va="center",
+        )
+    figure.colorbar(image, ax=axes[0], fraction=0.046)
+
+    self_terms = np.diag(linkage.matrix)
+    radii = np.asarray([turn.centroid[0] for turn in turns])
+    is_case = np.asarray([bool(turn.enclosed_coil) for turn in turns])
+    for mask, colour, label in (
+        (~is_case, "#1f5f9c", "vessel and structure"),
+        (is_case, "#b0353a", "coil cases"),
+    ):
+        axes[1].scatter(
+            radii[mask], self_terms[mask] * 1e6, s=18, c=colour, label=label
+        )
+    axes[1].set_xlabel("centroid major radius [m]")
+    axes[1].set_ylabel("self inductance [$\\mu$H]")
+    axes[1].set_title("self inductance grows with the ring it encloses")
+    axes[1].legend(fontsize=7)
+
+    tau = self_terms / resistance
+    order = np.argsort(-tau)
+    axes[2].barh(
+        np.arange(min(14, len(turns))),
+        tau[order][:14] * 1e3,
+        color=["#b0353a" if is_case[index] else "#1f5f9c" for index in order[:14]],
+    )
+    axes[2].set_yticks(np.arange(min(14, len(turns))))
+    axes[2].set_yticklabels([turns[index].name for index in order[:14]], fontsize=6)
+    axes[2].invert_yaxis()
+    axes[2].set_xlabel("isolated $L/R$ at nominal resistivity [ms]")
+    axes[2].set_title("the slowest circuits taken alone")
+    figure.suptitle(
+        "Passive flux linkage on the corrected case geometry: "
+        f"{len(turns)} circuits, {int(linkage.quadrature_points.sum())} quadrature "
+        f"points, reciprocity residual {linkage.reciprocity_residual:.1e}",
+        fontsize=9.5,
+    )
+    figure.tight_layout(rect=(0, 0, 1, 0.94))
+    figure.savefig(out / "passive_linkage_structure.svg")
+    plt.close(figure)
+
+
+def _spectrum_figure(plt, linkage, resistance, coupling, turns, report, out) -> None:
+    """Compare the nominal and fitted mode spectra and their probe visibility."""
+
+    nominal = mode_set(linkage, resistance, coupling)
+    fitted = mode_set(
+        linkage,
+        resistance,
+        coupling,
+        multipliers=_fitted_multipliers(report, turns),
+    )
+    figure, axes = plt.subplots(1, 3, figsize=(12.4, 4.0))
+    for modes, colour, label in (
+        (nominal, "#1f5f9c", "nominal resistivity"),
+        (fitted, "#b0353a", "fitted resistivity"),
+    ):
+        keep = modes.tau <= 1.0
+        axes[0].semilogy(
+            np.arange(int(keep.sum())),
+            modes.tau[keep] * 1e3,
+            "o-",
+            ms=3,
+            color=colour,
+            label=label,
+            lw=0.9,
+        )
+    axes[0].axhspan(
+        FASTEST_RESOLVABLE_TIME * 1e3,
+        SLOWEST_RESOLVABLE_TIME * 1e3,
+        color="#dfe8ef",
+        zorder=0,
+        label="window can resolve",
+    )
+    axes[0].set_xlabel("mode, slowest first")
+    axes[0].set_ylabel("decay time [ms]")
+    axes[0].set_title("mode spectrum")
+    axes[0].legend(fontsize=7)
+
+    for modes, colour, label in (
+        (nominal, "#1f5f9c", "nominal"),
+        (fitted, "#b0353a", "fitted"),
+    ):
+        strength = np.linalg.norm(modes.signature, axis=0)
+        keep = modes.tau <= 1.0
+        axes[1].loglog(
+            modes.tau[keep] * 1e3,
+            strength[keep] * 1e6,
+            "o",
+            ms=4,
+            color=colour,
+            label=label,
+        )
+    axes[1].set_xlabel("decay time [ms]")
+    axes[1].set_ylabel("probe signature $\\|Cv\\|$ [$\\mu$T per unit amplitude]")
+    axes[1].set_title("how strongly each mode shows up")
+    axes[1].legend(fontsize=7)
+
+    weight = np.abs(fitted.vectors[:, np.argsort(-fitted.tau)[:3]])
+    weight = weight / np.maximum(weight.max(axis=0, keepdims=True), 1e-30)
+    top = np.argsort(-weight.max(axis=1))[:12]
+    positions = np.arange(len(top))
+    for column, (colour, label) in enumerate(
+        (("#b0353a", "slowest"), ("#d18a2c", "second"), ("#3d8b5f", "third"))
+    ):
+        axes[2].barh(
+            positions + 0.26 * (column - 1),
+            weight[top, column],
+            height=0.24,
+            color=colour,
+            label=label,
+        )
+    axes[2].set_yticks(positions)
+    axes[2].set_yticklabels([turns[index].name for index in top], fontsize=6)
+    axes[2].invert_yaxis()
+    axes[2].set_xlabel("normalised circuit participation")
+    axes[2].set_title("the three slowest fitted modes are mixtures")
+    axes[2].legend(fontsize=7)
+    figure.suptitle(
+        "A decay mode is a mixture of circuits, and resistance reshapes it",
+        fontsize=9.5,
+    )
+    figure.tight_layout(rect=(0, 0, 1, 0.94))
+    figure.savefig(out / "passive_mode_spectra.svg")
+    plt.close(figure)
+
+
+def _resistance_figure(plt, linkage, resistance, turns, report, out) -> None:
+    """Show each class's fitted multiplier, its interval and its verdict."""
+
+    verdicts = report["verdicts"]
+    names = sorted(verdicts)
+    figure, axes = plt.subplots(1, 3, figsize=(12.4, 4.0))
+    positions = np.arange(len(names))
+    for position, name in zip(positions, names, strict=True):
+        row = verdicts[name]
+        lower, upper = row["interval"]
+        colour = "#3d8b5f" if row["promoted"] else "#b0353a"
+        axes[0].plot([lower, upper], [position, position], color=colour, lw=2.4)
+        axes[0].plot(row["multiplier"], position, "o", color=colour, ms=6)
+        profile = row.get("profile_interval", [lower, upper])
+        axes[0].plot(profile, [position - 0.18] * 2, color="#666", lw=1.0)
+    axes[0].axvline(1.0, color="#333", ls="--", lw=0.8)
+    axes[0].set_xscale("log")
+    axes[0].set_yticks(positions)
+    axes[0].set_yticklabels(names, fontsize=7)
+    axes[0].set_xlabel("resistivity multiplier on nominal")
+    axes[0].set_title("thick: promoted interval, thin: profile alone")
+
+    for position, name in zip(positions, names, strict=True):
+        row = verdicts[name]
+        lower, upper = row["resistivity_interval"]
+        axes[1].plot([lower, upper], [position, position], color="#1f5f9c", lw=2.4)
+        axes[1].plot(row["resistivity"], position, "o", color="#1f5f9c", ms=6)
+        material_lower = row["nominal_resistivity"] * 0.93
+        material_upper = row["nominal_resistivity"] * 1.22
+        axes[1].plot(
+            [material_lower, material_upper],
+            [position + 0.2] * 2,
+            color="#3d8b5f",
+            lw=1.4,
+        )
+    axes[1].set_xscale("log")
+    axes[1].set_yticks(positions)
+    axes[1].set_yticklabels(names, fontsize=7)
+    axes[1].set_xlabel("effective resistivity [$\\Omega$ m]")
+    axes[1].set_title("blue: fitted, green: bulk-material interval")
+
+    multipliers = _fitted_multipliers(report, turns)
+    axes[2].scatter(
+        resistance,
+        resistance * multipliers,
+        s=16,
+        c=["#b0353a" if turn.enclosed_coil else "#1f5f9c" for turn in turns],
+    )
+    limits = [float(resistance.min()) * 0.7, float(resistance.max()) * 1.4]
+    axes[2].plot(limits, limits, color="#333", ls="--", lw=0.8)
+    axes[2].set_xscale("log")
+    axes[2].set_yscale("log")
+    axes[2].set_xlabel("nominal ring resistance [$\\Omega$]")
+    axes[2].set_ylabel("fitted ring resistance [$\\Omega$]")
+    axes[2].set_title("red: coil cases, blue: vessel and structure")
+    figure.suptitle(
+        "Per-class resistivity: the promoted interval is the union of the profile "
+        "and the leave-one-out range",
+        fontsize=9.5,
+    )
+    figure.tight_layout(rect=(0, 0, 1, 0.94))
+    figure.savefig(out / "passive_group_resistance.svg")
+    plt.close(figure)
+
+
+def _reconstruction_figure(
+    plt, linkage, resistance, coupling, channels, turns, report, rows, out
+) -> None:
+    """Reconstruct a held-out transient under both resistance models."""
+
+    held = set(report["split"].get("held_out_coil", [])) | set(
+        report["split"].get("held_out_shots", [])
+    )
+    candidates = [row for row in rows if row.shot in held] or list(rows)
+    transient = max(candidates, key=lambda row: row.signal_to_noise)
+    models = {
+        "nominal": mode_set(linkage, resistance, coupling),
+        "fitted": mode_set(
+            linkage,
+            resistance,
+            coupling,
+            multipliers=_fitted_multipliers(report, turns),
+        ),
+    }
+    figure, axes = plt.subplots(1, 3, figsize=(12.4, 4.0))
+    channel_index = channel_rows(transient, channels)
+    loudest = np.argsort(-np.abs(transient.signal).max(axis=1))[:3]
+    for offset, row in enumerate(loudest):
+        axes[0].plot(
+            transient.time * 1e3,
+            transient.signal[row] * 1e3,
+            color="#333",
+            lw=1.4,
+            label="measured" if offset == 0 else None,
+        )
+    residuals = {}
+    for label, colour in (("nominal", "#1f5f9c"), ("fitted", "#b0353a")):
+        modes = models[label]
+        selection = visible_modes(modes, transient, channel_index)
+        outcome = reconstruct(transient, modes, channel_index, selection)
+        envelope = np.exp(-transient.time[None, :] / modes.tau[selection][:, None])
+        signature = modes.signature[np.ix_(channel_index, selection)]
+        predicted = (signature * np.asarray(outcome.amplitudes)) @ envelope
+        residuals[label] = (
+            np.abs(transient.signal - predicted).max(axis=1) / transient.noise
+        )
+        for offset, row in enumerate(loudest):
+            axes[0].plot(
+                transient.time * 1e3,
+                predicted[row] * 1e3,
+                color=colour,
+                ls="--",
+                lw=1.1,
+                label=label if offset == 0 else None,
+            )
+        axes[1].plot(
+            np.sort(residuals[label]),
+            np.linspace(0.0, 1.0, residuals[label].size),
+            color=colour,
+            label=f"{label}: {outcome.whitened_residual:.2f}",
+        )
+    axes[0].set_xlabel("time since switch-off [ms]")
+    axes[0].set_ylabel("probe field [mT]")
+    axes[0].set_title(f"shot {transient.shot}, three loudest channels")
+    axes[0].legend(fontsize=7)
+    axes[1].set_xscale("log")
+    axes[1].set_xlabel("worst-sample residual, in units of the channel's own noise")
+    axes[1].set_ylabel("fraction of channels")
+    axes[1].set_title("whitened residual, pooled misfit in the legend")
+    axes[1].legend(fontsize=7)
+
+    scores = report["held_out_scores"]
+    labels = sorted(scores)
+    width = 0.36
+    for offset, (key, colour) in enumerate(
+        (("nominal_misfit", "#1f5f9c"), ("fitted_misfit", "#b0353a"))
+    ):
+        axes[2].bar(
+            np.arange(len(labels)) + width * (offset - 0.5),
+            [scores[label][key] for label in labels],
+            width=width,
+            color=colour,
+            label=key.split("_")[0],
+        )
+    axes[2].set_xticks(np.arange(len(labels)))
+    axes[2].set_xticklabels([label.replace("_", "\n") for label in labels], fontsize=7)
+    axes[2].set_ylabel("pooled whitened misfit")
+    axes[2].set_title("held-out challenges")
+    axes[2].legend(fontsize=7)
+    figure.suptitle("A held-out decay under both resistance models", fontsize=9.5)
+    figure.tight_layout(rect=(0, 0, 1, 0.94))
+    figure.savefig(out / "passive_held_out_reconstruction.svg")
+    plt.close(figure)
+
+
 def main(argv: Sequence[str] | None = None) -> None:
     """Run one stage of the passive calibration."""
 
@@ -650,7 +1025,9 @@ def main(argv: Sequence[str] | None = None) -> None:
     transient_parser.add_argument(
         "--report", type=Path, default=cache / "mast_passive_transients.json"
     )
-    transient_parser.add_argument("--settle-fraction", type=float, default=0.02)
+    transient_parser.add_argument(
+        "--maximum-drive-share", type=float, default=MAXIMUM_DRIVE_SHARE
+    )
     transient_parser.set_defaults(handler=transients)
 
     fit_parser = subparsers.add_parser("fit")
@@ -661,6 +1038,20 @@ def main(argv: Sequence[str] | None = None) -> None:
     fit_parser.add_argument("--profile-points", type=int, default=13)
     fit_parser.add_argument("--sensitivity", action="store_true")
     fit_parser.set_defaults(handler=fit)
+
+    figure_parser = subparsers.add_parser("figures")
+    figure_parser.add_argument(
+        "--report", type=Path, default=cache / "mast_passive_calibration.json"
+    )
+    figure_parser.add_argument(
+        "--figures",
+        type=Path,
+        default=Path(__file__).resolve().parents[2]
+        / "docs"
+        / "figures"
+        / "mast-vacuum-floor",
+    )
+    figure_parser.set_defaults(handler=figures)
 
     arguments = parser.parse_args(argv)
     arguments.handler(arguments)

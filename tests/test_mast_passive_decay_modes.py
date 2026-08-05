@@ -14,6 +14,7 @@ against a shot that happens to pass.
 from __future__ import annotations
 
 import math
+from dataclasses import replace
 
 import numpy as np
 import pytest
@@ -21,6 +22,7 @@ import pytest
 from nova.imas.mast_passive_decay_modes import (
     DEFAULT_RESISTIVITY_CLASS,
     FASTEST_RESOLVABLE_TIME,
+    MAXIMUM_DRIVE_SHARE,
     MULTIPLIER_BOUNDS,
     RESOLVED_MODE_COUNT,
     SLOWEST_RESOLVABLE_TIME,
@@ -655,6 +657,79 @@ class TestTransientReading:
         idle = switched_shot(hold=0.0)
         with pytest.raises(PassiveError):
             read_transient(idle, TARGETS, excitation_family="p4")
+
+    def test_the_residual_drive_is_carried_as_a_modelled_column(self):
+        """A drive still falling in the window is known, so it is modelled."""
+
+        response = {"p4_upper": {target.channel: 1.0e-7 for target in TARGETS}}
+        plain = read_transient(switched_shot(), TARGETS, excitation_family="p4")
+        carried = read_transient(
+            switched_shot(tail_slope=1.6e3),
+            TARGETS,
+            excitation_family="p4",
+            drive_response=response,
+        )
+        assert plain.drive_names == ()
+        assert plain.drive_columns.shape[1] == 0
+        assert carried.drive_names == ("p4_upper",)
+        assert carried.drive_columns.shape == (carried.signal.size, 1)
+
+    def test_a_steady_drive_earns_no_column(self):
+        """A coil holding still adds a constant the baseline already removed."""
+
+        response = {"p4_upper": {target.channel: 1.0e-7 for target in TARGETS}}
+        transient = read_transient(
+            switched_shot(),
+            TARGETS,
+            excitation_family="p4",
+            drive_response=response,
+        )
+        assert transient.drive_names == ()
+
+    def test_the_drive_share_measures_what_the_coil_explains(self):
+        """The discriminant is the share of the transient, not the size of the drive.
+
+        A window whose signal IS the drive waveform must report a share near one,
+        because that is the case where no resistance can be read; the real decays
+        this fit consumes sit far below it.
+        """
+
+        response = {"p4_upper": {target.channel: 1.0e-7 for target in TARGETS}}
+        transient = read_transient(
+            switched_shot(tail_slope=1.6e3),
+            TARGETS,
+            excitation_family="p4",
+            drive_response=response,
+        )
+        assert 0.0 <= transient.drive_share < MAXIMUM_DRIVE_SHARE
+        impostor = replace(
+            transient,
+            signal=transient.drive_patterns[:, :1] @ transient.drive_waveforms[:1],
+        )
+        assert impostor.drive_share > 0.99
+
+    def test_a_reconstruction_separates_the_modes_from_the_drive(self, system):
+        """The mode share is reported so a good fit cannot hide behind the coil."""
+
+        linkage, resistance, coupling, channels = system
+        truth = {name: 1.0 for name in class_names(CIRCUITS)}
+        transient = synthesise(system, truth, shot=77, noise=1.0e-9)
+        pattern = np.full((len(channels), 1), 1.0e-7)
+        waveform = np.exp(-transient.time / 0.02)[None, :]
+        with_drive = replace(
+            transient,
+            signal=transient.signal + pattern @ waveform,
+            drive_patterns=pattern,
+            drive_waveforms=waveform - waveform.mean(),
+            drive_names=("p4_upper",),
+        )
+        modes = mode_set(linkage, resistance, coupling)
+        rows = channel_rows(with_drive, channels)
+        selection = visible_modes(modes, with_drive, rows)
+        outcome = reconstruct(with_drive, modes, rows, selection)
+        assert len(outcome.drive_amplitudes) == 1
+        assert outcome.variance_explained > 0.99
+        assert outcome.mode_share > 0.1
 
     def test_the_record_reports_what_it_read(self):
         """The provenance a promotion rests on has to be inspectable."""

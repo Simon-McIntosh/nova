@@ -108,13 +108,17 @@ construction.  The material interval is applied afterwards, as the promotion
 test, where a value outside it has to be explained rather than prevented.
 """
 
-SETTLE_DRIVE_FRACTION = 0.02
-"""Fraction of the shot's peak drive still allowed inside the decay window.
+MAXIMUM_DRIVE_SHARE = 0.5
+"""How much of a transient the measured residual drive may explain on its own.
 
-The vertical-control coils hold a few hundred amperes between pulses, so a test
-at zero opens no window at all.  What must be excluded is a drive still *moving*,
-because a ramp inside the window injects a term the free-decay model has no
-place for.
+The window opens when the deliberate excitation falls below the excitation
+threshold, so a few hundred amperes are always still falling inside it -- an
+absolute remainder set by the threshold, not by the shot's peak.  Testing the
+swing against the peak therefore refuses every shot in the archive and measures
+nothing, which is why the discriminant is the *share of the transient* the drive
+accounts for rather than the size of the drive.  Above this share the probes are
+watching the coil finish switching off and no resistance can be read; below it,
+the drive is carried as a modelled column and the rest is the structure.
 """
 
 
@@ -136,6 +140,18 @@ class DecayTransient:
     nothing measured its setting and one read unscaled because its setting was
     measured to be the ordinary one are different statements about the same
     number.
+
+    **The drive does not stop where the window opens, and it is carried rather
+    than screened.**  The window opens once the deliberate excitation falls below
+    the excitation threshold, and the remainder of that current keeps falling
+    through the window -- a few hundred amperes, set by the threshold and so
+    roughly the same whatever the shot's peak was.  Refusing every shot whose
+    drive still moves would refuse them all.  But the residual is *measured*, and
+    the field it makes is a known spatial pattern times that measured waveform, so
+    it enters the reconstruction as its own column with a free amplitude:
+    ``drive_patterns`` is field per unit drive at each admitted channel and
+    ``drive_waveforms`` the measured drive inside the window.  What it absorbs is
+    reported, which is what shows the passive part is not the coil's own tail.
     """
 
     shot: int
@@ -147,6 +163,9 @@ class DecayTransient:
     driven_families: tuple[str, ...]
     peak_drive: float
     residual_drive: float
+    drive_patterns: np.ndarray | None = None
+    drive_waveforms: np.ndarray | None = None
+    drive_names: tuple[str, ...] = ()
     scale_dispositions: Mapping[str, str] = field(default_factory=dict)
     refused_channels: tuple[str, ...] = ()
 
@@ -155,6 +174,41 @@ class DecayTransient:
         """Return how many samples the decay window admitted."""
 
         return int(self.time.size)
+
+    @property
+    def drive_columns(self) -> np.ndarray:
+        """Return the whitened design columns the measured residual drive spans."""
+
+        if self.drive_patterns is None or self.drive_waveforms is None:
+            return np.zeros((self.signal.size, 0))
+        noise = self.noise[:, None]
+        return np.stack(
+            [
+                np.outer(self.drive_patterns[:, column] / noise[:, 0], waveform).ravel()
+                for column, waveform in enumerate(self.drive_waveforms)
+            ],
+            axis=1,
+        )
+
+    @property
+    def drive_share(self) -> float:
+        """Return the whitened variance share the measured drive alone explains.
+
+        The discriminant that decides whether a window is worth fitting at all: a
+        share near one says the probes are watching the coil finish switching off,
+        not the structure ringing down, and no resistance can be read from it.
+        """
+
+        columns = self.drive_columns
+        if columns.shape[1] == 0:
+            return 0.0
+        observed = (self.signal / self.noise[:, None]).ravel()
+        total = float(observed @ observed)
+        if total <= 0.0:
+            return 0.0
+        amplitudes, *_ = np.linalg.lstsq(columns, observed, rcond=None)
+        residual = observed - columns @ amplitudes
+        return float(1.0 - (residual @ residual) / total)
 
     @property
     def signal_to_noise(self) -> float:
@@ -167,6 +221,8 @@ class DecayTransient:
 
         return {
             "channel_count": len(self.channels),
+            "drive_names": list(self.drive_names),
+            "drive_share": self.drive_share,
             "driven_families": list(self.driven_families),
             "excitation_family": self.excitation_family,
             "noise_median": float(np.median(self.noise)),
@@ -194,6 +250,7 @@ def read_transient(
     excitation_family: str,
     refused_channels: Iterable[str] = (),
     minimum_channels: int = 8,
+    drive_response: Mapping[str, Mapping[str, float]] | None = None,
 ) -> DecayTransient:
     """Extract one shot's free decay on the channels the model can predict.
 
@@ -201,6 +258,12 @@ def read_transient(
     scatter are measured in its own pre-excitation baseline, and the window is
     narrowed to the samples every admitted channel is present for, because a
     spatial pattern across the array only means something on a common time base.
+
+    ``drive_response`` gives, per driven coil family, the field each channel reads
+    per unit of that family's drive.  Supplying it lets the residual drive still
+    falling through the window be carried as a modelled column instead of
+    contaminating the modes; leaving it out treats the window as a pure free decay,
+    which is only right where the drive has genuinely stopped.
     """
 
     window = decay_window(waveforms)
@@ -253,12 +316,18 @@ def read_transient(
 
     time = waveforms.time[shared]
     peak, residual = _drive_activity(waveforms, shared)
+    names, patterns, envelopes = _drive_terms(
+        waveforms, shared, channels, drive_response
+    )
     return DecayTransient(
         shot=waveforms.shot,
         channels=tuple(channels),
         time=time - float(time[0]),
         signal=np.vstack(rows),
         noise=np.asarray(floors, dtype=float),
+        drive_patterns=patterns,
+        drive_waveforms=envelopes,
+        drive_names=names,
         excitation_family=excitation_family,
         driven_families=_driven_families(waveforms),
         peak_drive=peak,
@@ -268,6 +337,46 @@ def read_transient(
         },
         refused_channels=tuple(sorted(refused & posed)),
     )
+
+
+def _drive_terms(
+    waveforms: ShotWaveforms,
+    window: np.ndarray,
+    channels: Sequence[str],
+    drive_response: Mapping[str, Mapping[str, float]] | None,
+) -> tuple[tuple[str, ...], np.ndarray | None, np.ndarray | None]:
+    """Build one modelled column per coil still moving inside the window.
+
+    A family is carried only if it was deliberately excited and its current still
+    changes inside the window: a coil holding steady adds a constant, which the
+    baseline subtraction has already taken out, and giving it a column would hand
+    the fit a degenerate direction.  The waveform is mean-removed for the same
+    reason.
+    """
+
+    if not drive_response:
+        return ((), None, None)
+    names: list[str] = []
+    patterns: list[np.ndarray] = []
+    envelopes: list[np.ndarray] = []
+    for family, values in sorted(waveforms.drives.items()):
+        response = drive_response.get(family)
+        if response is None:
+            continue
+        signal = np.nan_to_num(values)
+        if float(np.max(np.abs(signal))) < EXCITATION_CURRENT:
+            continue
+        inside = signal[window]
+        if float(np.max(inside) - np.min(inside)) <= 0.0:
+            continue
+        names.append(family)
+        patterns.append(
+            np.asarray([float(response.get(channel, 0.0)) for channel in channels])
+        )
+        envelopes.append(inside - float(inside.mean()))
+    if not names:
+        return ((), None, None)
+    return (tuple(names), np.stack(patterns, axis=1), np.stack(envelopes, axis=0))
 
 
 def _driven_families(waveforms: ShotWaveforms) -> tuple[str, ...]:
@@ -432,14 +541,29 @@ class Reconstruction:
     whitened_residual: float
     whitened_signal: float
     condition: float
+    drive_amplitudes: tuple[float, ...] = ()
+    whitened_modes: float = 0.0
 
     @property
     def variance_explained(self) -> float:
-        """Return the whitened variance the mode set accounts for."""
+        """Return the whitened variance the fitted columns account for."""
 
         if self.whitened_signal <= 0.0:
             return 0.0
         return float(1.0 - (self.whitened_residual / self.whitened_signal) ** 2)
+
+    @property
+    def mode_share(self) -> float:
+        """Return how much of the explained signal the passive modes carry.
+
+        Reported beside the residual because a reconstruction that fitted well
+        while the drive columns did all the work would be a statement about the
+        coil, not about the structure.
+        """
+
+        if self.whitened_signal <= 0.0:
+            return 0.0
+        return float(self.whitened_modes / self.whitened_signal)
 
     def as_dict(self) -> dict[str, Any]:
         """Return the canonical JSON representation."""
@@ -447,10 +571,13 @@ class Reconstruction:
         return {
             "amplitudes": list(self.amplitudes),
             "condition": self.condition,
+            "drive_amplitudes": list(self.drive_amplitudes),
             "mode_indices": list(self.mode_indices),
+            "mode_share": self.mode_share,
             "shot": self.shot,
             "tau": list(self.tau),
             "variance_explained": self.variance_explained,
+            "whitened_modes": self.whitened_modes,
             "whitened_residual": self.whitened_residual,
             "whitened_signal": self.whitened_signal,
         }
@@ -486,23 +613,28 @@ def reconstruct(
     observed = (transient.signal / noise).ravel()
     envelope = np.exp(-transient.time[None, :] / modes.tau[selection][:, None])
     patterns = modes.signature[np.ix_(rows, selection)] / noise
-    design = np.stack(
+    mode_design = np.stack(
         [
             np.outer(patterns[:, column], envelope[column]).ravel()
             for column in range(selection.size)
         ],
         axis=1,
     )
+    drive_design = transient.drive_columns
+    design = np.concatenate([mode_design, drive_design], axis=1)
     amplitudes, *_ = np.linalg.lstsq(design, observed, rcond=None)
     residual = observed - design @ amplitudes
     scale = np.sqrt(observed.size)
+    mode_only = mode_design @ amplitudes[: selection.size]
     return Reconstruction(
         shot=transient.shot,
         mode_indices=tuple(int(index) for index in selection),
         tau=tuple(float(value) for value in modes.tau[selection]),
-        amplitudes=tuple(float(value) for value in amplitudes),
+        amplitudes=tuple(float(value) for value in amplitudes[: selection.size]),
+        drive_amplitudes=tuple(float(value) for value in amplitudes[selection.size :]),
         whitened_residual=float(np.linalg.norm(residual) / scale),
         whitened_signal=float(np.linalg.norm(observed) / scale),
+        whitened_modes=float(np.linalg.norm(mode_only) / scale),
         condition=float(np.linalg.cond(design)),
     )
 

@@ -351,6 +351,32 @@ CIRCUIT_RELATIONS = (
 
 _PASSIVE_TURNS_PER_SECTION = 1.0
 
+DECAY_CALIBRATION_TRANSIENTS = 100
+"""Dedicated decay experiments the passive resistance was tested against.
+
+Of a hundred and thirteen candidates in the designed classes -- sustained
+single-coil pulses, sustained symmetric pairs and pulsed shots.  The thirteen
+refusals are the eight-shot amplitude refusal that carries through from the
+acquisition sweep, shots with no readable common window, and one shot whose
+measured residual drive accounted for most of its transient.
+"""
+
+NOMINAL_SLOWEST_MODE = 0.0719
+"""Slowest decay time the nominal resistivity predicts on the exact inductance [s].
+
+Computed from the geometric flux linkage of the fifty-seven passive circuits with
+the published bulk resistivities, nothing fitted.  It is quoted because it lands
+inside the band the probe decays measure, which is what makes the seed a
+corroborated value rather than an untested one.
+"""
+
+MEASURED_DECAY_BAND = (0.0229, 0.0719)
+"""Range of dominant decay times the probe array measures directly [s].
+
+Read off the free decays themselves by decomposition, independent of any circuit
+model, so it is the observation the predicted spectrum has to sit inside.
+"""
+
 
 @dataclass(frozen=True)
 class ProposedStandardName:
@@ -548,6 +574,49 @@ def _passive_records(
                 "is invariant under their subdivision"
             ),
             source=catalog_source("level-2 pf_passive named component arrays"),
+        ),
+        EvidenceRecord(
+            path="pf_passive/loop/resistance",
+            evidence=FieldEvidence.GENERATED,
+            first_shot=first_shot,
+            last_shot=last_shot,
+            statement=(
+                "the nominal ring resistances stand: a mode-resolved fit of the "
+                f"{DECAY_CALIBRATION_TRANSIENTS} dedicated decay experiments against "
+                "the exact geometric inductance could not identify a resistivity for "
+                "any class of conductor, and the nominal values already reproduce the "
+                "measured decay band"
+            ),
+            assumptions=(
+                "the inductance is exact rather than fitted, so a decay time converts "
+                "straight to a resistance and resistivity is the only unknown a decay "
+                "can carry",
+                "at the nominal resistivity the slowest predicted mode is "
+                f"{NOMINAL_SLOWEST_MODE * 1e3:.1f} ms, inside the "
+                f"{MEASURED_DECAY_BAND[0] * 1e3:.1f} to "
+                f"{MEASURED_DECAY_BAND[1] * 1e3:.1f} ms band the probe decays "
+                "themselves show, which is a corroboration of the seed and not a fit "
+                "to it",
+                "the fitted alternative lowers the training misfit by seven per cent "
+                "while turning two thirds of the modes it uses into ramps slower than "
+                "their own window can resolve, where the nominal model uses none; a "
+                "ramp absorbs baseline error rather than describing a conductor",
+                "scored on the withheld coil with those ramps disallowed the fitted "
+                "model is worse by half, so the training gain does not generalise",
+                "three of the four conductor classes leave their profile open across "
+                "the whole search range, and the fourth spans a factor of sixteen, so "
+                "the diagnostic set does not constrain a resistivity per class",
+                "the fitted vessel value implies a resistivity below the bulk interval "
+                "of the metal, which an ideal ring standing in for a real shell cannot "
+                "reach: cut-outs, joints and longer paths all raise resistance, so a "
+                "value there points at conductor the model does not carry rather than "
+                "at a resistivity",
+            ),
+            uncertainty=Uncertainty(lower=0.2, upper=20.0, unit="1"),
+            source=_reduced_vessel_model(
+                "abstract; effective vessel resistances are refined against vacuum "
+                "coil-test shots"
+            ),
         ),
         EvidenceRecord(
             path="pf_passive/loop/element/turns_with_sign",

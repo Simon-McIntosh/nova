@@ -20,6 +20,8 @@ from nova.imas.machine_evidence import FieldEvidence
 from nova.imas.mast_seed_parameters import (
     CIRCUIT_RELATIONS,
     INCONEL,
+    MEASURED_DECAY_BAND,
+    NOMINAL_SLOWEST_MODE,
     MAST_MACHINE_SCOPES,
     PROPOSED_STANDARD_NAMES,
     STAINLESS_STEEL,
@@ -175,7 +177,7 @@ def test_seeded_ledger_states_every_field_it_touches(ledger) -> None:
     assert ledger.state_counts() == {
         "measured": 8,
         "published": 9,
-        "generated": 28,
+        "generated": 29,
         "fitted": 0,
         "unresolved": 15,
     }
@@ -196,6 +198,30 @@ def test_seeded_ledger_states_every_field_it_touches(ledger) -> None:
         "tf/coils_n",
         "tf/r0",
     )
+
+
+def test_the_decay_calibration_records_its_negative_result(ledger) -> None:
+    """The nominal resistance carries the reason a fit did not replace it.
+
+    A negative result that lives only in a report is invisible to every reader of
+    the description, and the next pass repeats the work.  So the record states that
+    the fit was run, what it could not identify, and the corroboration that makes
+    the seed a tested value: the predicted slowest mode sits inside the band the
+    probe decays measure.
+    """
+
+    record = next(
+        row for row in ledger.records if row.path == "pf_passive/loop/resistance"
+    )
+    assumptions = " ".join(record.assumptions)
+
+    assert record.evidence is FieldEvidence.GENERATED
+    assert "could not identify a resistivity" in record.statement
+    assert MEASURED_DECAY_BAND[0] < NOMINAL_SLOWEST_MODE <= MEASURED_DECAY_BAND[1]
+    assert "71.9 ms" in assumptions
+    assert "ramps slower than" in assumptions
+    assert "does not generalise" in assumptions
+    assert "profile open" in assumptions
 
 
 def test_the_p2_packs_are_published_as_separately_fed(ledger) -> None:

@@ -220,7 +220,7 @@ def test_published_revision_verifies_but_is_not_operator_ready(tmp_path: Path) -
     assert manifest.evidence.state_counts() == {
         "measured": 8,
         "published": 9,
-        "generated": 28,
+        "generated": 29,
         "fitted": 0,
         "unresolved": 15,
     }

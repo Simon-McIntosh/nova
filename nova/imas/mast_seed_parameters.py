@@ -377,6 +377,32 @@ Read off the free decays themselves by decomposition, independent of any circuit
 model, so it is the observation the predicted spectrum has to sit inside.
 """
 
+INSTRUMENTED_CASE_GROUPS = 8
+"""Coil-case groups whose induced current the store measures directly.
+
+The lower and upper case of each of P2, P3, P4 and P5.  Unlike the per-family
+passive currents, which are a reconstruction's own wall-model output, these are
+transducer readings, so they can ground a fit rather than only corroborate one.
+The two P6 case groups carry no such channel, which is why they stay induced.
+"""
+
+CASE_CURRENT_IDENTIFYING_SHOTS = 37
+"""Decay shots on which a case channel identifies its own coil unambiguously.
+
+Every single-coil-set decay shot in the calibration cohort that carries the case
+channels.  On all of them the case of the coil that was driven reads the largest
+current of the eight, which is what establishes that these channels measure
+induced current per group rather than a common pickup.
+"""
+
+CASE_CURRENT_CONTRAST = 8.1
+"""How far the driven coil's own case current stands above the others.
+
+Median over :data:`CASE_CURRENT_IDENTIFYING_SHOTS` of the excited case's peak
+divided by the median peak of the other seven; the range runs from 2.5 to 54.
+A contrast this large per group is the identifiability the probe array lacks.
+"""
+
 
 @dataclass(frozen=True)
 class ProposedStandardName:
@@ -620,6 +646,15 @@ def _passive_records(
                 "no mode count settles it either: the misfit keeps falling from two "
                 "modes to four while the fitted values move by factors of several, so "
                 "the fit absorbs whatever basis it is given rather than converging",
+                f"a stronger measurement than the probe field exists and this fit did "
+                f"not use it: the store carries {INSTRUMENTED_CASE_GROUPS} coil-case "
+                "current channels, and on every one of the "
+                f"{CASE_CURRENT_IDENTIFYING_SHOTS} single-set decay shots that carry "
+                "them the driven coil's own case reads the largest current, by a "
+                f"median factor of {CASE_CURRENT_CONTRAST:.1f} over the others -- so "
+                "these are instrument readings of induced current per case group "
+                "rather than a reconstruction's output, and they constrain a case "
+                "group individually where the probe array constrains only a class",
             ),
             uncertainty=Uncertainty(lower=0.2, upper=20.0, unit="1"),
             source=_reduced_vessel_model(

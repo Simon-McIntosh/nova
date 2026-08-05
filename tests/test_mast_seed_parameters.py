@@ -18,8 +18,10 @@ import pytest
 from nova.catalog.mast_geometry import MachineGeometryRegistry, physical_digest
 from nova.imas.machine_evidence import FieldEvidence
 from nova.imas.mast_seed_parameters import (
+    CASE_CURRENT_IDENTIFYING_SHOTS,
     CIRCUIT_RELATIONS,
     INCONEL,
+    INSTRUMENTED_CASE_GROUPS,
     MEASURED_DECAY_BAND,
     NOMINAL_SLOWEST_MODE,
     MAST_MACHINE_SCOPES,
@@ -222,6 +224,29 @@ def test_the_decay_calibration_records_its_negative_result(ledger) -> None:
     assert "ramps slower than" in assumptions
     assert "does not generalise" in assumptions
     assert "leave their profile open at a search bound" in assumptions
+
+
+def test_the_record_names_the_measurement_that_would_identify_a_resistance(
+    ledger,
+) -> None:
+    """A negative result should hand on the lever it found but did not spend.
+
+    The eight instrumented case-current channels are transducer readings of
+    induced current per case group, and the excited coil's own case dominates them
+    on every shot that carries them.  That is the identifiability the probe array
+    lacks, so the record names it rather than leaving the next pass to rediscover
+    it.
+    """
+
+    record = next(
+        row for row in ledger.records if row.path == "pf_passive/loop/resistivity"
+    )
+    assumptions = " ".join(record.assumptions)
+
+    assert "coil-case " in assumptions and "current channels" in assumptions
+    assert str(INSTRUMENTED_CASE_GROUPS) in assumptions
+    assert str(CASE_CURRENT_IDENTIFYING_SHOTS) in assumptions
+    assert "instrument readings" in assumptions
 
 
 def test_the_p2_packs_are_published_as_separately_fed(ledger) -> None:

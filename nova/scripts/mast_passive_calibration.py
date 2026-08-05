@@ -801,7 +801,7 @@ def _linkage_figure(plt, linkage, resistance, turns, out: Path) -> None:
         )
     axes[1].set_xlabel("centroid major radius [m]")
     axes[1].set_ylabel("self inductance [$\\mu$H]")
-    axes[1].set_title("self inductance grows with the ring it encloses")
+    axes[1].set_title("radius alone does not set it: shape does too")
     axes[1].legend(fontsize=7)
 
     tau = self_terms / resistance
@@ -932,7 +932,7 @@ def _resistance_figure(plt, linkage, resistance, turns, report, out) -> None:
     axes[0].set_yticks(positions)
     axes[0].set_yticklabels(names, fontsize=7)
     axes[0].set_xlabel("resistivity multiplier on nominal")
-    axes[0].set_title("thick: promoted interval, thin: profile alone")
+    axes[0].set_title("green promoted, red refused; thin bar is the profile alone")
 
     for position, name in zip(positions, names, strict=True):
         row = verdicts[name]
@@ -966,8 +966,9 @@ def _resistance_figure(plt, linkage, resistance, turns, report, out) -> None:
     axes[2].set_ylabel("fitted ring resistance [$\\Omega$]")
     axes[2].set_title("red: coil cases, blue: vessel and structure")
     figure.suptitle(
-        "Per-class resistivity: the promoted interval is the union of the profile "
-        "and the leave-one-out range",
+        "Per-class resistivity: the reported interval is the union of the profile "
+        "and the leave-one-out range, and a value left of the green bar would have "
+        "the ring out-conducting its own metal",
         fontsize=9.5,
     )
     figure.tight_layout(rect=(0, 0, 1, 0.94))
@@ -1043,7 +1044,11 @@ def _reconstruction_figure(
     axes[0].set_ylabel("probe field [mT]")
     axes[0].set_title(f"shot {transient.shot}, three loudest channels")
     axes[0].legend(fontsize=7)
+    from matplotlib.ticker import LogFormatterMathtext, NullFormatter
+
     axes[1].set_xscale("log")
+    axes[1].xaxis.set_major_formatter(LogFormatterMathtext())
+    axes[1].xaxis.set_minor_formatter(NullFormatter())
     axes[1].set_xlabel("worst-sample residual, in units of the channel's own noise")
     axes[1].set_ylabel("fraction of channels")
     axes[1].set_title("whitened residual, pooled misfit in the legend")

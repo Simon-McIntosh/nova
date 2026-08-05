@@ -174,15 +174,15 @@ class BlockScale:
             raise BlockScaleError(
                 f"{self.channel!r} block shots are not a sorted distinct run"
             )
-        if not math.isfinite(self.scale) or self.scale <= 0.0:
+        if not math.isfinite(self.scale) or self.scale == 0.0:
             raise BlockScaleError(
                 f"{self.channel!r} block carries scale {self.scale}, which is not a "
                 "measurable ratio"
             )
-        if self.rung == 0.0:
+        if self.rung == 0.0 or (math.isfinite(self.rung) and self.rung < 0.0):
             raise BlockScaleError(
-                f"{self.channel!r} block carries a rung of zero, which would erase "
-                "the signal"
+                f"{self.channel!r} block carries a rung of {self.rung}, and a range "
+                "setting neither erases a signal nor inverts one"
             )
 
     def as_dict(self) -> dict[str, Any]:
@@ -241,10 +241,18 @@ def channel_blocks(
     rung of one channel by one common factor, and a common per-channel factor is
     exactly what this correction deliberately leaves alone.
 
-    A block whose relative factor misses every rung by more than ``tolerance`` keeps
-    a rung that is not finite: the step is real -- the block finder measured it --
-    but it is not the discrete factor a range setting moves by, so removing it would
-    be a fit rather than a correction.
+    A block whose relative factor misses every rung by more than ``tolerance`` keeps a
+    rung that is not finite: the step is real -- the block finder measured it -- but it
+    is not the discrete factor a range setting moves by, so removing it would be a fit
+    rather than a correction.
+
+    A block whose own measured scale is negative is refused on the same grounds and for
+    a sharper reason.  The ladder is positive by declaration, so no rung inverts a
+    signal; a channel reading the described field backwards on a run of shots is saying
+    something about its polarity or about how little signal it had, and neither is a
+    range setting.  These are rare -- a fraction of a percent of readings, on the
+    quietest channels -- and refusing them is what keeps that tail out of the
+    correction.
     """
 
     blocks = history.blocks
@@ -267,13 +275,17 @@ def channel_blocks(
     )
     rows = []
     for block in blocks:
-        rung, distance = nearest_rung(block.scale / reference.scale)
+        if block.scale <= 0.0 or reference.scale <= 0.0:
+            rung = math.nan
+        else:
+            candidate, distance = nearest_rung(block.scale / reference.scale)
+            rung = candidate if distance <= tolerance else math.nan
         rows.append(
             BlockScale(
                 channel=block.channel,
                 scale=float(block.scale),
                 shots=inside[block.first_shot],
-                rung=rung if distance <= tolerance else math.nan,
+                rung=rung,
                 route=route,
             )
         )

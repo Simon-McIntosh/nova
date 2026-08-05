@@ -7,30 +7,38 @@ reading, and they arrive in clusters, so a switch that happened between two clus
 is known only to lie somewhere in a gap five thousand shots wide.  A correction with
 a bracket that wide can be applied to the cohort and to almost nothing else.
 
-Two passes narrow it, and they differ in what they are allowed to conclude.
+Four passes narrow it, and they differ in what each is allowed to conclude.
 
 ``sweep`` reads every plasma-free shot the cohort classifier found an excitation in,
-not only the ones the split trained on.  These are measurement-grade: the response
-model predicts a plasma-free shot completely, so the ratio it returns is a statement
-about the channel.  This pass is what the promoted settings rest on.
+not only the ones the split trained on.  A plasma-free shot is one the response model
+predicts completely, so the ratio it returns is measurement-grade and this pass is
+what the promoted settings rest on.  It keeps every coil family's ratio separately,
+because how many families a reading rests on decides whether the reading is usable:
+admitting single-family ratios more than doubles the shot coverage and then chops the
+histories into blocks on their scatter, which is a loss disguised as a gain.
+``--families`` reports the block structure each candidate rule produces so the choice
+is made against the measurement.
 
-``pin`` spends its reads inside whatever brackets remain, on the vacuum phase of
-plasma shots.  A plasma shot pre-charges the coils before breakdown, and the sample
-window that survives the plasma-current test is an ordinary vacuum measurement -- but
-one taken on a shot the cohort refused, so this pass may place a boundary and may not
-set a setting.  It only has to resolve a factor of two, and it chooses its next shot
-by bisecting the widest bracket still open, so it converges on a boundary in reads
-growing with the logarithm of the bracket's width.  One read serves every channel
-at once, because every channel's setting is recorded on the same shot.
+``array`` measures a second observable that needs no description -- each channel's
+amplitude relative to the array median, which no drive, coil or plasma can move
+because it is in the numerator and denominator alike -- and checks it against the
+fitted route on the shots both read.  That check is a gate, not a result.
 
-``promote`` assembles the table the read path applies, refers each block to the block
-reading nearest the described field, snaps each step to the declared ladder, and
+``pin`` spends reads inside whatever brackets remain, using that model-free
+observable, so it can read plasma shots the fitted route refuses.  It bisects the
+widest bracket still open, converging in reads growing with the logarithm of a
+bracket's width, and one read serves every channel at once because every channel's
+setting is recorded on the same shot.  It may move a boundary and may never set a
+value.
+
+``promote`` assembles the table the read path applies: it refers each block to the
+block reading nearest the described field, snaps each step to the declared ladder, and
 writes the pinning summary beside it so a reader sees which switches the archive pins
 and which it cannot.
 
 Every pass reads the archive as published.  Passing the promoted table into the very
-measurement that produced it would divide out the setting and then measure that it
-was gone, so the raw path is named explicitly here rather than defaulted.
+measurement that produced it would divide out the setting and then measure that it was
+gone, so the raw path is named explicitly here rather than defaulted.
 """
 
 from __future__ import annotations
@@ -41,7 +49,6 @@ import json
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 
-import numpy as np
 
 from nova.catalog.mast_geometry import MachineGeometryRegistry
 from nova.imas.mast_acquisition_scale import (
@@ -50,7 +57,15 @@ from nova.imas.mast_acquisition_scale import (
     step_concurrency,
     stepping_channels,
 )
+from nova.imas.mast_array_amplitude import (
+    agreement,
+    agreement_summary,
+    channel_amplitudes,
+    narrow_bracket,
+    narrowing_summary,
+)
 from nova.imas.mast_block_scale import (
+    PROMOTED_ROUTE,
     BlockScaleTable,
     bracket_probe,
     pinning_summary,
@@ -96,7 +111,7 @@ The toroidal-field-only and quiescent classes drive no poloidal coil, so the
 described field is zero and the ratio is undefined rather than large.
 """
 
-MINIMUM_FAR_FIELD_FAMILIES = 1
+MINIMUM_FAR_FIELD_FAMILIES = 3
 """Coil families a shot must give a channel a far-field reading on to count."""
 
 
@@ -166,14 +181,20 @@ def measure_shot(
     weights: Mapping[str, float],
     screen: ErrorFieldScreen,
     far: set[tuple[str, str]],
-) -> dict[str, float]:
-    """Return each channel's far-field ratio on one shot, or nothing measurable.
+) -> dict[str, list[float]]:
+    """Return each channel's far-field ratios on one shot, one per coil family.
 
-    The rigid scale-and-rotation fit is not asked for: a range setting is an
-    amplitude and the pair would double the cost of a pass whose whole purpose is
-    breadth.  The error-field screen and the amplitude refusal apply exactly as they
-    do in the fit the settings came from, so a shot excluded there stays excluded
-    here.
+    Every family's ratio is kept rather than pooled here, because how many families a
+    reading rests on turns out to decide whether the reading is usable at all: a
+    single-family ratio on a shot that lit several coils is one projection carrying
+    that coil's own model error, and admitting those chops a channel's history into
+    blocks on scatter.  Keeping the list lets the admission rule be chosen against the
+    measurement instead of the archive being read again for every candidate rule.
+
+    The rigid scale-and-rotation fit is not asked for: a range setting is an amplitude
+    and the pair would double the cost of a pass whose whole purpose is breadth.  The
+    error-field screen and the amplitude refusal apply exactly as they do in the fit
+    the settings came from, so a shot excluded there stays excluded here.
     """
 
     if shot in MIS_SCALED_SHOTS:
@@ -196,11 +217,7 @@ def measure_shot(
     for row in gains:
         if (row.channel, row.family) in far:
             rows[row.channel].append(row.gain)
-    return {
-        channel: float(np.median(values))
-        for channel, values in rows.items()
-        if len(values) >= MINIMUM_FAR_FIELD_FAMILIES
-    }
+    return dict(rows)
 
 
 def _cohort() -> dict[str, Any]:
@@ -262,10 +279,62 @@ def _write_series(
 def _merge(
     series: dict[str, dict[int, list[float]]],
     shot: int,
-    ratios: Mapping[str, float],
+    ratios: Mapping[str, Sequence[float] | float],
 ) -> None:
     for channel, value in ratios.items():
-        series.setdefault(channel, {})[int(shot)] = [float(value)]
+        values = [float(value)] if isinstance(value, (int, float)) else list(value)
+        series.setdefault(channel, {})[int(shot)] = [float(item) for item in values]
+
+
+def admitted(
+    series: Mapping[str, Mapping[int, Sequence[float]]], families: int
+) -> dict[str, dict[int, list[float]]]:
+    """Keep the readings resting on at least this many coil families.
+
+    A reading's family count is the number of independent excitations that agreed on
+    it, so it is the only thing separating a pooled ratio from one projection onto a
+    single coil's modelled waveform.  Applied here rather than at read time so the
+    rule stays visible and its effect on the block structure stays measurable.
+    """
+
+    return {
+        channel: {
+            shot: list(values)
+            for shot, values in rows.items()
+            if len(values) >= families
+        }
+        for channel, rows in series.items()
+        if any(len(values) >= families for values in rows.values())
+    }
+
+
+def family_rule(
+    series: Mapping[str, Mapping[int, Sequence[float]]], families: int
+) -> dict[str, Any]:
+    """Report the block structure one admission rule produces.
+
+    Coverage and coherence pull opposite ways here, and the ladder is what breaks the
+    tie: a rule that admits more shots but sends the share of steps landing on the
+    declared ladder down has bought shots by turning scatter into blocks.  The ladder
+    was declared before any of these settings were classified, so it is evidence about
+    the rule rather than a target the rule can be tuned onto.
+    """
+
+    rows = admitted(series, families)
+    histories = channel_histories(rows)
+    stepping = stepping_channels(histories)
+    steps = [step for row in stepping for step in row.steps]
+    counts = sorted(len(shots) for shots in rows.values()) or [0]
+    return {
+        "channels": len(rows),
+        "families": families,
+        "median_shots": counts[len(counts) // 2],
+        "on_ladder": sum(1 for step in steps if step.on_ladder),
+        "readings": sum(len(shots) for shots in rows.values()),
+        "steps": len(steps),
+        "stepping": len(stepping),
+        "switches": len(steps),
+    }
 
 
 def run_sweep(arguments: argparse.Namespace) -> None:
@@ -310,27 +379,96 @@ def _table_from(
     )
 
 
-def run_pin(arguments: argparse.Namespace) -> None:
-    """Bisect the brackets left open, on the vacuum phase of plasma shots."""
+def array_shot(shot: int, screen: ErrorFieldScreen) -> dict[str, float]:
+    """Return each channel's amplitude relative to the array on one shot.
 
-    model, weights = build_model()
+    No response model and no drive weights enter, so this reads on shots the fitted
+    route refuses -- a plasma shot's whole record included.  The error-field screen and
+    the amplitude refusal still apply: a channel the screen removes is removed from the
+    array too, because leaving it in would let the excitation it couples to move the
+    reference.
+    """
+
+    if shot in MIS_SCALED_SHOTS:
+        return {}
+    try:
+        drive = read_error_field_drive(shot)
+        refused = set(screen.refused(drive))
+        waveforms = read_shot_waveforms(shot, block_scale=RAW)
+    except Exception as error:  # noqa: BLE001
+        log(f"  {shot}: unreadable ({error})")
+        return {}
+    probes = {
+        channel: values
+        for channel, values in waveforms.probes.items()
+        if channel not in refused and values.shape == waveforms.time.shape
+    }
+    return channel_amplitudes(probes, baseline=waveforms.baseline_mask)
+
+
+def run_array(arguments: argparse.Namespace) -> None:
+    """Measure the model-free amplitude on the shots the fitted route also read.
+
+    This is the gate rather than a result: the two routes have to tell the same story
+    about which channels stepped and where, on the shots they share, before the
+    model-free one is allowed to place a boundary where nothing else can look.
+    """
+
     screen = load_screen()
-    far = far_field_pairs(model)
+    shots = excitation_shots()
+    if arguments.limit:
+        shots = shots[: arguments.limit]
+    series = _load_series("array_plasma_free") if arguments.resume else {}
+    done = {shot for rows in series.values() for shot in rows}
+    for index, shot in enumerate(shots):
+        if shot in done:
+            continue
+        _merge(series, shot, array_shot(shot, screen))
+        if index % 50 == 0:
+            log(f"  {index}/{len(shots)} shot {shot}")
+    _write_series("array_plasma_free", series)
+
+    fitted = _load_series("plasma_free")
+    if not fitted:
+        raise SystemExit("run the sweep pass before checking the model-free route")
+    flat = {
+        channel: {shot: rows[shot][0] for shot in rows}
+        for channel, rows in series.items()
+    }
+    rows = agreement(fitted, flat)
+    summary = agreement_summary(rows)
+    log(f"channels compared: {summary['channels']}")
+    log(
+        f"stepping channels reproduced: {summary['stepping_reproduced']}"
+        f"/{summary['stepping_channels']}  steps matched "
+        f"{summary['matched_steps']}/{summary['total_steps']}"
+    )
+    log(
+        f"steady channels reproduced: {summary['steady_reproduced']}"
+        f"/{summary['steady_channels']}  boundaries invented "
+        f"{summary['invented_on_steady']}"
+    )
+    (CACHE / "mast_array_amplitude_agreement.json").write_text(
+        json.dumps(summary, indent=1, sort_keys=True)
+    )
+    log("wrote mast_array_amplitude_agreement.json")
+
+
+def run_pin(arguments: argparse.Namespace) -> None:
+    """Bisect the brackets left open, using the model-free amplitude on any shot."""
+
+    screen = load_screen()
     base = _load_series("plasma_free")
     if not base:
         raise SystemExit("run the sweep pass before pinning its boundaries")
-    extra = _load_series("plasma_vacuum_phase") if arguments.resume else {}
-    candidates = plasma_shots()
+    extra = _load_series("array_pinning") if arguments.resume else {}
+    candidates = sorted(set(plasma_shots()) | set(excitation_shots()))
     attempted: set[int] = {shot for rows in extra.values() for shot in rows}
-    log(f"candidate plasma shots: {len(candidates)}  already read: {len(attempted)}")
+    log(f"candidate shots: {len(candidates)}  already read: {len(attempted)}")
 
+    brackets = _table_from(base, PROMOTED_ROUTE).brackets()
     for step in range(arguments.reads):
-        combined = {
-            channel: {**base.get(channel, {}), **extra.get(channel, {})}
-            for channel in set(base) | set(extra)
-        }
-        table = _table_from(combined, "bisected on the plasma vacuum phase")
-        target = bracket_probe(table.brackets(), candidates, measured=attempted)
+        target = bracket_probe(brackets, candidates, measured=attempted)
         if target is None:
             log("every bracket is pinned as tightly as the archive allows")
             break
@@ -340,10 +478,9 @@ def run_pin(arguments: argparse.Namespace) -> None:
             if abs(shot - target) <= arguments.reach and shot not in attempted
         ]
         window.sort(key=lambda shot: (abs(shot - target), shot))
-        ratios: dict[str, float] = {}
         for shot in window[: arguments.attempts]:
             attempted.add(shot)
-            ratios = measure_shot(shot, model, weights, screen, far)
+            ratios = array_shot(shot, screen)
             if ratios:
                 _merge(extra, shot, ratios)
                 log(f"  read {step}: shot {shot} gave {len(ratios)} channels")
@@ -351,36 +488,35 @@ def run_pin(arguments: argparse.Namespace) -> None:
         else:
             log(f"  read {step}: no readable shot near {target}")
         if step % 10 == 0:
-            _write_series("plasma_vacuum_phase", extra)
-    _write_series("plasma_vacuum_phase", extra)
-    log(f"plasma-phase readings: {sum(len(rows) for rows in extra.values())}")
+            _write_series("array_pinning", extra)
+    _write_series("array_pinning", extra)
+    log(f"model-free readings for pinning: {sum(len(rows) for rows in extra.values())}")
 
 
 def run_promote(arguments: argparse.Namespace) -> None:
     """Assemble the table the read path applies, and report what pins it."""
 
-    base = _load_series("plasma_free")
-    if not base:
+    measured = _load_series("plasma_free")
+    if not measured:
         raise SystemExit("run the sweep pass before promoting a table")
-    extra = _load_series("plasma_vacuum_phase") if arguments.with_plasma_phase else {}
-    combined = {
-        channel: {**base.get(channel, {}), **extra.get(channel, {})}
-        for channel in set(base) | set(extra)
-    }
-    route = (
-        "far-field response ratio on plasma-free shots"
-        if not extra
-        else "far-field response ratio on plasma-free shots, boundaries bisected on "
-        "the vacuum phase of plasma shots"
-    )
+    rules = [family_rule(measured, families) for families in range(1, 6)]
+    for report in rules:
+        log(
+            f"  families >= {report['families']}: {report['channels']:2d} channels, "
+            f"{report['readings']:5d} readings, median {report['median_shots']:3.0f} "
+            f"shots/channel, {report['stepping']:2d} stepping, "
+            f"{report['switches']:3d} switches, "
+            f"{report['on_ladder']}/{report['steps']} on the ladder"
+        )
+    combined = admitted(measured, arguments.families)
+    log(f"admitting readings resting on {arguments.families} or more coil families")
     histories = channel_histories(combined)
-    table = _table_from(combined, route)
+    table = _table_from(combined, PROMOTED_ROUTE)
     stepping = stepping_channels(histories)
     steps = [step for row in stepping for step in row.steps]
     concurrency = step_concurrency(combined, steps)
-    summary = pinning_summary(
-        table, sorted(set(excitation_shots()) | set(plasma_shots()))
-    )
+    archive = sorted(set(excitation_shots()) | set(plasma_shots()))
+    summary = pinning_summary(table, archive)
 
     log(f"channels measured: {len(table.channels)}")
     log(f"stepping channels: {len(table.stepping)} {list(table.stepping)}")
@@ -399,8 +535,46 @@ def run_promote(arguments: argparse.Namespace) -> None:
     log(f"blocks refused as off ladder: {len(refused)} {refused}")
 
     record = acquisition_record(histories, concurrency)
+    record["admitted_families"] = arguments.families
+    record["family_rules"] = rules
     record["pinning"] = summary
     record["table"] = table.as_dict()
+
+    array_series = _load_series("array_plasma_free")
+    pinning = _load_series("array_pinning")
+    if array_series or pinning:
+        flat: dict[str, dict[int, float]] = {}
+        for source in (array_series, pinning):
+            for channel, rows in source.items():
+                flat.setdefault(channel, {}).update(
+                    {shot: values[0] for shot, values in rows.items()}
+                )
+        narrowed = [
+            row
+            for bracket in table.brackets()
+            if (
+                row := narrow_bracket(
+                    bracket.channel,
+                    bracket.before_shot,
+                    bracket.after_shot,
+                    bracket.ratio,
+                    flat.get(bracket.channel, {}),
+                )
+            )
+            is not None
+        ]
+        report = narrowing_summary(narrowed)
+        log(
+            f"boundaries the model-free route placed: {report['placed']}"
+            f"/{summary['switch_count']}  narrowed {report['narrowed']}"
+        )
+        log(
+            f"width after narrowing: median {report['median_width']:.0f} "
+            f"widest {report['widest_width']} (was median "
+            f"{report['median_fitted_width']:.0f})"
+        )
+        record["narrowing"] = report
+        record["route_agreement"] = agreement_summary(agreement(combined, flat))
     (CACHE / "mast_block_scale_sweep.json").write_text(
         json.dumps(record, indent=1, sort_keys=True)
     )
@@ -410,6 +584,168 @@ def run_promote(arguments: argparse.Namespace) -> None:
             json.dumps(table.as_dict(), indent=1, sort_keys=True)
         )
         log(f"wrote the promoted table to {arguments.promote_to}")
+
+
+RUNG_COLOURS = {
+    2.0: "#b04a4a",
+    1.4142135623730951: "#d08a3a",
+    1.0: "#1a6b3c",
+    0.7071067811865476: "#3a7ab0",
+    0.5: "#4a4ab0",
+}
+"""One colour per ladder rung, so a block map reads as a setting rather than a level."""
+
+
+def _rung_colour(rung: float | None) -> str:
+    """Return the colour of the rung a block sits at, grey where it has none."""
+
+    if rung is None:
+        return "#999999"
+    nearest = min(RUNG_COLOURS, key=lambda value: abs(value - rung))
+    return RUNG_COLOURS[nearest]
+
+
+def draw_figures(arguments: argparse.Namespace) -> None:
+    """Draw the block map, the admission-rule trade-off and the pinning it bought."""
+
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    record = json.loads(arguments.record.read_text())
+    table = record["table"]
+    directory = arguments.figures
+    directory.mkdir(parents=True, exist_ok=True)
+
+    blocks = [row for row in table["blocks"]]
+    corrected = sorted(
+        {
+            row["channel"]
+            for row in blocks
+            if row["rung"] is not None and row["rung"] != 1.0
+        }
+    )
+    rows = [row for row in blocks if row["channel"] in corrected]
+    order = {channel: index for index, channel in enumerate(corrected)}
+
+    figure, axis = plt.subplots(figsize=(11.0, max(4.0, 0.26 * len(corrected))))
+    for row in rows:
+        height = order[row["channel"]]
+        axis.plot(
+            [row["first_shot"], row["last_shot"]],
+            [height, height],
+            color=_rung_colour(row["rung"]),
+            lw=4.0,
+            solid_capstyle="butt",
+        )
+        axis.plot(
+            row["shots"],
+            np.full(len(row["shots"]), height),
+            "|",
+            color="#222",
+            ms=4,
+            mew=0.6,
+        )
+    for bracket in record["pinning"]["brackets"]:
+        if bracket["channel"] not in order:
+            continue
+        height = order[bracket["channel"]]
+        axis.plot(
+            [bracket["before_shot"], bracket["after_shot"]],
+            [height, height],
+            color="#bbbbbb",
+            lw=1.0,
+            ls=":",
+        )
+    axis.set_yticks(range(len(corrected)))
+    axis.set_yticklabels(corrected, fontsize=6)
+    axis.set_xlabel("shot")
+    axis.set_title(
+        "Where each channel held which range setting: bars are blocks coloured by "
+        "rung,\nticks are the shots that measured them, dots are the switch brackets"
+    )
+    handles = [
+        plt.Line2D([], [], color=colour, lw=4.0, label=f"x{rung:.3g}")
+        for rung, colour in sorted(RUNG_COLOURS.items())
+    ]
+    handles.append(plt.Line2D([], [], color="#999999", lw=4.0, label="off ladder"))
+    axis.legend(handles=handles, fontsize=7, ncol=6, loc="upper center")
+    figure.tight_layout()
+    path = directory / "scale_block_map.svg"
+    figure.savefig(path)
+    plt.close(figure)
+    log(f"wrote {path}")
+
+    rules = record.get("family_rules", [])
+    if rules:
+        figure, axes = plt.subplots(1, 2, figsize=(10.0, 4.2))
+        counts = [row["families"] for row in rules]
+        axes[0].plot(counts, [row["readings"] for row in rules], "o-", color="#3a7ab0")
+        axes[0].set_ylabel("channel-shot readings admitted")
+        axes[0].set_xlabel("coil families a reading must rest on")
+        axes[0].set_title("Coverage falls with the rule")
+        share = [
+            row["on_ladder"] / row["steps"] if row["steps"] else np.nan for row in rules
+        ]
+        axes[1].plot(counts, share, "o-", color="#1a6b3c")
+        axes[1].set_ylim(0.0, 1.02)
+        axes[1].set_ylabel("share of steps landing on the declared ladder")
+        axes[1].set_xlabel("coil families a reading must rest on")
+        axes[1].set_title("Coherence rises with it")
+        for axis, values in zip(axes, ([row["stepping"] for row in rules], share)):
+            for x, y, n in zip(counts, values, [row["stepping"] for row in rules]):
+                axis.annotate(
+                    f"{n} stepping",
+                    (x, y),
+                    textcoords="offset points",
+                    xytext=(0, 7),
+                    fontsize=6,
+                    ha="center",
+                )
+        figure.suptitle(
+            "Choosing the admission rule: the ladder was declared before any of these "
+            "settings were classified, so it is evidence about the rule"
+        )
+        figure.tight_layout()
+        path = directory / "scale_family_rule.svg"
+        figure.savefig(path)
+        plt.close(figure)
+        log(f"wrote {path}")
+
+    narrowing = record.get("narrowing")
+    if narrowing and narrowing["brackets"]:
+        figure, axis = plt.subplots(figsize=(9.0, 4.4))
+        fitted = np.asarray(
+            [row["fitted_width"] for row in narrowing["brackets"]], dtype=float
+        )
+        placed = np.asarray(
+            [row["width"] for row in narrowing["brackets"]], dtype=float
+        )
+        keep = fitted > 0
+        axis.loglog(
+            fitted[keep],
+            np.clip(placed[keep], 1.0, None),
+            "o",
+            color="#1a6b3c",
+            ms=5,
+            alpha=0.8,
+        )
+        limit = [1.0, max(fitted.max(), 1.0)]
+        axis.plot(limit, limit, color="#999", ls="--", lw=1.0, label="no narrowing")
+        axis.set_xlabel("bracket width the fitted route left [shots]")
+        axis.set_ylabel("width after the model-free route placed it [shots]")
+        axis.set_title(
+            "What the model-free observable bought: each point is one switch, and "
+            "distance below\nthe dashed line is how much of its bracket was closed"
+        )
+        axis.legend(fontsize=8)
+        figure.tight_layout()
+        path = directory / "scale_bracket_pinning.svg"
+        figure.savefig(path)
+        plt.close(figure)
+        log(f"wrote {path}")
 
 
 def main(argv: Iterable[str] | None = None) -> None:
@@ -424,6 +760,15 @@ def main(argv: Iterable[str] | None = None) -> None:
     )
     sweep.add_argument("--resume", action="store_true", help="keep an earlier series")
     sweep.set_defaults(handler=run_sweep)
+
+    array = passes.add_parser(
+        "array", help="measure the model-free amplitude and check it against the fit"
+    )
+    array.add_argument(
+        "--limit", type=int, default=0, help="stop after this many shots"
+    )
+    array.add_argument("--resume", action="store_true", help="keep an earlier series")
+    array.set_defaults(handler=run_array)
 
     pin = passes.add_parser("pin", help="bisect the brackets on plasma shots")
     pin.add_argument("--reads", type=int, default=120, help="how many shots to read")
@@ -444,14 +789,24 @@ def main(argv: Iterable[str] | None = None) -> None:
 
     promote = passes.add_parser("promote", help="assemble and report the table")
     promote.add_argument(
-        "--with-plasma-phase",
-        action="store_true",
-        help="include the boundaries bisected on plasma shots",
+        "--families",
+        type=int,
+        default=MINIMUM_FAR_FIELD_FAMILIES,
+        help="coil families a reading must rest on to be admitted",
     )
     promote.add_argument(
         "--promote-to", default="", help="write the table to this path"
     )
     promote.set_defaults(handler=run_promote)
+
+    figures = passes.add_parser("figures", help="draw the block map and what pins it")
+    figures.add_argument(
+        "--record", type=Path, default=CACHE / "mast_block_scale_sweep.json"
+    )
+    figures.add_argument(
+        "--figures", type=Path, default=Path("docs/figures/mast-vacuum-floor")
+    )
+    figures.set_defaults(handler=draw_figures)
 
     arguments = parser.parse_args(list(argv) if argv is not None else None)
     arguments.handler(arguments)

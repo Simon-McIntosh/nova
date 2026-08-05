@@ -193,7 +193,16 @@ def test_a_shot_outside_the_measured_span_is_unmeasured():
 
 
 def test_a_channel_the_table_never_measured_reads_unmeasured():
-    assert promoted_block_scales().correction("obv06", 14061).disposition == UNMEASURED
+    """Named for a channel the archive does not carry, so the case cannot go stale.
+
+    Asking about a real channel would make this pass or fail on whether the promoted
+    table happens to have measured that one, which is a fact about the sweep rather
+    than about the reader.
+    """
+
+    table = promoted_block_scales()
+    assert "ccbv99" not in table.channels
+    assert table.correction("ccbv99", 14061).disposition == UNMEASURED
 
 
 # --- the division itself -------------------------------------------------

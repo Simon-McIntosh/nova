@@ -125,16 +125,29 @@ class ScaleStep:
         return self.after_scale / self.before_scale
 
     @property
-    def rung(self) -> float:
-        """Return the ladder rung this step is closest to."""
+    def inverting(self) -> bool:
+        """Return whether the two blocks read the described field opposite ways.
 
-        return nearest_rung(self.ratio)[0]
+        A channel measured negative against the description on a run of shots is
+        saying something about its polarity, or about having had too little signal to
+        say anything -- and neither is a range setting, because the ladder is positive
+        by declaration.  Such a step has no rung, which is a verdict rather than a
+        failure to compute one.
+        """
+
+        return not (self.ratio > 0.0)
+
+    @property
+    def rung(self) -> float:
+        """Return the ladder rung this step is closest to, if it has one."""
+
+        return math.nan if self.inverting else nearest_rung(self.ratio)[0]
 
     @property
     def ladder_distance(self) -> float:
         """Return how far from that rung the step landed, as a fraction."""
 
-        return nearest_rung(self.ratio)[1]
+        return math.inf if self.inverting else nearest_rung(self.ratio)[1]
 
     @property
     def on_ladder(self) -> bool:
@@ -151,10 +164,13 @@ class ScaleStep:
             "before_scale": self.before_scale,
             "before_shot": self.before_shot,
             "channel": self.channel,
-            "ladder_distance": self.ladder_distance,
+            "inverting": self.inverting,
+            "ladder_distance": (
+                None if math.isinf(self.ladder_distance) else self.ladder_distance
+            ),
             "on_ladder": self.on_ladder,
             "ratio": self.ratio,
-            "rung": self.rung,
+            "rung": None if self.inverting else self.rung,
         }
 
 

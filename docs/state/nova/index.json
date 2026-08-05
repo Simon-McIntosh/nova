@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-04T17:09:07",
+  "updated": "2026-08-05T17:49:43",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -76,7 +76,7 @@
       },
       {
         "id": "S5",
-        "status": "active",
+        "status": "done",
         "theme": "Recover the vacuum floor",
         "items": [
           {
@@ -133,8 +133,8 @@
           }
         ],
         "starts": "2026-08-05",
-        "ends": "2026-08-19",
-        "description": "Calibrate the MAST machine description to the measurement floor. The S2 cutover passed on a measured cross-source budget; this sprint makes that budget moot by completing turns/circuits, adjudicating sensor poses and winding lattices, and calibrating passive R/L on the archive's designed vacuum experiments, until the artifact path beats the incumbent on absolute whitened sensor misfit and approaches the quantified noise envelope. Order: registry corrections first (one digest change), then the mast-vacuum-floor-recovery ladder (cohort + noise envelope \u2192 turns \u2192 sensors \u2225 lattices \u2192 passive R/L \u2192 closing stamps), with ingest maps and donor migration riding alongside."
+        "ends": "2026-08-05",
+        "description": "Closed 2026-08-05; implementation 99.2% at close; 3 of 4 plans shipped. Item accounting, without gloss: mast-catalog-geometry-recovery SHIPPED (both registry defects fixed at the builder root in one digest change 76cf833561e602a7 -> ca06c8f64481114f; probe axes upgraded fitted -> measured-in-source; coupled ambix pin bump green). mast-machine-description SHIPPED (139 solve-input rows through nova.io; 7-shot two-polarity pilot round-trips exact; TF summary rides as a triggered followup). physics-spine-adoption item complete via its explicit re-scope clause: the donor ladder has no migratable rung (measured census: six of eight donors are physics kernels; zero product route to the artifact path); residues shipped; the artifact-wiring design rung is the plan's open followup. mast-vacuum-floor-recovery SHIPPED on the honest-failure branch: the <=-incumbent clause of this item's done_when WAS NOT MET (artifact - incumbent = +0.023 sigma both arms; SAME_SOURCE fails; SOURCE_CUTOVER passes 15/15; the qualified status stands); everything else delivered: 387 uT noise envelope quantified (residual 91-253x per-channel floors), gap decomposed per channel (obr17 the largest ABSOLUTE share on both arms; the +0.023 is an outboard-vertical trade at obv06/obv14), all six S2 gaps re-dispositioned. Major discoveries: ten turn counts are PUBLISHED archive integers; 19 channels carry discrete unnormalised acquisition scales (1/2, 1/sqrt2, sqrt2, 2), now divided out on the read path - closing the P5-lower 4.5% shift at 0.37% and falsifying the campaign-geometry term; turn counts are operator-inert (drive weight supersedes); the gate gained a committed artifact arm reproducing the out-of-tree stamps to float equality, plus a committed per-channel decomposition. Records: docs/research/mast-registry-corrections-landed, mast-solve-input-maps-landed, mast-calibration-cohort-landed, mast-winding-lattice-landed, mast-sensor-adjudication-landed, mast-block-scale-normalisation-landed, mast-passive-calibration-landed, mast-vacuum-floor-closure-landed (all .html)."
       },
       {
         "id": "S3",
@@ -177,7 +177,7 @@
         "description": "Run the GPU catalog only after reconstruction, machine descriptions and MAST 3D/passive physics pass their evidence gates."
       }
     ],
-    "active_sprint_id": "S5",
+    "active_sprint_id": null,
     "timeline": [
       {
         "when": "2026-07-29",
@@ -213,6 +213,11 @@
         "when": "2026-08-04",
         "who": "reckon-ship",
         "what": "S5 started: registry digest-change corrections and deep-donor importer migration dispatched as the first parallel wave; ingest maps and the vacuum-floor ladder queued behind the digest change."
+      },
+      {
+        "when": "2026-08-05",
+        "who": "reckon-ship",
+        "what": "S5 closed: 18 worker nodes across nova and imas-ambix (two-worker cap held throughout). Geometry corrections, solve-input maps, and the full vacuum-floor ladder executed; the ladder closed on its honest-failure branch (+0.023 sigma above the incumbent, qualified cutover status stands) with the gap decomposed onto six channels at 91-253x their measured noise floors. The acquisition-scale discovery (19 stepping channels) and the committed artifact-arm bench path are the sprint's durable infrastructure gains."
       }
     ],
     "blockers": [
@@ -245,6 +250,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 10
+    "_version": 11
   }
 }

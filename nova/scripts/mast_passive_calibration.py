@@ -164,15 +164,8 @@ def inductance(arguments: argparse.Namespace) -> None:
         f"nominal resistance gives {modes.tau.max() * 1e3:.1f} ms slowest mode and "
         f"{band.size} modes between 1 ms and 500 ms"
     )
-    if arguments.convergence:
-        report = linkage_convergence(turns)
-        provenance["convergence"] = report
-        print(
-            "convergence: self terms move "
-            f"{report['self_term_shift_median'] * 100:.2f}% median / "
-            f"{report['self_term_shift_max'] * 100:.2f}% worst, eigenvalues "
-            f"{report['eigenvalue_shift_max'] * 100:.2f}% worst"
-        )
+    # The matrix is written before the convergence check, which costs as much again
+    # to compute: a run cut short then still leaves the expensive result on disk.
     arguments.linkage.parent.mkdir(parents=True, exist_ok=True)
     np.savez_compressed(
         arguments.linkage,
@@ -186,7 +179,19 @@ def inductance(arguments: argparse.Namespace) -> None:
     )
     arguments.report.parent.mkdir(parents=True, exist_ok=True)
     arguments.report.write_text(json.dumps(provenance, indent=1, sort_keys=True) + "\n")
-    print(f"wrote {arguments.linkage} and {arguments.report}")
+    print(f"wrote {arguments.linkage} and {arguments.report}", flush=True)
+    if arguments.convergence:
+        report = linkage_convergence(turns)
+        provenance["convergence"] = report
+        print(
+            "convergence: self terms move "
+            f"{report['self_term_shift_median'] * 100:.2f}% median / "
+            f"{report['self_term_shift_max'] * 100:.2f}% worst, eigenvalues "
+            f"{report['eigenvalue_shift_max'] * 100:.2f}% worst"
+        )
+        arguments.report.write_text(
+            json.dumps(provenance, indent=1, sort_keys=True) + "\n"
+        )
 
 
 def load_linkage(path: Path) -> tuple[Linkage, np.ndarray, np.ndarray, list[str]]:
@@ -399,6 +404,9 @@ def load_transients(path: Path) -> tuple[DecayTransient, ...]:
                 driven_families=tuple(str(name) for name in cached[f"driven_{shot}"]),
                 peak_drive=float(activity[0]),
                 residual_drive=float(activity[1]),
+                drive_patterns=cached[f"drive_patterns_{shot}"],
+                drive_waveforms=cached[f"drive_waveforms_{shot}"],
+                drive_names=tuple(str(name) for name in cached[f"drive_names_{shot}"]),
                 refused_channels=tuple(str(name) for name in cached[f"refused_{shot}"]),
             )
         )

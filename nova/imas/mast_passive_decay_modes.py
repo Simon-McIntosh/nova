@@ -607,35 +607,68 @@ def reconstruct(
     searched.  Everything the resistance model controls -- the decay times and the
     spatial patterns -- is held fixed here, which is what makes the leftover a
     statement about the resistance rather than about the fit.
+
+    **Solved through the Gram factors, never through the dense design.**  Every
+    column is a spatial pattern times a temporal envelope, so the inner product of
+    two columns factorises into the product of their spatial and temporal inner
+    products.  Forming the small normal system that way costs the pattern and
+    envelope sizes added rather than multiplied -- the dense column would be one
+    number per channel per sample -- and this routine runs once per shot inside
+    every step of the resistance search, which is what makes the difference
+    between an afternoon and a minute.  The arithmetic is the same least-squares
+    problem, not an approximation of it.
     """
 
     noise = transient.noise[:, None]
-    observed = (transient.signal / noise).ravel()
-    envelope = np.exp(-transient.time[None, :] / modes.tau[selection][:, None])
-    patterns = modes.signature[np.ix_(rows, selection)] / noise
-    mode_design = np.stack(
+    observed = transient.signal / noise
+    patterns = np.concatenate(
         [
-            np.outer(patterns[:, column], envelope[column]).ravel()
-            for column in range(selection.size)
+            modes.signature[np.ix_(rows, selection)] / noise,
+            (
+                transient.drive_patterns / noise
+                if transient.drive_patterns is not None
+                else np.zeros((observed.shape[0], 0))
+            ),
         ],
         axis=1,
     )
-    drive_design = transient.drive_columns
-    design = np.concatenate([mode_design, drive_design], axis=1)
-    amplitudes, *_ = np.linalg.lstsq(design, observed, rcond=None)
-    residual = observed - design @ amplitudes
-    scale = np.sqrt(observed.size)
-    mode_only = mode_design @ amplitudes[: selection.size]
+    envelopes = np.concatenate(
+        [
+            np.exp(-transient.time[None, :] / modes.tau[selection][:, None]),
+            (
+                transient.drive_waveforms
+                if transient.drive_waveforms is not None
+                else np.zeros((0, observed.shape[1]))
+            ),
+        ],
+        axis=0,
+    )
+    gram = (patterns.T @ patterns) * (envelopes @ envelopes.T)
+    projection = np.einsum("ci,cs,is->i", patterns, observed, envelopes)
+    amplitudes, *_ = np.linalg.lstsq(gram, projection, rcond=None)
+    total = float(np.sum(observed**2))
+    residual = max(
+        total
+        - 2.0 * float(projection @ amplitudes)
+        + float(amplitudes @ gram @ amplitudes),
+        0.0,
+    )
+    count = selection.size
+    mode_block = amplitudes[:count]
+    scale = float(np.sqrt(observed.size))
     return Reconstruction(
         shot=transient.shot,
         mode_indices=tuple(int(index) for index in selection),
         tau=tuple(float(value) for value in modes.tau[selection]),
-        amplitudes=tuple(float(value) for value in amplitudes[: selection.size]),
-        drive_amplitudes=tuple(float(value) for value in amplitudes[selection.size :]),
-        whitened_residual=float(np.linalg.norm(residual) / scale),
-        whitened_signal=float(np.linalg.norm(observed) / scale),
-        whitened_modes=float(np.linalg.norm(mode_only) / scale),
-        condition=float(np.linalg.cond(design)),
+        amplitudes=tuple(float(value) for value in mode_block),
+        drive_amplitudes=tuple(float(value) for value in amplitudes[count:]),
+        whitened_residual=float(np.sqrt(residual)) / scale,
+        whitened_signal=float(np.sqrt(total)) / scale,
+        whitened_modes=float(
+            np.sqrt(max(mode_block @ gram[:count, :count] @ mode_block, 0.0))
+        )
+        / scale,
+        condition=float(np.linalg.cond(gram)) ** 0.5,
     )
 
 
@@ -666,12 +699,19 @@ def decay_misfit(
     values: np.ndarray,
     *,
     mode_count: int = RESOLVED_MODE_COUNT,
+    selections: Mapping[int, np.ndarray] | None = None,
 ) -> MisfitReport:
     """Return the pooled whitened misfit of one candidate resistivity model.
 
     Every transient is weighted alike, in units of its own measured noise, so a
     loud shot does not outvote a quiet one and the pooled number reads as a
     multiple of the noise floor.
+
+    ``selections`` fixes which modes each shot carries.  Re-ranking them at every
+    candidate resistance would make the misfit a step function of the parameters
+    -- one mode overtaking another swaps a basis column and jumps the residual --
+    and a gradient search reads those steps as noise.  So the selection is made
+    once, held while the parameters move, and checked again at the optimum.
     """
 
     modes = mode_set(
@@ -680,13 +720,14 @@ def decay_misfit(
         coupling,
         multipliers=circuit_multipliers(turns, names, values),
     )
-    rows_by_shot = {
-        transient.shot: channel_rows(transient, channels) for transient in transients
-    }
     reconstructions = []
     for transient in transients:
-        rows = rows_by_shot[transient.shot]
-        selection = visible_modes(modes, transient, rows, count=mode_count)
+        rows = channel_rows(transient, channels)
+        selection = (
+            visible_modes(modes, transient, rows, count=mode_count)
+            if selections is None
+            else np.asarray(selections[transient.shot], dtype=int)
+        )
         reconstructions.append(reconstruct(transient, modes, rows, selection))
     if not reconstructions:
         raise DecayModeError("no transient to fit")
@@ -694,6 +735,34 @@ def decay_misfit(
         float(np.mean([row.whitened_residual**2 for row in reconstructions]))
     )
     return MisfitReport(misfit=misfit, reconstructions=tuple(reconstructions))
+
+
+def mode_selections(
+    transients: Sequence[DecayTransient],
+    linkage: Linkage,
+    resistance: np.ndarray,
+    coupling: np.ndarray,
+    channels: Sequence[str],
+    turns: Sequence[PassiveTurn],
+    names: Sequence[str],
+    values: np.ndarray,
+    *,
+    mode_count: int = RESOLVED_MODE_COUNT,
+) -> dict[int, np.ndarray]:
+    """Rank and choose the modes each shot carries under one resistance model."""
+
+    modes = mode_set(
+        linkage,
+        resistance,
+        coupling,
+        multipliers=circuit_multipliers(turns, names, values),
+    )
+    return {
+        transient.shot: visible_modes(
+            modes, transient, channel_rows(transient, channels), count=mode_count
+        )
+        for transient in transients
+    }
 
 
 @dataclass(frozen=True)
@@ -708,6 +777,8 @@ class ResistivityFit:
     iterations: int
     converged: bool
     reconstructions: tuple[Reconstruction, ...] = ()
+    selection_stable: bool = True
+    selections: Mapping[int, tuple[int, ...]] = field(default_factory=dict)
 
     @property
     def improvement(self) -> float:
@@ -733,6 +804,11 @@ class ResistivityFit:
             "multipliers": dict(zip(self.names, self.multipliers, strict=True)),
             "names": list(self.names),
             "nominal_misfit": self.nominal_misfit,
+            "selection_stable": self.selection_stable,
+            "selections": {
+                str(shot): list(modes)
+                for shot, modes in sorted(self.selections.items())
+            },
             "variance_explained": self.variance_explained,
         }
 
@@ -764,6 +840,23 @@ def fit_resistivity(
     if not names:
         raise DecayModeError("no resistivity class to fit")
 
+    seed = (
+        np.zeros(len(names))
+        if start is None
+        else np.log(np.clip(np.asarray(start, dtype=float), *bounds))
+    )
+    selections = mode_selections(
+        transients,
+        linkage,
+        resistance,
+        coupling,
+        channels,
+        turns,
+        names,
+        np.exp(seed),
+        mode_count=mode_count,
+    )
+
     def misfit_of(logarithms: np.ndarray) -> float:
         return decay_misfit(
             transients,
@@ -775,6 +868,7 @@ def fit_resistivity(
             names,
             np.exp(logarithms),
             mode_count=mode_count,
+            selections=selections,
         ).misfit
 
     nominal = decay_misfit(
@@ -787,13 +881,9 @@ def fit_resistivity(
         names,
         np.ones(len(names)),
         mode_count=mode_count,
+        selections=selections,
     )
     limits = [(math.log(bounds[0]), math.log(bounds[1]))] * len(names)
-    seed = (
-        np.zeros(len(names))
-        if start is None
-        else np.log(np.clip(np.asarray(start, dtype=float), *bounds))
-    )
     result = minimize(
         misfit_of,
         seed,
@@ -802,6 +892,18 @@ def fit_resistivity(
         options={"maxiter": maxiter, "eps": 1.0e-3, "ftol": 1.0e-10},
     )
     fitted = decay_misfit(
+        transients,
+        linkage,
+        resistance,
+        coupling,
+        channels,
+        turns,
+        names,
+        np.exp(result.x),
+        mode_count=mode_count,
+        selections=selections,
+    )
+    settled = mode_selections(
         transients,
         linkage,
         resistance,
@@ -821,6 +923,13 @@ def fit_resistivity(
         iterations=int(result.nit),
         converged=bool(result.success),
         reconstructions=fitted.reconstructions,
+        selection_stable=all(
+            np.array_equal(selections[shot], settled[shot]) for shot in settled
+        ),
+        selections={
+            shot: tuple(int(index) for index in modes)
+            for shot, modes in selections.items()
+        },
     )
 
 

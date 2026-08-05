@@ -462,22 +462,42 @@ def _active_records(first_shot: int, last_shot: int) -> list[EvidenceRecord]:
                 "the coil grouping and connection kind each circuit needs are "
                 "recorded per circuit and become authorable once the supply "
                 "inventory is sourced",
+                "the store's channel set bounds the inventory from below without "
+                "fixing it: thirteen coil feeds are commanded independently, which "
+                "says at least that many controllable outputs exist and nothing about "
+                "how many supplies provide them or how their terminals are shared",
             ),
         ),
         EvidenceRecord(
             path="pf_active/circuit(P2)/connections",
-            evidence=FieldEvidence.UNRESOLVED,
+            evidence=FieldEvidence.PUBLISHED,
             first_shot=first_shot,
             last_shot=last_shot,
             statement=(
-                "the published relation covers the upper-to-lower pairing of the "
-                "coil set, not whether the inner and outer winding packs are "
-                "connected to each other"
+                "the inner and outer winding packs of a P2 coil carry no common "
+                "current: the store publishes one feed-current channel per pack and "
+                "drives either pack while the other sits at its pickup floor, and the "
+                "set channel is the sum of the two packs' ampere-turns rather than a "
+                "current they share"
             ),
             assumptions=(
-                "the catalog resolves four separate P2 outlines, so the pack "
-                "interconnection is a distinct electrical question from the "
-                "documented up-down pairing",
+                "two channels of one shot reading nine kiloamperes and thirty amperes "
+                "measure two different currents, so a series connection between the "
+                "packs is excluded rather than thought unlikely",
+                "producing that split across shared terminals would need an impedance "
+                "ratio of some hundreds between two similar packs, and each pack "
+                "carries its own feed measurement, so they are separately fed rather "
+                "than paralleled",
+                "the pack ampere-turn ratios these channels carry are exact integers, "
+                "twelve inner and eight outer, which is what makes the set channel's "
+                "agreement with their sum a statement about the coil rather than a "
+                "coincidence of scaling",
+                "this fixes how the packs relate to each other and not how many "
+                "supplies feed them, so the node matrix stays unauthorable",
+            ),
+            source=catalog_source(
+                "level-1 amc per-pack feed-current, per-pack ampere-turn and "
+                "set ampere-turn channels"
             ),
         ),
     ]

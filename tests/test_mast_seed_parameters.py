@@ -174,10 +174,10 @@ def test_section_measurement_rejects_a_degenerate_loop() -> None:
 def test_seeded_ledger_states_every_field_it_touches(ledger) -> None:
     assert ledger.state_counts() == {
         "measured": 8,
-        "published": 8,
+        "published": 9,
         "generated": 28,
         "fitted": 0,
-        "unresolved": 16,
+        "unresolved": 15,
     }
     assert ledger.paths_with_state(FieldEvidence.UNRESOLVED) == (
         "magnetics/b_field_phi_probe/toroidal_angle",
@@ -185,7 +185,6 @@ def test_seeded_ledger_states_every_field_it_touches(ledger) -> None:
         "magnetics/b_field_pol_probe/position/phi",
         "magnetics/b_field_pol_probe/toroidal_angle",
         "magnetics/flux_loop(saddle)/traversal_sign",
-        "pf_active/circuit(P2)/connections",
         "pf_active/circuit/connections",
         "pf_active/coil/element/turns_with_sign",
         "pf_passive/loop(coil_cases)/resistance",
@@ -197,6 +196,33 @@ def test_seeded_ledger_states_every_field_it_touches(ledger) -> None:
         "tf/coils_n",
         "tf/r0",
     )
+
+
+def test_the_p2_packs_are_published_as_separately_fed(ledger) -> None:
+    """Two currents measured on one shot settle the pack interconnection.
+
+    A series connection cannot carry nine kiloamperes in one pack and thirty
+    amperes in the other, so this is excluded by measurement rather than argued
+    from plausibility -- which is why the record is published rather than fitted.
+    """
+
+    record = next(
+        row for row in ledger.records if row.path == "pf_active/circuit(P2)/connections"
+    )
+    assert record.evidence is FieldEvidence.PUBLISHED
+    assert "no common current" in record.statement
+    assert record.source is not None
+    assert "feed-current" in record.source.locator
+
+
+def test_the_supply_inventory_stays_unauthorable(ledger) -> None:
+    """Knowing the packs are separate says nothing about how many supplies exist."""
+
+    record = next(
+        row for row in ledger.records if row.path == "pf_active/circuit/connections"
+    )
+    assert record.evidence is FieldEvidence.UNRESOLVED
+    assert any("controllable outputs" in row for row in record.assumptions)
 
 
 def test_turns_are_the_only_axisymmetric_forward_model_blocker(ledger) -> None:

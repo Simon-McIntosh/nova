@@ -12,24 +12,35 @@ Four passes narrow it, and they differ in what each is allowed to conclude.
 ``sweep`` reads every plasma-free shot the cohort classifier found an excitation in,
 not only the ones the split trained on.  A plasma-free shot is one the response model
 predicts completely, so the ratio it returns is measurement-grade and this pass is
-what the promoted settings rest on.  It keeps every coil family's ratio separately,
-because how many families a reading rests on decides whether the reading is usable:
-admitting single-family ratios more than doubles the shot coverage and then chops the
-histories into blocks on their scatter, which is a loss disguised as a gain.
-``--families`` reports the block structure each candidate rule produces so the choice
-is made against the measurement.
+what the promoted settings rest on -- but only over the binding training split, and
+the pass reports why.  Measured on that split this sweep reproduces the adjudicated
+result exactly: the same nineteen stepping channels, thirty-seven steps, twenty-nine
+of them on the declared ladder.  Re-running the block finder over the held-out and
+unsplit readings as well returns fifty-five stepping channels and drops the ladder
+share to 57 percent, because the block finder splits on their scatter and a boundary
+found that way is indistinguishable from a switch once it is in the table.  So those
+readings never set a value; they challenge the table and they place boundaries.
 
 ``array`` measures a second observable that needs no description -- each channel's
 amplitude relative to the array median, which no drive, coil or plasma can move
 because it is in the numerator and denominator alike -- and checks it against the
-fitted route on the shots both read.  That check is a gate, not a result.
+fitted route on the shots both read.  That check is a gate, not a result, and on this
+archive **it refuses the observable**: over the binding split the array route places
+ten to eighteen boundaries per channel on all thirty-nine channels the fitted route
+measures steady, and matches only 41 of 75 real steps.  The field-pattern confound the
+observable was declared to carry is what dominates -- a different coil lights up a
+different part of the array, and between excitation classes that moves a channel's
+ratio by more than the 1.41 a step must reach.  The passes are kept because the
+refusal is the finding: without the gate this route reports a median bracket of 24
+shots where the fitted route leaves 4942, and that 200-fold narrowing is an artifact.
 
 ``pin`` spends reads inside whatever brackets remain, using that model-free
 observable, so it can read plasma shots the fitted route refuses.  It bisects the
 widest bracket still open, converging in reads growing with the logarithm of a
 bracket's width, and one read serves every channel at once because every channel's
 setting is recorded on the same shot.  It may move a boundary and may never set a
-value.
+value -- and while the gate refuses it, it does not move one either: what it would
+have placed is recorded beside the gate that rejected it.
 
 ``promote`` assembles the table the read path applies: it refers each block to the
 block reading nearest the described field, snaps each step to the declared ladder, and
@@ -46,6 +57,7 @@ from __future__ import annotations
 import argparse
 import collections
 import json
+import math
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 
@@ -110,9 +122,6 @@ EXCITATION_CLASSES = (
 The toroidal-field-only and quiescent classes drive no poloidal coil, so the
 described field is zero and the ratio is undefined rather than large.
 """
-
-MINIMUM_FAR_FIELD_FAMILIES = 3
-"""Coil families a shot must give a channel a far-field reading on to count."""
 
 
 def log(message: str) -> None:
@@ -240,6 +249,90 @@ def plasma_shots() -> list[int]:
     return sorted(int(shot) for shot in _cohort()["cohort"]["by_class"]["plasma"])
 
 
+def training_shots() -> set[int]:
+    """Return the binding training split, which is what may set a value.
+
+    The classifier declared this split before any of these settings were fitted and it
+    is binding on every later fit, so the block structure and the settings themselves
+    are measured on it and nothing else.  That is not a quality judgement about the
+    other shots: measured on the training split alone this sweep reproduces the
+    adjudicated result exactly -- the same nineteen stepping channels, thirty-seven
+    steps, twenty-nine on the ladder -- while pooling the held-out and unsplit shots
+    into the same block finder returns fifty-five stepping channels and sends the share
+    of steps landing on the declared ladder from 78 percent to 57.  Those extra
+    readings are real; re-running the block finder over them is what is not allowed,
+    because a boundary found by splitting on scatter is indistinguishable from a switch
+    once it is in the table.
+    """
+
+    return {int(shot) for shot in _cohort()["cohort"]["training"]} - set(
+        MIS_SCALED_SHOTS
+    )
+
+
+def held_out_shots() -> set[int]:
+    """Return the shots the table is challenged on rather than measured from."""
+
+    return {int(shot) for shot in _cohort()["cohort"]["held_out"]} - set(
+        MIS_SCALED_SHOTS
+    )
+
+
+def held_out_check(
+    table: BlockScaleTable,
+    series: Mapping[str, Mapping[int, Sequence[float]]],
+    shots: Iterable[int],
+) -> dict[str, Any]:
+    """Test the table on readings it was not measured from.
+
+    A held-out reading lands inside some block's span or between two blocks.  Where it
+    lands inside one, the block asserts a setting for it, and dividing the reading by
+    that block's rung has to bring it near the channel's reference level -- if it does
+    not, the block is wrong about shots it was not fitted on.  Where it lands in a
+    bracket the table refuses to assert anything, and those are counted separately
+    rather than scored, because a refusal cannot be wrong.
+    """
+
+    import numpy as np
+
+    wanted = {int(shot) for shot in shots}
+    agreed = missed = refused = 0
+    worst: list[tuple[float, str, int]] = []
+    for channel, rows in sorted(series.items()):
+        blocks = table.blocks.get(channel, ())
+        if not blocks:
+            continue
+        reference = next(
+            (block.scale for block in blocks if block.unchanged), blocks[0].scale
+        )
+        for shot, values in sorted(rows.items()):
+            if shot not in wanted:
+                continue
+            correction = table.correction(channel, shot)
+            if not correction.applied:
+                refused += 1
+                continue
+            reading = float(np.median(values)) / correction.scale
+            gap = abs(reading / reference - 1.0) if reference else math.inf
+            if gap <= 0.25:
+                agreed += 1
+            else:
+                missed += 1
+                worst.append((gap, channel, shot))
+    worst.sort(reverse=True)
+    scored = agreed + missed
+    return {
+        "agreed": agreed,
+        "missed": missed,
+        "refused": refused,
+        "share_agreeing": agreed / scored if scored else math.nan,
+        "worst": [
+            {"channel": channel, "gap": gap, "shot": shot}
+            for gap, channel, shot in worst[:12]
+        ],
+    }
+
+
 def _series_path(name: str) -> Path:
     return CACHE / f"mast_acquisition_{name}.json"
 
@@ -286,51 +379,39 @@ def _merge(
         series.setdefault(channel, {})[int(shot)] = [float(item) for item in values]
 
 
-def admitted(
-    series: Mapping[str, Mapping[int, Sequence[float]]], families: int
-) -> dict[str, dict[int, list[float]]]:
-    """Keep the readings resting on at least this many coil families.
-
-    A reading's family count is the number of independent excitations that agreed on
-    it, so it is the only thing separating a pooled ratio from one projection onto a
-    single coil's modelled waveform.  Applied here rather than at read time so the
-    rule stays visible and its effect on the block structure stays measurable.
-    """
-
-    return {
-        channel: {
-            shot: list(values)
-            for shot, values in rows.items()
-            if len(values) >= families
-        }
-        for channel, rows in series.items()
-        if any(len(values) >= families for values in rows.values())
-    }
+def _every_shot(series: Mapping[str, Mapping[int, Sequence[float]]]) -> set[int]:
+    return {int(shot) for rows in series.values() for shot in rows}
 
 
-def family_rule(
-    series: Mapping[str, Mapping[int, Sequence[float]]], families: int
+def shot_set_rule(
+    series: Mapping[str, Mapping[int, Sequence[float]]],
+    label: str,
+    shots: set[int],
 ) -> dict[str, Any]:
-    """Report the block structure one admission rule produces.
+    """Report the block structure one shot set produces.
 
-    Coverage and coherence pull opposite ways here, and the ladder is what breaks the
-    tie: a rule that admits more shots but sends the share of steps landing on the
-    declared ladder down has bought shots by turning scatter into blocks.  The ladder
-    was declared before any of these settings were classified, so it is evidence about
-    the rule rather than a target the rule can be tuned onto.
+    Coverage and coherence pull opposite ways, and the ladder breaks the tie: a set
+    that admits more readings but sends the share of steps landing on the declared
+    ladder down has bought coverage by turning scatter into blocks.  The ladder was
+    declared before any of these settings were classified, so it is evidence about the
+    shot set rather than a target the set can be tuned onto.
     """
 
-    rows = admitted(series, families)
+    rows = {
+        channel: {shot: list(values) for shot, values in inner.items() if shot in shots}
+        for channel, inner in series.items()
+    }
+    rows = {channel: inner for channel, inner in rows.items() if inner}
     histories = channel_histories(rows)
     stepping = stepping_channels(histories)
     steps = [step for row in stepping for step in row.steps]
-    counts = sorted(len(shots) for shots in rows.values()) or [0]
+    counts = sorted(len(inner) for inner in rows.values()) or [0]
     return {
         "channels": len(rows),
-        "families": families,
+        "label": label,
         "median_shots": counts[len(counts) // 2],
         "on_ladder": sum(1 for step in steps if step.on_ladder),
-        "readings": sum(len(shots) for shots in rows.values()),
+        "readings": sum(len(inner) for inner in rows.values()),
         "steps": len(steps),
         "stepping": len(stepping),
         "switches": len(steps),
@@ -499,17 +580,27 @@ def run_promote(arguments: argparse.Namespace) -> None:
     measured = _load_series("plasma_free")
     if not measured:
         raise SystemExit("run the sweep pass before promoting a table")
-    rules = [family_rule(measured, families) for families in range(1, 6)]
+    training = training_shots()
+    rules = [
+        shot_set_rule(measured, "every plasma-free shot read", _every_shot(measured)),
+        shot_set_rule(measured, "the binding training split", training),
+    ]
     for report in rules:
         log(
-            f"  families >= {report['families']}: {report['channels']:2d} channels, "
+            f"  {report['label']:32s}: {report['channels']:2d} channels, "
             f"{report['readings']:5d} readings, median {report['median_shots']:3.0f} "
             f"shots/channel, {report['stepping']:2d} stepping, "
             f"{report['switches']:3d} switches, "
             f"{report['on_ladder']}/{report['steps']} on the ladder"
         )
-    combined = admitted(measured, arguments.families)
-    log(f"admitting readings resting on {arguments.families} or more coil families")
+    combined = {
+        channel: {
+            shot: list(values) for shot, values in rows.items() if shot in training
+        }
+        for channel, rows in measured.items()
+    }
+    combined = {channel: rows for channel, rows in combined.items() if rows}
+    log(f"settings measured on the binding training split ({len(training)} shots)")
     histories = channel_histories(combined)
     table = _table_from(combined, PROMOTED_ROUTE)
     stepping = stepping_channels(histories)
@@ -534,9 +625,17 @@ def run_promote(arguments: argparse.Namespace) -> None:
     ]
     log(f"blocks refused as off ladder: {len(refused)} {refused}")
 
+    challenge = held_out_check(table, measured, held_out_shots())
+    log(
+        f"held-out readings agreeing with the block they fall in: "
+        f"{challenge['agreed']}/{challenge['agreed'] + challenge['missed']} "
+        f"({100 * challenge['share_agreeing']:.0f}%), {challenge['refused']} refused"
+    )
+
     record = acquisition_record(histories, concurrency)
-    record["admitted_families"] = arguments.families
-    record["family_rules"] = rules
+    record["held_out_challenge"] = challenge
+    record["shot_set_rules"] = rules
+    record["training_shots"] = sorted(training)
     record["pinning"] = summary
     record["table"] = table.as_dict()
 
@@ -549,6 +648,30 @@ def run_promote(arguments: argparse.Namespace) -> None:
                 flat.setdefault(channel, {}).update(
                     {shot: values[0] for shot, values in rows.items()}
                 )
+        gate = agreement_summary(
+            agreement(
+                combined,
+                {
+                    channel: {
+                        shot: value for shot, value in rows.items() if shot in training
+                    }
+                    for channel, rows in flat.items()
+                },
+            )
+        )
+        passes = (
+            gate["invented_on_steady"] == 0
+            and gate["stepping_reproduced"] == gate["stepping_channels"]
+        )
+        log(
+            f"model-free gate on the training split: "
+            f"{gate['stepping_reproduced']}/{gate['stepping_channels']} stepping "
+            f"channels reproduced, {gate['matched_steps']}/{gate['total_steps']} steps "
+            f"matched, boundaries invented on {gate['invented_on_steady']}"
+            f"/{gate['steady_channels']} steady channels -> "
+            f"{'PASS' if passes else 'REFUSED'}"
+        )
+        record["model_free_gate"] = {**gate, "passes": passes}
         narrowed = [
             row
             for bracket in table.brackets()
@@ -564,17 +687,25 @@ def run_promote(arguments: argparse.Namespace) -> None:
             is not None
         ]
         report = narrowing_summary(narrowed)
+        report["admissible"] = passes
         log(
-            f"boundaries the model-free route placed: {report['placed']}"
-            f"/{summary['switch_count']}  narrowed {report['narrowed']}"
+            f"boundaries the model-free route would place: {report['placed']}"
+            f"/{summary['switch_count']}  narrowing {report['narrowed']}"
         )
         log(
-            f"width after narrowing: median {report['median_width']:.0f} "
-            f"widest {report['widest_width']} (was median "
+            f"width they would leave: median {report['median_width']:.0f} "
+            f"widest {report['widest_width']} (fitted median "
             f"{report['median_fitted_width']:.0f})"
         )
+        if not passes:
+            log(
+                "the gate refused the route, so none of that narrowing is adopted: an "
+                "instrument that places boundaries on channels measured steady is "
+                "reading its own confound, and a narrower bracket built from it would "
+                "be a worse statement than the wide one it replaced"
+            )
         record["narrowing"] = report
-        record["route_agreement"] = agreement_summary(agreement(combined, flat))
+
     (CACHE / "mast_block_scale_sweep.json").write_text(
         json.dumps(record, indent=1, sort_keys=True)
     )
@@ -678,38 +809,87 @@ def draw_figures(arguments: argparse.Namespace) -> None:
     plt.close(figure)
     log(f"wrote {path}")
 
-    rules = record.get("family_rules", [])
+    rules = record.get("shot_set_rules", [])
     if rules:
-        figure, axes = plt.subplots(1, 2, figsize=(10.0, 4.2))
-        counts = [row["families"] for row in rules]
-        axes[0].plot(counts, [row["readings"] for row in rules], "o-", color="#3a7ab0")
-        axes[0].set_ylabel("channel-shot readings admitted")
-        axes[0].set_xlabel("coil families a reading must rest on")
-        axes[0].set_title("Coverage falls with the rule")
+        figure, axes = plt.subplots(1, 3, figsize=(12.0, 4.0))
+        labels = [row["label"].replace(" ", "\n", 1) for row in rules]
+        places = np.arange(len(rules))
+        axes[0].bar(
+            places, [row["readings"] for row in rules], color="#3a7ab0", width=0.55
+        )
+        axes[0].set_ylabel("channel-shot readings")
+        axes[0].set_title("Coverage")
+        axes[1].bar(
+            places, [row["stepping"] for row in rules], color="#b04a4a", width=0.55
+        )
+        axes[1].set_ylabel("channels called stepping")
+        axes[1].set_title("Blocks the finder returns")
         share = [
             row["on_ladder"] / row["steps"] if row["steps"] else np.nan for row in rules
         ]
-        axes[1].plot(counts, share, "o-", color="#1a6b3c")
-        axes[1].set_ylim(0.0, 1.02)
-        axes[1].set_ylabel("share of steps landing on the declared ladder")
-        axes[1].set_xlabel("coil families a reading must rest on")
-        axes[1].set_title("Coherence rises with it")
-        for axis, values in zip(axes, ([row["stepping"] for row in rules], share)):
-            for x, y, n in zip(counts, values, [row["stepping"] for row in rules]):
-                axis.annotate(
-                    f"{n} stepping",
-                    (x, y),
-                    textcoords="offset points",
-                    xytext=(0, 7),
-                    fontsize=6,
-                    ha="center",
-                )
+        axes[2].bar(places, share, color="#1a6b3c", width=0.55)
+        axes[2].set_ylim(0.0, 1.02)
+        axes[2].set_ylabel("share of steps on the declared ladder")
+        axes[2].set_title("Coherence")
+        for axis in axes:
+            axis.set_xticks(places)
+            axis.set_xticklabels(labels, fontsize=7)
+        for place, value, count in zip(places, share, [row["steps"] for row in rules]):
+            axes[2].annotate(
+                f"{count} steps",
+                (place, value),
+                textcoords="offset points",
+                xytext=(0, 5),
+                fontsize=7,
+                ha="center",
+            )
         figure.suptitle(
-            "Choosing the admission rule: the ladder was declared before any of these "
-            "settings were classified, so it is evidence about the rule"
+            "Why the settings are measured on the binding split alone: the wider "
+            "set triples the channels called stepping\nand sends the share of steps "
+            "landing on the ladder -- declared before any of this was classified -- "
+            "from 78% to 57%"
         )
         figure.tight_layout()
-        path = directory / "scale_family_rule.svg"
+        path = directory / "scale_shot_set.svg"
+        figure.savefig(path)
+        plt.close(figure)
+        log(f"wrote {path}")
+
+    falsification = arguments.falsification
+    if falsification.exists():
+        verdict = json.loads(falsification.read_text())
+        rows = sorted(verdict["reversal"].items())
+        figure, axis = plt.subplots(figsize=(8.0, 4.2))
+        places = np.arange(len(rows))
+        axis.bar(
+            places - 0.18,
+            [-1.0 if row["raw"] else 1.0 for _, row in rows],
+            width=0.34,
+            color="#b04a4a",
+            label="as published",
+        )
+        axis.bar(
+            places + 0.18,
+            [-1.0 if row["normalised"] else 1.0 for _, row in rows],
+            width=0.34,
+            color="#1a6b3c",
+            label="range setting divided out",
+        )
+        axis.axhline(0.0, color="#333", lw=0.8)
+        axis.set_xticks(places)
+        axis.set_xticklabels([name for name, _ in rows])
+        axis.set_yticks([-1.0, 1.0])
+        axis.set_yticklabels(
+            ["train and held-out\ndisagree in sign", "train and held-out\nagree"]
+        )
+        axis.legend(fontsize=8, loc="center right")
+        axis.set_title(
+            "The pre-registered falsification: the displacement a coil's near probes "
+            "want\nreversed between train and held-out on three coils, and on two of "
+            "them it stops"
+        )
+        figure.tight_layout()
+        path = directory / "scale_falsification.svg"
         figure.savefig(path)
         plt.close(figure)
         log(f"wrote {path}")
@@ -735,14 +915,71 @@ def draw_figures(arguments: argparse.Namespace) -> None:
         limit = [1.0, max(fitted.max(), 1.0)]
         axis.plot(limit, limit, color="#999", ls="--", lw=1.0, label="no narrowing")
         axis.set_xlabel("bracket width the fitted route left [shots]")
-        axis.set_ylabel("width after the model-free route placed it [shots]")
+        axis.set_ylabel("width the model-free route would leave [shots]")
+        gate = record.get("model_free_gate", {})
+        admissible = bool(narrowing.get("admissible"))
         axis.set_title(
-            "What the model-free observable bought: each point is one switch, and "
-            "distance below\nthe dashed line is how much of its bracket was closed"
+            "What the model-free observable would have bought, and did not: each point "
+            "is one switch"
+            + (
+                ""
+                if admissible
+                else "\nREFUSED by its own gate -- it places boundaries on "
+                f"{gate.get('invented_on_steady', '?')} of "
+                f"{gate.get('steady_channels', '?')} channels measured steady, so "
+                "it is reading its field-pattern confound"
+            )
         )
         axis.legend(fontsize=8)
         figure.tight_layout()
         path = directory / "scale_bracket_pinning.svg"
+        figure.savefig(path)
+        plt.close(figure)
+        log(f"wrote {path}")
+
+    if arguments.gains.exists():
+        ledger = json.loads(arguments.gains.read_text())["calibration"]["gains"]
+        base = json.loads(arguments.raw_gains.read_text())["calibration"]["gains"]
+        shared = sorted(set(ledger) & set(base))
+        figure, axis = plt.subplots(figsize=(11.0, 4.4))
+        places = np.arange(len(shared))
+        axis.plot(
+            places,
+            [base[channel] for channel in shared],
+            "o",
+            color="#b04a4a",
+            ms=4,
+            label="as published",
+        )
+        axis.plot(
+            places,
+            [ledger[channel] for channel in shared],
+            "o",
+            color="#1a6b3c",
+            ms=4,
+            label="range setting divided out",
+        )
+        for place, channel in zip(places, shared):
+            axis.plot(
+                [place, place],
+                [base[channel], ledger[channel]],
+                color="#bbb",
+                lw=0.7,
+                zorder=0,
+            )
+        axis.axhspan(0.95, 1.05, color="#1a6b3c", alpha=0.08)
+        axis.axhline(1.0, color="#333", lw=0.8)
+        axis.set_xticks(places)
+        axis.set_xticklabels(shared, rotation=90, fontsize=5)
+        axis.set_ylabel("far-field gain")
+        axis.set_title(
+            "The far-field gain ledger: channels that had been handed a static gain "
+            "spanning a switch\ncome back to unity once the setting is divided out "
+            "instead"
+        )
+        axis.legend(fontsize=8)
+        figure.tight_layout()
+        path = directory / "scale_gain_ledger.svg"
         figure.savefig(path)
         plt.close(figure)
         log(f"wrote {path}")
@@ -789,12 +1026,6 @@ def main(argv: Iterable[str] | None = None) -> None:
 
     promote = passes.add_parser("promote", help="assemble and report the table")
     promote.add_argument(
-        "--families",
-        type=int,
-        default=MINIMUM_FAR_FIELD_FAMILIES,
-        help="coil families a reading must rest on to be admitted",
-    )
-    promote.add_argument(
         "--promote-to", default="", help="write the table to this path"
     )
     promote.set_defaults(handler=run_promote)
@@ -802,6 +1033,19 @@ def main(argv: Iterable[str] | None = None) -> None:
     figures = passes.add_parser("figures", help="draw the block map and what pins it")
     figures.add_argument(
         "--record", type=Path, default=CACHE / "mast_block_scale_sweep.json"
+    )
+    figures.add_argument(
+        "--falsification",
+        type=Path,
+        default=CACHE / "mast_block_scale_falsification.json",
+    )
+    figures.add_argument(
+        "--gains",
+        type=Path,
+        default=CACHE / "mast_winding_lattice_block_normalised.json",
+    )
+    figures.add_argument(
+        "--raw-gains", type=Path, default=CACHE / "mast_winding_lattice.json"
     )
     figures.add_argument(
         "--figures", type=Path, default=Path("docs/figures/mast-vacuum-floor")

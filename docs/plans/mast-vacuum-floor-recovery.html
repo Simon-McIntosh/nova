@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="mast-vacuum-floor-recovery">
   <meta name="plan-title" content="MAST Vacuum Floor Recovery — calibrate the description to the measurement floor">
   <meta name="plan-summary" content="Drive the absolute whitened magnetics misfit on the frozen vacuum-dominated gate from ~0.74σ toward the sensor noise envelope by closing the turn counts, adjudicating sensor poses and winding lattices, and calibrating passive R/L on dedicated vacuum experiments — so the artifact path beats the incumbent absolutely instead of passing on a wider budget.">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="XL">
   <meta name="plan-capability-version" content="1.0">
@@ -26,8 +26,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-05">
-<meta name="plan-version" content="9">
-<meta name="plan-impl" content="0.85">
+<meta name="plan-version" content="11">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
   <main class="plan-doc">
@@ -263,6 +263,21 @@
     <a href="/nova/research/mast-passive-calibration-landed.html">passive calibration
     landed</a>.</p>
 
+    <h3>Stage F <span class="badge badge-shipped">✓ closed 2026-08-05 — honest failure: the incumbent stands</span></h3>
+    <p class="landed-summary">
+    The ladder closed with every lever executed and the target unmet: artifact − incumbent =
+    <strong>+0.023σ on both arms</strong> (SAME_SOURCE fails; SOURCE_CUTOVER passes 15/15 — the
+    qualified status stands, not retired; ambix <code>2239d95..93f6c4b</code>; monotone gate
+    holds every rung; gap stable to seven decimals). The owner's re-baseline was executed and is
+    a <strong>measured no-op</strong> (the frozen set sits at the reference acquisition rung;
+    zero divisions). The republished full description (semantic <code>18c75c19…</code>, with the
+    P2 interconnection) stamps float-identical — every promotion this campaign is operator-inert,
+    verified. The gap decomposes onto six channels at 91–253× their own floors, led by
+    <strong>obr17 (largest absolute share on BOTH arms — unexplained by either description)</strong>
+    and the outboard-vertical trade at obv06/obv14; surviving candidates: pose, or a conductor
+    absent from both descriptions. Six-gap table refreshed. Full record:
+    <a href="/nova/research/mast-vacuum-floor-closure-landed.html">ladder closure</a>.</p>
+
     <h3 id="s3f">Stage F — the floor ladder</h3>
     <p>After each stage lands in the artifact: republish (new semantic identity, physical digest
     moves only through the upstream registry-corrections node), bump the ambix pin, re-stamp the
@@ -477,7 +492,7 @@ Done-when
      written, this resolved.</pre>
     <p class="r-fu-outcome">Stage E landed (nova 2ee8980c, 14 commits; lanes 3988/0 + 522/0 + 237/0; manifest reconstructed by orchestrator audit after server-overload interruptions — all evidence committed/on disk). POSITIVE: exact 57-circuit passive L matrix on the corrected case geometry (reciprocity 3.0e-3, convergence banked, 7 unsourced-material sections explicit); P2 pack interconnection PUBLISHED from archive evidence (stage-B item 4 resolved); decay machinery gives τ ∈ [22.9, 71.9] ms with dominant shares to 0.998 but only 2 decisive attributions. VERDICT: the four-class resistivity fit converges in-sample (+7.2%, variance 0.70) and fails the promotion contract four ways (held-out coil +0.25% only; stricter resolvability screen degrades 30–53%; pedestal check shows the fit flattens 2/3 of modes where nominal flattens none; selection unstable; only coil_case identified at 0.406× nominal [0.25, 4.0]) — NOMINAL RESISTANCES STAND as a visible negative with the identifying measurement named. Screens held: eight mis-scaled shots refused; block-normalised reads; binding split consumed. Ledger rider done. Record: docs/research/mast-passive-calibration-landed.html</p>
     </article>
-<article class="r-fu" data-id="f-vfr-04" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-create" data-written-at="2026-08-04" data-recommends-skill="/reckon-ship mast-vacuum-floor-recovery §3f" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-vfr-04" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-create" data-written-at="2026-08-04" data-recommends-skill="/reckon-ship mast-vacuum-floor-recovery §3f" data-resolved-at="2026-08-05T15:48:09+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Stage F — close the ladder and retire the qualified pass</h4>
     <div class="r-fu-body"><p>Final ladder accounting: verify the monotone residual sequence, run the
         closing frozen-gate pair, and if the artifact path now beats the incumbent absolutely, re-score the
@@ -513,8 +528,9 @@ Done-when
   3. Remaining gap to the noise envelope decomposed per channel; six-gap disposition
      table refreshed; handoff comments written to physics-spine-adoption (donor
      migration) and mast-catalog-gpu-solve; plan set shipped; this resolved.</pre>
+    <p class="r-fu-outcome">Stage F closed on the HONEST-FAILURE branch of its own contract (ambix 2239d95..93f6c4b; suites 351/0). Ladder table committed (11 rows); monotone gate HOLDS every rung; closing pair banked from the committed artifact arm. VERDICT: artifact − incumbent = +0.0231/+0.0236 — SAME_SOURCE FAILS both arms, SOURCE_CUTOVER passes 15/15, the qualified cross-source status STANDS and is not retired; no tolerance touched. The owner's re-baseline decision executed: MEASURED NO-OP (all six frozen shots at the reference acquisition rung, zero divisions; obv06/obv14 single-block-at-reference). Republished full description (semantic 18c75c19…, durable ~/.cache/mast-artifact-ef) stamps float-identical — P2 interconnection and all campaign promotions operator-inert, verified. Gap decomposed: six channels carry 56.6% at 91–253× their own floors (obr17 22.6% — the largest ABSOLUTE share on both arms, unexplained by either description; the +0.023 is an outboard-vertical trade at obv06/obv14). Six-gap disposition refreshed (turns gap narrowed to the P6 pair). Record: docs/research/mast-vacuum-floor-closure-landed.html</p>
     </article>
-<article class="r-fu" data-id="f-vfr-05" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-08-05 01:00" data-recommends-skill="/reckon-ship mast-vacuum-floor-recovery §3f" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-vfr-05" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-08-05 01:00" data-recommends-skill="/reckon-ship mast-vacuum-floor-recovery §3f" data-resolved-at="2026-08-05T08:12:58+00:00" data-resolved-by="Simon McIntosh (via reckon-ship)">
     <h4 class="r-fu-title">Decide whether the frozen gate reads block-normalised measurements</h4>
     <div class="r-fu-body"><p>The acquisition-scale finding means the frozen six-shot gate scores both arms against 19 mis-scaled channels on some shots. Normalising the gate's measurement path would lower both arms' residuals and sharpen the comparison, but changes stamp comparability across the banked ladder. This is a material scoring decision for stage F / the owner: re-baseline both arms on normalised measurements (one fresh before/after pair at the same commit), or keep the gate raw and confine normalisation to nova-side fits. The same-source budget itself stays untouched either way.</p></div>
     <pre class="r-fu-prompt">Project: nova + authorized imas-ambix scoring-path change
@@ -530,6 +546,29 @@ Work
 
 Done when
   - The decision is locked with the owner&#x27;s authority; the ladder table carries the re-baseline point if taken; stamps banked.</pre>
+    <p class="r-fu-outcome">DECIDED by the owner 2026-08-05: RE-BASELINE BOTH ARMS. The gate's measurement read adopts the block-scale normalisation (the acquisition scale is a data defect, not a description difference); one fresh before/after stamp pair for both arms at a single commit records the measurement discontinuity in the ladder table; the same-source budget itself stays untouched. Executed inside the stage F closure node.</p>
+    </article>
+<article class="r-fu" data-id="f-vfr-06" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-05 16:00" data-recommends-skill="/reckon-ship mast-vacuum-floor-recovery" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Hunt the common-mode term: pose or a conductor absent from both descriptions</h4>
+    <div class="r-fu-body"><p>The closure left a fully-characterised target: six channels carry 56.6% of the misfit at 91–253× their own noise floors, with obr17 the largest absolute share on BOTH arms (unexplained by either description) and the +0.023 cutover gap an outboard-vertical trade at obv06/obv14. Noise, gain, turns, lattice, and acquisition range are all excluded by measurement. What remains is sensor POSE (a survey-lineage error common to both descriptions) or a CONDUCTOR absent from both (busbars/feeders class). Trigger: before mast-catalog-gpu-solve relies on absolute magnetics misfit, or when new pose/as-built evidence surfaces.</p></div>
+    <pre class="r-fu-prompt">Project: nova (+ read-only imas-ambix evidence)
+Plan: mast-vacuum-floor-recovery (post-closure common-mode hunt)
+
+Context
+  docs/research/mast-vacuum-floor-closure-landed.html: the ladder closed honestly at +0.023σ above the incumbent with the gap decomposed per channel. Every description-side lever this sprint could reach is excluded by measurement. The target is the COMMON-MODE term both descriptions share: obr17 at 206× floor on both arms, the obv06/obv14 outboard-vertical excess (field-shape verdict, not mis-gained, quietest channels).
+
+Read first
+  imas_ambix/spine_bench/results/{magnetics-residual-ladder.md, channel-gap-*.json}
+  docs/research/mast-sensor-adjudication-landed.html (the FIELD_SHAPE discriminant record)
+  ~/.cache/nova-mast/fidelity/evidence.json (turn fidelity struck off; representation table)
+
+Candidate routes (pre-register a discriminant before fitting anything)
+  1. Pose: a survey-lineage error common to both descriptions — needs an evidence class NEITHER description descends from (engineering drawings, as-installed survey, or a physics-side constraint such as inter-probe consistency on TF-only shots).
+  2. Absent conductor: busbars/feeder runs near the outboard verticals — author from engineering documentation as explicit geometry with evidence typing; test on single-coil sustained shots (the feed current path is known per experiment class).
+  3. obr17 specifically: its 0.5011 promoted scale (a factor-2 acquisition defect) is description evidence the gate never reads — establish whether the gate SHOULD read sensor calibration records (a scoring-path decision for the owner, not a unilateral change).
+
+Done when
+  - A pre-registered discriminant separates the routes with measured evidence, or the search is closed with the measured reason; any promotion passes held-out challenge; the gate is re-stamped only through the committed entry points.</pre>
     </article>
 </section>
 

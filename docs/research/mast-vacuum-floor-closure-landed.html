@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="mast-vacuum-floor-closure-landed">
+  <meta name="plan-title" content="MAST vacuum-floor ladder closure — honest failure: the artifact does not beat the incumbent">
+  <meta name="plan-summary" content="Closure record: the ladder is monotone and every calibration lever was executed, but artifact − incumbent = +0.023σ on both arms (SAME_SOURCE fails, SOURCE_CUTOVER passes 15/15 — the qualified status stands); the re-baseline was a measured no-op; the gap decomposes onto six channels each 91–253× its own noise floor, led by obr17 which neither description explains; the remaining levers are pose or a conductor absent from both descriptions.">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>MAST vacuum-floor closure | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+  <h1>Ladder closure — the honest failure, fully decomposed</h1>
+  <p>Closed 2026-08-05 (imas-ambix <code>2239d95..93f6c4b</code>, ten commits; final suites
+  351/0 with artifact-backed tests executed; ladder table at
+  <code>imas_ambix/spine_bench/results/magnetics-residual-ladder.md</code>).
+  Plan: <a href="/nova/plans/mast-vacuum-floor-recovery.html">mast-vacuum-floor-recovery</a>.</p>
+
+  <h2>The verdict</h2>
+  <table>
+    <thead><tr><th>metric</th><th>incumbent (efm)</th><th>artifact</th><th>Δ</th></tr></thead>
+    <tbody>
+      <tr><td>greens-matvec</td><td>0.7401031</td><td>0.7632105</td><td>+0.0231</td></tr>
+      <tr><td>grid-delstar</td><td>0.7395613</td><td>0.7631399</td><td>+0.0236</td></tr>
+    </tbody>
+  </table>
+  <p><strong>SAME_SOURCE fails on both arms</strong> (bounds ≈0.7475/0.7470);
+  <strong>SOURCE_CUTOVER passes 15/15</strong> — the qualified cross-source status stands and is
+  not retired. No tolerance was touched. The monotone gate holds at every rung
+  (1.2098 → 0.7639 → 0.7632 → flat ×7); the incumbent is bit-identical across four stamps on
+  three hosts; the gap is stable to seven decimals across eight artifact stamps and four
+  revisions — <em>a property of the description, not of the measurement</em>.</p>
+
+  <h2>What the closure executed and measured</h2>
+  <ul>
+    <li><strong>The owner's re-baseline decision was executed and is a measured no-op:</strong>
+    the gate's measurement read now refers every channel to one acquisition setting (schema 1.6),
+    but all six frozen shots already sit at the reference rung — zero divisions applied, all
+    schema-1.5 stamps stay directly comparable, and obv06/obv14 hold single reference blocks
+    across the whole archive, so the acquisition correction could never have reached them.</li>
+    <li><strong>The republished description was benched, not an old snapshot:</strong> semantic
+    identity <code>sha256:18c75c19…937bdc</code> (artifact digest <code>b41c076e…ef90e4</code>,
+    durable <code>~/.cache/mast-artifact-ef</code>) carries the stage C sensor records and the
+    published P2 interconnection — and stamps float-identical to the previous revision. Every
+    promotion this campaign is operator-inert to this gate, verified rather than assumed
+    (the forward model reads pose only; drive weights supersede turns).</li>
+    <li><strong>Like-for-like proven:</strong> the two arms score the same 72 channels (the three
+    differing sensor rows are unmeasured on these shots).</li>
+  </ul>
+
+  <h2>The per-channel decomposition — the floor is not the constraint</h2>
+  <p>Both decomposition records reproduce their own stamp's aggregate to float equality, and the
+  pooled floor recomputes at 386.978 µT from the same data. Six channels carry 56.6% of the
+  artifact misfit, every one 91–253× its own noise floor:</p>
+  <table>
+    <thead><tr><th>channel</th><th>share</th><th>misfit</th><th>own floor</th><th>ratio</th></tr></thead>
+    <tbody>
+      <tr><td>obr17</td><td>22.6%</td><td>15.9 mT</td><td>77 µT</td><td>206×</td></tr>
+      <tr><td>obv06</td><td>11.4%</td><td>12.8 mT</td><td>86 µT</td><td>149×</td></tr>
+      <tr><td>obv14</td><td>8.2%</td><td>10.4 mT</td><td>48 µT</td><td>219×</td></tr>
+      <tr><td>obr04</td><td>6.9%</td><td>12.8 mT</td><td>51 µT</td><td>253×</td></tr>
+      <tr><td>obr10</td><td>4.2%</td><td>5.3 mT</td><td>59 µT</td><td>91×</td></tr>
+      <tr><td>ccbv25</td><td>3.3%</td><td>76.3 mT</td><td>417 µT</td><td>183×</td></tr>
+    </tbody>
+  </table>
+  <p>Two findings the ladder did not have before:</p>
+  <ol>
+    <li><strong>obr17 carries the largest single share on BOTH arms</strong> (22.6% artifact /
+    25.0% incumbent) at ~206× floor — the biggest piece of the <em>absolute</em> misfit is a
+    probe neither description explains, distinct from the cutover gap. It is also the channel
+    with a promoted 0.5011 calibration scale the gate never reads.</li>
+    <li><strong>The +0.023 cutover gap is specifically an outboard-vertical trade:</strong> the
+    artifact loses on obv06/obv14/obv13/obv03/obv04 and partly wins it back on obr17/obr04/ccbv25
+    — it trades radial probes for vertical ones and loses on the trade, on exactly the outboard
+    verticals beside P4/P5. With noise, gain, turns, lattice, and acquisition range all excluded
+    by measurement this sprint, the surviving candidates are <strong>pose, or a conductor absent
+    from both descriptions</strong>.</li>
+  </ol>
+
+  <h2>Six-gap disposition (refreshed against this sprint's evidence)</h2>
+  <table>
+    <thead><tr><th>gap</th><th>disposition after S5</th></tr></thead>
+    <tbody>
+      <tr><td>Active turns / polarity / circuit topology</td><td>Narrowed to the P6 pair only: ten of thirteen counts PUBLISHED on exact archive integers; solenoid reconciled (344.657 [332.97, 356.34] overlapping the stratum route); P2 interconnection PUBLISHED from archive evidence; P6 structurally unreachable — blocks stays True. All operator-inert to the gate.</td></tr>
+      <tr><td>Passive material / resistance / topology</td><td>Inductive half EXACT (57-circuit L matrix, reciprocity 3e-3); resistive half nominal as a visible negative (fit failed the promotion contract four ways; identifying measurement named).</td></tr>
+      <tr><td>Detailed TF winding geometry</td><td>Unchanged — not required for this lane per the locked axisymmetric-TF decision.</td></tr>
+      <tr><td>Independent toroidal-probe orientation</td><td>Unchanged (36 probes position-only, non-blocking); corroborated: the floor is EFC-free to 1.75 pT.</td></tr>
+      <tr><td>Poloidal channel-to-bank assignment</td><td>Converted to a CLOSED SEARCH with a measured reason: unobtainable from the archive (~50 kA needed vs 12 kA held); both candidates carried; the blocker record corrected (EFC geometry would not help).</td></tr>
+      <tr><td>Saddle traversal sign</td><td>Unchanged — both signs carried, no new evidence this sprint.</td></tr>
+    </tbody>
+  </table>
+
+  <p>Ladder, stamps, and gap records:
+  <code>imas_ambix/spine_bench/results/magnetics-residual-ladder.md</code> +
+  <code>channel-gap-…-{artifact,campaign}.json</code> + the banked YAMLs; the superseded
+  first decomposition run was deleted rather than banked when its own cross-check disagreed
+  with the gate (aggregation defect, fixed and test-pinned apart).</p>
+
+</main>
+</body>
+</html>

@@ -603,9 +603,10 @@ def _passive_records(
                 "ramp absorbs baseline error rather than describing a conductor",
                 "scored on the withheld coil with those ramps disallowed the fitted "
                 "model is worse by half, so the training gain does not generalise",
-                "three of the four conductor classes leave their profile open across "
-                "the whole search range, and the fourth spans a factor of sixteen, so "
-                "the diagnostic set does not constrain a resistivity per class",
+                "three of the four conductor classes leave their profile open at a "
+                "search bound rather than closing inside it, and the fourth closes "
+                "only across a factor of sixteen, so the diagnostic set does not "
+                "constrain a resistivity per class",
                 "the fitted vessel value implies a resistivity below the bulk interval "
                 "of the metal, which an ideal ring standing in for a real shell cannot "
                 "reach: cut-outs, joints and longer paths all raise resistance, so a "

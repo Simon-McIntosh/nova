@@ -221,7 +221,7 @@ def test_the_decay_calibration_records_its_negative_result(ledger) -> None:
     assert "71.9 ms" in assumptions
     assert "ramps slower than" in assumptions
     assert "does not generalise" in assumptions
-    assert "profile open" in assumptions
+    assert "leave their profile open at a search bound" in assumptions
 
 
 def test_the_p2_packs_are_published_as_separately_fed(ledger) -> None:

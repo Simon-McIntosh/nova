@@ -26,8 +26,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-05">
-<meta name="plan-version" content="5">
-<meta name="plan-impl" content="0.67">
+<meta name="plan-version" content="6">
+<meta name="plan-impl" content="0.72">
 </head>
 <body>
   <main class="plan-doc">
@@ -206,6 +206,19 @@
     measurably unobtainable (~50 kA needed vs 12 kA held). No identity-bearing promotion;
     semantic → 3aba565a… (nova <code>fef981b4</code>; lanes 3815/0 + 522/0). Full record:
     <a href="/nova/research/mast-sensor-adjudication-landed.html">sensor adjudication landed</a>.</p>
+
+    <h3>Read-path normalisation <span class="badge badge-shipped">✓ landed 2026-08-05 — the campaign term was the acquisition</span></h3>
+    <p class="landed-summary">
+    The discrete acquisition scales are divided out on the read path (nova <code>94c6dc99</code>:
+    BlockScaleTable, 113 blocks / 19 stepping channels, four dispositions, provenance on every
+    read; lanes 3904/0 + 522/0). <strong>Falsification positive:</strong> the stage-D displacement
+    sign-flip disappears on exactly the two boundary-straddling coils — the campaign-dependent
+    term was the acquisition setting, not geometry. Far-field gain residual −13%; eight channels
+    return to unity; four new static-gain candidates (ccbv25, obr11, obv01, obv02). Brackets stay
+    campaign-wide (0/37 pinned; two narrowing routes refused by pre-stated gates — recorded).
+    Gate re-baselining stays an open followup. Full record:
+    <a href="/nova/research/mast-block-scale-normalisation-landed.html">block-scale
+    normalisation landed</a>.</p>
 
     <h3>Stage D <span class="badge badge-shipped">✓ landed 2026-08-05 — negative result, uniform density stands</span></h3>
     <p class="landed-summary">

@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="mast-block-scale-normalisation-landed">
+  <meta name="plan-title" content="MAST acquisition block-scale normalisation — read path corrected, campaign term falsified as geometry">
+  <meta name="plan-summary" content="Per-stage record: the discrete acquisition scales are divided out on the read path (113 blocks / 19 stepping channels, four dispositions, full provenance); the stage-D displacement sign-flip disappears on the decisive coils — the campaign term was the acquisition, not geometry; far-field residual −13% with eight channels returning to unity.">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>MAST block-scale normalisation landed | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+  <h1>Block-scale normalisation — the read path now divides the acquisition out</h1>
+  <p>Landed 2026-08-05, nova merge <code>94c6dc99</code> (three commits, 16 files, 18,393
+  insertions). Combined-tree verification first (no seam: 3859/0 + 522/0, job 1240954); final
+  lanes 3904/0 fast + 522/0 slow (job 1240963, +45 new tests).
+  Plan: <a href="/nova/plans/mast-vacuum-floor-recovery.html">mast-vacuum-floor-recovery</a>.</p>
+
+  <h2>Design</h2>
+  <p><code>nova/imas/mast_block_scale.py</code> promotes a <code>BlockScaleTable</code> as tracked
+  data (113 blocks / 76 channels / 19 stepping), applied by default in the vacuum-fit,
+  solve-input, and EFC-screen read paths with the raw path reachable. The correction divided out
+  is the <strong>discrete ladder rung</strong> nearest the described field — never the fitted
+  ratio, which would launder model error into the data; static per-channel gain remains the
+  sensor ledger's question. Every read returns a <code>ScaleCorrection</code> with one of four
+  dispositions — measured / bracketed / refused / unmeasured — and the last two read exactly as
+  published, flagged; a shot between two blocks is unmeasured however narrow the gap, because
+  that is where the switch is and a guess there costs the factor of two.</p>
+
+  <h2>The sweep, and two honest refusals</h2>
+  <p>All 400 plasma-free excitation shots swept (coverage 40 → 85 shots/channel median); the
+  estimator reproduces the adjudication exactly on the original split. <strong>0 of 37 switches
+  pinned to the shot</strong> — brackets stay campaign-wide (median 4,942 shots). Two narrowing
+  routes failed honestly and are recorded: pre-breakdown windows are defeated by the solenoid
+  swing transient, and a model-free amplitude-ratio observable that would have cut brackets 200×
+  was <strong>refused by its own pre-stated gate</strong> (it invents 10–18 boundaries on every
+  steady channel and matches only 41/75 real steps — the field-pattern confound dominates).
+  Pooling held-out readings into the block finder would inflate 19 stepping channels to 55 and
+  drop the ladder share 78%→57% — promotion stays on the binding split; held-out agreement
+  94%.</p>
+
+  <h2>The falsification verdict — it was the acquisition, not geometry</h2>
+  <table>
+    <thead><tr><th>coil</th><th>sign alignment raw → normalised</th><th>verdict</th></tr></thead>
+    <tbody>
+      <tr><td>p4_lower</td><td>−1.000 → +0.605</td><td><strong>reversal removed</strong></td></tr>
+      <tr><td>p5_lower</td><td>−1.000 → +0.707</td><td><strong>reversal removed</strong></td></tr>
+      <tr><td>p5_upper</td><td>−0.447 → −0.707</td><td>survives, but prefers no direction (training gain 0.006)</td></tr>
+      <tr><td>p4_upper</td><td>+1.000 → +0.832</td><td>never reversed</td></tr>
+    </tbody>
+  </table>
+  <p>Both coils whose split straddles the 192xx/25xxx boundary — the pair the lattice node named
+  decisive — stop reversing. <strong>The campaign-dependent near-probe term was the acquisition
+  setting, not geometry.</strong> The lattice node's negative result on the lattice itself is
+  untouched; its attribution of the campaign term is corrected.</p>
+
+  <h2>Gain ledger on normalised signals</h2>
+  <p>Far-field whitened residual 27.47 → 23.90 (−13%); channels off unity by &gt;5%: 30 → 20 of
+  77. Eight corrected channels return to unity (obr02 1.747→0.962, ccbv06 1.525→0.991, obr16
+  1.428→1.016, ccbv28, ccbv18–20, obv12) — every one had previously been handed a single static
+  gain averaged across a switch. Four new honest static-gain candidates for the sensor ledger:
+  ccbv25 1.065, obr11 0.864, obv01 0.886, obv02 0.941. The five promoted scales persist within
+  0.65% (ccbv35's apparent 4% move is unit-median renormalisation, not a finding). Records:
+  <code>nova/imas/mast_block_scale.json</code> (tracked) +
+  <code>~/.cache/nova-mast/mast_block_scale_*.json</code>; figures <code>scale_*</code> under
+  <code>docs/figures/mast-vacuum-floor/</code>.</p>
+
+  <p><strong>Scope note:</strong> this improves the nova-side vacuum-fit residual; whether a
+  frozen-gate stamp sees it depends on the gate's own measurement path — that decision is
+  tracked as the plan's open followup on gate re-baselining.</p>
+
+</main>
+</body>
+</html>

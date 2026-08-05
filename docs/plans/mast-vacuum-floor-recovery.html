@@ -25,8 +25,8 @@
   <title>MAST Vacuum Floor Recovery | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-05">
-<meta name="plan-version" content="11">
+<meta name="plan-modified" content="2026-08-06">
+<meta name="plan-version" content="12">
 <meta name="plan-impl" content="1.0">
 </head>
 <body>
@@ -548,7 +548,7 @@ Done when
   - The decision is locked with the owner&#x27;s authority; the ladder table carries the re-baseline point if taken; stamps banked.</pre>
     <p class="r-fu-outcome">DECIDED by the owner 2026-08-05: RE-BASELINE BOTH ARMS. The gate's measurement read adopts the block-scale normalisation (the acquisition scale is a data defect, not a description difference); one fresh before/after stamp pair for both arms at a single commit records the measurement discontinuity in the ladder table; the same-source budget itself stays untouched. Executed inside the stage F closure node.</p>
     </article>
-<article class="r-fu" data-id="f-vfr-06" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-05 16:00" data-recommends-skill="/reckon-ship mast-vacuum-floor-recovery" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-vfr-06" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-05 16:00" data-recommends-skill="/reckon-ship mast-vacuum-floor-recovery" data-resolved-at="2026-08-05T22:19:34+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Hunt the common-mode term: pose or a conductor absent from both descriptions</h4>
     <div class="r-fu-body"><p>The closure left a fully-characterised target: six channels carry 56.6% of the misfit at 91–253× their own noise floors, with obr17 the largest absolute share on BOTH arms (unexplained by either description) and the +0.023 cutover gap an outboard-vertical trade at obv06/obv14. Noise, gain, turns, lattice, and acquisition range are all excluded by measurement. What remains is sensor POSE (a survey-lineage error common to both descriptions) or a CONDUCTOR absent from both (busbars/feeders class). Trigger: before mast-catalog-gpu-solve relies on absolute magnetics misfit, or when new pose/as-built evidence surfaces.</p></div>
     <pre class="r-fu-prompt">Project: nova (+ read-only imas-ambix evidence)
@@ -569,6 +569,25 @@ Candidate routes (pre-register a discriminant before fitting anything)
 
 Done when
   - A pre-registered discriminant separates the routes with measured evidence, or the search is closed with the measured reason; any promotion passes held-out challenge; the gate is re-stamped only through the committed entry points.</pre>
+    <p class="r-fu-outcome">Executed as the user-directed misfit hunt (evidence ~/.cache/nova-mast/misfit-hunt/, research doc in production). THE RESIDUAL SEPARATED INTO TWO INDEPENDENT FAULTS: (1) obr17 is a probe GAIN of 0.50 — 99.88% of its residual is the described field × −0.50, four independent routes over a 280× amplitude range; worth 11–13% of BOTH arms' pooled misfit but widens the cutover gap ~30% (shared defect the artifact handles slightly better). (2) A P4/P5-localised field the description cannot produce: 58–78% of obv06/obv14's residual is orthogonal to every described coil column; 7–9 mT survives a FREE least-squares inversion of all 13 coil currents (user-proposed test) while staying linear in the P4/P5 drives (R² 0.77–0.99); up-down SYMMETRIC (the antisymmetry hypothesis REFUTED — the recorded parity inference was backwards: symmetric currents give antisymmetric B_r); level-following (95.4% level vs 0.7% rate — inductive/passive pickup dead); EFC-independent (R² 0.0004). Wiring: P5 turns confirmed blind to ~1%; solenoid 0.5 split corroborated (±15%); P4 members demand weights 11–26% apart at equal measured currents and turns ⇒ geometric fault on one P4 member; P2/P3/P6 wiring UNANSWERABLE from magnetics (array rank 10 of 13 — a bound, not a gap); every published circuit relation falsified by counterexample shots but operator-inert. Pose demoted to third.</p>
+    </article>
+<article class="r-fu" data-id="f-vfr-07" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-06 00:30" data-recommends-skill="/reckon-ship mast-vacuum-floor-recovery" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Close the two named faults: the P4-local conductor and the obr17 scoring decision</h4>
+    <div class="r-fu-body"><p>The misfit hunt reduced the floor problem to two named targets. (1) The P4/P5-local field: either one P4 member's geometry/current distribution is wrong (its inverted weight disagrees with its twin by 11–26% at equal currents and turns — pf_active/coil(p4)/element/current_distribution is the description's own unresolved record) or a feeder/busbar conductor local to P4/P5 is absent from both descriptions — engineering documentation, not more magnetics, decides which. (2) obr17's 0.50 gain is measured four ways but architecturally unreachable (reference-block rung = 1 by construction; the discriminant lacked a magnitude term) — whether the gate consumes promoted sensor calibrations is an owner scoring decision. Correcting obr17 removes 11–13% of both arms but widens the cutover gap.</p></div>
+    <pre class="r-fu-prompt">Project: nova (+ authorized imas-ambix scoring change if the owner decides it)
+Plan: mast-vacuum-floor-recovery (two-fault closure)
+
+Read first
+  docs/research/mast-vacuum-misfit-separation.html (the separation evidence)
+  ~/.cache/nova-mast/misfit-hunt/MANIFEST.json + attribution_verdicts.json + inversion_taxonomy.json
+
+Work
+  1. P4 member fault: pull the engineering documentation for P4 upper vs lower (winding drawings, as-built records, feeder/busbar routing near R=1.8–2.0, Z=±0.3–1.0); decide member-geometry vs absent-conductor; author the correction as evidence-typed description (identity moves only if outline/pose changes).
+  2. obr17: surface the scoring decision to the owner — should the gate consume promoted sensor calibration records (a magnitude-bearing discriminant would also need registering)? Implement only after the owner locks it.
+  3. Re-stamp through the committed entry points after any description change; the same-source budget stays untouched.
+
+Done when
+  - The P4/P5-local fault is identified from documentation with the correction landed or the honest dead-end recorded; the obr17 decision locked and executed; ladder re-stamped.</pre>
     </article>
 </section>
 

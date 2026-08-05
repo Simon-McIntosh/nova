@@ -17,9 +17,9 @@
   <title>MAST Machine Description | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-05">
+<meta name="plan-modified" content="2026-08-06">
 <meta name="plan-impl" content="1.0">
-<meta name="plan-version" content="20">
+<meta name="plan-version" content="21">
 <meta name="plan-sprint" content="S5">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -660,6 +660,24 @@ Work
 
 Done when
   - Single-element authoring unchanged (digest-stable); multi-element authoring sums correctly; suites green.</pre>
+    </article>
+<article class="r-fu" data-id="f-mmd-circuit-relations" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-ship" data-written-at="2026-08-06 00:40" data-recommends-skill="/reckon-ship mast-machine-description" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Correct the falsified circuit relations and map the pack-total channel class</h4>
+    <div class="r-fu-body"><p>The misfit hunt's pair-independence test (409 shots) falsified every published circuit relation in the description: all five up-down series relations (P2 inner/outer, P3, P4, P5) and the P6 anti-series relation have counterexample shots where one member carries tens of kA while the other reads near zero — every coil in the archive is independently fed. The P4/P5 unipolar single-supply claim is also false (channels reach +10.2 kA and −17.6 kA). An undocumented third channel class exists (p2l_current, p3l_current, …) carrying each pack's TOTAL ampere-turns. All operator-inert (the forward model reads per-coil channels), but they are real defects in pf_active/circuit(*)/type and /connections and the solve-input map should serve the pack-total channels. Evidence: ~/.cache/nova-mast/misfit-hunt/pair_independence.json.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan: mast-machine-description (circuit-relation corrections)
+
+Read first
+  ~/.cache/nova-mast/misfit-hunt/pair_independence.json (the counterexample table)
+  docs/research/mast-vacuum-misfit-separation.html (context)
+
+Work
+  1. Rewrite pf_active/circuit(*)/type and /connections to independently-fed per-coil circuits (evidence-typed, with the counterexample shots as the measured basis); drop the P4/P5 unipolar claim.
+  2. Add the pack-total ampere-turn channels (p2l_current class) to the solve-input map as served rows with provenance; record the redundancy relation they satisfy.
+  3. Digest discipline: circuit topology is identity-bearing — expect a physical-digest move; one deliberate change with the mapping recorded, pins updated, artifact republished, ambix pin bump coupled (same pattern as the registry-corrections node).
+
+Done when
+  - Circuits match the measured feeding; pack-total channels served; digest mapping test-pinned; lanes green both repos.</pre>
     </article>
 </section>
 

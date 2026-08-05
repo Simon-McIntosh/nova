@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-05">
-<meta name="plan-version" content="6">
+<meta name="plan-version" content="7">
 <meta name="plan-impl" content="0.72">
 </head>
 <body>
@@ -537,6 +537,9 @@ Done when
 </div>
 <div class="r-comment" data-section="_top" data-id="c-vfr-artifact-arm-provenance" data-who="reckon-ship" data-when="2026-08-05">
     <div class="r-comment-body">Gate audit at the sensor-adjudication pin (ambix 26862b3): the campaign-table arm is bit-identical to the registered baseline (0.7401031 / 0.7395613 both metrics, jobs 1240952/1240953, compare_paths 15/15) — proving the C/D nova changes do not perturb the efm path. But the audit found the benchmark has NO COMMITTED artifact-arm entry point: every banked artifact-arm stamp (27aaed2bb9, e76b0dc65c, 180455e846) came from an uncommitted out-of-tree driver (~/.cache/ambix-after-path/artifact_path_stamp.py). Consequences: (1) a reviewed artifact-arm entry point is being committed as its own node with continuity validation against the banked stamps; (2) the quoted registry-corrections delta (−0.0007) and the calibrated-turns flatness need re-derivation from the reproducible path — the flatness verdict is independently corroborated at reader level (operator-equivalence diff: drive weights/positions/xmult identical), the −0.0007 is not yet; (3) stage F closure must score both arms from committed code only. Republish reconciliation: authoritative ledger states 24 measured / 22 published / 37 generated / 15 fitted / 25 unresolved; semantic 3aba565a… reproduced exactly; artifact digest 221522a8…; durable ~/.cache/mast-artifact-cd.</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-vfr-artifact-arm-committed" data-who="reckon-ship" data-when="2026-08-05">
+    <div class="r-comment-body">The artifact-arm provenance gap is CLOSED (ambix 804388c): a committed entry point (spine_bench/machine_artifact_arm.py, GeometrySource protocol, schema spine-bench/1.5 with geometry_source/revision/provenance on every stamp) reproduces the banked out-of-tree residual to FLOAT EQUALITY at the same artifact revision - also proving the unrecorded solenoid-weight override was not in play. Three revisions banked from the committed path (85993ba9 / c20bc7e1 / 3aba565a): all stamp 0.7632105/0.7631399. Ladder re-derivation: calibrated-turns flatness HOLDS with mechanism (turn counts are inert - the vacuum term builds from the drive weight; P4/P5 drive at ampere_turns_per_ampere=1; per-field table hash differs only in provenance_flags); -0.0007 HOLDS as a number but its attribution does not (the pair crosses physical digest + registry + ~11 engine commits and the near-side artifact is no longer on disk - treat as an UPPER BOUND on the registry corrections' contribution); source-cutover parity reproducible at 29% of budget, 15/15 for all three revisions. Signature ambiguity fixed and test-pinned (setup_signature hashes positions, not turns - geometry_revision now keys stamps/filenames). The dead out-of-tree driver (~/.cache/ambix-after-path/artifact_path_stamp.py, pins a digest no cache holds) is retained as audit evidence - do not re-run it; the committed path is the gate's artifact arm from here on.</div>
 </div>
 </section>
 </main>

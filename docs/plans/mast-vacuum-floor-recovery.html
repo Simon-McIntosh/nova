@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-05">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="5">
 <meta name="plan-impl" content="0.67">
 </head>
 <body>
@@ -521,6 +521,9 @@ Done when
 </div>
 <div class="r-comment" data-section="_top" data-id="c-vfr-lattice-negative" data-who="reckon-ship" data-when="2026-08-05">
     <div class="r-comment-body">Stage D landed as a promoted negative (nova 9f9ad143): the P4/P5 layout is derivable from the pack chamfer (23 turns, nothing fitted) yet refused four ways; uniform density stands and no artifact republish occurred. Decisive for the ladder: the near-probe misfit is CAMPAIGN-DEPENDENT (rigid-displacement direction reverses across the 192xx/25xxx boundary on exactly the straddling coils) — no static description can carry it. Stage C now owns: the far-field gain ledger (30/77 channels off unity &gt;5%; obr02 1.747, obr17 0.504; obv06 1.001 / obv14 0.987 — NOT mis-gained), campaign-resolved calibration, and the P5-lower verdict (layout amplitude reach ≤0.066% = 130× below the 4.5% shift → sensor- or supply-side). f-vfr-02 resolves when stage C reports. Record: docs/research/mast-winding-lattice-landed.html</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-vfr-artifact-arm-provenance" data-who="reckon-ship" data-when="2026-08-05">
+    <div class="r-comment-body">Gate audit at the sensor-adjudication pin (ambix 26862b3): the campaign-table arm is bit-identical to the registered baseline (0.7401031 / 0.7395613 both metrics, jobs 1240952/1240953, compare_paths 15/15) — proving the C/D nova changes do not perturb the efm path. But the audit found the benchmark has NO COMMITTED artifact-arm entry point: every banked artifact-arm stamp (27aaed2bb9, e76b0dc65c, 180455e846) came from an uncommitted out-of-tree driver (~/.cache/ambix-after-path/artifact_path_stamp.py). Consequences: (1) a reviewed artifact-arm entry point is being committed as its own node with continuity validation against the banked stamps; (2) the quoted registry-corrections delta (−0.0007) and the calibrated-turns flatness need re-derivation from the reproducible path — the flatness verdict is independently corroborated at reader level (operator-equivalence diff: drive weights/positions/xmult identical), the −0.0007 is not yet; (3) stage F closure must score both arms from committed code only. Republish reconciliation: authoritative ledger states 24 measured / 22 published / 37 generated / 15 fitted / 25 unresolved; semantic 3aba565a… reproduced exactly; artifact digest 221522a8…; durable ~/.cache/mast-artifact-cd.</div>
 </div>
 </section>
 </main>

@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="vacuum-signature-extraction">
   <meta name="plan-title" content="Vacuum Signature Extraction — every pulse carries its own calibration windows">
   <meta name="plan-summary" content="Every tokamak pulse has vacuum intervals — before breakdown and after termination — where the exact field is computable from recorded conductor currents alone. Build machine-agnostic routines that harvest those windows from every pulse: per-channel offsets, integrator drift (rate and curvature), post-pulse return-to-baseline, scale-step and pair-state flags, and opportunistic gain checks against the exact solution. Products flow into the diagnostic-correction schema, turning the whole archive into a continuous calibration instrument instead of relying on designed calibration shots alone.">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="M">
   <meta name="plan-capability-version" content="1.0">
@@ -20,6 +20,8 @@
   <title>Vacuum Signature Extraction | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-08">
+<meta name="plan-version" content="1">
 </head>
 <body>
 <main class="plan-doc">
@@ -79,15 +81,13 @@
   source; findings recorded in a research note.</p>
 
   <section data-reckon="followups" id="followups" class="r-followups">
-    <h2><span class="sec">§</span> Followups</h2>
-    <article class="r-fu" data-id="f-vse-001" data-status="open"
-             data-capability-version="1.0" data-capability-class="general"
-             data-written-by="reckon-create" data-written-at="2026-08-07">
-      <h4 class="r-fu-title">Implement the window classifier and instrument-term extraction with synthetic-truth tests</h4>
-      <div class="r-fu-body"><p>The §2.1–§2.2 core: pulse timeline classification and per-window
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-vse-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-08-07" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Implement the window classifier and instrument-term extraction with synthetic-truth tests</h4>
+    <div class="r-fu-body"><p>The §2.1–§2.2 core: pulse timeline classification and per-window
       offset/drift/closure extraction, unit-tested on manufactured signals before any archive
       sweep.</p></div>
-      <pre class="r-fu-prompt">Project: nova
+    <pre class="r-fu-prompt">Project: nova
 Plan:    vacuum-signature-extraction (http://localhost:8765/nova/plans/vacuum-signature-extraction.html)
 Section: §2.1–§2.2
 Capability: general
@@ -118,7 +118,7 @@ Done-when
      shot, one plasma shot pre/post windows, one degenerate case)
   3. Followup written into plan + this one resolved</pre>
     </article>
-  </section>
+</section>
 
 </main>
 </body>

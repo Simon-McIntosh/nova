@@ -1,0 +1,2588 @@
+machine: mast
+diagnostic_system: magnetics
+schema_version: 1.0.0
+set_version: 1.0.0
+generated_by: 'mined from the vacuum-floor and misfit calibration records: the promoted and
+  withheld channel scales and the acquisition block table from nova/imas/mast_fitted_parameters.py
+  and nova/imas/mast_block_scale.json, whose measurement and read-path consequences are recorded
+  in docs/research/mast-sensor-adjudication-landed.html and docs/research/mast-block-scale-normalisation-landed.html;
+  the pickup pair states and quality states from docs/research/mast-misfit-source-localization.html;
+  the flux convention from nova/imas/mast_solve_inputs.py'
+generated_at: '2026-08-07'
+description: 'Every diagnostic correction the MAST calibration ladder has measured for the
+  magnetics system. Gains and acquisition rungs the read path applies; pickup pair states,
+  exclusions and quality states measured but not yet applied; one store-to-solver convention.
+  Offsets are deliberately absent: every fit measures the pre-excitation baseline from the
+  pulse''s own quiet window, so an offset is a per-pulse quantity rather than a set constant.'
+ladders:
+- name: acquisition_range
+  kind: acquisition_scale
+  rungs: [0.25, 0.5, 0.7071067811865475, 1.0, 1.4142135623730951, 2.0, 4.0]
+  tolerance: 0.08
+  basis: 'powers of two and their square roots, which is what a binary range ladder in an
+    acquisition chain offers. Declared as a hypothesis before any step was classified and
+    confirmed by the histogram rather than imposed on it: of 37 steps found, 29 land on a
+    rung -- one half 14 times, one over root two 4, root two 5 and two 14.'
+corrections:
+- channel: obr17
+  kind: gain
+  status: promoted
+  value: 0.5011
+  measured_value: 0.5011125727424951
+  uncertainty:
+    lower: 0.5011
+    upper: 0.5037
+  validity:
+  - measured_pulses: [14080, 14081, 14084, 14086, 14098, 14099, 14103, 14109, 14113, 14127,
+      19231, 19232, 19235, 19246, 19250, 19252, 24938, 24939, 24940, 24941, 25722, 25826,
+      25828]
+    notes: 'open in both directions: the scale is applied for the machine''s life, and was
+      measured on the pulses listed, spanning 14080 to 25828'
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field; promoted because it is steady across every pulse the channel
+      appears on, off unity by more than five percent, agreed within three percent by an independent
+      solve sharing no estimator and no pulse selection, and confirmed on both halves of its
+      own pulses taken in pulse order
+    evidence_uri: docs/research/mast-sensor-adjudication-landed.html
+    fitted_by: nova.imas.mast_probe_calibration
+    statement: promoted scale 0.5011, supported interval [0.5011, 0.5037], independent-route
+      gap 0.5%
+    corroborations:
+    - method: ratio of the recorded field to the archive's own forward field, pulse by pulse,
+        which resolves a channel's state per pulse instead of pooling it into one scale
+      value: 0.5023
+      uncertainty:
+        lower: 0.5016
+        upper: 0.503
+      evidence_uri: docs/research/mast-misfit-source-localization.html
+      statement: a third route, sharing neither estimator nor reference with the two the promotion
+        gate used, returns 0.5023 +/- 0.0007
+    - method: ratio of the recorded field to the archive's own forward field, pulse by pulse,
+        which resolves a channel's state per pulse instead of pooling it into one scale
+      uncertainty:
+        lower: 0.488
+        upper: 0.514
+      evidence_uri: docs/research/mast-misfit-source-localization.html
+      statement: the same ratio measured pulse by pulse spans 0.488 to 0.514 across pulses
+        15000 to 30420 without trend, so the half is a frozen calibration state for the machine's
+        life rather than a mid-life failure
+    - method: regression of the channel on a deliberately non-axisymmetric excitation with
+        every poloidal coil quiet, so the coupling is measured rather than inferred
+      value: 1.1238e-07
+      unit: T/A
+      evidence_uri: nova/imas/mast_fitted_parameters.py
+      statement: this channel responds fifty times more than the channels seventy-five millimetres
+        either side of it and tracks the current rather than its derivative, which no field
+        can do -- a conductor shared with the excitation, and the second independent symptom
+        of one faulty signal path
+    - method: published instrument description
+      evidence_uri: von Nessi et al., Phys. Plasmas 19, 012506 (2012)
+      statement: every MAST equilibrium pickup is two coils 180 degrees apart toroidally whose
+        signals are averaged before recording, so a channel whose recorded amplitude is exactly
+        half has lost one member -- the mechanism that predicts a factor of two rather than
+        an arbitrary gain
+  notes: the value the read path divides by is the four-decimal constant the sensor adjudication
+    promoted; measured_value carries the same route's unrounded pooled ratio
+- channel: obv04
+  kind: gain
+  status: promoted
+  value: 0.8571
+  measured_value: 0.8571216161534859
+  uncertainty:
+    lower: 0.857
+    upper: 0.8758
+  validity:
+  - measured_pulses: [11884, 11885, 11887, 14061, 14065, 14070, 14071, 14098, 14099, 14103,
+      14109, 14127, 14167, 19219, 19220, 19222, 19223, 19224, 19225, 19227, 19228, 19229,
+      19231, 19232, 19235, 19238, 19246, 19250, 19251, 19252, 19253, 19255, 19257, 19258,
+      24965]
+    notes: 'open in both directions: the scale is applied for the machine''s life, and was
+      measured on the pulses listed, spanning 11884 to 24965'
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field; promoted because it is steady across every pulse the channel
+      appears on, off unity by more than five percent, agreed within three percent by an independent
+      solve sharing no estimator and no pulse selection, and confirmed on both halves of its
+      own pulses taken in pulse order
+    evidence_uri: docs/research/mast-sensor-adjudication-landed.html
+    fitted_by: nova.imas.mast_probe_calibration
+    statement: promoted scale 0.8571, supported interval [0.857, 0.8758], independent-route
+      gap 2.2%
+    corroborations:
+    - method: independent solve on a disjoint estimator and pulse selection
+      evidence_uri: docs/research/mast-sensor-adjudication-landed.html
+      statement: agrees with the promoted scale to 2.2%
+- channel: obr05
+  kind: gain
+  status: promoted
+  value: 1.1043
+  measured_value: 1.1042830233628103
+  uncertainty:
+    lower: 1.1029
+    upper: 1.1279
+  validity:
+  - measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14098, 14099, 14103, 14106,
+      14109, 14113, 14127, 14131, 15295, 15296, 15298, 15299, 19219, 19220, 19222, 19223,
+      19224, 19225, 19227, 19228, 19229, 19231, 19232, 19235, 19238, 19246, 19250, 19251,
+      19252, 19253, 19255, 19257, 19258, 19995, 24938, 24939, 24965, 25722, 25826]
+    notes: 'open in both directions: the scale is applied for the machine''s life, and was
+      measured on the pulses listed, spanning 14061 to 25826'
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field; promoted because it is steady across every pulse the channel
+      appears on, off unity by more than five percent, agreed within three percent by an independent
+      solve sharing no estimator and no pulse selection, and confirmed on both halves of its
+      own pulses taken in pulse order
+    evidence_uri: docs/research/mast-sensor-adjudication-landed.html
+    fitted_by: nova.imas.mast_probe_calibration
+    statement: promoted scale 1.1043, supported interval [1.1029, 1.1279], independent-route
+      gap 2.1%
+    corroborations:
+    - method: independent solve on a disjoint estimator and pulse selection
+      evidence_uri: docs/research/mast-sensor-adjudication-landed.html
+      statement: agrees with the promoted scale to 2.1%
+  notes: 'carried as promoted because it is what the read path applies, but a static scale
+    is the wrong model for this channel: measured pulse by pulse it flips between 1.25 and
+    0.50, so the pooled 1.1043 describes no pulse -- see this channel''s pair_state and quality
+    records'
+- channel: obv05
+  kind: gain
+  status: promoted
+  value: 0.9449
+  measured_value: 0.944871899933001
+  uncertainty:
+    lower: 0.9409
+    upper: 0.9565
+  validity:
+  - measured_pulses: [11884, 11885, 11887, 14061, 14065, 14070, 14071, 14080, 14081, 14098,
+      14099, 14103, 14109, 14127, 19219, 19220, 19222, 19223, 19224, 19225, 19227, 19228,
+      19229, 19231, 19232, 19235, 19238, 19246, 19250, 19251, 19252, 19253, 19255, 19257,
+      19258, 19996, 24938, 24939, 24965, 25722, 25826]
+    notes: 'open in both directions: the scale is applied for the machine''s life, and was
+      measured on the pulses listed, spanning 11884 to 25826'
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field; promoted because it is steady across every pulse the channel
+      appears on, off unity by more than five percent, agreed within three percent by an independent
+      solve sharing no estimator and no pulse selection, and confirmed on both halves of its
+      own pulses taken in pulse order
+    evidence_uri: docs/research/mast-sensor-adjudication-landed.html
+    fitted_by: nova.imas.mast_probe_calibration
+    statement: promoted scale 0.9449, supported interval [0.9409, 0.9565], independent-route
+      gap 0.2%
+    corroborations:
+    - method: independent solve on a disjoint estimator and pulse selection
+      evidence_uri: docs/research/mast-sensor-adjudication-landed.html
+      statement: agrees with the promoted scale to 0.2%
+- channel: ccbv35
+  kind: gain
+  status: promoted
+  value: 0.9474
+  measured_value: 0.9474024805569328
+  uncertainty:
+    lower: 0.933
+    upper: 0.97
+  validity:
+  - measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099,
+      14103, 14106, 14109, 14113, 14131, 14190, 14225, 14247, 14274, 14312, 14340, 14380,
+      14408, 14432, 14457, 14460, 14492, 14527, 14565, 14596, 14635, 14788, 14938, 14964,
+      14985, 15014, 15051, 15102, 15132, 15151, 15175, 15244, 15300, 15324, 15352, 15378,
+      15440, 15489, 15535, 15551, 15604, 15624, 15690, 15691, 15692, 15757, 15785, 15820,
+      15823, 15842, 15876, 15911, 15950, 15974, 16007, 16031, 16064, 16088, 16233, 16234,
+      16253, 16286, 16356, 16381, 16566, 16605, 16634, 16720, 19219, 19220, 19222, 19223,
+      19224, 19225, 19227, 19228, 19229, 19238, 19246, 19250, 19251, 19252, 19253, 19255,
+      19257, 19258, 19347, 19459, 19480, 19501, 19535, 19560, 19572, 19595, 19620, 19636,
+      19659, 19674, 19699, 19742, 19747, 19777, 19795, 19816, 19837, 19861, 19893, 19897,
+      19909, 19924, 19943, 19974, 20058, 20074, 20098, 20226, 20238, 20251, 20266, 20269,
+      20293, 20295, 20324, 20326, 20372, 20402, 24938, 24939, 24940, 24941, 24965]
+    notes: 'open in both directions: the scale is applied for the machine''s life, and was
+      measured on the pulses listed, spanning 14061 to 24965'
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field; promoted because it is steady across every pulse the channel
+      appears on, off unity by more than five percent, agreed within three percent by an independent
+      solve sharing no estimator and no pulse selection, and confirmed on both halves of its
+      own pulses taken in pulse order
+    evidence_uri: docs/research/mast-sensor-adjudication-landed.html
+    fitted_by: nova.imas.mast_probe_calibration
+    statement: promoted scale 0.9474, supported interval [0.933, 0.97], independent-route
+      gap 1.2%
+    corroborations:
+    - method: independent solve on a disjoint estimator and pulse selection
+      evidence_uri: docs/research/mast-sensor-adjudication-landed.html
+      statement: agrees with the promoted scale to 1.2%
+- channel: obv11
+  kind: gain
+  status: withheld
+  measured_value: 0.9247565786716503
+  uncertainty:
+    lower: 0.869
+    upper: 1.065
+  validity:
+  - measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14103, 14106, 14109, 14113,
+      14127, 19219, 19220, 19222, 19223, 19224, 19225, 19227, 19228, 19229, 19231, 19232,
+      19235, 19238, 19251, 19253, 19255, 19257, 19258, 19995, 19996, 24938, 24939, 24965,
+      25722, 25826]
+    notes: the pulses the refused measurement rests on, spanning 14061 to 25826
+  cause: 'the promotion gate refused it: two independent routes disagree by 7.4 percent and
+    the channel''s own pulse halves read 0.869 and 1.065, so whatever this channel is doing
+    is not one scale'
+  notes: recorded rather than dropped because a refusal with a reason is worth more than a
+    silence -- a consumer can tell an unpromoted channel from an unmeasured one
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: docs/research/mast-sensor-adjudication-landed.html
+    fitted_by: nova.imas.mast_probe_calibration
+    statement: steady and off unity, but unstable across its own halves and across routes,
+      so no value is promoted
+- channel: ccbv01
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.985191177718298
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 25828
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099,
+      14106, 14113, 14121, 14123, 14126, 14131, 24938, 24939, 24940, 24941, 24965, 25722,
+      25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv02
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9808474670807914
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 14131
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099,
+      14103, 14106, 14109, 14113, 14131]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv02
+  kind: acquisition_scale
+  status: promoted
+  value: 2.0
+  measured_value: 1.9254194506389384
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 19219
+    pulse_end: 19258
+    measured_pulses: [19219, 19220, 19222, 19223, 19224, 19225, 19227, 19228, 19229, 19238,
+      19246, 19250, 19251, 19252, 19253, 19255, 19257, 19258]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv02
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9777357778560405
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 24938
+    pulse_end: 25828
+    measured_pulses: [24938, 24939, 24940, 24941, 24965, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv03
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.973303583412844
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 25828
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099,
+      14103, 14106, 14109, 14113, 14131, 19219, 19220, 19222, 19223, 19224, 19225, 19227,
+      19228, 19229, 19238, 19246, 19250, 19251, 19252, 19253, 19255, 19257, 19258, 24938,
+      24939, 24940, 24941, 24965, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv04
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9748525980979101
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 25828
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099,
+      14103, 14106, 14113, 14131, 19219, 19220, 19222, 19223, 19224, 19225, 19227, 19228,
+      19229, 19238, 19246, 19250, 19251, 19252, 19253, 19255, 19257, 19258, 24938, 24939,
+      24940, 24941, 24965, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv05
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9755125210125418
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 25828
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099,
+      14103, 14106, 14109, 14113, 14131, 19219, 19220, 19222, 19223, 19224, 19225, 19227,
+      19228, 19229, 19238, 19246, 19250, 19251, 19252, 19253, 19255, 19257, 19258, 24938,
+      24939, 24940, 24941, 24965, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv06
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9751260411838918
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 19258
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099,
+      14103, 14106, 14109, 14113, 14131, 16006, 19219, 19220, 19222, 19223, 19224, 19225,
+      19227, 19228, 19229, 19238, 19246, 19250, 19251, 19252, 19253, 19255, 19257, 19258]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv06
+  kind: acquisition_scale
+  status: promoted
+  value: 2.0
+  measured_value: 1.9226519616889806
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 24938
+    pulse_end: 24965
+    measured_pulses: [24938, 24939, 24940, 24941, 24965]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv07
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9835947265383798
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 14131
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099,
+      14106, 14109, 14113, 14131]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv07
+  kind: acquisition_scale
+  status: promoted
+  value: 0.7071067811865475
+  measured_value: 0.6838827740878467
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 15295
+    pulse_end: 15296
+    measured_pulses: [15295, 15296]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv07
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9689365197796381
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 16113
+    pulse_end: 25828
+    measured_pulses: [16113, 16415, 16416, 16417, 19219, 19220, 19222, 19223, 19224, 19225,
+      19227, 19228, 19229, 19238, 19246, 19250, 19251, 19252, 19253, 19255, 19257, 19258,
+      24938, 24939, 24940, 24941, 24965, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv08
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9801789501216858
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 25828
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099,
+      14103, 14106, 14109, 14113, 14131, 15295, 15296, 15298, 15299, 19219, 19220, 19222,
+      19223, 19224, 19225, 19227, 19228, 19229, 19238, 19246, 19250, 19251, 19252, 19253,
+      19255, 19257, 19258, 24938, 24939, 24940, 24941, 24965, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv09
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9810219581768603
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 25828
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099,
+      14103, 14106, 14109, 14113, 14131, 15295, 15296, 15298, 15299, 19219, 19220, 19222,
+      19223, 19224, 19225, 19227, 19228, 19229, 19238, 19246, 19250, 19251, 19252, 19253,
+      19255, 19257, 19258, 24938, 24939, 24940, 24941, 24965, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv10
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.981854421524148
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 24938
+    pulse_end: 25828
+    measured_pulses: [24938, 24939, 24940, 24941, 24965, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv11
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9835730527835987
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 25828
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099,
+      14103, 14106, 14109, 14113, 14131, 15295, 15296, 15298, 15299, 19219, 19220, 19222,
+      19223, 19224, 19225, 19227, 19228, 19229, 19238, 19246, 19250, 19251, 19252, 19253,
+      19255, 19257, 19258, 24938, 24939, 24940, 24941, 24965, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv12
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.987618015774321
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 25828
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099,
+      14103, 14106, 14109, 14113, 14131, 15295, 15296, 15298, 15299, 19219, 19220, 19222,
+      19223, 19224, 19225, 19227, 19228, 19229, 19238, 19246, 19250, 19251, 19252, 19253,
+      19255, 19257, 19258, 24938, 24939, 24940, 24941, 24965, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv13
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9906207204546795
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 25828
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099,
+      14103, 14106, 14109, 14113, 14131, 24938, 24939, 24940, 24941, 24965, 25722, 25826,
+      25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv14
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9863235552531014
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 25828
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099,
+      14103, 14106, 14109, 14113, 15295, 15296, 15298, 15299, 19219, 19220, 19222, 19223,
+      19224, 19225, 19227, 19228, 19229, 19238, 19246, 19250, 19251, 19252, 19253, 19255,
+      19257, 19258, 24938, 24939, 24940, 24941, 24965, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv15
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9869472656634777
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 25828
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099,
+      14103, 14106, 14109, 14113, 15295, 15296, 15298, 15299, 19219, 19220, 19222, 19223,
+      19224, 19225, 19227, 19228, 19229, 19238, 19246, 19250, 19251, 19252, 19253, 19255,
+      19257, 19258, 24938, 24939, 24940, 24941, 24965, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv16
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9874675922765792
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 25828
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099,
+      14103, 14106, 14109, 14113, 15295, 15296, 15298, 15299, 19219, 19220, 19222, 19223,
+      19224, 19225, 19227, 19228, 19229, 19238, 19246, 19250, 19251, 19252, 19253, 19255,
+      19257, 19258, 24938, 24939, 24940, 24941, 24965, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv17
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9861787458260656
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 25828
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099,
+      14103, 14106, 14109, 14113, 19219, 19220, 19222, 19223, 19224, 19225, 19227, 19228,
+      19229, 19238, 19246, 19250, 19251, 19252, 19253, 19255, 19257, 19258, 24938, 24939,
+      24940, 24941, 24965, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv18
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9919742412037746
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 14113
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099,
+      14103, 14106, 14109, 14113]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv18
+  kind: acquisition_scale
+  status: promoted
+  value: 2.0
+  measured_value: 1.9669941619321096
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 19219
+    pulse_end: 19258
+    measured_pulses: [19219, 19220, 19222, 19223, 19224, 19225, 19227, 19228, 19229, 19238,
+      19246, 19250, 19251, 19252, 19253, 19255, 19257, 19258]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv18
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9830319455570135
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 24938
+    pulse_end: 25828
+    measured_pulses: [24938, 24939, 24940, 24941, 24965, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv19
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9892162232461398
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 14113
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099,
+      14103, 14106, 14109, 14113]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv19
+  kind: acquisition_scale
+  status: promoted
+  value: 2.0
+  measured_value: 1.9718086849553074
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 19219
+    pulse_end: 19258
+    measured_pulses: [19219, 19220, 19222, 19223, 19224, 19225, 19227, 19228, 19229, 19238,
+      19246, 19250, 19251, 19252, 19253, 19255, 19257, 19258]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv19
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9836385938826444
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 24938
+    pulse_end: 25828
+    measured_pulses: [24938, 24939, 24940, 24941, 24965, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv20
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9855319549863104
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 14113
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099,
+      14103, 14106, 14109, 14113]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv20
+  kind: acquisition_scale
+  status: promoted
+  value: 2.0
+  measured_value: 1.9712205616395866
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 19219
+    pulse_end: 19258
+    measured_pulses: [19219, 19220, 19222, 19223, 19224, 19225, 19227, 19228, 19229, 19238,
+      19246, 19250, 19251, 19252, 19253, 19255, 19257, 19258]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv20
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9844354058455331
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 24938
+    pulse_end: 25828
+    measured_pulses: [24938, 24939, 24940, 24941, 24965, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv21
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9877011639693416
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 25828
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099,
+      14103, 14106, 14109, 14113, 19219, 19220, 19222, 19223, 19224, 19225, 19227, 19228,
+      19229, 19238, 19246, 19250, 19251, 19252, 19253, 19255, 19257, 19258, 24938, 24939,
+      24940, 24941, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv23
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9699165463713253
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 25828
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099,
+      14103, 14106, 14109, 14113, 19219, 19220, 19222, 19223, 19224, 19225, 19227, 19228,
+      19229, 19238, 19246, 19250, 19251, 19252, 19253, 19255, 19257, 19258, 24938, 24939,
+      24940, 24941, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv24
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9891804931100419
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 25828
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099,
+      14103, 14106, 14109, 14113, 15295, 15296, 15298, 15299, 19219, 19220, 19222, 19223,
+      19224, 19225, 19227, 19228, 19229, 19238, 19246, 19250, 19251, 19252, 19253, 19255,
+      19257, 19258, 24938, 24939, 24940, 24941, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv25
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9894154369492784
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 19258
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099,
+      14103, 14106, 14109, 14113, 15295, 15296, 15298, 15299, 19219, 19220, 19222, 19223,
+      19224, 19225, 19227, 19228, 19229, 19238, 19246, 19250, 19251, 19252, 19253, 19255,
+      19257, 19258]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv25
+  kind: acquisition_scale
+  status: promoted
+  value: 2.0
+  measured_value: 1.9444792297407645
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 24938
+    pulse_end: 24965
+    measured_pulses: [24938, 24939, 24940, 24941, 24965]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv25
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9320387239513155
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 25722
+    pulse_end: 25828
+    measured_pulses: [25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv26
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9863469479476978
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 25828
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099,
+      14103, 14106, 14109, 14113, 15295, 15296, 15298, 15299, 19219, 19220, 19222, 19223,
+      19224, 19225, 19227, 19228, 19229, 19238, 19246, 19250, 19251, 19252, 19253, 19255,
+      19257, 19258, 24938, 24939, 24940, 24941, 24965, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv27
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9868502919249216
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 25828
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099,
+      14103, 14106, 14109, 14131, 15295, 15296, 15298, 15299, 19219, 19220, 19222, 19223,
+      19224, 19225, 19227, 19228, 19229, 19238, 19246, 19250, 19251, 19252, 19253, 19255,
+      19257, 19258, 24938, 24939, 24940, 24941, 24965, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv28
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.991223240383323
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 15299
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099,
+      14103, 14106, 14109, 14113, 14131, 15295, 15296, 15298, 15299]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv28
+  kind: acquisition_scale
+  status: promoted
+  value: 0.5
+  measured_value: 0.4861102396003899
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 19219
+    pulse_end: 19258
+    measured_pulses: [19219, 19220, 19222, 19223, 19224, 19225, 19227, 19228, 19229, 19238,
+      19246, 19250, 19251, 19252, 19253, 19255, 19257, 19258]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv28
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9727159756359082
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 24938
+    pulse_end: 25828
+    measured_pulses: [24938, 24939, 24940, 24941, 24965, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv29
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9901811290548258
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 25828
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099,
+      14103, 14106, 14109, 14113, 14131, 15295, 15296, 15298, 15299, 19219, 19220, 19222,
+      19223, 19224, 19225, 19227, 19228, 19229, 19238, 19246, 19250, 19251, 19252, 19253,
+      19255, 19257, 19258, 24938, 24939, 24940, 24941, 24965, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv30
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9848884619663479
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 25828
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099,
+      14103, 14106, 14109, 14113, 14131, 15295, 15296, 15298, 15299, 19219, 19220, 19222,
+      19223, 19224, 19225, 19227, 19228, 19229, 19238, 19246, 19250, 19251, 19252, 19253,
+      19255, 19257, 19258, 24938, 24939, 24940, 24941, 24965, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv31
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9863542467404725
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 25828
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099,
+      14103, 14106, 14109, 14113, 14131, 15295, 15296, 15298, 15299, 19219, 19220, 19222,
+      19223, 19224, 19225, 19227, 19228, 19229, 19238, 19246, 19250, 19251, 19252, 19253,
+      19255, 19257, 19258, 24938, 24939, 24940, 24941, 24965, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv32
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9829527812620374
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 25828
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099,
+      14103, 14106, 14109, 14113, 14131, 15295, 15296, 15298, 15299, 19219, 19220, 19222,
+      19223, 19224, 19225, 19227, 19228, 19229, 19238, 19246, 19250, 19251, 19252, 19253,
+      19255, 19257, 19258, 24938, 24939, 24940, 24941, 24965, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv33
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9859967628917854
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 14131
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099,
+      14103, 14106, 14109, 14113, 14131]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv33
+  kind: acquisition_scale
+  status: promoted
+  value: 0.7071067811865475
+  measured_value: 0.6935911170422357
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 15295
+    pulse_end: 15296
+    measured_pulses: [15295, 15296]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv33
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9829634454197355
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 16415
+    pulse_end: 25828
+    measured_pulses: [16415, 16416, 16417, 19219, 19220, 19222, 19223, 19224, 19225, 19227,
+      19228, 19229, 19238, 19246, 19250, 19251, 19252, 19253, 19255, 19257, 19258, 24938,
+      24939, 24940, 24941, 24965, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv34
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9843067738125677
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 25828
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099,
+      14103, 14106, 14109, 14113, 14131, 16006, 16113, 16415, 19219, 19220, 19222, 19223,
+      19224, 19225, 19227, 19228, 19229, 19238, 19246, 19250, 19251, 19252, 19253, 19255,
+      19257, 19258, 24938, 24939, 24940, 24941, 24965, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv35
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9474024805569328
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 24965
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099,
+      14103, 14106, 14109, 14113, 14131, 14190, 14225, 14247, 14274, 14312, 14340, 14380,
+      14408, 14432, 14457, 14460, 14492, 14527, 14565, 14596, 14635, 14788, 14938, 14964,
+      14985, 15014, 15051, 15102, 15132, 15151, 15175, 15244, 15300, 15324, 15352, 15378,
+      15440, 15489, 15535, 15551, 15604, 15624, 15690, 15691, 15692, 15757, 15785, 15820,
+      15823, 15842, 15876, 15911, 15950, 15974, 16007, 16031, 16064, 16088, 16233, 16234,
+      16253, 16286, 16356, 16381, 16566, 16605, 16634, 16720, 19219, 19220, 19222, 19223,
+      19224, 19225, 19227, 19228, 19229, 19238, 19246, 19250, 19251, 19252, 19253, 19255,
+      19257, 19258, 19347, 19459, 19480, 19501, 19535, 19560, 19572, 19595, 19620, 19636,
+      19659, 19674, 19699, 19742, 19747, 19777, 19795, 19816, 19837, 19861, 19893, 19897,
+      19909, 19924, 19943, 19974, 20058, 20074, 20098, 20226, 20238, 20251, 20266, 20269,
+      20293, 20295, 20324, 20326, 20372, 20402, 24938, 24939, 24940, 24941, 24965]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv36
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9807351325360144
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 25828
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099,
+      14103, 14106, 14109, 14113, 14131, 19219, 19220, 19222, 19223, 19224, 19225, 19227,
+      19228, 19229, 19238, 19246, 19250, 19251, 19252, 19253, 19255, 19257, 19258, 24938,
+      24939, 24940, 24941, 24965, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv37
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9789165442406209
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 25828
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099,
+      14103, 14109, 14113, 14131, 19219, 19220, 19222, 19223, 19224, 19225, 19227, 19228,
+      19229, 19238, 19246, 19250, 19251, 19252, 19253, 19255, 19257, 19258, 24938, 24939,
+      24940, 24941, 24965, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv38
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9800422861996079
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 25828
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099,
+      14103, 14109, 14113, 14131, 19219, 19220, 19222, 19223, 19224, 19225, 19227, 19228,
+      19229, 19238, 19246, 19250, 19251, 19252, 19253, 19255, 19257, 19258, 24938, 24939,
+      24940, 24941, 24965, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv39
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9750797261515487
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 25828
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099,
+      14103, 14106, 14109, 14113, 14131, 19219, 19220, 19222, 19223, 19224, 19225, 19227,
+      19228, 19229, 19238, 19246, 19250, 19251, 19252, 19253, 19255, 19257, 19258, 24938,
+      24939, 24940, 24941, 24965, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: ccbv40
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9782174219585491
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 25828
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099,
+      14103, 14109, 14113, 14131, 19219, 19220, 19222, 19223, 19224, 19225, 19227, 19228,
+      19229, 19238, 19246, 19250, 19251, 19252, 19253, 19255, 19257, 19258, 24938, 24939,
+      24940, 24941, 24965, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obr01
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9854057997596984
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 25828
+    measured_pulses: [14061, 14065, 14070, 14071, 14084, 14086, 14098, 14099, 14106, 14113,
+      14127, 19219, 19220, 19222, 19223, 19224, 19225, 19227, 19228, 19229, 19231, 19232,
+      19235, 19238, 19246, 19250, 19251, 19252, 19253, 19255, 19257, 19258, 19996, 24940,
+      24941, 24965, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obr02
+  kind: acquisition_scale
+  status: promoted
+  value: 2.0
+  measured_value: 1.9851286520377467
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 14127
+    measured_pulses: [14061, 14065, 14070, 14071, 14084, 14086, 14098, 14099, 14106, 14109,
+      14113, 14127]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obr02
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 1.0073568473093886
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 19219
+    pulse_end: 19996
+    measured_pulses: [19219, 19220, 19222, 19223, 19224, 19225, 19227, 19228, 19229, 19231,
+      19232, 19235, 19238, 19246, 19250, 19251, 19252, 19253, 19255, 19257, 19258, 19996]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obr02
+  kind: acquisition_scale
+  status: promoted
+  value: 2.0
+  measured_value: 1.9903421911413142
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 24940
+    pulse_end: 24965
+    measured_pulses: [24940, 24941, 24965]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obr03
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9855317913927527
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 24965
+    measured_pulses: [14061, 14065, 14070, 14071, 14098, 14099, 14103, 14106, 14109, 14113,
+      14127, 19219, 19220, 19222, 19223, 19224, 19225, 19227, 19228, 19229, 19231, 19232,
+      19235, 19238, 19246, 19250, 19251, 19252, 19253, 19255, 19257, 19258, 24965]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obr04
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9790713644324458
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 24965
+    measured_pulses: [14061, 14065, 14070, 14071, 14098, 14099, 14103, 14106, 14109, 14113,
+      14127, 19219, 19220, 19222, 19223, 19224, 19225, 19227, 19228, 19229, 19231, 19232,
+      19235, 19238, 19246, 19250, 19251, 19252, 19253, 19255, 19257, 19258, 19995, 24965]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obr05
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 1.1042830233628103
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 25826
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14098, 14099, 14103, 14106,
+      14109, 14113, 14127, 14131, 15295, 15296, 15298, 15299, 19219, 19220, 19222, 19223,
+      19224, 19225, 19227, 19228, 19229, 19231, 19232, 19235, 19238, 19246, 19250, 19251,
+      19252, 19253, 19255, 19257, 19258, 19995, 24938, 24939, 24965, 25722, 25826]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obr06
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.993046044894049
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 25826
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14098, 14099, 14103, 14106,
+      14109, 14113, 14127, 14167, 19219, 19220, 19222, 19223, 19224, 19225, 19227, 19228,
+      19229, 19231, 19232, 19235, 19238, 19246, 19250, 19251, 19252, 19253, 19255, 19257,
+      19258, 24938, 24939, 24965, 25722, 25826]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obr07
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9942485373160846
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 25826
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14098, 14099, 14103, 14106,
+      14109, 14113, 14127, 19219, 19220, 19222, 19223, 19224, 19225, 19227, 19228, 19229,
+      19231, 19232, 19235, 19238, 19246, 19250, 19251, 19252, 19253, 19255, 19257, 19258,
+      24938, 24939, 24965, 25722, 25826]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obr08
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9956444779557028
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 25826
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14098, 14099, 14103, 14106,
+      14109, 14113, 14127, 19219, 19220, 19222, 19223, 19224, 19225, 19227, 19228, 19229,
+      19231, 19232, 19235, 19238, 19246, 19250, 19251, 19252, 19253, 19255, 19257, 19258,
+      24938, 24939, 24965, 25722, 25826]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obr09
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.997576115153936
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 25828
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099,
+      14103, 14106, 14109, 14113, 14127, 19219, 19220, 19222, 19223, 19224, 19225, 19227,
+      19228, 19229, 19231, 19232, 19235, 19238, 19246, 19250, 19251, 19252, 19253, 19255,
+      19257, 19258, 24938, 24939, 24940, 24941, 24965, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obr10
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9960209781326845
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 25828
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099,
+      14103, 14106, 14109, 14113, 19219, 19220, 19222, 19223, 19224, 19225, 19227, 19228,
+      19229, 19238, 19246, 19250, 19251, 19252, 19253, 19255, 19257, 19258, 24938, 24939,
+      24940, 24941, 24965, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obr11
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9991825561407957
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 14127
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099,
+      14103, 14106, 14109, 14113, 14127]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obr11
+  kind: acquisition_scale
+  status: promoted
+  value: 0.5
+  measured_value: 0.49891153513855496
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 19219
+    pulse_end: 19258
+    measured_pulses: [19219, 19220, 19222, 19223, 19224, 19225, 19227, 19228, 19229, 19231,
+      19232, 19235, 19238, 19246, 19250, 19251, 19252, 19253, 19255, 19257, 19258]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obr11
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9987916390463544
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 24938
+    pulse_end: 24965
+    measured_pulses: [24938, 24939, 24940, 24941, 24965]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obr11
+  kind: acquisition_scale
+  status: promoted
+  value: 0.5
+  measured_value: 0.5002381535617013
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 25722
+    pulse_end: 25828
+    measured_pulses: [25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obr12
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 1.0041499246371073
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 25828
+    measured_pulses: [14061, 14065, 14080, 14081, 14084, 14086, 14098, 14099, 14103, 14106,
+      14109, 14113, 14127, 19219, 19220, 19222, 19223, 19224, 19225, 19229, 19231, 19232,
+      19235, 19246, 19250, 19252, 24938, 24939, 24940, 24941, 24965, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obr13
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 1.0230955334955731
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 11887
+    pulse_end: 25828
+    measured_pulses: [11887, 14061, 14065, 14080, 14081, 14084, 14086, 14098, 14099, 14103,
+      14106, 14109, 14113, 14127, 19219, 19220, 19222, 19223, 19224, 19225, 19229, 19231,
+      19232, 19235, 19246, 19250, 19252, 24938, 24939, 24940, 24941, 24965, 25722, 25826,
+      25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obr14
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 1.022270447540179
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 25828
+    measured_pulses: [14061, 14065, 14080, 14081, 14084, 14086, 14098, 14099, 14103, 14106,
+      14109, 14113, 14127, 14167, 19219, 19220, 19222, 19223, 19224, 19225, 19229, 19231,
+      19232, 19235, 19246, 19250, 19252, 24938, 24939, 24940, 24941, 24965, 25722, 25826,
+      25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obr15
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9935561593864106
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 25828
+    measured_pulses: [14061, 14065, 14080, 14081, 14084, 14086, 14098, 14099, 14103, 14106,
+      14109, 14113, 14127, 14131, 15295, 15296, 15298, 15299, 19219, 19220, 19222, 19223,
+      19224, 19225, 19229, 19231, 19232, 19235, 19246, 19250, 19252, 19995, 24938, 24939,
+      24940, 24941, 24965, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obr16
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9736630060425912
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 15299
+    measured_pulses: [14061, 14065, 14080, 14081, 14084, 14086, 14098, 14099, 14103, 14106,
+      14109, 14113, 14127, 14131, 15295, 15296, 15298, 15299]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obr16
+  kind: acquisition_scale
+  status: promoted
+  value: 2.0
+  measured_value: 1.9758900675419082
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 19219
+    pulse_end: 19252
+    measured_pulses: [19219, 19220, 19222, 19223, 19224, 19225, 19229, 19231, 19232, 19235,
+      19246, 19250, 19252]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obr16
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9774696846207194
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 19995
+    pulse_end: 25828
+    measured_pulses: [19995, 19996, 24938, 24939, 24940, 24941, 24965, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obr17
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.5011125727424951
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14080
+    pulse_end: 25828
+    measured_pulses: [14080, 14081, 14084, 14086, 14098, 14099, 14103, 14109, 14113, 14127,
+      19231, 19232, 19235, 19246, 19250, 19252, 24938, 24939, 24940, 24941, 25722, 25826,
+      25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obr18
+  kind: acquisition_scale
+  status: refused
+  measured_value: 0.6836652336349689
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 11884
+    pulse_end: 11887
+    measured_pulses: [11884, 11885, 11887]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+  notes: 'the block''s factor relative to this channel''s reference block misses every rung
+    by more than the ladder tolerance, so it is not a range setting: the pulses in this block
+    are read exactly as published and flagged, because rounding onto the nearest rung would
+    assert a setting the ladder does not support and move the channel by the difference'
+- channel: obr18
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 1.1380710893367885
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14070
+    pulse_end: 25828
+    measured_pulses: [14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099, 14103, 14109,
+      14113, 14127, 19227, 19228, 19231, 19232, 19235, 19238, 19246, 19250, 19251, 19252,
+      19253, 19255, 19257, 19258, 24938, 24939, 24940, 24941, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obr19
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9602188047065056
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14070
+    pulse_end: 24941
+    measured_pulses: [14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099, 14103, 14106,
+      14109, 14113, 14127, 19227, 19228, 19231, 19232, 19235, 19238, 19246, 19250, 19251,
+      19252, 19253, 19255, 19257, 19258, 24938, 24939, 24940, 24941]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obv01
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9174666728742733
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 14167
+    measured_pulses: [14061, 14065, 14070, 14071, 14084, 14086, 14098, 14099, 14103, 14106,
+      14109, 14113, 14127, 14167]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obv01
+  kind: acquisition_scale
+  status: promoted
+  value: 0.5
+  measured_value: 0.43836110930513933
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 19219
+    pulse_end: 19258
+    measured_pulses: [19219, 19220, 19222, 19223, 19224, 19225, 19227, 19228, 19229, 19231,
+      19232, 19235, 19238, 19246, 19250, 19251, 19252, 19253, 19255, 19257, 19258]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obv01
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.8676074522435616
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 19995
+    pulse_end: 24965
+    measured_pulses: [19995, 19996, 24940, 24941, 24965]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obv02
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.914672934560097
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 19258
+    measured_pulses: [14061, 14065, 14070, 14071, 14084, 14086, 14098, 14099, 14103, 14106,
+      14109, 14113, 14127, 19219, 19220, 19222, 19223, 19224, 19225, 19227, 19228, 19229,
+      19231, 19232, 19235, 19238, 19246, 19250, 19251, 19252, 19253, 19255, 19257, 19258]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obv02
+  kind: acquisition_scale
+  status: promoted
+  value: 1.4142135623730951
+  measured_value: 1.4199429268390613
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 19995
+    pulse_end: 19996
+    measured_pulses: [19995, 19996]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obv02
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9488922481097752
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 24940
+    pulse_end: 25828
+    measured_pulses: [24940, 24941, 24965, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obv03
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.8860395875159752
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 19258
+    measured_pulses: [14061, 14065, 14070, 14071, 14098, 14099, 14103, 14106, 14109, 14113,
+      14121, 14123, 14126, 14127, 14167, 19219, 19220, 19222, 19223, 19224, 19225, 19227,
+      19228, 19229, 19231, 19232, 19235, 19238, 19246, 19250, 19251, 19252, 19253, 19255,
+      19257, 19258]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obv03
+  kind: acquisition_scale
+  status: refused
+  measured_value: 0.5182984917648246
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 19995
+    pulse_end: 24965
+    measured_pulses: [19995, 24965]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+  notes: 'the block''s factor relative to this channel''s reference block misses every rung
+    by more than the ladder tolerance, so it is not a range setting: the pulses in this block
+    are read exactly as published and flagged, because rounding onto the nearest rung would
+    assert a setting the ladder does not support and move the channel by the difference'
+- channel: obv04
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.8571216161534859
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 11884
+    pulse_end: 24965
+    measured_pulses: [11884, 11885, 11887, 14061, 14065, 14070, 14071, 14098, 14099, 14103,
+      14109, 14127, 14167, 19219, 19220, 19222, 19223, 19224, 19225, 19227, 19228, 19229,
+      19231, 19232, 19235, 19238, 19246, 19250, 19251, 19252, 19253, 19255, 19257, 19258,
+      24965]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obv05
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.944871899933001
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 11884
+    pulse_end: 25826
+    measured_pulses: [11884, 11885, 11887, 14061, 14065, 14070, 14071, 14080, 14081, 14098,
+      14099, 14103, 14109, 14127, 19219, 19220, 19222, 19223, 19224, 19225, 19227, 19228,
+      19229, 19231, 19232, 19235, 19238, 19246, 19250, 19251, 19252, 19253, 19255, 19257,
+      19258, 19996, 24938, 24939, 24965, 25722, 25826]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obv06
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9970256327321916
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 11884
+    pulse_end: 24965
+    measured_pulses: [11884, 11885, 11887, 14061, 14065, 14070, 14071, 14098, 14099, 14103,
+      14109, 14127, 14131, 19219, 19220, 19222, 19223, 19224, 19225, 19227, 19228, 19229,
+      19231, 19232, 19235, 19238, 19250, 19251, 19252, 19253, 19255, 19257, 19258, 19995,
+      19996, 24965]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obv07
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9808301043417511
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 11884
+    pulse_end: 24965
+    measured_pulses: [11884, 11885, 11887, 14061, 14065, 14070, 14071, 14080, 14081, 14098,
+      14099, 14103, 14109, 14127, 19219, 19220, 19222, 19223, 19224, 19225, 19227, 19228,
+      19229, 19231, 19232, 19235, 19238, 19250, 19251, 19252, 19253, 19255, 19257, 19258,
+      19995, 19996, 24938, 24965]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obv08
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9942525503453515
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 11884
+    pulse_end: 25826
+    measured_pulses: [11884, 11885, 11887, 14061, 14065, 14070, 14071, 14080, 14081, 14099,
+      14103, 14109, 14127, 19219, 19220, 19222, 19223, 19224, 19225, 19227, 19228, 19229,
+      19231, 19232, 19235, 19238, 19250, 19251, 19253, 19255, 19257, 19258, 19995, 19996,
+      24938, 24939, 24965, 25722, 25826]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obv09
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 1.0089208116663995
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 11884
+    pulse_end: 25828
+    measured_pulses: [11884, 11885, 11887, 14061, 14065, 14080, 14081, 14084, 14086, 14103,
+      14106, 14109, 14113, 14127, 19219, 19220, 19222, 19223, 19224, 19225, 19229, 19231,
+      19232, 19235, 19995, 19996, 24938, 24939, 24940, 24941, 24965, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obv11
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9247565786716503
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 25826
+    measured_pulses: [14061, 14065, 14070, 14071, 14080, 14081, 14103, 14106, 14109, 14113,
+      14127, 19219, 19220, 19222, 19223, 19224, 19225, 19227, 19228, 19229, 19231, 19232,
+      19235, 19238, 19251, 19253, 19255, 19257, 19258, 19995, 19996, 24938, 24939, 24965,
+      25722, 25826]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obv12
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9779090846187726
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 11884
+    pulse_end: 14127
+    measured_pulses: [11884, 11885, 11887, 14061, 14065, 14080, 14081, 14084, 14086, 14098,
+      14106, 14113, 14127]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obv12
+  kind: acquisition_scale
+  status: refused
+  measured_value: 0.4383580284135138
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 19219
+    pulse_end: 19235
+    measured_pulses: [19219, 19220, 19222, 19223, 19224, 19225, 19229, 19231, 19232, 19235]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+  notes: 'the block''s factor relative to this channel''s reference block misses every rung
+    by more than the ladder tolerance, so it is not a range setting: the pulses in this block
+    are read exactly as published and flagged, because rounding onto the nearest rung would
+    assert a setting the ladder does not support and move the channel by the difference'
+- channel: obv12
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9212085305691193
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 19995
+    pulse_end: 24965
+    measured_pulses: [19995, 19996, 24938, 24939, 24940, 24941, 24965]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obv12
+  kind: acquisition_scale
+  status: promoted
+  value: 2.0
+  measured_value: 1.8411074225412034
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 25722
+    pulse_end: 25828
+    measured_pulses: [25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obv13
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9731713944180358
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 11884
+    pulse_end: 25828
+    measured_pulses: [11884, 11885, 11887, 14061, 14065, 14080, 14081, 14084, 14086, 14098,
+      14099, 14106, 14113, 14127, 19219, 19220, 19222, 19231, 19232, 19235, 19250, 19995,
+      19996, 24938, 24939, 24940, 24941, 24965, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obv14
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 1.0151822970185331
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 11884
+    pulse_end: 25828
+    measured_pulses: [11884, 11885, 11887, 14080, 14081, 14084, 14086, 14098, 14099, 14106,
+      14113, 14127, 19231, 19232, 19235, 19246, 19250, 19252, 19995, 19996, 24938, 24939,
+      24940, 24941, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obv15
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9817291213287642
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14061
+    pulse_end: 25828
+    measured_pulses: [14061, 14065, 14080, 14081, 14084, 14086, 14098, 14099, 14106, 14113,
+      14127, 19219, 19220, 19222, 19223, 19224, 19225, 19229, 19231, 19232, 19235, 19246,
+      19250, 19252, 19996, 24938, 24939, 24940, 24941, 24965, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obv16
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9777877993901404
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 11884
+    pulse_end: 25828
+    measured_pulses: [11884, 11885, 11887, 14061, 14065, 14080, 14081, 14084, 14086, 14098,
+      14099, 14106, 14113, 14127, 14167, 19219, 19220, 19222, 19223, 19224, 19225, 19229,
+      19231, 19232, 19235, 19246, 19250, 19252, 24938, 24939, 24940, 24941, 24965, 25722,
+      25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obv17
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9844792317638189
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 11885
+    pulse_end: 25828
+    measured_pulses: [11885, 11887, 14080, 14081, 14084, 14086, 14098, 14099, 14106, 14113,
+      14121, 14123, 14126, 14127, 14131, 14167, 19231, 19232, 19235, 19246, 19250, 19252,
+      19995, 24938, 24939, 24940, 24941, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obv18
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.8812028284307529
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14070
+    pulse_end: 19258
+    measured_pulses: [14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099, 14103, 14106,
+      14109, 14113, 14127, 19227, 19228, 19231, 19232, 19235, 19238, 19246, 19250, 19251,
+      19252, 19253, 19255, 19257, 19258]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obv18
+  kind: acquisition_scale
+  status: refused
+  measured_value: 1.3733948295617209
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 19995
+    pulse_end: 19996
+    measured_pulses: [19995, 19996]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+  notes: 'the block''s factor relative to this channel''s reference block misses every rung
+    by more than the ladder tolerance, so it is not a range setting: the pulses in this block
+    are read exactly as published and flagged, because rounding onto the nearest rung would
+    assert a setting the ladder does not support and move the channel by the difference'
+- channel: obv18
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.8659207242613484
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 24938
+    pulse_end: 25828
+    measured_pulses: [24938, 24939, 24940, 24941, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obv19
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9237849854215325
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 14070
+    pulse_end: 19258
+    measured_pulses: [14070, 14071, 14080, 14081, 14084, 14086, 14098, 14099, 14103, 14106,
+      14109, 14113, 14127, 14167, 19227, 19228, 19231, 19232, 19235, 19238, 19246, 19250,
+      19251, 19252, 19253, 19255, 19257, 19258]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obv19
+  kind: acquisition_scale
+  status: refused
+  measured_value: 1.6003469492828493
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 19995
+    pulse_end: 19996
+    measured_pulses: [19995, 19996]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+  notes: 'the block''s factor relative to this channel''s reference block misses every rung
+    by more than the ladder tolerance, so it is not a range setting: the pulses in this block
+    are read exactly as published and flagged, because rounding onto the nearest rung would
+    assert a setting the ladder does not support and move the channel by the difference'
+- channel: obv19
+  kind: acquisition_scale
+  status: promoted
+  value: 1.0
+  measured_value: 0.9065566924264813
+  ladder: acquisition_range
+  validity:
+  - pulse_start: 24938
+    pulse_end: 25828
+    measured_pulses: [24938, 24939, 24940, 24941, 25722, 25826, 25828]
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: nova/imas/mast_block_scale.json
+    fitted_by: nova.imas.mast_acquisition_scale
+- channel: obv03
+  kind: pair_state
+  status: recorded
+  value: 1.01
+  state: both_members
+  validity:
+  - pulse_start: 14061
+    pulse_end: 19258
+    measured_pulses: [14061, 14065, 14070, 14071, 14098, 14099, 14103, 14106, 14109, 14113,
+      14121, 14123, 14126, 14127, 14167, 19219, 19220, 19222, 19223, 19224, 19225, 19227,
+      19228, 19229, 19231, 19232, 19235, 19238, 19246, 19250, 19251, 19252, 19253, 19255,
+      19257, 19258]
+  provenance:
+    method: ratio of the recorded field to the archive's own forward field, pulse by pulse,
+      which resolves a channel's state per pulse instead of pooling it into one scale
+    evidence_uri: docs/research/mast-misfit-source-localization.html
+    fitted_at: '2026-08-07'
+    fitted_by: pair-failure survey over the level-1 store
+    statement: the channel reads 1.01 of the archive's own forward field over the earlier
+      era
+    corroborations:
+    - method: ratio of a probe's recorded field to the described field, pooled over the samples
+        of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+        widths from every excited coil so the ratio states something about the channel and
+        not about one coil's near field
+      value: 0.8860395875159752
+      evidence_uri: nova/imas/mast_block_scale.json
+      statement: the far-field route reads the same era at 0.886 against a different reference;
+        the two routes are compared through their step ratio, not their level
+  notes: 'recorded, not promoted: the read path applies no correction to this channel today,
+    and promoting a per-era gain is a separate decision'
+- channel: obv03
+  kind: pair_state
+  status: recorded
+  value: 0.586
+  state: single_member
+  validity:
+  - pulse_start: 19995
+    pulse_end: 24965
+    measured_pulses: [19995, 24965]
+    notes: the switch is bracketed between pulses 19258 and 19995 -- no pulse in between was
+      read, so the era boundary is a bracket and naming a single switch pulse would assert
+      more than was measured
+  provenance:
+    method: ratio of the recorded field to the archive's own forward field, pulse by pulse,
+      which resolves a channel's state per pulse instead of pooling it into one scale
+    evidence_uri: docs/research/mast-misfit-source-localization.html
+    fitted_at: '2026-08-07'
+    fitted_by: pair-failure survey over the level-1 store
+    statement: the channel steps from 1.01 to 0.586 mid-life, a factor of 0.580 -- one member
+      of the averaged pickup pair lost
+    corroborations:
+    - method: ratio of a probe's recorded field to the described field, pooled over the samples
+        of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+        widths from every excited coil so the ratio states something about the channel and
+        not about one coil's near field
+      value: 0.5182984917648246
+      evidence_uri: nova/imas/mast_block_scale.json
+      statement: the far-field route measures the same step independently at 0.518 / 0.886
+        = 0.585, against 0.586 / 1.01 = 0.580 here -- eight parts in a thousand apart, although
+        the two routes refer the channel to different fields, so what agrees is the step and
+        not the level
+  notes: 'this is the block the acquisition ladder refuses: a factor of 0.58 is not a rung,
+    and the reason is that the step is a pickup failure rather than a range setting'
+- channel: obr05
+  kind: pair_state
+  status: recorded
+  state: indeterminate
+  candidate_values: [1.25, 0.5]
+  validity:
+  - notes: 'no era resolves: the state changes pulse to pulse'
+  provenance:
+    method: ratio of the recorded field to the archive's own forward field, pulse by pulse,
+      which resolves a channel's state per pulse instead of pooling it into one scale
+    evidence_uri: docs/research/mast-misfit-source-localization.html
+    fitted_at: '2026-08-07'
+    fitted_by: pair-failure survey over the level-1 store
+    statement: measured pulse by pulse the channel alternates between 1.25 and 0.50 rather
+      than holding either, so no interval carries one state
+  notes: the two states are carried as candidates because a mean of them describes no pulse;
+    a consumer needs the size of what is unresolved, not an average of it
+- channel: obv10
+  kind: exclusion
+  status: recorded
+  validity:
+  - {}
+  cause: dead -- the channel carries no signal, and it is the one probe of the outboard vertical
+    array with no measurable scale history at all
+  provenance:
+    method: ratio of the recorded field to the archive's own forward field, pulse by pulse,
+      which resolves a channel's state per pulse instead of pooling it into one scale
+    evidence_uri: docs/research/mast-misfit-source-localization.html
+    fitted_at: '2026-08-07'
+    fitted_by: pair-failure survey over the level-1 store
+    statement: no pulse in the archive gives this channel a scale, and the acquisition block
+      table carries no block for it
+    corroborations:
+    - method: ratio of a probe's recorded field to the described field, pooled over the samples
+        of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+        widths from every excited coil so the ratio states something about the channel and
+        not about one coil's near field
+      evidence_uri: nova/imas/mast_block_scale.json
+      statement: the block table holds 113 blocks over 76 channels and none of them is this
+        one
+- channel: obv11
+  kind: exclusion
+  status: recorded
+  validity:
+  - {}
+  cause: 'no scale could be promoted: two independent routes disagree by 7.4 percent and the
+    channel''s own halves read 0.869 and 1.065, so a consumer that needs a calibrated amplitude
+    cannot use this channel'
+  provenance:
+    method: ratio of a probe's recorded field to the described field, pooled over the samples
+      of a pulse and over the pulses of a block, on probes standing further than two winding-pack
+      widths from every excited coil so the ratio states something about the channel and not
+      about one coil's near field
+    evidence_uri: docs/research/mast-sensor-adjudication-landed.html
+    fitted_by: nova.imas.mast_probe_calibration
+    statement: the withheld scale beside this exclusion is the measurement the gate refused
+  notes: an exclusion is an action and the withheld gain is the measurement behind it; both
+    are carried so a consumer can act without re-reading the research record
+- channel: obv10
+  kind: quality
+  status: recorded
+  quality_status: dead
+  validity:
+  - {}
+  cause: carries no signal on any pulse the survey read
+  provenance:
+    method: ratio of the recorded field to the archive's own forward field, pulse by pulse,
+      which resolves a channel's state per pulse instead of pooling it into one scale
+    evidence_uri: docs/research/mast-misfit-source-localization.html
+    fitted_at: '2026-08-07'
+    fitted_by: pair-failure survey over the level-1 store
+- channel: obr05
+  kind: quality
+  status: recorded
+  quality_status: suspect
+  validity:
+  - {}
+  cause: the channel's gain flips between two states pulse to pulse, so the promoted static
+    scale describes no pulse and any fit that pools this channel across pulses averages two
+    discrete states
+  provenance:
+    method: ratio of the recorded field to the archive's own forward field, pulse by pulse,
+      which resolves a channel's state per pulse instead of pooling it into one scale
+    evidence_uri: docs/research/mast-misfit-source-localization.html
+    fitted_at: '2026-08-07'
+    fitted_by: pair-failure survey over the level-1 store
+- channel: ccbv22
+  kind: quality
+  status: recorded
+  quality_status: suspect
+  measured_value: -2.44e-07
+  unit: T/At
+  validity:
+  - {}
+  cause: on P4 lower drives this centre-column probe carries the largest surviving misfit
+    per ampere-turn in the array, -244 nT/At against an array RMS of 41.7 nT/At -- an outlier
+    against its own neighbours that no fitted gain explains and no exclusion is warranted
+    for
+  provenance:
+    method: signed coupling regression of the surviving vacuum misfit on each drive group,
+      pooled over pulses and drawn along each probe's sensitive axis
+    evidence_uri: docs/research/mast-misfit-source-localization.html
+    fitted_at: '2026-08-07'
+    fitted_by: misfit source-localization scan
+    statement: the surviving pattern this probe leads reproduces at cosine +0.92 between disjoint
+      pulse halves of the P4 lower group, so the outlier is signal rather than pooling noise
+  notes: 'a quality state and not an exclusion: the channel is the strongest single carrier
+    of a pattern the description does not yet explain, so dropping it would hide the evidence
+    a later source model needs'
+- channel_group: flux_loop
+  kind: convention
+  status: promoted
+  value: 6.283185307179586
+  validity:
+  - {}
+  provenance:
+    method: ratio of a loop's fitted flux to the reconstructed flux function interpolated
+      to that loop's own position, measured rather than read off the unit string
+    evidence_uri: nova/imas/mast_solve_inputs.py
+    fitted_by: nova.imas.mast_solve_inputs
+    statement: 'the measured ratio is 2*pi, which is the digit that says whether the 2*pi
+      is inside the quantity: the store publishes total flux in weber while the reconstruction''s
+      flux function is per radian'
+    corroborations:
+    - method: the archive's own reconstruction tables
+      value: 6.283185307179586
+      evidence_uri: docs/research/mast-misfit-source-localization.html
+      statement: the reconstruction declares the same factor for all 46 of its loops
+  notes: 'applied at the unit boundary and never inside the per-channel chain: nova carries
+    it as a convention digit, 13 for the measured loops against 3 for the source and 17 for
+    the target, so one algebra hands the measured channel a factor of one and the reconstructed
+    flux function a factor of 2*pi'

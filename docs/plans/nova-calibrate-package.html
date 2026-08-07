@@ -21,7 +21,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-07">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="3">
+<meta name="plan-impl" content="0.55">
 </head>
 <body>
 <main class="plan-doc">
@@ -112,6 +113,17 @@
     data-availability flags, mirroring the norma-corpus pattern; they never gate the default
     suite.</li>
   </ol>
+  <p class="landed-summary"><span class="badge badge-shipped">✓ landed 2026-08-07 (first slice)</span>
+  Five of the nine capabilities are in (merge <code>623ae5cf</code>):
+  <code>corrections.py</code> (application engine driven off the schema's enum ranks, refusing
+  unordered or unresolved-candidate channels), <code>coupling.py</code>, <code>gain.py</code>,
+  <code>inversion.py</code>, <code>localize.py</code> — arrays-only signatures throughout.
+  Synthetic-truth unit lane 160 passed in 5.75 s, store-free; banked regression pins green
+  (couplings fixture 23 kB, obr17 gain, identifiability spectrum reproduce through the
+  package); full default suite 4148 passed / 0 failed. Remaining below:
+  <code>partial.py</code>, <code>scale_step.py</code>, <code>noise.py</code>,
+  <code>pair_state.py</code>, adapter thinning, and the schema-served constant cutover
+  (tracked in <code>diagnostic-correction-schema</code>).</p>
   <p>Done-when: <code>nova/calibrate/</code> exists with the nine modules above migrated or
   implemented, <code>tests/calibrate/</code> mirrors it with synthetic-truth unit tests
   passing in the default lane, the cache scripts' results reproduce through the package
@@ -134,7 +146,7 @@
 
   <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-ncp-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-08-07" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ncp-001" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-08-07" data-recommends-skill="" data-resolved-at="2026-08-07T18:50:20+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Scaffold nova/calibrate and migrate the first two kernels with synthetic-truth tests</h4>
     <div class="r-fu-body"><p>Package skeleton, then <code>coupling.py</code> and
       <code>gain.py</code> migrated from the banked scripts with full unit coverage — the
@@ -168,6 +180,34 @@ Scope locks / constraints
 Done-when
   1. nova/calibrate/{__init__,coupling,gain}.py landed with docstrings
   2. tests/calibrate/ synthetic-truth suite green, no data mounts
+  3. Followup written into plan + this one resolved</pre>
+    <p class="r-fu-outcome">First migration slice landed, wider than scoped (merge 623ae5cf): corrections application engine plus coupling, gain, inversion, and localize kernels with arrays-only signatures; synthetic-truth lane 160 passed store-free; banked pins reproduce (couplings fixture, obr17 gain 0.5011, identifiability spectrum); full suite 4148 passed / 0 failed with all extras. Adapter-boundary decision implemented per section 2 prose (arrays-only) - decision block left open for the owner to lock.</p>
+    </article>
+<article class="r-fu" data-id="f-ncp-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-07" data-recommends-skill="/reckon-ship nova-calibrate-package" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Migrate the remaining four capabilities (partial, scale_step, noise, pair_state) and thin the MAST adapters onto the kernels</h4>
+    <div class="r-fu-body">Five of nine capabilities are in. Remaining: partial.py (Frisch-Waugh differential tests), scale_step.py (block-scale detection), noise.py (quiet-window statistics), pair_state.py (0.5/1.5 gain-state detection), then the adapter thinning so mast_ modules feed the kernels with no behaviour change to the vacuum-floor gate. The schema-served constant cutover is tracked separately in diagnostic-correction-schema f-dcs-002.</div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    nova-calibrate-package (docs/plans/nova-calibrate-package.html)
+Section: §1-§3 second migration slice
+Capability: general
+Requirements: strict verification
+
+Context
+  corrections/coupling/gain/inversion/localize are landed with synthetic
+  truth and banked pins (merge 623ae5cf). Migrate the remaining four
+  capabilities from the §1 inventory and thin the MAST adapters.
+
+State to read
+  nova/calibrate/ (the established pattern: arrays-only, schema-ordered)
+  nova/imas/mast_block_scale.py, nova/imas/mast_acquisition_scale.py
+  nova/imas/mast_sensor_noise.py
+  ~/.cache/nova-mast/misfit-localization/pair_differential_test.py
+
+Done-when
+  1. partial.py, scale_step.py, noise.py, pair_state.py landed with
+     synthetic-truth tests (exact rungs, injected drifts, state sequences)
+  2. MAST adapters consume the kernels with no behaviour change to the
+     vacuum-floor gate (full suite green, all extras)
   3. Followup written into plan + this one resolved</pre>
     </article>
 </section>

@@ -85,6 +85,57 @@ def arc_filament_greens(
     return tuple(value.reshape(shape) for value in (ar, aphi, br, bphi, bz))
 
 
+def traced_arc_filament_greens(
+    xp,
+    target_r,
+    target_z,
+    target_phi,
+    source_r,
+    source_z,
+    start,
+    end,
+    *,
+    nodes: int = _FILAMENT_NODES,
+):
+    """Return the five arc-filament rows, traced instead of executed.
+
+    A transcription of :func:`arc_filament_greens` into whichever array
+    namespace ``xp`` is, with the filament position AND the arc's two azimuths
+    as trace inputs, so d(A, B)/d(source_r, source_z, start, end) come exactly
+    off the same fixed-node rule the values do.  The rule itself is a constant
+    of ``nodes`` and is formed on the host.
+    """
+    point, weight = _arc_rule(nodes)
+    point = xp.asarray(point)
+    weight = xp.asarray(weight)
+    radius = xp.abs(xp.asarray(target_r))
+    height = xp.asarray(target_z) + xp.zeros_like(radius)
+    azimuth = xp.asarray(target_phi) + xp.zeros_like(radius)
+    theta = start + (end - start) * point
+    delta = azimuth[..., None] - theta
+    cosine = xp.cos(delta)
+    sine = xp.sin(delta)
+    dz = height[..., None] - source_z
+    distance2 = (
+        radius[..., None] ** 2
+        + source_r**2
+        - 2.0 * radius[..., None] * source_r * cosine
+        + dz**2
+    )
+    distance = xp.sqrt(distance2)
+    factor = MU0 / (4.0 * np.pi) * (end - start) * source_r
+    weighted = weight / distance
+    field_weighted = weight / (distance2 * distance)
+    return (
+        factor * xp.sum(sine * weighted, axis=-1),
+        factor * xp.sum(cosine * weighted, axis=-1),
+        factor * xp.sum(dz * cosine * field_weighted, axis=-1),
+        -factor * xp.sum(dz * sine * field_weighted, axis=-1),
+        factor
+        * xp.sum((source_r - radius[..., None] * cosine) * field_weighted, axis=-1),
+    )
+
+
 def rms_radius(vertices: np.ndarray) -> float:
     """Return ``sqrt(mean(r**2))`` over the polygon area."""
     centre = section_centroid(vertices)
@@ -407,4 +458,5 @@ __all__ = [
     "arc_moment_filament",
     "banded_arc_greens",
     "rms_radius",
+    "traced_arc_filament_greens",
 ]

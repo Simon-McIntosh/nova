@@ -74,7 +74,7 @@ from __future__ import annotations
 
 import numpy as np
 
-__all__ = ["TRIPS", "symmetric_kinds"]
+__all__ = ["SERIES_RATIO", "SERIES_TERMS", "TRIPS", "symmetric_kinds"]
 
 # Trips of the duplication.  Each takes a geometric mean of the running triple, so
 # the trips before the three are of one size halve their exponent gap and the ones
@@ -82,6 +82,24 @@ __all__ = ["TRIPS", "symmetric_kinds"]
 # count matches the two descents because the mechanism is theirs; the accompanying
 # test asserts it in both directions.
 TRIPS = 14
+
+# Where the degenerate form leaves its transcendental for the series both of its
+# branches share.  Below this ratio of the two roots the series is the accurate
+# arrangement and above it the transcendental is, and the crossing is set by what
+# each costs: the series truncates at ``ratio**(2 SERIES_TERMS)/(2 SERIES_TERMS +
+# 1)``, which at a tenth is 3e-19 with nine terms, while the transcendental's
+# SLOPE loses a relative ``ratio**-2`` -- 2e-14 at a tenth, and unbounded below
+# it.  See :func:`_elementary` for why only the slope is at stake.
+#
+# The series is evaluated on every element, since the branch is a ``where``, and
+# that is what it is worth paying: the nine Horner steps a trip cost 28 % of the
+# incomplete third kind measured alone and 5 % of the finite-arc reduction that
+# consumes it, against a geometry slope that is otherwise 1.3e-05 out at the
+# small end of the pole range.  A shorter series needs a lower crossing, and the
+# transcendental's loss at the crossing then exceeds what the arc's own slope
+# sweep holds -- so the two constants move together or not at all.
+SERIES_RATIO = 0.1
+SERIES_TERMS = 9
 
 
 def _elementary(first, second, weight, xp, *, gaps=None):
@@ -151,6 +169,28 @@ def _elementary(first, second, weight, xp, *, gaps=None):
     the gap itself would put a ``nan`` in the gradient at the one configuration
     whose value is the elementary limit; held, the value is that limit and the
     derivative is finite.
+
+    **Both branches leave the transcendental for a series once the two roots are
+    within a factor of ten, and that is the whole accuracy of a SLOPE at a small
+    pole.**  Written in ``v = root/sigma`` the two are ``arctan(v)/v`` and
+    ``artanh(v)/v``, the same series but for the alternation, and both are EVEN in
+    ``v`` -- so the quantity that actually enters is ``v^2``, which is the gap
+    product itself and linear in each gap.  Taken through the transcendental
+    instead, the derivative is a difference of two terms of size ``1/root`` whose
+    leading parts cancel to leave one of size ``root``, so the slope keeps only a
+    relative ``v^2`` of its digits while the VALUE keeps all of them.  ``root``
+    carries a factor ``sqrt(pole - x)``, so ``v^2`` falls with the pole itself:
+    measured on the incomplete third kind's slope in the pole, against the
+    extended-precision derivative integral, the transcendental holds 3e-13 at a
+    pole of 1e-4, 3e-09 at 1e-08 and 1.3e-05 at 1e-12, where the series holds
+    3e-15 at every one of them.  The value is 8e-16 either way throughout.
+
+    The loss is on the DIRECT side of the reflection only.  Above a pole of one
+    the caller reflects onto the partner, and there the assembled slope is a few
+    ulp out to a partner of 1e-13 with the transcendental alone -- the reflection
+    was arranged for the value's sake and it carries the derivative with it.  So
+    the series is what extends that reach to the side where no reflection is
+    available, rather than a repair of the reflected arrangement.
     """
     if gaps is None:
         difference = second - first
@@ -168,13 +208,31 @@ def _elementary(first, second, weight, xp, *, gaps=None):
     scaled = weight / held
     held_first = xp.where(first > 0.0, first, 1.0)
     held_second = xp.where(second > 0.0, second, 1.0)
+
+    # the confluent value the two branches both approach, and the series in the
+    # ratio of the roots that carries each of them away from it.  ONE series
+    # serves both, because the two differ only in an alternation and the branch
+    # already has a sign: taken in a ratio signed by it, the circular form's
+    # series is the hyperbolic one's in a negative argument.  The argument is
+    # held at zero outside the series' own range, so a first root of zero --
+    # where the circular form is a quarter turn rather than anything near the
+    # confluence -- takes the transcendental instead.
+    confluent = weight / held_first
+    ratio = root / held_first
+    close = (first > 0.0) & (ratio < SERIES_RATIO)
+    squared = xp.where(close, xp.where(sign > 0.0, -ratio, ratio) * ratio, 0.0)
+    series = xp.zeros_like(squared)
+    for order in range(SERIES_TERMS - 1, -1, -1):
+        series = 1.0 / (2.0 * order + 1.0) + squared * series
+    near = confluent * series
+
     return xp.where(
         live & (sign > 0.0),
-        scaled * xp.arctan2(root, first),
+        xp.where(close, near, scaled * xp.arctan2(root, first)),
         xp.where(
             live & (sign < 0.0),
-            scaled * xp.log1p((root - difference) / held_second),
-            weight / held_first,
+            xp.where(close, near, scaled * xp.log1p((root - difference) / held_second)),
+            confluent,
         ),
     )
 

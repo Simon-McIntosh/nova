@@ -148,6 +148,22 @@ def _edges(v: np.ndarray):
             yield ra, za, rb, zb
 
 
+def horizontal_edges(vertices: np.ndarray) -> np.ndarray:
+    """Return the mask of edges that contribute nothing (dz = 0, paper eq 7a).
+
+    The tolerance is relative to the section's own height so it holds for a
+    millimetre-scale section as well as a metre-scale one.  This is the pack's
+    TOPOLOGY: which integrand the kernel evaluates per edge, a discrete property
+    of the section rather than a smooth function of its vertices -- which is why
+    :func:`traced_pack_section` takes it as a static input rather than forming
+    it from traced values.
+    """
+    v = np.asarray(vertices, dtype=np.float64)
+    z_scale = max(float(np.ptp(v[:, 1])), 1e-6)
+    dz = np.roll(v[:, 1], -1) - v[:, 1]
+    return np.abs(dz) < 1e-12 * z_scale
+
+
 def pack_section(vertices: np.ndarray) -> tuple[np.ndarray, np.ndarray, float]:
     """Return ``(edge, weight, norm)`` for one polygon section.
 
@@ -164,12 +180,48 @@ def pack_section(vertices: np.ndarray) -> tuple[np.ndarray, np.ndarray, float]:
     sign, area = _orientation(v)
     rolled = np.roll(v, -1, axis=0)
     edge = np.column_stack([v[:, 0], v[:, 1], rolled[:, 0], rolled[:, 1]])
-    z_scale = max(float(np.ptp(v[:, 1])), 1e-6)
-    horizontal = np.abs(edge[:, 3] - edge[:, 1]) < 1e-12 * z_scale
+    horizontal = horizontal_edges(v)
     weight = (~horizontal).astype(np.float64)
     edge[horizontal] = (0.0, 0.0, 0.0, 1.0)
     norm = 2.0 * np.pi * sign * MU0 / (4.0 * np.pi * area) * 2.0
     return edge, weight, float(norm)
+
+
+def traced_pack_section(xp, vertices, horizontal):
+    """Return ``(edge, weight, norm)`` with the pack inside the trace.
+
+    A transcription of :func:`pack_section` into whichever array namespace
+    ``xp`` is, so a geometry Jacobian reaches THROUGH the pack: the vertices
+    stay trace inputs, and the edge table, the orientation sign and the
+    per-ampere area normalisation all differentiate with them.  The kernel's
+    orientation sign is MINUS the shoelace sign, exactly as
+    :func:`_orientation` takes it (the counter-clockwise edge sum yields
+    -f(phi)); through ``xp.sign`` it back-propagates a zero, which is correct
+    -- a perturbation small enough to differentiate does not flip a section's
+    orientation.
+
+    ``horizontal`` is the STATIC zero-weight mask from
+    :func:`horizontal_edges`, computed OUTSIDE the trace on the base topology.
+    An edge's weight is a discrete property of which integrand the kernel
+    evaluates, so a perturbation that would tilt a dropped edge into a live one
+    is a re-pack, not a derivative -- and baking the mask keeps the trace free
+    of value branching.  A masked edge keeps the pack's harmless placeholder,
+    so its own coordinates carry no gradient, exactly as they carry no value.
+    """
+    vertices = xp.asarray(vertices)
+    mask = np.asarray(horizontal, dtype=bool)
+    rolled = xp.roll(vertices, -1, axis=0)
+    cross = vertices[:, 0] * rolled[:, 1] - rolled[:, 0] * vertices[:, 1]
+    signed_area = 0.5 * xp.sum(cross)
+    sign = -xp.sign(signed_area)
+    area = xp.abs(signed_area)
+    edge = xp.stack(
+        [vertices[:, 0], vertices[:, 1], rolled[:, 0], rolled[:, 1]], axis=1
+    )
+    edge = xp.where(xp.asarray(mask)[:, None], xp.asarray((0.0, 0.0, 0.0, 1.0)), edge)
+    weight = xp.asarray((~mask).astype(np.float64))
+    norm = 2.0 * np.pi * sign * MU0 / (4.0 * np.pi * area) * 2.0
+    return edge, weight, norm
 
 
 def pad_batch(
@@ -421,4 +473,11 @@ def polygon_greens(
     return psi.reshape(shape), br.reshape(shape), bz.reshape(shape)
 
 
-__all__ = ["polygon_greens", "pack_section", "pad_batch", "MU0"]
+__all__ = [
+    "MU0",
+    "horizontal_edges",
+    "pack_section",
+    "pad_batch",
+    "polygon_greens",
+    "traced_pack_section",
+]

@@ -321,8 +321,15 @@ def incomplete_pole(pole, complement, sine, cosine, *, xp=np, trips: int = TRIPS
     weight = squared_cosine + partner * squared_sine
 
     gap = xp.where(reflected, pole - complement, 1.0)
-    growth = xp.sqrt(
-        xp.where(reflected, (pole - 1.0) * (pole - complement) / held, 0.0)
+    # the sqrt's argument is held at one where no reflection is wanted and the
+    # result masked to zero, rather than passing an exact zero through the root:
+    # sqrt has an unbounded derivative at zero, so a zero argument turns a zero
+    # tangent into nan and poisons the geometry jacobian of every unreflected
+    # element -- the value either way is the same zero
+    growth = xp.where(
+        reflected,
+        xp.sqrt(xp.where(reflected, (pole - 1.0) * (pole - complement) / held, 1.0)),
+        0.0,
     )
     partner_weight = xp.where(reflected, complement * (pole - 1.0) / (held * gap), 1.0)
     first_weight = partner_weight + xp.where(reflected, (1.0 - complement) / gap, 0.0)

@@ -375,29 +375,26 @@ POLES = [1e-12, 1e-8, 1e-3, 0.3, 1.0, 3.0, 1e3, 1e8, 1e12]
 SMALLEST_PARTNER = 2.3e-308
 
 
-def _pole_integral(co_amplitude, pole, complement, nodes=60):
-    """Return the third kind's defining integral in longdouble, resolved everywhere.
+def _on_the_two_layers(co_amplitude, pole, complement, nodes, integrand):
+    """Return ``integrand`` over the amplitude range, resolved everywhere.
 
     Two layers rather than one, so the range is halved and each half graded from
     its OWN end.  The pole factor turns over within ``1/sqrt(1 + p)`` of ``a = 0``
     and the whole denominator within ``k' sqrt(p)/sqrt(p + k'^2)`` of a quarter
     turn -- the second being ``k'`` where the modulus layer is the narrower of the
-    two and ``sqrt(p)`` where the pole's is.
+    two and ``sqrt(p)`` where the pole's is.  The two layers are properties of the
+    DENOMINATORS, so the same pair grades the integral and its derivatives, which
+    raise a denominator's power without moving where it turns over.
 
     Neither end angle is ever formed by subtracting from a quarter turn.  That is
     not tidiness: below the ulp of ``pi/2`` the subtraction loses the co-amplitude
     outright, and a reference built that way agrees with itself under refinement
     while being wrong in the third decimal -- measured, on the way to this one.
-    """
-    pole = np.longdouble(pole)
-    complement = np.longdouble(complement)
-    co_amplitude = np.longdouble(co_amplitude)
-    node, weight = (np.longdouble(term) for term in leggauss(nodes))
 
-    def integrand(cosine, sine):
-        return 1.0 / (
-            (cosine**2 + pole * sine**2) * np.sqrt(cosine**2 + complement * sine**2)
-        )
+    ``integrand`` is called with the amplitude's ``(cosine, sine)`` and everything
+    is longdouble, the caller having converted its own arguments.
+    """
+    node, weight = (np.longdouble(term) for term in leggauss(nodes))
 
     def graded(lower, top, layer, flipped):
         """Return the piece over ``[lower, top]``, mapped by sinh from ``lower``."""
@@ -422,6 +419,48 @@ def _pole_integral(co_amplitude, pole, complement, nodes=60):
             True,
         )
     )
+
+
+def _pole_integral(co_amplitude, pole, complement, nodes=60):
+    """Return the third kind's defining integral in longdouble."""
+    pole = np.longdouble(pole)
+    complement = np.longdouble(complement)
+    co_amplitude = np.longdouble(co_amplitude)
+
+    def integrand(cosine, sine):
+        return 1.0 / (
+            (cosine**2 + pole * sine**2) * np.sqrt(cosine**2 + complement * sine**2)
+        )
+
+    return _on_the_two_layers(co_amplitude, pole, complement, nodes, integrand)
+
+
+def _pole_slope(co_amplitude, pole, complement, nodes=60):
+    """Return d/d(pole) of the third kind's defining integral, in longdouble.
+
+    Differentiated UNDER the integral sign rather than by differencing
+    :func:`_pole_integral`, because a difference cannot reach the slope where it
+    is most at issue.  The step has to sit inside the pole itself, so at a pole of
+    1e-08 it is 1e-14 and the two values it separates are of order one -- the
+    difference then keeps two digits of a float64 reference and the quotient is
+    6e-04 out.  Measured, on the way to this one: differenced, the reference
+    reports a routine that is right to a few ulp as being wrong in the fourth
+    decimal, which is the opposite of the sign the test is looking for.
+
+    The integrand is the same one with its pole factor squared and negated, so it
+    turns over on the same two layers and takes the same grading.
+    """
+    pole = np.longdouble(pole)
+    complement = np.longdouble(complement)
+    co_amplitude = np.longdouble(co_amplitude)
+
+    def integrand(cosine, sine):
+        return -(sine**2) / (
+            (cosine**2 + pole * sine**2) ** 2
+            * np.sqrt(cosine**2 + complement * sine**2)
+        )
+
+    return _on_the_two_layers(co_amplitude, pole, complement, nodes, integrand)
 
 
 @pytest.mark.parametrize("pole", POLES)
@@ -887,3 +926,83 @@ def test_the_third_kind_differentiates_where_a_gap_vanishes_exactly():
                 - float(value(*(jnp.asarray(term) for term in backed)))
             ) / (2.0 * step)
             assert float(taken[index]) == pytest.approx(difference, rel=1e-7)
+
+
+def test_the_third_kind_differentiates_forward_below_a_pole_of_one():
+    """The unreflected side must survive FORWARD mode, not only reverse.
+
+    The reflection's growth factor is zero wherever the pole sits below one, and
+    a zero passed through its square root turns a zero TANGENT into nan -- while
+    reverse mode survives, because the zero cotangent is discarded by the mask
+    before it reaches the root.  Every pole a section's own denominators produce
+    on the cn orientation is below one, so forward-mode geometry Jacobians hang
+    on this case: the root's argument is held at one where no reflection is
+    wanted and the result masked, and the slope is then the derivative itself in
+    both modes.
+    """
+    jax, jnp = traced_namespace()
+    _, sine, cosine = pair(0.4)
+
+    def value(pole, complement):
+        return incomplete_pole(
+            pole, complement, jnp.asarray(sine), jnp.asarray(cosine), xp=jnp
+        )
+
+    for pole, complement in ((1e-8, 0.1), (0.3, 0.1), (3.0, 0.1)):
+        forward = jax.jacfwd(value, argnums=(0, 1))(
+            jnp.asarray(pole), jnp.asarray(complement)
+        )
+        reverse = jax.grad(value, argnums=(0, 1))(
+            jnp.asarray(pole), jnp.asarray(complement)
+        )
+        for one, other in zip(forward, reverse):
+            assert np.isfinite(float(one))
+            assert float(one) == pytest.approx(float(other), rel=1e-12)
+
+
+def test_the_slope_in_the_pole_holds_the_extended_reference_over_the_sweep():
+    """The SLOPE against the derivative integral, not the two modes against each other.
+
+    A geometry Jacobian is what the third kind is differentiated FOR, and the two
+    modes agreeing does not establish that either is right -- below a pole of 1e-3
+    they agree with each other an order of magnitude better than either agrees
+    with the derivative itself.  So this holds both to :func:`_pole_slope`
+    absolutely, across the small-pole side, exactly as the value's own sweep is
+    held to :func:`_pole_integral`.
+
+    What the sweep pins is the series the degenerate form leaves its
+    transcendental for once the two roots are within a factor of ten --
+    :data:`nova.biot.symmetricelliptic.SERIES_RATIO`.  ``arctan(v)/v`` is EVEN in
+    ``v``, so through the series the slope flows into the gap product itself
+    rather than into its square root, and nothing cancels; taken through the
+    transcendental it loses a relative ``v^2``, and ``v^2`` falls with the pole.
+    Measured against this reference with the transcendental alone: 3e-13 at a pole
+    of 1e-04, 3e-09 at 1e-08 and 1.3e-05 at 1e-12, where the VALUE is a few ulp at
+    every one of them -- so the tolerance here is what separates the two
+    arrangements, and it is not a round number for that reason.
+
+    The reflected side needs no series and is included to say so: above a pole of
+    one the partner is the small quantity, and the same few ulp hold out to a
+    partner of 1e-13 either way.
+    """
+    jax, jnp = traced_namespace()
+    _, sine, cosine = pair(0.4)
+    complement = 0.1
+
+    def value(pole):
+        return incomplete_pole(
+            pole,
+            jnp.asarray(complement),
+            jnp.asarray(sine),
+            jnp.asarray(cosine),
+            xp=jnp,
+        )
+
+    forward = jax.jit(jax.jacfwd(value))
+    reverse = jax.jit(jax.grad(value))
+    for pole in (1e-12, 1e-10, 1e-8, 1e-6, 1e-4, 1e-2, 1.0, 1e4, 1e8, 1e12):
+        expected = _pole_slope(0.4, pole, complement)
+        coarse = _pole_slope(0.4, pole, complement, nodes=30)
+        assert coarse == pytest.approx(expected, rel=1e-15)
+        for taken in (forward(jnp.asarray(pole)), reverse(jnp.asarray(pole))):
+            assert float(taken) == pytest.approx(expected, rel=1e-13)

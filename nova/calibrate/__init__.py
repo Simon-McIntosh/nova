@@ -16,6 +16,31 @@ under ``corrections/<machine>/``, one document per diagnostic system, versioned 
 git and by an explicit monotonic set version.
 
 Importing the subpackage is explicit: ``from nova.calibrate import correction_set``.
+
+The measurement side of the ladder sits beside the storage side.
+:mod:`nova.calibrate.coupling` regresses what a sensor reads that the description
+does not predict onto the drives that could have produced it;
+:mod:`nova.calibrate.gain` fits and pools per-channel scales, baselines and drift
+rates; :mod:`nova.calibrate.inversion` solves the sensors for the currents and
+reports which current combinations they cannot resolve at all;
+:mod:`nova.calibrate.localize` asks where a surviving residual came from by scanning
+candidate sources over the poloidal plane; and :mod:`nova.calibrate.corrections`
+applies what those fits established, in the order the schema fixes.
+
+Every module here is numerics over arrays.  A kernel takes samples, sensor positions
+and axes, and a response matrix, and never a store path, a pulse number or a channel
+naming convention -- those belong to the adapter that feeds it, which is machine code
+and lives with the machine.  The one exception is deliberate: correction documents
+under ``corrections/<machine>/`` are instance data, and naming a machine is what a
+directory of instances is for.
 """
 
-__all__: list[str] = ["correction_model", "correction_set"]
+__all__: list[str] = [
+    "correction_model",
+    "correction_set",
+    "corrections",
+    "coupling",
+    "gain",
+    "inversion",
+    "localize",
+]

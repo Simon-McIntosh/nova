@@ -42,6 +42,15 @@ different clocks at different rates, and a map that resampled one onto the other
 would be making a modelling choice on a consumer's behalf; the dictionary's
 heterogeneous time lets each signal carry the clock it was measured on.
 
+Pack totals are not served either, and for a reason the store settles rather than
+leaves open.  Six coil sets publish a third current channel beside their conductor
+and ampere-turn ones, and that channel is the sum of the coil's ampere turns and
+the current its own case carries -- measured, to the last bit a 32-bit float
+holds.  It is therefore a restatement of two quantities the map already reaches,
+and it is not servable as either of them: the case current is induced, so the
+total is not a fixed multiple of the coil, and the two terms sit in different
+containers of the dictionary with no field spanning them.
+
 Circuit currents are deliberately not served.  A series pair carries one current,
 and the store publishes a feed channel for each of its two coils; on the pilot
 shots those two agree to within a few per cent of peak, which is the coherence a
@@ -106,6 +115,17 @@ here rather than special-casing them is what lets one algebra hand the measured
 channel a factor of one and the reconstructed flux function a factor of 2*pi.
 The digit is measured, not read off the unit string: the ratio of a loop's fitted
 flux to the reconstructed flux interpolated to that loop's own position is 2*pi.
+"""
+
+PACK_TOTAL_TOLERANCE = 1.2e-7
+"""How far a pack total may sit from its coil plus its case, per unit of the terms.
+
+The three channels are recorded as 32-bit floats, so a sum of two of them can
+reproduce the third only to the last bit either carries, and the bound here is
+that resolution rather than a physical allowance.  The measured worst case is
+1.09e-07 of the summed terms over 4578 coil-set and shot pairs drawn across the
+whole campaign, with a median of 9.7e-09; a store whose totals were acquired
+independently of the two terms would not sit inside a float's own rounding.
 """
 
 CURRENT_CLOCK = "current"
@@ -749,6 +769,81 @@ def toroidal_field_blocked() -> tuple[BlockedSignal, ...]:
     )
 
 
+def pack_total_channels(
+    machine: DescribedMachine,
+) -> tuple[tuple[str, str, str], ...]:
+    """Return each coil set whose published total is its coil plus its own case.
+
+    Read off the drive map rather than listed.  A set qualifies when the
+    description reaches both terms of the sum -- an already-multiplied coil
+    channel driving a conductor, and a case channel driving the enclosure around
+    it -- because that pairing is what makes the total a restatement rather than a
+    measurement of its own.  A set publishing only one of the two would leave a
+    total carrying something no described conductor accounts for, which is a
+    different refusal and belongs beside a different reason.
+
+    Each row is the set's channel prefix followed by the two channels its total
+    decomposes into, in that order.
+    """
+
+    coil_channels = {
+        drive.channel
+        for drive in machine.drives.drives
+        if drive.container == "pf_active"
+    }
+    case_channels = {
+        drive.channel
+        for drive in machine.drives.drives
+        if drive.container == "pf_passive"
+    }
+    suffix = "_coil_current"
+    return tuple(
+        (prefix, channel, f"{prefix}_case_current")
+        for channel in sorted(coil_channels)
+        if channel.endswith(suffix)
+        for prefix in (channel[: -len(suffix)],)
+        if f"{prefix}_case_current" in case_channels
+    )
+
+
+def pack_total_residuals(
+    machine: DescribedMachine, shot: int, *, store: Path | str = SHOT_STORE
+) -> dict[str, float]:
+    """Return how far each pack total departs from its coil plus its case.
+
+    The residual is scaled by the two terms rather than by the total, because the
+    terms cancel to a few parts in a thousand of themselves on shots where the case
+    opposes the coil, and dividing by what is left of the total after a
+    cancellation measures the cancellation instead of the identity.
+    """
+
+    import zarr
+
+    group = zarr.open_group(f"{Path(store)}/{shot}.zarr", mode="r")
+    if CURRENT_GROUP not in group:
+        raise SolveInputError(f"shot {shot} carries no {CURRENT_GROUP!r} group")
+    current = group[CURRENT_GROUP]
+    residuals = {}
+    for prefix, coil_channel, case_channel in pack_total_channels(machine):
+        channels = (f"{prefix}_current", coil_channel, case_channel)
+        if any(channel not in current for channel in channels):
+            continue
+        traces = [
+            np.asarray(current[channel][...], dtype=float) for channel in channels
+        ]
+        if len({trace.shape for trace in traces}) != 1:
+            continue
+        finite = np.all([np.isfinite(trace) for trace in traces], axis=0)
+        if int(finite.sum()) < 10:
+            continue
+        total, coil, case = (trace[finite] for trace in traces)
+        scale = float(np.max(np.abs(coil)) + np.max(np.abs(case)))
+        if scale <= 0.0:
+            continue
+        residuals[prefix] = float(np.max(np.abs(total - coil - case)) / scale)
+    return residuals
+
+
 def unmapped_current_blocked(machine: DescribedMachine) -> tuple[BlockedSignal, ...]:
     """Return the remaining excitation channels and why none reaches a conductor.
 
@@ -811,20 +906,22 @@ def unmapped_current_blocked(machine: DescribedMachine) -> tuple[BlockedSignal, 
                 ),
             )
         )
-    for prefix in ("p3l", "p3u", "p4l", "p4u", "p5l", "p5u"):
+    for prefix, coil_channel, case_channel in pack_total_channels(machine):
         blocked.append(
             BlockedSignal(
                 source_group=CURRENT_GROUP,
                 source_channel=f"{prefix}_current",
                 target_path="pf_active/coil/current/data",
                 reason=(
-                    "this internal channel tracks the coil's ampere-turn channel "
-                    "without equalling it, and no source states what the difference "
-                    "is, so which of the two measures the conductor is unsettled"
+                    f"this channel is the pack total: it equals {coil_channel} plus "
+                    f"{case_channel} sample for sample, so it measures the coil's "
+                    "ampere turns together with the current its own case carries, "
+                    "and the description holds those two in different containers"
                 ),
                 unmet=(
-                    "no source states what this channel measures that the coil's "
-                    "ampere-turn channel does not"
+                    "the case current is induced rather than driven, so the pack "
+                    "total is not a fixed multiple of either term and the two terms "
+                    "it decomposes into already carry the measurement"
                 ),
             )
         )

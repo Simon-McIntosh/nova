@@ -1,0 +1,557 @@
+{
+    "$defs": {
+        "ApplicationStage": {
+            "description": "The fixed order the read path applies corrections in, lowest rank first.  A correction a consumer cannot order is a correction that will be applied twice or not at all, so the order is part of the schema rather than of one consumer. Additive terms come out before multiplicative ones; the acquisition scale comes out before any sensor gain because the range setting is applied last by the instrument and must therefore be removed first among the multipliers; the pair state precedes the gain because a fitted gain measured across mixed states is itself contaminated by them.",
+            "enum": [
+                "offset",
+                "drift",
+                "acquisition_scale",
+                "pair_state",
+                "gain",
+                "convention"
+            ],
+            "title": "ApplicationStage",
+            "type": "string"
+        },
+        "ChannelCorrection": {
+            "additionalProperties": false,
+            "description": "One correction, on one channel or channel group, over one or more validity intervals.  A channel that holds different states over different pulse ranges carries one of these per era.",
+            "properties": {
+                "candidate_values": {
+                    "description": "Values the quantity was observed to take when no single one describes the interval, so a consumer can see the size of what is unresolved rather than infer it from a missing value.",
+                    "items": {
+                        "type": "number"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "cause": {
+                    "description": "Why the channel is excluded or in this quality state, in mechanism terms.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "channel": {
+                    "description": "Channel the correction applies to, named as the source store names it. Exactly one of channel or channel_group is set.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "channel_group": {
+                    "description": "Named set of channels the correction applies to \u2014 a probe family, a digitiser group, a whole array failing together.  Exactly one of channel or channel_group is set.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "kind": {
+                    "$ref": "#/$defs/CorrectionKind",
+                    "description": "What the correction states."
+                },
+                "ladder": {
+                    "description": "Name of the ladder this correction's value must land on.  Set on a quantised kind so validation can reject a free-floating value.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "measured_value": {
+                    "description": "The raw measurement behind the value, kept when the two differ.  An acquisition block's measured response ratio carries both the range setting and whatever the forward description gets wrong about the channel; only the rung is a statement about the acquisition, so the read path divides by the rung and the ratio stays here as evidence.",
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "description": "Anything a consumer needs that the structured slots do not carry.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "provenance": {
+                    "$ref": "#/$defs/Provenance",
+                    "description": "What established the correction."
+                },
+                "quality_status": {
+                    "$ref": "#/$defs/QualityStatus",
+                    "description": "Condition of the channel or group, for a quality correction."
+                },
+                "state": {
+                    "$ref": "#/$defs/PairState",
+                    "description": "Pickup state over the interval, for a pair_state correction."
+                },
+                "status": {
+                    "$ref": "#/$defs/CorrectionStatus",
+                    "description": "Whether the read path applies the correction, and if not, why not."
+                },
+                "uncertainty": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/Uncertainty"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Interval the value is supported to."
+                },
+                "unit": {
+                    "description": "Unit of value and measured_value, omitted when the quantity is a ratio.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "validity": {
+                    "description": "Pulse or time spans the correction holds over.  Corrections that the read path would both apply must not overlap, so a value is carried per span and a channel that steps carries one correction per era rather than one averaged constant.",
+                    "items": {
+                        "$ref": "#/$defs/ValidityInterval"
+                    },
+                    "type": "array"
+                },
+                "value": {
+                    "description": "The quantity the read path uses, in the correction's own units: a multiplier for gain, acquisition_scale, pair_state and convention; an additive term for offset; a slope for drift_rate.  Absent when the correction carries no value a consumer may apply, which every non-promoted kind may be.",
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                }
+            },
+            "required": [
+                "kind",
+                "status",
+                "validity",
+                "provenance"
+            ],
+            "title": "ChannelCorrection",
+            "type": "object"
+        },
+        "CorrectionKind": {
+            "description": "What a correction states about a channel.  The kinds are disjoint by the quantity they carry rather than by the fault they describe, because one fault can show up as several kinds: a failed pickup pair is a pair_state on the pulses where the state is resolved and a quality state where it is not.",
+            "enum": [
+                "gain",
+                "acquisition_scale",
+                "pair_state",
+                "offset",
+                "drift_rate",
+                "exclusion",
+                "quality",
+                "convention"
+            ],
+            "title": "CorrectionKind",
+            "type": "string"
+        },
+        "CorrectionSet": {
+            "additionalProperties": false,
+            "description": "One machine's corrections for one diagnostic system, versioned as a whole. The set version moves when any correction in it does, so a consumer can pin a calibration the way it pins a code version.",
+            "properties": {
+                "corrections": {
+                    "description": "Every correction the set carries.",
+                    "items": {
+                        "$ref": "#/$defs/ChannelCorrection"
+                    },
+                    "type": "array"
+                },
+                "description": {
+                    "description": "What the set covers and what it deliberately leaves out.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "diagnostic_system": {
+                    "description": "Diagnostic the document covers, named as the data-dictionary IDS holding it (magnetics, pf_active, ...).  One document per system keeps a correction's scope legible from its path.",
+                    "type": "string"
+                },
+                "generated_at": {
+                    "description": "When the document was last written.",
+                    "format": "date",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "generated_by": {
+                    "description": "What produced the document, specifically enough to run again.",
+                    "type": "string"
+                },
+                "ladders": {
+                    "description": "Quantisation ladders the set's corrections are validated against.",
+                    "items": {
+                        "$ref": "#/$defs/QuantisationLadder"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "machine": {
+                    "description": "Device the corrections describe.",
+                    "type": "string"
+                },
+                "schema_version": {
+                    "description": "Version of this schema the document is written against.",
+                    "pattern": "^\\d+\\.\\d+\\.\\d+$",
+                    "type": "string"
+                },
+                "set_version": {
+                    "description": "Monotonic semantic version of the correction set itself, bumped by the author when a value, an interval or a status changes.  Semantic and never a content hash: a hash orders nothing and tells a consumer nothing about compatibility.",
+                    "pattern": "^\\d+\\.\\d+\\.\\d+$",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "machine",
+                "diagnostic_system",
+                "schema_version",
+                "set_version",
+                "generated_by",
+                "corrections"
+            ],
+            "title": "CorrectionSet",
+            "type": "object"
+        },
+        "CorrectionStatus": {
+            "description": "Whether the read path acts on a correction, and if not, why it is nonetheless in the document.  Recording the refusals beside the promotions is the point: an absent correction cannot be told from an unmeasured one.",
+            "enum": [
+                "promoted",
+                "recorded",
+                "withheld",
+                "refused",
+                "superseded"
+            ],
+            "title": "CorrectionStatus",
+            "type": "string"
+        },
+        "Corroboration": {
+            "additionalProperties": false,
+            "description": "An independent route reaching the same quantity, recorded beside the value it supports rather than in place of it, so a later disagreement between routes is visible instead of hidden by whichever was written.",
+            "properties": {
+                "evidence_uri": {
+                    "description": "Where the evidence lives \u2014 a research record, a banked array, or the module the value was mined from.  Repo-relative paths and URLs are both accepted; what matters is that a reader can reach the thing that justified the number.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "method": {
+                    "description": "How the quantity was measured, in enough detail to repeat it.",
+                    "type": "string"
+                },
+                "statement": {
+                    "description": "What the evidence says, in one sentence.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "uncertainty": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/Uncertainty"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Interval the value is supported to."
+                },
+                "unit": {
+                    "description": "Unit of value and measured_value, omitted when the quantity is a ratio.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "value": {
+                    "description": "The quantity the read path uses, in the correction's own units: a multiplier for gain, acquisition_scale, pair_state and convention; an additive term for offset; a slope for drift_rate.  Absent when the correction carries no value a consumer may apply, which every non-promoted kind may be.",
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                }
+            },
+            "required": [
+                "method"
+            ],
+            "title": "Corroboration",
+            "type": "object"
+        },
+        "PairState": {
+            "description": "Which elements of a multi-element pickup contributed to a recorded signal. MAST equilibrium pickups are two coils 180 degrees apart toroidally whose signals are averaged before recording, so the state fixes a nominal multiplier on the recorded amplitude.",
+            "enum": [
+                "both_members",
+                "single_member",
+                "recovered",
+                "indeterminate"
+            ],
+            "title": "PairState",
+            "type": "string"
+        },
+        "Provenance": {
+            "additionalProperties": false,
+            "description": "What established a correction.  A value without provenance is indistinguishable from a guess once the session that produced it is over.",
+            "properties": {
+                "corroborations": {
+                    "description": "Independent routes to the same quantity.  Kept as structured entries rather than prose because which route established a value matters more than how close two routes came, and a route that later moves must be findable.",
+                    "items": {
+                        "$ref": "#/$defs/Corroboration"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "evidence_uri": {
+                    "description": "Where the evidence lives \u2014 a research record, a banked array, or the module the value was mined from.  Repo-relative paths and URLs are both accepted; what matters is that a reader can reach the thing that justified the number.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "fitted_at": {
+                    "description": "When the measurement was made.",
+                    "format": "date",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "fitted_by": {
+                    "description": "Who or what made it.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "method": {
+                    "description": "How the quantity was measured, in enough detail to repeat it.",
+                    "type": "string"
+                },
+                "statement": {
+                    "description": "What the evidence says, in one sentence.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                }
+            },
+            "required": [
+                "method"
+            ],
+            "title": "Provenance",
+            "type": "object"
+        },
+        "QualityStatus": {
+            "description": "Condition of a channel or channel group.",
+            "enum": [
+                "good",
+                "suspect",
+                "corrupted",
+                "dead"
+            ],
+            "title": "QualityStatus",
+            "type": "string"
+        },
+        "QuantisationLadder": {
+            "additionalProperties": false,
+            "description": "The discrete values a quantised correction may take.  Declaring them in the document is what lets validation refuse a free-floating value: a step that misses every rung is a real step the finder measured, but it is not the discrete factor a range setting moves by, and removing it would be a fit rather than a correction.",
+            "properties": {
+                "basis": {
+                    "description": "Why these rungs and not others.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "kind": {
+                    "$ref": "#/$defs/CorrectionKind",
+                    "description": "What the correction states."
+                },
+                "name": {
+                    "description": "Identifier of a ladder, unique within the set.",
+                    "type": "string"
+                },
+                "rungs": {
+                    "description": "Values a quantised correction of this kind may take, declared as a hypothesis before any step is classified so that a measurement missing every rung is visible as such instead of being rounded onto one.",
+                    "items": {
+                        "type": "number"
+                    },
+                    "type": "array"
+                },
+                "tolerance": {
+                    "description": "Fractional distance from a rung, |value - rung| / rung, inside which a value is said to land on it.  Wide enough to absorb a channel's own few-percent calibration offset riding on the setting, narrow enough that neighbouring rungs cannot be confused.",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "name",
+                "kind",
+                "rungs",
+                "tolerance"
+            ],
+            "title": "QuantisationLadder",
+            "type": "object"
+        },
+        "Uncertainty": {
+            "additionalProperties": false,
+            "description": "The interval a value is supported to, in the value's own units.",
+            "properties": {
+                "lower": {
+                    "description": "Lower end of the supported interval.",
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                },
+                "unit": {
+                    "description": "Unit of value and measured_value, omitted when the quantity is a ratio.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "upper": {
+                    "description": "Upper end of the supported interval.",
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                }
+            },
+            "title": "Uncertainty",
+            "type": "object"
+        },
+        "ValidityInterval": {
+            "additionalProperties": false,
+            "description": "A span of pulses or of time, either end open.  Pulse and time bounds are not mixed in one interval: the two cannot be ordered against each other, so an interval bounded below in pulse and above in time names nothing.",
+            "properties": {
+                "measured_pulses": {
+                    "description": "Pulses the correction was actually measured on, which the span alone does not give.  A block running from pulse 14061 to 19258 may rest on thirty-six of the five thousand pulses between them, and recording the span alone would let a read of pulse 17000 come back measured when nothing measured it.",
+                    "items": {
+                        "type": "integer"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "description": "Anything a consumer needs that the structured slots do not carry.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "pulse_end": {
+                    "description": "Last pulse the correction holds on; open above when absent.",
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                },
+                "pulse_start": {
+                    "description": "First pulse the correction holds on; open below when absent.",
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                },
+                "time_end": {
+                    "description": "Last time the correction holds at [s]; open above when absent.",
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                },
+                "time_start": {
+                    "description": "First time the correction holds at [s]; open below when absent.",
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                }
+            },
+            "title": "ValidityInterval",
+            "type": "object"
+        }
+    },
+    "$id": "https://github.com/Simon-McIntosh/nova/schema/diagnostic-correction",
+    "$schema": "https://json-schema.org/draft/2019-09/schema",
+    "additionalProperties": true,
+    "description": "One machine's corrections for one diagnostic system, versioned as a whole. The set version moves when any correction in it does, so a consumer can pin a calibration the way it pins a code version.",
+    "metamodel_version": "1.11.0",
+    "properties": {
+        "corrections": {
+            "description": "Every correction the set carries.",
+            "items": {
+                "$ref": "#/$defs/ChannelCorrection"
+            },
+            "type": "array"
+        },
+        "description": {
+            "description": "What the set covers and what it deliberately leaves out.",
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "diagnostic_system": {
+            "description": "Diagnostic the document covers, named as the data-dictionary IDS holding it (magnetics, pf_active, ...).  One document per system keeps a correction's scope legible from its path.",
+            "type": "string"
+        },
+        "generated_at": {
+            "description": "When the document was last written.",
+            "format": "date",
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "generated_by": {
+            "description": "What produced the document, specifically enough to run again.",
+            "type": "string"
+        },
+        "ladders": {
+            "description": "Quantisation ladders the set's corrections are validated against.",
+            "items": {
+                "$ref": "#/$defs/QuantisationLadder"
+            },
+            "type": [
+                "array",
+                "null"
+            ]
+        },
+        "machine": {
+            "description": "Device the corrections describe.",
+            "type": "string"
+        },
+        "schema_version": {
+            "description": "Version of this schema the document is written against.",
+            "pattern": "^\\d+\\.\\d+\\.\\d+$",
+            "type": "string"
+        },
+        "set_version": {
+            "description": "Monotonic semantic version of the correction set itself, bumped by the author when a value, an interval or a status changes.  Semantic and never a content hash: a hash orders nothing and tells a consumer nothing about compatibility.",
+            "pattern": "^\\d+\\.\\d+\\.\\d+$",
+            "type": "string"
+        }
+    },
+    "required": [
+        "machine",
+        "diagnostic_system",
+        "schema_version",
+        "set_version",
+        "generated_by",
+        "corrections"
+    ],
+    "title": "diagnostic-correction",
+    "type": "object",
+    "version": "1.0.0"
+}
+

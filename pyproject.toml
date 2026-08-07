@@ -36,7 +36,11 @@ dependencies = [
   "netcdf4>=1.7",
   "numpy>=2",
   "packaging>=23.2",
+  # Diagnostic-correction documents are read through the models generated from
+  # their LinkML schema; the generators themselves live in the schema extra.
+  "pydantic>=2.9",
   "pyquaternion>=0.9.9",
+  "pyyaml>=6",
   "scipy>=1.14",
   "shapely>=2.0.1",
   "tqdm>=4.66.1",
@@ -71,6 +75,10 @@ jax = [
 ]
 matplotlib = ["matplotlib>=3.10", "seaborn>=0.13"]
 numba = ["numba>=0.61"]
+# LinkML authoring toolchain: generates the Pydantic models and the JSON-Schema
+# export from nova/calibrate/schema. Both generated files are committed, so
+# reading a correction document needs none of this.
+schema = ["linkml>=1.9"]
 test = [
   "jax>=0.5",
   "matplotlib>=3.10",
@@ -179,6 +187,13 @@ exclude = [
 
 lint.select = ["E", "F"]
 lint.ignore = []
+
+# Written verbatim by `gen-pydantic` from the LinkML schema beside it and
+# committed so that reading a correction document needs no toolchain. The
+# generator emits one long line per slot and a fixed import block it does not
+# prune, neither of which a hand edit may fix: the file is regenerated and
+# compared byte for byte by the test suite.
+lint.per-file-ignores = { "nova/calibrate/correction_model.py" = ["E501", "F401"] }
 
 lint.fixable = [
   "A",

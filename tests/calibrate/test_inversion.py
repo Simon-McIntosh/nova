@@ -118,9 +118,7 @@ def test_the_held_out_residual_reports_reconstruction_and_the_fit_residual_does_
     design = design_matrix(CONDUCTORS)
     truth = histories(len(CONDUCTORS))
     radius, height, cosine, sine = sensors()
-    undescribed = axial_projection(
-        *loop_field(radius, height, 2.3, 1.6), cosine, sine
-    )
+    undescribed = axial_projection(*loop_field(radius, height, 2.3, 1.6), cosine, sine)
     observed = design @ truth + np.outer(undescribed, 400.0 * truth[0])
     solution = solve_currents(design, observed, tuple(CONDUCTORS))
     assert solution.held_out_residual > solution.residual
@@ -181,12 +179,8 @@ def test_a_published_current_leaves_the_measurement_rather_than_being_solved():
     truth = histories(len(CONDUCTORS))
     observed = design @ truth
     columns = tuple(CONDUCTORS)
-    reduced = subtract_known_drives(
-        observed, design, columns, {"solenoid": truth[4]}
-    )
-    solution = solve_currents(
-        design[:, :4], reduced, columns[:4]
-    )
+    reduced = subtract_known_drives(observed, design, columns, {"solenoid": truth[4]})
+    solution = solve_currents(design[:, :4], reduced, columns[:4])
     assert np.allclose(solution.currents, truth[:4], rtol=1e-8)
 
 

@@ -63,7 +63,7 @@ CONDITION_NUMBER = 370.6988995747693
 """What the same spectrum's extremes divide to."""
 
 EXCLUDED_CHANNEL = "obr17"
-"""The one sensor held out of every pooled fit, its own gain being under adjudication."""
+"""The one sensor held out of every pooled fit, its gain being under adjudication."""
 
 SCAN_RADIUS = np.linspace(0.15, 2.4, 91)
 SCAN_HEIGHT = np.linspace(-2.4, 2.4, 129)
@@ -156,9 +156,7 @@ def surviving(banked, group):
 def test_the_identifiability_spectrum_still_has_the_values_the_record_reports(banked):
     whitened = whiten(banked["response"], banked["floor"])
     spectrum = identifiability(whitened, [str(name) for name in banked["drives"]])
-    assert np.allclose(
-        spectrum.singular_values, SINGULAR_VALUES, rtol=1e-10, atol=0.0
-    )
+    assert np.allclose(spectrum.singular_values, SINGULAR_VALUES, rtol=1e-10, atol=0.0)
     assert spectrum.condition_number == pytest.approx(CONDITION_NUMBER, rel=1e-10)
 
 

@@ -236,8 +236,6 @@ def test_the_jackknife_widens_when_one_pulse_disagrees():
 def test_a_correction_is_scored_on_a_pulse_it_never_saw():
     gain, tilt = 1.3, 0.22
     observed, own, other = tilted_pulse(9, gain, tilt, ratio=0.9)
-    corrected, reference = score_axis_correction(
-        observed, own, other, (gain, tilt)
-    )
+    corrected, reference = score_axis_correction(observed, own, other, (gain, tilt))
     assert corrected == pytest.approx(0.0, abs=1e-12)
     assert reference > 1.0e-3

@@ -103,9 +103,7 @@ def test_the_whole_chain_returns_the_signal_it_was_manufactured_from():
     parsed = document(
         correction(kind="gain", value=gain),
         correction(kind="pair_state", value=pair, state="single_member"),
-        correction(
-            kind="acquisition_scale", value=rung, ladder="acquisition_range"
-        ),
+        correction(kind="acquisition_scale", value=rung, ladder="acquisition_range"),
         correction(kind="offset", value=offset, unit="T"),
         correction(kind="drift_rate", value=drift, unit="T/s"),
     )
@@ -229,7 +227,9 @@ def test_a_channel_and_a_group_it_belongs_to_cannot_both_own_one_stage():
 
 def test_a_group_correction_reaches_only_its_members():
     parsed = document(
-        correction(channel=None, channel_group="flux_loop", kind="convention", value=2.0)
+        correction(
+            channel=None, channel_group="flux_loop", kind="convention", value=2.0
+        )
     )
     groups = {"flux_loop": ["loop01"]}
     assert build_chain(parsed, "loop01", groups=groups).multiplier == 2.0

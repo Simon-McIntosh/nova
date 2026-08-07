@@ -1,4 +1,4 @@
-"""Whether an injected coupling comes back, and whether the guards refuse what they claim to.
+"""Whether an injected coupling comes back, and the guards refuse what they claim to.
 
 The manufactured truth is a machine that is described slightly wrongly.  A sensor is
 given a described response to every drive, an undescribed source is added that couples
@@ -63,9 +63,7 @@ def test_a_residual_is_what_the_described_response_does_not_predict():
     baseline[:40] = True
     extra, offset = 5.0e-8, 0.031
     signal = drive @ response + extra * drive[:, 2] + offset
-    residual = baseline_free_residual(
-        signal, drive, response, baseline_mask=baseline
-    )
+    residual = baseline_free_residual(signal, drive, response, baseline_mask=baseline)
     assert np.allclose(residual, extra * drive[:, 2], atol=1e-12)
 
 

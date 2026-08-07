@@ -197,6 +197,44 @@ def zeta(
     return result.reshape(broadcast)
 
 
+def traced_zeta(xp, rs, r, gamma, alpha):
+    """Return the zeta integral in whichever array namespace ``xp`` is.
+
+    The tanh-sinh rule UNCONDITIONALLY, as :class:`Zeta` takes it: the numpy
+    :func:`zeta` picks between two rules per element, which is a host-side cost
+    optimisation that a trace would have to pay for by evaluating both -- and
+    the double-exponential rule alone is uniformly accurate over the whole
+    domain, so the branch-free path takes it outright.  Everything else is
+    :func:`zeta`'s own arithmetic, so with ``xp = numpy`` the two agree to the
+    two rules' mutual accuracy wherever the host picks Gauss-Legendre and
+    exactly where it picks tanh-sinh.
+
+    A zero-length interval is held at one and the result masked, so it returns
+    the zero it integrates to without dividing by a vanishing ``sin phi`` --
+    and without the held element poisoning a geometry tangent.
+    """
+    offset, upper, weights = _tanh_sinh_rule()
+    offset = xp.asarray(offset)
+    upper = xp.asarray(upper)
+    weights = xp.asarray(weights)
+    rs, r, gamma, alpha = xp.broadcast_arrays(
+        xp.asarray(rs), xp.asarray(r), xp.asarray(gamma), xp.asarray(alpha)
+    )
+    # the integrand is even in alpha, so the interval is taken as [0, |alpha|]
+    alpha = xp.abs(alpha)
+    extent = alpha > 0.0
+    held = xp.where(extent, alpha, 1.0)[..., None]
+    angle = 2.0 * held * offset
+    angle = xp.where(upper, np.pi - 2.0 * held + angle, angle)
+    sin_phi = xp.sin(angle)
+    cos_phi = xp.where(upper, xp.cos(angle), -xp.cos(angle))
+    integrand = xp.arcsinh(
+        (rs[..., None] - r[..., None] * cos_phi)
+        / xp.sqrt(gamma[..., None] ** 2 + r[..., None] ** 2 * sin_phi**2)
+    )
+    return xp.where(extent, alpha, 0.0) * (integrand @ weights)
+
+
 def zeta_midpoint(
     rs: np.ndarray,
     r: np.ndarray,

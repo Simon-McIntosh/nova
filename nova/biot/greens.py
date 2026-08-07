@@ -47,7 +47,7 @@ import numpy as np
 import scipy.special  # type: ignore[import-untyped]
 
 from nova.biot.completeelliptic import complete_kind, complete_pole
-from nova.biot.zeta import zeta
+from nova.biot.zeta import traced_zeta, zeta
 
 MU0 = 4.0e-7 * np.pi
 """Vacuum permeability [T.m/A]."""
@@ -177,6 +177,55 @@ def greens_bz_br(
     )
     br = np.where(r < _R_FLOOR, 0.0, br_full)
     return bz, br
+
+
+def traced_filament_greens(xp, target_r, target_z, source_r, source_z):
+    """Return ``(psi, B_R, B_Z)`` per ampere of a circular filament, traced.
+
+    A transcription of :func:`greens_psi` and :func:`greens_bz_br` into
+    whichever array namespace ``xp`` is, with the SOURCE position an array
+    input rather than a scalar -- so tracing it yields geometry Jacobians,
+    d(psi, B)/d(a, z) of a coil's filament positions, alongside the target-side
+    ones.  All four inputs broadcast together.
+
+    The complete integrals come from
+    :func:`nova.biot.completeelliptic.complete_kind` -- complement-native,
+    fixed trip count, differentiable -- rather than the Cephes pair; the two
+    routes agree to a few ulp everywhere off the filament, and the second kind
+    taken from the complement needs no held parameter at all.  The one place
+    they differ is a target ON the filament, where the first kind's divergence
+    comes back as its finite part instead of an infinity -- a configuration
+    that has no derivative under either convention.
+
+    The axis guards hold their arguments rather than only masking the result:
+    ``sqrt`` has an unbounded derivative at zero, so an on-axis target passed
+    through the bare ``k`` would turn its zero tangent into nan even though the
+    masked VALUE is exactly the loop limit ``psi = B_R = 0``.
+    """
+    r = xp.asarray(target_r)
+    z = xp.asarray(target_z)
+    ar = xp.asarray(source_r)
+    az = xp.asarray(source_z)
+    dz = z - az
+    span = xp.maximum((ar + r) ** 2 + dz**2, _R_FLOOR)
+    gap = (ar - r) ** 2 + dz**2
+    complement = gap / span
+    k2 = 4.0 * ar * r / span
+    big_k, big_e = complete_kind(complement, xp=xp)
+    on_axis = r < _R_FLOOR
+    held_r = xp.where(on_axis, _R_FLOOR, r)
+    k = xp.sqrt(xp.where(on_axis, 1.0, k2))
+    pref = 2.0 * MU0 * xp.sqrt(ar * held_r) / xp.maximum(k, _R_FLOOR)
+    psi = xp.where(on_axis, 0.0, pref * (0.5 * (1.0 + complement) * big_k - big_e))
+    sq = xp.sqrt(span)
+    pre = MU0 / (2.0 * np.pi)
+    bz = pre / sq * (big_k - big_e + 2.0 * ar * (ar - r) / gap * big_e)
+    br = xp.where(
+        on_axis,
+        0.0,
+        pre * dz / (held_r * sq) * (big_e - big_k + 2.0 * ar * r / gap * big_e),
+    )
+    return psi, br, bz
 
 
 # --- rectangular finite section ---------------------------------------
@@ -339,6 +388,94 @@ def corner_fields(
     return aphi_hat, br_hat, bz_hat
 
 
+def traced_corner_fields(xp, rs, zs, r, z):
+    """Return the corner antiderivative coefficients, traced instead of executed.
+
+    A transcription of :func:`corner_fields` into whichever array namespace
+    ``xp`` is, so the corner coordinates stay trace inputs and a geometry
+    Jacobian -- d(psi, B)/d(section corners) -- follows from the same
+    closed-form pass that produces the values.  Every branch of the host is
+    already arithmetic (``where`` over held arguments, exact signs), so nothing
+    structural changes; the one substitution is the zeta quadrature, which the
+    host routes between two rules per element and the trace takes branch-free
+    through :func:`nova.biot.zeta.traced_zeta` -- the two agree to the rules'
+    mutual accuracy, ~1e-12 relative.
+    """
+    gamma = zs - z
+    a2 = gamma**2 + (rs + r) ** 2
+    a = xp.sqrt(a2)
+    b = rs + r
+    c = xp.sqrt(gamma**2 + r**2)
+    radius_sum = r + c
+    radius_gap = (rs - r) - gamma**2 / radius_sum
+    k2 = 4.0 * r * rs / a2
+    complement = (gamma**2 + (rs - r) ** 2) / a2
+    v = 1.0 + k2 * (gamma**2 - b * r) / (2.0 * r * rs)
+    ellip_k, ellip_e = complete_kind(complement, xp=xp)
+    u_coef = k2 * (4.0 * gamma**2 + 3.0 * rs**2 - 5.0 * r**2) / (4.0 * r)
+
+    level = gamma == 0.0
+    held = xp.where(level, 1.0, gamma)
+    pole = {
+        1: (radius_sum / held) ** 2,
+        2: (gamma / radius_sum) ** 2,
+        3: ((rs - r) / b) ** 2,
+    }
+    pi3 = {p: complete_pole(pole[p], complement, xp=xp) for p in (1, 2, 3)}
+    np2_2 = 2.0 * r / radius_sum
+    np2_3 = 4.0 * r * rs / b**2
+
+    far = xp.where(level, 0.0, -2.0 * r * radius_sum / held * pi3[1])
+    near = gamma * pi3[2]
+    third = gamma * pi3[3]
+
+    moment = c * (2.0 * r**2 - gamma**2) / (2.0 * r)
+    qr = {
+        1: (rs + c) * gamma * c / r * far,
+        2: radius_gap * np2_2 * gamma * c / r * near,
+        3: xp.zeros_like(r),
+    }
+    qz = {
+        1: (rs + c) * -2.0 * c * far,
+        2: radius_gap * -2.0 * c * np2_2 * near,
+        3: b * (rs - r) * np2_3 * third,
+    }
+    pphi = {
+        1: (rs + c) * moment * far,
+        2: radius_gap * np2_2 * moment * near,
+        3: -rs / b * (rs - r) * (3.0 * r**2 - rs**2) * third,
+    }
+
+    def p_sum(coef):
+        out = xp.zeros_like(coef[1])
+        for p in (1, 2, 3):
+            out = out + (-1.0) ** p * coef[p]
+        return out
+
+    cphi = -1.0 / 3.0 * r**2 * np.pi / 2.0 * xp.sign(gamma) * (xp.sign(rs - r) + 1.0)
+    dz_coef = 3.0 / r * cphi
+    zeta = traced_zeta(xp, rs, r, gamma, np.pi / 2.0)
+
+    aphi_hat = (
+        cphi
+        + gamma * r * zeta
+        + gamma * a / (6.0 * r) * (u_coef * ellip_k - 2.0 * rs * ellip_e)
+        + 1.0 / (6.0 * a * r) * p_sum(pphi)
+    )
+    br_hat = (
+        r * zeta
+        - a / (2.0 * r) * rs * (ellip_e - v * ellip_k)
+        - 1.0 / (4.0 * a * r) * p_sum(qr)
+    )
+    bz_hat = (
+        dz_coef
+        + 2.0 * gamma * zeta
+        - a / (2.0 * r) * 1.5 * gamma * k2 * ellip_k
+        - 1.0 / (4.0 * a * r) * p_sum(qz)
+    )
+    return aphi_hat, br_hat, bz_hat
+
+
 def cylinder_greens(
     target_r: np.ndarray,
     target_z: np.ndarray,
@@ -380,6 +517,36 @@ def cylinder_greens(
     br = MU0 * corner(br_hat)
     bz = MU0 * corner(bz_hat)
     return psi, br, bz
+
+
+def traced_cylinder_greens(xp, target_r, target_z, a, z0, da, dz):
+    """(psi, B_R, B_Z) per ampere from a rectangular-section ring, traced.
+
+    :func:`cylinder_greens` with the section descriptor ``(a, z0, da, dz)`` as
+    trace inputs and the corner pass through :func:`traced_corner_fields`, so
+    the section's position and extents carry exact geometry Jacobians.
+    """
+    tr = xp.asarray(target_r)
+    tz = xp.asarray(target_z)
+    one = xp.ones_like(tr)
+    # corner order (matching the reference): (-,-), (+,-), (+,+), (-,+)
+    rs = xp.stack([(a + d * da / 2.0) * one for d in (-1, 1, 1, -1)], axis=-1)
+    zs = xp.stack([(z0 + d * dz / 2.0) * one for d in (-1, -1, 1, 1)], axis=-1)
+    r4 = xp.stack([tr for _ in range(4)], axis=-1)
+    z4 = xp.stack([tz for _ in range(4)], axis=-1)
+
+    aphi_hat, br_hat, bz_hat = traced_corner_fields(xp, rs, zs, r4, z4)
+    area = da * dz
+
+    def corner(data):
+        return (
+            1.0
+            / (2.0 * np.pi * area)
+            * ((data[..., 2] - data[..., 3]) - (data[..., 1] - data[..., 0]))
+        )
+
+    psi = 2.0 * np.pi * MU0 * tr * corner(aphi_hat)
+    return psi, MU0 * corner(br_hat), MU0 * corner(bz_hat)
 
 
 # --- second-moment corrected filament ---------------------------------
@@ -629,4 +796,7 @@ __all__ = [
     "section_centroid",
     "second_moments",
     "moment_filament",
+    "traced_corner_fields",
+    "traced_cylinder_greens",
+    "traced_filament_greens",
 ]

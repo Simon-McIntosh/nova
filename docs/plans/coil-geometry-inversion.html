@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="coil-geometry-inversion">
   <meta name="plan-title" content="Coil Geometry Inversion — solve coil positions and shapes from vacuum measurements by autodiff">
   <meta name="plan-summary" content="The traced polygon Green&#x27;s kernel is verified autograd-able with respect to coil geometry (jacfwd against finite differences to 1e-6; values to 8e-12; second derivatives finite; jacrev consistent to 1e-12), so coil positions and shapes are solvable from vacuum measurements by gradient optimisation. Two problem classes: sensor-space (recorded currents fixed, optimise per-coil geometry against vacuum magnetics — the MAST case, seeded with Kirk&#x27;s measured as-built offsets) and flux-map-space (currents fixed, match a plasma-subtracted flux map). First stage: audit and refactor the remaining kernel classes (ring filament, arc, line, closed-form polygon) to the traced dual-namespace pattern with a traceable section pack.">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="L">
   <meta name="plan-capability-version" content="1.0">
@@ -21,7 +21,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-07">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="4">
+<meta name="plan-impl" content="0.2">
 </head>
 <body>
 <main class="plan-doc">
@@ -54,17 +55,24 @@
 
   <h2 id="s2">§2 — Implementation</h2>
   <ol>
-    <li><strong>Kernel differentiability audit and refactor.</strong> Inventory every biot
-    kernel class — polygon quadrature (verified), closed-form polygon
-    (<code>polygonanalytic.packed_analytic_greens</code>), ring filament
-    (<code>greens.py</code>), arc filament (<code>arcbandedcoupling</code>), line elements —
-    and bring each to the traced dual-namespace pattern with geometry as trace inputs:
-    <code>xp</code> namespace, static shapes, no value branching, plus a traceable
-    <code>pack_section</code> twin (fixed topology; the horizontal-edge zero-weight mask
-    computed as a static mask outside the trace). Each kernel gains an autograd regression
-    test in the style of the banked check: value parity with the numpy reference, jacfwd
-    against central differences, jacrev-jacfwd consistency. This stage is useful far beyond
-    this plan — it makes every nova coupling operator differentiable end-to-end.</li>
+    <li class="section-landed"><span class="badge badge-shipped">✓ landed 2026-08-07</span>
+    <strong>Kernel differentiability audit and refactor — the whole coupling family is
+    geometry-traceable.</strong> Eight kernel classes brought to the traced pattern with
+    three-part autograd regressions (value / jacfwd-vs-FD / jacrev-vs-jacfwd), merged
+    <code>42dd1816</code>: traced section pack (static horizontal-edge mask;
+    edges/weights exact, norm 1e-15), polygon quadrature driven from the traced pack
+    (vertex-level Jacobians, value 1e-10, jacfwd-FD 1e-6), ring filament
+    (complement-native complete pair replacing opaque Cephes; on-axis Jacobians finite),
+    rectangular finite section, arc filament (position + both azimuths), traced zeta
+    (tanh-sinh unconditionally, 1e-13 vs routed host), and both closed-form polygon paths
+    (full turn + finite arc). Two elliptic derivative repairs along the way: the third
+    kind's forward mode no longer NaNs on the unreflected side, and the Carlson degenerate
+    form's slope takes an even series in v² below ratio 0.1 — slope error 3e-9 → 3e-15
+    near small poles, values unchanged at 8e-16, +5.4% cost on the arc path only. Fast
+    autograd lane 30 s; three closed-form section traces behind the <code>slow</code>
+    marker (finite-arc trace is op-count-bound at ~284 s — measured, not reducible by
+    grid size). Recorded limitation: at pole == complement exactly the slope is finite
+    but 1.2e-02 relative (pre-existing, test-documented). Full default suite green.</li>
     <li><strong>Geometry parametrisation.</strong> Per-coil parameter blocks at increasing
     freedom: rigid (ΔR, ΔZ), scale, tilt/shear, per-vertex freedom for the pack outline, and
     the discrete chamfer-side state for the 23-turn lattice (branch comparison, not a
@@ -125,7 +133,7 @@
 
   <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-cgi-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-08-07" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-cgi-001" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-08-07" data-recommends-skill="" data-resolved-at="2026-08-07T19:55:48+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Kernel differentiability audit: refactor ring/arc/line/closed-form kernels to the traced pattern with autograd regression tests</h4>
     <div class="r-fu-body"><p>§2.1 in full: the polygon quadrature path is verified; bring
       the remaining kernel classes to the same standard and pin each with the three-part
@@ -163,6 +171,37 @@ Scope locks / constraints
 Done-when
   1. Audit table (kernel class -&gt; trace status -&gt; action) recorded in plan
   2. Refactors landed with three-part autograd regression tests green
+  3. Followup written into plan + this one resolved</pre>
+    <p class="r-fu-outcome">Section 2.1 landed (commits bf8f9bcb + dcc3a62a, merged 42dd1816). Eight kernel classes geometry-traceable with three-part autograd regressions: traced pack, polygon quadrature (vertex Jacobians), ring filament, rectangular section, arc filament, traced zeta, closed-form full turn and finite arc. Two elliptic derivative repairs: third-kind forward-mode NaN on the unreflected side fixed (root argument held at one); Carlson degenerate slope series in v-squared below ratio 0.1 (slope 3e-9 to 3e-15, value unchanged 8e-16, +5.4% arc-path cost). Fast lane 30 s, three section traces slow-marked. Limitation recorded: pole == complement slope 1.2e-2 relative (pre-existing). Full default suite green; every nova coupling operator now differentiable end-to-end w.r.t. source geometry.</p>
+    </article>
+<article class="r-fu" data-id="f-cgi-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-07" data-recommends-skill="/reckon-ship coil-geometry-inversion §2.2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Geometry parametrisation and identifiability spectrum (sections 2.2-2.3), then the synthetic recovery ladder</h4>
+    <div class="r-fu-body">The kernel family is traceable with exact geometry Jacobians. Next: per-coil parameter blocks (rigid, scale, tilt/shear, per-vertex, discrete chamfer branch), then the geometry-Jacobian singular spectrum at the real MAST sensor set. Seeds from the symmetry verdict: exclude or deweight near-field probes (<2 pack widths - the +-25 mm basin is a 5-channel near-field trap); drive the described 23-cell lattice, not the hull smear (11-15% at gain ~1); banked difference-field grids in ~/.cache/nova-mast/misfit-localization/symmetry_scan.npz are ready linearisation points; any solve that finds a P4L displacement explaining the p4_lower survivor has found the near-field trap. Optimiser decision (Gauss-Newton vs L-BFGS) still open for the owner.</div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    coil-geometry-inversion (docs/plans/coil-geometry-inversion.html)
+Section: §2.2 (geometry parametrisation) + §2.3 (identifiability first)
+Capability: general
+Requirements: deep reasoning, strict verification
+
+Context
+  Section 2.1 is landed: eight kernel classes geometry-traceable with exact
+  Jacobians (merge 42dd1816; tests/test_biotgeometryautograd.py is the
+  regression suite and the usage pattern). Build the per-coil parameter
+  blocks and publish the identifiability spectrum at the real sensor set.
+
+State to read
+  docs/plans/coil-geometry-inversion.html (§2.2-§2.3; honour the open
+  optimiser decision - surface, do not resolve)
+  docs/research/mast-p4p5-symmetry-verdict.html (near-field trap; lattice
+  vs hull; seeds)
+  tests/test_biotgeometryautograd.py (traced-kernel API)
+  ~/.cache/nova-mast/misfit-localization/symmetry_scan.npz + couplings.npz
+
+Done-when
+  1. Parameter blocks implemented (rigid/scale/tilt/per-vertex + discrete
+     chamfer branch) with synthetic Jacobian tests
+  2. Identifiability spectrum at the MAST array published with figures
+     (near-field exclusion sensitivity shown)
   3. Followup written into plan + this one resolved</pre>
     </article>
 </section>

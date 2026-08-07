@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="mast-p4p5-symmetry-verdict">
+  <meta name="plan-title" content="P4/P5 symmetry elimination — geometry error EXCLUDED as the survivor's source">
+  <meta name="plan-summary" content="The full enumerated geometry scan refuses the described-asymmetry hypothesis: symmetrising corrections (mirrored members, symmetrised centroids, equalised footprints) explain at most 3% of the stable surviving misfit and mostly worsen it; rigid per-member translations to ±25 mm cap at 0.29-0.32 explained fraction that collapses to 0.01-0.03 on far-field probes with sign-flipped gains — a near-field artifact, not a coil position. The one amplitude-consistent, far-field-robust geometry component is turn discreteness: replacing the uniform hull smear with the described 23-cell lattice removes 15% of the P5 lower surviving power (gain 1.28, bootstrap [0.8%, 15.3%]) and 11% on P4 upper, and the disputed 5-turn partial row resolves to the described side (max |z|): flipping it costs -25% on P5 lower. At least 85% of the survivor — and ≥95% of the stable P4 lower pattern under survey-bounded offsets — needs current the coils do not carry.">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-recorded-at" content="2026-08-07">
+  <meta name="plan-evidence-for" content="mast-p4p5-circuit-provenance">
+  <meta name="plan-informs" content="coil-geometry-inversion">
+  <title>P4/P5 symmetry verdict | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+  <header>
+    <span class="badge badge-active">recorded 2026-08-07</span>
+    <h1>The symmetry elimination test: the description's asymmetry is not the fault</h1>
+    <p><strong>Verdict: geometry error EXCLUDED as the source of the surviving misfit.</strong>
+    Correcting the described P4/P5 member asymmetry — by mirroring one member from the other,
+    symmetrising the pair centroids, or equalising the footprints — explains at most 3% of the
+    stable surviving patterns and makes most of them <em>worse</em> (refit reductions −1% to
+    −64%). The full per-member translation scan to ±25 mm finds nothing a coil position can fix:
+    the best apparent explanations (0.29–0.36 explained fraction) sit at the scan boundary or
+    collapse to 0.01–0.03 with sign-flipped gains when the probes within two pack widths of the
+    coil are removed — they are near-field artifacts of the uniform-density section model, not
+    evidence of a displaced coil. The one geometry component that survives every check is
+    <strong>turn discreteness</strong>: driving the described 23-cell winding lattice instead of
+    the uniform hull smear removes 15.0% of the P5 lower surviving power at fitted gain 1.28
+    (bootstrap [0.8%, 15.3%], far-field robust) and 11.4% on P4 upper (gain 1.14) — and it
+    resolves the disputed 5-turn partial row to the <em>described</em> side of the pack
+    (max |z|): flipping the row to the midplane side costs −24.7% on P5 lower. Everything else —
+    at least 85% of the surviving power, and ≥95% of the only evidential pattern (P4 lower,
+    split-half cosine +0.92) — needs current the coils do not carry, which hands the programme
+    back to the feeder/conductor hunt with the geometry lead closed.</p>
+  </header>
+
+  <section class="quick-status">
+    <h2>Headline numbers</h2>
+    <table>
+      <thead><tr><th>question</th><th>answer</th><th>measurement</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Does symmetrising the description remove the survivor?</td>
+          <td><strong>No — refused on every group.</strong></td>
+          <td>Mirror/symmetrise/equalise variants: explained fraction ≤ 0.03 on P5 groups;
+          0.06–0.24 on P4 groups only at fitted gains −8.5 to +126× the variants' own amplitude
+          (amplitude-inconsistent); refit reductions +0.1% to +4.6% at best, −13% to −64% where
+          the gain is negative.</td>
+        </tr>
+        <tr>
+          <td>Can any coil displacement within ±25 mm produce it?</td>
+          <td><strong>No.</strong> Apparent matches are near-field artifacts.</td>
+          <td>P4 lower best (dz,dr) = (−20,−20) mm: explained fraction 0.32, but 0.010 on
+          far-field probes (gain sign flips −2.7); P4 upper best (+5.5,−4.5) mm at gain ≈ 1
+          splits into opposite-sign near/far gains (−12 to −44 far-field). Kirk-bounded offsets
+          (≤6.6 mm at P4L) cap the P4 lower reduction at +4.8%.</td>
+        </tr>
+        <tr>
+          <td>Is any geometry refinement real?</td>
+          <td><strong>Yes, one: the cell lattice, at ~15% max.</strong></td>
+          <td>Described 23-cell lattice vs uniform hull: P5 lower reduction +14.9%
+          [+0.8%, +15.3%] at gain +1.28, far-field f 0.145 ≈ all-probe 0.157; P4 upper +11.4%
+          [+1.2%, +12.6%] at gain +1.14.</td>
+        </tr>
+        <tr>
+          <td>Which side does the 5-turn partial row sit?</td>
+          <td><strong>The described side — far from the midplane.</strong></td>
+          <td>Row flipped to the midplane side: P5 lower reduction −24.7% (vs +14.9% described),
+          gain −0.23; P4 upper cannot discriminate (+11.3% vs +11.4%). The description's own
+          cells already place the 4+1 partial row at max |z| on all four members.</td>
+        </tr>
+        <tr>
+          <td>What is the cap?</td>
+          <td><strong>≥85% of the survivor needs unmodelled current.</strong></td>
+          <td>Max far-field-robust, amplitude-consistent reduction: 15.0% (P5 lower, lattice).
+          On the evidential P4 lower pattern (13 rows, split-half +0.92) the same cap is 4.4%
+          (lattice, amplitude-inconsistent at gain 12.4) — ≥95% survives every geometry freedom
+          scanned.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <h2>Sanity gates — all passed before any variant was scored</h2>
+  <ul>
+    <li><strong>Forward-model parity:</strong> the rebuilt 78×13 response matrix matches the
+    banked <code>couplings.npz</code> response to 0.0 (bit-identical) on every column, and the
+    variant engine reproduces the described columns exactly at zero offset.</li>
+    <li><strong>Survivor reproduction:</strong> pooled surviving patterns reproduce the
+    localization record byte for byte — P4 lower coupling rms 4.173×10⁻⁸ T/At, surviving rms
+    3.698×10⁻⁸ (79% of power), largest carriers ccbv22 −243.7, obr18 −152.4 nT/At; P4 upper
+    55%, P5 lower 71%, P5 upper 84%, P5 pair 44%.</li>
+    <li><strong>Split-half stability:</strong> P4 lower +0.92 (odd vs even rows, span removed
+    per half) — the gate value, reproduced exactly.</li>
+    <li><strong>Acquisition-scale convention:</strong> obr17's own pooled coupling sits at
+    −0.498 to −0.516 × its described response column on every drive group — exactly the −0.5
+    signature of the known 0.50 gain fault read <em>without</em> re-applied corrections, so the
+    banked couplings carry block-scale normalisation only and obr17 stays excluded from every
+    fit, matching the localization record's convention.</li>
+  </ul>
+
+  <h2>A premise correction: what asymmetry the model actually carries</h2>
+  <p>The plan quotes P4 lower at z = −1.1268 m against P4 upper +1.1095 m — 17.3 mm with the
+  <em>lower</em> member further from the midplane. The geometry the misfit was measured against
+  says otherwise: the registry outlines (physical digest <code>ca06c8f64481114f</code>, built
+  from the level-2 winding cells at shot 21978) put the P4 lower hull centroid at
+  (1.4983, −1.0987) m and P4 upper at (1.4981, +1.1033) m — the <em>upper</em> member 4.6 mm
+  further out, with the 0.159×0.158 m vs 0.154×0.154 m footprint split (area +5.1%) on the upper
+  member; the source cell lattices give the same reading (∓1.0971/+1.1009, 3.8 mm). P5 differs
+  by 8.7 mm (upper further out) with identical footprints. The 17.3/12.9 mm figures evidently
+  came from a different source reading during the survey; the scan below tests the asymmetry the
+  forward model actually consumed, and its translation grids (±25 mm) cover both readings'
+  magnitudes with margin. The description's cells also already place the 23-turn winding's
+  5-turn partial row at max |z| on all four members — mirror-symmetrically — so the description
+  is <em>not</em> asymmetric in the chamfer side, only in centroid and footprint.</p>
+
+  <h2>Method</h2>
+  <p>A geometry error in coil c produces a residual coupling on drive c equal to the variant's
+  <strong>difference field</strong>: the field of the modified section minus the described
+  section, per ampere-turn, computed with the same polygon-section Green's kernel that built the
+  banked response (2510 kernel calls; the lattice variants drive the 23 described cells
+  individually and average). Each variant is scored against its own drive group's surviving
+  pattern three ways:</p>
+  <ol>
+    <li><strong>Explained fraction f</strong> — squared cosine between the span-removed
+    difference field and the survivor (the filament-scan metric): does the variant have the
+    right shape.</li>
+    <li><strong>Fitted gain α</strong> — least-squares multiplier on the difference field. A
+    real geometry error must fit at α ≈ 1 (its amplitude is not a free parameter); for
+    translation grids the implied offset is α × the scanned offset while the response stays
+    linear.</li>
+    <li><strong>Refit reduction</strong> — the variant's column replaces the described column,
+    the measured coupling is corrected by the difference field, and the thirteen-column span
+    removal reruns: the fraction of surviving power removed after the variant survives the same
+    current freedoms that defined the target. This is the decisive metric — a variant that
+    aligns but does not survive the refit has explained nothing.</li>
+  </ol>
+  <p>Pooling and span removal reproduce the localization record exactly: per-channel medians
+  over each group's (shot, group) coupling rows, channels with fewer than two finite rows
+  dropped, obr17 excluded, QR projector of the described response on the kept channels.
+  <strong>Bootstrap:</strong> the resampling unit is the (shot, group) coupling row — 13 rows
+  P4 lower, 7 P4 upper, 12 P5 lower, 7 P5 upper, 2 P5 pair — resampled with replacement within
+  group, the full pool-and-project pipeline rerun per replicate; B = 2000 for shape and gain,
+  B = 1000 for refit reductions, seed 20260807, bounds are 2.5/97.5 percentiles. The two-row
+  P5 pair bounds are indicative only. <strong>Far-field robustness:</strong> every leading
+  variant is rescored with probes standing closer than two pack widths to the varied coil
+  removed — the standoff below which the winding-lattice study measured the uniform-density
+  section reading to break down, and the cut the response fits themselves apply.</p>
+
+  <h2>The scan</h2>
+  <figure>
+    <img src="/nova/figures/p4p5-symmetry/variant_reductions.png"
+         alt="Dot plot of refit reduction per discrete geometry variant per drive group with bootstrap whiskers: symmetrising variants cluster at zero or negative, lattice variants alone are positive and gain-consistent"
+         style="max-width:100%;height:auto">
+    <figcaption>The discrete variants. Every symmetrising correction (gray) sits at zero or
+    negative reduction, or reaches positive only with an amplitude-inconsistent gain (open
+    markers). The cell-lattice variants (blue) are the only filled positive markers — and the
+    row-flipped lattice on P5 lower is strongly negative: the data prefers the described chamfer
+    side. Evidence: <code>symmetry_scan.npz</code>.</figcaption>
+  </figure>
+
+  <table>
+    <thead><tr><th>variant</th><th>group</th><th>explained f [2.5%, 97.5%]</th>
+    <th>gain α</th><th>refit reduction [2.5%, 97.5%]</th></tr></thead>
+    <tbody>
+      <tr><td>mirror P4U := reflect(P4L)</td><td>p4_upper</td><td>0.285 [0.007, 0.367]</td><td>−1.26</td><td>−0.640 [−0.640, −0.012]</td></tr>
+      <tr><td>mirror P4L := reflect(P4U)</td><td>p4_lower</td><td>0.179 [0.060, 0.377]</td><td>+7.99</td><td>+0.046 [+0.026, +0.121]</td></tr>
+      <tr><td>symmetrise P4 centroids</td><td>p4_lower</td><td>0.125 [0.046, 0.253]</td><td>+14.48</td><td>+0.019 [+0.011, +0.048]</td></tr>
+      <tr><td>symmetrise P4 centroids</td><td>p4_upper</td><td>0.241 [0.004, 0.280]</td><td>−2.43</td><td>−0.240 [−0.240, −0.004]</td></tr>
+      <tr><td>equalise P4 footprints</td><td>p4_lower</td><td>0.062 [0.010, 0.173]</td><td>+126</td><td>+0.001 [+0.000, +0.003]</td></tr>
+      <tr><td>mirror P5U := reflect(P5L)</td><td>p5_upper</td><td>0.000 [0.000, 0.111]</td><td>+0.05</td><td>−0.045 [−1.407, −0.009]</td></tr>
+      <tr><td>mirror P5L := reflect(P5U)</td><td>p5_lower</td><td>0.001 [0.001, 0.007]</td><td>+0.04</td><td>−0.594 [−0.606, −0.023]</td></tr>
+      <tr><td>symmetrise P5 centroids</td><td>p5_lower</td><td>0.001 [0.001, 0.006]</td><td>+0.08</td><td>−0.131 [−0.137, −0.003]</td></tr>
+      <tr><td>cell lattice P4L (described side)</td><td>p4_lower</td><td>0.250 [0.058, 0.633]</td><td>+12.42</td><td>+0.044 [+0.021, +0.128]</td></tr>
+      <tr><td>cell lattice P4U (described side)</td><td>p4_upper</td><td>0.115 [0.014, 0.416]</td><td>+1.14</td><td>+0.114 [+0.012, +0.126]</td></tr>
+      <tr><td><strong>cell lattice P5L (described side)</strong></td><td>p5_lower</td><td>0.157 [0.014, 0.162]</td><td><strong>+1.28</strong></td><td><strong>+0.149 [+0.008, +0.153]</strong></td></tr>
+      <tr><td>cell lattice P5U (described side)</td><td>p5_upper</td><td>0.026 [0.007, 0.654]</td><td>+1.96</td><td>+0.020 [+0.003, +0.538]</td></tr>
+      <tr><td>cell lattice P4U (row flipped)</td><td>p4_upper</td><td>0.154 [0.001, 0.158]</td><td>+0.64</td><td>+0.113 [−0.013, +0.121]</td></tr>
+      <tr><td><strong>cell lattice P5L (row flipped)</strong></td><td>p5_lower</td><td>0.009 [0.000, 0.011]</td><td>−0.23</td><td><strong>−0.247 [−0.252, +0.004]</strong></td></tr>
+      <tr><td>cell lattice P5U (row flipped)</td><td>p5_upper</td><td>0.001 [0.001, 0.029]</td><td>−0.30</td><td>−0.025 [−0.748, +0.027]</td></tr>
+    </tbody>
+  </table>
+  <p>Footprint equalisation at P5 is a no-op (the described P5 footprints are already
+  identical); pair-group scores (two rows) are banked but not tabulated here. Reading the P4
+  rows: the mirror and symmetrise variants can only align with the P4 survivors at gains many
+  times their own amplitude — a 4.6 mm centroid correction would need to act like a 37–67 mm
+  one — and where the gain is physical it is <em>negative</em>: the P4 upper survivor prefers
+  the described asymmetry over the mirrored geometry by −0.64 of its power. The description's
+  asymmetry is not the fault; if anything it is slightly on the machine's side.</p>
+
+  <figure>
+    <img src="/nova/figures/p4p5-symmetry/offset_scans.png"
+         alt="Explained fraction with bootstrap band and refit reduction versus dz and dr offsets for each of the four members, with Kirk's measured case offsets marked"
+         style="max-width:100%;height:auto">
+    <figcaption>Rigid translations, member by member (blue: explained fraction with bootstrap
+    band; orange: refit reduction; dashed: Kirk's arXiv:1312.6507 Table-1 as-built case offsets
+    ±2.9/6.6/0.6/13.1 mm). P5 members refuse dz outright (f ≤ 0.001); P4 curves rise only toward
+    the ±25 mm boundary — far beyond every measured offset — and fail the far-field test below.
+    Evidence: <code>symmetry_scan.npz</code>.</figcaption>
+  </figure>
+
+  <figure>
+    <img src="/nova/figures/p4p5-symmetry/offset_maps.png"
+         alt="Joint dz-dr refit-reduction maps for the four members: P4 lower peaks at the scan corner, P4 upper at a small central ridge, P5 members near zero"
+         style="max-width:100%;height:auto">
+    <figcaption>Joint dz × dr maps. P4 lower's peak (+0.32) runs off the scan corner at
+    (−20, −20) mm — four times Kirk's largest P4 offset; P4 upper's small central peak (+0.36 at
+    (−2.5, +5.5) mm) looks plausible until the far-field split; P5 lower and upper have nothing
+    a translation can reach (+0.14 shallow, +0.02). Evidence: <code>symmetry_scan.npz</code>.</figcaption>
+  </figure>
+
+  <h2>Why the apparent translation matches are artifacts</h2>
+  <p>Rescoring the leading variants with the probes within two pack widths of the varied coil
+  removed (5–12 channels depending on member):</p>
+  <table>
+    <thead><tr><th>variant</th><th>group</th><th>all-probe f / α</th><th>far-field f / α</th><th>verdict</th></tr></thead>
+    <tbody>
+      <tr><td>dz P4L −25 mm</td><td>p4_lower</td><td>0.114 / +1.14</td><td>0.005 / −2.69</td><td>near-field artifact</td></tr>
+      <tr><td>dz P4L −6.6 mm (Kirk)</td><td>p4_lower</td><td>0.124 / +4.95</td><td>0.005 / −9.95</td><td>near-field artifact, amplitude-inconsistent</td></tr>
+      <tr><td>dr P4L −22.5 mm</td><td>p4_lower</td><td>0.287 / +1.26</td><td>0.030 / −23.8</td><td>near-field artifact</td></tr>
+      <tr><td>dz P4U +5.5 mm</td><td>p4_upper</td><td>0.237 / +0.99</td><td>0.647 / −12.1</td><td>near/far gains opposite — no coherent displacement</td></tr>
+      <tr><td>dr P4U −4.5 mm</td><td>p4_upper</td><td>0.305 / +0.98</td><td>0.577 / −43.6</td><td>near/far gains opposite — no coherent displacement</td></tr>
+      <tr><td>dr P5L −2.9 mm</td><td>p5_lower</td><td>0.143 / +0.95</td><td>0.033 / +2.60</td><td>mostly near-field; the lattice carries the real part</td></tr>
+      <tr><td><strong>cell lattice P5L</strong></td><td>p5_lower</td><td>0.157 / +1.28</td><td><strong>0.145 / consistent</strong></td><td><strong>robust</strong></td></tr>
+    </tbody>
+  </table>
+  <p>A displaced coil moves its near field far more than its far field, so a translation can
+  always buy alignment on the handful of probes beside the pack — the same probes on which the
+  winding-lattice study measured a campaign-dependent misfit no static geometry can carry. When
+  those probes are removed the P4 lower matches collapse two orders and flip sign; P4 upper's
+  gain ≈ 1 candidates split into opposite-sign near and far fits, which no rigid displacement
+  can produce. The 2D corner peak's bootstrap interval [−0.114, +0.722] spans zero, and its
+  split-half explained fractions (0.293 / 0.537) disagree — against the survivor's own +0.92
+  stability. The P5 lower dr = −2.9 mm point estimate is instead the translation echo of the
+  lattice component: the described cells sit 1.6 mm inboard of the hull centroid, and once the
+  lattice is driven directly (α = 1.28, far-field robust) the translation adds nothing.</p>
+
+  <figure>
+    <img src="/nova/figures/p4p5-symmetry/sensor_overlay.png"
+         alt="Signed sensor-space patterns for P5 lower and P4 lower: surviving misfit, fitted best-variant difference field, and residual after refit, drawn as arrows along each probe's sensitive axis over the machine cross-section"
+         style="max-width:100%;height:auto">
+    <figcaption>Sensor space. Top: the P5 lower survivor (rms 8.1 nT/At), the fitted lattice
+    difference field (rms 3.2), and the post-refit residual (rms 7.5 — 15% of power removed).
+    Bottom: the P4 lower survivor (rms 37.0) against its best translation variant: the fitted
+    field lives on the outboard band beside P4 while the survivor's largest carriers are
+    centre-column channels (ccbv22 −244 nT/At), and the residual after (rms 30.5) keeps the
+    machine-wide pattern — the variant bought its 32% on five near probes. Evidence:
+    <code>symmetry_scan.npz</code> patterns, <code>couplings.npz</code>.</figcaption>
+  </figure>
+
+  <h2>What this hands to the rest of the programme</h2>
+  <ul>
+    <li><strong>To the provenance plan:</strong> the geometry-error candidate is closed as the
+    survivor's source. The surviving misfit — 79% of P4 lower's coupling power, stable at
+    +0.92 — needs current on a path that is not the described winding, at the feeder scale the
+    localization maps already implied. The conductor hunt (supply returns, the P3/4/5 link
+    board, the coil tail) is the remaining explanation standing.</li>
+    <li><strong>To coil-geometry-inversion:</strong> (1) the banked difference-field grids in
+    <code>symmetry_scan.npz</code> are ready-made linearisation points; (2) any geometry
+    inversion over these couplings must exclude or separately weight the near-field probes —
+    the ±25 mm basin is dominated by five channels whose misfit is known to be
+    campaign-dependent, and chasing it buys sign-inconsistent geometry; (3) the forward model
+    should drive the described cell lattice, not the hull smear — it is a strict, evidenced
+    improvement worth 11–15% of surviving power on two groups at the correct amplitude; (4) the
+    P4 lower survivor is not reachable by any P4 lower geometry freedom scanned here — a
+    gradient solve that "finds" one will have found the near-field trap.</li>
+    <li><strong>A discrete description fact settled:</strong> EFIT-MAST and FreeGSNKE disagree
+    on which |z| side the 5-turn partial row sits; the archive's own cells and the magnetics
+    agree it sits at max |z| (the described side), and the flipped branch is refused at −24.7%
+    on the only group able to discriminate.</li>
+    <li><strong>Not settled here (measurement-only):</strong> whether the lattice refinement is
+    promoted into the forward model, and where any geometry correction would land
+    (artifact revision vs fitted overlay) — the plan's open decision, untouched.</li>
+  </ul>
+
+  <h2>Caveats</h2>
+  <ul>
+    <li>The scan is linear and enumerated: translations, isotropic/anisotropic scales, mirror
+    exchanges, and the two lattice branches. Tilts, ellipticity, and higher Kirk moments are
+    not scanned; they are continuous freedoms for the inversion plan. Nothing here bounds a
+    <em>non-axisymmetric</em> geometry fault (that path stays with the harmonics plan).</li>
+    <li>The upper groups pool 7 rows each (split-half +0.32/+0.42) and the P5 pair only 2 —
+    their numbers are indicative. The verdict rests on P4 lower (13 rows, +0.92) and P5 lower
+    (12 rows, +0.54).</li>
+    <li>Channels pool with uniform weight, no per-channel noise whitening — same convention as
+    the localization record the targets come from.</li>
+    <li>The lattice difference field includes both turn discreteness and the 1.6 mm
+    cell-vs-hull centroid offset; this scan does not separate them, only bounds their joint
+    contribution.</li>
+    <li>Explained fractions are shape cosines against a pooled median pattern; a variant
+    explaining 15% of surviving <em>power</em> removes 8% of surviving rms.</li>
+  </ul>
+
+  <h2>Reproduction</h2>
+  <p>Scripts and banked arrays under <code>~/.cache/nova-mast/misfit-localization/</code>:
+  <code>symmetry_gates.py</code> → <code>symmetry_gates.log</code> (the four gates),
+  <code>symmetry_scan.py</code> → <code>symmetry_scan.npz</code> +
+  <code>symmetry_scan_summary.json</code> + <code>symmetry_scan.log</code> (2510 kernel calls,
+  128 s), <code>symmetry_farfield_check.py</code> → <code>symmetry_farfield_check.log</code>,
+  <code>symmetry_figures.py</code> → the four PNGs in
+  <code>docs/figures/p4p5-symmetry/</code>. Inputs: <code>couplings.npz</code> sha256
+  <code>df80121389f444709fb9b81db4824492adc9dfa4e621bd2b637142d179302f85</code> (41 coupling
+  rows over 40 sustained shots, unmodified); machine geometry from the packaged registry,
+  physical digest <code>ca06c8f64481114f</code> (registry digest
+  <code>7083e802…a307366</code>), winding cells from the level-2 store at shot 21978; forward
+  model <code>nova.imas.mast_vacuum_response</code> over the polygon-section Green's kernel.
+  Banked output sha256: <code>symmetry_scan.npz</code>
+  <code>4c80ae213270603d69d095ebbe5b97fe21a8cf69e019784b0d0b2a1cab758a9a</code>. Bootstrap seed
+  20260807.</p>
+
+  <h2>Related records</h2>
+  <ul>
+    <li><a href="/nova/research/mast-misfit-source-localization.html">Misfit source
+    localization</a> — the surviving patterns, targets, and array semantics this scan scores
+    against.</li>
+    <li><a href="/nova/research/mast-winding-lattice-landed.html">Winding-lattice test</a> —
+    the near-probe standoff breakdown and campaign-dependence this scan's far-field check
+    leans on; its refusal of a <em>fitted</em> lattice is compatible with this scan's
+    <em>described</em>-lattice component, which fits nothing.</li>
+    <li><a href="/nova/research/mast-vacuum-misfit-separation.html">Vacuum misfit
+    separation</a> — the free-inversion survivor the targets descend from.</li>
+    <li><a href="/nova/plans/mast-p4p5-circuit-provenance.html">P4/P5 circuit provenance</a> —
+    the owning plan; this record closes its symmetry-elimination item.</li>
+  </ul>
+
+</main>
+</body>
+</html>

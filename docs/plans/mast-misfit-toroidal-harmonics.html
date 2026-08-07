@@ -22,7 +22,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-08">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="3">
+<meta name="plan-impl" content="0.17">
 </head>
 <body>
 <main class="plan-doc">
@@ -47,11 +48,24 @@
 
   <h2 id="s2">§2 — Implementation</h2>
   <ol>
-    <li><strong>Basis.</strong> Toroidal-harmonic flux basis (P and Q half-integer Legendre) with
-    the conditioning discipline the polynomial work established — orthogonalised on the fit
-    window, degree chosen by held-out probes, never raw monomial-style contraction. Verify
-    against the polygon Green's kernel on synthetic filaments (place a known filament, fit the
-    expansion, recover flux to stated tolerance and location by mismatch).</li>
+    <li class="section-landed"><span class="badge badge-shipped">✓ landed 2026-08-08</span>
+    <strong>Basis — landed with synthetic recovery validated.</strong>
+    <code>nova/biot/toroidalharmonic.py</code>: both radial families, the recessive
+    second-kind ladder built by the backward-recurrence ratio form (a forward climb is wrong
+    by 3×10¹² at degree 8 once cosh η = 30 — the normal working configuration), and the exact
+    filament coefficient law pinned against <code>greens_psi</code>, which makes localisation
+    a read (modulus → distance, phase → angle) rather than a scan. Recovery at the real
+    77-probe array (obr17 excluded, 387 µT floor, SNR 17.3): probe residual 2.8×10⁻¹⁵ T at
+    degree 12; position error 31 mm median fixed-focus, 5.4 mm with the placement iterated;
+    current to 1.5%; 6 singular directions resolved at the floor (13 noiseless); two filaments
+    separate only at ~100–200 mm (noise-limited, not geometry-limited). Equilibration buys
+    1.9×10⁹ in conditioning at degree 12; a 3σ whitened singular cut keeps every degree to 16
+    safe. <em>Load-bearing for §2.2:</em> projecting out the 13 described-coil columns leaves
+    35% of a filament's pattern and biases position by 114–202 mm at zero noise — fit
+    harmonics and coil currents jointly against the raw residual, or admit calibrated loops,
+    never the pre-projected survivor alone. 49 tests; merge <code>a08af0e5</code>; figures
+    <code>docs/figures/toroidal-harmonics/</code>; banked
+    <code>~/.cache/nova-mast/toroidal-harmonics/</code>.</li>
     <li><strong>Constraint sets.</strong> Per drive group: the banked signed couplings
     (<code>~/.cache/nova-mast/misfit-localization/couplings.npz</code>) as B-projections at 77
     probes, plus calibrated loop fluxes from <code>mast-flux-loop-calibration</code>, with
@@ -104,7 +118,7 @@
 
   <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-mth-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-08-07" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-mth-001" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-08-07" data-recommends-skill="" data-resolved-at="2026-08-07T23:18:36+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Implement §2.1 — harmonic basis with synthetic-filament recovery validation</h4>
     <div class="r-fu-body"><p>The basis and its validation harness are independent of the loop
       calibration and can start immediately; every later product depends on the recovery test
@@ -137,6 +151,38 @@ Scope locks / constraints
 Done-when
   1. Basis module + tests committed (nova conventions, uv run pytest green)
   2. Synthetic recovery report banked with figures
+  3. Followup written into plan + this one resolved</pre>
+    <p class="r-fu-outcome">§2.1 landed — merge a08af0e5 (commit 9657ee4a). Basis with both radial families in nova/biot/toroidalharmonic.py; recessive second-kind ladder via backward-recurrence ratios; exact filament coefficient law pinned against greens_psi. Synthetic recovery at the real array PASS: flux residual 2.8e-15 T at degree 12; position 31 mm fixed / 5.4 mm iterated at the 387 uT floor; current to 1.5%; 6 of 13 directions resolved at the floor. New load-bearing bound: coil-span projection leaves 35% of a filament pattern and biases position 114-202 mm at zero noise — §2.2 must fit jointly against the raw residual or admit loops. 49 tests; fast lane 4161 passed (5 known env failures: firewalled imas-standard-names extra).</p>
+    </article>
+<article class="r-fu" data-id="f-mth-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-08" data-recommends-skill="/reckon-ship mast-misfit-toroidal-harmonics §2.2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Build the per-group constraint sets and fit the interior/exterior misfit maps (§2.2–§2.3)</h4>
+    <div class="r-fu-body">The basis is validated; the measured trap is that fitting the pre-projected survivor carries a zero-noise position bias up to 202 mm (35% pattern survival after coil-span projection), so the default is the joint harmonics+coil-currents fit against the raw residual, with calibrated loops admitted as they promote (flux-loop calibration landed this session). The probes-only-start decision is effectively mooted by the loop landing — record the choice when the maps are fit. In passing: nova/equilibrium/harmonic.py carries an inner-family-only variant with 1e-4 central-difference fields; layer it onto the new biot module (strict superset) so the duplication does not set.</div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    mast-misfit-toroidal-harmonics (docs/plans/mast-misfit-toroidal-harmonics.html)
+Section: §2.2 (constraint sets) + §2.3 (interior/exterior maps)
+Capability: general
+Requirements: deep reasoning, strict verification
+
+Context
+  §2.1 landed: basis validated (position 5-31 mm at the floor; 6 of 13
+  directions resolved). Measured trap: fitting the pre-projected survivor
+  biases position up to 202 mm at zero noise (35% pattern survival) — fit
+  harmonics and coil currents JOINTLY against the raw residual, and admit
+  calibrated loops where promoted.
+
+State to read
+  docs/plans/mast-misfit-toroidal-harmonics.html (§2.2-§2.3)
+  nova/biot/toroidalharmonic.py + tests/test_biottoroidalharmonic.py (API,
+  filament coefficient law)
+  ~/.cache/nova-mast/toroidal-harmonics/ (recovery.json, iterated_resolution.json)
+  ~/.cache/nova-mast/misfit-localization/couplings.npz (banked constraint sets)
+  docs/research/mast-flux-loop-gain-fits.html (per-loop gains and verdicts)
+
+Done-when
+  1. Per-drive-group constraint sets with per-channel noise weights from the
+     sensor-floor record; promoted loops included
+  2. Interior+exterior expansions fitted (joint-fit default), contoured with
+     bootstrap confidence bands; figures committed
   3. Followup written into plan + this one resolved</pre>
     </article>
 </section>

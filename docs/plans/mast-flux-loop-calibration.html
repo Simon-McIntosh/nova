@@ -7,8 +7,8 @@
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="mast-flux-loop-calibration">
   <meta name="plan-title" content="MAST Flux-Loop Calibration and Inclusion">
-  <meta name="plan-summary" content="Fit every MAST flux loop's gain against the exact vacuum flux, adjudicate the suspected 2-pi store convention, and admit calibrated loops to the current inversion, the misfit maps, and the residual gate — recovering the rank the probe array lacks.">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-summary" content="Fit every MAST flux loop&#x27;s gain against the exact vacuum flux, adjudicate the suspected 2-pi store convention, and admit calibrated loops to the current inversion, the misfit maps, and the residual gate — recovering the rank the probe array lacks.">
+  <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="M">
   <meta name="plan-capability-version" content="1.0">
@@ -19,6 +19,8 @@
   <title>MAST Flux-Loop Calibration and Inclusion | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-08">
+<meta name="plan-version" content="1">
 </head>
 <body>
 <main class="plan-doc">
@@ -107,28 +109,26 @@
   banked scripts under <code>~/.cache/nova-mast/</code>.</p>
 
   <section data-reckon="decisions" id="decisions" class="r-decisions">
-    <h2><span class="sec">§</span> Decisions</h2>
-    <div class="r-dec" data-key="convention-correction-site" data-choice="" data-by="" data-when="">
-      <p class="r-dec-q">Where is the flux-loop convention factor corrected — divided out on the
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="convention-correction-site" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Where is the flux-loop convention factor corrected — divided out on the
       nova read path, or fixed in the machine-description artifact so every consumer inherits it?</p>
-      <p class="r-dec-opts">
-        <button class="r-opt" data-value="read-path">read path (nova-local, fast)</button>
-        <button class="r-opt" data-value="artifact">machine-description artifact (fleet-wide)</button>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="read-path">read path (nova-local, fast)</button>
+      <button class="r-opt" data-value="artifact">machine-description artifact (fleet-wide)</button>
       </p>
-      <p class="r-dec-rat"></p>
+    <p class="r-dec-rat"></p>
     </div>
-  </section>
+</section>
 
   <section data-reckon="followups" id="followups" class="r-followups">
-    <h2><span class="sec">§</span> Followups</h2>
-    <article class="r-fu" data-id="f-flc-001" data-status="open"
-             data-capability-version="1.0" data-capability-class="general"
-             data-written-by="reckon-create" data-written-at="2026-08-07">
-      <h4 class="r-fu-title">Implement §2.1–§2.4 — loop inventory, flux columns, gain fits, convention verdict</h4>
-      <div class="r-fu-body"><p>First shippable slice: everything up to the convention verdict,
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-flc-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-08-07" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Implement §2.1–§2.4 — loop inventory, flux columns, gain fits, convention verdict</h4>
+    <div class="r-fu-body"><p>First shippable slice: everything up to the convention verdict,
       no inversion re-run yet. The localization record documents the method precedent (per-channel
       scale fits) and the store facts.</p></div>
-      <pre class="r-fu-prompt">Project: nova
+    <pre class="r-fu-prompt">Project: nova
 Plan:    mast-flux-loop-calibration (http://localhost:8765/nova/plans/mast-flux-loop-calibration.html)
 Section: §2.1–§2.4
 Capability: general
@@ -151,14 +151,14 @@ Scope locks / constraints
   Use imas-python for any IDS read (dd version from the artifact); never h5py.
   Loop channels must be swept for acquisition block-scale steps before any
   static gain is promoted. Loops that will not stabilise stay excluded with
-  cause. Heavy sweeps run on SLURM debug partitions (time <= 01:00:00).
+  cause. Heavy sweeps run on SLURM debug partitions (time &lt;= 01:00:00).
 
 Done-when
   1. Loop inventory + per-loop gain fits banked under ~/.cache/nova-mast/
   2. Convention verdict (2-pi or not) named with evidence
   3. Followup written into plan + this one resolved</pre>
     </article>
-  </section>
+</section>
 
 </main>
 </body>

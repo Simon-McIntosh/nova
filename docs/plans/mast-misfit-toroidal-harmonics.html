@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="mast-misfit-toroidal-harmonics">
   <meta name="plan-title" content="Toroidal-Harmonic Misfit Maps and Source Localization">
   <meta name="plan-summary" content="Expand the surviving vacuum misfit in toroidal harmonics constrained by probes and calibrated flux loops, producing honest contour maps of the misfit flux and localising the missing conductor by interior/exterior expansion mismatch and multi-filament fits.">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="L">
   <meta name="plan-capability-version" content="1.0">
@@ -21,6 +21,8 @@
   <title>Toroidal-Harmonic Misfit Maps | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-08">
+<meta name="plan-version" content="1">
 </head>
 <body>
 <main class="plan-doc">
@@ -88,28 +90,26 @@
   research record collapses the findings and hands named candidates onward.</p>
 
   <section data-reckon="decisions" id="decisions" class="r-decisions">
-    <h2><span class="sec">§</span> Decisions</h2>
-    <div class="r-dec" data-key="probes-only-start" data-choice="" data-by="" data-when="">
-      <p class="r-dec-q">Start the harmonic fits on probes alone before the loop calibration
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="probes-only-start" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Start the harmonic fits on probes alone before the loop calibration
       lands, accepting a re-run, or wait for loops so every map is final?</p>
-      <p class="r-dec-opts">
-        <button class="r-opt" data-value="probes-first">probes first, re-run with loops</button>
-        <button class="r-opt" data-value="wait-for-loops">wait for calibrated loops</button>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="probes-first">probes first, re-run with loops</button>
+      <button class="r-opt" data-value="wait-for-loops">wait for calibrated loops</button>
       </p>
-      <p class="r-dec-rat"></p>
+    <p class="r-dec-rat"></p>
     </div>
-  </section>
+</section>
 
   <section data-reckon="followups" id="followups" class="r-followups">
-    <h2><span class="sec">§</span> Followups</h2>
-    <article class="r-fu" data-id="f-mth-001" data-status="open"
-             data-capability-version="1.0" data-capability-class="general"
-             data-written-by="reckon-create" data-written-at="2026-08-07">
-      <h4 class="r-fu-title">Implement §2.1 — harmonic basis with synthetic-filament recovery validation</h4>
-      <div class="r-fu-body"><p>The basis and its validation harness are independent of the loop
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-mth-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-08-07" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Implement §2.1 — harmonic basis with synthetic-filament recovery validation</h4>
+    <div class="r-fu-body"><p>The basis and its validation harness are independent of the loop
       calibration and can start immediately; every later product depends on the recovery test
       passing.</p></div>
-      <pre class="r-fu-prompt">Project: nova
+    <pre class="r-fu-prompt">Project: nova
 Plan:    mast-misfit-toroidal-harmonics (http://localhost:8765/nova/plans/mast-misfit-toroidal-harmonics.html)
 Section: §2.1
 Capability: general
@@ -124,7 +124,7 @@ Context
 State to read
   docs/research/mast-misfit-source-localization.html (targets, first maps)
   ~/.cache/nova-mast/misfit-localization/ (couplings, probe poses, response)
-  nova/biot/ (polygon Green's kernel for synthetic truth)
+  nova/biot/ (polygon Green&#x27;s kernel for synthetic truth)
   Memory: polynomial-basis-conditioning (orthogonalise on the fit window;
   monomial-style contraction loses four decades by degree six)
 
@@ -139,7 +139,7 @@ Done-when
   2. Synthetic recovery report banked with figures
   3. Followup written into plan + this one resolved</pre>
     </article>
-  </section>
+</section>
 
 </main>
 </body>

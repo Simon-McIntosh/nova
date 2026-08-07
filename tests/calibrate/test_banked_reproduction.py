@@ -26,7 +26,11 @@ import pytest
 
 from nova.calibrate.correction_model import CorrectionKind
 from nova.calibrate.correction_set import read_correction_set
-from nova.calibrate.corrections import apply_corrections, build_chain
+from nova.calibrate.corrections import (
+    CorrectionApplicationError,
+    apply_corrections,
+    build_chain,
+)
 from nova.calibrate.coupling import pool_couplings
 from nova.calibrate.gain import pool_scalar_gains
 from nova.calibrate.inversion import identifiability, whiten
@@ -266,3 +270,43 @@ def test_a_read_between_the_measured_pulses_says_so():
     assert not measured.extrapolated
     assert between.extrapolated
     assert measured.multiplier == between.multiplier
+
+
+def test_every_channel_of_the_landed_document_reads_without_refusing():
+    """A read path that refuses a real channel is not a read path.
+
+    The refusals are worth having only if they fire on the faults and not on the
+    document as it stands, so every channel it carries is read across the span of
+    pulses it covers and every one has to come back with a chain.
+    """
+
+    document = read_correction_set("mast", "magnetics")
+    channels = sorted({row.channel for row in document.corrections if row.channel})
+    assert len(channels) > 50
+    for pulse in (14000, 14080, 17000, 20000, 25826, 30000):
+        for channel in channels:
+            chain = build_chain(document, channel, pulse=pulse)
+            assert not chain.excluded
+            assert all(np.isfinite(step.value) for step in chain.steps)
+
+
+def test_the_channel_that_flips_between_two_states_refuses_rather_than_averaging():
+    """The case the schema carries candidate values for, read off the real document.
+
+    The channel's pickup state moves pulse to pulse, so the document records the two
+    states it takes instead of their mean.  A consumer that widens its read to the
+    recorded corrections has to be told that, not handed 0.875.
+    """
+
+    document = read_correction_set("mast", "magnetics")
+    with pytest.raises(CorrectionApplicationError, match=r"\[1.25, 0.5\]"):
+        build_chain(document, "obr05", pulse=20000, statuses=["recorded"])
+    resolved = build_chain(
+        document,
+        "obr05",
+        pulse=20000,
+        statuses=["recorded"],
+        resolution={("obr05", CorrectionKind.pair_state): 1.25},
+    )
+    assert resolved.multiplier == pytest.approx(1.25)
+    assert resolved.steps[0].resolved

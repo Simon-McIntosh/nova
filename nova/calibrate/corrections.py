@@ -263,6 +263,7 @@ def build_chain(
     time: float | None = None,
     groups: Mapping[str, Iterable[str]] | None = None,
     statuses: Iterable[CorrectionStatus] = APPLIED_STATUSES,
+    kinds: Iterable[CorrectionKind] | None = None,
     resolution: Mapping[tuple[str, CorrectionKind], float] | None = None,
 ) -> CorrectionChain:
     """Return one channel's ordered chain at one point in pulse or time.
@@ -271,9 +272,17 @@ def build_chain(
     named group holds is a property of the machine rather than of the correction set,
     and a document that carried it would have to be rewritten whenever an array was
     rewired.  A channel absent from every group simply matches no group correction.
+
+    ``kinds`` narrows the chain to the corrections a consumer is asking for, and
+    defaults to every kind the document carries.  A consumer that removes one stage
+    somewhere else -- a unit boundary that already carries a convention factor, a
+    sensor gain another pass divides out -- would otherwise remove it twice, and
+    naming what it draws is how it says so where the read happens rather than by
+    leaving the correction out of the document.
     """
 
     wanted = frozenset(CorrectionStatus(value) for value in statuses)
+    drawn = None if kinds is None else frozenset(CorrectionKind(row) for row in kinds)
     scopes = _scopes(channel, groups)
     steps: dict[ApplicationStage, CorrectionStep] = {}
     exclusions: list[str] = []
@@ -283,6 +292,8 @@ def build_chain(
             continue
         status = CorrectionStatus(correction.status)
         if status not in wanted:
+            continue
+        if drawn is not None and CorrectionKind(correction.kind) not in drawn:
             continue
         interval = select_interval(correction, pulse=pulse, time=time)
         if interval is None:
@@ -417,6 +428,7 @@ def apply_corrections(
     reference_time: float | None = None,
     groups: Mapping[str, Iterable[str]] | None = None,
     statuses: Iterable[CorrectionStatus] = APPLIED_STATUSES,
+    kinds: Iterable[CorrectionKind] | None = None,
     resolution: Mapping[tuple[str, CorrectionKind], float] | None = None,
     allow_excluded: bool = False,
 ) -> tuple[np.ndarray, CorrectionChain]:
@@ -444,6 +456,7 @@ def apply_corrections(
         time=moment,
         groups=groups,
         statuses=statuses,
+        kinds=kinds,
         resolution=resolution,
     )
     corrected = apply_chain(

@@ -83,9 +83,7 @@ def test_the_field_on_the_axis_matches_its_elementary_closed_form(height):
     assert np.allclose(axial, expected, rtol=1e-12)
 
 
-@pytest.mark.parametrize(
-    ("point_r", "point_z"), [(1.3, 0.2), (0.4, -0.9), (2.2, 1.4)]
-)
+@pytest.mark.parametrize(("point_r", "point_z"), [(1.3, 0.2), (0.4, -0.9), (2.2, 1.4)])
 def test_the_field_off_the_axis_matches_a_direct_line_integral(point_r, point_z):
     radius, height = 1.0, 0.25
     radial, axial = loop_field(

@@ -38,8 +38,8 @@ from typing import Any, Iterable, Mapping, Sequence
 import numpy as np
 
 from nova.imas.mast_block_scale import (
-    BlockScaleTable,
     ScaleCorrection,
+    ScaleReader,
     promoted_block_scales,
 )
 
@@ -913,7 +913,7 @@ def read_shot_waveforms(
     *,
     store: Path | str = SHOT_STORE,
     quiescent_ramp_fraction: float = 0.0,
-    block_scale: BlockScaleTable | None = None,
+    block_scale: ScaleReader | None = None,
 ) -> ShotWaveforms:
     """Read one shot's coil excitations and probe responses, windows marked.
 
@@ -928,10 +928,10 @@ def read_shot_waveforms(
 
     Probe channels are returned with their measured acquisition range setting
     divided out, because a channel recorded at twice its usual setting is not a
-    measurement of twice the field.  ``block_scale`` names the table that supplies
-    the setting and defaults to the promoted one; passing
-    :func:`~nova.imas.mast_block_scale.BlockScaleTable` with no blocks, or an empty
-    table, reads the archive exactly as published.  What was divided out of each
+    measurement of twice the field.  ``block_scale`` names what supplies the setting
+    and defaults to the machine's correction document; passing a
+    :class:`~nova.imas.mast_block_scale.BlockScaleTable` with no blocks reads the
+    archive exactly as published.  What was divided out of each
     channel -- including the channels nothing was divided out of, and why -- comes
     back in ``scale_corrections``.
     """

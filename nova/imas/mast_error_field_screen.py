@@ -53,7 +53,7 @@ from typing import Any, Iterable, Mapping, Sequence
 
 import numpy as np
 
-from nova.imas.mast_block_scale import BlockScaleTable, promoted_block_scales
+from nova.imas.mast_block_scale import ScaleReader, promoted_block_scales
 from nova.imas.mast_vacuum_cohort import (
     CURRENT_GROUP,
     FIELD_GROUP,
@@ -836,7 +836,7 @@ def read_probe_signals(
     shot: int,
     *,
     store: Path | str = SHOT_STORE,
-    block_scale: BlockScaleTable | None = None,
+    block_scale: ScaleReader | None = None,
 ) -> dict[str, np.ndarray]:
     """Read one shot's poloidal field probe channels, range setting divided out.
 

@@ -47,8 +47,11 @@
   duplicated P3 positions, and empty calibration fields; at P4 the described (upper) and measured
   (lower) loop sets are almost disjoint, and <code>fl_p4u_1..3</code> never carry data — so the
   loop-position reconciliation at P4 is in scope, not an afterthought. And the archive's own
-  EFIT gave every loop zero weight in every sampled shot, so a fitted gain has no upstream
-  cross-check: its evidence must stand alone.</p>
+  EFIT gave every loop zero weight in every sampled shot, so no upstream <em>fit</em> exists to
+  check a gain against — but the archive still computes an independent forward prediction at
+  every loop (<code>efm/silop_c</code>, 46 loops per time slice from a 938-filament,
+  101-circuit model), the same route that corroborated obr17's gain at the probes to 0.25%.
+  Every promoted loop gain should carry that cross-check.</p>
 
   <h2 id="s2">§2 — Implementation</h2>
   <ol>
@@ -70,8 +73,10 @@
     <li><strong>Convention confirmation and promotion.</strong> Confirm the measured 2π
     convention holds per loop (a residual global cluster off unity reads a store-wide factor);
     promote stable per-loop gains with the probe-scale evidence discipline; loops whose gain
-    will not stabilise across shots or blocks stay excluded, with cause recorded. Note the
-    absence of any upstream cross-check — the archive EFIT never weighted a loop.</li>
+    will not stabilise across shots or blocks stay excluded, with cause recorded. Corroborate
+    every promoted gain against the archive's independent forward prediction
+    (<code>efm/silop_c</code>) — the route that confirmed obr17 at the probes — since no
+    upstream fit exists (the archive EFIT never weighted a loop).</li>
     <li><strong>Inclusion and re-measurement.</strong> Admit calibrated loops to the free current
     inversion and recompute the identifiability spectrum — report the new rank and whether
     P2/P3/P6 wiring becomes answerable. Recompute the P4/P5 surviving-misfit patterns with loop

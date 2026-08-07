@@ -33,6 +33,7 @@ from nova.imas.mast_solve_inputs import (
     LOOP_FLUX_NAME,
     LOOP_POSITION_TOLERANCE,
     MEASURED_FLUX_CONVENTION,
+    PACK_TOTAL_TOLERANCE,
     PLASMA_CURRENT_NAME,
     PROBE_FIELD_NAME,
     RECONSTRUCTION_LOOP_COUNT,
@@ -47,6 +48,8 @@ from nova.imas.mast_solve_inputs import (
     flux_loop_signals,
     loop_channel_name,
     loop_target_indices,
+    pack_total_channels,
+    pack_total_residuals,
     parse_loop_channel,
     probe_field_signals,
     read_solve_inputs,
@@ -395,6 +398,62 @@ def test_the_measured_case_currents_share_one_dictionary_field():
     assert "drive map carries the per-element weights" in blocked[0].unmet
 
 
+def _paired_machine(cased: tuple[str, ...] = ("c1",)) -> DescribedMachine:
+    """Return a machine whose named sets publish a coil channel and a case one."""
+
+    drives = [
+        ChannelDrive(
+            channel=f"{name}_coil_current",
+            container="pf_active",
+            conductor=name,
+            elements=(0,),
+            circuit="C",
+            ampere_turns_per_ampere=1.0,
+            distribution="single",
+            evidence=FieldEvidence.MEASURED,
+            path=f"pf_active/coil({name})/current({name}_coil_current)",
+        )
+        for name in ("c1", "c2")
+    ]
+    drives += [
+        ChannelDrive(
+            channel=f"{name}_case_current",
+            container="pf_passive",
+            conductor="coil_cases",
+            elements=(index,),
+            circuit="",
+            ampere_turns_per_ampere=1.0,
+            distribution="single",
+            evidence=FieldEvidence.GENERATED,
+            path=f"pf_passive/loop(coil_cases)/current({name})",
+            uncertainty=Uncertainty(lower=1.0, upper=1.0, unit="turn"),
+        )
+        for index, name in enumerate(cased)
+    ]
+    return _machine(turns={"c1": 8.0, "c2": 12.0}, drives=DriveMap.create(drives))
+
+
+def test_a_pack_total_is_paired_with_the_two_terms_it_sums():
+    """Read off the drive map, so each row names the channels it decomposes into."""
+
+    rows = pack_total_channels(_paired_machine())
+    assert rows == (("c1", "c1_coil_current", "c1_case_current"),)
+    blocked = {
+        row.source_channel: row for row in unmapped_current_blocked(_paired_machine())
+    }
+    assert "c1_current" in blocked
+    assert "c1_coil_current plus c1_case_current" in blocked["c1_current"].reason
+    assert "not a fixed multiple" in blocked["c1_current"].unmet
+
+
+def test_a_set_without_a_measured_case_carries_no_pack_total_row():
+    """A total whose second term is unmeasured is a different refusal, not this one."""
+
+    assert pack_total_channels(_machine()) == ()
+    paired = pack_total_channels(_paired_machine(cased=("c1", "c2")))
+    assert [row[0] for row in paired] == ["c1", "c2"]
+
+
 def test_the_toroidal_field_is_blocked_by_the_description_not_the_source():
     """Both toroidal routes want a described conductor or a described radius."""
 
@@ -649,6 +708,51 @@ def test_the_excitation_group_is_fully_accounted_for(published_map):
     assert not served & blocked
     assert len(served) == 22
     assert len(blocked) == 22
+
+
+@_needs_store
+@pytest.mark.parametrize("shot", (FORWARD_SHOTS[1], REVERSED_SHOTS[0]))
+def test_a_pack_total_is_its_coil_plus_its_case_to_the_last_bit(shot, description):
+    """The identity is the channel's whole content, so it is read from the store."""
+
+    residuals = pack_total_residuals(description.machine, shot)
+    assert set(residuals) == {"p3l", "p3u", "p4l", "p4u", "p5l", "p5u"}
+    assert max(residuals.values()) < PACK_TOTAL_TOLERANCE
+
+
+@_needs_store
+def test_a_pack_total_reaches_neither_term_by_a_fixed_factor(description):
+    """The refusal rests on the case being induced: a spread, not an offset."""
+
+    import zarr
+
+    group = zarr.open_group(f"{SHOT_STORE}/{FORWARD_SHOTS[1]}.zarr", mode="r")[
+        CURRENT_GROUP
+    ]
+    spreads = {}
+    for prefix, coil_channel, _ in pack_total_channels(description.machine):
+        coil = np.asarray(group[coil_channel][...], dtype=float)
+        total = np.asarray(group[f"{prefix}_current"][...], dtype=float)
+        driven = np.isfinite(coil) & np.isfinite(total)
+        driven &= np.abs(coil) > 0.2 * np.max(np.abs(coil[np.isfinite(coil)]))
+        ratio = total[driven] / coil[driven]
+        spreads[prefix] = float(np.ptp(ratio))
+    assert min(spreads.values()) > 0.1
+
+
+@_needs_store
+def test_every_pack_total_names_the_two_channels_it_sums(description, published_map):
+    """A refusal that states a mechanism has to state it in the description's terms."""
+
+    blocked = {row.source_channel: row for row in published_map.blocked}
+    for prefix, coil_channel, case_channel in pack_total_channels(description.machine):
+        row = blocked[f"{prefix}_current"]
+        assert coil_channel in row.reason
+        assert case_channel in row.reason
+        assert coil_channel in {
+            signal.source_channel for signal in published_map.signals
+        }
+        assert case_channel in blocked
 
 
 @_needs_store

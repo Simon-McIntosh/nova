@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="mast-p4p5-provenance-note">
+  <meta name="plan-title" content="P4/P5 provenance — both asymmetry readings traced, the P4-lower loop block is a copy, the pack total is the coil plus its case">
+  <meta name="plan-summary" content="The two circulating readings of the P4 up-down asymmetry come from one source and two arithmetics on it: the registry outline's area centroid puts the upper member 4.6 mm further out, while the mean of the same outline's closed coordinate ring — which counts the ring's start vertex twice, and the two members start on opposite corners — puts the lower member 17.2 mm further out. Only the first is a centroid. The placement asymmetry itself (3.9 mm at P4, 8.7 mm at P5) is matched in size and direction by Kirk's Hall-probe fit to the copper of these same coils, and the magnetics prefer it; the +5.1% P4 footprint difference reduces to one number, a 27 mm turn pitch on P4 upper where the other three members carry 26 mm, and is a model artifact. Separately: the level-2 catalog's four FL_P4L loop positions are the FL_P3L block verbatim on every shot sampled, which is why the two P4-lower channels that publish data on every shot reach no described loop. And the six pack-total current channels equal their coil channel plus their case channel to 1.09e-07 of the summed terms over 4578 pairs — a 32-bit float's own resolution.">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-recorded-at" content="2026-08-07">
+  <meta name="plan-evidence-for" content="mast-p4p5-circuit-provenance">
+  <meta name="plan-informs" content="mast-flux-loop-calibration">
+  <title>P4/P5 provenance note | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+  <header>
+    <span class="badge badge-active">recorded 2026-08-07</span>
+    <h1>Where the P4 numbers came from</h1>
+    <p>Three questions were open. Which source each of the two circulating P4 asymmetry
+    readings came from; whether the asymmetry the model actually carries is a machine
+    feature or a description error; and why the described and published P4 flux loops
+    barely overlap. All three are now answered from the sources on this host, and none of
+    the answers needed a fit.</p>
+    <p><strong>The two readings are one source and two arithmetics.</strong> Both are the
+    registry's own P4 outlines. The <em>area centroid</em> of those outlines puts the upper
+    member 4.6 mm further from the midplane; the <em>mean of the outline's coordinate
+    ring</em> puts the lower member 17.2 mm further out. The ring mean is not a centroid —
+    a vertex average of a chamfered hexagon misses the area centroid by 20 mm on its own —
+    and the closed ring repeats its start vertex, which the two members do not share: P4
+    lower's ring starts on a far-side chamfer corner, P4 upper's on the midplane-side
+    corner. That single repeated vertex is what flips the sign of the pair difference and
+    inflates it. <strong>The plan's §1 figures should be retired; §2.1's are the outlines'
+    real centroids.</strong></p>
+    <p><strong>The placement asymmetry is not adjudicable as an error, and the footprint
+    difference is.</strong> P5's two members carry byte-identical winding lattices offset
+    8.7 mm in |z|; P4's main block is offset 3.2 mm. Kirk's Hall-probe fit to these same
+    coils — a magnetic measurement of the copper, not the mechanical survey, which never saw
+    inside the case — finds z-shifts of 2.9 / 6.6 / 0.6 / 13.1 mm, implying up-down
+    differences of the same order and, on the natural reading of its sign convention, the
+    same direction. The symmetry scan already measured that the data prefers the described
+    asymmetry to a mirrored geometry. The +5.1% P4 footprint difference is a different animal: it reduces to one
+    parameter — a 27 mm main-row turn pitch on P4 upper where P4 lower, P5 lower and P5 upper
+    all carry 26 mm — with conductor size, turn count, row pitch and chamfer side identical
+    on all four and both packs centred on the same radius. That is a per-member digitisation
+    of one drawing, not a manufactured difference, and correcting it will not move the
+    misfit.</p>
+    <p><strong>The P4-lower loop block is a copy.</strong> The level-2 catalog names its 44
+    loops, and its four <code>FL_P4L</code> entries hold the four <code>FL_P3L</code>
+    positions bit for bit, on every shot sampled across the campaign. The reconstruction's
+    own loop table carries physically sensible P4-lower positions in the same slots. So the
+    two P4-lower channels that publish data on every shot land 0.37–0.44 m from anything the
+    description has, and the position join refuses them — correctly, but for a reason nobody
+    had named.</p>
+  </header>
+
+  <section class="quick-status">
+    <h2>Headline numbers</h2>
+    <table>
+      <thead><tr><th>question</th><th>answer</th><th>measurement</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Where did z = −1.1268 / +1.1095 come from?</td>
+          <td><strong>The registry outlines, averaged over the closed coordinate ring.</strong></td>
+          <td>Closed-ring mean: p4_lower (1.48829, −1.12680), p4_upper (1.48721, +1.10955)
+          — the plan's figures to five decimals; pair difference −17.25 mm, P5 −12.89 mm
+          (plan: 17.3 and 12.9). No array in the level-2 catalog, the reconstruction setup
+          or the archive carries either value as a P4 quantity.</td>
+        </tr>
+        <tr>
+          <td>Where did the 4.6 mm reading come from?</td>
+          <td><strong>The same outlines, area centroid.</strong></td>
+          <td>p4_lower (1.49833, −1.09870), p4_upper (1.49805, +1.10333); +4.64 mm.
+          Bounding-box centres give +5.18 mm, the source cells' mean +3.88 mm. Every
+          convention except the ring mean agrees on the sign.</td>
+        </tr>
+        <tr>
+          <td>Are the described footprints 0.159×0.158 vs 0.154×0.154 right?</td>
+          <td><strong>Yes — both readings had these right.</strong></td>
+          <td>They are the cell bounding boxes; area ratio upper/lower 1.0513 at P4 and
+          exactly 1.000000 at P5.</td>
+        </tr>
+        <tr>
+          <td>Is the registry asymmetry real?</td>
+          <td><strong>Placement: consistent with as-built, leave it.
+          Footprint: model artifact.</strong></td>
+          <td>P5's members are the same lattice displaced 8.68 mm, and Kirk's magnetic fit
+          to the copper gives z-shifts implying 9.6 mm (P4) and 13.6 mm (P5) in the same
+          direction. P4's members differ additionally by one shape parameter — 27 vs 26 mm
+          main-row pitch — with 23 turns, 24×37 mm conductor, 38 mm row pitch and max-|z|
+          chamfer identical on all four, both centred on r = 1.500000. Stable on every
+          level-2 shot sampled (29 of 29, 11766–28770).</td>
+        </tr>
+        <tr>
+          <td>Why are the described and published P4 loops disjoint?</td>
+          <td><strong>The catalog's FL_P4L block is the FL_P3L block verbatim.</strong></td>
+          <td>Bit-identical on 29 of 29 sampled shots. Described-minus-reconstruction
+          separation 437.1 / 436.7 / 369.3 / 370.2 mm for the four P4-lower channels;
+          every other loop in every other family agrees to ≤ 6.0 mm (one exception,
+          <code>fl_p5l_3</code>, is an outlier on the reconstruction's side and carries
+          no data).</td>
+        </tr>
+        <tr>
+          <td>What is the pack-total channel?</td>
+          <td><strong>The coil's ampere turns plus its own case current, exactly.</strong></td>
+          <td>Worst residual 1.094×10⁻⁷ of the summed terms over 4578 coil-set and shot
+          pairs on 763 shots, median 9.7×10⁻⁹ — below a 32-bit float's resolution
+          (1.19×10⁻⁷). The case/coil ratio swings ±0.11 (P4), ±0.14 (P5) and −0.74…+0.47
+          (P3) across a shot, so no fixed factor reaches either term.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <h2>Reading one: the ring-closure artifact</h2>
+  <p>The registry authors each active component as a single polygon — the convex hull of the
+  level-2 winding cells — stored as WKB. A polygon's exterior coordinate list is a
+  <em>closed ring</em>: the first vertex is repeated as the last, so a seven-entry list
+  describes a hexagon. Averaging that list therefore weights one corner twice, and for a
+  seven-entry ring the displacement is exactly one seventh of the way from the vertex mean
+  toward the repeated corner. P4 lower's ring starts at (1.423, −1.17451), the chamfered
+  corner furthest from the midplane; P4 upper's starts at (1.4205, +1.02669), the corner
+  nearest it. The two biases therefore point in opposite directions:</p>
+
+  <table>
+    <thead><tr><th>member</th><th>area centroid z</th><th>vertex mean z (open)</th>
+    <th>repeated start z</th><th>closed-ring mean z</th></tr></thead>
+    <tbody>
+      <tr><td>p4_lower</td><td>−1.09870</td><td>−1.11884</td><td>−1.17451</td><td><strong>−1.12680</strong></td></tr>
+      <tr><td>p4_upper</td><td>+1.10333</td><td>+1.12336</td><td>+1.02669</td><td><strong>+1.10955</strong></td></tr>
+      <tr><td>p5_lower</td><td>−0.49548</td><td>−0.51562</td><td>−0.57129</td><td><strong>−0.52358</strong></td></tr>
+      <tr><td>p5_upper</td><td>+0.50416</td><td>+0.52430</td><td>+0.42897</td><td><strong>+0.51068</strong></td></tr>
+    </tbody>
+  </table>
+  <p>Two separate faults compound here and it is worth keeping them apart. A vertex mean is
+  not a centroid for any polygon that is not vertex-regular: on the lower member it already
+  sits 20 mm below the area centroid, because the chamfer contributes two vertices to a
+  corner that carries little area. Repeating the start vertex then adds 8 mm on the lower
+  member and subtracts 14 mm on the upper, and it is that second, orientation-dependent step
+  that reverses which member looks displaced. The registry's own numbers were never wrong;
+  the arithmetic applied to them was.</p>
+
+  <figure>
+    <img src="/nova/figures/p4p5-provenance/centroid-readings.png"
+         alt="P4 upper and P4 lower outlines with their winding cells, each marked with its area centroid, closed-ring vertex mean, bounding-box centre and the repeated ring-start vertex; a bar chart compares the upper-minus-lower asymmetry under the three conventions for P4 and P5"
+         style="max-width:100%;height:auto">
+    <figcaption>Left and centre: the two P4 members drawn on the same |z| axis, with the
+    described winding cells inside the registry hull. The repeated ring-start vertex (star)
+    sits at the far corner on the lower member and the near corner on the upper one, which
+    drags the two ring means (×) apart in opposite directions while the area centroids (●)
+    and bounding-box centres (■) stay within 0.6 mm of each other. Right: the same outlines
+    under three conventions — only the ring mean changes the sign of the answer.
+    Evidence: <code>geometry_loop_provenance.json</code>.</figcaption>
+  </figure>
+
+  <h2>Reading two: what the model actually carries, and where it came from</h2>
+  <p>The level-2 catalog publishes each active component as a list of rectangular winding
+  cells (<code>&lt;member&gt;_r</code>, <code>_z</code>, <code>_width</code>,
+  <code>_height</code>), and the registry hulls are built from exactly those. The level-1
+  reconstruction's own 938-element coil table is not an independent second source: its
+  circuits 8–11 reproduce the four members' cell bounds and element means digit for digit.
+  So one table stands behind every reading above.</p>
+
+  <table>
+    <thead><tr><th>member</th><th>turns</th><th>conductor</th><th>main-row pitch</th>
+    <th>row pitch</th><th>cross-over split</th><th>footprint</th><th>pack centre</th></tr></thead>
+    <tbody>
+      <tr><td>p4_lower</td><td>18 + 5</td><td>24 × 37 mm</td><td>26 mm</td><td>38 mm</td><td>3 mm</td><td>0.154 × 0.154</td><td>(1.500000, −1.100510)</td></tr>
+      <tr><td><strong>p4_upper</strong></td><td>18 + 5</td><td>24 × 37 mm</td><td><strong>27 mm</strong></td><td>38 mm</td><td><strong>7 mm</strong></td><td>0.159 × 0.158</td><td>(1.500000, +1.105690)</td></tr>
+      <tr><td>p5_lower</td><td>18 + 5</td><td>24 × 37 mm</td><td>26 mm</td><td>38 mm</td><td>3 mm</td><td>0.154 × 0.154</td><td>(1.650000, −0.497292)</td></tr>
+      <tr><td>p5_upper</td><td>18 + 5</td><td>24 × 37 mm</td><td>26 mm</td><td>38 mm</td><td>3 mm</td><td>0.154 × 0.154</td><td>(1.650000, +0.505966)</td></tr>
+    </tbody>
+  </table>
+  <p>Every member is three full rows of six turns plus a five-turn cross-over row on the
+  max-|z| side, the cross-over row itself pitched at 25 mm on all four. The cross-over row's
+  apparent radial skew — 1 mm per column on three members, 2 mm on P4 upper — is not an
+  independent difference: it is the main-row pitch minus the cross-over pitch, so it doubles
+  because the pitch changed. <strong>The whole P4 footprint asymmetry is one number.</strong></p>
+  <p>Three arguments make that number a description artifact rather than a machine feature.
+  It would require the inter-turn radial gap of one member to be 3 mm where its three
+  siblings are 2 mm, while the conductor, the axial pitch and the turn count stayed
+  identical and the pack stayed centred on the same radius — that is not how a winding
+  differs from its twin. Kirk (arXiv:1312.6507) states the as-built survey fixed the coil
+  <em>case</em> position and explicitly not the copper inside it, so no metrology backs a
+  copper <em>shape</em> difference. And in the same reconstruction table the P4 and P5
+  coil-case circuits sit at exactly ±1.100000 and ±0.500000 — round nominal values — while the copper
+  carries five-decimal ones; the case model is nominal and the winding model is not, which
+  is the opposite of what a metrology-driven asymmetry would look like.</p>
+  <p>The placement asymmetry does not fall to the same argument — it survives it, and Kirk's
+  own numbers point the same way. P5's members are the same lattice moved 8.68 mm; P4's main
+  block is moved 3.18 mm with the cross-over split adding the rest. Kirk's Table 1 gives
+  z-shifts of 2.941 mm (P4 upper), 6.638 mm (P4 lower), 0.562 mm (P5 upper) and 13.07 mm
+  (P5 lower), and — this matters for what they can be compared with — those are <em>not</em>
+  the mechanical survey. The mechanical measurement used a clamp ring and gauges referenced
+  to the vessel end plates and, in the paper's own words, "only allowed a determination of
+  the position of the coil case, not the copper turns of the coil inside the case". Table 1
+  instead comes from a twelve-parameter least-squares fit to radial and vertical fields
+  measured by Hall probes at twenty-four toroidal angles: <strong>it senses the copper, which
+  is what the described winding cells claim to be.</strong> Taking the shifts in the machine
+  frame, as their companion x and y shifts plainly are, both members of each pair move in
+  +z, so the upper member ends further from the midplane in both pairs — the same sign the
+  description carries, at 9.6 mm against the described 4.6 mm at P4 and 13.6 mm against 8.7 mm
+  at P5. If instead the shifts were meant per-coil outward, the implied differences are
+  3.7 mm and 12.5 mm with the opposite sign; either way an independent magnetic measurement
+  of these coils finds up-down differences of the same order as the description's.</p>
+  <p>The same table also argues the other half of the verdict. The coil-shape parameters
+  Kirk fits are ellipticity (1.8–3.8 mm), banana bowing (2.2–4.9 mm), wobble (0.7–1.7 mm)
+  and tilt — all non-axisymmetric distortions of the coil ring. Nothing in the published
+  as-built characterisation of these very coils corresponds to one member's winding pack
+  being 5 mm wider than its twin's, and the mechanical survey that might have seen such a
+  thing never looked inside the case. <strong>Verdict: no correction is warranted at the
+  placement — the described asymmetry is if anything understated — and the footprint
+  difference is a model artifact worth recording but not worth chasing.</strong> The
+  <a href="/nova/research/mast-p4p5-symmetry-verdict.html">symmetry scan</a> already measured
+  both halves from the data: the P4 upper survivor prefers the described asymmetry to a
+  mirrored geometry by −0.64 of its power, and footprint equalisation removes +0.1% of the
+  survivor, at a gain 126× the variant's own amplitude.</p>
+
+  <h2>The P4 flux loops: a duplicated block, not a mystery</h2>
+  <p>The level-2 catalog names each of its 44 described loops in
+  <code>flux_loop_geometry_channel</code>. Entries 20–23, named <code>FL_P4L_1</code>
+  through <code>FL_P4L_4</code>, hold the same four coordinates as entries 12–15,
+  <code>FL_P3L_1</code> through <code>FL_P3L_4</code> — bit-identical, on every level-2 shot
+  sampled from 11766 to 28770. The reconstruction's loop table carries P4-lower positions in
+  those slots that are near-mirrors of the described P4-upper set (0.4–5.4 mm in r,
+  3.6–13.6 mm in |z|), so the correct positions exist on this host; the geometry catalog
+  simply does not have them.</p>
+
+  <table>
+    <thead><tr><th>channel</th><th>described (r, z)</th><th>reconstruction (r, z)</th>
+    <th>separation</th><th>shots publishing data</th></tr></thead>
+    <tbody>
+      <tr><td>fl_p4u_1</td><td>(1.5930, +1.0408)</td><td>(1.5930, +1.0408)</td><td>0.0 mm</td><td>none</td></tr>
+      <tr><td>fl_p4u_2</td><td>(1.5930, +1.0558)</td><td>(1.5930, +1.0558)</td><td>0.0 mm</td><td>none</td></tr>
+      <tr><td>fl_p4u_3</td><td>(1.4001, +1.1658)</td><td>(1.4001, +1.1658)</td><td>0.0 mm</td><td>none</td></tr>
+      <tr><td><strong>fl_p4u_4</strong></td><td>(1.4001, +1.1508)</td><td>(1.4001, +1.1508)</td><td>0.0 mm</td><td><strong>383 / 383</strong></td></tr>
+      <tr><td><strong>fl_p4l_1</strong></td><td>(1.1630, −1.0826)</td><td>(1.5984, −1.0444)</td><td><strong>437.1 mm</strong></td><td><strong>383 / 383</strong></td></tr>
+      <tr><td>fl_p4l_2</td><td>(1.1630, −1.1036)</td><td>(1.5984, −1.0694)</td><td>436.7 mm</td><td>none</td></tr>
+      <tr><td>fl_p4l_3</td><td>(1.0354, −1.1036)</td><td>(1.4005, −1.1594)</td><td>369.3 mm</td><td>none</td></tr>
+      <tr><td><strong>fl_p4l_4</strong></td><td>(1.0354, −1.0831)</td><td>(1.4005, −1.1440)</td><td><strong>370.2 mm</strong></td><td><strong>383 / 383</strong></td></tr>
+    </tbody>
+  </table>
+  <p>Read down the last two columns: <strong>of the eight described P4 loops exactly one —
+  <code>fl_p4u_4</code> — both has a correct position and carries data.</strong> Three more
+  have correct positions and were never published; two have wrong positions and are
+  published on every shot; two have wrong positions and no data. That is the disjointness
+  the plan noticed, with its mechanism named.</p>
+
+  <figure>
+    <img src="/nova/figures/p4p5-provenance/loop-provenance.png"
+         alt="Top: poloidal cross-section of the P3 lower and P4 lower coils with the four described P4-lower loop positions sitting on the four P3-lower ones and arrows running out to the reconstruction's P4-lower positions. Bottom: log bar chart of described-minus-reconstruction separation for all 24 P3, P4 and P5 loops, showing the four P4-lower bars two orders beyond the 15 mm join tolerance."
+         style="max-width:100%;height:auto">
+    <figcaption>Top: the four described <code>FL_P4L</code> positions (circles) sit on the
+    four <code>FL_P3L</code> positions (triangles) beside the P3-lower coil; the arrows run
+    to where the reconstruction puts them, beside P4 lower. Filled markers and solid arrows
+    are the two channels the archive publishes on every shot. Bottom: the same comparison for
+    all 24 P3/P5/P4 loops on a log scale — every family agrees to a few millimetres except
+    the copied block. Evidence: <code>geometry_loop_provenance.json</code>.</figcaption>
+  </figure>
+
+  <p>Three consequences follow in the published description, all measured against it rather
+  than inferred. Four positions are each carried by two described loops —
+  (1.0354, −1.1036), (1.0354, −1.0831), (1.1630, −1.1036), (1.1630, −1.0826) — so eight
+  described loops occupy four points. Seven reconstruction channels reach no described loop
+  at the registry's 15 mm tolerance: all four <code>fl_p4l_*</code>, plus
+  <code>fl_p5l_3</code> and both <code>fl_p6u_*</code>, the latter because the level-2
+  catalog carries no P6-upper loops at all. And five described loops are never reached by
+  any channel. The join serves 39 of 46. Nothing here needs the tolerance loosened: a 15 mm
+  threshold and a 0.44 m error are not in the same conversation.</p>
+
+  <h2>The pack-total channels</h2>
+  <p>Six coil sets publish a third current channel beside their conductor-current and
+  ampere-turn ones. It is their sum with the case: <code>pXY_current</code> equals
+  <code>pXY_coil_current</code> plus <code>pXY_case_current</code>, sample for sample, to
+  the last bit a 32-bit float carries.</p>
+  <table>
+    <thead><tr><th>set</th><th>pairs</th><th>worst residual / summed terms</th>
+    <th>median coil / case peak</th><th>case-to-coil ratio range on one shot</th></tr></thead>
+    <tbody>
+      <tr><td>p3l</td><td>763</td><td>8.73×10⁻⁸</td><td>4.8</td><td>−0.744 … +0.470</td></tr>
+      <tr><td>p3u</td><td>763</td><td>9.03×10⁻⁸</td><td>4.5</td><td>—</td></tr>
+      <tr><td>p4l</td><td>763</td><td>1.080×10⁻⁷</td><td>20.2</td><td>−0.106 … +0.103</td></tr>
+      <tr><td>p4u</td><td>763</td><td>1.062×10⁻⁷</td><td>20.6</td><td>−0.109 … +0.107</td></tr>
+      <tr><td>p5l</td><td>763</td><td>1.052×10⁻⁷</td><td>13.1</td><td>−0.138 … +0.138</td></tr>
+      <tr><td>p5u</td><td>763</td><td>1.094×10⁻⁷</td><td>13.2</td><td>—</td></tr>
+    </tbody>
+  </table>
+  <p>Normalisation matters and the two conventions must not be confused. Scaled by the
+  <em>summed terms</em> the worst case over all 4578 pairs is 1.094×10⁻⁷, just inside a
+  float's own resolution of 1.19×10⁻⁷, with a median of 9.7×10⁻⁹. Scaled by the
+  <em>total</em> the worst case is 2.39×10⁻⁵, but that number is an artifact of one shot
+  where the case opposes the coil and the total collapses to 0.6 kA while its two terms
+  stand at 286 kA each: dividing by what survives a cancellation measures the cancellation.
+  The plan's earlier 6.5×10⁻⁶ over 336 pairs is the total-normalised convention on a smaller
+  sample, and it is consistent with this one. The same identity holds at set level for the
+  two-pack P2 sets — <code>p2Xl_current</code> equals the two packs' coil channels plus the
+  shared case channel, worst 8.8×10⁻⁶ over 1526 pairs.</p>
+  <p><strong>The six channels are explained but they are not servable, and the measurement
+  is what refuses them.</strong> A source-map row converts one channel to one dictionary
+  field by a fixed factor. The pack total's two terms sit in different containers —
+  <code>pf_active/coil</code> for the copper, <code>pf_passive/loop</code> for the enclosure
+  — and the case current is induced, not driven, so the ratio between them is not a constant
+  to fold into a factor: it swings by 0.21 of the coil current at P4 and by 1.21 at P3 within
+  a single shot. The channel is therefore a restatement of two quantities the map already
+  reaches, and <code>nova/imas/mast_solve_inputs.py</code> now says exactly that: the
+  refusal names both terms, states the mechanism, and derives which sets get a row from the
+  drive map rather than from a written list, so a set gains or loses one with its measured
+  case. What has changed is that no excitation channel in the map is refused as unexplained
+  any more.</p>
+
+  <h2>What this hands on</h2>
+  <ul>
+    <li><strong>To the flux-loop calibration plan:</strong> the four described
+    <code>FL_P4L</code> positions are wrong and the replacement exists in the
+    reconstruction's own loop table at (1.5984, −1.0444), (1.5984, −1.0694),
+    (1.4005, −1.1594), (1.4005, −1.1440). Correcting them turns two channels published on
+    every shot from unusable into usable, and it removes four duplicate described positions.
+    The correction belongs to the level-2 read in the registry recovery, not to a tolerance:
+    the join is refusing a 0.44 m error, which is the right behaviour. Note also that
+    <code>fl_p5l_3</code> is a disagreement in the other direction — the description's
+    (1.5458, −0.5322) is mirror-consistent with P5 upper and the reconstruction's
+    (1.7463, −0.5322) is not — and that no P6-upper loop is described at all.</li>
+    <li><strong>To the owning provenance plan:</strong> §1's asymmetry figures are an
+    arithmetic artifact and should be replaced by the area centroids; the geometry lead
+    stays closed. The footprint difference is real in the description and unreal in the
+    machine, and it is worth 0.1% of the survivor, so no geometry correction is on the
+    critical path. The remaining explanation is unchanged: current on a path that is not the
+    described winding.</li>
+    <li><strong>To any consumer of the registry outlines:</strong> take the polygon's
+    centroid, never the mean of its coordinate ring. The ring is closed, and on these
+    chamfered hulls the two answers differ by up to 28 mm and can differ in sign between two
+    members of a pair.</li>
+    <li><strong>Left alone deliberately:</strong> the P2 set-level channels stay blocked on
+    their unsourced pack interconnection. The set-level identity measured above does weaken
+    the wording of that refusal — the archive does publish the two packs' currents
+    separately — so it is a candidate correction, but the unmet condition it names is still
+    unmet and changing it belongs with whoever owns the P2 interconnection question. The
+    channel-drive record's "three kinds of current channel" also predates the pack total and
+    now undercounts by one.</li>
+  </ul>
+
+  <h2>Caveats</h2>
+  <ul>
+    <li>Kirk's Table 1 was read from the paper itself (retrieved during this work, banked at
+    <code>~/.cache/nova-mast/p4p5-provenance/kirk-2013-mast-intrinsic-error-fields.pdf</code>
+    — the repository is public and the paper is not ours to commit). The sign convention of
+    its z-shifts is not stated in the text; both readings are given above and the
+    order-of-magnitude agreement holds under either.</li>
+    <li>Whether the 26 mm or the 27 mm turn pitch is the true one is not settled here. Three
+    members against one is a majority, not a drawing, and no winding drawing was available on
+    this host to arbitrate. What is settled is that the two cannot both describe identically
+    manufactured coils.</li>
+    <li>The loop comparison uses the reconstruction setup at one shot and the archive channel
+    census at a stride of 40 over the store (383 readable shots of 428 sampled). The
+    duplicated-block check ran on 29 level-2 shots spanning 11766–28770.</li>
+    <li>The pack-total scan sampled every twentieth store (856 shots, 93 unreadable) and
+    covers whole shots rather than the sustained windows the response fits use; nothing about
+    the identity depends on the window.</li>
+  </ul>
+
+  <h2>Reproduction</h2>
+  <p>Scripts and banked arrays under <code>~/.cache/nova-mast/</code>:
+  <code>p4p5-provenance/geometry_loop_provenance.py</code> →
+  <code>geometry_loop_provenance.json</code> (registry readings, cell lattices,
+  reconstruction circuits, both loop tables, channel census, cross-shot stability),
+  <code>p4p5-provenance/provenance_figures.py</code> → the two PNGs in
+  <code>docs/figures/p4p5-provenance/</code>, and
+  <code>pack-total/pack_total_identity.py</code> →
+  <code>pack_total_identity.json</code> + <code>pack_total_identity.npz</code> +
+  <code>pack_total_identity.log</code>. Sources: the level-2 geometry catalog and level-1
+  reconstruction setup at shot 21978 under
+  <code>/work/projects/imas_gpu/mast/level{1,2}/shots</code>, and the packaged registry at
+  physical digest <code>ca06c8f64481114f</code>, whose active-component outlines are convex
+  hulls of the level-2 winding cells. The identity is also pinned in the test suite:
+  <code>tests/test_mast_solve_inputs.py</code> reads it from the store on two shots of
+  opposite polarity and checks the ratio spread that refuses a fixed-factor conversion.</p>
+
+  <h2>Related records</h2>
+  <ul>
+    <li><a href="/nova/research/mast-p4p5-symmetry-verdict.html">P4/P5 symmetry verdict</a> —
+    excluded a described-geometry error as the survivor's source and raised the premise
+    conflict this note resolves.</li>
+    <li><a href="/nova/research/mast-winding-lattice-landed.html">Winding-lattice test</a> —
+    the 23-cell lattice this note reads the pitch off, and the near-probe standoff at which a
+    uniform section model breaks down.</li>
+    <li><a href="/nova/research/mast-catalog-geometry-registry-ids-landed.html">Registry and
+    DD authoring</a> — how the level-2 static arrays become the packaged registry the two
+    centroid readings were both taken from.</li>
+    <li><a href="/nova/plans/mast-p4p5-circuit-provenance.html">P4/P5 circuit provenance</a> —
+    the owning plan; this record closes its geometry-provenance and pack-total items.</li>
+  </ul>
+
+</main>
+</body>
+</html>

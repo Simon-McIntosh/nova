@@ -58,6 +58,12 @@ from typing import Any, Iterable, Mapping, Sequence
 
 import numpy as np
 
+from nova.calibrate.correction_model import (
+    CorrectionKind,
+    CorrectionSet,
+    CorrectionStatus,
+)
+from nova.calibrate.corrections import build_chain
 from nova.imas.mast_acquisition_scale import (
     LADDER_TOLERANCE,
     ChannelScaleHistory,
@@ -592,6 +598,197 @@ class BlockScaleTable:
         return cls.create(
             (BlockScale.from_dict(block) for block in row["blocks"]),
             route=str(row.get("route", "")),
+        )
+
+
+@dataclass(frozen=True, order=True)
+class ChannelSetting:
+    """One interval of a channel's acquisition record, as a document states it.
+
+    The document is the source of both halves of a read: what to divide by, and what
+    warrants dividing.  The engine answers the first and needs no help; the second is
+    a question about intervals the read falls outside of -- whether the setting was
+    refused, or simply never measured near this pulse -- and no chain describes a
+    correction that did not apply.  This is the index that answers it.
+    """
+
+    pulse_start: int
+    pulse_end: int
+    rung: float
+    measured_value: float
+    refused: bool
+
+    def covers(self, shot: int) -> bool:
+        """Return whether this interval holds over a shot."""
+
+        return self.pulse_start <= int(shot) <= self.pulse_end
+
+
+def _channel_settings(
+    document: CorrectionSet,
+) -> dict[str, tuple[ChannelSetting, ...]]:
+    """Index a document's acquisition record by channel, in pulse order."""
+
+    grouped: dict[str, list[ChannelSetting]] = {}
+    for correction in document.corrections:
+        if CorrectionKind(correction.kind) is not CorrectionKind.acquisition_scale:
+            continue
+        refused = CorrectionStatus(correction.status) is not CorrectionStatus.promoted
+        for interval in correction.validity:
+            if interval.pulse_start is None or interval.pulse_end is None:
+                raise BlockScaleError(
+                    f"{correction.channel} carries an acquisition setting over an "
+                    "interval unbounded in pulse; a range setting holds over a run of "
+                    "shots and steps, so an unbounded one states no block"
+                )
+            grouped.setdefault(str(correction.channel), []).append(
+                ChannelSetting(
+                    pulse_start=int(interval.pulse_start),
+                    pulse_end=int(interval.pulse_end),
+                    rung=math.nan
+                    if correction.value is None
+                    else float(correction.value),
+                    measured_value=float(correction.measured_value),
+                    refused=refused,
+                )
+            )
+    return {channel: tuple(sorted(rows)) for channel, rows in sorted(grouped.items())}
+
+
+@dataclass(frozen=True)
+class CorrectionSetScales:
+    """Serve the acquisition setting a read divides out, from a correction document.
+
+    The same reads :class:`BlockScaleTable` serves, answered from the versioned
+    correction set rather than from a table beside this module.  The document is the
+    one that also carries the sensor gains, the pickup states and the exclusions, so
+    the setting a channel was recorded at stops being a fact only this module knows.
+
+    What divides a signal comes from
+    :func:`~nova.calibrate.corrections.build_chain`, which orders the stages from the
+    schema's own ranks -- this class states which stage it is drawing and never how
+    the stages compose.  It draws the acquisition rung alone: the five promoted sensor
+    gains in the same document are not removed on this path today, and quietly
+    starting to remove them here would change every fit's amplitude while looking like
+    a storage change.
+
+    ``settings`` indexes the same corrections to answer what warranted a read that
+    divided by nothing, which a chain cannot report because the correction it would
+    describe is the one that did not apply.
+    """
+
+    document: CorrectionSet
+    settings: Mapping[str, tuple[ChannelSetting, ...]] = field(default_factory=dict)
+
+    @classmethod
+    def create(cls, document: CorrectionSet) -> CorrectionSetScales:
+        """Index a validated document for reading."""
+
+        settings = _channel_settings(document)
+        for channel, rows in settings.items():
+            for first, second in zip(rows, rows[1:], strict=False):
+                if second.pulse_start <= first.pulse_end:
+                    raise BlockScaleError(
+                        f"{channel!r} carries acquisition intervals "
+                        f"{first.pulse_start}-{first.pulse_end} and "
+                        f"{second.pulse_start}-{second.pulse_end}, which overlap, so a "
+                        "shot in the overlap has two settings"
+                    )
+        return cls(document=document, settings=settings)
+
+    @property
+    def channels(self) -> tuple[str, ...]:
+        """Return every channel the document carries a setting for."""
+
+        return tuple(sorted(self.settings))
+
+    @property
+    def stepping(self) -> tuple[str, ...]:
+        """Return the channels recorded at more than one setting."""
+
+        return tuple(
+            channel for channel in self.channels if len(self.settings[channel]) > 1
+        )
+
+    @property
+    def corrected(self) -> tuple[str, ...]:
+        """Return the channels some interval of which a read divides a rung out of."""
+
+        return tuple(
+            channel
+            for channel in self.channels
+            if any(
+                not row.refused and row.rung != 1.0 for row in self.settings[channel]
+            )
+        )
+
+    def correction(self, channel: str, shot: int) -> ScaleCorrection:
+        """Return the setting a read of this channel on this shot may divide by."""
+
+        shot = int(shot)
+        rows = self.settings.get(channel, ())
+        if not rows:
+            return ScaleCorrection(channel, shot, 1.0, UNMEASURED)
+        covering = [row for row in rows if row.covers(shot)]
+        if covering:
+            return self._covered(channel, shot, covering[0])
+        before = [row for row in rows if row.pulse_end < shot]
+        after = [row for row in rows if row.pulse_start > shot]
+        if before and after:
+            return ScaleCorrection(
+                channel,
+                shot,
+                1.0,
+                UNMEASURED,
+                candidates=(before[-1].rung, after[0].rung),
+            )
+        nearest = before[-1] if before else after[0]
+        return ScaleCorrection(
+            channel, shot, 1.0, UNMEASURED, candidates=(nearest.rung,)
+        )
+
+    def _covered(
+        self, channel: str, shot: int, setting: ChannelSetting
+    ) -> ScaleCorrection:
+        """Return the read for a shot an interval holds over."""
+
+        if setting.refused:
+            return ScaleCorrection(
+                channel, shot, 1.0, REFUSED, candidates=(setting.measured_value,)
+            )
+        chain = build_chain(
+            self.document,
+            channel,
+            pulse=shot,
+            kinds=(CorrectionKind.acquisition_scale,),
+        )
+        step = chain.steps[0]
+        return ScaleCorrection(
+            channel, shot, step.value, MEASURED if step.measured else BRACKETED
+        )
+
+    def corrections(
+        self, shot: int, channels: Iterable[str]
+    ) -> tuple[ScaleCorrection, ...]:
+        """Return one correction per channel for one shot, in channel order."""
+
+        return tuple(
+            self.correction(channel, shot) for channel in sorted(set(channels))
+        )
+
+    def normalise(
+        self, shot: int, probes: Mapping[str, np.ndarray]
+    ) -> tuple[dict[str, np.ndarray], tuple[ScaleCorrection, ...]]:
+        """Divide one shot's probe channels by the setting each was recorded at."""
+
+        rows = self.corrections(shot, probes)
+        lookup = {row.channel: row for row in rows}
+        return (
+            {
+                channel: lookup[channel].normalise(values)
+                for channel, values in probes.items()
+            },
+            rows,
         )
 
 

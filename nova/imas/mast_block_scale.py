@@ -49,11 +49,9 @@ known only to within a campaign.
 
 from __future__ import annotations
 
-import json
 import math
 from dataclasses import dataclass, field
 from functools import cache
-from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 
 import numpy as np
@@ -63,6 +61,7 @@ from nova.calibrate.correction_model import (
     CorrectionSet,
     CorrectionStatus,
 )
+from nova.calibrate.correction_set import read_correction_set
 from nova.calibrate.corrections import build_chain
 from nova.imas.mast_acquisition_scale import (
     LADDER_TOLERANCE,
@@ -792,6 +791,16 @@ class CorrectionSetScales:
         )
 
 
+ScaleReader = BlockScaleTable | CorrectionSetScales
+"""What a consumer may be handed to supply a shot's acquisition settings.
+
+Two readers answer the same reads from different sources.  The document is what the
+read path serves by default; a table built from loose blocks is what a sweep holds
+while it is still measuring them, and what a test writes to state a case in two lines
+rather than by authoring a correction set.
+"""
+
+
 def bracket_probe(
     brackets: Sequence[ScaleBracket],
     shots: Sequence[int],
@@ -846,30 +855,27 @@ two winding-pack widths from every excited coil so that the ratio is a statement
 about the channel and not about the near field of one coil.
 """
 
-PROMOTED_PATH = Path(__file__).with_name("mast_block_scale.json")
-"""Where the promoted table is carried.
+PROMOTED_MACHINE = "mast"
+"""Machine whose correction document the promoted settings are read from."""
 
-Beside the module rather than in a runtime cache, because the read path applies it by
-default: a table a consumer has to fetch is a table some consumer will read without,
-and two runs disagreeing about whether a channel was halved is exactly the failure
-this correction exists to remove.  The shot lists are what make it a file rather than
-a literal -- each block names every shot its setting was measured on.
-"""
+PROMOTED_SYSTEM = "magnetics"
+"""Diagnostic system within that document these settings belong to."""
 
 
 @cache
-def promoted_block_scales() -> BlockScaleTable:
-    """Return the block table every read applies unless told otherwise.
+def promoted_block_scales() -> CorrectionSetScales:
+    """Return the settings every read applies unless told otherwise.
 
-    A missing file is an error rather than an empty table.  Silently reading the raw
-    archive would make the correction vanish without a symptom, so the absence has to
-    be louder than the presence.
+    Read from the machine's correction document, which is also where the sensor
+    gains, the pickup states and the exclusions live, so a channel's acquisition
+    history stops being a fact only this module holds.
+
+    A missing document is an error rather than an empty set.  Silently reading the
+    raw archive would make the correction vanish without a symptom, so the absence
+    has to be louder than the presence -- which is what
+    :func:`~nova.calibrate.correction_set.read_correction_set` raises on.
     """
 
-    if not PROMOTED_PATH.exists():
-        raise BlockScaleError(
-            f"no promoted block table at {PROMOTED_PATH}: every probe read applies "
-            "it, so a missing table is a broken read path rather than an uncorrected "
-            "one -- pass an empty BlockScaleTable to read the archive as published"
-        )
-    return BlockScaleTable.from_dict(json.loads(PROMOTED_PATH.read_text()))
+    return CorrectionSetScales.create(
+        read_correction_set(PROMOTED_MACHINE, PROMOTED_SYSTEM)
+    )

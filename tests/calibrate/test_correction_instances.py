@@ -34,7 +34,13 @@ from nova.calibrate.correction_set import (
     stage,
 )
 
-BLOCK_TABLE = Path(__file__).parents[2] / "nova" / "imas" / "mast_block_scale.json"
+BLOCK_TABLE = Path(__file__).parent / "data" / "banked_block_scales.json"
+"""The table the acquisition corrections were mined from, frozen beside the tests.
+
+It served the read path until the document replaced it, and is kept because a
+transcription can only be checked against its source.  That the two still describe
+the same reads is the subject of ``test_read_path_equivalence``.
+"""
 
 PROMOTED_GAINS = {
     "obr17": 0.5011,
@@ -124,8 +130,6 @@ def test_the_read_path_applies_the_gains_the_rungs_and_the_convention(instance):
 def blocks():
     """Return the block table the acquisition corrections were mined from."""
 
-    if not BLOCK_TABLE.exists():
-        pytest.skip(f"{BLOCK_TABLE} has been retired from the read path")
     return json.loads(BLOCK_TABLE.read_text())["blocks"]
 
 

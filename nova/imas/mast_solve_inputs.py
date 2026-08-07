@@ -65,8 +65,8 @@ import xarray
 from nova.imas.machine_drive import DriveMap
 from nova.imas.machine_evidence import FieldEvidence
 from nova.imas.mast_block_scale import (
-    BlockScaleTable,
     ScaleCorrection,
+    ScaleReader,
     promoted_block_scales,
 )
 from nova.imas.mast_vacuum_cohort import (
@@ -931,7 +931,7 @@ def read_solve_inputs(
     *,
     store: Path | str = SHOT_STORE,
     resolver: StandardNameResolver | None = None,
-    block_scale: BlockScaleTable | None = None,
+    block_scale: ScaleReader | None = None,
 ) -> ShotSignals:
     """Read one shot's mapped channels and convert them onto the description.
 

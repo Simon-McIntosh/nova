@@ -45,6 +45,7 @@ from nova.imas.mast_block_scale import (
     UNMEASURED,
     BlockScaleTable,
     CorrectionSetScales,
+    promoted_block_scales,
 )
 
 BANK = Path(__file__).parent / "data" / "banked_block_scales.json"
@@ -149,6 +150,19 @@ def test_the_bank_is_the_table_the_read_path_served(banked):
     assert len(banked.stepping) == 19
     off_ladder = {block.channel: block.scale for block in blocks if not block.on_ladder}
     assert off_ladder == REFUSED_BLOCKS
+
+
+def test_the_read_path_serves_the_reader_this_bench_compares(banked):
+    """Without this the bench could pass while the read path served something else."""
+
+    promoted = promoted_block_scales()
+    assert isinstance(promoted, CorrectionSetScales)
+    assert promoted.channels == banked.channels
+    for channel in banked.channels:
+        for pulse in probe_pulses(banked.blocks[channel]):
+            assert agree(
+                banked.correction(channel, pulse), promoted.correction(channel, pulse)
+            )
 
 
 def test_both_readers_carry_the_same_channels(banked, served):
